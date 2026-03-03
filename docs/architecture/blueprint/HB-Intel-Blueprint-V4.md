@@ -562,4 +562,21 @@ Phase 2.6 (@hbc/ui-kit — HB Intel Design System) completed: 2026-03-03
 - ADR created: docs/architecture/adr/0004-ui-kit-design-system.md
 - Documentation updated: docs/how-to/developer/phase-2-shared-packages-guide.md (§2.6 section)
 Next: Phase 3 — apps/dev-harness
+
+Phase 3 (apps/dev-harness) completed: 2026-03-03
+- Created apps/dev-harness/ (17 source files + 4 config files) per Blueprint §1 (monorepo: apps/dev-harness)
+- Vite SPA with resolve.alias → package src/ dirs for instant HMR across package boundaries
+- Compile-time mock injection via define: process.env.HBC_ADAPTER_MODE = "mock", HBC_AUTH_MODE = "mock"
+- Synchronous Zustand bootstrap (bootstrap.ts): seeds authStore, permissionStore, projectStore, navStore before React render
+- Provider hierarchy: FluentProvider > QueryClientProvider > HbcErrorBoundary > TabRouter + DevControls + ReactQueryDevtools
+- 13-tab navigation (Fluent TabList + React useState): PWA full shell + 11 SPFx webpart previews + HB Site Control mobile viewport
+- PwaPreview: ShellLayout mode='full' with workspace switching, project selection, back-to-hub callbacks
+- WebpartPreview: Reusable ShellLayout mode='simplified' wrapper with workspaceId prop
+- SiteControlPreview: Mobile viewport (max-width 428px) with simplified shell
+- 4 demo pages: WorkspacePlaceholder (status badges, conditional demos), DemoDataGrid (HbcDataTable + HbcCommandBar + useLeads), DemoCharts (HbcChart line + pie), DemoForms (HbcTextField + HbcSelect + HbcCheckbox + HbcFormLayout)
+- DevControls: Floating panel with theme toggle, user/project info, feature flag toggles, mock data reset
+- Verification: pnpm turbo run build (7 tasks, all success, 5.2s); Vite build produces 4 chunks (index.html, CSS, JS 652KB, ECharts lazy 1056KB)
+- ADR created: docs/architecture/adr/0005-dev-harness.md
+- Documentation added: docs/how-to/developer/phase-3-dev-harness-guide.md
+Next: Phase 4 — PWA (apps/web)
 -->

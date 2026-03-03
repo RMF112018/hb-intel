@@ -172,4 +172,24 @@ Phase 2.6 (@hbc/ui-kit — HB Intel Design System) completed: 2026-03-03
 - Full monorepo build: 6 tasks, all success, 1.761s
 - Documentation: ADR-0004, phase-2-shared-packages-guide.md §2.6 section
 Next: Phase 3 — apps/dev-harness
+
+Phase 3 (apps/dev-harness) completed: 2026-03-03
+- Created apps/dev-harness/ (17 source files + 4 config files) per Foundation Plan Phase 3
+- Config: package.json (Vite + all 6 @hbc/* workspace deps + React 18 + Fluent + TanStack Query), tsconfig.json (extends tsconfig.base.json, noEmit), vite.config.ts (alias-based HMR + mock define), index.html
+- bootstrap.ts: Synchronous Zustand store seeding — authStore (admin user), permissionStore (*:* + feature flags), projectStore (3 mock projects), navStore (project-hub)
+- main.tsx: Bootstrap → createRoot → StrictMode → App
+- App.tsx: FluentProvider (theme toggle) > QueryClientProvider > HbcErrorBoundary > TabRouter + DevControls + ReactQueryDevtools
+- TabRouter.tsx: 13 Fluent TabList tabs (PWA + 11 webparts + HB Site Control), React useState tab switching
+- PwaPreview: ShellLayout mode='full' with workspace/project switching callbacks
+- WebpartPreview: Reusable ShellLayout mode='simplified' with workspaceId prop + navStore sync
+- SiteControlPreview: Mobile viewport wrapper (max-width 428px) + simplified shell
+- WorkspacePlaceholder: Status badges + conditional demo components per workspace
+- DemoDataGrid: HbcDataTable + HbcCommandBar + useLeads() → IPagedResult<ILead>.items
+- DemoCharts: HbcChart (schedule progress line + budget pie with mock data)
+- DemoForms: HbcTextField + HbcSelect + HbcCheckbox + HbcFormLayout
+- DevControls: Floating panel — theme toggle, user/project info, feature flag toggles, mock reset
+- Verification: pnpm turbo run build (7 tasks, all success, 5.2s); Vite production build 4 chunks
+- ADR: docs/architecture/adr/0005-dev-harness.md
+- Documentation: docs/how-to/developer/phase-3-dev-harness-guide.md
+Next: Phase 4 — PWA (apps/web)
 -->
