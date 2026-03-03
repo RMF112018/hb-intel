@@ -89,6 +89,8 @@ pnpm turbo run build --filter=@hbc/models
 
 `@hbc/data-access` implements the ports/adapters (hexagonal architecture) pattern, replacing the monolithic `IDataService` with domain-scoped repository interfaces and swappable adapter implementations. Depends on `@hbc/models`.
 
+As of Phase 2.2, all 11 domains have complete mock adapters, factory functions, a typed error hierarchy, and a `BaseRepository` abstract class. The package exports 11 port interfaces, 11 mock classes, 11 factory functions, 4 error types, and shared infrastructure.
+
 ### Package Location
 
 ```
@@ -96,10 +98,12 @@ packages/data-access/
 ├── package.json
 ├── tsconfig.json
 └── src/
-    ├── index.ts                        # Barrel exports (ports, mocks, factory)
-    ├── factory.ts                      # Mode-aware adapter factory
+    ├── index.ts                        # Root barrel (ports, errors, mocks, factory, BaseRepository)
+    ├── factory.ts                      # Mode-aware adapter factory (11 create functions)
+    ├── errors/
+    │   └── index.ts                    # HbcDataAccessError, NotFoundError, ValidationError, etc.
     ├── ports/
-    │   ├── index.ts                    # Barrel re-export of all port interfaces
+    │   ├── index.ts                    # Barrel re-export of all 11 port interfaces
     │   ├── ILeadRepository.ts          # getAll, getById, create, update, delete, search
     │   ├── IEstimatingRepository.ts    # getAllTrackers, getKickoff, createKickoff
     │   ├── IScheduleRepository.ts      # getActivities, getMetrics
@@ -112,10 +116,36 @@ packages/data-access/
     │   ├── IProjectRepository.ts       # getProjects, getPortfolioSummary
     │   └── IAuthRepository.ts          # getCurrentUser, getRoles
     └── adapters/
-        ├── mock/index.ts               # MockLeadRepository, MockScheduleRepository, MockBuyoutRepository
-        ├── sharepoint/index.ts         # Stub (Phase 5)
-        ├── proxy/index.ts              # Stub (Phase 4)
-        └── api/index.ts                # Stub (Phase 7+)
+        ├── base.ts                     # BaseRepository<T> abstract class
+        ├── mock/
+        │   ├── index.ts               # Barrel: all 11 Mock classes + helpers + seedData
+        │   ├── helpers.ts             # paginate(), genId(), resetId()
+        │   ├── seedData.ts            # Seed data constants (11 domains)
+        │   ├── types.ts               # MockAdapterConfig
+        │   ├── constants.ts           # MOCK_DEFAULT_PAGE_SIZE, MOCK_DELAY_MS
+        │   ├── MockLeadRepository.ts
+        │   ├── MockEstimatingRepository.ts
+        │   ├── MockScheduleRepository.ts
+        │   ├── MockBuyoutRepository.ts
+        │   ├── MockComplianceRepository.ts
+        │   ├── MockContractRepository.ts
+        │   ├── MockRiskRepository.ts
+        │   ├── MockScorecardRepository.ts
+        │   ├── MockPmpRepository.ts
+        │   ├── MockProjectRepository.ts
+        │   └── MockAuthRepository.ts
+        ├── sharepoint/
+        │   ├── index.ts               # Stub barrel + re-exports (Phase 5)
+        │   ├── types.ts               # SharePointConfig, SharePointAdapterOptions
+        │   └── constants.ts           # DEFAULT_BATCH_SIZE, SHAREPOINT_LIST_NAMES
+        ├── proxy/
+        │   ├── index.ts               # Stub barrel + re-exports (Phase 4)
+        │   ├── types.ts               # ProxyConfig
+        │   └── constants.ts           # DEFAULT_TIMEOUT_MS, DEFAULT_RETRY_COUNT
+        └── api/
+            ├── index.ts               # Stub barrel + re-exports (Phase 7+)
+            ├── types.ts               # ApiConfig
+            └── constants.ts           # DEFAULT_API_VERSION
 ```
 
 ### Importing
@@ -125,11 +155,17 @@ packages/data-access/
 import type { ILeadRepository } from '@hbc/data-access';
 
 // Factory (creates adapter based on runtime mode)
-import { createLeadRepository } from '@hbc/data-access';
+import { createLeadRepository, createProjectRepository } from '@hbc/data-access';
 const repo = createLeadRepository(); // defaults to 'mock'
 
 // Direct mock import for tests
 import { MockLeadRepository } from '@hbc/data-access';
+
+// Error handling
+import { NotFoundError, AdapterNotImplementedError } from '@hbc/data-access';
+
+// Base class for custom adapters
+import { BaseRepository } from '@hbc/data-access';
 ```
 
 ### Factory Modes
@@ -138,7 +174,7 @@ Set `HBC_ADAPTER_MODE` environment variable to switch adapters:
 
 | Value | Context | Status |
 |-------|---------|--------|
-| `mock` (default) | Dev-harness, unit tests | Implemented |
+| `mock` (default) | Dev-harness, unit tests | Implemented (all 11 domains) |
 | `sharepoint` | SPFx webparts | Stub |
 | `proxy` | PWA via Azure Functions | Stub |
 | `api` | REST API / Azure SQL | Stub |
@@ -152,8 +188,10 @@ pnpm turbo run build --filter=@hbc/data-access
 ### Related Documentation
 
 - [ADR-0002: Ports/Adapters for Data Access](../../architecture/adr/0002-ports-adapters-data-access.md)
+- [ADR-0013: Data Access Comprehensive Rebuild](../../architecture/adr/0013-data-access-comprehensive-rebuild.md)
 - [Ports & Adapters Architecture (Explanation)](../../explanation/ports-adapters-architecture.md)
 - [Data Access Ports API Reference](../../reference/api/data-access-ports.md)
+- [Data Access Adapters API Reference](../../reference/api/data-access-adapters.md)
 
 ---
 

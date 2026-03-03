@@ -1,7 +1,28 @@
 import type { ILeadRepository } from './ports/ILeadRepository.js';
 import type { IScheduleRepository } from './ports/IScheduleRepository.js';
 import type { IBuyoutRepository } from './ports/IBuyoutRepository.js';
-import { MockLeadRepository, MockScheduleRepository, MockBuyoutRepository } from './adapters/mock/index.js';
+import type { IEstimatingRepository } from './ports/IEstimatingRepository.js';
+import type { IComplianceRepository } from './ports/IComplianceRepository.js';
+import type { IContractRepository } from './ports/IContractRepository.js';
+import type { IRiskRepository } from './ports/IRiskRepository.js';
+import type { IScorecardRepository } from './ports/IScorecardRepository.js';
+import type { IPmpRepository } from './ports/IPmpRepository.js';
+import type { IProjectRepository } from './ports/IProjectRepository.js';
+import type { IAuthRepository } from './ports/IAuthRepository.js';
+import {
+  MockLeadRepository,
+  MockScheduleRepository,
+  MockBuyoutRepository,
+  MockEstimatingRepository,
+  MockComplianceRepository,
+  MockContractRepository,
+  MockRiskRepository,
+  MockScorecardRepository,
+  MockPmpRepository,
+  MockProjectRepository,
+  MockAuthRepository,
+} from './adapters/mock/index.js';
+import { AdapterNotImplementedError } from './errors/index.js';
 
 /** Runtime adapter mode resolved from environment. */
 export type AdapterMode = 'mock' | 'sharepoint' | 'proxy' | 'api';
@@ -37,7 +58,7 @@ export function createLeadRepository(mode?: AdapterMode): ILeadRepository {
     case 'sharepoint':
     case 'proxy':
     case 'api':
-      throw new Error(`LeadRepository adapter "${resolved}" not yet implemented`);
+      throw new AdapterNotImplementedError(resolved, 'LeadRepository');
   }
 }
 
@@ -49,7 +70,7 @@ export function createScheduleRepository(mode?: AdapterMode): IScheduleRepositor
     case 'sharepoint':
     case 'proxy':
     case 'api':
-      throw new Error(`ScheduleRepository adapter "${resolved}" not yet implemented`);
+      throw new AdapterNotImplementedError(resolved, 'ScheduleRepository');
   }
 }
 
@@ -61,6 +82,102 @@ export function createBuyoutRepository(mode?: AdapterMode): IBuyoutRepository {
     case 'sharepoint':
     case 'proxy':
     case 'api':
-      throw new Error(`BuyoutRepository adapter "${resolved}" not yet implemented`);
+      throw new AdapterNotImplementedError(resolved, 'BuyoutRepository');
+  }
+}
+
+export function createEstimatingRepository(mode?: AdapterMode): IEstimatingRepository {
+  const resolved = mode ?? resolveAdapterMode();
+  switch (resolved) {
+    case 'mock':
+      return new MockEstimatingRepository();
+    case 'sharepoint':
+    case 'proxy':
+    case 'api':
+      throw new AdapterNotImplementedError(resolved, 'EstimatingRepository');
+  }
+}
+
+export function createComplianceRepository(mode?: AdapterMode): IComplianceRepository {
+  const resolved = mode ?? resolveAdapterMode();
+  switch (resolved) {
+    case 'mock':
+      return new MockComplianceRepository();
+    case 'sharepoint':
+    case 'proxy':
+    case 'api':
+      throw new AdapterNotImplementedError(resolved, 'ComplianceRepository');
+  }
+}
+
+export function createContractRepository(mode?: AdapterMode): IContractRepository {
+  const resolved = mode ?? resolveAdapterMode();
+  switch (resolved) {
+    case 'mock':
+      return new MockContractRepository();
+    case 'sharepoint':
+    case 'proxy':
+    case 'api':
+      throw new AdapterNotImplementedError(resolved, 'ContractRepository');
+  }
+}
+
+export function createRiskRepository(mode?: AdapterMode): IRiskRepository {
+  const resolved = mode ?? resolveAdapterMode();
+  switch (resolved) {
+    case 'mock':
+      return new MockRiskRepository();
+    case 'sharepoint':
+    case 'proxy':
+    case 'api':
+      throw new AdapterNotImplementedError(resolved, 'RiskRepository');
+  }
+}
+
+export function createScorecardRepository(mode?: AdapterMode): IScorecardRepository {
+  const resolved = mode ?? resolveAdapterMode();
+  switch (resolved) {
+    case 'mock':
+      return new MockScorecardRepository();
+    case 'sharepoint':
+    case 'proxy':
+    case 'api':
+      throw new AdapterNotImplementedError(resolved, 'ScorecardRepository');
+  }
+}
+
+export function createPmpRepository(mode?: AdapterMode): IPmpRepository {
+  const resolved = mode ?? resolveAdapterMode();
+  switch (resolved) {
+    case 'mock':
+      return new MockPmpRepository();
+    case 'sharepoint':
+    case 'proxy':
+    case 'api':
+      throw new AdapterNotImplementedError(resolved, 'PmpRepository');
+  }
+}
+
+export function createProjectRepository(mode?: AdapterMode): IProjectRepository {
+  const resolved = mode ?? resolveAdapterMode();
+  switch (resolved) {
+    case 'mock':
+      return new MockProjectRepository();
+    case 'sharepoint':
+    case 'proxy':
+    case 'api':
+      throw new AdapterNotImplementedError(resolved, 'ProjectRepository');
+  }
+}
+
+export function createAuthRepository(mode?: AdapterMode): IAuthRepository {
+  const resolved = mode ?? resolveAdapterMode();
+  switch (resolved) {
+    case 'mock':
+      return new MockAuthRepository();
+    case 'sharepoint':
+    case 'proxy':
+    case 'api':
+      throw new AdapterNotImplementedError(resolved, 'AuthRepository');
   }
 }

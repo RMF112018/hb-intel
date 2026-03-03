@@ -193,6 +193,22 @@ Implement `@hbc/models` (zero-dependency domain models & enums) and `@hbc/data-a
 2. Confirm all repositories resolve correctly and basic CRUD operations work in the demo data-grid component.  
 3. All packages are now ready for use by query-hooks, auth, shell, and future apps.
 
-**Phase 2 is complete.** Update the implementation progress notes in the main foundation plan and proceed to Phase 3 (dev-harness integration).  
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 2.1 (@hbc/models Comprehensive Rebuild) completed: 2026-03-03
+Documentation added: docs/reference/models/ (13 domain reference files)
+ADR created: docs/architecture/adr/0012-models-comprehensive-structure.md
 
-If you would like me to provide the exact copy-paste code for any specific file (e.g., full factory.ts, BaseRepository, a complete SharePointLeadRepository stub, or the error hierarchy), or if you are ready to begin actual file creation in the repository, please let me know. I remain available for the next phase or any clarification.
+Phase 2.2 (@hbc/data-access Comprehensive Rebuild) completed: 2026-03-03
+- Error hierarchy: HbcDataAccessError, NotFoundError, ValidationError, AdapterNotImplementedError, wrapError()
+- BaseRepository<T> abstract class in src/adapters/base.ts
+- 11 per-domain mock adapters (decomposed from monolithic mock/index.ts)
+- Shared mock infrastructure: helpers.ts, seedData.ts, types.ts, constants.ts
+- 11 factory functions (expanded from 3), using AdapterNotImplementedError
+- Stub adapter typed configs: SharePoint (types, constants), Proxy (types, constants), API (types, constants)
+- Comprehensive JSDoc on all 11 port interfaces
+- Root barrel rewrite with grouped sections and package-level JSDoc
+Documentation added: docs/reference/api/data-access-adapters.md
+ADR created: docs/architecture/adr/0013-data-access-comprehensive-rebuild.md
+Updated: docs/reference/api/data-access-ports.md, docs/how-to/developer/phase-2-shared-packages-guide.md
+Next: Phase 2.3 (@hbc/query-hooks)
+-->

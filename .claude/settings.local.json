@@ -32,7 +32,8 @@
       "Bash(git push:*)",
       "Bash(npx prettier:*)",
       "Bash(node:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(do echo:*)"
     ]
   }
 }

@@ -1,3 +1,14 @@
+/**
+ * @hbc/data-access — Port interfaces barrel.
+ *
+ * All 11 domain-scoped repository interfaces are re-exported here
+ * as type-only imports. These define the contracts that adapters must implement.
+ *
+ * @example
+ * ```ts
+ * import type { ILeadRepository, IProjectRepository } from '@hbc/data-access/ports';
+ * ```
+ */
 export type { ILeadRepository } from './ILeadRepository.js';
 export type { IEstimatingRepository } from './IEstimatingRepository.js';
 export type { IScheduleRepository } from './IScheduleRepository.js';

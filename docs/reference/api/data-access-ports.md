@@ -133,20 +133,41 @@ The data access layer defines 11 domain-scoped repository port interfaces. Each 
 | `assignRole` | `(userId: string, roleId: string) => Promise<void>` | Assign role to user |
 | `removeRole` | `(userId: string, roleId: string) => Promise<void>` | Remove role from user |
 
+## Error Types
+
+| Error Class | Code | Description |
+|-------------|------|-------------|
+| `HbcDataAccessError` | varies | Base error for all data-access operations |
+| `NotFoundError` | `NOT_FOUND` | Entity not found by ID |
+| `ValidationError` | `VALIDATION_ERROR` | Invalid input (bad ID, missing field) |
+| `AdapterNotImplementedError` | `ADAPTER_NOT_IMPLEMENTED` | Non-mock adapter not yet built |
+
+## BaseRepository\<T\>
+
+Abstract class with protected helpers: `wrapAsync()`, `validateId()`, `throwNotFound()`. Extended by all mock (and future concrete) adapters.
+
 ## Factory Functions
 
 | Function | Returns | Description |
 |----------|---------|-------------|
 | `resolveAdapterMode()` | `AdapterMode` | Reads `HBC_ADAPTER_MODE` env var; defaults to `'mock'` |
 | `createLeadRepository(mode?)` | `ILeadRepository` | Creates lead adapter for given mode |
+| `createEstimatingRepository(mode?)` | `IEstimatingRepository` | Creates estimating adapter for given mode |
 | `createScheduleRepository(mode?)` | `IScheduleRepository` | Creates schedule adapter for given mode |
 | `createBuyoutRepository(mode?)` | `IBuyoutRepository` | Creates buyout adapter for given mode |
+| `createComplianceRepository(mode?)` | `IComplianceRepository` | Creates compliance adapter for given mode |
+| `createContractRepository(mode?)` | `IContractRepository` | Creates contract adapter for given mode |
+| `createRiskRepository(mode?)` | `IRiskRepository` | Creates risk adapter for given mode |
+| `createScorecardRepository(mode?)` | `IScorecardRepository` | Creates scorecard adapter for given mode |
+| `createPmpRepository(mode?)` | `IPmpRepository` | Creates PMP adapter for given mode |
+| `createProjectRepository(mode?)` | `IProjectRepository` | Creates project adapter for given mode |
+| `createAuthRepository(mode?)` | `IAuthRepository` | Creates auth adapter for given mode |
 
 ## Adapter Modes
 
 | Mode | Source | Status |
 |------|--------|--------|
-| `mock` | In-memory seed data | Implemented (3 domains) |
+| `mock` | In-memory seed data | Implemented (all 11 domains) |
 | `sharepoint` | PnPjs / SPFx | Stub (Phase 5) |
 | `proxy` | Azure Functions / MSAL | Stub (Phase 4) |
 | `api` | REST API / Azure SQL | Stub (Phase 7+) |

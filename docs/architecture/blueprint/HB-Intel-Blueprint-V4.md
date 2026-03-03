@@ -735,4 +735,14 @@ Phase 2.1 Rebuild (@hbc/models Comprehensive Structure) completed: 2026-03-03
 - 65 new TS files + 14 modified barrels, 13 reference docs, 1 ADR
 - Full JSDoc, new enums/FormData/types/constants for all 13 domains
 - Zero breaking changes across 62+ consumer imports
+
+Phase 2.2 Rebuild (@hbc/data-access Comprehensive Rebuild) completed: 2026-03-03
+- PH2-Shared-Packages-Plan.md §2.2 — Error hierarchy, BaseRepository, 11 mock adapters, 11 factories
+- 21 new TS files + 18 modified, 3 new docs + 3 modified docs, 1 ADR (0013)
+- Typed error hierarchy: HbcDataAccessError, NotFoundError, ValidationError, AdapterNotImplementedError
+- BaseRepository<T> abstract class with wrapAsync, validateId, throwNotFound
+- Monolithic mock/index.ts decomposed into 11 per-domain files + shared infrastructure
+- All 11 factory functions implemented (unblocks query-hooks/project and query-hooks/scorecard)
+- Stub adapter typed configs for SharePoint, Proxy, API
+- Full backward compatibility preserved for all existing consumer imports
 -->
