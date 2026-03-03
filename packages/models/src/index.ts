@@ -10,3 +10,4 @@ export * from './scorecard/index.js';
 export * from './pmp/index.js';
 export * from './project/index.js';
 export * from './auth/index.js';
+export * from './provisioning/index.js';

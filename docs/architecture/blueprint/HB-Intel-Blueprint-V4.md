@@ -694,4 +694,24 @@ Phase 6 (HB Site Control — Mobile-First Field App) completed: 2026-03-03
 - ADR created: docs/architecture/adr/0008-hb-site-control-mobile.md
 - Documentation added: docs/how-to/developer/phase-6-hb-site-control-guide.md
 Next: Phase 7 — Backend
+
+Phase 7 (Backend/Functions — Azure Functions v4) completed: 2026-03-03
+- Created backend/functions/ as Azure Functions v4 Node.js serverless app per Blueprint §1, §2a, §2i, §2j, §3
+- Shared provisioning types in packages/models/src/provisioning/: IProvisioningStatus, ISagaStepResult, IProvisionSiteRequest, IProvisioningProgressEvent, IProvisioningEscalation, SAGA_STEPS
+- Azure Functions v4 programming model: app.http() / app.timer() registration (no function.json files)
+- tsconfig overrides: module: "Node16", moduleResolution: "Node16", no DOM lib, types: ["node"]
+- Service layer: 5 port interfaces (ISharePointService, ITableStorageService, IRedisCacheService, ISignalRPushService, IMsalOboService) with mock implementations
+- Service factory: HBC_SERVICE_MODE env var controls mock vs azure service instantiation
+- Provisioning saga orchestrator: 7-step engine with execute, retry, compensate, and pushProgress
+- Saga bifurcation: steps 1,2,3,4,6,7 immediate; step 5 (web parts) deferred to 1:00 AM EST timer
+- Compensation: reverse-order rollback from lastSuccessfulStep; step 1 (deleteSite) cascades
+- 4 HTTP endpoints: POST /provision-project-site (202), GET /provisioning-status/{projectCode}, POST /provisioning-retry/{projectCode}, POST /provisioning-escalate/{projectCode}
+- Proxy layer: GET/POST /api/proxy/{*path} with MSAL OBO, Redis cache (TTL-based), cache invalidation on mutations
+- Timer function: cron 0 0 6 * * * (6:00 AM UTC) processes deferred full-spec projects
+- SignalR negotiate endpoint: POST /api/signalr/negotiate returns mock connection info
+- Backend depends on @hbc/models only — no other @hbc/* packages
+- Verification: pnpm turbo run build (21 tasks, all success)
+- ADR created: docs/architecture/adr/0009-backend-functions.md
+- Documentation added: docs/how-to/developer/phase-7-azure-functions-guide.md
+Next: Phase 8 — CI/CD
 -->

@@ -255,4 +255,22 @@ Phase 6 (HB Site Control) completed: 2026-03-03
 - ADR: docs/architecture/adr/0008-hb-site-control-mobile.md
 - Documentation: docs/how-to/developer/phase-6-hb-site-control-guide.md
 Next: Phase 7 — Backend
+
+Phase 7 (Backend/Functions) completed: 2026-03-03
+- backend/functions/: Azure Functions v4 Node.js serverless app (@hbc/functions)
+- ~27 source files:
+  - Shared types: packages/models/src/provisioning/index.ts (7 exports)
+  - Config: package.json, tsconfig.json (Node16), host.json, local.settings.json
+  - Services (6): sharepoint-service, table-storage-service, redis-cache-service, signalr-push-service, msal-obo-service, service-factory
+  - Saga (9): provisioningSaga/index.ts (4 HTTP endpoints), saga-orchestrator.ts, 7 step files
+  - Proxy (2): proxy/index.ts, proxy-handler.ts
+  - Timer (1): timerFullSpec/index.ts (cron 0 0 6 * * *)
+  - SignalR (1): signalr/index.ts (negotiate endpoint)
+  - Utils (2): logger.ts, env.ts
+  - Entry: src/index.ts
+- Key decisions: tsc-only build, HBC_SERVICE_MODE factory, mock-first services, step 5 deferred to timer
+- Verification: pnpm turbo run build (21 tasks, all success)
+- ADR: docs/architecture/adr/0009-backend-functions.md
+- Documentation: docs/how-to/developer/phase-7-azure-functions-guide.md
+Next: Phase 8 — CI/CD
 -->
