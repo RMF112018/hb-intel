@@ -714,4 +714,19 @@ Phase 7 (Backend/Functions — Azure Functions v4) completed: 2026-03-03
 - ADR created: docs/architecture/adr/0009-backend-functions.md
 - Documentation added: docs/how-to/developer/phase-7-azure-functions-guide.md
 Next: Phase 8 — CI/CD
+
+Phase 8 completed: 2026-03-03
+- CI/CD pipeline: 3 GitHub Actions workflows (ci.yml, cd.yml, security.yml)
+- CI: 5 jobs — lint-and-format, test, build, storybook, e2e (Playwright smoke test)
+- CD: 4 jobs — deploy-pwa (Vercel), deploy-site-control (Vercel), deploy-functions (Azure), deploy-spfx (stubbed, if: false)
+- Security: dependency audit on PR + weekly + manual dispatch
+- Prettier config: .prettierrc + .prettierignore (semi, singleQuote, 100 width)
+- Playwright: chromium-only, testDir: ./e2e, baseURL: localhost:4000, single smoke test
+- Turborepo remote caching via TURBO_TOKEN/TURBO_TEAM env vars
+- Coverage thresholds start at 0% — ramp to 95% per Blueprint §2h
+- SPFx deploy stubbed — Vite-to-.sppkg packaging deferred
+- Root config updates: format:check script + task, @playwright/test devDep, vitest workspace expanded
+- ADR created: docs/architecture/adr/0010-ci-cd-pipeline.md
+- Documentation added: docs/how-to/developer/phase-8-ci-cd-guide.md
+Next: Phase 9 — Verification
 -->

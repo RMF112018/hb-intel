@@ -82,6 +82,16 @@ Every file is provided as copy-paste-ready code in this plan.]
 2. Deploy PWA to Vercel and one SPFx webpart to test catalog.
 3. Begin incremental migration of domains per Blueprint section 6.
 
+### Phase 2 Migration Plan `docs/architecture/plans/PH2-Shared-Packages-Plan.md`
+### Phase 3 Migration Plan `docs/architecture/plans/PH3-Query-State-Mngmt-Plan.md`
+### Phase 4 Migration Plan `docs/architecture/plans/PH4-UI-Design-Plan.md`
+### Phase 5 Migration Plan **TO BE PROVIDED**
+### Phase 6 Migration Plan **TO BE PROVIDED**
+### Phase 7 Migration Plan **TO BE PROVIDED**
+### Phase 8 Migration Plan **TO BE PROVIDED**
+### Phase 9 Migration Plan **TO BE PROVIDED**
+### Phase 10 Migration Plan **TO BE PROVIDED**
+
 **End of Development Plan**
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
@@ -273,4 +283,18 @@ Phase 7 (Backend/Functions) completed: 2026-03-03
 - ADR: docs/architecture/adr/0009-backend-functions.md
 - Documentation: docs/how-to/developer/phase-7-azure-functions-guide.md
 Next: Phase 8 — CI/CD
+
+Phase 8 completed: 2026-03-03
+- 10 new files + 5 edits:
+  - .prettierrc, .prettierignore (formatting config)
+  - playwright.config.ts, e2e/smoke.spec.ts (E2E setup)
+  - .github/workflows/ci.yml (5 jobs: lint-format, test, build, storybook, e2e)
+  - .github/workflows/cd.yml (4 jobs: pwa, site-control, functions, spfx-stubbed)
+  - .github/workflows/security.yml (1 job: dependency audit)
+  - docs/architecture/adr/0010-ci-cd-pipeline.md
+  - docs/how-to/developer/phase-8-ci-cd-guide.md
+- Modified: package.json (scripts + devDep), turbo.json (format:check), vitest.workspace.ts (expanded)
+- Key decisions: 3-workflow split, Turborepo remote cache, Playwright chromium-only, 0% coverage start, SPFx stubbed
+- Verification: pnpm turbo run build (21 tasks), pnpm format:check, pnpm e2e
+Next: Phase 9 — Verification
 -->

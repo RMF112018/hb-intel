@@ -1,0 +1,120 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  check-ci:
+    name: Gate – CI must pass
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - run: echo "CI passed — proceeding with deploy"
+
+  deploy-pwa:
+    name: Deploy PWA
+    needs: check-ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build PWA
+        run: pnpm turbo run build --filter=@hbc/pwa...
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_PWA }}
+          working-directory: apps/pwa
+          vercel-args: --prod
+
+  deploy-site-control:
+    name: Deploy HB Site Control
+    needs: check-ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build HB Site Control
+        run: pnpm turbo run build --filter=@hbc/hb-site-control...
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_SITE_CONTROL }}
+          working-directory: apps/hb-site-control
+          vercel-args: --prod
+
+  deploy-functions:
+    name: Deploy Azure Functions
+    needs: check-ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build Functions
+        run: pnpm turbo run build --filter=@hbc/functions...
+
+      - name: Deploy to Azure Functions
+        uses: azure/functions-action@v1
+        with:
+          app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME }}
+          package: backend/functions/dist
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+  deploy-spfx:
+    name: Deploy SPFx (Stubbed)
+    needs: check-ci
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      # TODO: SPFx deployment requires Vite-to-.sppkg packaging pipeline
+      # Steps needed:
+      #   1. Build all SPFx webparts via turbo (already working)
+      #   2. Convert Vite dist output to SharePoint .sppkg format
+      #   3. Upload .sppkg to SharePoint App Catalog via CLI for Microsoft 365
+      #   4. Deploy/retract as needed
+      # Blocked on: .sppkg packaging toolchain (non-trivial, deferred)
+      - run: echo "SPFx deploy is stubbed — see TODO comments"
