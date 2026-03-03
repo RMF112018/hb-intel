@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { IActiveProject } from '@hbc/models';
 
 export interface ProjectState {
@@ -13,15 +14,23 @@ export interface ProjectState {
 
 /**
  * Zustand store for project context — Blueprint §2e.
- * In-memory only for Phase 2.5.
- * TODO: Phase 4 — add zustand/middleware persist with localStorage.
+ * Phase 4: persist activeProject to localStorage.
+ * Only activeProject is persisted (not availableProjects or isLoading).
  */
-export const useProjectStore = create<ProjectState>((set) => ({
-  activeProject: null,
-  availableProjects: [],
-  isLoading: false,
-  setActiveProject: (activeProject) => set({ activeProject }),
-  setAvailableProjects: (availableProjects) => set({ availableProjects }),
-  setLoading: (isLoading) => set({ isLoading }),
-  clear: () => set({ activeProject: null, availableProjects: [], isLoading: false }),
-}));
+export const useProjectStore = create<ProjectState>()(
+  persist(
+    (set) => ({
+      activeProject: null,
+      availableProjects: [],
+      isLoading: false,
+      setActiveProject: (activeProject) => set({ activeProject }),
+      setAvailableProjects: (availableProjects) => set({ availableProjects }),
+      setLoading: (isLoading) => set({ isLoading }),
+      clear: () => set({ activeProject: null, availableProjects: [], isLoading: false }),
+    }),
+    {
+      name: 'hbc-project-store',
+      partialize: (state) => ({ activeProject: state.activeProject }),
+    },
+  ),
+);

@@ -192,4 +192,23 @@ Phase 3 (apps/dev-harness) completed: 2026-03-03
 - ADR: docs/architecture/adr/0005-dev-harness.md
 - Documentation: docs/how-to/developer/phase-3-dev-harness-guide.md
 Next: Phase 4 — PWA (apps/web)
+
+Phase 4 (apps/pwa) completed: 2026-03-03
+- Created apps/pwa/ (31 source files + 5 config files) per Foundation Plan Phase 4
+- Config: package.json (Vite + PWA plugin + MSAL + TanStack Router + all 6 @hbc/* deps), tsconfig.json, vite.config.ts (dual-mode env defines), index.html (PWA manifest + theme-color meta), env.d.ts (VITE_MSAL_* types)
+- main.tsx: Dual-mode entry — resolveAuthMode() → mock (sync bootstrap) or msal (async init) → createRoot
+- App.tsx: FluentProvider > MsalProvider (conditional) > QueryClientProvider > HbcErrorBoundary > RouterProvider
+- bootstrap.ts: Same mock seeding pattern as dev-harness
+- pwa.css: CSS reset + shell layout sizing (flex column + body)
+- Auth: msal-config.ts (MSAL Configuration from VITE_MSAL_* env vars), msal-init.ts (PublicClientApplication init + redirect + silent token + store sync), MsalGuard.tsx (MsalProvider + MsalAuthenticationTemplate wrapper)
+- Router: index.ts (createAppRouter + type registration), root-route.tsx (ShellLayout mode='full' + Outlet + callbacks → router.navigate), workspace-routes.ts (createWorkspaceRoute factory × 14 + index redirect + 404), route-guards.ts (requireAuth + requirePermission via Zustand .getState()), workspace-config.ts (descriptors + tool-picker/sidebar factories)
+- Components: WorkspacePageShell (title + project context + status), LoadingFallback (Spinner), ErrorFallback (error + retry)
+- 5 MVP pages: ProjectHubPage (project table + summary cards), AccountingPage (budget grid + financial cards), EstimatingPage (bid grid + status badges), LeadershipPage (KPI cards + ECharts bar chart), BusinessDevelopmentPage (lead pipeline grid)
+- 9 standard placeholder pages: Scheduling, Buyout, Compliance, Contracts, Risk, Scorecard, PMP, Admin, SiteControl (all using HbcEmptyState)
+- NotFoundPage: 404 catch-all with navigation back to project-hub
+- Package modifications: projectStore.ts → zustand persist middleware (localStorage, hbc-project-store, partialize: activeProject); packages/auth/src/msal/index.ts (mapMsalAccountToUser, validateMsalConfig); re-exported ColumnDef from @hbc/ui-kit
+- Verification: pnpm turbo run build (8 tasks, all success, 6.77s); PWA build: 24 precache entries, lazy chunks for all workspace pages
+- ADR: docs/architecture/adr/0006-pwa-standalone.md
+- Documentation: docs/how-to/developer/phase-4-pwa-guide.md
+Next: Phase 5 — SPFx webparts
 -->

@@ -434,6 +434,70 @@ GitHub Actions; Turborepo-aware (lint, test, build, e2e, deploy). Full exhaustiv
 
 ## 6. Migration Path (Incremental)
 Phases 1-10 as detailed; start with provisioning modernization.
+ 
+**Version:** 1.0 (aligned with Blueprint V4)  
+**Status:** Approved and Locked  
+**Date:** March 2026  
+**Purpose:** This document provides the complete, detailed 10-phase incremental migration plan (“strangler fig” pattern) from the current monolithic SPFx webpart to the new clean monorepo architecture (PWA + 11 breakout SPFx webparts + HB Site Control).  
+
+The plan ensures **zero-downtime**, **early business value**, and **risk reduction**. It begins technical foundation work first and delivers the highest-value MVP feature (SharePoint site provisioning) in Phase 6.
+
+## Phase 1: Monorepo Infrastructure & Tooling Setup
+Bootstrap the full pnpm workspaces + Turborepo structure using the official starter template. Create all root configuration files and the `apps/dev-harness`.  
+**Success Criteria:** `turbo run build` succeeds across the empty workspace.  
+**Deliverables:** Working monorepo skeleton with dev-harness.
+
+## Phase 2: Core Shared Packages – Models & Data Access
+Implement `@hbc/models` (all domain models and enums) and the complete `@hbc/data-access` package (15 domain-specific ports + SharePoint, proxy, mock, and future API adapters + mode-aware factory).  
+**Success Criteria:** All repository ports are swappable and fully tested in the dev-harness.  
+**Deliverables:** Clean replacement for the legacy `IDataService` god-interface.
+
+## Phase 3: Query & State Management Layer
+Build `@hbc/query-hooks` (TanStack Query hooks, centralized query-key factory, defaults) and Zustand stores for client state.  
+**Success Criteria:** Optimistic updates, caching, and invalidation work correctly in the harness.  
+**Deliverables:** Modern server-state and client-state management layer.
+
+## Phase 4: UI Foundation & HB Intel Design System
+Develop the full `@hbc/ui-kit` package with heavily customized Fluent UI v9 + Griffel and the complete **HB Intel Design System** (signature branding, micro-interactions, smooth animations, and visual identity). Configure Storybook.  
+**Success Criteria:** All components render consistently, pass accessibility checks, and reflect the premium HB Intel brand.  
+**Deliverables:** Reusable, instantly recognizable UI library.
+
+## Phase 5: Authentication & Navigation Shell
+Implement `@hbc/auth` (dual-mode MSAL + SPFx adapters, guards, hooks) and `@hbc/shell` (Procore-style header, global project persistence, Back-to-Project-Hub logic, simplified shells for webparts).  
+**Success Criteria:** Seamless mode switching and navigation work across PWA and SPFx previews.  
+**Deliverables:** Dual-mode authentication and workspace-centric navigation foundation.
+
+## Phase 6: Provisioning Modernization (MVP Critical – First Business-Value Delivery)
+Modernize the entire SharePoint site provisioning workflow using the new Azure Functions backend (`provisioningSaga`, compensation logic, SignalR real-time updates, ProvisioningStatus persistence, bifurcated execution, rollback/retry/escalation). Integrate the Accounting trigger and the Estimating Project Setup page (real-time checklist).  
+**Success Criteria:** Accounting Manager can click “Save + Provision Site” and see live, layman-friendly progress on the Estimating page with zero data loss.  
+**Deliverables:** Production-ready provisioning (highest-priority MVP feature).
+
+## Phase 7: First Breakout Webparts
+Convert the Accounting and Estimating functionality into independent SPFx webparts using the new shared packages and simplified shell.  
+**Success Criteria:** These two webparts are production-deployable and fully functional inside SharePoint sites.  
+**Deliverables:** First two live breakout webparts.
+
+## Phase 8: Remaining Departmental & Project-Specific Webparts
+Migrate the other nine SPFx webparts (Project Hub, Leadership, Risk Management, Safety, etc.) one by one using the shared template and overrides.  
+**Success Criteria:** All 11 webparts are independent, lightweight, and use the new architecture.  
+**Deliverables:** Complete set of 11 focused SPFx webparts.
+
+## Phase 9: Standalone Procore-like PWA
+Build the full primary PWA (`apps/pwa`) with all 14 workspaces, complete TanStack Router, MSAL authentication, and the Procore-inspired shell.  
+**Success Criteria:** The PWA runs independently on Vercel and provides the flagship experience.  
+**Deliverables:** Primary standalone application (the future main user experience).
+
+## Phase 10: Mobile App, Backend Polish, CI/CD & Full Cutover
+Complete `apps/hb-site-control`, finalize the Azure Functions proxy and timer triggers, implement the full GitHub Actions CI/CD pipeline, run comprehensive testing (Vitest, Playwright, Storybook), optimize performance, and gradually decommission the old monolithic webpart.  
+**Success Criteria:** 100 % of functionality is available in the new architecture; the legacy monolith is retired.  
+**Deliverables:** Complete, production-ready HB Intel platform.
+
+## Migration Governance
+- Each phase ends with a working dev-harness verification and automated tests.  
+- Progress is tracked in the project’s issue tracker.  
+- Rollback is always possible because shared packages are introduced incrementally.  
+- Business stakeholders receive visible value starting at Phase 6 (provisioning).
+
 
 ## 7. Why This Architecture
 | Current Pain                   | Greenfield Solution                          |
@@ -579,4 +643,23 @@ Phase 3 (apps/dev-harness) completed: 2026-03-03
 - ADR created: docs/architecture/adr/0005-dev-harness.md
 - Documentation added: docs/how-to/developer/phase-3-dev-harness-guide.md
 Next: Phase 4 — PWA (apps/web)
+
+Phase 4 (apps/pwa) completed: 2026-03-03
+- Created apps/pwa/ (31 source files + 5 config files) per Blueprint §1 (monorepo: apps/pwa/), §2a (dual-mode hosting), §2b (MSAL auth), §2c (shell navigation), §2e (Zustand), §2f (TanStack Router), §4a (route guards)
+- Vite PWA with vite-plugin-pwa: registerType='autoUpdate', web manifest (HB Intel, #004B87, standalone), Workbox service worker (24 precache entries)
+- Dual-mode auth bootstrap: mock (synchronous bootstrapMockEnvironment) + msal (async initializeMsalAuth with MSAL PublicClientApplication, redirect handling, silent token)
+- Provider hierarchy: FluentProvider > MsalProvider (conditional) > QueryClientProvider > HbcErrorBoundary > RouterProvider > ShellLayout (root route)
+- TanStack Router code-based routes: createAppRouter() with type registration, createWorkspaceRoute() factory for all 14 workspaces
+- Shell-router integration: root route renders ShellLayout mode='full' with <Outlet/>, callbacks wire to router.navigate() per ADR-0003
+- Imperative Zustand route guards: requireAuth(), requirePermission() called from beforeLoad (outside React tree)
+- 14 lazy-loaded workspace routes + index redirect (/ → /project-hub) + 404 catch-all
+- 5 MVP pages with data grids/charts: ProjectHubPage, AccountingPage, EstimatingPage, LeadershipPage, BusinessDevelopmentPage
+- 9 standard placeholder pages with HbcEmptyState + NotFoundPage
+- Modified packages/shell/src/stores/projectStore.ts: added zustand/middleware persist with localStorage (key: hbc-project-store, partialize: activeProject only)
+- Created packages/auth/src/msal/index.ts: mapMsalAccountToUser(), validateMsalConfig() helpers
+- Re-exported ColumnDef type from @hbc/ui-kit to avoid leaking @tanstack/react-table as direct dependency
+- Verification: pnpm turbo run build (8 tasks, all success, 6.77s); Vite build produces lazy-loaded chunks for all workspace pages + ECharts
+- ADR created: docs/architecture/adr/0006-pwa-standalone.md
+- Documentation added: docs/how-to/developer/phase-4-pwa-guide.md
+Next: Phase 5 — SPFx webparts
 -->

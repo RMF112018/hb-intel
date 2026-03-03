@@ -1,0 +1,43 @@
+/* PWA global styles — Foundation Plan Phase 4 */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--fontFamilyBase, 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--colorNeutralBackground1, #fafafa);
+  color: var(--colorNeutralForeground1, #242424);
+}
+
+/* Shell layout sizing */
+[data-hbc-shell="shell-layout"] {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+[data-hbc-shell="shell-body"] {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+[data-hbc-shell="shell-content"] {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}

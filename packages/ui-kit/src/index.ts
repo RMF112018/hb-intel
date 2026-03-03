@@ -70,6 +70,7 @@ export type {
 
 export { HbcDataTable } from './HbcDataTable/index.js';
 export type { HbcDataTableProps } from './HbcDataTable/index.js';
+export type { ColumnDef } from '@tanstack/react-table';
 
 export { HbcChart } from './HbcChart/index.js';
 export type { HbcChartProps } from './HbcChart/index.js';
