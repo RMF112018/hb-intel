@@ -1,19 +1,11 @@
-export interface ICurrentUser {
-  id: string;
-  displayName: string;
-  email: string;
-  roles: IRole[];
-}
+/**
+ * Auth domain models — users, roles, permissions, and authentication.
+ *
+ * @module auth
+ */
 
-export interface IRole {
-  id: string;
-  name: string;
-  permissions: string[];
-}
-
-export interface IPermissionTemplate {
-  id: string;
-  name: string;
-  description: string;
-  permissions: string[];
-}
+export { type ICurrentUser, type IRole, type IPermissionTemplate } from './IAuth.js';
+export { type ILoginFormData, type IRoleAssignmentFormData } from './IAuthFormData.js';
+export { SystemRole, type AuthMode } from './AuthEnums.js';
+export { type UserId, type RoleId, type PermissionAction } from './types.js';
+export { SYSTEM_ROLE_LABELS, SYSTEM_ROLE_LEVELS } from './constants.js';

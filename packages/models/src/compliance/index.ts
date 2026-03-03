@@ -1,16 +1,11 @@
-export interface IComplianceEntry {
-  id: number;
-  projectId: string;
-  vendorName: string;
-  requirementType: string;
-  status: string;
-  expirationDate: string;
-}
+/**
+ * Compliance domain models — vendor regulatory tracking.
+ *
+ * @module compliance
+ */
 
-export interface IComplianceSummary {
-  projectId: string;
-  totalEntries: number;
-  compliant: number;
-  nonCompliant: number;
-  expiringSoon: number;
-}
+export { type IComplianceEntry, type IComplianceSummary } from './ICompliance.js';
+export { type IComplianceEntryFormData } from './IComplianceFormData.js';
+export { ComplianceStatus, ComplianceRequirementType } from './ComplianceEnums.js';
+export { type ComplianceEntryId, type ComplianceSearchCriteria } from './types.js';
+export { COMPLIANCE_STATUS_LABELS, COMPLIANCE_EXPIRY_WARNING_DAYS } from './constants.js';

@@ -1,18 +1,11 @@
-export interface IContractInfo {
-  id: number;
-  projectId: string;
-  contractNumber: string;
-  vendorName: string;
-  amount: number;
-  status: string;
-  executedDate: string;
-}
+/**
+ * Contracts domain models — contract management and approval workflows.
+ *
+ * @module contracts
+ */
 
-export interface ICommitmentApproval {
-  id: number;
-  contractId: number;
-  approverName: string;
-  approvedAt: string;
-  status: string;
-  notes: string;
-}
+export { type IContractInfo, type ICommitmentApproval } from './IContracts.js';
+export { type IContractFormData, type ICommitmentApprovalFormData } from './IContractsFormData.js';
+export { ContractStatus, ApprovalStatus } from './ContractEnums.js';
+export { type ContractId, type ApprovalId, type ContractSearchCriteria } from './types.js';
+export { CONTRACT_STATUS_LABELS, APPROVAL_STATUS_LABELS } from './constants.js';

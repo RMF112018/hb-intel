@@ -1,17 +1,11 @@
-export interface IScheduleActivity {
-  id: number;
-  projectId: string;
-  name: string;
-  startDate: string;
-  endDate: string;
-  percentComplete: number;
-  isCriticalPath: boolean;
-}
+/**
+ * Schedule domain models — project activity tracking and metrics.
+ *
+ * @module schedule
+ */
 
-export interface IScheduleMetrics {
-  projectId: string;
-  totalActivities: number;
-  completedActivities: number;
-  criticalPathVariance: number;
-  overallPercentComplete: number;
-}
+export { type IScheduleActivity, type IScheduleMetrics } from './ISchedule.js';
+export { type IScheduleActivityFormData } from './IScheduleFormData.js';
+export { ScheduleActivityStatus } from './ScheduleEnums.js';
+export { type ScheduleActivityId, type ScheduleSearchCriteria } from './types.js';
+export { SCHEDULE_STATUS_LABELS } from './constants.js';

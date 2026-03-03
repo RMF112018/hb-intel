@@ -16,20 +16,35 @@ packages/models/
 ├── package.json
 ├── tsconfig.json
 └── src/
-    ├── index.ts          # Barrel re-export
-    ├── shared/           # IPagedResult<T>, ICursorPageResult<T>, IListQueryOptions
-    ├── leads/            # LeadStage enum, ILead, ILeadFormData
-    ├── estimating/       # IEstimatingTracker, IEstimatingKickoff
-    ├── schedule/         # IScheduleActivity, IScheduleMetrics
-    ├── buyout/           # IBuyoutEntry, IBuyoutSummary
-    ├── compliance/       # IComplianceEntry, IComplianceSummary
-    ├── contracts/        # IContractInfo, ICommitmentApproval
-    ├── risk/             # IRiskCostItem, IRiskCostManagement
-    ├── scorecard/        # IGoNoGoScorecard, IScorecardVersion
-    ├── pmp/              # IProjectManagementPlan, IPMPSignature
-    ├── project/          # IActiveProject, IPortfolioSummary
-    └── auth/             # ICurrentUser, IRole, IPermissionTemplate
+    ├── index.ts              # Root barrel re-export (Option C JSDoc)
+    ├── shared/
+    │   ├── IPagedResult.ts
+    │   ├── ICursorPageResult.ts
+    │   ├── IListQueryOptions.ts
+    │   ├── types.ts          # SortOrder, DateString, EntityId
+    │   ├── constants.ts      # DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
+    │   └── index.ts          # Barrel
+    ├── leads/                # ILead, ILeadFormData, LeadStage, types, constants
+    ├── estimating/           # IEstimatingTracker, IEstimatingKickoff, EstimatingStatus
+    ├── schedule/             # IScheduleActivity, IScheduleMetrics, ScheduleActivityStatus
+    ├── buyout/               # IBuyoutEntry, IBuyoutSummary, BuyoutStatus
+    ├── compliance/           # IComplianceEntry, ComplianceStatus, ComplianceRequirementType
+    ├── contracts/            # IContractInfo, ICommitmentApproval, ContractStatus, ApprovalStatus
+    ├── risk/                 # IRiskCostItem, IRiskCostManagement, RiskCategory, RiskStatus
+    ├── scorecard/            # IGoNoGoScorecard, IScorecardVersion, ScorecardRecommendation
+    ├── pmp/                  # IProjectManagementPlan, IPMPSignature, PmpStatus, SignatureStatus
+    ├── project/              # IActiveProject, IPortfolioSummary, ProjectStatus
+    ├── auth/                 # ICurrentUser, IRole, SystemRole, AuthMode
+    └── provisioning/         # IProvisioningStatus, SAGA_STEPS (runtime), type unions
 ```
+
+Each domain follows a consistent 6-file structure (per ADR-0012):
+- `I[Domain].ts` — Main interface(s) with full JSDoc
+- `I[Domain]FormData.ts` — Form input interfaces
+- `[Domain]Enums.ts` — Domain enums and type unions
+- `types.ts` — Domain-specific type aliases (IDs, search criteria)
+- `constants.ts` — Labels, defaults, thresholds
+- `index.ts` — Pure barrel re-export with `.js` extensions
 
 ### Importing Models
 
@@ -55,8 +70,13 @@ pnpm turbo run build --filter=@hbc/models
 
 - **Zero dependencies**: Models are pure TypeScript interfaces/enums with no runtime imports.
 - **ESM-only**: `"type": "module"` with `.js` extensions in barrel re-exports for Node ESM resolution.
-- **Placeholder fields**: Interfaces contain minimal representative fields; they will be expanded as domain features are implemented in later phases.
-- **12 domains**: Matches the Blueprint §1a specification exactly (leads, estimating, schedule, buyout, compliance, contracts, risk, scorecard, pmp, project, auth, shared).
+- **Comprehensive file structure (Option C)**: Each domain has 6 files — interface, FormData, enums, types, constants, barrel. See [ADR-0012](../../architecture/adr/0012-models-comprehensive-structure.md).
+- **Full JSDoc**: Every exported type and field has JSDoc documentation.
+- **13 domains**: shared, leads, estimating, schedule, buyout, compliance, contracts, risk, scorecard, pmp, project, auth, provisioning.
+- **Runtime values preserved**: `SAGA_STEPS`, `TOTAL_SAGA_STEPS`, and `LeadStage` use `export` (not `export type`) to ensure runtime accessibility.
+- **Zero breaking changes**: All 62+ existing imports resolve identically through re-export chains.
+
+**Reference:** See `docs/reference/models/` for per-domain API documentation.
 
 ---
 

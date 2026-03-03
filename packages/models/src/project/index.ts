@@ -1,15 +1,11 @@
-export interface IActiveProject {
-  id: string;
-  name: string;
-  number: string;
-  status: string;
-  startDate: string;
-  endDate: string;
-}
+/**
+ * Project domain models — active project context and portfolio summary.
+ *
+ * @module project
+ */
 
-export interface IPortfolioSummary {
-  totalProjects: number;
-  activeProjects: number;
-  totalContractValue: number;
-  averagePercentComplete: number;
-}
+export { type IActiveProject, type IPortfolioSummary } from './IProject.js';
+export { type IProjectFormData } from './IProjectFormData.js';
+export { ProjectStatus } from './ProjectEnums.js';
+export { type ProjectId, type ProjectNumber, type ProjectSearchCriteria } from './types.js';
+export { PROJECT_STATUS_LABELS, ACTIVE_PROJECT_STATUSES } from './constants.js';

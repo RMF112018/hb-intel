@@ -1,23 +1,11 @@
-/** Paginated result using offset-based pagination. */
-export interface IPagedResult<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
+/**
+ * Shared pagination, query, and utility types used across all domains.
+ *
+ * @module shared
+ */
 
-/** Paginated result using cursor-based pagination. */
-export interface ICursorPageResult<T> {
-  items: T[];
-  cursor: string | null;
-  hasMore: boolean;
-}
-
-/** Common query options for list endpoints. */
-export interface IListQueryOptions {
-  page?: number;
-  pageSize?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  search?: string;
-}
+export { type IPagedResult } from './IPagedResult.js';
+export { type ICursorPageResult } from './ICursorPageResult.js';
+export { type IListQueryOptions } from './IListQueryOptions.js';
+export { type SortOrder, type DateString, type EntityId } from './types.js';
+export { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from './constants.js';

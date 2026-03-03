@@ -335,4 +335,19 @@ Phase 9 (Verification & Deployment Readiness) completed: 2026-03-03
 - Key decisions: multi-project Playwright, env-var auth mode, Vercel SPA config, iframe SPFx testing
 - Verification: pnpm turbo run build (21 tasks), pnpm format:check, pnpm e2e
 Foundation complete — ready for domain migration starting with Accounting
+
+Phase 2.1 (@hbc/models Comprehensive Rebuild) completed: 2026-03-03
+- PH2-Shared-Packages-Plan.md §2.1 Option C — per-domain 6-file structure
+- 65 new TypeScript files (13 domains × 5 content files)
+- 14 modified TypeScript files (13 domain index.ts + 1 root index.ts)
+- New enums: EstimatingStatus, ScheduleActivityStatus, BuyoutStatus, ComplianceStatus,
+  ComplianceRequirementType, ContractStatus, ApprovalStatus, RiskCategory, RiskStatus,
+  ScorecardRecommendation, PmpStatus, SignatureStatus, ProjectStatus, SystemRole
+- New FormData interfaces for all 13 domains
+- New type aliases (IDs, search criteria) and constants (labels, thresholds) per domain
+- Root barrel rewritten with Option C JSDoc (package docs, domain table, import examples)
+- Documentation: 13 reference docs (docs/reference/models/), ADR-0012, updated phase-2 guide
+- Zero breaking changes: all 62+ existing imports resolve identically
+- Verification: pnpm turbo run build (21/21 pass), check-types pass, runtime values verified
+Next: Phase 2.2 — @hbc/data-access rebuild
 -->

@@ -1,18 +1,11 @@
-export interface IEstimatingTracker {
-  id: number;
-  projectId: string;
-  bidNumber: string;
-  status: string;
-  dueDate: string;
-  createdAt: string;
-  updatedAt: string;
-}
+/**
+ * Estimating domain models — bid tracking and kickoff management.
+ *
+ * @module estimating
+ */
 
-export interface IEstimatingKickoff {
-  id: number;
-  projectId: string;
-  kickoffDate: string;
-  attendees: string[];
-  notes: string;
-  createdAt: string;
-}
+export { type IEstimatingTracker, type IEstimatingKickoff } from './IEstimating.js';
+export { type IEstimatingTrackerFormData, type IEstimatingKickoffFormData } from './IEstimatingFormData.js';
+export { EstimatingStatus } from './EstimatingEnums.js';
+export { type EstimatingTrackerId, type EstimatingSearchCriteria } from './types.js';
+export { ESTIMATING_STATUS_LABELS } from './constants.js';

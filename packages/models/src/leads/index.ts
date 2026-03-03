@@ -1,26 +1,11 @@
-export enum LeadStage {
-  Identified = 'Identified',
-  Qualifying = 'Qualifying',
-  BidDecision = 'BidDecision',
-  Bidding = 'Bidding',
-  Awarded = 'Awarded',
-  Lost = 'Lost',
-  Declined = 'Declined',
-}
+/**
+ * Lead domain models — business development pipeline tracking.
+ *
+ * @module leads
+ */
 
-export interface ILead {
-  id: number;
-  title: string;
-  stage: LeadStage;
-  clientName: string;
-  estimatedValue: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ILeadFormData {
-  title: string;
-  stage: LeadStage;
-  clientName: string;
-  estimatedValue: number;
-}
+export { type ILead } from './ILead.js';
+export { type ILeadFormData } from './ILeadFormData.js';
+export { LeadStage } from './LeadEnums.js';
+export { type LeadId, type LeadSearchCriteria } from './types.js';
+export { LEAD_STAGE_LABELS, ACTIVE_LEAD_STAGES } from './constants.js';

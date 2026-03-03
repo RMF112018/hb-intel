@@ -729,4 +729,10 @@ Phase 8 completed: 2026-03-03
 - ADR created: docs/architecture/adr/0010-ci-cd-pipeline.md
 - Documentation added: docs/how-to/developer/phase-8-ci-cd-guide.md
 Next: Phase 9 — Verification
+
+Phase 2.1 Rebuild (@hbc/models Comprehensive Structure) completed: 2026-03-03
+- PH2-Shared-Packages-Plan.md §2.1 Option C — per-domain 6-file structure (ADR-0012)
+- 65 new TS files + 14 modified barrels, 13 reference docs, 1 ADR
+- Full JSDoc, new enums/FormData/types/constants for all 13 domains
+- Zero breaking changes across 62+ consumer imports
 -->
