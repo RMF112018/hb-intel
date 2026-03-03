@@ -29,7 +29,9 @@
       "Bash(ls -1 /Users/bobbyfetting/hb-intel/apps/*/package.json)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npx prettier:*)",
+      "Bash(node:*)"
     ]
   }
 }

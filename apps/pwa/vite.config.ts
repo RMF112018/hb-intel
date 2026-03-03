@@ -35,8 +35,12 @@ export default defineConfig(({ mode }) => ({
     },
   },
   define: {
-    'process.env.HBC_ADAPTER_MODE': mode === 'development' ? '"mock"' : '"proxy"',
-    'process.env.HBC_AUTH_MODE': mode === 'development' ? '"mock"' : '"msal"',
+    'process.env.HBC_ADAPTER_MODE': JSON.stringify(
+      process.env.VITE_ADAPTER_MODE ?? (mode === 'development' ? 'mock' : 'proxy'),
+    ),
+    'process.env.HBC_AUTH_MODE': JSON.stringify(
+      process.env.VITE_AUTH_MODE ?? (mode === 'development' ? 'mock' : 'msal'),
+    ),
   },
   server: {
     port: 4000,

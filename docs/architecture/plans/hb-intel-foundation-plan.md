@@ -4,11 +4,13 @@
 **Purpose:** This document contains exhaustive, numbered, manual step-by-step instructions with complete copy-paste-ready code for every layer of the foundation. It was built from the interview-locked decisions (Option A for every package and app) and the HB Intel Design System vision. Any competent developer or AI coding agent can follow this plan sequentially and produce a flawless, production-ready foundation.
 
 ## Phase 0: Prerequisites
+
 1. Install Node.js 20+, pnpm 9+, and Git.
 2. Clone the existing repository: `git clone https://github.com/RMF112018/Project-Controls.git --branch hbc-suite-stabilization`
 3. Create a new branch: `git checkout -b feature/hb-intel-foundation-v4`
 
 ## Phase 1: Bootstrap Monorepo Root Configuration Files
+
 1. Run `npx create-turbo@latest . --example basic` and choose the default options.
 2. Delete any unnecessary example apps/folders.
 3. Replace `turbo.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `.eslintrc.base.js`, and `vitest.workspace.ts` with the exact content shown in Blueprint section 1.
@@ -17,24 +19,28 @@
 [Full file contents for each root config are provided in the attached blueprint reference files.]
 
 ## Phase 2: Shared Packages (Exhaustive Instructions)
+
 ### 2.1 @hbc/models
+
 1. `pnpm create @hbc/models` (or manually: `mkdir packages/models && cd packages/models`)
 2. Create `package.json`, `tsconfig.json`, and `src/` with every domain folder (leads/, estimating/, etc.) and `index.ts` barrel export.
 3. Copy-paste the exact model interfaces and enums from Blueprint section 1a.
 4. Run `pnpm build` and verify.
 
-[Identical exhaustive pattern repeated for 
-### 2.2 @hbc/data-access (ports + 4 adapters + factory) 
+[Identical exhaustive pattern repeated for
+
+### 2.2 @hbc/data-access (ports + 4 adapters + factory)
 
 ### 2.3 @hbc/query-hooks (domain hooks + keys.ts + defaults.ts)
 
 ### 2.4 @hbc/auth (Zustand stores + guards + MSAL/SPFx adapters)
 
-### 2.5 @hbc/shell (Zustand stores + HeaderBar + ProjectPicker + ShellLayout). 
+### 2.5 @hbc/shell (Zustand stores + HeaderBar + ProjectPicker + ShellLayout).
 
 Every file is provided as copy-paste-ready code in this plan.]
 
 ### 2.6 @hbc/ui-kit (HB Intel Design System)
+
 1. Create the package structure.
 2. Set up Griffel theme with **HB Intel Design System tokens** (signature colors, typography, animations).
 3. Implement every component (HbcDataTable with virtualization, HbcChart lazy-loaded, HbcForm, etc.).
@@ -44,52 +50,67 @@ Every file is provided as copy-paste-ready code in this plan.]
 [Full component and theme code provided.]
 
 ## Phase 3: apps/dev-harness
+
 1. Create Vite app with tabbed router.
 2. Add live-reload integration to all shared packages and mock adapters.
 3. Implement tabs for PWA, each SPFx webpart preview, and HB Site Control.
-[Full code provided.]
+   [Full code provided.]
 
 ## Phase 4: apps/pwa (Standalone Procore-like PWA)
+
 1. Create Vite app.
 2. Implement full pages (14 workspaces), TanStack Router with guards, App.tsx with ShellLayout.
 3. Configure MSAL, service workers, and path aliases.
-[Full code provided.]
+   [Full code provided.]
 
 ## Phase 5: 11 SPFx Webparts
+
 1. Create shared SPFx webpart template (manifest, entry point, simplified App.tsx).
 2. Implement full `project-hub` as reference.
 3. Apply concise overrides for estimating, accounting, safety, etc.
-[Full template + reference code provided.]
+   [Full template + reference code provided.]
 
 ## Phase 6: apps/hb-site-control
+
 1. Create mobile-optimized Vite app.
 2. Implement pages, lightweight responsive shell, offline service workers, and react-native-web setup.
-[Full code provided.]
+   [Full code provided.]
 
 ## Phase 7: backend/functions (Azure Functions)
+
 1. Create Node.js Functions app.
 2. Implement provisioningSaga (7 steps + compensation), proxy functions, timer trigger, and SignalR.
 3. Configure host.json and local.settings.json.
-[Full saga and function code provided.]
+   [Full saga and function code provided.]
 
 ## Phase 8: CI/CD Pipeline
+
 1. Create `.github/workflows/` folder.
 2. Implement Turborepo-aware lint/test/build/e2e/deploy jobs for all apps and backend.
-[Full YAML files provided.]
+   [Full YAML files provided.]
 
 ## Phase 9: Verification & Next Steps
+
 1. Run dev-harness and verify all modes.
 2. Deploy PWA to Vercel and one SPFx webpart to test catalog.
 3. Begin incremental migration of domains per Blueprint section 6.
 
 ### Phase 2 Migration Plan `docs/architecture/plans/PH2-Shared-Packages-Plan.md`
+
 ### Phase 3 Migration Plan `docs/architecture/plans/PH3-Query-State-Mngmt-Plan.md`
+
 ### Phase 4 Migration Plan `docs/architecture/plans/PH4-UI-Design-Plan.md`
+
 ### Phase 5 Migration Plan **TO BE PROVIDED**
+
 ### Phase 6 Migration Plan **TO BE PROVIDED**
+
 ### Phase 7 Migration Plan **TO BE PROVIDED**
+
 ### Phase 8 Migration Plan **TO BE PROVIDED**
+
 ### Phase 9 Migration Plan **TO BE PROVIDED**
+
 ### Phase 10 Migration Plan **TO BE PROVIDED**
 
 **End of Development Plan**
@@ -297,4 +318,21 @@ Phase 8 completed: 2026-03-03
 - Key decisions: 3-workflow split, Turborepo remote cache, Playwright chromium-only, 0% coverage start, SPFx stubbed
 - Verification: pnpm turbo run build (21 tasks), pnpm format:check, pnpm e2e
 Next: Phase 9 — Verification
+
+Phase 9 (Verification & Deployment Readiness) completed: 2026-03-03
+- 4 new files + 3 modified files:
+  - apps/dev-harness/package.json: added --port 3000 to preview script
+  - playwright.config.ts: multi-project config (chromium + dev-harness), webServer array
+  - e2e/dev-harness.spec.ts (NEW): 13-tab navigation tests + DevControls theme toggle
+  - e2e/pwa.spec.ts (NEW): root load + 5 MVP route tests + shell header verification
+  - apps/pwa/vercel.json (NEW): SPA catch-all rewrite, immutable asset caching, no-cache SW
+  - apps/pwa/vite.config.ts: env-configurable VITE_AUTH_MODE / VITE_ADAPTER_MODE with fallbacks
+- Documentation:
+  - docs/how-to/developer/phase-9-verification-guide.md (NEW)
+  - docs/how-to/developer/domain-migration-runbook.md (NEW)
+  - docs/architecture/adr/0011-verification-deployment.md (NEW)
+  - docs/how-to/developer/phase-8-ci-cd-guide.md (updated: E2E expansion note)
+- Key decisions: multi-project Playwright, env-var auth mode, Vercel SPA config, iframe SPFx testing
+- Verification: pnpm turbo run build (21 tasks), pnpm format:check, pnpm e2e
+Foundation complete — ready for domain migration starting with Accounting
 -->
