@@ -6,8 +6,7 @@ import type { ReactNode } from 'react';
 import { Text, Card, CardHeader } from '@fluentui/react-components';
 import { useProjectStore } from '@hbc/shell';
 import type { IActiveProject } from '@hbc/models';
-import { WorkspacePageShell } from '../components/WorkspacePageShell.js';
-import { HbcDataTable } from '@hbc/ui-kit';
+import { HbcDataTable, WorkspacePageShell } from '@hbc/ui-kit';
 import type { ColumnDef } from '@hbc/ui-kit';
 
 const columns: ColumnDef<IActiveProject, unknown>[] = [

@@ -662,4 +662,19 @@ Phase 4 (apps/pwa) completed: 2026-03-03
 - ADR created: docs/architecture/adr/0006-pwa-standalone.md
 - Documentation added: docs/how-to/developer/phase-4-pwa-guide.md
 Next: Phase 5 — SPFx webparts
+
+Phase 5 (11 SPFx webparts) completed: 2026-03-03
+- Pre-requisites: Expanded WorkspaceId from 14 → 19 (added safety, quality-control-warranty, risk-management, operational-excellence, human-resources) per Blueprint §2c
+- Implemented extractSpfxUser() in packages/auth/src/adapters/index.ts with ISpfxPageContext interface per Blueprint §2b (dual-mode auth)
+- Created packages/auth/src/spfx/index.ts: bootstrapSpfxAuth() seeds authStore + permissionStore from SharePoint context
+- Moved WorkspacePageShell from apps/pwa/src/components/ to packages/ui-kit/src/WorkspacePageShell/ for cross-app reuse
+- Fixed dev-harness TAB_TO_WORKSPACE mappings for 5 new SPFx workspace IDs
+- Added 5 new PWA workspace routes + placeholder pages (SafetyPage, QualityControlWarrantyPage, RiskManagementPage, OperationalExcellencePage, HumanResourcesPage)
+- Created 11 SPFx webpart apps (apps/project-hub through apps/human-resources) per Blueprint §1 (monorepo structure), §2a (dual-mode hosting), §2b (SPFx auth), §2c (simplified shell)
+- Each webpart: Vite build, ShellLayout mode='simplified', memory-based TanStack Router (createMemoryHistory), dual-mode auth (mock/spfx), unique dev port (4001–4011)
+- Page breakdown: project-hub (4 pages), accounting (3), estimating (3), leadership (2), business-development (2), admin (3), safety (2), quality-control-warranty (2), risk-management (2), operational-excellence (2), human-resources (2) = 27 pages total
+- Verification: pnpm turbo run build (19 tasks, all success, 15.6s)
+- ADR created: docs/architecture/adr/0007-spfx-vite-first.md
+- Documentation added: docs/how-to/developer/phase-5-spfx-webparts-guide.md
+Next: Phase 6 — HB Site Control
 -->

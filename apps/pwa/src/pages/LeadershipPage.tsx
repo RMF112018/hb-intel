@@ -4,8 +4,7 @@
  */
 import type { ReactNode } from 'react';
 import { Text, Card, CardHeader } from '@fluentui/react-components';
-import { WorkspacePageShell } from '../components/WorkspacePageShell.js';
-import { HbcChart } from '@hbc/ui-kit';
+import { HbcChart, WorkspacePageShell } from '@hbc/ui-kit';
 
 export function LeadershipPage(): ReactNode {
   const kpis = [

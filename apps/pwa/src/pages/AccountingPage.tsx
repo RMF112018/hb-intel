@@ -4,8 +4,7 @@
  */
 import type { ReactNode } from 'react';
 import { Text, Card, CardHeader } from '@fluentui/react-components';
-import { WorkspacePageShell } from '../components/WorkspacePageShell.js';
-import { HbcDataTable } from '@hbc/ui-kit';
+import { HbcDataTable, WorkspacePageShell } from '@hbc/ui-kit';
 import type { ColumnDef } from '@hbc/ui-kit';
 
 interface BudgetItem {

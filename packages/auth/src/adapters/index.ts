@@ -12,6 +12,25 @@ export interface IMsalConfig {
 }
 
 /**
+ * Lightweight interface mirroring SPFx pageContext.user — avoids pulling
+ * @microsoft/sp-* types into the shared package (Phase 5).
+ */
+export interface ISpfxPageContext {
+  user: {
+    displayName: string;
+    email: string;
+    loginName: string;
+    isAnonymousGuestUser: boolean;
+    isSiteAdmin: boolean;
+  };
+  web: {
+    permissions: {
+      value: { High: number; Low: number };
+    };
+  };
+}
+
+/**
  * Detect current auth mode from environment.
  * Blueprint §2b — dual-mode auto-detection.
  */
@@ -39,10 +58,44 @@ export function resolveAuthMode(): AuthMode {
 
 /**
  * Extract current user from SPFx page context.
- * Stub — concrete implementation wired in Phase 5 (SPFx webparts).
+ * Phase 5 — maps pageContext.user → ICurrentUser.
+ * Derives permissions from SharePoint permission levels.
  */
-export function extractSpfxUser(): ICurrentUser {
-  throw new Error('extractSpfxUser() not yet implemented — requires SPFx context (Phase 5)');
+export function extractSpfxUser(pageContext: ISpfxPageContext): ICurrentUser {
+  const { user, web } = pageContext;
+
+  const permissions: string[] = [];
+  if (user.isSiteAdmin) {
+    permissions.push('*:*');
+  } else {
+    // Map SharePoint permission mask to HBC permissions
+    // High bit 0x800 = ManageWeb (admin-level)
+    // Low bit 0x20 = EditListItems, 0x10 = ViewListItems
+    const high = web.permissions.value.High;
+    const low = web.permissions.value.Low;
+
+    if (high & 0x800) permissions.push('settings:*');
+    if (low & 0x20) permissions.push('project:write', 'document:write');
+    if (low & 0x10) permissions.push('project:read', 'document:read', 'reports:read');
+
+    // Everyone gets at least read access
+    if (permissions.length === 0) {
+      permissions.push('project:read');
+    }
+  }
+
+  return {
+    id: `spfx-${user.loginName}`,
+    displayName: user.displayName,
+    email: user.email,
+    roles: [
+      {
+        id: user.isSiteAdmin ? 'role-admin' : 'role-member',
+        name: user.isSiteAdmin ? 'Administrator' : 'Member',
+        permissions,
+      },
+    ],
+  };
 }
 
 /**

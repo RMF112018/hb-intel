@@ -211,4 +211,33 @@ Phase 4 (apps/pwa) completed: 2026-03-03
 - ADR: docs/architecture/adr/0006-pwa-standalone.md
 - Documentation: docs/how-to/developer/phase-4-pwa-guide.md
 Next: Phase 5 — SPFx webparts
+
+Phase 5 (11 SPFx webparts) completed: 2026-03-03
+- Pre-requisites (~14 existing files modified + 6 new PWA pages):
+  - packages/shell/src/types.ts: WorkspaceId expanded 14 → 19, WORKSPACE_IDS array updated
+  - packages/auth/src/adapters/index.ts: extractSpfxUser() implemented with ISpfxPageContext interface (maps pageContext.user → ICurrentUser, derives permissions from SP permission levels)
+  - packages/auth/src/spfx/index.ts (NEW): bootstrapSpfxAuth() function, re-exported from packages/auth/src/index.ts
+  - packages/ui-kit/src/WorkspacePageShell/index.tsx (NEW): moved from apps/pwa, added @hbc/shell dependency to ui-kit
+  - 14 PWA pages updated to import WorkspacePageShell from @hbc/ui-kit
+  - apps/dev-harness/src/TabRouter.tsx: fixed TAB_TO_WORKSPACE for 5 new workspace IDs, renamed quality-control → quality-control-warranty
+  - apps/pwa/src/router/workspace-config.ts: 5 new WORKSPACE_DESCRIPTORS
+  - apps/pwa/src/router/workspace-routes.ts: 5 new routes + allRoutes updated
+  - 5 new PWA placeholder pages: SafetyPage, QualityControlWarrantyPage, RiskManagementPage, OperationalExcellencePage, HumanResourcesPage
+- 11 SPFx webpart apps created (~115 source files total):
+  - apps/project-hub (port 4001): DashboardPage, PreconstructionPage, DocumentsPage, TeamPage
+  - apps/accounting (port 4002): OverviewPage, BudgetsPage, InvoicesPage
+  - apps/estimating (port 4003): BidsPage, TemplatesPage, ProjectSetupPage
+  - apps/leadership (port 4004): KpiDashboardPage, PortfolioOverviewPage
+  - apps/business-development (port 4005): PipelinePage, OpportunitiesPage
+  - apps/admin (port 4006): SystemSettingsPage, ErrorLogPage, ProvisioningFailuresPage
+  - apps/safety (port 4007): IncidentsPage, InspectionsPage
+  - apps/quality-control-warranty (port 4008): QualityChecksPage, WarrantyTrackingPage
+  - apps/risk-management (port 4009): RiskRegisterPage, MitigationPage
+  - apps/operational-excellence (port 4010): MetricsPage, ProcessImprovementPage
+  - apps/human-resources (port 4011): StaffingPage, CertificationsPage
+- Each webpart: Vite-first build (no SPFx gulp/webpack), ShellLayout mode='simplified', createMemoryHistory router, dual-mode auth (mock/spfx), HBC_AUTH_MODE define
+- Verification: pnpm turbo run build (19 tasks, all success, 15.6s)
+- ADR: docs/architecture/adr/0007-spfx-vite-first.md
+- Documentation: docs/how-to/developer/phase-5-spfx-webparts-guide.md
+Next: Phase 6 — HB Site Control
 -->

@@ -13,7 +13,10 @@ export { useCurrentUser, usePermission, useFeatureFlag } from './hooks/index.js'
 
 // Adapters (Blueprint §2b — dual-mode auth)
 export { resolveAuthMode, extractSpfxUser, initMsalAuth } from './adapters/index.js';
-export type { AuthMode, IMsalConfig } from './adapters/index.js';
+export type { AuthMode, IMsalConfig, ISpfxPageContext } from './adapters/index.js';
+
+// SPFx bootstrap (Blueprint §2b — Phase 5)
+export { bootstrapSpfxAuth } from './spfx/index.js';
 
 // MSAL helpers (Blueprint §2b — Phase 4)
 export { mapMsalAccountToUser, validateMsalConfig } from './msal/index.js';

@@ -3,7 +3,7 @@
  * Navigation is a shell concern; these types live here, not in @hbc/models.
  */
 
-/** The 14 Procore-aligned workspace identifiers (Blueprint §2c). */
+/** The 19 workspace identifiers — 14 Procore-aligned + 5 SPFx-only (Blueprint §2c, Phase 5). */
 export type WorkspaceId =
   | 'project-hub'
   | 'accounting'
@@ -18,7 +18,12 @@ export type WorkspaceId =
   | 'leadership'
   | 'business-development'
   | 'admin'
-  | 'site-control';
+  | 'site-control'
+  | 'safety'
+  | 'quality-control-warranty'
+  | 'risk-management'
+  | 'operational-excellence'
+  | 'human-resources';
 
 /** Runtime-iterable list of all workspace IDs (e.g. for AppLauncher grid). */
 export const WORKSPACE_IDS: readonly WorkspaceId[] = [
@@ -36,6 +41,11 @@ export const WORKSPACE_IDS: readonly WorkspaceId[] = [
   'business-development',
   'admin',
   'site-control',
+  'safety',
+  'quality-control-warranty',
+  'risk-management',
+  'operational-excellence',
+  'human-resources',
 ] as const;
 
 /** A single item in the center tool-picker strip (Blueprint §2c). */

@@ -74,3 +74,6 @@ export type { ColumnDef } from '@tanstack/react-table';
 
 export { HbcChart } from './HbcChart/index.js';
 export type { HbcChartProps } from './HbcChart/index.js';
+
+export { WorkspacePageShell } from './WorkspacePageShell/index.js';
+export type { WorkspacePageShellProps } from './WorkspacePageShell/index.js';

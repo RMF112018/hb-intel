@@ -119,6 +119,32 @@ export const siteControlRoute = createWorkspaceRoute(
   () => import('../pages/SiteControlPage.js').then((m) => ({ default: m.SiteControlPage })),
 );
 
+// SPFx-only workspace routes (Phase 5 — 5 new workspaces)
+export const safetyRoute = createWorkspaceRoute(
+  'safety',
+  () => import('../pages/SafetyPage.js').then((m) => ({ default: m.SafetyPage })),
+);
+
+export const qualityControlWarrantyRoute = createWorkspaceRoute(
+  'quality-control-warranty',
+  () => import('../pages/QualityControlWarrantyPage.js').then((m) => ({ default: m.QualityControlWarrantyPage })),
+);
+
+export const riskManagementRoute = createWorkspaceRoute(
+  'risk-management',
+  () => import('../pages/RiskManagementPage.js').then((m) => ({ default: m.RiskManagementPage })),
+);
+
+export const operationalExcellenceRoute = createWorkspaceRoute(
+  'operational-excellence',
+  () => import('../pages/OperationalExcellencePage.js').then((m) => ({ default: m.OperationalExcellencePage })),
+);
+
+export const humanResourcesRoute = createWorkspaceRoute(
+  'human-resources',
+  () => import('../pages/HumanResourcesPage.js').then((m) => ({ default: m.HumanResourcesPage })),
+);
+
 // 404 catch-all
 export const notFoundRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -144,5 +170,10 @@ export const allRoutes = [
   pmpRoute,
   adminRoute,
   siteControlRoute,
+  safetyRoute,
+  qualityControlWarrantyRoute,
+  riskManagementRoute,
+  operationalExcellenceRoute,
+  humanResourcesRoute,
   notFoundRoute,
 ];

@@ -1,0 +1,5 @@
+:root { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; line-height: 1.5; color: #242424; background-color: #ffffff; }
+#root { min-height: 100vh; }
+[data-hbc-shell="shell-layout"] { min-height: 100vh; display: flex; flex-direction: column; }
+[data-hbc-shell="shell-body"] { display: flex; flex: 1; }
+[data-hbc-shell="shell-content"] { flex: 1; padding: 24px; overflow-y: auto; }

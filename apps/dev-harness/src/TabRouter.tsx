@@ -16,7 +16,7 @@ type TabId =
   | 'estimating'
   | 'business-development'
   | 'safety'
-  | 'quality-control'
+  | 'quality-control-warranty'
   | 'risk-management'
   | 'leadership'
   | 'operational-excellence'
@@ -36,7 +36,7 @@ const TABS: TabDef[] = [
   { id: 'estimating', label: 'Estimating' },
   { id: 'business-development', label: 'Business Development' },
   { id: 'safety', label: 'Safety' },
-  { id: 'quality-control', label: 'Quality Control' },
+  { id: 'quality-control-warranty', label: 'Quality Control & Warranty' },
   { id: 'risk-management', label: 'Risk Management' },
   { id: 'leadership', label: 'Leadership' },
   { id: 'operational-excellence', label: 'Operational Excellence' },
@@ -45,18 +45,18 @@ const TABS: TabDef[] = [
   { id: 'site-control', label: 'HB Site Control' },
 ];
 
-/** Map tab IDs to WorkspaceId for WebpartPreview. */
+/** Map tab IDs to WorkspaceId for WebpartPreview (Phase 5 — corrected). */
 const TAB_TO_WORKSPACE: Record<string, string> = {
   'project-hub': 'project-hub',
   accounting: 'accounting',
   estimating: 'estimating',
   'business-development': 'business-development',
-  safety: 'scheduling',
-  'quality-control': 'compliance',
-  'risk-management': 'risk',
+  safety: 'safety',
+  'quality-control-warranty': 'quality-control-warranty',
+  'risk-management': 'risk-management',
   leadership: 'leadership',
-  'operational-excellence': 'pmp',
-  'human-resources': 'admin',
+  'operational-excellence': 'operational-excellence',
+  'human-resources': 'human-resources',
   admin: 'admin',
 };
 

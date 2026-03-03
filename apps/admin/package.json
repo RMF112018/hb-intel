@@ -1,0 +1,33 @@
+{
+  "name": "@hbc/spfx-admin",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 4006",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4006"
+  },
+  "dependencies": {
+    "@hbc/models": "workspace:*",
+    "@hbc/data-access": "workspace:*",
+    "@hbc/query-hooks": "workspace:*",
+    "@hbc/auth": "workspace:*",
+    "@hbc/shell": "workspace:*",
+    "@hbc/ui-kit": "workspace:*",
+    "@fluentui/react-components": "^9.56.0",
+    "@griffel/react": "^1.5.0",
+    "@tanstack/react-query": "^5.75.0",
+    "@tanstack/react-router": "^1.120.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.4.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  }
+}

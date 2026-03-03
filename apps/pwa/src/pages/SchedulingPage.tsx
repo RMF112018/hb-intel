@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { WorkspacePageShell } from '../components/WorkspacePageShell.js';
-import { HbcEmptyState } from '@hbc/ui-kit';
+import { HbcEmptyState, WorkspacePageShell } from '@hbc/ui-kit';
 
 export function SchedulingPage(): ReactNode {
   return (
