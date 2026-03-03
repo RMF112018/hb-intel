@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@hbc/models/*": ["packages/models/src/*"],
+      "@hbc/data-access/*": ["packages/data-access/src/*"],
+      "@hbc/query-hooks/*": ["packages/query-hooks/src/*"],
+      "@hbc/ui-kit/*": ["packages/ui-kit/src/*"],
+      "@hbc/auth/*": ["packages/auth/src/*"],
+      "@hbc/shell/*": ["packages/shell/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build", "coverage"]
+}

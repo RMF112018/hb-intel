@@ -1,0 +1,496 @@
+```markdown
+# HB-Intel-Blueprint.md
+
+**HB Intel: Architecture Redesign Blueprint**
+
+**Version:** 4
+**Branch:** 
+**Status:** Production-Ready Plan (Fully Refined After Structured Interview)  
+**Purpose:** This document defines the complete, exhaustive, and granular target architecture for the **HB Intel** application. It replaces the current monolithic SPFx webpart with a clean, scalable monorepo that supports a single **Procore-like standalone PWA** (primary experience for fluent use outside SharePoint), **11 dedicated breakout SPFx webparts** (focused departmental and project-specific use inside SharePoint), and a separate **mobile-first connected application** (HB Site Control) for construction field personnel.  
+
+This blueprint is self-contained and designed such that any competent development team, even one unfamiliar with the project, can implement HB Intel to exact specifications by following the detailed guidance herein. All code is shared via packages. The architecture is deliberately optimized for five core principles: **scalability** (e.g., horizontal backend scaling), **stability** (e.g., compensation on failures), **security** (e.g., server-side operations for sensitive actions), **performance** (e.g., caching and bifurcation in provisioning), and **maintainability** (e.g., clear package boundaries and incremental migration).
+
+## Context & Vision (Interview-Refined)
+
+The current HB Intel app is a single monolithic SPFx webpart housing approximately 65 page components, 55 domain hooks, and 250 data service methods across construction project management domains (leads, estimating, scheduling, buyout, compliance, risk, contracts, Go/No-Go, PMP, and more). It has accumulated significant architectural debt: a single `IDataService` god-interface, React Context cascade problems, a deep folder hierarchy nested under `src/webparts/hbcProjectControls/`, and tight coupling between unrelated domains.
+
+This blueprint answers the question: *"If we built HB Intel from scratch, what does the ideal architecture look like?"* — informed by the real domain complexity of this app, modern best practices, and every decision locked during our structured interview:
+
+- Primary user experience = Procore-like standalone PWA (Vercel for MVP, designed for zero-friction migration to Azure Static Web Apps)  
+- 11 independent breakout SPFx webparts (simplified headers — **no project picker**, **no app launcher**) hosted on department- and project-specific SharePoint sites  
+- HB Site Control = separate mobile-first connected application (replicates Procore Observations + added safety/job-site monitoring)  
+- Dual-mode hosting, dual-mode authentication (MSAL for PWA, native SharePoint context for webparts)  
+- Workspace-centric navigation: Procore-style header bar + Microsoft 365 waffle app launcher + global project persistence with intelligent “Back to the Project Hub” section  
+- Azure Functions thin secure proxy (Option A: intelligent caching, throttling, batching) for the PWA path  
+- Port/adapter pattern retained and extended for all deployment modes  
+- Critical MVP feature: SharePoint site provisioning (template-based, bifurcated for speed: basic initial setup + deferred full-spec at 1:00 AM EST, with no data loss)  
+- MVP rollout priorities: SharePoint provisioning (triggered by Accounting Manager "Save + Provision Site"), Estimating and Accounting webparts first, followed by Project Hub, Leadership, and Business Development  
+
+## 1. Monorepo Structure (Fully Updated for V4)
+
+The monorepo uses **pnpm workspaces + Turborepo** (locked). Root configuration files are bootstrapped from the official Turborepo starter template with exact customizations. All shared packages and apps are documented with exhaustive manual instructions in the companion Development Plan.
+
+```
+hb-intel/
+├── turbo.json                          # Turborepo pipeline config (e.g., {"pipeline": {"build": {...}}})
+├── pnpm-workspace.yaml                 # Workspace definitions (packages/*, apps/*)
+├── tsconfig.base.json                  # Shared TypeScript config (strict mode, path aliases like "@hbc/models/*")
+├── .eslintrc.base.js                   # Shared lint rules (extends @typescript-eslint/recommended)
+├── vitest.workspace.ts                 # Unified test runner config (include: ['packages/*/src/**/*.test.ts'])
+│
+├── .github/                       # GitHub-specific templates and workflows
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md          # Structured bug reporting (required fields, screenshots, reproduction steps)
+│   │   ├── feature_request.md
+│   │   └── question.md
+│   └── PULL_REQUEST_TEMPLATE.md
+|
+├── packages/
+│   ├── models/                         # §1a — Domain models & enums (zero dependencies)
+│   │   ├── src/
+│   │   │   ├── leads/                  # ILead, ILeadFormData, LeadStage enum
+│   │   │   ├── estimating/             # IEstimatingTracker, IEstimatingKickoff
+│   │   │   ├── schedule/               # IScheduleActivity, IScheduleMetrics
+│   │   │   ├── buyout/                 # IBuyoutEntry, IBuyoutSummary
+│   │   │   ├── compliance/             # IComplianceEntry, IComplianceSummary
+│   │   │   ├── contracts/              # IContractInfo, ICommitmentApproval
+│   │   │   ├── risk/                   # IRiskCostItem, IRiskCostManagement
+│   │   │   ├── scorecard/              # IGoNoGoScorecard, IScorecardVersion
+│   │   │   ├── pmp/                    # IProjectManagementPlan, IPMPSignature
+│   │   │   ├── project/                # IActiveProject, IPortfolioSummary
+│   │   │   ├── auth/                   # ICurrentUser, IRole, IPermissionTemplate
+│   │   │   ├── shared/                 # IPagedResult<T>, ICursorPageResult, IListQueryOptions
+│   │   │   └── index.ts                # Barrel exports for easy imports
+│   │   ├── package.json                # {"name": "@hbc/models", "dependencies": {}}
+│   │   └── tsconfig.json               # Extends ../tsconfig.base.json
+│   │
+│   ├── data-access/                    # §1b — Data access layer (ports/adapters, replaces IDataService)
+│   │   ├── src/
+│   │   │   ├── ports/                  # Abstract interfaces per domain (~15 total)
+│   │   │   │   ├── ILeadRepository.ts  # getAll, getById, create, update, delete, search
+│   │   │   │   ├── IScheduleRepository.ts
+│   │   │   │   ├── IBuyoutRepository.ts
+│   │   │   │   ├── IScorecardRepository.ts
+│   │   │   │   └── ... (one per domain)
+│   │   │   ├── adapters/
+│   │   │   │   ├── sharepoint/         # PnPjs-based concrete adapters for SPFx/direct calls
+│   │   │   │   ├── proxy/              # Azure Functions proxy adapters for PWA (MSAL on-behalf-of)
+│   │   │   │   ├── mock/               # In-memory mocks for dev/test
+│   │   │   │   └── api/                # Future REST API adapters (e.g., for Azure SQL migration)
+│   │   │   ├── factory.ts              # Mode-aware factory: returns adapter based on env (SPFx vs PWA vs Mobile)
+│   │   │   └── index.ts                # Exports factories and ports
+│   │   ├── package.json                # {"name": "@hbc/data-access", "dependencies": {"@hbc/models": "*"}}
+│   │   └── tsconfig.json
+│   │
+│   ├── query-hooks/                    # §1c — TanStack Query hooks per domain
+│   │   ├── src/
+│   │   │   ├── leads/                  # useLeads, useLeadById, useCreateLead mutation
+│   │   │   ├── schedule/               # useScheduleActivities, useScheduleMetrics
+│   │   │   ├── buyout/                 # useBuyoutLog, useCreateBuyoutEntry
+│   │   │   ├── scorecard/              # useScorecards, useSubmitDecision
+│   │   │   ├── project/                # useActiveProjects, useProjectDashboard
+│   │   │   ├── keys.ts                 # Centralized, type-safe query key factory (e.g., queryKeys.leads.all)
+│   │   │   ├── defaults.ts             # Default query/mutation options (e.g., staleTime: 5min)
+│   │   │   └── index.ts
+│   │   ├── package.json                # {"name": "@hbc/query-hooks", "dependencies": {"@hbc/data-access": "*"}}
+│   │   └── tsconfig.json
+│   │
+│   ├── ui-kit/                         # §1d — Shared Fluent UI v9 component library
+│   │   ├── src/
+│   │   │   ├── HbcDataTable/           # TanStack Table wrapper with virtualization for 10k+ rows
+│   │   │   ├── HbcChart/               # Lazy-loaded ECharts wrapper for construction metrics
+│   │   │   ├── HbcForm/                # Form primitives (fields, validation, layout)
+│   │   │   ├── HbcStatusBadge/         # Consistent status indicators (e.g., In Progress, Failed)
+│   │   │   ├── HbcPanel/               # Side panels for detail views/approvals
+│   │   │   ├── HbcCommandBar/          # Toolbar with search, filters, actions
+│   │   │   ├── HbcEmptyState/          # Zero-data states with actions
+│   │   │   ├── HbcErrorBoundary/       # Error boundary with retry button
+│   │   │   ├── theme/                  # Fluent tokens/Griffel theme for SharePoint consistency
+│   │   │   └── index.ts
+│   │   ├── .storybook/                 # Storybook config for isolated component testing
+│   │   ├── package.json                # {"name": "@hbc/ui-kit", "dependencies": {"@fluentui/react-components": "^9.0.0"}}
+│   │   └── tsconfig.json
+│   │
+│   ├── auth/                           # §1e — Dual-mode auth & permissions
+│   │   ├── src/
+│   │   │   ├── stores/                 # Zustand: authStore (currentUser, roles), permissionStore
+│   │   │   ├── guards/                 # RoleGate, FeatureGate, PermissionGate components
+│   │   │   ├── hooks/                  # useCurrentUser, usePermission, useFeatureFlag
+│   │   │   ├── msal/                   # MSAL config for PWA (enterprise Microsoft credentials)
+│   │   │   ├── spfx/                   # SPFx context adapter for webparts
+│   │   │   └── index.ts
+│   │   ├── package.json                # {"name": "@hbc/auth"}
+│   │   └── tsconfig.json
+│   │
+│   └── shell/                          # §1f — Procore-inspired shell (interview-refined)
+│       ├── src/
+│       │   ├── stores/                 # Zustand: projectStore (global persistence), navStore
+│       │   ├── HeaderBar/              # Procore-style: ProjectPicker (left, only in Project Hub) + dynamic tool picker (center)
+│       │   ├── AppLauncher/            # M365 waffle icon (top-right, opens workspace grid)
+│       │   ├── ProjectPicker/          # Enhanced picker; absent in non-Project-Hub workspaces
+│       │   ├── BackToProjectHub/       # Emphasized top section in tool picker for non-Project-Hub (navigates to Project Hub)
+│       │   ├── ContextualSidebar/      # Tool-specific navigation (appears as needed)
+│       │   ├── ShellLayout/            # Main orchestration (header, sidebar, content)
+│       │   └── index.ts
+│       ├── package.json                # {"name": "@hbc/shell"}
+│       └── tsconfig.json
+│
+├── apps/
+│   ├── pwa/                            # Standalone Procore-like PWA (Vercel MVP, Azure migration-ready)
+│   │   ├── src/
+│   │   │   ├── pages/                  # All 14 workspaces (e.g., AdminDashboard.tsx, EstimatingDashboard.tsx)
+│   │   │   ├── router/                 # Full TanStack Router with route guards
+│   │   │   ├── App.tsx                 # Root (wraps ShellLayout, QueryClientProvider)
+│   │   │   └── main.tsx                # Entry (ReactDOM.render)
+│   │   ├── vite.config.ts              # Vite config (plugins for React, MSAL, service workers for PWA)
+│   │   └── package.json                # Dependencies: @hbc/* packages, msal-react
+│   │
+│   ├── project-hub/                    # SPFx webpart for Project Hub (project-specific sites)
+│   │   ├── src/
+│   │   │   ├── webparts/project-hub/
+│   │   │   │   ├── ProjectHubWebPart.ts  # SPFx entry point
+│   │   │   │   └── ProjectHubWebPart.manifest.json
+│   │   │   ├── pages/                  # ProjectDashboard.tsx, Preconstruction.tsx, etc.
+│   │   │   ├── router/                 # TanStack Router (Project Hub routes only)
+│   │   │   └── App.tsx                 # Root with simplified shell
+│   │   ├── config/                     # SPFx serve/deploy configs
+│   │   └── package.json                # Depends on @hbc/shell, @hbc/query-hooks, etc.
+│   │
+│   ├── estimating/                     # SPFx webpart for Estimating (department site)
+│   │   # (Similar structure to project-hub, but with Estimating-specific pages)
+│   │
+│   ├── business-development/           # SPFx webpart for Business Development
+│   ├── accounting/                     # SPFx webpart for Accounting (critical for provisioning trigger)
+│   ├── safety/                         # SPFx webpart for Safety
+│   ├── quality-control-warranty/       # SPFx webpart for Quality Control & Warranty
+│   ├── risk-management/                # SPFx webpart for Risk Management
+│   ├── leadership/                     # SPFx webpart for Leadership
+│   ├── operational-excellence/         # SPFx webpart for Operational Excellence
+│   ├── human-resources/                # SPFx webpart for Human Resources
+│   ├── admin/                          # SPFx webpart for Admin (central admin site, includes error logging)
+│   │
+│   ├── hb-site-control/                # Mobile-first connected app (replicates Procore Observations + safety)
+│   │   ├── src/
+│   │   │   ├── pages/                  # ObservationsPage.tsx, SafetyMonitoring.tsx
+│   │   │   ├── router/                 # TanStack Router (mobile routes)
+│   │   │   └── App.tsx                 # Lightweight shell (responsive-first UI)
+│   │   ├── vite.config.ts              # Vite config with mobile optimizations (e.g., service workers for offline)
+│   │   └── package.json                # Depends on @hbc/*, react-native-web for future RN migration
+│   │
+│   └── dev-harness/                    # Vite dev harness (tabs for PWA, each webpart, HB Site Control; mocks Azure Functions)
+│
+├── backend/
+│   └── functions/                      # Azure Functions app (Node.js runtime)
+│       ├── host.json                   # Config (e.g., extensions, logging)
+│       ├── local.settings.json         # Dev env vars (e.g., AzureWebJobsStorage)
+│       ├── provisioningSaga/           # Function for /provision-project-site (Saga orchestrator)
+│       ├── proxy/                      # Thin proxy functions for data access (caching with Azure Redis, throttling)
+│       ├── timerFullSpec/              # Timer trigger (1:00 AM EST) for deferred full-spec template application
+│       └── package.json                # Dependencies: @azure/functions, @pnp/sp, msal-node
+│
+├── tools/                              # Utility scripts
+│   ├── eslint-rules/                   # Custom ESLint plugins (e.g., enforce ports/adapters)
+│   ├── bundle-analyzer/                # Scripts for bundle size checks
+│   └── generators/                     # Plop.js generators for new domains (e.g., plop new-domain)
+│
+├── docs/                          # All documentation (the single source of truth)
+│   ├── README.md                  # Navigation index and search guidance for the entire docs folder
+│   │
+│   ├── tutorials/                 # Diátaxis: Learning-oriented (step-by-step onboarding)
+│   │   └── getting-started.md
+│   │
+│   ├── how-to/                    # Diátaxis: Goal-oriented practical guides
+│   │   ├── user/
+│   │   │   ├── installing-and-using.md
+│   │   │   └── common-tasks.md
+│   │   ├── administrator/
+│   │   └── developer/
+│   │
+│   ├── reference/                 # Diátaxis: Technical facts and specifications
+│   │   ├── api/
+│   │   ├── configuration/
+│   │   ├── glossary.md
+│   │   └── schemas/
+│   │
+│   ├── explanation/               # Diátaxis: Conceptual and architectural understanding
+│   │   ├── architecture.md
+│   │   └── design-decisions/
+│   │
+│   ├── user-guide/                # Complete end-user instructions (mirrors how-to/user/)
+│   │   └── full-manual.pdf        # (optional exported version for offline use)
+│   │
+│   ├── administrator-guide/       # Operations and admin procedures
+│   │
+│   ├── maintenance/               # Dedicated maintenance runbooks and procedures
+│   │   ├── backup-and-restore.md
+│   │   ├── patching-and-upgrades.md
+│   │   ├── monitoring-and-alerts.md
+│   │   └── disaster-recovery.md
+│   │
+│   ├── troubleshooting/           # Error handling and known problems
+│   │   ├── known-issues.md        # Curated list of active bugs with workarounds (never exhaustive)
+│   │   └── common-errors.md
+│   │
+│   ├── architecture/              # High-level blueprints and decisions
+│   │   ├── adr/                   # Architecture Decision Records (one markdown file per decision)
+│   │   ├── diagrams/              # Architecture diagrams (PlantUML, draw.io exports)
+│   │   └── blueprints/            # (e.g., current HB Intel Blueprint V4)
+│   │
+│   ├── release-notes/             # Detailed per-version notes
+│   ├── security/
+│   │   └── compliance.md
+│   └── faq.md
+│
+└── (optional) docs-archive/       # Archived older versions (for long-lived enterprise products)
+```
+
+### 1d. ui-kit (Enhanced – Critical for Leadership Pitch & Brand Recognition)
+
+**@hbc/ui-kit** is the shared component library built on **heavily customized Fluent UI v9 + Griffel**.  
+
+**HB Intel Design System Requirements (Locked Vision):**  
+The UI must be powerful, engaging, stunning, smooth, and easy to follow with the eyes while remaining strictly professional. The application must be instantly recognizable as **HB Intel** — even from across a room or at a glance during leadership presentations or walk-by displays. It must stand out as the premium, one-of-a-kind construction-technology platform rather than a generic or AI-generated interface.  
+
+The design system includes:  
+- Signature color palette, typography scale, and elevation system  
+- Custom semantic design tokens and Griffel-based theming  
+- Smooth micro-interactions, 60 fps animations, and guided eye-flow transitions  
+- Distinctive dashboard cards, status badges, command bars, and data-table styling  
+- Signature header and workspace-switcher elements that create immediate visual brand identity
+
+## 2. Key Architecture Decisions (Interview-Locked)
+
+### 2a. Dual-Mode Hosting & Deployment
+- **PWA**: Vercel for MVP (static hosting with edge functions); migrate to Azure Static Web Apps (integrate with Azure Functions). Use service workers for PWA features like offline caching.
+- **11 Breakout SPFx Webparts**: SPFx 1.18+; deploy via SharePoint App Catalog. Each webpart is independent, with its own manifest and bundle.
+- **HB Site Control**: Dedicated Vite app (mobile-first, responsive UI); future-proof for React Native migration.
+- **Backend**: Azure Functions (serverless, Node.js); thin proxy for all PWA/SPFx data ops. Use managed identities for SharePoint access.
+
+### 2b. Authentication (Dual-Mode Locked)
+- PWA: MSAL.js with enterprise Microsoft credentials (Azure AD app registration; scopes: SharePoint.AllSites.FullControl).
+- SPFx Webparts/HB Site Control: Native SPFx context (this.context.pageContext.user). No separate login; permissions via SharePoint groups.
+- `@hbc/auth`: Dual adapters; use Zustand for state. Example hook:
+  ```ts
+  const { currentUser } = useCurrentUser(); // Auto-detects mode
+  ```
+
+### 2c. Navigation & Shell (Procore-Aligned)
+- Header: Procore-style with ProjectPicker (left, visible only in Project Hub) + tool picker (center, workspace-specific).
+- Workspace Switcher: M365 waffle icon (top-right; opens grid of 14 workspaces).
+- Global Project Persistence: Zustand `projectStore`; persists across workspaces. In non-Project-Hub, add emphasized "Back to the Project Hub {Project Name}" section in tool picker (click navigates).
+- Contextual Sidebars: Appear for tool-specific nav (e.g., in Estimating: Tracking, Post-Bid).
+- Simplified Shells: Breakout webparts/HB Site Control omit picker/launcher for focus.
+
+### 2d. Domain-Scoped Repositories (Not God-Interface)
+Current: `IDataService` (250 methods).  
+New: Ports/adapters. Example interface:
+  ```ts
+  export interface ILeadRepository {
+    getAll(options?: IListQueryOptions): Promise<IPagedResult<ILead>>;
+    getById(id: number): Promise<ILead | null>;
+    create(data: ILeadFormData): Promise<ILead>;
+    // etc.
+  }
+  ```
+~15 repositories; adapters swap per mode (SharePoint for SPFx, proxy for PWA).
+
+### 2e. Zustand Stores (Not React Context)
+Avoid cascade re-renders. Example:
+  ```ts
+  export const useAuthStore = create<AuthState>((set, get) => ({
+    currentUser: null,
+    setUser: (user) => set({ currentUser: user }),
+  }));
+  ```
+
+### 2f. TanStack Router Per App
+Isolated instances; type-safe. Example route in Accounting webpart:
+  ```ts
+  const router = createRouter({
+    routeTree: rootRoute.addChildren([accountingSetupRoute]),
+  });
+  ```
+
+### 2g. Query Key Factory
+Centralized:
+  ```ts
+  export const queryKeys = {
+    leads: {
+      all: ['leads'] as const,
+      detail: (id: number) => ['leads', 'detail', id] as const,
+    },
+  };
+  ```
+
+### 2h. Testing Strategy
+Vitest (unit/integration), Playwright (E2E), Storybook (UI/a11y). 95%+ coverage. Turborepo filters changed packages.
+
+### 2i. Provisioning Workflow (MVP Critical)
+- Trigger: Accounting Manager "Save + Provision Site" in Accounting webpart.
+- Saga: Server-side in Azure Functions (7 steps from ProvisioningSaga.ts; compensation on failure).
+- Bifurcated: Immediate basic site (Microsoft template + custom lists/libraries/links/hub connection); deferred full-spec (1:00 AM EST timer trigger) adds web parts without data loss.
+- Progress: SignalR real-time bar/modal.
+- Error: Layman's modal with retry; log to Admin workspace (state: rolled back, retrying, etc.).
+- Example endpoint call:
+  ```ts
+  await mutation.mutateAsync({ projectCode, ...input }); // Calls /provision-project-site
+  ```
+
+### 2i. Provisioning Workflow (MVP Critical)
+
+**Trigger:** Accounting Manager clicks “Save + Provision Site” in the Accounting webpart. This only fires the Azure Functions endpoint — no UI feedback remains here.
+
+**Ownership & UX:** The **Estimating Project Setup page** (in the Estimating SPFx webpart) is the single source of truth for status, feedback, and actions. After trigger, the Accounting user is automatically redirected (or shown a link) to this page.
+
+**Real-time Checklist (Estimating page):**
+- Site creation complete  
+- Document library setup  
+- Template files saved  
+- {n} of {m} data lists created  
+- Site layout and web parts applied  
+- Permissions configured  
+- Hub association completed  
+
+Progress updates live via SignalR. Each item shows status (Completed / In Progress / Failed), timestamps, and counts. Layman’s language only — no technical jargon.
+
+**Rollback / Retry / Escalation Logic:**
+- On any failure: automatic rollback to the last successfully completed task (compensation executed server-side).  
+- “Retry” button attempts only remaining incomplete tasks.  
+- On successful completion: clear success message + direct link to the new Project Hub site.  
+- On final failed retry: prominent “Escalate to Admin” button (one-click handoff with full context copied to Admin workspace).
+
+**Admin Experience (Admin workspace):**
+- Dedicated “Provisioning Failures” dashboard.  
+- Guided step-by-step troubleshooting cards for each failure type.  
+- One-click “Retry from Admin” and “Mark Resolved” actions.  
+- Full audit trail visible (every saga step, compensation action, and error details).
+
+**Technical Implementation (unchanged core):**
+- Server-side ProvisioningSaga in Azure Functions (7 steps + compensation).  
+- Bifurcated execution: immediate basic site + deferred full-spec at 1:00 AM EST timer trigger.  
+- Real-time updates via SignalR.  
+- All logging routed to Admin workspace for traceability.
+
+### 2j. Provisioning State Management [New section]
+
+**Persistence Strategy (recommended & assumed for this version):**
+- Primary store: Dedicated **ProvisioningStatus** list created in the target project site during the basic provisioning step (visible to Estimating webpart and Admin).  
+- Secondary store: Azure Table Storage (for atomic server-side updates and durability during partial failures).  
+- Each record contains:  
+  - ProjectCode (key)  
+  - CurrentStep / TotalSteps  
+  - StepResults (JSON array: status, timestamp, error message, completedCount)  
+  - OverallStatus (InProgress / Completed / Failed / RolledBack)  
+  - LastSuccessfulStep  
+  - Escalated (boolean + escalation timestamp)
+
+**Why this works:**
+- Estimating SPFx webpart reads the list directly (PnPjs) for instant UI.  
+- Azure Functions updates state atomically (even on rollback).  
+- Supports SignalR push + polling fallback.  
+- Zero data loss on partial failures.
+
+## 3. Data Flow Architecture (Updated)
+
+```mermaid
+flowchart LR
+    A[UI (PWA/Webpart)] --> B[TanStack Router]
+    B --> C[Query Hooks (@hbc/query-hooks)]
+    C --> D[Repository Ports (@hbc/data-access)]
+    D --> E[Adapters (Proxy for PWA / PnPjs for SPFx)]
+    E --> F[SharePoint / Graph API]
+
+    G[UI (Accounting Trigger)] --> H[Azure Functions Saga]
+    H <--> I[ProvisioningStatus (SP list + Azure Table)]
+    H --> F[SharePoint / Graph API]
+    I <--> J[SignalR]
+    J --> K[UI (Estimating Project Setup page)]
+```
+
+- PWA: All ops via Azure proxy (caching reduces load 70-90%).
+- Mutation: Optimistic UI, server confirm, invalidate queries.
+- Provisioning: Server-side saga; SignalR for progress. The saga interacts directly with SharePoint/Graph API for provisioning actions, while persisting granular state (e.g., step results, completion counts) in ProvisioningStatus for atomic updates. SignalR enables real-time checklist and feedback pushes to the Estimating Project Setup page, supporting rollback, retry, and escalation logic without requiring full page reloads.
+
+## 4. Cross-Cutting Concerns
+
+### 4a. Permissions & RBAC
+`@hbc/auth`: Guards, hooks. Route guards in TanStack Router.
+
+### 4b. Audit Logging
+Injected at repository; every mutation logged (e.g., AuditAction.SagaStepCompensated).
+
+### 4c. Error Handling
+`HbcErrorBoundary`; global toasts; typed errors.
+
+### 4d. Bundle Optimization
+Per-app splitting; Turborepo caching.
+
+### 4e. Accessibility (WCAG 2.2 AA)
+Fluent UI enforcement; automated checks.
+
+## 5. CI/CD Pipeline
+
+GitHub Actions; Turborepo-aware (lint, test, build, e2e, deploy). Full exhaustive documentation (Option A) provided in the companion Development Plan.
+
+## 6. Migration Path (Incremental)
+Phases 1-10 as detailed; start with provisioning modernization.
+
+## 7. Why This Architecture
+| Current Pain                   | Greenfield Solution                          |
+|--------------------------------|----------------------------------------------|
+| God interface (250 methods)    | ~15 focused domain repositories              |
+| Context cascade re-renders     | Zustand selector subscriptions               |
+| Single giant bundle            | Natural per-app code splitting               |
+| Router instability             | Small per-app TanStack Routers               |
+| Monolithic deployment          | 11 SPFx webparts + standalone PWA            |
+| Backend lock-in                | Port/adapter + Azure proxy                   |
+| Onboarding difficulty          | Clear boundaries + explicit deps             |
+
+## 8. Tech Stack Summary (Updated for V4)
+
+| Layer              | Technology                                      | Rationale                                      |
+|--------------------|-------------------------------------------------|------------------------------------------------|
+| Hosting            | PWA (Vercel→Azure) + 11 SPFx                    | Focused, dual-mode use                         |
+| Monorepo           | pnpm + Turborepo (official starter)             | Fast, incremental builds                       |
+| Framework          | React 18                                        | Established                                    |
+| UI Library         | Fluent UI v9 + Griffel + **HB Intel Design System** | Consistency + stunning, instantly recognizable branding |
+| Routing            | TanStack Router v1 + Procore shell              | Type-safe UX                                   |
+| Server State       | TanStack Query v5                               | Caching/updates                                |
+| Client State       | Zustand                                         | No cascades                                    |
+| Tables             | TanStack Table + virtualization                 | Large datasets                                 |
+| Charts             | ECharts (lazy)                                  | Metrics                                        |
+| Data Access        | Ports/adapters + Azure proxy                    | Swappable                                      |
+| Backend            | Azure Functions (proxy + caching)               | Scalable security                              |
+| Testing            | Vitest + Playwright + Storybook                 | Comprehensive                                  |
+| Linting/CI         | ESLint + Turborepo + GitHub Actions             | Enforcement                                    |
+| Dev Experience     | Vite dev-harness                                | HMR/mocks                                      |
+
+## 9. Companion Development Plan
+
+The exhaustive, numbered, manual step-by-step implementation instructions (including every folder command, package.json, tsconfig.json, and full copy-paste-ready file content for **every** layer) are contained in the separate document **HB Intel Foundation Development Plan** (aligned with Blueprint V4). This plan is the single executable reference for any new developer or AI coding agent.
+
+**End of Document – HB-Intel-Blueprint-V4.md**
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 0 (Prerequisites) completed: 2026-03-03
+- CLAUDE.md updated: locked source path corrected from blueprints/ to blueprint/ (singular)
+- Duplicate docs/blueprint/ directory removed; canonical location: docs/architecture/blueprint/
+- Full Diataxis docs/ folder structure scaffolded per CLAUDE.md §4
+- Prerequisites verified: Node.js v22.14.0, pnpm 10.13.1, Git 2.50.1
+- Documentation added: docs/README.md (navigation index)
+- Documentation added: docs/faq.md (placeholder)
+Next: Phase 1 — Bootstrap Monorepo Root Configuration Files
+
+Phase 1 (Bootstrap Monorepo Root Configuration Files) completed: 2026-03-03
+- Root config files created: turbo.json, pnpm-workspace.yaml, tsconfig.base.json, .eslintrc.base.js, vitest.workspace.ts
+- turbo.json uses Turbo v2 "tasks" syntax (not deprecated "pipeline") — see ADR-0001
+- .eslintrc.base.js extends eslint:recommended + @typescript-eslint/recommended (exact Blueprint filename)
+- tsconfig.base.json standalone with strict mode, ES2022, @hbc/* path aliases (no config packages)
+- pnpm-workspace.yaml includes: apps/*, packages/*, backend/*, tools/*
+- .github/ templates created: bug_report.md, feature_request.md, question.md, PULL_REQUEST_TEMPLATE.md
+- Supporting files: package.json, .gitignore (replaced Java template), .npmrc, .vscode/settings.json
+- Verification: pnpm install (178 packages) + turbo run build (0 tasks, success)
+- Documentation added: docs/how-to/developer/phase-1-bootstrap-guide.md
+- ADR created: docs/architecture/adr/0001-monorepo-bootstrap.md
+Next: Phase 2 — Shared Packages (@hbc/models, @hbc/data-access, etc.)
+-->

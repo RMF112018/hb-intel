@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --version)",
+      "Bash(pnpm --version)",
+      "Bash(git --version)",
+      "Bash(ls -la /Users/bobbyfetting/hb-intel/.git*)",
+      "Bash(git -C /Users/bobbyfetting/hb-intel status)",
+      "Bash(git -C /Users/bobbyfetting/hb-intel log --oneline -5)",
+      "Bash(git -C /Users/bobbyfetting/hb-intel branch -a)",
+      "Bash(git -C /Users/bobbyfetting/hb-intel remote -v)",
+      "Bash(npm view create-turbo@latest version)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:turborepo.dev)",
+      "WebFetch(domain:turbo.build)",
+      "Bash(git -C /Users/bobbyfetting/hb-intel log --oneline -20)",
+      "Bash(npx create-turbo@latest --help)",
+      "Bash(npm view vitest version)",
+      "Bash(npm view turbo version)",
+      "Bash(npx create-turbo@latest /tmp/hb-intel-scaffold --example basic --package-manager pnpm --skip-install)",
+      "Bash(pnpm install)",
+      "Bash(pnpm turbo run build)"
+    ]
+  }
+}
