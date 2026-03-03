@@ -20,7 +20,8 @@
       "Bash(npm view turbo version)",
       "Bash(npx create-turbo@latest /tmp/hb-intel-scaffold --example basic --package-manager pnpm --skip-install)",
       "Bash(pnpm install)",
-      "Bash(pnpm turbo run build)"
+      "Bash(pnpm turbo run build)",
+      "Bash(pnpm:*)"
     ]
   }
 }

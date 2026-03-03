@@ -1,0 +1,30 @@
+{
+  "name": "@hbc/query-hooks",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hbc/data-access": "workspace:*",
+    "@hbc/models": "workspace:*",
+    "@tanstack/react-query": "^5.75.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  },
+  "files": ["dist"]
+}

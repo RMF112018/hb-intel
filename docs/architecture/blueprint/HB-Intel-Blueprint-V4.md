@@ -493,4 +493,73 @@ Phase 1 (Bootstrap Monorepo Root Configuration Files) completed: 2026-03-03
 - Documentation added: docs/how-to/developer/phase-1-bootstrap-guide.md
 - ADR created: docs/architecture/adr/0001-monorepo-bootstrap.md
 Next: Phase 2 — Shared Packages (@hbc/models, @hbc/data-access, etc.)
+
+Phase 2.1 (@hbc/models) completed: 2026-03-03
+- Created packages/models/ with package.json (ESM, zero deps), tsconfig.json (extends tsconfig.base.json)
+- 12 domain folders per Blueprint §1a: leads, estimating, schedule, buyout, compliance, contracts, risk, scorecard, pmp, project, auth, shared
+- Barrel export src/index.ts re-exports all 12 domains
+- Verification: pnpm turbo run build --filter=@hbc/models (1 task, success, 1.166s)
+- Documentation added: docs/how-to/developer/phase-2-shared-packages-guide.md (models section)
+Phase 2.2 (@hbc/data-access) completed: 2026-03-03
+- Created packages/data-access/ with package.json (ESM, depends on @hbc/models workspace:*), tsconfig.json
+- 11 port interfaces per Blueprint §1b: ILeadRepository, IEstimatingRepository, IScheduleRepository, IBuyoutRepository, IComplianceRepository, IContractRepository, IRiskRepository, IScorecardRepository, IPmpRepository, IProjectRepository, IAuthRepository
+- 4 adapter directories per Blueprint §1b: mock/ (3 implementations), sharepoint/ (stub), proxy/ (stub), api/ (stub)
+- Mode-aware factory.ts with resolveAdapterMode() (reads HBC_ADAPTER_MODE, defaults to 'mock')
+- Barrel exports: src/index.ts re-exports all ports (type-only), mock adapters, and factory functions
+- Verification: pnpm turbo run build --filter=@hbc/data-access (2 tasks, success, 925ms)
+- Documentation added: docs/how-to/developer/phase-2-shared-packages-guide.md (data-access section)
+- ADR created: docs/architecture/adr/0002-ports-adapters-data-access.md
+- Reference created: docs/reference/api/data-access-ports.md
+- Explanation created: docs/explanation/ports-adapters-architecture.md
+Phase 2.3 (@hbc/query-hooks) completed: 2026-03-03
+- Created packages/query-hooks/ with package.json (ESM, deps: @hbc/data-access, @hbc/models, @tanstack/react-query v5; peerDep: react), tsconfig.json
+- Centralized query key factory in src/keys.ts per §2g: type-safe `as const` keys for all 5 domains (leads, schedule, buyout, scorecard, project)
+- Default options in src/defaults.ts: staleTime 5min, gcTime 10min, retry 2 (queries) / 0 (mutations) per §1c
+- 5 domain hook modules per §1c: leads/ (6 hooks), schedule/ (6 hooks), buyout/ (6 hooks), scorecard/ (4 hooks), project/ (5 hooks)
+- Leads/schedule/buyout hooks use factory-created repositories; scorecard/project use type-safe placeholders (awaiting factory export)
+- All mutations invalidate parent query keys on success for automatic cache refresh
+- Barrel src/index.ts re-exports all 27 hooks + queryKeys + default options
+- Verification: pnpm turbo run build --filter=@hbc/query-hooks (3 tasks, success, 2.145s)
+- Documentation updated: docs/how-to/developer/phase-2-shared-packages-guide.md (query-hooks section)
+Next: Phase 2.4
+
+Phase 2.4 (@hbc/auth) completed: 2026-03-03
+- Created packages/auth/ (12 files) per Blueprint §1e, §2b, §2e
+- Zustand stores (§2e): useAuthStore (currentUser, isLoading, error, setUser, setLoading, setError, clear), usePermissionStore (permissions[], featureFlags{}, hasPermission(), hasFeatureFlag(), setters)
+- React guard components (§1e): RoleGate (checks user role), FeatureGate (checks feature flag), PermissionGate (checks permission action) — all accept children + optional fallback
+- Convenience hooks (§1e): useCurrentUser(), usePermission(action), useFeatureFlag(feature) — selector-based subscriptions to prevent cascade re-renders
+- Dual-mode adapters (§2b): AuthMode type ('msal' | 'spfx' | 'mock'), resolveAuthMode() auto-detects from environment, IMsalConfig interface, extractSpfxUser() stub (Phase 5), initMsalAuth() stub (Phase 4)
+- Dependencies: @hbc/models (workspace:*), zustand ^5.0.0; optionalDeps: @azure/msal-browser ^4.0.0, @azure/msal-react ^3.0.0; peerDep: react ^18.0.0
+- Verification: pnpm turbo run build --filter=@hbc/auth (2 tasks, success, 1.301s)
+- Documentation updated: docs/how-to/developer/phase-2-shared-packages-guide.md (auth section)
+Next: Phase 2.5
+
+Phase 2.5 (@hbc/shell) completed: 2026-03-03
+- Created packages/shell/ (13 source files) per Blueprint §1f, §2c, §2e
+- Shell-specific types (types.ts): WorkspaceId (14-member string union), WORKSPACE_IDS runtime array, ToolPickerItem, SidebarItem, WorkspaceDescriptor
+- 2 Zustand stores (§2e): projectStore (activeProject, availableProjects, isLoading), navStore (activeWorkspace, toolPickerItems, sidebarItems, isSidebarOpen, isAppLauncherOpen)
+- navStore.setActiveWorkspace() atomically clears toolPickerItems + sidebarItems to prevent stale nav flash
+- 6 React components (§1f, §2c): HeaderBar (3-section), AppLauncher (M365 waffle + 14-workspace grid), ProjectPicker (dropdown), BackToProjectHub (emphasized link), ContextualSidebar (tool-specific nav), ShellLayout (root orchestrator)
+- ShellLayout mode prop: 'full' (PWA) vs 'simplified' (SPFx) — simplified unmounts ProjectPicker + AppLauncher entirely (not CSS-hidden)
+- Navigation rules enforced: ProjectPicker only in project-hub workspace, BackToProjectHub in non-project-hub, AppLauncher only in full mode
+- All components use data-hbc-shell="*" attributes as styling hooks for @hbc/ui-kit (Phase 2.6)
+- Callback-based navigation (onClick) — shell never calls router directly; apps inject behavior
+- Dependencies: @hbc/models (workspace:*), @hbc/auth (workspace:*), zustand ^5.0.0; peerDep: react ^18.0.0
+- ADR created: docs/architecture/adr/0003-shell-navigation-zustand.md
+- Documentation updated: docs/how-to/developer/phase-2-shared-packages-guide.md (shell section)
+Next: Phase 2.6
+
+Phase 2.6 (@hbc/ui-kit — HB Intel Design System) completed: 2026-03-03
+- Created packages/ui-kit/ (30 source files) per Blueprint §1d
+- Brand assets: hb_icon_blueBG.jpg + hb_logo_icon-NoBG.svg copied to src/assets/logos/
+- Theme system (5 files): tokens.ts (BrandVariants 16-shade ramp from #004B87, HBC_PRIMARY_BLUE #004B87, HBC_ACCENT_ORANGE #F37021, 12 semantic status colors), theme.ts (hbcLightTheme + hbcDarkTheme via createLightTheme/createDarkTheme with HbcSemanticTokens overrides), animations.ts (6 Griffel keyframes: fadeIn, slideInRight, slideInUp, scaleIn, pulse, shimmer + 3 transition presets), typography.ts (9-level type scale: displayHero→caption + monospace), elevation.ts (5-level shadow system: rest, hover, raised, overlay, dialog)
+- 8 Blueprint components: HbcStatusBadge (status→color mapping, Fluent Badge), HbcEmptyState (centered + fadeIn/slideInUp), HbcErrorBoundary (class component, retry, onError, fallback render prop), HbcForm (HbcTextField, HbcSelect, HbcCheckbox, HbcFormLayout — thin Fluent v9 wrappers, controlled-only), HbcPanel (OverlayDrawer sm/md/lg), HbcCommandBar (Toolbar + SearchBox + filters + actions), HbcDataTable (@tanstack/react-table + react-virtual, sorting, pagination, row selection, 10k+ virtualization, shimmer loading, semantic <table> for a11y), HbcChart (React.lazy + Suspense around EChartsRenderer, HB color palette as ECharts theme)
+- All components use Griffel makeStyles with theme tokens, data-hbc-ui="*" attributes, controlled props pattern
+- Storybook 8 config: .storybook/main.ts (@storybook/react-vite, addon-essentials, addon-a11y) + .storybook/preview.tsx (FluentProvider decorator with hbcLightTheme)
+- Dependencies: @fluentui/react-components ^9.56.0, @griffel/react ^1.5.0, @tanstack/react-table ^8.21.0, @tanstack/react-virtual ^3.13.0, echarts ^5.6.0, echarts-for-react ^3.0.0; dev: @storybook/* ^8.6.0, vite ^6.0.0
+- No workspace dependencies — builds independently
+- Verification: pnpm turbo run build --filter=@hbc/ui-kit (1 task, success, 1.17s); full monorepo build (6 tasks, all success, 1.761s)
+- ADR created: docs/architecture/adr/0004-ui-kit-design-system.md
+- Documentation updated: docs/how-to/developer/phase-2-shared-packages-guide.md (§2.6 section)
+Next: Phase 3 — apps/dev-harness
 -->
