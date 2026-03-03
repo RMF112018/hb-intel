@@ -677,4 +677,21 @@ Phase 5 (11 SPFx webparts) completed: 2026-03-03
 - ADR created: docs/architecture/adr/0007-spfx-vite-first.md
 - Documentation added: docs/how-to/developer/phase-5-spfx-webparts-guide.md
 Next: Phase 6 — HB Site Control
+
+Phase 6 (HB Site Control — Mobile-First Field App) completed: 2026-03-03
+- Created apps/hb-site-control as a dedicated mobile-first Vite application per Blueprint §1, §2a, §2b, §2c, §2i
+- Tri-mode auth: mock (dev) / msal (prod standalone) / spfx (embedded) via resolveAuthMode()
+- Browser history router (not memory) for standalone deployment with mobile back button + deep linking
+- vite-plugin-pwa with registerType: 'autoUpdate', standalone display, #004B87 theme, precaches 10 entries
+- react-native-web dependency with Vite alias for future React Native migration path
+- ShellLayout mode='simplified' (no ProjectPicker, no AppLauncher)
+- Mock bootstrap: field worker persona with project:read + document:write permissions
+- Mobile-first CSS: 48px min touch targets, env(safe-area-inset-*), overscroll-behavior: contain, prefers-reduced-motion
+- 3 pages: HomePage (dashboard cards + recent activity), ObservationsPage (data table with 10 mock observations), SafetyMonitoringPage (SignalR events + trend chart)
+- useSignalR hook: setInterval mock event stream (8 event templates, 5s interval, max 50 events), interface ready for @microsoft/signalr swap in Phase 7
+- Port assignment: 4012
+- Verification: pnpm turbo run build (20 tasks, all success)
+- ADR created: docs/architecture/adr/0008-hb-site-control-mobile.md
+- Documentation added: docs/how-to/developer/phase-6-hb-site-control-guide.md
+Next: Phase 7 — Backend
 -->

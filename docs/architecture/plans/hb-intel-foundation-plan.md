@@ -240,4 +240,19 @@ Phase 5 (11 SPFx webparts) completed: 2026-03-03
 - ADR: docs/architecture/adr/0007-spfx-vite-first.md
 - Documentation: docs/how-to/developer/phase-5-spfx-webparts-guide.md
 Next: Phase 6 — HB Site Control
+
+Phase 6 (HB Site Control) completed: 2026-03-03
+- apps/hb-site-control: mobile-first Vite app (port 4012) with vite-plugin-pwa + react-native-web
+- ~16 source files:
+  - Config: package.json, tsconfig.json, vite.config.ts, index.html, src/env.d.ts
+  - Core: main.tsx (tri-mode entry), App.tsx (provider hierarchy), bootstrap.ts (field worker mock), app.css (mobile-first styles)
+  - Router: index.ts (browser history), root-route.tsx (simplified shell), routes.ts (3 lazy routes)
+  - Pages: HomePage (dashboard), ObservationsPage (data table), SafetyMonitoringPage (SignalR + chart)
+  - Hooks: useSignalR.ts (mock event stream, 5s interval, 8 templates)
+- Key decisions: browser history (not memory) for standalone deployment, tri-mode auth, simplified shell, 48px touch targets
+- Dependencies added: react-native-web, @tanstack/react-table, vite-plugin-pwa
+- Verification: pnpm turbo run build (20 tasks, all success)
+- ADR: docs/architecture/adr/0008-hb-site-control-mobile.md
+- Documentation: docs/how-to/developer/phase-6-hb-site-control-guide.md
+Next: Phase 7 — Backend
 -->
