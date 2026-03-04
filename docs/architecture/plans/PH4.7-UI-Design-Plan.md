@@ -156,3 +156,24 @@ All charts use **ECharts** via `echarts-for-react`. Lazy-loaded. ECharts bundle 
 | `HbcKpiCard` | Single metric | Standalone KPI |
 
 All chart series use HBC brand palette. Charts click-to-filter the associated `HbcDataTable`. Charts reflow on sidebar expand/collapse.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.7 completed: 2026-03-04
+All 12 steps implemented:
+  - Step 1: useAdaptiveDensity hook (compact/standard/touch + Field Mode + localStorage)
+  - Step 2: Responsibility heat map (orange left border + background tint)
+  - Step 3: Layout-matched shimmer skeletons (column-width matched, crossfade)
+  - Step 4: Card-stack mobile view (HbcDataTableCard, <640px breakpoint)
+  - Step 5: Inline editing (double-click, Tab/Enter/Escape, editable column indicator)
+  - Step 6: Column configuration (show/hide, resize, reorder via TanStack Table)
+  - Step 7: Data freshness indicator (dashed→solid border) + empty state integration
+  - Step 8: 9 Storybook stories for HbcDataTable
+  - Step 9: HbcKpiCard with trend, click-to-filter, active state (4 stories)
+  - Step 10: HbcBarChart, HbcDonutChart, HbcLineChart typed wrappers (4 stories)
+  - Step 11: useSavedViews hook (CRUD, deep-link URL, localStorage persistence)
+  - Step 12: Barrel exports, developer guide, ADR-0020
+Documentation: docs/how-to/developer/phase-4.7-data-visualization.md
+ADR: docs/architecture/adr/ADR-0020-data-visualization-table-system.md
+New exports: HbcKpiCard, HbcBarChart, HbcDonutChart, HbcLineChart, useAdaptiveDensity, useSavedViews
+Next: Phase 4.8
+-->

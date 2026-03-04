@@ -56,3 +56,16 @@ export const HbcChart: React.FC<HbcChartProps> = ({
 };
 
 export type { HbcChartProps } from './types.js';
+
+// PH4.7 typed chart wrappers
+export { HbcBarChart } from './HbcBarChart.js';
+export { HbcDonutChart } from './HbcDonutChart.js';
+export { HbcLineChart } from './HbcLineChart.js';
+export type {
+  HbcBarChartProps,
+  BarDataItem,
+  HbcDonutChartProps,
+  DonutDataItem,
+  HbcLineChartProps,
+  LineSeriesItem,
+} from './chart-types.js';

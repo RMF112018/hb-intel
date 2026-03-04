@@ -115,11 +115,42 @@ export type {
 } from './HbcCommandBar/index.js';
 
 export { HbcDataTable } from './HbcDataTable/index.js';
-export type { HbcDataTableProps } from './HbcDataTable/index.js';
+export type { HbcDataTableProps, DataTableEmptyStateConfig } from './HbcDataTable/index.js';
 export type { ColumnDef } from '@tanstack/react-table';
+export { useAdaptiveDensity } from './HbcDataTable/hooks/useAdaptiveDensity.js';
+export type {
+  DensityConfig,
+  UseAdaptiveDensityOptions,
+  UseAdaptiveDensityReturn,
+} from './HbcDataTable/hooks/useAdaptiveDensity.js';
+export { useSavedViews } from './HbcDataTable/hooks/useSavedViews.js';
+export type {
+  UseSavedViewsOptions,
+  UseSavedViewsReturn,
+} from './HbcDataTable/hooks/useSavedViews.js';
+export type {
+  SavedViewConfig,
+  SavedViewEntry,
+  SavedViewsPersistenceAdapter,
+} from './HbcDataTable/saved-views-types.js';
 
 export { HbcChart } from './HbcChart/index.js';
 export type { HbcChartProps } from './HbcChart/index.js';
+
+// PH4.7 Typed chart wrappers
+export { HbcBarChart, HbcDonutChart, HbcLineChart } from './HbcChart/index.js';
+export type {
+  HbcBarChartProps,
+  BarDataItem,
+  HbcDonutChartProps,
+  DonutDataItem,
+  HbcLineChartProps,
+  LineSeriesItem,
+} from './HbcChart/index.js';
+
+// PH4.7 KPI Card
+export { HbcKpiCard } from './HbcKpiCard/index.js';
+export type { HbcKpiCardProps, KpiTrend } from './HbcKpiCard/index.js';
 
 export { WorkspacePageShell } from './WorkspacePageShell/index.js';
 export type { WorkspacePageShellProps } from './WorkspacePageShell/index.js';
