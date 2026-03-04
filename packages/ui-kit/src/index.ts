@@ -258,6 +258,27 @@ export type { HbcTooltipProps, TooltipPosition } from './HbcTooltip/index.js';
 export { HbcSpinner } from './HbcSpinner/index.js';
 export type { HbcSpinnerProps, SpinnerSize } from './HbcSpinner/index.js';
 
+// PH4.10 Navigation UI System
+export { HbcBreadcrumbs } from './HbcBreadcrumbs/index.js';
+export type { HbcBreadcrumbsProps } from './HbcBreadcrumbs/index.js';
+
+export { HbcTabs } from './HbcTabs/index.js';
+export type { HbcTabsProps, TabPanel } from './HbcTabs/index.js';
+
+export { HbcPagination } from './HbcPagination/index.js';
+export type { HbcPaginationProps, PageSizeOption } from './HbcPagination/index.js';
+
+export { HbcSearch } from './HbcSearch/index.js';
+export type {
+  HbcSearchProps,
+  HbcSearchVariant,
+  HbcSearchGlobalProps,
+  HbcSearchLocalProps,
+} from './HbcSearch/index.js';
+
+export { HbcTree } from './HbcTree/index.js';
+export type { HbcTreeProps, HbcTreeNode } from './HbcTree/index.js';
+
 // Page Layouts (PH4.5)
 export {
   ToolLandingLayout,

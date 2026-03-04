@@ -17,7 +17,7 @@ import { elevationLevel3 } from '../theme/elevation.js';
 import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE } from '../theme/tokens.js';
 import { TRANSITION_FAST, keyframes } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
-import { Search, Star } from '../icons/index.js';
+import { Search, SparkleIcon } from '../icons/index.js';
 import { useOnlineStatus } from '../HbcAppShell/hooks/useOnlineStatus.js';
 import { useCommandPalette } from './hooks/useCommandPalette.js';
 import type {
@@ -382,7 +382,7 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
                     onMouseEnter={() => setActiveIndex(flatIdx)}
                   >
                     <span className={styles.resultIcon}>
-                      {result.icon ?? (result.category === 'ai' ? <Star size="sm" /> : null)}
+                      {result.icon ?? (result.category === 'ai' ? <SparkleIcon size="sm" /> : null)}
                     </span>
                     <span className={styles.resultLabel}>{result.label}</span>
                     {result.description && (
@@ -402,7 +402,7 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
               onClick={handleAiQuery}
             >
               <span className={mergeClasses(styles.resultIcon, styles.aiIndicator)}>
-                <Star size="sm" />
+                <SparkleIcon size="sm" />
               </span>
               <span className={styles.resultLabel}>
                 Ask AI: &quot;{query}&quot;
