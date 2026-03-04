@@ -35,7 +35,10 @@
       "Bash(ls:*)",
       "Bash(do echo:*)",
       "Bash(wc:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__Control_Chrome__list_tabs",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "Bash(npx @playwright/mcp@latest --help)"
     ]
   }
 }
