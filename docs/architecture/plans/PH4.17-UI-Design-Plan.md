@@ -67,3 +67,19 @@ Every component must export four named stories:
 | Bundle size | `vite-bundle-visualizer` | All chunks under 500KB. ECharts in own chunk |
 | TypeScript | `tsc --noEmit` | Zero type errors |
 | Touch targets | Manual / Storybook controls | Touch density tier: all interactive elements ≥ 56×56px hit area |
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.17 completed: 2026-03-04
+- G1: preview.tsx light bg #FFFFFF → #FAFBFC ✓
+- G2: parameters.a11y (WCAG 2.2 AA rules) + viewport presets ✓
+- G3: HbcHeader +AllVariants, +FieldMode, +A11yTest ✓
+- G4: HbcSidebar +Default, +AllVariants, +FieldMode, +A11yTest ✓
+- G5: HbcConnectivityBar +AllVariants, +FieldMode ✓
+- G6: HbcAppShell +Default, +AllVariants, FieldMode rename, +A11yTest ✓
+- G7: DetailLayout +AllVariants, +FieldMode, +A11yTest ✓
+- G8: CreateUpdateLayout +Default, +AllVariants, +FieldMode, +A11yTest ✓
+- G9: ToolLandingLayout +AllVariants, +FieldMode, +A11yTest ✓
+- G10: @storybook/test-runner + axe-playwright + test-runner.ts ✓
+- ADR-0031, developer guide created
+- Build: zero errors; Lint: zero errors
+-->

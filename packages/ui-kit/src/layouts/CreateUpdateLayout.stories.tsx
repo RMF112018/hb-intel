@@ -1,7 +1,9 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { FluentProvider } from '@fluentui/react-components';
 import { HbcAppShell } from '../HbcAppShell/HbcAppShell.js';
 import { CreateUpdateLayout } from './CreateUpdateLayout.js';
+import { hbcFieldTheme } from '../theme/theme.js';
 import { RFI } from '../icons/index.js';
 import type { SidebarNavGroup, ShellUser } from '../HbcAppShell/types.js';
 
@@ -159,5 +161,99 @@ export const Submitting: Story = {
         <MockFormContent />
       </CreateUpdateLayout>
     </HbcAppShell>
+  ),
+};
+
+export const Default: Story = {
+  render: () => (
+    <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+      <CreateUpdateLayout
+        mode="create"
+        itemType="RFI"
+        onCancel={() => console.log('Cancel')}
+        onSubmit={() => console.log('Submit')}
+      >
+        <MockFormContent />
+      </CreateUpdateLayout>
+    </HbcAppShell>
+  ),
+};
+
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      <div>
+        <p style={{ fontSize: '0.75rem', color: '#6B7280', marginBottom: '4px' }}>Create mode</p>
+        <div style={{ height: '350px', overflow: 'hidden' }}>
+          <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+            <CreateUpdateLayout mode="create" itemType="RFI" onCancel={() => {}} onSubmit={() => {}}>
+              <MockFormContent />
+            </CreateUpdateLayout>
+          </HbcAppShell>
+        </div>
+      </div>
+      <div>
+        <p style={{ fontSize: '0.75rem', color: '#6B7280', marginBottom: '4px' }}>Edit mode</p>
+        <div style={{ height: '350px', overflow: 'hidden' }}>
+          <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+            <CreateUpdateLayout mode="edit" itemType="RFI" itemTitle="RFI-042" onCancel={() => {}} onSubmit={() => {}}>
+              <MockFormContent />
+            </CreateUpdateLayout>
+          </HbcAppShell>
+        </div>
+      </div>
+      <div>
+        <p style={{ fontSize: '0.75rem', color: '#6B7280', marginBottom: '4px' }}>Submitting state</p>
+        <div style={{ height: '350px', overflow: 'hidden' }}>
+          <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+            <CreateUpdateLayout mode="edit" itemType="RFI" itemTitle="RFI-042" onCancel={() => {}} onSubmit={() => {}} isSubmitting>
+              <MockFormContent />
+            </CreateUpdateLayout>
+          </HbcAppShell>
+        </div>
+      </div>
+    </div>
+  ),
+};
+
+export const FieldMode: Story = {
+  render: () => (
+    <FluentProvider theme={hbcFieldTheme}>
+      <div style={{ backgroundColor: '#0F1419', minHeight: '100vh' }}>
+        <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+          <CreateUpdateLayout
+            mode="create"
+            itemType="RFI"
+            onCancel={() => {}}
+            onSubmit={() => {}}
+          >
+            <MockFormContent />
+          </CreateUpdateLayout>
+        </HbcAppShell>
+      </div>
+    </FluentProvider>
+  ),
+};
+
+export const A11yTest: Story = {
+  name: 'A11y Test (Form Labels + Keyboard)',
+  render: () => (
+    <div>
+      <p style={{ marginBottom: '16px', fontSize: '0.875rem', color: '#605E5C' }}>
+        Tab through form fields to verify label association. Required fields should have
+        <code> aria-required=&quot;true&quot;</code>. Submit and Cancel buttons are keyboard accessible.
+        Press Escape to cancel, Enter to submit (when focused on submit button).
+      </p>
+      <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+        <CreateUpdateLayout
+          mode="create"
+          itemType="RFI"
+          onCancel={() => console.log('Cancel')}
+          onSubmit={() => console.log('Submit')}
+        >
+          <MockFormContent />
+        </CreateUpdateLayout>
+      </HbcAppShell>
+    </div>
   ),
 };

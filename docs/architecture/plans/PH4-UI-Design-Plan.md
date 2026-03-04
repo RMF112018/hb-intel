@@ -473,4 +473,17 @@ Phase 4.16 completed: 2026-03-04
 - Developer guide: docs/how-to/developer/phase-4.16-ui-kit-package.md
 - Build: zero TypeScript errors; Lint: zero errors (65 pre-existing warnings)
 Next: Phase 5 (SPFx webparts) or verification
+
+Phase 4.17 completed: 2026-03-04
+- preview.tsx: light bg corrected #FFFFFF → #FAFBFC; added parameters.a11y (WCAG 2.2 AA) + viewport presets (Field Tablet, Field Mobile)
+- Shell stories: HbcHeader (+3), HbcSidebar (+4), HbcConnectivityBar (+2), HbcAppShell (+3 + FieldMode rename) — all 4 required exports
+- Layout stories: DetailLayout (+3), CreateUpdateLayout (+4), ToolLandingLayout (+3) — all 4 required exports
+- test-runner.ts: axe-playwright CI integration for automated WCAG testing
+- package.json: +test-storybook script, +@storybook/test-runner, +axe-playwright devDeps
+- ADR-0031: ui-storybook-configuration.md
+- Developer guide: docs/how-to/developer/phase-4.17-storybook-configuration.md
+- Build: zero TypeScript errors; Lint: zero errors (65 pre-existing warnings)
+- §20 Testing items verified: WCAG 2.2 AA config, all stories have 4 exports
+- Note: Storybook build (`storybook build`) has pre-existing Vite 6 / Storybook 8 incompatibility; tracked separately
+Next: Phase 5 (SPFx webparts) or verification
 -->

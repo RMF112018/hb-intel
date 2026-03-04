@@ -413,4 +413,13 @@ Phase 4.16 completed: 2026-03-04
 - ADR-0030, developer guide: phase-4.16-ui-kit-package.md
 - Build: zero errors; Lint: zero errors
 Next: Phase 5 (SPFx webparts) or verification
+
+Phase 4.17 completed: 2026-03-04
+- Storybook configuration: preview bg fix, WCAG 2.2 AA parameters, field viewport presets
+- Shell stories (HbcHeader, HbcSidebar, HbcConnectivityBar, HbcAppShell): all 4 required exports
+- Layout stories (DetailLayout, CreateUpdateLayout, ToolLandingLayout): all 4 required exports
+- CI automation: @storybook/test-runner + axe-playwright test-runner.ts
+- ADR-0031, developer guide: phase-4.17-storybook-configuration.md
+- Build: zero errors; Lint: zero errors
+Next: Phase 5 (SPFx webparts) or verification
 -->

@@ -4,7 +4,9 @@
  */
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { FluentProvider } from '@fluentui/react-components';
 import { HbcConnectivityBar } from './HbcConnectivityBar.js';
+import { hbcFieldTheme } from '../theme/theme.js';
 
 const meta: Meta<typeof HbcConnectivityBar> = {
   title: 'Shell/HbcConnectivityBar',
@@ -27,6 +29,43 @@ type Story = StoryObj<typeof HbcConnectivityBar>;
 export const Default: Story = { args: { status: 'online' } };
 export const Syncing: Story = { args: { status: 'syncing' } };
 export const Offline: Story = { args: { status: 'offline' } };
+
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div>
+        <p style={{ color: '#A0A0A0', fontSize: '0.75rem', padding: '0 16px' }}>Online (2px)</p>
+        <div style={{ position: 'relative', height: '8px' }}>
+          <HbcConnectivityBar status="online" />
+        </div>
+      </div>
+      <div>
+        <p style={{ color: '#A0A0A0', fontSize: '0.75rem', padding: '0 16px' }}>Syncing (4px, pulse)</p>
+        <div style={{ position: 'relative', height: '8px' }}>
+          <HbcConnectivityBar status="syncing" />
+        </div>
+      </div>
+      <div>
+        <p style={{ color: '#A0A0A0', fontSize: '0.75rem', padding: '0 16px' }}>Offline (4px, pulse)</p>
+        <div style={{ position: 'relative', height: '8px' }}>
+          <HbcConnectivityBar status="offline" />
+        </div>
+      </div>
+    </div>
+  ),
+};
+
+export const FieldMode: Story = {
+  render: () => (
+    <FluentProvider theme={hbcFieldTheme}>
+      <div style={{ backgroundColor: '#0F1419', minHeight: '80px', paddingTop: '16px' }}>
+        <div style={{ position: 'relative', height: '8px' }}>
+          <HbcConnectivityBar status="online" />
+        </div>
+      </div>
+    </FluentProvider>
+  ),
+};
 
 export const A11yTest: Story = {
   name: 'A11y Test (Screen Reader)',

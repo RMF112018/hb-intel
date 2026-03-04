@@ -65,7 +65,52 @@ export const FullLight: Story = {
   ),
 };
 
-export const FullFieldMode: Story = {
+export const Default: Story = {
+  args: {
+    user: mockUser,
+    sidebarGroups: mockGroups,
+    mode: 'pwa',
+  },
+  render: (args) => (
+    <HbcAppShell {...args}>
+      <div style={{ padding: '24px' }}>
+        <h1>Dashboard</h1>
+        <p>Main content area. Resize the browser to test sidebar responsiveness.</p>
+      </div>
+    </HbcAppShell>
+  ),
+};
+
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      <div>
+        <p style={{ fontSize: '0.75rem', color: '#6B7280', marginBottom: '4px' }}>PWA mode</p>
+        <div style={{ height: '300px', overflow: 'hidden' }}>
+          <HbcAppShell user={mockUser} sidebarGroups={mockGroups} mode="pwa">
+            <div style={{ padding: '24px' }}>
+              <h2>PWA Mode</h2>
+              <p>Full app shell with sidebar, header, connectivity bar.</p>
+            </div>
+          </HbcAppShell>
+        </div>
+      </div>
+      <div>
+        <p style={{ fontSize: '0.75rem', color: '#6B7280', marginBottom: '4px' }}>SPFx mode</p>
+        <div style={{ height: '300px', overflow: 'hidden' }}>
+          <HbcAppShell user={mockUser} sidebarGroups={mockGroups} mode="spfx">
+            <div style={{ padding: '24px' }}>
+              <h2>SPFx Mode</h2>
+              <p>Embedded in SharePoint — no sidebar, streamlined header.</p>
+            </div>
+          </HbcAppShell>
+        </div>
+      </div>
+    </div>
+  ),
+};
+
+export const FieldMode: Story = {
   args: {
     user: mockUser,
     sidebarGroups: mockGroups,
@@ -78,5 +123,27 @@ export const FullFieldMode: Story = {
         <p>Toggle Field Mode via the user menu avatar to see the theme switch.</p>
       </div>
     </HbcAppShell>
+  ),
+};
+
+/** @deprecated Use FieldMode instead */
+export const FullFieldMode: Story = FieldMode;
+
+export const A11yTest: Story = {
+  name: 'A11y Test (Landmarks + Keyboard)',
+  render: () => (
+    <div>
+      <p style={{ marginBottom: '16px', fontSize: '0.875rem', color: '#605E5C' }}>
+        Verify landmark roles: <code>banner</code> (header), <code>navigation</code> (sidebar),
+        <code> main</code> (content area). Tab through shell to verify focus order:
+        header → sidebar → main content. Skip-to-content link should appear on first Tab.
+      </p>
+      <HbcAppShell user={mockUser} sidebarGroups={mockGroups} mode="pwa">
+        <div style={{ padding: '24px' }}>
+          <h1>A11y Test Content</h1>
+          <p>Focus should reach this content area after navigating through shell controls.</p>
+        </div>
+      </HbcAppShell>
+    </div>
   ),
 };

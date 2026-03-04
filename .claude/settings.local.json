@@ -47,7 +47,8 @@
       "Bash(/Users/bobbyfetting/hb-intel/docs/architecture/plans/PH4.6-UI-Design-Plan.md:*)",
       "Bash(read f:*)",
       "Bash(/Users/bobbyfetting/hb-intel/docs/architecture/plans/PH4.7-UI-Design-Plan.md:*)",
-      "Bash(/Users/bobbyfetting/hb-intel/docs/architecture/plans/PH4.8-UI-Design-Plan.md:*)"
+      "Bash(/Users/bobbyfetting/hb-intel/docs/architecture/plans/PH4.8-UI-Design-Plan.md:*)",
+      "Bash(git stash:*)"
     ]
   }
 }

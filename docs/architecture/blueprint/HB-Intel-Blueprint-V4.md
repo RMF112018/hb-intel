@@ -815,4 +815,12 @@ Phase 4.16 completed: 2026-03-04
 - ADR-0030, developer guide: phase-4.16-ui-kit-package.md
 - Build: zero errors; Lint: zero errors
 Next: Phase 5 (SPFx webparts) or verification
+
+Phase 4.17 completed: 2026-03-04
+- Storybook preview: bg corrected to #FAFBFC, WCAG 2.2 AA a11y params, field viewport presets
+- All shell + layout stories standardized to 4 required exports (Default, AllVariants, FieldMode, A11yTest)
+- CI test-runner: @storybook/test-runner + axe-playwright for automated WCAG 2.2 AA validation
+- ADR-0031, developer guide: phase-4.17-storybook-configuration.md
+- Build: zero errors; Lint: zero errors
+Next: Phase 5 (SPFx webparts) or verification
 -->

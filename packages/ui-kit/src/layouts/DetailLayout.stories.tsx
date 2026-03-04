@@ -1,7 +1,9 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { FluentProvider } from '@fluentui/react-components';
 import { HbcAppShell } from '../HbcAppShell/HbcAppShell.js';
 import { DetailLayout } from './DetailLayout.js';
+import { hbcFieldTheme } from '../theme/theme.js';
 import { RFI } from '../icons/index.js';
 import { HbcStatusBadge } from '../HbcStatusBadge/index.js';
 import type { SidebarNavGroup, ShellUser } from '../HbcAppShell/types.js';
@@ -151,6 +153,104 @@ export const WithManyTabs: Story = {
           }
         />
       </HbcAppShell>
+    );
+  },
+};
+
+export const AllVariants: Story = {
+  render: () => {
+    const [activeTab, setActiveTab] = React.useState('details');
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        <div>
+          <p style={{ fontSize: '0.75rem', color: '#6B7280', marginBottom: '4px' }}>With tabs + sidebar</p>
+          <div style={{ height: '350px', overflow: 'hidden' }}>
+            <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+              <DetailLayout
+                breadcrumbs={mockBreadcrumbs}
+                backLink="/rfis"
+                backLabel="Back to RFIs"
+                itemTitle="RFI-042: Foundation Rebar Specification"
+                statusBadge={<HbcStatusBadge variant="inProgress" label="In Progress" />}
+                actions={mockActions}
+                tabs={mockTabs}
+                activeTabId={activeTab}
+                onTabChange={setActiveTab}
+                mainContent={<div style={{ padding: '16px' }}><h3>Main — {activeTab}</h3></div>}
+                sidebarContent={<div style={{ padding: '16px', backgroundColor: '#FAFBFC', borderRadius: '8px' }}><h4>Side Panel</h4></div>}
+              />
+            </HbcAppShell>
+          </div>
+        </div>
+        <div>
+          <p style={{ fontSize: '0.75rem', color: '#6B7280', marginBottom: '4px' }}>Without tabs (minimal)</p>
+          <div style={{ height: '250px', overflow: 'hidden' }}>
+            <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+              <DetailLayout
+                itemTitle="Simple Detail View"
+                mainContent={<div style={{ padding: '16px' }}><p>No tabs, no sidebar, no actions.</p></div>}
+              />
+            </HbcAppShell>
+          </div>
+        </div>
+      </div>
+    );
+  },
+};
+
+export const FieldMode: Story = {
+  render: () => {
+    const [activeTab, setActiveTab] = React.useState('details');
+    return (
+      <FluentProvider theme={hbcFieldTheme}>
+        <div style={{ backgroundColor: '#0F1419', minHeight: '100vh' }}>
+          <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+            <DetailLayout
+              breadcrumbs={mockBreadcrumbs}
+              backLink="/rfis"
+              backLabel="Back to RFIs"
+              itemTitle="RFI-042: Foundation Rebar Specification"
+              statusBadge={<HbcStatusBadge variant="inProgress" label="In Progress" />}
+              actions={mockActions}
+              tabs={mockTabs}
+              activeTabId={activeTab}
+              onTabChange={setActiveTab}
+              mainContent={<div style={{ padding: '16px' }}><h3>Field Mode Content</h3></div>}
+              sidebarContent={<div style={{ padding: '16px' }}><h4>Side Panel</h4></div>}
+            />
+          </HbcAppShell>
+        </div>
+      </FluentProvider>
+    );
+  },
+};
+
+export const A11yTest: Story = {
+  name: 'A11y Test (Tabs + Breadcrumbs)',
+  render: () => {
+    const [activeTab, setActiveTab] = React.useState('details');
+    return (
+      <div>
+        <p style={{ marginBottom: '16px', fontSize: '0.875rem', color: '#605E5C' }}>
+          Use arrow keys to navigate tabs. Breadcrumbs are links with <code>aria-label=&quot;Breadcrumb&quot;</code>.
+          Tab panel content updates via <code>aria-labelledby</code>. Verify landmark roles in DevTools.
+        </p>
+        <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+          <DetailLayout
+            breadcrumbs={mockBreadcrumbs}
+            backLink="/rfis"
+            backLabel="Back to RFIs"
+            itemTitle="RFI-042: Foundation Rebar Specification"
+            statusBadge={<HbcStatusBadge variant="inProgress" label="In Progress" />}
+            actions={mockActions}
+            tabs={mockTabs}
+            activeTabId={activeTab}
+            onTabChange={setActiveTab}
+            onNavigate={(href) => console.log('Navigate:', href)}
+            mainContent={<div style={{ padding: '16px' }}><h3>Active Tab: {activeTab}</h3></div>}
+          />
+        </HbcAppShell>
+      </div>
     );
   },
 };

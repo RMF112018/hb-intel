@@ -36,7 +36,7 @@ const preview: Preview = {
     (Story, context) => {
       const themeKey = (context.globals.theme as string) || 'light';
       const theme = THEMES[themeKey] ?? hbcLightTheme;
-      const bgColor = themeKey === 'field' ? '#0F1419' : '#FFFFFF';
+      const bgColor = themeKey === 'field' ? '#0F1419' : '#FAFBFC';
       return (
         <FluentProvider theme={theme}>
           <div style={{ background: bgColor, minHeight: '100vh', padding: '1rem' }}>
@@ -49,6 +49,26 @@ const preview: Preview = {
   parameters: {
     controls: { expanded: true },
     layout: 'padded',
+    a11y: {
+      config: {
+        rules: [
+          { id: 'color-contrast', enabled: true },
+          { id: 'target-size', enabled: true },
+        ],
+      },
+      options: {
+        runOnly: {
+          type: 'tag',
+          values: ['wcag2a', 'wcag2aa', 'wcag22aa', 'best-practice'],
+        },
+      },
+    },
+    viewport: {
+      viewports: {
+        fieldTablet: { name: 'Field Tablet', styles: { width: '1024px', height: '768px' } },
+        fieldMobile: { name: 'Field Mobile', styles: { width: '390px', height: '844px' } },
+      },
+    },
   },
 };
 
