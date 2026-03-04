@@ -31,7 +31,9 @@ export {
   TRANSITION_FAST,
   TRANSITION_NORMAL,
   TRANSITION_SLOW,
+  TIMING,
   useAnimationStyles,
+  useReducedMotionStyles,
 } from './animations.js';
 
 // Typography (V2.1 intent-based + deprecated aliases)

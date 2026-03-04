@@ -18,6 +18,10 @@ export interface CommandPaletteResult {
   icon?: React.ReactNode;
   /** Action to perform on selection */
   onSelect: () => void;
+  /** PH4.12: When true, shows a confirmation dialog before executing */
+  requiresConfirmation?: boolean;
+  /** PH4.12: Custom confirmation message (default: "Are you sure?") */
+  confirmMessage?: string;
 }
 
 export interface HbcCommandPaletteProps {
@@ -29,6 +33,8 @@ export interface HbcCommandPaletteProps {
   onAiQuery?: (query: string) => Promise<string>;
   /** Custom result handler */
   onSelect?: (result: CommandPaletteResult) => void;
+  /** PH4.12: Filter results by permission — return false to hide */
+  permissionFilter?: (result: CommandPaletteResult) => boolean;
   /** Additional CSS class */
   className?: string;
 }

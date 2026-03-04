@@ -18,6 +18,7 @@ import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE } from '../theme/tokens.js';
 import { TRANSITION_FAST, keyframes } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { Search, SparkleIcon } from '../icons/index.js';
+import { HbcConfirmDialog } from '../HbcConfirmDialog/index.js';
 import { useOnlineStatus } from '../HbcAppShell/hooks/useOnlineStatus.js';
 import { useCommandPalette } from './hooks/useCommandPalette.js';
 import type {
@@ -191,6 +192,7 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
   actionItems = [],
   onAiQuery,
   onSelect,
+  permissionFilter,
   className,
 }) => {
   const styles = useStyles();
@@ -202,6 +204,7 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [aiResponse, setAiResponse] = React.useState<string | null>(null);
   const [aiLoading, setAiLoading] = React.useState(false);
+  const [pendingAction, setPendingAction] = React.useState<CommandPaletteResult | null>(null);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const dialogRef = React.useRef<HTMLDivElement>(null);
@@ -249,8 +252,8 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
       : actionItems;
     filtered.push(...actionMatches);
 
-    return filtered;
-  }, [debouncedQuery, navigationItems, actionItems, recentItems]);
+    return permissionFilter ? filtered.filter(permissionFilter) : filtered;
+  }, [debouncedQuery, navigationItems, actionItems, recentItems, permissionFilter]);
 
   // Group results by category
   const groupedResults = React.useMemo(() => {
@@ -274,12 +277,26 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
 
   const handleSelect = React.useCallback(
     (result: CommandPaletteResult) => {
+      // PH4.12: confirmation step for destructive actions
+      if (result.requiresConfirmation) {
+        setPendingAction(result);
+        return;
+      }
       onSelect?.(result);
       result.onSelect();
       close();
     },
     [onSelect, close],
   );
+
+  // PH4.12: execute pending confirmed action
+  const handleConfirmPending = React.useCallback(() => {
+    if (!pendingAction) return;
+    onSelect?.(pendingAction);
+    pendingAction.onSelect();
+    setPendingAction(null);
+    close();
+  }, [pendingAction, onSelect, close]);
 
   const handleAiQuery = React.useCallback(async () => {
     if (!onAiQuery || !query.trim()) return;
@@ -437,6 +454,17 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
           </div>
         )}
       </div>
+
+      {/* PH4.12: Confirmation dialog for destructive actions */}
+      <HbcConfirmDialog
+        open={pendingAction !== null}
+        onClose={() => setPendingAction(null)}
+        onConfirm={handleConfirmPending}
+        title="Confirm Action"
+        description={pendingAction?.confirmMessage ?? 'Are you sure you want to perform this action?'}
+        confirmLabel="Confirm"
+        variant="danger"
+      />
     </>
   );
 };

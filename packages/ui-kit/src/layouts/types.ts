@@ -136,4 +136,6 @@ export interface UseFocusModeReturn {
   toggleFocusMode: () => void;
   /** Whether focus mode was auto-activated (touch device) */
   isAutoFocus: boolean;
+  /** Explicitly deactivate focus mode (e.g., on save/cancel) */
+  deactivate: () => void;
 }

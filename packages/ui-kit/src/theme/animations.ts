@@ -2,7 +2,7 @@
  * HB Intel Design System — Animations & transitions
  * Blueprint §1d — Smooth micro-interactions, 60 fps animations
  */
-import { makeStyles, shorthands } from '@griffel/react';
+import { makeStyles } from '@griffel/react';
 
 /** Griffel keyframe definitions for reuse across components */
 export const keyframes = {
@@ -31,12 +31,34 @@ export const keyframes = {
     '0%': { backgroundPosition: '-200% 0' },
     '100%': { backgroundPosition: '200% 0' },
   },
+  badgePulse: {
+    '0%': { transform: 'scale(1)' },
+    '50%': { transform: 'scale(1.1)' },
+    '100%': { transform: 'scale(1)' },
+  },
+  crossfade: {
+    from: { opacity: 0 },
+    to: { opacity: 1 },
+  },
 } as const;
 
 /** Transition duration presets (ms) */
 export const TRANSITION_FAST = '150ms' as const;
 export const TRANSITION_NORMAL = '250ms' as const;
 export const TRANSITION_SLOW = '400ms' as const;
+
+/** Named timing constants for interaction patterns (PH4.12) */
+export const TIMING = {
+  sidebarCollapse: '250ms',
+  headerFade: '150ms',
+  backgroundDim: '200ms',
+  badgePulse: '300ms',
+  crossfade: '200ms',
+  skeletonSweep: '1500ms',
+  focusActivation: '200ms',
+  connectivityExpand: '100ms',
+  buttonLoading: '150ms',
+} as const;
 
 /** Common transition presets for component use */
 export const transitions = {
@@ -74,5 +96,27 @@ export const useAnimationStyles = makeStyles({
     animationTimingFunction: 'linear',
     backgroundImage: `linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.4) 50%, transparent 75%)`,
     backgroundSize: '200% 100%',
+  },
+  badgePulse: {
+    animationName: keyframes.badgePulse,
+    animationDuration: TIMING.badgePulse,
+    animationTimingFunction: 'ease-in-out',
+    animationFillMode: 'forwards',
+  },
+  crossfade: {
+    animationName: keyframes.crossfade,
+    animationDuration: TIMING.crossfade,
+    animationFillMode: 'forwards',
+  },
+});
+
+/** Reduced-motion override styles — zeroes animation/transition durations */
+export const useReducedMotionStyles = makeStyles({
+  reduced: {
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0.01ms !important' as string,
+      animationIterationCount: '1 !important' as string,
+      transitionDuration: '0.01ms !important' as string,
+    },
   },
 });

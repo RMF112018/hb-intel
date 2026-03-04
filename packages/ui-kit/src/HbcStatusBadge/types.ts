@@ -26,6 +26,8 @@ export interface HbcStatusBadgeProps {
   size?: 'small' | 'medium' | 'large';
   /** Optional icon override — auto-injected from variant map when omitted */
   icon?: React.ReactNode;
+  /** PH4.12: Enable crossfade + pulse animation on variant change */
+  animate?: boolean;
   /** Additional CSS class */
   className?: string;
 }

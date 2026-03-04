@@ -99,3 +99,21 @@ All animations respect `prefers-reduced-motion`. When `prefers-reduced-motion: r
 | Focus Mode activation | 200ms opacity dim | `ease-out` |
 | Connectivity bar expand | 100ms height | `ease` |
 | Button loading state | 150ms opacity | `ease` |
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.12 completed: 2026-03-04
+All 8 interaction patterns implemented:
+  1. usePrefersReducedMotion hook (matchMedia pattern)
+  2. HbcConfirmDialog (HbcModal sm wrapper)
+  3. Focus Mode orchestration (deactivate, Cmd+Shift+F, dim overlay)
+  4. Command Palette enhancements (confirmation step, permission filtering)
+  5. useOptimisticMutation hook (toast-optional)
+  6. useUnsavedChangesBlocker hook (router-agnostic)
+  7. HbcStatusBadge animate prop (crossfade + pulse, reduced-motion safe)
+  8. Barrel exports (hooks/index.ts, interactions/index.ts, src/index.ts)
+Animation constants: TIMING object + badgePulse/crossfade keyframes + useReducedMotionStyles
+Documentation added: docs/how-to/developer/phase-4.12-interaction-patterns.md
+ADR created: docs/architecture/adr/ADR-0025-ui-interaction-pattern-library.md
+Stories: HbcConfirmDialog.stories.tsx + Interactions.stories.tsx (6 stories)
+Zero breaking changes — all new props are optional.
+-->

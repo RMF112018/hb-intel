@@ -1,11 +1,11 @@
 /**
  * useFocusMode — Focus Mode hook for CreateUpdateLayout
- * PH4.5 §Step 1 | Blueprint §1f
+ * PH4.5 §Step 1, PH4.12 §Step 3 | Blueprint §1f
  *
  * Auto-detect touch → activate immediately.
- * Desktop: read/write localStorage, toggle via button.
+ * Desktop: read/write localStorage, toggle via button or Cmd/Ctrl+Shift+F.
  * Dispatches CustomEvent + sets data-focus-mode attribute on shell.
- * Pattern follows useFieldMode.ts (localStorage + DOM attr + matchMedia).
+ * PH4.12: adds deactivate() callback and keyboard shortcut.
  */
 import { useState, useEffect, useCallback } from 'react';
 import type { UseFocusModeReturn } from '../types.js';
@@ -73,9 +73,31 @@ export function useFocusMode(): UseFocusModeReturn {
     });
   }, []);
 
+  /** PH4.12: Explicitly deactivate focus mode */
+  const deactivate = useCallback(() => {
+    setIsFocusMode(false);
+    if (!isTouchDevice()) {
+      localStorage.setItem(STORAGE_KEY, 'false');
+    }
+  }, []);
+
+  // PH4.12: Cmd/Ctrl+Shift+F keyboard shortcut (desktop only)
+  useEffect(() => {
+    if (isAutoFocus) return;
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'f') {
+        e.preventDefault();
+        toggleFocusMode();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isAutoFocus, toggleFocusMode]);
+
   return {
     isFocusMode,
     toggleFocusMode,
     isAutoFocus,
+    deactivate,
   };
 }

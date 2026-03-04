@@ -14,7 +14,7 @@ import {
   HBC_SURFACE_LIGHT,
   HBC_ACCENT_ORANGE,
 } from '../theme/tokens.js';
-import { TRANSITION_NORMAL } from '../theme/animations.js';
+import { TRANSITION_NORMAL, TIMING } from '../theme/animations.js';
 import { FocusModeEnter, FocusModeExit } from '../icons/index.js';
 import { useFocusMode } from './hooks/useFocusMode.js';
 import type { CreateUpdateLayoutProps } from './types.js';
@@ -185,6 +185,34 @@ const useStyles = makeStyles({
     animationTimingFunction: 'linear',
     animationIterationCount: 'infinite',
   },
+  // PH4.12: dim overlay behind form when Focus Mode is active
+  dimOverlay: {
+    '::after': {
+      content: '""',
+      position: 'fixed',
+      top: '0',
+      right: '0',
+      bottom: '0',
+      left: '0',
+      backgroundColor: 'rgba(0, 0, 0, 0.4)',
+      pointerEvents: 'none',
+      zIndex: 1,
+      transitionProperty: 'opacity',
+      transitionDuration: TIMING.backgroundDim,
+      transitionTimingFunction: 'ease-out',
+    },
+  },
+  formContentAboveDim: {
+    position: 'relative',
+    zIndex: 2,
+  },
+  formHeaderAboveDim: {
+    zIndex: 11,
+    position: 'sticky',
+  },
+  footerAboveDim: {
+    zIndex: 11,
+  },
 });
 
 export const CreateUpdateLayout: React.FC<CreateUpdateLayoutProps> = ({
@@ -197,16 +225,27 @@ export const CreateUpdateLayout: React.FC<CreateUpdateLayoutProps> = ({
   children,
 }) => {
   const styles = useStyles();
-  const { isFocusMode, toggleFocusMode, isAutoFocus } = useFocusMode();
+  const { isFocusMode, toggleFocusMode, isAutoFocus, deactivate } = useFocusMode();
+
+  // PH4.12: deactivate focus mode on cancel/save
+  const handleCancel = React.useCallback(() => {
+    deactivate();
+    onCancel();
+  }, [deactivate, onCancel]);
+
+  const handleSubmit = React.useCallback(() => {
+    deactivate();
+    onSubmit();
+  }, [deactivate, onSubmit]);
 
   const title = mode === 'create'
     ? `Create New ${itemType}`
     : `Edit ${itemTitle ?? itemType}`;
 
   return (
-    <div className={styles.root} data-hbc-layout="create-update">
+    <div className={mergeClasses(styles.root, isFocusMode && styles.dimOverlay)} data-hbc-layout="create-update">
       {/* Form Header */}
-      <div className={styles.formHeader}>
+      <div className={mergeClasses(styles.formHeader, isFocusMode && styles.formHeaderAboveDim)}>
         <div className={styles.headerLeft}>
           <h2 className={styles.formTitle}>{title}</h2>
         </div>
@@ -229,7 +268,7 @@ export const CreateUpdateLayout: React.FC<CreateUpdateLayoutProps> = ({
           )}
           <button
             className={styles.cancelButton}
-            onClick={onCancel}
+            onClick={handleCancel}
             disabled={isSubmitting}
             type="button"
           >
@@ -237,7 +276,7 @@ export const CreateUpdateLayout: React.FC<CreateUpdateLayoutProps> = ({
           </button>
           <button
             className={styles.saveButton}
-            onClick={onSubmit}
+            onClick={handleSubmit}
             disabled={isSubmitting}
             type="button"
           >
@@ -252,16 +291,17 @@ export const CreateUpdateLayout: React.FC<CreateUpdateLayoutProps> = ({
         className={mergeClasses(
           styles.formContent,
           isFocusMode && styles.formContentFocused,
+          isFocusMode && styles.formContentAboveDim,
         )}
       >
         {children}
       </div>
 
       {/* Sticky Footer */}
-      <div className={styles.stickyFooter}>
+      <div className={mergeClasses(styles.stickyFooter, isFocusMode && styles.footerAboveDim)}>
         <button
           className={styles.cancelButton}
-          onClick={onCancel}
+          onClick={handleCancel}
           disabled={isSubmitting}
           type="button"
         >
@@ -269,7 +309,7 @@ export const CreateUpdateLayout: React.FC<CreateUpdateLayoutProps> = ({
         </button>
         <button
           className={styles.saveButton}
-          onClick={onSubmit}
+          onClick={handleSubmit}
           disabled={isSubmitting}
           type="button"
         >

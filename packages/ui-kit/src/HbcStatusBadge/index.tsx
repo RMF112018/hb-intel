@@ -2,11 +2,14 @@
  * HbcStatusBadge — Consistent status indicators (V2.1 dual-channel)
  * Blueprint §1d — status variant → semantic color + mandatory shape icon
  * PH4.6 §Step 1 — Dual-channel: color + shape, never color alone (V2.1 Dec 26)
+ * PH4.12 §Step 7 — animate prop: crossfade + pulse on variant change
  */
 import * as React from 'react';
 import { Badge, mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { HBC_STATUS_COLORS } from '../theme/tokens.js';
+import { TIMING, keyframes as kf } from '../theme/animations.js';
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.js';
 import {
   StatusCompleteIcon,
   StatusAttentionIcon,
@@ -59,6 +62,21 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: '4px',
   },
+  animating: {
+    animationName: {
+      '0%': { transform: 'scale(1)', opacity: 0.7 },
+      '50%': { transform: 'scale(1.1)', opacity: 1 },
+      '100%': { transform: 'scale(1)', opacity: 1 },
+    },
+    animationDuration: TIMING.badgePulse,
+    animationTimingFunction: 'ease-in-out',
+    animationFillMode: 'forwards',
+  },
+  reducedMotionAnimating: {
+    animationName: kf.crossfade,
+    animationDuration: TIMING.crossfade,
+    animationFillMode: 'forwards',
+  },
 });
 
 export const HbcStatusBadge: React.FC<HbcStatusBadgeProps> = ({
@@ -66,10 +84,26 @@ export const HbcStatusBadge: React.FC<HbcStatusBadgeProps> = ({
   label,
   size = 'medium',
   icon,
+  animate = false,
   className,
 }) => {
   const styles = useStyles();
+  const prefersReduced = usePrefersReducedMotion();
   const color = STATUS_COLOR_MAP[variant];
+
+  // Track previous variant to detect changes
+  const prevVariantRef = React.useRef(variant);
+  const [isAnimating, setIsAnimating] = React.useState(false);
+
+  React.useEffect(() => {
+    if (animate && prevVariantRef.current !== variant) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 300);
+      prevVariantRef.current = variant;
+      return () => clearTimeout(timer);
+    }
+    prevVariantRef.current = variant;
+  }, [variant, animate]);
 
   // Auto-inject icon from variant map when not explicitly provided
   const IconComponent = STATUS_ICON_MAP[variant];
@@ -79,7 +113,12 @@ export const HbcStatusBadge: React.FC<HbcStatusBadgeProps> = ({
     <Badge
       data-hbc-ui="status-badge"
       data-hbc-status={variant}
-      className={mergeClasses(styles.badge, className)}
+      className={mergeClasses(
+        styles.badge,
+        isAnimating && !prefersReduced && styles.animating,
+        isAnimating && prefersReduced && styles.reducedMotionAnimating,
+        className,
+      )}
       size={size}
       icon={resolvedIcon as React.JSX.Element}
       appearance="filled"

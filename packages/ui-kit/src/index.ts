@@ -26,7 +26,9 @@ export {
   TRANSITION_FAST,
   TRANSITION_NORMAL,
   TRANSITION_SLOW,
+  TIMING,
   useAnimationStyles,
+  useReducedMotionStyles,
   hbcTypeScale,
   display,
   heading1,
@@ -136,8 +138,19 @@ export type { HbcTearsheetProps, TearsheetStep } from './HbcTearsheet/index.js';
 export { HbcPopover } from './HbcPopover/index.js';
 export type { HbcPopoverProps, PopoverSize } from './HbcPopover/index.js';
 
-// Shared hooks (PH4.8, PH4.9)
+// Shared hooks (PH4.8, PH4.9, PH4.12)
 export { useFocusTrap, useIsMobile, useMinDisplayTime } from './hooks/index.js';
+export { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.js';
+export { useOptimisticMutation } from './hooks/useOptimisticMutation.js';
+export type {
+  UseOptimisticMutationOptions,
+  UseOptimisticMutationReturn,
+} from './hooks/useOptimisticMutation.js';
+export { useUnsavedChangesBlocker } from './hooks/useUnsavedChangesBlocker.js';
+export type {
+  UseUnsavedChangesBlockerOptions,
+  UseUnsavedChangesBlockerReturn,
+} from './hooks/useUnsavedChangesBlocker.js';
 
 export { HbcCommandBar } from './HbcCommandBar/index.js';
 export type {
@@ -204,6 +217,10 @@ export type {
   RichTextToolbarAction,
   UseVoiceDictationReturn,
 } from './HbcInput/index.js';
+
+// PH4.12 Interaction Pattern Library
+export { HbcConfirmDialog } from './HbcConfirmDialog/index.js';
+export type { HbcConfirmDialogProps } from './HbcConfirmDialog/types.js';
 
 export { HbcCommandPalette, useCommandPalette } from './HbcCommandPalette/index.js';
 export type {

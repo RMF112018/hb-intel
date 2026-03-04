@@ -389,4 +389,19 @@ ADR created: docs/architecture/adr/ADR-0024-ui-form-architecture.md
   - [x] 56×56px touch targets (useFormDensity hook, applied to HbcTextField/HbcSelect)
   - [x] Dirty tracking (markDirty via context, onDirtyChange callback)
   - [x] Z-index stickyFooter layer (50, between content 0 and sidebar 100)
+
+Phase 4.12 completed: 2026-03-04
+§12 Interaction Pattern Library: COMPLETE
+§20 Checklist updates:
+  - [x] usePrefersReducedMotion (matchMedia hook, SSR-safe)
+  - [x] TIMING constants + badgePulse/crossfade keyframes + useReducedMotionStyles
+  - [x] HbcConfirmDialog (HbcModal sm wrapper, danger/warning variants, loading state)
+  - [x] Focus Mode: deactivate() on save/cancel, Cmd/Ctrl+Shift+F shortcut, 40% dim overlay
+  - [x] Command Palette: requiresConfirmation + confirmMessage, permissionFilter prop
+  - [x] useOptimisticMutation (toast-optional via onShowError callback)
+  - [x] useUnsavedChangesBlocker (beforeunload + showPrompt/confirm/cancel state)
+  - [x] HbcStatusBadge animate prop (crossfade + pulse, prefers-reduced-motion safe)
+  - [x] Barrel exports: hooks/index.ts, interactions/index.ts, src/index.ts
+  - [x] Storybook stories: HbcConfirmDialog (3) + Interactions (6)
+  - [x] ADR-0025: UI Interaction Pattern Library
 -->
