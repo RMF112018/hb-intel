@@ -138,8 +138,8 @@ export type { HbcTearsheetProps, TearsheetStep } from './HbcTearsheet/index.js';
 export { HbcPopover } from './HbcPopover/index.js';
 export type { HbcPopoverProps, PopoverSize } from './HbcPopover/index.js';
 
-// Shared hooks (PH4.8, PH4.9, PH4.12)
-export { useFocusTrap, useIsMobile, useMinDisplayTime } from './hooks/index.js';
+// Shared hooks (PH4.8, PH4.9, PH4.12, PH4.14.5)
+export { useFocusTrap, useIsMobile, useIsTablet, useMinDisplayTime } from './hooks/index.js';
 export { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.js';
 export { useOptimisticMutation } from './hooks/useOptimisticMutation.js';
 export type {
@@ -229,6 +229,10 @@ export type {
   CommandPaletteCategory,
   UseCommandPaletteReturn,
 } from './HbcCommandPalette/index.js';
+
+// Bottom Navigation (PH4.14.5)
+export { HbcBottomNav } from './HbcBottomNav/index.js';
+export type { BottomNavItem, HbcBottomNavProps } from './HbcBottomNav/index.js';
 
 // App Shell (PH4.4)
 export {

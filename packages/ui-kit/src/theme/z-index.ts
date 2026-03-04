@@ -12,6 +12,7 @@ export type ZIndexLayer =
   | 'stickyFooter'
   | 'sidebar'
   | 'header'
+  | 'bottomNav'
   | 'popover'
   | 'panel'
   | 'panelBackdrop'
@@ -34,6 +35,8 @@ export const Z_INDEX: Record<ZIndexLayer, number> = {
   sidebar: 100,
   /** Fixed header bar */
   header: 200,
+  /** Bottom navigation bar (mobile/tablet) — PH4.14.5 */
+  bottomNav: 300,
   /** Popovers, dropdowns, flyouts */
   popover: 1000,
   /** Slide-in panel backdrop */

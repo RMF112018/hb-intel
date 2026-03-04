@@ -13,10 +13,13 @@ import { hbcLightTheme, hbcFieldTheme } from '../theme/theme.js';
 import { HbcConnectivityBar } from './HbcConnectivityBar.js';
 import { HbcHeader } from './HbcHeader.js';
 import { HbcSidebar } from './HbcSidebar.js';
+import { HbcBottomNav } from '../HbcBottomNav/index.js';
 import { useSidebarState } from './hooks/useSidebarState.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import { useFieldMode } from './hooks/useFieldMode.js';
+import { useIsTablet } from '../hooks/useIsTablet.js';
 import type { HbcAppShellProps } from './types.js';
+import type { BottomNavItem } from '../HbcBottomNav/types.js';
 
 const FOCUS_EVENT = 'hbc-focus-mode-change';
 
@@ -38,6 +41,9 @@ const useStyles = makeStyles({
   },
   mainMobile: {
     marginLeft: '0px',
+  },
+  mainBottomNav: {
+    paddingBottom: '56px',
   },
   mainFocusMode: {
     zIndex: Z_INDEX.sidebar,
@@ -69,11 +75,13 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   children,
   user,
   sidebarGroups,
+  activeItemId,
   mode = 'pwa',
   onSignOut,
   onNavigate,
 }) => {
   const { isExpanded, isMobile } = useSidebarState();
+  const isTablet = useIsTablet();
   const connectivityStatus = useOnlineStatus();
   const { isFieldMode } = useFieldMode();
   const [isFocusModeActive, setIsFocusModeActive] = React.useState(false);
@@ -90,10 +98,27 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
     return () => window.removeEventListener(FOCUS_EVENT, handler);
   }, []);
 
+  // Derive bottom nav items from sidebar groups — PH4.14.5
+  const bottomNavItems: BottomNavItem[] = React.useMemo(
+    () =>
+      sidebarGroups.flatMap((g) =>
+        g.items.map((item) => ({
+          id: item.id,
+          label: item.label,
+          icon: item.icon,
+          href: item.href,
+        })),
+      ),
+    [sidebarGroups],
+  );
+
+  const showBottomNav = isTablet && !isFocusModeActive;
+
   const mainClass = mergeClasses(
     styles.main,
     isMobile ? styles.mainMobile : isExpanded && !isFocusModeActive ? styles.mainExpanded : styles.mainCollapsed,
     isFocusModeActive && styles.mainFocusMode,
+    showBottomNav && styles.mainBottomNav,
   );
 
   return (
@@ -116,6 +141,14 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
         >
           {children}
         </main>
+        {/* Bottom navigation — tablet/mobile only (PH4.14.5) */}
+        {showBottomNav && (
+          <HbcBottomNav
+            items={bottomNavItems}
+            activeId={activeItemId}
+            onNavigate={onNavigate}
+          />
+        )}
       </div>
     </FluentProvider>
   );

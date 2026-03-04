@@ -15,6 +15,7 @@ import { keyframes, TRANSITION_FAST } from '../theme/animations.js';
 import { heading3 } from '../theme/typography.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
+import { useIsMobile } from '../hooks/useIsMobile.js';
 import type { HbcModalProps, ModalSize } from './types.js';
 
 const SIZE_MAP: Record<ModalSize, string> = {
@@ -100,6 +101,30 @@ const useStyles = makeStyles({
     paddingLeft: '24px',
     ...shorthands.borderTop('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
   },
+  // Mobile full-screen adaptations — PH4.14.5
+  dialogMobile: {
+    top: '0',
+    left: '0',
+    right: '0',
+    bottom: '0',
+    transform: 'none',
+    width: '100vw',
+    height: '100vh',
+    maxWidth: '100vw',
+    maxHeight: '100vh',
+    borderRadius: '0',
+    animationName: keyframes.slideInFromBottom,
+  },
+  bodyMobile: {
+    maxHeight: 'none',
+    flex: '1 1 auto',
+  },
+  closeButtonMobile: {
+    width: '44px',
+    height: '44px',
+    minWidth: '44px',
+    minHeight: '44px',
+  },
 });
 
 export const HbcModal: React.FC<HbcModalProps> = ({
@@ -113,6 +138,7 @@ export const HbcModal: React.FC<HbcModalProps> = ({
   className,
 }) => {
   const styles = useStyles();
+  const isMobile = useIsMobile();
   const dialogRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<Element | null>(null);
 
@@ -153,8 +179,8 @@ export const HbcModal: React.FC<HbcModalProps> = ({
       />
       <div
         ref={dialogRef}
-        className={mergeClasses(styles.dialog, className)}
-        style={{ width: SIZE_MAP[size] }}
+        className={mergeClasses(styles.dialog, isMobile && styles.dialogMobile, className)}
+        style={isMobile ? undefined : { width: SIZE_MAP[size] }}
         role="dialog"
         aria-modal="true"
         aria-label={title}
@@ -164,14 +190,14 @@ export const HbcModal: React.FC<HbcModalProps> = ({
           <h3 className={styles.title}>{title}</h3>
           <button
             type="button"
-            className={styles.closeButton}
+            className={mergeClasses(styles.closeButton, isMobile && styles.closeButtonMobile)}
             onClick={onClose}
             aria-label="Close"
           >
             ✕
           </button>
         </div>
-        <div className={styles.body}>{children}</div>
+        <div className={mergeClasses(styles.body, isMobile && styles.bodyMobile)}>{children}</div>
         {footer && <div className={styles.footer}>{footer}</div>}
       </div>
     </>

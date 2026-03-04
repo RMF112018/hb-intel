@@ -430,4 +430,18 @@ Phase 4.14.4 (Field Mode Dark Theme) completed: 2026-03-04
   - [x] FieldMode.stories.tsx: LightMode + FieldMode stories
   - [x] ADR-0027: UI Field Mode Implementation
   - [x] Developer guide: docs/how-to/developer/phase-4.14-mobile-pwa-adaptations.md
+
+Phase 4.14.5 completed: 2026-03-04
+- HbcBottomNav: fixed bottom nav bar for <1024px viewports, 56px height, "More" overflow sheet
+- useIsTablet hook: tablet breakpoint detection at ≤1023px
+- HbcModal: full-screen slide-up on mobile (<768px), 44px close button touch target
+- HbcCommandPalette: full-screen slide-up on mobile (<768px), X close button replaces ESC hint
+- slideInFromBottom keyframe + bottomNav z-index (300) added to theme
+- HbcAppShell: integrates bottom nav, derives items from sidebarGroups
+- Documentation: ADR-0028, developer how-to guide updated
+§20 Responsive checklist updates:
+  - [x] Bottom navigation renders on viewports < 1024px
+  - [x] HbcModal full-screen on mobile
+  - [x] HbcCommandPalette full-screen on mobile with bottom-up slide animation
+Next: Phase 4.15 or verification
 -->

@@ -12,12 +12,13 @@
  */
 import * as React from 'react';
 import { mergeClasses } from '@fluentui/react-components';
-import { makeStyles } from '@griffel/react';
+import { makeStyles, shorthands } from '@griffel/react';
 import { elevationLevel3 } from '../theme/elevation.js';
 import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE } from '../theme/tokens.js';
 import { TRANSITION_FAST, keyframes } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { Search, SparkleIcon } from '../icons/index.js';
+import { useIsMobile } from '../hooks/useIsMobile.js';
 import { HbcConfirmDialog } from '../HbcConfirmDialog/index.js';
 import { useOnlineStatus } from '../HbcAppShell/hooks/useOnlineStatus.js';
 import { useCommandPalette } from './hooks/useCommandPalette.js';
@@ -168,6 +169,38 @@ const useStyles = makeStyles({
     maxHeight: '200px',
     overflowY: 'auto',
   },
+  // Mobile full-screen adaptations — PH4.14.5
+  dialogMobile: {
+    top: '0',
+    left: '0',
+    right: '0',
+    bottom: '0',
+    transform: 'none',
+    width: '100vw',
+    height: '100vh',
+    maxWidth: '100vw',
+    maxHeight: '100vh',
+    borderRadius: '0',
+    animationName: keyframes.slideInFromBottom,
+  },
+  resultsMobile: {
+    flex: '1 1 auto',
+    maxHeight: 'none',
+  },
+  mobileCloseButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '44px',
+    height: '44px',
+    flexShrink: 0,
+    backgroundColor: 'transparent',
+    ...shorthands.borderStyle('none'),
+    ...shorthands.borderWidth('0'),
+    cursor: 'pointer',
+    fontSize: '1.25rem',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
 });
 
 /** Get recent items from localStorage */
@@ -196,6 +229,7 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
   className,
 }) => {
   const styles = useStyles();
+  const isMobile = useIsMobile();
   const { isOpen, close } = useCommandPalette();
   const connectivityStatus = useOnlineStatus();
   const isOnline = connectivityStatus === 'online';
@@ -353,7 +387,7 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
       />
       <div
         ref={dialogRef}
-        className={mergeClasses(styles.dialog, className)}
+        className={mergeClasses(styles.dialog, isMobile && styles.dialogMobile, className)}
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
@@ -374,11 +408,22 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
             placeholder="Search or ask AI..."
             aria-label="Search commands"
           />
-          <span className={styles.shortcutHint}>ESC</span>
+          {isMobile ? (
+            <button
+              type="button"
+              className={styles.mobileCloseButton}
+              onClick={close}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+          ) : (
+            <span className={styles.shortcutHint}>ESC</span>
+          )}
         </div>
 
         {/* Results */}
-        <div className={styles.results} role="listbox" aria-label="Results">
+        <div className={mergeClasses(styles.results, isMobile && styles.resultsMobile)} role="listbox" aria-label="Results">
           {Object.entries(groupedResults).map(([category, results]) => (
             <div key={category}>
               <div className={styles.categoryLabel}>

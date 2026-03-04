@@ -74,6 +74,8 @@ export interface HbcAppShellProps {
   user?: ShellUser | null;
   sidebarGroups: SidebarNavGroup[];
   mode?: 'pwa' | 'spfx';
+  /** Active sidebar/bottom-nav item id for highlight — PH4.14.5 */
+  activeItemId?: string;
   onSignOut?: () => void;
   onNavigate?: (href: string) => void;
 }

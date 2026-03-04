@@ -40,6 +40,10 @@ export const keyframes = {
     from: { opacity: 0 },
     to: { opacity: 1 },
   },
+  slideInFromBottom: {
+    from: { transform: 'translateY(100%)' },
+    to: { transform: 'translateY(0)' },
+  },
 } as const;
 
 /** Transition duration presets (ms) */
@@ -106,6 +110,12 @@ export const useAnimationStyles = makeStyles({
   crossfade: {
     animationName: keyframes.crossfade,
     animationDuration: TIMING.crossfade,
+    animationFillMode: 'forwards',
+  },
+  slideInFromBottom: {
+    animationName: keyframes.slideInFromBottom,
+    animationDuration: TRANSITION_NORMAL,
+    animationTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
     animationFillMode: 'forwards',
   },
 });
