@@ -19,6 +19,7 @@
     "lint": "eslint src/ --ext .ts,.tsx"
   },
   "dependencies": {
+    "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
     "@fluentui/react-components": "^9.56.0",
     "@griffel/react": "^1.5.0",

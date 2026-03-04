@@ -277,3 +277,9 @@ Documentation: docs/architecture/adr/0016-ui-design-system-foundation.md, docs/h
 Build: pnpm turbo run build --filter=@hbc/ui-kit — zero errors
 Next: Phase 4.4 (Shell Chrome)
 -->
+<!-- PROGRESS: Phase 4.4 (Global Application Shell) completed 2026-03-04
+All shell chrome components delivered: HbcConnectivityBar, HbcHeader (7 sub-components), HbcSidebar, HbcAppShell orchestrator.
+4 hooks: useOnlineStatus, useFieldMode, useSidebarState, useKeyboardShortcut.
+4 Storybook story files. ADR-0017 created. Build & type-check pass.
+Next: Phase 4.5
+-->

@@ -116,3 +116,36 @@ export type { HbcChartProps } from './HbcChart/index.js';
 
 export { WorkspacePageShell } from './WorkspacePageShell/index.js';
 export type { WorkspacePageShellProps } from './WorkspacePageShell/index.js';
+
+// App Shell (PH4.4)
+export {
+  HbcAppShell,
+  HbcConnectivityBar,
+  HbcHeader,
+  HbcSidebar,
+  HbcProjectSelector,
+  HbcToolboxFlyout,
+  HbcFavoriteTools,
+  HbcGlobalSearch,
+  HbcCreateButton,
+  HbcNotificationBell,
+  HbcUserMenu,
+} from './HbcAppShell/index.js';
+export type {
+  HbcAppShellProps,
+  HbcHeaderProps,
+  HbcSidebarProps,
+  HbcConnectivityBarProps,
+  HbcUserMenuProps,
+  ConnectivityStatus,
+  SidebarNavItem,
+  SidebarNavGroup,
+  ShellUser,
+  HbcProjectSelectorProps,
+  HbcToolboxFlyoutProps,
+  HbcFavoriteToolsProps,
+  HbcGlobalSearchProps,
+  HbcCreateButtonProps,
+  HbcNotificationBellProps,
+} from './HbcAppShell/index.js';
+export { useOnlineStatus, useFieldMode, useSidebarState } from './HbcAppShell/hooks/index.js';

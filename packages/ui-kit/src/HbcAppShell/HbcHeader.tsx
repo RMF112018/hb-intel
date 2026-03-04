@@ -1,0 +1,150 @@
+/**
+ * HbcHeader — 56px dark header bar
+ * PH4.4 §Step 4 | Blueprint §1f, §2c
+ *
+ * Layout: Logo + ProjectSelector | Toolbox + Favorites + Search | Create + M365 + Notifications + UserMenu
+ */
+import * as React from 'react';
+import { makeStyles, shorthands } from '@griffel/react';
+import { HBC_DARK_HEADER, HBC_HEADER_TEXT, HBC_HEADER_ICON_MUTED } from '../theme/tokens.js';
+import { Menu } from '../icons/index.js';
+import { useFieldMode } from './hooks/useFieldMode.js';
+import { HbcProjectSelector } from './HbcProjectSelector.js';
+import { HbcToolboxFlyout } from './HbcToolboxFlyout.js';
+import { HbcFavoriteTools } from './HbcFavoriteTools.js';
+import { HbcGlobalSearch } from './HbcGlobalSearch.js';
+import { HbcCreateButton } from './HbcCreateButton.js';
+import { HbcNotificationBell } from './HbcNotificationBell.js';
+import { HbcUserMenu } from './HbcUserMenu.js';
+import type { HbcHeaderProps } from './types.js';
+
+const useStyles = makeStyles({
+  root: {
+    position: 'fixed',
+    top: '2px',
+    left: '0px',
+    width: '100%',
+    height: '56px',
+    backgroundColor: HBC_DARK_HEADER,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    boxSizing: 'border-box',
+    zIndex: 10000,
+  },
+  left: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    flexShrink: 0,
+  },
+  center: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    flexGrow: 1,
+    justifyContent: 'center',
+    '@media (max-width: 1024px)': {
+      display: 'none',
+    },
+  },
+  right: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    flexShrink: 0,
+  },
+  logoLink: {
+    display: 'flex',
+    alignItems: 'center',
+    textDecorationLine: 'none',
+  },
+  logoFallback: {
+    width: '32px',
+    height: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: '700',
+    fontSize: '1rem',
+    color: HBC_HEADER_TEXT,
+  },
+  m365Button: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    ...shorthands.borderStyle('none'),
+    cursor: 'pointer',
+    paddingLeft: '8px',
+    paddingRight: '8px',
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    ...shorthands.borderRadius('4px'),
+    ':hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+  },
+});
+
+export const HbcHeader: React.FC<HbcHeaderProps> = ({
+  user,
+  logo,
+  onSignOut,
+  onCreateClick,
+  onSearchOpen,
+  onNotificationsOpen,
+  onProjectSelect,
+  onToolboxOpen,
+}) => {
+  const styles = useStyles();
+  const { isFieldMode, toggleFieldMode } = useFieldMode();
+
+  const shellUser = user
+    ? {
+        id: user.id,
+        displayName: user.displayName,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+        initials: user.initials,
+      }
+    : null;
+
+  return (
+    <header className={styles.root} role="banner" data-hbc-ui="header">
+      {/* Left: Logo + Project Selector */}
+      <div className={styles.left}>
+        <a href="/" className={styles.logoLink} aria-label="Project Home">
+          {logo ?? <span className={styles.logoFallback}>HB</span>}
+        </a>
+        <HbcProjectSelector onProjectSelect={onProjectSelect} />
+      </div>
+
+      {/* Center: Toolbox + Favorites + Search */}
+      <div className={styles.center}>
+        <HbcToolboxFlyout onToolboxOpen={onToolboxOpen} />
+        <HbcFavoriteTools />
+        <HbcGlobalSearch onSearchOpen={onSearchOpen} />
+      </div>
+
+      {/* Right: Create + M365 + Notifications + User */}
+      <div className={styles.right}>
+        <HbcCreateButton onClick={onCreateClick} />
+        <button className={styles.m365Button} aria-label="Microsoft 365 apps" type="button">
+          <Menu size="lg" color={HBC_HEADER_ICON_MUTED} />
+        </button>
+        <HbcNotificationBell onClick={onNotificationsOpen} />
+        {shellUser && (
+          <HbcUserMenu
+            user={shellUser}
+            isFieldMode={isFieldMode}
+            onToggleFieldMode={toggleFieldMode}
+            onSignOut={onSignOut}
+          />
+        )}
+      </div>
+    </header>
+  );
+};

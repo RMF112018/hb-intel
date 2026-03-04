@@ -161,3 +161,28 @@ The Application Customizer bundle must stay **under 250KB**. Create a separate `
 - **Active tool link (expanded):** 3px solid left border `#F37021` + background `#E8F1F8` + text color `#004B87`
 - **Active tool link (collapsed):** Icon fill `#F37021` + 3px left border `#F37021`
 - **Hover state:** Background `#F0F2F5`, text color `#004B87`
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.4 completed: 2026-03-04
+Files created:
+  - packages/ui-kit/src/HbcAppShell/types.ts
+  - packages/ui-kit/src/HbcAppShell/hooks/ (useOnlineStatus, useFieldMode, useSidebarState, useKeyboardShortcut, index)
+  - packages/ui-kit/src/HbcAppShell/HbcConnectivityBar.tsx
+  - packages/ui-kit/src/HbcAppShell/HbcProjectSelector.tsx
+  - packages/ui-kit/src/HbcAppShell/HbcToolboxFlyout.tsx
+  - packages/ui-kit/src/HbcAppShell/HbcFavoriteTools.tsx
+  - packages/ui-kit/src/HbcAppShell/HbcGlobalSearch.tsx
+  - packages/ui-kit/src/HbcAppShell/HbcCreateButton.tsx
+  - packages/ui-kit/src/HbcAppShell/HbcNotificationBell.tsx
+  - packages/ui-kit/src/HbcAppShell/HbcUserMenu.tsx
+  - packages/ui-kit/src/HbcAppShell/HbcHeader.tsx
+  - packages/ui-kit/src/HbcAppShell/HbcSidebar.tsx
+  - packages/ui-kit/src/HbcAppShell/HbcAppShell.tsx
+  - packages/ui-kit/src/HbcAppShell/index.ts (barrel)
+  - 4 Storybook stories (ConnectivityBar, Header, Sidebar, AppShell)
+Documentation: docs/how-to/developer/phase-4.4-global-application-shell.md
+ADR: docs/architecture/adr/ADR-0017-ui-global-shell.md
+Build: pnpm turbo run build --filter=@hbc/ui-kit — zero errors
+Type check: pnpm turbo run check-types --filter=@hbc/ui-kit — zero errors
+Note: @hbc/auth added as dependency to @hbc/ui-kit for usePermission() in sidebar filtering
+Next: Phase 4.5
+-->
