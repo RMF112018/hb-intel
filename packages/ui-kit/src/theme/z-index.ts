@@ -9,6 +9,7 @@
 /** All available z-index layer names */
 export type ZIndexLayer =
   | 'content'
+  | 'stickyFooter'
   | 'sidebar'
   | 'header'
   | 'popover'
@@ -27,6 +28,8 @@ export type ZIndexLayer =
 export const Z_INDEX: Record<ZIndexLayer, number> = {
   /** Page content: 0–99 */
   content: 0,
+  /** PH4.11 — Sticky form footer: above content, below sidebar */
+  stickyFooter: 50,
   /** Sidebar navigation */
   sidebar: 100,
   /** Fixed header bar */

@@ -79,3 +79,31 @@ Fixed to viewport bottom. `z-index: 100`. `box-shadow: 0 -2px 8px rgba(0,0,0,0.1
 | **Touch** | **56×56px** | **Gloved hand construction field use** |
 
 All interactive elements in the Touch density tier must meet the 56×56px minimum. This includes buttons, icon buttons, table row action icons, form field inputs, checkboxes, and the microphone dictation button.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.11 (Form Architecture) completed: 2026-03-04
+Documentation added: docs/how-to/developer/phase-4.11-form-architecture.md
+ADR created: docs/architecture/adr/ADR-0024-ui-form-architecture.md
+
+§11 Form Architecture: COMPLETE
+New files created:
+  - HbcFormContext.tsx (React context + useHbcFormContext hook, noop defaults)
+  - HbcFormRow.tsx (responsive flex row, stacks below 768px)
+  - HbcStickyFormFooter.tsx (Cancel + Save, positioning-agnostic)
+  - hooks/useFormDensity.ts (touch 56px / standard 36px / compact 28px)
+
+Enhanced files:
+  - types.ts: FormFieldError, HbcFormContextValue, HbcFormRowProps, HbcStickyFormFooterProps
+  - HbcForm.tsx: context provider, error summary banner, onDirtyChange, Z_INDEX.stickyFooter (50)
+  - HbcTextField.tsx: fieldId, onBlurValidate, context registration, touch minHeight
+  - HbcSelect.tsx: fieldId, onChangeValidate, context registration, touch minHeight
+  - HbcCheckbox.tsx: fieldId, context registration, dirty tracking
+  - z-index.ts: added stickyFooter: 50 layer
+
+Stories added: ErrorSummary, DirtyTracking, FormRowResponsive, StickyFormFooterComponent,
+  InlineValidation, VoiceDictation, TouchTargets, A11yTest
+
+Build: zero TypeScript errors
+Lint: zero new warnings (7 pre-existing from prior phases)
+Backward compatibility: all existing consumers work without changes
+-->

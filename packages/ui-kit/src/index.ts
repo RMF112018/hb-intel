@@ -102,6 +102,9 @@ export {
   HbcFormLayout,
   HbcForm,
   HbcFormSection,
+  HbcFormRow,
+  HbcStickyFormFooter,
+  useHbcFormContext,
 } from './HbcForm/index.js';
 export type {
   HbcTextFieldProps,
@@ -111,6 +114,10 @@ export type {
   HbcFormLayoutProps,
   HbcFormProps,
   HbcFormSectionProps,
+  HbcFormRowProps,
+  HbcStickyFormFooterProps,
+  HbcFormContextValue,
+  FormFieldError,
 } from './HbcForm/index.js';
 
 export { HbcPanel } from './HbcPanel/index.js';

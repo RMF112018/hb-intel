@@ -371,3 +371,22 @@ ADR created: docs/architecture/adr/ADR-0023-ui-navigation-system.md
   - [x] HbcCommandPalette SparkleIcon (Star→SparkleIcon V2.1)
   - [x] Focus Mode breadcrumb reduction (strips sticky/border/bg)
 -->
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.11 (Form Architecture) completed: 2026-03-04
+Documentation added: docs/how-to/developer/phase-4.11-form-architecture.md
+ADR created: docs/architecture/adr/ADR-0024-ui-form-architecture.md
+
+§11 Form Architecture: COMPLETE
+§20 Checklist updates:
+  - [x] HbcForm (context provider, error summary banner, onDirtyChange, Z_INDEX.stickyFooter)
+  - [x] HbcFormSection (unchanged, working with context)
+  - [x] HbcFormRow (responsive flex row, stacks below 768px)
+  - [x] HbcStickyFormFooter (Cancel + Save buttons, positioning-agnostic)
+  - [x] Inline validation (onBlurValidate for text, onChangeValidate for select, context-driven)
+  - [x] Form-level error banner (HbcBanner error variant with anchor links to fields)
+  - [x] Voice dictation (verified: HbcTextArea/HbcRichTextEditor enableVoice prop)
+  - [x] 56×56px touch targets (useFormDensity hook, applied to HbcTextField/HbcSelect)
+  - [x] Dirty tracking (markDirty via context, onDirtyChange callback)
+  - [x] Z-index stickyFooter layer (50, between content 0 and sidebar 100)
+-->
