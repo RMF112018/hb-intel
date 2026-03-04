@@ -382,4 +382,11 @@ Phase 4.13 (Module-Specific UI Patterns) completed: 2026-03-04
 - pdfjs-dist peer dependency (lazy-loaded for DrawingViewer)
 - 7 Storybook story files + ModulePatterns.stories.tsx
 - See ADR-0026, developer guide at docs/how-to/developer/phase-4.13-module-specific-patterns.md
+
+Phase 4.14.4 (Field Mode Dark Theme) completed: 2026-03-04
+- FluentProvider wrapping at HbcAppShell level with dynamic theme selection
+- useFieldMode: dynamic <meta name="theme-color"> update (Light=#FFFFFF, Field=#0F1419)
+- HbcUserMenu: theme-aware dropdown colors via isFieldMode prop
+- FieldMode.stories.tsx: LightMode + FieldMode stories
+- See ADR-0027, developer guide at docs/how-to/developer/phase-4.14-mobile-pwa-adaptations.md
 -->

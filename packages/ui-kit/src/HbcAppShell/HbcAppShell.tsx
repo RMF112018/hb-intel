@@ -6,13 +6,16 @@
  */
 import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
+import { FluentProvider } from '@fluentui/react-components';
 import { TRANSITION_NORMAL } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
+import { hbcLightTheme, hbcFieldTheme } from '../theme/theme.js';
 import { HbcConnectivityBar } from './HbcConnectivityBar.js';
 import { HbcHeader } from './HbcHeader.js';
 import { HbcSidebar } from './HbcSidebar.js';
 import { useSidebarState } from './hooks/useSidebarState.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
+import { useFieldMode } from './hooks/useFieldMode.js';
 import type { HbcAppShellProps } from './types.js';
 
 const FOCUS_EVENT = 'hbc-focus-mode-change';
@@ -72,6 +75,7 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
 }) => {
   const { isExpanded, isMobile } = useSidebarState();
   const connectivityStatus = useOnlineStatus();
+  const { isFieldMode } = useFieldMode();
   const [isFocusModeActive, setIsFocusModeActive] = React.useState(false);
   const styles = useStyles();
   const shellOffset = connectivityStatus === 'online' ? 58 : 60;
@@ -93,24 +97,26 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   );
 
   return (
-    <div data-hbc-shell="app-shell" data-mode={mode}>
-      <HbcConnectivityBar />
-      <HbcHeader user={user} onSignOut={onSignOut} />
-      <HbcSidebar groups={sidebarGroups} onNavigate={onNavigate} />
-      {/* Focus Mode overlay */}
-      <div
-        className={mergeClasses(
-          styles.focusOverlay,
-          isFocusModeActive ? styles.focusOverlayVisible : styles.focusOverlayHidden,
-        )}
-        aria-hidden="true"
-      />
-      <main
-        className={mainClass}
-        style={{ marginTop: `${shellOffset}px`, minHeight: `calc(100vh - ${shellOffset}px)` }}
-      >
-        {children}
-      </main>
-    </div>
+    <FluentProvider theme={isFieldMode ? hbcFieldTheme : hbcLightTheme}>
+      <div data-hbc-shell="app-shell" data-mode={mode}>
+        <HbcConnectivityBar />
+        <HbcHeader user={user} onSignOut={onSignOut} />
+        <HbcSidebar groups={sidebarGroups} onNavigate={onNavigate} />
+        {/* Focus Mode overlay */}
+        <div
+          className={mergeClasses(
+            styles.focusOverlay,
+            isFocusModeActive ? styles.focusOverlayVisible : styles.focusOverlayHidden,
+          )}
+          aria-hidden="true"
+        />
+        <main
+          className={mainClass}
+          style={{ marginTop: `${shellOffset}px`, minHeight: `calc(100vh - ${shellOffset}px)` }}
+        >
+          {children}
+        </main>
+      </div>
+    </FluentProvider>
   );
 };

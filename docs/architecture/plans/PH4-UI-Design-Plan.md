@@ -420,4 +420,14 @@ Phase 4.13 completed: 2026-03-04
   - [x] Barrel exports updated in src/index.ts
   - [x] ADR-0026: UI Module-Specific Patterns
   - [x] Developer guide: docs/how-to/developer/phase-4.13-module-specific-patterns.md
+
+Phase 4.14.4 (Field Mode Dark Theme) completed: 2026-03-04
+§14 Field Mode integration: COMPLETE
+§20 Checklist updates:
+  - [x] FluentProvider wrapping at HbcAppShell level (dynamic theme selection)
+  - [x] useFieldMode: <meta name="theme-color"> dynamic update (Light=#FFFFFF, Field=#0F1419)
+  - [x] HbcUserMenu: theme-aware dropdown (bg, text, border conditionals via isFieldMode)
+  - [x] FieldMode.stories.tsx: LightMode + FieldMode stories
+  - [x] ADR-0027: UI Field Mode Implementation
+  - [x] Developer guide: docs/how-to/developer/phase-4.14-mobile-pwa-adaptations.md
 -->

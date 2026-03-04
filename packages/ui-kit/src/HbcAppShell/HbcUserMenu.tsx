@@ -5,7 +5,7 @@
 import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
-import { HBC_HEADER_TEXT, HBC_SURFACE_LIGHT, HBC_PRIMARY_BLUE } from '../theme/tokens.js';
+import { HBC_HEADER_TEXT, HBC_SURFACE_LIGHT, HBC_SURFACE_FIELD, HBC_PRIMARY_BLUE } from '../theme/tokens.js';
 import { elevationLevel2 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import type { HbcUserMenuProps } from './types.js';
@@ -166,8 +166,23 @@ export const HbcUserMenu: React.FC<HbcUserMenuProps> = ({
       </button>
 
       {isOpen && (
-        <div className={styles.dropdown} role="menu" aria-label="User menu">
-          <button className={styles.menuItem} role="menuitem" onClick={onProfileClick} type="button">
+        <div
+          className={styles.dropdown}
+          role="menu"
+          aria-label="User menu"
+          style={{
+            backgroundColor: isFieldMode ? HBC_SURFACE_FIELD['surface-1'] : '#FFFFFF',
+          }}
+        >
+          <button
+            className={styles.menuItem}
+            role="menuitem"
+            onClick={onProfileClick}
+            type="button"
+            style={{
+              color: isFieldMode ? HBC_SURFACE_FIELD['text-primary'] : HBC_SURFACE_LIGHT['text-primary'],
+            }}
+          >
             Profile
           </button>
 
@@ -176,6 +191,9 @@ export const HbcUserMenu: React.FC<HbcUserMenuProps> = ({
             role="menuitem"
             onClick={onToggleFieldMode}
             type="button"
+            style={{
+              color: isFieldMode ? HBC_SURFACE_FIELD['text-primary'] : HBC_SURFACE_LIGHT['text-primary'],
+            }}
           >
             <span>Field Mode</span>
             <span
@@ -188,9 +206,22 @@ export const HbcUserMenu: React.FC<HbcUserMenuProps> = ({
             </span>
           </button>
 
-          <div className={styles.divider} />
+          <div
+            className={styles.divider}
+            style={{
+              backgroundColor: isFieldMode ? HBC_SURFACE_FIELD['border-default'] : HBC_SURFACE_LIGHT['border-default'],
+            }}
+          />
 
-          <button className={styles.menuItem} role="menuitem" onClick={onSignOut} type="button">
+          <button
+            className={styles.menuItem}
+            role="menuitem"
+            onClick={onSignOut}
+            type="button"
+            style={{
+              color: isFieldMode ? HBC_SURFACE_FIELD['text-primary'] : HBC_SURFACE_LIGHT['text-primary'],
+            }}
+          >
             Sign Out
           </button>
         </div>

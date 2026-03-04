@@ -26,7 +26,7 @@ function getInitialFieldMode(): boolean {
 export function useFieldMode(): UseFieldModeReturn {
   const [isFieldMode, setIsFieldMode] = useState(getInitialFieldMode);
 
-  // Sync data-theme attribute on <html>
+  // Sync data-theme attribute on <html> and <meta name="theme-color">
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
@@ -35,6 +35,16 @@ export function useFieldMode(): UseFieldModeReturn {
     } else {
       root.removeAttribute('data-theme');
     }
+
+    // Update <meta name="theme-color"> for mobile browser chrome
+    const themeColor = isFieldMode ? '#0F1419' : '#FFFFFF';
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'theme-color';
+      document.head.appendChild(meta);
+    }
+    meta.content = themeColor;
   }, [isFieldMode]);
 
   // Listen for OS theme changes (only when no explicit preference stored)

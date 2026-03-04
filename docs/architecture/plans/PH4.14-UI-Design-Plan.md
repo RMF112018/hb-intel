@@ -136,3 +136,14 @@ Field Mode is completed in Phase 4. It is not a Phase 5 enhancement.
 ### Offline Indicator (Replaced by Connectivity Bar)
 
 The V2.0 `HbcBanner` offline indicator is **replaced** by the `HbcConnectivityBar` (Section 4.1). The connectivity bar is always visible and never pushes page content down. The `HbcBanner` component is still used for other persistent page-level messages — it is not deprecated, only removed from offline indicator duty.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.14.4 (Field Mode Dark Theme) completed: 2026-03-04
+- useFieldMode hook: added dynamic <meta name="theme-color"> update (Light=#FFFFFF, Field=#0F1419)
+- HbcAppShell: wrapped children in FluentProvider with dynamic theme selection
+- HbcUserMenu: dropdown bg/text/border now theme-aware via isFieldMode prop
+- FieldMode.stories.tsx: LightMode + FieldMode stories demonstrating full shell
+- ADR-0027 filed: docs/architecture/adr/ADR-0027-ui-field-mode-implementation.md
+- Developer guide: docs/how-to/developer/phase-4.14-mobile-pwa-adaptations.md
+- Verification: pnpm turbo run build (0 errors), lint (0 new warnings)
+-->

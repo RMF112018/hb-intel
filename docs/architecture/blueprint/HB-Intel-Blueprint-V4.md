@@ -782,4 +782,11 @@ Phase 4.13 (Module-Specific UI Patterns) completed: 2026-03-04
 - 8 module config files: scorecards, rfis, punch-list, drawings, budget, daily-log, turnover, documents
 - pdfjs-dist added as optional peer dependency for HbcDrawingViewer
 - ADR-0026 filed, developer guide created
+
+Phase 4.14.4 (Field Mode Dark Theme) completed: 2026-03-04
+- HbcAppShell wrapped in FluentProvider with dynamic theme (isFieldMode ? hbcFieldTheme : hbcLightTheme)
+- useFieldMode hook: dynamic <meta name="theme-color"> (Light=#FFFFFF, Field=#0F1419)
+- HbcUserMenu dropdown: theme-aware bg/text/border via isFieldMode prop
+- FieldMode.stories.tsx: LightMode + FieldMode Storybook stories
+- ADR-0027 filed, developer guide: phase-4.14-mobile-pwa-adaptations.md
 -->
