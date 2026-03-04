@@ -7,6 +7,7 @@
 import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { HBC_CONNECTIVITY } from '../theme/tokens.js';
+import { Z_INDEX } from '../theme/z-index.js';
 import { keyframes } from '../theme/animations.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import type { HbcConnectivityBarProps, ConnectivityStatus } from './types.js';
@@ -17,7 +18,7 @@ const useStyles = makeStyles({
     top: '0px',
     left: '0px',
     width: '100%',
-    zIndex: 10001,
+    zIndex: Z_INDEX.connectivityBar,
     transitionProperty: 'height, background-color',
     transitionDuration: '250ms',
     transitionTimingFunction: 'ease-in-out',

@@ -13,9 +13,10 @@
 import * as React from 'react';
 import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
-import { elevationDialog } from '../theme/elevation.js';
+import { elevationLevel3 } from '../theme/elevation.js';
 import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE } from '../theme/tokens.js';
 import { TRANSITION_FAST, keyframes } from '../theme/animations.js';
+import { Z_INDEX } from '../theme/z-index.js';
 import { Search, Star } from '../icons/index.js';
 import { useOnlineStatus } from '../HbcAppShell/hooks/useOnlineStatus.js';
 import { useCommandPalette } from './hooks/useCommandPalette.js';
@@ -42,7 +43,7 @@ const useStyles = makeStyles({
     left: '0',
     right: '0',
     bottom: '0',
-    zIndex: 10100,
+    zIndex: Z_INDEX.commandPaletteBackdrop,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     backdropFilter: 'blur(4px)',
   },
@@ -51,13 +52,13 @@ const useStyles = makeStyles({
     top: '20%',
     left: '50%',
     transform: 'translateX(-50%)',
-    zIndex: 10101,
+    zIndex: Z_INDEX.commandPalette,
     width: '560px',
     maxWidth: 'calc(100vw - 32px)',
     maxHeight: '480px',
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
     borderRadius: '8px',
-    boxShadow: elevationDialog,
+    boxShadow: elevationLevel3,
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',

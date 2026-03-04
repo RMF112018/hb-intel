@@ -6,7 +6,8 @@ import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { HBC_HEADER_TEXT, HBC_SURFACE_LIGHT, HBC_PRIMARY_BLUE } from '../theme/tokens.js';
-import { elevationOverlay } from '../theme/elevation.js';
+import { elevationLevel2 } from '../theme/elevation.js';
+import { Z_INDEX } from '../theme/z-index.js';
 import type { HbcUserMenuProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -42,8 +43,8 @@ const useStyles = makeStyles({
     minWidth: '200px',
     backgroundColor: '#FFFFFF',
     ...shorthands.borderRadius('8px'),
-    boxShadow: elevationOverlay,
-    zIndex: 10002,
+    boxShadow: elevationLevel2,
+    zIndex: Z_INDEX.popover,
     paddingTop: '4px',
     paddingBottom: '4px',
   },

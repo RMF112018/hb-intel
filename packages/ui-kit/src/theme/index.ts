@@ -58,15 +58,31 @@ export {
   monospace,
 } from './typography.js';
 
-// Elevation
+// Elevation (V2.1 dual-shadow + deprecated aliases)
 export {
   hbcElevation,
+  elevationLevel0,
+  elevationLevel1,
+  elevationLevel2,
+  elevationLevel3,
+  elevationCard,
+  elevationModal,
+  hbcElevationField,
+  elevationFieldLevel0,
+  elevationFieldLevel1,
+  elevationFieldLevel2,
+  elevationFieldLevel3,
+  // Deprecated aliases
   elevationRest,
   elevationHover,
   elevationRaised,
   elevationOverlay,
   elevationDialog,
 } from './elevation.js';
+
+// Z-Index
+export { Z_INDEX } from './z-index.js';
+export type { ZIndexLayer } from './z-index.js';
 
 // Grid & spacing
 export {

@@ -7,6 +7,7 @@
 import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { TRANSITION_NORMAL } from '../theme/animations.js';
+import { Z_INDEX } from '../theme/z-index.js';
 import { HbcConnectivityBar } from './HbcConnectivityBar.js';
 import { HbcHeader } from './HbcHeader.js';
 import { HbcSidebar } from './HbcSidebar.js';
@@ -36,7 +37,7 @@ const useStyles = makeStyles({
     marginLeft: '0px',
   },
   mainFocusMode: {
-    zIndex: 9999,
+    zIndex: Z_INDEX.sidebar,
     position: 'relative',
   },
   focusOverlay: {
@@ -46,7 +47,7 @@ const useStyles = makeStyles({
     width: '100vw',
     height: '100vh',
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    zIndex: 9998,
+    zIndex: Z_INDEX.sidebar - 1,
     pointerEvents: 'none',
     transitionProperty: 'opacity',
     transitionDuration: TRANSITION_NORMAL,

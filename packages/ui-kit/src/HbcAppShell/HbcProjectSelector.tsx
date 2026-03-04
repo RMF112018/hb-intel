@@ -8,7 +8,8 @@ import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { useProjectStore } from '@hbc/shell';
 import { heading4 } from '../theme/typography.js';
 import { HBC_HEADER_TEXT, HBC_HEADER_ICON_MUTED, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
-import { elevationOverlay } from '../theme/elevation.js';
+import { elevationLevel2 } from '../theme/elevation.js';
+import { Z_INDEX } from '../theme/z-index.js';
 import { ChevronDown } from '../icons/index.js';
 import type { HbcProjectSelectorProps } from './types.js';
 
@@ -47,8 +48,8 @@ const useStyles = makeStyles({
     minWidth: '240px',
     backgroundColor: '#FFFFFF',
     ...shorthands.borderRadius('4px'),
-    boxShadow: elevationOverlay,
-    zIndex: 10002,
+    boxShadow: elevationLevel2,
+    zIndex: Z_INDEX.popover,
     overflowY: 'auto',
     maxHeight: '300px',
   },

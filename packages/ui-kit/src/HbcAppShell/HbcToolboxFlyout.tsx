@@ -6,7 +6,8 @@ import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
 import { HBC_HEADER_ICON_MUTED } from '../theme/tokens.js';
-import { elevationOverlay } from '../theme/elevation.js';
+import { elevationLevel2 } from '../theme/elevation.js';
+import { Z_INDEX } from '../theme/z-index.js';
 import { Toolbox } from '../icons/index.js';
 import type { HbcToolboxFlyoutProps } from './types.js';
 
@@ -39,8 +40,8 @@ const useStyles = makeStyles({
     minWidth: '320px',
     backgroundColor: '#FFFFFF',
     ...shorthands.borderRadius('8px'),
-    boxShadow: elevationOverlay,
-    zIndex: 10002,
+    boxShadow: elevationLevel2,
+    zIndex: Z_INDEX.popover,
     paddingLeft: '16px',
     paddingRight: '16px',
     paddingTop: '16px',

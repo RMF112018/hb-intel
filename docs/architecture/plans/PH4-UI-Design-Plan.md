@@ -321,3 +321,20 @@ Documentation: docs/how-to/developer/phase-4.7-data-visualization.md
 ADR: docs/architecture/adr/ADR-0020-data-visualization-table-system.md
 Next: Phase 4.8
 -->
+
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.8 (Overlay & Surface System) completed: 2026-03-04
+Documentation added: docs/how-to/developer/phase-4.8-overlay-surface-system.md
+ADR created: docs/architecture/adr/ADR-0021-ui-overlay-surface-system.md
+
+§8 Elevation system: COMPLETE — V2.1 dual-shadow 4-level scale with Field Mode variants
+§20 Checklist updates:
+  - [x] Elevation system (V2.1 dual-shadow)
+  - [x] HbcModal (3 sizes, focus trap, portal, scaleIn)
+  - [x] HbcPanel (z-index migration, shared hooks)
+  - [x] HbcTearsheet (multi-step, validation, slideInUp)
+  - [x] HbcPopover (hover/click, auto-position, arrow)
+  - [x] HbcCard (Level 1 shadow, header/footer)
+  - [x] Z-index layering (centralized Z_INDEX constants)
+-->

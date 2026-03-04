@@ -7,6 +7,7 @@
 import * as React from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
 import { HBC_DARK_HEADER, HBC_HEADER_TEXT } from '../theme/tokens.js';
+import { Z_INDEX } from '../theme/z-index.js';
 import { ViewGrid } from '../icons/index.js';
 import { useFieldMode } from './hooks/useFieldMode.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
@@ -33,7 +34,7 @@ const useStyles = makeStyles({
     paddingLeft: '16px',
     paddingRight: '16px',
     boxSizing: 'border-box',
-    zIndex: 10000,
+    zIndex: Z_INDEX.header,
   },
   left: {
     display: 'flex',

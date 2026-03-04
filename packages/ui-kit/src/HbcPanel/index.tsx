@@ -15,10 +15,11 @@ import {
 } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
-import { elevationDialog } from '../theme/elevation.js';
+import { elevationLevel3 } from '../theme/elevation.js';
+import { Z_INDEX } from '../theme/z-index.js';
+import { useFocusTrap } from '../hooks/useFocusTrap.js';
+import { useIsMobile } from '../hooks/useIsMobile.js';
 import type { HbcPanelProps } from './types.js';
-
-const MOBILE_BREAKPOINT = 767;
 
 const useStyles = makeStyles({
   body: {
@@ -36,12 +37,12 @@ const useStyles = makeStyles({
     bottom: '0',
     left: '0',
     right: '0',
-    zIndex: 10000,
+    zIndex: Z_INDEX.panel,
     maxHeight: '80vh',
     borderTopLeftRadius: '12px',
     borderTopRightRadius: '12px',
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    boxShadow: elevationDialog,
+    boxShadow: elevationLevel3,
     display: 'flex',
     flexDirection: 'column',
     animationName: {
@@ -58,7 +59,7 @@ const useStyles = makeStyles({
     left: '0',
     right: '0',
     bottom: '0',
-    zIndex: 9999,
+    zIndex: Z_INDEX.panelBackdrop,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   dragHandle: {
@@ -102,56 +103,6 @@ const useStyles = makeStyles({
     borderRadius: '4px',
   },
 });
-
-function useIsMobile(): boolean {
-  const [isMobile, setIsMobile] = React.useState(
-    typeof window !== 'undefined' ? window.innerWidth <= MOBILE_BREAKPOINT : false,
-  );
-
-  React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const handler = () => setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
-
-  return isMobile;
-}
-
-/** Focus trap: cycle Tab within container */
-function useFocusTrap(ref: React.RefObject<HTMLDivElement | null>, active: boolean) {
-  React.useEffect(() => {
-    if (!active || !ref.current) return;
-
-    const container = ref.current;
-    const focusable = container.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-    );
-    if (focusable.length === 0) return;
-
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-
-    const handler = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    };
-
-    container.addEventListener('keydown', handler);
-    first.focus();
-    return () => container.removeEventListener('keydown', handler);
-  }, [ref, active]);
-}
 
 export const HbcPanel: React.FC<HbcPanelProps> = ({
   open,

@@ -47,11 +47,23 @@ export {
   caption,
   monospace,
   hbcElevation,
+  elevationLevel0,
+  elevationLevel1,
+  elevationLevel2,
+  elevationLevel3,
+  elevationCard,
+  elevationModal,
+  hbcElevationField,
+  elevationFieldLevel0,
+  elevationFieldLevel1,
+  elevationFieldLevel2,
+  elevationFieldLevel3,
   elevationRest,
   elevationHover,
   elevationRaised,
   elevationOverlay,
   elevationDialog,
+  Z_INDEX,
   HBC_SPACE_XS,
   HBC_SPACE_SM,
   HBC_SPACE_MD,
@@ -68,7 +80,7 @@ export {
   hbcSpacingCSSVars,
   hbcMediaQuery,
 } from './theme/index.js';
-export type { HbcSemanticTokens, HbcTheme, HbcSpacingKey, HbcBreakpointConfig } from './theme/index.js';
+export type { HbcSemanticTokens, HbcTheme, HbcSpacingKey, HbcBreakpointConfig, ZIndexLayer } from './theme/index.js';
 
 // Icons
 export * from './icons/index.js';
@@ -103,6 +115,22 @@ export type {
 
 export { HbcPanel } from './HbcPanel/index.js';
 export type { HbcPanelProps, PanelSize } from './HbcPanel/index.js';
+
+// PH4.8 Overlay & Surface System
+export { HbcCard } from './HbcCard/index.js';
+export type { HbcCardProps } from './HbcCard/index.js';
+
+export { HbcModal } from './HbcModal/index.js';
+export type { HbcModalProps, ModalSize } from './HbcModal/index.js';
+
+export { HbcTearsheet } from './HbcTearsheet/index.js';
+export type { HbcTearsheetProps, TearsheetStep } from './HbcTearsheet/index.js';
+
+export { HbcPopover } from './HbcPopover/index.js';
+export type { HbcPopoverProps, PopoverSize } from './HbcPopover/index.js';
+
+// Shared hooks (PH4.8)
+export { useFocusTrap, useIsMobile } from './hooks/index.js';
 
 export { HbcCommandBar } from './HbcCommandBar/index.js';
 export type {

@@ -16,6 +16,7 @@ import {
   HBC_HEADER_ICON_MUTED,
 } from '../theme/tokens.js';
 import { TRANSITION_NORMAL } from '../theme/animations.js';
+import { Z_INDEX } from '../theme/z-index.js';
 import { Expand, Collapse } from '../icons/index.js';
 import { useSidebarState } from './hooks/useSidebarState.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
@@ -36,7 +37,7 @@ const useStyles = makeStyles({
     transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
     overflowX: 'hidden',
     overflowY: 'auto',
-    zIndex: 9999,
+    zIndex: Z_INDEX.sidebar,
   },
   collapsed: {
     width: '56px',

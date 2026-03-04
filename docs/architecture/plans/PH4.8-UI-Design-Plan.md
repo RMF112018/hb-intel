@@ -62,3 +62,42 @@ export const hbcElevation = {
 - Footer: Right-aligned buttons. Primary action rightmost. Max 3 buttons.
 - Backdrop: `rgba(0,0,0,0.5)`. Click outside closes unless destructive confirmation in progress.
 - Focus trap while open. `Escape` closes and returns focus to triggering element.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.8 completed: 2026-03-04
+
+Step 1: Z-Index Constants + V2.1 Elevation Rewrite — DONE
+  - Created src/theme/z-index.ts with centralized Z_INDEX constants
+  - Rewrote src/theme/elevation.ts with V2.1 dual-shadow 4-level system
+  - Added Field Mode elevation variants (+50% opacity)
+  - Backward-compatible deprecated aliases: elevationRest→Level1, elevationDialog→Level3
+
+Step 2: Shared Hooks — DONE
+  - Extracted useFocusTrap and useIsMobile from HbcPanel into src/hooks/
+
+Step 3: HbcCard — DONE
+  - src/HbcCard/index.tsx — Level 1 shadow, optional header/footer sections
+
+Step 4: HbcModal — DONE
+  - src/HbcModal/index.tsx — 3 sizes, focus trap, Escape close, portal, scaleIn animation
+
+Step 5: HbcTearsheet — DONE
+  - src/HbcTearsheet/index.tsx — Multi-step, step indicator, onValidate, slideInUp
+
+Step 6: HbcPopover — DONE
+  - src/HbcPopover/index.tsx — hover/click trigger, auto-position, arrow, viewport flip
+
+Step 7: Z-Index Migration — DONE
+  - Migrated 9 files from magic numbers to Z_INDEX constants
+  - Updated elevation imports from deprecated to V2.1 names
+
+Step 8: Barrel Exports + Elevation Stories — DONE
+  - Updated src/index.ts and src/theme/index.ts with all new exports
+  - Created Elevation.stories.tsx visual showcase
+
+Step 9: Documentation — DONE
+  - docs/how-to/developer/phase-4.8-overlay-surface-system.md
+  - docs/architecture/adr/ADR-0021-ui-overlay-surface-system.md
+
+Next: Phase 4.9 (if applicable) or Phase 5 (SPFx webparts)
+-->
