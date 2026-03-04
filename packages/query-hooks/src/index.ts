@@ -83,17 +83,19 @@ export {
 } from './buyout/index.js';
 
 // ---------------------------------------------------------------------------
-// Domain hooks — Scorecard (4)
+// Domain hooks — Scorecard (6)
 // ---------------------------------------------------------------------------
 export {
   useScorecards,
   useScorecardById,
   useSubmitDecision,
+  useUpdateScorecard,
+  useDeleteScorecard,
   useScorecardVersions,
 } from './scorecard/index.js';
 
 // ---------------------------------------------------------------------------
-// Domain hooks — Project (5)
+// Domain hooks — Project (6)
 // ---------------------------------------------------------------------------
 export {
   useActiveProjects,
@@ -101,6 +103,7 @@ export {
   useProjectDashboard,
   useCreateProject,
   useUpdateProject,
+  useDeleteProject,
 } from './project/index.js';
 
 // ---------------------------------------------------------------------------

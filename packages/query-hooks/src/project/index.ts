@@ -3,3 +3,4 @@ export { useProjectById } from './useProjectById.js';
 export { useProjectDashboard } from './useProjectDashboard.js';
 export { useCreateProject } from './useCreateProject.js';
 export { useUpdateProject } from './useUpdateProject.js';
+export { useDeleteProject } from './useDeleteProject.js';

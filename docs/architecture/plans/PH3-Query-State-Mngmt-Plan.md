@@ -250,4 +250,15 @@ Implementation followed §3.1 Option C exactly (10-step sequence):
 - Step 10: 14 documentation files (11 reference, ADR-0014, developer guide, progress notes)
 Verification: pnpm turbo run build — 21/21 tasks pass
 ADR created: docs/architecture/adr/0014-query-hooks-comprehensive.md (not 0007 as originally planned — ADR numbering has progressed)
+
+Phase 3.2 (@hbc/query-hooks Quality Audit & Gap Remediation) completed: 2026-03-03
+- Quality audit found 3 missing hooks where port methods existed without corresponding hooks
+- Gap 1: useUpdateScorecard (IScorecardRepository.updateScorecard)
+- Gap 2: useDeleteScorecard (IScorecardRepository.deleteScorecard)
+- Gap 3: useDeleteProject (IProjectRepository.deleteProject)
+- All 3 hooks follow established useOptimisticMutation pattern
+- Barrel exports updated: scorecard (4→6), project (5→6), root index updated
+- Port-to-hook coverage: 69/69 (100%)
+- Documentation updated: scorecard.md, project.md, developer guide (66→69), ADR-0014 (66→69)
+- Verification: pnpm turbo run build — 21/21 tasks pass
 -->

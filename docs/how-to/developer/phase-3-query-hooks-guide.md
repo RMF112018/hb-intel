@@ -29,13 +29,13 @@ Each domain provides a consistent set of hooks:
 | `useDelete{Domain}` | `useDeleteLead()` | Delete mutation with optimistic update |
 | Domain-specific | `useSearchLeads(q)` | Search, metrics, summary, etc. |
 
-### Available Domains (66 hooks total)
+### Available Domains (69 hooks total)
 
 - **leads** (6) — `useLeads`, `useLeadById`, `useCreateLead`, `useUpdateLead`, `useDeleteLead`, `useSearchLeads`
 - **schedule** (6) — `useScheduleActivities`, `useScheduleActivityById`, `useCreateScheduleActivity`, `useUpdateScheduleActivity`, `useDeleteScheduleActivity`, `useScheduleMetrics`
 - **buyout** (6) — `useBuyoutLog`, `useBuyoutEntryById`, `useCreateBuyoutEntry`, `useUpdateBuyoutEntry`, `useDeleteBuyoutEntry`, `useBuyoutSummary`
-- **scorecard** (4) — `useScorecards`, `useScorecardById`, `useSubmitDecision`, `useScorecardVersions`
-- **project** (5) — `useActiveProjects`, `useProjectById`, `useProjectDashboard`, `useCreateProject`, `useUpdateProject`
+- **scorecard** (6) — `useScorecards`, `useScorecardById`, `useSubmitDecision`, `useUpdateScorecard`, `useDeleteScorecard`, `useScorecardVersions`
+- **project** (6) — `useActiveProjects`, `useProjectById`, `useProjectDashboard`, `useCreateProject`, `useUpdateProject`, `useDeleteProject`
 - **estimating** (7) — `useEstimatingTrackers`, `useEstimatingTrackerById`, `useCreateEstimatingTracker`, `useUpdateEstimatingTracker`, `useDeleteEstimatingTracker`, `useEstimatingKickoff`, `useCreateEstimatingKickoff`
 - **compliance** (6) — `useComplianceEntries`, `useComplianceEntryById`, `useCreateComplianceEntry`, `useUpdateComplianceEntry`, `useDeleteComplianceEntry`, `useComplianceSummary`
 - **contracts** (7) — `useContracts`, `useContractById`, `useCreateContract`, `useUpdateContract`, `useDeleteContract`, `useContractApprovals`, `useCreateContractApproval`

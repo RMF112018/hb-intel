@@ -18,7 +18,7 @@ Rebuild `@hbc/query-hooks` comprehensively per Option C:
 2. **createQueryKeys helper** — Consistent key factory with static `all` array (backward compatible)
 3. **useOptimisticMutation** — Generic helper handling cancel → snapshot → rollback → invalidate
 4. **useRepository** — Type-safe generic hook mapping 11 domain keys to port interfaces with DI support
-5. **11 domain coverage** — 66 hooks total covering all port interface methods
+5. **11 domain coverage** — 69 hooks total covering all port interface methods
 6. **Zustand stores** — `useUiStore`, `useFilterStore`, `useFormDraftStore` for client state
 7. **Backward compatibility** — All 27 existing hook names/signatures preserved, `defaultQueryOptions`/`defaultMutationOptions` remain flat objects
 

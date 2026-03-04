@@ -363,4 +363,11 @@ Phase 3.1 (@hbc/query-hooks Comprehensive Rebuild) completed: 2026-03-03
 - Documentation: 11 reference docs, ADR-0014, developer guide
 - Verification: pnpm turbo run build (21/21 pass)
 Next: Phase 3.2 — Zustand store integration with shell/auth packages
+
+Phase 3.2 (@hbc/query-hooks Quality Audit & Gap Remediation) completed: 2026-03-03
+- 3 missing hooks created: useUpdateScorecard, useDeleteScorecard, useDeleteProject
+- Port-to-hook coverage: 69/69 (100%)
+- Barrel exports and root index updated
+- Documentation updated: reference docs, developer guide, ADR-0014
+- Verification: pnpm turbo run build (21/21 pass)
 -->

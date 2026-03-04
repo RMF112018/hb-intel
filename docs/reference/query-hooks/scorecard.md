@@ -22,6 +22,18 @@
 - **Returns:** `UseMutationResult<Scorecard, Error, SubmitDecisionInput>`
 - **Description:** Submits a go/no-go decision for a scorecard.
 
+### `useUpdateScorecard()`
+- **Type:** Mutation
+- **Key:** Invalidates `queryKeys.scorecard.all`
+- **Returns:** `UseMutationResult<Scorecard, Error, { id: number; data: Partial<Scorecard> }>`
+- **Description:** Updates an existing scorecard by ID with partial data.
+
+### `useDeleteScorecard()`
+- **Type:** Mutation
+- **Key:** Invalidates `queryKeys.scorecard.all`
+- **Returns:** `UseMutationResult<void, Error, number>`
+- **Description:** Deletes a scorecard by its numeric ID.
+
 ### `useScorecardVersions(scorecardId: number)`
 - **Type:** Query
 - **Key:** `queryKeys.scorecard.versions(scorecardId)`

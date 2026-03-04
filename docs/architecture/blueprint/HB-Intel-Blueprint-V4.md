@@ -758,4 +758,12 @@ Phase 3.1 Rebuild (@hbc/query-hooks Comprehensive Rebuild) completed: 2026-03-03
 - 14 docs: 11 reference, 1 ADR (0014), 1 developer guide, progress notes
 - All 27 existing hook names/signatures preserved, defaultQueryOptions/defaultMutationOptions unchanged
 - Full monorepo build: 21/21 tasks pass
+
+Phase 3.2 (@hbc/query-hooks Quality Audit & Gap Remediation) completed: 2026-03-03
+- Port-to-hook coverage: 66/69 → 69/69 (100%)
+- 3 new hooks: useUpdateScorecard, useDeleteScorecard, useDeleteProject
+- Scorecard domain: 4 → 6 hooks; Project domain: 5 → 6 hooks
+- Barrel exports updated (scorecard/index.ts, project/index.ts, root index.ts)
+- Documentation updated: scorecard.md, project.md, developer guide, ADR-0014
+- Verification: pnpm turbo run build — 21/21 tasks pass
 -->

@@ -34,6 +34,12 @@
 - **Returns:** `UseMutationResult<Project, Error, UpdateProjectInput>`
 - **Description:** Updates an existing project.
 
+### `useDeleteProject()`
+- **Type:** Mutation
+- **Key:** Invalidates `queryKeys.project.all`
+- **Returns:** `UseMutationResult<void, Error, string>`
+- **Description:** Deletes a project by its string UUID.
+
 ## Query Keys
 
 | Key | Factory | Usage |
