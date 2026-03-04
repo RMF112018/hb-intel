@@ -374,4 +374,12 @@ Phase 3.2 (@hbc/query-hooks Quality Audit & Gap Remediation) completed: 2026-03-
 Phase 4.3 (Design System Foundation) completed: 2026-03-04
 - V2.1 tokens, Field Mode theme, intent-based typography, 12-col grid, 60+ icons, ESLint stub, Storybook switcher
 - See ADR-0016
+
+Phase 4.13 (Module-Specific UI Patterns) completed: 2026-03-04
+- 5 new components: HbcScoreBar, HbcApprovalStepper, HbcPhotoGrid, HbcCalendarGrid, HbcDrawingViewer
+- HbcDataTable frozenColumns enhancement (sticky left + shadow border)
+- 8 module config files with typed presets (columns, KPIs, tabs)
+- pdfjs-dist peer dependency (lazy-loaded for DrawingViewer)
+- 7 Storybook story files + ModulePatterns.stories.tsx
+- See ADR-0026, developer guide at docs/how-to/developer/phase-4.13-module-specific-patterns.md
 -->

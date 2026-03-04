@@ -775,4 +775,11 @@ Phase 3.2 (@hbc/query-hooks Quality Audit & Gap Remediation) completed: 2026-03-
 Phase 4.3 (Design System Foundation V2.1) completed: 2026-03-04
 - tokens.ts, theme.ts, typography.ts enhanced; grid.ts, icons/index.tsx, lint/enforce-hbc-tokens.ts created
 - ADR-0016 filed
+
+Phase 4.13 (Module-Specific UI Patterns) completed: 2026-03-04
+- 5 new components: HbcScoreBar, HbcApprovalStepper, HbcPhotoGrid, HbcCalendarGrid, HbcDrawingViewer
+- HbcDataTable enhanced with frozenColumns prop (sticky left, shadow border)
+- 8 module config files: scorecards, rfis, punch-list, drawings, budget, daily-log, turnover, documents
+- pdfjs-dist added as optional peer dependency for HbcDrawingViewer
+- ADR-0026 filed, developer guide created
 -->

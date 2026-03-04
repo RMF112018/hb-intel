@@ -83,4 +83,8 @@ export interface HbcDataTableProps<TData> {
   isStale?: boolean;
   /** Empty state configuration when data is empty and not loading */
   emptyStateConfig?: DataTableEmptyStateConfig;
+
+  // --- PH4.13 Step 1: Frozen Columns ---
+  /** Column accessor keys to freeze (sticky left). Columns stay fixed during horizontal scroll. */
+  frozenColumns?: string[];
 }

@@ -404,4 +404,20 @@ Phase 4.12 completed: 2026-03-04
   - [x] Barrel exports: hooks/index.ts, interactions/index.ts, src/index.ts
   - [x] Storybook stories: HbcConfirmDialog (3) + Interactions (6)
   - [x] ADR-0025: UI Interaction Pattern Library
+
+Phase 4.13 completed: 2026-03-04
+§13 Module-Specific UI Patterns: COMPLETE
+§20 Checklist updates:
+  - [x] HbcDataTable frozenColumns prop (sticky left, cumulative offsets, shadow border)
+  - [x] HbcScoreBar (red/amber/green segments, score marker, showLabel)
+  - [x] HbcApprovalStepper (vertical/horizontal, avatar/initials, decision badge, reused by Scorecards + Turnover)
+  - [x] HbcPhotoGrid (CSS Grid, hover overlay, +N more, add-photo tile)
+  - [x] HbcCalendarGrid (month grid, status dots, weather icons, crew count, today highlight)
+  - [x] HbcDrawingViewer (3-layer canvas/svg/gesture, pdfjs-dist lazy peer dep, markup toolbar)
+  - [x] 8 module config files (scorecards, rfis, punch-list, drawings, budget, daily-log, turnover, documents)
+  - [x] Module config barrel export + types (ModuleTableConfig, ModuleLandingConfig, ModuleDetailConfig)
+  - [x] Storybook stories: 7 component stories + ModulePatterns.stories.tsx (8 landing patterns)
+  - [x] Barrel exports updated in src/index.ts
+  - [x] ADR-0026: UI Module-Specific Patterns
+  - [x] Developer guide: docs/how-to/developer/phase-4.13-module-specific-patterns.md
 -->

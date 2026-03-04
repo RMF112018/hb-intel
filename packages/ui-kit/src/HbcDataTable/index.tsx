@@ -11,6 +11,9 @@
  *  §7.2 — Inline editing (double-click cells)
  *  §7.2 — Column configuration (show/hide, resize, reorder)
  *  §7.3 — Data freshness indicator & empty state
+ *
+ * PH4.13 enhancements:
+ *  §13.1 — Frozen columns (sticky left with shadow border)
  */
 import * as React from 'react';
 import {
@@ -42,7 +45,7 @@ import type { HbcDataTableProps } from './types.js';
 
 const useStyles = makeStyles({
   wrapper: {
-    overflowY: 'auto',
+    overflow: 'auto',
     position: 'relative',
     borderRadius: '4px',
     boxShadow: elevationRest,
@@ -259,6 +262,20 @@ const useStyles = makeStyles({
     paddingLeft: '8px',
     paddingRight: '8px',
   },
+  // PH4.13: Frozen columns
+  frozenCell: {
+    position: 'sticky' as const,
+    zIndex: 1,
+    backgroundColor: 'inherit',
+  },
+  frozenCellLast: {
+    boxShadow: '2px 0 4px rgba(0, 0, 0, 0.08)',
+  },
+  frozenHeader: {
+    position: 'sticky' as const,
+    zIndex: 2,
+    backgroundColor: 'var(--colorNeutralBackground3)',
+  },
   pagination: {
     display: 'flex',
     alignItems: 'center',
@@ -330,6 +347,8 @@ export function HbcDataTable<TData>({
   // PH4.7 Step 7: Data Freshness & Empty State
   isStale,
   emptyStateConfig,
+  // PH4.13 Step 1: Frozen Columns
+  frozenColumns,
 }: HbcDataTableProps<TData>): React.JSX.Element {
   const styles = useStyles();
   const parentRef = React.useRef<HTMLDivElement>(null);
@@ -463,6 +482,29 @@ export function HbcDataTable<TData>({
     if (!responsibilityField || !currentUserId) return false;
     return (row as Record<string, unknown>)[responsibilityField] === currentUserId;
   };
+
+  // PH4.13: Frozen column offset map
+  const frozenOffsets = React.useMemo(() => {
+    if (!frozenColumns || frozenColumns.length === 0) return null;
+    const offsets = new Map<string, { left: number; isLast: boolean }>();
+    let cumulativeLeft = 0;
+    const visibleCols = table.getVisibleLeafColumns();
+    for (const colId of frozenColumns) {
+      const col = visibleCols.find((c) => {
+        const key = (c.columnDef as { accessorKey?: string }).accessorKey ?? c.id;
+        return key === colId;
+      });
+      if (col) {
+        offsets.set(colId, { left: cumulativeLeft, isLast: false });
+        cumulativeLeft += col.getSize();
+      }
+    }
+    // Mark last frozen column
+    const lastFrozenId = frozenColumns[frozenColumns.length - 1];
+    const lastEntry = offsets.get(lastFrozenId);
+    if (lastEntry) offsets.set(lastFrozenId, { ...lastEntry, isLast: true });
+    return offsets;
+  }, [frozenColumns, table]);
 
   // Inline editing handlers
   const startEditing = (rowId: string, columnId: string, currentValue: unknown) => {
@@ -634,9 +676,32 @@ export function HbcDataTable<TData>({
                         styles.th,
                         thDensityClass,
                         header.column.getCanSort() ? styles.thSortable : undefined,
+                        frozenOffsets?.has(
+                          (header.column.columnDef as { accessorKey?: string }).accessorKey ?? header.column.id,
+                        )
+                          ? mergeClasses(
+                              styles.frozenHeader,
+                              frozenOffsets.get(
+                                (header.column.columnDef as { accessorKey?: string }).accessorKey ?? header.column.id,
+                              )?.isLast
+                                ? styles.frozenCellLast
+                                : undefined,
+                            )
+                          : undefined,
                       )}
                       onClick={header.column.getToggleSortingHandler()}
-                      style={{ width: header.getSize() }}
+                      style={{
+                        width: header.getSize(),
+                        ...(frozenOffsets?.has(
+                          (header.column.columnDef as { accessorKey?: string }).accessorKey ?? header.column.id,
+                        )
+                          ? {
+                              left: frozenOffsets.get(
+                                (header.column.columnDef as { accessorKey?: string }).accessorKey ?? header.column.id,
+                              )!.left,
+                            }
+                          : {}),
+                      }}
                       scope="col"
                       aria-sort={
                         header.column.getIsSorted() === 'asc'
@@ -707,6 +772,8 @@ export function HbcDataTable<TData>({
                         editingCell?.rowId === row.id &&
                         editingCell?.columnId === colId;
 
+                      const frozenInfo = frozenOffsets?.get(colId);
+
                       return (
                         <td
                           key={cell.id}
@@ -717,7 +784,14 @@ export function HbcDataTable<TData>({
                               ? styles.tdEditable
                               : undefined,
                             isCurrentlyEditing ? styles.tdEditing : undefined,
+                            frozenInfo
+                              ? mergeClasses(
+                                  styles.frozenCell,
+                                  frozenInfo.isLast ? styles.frozenCellLast : undefined,
+                                )
+                              : undefined,
                           )}
+                          style={frozenInfo ? { left: frozenInfo.left } : undefined}
                           onDoubleClick={
                             isEditable
                               ? (e) => {

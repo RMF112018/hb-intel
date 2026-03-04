@@ -126,3 +126,18 @@
 - Left column (3/12): `HbcTree` folder navigator
 - Right column (9/12): File list `HbcDataTable` — Name, Type icon, Size, Modified Date, Modified By, Version
 - Preview pane: Optional right `HbcPanel` (md) for selected file thumbnail + metadata
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.13 completed: 2026-03-04
+§13.1 HbcDataTable frozen columns: frozenColumns prop, sticky CSS, shadow border — COMPLETE
+§13.2 HbcScoreBar: red/amber/green bar with marker — COMPLETE
+§13.3 HbcApprovalStepper: vertical/horizontal stepper with avatar/decision badges — COMPLETE
+§13.4 HbcPhotoGrid: CSS Grid gallery with hover overlays, +N more, add-photo tile — COMPLETE
+§13.5 HbcCalendarGrid: month grid with status dots, weather, crew count, today ring — COMPLETE
+§13.6 HbcDrawingViewer: 3-layer stack (canvas/svg/gesture), pdfjs-dist lazy, markup tools — COMPLETE
+§13.7 Module configs: 8 config files (scorecards, rfis, punch-list, drawings, budget, daily-log, turnover, documents) — COMPLETE
+§13.8 Storybook stories: 7 story files + ModulePatterns.stories.tsx — COMPLETE
+Documentation added: docs/how-to/developer/phase-4.13-module-specific-patterns.md
+ADR created: docs/architecture/adr/ADR-0026-ui-module-specific-patterns.md
+Next: Phase 4.14
+-->

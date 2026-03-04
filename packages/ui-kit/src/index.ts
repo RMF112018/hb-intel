@@ -321,3 +321,58 @@ export type {
   CreateUpdateLayoutProps,
   UseFocusModeReturn,
 } from './layouts/index.js';
+
+// ---------------------------------------------------------------------------
+// PH4.13 Module-Specific UI Patterns
+// ---------------------------------------------------------------------------
+
+// HbcScoreBar
+export { HbcScoreBar } from './HbcScoreBar/index.js';
+export type { HbcScoreBarProps } from './HbcScoreBar/index.js';
+
+// HbcApprovalStepper
+export { HbcApprovalStepper } from './HbcApprovalStepper/index.js';
+export type { HbcApprovalStepperProps, ApprovalStep } from './HbcApprovalStepper/index.js';
+
+// HbcPhotoGrid
+export { HbcPhotoGrid } from './HbcPhotoGrid/index.js';
+export type { HbcPhotoGridProps, PhotoItem } from './HbcPhotoGrid/index.js';
+
+// HbcCalendarGrid
+export { HbcCalendarGrid } from './HbcCalendarGrid/index.js';
+export type { HbcCalendarGridProps, CalendarDayData } from './HbcCalendarGrid/index.js';
+
+// HbcDrawingViewer
+export { HbcDrawingViewer } from './HbcDrawingViewer/index.js';
+export type {
+  HbcDrawingViewerProps,
+  DrawingMarkup,
+  MarkupTool,
+  MarkupShapeType,
+  SheetOption,
+  RevisionOption,
+} from './HbcDrawingViewer/index.js';
+
+// Module Configuration Objects
+export {
+  scorecardsLanding,
+  scorecardsDetail,
+  rfisLanding,
+  rfisDetail,
+  punchListLanding,
+  punchListDetail,
+  drawingsLanding,
+  disciplineFilters,
+  budgetLanding,
+  dailyLogSections,
+  dailyLogVoiceFields,
+  turnoverLanding,
+  turnoverDetail,
+  turnoverTearsheetSteps,
+  documentsLanding,
+} from './module-configs/index.js';
+export type {
+  ModuleTableConfig,
+  ModuleLandingConfig,
+  ModuleDetailConfig,
+} from './module-configs/index.js';

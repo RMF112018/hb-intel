@@ -228,6 +228,23 @@ export const DataFreshness: Story = {
   },
 };
 
+export const FrozenColumns: Story = {
+  render: () => (
+    <div style={{ maxWidth: 600 }}>
+      <p style={{ marginBottom: 8 }}>
+        <small>Scroll horizontally — ID and Name columns stay fixed.</small>
+      </p>
+      <HbcDataTable
+        data={sampleData.slice(0, 20)}
+        columns={sampleColumns}
+        enableSorting
+        frozenColumns={['id', 'name']}
+        height="400px"
+      />
+    </div>
+  ),
+};
+
 export const FieldMode: Story = {
   parameters: {
     backgrounds: { default: 'dark' },
