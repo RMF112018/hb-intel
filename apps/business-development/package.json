@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --port 4005",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --port 4005"
+    "preview": "vite preview --port 4005",
+    "lint": "eslint src/ --ext .ts,.tsx"
   },
   "dependencies": {
     "@hbc/models": "workspace:*",

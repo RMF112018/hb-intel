@@ -21,5 +21,5 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/consistent-type-imports': 'warn',
   },
-  ignorePatterns: ['dist/', 'node_modules/', 'coverage/', '*.js'],
+  ignorePatterns: ['dist/', 'node_modules/', 'coverage/', '*.js', '*.cjs'],
 };

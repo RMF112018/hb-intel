@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src/ --ext .ts,.tsx"
   },
   "dependencies": {
     "@hbc/models": "workspace:*",
@@ -29,5 +30,7 @@
   "peerDependencies": {
     "react": "^18.0.0"
   },
-  "files": ["dist"]
+  "files": [
+    "dist"
+  ]
 }

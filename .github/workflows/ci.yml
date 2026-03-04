@@ -21,14 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
+      - uses: ./.github/actions/setup-pnpm
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm turbo run lint
 
       - name: Check formatting
         run: pnpm format:check
@@ -42,14 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-pnpm
 
       - name: Run tests
         run: pnpm turbo run test
@@ -68,14 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-pnpm
 
       - name: Build all workspaces
         run: pnpm turbo run build
@@ -107,14 +89,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-pnpm
 
       - name: Build ui-kit dependencies
         run: pnpm turbo run build --filter=@hbc/ui-kit^...
@@ -136,20 +111,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
+      - uses: ./.github/actions/setup-pnpm
 
-      - uses: actions/setup-node@v4
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
         with:
-          node-version: 20
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package.json') }}
 
       - name: Install Playwright
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: pnpm e2e:install
 
-      - name: Build PWA and dependencies
-        run: pnpm turbo run build --filter=@hbc/pwa...
+      - name: Build PWA and dev-harness
+        run: pnpm turbo run build --filter=@hbc/pwa... --filter=@hbc/dev-harness...
 
       - name: Run E2E tests
         run: pnpm e2e

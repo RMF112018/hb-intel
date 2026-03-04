@@ -38,7 +38,8 @@
       "Bash(find:*)",
       "mcp__Control_Chrome__list_tabs",
       "mcp__plugin_playwright_playwright__browser_navigate",
-      "Bash(npx @playwright/mcp@latest --help)"
+      "Bash(npx @playwright/mcp@latest --help)",
+      "Bash(jq:*)"
     ]
   }
 }
