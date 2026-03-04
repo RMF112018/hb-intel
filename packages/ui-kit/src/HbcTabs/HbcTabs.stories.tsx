@@ -87,6 +87,50 @@ export const DisabledTab = () => {
   );
 };
 
+export const AllVariants = () => {
+  const [active, setActive] = React.useState('tab1');
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Plain tabs</p>
+        <HbcTabs
+          tabs={[
+            { id: 'tab1', label: 'Overview' },
+            { id: 'tab2', label: 'Details' },
+            { id: 'tab3', label: 'History' },
+          ]}
+          activeTabId={active}
+          onTabChange={setActive}
+        />
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With icons</p>
+        <HbcTabs
+          tabs={[
+            { id: 'drawings', label: 'Drawings', icon: <DrawingSheet size="sm" /> },
+            { id: 'rfis', label: 'RFIs', icon: <RFI size="sm" /> },
+            { id: 'punch', label: 'Punch Items', icon: <PunchItem size="sm" /> },
+          ]}
+          activeTabId="drawings"
+          onTabChange={() => {}}
+        />
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With disabled tab</p>
+        <HbcTabs
+          tabs={[
+            { id: 'a', label: 'Active' },
+            { id: 'b', label: 'Restricted', disabled: true },
+            { id: 'c', label: 'History' },
+          ]}
+          activeTabId="a"
+          onTabChange={() => {}}
+        />
+      </div>
+    </div>
+  );
+};
+
 export const FieldMode = () => {
   const [active, setActive] = React.useState('overview');
   return (

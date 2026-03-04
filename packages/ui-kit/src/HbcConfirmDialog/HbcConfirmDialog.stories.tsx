@@ -4,7 +4,7 @@
  */
 import * as React from 'react';
 import { FluentProvider } from '@fluentui/react-components';
-import { hbcLightTheme } from '../theme/theme.js';
+import { hbcLightTheme, hbcFieldTheme } from '../theme/theme.js';
 import { HbcConfirmDialog } from './index.js';
 
 export default {
@@ -57,6 +57,63 @@ export const WarningVariant = () => {
     </>
   );
 };
+
+export const AllVariants = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Danger (default)</p>
+      <HbcConfirmDialog
+        open
+        onClose={() => {}}
+        onConfirm={() => {}}
+        title="Delete Commitment"
+        description="This will permanently delete the commitment."
+      />
+    </div>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Warning variant</p>
+      <HbcConfirmDialog
+        open
+        onClose={() => {}}
+        onConfirm={() => {}}
+        title="Reset Filters"
+        description="This will reset all filters to defaults."
+        confirmLabel="Reset"
+        variant="warning"
+      />
+    </div>
+  </div>
+);
+
+export const FieldMode = () => (
+  <FluentProvider theme={hbcFieldTheme}>
+    <div style={{ padding: 24, backgroundColor: '#0F1419' }}>
+      <HbcConfirmDialog
+        open
+        onClose={() => {}}
+        onConfirm={() => {}}
+        title="Delete Item"
+        description="This action cannot be undone."
+      />
+    </div>
+  </FluentProvider>
+);
+
+export const A11yTest = () => (
+  <div>
+    <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '16px' }}>
+      Dialog uses role=&quot;alertdialog&quot; with focus trap. Escape closes.
+      Confirm button has focus by default. Tab cycles through Cancel and Confirm.
+    </p>
+    <HbcConfirmDialog
+      open
+      onClose={() => {}}
+      onConfirm={() => {}}
+      title="Confirm Action"
+      description="Verify keyboard navigation and focus management."
+    />
+  </div>
+);
 
 /** Loading state on confirm button */
 export const Loading = () => {

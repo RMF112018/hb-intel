@@ -130,6 +130,43 @@ export const DisabledNodes = () => {
   );
 };
 
+export const AllVariants = () => (
+  <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+    <div style={{ width: 280 }}>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Default tree</p>
+      <HbcTree
+        nodes={sampleNodes}
+        selectedNodeId={undefined}
+        onNodeSelect={() => {}}
+      />
+    </div>
+    <div style={{ width: 280 }}>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With selected node</p>
+      <HbcTree
+        nodes={sampleNodes}
+        selectedNodeId="rfis"
+        onNodeSelect={() => {}}
+      />
+    </div>
+    <div style={{ width: 280 }}>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With disabled nodes</p>
+      <HbcTree
+        nodes={[{
+          id: 'root',
+          label: 'Documents',
+          defaultExpanded: true,
+          children: [
+            { id: 'public', label: 'Public Docs' },
+            { id: 'restricted', label: 'Restricted', disabled: true },
+            { id: 'archived', label: 'Archived', disabled: true },
+          ],
+        }]}
+        onNodeSelect={() => {}}
+      />
+    </div>
+  </div>
+);
+
 export const FieldMode = () => {
   const [selected, setSelected] = React.useState<string | undefined>();
   return (

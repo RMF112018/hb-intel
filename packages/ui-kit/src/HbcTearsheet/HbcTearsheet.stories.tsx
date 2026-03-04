@@ -102,6 +102,28 @@ export const SingleStep: Story = {
   ),
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 16 }}>
+      <TearsheetDemo />
+      <TearsheetDemo
+        steps={[
+          {
+            id: 'only',
+            label: 'Only Step',
+            content: (
+              <div>
+                <h4>Single Step Tearsheet</h4>
+                <p>Footer shows Cancel and Complete only.</p>
+              </div>
+            ),
+          },
+        ]}
+      />
+    </div>
+  ),
+};
+
 export const FieldMode: Story = {
   render: () => (
     <div style={{ backgroundColor: '#0F1419', minHeight: '100vh' }}>

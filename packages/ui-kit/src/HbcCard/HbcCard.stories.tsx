@@ -38,6 +38,58 @@ export const WithHeaderFooter: Story = {
   ),
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+      <div style={{ width: '280px' }}>
+        <HbcCard>
+          <p style={{ margin: 0 }}>Basic card</p>
+        </HbcCard>
+      </div>
+      <div style={{ width: '280px' }}>
+        <HbcCard header={<strong>With Header</strong>}>
+          <p style={{ margin: 0 }}>Card with header</p>
+        </HbcCard>
+      </div>
+      <div style={{ width: '280px' }}>
+        <HbcCard
+          header={<strong>Full Card</strong>}
+          footer={
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <button type="button">Cancel</button>
+              <button type="button">Save</button>
+            </div>
+          }
+        >
+          <p style={{ margin: 0 }}>Card with header and footer</p>
+        </HbcCard>
+      </div>
+    </div>
+  ),
+};
+
+export const A11yTest: Story = {
+  render: () => (
+    <div>
+      <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '16px' }}>
+        Cards use semantic HTML. Interactive elements within cards are keyboard accessible.
+        Elevation provides visual hierarchy.
+      </p>
+      <HbcCard
+        header={<strong>Accessible Card</strong>}
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <button type="button">Tab to me</button>
+            <button type="button">And me</button>
+          </div>
+        }
+      >
+        <p style={{ margin: 0 }}>Tab through interactive elements within the card.</p>
+      </HbcCard>
+    </div>
+  ),
+};
+
 export const FieldMode: Story = {
   render: () => (
     <div style={{ backgroundColor: '#0F1419', padding: '32px' }}>

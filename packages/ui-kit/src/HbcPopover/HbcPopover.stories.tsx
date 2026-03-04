@@ -75,6 +75,53 @@ export const AllSizes: Story = {
   ),
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32, padding: '60px 200px' }}>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Click trigger</p>
+        <HbcPopover trigger={<button type="button">Click</button>} triggerMode="click">
+          <p style={{ margin: 0 }}>Click-triggered popover.</p>
+        </HbcPopover>
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Hover trigger</p>
+        <HbcPopover trigger={<button type="button">Hover</button>} triggerMode="hover">
+          <p style={{ margin: 0 }}>Hover-triggered popover.</p>
+        </HbcPopover>
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Sizes</p>
+        <div style={{ display: 'flex', gap: 32 }}>
+          <HbcPopover trigger={<button type="button">Small</button>} size="sm" triggerMode="click">
+            <p style={{ margin: 0 }}>Small popover.</p>
+          </HbcPopover>
+          <HbcPopover trigger={<button type="button">Medium</button>} size="md" triggerMode="click">
+            <p style={{ margin: 0 }}>Medium popover.</p>
+          </HbcPopover>
+        </div>
+      </div>
+    </div>
+  ),
+};
+
+export const A11yTest: Story = {
+  render: () => (
+    <div style={{ padding: '100px 200px' }}>
+      <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '16px' }}>
+        Click the button to open popover. Press Escape to dismiss. Tab traps within popover content.
+      </p>
+      <HbcPopover
+        trigger={<button type="button">Open popover</button>}
+        triggerMode="click"
+      >
+        <p style={{ margin: 0 }}>Popover content. Press Escape to close.</p>
+        <button type="button" style={{ marginTop: '8px' }}>Focusable action</button>
+      </HbcPopover>
+    </div>
+  ),
+};
+
 export const FieldMode: Story = {
   render: () => (
     <div style={{ backgroundColor: '#0F1419', minHeight: '400px', padding: '100px 200px' }}>

@@ -105,6 +105,66 @@ export const StickyFooter: StoryObj = {
   },
 };
 
+export const AllVariants: StoryObj = {
+  render: () => {
+    const [v1, setV1] = React.useState('');
+    const [v2, setV2] = React.useState('');
+    const [v3, setV3] = React.useState(false);
+    const [sel, setSel] = React.useState('');
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: '560px' }}>
+        <div>
+          <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Basic form</p>
+          <HbcForm onSubmit={() => {}}>
+            <HbcFormSection title="Project Details">
+              <HbcTextField label="Name" value={v1} onChange={setV1} />
+            </HbcFormSection>
+          </HbcForm>
+        </div>
+        <div>
+          <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Collapsible sections</p>
+          <HbcForm onSubmit={() => {}}>
+            <HbcFormSection title="General" collapsible defaultExpanded>
+              <HbcTextField label="Company" value={v2} onChange={setV2} />
+            </HbcFormSection>
+            <HbcFormSection title="Advanced" collapsible defaultExpanded={false}>
+              <HbcCheckbox label="Notifications" checked={v3} onChange={setV3} />
+            </HbcFormSection>
+          </HbcForm>
+        </div>
+        <div>
+          <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Form row layout</p>
+          <HbcForm onSubmit={() => {}}>
+            <div style={{ padding: '16px' }}>
+              <HbcFormRow>
+                <HbcTextField label="First Name" value="" onChange={() => {}} />
+                <HbcTextField label="Last Name" value="" onChange={() => {}} />
+              </HbcFormRow>
+            </div>
+          </HbcForm>
+        </div>
+        <div>
+          <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With select + checkbox</p>
+          <HbcForm onSubmit={() => {}}>
+            <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <HbcSelect
+                label="Role"
+                value={sel}
+                onChange={setSel}
+                options={[
+                  { value: 'pm', label: 'Project Manager' },
+                  { value: 'est', label: 'Estimator' },
+                ]}
+              />
+              <HbcCheckbox label="Accept terms" checked={v3} onChange={setV3} />
+            </div>
+          </HbcForm>
+        </div>
+      </div>
+    );
+  },
+};
+
 export const FieldMode: StoryObj = {
   render: () => {
     const [name, setName] = React.useState('');

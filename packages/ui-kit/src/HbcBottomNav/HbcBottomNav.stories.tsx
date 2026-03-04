@@ -79,6 +79,37 @@ export const ActiveState: Story = {
   },
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32, padding: '16px' }}>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>7 items (4 visible + More overflow)</p>
+        <HbcBottomNav items={mockItems} activeId="home" onNavigate={(href) => console.log(href)} />
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>4 items (no overflow)</p>
+        <HbcBottomNav items={mockItems.slice(0, 4)} activeId="budget" onNavigate={(href) => console.log(href)} />
+      </div>
+    </div>
+  ),
+};
+
+export const A11yTest: Story = {
+  render: () => (
+    <div style={{ minHeight: '200px', padding: '16px' }}>
+      <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '16px' }}>
+        Bottom nav uses role=&quot;navigation&quot; with aria-label.
+        Each item is keyboard focusable. Active item has aria-current.
+      </p>
+      <HbcBottomNav
+        items={mockItems.slice(0, 4)}
+        activeId="home"
+        onNavigate={(href) => console.log('Navigate:', href)}
+      />
+    </div>
+  ),
+};
+
 /** Field Mode (dark theme) context */
 export const FieldMode: Story = {
   render: () => (

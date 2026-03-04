@@ -75,6 +75,75 @@ export const VoiceDictation: StoryObj = {
   },
 };
 
+export const AllVariants: StoryObj = {
+  render: () => {
+    const [text, setText] = React.useState('');
+    const [rich, setRich] = React.useState('');
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: '480px' }}>
+        <div>
+          <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>TextArea</p>
+          <HbcTextArea
+            label="Description"
+            value={text}
+            onChange={setText}
+            placeholder="Enter text..."
+            maxLength={500}
+          />
+        </div>
+        <div>
+          <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>TextArea with voice</p>
+          <HbcTextArea
+            label="Voice-enabled"
+            value=""
+            onChange={() => {}}
+            placeholder="Voice enabled..."
+            enableVoice
+          />
+        </div>
+        <div>
+          <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>RichTextEditor</p>
+          <HbcRichTextEditor
+            label="Notes"
+            value={rich}
+            onChange={setRich}
+            placeholder="Rich text..."
+            toolbar={['bold', 'italic', 'underline', 'list', 'link']}
+          />
+        </div>
+      </div>
+    );
+  },
+};
+
+export const A11yTest: StoryObj = {
+  render: () => {
+    const [value, setValue] = React.useState('');
+    return (
+      <div style={{ maxWidth: '480px' }}>
+        <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '16px' }}>
+          Tab to text areas to verify focus ring. Labels are associated via htmlFor.
+          Voice button is keyboard accessible.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <HbcTextArea
+            label="Accessible TextArea"
+            value={value}
+            onChange={setValue}
+            placeholder="Tab here..."
+          />
+          <HbcRichTextEditor
+            label="Accessible Rich Text"
+            value=""
+            onChange={() => {}}
+            placeholder="Tab here..."
+          />
+        </div>
+      </div>
+    );
+  },
+};
+
 export const FieldMode: StoryObj = {
   render: () => {
     const [textValue, setTextValue] = React.useState('');

@@ -66,6 +66,56 @@ export const FocusMode = () => (
   />
 );
 
+export const AllVariants = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>2 levels</p>
+      <HbcBreadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'RFIs', href: '/rfis' },
+        ]}
+        onNavigate={(href) => console.log('Navigate to', href)}
+      />
+    </div>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>3 levels</p>
+      <HbcBreadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'RFIs', href: '/rfis' },
+          { label: 'RFI-0042' },
+        ]}
+        onNavigate={(href) => console.log('Navigate to', href)}
+      />
+    </div>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>4 levels (truncated)</p>
+      <HbcBreadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Projects', href: '/projects' },
+          { label: 'PRJ-A1B2C3', href: '/projects/PRJ-A1B2C3' },
+          { label: 'RFI-0042' },
+        ]}
+        onNavigate={(href) => console.log('Navigate to', href)}
+      />
+    </div>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Focus Mode</p>
+      <HbcBreadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'RFIs', href: '/rfis' },
+          { label: 'RFI-0042' },
+        ]}
+        isFocusMode
+        onNavigate={(href) => console.log('Navigate to', href)}
+      />
+    </div>
+  </div>
+);
+
 export const FieldMode = () => (
   <FluentProvider theme={hbcFieldTheme}>
     <div style={{ padding: 24, backgroundColor: '#0F1419' }}>

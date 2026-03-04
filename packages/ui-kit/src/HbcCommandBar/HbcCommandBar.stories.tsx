@@ -114,6 +114,73 @@ export const DensityControl: Story = {
   },
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With filters + actions</p>
+        <HbcCommandBar
+          searchValue=""
+          onSearchChange={() => {}}
+          filters={[
+            { key: 'active', label: 'Active', active: true, onToggle: () => {} },
+            { key: 'closed', label: 'Closed', active: false, onToggle: () => {} },
+          ]}
+          actions={[
+            { key: 'filter', label: 'Filter', icon: <Filter size="sm" />, onClick: () => {} },
+            { key: 'new', label: 'New Item', onClick: () => {}, primary: true },
+          ]}
+        />
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With saved views</p>
+        <HbcCommandBar
+          searchValue=""
+          onSearchChange={() => {}}
+          savedViews={SAMPLE_VIEWS}
+          onViewChange={() => {}}
+          onViewSave={() => {}}
+          actions={[
+            { key: 'new', label: 'New', onClick: () => {}, primary: true },
+          ]}
+        />
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With density control</p>
+        <HbcCommandBar
+          searchValue=""
+          onSearchChange={() => {}}
+          densityTier="standard"
+          onDensityChange={() => {}}
+          actions={[
+            { key: 'export', label: 'Export', onClick: () => {} },
+          ]}
+        />
+      </div>
+    </div>
+  ),
+};
+
+export const A11yTest: Story = {
+  render: () => (
+    <div>
+      <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '12px' }}>
+        Tab through search, filter chips, and action buttons. Verify keyboard navigation and focus indicators.
+      </p>
+      <HbcCommandBar
+        searchValue=""
+        onSearchChange={() => {}}
+        filters={[
+          { key: 'active', label: 'Active', active: true, onToggle: () => {} },
+        ]}
+        actions={[
+          { key: 'new', label: 'New', onClick: () => {}, primary: true },
+        ]}
+      />
+    </div>
+  ),
+};
+
 export const FieldMode: Story = {
   render: () => (
     <FluentProvider theme={hbcFieldTheme}>

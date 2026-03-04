@@ -46,6 +46,36 @@ export const CustomColor = () => (
   </div>
 );
 
+export const AllVariants = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Sizes</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <div style={{ textAlign: 'center' }}>
+          <HbcSpinner size="sm" />
+          <p style={{ fontSize: 12, marginTop: 8 }}>sm</p>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <HbcSpinner size="md" />
+          <p style={{ fontSize: 12, marginTop: 8 }}>md</p>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <HbcSpinner size="lg" />
+          <p style={{ fontSize: 12, marginTop: 8 }}>lg</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>With labels</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <HbcSpinner color={HBC_STATUS_COLORS.success} label="Syncing" />
+        <HbcSpinner color={HBC_STATUS_COLORS.error} label="Error" />
+        <HbcSpinner color={HBC_STATUS_COLORS.warning} label="Processing" />
+      </div>
+    </div>
+  </div>
+);
+
 export const FieldMode = () => (
   <FluentProvider theme={hbcFieldTheme}>
     <div style={{ padding: 24, backgroundColor: '#0F1419', display: 'flex', gap: 24 }}>

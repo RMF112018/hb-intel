@@ -245,6 +245,60 @@ export const FrozenColumns: Story = {
   ),
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Basic with sorting</p>
+        <HbcDataTable
+          data={sampleData.slice(0, 10)}
+          columns={sampleColumns}
+          enableSorting
+          height="300px"
+        />
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With responsibility heat map</p>
+        <HbcDataTable
+          data={sampleData.slice(0, 10)}
+          columns={sampleColumns}
+          responsibilityField="assignee"
+          currentUserId={CURRENT_USER}
+          height="300px"
+        />
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Loading (shimmer)</p>
+        <HbcDataTable
+          data={[]}
+          columns={sampleColumns}
+          isLoading
+          height="200px"
+        />
+      </div>
+    </div>
+  ),
+};
+
+export const A11yTest: Story = {
+  render: () => (
+    <div>
+      <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '12px' }}>
+        Table uses proper ARIA roles. Column headers are sortable via keyboard.
+        Inline editing cells are tab-navigable. Responsibility rows use aria-label.
+      </p>
+      <HbcDataTable
+        data={sampleData.slice(0, 10)}
+        columns={sampleColumns}
+        enableSorting
+        responsibilityField="assignee"
+        currentUserId={CURRENT_USER}
+        height="400px"
+      />
+    </div>
+  ),
+};
+
 export const FieldMode: Story = {
   parameters: {
     backgrounds: { default: 'dark' },

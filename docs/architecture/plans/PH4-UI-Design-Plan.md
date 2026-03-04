@@ -443,5 +443,17 @@ Phase 4.14.5 completed: 2026-03-04
   - [x] Bottom navigation renders on viewports < 1024px
   - [x] HbcModal full-screen on mobile
   - [x] HbcCommandPalette full-screen on mobile with bottom-up slide animation
-Next: Phase 4.15 or verification
+Phase 4.15 (NGX Modernization & Design Consistency) completed: 2026-03-04
+- eslint-plugin-hbc: local ESLint plugin with enforce-hbc-tokens rule (warns on hardcoded hex)
+- no-restricted-imports: blocks @fluentui/react-theme direct imports
+- Storybook compliance: all 30+ core component stories now export Default + AllVariants + FieldMode + A11yTest
+- DESIGN_SYSTEM.md: 10-section authoring rules document in packages/ui-kit/
+- NGX Modernization Tracker: docs/architecture/ngx-tracker.md (8 tools, all ✅ Modern)
+- ADR-0029 filed, developer guide: docs/how-to/developer/phase-4.15-ngx-modernization.md
+§20 Design consistency checklist updates:
+  - [x] enforce-hbc-tokens ESLint rule active and passing on all styles.ts files
+  - [x] All Storybook stories have: Default, AllVariants, FieldMode, A11yTest exports
+  - [x] DESIGN_SYSTEM.md in packages/ui-kit/ with all authoring rules
+  - [x] NGX Modernization tracker in docs/architecture/ngx-tracker.md
+Next: Phase 5 (SPFx webparts) or verification
 -->

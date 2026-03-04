@@ -83,6 +83,59 @@ export const MarkupMode: Story = {
   },
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With sheet/revision selectors</p>
+        <div style={{ height: '300px' }}>
+          <HbcDrawingViewer
+            pdfUrl={SAMPLE_PDF}
+            sheetOptions={[
+              { id: 'S-101', label: 'S-101 Foundation' },
+              { id: 'S-102', label: 'S-102 Framing' },
+            ]}
+            revisionOptions={[
+              { id: 'rev-3', label: 'Rev 3' },
+              { id: 'rev-2', label: 'Rev 2' },
+            ]}
+            currentSheet="S-101"
+            currentRevision="rev-3"
+          />
+        </div>
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With markups</p>
+        <div style={{ height: '300px' }}>
+          <HbcDrawingViewer pdfUrl={SAMPLE_PDF} markups={sampleMarkups} />
+        </div>
+      </div>
+    </div>
+  ),
+};
+
+export const FieldMode: Story = {
+  render: () => (
+    <div style={{ backgroundColor: '#0F1419', height: '80vh' }}>
+      <HbcDrawingViewer pdfUrl={SAMPLE_PDF} markups={sampleMarkups} />
+    </div>
+  ),
+};
+
+export const A11yTest: Story = {
+  render: () => (
+    <div>
+      <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '16px' }}>
+        Drawing viewer toolbar buttons are keyboard accessible. Zoom controls have aria-labels.
+        Markup pins have aria-describedby linking to their RFI/item labels.
+      </p>
+      <div style={{ height: '60vh' }}>
+        <HbcDrawingViewer pdfUrl={SAMPLE_PDF} markups={sampleMarkups} />
+      </div>
+    </div>
+  ),
+};
+
 export const TouchGestures: Story = {
   render: () => (
     <div style={{ height: '80vh' }}>

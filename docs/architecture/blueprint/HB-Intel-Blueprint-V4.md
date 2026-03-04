@@ -798,5 +798,12 @@ Phase 4.14.5 completed: 2026-03-04
 - slideInFromBottom keyframe + bottomNav z-index (300) added to theme
 - HbcAppShell: integrates bottom nav, derives items from sidebarGroups
 - Documentation: ADR-0028, developer how-to guide updated
-Next: Phase 4.15 or verification
+Phase 4.15 (NGX Modernization & Design Consistency) completed: 2026-03-04
+- eslint-plugin-hbc: local ESLint plugin with enforce-hbc-tokens rule
+- no-restricted-imports: blocks @fluentui/react-theme direct imports
+- Storybook compliance: all core stories export Default + AllVariants + FieldMode + A11yTest
+- DESIGN_SYSTEM.md: authoring rules in packages/ui-kit/
+- NGX Tracker: docs/architecture/ngx-tracker.md
+- ADR-0029, developer guide: phase-4.15-ngx-modernization.md
+Next: Phase 5 (SPFx webparts) or verification
 -->

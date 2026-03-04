@@ -106,6 +106,26 @@ export const FieldMode: StoryObj = {
   ),
 };
 
+export const A11yTest: StoryObj = {
+  render: () => (
+    <div>
+      <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '16px' }}>
+        Charts include aria-label with title. Click handlers support keyboard Enter/Space.
+        Color palette maintains 3:1 contrast ratio for data visualization.
+      </p>
+      <HbcBarChart
+        title="Accessible Bar Chart"
+        data={[
+          { category: 'Q1', value: 120 },
+          { category: 'Q2', value: 180 },
+          { category: 'Q3', value: 150 },
+        ]}
+        height="250px"
+      />
+    </div>
+  ),
+};
+
 export const AllVariants: StoryObj = {
   render: () => (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>

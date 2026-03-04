@@ -57,6 +57,32 @@ export const CustomFallback: Story = {
   ),
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Default fallback</p>
+        <HbcErrorBoundary>
+          <BrokenComponent />
+        </HbcErrorBoundary>
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Custom fallback</p>
+        <HbcErrorBoundary
+          fallback={(error, retry) => (
+            <div style={{ padding: '16px', textAlign: 'center', border: '1px dashed #FF4D4D', borderRadius: '4px' }}>
+              <p style={{ color: '#FF4D4D', fontWeight: 600 }}>Custom: {error.message}</p>
+              <button type="button" onClick={retry} style={{ padding: '6px 12px', cursor: 'pointer' }}>Retry</button>
+            </div>
+          )}
+        >
+          <BrokenComponent />
+        </HbcErrorBoundary>
+      </div>
+    </div>
+  ),
+};
+
 export const FieldMode: Story = {
   render: () => (
     <FluentProvider theme={hbcFieldTheme}>

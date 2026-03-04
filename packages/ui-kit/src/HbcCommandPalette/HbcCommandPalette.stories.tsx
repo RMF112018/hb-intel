@@ -83,6 +83,43 @@ export const OfflineMode: Story = {
   ),
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '24px' }}>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With navigation + actions + AI</p>
+        <HbcCommandPalette
+          navigationItems={NAV_ITEMS}
+          actionItems={ACTION_ITEMS}
+          onAiQuery={async (q) => `AI response for: "${q}"`}
+        />
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Navigation only (no AI)</p>
+        <HbcCommandPalette
+          navigationItems={NAV_ITEMS}
+          actionItems={[]}
+        />
+      </div>
+    </div>
+  ),
+};
+
+export const A11yTest: Story = {
+  render: () => (
+    <div style={{ padding: '24px' }}>
+      <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '16px' }}>
+        Press Cmd+K to open. ArrowUp/Down to navigate results. Enter to select.
+        Escape to close. Focus returns to previously focused element.
+      </p>
+      <HbcCommandPalette
+        navigationItems={NAV_ITEMS}
+        actionItems={ACTION_ITEMS}
+      />
+    </div>
+  ),
+};
+
 export const FieldMode: Story = {
   render: () => (
     <FluentProvider theme={hbcFieldTheme}>

@@ -73,6 +73,48 @@ export const ActiveState: Story = {
   },
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Trend directions</p>
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          <HbcKpiCard label="Revenue" value="$2.4M" trend={{ direction: 'up', label: '+12%' }} color="#00C896" />
+          <HbcKpiCard label="Overdue" value={23} trend={{ direction: 'down', label: '-5' }} color="#FF4D4D" />
+          <HbcKpiCard label="In Progress" value={67} trend={{ direction: 'flat', label: 'No change' }} color="#FFB020" />
+        </div>
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Active/clickable state</p>
+        <div style={{ display: 'flex', gap: 16 }}>
+          <HbcKpiCard label="Open" value={42} color="#3B9FFF" isActive onClick={() => {}} />
+          <HbcKpiCard label="Closed" value={98} color="#00C896" onClick={() => {}} />
+          <HbcKpiCard label="Draft" value={15} color="#8B95A5" onClick={() => {}} />
+        </div>
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Plain (no trend)</p>
+        <HbcKpiCard label="Total RFIs" value={142} color="#004B87" />
+      </div>
+    </div>
+  ),
+};
+
+export const A11yTest: Story = {
+  render: () => (
+    <div>
+      <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '12px' }}>
+        Clickable cards are keyboard focusable. Tab to navigate, Enter/Space to activate.
+        Trend indicators have aria-label for screen readers.
+      </p>
+      <div style={{ display: 'flex', gap: 16 }}>
+        <HbcKpiCard label="Open" value={42} color="#3B9FFF" onClick={() => {}} />
+        <HbcKpiCard label="Closed" value={98} color="#00C896" trend={{ direction: 'up', label: '+5%' }} />
+      </div>
+    </div>
+  ),
+};
+
 export const FieldMode: Story = {
   parameters: { backgrounds: { default: 'dark' } },
   args: {

@@ -78,6 +78,42 @@ export const NavigateMonths: Story = {
   },
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+      <div style={{ maxWidth: 500 }}>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Empty calendar</p>
+        <HbcCalendarGrid year={2026} month={2} days={[]} />
+      </div>
+      <div style={{ maxWidth: 500 }}>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With data</p>
+        <HbcCalendarGrid year={2026} month={2} days={sampleDays} onDayClick={(d) => console.log(d)} />
+      </div>
+    </div>
+  ),
+};
+
+export const FieldMode: Story = {
+  parameters: { backgrounds: { default: 'dark' } },
+  render: () => (
+    <div style={{ padding: 24, backgroundColor: '#0F1419', maxWidth: 500 }}>
+      <HbcCalendarGrid year={2026} month={2} days={sampleDays} onDayClick={(d) => console.log(d)} />
+    </div>
+  ),
+};
+
+export const A11yTest: Story = {
+  render: () => (
+    <div style={{ maxWidth: 500 }}>
+      <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '16px' }}>
+        Calendar uses table semantics with proper headers. Days are keyboard navigable via arrow keys.
+        Status colors are paired with text labels for accessibility.
+      </p>
+      <HbcCalendarGrid year={2026} month={2} days={sampleDays} onDayClick={(d) => console.log(d)} />
+    </div>
+  ),
+};
+
 export const Today: Story = {
   render: () => {
     const now = new Date();

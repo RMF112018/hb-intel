@@ -79,6 +79,44 @@ export const PageSizeSelector = () => {
   );
 };
 
+export const AllVariants = () => {
+  const [page, setPage] = React.useState(1);
+  const [size, setSize] = React.useState<PageSizeOption>(25);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Standard (127 items)</p>
+        <HbcPagination
+          totalItems={127}
+          currentPage={page}
+          pageSize={size}
+          onPageChange={setPage}
+          onPageSizeChange={setSize}
+        />
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Large (2500 items, page 15)</p>
+        <HbcPagination
+          totalItems={2500}
+          currentPage={15}
+          pageSize={25}
+          onPageChange={() => {}}
+        />
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Single page (hidden)</p>
+        <HbcPagination
+          totalItems={20}
+          currentPage={1}
+          pageSize={25}
+          onPageChange={() => {}}
+        />
+        <p style={{ fontSize: 11, color: '#6B7280' }}>(Nothing rendered — single page)</p>
+      </div>
+    </div>
+  );
+};
+
 export const FieldMode = () => {
   const [page, setPage] = React.useState(3);
   return (

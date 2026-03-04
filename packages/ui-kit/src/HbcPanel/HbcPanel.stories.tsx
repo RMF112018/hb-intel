@@ -67,6 +67,28 @@ export const MobileBottomSheet: Story = {
   render: () => <PanelDemo />,
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '8px' }}>
+      <PanelDemo size="sm" />
+      <PanelDemo size="md" />
+      <PanelDemo size="lg" />
+    </div>
+  ),
+};
+
+export const A11yTest: Story = {
+  render: () => (
+    <div>
+      <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '16px' }}>
+        Open a panel and verify: focus trap, Escape closes, focus returns to trigger button.
+        On mobile, bottom sheet swipe-down to dismiss.
+      </p>
+      <PanelDemo />
+    </div>
+  ),
+};
+
 export const FieldMode: Story = {
   render: () => (
     <FluentProvider theme={hbcFieldTheme}>

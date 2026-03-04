@@ -51,6 +51,36 @@ export const LongContent = () => (
   </HbcTooltip>
 );
 
+export const AllVariants = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Positions</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, padding: '40px 80px' }}>
+        <HbcTooltip content="Top tooltip" position="top">
+          <HbcButton>Top</HbcButton>
+        </HbcTooltip>
+        <HbcTooltip content="Bottom tooltip" position="bottom">
+          <HbcButton>Bottom</HbcButton>
+        </HbcTooltip>
+        <HbcTooltip content="Left tooltip" position="left">
+          <HbcButton>Left</HbcButton>
+        </HbcTooltip>
+        <HbcTooltip content="Right tooltip" position="right">
+          <HbcButton>Right</HbcButton>
+        </HbcTooltip>
+      </div>
+    </div>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Long content</p>
+      <div style={{ padding: '0 80px' }}>
+        <HbcTooltip content="This is a longer tooltip message that demonstrates text wrapping behavior within the maximum width constraint.">
+          <HbcButton>Hover for long text</HbcButton>
+        </HbcTooltip>
+      </div>
+    </div>
+  </div>
+);
+
 export const FieldMode = () => (
   <FluentProvider theme={hbcFieldTheme}>
     <div style={{ padding: 80, backgroundColor: '#0F1419', display: 'flex', justifyContent: 'center' }}>

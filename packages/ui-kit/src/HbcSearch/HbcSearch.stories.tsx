@@ -21,6 +21,48 @@ export default {
   ],
 };
 
+export const Default = () => (
+  <HbcSearch
+    variant="local"
+    value=""
+    onSearch={(v) => console.log('Search:', v)}
+    placeholder="Search..."
+  />
+);
+
+export const AllVariants = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Global variant</p>
+      <div style={{ backgroundColor: '#1E1E1E', padding: 16 }}>
+        <HbcSearch variant="global" onSearchOpen={() => console.log('opened')} />
+      </div>
+    </div>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Local (empty)</p>
+      <HbcSearch variant="local" value="" onSearch={() => {}} placeholder="Filter items..." />
+    </div>
+    <div>
+      <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Local (with value)</p>
+      <HbcSearch variant="local" value="concrete pour" onSearch={() => {}} />
+    </div>
+  </div>
+);
+
+export const FieldMode = () => (
+  <FluentProvider theme={hbcFieldTheme}>
+    <div style={{ padding: 24, backgroundColor: '#0F1419' }}>
+      <HbcSearch
+        variant="local"
+        value=""
+        onSearch={(v) => console.log('Search:', v)}
+        placeholder="Search field data..."
+        isFieldMode
+      />
+    </div>
+  </FluentProvider>
+);
+
 export const GlobalVariant = () => (
   <div style={{ backgroundColor: '#1E1E1E', padding: 16 }}>
     <HbcSearch

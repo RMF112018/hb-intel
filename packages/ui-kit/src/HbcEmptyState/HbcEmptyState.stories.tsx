@@ -72,6 +72,53 @@ export const WithIllustration: Story = {
   },
 };
 
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Text only</p>
+        <HbcEmptyState title="No items found" description="No matching results." />
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>With icon + action</p>
+        <HbcEmptyState
+          title="No projects"
+          description="Get started by creating your first project."
+          icon={<DrawingSheet size="lg" color="#8B95A5" />}
+          primaryAction={<button type="button">Create Project</button>}
+        />
+      </div>
+      <div>
+        <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Dual actions</p>
+        <HbcEmptyState
+          title="No commitments"
+          description="Import from Procore or create locally."
+          icon={<StatusInfoIcon size="lg" color="#8B95A5" />}
+          primaryAction={<button type="button">Import</button>}
+          secondaryAction={<button type="button">Create Local</button>}
+        />
+      </div>
+    </div>
+  ),
+};
+
+export const A11yTest: Story = {
+  render: () => (
+    <div>
+      <p style={{ fontSize: '0.875rem', color: '#605E5C', marginBottom: '16px' }}>
+        Empty state uses semantic heading and descriptive text.
+        Action buttons are keyboard accessible.
+      </p>
+      <HbcEmptyState
+        title="No data"
+        description="Try adjusting your filters."
+        icon={<StatusInfoIcon size="lg" color="#8B95A5" />}
+        primaryAction={<button type="button">Tab to me</button>}
+      />
+    </div>
+  ),
+};
+
 export const FieldMode: Story = {
   render: () => (
     <FluentProvider theme={hbcFieldTheme}>

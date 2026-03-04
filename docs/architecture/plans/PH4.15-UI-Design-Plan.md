@@ -30,3 +30,16 @@ HB Intel introduces no legacy component patterns. Every component built in Phase
 - PR introducing a new UI component requires: Storybook story (Default + AllVariants + FieldMode + A11yTest). No exceptions.
 - All components must pass in both `hbcLightTheme` and `hbcFieldTheme` before merge.
 - `DESIGN_SYSTEM.md` in `packages/ui-kit/` documents all authoring rules.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.15 completed: 2026-03-04
+- eslint-plugin-hbc: local CommonJS ESLint plugin at src/lint/eslint-plugin-hbc/
+- enforce-hbc-tokens rule: warns on hardcoded hex (#xxxxxx) in src/**/*.{ts,tsx}
+- Excluded: src/theme/**, src/icons/**, src/lint/**, *.stories.tsx
+- no-restricted-imports: blocks @fluentui/react-theme with guidance message
+- All 30+ core component stories now have Default + AllVariants + FieldMode + A11yTest
+- DESIGN_SYSTEM.md created with 10 sections (tokens, imports, storybook, themes, naming, elevation, typography, spacing, a11y, file structure)
+- NGX Tracker created at docs/architecture/ngx-tracker.md
+- ADR-0029: docs/architecture/adr/ADR-0029-ui-ngx-modernization.md
+- Developer guide: docs/how-to/developer/phase-4.15-ngx-modernization.md
+-->
