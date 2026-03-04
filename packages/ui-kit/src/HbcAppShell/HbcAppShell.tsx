@@ -11,7 +11,10 @@ import { HbcConnectivityBar } from './HbcConnectivityBar.js';
 import { HbcHeader } from './HbcHeader.js';
 import { HbcSidebar } from './HbcSidebar.js';
 import { useSidebarState } from './hooks/useSidebarState.js';
+import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import type { HbcAppShellProps } from './types.js';
+
+const FOCUS_EVENT = 'hbc-focus-mode-change';
 
 const useStyles = makeStyles({
   main: {
@@ -21,6 +24,7 @@ const useStyles = makeStyles({
     transitionDuration: TRANSITION_NORMAL,
     transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
     boxSizing: 'border-box',
+    position: 'relative',
   },
   mainExpanded: {
     marginLeft: '240px',
@@ -30,6 +34,30 @@ const useStyles = makeStyles({
   },
   mainMobile: {
     marginLeft: '0px',
+  },
+  mainFocusMode: {
+    zIndex: 9999,
+    position: 'relative',
+  },
+  focusOverlay: {
+    position: 'fixed',
+    top: '0px',
+    left: '0px',
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    zIndex: 9998,
+    pointerEvents: 'none',
+    transitionProperty: 'opacity',
+    transitionDuration: TRANSITION_NORMAL,
+    transitionTimingFunction: 'ease-in-out',
+  },
+  focusOverlayHidden: {
+    opacity: '0',
+    pointerEvents: 'none',
+  },
+  focusOverlayVisible: {
+    opacity: '1',
   },
 });
 
@@ -42,11 +70,25 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   onNavigate,
 }) => {
   const { isExpanded, isMobile } = useSidebarState();
+  const connectivityStatus = useOnlineStatus();
+  const [isFocusModeActive, setIsFocusModeActive] = React.useState(false);
   const styles = useStyles();
+  const shellOffset = connectivityStatus === 'online' ? 58 : 60;
+
+  // Listen for Focus Mode CustomEvent from CreateUpdateLayout
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ active: boolean }>).detail;
+      setIsFocusModeActive(detail.active);
+    };
+    window.addEventListener(FOCUS_EVENT, handler);
+    return () => window.removeEventListener(FOCUS_EVENT, handler);
+  }, []);
 
   const mainClass = mergeClasses(
     styles.main,
-    isMobile ? styles.mainMobile : isExpanded ? styles.mainExpanded : styles.mainCollapsed,
+    isMobile ? styles.mainMobile : isExpanded && !isFocusModeActive ? styles.mainExpanded : styles.mainCollapsed,
+    isFocusModeActive && styles.mainFocusMode,
   );
 
   return (
@@ -54,7 +96,20 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
       <HbcConnectivityBar />
       <HbcHeader user={user} onSignOut={onSignOut} />
       <HbcSidebar groups={sidebarGroups} onNavigate={onNavigate} />
-      <main className={mainClass}>{children}</main>
+      {/* Focus Mode overlay */}
+      <div
+        className={mergeClasses(
+          styles.focusOverlay,
+          isFocusModeActive ? styles.focusOverlayVisible : styles.focusOverlayHidden,
+        )}
+        aria-hidden="true"
+      />
+      <main
+        className={mainClass}
+        style={{ marginTop: `${shellOffset}px`, minHeight: `calc(100vh - ${shellOffset}px)` }}
+      >
+        {children}
+      </main>
     </div>
   );
 };

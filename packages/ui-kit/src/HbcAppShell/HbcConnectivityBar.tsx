@@ -54,6 +54,7 @@ export const HbcConnectivityBar: React.FC<HbcConnectivityBarProps> = ({ status: 
   const detectedStatus = useOnlineStatus();
   const status = statusOverride ?? detectedStatus;
   const styles = useStyles();
+  const connectivityHeight = status === 'online' ? '2px' : '4px';
 
   return (
     <div
@@ -63,6 +64,7 @@ export const HbcConnectivityBar: React.FC<HbcConnectivityBarProps> = ({ status: 
       aria-label={ariaLabels[status]}
       data-hbc-ui="connectivity-bar"
       data-hbc-status={status}
+      style={{ '--hbc-connectivity-height': connectivityHeight } as React.CSSProperties}
     />
   );
 };

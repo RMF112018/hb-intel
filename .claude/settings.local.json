@@ -41,7 +41,9 @@
       "Bash(npx @playwright/mcp@latest --help)",
       "Bash(jq:*)",
       "Bash(/Users/bobbyfetting/hb-intel/docs/architecture/plans/PH4.4-UI-Design-Plan.md:*)",
-      "Bash(/Users/bobbyfetting/hb-intel/docs/architecture/plans/PH4-UI-Design-Plan.md:*)"
+      "Bash(/Users/bobbyfetting/hb-intel/docs/architecture/plans/PH4-UI-Design-Plan.md:*)",
+      "Bash(npx turbo:*)",
+      "Bash(/Users/bobbyfetting/hb-intel/docs/architecture/plans/PH4.5-UI-Design-Plan.md:*)"
     ]
   }
 }

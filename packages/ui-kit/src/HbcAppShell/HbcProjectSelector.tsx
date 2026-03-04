@@ -91,6 +91,7 @@ export const HbcProjectSelector: React.FC<HbcProjectSelectorProps> = ({ onProjec
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const styles = useStyles();
 
   const filtered = availableProjects.filter(
@@ -110,7 +111,10 @@ export const HbcProjectSelector: React.FC<HbcProjectSelectorProps> = ({ onProjec
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        triggerRef.current?.focus();
+      }
     };
     const handleClick = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -128,6 +132,7 @@ export const HbcProjectSelector: React.FC<HbcProjectSelectorProps> = ({ onProjec
   return (
     <div ref={dropdownRef} style={{ position: 'relative' }}>
       <button
+        ref={triggerRef}
         className={styles.root}
         onClick={() => setIsOpen((v) => !v)}
         aria-haspopup="listbox"

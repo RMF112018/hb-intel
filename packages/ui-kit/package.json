@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./app-shell": {
+      "types": "./dist/app-shell.d.ts",
+      "import": "./dist/app-shell.js"
     }
   },
   "scripts": {

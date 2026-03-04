@@ -97,3 +97,28 @@ Every screen in HB Intel uses exactly one of three canonical layouts. All three 
 - On desktop: a `FocusModeEnter` icon button appears in the form header. Click toggles focus mode.
 - Focus mode state persisted to `localStorage` key `hbc-focus-mode-desktop` (desktop preference only; touch auto-activates every time).
 - Exit via the `FocusModeExit` icon button or by saving/cancelling the form.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.5 completed: 2026-03-04
+All 12 files created:
+  - layouts/types.ts (all interfaces)
+  - layouts/hooks/useFocusMode.ts (focus mode hook)
+  - layouts/hooks/index.ts (hooks barrel)
+  - layouts/ToolLandingLayout.tsx (tool list/dashboard)
+  - layouts/DetailLayout.tsx (single-item detail)
+  - layouts/CreateUpdateLayout.tsx (create/edit with focus mode)
+  - layouts/index.ts (layouts barrel)
+  - layouts/ToolLandingLayout.stories.tsx (4 stories)
+  - layouts/DetailLayout.stories.tsx (3 stories)
+  - layouts/CreateUpdateLayout.stories.tsx (4 stories)
+  - docs/how-to/developer/phase-4.5-page-layout-taxonomy.md
+  - docs/architecture/adr/ADR-0018-ui-page-layout-taxonomy.md
+5 files modified:
+  - packages/ui-kit/src/index.ts (barrel exports)
+  - HbcAppShell.tsx (focus overlay + event listener)
+  - HbcSidebar.tsx (focus collapse override via effectiveExpanded)
+  - PH4-UI-Design-Plan.md (progress comment)
+  - PH4.5-UI-Design-Plan.md (this comment)
+Build: zero TypeScript errors
+Lint: zero new errors (only pre-existing warnings)
+-->

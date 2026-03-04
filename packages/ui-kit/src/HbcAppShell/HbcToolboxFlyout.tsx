@@ -56,12 +56,16 @@ const useStyles = makeStyles({
 export const HbcToolboxFlyout: React.FC<HbcToolboxFlyoutProps> = ({ onToolboxOpen }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const styles = useStyles();
 
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        triggerRef.current?.focus();
+      }
     };
     const handleClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -85,6 +89,7 @@ export const HbcToolboxFlyout: React.FC<HbcToolboxFlyoutProps> = ({ onToolboxOpe
   return (
     <div className={styles.root} ref={ref}>
       <button
+        ref={triggerRef}
         className={styles.trigger}
         onClick={handleToggle}
         aria-label="Open toolbox"

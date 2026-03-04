@@ -149,3 +149,22 @@ export type {
   HbcNotificationBellProps,
 } from './HbcAppShell/index.js';
 export { useOnlineStatus, useFieldMode, useSidebarState } from './HbcAppShell/hooks/index.js';
+
+// Page Layouts (PH4.5)
+export {
+  ToolLandingLayout,
+  DetailLayout,
+  CreateUpdateLayout,
+  useFocusMode,
+} from './layouts/index.js';
+export type {
+  KpiCardData,
+  LayoutAction,
+  LayoutTab,
+  StatusBarData,
+  BreadcrumbItem,
+  ToolLandingLayoutProps,
+  DetailLayoutProps,
+  CreateUpdateLayoutProps,
+  UseFocusModeReturn,
+} from './layouts/index.js';

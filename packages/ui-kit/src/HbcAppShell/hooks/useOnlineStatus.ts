@@ -16,7 +16,7 @@ export function useOnlineStatus(): ConnectivityStatus {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const handleOnline = () => setStatus('online');
+    const handleOnline = () => setStatus((prev) => (prev === 'offline' ? 'online' : prev));
     const handleOffline = () => setStatus('offline');
 
     window.addEventListener('online', handleOnline);
@@ -32,7 +32,7 @@ export function useOnlineStatus(): ConnectivityStatus {
       }
     };
 
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', handleSWMessage);
     }
 

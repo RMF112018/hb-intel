@@ -18,6 +18,7 @@ import {
 import { TRANSITION_NORMAL } from '../theme/animations.js';
 import { Expand, Collapse } from '../icons/index.js';
 import { useSidebarState } from './hooks/useSidebarState.js';
+import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import type { HbcSidebarProps, SidebarNavGroup } from './types.js';
 
 const useStyles = makeStyles({
@@ -151,6 +152,8 @@ const PermissionFilteredGroup: React.FC<{
   return <>{children(visible)}</>;
 };
 
+const FOCUS_EVENT = 'hbc-focus-mode-change';
+
 export const HbcSidebar: React.FC<HbcSidebarProps> = ({
   groups,
   activeItemId,
@@ -158,17 +161,34 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
   onToggleFavorite,
 }) => {
   const { isExpanded, isMobile, toggle } = useSidebarState();
+  const connectivityStatus = useOnlineStatus();
+  const [focusOverride, setFocusOverride] = React.useState(false);
   const styles = useStyles();
+
+  // Listen for Focus Mode CustomEvent — force collapse when active
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ active: boolean }>).detail;
+      setFocusOverride(detail.active);
+    };
+    window.addEventListener(FOCUS_EVENT, handler);
+    return () => window.removeEventListener(FOCUS_EVENT, handler);
+  }, []);
+
+  const effectiveExpanded = focusOverride ? false : isExpanded;
+  const topOffset = connectivityStatus === 'online' ? '58px' : '60px';
+  const sidebarHeight = connectivityStatus === 'online' ? 'calc(100vh - 58px)' : 'calc(100vh - 60px)';
 
   if (isMobile) return null;
 
   return (
     <nav
-      className={mergeClasses(styles.root, isExpanded ? styles.expanded : styles.collapsed)}
+      className={mergeClasses(styles.root, effectiveExpanded ? styles.expanded : styles.collapsed)}
       role="navigation"
       aria-label="Main navigation"
       data-hbc-ui="sidebar"
-      data-expanded={isExpanded}
+      data-expanded={effectiveExpanded}
+      style={{ top: topOffset, height: sidebarHeight }}
     >
       {groups.map((group) => (
         <PermissionFilteredGroup key={group.id} group={group}>
@@ -178,10 +198,10 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
                 <div
                   className={mergeClasses(
                     styles.groupLabel,
-                    !isExpanded && styles.groupLabelCollapsed,
+                    !effectiveExpanded && styles.groupLabelCollapsed,
                   )}
                 >
-                  {isExpanded ? group.label : ''}
+                  {effectiveExpanded ? group.label : ''}
                 </div>
                 {group.items.map((item) => {
                   const isActive = item.id === activeItemId;
@@ -189,7 +209,7 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
                     <span
                       className={mergeClasses(
                         styles.navItemIcon,
-                        isActive && !isExpanded && styles.navItemActiveIcon,
+                        isActive && !effectiveExpanded && styles.navItemActiveIcon,
                       )}
                     >
                       {item.icon}
@@ -201,20 +221,20 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
                       key={item.id}
                       className={mergeClasses(
                         styles.navItem,
-                        !isExpanded && styles.navItemCollapsed,
+                        !effectiveExpanded && styles.navItemCollapsed,
                         isActive && styles.navItemActive,
-                        isActive && !isExpanded && styles.navItemActiveCollapsed,
+                        isActive && !effectiveExpanded && styles.navItemActiveCollapsed,
                       )}
                       onClick={() => onNavigate?.(item.href)}
                       aria-current={isActive ? 'page' : undefined}
                       type="button"
                     >
                       {iconEl}
-                      {isExpanded && <span className={styles.navItemLabel}>{item.label}</span>}
+                      {effectiveExpanded && <span className={styles.navItemLabel}>{item.label}</span>}
                     </button>
                   );
 
-                  return isExpanded ? (
+                  return effectiveExpanded ? (
                     <React.Fragment key={item.id}>{button}</React.Fragment>
                   ) : (
                     <Tooltip

@@ -17,10 +17,10 @@ export interface UseSidebarStateReturn {
 }
 
 function getInitialExpanded(): boolean {
-  if (typeof window === 'undefined') return true;
+  if (typeof window === 'undefined') return false;
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored !== null) return stored === 'expanded';
-  return window.innerWidth >= MOBILE_BREAKPOINT;
+  return false;
 }
 
 function getIsMobile(): boolean {

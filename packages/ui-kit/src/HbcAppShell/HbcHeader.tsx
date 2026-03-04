@@ -6,9 +6,10 @@
  */
 import * as React from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
-import { HBC_DARK_HEADER, HBC_HEADER_TEXT, HBC_HEADER_ICON_MUTED } from '../theme/tokens.js';
-import { Menu } from '../icons/index.js';
+import { HBC_DARK_HEADER, HBC_HEADER_TEXT } from '../theme/tokens.js';
+import { ViewGrid } from '../icons/index.js';
 import { useFieldMode } from './hooks/useFieldMode.js';
+import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import { HbcProjectSelector } from './HbcProjectSelector.js';
 import { HbcToolboxFlyout } from './HbcToolboxFlyout.js';
 import { HbcFavoriteTools } from './HbcFavoriteTools.js';
@@ -101,6 +102,8 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
 }) => {
   const styles = useStyles();
   const { isFieldMode, toggleFieldMode } = useFieldMode();
+  const connectivityStatus = useOnlineStatus();
+  const topOffset = connectivityStatus === 'online' ? '2px' : '4px';
 
   const shellUser = user
     ? {
@@ -113,7 +116,12 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
     : null;
 
   return (
-    <header className={styles.root} role="banner" data-hbc-ui="header">
+    <header
+      className={styles.root}
+      role="banner"
+      data-hbc-ui="header"
+      style={{ top: topOffset }}
+    >
       {/* Left: Logo + Project Selector */}
       <div className={styles.left}>
         <a href="/" className={styles.logoLink} aria-label="Project Home">
@@ -133,7 +141,7 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
       <div className={styles.right}>
         <HbcCreateButton onClick={onCreateClick} />
         <button className={styles.m365Button} aria-label="Microsoft 365 apps" type="button">
-          <Menu size="lg" color={HBC_HEADER_ICON_MUTED} />
+          <ViewGrid size="lg" color={HBC_HEADER_TEXT} />
         </button>
         <HbcNotificationBell onClick={onNotificationsOpen} />
         {shellUser && (

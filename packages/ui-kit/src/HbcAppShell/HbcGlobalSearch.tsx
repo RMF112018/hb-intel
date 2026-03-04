@@ -60,7 +60,7 @@ export const HbcGlobalSearch: React.FC<HbcGlobalSearchProps> = ({ onSearchOpen }
     <button
       className={styles.root}
       onClick={handleOpen}
-      aria-label="Search (Cmd+K)"
+      aria-label="Search (Command+K or Control+K)"
       type="button"
     >
       <CommandPalette size="sm" color={HBC_HEADER_ICON_MUTED} />

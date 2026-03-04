@@ -283,3 +283,15 @@ All shell chrome components delivered: HbcConnectivityBar, HbcHeader (7 sub-comp
 4 Storybook story files. ADR-0017 created. Build & type-check pass.
 Next: Phase 4.5
 -->
+
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.5 completed: 2026-03-04
+Page Layout Taxonomy delivered: ToolLandingLayout, DetailLayout, CreateUpdateLayout.
+Focus Mode hook (useFocusMode) with CustomEvent + DOM attribute pattern.
+Shell modifications: HbcAppShell focus overlay + HbcSidebar focus collapse override.
+11 Storybook stories across 3 story files.
+Documentation added: docs/how-to/developer/phase-4.5-page-layout-taxonomy.md
+ADR created: docs/architecture/adr/ADR-0018-ui-page-layout-taxonomy.md
+Next: Phase 4.6
+-->
