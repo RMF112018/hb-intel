@@ -745,4 +745,17 @@ Phase 2.2 Rebuild (@hbc/data-access Comprehensive Rebuild) completed: 2026-03-03
 - All 11 factory functions implemented (unblocks query-hooks/project and query-hooks/scorecard)
 - Stub adapter typed configs for SharePoint, Proxy, API
 - Full backward compatibility preserved for all existing consumer imports
+
+Phase 3.1 Rebuild (@hbc/query-hooks Comprehensive Rebuild) completed: 2026-03-03
+- PH3-Query-State-Mngmt-Plan.md §3.1 Option C — per-file hook structure, 11 domains, optimistic mutations
+- ~100 new TS files: 66 hooks across 11 domains, 3 Zustand stores, createQueryKeys utility, useRepository hook
+- createQueryKeys helper with static `all` array (backward compatible)
+- useOptimisticMutation generic helper: cancel → snapshot → rollback → invalidate lifecycle
+- useRepository type-safe hook with RepositoryMap interface + DI overrides for testing
+- 5 existing domains refactored from monolithic to per-file; scorecard/project placeholders replaced with real factories
+- 6 new domains: estimating (7), compliance (6), contracts (7), risk (6), pmp (7), auth (6)
+- 3 Zustand stores: useUiStore, useFilterStore (shallow selectors), useFormDraftStore
+- 14 docs: 11 reference, 1 ADR (0014), 1 developer guide, progress notes
+- All 27 existing hook names/signatures preserved, defaultQueryOptions/defaultMutationOptions unchanged
+- Full monorepo build: 21/21 tasks pass
 -->

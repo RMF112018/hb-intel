@@ -234,3 +234,20 @@ Build `@hbc/query-hooks` (TanStack Query hooks per domain, centralized query-key
    - Invalidation refreshes the grid after mutations.  
    - Zustand client-state stores (filters, form drafts) combine seamlessly without re-render cascades.  
 3. All packages are now ready for use by the PWA, SPFx webparts, and future phases.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 3.1 (@hbc/query-hooks Comprehensive Rebuild) completed: 2026-03-03
+Implementation followed §3.1 Option C exactly (10-step sequence):
+- Step 1: createQueryKeys utility + barrel (src/utils/)
+- Step 2: keys.ts rebuilt for 11 domains using createQueryKeys base + domain-specific extensions
+- Step 3: useOptimisticMutation added to defaults.ts (additive, no breaking changes)
+- Step 4: useRepository.ts with RepositoryMap, factoryMap, DI overrides
+- Step 5: 5 existing domains refactored to per-file structure, scorecard/project placeholders removed
+- Step 6: 6 new domain folders created (estimating, compliance, contracts, risk, pmp, auth)
+- Step 7: 3 Zustand stores (useUiStore, useFilterStore, useFormDraftStore)
+- Step 8: zustand ^5.0.0 added to package.json
+- Step 9: Root barrel rewritten with 66 hooks + stores + utilities
+- Step 10: 14 documentation files (11 reference, ADR-0014, developer guide, progress notes)
+Verification: pnpm turbo run build — 21/21 tasks pass
+ADR created: docs/architecture/adr/0014-query-hooks-comprehensive.md (not 0007 as originally planned — ADR numbering has progressed)
+-->

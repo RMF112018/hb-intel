@@ -18,7 +18,8 @@
   "dependencies": {
     "@hbc/data-access": "workspace:*",
     "@hbc/models": "workspace:*",
-    "@tanstack/react-query": "^5.75.0"
+    "@tanstack/react-query": "^5.75.0",
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.0"

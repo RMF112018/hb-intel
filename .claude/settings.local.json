@@ -33,7 +33,9 @@
       "Bash(npx prettier:*)",
       "Bash(node:*)",
       "Bash(ls:*)",
-      "Bash(do echo:*)"
+      "Bash(do echo:*)",
+      "Bash(wc:*)",
+      "Bash(find:*)"
     ]
   }
 }

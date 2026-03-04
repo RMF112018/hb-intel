@@ -350,4 +350,17 @@ Phase 2.1 (@hbc/models Comprehensive Rebuild) completed: 2026-03-03
 - Zero breaking changes: all 62+ existing imports resolve identically
 - Verification: pnpm turbo run build (21/21 pass), check-types pass, runtime values verified
 Next: Phase 2.2 — @hbc/data-access rebuild
+
+Phase 2.2 (@hbc/data-access Comprehensive Rebuild) completed: 2026-03-03
+- See Blueprint progress notes for full details
+
+Phase 3.1 (@hbc/query-hooks Comprehensive Rebuild) completed: 2026-03-03
+- PH3-Query-State-Mngmt-Plan.md §3.1 Option C — per-file hooks, 11 domains, optimistic mutations
+- 66 hooks across 11 domains (27 existing preserved + 39 new)
+- Infrastructure: createQueryKeys utility, useOptimisticMutation helper, useRepository with DI
+- 3 Zustand stores: useUiStore, useFilterStore (with useDomainFilters shallow selector), useFormDraftStore
+- Scorecard/project placeholders replaced with real factory-backed hooks
+- Documentation: 11 reference docs, ADR-0014, developer guide
+- Verification: pnpm turbo run build (21/21 pass)
+Next: Phase 3.2 — Zustand store integration with shell/auth packages
 -->
