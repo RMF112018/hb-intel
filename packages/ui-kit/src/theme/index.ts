@@ -1,15 +1,30 @@
-// Theme barrel — Blueprint §1d (HB Intel Design System)
+// Theme barrel — Blueprint §1d (HB Intel Design System V2.1)
+
+// Tokens
 export {
   hbcBrandRamp,
   HBC_PRIMARY_BLUE,
   HBC_ACCENT_ORANGE,
   HBC_STATUS_COLORS,
+  HBC_DARK_HEADER,
+  HBC_HEADER_TEXT,
+  HBC_HEADER_ICON_MUTED,
+  HBC_STATUS_RAMP_GREEN,
+  HBC_STATUS_RAMP_RED,
+  HBC_STATUS_RAMP_AMBER,
+  HBC_STATUS_RAMP_INFO,
+  HBC_STATUS_RAMP_GRAY,
+  HBC_SURFACE_LIGHT,
+  HBC_SURFACE_FIELD,
+  HBC_CONNECTIVITY,
 } from './tokens.js';
 export type { HbcSemanticTokens } from './tokens.js';
 
-export { hbcLightTheme, hbcDarkTheme } from './theme.js';
+// Themes
+export { hbcLightTheme, hbcFieldTheme, hbcDarkTheme } from './theme.js';
 export type { HbcTheme } from './theme.js';
 
+// Animations
 export {
   keyframes,
   transitions,
@@ -19,8 +34,19 @@ export {
   useAnimationStyles,
 } from './animations.js';
 
+// Typography (V2.1 intent-based + deprecated aliases)
 export {
   hbcTypeScale,
+  display,
+  heading1,
+  heading2,
+  heading3,
+  heading4,
+  body,
+  bodySmall,
+  label,
+  code,
+  // Deprecated aliases
   displayHero,
   displayLarge,
   displayMedium,
@@ -32,6 +58,7 @@ export {
   monospace,
 } from './typography.js';
 
+// Elevation
 export {
   hbcElevation,
   elevationRest,
@@ -40,3 +67,23 @@ export {
   elevationOverlay,
   elevationDialog,
 } from './elevation.js';
+
+// Grid & spacing
+export {
+  HBC_SPACE_XS,
+  HBC_SPACE_SM,
+  HBC_SPACE_MD,
+  HBC_SPACE_LG,
+  HBC_SPACE_XL,
+  HBC_SPACE_XXL,
+  hbcSpacing,
+  BREAKPOINT_MOBILE,
+  BREAKPOINT_TABLET,
+  BREAKPOINT_DESKTOP,
+  BREAKPOINT_WIDE,
+  hbcBreakpoints,
+  hbcGrid,
+  hbcSpacingCSSVars,
+  hbcMediaQuery,
+} from './grid.js';
+export type { HbcSpacingKey, HbcBreakpointConfig } from './grid.js';

@@ -370,4 +370,8 @@ Phase 3.2 (@hbc/query-hooks Quality Audit & Gap Remediation) completed: 2026-03-
 - Barrel exports and root index updated
 - Documentation updated: reference docs, developer guide, ADR-0014
 - Verification: pnpm turbo run build (21/21 pass)
+
+Phase 4.3 (Design System Foundation) completed: 2026-03-04
+- V2.1 tokens, Field Mode theme, intent-based typography, 12-col grid, 60+ icons, ESLint stub, Storybook switcher
+- See ADR-0016
 -->

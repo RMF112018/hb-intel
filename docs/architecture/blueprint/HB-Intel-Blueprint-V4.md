@@ -482,12 +482,17 @@ Migrate the other nine SPFx webparts (Project Hub, Leadership, Risk Management, 
 **Success Criteria:** All 11 webparts are independent, lightweight, and use the new architecture.  
 **Deliverables:** Complete set of 11 focused SPFx webparts.
 
-## Phase 9: Standalone Procore-like PWA
+## Phase 9A: Standalone Procore-like PWA
 Build the full primary PWA (`apps/pwa`) with all 14 workspaces, complete TanStack Router, MSAL authentication, and the Procore-inspired shell.  
 **Success Criteria:** The PWA runs independently on Vercel and provides the flagship experience.  
 **Deliverables:** Primary standalone application (the future main user experience).
 
-## Phase 10: Mobile App, Backend Polish, CI/CD & Full Cutover
+## Phase 9B: UX Enhancement Layer — My Work Feed, Progressive Coaching, Draft Persistence & Instrumentation
+Apply the four UX differentiation layers defined in `docs/architecture/plans/PH4-UX-Enhanced-Plan.md` to the fully-built PWA. Wire the `HbcMyWorkFeed` as the default PWA landing route. Integrate `HbcCoachCard` coaching sequences across all 14 workspaces for the 5 MVP roles. Add `useFormDraft` auto-save to all 7 major forms. Instrument the 5 critical task flows with `useUXInstrumentation` timing and `HbcCESPrompt` measurement.  
+**Success Criteria:** Field users land on a populated, priority-sorted My Work feed on first open; no form data is lost to a network or browser failure; UX metrics begin accumulating in `HBIntel_UXMetrics`.  
+**Deliverables:** Industry-differentiating UX layer applied to the complete PWA — My Work feed, role-aware progressive coaching, form draft recovery, and lightweight task instrumentation.
+
+## Phase 11: Mobile App, Backend Polish, CI/CD & Full Cutover
 Complete `apps/hb-site-control`, finalize the Azure Functions proxy and timer triggers, implement the full GitHub Actions CI/CD pipeline, run comprehensive testing (Vitest, Playwright, Storybook), optimize performance, and gradually decommission the old monolithic webpart.  
 **Success Criteria:** 100 % of functionality is available in the new architecture; the legacy monolith is retired.  
 **Deliverables:** Complete, production-ready HB Intel platform.
@@ -766,4 +771,8 @@ Phase 3.2 (@hbc/query-hooks Quality Audit & Gap Remediation) completed: 2026-03-
 - Barrel exports updated (scorecard/index.ts, project/index.ts, root index.ts)
 - Documentation updated: scorecard.md, project.md, developer guide, ADR-0014
 - Verification: pnpm turbo run build — 21/21 tasks pass
+
+Phase 4.3 (Design System Foundation V2.1) completed: 2026-03-04
+- tokens.ts, theme.ts, typography.ts enhanced; grid.ts, icons/index.tsx, lint/enforce-hbc-tokens.ts created
+- ADR-0016 filed
 -->

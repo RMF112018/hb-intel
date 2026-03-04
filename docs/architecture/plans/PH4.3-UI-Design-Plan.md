@@ -221,3 +221,17 @@ Status icons are paired with status colors in `HbcStatusBadge`. The shape encode
 2. Decorative icons (paired with visible text) must have `aria-hidden="true"`.
 3. Standalone icon buttons must have an `aria-label` attribute.
 4. Never use icons as the sole indicator of status — `HbcStatusBadge` always pairs icon with color and text label.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.3 completed: 2026-03-04
+Step 1: tokens.ts — V2.1 sunlight-optimized status colors, HSL ramps, surface/field tokens, connectivity, expanded HbcSemanticTokens
+Step 2: theme.ts — hbcLightTheme warm off-white, hbcFieldTheme, hbcDarkTheme deprecated alias
+Step 3: typography.ts — intent-based naming (display/heading1-4/body/bodySmall/label/code), deprecated aliases preserved
+Step 4: grid.ts — 4px spacing scale, breakpoints, 12-col grid, CSS var generators
+Step 5: icons/index.tsx — 60 icons, 6 categories, 3 weights, 3 sizes, createIcon factory
+Step 6: Barrel exports updated (theme/index.ts + src/index.ts)
+Step 7: ESLint enforce-hbc-tokens stub created
+Step 8: Storybook Light/Field Mode theme switcher added
+Step 9: Build verification — zero errors
+Step 10: ADR-0016 + developer guide created
+-->
