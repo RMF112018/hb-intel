@@ -5,9 +5,15 @@ export interface HbcEmptyStateProps {
   title: string;
   /** Optional description text */
   description?: string;
-  /** Optional illustration element (icon, image, or SVG) */
+  /** Icon or illustration element (preferred name) */
+  icon?: React.ReactNode;
+  /** @deprecated Use `icon` instead */
   illustration?: React.ReactNode;
-  /** Optional call-to-action button or element */
+  /** Primary call-to-action (preferred name) */
+  primaryAction?: React.ReactNode;
+  /** Secondary call-to-action */
+  secondaryAction?: React.ReactNode;
+  /** @deprecated Use `primaryAction` instead */
   action?: React.ReactNode;
   /** Additional CSS class */
   className?: string;

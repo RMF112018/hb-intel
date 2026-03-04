@@ -338,3 +338,20 @@ ADR created: docs/architecture/adr/ADR-0021-ui-overlay-surface-system.md
   - [x] HbcCard (Level 1 shadow, header/footer)
   - [x] Z-index layering (centralized Z_INDEX constants)
 -->
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.9 (Messaging & Feedback System) completed: 2026-03-04
+Documentation added: docs/how-to/developer/phase-4.9-messaging-feedback.md
+ADR created: docs/architecture/adr/ADR-0022-ui-messaging-feedback-system.md
+
+§9 Messaging & Feedback System: COMPLETE
+§20 Checklist updates:
+  - [x] HbcBanner (4 variants, dismiss logic, slideInUp animation)
+  - [x] HbcToast (V2.1 three-category restriction, provider/hook pattern, portal)
+  - [x] HbcTooltip (string-only content, 4 positions, auto-flip, delay)
+  - [x] HbcSpinner (3 sizes, CSS border spinner, sr-only label)
+  - [x] HbcEmptyState enhanced (icon alias, h2/heading2, dual actions)
+  - [x] useMinDisplayTime hook (debounced spinner visibility)
+  - [x] Toast three-category restriction enforced at type level
+  - [x] Banner dismiss logic (omit onDismiss for critical)
+-->

@@ -1,13 +1,15 @@
 /**
- * HbcEmptyState — Zero-data states with illustration + CTA
+ * HbcEmptyState — Zero-data states with icon/illustration + dual CTAs
  * Blueprint §1d — centered layout, fadeIn + slideInUp entrance
  * PH4.6 §Step 4 — Replace Fluent CSS vars with HBC tokens
+ * PH4.9 §Step 5 — icon alias, heading-2 typography, dual action row
  */
 import * as React from 'react';
 import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { keyframes, TRANSITION_NORMAL } from '../theme/animations.js';
 import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
+import { heading2 } from '../theme/typography.js';
 import type { HbcEmptyStateProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -38,8 +40,7 @@ const useStyles = makeStyles({
     animationFillMode: 'forwards',
   },
   title: {
-    fontSize: '1.25rem',
-    fontWeight: '600',
+    ...heading2,
     color: HBC_SURFACE_LIGHT['text-primary'],
     margin: '0',
   },
@@ -49,7 +50,11 @@ const useStyles = makeStyles({
     margin: '0',
     maxWidth: '400px',
   },
-  action: {
+  actions: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '12px',
     marginTop: '8px',
   },
 });
@@ -57,20 +62,32 @@ const useStyles = makeStyles({
 export const HbcEmptyState: React.FC<HbcEmptyStateProps> = ({
   title,
   description,
+  icon,
   illustration,
+  primaryAction,
+  secondaryAction,
   action,
   className,
 }) => {
   const styles = useStyles();
 
+  // Backward compat: icon ?? illustration, primaryAction ?? action
+  const resolvedIcon = icon ?? illustration;
+  const resolvedPrimary = primaryAction ?? action;
+
   return (
     <div data-hbc-ui="empty-state" className={mergeClasses(styles.root, className)}>
-      {illustration && (
-        <div className={styles.illustration}>{illustration}</div>
+      {resolvedIcon && (
+        <div className={styles.illustration}>{resolvedIcon}</div>
       )}
-      <h3 className={styles.title}>{title}</h3>
+      <h2 className={styles.title}>{title}</h2>
       {description && <p className={styles.description}>{description}</p>}
-      {action && <div className={styles.action}>{action}</div>}
+      {(resolvedPrimary || secondaryAction) && (
+        <div className={styles.actions}>
+          {resolvedPrimary}
+          {secondaryAction}
+        </div>
+      )}
     </div>
   );
 };

@@ -129,8 +129,8 @@ export type { HbcTearsheetProps, TearsheetStep } from './HbcTearsheet/index.js';
 export { HbcPopover } from './HbcPopover/index.js';
 export type { HbcPopoverProps, PopoverSize } from './HbcPopover/index.js';
 
-// Shared hooks (PH4.8)
-export { useFocusTrap, useIsMobile } from './hooks/index.js';
+// Shared hooks (PH4.8, PH4.9)
+export { useFocusTrap, useIsMobile, useMinDisplayTime } from './hooks/index.js';
 
 export { HbcCommandBar } from './HbcCommandBar/index.js';
 export type {
@@ -238,6 +238,25 @@ export type {
   HbcNotificationBellProps,
 } from './HbcAppShell/index.js';
 export { useOnlineStatus, useFieldMode, useSidebarState } from './HbcAppShell/hooks/index.js';
+
+// PH4.9 Messaging & Feedback System
+export { HbcBanner } from './HbcBanner/index.js';
+export type { HbcBannerProps, BannerVariant } from './HbcBanner/index.js';
+
+export { HbcToastProvider, useToast, HbcToastContainer } from './HbcToast/index.js';
+export type {
+  ToastConfig,
+  ToastCategory,
+  ToastContextValue,
+  HbcToastProviderProps,
+  ToastEntry,
+} from './HbcToast/index.js';
+
+export { HbcTooltip } from './HbcTooltip/index.js';
+export type { HbcTooltipProps, TooltipPosition } from './HbcTooltip/index.js';
+
+export { HbcSpinner } from './HbcSpinner/index.js';
+export type { HbcSpinnerProps, SpinnerSize } from './HbcSpinner/index.js';
 
 // Page Layouts (PH4.5)
 export {
