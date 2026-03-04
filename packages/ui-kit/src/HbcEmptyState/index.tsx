@@ -1,11 +1,13 @@
 /**
  * HbcEmptyState — Zero-data states with illustration + CTA
  * Blueprint §1d — centered layout, fadeIn + slideInUp entrance
+ * PH4.6 §Step 4 — Replace Fluent CSS vars with HBC tokens
  */
 import * as React from 'react';
 import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { keyframes, TRANSITION_NORMAL } from '../theme/animations.js';
+import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import type { HbcEmptyStateProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -38,12 +40,12 @@ const useStyles = makeStyles({
   title: {
     fontSize: '1.25rem',
     fontWeight: '600',
-    color: 'var(--colorNeutralForeground1)',
+    color: HBC_SURFACE_LIGHT['text-primary'],
     margin: '0',
   },
   description: {
     fontSize: '0.875rem',
-    color: 'var(--colorNeutralForeground3)',
+    color: HBC_SURFACE_LIGHT['text-muted'],
     margin: '0',
     maxWidth: '400px',
   },

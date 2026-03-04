@@ -1,4 +1,7 @@
-/** HbcPanel — Blueprint §1d side panel */
+/**
+ * HbcPanel — Blueprint §1d side panel
+ * PH4.6 §Step 9 — animation timing + mobile bottom-sheet
+ */
 
 export type PanelSize = 'sm' | 'md' | 'lg';
 

@@ -1,4 +1,4 @@
-/** HbcForm — Blueprint §1d form primitives */
+/** HbcForm — Blueprint §1d form primitives + PH4.6 §Step 8 form/section */
 
 export interface HbcTextFieldProps {
   /** Field label */
@@ -68,6 +68,34 @@ export interface HbcFormLayoutProps {
   columns?: 1 | 2 | 3 | 4;
   /** Gap between fields */
   gap?: 'small' | 'medium' | 'large';
+  /** Additional CSS class */
+  className?: string;
+}
+
+// PH4.6 §Step 8 — Form wrapper + collapsible sections
+
+export interface HbcFormProps {
+  /** Form submit handler */
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  /** Form content */
+  children: React.ReactNode;
+  /** Sticky footer content (cancel/save buttons) */
+  stickyFooter?: React.ReactNode;
+  /** Additional CSS class */
+  className?: string;
+}
+
+export interface HbcFormSectionProps {
+  /** Section title */
+  title: string;
+  /** Optional section description */
+  description?: string;
+  /** Enable collapse toggle (default false) */
+  collapsible?: boolean;
+  /** Initial expanded state (default true) */
+  defaultExpanded?: boolean;
+  /** Section content */
+  children: React.ReactNode;
   /** Additional CSS class */
   className?: string;
 }

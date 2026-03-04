@@ -1,6 +1,7 @@
 /**
  * HbcCommandBar — Fluent v9 Toolbar wrapper
  * Blueprint §1d — SearchBox + filter toggles + action buttons
+ * PH4.6 §Step 10 — Saved views + density auto-detection + column config
  */
 import * as React from 'react';
 import {
@@ -13,7 +14,20 @@ import {
 } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { elevationRaised } from '../theme/elevation.js';
-import type { HbcCommandBarProps } from './types.js';
+import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE } from '../theme/tokens.js';
+import type { HbcCommandBarProps, DensityTier } from './types.js';
+
+const DENSITY_HEIGHT: Record<DensityTier, string> = {
+  compact: '32px',
+  standard: '40px',
+  touch: '48px',
+};
+
+const DENSITY_LABELS: Record<DensityTier, string> = {
+  compact: 'Compact',
+  standard: 'Standard',
+  touch: 'Touch',
+};
 
 const useStyles = makeStyles({
   root: {
@@ -27,6 +41,7 @@ const useStyles = makeStyles({
     backgroundColor: 'var(--colorNeutralBackground1)',
     borderRadius: '4px',
     gap: '8px',
+    flexWrap: 'wrap',
   },
   search: {
     minWidth: '200px',
@@ -45,7 +60,83 @@ const useStyles = makeStyles({
     gap: '4px',
     flexShrink: 0,
   },
+  viewSelector: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+  },
+  viewSelect: {
+    fontSize: '0.8125rem',
+    padding: '2px 8px',
+    border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    borderRadius: '3px',
+    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+    color: HBC_SURFACE_LIGHT['text-primary'],
+    cursor: 'pointer',
+  },
+  densityControl: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontSize: '0.75rem',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
+  densityLabel: {
+    fontSize: '0.6875rem',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    padding: '2px 6px',
+    borderRadius: '3px',
+  },
+  densitySelect: {
+    fontSize: '0.75rem',
+    padding: '1px 4px',
+    border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    borderRadius: '3px',
+    backgroundColor: 'transparent',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    cursor: 'pointer',
+  },
+  scopeBadge: {
+    fontSize: '0.625rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    marginLeft: '4px',
+  },
 });
+
+/** V2.1 Dec 23: auto-detect density tier from pointer and screen width */
+function useAutoDetectDensity(): DensityTier {
+  const [tier, setTier] = React.useState<DensityTier>('standard');
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const detect = () => {
+      const coarse = window.matchMedia('(pointer: coarse)').matches;
+      if (coarse) {
+        setTier('touch');
+      } else if (window.innerWidth >= 1200) {
+        setTier('compact');
+      } else {
+        setTier('standard');
+      }
+    };
+
+    detect();
+    window.addEventListener('resize', detect);
+    const mq = window.matchMedia('(pointer: coarse)');
+    mq.addEventListener('change', detect);
+
+    return () => {
+      window.removeEventListener('resize', detect);
+      mq.removeEventListener('change', detect);
+    };
+  }, []);
+
+  return tier;
+}
 
 export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
   searchValue,
@@ -53,12 +144,70 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
   searchPlaceholder = 'Search...',
   filters,
   actions,
+  savedViews,
+  onViewChange,
+  onViewSave,
+  densityTier: densityOverride,
+  onDensityChange,
+  columnConfigTrigger,
   className,
 }) => {
   const styles = useStyles();
+  const autoDetected = useAutoDetectDensity();
+  const effectiveDensity = densityOverride ?? autoDetected;
+  const minItemHeight = DENSITY_HEIGHT[effectiveDensity];
+
+  const activeView = savedViews?.find((v) => v.isActive);
 
   return (
-    <div data-hbc-ui="command-bar" className={mergeClasses(styles.root, className)}>
+    <div
+      data-hbc-ui="command-bar"
+      data-hbc-density={effectiveDensity}
+      className={mergeClasses(styles.root, className)}
+      style={{ minHeight: minItemHeight }}
+    >
+      {/* Saved views selector */}
+      {savedViews && savedViews.length > 0 && (
+        <>
+          <div className={styles.viewSelector}>
+            <select
+              className={styles.viewSelect}
+              value={activeView?.id ?? ''}
+              onChange={(e) => onViewChange?.(e.target.value)}
+              aria-label="Saved views"
+            >
+              {savedViews.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.name}
+                </option>
+              ))}
+            </select>
+            {activeView && (
+              <span className={styles.scopeBadge}>{activeView.scope}</span>
+            )}
+            {onViewSave && (
+              <button
+                type="button"
+                onClick={onViewSave}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '2px 6px',
+                  border: 'none',
+                  borderRadius: '3px',
+                  cursor: 'pointer',
+                  backgroundColor: 'transparent',
+                  color: HBC_ACCENT_ORANGE,
+                }}
+              >
+                Save
+              </button>
+            )}
+          </div>
+          <ToolbarDivider />
+        </>
+      )}
+
+      {/* Search */}
       {onSearchChange !== undefined && (
         <SearchBox
           className={styles.search}
@@ -69,6 +218,7 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
         />
       )}
 
+      {/* Filters */}
       {filters && filters.length > 0 && (
         <>
           <ToolbarDivider />
@@ -91,6 +241,27 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
 
       <div className={styles.spacer} />
 
+      {/* Density indicator + override */}
+      <div className={styles.densityControl}>
+        <span className={styles.densityLabel}>{DENSITY_LABELS[effectiveDensity]}</span>
+        {onDensityChange && (
+          <select
+            className={styles.densitySelect}
+            value={effectiveDensity}
+            onChange={(e) => onDensityChange(e.target.value as DensityTier)}
+            aria-label="Density"
+          >
+            <option value="compact">Compact</option>
+            <option value="standard">Standard</option>
+            <option value="touch">Touch</option>
+          </select>
+        )}
+      </div>
+
+      {/* Column config trigger slot */}
+      {columnConfigTrigger}
+
+      {/* Actions */}
       {actions && actions.length > 0 && (
         <div className={styles.actions}>
           {actions.map((a) => (
@@ -114,4 +285,7 @@ export type {
   HbcCommandBarProps,
   CommandBarAction,
   CommandBarFilter,
+  SavedView,
+  SavedViewScope,
+  DensityTier,
 } from './types.js';

@@ -1,4 +1,7 @@
-/** HbcStatusBadge — Blueprint §1d status indicators */
+/**
+ * HbcStatusBadge — Blueprint §1d status indicators
+ * V2.1 Dec 26 — Dual-channel: color + shape, never color alone
+ */
 
 export type StatusVariant =
   | 'success'
@@ -15,13 +18,13 @@ export type StatusVariant =
   | 'draft';
 
 export interface HbcStatusBadgeProps {
-  /** Status variant determines color mapping */
+  /** Status variant determines color + icon mapping (dual-channel) */
   variant: StatusVariant;
   /** Display label text */
   label: string;
   /** Optional size override */
   size?: 'small' | 'medium' | 'large';
-  /** Optional icon before the label */
+  /** Optional icon override — auto-injected from variant map when omitted */
   icon?: React.ReactNode;
   /** Additional CSS class */
   className?: string;

@@ -88,6 +88,8 @@ export {
   HbcSelect,
   HbcCheckbox,
   HbcFormLayout,
+  HbcForm,
+  HbcFormSection,
 } from './HbcForm/index.js';
 export type {
   HbcTextFieldProps,
@@ -95,6 +97,8 @@ export type {
   HbcSelectOption,
   HbcCheckboxProps,
   HbcFormLayoutProps,
+  HbcFormProps,
+  HbcFormSectionProps,
 } from './HbcForm/index.js';
 
 export { HbcPanel } from './HbcPanel/index.js';
@@ -105,6 +109,9 @@ export type {
   HbcCommandBarProps,
   CommandBarAction,
   CommandBarFilter,
+  SavedView,
+  SavedViewScope,
+  DensityTier,
 } from './HbcCommandBar/index.js';
 
 export { HbcDataTable } from './HbcDataTable/index.js';
@@ -116,6 +123,29 @@ export type { HbcChartProps } from './HbcChart/index.js';
 
 export { WorkspacePageShell } from './WorkspacePageShell/index.js';
 export type { WorkspacePageShellProps } from './WorkspacePageShell/index.js';
+
+// New components (PH4.6)
+export { HbcButton } from './HbcButton/index.js';
+export type { HbcButtonProps, ButtonVariant, ButtonSize } from './HbcButton/index.js';
+
+export { HbcTypography } from './HbcTypography/index.js';
+export type { HbcTypographyProps, TypographyIntent } from './HbcTypography/index.js';
+
+export { HbcTextArea, HbcRichTextEditor, useVoiceDictation } from './HbcInput/index.js';
+export type {
+  HbcTextAreaProps,
+  HbcRichTextEditorProps,
+  RichTextToolbarAction,
+  UseVoiceDictationReturn,
+} from './HbcInput/index.js';
+
+export { HbcCommandPalette, useCommandPalette } from './HbcCommandPalette/index.js';
+export type {
+  HbcCommandPaletteProps,
+  CommandPaletteResult,
+  CommandPaletteCategory,
+  UseCommandPaletteReturn,
+} from './HbcCommandPalette/index.js';
 
 // App Shell (PH4.4)
 export {

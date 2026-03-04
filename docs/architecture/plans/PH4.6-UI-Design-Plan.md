@@ -184,3 +184,27 @@ Toolbar component for all `ToolLandingLayout` screens:
 - Density override control (Compact / Standard / Touch) — shows auto-detected tier, allows override **[V2.1]**
 - Secondary action buttons (Export, Reports)
 - Column configurator trigger (gear icon)
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.6 completed: 2026-03-04
+
+All 11 priority components implemented:
+1. HbcStatusBadge — Dual-channel icon auto-injection (V2.1 Dec 26)
+2. HbcConnectivityBar — Added A11yTest story
+3. HbcTypography — NEW: 9 intent types, semantic HTML mapping
+4. HbcEmptyState — Replaced Fluent CSS vars with HBC tokens
+5. HbcErrorBoundary — Replaced hardcoded hex with HBC token constants
+6. HbcButton — NEW: 4 variants, 3 sizes, touch auto-scale (V2.1 Dec 31)
+7. HbcInput suite — NEW: HbcTextArea + HbcRichTextEditor + useVoiceDictation
+8. HbcForm + HbcFormSection — NEW: sticky footer + collapsible sections
+9. HbcPanel — Added cubic-bezier animation + mobile bottom-sheet + focus trap
+10. HbcCommandBar — Added saved views (3-tier) + density auto-detection
+11. HbcCommandPalette — NEW: Cmd+K, keyboard nav, AI integration, offline support
+
+44 Storybook stories (11 × 4 each)
+Documentation: docs/how-to/developer/phase-4.6-component-library.md
+ADR: docs/architecture/adr/ADR-0019-ui-component-library-priority.md
+
+Build: zero TypeScript errors
+Lint: zero new errors (8 pre-existing warnings)
+-->

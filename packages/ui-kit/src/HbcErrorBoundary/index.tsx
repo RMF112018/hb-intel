@@ -1,9 +1,10 @@
 /**
  * HbcErrorBoundary — React class error boundary with retry
  * Blueprint §1d — retry button, onError callback, fallback render prop
+ * PH4.6 §Step 5 — Replace hardcoded hex with HBC tokens
  */
 import * as React from 'react';
-import { makeStyles } from '@griffel/react';
+import { HBC_STATUS_COLORS, HBC_PRIMARY_BLUE, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import type { HbcErrorBoundaryProps, HbcErrorBoundaryState } from './types.js';
 
 const defaultFallbackStyles: Record<string, React.CSSProperties> = {
@@ -19,12 +20,12 @@ const defaultFallbackStyles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: '1.25rem',
     fontWeight: 600,
-    color: '#D13438',
+    color: HBC_STATUS_COLORS.error,
     margin: 0,
   },
   message: {
     fontSize: '0.875rem',
-    color: '#605E5C',
+    color: HBC_SURFACE_LIGHT['text-muted'],
     margin: 0,
     maxWidth: '400px',
   },
@@ -33,7 +34,7 @@ const defaultFallbackStyles: Record<string, React.CSSProperties> = {
     fontSize: '0.875rem',
     fontWeight: 600,
     color: '#FFFFFF',
-    backgroundColor: '#004B87',
+    backgroundColor: HBC_PRIMARY_BLUE,
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
