@@ -805,5 +805,14 @@ Phase 4.15 (NGX Modernization & Design Consistency) completed: 2026-03-04
 - DESIGN_SYSTEM.md: authoring rules in packages/ui-kit/
 - NGX Tracker: docs/architecture/ngx-tracker.md
 - ADR-0029, developer guide: phase-4.15-ngx-modernization.md
+
+Phase 4.16 completed: 2026-03-04
+- @hbc/ui-kit finalized at v2.1.0 with full exports map (./theme, ./icons)
+- vite.config.ts added for Storybook/analysis; production build remains tsc
+- Density tier system: compact/comfortable/touch with auto-detection + localStorage persistence
+- Canonical theme hooks: useHbcTheme, useConnectivity, useDensity in @hbc/ui-kit/theme
+- 27 per-component reference docs in docs/reference/ui-kit/
+- ADR-0030, developer guide: phase-4.16-ui-kit-package.md
+- Build: zero errors; Lint: zero errors
 Next: Phase 5 (SPFx webparts) or verification
 -->

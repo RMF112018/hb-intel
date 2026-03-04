@@ -455,5 +455,22 @@ Phase 4.15 (NGX Modernization & Design Consistency) completed: 2026-03-04
   - [x] All Storybook stories have: Default, AllVariants, FieldMode, A11yTest exports
   - [x] DESIGN_SYSTEM.md in packages/ui-kit/ with all authoring rules
   - [x] NGX Modernization tracker in docs/architecture/ngx-tracker.md
+  - [x] All token files in src/theme/ (density.ts, useHbcTheme.ts, useConnectivity.ts, useDensity.ts, README.md)
+  - [x] One markdown file per component in docs/reference/ui-kit/ (27 files)
+  - [x] DESIGN_SYSTEM.md (completed in 4.15)
+  - [x] src/theme/README.md completed
+  - [x] NGX Modernization tracker (completed in 4.15)
+
+Phase 4.16 completed: 2026-03-04
+- package.json: version 2.1.0, ./theme + ./icons exports, analyze script, vite-bundle-visualizer + @vitejs/plugin-react devDeps
+- vite.config.ts: library build config with echarts manual chunk
+- Theme files: density.ts, useHbcTheme.ts, useConnectivity.ts, useDensity.ts, README.md
+- Theme barrel (index.ts): updated with density + canonical hook exports
+- Root barrel (src/index.ts): v2.1 JSDoc header, density/hook re-exports, removed duplicate DensityTier
+- Maskable icon placeholder: hb_icon_maskable.png (512x512)
+- 27 per-component docs in docs/reference/ui-kit/
+- ADR-0030: ui-kit-final-implementation.md
+- Developer guide: docs/how-to/developer/phase-4.16-ui-kit-package.md
+- Build: zero TypeScript errors; Lint: zero errors (65 pre-existing warnings)
 Next: Phase 5 (SPFx webparts) or verification
 -->

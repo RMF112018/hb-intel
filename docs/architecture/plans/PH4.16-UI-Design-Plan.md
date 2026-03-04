@@ -225,3 +225,19 @@ pnpm turbo run build --filter=@hbc/ui-kit
 pnpm --filter=@hbc/ui-kit storybook    # Verify all stories in both themes
 pnpm --filter=@hbc/ui-kit analyze      # Verify chunks under 500KB
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4.16 completed: 2026-03-04
+Step 1 (directory structure): Already complete from prior phases
+Step 2 (package.json): version 2.1.0, ./theme + ./icons exports, analyze script, new devDeps
+Step 3 (tsconfig.json): declaration/declarationMap/sourceMap inherited from tsconfig.base.json — no changes needed
+Step 4 (vite.config.ts): Created with library build mode, externals, echarts manual chunk
+Step 5 (brand assets): hb_icon_maskable.png placeholder created (512x512 #004B87)
+Step 6 (theme files): density.ts, useHbcTheme.ts, useConnectivity.ts, useDensity.ts, README.md created; theme/index.ts updated
+Step 7 (ESLint rule): Already complete from Phase 4.15
+Step 8 (components): Already complete from Phases 4.3–4.14.5
+Step 9 (root barrel): Updated with v2.1 JSDoc header, density/hook re-exports, removed duplicate DensityTier
+Step 10 (component docs): 27 markdown files created in docs/reference/ui-kit/
+Step 11 (ADRs): ADR-0030 created (slots 0008/0009 already taken), developer guide created
+Step 12 (verify): Build zero errors, lint zero errors (65 pre-existing warnings)
+-->

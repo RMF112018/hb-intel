@@ -1,5 +1,13 @@
-// @hbc/ui-kit — HB Intel Design System (V2.1)
-// Blueprint §1d — Package barrel
+/**
+ * @hbc/ui-kit — HB Intel Design System V2.1
+ * Blueprint §1d | PH4.16 §Step 9
+ *
+ * Unified component library for the HB Intel construction intelligence platform.
+ * Supports PWA (Next.js 14) and SPFx (SharePoint Framework) dual-target rendering.
+ *
+ * @version 2.1.0
+ * @see docs/reference/ui-kit/ for per-component documentation
+ */
 
 // Theme system
 export {
@@ -84,6 +92,19 @@ export {
 } from './theme/index.js';
 export type { HbcSemanticTokens, HbcTheme, HbcSpacingKey, HbcBreakpointConfig, ZIndexLayer } from './theme/index.js';
 
+// Theme V2.1 — Density & canonical hooks
+export {
+  detectDensityTier,
+  persistDensityOverride,
+  getDensityOverride,
+  clearDensityOverride,
+  DENSITY_BREAKPOINTS,
+  useHbcTheme,
+  useConnectivity,
+  useDensity,
+} from './theme/index.js';
+export type { DensityTier, UseHbcThemeReturn, UseDensityReturn } from './theme/index.js';
+
 // Icons
 export * from './icons/index.js';
 
@@ -159,7 +180,6 @@ export type {
   CommandBarFilter,
   SavedView,
   SavedViewScope,
-  DensityTier,
 } from './HbcCommandBar/index.js';
 
 export { HbcDataTable } from './HbcDataTable/index.js';

@@ -105,3 +105,20 @@ export {
   hbcMediaQuery,
 } from './grid.js';
 export type { HbcSpacingKey, HbcBreakpointConfig } from './grid.js';
+
+// Density (V2.1)
+export {
+  detectDensityTier,
+  persistDensityOverride,
+  getDensityOverride,
+  clearDensityOverride,
+  DENSITY_BREAKPOINTS,
+} from './density.js';
+export type { DensityTier } from './density.js';
+
+// Canonical hooks (V2.1)
+export { useHbcTheme } from './useHbcTheme.js';
+export type { UseHbcThemeReturn } from './useHbcTheme.js';
+export { useConnectivity } from './useConnectivity.js';
+export { useDensity } from './useDensity.js';
+export type { UseDensityReturn } from './useDensity.js';

@@ -405,5 +405,12 @@ Phase 4.15 (NGX Modernization & Design Consistency) completed: 2026-03-04
 - DESIGN_SYSTEM.md: authoring rules in packages/ui-kit/
 - NGX Tracker: docs/architecture/ngx-tracker.md
 - ADR-0029, developer guide: phase-4.15-ngx-modernization.md
+
+Phase 4.16 completed: 2026-03-04
+- @hbc/ui-kit v2.1.0 finalized: package.json exports, vite.config.ts, density tier system
+- Theme hooks (useHbcTheme, useConnectivity, useDensity) + density.ts + theme/README.md
+- 27 per-component docs in docs/reference/ui-kit/
+- ADR-0030, developer guide: phase-4.16-ui-kit-package.md
+- Build: zero errors; Lint: zero errors
 Next: Phase 5 (SPFx webparts) or verification
 -->
