@@ -286,3 +286,12 @@ When all completion criteria above are met, the following statement is **mechani
 *Version 1.2 — March 5, 2026 (amended: competitive list layout spec from industry research)*
 *Supersedes: Phase 4 partial implementation (ADR-0016 through ADR-0033)*
 *Next Phase: Phase 5 — SPFx Webpart Breakout*
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4b.3 (Layout Variant System) completed: 2026-03-05
+  - §6 DashboardLayout + ListLayout created
+  - §16 LAYOUT_MAP wired into WorkspacePageShell
+  - §17 All 5 layout story files complete
+  - ADR-0037 created
+  - Reference docs: DashboardLayout.md, ListLayout.md, WorkspacePageShell.md updated
+-->

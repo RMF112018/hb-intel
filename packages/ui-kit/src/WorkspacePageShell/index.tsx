@@ -1,10 +1,10 @@
 /**
  * WorkspacePageShell — Mandatory outer container for every page (D-01)
- * PH4B.2 §Step 2 | Blueprint §1d
+ * PH4B.2 §Step 2 | PH4B.3 §Step 3 | Blueprint §1d
  *
  * Renders breadcrumbs, command bar, banner, and state overlays
- * (loading/empty/error). Layout variant rendering deferred to Phase 4b.3.
- * listConfig stored in React context for Phase 4b.3 consumption.
+ * (loading/empty/error). LAYOUT_MAP wires DashboardLayout and ListLayout;
+ * form/detail/landing pass children through (page authors compose those directly).
  */
 import * as React from 'react';
 import { createContext } from 'react';
@@ -16,12 +16,14 @@ import { HbcBanner } from '../HbcBanner/index.js';
 import { HbcSpinner } from '../HbcSpinner/index.js';
 import { HbcEmptyState } from '../HbcEmptyState/index.js';
 import { HbcButton } from '../HbcButton/index.js';
+import { DashboardLayout } from '../layouts/DashboardLayout.js';
+import { ListLayout } from '../layouts/ListLayout.js';
 import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { heading2 } from '../theme/typography.js';
 import type { WorkspacePageShellProps, ListConfig } from './types.js';
 
 // ---------------------------------------------------------------------------
-// ListConfig context for Phase 4b.3 consumption
+// ListConfig context — still available for consumers needing programmatic access
 // ---------------------------------------------------------------------------
 export const ListConfigContext = createContext<ListConfig | undefined>(undefined);
 
@@ -108,6 +110,7 @@ export function WorkspacePageShell({
   breadcrumbs,
   actions,
   overflowActions,
+  dashboardConfig,
   listConfig,
   isLoading = false,
   isEmpty = false,
@@ -175,7 +178,7 @@ export function WorkspacePageShell({
           </div>
         )}
 
-        {/* Content area with state overlays */}
+        {/* Content area with state overlays + LAYOUT_MAP */}
         <div className={styles.content}>
           {isLoading ? (
             <div className={styles.stateOverlay}>
@@ -201,6 +204,22 @@ export function WorkspacePageShell({
                 }
               />
             </div>
+          ) : layout === 'dashboard' ? (
+            <DashboardLayout
+              kpiCards={dashboardConfig?.kpiCards}
+              chartContent={dashboardConfig?.chartContent}
+            >
+              {children}
+            </DashboardLayout>
+          ) : layout === 'list' && listConfig ? (
+            <ListLayout
+              primaryFilters={listConfig.primaryFilters}
+              advancedFilters={listConfig.advancedFilters}
+              savedViewsEnabled={listConfig.savedViewsEnabled}
+              bulkActions={listConfig.bulkActions}
+            >
+              {children}
+            </ListLayout>
           ) : (
             children
           )}
@@ -214,7 +233,10 @@ export type {
   WorkspacePageShellProps,
   PageLayout,
   BannerConfig,
+  DashboardConfig,
   ListConfig,
   FilterDef,
   BulkAction,
+  ListFilterDef,
+  ListBulkAction,
 } from './types.js';

@@ -1,15 +1,23 @@
 /**
  * WorkspacePageShell — Full prop contract
- * PH4B.2 §Step 2 | Blueprint §1d (D-01, D-02)
+ * PH4B.2 §Step 2 | PH4B.3 §Step 3 | Blueprint §1d (D-01, D-02)
  *
  * Mandatory outer container for every page in HB Intel.
- * The `layout` prop enforces D-02 at the type level.
- * Layout variant rendering deferred to Phase 4b.3.
+ * The `layout` prop enforces D-02 at the type level and drives LAYOUT_MAP rendering.
  */
 import type { ReactNode } from 'react';
 import type { BreadcrumbItem } from '@hbc/models';
 import type { BannerVariant } from '../HbcBanner/types.js';
 import type { CommandBarAction } from '../HbcCommandBar/types.js';
+import type {
+  DashboardConfig,
+  ListConfig,
+  ListFilterDef,
+  ListBulkAction,
+} from '../layouts/types.js';
+
+// Re-export layout types for backward compatibility
+export type { DashboardConfig, ListConfig, ListFilterDef, ListBulkAction };
 
 /** Page layout variants — enforced by D-02 */
 export type PageLayout = 'dashboard' | 'list' | 'form' | 'detail' | 'landing';
@@ -21,32 +29,9 @@ export interface BannerConfig {
   dismissible?: boolean;
 }
 
-/** Filter definition for list-mode pages */
-export interface FilterDef {
-  key: string;
-  label: string;
-  type: 'select' | 'date-range' | 'text';
-  options?: { value: string; label: string }[];
-}
-
-/** Bulk action for list-mode pages with row selection */
-export interface BulkAction {
-  key: string;
-  label: string;
-  icon?: ReactNode;
-  onClick: (selectedIds: string[]) => void;
-  isDestructive?: boolean;
-}
-
-/** List-mode configuration (forwarded as context for Phase 4b.3) */
-export interface ListConfig {
-  filterStoreKey: string;
-  primaryFilters: FilterDef[];
-  advancedFilters?: FilterDef[];
-  savedViewsEnabled?: boolean;
-  selectable?: boolean;
-  bulkActions?: BulkAction[];
-}
+// Legacy aliases — kept for backward compat, prefer ListFilterDef / ListBulkAction
+export type FilterDef = ListFilterDef;
+export type BulkAction = ListBulkAction;
 
 /** Full WorkspacePageShell props — D-01 mandatory wrapper */
 export interface WorkspacePageShellProps {
@@ -60,7 +45,9 @@ export interface WorkspacePageShellProps {
   actions?: CommandBarAction[];
   /** Overflow menu actions */
   overflowActions?: CommandBarAction[];
-  /** List-mode config (forwarded to Phase 4b.3 context) */
+  /** Dashboard layout config (only used when layout='dashboard') */
+  dashboardConfig?: DashboardConfig;
+  /** List-mode config (forwarded to ListLayout context) */
   listConfig?: ListConfig;
   /** Show loading spinner overlay */
   isLoading?: boolean;

@@ -103,6 +103,112 @@ export interface CreateUpdateLayoutProps {
 // useFocusMode hook
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// DashboardLayout
+// ---------------------------------------------------------------------------
+
+export interface DashboardLayoutProps {
+  /** KPI card data for the responsive grid */
+  kpiCards?: KpiCardData[];
+  /** Chart zone content (full-width slot below KPI grid) */
+  chartContent?: ReactNode;
+  /** Data zone content (flexGrow: 1) */
+  children: ReactNode;
+}
+
+/** DashboardConfig — subset of DashboardLayoutProps for WorkspacePageShell */
+export interface DashboardConfig {
+  kpiCards?: KpiCardData[];
+  chartContent?: ReactNode;
+}
+
+// ---------------------------------------------------------------------------
+// ListLayout
+// ---------------------------------------------------------------------------
+
+/** Filter definition for list-mode pages */
+export interface ListFilterDef {
+  key: string;
+  label: string;
+  type: 'select' | 'date-range' | 'text';
+  options?: { value: string; label: string }[];
+}
+
+/** Bulk action for list-mode pages with row selection */
+export interface ListBulkAction {
+  key: string;
+  label: string;
+  icon?: ReactNode;
+  onClick: (selectedIds: string[]) => void;
+  isDestructive?: boolean;
+}
+
+/** Saved view entry for ListLayout */
+export interface ListSavedViewEntry {
+  id: string;
+  name: string;
+  scope: 'personal' | 'project' | 'organization';
+}
+
+export interface ListLayoutProps {
+  /** Primary filter definitions (shown in toolbar) */
+  primaryFilters?: ListFilterDef[];
+  /** Advanced filter definitions (shown in expandable panel) */
+  advancedFilters?: ListFilterDef[];
+  /** Active filter values — controlled by parent */
+  activeFilters?: Record<string, string | string[]>;
+  /** Filter change handler */
+  onFilterChange?: (key: string, value: string | string[] | undefined) => void;
+  /** Clear all filters handler */
+  onClearAllFilters?: () => void;
+  /** Search input value — controlled */
+  searchValue?: string;
+  /** Search change handler */
+  onSearchChange?: (value: string) => void;
+  /** Search placeholder text */
+  searchPlaceholder?: string;
+  /** Enable saved views bar */
+  savedViewsEnabled?: boolean;
+  /** Saved view entries */
+  savedViews?: ListSavedViewEntry[];
+  /** Currently active view ID */
+  activeViewId?: string;
+  /** View selection handler */
+  onViewSelect?: (viewId: string) => void;
+  /** Save current view handler */
+  onSaveView?: () => void;
+  /** Current view mode */
+  viewMode?: 'table' | 'card';
+  /** View mode change handler */
+  onViewModeChange?: (mode: 'table' | 'card') => void;
+  /** Number of selected rows (triggers bulk bar) */
+  selectedCount?: number;
+  /** Bulk action definitions */
+  bulkActions?: ListBulkAction[];
+  /** Clear selection handler */
+  onClearSelection?: () => void;
+  /** Number of items currently shown */
+  showingCount?: number;
+  /** Total number of items */
+  totalCount?: number;
+  /** Table/card content */
+  children: ReactNode;
+}
+
+/** ListConfig — subset of ListLayoutProps for WorkspacePageShell */
+export interface ListConfig {
+  filterStoreKey: string;
+  primaryFilters?: ListFilterDef[];
+  advancedFilters?: ListFilterDef[];
+  savedViewsEnabled?: boolean;
+  selectable?: boolean;
+  bulkActions?: ListBulkAction[];
+}
+
+// ---------------------------------------------------------------------------
+// useFocusMode hook
+// ---------------------------------------------------------------------------
+
 export interface UseFocusModeReturn {
   /** Whether focus mode is currently active */
   isFocusMode: boolean;

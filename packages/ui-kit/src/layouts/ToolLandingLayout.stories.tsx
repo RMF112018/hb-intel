@@ -109,6 +109,31 @@ export const WithKpiCards: Story = {
   ),
 };
 
+export const WithCommandBar: Story = {
+  render: () => (
+    <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+      <ToolLandingLayout
+        toolName="RFIs"
+        primaryAction={mockPrimaryAction}
+        commandBar={
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '0.875rem', color: '#6B7280' }}>
+            <span>Filter: All</span>
+            <span>|</span>
+            <span>Sort: Date</span>
+            <span>|</span>
+            <span>Group: None</span>
+          </div>
+        }
+        statusBar={mockStatusBar}
+      >
+        <div style={{ padding: '16px', color: '#6B7280' }}>
+          <p>Content area with command bar above (sticky at 64px).</p>
+        </div>
+      </ToolLandingLayout>
+    </HbcAppShell>
+  ),
+};
+
 export const NoActions: Story = {
   render: () => (
     <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>

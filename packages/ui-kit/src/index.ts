@@ -225,7 +225,6 @@ export type {
   WorkspacePageShellProps,
   PageLayout,
   BannerConfig,
-  ListConfig,
   FilterDef,
   BulkAction,
 } from './WorkspacePageShell/index.js';
@@ -334,11 +333,13 @@ export type {
 export { HbcTree } from './HbcTree/index.js';
 export type { HbcTreeProps, HbcTreeNode } from './HbcTree/index.js';
 
-// Page Layouts (PH4.5)
+// Page Layouts (PH4.5 + PH4B.3)
 export {
   ToolLandingLayout,
   DetailLayout,
   CreateUpdateLayout,
+  DashboardLayout,
+  ListLayout,
   useFocusMode,
 } from './layouts/index.js';
 export type {
@@ -350,6 +351,13 @@ export type {
   ToolLandingLayoutProps,
   DetailLayoutProps,
   CreateUpdateLayoutProps,
+  DashboardLayoutProps,
+  DashboardConfig,
+  ListLayoutProps,
+  ListConfig,
+  ListFilterDef,
+  ListBulkAction,
+  ListSavedViewEntry,
   UseFocusModeReturn,
 } from './layouts/index.js';
 

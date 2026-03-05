@@ -91,6 +91,68 @@ export const Default: Story = {
   },
 };
 
+export const WithTabs: Story = {
+  render: () => {
+    const [activeTab, setActiveTab] = React.useState('details');
+    return (
+      <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+        <DetailLayout
+          itemTitle="RFI-042: Foundation Rebar Specification"
+          tabs={mockTabs}
+          activeTabId={activeTab}
+          onTabChange={setActiveTab}
+          mainContent={
+            <div style={{ padding: '16px' }}>
+              <h3>Tab Content: {activeTab}</h3>
+              <p style={{ color: '#6B7280' }}>Tab navigation with keyboard arrow keys.</p>
+            </div>
+          }
+        />
+      </HbcAppShell>
+    );
+  },
+};
+
+export const WithSidebar: Story = {
+  render: () => (
+    <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+      <DetailLayout
+        itemTitle="RFI-042: Foundation Rebar Specification"
+        mainContent={
+          <div style={{ padding: '16px' }}>
+            <h3>Main Content (8-col)</h3>
+            <p style={{ color: '#6B7280' }}>Primary content area.</p>
+          </div>
+        }
+        sidebarContent={
+          <div style={{ padding: '16px', backgroundColor: '#FAFBFC', borderRadius: '8px' }}>
+            <h4>Side Panel (4-col)</h4>
+            <p style={{ color: '#6B7280', fontSize: '0.875rem' }}>Metadata, related items.</p>
+          </div>
+        }
+      />
+    </HbcAppShell>
+  ),
+};
+
+export const WithActions: Story = {
+  render: () => (
+    <HbcAppShell user={mockUser} sidebarGroups={mockGroups}>
+      <DetailLayout
+        itemTitle="RFI-042: Foundation Rebar Specification"
+        statusBadge={<HbcStatusBadge variant="inProgress" label="In Progress" />}
+        actions={mockActions}
+        mainContent={
+          <div style={{ padding: '16px' }}>
+            <h3>Detail with header actions</h3>
+            <p style={{ color: '#6B7280' }}>Edit and Export PDF buttons in the header.</p>
+          </div>
+        }
+      />
+    </HbcAppShell>
+  ),
+};
+
 export const TabletStacked: Story = {
   parameters: {
     viewport: { defaultViewport: 'tablet' },

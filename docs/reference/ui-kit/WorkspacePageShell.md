@@ -28,7 +28,8 @@ import type {
 | breadcrumbs | `BreadcrumbItem[]` | `undefined` | Breadcrumb navigation segments |
 | actions | `CommandBarAction[]` | `undefined` | Primary command bar actions |
 | overflowActions | `CommandBarAction[]` | `undefined` | Overflow menu actions |
-| listConfig | `ListConfig` | `undefined` | List-mode config (Phase 4b.3 context) |
+| dashboardConfig | `DashboardConfig` | `undefined` | Dashboard layout config (KPIs + chart) — used when `layout='dashboard'` |
+| listConfig | `ListConfig` | `undefined` | List-mode config (filters, bulk actions) — used when `layout='list'` |
 | isLoading | `boolean` | `false` | Show loading spinner overlay |
 | isEmpty | `boolean` | `false` | Show empty state |
 | isError | `boolean` | `false` | Show error state |
@@ -56,18 +57,41 @@ interface BannerConfig {
 }
 ```
 
+## DashboardConfig (Phase 4b.3)
+
+```ts
+interface DashboardConfig {
+  kpiCards?: KpiCardData[];
+  chartContent?: ReactNode;
+}
+```
+
+When `layout='dashboard'`, WPS wraps children in `DashboardLayout` with the config props. See [DashboardLayout.md](./DashboardLayout.md).
+
 ## ListConfig (Phase 4b.3)
 
 ```ts
 interface ListConfig {
   filterStoreKey: string;
-  primaryFilters: FilterDef[];
-  advancedFilters?: FilterDef[];
+  primaryFilters?: ListFilterDef[];
+  advancedFilters?: ListFilterDef[];
   savedViewsEnabled?: boolean;
   selectable?: boolean;
-  bulkActions?: BulkAction[];
+  bulkActions?: ListBulkAction[];
 }
 ```
+
+When `layout='list'`, WPS wraps children in `ListLayout` with the config props. See [ListLayout.md](./ListLayout.md).
+
+## Layout Variant Behavior (Phase 4b.3 LAYOUT_MAP)
+
+| Layout | WPS Behavior |
+|--------|-------------|
+| `dashboard` | Wraps children in `DashboardLayout` with `dashboardConfig` props |
+| `list` | Wraps children in `ListLayout` with `listConfig` props |
+| `form` | Pass-through — page composes `CreateUpdateLayout` directly |
+| `detail` | Pass-through — page composes `DetailLayout` directly |
+| `landing` | Pass-through — page composes `ToolLandingLayout` directly |
 
 ## Usage
 

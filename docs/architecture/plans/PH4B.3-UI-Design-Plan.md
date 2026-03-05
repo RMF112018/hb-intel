@@ -344,3 +344,25 @@ For the `list` variant specifically, also include:
 *Version 1.0 — March 5, 2026*
 *Supersedes: Phase 4 partial implementation (ADR-0016 through ADR-0033)*
 *Next Phase: Phase 5 — SPFx Webpart Breakout*
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4b.3 completed: 2026-03-05
+Steps completed:
+  - 4b.3.1: DashboardLayout created (packages/ui-kit/src/layouts/DashboardLayout.tsx)
+  - 4b.3.1: ListLayout created (packages/ui-kit/src/layouts/ListLayout.tsx)
+  - 4b.3.2: LAYOUT_MAP wired into WorkspacePageShell (dashboard + list auto-wrap, form/detail/landing pass-through)
+  - 4b.3.2: DashboardConfig + ListConfig types added to WPS props
+  - 4b.3.2: Barrel exports updated (layouts/index.ts, layouts/types.ts, src/index.ts)
+  - 4b.3.3: 5 layout story files (2 new + 3 updated with additional exports)
+Documentation:
+  - ADR created: docs/architecture/adr/ADR-0037-layout-variant-system.md
+  - Reference docs: docs/reference/ui-kit/DashboardLayout.md, ListLayout.md
+  - Updated: docs/reference/ui-kit/WorkspacePageShell.md (DashboardConfig, LAYOUT_MAP behavior)
+Deferred to Phase 5+:
+  - useFilterStore Zustand store
+  - HbcLocationFilter
+  - Saved views persistence backend
+  - AI-suggested filters
+  - Service worker deep-link caching
+Build verification: pnpm turbo run build — 23/23 tasks pass
+-->
