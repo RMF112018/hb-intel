@@ -42,3 +42,12 @@ expects (`SidebarNavGroup[]`, `ShellUser`).
 - Field Mode toggle, connectivity bar, and responsive bottom nav are functional
 - No changes required to SPFx webpart apps (already wired correctly)
 - `@hbc/shell` package remains intact; only its consumer usage in root routes changed
+
+## Update: `@hbc/app-shell` Removed (2026-03-05)
+
+The redundant `@hbc/app-shell` package — a thin re-export wrapper over `@hbc/ui-kit/app-shell` —
+has been deleted. Its sole consumer (`@hbc/spfx`) was migrated to import directly from
+`@hbc/ui-kit/app-shell`. This eliminates the unnecessary indirection layer and establishes
+`@hbc/ui-kit` as the single authoritative source for all shell UI components.
+
+See [PH4-Shell-Consolidation.md](../plans/PH4-Shell-Consolidation.md) for full details.
