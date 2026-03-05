@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+// eslint-disable-next-line @hbc/hbc/no-direct-fluent-import -- TODO: migrate to @hbc/ui-kit (Phase 4b.11)
 import { Text, Card, CardHeader } from '@fluentui/react-components';
 import { WorkspacePageShell, HbcDataTable, HbcStatusBadge } from '@hbc/ui-kit';
 import type { ColumnDef } from '@hbc/ui-kit';

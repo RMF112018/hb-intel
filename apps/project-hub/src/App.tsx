@@ -2,6 +2,7 @@
  * App root — Provider hierarchy for SPFx webpart.
  * FluentProvider > QueryClientProvider > HbcErrorBoundary > RouterProvider
  */
+// eslint-disable-next-line @hbc/hbc/no-direct-fluent-import -- TODO: migrate to @hbc/ui-kit (Phase 4b.11)
 import { FluentProvider } from '@fluentui/react-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';

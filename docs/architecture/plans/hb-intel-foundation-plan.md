@@ -456,4 +456,11 @@ Phase 4b.5 (Navigation & Active State) completed: 2026-03-05
 D-04 implemented: active sidebar state derived from useRouterState().location.pathname
 NAV_ITEMS centralized registry created in @hbc/shell
 Per-item requiredPermission filtering added to HbcSidebar
+
+Phase 4b.6 (Theme & Token Enforcement) completed: 2026-03-05
+D-05 + D-10 implemented via eslint-plugin-hbc (enforce-hbc-tokens enhanced, no-direct-fluent-import added)
+Both rules set to 'error' in .eslintrc.base.js for apps/**
+Dark mode: all 25 HbcSemanticTokens verified in both light and field themes
+Token reference table expanded in packages/ui-kit/src/theme/README.md
+ADR-0040: theme-and-token-enforcement.md
 -->

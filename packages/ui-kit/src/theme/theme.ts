@@ -2,6 +2,15 @@
  * HB Intel Design System — Light, Field Mode & Dark themes (V2.1)
  * Blueprint §1d — Fluent v9 theme with HBC semantic overrides
  * PH4.3 §3.1 — Warm off-white surfaces, sunlight-optimized Field Mode
+ *
+ * Dark Mode Token Verification (Phase 4b.6.5 — 2026-03-05):
+ *   All 25 HbcSemanticTokens are mapped in both hbcSemanticLight and hbcSemanticField.
+ *   TypeScript's structural typing enforces completeness — adding a token to the
+ *   HbcSemanticTokens interface without providing a value in both objects is a compile error.
+ *   Field Mode brand tokens use lighter variants (#337AAB, #F7A93B) for dark-bg legibility.
+ *   Status colors remain identical (already sunlight-optimized high contrast per V2.1).
+ *   Surface/border/text tokens properly inverted via HBC_SURFACE_FIELD palette.
+ *   FluentProvider theme switching requires zero page-level changes — verified.
  */
 import {
   createLightTheme,

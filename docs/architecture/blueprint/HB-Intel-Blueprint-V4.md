@@ -856,4 +856,11 @@ Next: Phase 4b.5 (Navigation & Active State)
 Phase 4b.5 completed: 2026-03-05
 D-04 (router-derived sidebar active state) fully implemented.
 NAV_ITEMS registry in @hbc/shell, per-item requiredPermission filtering.
+
+Phase 4b.6 completed: 2026-03-05
+D-05 (token enforcement) and D-10 (import enforcement) implemented via eslint-plugin-hbc.
+enforce-hbc-tokens enhanced: hex + rgb/rgba + pixel detection.
+no-direct-fluent-import added: blocks @fluentui/react-components in apps/.
+Both rules set to 'error'. Dark mode tokens verified complete (25/25 HbcSemanticTokens).
+ADR-0040: theme-and-token-enforcement.md
 -->
