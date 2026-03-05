@@ -1,8 +1,10 @@
 /**
  * Workspace metadata — Blueprint §2c.
- * Static config per workspace: label, description, toolPickerItems, sidebarItems.
+ * Static config per workspace: label, description.
+ * PH4B.5 §4b.5.2 — isActive removed (D-04); sidebar items sourced from NAV_ITEMS registry.
  */
 import type { WorkspaceId, WorkspaceDescriptor, ToolPickerItem, SidebarItem } from '@hbc/shell';
+import { getNavItemsForWorkspace } from '@hbc/shell';
 
 export const WORKSPACE_DESCRIPTORS: Record<WorkspaceId, WorkspaceDescriptor> = {
   'project-hub': { id: 'project-hub', label: 'Project Hub', description: 'Portfolio overview and project navigation' },
@@ -31,20 +33,33 @@ type SidebarFactory = (navigate: (id: string) => void) => SidebarItem[];
 
 export const WORKSPACE_TOOL_PICKERS: Partial<Record<WorkspaceId, ToolPickerFactory>> = {
   accounting: (navigate) => [
-    { id: 'overview', label: 'Overview', isActive: true, onClick: () => navigate('overview') },
-    { id: 'budgets', label: 'Budgets', isActive: false, onClick: () => navigate('budgets') },
-    { id: 'invoices', label: 'Invoices', isActive: false, onClick: () => navigate('invoices') },
+    { id: 'overview', label: 'Overview', onClick: () => navigate('overview') },
+    { id: 'budgets', label: 'Budgets', onClick: () => navigate('budgets') },
+    { id: 'invoices', label: 'Invoices', onClick: () => navigate('invoices') },
   ],
   estimating: (navigate) => [
-    { id: 'bids', label: 'Bids', isActive: true, onClick: () => navigate('bids') },
-    { id: 'templates', label: 'Templates', isActive: false, onClick: () => navigate('templates') },
+    { id: 'bids', label: 'Bids', onClick: () => navigate('bids') },
+    { id: 'templates', label: 'Templates', onClick: () => navigate('templates') },
   ],
 };
 
 export const WORKSPACE_SIDEBARS: Partial<Record<WorkspaceId, SidebarFactory>> = {
-  'project-hub': (navigate) => [
-    { id: 'portfolio', label: 'Portfolio', isActive: true, onClick: () => navigate('portfolio') },
-    { id: 'recent', label: 'Recent', isActive: false, onClick: () => navigate('recent') },
-    { id: 'favorites', label: 'Favorites', isActive: false, onClick: () => navigate('favorites') },
-  ],
+  'project-hub': (navigate) =>
+    getNavItemsForWorkspace('project-hub').map((item) => ({
+      id: item.key,
+      label: item.label,
+      onClick: () => navigate(item.key),
+    })),
+  accounting: (navigate) =>
+    getNavItemsForWorkspace('accounting').map((item) => ({
+      id: item.key,
+      label: item.label,
+      onClick: () => navigate(item.key),
+    })),
+  estimating: (navigate) =>
+    getNavItemsForWorkspace('estimating').map((item) => ({
+      id: item.key,
+      label: item.label,
+      onClick: () => navigate(item.key),
+    })),
 };

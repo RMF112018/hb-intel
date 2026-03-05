@@ -1,17 +1,19 @@
 /**
- * Shell bridge — Phase 4.19
- * Converts navStore (flat SidebarItem[]) → SidebarNavGroup[] expected by HbcAppShell,
+ * Shell bridge — Phase 4.19, PH4B.5 §4b.5.3
+ * Converts navStore / NAV_ITEMS registry → SidebarNavGroup[] expected by HbcAppShell,
  * and ICurrentUser → ShellUser.
  */
 import { createElement } from 'react';
 import type { ICurrentUser } from '@hbc/models';
 import type { WorkspaceId, SidebarItem } from '@hbc/shell';
+import { getNavItemsForWorkspace } from '@hbc/shell';
 import type { SidebarNavGroup, ShellUser } from '@hbc/ui-kit';
 import { DrawingSheet } from '@hbc/ui-kit';
 import { WORKSPACE_DESCRIPTORS } from '../router/workspace-config.js';
 
 /**
  * Maps flat navStore sidebar items into the grouped structure HbcAppShell expects.
+ * @deprecated Prefer buildSidebarGroupsFromRegistry() — PH4B.5 §4b.5.3
  */
 export function mapNavStoreToSidebarGroups(
   items: SidebarItem[],
@@ -29,6 +31,32 @@ export function mapNavStoreToSidebarGroups(
         label: item.label,
         icon: createElement(DrawingSheet, { size: 'sm' }),
         href: `/${wsId}/${item.id}`,
+      })),
+    },
+  ];
+}
+
+/**
+ * Builds sidebar groups directly from the NAV_ITEMS registry — PH4B.5 §4b.5.3.
+ * No dependency on navStore's sidebarItems for content.
+ */
+export function buildSidebarGroupsFromRegistry(
+  workspaceId: WorkspaceId | null,
+): SidebarNavGroup[] {
+  const wsId = workspaceId ?? 'project-hub';
+  const navItems = getNavItemsForWorkspace(wsId);
+  if (navItems.length === 0) return [];
+  const descriptor = WORKSPACE_DESCRIPTORS[wsId];
+  return [
+    {
+      id: wsId,
+      label: descriptor?.label ?? 'Navigation',
+      items: navItems.map((navItem) => ({
+        id: navItem.key,
+        label: navItem.label,
+        icon: createElement(DrawingSheet, { size: 'sm' }),
+        href: navItem.path,
+        requiredPermission: navItem.requiredPermission,
       })),
     },
   ];

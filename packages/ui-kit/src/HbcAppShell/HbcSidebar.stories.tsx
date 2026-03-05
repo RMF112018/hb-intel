@@ -79,6 +79,30 @@ export const Default: Story = {
   },
 };
 
+/** D-04: Simulates router-derived active state — each variant highlights a different item */
+export const RouterDerivedActiveState: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '32px' }}>
+      <div>
+        <p style={{ fontSize: '0.75rem', color: '#6B7280', marginBottom: '4px' }}>Active: estimating</p>
+        <HbcSidebar groups={mockGroups} activeItemId="estimating" />
+      </div>
+      <div>
+        <p style={{ fontSize: '0.75rem', color: '#6B7280', marginBottom: '4px' }}>Active: rfis</p>
+        <HbcSidebar groups={mockGroups} activeItemId="rfis" />
+      </div>
+      <div>
+        <p style={{ fontSize: '0.75rem', color: '#6B7280', marginBottom: '4px' }}>Active: submittals</p>
+        <HbcSidebar groups={mockGroups} activeItemId="submittals" />
+      </div>
+      <div>
+        <p style={{ fontSize: '0.75rem', color: '#6B7280', marginBottom: '4px' }}>No active item</p>
+        <HbcSidebar groups={mockGroups} />
+      </div>
+    </div>
+  ),
+};
+
 export const AllVariants: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: '24px' }}>
@@ -96,6 +120,24 @@ export const AllVariants: Story = {
       </div>
     </div>
   ),
+};
+
+/** Per-item requiredPermission — settings item requires admin:* */
+export const PermissionFilteredItems: Story = {
+  args: {
+    groups: [
+      {
+        id: 'operations',
+        label: 'Operations',
+        items: [
+          { id: 'rfis', label: 'RFIs', icon: <RFI size="md" />, href: '/rfis' },
+          { id: 'submittals', label: 'Submittals', icon: <Submittal size="md" />, href: '/submittals' },
+          { id: 'admin-tool', label: 'Admin Tool', icon: <Settings size="md" />, href: '/admin-tool', requiredPermission: 'admin:*' },
+        ],
+      },
+    ],
+    activeItemId: 'rfis',
+  },
 };
 
 export const FieldMode: Story = {

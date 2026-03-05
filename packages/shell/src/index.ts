@@ -44,9 +44,12 @@ export {
   turnoverDetail,
   turnoverTearsheetSteps,
   documentsLanding,
+  NAV_ITEMS,
+  getNavItemsForWorkspace,
 } from './module-configs/index.js';
 export type {
   ModuleTableConfig,
   ModuleLandingConfig,
   ModuleDetailConfig,
+  NavItemConfig,
 } from './module-configs/index.js';

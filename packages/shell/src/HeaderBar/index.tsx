@@ -32,7 +32,7 @@ export function HeaderBar({ leftSlot, toolPickerSlot, rightSlot, onToolSelect }:
             <button
               key={item.id}
               data-hbc-shell="tool-picker-item"
-              data-active={item.isActive || undefined}
+              data-active={undefined}
               onClick={() => {
                 item.onClick();
                 onToolSelect?.(item.id);

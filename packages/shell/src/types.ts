@@ -53,16 +53,14 @@ export interface ToolPickerItem {
   id: string;
   label: string;
   icon?: string;
-  isActive: boolean;
   onClick: () => void;
 }
 
-/** A single item in the contextual sidebar (Blueprint §2c). */
+/** A single item in the contextual sidebar (Blueprint §2c). D-04: active state is router-derived. */
 export interface SidebarItem {
   id: string;
   label: string;
   icon?: string;
-  isActive: boolean;
   onClick: () => void;
 }
 

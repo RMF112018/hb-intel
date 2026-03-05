@@ -126,7 +126,7 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
       <div data-hbc-shell="app-shell" data-mode={mode}>
         <HbcConnectivityBar />
         <HbcHeader user={user} onSignOut={onSignOut} />
-        <HbcSidebar groups={sidebarGroups} onNavigate={onNavigate} />
+        <HbcSidebar groups={sidebarGroups} activeItemId={activeItemId} onNavigate={onNavigate} />
         {/* Focus Mode overlay */}
         <div
           className={mergeClasses(

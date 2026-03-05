@@ -236,6 +236,17 @@ The FAB renders with `data-hbc-ui="fab-primary"` and `aria-label={primaryAction.
 
 Secondary actions are written to a module-level store (`fieldModeActionsStore`) and consumed by `HbcCommandPalette` via `useFieldModeActions()`.
 
+## Active Sidebar State (D-04)
+
+Sidebar active state is derived **automatically** from the router. Pages must never manually set active nav state.
+
+- `root-route.tsx` calls `useRouterState().location.pathname` and matches against sidebar item `href` values
+- The matched item's `id` is passed as `activeItemId` through `HbcAppShell` → `HbcSidebar` → `HbcBottomNav`
+- Path matching: `path === item.href || path.startsWith(item.href + '/')` — longest match wins
+- Adding a nav item requires only adding an entry to `NAV_ITEMS` in `@hbc/shell`
+
+See [ADR-0039](../../architecture/adr/ADR-0039-navigation-and-active-state.md) for full rationale.
+
 ## SPFx Constraints
 
 Depends on `useProjectStore` from `@hbc/shell` for active project context. In SPFx environments, ensure the shell store is properly initialized.

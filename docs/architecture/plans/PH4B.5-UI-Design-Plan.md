@@ -155,3 +155,11 @@ Nav items with `requiredRole` are hidden (not just disabled) for users without t
 *Version 1.0 — March 5, 2026*
 *Supersedes: Phase 4 partial implementation (ADR-0016 through ADR-0033)*
 *Next Phase: Phase 5 — SPFx Webpart Breakout*
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4b.5 completed: 2026-03-05
+Tasks: 4b.5.1 (router-derived activeItemId), 4b.5.2 (isActive removal), 4b.5.3 (NAV_ITEMS registry), 4b.5.4 (per-item requiredPermission)
+ADR created: docs/architecture/adr/ADR-0039-navigation-and-active-state.md
+Documentation updated: docs/reference/ui-kit/WorkspacePageShell.md (D-04 section)
+Build: 23/23 tasks pass, 0 errors
+-->

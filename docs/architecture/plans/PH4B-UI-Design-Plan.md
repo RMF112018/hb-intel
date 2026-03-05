@@ -301,4 +301,9 @@ Phase 4b.4 (Command Bar & Page Actions) completed: 2026-03-05
   - ESLint rule hbc/no-direct-buttons-in-content (D-03)
   - ADR-0038 created
   - Reference docs: WorkspacePageShell.md updated with D-03 pattern + field mode behavior
+
+Phase 4b.5 (Navigation & Active State) completed: 2026-03-05
+§17 items: 4b.5.1-4b.5.4 all complete
+ADR: ADR-0039-navigation-and-active-state.md
+Next: Phase 4b.6
 -->

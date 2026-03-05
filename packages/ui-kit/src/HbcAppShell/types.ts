@@ -20,6 +20,8 @@ export interface SidebarNavItem {
   icon: ReactNode;
   href: string;
   isFavorite?: boolean;
+  /** Permission required to see this item. Hidden (not disabled) if not met. PH4B.5 §4b.5.4 */
+  requiredPermission?: string;
 }
 
 /** A group of navigation items in the sidebar */

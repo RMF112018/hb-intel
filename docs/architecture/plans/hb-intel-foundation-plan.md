@@ -451,4 +451,9 @@ Phase 4b.4 completed: 2026-03-05 — Command Bar & Page Actions (ADR-0038)
 - Field mode: primary → FAB, secondary → Cmd+K palette via fieldModeActionsStore
 - ESLint rule: hbc/no-direct-buttons-in-content (D-03)
 Next: Phase 4b.5 (Navigation & Active State)
+
+Phase 4b.5 (Navigation & Active State) completed: 2026-03-05
+D-04 implemented: active sidebar state derived from useRouterState().location.pathname
+NAV_ITEMS centralized registry created in @hbc/shell
+Per-item requiredPermission filtering added to HbcSidebar
 -->

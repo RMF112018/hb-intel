@@ -39,3 +39,7 @@ export {
 
 // Documents
 export { documentsLanding } from './documents.config.js';
+
+// Navigation Registry (PH4B.5 §4b.5.3)
+export { NAV_ITEMS, getNavItemsForWorkspace } from './nav-config.js';
+export type { NavItemConfig } from './nav-config.js';

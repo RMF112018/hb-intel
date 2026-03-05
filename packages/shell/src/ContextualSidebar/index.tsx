@@ -26,7 +26,7 @@ export function ContextualSidebar({ sidebarSlot, onNavigate }: ContextualSidebar
             <button
               key={item.id}
               data-hbc-shell="sidebar-item"
-              data-active={item.isActive || undefined}
+              data-active={undefined}
               onClick={() => {
                 item.onClick();
                 onNavigate?.(item.id);

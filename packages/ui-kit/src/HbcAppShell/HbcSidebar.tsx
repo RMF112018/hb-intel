@@ -20,7 +20,7 @@ import { Z_INDEX } from '../theme/z-index.js';
 import { Expand, Collapse } from '../icons/index.js';
 import { useSidebarState } from './hooks/useSidebarState.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
-import type { HbcSidebarProps, SidebarNavGroup } from './types.js';
+import type { HbcSidebarProps, SidebarNavGroup, SidebarNavItem } from './types.js';
 
 const useStyles = makeStyles({
   root: {
@@ -153,6 +153,16 @@ const PermissionFilteredGroup: React.FC<{
   return <>{children(visible)}</>;
 };
 
+/** Wrapper that filters a single nav item by permission — PH4B.5 §4b.5.4 */
+const PermissionFilteredItem: React.FC<{
+  permission?: string;
+  children: React.ReactNode;
+}> = ({ permission, children }) => {
+  const allowed = usePermission(permission ?? '');
+  if (permission && !allowed) return null;
+  return <>{children}</>;
+};
+
 const FOCUS_EVENT = 'hbc-focus-mode-change';
 
 export const HbcSidebar: React.FC<HbcSidebarProps> = ({
@@ -235,17 +245,20 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
                     </button>
                   );
 
-                  return effectiveExpanded ? (
-                    <React.Fragment key={item.id}>{button}</React.Fragment>
-                  ) : (
-                    <Tooltip
-                      key={item.id}
-                      content={item.label}
-                      relationship="label"
-                      positioning="after"
-                    >
-                      {button}
-                    </Tooltip>
+                  return (
+                    <PermissionFilteredItem key={item.id} permission={item.requiredPermission}>
+                      {effectiveExpanded ? (
+                        button
+                      ) : (
+                        <Tooltip
+                          content={item.label}
+                          relationship="label"
+                          positioning="after"
+                        >
+                          {button}
+                        </Tooltip>
+                      )}
+                    </PermissionFilteredItem>
                   );
                 })}
               </div>
