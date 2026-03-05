@@ -18,7 +18,7 @@
     "bundle:size": "node ./scripts/report-bundle-size.mjs"
   },
   "dependencies": {
-    "@hbc/app-shell": "workspace:*"
+    "@hbc/ui-kit": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",

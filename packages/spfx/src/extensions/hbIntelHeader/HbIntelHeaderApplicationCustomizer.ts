@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { HbcAppShell } from '@hbc/app-shell';
+import { HbcAppShell } from '@hbc/ui-kit/app-shell';
 
 interface ITopPlaceholder {
   domElement: HTMLElement;
@@ -58,8 +58,8 @@ export class HbIntelHeaderApplicationCustomizer {
           mode: 'spfx',
           sidebarGroups: [],
           user: null,
+          children: React.createElement('div', { 'aria-hidden': true }),
         },
-        React.createElement('div', { 'aria-hidden': true }),
       ),
     );
   }
