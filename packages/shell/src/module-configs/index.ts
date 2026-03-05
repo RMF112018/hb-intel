@@ -1,6 +1,8 @@
 /**
  * Module Configuration Barrel — PH4.13 §13.7
  * Blueprint §1d — All module-specific presets
+ *
+ * PH4B.2 §Step 3 — Moved from ui-kit to shell (F-014)
  */
 
 // Types

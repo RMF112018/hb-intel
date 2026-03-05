@@ -80,7 +80,7 @@ export function HomePage(): ReactNode {
   const router = useRouter();
 
   return (
-    <WorkspacePageShell title="Site Control" description="Mobile field dashboard">
+    <WorkspacePageShell layout="dashboard" title="Site Control">
       <div className={styles.grid}>
         <Card
           className={styles.card}

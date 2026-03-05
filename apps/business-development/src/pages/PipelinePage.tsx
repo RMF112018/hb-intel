@@ -29,7 +29,7 @@ export function PipelinePage(): ReactNode {
   ];
 
   return (
-    <WorkspacePageShell title="Pipeline" description="Lead pipeline and opportunity tracking">
+    <WorkspacePageShell layout="list" title="Pipeline">
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
         {summaryCards.map((card) => (
           <Card key={card.label} size="small">

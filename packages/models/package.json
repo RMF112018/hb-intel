@@ -20,6 +20,9 @@
     "check-types": "tsc --noEmit",
     "lint": "eslint src/ --ext .ts,.tsx"
   },
+  "devDependencies": {
+    "@types/react": "^18.3.0"
+  },
   "files": [
     "dist"
   ]

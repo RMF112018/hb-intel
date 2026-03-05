@@ -1,6 +1,8 @@
 /**
  * Module Pattern Stories — PH4.13 §13.8
  * Blueprint §1d — Demonstrates module configs wired into ui-kit layouts
+ *
+ * PH4B.2 — Configs now imported from @hbc/shell (F-014)
  */
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -8,12 +10,14 @@ import { HbcDataTable } from '../HbcDataTable/index.js';
 import { HbcKpiCard } from '../HbcKpiCard/index.js';
 import { HbcCalendarGrid } from '../HbcCalendarGrid/index.js';
 import { HbcScoreBar } from '../HbcScoreBar/index.js';
-import { scorecardsLanding } from './scorecards.config.js';
-import { rfisLanding } from './rfis.config.js';
-import { punchListLanding } from './punch-list.config.js';
-import { budgetLanding } from './budget.config.js';
-import { turnoverLanding } from './turnover.config.js';
-import { documentsLanding } from './documents.config.js';
+import {
+  scorecardsLanding,
+  rfisLanding,
+  punchListLanding,
+  budgetLanding,
+  turnoverLanding,
+  documentsLanding,
+} from '@hbc/shell';
 
 // Helper: generate sample rows
 function generateRows(count: number): Record<string, unknown>[] {

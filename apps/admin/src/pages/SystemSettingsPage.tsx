@@ -3,7 +3,7 @@ import { HbcEmptyState, WorkspacePageShell } from '@hbc/ui-kit';
 
 export function SystemSettingsPage(): ReactNode {
   return (
-    <WorkspacePageShell title="System Settings" description="System configuration and administration">
+    <WorkspacePageShell layout="form" title="System Settings">
       <HbcEmptyState title="System Settings" description="System configuration tools will be available in a future release." />
     </WorkspacePageShell>
   );

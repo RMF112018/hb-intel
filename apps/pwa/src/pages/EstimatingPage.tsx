@@ -39,7 +39,7 @@ export function EstimatingPage(): ReactNode {
   ];
 
   return (
-    <WorkspacePageShell title="Estimating" description="Bid tracking and cost estimation">
+    <WorkspacePageShell layout="dashboard" title="Estimating">
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
         {summaryCards.map((card) => (
           <Card key={card.label} size="small">

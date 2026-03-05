@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@hbc/auth": "workspace:*",
+    "@hbc/models": "workspace:*",
     "@hbc/shell": "workspace:*",
     "@fluentui/react-components": "^9.56.0",
     "@griffel/react": "^1.5.0",

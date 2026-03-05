@@ -4,53 +4,27 @@
  *
  * Three canonical layouts: ToolLanding, Detail, CreateUpdate.
  * Every page in HB Intel must use exactly one of these.
+ *
+ * PH4B.2 §Step 1 — Pure data-shape interfaces re-exported from @hbc/models
+ * to break circular deps while preserving backward compatibility.
  */
 import type { ReactNode } from 'react';
+import type {
+  KpiCardData,
+  LayoutAction,
+  LayoutTab,
+  StatusBarData,
+  BreadcrumbItem,
+} from '@hbc/models';
 
-// ---------------------------------------------------------------------------
-// Shared types
-// ---------------------------------------------------------------------------
-
-/** KPI card data for ToolLandingLayout metric cards */
-export interface KpiCardData {
-  id: string;
-  label: string;
-  value: string | number;
-  trend?: 'up' | 'down' | 'flat';
-  trendValue?: string;
-  icon?: ReactNode;
-}
-
-/** Action button used across layout headers */
-export interface LayoutAction {
-  key: string;
-  label: string;
-  icon?: ReactNode;
-  onClick: () => void;
-  primary?: boolean;
-  disabled?: boolean;
-}
-
-/** Tab definition for DetailLayout tab bar */
-export interface LayoutTab {
-  id: string;
-  label: string;
-  icon?: ReactNode;
-  disabled?: boolean;
-}
-
-/** Status bar data for ToolLandingLayout */
-export interface StatusBarData {
-  showing: number;
-  total: number;
-  lastSynced?: string;
-}
-
-/** Breadcrumb segment for DetailLayout */
-export interface BreadcrumbItem {
-  label: string;
-  href?: string;
-}
+// Re-export shared data shapes from @hbc/models (canonical source)
+export type {
+  KpiCardData,
+  LayoutAction,
+  LayoutTab,
+  StatusBarData,
+  BreadcrumbItem,
+};
 
 // ---------------------------------------------------------------------------
 // ToolLandingLayout

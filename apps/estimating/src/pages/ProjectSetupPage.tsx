@@ -3,7 +3,7 @@ import { HbcEmptyState, WorkspacePageShell } from '@hbc/ui-kit';
 
 export function ProjectSetupPage(): ReactNode {
   return (
-    <WorkspacePageShell title="Project Setup" description="Project estimation setup and configuration">
+    <WorkspacePageShell layout="form" title="Project Setup">
       <HbcEmptyState title="Project Setup" description="Project estimation setup tools will be available in a future release." />
     </WorkspacePageShell>
   );

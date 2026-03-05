@@ -220,8 +220,15 @@ export type {
 export { HbcKpiCard } from './HbcKpiCard/index.js';
 export type { HbcKpiCardProps, KpiTrend } from './HbcKpiCard/index.js';
 
-export { WorkspacePageShell } from './WorkspacePageShell/index.js';
-export type { WorkspacePageShellProps } from './WorkspacePageShell/index.js';
+export { WorkspacePageShell, ListConfigContext } from './WorkspacePageShell/index.js';
+export type {
+  WorkspacePageShellProps,
+  PageLayout,
+  BannerConfig,
+  ListConfig,
+  FilterDef,
+  BulkAction,
+} from './WorkspacePageShell/index.js';
 
 // New components (PH4.6)
 export { HbcButton } from './HbcButton/index.js';
@@ -377,7 +384,8 @@ export type {
   RevisionOption,
 } from './HbcDrawingViewer/index.js';
 
-// Module Configuration Objects
+// Module Configuration Objects — moved to @hbc/shell (PH4B.2 F-014)
+// Re-export from @hbc/shell for backward compatibility
 export {
   scorecardsLanding,
   scorecardsDetail,
@@ -394,9 +402,9 @@ export {
   turnoverDetail,
   turnoverTearsheetSteps,
   documentsLanding,
-} from './module-configs/index.js';
+} from '@hbc/shell';
 export type {
   ModuleTableConfig,
   ModuleLandingConfig,
   ModuleDetailConfig,
-} from './module-configs/index.js';
+} from '@hbc/shell';

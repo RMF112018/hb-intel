@@ -1,7 +1,13 @@
 /**
  * HbcCommandBar — Blueprint §1d toolbar
  * PH4.6 §Step 10 — saved views + density control
+ *
+ * PH4B.2 §Step 1 — DensityTier re-exported from @hbc/models
  */
+import type { DensityTier } from '@hbc/models';
+
+// Re-export for backward compat
+export type { DensityTier };
 
 export interface CommandBarAction {
   /** Unique key */
@@ -43,10 +49,6 @@ export interface SavedView {
   /** Currently active view */
   isActive?: boolean;
 }
-
-// PH4.6 §Step 10 — Density tiers (V2.1 Dec 23)
-
-export type DensityTier = 'compact' | 'standard' | 'touch';
 
 export interface HbcCommandBarProps {
   /** Search box value */

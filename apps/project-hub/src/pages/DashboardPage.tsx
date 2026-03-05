@@ -22,7 +22,7 @@ export function DashboardPage(): ReactNode {
   ];
 
   return (
-    <WorkspacePageShell title="Project Hub" description="Portfolio overview and project navigation">
+    <WorkspacePageShell layout="dashboard" title="Project Hub">
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
         {summaryCards.map((card) => (
           <Card key={card.label} size="small">

@@ -26,3 +26,27 @@ export { ContextualSidebar } from './ContextualSidebar/index.js';
 export type { ContextualSidebarProps } from './ContextualSidebar/index.js';
 export { ShellLayout } from './ShellLayout/index.js';
 export type { ShellLayoutProps } from './ShellLayout/index.js';
+
+// Module Configurations (PH4B.2 §Step 3 — moved from ui-kit, F-014)
+export {
+  scorecardsLanding,
+  scorecardsDetail,
+  rfisLanding,
+  rfisDetail,
+  punchListLanding,
+  punchListDetail,
+  drawingsLanding,
+  disciplineFilters,
+  budgetLanding,
+  dailyLogSections,
+  dailyLogVoiceFields,
+  turnoverLanding,
+  turnoverDetail,
+  turnoverTearsheetSteps,
+  documentsLanding,
+} from './module-configs/index.js';
+export type {
+  ModuleTableConfig,
+  ModuleLandingConfig,
+  ModuleDetailConfig,
+} from './module-configs/index.js';

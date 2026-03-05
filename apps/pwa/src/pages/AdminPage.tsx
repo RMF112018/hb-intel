@@ -3,7 +3,7 @@ import { HbcEmptyState, WorkspacePageShell } from '@hbc/ui-kit';
 
 export function AdminPage(): ReactNode {
   return (
-    <WorkspacePageShell title="Admin" description="System administration and settings">
+    <WorkspacePageShell layout="dashboard" title="Admin">
       <HbcEmptyState
         title="Administration"
         description="System administration and settings will be available in a future release."

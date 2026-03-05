@@ -3,7 +3,7 @@ import { HbcEmptyState, WorkspacePageShell } from '@hbc/ui-kit';
 
 export function DocumentsPage(): ReactNode {
   return (
-    <WorkspacePageShell title="Documents" description="Project document management">
+    <WorkspacePageShell layout="list" title="Documents">
       <HbcEmptyState
         title="Documents"
         description="Document management will be available in a future release."

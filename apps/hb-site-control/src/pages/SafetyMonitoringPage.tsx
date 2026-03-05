@@ -106,10 +106,7 @@ export function SafetyMonitoringPage(): ReactNode {
   const { events, isConnected, lastEvent } = useSignalR(5000);
 
   return (
-    <WorkspacePageShell
-      title="Safety Monitoring"
-      description="Real-time safety incident tracking & alerts"
-    >
+    <WorkspacePageShell layout="dashboard" title="Safety Monitoring">
       <div className={styles.statusBar}>
         <div
           className={styles.connectionDot}

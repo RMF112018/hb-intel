@@ -15,7 +15,7 @@ export function LeadershipPage(): ReactNode {
   ];
 
   return (
-    <WorkspacePageShell title="Leadership" description="Executive dashboards and KPIs">
+    <WorkspacePageShell layout="dashboard" title="Leadership">
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
         {kpis.map((kpi) => (
           <Card key={kpi.label} size="small">

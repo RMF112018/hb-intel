@@ -110,11 +110,7 @@ export function ObservationsPage(): ReactNode {
   );
 
   return (
-    <WorkspacePageShell
-      title="Observations"
-      description="Field observations tracking — Procore-aligned"
-      status={{ label: `${MOCK_OBSERVATIONS.filter((o) => o.status === 'Open').length} Open`, variant: 'pending' }}
-    >
+    <WorkspacePageShell layout="list" title="Observations">
       <div className={styles.container}>
         <HbcCommandBar
           searchValue={searchValue}

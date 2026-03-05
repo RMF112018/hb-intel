@@ -3,7 +3,7 @@ import { HbcEmptyState, WorkspacePageShell } from '@hbc/ui-kit';
 
 export function BudgetsPage(): ReactNode {
   return (
-    <WorkspacePageShell title="Budgets" description="Budget management and tracking">
+    <WorkspacePageShell layout="list" title="Budgets">
       <HbcEmptyState title="Budgets" description="Detailed budget management will be available in a future release." />
     </WorkspacePageShell>
   );

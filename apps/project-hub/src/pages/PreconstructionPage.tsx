@@ -3,7 +3,7 @@ import { HbcEmptyState, WorkspacePageShell } from '@hbc/ui-kit';
 
 export function PreconstructionPage(): ReactNode {
   return (
-    <WorkspacePageShell title="Preconstruction" description="Preconstruction planning and coordination">
+    <WorkspacePageShell layout="dashboard" title="Preconstruction">
       <HbcEmptyState
         title="Preconstruction"
         description="Preconstruction planning tools will be available in a future release."

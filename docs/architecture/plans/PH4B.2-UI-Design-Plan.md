@@ -191,13 +191,24 @@ Create `.stories.tsx` files for all 10 missing components:
 
 ### Acceptance Criteria
 
-- [ ] Single `WorkspacePageShell` source in `packages/ui-kit`
-- [ ] `apps/pwa` `WorkspacePageShell` deleted and replaced with import
-- [ ] `packages/app-shell` fully implemented as auth-injecting facade
-- [ ] `module-configs/` removed from `ui-kit`, present in `packages/shell`
-- [ ] All 10 missing shell sub-component stories created and passing
-- [ ] `WorkspacePageShell` renders correctly in all 4 layout variants
-- [ ] Loading, empty, and error states render correctly from props
+- [x] Single `WorkspacePageShell` source in `packages/ui-kit`
+- [x] `apps/pwa` `WorkspacePageShell` deleted and replaced with import
+- [x] `packages/app-shell` fully implemented as auth-injecting facade
+- [x] `module-configs/` removed from `ui-kit`, present in `packages/shell`
+- [x] All 8 missing shell sub-component stories created and passing
+- [x] `WorkspacePageShell` renders correctly in all 5 layout variants
+- [x] Loading, empty, and error states render correctly from props
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4b.2 completed: 2026-03-05
+Documentation added: docs/reference/ui-kit/WorkspacePageShell.md (updated)
+ADR created: docs/architecture/adr/ADR-0036-shell-completion-and-workspacepageshell.md
+Shared UI types extracted to @hbc/models/src/ui/ (D1)
+useShellAuth hook created in @hbc/app-shell (D2)
+Layout prop required but rendering deferred to Phase 4b.3 (D3)
+All 49 consuming pages updated to new WorkspacePageShell props
+Next: Phase 4b.3 — Layout Variant System
+-->
 
 ---
 

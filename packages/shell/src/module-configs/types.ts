@@ -2,13 +2,11 @@
  * Module Configuration Types — PH4.13 §13.7
  * Blueprint §1d — Typed data objects for module-specific patterns
  *
- * Module configs are TypeScript objects, not React components.
- * Column defs, KPI arrays, and tab arrays are exported as typed data objects.
- * Page-level composition happens in apps/pwa, not in ui-kit.
+ * PH4B.2 §Step 3 — Moved from ui-kit to shell; imports from @hbc/models
+ * to break circular dependency chain.
  */
 import type { ColumnDef } from '@tanstack/react-table';
-import type { KpiCardData, LayoutTab } from '../layouts/types.js';
-import type { DensityTier } from '../HbcCommandBar/types.js';
+import type { KpiCardData, LayoutTab, DensityTier } from '@hbc/models';
 
 /** Table configuration for a module landing page */
 export interface ModuleTableConfig<TData = Record<string, unknown>> {

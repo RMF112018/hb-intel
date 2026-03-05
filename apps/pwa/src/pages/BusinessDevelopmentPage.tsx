@@ -39,7 +39,7 @@ export function BusinessDevelopmentPage(): ReactNode {
   ];
 
   return (
-    <WorkspacePageShell title="Business Development" description="Lead pipeline and opportunity tracking">
+    <WorkspacePageShell layout="dashboard" title="Business Development">
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
         {summaryCards.map((card) => (
           <Card key={card.label} size="small">

@@ -29,7 +29,7 @@ export function OverviewPage(): ReactNode {
   ];
 
   return (
-    <WorkspacePageShell title="Accounting Overview" description="Financial management and cost tracking">
+    <WorkspacePageShell layout="dashboard" title="Accounting Overview">
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
         {summaryCards.map((card) => (
           <Card key={card.label} size="small">

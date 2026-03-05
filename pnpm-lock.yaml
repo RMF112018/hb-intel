@@ -891,6 +891,25 @@ importers:
         specifier: ^5.7.0
         version: 5.9.3
 
+  packages/app-shell:
+    dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../ui-kit
+      react:
+        specifier: ^18.0.0
+        version: 18.3.1
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.0
+        version: 18.3.28
+
   packages/auth:
     dependencies:
       '@hbc/models':
@@ -922,7 +941,11 @@ importers:
 
   packages/eslint-plugin-hbc: {}
 
-  packages/models: {}
+  packages/models:
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.0
+        version: 18.3.28
 
   packages/query-hooks:
     dependencies:
@@ -954,6 +977,9 @@ importers:
       '@hbc/models':
         specifier: workspace:*
         version: link:../models
+      '@tanstack/react-table':
+        specifier: ^8.21.0
+        version: 8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.0.0
         version: 18.3.1
@@ -995,6 +1021,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../auth
+      '@hbc/models':
+        specifier: workspace:*
+        version: link:../models
       '@hbc/shell':
         specifier: workspace:*
         version: link:../shell

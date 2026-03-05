@@ -11,7 +11,7 @@ export function KpiDashboardPage(): ReactNode {
   ];
 
   return (
-    <WorkspacePageShell title="KPI Dashboard" description="Executive key performance indicators">
+    <WorkspacePageShell layout="dashboard" title="KPI Dashboard">
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
         {kpis.map((kpi) => (
           <Card key={kpi.label} size="small">

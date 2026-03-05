@@ -29,7 +29,7 @@ export function BidsPage(): ReactNode {
   ];
 
   return (
-    <WorkspacePageShell title="Estimating — Bids" description="Bid tracking and cost estimation">
+    <WorkspacePageShell layout="list" title="Estimating — Bids">
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
         {summaryCards.map((card) => (
           <Card key={card.label} size="small">

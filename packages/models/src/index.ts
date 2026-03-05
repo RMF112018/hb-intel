@@ -75,3 +75,6 @@ export * from './auth/index.js';
 
 // ─── Provisioning (site provisioning saga) ──────────────────────────────────
 export * from './provisioning/index.js';
+
+// ─── UI (shared data-shape interfaces for cross-package use) ─────────────────
+export * from './ui/index.js';
