@@ -498,4 +498,6 @@ PHASE 4 FORMALLY COMPLETE.
 - Documentation: ADR-0032, PH4.18 plan, developer guide phase-4.18-qa-qc-review.md
 - Final counts: 37 component dirs, 43 story files, 27 ref docs, 16 ADRs (0016-0031), 26 dev guides
 Next: Phase 5 (SPFx Webparts)
+
+Phase 4.19 completed: 2026-03-04 — UI-kit app wiring (ShellLayout→HbcAppShell in PWA, dev-harness, hb-site-control)
 -->

@@ -830,4 +830,6 @@ PHASE 4 COMPLETE — Phase 4.18 QA/QC Review: 2026-03-04
 - Deferred to Phase 5+: SPFx Application Customizer, SharePoint list schema, PWA runtime APIs
 - ADR-0032: Phase 4 completion QA/QC review
 Next: Phase 5 (SPFx Webparts)
+
+Phase 4.19 completed: 2026-03-04 — Full wiring of @hbc/ui-kit HbcAppShell into PWA, dev-harness, and hb-site-control root routes
 -->

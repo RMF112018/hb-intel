@@ -1,30 +1,38 @@
 /**
- * Root route — Blueprint §2c, §2f.
- * Renders ShellLayout mode='full' with <Outlet/>.
- * Shell callbacks wire to router.navigate() per ADR-0003.
+ * Root route — Blueprint §2c, §2f, Phase 4.19.
+ * Renders HbcAppShell (fully-styled Griffel shell) with <Outlet/>.
+ * Bridge functions convert navStore + auth data to HbcAppShell's expected shapes.
  */
 import { createRootRoute, Outlet, useRouter } from '@tanstack/react-router';
-import { ShellLayout, useProjectStore } from '@hbc/shell';
-import type { WorkspaceId } from '@hbc/shell';
+import { useNavStore } from '@hbc/shell';
+import { HbcAppShell } from '@hbc/ui-kit';
+import { useCurrentUser, useAuthStore } from '@hbc/auth';
+import { mapNavStoreToSidebarGroups, mapCurrentUserToShellUser } from '../utils/shell-bridge.js';
 
 function RootComponent(): React.ReactNode {
   const router = useRouter();
+  const currentUser = useCurrentUser();
+  const activeWorkspace = useNavStore((s) => s.activeWorkspace);
+  const sidebarItems = useNavStore((s) => s.sidebarItems);
+
+  const shellUser = mapCurrentUserToShellUser(currentUser);
+  const sidebarGroups = mapNavStoreToSidebarGroups(sidebarItems, activeWorkspace);
 
   return (
-    <ShellLayout
-      mode="full"
-      onWorkspaceSelect={(id: WorkspaceId) => {
-        void router.navigate({ to: `/${id}` });
+    <HbcAppShell
+      mode="pwa"
+      user={shellUser}
+      sidebarGroups={sidebarGroups}
+      onNavigate={(href: string) => {
+        void router.navigate({ to: href });
       }}
-      onBackToProjectHub={() => {
-        void router.navigate({ to: '/project-hub' });
-      }}
-      onProjectSelect={(project) => {
-        useProjectStore.getState().setActiveProject(project);
+      onSignOut={() => {
+        useAuthStore.getState().clear();
+        void router.navigate({ to: '/' });
       }}
     >
       <Outlet />
-    </ShellLayout>
+    </HbcAppShell>
   );
 }
 
