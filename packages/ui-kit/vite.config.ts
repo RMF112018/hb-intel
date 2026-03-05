@@ -13,11 +13,13 @@ export default defineConfig({
   plugins: [react()],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        'app-shell': resolve(__dirname, 'src/app-shell.ts'),
+      },
       formats: ['es'],
-      fileName: 'index',
     },
-    chunkSizeWarningLimit: 500,
+    outDir: 'dist',
     rollupOptions: {
       external: [
         'react',
@@ -28,11 +30,13 @@ export default defineConfig({
         '@tanstack/react-table',
         '@tanstack/react-virtual',
         'pdfjs-dist',
+        'echarts',
+        'echarts-for-react',
+        'zustand',
       ],
       output: {
-        manualChunks: {
-          echarts: ['echarts', 'echarts-for-react'],
-        },
+        preserveModules: true,
+        preserveModulesRoot: 'src',
       },
     },
   },

@@ -1,6 +1,6 @@
 module.exports = {
   extends: ['../../.eslintrc.base.js'],
-  plugins: ['hbc'],
+  plugins: ['@hbc/hbc'],
   rules: {
     'no-restricted-imports': [
       'warn',
@@ -21,11 +21,10 @@ module.exports = {
       excludedFiles: [
         'src/theme/**',
         'src/icons/**',
-        'src/lint/**',
         '*.stories.tsx',
       ],
       rules: {
-        'hbc/enforce-hbc-tokens': 'warn',
+        '@hbc/hbc/enforce-hbc-tokens': 'warn',
       },
     },
   ],

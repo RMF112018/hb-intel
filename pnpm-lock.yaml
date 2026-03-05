@@ -891,6 +891,25 @@ importers:
         specifier: ^5.7.0
         version: 5.9.3
 
+  packages/app-shell:
+    dependencies:
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../ui-kit
+      react:
+        specifier: ^18.0.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.0.0
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.0
+        version: 18.3.28
+
   packages/auth:
     dependencies:
       '@hbc/models':
@@ -919,6 +938,8 @@ importers:
       '@hbc/models':
         specifier: workspace:*
         version: link:../models
+
+  packages/eslint-plugin-hbc: {}
 
   packages/models: {}
 
@@ -965,9 +986,9 @@ importers:
 
   packages/spfx:
     dependencies:
-      '@hbc/ui-kit':
+      '@hbc/app-shell':
         specifier: workspace:*
-        version: link:../ui-kit
+        version: link:../app-shell
       react:
         specifier: ^18.0.0
         version: 18.3.1
@@ -1018,6 +1039,9 @@ importers:
         specifier: ^18.0.0
         version: 18.3.1(react@18.3.1)
     devDependencies:
+      '@hbc/eslint-plugin-hbc':
+        specifier: workspace:*
+        version: link:../eslint-plugin-hbc
       '@storybook/addon-a11y':
         specifier: ^8.6.0
         version: 8.6.17(storybook@8.6.17(prettier@3.8.1))
@@ -1042,9 +1066,6 @@ importers:
       axe-playwright:
         specifier: ^2.2.0
         version: 2.2.2(playwright@1.58.2)
-      eslint-plugin-hbc:
-        specifier: file:src/lint/eslint-plugin-hbc
-        version: file:packages/ui-kit/src/lint/eslint-plugin-hbc
       storybook:
         specifier: ^8.6.0
         version: 8.6.17(prettier@3.8.1)
@@ -4016,9 +4037,6 @@ packages:
   escape-string-regexp@4.0.0:
     resolution: {integrity: sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==}
     engines: {node: '>=10'}
-
-  eslint-plugin-hbc@file:packages/ui-kit/src/lint/eslint-plugin-hbc:
-    resolution: {directory: packages/ui-kit/src/lint/eslint-plugin-hbc, type: directory}
 
   eslint-scope@7.2.2:
     resolution: {integrity: sha512-dOt21O7lTMhDM+X9mB4GX+DZrZtCUJPL/wlcTqxyrx5IvO0IYtILdtrQGQp+8n5S0gwSVmOf9NQrjMOgfQZlIg==}
@@ -10187,8 +10205,6 @@ snapshots:
   escape-string-regexp@2.0.0: {}
 
   escape-string-regexp@4.0.0: {}
-
-  eslint-plugin-hbc@file:packages/ui-kit/src/lint/eslint-plugin-hbc: {}
 
   eslint-scope@7.2.2:
     dependencies:

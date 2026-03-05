@@ -44,6 +44,9 @@ solution/
 # Azure Functions
 local.settings.json
 
+# Storybook build output
+storybook-static/
+
 # IDE
 .idea/
 *.swp

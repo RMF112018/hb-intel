@@ -1,0 +1,9 @@
+{
+  "name": "@hbc/eslint-plugin-hbc",
+  "version": "0.0.1",
+  "description": "ESLint plugin for HBC Design System token and component enforcement",
+  "main": "src/index.js",
+  "private": true,
+  "license": "UNLICENSED",
+  "files": ["src"]
+}

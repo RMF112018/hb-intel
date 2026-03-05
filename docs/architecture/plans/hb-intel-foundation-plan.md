@@ -431,4 +431,9 @@ PHASE 4 COMPLETE — Phase 4.18 QA/QC Review: 2026-03-04
 Next: Phase 5 (SPFx Webparts)
 
 Phase 4.19 completed: 2026-03-04 — Integration gap diagnosis and HbcAppShell wiring across all consumer apps
+
+Phase 4b.0 completed: 2026-03-05 — Prerequisites & Audit Remediation (SS3.1 hard blockers F-001/F-002/F-004/F-005/F-006 resolved)
+- 117 build artifacts removed from ui-kit/src/, eslint-plugin-hbc extracted to workspace package, app-shell expanded as PWA facade
+- ADR-0034: audit-remediation.md
+Next: Phase 4b.1 (Build & Packaging Foundation)
 -->

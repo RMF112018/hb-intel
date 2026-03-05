@@ -51,7 +51,7 @@
     "@vitejs/plugin-react": "^4.0.0",
     "@storybook/test-runner": "^0.21.0",
     "axe-playwright": "^2.2.0",
-    "eslint-plugin-hbc": "file:src/lint/eslint-plugin-hbc",
+    "@hbc/eslint-plugin-hbc": "workspace:*",
     "storybook": "^8.6.0",
     "vite": "^6.0.0",
     "vite-bundle-visualizer": "^1.2.0"
@@ -61,6 +61,7 @@
     "react-dom": "^18.0.0",
     "pdfjs-dist": "^4.0.0"
   },
+  "sideEffects": false,
   "files": [
     "dist"
   ]
