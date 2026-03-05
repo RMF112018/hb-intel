@@ -117,7 +117,7 @@ Auth context is injected via the `packages/app-shell` facade (resolved in prereq
 ```ts
 interface WorkspacePageShellProps {
   // Layout (D-02)
-  layout: 'dashboard' | 'form' | 'detail' | 'landing';
+  layout: 'dashboard' | 'list' | 'form' | 'detail' | 'landing';
 
   // Page identity
   title: string;

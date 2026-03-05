@@ -177,13 +177,126 @@ if (props.isLoading && props.layout === 'dashboard') {
 }
 ```
 
+For list pages, show a skeleton table (ghost rows matching column structure) while loading:
+
+```tsx
+if (props.isLoading && props.layout === 'list') {
+  return <TableSkeleton columns={props.skeletonColumns ?? 5} rows={10} />;
+}
+```
+
+#### 4b.7.5 — Wire `useFilterStore` to `ListLayout` and `HbcDataTable`
+
+`useFilterStore` (already in `packages/query-hooks/src/stores/`) manages filter state for all list pages. `ListLayout` reads and writes to it automatically via `filterStoreKey`. Page authors never interact with the store directly.
+
+```ts
+// packages/query-hooks/src/stores/useFilterStore.ts — required interface
+interface FilterStore {
+  // Filter state
+  getFilters: (key: string) => FilterState;
+  setFilter: (key: string, field: string, value: unknown) => void;
+  clearFilter: (key: string, field: string) => void;
+  clearFilters: (key: string) => void;
+  hasActiveFilters: (key: string) => boolean;
+  getActivePills: (key: string) => FilterPill[];  // for pill strip rendering
+
+  // Saved views (three-scope implementation — competitive differentiator)
+  getSavedViews: (key: string) => SavedView[];
+  saveView: (key: string, name: string, scope: 'personal' | 'project' | 'org') => void;
+  applyView: (key: string, viewId: string) => void;
+  deleteView: (key: string, viewId: string) => void;
+  getActiveView: (key: string) => SavedView | null;
+
+  // Column configuration (per-user, persisted)
+  getColumnConfig: (key: string) => ColumnConfig;
+  setColumnConfig: (key: string, config: ColumnConfig) => void;
+
+  // View mode + density
+  getViewMode: (key: string) => 'table' | 'card';
+  setViewMode: (key: string, mode: 'table' | 'card') => void;
+  getPagination: (key: string) => PaginationState;
+  setPagination: (key: string, state: PaginationState) => void;
+}
+```
+
+**Saved views deep-link sharing** — filter state is URL-encoded for sharing:
+```ts
+// When user clicks "Share View":
+const filterParams = encodeFilterStateToURL(useFilterStore.getFilters(key));
+// Results in URL like: /risk-management/register?view=overdue-by-category
+// Service worker caches these deep-link pages for offline access
+```
+
+Document the canonical list page pattern:
+
+```tsx
+// ✅ Correct — standard list page pattern
+const RiskRegisterPage = () => {
+  const filters = useFilterStore(s => s.getFilters('risk-register'));
+  const { data, isLoading, isError } = useRiskItems(filters);
+  const isEmpty = !isLoading && !data?.length;
+
+  return (
+    <WorkspacePageShell
+      layout="list"
+      title="Risk Register"
+      isLoading={isLoading}
+      isError={isError}
+      isEmpty={isEmpty}
+      emptyMessage="No risk items match the current filters."
+      emptyActionLabel="Clear Filters"
+      onEmptyAction={() => useFilterStore.getState().clearFilters('risk-register')}
+      listConfig={{
+        filterStoreKey: 'risk-register',
+        primaryFilters: [
+          { key: 'status', label: 'Status', type: 'select', options: RISK_STATUSES },
+          { key: 'category', label: 'Category', type: 'select', options: RISK_CATEGORIES },
+          { key: 'due_date', label: 'Due Date', type: 'date-range' },
+        ],
+        advancedFilters: RISK_ADVANCED_FILTERS,
+        savedViewsEnabled: true,
+        selectable: true,
+        bulkActions: [
+          { key: 'close', label: 'Close Selected', icon: 'Checkmark', onClick: handleBulkClose },
+          { key: 'delete', label: 'Delete Selected', icon: 'Delete', onClick: handleBulkDelete, isDestructive: true },
+        ],
+      }}
+      actions={[
+        { key: 'new', label: 'New Risk Item', icon: 'Add', onClick: handleNew, isPrimary: true },
+        { key: 'export', label: 'Export', icon: 'ArrowExport', onClick: handleExport },
+      ]}
+    >
+      <HbcDataTable
+        rows={data}
+        columns={RISK_COLUMNS}
+        filterStoreKey="risk-register"   // wires density + column config + row panel
+        onRowClick={handleRowClick}       // opens HbcPanel slide-out
+        responsibilityField="assignee_id" // drives heat mapping
+        paginationMode="pages"
+      />
+    </WorkspacePageShell>
+  );
+};
+// FilterToolbar, SavedViewsBar, and Pagination are rendered by ListLayout automatically
+// Page author only provides HbcDataTable as children
+```
+
 ### Acceptance Criteria
 
 - [ ] `WorkspacePageShell` renders `HbcSpinner` when `isLoading={true}`
 - [ ] `WorkspacePageShell` renders `HbcErrorBoundary` when `isError={true}`
 - [ ] `WorkspacePageShell` renders `HbcEmptyState` when `isEmpty={true}`
-- [ ] Dashboard layout shows skeleton loading, not centered spinner
-- [ ] `HbcDataTable` savedViews uses SPFx-compatible storage
+- [ ] Dashboard layout shows skeleton cards during loading
+- [ ] List layout shows skeleton table rows during loading (no layout shift on data arrival)
+- [ ] `ListLayout` filter toolbar renders active filter pill strip for every applied filter
+- [ ] Individual filter pills are dismissible (removing them clears that filter)
+- [ ] "Clear All" link appears when any filter is active
+- [ ] Advanced filter `HbcPanel` opens on "More Filters" click and closes on apply
+- [ ] `useFilterStore` saves/restores all filter + sort + column + pagination + view-mode state per `filterStoreKey`
+- [ ] `useFilterStore` saved views implement all 3 scopes (personal/project/org)
+- [ ] Deep-link URL correctly encodes and restores filter state
+- [ ] Applying filters with zero results shows `HbcEmptyState` with "Clear Filters" action
+- [ ] `HbcDataTable` `savedViews` uses SPFx-compatible storage adapter
 - [ ] No `HbcSpinner`, `HbcEmptyState`, or `HbcErrorBoundary` renders directly inside any `apps/` page component
 
 ---

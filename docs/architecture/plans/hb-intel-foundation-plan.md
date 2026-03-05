@@ -436,4 +436,11 @@ Phase 4b.0 completed: 2026-03-05 — Prerequisites & Audit Remediation (SS3.1 ha
 - 117 build artifacts removed from ui-kit/src/, eslint-plugin-hbc extracted to workspace package, app-shell expanded as PWA facade
 - ADR-0034: audit-remediation.md
 Next: Phase 4b.1 (Build & Packaging Foundation)
+
+Phase 4b.1 completed: 2026-03-05 — Build & Packaging Foundation
+- turbo.json: check-types ^build dep, lint inputs, build-storybook task
+- Barrel: 35 component families verified complete; interactions/ excluded per F-017
+- 10 reference docs + entry-points.md created (38 total in docs/reference/ui-kit/)
+- ADR-0035: build-packaging-foundation.md
+Next: Phase 4b.2 (Shell Completion & WorkspacePageShell)
 -->

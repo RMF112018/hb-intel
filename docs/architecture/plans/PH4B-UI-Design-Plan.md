@@ -1,9 +1,10 @@
 # HB-Intel — Phase 4b: UI Design Implementation Plan
 ### Comprehensive UI Kit + Shell Integration
 
-**Version:** 1.0
+**Version:** 1.2
 **Date:** March 5, 2026
 **Depends On:** Phase 4 (UI Kit component build — partially complete)
+**Research Basis:** Comprehensive UI analysis of Procore (CORE Design System v8–v12, NGX 2025–2026), Autodesk Construction Cloud, Trimble Viewpoint, CMiC, InEight, Oracle Primavera Cloud/Aconex, and Bluebeam Studio — sourced from official documentation, release notes, design system publications, and 2025–2026 verified user reviews (G2, Capterra, TrustRadius)
 **Objective:** Deliver a fully wired UI Kit and Shell such that any page built to the system is guaranteed to render correctly according to HBC design specifications — with zero design decisions required from the page author.
 
 ---
@@ -73,7 +74,7 @@ These 10 decisions were established through the Phase 4b design interview and ar
 | # | Decision | Binding Rule |
 |---|----------|-------------|
 | **D-01** | Shell enforcement model | Every page **must** use `WorkspacePageShell` as its outer container. Direct rendering without the shell is prohibited. |
-| **D-02** | Layout variant system | Every page **must** declare one of the named layout variants: `dashboard`, `form`, `detail`, or `landing`. No free-composition inside the wrapper. |
+| **D-02** | Layout variant system | Every page **must** declare one of the named layout variants: `dashboard`, `list`, `form`, `detail`, or `landing`. No free-composition inside the wrapper. |
 | **D-03** | Command bar zone | All page actions **must** be passed to the shell's command bar zone via the `actions` prop on `WorkspacePageShell`. Direct button placement outside the command bar is prohibited. |
 | **D-04** | Navigation active state | Active sidebar state **must** be derived automatically from the router. Pages must never manually set active nav state. |
 | **D-05** | Token enforcement | All color, spacing, typography, and shadow values **must** come from `@hb-intel/ui-kit` tokens. Hardcoded values are a lint error. |
@@ -82,6 +83,8 @@ These 10 decisions were established through the Phase 4b design interview and ar
 | **D-08** | Notifications | All user feedback (success, error, warning) **must** be triggered via `useToast`. Inline feedback components on pages are prohibited except `HbcBanner` for persistent page-level warnings. |
 | **D-09** | Mobile/field mode | Pages **must** declare supported layout modes. The shell handles all context switching via `useFieldMode`. Pages must not contain their own breakpoint logic. |
 | **D-10** | Component consumption | Pages **must** import exclusively from `@hb-intel/ui-kit`. Direct imports from `@fluentui/react-components`, raw HTML structural elements, and inline styles are prohibited and enforced via ESLint. |
+
+---
 
 ## 16. Developer Playbook
 
@@ -96,6 +99,7 @@ Every new page in HB-Intel follows exactly this pattern. No exceptions.
 | My page is... | Use layout |
 |--------------|------------|
 | A dashboard with KPI cards and charts | `"dashboard"` |
+| A list or index of records (table + filters) | `"list"` |
 | A form to create or edit a record | `"form"` |
 | A detail view of a single record | `"detail"` |
 | A module home page with sub-module cards | `"landing"` |
@@ -133,6 +137,51 @@ return (
 );
 ```
 
+**List page variant of Step 4** — declare your filter config, the layout handles the rest:
+
+```tsx
+// List pages pass filter config and table config to WorkspacePageShell.
+// ListLayout renders the filter toolbar, saved views bar, and pagination automatically.
+// You only provide HbcDataTable as the child.
+return (
+  <WorkspacePageShell
+    layout="list"
+    title="Risk Register"
+    isLoading={isLoading}
+    isError={isError}
+    isEmpty={isEmpty}
+    emptyMessage="No risk items match the current filters."
+    emptyActionLabel="Clear Filters"
+    onEmptyAction={() => clearFilters('risk-register')}
+    listConfig={{
+      filterStoreKey: 'risk-register',       // unique key — drives ALL filter/view persistence
+      primaryFilters: [                       // max 3 — always visible in toolbar
+        { key: 'status', label: 'Status', type: 'select', options: RISK_STATUSES },
+        { key: 'category', label: 'Category', type: 'select', options: RISK_CATEGORIES },
+        { key: 'due_date', label: 'Due Date', type: 'date-range' },
+      ],
+      advancedFilters: RISK_ADVANCED_FILTERS, // in HbcPanel slide-out
+      savedViewsEnabled: true,                // personal / project / org scope views
+      selectable: true,                       // checkbox row selection for bulk ops
+      bulkActions: [
+        { key: 'close', label: 'Close', icon: 'Checkmark', onClick: handleBulkClose },
+        { key: 'delete', label: 'Delete', icon: 'Delete', onClick: handleBulkDelete, isDestructive: true },
+      ],
+    }}
+    actions={actions}
+  >
+    <HbcDataTable
+      rows={data}
+      columns={RISK_COLUMNS}
+      filterStoreKey="risk-register"    // wires auto-density, column config, row panel
+      onRowClick={handleRowClick}        // opens HbcPanel slide-out preview
+      responsibilityField="assignee_id"  // drives responsibility heat mapping
+    />
+    {/* No FilterToolbar, SavedViewsBar, or Pagination here — ListLayout adds them */}
+  </WorkspacePageShell>
+);
+```
+
 **Step 5: Build your content using only `@hb-intel/ui-kit` components**
 
 ```tsx
@@ -149,14 +198,27 @@ By following the formula, these are automatic — you write zero additional code
 |---------|-------------|
 | Correct page frame | `WorkspacePageShell` handles it |
 | Sidebar highlights | TanStack Router handles it |
-| Loading spinner | `isLoading` prop handles it |
+| Loading spinner/skeleton | `isLoading` prop handles it |
 | Empty state | `isEmpty` prop handles it |
 | Error state | `isError` prop handles it |
 | Consistent action bar | `actions` prop handles it |
+| Filter toolbar with primary filters | `listConfig.primaryFilters` handles it |
+| Active filter pill strip | `ListLayout` + `useFilterStore` handles it |
+| Advanced filter panel | `listConfig.advancedFilters` + `HbcPanel` handles it |
+| Saved views (3 scopes) | `listConfig.savedViewsEnabled` + `useFilterStore` handles it |
+| Deep-link filter sharing | `useFilterStore` URL encoding handles it |
+| Filter/sort/column state persistence | `useFilterStore` via `filterStoreKey` handles it |
+| Table auto-density (3 tiers) | `HbcDataTable` + `useDensity()` + pointer/viewport detection handles it |
+| Card transformation at mobile widths | `HbcDataTable` handles it automatically below 640px |
+| Responsibility heat mapping | `HbcDataTable` `responsibilityField` prop handles it |
+| Dual-channel status encoding | `HbcStatusBadge` handles it on all status columns |
+| Row panel slide-out | `HbcDataTable` `onRowClick` + `HbcPanel` handles it |
+| Floating bulk action bar | `listConfig.bulkActions` + row selection handles it |
+| Pagination | `ListLayout.Pagination` handles it |
 | Unsaved changes warning | `HbcForm` handles it |
 | Draft auto-save | `HbcForm` + `useFormDraftStore` handles it |
 | Toast on save/error | `useToast()` in mutation handles it |
-| Mobile layout | `useFieldMode` handles it |
+| Mobile/field layout | `useFieldMode` handles it |
 | Token-correct styling | ESLint enforces it at dev time |
 
 ### The Complete Import Map
@@ -193,7 +255,7 @@ Phase 4b is **complete** when all of the following are true simultaneously:
 - [ ] 44/44 ui-kit components have Storybook stories
 - [ ] 44/44 ui-kit components have reference documentation
 - [ ] 100% of workspace app pages use `WorkspacePageShell`
-- [ ] 100% of workspace app pages declare a layout variant
+- [ ] 100% of workspace app pages declare a layout variant (`dashboard`, `list`, `form`, `detail`, or `landing`)
 - [ ] 0 direct `@fluentui/react-components` imports in `apps/`
 - [ ] 0 hardcoded token values in `apps/`
 
@@ -208,8 +270,8 @@ Phase 4b is **complete** when all of the following are true simultaneously:
 
 ### Documentation Gates
 - [ ] `docs/how-to/developer/phase-4b-developer-playbook.md` published
-- [ ] All 9 missing component reference docs created
-- [ ] `DESIGN_SYSTEM.md` updated with dual entry point documentation
+- [x] All 9 missing component reference docs created
+- [x] `DESIGN_SYSTEM.md` updated with dual entry point documentation (via docs/reference/ui-kit/entry-points.md)
 - [ ] ADR-0034 written documenting Phase 4b architectural decisions
 
 ### The Guarantee
@@ -221,22 +283,6 @@ When all completion criteria above are met, the following statement is **mechani
 ---
 
 *Phase 4b — HB-Intel UI Design Implementation Plan*
-*Version 1.0 — March 5, 2026*
+*Version 1.2 — March 5, 2026 (amended: competitive list layout spec from industry research)*
 *Supersedes: Phase 4 partial implementation (ADR-0016 through ADR-0033)*
 *Next Phase: Phase 5 — SPFx Webpart Breakout*
-
-<!-- IMPLEMENTATION PROGRESS & NOTES
-Phase 4b.0 completed: 2026-03-05
-Prerequisites & Audit Remediation (SS3.1) — ALL hard blockers resolved:
-- F-001/F-002: Build artifacts removed from src/, .gitignore added, vite.config.ts updated
-- F-004: eslint-plugin-hbc extracted to packages/eslint-plugin-hbc/
-- F-005: packages/app-shell removed per remote consolidation (PR #1 / ADR-0033); direct imports from @hbc/ui-kit/app-shell and @hbc/shell
-- F-006: storybook-static/ removed from git tracking
-SS17 Structural Gates completed:
-- [x] 0 build artifacts committed to src/
-- [x] storybook-static/ not tracked in git
-- [x] eslint-plugin-hbc is a proper workspace package
-- [x] packages/app-shell removed per consolidation (ADR-0033); facade deferred
-ADR created: ADR-0034-audit-remediation.md
-Next: Phase 4b.1 (Build & Packaging Foundation)
--->

@@ -404,3 +404,14 @@ Each doc must include: description, props table, usage example, variants, and SP
 *Version 1.0 — March 5, 2026*
 *Supersedes: Phase 4 partial implementation (ADR-0016 through ADR-0033)*
 *Next Phase: Phase 5 — SPFx Webpart Breakout*
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4b.1 completed: 2026-03-05
+- turbo.json: check-types.dependsOn → ["^build"], lint.inputs added, build-storybook task added
+- Barrel audit: all 35 component dirs + theme/icons/hooks/layouts/module-configs verified exported
+- 10 missing reference docs created: HbcApprovalStepper, HbcCalendarGrid, HbcConfirmDialog, HbcDrawingViewer, HbcHeader, HbcKpiCard, HbcPhotoGrid, HbcScoreBar, WorkspacePageShell, HbcBottomNav
+- Dual entry points documented: docs/reference/ui-kit/entry-points.md
+- ADR-0035: build-packaging-foundation.md
+- ECharts lazy (React.lazy), pdf.js dynamic import, useVoiceDictation feature detection: all confirmed already done
+Next: Phase 4b.2 (Shell Completion & WorkspacePageShell)
+-->
