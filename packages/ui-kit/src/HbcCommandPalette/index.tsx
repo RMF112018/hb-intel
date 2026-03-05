@@ -22,6 +22,7 @@ import { useIsMobile } from '../hooks/useIsMobile.js';
 import { HbcConfirmDialog } from '../HbcConfirmDialog/index.js';
 import { useOnlineStatus } from '../HbcAppShell/hooks/useOnlineStatus.js';
 import { useCommandPalette } from './hooks/useCommandPalette.js';
+import { useFieldModeActions } from '../HbcCommandBar/fieldModeActionsStore.js';
 import type {
   HbcCommandPaletteProps,
   CommandPaletteResult,
@@ -232,6 +233,19 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
   const isMobile = useIsMobile();
   const { isOpen, close } = useCommandPalette();
   const connectivityStatus = useOnlineStatus();
+
+  // PH4B.4 §4b.4.3: Inject field mode secondary actions into palette
+  const fieldModeActions = useFieldModeActions();
+  const injectedActionItems = React.useMemo(() => {
+    const injected: CommandPaletteResult[] = fieldModeActions.map((a) => ({
+      id: `field-action-${a.key}`,
+      label: a.label,
+      category: 'actions' as const,
+      icon: a.icon as React.ReactNode,
+      onSelect: a.onClick,
+    }));
+    return [...(actionItems ?? []), ...injected];
+  }, [actionItems, fieldModeActions]);
   const isOnline = connectivityStatus === 'online';
 
   const [query, setQuery] = React.useState('');
@@ -280,14 +294,14 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
       : recentItems;
     filtered.push(...recentMatches);
 
-    // Actions
+    // Actions (includes field mode injected actions)
     const actionMatches = lowerQ
-      ? actionItems.filter((r) => r.label.toLowerCase().includes(lowerQ))
-      : actionItems;
+      ? injectedActionItems.filter((r) => r.label.toLowerCase().includes(lowerQ))
+      : injectedActionItems;
     filtered.push(...actionMatches);
 
     return permissionFilter ? filtered.filter(permissionFilter) : filtered;
-  }, [debouncedQuery, navigationItems, actionItems, recentItems, permissionFilter]);
+  }, [debouncedQuery, navigationItems, injectedActionItems, recentItems, permissionFilter]);
 
   // Group results by category
   const groupedResults = React.useMemo(() => {

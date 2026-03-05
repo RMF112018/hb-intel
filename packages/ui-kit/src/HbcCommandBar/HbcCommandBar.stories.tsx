@@ -181,6 +181,50 @@ export const A11yTest: Story = {
   ),
 };
 
+export const WithDestructiveAction: Story = {
+  render: () => (
+    <HbcCommandBar
+      searchValue=""
+      onSearchChange={() => {}}
+      actions={[
+        { key: 'save', label: 'Save', onClick: () => {}, primary: true },
+        { key: 'delete', label: 'Delete', onClick: () => {}, isDestructive: true },
+      ]}
+    />
+  ),
+};
+
+export const WithTooltips: Story = {
+  render: () => (
+    <HbcCommandBar
+      searchValue=""
+      onSearchChange={() => {}}
+      actions={[
+        { key: 'filter', label: 'Filter', icon: <Filter size="sm" />, onClick: () => {}, tooltip: 'Apply column filters' },
+        { key: 'new', label: 'New Item', onClick: () => {}, primary: true, tooltip: 'Create a new item' },
+      ]}
+    />
+  ),
+};
+
+export const WithOverflowMenu: Story = {
+  render: () => (
+    <HbcCommandBar
+      searchValue=""
+      onSearchChange={() => {}}
+      actions={[
+        { key: 'new', label: 'New', onClick: () => {}, primary: true },
+        { key: 'export', label: 'Export', onClick: () => {} },
+      ]}
+      overflowActions={[
+        { key: 'archive', label: 'Archive All', onClick: () => {} },
+        { key: 'delete-all', label: 'Delete All', onClick: () => {}, isDestructive: true },
+        { key: 'settings', label: 'Settings', icon: <Settings size="sm" />, onClick: () => {} },
+      ]}
+    />
+  ),
+};
+
 export const FieldMode: Story = {
   render: () => (
     <FluentProvider theme={hbcFieldTheme}>

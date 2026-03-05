@@ -167,3 +167,17 @@ Add to `docs/reference/ui-kit/WorkspacePageShell.md`:
 *Version 1.0 — March 5, 2026*
 *Supersedes: Phase 4 partial implementation (ADR-0016 through ADR-0033)*
 *Next Phase: Phase 5 — SPFx Webpart Breakout*
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4b.4 completed: 2026-03-05
+Implementation summary:
+- §4b.4.1: CommandBarAction enhanced with isDestructive + tooltip fields
+- §4b.4.2: Overflow menu via Fluent v9 Menu/MenuPopover/MenuItem; command bar zone uses Griffel class
+- §4b.4.3: Field mode FAB (56px, fixed bottom-right) for primary action; fieldModeActionsStore (useSyncExternalStore) injects secondary actions into HbcCommandPalette
+- §4b.4.4: ESLint rule hbc/no-direct-buttons-in-content enforces D-03; reference docs updated
+Documentation added:
+- docs/reference/ui-kit/WorkspacePageShell.md (D-03 pattern, CommandBarAction interface, field mode behavior)
+- docs/architecture/adr/ADR-0038-command-bar-and-page-actions.md
+Stories added: WithDestructiveAction, WithTooltips, WithOverflowMenu, FieldModeActions, WithDestructiveOverflow
+Next: Phase 4b.5 — Navigation & Active State
+-->

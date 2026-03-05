@@ -8,7 +8,7 @@
  */
 import * as React from 'react';
 import { createContext } from 'react';
-import { makeStyles } from '@griffel/react';
+import { makeStyles, mergeClasses } from '@griffel/react';
 import { useProjectStore } from '@hbc/shell';
 import { HbcBreadcrumbs } from '../HbcBreadcrumbs/index.js';
 import { HbcCommandBar } from '../HbcCommandBar/index.js';
@@ -18,8 +18,11 @@ import { HbcEmptyState } from '../HbcEmptyState/index.js';
 import { HbcButton } from '../HbcButton/index.js';
 import { DashboardLayout } from '../layouts/DashboardLayout.js';
 import { ListLayout } from '../layouts/ListLayout.js';
-import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
+import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE, HBC_STATUS_COLORS } from '../theme/tokens.js';
+import { elevationRaised } from '../theme/elevation.js';
 import { heading2 } from '../theme/typography.js';
+import { useFieldMode } from '../HbcAppShell/hooks/useFieldMode.js';
+import { setFieldModeActions } from '../HbcCommandBar/fieldModeActionsStore.js';
 import type { WorkspacePageShellProps, ListConfig } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -60,6 +63,11 @@ const useStyles = makeStyles({
     fontSize: '0.75rem',
     color: HBC_SURFACE_LIGHT['text-muted'],
   },
+  commandBarZone: {
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    paddingBottom: '8px',
+  },
   content: {
     display: 'flex',
     flexDirection: 'column',
@@ -99,6 +107,27 @@ const useStyles = makeStyles({
     margin: '0',
     textAlign: 'center' as const,
   },
+  fab: {
+    position: 'fixed',
+    bottom: '72px',
+    right: '16px',
+    width: '56px',
+    height: '56px',
+    borderRadius: '50%',
+    border: 'none',
+    backgroundColor: HBC_ACCENT_ORANGE,
+    color: '#FFFFFF',
+    fontSize: '1.5rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: elevationRaised,
+    cursor: 'pointer',
+    zIndex: 10,
+  },
+  fabDestructive: {
+    backgroundColor: HBC_STATUS_COLORS.error,
+  },
 });
 
 // ---------------------------------------------------------------------------
@@ -124,6 +153,7 @@ export function WorkspacePageShell({
 }: WorkspacePageShellProps): React.ReactNode {
   const activeProject = useProjectStore((s) => s.activeProject);
   const styles = useStyles();
+  const { isFieldMode } = useFieldMode();
 
   const [bannerDismissed, setBannerDismissed] = React.useState(false);
 
@@ -132,10 +162,25 @@ export function WorkspacePageShell({
     setBannerDismissed(false);
   }, [banner?.message, banner?.variant]);
 
-  const allActions = [
-    ...(actions ?? []),
-    ...(overflowActions ?? []),
-  ];
+  const hasActions = (actions?.length ?? 0) > 0 || (overflowActions?.length ?? 0) > 0;
+
+  // Field mode: derive primary + secondary actions — PH4B.4 §4b.4.3
+  const primaryAction = actions?.find((a) => a.primary);
+  const secondaryActions = React.useMemo(
+    () => actions?.filter((a) => !a.primary) ?? [],
+    [actions],
+  );
+
+  // Write secondary actions to field mode store for Cmd+K palette injection
+  React.useEffect(() => {
+    if (isFieldMode) {
+      const allSecondary = [...secondaryActions, ...(overflowActions ?? [])];
+      setFieldModeActions(allSecondary);
+    } else {
+      setFieldModeActions([]);
+    }
+    return () => setFieldModeActions([]);
+  }, [isFieldMode, secondaryActions, overflowActions]);
 
   return (
     <ListConfigContext.Provider value={listConfig}>
@@ -171,11 +216,28 @@ export function WorkspacePageShell({
           </div>
         </div>
 
-        {/* Command bar */}
-        {allActions.length > 0 && (
-          <div style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '8px' }}>
-            <HbcCommandBar actions={allActions} />
+        {/* Command bar — D-03: all page actions via actions/overflowActions props */}
+        {hasActions && !isFieldMode && (
+          <div className={styles.commandBarZone}>
+            <HbcCommandBar actions={actions} overflowActions={overflowActions} />
           </div>
+        )}
+
+        {/* Field mode FAB — PH4B.4 §4b.4.3 */}
+        {isFieldMode && primaryAction && (
+          <button
+            type="button"
+            data-hbc-ui="fab-primary"
+            aria-label={primaryAction.label}
+            className={mergeClasses(
+              styles.fab,
+              primaryAction.isDestructive && styles.fabDestructive,
+            )}
+            onClick={primaryAction.onClick}
+            disabled={primaryAction.disabled}
+          >
+            {primaryAction.icon ?? '+'}
+          </button>
         )}
 
         {/* Content area with state overlays + LAYOUT_MAP */}

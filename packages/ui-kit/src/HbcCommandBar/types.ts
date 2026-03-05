@@ -22,6 +22,10 @@ export interface CommandBarAction {
   disabled?: boolean;
   /** Visually emphasize as primary action */
   primary?: boolean;
+  /** Renders as danger-styled button (red). PH4B.4 §4b.4.1 */
+  isDestructive?: boolean;
+  /** Tooltip text shown on hover. PH4B.4 §4b.4.1 */
+  tooltip?: string;
 }
 
 export interface CommandBarFilter {
@@ -61,6 +65,8 @@ export interface HbcCommandBarProps {
   filters?: CommandBarFilter[];
   /** Action buttons (right side) */
   actions?: CommandBarAction[];
+  /** Overflow menu actions — rendered in "More" popover. PH4B.4 §4b.4.2 */
+  overflowActions?: CommandBarAction[];
   /** Three-tier saved views (V2.1 Dec 14) */
   savedViews?: SavedView[];
   /** Saved view change handler */

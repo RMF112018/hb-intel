@@ -10,12 +10,19 @@ import {
   ToolbarDivider,
   ToolbarToggleButton,
   SearchBox,
+  Menu,
+  MenuTrigger,
+  MenuPopover,
+  MenuList,
+  MenuItem,
   mergeClasses,
 } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { elevationRaised } from '../theme/elevation.js';
-import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE } from '../theme/tokens.js';
-import type { HbcCommandBarProps, DensityTier } from './types.js';
+import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE, HBC_STATUS_COLORS } from '../theme/tokens.js';
+import { HbcTooltip } from '../HbcTooltip/index.js';
+import { MoreActions } from '../icons/index.js';
+import type { HbcCommandBarProps, CommandBarAction, DensityTier } from './types.js';
 
 const DENSITY_HEIGHT: Record<DensityTier, string> = {
   compact: '32px',
@@ -59,6 +66,16 @@ const useStyles = makeStyles({
     display: 'flex',
     gap: '4px',
     flexShrink: 0,
+  },
+  destructiveBtn: {
+    backgroundColor: HBC_STATUS_COLORS.error,
+    color: '#FFFFFF',
+    ':hover': {
+      backgroundColor: '#E04545',
+    },
+  },
+  overflowBtn: {
+    minWidth: '32px',
   },
   viewSelector: {
     display: 'flex',
@@ -144,6 +161,7 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
   searchPlaceholder = 'Search...',
   filters,
   actions,
+  overflowActions,
   savedViews,
   onViewChange,
   onViewSave,
@@ -264,18 +282,55 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
       {/* Actions */}
       {actions && actions.length > 0 && (
         <div className={styles.actions}>
-          {actions.map((a) => (
-            <ToolbarButton
-              key={a.key}
-              icon={a.icon as React.JSX.Element | undefined}
-              onClick={a.onClick}
-              disabled={a.disabled}
-              appearance={a.primary ? 'primary' : 'subtle'}
-            >
-              {a.label}
-            </ToolbarButton>
-          ))}
+          {actions.map((a) => {
+            const appearance = a.isDestructive ? 'subtle' : a.primary ? 'primary' : 'subtle';
+            const btn = (
+              <ToolbarButton
+                key={a.key}
+                icon={a.icon as React.JSX.Element | undefined}
+                onClick={a.onClick}
+                disabled={a.disabled}
+                appearance={appearance}
+                className={a.isDestructive ? styles.destructiveBtn : undefined}
+              >
+                {a.label}
+              </ToolbarButton>
+            );
+            return a.tooltip ? (
+              <HbcTooltip key={a.key} content={a.tooltip}>{btn}</HbcTooltip>
+            ) : (
+              <React.Fragment key={a.key}>{btn}</React.Fragment>
+            );
+          })}
         </div>
+      )}
+
+      {/* Overflow menu — PH4B.4 §4b.4.2 */}
+      {overflowActions && overflowActions.length > 0 && (
+        <Menu>
+          <MenuTrigger disableButtonEnhancement>
+            <ToolbarButton
+              aria-label="More actions"
+              icon={<MoreActions size="sm" /> as React.JSX.Element}
+              appearance="subtle"
+              className={styles.overflowBtn}
+            />
+          </MenuTrigger>
+          <MenuPopover>
+            <MenuList>
+              {overflowActions.map((a) => (
+                <MenuItem
+                  key={a.key}
+                  icon={a.icon as React.JSX.Element | undefined}
+                  onClick={a.onClick}
+                  disabled={a.disabled}
+                >
+                  {a.label}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </MenuPopover>
+        </Menu>
       )}
     </div>
   );

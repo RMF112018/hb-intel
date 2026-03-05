@@ -168,6 +168,74 @@ function MyListLayout() {
 - Empty state uses `HbcEmptyState` with optional CTA
 - Banner uses `HbcBanner` with appropriate `role="alert"` or `role="status"`
 
+## Page Actions Pattern (D-03)
+
+All page actions must flow through WorkspacePageShell's `actions` and `overflowActions` props. Do **not** place buttons directly in the page content zone.
+
+### Correct
+
+```tsx
+<WorkspacePageShell
+  layout="list"
+  title="RFIs"
+  actions={[
+    { key: 'create', label: 'New RFI', onClick: handleCreate, primary: true },
+    { key: 'export', label: 'Export', onClick: handleExport },
+  ]}
+  overflowActions={[
+    { key: 'archive', label: 'Archive All', onClick: handleArchive },
+    { key: 'delete', label: 'Delete All', onClick: handleDelete, isDestructive: true },
+  ]}
+>
+  <RFITable />
+</WorkspacePageShell>
+```
+
+### Prohibited
+
+```tsx
+{/* ESLint rule hbc/no-direct-buttons-in-content will warn */}
+<WorkspacePageShell layout="list" title="RFIs">
+  <HbcButton onClick={handleCreate}>New RFI</HbcButton>
+  <RFITable />
+</WorkspacePageShell>
+```
+
+## CommandBarAction Interface
+
+```ts
+interface CommandBarAction {
+  key: string;
+  label: string;
+  icon?: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+  primary?: boolean;
+  isDestructive?: boolean;  // Renders as danger-styled (red) button
+  tooltip?: string;         // Tooltip text on hover
+}
+```
+
+- `primary` renders as accent-colored button
+- `isDestructive` renders as red/danger button (overrides primary styling)
+- `tooltip` wraps the button in `HbcTooltip`
+- `overflowActions` renders a "More" overflow menu with `Menu`/`MenuItem`
+
+## Field Mode Behavior (PH4B.4 §4b.4.3)
+
+When field mode is active (`data-theme="field"`), WorkspacePageShell adapts page actions:
+
+| Element | Office Mode | Field Mode |
+|---------|------------|------------|
+| Command bar zone | Visible | Hidden |
+| Primary action | Button in command bar | 56px FAB (bottom-right, above bottom nav) |
+| Secondary actions | Buttons in command bar | Injected into Cmd+K palette |
+| Overflow actions | "More" menu | Injected into Cmd+K palette |
+
+The FAB renders with `data-hbc-ui="fab-primary"` and `aria-label={primaryAction.label}`.
+
+Secondary actions are written to a module-level store (`fieldModeActionsStore`) and consumed by `HbcCommandPalette` via `useFieldModeActions()`.
+
 ## SPFx Constraints
 
 Depends on `useProjectStore` from `@hbc/shell` for active project context. In SPFx environments, ensure the shell store is properly initialized.

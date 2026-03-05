@@ -188,6 +188,49 @@ export const FieldMode: Story = {
   ),
 };
 
+export const FieldModeActions: Story = {
+  name: 'Field Mode Actions (FAB + Cmd+K)',
+  render: () => (
+    <FluentProvider theme={hbcFieldTheme}>
+      <div data-theme="field" style={{ minHeight: '400px', backgroundColor: '#0F1419', position: 'relative' }}>
+        <WorkspacePageShell
+          layout="list"
+          title="Daily Log"
+          actions={[
+            { key: 'create', label: 'New Entry', onClick: () => console.log('Create'), primary: true },
+            { key: 'export', label: 'Export', onClick: () => console.log('Export') },
+            { key: 'sync', label: 'Sync', onClick: () => console.log('Sync') },
+          ]}
+          overflowActions={[
+            { key: 'archive', label: 'Archive', onClick: () => console.log('Archive') },
+          ]}
+        >
+          <div style={{ padding: '16px', color: '#E5E7EB' }}>
+            <p>In field mode: primary action renders as 56px FAB (bottom-right).</p>
+            <p>Secondary actions are injected into Cmd+K palette.</p>
+            <p>Command bar zone is hidden.</p>
+          </div>
+        </WorkspacePageShell>
+      </div>
+    </FluentProvider>
+  ),
+};
+
+export const WithDestructiveOverflow: Story = {
+  args: {
+    ...baseArgs,
+    actions: [
+      { key: 'create', label: 'New RFI', onClick: () => console.log('Create'), primary: true },
+      { key: 'export', label: 'Export', onClick: () => console.log('Export') },
+    ],
+    overflowActions: [
+      { key: 'archive', label: 'Archive', onClick: () => console.log('Archive') },
+      { key: 'delete', label: 'Delete All', onClick: () => console.log('Delete'), isDestructive: true },
+    ],
+    children: <SampleContent />,
+  },
+};
+
 export const A11yTest: Story = {
   name: 'A11y Test (Landmarks + States)',
   render: () => (

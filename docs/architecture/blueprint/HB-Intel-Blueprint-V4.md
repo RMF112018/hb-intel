@@ -844,4 +844,12 @@ Phase 4b.1 completed: 2026-03-05 — Build & Packaging Foundation
 - 10 reference docs + entry-points.md created (38 total in docs/reference/ui-kit/)
 - ADR-0035: build-packaging-foundation.md
 Next: Phase 4b.2 (Shell Completion & WorkspacePageShell)
+
+Phase 4b.2 completed: 2026-03-05 — Shell Completion & WorkspacePageShell
+Phase 4b.3 completed: 2026-03-05 — Layout Variant System (ADR-0037)
+Phase 4b.4 completed: 2026-03-05 — Command Bar & Page Actions (ADR-0038)
+- CommandBarAction: isDestructive, tooltip, overflow menu
+- Field mode: primary → FAB, secondary → Cmd+K palette via fieldModeActionsStore
+- ESLint rule: hbc/no-direct-buttons-in-content (D-03)
+Next: Phase 4b.5 (Navigation & Active State)
 -->

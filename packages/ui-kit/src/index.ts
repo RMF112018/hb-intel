@@ -174,6 +174,7 @@ export type {
 } from './hooks/useUnsavedChangesBlocker.js';
 
 export { HbcCommandBar } from './HbcCommandBar/index.js';
+export { useFieldModeActions, setFieldModeActions } from './HbcCommandBar/fieldModeActionsStore.js';
 export type {
   HbcCommandBarProps,
   CommandBarAction,

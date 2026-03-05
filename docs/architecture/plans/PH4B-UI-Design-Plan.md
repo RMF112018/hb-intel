@@ -294,4 +294,11 @@ Phase 4b.3 (Layout Variant System) completed: 2026-03-05
   - §17 All 5 layout story files complete
   - ADR-0037 created
   - Reference docs: DashboardLayout.md, ListLayout.md, WorkspacePageShell.md updated
+
+Phase 4b.4 (Command Bar & Page Actions) completed: 2026-03-05
+  - §7 CommandBarAction enhanced (isDestructive, tooltip), overflow menu, field mode FAB
+  - fieldModeActionsStore for Cmd+K palette injection
+  - ESLint rule hbc/no-direct-buttons-in-content (D-03)
+  - ADR-0038 created
+  - Reference docs: WorkspacePageShell.md updated with D-03 pattern + field mode behavior
 -->
