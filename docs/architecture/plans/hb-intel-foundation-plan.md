@@ -548,4 +548,11 @@ Phase 5.3 (Central Auth / Session / Permission State) completed: 2026-03-06
   - 5.3.4 anti-bypass shared API boundary enforced at auth package export surface; compatibility fields/actions retained for migration-safe adoption
   - 5.3.5 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`
   - 5.3.6 ADR-0056 created: `docs/architecture/adr/ADR-0056-central-auth-session-permission-state.md`
+Phase 5.4 (Role Mapping and Authorization Governance) completed: 2026-03-06
+  - 5.4.1 role-mapping layer added (`packages/auth/src/roleMapping.ts`) and integrated into session normalization so provider/context identity resolves to app roles centrally
+  - 5.4.2 standard action vocabulary + feature registration contracts added with centralized evaluators (`isActionAllowed`, `isFeatureVisible`, `isFeatureAccessible`, `evaluateFeatureAccess`)
+  - 5.4.3 default-deny enforcement applied for unregistered protected features and discoverable-locked visibility policy implemented for strategic restricted navigation surfaces
+  - 5.4.4 structured access-denied UX added in auth guard layer (`AccessDenied`) with plain-language explanation, safe nav actions, and optional request-access callback seam
+  - 5.4.5 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`
+  - 5.4.6 ADR-0057 created: `docs/architecture/adr/ADR-0057-role-mapping-and-authorization-governance.md`
 -->

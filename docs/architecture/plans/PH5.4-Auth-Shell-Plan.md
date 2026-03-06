@@ -70,3 +70,31 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - enables production operations through core admin workflows,
 - satisfies formal validation, audit, release, and documentation requirements,
 - and explicitly documents every deferred future expansion path so later phases can extend the platform without re-architecting the foundation.
+
+---
+
+## 5.4 Success Criteria Checklist (Task 4)
+
+- [x] 5.4.1 HB Intel role-mapping layer implemented in `@hbc/auth` to convert provider/context identity into app roles.
+- [x] 5.4.2 role mapping isolated from feature code so raw provider semantics are no longer required in guarded feature flows.
+- [x] 5.4.3 standard action permission vocabulary implemented (`view`, `create`, `edit`, `approve`, `admin`).
+- [x] 5.4.4 feature-level + action-level permission registration/evaluation implemented with documented future grammar seam.
+- [x] 5.4.5 default-deny enforcement implemented for unregistered protected feature access checks.
+- [x] 5.4.6 restricted visibility behavior implemented for hidden-by-default and discoverable-locked features.
+- [x] 5.4.7 structured access-denied surface implemented with plain-language explanation, safe navigation actions, and optional request-access entry point.
+- [x] ADR-0057 created and linked to Phase 5.4 governance traceability.
+
+## Phase 5.4 Progress Notes
+
+- 5.4.1 completed - centralized role-mapping layer added (`packages/auth/src/roleMapping.ts`) and session normalization now resolves mapped app roles - 2026-03-06.
+- 5.4.2 completed - authorization contracts expanded for standard action vocabulary, feature registration, default-deny evaluation, and visibility-lock semantics - 2026-03-06.
+- 5.4.3 completed - guard layer updated (`RoleGate`, `PermissionGate`, `FeatureGate`) and structured `AccessDenied` experience added with optional request-access callback - 2026-03-06.
+- 5.4.4 completed - unit tests added for role mapping, default-deny/visibility evaluation, and access-denied request CTA model behavior - 2026-03-06.
+- 5.4.5 completed - ADR-0057 authored and Phase 5 governance/planning docs updated for traceability closure - 2026-03-06.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth` - PASS
+- `pnpm exec vitest run packages/auth/src/roleMapping.test.ts packages/auth/src/stores/permissionResolution.test.ts packages/auth/src/guards/AccessDenied.test.ts` - BLOCKED (workspace Vitest project setup cannot resolve package-local `vite` in generated temp config; no code-level test failures reported).

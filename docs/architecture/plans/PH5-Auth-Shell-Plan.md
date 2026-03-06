@@ -777,6 +777,28 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 
 ---
 
+## Phase 5.4 Progress Notes
+
+- 5.4.1 completed - role-mapping layer implemented in `@hbc/auth` (`roleMapping.ts`) with session normalization integration for provider/context -> app role resolution - 2026-03-06.
+- 5.4.2 completed - standard action vocabulary + feature registration contracts implemented with centralized default-deny, visibility, and accessibility evaluators - 2026-03-06.
+- 5.4.3 completed - guard surfaces updated for centralized authorization truth and new `AccessDenied` structured UX (plain-language explanation, safe navigation, optional request-access callback) - 2026-03-06.
+- 5.4.4 completed - Phase 5.4 unit tests added for role mapping, default-deny/visibility behavior, and access-denied request-action rendering model - 2026-03-06.
+- 5.4.5 completed - ADR-0057 created and governance/documentation traceability updates applied across PH5/PH5.4/Blueprint/Foundation plans - 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.4)
+
+- [x] Success Criteria #4 advanced to centrally enforced protected-feature visibility and access-denied behavior under default-deny governance.
+- [x] Success Criteria #5 advanced to standardized role mapping plus feature/action authorization vocabulary with explicit protected-feature registration contracts.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth` - PASS
+- `pnpm exec vitest run packages/auth/src/roleMapping.test.ts packages/auth/src/stores/permissionResolution.test.ts packages/auth/src/guards/AccessDenied.test.ts` - BLOCKED (workspace Vitest project setup cannot resolve package-local `vite` in generated temp config).
+
+---
+
 ## Phase 5.3 Progress Notes
 
 - 5.3.1 completed - central auth/session store redesigned with lifecycle, restore, structured error, and shell bootstrap readiness ownership - 2026-03-06.

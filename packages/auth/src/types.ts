@@ -103,6 +103,15 @@ export interface PermissionSummary {
 }
 
 /**
+ * Phase 5.4 standard action-level authorization vocabulary.
+ *
+ * Traceability:
+ * - PH5.4-Auth-Shell-Plan.md §5.4 (standard action permission vocabulary)
+ * - PH5-Auth-Shell-Plan.md §5.4 (locked Option C)
+ */
+export type StandardActionPermission = 'view' | 'create' | 'edit' | 'approve' | 'admin';
+
+/**
  * Session restoration metadata required by locked Phase 5.2 decisions.
  */
 export interface SessionRestoreMetadata {
@@ -173,6 +182,83 @@ export interface AdapterIdentityPayload {
   runtimeMode: CanonicalAuthMode;
   rawContext?: RawAuthContext;
   expiresAt?: string;
+}
+
+/**
+ * Optional provider-context hints consumed only by the centralized role-mapping
+ * layer. Feature modules must never read raw provider group/context semantics.
+ *
+ * Alignment notes:
+ * - D-10: central mapping contract avoids feature-level provider coupling.
+ */
+export interface RoleMappingHint {
+  loginName?: string;
+  isSiteAdmin?: boolean;
+  providerGroupRefs?: string[];
+}
+
+/**
+ * Input contract for converting provider/context identity into app roles.
+ */
+export interface RoleMappingInput {
+  providerIdentityRef: string;
+  runtimeMode: CanonicalAuthMode;
+  existingRoleNames: string[];
+  rawContext?: RawAuthContext;
+  hint?: RoleMappingHint;
+}
+
+/**
+ * Explicit exception hook for governed role-mapping edge cases.
+ * Keeps default roles clean while making exceptions auditable and bounded.
+ */
+export interface RoleMappingException {
+  id: string;
+  reason: string;
+  when: (input: RoleMappingInput) => boolean;
+  appendRoles: string[];
+}
+
+/**
+ * Role-mapping policy knobs used by the centralized mapper.
+ */
+export interface RoleMappingOptions {
+  defaultRoleName?: string;
+  exceptions?: RoleMappingException[];
+}
+
+/**
+ * Visibility behavior for protected feature navigation/surfaces.
+ */
+export type FeatureVisibilityMode = 'hidden' | 'discoverable-locked';
+
+/**
+ * Standard protected-feature registration contract for Phase 5.
+ *
+ * This reserves a seam (`futureGrammarKey`) for deeper custom grammars in
+ * later phases without changing the Phase 5 evaluator surface.
+ */
+export interface FeaturePermissionRegistration {
+  featureId: string;
+  requiredFeatureGrants: string[];
+  actionGrants: Partial<Record<StandardActionPermission, string[]>>;
+  visibility: FeatureVisibilityMode;
+  compatibleModes?: CanonicalAuthMode[] | 'all';
+  lockMessage?: string;
+  futureGrammarKey?: string;
+}
+
+/**
+ * Shared evaluation output consumed by guards/hooks/shell visibility logic.
+ */
+export interface FeatureAccessEvaluation {
+  featureId: string;
+  action: StandardActionPermission;
+  registered: boolean;
+  visible: boolean;
+  allowed: boolean;
+  locked: boolean;
+  denialReason: string | null;
 }
 
 /**

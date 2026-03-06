@@ -13,9 +13,11 @@ export interface RoleGateProps {
  * Blueprint §1e — role-based access guard.
  */
 export function RoleGate({ requiredRole, children, fallback = null }: RoleGateProps): ReactNode {
-  const currentUser = useAuthStore((s) => s.currentUser);
-  if (!currentUser) return fallback;
+  const session = useAuthStore((s) => s.session);
+  if (!session) return fallback;
 
-  const hasRole = currentUser.roles.some((r) => r.name === requiredRole);
+  // Phase 5.4: role checks consume centralized mapped app roles, not raw
+  // provider semantics that may have produced the source identity.
+  const hasRole = session.resolvedRoles.includes(requiredRole);
   return hasRole ? children : fallback;
 }

@@ -1,8 +1,12 @@
 import type {
+  CanonicalAuthMode,
   EffectivePermissionSet,
+  FeatureAccessEvaluation,
+  FeaturePermissionRegistration,
   PermissionOverrideRecord,
   PermissionResolutionInput,
   PermissionResolutionSnapshot,
+  StandardActionPermission,
 } from '../types.js';
 
 /**
@@ -89,6 +93,127 @@ export function isPermissionGranted(effective: EffectivePermissionSet, action: s
 }
 
 /**
+ * Lightweight helper to wrap flat grant arrays in an EffectivePermissionSet.
+ * Useful when evaluating permission store snapshots outside full resolution.
+ */
+export function toEffectivePermissionSet(grants: string[]): EffectivePermissionSet {
+  return {
+    grants: Array.from(new Set(grants)).sort(),
+    denied: [],
+    expiredOverrides: [],
+    emergencyAccessActive: false,
+  };
+}
+
+/**
+ * Evaluate whether a specific action is allowed for a registered feature.
+ *
+ * Locked Option C behavior:
+ * - default deny for missing registration
+ * - feature-level and action-level grants both enforced
+ */
+export function isActionAllowed(params: {
+  effective: EffectivePermissionSet;
+  registration: FeaturePermissionRegistration | null | undefined;
+  action: StandardActionPermission;
+  runtimeMode?: string | null;
+}): boolean {
+  const evaluation = evaluateFeatureAccess(params);
+  return evaluation.allowed;
+}
+
+/**
+ * Determine whether a feature should be visible in navigation/shell surfaces.
+ */
+export function isFeatureVisible(params: {
+  effective: EffectivePermissionSet;
+  registration: FeaturePermissionRegistration | null | undefined;
+  runtimeMode?: string | null;
+}): boolean {
+  const evaluation = evaluateFeatureAccess({
+    ...params,
+    action: 'view',
+  });
+  return evaluation.visible;
+}
+
+/**
+ * Determine whether a feature can be interacted with for a given action.
+ */
+export function isFeatureAccessible(params: {
+  effective: EffectivePermissionSet;
+  registration: FeaturePermissionRegistration | null | undefined;
+  action?: StandardActionPermission;
+  runtimeMode?: string | null;
+}): boolean {
+  const evaluation = evaluateFeatureAccess({
+    ...params,
+    action: params.action ?? 'view',
+  });
+  return evaluation.allowed;
+}
+
+/**
+ * Centralized access evaluator consumed by guards/hooks/stores.
+ */
+export function evaluateFeatureAccess(params: {
+  effective: EffectivePermissionSet;
+  registration: FeaturePermissionRegistration | null | undefined;
+  action: StandardActionPermission;
+  runtimeMode?: string | null;
+}): FeatureAccessEvaluation {
+  const { effective, registration, action, runtimeMode } = params;
+
+  if (!registration) {
+    return {
+      featureId: 'unregistered',
+      action,
+      registered: false,
+      visible: false,
+      allowed: false,
+      locked: false,
+      denialReason:
+        'Default-deny policy: protected feature is not registered in authorization contracts.',
+    };
+  }
+
+  if (!isRuntimeModeCompatible(registration, runtimeMode)) {
+    return {
+      featureId: registration.featureId,
+      action,
+      registered: true,
+      visible: false,
+      allowed: false,
+      locked: false,
+      denialReason: 'Feature is not compatible with the current runtime mode.',
+    };
+  }
+
+  const hasFeatureGrants = registration.requiredFeatureGrants.every((grant) =>
+    isPermissionGranted(effective, grant),
+  );
+  const actionGrants = registration.actionGrants[action] ?? [];
+  const hasActionGrants =
+    actionGrants.length === 0 || actionGrants.every((grant) => isPermissionGranted(effective, grant));
+  const allowed = hasFeatureGrants && hasActionGrants;
+  const locked = !allowed && registration.visibility === 'discoverable-locked';
+  const visible = allowed || locked;
+
+  return {
+    featureId: registration.featureId,
+    action,
+    registered: true,
+    visible,
+    allowed,
+    locked,
+    denialReason: allowed
+      ? null
+      : registration.lockMessage ??
+        'You do not currently have the required role/permission mapping for this feature.',
+  };
+}
+
+/**
  * Produce a diagnostics-friendly snapshot for logs/audit and debugging.
  */
 export function getPermissionResolutionSnapshot(
@@ -104,6 +229,21 @@ export function getPermissionResolutionSnapshot(
     },
     effective: resolveEffectivePermissions(input),
   };
+}
+
+function isRuntimeModeCompatible(
+  registration: FeaturePermissionRegistration,
+  runtimeMode: string | null | undefined,
+): boolean {
+  if (!registration.compatibleModes || registration.compatibleModes === 'all') {
+    return true;
+  }
+
+  if (!runtimeMode) {
+    return false;
+  }
+
+  return registration.compatibleModes.includes(runtimeMode as CanonicalAuthMode);
 }
 
 function isOverrideExpired(override: PermissionOverrideRecord, now: Date): boolean {

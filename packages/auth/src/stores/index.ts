@@ -16,6 +16,11 @@ export type { PermissionState } from './permissionStore.js';
 
 export {
   resolveEffectivePermissions,
+  toEffectivePermissionSet,
   isPermissionGranted,
+  isActionAllowed,
+  isFeatureVisible,
+  isFeatureAccessible,
+  evaluateFeatureAccess,
   getPermissionResolutionSnapshot,
 } from './permissionResolution.js';

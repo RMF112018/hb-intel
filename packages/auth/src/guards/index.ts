@@ -4,3 +4,8 @@ export { FeatureGate } from './FeatureGate.js';
 export type { FeatureGateProps } from './FeatureGate.js';
 export { PermissionGate } from './PermissionGate.js';
 export type { PermissionGateProps } from './PermissionGate.js';
+export { AccessDenied, buildAccessDeniedActionModel } from './AccessDenied.js';
+export type {
+  AccessDeniedActionModel,
+  AccessDeniedProps,
+} from './AccessDenied.js';

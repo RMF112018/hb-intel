@@ -7,6 +7,7 @@ import type {
   SessionRestorePolicy,
   SessionRestoreResult,
 } from '../types.js';
+import { mapIdentityToAppRoles } from '../roleMapping.js';
 
 /**
  * Build a structured auth failure payload with consistent defaults.
@@ -49,13 +50,14 @@ export function normalizeIdentityToSession(
 
   const nowIso = new Date().toISOString();
   const grants = identity.user.roles.flatMap((role) => role.permissions);
+  const resolvedRoles = mapIdentityToAppRoles(identity);
 
   return {
     ok: true,
     value: {
       user: identity.user,
       providerIdentityRef: identity.providerIdentityRef,
-      resolvedRoles: identity.user.roles.map((role) => role.name),
+      resolvedRoles,
       permissionSummary: {
         grants,
         overrides: [],
