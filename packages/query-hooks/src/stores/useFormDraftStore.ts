@@ -1,5 +1,6 @@
 /**
- * Form draft persistence store — Blueprint §2e, PH3 §3.1 Step 7.
+ * Form draft persistence store (low-level/internal) — Blueprint §2e, PH3 §3.1 Step 7.
+ * PH4B.15 (HF-007): consumer-facing integrations should prefer `useFormDraft`.
  *
  * Stores unsaved form data keyed by `domain:entityId` so that
  * navigating away and returning preserves work-in-progress.

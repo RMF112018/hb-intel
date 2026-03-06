@@ -1,20 +1,28 @@
 /**
- * HbcForm — Form wrapper with context provider, error summary, dirty tracking
- * PH4.6 §Step 8 + PH4.11 §Step 2 | Blueprint §1d
+ * HbcForm — D-07 centralized validation architecture with RHF + zodResolver
+ * PH4B.15 §6 (HF-007) | PH4B-C D-07 | Blueprint §1d
  *
- * Backward-compatible: existing consumers with just onSubmit+children+stickyFooter
- * continue working with zero changes. New props (onDirtyChange, showErrorSummary)
- * are all optional.
+ * This component is the single form-validation boundary for HB Intel forms.
+ * It exposes react-hook-form APIs through HbcFormContext, supports schema-driven
+ * validation through zodResolver, and preserves legacy onSubmit behavior so
+ * existing controlled forms continue to function during migration.
  */
 import * as React from 'react';
 import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import type { FieldErrors } from 'react-hook-form';
 import { elevationRaised } from '../theme/elevation.js';
 import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { HbcBanner } from '../HbcBanner/index.js';
 import { HbcFormContext } from './HbcFormContext.js';
-import type { HbcFormProps, FormFieldError } from './types.js';
+import type {
+  FormFieldError,
+  HbcFormProps,
+  HbcFormValues,
+} from './types.js';
 
 const useStyles = makeStyles({
   form: {
@@ -52,8 +60,48 @@ const useStyles = makeStyles({
   },
 });
 
+function getErrorMessage(error: unknown): string | undefined {
+  if (typeof error !== 'object' || error === null) return undefined;
+  if ('message' in error && typeof error.message === 'string' && error.message) {
+    return error.message;
+  }
+
+  const entries = Object.values(error as Record<string, unknown>);
+  for (const entry of entries) {
+    const nested = getErrorMessage(entry);
+    if (nested) return nested;
+  }
+  return undefined;
+}
+
+function flattenErrors(
+  errors: FieldErrors<HbcFormValues>,
+  prefix = '',
+): Array<{ fieldId: string; message: string }> {
+  const flattened: Array<{ fieldId: string; message: string }> = [];
+
+  Object.entries(errors).forEach(([key, value]) => {
+    const fieldId = prefix ? `${prefix}.${key}` : key;
+    const message = getErrorMessage(value);
+    if (message) {
+      flattened.push({ fieldId, message });
+      return;
+    }
+
+    if (typeof value === 'object' && value !== null) {
+      flattened.push(...flattenErrors(value as FieldErrors<HbcFormValues>, fieldId));
+    }
+  });
+
+  return flattened;
+}
+
 export const HbcForm: React.FC<HbcFormProps> = ({
   onSubmit,
+  onValidSubmit,
+  schema,
+  resolver,
+  defaultValues,
   children,
   stickyFooter,
   className,
@@ -62,7 +110,23 @@ export const HbcForm: React.FC<HbcFormProps> = ({
 }) => {
   const styles = useStyles();
 
-  // --- Internal state for context ---
+  const rhf = useForm<HbcFormValues>({
+    defaultValues,
+    resolver: resolver ?? (schema ? zodResolver(schema) : undefined),
+  });
+  const {
+    register,
+    handleSubmit: rhfHandleSubmit,
+    formState,
+    control,
+    setValue,
+    getValues,
+    watch,
+    trigger,
+    reset,
+  } = rhf;
+
+  // Field metadata + manual errors support migration-era validators.
   const fieldsRef = React.useRef<Map<string, string>>(new Map());
   const errorsRef = React.useRef<Map<string, string>>(new Map());
   const dirtyFieldsRef = React.useRef<Set<string>>(new Set());
@@ -70,7 +134,32 @@ export const HbcForm: React.FC<HbcFormProps> = ({
   const [errors, setErrors] = React.useState<FormFieldError[]>([]);
   const [isDirty, setIsDirty] = React.useState(false);
 
-  // Fire onDirtyChange when isDirty changes
+  const syncErrors = React.useCallback(() => {
+    const merged = new Map(errorsRef.current);
+
+    // Merge centralized RHF errors into summary so zod + resolver results are
+    // always visible through the shared form banner (D-07 single surface).
+    flattenErrors(formState.errors).forEach(({ fieldId, message }) => {
+      merged.set(fieldId, message);
+    });
+
+    const next: FormFieldError[] = [];
+    merged.forEach((message, fieldId) => {
+      const label = fieldsRef.current.get(fieldId) ?? fieldId;
+      next.push({ fieldId, label, message });
+    });
+    setErrors(next);
+  }, [formState.errors]);
+
+  React.useEffect(() => {
+    syncErrors();
+  }, [syncErrors]);
+
+  React.useEffect(() => {
+    const nextDirty = formState.isDirty || dirtyFieldsRef.current.size > 0;
+    setIsDirty(nextDirty);
+  }, [formState.isDirty]);
+
   const prevDirtyRef = React.useRef(false);
   React.useEffect(() => {
     if (prevDirtyRef.current !== isDirty) {
@@ -79,19 +168,9 @@ export const HbcForm: React.FC<HbcFormProps> = ({
     }
   }, [isDirty, onDirtyChange]);
 
-  // Sync errors state from errorsRef
-  const syncErrors = React.useCallback(() => {
-    const next: FormFieldError[] = [];
-    errorsRef.current.forEach((message, fieldId) => {
-      const label = fieldsRef.current.get(fieldId) ?? fieldId;
-      next.push({ fieldId, label, message });
-    });
-    setErrors(next);
-  }, []);
-
-  // --- Context methods ---
   const contextValue = React.useMemo(
     () => ({
+      isFormContextActive: true,
       registerField: (fieldId: string, label: string) => {
         fieldsRef.current.set(fieldId, label);
       },
@@ -113,25 +192,57 @@ export const HbcForm: React.FC<HbcFormProps> = ({
       },
       markDirty: (fieldId: string) => {
         dirtyFieldsRef.current.add(fieldId);
-        if (!isDirty) setIsDirty(true);
+        setIsDirty(true);
       },
+      register,
+      handleSubmit: rhfHandleSubmit,
+      formState,
+      control,
+      setValue,
+      getValues,
+      watch,
+      trigger,
+      reset,
     }),
-    [syncErrors, isDirty],
+    [
+      control,
+      formState,
+      getValues,
+      register,
+      reset,
+      rhfHandleSubmit,
+      setValue,
+      syncErrors,
+      trigger,
+      watch,
+    ],
   );
 
   const handleSubmit = React.useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      onSubmit(e);
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+
+      const submit = rhfHandleSubmit(
+        async (values) => {
+          await onValidSubmit?.(values);
+          onSubmit?.(event);
+        },
+        () => {
+          // Legacy compatibility path: callers historically relied on onSubmit
+          // firing on attempted submit even before RHF schema integration.
+          onSubmit?.(event);
+        },
+      );
+
+      void submit(event);
     },
-    [onSubmit],
+    [rhfHandleSubmit, onSubmit, onValidSubmit],
   );
 
   const handleErrorClick = React.useCallback((fieldId: string) => {
     const el = document.getElementById(`field-${fieldId}`);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Focus the first focusable element within the field
       const focusable = el.querySelector<HTMLElement>(
         'input, select, textarea, [tabindex]:not([tabindex="-1"])',
       );

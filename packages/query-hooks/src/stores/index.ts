@@ -22,6 +22,7 @@ export type { FilterStoreState as FilterState } from './useFilterStore.js';
 export { useListFilterStoreBinding } from './useListFilterStoreBinding.js';
 export type { ListFilterStoreBindingProps } from './useListFilterStoreBinding.js';
 
+/** @deprecated Prefer `useFormDraft` as the consumer-facing API. */
 export { useFormDraftStore } from './useFormDraftStore.js';
 export type { FormDraftState } from './useFormDraftStore.js';
 

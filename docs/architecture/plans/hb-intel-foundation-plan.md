@@ -505,4 +505,10 @@ Phase 4b.14 (Navigation & Active State Synchronization / CF-005) completed: 2026
   - `HbcAppShell` now defaults active item rendering to synchronized store state; `WorkspacePageShell` reads synchronized workspace metadata
   - Added regression coverage: `packages/shell/src/stores/navStore.test.ts` + `HbcAppShell.stories.tsx` back/forward synchronization scenario
   - Verification: `pnpm turbo run build`, `pnpm turbo run lint`, `pnpm turbo run check-types`, Storybook build/test-runner, and `pnpm e2e` all pass (lint warnings remain pre-existing)
+Phase 4b.15 (Form Validation Architecture Finalization / HF-007) completed: 2026-03-06
+  - HbcForm now provides centralized RHF + zod validation with D-07 enforcement and migration-safe submit compatibility
+  - HbcFormContext now exposes full API surface required by HF-007: register, handleSubmit, formState, control, setValue, getValues, watch, trigger, reset
+  - HbcForm primitives (TextField, Select, Checkbox) now consume centralized context in RHF mode while preserving controlled compatibility
+  - useFormDraft consolidation completed: hook is consumer-facing and store remains low-level for compatibility
+  - Governance closure completed: HbcForm validation story added, ADR-0042 updated, ADR-0049 created, PH4B-C HF-007 gate marked complete
 -->

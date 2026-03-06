@@ -1,9 +1,12 @@
 /**
  * useFormDraft — Page-level hook for form draft persistence
- * PH4B.8 §4b.8.2 | Blueprint §2e | D-07
+ * PH4B.8 §4b.8.2 + PH4B.15 §6 (HF-007) | Blueprint §2e | D-07
  *
- * Wraps useFormDraftStore to provide a simple API for auto-saving
- * and restoring form drafts keyed by a formId.
+ * Consumer-facing draft API for forms. This hook is the intended integration
+ * surface while useFormDraftStore remains an internal state primitive.
+ *
+ * The hook stays decoupled from @hbc/ui-kit so ui-kit never depends on
+ * query-hooks (prevents circular dependency between UI primitives and data state).
  *
  * Usage pattern (at the page level):
  * ```tsx
@@ -35,8 +38,30 @@ export interface UseFormDraftReturn {
   hasDraft: boolean;
   /** Save current form data as a draft */
   saveDraft: (data: Record<string, unknown>) => void;
+  /** RHF-aligned helper alias: save current values as a draft */
+  saveCurrentValues: (values: Record<string, unknown>) => void;
+  /**
+   * Restore draft into a baseline value object.
+   *
+   * This is useful for RHF `defaultValues` composition and non-RHF forms.
+   */
+  restoreDraftValues: <T extends Record<string, unknown>>(fallback: T) => T;
+  /**
+   * RHF-aligned helper to push draft values directly into `reset`.
+   *
+   * Returns true when a draft was applied, false when no draft existed.
+   */
+  restoreIntoReset: (reset: (values: Record<string, unknown>) => void) => boolean;
   /** Clear the draft (on submit or cancel) */
   clearDraft: () => void;
+  /**
+   * Wrap a submit handler and clear draft on success.
+   *
+   * Intended for RHF `handleSubmit(submitWithDraftClear(onSubmit))`.
+   */
+  submitWithDraftClear: <T extends Record<string, unknown>>(
+    submit: (values: T) => void | Promise<void>,
+  ) => (values: T) => Promise<void>;
 }
 
 /**
@@ -64,9 +89,53 @@ export function useFormDraft(formId: string | undefined): UseFormDraftReturn {
     [formId, setDraft],
   );
 
+  const saveCurrentValues = useCallback(
+    (values: Record<string, unknown>) => {
+      saveDraft(values);
+    },
+    [saveDraft],
+  );
+
+  const restoreDraftValues = useCallback(
+    <T extends Record<string, unknown>>(fallback: T): T => {
+      if (!draft) return fallback;
+      return { ...fallback, ...draft };
+    },
+    [draft],
+  );
+
+  const restoreIntoReset = useCallback(
+    (reset: (values: Record<string, unknown>) => void): boolean => {
+      if (!draft) return false;
+      reset(draft);
+      return true;
+    },
+    [draft],
+  );
+
   const clearDraft = useCallback(() => {
     if (formId) removeDraft(formId);
   }, [formId, removeDraft]);
 
-  return { draft, hasDraft, saveDraft, clearDraft };
+  const submitWithDraftClear = useCallback(
+    <T extends Record<string, unknown>>(
+      submit: (values: T) => void | Promise<void>,
+    ) =>
+      async (values: T): Promise<void> => {
+        await submit(values);
+        clearDraft();
+      },
+    [clearDraft],
+  );
+
+  return {
+    draft,
+    hasDraft,
+    saveDraft,
+    saveCurrentValues,
+    restoreDraftValues,
+    restoreIntoReset,
+    clearDraft,
+    submitWithDraftClear,
+  };
 }

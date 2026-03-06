@@ -117,7 +117,7 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 - [x] System theme awareness bug resolved (respects OS `prefers-color-scheme`) — dynamic theme resolution now uses OS preference in office mode and forces field theme in Field Mode (D-13 verified on 2026-03-06)  
 - [x] Menu & overlay contrast bug (white backgrounds) fully resolved — verified across Project Picker, User Menu, Toolbox flyout, and Command Palette in light + dark/Field Mode (2026-03-06)  
 - [x] CF-005 navigation active state synchronization resolved — `navStore` now subscribes to TanStack Router history and drives route-authoritative `activeWorkspace`/`activeItemId` updates for deep links and browser back/forward (2026-03-06)  
-- [ ] HF-007 form validation architecture finalization pending  
+- [x] HF-007 form validation architecture finalization resolved — `HbcForm` now exposes centralized RHF + zod validation context, `HbcForm` primitives run in dual-mode context validation, draft APIs consolidated around `useFormDraft`, and ADR-0049 published (2026-03-06)  
 - [ ] All P2–P4 items closed  
 - [ ] 100% of workspace pages use `WorkspacePageShell` + named layout  
 - [ ] 0 direct Fluent UI imports or token violations  
@@ -147,3 +147,7 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 - 4b.14 implementation completed — added `resolveNavRouteState`, `syncFromPathname`, and `startNavSync`/`stopNavSync` lifecycle controls in `navStore`; active state now derives automatically from TanStack Router location changes (deep link + nested route + back/forward support) — 2026-03-06.
 - 4b.14 consumer wiring completed — `HbcAppShell` now consumes synchronized store active state by default, `WorkspacePageShell` now reads synchronized workspace context, and PWA root route initializes router history sync on mount — 2026-03-06.
 - 4b.14 verification and governance completed — unit test + Storybook route-sync scenario added, gates executed (`build`, `lint`, `check-types`, Storybook test-runner, `pnpm e2e`), remediation gate updated, and ADR-0048 published — 2026-03-06.
+- 4b.15 completed — `HbcFormContext` now exposes full centralized `react-hook-form` + `zodResolver` validation API (`register`, `handleSubmit`, `formState`, `control`, `setValue`, `getValues`, `watch`, `trigger`, `reset`) per D-07/HF-007 — 2026-03-06.
+- 4b.15 completed — `HbcTextField`, `HbcSelect`, and `HbcCheckbox` now enforce dual-mode centralized validation via `name` + context while preserving controlled backward compatibility paths — 2026-03-06.
+- 4b.15 completed — draft persistence finalized: `useFormDraft` is the consumer-facing API with RHF-aligned helpers, `useFormDraftStore` retained as low-level state for compatibility — 2026-03-06.
+- 4b.15 governance completed — `HbcForm.stories.tsx` schema-validation + draft example added, ADR-0042 updated, ADR-0049 created, and HF-007 remediation gate marked complete — 2026-03-06.

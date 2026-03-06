@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-03-06
-**Phase:** 4b.8
+**Phase:** 4b.8 (updated with 4b.15 finalization)
 
 ## Context
 
@@ -19,6 +19,24 @@ All data entry forms must use `HbcForm`, `HbcFormLayout`, `HbcFormSection`, and 
 - Pages save drafts in `onDirtyChange` callback, restore on mount from `draft`
 - Drafts are cleared on submit or cancel
 - `@hbc/ui-kit` does NOT depend on `@hbc/query-hooks` — draft wiring is page-level
+
+### Validation Finalization (§4b.15 / HF-007)
+- `HbcForm` now provisions centralized `react-hook-form` context with `zodResolver` support.
+- `HbcFormContext` now exposes `register`, `handleSubmit`, `formState`, `control`, `setValue`, `getValues`, `watch`, `trigger`, and `reset`.
+- `HbcTextField`, `HbcSelect`, and `HbcCheckbox` now run in dual mode:
+  - RHF context mode via `name`
+  - legacy controlled fallback via `value`/`onChange` (or `checked`/`onChange`)
+- Error summary now merges RHF schema errors and legacy inline errors into one centralized banner.
+- D-07 enforcement remains strict: all data-entry forms must route validation through `HbcForm` context.
+
+### Draft Consolidation Finalization (§4b.15 / HF-007)
+- `useFormDraft` is the consumer-facing integration surface.
+- `useFormDraftStore` remains the low-level state container (compatibility maintained).
+- RHF-aligned helper methods added to `useFormDraft`:
+  - `saveCurrentValues`
+  - `restoreDraftValues`
+  - `restoreIntoReset`
+  - `submitWithDraftClear`
 
 ### Unsaved Changes Protection (§4b.8.3)
 `HbcFormGuard` component in `@hbc/ui-kit` combines:
@@ -51,3 +69,9 @@ All data entry forms must use `HbcForm`, `HbcFormLayout`, `HbcFormSection`, and 
 | `packages/ui-kit/src/HbcForm/hooks/useFormDensity.ts` | Switched to canonical useDensity |
 | `packages/ui-kit/src/layouts/CreateUpdateLayout.tsx` | Density-aware footer and content |
 | `docs/how-to/developer/phase-4b.8-form-architecture-guide.md` | New how-to guide |
+| `packages/ui-kit/src/HbcForm/HbcFormContext.tsx` | HF-007 centralized RHF validation API exposure |
+| `packages/ui-kit/src/HbcForm/HbcForm.tsx` | zodResolver + RHF submit orchestration + merged summary errors |
+| `packages/ui-kit/src/HbcForm/HbcTextField.tsx` | RHF/controller mode + controlled fallback |
+| `packages/ui-kit/src/HbcForm/HbcSelect.tsx` | RHF/controller mode + controlled fallback |
+| `packages/ui-kit/src/HbcForm/HbcCheckbox.tsx` | RHF/controller mode + controlled fallback |
+| `packages/ui-kit/src/HbcForm/HbcForm.stories.tsx` | Schema validation + draft workflow example |

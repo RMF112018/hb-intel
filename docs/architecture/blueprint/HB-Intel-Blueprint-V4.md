@@ -904,4 +904,10 @@ Phase 4b.14 (Navigation & Active State Synchronization / CF-005) completed: 2026
   - PWA root route now initializes TanStack `router.history` subscription to synchronize nav state for deep links and browser back/forward transitions
   - HbcAppShell consumes store-synchronized `activeItemId` by default; WorkspacePageShell now reads synchronized workspace context
   - Verification: shell unit test coverage added for initial sync/route changes/back-forward/unsubscribe cleanup; Storybook route-sync scenario added; ADR-0048 published
+Phase 4b.15 (Form Validation Architecture Finalization / HF-007) completed: 2026-03-06
+  - HbcForm now provisions centralized `react-hook-form` + `zodResolver` validation context and submit orchestration (D-07)
+  - HbcFormContext exposes full API: register, handleSubmit, formState, control, setValue, getValues, watch, trigger, reset
+  - HbcTextField, HbcSelect, and HbcCheckbox now run in dual-mode (RHF `name` path + controlled compatibility fallback)
+  - Draft consolidation finalized: useFormDraft is consumer-facing with RHF-aligned helpers; useFormDraftStore retained as low-level state
+  - Governance/docs closure: HbcForm schema validation story added, ADR-0042 updated, ADR-0049 created, HF-007 remediation gate marked complete
 -->

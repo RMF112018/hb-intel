@@ -188,6 +188,7 @@ export {
   useUiStore,
   useFilterStore,
   useDomainFilters,
+  // Deprecated consumer path kept for compatibility; prefer useFormDraft.
   useFormDraftStore,
   useFormDraft,
   useListFilterStoreBinding,

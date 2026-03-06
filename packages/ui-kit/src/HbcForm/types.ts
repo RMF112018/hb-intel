@@ -1,4 +1,25 @@
 /** HbcForm — Blueprint §1d form primitives + PH4.6 §Step 8 form/section + PH4.11 form architecture */
+import type {
+  Control,
+  DefaultValues,
+  FieldValues,
+  FormState,
+  Resolver,
+  UseFormGetValues,
+  UseFormHandleSubmit,
+  UseFormRegister,
+  UseFormReset,
+  UseFormSetValue,
+  UseFormTrigger,
+  UseFormWatch,
+} from 'react-hook-form';
+import type { ZodTypeAny } from 'zod';
+
+/** Canonical form value map for HbcForm + RHF integration */
+export type HbcFormValues = Record<string, unknown>;
+
+/** Supported zod schema type for D-07 centralized validation */
+export type HbcFormSchema = ZodTypeAny;
 
 // ---------------------------------------------------------------------------
 // PH4.11 — Form context types
@@ -16,6 +37,12 @@ export interface FormFieldError {
 
 /** Form context value provided by HbcForm to descendant fields */
 export interface HbcFormContextValue {
+  /**
+   * Indicates whether the consumer is currently inside a live HbcForm provider.
+   *
+   * Components use this guard to choose RHF mode (`name`) vs controlled mode.
+   */
+  isFormContextActive: boolean;
   /** Register a field with the form context */
   registerField: (fieldId: string, label: string) => void;
   /** Unregister a field (on unmount) */
@@ -26,6 +53,24 @@ export interface HbcFormContextValue {
   clearFieldError: (fieldId: string) => void;
   /** Mark a field as dirty (edited) */
   markDirty: (fieldId: string) => void;
+  /** react-hook-form register API exposed centrally per D-07 */
+  register: UseFormRegister<HbcFormValues>;
+  /** react-hook-form handleSubmit API exposed centrally per D-07 */
+  handleSubmit: UseFormHandleSubmit<HbcFormValues>;
+  /** react-hook-form formState API exposed centrally per D-07 */
+  formState: FormState<HbcFormValues>;
+  /** react-hook-form control API for controller-based integrations */
+  control: Control<HbcFormValues>;
+  /** react-hook-form setValue API exposed for advanced field integrations */
+  setValue: UseFormSetValue<HbcFormValues>;
+  /** react-hook-form getValues API exposed for form-level orchestration */
+  getValues: UseFormGetValues<HbcFormValues>;
+  /** react-hook-form watch API exposed for reactive derived UI */
+  watch: UseFormWatch<HbcFormValues>;
+  /** react-hook-form trigger API for imperative validation requests */
+  trigger: UseFormTrigger<HbcFormValues>;
+  /** react-hook-form reset API for submit/cancel/reset workflows */
+  reset: UseFormReset<HbcFormValues>;
 }
 
 // ---------------------------------------------------------------------------
@@ -33,12 +78,14 @@ export interface HbcFormContextValue {
 // ---------------------------------------------------------------------------
 
 export interface HbcTextFieldProps {
+  /** RHF field name; when provided inside HbcForm this enables context-driven validation mode */
+  name?: string;
   /** Field label */
   label: string;
-  /** Controlled value */
-  value: string;
-  /** Change handler */
-  onChange: (value: string) => void;
+  /** Controlled value (legacy controlled mode fallback) */
+  value?: string;
+  /** Change handler (legacy controlled mode fallback) */
+  onChange?: (value: string) => void;
   /** Optional placeholder text */
   placeholder?: string;
   /** Field is required */
@@ -64,12 +111,14 @@ export interface HbcSelectOption {
 }
 
 export interface HbcSelectProps {
+  /** RHF field name; when provided inside HbcForm this enables context-driven validation mode */
+  name?: string;
   /** Field label */
   label: string;
-  /** Controlled selected value */
-  value: string;
-  /** Change handler */
-  onChange: (value: string) => void;
+  /** Controlled selected value (legacy controlled mode fallback) */
+  value?: string;
+  /** Change handler (legacy controlled mode fallback) */
+  onChange?: (value: string) => void;
   /** Available options */
   options: HbcSelectOption[];
   /** Optional placeholder text */
@@ -89,12 +138,14 @@ export interface HbcSelectProps {
 }
 
 export interface HbcCheckboxProps {
+  /** RHF field name; when provided inside HbcForm this enables context-driven validation mode */
+  name?: string;
   /** Checkbox label */
   label: string;
-  /** Controlled checked state */
-  checked: boolean;
-  /** Change handler */
-  onChange: (checked: boolean) => void;
+  /** Controlled checked state (legacy controlled mode fallback) */
+  checked?: boolean;
+  /** Change handler (legacy controlled mode fallback) */
+  onChange?: (checked: boolean) => void;
   /** Checkbox is disabled */
   disabled?: boolean;
   /** Additional CSS class */
@@ -117,8 +168,29 @@ export interface HbcFormLayoutProps {
 // PH4.6 §Step 8 — Form wrapper + collapsible sections
 
 export interface HbcFormProps {
-  /** Form submit handler */
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  /**
+   * Legacy submit handler.
+   *
+   * Backward-compatibility path: still supported for existing callers, including
+   * forms that are not yet migrated to schema + onValidSubmit.
+   */
+  onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
+  /**
+   * Preferred schema-validated submit handler (D-07).
+   *
+   * Receives parsed form values after resolver/schema validation succeeds.
+   */
+  onValidSubmit?: (values: HbcFormValues) => void | Promise<void>;
+  /** Optional zod schema used to build a centralized resolver */
+  schema?: HbcFormSchema;
+  /**
+   * Optional custom resolver for advanced workflows.
+   *
+   * If both `schema` and `resolver` are provided, resolver takes precedence.
+   */
+  resolver?: Resolver<HbcFormValues, unknown, FieldValues>;
+  /** Initial values fed into react-hook-form */
+  defaultValues?: DefaultValues<HbcFormValues>;
   /** Form content */
   children: React.ReactNode;
   /** Sticky footer content (cancel/save buttons) */
