@@ -9,10 +9,15 @@
  * Desktop users retain manual toggle via toggleFieldMode() (stored in localStorage).
  * When auto-detected as field (mobile or HbSiteControl), manual toggle is ignored.
  *
- * Backward-compatible: `isFieldMode` and `theme` behave identically to V1.
+ * Phase 4b.13 follow-up (D-13):
+ * - When Field Mode is off, app theme follows OS `prefers-color-scheme`.
+ * - When Field Mode is on, app theme is always Field Mode.
+ *
+ * Backward-compatible: `useFieldMode()` remains the public export.
  */
 import { useState, useEffect, useCallback } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile.js';
+import { hbcDarkTheme, hbcFieldTheme, hbcLightTheme, type HbcTheme } from '../../theme/theme.js';
 
 const STORAGE_KEY = 'hbc-field-mode';
 
@@ -21,6 +26,7 @@ const STORAGE_KEY = 'hbc-field-mode';
 // ---------------------------------------------------------------------------
 
 export type AppMode = 'office' | 'field';
+export type AppThemeMode = 'light' | 'dark' | 'field';
 
 export interface UseFieldModeReturn {
   /** true when mode === 'field' (auto-detected OR manually toggled) */
@@ -29,8 +35,17 @@ export interface UseFieldModeReturn {
   mode: AppMode;
   /** Manual override for desktop users (no-op when auto-detected as field) */
   toggleFieldMode: () => void;
-  /** Derived theme key: field mode → 'field', office mode → 'light' */
-  theme: 'light' | 'field';
+  /**
+   * Resolved app theme key:
+   * - `field` when field mode is enabled
+   * - `dark` when office mode + OS prefers dark
+   * - `light` when office mode + OS prefers light
+   */
+  theme: AppThemeMode;
+  /** Resolved Fluent theme object consumed by FluentProvider roots */
+  resolvedTheme: HbcTheme;
+  /** OS preference signal used for D-13 office mode theme resolution */
+  prefersDarkMode: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -58,12 +73,13 @@ function getOsDarkPreference(): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Hook
+// Hook internals
 // ---------------------------------------------------------------------------
 
-export function useFieldMode(): UseFieldModeReturn {
+function useAppTheme(): UseFieldModeReturn {
   const isMobile = useIsMobile();
   const [isHbSiteControl] = useState(getIsHbSiteControl);
+  const [prefersDarkMode, setPrefersDarkMode] = useState<boolean>(getOsDarkPreference);
   const [manualToggle, setManualToggle] = useState<boolean>(() => {
     const override = getManualOverride();
     return override ?? getOsDarkPreference();
@@ -75,19 +91,19 @@ export function useFieldMode(): UseFieldModeReturn {
   // Resolved mode: auto-detect takes priority; otherwise manual toggle applies
   const mode: AppMode = autoDetectedField ? 'field' : (manualToggle ? 'field' : 'office');
   const isFieldMode = mode === 'field';
+  const theme: AppThemeMode = isFieldMode ? 'field' : (prefersDarkMode ? 'dark' : 'light');
+  const resolvedTheme: HbcTheme = isFieldMode
+    ? hbcFieldTheme
+    : prefersDarkMode ? hbcDarkTheme : hbcLightTheme;
 
   // Sync data-theme attribute on <html> and <meta name="theme-color">
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    if (isFieldMode) {
-      root.setAttribute('data-theme', 'field');
-    } else {
-      root.removeAttribute('data-theme');
-    }
+    root.setAttribute('data-theme', theme);
 
     // Update <meta name="theme-color"> for mobile browser chrome
-    const themeColor = isFieldMode ? '#0F1419' : '#FFFFFF';
+    const themeColor = theme === 'field' ? '#0F1419' : theme === 'dark' ? '#111827' : '#FFFFFF';
     let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     if (!meta) {
       meta = document.createElement('meta');
@@ -95,16 +111,15 @@ export function useFieldMode(): UseFieldModeReturn {
       document.head.appendChild(meta);
     }
     meta.content = themeColor;
-  }, [isFieldMode]);
+  }, [theme]);
 
-  // Listen for OS theme changes (only when no explicit preference stored)
+  // D-13: Listen for OS theme changes and apply immediately in office mode.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    setPrefersDarkMode(mq.matches);
     const handler = (e: MediaQueryListEvent) => {
-      if (localStorage.getItem(STORAGE_KEY) === null) {
-        setManualToggle(e.matches);
-      }
+      setPrefersDarkMode(e.matches);
     };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
@@ -124,6 +139,18 @@ export function useFieldMode(): UseFieldModeReturn {
     isFieldMode,
     mode,
     toggleFieldMode,
-    theme: isFieldMode ? 'field' : 'light',
+    theme,
+    resolvedTheme,
+    prefersDarkMode,
   };
+}
+
+/**
+ * Public compatibility wrapper for field-mode consumers.
+ *
+ * Internally delegates to useAppTheme() so provider roots and legacy consumers
+ * resolve from one canonical D-13-aware source of truth.
+ */
+export function useFieldMode(): UseFieldModeReturn {
+  return useAppTheme();
 }

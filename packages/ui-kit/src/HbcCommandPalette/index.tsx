@@ -14,7 +14,8 @@ import * as React from 'react';
 import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles, shorthands } from '@griffel/react';
 import { elevationLevel3 } from '../theme/elevation.js';
-import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE } from '../theme/tokens.js';
+import { useHbcTheme } from '../theme/useHbcTheme.js';
+import { HBC_SURFACE_FIELD, HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE } from '../theme/tokens.js';
 import { TRANSITION_FAST, keyframes } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { Search, SparkleIcon } from '../icons/index.js';
@@ -59,7 +60,7 @@ const useStyles = makeStyles({
     width: '560px',
     maxWidth: 'calc(100vw - 32px)',
     maxHeight: '480px',
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+    backgroundColor: 'var(--hbc-palette-surface)',
     borderRadius: '8px',
     boxShadow: elevationLevel3,
     display: 'flex',
@@ -74,11 +75,11 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: '8px',
     padding: '12px 16px',
-    borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    borderBottom: '1px solid var(--hbc-palette-border)',
   },
   searchIcon: {
     flexShrink: 0,
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: 'var(--hbc-palette-text-muted)',
   },
   searchInput: {
     flex: '1 1 auto',
@@ -87,16 +88,16 @@ const useStyles = makeStyles({
     fontSize: '1rem',
     fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif',
     backgroundColor: 'transparent',
-    color: HBC_SURFACE_LIGHT['text-primary'],
+    color: 'var(--hbc-palette-text-primary)',
     '::placeholder': {
-      color: HBC_SURFACE_LIGHT['text-muted'],
+      color: 'var(--hbc-palette-text-muted)',
     },
   },
   shortcutHint: {
     flexShrink: 0,
     fontSize: '0.6875rem',
-    color: HBC_SURFACE_LIGHT['text-muted'],
-    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    color: 'var(--hbc-palette-text-muted)',
+    backgroundColor: 'var(--hbc-palette-surface-subtle)',
     padding: '2px 6px',
     borderRadius: '3px',
   },
@@ -110,7 +111,7 @@ const useStyles = makeStyles({
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: '0.04em',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: 'var(--hbc-palette-text-muted)',
     padding: '8px 16px 4px',
   },
   resultItem: {
@@ -120,15 +121,15 @@ const useStyles = makeStyles({
     padding: '8px 16px',
     cursor: 'pointer',
     fontSize: '0.875rem',
-    color: HBC_SURFACE_LIGHT['text-primary'],
+    color: 'var(--hbc-palette-text-primary)',
     transitionProperty: 'background-color',
     transitionDuration: TRANSITION_FAST,
     ':hover': {
-      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+      backgroundColor: 'var(--hbc-palette-surface-subtle)',
     },
   },
   resultActive: {
-    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    backgroundColor: 'var(--hbc-palette-surface-subtle)',
   },
   resultIcon: {
     flexShrink: 0,
@@ -137,21 +138,21 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: 'var(--hbc-palette-text-muted)',
   },
   resultLabel: {
     flex: '1 1 auto',
   },
   resultDescription: {
     fontSize: '0.75rem',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: 'var(--hbc-palette-text-muted)',
   },
   aiIndicator: {
     color: HBC_ACCENT_ORANGE,
   },
   offlineNote: {
     fontSize: '0.75rem',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: 'var(--hbc-palette-text-muted)',
     padding: '8px 16px',
     fontStyle: 'italic',
   },
@@ -159,14 +160,14 @@ const useStyles = makeStyles({
     padding: '24px 16px',
     textAlign: 'center',
     fontSize: '0.875rem',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: 'var(--hbc-palette-text-muted)',
   },
   aiResponse: {
     padding: '12px 16px',
     fontSize: '0.875rem',
     lineHeight: '1.5',
-    color: HBC_SURFACE_LIGHT['text-primary'],
-    borderTop: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    color: 'var(--hbc-palette-text-primary)',
+    borderTop: '1px solid var(--hbc-palette-border)',
     maxHeight: '200px',
     overflowY: 'auto',
   },
@@ -200,7 +201,7 @@ const useStyles = makeStyles({
     ...shorthands.borderWidth('0'),
     cursor: 'pointer',
     fontSize: '1.25rem',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: 'var(--hbc-palette-text-muted)',
   },
 });
 
@@ -230,6 +231,7 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
   className,
 }) => {
   const styles = useStyles();
+  const { isFieldMode } = useHbcTheme();
   const isMobile = useIsMobile();
   const { isOpen, close } = useCommandPalette();
   const connectivityStatus = useOnlineStatus();
@@ -391,6 +393,19 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
   if (!isOpen) return null;
 
   const showAiOption = isOnline && onAiQuery && query.trim() && flatResults.length === 0;
+  const overlaySurface = isFieldMode ? HBC_SURFACE_FIELD : HBC_SURFACE_LIGHT;
+  // D-12: Overlay styles resolve from active provider theme; no light-only hard-coding.
+  const overlayThemeVars = React.useMemo(
+    () =>
+      ({
+        '--hbc-palette-surface': overlaySurface['surface-1'],
+        '--hbc-palette-surface-subtle': overlaySurface['surface-2'],
+        '--hbc-palette-border': overlaySurface['border-default'],
+        '--hbc-palette-text-primary': overlaySurface['text-primary'],
+        '--hbc-palette-text-muted': overlaySurface['text-muted'],
+      }) as React.CSSProperties,
+    [overlaySurface],
+  );
 
   return (
     <>
@@ -407,6 +422,7 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
         aria-label="Command palette"
         data-hbc-ui="command-palette"
         onKeyDown={handleKeyDown}
+        style={overlayThemeVars}
       >
         {/* Search input */}
         <div className={styles.searchWrapper}>

@@ -489,4 +489,14 @@ Phase 4b.12 (Integration Verification & Acceptance) completed: 2026-03-06
   - ADR hygiene completed: ADR-0001..ADR-0014 naming standardization, duplicate legacy ADR-0016 removed, ADR index status fields added
   - Carryover crosswalk (4b.1–4b.11) reconciled and §17 completion checklist fully marked complete
   - Final sign-off published: ADR-0046-integration-verification-and-acceptance.md
+Phase 4b.13 (Menu & Overlay Theme Adaptation) completed: 2026-03-06
+  - D-12 compliance enforced in overlay surfaces: `HbcProjectSelector`, `HbcUserMenu`, `HbcToolboxFlyout`, and `HbcCommandPalette`
+  - Removed residual light-only overlay backgrounds; active provider theme now drives overlay contrast in office/light and dark/Field contexts
+  - Added deterministic dark + Field Mode verification stories for `HbcAppShell`
+  - Documentation closure completed in PH4B.13-C + PH4B-C plans, remediation gate updated, ADR-0047 published
+Phase 4b.13 follow-up (System Theme Awareness / D-13) completed: 2026-03-06
+  - Implemented dedicated `hbcDarkTheme` and removed dark aliasing to field theme
+  - `useFieldMode` internal `useAppTheme` now resolves OS `prefers-color-scheme` in office mode and exposes `resolvedTheme`
+  - Root `FluentProvider` usage updated across PWA/SPFx/hb-site-control plus HbcAppShell to consume hook-driven dynamic theme
+  - Storybook + runtime verification completed for light/dark/field behavior; ADR-0047 addendum published with acceptance evidence
 -->

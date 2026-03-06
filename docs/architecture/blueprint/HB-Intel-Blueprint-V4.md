@@ -889,4 +889,14 @@ Phase 4b.12 (Integration Verification & Acceptance) completed: 2026-03-06
   - ADR naming standardized (ADR-0001..ADR-0014), duplicate legacy ADR-0016 removed, ADR index status fields updated
   - Acceptance matrix + carryover crosswalk closed with objective evidence; §17 guarantee marked verified
   - Final sign-off ADR created: ADR-0046-integration-verification-and-acceptance.md
+Phase 4b.13 (Menu & Overlay Theme Adaptation) completed: 2026-03-06
+  - D-12 enforced for shell overlays: Project Picker, User Menu, Toolbox flyout, and Command Palette all inherit active provider theme
+  - Removed hard-coded light-mode overlay backgrounds; mode-aware token selection now applied through `useHbcTheme()` paths
+  - Storybook expanded with deterministic dark/Field overlay verification stories in HbcAppShell
+  - Remediation gate updated in PH4B-C §11; ADR-0047 created: ADR-0047-menu-and-overlay-theme-adaptation.md
+Phase 4b.13 follow-up (System Theme Awareness / D-13) completed: 2026-03-06
+  - `hbcDarkTheme` implemented as dedicated office dark theme (no longer field alias)
+  - `useFieldMode` internal `useAppTheme` now resolves `light`/`dark` from OS preference when Field Mode is off and returns provider-ready `resolvedTheme`
+  - HbcAppShell + root app providers switched from hard-coded light theme to dynamic `resolvedTheme` consumption
+  - Storybook HbcAppShell variants now include deterministic light/dark/field simulation; ADR-0047 addendum records D-13 closure evidence
 -->

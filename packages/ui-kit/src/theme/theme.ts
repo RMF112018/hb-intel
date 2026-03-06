@@ -1,5 +1,5 @@
 /**
- * HB Intel Design System — Light, Field Mode & Dark themes (V2.1)
+ * HB Intel Design System — Light, Dark, and Field themes (V2.1)
  * Blueprint §1d — Fluent v9 theme with HBC semantic overrides
  * PH4.3 §3.1 — Warm off-white surfaces, sunlight-optimized Field Mode
  *
@@ -74,6 +74,45 @@ const hbcSemanticLight: HbcSemanticTokens = {
 };
 
 // ---------------------------------------------------------------------------
+// Dark theme semantic tokens (V2.1)
+// ---------------------------------------------------------------------------
+const hbcSemanticDark: HbcSemanticTokens = {
+  // Brand (full dark mode keeps core brand hues)
+  hbcColorBrandPrimary: HBC_PRIMARY_BLUE,
+  hbcColorBrandAccent: HBC_ACCENT_ORANGE,
+  // Status
+  hbcColorStatusSuccess: HBC_STATUS_COLORS.success,
+  hbcColorStatusWarning: HBC_STATUS_COLORS.warning,
+  hbcColorStatusError: HBC_STATUS_COLORS.error,
+  hbcColorStatusInfo: HBC_STATUS_COLORS.info,
+  hbcColorStatusNeutral: HBC_STATUS_COLORS.neutral,
+  // Surfaces
+  hbcColorSurface0: '#0F172A',
+  hbcColorSurface1: '#111827',
+  hbcColorSurface2: '#1F2937',
+  hbcColorSurface3: '#374151',
+  hbcColorSurfaceElevated: '#111827',
+  hbcColorSurfaceSubtle: '#0F172A',
+  // Borders
+  hbcColorBorderDefault: '#334155',
+  hbcColorBorderFocus: '#60A5FA',
+  // Text
+  hbcColorTextPrimary: '#F3F4F6',
+  hbcColorTextMuted: '#9CA3AF',
+  hbcColorTextSubtle: '#9CA3AF',
+  // Header
+  hbcColorHeaderBg: '#0A0E14',
+  hbcColorHeaderText: HBC_HEADER_TEXT,
+  hbcColorHeaderIconMuted: '#9CA3AF',
+  // Connectivity
+  hbcColorConnOnline: HBC_CONNECTIVITY.online,
+  hbcColorConnSyncing: HBC_CONNECTIVITY.syncing,
+  hbcColorConnOffline: HBC_CONNECTIVITY.offline,
+  // Responsibility
+  hbcColorResponsibilityBg: '#1F2937',
+};
+
+// ---------------------------------------------------------------------------
 // Field Mode semantic tokens (V2.1)
 // ---------------------------------------------------------------------------
 const hbcSemanticField: HbcSemanticTokens = {
@@ -126,6 +165,16 @@ export const hbcLightTheme: HbcTheme = {
   ...hbcSemanticLight,
 };
 
+/** HB Intel dark theme — OS-driven office dark mode (D-13) */
+export const hbcDarkTheme: HbcTheme = {
+  ...createDarkTheme(hbcBrandRamp),
+  // Dark mode surfaces optimized for desktop office contexts
+  colorNeutralBackground1: '#111827',
+  colorNeutralBackground2: '#0F172A',
+  colorNeutralBackground3: '#1F2937',
+  ...hbcSemanticDark,
+};
+
 /** HB Intel Field Mode theme — high-contrast dark for jobsite/sunlight use (V2.1) */
 export const hbcFieldTheme: HbcTheme = {
   ...createDarkTheme(hbcBrandRamp),
@@ -135,6 +184,3 @@ export const hbcFieldTheme: HbcTheme = {
   colorNeutralBackground3: '#243040',
   ...hbcSemanticField,
 };
-
-/** @deprecated Use hbcFieldTheme — kept as alias for backward compatibility */
-export const hbcDarkTheme: HbcTheme = hbcFieldTheme;

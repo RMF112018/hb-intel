@@ -74,6 +74,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0044 | Accepted | [ADR-0044-mobile-and-field-mode.md](./architecture/adr/ADR-0044-mobile-and-field-mode.md) |
 | ADR-0045 | Accepted | [ADR-0045-component-consumption-enforcement.md](./architecture/adr/ADR-0045-component-consumption-enforcement.md) |
 | ADR-0046 | Accepted | [ADR-0046-integration-verification-and-acceptance.md](./architecture/adr/ADR-0046-integration-verification-and-acceptance.md) |
+| ADR-0047 | Accepted | [ADR-0047-menu-and-overlay-theme-adaptation.md](./architecture/adr/ADR-0047-menu-and-overlay-theme-adaptation.md) |
 
 ## Conventions
 

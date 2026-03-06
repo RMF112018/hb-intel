@@ -7,7 +7,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider } from '@tanstack/react-router';
-import { FluentProvider, hbcLightTheme, HbcErrorBoundary } from '@hbc/ui-kit';
+import { FluentProvider, HbcErrorBoundary, useHbcTheme } from '@hbc/ui-kit';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import type { AuthMode } from '@hbc/auth';
 import { createAppRouter } from './router/index.js';
@@ -24,6 +24,7 @@ interface AppProps {
 }
 
 export function App({ authMode }: AppProps): React.ReactNode {
+  const { resolvedTheme } = useHbcTheme();
   const content = (
     <QueryClientProvider client={queryClient}>
       <HbcErrorBoundary>
@@ -34,7 +35,7 @@ export function App({ authMode }: AppProps): React.ReactNode {
   );
 
   return (
-    <FluentProvider theme={hbcLightTheme}>
+    <FluentProvider theme={resolvedTheme}>
       {authMode === 'msal' ? <MsalGuard>{content}</MsalGuard> : content}
     </FluentProvider>
   );

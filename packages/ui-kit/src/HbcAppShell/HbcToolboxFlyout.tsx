@@ -4,8 +4,9 @@
  */
 import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
-import { makeStyles, shorthands } from '@griffel/react';
-import { HBC_HEADER_ICON_MUTED } from '../theme/tokens.js';
+import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
+import { useHbcTheme } from '../theme/useHbcTheme.js';
+import { HBC_HEADER_ICON_MUTED, HBC_SURFACE_FIELD, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { elevationLevel2 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { Toolbox } from '../icons/index.js';
@@ -38,7 +39,6 @@ const useStyles = makeStyles({
     transform: 'translateX(-50%)',
     marginTop: '4px',
     minWidth: '320px',
-    backgroundColor: '#FFFFFF',
     ...shorthands.borderRadius('8px'),
     boxShadow: elevationLevel2,
     zIndex: Z_INDEX.popover,
@@ -48,13 +48,27 @@ const useStyles = makeStyles({
     paddingBottom: '16px',
   },
   placeholder: {
-    color: '#6B7280',
     fontSize: '0.875rem',
     textAlign: 'center' as const,
+  },
+  flyoutOffice: {
+    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+  },
+  flyoutField: {
+    backgroundColor: HBC_SURFACE_FIELD['surface-1'],
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_FIELD['border-default']),
+  },
+  placeholderOffice: {
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
+  placeholderField: {
+    color: HBC_SURFACE_FIELD['text-muted'],
   },
 });
 
 export const HbcToolboxFlyout: React.FC<HbcToolboxFlyoutProps> = ({ onToolboxOpen }) => {
+  const { isFieldMode } = useHbcTheme();
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -100,8 +114,14 @@ export const HbcToolboxFlyout: React.FC<HbcToolboxFlyoutProps> = ({ onToolboxOpe
         <Toolbox size="md" color={HBC_HEADER_ICON_MUTED} />
       </button>
       {isOpen && (
-        <div className={styles.flyout} role="dialog" aria-label="Toolbox">
-          <p className={styles.placeholder}>Tool grid — filtered by role (Phase 5)</p>
+        <div
+          className={mergeClasses(styles.flyout, isFieldMode ? styles.flyoutField : styles.flyoutOffice)}
+          role="dialog"
+          aria-label="Toolbox"
+        >
+          <p className={mergeClasses(styles.placeholder, isFieldMode ? styles.placeholderField : styles.placeholderOffice)}>
+            Tool grid — filtered by role (Phase 5)
+          </p>
         </div>
       )}
     </div>

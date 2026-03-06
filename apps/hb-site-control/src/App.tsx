@@ -6,7 +6,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider } from '@tanstack/react-router';
-import { FluentProvider, hbcLightTheme, HbcErrorBoundary } from '@hbc/ui-kit';
+import { FluentProvider, HbcErrorBoundary, useHbcTheme } from '@hbc/ui-kit';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import type { AuthMode } from '@hbc/auth';
 import { createAppRouter } from './router/index.js';
@@ -22,8 +22,9 @@ interface AppProps {
 }
 
 export function App({ authMode: _authMode }: AppProps): React.ReactNode {
+  const { resolvedTheme } = useHbcTheme();
   return (
-    <FluentProvider theme={hbcLightTheme}>
+    <FluentProvider theme={resolvedTheme}>
       <QueryClientProvider client={queryClient}>
         <HbcErrorBoundary>
           <RouterProvider router={router} />

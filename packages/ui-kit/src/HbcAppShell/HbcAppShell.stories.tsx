@@ -49,6 +49,71 @@ const meta: Meta<typeof HbcAppShell> = {
 export default meta;
 type Story = StoryObj<typeof HbcAppShell>;
 
+interface ThemeHarnessProps {
+  readonly forceFieldMode?: boolean;
+  readonly hbSiteControlContext?: boolean;
+  readonly forceOsDark?: boolean;
+  readonly children: React.ReactNode;
+}
+
+/**
+ * Storybook-only theme harness for deterministic overlay verification.
+ * Enforces D-12/D-13 validation scenarios without changing runtime app behavior.
+ */
+const ThemeHarness: React.FC<ThemeHarnessProps> = ({
+  forceFieldMode = false,
+  hbSiteControlContext = false,
+  forceOsDark,
+  children,
+}) => {
+  React.useEffect(() => {
+    const originalHtmlApp = document.documentElement.getAttribute('data-hbc-app');
+    const originalStoredMode = localStorage.getItem('hbc-field-mode');
+    const originalMatchMedia = window.matchMedia;
+
+    if (hbSiteControlContext) {
+      document.documentElement.setAttribute('data-hbc-app', 'hb-site-control');
+    } else if (originalHtmlApp === 'hb-site-control') {
+      document.documentElement.removeAttribute('data-hbc-app');
+    }
+
+    localStorage.setItem('hbc-field-mode', forceFieldMode ? 'true' : 'false');
+
+    // D-13: deterministic OS-theme simulation for Storybook light/dark variants.
+    if (forceOsDark !== undefined) {
+      window.matchMedia = ((query: string) =>
+        ({
+          matches: query === '(prefers-color-scheme: dark)' ? forceOsDark : false,
+          media: query,
+          onchange: null,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          addListener: () => {},
+          removeListener: () => {},
+          dispatchEvent: () => false,
+        }) as MediaQueryList) as typeof window.matchMedia;
+    }
+
+    return () => {
+      if (originalHtmlApp) {
+        document.documentElement.setAttribute('data-hbc-app', originalHtmlApp);
+      } else {
+        document.documentElement.removeAttribute('data-hbc-app');
+      }
+
+      if (originalStoredMode === null) {
+        localStorage.removeItem('hbc-field-mode');
+      } else {
+        localStorage.setItem('hbc-field-mode', originalStoredMode);
+      }
+
+      window.matchMedia = originalMatchMedia;
+    };
+  }, [forceFieldMode, hbSiteControlContext, forceOsDark]);
+
+  return <>{children}</>;
+};
+
 export const FullLight: Story = {
   args: {
     user: mockUser,
@@ -128,6 +193,48 @@ export const FieldMode: Story = {
 
 /** @deprecated Use FieldMode instead */
 export const FullFieldMode: Story = FieldMode;
+
+export const DarkThemeOverlayVerification: Story = {
+  name: 'Dark Theme Overlay Verification',
+  render: () => (
+    <ThemeHarness forceFieldMode={false} forceOsDark={true}>
+      <HbcAppShell user={mockUser} sidebarGroups={mockGroups} mode="pwa">
+        <div style={{ padding: '24px' }}>
+          <h1>Dark Theme Overlay Verification</h1>
+          <p>Open project picker, toolbox, and user menu to validate OS dark-mode theme inheritance.</p>
+        </div>
+      </HbcAppShell>
+    </ThemeHarness>
+  ),
+};
+
+export const LightThemeOverlayVerification: Story = {
+  name: 'Light Theme Overlay Verification',
+  render: () => (
+    <ThemeHarness forceFieldMode={false} forceOsDark={false}>
+      <HbcAppShell user={mockUser} sidebarGroups={mockGroups} mode="pwa">
+        <div style={{ padding: '24px' }}>
+          <h1>Light Theme Overlay Verification</h1>
+          <p>Office mode with OS light preference should resolve to hbcLightTheme.</p>
+        </div>
+      </HbcAppShell>
+    </ThemeHarness>
+  ),
+};
+
+export const FieldModeOverlayVerification: Story = {
+  name: 'Field Mode Overlay Verification',
+  render: () => (
+    <ThemeHarness hbSiteControlContext={true} forceOsDark={false}>
+      <HbcAppShell user={mockUser} sidebarGroups={mockGroups} mode="pwa">
+        <div style={{ padding: '24px' }}>
+          <h1>Field Mode Overlay Verification</h1>
+          <p>HB Site Control context auto-enables Field Mode for menu/popover contrast checks.</p>
+        </div>
+      </HbcAppShell>
+    </ThemeHarness>
+  ),
+};
 
 export const A11yTest: Story = {
   name: 'A11y Test (Landmarks + Keyboard)',

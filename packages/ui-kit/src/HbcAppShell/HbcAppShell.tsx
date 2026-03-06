@@ -9,7 +9,6 @@ import { makeStyles, mergeClasses } from '@griffel/react';
 import { FluentProvider } from '@fluentui/react-components';
 import { TRANSITION_NORMAL } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
-import { hbcLightTheme, hbcFieldTheme } from '../theme/theme.js';
 import { HbcConnectivityBar } from './HbcConnectivityBar.js';
 import { HbcHeader } from './HbcHeader.js';
 import { HbcSidebar } from './HbcSidebar.js';
@@ -81,7 +80,7 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
 }) => {
   const { isExpanded, isMobile } = useSidebarState();
   const connectivityStatus = useOnlineStatus();
-  const { isFieldMode, mode: appMode } = useFieldMode();
+  const { mode: appMode, resolvedTheme } = useFieldMode();
   const [isFocusModeActive, setIsFocusModeActive] = React.useState(false);
   const styles = useStyles();
   const shellOffset = connectivityStatus === 'online' ? 58 : 60;
@@ -124,7 +123,7 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   );
 
   return (
-    <FluentProvider theme={isFieldMode ? hbcFieldTheme : hbcLightTheme}>
+    <FluentProvider theme={resolvedTheme}>
       <div data-hbc-shell="app-shell" data-mode={mode}>
         <HbcConnectivityBar />
         <HbcHeader user={user} onSignOut={onSignOut} />

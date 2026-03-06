@@ -5,6 +5,7 @@
 import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
+import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { HBC_HEADER_TEXT, HBC_SURFACE_LIGHT, HBC_SURFACE_FIELD, HBC_PRIMARY_BLUE } from '../theme/tokens.js';
 import { elevationLevel2 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
@@ -41,7 +42,6 @@ const useStyles = makeStyles({
     right: '0px',
     marginTop: '8px',
     minWidth: '200px',
-    backgroundColor: '#FFFFFF',
     ...shorthands.borderRadius('8px'),
     boxShadow: elevationLevel2,
     zIndex: Z_INDEX.popover,
@@ -62,16 +62,11 @@ const useStyles = makeStyles({
     textAlign: 'left',
     cursor: 'pointer',
     fontSize: '0.875rem',
-    color: HBC_SURFACE_LIGHT['text-primary'],
-    ':hover': {
-      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
-    },
   },
   toggle: {
     width: '36px',
     height: '20px',
     ...shorthands.borderRadius('10px'),
-    backgroundColor: HBC_SURFACE_LIGHT['border-default'],
     position: 'relative',
     cursor: 'pointer',
     transitionProperty: 'background-color',
@@ -88,7 +83,6 @@ const useStyles = makeStyles({
     width: '16px',
     height: '16px',
     ...shorthands.borderRadius('50%'),
-    backgroundColor: '#FFFFFF',
     transitionProperty: 'transform',
     transitionDuration: '150ms',
   },
@@ -97,9 +91,46 @@ const useStyles = makeStyles({
   },
   divider: {
     height: '1px',
-    backgroundColor: HBC_SURFACE_LIGHT['border-default'],
     marginTop: '4px',
     marginBottom: '4px',
+  },
+  dropdownOffice: {
+    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+  },
+  dropdownField: {
+    backgroundColor: HBC_SURFACE_FIELD['surface-1'],
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_FIELD['border-default']),
+  },
+  menuItemOffice: {
+    color: HBC_SURFACE_LIGHT['text-primary'],
+    ':hover': {
+      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    },
+  },
+  menuItemField: {
+    color: HBC_SURFACE_FIELD['text-primary'],
+    ':hover': {
+      backgroundColor: HBC_SURFACE_FIELD['surface-2'],
+    },
+  },
+  toggleOffice: {
+    backgroundColor: HBC_SURFACE_LIGHT['border-default'],
+  },
+  toggleField: {
+    backgroundColor: HBC_SURFACE_FIELD['border-default'],
+  },
+  toggleKnobOffice: {
+    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+  },
+  toggleKnobField: {
+    backgroundColor: HBC_SURFACE_FIELD['surface-0'],
+  },
+  dividerOffice: {
+    backgroundColor: HBC_SURFACE_LIGHT['border-default'],
+  },
+  dividerField: {
+    backgroundColor: HBC_SURFACE_FIELD['border-default'],
   },
 });
 
@@ -119,6 +150,9 @@ export const HbcUserMenu: React.FC<HbcUserMenuProps> = ({
   onSignOut,
   onProfileClick,
 }) => {
+  // D-12: Always respect provider-resolved theme, even when consumers pass legacy props.
+  const { isFieldMode: providerIsFieldMode } = useHbcTheme();
+  const resolvedFieldMode = providerIsFieldMode || isFieldMode;
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -167,60 +201,68 @@ export const HbcUserMenu: React.FC<HbcUserMenuProps> = ({
 
       {isOpen && (
         <div
-          className={styles.dropdown}
+          className={mergeClasses(
+            styles.dropdown,
+            resolvedFieldMode ? styles.dropdownField : styles.dropdownOffice,
+          )}
           role="menu"
           aria-label="User menu"
-          style={{
-            backgroundColor: isFieldMode ? HBC_SURFACE_FIELD['surface-1'] : '#FFFFFF',
-          }}
         >
           <button
-            className={styles.menuItem}
+            className={mergeClasses(
+              styles.menuItem,
+              resolvedFieldMode ? styles.menuItemField : styles.menuItemOffice,
+            )}
             role="menuitem"
             onClick={onProfileClick}
             type="button"
-            style={{
-              color: isFieldMode ? HBC_SURFACE_FIELD['text-primary'] : HBC_SURFACE_LIGHT['text-primary'],
-            }}
           >
             Profile
           </button>
 
           <button
-            className={styles.menuItem}
+            className={mergeClasses(
+              styles.menuItem,
+              resolvedFieldMode ? styles.menuItemField : styles.menuItemOffice,
+            )}
             role="menuitem"
             onClick={onToggleFieldMode}
             type="button"
-            style={{
-              color: isFieldMode ? HBC_SURFACE_FIELD['text-primary'] : HBC_SURFACE_LIGHT['text-primary'],
-            }}
           >
             <span>Field Mode</span>
             <span
-              className={mergeClasses(styles.toggle, isFieldMode && styles.toggleActive)}
+              className={mergeClasses(
+                styles.toggle,
+                resolvedFieldMode ? styles.toggleField : styles.toggleOffice,
+                resolvedFieldMode && styles.toggleActive,
+              )}
               aria-hidden="true"
             >
               <span
-                className={mergeClasses(styles.toggleKnob, isFieldMode && styles.toggleKnobActive)}
+                className={mergeClasses(
+                  styles.toggleKnob,
+                  resolvedFieldMode ? styles.toggleKnobField : styles.toggleKnobOffice,
+                  resolvedFieldMode && styles.toggleKnobActive,
+                )}
               />
             </span>
           </button>
 
           <div
-            className={styles.divider}
-            style={{
-              backgroundColor: isFieldMode ? HBC_SURFACE_FIELD['border-default'] : HBC_SURFACE_LIGHT['border-default'],
-            }}
+            className={mergeClasses(
+              styles.divider,
+              resolvedFieldMode ? styles.dividerField : styles.dividerOffice,
+            )}
           />
 
           <button
-            className={styles.menuItem}
+            className={mergeClasses(
+              styles.menuItem,
+              resolvedFieldMode ? styles.menuItemField : styles.menuItemOffice,
+            )}
             role="menuitem"
             onClick={onSignOut}
             type="button"
-            style={{
-              color: isFieldMode ? HBC_SURFACE_FIELD['text-primary'] : HBC_SURFACE_LIGHT['text-primary'],
-            }}
           >
             Sign Out
           </button>

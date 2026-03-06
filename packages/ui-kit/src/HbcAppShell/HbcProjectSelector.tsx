@@ -6,8 +6,9 @@ import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { useProjectStore } from '@hbc/shell';
+import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { heading4 } from '../theme/typography.js';
-import { HBC_HEADER_TEXT, HBC_HEADER_ICON_MUTED, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
+import { HBC_HEADER_TEXT, HBC_HEADER_ICON_MUTED, HBC_SURFACE_FIELD, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { elevationLevel2 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { ChevronDown } from '../icons/index.js';
@@ -46,7 +47,6 @@ const useStyles = makeStyles({
     left: '0px',
     marginTop: '4px',
     minWidth: '240px',
-    backgroundColor: '#FFFFFF',
     ...shorthands.borderRadius('4px'),
     boxShadow: elevationLevel2,
     zIndex: Z_INDEX.popover,
@@ -61,7 +61,6 @@ const useStyles = makeStyles({
     paddingTop: '8px',
     paddingBottom: '8px',
     ...shorthands.borderStyle('none'),
-    ...shorthands.borderBottom('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
     fontSize: '0.875rem',
     outlineStyle: 'none',
   },
@@ -77,9 +76,41 @@ const useStyles = makeStyles({
     textAlign: 'left',
     cursor: 'pointer',
     fontSize: '0.875rem',
+  },
+  dropdownOffice: {
+    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+  },
+  dropdownField: {
+    backgroundColor: HBC_SURFACE_FIELD['surface-1'],
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_FIELD['border-default']),
+  },
+  searchInputOffice: {
+    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+    color: HBC_SURFACE_LIGHT['text-primary'],
+    ...shorthands.borderBottom('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    '::placeholder': {
+      color: HBC_SURFACE_LIGHT['text-muted'],
+    },
+  },
+  searchInputField: {
+    backgroundColor: HBC_SURFACE_FIELD['surface-1'],
+    color: HBC_SURFACE_FIELD['text-primary'],
+    ...shorthands.borderBottom('1px', 'solid', HBC_SURFACE_FIELD['border-default']),
+    '::placeholder': {
+      color: HBC_SURFACE_FIELD['text-muted'],
+    },
+  },
+  projectItemOffice: {
     color: HBC_SURFACE_LIGHT['text-primary'],
     ':hover': {
       backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    },
+  },
+  projectItemField: {
+    color: HBC_SURFACE_FIELD['text-primary'],
+    ':hover': {
+      backgroundColor: HBC_SURFACE_FIELD['surface-2'],
     },
   },
   activeItem: {
@@ -89,6 +120,7 @@ const useStyles = makeStyles({
 
 export const HbcProjectSelector: React.FC<HbcProjectSelectorProps> = ({ onProjectSelect }) => {
   const { activeProject, availableProjects } = useProjectStore();
+  const { isFieldMode } = useHbcTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -148,9 +180,19 @@ export const HbcProjectSelector: React.FC<HbcProjectSelectorProps> = ({ onProjec
       </button>
 
       {isOpen && (
-        <div className={styles.dropdown} role="listbox" aria-label="Projects">
+        <div
+          className={mergeClasses(
+            styles.dropdown,
+            isFieldMode ? styles.dropdownField : styles.dropdownOffice,
+          )}
+          role="listbox"
+          aria-label="Projects"
+        >
           <input
-            className={styles.searchInput}
+            className={mergeClasses(
+              styles.searchInput,
+              isFieldMode ? styles.searchInputField : styles.searchInputOffice,
+            )}
             placeholder="Search projects..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -159,7 +201,11 @@ export const HbcProjectSelector: React.FC<HbcProjectSelectorProps> = ({ onProjec
           {filtered.map((project) => (
             <button
               key={project.id}
-              className={mergeClasses(styles.projectItem, project.id === activeProject?.id && styles.activeItem)}
+              className={mergeClasses(
+                styles.projectItem,
+                isFieldMode ? styles.projectItemField : styles.projectItemOffice,
+                project.id === activeProject?.id && styles.activeItem,
+              )}
               role="option"
               aria-selected={project.id === activeProject?.id}
               onClick={() => handleSelect(project.id)}

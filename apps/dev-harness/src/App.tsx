@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { FluentProvider, hbcLightTheme, hbcDarkTheme, HbcErrorBoundary } from '@hbc/ui-kit';
+import { FluentProvider, hbcDarkTheme, HbcErrorBoundary, useHbcTheme } from '@hbc/ui-kit';
 import { defaultQueryOptions, defaultMutationOptions } from '@hbc/query-hooks';
 import { TabRouter } from './TabRouter.js';
 import { DevControls } from './DevControls.js';
@@ -21,9 +21,10 @@ const queryClient = new QueryClient({
 
 export function App() {
   const [isDark, setIsDark] = useState(false);
+  const { resolvedTheme } = useHbcTheme();
 
   return (
-    <FluentProvider theme={isDark ? hbcDarkTheme : hbcLightTheme}>
+    <FluentProvider theme={isDark ? hbcDarkTheme : resolvedTheme}>
       <QueryClientProvider client={queryClient}>
         <HbcErrorBoundary>
           <div className="harness-root">

@@ -13,7 +13,10 @@ export type UseHbcThemeReturn = UseFieldModeReturn;
 /**
  * Access the current HBC theme state.
  *
- * @returns `{ theme, isFieldMode, toggleFieldMode }` matching the useFieldMode interface
+ * @returns D-13-aware theme state including:
+ * - `theme` key (`light` | `dark` | `field`)
+ * - `resolvedTheme` Fluent theme object for provider roots
+ * - mode + field toggle compatibility fields
  */
 export function useHbcTheme(): UseHbcThemeReturn {
   return useFieldMode();
