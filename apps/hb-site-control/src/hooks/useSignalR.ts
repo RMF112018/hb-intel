@@ -60,17 +60,46 @@ export function useSignalR(intervalMs = 5000): UseSignalRReturn {
       setIsConnected(true);
     }, 500);
 
-    intervalRef.current = setInterval(() => {
-      const event = generateEvent();
-      setEvents((prev) => [event, ...prev].slice(0, 50));
-      setLastEvent(event);
-    }, intervalMs);
+    const startInterval = () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = setInterval(() => {
+        const event = generateEvent();
+        setEvents((prev) => [event, ...prev].slice(0, 50));
+        setLastEvent(event);
+      }, intervalMs);
+    };
+
+    const stopInterval = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+
+    startInterval();
+
+    // PH4B.10 §13 (4b.10.5): Reconnect-on-focus pattern
+    // Pause mock events when app is backgrounded, resume when foregrounded.
+    // In Phase 7, this handler will call hubConnection.start() on resume.
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopInterval();
+        setIsConnected(false);
+      } else {
+        // Simulate reconnection delay
+        setTimeout(() => {
+          setIsConnected(true);
+          startInterval();
+        }, 300);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       clearTimeout(connectTimeout);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      stopInterval();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       setIsConnected(false);
     };
   }, [intervalMs]);

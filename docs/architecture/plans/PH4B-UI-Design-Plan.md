@@ -317,4 +317,15 @@ Phase 4b.9 (Notifications & Feedback) completed: 2026-03-06
   - Storybook stories updated for all 4 toast variants
   - Build: pnpm turbo run build — 23/23 packages successful
   - §17 acceptance: all 4b.9 items marked complete
+
+Phase 4b.10 (Mobile & Field Mode) completed: 2026-03-06
+  - 4b.10.1: useFieldMode refactored — auto-detect (viewport ≤ 767px + HbSiteControl) + manual override + AppMode type
+  - 4b.10.2: HbcAppShell conditional chrome (sidebar in office, bottom nav in field) + supportedModes guard in WorkspacePageShell
+  - 4b.10.3: HbcBottomNav verified (already complete, wired via shell mode switching)
+  - 4b.10.4: useDensity auto-switches to comfortable in field mode (user override respected)
+  - 4b.10.5: useSignalR reconnect-on-focus + timerFullSpec documented
+  - ADR-0044 created (mobile-and-field-mode.md)
+  - Reference doc updated: docs/reference/ui-kit/HbcAppShell.md (mode switching section)
+  - Build: pnpm turbo run build — 23/23 packages successful
+  - §17 acceptance: all 4b.10 items marked complete
 -->

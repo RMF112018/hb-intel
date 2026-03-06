@@ -162,12 +162,12 @@ document.addEventListener('visibilitychange', () => {
 
 ### Acceptance Criteria
 
-- [ ] `useFieldMode` returns `'field'` on viewport < 768px and in `apps/hb-site-control`
-- [ ] Shell renders `HbcBottomNav` in field mode, `HbcSidebar` in office mode
-- [ ] Density auto-switches to `comfortable` in field mode
-- [ ] No breakpoint media queries in any `apps/` page file
-- [ ] `HbcBottomNav` stories cover all item states and active highlighting
-- [ ] `useSignalR` implements reconnect-on-focus
+- [x] `useFieldMode` returns `'field'` on viewport < 768px and in `apps/hb-site-control`
+- [x] Shell renders `HbcBottomNav` in field mode, `HbcSidebar` in office mode
+- [x] Density auto-switches to `comfortable` in field mode
+- [x] No breakpoint media queries in any `apps/` page file
+- [x] `HbcBottomNav` stories cover all item states and active highlighting
+- [x] `useSignalR` implements reconnect-on-focus
 
 ---
 
@@ -175,3 +175,14 @@ document.addEventListener('visibilitychange', () => {
 *Version 1.0 — March 5, 2026*
 *Supersedes: Phase 4 partial implementation (ADR-0016 through ADR-0033)*
 *Next Phase: Phase 5 — SPFx Webpart Breakout*
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4b.10 (Mobile & Field Mode) completed: 2026-03-06
+- 4b.10.1: useFieldMode refactored with auto-detect (viewport + HbSiteControl) + manual override + AppMode type
+- 4b.10.2: HbcAppShell conditional chrome switching (sidebar in office, bottom nav in field) + supportedModes guard
+- 4b.10.3: HbcBottomNav verified (already complete from PH4.14.5, wired via shell mode switching)
+- 4b.10.4: useDensity auto-switches to comfortable in field mode (user override respected)
+- 4b.10.5: useSignalR reconnect-on-focus + timerFullSpec documented in phase-7 guide
+- ADR-0044 created
+- Build: 23/23 packages pass
+-->

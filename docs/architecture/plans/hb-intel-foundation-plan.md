@@ -464,4 +464,11 @@ Phase 4b.9 (Notifications & Feedback) completed: 2026-03-06
 - ESLint rule: @hbc/hbc/no-inline-feedback (blocks Alert, MessageBar, etc.)
 - ADR-0043 (amends ADR-0022 §1 three-category restriction)
 - Build: 23/23 packages pass
+
+Phase 4b.10 (Mobile & Field Mode) completed: 2026-03-06
+- D-09 enforcement: useFieldMode auto-detects (viewport ≤ 767px + HbSiteControl) + manual override
+- AppMode type, HbcAppShell chrome switching, supportedModes guard, density auto-switch
+- useSignalR reconnect-on-focus + timerFullSpec documented
+- ADR-0044 (mobile-and-field-mode.md)
+- Build: 23/23 packages pass
 -->

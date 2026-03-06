@@ -864,4 +864,15 @@ Phase 4b.9 completed: 2026-03-06 — Notifications & Feedback (ADR-0043)
 - ESLint rule: @hbc/hbc/no-inline-feedback (blocks Alert, MessageBar, etc.)
 - Reference doc updated: docs/reference/ui-kit/HbcToast.md (includes mutation wiring pattern)
 - Build: 23/23 packages pass
+
+Phase 4b.10 completed: 2026-03-06 — Mobile & Field Mode (ADR-0044)
+- D-09 enforcement: useFieldMode auto-detects field mode from viewport + HbSiteControl context
+- AppMode type ('office' | 'field') with auto-detect + manual override for desktop users
+- HbcAppShell: conditional chrome switching (sidebar in office, bottom nav in field)
+- WorkspacePageShell: supportedModes guard with HbcEmptyState fallback
+- useDensity: auto-switches to comfortable tier in field mode
+- useSignalR: reconnect-on-focus (visibilitychange) for field workers
+- HB Site Control: data-hbc-app marker + timerFullSpec documented in phase-7 guide
+- Reference doc updated: docs/reference/ui-kit/HbcAppShell.md (mode switching section)
+- Build: 23/23 packages pass
 -->
