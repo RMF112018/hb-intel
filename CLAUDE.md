@@ -100,6 +100,12 @@ Rules:
 - Prefer the narrowest entry point that meets requirements to preserve bundle budgets.
 - Keep entry-point usage consistent with `docs/reference/ui-kit/entry-points.md` and `packages/ui-kit/DESIGN_SYSTEM.md`.
 
+## 6.2 Vercel Preview-Only Policy
+
+- `vercel.json` is reserved for preview and validation environments only.
+- Production deployment contracts remain governed by the platform-specific CI/CD paths defined in the architecture plans.
+- Do not introduce or modify Vercel production routing/build behavior without an explicit ADR and plan update.
+
 ## 7. Common Pitfalls – Automatic Rejection
 (unchanged from v1.1 plus new one): Failing to create or update documentation in the correct Diátaxis folder.
 

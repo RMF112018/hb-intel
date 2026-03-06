@@ -917,4 +917,9 @@ Phase 4b.16 (Developer Harness, Documentation & E2E Expansion / P3) completed: 2
   - UI-kit reference audit closed with new docs for bar/donut/line chart wrappers, text area/rich text editor, and toast provider/container
   - CLAUDE.md + DESIGN_SYSTEM.md dual-entry-point guidance finalized; ADR-0050 published and PH4B-C remediation gates updated
   - Final verification rerun passed: `pnpm turbo run build`, `pnpm turbo run check-types`, `pnpm turbo run lint` (0 errors), Storybook test-runner, and `pnpm e2e`
+Phase 4b.17 (Build Pipeline, Bundle Reporting & Polish / P2-P4) completed: 2026-03-06
+  - Turbo pipeline now includes `bundle-report` task bound to SPFx bundle budget verification (`packages/spfx/scripts/report-bundle-size.mjs`)
+  - CI gate added to fail on bundle-size regression via `pnpm turbo run bundle-report --filter=@hbc/spfx`
+  - Root dist artifact ignore policy normalized for apps/libraries/functions and CLAUDE.md documents Vercel preview-only policy
+  - Governance closure completed with PH4B-C + PH4B.17-C updates and ADR-0051 publication
 -->

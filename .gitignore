@@ -23,7 +23,10 @@ coverage
 .next/
 out/
 build
-dist
+# Phase 4b.17: keep generated dist artifacts out of git for both apps and libraries.
+apps/*/dist/
+packages/*/dist/
+backend/functions/dist/
 
 # Debug
 npm-debug.log*

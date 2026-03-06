@@ -4,15 +4,35 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*",
+        "tsconfig*.json",
+        "**/tsconfig*.json",
+        "package.json"
+      ],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "lint": {
       "dependsOn": [],
-      "inputs": ["$TURBO_DEFAULT$", ".eslintrc.*"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".eslintrc.*",
+        "eslint.config.*",
+        ".eslintignore",
+        "packages/eslint-plugin-hbc/**"
+      ],
+      "outputs": []
     },
     "check-types": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "tsconfig*.json",
+        "**/tsconfig*.json",
+        ".env*"
+      ],
+      "outputs": []
     },
     "test": {
       "dependsOn": ["^build"],
@@ -27,6 +47,24 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".storybook/**"],
       "outputs": ["storybook-static/**"]
+    },
+    "bundle-report": {
+      "dependsOn": ["bundle:size"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "packages/spfx/scripts/report-bundle-size.mjs",
+        "packages/spfx/dist/**"
+      ],
+      "outputs": []
+    },
+    "bundle:size": {
+      "dependsOn": ["build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "packages/spfx/scripts/report-bundle-size.mjs",
+        "packages/spfx/dist/**"
+      ],
+      "outputs": []
     },
     "format:check": {}
   }

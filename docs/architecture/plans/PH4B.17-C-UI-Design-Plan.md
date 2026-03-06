@@ -140,10 +140,17 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 ### Documentation & Polish
 - [ ] Developer Playbook updated with theme rules  
 - [ ] All reference docs complete  
-- [ ] Bundle-size reporting enforced in CI  
+- [x] Bundle-size reporting enforced in CI — Turbo `bundle-report` task wired to SPFx bundle budget script and CI gate now fails on regression (2026-03-06)  
 
 **Final Status:** Production-ready for Phase 5 deployment.
 
 ---
 
 This plan is ready to be saved as `docs/architecture/plans/PH4B-UI-Design-Post-Audit-Remediation-Plan.md`. All tasks are fully scoped, estimated, and include clear acceptance criteria and implementation steps matching the style of the existing PH4B.1–PH4B.12 plans. The menu contrast issue has been elevated to the first P1 task (4b.13) as it blocks visual consistency in the development environment.
+
+## 12. Progress Notes
+
+- 4b.17 completed — Turbo pipeline finalized with `bundle-report` task and optimized build/lint/check-types input-output cache boundaries for deterministic CI behavior — 2026-03-06.
+- 4b.17 completed — CI enforcement added via `Bundle Size Gate` job running `pnpm turbo run bundle-report --filter=@hbc/spfx` with hard-fail regression behavior — 2026-03-06.
+- 4b.17 completed — root `.gitignore` dist policy normalized for apps/libraries/functions and SPFx bundle-size script output clarified for gate diagnostics — 2026-03-06.
+- 4b.17 governance completed — `CLAUDE.md` preview-only Vercel policy added and ADR-0051 created with verification evidence — 2026-03-06.

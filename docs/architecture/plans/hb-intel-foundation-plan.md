@@ -518,4 +518,9 @@ Phase 4b.16 (Developer Harness, Documentation & E2E Expansion / P3) completed: 2
   - Completed remaining UI-kit component reference docs and entry-point cross-links (chart wrappers, input wrappers, toast provider/container)
   - Finalized dual-entry-point guidance in CLAUDE.md and DESIGN_SYSTEM.md; ADR-0050 created
   - Verification rerun completed successfully across required gates: build, check-types, lint (0 errors), Storybook test-runner, and Playwright e2e
+Phase 4b.17 (Build Pipeline, Bundle Reporting & Polish / P2-P4) completed: 2026-03-06
+  - Added Turbo `bundle-report` task and wired it to SPFx bundle budget script for deterministic regression checks
+  - Added CI `Bundle Size Gate` with hard-fail behavior when SPFx bundle exceeds threshold
+  - Updated root `.gitignore` dist handling for app/library/function outputs and documented Vercel preview-only policy in CLAUDE.md
+  - Governance updates completed: PH4B-C + PH4B.17-C progress/gates updated and ADR-0051 created
 -->

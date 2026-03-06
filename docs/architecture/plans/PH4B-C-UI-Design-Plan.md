@@ -119,6 +119,7 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 - [x] CF-005 navigation active state synchronization resolved — `navStore` now subscribes to TanStack Router history and drives route-authoritative `activeWorkspace`/`activeItemId` updates for deep links and browser back/forward (2026-03-06)  
 - [x] HF-007 form validation architecture finalization resolved — `HbcForm` now exposes centralized RHF + zod validation context, `HbcForm` primitives run in dual-mode context validation, draft APIs consolidated around `useFormDraft`, and ADR-0049 published (2026-03-06)  
 - [x] P3 Developer Harness / Documentation / E2E expansion complete — DemoShell/DemoNavigation/DemoLayouts added, per-domain WorkspacePageShell smoke specs added, and ADR-0050 published (2026-03-06)
+- [x] P2/P4 Build Pipeline / Bundle Reporting polish complete — Turbo bundle-report task added, CI regression gate enforced, dist artifact ignore policy normalized, and ADR-0051 published (2026-03-06)
 - [ ] All P2–P4 items closed  
 - [x] 100% of workspace pages use `WorkspacePageShell` + named layout — validated by route/component audit and per-domain shell smoke coverage refresh (2026-03-06)  
 - [ ] 0 direct Fluent UI imports or token violations  
@@ -126,7 +127,7 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 ### Documentation & Polish
 - [ ] Developer Playbook updated with theme rules  
 - [x] All reference docs complete — component reference audit closed with missing chart/input/toast references added and cross-links updated (2026-03-06)  
-- [ ] Bundle-size reporting enforced in CI  
+- [x] Bundle-size reporting enforced in CI — SPFx budget gate now runs in Turbo and CI with regression-fail behavior (2026-03-06)  
 
 **Final Status:** Production-ready for Phase 5 deployment.
 
@@ -157,3 +158,7 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 - 4b.16 completed — UI-kit reference documentation audit finalized; missing chart/input/toast component references created and entry-point cross-links updated — 2026-03-06.
 - 4b.16 governance completed — `CLAUDE.md` and `DESIGN_SYSTEM.md` dual-entry-point guidance finalized, PH4B-C remediation gates updated, and ADR-0050 created — 2026-03-06.
 - 4b.16 verification completed — `pnpm turbo run build`, `pnpm turbo run check-types`, `pnpm turbo run lint` (0 errors), Storybook build/test-runner, and `pnpm e2e` all passed for P3 closure evidence — 2026-03-06.
+- 4b.17 completed — Turbo now includes dedicated `bundle-report` task and optimized build/lint/check-types pipeline cache contracts for deterministic regression detection — 2026-03-06.
+- 4b.17 completed — CI `Bundle Size Gate` job added and wired to fail on SPFx bundle-size regression via `packages/spfx/scripts/report-bundle-size.mjs` — 2026-03-06.
+- 4b.17 completed — `.gitignore` dist policy normalized for app/library/function outputs and bundle report diagnostics improved for CI readability — 2026-03-06.
+- 4b.17 governance completed — `CLAUDE.md` preview-only Vercel policy documented, PH4B-C remediation gates updated, and ADR-0051 created — 2026-03-06.

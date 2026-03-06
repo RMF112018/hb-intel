@@ -83,6 +83,19 @@ jobs:
           path: backend/functions/dist
           retention-days: 1
 
+  bundle-size:
+    name: Bundle Size Gate
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-pnpm
+
+      - name: Verify SPFx bundle size budget
+        # 4b.17 / P2-P4: hard-fail CI when SPFx bundle output regresses beyond threshold.
+        run: pnpm turbo run bundle-report --filter=@hbc/spfx
+
   storybook:
     name: Storybook
     runs-on: ubuntu-latest
@@ -171,6 +184,7 @@ jobs:
       - lint-and-format
       - test
       - build
+      - bundle-size
       - storybook
       - e2e
     runs-on: ubuntu-latest
