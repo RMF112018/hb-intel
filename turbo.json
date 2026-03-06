@@ -1,12 +1,14 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
+  "globalDependencies": ["pnpm-workspace.yaml"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": [
         "$TURBO_DEFAULT$",
         ".env*",
+        "pnpm-workspace.yaml",
         "tsconfig*.json",
         "**/tsconfig*.json",
         "package.json"
@@ -17,6 +19,7 @@
       "dependsOn": [],
       "inputs": [
         "$TURBO_DEFAULT$",
+        "pnpm-workspace.yaml",
         ".eslintrc.*",
         "eslint.config.*",
         ".eslintignore",
@@ -28,6 +31,7 @@
       "dependsOn": ["^build"],
       "inputs": [
         "$TURBO_DEFAULT$",
+        "pnpm-workspace.yaml",
         "tsconfig*.json",
         "**/tsconfig*.json",
         ".env*"

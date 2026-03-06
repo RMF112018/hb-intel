@@ -76,6 +76,12 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0046 | Accepted | [ADR-0046-integration-verification-and-acceptance.md](./architecture/adr/ADR-0046-integration-verification-and-acceptance.md) |
 | ADR-0047 | Accepted | [ADR-0047-menu-and-overlay-theme-adaptation.md](./architecture/adr/ADR-0047-menu-and-overlay-theme-adaptation.md) |
 | ADR-0048 | Accepted | [ADR-0048-navigation-and-active-state-synchronization.md](./architecture/adr/ADR-0048-navigation-and-active-state-synchronization.md) |
+| ADR-0049 | Accepted | [ADR-0049-form-validation-architecture-finalization.md](./architecture/adr/ADR-0049-form-validation-architecture-finalization.md) |
+| ADR-0050 | Accepted | [ADR-0050-developer-harness-documentation-and-e2e-expansion.md](./architecture/adr/ADR-0050-developer-harness-documentation-and-e2e-expansion.md) |
+| ADR-0051 | Accepted | [ADR-0051-build-pipeline-bundle-reporting-and-polish.md](./architecture/adr/ADR-0051-build-pipeline-bundle-reporting-and-polish.md) |
+| ADR-0052 | Accepted | [ADR-0052-integration-verification-and-acceptance-final.md](./architecture/adr/ADR-0052-integration-verification-and-acceptance-final.md) |
+| ADR-0053 | Accepted | [ADR-0053-auth-dual-mode-foundation.md](./architecture/adr/ADR-0053-auth-dual-mode-foundation.md) |
+| ADR-0054 | Accepted | [ADR-0054-shell-navigation-foundation.md](./architecture/adr/ADR-0054-shell-navigation-foundation.md) |
 
 ## Conventions
 

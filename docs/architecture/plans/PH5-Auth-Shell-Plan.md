@@ -734,3 +734,19 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - enables production operations through core admin workflows,
 - satisfies formal validation, audit, release, and documentation requirements,
 - and explicitly documents every deferred future expansion path so later phases can extend the platform without re-architecting the foundation.
+
+---
+
+## Phase 5.1 Progress Notes
+
+- 5.1.1 completed - package boundaries codified in package manifests/tsconfig/vite and package ownership READMEs - 2026-03-06.
+- 5.1.2 completed - Option C per-feature structure + public-export JSDoc requirements documented in `packages/auth/README.md` and `packages/shell/README.md` - 2026-03-06.
+- 5.1.3 completed - ADRs 0053 and 0054 created and locked before further migration - 2026-03-06.
+- 5.1.4 completed - root workspace dependency governance updated in `pnpm-workspace.yaml` and `turbo.json` - 2026-03-06.
+- 5.1.5 completed - verification evidence and traceability notes appended for Phase 5.1 closure - 2026-03-06.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS

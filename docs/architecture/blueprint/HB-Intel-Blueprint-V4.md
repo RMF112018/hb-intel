@@ -926,4 +926,10 @@ Phase 4b.18 (Integration Verification & Acceptance Final Closure) completed: 202
   - Final verification gates passed: `pnpm turbo run build`, `pnpm turbo run check-types`, `pnpm turbo run lint` (0 errors), Storybook test-runner (`54 suites`, `365 tests`, `0 failed`), Playwright (`37 passed`, `4 skipped`, `0 failed`)
   - Final visual QA validated Project Picker, User Menu, Toolbox flyout, and Command Palette contrast in light/dark/Field Mode via overlay verification stories + PWA shell smoke checks
   - PH4B-C §11 completion criteria/remediation gates/documentation gates fully marked complete; ADR-0052 published for final acceptance and Phase 5 readiness declaration
+Phase 5.1 (Authentication & Shell Foundation Task 1) completed: 2026-03-06
+  - 5.1.1 package boundaries locked for `@hbc/auth` and `@hbc/shell` via package configs (`package.json`, `tsconfig.json`, `vite.config.ts`) and package boundary READMEs
+  - 5.1.2 Option C per-feature structure and JSDoc/public export rules documented and enforced in package ownership docs
+  - 5.1.3 ADR-0053 and ADR-0054 published to lock auth/shell ownership seams prior to migration
+  - 5.1.4 workspace dependency governance updated in `pnpm-workspace.yaml` and `turbo.json` (including cache invalidation linkage to workspace dependency rules)
+  - 5.1.5 verification gates passed for scoped packages: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`
 -->
