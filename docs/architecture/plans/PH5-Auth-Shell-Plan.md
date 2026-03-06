@@ -774,3 +774,25 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - `pnpm turbo run build --filter=@hbc/auth` - PASS
 - `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
 - `pnpm turbo run check-types --filter=@hbc/auth` - PASS
+
+---
+
+## Phase 5.3 Progress Notes
+
+- 5.3.1 completed - central auth/session store redesigned with lifecycle, restore, structured error, and shell bootstrap readiness ownership - 2026-03-06.
+- 5.3.2 completed - typed shallow selector contracts and selector hooks implemented for lifecycle/bootstrap/session/permission slices - 2026-03-06.
+- 5.3.3 completed - adjacent permission resolution layer implemented with deterministic multi-source permission combination logic - 2026-03-06.
+- 5.3.4 completed - shared authorization APIs exported via auth store and root barrels to prevent feature-level truth recomputation - 2026-03-06.
+- 5.3.5 completed - ADR-0056 created and governance traceability updated in docs index/plans - 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.3)
+
+- [x] Success Criteria #3 advanced to centralized auth/session/permission state truth with typed selectors and atomic action boundaries.
+- [x] Success Criteria #4 advanced through centralized authorization API export and anti-bypass boundary enforcement at auth package surface.
+- [x] Success Criteria #5 advanced through deterministic permission resolution combining base/default/override/expiry/emergency sources.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth` - PASS

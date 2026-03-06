@@ -1,5 +1,14 @@
 // Stores (Blueprint §2e — Zustand exclusively)
-export { useAuthStore } from './stores/index.js';
+export {
+  useAuthStore,
+  useAuthLifecycleSelector,
+  useAuthBootstrapSelector,
+  useAuthSessionSummarySelector,
+  useAuthPermissionSummarySelector,
+  resolveEffectivePermissions,
+  isPermissionGranted,
+  getPermissionResolutionSnapshot,
+} from './stores/index.js';
 export type { AuthState } from './stores/index.js';
 export { usePermissionStore } from './stores/index.js';
 export type { PermissionState } from './stores/index.js';
@@ -11,22 +20,37 @@ export type { RoleGateProps, FeatureGateProps, PermissionGateProps } from './gua
 // Hooks (Blueprint §1e — convenience hooks)
 export { useCurrentUser, usePermission, useFeatureFlag } from './hooks/index.js';
 
-// Dual-mode auth types (PH5.2 — canonical + compatibility runtime contract)
+// Dual-mode auth types (PH5.2/5.3 — canonical + compatibility runtime contract)
 export type {
   AdapterIdentityPayload,
+  AuthBootstrapSelectorResult,
   AuthFailure,
   AuthFailureCode,
+  AuthLifecyclePhase,
+  AuthLifecycleSelectorResult,
   AuthMode,
+  AuthPermissionSummarySelectorResult,
   AuthResult,
+  AuthRestoreState,
+  AuthSessionSummarySelectorResult,
+  AuthStoreActions,
+  AuthStoreSlice,
+  AuthStoreState,
   CanonicalAuthMode,
+  EffectivePermissionSet,
+  EmergencyAccessState,
   IMsalConfig,
   ISpfxPageContext,
   LegacyAuthMode,
   NormalizedAuthSession,
+  PermissionOverrideRecord,
+  PermissionResolutionInput,
+  PermissionResolutionSnapshot,
   SessionRestoreMetadata,
   SessionRestoreOutcome,
   SessionRestorePolicy,
   SessionRestoreResult,
+  ShellBootstrapReadiness,
   ShellStatusTransition,
 } from './types.js';
 export type { IAuthAdapter } from './IAuthAdapter.js';

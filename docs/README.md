@@ -83,6 +83,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0053 | Accepted | [ADR-0053-auth-dual-mode-foundation.md](./architecture/adr/ADR-0053-auth-dual-mode-foundation.md) |
 | ADR-0054 | Accepted | [ADR-0054-shell-navigation-foundation.md](./architecture/adr/ADR-0054-shell-navigation-foundation.md) |
 | ADR-0055 | Accepted | [ADR-0055-dual-mode-authentication-architecture.md](./architecture/adr/ADR-0055-dual-mode-authentication-architecture.md) |
+| ADR-0056 | Accepted | [ADR-0056-central-auth-session-permission-state.md](./architecture/adr/ADR-0056-central-auth-session-permission-state.md) |
 
 ## Conventions
 

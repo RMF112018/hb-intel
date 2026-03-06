@@ -69,3 +69,30 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - enables production operations through core admin workflows,
 - satisfies formal validation, audit, release, and documentation requirements,
 - and explicitly documents every deferred future expansion path so later phases can extend the platform without re-architecting the foundation.
+
+---
+
+## 5.3 Success Criteria Checklist (Task 3)
+
+- [x] 5.3.1 central Zustand auth/session truth store implemented.
+- [x] 5.3.2 auth store now owns lifecycle phase, normalized session, runtime mode, restore state, sign-in/sign-out/reauth actions, structured error, and shell bootstrap readiness flags.
+- [x] 5.3.3 typed selectors with shallow subscription patterns implemented.
+- [x] 5.3.4 auth actions implemented as atomic actions with explicit side-effect boundaries.
+- [x] 5.3.5 permission resolution layer implemented adjacent to auth with provider identity resolution kept separate.
+- [x] 5.3.6 permission evaluation now combines base grants, default grants, explicit overrides, expiring overrides, and emergency access state.
+- [x] 5.3.7 shared permission APIs exported as centralized authorization truth entry points.
+- [x] ADR-0056 created and linked to Phase 5.3 traceability.
+
+## Phase 5.3 Progress Notes
+
+- 5.3.1 completed - central auth/session store redesigned with lifecycle, restore, structured error, and shell bootstrap readiness ownership - 2026-03-06.
+- 5.3.2 completed - typed shallow selector contracts and selector hooks implemented for lifecycle/bootstrap/session/permission slices - 2026-03-06.
+- 5.3.3 completed - adjacent permission resolution layer implemented with deterministic multi-source permission combination logic - 2026-03-06.
+- 5.3.4 completed - shared authorization APIs exported via auth store and root barrels to prevent feature-level truth recomputation - 2026-03-06.
+- 5.3.5 completed - ADR-0056 created and governance traceability updated in docs index/plans - 2026-03-06.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth` - PASS

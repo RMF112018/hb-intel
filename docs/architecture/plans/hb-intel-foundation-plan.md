@@ -541,4 +541,11 @@ Phase 5.2 (Dual-Mode Authentication Architecture) completed: 2026-03-06
   - 5.2.5 session normalization + restore-policy utilities implemented with typed restore outcomes and shell-status transition outputs
   - 5.2.6 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`
   - 5.2.7 ADR-0055 created: `docs/architecture/adr/ADR-0055-dual-mode-authentication-architecture.md`
+Phase 5.3 (Central Auth / Session / Permission State) completed: 2026-03-06
+  - 5.3.1 central auth/session store implemented with lifecycle phase, normalized session, runtime mode, restore state, structured error, and shell bootstrap readiness ownership
+  - 5.3.2 typed shallow selector hooks/functions added for lifecycle/bootstrap/session/permission slices (`useAuthLifecycleSelector`, `useAuthBootstrapSelector`, `useAuthSessionSummarySelector`, `useAuthPermissionSummarySelector`)
+  - 5.3.3 permission resolution layer added (`resolveEffectivePermissions`, `isPermissionGranted`, `getPermissionResolutionSnapshot`) combining base/default/override/expiry/emergency access sources
+  - 5.3.4 anti-bypass shared API boundary enforced at auth package export surface; compatibility fields/actions retained for migration-safe adoption
+  - 5.3.5 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`
+  - 5.3.6 ADR-0056 created: `docs/architecture/adr/ADR-0056-central-auth-session-permission-state.md`
 -->

@@ -174,3 +174,177 @@ export interface AdapterIdentityPayload {
   rawContext?: RawAuthContext;
   expiresAt?: string;
 }
+
+/**
+ * Central lifecycle phases for the Phase 5.3 auth/session store.
+ *
+ * Alignment notes:
+ * - D-04: route-driven shells can subscribe to minimal lifecycle slices.
+ * - D-07: structured lifecycle states support deterministic validation/submit
+ *   prerequisites before protected actions run.
+ */
+export type AuthLifecyclePhase =
+  | 'idle'
+  | 'bootstrapping'
+  | 'restoring'
+  | 'authenticated'
+  | 'reauth-required'
+  | 'signed-out'
+  | 'error';
+
+/**
+ * Restore-tracking state owned by the central auth/session store.
+ */
+export interface AuthRestoreState {
+  inFlight: boolean;
+  outcome: SessionRestoreOutcome | null;
+  shellTransition: ShellStatusTransition | null;
+  lastAttemptedAt: string | null;
+  lastResolvedAt: string | null;
+}
+
+/**
+ * Shell bootstrap readiness flags consumed by shell/guards.
+ */
+export interface ShellBootstrapReadiness {
+  authReady: boolean;
+  permissionsReady: boolean;
+  shellReadyToRender: boolean;
+}
+
+/**
+ * Central auth/session store state contract.
+ */
+export interface AuthStoreState {
+  lifecyclePhase: AuthLifecyclePhase;
+  session: NormalizedAuthSession | null;
+  runtimeMode: AuthMode | null;
+  restoreState: AuthRestoreState;
+  structuredError: AuthFailure | null;
+  shellBootstrap: ShellBootstrapReadiness;
+
+  /** Compatibility field for existing consumers. */
+  currentUser: ICurrentUser | null;
+  /** Compatibility loading field for existing consumers. */
+  isLoading: boolean;
+  /** Compatibility error message field for existing consumers. */
+  error: string | null;
+}
+
+/**
+ * Central auth/session store atomic action contract.
+ */
+export interface AuthStoreActions {
+  beginBootstrap: (runtimeMode?: AuthMode | null) => void;
+  completeBootstrap: (params?: {
+    session?: NormalizedAuthSession | null;
+    permissionsReady?: boolean;
+  }) => void;
+  beginRestore: () => void;
+  resolveRestore: (result: SessionRestoreResult) => void;
+  signInSuccess: (session: NormalizedAuthSession) => void;
+  signOut: () => void;
+  markReauthRequired: (failure?: AuthFailure | null) => void;
+  setStructuredError: (error: AuthFailure | null) => void;
+  clearStructuredError: () => void;
+
+  /** Compatibility wrappers retained for existing apps. */
+  setUser: (user: ICurrentUser | null) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (errorMessage: string | null) => void;
+  clear: () => void;
+}
+
+/**
+ * Complete central auth store slice.
+ */
+export type AuthStoreSlice = AuthStoreState & AuthStoreActions;
+
+/**
+ * Lifecycle selector output for shallow subscriptions.
+ */
+export interface AuthLifecycleSelectorResult {
+  lifecyclePhase: AuthLifecyclePhase;
+  runtimeMode: AuthMode | null;
+  isLoading: boolean;
+}
+
+/**
+ * Shell bootstrap selector output for shallow subscriptions.
+ */
+export interface AuthBootstrapSelectorResult {
+  authReady: boolean;
+  permissionsReady: boolean;
+  shellReadyToRender: boolean;
+}
+
+/**
+ * Session summary selector output for shallow subscriptions.
+ */
+export interface AuthSessionSummarySelectorResult {
+  userId: string | null;
+  runtimeMode: AuthMode | null;
+  resolvedRoles: string[];
+}
+
+/**
+ * Permission summary selector output for shallow subscriptions.
+ */
+export interface AuthPermissionSummarySelectorResult {
+  grants: string[];
+  overrides: string[];
+}
+
+/**
+ * Per-user permission override record.
+ */
+export interface PermissionOverrideRecord {
+  action: string;
+  mode: 'grant' | 'deny';
+  reason: string;
+  expiresAt?: string;
+}
+
+/**
+ * Emergency-access grant state used in permission resolution.
+ */
+export interface EmergencyAccessState {
+  enabled: boolean;
+  grants: string[];
+  expiresAt?: string;
+}
+
+/**
+ * Input contract for deterministic permission resolution.
+ */
+export interface PermissionResolutionInput {
+  baseRoleGrants: string[];
+  defaultFeatureActionGrants: string[];
+  explicitOverrides: PermissionOverrideRecord[];
+  emergencyAccess: EmergencyAccessState | null;
+  now?: Date;
+}
+
+/**
+ * Resolution output exposed as the shared authorization truth contract.
+ */
+export interface EffectivePermissionSet {
+  grants: string[];
+  denied: string[];
+  expiredOverrides: string[];
+  emergencyAccessActive: boolean;
+}
+
+/**
+ * Snapshot payload for diagnostics/audit trails.
+ */
+export interface PermissionResolutionSnapshot {
+  evaluatedAt: string;
+  inputSummary: {
+    baseRoleGrantCount: number;
+    defaultGrantCount: number;
+    overrideCount: number;
+    emergencyConfigured: boolean;
+  };
+  effective: EffectivePermissionSet;
+}
