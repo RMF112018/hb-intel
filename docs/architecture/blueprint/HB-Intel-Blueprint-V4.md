@@ -954,4 +954,12 @@ Phase 5.4 (Role Mapping and Authorization Governance) completed: 2026-03-06
   - 5.4.4 structured `AccessDenied` surface added with plain-language guidance, safe navigation actions, and optional request-access callback seam
   - 5.4.5 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`
   - 5.4.6 ADR-0057 created: `docs/architecture/adr/ADR-0057-role-mapping-and-authorization-governance.md`
+Phase 5.5 (Shell Composition and Core Layout Architecture) completed: 2026-03-06
+  - 5.5.1 shared shell core implemented (`packages/shell/src/ShellCore.tsx`) with centralized auth-aware composition, experience-state selection, and route enforcement seams
+  - 5.5.2 shell extension-point contracts + centralized mode-rule resolver implemented for runtime environments (`pwa`, `spfx`, `hb-site-control`, `dev-override`)
+  - 5.5.3 `ShellLayout` narrowed to presentational composition and shell-core state store added for bootstrap/experience orchestration boundaries
+  - 5.5.4 safe redirect restoration + role-appropriate landing policy implemented with explicit redirect-memory safety checks
+  - 5.5.5 full sign-out cleanup orchestration implemented for auth/session, redirect memory, shell bootstrap state, environment artifacts, and retention-tier cache cleanup hooks
+  - 5.5.6 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/shell`
+  - 5.5.7 ADR-0058 created: `docs/architecture/adr/ADR-0058-shell-composition-and-core-layout-architecture.md`
 -->

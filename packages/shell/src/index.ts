@@ -4,6 +4,15 @@ export type {
   ToolPickerItem,
   SidebarItem,
   WorkspaceDescriptor,
+  ShellEnvironment,
+  ShellMode,
+  ShellExperienceState,
+  ShellCacheRetentionTier,
+  ShellModeRules,
+  ShellEnvironmentAdapter,
+  ShellRouteEnforcementContext,
+  ShellRouteEnforcementDecision,
+  RedirectMemoryRecord,
 } from './types.js';
 export { WORKSPACE_IDS } from './types.js';
 
@@ -12,6 +21,8 @@ export { useProjectStore } from './stores/index.js';
 export type { ProjectState } from './stores/index.js';
 export { useNavStore } from './stores/index.js';
 export type { NavState } from './stores/index.js';
+export { useShellCoreStore } from './stores/index.js';
+export type { ShellCoreState, ShellBootstrapPhase } from './stores/index.js';
 
 // Components (Blueprint §1f, §2c — Procore-inspired shell)
 export { HeaderBar } from './HeaderBar/index.js';
@@ -26,6 +37,25 @@ export { ContextualSidebar } from './ContextualSidebar/index.js';
 export type { ContextualSidebarProps } from './ContextualSidebar/index.js';
 export { ShellLayout } from './ShellLayout/index.js';
 export type { ShellLayoutProps } from './ShellLayout/index.js';
+export {
+  ShellCore,
+  performShellSignOut,
+  resolveRoleLandingPath,
+  resolveShellExperienceState,
+} from './ShellCore.js';
+export type { ShellCoreProps } from './ShellCore.js';
+export { resolveShellModeRules } from './shellModeRules.js';
+export {
+  rememberRedirectTarget,
+  restoreRedirectTarget,
+  clearRedirectMemory,
+  isSafeRedirectPath,
+} from './redirectMemory.js';
+export {
+  createDefaultShellSignOutCleanupDependencies,
+  runShellSignOutCleanup,
+} from './signOutCleanup.js';
+export type { ShellSignOutCleanupDependencies } from './signOutCleanup.js';
 
 // Module Configurations (PH4B.2 §Step 3 — moved from ui-kit, F-014)
 export {

@@ -69,3 +69,31 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - enables production operations through core admin workflows,
 - satisfies formal validation, audit, release, and documentation requirements,
 - and explicitly documents every deferred future expansion path so later phases can extend the platform without re-architecting the foundation.
+
+---
+
+## 5.5 Success Criteria Checklist (Task 5)
+
+- [x] 5.5.1 one shared HB Intel shell core implemented (`ShellCore`) with centralized orchestration boundaries.
+- [x] 5.5.2 environment-specific behavior constrained to approved extension points via shell adapter contracts.
+- [x] 5.5.3 shell scope constrained to bootstrap framing, auth-aware composition, navigation frame, status slot, route enforcement, degraded/recovery/access-denied, and workspace persistence coordination.
+- [x] 5.5.4 shell mode rules centralized with explicit runtime capabilities and guardrails against feature/business-logic leakage.
+- [x] 5.5.5 role-appropriate landing + safe redirect restore policy implemented with mode-aware safety checks.
+- [x] 5.5.6 full sign-out cleanup orchestration implemented for auth/session, redirect memory, shell bootstrap state, environment artifacts, and retention-tier cache cleanup.
+- [x] ADR-0058 created and linked to Phase 5.5 traceability.
+
+## Phase 5.5 Progress Notes
+
+- 5.5.1 completed — shared shell core orchestration implemented (`packages/shell/src/ShellCore.tsx`) with centralized experience selection and auth-aware layout composition — 2026-03-06.
+- 5.5.2 completed — shell adapter extension contracts + centralized shell mode rules implemented (`types.ts`, `shellModeRules.ts`) with explicit Option C boundaries — 2026-03-06.
+- 5.5.3 completed — `ShellLayout` refactored to presentational-only composition and shell-core state store introduced for bootstrap/experience coordination — 2026-03-06.
+- 5.5.4 completed — role landing + safe redirect restoration utilities implemented (`redirectMemory.ts`) and wired into shell core flow — 2026-03-06.
+- 5.5.5 completed — full sign-out cleanup orchestration implemented (`signOutCleanup.ts`) with deterministic cleanup ordering and retention-tier cache hooks — 2026-03-06.
+- 5.5.6 completed — unit tests added for shell mode rules, redirect restoration safety, sign-out cleanup ordering, and shell experience-state resolution — 2026-03-06.
+- 5.5.7 completed — ADR-0058 authored and governance traceability updates applied across PH5.5/PH5/Blueprint/Foundation plans — 2026-03-06.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/shell` - PASS

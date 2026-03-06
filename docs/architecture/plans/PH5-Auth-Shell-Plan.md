@@ -799,6 +799,31 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 
 ---
 
+## Phase 5.5 Progress Notes
+
+- 5.5.1 completed — shared `ShellCore` orchestration implemented for auth-aware layout composition, route enforcement seam, shell experience selection, and workspace persistence coordination — 2026-03-06.
+- 5.5.2 completed — shell extension-point contracts and centralized mode-rule enforcement implemented for `pwa`, `spfx`, `hb-site-control`, and `dev-override` adapters — 2026-03-06.
+- 5.5.3 completed — `ShellLayout` narrowed to presentational composition while orchestration moved to shell core and shell-core state store — 2026-03-06.
+- 5.5.4 completed — role-appropriate landing + safe redirect restoration policy implemented with runtime-mode guardrails and redirect-memory safety checks — 2026-03-06.
+- 5.5.5 completed — full sign-out cleanup orchestration implemented for auth/session, redirect memory, shell bootstrap state, environment artifacts, and retention-tier feature cache cleanup — 2026-03-06.
+- 5.5.6 completed — shell unit tests added for mode rules, redirect safety/restore, cleanup ordering, and shell experience-state resolution — 2026-03-06.
+- 5.5.7 completed — ADR-0058 created with full traceability to PH5.5 and locked Option C shell-boundary decisions — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.5)
+
+- [x] Success Criteria #1 advanced through one shared shell-core behavior model across runtime environments with explicit adapter seams.
+- [x] Success Criteria #4 advanced through centralized shell route enforcement, access-denied/degraded/recovery orchestration, and safe redirect restoration.
+- [x] Success Criteria #7 advanced through explicit degraded/recovery shell-state selection and bounded behavior contracts.
+- [x] Success Criteria #8 advanced by centralizing shell-mode rule enforcement and shell-status composition ownership in `@hbc/shell`.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/shell` - PASS
+
+---
+
 ## Phase 5.3 Progress Notes
 
 - 5.3.1 completed - central auth/session store redesigned with lifecycle, restore, structured error, and shell bootstrap readiness ownership - 2026-03-06.
