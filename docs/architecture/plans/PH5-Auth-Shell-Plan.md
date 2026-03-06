@@ -824,6 +824,28 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 
 ---
 
+## Phase 5.6 Progress Notes
+
+- 5.6.1 completed — unified shell-status model implemented in `@hbc/shell` with fixed priority hierarchy, plain-language copy, and approved action allowlist constraints — 2026-03-06.
+- 5.6.2 completed — shell core now derives the canonical shell-status snapshot from centralized auth/shell/connectivity inputs; direct subsystem status writes remain disallowed — 2026-03-06.
+- 5.6.3 completed — existing top `HbcConnectivityBar` expanded into the canonical shell-status rail with backward-compatible legacy connectivity support — 2026-03-06.
+- 5.6.4 completed — degraded-mode integration added with section-level labels while explicitly deferring richer future sub-state contribution models — 2026-03-06.
+- 5.6.5 completed — centralized shell-status action handlers added (`retry`, `sign-in-again`, `learn-more`) with strict state-based action gating — 2026-03-06.
+- 5.6.6 completed — ADR-0059 created and full documentation traceability updates applied to PH5.6/PH5/Blueprint/Foundation artifacts — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.6)
+
+- [x] Success Criteria #7 advanced through unified degraded-mode shell signaling and section-level degraded labeling.
+- [x] Success Criteria #8 advanced through centralized shell-status derivation, fixed-priority arbitration, and canonical top-rail messaging/actions.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/shell` - PASS
+
+---
+
 ## Phase 5.3 Progress Notes
 
 - 5.3.1 completed - central auth/session store redesigned with lifecycle, restore, structured error, and shell bootstrap readiness ownership - 2026-03-06.

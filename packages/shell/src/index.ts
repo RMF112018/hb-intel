@@ -44,6 +44,21 @@ export {
   resolveShellExperienceState,
 } from './ShellCore.js';
 export type { ShellCoreProps } from './ShellCore.js';
+export {
+  SHELL_STATUS_PRIORITY,
+  resolveShellStatusSnapshot,
+  deriveDegradedSectionLabels,
+  isShellStatusActionAllowed,
+} from './shellStatus.js';
+export type {
+  ShellStatusKind,
+  ShellStatusAction,
+  ShellStatusSnapshot,
+  ShellStatusResolutionInput,
+  ShellConnectivitySignal,
+  ShellDegradedSectionInput,
+  ShellDegradedSectionLabel,
+} from './shellStatus.js';
 export { resolveShellModeRules } from './shellModeRules.js';
 export {
   rememberRedirectTarget,

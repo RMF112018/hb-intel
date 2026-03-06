@@ -3,6 +3,7 @@
  * PH4.4 §Step 1 | Blueprint §1f, §2c
  */
 import type { ReactNode } from 'react';
+import type { ShellStatusAction, ShellStatusSnapshot } from '@hbc/shell';
 
 /** Connectivity status for the ambient bar */
 export type ConnectivityStatus = 'online' | 'syncing' | 'offline';
@@ -11,6 +12,10 @@ export type ConnectivityStatus = 'online' | 'syncing' | 'offline';
 export interface HbcConnectivityBarProps {
   /** Override auto-detected status (useful in Storybook) */
   status?: ConnectivityStatus;
+  /** Unified shell-status snapshot (Phase 5.6 canonical path). */
+  shellStatus?: ShellStatusSnapshot;
+  /** Approved shell-status action callback. */
+  onShellAction?: (action: ShellStatusAction) => void;
 }
 
 /** A navigation item within a sidebar group */

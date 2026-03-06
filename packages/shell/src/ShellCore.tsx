@@ -9,6 +9,14 @@ import { ShellLayout } from './ShellLayout/index.js';
 import { clearRedirectMemory, restoreRedirectTarget } from './redirectMemory.js';
 import { resolveShellModeRules } from './shellModeRules.js';
 import {
+  isShellStatusActionAllowed,
+  resolveShellStatusSnapshot,
+  type ShellConnectivitySignal,
+  type ShellDegradedSectionInput,
+  type ShellStatusAction,
+  type ShellStatusSnapshot,
+} from './shellStatus.js';
+import {
   createDefaultShellSignOutCleanupDependencies,
   runShellSignOutCleanup,
 } from './signOutCleanup.js';
@@ -27,7 +35,13 @@ export interface ShellCoreProps {
   children: ReactNode;
   currentPathname: string;
   intendedPathname?: string | null;
+  /** Optional status rail slot for backwards compatibility. */
   statusSlot?: ReactNode;
+  /** Preferred status rail renderer for unified shell-status integration. */
+  renderStatusRail?: (params: {
+    snapshot: ShellStatusSnapshot;
+    onAction: (action: ShellStatusAction) => void;
+  }) => ReactNode;
   degradedSlot?: ReactNode;
   recoverySlot?: ReactNode;
   accessDeniedSlot?: ReactNode;
@@ -41,6 +55,12 @@ export interface ShellCoreProps {
   onToolSelect?: (id: string) => void;
   onNavigate?: (pathname: string) => void;
   onRequestAccess?: () => void;
+  onRetry?: () => void;
+  onSignInAgain?: () => void;
+  onLearnMore?: () => void;
+  onShellStatusAction?: (action: ShellStatusAction, snapshot: ShellStatusSnapshot) => void;
+  connectivitySignal?: ShellConnectivitySignal;
+  degradedSections?: readonly ShellDegradedSectionInput[];
   forcedExperienceState?: Exclude<ShellExperienceState, 'access-denied'> | null;
 }
 
@@ -97,6 +117,7 @@ export function ShellCore({
   currentPathname,
   intendedPathname = null,
   statusSlot = null,
+  renderStatusRail,
   degradedSlot = null,
   recoverySlot = null,
   accessDeniedSlot = null,
@@ -110,10 +131,17 @@ export function ShellCore({
   onToolSelect,
   onNavigate,
   onRequestAccess,
+  onRetry,
+  onSignInAgain,
+  onLearnMore,
+  onShellStatusAction,
+  connectivitySignal,
+  degradedSections = [],
   forcedExperienceState = null,
 }: ShellCoreProps): ReactNode {
   const lifecyclePhase = useAuthStore((s) => s.lifecyclePhase);
   const session = useAuthStore((s) => s.session);
+  const structuredError = useAuthStore((s) => s.structuredError);
   const activeWorkspace = useNavStore((s) => s.activeWorkspace);
   const setExperienceState = useShellCoreStore((s) => s.setExperienceState);
   const setBootstrapPhase = useShellCoreStore((s) => s.setBootstrapPhase);
@@ -129,6 +157,28 @@ export function ShellCore({
     routeDecision,
     forcedExperienceState,
   });
+  const resolvedConnectivitySignal: ShellConnectivitySignal =
+    connectivitySignal ??
+    (typeof navigator !== 'undefined' && navigator.onLine ? 'connected' : 'reconnecting');
+  const statusSnapshot = useMemo(
+    () =>
+      resolveShellStatusSnapshot({
+        lifecyclePhase,
+        experienceState,
+        hasAccessValidationIssue: Boolean(routeDecision && !routeDecision.allow),
+        hasFatalError: Boolean(structuredError),
+        connectivitySignal: resolvedConnectivitySignal,
+        degradedSections,
+      }),
+    [
+      lifecyclePhase,
+      experienceState,
+      routeDecision,
+      structuredError,
+      resolvedConnectivitySignal,
+      degradedSections,
+    ],
+  );
 
   useEffect(() => {
     setExperienceState(experienceState);
@@ -216,6 +266,32 @@ export function ShellCore({
       <AppLauncher onWorkspaceSelect={onWorkspaceSelect} />
     ) : undefined);
 
+  const handleShellStatusAction = (action: ShellStatusAction): void => {
+    if (!isShellStatusActionAllowed(statusSnapshot, action)) {
+      return;
+    }
+
+    if (action === 'retry') {
+      onRetry?.();
+    }
+    if (action === 'sign-in-again') {
+      onSignInAgain?.();
+    }
+    if (action === 'learn-more') {
+      onLearnMore?.();
+    }
+
+    onShellStatusAction?.(action, statusSnapshot);
+  };
+
+  const resolvedStatusRail =
+    renderStatusRail != null
+      ? renderStatusRail({
+          snapshot: statusSnapshot,
+          onAction: handleShellStatusAction,
+        })
+      : statusSlot;
+
   if (experienceState === 'access-denied') {
     return (
       accessDeniedSlot ?? (
@@ -238,7 +314,7 @@ export function ShellCore({
 
   return (
     <div data-hbc-shell="shell-core" data-environment={adapter.environment}>
-      {statusSlot}
+      {resolvedStatusRail}
       <ShellLayout
         mode={rules.mode}
         leftSlot={layoutLeftSlot}

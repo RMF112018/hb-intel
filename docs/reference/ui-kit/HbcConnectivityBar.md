@@ -1,6 +1,6 @@
 # HbcConnectivityBar
 
-Network status indicator bar displaying connectivity state and retry options.
+Canonical top shell-status rail for connectivity and centralized shell-state messaging.
 
 ## Import
 
@@ -12,39 +12,46 @@ import { HbcConnectivityBar } from '@hbc/ui-kit';
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| status | ConnectivityStatus | 'online' | Current connection state: 'online' \| 'offline' \| 'degraded' |
-| retryAction | () => void | - | Callback for retry button click |
-| message | string | - | Custom status message |
+| status | ConnectivityStatus | auto-detected | Legacy connectivity override (`online` \| `syncing` \| `offline`) for compatibility |
+| shellStatus | ShellStatusSnapshot | - | Centralized shell-status snapshot from `@hbc/shell` resolver (preferred) |
+| onShellAction | (action) => void | - | Handler for approved actions (`retry`, `sign-in-again`, `learn-more`) |
 
 ## Usage
 
 ```tsx
-const [status, setStatus] = useState('online');
+const statusSnapshot = resolveShellStatusSnapshot({
+  lifecyclePhase: 'restoring',
+  experienceState: 'recovery',
+  hasAccessValidationIssue: false,
+  hasFatalError: false,
+  connectivitySignal: 'connected',
+});
 
 <HbcConnectivityBar
-  status={status}
-  message="Connection lost. Retrying..."
-  retryAction={() => {
-    // Retry logic
-    reconnect();
+  shellStatus={statusSnapshot}
+  onShellAction={(action) => {
+    if (action === 'retry') {
+      // Safe retry path
+      retryBootstrap();
+    }
   }}
 />
 ```
 
 ## Field Mode Behavior
 
-Status bar colors adapt for dark surfaces in Field Mode. Online state uses muted green, offline uses red, degraded uses yellow/orange. All colors maintain WCAG AA contrast ratios against dark background. Bar background and text colors adapt appropriately.
+Status rail colors adapt for dark surfaces in Field Mode. Connected state remains the minimal ambient rail, while non-connected centralized shell statuses may expand to show plain-language message and approved actions.
 
 ## Accessibility
 
 - `role="status"` on bar container
 - `aria-live="polite"` for dynamic status updates
 - Status message is always announced to assistive technology
-- Retry button has clear `aria-label="Retry connection"`
+- Approved action buttons are rendered only when allowed by centralized shell-status snapshot
 - Color is not the only indicator of status (text message included)
 - Status changes are announced when they occur
 - Dismiss button (if present) has clear aria-label
 
 ## SPFx Constraints
 
-No SPFx-specific constraints.
+No SPFx-specific constraints. In simplified shell modes, the same rail component is reused while status derivation remains centralized in `@hbc/shell`.

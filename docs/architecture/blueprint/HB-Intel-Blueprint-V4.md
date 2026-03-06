@@ -962,4 +962,11 @@ Phase 5.5 (Shell Composition and Core Layout Architecture) completed: 2026-03-06
   - 5.5.5 full sign-out cleanup orchestration implemented for auth/session, redirect memory, shell bootstrap state, environment artifacts, and retention-tier cache cleanup hooks
   - 5.5.6 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/shell`
   - 5.5.7 ADR-0058 created: `docs/architecture/adr/ADR-0058-shell-composition-and-core-layout-architecture.md`
+Phase 5.6 (Unified Shell-Status / Connectivity Bar Integration) completed: 2026-03-06
+  - 5.6.1 centralized shell-status model/resolver implemented with locked state set, fixed priority hierarchy, plain-language copy, and approved-action allowlist
+  - 5.6.2 shell core integration implemented so unified shell-status rail derives from central auth/shell/connectivity inputs instead of direct subsystem writes
+  - 5.6.3 existing top `HbcConnectivityBar` expanded as canonical shell-status rail with snapshot-driven messaging/actions and legacy connectivity compatibility bridge
+  - 5.6.4 degraded mode integration implemented with section-level label derivation while explicitly deferring richer future sub-state contribution paths
+  - 5.6.5 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/shell`
+  - 5.6.6 ADR-0059 created: `docs/architecture/adr/ADR-0059-unified-shell-status-connectivity-bar-integration.md`
 -->
