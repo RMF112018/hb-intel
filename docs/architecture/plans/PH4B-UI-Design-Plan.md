@@ -316,4 +316,15 @@ Phase 4b.6 (Theme & Token Enforcement) completed: 2026-03-05
   - §17 items: D-05 import enforcement ✓, D-10 token enforcement ✓
   - ADR: ADR-0040-theme-and-token-enforcement.md
 Next: Phase 4b.7
+
+Phase 4b.7 (Data Loading & State Handling) completed: 2026-03-05
+  - 4b.7.1: Error state with tokens (HbcErrorBoundary token-driven styling)
+  - 4b.7.3: SPFx storage adapter F-022 implemented
+  - 4b.7.4: Layout-aware skeleton loading (dashboard skeleton cards, list skeleton rows)
+  - 4b.7.5: useFilterStore full interface + useListFilterStoreBinding
+  - 4b.7.2: Documentation
+  - ADR: ADR-0041-data-loading-and-state-handling.md
+  - Documentation added: docs/how-to/developer/phase-4b.7-data-loading-guide.md
+  - Build: 23/23 packages pass, 0 errors
+Next: Phase 4b.8
 -->
