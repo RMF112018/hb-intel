@@ -303,6 +303,7 @@ export type {
   ToastConfig,
   ToastCategory,
   ToastContextValue,
+  ToastApi,
   HbcToastProviderProps,
   ToastEntry,
 } from './HbcToast/index.js';

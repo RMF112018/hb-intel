@@ -856,4 +856,12 @@ Next: Phase 4b.5 (Navigation & Active State)
 Phase 4b.5 completed: 2026-03-05
 D-04 (router-derived sidebar active state) fully implemented.
 NAV_ITEMS registry in @hbc/shell, per-item requiredPermission filtering.
+
+Phase 4b.9 completed: 2026-03-06 — Notifications & Feedback (ADR-0043)
+- D-08 enforcement: all transient feedback via useToast(); persistent via banner prop
+- Toast system expanded to 4 categories (success/error/warning/info) with convenience API
+- AppShellLayout created in @hbc/app-shell wrapping ShellLayout with HbcToastProvider + HbcToastContainer
+- ESLint rule: @hbc/hbc/no-inline-feedback (blocks Alert, MessageBar, etc.)
+- Reference doc updated: docs/reference/ui-kit/HbcToast.md (includes mutation wiring pattern)
+- Build: 23/23 packages pass
 -->

@@ -306,4 +306,15 @@ Phase 4b.5 (Navigation & Active State) completed: 2026-03-05
 §17 items: 4b.5.1-4b.5.4 all complete
 ADR: ADR-0039-navigation-and-active-state.md
 Next: Phase 4b.6
+
+Phase 4b.9 (Notifications & Feedback) completed: 2026-03-06
+  - 4b.9.1: HbcToastContainer mounted once in AppShellLayout (@hbc/app-shell) per D-08
+  - 4b.9.2: useToast expanded to 4 variants (success/error/warning/info) with convenience API
+  - 4b.9.3: Canonical mutation wiring documented in docs/reference/ui-kit/HbcToast.md
+  - 4b.9.4: Banner prop in WorkspacePageShell verified (BannerConfig, HbcBanner)
+  - 4b.9.5: ESLint rule @hbc/hbc/no-inline-feedback added (D-08 enforcement)
+  - ADR-0043 created (amends ADR-0022 §1 three-category restriction)
+  - Storybook stories updated for all 4 toast variants
+  - Build: pnpm turbo run build — 23/23 packages successful
+  - §17 acceptance: all 4b.9 items marked complete
 -->

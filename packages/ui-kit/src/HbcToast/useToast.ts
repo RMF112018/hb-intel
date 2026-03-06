@@ -1,9 +1,16 @@
 /**
- * HbcToastProvider + useToast hook — Phase 4.9
- * Reference: PH4.9-UI-Design-Plan.md §9
+ * HbcToastProvider + useToast hook — Phase 4b.9
+ * Reference: PH4B.9-UI-Design-Plan.md §12 (4b.9.1, 4b.9.2)
  *
  * Imperative toast API via React context.
- * V2.1: success (auto-dismiss 3s), error (manual), sync-status (programmatic).
+ * V3.0: Four categories with convenience API:
+ *   toast.success(msg) — auto-dismiss 3 s
+ *   toast.error(msg)   — manual dismiss (close button)
+ *   toast.warning(msg) — auto-dismiss 5 s
+ *   toast.info(msg)    — auto-dismiss 4 s
+ *
+ * D-08 enforcement: all transient feedback MUST use useToast().
+ * Persistent warnings use WorkspacePageShell.banner prop with HbcBanner.
  */
 import * as React from 'react';
 import type {
@@ -11,14 +18,39 @@ import type {
   ToastEntry,
   ToastContextValue,
   ToastCategory,
+  ToastApi,
   HbcToastProviderProps,
 } from './types.js';
 
 let nextId = 0;
 const genId = () => `hbc-toast-${++nextId}`;
 
+/**
+ * Auto-dismiss durations per category (ms).
+ * error = 0 means no auto-dismiss — requires manual close.
+ */
+const AUTO_DISMISS_MS: Record<ToastCategory, number> = {
+  success: 3000,
+  error: 0,
+  warning: 5000,
+  info: 4000,
+};
+
 const ToastContext = React.createContext<ToastContextValue | null>(null);
 
+/**
+ * useToast — imperative toast API.
+ * Must be called within an HbcToastProvider (mounted once in ShellLayout).
+ *
+ * @returns {{ toast, addToast, dismissToast, dismissCategory }}
+ *
+ * @example
+ * ```ts
+ * const { toast } = useToast();
+ * toast.success('Changes saved.');
+ * toast.error('Network error. Try again.');
+ * ```
+ */
 export const useToast = (): ToastContextValue => {
   const ctx = React.useContext(ToastContext);
   if (!ctx) throw new Error('useToast must be used within <HbcToastProvider>');
@@ -36,6 +68,11 @@ const ToastInternalContext = React.createContext<ToastInternalState | null>(null
 export const useToastInternal = (): ToastInternalState | null =>
   React.useContext(ToastInternalContext);
 
+/**
+ * HbcToastProvider — context provider managing toast lifecycle.
+ * Mount exactly once in the shell root (ShellLayout).
+ * Never mount inside individual pages.
+ */
 export const HbcToastProvider: React.FC<HbcToastProviderProps> = ({
   children,
   maxVisible = 3,
@@ -72,14 +109,30 @@ export const HbcToastProvider: React.FC<HbcToastProviderProps> = ({
       const entry: ToastEntry = { ...config, id };
       setToasts((prev) => [...prev, entry]);
 
-      if (config.category === 'success') {
-        const timer = setTimeout(() => dismissToast(id), 3000);
+      // Schedule auto-dismiss based on category timing
+      const duration = AUTO_DISMISS_MS[config.category];
+      if (duration > 0) {
+        const timer = setTimeout(() => dismissToast(id), duration);
         timersRef.current.set(id, timer);
       }
 
       return id;
     },
     [dismissToast],
+  );
+
+  /**
+   * Convenience API — wraps addToast with per-category shorthand.
+   * Memoized to maintain stable references across renders.
+   */
+  const toast = React.useMemo<ToastApi>(
+    () => ({
+      success: (message, icon) => addToast({ category: 'success', message, icon }),
+      error: (message, icon) => addToast({ category: 'error', message, icon }),
+      warning: (message, icon) => addToast({ category: 'warning', message, icon }),
+      info: (message, icon) => addToast({ category: 'info', message, icon }),
+    }),
+    [addToast],
   );
 
   React.useEffect(() => {
@@ -91,8 +144,8 @@ export const HbcToastProvider: React.FC<HbcToastProviderProps> = ({
   }, []);
 
   const value = React.useMemo<ToastContextValue>(
-    () => ({ addToast, dismissToast, dismissCategory }),
-    [addToast, dismissToast, dismissCategory],
+    () => ({ addToast, dismissToast, dismissCategory, toast }),
+    [addToast, dismissToast, dismissCategory, toast],
   );
 
   const internal = React.useMemo<ToastInternalState>(
