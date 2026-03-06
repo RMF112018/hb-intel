@@ -163,3 +163,34 @@ Verify all HBC tokens have correct dark mode counterparts in `theme.ts`. The `Fl
 *Version 1.0 — March 5, 2026*
 *Supersedes: Phase 4 partial implementation (ADR-0016 through ADR-0033)*
 *Next Phase: Phase 5 — SPFx Webpart Breakout*
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+4b.6.1 completed — enforce-hbc-tokens rule enhanced with hex/rgb/rgba/pixel detection — 2026-03-05
+  - Three messageIds: noHardcodedHex, noHardcodedRgb, noHardcodedPixel
+  - Pixel detection uses isInStyleContext() guard to avoid SVG/data false positives
+  - Rule type upgraded from 'suggestion' to 'problem', recommended: true
+
+4b.6.2 completed — no-direct-fluent-import rule implemented — 2026-03-05
+  - Flags ImportDeclaration nodes with source '@fluentui/react-components'
+  - Type: 'problem', recommended: true
+
+4b.6.3 completed — root .eslintrc.base.js configured — 2026-03-05
+  - @hbc/hbc plugin added to plugins array
+  - Both rules set to 'error' in overrides for apps/**/*.ts and apps/**/*.tsx
+  - 37 existing violations annotated with eslint-disable + Phase 4b.11 TODO
+
+4b.6.4 completed — token reference table expanded in README.md — 2026-03-05
+  - Full tables for brand, status, surface, border, text, header, connectivity tokens
+  - Spacing, typography, elevation, breakpoint, z-index reference tables added
+  - D-05 enforcement note and ADR-0040 cross-reference included
+
+4b.6.5 completed — dark mode token verification — 2026-03-05
+  - All 25 HbcSemanticTokens confirmed mapped in both hbcSemanticLight and hbcSemanticField
+  - TypeScript structural typing enforces completeness at compile time
+  - Verification JSDoc added to theme.ts
+
+ADR created: docs/architecture/adr/ADR-0040-theme-and-token-enforcement.md
+Build: 23/23 packages pass (pnpm turbo run build)
+Lint: 14/14 app packages pass with 0 errors (pre-existing @hbc/app-shell and @hbc/spfx config issues unrelated)
+Next: Phase 4b.7
+-->

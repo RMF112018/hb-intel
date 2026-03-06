@@ -128,6 +128,8 @@ export {
   HbcFormRow,
   HbcStickyFormFooter,
   useHbcFormContext,
+  HbcFormGuard,
+  useFormGuardContext,
 } from './HbcForm/index.js';
 export type {
   HbcTextFieldProps,
@@ -141,6 +143,8 @@ export type {
   HbcStickyFormFooterProps,
   HbcFormContextValue,
   FormFieldError,
+  HbcFormGuardProps,
+  HbcFormGuardContextValue,
 } from './HbcForm/index.js';
 
 export { HbcPanel } from './HbcPanel/index.js';

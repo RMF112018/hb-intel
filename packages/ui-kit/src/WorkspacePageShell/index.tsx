@@ -1,10 +1,14 @@
 /**
  * WorkspacePageShell — Mandatory outer container for every page (D-01)
- * PH4B.2 §Step 2 | PH4B.3 §Step 3 | Blueprint §1d
+ * PH4B.2 §Step 2 | PH4B.3 §Step 3 | PH4B.7 §4b.7.1 + §4b.7.4 | Blueprint §1d
  *
  * Renders breadcrumbs, command bar, banner, and state overlays
  * (loading/empty/error). LAYOUT_MAP wires DashboardLayout and ListLayout;
  * form/detail/landing pass children through (page authors compose those directly).
+ *
+ * D-06: Loading/empty/error states passed via props — pages never render own spinners.
+ * §4b.7.1: Error state uses HBC tokens (no hardcoded hex).
+ * §4b.7.4: Layout-aware skeleton loading (DashboardSkeleton, ListSkeleton).
  */
 import * as React from 'react';
 import { createContext } from 'react';
@@ -18,9 +22,15 @@ import { HbcEmptyState } from '../HbcEmptyState/index.js';
 import { HbcButton } from '../HbcButton/index.js';
 import { DashboardLayout } from '../layouts/DashboardLayout.js';
 import { ListLayout } from '../layouts/ListLayout.js';
-import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE, HBC_STATUS_COLORS } from '../theme/tokens.js';
+import {
+  HBC_SURFACE_LIGHT,
+  HBC_ACCENT_ORANGE,
+  HBC_STATUS_COLORS,
+  HBC_STATUS_RAMP_RED,
+} from '../theme/tokens.js';
+import { hbcSpacing } from '../theme/grid.js';
 import { elevationRaised } from '../theme/elevation.js';
-import { heading2 } from '../theme/typography.js';
+import { heading2, heading3, body } from '../theme/typography.js';
 import { useFieldMode } from '../HbcAppShell/hooks/useFieldMode.js';
 import { setFieldModeActions } from '../HbcCommandBar/fieldModeActionsStore.js';
 import type { WorkspacePageShellProps, ListConfig } from './types.js';
@@ -29,6 +39,14 @@ import type { WorkspacePageShellProps, ListConfig } from './types.js';
 // ListConfig context — still available for consumers needing programmatic access
 // ---------------------------------------------------------------------------
 export const ListConfigContext = createContext<ListConfig | undefined>(undefined);
+
+// ---------------------------------------------------------------------------
+// Shimmer keyframe for skeleton loading — PH4B.7 §4b.7.4
+// ---------------------------------------------------------------------------
+const shimmerKeyframe = {
+  from: { backgroundPosition: '-200% 0' },
+  to: { backgroundPosition: '200% 0' },
+};
 
 // ---------------------------------------------------------------------------
 // Styles
@@ -44,8 +62,8 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingLeft: '16px',
-    paddingRight: '16px',
+    paddingLeft: `${hbcSpacing.md}px`,
+    paddingRight: `${hbcSpacing.md}px`,
     paddingTop: '12px',
     paddingBottom: '12px',
   },
@@ -64,18 +82,18 @@ const useStyles = makeStyles({
     color: HBC_SURFACE_LIGHT['text-muted'],
   },
   commandBarZone: {
-    paddingLeft: '16px',
-    paddingRight: '16px',
-    paddingBottom: '8px',
+    paddingLeft: `${hbcSpacing.md}px`,
+    paddingRight: `${hbcSpacing.md}px`,
+    paddingBottom: `${hbcSpacing.sm}px`,
   },
   content: {
     display: 'flex',
     flexDirection: 'column',
     flexGrow: 1,
     minHeight: 0,
-    paddingLeft: '16px',
-    paddingRight: '16px',
-    paddingBottom: '16px',
+    paddingLeft: `${hbcSpacing.md}px`,
+    paddingRight: `${hbcSpacing.md}px`,
+    paddingBottom: `${hbcSpacing.md}px`,
   },
   stateOverlay: {
     display: 'flex',
@@ -84,33 +102,79 @@ const useStyles = makeStyles({
     flexGrow: 1,
     minHeight: '200px',
   },
+  // D-06 error state — all values from HBC tokens (§4b.7.1)
   errorCard: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     gap: '12px',
-    padding: '32px',
-    backgroundColor: '#FEF2F2',
-    borderLeft: '4px solid #EF4444',
+    padding: `${hbcSpacing.xl}px`,
+    backgroundColor: HBC_STATUS_RAMP_RED[90],
+    borderLeft: `4px solid ${HBC_STATUS_COLORS.error}`,
     borderRadius: '4px',
     maxWidth: '480px',
   },
   errorTitle: {
-    ...heading2,
-    color: '#991B1B',
+    ...heading3,
+    color: HBC_STATUS_RAMP_RED[10],
     margin: '0',
-    fontSize: '1rem',
   },
   errorMessage: {
-    fontSize: '0.875rem',
-    color: '#7F1D1D',
+    ...body,
+    color: HBC_STATUS_RAMP_RED[10],
     margin: '0',
     textAlign: 'center' as const,
+  },
+  // Skeleton styles — PH4B.7 §4b.7.4
+  shimmerBase: {
+    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    backgroundImage: `linear-gradient(90deg, transparent 25%, rgba(0,75,135,0.06) 50%, transparent 75%)`,
+    backgroundSize: '200% 100%',
+    animationName: shimmerKeyframe,
+    animationDuration: '1.5s',
+    animationIterationCount: 'infinite',
+    animationTimingFunction: 'ease-in-out',
+    borderRadius: '4px',
+  },
+  skeletonContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: `${hbcSpacing.md}px`,
+    width: '100%',
+    flexGrow: 1,
+  },
+  // Dashboard skeleton
+  dashKpiGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: `${hbcSpacing.md}px`,
+  },
+  dashKpiCard: {
+    height: '96px',
+  },
+  dashChartArea: {
+    height: '280px',
+  },
+  dashDataZone: {
+    height: '200px',
+  },
+  // List skeleton
+  listToolbar: {
+    height: '40px',
+    width: '100%',
+  },
+  listRow: {
+    display: 'grid',
+    gap: `${hbcSpacing.sm}px`,
+    height: '36px',
+  },
+  listCell: {
+    height: '100%',
   },
   fab: {
     position: 'fixed',
     bottom: '72px',
-    right: '16px',
+    right: `${hbcSpacing.md}px`,
     width: '56px',
     height: '56px',
     borderRadius: '50%',
@@ -131,6 +195,50 @@ const useStyles = makeStyles({
 });
 
 // ---------------------------------------------------------------------------
+// DashboardSkeleton — PH4B.7 §4b.7.4
+// ---------------------------------------------------------------------------
+function DashboardSkeleton(): React.ReactNode {
+  const styles = useStyles();
+  return (
+    <div className={styles.skeletonContainer} data-hbc-ui="dashboard-skeleton">
+      <div className={styles.dashKpiGrid}>
+        {[0, 1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className={mergeClasses(styles.shimmerBase, styles.dashKpiCard)}
+          />
+        ))}
+      </div>
+      <div className={mergeClasses(styles.shimmerBase, styles.dashChartArea)} />
+      <div className={mergeClasses(styles.shimmerBase, styles.dashDataZone)} />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ListSkeleton — PH4B.7 §4b.7.4
+// ---------------------------------------------------------------------------
+function ListSkeleton({ columns }: { columns: number }): React.ReactNode {
+  const styles = useStyles();
+  const rowStyle = { gridTemplateColumns: `repeat(${columns}, 1fr)` };
+  return (
+    <div className={styles.skeletonContainer} data-hbc-ui="list-skeleton">
+      <div className={mergeClasses(styles.shimmerBase, styles.listToolbar)} />
+      {Array.from({ length: 10 }, (_, rowIdx) => (
+        <div key={rowIdx} className={styles.listRow} style={rowStyle}>
+          {Array.from({ length: columns }, (_, colIdx) => (
+            <div
+              key={colIdx}
+              className={mergeClasses(styles.shimmerBase, styles.listCell)}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 export function WorkspacePageShell({
@@ -145,6 +253,8 @@ export function WorkspacePageShell({
   isEmpty = false,
   isError = false,
   errorMessage = 'An unexpected error occurred.',
+  onRetry,
+  skeletonColumns,
   emptyMessage = 'No items found.',
   emptyActionLabel,
   onEmptyAction,
@@ -181,6 +291,17 @@ export function WorkspacePageShell({
     }
     return () => setFieldModeActions([]);
   }, [isFieldMode, secondaryActions, overflowActions]);
+
+  // Layout-aware loading content — PH4B.7 §4b.7.4
+  const renderLoadingState = (): React.ReactNode => {
+    if (layout === 'dashboard') return <DashboardSkeleton />;
+    if (layout === 'list') return <ListSkeleton columns={skeletonColumns ?? 5} />;
+    return (
+      <div className={styles.stateOverlay}>
+        <HbcSpinner size="lg" label="Loading page content" />
+      </div>
+    );
+  };
 
   return (
     <ListConfigContext.Provider value={listConfig}>
@@ -243,14 +364,17 @@ export function WorkspacePageShell({
         {/* Content area with state overlays + LAYOUT_MAP */}
         <div className={styles.content}>
           {isLoading ? (
-            <div className={styles.stateOverlay}>
-              <HbcSpinner size="lg" label="Loading page content" />
-            </div>
+            renderLoadingState()
           ) : isError ? (
             <div className={styles.stateOverlay}>
-              <div className={styles.errorCard}>
+              <div className={styles.errorCard} role="alert">
                 <h2 className={styles.errorTitle}>Something went wrong</h2>
                 <p className={styles.errorMessage}>{errorMessage}</p>
+                {onRetry && (
+                  <HbcButton variant="primary" onClick={onRetry}>
+                    Try Again
+                  </HbcButton>
+                )}
               </div>
             </div>
           ) : isEmpty ? (

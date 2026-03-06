@@ -456,4 +456,31 @@ Phase 4b.5 (Navigation & Active State) completed: 2026-03-05
 D-04 implemented: active sidebar state derived from useRouterState().location.pathname
 NAV_ITEMS centralized registry created in @hbc/shell
 Per-item requiredPermission filtering added to HbcSidebar
+
+Phase 4b.6 (Theme & Token Enforcement) completed: 2026-03-05
+D-05 + D-10 implemented via eslint-plugin-hbc (enforce-hbc-tokens enhanced, no-direct-fluent-import added)
+Both rules set to 'error' in .eslintrc.base.js for apps/**
+Dark mode: all 25 HbcSemanticTokens verified in both light and field themes
+Token reference table expanded in packages/ui-kit/src/theme/README.md
+ADR-0040: theme-and-token-enforcement.md
+
+Phase 4b.7 (Data Loading & State Handling) completed: 2026-03-05
+  - 4b.7.1: Error state with tokens
+  - 4b.7.3: SPFx storage adapter F-022
+  - 4b.7.4: Layout-aware skeleton loading
+  - 4b.7.5: useFilterStore full interface + useListFilterStoreBinding
+  - 4b.7.2: Documentation
+  - ADR: ADR-0041-data-loading-and-state-handling.md
+  - Documentation added: docs/how-to/developer/phase-4b.7-data-loading-guide.md
+  - Build: 23/23 packages pass, 0 errors
+
+Phase 4b.8 (Form Architecture & Draft System) completed: 2026-03-06
+  - 4b.8.1: HbcForm sub-components verified (HbcFormSection, HbcFormLayout, HbcStickyFormFooter)
+  - 4b.8.2: useFormDraft hook for auto-save draft persistence
+  - 4b.8.3: HbcFormGuard with HbcConfirmDialog for unsaved changes blocking
+  - 4b.8.5: Density integration via useDensity() — compact mode auto-applied
+  - 4b.8.4: Documentation
+  - ADR created: ADR-0042-form-architecture.md
+  - Documentation added: docs/how-to/developer/phase-4b.8-form-architecture-guide.md
+  - Build: 23/23 packages pass, 0 errors
 -->

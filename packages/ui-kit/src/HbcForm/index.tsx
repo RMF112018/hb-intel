@@ -13,6 +13,8 @@ export { HbcFormSection } from './HbcFormSection.js';
 export { HbcFormRow } from './HbcFormRow.js';
 export { HbcStickyFormFooter } from './HbcStickyFormFooter.js';
 export { useHbcFormContext } from './HbcFormContext.js';
+export { HbcFormGuard, useFormGuardContext, HbcFormGuardContext } from './HbcFormGuard.js';
+export type { HbcFormGuardProps, HbcFormGuardContextValue } from './HbcFormGuard.js';
 export type {
   HbcTextFieldProps,
   HbcSelectProps,

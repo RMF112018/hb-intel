@@ -57,6 +57,10 @@ export interface WorkspacePageShellProps {
   isError?: boolean;
   /** Error message for error state */
   errorMessage?: string;
+  /** Retry handler for error state — renders "Try Again" button when provided (D-06) */
+  onRetry?: () => void;
+  /** Number of skeleton columns for list loading state (default 5) — PH4B.7 §4b.7.4 */
+  skeletonColumns?: number;
   /** Empty state message */
   emptyMessage?: string;
   /** Empty state CTA label */

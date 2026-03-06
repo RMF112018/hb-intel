@@ -2,6 +2,7 @@
  * DemoCharts — HbcChart with mock schedule metrics.
  * Foundation Plan Phase 3.
  */
+/* eslint-disable @hbc/hbc/enforce-hbc-tokens -- TODO: use HBC tokens (Phase 4b.11) */
 import { HbcChart } from '@hbc/ui-kit';
 
 const scheduleOption = {

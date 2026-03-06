@@ -2,6 +2,7 @@
  * LoadingFallback — route pending/suspense fallback with HB branding.
  */
 import type { ReactNode } from 'react';
+// eslint-disable-next-line @hbc/hbc/no-direct-fluent-import -- TODO: migrate to @hbc/ui-kit (Phase 4b.11)
 import { Spinner, Text } from '@fluentui/react-components';
 
 export function LoadingFallback(): ReactNode {

@@ -1,18 +1,21 @@
 /**
  * useFormDensity — Touch target density hook for form inputs
- * PH4.11 §Step 6 | Blueprint §1d
+ * PH4.11 §Step 6 | PH4B.8 §4b.8.5 | Blueprint §1d
  *
- * Wraps useAdaptiveDensity to provide inputMinHeight per tier:
- *  - touch:    56px (matches WCAG 2.5.8 Target Size)
- *  - standard: 36px
- *  - compact:  28px
+ * Delegates to the canonical useDensity() hook from theme/useDensity.ts
+ * (replacing the previous useAdaptiveDensity from DataTable).
+ *
+ * Maps density tiers to input minimum heights:
+ *  - touch:       56px (WCAG 2.5.8 Target Size)
+ *  - comfortable: 36px (default desktop)
+ *  - compact:     28px (dense desktop)
  */
-import { useAdaptiveDensity } from '../../HbcDataTable/hooks/useAdaptiveDensity.js';
-import type { DensityTier } from '../../HbcCommandBar/types.js';
+import { useDensity } from '../../theme/useDensity.js';
+import type { DensityTier } from '../../theme/density.js';
 
 const INPUT_MIN_HEIGHT: Record<DensityTier, number> = {
   touch: 56,
-  standard: 36,
+  comfortable: 36,
   compact: 28,
 };
 
@@ -22,7 +25,7 @@ export interface UseFormDensityReturn {
 }
 
 export function useFormDensity(): UseFormDensityReturn {
-  const { tier } = useAdaptiveDensity();
+  const { tier } = useDensity();
   return {
     tier,
     inputMinHeight: INPUT_MIN_HEIGHT[tier],

@@ -185,3 +185,16 @@ const NewRiskItemPage = () => {
 *Version 1.0 — March 5, 2026*
 *Supersedes: Phase 4 partial implementation (ADR-0016 through ADR-0033)*
 *Next Phase: Phase 5 — SPFx Webpart Breakout*
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4b.8 (Form Architecture & Draft System) completed: 2026-03-06
+  - 4b.8.1: HbcForm sub-components verified (HbcFormSection, HbcFormLayout, HbcStickyFormFooter)
+  - 4b.8.2: useFormDraft hook for auto-save draft persistence
+  - 4b.8.3: HbcFormGuard with HbcConfirmDialog for unsaved changes blocking
+  - 4b.8.5: Density integration via useDensity() — compact mode auto-applied
+  - 4b.8.4: Documentation
+  - ADR created: ADR-0042-form-architecture.md
+  - Documentation added: docs/how-to/developer/phase-4b.8-form-architecture-guide.md
+  - Build: 23/23 packages pass, 0 errors
+Next: Phase 4b.9
+-->

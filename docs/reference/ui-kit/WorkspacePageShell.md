@@ -34,6 +34,8 @@ import type {
 | isEmpty | `boolean` | `false` | Show empty state |
 | isError | `boolean` | `false` | Show error state |
 | errorMessage | `string` | `'An unexpected error occurred.'` | Error state message |
+| onRetry | `() => void` | `undefined` | Retry handler for error state — renders "Try Again" button (D-06) |
+| skeletonColumns | `number` | `5` | Number of columns for list skeleton loading state |
 | emptyMessage | `string` | `'No items found.'` | Empty state message |
 | emptyActionLabel | `string` | `undefined` | Empty state CTA label |
 | onEmptyAction | `() => void` | `undefined` | Empty state CTA handler |
@@ -116,20 +118,36 @@ When `layout='list'`, WPS wraps children in `ListLayout` with the config props. 
 </WorkspacePageShell>
 ```
 
-### State Overlays
+### State Overlays (D-06)
+
+D-06 requires all loading/empty/error states to be passed via props — pages must never render their own spinners, empty states, or error UIs.
 
 ```tsx
-// Loading
-<WorkspacePageShell layout="list" title="RFIs" isLoading>
-  <RFITable />  {/* Not rendered while loading */}
+// Loading — layout-aware skeleton (Phase 4b.7)
+// Dashboard layout → DashboardSkeleton (4-card KPI grid + chart shimmer)
+// List layout → ListSkeleton (toolbar + 10 ghost rows)
+// Other layouts → HbcSpinner centered
+<WorkspacePageShell layout="dashboard" title="Overview" isLoading>
+  <Dashboard />  {/* Not rendered while loading */}
 </WorkspacePageShell>
 
-// Error
-<WorkspacePageShell layout="list" title="RFIs" isError errorMessage="Server error">
+// List loading with custom column count
+<WorkspacePageShell layout="list" title="RFIs" isLoading skeletonColumns={7}>
   <RFITable />
 </WorkspacePageShell>
 
-// Empty
+// Error with retry
+<WorkspacePageShell
+  layout="list"
+  title="RFIs"
+  isError
+  errorMessage="Failed to load RFIs"
+  onRetry={() => refetch()}
+>
+  <RFITable />
+</WorkspacePageShell>
+
+// Empty with CTA
 <WorkspacePageShell
   layout="list"
   title="RFIs"

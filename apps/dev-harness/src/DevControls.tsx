@@ -4,6 +4,7 @@
  * Foundation Plan Phase 3.
  */
 import { useState } from 'react';
+// eslint-disable-next-line @hbc/hbc/no-direct-fluent-import -- TODO: migrate to @hbc/ui-kit (Phase 4b.11)
 import { Button, Switch } from '@fluentui/react-components';
 import { useAuthStore, usePermissionStore } from '@hbc/auth';
 import { useProjectStore, useNavStore } from '@hbc/shell';

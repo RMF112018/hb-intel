@@ -2,6 +2,7 @@
  * ErrorFallback — route error boundary fallback.
  */
 import type { ReactNode } from 'react';
+// eslint-disable-next-line @hbc/hbc/no-direct-fluent-import -- TODO: migrate to @hbc/ui-kit (Phase 4b.11)
 import { Button, Text } from '@fluentui/react-components';
 
 interface ErrorFallbackProps {

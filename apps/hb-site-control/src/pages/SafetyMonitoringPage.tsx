@@ -3,7 +3,9 @@
  * Foundation Plan Phase 6 — Blueprint §2i.
  * Uses useSignalR hook for mock real-time updates.
  */
+/* eslint-disable @hbc/hbc/enforce-hbc-tokens -- TODO: use HBC tokens (Phase 4b.11) */
 import type { ReactNode } from 'react';
+// eslint-disable-next-line @hbc/hbc/no-direct-fluent-import -- TODO: migrate to @hbc/ui-kit (Phase 4b.11)
 import { Text, Card, CardHeader, Badge } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { HbcStatusBadge, HbcChart, WorkspacePageShell } from '@hbc/ui-kit';

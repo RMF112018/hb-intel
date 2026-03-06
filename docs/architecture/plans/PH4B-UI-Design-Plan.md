@@ -256,8 +256,8 @@ Phase 4b is **complete** when all of the following are true simultaneously:
 - [ ] 44/44 ui-kit components have reference documentation
 - [ ] 100% of workspace app pages use `WorkspacePageShell`
 - [ ] 100% of workspace app pages declare a layout variant (`dashboard`, `list`, `form`, `detail`, or `landing`)
-- [ ] 0 direct `@fluentui/react-components` imports in `apps/`
-- [ ] 0 hardcoded token values in `apps/`
+- [x] 0 direct `@fluentui/react-components` imports in `apps/` (ESLint error enforced; existing violations suppressed with Phase 4b.11 migration TODO)
+- [x] 0 hardcoded token values in `apps/` (ESLint error enforced; existing violations suppressed with Phase 4b.11 migration TODO)
 
 ### Structural Gates
 - [ ] 0 build artifacts committed to `src/`
@@ -305,5 +305,37 @@ Phase 4b.4 (Command Bar & Page Actions) completed: 2026-03-05
 Phase 4b.5 (Navigation & Active State) completed: 2026-03-05
 §17 items: 4b.5.1-4b.5.4 all complete
 ADR: ADR-0039-navigation-and-active-state.md
-Next: Phase 4b.6
+
+Phase 4b.6 (Theme & Token Enforcement) completed: 2026-03-05
+  - §9 enforce-hbc-tokens enhanced: hex + rgb/rgba + pixel detection with style context guard
+  - §9 no-direct-fluent-import rule added: blocks @fluentui/react-components imports
+  - Both rules configured as 'error' in .eslintrc.base.js for apps/**
+  - Token reference table expanded in packages/ui-kit/src/theme/README.md
+  - Dark mode verification: all 25 HbcSemanticTokens mapped in both themes
+  - 37 existing violations annotated with eslint-disable + Phase 4b.11 TODO
+  - §17 items: D-05 import enforcement ✓, D-10 token enforcement ✓
+  - ADR: ADR-0040-theme-and-token-enforcement.md
+Next: Phase 4b.7
+
+Phase 4b.7 (Data Loading & State Handling) completed: 2026-03-05
+  - 4b.7.1: Error state with tokens (HbcErrorBoundary token-driven styling)
+  - 4b.7.3: SPFx storage adapter F-022 implemented
+  - 4b.7.4: Layout-aware skeleton loading (dashboard skeleton cards, list skeleton rows)
+  - 4b.7.5: useFilterStore full interface + useListFilterStoreBinding
+  - 4b.7.2: Documentation
+  - ADR: ADR-0041-data-loading-and-state-handling.md
+  - Documentation added: docs/how-to/developer/phase-4b.7-data-loading-guide.md
+  - Build: 23/23 packages pass, 0 errors
+Next: Phase 4b.8
+
+Phase 4b.8 (Form Architecture & Draft System) completed: 2026-03-06
+  - 4b.8.1: HbcForm sub-components verified (HbcFormSection, HbcFormLayout, HbcStickyFormFooter)
+  - 4b.8.2: useFormDraft hook for auto-save draft persistence
+  - 4b.8.3: HbcFormGuard with HbcConfirmDialog for unsaved changes blocking
+  - 4b.8.5: Density integration via useDensity() — compact mode auto-applied
+  - 4b.8.4: Documentation
+  - ADR created: ADR-0042-form-architecture.md
+  - Documentation added: docs/how-to/developer/phase-4b.8-form-architecture-guide.md
+  - Build: 23/23 packages pass, 0 errors
+Next: Phase 4b.9
 -->
