@@ -1,14 +1,15 @@
 /**
  * CreateUpdateLayout — Create/edit form page layout with Focus Mode
- * PH4.5 §Step 4 | Blueprint §1f, §2c
+ * PH4.5 §Step 4 | PH4B.8 §4b.8.5 | Blueprint §1f, §2c
  *
  * Structure: Form Header (sticky) → Form Content (centered) → Sticky Footer
  * Focus Mode: auto-activates on touch, toggle on desktop, collapses sidebar + dims bg.
+ * Density: reads useDensity() for touch/compact/comfortable footer & content sizing.
  */
 import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { heading2 } from '../theme/typography.js';
-import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
+import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG, HBC_SPACE_XL } from '../theme/grid.js';
 import { elevationRaised } from '../theme/elevation.js';
 import {
   HBC_SURFACE_LIGHT,
@@ -17,6 +18,8 @@ import {
 import { TRANSITION_NORMAL, TIMING } from '../theme/animations.js';
 import { FocusModeEnter, FocusModeExit } from '../icons/index.js';
 import { useFocusMode } from './hooks/useFocusMode.js';
+import { useDensity } from '../theme/useDensity.js';
+import { DENSITY_BREAKPOINTS } from '../theme/density.js';
 import type { CreateUpdateLayoutProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -226,6 +229,11 @@ export const CreateUpdateLayout: React.FC<CreateUpdateLayoutProps> = ({
 }) => {
   const styles = useStyles();
   const { isFocusMode, toggleFocusMode, isAutoFocus, deactivate } = useFocusMode();
+  const { tier: densityTier } = useDensity();
+
+  // PH4B.8 §4b.8.5: density-aware footer height
+  const footerHeight = densityTier === 'touch' ? 64 : densityTier === 'compact' ? 48 : 56;
+  const contentPadding = densityTier === 'touch' ? HBC_SPACE_XL : HBC_SPACE_LG;
 
   // PH4.12: deactivate focus mode on cancel/save
   const handleCancel = React.useCallback(() => {
@@ -286,19 +294,27 @@ export const CreateUpdateLayout: React.FC<CreateUpdateLayoutProps> = ({
         </div>
       </div>
 
-      {/* Form Content */}
+      {/* Form Content — density-aware padding (§4b.8.5) */}
       <div
         className={mergeClasses(
           styles.formContent,
           isFocusMode && styles.formContentFocused,
           isFocusMode && styles.formContentAboveDim,
         )}
+        style={{
+          paddingLeft: `${contentPadding}px`,
+          paddingRight: `${contentPadding}px`,
+          paddingTop: `${contentPadding}px`,
+        }}
       >
         {children}
       </div>
 
-      {/* Sticky Footer */}
-      <div className={mergeClasses(styles.stickyFooter, isFocusMode && styles.footerAboveDim)}>
+      {/* Sticky Footer — density-aware height (§4b.8.5) */}
+      <div
+        className={mergeClasses(styles.stickyFooter, isFocusMode && styles.footerAboveDim)}
+        style={{ height: `${footerHeight}px` }}
+      >
         <button
           className={styles.cancelButton}
           onClick={handleCancel}

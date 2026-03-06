@@ -873,4 +873,14 @@ Phase 4b.7 (Data Loading & State Handling) completed: 2026-03-05
   - ADR: ADR-0041-data-loading-and-state-handling.md
   - Documentation added: docs/how-to/developer/phase-4b.7-data-loading-guide.md
   - Build: 23/23 packages pass, 0 errors
+
+Phase 4b.8 (Form Architecture & Draft System) completed: 2026-03-06
+  - 4b.8.1: HbcForm sub-components verified (HbcFormSection, HbcFormLayout, HbcStickyFormFooter)
+  - 4b.8.2: useFormDraft hook for auto-save draft persistence
+  - 4b.8.3: HbcFormGuard with HbcConfirmDialog for unsaved changes blocking
+  - 4b.8.5: Density integration via useDensity() — compact mode auto-applied
+  - 4b.8.4: Documentation
+  - ADR created: ADR-0042-form-architecture.md
+  - Documentation added: docs/how-to/developer/phase-4b.8-form-architecture-guide.md
+  - Build: 23/23 packages pass, 0 errors
 -->
