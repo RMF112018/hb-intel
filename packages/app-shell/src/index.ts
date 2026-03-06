@@ -98,6 +98,19 @@ export type {
   BulkAction,
 } from '@hbc/ui-kit';
 
+// Toast & Feedback (D-08) — PH4B.9 §12
+// AppShellLayout wraps ShellLayout with HbcToastProvider + HbcToastContainer
+export { AppShellLayout } from './AppShellLayout.js';
+export type { AppShellLayoutProps } from './AppShellLayout.js';
+
+// Re-export useToast for page-level mutation wiring
+export { useToast } from '@hbc/ui-kit';
+export type {
+  ToastContextValue,
+  ToastApi,
+  ToastCategory,
+} from '@hbc/ui-kit';
+
 // Auth adapter
 export { useShellAuth } from './useShellAuth.js';
 export type { ShellAuthContext } from './useShellAuth.js';

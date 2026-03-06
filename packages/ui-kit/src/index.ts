@@ -297,6 +297,7 @@ export type {
   HbcNotificationBellProps,
 } from './HbcAppShell/index.js';
 export { useOnlineStatus, useFieldMode, useSidebarState } from './HbcAppShell/hooks/index.js';
+export type { AppMode } from './HbcAppShell/hooks/index.js';
 
 // PH4.9 Messaging & Feedback System
 export { HbcBanner } from './HbcBanner/index.js';
@@ -307,6 +308,7 @@ export type {
   ToastConfig,
   ToastCategory,
   ToastContextValue,
+  ToastApi,
   HbcToastProviderProps,
   ToastEntry,
 } from './HbcToast/index.js';

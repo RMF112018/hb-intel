@@ -115,6 +115,43 @@ On failure, steps are rolled back in reverse order. Step 1 compensation (site de
 2. Update `service-factory.ts` to instantiate it when `HBC_SERVICE_MODE === 'azure'`
 3. Add required environment variables to `local.settings.json`
 
+## timerFullSpec — Deferred Provisioning Timer (PH4B.10 §4b.10.5)
+
+The `timerFullSpec` Azure Function runs on a cron schedule to process deferred full-spec (step 5) projects:
+
+| Property | Value |
+|----------|-------|
+| Trigger | Timer (cron) |
+| Schedule | `0 0 6 * * *` (6:00 AM UTC = 1:00 AM EST) |
+| Purpose | Processes projects deferred at step 5 (web parts) for provisioning |
+| SignalR payload | `IProvisioningProgressEvent` from `@hbc/models` |
+
+### SignalR Reconnect-on-Focus Pattern
+
+Field workers frequently background the app (phone calls, camera, etc.). When the app returns to foreground, the SignalR connection must reconnect to receive pending provisioning events.
+
+```ts
+// apps/hb-site-control/src/hooks/useSignalR.ts
+// Phase 6 mock implementation — pauses/resumes setInterval
+// Phase 7: replace with hubConnection.start() / .stop()
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // Pause: clear interval / stop connection
+    stopInterval();
+    setIsConnected(false);
+  } else {
+    // Resume: restart interval / reconnect
+    setTimeout(() => {
+      setIsConnected(true);
+      startInterval();
+    }, 300);
+  }
+});
+```
+
+In Phase 7 with real `@microsoft/signalr`, replace `startInterval()`/`stopInterval()` with `hubConnection.start()`/`hubConnection.stop()`.
+
 ## Shared Types
 
 Provisioning domain types live in `packages/models/src/provisioning/index.ts` and are shared between frontend and backend:

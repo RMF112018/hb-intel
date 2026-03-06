@@ -249,6 +249,7 @@ export function WorkspacePageShell({
   overflowActions,
   dashboardConfig,
   listConfig,
+  supportedModes,
   isLoading = false,
   isEmpty = false,
   isError = false,
@@ -263,7 +264,18 @@ export function WorkspacePageShell({
 }: WorkspacePageShellProps): React.ReactNode {
   const activeProject = useProjectStore((s) => s.activeProject);
   const styles = useStyles();
-  const { isFieldMode } = useFieldMode();
+  const { isFieldMode, mode } = useFieldMode();
+
+  // PH4B.10: Guard against unsupported modes (D-09)
+  if (supportedModes && !supportedModes.includes(mode)) {
+    return (
+      <div data-hbc-ui="workspace-page-shell" data-layout={layout} className={styles.root}>
+        <div className={styles.stateOverlay}>
+          <HbcEmptyState title={`This page is not available in ${mode} mode.`} />
+        </div>
+      </div>
+    );
+  }
 
   const [bannerDismissed, setBannerDismissed] = React.useState(false);
 

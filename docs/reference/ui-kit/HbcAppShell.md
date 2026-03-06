@@ -68,9 +68,53 @@ import { HbcAppShell } from '@hbc/ui-kit';
 </HbcAppShell>
 ```
 
+## Mode Switching (PH4B.10 — D-09)
+
+`HbcAppShell` automatically switches chrome based on the resolved `AppMode`:
+
+| Mode | Chrome | Detection |
+|------|--------|-----------|
+| `office` | HbcHeader + HbcSidebar + content (sidebar margin) | Viewport > 767px AND not HB Site Control |
+| `field` | HbcHeader + content (no sidebar) + HbcBottomNav | Viewport ≤ 767px OR HB Site Control app |
+
+### useFieldMode Hook
+
+```ts
+import { useFieldMode } from '@hbc/ui-kit';
+// or from '@hbc/app-shell'
+
+const { isFieldMode, mode, toggleFieldMode, theme } = useFieldMode();
+// mode: 'office' | 'field'
+// isFieldMode: boolean (mode === 'field')
+// toggleFieldMode: manual toggle (no-op when auto-detected as field)
+// theme: 'light' | 'field'
+```
+
+**Auto-detection priority:**
+1. Mobile viewport (≤ 767px) → always `'field'`
+2. HB Site Control app (`data-hbc-app="hb-site-control"`) → always `'field'`
+3. Desktop with no override → `'office'`
+4. Desktop with manual toggle → user's choice
+
+### supportedModes Guard
+
+Pages can declare which modes they support via `WorkspacePageShell`:
+
+```tsx
+<WorkspacePageShell
+  layout="form"
+  title="Risk Assessment"
+  supportedModes={['office']}  // Only available in office mode
+>
+  {/* content */}
+</WorkspacePageShell>
+```
+
+If `supportedModes` is omitted, all modes are supported (default).
+
 ## Field Mode Behavior
 
-The app shell adapts fully to Field Mode. Header background remains dark (no change needed). Sidebar background, text, and icons adapt to dark theme with proper contrast. Content area background inherits document dark mode. All navigation items and interactive elements in the shell use Field Mode color palette.
+The app shell adapts fully to Field Mode. Header background remains dark (no change needed). Content area background inherits document dark mode. In field mode, `HbcSidebar` is hidden and `HbcBottomNav` appears at the bottom. All navigation items and interactive elements use Field Mode color palette.
 
 ## Accessibility
 

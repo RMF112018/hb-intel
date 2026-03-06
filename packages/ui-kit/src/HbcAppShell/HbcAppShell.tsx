@@ -17,7 +17,6 @@ import { HbcBottomNav } from '../HbcBottomNav/index.js';
 import { useSidebarState } from './hooks/useSidebarState.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import { useFieldMode } from './hooks/useFieldMode.js';
-import { useIsTablet } from '../hooks/useIsTablet.js';
 import type { HbcAppShellProps } from './types.js';
 import type { BottomNavItem } from '../HbcBottomNav/types.js';
 
@@ -81,9 +80,8 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   onNavigate,
 }) => {
   const { isExpanded, isMobile } = useSidebarState();
-  const isTablet = useIsTablet();
   const connectivityStatus = useOnlineStatus();
-  const { isFieldMode } = useFieldMode();
+  const { isFieldMode, mode: appMode } = useFieldMode();
   const [isFocusModeActive, setIsFocusModeActive] = React.useState(false);
   const styles = useStyles();
   const shellOffset = connectivityStatus === 'online' ? 58 : 60;
@@ -112,11 +110,15 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
     [sidebarGroups],
   );
 
-  const showBottomNav = isTablet && !isFocusModeActive;
+  // PH4B.10: Field mode → bottom nav (no sidebar); Office mode → sidebar (no bottom nav)
+  const showBottomNav = appMode === 'field' && !isFocusModeActive;
+  const showSidebar = appMode === 'office';
 
   const mainClass = mergeClasses(
     styles.main,
-    isMobile ? styles.mainMobile : isExpanded && !isFocusModeActive ? styles.mainExpanded : styles.mainCollapsed,
+    appMode === 'field'
+      ? styles.mainMobile
+      : isMobile ? styles.mainMobile : isExpanded && !isFocusModeActive ? styles.mainExpanded : styles.mainCollapsed,
     isFocusModeActive && styles.mainFocusMode,
     showBottomNav && styles.mainBottomNav,
   );
@@ -126,7 +128,9 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
       <div data-hbc-shell="app-shell" data-mode={mode}>
         <HbcConnectivityBar />
         <HbcHeader user={user} onSignOut={onSignOut} />
-        <HbcSidebar groups={sidebarGroups} activeItemId={activeItemId} onNavigate={onNavigate} />
+        {showSidebar && (
+          <HbcSidebar groups={sidebarGroups} activeItemId={activeItemId} onNavigate={onNavigate} />
+        )}
         {/* Focus Mode overlay */}
         <div
           className={mergeClasses(

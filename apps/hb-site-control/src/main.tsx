@@ -10,6 +10,9 @@ import { bootstrapMockEnvironment } from './bootstrap.js';
 import { App } from './App.js';
 import './app.css';
 
+// Mark as HB Site Control app for useFieldMode auto-detection (PH4B.10 §13)
+document.documentElement.dataset.hbcApp = 'hb-site-control';
+
 async function start(): Promise<void> {
   const authMode: AuthMode = resolveAuthMode();
 

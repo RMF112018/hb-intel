@@ -163,11 +163,11 @@ Add rule to `eslint-plugin-hbc`:
 
 ### Acceptance Criteria
 
-- [ ] `HbcToastContainer` mounted exactly once in `ShellLayout`
-- [ ] All 4 toast variants (`success`, `error`, `warning`, `info`) render correctly
-- [ ] `useToast` accessible from any page without additional setup
-- [ ] `HbcBanner` renders in reserved zone above content when `banner` prop provided
-- [ ] No `Alert` or inline message components in any `apps/` page file
+- [x] `HbcToastContainer` mounted exactly once in `AppShellLayout` (4b.9.1 — 2026-03-06)
+- [x] All 4 toast variants (`success`, `error`, `warning`, `info`) render correctly (4b.9.2 — 2026-03-06)
+- [x] `useToast` accessible from any page without additional setup (4b.9.2 — 2026-03-06)
+- [x] `HbcBanner` renders in reserved zone above content when `banner` prop provided (4b.9.4 — 2026-03-06)
+- [x] No `Alert` or inline message components in any `apps/` page file (4b.9.5 — 2026-03-06)
 
 ---
 
@@ -175,3 +175,24 @@ Add rule to `eslint-plugin-hbc`:
 *Version 1.0 — March 5, 2026*
 *Supersedes: Phase 4 partial implementation (ADR-0016 through ADR-0033)*
 *Next Phase: Phase 5 — SPFx Webpart Breakout*
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+4b.9.1 completed — HbcToastContainer mounted once in AppShellLayout (app-shell) per D-08 — 2026-03-06
+  - AppShellLayout wraps ShellLayout with HbcToastProvider + HbcToastContainer
+  - Mounted in @hbc/app-shell (not @hbc/shell) to avoid circular dependency
+4b.9.2 completed — useToast expanded to 4 variants with convenience API — 2026-03-06
+  - ToastCategory: success | error | warning | info (supersedes V2.1 three-category)
+  - Convenience API: toast.success(), toast.error(), toast.warning(), toast.info()
+  - Auto-dismiss: success=3s, warning=5s, info=4s, error=manual
+4b.9.3 completed — Canonical mutation wiring documented — 2026-03-06
+  - Reference doc updated: docs/reference/ui-kit/HbcToast.md
+  - Pattern: wire toast.success/toast.error to TanStack Query onSuccess/onError
+4b.9.4 completed — Banner prop verified in WorkspacePageShell — 2026-03-06
+  - BannerConfig interface (variant, message, dismissible) already correct
+  - HbcBanner renders below breadcrumbs, above content
+4b.9.5 completed — no-inline-feedback ESLint rule added — 2026-03-06
+  - Rule: @hbc/hbc/no-inline-feedback warns on Alert, MessageBar, etc.
+  - Enforces D-08 at lint time
+ADR created: docs/architecture/adr/ADR-0043-notifications-and-feedback.md
+Build: pnpm turbo run build — 23/23 packages successful
+-->
