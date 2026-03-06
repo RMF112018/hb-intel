@@ -86,3 +86,33 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - enables production operations through core admin workflows,
 - satisfies formal validation, audit, release, and documentation requirements,
 - and explicitly documents every deferred future expansion path so later phases can extend the platform without re-architecting the foundation.
+
+---
+
+## 5.2 Success Criteria Checklist (Task 2)
+
+- [x] 5.2.1 typed `IAuthAdapter` abstraction implemented with minimal non-speculative contract.
+- [x] 5.2.2 runtime modes implemented: `pwa-msal`, `spfx-context`, `mock`, `dev-override`.
+- [x] 5.2.3 production runtime auto-detection implemented.
+- [x] 5.2.4 non-production override gate implemented and blocked in production.
+- [x] 5.2.5 adapters implemented (`MsalAdapter`, `SpfxAdapter`, `MockAdapter`) with structured acquire/normalize behavior.
+- [x] 5.2.6 session normalization contract implemented with required identity/runtime/timestamp/restore fields.
+- [x] 5.2.7 restore policy logic implemented with explicit outcomes and shell-status transitions.
+- [x] 5.2.8 structured authentication failure classification implemented for all required categories.
+- [x] ADR-0055 created and linked to Phase 5.2 traceability.
+
+## Phase 5.2 Progress Notes
+
+- 5.2.1 completed - typed adapter abstraction and shared auth primitives implemented (`IAuthAdapter.ts`, `types.ts`) - 2026-03-06.
+- 5.2.2 completed - canonical runtime mode support and compatibility alias mapping implemented (`resolveAuthMode.ts`) - 2026-03-06.
+- 5.2.3 completed - production auto-detection and non-production override guard implemented with explicit gating comments - 2026-03-06.
+- 5.2.4 completed - `MsalAdapter`, `SpfxAdapter`, and `MockAdapter` implemented with structured `AuthResult` surfaces - 2026-03-06.
+- 5.2.5 completed - session normalization and restoration utilities implemented with required contract fields and typed restore outcomes - 2026-03-06.
+- 5.2.6 completed - root barrel exports updated for canonical contracts + backward compatibility paths - 2026-03-06.
+- 5.2.7 completed - ADR-0055 created and ADR index updated with full traceability to PH5.2 and locked Option C decisions - 2026-03-06.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth` - PASS

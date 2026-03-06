@@ -750,3 +750,27 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
 - `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
 - `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
+
+---
+
+## Phase 5.2 Progress Notes
+
+- 5.2.1 completed - typed adapter abstraction and shared auth primitives implemented (`IAuthAdapter.ts`, `types.ts`) - 2026-03-06.
+- 5.2.2 completed - canonical runtime mode support and compatibility alias mapping implemented (`resolveAuthMode.ts`) - 2026-03-06.
+- 5.2.3 completed - production auto-detection and non-production override guard implemented with explicit gating comments - 2026-03-06.
+- 5.2.4 completed - `MsalAdapter`, `SpfxAdapter`, and `MockAdapter` implemented with structured `AuthResult` surfaces - 2026-03-06.
+- 5.2.5 completed - session normalization and restoration utilities implemented with required contract fields and typed restore outcomes - 2026-03-06.
+- 5.2.6 completed - root barrel exports updated for canonical contracts + backward compatibility paths - 2026-03-06.
+- 5.2.7 completed - ADR-0055 created and ADR index updated with full traceability to PH5.2 and locked Option C decisions - 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.2)
+
+- [x] Success Criteria #1 trajectory validated for dual-mode runtime architecture implementation scope.
+- [x] Success Criteria #2 validated for auth-difference encapsulation in adapters and normalized session contract.
+- [x] Success Criteria #3 validated for centralized session normalization contract and typed restore/failure handling.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth` - PASS

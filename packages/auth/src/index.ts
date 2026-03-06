@@ -11,9 +11,42 @@ export type { RoleGateProps, FeatureGateProps, PermissionGateProps } from './gua
 // Hooks (Blueprint §1e — convenience hooks)
 export { useCurrentUser, usePermission, useFeatureFlag } from './hooks/index.js';
 
+// Dual-mode auth types (PH5.2 — canonical + compatibility runtime contract)
+export type {
+  AdapterIdentityPayload,
+  AuthFailure,
+  AuthFailureCode,
+  AuthMode,
+  AuthResult,
+  CanonicalAuthMode,
+  IMsalConfig,
+  ISpfxPageContext,
+  LegacyAuthMode,
+  NormalizedAuthSession,
+  SessionRestoreMetadata,
+  SessionRestoreOutcome,
+  SessionRestorePolicy,
+  SessionRestoreResult,
+  ShellStatusTransition,
+} from './types.js';
+export type { IAuthAdapter } from './IAuthAdapter.js';
+
 // Adapters (Blueprint §2b — dual-mode auth)
-export { resolveAuthMode, extractSpfxUser, initMsalAuth } from './adapters/index.js';
-export type { AuthMode, IMsalConfig, ISpfxPageContext } from './adapters/index.js';
+export {
+  resolveAuthMode,
+  resolveCanonicalAuthMode,
+  mapLegacyToCanonicalAuthMode,
+  mapCanonicalToLegacyAuthMode,
+  describeResolvedAuthRuntime,
+  extractSpfxUser,
+  initMsalAuth,
+  createAuthFailure,
+  normalizeIdentityToSession,
+  restoreSessionWithinPolicy,
+  MsalAdapter,
+  SpfxAdapter,
+  MockAdapter,
+} from './adapters/index.js';
 
 // SPFx bootstrap (Blueprint §2b — Phase 5)
 export { bootstrapSpfxAuth } from './spfx/index.js';

@@ -932,4 +932,12 @@ Phase 5.1 (Authentication & Shell Foundation Task 1) completed: 2026-03-06
   - 5.1.3 ADR-0053 and ADR-0054 published to lock auth/shell ownership seams prior to migration
   - 5.1.4 workspace dependency governance updated in `pnpm-workspace.yaml` and `turbo.json` (including cache invalidation linkage to workspace dependency rules)
   - 5.1.5 verification gates passed for scoped packages: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`
+Phase 5.2 (Dual-Mode Authentication Architecture) completed: 2026-03-06
+  - 5.2.1 typed adapter abstraction + shared auth primitives implemented (`IAuthAdapter.ts`, `types.ts`) with Option C boundary constraints
+  - 5.2.2 canonical modes implemented (`pwa-msal`, `spfx-context`, `mock`, `dev-override`) with compatibility alias mapping for existing app branches (`msal`, `spfx`)
+  - 5.2.3 production auto-detection + non-production override gating implemented in `resolveAuthMode.ts`
+  - 5.2.4 auth adapters implemented (`MsalAdapter`, `SpfxAdapter`, `MockAdapter`) with structured `AuthResult` and required failure classification categories
+  - 5.2.5 session normalization + restore-policy utilities implemented with typed restore outcomes and shell-status transition outputs
+  - 5.2.6 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`
+  - 5.2.7 ADR-0055 created: `docs/architecture/adr/ADR-0055-dual-mode-authentication-architecture.md`
 -->
