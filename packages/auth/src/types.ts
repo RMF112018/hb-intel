@@ -560,10 +560,12 @@ export interface AccessOverrideRequest {
 export type AccessControlAuditEventType =
   | 'override-requested'
   | 'override-approved'
+  | 'override-rejected'
   | 'override-revoked'
   | 'override-archived'
   | 'override-renewed'
   | 'override-review-flagged'
+  | 'override-review-resolved'
   | 'base-role-updated';
 
 /**
@@ -635,4 +637,316 @@ export interface ShellAuthConfigurationInput {
   redirectDefaults?: Partial<RedirectDefaultPolicy>;
   sessionWindows?: Partial<SessionPolicyWindowSettings>;
   policySettings?: Partial<AccessControlPolicySettings>;
+}
+
+/**
+ * Section identifiers for the Phase 5.11 minimal production admin experience.
+ */
+export type AccessControlAdminSection =
+  | 'user-lookup'
+  | 'role-access-lookup'
+  | 'override-review'
+  | 'renewal-queue'
+  | 'role-change-review'
+  | 'emergency-review'
+  | 'audit-log';
+
+/**
+ * User lookup row model for admin access-control operations.
+ */
+export interface AccessControlUserLookupRecord {
+  userId: string;
+  displayName: string;
+  email: string;
+  resolvedRoles: string[];
+  grants: string[];
+}
+
+/**
+ * Role/access lookup row model for admin role governance review.
+ */
+export interface AccessControlRoleAccessRecord {
+  roleId: string;
+  roleName: string;
+  grants: string[];
+  activeOverrideCount: number;
+  pendingOverrideCount: number;
+  reviewRequiredCount: number;
+}
+
+/**
+ * Snapshot payload consumed by the sectioned Phase 5.11 admin UX.
+ */
+export interface AccessControlAdminSnapshot {
+  generatedAt: string;
+  users: AccessControlUserLookupRecord[];
+  roleAccess: AccessControlRoleAccessRecord[];
+  overrideReviewQueue: AccessControlOverrideRecord[];
+  renewalQueue: AccessControlOverrideRecord[];
+  roleChangeReviewQueue: AccessControlOverrideRecord[];
+  emergencyReviewQueue: AccessControlOverrideRecord[];
+  auditEvents: AccessControlAuditEventRecord[];
+}
+
+/**
+ * Query options for lookup/filter scenarios on the admin surface.
+ */
+export interface AccessControlAdminQuery {
+  searchTerm?: string;
+}
+
+/**
+ * Approval decisions for review queues.
+ */
+export type ReviewOverrideDecision = 'approve' | 'reject';
+
+/**
+ * Command for review decisions in override request queue.
+ */
+export interface ReviewOverrideCommand {
+  overrideId: string;
+  reviewerId: string;
+  decision: ReviewOverrideDecision;
+  reason?: string;
+  reviewedAt?: string;
+}
+
+/**
+ * Command for renewal handling of expiring overrides.
+ */
+export interface RenewOverrideCommand {
+  overrideId: string;
+  reviewerId: string;
+  reason: string;
+  expiresAt: string;
+  reviewedAt?: string;
+}
+
+/**
+ * Command for resolving overrides flagged by role-definition changes.
+ */
+export interface ResolveRoleChangeReviewCommand {
+  overrideId: string;
+  reviewerId: string;
+  reason: string;
+  reviewedAt?: string;
+}
+
+/**
+ * Command for emergency-access queue review with mandatory reason.
+ */
+export interface ReviewEmergencyAccessCommand {
+  overrideId: string;
+  reviewerId: string;
+  decision: ReviewOverrideDecision;
+  reason: string;
+  reviewedAt?: string;
+}
+
+/**
+ * Typed workflow result contract for admin queue action handlers.
+ */
+export interface AccessControlWorkflowResult {
+  ok: boolean;
+  message: string;
+  updatedOverride?: AccessControlOverrideRecord;
+  auditEvent?: AccessControlAuditEventRecord;
+}
+
+/**
+ * Repository contract for Phase 5.11 admin UX data access and queue actions.
+ */
+export interface AccessControlAdminRepository {
+  getSnapshot: (query?: AccessControlAdminQuery) => Promise<AccessControlAdminSnapshot>;
+  reviewOverride: (command: ReviewOverrideCommand) => Promise<AccessControlWorkflowResult>;
+  renewOverride: (command: RenewOverrideCommand) => Promise<AccessControlWorkflowResult>;
+  resolveRoleChangeReview: (
+    command: ResolveRoleChangeReviewCommand,
+  ) => Promise<AccessControlWorkflowResult>;
+  reviewEmergencyAccess: (
+    command: ReviewEmergencyAccessCommand,
+  ) => Promise<AccessControlWorkflowResult>;
+}
+
+/**
+ * Policy knobs for structured override request intake.
+ */
+export interface AccessOverrideRequestPolicy {
+  defaultExpirationHours: number;
+  minimumBusinessReasonLength: number;
+}
+
+/**
+ * Validation result for structured request payloads.
+ */
+export interface AccessOverrideRequestValidationResult {
+  valid: boolean;
+  errors: string[];
+}
+
+/**
+ * Structured request command for standard override workflows.
+ */
+export interface StructuredAccessOverrideRequestCommand {
+  requestId: string;
+  targetUserId: string;
+  baseRoleId: string;
+  requestedChange: AccessOverrideGrantChange;
+  businessReason: string;
+  targetFeatureId: string;
+  targetAction: string;
+  requesterId: string;
+  requestedDurationHours?: number;
+  requestedExpiresAt?: string;
+  requestedAt?: string;
+  renewalOfRequestId?: string;
+}
+
+/**
+ * Canonical structured request payload consumed by approval/renewal workflows.
+ */
+export interface StructuredAccessOverrideRequest {
+  requestId: string;
+  targetUserId: string;
+  baseRoleId: string;
+  requestedChange: AccessOverrideGrantChange;
+  businessReason: string;
+  targetFeatureId: string;
+  targetAction: string;
+  requesterId: string;
+  requestedAt: string;
+  requestedDurationHours?: number;
+  requestedExpiresAt: string;
+  renewalOfRequestId?: string;
+}
+
+/**
+ * Decision set for standard override approval actions.
+ */
+export type AccessOverrideApprovalDecision = 'approve' | 'reject';
+
+/**
+ * Command contract for approval actions on structured requests.
+ */
+export interface AccessOverrideApprovalActionCommand {
+  reviewerId: string;
+  decision: AccessOverrideApprovalDecision;
+  reviewedAt?: string;
+  expiresAt?: string;
+  markPermanent?: boolean;
+  permanentJustification?: string;
+  rejectionReason?: string;
+}
+
+/**
+ * Policy controls for approval behavior and permanent designation validation.
+ */
+export interface AccessOverrideApprovalPolicy {
+  defaultExpirationHours: number;
+  minimumPermanentJustificationLength: number;
+}
+
+/**
+ * Result contract returned by approval handlers.
+ */
+export interface AccessOverrideApprovalResult {
+  ok: boolean;
+  decision: AccessOverrideApprovalDecision;
+  message: string;
+  override?: AccessControlOverrideRecord;
+  audit?: AccessControlAuditEventRecord;
+}
+
+/**
+ * Command contract for renewal request initiation.
+ */
+export interface AccessOverrideRenewalCommand {
+  renewalRequestId: string;
+  previousRequestId: string;
+  targetUserId: string;
+  baseRoleId: string;
+  requestedChange: AccessOverrideGrantChange;
+  targetFeatureId: string;
+  targetAction: string;
+  requesterId: string;
+  updatedJustification: string;
+  requestedDurationHours?: number;
+  requestedExpiresAt?: string;
+  requestedAt?: string;
+}
+
+/**
+ * Renewal action input with explicit approval command.
+ */
+export interface AccessOverrideRenewalAction {
+  renewalRequestId: string;
+  previousRequestId: string;
+  targetUserId: string;
+  baseRoleId: string;
+  requestedChange: AccessOverrideGrantChange;
+  targetFeatureId: string;
+  targetAction: string;
+  requesterId: string;
+  updatedJustification: string;
+  requestedDurationHours?: number;
+  requestedExpiresAt?: string;
+  requestedAt?: string;
+}
+
+/**
+ * Result payload for completed renewal workflows.
+ */
+export interface AccessOverrideRenewalResult {
+  ok: boolean;
+  message: string;
+  request?: StructuredAccessOverrideRequest;
+  override?: AccessControlOverrideRecord;
+  audit?: AccessControlAuditEventRecord;
+}
+
+/**
+ * Policy controls for emergency-access governance boundaries.
+ */
+export interface AccessOverrideEmergencyPolicy {
+  authorizedRoles: string[];
+  maximumEmergencyHours: number;
+  minimumReasonLength: number;
+  minimumBoundaryReasonLength: number;
+}
+
+/**
+ * Boundary-evaluation output for emergency-access requests.
+ */
+export interface AccessOverrideEmergencyBoundaryCheck {
+  allowed: boolean;
+  reason: string | null;
+}
+
+/**
+ * Command payload for emergency-access workflows.
+ */
+export interface AccessOverrideEmergencyCommand {
+  requestId: string;
+  targetUserId: string;
+  baseRoleId: string;
+  requestedChange: AccessOverrideGrantChange;
+  targetFeatureId: string;
+  targetAction: string;
+  requesterId: string;
+  requesterRoles: string[];
+  emergencyReason: string;
+  normalWorkflowAvailable: boolean;
+  boundaryBypassReason?: string;
+  requestedAt?: string;
+}
+
+/**
+ * Result payload for emergency-access workflow execution.
+ */
+export interface AccessOverrideEmergencyResult {
+  ok: boolean;
+  message: string;
+  request?: StructuredAccessOverrideRequest;
+  override?: AccessControlOverrideRecord;
+  audit?: AccessControlAuditEventRecord[];
 }

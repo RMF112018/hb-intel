@@ -6,6 +6,8 @@
 import { redirect } from '@tanstack/react-router';
 import { useAuthStore, usePermissionStore } from '@hbc/auth';
 
+const ADMIN_ACCESS_PERMISSION = 'admin:access-control:view';
+
 /**
  * Require authenticated user. Redirect to root if not logged in.
  */
@@ -26,4 +28,11 @@ export function requirePermission(action: string): void {
   if (!hasIt && !hasWildcard) {
     throw redirect({ to: '/project-hub' });
   }
+}
+
+/**
+ * Require access-control admin capability before entering admin route surfaces.
+ */
+export function requireAdminAccessControl(): void {
+  requirePermission(ADMIN_ACCESS_PERMISSION);
 }

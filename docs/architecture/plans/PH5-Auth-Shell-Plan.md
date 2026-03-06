@@ -431,3 +431,53 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - `pnpm --filter @hbc/auth exec vitest run packages/auth/src/backend/accessControlModel.test.ts packages/auth/src/backend/overrideRecord.test.ts packages/auth/src/backend/configurationLayer.test.ts` - BLOCKED (workspace Vitest startup cannot resolve package-local `vite` in generated temp config).
 
 ---
+
+## Phase 5.11 Progress Notes
+
+- 5.11.1 completed — `@hbc/auth` minimal production admin module implemented (`src/admin/`) with sectioned UX capabilities for user lookup, role/access lookup, override request review, approval/rejection, renewal handling, role-change impact queue, emergency queue, and basic audit visibility — 2026-03-06.
+- 5.11.2 completed — typed repository abstraction + in-memory adapter introduced for Phase 5.11 operational workflows while preserving Phase 5.10 backend/rules as the richer long-term model — 2026-03-06.
+- 5.11.3 completed — deterministic workflow handlers added for standard override review, emergency review, renewal handling, and role-change review resolution with explicit reason requirements and audit-event emission — 2026-03-06.
+- 5.11.4 completed — dual-mode integration applied by wiring shared admin UX to PWA `/admin` and `apps/admin`, with explicit admin route guard enforcement for access-control permissions — 2026-03-06.
+- 5.11.5 completed — governance/documentation closure completed across PH5.11/PH5/Blueprint/Foundation with ADR-0064 and deferred expansion items explicitly captured — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.11)
+
+- [x] Success Criteria #4 advanced through explicit admin-route access guard enforcement and centralized admin workflow boundaries.
+- [x] Success Criteria #5 advanced through auditable admin lookup/review visibility and deterministic queue action semantics tied to app-owned authorization records.
+- [x] Success Criteria #6 advanced through production-usable minimal admin override governance workflows (approve/reject, renewal, role-change review, emergency review).
+- [x] Success Criteria #9 advanced through shared `@hbc/auth` admin capability wiring across PWA and SPFx-hosted admin surfaces without environment-specific authorization leakage.
+- [x] Success Criteria #10 advanced through Phase 5.11 documentation closure (plan progress/checklists, blueprint/foundation progress notes, ADR-0064, and verification evidence).
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth` - PASS
+- `pnpm --filter @hbc/auth exec vitest run packages/auth/src/admin/workflows.test.ts packages/auth/src/admin/repository.test.ts packages/auth/src/admin/hooks.test.ts` - BLOCKED (workspace Vitest startup cannot resolve package-local `vite` in generated temp config).
+
+---
+
+## Phase 5.12 Progress Notes
+
+- 5.12.1 completed — structured override request workflow added (`packages/auth/src/workflows/overrideRequest.ts`) with governed request contracts and strict required-field validation — 2026-03-06.
+- 5.12.2 completed — approval workflow added (`packages/auth/src/workflows/overrideApproval.ts`) supporting approve/reject/set expiration/permanent-with-justification under locked Option C controls — 2026-03-06.
+- 5.12.3 completed — default expiration enforcement implemented for non-permanent approvals, preventing silent indefinite carry-forward of standard overrides — 2026-03-06.
+- 5.12.4 completed — renewal workflow added (`packages/auth/src/workflows/renewalWorkflow.ts`) requiring renewed request, updated justification, and fresh approval; explicit expired-override detection included — 2026-03-06.
+- 5.12.5 completed — emergency workflow added (`packages/auth/src/workflows/emergencyAccess.ts`) with authorized-admin immediate action, mandatory reason, short expiration, mandatory post-action review, and boundary checks preventing substitution for normal workflow — 2026-03-06.
+- 5.12.6 completed — workflow types/exports integrated in `packages/auth/src/types.ts` and `packages/auth/src/index.ts`; ADR-0065 + governance traceability updates completed — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.12)
+
+- [x] Success Criteria #5 advanced through standardized, explicit, and auditable workflow contracts for override request/approval/renewal/emergency decision paths.
+- [x] Success Criteria #6 advanced through production-usable structured approval, default expiration, renewal re-approval, and emergency post-review governance rules.
+- [x] Success Criteria #8 advanced by centralizing workflow policy boundaries and deterministic emergency-vs-normal-path enforcement.
+- [x] Success Criteria #10 advanced through Phase 5.12 documentation closure (PH5.12/PH5 notes + checklist updates, blueprint/foundation traceability, ADR-0065, and verification evidence).
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth` - PASS
+- `pnpm --filter @hbc/auth exec vitest run packages/auth/src/workflows/overrideRequest.test.ts packages/auth/src/workflows/overrideApproval.test.ts packages/auth/src/workflows/renewalWorkflow.test.ts packages/auth/src/workflows/emergencyAccess.test.ts` - BLOCKED (workspace Vitest startup cannot resolve package-local `vite` in generated temp config).
+
+---

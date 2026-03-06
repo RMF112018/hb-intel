@@ -74,3 +74,32 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - enables production operations through core admin workflows,
 - satisfies formal validation, audit, release, and documentation requirements,
 - and explicitly documents every deferred future expansion path so later phases can extend the platform without re-architecting the foundation.
+
+---
+
+## Phase 5.12 Progress Notes
+
+- 5.12.1 completed — structured override request workflow implemented (`workflows/overrideRequest.ts`) capturing requested access change, business reason, target feature/action, and requested duration/expiration with strict validation — 2026-03-06.
+- 5.12.2 completed — standard approval workflow implemented (`workflows/overrideApproval.ts`) supporting approve/reject/set expiration and permanent designation only with explicit justification — 2026-03-06.
+- 5.12.3 completed — default expiration policy enforced for standard approvals, preventing indefinite continuation unless explicit permanent justification passes policy checks — 2026-03-06.
+- 5.12.4 completed — renewal workflow implemented (`workflows/renewalWorkflow.ts`) requiring renewed request, updated justification, and fresh approval; expired overrides explicitly detected to prevent silent continuation — 2026-03-06.
+- 5.12.5 completed — emergency workflow implemented (`workflows/emergencyAccess.ts`) with authorized-admin gating, mandatory reason, short expiration, mandatory post-action review, and boundary checks to prevent normal-workflow substitution — 2026-03-06.
+- 5.12.6 completed — related workflow types and root exports added in `types.ts` + `index.ts`; governance closure finalized with ADR-0065 — 2026-03-06.
+
+## Phase 5.12 Completion Checklist
+
+- [x] §5.12 item 1 complete — standard overrides require structured request + approval workflow.
+- [x] §5.12 item 2 complete — requests capture access change, business reason, target feature/action, and duration/expiration.
+- [x] §5.12 item 3 complete — approvals support approve, reject, set expiration, and permanent with explicit justification.
+- [x] §5.12 item 4 complete — default expiration enforced for most overrides.
+- [x] §5.12 item 5 complete — expiring overrides cannot silently continue.
+- [x] §5.12 item 6 complete — renewal requires renewed request, updated justification, and fresh approval.
+- [x] §5.12 item 7 complete — emergency access supports immediate authorized action, mandatory reason, short expiration, and mandatory post-review.
+- [x] §5.12 item 8 complete — emergency boundary checks implemented and documented to prevent substitution for normal workflow.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth` - PASS
+- `pnpm --filter @hbc/auth exec vitest run packages/auth/src/workflows/overrideRequest.test.ts packages/auth/src/workflows/overrideApproval.test.ts packages/auth/src/workflows/renewalWorkflow.test.ts packages/auth/src/workflows/emergencyAccess.test.ts` - BLOCKED (workspace Vitest startup cannot resolve package-local `vite` in generated temp config).

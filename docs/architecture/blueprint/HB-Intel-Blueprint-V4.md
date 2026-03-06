@@ -997,4 +997,19 @@ Phase 5.10 (Access-Control Backend and Data Model) completed: 2026-03-06
   - 5.10.4 typed central runtime/auth configuration layer added in `packages/auth/src/backend/configurationLayer.ts` (runtime rules, redirect defaults, session windows, policy settings) with Option C default-deny invariant validation
   - 5.10.5 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`; backend vitest execution remains blocked by workspace vite-resolution issue
   - 5.10.6 ADR-0063 created: `docs/architecture/adr/ADR-0063-access-control-backend-and-data-model.md`
+Phase 5.11 (Minimal Production Admin UX) completed: 2026-03-06
+  - 5.11.1 shared admin capability module implemented in `packages/auth/src/admin/` (repository contracts, in-memory adapter, workflows, hooks, and sectioned admin surface) for minimum production operations
+  - 5.11.2 minimum admin workflows delivered: user lookup, role/access lookup, override review decisions, renewal handling, role-change review queue, emergency review queue, and basic audit visibility
+  - 5.11.3 dual-surface integration completed across PWA `/admin` and `apps/admin` routes using shared `@hbc/auth` admin logic with explicit admin route guard enforcement
+  - 5.11.4 deferred expansion path documented for broader dashboards, richer analytics, request tracking history, notifications, and advanced reporting
+  - 5.11.5 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`; targeted admin vitest remains blocked by existing workspace vite-resolution issue
+  - 5.11.6 ADR-0064 created: `docs/architecture/adr/ADR-0064-minimal-production-admin-ux.md`
+Phase 5.12 (Approval, Renewal, and Emergency Access Workflows) completed: 2026-03-06
+  - 5.12.1 structured request workflow added in `packages/auth/src/workflows/overrideRequest.ts` with required-field validation for requested change, business reason, feature/action target, and requested duration/expiration
+  - 5.12.2 approval workflow added in `packages/auth/src/workflows/overrideApproval.ts` supporting approve/reject/set expiration and permanent access only with explicit justification
+  - 5.12.3 renewal workflow added in `packages/auth/src/workflows/renewalWorkflow.ts` enforcing renewed request + updated justification + fresh approval, and explicit expired-override detection to prevent silent continuation
+  - 5.12.4 emergency workflow added in `packages/auth/src/workflows/emergencyAccess.ts` with authorized-admin gating, mandatory reason, short expiration, mandatory post-action review, and substitution boundary checks
+  - 5.12.5 workflow contracts exported via `packages/auth/src/workflows/index.ts`, `packages/auth/src/types.ts`, and root `packages/auth/src/index.ts`
+  - 5.12.6 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`; targeted workflow vitest remains blocked by workspace vite-resolution issue
+  - 5.12.7 ADR-0065 created: `docs/architecture/adr/ADR-0065-approval-renewal-and-emergency-access-workflows.md`
 -->

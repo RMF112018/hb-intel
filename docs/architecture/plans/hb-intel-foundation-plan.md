@@ -601,4 +601,19 @@ Phase 5.10 (Access-Control Backend and Data Model) completed: 2026-03-06
   - 5.10.5 package exports/types + Phase 5 documentation closure completed (PH5.10 and PH5 progress notes/checklists updated)
   - 5.10.6 verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`
   - 5.10.7 ADR-0063 created: `docs/architecture/adr/ADR-0063-access-control-backend-and-data-model.md`
+Phase 5.11 (Minimal Production Admin UX) completed: 2026-03-06
+  - 5.11.1 minimal production admin module implemented in `packages/auth/src/admin/` with typed repository, in-memory runtime adapter, workflow handlers, hooks, and sectioned UX surface
+  - 5.11.2 required core admin capabilities implemented: user lookup, role/access lookup, override review decisions, renewal handling, role-change impact review queue, emergency queue, and basic audit visibility
+  - 5.11.3 PWA/admin runtime wiring completed (`apps/pwa/src/pages/AdminPage.tsx`, `apps/admin/src/pages/SystemSettingsPage.tsx`) with explicit admin route guard enforcement
+  - 5.11.4 deferred expansion items documented (broader dashboards, analytics, request tracking history, notifications, advanced reporting)
+  - 5.11.5 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`
+  - 5.11.6 ADR-0064 created: `docs/architecture/adr/ADR-0064-minimal-production-admin-ux.md`
+Phase 5.12 (Approval, Renewal, and Emergency Access Workflows) completed: 2026-03-06
+  - 5.12.1 structured request workflow implemented in `packages/auth/src/workflows/overrideRequest.ts` with deterministic validation and required request metadata capture
+  - 5.12.2 approval workflow implemented in `packages/auth/src/workflows/overrideApproval.ts` for approve/reject/set expiration/permanent-with-explicit-justification paths
+  - 5.12.3 renewal workflow implemented in `packages/auth/src/workflows/renewalWorkflow.ts` enforcing renewed request, updated justification, and fresh approval
+  - 5.12.4 emergency workflow implemented in `packages/auth/src/workflows/emergencyAccess.ts` with authorized-admin immediate action, mandatory reason, short expiration, mandatory post-action review, and non-substitution boundary checks
+  - 5.12.5 workflow exports/contracts integrated through `packages/auth/src/workflows/index.ts`, `packages/auth/src/types.ts`, and `packages/auth/src/index.ts`
+  - 5.12.6 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`
+  - 5.12.7 ADR-0065 created: `docs/architecture/adr/ADR-0065-approval-renewal-and-emergency-access-workflows.md`
 -->

@@ -7,7 +7,7 @@ import { createRoute, redirect, lazyRouteComponent } from '@tanstack/react-route
 import type { WorkspaceId } from '@hbc/shell';
 import { useNavStore } from '@hbc/shell';
 import { rootRoute } from './root-route.js';
-import { requireAuth } from './route-guards.js';
+import { requireAuth, requireAdminAccessControl } from './route-guards.js';
 import { WORKSPACE_TOOL_PICKERS, WORKSPACE_SIDEBARS } from './workspace-config.js';
 
 function createWorkspaceRoute(
@@ -109,10 +109,19 @@ export const pmpRoute = createWorkspaceRoute(
   () => import('../pages/PmpPage.js').then((m) => ({ default: m.PmpPage })),
 );
 
-export const adminRoute = createWorkspaceRoute(
-  'admin',
-  () => import('../pages/AdminPage.js').then((m) => ({ default: m.AdminPage })),
-);
+export const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'admin',
+  beforeLoad: () => {
+    requireAuth();
+    requireAdminAccessControl();
+    const nav = useNavStore.getState();
+    nav.setActiveWorkspace('admin');
+  },
+  component: lazyRouteComponent(
+    () => import('../pages/AdminPage.js').then((m) => ({ default: m.AdminPage })),
+  ),
+});
 
 export const siteControlRoute = createWorkspaceRoute(
   'site-control',

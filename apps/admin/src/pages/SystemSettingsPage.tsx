@@ -1,10 +1,19 @@
 import type { ReactNode } from 'react';
-import { HbcEmptyState, WorkspacePageShell } from '@hbc/ui-kit';
+import { AdminAccessControlPage } from '@hbc/auth';
+import type { AccessControlAdminSection } from '@hbc/auth';
+import { WorkspacePageShell } from '@hbc/ui-kit';
 
-export function SystemSettingsPage(): ReactNode {
+interface SystemSettingsPageProps {
+  initialSection?: AccessControlAdminSection;
+}
+
+export function SystemSettingsPage({ initialSection = 'user-lookup' }: SystemSettingsPageProps): ReactNode {
   return (
-    <WorkspacePageShell layout="form" title="System Settings">
-      <HbcEmptyState title="System Settings" description="System configuration tools will be available in a future release." />
+    <WorkspacePageShell layout="list" title="Administration">
+      <AdminAccessControlPage
+        title="Access Control Administration"
+        initialSection={initialSection}
+      />
     </WorkspacePageShell>
   );
 }

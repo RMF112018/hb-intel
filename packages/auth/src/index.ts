@@ -61,12 +61,32 @@ export {
 
 // Dual-mode auth types (PH5.2/5.3 — canonical + compatibility runtime contract)
 export type {
+  AccessOverrideApprovalActionCommand,
+  AccessOverrideApprovalDecision,
+  AccessOverrideApprovalPolicy,
+  AccessOverrideApprovalResult,
+  AccessOverrideEmergencyBoundaryCheck,
+  AccessOverrideEmergencyCommand,
+  AccessOverrideEmergencyPolicy,
+  AccessOverrideEmergencyResult,
+  AccessOverrideRenewalAction,
+  AccessOverrideRenewalCommand,
+  AccessOverrideRenewalResult,
+  AccessOverrideRequestPolicy,
+  AccessOverrideRequestValidationResult,
+  AccessControlAdminQuery,
+  AccessControlAdminRepository,
+  AccessControlAdminSection,
+  AccessControlAdminSnapshot,
   AccessControlAuditEventRecord,
   AccessControlAuditEventType,
   AccessControlOverrideRecord,
   AccessControlOverrideReviewMetadata,
   AccessControlPolicySettings,
   AccessControlRecordStatus,
+  AccessControlRoleAccessRecord,
+  AccessControlUserLookupRecord,
+  AccessControlWorkflowResult,
   AccessOverrideApprovalMetadata,
   AccessOverrideChangeMode,
   AccessOverrideExpirationMetadata,
@@ -116,12 +136,59 @@ export type {
   ShellAuthConfigurationInput,
   ShellStatusTransition,
   RedirectDefaultPolicy,
+  RenewOverrideCommand,
+  ResolveRoleChangeReviewCommand,
+  ReviewEmergencyAccessCommand,
+  ReviewOverrideCommand,
+  ReviewOverrideDecision,
+  StructuredAccessOverrideRequest,
+  StructuredAccessOverrideRequestCommand,
   RenewalState,
   SessionPolicyWindowSettings,
   StandardActionPermission,
 } from './types.js';
 export type { IAuthAdapter } from './IAuthAdapter.js';
 export { mapIdentityToAppRoles, toRoleMappingInput } from './roleMapping.js';
+
+// Access-control workflow layer (PH5.12 — approval, renewal, emergency governance)
+export {
+  DEFAULT_OVERRIDE_REQUEST_POLICY,
+  validateStructuredOverrideRequest,
+  createStructuredOverrideRequest,
+  toOverrideRequestInput,
+  DEFAULT_OVERRIDE_APPROVAL_POLICY,
+  createPendingOverrideFromRequest,
+  applyOverrideApprovalAction,
+  isOverrideApprovalDecision,
+  isOverrideExpired,
+  createRenewalRequest,
+  runRenewalWorkflow,
+  DEFAULT_EMERGENCY_ACCESS_POLICY,
+  evaluateEmergencyBoundary,
+  runEmergencyAccessWorkflow,
+} from './workflows/index.js';
+
+// Admin UX module (PH5.11 — minimal production admin capability surface)
+export {
+  AdminAccessControlPage,
+  buildAccessControlAdminSnapshot,
+  getAccessControlAdminSnapshot,
+  createInMemoryAccessControlAdminRepository,
+  defaultAccessControlAdminRepository,
+  toOverrideQueueItem,
+  isRenewalDue,
+  buildRoleAccessLookup,
+  applyOverrideReviewDecision,
+  applyRenewalRequest,
+  resolveRoleChangeReview,
+  applyEmergencyReviewDecision,
+  deriveQueueByDecision,
+  sortAuditEventsDescending,
+  loadAdminAccessControlSnapshot,
+  toAdminSearchQuery,
+  useAdminAccessControlData,
+} from './admin/index.js';
+export type { AdminAccessControlPageProps, AdminSectionDescriptor } from './admin/index.js';
 
 // Access-control backend model (PH5.10 — centralized HB Intel authorization SoR)
 export {
