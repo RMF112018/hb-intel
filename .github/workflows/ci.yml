@@ -95,7 +95,32 @@ jobs:
         run: pnpm turbo run build --filter=@hbc/ui-kit^...
 
       - name: Build Storybook
+        # 4b.12.1 / F-012: enforce a deterministic Storybook build artifact in CI.
         run: pnpm --filter @hbc/ui-kit build-storybook
+
+      - name: Cache Playwright browsers for Storybook test-runner
+        # test-storybook uses Playwright under the hood; cache keeps CI stable and faster.
+        id: sb-pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: storybook-playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright for Storybook test-runner
+        if: steps.sb-pw-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Storybook tests
+        # 4b.12.1 / F-012: serve the built static Storybook output (no file watchers), wait until reachable,
+        # execute @storybook/test-runner, and always terminate the background server.
+        run: |
+          cd packages/ui-kit/storybook-static
+          python3 -m http.server 6006 --bind 127.0.0.1 &
+          STORYBOOK_PID=$!
+          trap "kill $STORYBOOK_PID" EXIT
+          until curl -sf http://127.0.0.1:6006 >/dev/null; do sleep 2; done
+          cd "$GITHUB_WORKSPACE"
+          pnpm --filter @hbc/ui-kit test-storybook --url http://127.0.0.1:6006
 
       - name: Upload Storybook
         uses: actions/upload-artifact@v4
@@ -139,3 +164,21 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 14
+
+  final-lint-gate:
+    name: Final Lint Gate
+    needs:
+      - lint-and-format
+      - test
+      - build
+      - storybook
+      - e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-pnpm
+
+      - name: Final lint verification
+        # 4b.12 closure gate: require lint to pass after all integration checks complete.
+        run: pnpm turbo run lint

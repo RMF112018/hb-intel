@@ -883,4 +883,10 @@ Phase 4b.8 (Form Architecture & Draft System) completed: 2026-03-06
   - ADR created: ADR-0042-form-architecture.md
   - Documentation added: docs/how-to/developer/phase-4b.8-form-architecture-guide.md
   - Build: 23/23 packages pass, 0 errors
+Phase 4b.12 (Integration Verification & Acceptance) completed: 2026-03-06
+  - Storybook test-runner wired into CI with static-serve execution path; final lint gate added
+  - Playwright critical workflow coverage expanded (shell/forms/notifications/scorecard/risk/field-mode)
+  - ADR naming standardized (ADR-0001..ADR-0014), duplicate legacy ADR-0016 removed, ADR index status fields updated
+  - Acceptance matrix + carryover crosswalk closed with objective evidence; §17 guarantee marked verified
+  - Final sign-off ADR created: ADR-0046-integration-verification-and-acceptance.md
 -->

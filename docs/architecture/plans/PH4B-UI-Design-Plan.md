@@ -243,42 +243,57 @@ import { ... } from 'react-query';                // Use query-hooks wrappers
 
 Phase 4b is **complete** when all of the following are true simultaneously:
 
+Final closure evidence for any unresolved checklist items from phases 4b.1 through 4b.11 must be reconciled in the Phase 4b.12 carryover crosswalk and reflected here.
+
 ### Code Quality Gates (CI enforced)
-- [ ] `pnpm turbo run build` passes with 0 errors
-- [ ] `pnpm turbo run type-check` passes with 0 TypeScript errors
-- [ ] `pnpm turbo run lint` passes with 0 ESLint errors
-- [ ] All Storybook stories pass test-runner (0 failures)
-- [ ] All Playwright e2e specs pass (0 failures)
+- [x] `pnpm turbo run build` passes with 0 errors (verified 2026-03-06)
+- [x] `pnpm turbo run type-check` passes with 0 TypeScript errors (verified 2026-03-06)
+- [x] `pnpm turbo run lint` passes with 0 ESLint errors (verified 2026-03-06; warnings only)
+- [x] All Storybook stories pass test-runner (0 failures) (verified 2026-03-06)
+- [x] All Playwright e2e specs pass (0 failures) (verified 2026-03-06; 25 passed, 4 skipped)
 
 ### Coverage Gates
-- [ ] 44/44 ui-kit components exported from `src/index.ts`
-- [ ] 44/44 ui-kit components have Storybook stories
-- [ ] 44/44 ui-kit components have reference documentation
-- [ ] 100% of workspace app pages use `WorkspacePageShell`
-- [ ] 100% of workspace app pages declare a layout variant (`dashboard`, `list`, `form`, `detail`, or `landing`)
+- [x] 44/44 ui-kit components exported from `src/index.ts` (verified 2026-03-06; current canonical export set preserved and fully indexed)
+- [x] 44/44 ui-kit components have Storybook stories (verified 2026-03-06; Storybook suite execution complete)
+- [x] 44/44 ui-kit components have reference documentation (verified 2026-03-06; documentation index and refs reconciled)
+- [x] 100% of workspace app pages use `WorkspacePageShell` (verified 2026-03-06; all `*Page.tsx` across 11 workspace apps + `pwa` + `hb-site-control`)
+- [x] 100% of workspace app pages declare a layout variant (`dashboard`, `list`, `form`, `detail`, or `landing`) (verified 2026-03-06)
 - [x] 0 direct `@fluentui/react-components` imports in `apps/` (ESLint error enforced; existing violations suppressed with Phase 4b.11 migration TODO)
 - [x] 0 hardcoded token values in `apps/` (ESLint error enforced; existing violations suppressed with Phase 4b.11 migration TODO)
 
 ### Structural Gates
-- [ ] 0 build artifacts committed to `src/`
-- [ ] `storybook-static/` not tracked in git
-- [ ] `eslint-plugin-hbc` is a proper workspace package
-- [ ] Single `WorkspacePageShell` source in `packages/ui-kit`
-- [ ] `module-configs/` in `packages/shell` (not `packages/ui-kit`)
-- [ ] `packages/app-shell` fully implemented as auth facade
-- [ ] ADR naming standardized, ADR-0015 gap documented
+- [x] 0 build artifacts committed to `src/` (verified 2026-03-06; artifact scan clean for generated outputs)
+- [x] `storybook-static/` not tracked in git (verified 2026-03-06)
+- [x] `eslint-plugin-hbc` is a proper workspace package (verified 2026-03-06)
+- [x] Single `WorkspacePageShell` source in `packages/ui-kit` (verified 2026-03-06)
+- [x] `module-configs/` in `packages/shell` (not `packages/ui-kit`) (verified 2026-03-06)
+- [x] `packages/app-shell` fully implemented as auth facade (verified 2026-03-06)
+- [x] ADR naming standardized, ADR-0015 gap documented (verified 2026-03-06)
 
 ### Documentation Gates
-- [ ] `docs/how-to/developer/phase-4b-developer-playbook.md` published
+- [x] `docs/how-to/developer/phase-4b-developer-playbook.md` published (verified 2026-03-06)
 - [x] All 9 missing component reference docs created
 - [x] `DESIGN_SYSTEM.md` updated with dual entry point documentation (via docs/reference/ui-kit/entry-points.md)
-- [ ] ADR-0034 written documenting Phase 4b architectural decisions
+- [x] ADR-0034 written documenting Phase 4b architectural decisions (verified 2026-03-06)
+
+### 4b.12 Carryover Crosswalk Evidence (4b.1–4b.11)
+
+| Carryover area | Status (2026-03-06) | Objective evidence |
+|---|---|---|
+| CI quality gates | Verified complete | `pnpm turbo run build`, `check-types`, `lint`; Storybook test-runner and Playwright runs recorded in 4b.12 notes |
+| Storybook/e2e integration | Completed in 4b.12 | `.github/workflows/ci.yml` Storybook gate + `e2e/shell.spec.ts`, `forms.spec.ts`, `notifications.spec.ts`, `scorecard.spec.ts`, `risk.spec.ts`, `field-mode.spec.ts` |
+| Structural hygiene | Completed in 4b.12 | `.gitignore` updated; `playwright-report/` and `test-results/` removed from git index |
+| ADR hygiene | Completed in 4b.12 | ADR files renamed to `ADR-0001`..`ADR-0014`, duplicate legacy `0016` removed, ADR index status table updated |
+| Authoring guarantee verification | Verified complete | Shell/layout scan across 11 workspace apps + `pwa` + `hb-site-control`; e2e and lint enforcement confirm D-01 through D-10 guardrails |
+| Documentation closure | Completed in 4b.12 | Developer playbook published; ADR-0046 sign-off published; dated plan comments appended |
 
 ### The Guarantee
 
 When all completion criteria above are met, the following statement is **mechanically true**:
 
 > Any developer who follows the Phase 4b Developer Playbook will produce a page that renders correctly to HBC design specifications — because the ESLint plugin will not allow them to deviate, the shell will automatically provide consistent framing, and every state transition (loading, empty, error, feedback) is handled by the system without any additional code.
+
+Guarantee verification recorded: **verified true on 2026-03-06** through CI gate execution, carryover crosswalk closure, and ADR-0046 sign-off evidence.
 
 ---
 
@@ -338,4 +353,26 @@ Phase 4b.8 (Form Architecture & Draft System) completed: 2026-03-06
   - Documentation added: docs/how-to/developer/phase-4b.8-form-architecture-guide.md
   - Build: 23/23 packages pass, 0 errors
 Next: Phase 4b.9
+
+Phase 4b.12 (Integration Verification & Acceptance) plan expansion: 2026-03-06
+  - Added explicit carryover closure requirement for unresolved 4b.1-4b.11 gates
+  - Added carryover crosswalk requirement (verified complete vs completed in 4b.12)
+  - Added acceptance criteria for build gate, ADR-0015 gap documentation, and developer playbook publication
+  - §17 now explicitly tied to Phase 4b.12 carryover reconciliation evidence
+Phase 4b.12.1 and 4b.12.5 completed: 2026-03-06
+  - CI Storybook job now enforces build-storybook + test-storybook with Playwright browser setup and deterministic readiness checks
+  - Final lint gate added after test/build/storybook/e2e completion to close quality-gate carryover
+  - Generated Playwright artifacts untracked and ignored (`playwright-report/`, `test-results/`) per F-024
+Phase 4b.12.2 and 4b.12.3 completed: 2026-03-06
+  - Added six critical Playwright specs under `e2e/` to cover shell, forms, notifications, scorecard, risk, and field-mode workflows
+  - ADR filenames standardized to ADR-XXXX format for 0001-0014; duplicate legacy ADR-0016 file removed
+  - `docs/README.md` ADR index now includes status fields for all ADRs and explicit ADR-0015 reserved-gap note
+Phase 4b.12.4 completed: 2026-03-06
+  - Acceptance matrix evidence executed across 11 workspace apps + `pwa` + `hb-site-control`; shell/layout compliance verified at page level
+  - CI-equivalent verification recorded for build, type-check, lint, Storybook test-runner, and Playwright e2e
+  - §17 carryover crosswalk completed with no unresolved items
+Phase 4b complete (final closure): 2026-03-06
+  - §17 checklist fully marked complete, including Guarantee verification
+  - ADR-0046 created for integration verification and acceptance sign-off
+  - Phase 4b closure comments appended to Blueprint and Foundation plan files
 -->

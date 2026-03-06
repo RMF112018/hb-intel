@@ -30,7 +30,8 @@
     "build-storybook": "storybook build",
     "lint": "eslint src/ --ext .ts,.tsx",
     "analyze": "vite-bundle-visualizer",
-    "test-storybook": "test-storybook"
+    "test-storybook": "test-storybook",
+    "serve-storybook": "storybook dev --ci --port 6006 --no-open"
   },
   "dependencies": {
     "@hbc/auth": "workspace:*",
@@ -55,7 +56,8 @@
     "@hb-intel/eslint-plugin-hbc": "workspace:*",
     "storybook": "^8.6.0",
     "vite": "^6.0.0",
-    "vite-bundle-visualizer": "^1.2.0"
+    "vite-bundle-visualizer": "^1.2.0",
+    "@storybook/react": "^8.6.0"
   },
   "peerDependencies": {
     "react": "^18.0.0",
