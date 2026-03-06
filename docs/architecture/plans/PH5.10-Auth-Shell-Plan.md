@@ -65,3 +65,28 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - enables production operations through core admin workflows,
 - satisfies formal validation, audit, release, and documentation requirements,
 - and explicitly documents every deferred future expansion path so later phases can extend the platform without re-architecting the foundation.
+
+---
+
+## Phase 5.10 Progress Notes
+
+- 5.10.1 completed — HB Intel-owned access-control backend model implemented (`accessControlModel.ts`) for roles, grants, approvals, expiration metadata, review flags, and typed audit events while preserving Microsoft/SharePoint identity as input-only context — 2026-03-06.
+- 5.10.2 completed — explicit override record model implemented (`overrideRecord.ts`) with full governance fields (target user, base role reference, requested grant/restriction, reason, requester, approver, approval timestamp, expiration, renewal, emergency/review flags, active/revoked/archived) — 2026-03-06.
+- 5.10.3 completed — deterministic dependent-override drift review flagging implemented (`markDependentOverridesForRoleReview`) so base-role version changes mark overrides for review instead of silent rebasing/ignoring — 2026-03-06.
+- 5.10.4 completed — central typed auth/shell runtime configuration layer implemented (`configurationLayer.ts`) for runtime rules, redirect defaults, session windows, and policy settings with default-deny invariant validation — 2026-03-06.
+- 5.10.5 completed — package typing/exports, governance traceability updates, and ADR-0063 documentation closure completed for Phase 5.10 — 2026-03-06.
+
+## Phase 5.10 Completion Checklist
+
+- [x] §5.10 item 1 complete — HB Intel-owned data layer contracts cover roles, grants, overrides, approvals, expiration metadata, review flags, and audit records.
+- [x] §5.10 item 2 complete — Microsoft/SharePoint identity retained as input only, not system-of-record authorization truth.
+- [x] §5.10 item 3 complete — override record model includes all required governance fields and lifecycle statuses.
+- [x] §5.10 item 4 complete — base-role definition changes now flag dependent overrides for mandatory review.
+- [x] §5.10 item 5 complete — central typed configuration layer covers runtime rules, redirect defaults, session windows, and policy settings.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth` - PASS
+- `pnpm --filter @hbc/auth exec vitest run packages/auth/src/backend/accessControlModel.test.ts packages/auth/src/backend/overrideRecord.test.ts packages/auth/src/backend/configurationLayer.test.ts` - BLOCKED (workspace Vitest startup cannot resolve package-local `vite` in generated temp config).

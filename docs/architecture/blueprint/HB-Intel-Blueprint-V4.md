@@ -990,4 +990,11 @@ Phase 5.9 (Protected Feature Registration Contract) completed: 2026-03-06
   - 5.9.4 practical automated enforcement added via ESLint boundary rule `@hb-intel/hbc/require-feature-registration-contract` and app lint config integration
   - 5.9.5 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/shell`; eslint plugin tests pass (`pnpm --filter @hb-intel/eslint-plugin-hbc test`)
   - 5.9.6 ADR-0062 created: `docs/architecture/adr/ADR-0062-protected-feature-registration-contract.md`
+Phase 5.10 (Access-Control Backend and Data Model) completed: 2026-03-06
+  - 5.10.1 access-control backend model added in `packages/auth/src/backend/accessControlModel.ts` with typed base-role definitions, review metadata, status normalization, and structured audit event records (HB Intel-owned SoR)
+  - 5.10.2 override workflow model added in `packages/auth/src/backend/overrideRecord.ts` with required fields (target/base role/change/reason/requester/approver/timestamps/expiration/renewal/emergency/review/status) and guarded lifecycle transitions
+  - 5.10.3 deterministic drift review flagging implemented via `getChangedBaseRoleReferences` + `markDependentOverridesForRoleReview` to mark impacted overrides for explicit review when base roles change
+  - 5.10.4 typed central runtime/auth configuration layer added in `packages/auth/src/backend/configurationLayer.ts` (runtime rules, redirect defaults, session windows, policy settings) with Option C default-deny invariant validation
+  - 5.10.5 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`; backend vitest execution remains blocked by workspace vite-resolution issue
+  - 5.10.6 ADR-0063 created: `docs/architecture/adr/ADR-0063-access-control-backend-and-data-model.md`
 -->

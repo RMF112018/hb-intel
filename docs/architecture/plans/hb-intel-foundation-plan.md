@@ -593,4 +593,12 @@ Phase 5.9 (Protected Feature Registration Contract) completed: 2026-03-06
   - 5.9.5 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/shell`
   - 5.9.6 eslint plugin rule tests passed: `pnpm --filter @hb-intel/eslint-plugin-hbc test`
   - 5.9.7 ADR-0062 created: `docs/architecture/adr/ADR-0062-protected-feature-registration-contract.md`
+Phase 5.10 (Access-Control Backend and Data Model) completed: 2026-03-06
+  - 5.10.1 HB Intel-owned access-control backend model implemented in `packages/auth/src/backend/accessControlModel.ts` for role/grant/approval/expiration/review/audit contracts
+  - 5.10.2 explicit override record model + lifecycle transition helpers implemented in `packages/auth/src/backend/overrideRecord.ts`
+  - 5.10.3 role-definition drift detection + dependent override review flagging implemented (`getChangedBaseRoleReferences`, `markDependentOverridesForRoleReview`)
+  - 5.10.4 central typed shell/auth configuration layer implemented in `packages/auth/src/backend/configurationLayer.ts` with runtime/redirect/session/policy contracts and default-deny validation
+  - 5.10.5 package exports/types + Phase 5 documentation closure completed (PH5.10 and PH5 progress notes/checklists updated)
+  - 5.10.6 verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`
+  - 5.10.7 ADR-0063 created: `docs/architecture/adr/ADR-0063-access-control-backend-and-data-model.md`
 -->

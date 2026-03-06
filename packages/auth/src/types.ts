@@ -434,3 +434,205 @@ export interface PermissionResolutionSnapshot {
   };
   effective: EffectivePermissionSet;
 }
+
+/**
+ * Access-control lifecycle status for persisted override records.
+ */
+export type AccessControlRecordStatus = 'active' | 'revoked' | 'archived';
+
+/**
+ * Renewal state for expiring access override records.
+ */
+export type RenewalState = 'not-required' | 'pending-renewal' | 'renewed' | 'expired';
+
+/**
+ * Base-role definition persisted in HB Intel-owned authorization storage.
+ */
+export interface BaseRoleDefinition {
+  id: string;
+  name: string;
+  grants: string[];
+  version: number;
+  updatedAt: string;
+  updatedBy: string;
+}
+
+/**
+ * Input contract for creating normalized role definitions.
+ */
+export interface BaseRoleDefinitionInput {
+  id: string;
+  name: string;
+  grants: string[];
+  version: number;
+  updatedBy: string;
+  updatedAt?: string;
+}
+
+/**
+ * Diff contract identifying role-definition version changes that require
+ * dependent override review.
+ */
+export interface BaseRoleDefinitionVersionDiff {
+  roleId: string;
+  previousVersion: number | null;
+  nextVersion: number;
+}
+
+/**
+ * Override request change type for explicit grant or restriction records.
+ */
+export type AccessOverrideChangeMode = 'grant' | 'restriction';
+
+/**
+ * Requested access change payload for one override record.
+ */
+export interface AccessOverrideGrantChange {
+  mode: AccessOverrideChangeMode;
+  grants: string[];
+}
+
+/**
+ * Approval metadata for governed override workflows.
+ */
+export interface AccessOverrideApprovalMetadata {
+  state: 'pending' | 'approved' | 'rejected';
+  requestedAt: string;
+  approverId: string | null;
+  approvedAt: string | null;
+}
+
+/**
+ * Expiration and renewal metadata retained for all override records.
+ */
+export interface AccessOverrideExpirationMetadata {
+  expiresAt?: string;
+  renewalState?: RenewalState;
+}
+
+/**
+ * Review metadata used when role-definition drift requires explicit review.
+ */
+export interface AccessControlOverrideReviewMetadata {
+  reviewRequired: boolean;
+  reviewReason?: string;
+  reviewMarkedBy?: string;
+  reviewMarkedAt?: string;
+}
+
+/**
+ * HB Intel system-of-record override model for user-specific authorization
+ * exceptions.
+ */
+export interface AccessControlOverrideRecord {
+  id: string;
+  targetUserId: string;
+  baseRoleId: string;
+  requestedChange: AccessOverrideGrantChange;
+  reason: string;
+  requesterId: string;
+  approval: AccessOverrideApprovalMetadata;
+  expiration: AccessOverrideExpirationMetadata;
+  emergency: boolean;
+  review: AccessControlOverrideReviewMetadata;
+  status: AccessControlRecordStatus;
+}
+
+/**
+ * Input contract for creating an override request record.
+ */
+export interface AccessOverrideRequest {
+  id: string;
+  targetUserId: string;
+  baseRoleId: string;
+  requestedChange: AccessOverrideGrantChange;
+  reason: string;
+  requesterId: string;
+  requestedAt?: string;
+  expiresAt?: string;
+  emergency: boolean;
+  reviewRequired?: boolean;
+}
+
+/**
+ * Access-control audit event taxonomy for governance and traceability flows.
+ */
+export type AccessControlAuditEventType =
+  | 'override-requested'
+  | 'override-approved'
+  | 'override-revoked'
+  | 'override-archived'
+  | 'override-renewed'
+  | 'override-review-flagged'
+  | 'base-role-updated';
+
+/**
+ * Audit record payload for key access-control backend events.
+ */
+export interface AccessControlAuditEventRecord {
+  id: string;
+  eventType: AccessControlAuditEventType;
+  actorId: string;
+  subjectUserId: string;
+  overrideId?: string;
+  roleId?: string;
+  details?: Record<string, unknown>;
+  occurredAt: string;
+}
+
+/**
+ * Runtime rule configuration for auth/shell environment behavior.
+ */
+export interface AuthRuntimeRuleSet {
+  allowDevOverrideInProduction: boolean;
+  supportedRuntimeModes: CanonicalAuthMode[];
+}
+
+/**
+ * Redirect policy defaults used by centralized guard/shell flows.
+ */
+export interface RedirectDefaultPolicy {
+  defaultSignedInPath: string;
+  defaultSignedOutPath: string;
+  preserveIntendedRoute: boolean;
+  unsafeRouteFallbackPath: string;
+}
+
+/**
+ * Session policy windows used for restore/expiration/idle safeguards.
+ */
+export interface SessionPolicyWindowSettings {
+  safeRestoreWindowMs: number;
+  hardSessionMaxAgeMs: number;
+  idleTimeoutMs: number;
+}
+
+/**
+ * Access-control policy settings for Option C enforcement defaults.
+ */
+export interface AccessControlPolicySettings {
+  defaultDenyUnregisteredFeatures: boolean;
+  requireOverrideApproval: boolean;
+  requireReasonForOverride: boolean;
+  emergencyOverrideMaxHours: number;
+}
+
+/**
+ * Central typed auth/shell configuration contract for runtime policy loading.
+ */
+export interface ShellAuthConfiguration {
+  runtimeRules: AuthRuntimeRuleSet;
+  redirectDefaults: RedirectDefaultPolicy;
+  sessionWindows: SessionPolicyWindowSettings;
+  policySettings: AccessControlPolicySettings;
+}
+
+/**
+ * Input contract for partial configuration overrides.
+ */
+export interface ShellAuthConfigurationInput {
+  runtimeRules?: Partial<AuthRuntimeRuleSet>;
+  redirectDefaults?: Partial<RedirectDefaultPolicy>;
+  sessionWindows?: Partial<SessionPolicyWindowSettings>;
+  policySettings?: Partial<AccessControlPolicySettings>;
+}

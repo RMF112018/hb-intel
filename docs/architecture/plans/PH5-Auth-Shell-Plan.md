@@ -407,3 +407,27 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - `pnpm turbo run check-types --filter=@hbc/shell` - PASS
 
 ---
+
+## Phase 5.10 Progress Notes
+
+- 5.10.1 completed — HB Intel-owned access-control backend model implemented (`packages/auth/src/backend/accessControlModel.ts`) for base roles/grants, override approval metadata, expiration/renewal metadata, review flags, and structured audit taxonomy — 2026-03-06.
+- 5.10.2 completed — explicit override record workflow model implemented (`packages/auth/src/backend/overrideRecord.ts`) with required governance fields and lifecycle transitions (request, approve/active, renew, revoke, archive) — 2026-03-06.
+- 5.10.3 completed — dependent override review flagging implemented (`getChangedBaseRoleReferences`, `markDependentOverridesForRoleReview`) to enforce explicit post-change review on base-role definition drift — 2026-03-06.
+- 5.10.4 completed — typed central shell/auth configuration layer implemented (`packages/auth/src/backend/configurationLayer.ts`) for runtime rules, redirect defaults, session windows, and policy settings with default-deny validation invariants — 2026-03-06.
+- 5.10.5 completed — related auth package types/exports, progress documentation, and ADR-0063 completed for full Phase 5.10 governance closure — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.10)
+
+- [x] Success Criteria #5 advanced through standardized app-owned role/grant/override/audit data modeling and deterministic drift review flagging.
+- [x] Success Criteria #6 advanced through production-usable override lifecycle, approval metadata, expiration/renewal governance, and emergency guardrails.
+- [x] Success Criteria #8 advanced through centralized typed runtime/auth policy configuration with default-deny invariant enforcement.
+- [x] Success Criteria #10 advanced through Phase 5.10 documentation closure (progress notes in PH5/PH5.10 + blueprint/foundation comments, ADR-0063, and verification evidence).
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth` - PASS
+- `pnpm --filter @hbc/auth exec vitest run packages/auth/src/backend/accessControlModel.test.ts packages/auth/src/backend/overrideRecord.test.ts packages/auth/src/backend/configurationLayer.test.ts` - BLOCKED (workspace Vitest startup cannot resolve package-local `vite` in generated temp config).
+
+---

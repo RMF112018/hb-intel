@@ -61,6 +61,17 @@ export {
 
 // Dual-mode auth types (PH5.2/5.3 — canonical + compatibility runtime contract)
 export type {
+  AccessControlAuditEventRecord,
+  AccessControlAuditEventType,
+  AccessControlOverrideRecord,
+  AccessControlOverrideReviewMetadata,
+  AccessControlPolicySettings,
+  AccessControlRecordStatus,
+  AccessOverrideApprovalMetadata,
+  AccessOverrideChangeMode,
+  AccessOverrideExpirationMetadata,
+  AccessOverrideGrantChange,
+  AccessOverrideRequest,
   AdapterIdentityPayload,
   AuthBootstrapSelectorResult,
   AuthFailure,
@@ -81,6 +92,10 @@ export type {
   FeatureAccessEvaluation,
   FeaturePermissionRegistration,
   FeatureVisibilityMode,
+  AuthRuntimeRuleSet,
+  BaseRoleDefinition,
+  BaseRoleDefinitionInput,
+  BaseRoleDefinitionVersionDiff,
   IMsalConfig,
   ISpfxPageContext,
   LegacyAuthMode,
@@ -97,11 +112,38 @@ export type {
   SessionRestorePolicy,
   SessionRestoreResult,
   ShellBootstrapReadiness,
+  ShellAuthConfiguration,
+  ShellAuthConfigurationInput,
   ShellStatusTransition,
+  RedirectDefaultPolicy,
+  RenewalState,
+  SessionPolicyWindowSettings,
   StandardActionPermission,
 } from './types.js';
 export type { IAuthAdapter } from './IAuthAdapter.js';
 export { mapIdentityToAppRoles, toRoleMappingInput } from './roleMapping.js';
+
+// Access-control backend model (PH5.10 — centralized HB Intel authorization SoR)
+export {
+  createBaseRoleDefinition,
+  normalizeAccessControlStatus,
+  resolveRenewalState,
+  createReviewMetadata,
+  createAccessControlAuditEvent,
+  getChangedBaseRoleReferences,
+  createOverrideRequest,
+  approveOverrideRequest,
+  revokeOverrideRecord,
+  archiveOverrideRecord,
+  renewOverrideRecord,
+  resolveOverrideLifecycleStatus,
+  flagOverrideForReview,
+  markDependentOverridesForRoleReview,
+  DEFAULT_SHELL_AUTH_CONFIGURATION,
+  resolveShellAuthConfiguration,
+  validateShellAuthConfiguration,
+  loadShellAuthConfiguration,
+} from './backend/index.js';
 
 // Adapters (Blueprint §2b — dual-mode auth)
 export {
