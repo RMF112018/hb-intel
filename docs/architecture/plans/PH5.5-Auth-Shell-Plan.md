@@ -1,4 +1,4 @@
-# Phase 5 Development Plan – Authentication & Shell Foundation Task 1
+# Phase 5 Development Plan – Authentication & Shell Foundation Task 5
 
 **Version:** 2.0 (refined from interview-locked decisions and intended to supersede/expand the current Phase 5 plan)  
 **Purpose:** This document defines the comprehensive Phase 5 implementation plan for a production-ready HB Intel authentication and shell foundation that satisfies the dual PWA / SPFx operating model. It consolidates the architectural direction established in the current Phase 5 plan and hard-locks the additional interview decisions around runtime mode handling, shell governance, permission modeling, override administration, degraded-mode behavior, release gating, and documentation standards.  
@@ -7,29 +7,33 @@
 
 ---
 
-# Comprehensive Step-by-Step Implementation Plan
+## 5.5 Shell Composition and Core Layout Architecture
 
-## 5.1 Package and Architecture Foundation
+1. Implement one shared HB Intel shell core.
 
-1. Confirm the Phase 5 package boundaries:
-   - `@hbc/auth` owns provider abstraction, auth adapters, session normalization, auth store, permission evaluation helpers, route/authorization guards, and auth-specific hooks.
-   - `@hbc/shell` owns shell composition, shell-status derivation, navigation shell, shell layouts, degraded/recovery UI states, and shell-level stores.
+2. Environment-specific shell adapters may extend behavior only through approved extension points.
 
-2. Preserve per-feature file organization inside both packages:
-   - one file per major item
-   - `types.ts`
-   - `constants.ts`
-   - local `index.ts`
-   - JSDoc on public exports
+3. The shell must remain narrowly scoped to:
+   - bootstrap/init framing
+   - auth-aware layout composition
+   - navigation frame
+   - shell-status presentation
+   - route enforcement orchestration
+   - degraded/recovery/access-denied experience
+   - project/workspace context persistence where required by the broader shell plan
 
-3. Add/update ADRs before implementation begins so the package structure and non-negotiable boundaries are locked prior to code migration.
+4. Keep feature/business logic out of the shell unless explicitly approved as a platform concern.
 
-4. Define explicit ownership boundaries:
-   - auth provider/adapters may not directly control UI composition
-   - feature modules may not bypass the auth store, permission resolution layer, or shell registration contract
-   - SPFx-specific code must remain behind approved adapters or host integration seams
+5. Define shell modes as needed, but all must respect centralized rule enforcement.
 
-5. Update root workspace dependency rules so `@hbc/shell` depends on `@hbc/auth`, while feature packages consume auth/shell only through public exports.
+6. The shell must support role-appropriate landing behavior and safe redirect restoration.
+
+7. Sign-out must perform:
+   - auth/session clearing
+   - redirect memory clearing
+   - shell bootstrap state clearing
+   - environment artifact clearing
+   - feature cache cleanup according to documented retention tiers
 
 ---
 

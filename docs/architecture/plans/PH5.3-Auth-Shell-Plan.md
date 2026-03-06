@@ -1,4 +1,4 @@
-# Phase 5 Development Plan – Authentication & Shell Foundation Task 1
+# Phase 5 Development Plan – Authentication & Shell Foundation Task 3
 
 **Version:** 2.0 (refined from interview-locked decisions and intended to supersede/expand the current Phase 5 plan)  
 **Purpose:** This document defines the comprehensive Phase 5 implementation plan for a production-ready HB Intel authentication and shell foundation that satisfies the dual PWA / SPFx operating model. It consolidates the architectural direction established in the current Phase 5 plan and hard-locks the additional interview decisions around runtime mode handling, shell governance, permission modeling, override administration, degraded-mode behavior, release gating, and documentation standards.  
@@ -7,29 +7,33 @@
 
 ---
 
-# Comprehensive Step-by-Step Implementation Plan
+## 5.3 Central Auth / Session / Permission State
 
-## 5.1 Package and Architecture Foundation
+1. Use one central Zustand store for auth/session truth.
 
-1. Confirm the Phase 5 package boundaries:
-   - `@hbc/auth` owns provider abstraction, auth adapters, session normalization, auth store, permission evaluation helpers, route/authorization guards, and auth-specific hooks.
-   - `@hbc/shell` owns shell composition, shell-status derivation, navigation shell, shell layouts, degraded/recovery UI states, and shell-level stores.
+2. The auth store must own:
+   - current auth lifecycle phase
+   - normalized HB Intel session
+   - runtime mode
+   - restore state
+   - sign-in / sign-out / reauth actions
+   - structured error state
+   - shell bootstrap readiness flags required by guards and shell
 
-2. Preserve per-feature file organization inside both packages:
-   - one file per major item
-   - `types.ts`
-   - `constants.ts`
-   - local `index.ts`
-   - JSDoc on public exports
+3. Use typed selectors and shallow subscription patterns to prevent broad rerender cascades.
 
-3. Add/update ADRs before implementation begins so the package structure and non-negotiable boundaries are locked prior to code migration.
+4. Keep auth actions atomic and side-effect boundaries explicit.
 
-4. Define explicit ownership boundaries:
-   - auth provider/adapters may not directly control UI composition
-   - feature modules may not bypass the auth store, permission resolution layer, or shell registration contract
-   - SPFx-specific code must remain behind approved adapters or host integration seams
+5. Create a permission resolution layer adjacent to auth, but keep provider identity resolution separate from app authorization resolution.
 
-5. Update root workspace dependency rules so `@hbc/shell` depends on `@hbc/auth`, while feature packages consume auth/shell only through public exports.
+6. Permission evaluation must combine:
+   - base role grants
+   - default feature-action grants
+   - explicit per-user overrides
+   - temporary / expiring override state
+   - emergency access state where applicable
+
+7. Never allow feature modules to compute their own authorization truth outside the shared permission APIs.
 
 ---
 

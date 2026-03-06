@@ -1,4 +1,4 @@
-# Phase 5 Development Plan – Authentication & Shell Foundation Task 1
+# Phase 5 Development Plan – Authentication & Shell Foundation Task 8
 
 **Version:** 2.0 (refined from interview-locked decisions and intended to supersede/expand the current Phase 5 plan)  
 **Purpose:** This document defines the comprehensive Phase 5 implementation plan for a production-ready HB Intel authentication and shell foundation that satisfies the dual PWA / SPFx operating model. It consolidates the architectural direction established in the current Phase 5 plan and hard-locks the additional interview decisions around runtime mode handling, shell governance, permission modeling, override administration, degraded-mode behavior, release gating, and documentation standards.  
@@ -7,29 +7,37 @@
 
 ---
 
-# Comprehensive Step-by-Step Implementation Plan
+## 5.8 Guards, Hooks, Redirects, and Recovery Surfaces
 
-## 5.1 Package and Architecture Foundation
+1. Build central guards for:
+   - authenticated access
+   - role access
+   - permission access
+   - runtime/environment requirements where applicable
 
-1. Confirm the Phase 5 package boundaries:
-   - `@hbc/auth` owns provider abstraction, auth adapters, session normalization, auth store, permission evaluation helpers, route/authorization guards, and auth-specific hooks.
-   - `@hbc/shell` owns shell composition, shell-status derivation, navigation shell, shell layouts, degraded/recovery UI states, and shell-level stores.
+2. Guards must execute before protected content renders.
 
-2. Preserve per-feature file organization inside both packages:
-   - one file per major item
-   - `types.ts`
-   - `constants.ts`
-   - local `index.ts`
-   - JSDoc on public exports
+3. Provide shared hooks for:
+   - current user/session
+   - resolved runtime mode
+   - permission evaluation
+   - shell-status state
+   - degraded mode visibility rules
 
-3. Add/update ADRs before implementation begins so the package structure and non-negotiable boundaries are locked prior to code migration.
+4. Redirect handling must:
+   - capture intended destination
+   - return there when safe
+   - fall back to role landing page when not safe
 
-4. Define explicit ownership boundaries:
-   - auth provider/adapters may not directly control UI composition
-   - feature modules may not bypass the auth store, permission resolution layer, or shell registration contract
-   - SPFx-specific code must remain behind approved adapters or host integration seams
+5. Build dedicated shell surfaces for:
+   - loading/bootstrap
+   - session restore
+   - access denied
+   - expired session / reauthentication
+   - unsupported environment
+   - fatal startup failure
 
-5. Update root workspace dependency rules so `@hbc/shell` depends on `@hbc/auth`, while feature packages consume auth/shell only through public exports.
+6. Request-access flow in Phase 5 must allow simple in-app submission into the admin review queue.
 
 ---
 

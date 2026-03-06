@@ -17,15 +17,11 @@ const TABS = [
 ];
 
 test.describe('Dev Harness — Tab Navigation', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
-
   for (const tab of TABS) {
     test(`tab "${tab.label}" renders content without errors`, async ({ page }) => {
-      // The harness shell can render overlapping flyout controls; force-click keeps tab-nav
-      // regression coverage deterministic across environments.
-      await page.getByRole('tab', { name: tab.label }).click({ force: true });
+      // Phase 4b.16: the harness supports direct tab deep links for deterministic
+      // tab smoke validation without pointer-event interference from shell chrome.
+      await page.goto(`/?tab=${tab.id}`);
       const content = page.locator('.harness-content');
       await expect(content).not.toBeEmpty();
       await expect(content.locator('[data-error-boundary]')).toHaveCount(0);

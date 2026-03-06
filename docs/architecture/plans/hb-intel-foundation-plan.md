@@ -511,4 +511,11 @@ Phase 4b.15 (Form Validation Architecture Finalization / HF-007) completed: 2026
   - HbcForm primitives (TextField, Select, Checkbox) now consume centralized context in RHF mode while preserving controlled compatibility
   - useFormDraft consolidation completed: hook is consumer-facing and store remains low-level for compatibility
   - Governance closure completed: HbcForm validation story added, ADR-0042 updated, ADR-0049 created, PH4B-C HF-007 gate marked complete
+Phase 4b.16 (Developer Harness, Documentation & E2E Expansion / P3) completed: 2026-03-06
+  - Added DemoShell, DemoNavigation, and DemoLayouts in dev-harness pages with explicit WorkspacePageShell usage examples
+  - Updated workspace preview demo wiring so shell/navigation/layout demos are visible in runtime
+  - Added one WorkspacePageShell smoke spec per domain app route group (12 total) plus shared e2e helper assertions
+  - Completed remaining UI-kit component reference docs and entry-point cross-links (chart wrappers, input wrappers, toast provider/container)
+  - Finalized dual-entry-point guidance in CLAUDE.md and DESIGN_SYSTEM.md; ADR-0050 created
+  - Verification rerun completed successfully across required gates: build, check-types, lint (0 errors), Storybook test-runner, and Playwright e2e
 -->

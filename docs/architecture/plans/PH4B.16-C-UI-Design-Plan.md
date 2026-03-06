@@ -133,12 +133,12 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 - [ ] Menu & overlay contrast bug (white backgrounds) fully resolved  
 - [ ] CF-005 and HF-007 fully resolved  
 - [ ] All P2–P4 items closed  
-- [ ] 100% of workspace pages use `WorkspacePageShell` + named layout  
+- [x] 100% of workspace pages use `WorkspacePageShell` + named layout — validated by workspace page audit and 4b.16 per-domain shell smoke coverage (2026-03-06)  
 - [ ] 0 direct Fluent UI imports or token violations  
 
 ### Documentation & Polish
 - [ ] Developer Playbook updated with theme rules  
-- [ ] All reference docs complete  
+- [x] All reference docs complete — UI-kit component reference audit closed and missing markdown files added (2026-03-06)  
 - [ ] Bundle-size reporting enforced in CI  
 
 **Final Status:** Production-ready for Phase 5 deployment.
@@ -146,3 +146,11 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 ---
 
 This plan is ready to be saved as `docs/architecture/plans/PH4B-UI-Design-Post-Audit-Remediation-Plan.md`. All tasks are fully scoped, estimated, and include clear acceptance criteria and implementation steps matching the style of the existing PH4B.1–PH4B.12 plans. The menu contrast issue has been elevated to the first P1 task (4b.13) as it blocks visual consistency in the development environment.
+
+## 12. Progress Notes
+
+- 4b.16 completed — dev-harness demo expansion delivered with `DemoShell`, `DemoNavigation`, and `DemoLayouts` pages demonstrating `WorkspacePageShell` state, navigation continuity, and named layout usage (P3 traceability) — 2026-03-06.
+- 4b.16 completed — Playwright P3 expansion delivered with one WorkspacePageShell smoke spec per domain app (12 total) and shared assertion helpers for consistent shell verification — 2026-03-06.
+- 4b.16 completed — reference documentation audit finalized; missing chart/input/toast component references added and `entry-points.md` cross-links updated — 2026-03-06.
+- 4b.16 governance completed — `CLAUDE.md` and `DESIGN_SYSTEM.md` dual-entry-point guidance finalized and ADR-0050 created with verification evidence — 2026-03-06.
+- 4b.16 verification completed — full gate rerun passed: build, check-types, lint (0 errors), Storybook test-runner, and Playwright e2e with per-domain shell smokes — 2026-03-06.

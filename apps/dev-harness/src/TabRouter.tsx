@@ -60,6 +60,36 @@ const TAB_TO_WORKSPACE: Record<string, string> = {
   admin: 'admin',
 };
 
+const VALID_TAB_IDS = new Set<TabId>(TABS.map((tab) => tab.id));
+
+/**
+ * Allow deterministic harness deep links (`/?tab=<id>`) for dev QA and e2e.
+ * This keeps tab-based verification stable even when shell chrome overlays
+ * can intercept pointer events during automated clicks.
+ */
+function getInitialTabFromLocation(): TabId {
+  if (typeof window === 'undefined') {
+    return 'pwa';
+  }
+
+  const tabParam = new URLSearchParams(window.location.search).get('tab');
+  if (tabParam && VALID_TAB_IDS.has(tabParam as TabId)) {
+    return tabParam as TabId;
+  }
+
+  return 'pwa';
+}
+
+function syncTabToLocation(tabId: TabId): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const nextUrl = new URL(window.location.href);
+  nextUrl.searchParams.set('tab', tabId);
+  window.history.replaceState({}, '', nextUrl);
+}
+
 function renderTab(activeTab: TabId) {
   if (activeTab === 'pwa') return <PwaPreview />;
   if (activeTab === 'site-control') return <SiteControlPreview />;
@@ -69,10 +99,12 @@ function renderTab(activeTab: TabId) {
 }
 
 export function TabRouter() {
-  const [activeTab, setActiveTab] = useState<TabId>('pwa');
+  const [activeTab, setActiveTab] = useState<TabId>(() => getInitialTabFromLocation());
 
   const onTabSelect = (_: unknown, data: SelectTabData) => {
-    setActiveTab(data.value as TabId);
+    const nextTab = data.value as TabId;
+    setActiveTab(nextTab);
+    syncTabToLocation(nextTab);
   };
 
   return (

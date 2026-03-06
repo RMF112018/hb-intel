@@ -8,6 +8,9 @@ import { useProjectStore } from '@hbc/shell';
 import { DemoDataGrid } from './DemoDataGrid.js';
 import { DemoCharts } from './DemoCharts.js';
 import { DemoForms } from './DemoForms.js';
+import { DemoShell } from './DemoShell.js';
+import { DemoNavigation } from './DemoNavigation.js';
+import { DemoLayouts } from './DemoLayouts.js';
 
 const WORKSPACE_LABELS: Record<string, string> = {
   'project-hub': 'Project Hub',
@@ -26,18 +29,22 @@ const WORKSPACE_LABELS: Record<string, string> = {
   'site-control': 'HB Site Control',
 };
 
-/** Show different demo components based on workspace to exercise different ui-kit components. */
-const WORKSPACE_DEMOS: Record<string, ('grid' | 'charts' | 'forms')[]> = {
-  'project-hub': ['grid', 'charts'],
-  accounting: ['grid'],
-  estimating: ['grid', 'charts'],
-  scheduling: ['grid'],
-  'business-development': ['grid'],
-  leadership: ['charts'],
-  pmp: ['charts', 'forms'],
-  admin: ['forms'],
-  compliance: ['forms'],
-  risk: ['charts'],
+/**
+ * Show different demo components by workspace so phase-level behavior can be
+ * validated in one harness surface without requiring route-specific fixtures.
+ */
+const WORKSPACE_DEMOS: Record<string, Array<'grid' | 'charts' | 'forms' | 'shell' | 'navigation' | 'layouts'>> = {
+  'project-hub': ['grid', 'charts', 'shell', 'navigation', 'layouts'],
+  accounting: ['grid', 'shell'],
+  estimating: ['grid', 'charts', 'layouts'],
+  scheduling: ['grid', 'navigation'],
+  'business-development': ['grid', 'navigation'],
+  leadership: ['charts', 'shell'],
+  pmp: ['charts', 'forms', 'layouts'],
+  admin: ['forms', 'shell', 'navigation', 'layouts'],
+  compliance: ['forms', 'shell'],
+  risk: ['charts', 'navigation'],
+  'site-control': ['shell', 'layouts'],
 };
 
 interface WorkspacePlaceholderProps {
@@ -77,6 +84,9 @@ export function WorkspacePlaceholder({ workspaceId }: WorkspacePlaceholderProps)
         {demos.includes('grid') && <DemoDataGrid />}
         {demos.includes('charts') && <DemoCharts />}
         {demos.includes('forms') && <DemoForms />}
+        {demos.includes('shell') && <DemoShell />}
+        {demos.includes('navigation') && <DemoNavigation />}
+        {demos.includes('layouts') && <DemoLayouts />}
       </div>
     </div>
   );

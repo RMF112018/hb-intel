@@ -156,3 +156,34 @@ src/
 - Re-export from `index.tsx`
 - Keep types in `types.ts` for clean imports
 - Stories file name matches component directory name
+
+---
+
+## 11. Dual Entry-Point Rules (Final)
+
+To keep runtime bundles predictable, choose the narrowest entry point that satisfies the feature:
+
+### `@hbc/ui-kit` (full)
+- Use for PWA pages, dev-harness, and rich workspace UI where full component access is required.
+- Includes heavy dependencies (charts/tables/etc.) and should be treated as the comprehensive entry point.
+
+### `@hbc/ui-kit/app-shell` (lean shell)
+- Use for SPFx shell-chrome scenarios and other constrained bundle surfaces.
+- Includes shell-facing exports without the full component payload.
+
+### `@hbc/ui-kit/theme`
+- Use when only theme tokens/hooks are needed.
+- Prevents accidental component/library payload in utility packages.
+
+### `@hbc/ui-kit/icons`
+- Use when only icon components are needed.
+
+### Anti-patterns (prohibited)
+- Importing full `@hbc/ui-kit` into shell-only SPFx contexts where `@hbc/ui-kit/app-shell` is sufficient.
+- Pulling component exports via `@hbc/ui-kit` when the consuming module only requires `theme` or `icons`.
+- Mixing entry-point strategies arbitrarily within the same feature without clear rationale.
+
+### Migration guidance
+- Existing full-entry imports can remain if they rely on non-shell component families.
+- For SPFx and shell-only consumers, migrate imports incrementally to `/app-shell` and validate with lint/build/e2e.
+- Keep `docs/reference/ui-kit/entry-points.md` aligned whenever entry-point behavior changes.

@@ -1,4 +1,4 @@
-# Phase 5 Development Plan – Authentication & Shell Foundation Task 1
+# Phase 5 Development Plan – Authentication & Shell Foundation Task 2
 
 **Version:** 2.0 (refined from interview-locked decisions and intended to supersede/expand the current Phase 5 plan)  
 **Purpose:** This document defines the comprehensive Phase 5 implementation plan for a production-ready HB Intel authentication and shell foundation that satisfies the dual PWA / SPFx operating model. It consolidates the architectural direction established in the current Phase 5 plan and hard-locks the additional interview decisions around runtime mode handling, shell governance, permission modeling, override administration, degraded-mode behavior, release gating, and documentation standards.  
@@ -7,29 +7,50 @@
 
 ---
 
-# Comprehensive Step-by-Step Implementation Plan
+## 5.2 Dual-Mode Authentication Architecture
 
-## 5.1 Package and Architecture Foundation
+1. Implement a typed auth provider abstraction for current Phase 5 needs:
+   - do not over-generalize for speculative future providers
+   - require environment-specific adapters to conform to one internal contract
 
-1. Confirm the Phase 5 package boundaries:
-   - `@hbc/auth` owns provider abstraction, auth adapters, session normalization, auth store, permission evaluation helpers, route/authorization guards, and auth-specific hooks.
-   - `@hbc/shell` owns shell composition, shell-status derivation, navigation shell, shell layouts, degraded/recovery UI states, and shell-level stores.
+2. Support these runtime modes:
+   - `pwa-msal`
+   - `spfx-context`
+   - `mock`
+   - `dev-override`
 
-2. Preserve per-feature file organization inside both packages:
-   - one file per major item
-   - `types.ts`
-   - `constants.ts`
-   - local `index.ts`
-   - JSDoc on public exports
+3. Production runtime mode must be detected automatically.
 
-3. Add/update ADRs before implementation begins so the package structure and non-negotiable boundaries are locked prior to code migration.
+4. Non-production mode override must be explicit, controlled, documented, and impossible to enable accidentally in production builds.
 
-4. Define explicit ownership boundaries:
-   - auth provider/adapters may not directly control UI composition
-   - feature modules may not bypass the auth store, permission resolution layer, or shell registration contract
-   - SPFx-specific code must remain behind approved adapters or host integration seams
+5. Authentication adapters must:
+   - acquire identity from the appropriate runtime source
+   - normalize into the HB Intel session contract
+   - preserve raw environment/provider context only in the approved supplemental structure
+   - surface structured failure types
 
-5. Update root workspace dependency rules so `@hbc/shell` depends on `@hbc/auth`, while feature packages consume auth/shell only through public exports.
+6. Session normalization must produce a standard contract containing at minimum:
+   - user identity
+   - provider identity reference
+   - resolved HB Intel role(s)
+   - permission grants/overrides summary
+   - runtime mode
+   - session timestamps and restore metadata
+   - optional raw environment context reference
+
+7. Session restoration must:
+   - restore within the defined safe policy window
+   - revalidate as needed
+   - trigger reauthentication when expired or invalid
+   - surface shell-status transitions during restore
+
+8. Authentication failure handling must classify at least:
+   - missing context
+   - expired session
+   - unsupported runtime
+   - access validation issue
+   - provider bootstrap failure
+   - unknown fatal initialization failure
 
 ---
 

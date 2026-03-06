@@ -86,6 +86,20 @@ After **every phase or major task**, the agent must:
 ## 6. Build System & Commands
 (unchanged from v1.1)
 
+## 6.1 UI Kit Dual Entry-Point Guidance (Final)
+
+When implementing UI in this repository, select imports by runtime target:
+
+- `@hbc/ui-kit` — full component library for PWA, dev-harness, and non-constrained bundles.
+- `@hbc/ui-kit/app-shell` — shell-only exports for constrained contexts (notably SPFx webparts).
+- `@hbc/ui-kit/theme` — token/theme-only imports for styling without component payload.
+- `@hbc/ui-kit/icons` — icon-only imports where components are unnecessary.
+
+Rules:
+- Do not import full `@hbc/ui-kit` into SPFx shell-only surfaces when `/app-shell` satisfies the use case.
+- Prefer the narrowest entry point that meets requirements to preserve bundle budgets.
+- Keep entry-point usage consistent with `docs/reference/ui-kit/entry-points.md` and `packages/ui-kit/DESIGN_SYSTEM.md`.
+
 ## 7. Common Pitfalls – Automatic Rejection
 (unchanged from v1.1 plus new one): Failing to create or update documentation in the correct Diátaxis folder.
 

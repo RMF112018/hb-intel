@@ -118,13 +118,14 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 - [x] Menu & overlay contrast bug (white backgrounds) fully resolved — verified across Project Picker, User Menu, Toolbox flyout, and Command Palette in light + dark/Field Mode (2026-03-06)  
 - [x] CF-005 navigation active state synchronization resolved — `navStore` now subscribes to TanStack Router history and drives route-authoritative `activeWorkspace`/`activeItemId` updates for deep links and browser back/forward (2026-03-06)  
 - [x] HF-007 form validation architecture finalization resolved — `HbcForm` now exposes centralized RHF + zod validation context, `HbcForm` primitives run in dual-mode context validation, draft APIs consolidated around `useFormDraft`, and ADR-0049 published (2026-03-06)  
+- [x] P3 Developer Harness / Documentation / E2E expansion complete — DemoShell/DemoNavigation/DemoLayouts added, per-domain WorkspacePageShell smoke specs added, and ADR-0050 published (2026-03-06)
 - [ ] All P2–P4 items closed  
-- [ ] 100% of workspace pages use `WorkspacePageShell` + named layout  
+- [x] 100% of workspace pages use `WorkspacePageShell` + named layout — validated by route/component audit and per-domain shell smoke coverage refresh (2026-03-06)  
 - [ ] 0 direct Fluent UI imports or token violations  
 
 ### Documentation & Polish
 - [ ] Developer Playbook updated with theme rules  
-- [ ] All reference docs complete  
+- [x] All reference docs complete — component reference audit closed with missing chart/input/toast references added and cross-links updated (2026-03-06)  
 - [ ] Bundle-size reporting enforced in CI  
 
 **Final Status:** Production-ready for Phase 5 deployment.
@@ -151,3 +152,8 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 - 4b.15 completed — `HbcTextField`, `HbcSelect`, and `HbcCheckbox` now enforce dual-mode centralized validation via `name` + context while preserving controlled backward compatibility paths — 2026-03-06.
 - 4b.15 completed — draft persistence finalized: `useFormDraft` is the consumer-facing API with RHF-aligned helpers, `useFormDraftStore` retained as low-level state for compatibility — 2026-03-06.
 - 4b.15 governance completed — `HbcForm.stories.tsx` schema-validation + draft example added, ADR-0042 updated, ADR-0049 created, and HF-007 remediation gate marked complete — 2026-03-06.
+- 4b.16 completed — dev-harness P3 demo pages added (`DemoShell`, `DemoNavigation`, `DemoLayouts`) and wired into workspace preview flows for live shell/layout validation — 2026-03-06.
+- 4b.16 completed — per-domain Playwright smoke coverage added (12 domain specs) using shared WorkspacePageShell assertions to verify shell frame rendering and route stability — 2026-03-06.
+- 4b.16 completed — UI-kit reference documentation audit finalized; missing chart/input/toast component references created and entry-point cross-links updated — 2026-03-06.
+- 4b.16 governance completed — `CLAUDE.md` and `DESIGN_SYSTEM.md` dual-entry-point guidance finalized, PH4B-C remediation gates updated, and ADR-0050 created — 2026-03-06.
+- 4b.16 verification completed — `pnpm turbo run build`, `pnpm turbo run check-types`, `pnpm turbo run lint` (0 errors), Storybook build/test-runner, and `pnpm e2e` all passed for P3 closure evidence — 2026-03-06.

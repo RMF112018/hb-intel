@@ -1,4 +1,4 @@
-# Phase 5 Development Plan – Authentication & Shell Foundation Task 1
+# Phase 5 Development Plan – Authentication & Shell Foundation Task 4
 
 **Version:** 2.0 (refined from interview-locked decisions and intended to supersede/expand the current Phase 5 plan)  
 **Purpose:** This document defines the comprehensive Phase 5 implementation plan for a production-ready HB Intel authentication and shell foundation that satisfies the dual PWA / SPFx operating model. It consolidates the architectural direction established in the current Phase 5 plan and hard-locks the additional interview decisions around runtime mode handling, shell governance, permission modeling, override administration, degraded-mode behavior, release gating, and documentation standards.  
@@ -7,29 +7,34 @@
 
 ---
 
-# Comprehensive Step-by-Step Implementation Plan
+## 5.4 Role Mapping and Authorization Governance
 
-## 5.1 Package and Architecture Foundation
+1. Implement an HB Intel role-mapping layer that converts provider/context identity into app roles.
 
-1. Confirm the Phase 5 package boundaries:
-   - `@hbc/auth` owns provider abstraction, auth adapters, session normalization, auth store, permission evaluation helpers, route/authorization guards, and auth-specific hooks.
-   - `@hbc/shell` owns shell composition, shell-status derivation, navigation shell, shell layouts, degraded/recovery UI states, and shell-level stores.
+2. Role mapping must not rely on raw provider group semantics directly in feature code.
 
-2. Preserve per-feature file organization inside both packages:
-   - one file per major item
-   - `types.ts`
-   - `constants.ts`
-   - local `index.ts`
-   - JSDoc on public exports
+3. Define a standard action permission vocabulary for Phase 5, such as:
+   - `view`
+   - `create`
+   - `edit`
+   - `approve`
+   - `admin`
 
-3. Add/update ADRs before implementation begins so the package structure and non-negotiable boundaries are locked prior to code migration.
+4. Feature permissions in Phase 5 must use:
+   - feature-level access
+   - standard action-level grants
+   - documented future seam for deeper custom feature-specific grammars
 
-4. Define explicit ownership boundaries:
-   - auth provider/adapters may not directly control UI composition
-   - feature modules may not bypass the auth store, permission resolution layer, or shell registration contract
-   - SPFx-specific code must remain behind approved adapters or host integration seams
+5. Default-deny must apply to all new protected features until explicit role mappings exist.
 
-5. Update root workspace dependency rules so `@hbc/shell` depends on `@hbc/auth`, while feature packages consume auth/shell only through public exports.
+6. Restricted feature visibility rules must support:
+   - hidden by default
+   - selectively locked/discoverable presentation for strategic capabilities
+
+7. Direct access to unauthorized pages must render a structured access-denied experience with:
+   - plain-language explanation
+   - safe navigation options
+   - optional request-access entry point
 
 ---
 

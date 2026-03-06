@@ -910,4 +910,11 @@ Phase 4b.15 (Form Validation Architecture Finalization / HF-007) completed: 2026
   - HbcTextField, HbcSelect, and HbcCheckbox now run in dual-mode (RHF `name` path + controlled compatibility fallback)
   - Draft consolidation finalized: useFormDraft is consumer-facing with RHF-aligned helpers; useFormDraftStore retained as low-level state
   - Governance/docs closure: HbcForm schema validation story added, ADR-0042 updated, ADR-0049 created, HF-007 remediation gate marked complete
+Phase 4b.16 (Developer Harness, Documentation & E2E Expansion / P3) completed: 2026-03-06
+  - Dev-harness expanded with DemoShell, DemoNavigation, and DemoLayouts pages to demonstrate WorkspacePageShell state, navigation, and layout contracts
+  - WorkspacePlaceholder wiring updated so new demos are reachable in runtime across workspace previews
+  - Per-domain WorkspacePageShell smoke coverage added (12 domain specs) with shared Playwright assertion helper
+  - UI-kit reference audit closed with new docs for bar/donut/line chart wrappers, text area/rich text editor, and toast provider/container
+  - CLAUDE.md + DESIGN_SYSTEM.md dual-entry-point guidance finalized; ADR-0050 published and PH4B-C remediation gates updated
+  - Final verification rerun passed: `pnpm turbo run build`, `pnpm turbo run check-types`, `pnpm turbo run lint` (0 errors), Storybook test-runner, and `pnpm e2e`
 -->

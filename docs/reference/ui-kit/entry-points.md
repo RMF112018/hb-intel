@@ -65,3 +65,9 @@ The `/theme` and `/icons` entry points allow granular imports for packages that 
 ```
 
 The `sideEffects: false` flag enables bundlers to tree-shake unused exports from any entry point.
+
+## Related References
+
+- [HbcChart](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcChart.md), [HbcBarChart](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcBarChart.md), [HbcDonutChart](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcDonutChart.md), [HbcLineChart](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcLineChart.md)
+- [HbcInput](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcInput.md), [HbcTextArea](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcTextArea.md), [HbcRichTextEditor](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcRichTextEditor.md)
+- [HbcToast](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcToast.md), [HbcToastProvider](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcToastProvider.md), [HbcToastContainer](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcToastContainer.md)

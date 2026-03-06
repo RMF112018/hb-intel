@@ -70,6 +70,46 @@ html, body, #root {
   gap: 24px;
 }
 
+.harness-demo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--colorNeutralStroke2);
+  border-radius: 8px;
+  background: var(--colorNeutralBackground1);
+}
+
+.harness-demo-copy {
+  color: var(--colorNeutralForeground3);
+}
+
+.harness-demo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.harness-demo-controls button {
+  border: 1px solid var(--colorNeutralStroke1);
+  background: var(--colorNeutralBackground2);
+  color: var(--colorNeutralForeground1);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.harness-demo-controls button:hover {
+  background: var(--colorNeutralBackground3);
+}
+
+.harness-demo-surface {
+  padding: 12px;
+  border: 1px dashed var(--colorNeutralStroke2);
+  border-radius: 6px;
+  background: var(--colorNeutralBackground2);
+}
+
 .harness-section-title {
   font-size: 1rem;
   font-weight: 600;
