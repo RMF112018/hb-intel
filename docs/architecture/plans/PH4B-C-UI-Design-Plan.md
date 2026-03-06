@@ -116,7 +116,8 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 ### Remediation Gates
 - [x] System theme awareness bug resolved (respects OS `prefers-color-scheme`) — dynamic theme resolution now uses OS preference in office mode and forces field theme in Field Mode (D-13 verified on 2026-03-06)  
 - [x] Menu & overlay contrast bug (white backgrounds) fully resolved — verified across Project Picker, User Menu, Toolbox flyout, and Command Palette in light + dark/Field Mode (2026-03-06)  
-- [ ] CF-005 and HF-007 fully resolved  
+- [x] CF-005 navigation active state synchronization resolved — `navStore` now subscribes to TanStack Router history and drives route-authoritative `activeWorkspace`/`activeItemId` updates for deep links and browser back/forward (2026-03-06)  
+- [ ] HF-007 form validation architecture finalization pending  
 - [ ] All P2–P4 items closed  
 - [ ] 100% of workspace pages use `WorkspacePageShell` + named layout  
 - [ ] 0 direct Fluent UI imports or token violations  
@@ -142,3 +143,7 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 - 4b.13 implementation completed — all target overlays now derive surfaces/borders/text from active theme context using `useHbcTheme()` + mode-aware tokens; hard-coded white overlay backgrounds removed — 2026-03-06.  
 - 4b.13 Storybook coverage completed — `HbcAppShell.stories.tsx` now includes deterministic dark-theme and Field Mode overlay verification variants — 2026-03-06.  
 - 4b.13 governance completed — remediation gate updated, ADR-0047 authored, and blueprint/foundation progress logs updated with acceptance evidence — 2026-03-06.
+- 4b.14 audit completed — confirmed manual active item derivation in PWA root route and missing router subscription lifecycle in `packages/shell/src/stores/navStore.ts` (CF-005 / D-04 traceability) — 2026-03-06.
+- 4b.14 implementation completed — added `resolveNavRouteState`, `syncFromPathname`, and `startNavSync`/`stopNavSync` lifecycle controls in `navStore`; active state now derives automatically from TanStack Router location changes (deep link + nested route + back/forward support) — 2026-03-06.
+- 4b.14 consumer wiring completed — `HbcAppShell` now consumes synchronized store active state by default, `WorkspacePageShell` now reads synchronized workspace context, and PWA root route initializes router history sync on mount — 2026-03-06.
+- 4b.14 verification and governance completed — unit test + Storybook route-sync scenario added, gates executed (`build`, `lint`, `check-types`, Storybook test-runner, `pnpm e2e`), remediation gate updated, and ADR-0048 published — 2026-03-06.

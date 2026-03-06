@@ -13,7 +13,7 @@
 import * as React from 'react';
 import { createContext } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import { useProjectStore } from '@hbc/shell';
+import { useNavStore, useProjectStore } from '@hbc/shell';
 import { HbcBreadcrumbs } from '../HbcBreadcrumbs/index.js';
 import { HbcCommandBar } from '../HbcCommandBar/index.js';
 import { HbcBanner } from '../HbcBanner/index.js';
@@ -263,6 +263,7 @@ export function WorkspacePageShell({
   children,
 }: WorkspacePageShellProps): React.ReactNode {
   const activeProject = useProjectStore((s) => s.activeProject);
+  const activeWorkspace = useNavStore((s) => s.activeWorkspace);
   const styles = useStyles();
   const { isFieldMode, mode } = useFieldMode();
 
@@ -320,6 +321,7 @@ export function WorkspacePageShell({
       <div
         data-hbc-ui="workspace-page-shell"
         data-layout={layout}
+        data-active-workspace={activeWorkspace ?? undefined}
         className={styles.root}
       >
         {/* Breadcrumbs */}

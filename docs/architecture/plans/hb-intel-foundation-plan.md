@@ -499,4 +499,10 @@ Phase 4b.13 follow-up (System Theme Awareness / D-13) completed: 2026-03-06
   - `useFieldMode` internal `useAppTheme` now resolves OS `prefers-color-scheme` in office mode and exposes `resolvedTheme`
   - Root `FluentProvider` usage updated across PWA/SPFx/hb-site-control plus HbcAppShell to consume hook-driven dynamic theme
   - Storybook + runtime verification completed for light/dark/field behavior; ADR-0047 addendum published with acceptance evidence
+Phase 4b.14 (Navigation & Active State Synchronization / CF-005) completed: 2026-03-06
+  - Added route-sync lifecycle APIs in `packages/shell/src/stores/navStore.ts`: `resolveNavRouteState`, `syncFromPathname`, `startNavSync`, `stopNavSync`
+  - PWA TanStack root route now starts/stops router-history sync, making location changes authoritative for nav active state
+  - `HbcAppShell` now defaults active item rendering to synchronized store state; `WorkspacePageShell` reads synchronized workspace metadata
+  - Added regression coverage: `packages/shell/src/stores/navStore.test.ts` + `HbcAppShell.stories.tsx` back/forward synchronization scenario
+  - Verification: `pnpm turbo run build`, `pnpm turbo run lint`, `pnpm turbo run check-types`, Storybook build/test-runner, and `pnpm e2e` all pass (lint warnings remain pre-existing)
 -->

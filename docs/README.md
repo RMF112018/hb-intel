@@ -75,6 +75,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0045 | Accepted | [ADR-0045-component-consumption-enforcement.md](./architecture/adr/ADR-0045-component-consumption-enforcement.md) |
 | ADR-0046 | Accepted | [ADR-0046-integration-verification-and-acceptance.md](./architecture/adr/ADR-0046-integration-verification-and-acceptance.md) |
 | ADR-0047 | Accepted | [ADR-0047-menu-and-overlay-theme-adaptation.md](./architecture/adr/ADR-0047-menu-and-overlay-theme-adaptation.md) |
+| ADR-0048 | Accepted | [ADR-0048-navigation-and-active-state-synchronization.md](./architecture/adr/ADR-0048-navigation-and-active-state-synchronization.md) |
 
 ## Conventions
 

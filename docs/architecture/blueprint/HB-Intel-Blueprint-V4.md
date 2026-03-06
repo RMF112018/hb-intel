@@ -899,4 +899,9 @@ Phase 4b.13 follow-up (System Theme Awareness / D-13) completed: 2026-03-06
   - `useFieldMode` internal `useAppTheme` now resolves `light`/`dark` from OS preference when Field Mode is off and returns provider-ready `resolvedTheme`
   - HbcAppShell + root app providers switched from hard-coded light theme to dynamic `resolvedTheme` consumption
   - Storybook HbcAppShell variants now include deterministic light/dark/field simulation; ADR-0047 addendum records D-13 closure evidence
+Phase 4b.14 (Navigation & Active State Synchronization / CF-005) completed: 2026-03-06
+  - `navStore` now owns route-authoritative active state via `resolveNavRouteState`, `syncFromPathname`, and `startNavSync`/`stopNavSync` lifecycle APIs
+  - PWA root route now initializes TanStack `router.history` subscription to synchronize nav state for deep links and browser back/forward transitions
+  - HbcAppShell consumes store-synchronized `activeItemId` by default; WorkspacePageShell now reads synchronized workspace context
+  - Verification: shell unit test coverage added for initial sync/route changes/back-forward/unsubscribe cleanup; Storybook route-sync scenario added; ADR-0048 published
 -->

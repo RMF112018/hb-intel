@@ -7,6 +7,7 @@
 import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { FluentProvider } from '@fluentui/react-components';
+import { useNavStore } from '@hbc/shell';
 import { TRANSITION_NORMAL } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { HbcConnectivityBar } from './HbcConnectivityBar.js';
@@ -81,9 +82,12 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   const { isExpanded, isMobile } = useSidebarState();
   const connectivityStatus = useOnlineStatus();
   const { mode: appMode, resolvedTheme } = useFieldMode();
+  const syncedActiveItemId = useNavStore((s) => s.activeItemId);
   const [isFocusModeActive, setIsFocusModeActive] = React.useState(false);
   const styles = useStyles();
   const shellOffset = connectivityStatus === 'online' ? 58 : 60;
+  // D-04: Route-derived nav state in navStore is authoritative when explicit prop is not supplied.
+  const resolvedActiveItemId = activeItemId ?? syncedActiveItemId;
 
   // Listen for Focus Mode CustomEvent from CreateUpdateLayout
   React.useEffect(() => {
@@ -128,7 +132,7 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
         <HbcConnectivityBar />
         <HbcHeader user={user} onSignOut={onSignOut} />
         {showSidebar && (
-          <HbcSidebar groups={sidebarGroups} activeItemId={activeItemId} onNavigate={onNavigate} />
+          <HbcSidebar groups={sidebarGroups} activeItemId={resolvedActiveItemId} onNavigate={onNavigate} />
         )}
         {/* Focus Mode overlay */}
         <div
@@ -148,7 +152,7 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
         {showBottomNav && (
           <HbcBottomNav
             items={bottomNavItems}
-            activeId={activeItemId}
+            activeId={resolvedActiveItemId}
             onNavigate={onNavigate}
           />
         )}

@@ -145,3 +145,10 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 ---
 
 This plan is ready to be saved as `docs/architecture/plans/PH4B-UI-Design-Post-Audit-Remediation-Plan.md`. All tasks are fully scoped, estimated, and include clear acceptance criteria and implementation steps matching the style of the existing PH4B.1–PH4B.12 plans. The menu contrast issue has been elevated to the first P1 task (4b.13) as it blocks visual consistency in the development environment.
+
+## 12. Progress Notes
+
+- 4b.14 audit completed — identified D-04 drift in PWA shell where active item was derived ad hoc in root route and `navStore` lacked router subscription lifecycle controls for browser back/forward synchronization — 2026-03-06.
+- 4b.14 navStore synchronization completed — `packages/shell/src/stores/navStore.ts` now exposes `resolveNavRouteState`, `syncFromPathname`, and `startNavSync`/`stopNavSync` APIs with deterministic pathname mapping and cleanup guarantees for HMR/tests — 2026-03-06.
+- 4b.14 consumer wiring completed — `HbcAppShell` consumes synchronized store `activeItemId` by default, `WorkspacePageShell` now reads synchronized workspace context, and `apps/pwa/src/router/root-route.tsx` initializes TanStack Router history sync on mount — 2026-03-06.
+- 4b.14 verification and closure completed — regression test added (`navStore.test.ts`), Storybook back/forward sync story added, and verification gates passed (`pnpm turbo run build`, `pnpm turbo run lint`, `pnpm turbo run check-types`, Storybook build/test-runner, `pnpm e2e`) with ADR-0048 published — 2026-03-06.

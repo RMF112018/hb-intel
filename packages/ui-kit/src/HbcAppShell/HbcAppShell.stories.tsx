@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { useNavStore, type RouterHistoryLike } from '@hbc/shell';
 import { HbcAppShell } from './HbcAppShell.js';
 import { Home, BudgetLine, DrawingSheet, RFI, Submittal, Settings } from '../icons/index.js';
 import type { SidebarNavGroup, ShellUser } from './types.js';
@@ -37,6 +38,98 @@ const mockGroups: SidebarNavGroup[] = [
     ],
   },
 ];
+
+const routeSyncGroups: SidebarNavGroup[] = [
+  {
+    id: 'project-hub',
+    label: 'Project Hub',
+    items: [
+      { id: 'portfolio', label: 'Portfolio', icon: <Home size="md" />, href: '/project-hub/portfolio' },
+      { id: 'recent', label: 'Recent', icon: <DrawingSheet size="md" />, href: '/project-hub/recent' },
+    ],
+  },
+  {
+    id: 'accounting',
+    label: 'Accounting',
+    items: [
+      { id: 'overview', label: 'Overview', icon: <BudgetLine size="md" />, href: '/accounting/overview' },
+      { id: 'budgets', label: 'Budgets', icon: <BudgetLine size="md" />, href: '/accounting/budgets' },
+      { id: 'invoices', label: 'Invoices', icon: <BudgetLine size="md" />, href: '/accounting/invoices' },
+    ],
+  },
+];
+
+class StoryNavHistory implements RouterHistoryLike {
+  location: { pathname: string };
+
+  private listeners = new Set<() => void>();
+
+  constructor(initialPathname: string) {
+    this.location = { pathname: initialPathname };
+  }
+
+  subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  push(pathname: string): void {
+    this.location = { pathname };
+    for (const listener of this.listeners) listener();
+  }
+}
+
+const navDemoHistory = new StoryNavHistory('/project-hub/portfolio');
+const navDemoStack = ['/project-hub/portfolio', '/accounting/overview', '/accounting/invoices'];
+
+function RouteSyncDemo(): React.ReactNode {
+  const [index, setIndex] = React.useState(0);
+  const activeWorkspace = useNavStore((s) => s.activeWorkspace);
+  const activeItemId = useNavStore((s) => s.activeItemId);
+  const startNavSync = useNavStore((s) => s.startNavSync);
+  const stopNavSync = useNavStore((s) => s.stopNavSync);
+
+  React.useEffect(() => {
+    navDemoHistory.push(navDemoStack[0]);
+    startNavSync(navDemoHistory);
+    return () => stopNavSync();
+  }, [startNavSync, stopNavSync]);
+
+  const goToIndex = (nextIndex: number) => {
+    const boundedIndex = Math.max(0, Math.min(nextIndex, navDemoStack.length - 1));
+    setIndex(boundedIndex);
+    navDemoHistory.push(navDemoStack[boundedIndex]);
+  };
+
+  return (
+    <div style={{ display: 'grid', gap: '12px' }}>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button type="button" onClick={() => goToIndex(index - 1)}>Back</button>
+        <button type="button" onClick={() => goToIndex(index + 1)}>Forward</button>
+        <button type="button" onClick={() => goToIndex(0)}>Reset</button>
+      </div>
+      <p style={{ margin: 0 }}>
+        Path: <code>{navDemoHistory.location.pathname}</code> | workspace: <code>{activeWorkspace ?? 'null'}</code> |
+        item: <code>{activeItemId ?? 'undefined'}</code>
+      </p>
+      <div style={{ height: '320px', overflow: 'hidden' }}>
+        <HbcAppShell
+          mode="pwa"
+          user={mockUser}
+          sidebarGroups={routeSyncGroups}
+          onNavigate={(href) => navDemoHistory.push(href)}
+        >
+          <div style={{ padding: '16px' }}>
+            <h2>Route Sync Demo</h2>
+            <p>Use Back/Forward buttons to simulate browser history updates and verify active navigation sync.</p>
+          </div>
+        </HbcAppShell>
+      </div>
+    </div>
+  );
+}
 
 const meta: Meta<typeof HbcAppShell> = {
   title: 'Shell/HbcAppShell',
@@ -253,4 +346,9 @@ export const A11yTest: Story = {
       </HbcAppShell>
     </div>
   ),
+};
+
+export const RouterBackForwardSync: Story = {
+  name: 'Router Back/Forward Sync',
+  render: () => <RouteSyncDemo />,
 };
