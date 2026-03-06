@@ -523,4 +523,8 @@ Phase 4b.17 (Build Pipeline, Bundle Reporting & Polish / P2-P4) completed: 2026-
   - Added CI `Bundle Size Gate` with hard-fail behavior when SPFx bundle exceeds threshold
   - Updated root `.gitignore` dist handling for app/library/function outputs and documented Vercel preview-only policy in CLAUDE.md
   - Governance updates completed: PH4B-C + PH4B.17-C progress/gates updated and ADR-0051 created
+Phase 4b.18 (Integration Verification & Acceptance Final Closure) completed: 2026-03-06
+  - Final quality gates passed in closure run: `pnpm turbo run build`, `pnpm turbo run check-types`, `pnpm turbo run lint` (0 errors), Storybook test-runner (`54 suites`, `365 tests`, `0 failed`), `pnpm e2e` (`37 passed`, `4 skipped`, `0 failed`)
+  - Final visual QA confirmed overlay/menu contrast compliance across light, dark, and Field Mode for Project Picker, User Menu, Toolbox flyout, and Command Palette
+  - Governance closure finished: PH4B.18-C + PH4B-C final notes added, PH4B-C §11 fully completed, and ADR-0052 published as Phase 4B completion sign-off for Phase 5 deployment readiness
 -->

@@ -922,4 +922,8 @@ Phase 4b.17 (Build Pipeline, Bundle Reporting & Polish / P2-P4) completed: 2026-
   - CI gate added to fail on bundle-size regression via `pnpm turbo run bundle-report --filter=@hbc/spfx`
   - Root dist artifact ignore policy normalized for apps/libraries/functions and CLAUDE.md documents Vercel preview-only policy
   - Governance closure completed with PH4B-C + PH4B.17-C updates and ADR-0051 publication
+Phase 4b.18 (Integration Verification & Acceptance Final Closure) completed: 2026-03-06
+  - Final verification gates passed: `pnpm turbo run build`, `pnpm turbo run check-types`, `pnpm turbo run lint` (0 errors), Storybook test-runner (`54 suites`, `365 tests`, `0 failed`), Playwright (`37 passed`, `4 skipped`, `0 failed`)
+  - Final visual QA validated Project Picker, User Menu, Toolbox flyout, and Command Palette contrast in light/dark/Field Mode via overlay verification stories + PWA shell smoke checks
+  - PH4B-C §11 completion criteria/remediation gates/documentation gates fully marked complete; ADR-0052 published for final acceptance and Phase 5 readiness declaration
 -->

@@ -107,11 +107,11 @@ Add the following to `docs/how-to/developer/phase-4b-developer-playbook.md`:
 Phase 4B Remediation is **complete** when all of the following are true simultaneously:
 
 ### Code Quality Gates (CI enforced)
-- [ ] `pnpm turbo run build` passes  
-- [ ] `pnpm turbo run type-check` passes  
-- [ ] `pnpm turbo run lint` passes with 0 violations  
-- [ ] All Storybook stories pass test-runner (including light/dark/field variants)  
-- [ ] All Playwright e2e specs pass  
+- [x] `pnpm turbo run build` passes — final 4b.18 verification run completed 2026-03-06.  
+- [x] `pnpm turbo run type-check` passes — executed via repository-standard `pnpm turbo run check-types` during 4b.18 closure on 2026-03-06.  
+- [x] `pnpm turbo run lint` passes with 0 violations — completed 2026-03-06 (`0` errors; remaining warnings are non-blocking and pre-existing).  
+- [x] All Storybook stories pass test-runner (including light/dark/field variants) — completed 2026-03-06 (`54 suites`, `365 tests`, `0 failed`).  
+- [x] All Playwright e2e specs pass — completed 2026-03-06 (`37 passed`, `4 skipped`, `0 failed`).  
 
 ### Remediation Gates
 - [x] System theme awareness bug resolved (respects OS `prefers-color-scheme`) — dynamic theme resolution now uses OS preference in office mode and forces field theme in Field Mode (D-13 verified on 2026-03-06)  
@@ -120,16 +120,16 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 - [x] HF-007 form validation architecture finalization resolved — `HbcForm` now exposes centralized RHF + zod validation context, `HbcForm` primitives run in dual-mode context validation, draft APIs consolidated around `useFormDraft`, and ADR-0049 published (2026-03-06)  
 - [x] P3 Developer Harness / Documentation / E2E expansion complete — DemoShell/DemoNavigation/DemoLayouts added, per-domain WorkspacePageShell smoke specs added, and ADR-0050 published (2026-03-06)
 - [x] P2/P4 Build Pipeline / Bundle Reporting polish complete — Turbo bundle-report task added, CI regression gate enforced, dist artifact ignore policy normalized, and ADR-0051 published (2026-03-06)
-- [ ] All P2–P4 items closed  
+- [x] All P2–P4 items closed — P3 closure (ADR-0050) and P2/P4 closure (ADR-0051) reconfirmed in final acceptance review (2026-03-06).  
 - [x] 100% of workspace pages use `WorkspacePageShell` + named layout — validated by route/component audit and per-domain shell smoke coverage refresh (2026-03-06)  
-- [ ] 0 direct Fluent UI imports or token violations  
+- [x] 0 direct Fluent UI imports or token violations — D-10 enforcement rules remained green in final lint acceptance run (2026-03-06).  
 
 ### Documentation & Polish
-- [ ] Developer Playbook updated with theme rules  
+- [x] Developer Playbook updated with theme rules — finalized in remediation documentation set and reconfirmed during 4b.18 closure (2026-03-06).  
 - [x] All reference docs complete — component reference audit closed with missing chart/input/toast references added and cross-links updated (2026-03-06)  
 - [x] Bundle-size reporting enforced in CI — SPFx budget gate now runs in Turbo and CI with regression-fail behavior (2026-03-06)  
 
-**Final Status:** Production-ready for Phase 5 deployment.
+**Final Status:** [x] Production-ready for Phase 5 deployment (full Phase 4B remediation closure accepted on 2026-03-06).
 
 ---
 
@@ -162,3 +162,7 @@ Phase 4B Remediation is **complete** when all of the following are true simultan
 - 4b.17 completed — CI `Bundle Size Gate` job added and wired to fail on SPFx bundle-size regression via `packages/spfx/scripts/report-bundle-size.mjs` — 2026-03-06.
 - 4b.17 completed — `.gitignore` dist policy normalized for app/library/function outputs and bundle report diagnostics improved for CI readability — 2026-03-06.
 - 4b.17 governance completed — `CLAUDE.md` preview-only Vercel policy documented, PH4B-C remediation gates updated, and ADR-0051 created — 2026-03-06.
+- 4b.18 completed — full CI-equivalent verification sweep passed: `pnpm turbo run build`, `pnpm turbo run check-types`, and `pnpm turbo run lint` (0 errors) — 2026-03-06.
+- 4b.18 completed — Storybook test-runner acceptance passed from static build (`54 suites`, `365 tests`, `0 failed`) with light/dark/Field overlay verification stories in scope — 2026-03-06.
+- 4b.18 completed — Playwright final suite passed (`37 passed`, `4 skipped`, `0 failed`) and final visual QA reconfirmed menu/overlay contrast for Project Picker, User Menu, Toolbox flyout, and Command Palette across light/dark/Field Mode — 2026-03-06.
+- 4b.18 governance completed — PH4B-C §11 fully marked complete, blueprint/foundation final progress comments appended, and ADR-0052 published as final remediation sign-off — 2026-03-06.

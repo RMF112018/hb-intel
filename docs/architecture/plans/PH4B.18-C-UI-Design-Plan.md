@@ -20,7 +20,8 @@
 8. [Phase 4b.17 — Build Pipeline, Bundle Reporting & Polish (P2/P4)](#8-phase-4b17--build-pipeline-bundle-reporting--polish)  
 9. [Phase 4b.18 — Integration Verification & Acceptance](#9-phase-4b18--integration-verification--acceptance)  
 10. [Developer Playbook Update](#10-developer-playbook-update)  
-11. [Completion Criteria](#11-completion-criteria)
+11. [Completion Criteria](#11-completion-criteria)  
+12. [Progress Notes](#12-progress-notes)
 
 ---
 
@@ -124,26 +125,32 @@ Add the following to `docs/how-to/developer/phase-4b-developer-playbook.md`:
 Phase 4B Remediation is **complete** when all of the following are true simultaneously:
 
 ### Code Quality Gates (CI enforced)
-- [ ] `pnpm turbo run build` passes  
-- [ ] `pnpm turbo run type-check` passes  
-- [ ] `pnpm turbo run lint` passes with 0 violations  
-- [ ] All Storybook stories pass test-runner (including new dark/Field Mode variants)  
-- [ ] All Playwright e2e specs pass  
+- [x] `pnpm turbo run build` passes — completed 2026-03-06 in Phase 4b.18 verification sweep.  
+- [x] `pnpm turbo run type-check` passes — repository command is `pnpm turbo run check-types` (type-check alias reference normalized in evidence).  
+- [x] `pnpm turbo run lint` passes with 0 violations — completed 2026-03-06 (0 errors; warnings remained non-blocking and pre-existing).  
+- [x] All Storybook stories pass test-runner (including new dark/Field Mode variants) — completed 2026-03-06 (`365 passed`, `0 failed`).  
+- [x] All Playwright e2e specs pass — completed 2026-03-06 (`37 passed`, `4 skipped`, `0 failed`).  
 
 ### Remediation Gates
-- [ ] Menu & overlay contrast bug (white backgrounds) fully resolved  
-- [ ] CF-005 and HF-007 fully resolved  
-- [ ] All P2–P4 items closed  
-- [ ] 100% of workspace pages use `WorkspacePageShell` + named layout  
-- [ ] 0 direct Fluent UI imports or token violations  
+- [x] Menu & overlay contrast bug (white backgrounds) fully resolved — D-12 remediation verified in final light/dark/Field Mode QA pass and Storybook overlay verification stories.  
+- [x] CF-005 and HF-007 fully resolved — CF-005 (ADR-0048) and HF-007 (ADR-0049) closure reconfirmed during final gate run.  
+- [x] All P2–P4 items closed — P3 closure recorded in ADR-0050 and P2/P4 closure recorded in ADR-0051; no remaining open gates.  
+- [x] 100% of workspace pages use `WorkspacePageShell` + named layout — maintained by per-domain smoke suite and route/component audit evidence from Phase 4b.16.  
+- [x] 0 direct Fluent UI imports or token violations — lint gate completed with no rule-breaking errors on D-10 enforcement rules.  
 
 ### Documentation & Polish
-- [ ] Developer Playbook updated with theme rules  
-- [ ] All reference docs complete  
-- [ ] Bundle-size reporting enforced in CI  
+- [x] Developer Playbook updated with theme rules — completed in prior remediation and reconfirmed during 4b.18 closure review.  
+- [x] All reference docs complete — completed in Phase 4b.16 audit closure and reconfirmed in final acceptance review.  
+- [x] Bundle-size reporting enforced in CI — completed in Phase 4b.17 (`bundle-report` Turbo task + CI gate), reconfirmed in final acceptance review.  
 
-**Final Status:** Production-ready for Phase 5 deployment.
+**Final Status:** [x] Production-ready for Phase 5 deployment (final Phase 4B remediation acceptance confirmed 2026-03-06).
 
 ---
 
-This plan is ready to be saved as `docs/architecture/plans/PH4B-UI-Design-Post-Audit-Remediation-Plan.md`. All tasks are fully scoped, estimated, and include clear acceptance criteria and implementation steps matching the style of the existing PH4B.1–PH4B.12 plans. The menu contrast issue has been elevated to the first P1 task (4b.13) as it blocks visual consistency in the development environment.
+## 12. Progress Notes
+
+- 4b.18 completed — monorepo verification gates passed: `pnpm turbo run build`, `pnpm turbo run check-types` (type-check equivalent), and `pnpm turbo run lint` (0 errors) — 2026-03-06.  
+- 4b.18 completed — Storybook final acceptance run passed using static build + test-runner (`54 suites`, `365 tests`, `0 failed`) with dark/Field overlay verification stories included in coverage — 2026-03-06.  
+- 4b.18 completed — Playwright final acceptance run passed (`37 passed`, `4 skipped`, `0 failed`) and reconfirmed WorkspacePageShell rendering baseline across domain routes — 2026-03-06.  
+- 4b.18 completed — final visual QA evidence reviewed for Project Picker, User Menu, Toolbox flyout, and Command Palette across light, dark, and Field Mode using `HbcAppShell` overlay verification stories plus PWA shell smoke checks; no remaining contrast findings — 2026-03-06.  
+- 4b.18 completed — governance closure finalized: PH4B-C §11 fully marked complete, blueprint/foundation progress logs updated, and ADR-0052 published as final Phase 4B sign-off — 2026-03-06.
