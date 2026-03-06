@@ -2,8 +2,7 @@
  * DemoCharts — HbcChart with mock schedule metrics.
  * Foundation Plan Phase 3.
  */
-/* eslint-disable @hbc/hbc/enforce-hbc-tokens -- TODO: use HBC tokens (Phase 4b.11) */
-import { HbcChart } from '@hbc/ui-kit';
+import { HbcChart, tokens } from '@hbc/ui-kit';
 
 const scheduleOption = {
   title: { text: 'Schedule Progress', left: 'center' as const },
@@ -20,14 +19,14 @@ const scheduleOption = {
       type: 'line' as const,
       data: [10, 25, 40, 55, 70, 85],
       smooth: true,
-      color: '#004B87',
+      color: tokens.colorBrandBackground,
     },
     {
       name: 'Actual',
       type: 'line' as const,
       data: [8, 22, 38, 50, 63, 75],
       smooth: true,
-      color: '#E97A2B',
+      color: tokens.colorPaletteMarigoldBackground3,
     },
   ],
 };

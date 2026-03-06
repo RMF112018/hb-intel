@@ -52,7 +52,7 @@
     "@vitejs/plugin-react": "^4.0.0",
     "@storybook/test-runner": "^0.21.0",
     "axe-playwright": "^2.2.0",
-    "@hbc/eslint-plugin-hbc": "workspace:*",
+    "@hb-intel/eslint-plugin-hbc": "workspace:*",
     "storybook": "^8.6.0",
     "vite": "^6.0.0",
     "vite-bundle-visualizer": "^1.2.0"

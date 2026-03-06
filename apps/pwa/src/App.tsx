@@ -4,12 +4,10 @@
  * FluentProvider > MsalProvider (conditional) > QueryClientProvider
  *   > HbcErrorBoundary > RouterProvider > ReactQueryDevtools
  */
-// eslint-disable-next-line @hbc/hbc/no-direct-fluent-import -- TODO: migrate to @hbc/ui-kit (Phase 4b.11)
-import { FluentProvider } from '@fluentui/react-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider } from '@tanstack/react-router';
-import { hbcLightTheme, HbcErrorBoundary } from '@hbc/ui-kit';
+import { FluentProvider, hbcLightTheme, HbcErrorBoundary } from '@hbc/ui-kit';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import type { AuthMode } from '@hbc/auth';
 import { createAppRouter } from './router/index.js';

@@ -6,16 +6,16 @@
  */
 import * as React from 'react';
 import { FluentProvider } from '@fluentui/react-components';
-import { hbcLightTheme } from '../theme/theme.js';
-import { CreateUpdateLayout } from '../layouts/CreateUpdateLayout.js';
-import { HbcStatusBadge } from '../HbcStatusBadge/index.js';
-import { HbcDataTable } from '../HbcDataTable/index.js';
-import { HbcButton } from '../HbcButton/index.js';
-import { HbcConfirmDialog } from '../HbcConfirmDialog/index.js';
-import { useOptimisticMutation } from '../hooks/useOptimisticMutation.js';
-import { useUnsavedChangesBlocker } from '../hooks/useUnsavedChangesBlocker.js';
-import { useMinDisplayTime } from '../hooks/useMinDisplayTime.js';
-import type { StatusVariant } from '../HbcStatusBadge/types.js';
+import { hbcLightTheme } from '../../src/theme/theme.js';
+import { CreateUpdateLayout } from '../../src/layouts/CreateUpdateLayout.js';
+import { HbcStatusBadge } from '../../src/HbcStatusBadge/index.js';
+import { HbcDataTable } from '../../src/HbcDataTable/index.js';
+import { HbcButton } from '../../src/HbcButton/index.js';
+import { HbcConfirmDialog } from '../../src/HbcConfirmDialog/index.js';
+import { useOptimisticMutation } from '../../src/hooks/useOptimisticMutation.js';
+import { useUnsavedChangesBlocker } from '../../src/hooks/useUnsavedChangesBlocker.js';
+import { useMinDisplayTime } from '../../src/hooks/useMinDisplayTime.js';
+import type { StatusVariant } from '../../src/HbcStatusBadge/types.js';
 
 export default {
   title: 'PH4.12 Interactions/Patterns',

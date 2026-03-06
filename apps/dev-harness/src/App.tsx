@@ -5,11 +5,9 @@
  * FluentProvider > QueryClientProvider > HbcErrorBoundary > TabRouter + DevControls
  */
 import { useState } from 'react';
-// eslint-disable-next-line @hbc/hbc/no-direct-fluent-import -- TODO: migrate to @hbc/ui-kit (Phase 4b.11)
-import { FluentProvider } from '@fluentui/react-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { hbcLightTheme, hbcDarkTheme, HbcErrorBoundary } from '@hbc/ui-kit';
+import { FluentProvider, hbcLightTheme, hbcDarkTheme, HbcErrorBoundary } from '@hbc/ui-kit';
 import { defaultQueryOptions, defaultMutationOptions } from '@hbc/query-hooks';
 import { TabRouter } from './TabRouter.js';
 import { DevControls } from './DevControls.js';

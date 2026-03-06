@@ -3,9 +3,7 @@
  * Executive dashboard with KPI cards and chart.
  */
 import type { ReactNode } from 'react';
-// eslint-disable-next-line @hbc/hbc/no-direct-fluent-import -- TODO: migrate to @hbc/ui-kit (Phase 4b.11)
-import { Text, Card, CardHeader } from '@fluentui/react-components';
-import { HbcChart, WorkspacePageShell } from '@hbc/ui-kit';
+import { Text, Card, CardHeader, HbcChart, WorkspacePageShell } from '@hbc/ui-kit';
 
 export function LeadershipPage(): ReactNode {
   const kpis = [

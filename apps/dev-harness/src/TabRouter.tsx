@@ -3,10 +3,8 @@
  * Foundation Plan Phase 3 — no router library, React state tabs.
  */
 import { useState } from 'react';
-// eslint-disable-next-line @hbc/hbc/no-direct-fluent-import -- TODO: migrate to @hbc/ui-kit (Phase 4b.11)
-import { TabList, Tab } from '@fluentui/react-components';
-// eslint-disable-next-line @hbc/hbc/no-direct-fluent-import -- TODO: migrate to @hbc/ui-kit (Phase 4b.11)
-import type { SelectTabData } from '@fluentui/react-components';
+import { TabList, Tab } from '@hbc/ui-kit';
+import type { SelectTabData } from '@hbc/ui-kit';
 import { PwaPreview } from './tabs/PwaPreview.js';
 import { WebpartPreview } from './tabs/WebpartPreview.js';
 import { SiteControlPreview } from './tabs/SiteControlPreview.js';

@@ -4,11 +4,9 @@
  * Summary cards + recent activity + navigation to sub-pages.
  */
 import type { ReactNode } from 'react';
-// eslint-disable-next-line @hbc/hbc/no-direct-fluent-import -- TODO: migrate to @hbc/ui-kit (Phase 4b.11)
-import { Text, Card, CardHeader, Button, Badge } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { useRouter } from '@tanstack/react-router';
-import { HbcStatusBadge, WorkspacePageShell } from '@hbc/ui-kit';
+import { Text, Card, CardHeader, Button, HbcStatusBadge, WorkspacePageShell } from '@hbc/ui-kit';
 
 const useStyles = makeStyles({
   grid: {
