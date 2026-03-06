@@ -5,6 +5,7 @@ import type {
 } from '../types.js';
 import {
   evaluateFeatureAccess,
+  isProtectedFeatureRegistered,
   isActionAllowed,
   isFeatureVisible,
   toEffectivePermissionSet,
@@ -31,6 +32,12 @@ function createEffective(grants: string[]): EffectivePermissionSet {
 }
 
 describe('permissionResolution phase 5.4 evaluators', () => {
+  it('reports registration presence through centralized enforcement helper', () => {
+    const registration = createRegistration();
+    expect(isProtectedFeatureRegistered(registration)).toBe(true);
+    expect(isProtectedFeatureRegistered(null)).toBe(false);
+  });
+
   it('applies default-deny to unregistered features', () => {
     const allowed = isActionAllowed({
       effective: createEffective(['project-hub:view']),

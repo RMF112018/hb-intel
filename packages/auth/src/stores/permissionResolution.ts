@@ -164,7 +164,7 @@ export function evaluateFeatureAccess(params: {
 }): FeatureAccessEvaluation {
   const { effective, registration, action, runtimeMode } = params;
 
-  if (!registration) {
+  if (!isProtectedFeatureRegistered(registration)) {
     return {
       featureId: 'unregistered',
       action,
@@ -211,6 +211,16 @@ export function evaluateFeatureAccess(params: {
       : registration.lockMessage ??
         'You do not currently have the required role/permission mapping for this feature.',
   };
+}
+
+/**
+ * Practical enforcement helper to verify protected feature registration exists
+ * before wiring feature-level access checks.
+ */
+export function isProtectedFeatureRegistered(
+  registration: FeaturePermissionRegistration | null | undefined,
+): registration is FeaturePermissionRegistration {
+  return Boolean(registration && registration.featureId);
 }
 
 /**

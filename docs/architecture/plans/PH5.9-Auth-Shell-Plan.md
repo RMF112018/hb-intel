@@ -58,3 +58,27 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - enables production operations through core admin workflows,
 - satisfies formal validation, audit, release, and documentation requirements,
 - and explicitly documents every deferred future expansion path so later phases can extend the platform without re-architecting the foundation.
+
+---
+
+## 5.9 Success Criteria Checklist (Task 9)
+
+- [x] 5.9.1 no protected feature can self-wire into shell access patterns without centralized registration.
+- [x] 5.9.2 standard registration contract defined with feature id, route metadata, navigation metadata, required feature/action permissions, visibility designation, and shell compatibility metadata.
+- [x] 5.9.3 extension path documented and typed for exceptional protected features without overbuilding Phase 5 behavior.
+- [x] 5.9.4 registration usage enforcement implemented through practical linting and boundary helpers.
+- [x] ADR-0062 created and linked to Phase 5.9 traceability.
+
+## Phase 5.9 Progress Notes
+
+- 5.9.1 completed — shell-owned protected feature registration contract implemented in `packages/shell/src/featureRegistration.ts` with route/navigation/permission/visibility/compatibility metadata and strict validators/builders — 2026-03-06.
+- 5.9.2 completed — typed extension path for exceptional features added (`extensionPath`) plus auth-bridge adapters (`toFeaturePermissionRegistration(s)`) to keep one centralized registration vocabulary — 2026-03-06.
+- 5.9.3 completed — practical enforcement helpers added (`assertProtectedFeatureRegistered`, `isProtectedFeatureRegistered`) and default-deny behavior preserved for unregistered features — 2026-03-06.
+- 5.9.4 completed — lint/boundary enforcement rule added in `@hb-intel/eslint-plugin-hbc` (`require-feature-registration-contract`) and enabled in app lint config; ADR-0062 and governance traceability updates completed — 2026-03-06.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/shell` - PASS
+- `pnpm --filter @hb-intel/eslint-plugin-hbc test` - PASS (11/11 rule suites)

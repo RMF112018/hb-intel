@@ -585,4 +585,12 @@ Phase 5.8 (Guards, Redirects, and Recovery Surfaces) completed: 2026-03-06
   - 5.8.5 request-access flow extended with typed in-app admin review queue submission seam
   - 5.8.6 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`
   - 5.8.7 ADR-0061 created: `docs/architecture/adr/ADR-0061-guards-redirects-and-recovery-surfaces.md`
+Phase 5.9 (Protected Feature Registration Contract) completed: 2026-03-06
+  - 5.9.1 shell-owned protected feature registration contract implemented with centralized route/nav visibility/permission/visibility designation/shell compatibility metadata
+  - 5.9.2 extension path for exceptional features added with explicit typed seam and deferred-behavior documentation
+  - 5.9.3 shell/auth enforcement helpers added to require registration usage and preserve default-deny for unregistered protected features
+  - 5.9.4 practical lint/boundary restrictions implemented through `@hb-intel/hbc/require-feature-registration-contract` and app lint configuration
+  - 5.9.5 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/shell`
+  - 5.9.6 eslint plugin rule tests passed: `pnpm --filter @hb-intel/eslint-plugin-hbc test`
+  - 5.9.7 ADR-0062 created: `docs/architecture/adr/ADR-0062-protected-feature-registration-contract.md`
 -->

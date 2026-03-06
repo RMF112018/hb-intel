@@ -17,6 +17,7 @@
  * | no-page-breakpoints           | D-09     | warn            |
  * | no-direct-spinner             | D-06     | warn            |
  * | no-direct-buttons-in-content  | D-03     | warn            |
+ * | require-feature-registration-contract | PH5.9 | error         |
  *
  * @see docs/architecture/adr/ADR-0045-component-consumption-enforcement.md
  * @see docs/architecture/plans/PH4B.11-UI-Design-Plan.md §14
@@ -36,5 +37,6 @@ module.exports = {
     'no-page-breakpoints': require('./rules/no-page-breakpoints'),
     'no-direct-spinner': require('./rules/no-direct-spinner'),
     'no-direct-buttons-in-content': require('./rules/no-direct-buttons-in-content'),
+    'require-feature-registration-contract': require('./rules/require-feature-registration-contract'),
   },
 };

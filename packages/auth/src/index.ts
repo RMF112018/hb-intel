@@ -9,6 +9,7 @@ export {
   toEffectivePermissionSet,
   isPermissionGranted,
   isActionAllowed,
+  isProtectedFeatureRegistered,
   isFeatureVisible,
   isFeatureAccessible,
   evaluateFeatureAccess,

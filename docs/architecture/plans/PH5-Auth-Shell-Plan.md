@@ -343,6 +343,29 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 
 ---
 
+## Phase 5.9 Progress Notes
+
+- 5.9.1 completed — shell-owned protected feature registration contract implemented in `@hbc/shell` with canonical route, navigation visibility, permission requirements, locked/discoverable designation, and shell/runtime compatibility metadata — 2026-03-06.
+- 5.9.2 completed — extension path contract added for exceptional features and typed shell-to-auth registration adapters implemented to preserve one registration vocabulary — 2026-03-06.
+- 5.9.3 completed — registration enforcement helpers implemented (`assertProtectedFeatureRegistered`, `isProtectedFeatureRegistered`) while preserving locked Option C default-deny behavior for unregistered features — 2026-03-06.
+- 5.9.4 completed — practical automated boundary enforcement added via ESLint rule `@hb-intel/hbc/require-feature-registration-contract`, enabled for app linting, with plugin tests added and passing; ADR-0062 + governance traceability updates completed — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.9)
+
+- [x] Success Criteria #4 advanced through no-self-wiring enforcement and centralized protected feature registration requirements.
+- [x] Success Criteria #5 advanced through standardized registration metadata (feature id, route, nav visibility, feature/action permissions, discoverable-lock policy, compatibility metadata).
+- [x] Success Criteria #8 advanced by formalizing shell-owned registration governance and practical lint/boundary enforcement.
+- [x] Success Criteria #10 advanced through Phase 5.9 documentation closure (task checklist, progress notes, ADR-0062, blueprint/foundation traceability, verification evidence).
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/shell` - PASS
+- `pnpm --filter @hb-intel/eslint-plugin-hbc test` - PASS (11/11 rule suites)
+
+---
+
 ## Phase 5.6 Progress Notes
 
 - 5.6.1 completed — unified shell-status model implemented in `@hbc/shell` with fixed priority hierarchy, plain-language copy, and approved action allowlist constraints — 2026-03-06.

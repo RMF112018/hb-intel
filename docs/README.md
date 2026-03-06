@@ -89,6 +89,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0059 | Accepted | [ADR-0059-unified-shell-status-connectivity-bar-integration.md](./architecture/adr/ADR-0059-unified-shell-status-connectivity-bar-integration.md) |
 | ADR-0060 | Accepted | [ADR-0060-controlled-degraded-mode.md](./architecture/adr/ADR-0060-controlled-degraded-mode.md) |
 | ADR-0061 | Accepted | [ADR-0061-guards-redirects-and-recovery-surfaces.md](./architecture/adr/ADR-0061-guards-redirects-and-recovery-surfaces.md) |
+| ADR-0062 | Accepted | [ADR-0062-protected-feature-registration-contract.md](./architecture/adr/ADR-0062-protected-feature-registration-contract.md) |
 
 ## Conventions
 

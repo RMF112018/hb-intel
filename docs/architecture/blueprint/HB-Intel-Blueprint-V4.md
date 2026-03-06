@@ -983,4 +983,11 @@ Phase 5.8 (Guards, Redirects, and Recovery Surfaces) completed: 2026-03-06
   - 5.8.5 request-access flow extended with typed in-app submission seam to admin review queue boundary (`RequestAccessSubmission`, `AccessRequestSubmitter`)
   - 5.8.6 verification gates passed for scoped packages: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`
   - 5.8.7 ADR-0061 created: `docs/architecture/adr/ADR-0061-guards-redirects-and-recovery-surfaces.md`
+Phase 5.9 (Protected Feature Registration Contract) completed: 2026-03-06
+  - 5.9.1 shell-owned protected feature registration contract implemented in `packages/shell/src/featureRegistration.ts` with canonical route/nav/permission/visibility/compatibility metadata and validators/builders
+  - 5.9.2 extension path seam implemented (`extensionPath`) with typed metadata and shell-to-auth adapter utilities (`toFeaturePermissionRegistration`, `toFeaturePermissionRegistrations`)
+  - 5.9.3 registration enforcement helpers added (`assertProtectedFeatureRegistered`, `isProtectedFeatureRegistered`) while preserving locked Option C default-deny behavior for unregistered protected features
+  - 5.9.4 practical automated enforcement added via ESLint boundary rule `@hb-intel/hbc/require-feature-registration-contract` and app lint config integration
+  - 5.9.5 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/shell`; eslint plugin tests pass (`pnpm --filter @hb-intel/eslint-plugin-hbc test`)
+  - 5.9.6 ADR-0062 created: `docs/architecture/adr/ADR-0062-protected-feature-registration-contract.md`
 -->

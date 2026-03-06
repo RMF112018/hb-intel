@@ -39,6 +39,7 @@ module.exports = {
       rules: {
         '@hb-intel/hbc/enforce-hbc-tokens': 'error',
         '@hb-intel/hbc/no-direct-fluent-import': 'error',
+        '@hb-intel/hbc/require-feature-registration-contract': 'error',
       },
     },
   ],

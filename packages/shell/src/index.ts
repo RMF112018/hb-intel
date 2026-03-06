@@ -66,6 +66,23 @@ export type {
   ShellRecoveryState,
 } from './degradedMode.js';
 export {
+  validateProtectedFeatureRegistration,
+  defineProtectedFeatureRegistration,
+  createProtectedFeatureRegistry,
+  assertProtectedFeatureRegistered,
+  toFeaturePermissionRegistration,
+  toFeaturePermissionRegistrations,
+} from './featureRegistration.js';
+export type {
+  ProtectedFeatureRouteMetadata,
+  ProtectedFeatureNavigationMetadata,
+  ProtectedFeaturePermissionMetadata,
+  ProtectedFeatureExtensionPath,
+  ProtectedFeatureRegistrationContract,
+  ProtectedFeatureRegistrationRegistry,
+  ProtectedFeatureRegistrationValidationResult,
+} from './featureRegistration.js';
+export {
   SHELL_STATUS_PRIORITY,
   resolveShellStatusSnapshot,
   deriveDegradedSectionLabels,
