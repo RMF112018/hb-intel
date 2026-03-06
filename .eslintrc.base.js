@@ -2,7 +2,7 @@
  * Root ESLint configuration — HB Intel monorepo
  * Phase 4b.6 §9 — Theme & Token Enforcement
  *
- * Includes @hbc/eslint-plugin-hbc for D-05 (token enforcement),
+ * Includes @hb-intel/eslint-plugin-hbc for D-05 (token enforcement),
  * D-10 (import enforcement), and D-03 (command bar enforcement).
  *
  * @see PH4B.6-UI-Design-Plan.md §9 task 4b.6.3
@@ -12,7 +12,7 @@
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', '@hbc/hbc'],
+  plugins: ['@typescript-eslint', '@hb-intel/hbc'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
@@ -37,8 +37,8 @@ module.exports = {
       // D-10: Import enforcement — no direct @fluentui/react-components in app code
       files: ['apps/**/*.ts', 'apps/**/*.tsx'],
       rules: {
-        '@hbc/hbc/enforce-hbc-tokens': 'error',
-        '@hbc/hbc/no-direct-fluent-import': 'error',
+        '@hb-intel/hbc/enforce-hbc-tokens': 'error',
+        '@hb-intel/hbc/no-direct-fluent-import': 'error',
       },
     },
   ],
