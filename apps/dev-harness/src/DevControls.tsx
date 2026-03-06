@@ -4,7 +4,7 @@
  * Foundation Plan Phase 3.
  */
 import { useState } from 'react';
-import { Button, Switch } from '@fluentui/react-components';
+import { Button, Switch } from '@hbc/ui-kit';
 import { useAuthStore, usePermissionStore } from '@hbc/auth';
 import { useProjectStore, useNavStore } from '@hbc/shell';
 import { bootstrapMockEnvironment, DEFAULT_FEATURE_FLAGS } from './bootstrap.js';

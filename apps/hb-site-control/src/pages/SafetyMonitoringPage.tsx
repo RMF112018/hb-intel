@@ -4,9 +4,8 @@
  * Uses useSignalR hook for mock real-time updates.
  */
 import type { ReactNode } from 'react';
-import { Text, Card, CardHeader, Badge } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
-import { HbcStatusBadge, HbcChart, WorkspacePageShell } from '@hbc/ui-kit';
+import { Text, Badge, tokens, HbcStatusBadge, HbcChart, WorkspacePageShell } from '@hbc/ui-kit';
 import type { StatusVariant } from '@hbc/ui-kit';
 import { useSignalR } from '../hooks/useSignalR.js';
 import type { SignalREvent } from '../hooks/useSignalR.js';
@@ -85,16 +84,16 @@ const TREND_CHART_OPTION = {
       type: 'line' as const,
       smooth: true,
       data: [3, 5, 2, 8, 4, 1, 6],
-      itemStyle: { color: '#004B87' },
-      areaStyle: { color: 'rgba(0, 75, 135, 0.1)' },
+      itemStyle: { color: tokens.colorBrandBackground },
+      areaStyle: { color: tokens.colorBrandBackground2 },
     },
     {
       name: 'Resolved',
       type: 'line' as const,
       smooth: true,
       data: [2, 4, 3, 6, 5, 1, 4],
-      itemStyle: { color: '#107C10' },
-      areaStyle: { color: 'rgba(16, 124, 16, 0.1)' },
+      itemStyle: { color: tokens.colorPaletteGreenBackground3 },
+      areaStyle: { color: tokens.colorPaletteGreenBackground1 },
     },
   ],
   legend: { data: ['Incidents', 'Resolved'], bottom: 0 },
@@ -110,7 +109,7 @@ export function SafetyMonitoringPage(): ReactNode {
       <div className={styles.statusBar}>
         <div
           className={styles.connectionDot}
-          style={{ backgroundColor: isConnected ? '#107C10' : '#D13438' }}
+          style={{ backgroundColor: isConnected ? tokens.colorPaletteGreenBackground3 : tokens.colorPaletteRedBackground3 }}
         />
         <Text size={300} weight="medium">
           {isConnected ? 'Connected — Live Updates' : 'Connecting...'}

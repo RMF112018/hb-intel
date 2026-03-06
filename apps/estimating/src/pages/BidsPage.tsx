@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { Text, Card, CardHeader } from '@fluentui/react-components';
-import { WorkspacePageShell, HbcDataTable, HbcStatusBadge } from '@hbc/ui-kit';
+import { Text, Card, CardHeader, WorkspacePageShell, HbcDataTable, HbcStatusBadge } from '@hbc/ui-kit';
 import type { ColumnDef } from '@hbc/ui-kit';
 
 interface BidItem { name: string; bidder: string; amount: string; dueDate: string; status: string; }

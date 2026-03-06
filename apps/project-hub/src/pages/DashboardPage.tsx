@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
-import { Text, Card, CardHeader } from '@fluentui/react-components';
 import { useProjectStore } from '@hbc/shell';
-import { WorkspacePageShell, HbcDataTable } from '@hbc/ui-kit';
+import { Text, Card, CardHeader, WorkspacePageShell, HbcDataTable } from '@hbc/ui-kit';
 import type { ColumnDef } from '@hbc/ui-kit';
 import type { IActiveProject } from '@hbc/models';
 

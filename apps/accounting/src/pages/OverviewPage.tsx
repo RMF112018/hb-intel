@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { Text, Card, CardHeader } from '@fluentui/react-components';
-import { WorkspacePageShell, HbcDataTable } from '@hbc/ui-kit';
+import { Text, Card, CardHeader, WorkspacePageShell, HbcDataTable } from '@hbc/ui-kit';
 import type { ColumnDef } from '@hbc/ui-kit';
 
 interface BudgetItem { category: string; budget: string; actual: string; variance: string; percent: string; }

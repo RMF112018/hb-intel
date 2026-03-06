@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { Text, Card, CardHeader } from '@fluentui/react-components';
-import { WorkspacePageShell, HbcChart } from '@hbc/ui-kit';
+import { Text, Card, CardHeader, WorkspacePageShell, HbcChart } from '@hbc/ui-kit';
 
 export function KpiDashboardPage(): ReactNode {
   const kpis = [

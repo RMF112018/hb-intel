@@ -179,3 +179,41 @@ pnpm --filter './apps/**' lint --fix
 *Version 1.0 — March 5, 2026*
 *Supersedes: Phase 4 partial implementation (ADR-0016 through ADR-0033)*
 *Next Phase: Phase 5 — SPFx Webpart Breakout*
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4b.11 (Component Consumption Enforcement) completed: 2026-03-06
+
+4b.11.1 completed — Full set of 10 enforcement rules + 1 existing D-03 rule implemented and tested — 2026-03-06
+  - Plugin restructured from monolithic index.js to modular src/rules/*.js
+  - Package renamed from @hbc/eslint-plugin-hbc to @hb-intel/eslint-plugin-hbc
+  - 10 RuleTester-based test files (10/10 passing)
+  - Rules: no-direct-fluent-import (D-10), enforce-hbc-tokens (D-05), no-inline-styles (D-10),
+    require-workspace-page-shell (D-01), no-manual-nav-active (D-04), no-inline-feedback (D-08),
+    no-raw-form-elements (D-07), require-layout-variant (D-02), no-page-breakpoints (D-09),
+    no-direct-spinner (D-06), no-direct-buttons-in-content (D-03)
+
+4b.11.2 completed — interactions/Interactions.stories.tsx moved to .storybook/stories/InteractionPatterns.stories.tsx — 2026-03-06
+  - Storybook config updated to include .storybook/stories/ glob
+  - F-017 remediation complete
+
+4b.11.3 completed — Workspace-specific ESLint rules configured — 2026-03-06
+  - All 14 apps/ workspaces: 11 rules active (6 error, 5 warn)
+  - packages/ui-kit: permissive config (most rules off)
+  - Fluent UI passthrough re-exports added to ui-kit index.ts
+
+4b.11.4 completed — All existing violations remediated — 2026-03-06
+  - 46+ @fluentui/react-components imports removed from apps/
+  - Hardcoded hex values replaced with design tokens
+  - NotFoundPage wrapped in WorkspacePageShell
+  - pnpm turbo run lint: 0 errors across all workspaces
+
+4b.11.5 completed — CI lint gate verified — 2026-03-06
+  - Existing pnpm turbo run lint step in ci.yml enforces all error-level rules
+  - pnpm turbo run build: 23/23 successful
+  - pnpm turbo run check-types: 15/15 successful
+  - Plugin tests: 10/10 passing
+
+ADR created: docs/architecture/adr/ADR-0045-component-consumption-enforcement.md
+Documentation: docs/reference/eslint-plugin-hbc.md, packages/eslint-plugin-hbc/README.md updated
+Next: Phase 4b.12
+-->

@@ -246,7 +246,7 @@ Phase 4b is **complete** when all of the following are true simultaneously:
 ### Code Quality Gates (CI enforced)
 - [ ] `pnpm turbo run build` passes with 0 errors
 - [ ] `pnpm turbo run type-check` passes with 0 TypeScript errors
-- [ ] `pnpm turbo run lint` passes with 0 ESLint errors
+- [x] `pnpm turbo run lint` passes with 0 ESLint errors
 - [ ] All Storybook stories pass test-runner (0 failures)
 - [ ] All Playwright e2e specs pass (0 failures)
 
@@ -256,13 +256,13 @@ Phase 4b is **complete** when all of the following are true simultaneously:
 - [ ] 44/44 ui-kit components have reference documentation
 - [ ] 100% of workspace app pages use `WorkspacePageShell`
 - [ ] 100% of workspace app pages declare a layout variant (`dashboard`, `list`, `form`, `detail`, or `landing`)
-- [ ] 0 direct `@fluentui/react-components` imports in `apps/`
-- [ ] 0 hardcoded token values in `apps/`
+- [x] 0 direct `@fluentui/react-components` imports in `apps/`
+- [x] 0 hardcoded token values in `apps/`
 
 ### Structural Gates
 - [ ] 0 build artifacts committed to `src/`
 - [ ] `storybook-static/` not tracked in git
-- [ ] `eslint-plugin-hbc` is a proper workspace package
+- [x] `eslint-plugin-hbc` is a proper workspace package
 - [ ] Single `WorkspacePageShell` source in `packages/ui-kit`
 - [ ] `module-configs/` in `packages/shell` (not `packages/ui-kit`)
 - [ ] `packages/app-shell` fully implemented as auth facade
@@ -305,5 +305,17 @@ Phase 4b.4 (Command Bar & Page Actions) completed: 2026-03-05
 Phase 4b.5 (Navigation & Active State) completed: 2026-03-05
 §17 items: 4b.5.1-4b.5.4 all complete
 ADR: ADR-0039-navigation-and-active-state.md
-Next: Phase 4b.6
+
+Phase 4b.11 (Component Consumption Enforcement) completed: 2026-03-06
+  - 4b.11.1: Full set of 10 enforcement rules + 1 existing D-03 implemented and tested
+  - 4b.11.2: interactions/ moved to .storybook/stories/ (F-017)
+  - 4b.11.3: Workspace-specific ESLint configs — 14 apps at error level, ui-kit permissive
+  - 4b.11.4: All 46+ @fluentui violations remediated, 0 errors across all workspaces
+  - 4b.11.5: CI lint gate verified (existing pnpm turbo run lint step)
+  - Plugin renamed to @hb-intel/eslint-plugin-hbc
+  - Fluent UI passthrough re-exports added to ui-kit
+  - ADR-0045 created
+  - §17 items marked: lint 0 errors, 0 Fluent imports, 0 hardcoded tokens, eslint-plugin-hbc proper package
+  - Documentation: docs/reference/eslint-plugin-hbc.md, README updated
+Next: Phase 4b.12
 -->

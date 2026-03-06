@@ -3,8 +3,7 @@
  * Financial overview with data grid placeholder.
  */
 import type { ReactNode } from 'react';
-import { Text, Card, CardHeader } from '@fluentui/react-components';
-import { HbcDataTable, WorkspacePageShell } from '@hbc/ui-kit';
+import { Text, Card, CardHeader, HbcDataTable, WorkspacePageShell } from '@hbc/ui-kit';
 import type { ColumnDef } from '@hbc/ui-kit';
 
 interface BudgetItem {

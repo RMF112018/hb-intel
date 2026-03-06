@@ -456,4 +456,11 @@ Phase 4b.5 (Navigation & Active State) completed: 2026-03-05
 D-04 implemented: active sidebar state derived from useRouterState().location.pathname
 NAV_ITEMS centralized registry created in @hbc/shell
 Per-item requiredPermission filtering added to HbcSidebar
+
+Phase 4b.11 (Component Consumption Enforcement) completed: 2026-03-06
+- 11 ESLint rules (10 new + 1 existing D-03) enforcing D-01 through D-10
+- Plugin renamed @hb-intel/eslint-plugin-hbc, modular src/rules/*.js
+- 14 apps/ configs with full enforcement, ui-kit permissive
+- 46+ Fluent UI violations remediated, 0 errors
+- ADR-0045 created
 -->

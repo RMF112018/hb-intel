@@ -4,11 +4,10 @@
  * FluentProvider > MsalProvider (conditional) > QueryClientProvider
  *   > HbcErrorBoundary > RouterProvider > ReactQueryDevtools
  */
-import { FluentProvider } from '@fluentui/react-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider } from '@tanstack/react-router';
-import { hbcLightTheme, HbcErrorBoundary } from '@hbc/ui-kit';
+import { FluentProvider, hbcLightTheme, HbcErrorBoundary } from '@hbc/ui-kit';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import type { AuthMode } from '@hbc/auth';
 import { createAppRouter } from './router/index.js';

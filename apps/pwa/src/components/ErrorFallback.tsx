@@ -2,7 +2,7 @@
  * ErrorFallback — route error boundary fallback.
  */
 import type { ReactNode } from 'react';
-import { Button, Text } from '@fluentui/react-components';
+import { Button, Text } from '@hbc/ui-kit';
 
 interface ErrorFallbackProps {
   error: Error;

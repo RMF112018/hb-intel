@@ -1,7 +1,6 @@
-import { FluentProvider } from '@fluentui/react-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
-import { hbcLightTheme, HbcErrorBoundary } from '@hbc/ui-kit';
+import { FluentProvider, hbcLightTheme, HbcErrorBoundary } from '@hbc/ui-kit';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import { createWebpartRouter } from './router/index.js';
 

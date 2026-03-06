@@ -417,3 +417,24 @@ export type {
   ModuleLandingConfig,
   ModuleDetailConfig,
 } from '@hbc/shell';
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Fluent UI passthrough re-exports (D-10)
+ * PH4B.11 §4b.11.4 — apps must import from @hb-intel/ui-kit, not @fluentui/*
+ * These re-exports allow apps to consume Fluent primitives through ui-kit
+ * without violating the no-direct-fluent-import rule.
+ * ───────────────────────────────────────────────────────────────────────────── */
+export {
+  FluentProvider,
+  Text,
+  Badge,
+  Switch,
+  Spinner,
+  TabList,
+  Tab,
+  Card,
+  CardHeader,
+  Button,
+  tokens,
+} from '@fluentui/react-components';
+export type { SelectTabData } from '@fluentui/react-components';

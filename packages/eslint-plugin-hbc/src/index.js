@@ -1,91 +1,40 @@
 /**
- * eslint-plugin-hbc — Local ESLint plugin for HBC Design System enforcement
- * Phase 4.15 §15 — "Build Modern From Day One"
+ * @hb-intel/eslint-plugin-hbc — ESLint plugin for HBC Design System enforcement
+ * PH4B.11 §4b.11.1 — Component Consumption Enforcement
  *
- * Rule: enforce-hbc-tokens
- * Warns on hardcoded hex color string literals (#xxxxxx).
- * Use HBC design tokens from @hbc/ui-kit/theme instead.
+ * Implements 11 rules enforcing binding decisions D-01 through D-10:
+ *
+ * | Rule                          | Decision | Severity (apps) |
+ * |-------------------------------|----------|-----------------|
+ * | no-direct-fluent-import       | D-10     | error           |
+ * | enforce-hbc-tokens            | D-05     | error           |
+ * | no-inline-styles              | D-10     | warn            |
+ * | require-workspace-page-shell  | D-01     | error           |
+ * | no-manual-nav-active          | D-04     | error           |
+ * | no-inline-feedback            | D-08     | warn            |
+ * | no-raw-form-elements          | D-07     | error           |
+ * | require-layout-variant        | D-02     | error           |
+ * | no-page-breakpoints           | D-09     | warn            |
+ * | no-direct-spinner             | D-06     | warn            |
+ * | no-direct-buttons-in-content  | D-03     | warn            |
+ *
+ * @see docs/architecture/adr/ADR-0045-component-consumption-enforcement.md
+ * @see docs/architecture/plans/PH4B.11-UI-Design-Plan.md §14
  */
 'use strict';
 
-const HEX_PATTERN = /#[0-9A-Fa-f]{3,8}\b/;
-
-/** @type {import('eslint').Rule.RuleModule} */
-const enforceHbcTokens = {
-  meta: {
-    type: 'suggestion',
-    docs: {
-      description:
-        'Enforce usage of HBC design tokens instead of hardcoded hex color values',
-      recommended: false,
-    },
-    schema: [],
-    messages: {
-      noHardcodedHex:
-        'Hardcoded hex value detected. Use HBC design tokens from @hbc/ui-kit/theme instead.',
-    },
-  },
-  create(context) {
-    return {
-      Literal(node) {
-        if (typeof node.value === 'string' && HEX_PATTERN.test(node.value)) {
-          context.report({
-            node,
-            messageId: 'noHardcodedHex',
-          });
-        }
-      },
-    };
-  },
-};
-
-/**
- * Rule: no-direct-buttons-in-content (D-03)
- * PH4B.4 §4b.4.4 — Warns when HbcButton or Button is a direct child of WorkspacePageShell.
- * Page actions must flow through the `actions` prop instead.
- */
-const BUTTON_COMPONENTS = new Set(['HbcButton', 'Button']);
-
-/** @type {import('eslint').Rule.RuleModule} */
-const noDirectButtonsInContent = {
-  meta: {
-    type: 'suggestion',
-    docs: {
-      description:
-        'Disallow HbcButton/Button as direct children of WorkspacePageShell content (D-03)',
-      recommended: false,
-    },
-    schema: [],
-    messages: {
-      noDirectButton:
-        'Do not place {{component}} directly inside WorkspacePageShell content. Pass actions via the `actions` prop instead (D-03).',
-    },
-  },
-  create(context) {
-    return {
-      JSXElement(node) {
-        const opening = node.openingElement;
-        if (!opening.name || opening.name.name !== 'WorkspacePageShell') return;
-
-        for (const child of node.children) {
-          if (child.type !== 'JSXElement') continue;
-          const childName = child.openingElement.name?.name;
-          if (childName && BUTTON_COMPONENTS.has(childName)) {
-            context.report({
-              node: child,
-              messageId: 'noDirectButton',
-              data: { component: childName },
-            });
-          }
-        }
-      },
-    };
-  },
-};
-
 module.exports = {
   rules: {
-    'enforce-hbc-tokens': enforceHbcTokens,
-    'no-direct-buttons-in-content': noDirectButtonsInContent,
+    'no-direct-fluent-import': require('./rules/no-direct-fluent-import'),
+    'enforce-hbc-tokens': require('./rules/enforce-hbc-tokens'),
+    'no-inline-styles': require('./rules/no-inline-styles'),
+    'require-workspace-page-shell': require('./rules/require-workspace-page-shell'),
+    'no-manual-nav-active': require('./rules/no-manual-nav-active'),
+    'no-inline-feedback': require('./rules/no-inline-feedback'),
+    'no-raw-form-elements': require('./rules/no-raw-form-elements'),
+    'require-layout-variant': require('./rules/require-layout-variant'),
+    'no-page-breakpoints': require('./rules/no-page-breakpoints'),
+    'no-direct-spinner': require('./rules/no-direct-spinner'),
+    'no-direct-buttons-in-content': require('./rules/no-direct-buttons-in-content'),
   },
 };

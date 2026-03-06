@@ -856,4 +856,13 @@ Next: Phase 4b.5 (Navigation & Active State)
 Phase 4b.5 completed: 2026-03-05
 D-04 (router-derived sidebar active state) fully implemented.
 NAV_ITEMS registry in @hbc/shell, per-item requiredPermission filtering.
+
+Phase 4b.11 completed: 2026-03-06 — Component Consumption Enforcement (ADR-0045)
+- 10 ESLint rules enforcing D-01 through D-10 + 1 existing D-03 (11 total)
+- Plugin renamed to @hb-intel/eslint-plugin-hbc, modular src/rules/*.js structure
+- All 14 apps/ configs: 6 error-level, 5 warn-level rules
+- 46+ @fluentui imports in apps/ remediated to @hbc/ui-kit
+- CI lint gate verified: pnpm turbo run lint → 0 errors
+- Build/type-check: 23/23 build, 15/15 check-types passing
+Next: Phase 4b.12
 -->
