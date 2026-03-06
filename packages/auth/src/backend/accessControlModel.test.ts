@@ -58,13 +58,16 @@ describe('accessControlModel', () => {
 
   it('creates typed audit event records with event id', () => {
     const event = createAccessControlAuditEvent({
-      eventType: 'override-approved',
+      eventType: 'request-approved',
       actorId: 'approver-1',
       subjectUserId: 'user-1',
       overrideId: 'override-1',
+      source: 'backend',
+      outcome: 'success',
     });
 
-    expect(event.id).toContain('ace-override-approved-');
+    expect(event.id).toContain('ace-request-approved-');
     expect(event.actorId).toBe('approver-1');
+    expect(event.eventId).toBe(event.id);
   });
 });

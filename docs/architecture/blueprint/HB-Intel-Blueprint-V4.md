@@ -1012,4 +1012,11 @@ Phase 5.12 (Approval, Renewal, and Emergency Access Workflows) completed: 2026-0
   - 5.12.5 workflow contracts exported via `packages/auth/src/workflows/index.ts`, `packages/auth/src/types.ts`, and root `packages/auth/src/index.ts`
   - 5.12.6 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`; targeted workflow vitest remains blocked by workspace vite-resolution issue
   - 5.12.7 ADR-0065 created: `docs/architecture/adr/ADR-0065-approval-renewal-and-emergency-access-workflows.md`
+Phase 5.13 (Audit, Retention, and Traceability) completed: 2026-03-06
+  - 5.13.1 centralized structured audit logger implemented in `packages/auth/src/audit/auditLogger.ts` with required PH5.13 event taxonomy and metadata contract (eventId, source, runtime, correlation, request/override/feature context, outcome, details)
+  - 5.13.2 retention policy implemented with locked Option C defaults (180-day active history + indefinite archive strategy) and explicit deferred event-type tiering documentation
+  - 5.13.3 audit emission integrated across auth lifecycle store/adapters, access-denied/request submission, override workflows, emergency flow, and admin state-changing operations
+  - 5.13.4 basic operational admin audit visibility hook delivered with retention-aware active/archived counts and recent-events projection
+  - 5.13.5 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`
+  - 5.13.6 ADR-0066 created: `docs/architecture/adr/ADR-0066-audit-retention-and-traceability.md`
 -->

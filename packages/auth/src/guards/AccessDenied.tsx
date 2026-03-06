@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { AccessRequestSubmitter, RequestAccessSubmission } from './requestAccess.js';
+import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
 
 /**
  * UI contract for structured access-denied responses.
@@ -67,12 +68,34 @@ export function AccessDenied({
 }: AccessDeniedProps): ReactNode {
   const [submissionMessage, setSubmissionMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const auditLogged = useRef(false);
   const model = buildAccessDeniedActionModel({
     onGoHome,
     onGoBack,
     onRequestAccess,
     onSubmitAccessRequest,
   });
+
+  useEffect(() => {
+    if (auditLogged.current) {
+      return;
+    }
+
+    auditLogged.current = true;
+    // PH5.13: access-denied visibility requires a dedicated trace event.
+    recordStructuredAuditEvent({
+      eventType: 'access-denied',
+      actorId: 'unknown-user',
+      subjectUserId: 'unknown-user',
+      source: 'guard',
+      action: requestAccessSeed?.targetPath,
+      outcome: 'denied',
+      details: {
+        message,
+        reason: requestAccessSeed?.reason,
+      },
+    });
+  }, [message, requestAccessSeed]);
 
   const submitAccessRequest = async (): Promise<void> => {
     if (!onSubmitAccessRequest || !requestAccessSeed || submitting) {
@@ -84,6 +107,19 @@ export function AccessDenied({
       const result = await onSubmitAccessRequest({
         ...requestAccessSeed,
         requestedAt: new Date().toISOString(),
+      });
+      recordStructuredAuditEvent({
+        eventType: 'request-submitted',
+        actorId: 'unknown-user',
+        subjectUserId: 'unknown-user',
+        source: 'guard',
+        action: requestAccessSeed.targetPath,
+        outcome: result.success ? 'pending' : 'failure',
+        details: {
+          fromAccessDenied: true,
+          reason: requestAccessSeed.reason,
+          submissionMessage: result.message,
+        },
       });
       setSubmissionMessage(
         result.success

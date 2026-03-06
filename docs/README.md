@@ -90,6 +90,10 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0060 | Accepted | [ADR-0060-controlled-degraded-mode.md](./architecture/adr/ADR-0060-controlled-degraded-mode.md) |
 | ADR-0061 | Accepted | [ADR-0061-guards-redirects-and-recovery-surfaces.md](./architecture/adr/ADR-0061-guards-redirects-and-recovery-surfaces.md) |
 | ADR-0062 | Accepted | [ADR-0062-protected-feature-registration-contract.md](./architecture/adr/ADR-0062-protected-feature-registration-contract.md) |
+| ADR-0063 | Accepted | [ADR-0063-access-control-backend-and-data-model.md](./architecture/adr/ADR-0063-access-control-backend-and-data-model.md) |
+| ADR-0064 | Accepted | [ADR-0064-minimal-production-admin-ux.md](./architecture/adr/ADR-0064-minimal-production-admin-ux.md) |
+| ADR-0065 | Accepted | [ADR-0065-approval-renewal-and-emergency-access-workflows.md](./architecture/adr/ADR-0065-approval-renewal-and-emergency-access-workflows.md) |
+| ADR-0066 | Accepted | [ADR-0066-audit-retention-and-traceability.md](./architecture/adr/ADR-0066-audit-retention-and-traceability.md) |
 
 ## Conventions
 

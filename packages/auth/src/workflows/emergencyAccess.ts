@@ -12,6 +12,7 @@ import type {
   StructuredAccessOverrideRequest,
 } from '../types.js';
 import { createAccessControlAuditEvent } from '../backend/accessControlModel.js';
+import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
 
 /**
  * Strict emergency workflow policy with short expiration and review boundaries.
@@ -140,6 +141,8 @@ export function runEmergencyAccessWorkflow(
     },
   };
 
+  logEmergencyAudit(command, override.id);
+
   return {
     ok: true,
     message: 'Emergency access granted with mandatory post-action review.',
@@ -148,10 +151,15 @@ export function runEmergencyAccessWorkflow(
     audit: mergeAudits(
       approval.audit,
       createAccessControlAuditEvent({
-        eventType: 'override-review-flagged',
+        eventType: 'review-flag-generated',
         actorId: command.requesterId,
         subjectUserId: command.targetUserId,
+        source: 'workflow',
         overrideId: override.id,
+        requestId: command.requestId,
+        featureId: command.targetFeatureId,
+        action: command.targetAction,
+        outcome: 'pending',
         details: {
           emergency: true,
           postReviewRequired: true,
@@ -172,4 +180,42 @@ function mergeAudits(
   }
 
   return [primary, secondary];
+}
+
+/**
+ * PH5.13 event fan-out: emergency usage and review flag generation.
+ */
+function logEmergencyAudit(command: AccessOverrideEmergencyCommand, overrideId: string): void {
+  recordStructuredAuditEvent({
+    eventType: 'emergency-access-used',
+    actorId: command.requesterId,
+    subjectUserId: command.targetUserId,
+    source: 'workflow',
+    requestId: command.requestId,
+    overrideId,
+    featureId: command.targetFeatureId,
+    action: command.targetAction,
+    outcome: 'success',
+    details: {
+      requesterRoles: command.requesterRoles,
+      boundaryBypassReason: command.boundaryBypassReason,
+    },
+    occurredAt: command.requestedAt,
+  });
+
+  recordStructuredAuditEvent({
+    eventType: 'review-flag-generated',
+    actorId: command.requesterId,
+    subjectUserId: command.targetUserId,
+    source: 'workflow',
+    requestId: command.requestId,
+    overrideId,
+    featureId: command.targetFeatureId,
+    action: command.targetAction,
+    outcome: 'pending',
+    details: {
+      reason: 'Emergency access requires mandatory post-action review.',
+    },
+    occurredAt: command.requestedAt,
+  });
 }

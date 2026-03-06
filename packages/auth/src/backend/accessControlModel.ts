@@ -1,6 +1,8 @@
 import type {
   AccessControlAuditEventRecord,
+  AccessControlAuditEventSource,
   AccessControlAuditEventType,
+  AccessControlAuditOutcome,
   AccessControlOverrideReviewMetadata,
   AccessControlRecordStatus,
   AccessOverrideExpirationMetadata,
@@ -9,6 +11,7 @@ import type {
   BaseRoleDefinitionVersionDiff,
   RenewalState,
 } from '../types.js';
+import { createStructuredAuditEvent } from '../audit/auditLogger.js';
 
 /**
  * Create a normalized base-role definition owned by HB Intel access-control data.
@@ -86,21 +89,34 @@ export function createAccessControlAuditEvent(params: {
   eventType: AccessControlAuditEventType;
   actorId: string;
   subjectUserId: string;
+  runtimeMode?: AccessControlAuditEventRecord['runtimeMode'];
+  source?: AccessControlAuditEventSource;
+  correlationId?: string;
   overrideId?: string;
+  requestId?: string;
   roleId?: string;
+  featureId?: string;
+  action?: string;
+  outcome?: AccessControlAuditOutcome;
   details?: Record<string, unknown>;
   occurredAt?: string;
 }): AccessControlAuditEventRecord {
-  return {
-    id: createAuditEventId(params.eventType),
+  return createStructuredAuditEvent({
     eventType: params.eventType,
     actorId: params.actorId,
     subjectUserId: params.subjectUserId,
+    runtimeMode: params.runtimeMode,
+    source: params.source ?? 'backend',
+    correlationId: params.correlationId,
     overrideId: params.overrideId,
+    requestId: params.requestId,
     roleId: params.roleId,
+    featureId: params.featureId,
+    action: params.action,
+    outcome: params.outcome,
     details: params.details,
     occurredAt: params.occurredAt ?? new Date().toISOString(),
-  };
+  });
 }
 
 /**
@@ -145,9 +161,4 @@ function normalizeGrants(grants: string[]): string[] {
         .filter((grant) => grant.length > 0),
     ),
   ).sort();
-}
-
-function createAuditEventId(eventType: AccessControlAuditEventType): string {
-  const seed = Math.random().toString(36).slice(2, 10);
-  return `ace-${eventType}-${seed}`;
 }

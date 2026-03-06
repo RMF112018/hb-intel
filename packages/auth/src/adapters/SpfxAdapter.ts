@@ -13,6 +13,7 @@ import {
   normalizeIdentityToSession,
   restoreSessionWithinPolicy,
 } from './sessionNormalization.js';
+import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
 
 /**
  * SPFx adapter implementation for `spfx-context` runtime mode.
@@ -61,7 +62,20 @@ export class SpfxAdapter implements IAuthAdapter {
     session: NormalizedAuthSession | null,
     policy: SessionRestorePolicy,
   ): Promise<SessionRestoreResult> {
-    return restoreSessionWithinPolicy(session, policy);
+    const result = restoreSessionWithinPolicy(session, policy);
+    recordStructuredAuditEvent({
+      eventType: result.outcome === 'restored' ? 'session-restore-success' : 'session-restore-failure',
+      actorId: session?.user.id ?? 'system',
+      subjectUserId: session?.user.id ?? 'system',
+      runtimeMode: this.mode,
+      source: 'adapter',
+      outcome: result.outcome === 'restored' ? 'success' : 'failure',
+      details: {
+        provider: 'spfx',
+        outcome: result.outcome,
+      },
+    });
+    return result;
   }
 }
 

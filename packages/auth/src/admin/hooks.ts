@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  buildAuditOperationalVisibility,
+  getStructuredAuditEvents,
+  sortAuditEventsNewestFirst,
+} from '../audit/auditLogger.js';
+import {
   defaultAccessControlAdminRepository,
 } from './inMemoryRepository.js';
 import type {
+  AccessControlAdminAuditVisibility,
   AccessControlAdminQuery,
   AccessControlAdminRepository,
   AccessControlAdminSnapshot,
+  AccessControlAuditEventRecord,
 } from '../types.js';
 
 /**
@@ -68,5 +75,32 @@ export function useAdminAccessControlData(params?: {
     loading,
     error,
     refresh,
+    auditVisibility: toAdminAuditOperationalVisibility(snapshot?.auditEvents),
   };
+}
+
+/**
+ * Build Phase 5.13 operational audit visibility from current admin snapshot
+ * plus centralized auth/workflow audit stream entries.
+ */
+export function toAdminAuditOperationalVisibility(
+  auditEvents?: AccessControlAuditEventRecord[],
+): AccessControlAdminAuditVisibility {
+  const merged = mergeAuditEvents(auditEvents ?? [], getStructuredAuditEvents());
+  return buildAuditOperationalVisibility({
+    events: merged,
+  });
+}
+
+function mergeAuditEvents(
+  left: AccessControlAuditEventRecord[],
+  right: AccessControlAuditEventRecord[],
+): AccessControlAuditEventRecord[] {
+  const byId = new Map<string, AccessControlAuditEventRecord>();
+
+  for (const event of [...left, ...right]) {
+    byId.set(event.eventId, event);
+  }
+
+  return sortAuditEventsNewestFirst(Array.from(byId.values()));
 }

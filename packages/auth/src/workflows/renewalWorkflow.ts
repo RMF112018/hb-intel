@@ -9,6 +9,7 @@ import type {
   AccessOverrideRequestPolicy,
   StructuredAccessOverrideRequest,
 } from '../types.js';
+import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
 
 /**
  * Determine whether a currently active override has expired.
@@ -76,6 +77,40 @@ export function runRenewalWorkflow(params: {
       message: approval.message,
     };
   }
+
+  recordStructuredAuditEvent({
+    eventType: 'override-renewed',
+    actorId: params.approvalCommand.reviewerId,
+    subjectUserId: request.targetUserId,
+    source: 'workflow',
+    requestId: request.requestId,
+    overrideId: approval.override.id,
+    featureId: request.targetFeatureId,
+    action: request.targetAction,
+    outcome: 'success',
+    details: {
+      previousRequestId: request.renewalOfRequestId,
+      requestedExpiresAt: request.requestedExpiresAt,
+    },
+    occurredAt: params.approvalCommand.reviewedAt ?? request.requestedAt,
+  });
+
+  recordStructuredAuditEvent({
+    eventType: 'override-modified',
+    actorId: params.approvalCommand.reviewerId,
+    subjectUserId: request.targetUserId,
+    source: 'workflow',
+    requestId: request.requestId,
+    overrideId: approval.override.id,
+    featureId: request.targetFeatureId,
+    action: request.targetAction,
+    outcome: 'success',
+    details: {
+      modification: 'renewal-expiration-update',
+      requestedExpiresAt: request.requestedExpiresAt,
+    },
+    occurredAt: params.approvalCommand.reviewedAt ?? request.requestedAt,
+  });
 
   return {
     ok: true,

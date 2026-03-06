@@ -277,17 +277,21 @@ function buildDefaultOverrides(): AccessControlOverrideRecord[] {
 function buildDefaultAudits(): AccessControlAuditEventRecord[] {
   return [
     createAccessControlAuditEvent({
-      eventType: 'override-requested',
+      eventType: 'request-submitted',
       actorId: 'user-pm-01',
       subjectUserId: 'user-pm-01',
       overrideId: 'ovr-1001',
+      source: 'admin',
+      outcome: 'pending',
       occurredAt: '2026-03-05T09:00:00.000Z',
     }),
     createAccessControlAuditEvent({
-      eventType: 'override-review-flagged',
+      eventType: 'review-flag-generated',
       actorId: 'policy-engine',
       subjectUserId: 'user-pm-01',
       overrideId: 'ovr-1003',
+      source: 'admin',
+      outcome: 'pending',
       occurredAt: '2026-03-06T08:00:00.000Z',
     }),
   ];

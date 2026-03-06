@@ -33,6 +33,7 @@ describe('overrideApproval workflow', () => {
     expect(result.ok).toBe(true);
     expect(result.override?.approval.state).toBe('approved');
     expect(result.override?.expiration.expiresAt).toBeTruthy();
+    expect(result.audit?.eventType).toBe('request-approved');
   });
 
   it('blocks permanent access when explicit justification is missing', () => {
@@ -58,5 +59,19 @@ describe('overrideApproval workflow', () => {
     });
 
     expect(result.ok).toBe(false);
+  });
+
+  it('emits request-rejected when rejection succeeds', () => {
+    const result = applyOverrideApprovalAction({
+      request: createRequest(),
+      command: {
+        reviewerId: 'admin-1',
+        decision: 'reject',
+        rejectionReason: 'Insufficient business justification for elevated access.',
+      },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.audit?.eventType).toBe('request-rejected');
   });
 });

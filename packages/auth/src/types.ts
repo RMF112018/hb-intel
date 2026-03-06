@@ -555,31 +555,98 @@ export interface AccessOverrideRequest {
 }
 
 /**
- * Access-control audit event taxonomy for governance and traceability flows.
+ * Canonical Phase 5.13 audit event taxonomy covering required auth and
+ * access-governance traceability actions.
+ *
+ * Traceability:
+ * - PH5.13-Auth-Shell-Plan.md §5.13 item 1
+ * - PH5-Auth-Shell-Plan.md locked Option C (structured audit trail)
  */
 export type AccessControlAuditEventType =
-  | 'override-requested'
-  | 'override-approved'
-  | 'override-rejected'
+  | 'sign-in'
+  | 'sign-out'
+  | 'session-restore-success'
+  | 'session-restore-failure'
+  | 'access-denied'
+  | 'request-submitted'
+  | 'request-approved'
+  | 'request-rejected'
+  | 'override-created'
+  | 'override-modified'
   | 'override-revoked'
   | 'override-archived'
+  | 'override-expired'
   | 'override-renewed'
-  | 'override-review-flagged'
-  | 'override-review-resolved'
+  | 'emergency-access-used'
+  | 'review-flag-generated'
+  | 'review-flag-resolved'
+  | 'admin-access-action'
   | 'base-role-updated';
+
+/**
+ * Structured source classification for audit event producers.
+ */
+export type AccessControlAuditEventSource =
+  | 'auth-store'
+  | 'adapter'
+  | 'guard'
+  | 'workflow'
+  | 'admin'
+  | 'backend'
+  | 'system';
+
+/**
+ * Outcome shape required by governance and troubleshooting workflows.
+ */
+export type AccessControlAuditOutcome = 'success' | 'failure' | 'denied' | 'pending';
 
 /**
  * Audit record payload for key access-control backend events.
  */
 export interface AccessControlAuditEventRecord {
+  /**
+   * Compatibility alias retained for pre-5.13 call sites.
+   * Use `eventId` in new code.
+   */
   id: string;
+  eventId: string;
   eventType: AccessControlAuditEventType;
   actorId: string;
   subjectUserId: string;
+  runtimeMode: CanonicalAuthMode | 'unknown';
+  source: AccessControlAuditEventSource;
+  correlationId: string;
   overrideId?: string;
+  requestId?: string;
   roleId?: string;
+  featureId?: string;
+  action?: string;
+  outcome: AccessControlAuditOutcome;
   details?: Record<string, unknown>;
   occurredAt: string;
+}
+
+/**
+ * Retention policy for Phase 5.13 audit records.
+ *
+ * Deferred path:
+ * - Future event-type tiering is intentionally documented but not enabled in
+ *   Phase 5 per locked Option C scope.
+ */
+export interface AccessControlAuditRetentionPolicy {
+  activeWindowDays: number;
+  archiveStrategy: 'indefinite-archive';
+  futureTieringDocumented: true;
+}
+
+/**
+ * Retention partition output for operational visibility.
+ */
+export interface AccessControlAuditRetentionSnapshot {
+  active: AccessControlAuditEventRecord[];
+  archived: AccessControlAuditEventRecord[];
+  policy: AccessControlAuditRetentionPolicy;
+  generatedAt: string;
 }
 
 /**
@@ -686,6 +753,17 @@ export interface AccessControlAdminSnapshot {
   roleChangeReviewQueue: AccessControlOverrideRecord[];
   emergencyReviewQueue: AccessControlOverrideRecord[];
   auditEvents: AccessControlAuditEventRecord[];
+}
+
+/**
+ * Minimal operational visibility summary for Phase 5 admin scope.
+ */
+export interface AccessControlAdminAuditVisibility {
+  generatedAt: string;
+  activeCount: number;
+  archivedCount: number;
+  recentEvents: AccessControlAuditEventRecord[];
+  policy: AccessControlAuditRetentionPolicy;
 }
 
 /**

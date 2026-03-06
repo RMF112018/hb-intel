@@ -48,5 +48,6 @@ describe('emergencyAccess workflow', () => {
     expect(result.override?.emergency).toBe(true);
     expect(result.override?.review.reviewRequired).toBe(true);
     expect(result.audit?.length).toBe(2);
+    expect(result.audit?.some((event) => event.eventType === 'review-flag-generated')).toBe(true);
   });
 });

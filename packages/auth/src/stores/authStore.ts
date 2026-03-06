@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
+import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
 import type {
   AuthBootstrapSelectorResult,
   AuthFailure,
@@ -102,6 +103,22 @@ export const useAuthStore = create<AuthStoreSlice>((set) => ({
       const hasSession = Boolean(nextSession);
       const permissionsReady = hasSession;
 
+      recordStructuredAuditEvent({
+        eventType: result.outcome === 'restored' ? 'session-restore-success' : 'session-restore-failure',
+        actorId: nextSession?.user.id ?? state.session?.user.id ?? 'system',
+        subjectUserId: nextSession?.user.id ?? state.session?.user.id ?? 'system',
+        runtimeMode: nextSession?.runtimeMode ?? 'unknown',
+        source: 'auth-store',
+        correlationId: `restore-${state.restoreState.lastAttemptedAt ?? 'unknown'}`,
+        outcome: result.outcome === 'restored' ? 'success' : 'failure',
+        details: {
+          outcome: result.outcome,
+          shellTransition: result.shellStatusTransition,
+          failureCode: result.failure?.code,
+          failureMessage: result.failure?.message,
+        },
+      });
+
       return {
         ...state,
         lifecyclePhase:
@@ -134,41 +151,71 @@ export const useAuthStore = create<AuthStoreSlice>((set) => ({
     }),
 
   signInSuccess: (session: NormalizedAuthSession) =>
-    set((state) => ({
-      ...state,
-      lifecyclePhase: 'authenticated',
-      session,
-      runtimeMode: session.runtimeMode,
-      currentUser: session.user,
-      isLoading: false,
-      structuredError: null,
-      error: null,
-      shellBootstrap: {
-        authReady: true,
-        permissionsReady: true,
-        shellReadyToRender: true,
-      },
-    })),
+    set((state) => {
+      recordStructuredAuditEvent({
+        eventType: 'sign-in',
+        actorId: session.user.id,
+        subjectUserId: session.user.id,
+        runtimeMode: session.runtimeMode,
+        source: 'auth-store',
+        correlationId: `signin-${session.issuedAt}`,
+        outcome: 'success',
+        details: {
+          providerIdentityRef: session.providerIdentityRef,
+          roles: session.resolvedRoles,
+        },
+        occurredAt: session.validatedAt,
+      });
+
+      return {
+        ...state,
+        lifecyclePhase: 'authenticated',
+        session,
+        runtimeMode: session.runtimeMode,
+        currentUser: session.user,
+        isLoading: false,
+        structuredError: null,
+        error: null,
+        shellBootstrap: {
+          authReady: true,
+          permissionsReady: true,
+          shellReadyToRender: true,
+        },
+      };
+    }),
 
   signOut: () =>
-    set((state) => ({
-      ...state,
-      lifecyclePhase: 'signed-out',
-      session: null,
-      currentUser: null,
-      structuredError: null,
-      error: null,
-      isLoading: false,
-      restoreState: {
-        ...state.restoreState,
-        inFlight: false,
-      },
-      shellBootstrap: {
-        authReady: true,
-        permissionsReady: false,
-        shellReadyToRender: false,
-      },
-    })),
+    set((state) => {
+      const signer = state.session?.user.id ?? state.currentUser?.id ?? 'system';
+      recordStructuredAuditEvent({
+        eventType: 'sign-out',
+        actorId: signer,
+        subjectUserId: signer,
+        runtimeMode: state.session?.runtimeMode ?? 'unknown',
+        source: 'auth-store',
+        correlationId: `signout-${new Date().toISOString()}`,
+        outcome: 'success',
+      });
+
+      return {
+        ...state,
+        lifecyclePhase: 'signed-out',
+        session: null,
+        currentUser: null,
+        structuredError: null,
+        error: null,
+        isLoading: false,
+        restoreState: {
+          ...state.restoreState,
+          inFlight: false,
+        },
+        shellBootstrap: {
+          authReady: true,
+          permissionsReady: false,
+          shellReadyToRender: false,
+        },
+      };
+    }),
 
   markReauthRequired: (failure: AuthFailure | null = null) =>
     set((state) => ({

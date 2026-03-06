@@ -13,6 +13,7 @@ import {
 } from '../backend/accessControlModel.js';
 import { createOverrideRequest } from '../backend/overrideRecord.js';
 import { toOverrideRequestInput } from './overrideRequest.js';
+import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
 
 /**
  * Default approval policy for Phase 5.12 standard override governance.
@@ -32,7 +33,27 @@ export const DEFAULT_OVERRIDE_APPROVAL_POLICY: AccessOverrideApprovalPolicy = {
 export function createPendingOverrideFromRequest(
   request: StructuredAccessOverrideRequest,
 ): AccessControlOverrideRecord {
-  return createOverrideRequest(toOverrideRequestInput(request));
+  const pending = createOverrideRequest(toOverrideRequestInput(request));
+
+  // PH5.13: override creation is tracked separately from request submission.
+  recordStructuredAuditEvent({
+    eventType: 'override-created',
+    actorId: request.requesterId,
+    subjectUserId: request.targetUserId,
+    source: 'workflow',
+    requestId: request.requestId,
+    overrideId: pending.id,
+    featureId: request.targetFeatureId,
+    action: request.targetAction,
+    outcome: 'success',
+    details: {
+      baseRoleId: request.baseRoleId,
+      requestedExpiresAt: request.requestedExpiresAt,
+    },
+    occurredAt: request.requestedAt,
+  });
+
+  return pending;
 }
 
 /**
@@ -94,7 +115,7 @@ function approveOverride(
     decision: command.decision,
     message: 'Override approved with governed expiration policy.',
     override: updated,
-    audit: createDecisionAudit(updated, command, 'override-approved', {
+    audit: createDecisionAudit(updated, command, 'request-approved', {
       expiresAt: updated.expiration.expiresAt,
       permanent: command.markPermanent ?? false,
     }),
@@ -137,7 +158,7 @@ function rejectOverride(
     decision: 'reject',
     message: 'Override rejected.',
     override: updated,
-    audit: createDecisionAudit(updated, command, 'override-rejected', { reason }),
+    audit: createDecisionAudit(updated, command, 'request-rejected', { reason }),
   };
 }
 
@@ -158,17 +179,48 @@ function resolveApprovedExpiration(
 function createDecisionAudit(
   override: AccessControlOverrideRecord,
   command: AccessOverrideApprovalActionCommand,
-  eventType: Extract<AccessControlAuditEventRecord['eventType'], 'override-approved' | 'override-rejected'>,
+  eventType: Extract<AccessControlAuditEventRecord['eventType'], 'request-approved' | 'request-rejected'>,
   details?: Record<string, unknown>,
 ): AccessControlAuditEventRecord {
-  return createAccessControlAuditEvent({
+  const outcome = eventType === 'request-approved' ? 'success' : 'denied';
+  const event = createAccessControlAuditEvent({
     eventType,
     actorId: command.reviewerId,
     subjectUserId: override.targetUserId,
     overrideId: override.id,
+    source: 'workflow',
+    outcome,
     details,
     occurredAt: command.reviewedAt,
   });
+
+  recordStructuredAuditEvent({
+    eventType,
+    actorId: command.reviewerId,
+    subjectUserId: override.targetUserId,
+    source: 'workflow',
+    overrideId: override.id,
+    outcome,
+    details,
+    occurredAt: command.reviewedAt,
+  });
+
+  if (eventType === 'request-rejected') {
+    recordStructuredAuditEvent({
+      eventType: 'override-revoked',
+      actorId: command.reviewerId,
+      subjectUserId: override.targetUserId,
+      source: 'workflow',
+      overrideId: override.id,
+      outcome: 'success',
+      details: {
+        reason: details?.reason,
+      },
+      occurredAt: command.reviewedAt,
+    });
+  }
+
+  return event;
 }
 
 /**

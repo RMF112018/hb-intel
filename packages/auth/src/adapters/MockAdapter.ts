@@ -13,6 +13,7 @@ import {
   normalizeIdentityToSession,
   restoreSessionWithinPolicy,
 } from './sessionNormalization.js';
+import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
 
 /**
  * Mock/dev override adapter for local and test runtime scenarios.
@@ -61,7 +62,20 @@ export class MockAdapter implements IAuthAdapter {
     session: NormalizedAuthSession | null,
     policy: SessionRestorePolicy,
   ): Promise<SessionRestoreResult> {
-    return restoreSessionWithinPolicy(session, policy);
+    const result = restoreSessionWithinPolicy(session, policy);
+    recordStructuredAuditEvent({
+      eventType: result.outcome === 'restored' ? 'session-restore-success' : 'session-restore-failure',
+      actorId: session?.user.id ?? this.mockUser.id,
+      subjectUserId: session?.user.id ?? this.mockUser.id,
+      runtimeMode: this.mode,
+      source: 'adapter',
+      outcome: result.outcome === 'restored' ? 'success' : 'failure',
+      details: {
+        provider: this.mode,
+        outcome: result.outcome,
+      },
+    });
+    return result;
   }
 }
 

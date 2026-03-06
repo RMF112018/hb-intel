@@ -5,6 +5,7 @@ import type {
   StructuredAccessOverrideRequest,
   StructuredAccessOverrideRequestCommand,
 } from '../types.js';
+import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
 
 /**
  * Default policy for standard override request intake.
@@ -96,7 +97,7 @@ export function createStructuredOverrideRequest(
   const requestedAt = command.requestedAt ?? new Date().toISOString();
   const requestedExpiresAt = resolveRequestedExpiration(command, policy, requestedAt);
 
-  return {
+  const request: StructuredAccessOverrideRequest = {
     requestId: command.requestId,
     targetUserId: command.targetUserId,
     baseRoleId: command.baseRoleId,
@@ -113,6 +114,27 @@ export function createStructuredOverrideRequest(
     requestedExpiresAt,
     renewalOfRequestId: command.renewalOfRequestId,
   };
+
+  // PH5.13: every access request submission is captured as structured audit data.
+  recordStructuredAuditEvent({
+    eventType: 'request-submitted',
+    actorId: request.requesterId,
+    subjectUserId: request.targetUserId,
+    source: 'workflow',
+    requestId: request.requestId,
+    featureId: request.targetFeatureId,
+    action: request.targetAction,
+    outcome: 'pending',
+    details: {
+      baseRoleId: request.baseRoleId,
+      requestedChange: request.requestedChange,
+      renewalOfRequestId: request.renewalOfRequestId,
+      requestedExpiresAt: request.requestedExpiresAt,
+    },
+    occurredAt: request.requestedAt,
+  });
+
+  return request;
 }
 
 /**

@@ -481,3 +481,25 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - `pnpm --filter @hbc/auth exec vitest run packages/auth/src/workflows/overrideRequest.test.ts packages/auth/src/workflows/overrideApproval.test.ts packages/auth/src/workflows/renewalWorkflow.test.ts packages/auth/src/workflows/emergencyAccess.test.ts` - BLOCKED (workspace Vitest startup cannot resolve package-local `vite` in generated temp config).
 
 ---
+
+## Phase 5.13 Progress Notes
+
+- 5.13.1 completed — structured PH5.13 audit primitives implemented (`packages/auth/src/audit/auditLogger.ts`) with canonical event taxonomy spanning sign-in/out, restore, access denied, request lifecycle, override lifecycle, emergency use, review flags, and admin access-state actions — 2026-03-06.
+- 5.13.2 completed — audit metadata contract expanded in `packages/auth/src/types.ts` to enforce eventId/runtime/source/correlation/outcome plus request/override/feature/action context and troubleshooting details — 2026-03-06.
+- 5.13.3 completed — retention policy utilities added with locked Option C defaults (180-day active operational history + indefinite archived strategy) and deferred future event-type tiering documentation — 2026-03-06.
+- 5.13.4 completed — audit logging integrated into auth store/adapters, access-denied submission surfaces, override approval/renewal/emergency flows, and admin queue workflows with structured admin-action traceability — 2026-03-06.
+- 5.13.5 completed — initial admin operational audit visibility delivered through retention-aware hook projection (`toAdminAuditOperationalVisibility`) and merged centralized + repository audit streams — 2026-03-06.
+- 5.13.6 completed — PH5.13 code/docs governance closure completed (plan updates, blueprint/foundation progress comments, ADR-0066, and build/lint/type-check verification evidence) — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.13)
+
+- [x] Success Criteria #5 advanced through structured, end-to-end audit event modeling and metadata-complete traceability across auth/access governance actions.
+- [x] Success Criteria #6 advanced through retention-backed operational audit controls and explicit override lifecycle/emergency/admin mutation audit coverage.
+- [x] Success Criteria #8 advanced by centralizing audit emission and retention visibility seams in `@hbc/auth` stores/workflows/admin surfaces.
+- [x] Success Criteria #10 advanced through Phase 5.13 documentation closure (PH5.13/PH5 notes + checklists, blueprint/foundation progress comments, ADR-0066, and verification evidence).
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth` - PASS

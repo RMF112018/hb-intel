@@ -1,3 +1,17 @@
+// Audit logging + retention (PH5.13 — structured traceability and governance)
+export {
+  DEFAULT_AUDIT_RETENTION_POLICY,
+  createStructuredAuditEvent,
+  recordStructuredAuditEvent,
+  getStructuredAuditEvents,
+  seedStructuredAuditEvents,
+  clearStructuredAuditEvents,
+  partitionAuditEventsByRetention,
+  buildAuditOperationalVisibility,
+  sortAuditEventsNewestFirst,
+} from './audit/index.js';
+export type { CreateAuditEventInput } from './audit/index.js';
+
 // Stores (Blueprint §2e — Zustand exclusively)
 export {
   useAuthStore,
@@ -78,8 +92,13 @@ export type {
   AccessControlAdminRepository,
   AccessControlAdminSection,
   AccessControlAdminSnapshot,
+  AccessControlAdminAuditVisibility,
   AccessControlAuditEventRecord,
+  AccessControlAuditEventSource,
   AccessControlAuditEventType,
+  AccessControlAuditOutcome,
+  AccessControlAuditRetentionPolicy,
+  AccessControlAuditRetentionSnapshot,
   AccessControlOverrideRecord,
   AccessControlOverrideReviewMetadata,
   AccessControlPolicySettings,
@@ -186,6 +205,7 @@ export {
   sortAuditEventsDescending,
   loadAdminAccessControlSnapshot,
   toAdminSearchQuery,
+  toAdminAuditOperationalVisibility,
   useAdminAccessControlData,
 } from './admin/index.js';
 export type { AdminAccessControlPageProps, AdminSectionDescriptor } from './admin/index.js';

@@ -13,6 +13,10 @@ describe('admin repository', () => {
     expect(snapshot.roleChangeReviewQueue.length).toBeGreaterThan(0);
     expect(snapshot.emergencyReviewQueue.length).toBeGreaterThan(0);
     expect(snapshot.auditEvents.length).toBeGreaterThan(0);
+    expect(snapshot.auditEvents[0].eventType).toBe('review-flag-generated');
+    expect(new Date(snapshot.auditEvents[0].occurredAt).getTime()).toBeGreaterThanOrEqual(
+      new Date(snapshot.auditEvents[1].occurredAt).getTime(),
+    );
   });
 
   it('filters snapshot results by search term', async () => {

@@ -206,3 +206,20 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - enables production operations through core admin workflows,
 - satisfies formal validation, audit, release, and documentation requirements,
 - and explicitly documents every deferred future expansion path so later phases can extend the platform without re-architecting the foundation.
+
+---
+
+## Phase 5.13 Progress Notes
+
+- 5.13.1 completed — structured audit logger added in `packages/auth/src/audit/auditLogger.ts` with canonical PH5.13 event taxonomy and required metadata contract (`eventId`, actor/subject attribution, source/runtime, correlation, outcome, and structured troubleshooting details) — 2026-03-06.
+- 5.13.2 completed — retention utilities implemented with locked Option C defaults (180-day active history + indefinite archive strategy) and explicit deferred documentation seam for future event-type tiering — 2026-03-06.
+- 5.13.3 completed — audit emission integrated across auth lifecycle stores/adapters, access-denied/request submission surfaces, override approval/renewal/emergency workflows, and admin state-changing actions — 2026-03-06.
+- 5.13.4 completed — basic operational admin audit visibility hook added (`toAdminAuditOperationalVisibility`) with retention-aware active/archived counts and recent-event projection — 2026-03-06.
+- 5.13.5 completed — auth package type/export surfaces updated and verification-gated with PH5.13 audit tests (`auditLogger.test.ts`, `authStore.audit.test.ts`, admin/workflow test updates) plus ADR-0066 traceability closure — 2026-03-06.
+
+## Phase 5.13 Completion Checklist
+
+- [x] Structured audit events implemented for all §5.13 required action classes.
+- [x] Structured metadata contract implemented for troubleshooting/governance traceability.
+- [x] Retention policy implemented (active history + archive strategy) with future event-tiering explicitly documented.
+- [x] Basic operational audit visibility delivered in initial admin scope.

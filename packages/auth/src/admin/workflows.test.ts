@@ -34,6 +34,7 @@ describe('admin workflows', () => {
 
     expect(result.ok).toBe(true);
     expect(result.updatedOverride?.approval.state).toBe('approved');
+    expect(result.auditEvent?.eventType).toBe('request-approved');
   });
 
   it('requires rejection reason', () => {
@@ -63,6 +64,7 @@ describe('admin workflows', () => {
 
     expect(result.ok).toBe(true);
     expect(result.updatedOverride?.expiration.renewalState).toBe('renewed');
+    expect(result.auditEvent?.eventType).toBe('override-renewed');
   });
 
   it('flags near-term expirations for renewal queue handling', () => {
@@ -86,6 +88,7 @@ describe('admin workflows', () => {
 
     expect(result.ok).toBe(true);
     expect(result.updatedOverride?.review.reviewRequired).toBe(false);
+    expect(result.auditEvent?.eventType).toBe('review-flag-resolved');
   });
 
   it('requires detailed reason for emergency review', () => {

@@ -26,5 +26,6 @@ export {
 export {
   loadAdminAccessControlSnapshot,
   toAdminSearchQuery,
+  toAdminAuditOperationalVisibility,
   useAdminAccessControlData,
 } from './hooks.js';

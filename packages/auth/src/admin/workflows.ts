@@ -4,6 +4,7 @@ import {
   createReviewMetadata,
   renewOverrideRecord,
 } from '../backend/index.js';
+import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
 import type {
   AccessControlAuditEventRecord,
   AccessControlOverrideRecord,
@@ -87,15 +88,35 @@ export function applyOverrideReviewDecision(
       approvedAt: command.reviewedAt,
     });
 
+    recordStructuredAuditEvent({
+      eventType: 'override-modified',
+      actorId: command.reviewerId,
+      subjectUserId: record.targetUserId,
+      source: 'admin',
+      overrideId: record.id,
+      outcome: 'success',
+      details: { modification: 'approval-state-updated' },
+      occurredAt: command.reviewedAt,
+    });
+    recordAdminActionAudit({
+      actorId: command.reviewerId,
+      subjectUserId: record.targetUserId,
+      overrideId: record.id,
+      action: 'override-review:approve',
+      occurredAt: command.reviewedAt,
+    });
+
     return {
       ok: true,
       message: 'Override approved.',
       updatedOverride,
       auditEvent: createAccessControlAuditEvent({
-        eventType: 'override-approved',
+        eventType: 'request-approved',
         actorId: command.reviewerId,
         subjectUserId: record.targetUserId,
         overrideId: record.id,
+        source: 'admin',
+        outcome: 'success',
       }),
     };
   }
@@ -125,15 +146,36 @@ export function applyOverrideReviewDecision(
     }),
   };
 
+  recordStructuredAuditEvent({
+    eventType: 'override-revoked',
+    actorId: command.reviewerId,
+    subjectUserId: record.targetUserId,
+    source: 'admin',
+    overrideId: record.id,
+    outcome: 'success',
+    details: { reason: rejectionReason },
+    occurredAt: command.reviewedAt,
+  });
+  recordAdminActionAudit({
+    actorId: command.reviewerId,
+    subjectUserId: record.targetUserId,
+    overrideId: record.id,
+    action: 'override-review:reject',
+    details: { reason: rejectionReason },
+    occurredAt: command.reviewedAt,
+  });
+
   return {
     ok: true,
     message: 'Override rejected.',
     updatedOverride,
     auditEvent: createAccessControlAuditEvent({
-      eventType: 'override-rejected',
+      eventType: 'request-rejected',
       actorId: command.reviewerId,
       subjectUserId: record.targetUserId,
       overrideId: record.id,
+      source: 'admin',
+      outcome: 'denied',
       details: { reason: rejectionReason },
     }),
   };
@@ -155,8 +197,49 @@ export function applyRenewalRequest(
   }
 
   try {
+    const expiration = record.expiration.expiresAt;
+    const wasExpired =
+      expiration !== undefined
+      && new Date(expiration).getTime() <= new Date().getTime();
+
+    if (wasExpired) {
+      recordStructuredAuditEvent({
+        eventType: 'override-expired',
+        actorId: record.requesterId,
+        subjectUserId: record.targetUserId,
+        source: 'admin',
+        overrideId: record.id,
+        outcome: 'success',
+        details: {
+          expiresAt: expiration,
+        },
+      });
+    }
+
     const renewed = renewOverrideRecord(record, {
       expiresAt: command.expiresAt,
+    });
+
+    recordStructuredAuditEvent({
+      eventType: 'override-modified',
+      actorId: command.reviewerId,
+      subjectUserId: record.targetUserId,
+      source: 'admin',
+      overrideId: record.id,
+      outcome: 'success',
+      details: {
+        modification: 'renewal-expiration-update',
+        expiresAt: command.expiresAt,
+      },
+      occurredAt: command.reviewedAt,
+    });
+    recordAdminActionAudit({
+      actorId: command.reviewerId,
+      subjectUserId: record.targetUserId,
+      overrideId: record.id,
+      action: 'override-renew',
+      details: { expiresAt: command.expiresAt },
+      occurredAt: command.reviewedAt,
     });
 
     return {
@@ -176,6 +259,8 @@ export function applyRenewalRequest(
         actorId: command.reviewerId,
         subjectUserId: record.targetUserId,
         overrideId: record.id,
+        source: 'admin',
+        outcome: 'success',
         details: { reason: normalizedReason, expiresAt: command.expiresAt },
       }),
     };
@@ -211,15 +296,36 @@ export function resolveRoleChangeReview(
     }),
   };
 
+  recordStructuredAuditEvent({
+    eventType: 'override-modified',
+    actorId: command.reviewerId,
+    subjectUserId: record.targetUserId,
+    source: 'admin',
+    overrideId: record.id,
+    outcome: 'success',
+    details: { modification: 'review-requirement-cleared' },
+    occurredAt: command.reviewedAt,
+  });
+  recordAdminActionAudit({
+    actorId: command.reviewerId,
+    subjectUserId: record.targetUserId,
+    overrideId: record.id,
+    action: 'review-flag-resolve',
+    details: { reason: command.reason },
+    occurredAt: command.reviewedAt,
+  });
+
   return {
     ok: true,
     message: 'Role-change review completed.',
     updatedOverride,
     auditEvent: createAccessControlAuditEvent({
-      eventType: 'override-review-resolved',
+      eventType: 'review-flag-resolved',
       actorId: command.reviewerId,
       subjectUserId: record.targetUserId,
       overrideId: record.id,
+      source: 'admin',
+      outcome: 'success',
       details: { reason: command.reason },
     }),
   };
@@ -277,4 +383,25 @@ export function sortAuditEventsDescending(
   return [...events].sort(
     (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
   );
+}
+
+function recordAdminActionAudit(params: {
+  actorId: string;
+  subjectUserId: string;
+  overrideId?: string;
+  action: string;
+  details?: Record<string, unknown>;
+  occurredAt?: string;
+}): void {
+  recordStructuredAuditEvent({
+    eventType: 'admin-access-action',
+    actorId: params.actorId,
+    subjectUserId: params.subjectUserId,
+    source: 'admin',
+    overrideId: params.overrideId,
+    action: params.action,
+    outcome: 'success',
+    details: params.details,
+    occurredAt: params.occurredAt,
+  });
 }
