@@ -222,6 +222,7 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
 - `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
 - `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm exec vitest run packages/auth/src/guards/guardResolution.test.ts packages/auth/src/guards/AccessDenied.test.ts packages/shell/src/redirectMemory.test.ts` - BLOCKED (known workspace Vitest project setup cannot resolve package-local `vite` in generated temp config).
 
 ---
 
@@ -315,6 +316,30 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - `pnpm turbo run build --filter=@hbc/shell` - PASS
 - `pnpm turbo run lint --filter=@hbc/shell` - PASS (0 errors)
 - `pnpm turbo run check-types --filter=@hbc/shell` - PASS
+
+---
+
+## Phase 5.8 Progress Notes
+
+- 5.8.1 completed — centralized guard resolver and pre-render guard boundary implemented for runtime, authenticated, role, and permission checks (`resolveGuardResolution`, `ProtectedContentGuard`) — 2026-03-06.
+- 5.8.2 completed — shared hooks implemented for user/session/runtime/permission evaluation in `@hbc/auth` and shell-status/degraded-visibility rules in `@hbc/shell` — 2026-03-06.
+- 5.8.3 completed — redirect handling expanded with intended-destination capture and safe restore fallback policy (`captureIntendedDestination`, `resolvePostGuardRedirect`) — 2026-03-06.
+- 5.8.4 completed — dedicated recovery surfaces implemented for bootstrap/loading, restore, access denied, expired session/reauth, unsupported runtime, and fatal startup failures — 2026-03-06.
+- 5.8.5 completed — request-access flow extended with typed in-app submission seam to admin review queue boundary and governance traceability updates finalized with ADR-0061 — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.8)
+
+- [x] Success Criteria #3 advanced through centralized guard/hook consumption of normalized session/runtime truth before protected render.
+- [x] Success Criteria #4 advanced through deterministic guard precedence and safe redirect capture/restore/fallback orchestration.
+- [x] Success Criteria #7 advanced through explicit recovery surfaces for reauth, unsupported runtime, and fatal startup states.
+- [x] Success Criteria #8 advanced through shared shell-status/degraded-visibility hook surfaces and centralized shell signaling.
+- [x] Success Criteria #10 advanced through Phase 5.8 documentation and governance closure (checklists, progress notes, ADR-0061, verification evidence).
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
 
 ---
 

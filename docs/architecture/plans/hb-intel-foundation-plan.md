@@ -577,4 +577,12 @@ Phase 5.7 (Controlled Degraded Mode) completed: 2026-03-06
   - 5.7.4 shell-status messaging now exposes explicit recovery state (`recovered`) when safe reconnection/authorization validation completes
   - 5.7.5 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/shell`
   - 5.7.6 ADR-0060 created: `docs/architecture/adr/ADR-0060-controlled-degraded-mode.md`
+Phase 5.8 (Guards, Redirects, and Recovery Surfaces) completed: 2026-03-06
+  - 5.8.1 centralized guard resolution and pre-render guard execution implemented for runtime/auth/role/permission checks in `@hbc/auth`
+  - 5.8.2 shared hooks expanded for current session, resolved runtime mode, permission evaluation, shell-status state, and degraded visibility rules
+  - 5.8.3 redirect policy updated for intended destination capture, safe restoration, and role-landing fallback
+  - 5.8.4 dedicated recovery surfaces implemented for bootstrap, restore, access-denied, reauth, unsupported runtime, and fatal startup outcomes
+  - 5.8.5 request-access flow extended with typed in-app admin review queue submission seam
+  - 5.8.6 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`
+  - 5.8.7 ADR-0061 created: `docs/architecture/adr/ADR-0061-guards-redirects-and-recovery-surfaces.md`
 -->

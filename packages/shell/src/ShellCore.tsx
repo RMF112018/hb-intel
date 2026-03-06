@@ -18,7 +18,7 @@ import { AppLauncher } from './AppLauncher/index.js';
 import { BackToProjectHub } from './BackToProjectHub/index.js';
 import { ProjectPicker } from './ProjectPicker/index.js';
 import { ShellLayout } from './ShellLayout/index.js';
-import { clearRedirectMemory, restoreRedirectTarget } from './redirectMemory.js';
+import { clearRedirectMemory, resolvePostGuardRedirect, restoreRedirectTarget } from './redirectMemory.js';
 import { resolveShellModeRules } from './shellModeRules.js';
 import {
   isShellStatusActionAllowed,
@@ -323,20 +323,23 @@ export function ShellCore({
       return;
     }
 
-    const restored = restoreRedirectTarget({
+    const resolvedPath = resolvePostGuardRedirect({
       runtimeMode: adapter.environment,
+      fallbackPath: landingPath,
+      isTargetAllowed: (pathname) => pathname !== currentPathname,
     });
 
-    if (restored) {
-      setLastResolvedLandingPath(restored.pathname);
-      onNavigate(restored.pathname);
+    const restored = restoreRedirectTarget({ runtimeMode: adapter.environment });
+    if (restored && restored.pathname === resolvedPath) {
+      setLastResolvedLandingPath(resolvedPath);
+      onNavigate(resolvedPath);
       clearRedirectMemory();
       return;
     }
 
     if (currentPathname === '/') {
-      setLastResolvedLandingPath(landingPath);
-      onNavigate(landingPath);
+      setLastResolvedLandingPath(resolvedPath);
+      onNavigate(resolvedPath);
     }
   }, [
     adapter.environment,

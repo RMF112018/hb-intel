@@ -88,6 +88,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0058 | Accepted | [ADR-0058-shell-composition-and-core-layout-architecture.md](./architecture/adr/ADR-0058-shell-composition-and-core-layout-architecture.md) |
 | ADR-0059 | Accepted | [ADR-0059-unified-shell-status-connectivity-bar-integration.md](./architecture/adr/ADR-0059-unified-shell-status-connectivity-bar-integration.md) |
 | ADR-0060 | Accepted | [ADR-0060-controlled-degraded-mode.md](./architecture/adr/ADR-0060-controlled-degraded-mode.md) |
+| ADR-0061 | Accepted | [ADR-0061-guards-redirects-and-recovery-surfaces.md](./architecture/adr/ADR-0061-guards-redirects-and-recovery-surfaces.md) |
 
 ## Conventions
 

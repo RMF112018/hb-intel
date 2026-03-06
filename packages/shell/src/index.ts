@@ -82,11 +82,14 @@ export type {
 } from './shellStatus.js';
 export { resolveShellModeRules } from './shellModeRules.js';
 export {
+  captureIntendedDestination,
   rememberRedirectTarget,
   restoreRedirectTarget,
+  resolvePostGuardRedirect,
   clearRedirectMemory,
   isSafeRedirectPath,
 } from './redirectMemory.js';
+export { useShellStatusState, useDegradedModeVisibilityRules } from './hooks.js';
 export {
   createDefaultShellSignOutCleanupDependencies,
   runShellSignOutCleanup,

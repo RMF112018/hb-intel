@@ -975,4 +975,12 @@ Phase 5.7 (Controlled Degraded Mode) completed: 2026-03-06
   - 5.7.3 shell-status section labels expanded for freshness/validation/restricted communication and explicit `recovered` messaging; future richer sub-states documented without implementation
   - 5.7.4 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/shell`
   - 5.7.5 ADR-0060 created: `docs/architecture/adr/ADR-0060-controlled-degraded-mode.md`
+Phase 5.8 (Guards, Redirects, and Recovery Surfaces) completed: 2026-03-06
+  - 5.8.1 centralized guard resolver + pre-render guard boundary implemented for runtime, authentication, role, and permission enforcement (`resolveGuardResolution`, `ProtectedContentGuard`)
+  - 5.8.2 shared hooks added for session/runtime/permission evaluation in `@hbc/auth` and shell-status/degraded-visibility state in `@hbc/shell`
+  - 5.8.3 redirect handling expanded with intended destination capture and safe restore fallback to role landing (`captureIntendedDestination`, `resolvePostGuardRedirect`)
+  - 5.8.4 dedicated recovery surfaces implemented for bootstrap/loading, restore, access denied, expired session/reauth, unsupported runtime, and fatal startup failures
+  - 5.8.5 request-access flow extended with typed in-app submission seam to admin review queue boundary (`RequestAccessSubmission`, `AccessRequestSubmitter`)
+  - 5.8.6 verification gates passed for scoped packages: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`
+  - 5.8.7 ADR-0061 created: `docs/architecture/adr/ADR-0061-guards-redirects-and-recovery-surfaces.md`
 -->

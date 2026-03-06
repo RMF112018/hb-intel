@@ -73,3 +73,30 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - enables production operations through core admin workflows,
 - satisfies formal validation, audit, release, and documentation requirements,
 - and explicitly documents every deferred future expansion path so later phases can extend the platform without re-architecting the foundation.
+
+---
+
+## 5.8 Success Criteria Checklist (Task 8)
+
+- [x] 5.8.1 centralized guards implemented for authenticated, role, permission, and runtime/environment checks.
+- [x] 5.8.2 centralized guard resolution executes before protected content renders.
+- [x] 5.8.3 shared hooks implemented for session/runtime/permission, shell-status state, and degraded visibility rules.
+- [x] 5.8.4 redirect handling implemented for intended destination capture, safe restore, and role-landing fallback.
+- [x] 5.8.5 dedicated recovery surfaces implemented for bootstrap, restore, access denied, reauth, unsupported runtime, and fatal startup failure.
+- [x] 5.8.6 simple request-access submission seam implemented for admin review queue integration.
+- [x] ADR-0061 created and linked to Phase 5.8 traceability.
+
+## Phase 5.8 Progress Notes
+
+- 5.8.1 completed — central guard resolution contract implemented (`resolveGuardResolution`) and pre-render guard component added (`ProtectedContentGuard`) with deterministic runtime/auth/role/permission execution order — 2026-03-06.
+- 5.8.2 completed — shared hooks expanded for current session, resolved runtime mode, and centralized permission evaluation in `@hbc/auth`; shell hooks added for shell-status state and degraded visibility rules in `@hbc/shell` — 2026-03-06.
+- 5.8.3 completed — redirect utilities extended with intended-destination capture and post-guard restore/fallback policy (`captureIntendedDestination`, `resolvePostGuardRedirect`) aligned with safe restoration rules — 2026-03-06.
+- 5.8.4 completed — dedicated recovery surfaces implemented for loading/bootstrap, session restore, expired session/reauth, unsupported runtime, and fatal startup failure — 2026-03-06.
+- 5.8.5 completed — request-access flow extended with typed admin review queue submission seam in `AccessDenied` and request-access contracts; ADR-0061 and documentation traceability updates completed — 2026-03-06.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm exec vitest run packages/auth/src/guards/guardResolution.test.ts packages/auth/src/guards/AccessDenied.test.ts packages/shell/src/redirectMemory.test.ts` - BLOCKED (known workspace Vitest project setup cannot resolve package-local `vite` in generated temp config).

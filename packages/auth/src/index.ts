@@ -25,6 +25,13 @@ export {
   PermissionGate,
   AccessDenied,
   buildAccessDeniedActionModel,
+  resolveGuardResolution,
+  ProtectedContentGuard,
+  ShellBootstrapSurface,
+  SessionRestoreSurface,
+  ExpiredSessionSurface,
+  UnsupportedRuntimeSurface,
+  FatalStartupSurface,
 } from './guards/index.js';
 export type {
   RoleGateProps,
@@ -32,10 +39,24 @@ export type {
   PermissionGateProps,
   AccessDeniedProps,
   AccessDeniedActionModel,
+  GuardFailureKind,
+  GuardResolutionInput,
+  GuardResolutionResult,
+  ProtectedContentGuardProps,
+  RequestAccessSubmission,
+  RequestAccessSubmissionResult,
+  AccessRequestSubmitter,
 } from './guards/index.js';
 
 // Hooks (Blueprint §1e — convenience hooks)
-export { useCurrentUser, usePermission, useFeatureFlag } from './hooks/index.js';
+export {
+  useCurrentUser,
+  useCurrentSession,
+  useResolvedRuntimeMode,
+  usePermission,
+  usePermissionEvaluation,
+  useFeatureFlag,
+} from './hooks/index.js';
 
 // Dual-mode auth types (PH5.2/5.3 — canonical + compatibility runtime contract)
 export type {

@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { useState } from 'react';
+import type { AccessRequestSubmitter, RequestAccessSubmission } from './requestAccess.js';
 
 /**
  * UI contract for structured access-denied responses.
@@ -12,6 +14,8 @@ export interface AccessDeniedProps {
   homeLabel?: string;
   backLabel?: string;
   requestAccessLabel?: string;
+  onSubmitAccessRequest?: AccessRequestSubmitter;
+  requestAccessSeed?: Omit<RequestAccessSubmission, 'requestedAt'>;
 }
 
 /**
@@ -21,18 +25,23 @@ export interface AccessDeniedActionModel {
   showGoHome: boolean;
   showGoBack: boolean;
   showRequestAccess: boolean;
+  showSubmitRequestAccess: boolean;
 }
 
 /**
  * Build deterministic action visibility for structured access-denied UX.
  */
 export function buildAccessDeniedActionModel(
-  props: Pick<AccessDeniedProps, 'onGoHome' | 'onGoBack' | 'onRequestAccess'>,
+  props: Pick<
+    AccessDeniedProps,
+    'onGoHome' | 'onGoBack' | 'onRequestAccess' | 'onSubmitAccessRequest'
+  >,
 ): AccessDeniedActionModel {
   return {
     showGoHome: typeof props.onGoHome === 'function',
     showGoBack: typeof props.onGoBack === 'function',
     showRequestAccess: typeof props.onRequestAccess === 'function',
+    showSubmitRequestAccess: typeof props.onSubmitAccessRequest === 'function',
   };
 }
 
@@ -53,8 +62,38 @@ export function AccessDenied({
   homeLabel = 'Go to Project Hub',
   backLabel = 'Go back',
   requestAccessLabel = 'Request access',
+  onSubmitAccessRequest,
+  requestAccessSeed,
 }: AccessDeniedProps): ReactNode {
-  const model = buildAccessDeniedActionModel({ onGoHome, onGoBack, onRequestAccess });
+  const [submissionMessage, setSubmissionMessage] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const model = buildAccessDeniedActionModel({
+    onGoHome,
+    onGoBack,
+    onRequestAccess,
+    onSubmitAccessRequest,
+  });
+
+  const submitAccessRequest = async (): Promise<void> => {
+    if (!onSubmitAccessRequest || !requestAccessSeed || submitting) {
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const result = await onSubmitAccessRequest({
+        ...requestAccessSeed,
+        requestedAt: new Date().toISOString(),
+      });
+      setSubmissionMessage(
+        result.success
+          ? result.message ?? 'Your request was submitted to the admin review queue.'
+          : result.message ?? 'Request submission failed. Please try again.',
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <section aria-live="polite" aria-label="Access denied">
@@ -66,7 +105,13 @@ export function AccessDenied({
         {model.showRequestAccess ? (
           <button onClick={onRequestAccess ?? undefined}>{requestAccessLabel}</button>
         ) : null}
+        {model.showSubmitRequestAccess ? (
+          <button onClick={() => void submitAccessRequest()} disabled={submitting}>
+            {submitting ? 'Submitting access request...' : 'Submit access request'}
+          </button>
+        ) : null}
       </div>
+      {submissionMessage ? <p>{submissionMessage}</p> : null}
     </section>
   );
 }

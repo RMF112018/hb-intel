@@ -32,6 +32,21 @@ export function rememberRedirectTarget(params: {
 }
 
 /**
+ * Capture the current protected pathname as an intended destination.
+ *
+ * This helper is used by central guard surfaces to persist a safe post-auth
+ * return target without duplicating redirect-memory semantics.
+ */
+export function captureIntendedDestination(params: {
+  pathname: string;
+  runtimeMode: ShellEnvironment;
+  now?: Date;
+  ttlMs?: number;
+}): RedirectMemoryRecord | null {
+  return rememberRedirectTarget(params);
+}
+
+/**
  * Restore redirect intent only when path, mode, and expiry checks pass.
  */
 export function restoreRedirectTarget(params: {
@@ -60,6 +75,29 @@ export function restoreRedirectTarget(params: {
   }
 
   return record;
+}
+
+/**
+ * Resolve post-guard navigation:
+ * - restore remembered target when safe and still authorized
+ * - otherwise fall back to role-landing path
+ */
+export function resolvePostGuardRedirect(params: {
+  runtimeMode: ShellEnvironment;
+  fallbackPath: string;
+  now?: Date;
+  isTargetAllowed?: (pathname: string) => boolean;
+}): string {
+  const restored = restoreRedirectTarget({
+    runtimeMode: params.runtimeMode,
+    now: params.now,
+  });
+
+  if (restored && (params.isTargetAllowed?.(restored.pathname) ?? true)) {
+    return restored.pathname;
+  }
+
+  return params.fallbackPath;
 }
 
 /**
