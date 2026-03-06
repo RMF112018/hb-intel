@@ -1,6 +1,18 @@
 import { AccessDenied, useAuthStore } from '@hbc/auth';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import {
+  resolveDegradedEligibility,
+  resolveRestrictedZones,
+  resolveSafeRecoveryState,
+  resolveSensitiveActionPolicy,
+  type DegradedEligibilityResult,
+  type ShellRestrictedZoneInput,
+  type ShellRestrictedZoneState,
+  type ShellRecoveryState,
+  type ShellSensitiveActionIntent,
+  type ShellSensitiveActionPolicyResult,
+} from './degradedMode.js';
 import type { HeaderBarProps } from './HeaderBar/index.js';
 import { AppLauncher } from './AppLauncher/index.js';
 import { BackToProjectHub } from './BackToProjectHub/index.js';
@@ -60,7 +72,20 @@ export interface ShellCoreProps {
   onLearnMore?: () => void;
   onShellStatusAction?: (action: ShellStatusAction, snapshot: ShellStatusSnapshot) => void;
   connectivitySignal?: ShellConnectivitySignal;
+  /** Cached section metadata used for degraded eligibility/freshness labeling. */
   degradedSections?: readonly ShellDegradedSectionInput[];
+  /** Explicit action intents for centralized degraded-mode safety blocking. */
+  sensitiveActionIntents?: readonly ShellSensitiveActionIntent[];
+  /** Restricted-zone metadata rendered visibly while degraded mode is active. */
+  restrictedZones?: readonly ShellRestrictedZoneInput[];
+  /** Optional observer for resolved centralized sensitive-action policy. */
+  onSensitiveActionPolicyResolved?: (policy: ShellSensitiveActionPolicyResult) => void;
+  /** Optional observer for centralized restricted-zone state. */
+  onRestrictedZonesResolved?: (zones: readonly ShellRestrictedZoneState[]) => void;
+  /** Optional observer for explicit safe recovery transitions. */
+  onRecoveryStateResolved?: (state: ShellRecoveryState) => void;
+  /** Optional custom renderer for restricted-zone communication surfaces. */
+  renderRestrictedZones?: (zones: readonly ShellRestrictedZoneState[]) => ReactNode;
   forcedExperienceState?: Exclude<ShellExperienceState, 'access-denied'> | null;
 }
 
@@ -83,6 +108,7 @@ export function resolveRoleLandingPath(resolvedRoles: readonly string[]): string
 export function resolveShellExperienceState(params: {
   lifecyclePhase: string;
   routeDecision: ShellRouteEnforcementDecision | null;
+  degradedEligibility?: DegradedEligibilityResult;
   forcedExperienceState?: Exclude<ShellExperienceState, 'access-denied'> | null;
 }): ShellExperienceState {
   if (params.routeDecision && !params.routeDecision.allow) {
@@ -98,7 +124,7 @@ export function resolveShellExperienceState(params: {
   }
 
   if (params.lifecyclePhase === 'error' || params.lifecyclePhase === 'reauth-required') {
-    return 'degraded';
+    return params.degradedEligibility?.eligible === true ? 'degraded' : 'recovery';
   }
 
   return 'ready';
@@ -137,6 +163,12 @@ export function ShellCore({
   onShellStatusAction,
   connectivitySignal,
   degradedSections = [],
+  sensitiveActionIntents = [],
+  restrictedZones = [],
+  onSensitiveActionPolicyResolved,
+  onRestrictedZonesResolved,
+  onRecoveryStateResolved,
+  renderRestrictedZones,
   forcedExperienceState = null,
 }: ShellCoreProps): ReactNode {
   const lifecyclePhase = useAuthStore((s) => s.lifecyclePhase);
@@ -148,18 +180,59 @@ export function ShellCore({
   const setActiveWorkspaceSnapshot = useShellCoreStore((s) => s.setActiveWorkspaceSnapshot);
   const setLastResolvedLandingPath = useShellCoreStore((s) => s.setLastResolvedLandingPath);
   const [routeDecision, setRouteDecision] = useState<ShellRouteEnforcementDecision | null>(null);
+  const [wasDegraded, setWasDegraded] = useState(false);
 
   const rules = useMemo(() => resolveShellModeRules(adapter.environment), [adapter.environment]);
   const resolvedRoles = session?.resolvedRoles ?? [];
   const landingPath = resolveRoleLandingPath(resolvedRoles);
+  // Controlled degraded mode is gated by strict policy, not direct lifecycle state.
+  const degradedEligibility = useMemo(
+    () =>
+      resolveDegradedEligibility({
+        lifecyclePhase,
+        sessionValidatedAt: session?.validatedAt ?? null,
+        sections: degradedSections,
+      }),
+    [degradedSections, lifecyclePhase, session?.validatedAt],
+  );
   const experienceState = resolveShellExperienceState({
     lifecyclePhase,
     routeDecision,
+    degradedEligibility,
     forcedExperienceState,
   });
   const resolvedConnectivitySignal: ShellConnectivitySignal =
     connectivitySignal ??
     (typeof navigator !== 'undefined' && navigator.onLine ? 'connected' : 'reconnecting');
+  // Centralized sensitive-action resolver enforces blocked categories in degraded mode.
+  const sensitiveActionPolicy = useMemo(
+    () =>
+      resolveSensitiveActionPolicy({
+        isDegradedMode: experienceState === 'degraded',
+        intents: sensitiveActionIntents,
+      }),
+    [experienceState, sensitiveActionIntents],
+  );
+  // Restricted zones remain visible in degraded mode to make constraints explicit.
+  const resolvedRestrictedZones = useMemo(
+    () =>
+      resolveRestrictedZones({
+        isDegradedMode: experienceState === 'degraded',
+        zones: restrictedZones,
+      }),
+    [experienceState, restrictedZones],
+  );
+  // Recovery is explicit and safe only once authenticated + connected state is restored.
+  const recoveryState = useMemo(
+    () =>
+      resolveSafeRecoveryState({
+        wasDegraded,
+        isDegraded: experienceState === 'degraded',
+        lifecyclePhase,
+        connectivitySignal: resolvedConnectivitySignal,
+      }),
+    [experienceState, lifecyclePhase, resolvedConnectivitySignal, wasDegraded],
+  );
   const statusSnapshot = useMemo(
     () =>
       resolveShellStatusSnapshot({
@@ -169,6 +242,7 @@ export function ShellCore({
         hasFatalError: Boolean(structuredError),
         connectivitySignal: resolvedConnectivitySignal,
         degradedSections,
+        hasRecoveredFromDegraded: recoveryState.recovered,
       }),
     [
       lifecyclePhase,
@@ -177,12 +251,37 @@ export function ShellCore({
       structuredError,
       resolvedConnectivitySignal,
       degradedSections,
+      recoveryState.recovered,
     ],
   );
 
   useEffect(() => {
     setExperienceState(experienceState);
   }, [experienceState, setExperienceState]);
+
+  useEffect(() => {
+    // Track whether shell has entered degraded mode to power one-shot recovery signaling.
+    if (experienceState === 'degraded') {
+      setWasDegraded(true);
+      return;
+    }
+
+    if (recoveryState.recovered) {
+      setWasDegraded(false);
+    }
+  }, [experienceState, recoveryState.recovered]);
+
+  useEffect(() => {
+    onSensitiveActionPolicyResolved?.(sensitiveActionPolicy);
+  }, [onSensitiveActionPolicyResolved, sensitiveActionPolicy]);
+
+  useEffect(() => {
+    onRestrictedZonesResolved?.(resolvedRestrictedZones);
+  }, [onRestrictedZonesResolved, resolvedRestrictedZones]);
+
+  useEffect(() => {
+    onRecoveryStateResolved?.(recoveryState);
+  }, [onRecoveryStateResolved, recoveryState]);
 
   useEffect(() => {
     setBootstrapPhase(
@@ -305,16 +404,48 @@ export function ShellCore({
   }
 
   if (experienceState === 'recovery') {
-    return recoverySlot ?? <section data-hbc-shell="shell-recovery">Recovering shell state...</section>;
-  }
-
-  if (experienceState === 'degraded' && degradedSlot) {
-    return degradedSlot;
+    return (
+      recoverySlot ?? <section data-hbc-shell="shell-recovery">Recovering shell state...</section>
+    );
   }
 
   return (
     <div data-hbc-shell="shell-core" data-environment={adapter.environment}>
       {resolvedStatusRail}
+      {experienceState === 'degraded' ? (
+        <section data-hbc-shell="shell-degraded-context">
+          <p>
+            Degraded mode active. Sensitive actions are blocked until current authorization is
+            restored.
+          </p>
+          {statusSnapshot.degradedSectionLabels.length > 0 ? (
+            <ul data-hbc-shell="degraded-sections">
+              {statusSnapshot.degradedSectionLabels.map((sectionLabel) => (
+                <li key={sectionLabel.sectionId}>{sectionLabel.label}</li>
+              ))}
+            </ul>
+          ) : null}
+          {sensitiveActionPolicy.blockedActionIds.length > 0 ? (
+            <ul data-hbc-shell="blocked-sensitive-actions">
+              {sensitiveActionPolicy.blockedActionIds.map((actionId) => (
+                <li key={actionId}>{actionId}</li>
+              ))}
+            </ul>
+          ) : null}
+          {(renderRestrictedZones?.(resolvedRestrictedZones) ??
+            (resolvedRestrictedZones.some((zone) => zone.visible) ? (
+              <ul data-hbc-shell="restricted-zones">
+                {resolvedRestrictedZones
+                  .filter((zone) => zone.visible)
+                  .map((zone) => (
+                    <li key={zone.zoneId}>
+                      {zone.zoneLabel}: {zone.message}
+                    </li>
+                  ))}
+              </ul>
+            ) : null))}
+        </section>
+      ) : null}
       <ShellLayout
         mode={rules.mode}
         leftSlot={layoutLeftSlot}
@@ -325,6 +456,7 @@ export function ShellCore({
         onSidebarNavigate={onSidebarNavigate}
         onToolSelect={onToolSelect}
       >
+        {experienceState === 'degraded' ? degradedSlot : null}
         {children}
       </ShellLayout>
     </div>

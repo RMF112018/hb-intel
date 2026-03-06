@@ -41,17 +41,34 @@ describe('degraded labels and action allowlist', () => {
       {
         sectionId: 'dashboard',
         sectionLabel: 'Dashboard',
+        lastKnownTimestamp: '2026-03-06T10:00:00.000Z',
         lastKnownDataLabel: '2 min ago',
         limitedValidation: true,
+        restrictedInDegradedMode: true,
       },
     ]);
 
-    expect(labels).toEqual([
-      {
-        sectionId: 'dashboard',
-        label: 'Dashboard: Limited validation (2 min ago)',
-      },
-    ]);
+    expect(labels[0]?.sectionId).toBe('dashboard');
+    expect(labels[0]?.label).toContain('Validation limited');
+    expect(labels[0]?.label).toContain('Restricted zone');
+    expect(labels[0]?.label).toContain('2 min ago');
+    expect(labels[0]?.validation).toBe('limited');
+    expect(labels[0]?.restricted).toBe(true);
+  });
+
+  it('resolves recovered state copy when returning from degraded mode', () => {
+    const snapshot = resolveShellStatusSnapshot({
+      lifecyclePhase: 'authenticated',
+      experienceState: 'ready',
+      hasAccessValidationIssue: false,
+      hasFatalError: false,
+      connectivitySignal: 'connected',
+      hasRecoveredFromDegraded: true,
+      degradedSections: [],
+    });
+
+    expect(snapshot.kind).toBe('recovered');
+    expect(snapshot.message).toContain('Connection restored');
   });
 
   it('enforces approved action allowlist', () => {

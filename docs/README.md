@@ -84,6 +84,10 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0054 | Accepted | [ADR-0054-shell-navigation-foundation.md](./architecture/adr/ADR-0054-shell-navigation-foundation.md) |
 | ADR-0055 | Accepted | [ADR-0055-dual-mode-authentication-architecture.md](./architecture/adr/ADR-0055-dual-mode-authentication-architecture.md) |
 | ADR-0056 | Accepted | [ADR-0056-central-auth-session-permission-state.md](./architecture/adr/ADR-0056-central-auth-session-permission-state.md) |
+| ADR-0057 | Accepted | [ADR-0057-role-mapping-and-authorization-governance.md](./architecture/adr/ADR-0057-role-mapping-and-authorization-governance.md) |
+| ADR-0058 | Accepted | [ADR-0058-shell-composition-and-core-layout-architecture.md](./architecture/adr/ADR-0058-shell-composition-and-core-layout-architecture.md) |
+| ADR-0059 | Accepted | [ADR-0059-unified-shell-status-connectivity-bar-integration.md](./architecture/adr/ADR-0059-unified-shell-status-connectivity-bar-integration.md) |
+| ADR-0060 | Accepted | [ADR-0060-controlled-degraded-mode.md](./architecture/adr/ADR-0060-controlled-degraded-mode.md) |
 
 ## Conventions
 

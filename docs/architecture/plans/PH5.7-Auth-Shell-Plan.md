@@ -63,3 +63,26 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - enables production operations through core admin workflows,
 - satisfies formal validation, audit, release, and documentation requirements,
 - and explicitly documents every deferred future expansion path so later phases can extend the platform without re-architecting the foundation.
+
+---
+
+## 5.7 Success Criteria Checklist (Task 7)
+
+- [x] 5.7.1 degraded mode eligibility is enforced for recently authenticated users with trusted fresh last-known section state.
+- [x] 5.7.2 degraded mode blocks fresh sensitive actions and operations that require current authorization validation.
+- [x] 5.7.3 degraded mode preserves shell frame, safe identity context, cached navigation, and visibly restricted zones.
+- [x] 5.7.4 every visible cached section communicates freshness and validation status through centralized section labels.
+- [x] 5.7.5 explicit safe recovery to fully connected mode is surfaced through canonical shell-status signaling.
+- [x] ADR-0060 created and linked to Phase 5.7 traceability.
+
+## Phase 5.7 Progress Notes
+
+- 5.7.1 completed — centralized degraded mode policy domain implemented in `packages/shell/src/degradedMode.ts` with strict eligibility rules (4-hour auth recency + trusted fresh section requirement), sensitive action blocking matrix, restricted-zone resolver, and safe recovery resolver — 2026-03-06.
+- 5.7.2 completed — `ShellCore` integrated with centralized degraded policy enforcement to preserve shell frame/context/navigation, surface restricted zones, block sensitive action intents in degraded mode, and emit explicit recovery-state callbacks — 2026-03-06.
+- 5.7.3 completed — section freshness/validation/restriction labels expanded in `shellStatus.ts`, comprehensive tests added (`degradedMode.test.ts`, `ShellCore.test.ts`, `shellStatus.test.ts`), and ADR-0060 + governance traceability updates completed — 2026-03-06.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/shell` - PASS

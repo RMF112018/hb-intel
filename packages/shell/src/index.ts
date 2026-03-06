@@ -45,6 +45,27 @@ export {
 } from './ShellCore.js';
 export type { ShellCoreProps } from './ShellCore.js';
 export {
+  RECENT_AUTH_WINDOW_MS,
+  TRUSTED_SECTION_FRESHNESS_WINDOW_MS,
+  resolveSectionFreshnessState,
+  resolveDegradedEligibility,
+  resolveSensitiveActionPolicy,
+  resolveRestrictedZones,
+  resolveSafeRecoveryState,
+} from './degradedMode.js';
+export type {
+  ShellSectionFreshnessState,
+  DegradedModeSectionState,
+  DegradedEligibilityInput,
+  DegradedEligibilityResult,
+  ShellSensitiveActionIntent,
+  ShellSensitiveActionPolicyResult,
+  ShellRestrictedZoneInput,
+  ShellRestrictedZoneState,
+  ShellRecoveryStateInput,
+  ShellRecoveryState,
+} from './degradedMode.js';
+export {
   SHELL_STATUS_PRIORITY,
   resolveShellStatusSnapshot,
   deriveDegradedSectionLabels,

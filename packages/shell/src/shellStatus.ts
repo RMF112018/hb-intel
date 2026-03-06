@@ -1,4 +1,9 @@
 import type { AuthLifecyclePhase } from '@hbc/auth';
+import {
+  resolveSectionFreshnessState,
+  type DegradedModeSectionState,
+  type ShellSectionFreshnessState,
+} from './degradedMode.js';
 import type { ShellExperienceState } from './types.js';
 
 /**
@@ -9,6 +14,7 @@ export type ShellStatusKind =
   | 'restoring-session'
   | 'connected'
   | 'reconnecting'
+  | 'recovered'
   | 'degraded'
   | 'access-validation-issue'
   | 'error-failure';
@@ -26,12 +32,7 @@ export type ShellConnectivitySignal = 'connected' | 'reconnecting';
 /**
  * Section-level degraded status input shape.
  */
-export interface ShellDegradedSectionInput {
-  sectionId: string;
-  sectionLabel: string;
-  lastKnownDataLabel?: string;
-  limitedValidation?: boolean;
-}
+export interface ShellDegradedSectionInput extends DegradedModeSectionState {}
 
 /**
  * Section-level degraded status output label shape.
@@ -39,6 +40,9 @@ export interface ShellDegradedSectionInput {
 export interface ShellDegradedSectionLabel {
   sectionId: string;
   label: string;
+  freshness: ShellSectionFreshnessState;
+  validation: 'limited' | 'current';
+  restricted: boolean;
 }
 
 /**
@@ -68,6 +72,7 @@ export interface ShellStatusResolutionInput {
   hasFatalError: boolean;
   connectivitySignal: ShellConnectivitySignal;
   degradedSections?: readonly ShellDegradedSectionInput[];
+  hasRecoveredFromDegraded?: boolean;
 }
 
 /**
@@ -79,6 +84,7 @@ export const SHELL_STATUS_PRIORITY: readonly ShellStatusKind[] = [
   'restoring-session',
   'initializing',
   'degraded',
+  'recovered',
   'reconnecting',
   'connected',
 ] as const;
@@ -88,6 +94,7 @@ const STATUS_COPY: Record<ShellStatusKind, string> = {
   'restoring-session': 'Restoring your session...',
   connected: 'Connected.',
   reconnecting: 'Trying to reconnect...',
+  recovered: 'Connection restored. Full validation is active.',
   degraded: 'Running in degraded mode. Some validation is limited.',
   'access-validation-issue': 'We could not validate your access.',
   'error-failure': 'Shell startup encountered an error.',
@@ -98,6 +105,7 @@ const STATUS_ACTIONS: Record<ShellStatusKind, readonly ShellStatusAction[]> = {
   'restoring-session': ['retry'],
   connected: [],
   reconnecting: ['retry'],
+  recovered: [],
   degraded: ['learn-more'],
   'access-validation-issue': ['sign-in-again', 'learn-more'],
   'error-failure': ['retry', 'sign-in-again', 'learn-more'],
@@ -131,6 +139,10 @@ export function resolveShellStatusSnapshot(
     candidates.add('degraded');
   }
 
+  if (input.hasRecoveredFromDegraded) {
+    candidates.add('recovered');
+  }
+
   if (input.connectivitySignal === 'reconnecting') {
     candidates.add('reconnecting');
   }
@@ -158,12 +170,34 @@ export function resolveShellStatusSnapshot(
 export function deriveDegradedSectionLabels(
   sections: readonly ShellDegradedSectionInput[],
 ): readonly ShellDegradedSectionLabel[] {
+  // Section labels intentionally communicate freshness + validation + restriction
+  // in one canonical shell-level string to avoid feature-specific status writers.
   return sections.map((section) => {
-    const suffix = section.limitedValidation ? 'Limited validation' : 'Last known data';
+    const freshness = resolveSectionFreshnessState({
+      lastKnownTimestamp: section.lastKnownTimestamp,
+    });
+    const freshnessLabel =
+      freshness === 'fresh'
+        ? 'Fresh last-known data'
+        : freshness === 'stale'
+          ? 'Stale last-known data'
+          : 'Unknown freshness';
+    const validation: ShellDegradedSectionLabel['validation'] = section.limitedValidation
+      ? 'limited'
+      : 'current';
+    const validationLabel =
+      validation === 'limited' || section.requiresBackendValidation
+        ? 'Validation limited'
+        : 'Validation current';
+    const restricted = section.restrictedInDegradedMode === true;
+    const restrictedLabel = restricted ? 'Restricted zone' : 'Safe zone';
     const detail = section.lastKnownDataLabel ? ` (${section.lastKnownDataLabel})` : '';
     return {
       sectionId: section.sectionId,
-      label: `${section.sectionLabel}: ${suffix}${detail}`,
+      label: `${section.sectionLabel}: ${freshnessLabel}; ${validationLabel}; ${restrictedLabel}${detail}`,
+      freshness,
+      validation,
+      restricted,
     };
   });
 }

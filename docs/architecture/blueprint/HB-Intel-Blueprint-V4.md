@@ -969,4 +969,10 @@ Phase 5.6 (Unified Shell-Status / Connectivity Bar Integration) completed: 2026-
   - 5.6.4 degraded mode integration implemented with section-level label derivation while explicitly deferring richer future sub-state contribution paths
   - 5.6.5 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/shell`
   - 5.6.6 ADR-0059 created: `docs/architecture/adr/ADR-0059-unified-shell-status-connectivity-bar-integration.md`
+Phase 5.7 (Controlled Degraded Mode) completed: 2026-03-06
+  - 5.7.1 centralized degraded-mode policy implemented (`packages/shell/src/degradedMode.ts`) with strict eligibility (recent auth + trusted fresh section state), sensitive action blocking, restricted-zone handling, and safe recovery resolution
+  - 5.7.2 shell-core orchestration updated to preserve shell frame/context/navigation while degraded, block fresh sensitive/current-auth-dependent operations, and expose restricted-zone and policy state in-shell
+  - 5.7.3 shell-status section labels expanded for freshness/validation/restricted communication and explicit `recovered` messaging; future richer sub-states documented without implementation
+  - 5.7.4 verification gates passed for scoped package: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/shell`
+  - 5.7.5 ADR-0060 created: `docs/architecture/adr/ADR-0060-controlled-degraded-mode.md`
 -->

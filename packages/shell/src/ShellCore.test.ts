@@ -32,7 +32,17 @@ describe('resolveShellExperienceState', () => {
     const state = resolveShellExperienceState({
       lifecyclePhase: 'error',
       routeDecision: { allow: true },
+      degradedEligibility: { eligible: true, reason: 'eligible' },
     });
     expect(state).toBe('degraded');
+  });
+
+  it('returns recovery when degraded eligibility fails for error-like lifecycle', () => {
+    const state = resolveShellExperienceState({
+      lifecyclePhase: 'reauth-required',
+      routeDecision: { allow: true },
+      degradedEligibility: { eligible: false, reason: 'not-recently-authenticated' },
+    });
+    expect(state).toBe('recovery');
   });
 });
