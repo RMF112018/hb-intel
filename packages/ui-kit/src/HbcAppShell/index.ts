@@ -13,6 +13,7 @@ export { HbcNotificationBell } from './HbcNotificationBell.js';
 export { HbcUserMenu } from './HbcUserMenu.js';
 export { HbcSidebar } from './HbcSidebar.js';
 export { HbcAppShell } from './HbcAppShell.js';
+export { HbcThemeProvider, HbcThemeContext } from './HbcThemeContext.js';
 
 // Hooks
 export { useOnlineStatus, useFieldMode, useSidebarState, useKeyboardShortcut } from './hooks/index.js';

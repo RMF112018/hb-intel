@@ -13,7 +13,7 @@ import {
   persistDensityOverride,
   clearDensityOverride as clearStorage,
 } from './density.js';
-import { useFieldMode } from '../HbcAppShell/hooks/useFieldMode.js';
+import { useHbcTheme } from './useHbcTheme.js';
 
 export interface UseDensityReturn {
   /** Current active density tier */
@@ -31,7 +31,7 @@ export interface UseDensityReturn {
  * `pointer: fine` → compact) and respects user overrides via localStorage.
  */
 export function useDensity(): UseDensityReturn {
-  const { mode } = useFieldMode();
+  const { mode } = useHbcTheme();
 
   const [tier, setTier] = useState<DensityTier>(() => {
     const override = getDensityOverride();

@@ -2,13 +2,14 @@
  * useHbcTheme — Canonical theme hook
  * PH4.16 §Step 6 | Blueprint §1d
  *
- * Thin wrapper that provides a canonical import path from @hbc/ui-kit/theme.
- * Delegates to useFieldMode from HbcAppShell/hooks.
+ * Canonical context reader for app mode + Fluent theme state.
+ * PH4C.11 rewires this hook to HbcThemeContext (single-source invariant).
  */
-import { useFieldMode } from '../HbcAppShell/hooks/useFieldMode.js';
-import type { UseFieldModeReturn } from '../HbcAppShell/hooks/useFieldMode.js';
+import * as React from 'react';
+import { HbcThemeContext } from '../HbcAppShell/HbcThemeContext.js';
+import type { HbcThemeContextValue } from '../HbcAppShell/HbcThemeContext.js';
 
-export type UseHbcThemeReturn = UseFieldModeReturn;
+export type UseHbcThemeReturn = HbcThemeContextValue;
 
 /**
  * Access the current HBC theme state.
@@ -19,5 +20,11 @@ export type UseHbcThemeReturn = UseFieldModeReturn;
  * - mode + field toggle compatibility fields
  */
 export function useHbcTheme(): UseHbcThemeReturn {
-  return useFieldMode();
+  const context = React.useContext(HbcThemeContext);
+  if (!context) {
+    throw new Error(
+      '[HBC] useHbcTheme must be called inside <HbcThemeProvider>. Wrap your application root with HbcThemeProvider.',
+    );
+  }
+  return context;
 }

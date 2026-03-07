@@ -268,6 +268,8 @@ export type { BottomNavItem, HbcBottomNavProps } from './HbcBottomNav/index.js';
 // App Shell (PH4.4)
 export {
   HbcAppShell,
+  HbcThemeProvider,
+  HbcThemeContext,
   HbcConnectivityBar,
   HbcHeader,
   HbcSidebar,

@@ -38,7 +38,7 @@ import { TRANSITION_FAST } from '../theme/animations.js';
 import { elevationRest } from '../theme/elevation.js';
 import { HBC_ACCENT_ORANGE } from '../theme/tokens.js';
 import { useAdaptiveDensity } from './hooks/useAdaptiveDensity.js';
-import { useFieldMode } from '../HbcAppShell/hooks/useFieldMode.js';
+import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { HbcEmptyState } from '../HbcEmptyState/index.js';
 import { HbcDataTableCard } from './HbcDataTableCard.js';
 import { useShimmerStyles } from '../shared/index.js';
@@ -435,7 +435,7 @@ export function HbcDataTable<TData>({
   // D-PH4C-10: Stable per-instance prefix keeps th/td associations deterministic and unique.
   const tableIdPrefix = React.useId().replace(/:/g, '');
   const parentRef = React.useRef<HTMLDivElement>(null);
-  const { isFieldMode } = useFieldMode();
+  const { isFieldMode } = useHbcTheme();
 
   // Adaptive density
   const { tier, config: densityConfig } = useAdaptiveDensity({

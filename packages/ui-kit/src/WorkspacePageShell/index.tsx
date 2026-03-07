@@ -31,7 +31,7 @@ import {
 import { hbcSpacing } from '../theme/grid.js';
 import { elevationRaised } from '../theme/elevation.js';
 import { heading2, heading3, body } from '../theme/typography.js';
-import { useFieldMode } from '../HbcAppShell/hooks/useFieldMode.js';
+import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { setFieldModeActions } from '../HbcCommandBar/fieldModeActionsStore.js';
 import type { WorkspacePageShellProps, ListConfig } from './types.js';
 
@@ -265,7 +265,7 @@ export function WorkspacePageShell({
   const activeProject = useProjectStore((s) => s.activeProject);
   const activeWorkspace = useNavStore((s) => s.activeWorkspace);
   const styles = useStyles();
-  const { isFieldMode, mode } = useFieldMode();
+  const { isFieldMode, mode } = useHbcTheme();
 
   // PH4B.10: Guard against unsupported modes (D-09)
   if (supportedModes && !supportedModes.includes(mode)) {

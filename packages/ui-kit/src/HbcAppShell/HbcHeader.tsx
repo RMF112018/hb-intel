@@ -9,7 +9,7 @@ import { makeStyles, shorthands } from '@griffel/react';
 import { HBC_DARK_HEADER, HBC_HEADER_TEXT } from '../theme/tokens.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { ViewGrid } from '../icons/index.js';
-import { useFieldMode } from './hooks/useFieldMode.js';
+import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import { HbcProjectSelector } from './HbcProjectSelector.js';
 import { HbcToolboxFlyout } from './HbcToolboxFlyout.js';
@@ -102,7 +102,7 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
   onToolboxOpen,
 }) => {
   const styles = useStyles();
-  const { isFieldMode, toggleFieldMode } = useFieldMode();
+  const { isFieldMode, toggleFieldMode } = useHbcTheme();
   const connectivityStatus = useOnlineStatus();
   const topOffset = connectivityStatus === 'online' ? '2px' : '4px';
 

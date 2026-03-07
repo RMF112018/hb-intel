@@ -8,7 +8,7 @@ shell surfaces, all workspace apps, and all SPFx webpart roots.
 **Locked references:** Blueprint §1d, §2c | Foundation Plan PH4.16 §Step 6 | PH4B.10 §13
 **Depends on:** PH4C.10
 **Blocks:** PH4C.12, PH4C.13
-**Status:** PENDING
+**Status:** COMPLETE (2026-03-07)
 
 ---
 
@@ -330,37 +330,45 @@ pnpm --filter=dev-harness dev
 
 ## Definition of Done
 
-- [ ] `HbcThemeContext.tsx` created; exports `HbcThemeContext` and `HbcThemeProvider`.
-- [ ] `useHbcTheme.ts` reads from context; throws on missing provider.
-- [ ] `HbcAppShell.tsx` no longer imports `FluentProvider` or calls `useFieldMode`.
-- [ ] `HbcHeader.tsx` calls `useHbcTheme()` (not `useFieldMode()`).
-- [ ] `WorkspacePageShell/index.tsx` calls `useHbcTheme()`.
-- [ ] `useDensity.ts` calls `useHbcTheme()`.
-- [ ] `HbcDataTable/index.tsx` calls `useHbcTheme()`.
-- [ ] All 14 app `App.tsx` files use `<HbcThemeProvider>` — no standalone `FluentProvider`.
-- [ ] `dev-harness/src/App.tsx` local `isDark` state removed.
-- [ ] `HbcThemeProvider` and `HbcThemeContext` exported from `@hbc/ui-kit`.
-- [ ] Storybook preview uses `HbcThemeProvider`.
-- [ ] Unit tests pass (propagation, isolation, error throw).
-- [ ] `grep useFieldMode` confirms zero stray imports outside context + hook files.
-- [ ] `grep FluentProvider apps --include="App.tsx"` returns empty.
-- [ ] `pnpm turbo run build` passes with zero errors.
-- [ ] ADR created: `docs/architecture/adr/0013-hbc-theme-context.md`.
+- [x] `HbcThemeContext.tsx` created; exports `HbcThemeContext` and `HbcThemeProvider`.
+- [x] `useHbcTheme.ts` reads from context; throws on missing provider.
+- [x] `HbcAppShell.tsx` no longer imports `FluentProvider` or calls `useFieldMode`.
+- [x] `HbcHeader.tsx` calls `useHbcTheme()` (not `useFieldMode()`).
+- [x] `WorkspacePageShell/index.tsx` calls `useHbcTheme()`.
+- [x] `useDensity.ts` calls `useHbcTheme()`.
+- [x] `HbcDataTable/index.tsx` calls `useHbcTheme()`.
+- [x] All 14 app `App.tsx` files use `<HbcThemeProvider>` — no standalone `FluentProvider`.
+- [x] `dev-harness/src/App.tsx` local `isDark` state removed.
+- [x] `HbcThemeProvider` and `HbcThemeContext` exported from `@hbc/ui-kit`.
+- [x] Storybook preview uses `HbcThemeProvider`.
+- [x] Unit tests pass (propagation, isolation, error throw).
+- [x] `grep useFieldMode` confirms zero stray imports outside context + hook files.
+- [x] `grep FluentProvider apps --include="App.tsx"` returns empty.
+- [x] `pnpm turbo run build` passes with zero errors.
+- [x] ADR created: `docs/architecture/adr/ADR-0013-hbc-theme-context.md`.
 
 ---
 
 ## ADR Note
 
-Create `docs/architecture/adr/0013-hbc-theme-context.md` documenting the decision to use React
+Create `docs/architecture/adr/ADR-0013-hbc-theme-context.md` documenting the decision to use React
 Context (not Zustand) for field mode state propagation. Rationale: field mode state is purely
 presentational and tree-scoped; Fluent `FluentProvider` must sit at the React tree root and
 receives a resolved theme object synchronously; Zustand is appropriate for cross-tree domain
 state, not for `FluentProvider` integration that requires a single, authoritative root instance.
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-Status: PENDING — Full codebase audit completed 2026-03-07
-Affected files confirmed: 5 ui-kit source files + 14 app App.tsx files (13 workspace apps + pwa)
-Audit found: HbcProjectSelector, HbcToolboxFlyout also use useHbcTheme() — safe (read-only, auto-fixed by context)
-ADR needed: 0013-hbc-theme-context.md
-Next: Begin Step 1 (HbcThemeContext.tsx creation) after PH4C.10 complete
+Status: COMPLETE — 2026-03-07
+2026-03-07 Step 1 complete: Added HbcThemeContext/HbcThemeProvider (single useFieldMode call + FluentProvider root) in packages/ui-kit/src/HbcAppShell/HbcThemeContext.tsx (D-PH4C-21/D-PH4C-22/D-PH4C-23/D-PH4C-13).
+2026-03-07 Step 2 complete: Rewired useHbcTheme.ts to read context and throw outside provider; removed direct useFieldMode calls from HbcAppShell, HbcHeader, WorkspacePageShell, useDensity, and HbcDataTable.
+2026-03-07 Step 3 complete: Migrated all 14 app App.tsx roots to HbcThemeProvider; removed standalone FluentProvider usage; removed dev-harness local dark override state.
+2026-03-07 Step 4 complete: Exported HbcThemeProvider/HbcThemeContext in ui-kit public barrel and switched Storybook preview decorator to HbcThemeProvider with localStorage-backed toolbar mode simulation.
+2026-03-07 Step 5 complete: Added ADR docs/architecture/adr/ADR-0013-hbc-theme-context.md and added unit tests at packages/ui-kit/src/__tests__/HbcThemeContext.test.tsx for provider, propagation, and missing-provider error.
+2026-03-07 Step 6 complete: Verification commands executed (grep checks, build, lint, check-types, ui-kit storybook build) with zero errors.
+Verification evidence (2026-03-07):
+- `pnpm turbo run build` ✅ (0 errors)
+- `pnpm turbo run lint` ✅ (0 errors; warnings present in pre-existing files)
+- `pnpm turbo run check-types` ✅ (0 errors)
+- `pnpm --filter @hbc/ui-kit build-storybook` ✅ (0 errors)
+- `pnpm --filter @hbc/ui-kit exec vitest run src/__tests__/HbcThemeContext.test.tsx --environment happy-dom` ✅ (3/3 passing)
 -->

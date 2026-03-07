@@ -6,7 +6,6 @@
  */
 import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import { FluentProvider } from '@fluentui/react-components';
 import { useNavStore } from '@hbc/shell';
 import { TRANSITION_NORMAL } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
@@ -16,7 +15,7 @@ import { HbcSidebar } from './HbcSidebar.js';
 import { HbcBottomNav } from '../HbcBottomNav/index.js';
 import { useSidebarState } from './hooks/useSidebarState.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
-import { useFieldMode } from './hooks/useFieldMode.js';
+import { useHbcTheme } from '../theme/useHbcTheme.js';
 import type { HbcAppShellProps } from './types.js';
 import type { BottomNavItem } from '../HbcBottomNav/types.js';
 
@@ -81,7 +80,7 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
 }) => {
   const { isExpanded, isMobile } = useSidebarState();
   const connectivityStatus = useOnlineStatus();
-  const { mode: appMode, resolvedTheme } = useFieldMode();
+  const { mode: appMode } = useHbcTheme();
   const syncedActiveItemId = useNavStore((s) => s.activeItemId);
   const [isFocusModeActive, setIsFocusModeActive] = React.useState(false);
   const styles = useStyles();
@@ -127,36 +126,34 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   );
 
   return (
-    <FluentProvider theme={resolvedTheme}>
-      <div data-hbc-shell="app-shell" data-mode={mode}>
-        <HbcConnectivityBar />
-        <HbcHeader user={user} onSignOut={onSignOut} />
-        {showSidebar && (
-          <HbcSidebar groups={sidebarGroups} activeItemId={resolvedActiveItemId} onNavigate={onNavigate} />
+    <div data-hbc-shell="app-shell" data-mode={mode}>
+      <HbcConnectivityBar />
+      <HbcHeader user={user} onSignOut={onSignOut} />
+      {showSidebar && (
+        <HbcSidebar groups={sidebarGroups} activeItemId={resolvedActiveItemId} onNavigate={onNavigate} />
+      )}
+      {/* Focus Mode overlay */}
+      <div
+        className={mergeClasses(
+          styles.focusOverlay,
+          isFocusModeActive ? styles.focusOverlayVisible : styles.focusOverlayHidden,
         )}
-        {/* Focus Mode overlay */}
-        <div
-          className={mergeClasses(
-            styles.focusOverlay,
-            isFocusModeActive ? styles.focusOverlayVisible : styles.focusOverlayHidden,
-          )}
-          aria-hidden="true"
+        aria-hidden="true"
+      />
+      <main
+        className={mainClass}
+        style={{ marginTop: `${shellOffset}px`, minHeight: `calc(100vh - ${shellOffset}px)` }}
+      >
+        {children}
+      </main>
+      {/* Bottom navigation — tablet/mobile only (PH4.14.5) */}
+      {showBottomNav && (
+        <HbcBottomNav
+          items={bottomNavItems}
+          activeId={resolvedActiveItemId}
+          onNavigate={onNavigate}
         />
-        <main
-          className={mainClass}
-          style={{ marginTop: `${shellOffset}px`, minHeight: `calc(100vh - ${shellOffset}px)` }}
-        >
-          {children}
-        </main>
-        {/* Bottom navigation — tablet/mobile only (PH4.14.5) */}
-        {showBottomNav && (
-          <HbcBottomNav
-            items={bottomNavItems}
-            activeId={resolvedActiveItemId}
-            onNavigate={onNavigate}
-          />
-        )}
-      </div>
-    </FluentProvider>
+      )}
+    </div>
   );
 };

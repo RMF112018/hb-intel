@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
-import { FluentProvider, HbcErrorBoundary, useHbcTheme } from '@hbc/ui-kit';
+import { HbcThemeProvider, HbcErrorBoundary } from '@hbc/ui-kit';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import { createWebpartRouter } from './router/index.js';
 
@@ -8,12 +8,11 @@ const queryClient = new QueryClient({ defaultOptions: { queries: defaultQueryOpt
 const router = createWebpartRouter();
 
 export function App(): React.ReactNode {
-  const { resolvedTheme } = useHbcTheme();
   return (
-    <FluentProvider theme={resolvedTheme}>
+    <HbcThemeProvider>
       <QueryClientProvider client={queryClient}>
         <HbcErrorBoundary><RouterProvider router={router} /></HbcErrorBoundary>
       </QueryClientProvider>
-    </FluentProvider>
+    </HbcThemeProvider>
   );
 }

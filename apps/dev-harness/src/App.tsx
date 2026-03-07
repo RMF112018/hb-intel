@@ -2,12 +2,11 @@
  * App — Provider hierarchy & root layout.
  * Foundation Plan Phase 3 — Blueprint §1d, §2e.
  *
- * FluentProvider > QueryClientProvider > HbcErrorBoundary > TabRouter + DevControls
+ * HbcThemeProvider > QueryClientProvider > HbcErrorBoundary > TabRouter + DevControls
  */
-import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { FluentProvider, hbcDarkTheme, HbcErrorBoundary, useHbcTheme } from '@hbc/ui-kit';
+import { HbcThemeProvider, HbcErrorBoundary, useHbcTheme } from '@hbc/ui-kit';
 import { defaultQueryOptions, defaultMutationOptions } from '@hbc/query-hooks';
 import { TabRouter } from './TabRouter.js';
 import { DevControls } from './DevControls.js';
@@ -19,21 +18,27 @@ const queryClient = new QueryClient({
   },
 });
 
-export function App() {
-  const [isDark, setIsDark] = useState(false);
-  const { resolvedTheme } = useHbcTheme();
+function HarnessRoot(): React.ReactNode {
+  const { theme, toggleFieldMode } = useHbcTheme();
+  const isDark = theme === 'dark';
 
   return (
-    <FluentProvider theme={isDark ? hbcDarkTheme : resolvedTheme}>
-      <QueryClientProvider client={queryClient}>
-        <HbcErrorBoundary>
-          <div className="harness-root">
-            <TabRouter />
-            <DevControls isDark={isDark} onToggleTheme={() => setIsDark((d) => !d)} />
-          </div>
-        </HbcErrorBoundary>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </FluentProvider>
+    <QueryClientProvider client={queryClient}>
+      <HbcErrorBoundary>
+        <div className="harness-root">
+          <TabRouter />
+          <DevControls isDark={isDark} onToggleTheme={toggleFieldMode} />
+        </div>
+      </HbcErrorBoundary>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  );
+}
+
+export function App() {
+  return (
+    <HbcThemeProvider>
+      <HarnessRoot />
+    </HbcThemeProvider>
   );
 }
