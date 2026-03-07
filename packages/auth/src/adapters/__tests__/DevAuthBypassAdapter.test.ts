@@ -3,7 +3,7 @@
 // D-PH5C-05: Comprehensive test coverage for dev adapter
 // @vitest-environment happy-dom
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { DevAuthBypassAdapter } from '../DevAuthBypassAdapter';
 
 describe('DevAuthBypassAdapter', () => {
