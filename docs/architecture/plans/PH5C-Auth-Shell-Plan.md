@@ -255,9 +255,9 @@ All tasks start in PENDING state. Update this section after each task completion
 - 5.C.2.3 [COMPLETED] — Lifecycle events and timing
 
 ### PH5C.3 Progress Notes
-- 5.C.3.1 [PENDING] — PersonaRegistry creation with 11 personas
-- 5.C.3.2 [PENDING] — Export methods implementation
-- 5.C.3.3 [PENDING] — Reference documentation
+- 5.C.3.1 [COMPLETED] — PersonaRegistry creation with 11 personas
+- 5.C.3.2 [COMPLETED] — Export methods implementation
+- 5.C.3.3 [COMPLETED] — Reference documentation
 
 ### PH5C.4 Progress Notes
 - 5.C.4.1 [PENDING] — DevToolbar.tsx component
@@ -311,7 +311,7 @@ All verification gates remain PENDING until execution. See PH5C.10 for full veri
 - Zero dev-mode code in production bundle (grep verification) - [PASS for PH5C.2]
 
 ### Documentation & Architecture
-- All documentation files in correct `docs/` subfolders - [PENDING]
+- All documentation files in correct `docs/` subfolders - [PASS for PH5C.3]
 - ADRs linked and cross-referenced - [PENDING]
 
 ### Audit Coverage
@@ -353,5 +353,9 @@ PH5C.2 completed: 2026-03-07
 D-PH5C-02/D-PH5C-03 traceability closed: `DevAuthBypassAdapter` implemented with full acquire/normalize/restore lifecycle, configurable delay, startup/performance events, structured audit logging, session persistence/recovery, and strict `import.meta.env.DEV` gating in `packages/auth/src/adapters/DevAuthBypassAdapter.ts`.
 PH5C.2 dev export wiring: added dedicated subpath entrypoint `packages/auth/src/dev.ts` and `@hbc/auth/dev` package export mapping while preserving compile-safe root exports.
 PH5C.2 verification evidence: `pnpm turbo run build --filter=@hbc/auth` PASS; `pnpm turbo run test --filter=@hbc/auth` PASS; `pnpm --filter @hbc/auth run test:coverage` PASS (`DevAuthBypassAdapter.ts` statements 97.74%, functions 100.00%); `grep -r "DevAuthBypassAdapter" dist/ --include="*.js"` returned empty.
-Next: Execute PH5C.3 (PersonaRegistry)
+PH5C.3 completed: 2026-03-07
+D-PH5C-04 traceability closed: `packages/auth/src/mock/personaRegistry.ts` created with 6 base + 5 supplemental personas and query helpers (`getById`, `base`, `supplemental`, `all`, `default`, `byTag`, `byCategory`, `count`), and dev export wired through `packages/auth/src/dev.ts` for `@hbc/auth/dev`.
+PH5C.3 documentation closure: `docs/reference/auth/personas.md` created with persona tables, permission matrix, testing scenarios, and extension guidance.
+PH5C.3 verification evidence: `pnpm turbo run build --filter=@hbc/auth` PASS; `pnpm turbo run test --filter=@hbc/auth` PASS; `pnpm --filter @hbc/auth run test:coverage` PASS with `personaRegistry.ts` coverage 100% statements/branches/functions; PersonaRegistry test suite added (`packages/auth/src/mock/personaRegistry.test.ts`).
+Next: Execute PH5C.4 (DevToolbar)
 -->

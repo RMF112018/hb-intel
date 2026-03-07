@@ -14,6 +14,7 @@
     "src/**/*.test.ts",
     "src/adapters/__tests__/**",
     "src/adapters/DevAuthBypassAdapter.ts",
-    "src/dev.ts"
+    "src/dev.ts",
+    "src/mock/**"
   ]
 }

@@ -1068,4 +1068,9 @@ Phase 5C.2 (DevAuthBypassAdapter Implementation) completed: 2026-03-07
   - Dev-only export boundary implemented through dedicated `packages/auth/src/dev.ts` and `@hbc/auth/dev` subpath mapping in `packages/auth/package.json`; root `src/index.ts` remains compile-safe and production-oriented.
   - Production-leak prevention validated by excluding dev adapter/dev entry from auth package build emit and confirming empty grep scan in `packages/auth/dist`.
   - PH5C.2 verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run test --filter=@hbc/auth`, `pnpm --filter @hbc/auth run test:coverage` (`DevAuthBypassAdapter.ts` statements 97.74%, functions 100.00%), `grep -r "DevAuthBypassAdapter" dist/ --include="*.js"` (empty).
+Phase 5C.3 (PersonaRegistry Implementation) completed: 2026-03-07
+  - D-PH5C-04 implemented verbatim through `packages/auth/src/mock/personaRegistry.ts` with 11 personas (6 base + 5 supplemental), comprehensive persona metadata, and query helpers (`getById`, `base`, `supplemental`, `all`, `default`, `byTag`, `byCategory`, `count`).
+  - Dev export surface updated so `@hbc/auth/dev` exposes `PERSONA_REGISTRY` and `IPersona` from `packages/auth/src/dev.ts`; root production exports remain unchanged.
+  - Persona reference documentation created at `docs/reference/auth/personas.md` with registry overview, persona tables, permission matrix, scenario guidance, and extension instructions.
+  - PH5C.3 verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run test --filter=@hbc/auth`, `pnpm --filter @hbc/auth run test:coverage`; `personaRegistry.ts` coverage: statements 100.00%, branches 100.00%, functions 100.00%.
 -->
