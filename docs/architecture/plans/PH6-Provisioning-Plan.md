@@ -160,7 +160,7 @@ Phase 6 is complete when HB Intel has a production-ready provisioning system tha
 - [x] 6.0.1 `projectCode` identifier eliminated from all backend functions, frontend apps, and packages.
 - [x] 6.0.2 `@hbc/provisioning` package scaffold created and published within the monorepo.
 - [ ] 6.0.3 Azure AD app registration and Managed Identity configured; all endpoints secured. (PH6.2 code complete; Azure tenant ops pending)
-- [ ] 6.0.4 `SagaOrchestrator` hardened: correlation IDs, idempotency, exponential backoff.
+- [x] 6.0.4 `SagaOrchestrator` hardened: correlation IDs, idempotency, exponential backoff.
 - [ ] 6.0.5 All 7 steps use real PnPjs/Graph implementations (no mock service in production path).
 - [ ] 6.0.6 Azure Table Storage service is real and production-ready.
 - [ ] 6.0.7 SharePoint audit list (`ProvisioningAuditLog`) created and written to at lifecycle events.
@@ -229,7 +229,7 @@ Phase 6 completed: YYYY-MM-DD
 Task completions:
 - PH6.1 completed: 2026-03-07 — docs: docs/architecture/adr/ADR-0076-project-identifier-model.md, docs/architecture/adr/ADR-0077-provisioning-package-boundary.md
 - PH6.2 completed: 2026-03-07 (code + docs); Azure tenant ops pending — docs: docs/architecture/adr/ADR-0078-security-managed-identity.md
-- PH6.3 completed: YYYY-MM-DD
+- PH6.3 completed: 2026-03-07 — docs: docs/architecture/plans/PH6.3-SagaOrchestrator-Hardening.md
 - PH6.4 completed: YYYY-MM-DD
 - PH6.5 completed: YYYY-MM-DD
 - PH6.6 completed: YYYY-MM-DD

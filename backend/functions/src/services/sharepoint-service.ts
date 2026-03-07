@@ -1,3 +1,5 @@
+import type { IProvisioningAuditRecord } from '@hbc/models';
+
 export interface ISharePointService {
   createSite(projectNumber: string, projectName: string, templateId?: string): Promise<string>;
   createDocumentLibrary(siteUrl: string, libraryName: string): Promise<string>;
@@ -8,6 +10,7 @@ export interface ISharePointService {
   associateHub(siteUrl: string, hubSiteUrl: string): Promise<void>;
   deleteSite(siteUrl: string): Promise<void>;
   removeHubAssociation(siteUrl: string): Promise<void>;
+  writeAuditRecord(record: IProvisioningAuditRecord): Promise<void>;
 }
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -66,5 +69,12 @@ export class MockSharePointService implements ISharePointService {
   async removeHubAssociation(siteUrl: string): Promise<void> {
     await delay(40);
     console.log(`[MockSP] Removed hub association for ${siteUrl}`);
+  }
+
+  async writeAuditRecord(record: IProvisioningAuditRecord): Promise<void> {
+    await delay(20);
+    console.log(
+      `[MockSP] Audit ${record.event} for ${record.projectId} (${record.correlationId})`
+    );
   }
 }

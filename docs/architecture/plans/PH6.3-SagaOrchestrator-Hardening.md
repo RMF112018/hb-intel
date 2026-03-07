@@ -387,23 +387,47 @@ export class SagaOrchestrator {
 
 ## 6.3 Success Criteria Checklist
 
-- [ ] 6.3.1 `correlationId` is generated at trigger time and included in all log entries.
-- [ ] 6.3.2 `withRetry` utility implemented with 3 attempts and 2s/4s/8s backoff.
-- [ ] 6.3.3 `isStepAlreadyCompleted` guard prevents re-executing a completed step.
-- [ ] 6.3.4 Compensation runs in reverse step order and is failure-tolerant.
-- [ ] 6.3.5 Step 5 deferral flag (`step5DeferredToTimer`) is set and saga continues to steps 6–7.
-- [ ] 6.3.6 SignalR push failures are logged as warnings, not thrown as errors.
-- [ ] 6.3.7 Audit record writes are non-blocking (fire-and-forget with `.catch`).
-- [ ] 6.3.8 `pnpm turbo run build --filter=backend-functions` passes.
-- [ ] 6.3.9 `pnpm turbo run test --filter=backend-functions` passes (Layer 1 unit tests).
+- [x] 6.3.1 `correlationId` is generated at trigger time and included in all log entries.
+- [x] 6.3.2 `withRetry` utility implemented with 3 attempts and 2s/4s/8s backoff.
+- [x] 6.3.3 `isStepAlreadyCompleted` guard prevents re-executing a completed step.
+- [x] 6.3.4 Compensation runs in reverse step order and is failure-tolerant.
+- [x] 6.3.5 Step 5 deferral flag (`step5DeferredToTimer`) is set and saga continues to steps 6–7.
+- [x] 6.3.6 SignalR push failures are logged as warnings, not thrown as errors.
+- [x] 6.3.7 Audit record writes are non-blocking (fire-and-forget with `.catch`).
+- [x] 6.3.8 `pnpm turbo run build --filter=@hbc/functions` passes.
+- [x] 6.3.9 `pnpm turbo run test --filter=@hbc/functions` passes (Layer 1 unit tests).
 
 ## PH6.3 Progress Notes
 
-_(To be completed during implementation)_
+- 6.3.1 completed: 2026-03-07
+- 6.3.2 completed: 2026-03-07
+- 6.3.3 completed: 2026-03-07
+- 6.3.4 completed: 2026-03-07
+- 6.3.5 completed: 2026-03-07
+- 6.3.6 completed: 2026-03-07
+- 6.3.7 completed: 2026-03-07
+- 6.3.8 completed: 2026-03-07
+- 6.3.9 completed: 2026-03-07
 
 ### Verification Evidence
 
-- `pnpm turbo run build --filter=backend-functions` → EXIT 0 — PASS / FAIL
-- `pnpm turbo run test --filter=backend-functions` → all saga orchestrator unit tests pass — PASS / FAIL
-- Manual trigger with a simulated Step 3 failure → Steps 1 and 2 are compensated, status = Failed — PASS / FAIL
-- Manual retry after failure → Steps 1 and 2 are skipped (idempotent), saga resumes from Step 3 — PASS / FAIL
+- `pnpm turbo run build --filter=@hbc/functions` → EXIT 0 — PASS
+- `pnpm turbo run lint --filter=@hbc/functions` → EXIT 0 — PASS
+- `pnpm turbo run check-types --filter=@hbc/functions` → EXIT 0 — PASS
+- `pnpm turbo run test --filter=@hbc/functions` → EXIT 0 — PASS
+- Manual trigger with a simulated Step 3 failure → Steps 1 and 2 are compensated, status = Failed — PENDING EXTERNAL
+- Manual retry after failure → Steps 1 and 2 are skipped (idempotent), saga resumes from Step 3 — PENDING EXTERNAL
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+PH6.3 implementation executed: 2026-03-07
+Traceability:
+- D-PH6-05: retry utility, idempotency guards, correlation flow propagation.
+- D-PH6-06: failure-tolerant compensation, non-blocking audit writes, best-effort SignalR push.
+Files updated:
+- backend/functions/src/utils/retry.ts
+- backend/functions/src/functions/provisioningSaga/saga-orchestrator.ts
+- backend/functions/src/functions/provisioningSaga/index.ts
+- backend/functions/src/functions/provisioningSaga/steps/step2-document-library.ts
+- backend/functions/src/functions/provisioningSaga/steps/step5-web-parts.ts
+- backend/functions/src/services/sharepoint-service.ts
+-->

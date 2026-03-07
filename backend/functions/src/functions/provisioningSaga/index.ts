@@ -1,5 +1,6 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
 import type { IProvisionSiteRequest } from '@hbc/models';
+import { randomUUID } from 'crypto';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { SagaOrchestrator } from './saga-orchestrator.js';
 import { createLogger } from '../../utils/logger.js';
@@ -23,13 +24,22 @@ app.http('provisionProjectSite', {
       const body = (await request.json()) as IProvisionSiteRequest;
       // D-PH6-03 trust boundary: server overwrites identity from validated JWT claims.
       body.triggeredBy = claims.upn;
+      const correlationId = body.correlationId ?? randomUUID();
+      body.correlationId = correlationId;
 
-      if (!body.projectId || !body.projectNumber || !body.projectName || !body.triggeredBy || !body.correlationId) {
+      logger.info('Provisioning saga triggered', {
+        projectId: body.projectId,
+        projectNumber: body.projectNumber,
+        correlationId,
+        triggeredBy: body.triggeredBy,
+      });
+
+      if (!body.projectId || !body.projectNumber || !body.projectName || !body.triggeredBy) {
         return {
           status: 400,
           jsonBody: {
             error:
-              'Missing required fields: projectId, projectNumber, projectName, triggeredBy, correlationId',
+              'Missing required fields: projectId, projectNumber, projectName, triggeredBy',
           },
         };
       }
@@ -52,7 +62,7 @@ app.http('provisionProjectSite', {
 
       return {
         status: 202,
-        jsonBody: { message: 'Provisioning started', projectId: body.projectId, correlationId: body.correlationId },
+        jsonBody: { message: 'Provisioning started', projectId: body.projectId, correlationId },
       };
     } catch (err) {
       logger.error('Failed to start provisioning', {

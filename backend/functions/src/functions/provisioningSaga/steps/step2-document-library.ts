@@ -24,3 +24,11 @@ export async function executeStep2(
 
   return result;
 }
+
+export async function compensateStep2(
+  _services: IServiceContainer,
+  _status: IProvisioningStatus
+): Promise<void> {
+  // D-PH6-06 compensation contract: step 2 artifacts are cleaned by step 1 site delete.
+  return;
+}

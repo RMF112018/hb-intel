@@ -1,9 +1,11 @@
 import type { IServiceContainer } from '../../../services/service-factory.js';
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
+import type { ILogger } from '../../../utils/logger.js';
 
 export async function executeStep5(
   services: IServiceContainer,
-  status: IProvisioningStatus
+  status: IProvisioningStatus,
+  _logger?: ILogger
 ): Promise<ISagaStepResult> {
   const result: ISagaStepResult = {
     stepNumber: 5,
