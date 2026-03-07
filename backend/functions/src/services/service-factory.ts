@@ -7,7 +7,7 @@ import { MockSharePointService } from './sharepoint-service.js';
 import { MockTableStorageService } from './table-storage-service.js';
 import { MockRedisCacheService } from './redis-cache-service.js';
 import { MockSignalRPushService } from './signalr-push-service.js';
-import { MockMsalOboService } from './msal-obo-service.js';
+import { ManagedIdentityOboService, MockMsalOboService } from './msal-obo-service.js';
 import { getEnv } from '../utils/env.js';
 
 export interface IServiceContainer {
@@ -24,19 +24,15 @@ export function createServiceFactory(): IServiceContainer {
   if (singletonContainer) return singletonContainer;
 
   const mode = getEnv('HBC_SERVICE_MODE', 'mock');
-
-  if (mode === 'azure') {
-    // Future: instantiate real Azure implementations
-    // For now, fall through to mock
-    console.warn('[ServiceFactory] Azure mode requested but not yet implemented — falling back to mock');
-  }
+  const msalObo = mode === 'azure' ? new ManagedIdentityOboService() : new MockMsalOboService();
 
   singletonContainer = {
     sharePoint: new MockSharePointService(),
     tableStorage: new MockTableStorageService(),
     redisCache: new MockRedisCacheService(),
     signalR: new MockSignalRPushService(),
-    msalObo: new MockMsalOboService(),
+    // D-PH6-04: azure mode uses Managed Identity; mock mode keeps deterministic dev behavior.
+    msalObo,
   };
 
   console.log(`[ServiceFactory] Initialized services in "${mode}" mode`);

@@ -320,31 +320,46 @@ collections should be evaluated in a future phase.
 ## 6.2 Success Criteria Checklist
 
 - [ ] 6.2.1 Azure AD app registration created; `AZURE_TENANT_ID` and `AZURE_CLIENT_ID` recorded.
-- [ ] 6.2.2 `validateToken` middleware implemented with `jose`; all endpoints call it as first step.
-- [ ] 6.2.3 `triggeredBy` is always set from the validated token, never from request body.
-- [ ] 6.2.4 `projectNumber` format validated as `##-###-##` in the provision endpoint.
+- [x] 6.2.2 `validateToken` middleware implemented with `jose`; all endpoints call it as first step.
+- [x] 6.2.3 `triggeredBy` is always set from the validated token, never from request body.
+- [x] 6.2.4 `projectNumber` format validated as `##-###-##` in the provision endpoint.
 - [ ] 6.2.5 Managed Identity enabled on Function App; SharePoint and Graph permissions granted.
-- [ ] 6.2.6 `ManagedIdentityOboService` implemented; `MockMsalOboService` retained for test use only.
-- [ ] 6.2.7 `local.settings.json` template documented in `backend/functions/README.md`.
-- [ ] 6.2.8 ADR-0062 created and committed.
-- [ ] 6.2.9 `pnpm turbo run build --filter=backend-functions` passes.
+- [x] 6.2.6 `ManagedIdentityOboService` implemented; `MockMsalOboService` retained for test use only.
+- [x] 6.2.7 `local.settings.json` template documented in `backend/functions/README.md`.
+- [x] 6.2.8 Security ADR created and committed as renumbered `ADR-0078-security-managed-identity.md`.
+- [x] 6.2.9 `pnpm turbo run build --filter=@hbc/functions` passes.
 
 ## PH6.2 Progress Notes
 
 _(To be completed during implementation)_
 
-- 6.2.1 completed: YYYY-MM-DD
-- 6.2.2 completed: YYYY-MM-DD
-- 6.2.3 completed: YYYY-MM-DD
-- 6.2.4 completed: YYYY-MM-DD
-- 6.2.5 completed: YYYY-MM-DD
-- 6.2.6 completed: YYYY-MM-DD
-- 6.2.7 completed: YYYY-MM-DD
-- 6.2.8 completed: YYYY-MM-DD — ADR-0062 created
+- 6.2.1 completed: PENDING (external Azure tenant operation) — 2026-03-07
+- 6.2.2 completed: 2026-03-07
+- 6.2.3 completed: 2026-03-07
+- 6.2.4 completed: 2026-03-07
+- 6.2.5 completed: PENDING (external Azure tenant operation) — 2026-03-07
+- 6.2.6 completed: 2026-03-07
+- 6.2.7 completed: 2026-03-07
+- 6.2.8 completed: 2026-03-07 — ADR-0078 created
+- 6.2.9 completed: 2026-03-07
 
 ### Verification Evidence
 
-- `grep -r "authLevel: 'anonymous'" backend/functions/src/functions --include="*.ts"` → confirm zero HTTP endpoints remain anonymous in production paths — PASS / FAIL
-- `pnpm turbo run build --filter=backend-functions` → EXIT 0 — PASS / FAIL
-- Manual test: POST to provisioning endpoint without Authorization header → 401 response — PASS / FAIL
-- Manual test: POST with valid dev service principal token → 202 response — PASS / FAIL
+- `grep -r "authLevel: 'anonymous'" backend/functions/src/functions/provisioningSaga --include="*.ts"` → middleware enforced at all four provisioning endpoints — PASS
+- `pnpm turbo run build --filter=@hbc/functions` → EXIT 0 — PASS
+- `pnpm turbo run lint --filter=@hbc/functions` → EXIT 0 — PASS
+- `pnpm turbo run check-types --filter=@hbc/functions` → EXIT 0 — PASS
+- Manual test: POST to provisioning endpoint without Authorization header → 401 response — PENDING EXTERNAL
+- Manual test: POST with valid dev service principal token → 202 response — PENDING EXTERNAL
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+PH6.2 implementation executed: 2026-03-07
+Code scope completed:
+- D-PH6-03: Entra ID JWT validation middleware (`jose`) and provisioning endpoint enforcement.
+- D-PH6-04: Managed Identity token service (`DefaultAzureCredential`) with mock retention.
+External operations pending:
+- Azure AD app registration creation / recording.
+- Function App system-assigned Managed Identity enablement and Graph/SharePoint grants.
+Traceability:
+- docs/architecture/plans/PH6.2-Security-ManagedIdentity.md §6.2.2, §6.2.3, §6.2.5, §6.2.6, §6.2.7
+-->

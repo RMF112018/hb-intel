@@ -3,6 +3,7 @@ import type { IProvisionSiteRequest } from '@hbc/models';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { SagaOrchestrator } from './saga-orchestrator.js';
 import { createLogger } from '../../utils/logger.js';
+import { validateToken, unauthorizedResponse, type IValidatedClaims } from '../../middleware/validateToken.js';
 
 app.http('provisionProjectSite', {
   methods: ['POST'],
@@ -10,8 +11,18 @@ app.http('provisionProjectSite', {
   route: 'provision-project-site',
   handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
+    let claims: IValidatedClaims;
+    try {
+      // D-PH6-03: Token validation is the first action for every provisioning HTTP endpoint.
+      claims = await validateToken(request);
+    } catch {
+      return unauthorizedResponse('Invalid or missing Bearer token');
+    }
+
     try {
       const body = (await request.json()) as IProvisionSiteRequest;
+      // D-PH6-03 trust boundary: server overwrites identity from validated JWT claims.
+      body.triggeredBy = claims.upn;
 
       if (!body.projectId || !body.projectNumber || !body.projectName || !body.triggeredBy || !body.correlationId) {
         return {
@@ -21,6 +32,10 @@ app.http('provisionProjectSite', {
               'Missing required fields: projectId, projectNumber, projectName, triggeredBy, correlationId',
           },
         };
+      }
+
+      if (!/^\d{2}-\d{3}-\d{2}$/.test(body.projectNumber)) {
+        return { status: 400, jsonBody: { error: 'projectNumber must match ##-###-## format' } };
       }
 
       const services = createServiceFactory();
@@ -58,6 +73,13 @@ app.http('getProvisioningStatus', {
   route: 'provisioning-status/{projectId}',
   handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
+    try {
+      // D-PH6-03: endpoint access requires a valid Bearer token even for read operations.
+      await validateToken(request);
+    } catch {
+      return unauthorizedResponse('Invalid or missing Bearer token');
+    }
+
     const projectId = request.params.projectId;
 
     if (!projectId) {
@@ -90,6 +112,12 @@ app.http('retryProvisioning', {
   route: 'provisioning-retry/{projectId}',
   handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
+    try {
+      await validateToken(request);
+    } catch {
+      return unauthorizedResponse('Invalid or missing Bearer token');
+    }
+
     const projectId = request.params.projectId;
 
     if (!projectId) {
@@ -125,6 +153,14 @@ app.http('escalateProvisioning', {
   route: 'provisioning-escalate/{projectId}',
   handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
+    let claims: IValidatedClaims;
+    try {
+      // D-PH6-03 trust boundary: escalation identity is sourced from validated JWT claims.
+      claims = await validateToken(request);
+    } catch {
+      return unauthorizedResponse('Invalid or missing Bearer token');
+    }
+
     const projectId = request.params.projectId;
 
     if (!projectId) {
@@ -132,11 +168,11 @@ app.http('escalateProvisioning', {
     }
 
     try {
-      const body = (await request.json()) as { escalatedBy: string };
+      void (await request.json());
       const services = createServiceFactory();
-      await services.tableStorage.escalateProvisioning(projectId, body.escalatedBy);
+      await services.tableStorage.escalateProvisioning(projectId, claims.upn);
 
-      logger.info(`Provisioning escalated for ${projectId} by ${body.escalatedBy}`);
+      logger.info(`Provisioning escalated for ${projectId} by ${claims.upn}`);
       return { status: 200, jsonBody: { message: 'Provisioning escalated', projectId } };
     } catch (err) {
       logger.error('Failed to escalate', {
