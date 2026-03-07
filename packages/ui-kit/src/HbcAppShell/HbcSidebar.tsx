@@ -1,20 +1,16 @@
 /**
  * HbcSidebar — Collapsible icon-rail (56px / 240px)
  * PH4.4 §Step 5 | Blueprint §2c
+ * Traceability: D-PH4C-26, D-PH4C-27
  *
  * Groups filtered by usePermission(). Mobile (< 1024px) renders nothing.
  * Active state: 3px left border orange + highlight bg.
  */
 import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
-import { Tooltip } from '@fluentui/react-components';
+import { Tooltip, tokens } from '@fluentui/react-components';
 import { usePermission } from '@hbc/auth';
-import {
-  HBC_ACCENT_ORANGE,
-  HBC_PRIMARY_BLUE,
-  HBC_SURFACE_LIGHT,
-  HBC_HEADER_ICON_MUTED,
-} from '../theme/tokens.js';
+import { HBC_ACCENT_ORANGE } from '../theme/tokens.js';
 import { TRANSITION_NORMAL } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { Expand, Collapse } from '../icons/index.js';
@@ -28,8 +24,8 @@ const useStyles = makeStyles({
     top: '58px',
     left: '0px',
     height: 'calc(100vh - 58px)',
-    backgroundColor: '#FFFFFF',
-    ...shorthands.borderRight('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderRight('1px', 'solid', tokens.colorNeutralStroke1),
     display: 'flex',
     flexDirection: 'column',
     transitionProperty: 'width',
@@ -50,7 +46,7 @@ const useStyles = makeStyles({
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
-    color: HBC_HEADER_ICON_MUTED,
+    color: tokens.colorNeutralForeground3,
     paddingLeft: '16px',
     paddingRight: '16px',
     paddingTop: '16px',
@@ -65,7 +61,7 @@ const useStyles = makeStyles({
     fontSize: '0px',
     paddingTop: '12px',
     paddingBottom: '4px',
-    ...shorthands.borderBottom('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke1),
   },
   navItem: {
     display: 'flex',
@@ -80,7 +76,7 @@ const useStyles = makeStyles({
     ...shorthands.borderStyle('none'),
     ...shorthands.borderLeft('3px', 'solid', 'transparent'),
     cursor: 'pointer',
-    color: HBC_SURFACE_LIGHT['text-primary'],
+    color: tokens.colorNeutralForeground1,
     fontSize: '0.875rem',
     textAlign: 'left',
     whiteSpace: 'nowrap',
@@ -88,8 +84,8 @@ const useStyles = makeStyles({
     textOverflow: 'ellipsis',
     textDecorationLine: 'none',
     ':hover': {
-      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
-      color: HBC_PRIMARY_BLUE,
+      backgroundColor: tokens.colorNeutralBackground3Hover,
+      color: tokens.colorBrandForeground1,
     },
   },
   navItemCollapsed: {
@@ -98,9 +94,10 @@ const useStyles = makeStyles({
     paddingRight: '0px',
   },
   navItemActive: {
+    // D-PH4C-27 invariant: keep brand orange accent for active rail marker.
     borderLeftColor: HBC_ACCENT_ORANGE as string,
-    backgroundColor: '#E8F1F8',
-    color: HBC_PRIMARY_BLUE,
+    backgroundColor: tokens.colorBrandBackground2,
+    color: tokens.colorBrandForeground1,
     fontWeight: '600',
   },
   navItemActiveCollapsed: {
@@ -136,9 +133,9 @@ const useStyles = makeStyles({
     backgroundColor: 'transparent',
     ...shorthands.borderStyle('none'),
     cursor: 'pointer',
-    color: HBC_HEADER_ICON_MUTED,
+    color: tokens.colorNeutralForeground3,
     ':hover': {
-      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+      backgroundColor: tokens.colorNeutralBackground3Hover,
     },
   },
 });

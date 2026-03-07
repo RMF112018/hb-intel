@@ -1,12 +1,14 @@
 /**
  * HbcToolboxFlyout — Grid-icon flyout with role-filtered tools
  * PH4.4 §Step 3 | Blueprint §2c
+ * Traceability: D-PH4C-26, D-PH4C-27
  */
 import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
+import { tokens } from '@fluentui/react-components';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
-import { HBC_HEADER_ICON_MUTED, HBC_SURFACE_FIELD, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
+import { HBC_HEADER_ICON_MUTED, HBC_SURFACE_FIELD } from '../theme/tokens.js';
 import { elevationLevel2 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { Toolbox } from '../icons/index.js';
@@ -52,15 +54,16 @@ const useStyles = makeStyles({
     textAlign: 'center' as const,
   },
   flyoutOffice: {
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    // D-PH4C-26: office flyout surfaces use Fluent neutral tokens.
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
   flyoutField: {
     backgroundColor: HBC_SURFACE_FIELD['surface-1'],
     ...shorthands.border('1px', 'solid', HBC_SURFACE_FIELD['border-default']),
   },
   placeholderOffice: {
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: tokens.colorNeutralForeground3,
   },
   placeholderField: {
     color: HBC_SURFACE_FIELD['text-muted'],

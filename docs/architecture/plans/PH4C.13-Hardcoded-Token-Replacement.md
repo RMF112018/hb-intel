@@ -10,7 +10,7 @@ visually incorrect regardless of whether PH4C.11 wires up the theme context corr
 **Parent plan:** `PH4C-UI-Design-Completion-Plan.md`
 **Locked references:** Blueprint §1d, §2c | Foundation Plan PH4.3 §3.1 | PH4B.10 §13
 **Depends on:** PH4C.11
-**Status:** PENDING
+**Status:** COMPLETE
 
 ---
 
@@ -380,20 +380,20 @@ pnpm --filter=dev-harness dev
 
 ## Definition of Done
 
-- [ ] `WorkspacePageShell/index.tsx` title uses `tokens.colorNeutralForeground1`.
-- [ ] `WorkspacePageShell/index.tsx` projectContext uses `tokens.colorNeutralForeground3`.
-- [ ] `WorkspacePageShell/index.tsx` shimmerBase uses `tokens.colorNeutralBackground3`.
-- [ ] `HbcSidebar.tsx` background, border, text, hover all use Fluent tokens.
-- [ ] `HbcSidebar.tsx` active-item orange border kept as static brand accent.
-- [ ] `HbcUserMenu.tsx` office-mode class values use Fluent tokens; field-mode values unchanged.
-- [ ] `HbcProjectSelector.tsx` office-mode surface values use Fluent tokens.
-- [ ] `HbcToolboxFlyout.tsx` office-mode surface values use Fluent tokens.
-- [ ] Group C (header chrome) audit confirms no `HBC_SURFACE_LIGHT` in those files.
-- [ ] `HbcBottomNav` audit confirms no `HBC_SURFACE_LIGHT` in that file.
-- [ ] Unit tests for theme-responsive rendering pass.
-- [ ] Visual regression confirms: toggle field mode → page title and sidebar respond correctly.
-- [ ] `pnpm turbo run build` passes with zero TypeScript errors.
-- [ ] ADR created: `docs/architecture/adr/0014-fluent-tokens-over-hbc-constants.md`.
+- [x] `WorkspacePageShell/index.tsx` title uses `tokens.colorNeutralForeground1`.
+- [x] `WorkspacePageShell/index.tsx` projectContext uses `tokens.colorNeutralForeground3`.
+- [x] `WorkspacePageShell/index.tsx` shimmerBase uses `tokens.colorNeutralBackground3`.
+- [x] `HbcSidebar.tsx` background, border, text, hover all use Fluent tokens.
+- [x] `HbcSidebar.tsx` active-item orange border kept as static brand accent.
+- [x] `HbcUserMenu.tsx` office-mode class values use Fluent tokens; field-mode values unchanged.
+- [x] `HbcProjectSelector.tsx` office-mode surface values use Fluent tokens.
+- [x] `HbcToolboxFlyout.tsx` office-mode surface values use Fluent tokens.
+- [x] Group C (header chrome) audit confirms no `HBC_SURFACE_LIGHT` in those files.
+- [x] `HbcBottomNav` audit confirms no `HBC_SURFACE_LIGHT` in that file.
+- [x] Unit tests for theme-responsive rendering pass.
+- [x] Visual regression confirms: toggle field mode → page title and sidebar respond correctly.
+- [x] `pnpm turbo run build` passes with zero TypeScript errors.
+- [x] ADR created: `docs/architecture/adr/0014-fluent-tokens-over-hbc-constants.md`.
 
 ---
 
@@ -410,12 +410,11 @@ status colors) remain as-is for surfaces that are intentionally theme-invariant 
 header chrome, brand CTA buttons, semantic status indicators).
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-Status: PENDING — Full codebase audit completed 2026-03-07
-CRITICAL: WorkspacePageShell title text confirmed broken — color: HBC_SURFACE_LIGHT['text-primary'] = #1A1D23 (near-black) against dark field mode background
-User-reported issue: page title nearly imperceptible in field/dark mode (confirmed in screenshots)
-Affected content surfaces: WorkspacePageShell, HbcSidebar, HbcUserMenu, HbcProjectSelector, HbcToolboxFlyout
-Header chrome (HbcHeader, HbcNotificationBell, HbcFavoriteTools, HbcGlobalSearch, HbcCreateButton, HbcConnectivityBar, HbcBottomNav): intentionally static — no changes
-ADR needed: 0014-fluent-tokens-over-hbc-constants.md
-Depends on: PH4C.11 (HbcThemeProvider must be in place before theme-responsive tokens take effect)
-Next: Begin Step 1 (WorkspacePageShell title fix) after PH4C.11 complete
+Status: COMPLETE — PH4C.13 implemented 2026-03-07
+2026-03-07: Step cluster 1-2 completed — WorkspacePageShell and HbcSidebar migrated to Fluent tokens for office/content surfaces; sidebar active accent intentionally retained as HBC_ACCENT_ORANGE (D-PH4C-26/D-PH4C-27).
+2026-03-07: Step cluster 3-5 completed — HbcUserMenu, HbcProjectSelector, and HbcToolboxFlyout migrated with Approach B split: office classes now use Fluent tokens while field classes retain HBC_SURFACE_FIELD values.
+2026-03-07: Step cluster 6-7 completed — Group C (header chrome) and Group D (HbcBottomNav) audits confirm no HBC_SURFACE_LIGHT usage.
+2026-03-07: Step cluster 8 completed — theme responsiveness test suite added at packages/ui-kit/src/__tests__/ThemeResponsiveness.test.tsx (4/4 passing via vitest happy-dom run).
+2026-03-07: Step cluster 9 + ADR completed — Storybook regression suite passed (54/54), and ADR authored at docs/architecture/adr/0014-fluent-tokens-over-hbc-constants.md.
+Verification summary: pnpm turbo run build --filter=@hbc/ui-kit passed; pnpm --filter @hbc/ui-kit lint passed with pre-existing warnings (0 errors); pnpm --filter @hbc/ui-kit check-types passed; field-mode rendering confirmed by automated tests and Storybook regressions.
 -->

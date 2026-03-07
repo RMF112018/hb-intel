@@ -1,6 +1,7 @@
 /**
  * WorkspacePageShell — Mandatory outer container for every page (D-01)
  * PH4B.2 §Step 2 | PH4B.3 §Step 3 | PH4B.7 §4b.7.1 + §4b.7.4 | Blueprint §1d
+ * Traceability: D-PH4C-26, D-PH4C-27
  *
  * Renders breadcrumbs, command bar, banner, and state overlays
  * (loading/empty/error). LAYOUT_MAP wires DashboardLayout and ListLayout;
@@ -13,6 +14,7 @@
 import * as React from 'react';
 import { createContext } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
+import { tokens } from '@fluentui/react-components';
 import { useNavStore, useProjectStore } from '@hbc/shell';
 import { HbcBreadcrumbs } from '../HbcBreadcrumbs/index.js';
 import { HbcCommandBar } from '../HbcCommandBar/index.js';
@@ -23,8 +25,6 @@ import { HbcButton } from '../HbcButton/index.js';
 import { DashboardLayout } from '../layouts/DashboardLayout.js';
 import { ListLayout } from '../layouts/ListLayout.js';
 import {
-  HBC_SURFACE_LIGHT,
-  HBC_ACCENT_ORANGE,
   HBC_STATUS_COLORS,
   HBC_STATUS_RAMP_RED,
 } from '../theme/tokens.js';
@@ -74,12 +74,13 @@ const useStyles = makeStyles({
   },
   title: {
     ...heading2,
-    color: HBC_SURFACE_LIGHT['text-primary'],
+    // D-PH4C-26: Content title must resolve from Fluent runtime tokens for theme responsiveness.
+    color: tokens.colorNeutralForeground1,
     margin: '0',
   },
   projectContext: {
     fontSize: '0.75rem',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: tokens.colorNeutralForeground3,
   },
   commandBarZone: {
     paddingLeft: `${hbcSpacing.md}px`,
@@ -127,7 +128,8 @@ const useStyles = makeStyles({
   },
   // Skeleton styles — PH4B.7 §4b.7.4
   shimmerBase: {
-    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    // D-PH4C-27: Loading surfaces use Fluent neutral backgrounds in office/dark contexts.
+    backgroundColor: tokens.colorNeutralBackground3,
     backgroundImage: `linear-gradient(90deg, transparent 25%, rgba(0,75,135,0.06) 50%, transparent 75%)`,
     backgroundSize: '200% 100%',
     animationName: shimmerKeyframe,
@@ -179,7 +181,8 @@ const useStyles = makeStyles({
     height: '56px',
     borderRadius: '50%',
     border: 'none',
-    backgroundColor: HBC_ACCENT_ORANGE,
+    // Accent remains orange, but sourced from Fluent tokenized palette to stay theme-aware.
+    backgroundColor: tokens.colorPalettePumpkinBackground2,
     color: '#FFFFFF',
     fontSize: '1.5rem',
     display: 'flex',

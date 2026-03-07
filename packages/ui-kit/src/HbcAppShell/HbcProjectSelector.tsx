@@ -1,14 +1,16 @@
 /**
  * HbcProjectSelector — Project name + searchable dropdown
  * PH4.4 §Step 3 | Blueprint §2c
+ * Traceability: D-PH4C-26, D-PH4C-27
  */
 import * as React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
+import { tokens } from '@fluentui/react-components';
 import { useProjectStore } from '@hbc/shell';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { heading4 } from '../theme/typography.js';
-import { HBC_HEADER_TEXT, HBC_HEADER_ICON_MUTED, HBC_SURFACE_FIELD, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
+import { HBC_HEADER_TEXT, HBC_HEADER_ICON_MUTED, HBC_SURFACE_FIELD } from '../theme/tokens.js';
 import { elevationLevel2 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { ChevronDown } from '../icons/index.js';
@@ -78,19 +80,20 @@ const useStyles = makeStyles({
     fontSize: '0.875rem',
   },
   dropdownOffice: {
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    // D-PH4C-26: office dropdown panels must consume Fluent runtime tokens.
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
   dropdownField: {
     backgroundColor: HBC_SURFACE_FIELD['surface-1'],
     ...shorthands.border('1px', 'solid', HBC_SURFACE_FIELD['border-default']),
   },
   searchInputOffice: {
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    color: HBC_SURFACE_LIGHT['text-primary'],
-    ...shorthands.borderBottom('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    backgroundColor: tokens.colorNeutralBackground1,
+    color: tokens.colorNeutralForeground1,
+    ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke1),
     '::placeholder': {
-      color: HBC_SURFACE_LIGHT['text-muted'],
+      color: tokens.colorNeutralForeground3,
     },
   },
   searchInputField: {
@@ -102,9 +105,9 @@ const useStyles = makeStyles({
     },
   },
   projectItemOffice: {
-    color: HBC_SURFACE_LIGHT['text-primary'],
+    color: tokens.colorNeutralForeground1,
     ':hover': {
-      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+      backgroundColor: tokens.colorNeutralBackground3Hover,
     },
   },
   projectItemField: {

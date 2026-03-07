@@ -1,12 +1,14 @@
 /**
  * HbcUserMenu — Avatar dropdown with Field Mode toggle
  * PH4.4 §Step 3 | Blueprint §2c
+ * Traceability: D-PH4C-26, D-PH4C-27
  */
 import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
+import { tokens } from '@fluentui/react-components';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
-import { HBC_HEADER_TEXT, HBC_SURFACE_LIGHT, HBC_SURFACE_FIELD, HBC_PRIMARY_BLUE } from '../theme/tokens.js';
+import { HBC_HEADER_TEXT, HBC_SURFACE_FIELD } from '../theme/tokens.js';
 import { elevationLevel2 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import type { HbcUserMenuProps } from './types.js';
@@ -22,7 +24,8 @@ const useStyles = makeStyles({
     width: '32px',
     height: '32px',
     ...shorthands.borderRadius('50%'),
-    backgroundColor: HBC_PRIMARY_BLUE,
+    // Header avatar trigger uses Fluent brand token for office/field adaptive parity.
+    backgroundColor: tokens.colorBrandBackground,
     color: HBC_HEADER_TEXT,
     fontSize: '0.75rem',
     fontWeight: '600',
@@ -74,7 +77,7 @@ const useStyles = makeStyles({
     ...shorthands.borderStyle('none'),
   },
   toggleActive: {
-    backgroundColor: HBC_PRIMARY_BLUE,
+    backgroundColor: tokens.colorBrandBackground,
   },
   toggleKnob: {
     position: 'absolute',
@@ -95,17 +98,18 @@ const useStyles = makeStyles({
     marginBottom: '4px',
   },
   dropdownOffice: {
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    // D-PH4C-26: office dropdown surfaces are Fluent-token driven.
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
   dropdownField: {
     backgroundColor: HBC_SURFACE_FIELD['surface-1'],
     ...shorthands.border('1px', 'solid', HBC_SURFACE_FIELD['border-default']),
   },
   menuItemOffice: {
-    color: HBC_SURFACE_LIGHT['text-primary'],
+    color: tokens.colorNeutralForeground1,
     ':hover': {
-      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+      backgroundColor: tokens.colorNeutralBackground3Hover,
     },
   },
   menuItemField: {
@@ -115,19 +119,19 @@ const useStyles = makeStyles({
     },
   },
   toggleOffice: {
-    backgroundColor: HBC_SURFACE_LIGHT['border-default'],
+    backgroundColor: tokens.colorNeutralStroke1,
   },
   toggleField: {
     backgroundColor: HBC_SURFACE_FIELD['border-default'],
   },
   toggleKnobOffice: {
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+    backgroundColor: tokens.colorNeutralBackground1,
   },
   toggleKnobField: {
     backgroundColor: HBC_SURFACE_FIELD['surface-0'],
   },
   dividerOffice: {
-    backgroundColor: HBC_SURFACE_LIGHT['border-default'],
+    backgroundColor: tokens.colorNeutralStroke1,
   },
   dividerField: {
     backgroundColor: HBC_SURFACE_FIELD['border-default'],
