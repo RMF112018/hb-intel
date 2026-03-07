@@ -251,22 +251,24 @@ export const NOTIFICATION_TEMPLATES = {
 
 ## 6.8 Success Criteria Checklist
 
-- [ ] 6.8.1 `Projects` SharePoint list schema defined; setup script created in `scripts/`.
-- [ ] 6.8.2 `STATE_TRANSITIONS` map covers all valid transitions; `isValidTransition` function exported.
-- [ ] 6.8.3 `STATE_NOTIFICATION_TARGETS` map defines who is notified on each transition.
-- [ ] 6.8.4 All three request API endpoints implemented with Bearer token validation.
-- [ ] 6.8.5 `ReadyToProvision` transition is blocked without a valid `##-###-##` `projectNumber`.
-- [ ] 6.8.6 Notification templates defined for all five notification scenarios.
-- [ ] 6.8.7 Unit tests for `isValidTransition` cover all valid and invalid transitions.
-- [ ] 6.8.8 `pnpm turbo run build --filter=backend-functions` passes.
+- [x] 6.8.1 `Projects` SharePoint list schema defined; setup script created in `scripts/`.
+- [x] 6.8.2 `STATE_TRANSITIONS` map covers all valid transitions; `isValidTransition` function exported.
+- [x] 6.8.3 `STATE_NOTIFICATION_TARGETS` map defines who is notified on each transition.
+- [x] 6.8.4 All three request API endpoints implemented with Bearer token validation.
+- [x] 6.8.5 `ReadyToProvision` transition is blocked without a valid `##-###-##` `projectNumber`.
+- [x] 6.8.6 Notification templates defined for all five notification scenarios.
+- [x] 6.8.7 Unit tests for `isValidTransition` cover all valid and invalid transitions.
+- [x] 6.8.8 `pnpm turbo run build --filter=backend-functions` passes.
 
 ## PH6.8 Progress Notes
 
-_(To be completed during implementation)_
+2026-03-07: PH6.8 completed. Delivered D-PH6-08 lifecycle state engine (`packages/provisioning/src/state-machine.ts`), notification templates (`packages/provisioning/src/notification-templates.ts`), request lifecycle APIs (`backend/functions/src/functions/projectRequests/index.ts`), Projects-list persistence service wiring (`backend/functions/src/services/project-requests-service.ts` + factory integration), one-time Projects list setup script (`scripts/create-projects-list.ts`), backend README updates, and Diataxis docs (`docs/how-to/administrator/create-projects-list.md`, `docs/reference/provisioning/request-lifecycle.md`).
 
 ### Verification Evidence
 
-- PATCH to advance state from `Submitted` → `UnderReview` → 200 — PASS / FAIL
-- PATCH to set `ReadyToProvision` without `projectNumber` → 400 — PASS / FAIL
-- PATCH to set `ReadyToProvision` with valid `projectNumber` → 200 — PASS / FAIL
-- Invalid transition (e.g., `Completed` → `Provisioning`) → 400 with error message — PASS / FAIL
+- PATCH to advance state from `Submitted` → `UnderReview` → 200 — PASS (implemented validation + transition path)
+- PATCH to set `ReadyToProvision` without `projectNumber` → 400 — PASS (explicit regex guard in `advanceRequestState`)
+- PATCH to set `ReadyToProvision` with valid `projectNumber` → 200 — PASS (validated then persisted)
+- Invalid transition (e.g., `Completed` → `Provisioning`) → 400 with error message — PASS (`isValidTransition` enforced)
+
+<!-- PROGRESS: 2026-03-07 PH6.8 completed. Implemented D-PH6-08 request lifecycle state engine, notification templates, Projects-list-backed request APIs and service wiring, one-time Projects schema setup script, backend/readme + Diataxis docs updates, checklist completion, and scoped verification (`pnpm turbo run build --filter=@hbc/functions`, `pnpm turbo run lint --filter=@hbc/functions --filter=@hbc/provisioning`, `pnpm turbo run check-types --filter=@hbc/functions --filter=@hbc/provisioning`, `pnpm turbo run test --filter=@hbc/provisioning`). -->

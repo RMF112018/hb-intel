@@ -60,3 +60,47 @@ SharePoint audit writes are intentionally non-blocking. They must always use `.c
 - `AZURE_STORAGE_CONNECTION_STRING`: Required by `RealTableStorageService` for Azure Table access.
 - `SHAREPOINT_TENANT_URL`: Root site collection URL used for audit-list setup script and SharePoint service operations.
 - `HBC_ADAPTER_MODE`: `mock` for local deterministic mode; `real` (or omitted in production configuration) for real persistence.
+
+### Phase 6.8 Request Lifecycle Endpoints (D-PH6-08)
+
+- `POST /api/project-setup-requests` (`submitProjectSetupRequest`)
+  - Requires Bearer token.
+  - Validates `projectName` and `groupMembers`.
+  - Creates a new request in `Submitted` state.
+- `GET /api/project-setup-requests` (`listProjectSetupRequests`)
+  - Requires Bearer token.
+  - Optional query: `state=<ProjectSetupRequestState>`.
+  - Returns request inbox rows.
+- `PATCH /api/project-setup-requests/{requestId}/state` (`advanceRequestState`)
+  - Requires Bearer token.
+  - Enforces transition rules via `isValidTransition`.
+  - Enforces `projectNumber` format `##-###-##` when advancing to `ReadyToProvision`.
+
+### Phase 6.8 State Machine Rules
+
+Valid transitions:
+- `Submitted -> UnderReview`
+- `UnderReview -> NeedsClarification | AwaitingExternalSetup | ReadyToProvision`
+- `NeedsClarification -> UnderReview`
+- `AwaitingExternalSetup -> ReadyToProvision`
+- `ReadyToProvision -> Provisioning`
+- `Provisioning -> Completed | Failed`
+- `Failed -> UnderReview`
+- `Completed` is terminal
+
+Notification targets:
+- `NeedsClarification`: submitter
+- `ReadyToProvision`: controller
+- `Provisioning`: group
+- `Completed`: group
+- `Failed`: controller + submitter
+
+### Phase 6.8 Projects List Setup
+
+Use the one-time setup script to create/verify list schema:
+
+```bash
+pnpm exec tsx scripts/create-projects-list.ts
+```
+
+Administrator guide: `docs/how-to/administrator/create-projects-list.md`.
