@@ -543,18 +543,26 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - 5.7.1 completed — controlled degraded-mode policy implemented with strict eligibility enforcement for recent trusted sessions (4-hour auth recency + trusted fresh section state) and centralized sensitive action blocking contracts — 2026-03-06.
 - 5.7.2 completed — shell-core degraded orchestration updated to preserve core shell frame/context/navigation, communicate restricted zones, and prevent fresh sensitive/current-authorization-dependent operations while degraded — 2026-03-06.
 - 5.7.3 completed — section-level freshness/validation/restriction labels and explicit recovery signaling added to canonical shell-status model; ADR-0060 and governance traceability updates completed — 2026-03-06.
+- 5.7.4 remediation completed — resolved `@hbc/ui-kit` TS2741 build failure at `packages/ui-kit/src/HbcAppShell/HbcConnectivityBar.tsx:90` by adding the missing exhaustive `shellStatusToConnectivityStatus['recovered'] = 'online'` mapping to align Phase 5.7 recovery semantics with canonical connectivity-rail behavior — 2026-03-07.
 
 ## Phase 5 Success Criteria Checklist Progress (5.7)
 
 - [x] Success Criteria #7 advanced through controlled degraded-mode eligibility gates, explicit restricted-zone communication, and safe action blocking guarantees.
 - [x] Success Criteria #8 advanced through centralized recovery signaling (`recovered` state) and continued shell-status arbitration ownership in `@hbc/shell`.
 - [x] Success Criteria #10 advanced through Phase 5.7 documentation closure (plan checklist, ADR-0060, blueprint/foundation progress evidence, and verification artifacts).
+- [x] Success Criteria #8 remediation complete — `@hbc/ui-kit` canonical connectivity-rail adapter now exhaustively covers Phase 5.7 `recovered` shell status with verified build/lint/type-check compatibility.
 
 ### Verification Evidence (2026-03-06)
 
 - `pnpm turbo run build --filter=@hbc/shell` - PASS
 - `pnpm turbo run lint --filter=@hbc/shell` - PASS (0 errors)
 - `pnpm turbo run check-types --filter=@hbc/shell` - PASS
+
+### Verification Evidence (2026-03-07)
+
+- `pnpm turbo run build --filter=@hbc/ui-kit` - PASS
+- `pnpm turbo run lint --filter=@hbc/ui-kit` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/ui-kit` - PASS
 
 ---
 

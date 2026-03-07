@@ -87,11 +87,17 @@ const ariaLabels: Record<ConnectivityStatus, string> = {
   offline: 'No connection',
 };
 
+/**
+ * Phase 5.7 added explicit shell recovery signaling (`recovered`).
+ * The connectivity rail keeps recovery semantics as "back online", and this
+ * exhaustive Record intentionally fails fast when new shell status kinds are added.
+ */
 const shellStatusToConnectivityStatus: Record<ShellStatusSnapshot['kind'], ConnectivityStatus> = {
   initializing: 'syncing',
   'restoring-session': 'syncing',
   connected: 'online',
   reconnecting: 'syncing',
+  recovered: 'online',
   degraded: 'syncing',
   'access-validation-issue': 'offline',
   'error-failure': 'offline',
