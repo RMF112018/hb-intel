@@ -41,3 +41,22 @@ This package hosts HB Intel Azure Functions for provisioning and integration end
 - `HB_INTEL_SPFX_APP_ID`: Product ID GUID of the HB Intel SPFx package in the App Catalog.
 - `SHAREPOINT_HUB_SITE_ID`: Hub site GUID required for Step 7 association.
 - `OPEX_MANAGER_UPN`: UPN of the OpEx manager always included in Step 6 permission assignment.
+
+### Phase 6.6 Dual Store Write Rules (D-PH6-06)
+
+| Event | Azure Table (`ProvisioningStatus`) | SharePoint Audit (`ProvisioningAuditLog`) |
+|---|---|---|
+| Saga triggered | Upsert initial status row | Fire-and-forget `Started` write |
+| Step progress | Upsert after each step completion/failure | No write |
+| Step 5 deferred | Upsert with `step5DeferredToTimer=true`, `overallStatus=WebPartsPending` | No write |
+| Saga completed | Upsert terminal completion state | Fire-and-forget `Completed` write |
+| Saga failed | Upsert terminal failure state | Fire-and-forget `Failed` write |
+| Timer resolves Step 5 | Upsert completion and clear deferral flag | Fire-and-forget `Completed` write |
+
+SharePoint audit writes are intentionally non-blocking. They must always use `.catch(...)` and must never throw into saga execution flow.
+
+### Phase 6.6 Environment Variables
+
+- `AZURE_STORAGE_CONNECTION_STRING`: Required by `RealTableStorageService` for Azure Table access.
+- `SHAREPOINT_TENANT_URL`: Root site collection URL used for audit-list setup script and SharePoint service operations.
+- `HBC_ADAPTER_MODE`: `mock` for local deterministic mode; `real` (or omitted in production configuration) for real persistence.

@@ -4,7 +4,7 @@ import type { IRedisCacheService } from './redis-cache-service.js';
 import type { ISignalRPushService } from './signalr-push-service.js';
 import type { IMsalOboService } from './msal-obo-service.js';
 import { MockSharePointService, SharePointService } from './sharepoint-service.js';
-import { MockTableStorageService } from './table-storage-service.js';
+import { MockTableStorageService, RealTableStorageService } from './table-storage-service.js';
 import { MockRedisCacheService } from './redis-cache-service.js';
 import { MockSignalRPushService } from './signalr-push-service.js';
 import { ManagedIdentityOboService, MockMsalOboService } from './msal-obo-service.js';
@@ -29,7 +29,8 @@ export function createServiceFactory(): IServiceContainer {
   singletonContainer = {
     // D-PH6-05: real SharePoint adapter by default; mocks only in explicit mock/test mode.
     sharePoint: isMock ? new MockSharePointService() : new SharePointService(),
-    tableStorage: new MockTableStorageService(),
+    // D-PH6-06: real table persistence in production, in-memory mock for test/mock mode.
+    tableStorage: isMock ? new MockTableStorageService() : new RealTableStorageService(),
     redisCache: new MockRedisCacheService(),
     signalR: new MockSignalRPushService(),
     // D-PH6-04: Managed Identity in real mode, mock OBO in test/mock mode.
