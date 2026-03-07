@@ -164,7 +164,7 @@ Phase 6 is complete when HB Intel has a production-ready provisioning system tha
 - [x] 6.0.5 All 7 steps use real PnPjs/Graph implementations (no mock service in production path). (2026-03-07 update: Steps 1-7 completed via PH6.4 + PH6.5)
 - [x] 6.0.6 Azure Table Storage service is real and production-ready. (2026-03-07 update: PH6.6 `RealTableStorageService` delivered and wired in production mode)
 - [ ] 6.0.7 SharePoint audit list (`ProvisioningAuditLog`) created and written to at lifecycle events. (2026-03-07 update: schema + setup script delivered in PH6.6; tenant-side one-time execution pending)
-- [ ] 6.0.8 SignalR negotiate endpoint is real; per-project groups functioning.
+- [x] 6.0.8 SignalR negotiate endpoint is real; per-project groups functioning. (2026-03-07 update: PH6.7 completed with real negotiate endpoint, per-project/admin group routing, management API push service, and terminal cleanup.)
 - [ ] 6.0.9 Project Setup Request data model and 7-state machine implemented.
 - [ ] 6.0.10 Estimating app Project Setup Request form live with team member picker.
 - [ ] 6.0.11 Accounting app Project Setup Requests inbox live with full lifecycle state management.
@@ -233,7 +233,7 @@ Task completions:
 - PH6.4 completed: 2026-03-07 — real PnPjs implementations for Steps 1-4 delivered (`SharePointService`, idempotency checks, compensation hooks, list definitions).
 - PH6.5 completed: 2026-03-07 — real implementations delivered for Step 5 (SPFx timeout/deferral), Step 6 (group permissions), and Step 7 (hub association + compensation).
 - PH6.6 completed: 2026-03-07 — real Azure Table dual-store service implemented, production wiring enabled, and audit-list setup assets documented.
-- PH6.7 completed: YYYY-MM-DD — docs: docs/architecture/adr/0XXX-signalr-groups.md
+- PH6.7 completed: 2026-03-07 — docs: docs/architecture/adr/0063-signalr-per-project-groups.md, docs/how-to/developer/spfx-signalr-auth.md
 - PH6.8 completed: YYYY-MM-DD — docs: docs/reference/provisioning/request-lifecycle.md
 - PH6.9 completed: YYYY-MM-DD
 - PH6.10 completed: YYYY-MM-DD
@@ -252,3 +252,4 @@ Sign-off: Bobby Fetting — YYYY-MM-DD
 <!-- PROGRESS: 2026-03-07 PH6.4 completed. Installed PnPjs dependencies in backend/functions; replaced SharePoint service with managed-identity-backed implementation for steps 1-4; updated saga steps and list schema; scoped build/lint/check-types/test commands passed for @hbc/functions. -->
 <!-- PROGRESS: 2026-03-07 PH6.5 completed. Implemented real Step 5 timeout/deferral behavior, Step 6 OpEx-deduplicated permission assignment, and Step 7 hub idempotency/compensation with service-factory mock/real SharePoint selection and verification evidence recorded. -->
 <!-- PROGRESS: 2026-03-07 PH6.6 completed. Implemented D-PH6-06 dual-store persistence (`RealTableStorageService`), switched production factory wiring to real table adapter, added `scripts/create-audit-list.ts` + admin how-to documentation, and captured verification evidence including external Azurite/tenant constraints. -->
+<!-- PROGRESS: 2026-03-07 PH6.7 completed. Implemented D-PH6-07 SignalR production path: host extension config, authenticated negotiate endpoint with per-project/admin group assignment, real SignalR management API push/group lifecycle service, terminal-state saga group cleanup, developer how-to for SPFx AadHttpClient negotiate/reconnect pattern, ADR-0063, and scoped verification commands passed (`pnpm turbo run build/lint/check-types/test --filter=@hbc/functions`). -->

@@ -142,6 +142,14 @@ export class SagaOrchestrator {
       timestamp: status.completedAt, siteUrl: status.siteUrl,
     }).catch(() => {/* non-critical */});
 
+    // D-PH6-07: terminal-state cleanup for per-project SignalR group membership.
+    await this.services.signalR.closeGroup(status.projectId).catch((err) => {
+      this.logger.warn('Non-critical: SignalR group close failed', {
+        correlationId: status.correlationId,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    });
+
     this.logger.info('Saga completed', { correlationId, projectId, finalStatus });
   }
 
@@ -238,6 +246,14 @@ export class SagaOrchestrator {
       status: 'Failed',
       overallStatus: 'Failed',
       timestamp: new Date().toISOString(),
+    });
+
+    // D-PH6-07: terminal-state cleanup for failed saga executions.
+    await this.services.signalR.closeGroup(status.projectId).catch((err) => {
+      this.logger.warn('Non-critical: SignalR group close failed', {
+        correlationId: status.correlationId,
+        error: err instanceof Error ? err.message : String(err),
+      });
     });
   }
 

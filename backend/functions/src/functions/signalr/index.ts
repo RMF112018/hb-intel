@@ -1,34 +1,73 @@
-import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
-import { createLogger } from '../../utils/logger.js';
-import { getEnv } from '../../utils/env.js';
+import {
+  app,
+  output,
+  type HttpRequest,
+  type InvocationContext,
+  type HttpResponseInit,
+} from '@azure/functions';
+import { validateToken, unauthorizedResponse } from '../../middleware/validateToken.js';
 
+const ADMIN_ROLES = ['Admin', 'HBIntelAdmin'];
+const ADMIN_GROUP = 'provisioning-admin';
+const connectionInfoOutput = output.generic({
+  type: 'signalRConnectionInfo',
+  name: 'connectionInfo',
+  hubName: 'provisioning',
+  connectionStringSetting: 'AzureSignalRConnectionString',
+});
+
+/**
+ * D-PH6-07: SignalR negotiate endpoint for per-project real-time provisioning events.
+ * Validates Bearer tokens, derives group assignments, and returns connection metadata
+ * consumed by SPFx clients that implement automatic reconnect and group rejoin logic.
+ */
 app.http('signalrNegotiate', {
   methods: ['POST'],
   authLevel: 'anonymous',
-  route: 'signalr/negotiate',
-  handler: async (_request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
-    const logger = createLogger(context);
-    const connectionString = getEnv('SIGNALR_CONNECTION_STRING', '');
+  route: 'provisioning-negotiate',
+  extraInputs: [],
+  extraOutputs: [connectionInfoOutput],
+  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+    let claims;
+    try {
+      // Bearer validation is handled explicitly to keep negotiate auth policy aligned
+      // with PH6.2 and preserve user identity for SignalR userId assignment.
+      claims = await validateToken(request);
+    } catch {
+      return unauthorizedResponse('Invalid token for SignalR negotiate');
+    }
 
-    if (!connectionString) {
-      // Mock mode: return mock connection info
-      logger.info('SignalR negotiate: returning mock connection info');
+    const projectId = request.query.get('projectId');
+    if (!projectId) {
       return {
-        status: 200,
-        jsonBody: {
-          url: 'https://mock-signalr.service.signalr.net/client/',
-          accessToken: `mock-signalr-token-${Date.now()}`,
-        },
+        status: 400,
+        jsonBody: { error: 'projectId query parameter is required' },
       };
     }
 
-    // Future: real SignalR negotiate with Azure SignalR Service
-    logger.info('SignalR negotiate: real implementation pending');
+    // Per-project group is always required; admin group is additive for global monitoring.
+    const groups: string[] = [`provisioning-${projectId}`];
+    const isAdmin = claims.roles.some((role) => ADMIN_ROLES.includes(role));
+    if (isAdmin) {
+      groups.push(ADMIN_GROUP);
+    }
+
+    // The SignalR binding generates negotiate connection data; we persist userId so
+    // downstream push paths can correlate reconnect attempts to the authenticated user.
+    const connectionInfo =
+      (context.extraOutputs.get(connectionInfoOutput) as Record<string, unknown> | undefined) ?? {};
+
+    context.extraOutputs.set(connectionInfoOutput, {
+      ...connectionInfo,
+      userId: claims.upn,
+    });
+
     return {
       status: 200,
       jsonBody: {
-        url: connectionString.split(';')[0]?.replace('Endpoint=', '') ?? '',
-        accessToken: 'pending-real-token',
+        ...connectionInfo,
+        userId: claims.upn,
+        groups,
       },
     };
   },
