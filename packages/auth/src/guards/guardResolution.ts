@@ -1,6 +1,7 @@
 import type { AuthLifecyclePhase, AuthMode } from '../types.js';
 import { endStartupPhase, startStartupPhase } from '../startup/startupTimingBridge.js';
 
+// ALIGNMENT: guardResolution v1.0 - PH5C.3, PH5C.4 - Permission checking & guard enforcement
 /**
  * Guard failure categories for centralized pre-render enforcement.
  */
@@ -110,6 +111,8 @@ export function resolveGuardResolution(input: GuardResolutionInput): GuardResolu
     };
   }
 
+  // ALIGNMENT: Persona-based permissions per D-PH5C-04
+  // Role evaluation executes before permission checks to enforce deterministic precedence.
   if (input.requiredRole && !input.resolvedRoles.includes(input.requiredRole)) {
     endStartupPhase('permission-resolution', {
       source: 'guard-resolution',
@@ -126,6 +129,8 @@ export function resolveGuardResolution(input: GuardResolutionInput): GuardResolu
     };
   }
 
+  // ALIGNMENT: Permission matching per D-PH5C-04
+  // Permission checks are centralized to prevent feature-level authorization drift.
   if (input.requiredPermission && input.hasPermission !== true) {
     endStartupPhase('permission-resolution', {
       source: 'guard-resolution',

@@ -64,6 +64,8 @@ These concerns are owned by `@hbc/auth`.
 - Contracts/reference set: `docs/reference/auth-shell-*.md`
 - ADR chain: `docs/architecture/adr/ADR-0054-*.md` through `ADR-0071-*.md`
 - Blueprint anchors: `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md` §§1e, 1f, 2b, 2c, 2e
+- Auth integration is guided by alignment markers in `packages/shell/src/ShellCore.tsx` (`D-PH5C-08`).
+- Alignment marker standard/reference: `docs/reference/auth/alignment-markers.md`.
 
 ## Running Tests
 

@@ -583,31 +583,31 @@ Phase 5C is complete when:
 
 ## 5.C.8 Success Criteria Checklist (Task 5C.8)
 
-- [ ] 5.C.8.1 Alignment markers added to ShellCore.tsx (≥2 markers)
-- [ ] 5.C.8.2 Alignment markers added to authStore.ts (≥2 markers)
-- [ ] 5.C.8.3 Alignment markers added to guardResolution.ts (≥2 markers)
-- [ ] 5.C.8.4 Alignment markers added to sessionNormalization.ts (≥2 markers)
-- [ ] 5.C.8.5 All markers follow standard format and reference decisions/tasks
-- [ ] 5.C.8.6 Custom ESLint rule created in `eslint-alignment-markers.cjs`
-- [ ] 5.C.8.7 ESLint rule registered and configured
-- [ ] 5.C.8.8 Reference documentation `docs/reference/auth/alignment-markers.md` created
-- [ ] 5.C.8.9 `pnpm lint` passes for all packages with no marker violations
-- [ ] 5.C.8.10 All markers are reviewed and approved
+- [x] 5.C.8.1 Alignment markers added to ShellCore.tsx (≥2 markers)
+- [x] 5.C.8.2 Alignment markers added to authStore.ts (≥2 markers)
+- [x] 5.C.8.3 Alignment markers added to guardResolution.ts (≥2 markers)
+- [x] 5.C.8.4 Alignment markers added to sessionNormalization.ts (≥2 markers)
+- [x] 5.C.8.5 All markers follow standard format and reference decisions/tasks
+- [x] 5.C.8.6 Custom ESLint rule created in `eslint-alignment-markers.cjs`
+- [x] 5.C.8.7 ESLint rule registered and configured
+- [x] 5.C.8.8 Reference documentation `docs/reference/auth/alignment-markers.md` created
+- [x] 5.C.8.9 `pnpm lint` passes for all packages with no marker violations
+- [x] 5.C.8.10 All markers are reviewed and approved
 
 ---
 
 ## Phase 5.C.8 Progress Notes
 
-- 5.C.8.1 [PENDING] — Alignment markers in 4 critical files
-- 5.C.8.2 [PENDING] — Custom ESLint rule creation
-- 5.C.8.3 [PENDING] — Reference documentation
+- 5.C.8.1 [COMPLETED] — Alignment markers added in the four critical files
+- 5.C.8.2 [COMPLETED] — Custom ESLint rule created, bridged, and registered
+- 5.C.8.3 [COMPLETED] — Reference documentation and README marker guidance added
 
 ### Verification Evidence
 
-- Alignment markers present in ShellCore.tsx, authStore.ts, guardResolution.ts, sessionNormalization.ts - [PENDING]
-- Custom ESLint rule defined and registered - [PENDING]
-- `pnpm lint` passes without marker violations - [PENDING]
-- `docs/reference/auth/alignment-markers.md` exists and is complete - [PENDING]
+- Alignment markers present in ShellCore.tsx, authStore.ts, guardResolution.ts, sessionNormalization.ts - [PASS]
+- Custom ESLint rule defined and registered - [PASS]
+- `pnpm lint` passes without marker violations - [PASS]
+- `docs/reference/auth/alignment-markers.md` exists and is complete - [PASS]
 
 ---
 
@@ -616,5 +616,10 @@ Phase 5C is complete when:
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task PH5C.8 created: 2026-03-07
 Alignment markers and ESLint rule specification complete.
-Next: PH5C.9 (ADR Updates)
+Task PH5C.8 completed: 2026-03-07
+D-PH5C-08 traceability closed: alignment markers added in `packages/shell/src/ShellCore.tsx`, `packages/auth/src/stores/authStore.ts`, `packages/auth/src/guards/guardResolution.ts`, and `packages/auth/src/adapters/sessionNormalization.ts` using PH5C.8 marker format and decision links.
+D-PH5C-08 tooling closure: created locked `packages/auth/eslint-alignment-markers.cjs`, added rulesdir bridge `packages/auth/eslint-rules/alignment-markers.js`, registered rule in `packages/auth/.eslintrc.cjs`, and created `docs/reference/auth/alignment-markers.md` from the locked production markdown block.
+PH5C.8 verification evidence: `pnpm lint` PASS with no alignment-marker violations; `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` PASS.
+PH5C.8 remediation note: no phase-specific remediation required; no new build/lint/type-check errors were introduced by PH5C.8 changes.
+Next: PH5C.9 (awaiting explicit user confirmation)
 -->

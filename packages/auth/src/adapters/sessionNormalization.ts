@@ -9,6 +9,7 @@ import type {
 } from '../types.js';
 import { mapIdentityToAppRoles } from '../roleMapping.js';
 
+// ALIGNMENT: sessionNormalization v1.0 - PH5C.2, PH5C.3 - Session data normalization
 /**
  * Build a structured auth failure payload with consistent defaults.
  */
@@ -37,6 +38,8 @@ export function normalizeIdentityToSession(
   identity: AdapterIdentityPayload,
   restoreSource: 'memory' | 'storage' | 'provider' = 'provider',
 ): AuthResult<NormalizedAuthSession> {
+  // ALIGNMENT: Session structure per D-PH5C-03
+  // Normalize identity into canonical session shape for shared auth/shell contracts.
   if (!identity.user?.id) {
     return {
       ok: false,
@@ -82,6 +85,8 @@ export function restoreSessionWithinPolicy(
   session: NormalizedAuthSession | null,
   policy: SessionRestorePolicy,
 ): SessionRestoreResult {
+  // ALIGNMENT: Expiration handling per D-PH5C-03
+  // Restore policy validates expiration and safe-window boundaries before reuse.
   if (!session) {
     return {
       outcome: 'reauth-required',

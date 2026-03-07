@@ -22,7 +22,7 @@
     "test:watch": "pnpm --dir ../.. exec vitest watch --workspace vitest.workspace.ts packages/auth/src",
     "test:coverage": "pnpm --dir ../.. exec vitest run --coverage --workspace vitest.workspace.ts packages/auth/src",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src/ --ext .ts,.tsx"
+    "lint": "eslint src/ --ext .ts,.tsx --rulesdir ./eslint-rules"
   },
   "dependencies": {
     "@hbc/models": "workspace:*",

@@ -13,6 +13,7 @@ import type {
   SessionRestoreResult,
 } from '../types.js';
 
+// ALIGNMENT: authStore v1.0 - PH5C.2, PH5C.3 - Session storage & normalization
 /**
  * Side-effect boundary rule for Phase 5.3:
  * - This store owns central auth/session/permission truth state only.
@@ -71,6 +72,8 @@ export const useAuthStore = create<AuthStoreSlice>((set) => ({
       };
     }),
 
+  // ALIGNMENT: Session normalization per D-PH5C-03
+  // Session state moves into centralized normalized store for shell/auth consistency.
   completeBootstrap: (params) =>
     set((state) => {
       const session = params?.session ?? state.session;
@@ -235,6 +238,8 @@ export const useAuthStore = create<AuthStoreSlice>((set) => ({
       };
     }),
 
+  // ALIGNMENT: Guard resolution per D-PH5C-04
+  // Lifecycle + permission state in this store drives centralized guard evaluation.
   markReauthRequired: (failure: AuthFailure | null = null) =>
     set((state) => ({
       ...state,

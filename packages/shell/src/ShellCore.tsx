@@ -45,6 +45,7 @@ import type {
   WorkspaceId,
 } from './types.js';
 
+// ALIGNMENT: ShellCore.tsx v1.0 - PH5C.4, PH5C.2 - Shell core component with dev toolbar integration
 // ALIGNMENT: DevToolbar Integration PH5C.4
 // D-PH5C-06/D-PH5C-02: Lazily load dev toolbar only in DEV mode to avoid production inclusion.
 let DevToolbar: ComponentType | null = null;
@@ -164,6 +165,7 @@ export function canCompleteFirstProtectedShellRender(params: {
  * - No feature/business logic decisions.
  * - No feature-domain data fetching logic.
  */
+// ALIGNMENT: ShellCore exports - Auth shell foundation per PH5C
 export function ShellCore({
   adapter,
   children,

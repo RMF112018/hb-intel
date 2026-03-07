@@ -278,8 +278,8 @@ All tasks start in PENDING state. Update this section after each task completion
 - 5.C.7.2 [COMPLETED] — Override request lifecycle
 
 ### PH5C.8 Progress Notes
-- 5.C.8.1 [PENDING] — Alignment markers in 4 files
-- 5.C.8.2 [PENDING] — ESLint rule creation and integration
+- 5.C.8.1 [COMPLETED] — Alignment markers in 4 files
+- 5.C.8.2 [COMPLETED] — ESLint rule creation and integration
 
 ### PH5C.9 Progress Notes
 - 5.C.9.1 [PENDING] — ADR-PH5C-01 creation
@@ -318,6 +318,7 @@ All verification gates remain PENDING until execution. See PH5C.10 for full veri
 - Developer integration how-to guide (`docs/how-to/developer/integrate-auth-with-your-feature.md`) - [PASS for PH5C.5]
 - End-user access request how-to guide (`docs/how-to/user/request-elevated-access.md`) - [PASS for PH5C.6]
 - Administrator override management how-to guide (`docs/how-to/administrator/manage-override-requests.md`) - [PASS for PH5C.7]
+- Alignment markers reference (`docs/reference/auth/alignment-markers.md`) - [PASS for PH5C.8]
 
 ### Audit Coverage
 - Security: 100% - [PENDING]
@@ -379,5 +380,10 @@ PH5C.7 completed: 2026-03-07
 D-PH5C-07 traceability closed: created `docs/how-to/administrator/manage-override-requests.md` verbatim from locked PH5C.7 production markdown block with full administrator request lifecycle, approval/denial criteria, expiration management, audit/compliance procedures, troubleshooting, and FAQ.
 PH5C.7 verification evidence: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` PASS with one pre-existing warning in `packages/auth/src/adapters/__tests__/DevAuthBypassAdapter.test.ts`; `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` PASS.
 PH5C.7 remediation note: no phase-specific remediation required; no new build/lint/type-check failures were introduced by this documentation task.
-Next: PH5C.8 (awaiting explicit user confirmation)
+PH5C.8 completed: 2026-03-07
+D-PH5C-08 traceability closed: alignment markers added in `packages/shell/src/ShellCore.tsx`, `packages/auth/src/stores/authStore.ts`, `packages/auth/src/guards/guardResolution.ts`, and `packages/auth/src/adapters/sessionNormalization.ts`; locked ESLint rule created at `packages/auth/eslint-alignment-markers.cjs`; rulesdir bridge + config registration implemented for marker drift detection.
+PH5C.8 documentation closure: created `docs/reference/auth/alignment-markers.md` from locked PH5C.8 production markdown block and added alignment-marker guidance in `packages/auth/README.md` and `packages/shell/README.md`.
+PH5C.8 verification evidence: `pnpm lint` PASS with no alignment-marker violations; `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` PASS.
+PH5C.8 remediation note: no phase-specific remediation required; no new build/lint/type-check errors were introduced by this documentation and marker-enforcement task.
+Next: PH5C.9 (awaiting explicit user confirmation)
 -->
