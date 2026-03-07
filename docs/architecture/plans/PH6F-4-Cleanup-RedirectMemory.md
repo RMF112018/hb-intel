@@ -249,7 +249,21 @@ pnpm --filter pwa dev
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task created: 2026-03-07
-Status: Pending implementation
-Execution: Fourth in sequence
-Note: Combine with PH6F-5 role landing useEffect into single handler for efficiency
+Phase PH6F-4 completed: 2026-03-07
+Status: COMPLETE — all wiring applied to apps/pwa/src/router/root-route.tsx
+
+PH6F-4.1 ✅ beforeLoad captures intended destination for unauthenticated users on safe non-root paths
+PH6F-4.2 ✅ useEffect restores redirect target when lifecyclePhase transitions to 'authenticated'
+PH6F-4.3 ✅ isSafeRedirectPath + explicit pathname !== '/' guard prevents root/unsafe capture
+PH6F-4.4 ✅ clearRedirectMemory called after successful restoration
+PH6F-4.5 ✅ Sign-out cleanup already wired via PH6F-2
+PH6F-4.6 ✅ Deep subpath links fully restored (pathname preserved)
+PH6F-4.7 ✅ Build passes (pnpm turbo run build --filter=@hbc/pwa --filter=@hbc/shell)
+
+Deviations from governing plan:
+- Used restoreRedirectTarget (returns null) instead of resolvePostGuardRedirect (fallbackPath: string, not nullable)
+- Added redirect-chain overwrite guard: only captures if no existing unexpired record
+- Added explicit pathname !== '/' check since isSafeRedirectPath allows root path
+
+Next: PH6F-5 (role-based landing) — fold into same useEffect
 -->

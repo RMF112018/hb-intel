@@ -9,6 +9,10 @@ import { createRootRoute, Outlet, useRouter } from '@tanstack/react-router';
 import {
   useNavStore,
   resolveShellStatusSnapshot,
+  captureIntendedDestination,
+  restoreRedirectTarget,
+  clearRedirectMemory,
+  isSafeRedirectPath,
   type ShellConnectivitySignal,
 } from '@hbc/shell';
 import { HbcAppShell, HbcConnectivityBar } from '@hbc/ui-kit';
@@ -59,6 +63,18 @@ function RootComponent(): React.ReactNode {
     return () => stopNavSync();
   }, [router, startNavSync, stopNavSync]);
 
+  // D-PH6F-4: Restore intended destination after successful auth.
+  React.useEffect(() => {
+    if (lifecyclePhase !== 'authenticated') return;
+
+    const restored = restoreRedirectTarget({ runtimeMode: 'pwa' });
+    if (restored && restored.pathname !== router.state.location.pathname) {
+      clearRedirectMemory();
+      void router.navigate({ to: restored.pathname, replace: true });
+    }
+    // If no redirect memory, PH6F-5 will handle role-based landing
+  }, [lifecyclePhase, router]);
+
   const shellUser = mapCurrentUserToShellUser(currentUser);
   const sidebarGroups = React.useMemo(
     () => buildSidebarGroupsFromRegistry(activeWorkspace),
@@ -100,5 +116,25 @@ function RootComponent(): React.ReactNode {
 }
 
 export const rootRoute = createRootRoute({
+  // D-PH6F-4: Capture intended destination before auth redirect.
+  beforeLoad: ({ location }) => {
+    const isAuthenticated =
+      useAuthStore.getState().lifecyclePhase === 'authenticated';
+
+    if (
+      !isAuthenticated &&
+      location.pathname !== '/' &&
+      isSafeRedirectPath(location.pathname)
+    ) {
+      // Only capture if no existing redirect memory (prevent overwrite during redirect chains)
+      const existing = restoreRedirectTarget({ runtimeMode: 'pwa' });
+      if (!existing) {
+        captureIntendedDestination({
+          pathname: location.pathname,
+          runtimeMode: 'pwa',
+        });
+      }
+    }
+  },
   component: RootComponent,
 });
