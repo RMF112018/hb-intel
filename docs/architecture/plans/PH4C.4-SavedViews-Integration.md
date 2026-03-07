@@ -668,22 +668,22 @@ pnpm turbo run test --filter=@hbc/ui-kit 2>&1 | tail -20
 
 ## Success Criteria Checklist
 
-- [ ] `useSavedViews` hook API audited and documented
-- [ ] HbcDataTable props interface audited and documented
-- [ ] `HbcDataTableSavedViewsConfig` interface defined with comprehensive JSDoc
-- [ ] `savedViewsConfig` prop added to `HbcDataTableProps` with detailed documentation
-- [ ] `savedViewsConfig` destructured in component function
-- [ ] `useSavedViews` hook conditionally invoked (or refactored to support conditional calling)
-- [ ] Saved views state wired into toolbar/column chooser UI
-- [ ] Backward compatibility confirmed: DataTable works without `savedViewsConfig`
+- [x] `useSavedViews` hook API audited and documented
+- [x] HbcDataTable props interface audited and documented
+- [x] `HbcDataTableSavedViewsConfig` interface defined with comprehensive JSDoc
+- [x] `savedViewsConfig` prop added to `HbcDataTableProps` with detailed documentation
+- [x] `savedViewsConfig` destructured in component function
+- [x] `useSavedViews` hook conditionally invoked (or refactored to support conditional calling)
+- [x] Saved views state wired into toolbar/column chooser UI
+- [x] Backward compatibility confirmed: DataTable works without `savedViewsConfig`
 - [ ] Storybook stories created:
-  - [ ] `WithSavedViews` story with full functionality
-  - [ ] `WithoutSavedViews` story confirming backward compatibility
-- [ ] Reference documentation updated in `docs/reference/ui-kit/HbcDataTable.md`
-- [ ] Deferred-scope note added to documentation
-- [ ] Build succeeds (`pnpm turbo run build`)
-- [ ] Tests pass with no regressions (`pnpm turbo run test`)
-- [ ] No TypeScript errors or warnings
+  - [x] `WithSavedViews` story with full functionality
+  - [x] `WithoutSavedViews` story confirming backward compatibility
+- [x] Reference documentation updated in `docs/reference/ui-kit/HbcDataTable.md`
+- [x] Deferred-scope note added to documentation
+- [x] Build succeeds (`pnpm turbo run build`)
+- [x] Tests pass with no regressions (`pnpm turbo run test`)
+- [x] No TypeScript errors or warnings
 
 ---
 
@@ -745,70 +745,70 @@ pnpm turbo run build --filter=@hbc/ui-kit 2>&1 | grep -E "error|Error|ERROR" || 
 Use this section to document the execution of PH4C.4. Update it as you proceed through implementation steps.
 
 - **4C.4.1 — Hook API Audit**
-  - Date Completed: ___________
+  - Date Completed: 2026-03-07
   - Hook Location: `packages/ui-kit/src/HbcDataTable/hooks/useSavedViews.ts`
-  - Hook Signature: ___________
-  - Return Type: ___________
-  - Persistence Mechanism: [ ] localStorage [ ] sessionStorage [ ] API [ ] Other: ___________
-  - Supports Conditional Calls: [ ] Yes [ ] No (refactoring needed)
-  - Notes: ___________
+  - Hook Signature: `useSavedViews(options: UseSavedViewsOptions): UseSavedViewsReturn`
+  - Return Type: `UseSavedViewsReturn` (`views`, `activeView`, `createView`, `updateView`, `deleteView`, `activateView`, `getDeepLink`, `configFromUrl`, `isNearLimit`, `isAtLimit`)
+  - Persistence Mechanism: [x] localStorage [x] sessionStorage [ ] API [ ] Other: N/A
+  - Supports Conditional Calls: [ ] Yes [x] No (wrapper needed for hook-order safety)
+  - Notes: Hook is now invoked through an unconditional wrapper (`useOptionalSavedViews`) in `index.tsx`.
 
 - **4C.4.2 — Props Interface Audit**
-  - Date Completed: ___________
-  - Interface Location: ___________
-  - Existing Props Count: ___________
-  - Key Props Affecting Saved Views: ___________
+  - Date Completed: 2026-03-07
+  - Interface Location: `packages/ui-kit/src/HbcDataTable/types.ts`
+  - Existing Props Count: 32 (after PH4C.4 additions)
+  - Key Props Affecting Saved Views: `sorting`, `columnVisibility`, `columnOrder`, `onSortingChange`, `onColumnVisibilityChange`, `onColumnOrderChange`, `enableColumnConfig`
 
 - **4C.4.3 — Config Interface Defined**
-  - Date Completed: ___________
-  - File: [ ] Added to index.tsx [ ] Added to saved-views-config.ts
-  - Status: [ ] Complete
+  - Date Completed: 2026-03-07
+  - File: [x] Added to types.ts (canonical props source) [ ] Added to index.tsx [ ] Added to saved-views-config.ts
+  - Status: [x] Complete
 
 - **4C.4.4 — Props Interface Updated**
-  - Date Completed: ___________
-  - `HbcDataTableProps.savedViewsConfig` added: [ ]
-  - JSDoc complete: [ ]
+  - Date Completed: 2026-03-07
+  - `HbcDataTableProps.savedViewsConfig` added: [x]
+  - JSDoc complete: [x]
 
 - **4C.4.5 — Destructuring Added**
-  - Date Completed: ___________
-  - Component Function: ___________
-  - Status: [ ] Complete
+  - Date Completed: 2026-03-07
+  - Component Function: `HbcDataTable<TData>(...)` in `index.tsx`
+  - Status: [x] Complete
 
 - **4C.4.6 — Hook Invocation**
-  - Date Completed: ___________
-  - Approach: [ ] Option 1 (Conditional) [ ] Option 2 (Wrapper) [ ] Other
-  - Conditional Check: `savedViewsConfig ? useSavedViews(...) : null`
-  - Status: [ ] Complete
+  - Date Completed: 2026-03-07
+  - Approach: [ ] Option 1 (Conditional) [x] Option 2 (Wrapper) [ ] Other
+  - Conditional Check: wrapper returns `null` when config omitted while preserving hook order.
+  - Status: [x] Complete
 
 - **4C.4.7 — Toolbar/Column Chooser Wired**
-  - Date Completed: ___________
-  - Toolbar Component: ___________
-  - Props Connected: ___________
-  - Status: [ ] Complete
+  - Date Completed: 2026-03-07
+  - Toolbar Component: internal `HbcDataTable` saved-views toolbar block in `index.tsx`
+  - Props Connected: `views`, `activeView`, `createView`, `activateView`, `deleteView`, lifecycle callbacks (`onViewSaved`, `onViewDeleted`, `onViewApplied`)
+  - Status: [x] Complete
 
 - **4C.4.8 — Backward Compatibility Confirmed**
-  - Date Tested: ___________
-  - Test Result: [ ] Pass [ ] Fail
-  - Notes: ___________
+  - Date Tested: 2026-03-07
+  - Test Result: [x] Pass [ ] Fail
+  - Notes: `savedViewsConfig` omitted path renders table without saved-views UI and retains existing behavior.
 
 - **4C.4.9 — Storybook Stories Added**
-  - Date Completed: ___________
-  - Story File: ___________
-  - WithSavedViews Story: [ ] Complete
-  - WithoutSavedViews Story: [ ] Complete
-  - Manual Testing Done: [ ] Yes [ ] No
+  - Date Completed: 2026-03-07
+  - Story File: `packages/ui-kit/src/HbcDataTable/HbcDataTable.stories.tsx`
+  - WithSavedViews Story: [x] Complete
+  - WithoutSavedViews Story: [x] Complete
+  - Manual Testing Done: [x] Yes [ ] No
 
 - **4C.4.10 — Reference Documentation Updated**
-  - Date Completed: ___________
+  - Date Completed: 2026-03-07
   - File: `docs/reference/ui-kit/HbcDataTable.md`
-  - Props Table Updated: [ ]
-  - Deferred-Scope Note Added: [ ]
+  - Props Table Updated: [x]
+  - Deferred-Scope Note Added: [x]
 
 - **4C.4.11 — Build & Tests**
-  - Date Completed: ___________
-  - Build Status: [ ] Pass [ ] Fail
-  - Test Status: [ ] Pass [ ] Fail [ ] N/A
-  - Notes: ___________
+  - Date Completed: 2026-03-07
+  - Build Status: [x] Pass [ ] Fail
+  - Test Status: [x] Pass [ ] Fail [ ] N/A
+  - Notes: Lint/type-check/build/test verified; Storybook verification executed for saved-views stories.
 
 ---
 
@@ -818,12 +818,20 @@ Record the results of each verification command here.
 
 | Verification | Command | Status | Evidence |
 |---|---|---|---|
-| Config Interface | `grep HbcDataTableSavedViewsConfig` | [ ] Pass | ___________ |
-| Props Updated | `grep -A 20 "savedViewsConfig\?"` | [ ] Pass | ___________ |
-| Hook Invocation | `grep useSavedViews` | [ ] Pass | ___________ |
-| Storybook Story | `grep WithSavedViews` | [ ] Pass | ___________ |
-| Documentation | `test -f HbcDataTable.md` | [ ] Pass | ___________ |
-| Build Success | `pnpm turbo run build` | [ ] Pass | ___________ |
+| Config Interface | `grep HbcDataTableSavedViewsConfig` | [x] Pass | `types.ts` includes config interface + prop contract |
+| Props Updated | `grep -A 20 "savedViewsConfig\?"` | [x] Pass | `savedViewsConfig` documented in `HbcDataTableProps` |
+| Hook Invocation | `grep useSavedViews` | [x] Pass | `useOptionalSavedViews` wrapper + hook-safe invocation in `index.tsx` |
+| Storybook Story | `grep WithSavedViews` | [x] Pass | `WithSavedViews` and `WithoutSavedViews` stories present |
+| Documentation | `test -f HbcDataTable.md` | [x] Pass | reference doc updated with props matrix + deferred scope |
+| Build Success | `pnpm turbo run build` | [x] Pass | `@hbc/ui-kit` build succeeded |
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+PH4C.4 implementation completed: 2026-03-07
+- Major step 1: audited useSavedViews and props contract; identified hook-order constraint and selected wrapper approach.
+- Major step 2: implemented config-only integration (D-PH4C-09) with internal saved-views toolbar wiring and callback forwarding.
+- Major step 3: added WithSavedViews/WithoutSavedViews stories and updated reference documentation with deferred-scope note.
+- Verification: build, lint (0 errors), check-types, test, and Storybook completed for ui-kit.
+-->
 
 ---
 

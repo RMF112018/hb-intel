@@ -42,7 +42,9 @@ import { useFieldMode } from '../HbcAppShell/hooks/useFieldMode.js';
 import { HbcEmptyState } from '../HbcEmptyState/index.js';
 import { HbcDataTableCard } from './HbcDataTableCard.js';
 import { useShimmerStyles } from '../shared/index.js';
-import type { HbcDataTableProps } from './types.js';
+import { useSavedViews } from './hooks/useSavedViews.js';
+import type { SavedViewConfig, SavedViewEntry } from './saved-views-types.js';
+import type { HbcDataTableProps, HbcDataTableSavedViewsConfig } from './types.js';
 
 const useStyles = makeStyles({
   wrapper: {
@@ -303,7 +305,87 @@ const useStyles = makeStyles({
       cursor: 'default',
     },
   },
+  toolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    paddingLeft: '12px',
+    paddingRight: '12px',
+    borderBottom: '1px solid var(--colorNeutralStroke2)',
+    backgroundColor: 'var(--colorNeutralBackground2)',
+  },
+  toolbarLabel: {
+    fontSize: '0.75rem',
+    fontWeight: '600',
+    color: 'var(--colorNeutralForeground2)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.03em',
+  },
+  toolbarSelect: {
+    minWidth: '180px',
+    paddingTop: '4px',
+    paddingBottom: '4px',
+    paddingLeft: '8px',
+    paddingRight: '8px',
+    borderRadius: '4px',
+    border: '1px solid var(--colorNeutralStroke2)',
+    backgroundColor: 'var(--colorNeutralBackground1)',
+    color: 'var(--colorNeutralForeground1)',
+    fontSize: '0.813rem',
+  },
+  toolbarInput: {
+    minWidth: '160px',
+    paddingTop: '4px',
+    paddingBottom: '4px',
+    paddingLeft: '8px',
+    paddingRight: '8px',
+    borderRadius: '4px',
+    border: '1px solid var(--colorNeutralStroke2)',
+    backgroundColor: 'var(--colorNeutralBackground1)',
+    color: 'var(--colorNeutralForeground1)',
+    fontSize: '0.813rem',
+  },
+  toolbarButton: {
+    paddingTop: '4px',
+    paddingBottom: '4px',
+    paddingLeft: '8px',
+    paddingRight: '8px',
+    fontSize: '0.813rem',
+    border: '1px solid var(--colorNeutralStroke2)',
+    borderRadius: '4px',
+    backgroundColor: 'transparent',
+    color: 'var(--colorNeutralForeground1)',
+    cursor: 'pointer',
+    ':disabled': {
+      opacity: 0.45,
+      cursor: 'default',
+    },
+  },
+  toolbarHint: {
+    fontSize: '0.75rem',
+    color: 'var(--colorNeutralForeground3)',
+  },
 });
+
+/**
+ * PH4C.4 (D-PH4C-09): hook-safe config-only wrapper.
+ * `useSavedViews` is always invoked to preserve hook ordering, but returns `null`
+ * state for consumers when `savedViewsConfig` is omitted.
+ */
+function useOptionalSavedViews(
+  savedViewsConfig?: HbcDataTableSavedViewsConfig,
+) {
+  const enabled = Boolean(savedViewsConfig);
+  const internal = useSavedViews({
+    toolId: savedViewsConfig?.tableId ?? '__hbc-saved-views-disabled__',
+    userId: savedViewsConfig?.userId ?? '__hbc-saved-views-disabled__',
+    projectId: savedViewsConfig?.projectId,
+  });
+
+  return enabled ? internal : null;
+}
 
 // Generic component — use function declaration for proper generic forwarding
 export function HbcDataTable<TData>({
@@ -340,6 +422,8 @@ export function HbcDataTable<TData>({
   onColumnVisibilityChange,
   columnOrder: controlledColumnOrder,
   onColumnOrderChange,
+  // PH4C.4: Config-only saved views integration
+  savedViewsConfig,
   // PH4.7 Step 7: Data Freshness & Empty State
   isStale,
   emptyStateConfig,
@@ -388,6 +472,11 @@ export function HbcDataTable<TData>({
   const rowSelection = controlledRowSelection ?? internalSelection;
   const columnVisibility = controlledColumnVisibility ?? internalColumnVisibility;
   const columnOrder = controlledColumnOrder ?? internalColumnOrder;
+
+  // PH4C.4 (D-PH4C-09): saved views remain internally managed when config is provided.
+  const savedViews = useOptionalSavedViews(savedViewsConfig);
+  const [selectedSavedViewId, setSelectedSavedViewId] = React.useState<string>('');
+  const [savedViewName, setSavedViewName] = React.useState('');
 
   // Inline editing state
   const [editingCell, setEditingCell] = React.useState<{
@@ -573,11 +662,132 @@ export function HbcDataTable<TData>({
   // Card-stack mode
   const showCardStack = isMobile && mobileCardFields && mobileCardFields.length > 0;
 
+  // Build the persisted view payload from the table's current shape.
+  const getCurrentSavedViewConfig = React.useCallback((): SavedViewConfig => {
+    const columnWidths: Record<string, number> = {};
+    for (const col of table.getAllLeafColumns()) {
+      const key = (col.columnDef as { accessorKey?: string }).accessorKey ?? col.id;
+      columnWidths[key] = col.getSize();
+    }
+
+    return {
+      columns: table.getVisibleLeafColumns().map((col) => (col.columnDef as { accessorKey?: string }).accessorKey ?? col.id),
+      columnOrder: (columnOrder.length > 0 ? columnOrder : table.getAllLeafColumns().map((col) => (col.columnDef as { accessorKey?: string }).accessorKey ?? col.id)),
+      columnWidths,
+      filters: null,
+      sortColumn: sorting[0]?.id ?? '',
+      sortDirection: sorting[0]?.desc ? 'desc' : 'asc',
+      densityOverride: densityOverride ?? tier,
+    };
+  }, [table, columnOrder, sorting, densityOverride, tier]);
+
+  const applySavedViewToTable = React.useCallback((view: SavedViewEntry) => {
+    // Backward-compatible wiring: only apply fields supported by current table state.
+    const nextVisibility: Record<string, boolean> = {};
+    const allowedColumns = new Set(view.config.columns);
+    for (const col of table.getAllLeafColumns()) {
+      const key = (col.columnDef as { accessorKey?: string }).accessorKey ?? col.id;
+      nextVisibility[key] = allowedColumns.has(key);
+    }
+
+    const nextOrder = view.config.columnOrder.length > 0
+      ? view.config.columnOrder
+      : table.getAllLeafColumns().map((col) => (col.columnDef as { accessorKey?: string }).accessorKey ?? col.id);
+
+    onColumnVisibilityChange ? onColumnVisibilityChange(nextVisibility) : setInternalColumnVisibility(nextVisibility);
+    onColumnOrderChange ? onColumnOrderChange(nextOrder) : setInternalColumnOrder(nextOrder);
+
+    if (view.config.sortColumn) {
+      const nextSorting: SortingState = [{ id: view.config.sortColumn, desc: view.config.sortDirection === 'desc' }];
+      onSortingChange ? onSortingChange(nextSorting) : setInternalSorting(nextSorting);
+    }
+  }, [table, onColumnVisibilityChange, onColumnOrderChange, onSortingChange]);
+
+  const handleSaveView = React.useCallback(() => {
+    if (!savedViews || !savedViewsConfig || savedViewName.trim().length === 0) return;
+    const created = savedViews.createView(savedViewName.trim(), getCurrentSavedViewConfig(), 'personal');
+    if (!created) return;
+    savedViews.activateView(created.id);
+    setSelectedSavedViewId(created.id);
+    setSavedViewName('');
+    savedViewsConfig.onViewSaved?.(created);
+  }, [savedViews, savedViewsConfig, savedViewName, getCurrentSavedViewConfig]);
+
+  const handleApplyView = React.useCallback(() => {
+    if (!savedViews || !savedViewsConfig || !selectedSavedViewId) return;
+    const view = savedViews.views.find((entry) => entry.id === selectedSavedViewId);
+    if (!view) return;
+    savedViews.activateView(view.id);
+    applySavedViewToTable(view);
+    savedViewsConfig.onViewApplied?.(view.id, view);
+  }, [savedViews, savedViewsConfig, selectedSavedViewId, applySavedViewToTable]);
+
+  const handleDeleteView = React.useCallback(() => {
+    if (!savedViews || !savedViewsConfig || !selectedSavedViewId) return;
+    const toDelete = selectedSavedViewId;
+    savedViews.deleteView(toDelete);
+    setSelectedSavedViewId('');
+    savedViewsConfig.onViewDeleted?.(toDelete);
+  }, [savedViews, savedViewsConfig, selectedSavedViewId]);
+
   // Empty state check
   const showEmptyState = !isLoading && data.length === 0 && emptyStateConfig;
 
   return (
     <div data-hbc-ui="data-table" className={className}>
+      {savedViews ? (
+        <div className={styles.toolbar}>
+          <span className={styles.toolbarLabel}>Saved Views</span>
+          <select
+            className={styles.toolbarSelect}
+            value={selectedSavedViewId}
+            onChange={(event) => setSelectedSavedViewId(event.target.value)}
+            aria-label="Select saved view"
+          >
+            <option value="">Choose a view</option>
+            {savedViews.views.map((view) => (
+              <option key={view.id} value={view.id}>
+                {view.name}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className={styles.toolbarButton}
+            onClick={handleApplyView}
+            disabled={!selectedSavedViewId}
+          >
+            Apply
+          </button>
+          <button
+            type="button"
+            className={styles.toolbarButton}
+            onClick={handleDeleteView}
+            disabled={!selectedSavedViewId}
+          >
+            Delete
+          </button>
+          <input
+            className={styles.toolbarInput}
+            type="text"
+            value={savedViewName}
+            onChange={(event) => setSavedViewName(event.target.value)}
+            placeholder="New view name"
+            aria-label="Saved view name"
+          />
+          <button
+            type="button"
+            className={styles.toolbarButton}
+            onClick={handleSaveView}
+            disabled={savedViewName.trim().length === 0 || savedViews.isAtLimit}
+          >
+            Save Current
+          </button>
+          <span className={styles.toolbarHint}>
+            {savedViews.activeView ? `Active: ${savedViews.activeView.name}` : 'No active view'}
+          </span>
+        </div>
+      ) : null}
       <div
         ref={parentRef}
         className={mergeClasses(styles.wrapper, staleClass)}
@@ -920,4 +1130,8 @@ export function HbcDataTable<TData>({
   );
 }
 
-export type { HbcDataTableProps, DataTableEmptyStateConfig } from './types.js';
+export type {
+  HbcDataTableProps,
+  DataTableEmptyStateConfig,
+  HbcDataTableSavedViewsConfig,
+} from './types.js';

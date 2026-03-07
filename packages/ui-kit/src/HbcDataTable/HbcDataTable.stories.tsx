@@ -178,6 +178,62 @@ export const ColumnConfig: Story = {
   },
 };
 
+/**
+ * PH4C.4 (D-PH4C-09): Config-only saved-views integration.
+ * Consumers provide identifiers/callbacks while table state remains internal.
+ */
+export const WithSavedViews: Story = {
+  render: () => {
+    const [visibility, setVisibility] = React.useState<Record<string, boolean>>({
+      category: false,
+    });
+    const [order, setOrder] = React.useState<string[]>([]);
+    const [message, setMessage] = React.useState<string | null>(null);
+
+    return (
+      <div>
+        <p style={{ marginBottom: 8 }}>
+          <small>Saved views are managed internally by HbcDataTable via config-only integration.</small>
+        </p>
+        <HbcDataTable
+          data={sampleData.slice(0, 20)}
+          columns={sampleColumns}
+          enableSorting
+          enableColumnConfig
+          columnVisibility={visibility}
+          onColumnVisibilityChange={setVisibility}
+          columnOrder={order}
+          onColumnOrderChange={setOrder}
+          savedViewsConfig={{
+            tableId: 'storybook-hbc-datatable',
+            userId: 'storybook-user',
+            onViewSaved: (view) => setMessage(`Saved view: ${view.name}`),
+            onViewDeleted: () => setMessage('Deleted saved view'),
+            onViewApplied: (_viewId, view) => setMessage(`Applied view: ${view.name}`),
+          }}
+          height="450px"
+        />
+        {message ? (
+          <div style={{ marginTop: 8, fontSize: 12, color: '#0f6cbd' }}>{message}</div>
+        ) : null}
+      </div>
+    );
+  },
+};
+
+/**
+ * PH4C.4: Backward-compatibility baseline with saved views omitted.
+ */
+export const WithoutSavedViews: Story = {
+  args: {
+    data: sampleData.slice(0, 20),
+    columns: sampleColumns,
+    enableSorting: true,
+    enableColumnConfig: true,
+    height: '450px',
+  },
+};
+
 export const ShimmerLoading: Story = {
   render: () => {
     const [loading, setLoading] = React.useState(true);

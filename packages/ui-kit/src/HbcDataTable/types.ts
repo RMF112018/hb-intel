@@ -1,6 +1,7 @@
 /** HbcDataTable — Blueprint §1d, PH4.7 §7.1–7.4 virtualized data table */
 import type { ColumnDef, SortingState, RowSelectionState } from '@tanstack/react-table';
 import type { DensityTier } from '../HbcCommandBar/types.js';
+import type { SavedViewEntry } from './saved-views-types.js';
 
 /** Empty state configuration for zero-data display */
 export interface DataTableEmptyStateConfig {
@@ -8,6 +9,45 @@ export interface DataTableEmptyStateConfig {
   title: string;
   description?: string;
   action?: React.ReactNode;
+}
+
+/**
+ * Configuration for internal saved-view integration in `HbcDataTable`.
+ *
+ * @remarks
+ * D-PH4C-09 establishes a config-only pattern for PH4C: consumers provide stable
+ * identifiers and optional lifecycle callbacks, while the table owns saved-view state
+ * internally via `useSavedViews`.
+ *
+ * Deferred scope (post-PH4C): fully controlled/uncontrolled dual-mode APIs where
+ * consumers provide external saved-view state and synchronization handlers.
+ */
+export interface HbcDataTableSavedViewsConfig {
+  /**
+   * Stable per-table identifier used for saved-view persistence namespacing.
+   * Example: `accounting-transactions-table`.
+   */
+  tableId: string;
+  /**
+   * Current user identifier used to scope saved views by user.
+   */
+  userId: string;
+  /**
+   * Optional project identifier for project-scoped views.
+   */
+  projectId?: string;
+  /**
+   * Callback fired after a saved view is created.
+   */
+  onViewSaved?: (view: SavedViewEntry) => void;
+  /**
+   * Callback fired after a saved view is deleted.
+   */
+  onViewDeleted?: (viewId: string) => void;
+  /**
+   * Callback fired after a saved view is applied to table state.
+   */
+  onViewApplied?: (viewId: string, view: SavedViewEntry) => void;
 }
 
 export interface HbcDataTableProps<TData> {
@@ -77,6 +117,24 @@ export interface HbcDataTableProps<TData> {
   columnOrder?: string[];
   /** Column order change handler */
   onColumnOrderChange?: (order: string[]) => void;
+
+  // --- PH4C.4: Saved Views (config-only integration) ---
+  /**
+   * Optional saved-view integration config.
+   *
+   * @remarks
+   * When provided, `HbcDataTable` invokes `useSavedViews` internally and surfaces
+   * save/apply/delete controls using the current table sorting and column config.
+   * This preserves backward compatibility: when omitted, no saved-view state or UI
+   * is rendered.
+   *
+   * D-PH4C-09 (config-only pattern): consumers pass configuration + callbacks only;
+   * internal table state management remains inside `HbcDataTable`.
+   *
+   * Deferred scope: fully controlled/uncontrolled APIs are intentionally postponed
+   * beyond PH4C and documented in the PH4C completion plan.
+   */
+  savedViewsConfig?: HbcDataTableSavedViewsConfig;
 
   // --- PH4.7 Step 7: Data Freshness & Empty State ---
   /** Data is from cache / stale */

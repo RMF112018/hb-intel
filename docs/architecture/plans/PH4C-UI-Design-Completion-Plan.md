@@ -90,7 +90,7 @@ Phase 4C represents the *completion and hardening* of Phase 4. The UI design sys
 7. ✓ HbcConnectivityBar — hardcoded colors replaced with semantic token/variable references; Windows high-contrast tested
 8. ✓ HbcStatusBadge — inline style overrides replaced with Fluent `makeStyles` + `forced-colors` media query
 9. ✓ Deprecated tokens (`hbcColorSurfaceElevated`, `hbcColorSurfaceSubtle`, `hbcColorTextSubtle`) scanned; resolved via versioned TSDoc + tracking placeholders (scan counts: 45/41/38, PH4C.3 completed 2026-03-07; docs/reference/ui-kit/deprecated-tokens.md + ADR-PH4C-02)
-10. ✓ useSavedViews hook — config-only prop documented; deferred-scope note added for controlled mode implementation
+10. ✓ useSavedViews hook — config-only integration implemented in `HbcDataTable` with `savedViewsConfig` contract, Storybook coverage (`WithSavedViews` / `WithoutSavedViews`), and deferred-scope note for controlled mode (PH4C.4 completed 2026-03-07)
 11. ✓ ESLint compliance — three-bucket triage applied; high-severity issues fixed, medium suppressed with justification, low escalated
 12. ✓ All 9 task files executed in recommended sequence; hard prerequisites verified before dependent tasks start
 13. ✓ Three ADRs created: shimmer convention, deprecated token policy, Dev Auth Bypass boundary
