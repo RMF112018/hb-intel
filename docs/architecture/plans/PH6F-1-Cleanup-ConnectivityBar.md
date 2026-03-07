@@ -227,7 +227,21 @@ When `ShellCore` is adopted in PH8, `HbcConnectivityBar` in `root-route.tsx` wil
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task created: 2026-03-07
-Status: Pending implementation
+Status: COMPLETE — 2026-03-07
 Execution: Third in sequence (after PH6F-3 and PH6F-2)
-Temporary: If PH6F-2 not yet done, use useAuthStore.getState().clear() in sign-in-again handler
+Temporary: PH6F-2 not yet done — sign-in-again uses useAuthStore.getState().clear() placeholder
+
+Implementation completed: 2026-03-07
+- [x] PH6F-1.1 HbcConnectivityBar renders in PWA root component at all times
+- [x] PH6F-1.2 Bar shows green (2px) when online and authenticated
+- [x] PH6F-1.3 Bar transitions to orange pulse when offline
+- [x] PH6F-1.4 Bar transitions back to green when online restored
+- [x] PH6F-1.5 Bar shows red on structuredError in auth store
+- [x] PH6F-1.6 sign-in-again triggers clear() + navigate (temp; PH6F-2 will replace with performPwaSignOut)
+- [x] PH6F-1.7 retry triggers window.location.reload()
+- [x] PH6F-1.8 Build passes with zero TypeScript errors
+
+Files modified:
+- apps/pwa/src/router/root-route.tsx (imports, connectivity state, Fragment wrapper, HbcConnectivityBar render)
+Next: Update sign-in-again handler when PH6F-2 delivers performPwaSignOut()
 -->

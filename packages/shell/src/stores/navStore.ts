@@ -63,6 +63,7 @@ export interface NavState {
   syncFromPathname: (pathname: string) => void;
   startNavSync: (history: RouterHistoryLike) => void;
   stopNavSync: () => void;
+  reset: () => void;
 }
 
 /**
@@ -109,5 +110,19 @@ export const useNavStore = create<NavState>((set) => ({
       navSyncUnsubscribe();
       navSyncUnsubscribe = null;
     }
+  },
+  reset: () => {
+    if (navSyncUnsubscribe) {
+      navSyncUnsubscribe();
+      navSyncUnsubscribe = null;
+    }
+    set({
+      activeWorkspace: null,
+      activeItemId: undefined,
+      toolPickerItems: [],
+      sidebarItems: [],
+      isSidebarOpen: true,
+      isAppLauncherOpen: false,
+    });
   },
 }));

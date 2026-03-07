@@ -251,7 +251,30 @@ pnpm --filter pwa dev
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task created: 2026-03-07
-Status: Pending implementation
-Execution: Second in sequence (after PH6F-3, before PH6F-1)
-Key risk: Verify runShellSignOutCleanup API before implementing the dependency override
+Completed: 2026-03-07
+
+Step 1 — navStore reset(): Added reset() action to useNavStore (packages/shell/src/stores/navStore.ts)
+  - Stops navSync subscription and resets all state fields to initial values
+  - Added reset to NavState interface
+
+Step 2 — signOut.ts: Created apps/pwa/src/auth/signOut.ts with performPwaSignOut()
+  - Uses createDefaultShellSignOutCleanupDependencies(null) as base
+  - Overrides only clearShellBootstrapState to add usePermissionStore.getState().clear()
+  - Preserves default auth.signOut() audit event, navSync teardown, shellCoreStore/projectStore clear
+
+Step 3 — root-route.tsx: Replaced both direct useAuthStore.getState().clear() calls
+  - onShellAction sign-in-again handler now calls performPwaSignOut()
+  - onSignOut handler now calls performPwaSignOut()
+  - Navigation to '/' fires after cleanup completes (in .then())
+  - useAuthStore import retained for lifecyclePhase/structuredError selectors
+
+Checklist:
+- [x] PH6F-2.1 performPwaSignOut() called on all sign-out pathways
+- [x] PH6F-2.2 Auth store cleared (signOut() + clear() via defaults)
+- [x] PH6F-2.3 Permission store cleared (override in clearShellBootstrapState)
+- [x] PH6F-2.4 Nav store reset (stopNavSync + setState via defaults)
+- [x] PH6F-2.5 Project store cleared (via defaults)
+- [x] PH6F-2.6 Redirect memory cleared (via defaults)
+- [x] PH6F-2.7 Navigation to / fires after cleanup
+- [x] PH6F-2.8 Build passes — zero TypeScript errors
 -->
