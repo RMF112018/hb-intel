@@ -1,0 +1,25 @@
+name: Provisioning E2E
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  e2e:
+    name: Provisioning Journey E2E
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-pnpm
+
+      - name: Install Playwright browsers
+        run: pnpm e2e:install
+
+      - name: Run PH6.15 Layer 3 provisioning journey
+        run: pnpm exec playwright test e2e/provisioning.spec.ts
+        env:
+          ESTIMATING_APP_URL: ${{ secrets.STAGING_ESTIMATING_URL }}
+          ACCOUNTING_APP_URL: ${{ secrets.STAGING_ACCOUNTING_URL }}

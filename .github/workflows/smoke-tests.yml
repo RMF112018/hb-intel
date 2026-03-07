@@ -1,0 +1,30 @@
+name: Smoke Tests
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke:
+    name: SharePoint Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-pnpm
+
+      - name: Run PH6.15 Layer 2 smoke tests
+        # D-PH6-15 Layer 2 gate runs only in real-tenant mode.
+        run: pnpm --filter @hbc/functions test:smoke
+        env:
+          SMOKE_TEST: 'true'
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_TEST }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET_TEST }}
+          SHAREPOINT_TENANT_URL: ${{ secrets.SHAREPOINT_TENANT_URL }}
+          SHAREPOINT_HUB_SITE_ID: ${{ secrets.SHAREPOINT_HUB_SITE_ID }}
+          SHAREPOINT_TEST_SITE_COLLECTION: ${{ secrets.SHAREPOINT_TEST_SITE_COLLECTION }}
+          SHAREPOINT_APP_CATALOG_URL: ${{ secrets.SHAREPOINT_APP_CATALOG_URL }}
+          HB_INTEL_SPFX_APP_ID: ${{ secrets.HB_INTEL_SPFX_APP_ID }}

@@ -174,9 +174,9 @@ Phase 6 is complete when HB Intel has a production-ready provisioning system tha
 - [x] 6.0.15 Step 5 timeout/deferral logic functioning; timer trigger completing deferred jobs overnight.
 - [x] 6.0.16 Correlation IDs propagated through all events; custom App Insights metrics recording.
 - [x] 6.0.17 Stuck-run alert and timer failure alert configured and tested.
-- [ ] 6.0.18 All Layer 1 Vitest unit tests passing in CI.
-- [ ] 6.0.19 All Layer 2 SharePoint smoke tests passing in CI (nightly + pre-merge).
-- [ ] 6.0.20 All Layer 3 Playwright E2E tests passing against staging.
+- [x] 6.0.18 All Layer 1 Vitest unit tests passing in CI. (2026-03-07 update: PH6.15 Layer 1 implemented with `@hbc/functions` coverage at 84.30% and `@hbc/provisioning` unit suite passing.)
+- [ ] 6.0.19 All Layer 2 SharePoint smoke tests passing in CI (nightly + pre-merge). (2026-03-07 update: PH6.15 smoke tests + `smoke-tests.yml` implemented; tenant-backed run pending secrets/runtime execution.)
+- [ ] 6.0.20 All Layer 3 Playwright E2E tests passing against staging. (2026-03-07 update: PH6.15 `e2e/provisioning.spec.ts` + `e2e.yml` implemented; staging URL-backed execution pending environment secrets.)
 - [ ] 6.0.21 GitHub Actions deployment pipeline functional for dev, staging, and production.
 - [x] 6.0.22 All required ADRs created in `docs/architecture/adr/`.
 - [ ] 6.0.23 Diátaxis documentation complete in correct `docs/` folders.

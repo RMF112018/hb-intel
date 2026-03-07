@@ -959,9 +959,15 @@ importers:
       '@types/node':
         specifier: ^20.11.0
         version: 20.19.35
+      '@vitest/coverage-v8':
+        specifier: ^3.2.4
+        version: 3.2.4(vitest@3.2.4(@types/node@20.19.35)(happy-dom@18.0.1)(terser@5.46.0))
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@20.19.35)(happy-dom@18.0.1)(terser@5.46.0)
 
   packages/app-shell:
     dependencies:

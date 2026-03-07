@@ -35,13 +35,28 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    services:
+      azurite:
+        image: mcr.microsoft.com/azure-storage/azurite
+        ports:
+          - 10000:10000
+          - 10001:10001
+          - 10002:10002
     steps:
       - uses: actions/checkout@v4
 
       - uses: ./.github/actions/setup-pnpm
 
       - name: Run tests
-        run: pnpm turbo run test
+        # D-PH6-15 Layer 1 gate: provisioning unit tests + coverage threshold.
+        run: |
+          pnpm --filter @hbc/functions test:coverage
+          pnpm --filter @hbc/provisioning test
+        env:
+          AZURITE_TEST: 'true'
+          AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
+          AZURE_TENANT_ID: test-tenant
+          AZURE_CLIENT_ID: test-client
 
       - name: Upload coverage
         if: always()
