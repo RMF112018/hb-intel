@@ -31,13 +31,19 @@ declare module '@hbc/auth/dev' {
     name: string;
     email: string;
     roles: string[];
+    permissions: Record<string, boolean>;
     description: string;
+    category: 'base' | 'supplemental';
+    tags: string[];
+    usageExample: string;
+    created: number;
   }
 
   export class DevAuthBypassAdapter {
     constructor(delayMs?: number);
     acquireIdentity(): Promise<IMockIdentity>;
     normalizeSession(rawIdentity: IMockIdentity): Promise<ISessionData>;
+    normalizeSessionWithPermissions(rawIdentity: IMockIdentity, explicitPermissions: Record<string, boolean>): Promise<ISessionData>;
     restoreSession(): Promise<ISessionData | null>;
   }
 

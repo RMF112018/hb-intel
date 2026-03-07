@@ -9,3 +9,4 @@ if (!import.meta.env.DEV) {
 export { DevToolbar } from './DevToolbar.js';
 export { PersonaCard, type PersonaCardProps } from './PersonaCard.js';
 export { useDevAuthBypass, type IDevAuthBypassState } from './useDevAuthBypass.js';
+export { sessionDataToCurrentUser, extractGrantedPermissions } from './sessionDataToCurrentUser.js';

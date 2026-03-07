@@ -9,6 +9,11 @@ import {
   type IPersona,
   type ISessionData,
 } from '@hbc/auth/dev';
+import { useAuthStore, usePermissionStore } from '@hbc/auth';
+import {
+  sessionDataToCurrentUser,
+  extractGrantedPermissions,
+} from './sessionDataToCurrentUser.js';
 
 const STATE_KEY = 'hb-auth-dev-toolbar-state';
 const DELAY_KEY = 'hb-auth-dev-delay';
@@ -75,6 +80,11 @@ export function useDevAuthBypass(): IDevAuthBypassState {
     void newAdapter.restoreSession().then((session) => {
       if (session) {
         setCurrentSession(session);
+        // D-PH6F-01: Sync restored session to global auth/permission stores
+        useAuthStore.getState().setUser(sessionDataToCurrentUser(session));
+        usePermissionStore
+          .getState()
+          .setPermissions(extractGrantedPermissions(session.permissions));
       }
     });
   }, []);
@@ -97,14 +107,24 @@ export function useDevAuthBypass(): IDevAuthBypassState {
 
     try {
       const identity = await adapter.acquireIdentity();
-      const session = await adapter.normalizeSession({
-        ...identity,
-        userId: persona.id,
-        displayName: persona.name,
-        email: persona.email,
-        roles: persona.roles,
-      });
-      setCurrentSession(session);
+      // D-PH6F-01: Use normalizeSessionWithPermissions so persona.permissions override role defaults
+      const enrichedSession = await adapter.normalizeSessionWithPermissions(
+        {
+          ...identity,
+          userId: persona.id,
+          displayName: persona.name,
+          email: persona.email,
+          roles: persona.roles,
+        },
+        persona.permissions,
+      );
+      setCurrentSession(enrichedSession);
+
+      // D-PH6F-01: Sync to global auth and permission stores so feature gates react
+      useAuthStore.getState().setUser(sessionDataToCurrentUser(enrichedSession));
+      usePermissionStore
+        .getState()
+        .setPermissions(extractGrantedPermissions(enrichedSession.permissions));
 
       if (auditLoggingEnabled) {
         console.log(`[HB-AUTH-DEV] Persona selected: ${persona.id}`);
@@ -126,6 +146,10 @@ export function useDevAuthBypass(): IDevAuthBypassState {
   const expireSession = (): void => {
     sessionStorage.removeItem('hb-auth-dev-session');
     setCurrentSession(null);
+    setSelectedPersona(null);
+    // D-PH6F-01: Clear global auth/permission stores on session expiry
+    useAuthStore.getState().signOut();
+    usePermissionStore.getState().clear();
 
     if (auditLoggingEnabled) {
       console.log('[HB-AUTH-DEV] Session expired from toolbar action');
@@ -139,6 +163,17 @@ export function useDevAuthBypass(): IDevAuthBypassState {
 
     const session = await adapter.restoreSession();
     setCurrentSession(session);
+
+    // D-PH6F-01: Sync refreshed session to global stores (or clear if null)
+    if (session) {
+      useAuthStore.getState().setUser(sessionDataToCurrentUser(session));
+      usePermissionStore
+        .getState()
+        .setPermissions(extractGrantedPermissions(session.permissions));
+    } else {
+      useAuthStore.getState().signOut();
+      usePermissionStore.getState().clear();
+    }
 
     if (auditLoggingEnabled) {
       console.log('[HB-AUTH-DEV] Session refresh triggered from toolbar action');

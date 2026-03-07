@@ -436,7 +436,16 @@ produces an accurate base session even without the override (defense in depth).
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task created: 2026-03-07
-Status: Pending implementation
-Depends on: PH6F.2 (recommended first)
-Next: Begin with sessionDataToCurrentUser.ts creation, then modify useDevAuthBypass.ts
+PH6F.1 completed: 2026-03-07
+- [x] Step 1: Created packages/shell/src/devToolbar/sessionDataToCurrentUser.ts
+      — sessionDataToCurrentUser() and extractGrantedPermissions() with D-PH6F-01 traceability
+- [x] Step 2a: Added useAuthStore, usePermissionStore, utility imports to useDevAuthBypass.ts
+- [x] Step 2b: selectPersona() now uses normalizeSessionWithPermissions() + syncs to stores
+- [x] Step 2c: Mount restore useEffect syncs restored session to authStore/permissionStore
+- [x] Step 2d: expireSession() clears persona, calls signOut() and clear()
+- [x] Step 2e: refreshSession() syncs to stores (or clears on null)
+- [x] Step 3: index.ts exports sessionDataToCurrentUser and extractGrantedPermissions
+- [x] Updated auth-dev-shim.d.ts to include normalizeSessionWithPermissions and full IPersona shape
+- [x] Build verified: pnpm turbo run build --filter=@hbc/shell passes clean
+Gaps resolved: DA-01, DA-02, DA-03, DA-04, DA-05, DA-06
 -->
