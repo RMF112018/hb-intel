@@ -1039,4 +1039,10 @@ Phase 5.16 (Testing Strategy and Validation Matrix) completed: 2026-03-06
   - 5.16.3 performance/rerender checks implemented for selector slice stability and shell transition readiness; automated boundary checks added for protected-feature registration + SPFx host seam constraints
   - 5.16.4 verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`, `pnpm exec vitest run --config /tmp/hb-intel-vitest.config.ts`
   - 5.16.5 ADR-0069 created: `docs/architecture/adr/ADR-0069-testing-strategy-and-validation-matrix.md`
+Phase 5.17 (Release Gating and Sign-Off) completed: 2026-03-06
+  - 5.17.1 final formal release checklist created: `docs/architecture/release/PH5-final-release-checklist-and-signoff.md` with required pass/fail gates and recorded evidence fields
+  - 5.17.2 named sign-off process documented and enforced (architecture owner, product owner, operations/support owner) with explicit production release-lock rule
+  - 5.17.3 Phase 5 success criteria fully closed across all three acceptance layers (Layer 1 Feature Completion, Layer 2 Outcome Validation, Layer 3 Operational Readiness)
+  - 5.17.4 final verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`, `pnpm exec vitest run --config /tmp/hb-intel-vitest.config.ts`
+  - 5.17.5 ADR-0070 created: `docs/architecture/adr/ADR-0070-phase-5-final-release-gating-and-sign-off.md`
 -->

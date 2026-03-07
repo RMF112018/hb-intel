@@ -29,6 +29,28 @@
 
 4. No production release is complete without those sign-offs captured in the release package.
 
+## 5.17 Progress Notes
+
+- 5.17.1 completed — formal Phase 5 release checklist and pass/fail gating package created in `docs/architecture/release/PH5-final-release-checklist-and-signoff.md` with required architecture/package/validation/degraded/audit/admin/documentation/issues/performance gate coverage — 2026-03-06.
+- 5.17.2 completed — named sign-off process documented with mandatory architecture owner, product owner, and operations/support owner approvals; explicit release-lock statement added to block production release without captured sign-offs — 2026-03-06.
+- 5.17.3 completed — final Phase 5 plan updates completed (PH5.17 + PH5 progress notes, final sign-off section, full success criteria closure across Layer 1/Layer 2/Layer 3 acceptance) — 2026-03-06.
+- 5.17.4 completed — blueprint/foundation progress logs updated for Phase 5 closure and ADR-0070 final release-gating decision published with traceability to locked Option C decisions — 2026-03-06.
+- 5.17.5 completed — final verification evidence recorded with zero errors for build/lint/type-check and validation matrix command execution — 2026-03-06.
+
+## 5.17 Completion Checklist
+
+- [x] Formal release checklist with pass/fail criteria created and linked in release package.
+- [x] Named sign-off process documented and enforced as a hard production release gate.
+- [x] Final Phase 5 success criteria closure completed across Layer 1 (Feature Completion), Layer 2 (Outcome Validation), and Layer 3 (Operational Readiness).
+- [x] Final blueprint/foundation progress comments and closing ADR (ADR-0070) completed with full traceability.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm exec vitest run --config /tmp/hb-intel-vitest.config.ts` - PASS
+
 ---
 
 ## Recommended Implementation Sequence

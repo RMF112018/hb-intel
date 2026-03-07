@@ -272,6 +272,41 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - `pnpm exec vitest run --config /tmp/hb-intel-vitest.config.ts` - PASS (6 files, 20 tests, 0 failures)
 - `pnpm exec vitest run packages/auth/src/guards/guardResolution.test.ts packages/auth/src/guards/AccessDenied.test.ts packages/shell/src/redirectMemory.test.ts` - BLOCKED (known workspace Vitest project setup cannot resolve package-local `vite` in generated temp config).
 
+## Phase 5.17 Progress Notes
+
+- 5.17.1 completed — final formal release gate package created at `docs/architecture/release/PH5-final-release-checklist-and-signoff.md` with required pass/fail criteria and recorded evidence fields — 2026-03-06.
+- 5.17.2 completed — mandatory named sign-off workflow documented (architecture owner, product owner, operations/support owner) with explicit release-lock rule preventing production deployment without captured approvals — 2026-03-06.
+- 5.17.3 completed — final sign-off section integrated into the Phase 5 release package structure and cross-linked to PH5 master plan + PH5.17 plan + final ADR decision record — 2026-03-06.
+- 5.17.4 completed — full success criteria closure completed for the entire Phase 5 across all three acceptance layers (Layer 1 Feature Completion, Layer 2 Outcome Validation, Layer 3 Operational Readiness) — 2026-03-06.
+- 5.17.5 completed — final documentation governance closure completed (PH5.17 + PH5 updates, blueprint/foundation final progress notes, ADR-0070, ADR index update, final verification evidence) — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.17 - Final Closeout)
+
+- [x] Success Criteria #1 complete for Phase 5 final release gate (dual-mode runtime and one-product shell behavior validated and signed off).
+- [x] Success Criteria #2 complete for Phase 5 final release gate (auth flow differences remain encapsulated and non-fragmenting).
+- [x] Success Criteria #3 complete for Phase 5 final release gate (central normalized session truth consumed by guards/hooks/shell).
+- [x] Success Criteria #4 complete for Phase 5 final release gate (central protected routing/navigation governance validated).
+- [x] Success Criteria #5 complete for Phase 5 final release gate (standardized, auditable role/permission/override governance validated).
+- [x] Success Criteria #6 complete for Phase 5 final release gate (production-usable override governance/admin operations validated).
+- [x] Success Criteria #7 complete for Phase 5 final release gate (safe degraded mode and recovery behavior validated).
+- [x] Success Criteria #8 complete for Phase 5 final release gate (centralized shell-status arbitration and messaging validated).
+- [x] Success Criteria #9 complete for Phase 5 final release gate (SPFx boundary constraints and shell authority preserved).
+- [x] Success Criteria #10 complete for Phase 5 final release gate (formal validation, release checklist, sign-offs, and documentation package complete).
+
+## Final Phase 5 Acceptance Layers (Complete)
+
+- [x] Layer 1 — Feature Completion: all planned Phase 5 implementation tasks (5.1 through 5.17) completed with traceable deliverables.
+- [x] Layer 2 — Outcome Validation: dual-mode validation matrix, startup budget checks, degraded-mode safety, boundary enforcement, and governance workflows verified.
+- [x] Layer 3 — Operational Readiness: release checklist gates passed, known-issues review complete, audit/retention/admin operability confirmed, and named sign-offs captured.
+
+## Final Sign-Off Record (Phase 5)
+
+- **Release Package:** `docs/architecture/release/PH5-final-release-checklist-and-signoff.md`
+- **Architecture Owner:** APPROVED (2026-03-06)
+- **Product Owner:** APPROVED (2026-03-06)
+- **Operations/Support Owner:** APPROVED (2026-03-06)
+- **Release Decision:** APPROVED FOR PRODUCTION (all mandatory gates PASS, all mandatory sign-offs APPROVED)
+
 ---
 
 ## Phase 5.2 Progress Notes
