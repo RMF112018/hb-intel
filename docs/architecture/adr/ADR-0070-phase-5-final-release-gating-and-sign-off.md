@@ -66,3 +66,18 @@ Phase 5 requires formal release gating and named accountability before productio
 - `docs/architecture/plans/PH5.16-Auth-Shell-Plan.md` validation matrix continuity
 - `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md` §§1e, 1f, 2b, 2c, 2e
 - Implementation alignment markers in code/docs: D-04, D-07, D-10, D-12
+
+### Phase 5C Enhancement: Dev Auth Bypass
+
+See **ADR-PH5C-01-dev-auth-bypass.md** for complete decision details.
+
+**Impact on ADR-0070:**
+- Session Management logic unchanged (production path unaffected)
+- Dev Auth Bypass provides alternative implementation of `IAuthAdapter`
+- Session normalization in dev mode follows same ISessionData shape
+- Guards evaluation identical in dev and production
+
+**Cross-References:**
+- D-PH5C-02: Build-mode gating ensures no dev code in production
+- D-PH5C-03: Dev mode simulates full lifecycle with configurable delay
+- D-PH5C-04: Personas provide complete permission test coverage

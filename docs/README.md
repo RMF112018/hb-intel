@@ -100,6 +100,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0070 | Accepted | [ADR-0070-phase-5-final-release-gating-and-sign-off.md](./architecture/adr/ADR-0070-phase-5-final-release-gating-and-sign-off.md) |
 | ADR-0071 | Accepted | [ADR-0071-phase-5-documentation-package-and-release-sign-off.md](./architecture/adr/ADR-0071-phase-5-documentation-package-and-release-sign-off.md) |
 | ADR-0072 | Accepted | [ADR-0072-phase-5-final-acceptance-criteria-and-sign-off.md](./architecture/adr/ADR-0072-phase-5-final-acceptance-criteria-and-sign-off.md) |
+| ADR-PH5C-01 | Accepted | [ADR-PH5C-01-dev-auth-bypass.md](./architecture/adr/ADR-PH5C-01-dev-auth-bypass.md) |
 
 ## Conventions
 

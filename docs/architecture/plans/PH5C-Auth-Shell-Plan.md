@@ -282,9 +282,9 @@ All tasks start in PENDING state. Update this section after each task completion
 - 5.C.8.2 [COMPLETED] — ESLint rule creation and integration
 
 ### PH5C.9 Progress Notes
-- 5.C.9.1 [PENDING] — ADR-PH5C-01 creation
-- 5.C.9.2 [PENDING] — ADR-0070 update
-- 5.C.9.3 [PENDING] — ADR-0071 update
+- 5.C.9.1 [COMPLETED] — ADR-PH5C-01 creation
+- 5.C.9.2 [COMPLETED] — ADR-0070 update
+- 5.C.9.3 [COMPLETED] — ADR-0071 update
 
 ### PH5C.10 Progress Notes
 - 5.C.10.1 [PENDING] — Verification gate execution
@@ -314,11 +314,12 @@ All verification gates remain PENDING until execution. See PH5C.10 for full veri
 
 ### Documentation & Architecture
 - All documentation files in correct `docs/` subfolders - [PASS for PH5C.3]
-- ADRs linked and cross-referenced - [PENDING]
+- ADRs linked and cross-referenced - [PASS for PH5C.9]
 - Developer integration how-to guide (`docs/how-to/developer/integrate-auth-with-your-feature.md`) - [PASS for PH5C.5]
 - End-user access request how-to guide (`docs/how-to/user/request-elevated-access.md`) - [PASS for PH5C.6]
 - Administrator override management how-to guide (`docs/how-to/administrator/manage-override-requests.md`) - [PASS for PH5C.7]
 - Alignment markers reference (`docs/reference/auth/alignment-markers.md`) - [PASS for PH5C.8]
+- Dev auth bypass ADR (`docs/architecture/adr/ADR-PH5C-01-dev-auth-bypass.md`) - [PASS for PH5C.9]
 
 ### Audit Coverage
 - Security: 100% - [PENDING]
@@ -385,5 +386,10 @@ D-PH5C-08 traceability closed: alignment markers added in `packages/shell/src/Sh
 PH5C.8 documentation closure: created `docs/reference/auth/alignment-markers.md` from locked PH5C.8 production markdown block and added alignment-marker guidance in `packages/auth/README.md` and `packages/shell/README.md`.
 PH5C.8 verification evidence: `pnpm lint` PASS with no alignment-marker violations; `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` PASS.
 PH5C.8 remediation note: no phase-specific remediation required; no new build/lint/type-check errors were introduced by this documentation and marker-enforcement task.
-Next: PH5C.9 (awaiting explicit user confirmation)
+PH5C.9 completed: 2026-03-07
+D-PH5C-01 through D-PH5C-08 traceability closed: created `docs/architecture/adr/ADR-PH5C-01-dev-auth-bypass.md` from locked PH5C.9 production ADR template and updated ADR-0070/ADR-0071 with Phase 5C enhancement sections/cross-references.
+PH5C.9 documentation closure: updated ADR index in `docs/README.md` with ADR-PH5C-01 and validated cross-reference continuity across ADR-PH5C-01, ADR-0070, and ADR-0071.
+PH5C.9 verification evidence: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` PASS.
+PH5C.9 remediation note: no phase-specific remediation required; no new build/lint/type-check errors were introduced by this ADR documentation task.
+Next: PH5C.10 (awaiting explicit user confirmation)
 -->

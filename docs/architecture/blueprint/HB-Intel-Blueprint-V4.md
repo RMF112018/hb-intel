@@ -1098,4 +1098,11 @@ Phase 5C.8 (Alignment Markers & Drift Prevention) completed: 2026-03-07
   - PH5C.8 checklist closure confirmed in `docs/architecture/plans/PH5C.8-AlignmentMarkers.md` for items 5.C.8.1 through 5.C.8.10.
   - PH5C.8 verification gates passed: `pnpm lint` (no alignment-marker violations), `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`.
   - PH5C.8 remediation status: no phase-specific remediation required; no new build/lint/type-check failures introduced by PH5C.8 changes.
+Phase 5C.9 (Architecture Decision Records Updates) completed: 2026-03-07
+  - D-PH5C-01 through D-PH5C-08 documented by creating `docs/architecture/adr/ADR-PH5C-01-dev-auth-bypass.md` from the locked PH5C.9 production ADR template with complete decision rationale, alternatives, consequences, implementation traceability, and related-decision mapping.
+  - ADR continuity enhanced by appending Phase 5C enhancement sections to `docs/architecture/adr/ADR-0070-phase-5-final-release-gating-and-sign-off.md` and `docs/architecture/adr/ADR-0071-phase-5-documentation-package-and-release-sign-off.md`, each cross-linking to ADR-PH5C-01.
+  - ADR index updated in `docs/README.md` to include ADR-PH5C-01 for documentation discoverability.
+  - PH5C.9 checklist closure confirmed in `docs/architecture/plans/PH5C.9-ADRUpdates.md` for items 5.C.9.1 through 5.C.9.10.
+  - PH5C.9 verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`.
+  - PH5C.9 remediation status: no phase-specific remediation required; no new build/lint/type-check failures introduced by PH5C.9 ADR updates.
 -->

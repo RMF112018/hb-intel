@@ -71,3 +71,17 @@ the final documentation package and closes Phase 5 documentation obligations.
   - `docs/reference/auth-shell-governance-and-policies.md`
   - `docs/reference/auth-shell-validation-and-release-package.md`
   - `docs/reference/auth-shell-deferred-scope-roadmap.md`
+
+### Phase 5C Enhancement: Persona-Based Permission Testing
+
+See **ADR-PH5C-01-dev-auth-bypass.md** for complete decision details.
+
+**Impact on ADR-0071:**
+- Permission guard logic unchanged (production evaluation identical)
+- Dev mode provides 11 personas for comprehensive testing
+- PersonaRegistry demonstrates all possible role/permission combinations
+- Test coverage for edge cases (expired session, multi-role, degraded mode)
+
+**Cross-References:**
+- D-PH5C-04: PersonaRegistry with auto-generated + supplemental personas
+- D-PH5C-01: Persona switcher UI for easy role testing
