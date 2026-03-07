@@ -1083,4 +1083,8 @@ Phase 5C.5 (Developer Integration How-To Guide) completed: 2026-03-07
   - D-PH5C-07 implemented by creating `docs/how-to/developer/integrate-auth-with-your-feature.md` verbatim from locked PH5C.5 production markdown (goal-oriented how-to, prerequisites, 10 numbered steps, worked Accounting Invoice List example, troubleshooting, and next-step references).
   - PH5C.5 verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` (pass with one pre-existing auth warning), `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`.
   - PH5C.5 remediation status: no phase-specific remediation required; no new build/lint/type-check errors introduced by PH5C.5 documentation changes.
+Phase 5C.6 (End-User Access Request How-To Guide) completed: 2026-03-07
+  - D-PH5C-07 implemented by creating `docs/how-to/user/request-elevated-access.md` verbatim from locked PH5C.6 production markdown (non-technical language, step-by-step request workflow, visual descriptions, timeline and approval process, FAQ, troubleshooting).
+  - PH5C.6 verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` (pass with one pre-existing auth warning), `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`.
+  - PH5C.6 remediation status: no phase-specific remediation required; no new build/lint/type-check errors introduced by PH5C.6 documentation changes.
 -->

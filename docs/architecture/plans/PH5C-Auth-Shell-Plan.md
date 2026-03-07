@@ -270,8 +270,8 @@ All tasks start in PENDING state. Update this section after each task completion
 - 5.C.5.2 [COMPLETED] — Worked example (Accounting Invoice List)
 
 ### PH5C.6 Progress Notes
-- 5.C.6.1 [PENDING] — End-user guide creation
-- 5.C.6.2 [PENDING] — Request workflow documentation
+- 5.C.6.1 [COMPLETED] — End-user guide creation
+- 5.C.6.2 [COMPLETED] — Request workflow documentation
 
 ### PH5C.7 Progress Notes
 - 5.C.7.1 [PENDING] — Admin guide creation
@@ -316,6 +316,7 @@ All verification gates remain PENDING until execution. See PH5C.10 for full veri
 - All documentation files in correct `docs/` subfolders - [PASS for PH5C.3]
 - ADRs linked and cross-referenced - [PENDING]
 - Developer integration how-to guide (`docs/how-to/developer/integrate-auth-with-your-feature.md`) - [PASS for PH5C.5]
+- End-user access request how-to guide (`docs/how-to/user/request-elevated-access.md`) - [PASS for PH5C.6]
 
 ### Audit Coverage
 - Security: 100% - [PENDING]
@@ -369,5 +370,9 @@ PH5C.5 completed: 2026-03-07
 D-PH5C-07 traceability closed: created `docs/how-to/developer/integrate-auth-with-your-feature.md` verbatim from locked PH5C.5 production markdown block with 10 numbered integration steps, worked Accounting Invoice List example, code patterns, testing guidance, troubleshooting, and next-steps references.
 PH5C.5 verification evidence: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` PASS with one pre-existing auth warning; `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` PASS.
 PH5C.5 remediation note: no phase-specific remediation required; existing lint warning remains outside PH5C.5 doc-only change scope and no new lint issues were introduced.
-Next: Execute PH5C.6 (End-User How-To Guide)
+PH5C.6 completed: 2026-03-07
+D-PH5C-07 traceability closed: created `docs/how-to/user/request-elevated-access.md` verbatim from locked PH5C.6 production markdown block with non-technical language, full request workflow, visual descriptions, timeline/approval guidance, FAQ, and troubleshooting sections.
+PH5C.6 verification evidence: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` PASS with one pre-existing auth warning; `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` PASS.
+PH5C.6 remediation note: no phase-specific remediation required; no new build/lint/type-check errors were introduced by this documentation task.
+Next: Execute PH5C.7 (Administrator How-To Guide)
 -->
