@@ -8,6 +8,7 @@ import { FluentProvider } from '@fluentui/react-components';
 import type { Preview } from '@storybook/react';
 import { hbcLightTheme, hbcFieldTheme } from '../src/theme/index.js';
 import type { HbcTheme } from '../src/theme/index.js';
+import { withMockAuth } from './decorators/withMockAuth';
 
 const THEMES: Record<string, HbcTheme> = {
   light: hbcLightTheme,
@@ -33,6 +34,8 @@ const preview: Preview = {
     theme: 'light',
   },
   decorators: [
+    // PH4C.9 D-PH4C-15/D-PH4C-16: Storybook-only auth bypass with production guard.
+    withMockAuth,
     (Story, context) => {
       const themeKey = (context.globals.theme as string) || 'light';
       const theme = THEMES[themeKey] ?? hbcLightTheme;

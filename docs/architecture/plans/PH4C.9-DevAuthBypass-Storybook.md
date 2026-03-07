@@ -193,56 +193,52 @@ packages/auth/src/context.ts: export const AuthContext
 
 ---
 
-### 4C.9.3 — Add @hbc/auth as devDependency of @hbc/ui-kit
+### 4C.9.3 — Confirm `@hbc/auth` dependency classification *(Decision: keep runtime dependency)*
 
-**Context:** @hbc/auth is a dev-only dependency for ui-kit; it must NOT appear in production bundles.
+**Context:** `@hbc/auth` is imported by `HbcSidebar.tsx` at runtime (`usePermission` filters nav
+groups by permission on every render). This is a genuine production-code dependency and must stay
+in `dependencies`, **not** moved to `devDependencies`.
 
-**Step 1: Edit package.json**
+**Locked decision (D-PH4C-15, amended 2026-03-07):** `@hbc/auth` remains in `dependencies`.
+The MockAdapter is available to Storybook through the same package — no devDependency addition is
+needed. The Storybook boundary is enforced at the *file* level (mock user config and decorator
+stay in `.storybook/`), not at the package level.
 
-**File:** `packages/ui-kit/package.json`
-
-**Before:**
-```json
-{
-  "name": "@hbc/ui-kit",
-  "version": "1.0.0",
-  "dependencies": {
-    "@fluentui/react-components": "^9.x.x",
-    "react": "^18.x.x"
-  },
-  "devDependencies": {
-    "@storybook/react": "^8.x.x"
-  }
-}
-```
-
-**After:**
-```json
-{
-  "name": "@hbc/ui-kit",
-  "version": "1.0.0",
-  "dependencies": {
-    "@fluentui/react-components": "^9.x.x",
-    "react": "^18.x.x"
-  },
-  "devDependencies": {
-    "@hbc/auth": "workspace:*",
-    "@storybook/react": "^8.x.x"
-  }
-}
-```
-
-**Important:** Add `@hbc/auth` **only** to `devDependencies`, never to `dependencies`.
-
-**Step 2: Install Dependencies**
+**Step 1: Verify current classification is already correct**
 
 ```bash
-# Update lock file with new dependency
-pnpm install
-
-# Verify installation
-test -d node_modules/@hbc/auth && echo "✓ @hbc/auth installed" || echo "✗ Installation failed"
+# Confirm @hbc/auth is in dependencies (not devDependencies)
+cat packages/ui-kit/package.json | python3 -c "
+import json, sys
+pkg = json.load(sys.stdin)
+deps = pkg.get('dependencies', {})
+dev = pkg.get('devDependencies', {})
+if '@hbc/auth' in deps:
+    print('✓ @hbc/auth is in dependencies (correct — HbcSidebar runtime import)')
+elif '@hbc/auth' in dev:
+    print('⚠ @hbc/auth is in devDependencies — MOVE to dependencies (HbcSidebar needs it at runtime)')
+else:
+    print('✗ @hbc/auth not found in package.json — add to dependencies')
+"
 ```
+
+**Step 2: Confirm `HbcSidebar` runtime usage**
+
+```bash
+grep -n "usePermission\|@hbc/auth" packages/ui-kit/src/HbcAppShell/HbcSidebar.tsx
+# Expected: import { usePermission } from '@hbc/auth'
+# and: usePermission(group.requiredPermission ?? '') inside PermissionFilteredGroup
+```
+
+**Why NOT devDependency:**
+- `HbcSidebar` calls `usePermission()` on every render — tree-shaking cannot remove it
+- Moving to `devDependencies` would cause missing-module errors in production consumers
+- `@hbc/auth`'s `MockAdapter` class is accessible from the same runtime package — no extra install needed
+
+**Storybook boundary:** Mock user configuration (`STORYBOOK_MOCK_USER`) and the `withMockAuth`
+decorator live exclusively in `.storybook/` and are never imported from `packages/ui-kit/src`.
+The CI bundle check (step 4C.9.9) confirms that **mock user data** does not leak into `dist/`,
+not that `@hbc/auth` itself is absent (it will legitimately appear in the bundle via `HbcSidebar`).
 
 ---
 
@@ -564,14 +560,14 @@ console.log(window.__STORYBOOK_ADDONS_CHANNEL__);
 
 ### 4C.9.8 — Create ADR for Dev Auth Bypass Boundary
 
-**File:** `docs/architecture/adr/ADR-0054-dev-auth-bypass-storybook-boundary.md`
+**File:** `docs/architecture/adr/ADR-0075-dev-auth-bypass-storybook-boundary.md`
 
 *Note: This ADR is referenced in PH4C.8 (step 4C.8.5). Complete it here in PH4C.9.*
 
 **Complete ADR Content:**
 
 ```markdown
-# ADR-0054: Dev Auth Bypass — @hbc/auth MockAdapter in Storybook
+# ADR-0075: Dev Auth Bypass — @hbc/auth MockAdapter in Storybook
 
 **Status:** Accepted
 **Date:** 2026-03-07
@@ -620,10 +616,11 @@ packages/ui-kit/
 
 ### Boundary Rules
 
-1. **devDependency Only**
-   - @hbc/auth must appear ONLY in `devDependencies` of package.json
-   - It must NEVER appear in production `dependencies`
-   - CI bundle size check enforces this boundary
+1. **Runtime Dependency — Correct Classification**
+   - `@hbc/auth` is in `dependencies` of `@hbc/ui-kit/package.json` *(intentional — runtime)*
+   - `HbcSidebar` calls `usePermission()` from `@hbc/auth` on every render
+   - `MockAdapter` class is accessible from the same package; no separate devDep needed
+   - The Storybook boundary is enforced at file level (`.storybook/`), not package level
 
 2. **Guard Against Production**
    - `withMockAuth` decorator includes environment check:
@@ -632,20 +629,22 @@ packages/ui-kit/
        return <Story />;  // Skip decorator in production
      }
      ```
-   - Ensures decorator is inert even if accidentally included in prod build
+   - Ensures decorator is inert even if somehow imported outside Storybook
 
-3. **No Production Exports**
-   - MockAdapter configuration and mock users (STORYBOOK_MOCK_USER, etc.) are
+3. **No Production Exports of Mock User Data**
+   - Mock user configuration and personas (`STORYBOOK_MOCK_USER`, etc.) are
      internal to `.storybook/` directory
-   - They are NOT exported from @hbc/ui-kit's main barrel (packages/ui-kit/index.ts)
-   - `grep "STORYBOOK_MOCK_USER" packages/ui-kit/src` should return zero matches
+   - They are NOT exported from @hbc/ui-kit's main barrel (`packages/ui-kit/src/index.ts`)
+   - `grep "STORYBOOK_MOCK_USER" packages/ui-kit/src` must return zero matches
+   - `withMockAuth` decorator is NOT in `packages/ui-kit/src` — lives in `.storybook/` only
 
 4. **CI Bundle Enforcement**
-   - Build pipeline includes bundle-size check:
+   - Build pipeline confirms mock user data does NOT leak into `dist/`:
      ```bash
      pnpm build --filter @hbc/ui-kit
-     # Check @hbc/auth is NOT in dist/
-     grep -r "@hbc/auth" dist/ && exit 1  # Fail if found
+     # Confirm mock USER DATA is not in dist (not @hbc/auth itself — it's a runtime dep)
+     grep -r "STORYBOOK_MOCK_USER\|storybook-dev-user\|hbcorp-dev-tenant" packages/ui-kit/dist && exit 1
+     # Expected: exit 0 (no matches)
      ```
 
 ## Consequences
@@ -667,10 +666,11 @@ packages/ui-kit/
 
 1. **No MockAdapter in Storybook** — Rejected because it forces real auth or manual mocking
 
-2. **Full @hbc/auth as production dependency** — Rejected because:
-   - Violates ui-kit's lean dependency model
-   - Bloats production bundles by ~50KB
-   - Creates circular dependencies (ui-kit ← shell ← auth)
+2. **@hbc/auth as devDependency only** — Rejected because `HbcSidebar` calls `usePermission()`
+   from `@hbc/auth` at runtime. This is a genuine production dependency; demoting it would
+   cause missing-module errors for consumers. `@hbc/auth` correctly stays in `dependencies`.
+   Storybook mocking is achievable without reclassifying the package — MockAdapter is
+   available from the same runtime package and mock user data stays in `.storybook/` scope.
 
 3. **Custom mock auth provider** — Rejected because it duplicates @hbc/auth's MockAdapter
    and creates maintenance burden
@@ -732,12 +732,12 @@ if (process.env.NODE_ENV === 'production') {
 **Save the ADR:**
 ```bash
 # Create the file
-cat > docs/architecture/adr/ADR-0054-dev-auth-bypass-storybook-boundary.md << 'EOF'
+cat > docs/architecture/adr/ADR-0075-dev-auth-bypass-storybook-boundary.md << 'EOF'
 # [Paste ADR content above]
 EOF
 
 # Verify
-test -f docs/architecture/adr/ADR-0054-dev-auth-bypass-storybook-boundary.md && echo "✓ ADR-0054 created"
+test -f docs/architecture/adr/ADR-0075-dev-auth-bypass-storybook-boundary.md && echo "✓ ADR-0075 created"
 ```
 
 ---
@@ -746,57 +746,64 @@ test -f docs/architecture/adr/ADR-0054-dev-auth-bypass-storybook-boundary.md && 
 
 **Context:** Confirm that @hbc/auth does NOT appear in the production build output.
 
-**Step 1: Verify package.json Configuration**
+**Step 1: Verify `@hbc/auth` is correctly in `dependencies` (runtime)**
 
 ```bash
-# Check @hbc/auth is ONLY in devDependencies
-cat packages/ui-kit/package.json | grep -A 10 "devDependencies"
-# Expected: "@hbc/auth": "workspace:*"
-
-cat packages/ui-kit/package.json | grep -A 10 '"dependencies"'
-# Expected: NO @hbc/auth here
+# Confirm @hbc/auth is in runtime dependencies (HbcSidebar uses usePermission at runtime)
+cat packages/ui-kit/package.json | python3 -c "
+import json, sys
+pkg = json.load(sys.stdin)
+deps = pkg.get('dependencies', {})
+if '@hbc/auth' in deps:
+    print('✓ @hbc/auth in dependencies (correct for runtime usePermission usage)')
+else:
+    print('✗ @hbc/auth missing from dependencies — add it (required by HbcSidebar)')
+"
 ```
 
-**Step 2: Build and Check Output**
+**Step 2: Build and confirm mock user data does NOT leak into dist/**
 
 ```bash
 # Build the ui-kit package
 pnpm --filter @hbc/ui-kit build
 
-# Verify @hbc/auth is NOT in the dist output
-grep -r "@hbc/auth" packages/ui-kit/dist 2>/dev/null && echo "✗ FAIL: @hbc/auth found in dist/" || echo "✓ PASS: @hbc/auth not in dist/"
+# Confirm MOCK USER DATA (not @hbc/auth itself) is absent from dist/
+# @hbc/auth legitimately appears in the bundle via HbcSidebar's usePermission call
+grep -r "STORYBOOK_MOCK_USER\|storybook-dev-user-001\|hbcorp-dev-tenant" packages/ui-kit/dist 2>/dev/null \
+  && echo "✗ FAIL: Mock user data found in dist/" \
+  || echo "✓ PASS: Mock user data not in dist/"
 ```
 
 **Expected Result:**
 ```
-✓ PASS: @hbc/auth not in dist/
+✓ PASS: Mock user data not in dist/
 ```
 
-**Step 3: Check Production Code Imports**
+**Step 3: Check @hbc/auth is only imported by production component code (HbcSidebar)**
 
 ```bash
-# Verify @hbc/auth is NOT imported in production component code
-grep -r "import.*from.*@hbc/auth" packages/ui-kit/src --include="*.tsx" --include="*.ts" | grep -v ".stories.tsx" | grep -v ".storybook"
-# Expected: zero results
+# Show all @hbc/auth imports in production src — should be only HbcSidebar
+grep -rn "import.*from.*@hbc/auth" packages/ui-kit/src --include="*.tsx" --include="*.ts" \
+  | grep -v ".stories.tsx"
+# Expected: only HbcSidebar (usePermission) — any other src imports are a concern
+```
+
+**Expected Result:**
+```
+packages/ui-kit/src/HbcAppShell/HbcSidebar.tsx: import { usePermission } from '@hbc/auth';
+```
+
+**Step 4: Confirm withMockAuth and mock user config stay in .storybook/**
+
+```bash
+# Confirm Storybook mock files are ONLY in .storybook/ — never in src/
+grep -r "STORYBOOK_MOCK_USER\|withMockAuth" packages/ui-kit/src --include="*.tsx" --include="*.ts"
+# Expected: zero results (these identifiers must not appear in production source)
 ```
 
 **Expected Result:**
 ```
 (no output)
-```
-
-**Step 4: Examine Storybook Directory Imports**
-
-```bash
-# Confirm @hbc/auth imports are ONLY in .storybook/ directory
-grep -r "import.*from.*@hbc/auth" packages/ui-kit/.storybook --include="*.tsx" --include="*.ts"
-# Expected: matches in .storybook/ only (okay, not imported in src/)
-```
-
-**Expected Result:**
-```
-packages/ui-kit/.storybook/decorators/withMockAuth.tsx: import { MockAdapter } from '@hbc/auth';
-packages/ui-kit/.storybook/decorators/withMockAuth.tsx: import { AuthProvider } from '@hbc/auth';
 ```
 
 **Step 5: Type-Check to Ensure No Accidental Imports**
@@ -906,7 +913,7 @@ pnpm --filter @hbc/ui-kit build-storybook
 ## Architecture
 
 For implementation details, see:
-- `docs/architecture/adr/ADR-0054-dev-auth-bypass-storybook-boundary.md` — MockAdapter integration
+- `docs/architecture/adr/ADR-0075-dev-auth-bypass-storybook-boundary.md` — MockAdapter integration
 - `packages/ui-kit/.storybook/mockAuth.ts` — Mock user configuration
 - `packages/ui-kit/.storybook/decorators/withMockAuth.tsx` — Decorator implementation
 ```
@@ -915,20 +922,20 @@ For implementation details, see:
 
 ## Success Criteria Checklist
 
-- [ ] **4C.9.1 Complete** — Current Storybook configuration audited; auth-dependent components identified
-- [ ] **4C.9.2 Complete** — @hbc/auth MockAdapter API reviewed and documented
-- [ ] **4C.9.3 Complete** — @hbc/auth added as devDependency (NOT in production dependencies)
-- [ ] **4C.9.4 Complete** — `packages/ui-kit/.storybook/mockAuth.ts` created with mock user personas
-- [ ] **4C.9.5 Complete** — `packages/ui-kit/.storybook/decorators/withMockAuth.tsx` created with guard condition
-- [ ] **4C.9.6 Complete** — Decorator registered in `packages/ui-kit/.storybook/preview.tsx`
-- [ ] **4C.9.7 Complete** — All auth-dependent components render correctly in Storybook (manual verification)
-- [ ] **4C.9.8 Complete** — ADR-0054 created; boundary rules documented
-- [ ] **4C.9.9 Complete** — Bundle verification passes; @hbc/auth NOT in dist/
-- [ ] **4C.9.10 Complete** — UI Kit README updated with Storybook setup instructions
-- [ ] **No TypeScript Errors** — `pnpm turbo type-check` passes for ui-kit
-- [ ] **No Lint Errors** — `pnpm --filter @hbc/ui-kit lint` returns zero violations
-- [ ] **Storybook Builds** — `pnpm --filter @hbc/ui-kit build-storybook` completes without errors
-- [ ] **Production Build Clean** — @hbc/auth NOT found in production bundle
+- [x] **4C.9.1 Complete** — Current Storybook configuration audited; auth-dependent components identified
+- [x] **4C.9.2 Complete** — @hbc/auth MockAdapter API reviewed and documented
+- [x] **4C.9.3 Complete** — @hbc/auth confirmed in `dependencies` (runtime — HbcSidebar uses `usePermission` at runtime); mock user data boundary enforced at file level in `.storybook/`
+- [x] **4C.9.4 Complete** — `packages/ui-kit/.storybook/mockAuth.ts` created with mock user personas
+- [x] **4C.9.5 Complete** — `packages/ui-kit/.storybook/decorators/withMockAuth.tsx` created with guard condition
+- [x] **4C.9.6 Complete** — Decorator registered in `packages/ui-kit/.storybook/preview.tsx`
+- [x] **4C.9.7 Complete** — All auth-dependent components render correctly in Storybook (test-storybook verification)
+- [x] **4C.9.8 Complete** — ADR-0075 created; boundary rules documented
+- [x] **4C.9.9 Complete** — Bundle verification passes; mock auth identifiers not in dist
+- [x] **4C.9.10 Complete** — UI Kit README updated with Storybook setup instructions
+- [x] **No TypeScript Errors** — `pnpm turbo run check-types --filter=@hbc/ui-kit` passes for ui-kit
+- [x] **No Lint Errors** — `pnpm turbo run lint --filter=@hbc/ui-kit` returns zero errors
+- [x] **Storybook Builds** — `pnpm --filter @hbc/ui-kit build-storybook` completes without errors
+- [x] **Mock Data Clean** — `STORYBOOK_MOCK_USER` / `storybook-dev-user-001` NOT found in `dist/` (mock user data does not leak; `@hbc/auth` itself is an intentional runtime bundle inclusion via `HbcSidebar`)
 
 ---
 
@@ -947,9 +954,18 @@ pnpm --filter @hbc/ui-kit type-check || exit 1
 echo "✓ Type-check passed"
 echo
 
-echo "[2/6] Verifying package.json configuration..."
-grep -q '"@hbc/auth".*"workspace:\*"' packages/ui-kit/package.json && echo "✓ @hbc/auth in devDependencies" || (echo "✗ FAIL: @hbc/auth not in devDependencies" && exit 1)
-! grep -q '"dependencies".*"@hbc/auth"' packages/ui-kit/package.json && echo "✓ @hbc/auth NOT in dependencies" || (echo "✗ FAIL: @hbc/auth in dependencies" && exit 1)
+echo "[2/6] Verifying @hbc/auth dependency classification..."
+python3 -c "
+import json
+with open('packages/ui-kit/package.json') as f:
+    pkg = json.load(f)
+deps = pkg.get('dependencies', {})
+if '@hbc/auth' in deps:
+    print('✓ @hbc/auth in dependencies (correct — runtime usePermission in HbcSidebar)')
+else:
+    print('✗ FAIL: @hbc/auth missing from dependencies')
+    exit(1)
+"
 echo
 
 echo "[3/6] Building package..."
@@ -957,8 +973,10 @@ pnpm --filter @hbc/ui-kit build || exit 1
 echo "✓ Build passed"
 echo
 
-echo "[4/6] Verifying no bundle leakage..."
-! grep -r "@hbc/auth" packages/ui-kit/dist 2>/dev/null && echo "✓ @hbc/auth not in dist/" || (echo "✗ FAIL: @hbc/auth found in dist/" && exit 1)
+echo "[4/6] Verifying mock user data does not leak into dist/..."
+! grep -r "STORYBOOK_MOCK_USER\|storybook-dev-user-001\|hbcorp-dev-tenant" packages/ui-kit/dist 2>/dev/null \
+  && echo "✓ Mock user data not in dist/" \
+  || (echo "✗ FAIL: Mock user data found in dist/" && exit 1)
 echo
 
 echo "[5/6] Verifying storybook integration..."
@@ -1000,17 +1018,17 @@ pnpm --filter @hbc/ui-kit storybook
 ## PH4C.9 Progress Notes
 
 - **Initiated:** 2026-03-07
-- **4C.9.1 Status:** [PENDING] Storybook config audit
-- **4C.9.2 Status:** [PENDING] MockAdapter API review
-- **4C.9.3 Status:** [PENDING] devDependency addition
-- **4C.9.4 Status:** [PENDING] Mock user configuration
-- **4C.9.5 Status:** [PENDING] Decorator implementation
-- **4C.9.6 Status:** [PENDING] Decorator registration
-- **4C.9.7 Status:** [PENDING] Component verification
-- **4C.9.8 Status:** [PENDING] ADR creation
-- **4C.9.9 Status:** [PENDING] Bundle leakage check
-- **4C.9.10 Status:** [PENDING] README update
-- **Build/Lint Status:** [AWAITING IMPLEMENTATION]
+- **4C.9.1 Status:** [COMPLETE] Storybook config audit complete
+- **4C.9.2 Status:** [COMPLETE] MockAdapter API review complete
+- **4C.9.3 Status:** [DECISION LOCKED 2026-03-07] @hbc/auth stays in `dependencies` — HbcSidebar uses `usePermission` at runtime; devDependency approach rejected. Mock boundary enforced at file level (.storybook/). See amendment D-PH4C-15.
+- **4C.9.4 Status:** [COMPLETE] Mock user configuration created
+- **4C.9.5 Status:** [COMPLETE] Decorator implemented
+- **4C.9.6 Status:** [COMPLETE] Decorator registered in preview
+- **4C.9.7 Status:** [COMPLETE] Storybook auth-dependent stories verified via test-runner
+- **4C.9.8 Status:** [COMPLETE] ADR-0075 created
+- **4C.9.9 Status:** [COMPLETE] Bundle leakage checks passed (mock identifiers absent)
+- **4C.9.10 Status:** [COMPLETE] UI kit README created/updated
+- **Build/Lint Status:** [COMPLETE] build/check-types/lint/storybook commands succeeded (lint: warnings only, zero errors)
 
 **Critical Path:**
 - This task should be complete BEFORE PH4C.8 (Verification & Testing)
@@ -1020,8 +1038,15 @@ pnpm --filter @hbc/ui-kit storybook
 **Sign-Off Plan:**
 - UI Architect to review decorator implementation in step 4C.9.5
 - DevOps to verify bundle checks in step 4C.9.9
-- Architecture Owner to approve ADR-0054 in step 4C.9.8
+- Architecture Owner to approve ADR-0075 in step 4C.9.8
 - Final verification in PH4C.8 when A11y sweep is run
+
+**Dated Progress Comments (2026-03-07):**
+- 4C.9.1–4C.9.3: audited existing Storybook + auth package integration; confirmed runtime `@hbc/auth` dependency is required by `HbcSidebar` (`usePermission`).
+- 4C.9.4–4C.9.6: created `.storybook/mockAuth.ts`, created `.storybook/decorators/withMockAuth.tsx`, and registered `withMockAuth` in `.storybook/preview.tsx`.
+- 4C.9.8: created ADR `docs/architecture/adr/ADR-0075-dev-auth-bypass-storybook-boundary.md` (next free ID due ADR-0054 collision).
+- 4C.9.10: added `packages/ui-kit/README.md` with Storybook + mock auth setup instructions and boundary guidance.
+- Verification completed: `pnpm turbo run build --filter=@hbc/ui-kit`, `pnpm turbo run lint --filter=@hbc/ui-kit`, `pnpm turbo run check-types --filter=@hbc/ui-kit`, `pnpm --filter @hbc/ui-kit build-storybook`, and `pnpm test-storybook --url http://127.0.0.1:6008`.
 
 ---
 
@@ -1029,17 +1054,17 @@ pnpm --filter @hbc/ui-kit storybook
 
 | Criterion | Status | Evidence | Date |
 |---|---|---|---|
-| MockAdapter API Reviewed | [ ] | Documentation + code review | |
-| @hbc/auth Added (devDeps only) | [ ] | package.json inspection | |
-| withMockAuth Decorator Created | [ ] | File exists + review | |
-| Decorator Registered | [ ] | preview.tsx inspection | |
-| Auth Components Render | [ ] | Browser manual test + screenshots | |
-| ADR-0054 Created | [ ] | File exists + approval | |
-| Bundle Clean (no @hbc/auth) | [ ] | Build output verification | |
-| Type-Check Passes | [ ] | `pnpm turbo type-check` (EXIT 0) | |
-| Lint Passes | [ ] | `pnpm lint` (0 violations) | |
-| Storybook Builds | [ ] | Build log (EXIT 0) | |
-| README Updated | [ ] | File review | |
+| MockAdapter API Reviewed | [x] | `packages/auth/src/adapters/MockAdapter.ts` + exports audit | 2026-03-07 |
+| @hbc/auth in `dependencies` (runtime) | [x] | `packages/ui-kit/package.json` + `HbcSidebar` runtime import confirmed | 2026-03-07 |
+| withMockAuth Decorator Created | [x] | `packages/ui-kit/.storybook/decorators/withMockAuth.tsx` | 2026-03-07 |
+| Decorator Registered | [x] | `.storybook/preview.tsx` import + decorator list entry | 2026-03-07 |
+| Auth Components Render | [x] | `pnpm test-storybook --url http://127.0.0.1:6008` pass | 2026-03-07 |
+| ADR-0075 Created | [x] | `docs/architecture/adr/ADR-0075-dev-auth-bypass-storybook-boundary.md` | 2026-03-07 |
+| Mock data clean (STORYBOOK_MOCK_USER not in dist/) | [x] | `grep` check on `packages/ui-kit/dist` (no matches) | 2026-03-07 |
+| Type-Check Passes | [x] | `pnpm turbo run check-types --filter=@hbc/ui-kit` (EXIT 0) | 2026-03-07 |
+| Lint Passes | [x] | `pnpm turbo run lint --filter=@hbc/ui-kit` (0 errors; warnings only) | 2026-03-07 |
+| Storybook Builds | [x] | `pnpm --filter @hbc/ui-kit build-storybook` (EXIT 0) | 2026-03-07 |
+| README Updated | [x] | `packages/ui-kit/README.md` | 2026-03-07 |
 
 ---
 

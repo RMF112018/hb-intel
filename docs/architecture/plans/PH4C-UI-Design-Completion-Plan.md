@@ -379,4 +379,5 @@ ADR register: 5 ADRs total (3 original + ADR-0013 theme context + ADR-0014 fluen
 Status: READY FOR IMPLEMENTATION — all plans comprehensive and codebase-verified.
 Next: Execute PH4C.7 (Shimmer) first; then PH4C.10 → PH4C.11 → PH4C.12 + PH4C.13 (parallel) → PH4C.8.
 Progress 2026-03-07: PH4C.7 implemented (shared shimmer utility + DataTable/CommandPalette migration + ADR-0074 + build/lint/check-types/storybook verification).
+Progress 2026-03-07: PH4C.9 implemented (Storybook MockAdapter decorator wiring + mock personas + ADR-0075 + README setup + build/lint/check-types/storybook verification).
 -->
