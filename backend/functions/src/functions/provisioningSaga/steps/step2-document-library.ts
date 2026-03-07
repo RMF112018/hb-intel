@@ -1,34 +1,40 @@
-import type { IServiceContainer } from '../../../services/service-factory.js';
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
+import type { IServiceContainer } from '../../../services/service-factory.js';
 
+const LIBRARY_NAME = 'Project Documents';
+
+/**
+ * D-PH6-05 Step 2: Creates the project document library with an idempotency existence check.
+ */
 export async function executeStep2(
   services: IServiceContainer,
   status: IProvisioningStatus
 ): Promise<ISagaStepResult> {
   const result: ISagaStepResult = {
     stepNumber: 2,
-    stepName: 'Document Library',
+    stepName: 'Create Document Library',
     status: 'InProgress',
     startedAt: new Date().toISOString(),
   };
-
   try {
-    if (!status.siteUrl) throw new Error('No site URL available from step 1');
-    await services.sharePoint.createDocumentLibrary(status.siteUrl, 'Project Documents');
+    const alreadyExists = await services.sharePoint.documentLibraryExists(
+      status.siteUrl!,
+      LIBRARY_NAME
+    );
+    if (!alreadyExists) {
+      await services.sharePoint.createDocumentLibrary(status.siteUrl!, LIBRARY_NAME);
+    }
     result.status = 'Completed';
+    result.idempotentSkip = alreadyExists;
     result.completedAt = new Date().toISOString();
   } catch (err) {
     result.status = 'Failed';
     result.errorMessage = err instanceof Error ? err.message : String(err);
   }
-
   return result;
 }
 
-export async function compensateStep2(
-  _services: IServiceContainer,
-  _status: IProvisioningStatus
-): Promise<void> {
-  // D-PH6-06 compensation contract: step 2 artifacts are cleaned by step 1 site delete.
-  return;
+/** D-PH6-05 compensation: no-op because Step 1 site deletion cascades library cleanup. */
+export async function compensateStep2(): Promise<void> {
+  // no-op
 }

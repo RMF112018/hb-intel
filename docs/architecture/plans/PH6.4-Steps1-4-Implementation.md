@@ -403,23 +403,28 @@ Create `backend/functions/src/config/list-definitions.ts` with the list schema f
 
 ## 6.4 Success Criteria Checklist
 
-- [ ] 6.4.1 `@pnp/sp`, `@pnp/graph`, `@azure/identity` installed in `backend/functions`.
-- [ ] 6.4.2 `SharePointService` class implemented with all required interface methods.
-- [ ] 6.4.3 `siteExists` idempotency check uses `ProvisioningAuditLog` list.
-- [ ] 6.4.4 `createSite` includes a `waitForSite` poll loop (60s timeout).
-- [ ] 6.4.5 Steps 1–4 all have idempotency checks (`siteExists`, `documentLibraryExists`, `listExists`).
-- [ ] 6.4.6 `HB_INTEL_LIST_DEFINITIONS` array defined in `config/list-definitions.ts`.
-- [ ] 6.4.7 `compensateStep1` (delete site) and `compensateStep2` (no-op) implemented.
-- [ ] 6.4.8 `pnpm turbo run build --filter=backend-functions` passes.
-- [ ] 6.4.9 Layer 1 unit tests for Steps 1–4 pass with mocked `SharePointService`.
+- [x] 6.4.1 `@pnp/sp`, `@pnp/graph`, `@azure/identity` installed in `backend/functions`.
+- [x] 6.4.2 `SharePointService` class implemented with all required interface methods.
+- [x] 6.4.3 `siteExists` idempotency check uses `ProvisioningAuditLog` list.
+- [x] 6.4.4 `createSite` includes a `waitForSite` poll loop (60s timeout).
+- [x] 6.4.5 Steps 1–4 all have idempotency checks (`siteExists`, `documentLibraryExists`, `listExists`).
+- [x] 6.4.6 `HB_INTEL_LIST_DEFINITIONS` array defined in `config/list-definitions.ts`.
+- [x] 6.4.7 `compensateStep1` (delete site) and `compensateStep2` (no-op) implemented.
+- [x] 6.4.8 `pnpm turbo run build --filter=backend-functions` passes.
+- [x] 6.4.9 Layer 1 unit tests for Steps 1–4 pass with mocked `SharePointService`.
 
 ## PH6.4 Progress Notes
 
-_(To be completed during implementation)_
+2026-03-07: PH6.4 Steps 1–4 implementation completed with real PnPjs-based `SharePointService`, idempotent step logic, compensation behavior, and standardized list schema source (`PH6.4 Standard v1`).
+2026-03-07: D-PH6-05 documentation compliance added to all modified Step 1–4 and SharePoint service files (JSDoc + inline idempotency/compensation/PnPjs notes).
 
 ### Verification Evidence
 
-- `pnpm turbo run build --filter=backend-functions` → EXIT 0 — PASS / FAIL
-- `pnpm turbo run test --filter=backend-functions` → Steps 1–4 unit tests pass — PASS / FAIL
-- Layer 2 smoke test: Step 1 creates real SharePoint site in test tenant — PASS / FAIL
-- Layer 2 smoke test: Re-running Step 1 with same `projectId` returns idempotent skip — PASS / FAIL
+- `pnpm turbo run build --filter=@hbc/functions` → EXIT 0 — PASS (2026-03-07)
+- `pnpm turbo run lint --filter=@hbc/functions` → EXIT 0 with zero errors (warnings only) — PASS (2026-03-07)
+- `pnpm turbo run check-types --filter=@hbc/functions` → EXIT 0 — PASS (2026-03-07)
+- `pnpm turbo run test --filter=@hbc/functions` → EXIT 0 — PASS (2026-03-07)
+- Layer 2 smoke test: Step 1 creates real SharePoint site in test tenant — NOT RUN (outside local scope)
+- Layer 2 smoke test: Re-running Step 1 with same `projectId` returns idempotent skip — NOT RUN (outside local scope)
+
+<!-- PROGRESS: PH6.4 completed 2026-03-07. Steps 1-4 now execute real service calls with idempotency + compensation hooks; verification commands passed in local workspace. -->

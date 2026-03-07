@@ -931,6 +931,18 @@ importers:
       '@hbc/models':
         specifier: workspace:*
         version: link:../../packages/models
+      '@pnp/graph':
+        specifier: ^4.18.0
+        version: 4.18.0
+      '@pnp/logging':
+        specifier: ^4.18.0
+        version: 4.18.0
+      '@pnp/nodejs-commonjs':
+        specifier: ^2.15.0
+        version: 2.15.0
+      '@pnp/sp':
+        specifier: ^4.18.0
+        version: 4.18.0
       jose:
         specifier: ^5.9.6
         version: 5.10.0
@@ -1279,9 +1291,18 @@ packages:
     resolution: {integrity: sha512-/f3eHkSNUTl6DLQHm+bKecjBKcRQxbd/XLx8lvSYp8Nl/HRyPuIPOijt9Dt0sH50/SxOwQ62RnFCmFlGK+bR/w==}
     engines: {node: '>=0.8.0'}
 
+  '@azure/msal-common@13.3.1':
+    resolution: {integrity: sha512-Lrk1ozoAtaP/cp53May3v6HtcFSVxdFrg2Pa/1xu5oIvsIwhxW6zSPibKefCOVgd5osgykMi5jjcZHv8XkzZEQ==}
+    engines: {node: '>=0.8.0'}
+
   '@azure/msal-common@15.15.0':
     resolution: {integrity: sha512-/n+bN0AKlVa+AOcETkJSKj38+bvFs78BaP4rNtv3MJCmPH0YrHiskMRe74OhyZ5DZjGISlFyxqvf9/4QVEi2tw==}
     engines: {node: '>=0.8.0'}
+
+  '@azure/msal-node@1.18.4':
+    resolution: {integrity: sha512-Kc/dRvhZ9Q4+1FSfsTFDME/v6+R2Y1fuMty/TfwqE5p9GTPw08BPbKgeWinE8JRHRp+LemjQbUZsn4Q4l6Lszg==}
+    engines: {node: 10 || 12 || 14 || 16 || 18}
+    deprecated: A newer major version of this library is available. Please upgrade to the latest available version.
 
   '@azure/msal-node@3.8.8':
     resolution: {integrity: sha512-+f1VrJH1iI517t4zgmuhqORja0bL6LDQXfBqkjuMmfTYXTQQnh1EvwwxO3UbKLT05N0obF72SRHFrC1RBDv5Gg==}
@@ -2771,6 +2792,9 @@ packages:
       '@types/react': '>=16'
       react: '>=16'
 
+  '@microsoft/microsoft-graph-types@2.43.0':
+    resolution: {integrity: sha512-sB9TZugdGH2SnN2mcV5rfKhhfDLPSAvF5VQ+94wtbKAqRpVLFKl9IfqZ+q2/264adkb8iBmgiUEbyrVmOmE2/g==}
+
   '@napi-rs/canvas-android-arm64@0.1.95':
     resolution: {integrity: sha512-SqTh0wsYbetckMXEvHqmR7HKRJujVf1sYv1xdlhkifg6TlCSysz1opa49LlS3+xWuazcQcfRfmhA07HxxxGsAA==}
     engines: {node: '>= 10'}
@@ -2861,6 +2885,41 @@ packages:
     resolution: {integrity: sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@pnp/common-commonjs@2.15.0':
+    resolution: {integrity: sha512-ABSRB7C1RW75ti9xkSJ24CdXmJDEKO5SpOvGt7E40oEn+HT/bCVkfPBRwrXVVMLCxAawEitT90bQp9TaFLjMIg==}
+
+  '@pnp/core@4.18.0':
+    resolution: {integrity: sha512-dqJ+O2uNhQ+H3qVULXOXf8rYObaJB4a32RZjvD1bwCSwFk6dpOLijzCQ9EylfivpkSIL4+/YiZxXV2IJBjCp3Q==}
+    engines: {node: '>=18.12.0'}
+
+  '@pnp/graph@4.18.0':
+    resolution: {integrity: sha512-68Hu7Ip0otHsKpCR//DLk7NZPBtSdT5NgrBzTMNChphUtECa9tjIRcaAC74K5WovxEU7dT1+acXGOMvF/L1ydA==}
+    engines: {node: '>=18.12.0'}
+
+  '@pnp/logging-commonjs@2.15.0':
+    resolution: {integrity: sha512-4TbedYyEips5OND/POvtYyPYyYbIXebK4Q7qYtbmqaqHteuglhXA6wf0E5xNTjfK3L/ziNGytOkPGB/8Lbfq2w==}
+
+  '@pnp/logging@4.18.0':
+    resolution: {integrity: sha512-SRLWt8lv26kV8TTcUVOvLKSe9fub6I/dU3rrNLMBuIlrwEkdac8oPiKItVxhBW5vA/dy1ZqchECncQ4tG+nKvw==}
+    engines: {node: '>=18.12.0'}
+
+  '@pnp/nodejs-commonjs@2.15.0':
+    resolution: {integrity: sha512-o4awenGcXLkVUfGodCdLq7rRLWNxyXmzq8E0dfm49tLOmuU0RZJIP4KOSzuOp8VaUFJBf0cgdfjKtpU5tbIS5Q==}
+
+  '@pnp/odata-commonjs@2.15.0':
+    resolution: {integrity: sha512-1cIkJ8L5Gmx5++ZiIte6fWj8RRMQ+ANo+utpz2ihbp/YZtX5nx5CgrqE6FhLln40eo1hiQhses5oxxGwKz8puQ==}
+
+  '@pnp/queryable@4.18.0':
+    resolution: {integrity: sha512-dE9Xa2CTVwDtFvrOUuBnLTewEjNuLwrr9FtMtAGNfh0POgssxT5w6IAKrKDJjSEO3orzd2vV1hUfi3f0nTTEcA==}
+    engines: {node: '>=18.12.0'}
+
+  '@pnp/sp-commonjs@2.15.0':
+    resolution: {integrity: sha512-UtkxGidfjYuZcbr4CDlS8DWpoW67Vh1ADPgaIPaG+K8aH8RFgnndziEt/6puZhgO0BhE3skl6IYZKMTH2mPipw==}
+
+  '@pnp/sp@4.18.0':
+    resolution: {integrity: sha512-iMmcnpuXQ6bd/OlqkyrgpvXG3zga0v3NdaA3R1J551RkfENlUTR/+mylc2ZfdhJsq2CKRsq0Ed9WAqEQ2kq3lg==}
+    engines: {node: '>=18.12.0'}
 
   '@react-native/normalize-colors@0.74.89':
     resolution: {integrity: sha512-qoMMXddVKVhZ8PA1AbUCk83trpd6N+1nF2A6k1i6LsQObyS92fELuk8kU/lQs6M7BsMHwqyLCpQJ1uFgNvIQXg==}
@@ -3634,6 +3693,10 @@ packages:
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
 
+  '@xmldom/xmldom@0.8.11':
+    resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
+    engines: {node: '>=10.0.0'}
+
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
@@ -3643,6 +3706,15 @@ packages:
     resolution: {integrity: sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+
+  adal-node@0.2.4:
+    resolution: {integrity: sha512-zIcvbwQFKMUtKxxj8YMHeTT1o/TPXfVNsTXVgXD8sxwV6h4AFQgK77dRciGhuEF9/Sdm3UQPJVPc/6XxrccSeA==}
+    engines: {node: '>= 0.6.15'}
+    deprecated: This package is no longer supported. Please migrate to @azure/msal-node.
+
+  agent-base@6.0.2:
+    resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
+    engines: {node: '>= 6.0.0'}
 
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
@@ -3744,6 +3816,9 @@ packages:
     resolution: {integrity: sha512-hsU18Ae8CDTR6Kgu9DYf0EbCr/a5iGL0rytQDobUcdpYOKokk8LEjVphnXkDkgpi0wYVsqrXuP0bZxJaTqdgoA==}
     engines: {node: '>= 0.4'}
 
+  async@2.6.4:
+    resolution: {integrity: sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==}
+
   async@3.2.6:
     resolution: {integrity: sha512-htCUDlxyyCLMgaM3xXg0C0LW2xqfuQ6p05pCEIsXuyQ+a1koYKTuBMzRNwmybfLgvJDMd0r1LTn4+E0Ti6C2AA==}
 
@@ -3772,6 +3847,9 @@ packages:
     resolution: {integrity: sha512-h350/grzDCPgpuWV7eEOqr/f61Xn07Gi9f9B3Ew4rW6/nFtpdEJYW6jgRATorgAGXjEAYFTnaY3sEys39wDw4A==}
     peerDependencies:
       playwright: '>1.0.0'
+
+  axios@0.21.4:
+    resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
 
   axios@1.13.6:
     resolution: {integrity: sha512-ChTCHMouEe2kn713WHbQGcuYrr6fXTBiu460OTwWrWob16g1bXn4vtz07Ope7ewMozJAnEquLk5lWQWtBig9DQ==}
@@ -4052,6 +4130,10 @@ packages:
   data-view-byte-offset@1.0.1:
     resolution: {integrity: sha512-BS8PfmtDGnrgYdOonGZQdLZslWIeCGFP9tpan0hi1Co2Zr2NKADsvGYA8XxuG/4UWgJ6Cjtv+YJnB6MM69QGlQ==}
     engines: {node: '>= 0.4'}
+
+  date-utils@1.2.21:
+    resolution: {integrity: sha512-wJMBjqlwXR0Iv0wUo/lFbhSQ7MmG1hl36iuxuE91kW+5b5sWbase73manEqNH9sOLFAMG83B4ffNKq9/Iq0FVA==}
+    engines: {node: '>0.4.0'}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -4630,6 +4712,10 @@ packages:
     resolution: {integrity: sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==}
     engines: {node: '>= 14'}
 
+  https-proxy-agent@5.0.1:
+    resolution: {integrity: sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==}
+    engines: {node: '>= 6'}
+
   https-proxy-agent@7.0.6:
     resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
     engines: {node: '>= 14'}
@@ -5143,6 +5229,10 @@ packages:
     resolution: {integrity: sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ==}
     engines: {node: '>=0.10.0'}
 
+  jsonwebtoken@8.5.1:
+    resolution: {integrity: sha512-XjwVfRS6jTMsqYs0EsuJ4LGxXV14zQybNd4L2r0UvbVnSF9Af8x7p5MzbJ90Ioz/9TI41/hTCvznF/loiSzn8w==}
+    engines: {node: '>=4', npm: '>=1.4.28'}
+
   jsonwebtoken@9.0.3:
     resolution: {integrity: sha512-MT/xP0CrubFRNLNKvxJ2BYfy53Zkm++5bX9dtuPbqAeQpTVe0MQTFhao8+Cp//EmJp244xt6Drw/GVEGCUj40g==}
     engines: {node: '>=12', npm: '>=6'}
@@ -5151,8 +5241,14 @@ packages:
     resolution: {integrity: sha512-ZNOIIGMzqCGcHQEA2Q4rIQQ3Df6gSIfne+X9Rly9Bc2y55KxAZu8iGv+n2pP0bLf0XAOctJZgeloC54hWzCahQ==}
     engines: {node: '>=16'}
 
+  jwa@1.4.2:
+    resolution: {integrity: sha512-eeH5JO+21J78qMvTIDdBXidBd6nG2kZjg5Ohz/1fpa28Z4CcsWUzJ1ZZyFq/3z3N17aZy+ZuBoHljASbL1WfOw==}
+
   jwa@2.0.1:
     resolution: {integrity: sha512-hRF04fqJIP8Abbkq5NKGN0Bbr3JxlQ+qhZufXVr0DvujKy93ZCbXZMHDL4EOtodSbCWxOqR8MS1tXA5hwqCXDg==}
+
+  jws@3.2.3:
+    resolution: {integrity: sha512-byiJ0FLRdLdSVSReO/U4E7RoEyOCKnEnEPMjq3HxWtvzLsV08/i5RQKsFVNkCldrCaPr2vDNAOMsfs8T/Hze7g==}
 
   jws@4.0.1:
     resolution: {integrity: sha512-EKI/M/yqPncGUUh44xz0PxSidXFr/+r0pA70+gIYhjv+et7yxM+s29Y+VGDkovRofQem0fs7Uvf4+YmAdyRduA==}
@@ -5352,6 +5448,10 @@ packages:
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
+
+  node-fetch@2.6.1:
+    resolution: {integrity: sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==}
+    engines: {node: 4.x || >=6.0.0}
 
   node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
@@ -5792,6 +5892,10 @@ packages:
 
   scheduler@0.23.2:
     resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
+
+  semver@5.7.2:
+    resolution: {integrity: sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==}
+    hasBin: true
 
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -6243,6 +6347,9 @@ packages:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
 
+  underscore@1.13.8:
+    resolution: {integrity: sha512-DXtD3ZtEQzc7M8m4cXotyHR+FAS18C64asBYY5vqZexfYryNNnDc02W4hKg3rdQuqOYas1jkseX0+nZXjTXnvQ==}
+
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
@@ -6297,6 +6404,11 @@ packages:
 
   util@0.12.5:
     resolution: {integrity: sha512-kZf/K6hEIrWHI6XqOFUiiMa+79wE/D8Q+NCNAWclkyg3b4d2k7s0QGepNjiABc+aR3N1PAyHL7p6UcLY6LmrnA==}
+
+  uuid@3.4.0:
+    resolution: {integrity: sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==}
+    deprecated: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+    hasBin: true
 
   uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
@@ -6563,6 +6675,10 @@ packages:
     resolution: {integrity: sha512-yMqGBqtXyeN1e3TGYvgNgDVZ3j84W4cwkOXQswghol6APgZWaff9lnbvN7MHYJOiXsvGPXtjTYJEiC9J2wv9Eg==}
     engines: {node: '>=8.0'}
 
+  xpath.js@1.1.0:
+    resolution: {integrity: sha512-jg+qkfS4K8E7965sqaUl8mRngXiKb3WZGfONgE18pr03FUQiuSV6G+Ej4tS55B+rIQSFEIw3phdVAQ4pPqNWfQ==}
+    engines: {node: '>=0.4.0'}
+
   y18n@4.0.3:
     resolution: {integrity: sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ==}
 
@@ -6715,7 +6831,15 @@ snapshots:
     dependencies:
       '@azure/msal-common': 15.15.0
 
+  '@azure/msal-common@13.3.1': {}
+
   '@azure/msal-common@15.15.0': {}
+
+  '@azure/msal-node@1.18.4':
+    dependencies:
+      '@azure/msal-common': 13.3.1
+      jsonwebtoken: 9.0.3
+      uuid: 8.3.2
 
   '@azure/msal-node@3.8.8':
     dependencies:
@@ -9033,6 +9157,8 @@ snapshots:
       '@types/react': 18.3.28
       react: 18.3.1
 
+  '@microsoft/microsoft-graph-types@2.43.0': {}
+
   '@napi-rs/canvas-android-arm64@0.1.95':
     optional: true
 
@@ -9099,6 +9225,69 @@ snapshots:
   '@playwright/test@1.58.2':
     dependencies:
       playwright: 1.58.2
+
+  '@pnp/common-commonjs@2.15.0':
+    dependencies:
+      tslib: 2.3.0
+
+  '@pnp/core@4.18.0':
+    dependencies:
+      tslib: 2.8.1
+
+  '@pnp/graph@4.18.0':
+    dependencies:
+      '@microsoft/microsoft-graph-types': 2.43.0
+      '@pnp/core': 4.18.0
+      '@pnp/queryable': 4.18.0
+      tslib: 2.8.1
+
+  '@pnp/logging-commonjs@2.15.0':
+    dependencies:
+      tslib: 2.3.0
+
+  '@pnp/logging@4.18.0':
+    dependencies:
+      tslib: 2.8.1
+
+  '@pnp/nodejs-commonjs@2.15.0':
+    dependencies:
+      '@azure/msal-node': 1.18.4
+      '@pnp/common-commonjs': 2.15.0
+      '@pnp/logging-commonjs': 2.15.0
+      '@pnp/odata-commonjs': 2.15.0
+      '@pnp/sp-commonjs': 2.15.0
+      adal-node: 0.2.4
+      https-proxy-agent: 5.0.1
+      jsonwebtoken: 8.5.1
+      node-fetch: 2.6.1
+      tslib: 2.3.0
+    transitivePeerDependencies:
+      - debug
+      - supports-color
+
+  '@pnp/odata-commonjs@2.15.0':
+    dependencies:
+      '@pnp/common-commonjs': 2.15.0
+      '@pnp/logging-commonjs': 2.15.0
+      tslib: 2.3.0
+
+  '@pnp/queryable@4.18.0':
+    dependencies:
+      '@pnp/core': 4.18.0
+      tslib: 2.8.1
+
+  '@pnp/sp-commonjs@2.15.0':
+    dependencies:
+      '@pnp/common-commonjs': 2.15.0
+      '@pnp/logging-commonjs': 2.15.0
+      '@pnp/odata-commonjs': 2.15.0
+      tslib: 2.3.0
+
+  '@pnp/sp@4.18.0':
+    dependencies:
+      '@pnp/core': 4.18.0
+      '@pnp/queryable': 4.18.0
+      tslib: 2.8.1
 
   '@react-native/normalize-colors@0.74.89': {}
 
@@ -9969,11 +10158,32 @@ snapshots:
       loupe: 3.2.1
       tinyrainbow: 2.0.0
 
+  '@xmldom/xmldom@0.8.11': {}
+
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:
       acorn: 8.16.0
 
   acorn@8.16.0: {}
+
+  adal-node@0.2.4:
+    dependencies:
+      '@xmldom/xmldom': 0.8.11
+      async: 2.6.4
+      axios: 0.21.4
+      date-utils: 1.2.21
+      jws: 3.2.3
+      underscore: 1.13.8
+      uuid: 3.4.0
+      xpath.js: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
+  agent-base@6.0.2:
+    dependencies:
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
 
   agent-base@7.1.4: {}
 
@@ -10074,6 +10284,10 @@ snapshots:
 
   async-function@1.0.0: {}
 
+  async@2.6.4:
+    dependencies:
+      lodash: 4.17.23
+
   async@3.2.6: {}
 
   asynckit@0.4.0: {}
@@ -10099,6 +10313,12 @@ snapshots:
       junit-report-builder: 5.1.1
       picocolors: 1.1.1
       playwright: 1.58.2
+
+  axios@0.21.4:
+    dependencies:
+      follow-redirects: 1.15.11
+    transitivePeerDependencies:
+      - debug
 
   axios@1.13.6:
     dependencies:
@@ -10423,6 +10643,8 @@ snapshots:
       call-bound: 1.0.4
       es-errors: 1.3.0
       is-data-view: 1.0.2
+
+  date-utils@1.2.21: {}
 
   debug@4.4.3:
     dependencies:
@@ -11106,6 +11328,13 @@ snapshots:
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.4
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  https-proxy-agent@5.0.1:
+    dependencies:
+      agent-base: 6.0.2
       debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
@@ -11829,6 +12058,19 @@ snapshots:
 
   jsonpointer@5.0.1: {}
 
+  jsonwebtoken@8.5.1:
+    dependencies:
+      jws: 3.2.3
+      lodash.includes: 4.3.0
+      lodash.isboolean: 3.0.3
+      lodash.isinteger: 4.0.4
+      lodash.isnumber: 3.0.3
+      lodash.isplainobject: 4.0.6
+      lodash.isstring: 4.0.1
+      lodash.once: 4.1.1
+      ms: 2.1.3
+      semver: 5.7.2
+
   jsonwebtoken@9.0.3:
     dependencies:
       jws: 4.0.1
@@ -11848,10 +12090,21 @@ snapshots:
       make-dir: 3.1.0
       xmlbuilder: 15.1.1
 
+  jwa@1.4.2:
+    dependencies:
+      buffer-equal-constant-time: 1.0.1
+      ecdsa-sig-formatter: 1.0.11
+      safe-buffer: 5.2.1
+
   jwa@2.0.1:
     dependencies:
       buffer-equal-constant-time: 1.0.1
       ecdsa-sig-formatter: 1.0.11
+      safe-buffer: 5.2.1
+
+  jws@3.2.3:
+    dependencies:
+      jwa: 1.4.2
       safe-buffer: 5.2.1
 
   jws@4.0.1:
@@ -12014,6 +12267,8 @@ snapshots:
   nanoid@3.3.11: {}
 
   natural-compare@1.4.0: {}
+
+  node-fetch@2.6.1: {}
 
   node-fetch@2.7.0:
     dependencies:
@@ -12507,6 +12762,8 @@ snapshots:
     dependencies:
       loose-envify: 1.4.0
 
+  semver@5.7.2: {}
+
   semver@6.3.1: {}
 
   semver@7.7.4: {}
@@ -12962,6 +13219,8 @@ snapshots:
       has-symbols: 1.1.0
       which-boxed-primitive: 1.1.1
 
+  underscore@1.13.8: {}
+
   undici-types@6.21.0: {}
 
   unicode-canonical-property-names-ecmascript@2.0.1: {}
@@ -13011,6 +13270,8 @@ snapshots:
       is-generator-function: 1.1.2
       is-typed-array: 1.1.15
       which-typed-array: 1.1.20
+
+  uuid@3.4.0: {}
 
   uuid@8.3.2: {}
 
@@ -13373,6 +13634,8 @@ snapshots:
   xml@1.0.1: {}
 
   xmlbuilder@15.1.1: {}
+
+  xpath.js@1.1.0: {}
 
   y18n@4.0.3: {}
 

@@ -211,7 +211,7 @@ export class SagaOrchestrator {
         await compensateStep7(this.services, status);
       }
       if (status.steps.find((s) => s.stepNumber === 2)?.status === 'Completed') {
-        await compensateStep2(this.services, status);
+        await compensateStep2();
       }
       if (status.steps.find((s) => s.stepNumber === 1)?.status === 'Completed') {
         await compensateStep1(this.services, status);

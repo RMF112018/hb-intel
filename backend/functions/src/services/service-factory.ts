@@ -3,7 +3,7 @@ import type { ITableStorageService } from './table-storage-service.js';
 import type { IRedisCacheService } from './redis-cache-service.js';
 import type { ISignalRPushService } from './signalr-push-service.js';
 import type { IMsalOboService } from './msal-obo-service.js';
-import { MockSharePointService } from './sharepoint-service.js';
+import { SharePointService } from './sharepoint-service.js';
 import { MockTableStorageService } from './table-storage-service.js';
 import { MockRedisCacheService } from './redis-cache-service.js';
 import { MockSignalRPushService } from './signalr-push-service.js';
@@ -27,7 +27,7 @@ export function createServiceFactory(): IServiceContainer {
   const msalObo = mode === 'azure' ? new ManagedIdentityOboService() : new MockMsalOboService();
 
   singletonContainer = {
-    sharePoint: new MockSharePointService(),
+    sharePoint: new SharePointService(),
     tableStorage: new MockTableStorageService(),
     redisCache: new MockRedisCacheService(),
     signalR: new MockSignalRPushService(),
