@@ -36,7 +36,6 @@
   "dependencies": {
     "@hbc/auth": "workspace:*",
     "@hbc/models": "workspace:*",
-    "@hbc/shell": "workspace:*",
     "@hookform/resolvers": "^3.9.1",
     "@fluentui/react-components": "^9.56.0",
     "@griffel/react": "^1.5.0",
@@ -65,7 +64,8 @@
   "peerDependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "pdfjs-dist": "^4.0.0"
+    "pdfjs-dist": "^4.0.0",
+    "@hbc/shell": "workspace:*"
   },
   "sideEffects": false,
   "files": [

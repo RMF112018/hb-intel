@@ -1,0 +1,38 @@
+/* packages/shell/src/devToolbar/devToolbarTokens.css */
+/* D-PH4C-13 — scoped dev-toolbar dark palette variables for PH4C.10 */
+/* Applied only under [data-hbc-dev-toolbar]; no leakage to app theme. */
+
+[data-hbc-dev-toolbar] {
+  /* Base surfaces */
+  --hbc-dev-surface-base: #1a1a1a;
+  --hbc-dev-surface-raised: #222222;
+  --hbc-dev-surface-overlay: #000000;
+
+  /* Brand accent — HBC cyan/blue */
+  --hbc-dev-accent: #00a0e9;
+  --hbc-dev-accent-hover: #00c4ff;
+  --hbc-dev-accent-text: #ffffff;
+
+  /* Borders and dividers */
+  --hbc-dev-border: #333333;
+  --hbc-dev-border-active: #00a0e9;
+
+  /* Text hierarchy */
+  --hbc-dev-text-primary: #e0e0e0;
+  --hbc-dev-text-secondary: #b0b0b0;
+  --hbc-dev-text-muted: #666666;
+  --hbc-dev-text-code: #00a0e9;
+
+  /* Interactive states */
+  --hbc-dev-hover-bg: #2a2a2a;
+  --hbc-dev-selected-bg: #1a2a3a;
+  --hbc-dev-selected-border: #00a0e9;
+
+  /* Status — session active/expired */
+  --hbc-dev-status-active: #00a0e9;
+  --hbc-dev-status-expired: #ff6b6b;
+  --hbc-dev-status-pending: #f0a500;
+
+  /* Shadows */
+  --hbc-dev-shadow: 0 -2px 8px rgba(0, 0, 0, 0.5);
+}

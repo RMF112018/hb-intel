@@ -91,15 +91,17 @@ describe('DevToolbar', () => {
       root.render(<DevToolbar />);
     });
 
-    const toggle = container.querySelector('button[title="Expand dev toolbar"]') as HTMLButtonElement;
+    const toggle = Array.from(container.querySelectorAll('button')).find((btn) => btn.textContent?.includes('HB-AUTH-DEV')) as
+      | HTMLButtonElement
+      | undefined;
     expect(toggle).toBeTruthy();
 
     act(() => {
-      toggle.click();
+      toggle?.click();
     });
 
     expect(container.textContent).toContain('Personas');
-    const settingsTab = Array.from(container.querySelectorAll('button')).find((btn) => btn.textContent === 'Settings');
+    const settingsTab = Array.from(container.querySelectorAll('[role="tab"]')).find((btn) => btn.textContent === 'Settings');
     expect(settingsTab).toBeTruthy();
 
     act(() => {
@@ -108,7 +110,7 @@ describe('DevToolbar', () => {
 
     expect(container.textContent).toContain('Auth Delay: 500ms');
 
-    const sessionTab = Array.from(container.querySelectorAll('button')).find((btn) => btn.textContent === 'Session');
+    const sessionTab = Array.from(container.querySelectorAll('[role="tab"]')).find((btn) => btn.textContent === 'Session');
     act(() => {
       sessionTab?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
@@ -123,12 +125,14 @@ describe('DevToolbar', () => {
       root.render(<DevToolbar />);
     });
 
-    const toggle = container.querySelector('button[title="Expand dev toolbar"]') as HTMLButtonElement;
+    const toggle = Array.from(container.querySelectorAll('button')).find((btn) => btn.textContent?.includes('HB-AUTH-DEV')) as
+      | HTMLButtonElement
+      | undefined;
     act(() => {
-      toggle.click();
+      toggle?.click();
     });
 
-    const settingsTab = Array.from(container.querySelectorAll('button')).find((btn) => btn.textContent === 'Settings');
+    const settingsTab = Array.from(container.querySelectorAll('[role="tab"]')).find((btn) => btn.textContent === 'Settings');
     act(() => {
       settingsTab?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
@@ -156,7 +160,7 @@ describe('DevToolbar', () => {
     });
     expect(sessionStorage.length).toBe(0);
 
-    const sessionTab = Array.from(container.querySelectorAll('button')).find((btn) => btn.textContent === 'Session');
+    const sessionTab = Array.from(container.querySelectorAll('[role="tab"]')).find((btn) => btn.textContent === 'Session');
     act(() => {
       sessionTab?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
