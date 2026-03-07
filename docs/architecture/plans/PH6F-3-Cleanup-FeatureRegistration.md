@@ -300,4 +300,18 @@ Task created: 2026-03-07
 Status: Pending implementation
 Execution: First in sequence — all other PH6F tasks depend on this
 Key verification: Check createProtectedFeatureRegistry return type before Step 2
+
+PH6F-3 Steps 1-3 completed: 2026-03-07
+- Created apps/pwa/src/features/featureRegistry.ts with 5 feature contracts
+- Corrected visibility from 'always' (invalid) to 'discoverable-locked' (validated by schema)
+- Used toFeaturePermissionRegistrations() bridge to convert shell contracts to auth types
+- Modified apps/pwa/src/main.tsx to register features with usePermissionStore at bootstrap
+- Created apps/pwa/src/components/AccessDenied.tsx as PWA wrapper around @hbc/auth AccessDenied
+- Build passes: pnpm turbo run build --filter=@hbc/pwa (zero TS errors)
+- PH6F-3.1: DONE
+- PH6F-3.2: DONE (DEV-mode validation loop at module load)
+- PH6F-3.3: DONE (bootstrap registration via toFeaturePermissionRegistrations bridge)
+- PH6F-3.4/3.5: Structurally enabled — FeatureGate will evaluate against populated store
+- PH6F-3.6: DONE (PwaAccessDenied wrapper created)
+- PH6F-3.7: DONE (build passes)
 -->

@@ -4,8 +4,10 @@
  */
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { resolveAuthMode } from '@hbc/auth';
+import { resolveAuthMode, usePermissionStore } from '@hbc/auth';
 import type { AuthMode } from '@hbc/auth';
+import { toFeaturePermissionRegistrations } from '@hbc/shell';
+import { FEATURE_REGISTRY } from './features/featureRegistry.js';
 import { bootstrapMockEnvironment } from './bootstrap.js';
 import { initializeMsalAuth } from './auth/msal-init.js';
 import { App } from './App.js';
@@ -19,6 +21,11 @@ async function start(): Promise<void> {
   } else if (authMode === 'msal') {
     await initializeMsalAuth();
   }
+
+  // D-PH6F-3: Register protected feature contracts before any route guard evaluation.
+  usePermissionStore.getState().setFeatureRegistrations(
+    toFeaturePermissionRegistrations(Object.values(FEATURE_REGISTRY)),
+  );
 
   const root = document.getElementById('root');
   if (!root) throw new Error('Root element not found');
