@@ -22,9 +22,13 @@
     "zustand": "^5.0.0"
   },
   "dependencies": {
+    "@hbc/auth": "workspace:*",
+    "@microsoft/signalr": "^8.0.7",
+    "immer": "^10.1.1",
     "@hbc/models": "workspace:*"
   },
   "devDependencies": {
+    "@types/react": "^18.3.0",
     "typescript": "^5.7.0",
     "vite": "^6.0.0",
     "vitest": "^3.2.4",

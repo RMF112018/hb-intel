@@ -158,7 +158,7 @@ Phase 6 is complete when HB Intel has a production-ready provisioning system tha
 ## Phase 6 Master Success Criteria Checklist
 
 - [x] 6.0.1 `projectCode` identifier eliminated from all backend functions, frontend apps, and packages.
-- [x] 6.0.2 `@hbc/provisioning` package scaffold created and published within the monorepo.
+- [x] 6.0.2 `@hbc/provisioning` package scaffold created and published within the monorepo. (2026-03-07 update: PH6.9 package implementation completed with API client, store, SignalR hook, visibility helper, and tests.)
 - [ ] 6.0.3 Azure AD app registration and Managed Identity configured; all endpoints secured. (PH6.2 code complete; Azure tenant ops pending)
 - [x] 6.0.4 `SagaOrchestrator` hardened: correlation IDs, idempotency, exponential backoff.
 - [x] 6.0.5 All 7 steps use real PnPjs/Graph implementations (no mock service in production path). (2026-03-07 update: Steps 1-7 completed via PH6.4 + PH6.5)
@@ -235,7 +235,7 @@ Task completions:
 - PH6.6 completed: 2026-03-07 — real Azure Table dual-store service implemented, production wiring enabled, and audit-list setup assets documented.
 - PH6.7 completed: 2026-03-07 — docs: docs/architecture/adr/0063-signalr-per-project-groups.md, docs/how-to/developer/spfx-signalr-auth.md
 - PH6.8 completed: 2026-03-07 — docs: docs/reference/provisioning/request-lifecycle.md, docs/how-to/administrator/create-projects-list.md
-- PH6.9 completed: YYYY-MM-DD
+- PH6.9 completed: 2026-03-07 — docs: docs/architecture/plans/PH6.9-Provisioning-Package.md
 - PH6.10 completed: YYYY-MM-DD
 - PH6.11 completed: YYYY-MM-DD
 - PH6.12 completed: YYYY-MM-DD
@@ -254,3 +254,4 @@ Sign-off: Bobby Fetting — YYYY-MM-DD
 <!-- PROGRESS: 2026-03-07 PH6.6 completed. Implemented D-PH6-06 dual-store persistence (`RealTableStorageService`), switched production factory wiring to real table adapter, added `scripts/create-audit-list.ts` + admin how-to documentation, and captured verification evidence including external Azurite/tenant constraints. -->
 <!-- PROGRESS: 2026-03-07 PH6.7 completed. Implemented D-PH6-07 SignalR production path: host extension config, authenticated negotiate endpoint with per-project/admin group assignment, real SignalR management API push/group lifecycle service, terminal-state saga group cleanup, developer how-to for SPFx AadHttpClient negotiate/reconnect pattern, ADR-0063, and scoped verification commands passed (`pnpm turbo run build/lint/check-types/test --filter=@hbc/functions`). -->
 <!-- PROGRESS: 2026-03-07 PH6.8 completed. Implemented D-PH6-08 request lifecycle/state engine with `STATE_TRANSITIONS`, `isValidTransition`, `STATE_NOTIFICATION_TARGETS`, notification templates, new request APIs (`submitProjectSetupRequest`, `listProjectSetupRequests`, `advanceRequestState`) with Bearer + transition + `projectNumber` enforcement, Projects-list setup script/docs, backend README updates, and scoped verification commands passed (`pnpm turbo run build --filter=@hbc/functions`, `pnpm turbo run lint --filter=@hbc/functions --filter=@hbc/provisioning`, `pnpm turbo run check-types --filter=@hbc/functions --filter=@hbc/provisioning`, `pnpm turbo run test --filter=@hbc/provisioning`). -->
+<!-- PROGRESS: 2026-03-07 PH6.9 completed. Implemented D-PH6-09 `@hbc/provisioning` package (`createProvisioningApiClient`, Zustand+immer store with `handleProgressEvent`, `useProvisioningSignalR`, visibility helper, notification templates, and complete public exports), added unit tests for visibility/store alongside state-machine tests, and verified `pnpm turbo run build/lint/check-types/test --filter=@hbc/provisioning` passed with zero errors. -->

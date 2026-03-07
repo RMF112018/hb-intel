@@ -1,10 +1,73 @@
+import { useEffect, useRef } from 'react';
+import * as signalR from '@microsoft/signalr';
+import type { IProvisioningProgressEvent } from '@hbc/models';
+import { useProvisioningStore } from '../store.js';
+
 export interface IUseProvisioningSignalROptions {
+  /** The negotiate endpoint URL (Function App base URL + /api/provisioning-negotiate) */
+  negotiateUrl: string;
+  /** The projectId to connect to */
   projectId: string;
+  /** Factory function that returns the current Bearer token for the Function App */
+  getToken: () => Promise<string>;
+  /** Whether the connection should be active (e.g. false when no projectId) */
+  enabled?: boolean;
 }
 
 /**
- * D-PH6-02 scaffold placeholder. Live SignalR hook implementation lands in PH6.9.
+ * D-PH6-09 managed SignalR hook for provisioning progress events.
+ * Traceability: docs/architecture/plans/PH6.9-Provisioning-Package.md §6.9.3
  */
-export function useProvisioningSignalR(_options: IUseProvisioningSignalROptions): void {
-  return;
+export function useProvisioningSignalR({
+  negotiateUrl,
+  projectId,
+  getToken,
+  enabled = true,
+}: IUseProvisioningSignalROptions): { isConnected: boolean } {
+  const connectionRef = useRef<signalR.HubConnection | null>(null);
+  const { handleProgressEvent, setSignalRConnected } = useProvisioningStore();
+
+  useEffect(() => {
+    if (!enabled || !projectId) return;
+
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl(`${negotiateUrl}?projectId=${projectId}`, {
+        accessTokenFactory: getToken,
+      })
+      // D-PH6-09 reconnect strategy: immediate retry, then incremental backoff up to 60s.
+      .withAutomaticReconnect([0, 2000, 5000, 10000, 30000, 60000])
+      .configureLogging(signalR.LogLevel.Warning)
+      .build();
+
+    connection.on('provisioningProgress', (event: IProvisioningProgressEvent) => {
+      handleProgressEvent(event);
+    });
+
+    connection.onclose(() => setSignalRConnected(false));
+    connection.onreconnecting(() => setSignalRConnected(false));
+    connection.onreconnected(() => setSignalRConnected(true));
+
+    connectionRef.current = connection;
+
+    connection
+      .start()
+      .then(() => setSignalRConnected(true))
+      .catch((err) => {
+        console.warn('[useProvisioningSignalR] Failed to connect:', err);
+        setSignalRConnected(false);
+      });
+
+    return () => {
+      const activeConnection = connectionRef.current;
+      connectionRef.current = null;
+      activeConnection
+        ?.stop()
+        .catch(() => {
+          // Ignore cleanup errors on unmount.
+        });
+      setSignalRConnected(false);
+    };
+  }, [enabled, projectId, negotiateUrl, getToken, handleProgressEvent, setSignalRConnected]);
+
+  return { isConnected: useProvisioningStore((s) => s.signalRConnected) };
 }

@@ -1,6 +1,6 @@
 /**
- * D-PH6-08 notification templates for request lifecycle and provisioning milestones.
- * Traceability: docs/architecture/plans/PH6.8-RequestLifecycle-StateEngine.md §6.8.4
+ * D-PH6-09 notification templates used across lifecycle and provisioning updates.
+ * Traceability: docs/architecture/plans/PH6.9-Provisioning-Package.md §6.9.5
  */
 export const NOTIFICATION_TEMPLATES = {
   NeedsClarification: (projectName: string, note: string) => ({

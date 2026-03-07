@@ -310,21 +310,25 @@ export { isValidTransition, STATE_TRANSITIONS, STATE_NOTIFICATION_TARGETS } from
 
 ## 6.9 Success Criteria Checklist
 
-- [ ] 6.9.1 `createProvisioningApiClient` covers all six API operations with auth.
-- [ ] 6.9.2 Zustand store handles `handleProgressEvent` — updates both `latestEventByProjectId` and `statusByProjectId` steps.
-- [ ] 6.9.3 `useProvisioningSignalR` hook establishes connection, handles reconnection, and cleans up on unmount.
-- [ ] 6.9.4 `getProvisioningVisibility` correctly returns `'full'` for Admin, submitter; `'notification'` for OpEx/team members; `'none'` for Leadership/SharedServices.
-- [ ] 6.9.5 `packages/provisioning/src/index.ts` exports all public API surface.
-- [ ] 6.9.6 No React component exports in the package.
-- [ ] 6.9.7 `pnpm turbo run build --filter=@hbc/provisioning` passes.
-- [ ] 6.9.8 All unit tests for store, visibility helper, and state machine pass.
+- [x] 6.9.1 `createProvisioningApiClient` covers all six API operations with auth.
+- [x] 6.9.2 Zustand store handles `handleProgressEvent` — updates both `latestEventByProjectId` and `statusByProjectId` steps.
+- [x] 6.9.3 `useProvisioningSignalR` hook establishes connection, handles reconnection, and cleans up on unmount.
+- [x] 6.9.4 `getProvisioningVisibility` correctly returns `'full'` for Admin, submitter; `'notification'` for OpEx/team members; `'none'` for Leadership/SharedServices.
+- [x] 6.9.5 `packages/provisioning/src/index.ts` exports all public API surface.
+- [x] 6.9.6 No React component exports in the package.
+- [x] 6.9.7 `pnpm turbo run build --filter=@hbc/provisioning` passes.
+- [x] 6.9.8 All unit tests for store, visibility helper, and state machine pass.
 
 ## PH6.9 Progress Notes
 
-_(To be completed during implementation)_
+2026-03-07: PH6.9 completed. Implemented D-PH6-09 API client, Zustand+immer provisioning store, SignalR hook, role-based visibility helper, and full package export surface in `@hbc/provisioning`; added unit tests for store and visibility while retaining state-machine tests from PH6.8; aligned `notification-templates.ts` with PH6.9 headless package contract.
 
 ### Verification Evidence
 
-- `pnpm turbo run build --filter=@hbc/provisioning` → EXIT 0 — PASS / FAIL
-- `pnpm turbo run test --filter=@hbc/provisioning` → all tests pass — PASS / FAIL
-- `getProvisioningVisibility` unit tests: Admin → 'full', submitter → 'full', OpEx → 'notification', Leadership → 'none' — PASS / FAIL
+- `pnpm turbo run build --filter=@hbc/provisioning` → EXIT 0 — PASS
+- `pnpm turbo run lint --filter=@hbc/provisioning` → EXIT 0 — PASS
+- `pnpm turbo run check-types --filter=@hbc/provisioning` → EXIT 0 — PASS
+- `pnpm turbo run test --filter=@hbc/provisioning` → all tests pass — PASS
+- `getProvisioningVisibility` unit tests: Admin → 'full', submitter → 'full', OpEx → 'notification', Leadership → 'none' — PASS
+
+<!-- PROGRESS: 2026-03-07 PH6.9 completed. Implemented D-PH6-09 `@hbc/provisioning` package contracts (`createProvisioningApiClient`, Zustand+immer store slice, `useProvisioningSignalR`, `getProvisioningVisibility`, notification templates, and full index exports), added unit tests for visibility and store event propagation, and verified scoped build/lint/type-check/test commands all pass for `@hbc/provisioning`. -->
