@@ -5,7 +5,7 @@
  */
 import type { ReactNode } from 'react';
 import { MsalProvider, MsalAuthenticationTemplate } from '@azure/msal-react';
-import { InteractionType } from '@azure/msal-browser';
+import { InteractionType, PublicClientApplication } from '@azure/msal-browser';
 import { Spinner, Text } from '@hbc/ui-kit';
 import { getMsalInstance } from './msal-init.js';
 import { LOGIN_SCOPES } from './msal-config.js';
@@ -33,7 +33,16 @@ interface MsalGuardProps {
 }
 
 export function MsalGuard({ children }: MsalGuardProps): ReactNode {
-  const instance = getMsalInstance();
+  let instance: PublicClientApplication;
+  try {
+    instance = getMsalInstance();
+  } catch (err) {
+    return (
+      <ErrorComponent
+        error={err instanceof Error ? err : new Error('MSAL not initialized')}
+      />
+    );
+  }
 
   return (
     <MsalProvider instance={instance}>

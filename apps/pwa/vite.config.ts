@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => ({
     'process.env.HBC_ADAPTER_MODE': JSON.stringify(
       process.env.VITE_ADAPTER_MODE ?? (mode === 'development' ? 'mock' : 'proxy'),
     ),
-    'process.env.HBC_AUTH_MODE': JSON.stringify(
+    'process.env.HBC_AUTH_MODE_OVERRIDE': JSON.stringify(
       process.env.VITE_AUTH_MODE ?? (mode === 'development' ? 'mock' : 'msal'),
     ),
   },

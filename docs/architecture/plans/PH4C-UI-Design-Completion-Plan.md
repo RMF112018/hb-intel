@@ -1,352 +1,313 @@
-# 4C — UI Design Completion Plan
-### HB Intel · @hbc/ui-kit · Path to 100% Completion
-**Version:** 1.0  
-**Date:** March 6, 2026  
-**Repository:** github.com/RMF112018/hb-intel  
-**Audit Basis:** Agent 2 QA/QC Report (audit-report-2.js) + Agent 4 Independent Validation (HB-Intel-UIKit-Agent4-Validation-Report.docx)  
-**Reference Plans:** PH4-UI-Design-Plan V2.1 · PH4B-UI-Design-Plan V1.2
+# Phase 4C Development Plan – UI Design System Completion & Accessibility Hardening
+
+**Version:** 1.0 (UI Kit Audit Remediation & Design Hardening)
+**Purpose:** This document defines the complete Phase 4C implementation roadmap to elevate Phase 4 (UI Design System) from a baseline audit score of ~88.5–89.0% to a production-ready 99%+ through targeted accessibility fixes, token hardening, deprecated token removal, and comprehensive documentation.
+**Audience:** Implementation agents, engineering leads, quality assurance, design system maintainers, and technical stakeholders.
+**Implementation Objective:** Deliver a hardened, production-grade UI design system with full WCAG 2.2 AA accessibility compliance, zero hardcoded theme values, deprecated token resolution, complete Fluent UI pattern alignment, and comprehensive developer/operator documentation.
 
 ---
 
-## Table of Contents
+## Refined Blueprint Section for Phase 4C
 
-1. [Executive Summary](#1-executive-summary)
-2. [Audit Reconciliation & Corrected Baseline Score](#2-audit-reconciliation--corrected-baseline-score)
-3. [Validated Issue Registry](#3-validated-issue-registry)
-4. [Completion Gap Analysis by Category](#4-completion-gap-analysis-by-category)
-5. [Sprint Execution Plan](#5-sprint-execution-plan)
-   - [Sprint 4C-A: Critical Accessibility & Focus Management](#sprint-4c-a-critical-accessibility--focus-management)
-   - [Sprint 4C-B: Theme Token Hardcoding Elimination](#sprint-4c-b-theme-token-hardcoding-elimination)
-   - [Sprint 4C-C: Code Quality, Integration & ESLint Compliance](#sprint-4c-c-code-quality-integration--eslint-compliance)
-   - [Sprint 4C-D: UX Consistency & Polish](#sprint-4c-d-ux-consistency--polish)
-   - [Sprint 4C-E: Verification, Testing & Documentation Audit](#sprint-4c-e-verification-testing--documentation-audit)
-6. [Component-by-Component Completion Status](#6-component-by-component-completion-status)
-7. [100% Completion Criteria Checklist](#7-100-completion-criteria-checklist)
-8. [Score Projection Model](#8-score-projection-model)
-9. [Remediation Quick-Reference Card](#9-remediation-quick-reference-card)
-10. [Risk Register](#10-risk-register)
+### Locked Architectural Outcome
 
----
+Phase 4C represents the *completion and hardening* of Phase 4. The UI design system is now:
+- **Fully accessible** in both light and dark (Field Mode) themes with WCAG 2.2 AA compliance verified
+- **Token-compliant** with zero hardcoded color/style values; all theme references use semantic CSS variables
+- **Functionally complete** with all deprecated tokens scanned, identified, and either removed or versioned with tracking
+- **Fluent UI aligned** with proper component integration patterns, shimmer utilities, and focus management hooks
+- **Comprehensively documented** with role-specific guides for developers, operators, and component contributors
+- **Audit-verified** at 99%+ across all scoring categories: theming, accessibility, functional completeness, code quality, and documentation
 
-## 1. Executive Summary
+### Locked Decisions from the Structured Interview (2026-03-07)
 
-The `@hbc/ui-kit` package is in a strong near-production state. Both Agent 2 and Agent 4 audits confirm that the core design system — HSL token architecture, dual-theme system (`hbcLightTheme` / `hbcFieldTheme`), elevation, typography, density, connectivity tokens — is fully implemented and correct. All 44 required components are exported, all 44 have Storybook stories, and documentation coverage is confirmed at 48 reference files (not 43/44 as initially reported by Agent 2; `HbcInput.md` is present).
+#### 1. Task Granularity & File Structure
+- **D-PH4C-01**: Nine independent concern-based task files (PH4C.1–PH4C.9) with interdependencies documented in hard prerequisites
+- **D-PH4C-02**: Master plan file with complete file map, recommended sequence, release gating, and deferred-scope roadmap
 
-**Corrected Baseline Score: ~88.5–89.0%** (Agent 2 reported 86.2%, which contained a 0.7% arithmetic error and three false-positive findings that inflated the apparent gap).
+#### 2. Deprecated Token Resolution
+- **D-PH4C-03**: Scan-gated approach — run grep first; remove if zero usages; add versioned TSDoc + tracking issues if usages exist
+- **D-PH4C-04**: Three deprecated tokens identified: `hbcColorSurfaceElevated`, `hbcColorSurfaceSubtle`, `hbcColorTextSubtle`
 
-The remaining gap to 100% is real, well-defined, and addressable in a focused sprint sequence. It is driven by:
+#### 3. Shimmer Infrastructure
+- **D-PH4C-05**: Shared utility module MUST be created at `packages/ui-kit/src/shared/shimmer.ts` before PH4C.2 starts
+- **D-PH4C-06**: Shimmer module exports conventions, theme-aware overlay patterns, and loading skeleton utilities
 
-- **One HIGH accessibility defect** — missing Tab/Shift+Tab focus trap in `HbcCommandPalette` (WCAG 2.4.3 / 2.1.2 violation)
-- **Three confirmed MEDIUM token-hardcoding violations** in `HbcDataTable` that break Field Mode theme switching at runtime
-- **One MEDIUM integration gap** — `useSavedViews` hook is exported but not internally wired into `HbcDataTable`
-- **One MEDIUM ESLint compliance action** — direct Fluent UI import violations across `apps/` require a live linting run, triage, and resolution
-- **Three LOW accessibility/quality items** — ConnectivityBar hardcoded colors, StatusBadge high-contrast mode conflict, DataTable missing WCAG `headers` attribute on `<td>`
-- **Two LOW code quality items** — deprecated token cleanup in `tokens.ts` and CommandPalette AI response shimmer
+#### 4. Token Hardcoding Remediation
+- **D-PH4C-07**: Replace all hardcoded values (`rgba(255,255,255,0.85)`, `HBC_SURFACE_LIGHT['...']`) with CSS variables
+- **D-PH4C-08**: Define variables in both `hbcLightTheme` and `hbcFieldTheme` for dual-mode support
 
-This plan defines the exact file paths, code changes, acceptance criteria, and sequencing required to close every confirmed gap and certify 100% completion against the PH4-UI-Design-Plan V2.1 and PH4B-UI-Design-Plan V1.2 requirements.
+#### 5. Hook Wiring & Config Props
+- **D-PH4C-09**: `useSavedViews` exported but not wired; documented as config-only prop with explicit deferred-scope note for controlled mode
+- **D-PH4C-10**: `useFocusTrap` hook exists but not imported in HbcCommandPalette; WCAG 2.4.3 + 2.1.2 violation
 
----
+#### 6. Status Badge High-Contrast Fix
+- **D-PH4C-11**: Use `makeStyles` with Fluent tokens and `forced-colors` media query for Windows high-contrast mode support
+- **D-PH4C-12**: Inline style overrides must be replaced with semantic Fluent Badge integration
 
-## 2. Audit Reconciliation & Corrected Baseline Score
+#### 7. ESLint Compliance & Triage
+- **D-PH4C-13**: Three-bucket triage — Fix Now (F-09, F-03, F-04) / Suppress with Justification / Escalate
+- **D-PH4C-14**: ESLint linter integration for UI-kit consistency checks; Fluent import validation
 
-Before executing any work, it is essential to work from a reconciled, accurate baseline rather than Agent 2's uncorrected report. The following corrections are required.
+#### 8. Dev Auth Bypass In Scope
+- **D-PH4C-15**: MockAdapter pattern for Storybook testing; in scope as PH4C.9 (Dev Auth Bypass)
+- **D-PH4C-16**: Boundary documented: dev-only code path, zero production leak
 
-### 2.1 Mathematical Score Correction
+#### 9. ADR Selectivity
+- **D-PH4C-17**: Three selective ADRs required — (A) shimmer convention, (B) deprecated token policy, (C) Dev Auth Bypass boundary
+- **D-PH4C-18**: ADR file paths: `docs/architecture/adr/ADR-PH4C-01-shimmer-utility-convention.md`, etc.
 
-Agent 2's headline score of **86.2%** is arithmetically incorrect. The five per-row weighted contributions as listed in the `weightedCategories` array are individually correct, but sum to **86.90%**, not 86.2%. Verification:
-
-| Category | Weight | Raw Score | Weighted Contribution | Correct? |
-|---|---|---|---|---|
-| Theming & Token Compliance | 30% | 88% | 26.40% | ✅ |
-| Accessibility & Contrast (WCAG 2.2 AA) | 25% | 82% | 20.50% | ✅ |
-| Functional Completeness & Integration | 25% | 87% | 21.75% | ✅ |
-| Code Quality & Fluent UI Patterns | 15% | 91% | 13.65% | ✅ |
-| Documentation & Reusability | 5% | 92% | 4.60% | ✅ |
-| **TOTAL** | **100%** | — | **86.90%** | ❌ Agent 2 reported 86.2% |
-
-**Corrected baseline from math alone: 86.90%**
-
-### 2.2 Refuted Findings — Remove from Backlog
-
-The following three findings from Agent 2's report are factually incorrect and must be removed from any development backlog. Acting on them would waste developer time.
-
-| Finding | Agent 2 Claim | Agent 4 Verdict | Action |
-|---|---|---|---|
-| F-11 | HbcAppShell missing Cmd+K listener registration | **REFUTED** — Cmd+K is handled in `useCommandPalette` hook (inside `HbcCommandPalette`). This is the correct architectural pattern (D-01/D-10 compliant). | **CLOSE — no action needed** |
-| F-13 | PWA `WorkspacePageShell.tsx` is a shadow/parallel implementation | **REFUTED** — `apps/pwa/src/components/WorkspacePageShell.tsx` is a 4-line backward-compatibility re-export: `export { WorkspacePageShell } from '@hbc/ui-kit'`. D-01 is fully satisfied. | **CLOSE — no action needed** |
-| F-14 | `HbcInput.md` absent from docs | **REFUTED** — `HbcInput.md` is confirmed present at `docs/reference/ui-kit/HbcInput.md` (committed Mar 4, 2026). Docs folder contains 48 files total. | **CLOSE — no action needed** |
-
-**Corresponding remediation items R-04, R-05, and R-13 are also invalidated and must be removed from the sprint backlog.**
-
-### 2.3 Corrected Score Post-Reconciliation
-
-With the three refuted findings closed and the Documentation category score corrected to reflect 48/48 files present (approximately 100% rather than 92%):
-
-| Category | Old Raw | Corrected Raw | Reason for Correction |
-|---|---|---|---|
-| Theming & Token Compliance | 88% | 88% | No change — confirmed issues remain |
-| Accessibility & Contrast | 82% | 82% | No change — F-09 (HIGH) is real |
-| Functional Completeness | 87% | 91% | F-11 and F-13 refuted; gap is narrower |
-| Code Quality & Fluent UI Patterns | 91% | 91% | No change |
-| Documentation & Reusability | 92% | 100% | F-14 refuted; 48/48 docs confirmed |
-
-**Corrected weighted baseline: ~88.5–89.0%**
-
-**Gap to 100%: ~11–11.5 percentage points**, concentrated in Accessibility (WCAG focus trap) and Theming (runtime token hardcoding in DataTable).
+#### 10. Release Gating: Two-Layer Model
+- **D-PH4C-19**: Layer 1 — Automated gate (build, lint, type-check, test, bundle size, console validation)
+- **D-PH4C-20**: Layer 2 — Manual gate with audit score ≥99% plus one named sign-off per role category
 
 ---
 
-## 3. Validated Issue Registry
+## Phase 4C Success Criteria
 
-This is the single source of truth for all actionable work items. Each item below has been cross-validated by Agent 4's independent line-by-line inspection of the live repository. Items F-11, F-13, F-14 / R-04, R-05, R-13 are excluded as refuted.
-
-### 3.1 Severity Classification
-
-| ID | Severity | Component | File (Corrected Path) | Description | Validation Status |
-|---|---|---|---|---|---|
-| F-09 | **HIGH** | HbcCommandPalette | `packages/ui-kit/src/HbcCommandPalette/index.tsx` | `useFocusTrap` hook exists in kit but is NOT imported. Tab/Shift+Tab escapes the dialog. WCAG 2.4.3 (Focus Order) and 2.1.2 (No Keyboard Trap) violation. Note: Escape/Enter/Arrow keys ARE handled via `handleKeyDown`; only Tab cycling is missing. | ✅ CONFIRMED |
-| F-03 | **MEDIUM** | HbcDataTable | `packages/ui-kit/src/HbcDataTable/index.tsx` | Shimmer overlay uses hardcoded `rgba(255,255,255,0.85)` — fails in Field Mode (dark theme). | ✅ CONFIRMED |
-| F-04 | **MEDIUM** | HbcDataTable | `packages/ui-kit/src/HbcDataTable/index.tsx` | `wrapperStale` / `wrapperFresh` border styles reference `HBC_SURFACE_LIGHT['border-default']` directly — won't update on runtime theme switch. | ✅ CONFIRMED |
-| F-05 | **LOW** *(downgraded from MEDIUM)* | HbcDataTable | `packages/ui-kit/src/HbcDataTable/index.tsx` | `trResponsibility` background uses `HBC_SURFACE_LIGHT['responsibility-bg']` hardcoded. Field Mode branch (`trResponsibilityField`) already exists correctly. Gap is runtime theme changes outside field mode toggle — narrower than reported. | ✅ CONFIRMED (downgraded) |
-| F-07 | **LOW** | HbcDataTable | `packages/ui-kit/src/HbcDataTable/hooks/useSavedViews.ts` *(path corrected from Agent 2)* | `useSavedViews` hook is exported but not internally consumed by `HbcDataTable`. Consumers must wire it externally, creating an inconsistent integration pattern. | ✅ CONFIRMED |
-| F-12 | **MEDIUM** | ESLint / apps/* | `apps/` (all 14 app directories) | Direct `@fluentui/react-components` import violations in `apps/` — ESLint rule is active at `error` level but suppressed violations may exist. Requires live linting run to quantify. | ✅ PARTIALLY CONFIRMED (infrastructure confirmed; live audit unrun) |
-| F-06 | **LOW** | HbcDataTable | `packages/ui-kit/src/HbcDataTable/index.tsx` | Table data cells missing `headers` attribute linking cells to column headers. Partial WCAG 2.2 AA compliance gap. | ✅ CONFIRMED |
-| F-02 | **LOW** | HbcConnectivityBar | `packages/ui-kit/src/HbcAppShell/HbcConnectivityBar.tsx` *(path corrected from Agent 2)* | Action button uses hardcoded `color: '#FFFFFF'` and `border: 'rgba(255,255,255,0.55)'` in `useStyles()`. | ✅ CONFIRMED |
-| F-08 | **LOW** | HbcStatusBadge | `packages/ui-kit/src/HbcStatusBadge/index.tsx` | Fluent `Badge` uses `color='brand'` with inline `style` `backgroundColor` override — conflicts with Windows high-contrast mode which ignores inline styles. | ✅ CONFIRMED |
-| F-01 | **LOW** | tokens.ts | `packages/ui-kit/src/tokens.ts` | Three deprecated tokens (`hbcColorSurfaceElevated`, `hbcColorSurfaceSubtle`, `hbcColorTextSubtle`) remain in `HbcSemanticTokens` interface with `@deprecated` JSDoc. Remediation must specify removal or consumer migration timeline. | ✅ CONFIRMED (partial — annotation already present) |
-| F-10 | **LOW** | HbcCommandPalette | `packages/ui-kit/src/HbcCommandPalette/index.tsx` | AI response panel shows plain `'Thinking...'` text with no shimmer skeleton. Shimmer infrastructure exists in `HbcDataTable` but is not imported or replicated. | ✅ CONFIRMED |
-
-### 3.2 Additional Issues (Agent 4 Discovery)
-
-These issues were identified by Agent 4 and are absent from Agent 2's report.
-
-| ID | Severity | Description | Action |
-|---|---|---|---|
-| AF-01 | **HIGH** | Mathematical error in audit-report-2.js: headline score hardcoded as 86.2% but weighted contributions sum to 86.90%. | Correct `audit-report-2.js` score total row to 86.9%; re-derive category raw scores to justify 86.2% OR accept 86.9% as correct. |
-| AF-02 | **MEDIUM** | `HbcConnectivityBar.tsx` file path wrong throughout Agent 2 report and R-08. Correct path: `packages/ui-kit/src/HbcAppShell/HbcConnectivityBar.tsx` | Path already corrected in this plan; propagate correction if Agent 2 report is updated. |
-| AF-03 | **MEDIUM** | `useSavedViews.ts` path wrong in Agent 2 Finding #7 and R-10. Correct path: `packages/ui-kit/src/HbcDataTable/hooks/useSavedViews.ts` | Path already corrected in this plan. |
-| AF-04 | **LOW** | Component inventory omits `HbcEmptyState` and `HbcErrorBoundary` as standalone entries (absorbed in multi-component rows). Count of 44 is correct but inventory obscures individual component status. | Update component inventory table to give each component an explicit row. |
-| AF-05 | **LOW** | Documentation count claim (43/44) is incorrect — 48 docs confirmed, `HbcInput.md` present. Score for Documentation & Reusability category should be revised upward. | Documentation score corrected to 100% in this plan's score model. |
-| AF-06 | **LOW** | F-05 severity overclassified as MEDIUM. Field Mode branch already exists. | Downgraded to LOW in this plan. |
+1. ✓ Shimmer shared utility module created at `packages/ui-kit/src/shared/shimmer.ts` with theme-aware conventions and loading skeleton helpers
+2. ✓ HbcCommandPalette — `useFocusTrap` hook imported, called, and refs merged; focus trap confirmed in Storybook + Axe sweep
+3. ✓ HbcDataTable — `<td headers>` attribute added to all cells; WCAG 1.3.1 compliance verified
+4. ✓ HbcDataTable — shimmer overlay opacity replaced with CSS variable; Field Mode validation confirmed
+5. ✓ HbcDataTable — stale/fresh border tokens replaced with CSS variables; both themes tested
+6. ✓ HbcDataTable — responsibility row background token replaced with CSS variable; both themes validated
+7. ✓ HbcConnectivityBar — hardcoded colors replaced with semantic token/variable references; Windows high-contrast tested
+8. ✓ HbcStatusBadge — inline style overrides replaced with Fluent `makeStyles` + `forced-colors` media query
+9. ✓ Deprecated tokens (`hbcColorSurfaceElevated`, `hbcColorSurfaceSubtle`, `hbcColorTextSubtle`) scanned; zero usages found or resolved with versioning + tracking issues
+10. ✓ useSavedViews hook — config-only prop documented; deferred-scope note added for controlled mode implementation
+11. ✓ ESLint compliance — three-bucket triage applied; high-severity issues fixed, medium suppressed with justification, low escalated
+12. ✓ All 9 task files executed in recommended sequence; hard prerequisites verified before dependent tasks start
+13. ✓ Three ADRs created: shimmer convention, deprecated token policy, Dev Auth Bypass boundary
+14. ✓ All documentation files in correct `docs/` subfolders following Diátaxis structure (how-to, reference, adr, explanation)
+15. ✓ Audit score reaches 99%+ across all categories (theming, accessibility, functional completeness, code quality, documentation)
+16. ✓ Two-layer release gate passes: Layer 1 automated gates + Layer 2 manual audit ≥99% with named sign-offs
+17. ✓ Final sign-off table completed with all roles (Code, QA, Accessibility, Design System Lead, Product Owner)
 
 ---
 
-## 4. Completion Gap Analysis by Category
+## Phase 4C Definition of Done
 
-### 4.1 Theming & Token Compliance (30% weight · Current: ~88%)
-
-**Gap driver:** Three hardcoded values in `HbcDataTable` that bypass the runtime CSS variable injection system. These values work correctly in the default light theme but fail silently when users switch to Field Mode (dark/field theme) at runtime. The issue is specifically that inline JS style objects using direct token imports (`HBC_SURFACE_LIGHT[...]`) are evaluated once at component mount time and do not respond to CSS variable reassignment.
-
-**Items to close:**
-- F-03: Replace `rgba(255,255,255,0.85)` shimmer overlay with `var(--hbc-surface-2-alpha)`
-- F-04: Replace `HBC_SURFACE_LIGHT['border-default']` references with `var(--hbc-border-default)` in `wrapperStale` / `wrapperFresh`
-- F-05: Replace `HBC_SURFACE_LIGHT['responsibility-bg']` with `var(--hbc-responsibility-bg)` (both light and field theme CSS)
-- F-02: Replace hardcoded `#FFFFFF` and `rgba(255,255,255,0.55)` in `HbcConnectivityBar` action button
-- F-01: Resolve deprecated token exports in `HbcSemanticTokens` — either remove fields or add migration guide and removal timeline
-
-**Target score after remediation: 97–98%** (residual ~2% accounts for any undiscovered minor token usage)
-
-### 4.2 Accessibility & Contrast — WCAG 2.2 AA (25% weight · Current: 82%)
-
-**Gap driver:** One HIGH defect (missing focus trap) dominates this category. The CommandPalette already has correct dialog semantics (`role="dialog"`, `aria-modal="true"`, `dialogRef` attached) and handles Escape/Enter/Arrow keys. The sole missing piece is Tab/Shift+Tab cycling being contained within the dialog boundary.
-
-**Items to close:**
-- F-09: Import `useFocusTrap` and attach to `dialogRef` in `HbcCommandPalette`
-- F-06: Add `headers` attribute to `<td>` elements in `HbcDataTable` (WCAG 2.2 AA table compliance)
-- F-08: Replace inline `style` `backgroundColor` override on Fluent `Badge` with `makeStyles` or `tokens.colorBrandBackground`
-
-**Target score after remediation: 97–98%** (remaining ~2–3% accounts for any contrast ratios not yet verified across all states)
-
-### 4.3 Functional Completeness & Integration (25% weight · Current: ~91% corrected)
-
-**Gap driver:** With F-11 and F-13 refuted (removing ~4% false gap), the real remaining gap is the `useSavedViews` integration pattern and the Fluent import audit. The ESLint rule infrastructure is confirmed active; what's unknown is whether live violations exist in `apps/` that haven't been triaged.
-
-**Items to close:**
-- F-07: Wire `useSavedViews` internally into `HbcDataTable` — accept optional `savedViewsConfig` prop, invoke hook internally, expose controlled override pattern
-- F-12: Run `pnpm turbo lint` with `no-direct-fluent-import` at error level; triage all output; add `// eslint-disable-next-line` with tracking issue number for each legitimate exception; target zero unexplained violations
-
-**Target score after remediation: 98–99%**
-
-### 4.4 Code Quality & Fluent UI Patterns (15% weight · Current: 91%)
-
-**Gap driver:** Two items — the StatusBadge high-contrast pattern (using Fluent token system correctly rather than inline style override) and the CommandPalette AI shimmer (UX consistency with the established shimmer pattern throughout the kit).
-
-**Items to close:**
-- F-08: Fix `HbcStatusBadge` inline style pattern (overlaps with Accessibility category)
-- F-10: Add shimmer skeleton to `HbcCommandPalette` AI response panel
-
-**Target score after remediation: 98–99%**
-
-### 4.5 Documentation & Reusability (5% weight · Current: ~100% corrected)
-
-**No action required.** Agent 4 confirmed 48 reference docs present, including `HbcInput.md`. Agent 2's F-14 and R-13 were false positives. This category should be scored at or near 100%.
-
-**Remaining action:** Verify `HbcEmptyState.md` and `HbcErrorBoundary.md` are present as standalone files (AF-04 inventory gap). If missing, create from template.
+Phase 4C is complete when:
+1. All 9 granular task files (PH4C.1 through PH4C.9) are executed in recommended sequence.
+2. All hard prerequisites are verified before dependent tasks begin (especially PH4C.7 → PH4C.2 dependency).
+3. Phase 4 audit coverage reaches **99%+** across all five categories: theming & token compliance, accessibility & WCAG 2.2 AA, functional completeness, code quality & Fluent UI patterns, and documentation.
+4. `pnpm turbo run build --filter=@hbc/ui-kit` succeeds with zero warnings.
+5. `pnpm turbo run lint --filter=@hbc/ui-kit` succeeds with zero violations (high-severity compliance, suppressions justified, escalations documented).
+6. `pnpm turbo run check-types --filter=@hbc/ui-kit` succeeds with zero type errors.
+7. Storybook Axe sweep on all affected components (HbcCommandPalette, HbcDataTable, HbcStatusBadge, HbcConnectivityBar) confirms zero accessibility violations.
+8. Production bundle contains zero references to deprecated tokens or hardcoded color values in UI Kit components.
+9. All documentation files exist in correct `docs/` subfolders and follow Diátaxis structure.
+10. All ADRs (3 total) are created and cross-linked.
+11. Final Layer 1 + Layer 2 release gate passes; all sign-offs recorded with dates and role IDs.
 
 ---
 
-## 6. Component-by-Component Completion Status
+## Scope Boundaries
 
-This table reflects the corrected status after Agent 4 validation. It updates the Agent 2 component inventory with corrected paths, refuted findings closed, and F-05 downgraded.
+### In Scope for Phase 4C
+- Shimmer shared utility module creation and theme-aware loading skeleton helpers
+- Focus management hook integration (useFocusTrap) into HbcCommandPalette with ref merging and keyboard navigation testing
+- WCAG 1.3.1 headers attribute addition to all HbcDataTable `<td>` elements with column id mapping
+- Token hardcoding remediation in HbcDataTable (shimmer overlay, stale/fresh borders, responsibility row background)
+- Token hardcoding remediation in HbcConnectivityBar (action button hardcoded colors)
+- StatusBadge high-contrast fix with `makeStyles` and `forced-colors` media query
+- Deprecated token scan-gated resolution (three tokens: identify usages, remove or version with tracking)
+- useSavedViews config-only prop documentation with deferred-scope note for controlled mode
+- ESLint compliance triage and UI-kit linter integration
+- Dev Auth Bypass pattern for Storybook MockAdapter integration (PH4C.9)
+- Three selective ADRs (shimmer convention, deprecated token policy, Dev Auth Bypass boundary)
+- Comprehensive how-to guides for developers, operators, and component contributors
+- Two-layer release gating with automated Layer 1 and manual audit-based Layer 2
 
-| Component | Current Status | Open Findings | Sprint | Target Status |
-|---|---|---|---|---|
-| tokens.ts | ⚠️ WARN | F-01 (LOW) — deprecated tokens | 4C-B / Task B-05 | ✅ PASS |
-| theme.ts | ✅ PASS | None | — | ✅ PASS |
-| typography.ts / grid.ts / animations.ts | ✅ PASS | None | — | ✅ PASS |
-| elevation.ts | ✅ PASS | None | — | ✅ PASS |
-| density.ts / useHbcTheme / useDensity / useConnectivity | ✅ PASS | None | — | ✅ PASS |
-| HbcConnectivityBar | ⚠️ WARN | F-02 (LOW) — hardcoded colors | 4C-B / Task B-04 | ✅ PASS |
-| HbcHeader | ✅ PASS | None | — | ✅ PASS |
-| HbcSidebar | ✅ PASS | None | — | ✅ PASS |
-| HbcUserMenu | ✅ PASS | None | — | ✅ PASS |
-| HbcBottomNav | ✅ PASS | None | — | ✅ PASS |
-| HbcAppShell | ✅ PASS *(corrected from WARN)* | F-11 REFUTED — closed | — | ✅ PASS |
-| HbcProjectSelector / HbcToolboxFlyout | ✅ PASS | None | — | ✅ PASS |
-| HbcGlobalSearch / HbcCreateButton / HbcNotificationBell | ✅ PASS | None | — | ✅ PASS |
-| HbcFavoriteTools | ✅ PASS | None | — | ✅ PASS |
-| HbcButton | ✅ PASS | None | — | ✅ PASS |
-| HbcTypography | ✅ PASS | None | — | ✅ PASS |
-| HbcStatusBadge | ⚠️ WARN | F-08 (LOW) — high-contrast | 4C-D / Task D-02 | ✅ PASS |
-| HbcDataTable | ⚠️ WARN | F-03 (MED), F-04 (MED), F-05 (LOW), F-06 (LOW), F-07 (LOW) | 4C-B / Tasks B-01–03; 4C-C / Task C-01; 4C-D / Task D-01 | ✅ PASS |
-| HbcCommandPalette | ⚠️ WARN | F-09 (HIGH), F-10 (LOW) | 4C-A / Task A-01; 4C-D / Task D-03 | ✅ PASS |
-| HbcCommandBar | ✅ PASS | None | — | ✅ PASS |
-| HbcKpiCard | ✅ PASS | None | — | ✅ PASS |
-| HbcBarChart / HbcDonutChart / HbcLineChart | ✅ PASS | None | — | ✅ PASS |
-| HbcForm (all sub-components) | ✅ PASS | None | — | ✅ PASS |
-| HbcTextArea / HbcRichTextEditor / useVoiceDictation | ✅ PASS | None | — | ✅ PASS |
-| HbcModal / HbcPanel / HbcTearsheet / HbcPopover / HbcCard | ✅ PASS | None | — | ✅ PASS |
-| HbcConfirmDialog | ✅ PASS | None | — | ✅ PASS |
-| HbcBanner / HbcToast / useToast / HbcTooltip / HbcSpinner | ✅ PASS | None | — | ✅ PASS |
-| HbcBreadcrumbs / HbcTabs / HbcPagination / HbcSearch / HbcTree | ✅ PASS | None | — | ✅ PASS |
-| WorkspacePageShell | ✅ PASS *(corrected from WARN)* | F-13 REFUTED — closed | — | ✅ PASS |
-| ToolLandingLayout / DetailLayout / CreateUpdateLayout / DashboardLayout / ListLayout | ✅ PASS | None | — | ✅ PASS |
-| HbcScoreBar / HbcApprovalStepper | ✅ PASS | None | — | ✅ PASS |
-| HbcPhotoGrid / HbcCalendarGrid / HbcDrawingViewer | ✅ PASS | None | — | ✅ PASS |
-| HbcEmptyState | ✅ PASS (inferred) | AF-04 — inventory gap; verify doc | 4C-E / Task E-02 | ✅ PASS |
-| HbcErrorBoundary | ✅ PASS (inferred) | AF-04 — inventory gap; verify doc | 4C-E / Task E-02 | ✅ PASS |
-| ESLint Plugin (eslint-plugin-hbc) | ⚠️ WARN | F-12 (MED) — live apps/ audit unrun | 4C-C / Task C-02 | ✅ PASS |
-| Storybook (storybook-static) | ✅ PASS | None | — | ✅ PASS |
-| Reference Docs (docs/reference/ui-kit/) | ✅ PASS *(corrected from WARN)* | F-14 REFUTED — 48 docs confirmed | 4C-E / Task E-02 (minor) | ✅ PASS |
+### Explicitly Deferred
+- `useSavedViews` controlled mode implementation (documentation only; implementation planned for Phase 5)
+- New component creation beyond those in audit (only existing components are hardened)
+- Design system visual redesign (only token/accessibility hardening in scope)
+- Localization or internationalization (baseline WCAG 2.1 AA scope only)
+- Performance optimizations beyond shimmer/bundle validation
+- Fluent UI library version upgrades (use locked version from Phase 4)
 
 ---
 
-## 7. 100% Completion Criteria Checklist
+## Implementation Principles
 
-Use this checklist to gate final certification. All items must be checked before the @hbc/ui-kit package can be certified as 100% complete against PH4-UI-Design-Plan V2.1 and PH4B-UI-Design-Plan V1.2.
-
-### Accessibility — WCAG 2.2 AA
-- [ ] `HbcCommandPalette`: `useFocusTrap` imported and applied — Tab/Shift+Tab cycling confirmed trapped within dialog
-- [ ] `HbcCommandPalette`: Focus trap activates on open, deactivates on close
-- [ ] `HbcDataTable`: `headers` attribute present on all `<td>` elements referencing correct `<th>` IDs
-- [ ] `HbcStatusBadge`: High-contrast mode renders correctly (no inline `backgroundColor` override on Fluent Badge)
-- [ ] All modified components pass Storybook Axe A11y sweep with zero critical/serious violations
-
-### Theming & Token Compliance — Field Mode
-- [ ] `HbcDataTable` shimmer overlay uses `var(--hbc-surface-2-alpha)` — confirmed in light and field themes
-- [ ] `HbcDataTable` stale/fresh borders use `var(--hbc-border-default)` — confirmed on runtime theme switch
-- [ ] `HbcDataTable` responsibility row background uses `var(--hbc-responsibility-bg)` — confirmed in both themes
-- [ ] `HbcConnectivityBar` action button has zero hardcoded hex colors — uses token or CSS variable
-- [ ] `tokens.ts` deprecated token situation resolved (removed with migration guide OR TSDoc updated with removal version)
-- [ ] Zero occurrences of `HBC_SURFACE_LIGHT[` in `HbcDataTable/index.tsx`
-
-### Functional Completeness & Integration
-- [ ] `HbcDataTable` accepts optional `savedViewsConfig` prop and internally invokes `useSavedViews`
-- [ ] Backward compatibility confirmed — `HbcDataTable` works without `savedViewsConfig`
-- [ ] `pnpm turbo lint` runs clean — zero `no-direct-fluent-import` errors without tracked suppressions
-- [ ] Any legitimate inline suppressions carry business justification comment + tracking issue number
-
-### Code Quality & Fluent UI Patterns
-- [ ] `HbcCommandPalette` AI loading state renders shimmer skeleton (3 rows) instead of plain "Thinking..." text
-- [ ] AI shimmer respects `prefers-reduced-motion`
-- [ ] `HbcStatusBadge` uses `makeStyles` or Fluent token API for background color (no inline style)
-
-### Testing & Verification
-- [ ] Touch density row height (≥56px) asserted via Storybook play function or Playwright test
-- [ ] Full `pnpm turbo build` passes with zero errors
-- [ ] Full `pnpm turbo type-check` passes with zero errors
-- [ ] Full `pnpm turbo test` passes with zero failures
-- [ ] Storybook builds successfully via `pnpm --filter @hbc/ui-kit build-storybook`
-
-### Documentation
-- [ ] `HbcDataTable.md` updated to document `savedViewsConfig` prop
-- [ ] `HbcEmptyState.md` and `HbcErrorBoundary.md` confirmed present and complete
-- [ ] Deprecated token resolution documented in changelog or migration guide
-- [ ] Reference docs folder contains ≥50 files (or all components explicitly accounted for)
-
-### Audit Report Corrections (Housekeeping)
-- [ ] `audit-report-2.js` score total row corrected from 86.2% to 86.9% (or raw scores re-derived to justify 86.2%)
-- [ ] Findings F-11, F-13, F-14 marked CLOSED in any tracking system
-- [ ] Remediation items R-04, R-05, R-13 removed from sprint backlog
-- [ ] File path corrections propagated wherever Agent 2's wrong paths appear in documentation or tickets
+1. **Copy-Paste Ready**: Every code block in every task file is complete, production-grade, and immediately executable. No `// ...` truncations or pseudo-code.
+2. **Locked Decisions Embedded**: Every implementation step and code block references the relevant D-PH4C-XX decision, enforcing traceability to the structured interview.
+3. **Hard Prerequisites Enforced**: Each dependent task file includes a `## Prerequisites` section with exact verification commands; dependent task must not start until prerequisites pass.
+4. **Dual-Theme Testing**: All token replacements include definitions in both `hbcLightTheme` and `hbcFieldTheme`; Field Mode validation is mandatory for every token change.
+5. **WCAG 2.2 AA Baseline**: All accessibility fixes target WCAG 2.2 AA compliance; Axe sweep is verification tool of record.
+6. **Diátaxis Structure**: All documentation lives in correct `docs/` subfolders (how-to, reference, explanation, adr) with clear audience separation (developer, operator, contributor).
+7. **Scan-Gated Deprecation**: Deprecated tokens are scanned for usages first; removal or versioning decision is data-driven, not assumption-based.
+8. **Role-Based Sign-Off**: Final approval requires sign-off from code review, QA, accessibility, design system, and product ownership roles.
 
 ---
 
-## 8. Score Projection Model
+## Deliverables Summary
 
-The following table projects the weighted score impact of completing each sprint, tracking the path from corrected baseline to 100%.
+### Code Changes
+- 9 component/theme files updated with accessibility fixes and token replacements
+- 1 new shimmer shared utility module created
+- 1 new MockAdapter pattern for Storybook dev testing
+- All changes backward-compatible with production; zero breaking changes
 
-| Milestone | Theming (30%) | A11y (25%) | Functional (25%) | Code Quality (15%) | Docs (5%) | Weighted Total |
-|---|---|---|---|---|---|---|
-| **Corrected Baseline (pre-work)** | 88% → 26.4% | 82% → 20.5% | 91% → 22.75% | 91% → 13.65% | 100% → 5.0% | **~88.3%** |
-| After Sprint 4C-A (Focus Trap) | 88% | 91% → 22.75% | 91% | 91% | 100% | **~90.5%** |
-| After Sprint 4C-B (Token Hardcoding) | 98% → 29.4% | 92% | 91% | 92% → 13.8% | 100% | **~93.8%** |
-| After Sprint 4C-C (ESLint + SavedViews) | 98% | 93% | 98% → 24.5% | 93% → 13.95% | 100% | **~95.9%** |
-| After Sprint 4C-D (UX Polish) | 99% | 97% → 24.25% | 98% | 98% → 14.7% | 100% | **~97.9%** |
-| After Sprint 4C-E (Verify + Test) | 99% → 29.7% | 98% → 24.5% | 99% → 24.75% | 99% → 14.85% | 100% → 5.0% | **~98.8–99.0%** |
-| **Full 100% Target** | 100% → 30% | 100% → 25% | 100% → 25% | 100% → 15% | 100% → 5% | **100%** |
+### Documentation (8 files, Diátaxis-compliant)
+- 2 How-To guides (developer component building, operator deployment)
+- 1 Explanation guide (design system architecture)
+- 5 Reference guides (shimmer utility, token remediation, deprecated tokens, accessibility patterns, etc.)
 
-> **Note:** Individual raw scores in the 98–99% range rather than 100% reflect that the weighted model accounts for requirements met / total requirements with higher-severity items weighted 2×. Achieving a perfect 100% weighted score requires not only fixing all identified defects but confirming zero new defects via exhaustive testing and accessibility audit. Sprints 4C-A through 4C-E complete all identified gaps; the final fraction to 100% is closed through Sprint 4C-E verification.
-
----
-
-## 9. Remediation Quick-Reference Card
-
-A condensed execution reference for developers picking up individual tasks.
-
-| Task ID | Rem. ID | Priority | File (Corrected Path) | Action Summary |
-|---|---|---|---|---|
-| A-01 | R-01 | **HIGH** | `packages/ui-kit/src/HbcCommandPalette/index.tsx` | Import `useFocusTrap` from `../../hooks/useFocusTrap`; attach to `dialogRef` on dialog container div |
-| B-01 | R-02 | MEDIUM | `packages/ui-kit/src/HbcDataTable/index.tsx` | Replace `rgba(255,255,255,0.85)` shimmer background → `var(--hbc-surface-2-alpha)`; define var in both themes |
-| B-02 | R-03a | MEDIUM | `packages/ui-kit/src/HbcDataTable/index.tsx` | Replace `HBC_SURFACE_LIGHT['border-default']` in wrapperStale/wrapperFresh → `var(--hbc-border-default)` |
-| B-03 | R-03b | LOW | `packages/ui-kit/src/HbcDataTable/index.tsx` | Replace `HBC_SURFACE_LIGHT['responsibility-bg']` in trResponsibility → `var(--hbc-responsibility-bg)` |
-| B-04 | R-08 | LOW | `packages/ui-kit/src/HbcAppShell/HbcConnectivityBar.tsx` | Replace `#FFFFFF` and `rgba(255,255,255,0.55)` in actionButton style → semantic token or `var(--hbc-text-on-dark)` |
-| B-05 | R-07 | LOW | `packages/ui-kit/src/tokens.ts` | Remove deprecated token fields OR update TSDoc with migration path and removal version |
-| C-01 | R-10 | LOW | `packages/ui-kit/src/HbcDataTable/hooks/useSavedViews.ts` + `HbcDataTable/index.tsx` | Add `savedViewsConfig` prop to DataTable; internally invoke `useSavedViews` when prop provided |
-| C-02 | R-06 | MEDIUM | `apps/` (all 14 directories) | Run `pnpm turbo lint`; triage `no-direct-fluent-import` violations; document or fix each |
-| D-01 | R-09 | LOW | `packages/ui-kit/src/HbcDataTable/index.tsx` | Add `id` to `<th>` elements; add `headers` to `<td>` elements matching column IDs |
-| D-02 | R-11 | LOW | `packages/ui-kit/src/HbcStatusBadge/index.tsx` | Replace inline `style` backgroundColor on Fluent Badge → `makeStyles` with `tokens.colorBrandBackground` |
-| D-03 | R-12 | LOW | `packages/ui-kit/src/HbcCommandPalette/index.tsx` | Replace "Thinking..." plain text → 3-row shimmer skeleton; add `aria-busy`; respect `prefers-reduced-motion` |
-| E-01 | R-14 | LOW | `packages/ui-kit/src/HbcDataTable/index.tsx` + Storybook/Playwright | Assert Touch tier row height ≥ 56px via `data-testid` or Playwright test |
-| E-02 | AF-04 | LOW | `docs/reference/ui-kit/` | Confirm `HbcEmptyState.md` and `HbcErrorBoundary.md` present; create from template if missing |
-| E-03 | — | REQUIRED | Monorepo root | Run `pnpm turbo lint && type-check && build && test && build-storybook` — all must pass clean |
-| E-04 | — | REQUIRED | Storybook | Axe A11y sweep on all modified components — zero critical/serious violations |
-
-**Invalid Items — Do Not Execute:**
-
-| Rem. ID | Reason |
-|---|---|
-| R-04 | `apps/pwa/src/components/WorkspacePageShell.tsx` is a 4-line re-export, not a parallel implementation. **REFUTED.** |
-| R-05 | Cmd+K handled in `useCommandPalette` hook, not `HbcAppShell`. Architecture is correct. **REFUTED.** |
-| R-13 | `HbcInput.md` exists at `docs/reference/ui-kit/HbcInput.md`. **REFUTED.** |
+### Architecture Decision Records (3 ADRs)
+- ADR-PH4C-01: Shimmer utility convention
+- ADR-PH4C-02: Deprecated token policy
+- ADR-PH4C-03: Dev Auth Bypass boundary
 
 ---
 
-## 10. Risk Register
+## Recommended Implementation Sequence
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| `useFocusTrap` hook API has changed since components were initially built — incompatible ref signature | Low | Medium | Review `useFocusTrap` source before A-01; if signature mismatch exists, update the hook or write a local adapter |
-| CSS variable definitions (`--hbc-surface-2-alpha`, `--hbc-border-default`, `--hbc-responsibility-bg`) not yet defined in theme injection — require new additions to `theme.ts` | Medium | Medium | Sprint 4C-B tasks explicitly require defining these vars; verify theme file structure before coding |
-| ESLint audit (C-02) reveals a large number of direct Fluent imports in apps/ requiring significant refactor | Medium | High | Time-box initial triage to 1 hour; escalate violation count to product owner before committing to full remediation scope |
-| `savedViewsConfig` prop addition to `HbcDataTable` (C-01) requires downstream consumer updates if prop is required | Low | Medium | Make `savedViewsConfig` strictly optional with a default `undefined` value; backward compatibility is explicit acceptance criterion |
-| Merging `focusTrapRef` and `dialogRef` in A-01 causes ref callback issues in React 18 strict mode | Low | Low | Test with `<React.StrictMode>` wrapper in Storybook; use `useMergedRefs` if available or a stable ref callback pattern |
-| New shimmer component in CommandPalette (D-03) uses animation that conflicts with dark/field theme | Low | Low | Test shimmer in both light and field themes in Storybook before closing task |
-| Storybook A11y sweep reveals additional accessibility issues not in either audit | Low | Medium | Document any new findings; assess whether they block 100% certification or become backlog items for a subsequent sprint |
-| deprecated token removal (B-05 Option A) breaks an external consumer not visible in the monorepo | Medium | High | Run a codebase-wide search across all packages and apps before removal; prefer Option B (TSDoc + timeline) as a safer default if any external usage is uncertain |
+### Phase 4C Task Execution Order
+
+> **Critical dependency:** `PH4C.7` is the only hard prerequisite in the chain. It must be complete before `PH4C.2` begins. All other tasks are independent and may run in parallel once their prerequisites are satisfied.
+
+1. **PH4C.7 – Shimmer Infrastructure** (**START HERE — FOUNDATIONAL**, 2–3 hours)
+   - Creates `packages/ui-kit/src/shared/shimmer.ts` — prerequisite for PH4C.2
+   - Updates HbcDataTable shimmer import + implements CommandPalette AI shimmer
+   - Creates ADR for shimmer utility convention
+   - Verify: `ls packages/ui-kit/src/shared/shimmer.ts` + `pnpm turbo run build --filter=@hbc/ui-kit`
+
+2. **PH4C.9 – Dev Auth Bypass / Storybook MockAdapter** (2–3 hours, independent — run in parallel with PH4C.7 if desired)
+   - Wire `@hbc/auth` `MockAdapter` into Storybook global preview
+   - **Must complete before PH4C.8** so verification sweeps run against authenticated stories
+   - Creates ADR for Dev Auth Bypass boundary
+   - Verify: `pnpm --filter @hbc/ui-kit storybook` renders mock user correctly
+
+3. **PH4C.1 – Accessibility & Focus Management** (3–4 hours, independent)
+   - `useFocusTrap` import + ref merge in `HbcCommandPalette`
+   - `headers` attribute on all `<td>` elements in `HbcDataTable`
+   - Verify: Storybook Axe sweep — zero critical/serious violations
+
+4. **PH4C.2 – Theme Token Hardcoding** (4–5 hours, **REQUIRES PH4C.7 complete**)
+   - Four token replacement tasks: DataTable shimmer, borders, responsibility row + ConnectivityBar
+   - CSS variables defined in both `hbcLightTheme` and `hbcFieldTheme`
+   - Verify: `grep -r "HBC_SURFACE_LIGHT\[" packages/ui-kit/src/HbcDataTable/` → zero results
+
+5. **PH4C.3 – Deprecated Token Resolution** (2–3 hours, recommended after PH4C.2)
+   - Scan-gated: grep first → remove if zero usages, TSDoc + tracking if usages found
+   - Creates migration guide at `docs/how-to/developer/deprecated-token-migration.md`
+   - Creates ADR for deprecated token policy
+   - Verify: scan result documented in progress notes
+
+6. **PH4C.4 – SavedViews Integration** (2–3 hours, independent)
+   - Add optional `savedViewsConfig` prop to `HbcDataTable`
+   - Internal `useSavedViews` delegation + backward compatibility confirmed
+   - Explicit deferred-scope note for controlled mode
+   - Verify: Storybook `WithSavedViews` story renders correctly
+
+7. **PH4C.5 – ESLint Fluent Import Compliance** (2–4 hours, independent)
+   - Three-bucket triage across all 14 `apps/` directories
+   - Fix Now / Suppress with Justification / Escalate
+   - Verify: `pnpm turbo lint` → zero unexplained `no-direct-fluent-import` violations
+
+8. **PH4C.6 – High-Contrast & Code Quality Patterns** (1–2 hours, independent)
+   - Replace `HbcStatusBadge` inline `style` with `makeStyles` + `forced-colors` media query
+   - All HBC status variants covered
+   - Verify: Storybook high-contrast story renders correctly
+
+9. **PH4C.8 – Verification, Testing & Documentation Closure** (**FINAL — do last**, 3–4 hours, **REQUIRES PH4C.9 complete**)
+   - Touch density row height assertion (≥56px)
+   - Confirm `HbcEmptyState.md` and `HbcErrorBoundary.md` present
+   - Full monorepo gate: lint + type-check + build + test + storybook build
+   - Storybook Axe sweep — all modified components
+   - Audit score recalculation ≥99%
+   - Layer 1 + Layer 2 release gate sign-off
 
 ---
 
-*Plan version 1.0 — prepared March 6, 2026*  
-*Basis: Agent 2 QA/QC Audit (audit-report-2.js) + Agent 4 Independent Validation (HB-Intel-UIKit-Agent4-Validation-Report.docx)*  
-*Covering: @hbc/ui-kit against PH4-UI-Design-Plan V2.1 + PH4B-UI-Design-Plan V1.2*
+## Release Gate Criteria – Two-Layer Model
+
+### Layer 1: Automated Verification (11 gates, all must pass)
+
+1. Build: `pnpm turbo run build --filter=@hbc/ui-kit` — Exit 0, zero warnings
+2. Lint: `pnpm turbo run lint --filter=@hbc/ui-kit` — Exit 0, zero violations
+3. Type-Check: `pnpm turbo run check-types --filter=@hbc/ui-kit` — Exit 0
+4. Unit Test: `pnpm turbo run test --filter=@hbc/ui-kit` — Exit 0, ≥95% coverage
+5. Bundle Size: Within baseline +10% or documented
+6. Accessibility Sweep: Storybook Axe (4 components) — Zero WCAG 2.2 AA violations
+7. Console Validation: Dev harness light + dark modes — Zero errors
+8. Deprecated Token Leak: Grep scan — Zero matches or tracked
+9. Hardcoded Value Leak: Grep scan — Zero matches
+10. Production Mock Leak: Grep in dist/ — Zero matches
+11. Documentation Gate: 8 files in correct folders, Diátaxis structure, links valid
+
+### Layer 2: Manual Audit (after Layer 1 passes)
+
+| Category | Weight | Target | Requirement |
+|----------|--------|--------|-------------|
+| Theming & Token Compliance | 30% | 100% | All hardcoded values replaced; dual-theme support |
+| Accessibility & WCAG 2.2 AA | 25% | 100% | Axe sweep clean; focus management tested |
+| Functional Completeness | 25% | 100% | All tasks completed; prerequisites verified |
+| Code Quality & Fluent UI Patterns | 15% | 100% | ESLint triage applied; patterns enforced |
+| Documentation & Maintainability | 5% | 100% | Diátaxis compliant; audience separation clear |
+| **OVERALL SCORE TARGET** | **100%** | **≥99%** | **Minimum 49.5/50 points** |
+
+**Named Sign-Offs Required:**
+- Code Review Lead
+- QA Lead
+- Accessibility Lead
+- Design System Lead
+- Product Owner
+
+---
+
+## ADR Register
+
+| ADR | File | Decision | Date |
+|-----|------|----------|------|
+| ADR-PH4C-01 | `docs/architecture/adr/ADR-PH4C-01-shimmer-utility-convention.md` | Shimmer utility module convention and theme-aware patterns | 2026-03-07 |
+| ADR-PH4C-02 | `docs/architecture/adr/ADR-PH4C-02-deprecated-token-policy.md` | Deprecated token scan-gated resolution policy | 2026-03-07 |
+| ADR-PH4C-03 | `docs/architecture/adr/ADR-PH4C-03-dev-auth-bypass-boundary.md` | Dev Auth Bypass Storybook scope and zero-production-leak gating | 2026-03-07 |
+
+---
+
+## Phase 4C Task Files
+
+> **Note:** Execute in the recommended sequence below. `PH4C.7` is the only hard prerequisite — it must be complete before `PH4C.2` can begin.
+
+| File | Concern | Source Tasks | Duration |
+|------|---------|--------------|----------|
+| `PH4C.1-Accessibility-Focus-Management.md` | Focus trap + WCAG table headers | A-01, D-01 | 3–4 hours |
+| `PH4C.2-Theme-Token-Hardcoding.md` | DataTable + ConnectivityBar token fixes | B-01, B-02, B-03, B-04 | 4–5 hours |
+| `PH4C.3-Deprecated-Token-Resolution.md` | Scan-gated deprecated token removal | B-05 | 2–3 hours |
+| `PH4C.4-SavedViews-Integration.md` | `useSavedViews` internal wiring + deferred-scope note | C-01 | 2–3 hours |
+| `PH4C.5-ESLint-Fluent-Import-Compliance.md` | Three-bucket ESLint audit across all `apps/` | C-02 | 2–4 hours |
+| `PH4C.6-HighContrast-CodeQuality.md` | `HbcStatusBadge` `makeStyles` + `forced-colors` fix | D-02 | 1–2 hours |
+| `PH4C.7-Shimmer-Infrastructure.md` | Shared shimmer module + CommandPalette AI loading (**FOUNDATIONAL — do first**) | D-03 | 2–3 hours |
+| `PH4C.8-Verification-Testing-Documentation.md` | Full verification, testing, ADR creation, release gate closure | E-01–E-04 | 3–4 hours |
+| `PH4C.9-DevAuthBypass-Storybook.md` | `MockAdapter` Storybook integration + Dev Auth Bypass boundary | New scope | 2–3 hours |
+
+---
+
+## Deferred-Scope Roadmap
+
+| Item | Not In Scope | Deferral Reason | Future Direction |
+|------|--------------|-----------------|------------------|
+| useSavedViews controlled mode | Component state mgmt | Requires design + research | Phase 5+ |
+| New component creation | Beyond audit scope | Separate design phase | Phase 6+ |
+| Design system visual redesign | Token/a11y hardening only | Requires brand alignment | Future refresh |
+| Localization / i18n | Baseline WCAG 2.1 AA | Vendor integration needed | Phase 7+ |
+| Performance optimizations | Beyond shimmer/bundle | Requires profiling phase | Phase 5+ |
+| Fluent UI library upgrades | Using locked version | Requires migration testing | Future phase |
+
+---
+
+**End of Phase 4C Master Plan**
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 4C master plan created: 2026-03-07
+All 9 task files to follow (PH4C.1–PH4C.9).
+Locked decisions: D-PH4C-01 through D-PH4C-20 embedded.
+Hard prerequisites: PH4C.7 → PH4C.2 dependency documented.
+Release gating: Two-layer model (11 automated + manual audit ≥99% + named sign-offs).
+ADR register: 3 selective ADRs planned (shimmer, deprecated token policy, Dev Auth Bypass).
+Status: READY FOR IMPLEMENTATION.
+Next: Execute PH4C.7 (Shimmer) as prerequisite before PH4C.2 can begin.
+-->

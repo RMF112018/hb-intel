@@ -25,18 +25,18 @@ interface AppProps {
 
 export function App({ authMode }: AppProps): React.ReactNode {
   const { resolvedTheme } = useHbcTheme();
-  const content = (
+  const routerContent = (
     <QueryClientProvider client={queryClient}>
-      <HbcErrorBoundary>
-        <RouterProvider router={router} />
-      </HbcErrorBoundary>
+      <RouterProvider router={router} />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 
   return (
     <FluentProvider theme={resolvedTheme}>
-      {authMode === 'msal' ? <MsalGuard>{content}</MsalGuard> : content}
+      <HbcErrorBoundary>
+        {authMode === 'msal' ? <MsalGuard>{routerContent}</MsalGuard> : routerContent}
+      </HbcErrorBoundary>
     </FluentProvider>
   );
 }
