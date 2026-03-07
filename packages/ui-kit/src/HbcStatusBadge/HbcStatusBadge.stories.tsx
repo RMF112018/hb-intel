@@ -12,6 +12,7 @@ import type { StatusVariant } from './types.js';
 const meta: Meta<typeof HbcStatusBadge> = {
   title: 'Components/HbcStatusBadge',
   component: HbcStatusBadge,
+  tags: ['autodocs'],
   argTypes: {
     variant: {
       control: 'select',
@@ -32,10 +33,57 @@ export const Default: Story = {
   args: { variant: 'success', label: 'On Track' },
 };
 
+/**
+ * PH4C.6 semantic status stories rendered through the existing variant/label API.
+ * This preserves backward compatibility while validating the required eight status classes.
+ */
+export const Active: Story = {
+  args: { variant: 'onTrack', label: 'Active' },
+};
+
+export const Pending: Story = {
+  args: { variant: 'pending', label: 'Pending' },
+};
+
+export const AtRisk: Story = {
+  args: { variant: 'atRisk', label: 'At Risk' },
+};
+
+export const Complete: Story = {
+  args: { variant: 'completed', label: 'Complete' },
+};
+
+export const Inactive: Story = {
+  args: { variant: 'neutral', label: 'Inactive' },
+};
+
+export const Warning: Story = {
+  args: { variant: 'warning', label: 'Warning' },
+};
+
+export const Draft: Story = {
+  args: { variant: 'draft', label: 'Draft' },
+};
+
+export const Approved: Story = {
+  args: { variant: 'success', label: 'Approved' },
+};
+
 const ALL_VARIANTS: StatusVariant[] = [
   'success', 'warning', 'error', 'info', 'neutral',
   'onTrack', 'atRisk', 'critical', 'pending', 'inProgress',
   'completed', 'draft',
+];
+
+const HIGH_CONTRAST_VARIANTS: Array<{ variant: StatusVariant; label: string }> = [
+  { variant: 'onTrack', label: 'Active' },
+  { variant: 'pending', label: 'Pending' },
+  { variant: 'atRisk', label: 'At Risk' },
+  { variant: 'completed', label: 'Complete' },
+  { variant: 'neutral', label: 'Inactive' },
+  { variant: 'warning', label: 'Warning' },
+  { variant: 'draft', label: 'Draft' },
+  { variant: 'success', label: 'Approved' },
 ];
 
 export const AllVariants: Story = {
@@ -76,4 +124,33 @@ export const A11yTest: Story = {
       </div>
     </div>
   ),
+};
+
+/**
+ * High-Contrast Mode Support Story
+ *
+ * This story demonstrates the StatusBadge under Windows High Contrast Mode.
+ * Users with visual impairments or accessibility preferences can enable
+ * high-contrast mode in Windows settings, and all status badges will
+ * automatically adapt using the forced-colors media query.
+ *
+ * To test: Windows Settings -> Ease of Access -> High Contrast ->
+ * Enable "High Contrast" and view this story in the browser.
+ */
+export const AllStatusesHighContrast: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+      {HIGH_CONTRAST_VARIANTS.map((entry) => (
+        <HbcStatusBadge key={`${entry.variant}-${entry.label}`} variant={entry.variant} label={entry.label} />
+      ))}
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'All status variants rendered together. Enable Windows High Contrast mode to verify forced-colors styles are applied correctly.',
+      },
+    },
+  },
 };
