@@ -547,31 +547,31 @@ Phase 5C is complete when:
 
 ## 5.C.7 Success Criteria Checklist (Task 5C.7)
 
-- [ ] 5.C.7.1 `docs/how-to/administrator/manage-override-requests.md` created
-- [ ] 5.C.7.2 Guide includes 8+ numbered steps covering full admin workflow
-- [ ] 5.C.7.3 Guide covers request review, approval, denial, expiration management
-- [ ] 5.C.7.4 Guide explains expiration date guidelines and best practices
-- [ ] 5.C.7.5 Guide includes audit log review and compliance documentation
-- [ ] 5.C.7.6 Guide provides approval criteria checklist
-- [ ] 5.C.7.7 Guide includes workflow diagrams or process descriptions
-- [ ] 5.C.7.8 Guide includes troubleshooting for administrator issues
-- [ ] 5.C.7.9 Guide includes FAQ section (6+ questions)
-- [ ] 5.C.7.10 Document follows Diátaxis how-to format and is technically detailed
+- [x] 5.C.7.1 `docs/how-to/administrator/manage-override-requests.md` created
+- [x] 5.C.7.2 Guide includes 8+ numbered steps covering full admin workflow
+- [x] 5.C.7.3 Guide covers request review, approval, denial, expiration management
+- [x] 5.C.7.4 Guide explains expiration date guidelines and best practices
+- [x] 5.C.7.5 Guide includes audit log review and compliance documentation
+- [x] 5.C.7.6 Guide provides approval criteria checklist
+- [x] 5.C.7.7 Guide includes workflow diagrams or process descriptions
+- [x] 5.C.7.8 Guide includes troubleshooting for administrator issues
+- [x] 5.C.7.9 Guide includes FAQ section (6+ questions)
+- [x] 5.C.7.10 Document follows Diátaxis how-to format and is technically detailed
 
 ---
 
 ## Phase 5.C.7 Progress Notes
 
-- 5.C.7.1 [PENDING] — Guide creation with workflow steps
-- 5.C.7.2 [PENDING] — Approval criteria and expiration guidelines
-- 5.C.7.3 [PENDING] — Audit logging and best practices sections
+- 5.C.7.1 [COMPLETED] — Guide created from locked production markdown block
+- 5.C.7.2 [COMPLETED] — Approval criteria, expiration guidance, and lifecycle coverage validated
+- 5.C.7.3 [COMPLETED] — Audit logging, compliance tasks, troubleshooting, and FAQ documented
 
 ### Verification Evidence
 
-- `docs/how-to/administrator/manage-override-requests.md` exists and is complete - [PENDING]
-- Guide includes approval criteria and decision tree - [PENDING]
-- Guide covers audit logs and compliance tasks - [PENDING]
-- File follows Diátaxis how-to structure - [PENDING]
+- `docs/how-to/administrator/manage-override-requests.md` exists and is complete - [PASS]
+- Guide includes approval criteria and decision tree - [PASS]
+- Guide covers audit logs and compliance tasks - [PASS]
+- File follows Diátaxis how-to structure - [PASS]
 
 ---
 
@@ -580,5 +580,9 @@ Phase 5C is complete when:
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task PH5C.7 created: 2026-03-07
 Administrator override management how-to guide specification complete.
-Next: PH5C.8 (Alignment Markers)
+Task PH5C.7 completed: 2026-03-07
+D-PH5C-07 traceability closed: created `docs/how-to/administrator/manage-override-requests.md` verbatim from the locked PH5C.7 production markdown block with administrator workflow steps, approval criteria, denial handling, expiration management, audit/compliance, troubleshooting, and FAQ.
+PH5C.7 verification evidence: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` PASS with one pre-existing warning in `packages/auth/src/adapters/__tests__/DevAuthBypassAdapter.test.ts`; `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` PASS.
+PH5C.7 remediation note: no phase-specific remediation required; no new build/lint/type-check failures introduced by this documentation task.
+Next: PH5C.8 (awaiting explicit user confirmation)
 -->

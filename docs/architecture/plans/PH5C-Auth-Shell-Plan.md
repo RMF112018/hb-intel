@@ -274,8 +274,8 @@ All tasks start in PENDING state. Update this section after each task completion
 - 5.C.6.2 [COMPLETED] — Request workflow documentation
 
 ### PH5C.7 Progress Notes
-- 5.C.7.1 [PENDING] — Admin guide creation
-- 5.C.7.2 [PENDING] — Override request lifecycle
+- 5.C.7.1 [COMPLETED] — Admin guide creation
+- 5.C.7.2 [COMPLETED] — Override request lifecycle
 
 ### PH5C.8 Progress Notes
 - 5.C.8.1 [PENDING] — Alignment markers in 4 files
@@ -317,6 +317,7 @@ All verification gates remain PENDING until execution. See PH5C.10 for full veri
 - ADRs linked and cross-referenced - [PENDING]
 - Developer integration how-to guide (`docs/how-to/developer/integrate-auth-with-your-feature.md`) - [PASS for PH5C.5]
 - End-user access request how-to guide (`docs/how-to/user/request-elevated-access.md`) - [PASS for PH5C.6]
+- Administrator override management how-to guide (`docs/how-to/administrator/manage-override-requests.md`) - [PASS for PH5C.7]
 
 ### Audit Coverage
 - Security: 100% - [PENDING]
@@ -374,5 +375,9 @@ PH5C.6 completed: 2026-03-07
 D-PH5C-07 traceability closed: created `docs/how-to/user/request-elevated-access.md` verbatim from locked PH5C.6 production markdown block with non-technical language, full request workflow, visual descriptions, timeline/approval guidance, FAQ, and troubleshooting sections.
 PH5C.6 verification evidence: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` PASS with one pre-existing auth warning; `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` PASS.
 PH5C.6 remediation note: no phase-specific remediation required; no new build/lint/type-check errors were introduced by this documentation task.
-Next: Execute PH5C.7 (Administrator How-To Guide)
+PH5C.7 completed: 2026-03-07
+D-PH5C-07 traceability closed: created `docs/how-to/administrator/manage-override-requests.md` verbatim from locked PH5C.7 production markdown block with full administrator request lifecycle, approval/denial criteria, expiration management, audit/compliance procedures, troubleshooting, and FAQ.
+PH5C.7 verification evidence: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` PASS with one pre-existing warning in `packages/auth/src/adapters/__tests__/DevAuthBypassAdapter.test.ts`; `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` PASS.
+PH5C.7 remediation note: no phase-specific remediation required; no new build/lint/type-check failures were introduced by this documentation task.
+Next: PH5C.8 (awaiting explicit user confirmation)
 -->

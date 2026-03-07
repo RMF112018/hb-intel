@@ -1087,4 +1087,9 @@ Phase 5C.6 (End-User Access Request How-To Guide) completed: 2026-03-07
   - D-PH5C-07 implemented by creating `docs/how-to/user/request-elevated-access.md` verbatim from locked PH5C.6 production markdown (non-technical language, step-by-step request workflow, visual descriptions, timeline and approval process, FAQ, troubleshooting).
   - PH5C.6 verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` (pass with one pre-existing auth warning), `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`.
   - PH5C.6 remediation status: no phase-specific remediation required; no new build/lint/type-check errors introduced by PH5C.6 documentation changes.
+Phase 5C.7 (Administrator Override Management How-To Guide) completed: 2026-03-07
+  - D-PH5C-07 implemented by creating `docs/how-to/administrator/manage-override-requests.md` verbatim from locked PH5C.7 production markdown (administrator-focused process steps, approval criteria, denial handling, expiration management, workflow description, audit/compliance, troubleshooting, FAQ).
+  - PH5C.7 checklist closure confirmed in `docs/architecture/plans/PH5C.7-HowToAdmin.md` for items 5.C.7.1 through 5.C.7.10.
+  - PH5C.7 verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` (pass with one pre-existing warning in `packages/auth/src/adapters/__tests__/DevAuthBypassAdapter.test.ts`), `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`.
+  - PH5C.7 remediation status: no phase-specific remediation required; no new build/lint/type-check failures introduced by PH5C.7 documentation changes.
 -->

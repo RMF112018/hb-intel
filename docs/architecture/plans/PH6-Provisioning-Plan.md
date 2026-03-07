@@ -1,116 +1,250 @@
-**Phase 6 Development Plan – Provisioning Modernization (MVP Critical – First Business-Value Delivery)**
+# Phase 6 Development Plan – Provisioning Modernization
 
-**Version:** 1.0 (fully aligned with HB-Intel-Blueprint-V4.md §2i, §2j and all Option C decisions locked during the structured interview)  
-**Purpose:** This document provides exhaustive, numbered, manual step-by-step instructions with complete copy-paste-ready code and file names for the entire provisioning workflow. It is designed so that any developer unfamiliar with the project can execute Phase 6 flawlessly and produce production-ready, comprehensively documented backend components. All decisions follow the comprehensive Option C choices we finalized (Durable Functions saga orchestrator, dual-store persistence, 7-step activity functions with compensation, SignalR communication, bifurcated execution with timer trigger, Accounting trigger + real-time checklist UI, and comprehensive error/rollback/retry/escalation with Admin dashboard). This plan incorporates the enhanced additional details (Azure Functions & Durable Functions setup, Security & Permissions, Monitoring & Observability, Testing Strategy, Performance & Timeout Considerations, and Legacy Code Mapping & Migration).
+**Version:** 2.0 (supersedes v1.0 — fully re-derived from the structured interview conducted 2026-03-07; all decisions locked and documented below)
+**Purpose:** This document is the master plan for Phase 6: the first business-value delivery of HB Intel. It defines the complete provisioning modernization feature — from the Estimating Coordinator's Project Setup Request through the Controller's approval trigger, the 7-step SharePoint saga, real-time progress visibility across seven apps, and the overnight Step 5 fallback. It consolidates every architectural decision made during the structured interview and serves as the authoritative index for all 16 individual task files.
+**Audience:** Implementation agent(s), technical reviewers, product owner, operations/support stakeholders, and future maintainers.
+**Implementation Objective:** Deliver a production-ready SharePoint site provisioning system where an Estimating Coordinator submits a Project Setup Request, a Controller approves and triggers provisioning, and all relevant stakeholders see real-time or start/finish progress across seven HB Intel apps — with full security, observability, testing, and rollback coverage.
 
-## Refined Blueprint Section for Phase 6 (Updated for Interview-Locked Decisions)
+---
 
-**Phase 6: Provisioning Modernization (MVP Critical – First Business-Value Delivery)**  
-Modernize the entire SharePoint site provisioning workflow using the new Azure Functions backend (`provisioningSaga`, compensation logic, SignalR real-time updates, ProvisioningStatus persistence, bifurcated execution, rollback/retry/escalation). Integrate the Accounting trigger and the Estimating Project Setup page (real-time checklist).
+## Refined Blueprint Section for Phase 6
 
-**Locked Decisions (All Option C):**  
-- Comprehensive Durable Functions saga orchestrator (7 atomic steps, automatic compensation, SignalR push, ProvisioningStatus persistence, bifurcated execution, rollback/retry/escalation, Accounting trigger integration).  
-- Comprehensive ProvisioningStatus dual-store persistence (SharePoint list for UI + Azure Table for atomic durability, transactional helper, SignalR integration).  
-- Comprehensive 7-step activity functions with explicit ordering, PnPjs/Graph best practices, per-step compensation, and full JSDoc.  
-- Comprehensive Accounting trigger and real-time checklist UI (automatic redirect, SignalR-powered layman-friendly checklist with progress bar, retry/escalation buttons).  
-- Comprehensive SignalR communication (targeted groups, SPFx authentication, automatic reconnection, typed payload, client-side hook).  
-- Comprehensive bifurcated execution with Durable Functions timer trigger at 1:00 AM EST and cross-phase state management.  
-- Comprehensive error handling with typed errors, automatic compensation, UI retry/escalation buttons, and full Admin “Provisioning Failures” dashboard.
+**Phase 6: Provisioning Modernization (MVP Critical — First Business-Value Delivery)**
+Modernize the entire SharePoint site provisioning workflow. Replace all mock service implementations with production-grade PnPjs/Graph code. Implement the full request lifecycle (Estimating → Accounting → Saga → Notifications). Deliver real-time progress visibility governed by role and submitter identity. Harden the existing class-based `SagaOrchestrator` with idempotency, correlation IDs, exponential backoff, and dual-store persistence. Integrate SignalR per-project groups, Managed Identity security, Application Insights observability, a three-layer testing strategy, and GitHub Actions CI/CD.
 
-**Additional Enhancements (All Option C):**  
-- Comprehensive Azure Functions & Durable Functions setup (pinned extension, full `host.json` with task hubs and timeouts, managed identity, GitHub Actions deployment).  
-- Comprehensive Security & Permissions (granular per-step least-privilege, on-behalf-of flow, exact Azure AD registration, runbook).  
-- Comprehensive Monitoring & Observability (Application Insights with custom metrics, correlation IDs, alerts, Admin dashboard integration, observability runbook).  
-- Comprehensive Testing Strategy (unit, integration, end-to-end Playwright, chaos testing, CI enforcement).  
-- Comprehensive Performance & Timeout Considerations (intelligent throttling/batching, bifurcation optimizations, metrics, production runbook).  
-- Comprehensive Legacy Code Mapping & Migration (detailed file references, phased rollout with feature flags, risk mitigation, onboarding guide).
+### Locked Architectural Outcome
 
-**Success Criteria:** Accounting Manager can click “Save + Provision Site” and see live, layman-friendly progress on the Estimating page with zero data loss.  
-**Deliverables:** Production-ready provisioning (highest-priority MVP feature).
+Phase 6 produces a fully operational provisioning system that:
 
-## Exhaustive Step-by-Step Implementation Instructions
+- Accepts Project Setup Requests from Estimating Coordinators (with team member selection).
+- Routes requests through a 7-state lifecycle managed in the Accounting app inbox.
+- Uses `projectId` (auto-generated, immutable) and `projectNumber` (Controller-entered, `##-###-##`) as the only project identifiers — `projectCode` is eliminated entirely.
+- Executes a hardened, class-based `SagaOrchestrator` across 7 SharePoint provisioning steps with real PnPjs/Graph implementations, per-step idempotency guards, and compensation functions.
+- Persists provisioning state to Azure Table Storage (primary) and SharePoint List (lifecycle events).
+- Pushes real-time updates to per-project SignalR groups; shows full 7-step detail to Admins and the Request Submitter; shows start/finish notifications to all other role-eligible users.
+- Secures all endpoints with Bearer token validation and uses Managed Identity for all SharePoint/Graph operations.
+- Instruments every provisioning run with a correlation ID and custom Application Insights metrics.
+- Is covered by Vitest unit tests, real SharePoint smoke tests, and Playwright E2E tests.
 
-### 6.1 backend/functions Package
+---
 
-1. From the monorepo root, navigate to the backend folder and ensure the structure exists:  
-   ```bash
-   cd backend/functions
-   ```
+## All Locked Decisions from the Structured Interview (2026-03-07)
 
-2. Update `host.json` with the comprehensive configuration (pinned Durable extension, task hub, timeouts):  
-   ```json
-   {
-     "version": "2.0",
-     "extensions": {
-       "durableTask": {
-         "hubName": "ProvisioningHub",
-         "storageProvider": { "type": "azureStorage" }
-       },
-       "signalR": { "connectionStringSetting": "AzureSignalRConnectionString" }
-     },
-     "functionTimeout": "00:10:00"
-   }
-   ```
+### Decision 1 — Saga Orchestration Engine
+**Locked: Keep and harden the existing class-based `SagaOrchestrator`.** No migration to Azure Durable Functions. Add per-step idempotency guards, correlation IDs, exponential backoff retry (3 attempts with 2s/4s/8s delays), and duplicate-detection guards for all SharePoint operations. The manual Retry endpoint remains the recovery mechanism for terminal failures.
 
-3. Update `local.settings.json` for dev-harness testing (add SignalR and storage settings).
+### Decision 2 — Provisioning State Persistence
+**Locked: Dual store.** Azure Table Storage is the authoritative real-time record, written after every step completes or fails. A SharePoint List (`ProvisioningAuditLog`) receives summary records at three lifecycle events only: saga started, saga completed, saga failed. The SharePoint write is fire-and-forget and non-blocking — a failure to write the audit record does not fail the provisioning run.
 
-4. Create the comprehensive saga orchestrator files:  
-   - `provisioningSaga/Orchestrator.cs` (or TypeScript equivalent for Node.js runtime)  
-   - Seven Activity functions (e.g., `CreateBasicSiteActivity.cs`, `ProvisionListsActivity.cs`, etc.)  
-   - Compensation activities (one per step)  
-   - Timer trigger for bifurcated full-spec (`TimerFullSpec.cs`)  
+### Decision 3 — API Security Model
+**Locked: Bearer token validation in function code + Managed Identity for SharePoint/Graph.** All HTTP endpoints validate an Entra ID Bearer token (replacing `authLevel: 'anonymous'`). The validated token captures the caller's identity (`triggeredBy`, `submittedBy`) for audit. All actual SharePoint and Graph operations are performed by the Function App's system-assigned Managed Identity. The timer trigger uses Managed Identity only, with no user context.
 
-   **Exact example for the Orchestrator (simplified for clarity):**  
-   ```ts
-   /**
-    * Durable Orchestrator – controls the 7-step saga with automatic compensation.
-    */
-   export async function provisioningOrchestrator(context: any) {
-     const projectCode = context.input.projectCode;
-     try {
-       await context.callActivity("CreateBasicSite", projectCode);
-       // ... call remaining 6 activities sequentially
-       context.setCustomStatus({ status: "Completed" });
-     } catch (err) {
-       await context.callSubOrchestrator("CompensationOrchestrator", err);
-       throw err;
-     }
-   }
-   ```
+### Decision 4 — SignalR Connection Strategy
+**Locked: Per-project SignalR groups keyed by `projectId`.** Group name format: `provisioning-{projectId}`. The negotiate endpoint authenticates the user via Bearer token and adds their connection to the correct group. Step progress messages are sent to the group. Groups are closed and connections cleaned up when the saga reaches a terminal state (Completed or Failed). Admin users are added to an additional `provisioning-admin` group that receives all project events.
 
-5. Implement the dual-store persistence helper in `ProvisioningStatusHelper.ts` (transactional writes to SharePoint list + Azure Table).
+### Decision 5 — Frontend Package Architecture
+**Locked: `@hbc/provisioning` package owns headless logic only.** Exports: `provisioningApiClient` (all API call functions), `useProvisioningSignalR` hook, `useProvisioningStore` (Zustand slice), and all shared TypeScript types (`IProjectSetupRequest`, `IProvisioningStatus`, `IProvisioningProgressEvent`, `IProjectRecord`, request state enums). Visual UI components are built inside each consuming app, not in the package.
 
-6. Implement the comprehensive SignalR hub (`ProvisioningHub.cs`) with targeted groups and output binding.
+### Decision 6 — Accounting App UX
+**Locked: Dedicated "Project Setup Requests" inbox page in the Accounting app.** The Controller's full workflow lives here. The inbox shows all requests with their current lifecycle state. The `projectNumber` field (validated as `##-###-##`) is only editable and required when the request is in the "Ready to Provision" state. The trigger action is labelled "Complete Project Setup."
 
-7. Update the Accounting webpart trigger (in the existing Accounting SPFx webpart) to call the saga endpoint and auto-redirect to the Estimating page.
+### Decision 7 — Request Lifecycle States
+**Locked: Seven states with out-of-band clarification.** States: `Submitted` → `UnderReview` → `NeedsСlarification` → `AwaitingExternalSetup` → `ReadyToProvision` → `Provisioning` → `Completed` | `Failed`. Clarification communication happens via email/Teams. State transitions trigger automated HB Intel notifications to the appropriate parties. The `projectNumber` field is only shown and required at `ReadyToProvision`.
 
-8. Create the Estimating Project Setup page checklist component (real-time SignalR hook, layman-friendly UI with progress bar, retry/escalation buttons).
+### Decision 8 — Project Identifier Data Model
+**Locked: `projectCode` eliminated everywhere.** Two identifiers only:
+- `projectId`: UUID v4, auto-generated at record creation (BD stage or Estimating submission if no BD record exists), immutable, never displayed to users, used as the system key in Azure Table Storage, SignalR group names, and all backend references.
+- `projectNumber`: 9-digit string matching regex `/^\d{2}-\d{3}-\d{2}$/` (format `##-###-##`), entered by the Controller at approval, used in SharePoint site URLs/titles, Sage Intacct, Procore, and all human-facing references.
 
-9. Create the Admin “Provisioning Failures” dashboard (guided cards, one-click actions, audit trail).
+### Decision 9 — Cross-App Provisioning Visibility
+**Locked: Role-based detail across seven apps.** Provisioning progress is visible in: Accounting, Admin, Business Development, Estimating, Operational Excellence, Project Hub, and PWA.
 
-10. Run the build and verify:  
-    ```bash
-    cd backend/functions
-    func start
-    ```
-    Expected output: Orchestrator starts, timer trigger fires, SignalR updates appear in dev-harness.
+Visibility rules:
+- **Admin role** → Full 7-step real-time checklist for all projects (always, regardless of group).
+- **Request Submitter** → Full 7-step real-time checklist for their submitted project only (identified by `submittedBy` matching current user).
+- **All other roles** → Start and finish notifications only, gated to users who are members of that project's group.
+- **Leadership** → No provisioning notifications of any kind.
+- **Shared Services** (Accounting, Marketing, Safety, QC, Legal) → No provisioning notifications.
 
-11. Add documentation (as decided in Option C):  
-    - One markdown file per major feature in `docs/reference/provisioning/`.  
-    - Create ADR `docs/architecture/adr/0011-provisioning-saga.md`.  
-    - Update `docs/how-to/developer/phase-6-provisioning-guide.md` (full migration mapping table, runbooks, checklists).
+Notification copy (exact):
+- Start: *"The SharePoint Project Site for {projectNumber} - {projectName} is being created! We will let you know the moment it is ready for use."*
+- Finish: *"{projectNumber} - {projectName}'s SharePoint Site is up and running! Let's get to work!"*
 
-## Verification & Phase Completion
-1. In the dev-harness, set `HBC_ADAPTER_MODE=proxy` and trigger from the Accounting preview.  
-2. Confirm:  
-   - Automatic redirect to Estimating page.  
-   - Live, layman-friendly checklist updates via SignalR (no polling).  
-   - Automatic compensation on simulated failure.  
-   - Retry/escalation buttons work; Admin dashboard receives full context.  
-   - Bifurcated timer fires correctly at 1:00 AM EST simulation.  
-3. Success Criteria Checklist:  
-   - Accounting Manager sees instant live progress with zero data loss.  
-   - Rollback/retry/escalation fully functional.  
-   - Legacy mappings verified with side-by-side testing.  
-   - Performance: Initial response <10 seconds; throttling prevented.  
-4. Incremental Migration: Follow phased steps (Accounting trigger first); use feature flags; rollback via git.
+### Decision 10 — Step 5 / Timer Bifurcation
+**Locked: Attempt Step 5 immediately; fall back to 1:00 AM EST timer on failure or timeout.** Step 5 timeout threshold: 90 seconds. Retry count before deferral: 2 attempts. On deferral, the project enters `BaseSetupComplete_WebPartsPending` sub-state. The `timerFullSpec` trigger at 1:00 AM EST processes all deferred Step 5 jobs. A completion notification fires to the Request Submitter, Admin, and the project's group when the timer finishes Step 5.
+
+### Decision 11 — Testing Strategy
+**Locked: Three-layer strategy.**
+- **Layer 1 (Vitest, every PR):** Unit tests for saga orchestrator, all 7 steps, idempotency guards, state machine transitions, notification logic, validation functions. Fully mocked. Must complete in under 30 seconds.
+- **Layer 2 (Real SharePoint, nightly + pre-merge gate):** 5–8 smoke tests against a dedicated test site collection in a real SharePoint tenant. Proves PnPjs calls, MSAL/Managed Identity flow, and Azure Table writes actually work. Includes automatic site cleanup.
+- **Layer 3 (Playwright E2E, pre-release):** Full user journey — Estimating Coordinator submits request → Controller approves → SignalR checklist updates → site confirmed. Runs against staging environment.
+
+### Decision 12 — Observability
+**Locked: Correlation IDs + Custom Metrics + Proactive Alerts.** Every provisioning run receives a `correlationId` (UUID v4) at trigger time that is logged in every Application Insights event, every Azure Table write, and every SignalR message for that run. Custom metrics: step duration histograms, provisioning success/failure rate by step, Step 5 deferral rate. Proactive alerts: stuck run (non-terminal state for > 30 minutes) and nightly Step 5 timer failure.
+
+### Decision 13 — Permission Groups
+**Locked: Six permission tiers.**
+
+| Group / Role | SharePoint Site Access | Provisioning Notifications |
+|---|---|---|
+| Admin | Read-only all sites + can apply Admin write perms | Full 7-step checklist — all projects |
+| Leadership | Read-only all sites | None |
+| Shared Services (Accounting, Marketing, Safety, QC, Legal) | Read / limited write all sites | None |
+| Operational Excellence | Full read/write all sites | Start + Finish |
+| Pursuit Team | Full read/write designated site only | Start + Finish |
+| Project Team | Full read/write designated site only | Start + Finish |
+
+Group composition rules:
+- Pursuit Team and Project Team are defined in the Estimating Project Setup Request.
+- The BD user who created the original Project record is included in the group by default (if a BD record exists for that project).
+- The OpEx Manager is always pre-selected in every Project Setup Request by default.
+- Step 6 of the saga applies these permissions to the provisioned SharePoint site using the Managed Identity.
+
+---
+
+## Phase 6 File Map — Task Files
+
+| Task File | Title | Key Deliverables |
+|---|---|---|
+| `PH6.1` | Foundation & Data Model Migration | `projectCode` removal, type definitions, ADRs, `@hbc/provisioning` package scaffold |
+| `PH6.2` | Security & Managed Identity | App registration, Managed Identity, Bearer token middleware, `msal-obo-service.ts` |
+| `PH6.3` | SagaOrchestrator Hardening | Correlation IDs, idempotency guards, exponential backoff, state logging |
+| `PH6.4` | Steps 1–4 Real Implementations | PnPjs create site, document library, template files, data lists + compensation |
+| `PH6.5` | Steps 5–7 Real Implementations | SPFx web parts, permissions (group-based), hub association + compensation |
+| `PH6.6` | Dual Store Persistence | Real `table-storage-service.ts`, SharePoint audit list, schemas, write rules |
+| `PH6.7` | SignalR Hub & Real-Time Push | Negotiate endpoint, group management, SPFx token, reconnection, cleanup |
+| `PH6.8` | Request Lifecycle & State Engine | `IProjectSetupRequest`, 7-state machine, Projects list schema, notification triggers |
+| `PH6.9` | `@hbc/provisioning` Package | API client, `useProvisioningSignalR`, Zustand slice, public exports |
+| `PH6.10` | Estimating App — Request Form & Checklist | Project Setup Request form, team picker, full 7-step checklist component |
+| `PH6.11` | Accounting App — Inbox & Trigger | Requests inbox page, lifecycle state UI, `projectNumber` validation, trigger |
+| `PH6.12` | Cross-App Notifications & Admin Dashboard | Start/finish banner, role-based visibility, Admin failures dashboard |
+| `PH6.13` | Timer Trigger & Step 5 Bifurcation | Timeout logic, deferral scheduling, overnight execution, completion notification |
+| `PH6.14` | Observability & Application Insights | Correlation ID propagation, custom events, metrics, stuck-run + timer alerts |
+| `PH6.15` | Testing — All Three Layers | Vitest unit tests, SharePoint smoke tests, Playwright E2E, GitHub Actions |
+| `PH6.16` | CI/CD, Documentation & ADRs | GitHub Actions deployment, ADRs, how-to guides, reference docs, release sign-off |
+
+---
+
+## Recommended Implementation Sequence
+
+Execute task files strictly in the following order. Each task file lists its own prerequisite checks.
+
+```
+PH6.1 → PH6.2 → PH6.3 → PH6.6 → PH6.4 → PH6.5 → PH6.7 → PH6.8 →
+PH6.9 → PH6.10 → PH6.11 → PH6.12 → PH6.13 → PH6.14 → PH6.15 → PH6.16
+```
+
+Rationale: Foundation and security must precede all other work. The saga hardening (6.3) and persistence (6.6) must be in place before step implementations (6.4, 6.5). The backend must be complete before any frontend package (6.9) or app integration work (6.10–6.12) begins.
+
+---
+
+## Phase 6 Definition of Done
+
+Phase 6 is complete when HB Intel has a production-ready provisioning system that:
+
+- Processes Project Setup Requests from Estimating Coordinators with full team member selection.
+- Routes requests through a 7-state lifecycle in the Accounting app inbox, requiring a valid `projectNumber` before triggering.
+- Executes all 7 provisioning steps using real PnPjs/Graph code under Managed Identity, with per-step idempotency guards and compensation.
+- Persists state to Azure Table Storage (every step) and a SharePoint audit list (lifecycle events).
+- Delivers real-time progress to per-project SignalR groups; shows full checklist to Admins and Request Submitters; shows start/finish banners to role-eligible users across all seven apps.
+- Secures all HTTP endpoints with Bearer token validation; no `authLevel: 'anonymous'` endpoints exist in production.
+- Instruments every run with a correlation ID; fires proactive alerts for stuck runs and timer failures.
+- Is covered by passing Vitest unit tests, real SharePoint smoke tests, and Playwright E2E tests.
+- Is deployed via GitHub Actions to dev, staging, and production environments.
+- Has complete documentation in the correct `docs/` Diátaxis folders and all required ADRs.
+
+---
+
+## Phase 6 Master Success Criteria Checklist
+
+- [ ] 6.0.1 `projectCode` identifier eliminated from all backend functions, frontend apps, and packages.
+- [ ] 6.0.2 `@hbc/provisioning` package scaffold created and published within the monorepo.
+- [ ] 6.0.3 Azure AD app registration and Managed Identity configured; all endpoints secured.
+- [ ] 6.0.4 `SagaOrchestrator` hardened: correlation IDs, idempotency, exponential backoff.
+- [ ] 6.0.5 All 7 steps use real PnPjs/Graph implementations (no mock service in production path).
+- [ ] 6.0.6 Azure Table Storage service is real and production-ready.
+- [ ] 6.0.7 SharePoint audit list (`ProvisioningAuditLog`) created and written to at lifecycle events.
+- [ ] 6.0.8 SignalR negotiate endpoint is real; per-project groups functioning.
+- [ ] 6.0.9 Project Setup Request data model and 7-state machine implemented.
+- [ ] 6.0.10 Estimating app Project Setup Request form live with team member picker.
+- [ ] 6.0.11 Accounting app Project Setup Requests inbox live with full lifecycle state management.
+- [ ] 6.0.12 Start/finish notification banner live in all seven apps with role-based visibility.
+- [ ] 6.0.13 Full 7-step checklist visible to Admin (all projects) and Request Submitter (own project).
+- [ ] 6.0.14 Admin failures dashboard live and showing failed/stalled runs.
+- [ ] 6.0.15 Step 5 timeout/deferral logic functioning; timer trigger completing deferred jobs overnight.
+- [ ] 6.0.16 Correlation IDs propagated through all events; custom App Insights metrics recording.
+- [ ] 6.0.17 Stuck-run alert and timer failure alert configured and tested.
+- [ ] 6.0.18 All Layer 1 Vitest unit tests passing in CI.
+- [ ] 6.0.19 All Layer 2 SharePoint smoke tests passing in CI (nightly + pre-merge).
+- [ ] 6.0.20 All Layer 3 Playwright E2E tests passing against staging.
+- [ ] 6.0.21 GitHub Actions deployment pipeline functional for dev, staging, and production.
+- [ ] 6.0.22 All required ADRs created in `docs/architecture/adr/`.
+- [ ] 6.0.23 Diátaxis documentation complete in correct `docs/` folders.
+- [ ] 6.0.24 `pnpm turbo run build` passes with zero errors across the full monorepo.
+- [ ] 6.0.25 Release sign-off checklist completed and signed by product owner.
+
+---
+
+## Release Gating
+
+Phase 6 is blocked from production release until all of the following gates pass:
+
+1. **Build gate:** `pnpm turbo run build` exits 0 across all packages and apps.
+2. **Lint gate:** `pnpm turbo run lint` exits 0 with zero errors.
+3. **Type gate:** `pnpm turbo run check-types` exits 0.
+4. **Unit test gate:** All Layer 1 Vitest tests pass; minimum 80% coverage on `backend/functions/src/` and `packages/provisioning/src/`.
+5. **Smoke test gate:** All Layer 2 SharePoint smoke tests pass against the test tenant.
+6. **E2E gate:** All Layer 3 Playwright tests pass against the staging environment.
+7. **Security gate:** No `authLevel: 'anonymous'` on any HTTP endpoint; Managed Identity confirmed active in Azure Portal.
+8. **Observability gate:** Correlation IDs confirmed in Application Insights for at least one full test run; both alert rules confirmed active.
+9. **Documentation gate:** All ADRs complete; how-to guides present in `docs/how-to/`; reference docs present in `docs/reference/`.
+10. **Sign-off gate:** Product owner (Bobby Fetting) has reviewed staging and confirmed the full Estimating → Accounting → Provisioning → Notification flow.
+
+---
+
+## Deferred Scope Roadmap (Explicitly Out of Phase 6)
+
+The following items are intentionally deferred and must not be built in Phase 6. They are documented here so future phases can extend the platform without re-architecting the foundation.
+
+| Deferred Item | Rationale | Target Phase |
+|---|---|---|
+| Business Development app → Projects list lead creation (Step 1 of full workflow) | BD app integration depends on Phase 6 Projects list schema being stable first | Phase 7 |
+| In-app comment thread for request clarification | Out-of-band clarification (email/Teams) is sufficient for Phase 6 volume | Phase 7 |
+| Azure Monitor Workbook for provisioning health dashboard | Admin failures dashboard in HB Intel covers Phase 6 needs; workbook is supplementary | Phase 8 |
+| Power Automate integration against SharePoint audit list | Requires audit list to be stable and populated with real data | Phase 7 |
+| Sage Intacct / Procore API integration | External systems remain manual during Phase 6; API integration is a separate initiative | Phase 8+ |
+| Pursuit Team → Project Team lifecycle transition (project stage change) | Requires Projects list stage management feature not in Phase 6 scope | Phase 7 |
+| SharePoint site archival / deprovisioning | Site lifecycle management is a separate feature | Phase 8+ |
+| Notification delivery via Microsoft Teams adaptive cards | Email/Teams message link is Phase 6; full Teams bot integration is later | Phase 7 |
+
+---
+
+## Progress Notes Template
+
+```
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 6 started: YYYY-MM-DD
+Phase 6 completed: YYYY-MM-DD
+
+Task completions:
+- PH6.1 completed: YYYY-MM-DD — docs: docs/architecture/adr/0XXX-data-model.md
+- PH6.2 completed: YYYY-MM-DD — docs: docs/architecture/adr/0XXX-security-model.md
+- PH6.3 completed: YYYY-MM-DD
+- PH6.4 completed: YYYY-MM-DD
+- PH6.5 completed: YYYY-MM-DD
+- PH6.6 completed: YYYY-MM-DD
+- PH6.7 completed: YYYY-MM-DD — docs: docs/architecture/adr/0XXX-signalr-groups.md
+- PH6.8 completed: YYYY-MM-DD — docs: docs/reference/provisioning/request-lifecycle.md
+- PH6.9 completed: YYYY-MM-DD
+- PH6.10 completed: YYYY-MM-DD
+- PH6.11 completed: YYYY-MM-DD
+- PH6.12 completed: YYYY-MM-DD
+- PH6.13 completed: YYYY-MM-DD
+- PH6.14 completed: YYYY-MM-DD — docs: docs/maintenance/provisioning-observability-runbook.md
+- PH6.15 completed: YYYY-MM-DD
+- PH6.16 completed: YYYY-MM-DD — docs: full documentation suite
+
+Release: vX.X.X — YYYY-MM-DD
+Sign-off: Bobby Fetting — YYYY-MM-DD
+-->
+```
