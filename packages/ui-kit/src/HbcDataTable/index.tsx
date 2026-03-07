@@ -343,6 +343,8 @@ export function HbcDataTable<TData>({
 }: HbcDataTableProps<TData>): React.JSX.Element {
   const styles = useStyles();
   const shimmerStyles = useShimmerStyles();
+  // D-PH4C-10: Stable per-instance prefix keeps th/td associations deterministic and unique.
+  const tableIdPrefix = React.useId().replace(/:/g, '');
   const parentRef = React.useRef<HTMLDivElement>(null);
   const { isFieldMode } = useFieldMode();
 
@@ -453,6 +455,23 @@ export function HbcDataTable<TData>({
   });
 
   const virtualRows = virtualizer.getVirtualItems();
+
+  // D-PH4C-10: Build WCAG 1.3.1 header chains so each data cell maps to its leaf + group headers.
+  const columnHeaderIds = React.useMemo(() => {
+    const headersByColumn = new Map<string, string[]>();
+    const headerGroups = table.getHeaderGroups();
+    for (const group of headerGroups) {
+      for (const header of group.headers) {
+        if (header.isPlaceholder) continue;
+        const colId =
+          (header.column.columnDef as { accessorKey?: string }).accessorKey ?? header.column.id;
+        const headerId = `${tableIdPrefix}-${header.id}`;
+        const current = headersByColumn.get(colId) ?? [];
+        headersByColumn.set(colId, [...current, headerId]);
+      }
+    }
+    return headersByColumn;
+  }, [table, tableIdPrefix]);
 
   // Density class selectors
   const thDensityClass =
@@ -669,6 +688,7 @@ export function HbcDataTable<TData>({
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
+                      id={!header.isPlaceholder ? `${tableIdPrefix}-${header.id}` : undefined}
                       className={mergeClasses(
                         styles.th,
                         thDensityClass,
@@ -764,6 +784,8 @@ export function HbcDataTable<TData>({
                       const colId =
                         (cell.column.columnDef as { accessorKey?: string })
                           .accessorKey ?? cell.column.id;
+                      // D-PH4C-10: Space-separated ids support grouped headers; row headers are N/A in current table shape.
+                      const headerIds = columnHeaderIds.get(colId)?.join(' ');
                       const isEditable = editableColumns?.includes(colId);
                       const isCurrentlyEditing =
                         editingCell?.rowId === row.id &&
@@ -789,6 +811,7 @@ export function HbcDataTable<TData>({
                               : undefined,
                           )}
                           style={frozenInfo ? { left: frozenInfo.left } : undefined}
+                          headers={headerIds}
                           onDoubleClick={
                             isEditable
                               ? (e) => {

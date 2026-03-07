@@ -19,6 +19,7 @@ import { HBC_SURFACE_FIELD, HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE } from '../them
 import { TRANSITION_FAST, keyframes } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { Search, SparkleIcon } from '../icons/index.js';
+import { useFocusTrap } from '../hooks/index.js';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { HbcConfirmDialog } from '../HbcConfirmDialog/index.js';
 import { useOnlineStatus } from '../HbcAppShell/hooks/useOnlineStatus.js';
@@ -260,6 +261,8 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const dialogRef = React.useRef<HTMLDivElement>(null);
+  // D-PH4C-10: Activate focus containment on the dialog while it is open.
+  useFocusTrap(dialogRef, isOpen);
 
   // Debounced query
   const [debouncedQuery, setDebouncedQuery] = React.useState('');
