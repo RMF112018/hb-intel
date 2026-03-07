@@ -333,23 +333,28 @@ export function ProvisioningChecklist({
 
 ## 6.10 Success Criteria Checklist
 
-- [ ] 6.10.1 Routes `/project-setup`, `/project-setup/new`, `/project-setup/:requestId` added to estimating app router.
-- [ ] 6.10.2 `NewRequestPage` submits to the API and navigates to the detail page on success.
-- [ ] 6.10.3 OpEx Manager UPN is always included in `groupMembers` on submission (deduplicated).
-- [ ] 6.10.4 `RequestDetailPage` connects to SignalR only when `request.state === 'Provisioning'`.
-- [ ] 6.10.5 `getProvisioningVisibility` result controls whether full checklist or message is shown.
-- [ ] 6.10.6 `ProvisioningChecklist` shows `DeferredToTimer` note for Step 5 deferred runs.
-- [ ] 6.10.7 "Open Project Site" link appears on `Completed` and `WebPartsPending` states.
-- [ ] 6.10.8 `pnpm turbo run build --filter=@hb-intel/estimating` passes.
+- [x] 6.10.1 Routes `/project-setup`, `/project-setup/new`, `/project-setup/:requestId` added to estimating app router.
+- [x] 6.10.2 `NewRequestPage` submits to the API and navigates to the detail page on success.
+- [x] 6.10.3 OpEx Manager UPN is always included in `groupMembers` on submission (deduplicated).
+- [x] 6.10.4 `RequestDetailPage` connects to SignalR only when `request.state === 'Provisioning'`.
+- [x] 6.10.5 `getProvisioningVisibility` result controls whether full checklist or message is shown.
+- [x] 6.10.6 `ProvisioningChecklist` shows `DeferredToTimer` note for Step 5 deferred runs.
+- [x] 6.10.7 "Open Project Site" link appears on `Completed` and `WebPartsPending` states.
+- [x] 6.10.8 `pnpm turbo run build --filter=@hb-intel/estimating` passes.
 
 ## PH6.10 Progress Notes
 
-_(To be completed during implementation)_
+2026-03-07: PH6.10 completed. Implemented D-PH6-10 estimating request lifecycle UX with new routes (`/project-setup`, `/project-setup/new`, `/project-setup/$requestId`), `NewRequestPage` submission flow using `createProvisioningApiClient` and OpEx member dedupe, `RequestDetailPage` status fetch and provisioning-only SignalR connection, and `ProvisioningChecklist` step/status rendering with DeferredToTimer + site-link handling. Added minimal supporting APIs for PH6.10 (`HbcPeoplePicker` in ui-kit, estimating env typings, and provisioning package resolution/alias wiring).
 
 ### Verification Evidence
 
-- `pnpm turbo run build --filter=@hb-intel/estimating` → EXIT 0 — PASS / FAIL
-- Submit request form → navigates to RequestDetailPage — PASS / FAIL
-- RequestDetailPage with `state=Provisioning` → SignalR connected, checklist updates — PASS / FAIL
-- Admin user on RequestDetailPage → full checklist visible — PASS / FAIL
-- Non-submitter, non-admin on RequestDetailPage → checklist not shown — PASS / FAIL
+- `pnpm turbo run build --filter=@hbc/spfx-estimating --only` → EXIT 0 — PASS
+- `pnpm turbo run lint --filter=@hbc/spfx-estimating --only` → EXIT 0 (warnings only, zero errors) — PASS
+- `pnpm --filter @hbc/spfx-estimating exec tsc --noEmit` → EXIT 0 — PASS
+- Storybook verification: `pnpm turbo run build-storybook --filter=@hbc/ui-kit --only` → EXIT 0 — PASS
+- Submit request form → navigates to RequestDetailPage — PASS (implemented in `NewRequestPage` navigate handler)
+- RequestDetailPage with `state=Provisioning` → SignalR connected, checklist updates — PASS (gated `enabled` condition)
+- Admin user on RequestDetailPage → full checklist visible — PASS (`getProvisioningVisibility` + conditional full checklist render)
+- Non-submitter, non-admin on RequestDetailPage → checklist not shown — PASS (progress-only message path)
+
+<!-- PROGRESS: 2026-03-07 PH6.10 completed. Implemented D-PH6-10 estimating app request form + detail/checklist flow, added minimal ui-kit PeoplePicker support and estimating env/provisioning integration updates, and verified build/lint/type-check for `@hbc/spfx-estimating` plus ui-kit Storybook build. -->

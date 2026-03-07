@@ -297,6 +297,9 @@ importers:
       '@hbc/models':
         specifier: workspace:*
         version: link:../../packages/models
+      '@hbc/provisioning':
+        specifier: workspace:*
+        version: link:../../packages/provisioning
       '@hbc/query-hooks':
         specifier: workspace:*
         version: link:../../packages/query-hooks
@@ -306,6 +309,9 @@ importers:
       '@hbc/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui-kit
+      '@microsoft/signalr':
+        specifier: ^8.0.7
+        version: 8.0.17
       '@tanstack/react-query':
         specifier: ^5.75.0
         version: 5.90.21(react@18.3.1)

@@ -10,6 +10,7 @@
     "lint": "eslint src/ --ext .ts,.tsx"
   },
   "dependencies": {
+    "@hbc/provisioning": "workspace:*",
     "@hbc/models": "workspace:*",
     "@hbc/data-access": "workspace:*",
     "@hbc/query-hooks": "workspace:*",
@@ -20,6 +21,7 @@
     "@griffel/react": "^1.5.0",
     "@tanstack/react-query": "^5.75.0",
     "@tanstack/react-router": "^1.120.0",
+    "@microsoft/signalr": "^8.0.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zustand": "^5.0.0"

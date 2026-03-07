@@ -5,7 +5,9 @@ import { rootRoute } from './root-route.js';
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  beforeLoad: () => { useNavStore.getState().setActiveWorkspace('estimating'); },
+  beforeLoad: () => {
+    useNavStore.getState().setActiveWorkspace('estimating');
+  },
   component: lazyRouteComponent(() => import('../pages/BidsPage.js').then((m) => ({ default: m.BidsPage }))),
 });
 
@@ -21,4 +23,22 @@ const projectSetupRoute = createRoute({
   component: lazyRouteComponent(() => import('../pages/ProjectSetupPage.js').then((m) => ({ default: m.ProjectSetupPage }))),
 });
 
-export const webpartRoutes = [indexRoute, templatesRoute, projectSetupRoute];
+const newProjectSetupRequestRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/project-setup/new',
+  component: lazyRouteComponent(() => import('../pages/NewRequestPage.js').then((m) => ({ default: m.NewRequestPage }))),
+});
+
+const requestDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/project-setup/$requestId',
+  component: lazyRouteComponent(() => import('../pages/RequestDetailPage.js').then((m) => ({ default: m.RequestDetailPage }))),
+});
+
+export const webpartRoutes = [
+  indexRoute,
+  templatesRoute,
+  projectSetupRoute,
+  newProjectSetupRequestRoute,
+  requestDetailRoute,
+];

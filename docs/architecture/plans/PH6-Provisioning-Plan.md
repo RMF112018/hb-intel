@@ -166,7 +166,7 @@ Phase 6 is complete when HB Intel has a production-ready provisioning system tha
 - [ ] 6.0.7 SharePoint audit list (`ProvisioningAuditLog`) created and written to at lifecycle events. (2026-03-07 update: schema + setup script delivered in PH6.6; tenant-side one-time execution pending)
 - [x] 6.0.8 SignalR negotiate endpoint is real; per-project groups functioning. (2026-03-07 update: PH6.7 completed with real negotiate endpoint, per-project/admin group routing, management API push service, and terminal cleanup.)
 - [x] 6.0.9 Project Setup Request data model and 7-state machine implemented.
-- [ ] 6.0.10 Estimating app Project Setup Request form live with team member picker.
+- [x] 6.0.10 Estimating app Project Setup Request form live with team member picker.
 - [ ] 6.0.11 Accounting app Project Setup Requests inbox live with full lifecycle state management.
 - [ ] 6.0.12 Start/finish notification banner live in all seven apps with role-based visibility.
 - [ ] 6.0.13 Full 7-step checklist visible to Admin (all projects) and Request Submitter (own project).
@@ -236,7 +236,7 @@ Task completions:
 - PH6.7 completed: 2026-03-07 — docs: docs/architecture/adr/0063-signalr-per-project-groups.md, docs/how-to/developer/spfx-signalr-auth.md
 - PH6.8 completed: 2026-03-07 — docs: docs/reference/provisioning/request-lifecycle.md, docs/how-to/administrator/create-projects-list.md
 - PH6.9 completed: 2026-03-07 — docs: docs/architecture/plans/PH6.9-Provisioning-Package.md
-- PH6.10 completed: YYYY-MM-DD
+- PH6.10 completed: 2026-03-07
 - PH6.11 completed: YYYY-MM-DD
 - PH6.12 completed: YYYY-MM-DD
 - PH6.13 completed: YYYY-MM-DD
@@ -255,3 +255,4 @@ Sign-off: Bobby Fetting — YYYY-MM-DD
 <!-- PROGRESS: 2026-03-07 PH6.7 completed. Implemented D-PH6-07 SignalR production path: host extension config, authenticated negotiate endpoint with per-project/admin group assignment, real SignalR management API push/group lifecycle service, terminal-state saga group cleanup, developer how-to for SPFx AadHttpClient negotiate/reconnect pattern, ADR-0063, and scoped verification commands passed (`pnpm turbo run build/lint/check-types/test --filter=@hbc/functions`). -->
 <!-- PROGRESS: 2026-03-07 PH6.8 completed. Implemented D-PH6-08 request lifecycle/state engine with `STATE_TRANSITIONS`, `isValidTransition`, `STATE_NOTIFICATION_TARGETS`, notification templates, new request APIs (`submitProjectSetupRequest`, `listProjectSetupRequests`, `advanceRequestState`) with Bearer + transition + `projectNumber` enforcement, Projects-list setup script/docs, backend README updates, and scoped verification commands passed (`pnpm turbo run build --filter=@hbc/functions`, `pnpm turbo run lint --filter=@hbc/functions --filter=@hbc/provisioning`, `pnpm turbo run check-types --filter=@hbc/functions --filter=@hbc/provisioning`, `pnpm turbo run test --filter=@hbc/provisioning`). -->
 <!-- PROGRESS: 2026-03-07 PH6.9 completed. Implemented D-PH6-09 `@hbc/provisioning` package (`createProvisioningApiClient`, Zustand+immer store with `handleProgressEvent`, `useProvisioningSignalR`, visibility helper, notification templates, and complete public exports), added unit tests for visibility/store alongside state-machine tests, and verified `pnpm turbo run build/lint/check-types/test --filter=@hbc/provisioning` passed with zero errors. -->
+<!-- PROGRESS: 2026-03-07 PH6.10 completed. Implemented D-PH6-10 estimating app Project Setup Request UX (`/project-setup`, `/project-setup/new`, `/project-setup/$requestId`) with submission form, OpEx-deduplicated members, detail page provisioning visibility + provisioning-only SignalR connection, and 7-step checklist rendering including DeferredToTimer and site links. Added minimal support updates (`HbcPeoplePicker` in ui-kit, estimating env typing + provisioning alias/deps) and verified `pnpm turbo run build --filter=@hbc/spfx-estimating --only`, `pnpm turbo run lint --filter=@hbc/spfx-estimating --only`, `pnpm --filter @hbc/spfx-estimating exec tsc --noEmit`, and `pnpm turbo run build-storybook --filter=@hbc/ui-kit --only`. -->

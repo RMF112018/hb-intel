@@ -119,6 +119,8 @@ export * from './icons/index.js';
 // Components
 export { HbcStatusBadge } from './HbcStatusBadge/index.js';
 export type { HbcStatusBadgeProps, StatusVariant } from './HbcStatusBadge/index.js';
+export { HbcPeoplePicker } from './HbcPeoplePicker.js';
+export type { HbcPeoplePickerProps } from './HbcPeoplePicker.js';
 
 export { HbcEmptyState } from './HbcEmptyState/index.js';
 export type { HbcEmptyStateProps } from './HbcEmptyState/index.js';

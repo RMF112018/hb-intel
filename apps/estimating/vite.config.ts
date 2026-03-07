@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => ({
       '@hbc/auth': path.resolve(__dirname, '../../packages/auth/src'),
       '@hbc/shell': path.resolve(__dirname, '../../packages/shell/src'),
       '@hbc/ui-kit': path.resolve(__dirname, '../../packages/ui-kit/src'),
+      '@hbc/provisioning': path.resolve(__dirname, '../../packages/provisioning/src'),
     },
   },
   define: {
