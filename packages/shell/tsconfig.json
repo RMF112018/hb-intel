@@ -9,6 +9,7 @@
     "baseUrl": "../..",
     "paths": {
       "@hbc/auth/dev": ["packages/shell/src/devToolbar/auth-dev-shim.d.ts"],
+      "@hbc/shell": ["packages/shell/src/index.ts"],
       "@hbc/models/*": ["packages/models/src/*"],
       "@hbc/data-access/*": ["packages/data-access/src/*"],
       "@hbc/query-hooks/*": ["packages/query-hooks/src/*"],

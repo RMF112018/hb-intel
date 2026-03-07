@@ -180,7 +180,7 @@ Phase 6 is complete when HB Intel has a production-ready provisioning system tha
 - [ ] 6.0.21 GitHub Actions deployment pipeline functional for dev, staging, and production.
 - [x] 6.0.22 All required ADRs created in `docs/architecture/adr/`.
 - [ ] 6.0.23 Diátaxis documentation complete in correct `docs/` folders.
-- [ ] 6.0.24 `pnpm turbo run build` passes with zero errors across the full monorepo.
+- [x] 6.0.24 `pnpm turbo run build` passes with zero errors across the full monorepo. (2026-03-07 update: PH6.15 cleanup verification reran full monorepo build successfully with zero errors.)
 - [ ] 6.0.25 Release sign-off checklist completed and signed by product owner.
 
 ---
@@ -259,3 +259,4 @@ Sign-off: Bobby Fetting — YYYY-MM-DD
 <!-- PROGRESS: 2026-03-07 PH6.12 completed. Implemented D-PH6-12 cross-app notification and admin failures foundations: added `ProvisioningNotificationBanner` to `@hbc/ui-kit` export surface, added `listFailedRuns` to `@hbc/provisioning` API client and backend `provisioning-failures` admin-only endpoint, implemented table-storage failed-run retrieval, replaced Admin failures page with `HbcDataTable` retry/escalate inbox with live row action state, and verified `pnpm turbo run build`, `pnpm turbo run lint`, `pnpm turbo run check-types`, and `pnpm turbo run build-storybook --filter=@hbc/ui-kit`. -->
 <!-- PROGRESS: 2026-03-07 PH6.13 completed. Implemented D-PH6-13 timer trigger bifurcation with shared `runTimerFullSpec` handler, nightly EST schedule (`0 0 1 * * *` with `WEBSITE_TIME_ZONE=Eastern Standard Time`), deferred Step 5 processing + retry escalation (`step5TimerRetryCount`, fail after 3 overnight retries), fire-and-forget completion audit writes, admin-only non-production manual timer endpoint, and immediate `DeferredToTimer` saga SignalR progress updates. -->
 <!-- PROGRESS: 2026-03-07 PH6.14 completed. Implemented D-PH6-14 observability by upgrading `createLogger` to emit structured custom events/metrics, instrumenting saga + timer handlers with the nine required telemetry events and three custom metrics (step duration, saga success rate, step-5 deferral rate), and adding `docs/maintenance/provisioning-observability-runbook.md` with exact Kusto query reference cards and alert rule definitions for stuck runs and timer failures. -->
+<!-- PROGRESS: 2026-03-07 PH6.15 cleanup completed (D-PH6-16). Resolved pre-existing TS6059/TS6307 cross-package path alias failures using minimal package-local tsconfig path isolation across affected packages, cleaned accidental generated source artifacts, and reran full monorepo verification (`pnpm turbo run build`, `pnpm turbo run lint`, `pnpm turbo run check-types`, `pnpm turbo run test`) with zero command errors. -->

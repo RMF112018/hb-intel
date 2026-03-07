@@ -56,22 +56,24 @@ All routing, data fetching, and component scope is bound to a single `projectId`
 
 | Task File | Title | Key Deliverables |
 |---|---|---|
-| `PH7.1` | Foundation & Data Models | All TypeScript enums, interfaces, and type definitions for every Project Hub feature |
-| `PH7.2` | Routes & Shell Navigation | TanStack Router route tree, `ProjectHubApp` shell, sidebar nav, project selector |
-| `PH7.3` | Project Hub Home Page | Per-project dashboard: status cards, quick-action shortcuts, recent activity feed |
-| `PH7.4` | Preconstruction Module | Go/No-Go read-only view, Kickoff Checklist, Estimate Panel, Turnover to Ops, Post-Bid Autopsy |
-| `PH7.5` | Project Management Module | PMP + team acknowledgment, RACI Matrix, Startup Checklist, Closeout Checklist |
-| `PH7.6` | Safety Module | Site Specific Safety Plan, JHA Log, Emergency Plans Library, Incident Reporting |
-| `PH7.7` | Quality Control Module | QC Checklists (CSI-scoped), QC Completion + Third-Party Inspection Coordination |
-| `PH7.8` | Warranty Module | Warranty request workflow, document library, expiration alert system |
-| `PH7.9` | Financial Forecasting | Procore budget upload, Summary Sheet, GC/GR Forecast, Cash Flow Schedule |
-| `PH7.10` | Schedule | Milestone tracker, XER/XML/CSV file parsing, Primavera P6 / MS Project support |
-| `PH7.11` | Buyout Log | Full buyout tracker, Procore budget upload for original budget, CSI division structure |
-| `PH7.12` | Permit Log & Required Inspections | Permit log tracker, linked Required Inspections tracker, status management |
-| `PH7.13` | Constraints Log | 7-category constraints tracker, Change Tracking section, Delay Log section |
-| `PH7.14` | PX Review & Owner Report | PX Review auto-assembly + trend dashboard; Owner Report auto-populate + PDF export |
-| `PH7.15` | Backend API Endpoints | All Azure Functions HTTP triggers for Project Hub data operations |
-| `PH7.16` | Testing, CI/CD & Documentation | Vitest unit tests, Playwright E2E, GitHub Actions, ADRs, Diátaxis docs |
+| Task File | Title | Key Deliverables |
+|---|---|---|
+| `PH7-ProjectHub-1` | Foundation & Data Models | All TypeScript enums, interfaces, and type definitions for every Project Hub feature |
+| `PH7-ProjectHub-2` | Routes & Shell Navigation | TanStack Router route tree, `ProjectHubApp` shell, sidebar nav, project selector |
+| `PH7-ProjectHub-3` | Project Hub Home Page | Per-project dashboard: status cards, quick-action shortcuts, recent activity feed |
+| `PH7-ProjectHub-4` | Preconstruction Module | Go/No-Go scorecard read-only view, Kickoff Checklist, Estimate Panel, Turnover to Ops, Post-Bid Autopsy |
+| `PH7-ProjectHub-5` | Project Management Module | PMP + team acknowledgment, RACI Matrix, Startup Checklist, Closeout Checklist |
+| `PH7-ProjectHub-6` | Safety Module | Site Specific Safety Plan, JHA Log, Emergency Plans Library, Incident Reporting |
+| `PH7-ProjectHub-7` | Quality Control Module | QC Checklists (CSI-scoped), QC Completion + Third-Party Inspection Coordination |
+| `PH7-ProjectHub-8` | Warranty Module | Warranty request workflow, document library, expiration alert system |
+| `PH7-ProjectHub-9` | Financial Forecasting | Procore budget upload, Summary Sheet, GC/GR Forecast, Cash Flow Schedule |
+| `PH7-ProjectHub-10` | Schedule | Milestone tracker, XER/XML/CSV file parsing, Primavera P6 / MS Project support |
+| `PH7-ProjectHub-11` | Buyout Log | Full buyout tracker, Procore budget upload for original budget, CSI division structure |
+| `PH7-ProjectHub-12` | Permit Log & Required Inspections | Permit log tracker, linked Required Inspections tracker, status management |
+| `PH7-ProjectHub-13` | Constraints Log | 7-category constraints tracker, Change Tracking section, Delay Log section |
+| `PH7-ProjectHub-14` | PX Review & Owner Report | PX Review auto-assembly + trend dashboard; Owner Report auto-populate + PDF export |
+| `PH7-ProjectHub-15` | Backend API Endpoints | All Azure Functions HTTP triggers for Project Hub data operations |
+| `PH7-ProjectHub-16` | Testing, CI/CD & Documentation | Vitest unit tests, Playwright E2E, GitHub Actions, ADRs, Diátaxis docs |
 
 ---
 
@@ -80,11 +82,13 @@ All routing, data fetching, and component scope is bound to a single `projectId`
 Execute task files strictly in the following order. Each task file lists its own prerequisite checks.
 
 ```
-PH7.1 → PH7.2 → PH7.3 → PH7.4 → PH7.5 → PH7.6 → PH7.7 → PH7.8 →
-PH7.9 → PH7.10 → PH7.11 → PH7.12 → PH7.13 → PH7.14 → PH7.15 → PH7.16
+PH7-ProjectHub-1 → PH7-ProjectHub-2 → PH7-ProjectHub-3 → PH7-ProjectHub-4 →
+PH7-ProjectHub-5 → PH7-ProjectHub-6 → PH7-ProjectHub-7 → PH7-ProjectHub-8 →
+PH7-ProjectHub-9 → PH7-ProjectHub-10 → PH7-ProjectHub-11 → PH7-ProjectHub-12 →
+PH7-ProjectHub-13 → PH7-ProjectHub-14 → PH7-ProjectHub-15 → PH7-ProjectHub-16
 ```
 
-**Rationale:** Foundation types (PH7.1) must exist before any component or API work begins. Routes and shell (PH7.2) must exist before individual pages are built. The home page (PH7.3) provides the navigation anchor for all feature pages. Feature modules (PH7.4–PH7.14) are ordered by business priority (Preconstruction → Project Management → Safety → QC → Warranty → Financial → Schedule → Buyout → Permits → Constraints → Reporting). Backend API (PH7.15) must be finalized after all feature data shapes are confirmed. Testing and documentation (PH7.16) are last but mandatory.
+**Rationale:** Foundation types (PH7-ProjectHub-1) must exist before any component or API work begins. Routes and shell (PH7-ProjectHub-2) must exist before individual pages are built. The home page (PH7-ProjectHub-3) provides the navigation anchor for all feature pages. Feature modules (PH7-ProjectHub-4 through PH7-ProjectHub-14) are ordered by business priority. Backend API (PH7-ProjectHub-15) must be finalized after all feature data shapes are confirmed. Testing and documentation (PH7-ProjectHub-16) are last but mandatory.
 
 ---
 
