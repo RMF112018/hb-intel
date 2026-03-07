@@ -683,4 +683,8 @@ Phase 5C.4 (DevToolbar Component Implementation) completed: 2026-03-07
   - Added PH5C.4 validation suites in `packages/shell/src/devToolbar/DevToolbar.test.tsx` and `useDevAuthBypass.test.tsx` with wrapper `.test.ts` entries to align with workspace include patterns; targeted devToolbar coverage run reports 95.39%.
   - Verification gates passed: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run test --filter=@hbc/shell`, `pnpm --filter @hbc/shell run test:coverage`; production app bundle grep after `pnpm --filter @hbc/dev-harness build` returned no `HB-AUTH-DEV|DevToolbar|devToolbar` markers.
   - PH5C.4 remediation closure: resolved `@hbc/auth/dev` shell build boundary conflict by aligning auth dev subpath emit/export settings and shell type-path mapping (`packages/auth/package.json`, `packages/auth/tsconfig.json`, `packages/shell/tsconfig.json`) and removed duplicate `IPersona` re-export in persona registry.
+Phase 5C.5 (Developer Integration How-To Guide) completed: 2026-03-07
+  - Implemented D-PH5C-07 by creating `docs/how-to/developer/integrate-auth-with-your-feature.md` from the locked PH5C.5 production markdown block with complete Diátaxis how-to structure, 10 numbered integration steps, worked Accounting Invoice List example, and troubleshooting guidance.
+  - Verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` (pass with one pre-existing auth warning), `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`.
+  - PH5C.5 remediation status: no phase-specific remediation required; no new lint/build/type-check failures introduced by the PH5C.5 documentation deliverable.
 -->

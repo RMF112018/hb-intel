@@ -266,8 +266,8 @@ All tasks start in PENDING state. Update this section after each task completion
 - 5.C.4.4 [COMPLETED] — Styling and layout
 
 ### PH5C.5 Progress Notes
-- 5.C.5.1 [PENDING] — Developer guide creation
-- 5.C.5.2 [PENDING] — Worked example (Accounting Invoice List)
+- 5.C.5.1 [COMPLETED] — Developer guide creation
+- 5.C.5.2 [COMPLETED] — Worked example (Accounting Invoice List)
 
 ### PH5C.6 Progress Notes
 - 5.C.6.1 [PENDING] — End-user guide creation
@@ -315,6 +315,7 @@ All verification gates remain PENDING until execution. See PH5C.10 for full veri
 ### Documentation & Architecture
 - All documentation files in correct `docs/` subfolders - [PASS for PH5C.3]
 - ADRs linked and cross-referenced - [PENDING]
+- Developer integration how-to guide (`docs/how-to/developer/integrate-auth-with-your-feature.md`) - [PASS for PH5C.5]
 
 ### Audit Coverage
 - Security: 100% - [PENDING]
@@ -364,5 +365,9 @@ D-PH5C-06/D-PH5C-02/D-PH5C-03 traceability closed: implemented `packages/shell/s
 PH5C.4 validation coverage: added interaction suites (`packages/shell/src/devToolbar/DevToolbar.test.tsx`, `useDevAuthBypass.test.tsx`) with wrapper entries and targeted coverage run reporting 95.39% across devToolbar files.
 PH5C.4 verification evidence: `pnpm turbo run build --filter=@hbc/shell` PASS; `pnpm turbo run test --filter=@hbc/shell` PASS; `pnpm --filter @hbc/shell run test:coverage` PASS; production app bundle grep after `pnpm --filter @hbc/dev-harness build` returned no dev-toolbar markers.
 PH5C.4 remediation note: resolved `@hbc/auth/dev` compile boundary regression for shell builds by adding shell-local dev-auth type mapping and aligning auth dev subpath emit/export configuration (`packages/auth/package.json`, `packages/auth/tsconfig.json`) with a duplicate export cleanup in `personaRegistry.ts`.
-Next: Execute PH5C.5 (DevToolbar documentation)
+PH5C.5 completed: 2026-03-07
+D-PH5C-07 traceability closed: created `docs/how-to/developer/integrate-auth-with-your-feature.md` verbatim from locked PH5C.5 production markdown block with 10 numbered integration steps, worked Accounting Invoice List example, code patterns, testing guidance, troubleshooting, and next-steps references.
+PH5C.5 verification evidence: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` PASS with one pre-existing auth warning; `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` PASS.
+PH5C.5 remediation note: no phase-specific remediation required; existing lint warning remains outside PH5C.5 doc-only change scope and no new lint issues were introduced.
+Next: Execute PH5C.6 (End-User How-To Guide)
 -->
