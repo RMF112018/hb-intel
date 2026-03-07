@@ -86,6 +86,42 @@ export interface ISpfxPageContext {
 }
 
 /**
+ * Approved host-container metadata passed from SPFx into HB Intel seams.
+ *
+ * Boundary rule:
+ * - Metadata-only host context; no shell composition controls are allowed.
+ */
+export interface SpfxHostContainerMetadata {
+  hostId: string;
+  domElementId?: string;
+  siteUrl?: string;
+  webPartInstanceId?: string;
+}
+
+/**
+ * Limited SPFx host signals approved for Phase 5.14.
+ */
+export interface SpfxHostSignalState {
+  themeKey?: string;
+  widthPx?: number;
+  pathname?: string;
+}
+
+/**
+ * Strict identity handoff seam for SPFx hosting.
+ *
+ * Alignment notes:
+ * - PH5.14: SPFx can provide host container + identity context + narrow hooks.
+ * - D-10: keeps host/runtime integration out of feature-level composition logic.
+ */
+export interface SpfxIdentityBridgeInput {
+  pageContext: ISpfxPageContext;
+  hostContainer: SpfxHostContainerMetadata;
+  hostContextRef: string;
+  hostSignals?: SpfxHostSignalState;
+}
+
+/**
  * Raw provider/environment context that may be retained in supplemental
  * normalized session fields for approved diagnostics/integration seams.
  */

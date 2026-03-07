@@ -623,4 +623,18 @@ Phase 5.13 (Audit, Retention, and Traceability) completed: 2026-03-06
   - 5.13.4 basic operational admin audit visibility hook delivered with retention-aware active/archived counts and recent-events projection
   - 5.13.5 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run lint --filter=@hbc/auth`, `pnpm turbo run check-types --filter=@hbc/auth`
   - 5.13.6 ADR-0066 created: `docs/architecture/adr/ADR-0066-audit-retention-and-traceability.md`
+Phase 5.14 (SPFx Boundary and Hosting Integration) completed: 2026-03-06
+  - 5.14.1 strict SPFx host-bridge contracts implemented in `@hbc/auth` and `@hbc/shell` for approved seams only (container metadata, identity context handoff, limited host signals)
+  - 5.14.2 SPFx adapter and bootstrap seams refactored to typed bridge inputs with deterministic validation and legacy compatibility normalization
+  - 5.14.3 shell boundary enforcement implemented so SPFx host data cannot become shell composition truth; composition remains resolved by shell-owned rules
+  - 5.14.4 approved SPFx host hooks (`theme`, `resize`, `location`) implemented through `createSpfxShellEnvironmentAdapter` without generic shell component coupling
+  - 5.14.5 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`
+  - 5.14.6 ADR-0067 created: `docs/architecture/adr/ADR-0067-spfx-boundary-and-hosting-integration.md`
+Phase 5.15 (Performance Baseline and Startup Budgets) completed: 2026-03-06
+  - 5.15.1 centralized startup timing utility + locked balanced budgets implemented in `packages/shell/src/startupTiming.ts` (`runtime-detection`, `auth-bootstrap`, `session-restore`, `permission-resolution`, `first-protected-shell-render` => `100/800/500/200/1500` ms)
+  - 5.15.2 non-blocking budget validation model implemented with explicit diagnostics output (`StartupTimingSnapshot` + `StartupBudgetValidationResult`) and release-gating evidence semantics
+  - 5.15.3 instrumentation integrated through auth runtime detection, bootstrap/restore adapters, SPFx bootstrap seam, guard permission resolution, and shell first-protected-render readiness boundary
+  - 5.15.4 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`
+  - 5.15.5 targeted Vitest startup-timing suite attempted but blocked by existing workspace Vite-resolution issue (`Cannot find package 'vite'` from package `.vite-temp` configs)
+  - 5.15.6 ADR-0068 created: `docs/architecture/adr/ADR-0068-performance-baseline-and-startup-budgets.md`
 -->

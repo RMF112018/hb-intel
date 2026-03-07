@@ -1,8 +1,8 @@
 import type { ICurrentUser } from '@hbc/models';
-import type { IMsalConfig, ISpfxPageContext } from '../types.js';
+import type { IMsalConfig, ISpfxPageContext, SpfxIdentityBridgeInput } from '../types.js';
 import { MsalAdapter } from './MsalAdapter.js';
 import { MockAdapter } from './MockAdapter.js';
-import { mapSpfxContextToUser, SpfxAdapter } from './SpfxAdapter.js';
+import { mapSpfxContextToUser, SpfxAdapter, toSpfxIdentityBridgeInput } from './SpfxAdapter.js';
 export type {
   AdapterIdentityPayload,
   AuthFailure,
@@ -12,6 +12,9 @@ export type {
   CanonicalAuthMode,
   IMsalConfig,
   ISpfxPageContext,
+  SpfxHostContainerMetadata,
+  SpfxHostSignalState,
+  SpfxIdentityBridgeInput,
   LegacyAuthMode,
   NormalizedAuthSession,
   SessionRestoreMetadata,
@@ -38,7 +41,7 @@ export {
 } from './sessionNormalization.js';
 
 export { MsalAdapter } from './MsalAdapter.js';
-export { SpfxAdapter, mapSpfxContextToUser } from './SpfxAdapter.js';
+export { SpfxAdapter, mapSpfxContextToUser, toSpfxIdentityBridgeInput } from './SpfxAdapter.js';
 export { MockAdapter } from './MockAdapter.js';
 
 /**
@@ -68,9 +71,9 @@ export async function initMsalAuth(
  * Convenience helper for SPFx bootstrap integration seams.
  */
 export async function acquireSpfxSession(
-  pageContext: ISpfxPageContext,
+  pageContext: ISpfxPageContext | SpfxIdentityBridgeInput,
 ): Promise<ReturnType<SpfxAdapter['acquireIdentity']>> {
-  const adapter = new SpfxAdapter(pageContext);
+  const adapter = new SpfxAdapter(toSpfxIdentityBridgeInput(pageContext));
   return adapter.acquireIdentity();
 }
 

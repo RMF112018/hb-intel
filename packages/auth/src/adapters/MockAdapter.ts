@@ -14,6 +14,7 @@ import {
   restoreSessionWithinPolicy,
 } from './sessionNormalization.js';
 import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
+import { endStartupPhase, startStartupPhase } from '../startup/startupTimingBridge.js';
 
 /**
  * Mock/dev override adapter for local and test runtime scenarios.
@@ -62,20 +63,46 @@ export class MockAdapter implements IAuthAdapter {
     session: NormalizedAuthSession | null,
     policy: SessionRestorePolicy,
   ): Promise<SessionRestoreResult> {
-    const result = restoreSessionWithinPolicy(session, policy);
-    recordStructuredAuditEvent({
-      eventType: result.outcome === 'restored' ? 'session-restore-success' : 'session-restore-failure',
-      actorId: session?.user.id ?? this.mockUser.id,
-      subjectUserId: session?.user.id ?? this.mockUser.id,
+    startStartupPhase('session-restore', {
+      source: 'mock-adapter',
       runtimeMode: this.mode,
-      source: 'adapter',
-      outcome: result.outcome === 'restored' ? 'success' : 'failure',
-      details: {
-        provider: this.mode,
-        outcome: result.outcome,
-      },
+      outcome: 'pending',
     });
-    return result;
+    try {
+      const result = restoreSessionWithinPolicy(session, policy);
+      recordStructuredAuditEvent({
+        eventType: result.outcome === 'restored' ? 'session-restore-success' : 'session-restore-failure',
+        actorId: session?.user.id ?? this.mockUser.id,
+        subjectUserId: session?.user.id ?? this.mockUser.id,
+        runtimeMode: this.mode,
+        source: 'adapter',
+        outcome: result.outcome === 'restored' ? 'success' : 'failure',
+        details: {
+          provider: this.mode,
+          outcome: result.outcome,
+        },
+      });
+      endStartupPhase('session-restore', {
+        source: 'mock-adapter',
+        runtimeMode: this.mode,
+        outcome: result.outcome === 'restored' ? 'success' : 'failure',
+        details: {
+          restoreOutcome: result.outcome,
+        },
+      });
+      return result;
+    } catch (error) {
+      endStartupPhase('session-restore', {
+        source: 'mock-adapter',
+        runtimeMode: this.mode,
+        outcome: 'failure',
+        details: {
+          restoreOutcome: 'fatal',
+          message: error instanceof Error ? error.message : 'unknown-session-restore-error',
+        },
+      });
+      throw error;
+    }
   }
 }
 

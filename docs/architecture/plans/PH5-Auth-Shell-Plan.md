@@ -222,6 +222,29 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
 - `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
 - `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
+
+## Phase 5.15 Progress Notes
+
+- 5.15.1 completed — Phase 5.15 startup timing domain implemented in `@hbc/shell` (`startupTiming.ts`) with locked balanced budgets (`100/800/500/200/1500` ms) and explicit startup phase taxonomy coverage — 2026-03-06.
+- 5.15.2 completed — non-blocking budget validation and diagnostics snapshot APIs integrated as release-criteria evidence seams (`getSnapshot`, `validateBudgets`, `StartupTimingSnapshot`, `StartupBudgetValidationResult`) without runtime throws — 2026-03-06.
+- 5.15.3 completed — runtime/auth/guard/shell startup instrumentation wired in sequence: `resolveAuthMode`, auth bootstrap + restore adapters, SPFx bootstrap seam, centralized guard resolution, and first protected shell render completion in `ShellCore` — 2026-03-06.
+- 5.15.4 completed — shell-level startup diagnostics observer seam exposed through `ShellCore` optional callback and startup timing exports/types updated in `@hbc/shell` with bounded auth bridge integration to preserve package ownership — 2026-03-06.
+- 5.15.5 completed — startup timing tests added for utility behavior, adapter/guard instrumentation, SPFx bootstrap timing emission, and shell protected-render readiness without composition regressions — 2026-03-06.
+- 5.15.6 completed — Phase 5.15 documentation/governance closure completed (PH5.15 + PH5 updates, blueprint/foundation progress notes, ADR-0068, ADR index update, and verification evidence capture) — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.15)
+
+- [x] Success Criteria #1 advanced through explicit startup phase instrumentation coverage across dual-mode runtime paths (PWA and SPFx preview seams).
+- [x] Success Criteria #2 advanced by keeping performance instrumentation inside adapter/guard/shell seams without changing runtime-specific auth behavior contracts.
+- [x] Success Criteria #3 advanced through centralized guard/session timing checkpoints tied to normalized auth lifecycle and first protected shell render readiness.
+- [x] Success Criteria #10 advanced through formal startup budgets as release criteria, explicit non-blocking validation outputs, and complete Phase 5.15 documentation/ADR traceability.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm exec vitest run packages/shell/src/startupTiming.test.ts packages/shell/src/ShellCore.test.ts packages/auth/src/adapters/resolveAuthMode.test.ts packages/auth/src/adapters/sessionRestoreTiming.test.ts packages/auth/src/guards/guardResolution.test.ts packages/auth/src/spfx/index.test.ts` - BLOCKED (workspace Vitest project setup cannot resolve package-local `vite` in generated `.vite-temp` configs)
 - `pnpm exec vitest run packages/auth/src/guards/guardResolution.test.ts packages/auth/src/guards/AccessDenied.test.ts packages/shell/src/redirectMemory.test.ts` - BLOCKED (known workspace Vitest project setup cannot resolve package-local `vite` in generated temp config).
 
 ---
@@ -503,3 +526,24 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - `pnpm turbo run build --filter=@hbc/auth` - PASS
 - `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
 - `pnpm turbo run check-types --filter=@hbc/auth` - PASS
+
+## Phase 5.14 Progress Notes
+
+- 5.14.1 completed — typed SPFx boundary contracts added in `@hbc/auth` and `@hbc/shell` to formalize approved host seams (container metadata, identity context handoff ref, and limited host signals) under locked Option C boundary constraints — 2026-03-06.
+- 5.14.2 completed — SPFx auth bootstrap and adapter paths updated to consume strict bridge contracts (`SpfxHostBridgeInput`, `SpfxIdentityBridgeInput`) with deterministic validation and legacy compatibility normalization — 2026-03-06.
+- 5.14.3 completed — shell boundary enforcement implemented in `ShellCore`/SPFx bridge helpers to reject non-SPFx adapter bridge leakage and preserve shell-owned composition authority via `resolveShellModeRules` — 2026-03-06.
+- 5.14.4 completed — narrow approved SPFx host integration hooks implemented and documented (`theme`, `resize`, `location`) via `createSpfxShellEnvironmentAdapter` without introducing SPFx-specific logic into generic shell components — 2026-03-06.
+- 5.14.5 completed — public exports, seam normalization helpers, and boundary regression tests finalized for auth/shell host-bridge surfaces; governance closure prepared with ADR-0067 and traceability updates — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.14)
+
+- [x] Success Criteria #1 advanced through explicit one-product shell authority enforcement in SPFx runtime hosting.
+- [x] Success Criteria #4 advanced through centralized shell-boundary control preventing host-driven composition branching.
+- [x] Success Criteria #9 advanced through strict SPFx host-boundary seams that keep HB Intel shell composition truth inside shared shell/auth packages.
+- [x] Success Criteria #10 advanced through Phase 5.14 documentation closure (PH5.14/PH5 notes + checklist updates, blueprint/foundation progress comments, ADR-0067, and verification evidence).
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS

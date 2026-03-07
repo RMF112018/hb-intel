@@ -7,6 +7,7 @@ import type {
   NormalizedAuthSession,
   SessionRestorePolicy,
   SessionRestoreResult,
+  SpfxIdentityBridgeInput,
 } from '../types.js';
 import {
   createAuthFailure,
@@ -14,6 +15,7 @@ import {
   restoreSessionWithinPolicy,
 } from './sessionNormalization.js';
 import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
+import { endStartupPhase, startStartupPhase } from '../startup/startupTimingBridge.js';
 
 /**
  * SPFx adapter implementation for `spfx-context` runtime mode.
@@ -21,33 +23,36 @@ import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
 export class SpfxAdapter implements IAuthAdapter {
   public readonly mode = 'spfx-context' as const;
 
-  public constructor(private readonly pageContext: ISpfxPageContext | null) {}
+  public constructor(private readonly bridge: SpfxIdentityBridgeInput | null) {}
 
   public async acquireIdentity(): Promise<AuthResult<AdapterIdentityPayload>> {
-    if (!this.pageContext) {
+    if (!this.bridge) {
       return {
         ok: false,
         error: createAuthFailure(
           'missing-context',
-          'SPFx page context is missing for spfx-context runtime.',
+          'SPFx identity bridge is missing for spfx-context runtime.',
           false,
         ),
       };
     }
 
-    const user = mapSpfxContextToUser(this.pageContext);
+    const user = mapSpfxContextToUser(this.bridge.pageContext);
 
     return {
       ok: true,
       value: {
         user,
-        providerIdentityRef: this.pageContext.user.loginName,
+        providerIdentityRef: this.bridge.pageContext.user.loginName,
         runtimeMode: this.mode,
         rawContext: {
           provider: this.mode,
           payload: {
-            loginName: this.pageContext.user.loginName,
-            isSiteAdmin: this.pageContext.user.isSiteAdmin,
+            loginName: this.bridge.pageContext.user.loginName,
+            isSiteAdmin: this.bridge.pageContext.user.isSiteAdmin,
+            hostContextRef: this.bridge.hostContextRef,
+            hostContainer: this.bridge.hostContainer,
+            hostSignals: this.bridge.hostSignals,
           },
         },
       },
@@ -62,20 +67,46 @@ export class SpfxAdapter implements IAuthAdapter {
     session: NormalizedAuthSession | null,
     policy: SessionRestorePolicy,
   ): Promise<SessionRestoreResult> {
-    const result = restoreSessionWithinPolicy(session, policy);
-    recordStructuredAuditEvent({
-      eventType: result.outcome === 'restored' ? 'session-restore-success' : 'session-restore-failure',
-      actorId: session?.user.id ?? 'system',
-      subjectUserId: session?.user.id ?? 'system',
+    startStartupPhase('session-restore', {
+      source: 'spfx-adapter',
       runtimeMode: this.mode,
-      source: 'adapter',
-      outcome: result.outcome === 'restored' ? 'success' : 'failure',
-      details: {
-        provider: 'spfx',
-        outcome: result.outcome,
-      },
+      outcome: 'pending',
     });
-    return result;
+    try {
+      const result = restoreSessionWithinPolicy(session, policy);
+      recordStructuredAuditEvent({
+        eventType: result.outcome === 'restored' ? 'session-restore-success' : 'session-restore-failure',
+        actorId: session?.user.id ?? 'system',
+        subjectUserId: session?.user.id ?? 'system',
+        runtimeMode: this.mode,
+        source: 'adapter',
+        outcome: result.outcome === 'restored' ? 'success' : 'failure',
+        details: {
+          provider: 'spfx',
+          outcome: result.outcome,
+        },
+      });
+      endStartupPhase('session-restore', {
+        source: 'spfx-adapter',
+        runtimeMode: this.mode,
+        outcome: result.outcome === 'restored' ? 'success' : 'failure',
+        details: {
+          restoreOutcome: result.outcome,
+        },
+      });
+      return result;
+    } catch (error) {
+      endStartupPhase('session-restore', {
+        source: 'spfx-adapter',
+        runtimeMode: this.mode,
+        outcome: 'failure',
+        details: {
+          restoreOutcome: 'fatal',
+          message: error instanceof Error ? error.message : 'unknown-session-restore-error',
+        },
+      });
+      throw error;
+    }
   }
 }
 
@@ -113,5 +144,28 @@ export function mapSpfxContextToUser(pageContext: ISpfxPageContext): ICurrentUse
         permissions,
       },
     ],
+  };
+}
+
+/**
+ * Normalize compatibility input into the strict Phase 5.14 SPFx identity seam.
+ */
+export function toSpfxIdentityBridgeInput(
+  input: ISpfxPageContext | SpfxIdentityBridgeInput | null,
+): SpfxIdentityBridgeInput | null {
+  if (!input) {
+    return null;
+  }
+
+  if ('pageContext' in input) {
+    return input;
+  }
+
+  return {
+    pageContext: input,
+    hostContainer: {
+      hostId: 'spfx-host',
+    },
+    hostContextRef: input.user.loginName,
   };
 }

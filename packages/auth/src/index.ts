@@ -137,6 +137,9 @@ export type {
   BaseRoleDefinitionVersionDiff,
   IMsalConfig,
   ISpfxPageContext,
+  SpfxHostContainerMetadata,
+  SpfxHostSignalState,
+  SpfxIdentityBridgeInput,
   LegacyAuthMode,
   NormalizedAuthSession,
   PermissionOverrideRecord,
@@ -250,7 +253,23 @@ export {
 } from './adapters/index.js';
 
 // SPFx bootstrap (Blueprint §2b — Phase 5)
-export { bootstrapSpfxAuth } from './spfx/index.js';
+export {
+  bootstrapSpfxAuth,
+  assertValidSpfxHostBridgeInput,
+  toSpfxIdentityBridgeInput,
+} from './spfx/index.js';
+
+// Startup timing bridge (PH5.15 — cross-package startup phase instrumentation seam)
+export {
+  startStartupPhase,
+  endStartupPhase,
+  recordStartupPhase,
+} from './startup/startupTimingBridge.js';
+export type {
+  StartupPhase as AuthStartupPhase,
+  StartupTimingPhaseMetadata as AuthStartupTimingPhaseMetadata,
+} from './startup/startupTimingBridge.js';
+export type { SpfxHostBridgeInput } from './spfx/index.js';
 
 // MSAL helpers (Blueprint §2b — Phase 4)
 export { mapMsalAccountToUser, validateMsalConfig } from './msal/index.js';

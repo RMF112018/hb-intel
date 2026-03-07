@@ -136,6 +136,48 @@ export interface RedirectMemoryRecord {
 }
 
 /**
+ * Approved SPFx host container metadata for shell-host seams.
+ *
+ * Boundary rule:
+ * - Container metadata is informational only and cannot alter shell
+ *   composition authority.
+ */
+export interface SpfxHostContainerMetadata {
+  hostId: string;
+  domElementId?: string;
+  siteUrl?: string;
+  webPartInstanceId?: string;
+}
+
+/**
+ * Limited SPFx host signals approved for Phase 5.14.
+ */
+export interface SpfxHostSignalSnapshot {
+  themeKey?: string;
+  widthPx?: number;
+  pathname?: string;
+}
+
+/**
+ * Optional host callbacks for approved SPFx host-signal integration hooks.
+ */
+export interface SpfxHostSignalHandlers {
+  onThemeChange?: (themeKey: string) => void;
+  onResize?: (widthPx: number) => void;
+  onLocationChange?: (pathname: string) => void;
+}
+
+/**
+ * Strict SPFx host bridge contract consumed by shell adapters only.
+ */
+export interface SpfxHostBridge {
+  hostContainer: SpfxHostContainerMetadata;
+  identityContextRef: string;
+  signals?: SpfxHostSignalSnapshot;
+  handlers?: SpfxHostSignalHandlers;
+}
+
+/**
  * Approved extension point contract for environment-specific shell behavior.
  *
  * Scope boundary:
@@ -144,9 +186,82 @@ export interface RedirectMemoryRecord {
  */
 export interface ShellEnvironmentAdapter {
   environment: ShellEnvironment;
+  spfxHostBridge?: SpfxHostBridge;
   enforceRoute?: (
     context: ShellRouteEnforcementContext,
   ) => ShellRouteEnforcementDecision | Promise<ShellRouteEnforcementDecision>;
+  applySpfxHostSignals?: (signals: SpfxHostSignalSnapshot) => void | Promise<void>;
   clearEnvironmentArtifacts?: () => void | Promise<void>;
   clearFeatureCachesByTier?: (tier: ShellCacheRetentionTier) => void | Promise<void>;
+}
+
+/**
+ * Phase 5.15 startup phase taxonomy used for cross-mode budget validation.
+ */
+export type StartupPhase =
+  | 'runtime-detection'
+  | 'auth-bootstrap'
+  | 'session-restore'
+  | 'permission-resolution'
+  | 'first-protected-shell-render';
+
+/**
+ * Optional timing metadata attached to startup phase records.
+ */
+export interface StartupTimingPhaseMetadata {
+  source?: string;
+  environment?: ShellEnvironment | 'unknown';
+  runtimeMode?: string;
+  outcome?: 'success' | 'failure' | 'pending';
+  details?: Record<string, unknown>;
+}
+
+/**
+ * Startup budget target definition used for release-gating checks.
+ */
+export interface StartupBudgetDefinition {
+  phase: StartupPhase;
+  budgetMs: number;
+}
+
+/**
+ * One measured startup phase timing record.
+ */
+export interface StartupTimingRecord {
+  phase: StartupPhase;
+  elapsedMs: number;
+  startedAtMs: number;
+  endedAtMs: number;
+  occurredAt: string;
+  budgetMs: number;
+  withinBudget: boolean;
+  metadata?: StartupTimingPhaseMetadata;
+}
+
+/**
+ * Budget validation failure payload.
+ */
+export interface StartupBudgetFailure {
+  phase: StartupPhase;
+  budgetMs: number;
+  actualMs: number | null;
+  reason: 'missing-measurement' | 'exceeded-budget';
+}
+
+/**
+ * Non-blocking startup budget validation result.
+ */
+export interface StartupBudgetValidationResult {
+  ok: boolean;
+  failures: StartupBudgetFailure[];
+}
+
+/**
+ * Full startup timing snapshot used by preview diagnostics and release checks.
+ */
+export interface StartupTimingSnapshot {
+  generatedAt: string;
+  records: StartupTimingRecord[];
+  budgets: StartupBudgetDefinition[];
+  validation: StartupBudgetValidationResult;
 }

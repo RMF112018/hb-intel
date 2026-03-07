@@ -56,3 +56,21 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - enables production operations through core admin workflows,
 - satisfies formal validation, audit, release, and documentation requirements,
 - and explicitly documents every deferred future expansion path so later phases can extend the platform without re-architecting the foundation.
+
+---
+
+## Phase 5.14 Progress Notes
+
+- 5.14.1 completed — strict SPFx identity/host bridge contracts added in `@hbc/auth` and `@hbc/shell` for approved boundary seams only (host container metadata, identity context handoff, and limited host signals) — 2026-03-06.
+- 5.14.2 completed — SPFx adapter/bootstrap integration refactored to consume typed bridge input (`SpfxIdentityBridgeInput`, `SpfxHostBridgeInput`) while preserving backward-compatible legacy page-context intake through normalized seams — 2026-03-06.
+- 5.14.3 completed — shell boundary enforcement added so SPFx host bridge data is accepted only in `spfx` environment adapters and cannot drive shell composition truth (mode/layout remain resolved by shell-owned rules) — 2026-03-06.
+- 5.14.4 completed — documented narrow approved SPFx host integration hooks implemented (`theme`, `resize`, `location`) through `createSpfxShellEnvironmentAdapter` callback seams without generic-shell SPFx coupling — 2026-03-06.
+- 5.14.5 completed — boundary regression tests added for auth/shell seam normalization and composition-authority enforcement; package exports updated for typed host-bridge public APIs — 2026-03-06.
+
+## Phase 5.14 Completion Checklist
+
+- [x] HB Intel primary shell enforced for SPFx mode.
+- [x] SPFx host responsibilities constrained to container, Microsoft identity context, and approved narrow host hooks.
+- [x] SPFx prevented from becoming shell composition source of truth.
+- [x] Approved SPFx host integrations documented and implemented without shell fragmentation.
+- [x] SPFx-specific logic kept out of generic shell components except through documented seams.

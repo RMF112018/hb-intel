@@ -1,4 +1,5 @@
 import type { AuthLifecyclePhase, AuthMode } from '../types.js';
+import { endStartupPhase, startStartupPhase } from '../startup/startupTimingBridge.js';
 
 /**
  * Guard failure categories for centralized pre-render enforcement.
@@ -48,11 +49,28 @@ export interface GuardResolutionResult {
  * evaluation has resolved all required constraints.
  */
 export function resolveGuardResolution(input: GuardResolutionInput): GuardResolutionResult {
+  // Phase 5.15 startup instrumentation:
+  // Permission-resolution timing is captured at the centralized guard decision
+  // seam so both PWA and SPFx protected render flows are measured uniformly.
+  startStartupPhase('permission-resolution', {
+    source: 'guard-resolution',
+    runtimeMode: input.runtimeMode ?? undefined,
+    outcome: 'pending',
+  });
+
   if (
     input.supportedRuntimeModes &&
     input.runtimeMode &&
     !input.supportedRuntimeModes.includes(input.runtimeMode)
   ) {
+    endStartupPhase('permission-resolution', {
+      source: 'guard-resolution',
+      runtimeMode: input.runtimeMode,
+      outcome: 'failure',
+      details: {
+        failureKind: 'runtime-unsupported',
+      },
+    });
     return {
       allow: false,
       failureKind: 'runtime-unsupported',
@@ -61,6 +79,14 @@ export function resolveGuardResolution(input: GuardResolutionInput): GuardResolu
   }
 
   if (input.lifecyclePhase === 'reauth-required') {
+    endStartupPhase('permission-resolution', {
+      source: 'guard-resolution',
+      runtimeMode: input.runtimeMode ?? undefined,
+      outcome: 'failure',
+      details: {
+        failureKind: 'reauth-required',
+      },
+    });
     return {
       allow: false,
       failureKind: 'reauth-required',
@@ -69,6 +95,14 @@ export function resolveGuardResolution(input: GuardResolutionInput): GuardResolu
   }
 
   if (input.lifecyclePhase !== 'authenticated') {
+    endStartupPhase('permission-resolution', {
+      source: 'guard-resolution',
+      runtimeMode: input.runtimeMode ?? undefined,
+      outcome: 'failure',
+      details: {
+        failureKind: 'unauthenticated',
+      },
+    });
     return {
       allow: false,
       failureKind: 'unauthenticated',
@@ -77,6 +111,14 @@ export function resolveGuardResolution(input: GuardResolutionInput): GuardResolu
   }
 
   if (input.requiredRole && !input.resolvedRoles.includes(input.requiredRole)) {
+    endStartupPhase('permission-resolution', {
+      source: 'guard-resolution',
+      runtimeMode: input.runtimeMode ?? undefined,
+      outcome: 'failure',
+      details: {
+        failureKind: 'role-denied',
+      },
+    });
     return {
       allow: false,
       failureKind: 'role-denied',
@@ -85,6 +127,14 @@ export function resolveGuardResolution(input: GuardResolutionInput): GuardResolu
   }
 
   if (input.requiredPermission && input.hasPermission !== true) {
+    endStartupPhase('permission-resolution', {
+      source: 'guard-resolution',
+      runtimeMode: input.runtimeMode ?? undefined,
+      outcome: 'failure',
+      details: {
+        failureKind: 'permission-denied',
+      },
+    });
     return {
       allow: false,
       failureKind: 'permission-denied',
@@ -92,6 +142,14 @@ export function resolveGuardResolution(input: GuardResolutionInput): GuardResolu
     };
   }
 
+  endStartupPhase('permission-resolution', {
+    source: 'guard-resolution',
+    runtimeMode: input.runtimeMode ?? undefined,
+    outcome: 'success',
+    details: {
+      failureKind: null,
+    },
+  });
   return {
     allow: true,
     failureKind: null,

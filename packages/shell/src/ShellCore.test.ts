@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { resolveRoleLandingPath, resolveShellExperienceState } from './ShellCore.js';
+import {
+  canCompleteFirstProtectedShellRender,
+  resolveRoleLandingPath,
+  resolveShellExperienceState,
+} from './ShellCore.js';
 
 describe('resolveRoleLandingPath', () => {
   it('returns admin landing for Administrator role', () => {
@@ -44,5 +48,34 @@ describe('resolveShellExperienceState', () => {
       degradedEligibility: { eligible: false, reason: 'not-recently-authenticated' },
     });
     expect(state).toBe('recovery');
+  });
+});
+
+describe('canCompleteFirstProtectedShellRender', () => {
+  it('returns true only when auth/session/route state is ready for protected render', () => {
+    expect(
+      canCompleteFirstProtectedShellRender({
+        lifecyclePhase: 'authenticated',
+        experienceState: 'ready',
+        routeDecision: { allow: true },
+      }),
+    ).toBe(true);
+  });
+
+  it('returns false when route is unresolved or denied', () => {
+    expect(
+      canCompleteFirstProtectedShellRender({
+        lifecyclePhase: 'authenticated',
+        experienceState: 'ready',
+        routeDecision: null,
+      }),
+    ).toBe(false);
+    expect(
+      canCompleteFirstProtectedShellRender({
+        lifecyclePhase: 'authenticated',
+        experienceState: 'ready',
+        routeDecision: { allow: false, reason: 'denied' },
+      }),
+    ).toBe(false);
   });
 });

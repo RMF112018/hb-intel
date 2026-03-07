@@ -1,6 +1,6 @@
 import { AccessDenied, useAuthStore } from '@hbc/auth';
 import type { ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   resolveDegradedEligibility,
   resolveRestrictedZones,
@@ -20,6 +20,8 @@ import { ProjectPicker } from './ProjectPicker/index.js';
 import { ShellLayout } from './ShellLayout/index.js';
 import { clearRedirectMemory, resolvePostGuardRedirect, restoreRedirectTarget } from './redirectMemory.js';
 import { resolveShellModeRules } from './shellModeRules.js';
+import { assertValidSpfxHostBridge, normalizeSpfxHostSignals } from './spfxHostBridge.js';
+import { getSnapshot, recordPhase } from './startupTiming.js';
 import {
   isShellStatusActionAllowed,
   resolveShellStatusSnapshot,
@@ -39,6 +41,7 @@ import type {
   ShellEnvironmentAdapter,
   ShellExperienceState,
   ShellRouteEnforcementDecision,
+  StartupTimingSnapshot,
   WorkspaceId,
 } from './types.js';
 
@@ -87,6 +90,8 @@ export interface ShellCoreProps {
   /** Optional custom renderer for restricted-zone communication surfaces. */
   renderRestrictedZones?: (zones: readonly ShellRestrictedZoneState[]) => ReactNode;
   forcedExperienceState?: Exclude<ShellExperienceState, 'access-denied'> | null;
+  /** Optional diagnostics observer for Phase 5.15 startup budget validation. */
+  onStartupTimingSnapshot?: (snapshot: StartupTimingSnapshot) => void;
 }
 
 /**
@@ -131,6 +136,21 @@ export function resolveShellExperienceState(params: {
 }
 
 /**
+ * Determine when first protected shell render is eligible to be marked complete.
+ */
+export function canCompleteFirstProtectedShellRender(params: {
+  lifecyclePhase: string;
+  experienceState: ShellExperienceState;
+  routeDecision: ShellRouteEnforcementDecision | null;
+}): boolean {
+  return (
+    params.lifecyclePhase === 'authenticated' &&
+    params.experienceState === 'ready' &&
+    params.routeDecision?.allow === true
+  );
+}
+
+/**
  * Shared shell orchestrator for Phase 5.5.
  *
  * Non-goals:
@@ -170,6 +190,7 @@ export function ShellCore({
   onRecoveryStateResolved,
   renderRestrictedZones,
   forcedExperienceState = null,
+  onStartupTimingSnapshot,
 }: ShellCoreProps): ReactNode {
   const lifecyclePhase = useAuthStore((s) => s.lifecyclePhase);
   const session = useAuthStore((s) => s.session);
@@ -181,8 +202,18 @@ export function ShellCore({
   const setLastResolvedLandingPath = useShellCoreStore((s) => s.setLastResolvedLandingPath);
   const [routeDecision, setRouteDecision] = useState<ShellRouteEnforcementDecision | null>(null);
   const [wasDegraded, setWasDegraded] = useState(false);
+  const [firstProtectedRenderRecorded, setFirstProtectedRenderRecorded] = useState(false);
+  const startupMountTimeMs = useRef<number>(resolveMonotonicNowMs());
 
   const rules = useMemo(() => resolveShellModeRules(adapter.environment), [adapter.environment]);
+  useEffect(() => {
+    if (adapter.environment !== 'spfx' && adapter.spfxHostBridge) {
+      throw new Error('SPFx host bridge can only be supplied for spfx shell environment adapters.');
+    }
+    if (adapter.environment === 'spfx' && adapter.spfxHostBridge) {
+      assertValidSpfxHostBridge(adapter.spfxHostBridge);
+    }
+  }, [adapter]);
   const resolvedRoles = session?.resolvedRoles ?? [];
   const landingPath = resolveRoleLandingPath(resolvedRoles);
   // Controlled degraded mode is gated by strict policy, not direct lifecycle state.
@@ -300,6 +331,15 @@ export function ShellCore({
   }, [activeWorkspace, setActiveWorkspaceSnapshot]);
 
   useEffect(() => {
+    if (adapter.environment !== 'spfx') {
+      return;
+    }
+
+    const signals = normalizeSpfxHostSignals(adapter.spfxHostBridge?.signals);
+    void adapter.applySpfxHostSignals?.(signals);
+  }, [adapter]);
+
+  useEffect(() => {
     const evaluateRoute = async (): Promise<void> => {
       if (!adapter.enforceRoute) {
         setRouteDecision({ allow: true });
@@ -317,6 +357,38 @@ export function ShellCore({
 
     void evaluateRoute();
   }, [activeWorkspace, adapter, currentPathname, intendedPathname, resolvedRoles]);
+
+  useEffect(() => {
+    if (
+      firstProtectedRenderRecorded ||
+      !canCompleteFirstProtectedShellRender({
+        lifecyclePhase,
+        experienceState,
+        routeDecision,
+      })
+    ) {
+      return;
+    }
+
+    const elapsedMs = Math.max(resolveMonotonicNowMs() - startupMountTimeMs.current, 0);
+    recordPhase('first-protected-shell-render', elapsedMs, {
+      source: 'shell-core',
+      environment: adapter.environment,
+      outcome: 'success',
+      details: {
+        lifecyclePhase,
+      },
+    });
+    setFirstProtectedRenderRecorded(true);
+    onStartupTimingSnapshot?.(getSnapshot());
+  }, [
+    adapter.environment,
+    experienceState,
+    firstProtectedRenderRecorded,
+    lifecyclePhase,
+    onStartupTimingSnapshot,
+    routeDecision,
+  ]);
 
   useEffect(() => {
     if (!session || !rules.supportsRedirectRestore || !onNavigate) {
@@ -464,6 +536,14 @@ export function ShellCore({
       </ShellLayout>
     </div>
   );
+}
+
+function resolveMonotonicNowMs(): number {
+  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+    return performance.now();
+  }
+
+  return Date.now();
 }
 
 /**

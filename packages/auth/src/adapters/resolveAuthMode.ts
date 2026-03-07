@@ -1,4 +1,5 @@
 import type { AuthMode, CanonicalAuthMode } from '../types.js';
+import { endStartupPhase, startStartupPhase } from '../startup/startupTimingBridge.js';
 
 /**
  * Resolve runtime mode from environment and host signals.
@@ -10,24 +11,57 @@ import type { AuthMode, CanonicalAuthMode } from '../types.js';
  * 4. Mock fallback for non-browser/test contexts.
  */
 export function resolveCanonicalAuthMode(): CanonicalAuthMode {
+  startStartupPhase('runtime-detection', {
+    source: 'auth-runtime-resolver',
+    outcome: 'pending',
+  });
+
   const production = isProductionRuntime();
+  let resolvedMode: CanonicalAuthMode = 'mock';
 
   const override = getModeOverride();
   if (override && !production) {
-    return mapLegacyToCanonicalAuthMode(override);
+    resolvedMode = mapLegacyToCanonicalAuthMode(override);
+    endStartupPhase('runtime-detection', {
+      source: 'auth-runtime-resolver',
+      runtimeMode: resolvedMode,
+      outcome: 'success',
+      details: { overrideApplied: true, production },
+    });
+    return resolvedMode;
   }
 
   // Runtime host detection is intentionally conservative to avoid false SPFx
   // positives in standalone web execution.
   if (hasSpfxRuntimeContext()) {
-    return 'spfx-context';
+    resolvedMode = 'spfx-context';
+    endStartupPhase('runtime-detection', {
+      source: 'auth-runtime-resolver',
+      runtimeMode: resolvedMode,
+      outcome: 'success',
+      details: { overrideApplied: false, production },
+    });
+    return resolvedMode;
   }
 
   if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-    return 'pwa-msal';
+    resolvedMode = 'pwa-msal';
+    endStartupPhase('runtime-detection', {
+      source: 'auth-runtime-resolver',
+      runtimeMode: resolvedMode,
+      outcome: 'success',
+      details: { overrideApplied: false, production },
+    });
+    return resolvedMode;
   }
 
-  return 'mock';
+  endStartupPhase('runtime-detection', {
+    source: 'auth-runtime-resolver',
+    runtimeMode: resolvedMode,
+    outcome: 'success',
+    details: { overrideApplied: false, production },
+  });
+  return resolvedMode;
 }
 
 /**

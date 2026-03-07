@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
+import { endStartupPhase, startStartupPhase } from '../startup/startupTimingBridge.js';
 import type {
   AuthBootstrapSelectorResult,
   AuthFailure,
@@ -47,25 +48,42 @@ export const useAuthStore = create<AuthStoreSlice>((set) => ({
   error: null,
 
   beginBootstrap: (runtimeMode) =>
-    set((state) => ({
-      ...state,
-      lifecyclePhase: 'bootstrapping',
-      runtimeMode: runtimeMode ?? state.runtimeMode,
-      isLoading: true,
-      structuredError: null,
-      error: null,
-      shellBootstrap: {
-        ...state.shellBootstrap,
-        authReady: false,
-        shellReadyToRender: false,
-      },
-    })),
+    set((state) => {
+      const resolvedRuntime = runtimeMode ?? state.runtimeMode;
+      startStartupPhase('auth-bootstrap', {
+        source: 'auth-store',
+        runtimeMode: resolvedRuntime ?? undefined,
+        outcome: 'pending',
+      });
+
+      return {
+        ...state,
+        lifecyclePhase: 'bootstrapping',
+        runtimeMode: resolvedRuntime,
+        isLoading: true,
+        structuredError: null,
+        error: null,
+        shellBootstrap: {
+          ...state.shellBootstrap,
+          authReady: false,
+          shellReadyToRender: false,
+        },
+      };
+    }),
 
   completeBootstrap: (params) =>
     set((state) => {
       const session = params?.session ?? state.session;
       const permissionsReady = params?.permissionsReady ?? state.shellBootstrap.permissionsReady;
       const hasSession = Boolean(session);
+      endStartupPhase('auth-bootstrap', {
+        source: 'auth-store',
+        runtimeMode: session?.runtimeMode ?? state.runtimeMode ?? undefined,
+        outcome: hasSession ? 'success' : 'failure',
+        details: {
+          permissionsReady,
+        },
+      });
 
       return {
         ...state,

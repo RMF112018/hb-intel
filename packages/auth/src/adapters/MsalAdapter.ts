@@ -14,6 +14,7 @@ import {
   restoreSessionWithinPolicy,
 } from './sessionNormalization.js';
 import { recordStructuredAuditEvent } from '../audit/auditLogger.js';
+import { endStartupPhase, startStartupPhase } from '../startup/startupTimingBridge.js';
 
 /**
  * PWA MSAL adapter for canonical `pwa-msal` runtime mode.
@@ -93,19 +94,45 @@ export class MsalAdapter implements IAuthAdapter {
     session: NormalizedAuthSession | null,
     policy: SessionRestorePolicy,
   ): Promise<SessionRestoreResult> {
-    const result = restoreSessionWithinPolicy(session, policy);
-    recordStructuredAuditEvent({
-      eventType: result.outcome === 'restored' ? 'session-restore-success' : 'session-restore-failure',
-      actorId: session?.user.id ?? 'system',
-      subjectUserId: session?.user.id ?? 'system',
+    startStartupPhase('session-restore', {
+      source: 'msal-adapter',
       runtimeMode: this.mode,
-      source: 'adapter',
-      outcome: result.outcome === 'restored' ? 'success' : 'failure',
-      details: {
-        provider: 'msal',
-        outcome: result.outcome,
-      },
+      outcome: 'pending',
     });
-    return result;
+    try {
+      const result = restoreSessionWithinPolicy(session, policy);
+      recordStructuredAuditEvent({
+        eventType: result.outcome === 'restored' ? 'session-restore-success' : 'session-restore-failure',
+        actorId: session?.user.id ?? 'system',
+        subjectUserId: session?.user.id ?? 'system',
+        runtimeMode: this.mode,
+        source: 'adapter',
+        outcome: result.outcome === 'restored' ? 'success' : 'failure',
+        details: {
+          provider: 'msal',
+          outcome: result.outcome,
+        },
+      });
+      endStartupPhase('session-restore', {
+        source: 'msal-adapter',
+        runtimeMode: this.mode,
+        outcome: result.outcome === 'restored' ? 'success' : 'failure',
+        details: {
+          restoreOutcome: result.outcome,
+        },
+      });
+      return result;
+    } catch (error) {
+      endStartupPhase('session-restore', {
+        source: 'msal-adapter',
+        runtimeMode: this.mode,
+        outcome: 'failure',
+        details: {
+          restoreOutcome: 'fatal',
+          message: error instanceof Error ? error.message : 'unknown-session-restore-error',
+        },
+      });
+      throw error;
+    }
   }
 }

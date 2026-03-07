@@ -22,6 +22,29 @@
 
 4. Avoid premature deep optimization, but do not allow Phase 5 to ship with undefined startup expectations.
 
+## 5.15 Progress Notes
+
+- 5.15.1 completed — startup phase taxonomy and locked balanced budgets implemented in `packages/shell/src/startupTiming.ts` (`runtime-detection`, `auth-bootstrap`, `session-restore`, `permission-resolution`, `first-protected-shell-render` with `100/800/500/200/1500` ms budgets) — 2026-03-06.
+- 5.15.2 completed — non-blocking budget validation APIs delivered (`startPhase`, `endPhase`, `recordPhase`, `getSnapshot`, `validateBudgets`, `clear`) with explicit release-gating diagnostics semantics and no runtime throws — 2026-03-06.
+- 5.15.3 completed — auth/shell startup instrumentation integrated across runtime resolution, auth bootstrap, session restore, permission resolution, and first protected shell render (`resolveAuthMode`, auth store/adapters/SPFx bootstrap, guard resolver, `ShellCore`) — 2026-03-06.
+- 5.15.4 completed — shell diagnostics observer seam added via `ShellCore` startup snapshot callback and public startup timing exports/types in `@hbc/shell` (with minimal auth bridge exports preserved behind package boundaries) — 2026-03-06.
+- 5.15.5 completed — startup timing unit/integration coverage added for utility behavior, guard/adapters bootstrap instrumentation, and shell first-protected-render readiness (`startupTiming.test.ts`, `guardResolution.test.ts`, `resolveAuthMode.test.ts`, `sessionRestoreTiming.test.ts`, `spfx/index.test.ts`, `ShellCore.test.ts`) — 2026-03-06.
+- 5.15.6 completed — governance/doc closure finalized with PH5.15 + PH5 progress updates/checklists, blueprint/foundation progress comments, ADR-0068 creation, and ADR index update — 2026-03-06.
+
+## 5.15 Completion Checklist
+
+- [x] Startup phases and explicit budgets defined for runtime detection, auth bootstrap, session restore, permission resolution, and first protected shell render.
+- [x] Budgets treated as release criteria through explicit non-blocking validation output and diagnostics snapshot surfaces.
+- [x] Startup timing instrumentation integrated for both PWA and SPFx preview paths without changing auth/guard/shell behavior.
+- [x] Deep optimization deferred with explicit documentation while ensuring startup expectations are defined and measurable in Phase 5.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm exec vitest run packages/shell/src/startupTiming.test.ts packages/shell/src/ShellCore.test.ts packages/auth/src/adapters/resolveAuthMode.test.ts packages/auth/src/adapters/sessionRestoreTiming.test.ts packages/auth/src/guards/guardResolution.test.ts packages/auth/src/spfx/index.test.ts` - BLOCKED (workspace Vitest/Vite resolution issue: package-local `vite` import not resolvable from generated `.vite-temp` configs)
+
 ---
 
 ## Recommended Implementation Sequence

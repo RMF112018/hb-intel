@@ -13,6 +13,17 @@ export type {
   ShellRouteEnforcementContext,
   ShellRouteEnforcementDecision,
   RedirectMemoryRecord,
+  SpfxHostContainerMetadata,
+  SpfxHostSignalSnapshot,
+  SpfxHostSignalHandlers,
+  SpfxHostBridge,
+  StartupPhase,
+  StartupTimingPhaseMetadata,
+  StartupBudgetDefinition,
+  StartupTimingRecord,
+  StartupBudgetFailure,
+  StartupBudgetValidationResult,
+  StartupTimingSnapshot,
 } from './types.js';
 export { WORKSPACE_IDS } from './types.js';
 
@@ -40,6 +51,7 @@ export type { ShellLayoutProps } from './ShellLayout/index.js';
 export {
   ShellCore,
   performShellSignOut,
+  canCompleteFirstProtectedShellRender,
   resolveRoleLandingPath,
   resolveShellExperienceState,
 } from './ShellCore.js';
@@ -98,6 +110,24 @@ export type {
   ShellDegradedSectionLabel,
 } from './shellStatus.js';
 export { resolveShellModeRules } from './shellModeRules.js';
+export {
+  assertValidSpfxHostBridge,
+  normalizeSpfxHostSignals,
+  createSpfxShellEnvironmentAdapter,
+} from './spfxHostBridge.js';
+export {
+  BALANCED_STARTUP_BUDGETS,
+  startPhase,
+  endPhase,
+  recordPhase,
+  getSnapshot,
+  validateBudgets,
+  clear,
+  setBudgets,
+  registerStartupTimingBridge,
+} from './startupTiming.js';
+export type { StartupTimingBridge } from './startupTiming.js';
+
 export {
   captureIntendedDestination,
   rememberRedirectTarget,
