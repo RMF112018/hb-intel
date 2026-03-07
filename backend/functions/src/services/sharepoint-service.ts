@@ -1,6 +1,7 @@
 import { DefaultAzureCredential } from '@azure/identity';
 import { spfi } from '@pnp/sp';
 import '@pnp/nodejs-commonjs';
+import '@pnp/sp/appcatalog/index.js';
 import '@pnp/sp/files/index.js';
 import '@pnp/sp/folders/index.js';
 import '@pnp/sp/lists/index.js';
@@ -19,13 +20,14 @@ export interface ISharePointService {
   uploadTemplateFiles(siteUrl: string, libraryName: string): Promise<void>;
   createDataLists(siteUrl: string, listDefinitions: IListDefinition[]): Promise<void>;
   listExists(siteUrl: string, listTitle: string): Promise<boolean>;
+  installWebParts(siteUrl: string): Promise<void>;
   setGroupPermissions(siteUrl: string, memberUpns: string[], opexUpn: string): Promise<void>;
   associateHubSite(siteUrl: string, hubSiteId: string): Promise<void>;
   isHubAssociated(siteUrl: string): Promise<boolean>;
   disassociateHubSite(siteUrl: string): Promise<void>;
   writeAuditRecord(record: IProvisioningAuditRecord): Promise<void>;
 
-  // Backward-compatible methods retained until PH6.5 migrates Step 5-7 callsites.
+  // Backward-compatible methods retained for transition compatibility.
   applyWebParts(siteUrl: string): Promise<void>;
   setPermissions(siteUrl: string, projectId: string): Promise<void>;
   associateHub(siteUrl: string, hubSiteUrl: string): Promise<void>;
@@ -49,7 +51,7 @@ export interface IFieldDefinition {
 
 /**
  * D-PH6-05: Real SharePoint adapter for provisioning saga idempotency + compensation contracts.
- * Uses Managed Identity tokens with PnPjs and centralizes list/site operations for Steps 1-4.
+ * Uses Managed Identity tokens with PnPjs and centralizes list/site operations for Steps 1-7.
  */
 export class SharePointService implements ISharePointService {
   private readonly tenantUrl: string;
@@ -202,6 +204,31 @@ export class SharePointService implements ISharePointService {
     }
   }
 
+  /**
+   * D-PH6-05 Step 5 implementation: installs HB Intel SPFx app from tenant App Catalog
+   * and polls until installation is visible or timeout is reached.
+   */
+  async installWebParts(siteUrl: string): Promise<void> {
+    const sp: any = await this.getSP(siteUrl);
+    const appCatalogUrl = process.env.SHAREPOINT_APP_CATALOG_URL!;
+    if (!appCatalogUrl) throw new Error('SHAREPOINT_APP_CATALOG_URL env var is required');
+
+    const hbIntelAppId = process.env.HB_INTEL_SPFX_APP_ID!;
+    if (!hbIntelAppId) throw new Error('HB_INTEL_SPFX_APP_ID env var is required');
+
+    // The app catalog URL is validated by env presence; installation call executes on target web.
+    await sp.web.appcatalog.getAppById(hbIntelAppId).install();
+
+    const deadline = Date.now() + 60_000;
+    while (Date.now() < deadline) {
+      const apps = await sp.web.appcatalog.filter(`ProductId eq '${hbIntelAppId}'`)();
+      if (apps[0]?.InstalledVersion) return;
+      await new Promise((r) => setTimeout(r, 5000));
+    }
+
+    throw new Error('Web part installation did not complete within 60 seconds');
+  }
+
   async setGroupPermissions(siteUrl: string, memberUpns: string[], opexUpn: string): Promise<void> {
     const sp: any = await this.getSP(siteUrl);
     await sp.web.breakRoleInheritance(false, true);
@@ -255,9 +282,9 @@ export class SharePointService implements ISharePointService {
     });
   }
 
-  /** PH6.5 placeholder: web part install implementation is delivered in Step 5 real implementation phase. */
-  async applyWebParts(_siteUrl: string): Promise<void> {
-    return;
+  /** Compatibility wrapper for older Step 5 callsites. */
+  async applyWebParts(siteUrl: string): Promise<void> {
+    await this.installWebParts(siteUrl);
   }
 
   /** Compatibility wrapper for pre-PH6.5 step contract. */
@@ -305,4 +332,61 @@ export class SharePointService implements ISharePointService {
   }
 }
 
-export class MockSharePointService extends SharePointService {}
+/**
+ * D-PH6-05 mock adapter used for tests/local mock mode where real SharePoint access is disabled.
+ */
+export class MockSharePointService implements ISharePointService {
+  async createSite(_projectId: string, projectNumber: string, _projectName: string): Promise<string> {
+    return `https://contoso.sharepoint.com/sites/${projectNumber}`;
+  }
+
+  async siteExists(_projectId: string): Promise<string | null> {
+    return null;
+  }
+
+  async deleteSite(_siteUrl: string): Promise<void> {}
+
+  async createDocumentLibrary(_siteUrl: string, _libraryName: string): Promise<void> {}
+
+  async documentLibraryExists(_siteUrl: string, _libraryName: string): Promise<boolean> {
+    return false;
+  }
+
+  async uploadTemplateFiles(_siteUrl: string, _libraryName: string): Promise<void> {}
+
+  async createDataLists(_siteUrl: string, _listDefinitions: IListDefinition[]): Promise<void> {}
+
+  async listExists(_siteUrl: string, _listTitle: string): Promise<boolean> {
+    return false;
+  }
+
+  async installWebParts(_siteUrl: string): Promise<void> {}
+
+  async setGroupPermissions(_siteUrl: string, _memberUpns: string[], _opexUpn: string): Promise<void> {}
+
+  async associateHubSite(_siteUrl: string, _hubSiteId: string): Promise<void> {}
+
+  async isHubAssociated(_siteUrl: string): Promise<boolean> {
+    return false;
+  }
+
+  async disassociateHubSite(_siteUrl: string): Promise<void> {}
+
+  async writeAuditRecord(_record: IProvisioningAuditRecord): Promise<void> {}
+
+  async applyWebParts(siteUrl: string): Promise<void> {
+    await this.installWebParts(siteUrl);
+  }
+
+  async setPermissions(siteUrl: string, _projectId: string): Promise<void> {
+    await this.setGroupPermissions(siteUrl, [], '');
+  }
+
+  async associateHub(siteUrl: string, hubSiteUrl: string): Promise<void> {
+    await this.associateHubSite(siteUrl, hubSiteUrl);
+  }
+
+  async removeHubAssociation(siteUrl: string): Promise<void> {
+    await this.disassociateHubSite(siteUrl);
+  }
+}

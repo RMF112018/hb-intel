@@ -259,23 +259,29 @@ export function createServiceFactory(): IServiceContainer {
 
 ## 6.5 Success Criteria Checklist
 
-- [ ] 6.5.1 Step 5 attempts real `installWebParts`; defers after 2 failed attempts or 90s timeout.
-- [ ] 6.5.2 `status.step5DeferredToTimer = true` is set on deferral; result status is `DeferredToTimer`.
-- [ ] 6.5.3 Step 6 `setGroupPermissions` applies correct SharePoint role to all group members.
-- [ ] 6.5.4 OpEx Manager UPN is always included in Step 6 group members (deduplicated).
-- [ ] 6.5.5 Step 7 checks `isHubAssociated` before calling `associateHubSite` (idempotency).
-- [ ] 6.5.6 `compensateStep7` disassociates hub if Step 7 was the failure point.
-- [ ] 6.5.7 `createServiceFactory` returns real services in production, mocks in test mode.
-- [ ] 6.5.8 `SHAREPOINT_APP_CATALOG_URL`, `HB_INTEL_SPFX_APP_ID`, `SHAREPOINT_HUB_SITE_ID`, `OPEX_MANAGER_UPN` documented in `backend/functions/README.md`.
-- [ ] 6.5.9 All Step 5–7 unit tests pass with mock services.
+- [x] 6.5.1 Step 5 attempts real `installWebParts`; defers after 2 failed attempts or 90s timeout.
+- [x] 6.5.2 `status.step5DeferredToTimer = true` is set on deferral; result status is `DeferredToTimer`.
+- [x] 6.5.3 Step 6 `setGroupPermissions` applies correct SharePoint role to all group members.
+- [x] 6.5.4 OpEx Manager UPN is always included in Step 6 group members (deduplicated).
+- [x] 6.5.5 Step 7 checks `isHubAssociated` before calling `associateHubSite` (idempotency).
+- [x] 6.5.6 `compensateStep7` disassociates hub if Step 7 was the failure point.
+- [x] 6.5.7 `createServiceFactory` returns real services in production, mocks in test mode.
+- [x] 6.5.8 `SHAREPOINT_APP_CATALOG_URL`, `HB_INTEL_SPFX_APP_ID`, `SHAREPOINT_HUB_SITE_ID`, `OPEX_MANAGER_UPN` documented in `backend/functions/README.md`.
+- [x] 6.5.9 All Step 5–7 unit tests pass with mock services.
 
 ## PH6.5 Progress Notes
 
-_(To be completed during implementation)_
+2026-03-07: PH6.5 Steps 5–7 implementations completed with real Step 5 timeout/deferral logic, Step 6 permission assignment with OpEx dedupe, and Step 7 hub association idempotency + compensation.
+2026-03-07: `SharePointService` updated with `installWebParts` contract/implementation and D-PH6-05 documentation comments for timeout/deferral, idempotency, permission, and hub association flows.
 
 ### Verification Evidence
 
-- `pnpm turbo run build --filter=backend-functions` → EXIT 0 — PASS / FAIL
-- Step 5 timeout simulation (set `PROVISIONING_STEP5_TIMEOUT_MS=100`) → `DeferredToTimer` result — PASS / FAIL
-- Layer 2 smoke test: Step 7 associates site with hub in real SharePoint tenant — PASS / FAIL
-- Layer 2 smoke test: Re-running Step 7 returns idempotent skip — PASS / FAIL
+- `pnpm turbo run build --filter=@hbc/functions` → EXIT 0 — PASS (2026-03-07)
+- `pnpm turbo run lint --filter=@hbc/functions` → EXIT 0 (0 errors, warnings only) — PASS (2026-03-07)
+- `pnpm turbo run check-types --filter=@hbc/functions` → EXIT 0 — PASS (2026-03-07)
+- `pnpm turbo run test --filter=@hbc/functions` → EXIT 0 — PASS (2026-03-07)
+- Step 5 timeout simulation (set `PROVISIONING_STEP5_TIMEOUT_MS=100`) → `DeferredToTimer` result with `status.step5DeferredToTimer=true` — PASS (2026-03-07)
+- Layer 2 smoke test: Step 7 associates site with hub in real SharePoint tenant — NOT RUN (requires tenant access)
+- Layer 2 smoke test: Re-running Step 7 returns idempotent skip — NOT RUN (requires tenant access)
+
+<!-- PROGRESS: PH6.5 completed 2026-03-07. Steps 5-7 now use real implementation contracts, timeout/deferral logic, idempotency guards, and compensation hooks per D-PH6-05. -->

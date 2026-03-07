@@ -161,7 +161,7 @@ Phase 6 is complete when HB Intel has a production-ready provisioning system tha
 - [x] 6.0.2 `@hbc/provisioning` package scaffold created and published within the monorepo.
 - [ ] 6.0.3 Azure AD app registration and Managed Identity configured; all endpoints secured. (PH6.2 code complete; Azure tenant ops pending)
 - [x] 6.0.4 `SagaOrchestrator` hardened: correlation IDs, idempotency, exponential backoff.
-- [ ] 6.0.5 All 7 steps use real PnPjs/Graph implementations (no mock service in production path). (2026-03-07 update: Steps 1-4 complete in PH6.4; Steps 5-7 pending PH6.5)
+- [x] 6.0.5 All 7 steps use real PnPjs/Graph implementations (no mock service in production path). (2026-03-07 update: Steps 1-7 completed via PH6.4 + PH6.5)
 - [ ] 6.0.6 Azure Table Storage service is real and production-ready.
 - [ ] 6.0.7 SharePoint audit list (`ProvisioningAuditLog`) created and written to at lifecycle events.
 - [ ] 6.0.8 SignalR negotiate endpoint is real; per-project groups functioning.
@@ -231,7 +231,7 @@ Task completions:
 - PH6.2 completed: 2026-03-07 (code + docs); Azure tenant ops pending — docs: docs/architecture/adr/ADR-0078-security-managed-identity.md
 - PH6.3 completed: 2026-03-07 — docs: docs/architecture/plans/PH6.3-SagaOrchestrator-Hardening.md
 - PH6.4 completed: 2026-03-07 — real PnPjs implementations for Steps 1-4 delivered (`SharePointService`, idempotency checks, compensation hooks, list definitions).
-- PH6.5 completed: YYYY-MM-DD
+- PH6.5 completed: 2026-03-07 — real implementations delivered for Step 5 (SPFx timeout/deferral), Step 6 (group permissions), and Step 7 (hub association + compensation).
 - PH6.6 completed: YYYY-MM-DD
 - PH6.7 completed: YYYY-MM-DD — docs: docs/architecture/adr/0XXX-signalr-groups.md
 - PH6.8 completed: YYYY-MM-DD — docs: docs/reference/provisioning/request-lifecycle.md
@@ -250,3 +250,4 @@ Sign-off: Bobby Fetting — YYYY-MM-DD
 ```
 
 <!-- PROGRESS: 2026-03-07 PH6.4 completed. Installed PnPjs dependencies in backend/functions; replaced SharePoint service with managed-identity-backed implementation for steps 1-4; updated saga steps and list schema; scoped build/lint/check-types/test commands passed for @hbc/functions. -->
+<!-- PROGRESS: 2026-03-07 PH6.5 completed. Implemented real Step 5 timeout/deferral behavior, Step 6 OpEx-deduplicated permission assignment, and Step 7 hub idempotency/compensation with service-factory mock/real SharePoint selection and verification evidence recorded. -->
