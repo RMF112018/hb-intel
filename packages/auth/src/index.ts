@@ -264,6 +264,16 @@ export {
 // entrypoint `@hbc/auth/dev` via `src/dev.ts` to keep root index exports valid
 // under TypeScript/ESM static export rules.
 
+// D-PH6F-03: Bootstrap helpers and persona registry for dev-mode identity resolution.
+// Tree-shaking eliminates these from production builds since bootstrapMockEnvironment()
+// is only called in mock mode (guarded by resolveAuthMode() in main.tsx).
+export { PERSONA_REGISTRY, type IPersona } from './mock/personaRegistry.js';
+export {
+  resolveBootstrapPersona,
+  personaToCurrentUser,
+  resolveBootstrapPermissions,
+} from './mock/bootstrapHelpers.js';
+
 // Startup timing bridge (PH5.15 — cross-package startup phase instrumentation seam)
 export {
   startStartupPhase,

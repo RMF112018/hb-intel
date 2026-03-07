@@ -26,4 +26,7 @@ export { bootstrapSpfxAuth, assertValidSpfxHostBridgeInput, toSpfxIdentityBridge
 export { startStartupPhase, endStartupPhase, recordStartupPhase, } from './startup/startupTimingBridge.js';
 // MSAL helpers (Blueprint §2b — Phase 4)
 export { mapMsalAccountToUser, validateMsalConfig } from './msal/index.js';
+// D-PH6F-03: Bootstrap helpers and persona registry for dev-mode identity resolution.
+export { PERSONA_REGISTRY } from './mock/personaRegistry.js';
+export { resolveBootstrapPersona, personaToCurrentUser, resolveBootstrapPermissions, } from './mock/bootstrapHelpers.js';
 //# sourceMappingURL=index.js.map

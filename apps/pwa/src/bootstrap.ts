@@ -1,24 +1,18 @@
 /**
  * Synchronous mock environment bootstrap — Foundation Plan Phase 4.
- * Same pattern as dev-harness bootstrap.ts.
- * Imperatively sets Zustand stores before React renders.
+ * D-PH6F-03: Updated to use PERSONA_REGISTRY as the source of truth for dev identity.
+ * Checks localStorage for a persisted DevToolbar persona selection before falling back
+ * to the default Administrator persona. Same pattern as dev-harness bootstrap.ts.
  */
-import type { ICurrentUser, IActiveProject } from '@hbc/models';
-import { useAuthStore, usePermissionStore } from '@hbc/auth';
+import type { IActiveProject } from '@hbc/models';
+import {
+  useAuthStore,
+  usePermissionStore,
+  resolveBootstrapPersona,
+  personaToCurrentUser,
+  resolveBootstrapPermissions,
+} from '@hbc/auth';
 import { useProjectStore, useNavStore } from '@hbc/shell';
-
-const MOCK_USER: ICurrentUser = {
-  id: 'user-001',
-  displayName: 'Dev Admin',
-  email: 'dev.admin@hbintel.local',
-  roles: [
-    {
-      id: 'role-admin',
-      name: 'Administrator',
-      permissions: ['*:*'],
-    },
-  ],
-};
 
 const MOCK_PROJECTS: IActiveProject[] = [
   {
@@ -55,12 +49,20 @@ const DEFAULT_FEATURE_FLAGS: Record<string, boolean> = {
 };
 
 export function bootstrapMockEnvironment(): void {
-  useAuthStore.getState().setUser(MOCK_USER);
-  usePermissionStore.getState().setPermissions(['*:*']);
+  // D-PH6F-03: Use PERSONA_REGISTRY as source of truth.
+  // Restores persisted DevToolbar persona from localStorage if available.
+  const persona = resolveBootstrapPersona();
+
+  useAuthStore.getState().setUser(personaToCurrentUser(persona));
+  usePermissionStore.getState().setPermissions(resolveBootstrapPermissions(persona));
   usePermissionStore.getState().setFeatureFlags(DEFAULT_FEATURE_FLAGS);
   useProjectStore.getState().setAvailableProjects(MOCK_PROJECTS);
   useProjectStore.getState().setActiveProject(MOCK_PROJECTS[0]);
   useNavStore.getState().setActiveWorkspace('project-hub');
+
+  console.log(
+    `[HB-BOOTSTRAP] Mock environment bootstrapped as: ${persona.name} (${persona.id})`,
+  );
 }
 
-export { MOCK_USER, MOCK_PROJECTS, DEFAULT_FEATURE_FLAGS };
+export { MOCK_PROJECTS, DEFAULT_FEATURE_FLAGS };

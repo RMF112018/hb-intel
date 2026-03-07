@@ -424,8 +424,25 @@ change, only the explicit permission keys from the persona registry will be set.
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task created: 2026-03-07
-Status: Pending implementation
+PH6F.3 completed: 2026-03-07
 Execution: Third in sequence (after PH6F.2 and PH6F.1)
-Key dependency: PERSONA_REGISTRY must be exported from @hbc/auth main barrel
-Next: Implement shared bootstrapHelpers.ts utility, update both bootstrap files
+
+Files created:
+  - packages/auth/src/mock/bootstrapHelpers.ts (resolveBootstrapPersona, personaToCurrentUser, resolveBootstrapPermissions)
+
+Files modified:
+  - packages/auth/src/index.ts (added PERSONA_REGISTRY + IPersona + bootstrapHelpers exports)
+  - packages/auth/src/index.js (stale tsc artifact — appended matching exports for Rollup resolution)
+  - apps/pwa/src/bootstrap.ts (replaced MOCK_USER with PERSONA_REGISTRY-based helpers)
+  - apps/dev-harness/src/bootstrap.ts (same changes as PWA bootstrap)
+
+Notes:
+  - Discovered stale .js artifacts in packages/auth/src/ (tsc output from prior build with incorrect outDir).
+    Rollup resolves .js before .ts, so index.js shadowed index.ts. Added exports to both files.
+    Broader cleanup of stale .js files deferred (out of scope for PH6F.3).
+  - MOCK_USER export removed from both bootstrap files. No external consumers found.
+  - MOCK_PROJECTS and DEFAULT_FEATURE_FLAGS exports retained.
+
+Build verification: pnpm turbo run build (8/8 tasks successful)
+Next: PH6F.4 or broader stale .js cleanup
 -->
