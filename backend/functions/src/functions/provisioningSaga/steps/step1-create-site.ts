@@ -3,8 +3,7 @@ import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
 
 export async function executeStep1(
   services: IServiceContainer,
-  status: IProvisioningStatus,
-  templateId?: string
+  status: IProvisioningStatus
 ): Promise<ISagaStepResult> {
   const result: ISagaStepResult = {
     stepNumber: 1,
@@ -15,9 +14,8 @@ export async function executeStep1(
 
   try {
     const siteUrl = await services.sharePoint.createSite(
-      status.projectCode,
-      status.projectName,
-      templateId
+      status.projectNumber,
+      status.projectName
     );
     status.siteUrl = siteUrl;
     result.status = 'Completed';

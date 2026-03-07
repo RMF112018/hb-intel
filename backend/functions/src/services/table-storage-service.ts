@@ -2,42 +2,44 @@ import type { IProvisioningStatus } from '@hbc/models';
 
 export interface ITableStorageService {
   upsertProvisioningStatus(status: IProvisioningStatus): Promise<void>;
-  getProvisioningStatus(projectCode: string): Promise<IProvisioningStatus | null>;
+  getProvisioningStatus(projectId: string): Promise<IProvisioningStatus | null>;
   getAllPendingFullSpec(): Promise<IProvisioningStatus[]>;
-  escalateProvisioning(projectCode: string, escalatedBy: string): Promise<void>;
+  escalateProvisioning(projectId: string, escalatedBy: string): Promise<void>;
 }
 
 export class MockTableStorageService implements ITableStorageService {
   private store = new Map<string, IProvisioningStatus>();
 
   async upsertProvisioningStatus(status: IProvisioningStatus): Promise<void> {
-    this.store.set(status.projectCode, { ...status });
-    console.log(`[MockTable] Upserted provisioning status for ${status.projectCode}`);
+    // D-PH6-01 key strategy: partitionKey = projectId, rowKey = correlationId.
+    this.store.set(status.projectId, { ...status });
+    console.log(
+      `[MockTable] Upserted provisioning status partitionKey=${status.projectId} rowKey=${status.correlationId}`
+    );
   }
 
-  async getProvisioningStatus(projectCode: string): Promise<IProvisioningStatus | null> {
-    return this.store.get(projectCode) ?? null;
+  async getProvisioningStatus(projectId: string): Promise<IProvisioningStatus | null> {
+    return this.store.get(projectId) ?? null;
   }
 
   async getAllPendingFullSpec(): Promise<IProvisioningStatus[]> {
     const results: IProvisioningStatus[] = [];
     for (const status of this.store.values()) {
-      if (status.fullSpecDeferred && status.overallStatus === 'Completed') {
+      if (status.step5DeferredToTimer && status.overallStatus === 'WebPartsPending') {
         results.push({ ...status });
       }
     }
     return results;
   }
 
-  async escalateProvisioning(projectCode: string, escalatedBy: string): Promise<void> {
-    const status = this.store.get(projectCode);
+  async escalateProvisioning(projectId: string, escalatedBy: string): Promise<void> {
+    const status = this.store.get(projectId);
     if (status) {
-      status.escalated = true;
-      status.escalatedAt = new Date().toISOString();
       status.escalatedBy = escalatedBy;
-      status.overallStatus = 'Escalated';
-      this.store.set(projectCode, status);
-      console.log(`[MockTable] Escalated provisioning for ${projectCode} by ${escalatedBy}`);
+      status.overallStatus = 'Failed';
+      status.failedAt = new Date().toISOString();
+      this.store.set(projectId, status);
+      console.log(`[MockTable] Escalated provisioning for ${projectId} by ${escalatedBy}`);
     }
   }
 }

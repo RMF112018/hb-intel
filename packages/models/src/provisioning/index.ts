@@ -9,9 +9,11 @@ export type {
   IProvisioningStatus,
   IProvisionSiteRequest,
   IProvisioningProgressEvent,
-  IProvisioningEscalation,
+  IProjectSetupRequest,
+  ProjectSetupRequestState,
+  IProvisioningAuditRecord,
 } from './IProvisioning.js';
 export type { IProvisionSiteFormData } from './IProvisioningFormData.js';
 export type { ProvisioningOverallStatus, SagaStepStatus } from './ProvisioningEnums.js';
-export type { SagaStepNumber, ProjectCode } from './types.js';
+export type { SagaStepNumber } from './types.js';
 export { SAGA_STEPS, TOTAL_SAGA_STEPS } from './constants.js';

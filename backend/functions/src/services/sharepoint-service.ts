@@ -1,10 +1,10 @@
 export interface ISharePointService {
-  createSite(projectCode: string, projectName: string, templateId?: string): Promise<string>;
+  createSite(projectNumber: string, projectName: string, templateId?: string): Promise<string>;
   createDocumentLibrary(siteUrl: string, libraryName: string): Promise<string>;
   uploadTemplateFiles(siteUrl: string, libraryName: string, templateId?: string): Promise<number>;
   createDataLists(siteUrl: string, listDefinitions: string[]): Promise<{ created: number; total: number }>;
   applyWebParts(siteUrl: string): Promise<void>;
-  setPermissions(siteUrl: string, projectCode: string): Promise<void>;
+  setPermissions(siteUrl: string, projectId: string): Promise<void>;
   associateHub(siteUrl: string, hubSiteUrl: string): Promise<void>;
   deleteSite(siteUrl: string): Promise<void>;
   removeHubAssociation(siteUrl: string): Promise<void>;
@@ -13,9 +13,9 @@ export interface ISharePointService {
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export class MockSharePointService implements ISharePointService {
-  async createSite(projectCode: string, projectName: string, _templateId?: string): Promise<string> {
+  async createSite(projectNumber: string, projectName: string, _templateId?: string): Promise<string> {
     await delay(100);
-    const siteUrl = `https://contoso.sharepoint.com/sites/${projectCode}`;
+    const siteUrl = `https://contoso.sharepoint.com/sites/${projectNumber}`;
     console.log(`[MockSP] Created site: ${siteUrl} for "${projectName}"`);
     return siteUrl;
   }
@@ -48,9 +48,9 @@ export class MockSharePointService implements ISharePointService {
     console.log(`[MockSP] Applied web parts to ${siteUrl}`);
   }
 
-  async setPermissions(siteUrl: string, projectCode: string): Promise<void> {
+  async setPermissions(siteUrl: string, projectId: string): Promise<void> {
     await delay(80);
-    console.log(`[MockSP] Set permissions for ${projectCode} at ${siteUrl}`);
+    console.log(`[MockSP] Set permissions for ${projectId} at ${siteUrl}`);
   }
 
   async associateHub(siteUrl: string, hubSiteUrl: string): Promise<void> {

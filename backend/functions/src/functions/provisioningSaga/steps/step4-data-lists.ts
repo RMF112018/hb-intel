@@ -21,15 +21,11 @@ export async function executeStep4(
     stepName: 'Data Lists',
     status: 'InProgress',
     startedAt: new Date().toISOString(),
-    totalCount: DEFAULT_LISTS.length,
-    completedCount: 0,
   };
 
   try {
     if (!status.siteUrl) throw new Error('No site URL available');
-    const outcome = await services.sharePoint.createDataLists(status.siteUrl, DEFAULT_LISTS);
-    result.completedCount = outcome.created;
-    result.totalCount = outcome.total;
+    await services.sharePoint.createDataLists(status.siteUrl, DEFAULT_LISTS);
     result.status = 'Completed';
     result.completedAt = new Date().toISOString();
   } catch (err) {

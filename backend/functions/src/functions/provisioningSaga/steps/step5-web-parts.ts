@@ -25,11 +25,11 @@ export async function executeStep5(
   return result;
 }
 
-export function skipStep5(): ISagaStepResult {
+export function deferStep5(): ISagaStepResult {
   return {
     stepNumber: 5,
     stepName: 'Web Parts',
-    status: 'Skipped',
+    status: 'DeferredToTimer',
     startedAt: new Date().toISOString(),
     completedAt: new Date().toISOString(),
   };

@@ -5,8 +5,10 @@
  * suitable for use with React Hook Form.
  */
 export interface IProvisionSiteFormData {
-  /** Project code identifier. */
-  projectCode: string;
+  /** Immutable auto-generated project identifier (UUID v4). */
+  projectId: string;
+  /** Human-assigned project number. */
+  projectNumber: string;
   /** Project display name. */
   projectName: string;
   /** SharePoint site template identifier. */

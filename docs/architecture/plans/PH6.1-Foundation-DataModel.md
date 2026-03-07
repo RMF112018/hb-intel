@@ -328,30 +328,47 @@ ls docs/architecture/adr/0061-provisioning-package-boundary.md
 
 ## 6.1 Success Criteria Checklist
 
-- [ ] 6.1.1 Zero occurrences of `projectCode` in any `.ts` or `.tsx` file.
-- [ ] 6.1.2 `IProvisionSiteRequest`, `IProvisioningStatus`, `ISagaStepResult`, `IProvisioningProgressEvent`, `IProjectSetupRequest`, `ProjectSetupRequestState`, `IProvisioningAuditRecord` all defined and exported from `@hbc/models`.
-- [ ] 6.1.3 All backend HTTP routes updated to use `projectId`.
-- [ ] 6.1.4 Azure Table key strategy updated: `partitionKey = projectId`, `rowKey = correlationId`.
-- [ ] 6.1.5 SignalR group name format: `provisioning-${projectId}`.
-- [ ] 6.1.6 `packages/provisioning` scaffolded with `package.json`, `tsconfig.json`, `vite.config.ts`, and `src/index.ts`.
-- [ ] 6.1.7 ADR-0060 and ADR-0061 created and committed.
-- [ ] 6.1.8 `pnpm turbo run build` passes with zero errors.
+- [x] 6.1.1 Zero occurrences of `projectCode` in any `.ts` or `.tsx` file.
+- [x] 6.1.2 `IProvisionSiteRequest`, `IProvisioningStatus`, `ISagaStepResult`, `IProvisioningProgressEvent`, `IProjectSetupRequest`, `ProjectSetupRequestState`, `IProvisioningAuditRecord` all defined and exported from `@hbc/models`.
+- [x] 6.1.3 All backend HTTP routes updated to use `projectId`.
+- [x] 6.1.4 Azure Table key strategy updated: `partitionKey = projectId`, `rowKey = correlationId`.
+- [x] 6.1.5 SignalR group name format: `provisioning-${projectId}`.
+- [x] 6.1.6 `packages/provisioning` scaffolded with `package.json`, `tsconfig.json`, `vite.config.ts`, and `src/index.ts`.
+- [x] 6.1.7 PH6.1 ADR decisions captured with renumbered files `ADR-0076` and `ADR-0077` (preserving required PH6.1 content).
+- [x] 6.1.8 `pnpm turbo run build` passes with zero errors.
 
 ## PH6.1 Progress Notes
 
-_(To be completed during implementation)_
-
-- 6.1.1 completed: YYYY-MM-DD
-- 6.1.2 completed: YYYY-MM-DD
-- 6.1.3 completed: YYYY-MM-DD
-- 6.1.4 completed: YYYY-MM-DD
-- 6.1.5 completed: YYYY-MM-DD
-- 6.1.6 completed: YYYY-MM-DD
-- 6.1.7 completed: YYYY-MM-DD — ADR-0060, ADR-0061 created
-- 6.1.8 completed: YYYY-MM-DD
+- 6.1.1 completed: 2026-03-07 — baseline audit captured before edits:
+  - ./backend/functions/src/functions/timerFullSpec/index.ts
+  - ./backend/functions/src/functions/provisioningSaga/steps/step1-create-site.ts
+  - ./backend/functions/src/functions/provisioningSaga/steps/step6-permissions.ts
+  - ./backend/functions/src/functions/provisioningSaga/saga-orchestrator.ts
+  - ./backend/functions/src/functions/provisioningSaga/index.ts
+  - ./backend/functions/src/services/table-storage-service.ts
+  - ./backend/functions/src/services/signalr-push-service.ts
+  - ./backend/functions/src/services/sharepoint-service.ts
+  - ./packages/models/src/provisioning/IProvisioningFormData.ts
+  - ./packages/models/src/provisioning/IProvisioning.ts
+- 6.1.2 completed: 2026-03-07
+- 6.1.3 completed: 2026-03-07
+- 6.1.4 completed: 2026-03-07
+- 6.1.5 completed: 2026-03-07
+- 6.1.6 completed: 2026-03-07
+- 6.1.7 completed: 2026-03-07 — ADR-0076, ADR-0077 created (PH6.1 ADR-0060/0061 content preserved)
+- 6.1.8 completed: 2026-03-07
 
 ### Verification Evidence
 
-- `grep -r "projectCode" ... | wc -l` → 0 — PASS / FAIL
-- `pnpm turbo run build --filter=@hbc/models --filter=@hbc/provisioning` → EXIT 0 — PASS / FAIL
-- `pnpm turbo run check-types` → EXIT 0 — PASS / FAIL
+- `grep -r "projectCode" --include="*.ts" --include="*.tsx" --exclude-dir=node_modules --exclude-dir=dist . | wc -l` → 0 — PASS
+- `pnpm turbo run build --filter=@hbc/models --filter=@hbc/provisioning --filter=@hbc/functions` → EXIT 0 — PASS
+- `pnpm turbo run lint --filter=@hbc/models --filter=@hbc/provisioning --filter=@hbc/functions` → EXIT 0 — PASS
+- `pnpm turbo run check-types --filter=@hbc/models --filter=@hbc/provisioning --filter=@hbc/functions` → EXIT 0 — PASS
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+PH6.1 implementation executed: 2026-03-07
+Scope: projectId/projectNumber migration, provisioning model replacement, backend route/key/group updates, @hbc/provisioning scaffold, ADR-0076/ADR-0077, checklist closure.
+Traceability:
+- D-PH6-01 identifier model: projectId system key + projectNumber business key.
+- D-PH6-02 package boundary: @hbc/provisioning exports headless logic/types only.
+-->

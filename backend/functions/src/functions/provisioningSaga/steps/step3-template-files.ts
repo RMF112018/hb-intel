@@ -3,8 +3,7 @@ import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
 
 export async function executeStep3(
   services: IServiceContainer,
-  status: IProvisioningStatus,
-  templateId?: string
+  status: IProvisioningStatus
 ): Promise<ISagaStepResult> {
   const result: ISagaStepResult = {
     stepNumber: 3,
@@ -17,13 +16,11 @@ export async function executeStep3(
     if (!status.siteUrl) throw new Error('No site URL available');
     const count = await services.sharePoint.uploadTemplateFiles(
       status.siteUrl,
-      'Project Documents',
-      templateId
+      'Project Documents'
     );
+    void count;
     result.status = 'Completed';
     result.completedAt = new Date().toISOString();
-    result.completedCount = count;
-    result.totalCount = count;
   } catch (err) {
     result.status = 'Failed';
     result.errorMessage = err instanceof Error ? err.message : String(err);

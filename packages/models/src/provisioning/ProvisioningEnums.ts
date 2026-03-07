@@ -4,19 +4,18 @@
 export type ProvisioningOverallStatus =
   | 'NotStarted'
   | 'InProgress'
+  | 'BaseComplete'
   | 'Completed'
   | 'Failed'
-  | 'RollingBack'
-  | 'RolledBack'
-  | 'Escalated';
+  | 'WebPartsPending';
 
 /**
  * Execution status of an individual saga step.
  */
 export type SagaStepStatus =
-  | 'Pending'
+  | 'NotStarted'
   | 'InProgress'
   | 'Completed'
   | 'Failed'
   | 'Skipped'
-  | 'RolledBack';
+  | 'DeferredToTimer';

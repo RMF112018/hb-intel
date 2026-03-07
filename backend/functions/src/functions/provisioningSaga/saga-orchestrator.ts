@@ -12,7 +12,7 @@ import { executeStep1, compensateStep1 } from './steps/step1-create-site.js';
 import { executeStep2 } from './steps/step2-document-library.js';
 import { executeStep3 } from './steps/step3-template-files.js';
 import { executeStep4 } from './steps/step4-data-lists.js';
-import { executeStep5, skipStep5 } from './steps/step5-web-parts.js';
+import { executeStep5, deferStep5 } from './steps/step5-web-parts.js';
 import { executeStep6 } from './steps/step6-permissions.js';
 import { executeStep7, compensateStep7 } from './steps/step7-hub-association.js';
 
@@ -23,24 +23,26 @@ export class SagaOrchestrator {
   ) {}
 
   initializeStatus(request: IProvisionSiteRequest): IProvisioningStatus {
-    const stepResults: ISagaStepResult[] = SAGA_STEPS.map((name, i) => ({
+    const steps: ISagaStepResult[] = SAGA_STEPS.map((name, i) => ({
       stepNumber: i + 1,
       stepName: name,
-      status: 'Pending' as const,
+      status: 'NotStarted' as const,
     }));
 
     return {
-      projectCode: request.projectCode,
+      projectId: request.projectId,
+      projectNumber: request.projectNumber,
       projectName: request.projectName,
+      correlationId: request.correlationId,
       currentStep: 0,
-      totalSteps: TOTAL_SAGA_STEPS,
-      stepResults,
+      steps,
       overallStatus: 'NotStarted',
-      lastSuccessfulStep: 0,
-      escalated: false,
       triggeredBy: request.triggeredBy,
-      triggeredAt: new Date().toISOString(),
-      fullSpecDeferred: false,
+      submittedBy: request.submittedBy,
+      groupMembers: request.groupMembers,
+      startedAt: new Date().toISOString(),
+      step5DeferredToTimer: false,
+      retryCount: 0,
     };
   }
 
@@ -49,115 +51,119 @@ export class SagaOrchestrator {
     status.overallStatus = 'InProgress';
     await this.services.tableStorage.upsertProvisioningStatus(status);
 
-    // Immediate steps: 1, 2, 3, 4, 6, 7 (step 5 deferred)
+    // PH6.1 keeps immediate execution for 1/2/3/4/6/7 while step 5 is deferred to timer.
     const immediateSteps = [1, 2, 3, 4, 6, 7];
 
     for (const stepNum of immediateSteps) {
       status.currentStep = stepNum;
-      const result = await this.executeStep(stepNum, status, request);
-      status.stepResults[stepNum - 1] = result;
+      const result = await this.executeStep(stepNum, status);
+      status.steps[stepNum - 1] = result;
 
       await this.pushProgress(status, result);
       await this.services.tableStorage.upsertProvisioningStatus(status);
 
       if (result.status === 'Failed') {
         this.logger.error(`Step ${stepNum} (${result.stepName}) failed`, {
+          projectId: status.projectId,
+          correlationId: status.correlationId,
           error: result.errorMessage,
         });
         status.overallStatus = 'Failed';
+        status.failedAt = new Date().toISOString();
         await this.services.tableStorage.upsertProvisioningStatus(status);
         await this.compensate(status);
         return status;
       }
-
-      status.lastSuccessfulStep = stepNum;
     }
 
-    // Defer step 5 (web parts)
-    status.stepResults[4] = skipStep5();
-    status.fullSpecDeferred = true;
-    status.overallStatus = 'Completed';
-    status.completedAt = new Date().toISOString();
-    await this.pushProgress(status, status.stepResults[4]);
+    status.steps[4] = deferStep5();
+    status.step5DeferredToTimer = true;
+    status.overallStatus = 'WebPartsPending';
+    await this.pushProgress(status, status.steps[4]);
     await this.services.tableStorage.upsertProvisioningStatus(status);
 
-    this.logger.info(`Provisioning completed for ${request.projectCode} (step 5 deferred)`);
+    this.logger.info(`Provisioning base steps completed for ${request.projectId} (step 5 deferred)`, {
+      projectId: request.projectId,
+      correlationId: request.correlationId,
+    });
+
     return status;
   }
 
-  async retry(projectCode: string): Promise<IProvisioningStatus | null> {
-    const status = await this.services.tableStorage.getProvisioningStatus(projectCode);
+  async retry(projectId: string): Promise<IProvisioningStatus | null> {
+    const status = await this.services.tableStorage.getProvisioningStatus(projectId);
     if (!status) {
-      this.logger.warn(`No provisioning status found for ${projectCode}`);
+      this.logger.warn(`No provisioning status found for ${projectId}`);
       return null;
     }
 
     status.overallStatus = 'InProgress';
+    status.retryCount += 1;
     const immediateSteps = [1, 2, 3, 4, 6, 7];
 
     for (const stepNum of immediateSteps) {
-      const stepResult = status.stepResults[stepNum - 1];
+      const stepResult = status.steps[stepNum - 1];
       if (stepResult.status === 'Completed' || stepResult.status === 'Skipped') continue;
 
       status.currentStep = stepNum;
-      const result = await this.executeStep(stepNum, status, {
-        projectCode: status.projectCode,
-        projectName: status.projectName,
-        triggeredBy: status.triggeredBy,
-      });
-      status.stepResults[stepNum - 1] = result;
+      const result = await this.executeStep(stepNum, status);
+      status.steps[stepNum - 1] = result;
 
       await this.pushProgress(status, result);
       await this.services.tableStorage.upsertProvisioningStatus(status);
 
       if (result.status === 'Failed') {
         status.overallStatus = 'Failed';
+        status.failedAt = new Date().toISOString();
         await this.services.tableStorage.upsertProvisioningStatus(status);
         return status;
       }
-
-      status.lastSuccessfulStep = stepNum;
     }
 
-    if (status.stepResults[4].status !== 'Completed') {
-      status.stepResults[4] = skipStep5();
-      status.fullSpecDeferred = true;
+    if (status.steps[4].status !== 'Completed') {
+      status.steps[4] = deferStep5();
+      status.step5DeferredToTimer = true;
+      status.overallStatus = 'WebPartsPending';
     }
 
-    status.overallStatus = 'Completed';
-    status.completedAt = new Date().toISOString();
     await this.services.tableStorage.upsertProvisioningStatus(status);
     return status;
   }
 
   async compensate(status: IProvisioningStatus): Promise<void> {
-    this.logger.info(`Compensating from step ${status.lastSuccessfulStep} down to 1`);
-    status.overallStatus = 'RollingBack';
-    await this.services.tableStorage.upsertProvisioningStatus(status);
+    this.logger.info(`Compensating provisioning steps for ${status.projectId}`, {
+      projectId: status.projectId,
+      correlationId: status.correlationId,
+    });
 
-    for (let step = status.lastSuccessfulStep; step >= 1; step--) {
+    for (let step = TOTAL_SAGA_STEPS; step >= 1; step--) {
+      const result = status.steps[step - 1];
+      if (result.status !== 'Completed') continue;
+
       try {
         if (step === 7) await compensateStep7(this.services, status);
         if (step === 1) await compensateStep1(this.services, status);
-        // Steps 2-6: cascaded by site deletion in step 1
-        status.stepResults[step - 1].status = 'RolledBack';
       } catch (err) {
         this.logger.error(`Compensation failed at step ${step}`, {
+          projectId: status.projectId,
+          correlationId: status.correlationId,
           error: err instanceof Error ? err.message : String(err),
         });
       }
     }
-
-    status.overallStatus = 'RolledBack';
-    await this.services.tableStorage.upsertProvisioningStatus(status);
   }
 
   async executeFullSpec(status: IProvisioningStatus): Promise<ISagaStepResult> {
     const result = await executeStep5(this.services, status);
-    status.stepResults[4] = result;
+    status.steps[4] = result;
 
     if (result.status === 'Completed') {
-      status.fullSpecDeferred = false;
+      status.step5DeferredToTimer = false;
+      status.overallStatus = 'Completed';
+      status.completedAt = new Date().toISOString();
+    } else if (result.status === 'Failed') {
+      status.overallStatus = 'Failed';
+      status.failedAt = new Date().toISOString();
     }
 
     await this.pushProgress(status, result);
@@ -165,18 +171,14 @@ export class SagaOrchestrator {
     return result;
   }
 
-  private async executeStep(
-    stepNum: number,
-    status: IProvisioningStatus,
-    request: IProvisionSiteRequest
-  ): Promise<ISagaStepResult> {
+  private async executeStep(stepNum: number, status: IProvisioningStatus): Promise<ISagaStepResult> {
     switch (stepNum) {
       case 1:
-        return executeStep1(this.services, status, request.templateId);
+        return executeStep1(this.services, status);
       case 2:
         return executeStep2(this.services, status);
       case 3:
-        return executeStep3(this.services, status, request.templateId);
+        return executeStep3(this.services, status);
       case 4:
         return executeStep4(this.services, status);
       case 5:
@@ -184,24 +186,24 @@ export class SagaOrchestrator {
       case 6:
         return executeStep6(this.services, status);
       case 7:
-        return executeStep7(this.services, status, request.hubSiteUrl);
+        return executeStep7(this.services, status);
       default:
         throw new Error(`Unknown step number: ${stepNum}`);
     }
   }
 
-  private async pushProgress(
-    status: IProvisioningStatus,
-    stepResult: ISagaStepResult
-  ): Promise<void> {
+  private async pushProgress(status: IProvisioningStatus, stepResult: ISagaStepResult): Promise<void> {
+    // D-PH6-02: SignalR events are keyed by immutable projectId and include correlationId for traceability.
     const event: IProvisioningProgressEvent = {
-      projectCode: status.projectCode,
+      projectId: status.projectId,
+      projectNumber: status.projectNumber,
+      projectName: status.projectName,
+      correlationId: status.correlationId,
       stepNumber: stepResult.stepNumber,
       stepName: stepResult.stepName,
       status: stepResult.status,
       timestamp: new Date().toISOString(),
-      completedCount: stepResult.completedCount,
-      totalCount: stepResult.totalCount,
+      errorMessage: stepResult.errorMessage,
       overallStatus: status.overallStatus,
     };
 

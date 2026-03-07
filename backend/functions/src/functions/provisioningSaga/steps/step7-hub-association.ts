@@ -4,8 +4,7 @@ import { getEnv } from '../../../utils/env.js';
 
 export async function executeStep7(
   services: IServiceContainer,
-  status: IProvisioningStatus,
-  hubSiteUrl?: string
+  status: IProvisioningStatus
 ): Promise<ISagaStepResult> {
   const result: ISagaStepResult = {
     stepNumber: 7,
@@ -16,7 +15,7 @@ export async function executeStep7(
 
   try {
     if (!status.siteUrl) throw new Error('No site URL available');
-    const hub = hubSiteUrl ?? getEnv('SHAREPOINT_TENANT_URL', 'https://contoso.sharepoint.com');
+    const hub = getEnv('SHAREPOINT_TENANT_URL', 'https://contoso.sharepoint.com');
     await services.sharePoint.associateHub(status.siteUrl, hub);
     result.status = 'Completed';
     result.completedAt = new Date().toISOString();

@@ -157,8 +157,8 @@ Phase 6 is complete when HB Intel has a production-ready provisioning system tha
 
 ## Phase 6 Master Success Criteria Checklist
 
-- [ ] 6.0.1 `projectCode` identifier eliminated from all backend functions, frontend apps, and packages.
-- [ ] 6.0.2 `@hbc/provisioning` package scaffold created and published within the monorepo.
+- [x] 6.0.1 `projectCode` identifier eliminated from all backend functions, frontend apps, and packages.
+- [x] 6.0.2 `@hbc/provisioning` package scaffold created and published within the monorepo.
 - [ ] 6.0.3 Azure AD app registration and Managed Identity configured; all endpoints secured.
 - [ ] 6.0.4 `SagaOrchestrator` hardened: correlation IDs, idempotency, exponential backoff.
 - [ ] 6.0.5 All 7 steps use real PnPjs/Graph implementations (no mock service in production path).
@@ -178,7 +178,7 @@ Phase 6 is complete when HB Intel has a production-ready provisioning system tha
 - [ ] 6.0.19 All Layer 2 SharePoint smoke tests passing in CI (nightly + pre-merge).
 - [ ] 6.0.20 All Layer 3 Playwright E2E tests passing against staging.
 - [ ] 6.0.21 GitHub Actions deployment pipeline functional for dev, staging, and production.
-- [ ] 6.0.22 All required ADRs created in `docs/architecture/adr/`.
+- [x] 6.0.22 All required ADRs created in `docs/architecture/adr/`.
 - [ ] 6.0.23 Diátaxis documentation complete in correct `docs/` folders.
 - [ ] 6.0.24 `pnpm turbo run build` passes with zero errors across the full monorepo.
 - [ ] 6.0.25 Release sign-off checklist completed and signed by product owner.
@@ -227,7 +227,7 @@ Phase 6 started: YYYY-MM-DD
 Phase 6 completed: YYYY-MM-DD
 
 Task completions:
-- PH6.1 completed: YYYY-MM-DD — docs: docs/architecture/adr/0XXX-data-model.md
+- PH6.1 completed: 2026-03-07 — docs: docs/architecture/adr/ADR-0076-project-identifier-model.md, docs/architecture/adr/ADR-0077-provisioning-package-boundary.md
 - PH6.2 completed: YYYY-MM-DD — docs: docs/architecture/adr/0XXX-security-model.md
 - PH6.3 completed: YYYY-MM-DD
 - PH6.4 completed: YYYY-MM-DD

@@ -14,7 +14,7 @@ export async function executeStep6(
 
   try {
     if (!status.siteUrl) throw new Error('No site URL available');
-    await services.sharePoint.setPermissions(status.siteUrl, status.projectCode);
+    await services.sharePoint.setPermissions(status.siteUrl, status.projectId);
     result.status = 'Completed';
     result.completedAt = new Date().toISOString();
   } catch (err) {

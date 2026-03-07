@@ -20,10 +20,10 @@ app.timer('timerFullSpec', {
       try {
         const result = await orchestrator.executeFullSpec(status);
         logger.info(
-          `Full-spec for ${status.projectCode}: ${result.status}`
+          `Full-spec for ${status.projectId}: ${result.status}`
         );
       } catch (err) {
-        logger.error(`Full-spec failed for ${status.projectCode}`, {
+        logger.error(`Full-spec failed for ${status.projectId}`, {
           error: err instanceof Error ? err.message : String(err),
         });
       }

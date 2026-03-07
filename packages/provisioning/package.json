@@ -1,0 +1,33 @@
+{
+  "name": "@hbc/provisioning",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "lint": "eslint src/ --ext .ts,.tsx --config ../../.eslintrc.base.js",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "zustand": "^5.0.0"
+  },
+  "dependencies": {
+    "@hbc/models": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vitest": "^3.2.4",
+    "@vitejs/plugin-react": "^4.4.0"
+  }
+}

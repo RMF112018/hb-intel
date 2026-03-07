@@ -1,116 +1,115 @@
-import type { SagaStepStatus, ProvisioningOverallStatus } from './ProvisioningEnums.js';
-
 /**
- * Result of a single saga step execution.
- */
-export interface ISagaStepResult {
-  /** Step number in the saga sequence (1-based). */
-  stepNumber: number;
-  /** Human-readable step name. */
-  stepName: string;
-  /** Execution status of this step. */
-  status: SagaStepStatus;
-  /** ISO-8601 timestamp when step execution began. */
-  startedAt?: string;
-  /** ISO-8601 timestamp when step execution completed. */
-  completedAt?: string;
-  /** Error message if the step failed. */
-  errorMessage?: string;
-  /** Number of sub-tasks completed within this step. */
-  completedCount?: number;
-  /** Total number of sub-tasks within this step. */
-  totalCount?: number;
-}
-
-/**
- * Full provisioning status for a project site.
- *
- * Tracks the saga orchestrator's progress through all provisioning steps.
- *
- * @example
- * ```ts
- * import type { IProvisioningStatus } from '@hbc/models';
- * ```
- */
-export interface IProvisioningStatus {
-  /** Project code identifier. */
-  projectCode: string;
-  /** Project display name. */
-  projectName: string;
-  /** SharePoint site URL once created. */
-  siteUrl?: string;
-  /** Current step number being executed. */
-  currentStep: number;
-  /** Total number of steps in the saga. */
-  totalSteps: number;
-  /** Results for each step executed so far. */
-  stepResults: ISagaStepResult[];
-  /** Overall saga execution status. */
-  overallStatus: ProvisioningOverallStatus;
-  /** Last step number that completed successfully. */
-  lastSuccessfulStep: number;
-  /** Whether the provisioning has been escalated. */
-  escalated: boolean;
-  /** ISO-8601 timestamp when escalation occurred. */
-  escalatedAt?: string;
-  /** User who triggered the escalation. */
-  escalatedBy?: string;
-  /** User who initiated the provisioning request. */
-  triggeredBy: string;
-  /** ISO-8601 timestamp when provisioning was initiated. */
-  triggeredAt: string;
-  /** ISO-8601 timestamp when provisioning completed. */
-  completedAt?: string;
-  /** Whether full-spec provisioning was deferred. */
-  fullSpecDeferred: boolean;
-}
-
-/**
- * Request payload to initiate site provisioning.
+ * D-PH6-01: Request body for triggering a new provisioning saga.
+ * Traceability: docs/architecture/plans/PH6.1-Foundation-DataModel.md §6.1.2
  */
 export interface IProvisionSiteRequest {
-  /** Project code identifier. */
-  projectCode: string;
-  /** Project display name. */
+  /** Immutable auto-generated project identifier (UUID v4). */
+  projectId: string;
+  /** Human-assigned project number. Format: ##-###-## (e.g. "25-001-01"). */
+  projectNumber: string;
+  /** Display name of the project. */
   projectName: string;
-  /** User initiating the request. */
+  /** UPN of the user who triggered provisioning (from validated Bearer token). */
   triggeredBy: string;
-  /** SharePoint site template identifier. */
-  templateId?: string;
-  /** Hub site URL for association. */
-  hubSiteUrl?: string;
+  /** Correlation ID for this provisioning run (UUID v4, generated at trigger time). */
+  correlationId: string;
+  /** Members to be added to the project SharePoint group. Array of UPNs. */
+  groupMembers: string[];
+  /** UPN of the Estimating Coordinator who submitted the Project Setup Request. */
+  submittedBy: string;
 }
 
 /**
- * Real-time progress event pushed via SignalR during provisioning.
+ * D-PH6-01: Authoritative provisioning run record stored in Azure Table Storage.
+ * Traceability: docs/architecture/plans/PH6.1-Foundation-DataModel.md §6.1.2
+ */
+export interface IProvisioningStatus {
+  projectId: string;
+  projectNumber: string;
+  projectName: string;
+  correlationId: string;
+  overallStatus: 'NotStarted' | 'InProgress' | 'BaseComplete' | 'Completed' | 'Failed' | 'WebPartsPending';
+  currentStep: number;
+  steps: ISagaStepResult[];
+  siteUrl?: string;
+  triggeredBy: string;
+  submittedBy: string;
+  groupMembers: string[];
+  startedAt: string;
+  completedAt?: string;
+  failedAt?: string;
+  step5DeferredToTimer: boolean;
+  retryCount: number;
+  escalatedBy?: string;
+}
+
+/** D-PH6-01: Result for a single saga step execution. */
+export interface ISagaStepResult {
+  stepNumber: number;
+  stepName: string;
+  status: 'NotStarted' | 'InProgress' | 'Completed' | 'Failed' | 'Skipped' | 'DeferredToTimer';
+  startedAt?: string;
+  completedAt?: string;
+  errorMessage?: string;
+  /** Whether this step was skipped because idempotency check confirmed it was already done. */
+  idempotentSkip?: boolean;
+}
+
+/**
+ * D-PH6-01 / D-PH6-02: Payload sent to SignalR group on each step state change.
+ * Traceability: docs/architecture/plans/PH6.1-Foundation-DataModel.md §6.1.2
  */
 export interface IProvisioningProgressEvent {
-  /** Project code identifier. */
-  projectCode: string;
-  /** Current step number. */
+  projectId: string;
+  projectNumber: string;
+  projectName: string;
+  correlationId: string;
   stepNumber: number;
-  /** Human-readable step name. */
   stepName: string;
-  /** Step execution status. */
-  status: SagaStepStatus;
-  /** ISO-8601 event timestamp. */
+  status: ISagaStepResult['status'];
+  overallStatus: IProvisioningStatus['overallStatus'];
   timestamp: string;
-  /** Number of sub-tasks completed within this step. */
-  completedCount?: number;
-  /** Total number of sub-tasks within this step. */
-  totalCount?: number;
-  /** Overall saga execution status. */
-  overallStatus: ProvisioningOverallStatus;
+  errorMessage?: string;
 }
 
-/**
- * Payload for escalating a provisioning failure.
- */
-export interface IProvisioningEscalation {
-  /** Project code identifier. */
-  projectCode: string;
-  /** User triggering the escalation. */
-  escalatedBy: string;
-  /** Reason for the escalation. */
-  reason?: string;
+/** D-PH6-01: Project Setup Request — submitted by Estimating Coordinator. */
+export interface IProjectSetupRequest {
+  requestId: string;
+  projectId: string;
+  projectName: string;
+  projectLocation: string;
+  projectType: string;
+  projectStage: 'Pursuit' | 'Active';
+  submittedBy: string;
+  submittedAt: string;
+  state: ProjectSetupRequestState;
+  projectNumber?: string;
+  groupMembers: string[];
+  clarificationNote?: string;
+  completedBy?: string;
+  completedAt?: string;
+}
+
+export type ProjectSetupRequestState =
+  | 'Submitted'
+  | 'UnderReview'
+  | 'NeedsClarification'
+  | 'AwaitingExternalSetup'
+  | 'ReadyToProvision'
+  | 'Provisioning'
+  | 'Completed'
+  | 'Failed';
+
+/** D-PH6-01: Audit record written to the SharePoint ProvisioningAuditLog list. */
+export interface IProvisioningAuditRecord {
+  projectId: string;
+  projectNumber: string;
+  projectName: string;
+  correlationId: string;
+  event: 'Started' | 'Completed' | 'Failed';
+  triggeredBy: string;
+  submittedBy: string;
+  timestamp: string;
+  siteUrl?: string;
+  errorSummary?: string;
 }
