@@ -7,6 +7,7 @@ import { useDevAuthBypass } from './useDevAuthBypass.js';
 const restoreSessionMock = vi.fn();
 const acquireIdentityMock = vi.fn();
 const normalizeSessionMock = vi.fn();
+const normalizeSessionWithPermissionsMock = vi.fn();
 
 vi.mock('@hbc/auth/dev', () => {
   class MockAdapter {
@@ -14,6 +15,7 @@ vi.mock('@hbc/auth/dev', () => {
 
     acquireIdentity = acquireIdentityMock;
     normalizeSession = normalizeSessionMock;
+    normalizeSessionWithPermissions = normalizeSessionWithPermissionsMock;
     restoreSession = restoreSessionMock;
   }
 
@@ -27,6 +29,7 @@ vi.mock('@hbc/auth/dev', () => {
               name: 'Administrator',
               email: 'admin@hb-intel.local',
               roles: ['Administrator'],
+              permissions: { 'feature:admin-panel': true },
               description: 'Admin persona',
             }
           : null,
@@ -53,6 +56,7 @@ function HookHarness(): JSX.Element {
             name: 'Administrator',
             email: 'admin@hb-intel.local',
             roles: ['Administrator'],
+            permissions: { 'feature:admin-panel': true },
             description: 'Admin persona',
           } as never)
         }
@@ -125,6 +129,19 @@ describe('useDevAuthBypass', () => {
       acquiredAt: Date.now(),
     }));
 
+    normalizeSessionWithPermissionsMock.mockImplementation(
+      async (identity: { userId: string; email: string }, permissions: Record<string, boolean>) => ({
+        sessionId: 'normalized-session-1',
+        userId: identity.userId,
+        displayName: 'Administrator',
+        email: identity.email,
+        roles: ['Administrator'],
+        permissions,
+        expiresAt: Date.now() + 60_000,
+        acquiredAt: Date.now(),
+      }),
+    );
+
     await act(async () => {
       root.render(<HookHarness />);
       await Promise.resolve();
@@ -168,7 +185,7 @@ describe('useDevAuthBypass', () => {
     });
 
     expect(acquireIdentityMock).toHaveBeenCalledTimes(1);
-    expect(normalizeSessionMock).toHaveBeenCalledTimes(1);
+    expect(normalizeSessionWithPermissionsMock).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       expireButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));

@@ -631,7 +631,27 @@ Or use a test setup file that calls `vi.stubGlobal('import', { meta: { env: { DE
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task created: 2026-03-07
-Status: Pending implementation
-Execution: Fifth and final in sequence
+Phase PH6F.5 completed: 2026-03-07
+
+Files created:
+- packages/shell/src/devToolbar/__tests__/sessionDataToCurrentUser.test.ts (11 unit tests)
+- packages/shell/src/devToolbar/__tests__/useDevAuthBypass.integration.test.ts (21 integration tests)
+- packages/auth/src/mock/__tests__/bootstrapHelpers.test.ts (8 unit tests)
+
+Files modified:
+- packages/auth/src/adapters/__tests__/DevAuthBypassAdapter.test.ts (+8 tests: mapRolesToPermissions, normalizeSessionWithPermissions)
+- packages/shell/src/devToolbar/useDevAuthBypass.test.tsx (fix: added normalizeSessionWithPermissions mock + permissions to mock persona)
+
+Corrections from plan:
+- sessionDataToCurrentUser.test.ts: Role ID prefix corrected to `dev-role-` (not `role-`)
+- sessionDataToCurrentUser.test.ts: extractGrantedPermissions does NOT filter `_` prefix keys (only resolveBootstrapPermissions does) — test updated to verify actual behavior
+- No vitest.config.ts files needed — workspace config handles environment settings
+- Integration test uses store-level testing (simulatePersonaSelection) instead of renderHook (no @testing-library/react dependency)
+
+Test results:
+- @hbc/auth: 103 passed (24 files)
+- @hbc/shell: 89 passed (16 files)
+- Build: clean (tsc passes for both packages)
+
 Coverage targets: 100% for pure functions, 85%+ for hooks with store integration
 -->

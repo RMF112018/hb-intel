@@ -148,4 +148,119 @@ describe('DevAuthBypassAdapter', () => {
       expect(session.permissions['feature:view-profile']).toBe(true);
     });
   });
+
+  // D-PH6F.5: mapRolesToPermissions coverage via type-cast access
+  describe('mapRolesToPermissions (private)', () => {
+    function callMapRolesToPermissions(roles: string[]): Record<string, boolean> {
+      const a = new DevAuthBypassAdapter(0);
+      return (a as unknown as {
+        mapRolesToPermissions(roles: string[]): Record<string, boolean>;
+      }).mapRolesToPermissions(roles);
+    }
+
+    it('includes all 17 base permission keys', () => {
+      const permissions = callMapRolesToPermissions(['Administrator']);
+      const expectedKeys = [
+        'feature:admin-panel', 'feature:user-management', 'feature:system-settings',
+        'feature:override-requests', 'feature:audit-logs',
+        'feature:accounting-invoice', 'feature:accounting-reports',
+        'feature:estimating-projects', 'feature:estimating-quotes',
+        'feature:project-hub', 'feature:project-tracking',
+        'feature:view-dashboard', 'feature:view-profile',
+        'action:read', 'action:write', 'action:delete', 'action:approve',
+      ];
+      for (const key of expectedKeys) {
+        expect(permissions).toHaveProperty(key);
+      }
+      expect(Object.keys(permissions)).toHaveLength(17);
+    });
+
+    it('grants all permissions for Administrator role', () => {
+      const permissions = callMapRolesToPermissions(['Administrator']);
+      expect(permissions['feature:admin-panel']).toBe(true);
+      expect(permissions['feature:user-management']).toBe(true);
+      expect(permissions['action:delete']).toBe(true);
+      expect(permissions['action:approve']).toBe(true);
+    });
+
+    it('grants accounting features for AccountingUser role', () => {
+      const permissions = callMapRolesToPermissions(['AccountingUser']);
+      expect(permissions['feature:accounting-invoice']).toBe(true);
+      expect(permissions['feature:accounting-reports']).toBe(true);
+      expect(permissions['feature:admin-panel']).toBe(false);
+      expect(permissions['action:delete']).toBe(false);
+    });
+
+    it('grants action:approve for EstimatingUser role', () => {
+      const permissions = callMapRolesToPermissions(['EstimatingUser']);
+      expect(permissions['action:approve']).toBe(true);
+      expect(permissions['feature:estimating-projects']).toBe(true);
+      expect(permissions['feature:estimating-quotes']).toBe(true);
+    });
+
+    it('grants action:read universally', () => {
+      const permissions = callMapRolesToPermissions(['Member']);
+      expect(permissions['action:read']).toBe(true);
+    });
+
+    it('grants audit-logs for Executive role', () => {
+      const permissions = callMapRolesToPermissions(['Executive']);
+      expect(permissions['feature:audit-logs']).toBe(true);
+      expect(permissions['feature:accounting-reports']).toBe(true);
+    });
+  });
+
+  // D-PH6F.5: normalizeSessionWithPermissions coverage
+  describe('normalizeSessionWithPermissions', () => {
+    it('uses provided permissions map directly without role-based generation', async () => {
+      const mockIdentity = {
+        userId: 'test-user',
+        displayName: 'Test User',
+        email: 'test@example.com',
+        roles: ['AccountingUser'],
+        metadata: {
+          loginTimestamp: Date.now(),
+          deviceFingerprint: 'test-fp',
+          sessionId: 'test-session',
+        },
+        claims: { scopes: [] },
+      };
+      const explicitPermissions = {
+        'feature:accounting-invoice': true,
+        'custom:special-flag': true,
+      };
+
+      const session = await adapter.normalizeSessionWithPermissions(
+        mockIdentity,
+        explicitPermissions,
+      );
+
+      expect(session.permissions).toEqual(explicitPermissions);
+      expect(session.permissions).not.toHaveProperty('feature:view-dashboard');
+    });
+
+    it('persists session to sessionStorage', async () => {
+      const mockIdentity = {
+        userId: 'persist-user',
+        displayName: 'Persist User',
+        email: 'persist@example.com',
+        roles: ['Member'],
+        metadata: {
+          loginTimestamp: Date.now(),
+          deviceFingerprint: 'fp',
+          sessionId: 'persist-session',
+        },
+        claims: { scopes: [] },
+      };
+
+      await adapter.normalizeSessionWithPermissions(mockIdentity, { 'action:read': true });
+
+      const stored = sessionStorage.getItem('hb-auth-dev-session');
+      expect(stored).toBeDefined();
+      const parsed = JSON.parse(stored!);
+      expect(parsed.version).toBe(1);
+      expect(parsed.session.userId).toBe('persist-user');
+      expect(parsed.session.permissions).toEqual({ 'action:read': true });
+    });
+  });
 });
