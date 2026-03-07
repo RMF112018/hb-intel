@@ -677,4 +677,10 @@ Phase 5C.3 (PersonaRegistry Implementation) completed: 2026-03-07
   - Added dev-surface export wiring in `packages/auth/src/dev.ts` so `@hbc/auth/dev` exposes `PERSONA_REGISTRY`/`IPersona`; added persona reference documentation at `docs/reference/auth/personas.md`.
   - Added PersonaRegistry verification tests in `packages/auth/src/mock/personaRegistry.test.ts` for lookup, category/tag filters, default/count behavior, duplicate-id protection, and required field/permission integrity checks.
   - Verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run test --filter=@hbc/auth`, `pnpm --filter @hbc/auth run test:coverage`; `personaRegistry.ts` coverage 100.00% statements/branches/functions.
+Phase 5C.4 (DevToolbar Component Implementation) completed: 2026-03-07
+  - Implemented D-PH5C-06 DevToolbar package in `packages/shell/src/devToolbar/` with `DevToolbar.tsx`, `PersonaCard.tsx`, `useDevAuthBypass.ts`, `DevToolbar.module.css`, and `index.ts`, including collapsible three-tab interaction and persisted dev auth tooling.
+  - Integrated DEV-only lazy toolbar mount into `packages/shell/src/ShellCore.tsx` (alignment marker preserved) to enforce D-PH5C-02 production exclusion boundary.
+  - Added PH5C.4 validation suites in `packages/shell/src/devToolbar/DevToolbar.test.tsx` and `useDevAuthBypass.test.tsx` with wrapper `.test.ts` entries to align with workspace include patterns; targeted devToolbar coverage run reports 95.39%.
+  - Verification gates passed: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run test --filter=@hbc/shell`, `pnpm --filter @hbc/shell run test:coverage`; production app bundle grep after `pnpm --filter @hbc/dev-harness build` returned no `HB-AUTH-DEV|DevToolbar|devToolbar` markers.
+  - PH5C.4 remediation closure: resolved `@hbc/auth/dev` shell build boundary conflict by aligning auth dev subpath emit/export settings and shell type-path mapping (`packages/auth/package.json`, `packages/auth/tsconfig.json`, `packages/shell/tsconfig.json`) and removed duplicate `IPersona` re-export in persona registry.
 -->

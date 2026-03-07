@@ -453,5 +453,3 @@ export const PERSONA_REGISTRY = {
     return this.all().length;
   },
 };
-
-export type { IPersona };

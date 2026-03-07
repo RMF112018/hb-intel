@@ -1073,4 +1073,10 @@ Phase 5C.3 (PersonaRegistry Implementation) completed: 2026-03-07
   - Dev export surface updated so `@hbc/auth/dev` exposes `PERSONA_REGISTRY` and `IPersona` from `packages/auth/src/dev.ts`; root production exports remain unchanged.
   - Persona reference documentation created at `docs/reference/auth/personas.md` with registry overview, persona tables, permission matrix, scenario guidance, and extension instructions.
   - PH5C.3 verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run test --filter=@hbc/auth`, `pnpm --filter @hbc/auth run test:coverage`; `personaRegistry.ts` coverage: statements 100.00%, branches 100.00%, functions 100.00%.
+Phase 5C.4 (DevToolbar Component Implementation) completed: 2026-03-07
+  - D-PH5C-06 implemented via `packages/shell/src/devToolbar/DevToolbar.tsx`, `PersonaCard.tsx`, `useDevAuthBypass.ts`, `DevToolbar.module.css`, and `index.ts` with collapsible three-tab tooling and persisted dev-session controls.
+  - D-PH5C-02/D-PH5C-03 enforced with DEV-only ShellCore lazy integration (`packages/shell/src/ShellCore.tsx`) and runtime guard boundaries for toolbar exports.
+  - PH5C.4 validation coverage added through devToolbar interaction suites (`DevToolbar.test.tsx`, `useDevAuthBypass.test.tsx` + wrapper test entries) and targeted coverage execution at 95.39%.
+  - PH5C.4 verification gates passed: `pnpm turbo run build --filter=@hbc/shell`, `pnpm turbo run test --filter=@hbc/shell`, `pnpm --filter @hbc/shell run test:coverage`; production app bundle grep after `pnpm --filter @hbc/dev-harness build` returned no `HB-AUTH-DEV|DevToolbar|devToolbar` markers.
+  - PH5C.4 remediation closure: resolved `@hbc/auth/dev` compile-boundary conflict for shell builds by aligning auth dev subpath emit/export configuration and shell-side type mapping (`packages/auth/package.json`, `packages/auth/tsconfig.json`, `packages/shell/tsconfig.json`) plus duplicate `IPersona` export cleanup.
 -->

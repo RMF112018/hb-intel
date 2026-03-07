@@ -260,10 +260,10 @@ All tasks start in PENDING state. Update this section after each task completion
 - 5.C.3.3 [COMPLETED] — Reference documentation
 
 ### PH5C.4 Progress Notes
-- 5.C.4.1 [PENDING] — DevToolbar.tsx component
-- 5.C.4.2 [PENDING] — useDevAuthBypass hook
-- 5.C.4.3 [PENDING] — ShellCore.tsx integration
-- 5.C.4.4 [PENDING] — Styling and layout
+- 5.C.4.1 [COMPLETED] — DevToolbar.tsx component
+- 5.C.4.2 [COMPLETED] — useDevAuthBypass hook
+- 5.C.4.3 [COMPLETED] — ShellCore.tsx integration
+- 5.C.4.4 [COMPLETED] — Styling and layout
 
 ### PH5C.5 Progress Notes
 - 5.C.5.1 [PENDING] — Developer guide creation
@@ -305,10 +305,12 @@ All verification gates remain PENDING until execution. See PH5C.10 for full veri
 ### Testing & Coverage
 - `pnpm turbo run test --filter=@hbc/auth --filter=@hbc/shell` - [PASS for PH5C.1]
 - Coverage reports generated via `bash scripts/test-auth-shell.sh --coverage` - [PASS for PH5C.1]
+- `pnpm exec vitest run --workspace vitest.workspace.ts packages/shell/src/devToolbar --coverage --coverage.include='packages/shell/src/devToolbar/**' --coverage.exclude='**/*.test.*' --coverage.all=false` - [PASS for PH5C.4: 95.39%]
 
 ### Bundle & Security
 - Production bundle size check (no unexpected growth) - [PENDING]
 - Zero dev-mode code in production bundle (grep verification) - [PASS for PH5C.2]
+- DevToolbar production leak verification (`pnpm --filter @hbc/dev-harness build` + `rg -n "HB-AUTH-DEV|DevToolbar|devToolbar" apps/dev-harness/dist --glob "*.js"`) - [PASS for PH5C.4]
 
 ### Documentation & Architecture
 - All documentation files in correct `docs/` subfolders - [PASS for PH5C.3]
@@ -357,5 +359,10 @@ PH5C.3 completed: 2026-03-07
 D-PH5C-04 traceability closed: `packages/auth/src/mock/personaRegistry.ts` created with 6 base + 5 supplemental personas and query helpers (`getById`, `base`, `supplemental`, `all`, `default`, `byTag`, `byCategory`, `count`), and dev export wired through `packages/auth/src/dev.ts` for `@hbc/auth/dev`.
 PH5C.3 documentation closure: `docs/reference/auth/personas.md` created with persona tables, permission matrix, testing scenarios, and extension guidance.
 PH5C.3 verification evidence: `pnpm turbo run build --filter=@hbc/auth` PASS; `pnpm turbo run test --filter=@hbc/auth` PASS; `pnpm --filter @hbc/auth run test:coverage` PASS with `personaRegistry.ts` coverage 100% statements/branches/functions; PersonaRegistry test suite added (`packages/auth/src/mock/personaRegistry.test.ts`).
-Next: Execute PH5C.4 (DevToolbar)
+PH5C.4 completed: 2026-03-07
+D-PH5C-06/D-PH5C-02/D-PH5C-03 traceability closed: implemented `packages/shell/src/devToolbar/DevToolbar.tsx`, `PersonaCard.tsx`, `useDevAuthBypass.ts`, `DevToolbar.module.css`, `index.ts`, plus DEV-only lazy integration in `packages/shell/src/ShellCore.tsx`.
+PH5C.4 validation coverage: added interaction suites (`packages/shell/src/devToolbar/DevToolbar.test.tsx`, `useDevAuthBypass.test.tsx`) with wrapper entries and targeted coverage run reporting 95.39% across devToolbar files.
+PH5C.4 verification evidence: `pnpm turbo run build --filter=@hbc/shell` PASS; `pnpm turbo run test --filter=@hbc/shell` PASS; `pnpm --filter @hbc/shell run test:coverage` PASS; production app bundle grep after `pnpm --filter @hbc/dev-harness build` returned no dev-toolbar markers.
+PH5C.4 remediation note: resolved `@hbc/auth/dev` compile boundary regression for shell builds by adding shell-local dev-auth type mapping and aligning auth dev subpath emit/export configuration (`packages/auth/package.json`, `packages/auth/tsconfig.json`) with a duplicate export cleanup in `personaRegistry.ts`.
+Next: Execute PH5C.5 (DevToolbar documentation)
 -->

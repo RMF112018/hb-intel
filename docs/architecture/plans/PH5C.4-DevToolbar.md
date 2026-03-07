@@ -807,34 +807,34 @@ Phase 5C is complete when:
 
 ## 5.C.4 Success Criteria Checklist (Task 5C.4)
 
-- [ ] 5.C.4.1 `DevToolbar.tsx` created with three tabs (Personas / Settings / Session)
-- [ ] 5.C.4.2 Collapsible behavior: 36px collapsed, 300–400px expanded with smooth transition
-- [ ] 5.C.4.3 Personas tab displays all 11 personas with persona cards and selection capability
-- [ ] 5.C.4.4 Settings tab includes auth delay slider, audit logging toggle, clear sessionStorage button
-- [ ] 5.C.4.5 Session tab displays current session JSON, expiration countdown, action buttons
-- [ ] 5.C.4.6 `useDevAuthBypass.ts` hook manages state and localStorage persistence
-- [ ] 5.C.4.7 `PersonaCard.tsx` component displays persona details and handles selection
-- [ ] 5.C.4.8 `DevToolbar.module.css` provides complete styling with dark theme
-- [ ] 5.C.4.9 DevToolbar integrated into `ShellCore.tsx` with `import.meta.env.DEV` guard
-- [ ] 5.C.4.10 DevToolbar absent from production bundle; ≥95% test coverage
+- [x] 5.C.4.1 `DevToolbar.tsx` created with three tabs (Personas / Settings / Session)
+- [x] 5.C.4.2 Collapsible behavior: 36px collapsed, 300–400px expanded with smooth transition
+- [x] 5.C.4.3 Personas tab displays all 11 personas with persona cards and selection capability
+- [x] 5.C.4.4 Settings tab includes auth delay slider, audit logging toggle, clear sessionStorage button
+- [x] 5.C.4.5 Session tab displays current session JSON, expiration countdown, action buttons
+- [x] 5.C.4.6 `useDevAuthBypass.ts` hook manages state and localStorage persistence
+- [x] 5.C.4.7 `PersonaCard.tsx` component displays persona details and handles selection
+- [x] 5.C.4.8 `DevToolbar.module.css` provides complete styling with dark theme
+- [x] 5.C.4.9 DevToolbar integrated into `ShellCore.tsx` with `import.meta.env.DEV` guard
+- [x] 5.C.4.10 DevToolbar absent from production bundle; ≥95% test coverage
 
 ---
 
 ## Phase 5.C.4 Progress Notes
 
-- 5.C.4.1 [PENDING] — DevToolbar component implementation
-- 5.C.4.2 [PENDING] — Tab navigation and content
-- 5.C.4.3 [PENDING] — useDevAuthBypass hook
-- 5.C.4.4 [PENDING] — CSS styling and layout
-- 5.C.4.5 [PENDING] — ShellCore.tsx integration
+- 5.C.4.1 [COMPLETED] — DevToolbar component implementation
+- 5.C.4.2 [COMPLETED] — Tab navigation and content
+- 5.C.4.3 [COMPLETED] — useDevAuthBypass hook
+- 5.C.4.4 [COMPLETED] — CSS styling and layout
+- 5.C.4.5 [COMPLETED] — ShellCore.tsx integration
 
 ### Verification Evidence
 
-- `pnpm turbo run build --filter=@hbc/shell` - [PENDING]
-- `pnpm turbo run test --filter=@hbc/shell` - [PENDING]
-- `grep -r "DevToolbar" dist/shell/ --include="*.js"` (should return empty) - [PENDING]
-- Coverage report ≥95% for DevToolbar - [PENDING]
-- Visual inspection: Toolbar appears in dev mode, functions correctly - [PENDING]
+- `pnpm turbo run build --filter=@hbc/shell` - [PASS]
+- `pnpm turbo run test --filter=@hbc/shell` - [PASS]
+- `pnpm --filter @hbc/dev-harness build` + `rg -n "HB-AUTH-DEV|DevToolbar|devToolbar" apps/dev-harness/dist --glob "*.js"` - [PASS: no matches in production app bundle]
+- `pnpm exec vitest run --workspace vitest.workspace.ts packages/shell/src/devToolbar --coverage --coverage.include='packages/shell/src/devToolbar/**' --coverage.exclude='**/*.test.*' --coverage.all=false` - [PASS: devToolbar coverage 95.39%]
+- Visual inspection: Toolbar appears in dev mode, functions correctly - [PARTIAL: validated via interaction tests; manual browser inspection not performed in this session]
 
 ---
 
@@ -843,5 +843,10 @@ Phase 5C is complete when:
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task PH5C.4 created: 2026-03-07
 DevToolbar specification complete with all three tabs and state management.
+PH5C.4 completed: 2026-03-07
+D-PH5C-06/D-PH5C-02/D-PH5C-03 traceability closed: DevToolbar, PersonaCard, useDevAuthBypass, and DevToolbar CSS module implemented with DEV-only ShellCore lazy integration and localStorage/session controls.
+PH5C.4 verification evidence: `pnpm turbo run build --filter=@hbc/shell` PASS; `pnpm turbo run test --filter=@hbc/shell` PASS; devToolbar interaction suites added (`src/devToolbar/DevToolbar.test.tsx`, `src/devToolbar/useDevAuthBypass.test.tsx` via wrapper test entries); targeted devToolbar coverage command PASS at 95.39%.
+PH5C.4 production-boundary evidence: `pnpm --filter @hbc/dev-harness build` PASS and production asset grep (`HB-AUTH-DEV|DevToolbar|devToolbar`) returned no matches.
+PH5C.4 remediation note: resolved `@hbc/auth/dev` TypeScript workspace boundary conflict for shell builds by introducing a shell-local type shim path mapping and updating auth dev subpath build/export consistency (`packages/auth/package.json`, `packages/auth/tsconfig.json`, `packages/auth/src/mock/personaRegistry.ts`).
 Next: PH5C.5 (Developer How-To Guide)
 -->

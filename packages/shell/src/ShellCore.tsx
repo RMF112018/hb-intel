@@ -1,6 +1,6 @@
 import { AccessDenied, useAuthStore } from '@hbc/auth';
-import type { ReactNode } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ComponentType, ReactNode } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import {
   resolveDegradedEligibility,
   resolveRestrictedZones,
@@ -44,6 +44,13 @@ import type {
   StartupTimingSnapshot,
   WorkspaceId,
 } from './types.js';
+
+// ALIGNMENT: DevToolbar Integration PH5C.4
+// D-PH5C-06/D-PH5C-02: Lazily load dev toolbar only in DEV mode to avoid production inclusion.
+let DevToolbar: ComponentType | null = null;
+if (import.meta.env.DEV) {
+  DevToolbar = lazy(() => import('./devToolbar/DevToolbar.js').then((m) => ({ default: m.DevToolbar })));
+}
 
 export interface ShellCoreProps {
   adapter: ShellEnvironmentAdapter;
@@ -534,6 +541,11 @@ export function ShellCore({
         {experienceState === 'degraded' ? degradedSlot : null}
         {children}
       </ShellLayout>
+      {import.meta.env.DEV && DevToolbar ? (
+        <Suspense fallback={null}>
+          <DevToolbar />
+        </Suspense>
+      ) : null}
     </div>
   );
 }
