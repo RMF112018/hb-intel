@@ -121,6 +121,13 @@ export { HbcStatusBadge } from './HbcStatusBadge/index.js';
 export type { HbcStatusBadgeProps, StatusVariant } from './HbcStatusBadge/index.js';
 export { HbcPeoplePicker } from './HbcPeoplePicker.js';
 export type { HbcPeoplePickerProps } from './HbcPeoplePicker.js';
+export {
+  ProvisioningNotificationBanner,
+} from './components/ProvisioningNotificationBanner/index.js';
+export type {
+  IProvisioningNotificationBannerProps,
+  ProvisioningNotificationVariant,
+} from './components/ProvisioningNotificationBanner/index.js';
 
 export { HbcEmptyState } from './HbcEmptyState/index.js';
 export type { HbcEmptyStateProps } from './HbcEmptyState/index.js';

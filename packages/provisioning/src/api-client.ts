@@ -13,6 +13,7 @@ export interface IProvisioningApiClient {
     extras?: { projectNumber?: string; clarificationNote?: string }
   ): Promise<IProjectSetupRequest>;
   getProvisioningStatus(projectId: string): Promise<IProvisioningStatus | null>;
+  listFailedRuns(): Promise<IProvisioningStatus[]>;
   retryProvisioning(projectId: string): Promise<void>;
   escalateProvisioning(projectId: string, escalatedBy: string): Promise<void>;
 }
@@ -71,6 +72,10 @@ export function createProvisioningApiClient(
     async getProvisioningStatus(projectId) {
       const res = await authFetch(`/provisioning-status/${projectId}`);
       if (res.status === 404) return null;
+      return res.json();
+    },
+    async listFailedRuns() {
+      const res = await authFetch('/provisioning-failures');
       return res.json();
     },
     async retryProvisioning(projectId) {

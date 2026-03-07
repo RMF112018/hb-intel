@@ -7,6 +7,7 @@ export interface ITableStorageService {
   upsertProvisioningStatus(status: IProvisioningStatus): Promise<void>;
   getProvisioningStatus(projectId: string): Promise<IProvisioningStatus | null>;
   getLatestRun(projectId: string): Promise<IProvisioningStatus | null>;
+  listFailedRuns(): Promise<IProvisioningStatus[]>;
   listPendingStep5Jobs(): Promise<IProvisioningStatus[]>;
   // Backward-compatible alias retained for existing timer callsites.
   getAllPendingFullSpec(): Promise<IProvisioningStatus[]>;
@@ -97,6 +98,23 @@ export class RealTableStorageService implements ITableStorageService {
     return results;
   }
 
+  async listFailedRuns(): Promise<IProvisioningStatus[]> {
+    await this.ensureTable();
+
+    const entities = this.client.listEntities<Record<string, unknown>>({
+      queryOptions: {
+        // D-PH6-12 failed-runs dashboard contract: failed statuses only.
+        filter: odata`overallStatus eq 'Failed'`,
+      },
+    });
+
+    const results: IProvisioningStatus[] = [];
+    for await (const entity of entities) {
+      results.push(this.deserialize(entity as Record<string, unknown>));
+    }
+    return results;
+  }
+
   async getAllPendingFullSpec(): Promise<IProvisioningStatus[]> {
     return this.listPendingStep5Jobs();
   }
@@ -168,6 +186,12 @@ export class MockTableStorageService implements ITableStorageService {
   async listPendingStep5Jobs(): Promise<IProvisioningStatus[]> {
     return [...this.store.values()]
       .filter((status) => status.step5DeferredToTimer && status.overallStatus === 'WebPartsPending')
+      .map((status) => ({ ...status }));
+  }
+
+  async listFailedRuns(): Promise<IProvisioningStatus[]> {
+    return [...this.store.values()]
+      .filter((status) => status.overallStatus === 'Failed')
       .map((status) => ({ ...status }));
   }
 

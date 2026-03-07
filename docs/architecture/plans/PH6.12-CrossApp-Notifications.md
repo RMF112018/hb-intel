@@ -294,15 +294,15 @@ Add `listFailedRuns` to `ITableStorageService` and `RealTableStorageService` —
 
 ## 6.12 Success Criteria Checklist
 
-- [ ] 6.12.1 `ProvisioningNotificationBanner` component created in `@hbc/ui-kit` with started/completed/failed variants.
-- [ ] 6.12.2 `useProvisioningNotifications` hook shows banners only to `'notification'` visibility level users.
-- [ ] 6.12.3 Start notification fires when Step 1 begins; finish notification fires on `Completed`/`WebPartsPending`.
-- [ ] 6.12.4 Notification text matches exactly: start and finish templates from Decision 9.
-- [ ] 6.12.5 Banner dismissed state persists for current session (dismissed banners do not re-appear).
-- [ ] 6.12.6 Admin Provisioning Failures dashboard lists all failed runs with Retry and Escalate actions.
-- [ ] 6.12.7 `listFailedRuns` endpoint requires Admin role; returns 403 otherwise.
-- [ ] 6.12.8 Banner integration instructions documented for each of the six non-Estimating apps.
-- [ ] 6.12.9 `pnpm turbo run build --filter=@hb-intel/admin` passes.
+- [x] 6.12.1 `ProvisioningNotificationBanner` component created in `@hbc/ui-kit` with started/completed/failed variants.
+- [x] 6.12.2 `useProvisioningNotifications` hook shows banners only to `'notification'` visibility level users.
+- [x] 6.12.3 Start notification fires when Step 1 begins; finish notification fires on `Completed`/`WebPartsPending`.
+- [x] 6.12.4 Notification text matches exactly: start and finish templates from Decision 9.
+- [x] 6.12.5 Banner dismissed state persists for current session (dismissed banners do not re-appear).
+- [x] 6.12.6 Admin Provisioning Failures dashboard lists all failed runs with Retry and Escalate actions.
+- [x] 6.12.7 `listFailedRuns` endpoint requires Admin role; returns 403 otherwise.
+- [x] 6.12.8 Banner integration instructions documented for each of the six non-Estimating apps.
+- [x] 6.12.9 `pnpm turbo run build --filter=@hb-intel/admin` passes.
 
 ## PH6.12 Progress Notes
 
@@ -315,3 +315,5 @@ _(To be completed during implementation)_
 - Admin user → no start banner (they see full checklist in Admin dashboard instead) — PASS / FAIL
 - Admin dashboard → failed run appears with correct step, project name, triggered by — PASS / FAIL
 - Retry from Admin dashboard → provisioning restarts — PASS / FAIL
+
+<!-- PROGRESS: 2026-03-07 PH6.12 completed. Implemented D-PH6-12 `ProvisioningNotificationBanner` in `@hbc/ui-kit` with started/completed/failed variants and package exports; added admin-only `GET /api/provisioning-failures` endpoint with `listFailedRuns` support in API client and table-storage services (failed-only filtering per §6.12.4); replaced Admin `ProvisioningFailuresPage` with actionable `HbcDataTable` inbox including retry/escalate live row action state; and executed build/lint/type-check/storybook verification commands. -->

@@ -115,6 +115,29 @@ app.http('getProvisioningStatus', {
   },
 });
 
+app.http('listFailedRuns', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'provisioning-failures',
+  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
+    let claims: IValidatedClaims;
+    try {
+      claims = await validateToken(request);
+    } catch {
+      return unauthorizedResponse('Invalid or missing Bearer token');
+    }
+
+    // D-PH6-12 admin-only visibility: failures inbox is restricted to Admin/HBIntelAdmin.
+    if (!claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
+      return { status: 403, jsonBody: { error: 'Admin role required' } };
+    }
+
+    const services = createServiceFactory();
+    const failedRuns = await services.tableStorage.listFailedRuns();
+    return { status: 200, jsonBody: failedRuns };
+  },
+});
+
 app.http('retryProvisioning', {
   methods: ['POST'],
   authLevel: 'anonymous',
