@@ -32,7 +32,21 @@ import {
 } from './tokens.js';
 
 /** Extended HBC theme type — Fluent Theme + HBC semantic tokens */
-export type HbcTheme = Theme & HbcSemanticTokens;
+/**
+ * PH4C.2 (D-PH4C-07/D-PH4C-08):
+ * Explicit custom CSS variables consumed by HbcDataTable/HbcConnectivityBar.
+ * These keys must exist on both light and field themes for dual-theme parity.
+ */
+interface HbcThemeCssVars {
+  '--hbc-surface-2-alpha'?: string;
+  '--hbc-border-default'?: string;
+  '--hbc-responsibility-bg'?: string;
+  '--hbc-text-on-dark'?: string;
+  '--hbc-text-on-dark-alpha'?: string;
+}
+
+/** Extended HBC theme type — Fluent Theme + HBC semantic tokens + PH4C.2 CSS variables */
+export type HbcTheme = Theme & HbcSemanticTokens & HbcThemeCssVars;
 
 // ---------------------------------------------------------------------------
 // Light theme semantic tokens (V2.1)
@@ -162,6 +176,12 @@ export const hbcLightTheme: HbcTheme = {
   colorNeutralBackground1: '#FFFFFF',
   colorNeutralBackground2: '#FAFBFC',
   colorNeutralBackground3: '#F0F2F5',
+  // PH4C.2 (D-PH4C-07/D-PH4C-08): tokenized replacements for hardcoded component values.
+  '--hbc-surface-2-alpha': 'rgba(255, 255, 255, 0.85)',
+  '--hbc-border-default': HBC_SURFACE_LIGHT['border-default'],
+  '--hbc-responsibility-bg': HBC_SURFACE_LIGHT['responsibility-bg'],
+  '--hbc-text-on-dark': '#FFFFFF',
+  '--hbc-text-on-dark-alpha': 'rgba(255, 255, 255, 0.55)',
   ...hbcSemanticLight,
 };
 
@@ -182,5 +202,11 @@ export const hbcFieldTheme: HbcTheme = {
   colorNeutralBackground1: '#1A2332',
   colorNeutralBackground2: '#0F1419',
   colorNeutralBackground3: '#243040',
+  // PH4C.2 (D-PH4C-07/D-PH4C-08): field-mode equivalents for the same semantic CSS contract.
+  '--hbc-surface-2-alpha': 'rgba(20, 20, 20, 0.85)',
+  '--hbc-border-default': '#4B5563',
+  '--hbc-responsibility-bg': '#1E3A5F',
+  '--hbc-text-on-dark': '#1F2937',
+  '--hbc-text-on-dark-alpha': 'rgba(31, 41, 55, 0.55)',
   ...hbcSemanticField,
 };

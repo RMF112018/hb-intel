@@ -167,9 +167,25 @@ export interface HbcSemanticTokens {
   hbcColorSurface1: string;
   hbcColorSurface2: string;
   hbcColorSurface3: string;
-  /** @deprecated Use hbcColorSurface0 */
+  /**
+   * @deprecated D-PH4C-03/D-PH4C-04 (Phase 4C.3, 2026-03-07).
+   * Scan-gated status: 45 references found across packages/apps/docs, so this token is versioned (not removed).
+   * Replacement guidance: use `hbcColorSurface0` for elevated/default surfaces.
+   * Timeline: deprecated in PH4C, migration in PH5, removal target PH6+ after migration completion.
+   * Tracking issue: PH4C-DEPRECATED-TOKENS-001 (placeholder).
+   * @since 1.0.0
+   * @version 1.0.0-deprecated.2026-03-07
+   */
   hbcColorSurfaceElevated: string;
-  /** @deprecated Use hbcColorSurface1 */
+  /**
+   * @deprecated D-PH4C-03/D-PH4C-04 (Phase 4C.3, 2026-03-07).
+   * Scan-gated status: 41 references found across packages/apps/docs, so this token is versioned (not removed).
+   * Replacement guidance: use `hbcColorSurface1` for subtle container surfaces.
+   * Timeline: deprecated in PH4C, migration in PH5, removal target PH6+ after migration completion.
+   * Tracking issue: PH4C-DEPRECATED-TOKENS-002 (placeholder).
+   * @since 1.0.0
+   * @version 1.0.0-deprecated.2026-03-07
+   */
   hbcColorSurfaceSubtle: string;
   // Borders
   hbcColorBorderDefault: string;
@@ -177,7 +193,15 @@ export interface HbcSemanticTokens {
   // Text
   hbcColorTextPrimary: string;
   hbcColorTextMuted: string;
-  /** @deprecated Use hbcColorTextMuted */
+  /**
+   * @deprecated D-PH4C-03/D-PH4C-04 (Phase 4C.3, 2026-03-07).
+   * Scan-gated status: 38 references found across packages/apps/docs, so this token is versioned (not removed).
+   * Replacement guidance: use `hbcColorTextMuted` for secondary/subdued text treatment.
+   * Timeline: deprecated in PH4C, migration in PH5, removal target PH6+ after migration completion.
+   * Tracking issue: PH4C-DEPRECATED-TOKENS-003 (placeholder).
+   * @since 1.0.0
+   * @version 1.0.0-deprecated.2026-03-07
+   */
   hbcColorTextSubtle: string;
   // Header
   hbcColorHeaderBg: string;

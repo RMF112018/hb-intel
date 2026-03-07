@@ -8,6 +8,10 @@
  * Alignment notes:
  * - Unified shell-status surface per PH5.6 locked Option C.
  * - D-10: no feature-level direct state writes; shell passes centralized snapshot.
+ *
+ * PH4C.2 remediation:
+ * - D-PH4C-07/D-PH4C-08 require tokenized action-rail text/border colors for
+ *   dual-theme support (light + field) with no hardcoded hex/rgba values.
  */
 import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
@@ -57,7 +61,8 @@ const useStyles = makeStyles({
   railExpanded: {
     minHeight: '28px',
     ...shorthands.padding('4px', '8px'),
-    color: '#FFFFFF',
+    // PH4C.2 (D-PH4C-07/D-PH4C-08): semantic contrast token on connectivity surfaces.
+    color: 'var(--hbc-text-on-dark)',
     fontSize: '12px',
     lineHeight: '16px',
   },
@@ -71,8 +76,9 @@ const useStyles = makeStyles({
   },
   actionButton: {
     backgroundColor: 'transparent',
-    color: '#FFFFFF',
-    ...shorthands.border('1px', 'solid', 'rgba(255, 255, 255, 0.55)'),
+    // PH4C.2 (D-PH4C-07/D-PH4C-08): dual-theme token replacement for button foreground.
+    color: 'var(--hbc-text-on-dark)',
+    ...shorthands.border('1px', 'solid', 'var(--hbc-text-on-dark-alpha)'),
     ...shorthands.borderRadius('4px'),
     fontSize: '11px',
     lineHeight: '14px',

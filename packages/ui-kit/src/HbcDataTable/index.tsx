@@ -14,6 +14,10 @@
  *
  * PH4.13 enhancements:
  *  §13.1 — Frozen columns (sticky left with shadow border)
+ *
+ * PH4C.2 remediation:
+ *  D-PH4C-07/D-PH4C-08 — replace hardcoded/light-only color usage with
+ *  dual-theme CSS variables from hbcLightTheme/hbcFieldTheme.
  */
 import * as React from 'react';
 import {
@@ -32,11 +36,7 @@ import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { TRANSITION_FAST } from '../theme/animations.js';
 import { elevationRest } from '../theme/elevation.js';
-import {
-  HBC_ACCENT_ORANGE,
-  HBC_SURFACE_LIGHT,
-  HBC_SURFACE_FIELD,
-} from '../theme/tokens.js';
+import { HBC_ACCENT_ORANGE } from '../theme/tokens.js';
 import { useAdaptiveDensity } from './hooks/useAdaptiveDensity.js';
 import { useFieldMode } from '../HbcAppShell/hooks/useFieldMode.js';
 import { HbcEmptyState } from '../HbcEmptyState/index.js';
@@ -55,7 +55,8 @@ const useStyles = makeStyles({
   wrapperStale: {
     borderTopWidth: '1px',
     borderTopStyle: 'dashed',
-    borderTopColor: HBC_SURFACE_LIGHT['border-default'],
+    // PH4C.2 (D-PH4C-07/D-PH4C-08): theme-owned border token for light+field parity.
+    borderTopColor: 'var(--hbc-border-default)',
     transitionProperty: 'border-top-style',
     transitionDuration: '300ms',
     transitionTimingFunction: 'ease',
@@ -63,7 +64,8 @@ const useStyles = makeStyles({
   wrapperFresh: {
     borderTopWidth: '1px',
     borderTopStyle: 'solid',
-    borderTopColor: HBC_SURFACE_LIGHT['border-default'],
+    // PH4C.2 (D-PH4C-07/D-PH4C-08): avoid light-only constant in field mode.
+    borderTopColor: 'var(--hbc-border-default)',
     transitionProperty: 'border-top-style',
     transitionDuration: '300ms',
     transitionTimingFunction: 'ease',
@@ -167,13 +169,15 @@ const useStyles = makeStyles({
     borderLeftWidth: '4px',
     borderLeftStyle: 'solid',
     borderLeftColor: HBC_ACCENT_ORANGE,
-    backgroundColor: HBC_SURFACE_LIGHT['responsibility-bg'],
+    // PH4C.2 (D-PH4C-07/D-PH4C-08): semantic row highlight background by active theme.
+    backgroundColor: 'var(--hbc-responsibility-bg)',
   },
   trResponsibilityField: {
     borderLeftWidth: '4px',
     borderLeftStyle: 'solid',
     borderLeftColor: HBC_ACCENT_ORANGE,
-    backgroundColor: HBC_SURFACE_FIELD['responsibility-bg'],
+    // Keep dedicated class for call-site clarity; value now comes from shared CSS variable.
+    backgroundColor: 'var(--hbc-responsibility-bg)',
   },
   // Density: compact
   thCompact: {
@@ -228,7 +232,8 @@ const useStyles = makeStyles({
     right: '0',
     bottom: '0',
     zIndex: 2,
-    backgroundColor: 'rgba(255,255,255,0.85)',
+    // PH4C.2 (D-PH4C-07/D-PH4C-08): remove hardcoded white overlay for field compatibility.
+    backgroundColor: 'var(--hbc-surface-2-alpha)',
     transitionProperty: 'opacity',
     transitionDuration: '200ms',
     transitionTimingFunction: 'ease-out',
