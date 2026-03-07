@@ -61,11 +61,27 @@ Phase 4C represents the *completion and hardening* of Phase 4. The UI design sys
 - **D-PH4C-19**: Layer 1 — Automated gate (build, lint, type-check, test, bundle size, console validation)
 - **D-PH4C-20**: Layer 2 — Manual gate with audit score ≥99% plus one named sign-off per role category
 
+#### 11. PH5C DevToolbar UI Kit Application
+- **D-PH4C-21**: Apply `@hbc/ui-kit` components (`HbcButton`, `HbcTabs`, `HbcStatusBadge`) to PH5C's DevToolbar suite (`DevToolbar.tsx`, `PersonaCard.tsx`); replace all CSS module usage and plain HTML elements with Fluent-token-driven `makeStyles` hooks
+- **D-PH4C-22**: Preserve DevToolbar's intentional dark aesthetic via scoped CSS variables in `devToolbarTokens.css` (`[data-hbc-dev-toolbar]` scope) overriding Fluent tokens; maintain zero production bundle leak — DevToolbar is lazy-loaded behind `import.meta.env.DEV` guard only
+
+#### 12. Field Mode Toggle & Theme Context (PH4C.11)
+- **D-PH4C-23**: `useFieldMode()` / `useHbcTheme()` are plain `useState`-backed hooks — no shared React Context. Every component that calls either hook creates an independent state instance. The Field Mode toggle fires but the root `FluentProvider` (in `HbcAppShell`'s instance) is never notified → theme does not change until page reload.
+- **D-PH4C-24**: Fix by creating `HbcThemeContext` + `HbcThemeProvider`. `HbcThemeProvider` calls `useFieldMode()` exactly once, wraps children in a single root `FluentProvider`, and distributes state via context. `useHbcTheme()` is updated to read from context. `HbcAppShell`, `HbcHeader`, `WorkspacePageShell`, `useDensity`, and `HbcDataTable` all replace direct `useFieldMode()` calls with `useHbcTheme()`. All 14 app `App.tsx` files replaced with `<HbcThemeProvider>`. All toggle calls now update the single shared state instance.
+
+#### 13. Responsive Navigation Dead Zone (PH4C.12)
+- **D-PH4C-25**: Three misaligned breakpoints create a navigation dead zone: `useIsMobile()` uses ≤767px; `useIsTablet()` (1023px, previously unused in `HbcAppShell`) was the intended bottom nav trigger; `useSidebarState()` uses ≤1024px to return `null` from `HbcSidebar`. Navigation visibility is governed solely by `appMode` with no viewport fallback. At 768–1024px in office mode, sidebar returns null AND bottom nav is suppressed (field mode only) → zero navigation visible.
+- **D-PH4C-26**: Fix by: (1) creating `packages/ui-kit/src/theme/breakpoints.ts` with five canonical constants (`HBC_BREAKPOINT_MOBILE=767`, `HBC_BREAKPOINT_TABLET=1023`, `HBC_BREAKPOINT_SIDEBAR=1024`, `HBC_BREAKPOINT_CONTENT_MEDIUM=1199`, `HBC_BREAKPOINT_COMPACT_DENSITY=1440`); (2) consuming `useIsTablet` in `HbcAppShell` to drive `showSidebar` and `showBottomNav`; (3) guarding `showBottomNav` with `bottomNavItems.length > 0`; (4) returning `null` from `HbcBottomNav` and ensuring `HbcSidebar` null guard aligns to canonical constant; (5) replacing all hardcoded breakpoint literals in `HbcHeader`, `DashboardLayout`, `ToolLandingLayout`, and `useAdaptiveDensity` with canonical constant references.
+
+#### 14. Hardcoded Token Replacement — Shell Chrome & Page Components (PH4C.13)
+- **D-PH4C-27**: Griffel `makeStyles` compiles CSS at build time into static class names. Components using `HBC_SURFACE_LIGHT['text-primary']`, `HBC_SURFACE_LIGHT['surface-*']`, `HBC_PRIMARY_BLUE`, etc. produce static hex CSS that never reacts to `FluentProvider` theme changes. The most visible symptom: `WorkspacePageShell` page title uses `color: HBC_SURFACE_LIGHT['text-primary']` = `#1A1D23` (near-black), making it imperceptible against field/dark mode backgrounds (user-confirmed, 2026-03-07).
+- **D-PH4C-28**: Fix by replacing all theme-responsive surface and text token usages with Fluent `tokens.*` CSS custom properties (Approach A: `tokens.colorNeutralForeground1`, `tokens.colorNeutralBackground1`, etc.) in content-surface components (`WorkspacePageShell`, `HbcSidebar`, `HbcUserMenu`, `HbcProjectSelector`, `HbcToolboxFlyout`). Header chrome components (`HbcHeader`, `HbcNotificationBell`, `HbcFavoriteTools`, `HbcGlobalSearch`, `HbcCreateButton`, `HbcConnectivityBar`, `HbcBottomNav`) use intentionally static tokens on a fixed dark background — keep as-is. Field-mode-specific surface variants (`HBC_SURFACE_FIELD`) are retained as conditional `isFieldMode` class overrides (Approach B) for the deep navy palette that differs from standard Fluent dark.
+
 ---
 
 ## Phase 4C Success Criteria
 
-1. ✓ Shimmer shared utility module created at `packages/ui-kit/src/shared/shimmer.ts` with theme-aware conventions and loading skeleton helpers
+1. ✓ Shimmer shared utility module created at `packages/ui-kit/src/shared/shimmer.ts` with theme-aware conventions and loading skeleton helpers (PH4C.7 completed 2026-03-07; ADR-0074)
 2. ✓ HbcCommandPalette — `useFocusTrap` hook imported, called, and refs merged; focus trap confirmed in Storybook + Axe sweep
 3. ✓ HbcDataTable — `<td headers>` attribute added to all cells; WCAG 1.3.1 compliance verified
 4. ✓ HbcDataTable — shimmer overlay opacity replaced with CSS variable; Field Mode validation confirmed
@@ -82,13 +98,17 @@ Phase 4C represents the *completion and hardening* of Phase 4. The UI design sys
 15. ✓ Audit score reaches 99%+ across all categories (theming, accessibility, functional completeness, code quality, documentation)
 16. ✓ Two-layer release gate passes: Layer 1 automated gates + Layer 2 manual audit ≥99% with named sign-offs
 17. ✓ Final sign-off table completed with all roles (Code, QA, Accessibility, Design System Lead, Product Owner)
+18. ✓ PH5C DevToolbar suite — all CSS modules and hardcoded hex values replaced with `makeStyles` + Fluent tokens; `HbcButton`, `HbcTabs`, `HbcStatusBadge` applied throughout; production bundle contains zero DevToolbar markers (verified via `rg` scan in `dist/`)
+19. ✓ Field Mode toggle — clicking toggle in `HbcUserMenu` immediately changes app theme without page reload; `HbcThemeContext` provides single shared state; `useHbcTheme()` reads from context; no direct `useFieldMode()` calls remain outside `HbcThemeContext.tsx`; all 14 app `App.tsx` files use `<HbcThemeProvider>`
+20. ✓ Responsive navigation dead zone eliminated — at every viewport width in both office and field mode, at least one navigation surface (sidebar or bottom nav) is visible and populated; navigation behaviour matrix verified manually; all breakpoint magic numbers replaced with canonical constants from `breakpoints.ts`
+21. ✓ Page title and content surface text legible in all themes — `WorkspacePageShell` title, `HbcSidebar` text/background, `HbcUserMenu` dropdown, `HbcProjectSelector` dropdown all use Fluent `tokens.*` CSS variables that update when `FluentProvider` theme changes; confirmed by toggling field mode (page title visible in dark/field mode)
 
 ---
 
 ## Phase 4C Definition of Done
 
 Phase 4C is complete when:
-1. All 9 granular task files (PH4C.1 through PH4C.9) are executed in recommended sequence.
+1. All 13 granular task files (PH4C.1 through PH4C.13) are executed in recommended sequence.
 2. All hard prerequisites are verified before dependent tasks begin (especially PH4C.7 → PH4C.2 dependency).
 3. Phase 4 audit coverage reaches **99%+** across all five categories: theming & token compliance, accessibility & WCAG 2.2 AA, functional completeness, code quality & Fluent UI patterns, and documentation.
 4. `pnpm turbo run build --filter=@hbc/ui-kit` succeeds with zero warnings.
@@ -97,7 +117,7 @@ Phase 4C is complete when:
 7. Storybook Axe sweep on all affected components (HbcCommandPalette, HbcDataTable, HbcStatusBadge, HbcConnectivityBar) confirms zero accessibility violations.
 8. Production bundle contains zero references to deprecated tokens or hardcoded color values in UI Kit components.
 9. All documentation files exist in correct `docs/` subfolders and follow Diátaxis structure.
-10. All ADRs (3 total) are created and cross-linked.
+10. All ADRs (5 total) are created and cross-linked.
 11. Final Layer 1 + Layer 2 release gate passes; all sign-offs recorded with dates and role IDs.
 
 ---
@@ -118,6 +138,10 @@ Phase 4C is complete when:
 - Three selective ADRs (shimmer convention, deprecated token policy, Dev Auth Bypass boundary)
 - Comprehensive how-to guides for developers, operators, and component contributors
 - Two-layer release gating with automated Layer 1 and manual audit-based Layer 2
+- PH5C DevToolbar UI Kit application: replace CSS modules with `makeStyles`, replace plain HTML with `HbcButton`/`HbcTabs`/`HbcStatusBadge` in `DevToolbar.tsx` and `PersonaCard.tsx`; create `devToolbarTokens.css` with scoped dark-palette CSS variables; verify zero production bundle leak (PH4C.10)
+- Field Mode toggle wiring: create `HbcThemeContext` + `HbcThemeProvider`; update `useHbcTheme()` to read from context; remove `FluentProvider` from `HbcAppShell`; toggle fires immediately without page reload (PH4C.11)
+- Responsive navigation dead zone fix: create `breakpoints.ts` with 5 canonical constants; align `useIsTablet` into `HbcAppShell` nav logic; guard `showBottomNav` with item-count; `HbcSidebar` + `HbcBottomNav` null-on-empty; replace all hardcoded breakpoint literals (PH4C.12)
+- Hardcoded token replacement: replace `HBC_SURFACE_LIGHT['*']` in content surfaces (`WorkspacePageShell`, `HbcSidebar`, `HbcUserMenu`, `HbcProjectSelector`, `HbcToolboxFlyout`) with Fluent `tokens.*` CSS variables; fix page title text legibility in field/dark mode (PH4C.13)
 
 ### Explicitly Deferred
 - `useSavedViews` controlled mode implementation (documentation only; implementation planned for Phase 5)
@@ -148,6 +172,10 @@ Phase 4C is complete when:
 - 9 component/theme files updated with accessibility fixes and token replacements
 - 1 new shimmer shared utility module created
 - 1 new MockAdapter pattern for Storybook dev testing
+- 2 DevToolbar files refactored (`DevToolbar.tsx`, `PersonaCard.tsx`) with `@hbc/ui-kit` components and `makeStyles` hooks; 1 new `devToolbarTokens.css` scoped dark-palette token file; 2 CSS module files deleted (`DevToolbar.module.css`, `PersonaCard.module.css`)
+- 1 new `HbcThemeContext.tsx` (shared theme context + `HbcThemeProvider`); `useHbcTheme.ts` updated; `HbcAppShell.tsx` updated (remove `FluentProvider`, read from context); all 14 `App.tsx` files updated to use `HbcThemeProvider`; `HbcHeader.tsx`, `WorkspacePageShell`, `useDensity.ts`, `HbcDataTable/index.tsx` updated to use `useHbcTheme()`
+- 1 new `breakpoints.ts` with 5 canonical constants; `useIsMobile.ts`, `useIsTablet.ts`, `useSidebarState.ts` aligned; `HbcAppShell.tsx` updated (`useIsTablet` in nav logic, `bottomNavItems.length` guard); `HbcBottomNav` + `HbcSidebar` null-on-empty guards; `HbcHeader`, `DashboardLayout`, `ToolLandingLayout`, `useAdaptiveDensity` hardcoded literals replaced
+- 5 content surface component token replacements: `WorkspacePageShell`, `HbcSidebar`, `HbcUserMenu`, `HbcProjectSelector`, `HbcToolboxFlyout` — `HBC_SURFACE_LIGHT['*']` → Fluent `tokens.*` CSS variables
 - All changes backward-compatible with production; zero breaking changes
 
 ### Documentation (8 files, Diátaxis-compliant)
@@ -155,10 +183,12 @@ Phase 4C is complete when:
 - 1 Explanation guide (design system architecture)
 - 5 Reference guides (shimmer utility, token remediation, deprecated tokens, accessibility patterns, etc.)
 
-### Architecture Decision Records (3 ADRs)
+### Architecture Decision Records (5 ADRs)
 - ADR-PH4C-01: Shimmer utility convention
 - ADR-PH4C-02: Deprecated token policy
 - ADR-PH4C-03: Dev Auth Bypass boundary
+- ADR-0013: HBC Theme Context (React Context vs Zustand for field mode state)
+- ADR-0014: Fluent tokens over HBC JS constants for theme-responsive surfaces
 
 ---
 
@@ -166,7 +196,7 @@ Phase 4C is complete when:
 
 ### Phase 4C Task Execution Order
 
-> **Critical dependency:** `PH4C.7` is the only hard prerequisite in the chain. It must be complete before `PH4C.2` begins. All other tasks are independent and may run in parallel once their prerequisites are satisfied.
+> **Critical dependencies:** `PH4C.7` must complete before `PH4C.2`. `PH4C.10` must complete before `PH4C.11`. `PH4C.11` must complete before `PH4C.12` and `PH4C.13` (PH4C.12 and PH4C.13 may run in parallel after PH4C.11). All of PH4C.10–PH4C.13 must complete before `PH4C.8` (final verification).
 
 1. **PH4C.7 – Shimmer Infrastructure** (**START HERE — FOUNDATIONAL**, 2–3 hours)
    - Creates `packages/ui-kit/src/shared/shimmer.ts` — prerequisite for PH4C.2
@@ -212,7 +242,35 @@ Phase 4C is complete when:
    - All HBC status variants covered
    - Verify: Storybook high-contrast story renders correctly
 
-9. **PH4C.8 – Verification, Testing & Documentation Closure** (**FINAL — do last**, 3–4 hours, **REQUIRES PH4C.9 complete**)
+9. **PH4C.10 – PH5C DevToolbar UI Kit Application** (3–4 hours, independent — may run in parallel with PH4C.1–PH4C.6)
+   - Create `devToolbarTokens.css` with `[data-hbc-dev-toolbar]` scoped dark-palette CSS variables
+   - Replace `DevToolbar.module.css` + `PersonaCard.module.css` with `useDevToolbarStyles` / `usePersonaCardStyles` makeStyles hooks
+   - Replace plain `<button>` elements with `HbcButton`; tab nav with `HbcTabs`; status `<span>` with `HbcStatusBadge`
+   - Delete the two CSS module files
+   - Verify: `rg -n "HB-AUTH-DEV\|DevToolbar\|devToolbarTokens" apps/dev-harness/dist --glob "*.js"` → zero results
+
+10. **PH4C.11 – Field Mode & Theme Context Wiring** (4–5 hours, **REQUIRES PH4C.10 complete** — PH4C.10 removes CSS modules from DevToolbar which must be inside the correct `FluentProvider` scope)
+   - Create `HbcThemeContext` + `HbcThemeProvider` with single `useFieldMode()` call and root `FluentProvider`
+   - Update `useHbcTheme()` to read from context instead of calling `useFieldMode()` directly
+   - Remove `FluentProvider` from `HbcAppShell`; update `HbcHeader` to source `toggleFieldMode` from context
+   - Update dev-harness `App.tsx` to use `<HbcThemeProvider>`
+   - Verify: click Field Mode toggle → app theme changes immediately without page reload
+
+11. **PH4C.12 – Responsive Navigation Dead Zone** (3–4 hours, **REQUIRES PH4C.11 complete** — navigation visibility logic in `HbcAppShell` reads `appMode` from `useHbcTheme()` which must be context-backed)
+   - Create `packages/ui-kit/src/theme/breakpoints.ts` with `HBC_NAV_BREAKPOINT_SIDEBAR = 768`
+   - Align `useIsMobile()` and `useSidebarState()` to canonical breakpoint
+   - Add `workspaceNavItems` (Tier 1) prop to `HbcAppShell`; update nav visibility logic with `sidebarGroups.length` guard
+   - `HbcBottomNav` + `HbcSidebar` return `null` when items are empty
+   - Verify navigation matrix: no dead zone at any viewport width in any mode
+
+12. **PH4C.13 – Hardcoded Token Replacement** (3–4 hours, **REQUIRES PH4C.11 complete** — `FluentProvider` must be properly wired via `HbcThemeProvider` for `tokens.*` to produce responsive output; may run in parallel with PH4C.12)
+   - Replace `HBC_SURFACE_LIGHT['*']` in `WorkspacePageShell` (title text, muted text, shimmer bg), `HbcSidebar` (bg, border, text, hover), `HbcUserMenu` (office dropdown variants), `HbcProjectSelector` (office dropdown variants), `HbcToolboxFlyout` (office panel variants) with Fluent `tokens.*` CSS variables
+   - **Highest priority item:** `WorkspacePageShell` `h1.title` `color: tokens.colorNeutralForeground1` — fixes near-invisible page title in field/dark mode
+   - Header chrome (`HbcHeader`, `HbcConnectivityBar`, `HbcBottomNav`, etc.) — verify no surface token misuse; static values on dark chrome are intentional
+   - Verify: toggle field mode → page title visible; sidebar responds; menus respond
+   - ADR created: `docs/architecture/adr/0014-fluent-tokens-over-hbc-constants.md`
+
+13. **PH4C.8 – Verification, Testing & Documentation Closure** (**FINAL — do last**, 3–4 hours, **REQUIRES PH4C.9, PH4C.11, PH4C.12, PH4C.13 complete**)
    - Touch density row height assertion (≥56px)
    - Confirm `HbcEmptyState.md` and `HbcErrorBoundary.md` present
    - Full monorepo gate: lint + type-check + build + test + storybook build
@@ -265,12 +323,14 @@ Phase 4C is complete when:
 | ADR-PH4C-01 | `docs/architecture/adr/ADR-PH4C-01-shimmer-utility-convention.md` | Shimmer utility module convention and theme-aware patterns | 2026-03-07 |
 | ADR-PH4C-02 | `docs/architecture/adr/ADR-PH4C-02-deprecated-token-policy.md` | Deprecated token scan-gated resolution policy | 2026-03-07 |
 | ADR-PH4C-03 | `docs/architecture/adr/ADR-PH4C-03-dev-auth-bypass-boundary.md` | Dev Auth Bypass Storybook scope and zero-production-leak gating | 2026-03-07 |
+| ADR-0013 | `docs/architecture/adr/0013-hbc-theme-context.md` | React Context (not Zustand) for field mode state — single `FluentProvider` root | 2026-03-07 |
+| ADR-0014 | `docs/architecture/adr/0014-fluent-tokens-over-hbc-constants.md` | Fluent `tokens.*` CSS variables over HBC JS constants for theme-responsive surfaces | 2026-03-07 |
 
 ---
 
 ## Phase 4C Task Files
 
-> **Note:** Execute in the recommended sequence below. `PH4C.7` is the only hard prerequisite — it must be complete before `PH4C.2` can begin.
+> **Note:** Execute in the recommended sequence below. `PH4C.7` is the only hard prerequisite for the UI Kit tasks. `PH4C.10` must precede `PH4C.11` (DevToolbar must be inside the correct `FluentProvider` scope). `PH4C.11` must precede `PH4C.12` (navigation reads `appMode` from the context-backed `useHbcTheme()`). All three must precede `PH4C.8` (final verification covers theme and navigation behaviour).
 
 | File | Concern | Source Tasks | Duration |
 |------|---------|--------------|----------|
@@ -281,8 +341,12 @@ Phase 4C is complete when:
 | `PH4C.5-ESLint-Fluent-Import-Compliance.md` | Three-bucket ESLint audit across all `apps/` | C-02 | 2–4 hours |
 | `PH4C.6-HighContrast-CodeQuality.md` | `HbcStatusBadge` `makeStyles` + `forced-colors` fix | D-02 | 1–2 hours |
 | `PH4C.7-Shimmer-Infrastructure.md` | Shared shimmer module + CommandPalette AI loading (**FOUNDATIONAL — do first**) | D-03 | 2–3 hours |
-| `PH4C.8-Verification-Testing-Documentation.md` | Full verification, testing, ADR creation, release gate closure | E-01–E-04 | 3–4 hours |
+| `PH4C.8-Verification-Testing-Documentation.md` | Full verification, testing, ADR creation, release gate closure (**FINAL — do last**) | E-01–E-04 | 3–4 hours |
 | `PH4C.9-DevAuthBypass-Storybook.md` | `MockAdapter` Storybook integration + Dev Auth Bypass boundary | New scope | 2–3 hours |
+| `PH4C.10-PH5C-UIKit-Application.md` | Apply `@hbc/ui-kit` to PH5C DevToolbar suite; replace CSS modules with `makeStyles`; scoped dark-palette token file | New scope (D-PH4C-21, D-PH4C-22) | 3–4 hours |
+| `PH4C.11-Field-Mode-Theme-Wiring.md` | `HbcThemeContext` + `HbcThemeProvider`; shared `FluentProvider`; Field Mode toggle wires immediately (**REQUIRES PH4C.10**) | New scope (D-PH4C-23, D-PH4C-24) | 4–5 hours |
+| `PH4C.12-Responsive-Navigation-Dead-Zone.md` | 5 canonical breakpoint constants; `useIsTablet` in `HbcAppShell` nav logic; `bottomNavItems.length` guard; null-on-empty nav; replace all breakpoint literals (**REQUIRES PH4C.11**) | New scope (D-PH4C-25, D-PH4C-26) | 3–4 hours |
+| `PH4C.13-Hardcoded-Token-Replacement.md` | `WorkspacePageShell` title text + 4 other content surfaces: replace `HBC_SURFACE_LIGHT['*']` with Fluent `tokens.*`; fix page title invisible in field/dark mode (**REQUIRES PH4C.11; parallel with PH4C.12**) | New scope (D-PH4C-27, D-PH4C-28) | 3–4 hours |
 
 ---
 
@@ -303,11 +367,16 @@ Phase 4C is complete when:
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Phase 4C master plan created: 2026-03-07
-All 9 task files to follow (PH4C.1–PH4C.9).
-Locked decisions: D-PH4C-01 through D-PH4C-20 embedded.
-Hard prerequisites: PH4C.7 → PH4C.2 dependency documented.
+Scope expanded 2026-03-07: PH4C.10 added to apply @hbc/ui-kit to PH5C DevToolbar suite.
+Scope expanded 2026-03-07: PH4C.11 REWRITTEN comprehensively — covers all 14 app App.tsx files (13 workspace + pwa), all direct useFieldMode() callers (HbcHeader, WorkspacePageShell, useDensity, HbcDataTable), SPFx webpart entry points, Storybook preview, unit tests.
+Scope expanded 2026-03-07: PH4C.12 REWRITTEN comprehensively — covers 3 misaligned breakpoints (767/1023/1024), useIsTablet integration into HbcAppShell nav logic, HbcSidebar independent null guard, HbcHeader hardcoded media query, DashboardLayout/ToolLandingLayout hardcoded breakpoints, useAdaptiveDensity hardcoded threshold, SPFx nav model documentation.
+Scope expanded 2026-03-07: PH4C.13 CREATED — hardcoded token replacement in 5 content surface components (WorkspacePageShell title text fix — highest priority, HbcSidebar, HbcUserMenu, HbcProjectSelector, HbcToolboxFlyout). Header chrome components (HbcHeader, HbcConnectivityBar, HbcBottomNav, etc.) verified intentionally static — no changes.
+All 13 task files created (PH4C.1–PH4C.13).
+Locked decisions: D-PH4C-01 through D-PH4C-28 embedded.
+Hard prerequisites: PH4C.7 → PH4C.2; PH4C.10 → PH4C.11 → (PH4C.12 ∥ PH4C.13) → PH4C.8.
 Release gating: Two-layer model (11 automated + manual audit ≥99% + named sign-offs).
-ADR register: 3 selective ADRs planned (shimmer, deprecated token policy, Dev Auth Bypass).
-Status: READY FOR IMPLEMENTATION.
-Next: Execute PH4C.7 (Shimmer) as prerequisite before PH4C.2 can begin.
+ADR register: 5 ADRs total (3 original + ADR-0013 theme context + ADR-0014 fluent tokens policy).
+Status: READY FOR IMPLEMENTATION — all plans comprehensive and codebase-verified.
+Next: Execute PH4C.7 (Shimmer) first; then PH4C.10 → PH4C.11 → PH4C.12 + PH4C.13 (parallel) → PH4C.8.
+Progress 2026-03-07: PH4C.7 implemented (shared shimmer utility + DataTable/CommandPalette migration + ADR-0074 + build/lint/check-types/storybook verification).
 -->

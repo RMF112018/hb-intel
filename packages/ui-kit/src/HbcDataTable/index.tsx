@@ -30,7 +30,7 @@ import {
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
-import { keyframes, TRANSITION_FAST } from '../theme/animations.js';
+import { TRANSITION_FAST } from '../theme/animations.js';
 import { elevationRest } from '../theme/elevation.js';
 import {
   HBC_ACCENT_ORANGE,
@@ -41,6 +41,7 @@ import { useAdaptiveDensity } from './hooks/useAdaptiveDensity.js';
 import { useFieldMode } from '../HbcAppShell/hooks/useFieldMode.js';
 import { HbcEmptyState } from '../HbcEmptyState/index.js';
 import { HbcDataTableCard } from './HbcDataTableCard.js';
+import { useShimmerStyles } from '../shared/index.js';
 import type { HbcDataTableProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -219,8 +220,8 @@ const useStyles = makeStyles({
     paddingRight: '16px',
     fontSize: '1rem',
   },
-  // Shimmer skeletons
-  shimmerContainer: {
+  // Shimmer overlay layout wrapper. Animation styles are centralized in shared/shimmer.ts.
+  shimmerOverlay: {
     position: 'absolute',
     top: '0',
     left: '0',
@@ -232,25 +233,15 @@ const useStyles = makeStyles({
     transitionDuration: '200ms',
     transitionTimingFunction: 'ease-out',
   },
-  shimmerRow: {
+  shimmerTableRow: {
     display: 'flex',
     alignItems: 'center',
     borderBottom: '1px solid var(--colorNeutralStroke3)',
   },
   shimmerCell: {
     overflow: 'hidden',
-  },
-  shimmerBar: {
-    height: '14px',
-    borderRadius: '4px',
-    backgroundColor: 'var(--colorNeutralBackground3)',
-    backgroundImage:
-      'linear-gradient(90deg, transparent 25%, rgba(0,75,135,0.08) 50%, transparent 75%)',
-    backgroundSize: '200% 100%',
-    animationName: keyframes.shimmer,
-    animationDuration: '1.5s',
-    animationIterationCount: 'infinite',
-    animationTimingFunction: 'linear',
+    display: 'flex',
+    alignItems: 'center',
   },
   // Card-stack container
   cardStack: {
@@ -351,6 +342,7 @@ export function HbcDataTable<TData>({
   frozenColumns,
 }: HbcDataTableProps<TData>): React.JSX.Element {
   const styles = useStyles();
+  const shimmerStyles = useShimmerStyles();
   const parentRef = React.useRef<HTMLDivElement>(null);
   const { isFieldMode } = useFieldMode();
 
@@ -572,10 +564,15 @@ export function HbcDataTable<TData>({
       >
         {/* Layout-matched shimmer skeletons */}
         {isLoading && (
-          <div className={styles.shimmerContainer} aria-live="polite" aria-label="Loading">
+          <div
+            className={styles.shimmerOverlay}
+            aria-live="polite"
+            aria-busy="true"
+            aria-label="Loading"
+          >
             {/* Skeleton header */}
             <div
-              className={styles.shimmerRow}
+              className={styles.shimmerTableRow}
               style={{ height: `${effectiveRowHeight}px` }}
             >
               {table.getVisibleLeafColumns().map((col) => (
@@ -587,7 +584,7 @@ export function HbcDataTable<TData>({
                     padding: densityConfig.cellPaddingY + ' ' + densityConfig.cellPaddingX,
                   }}
                 >
-                  <div className={styles.shimmerBar} style={{ width: '60%' }} />
+                  <div className={shimmerStyles.shimmerRow} style={{ width: '60%' }} />
                 </div>
               ))}
             </div>
@@ -595,7 +592,7 @@ export function HbcDataTable<TData>({
             {Array.from({ length: lastKnownPageSize }).map((_, i) => (
               <div
                 key={i}
-                className={styles.shimmerRow}
+                className={styles.shimmerTableRow}
                 style={{ height: `${effectiveRowHeight}px` }}
               >
                 {table.getVisibleLeafColumns().map((col, ci) => (
@@ -608,7 +605,7 @@ export function HbcDataTable<TData>({
                     }}
                   >
                     <div
-                      className={styles.shimmerBar}
+                      className={shimmerStyles.shimmerRow}
                       style={{
                         width: `${50 + ((i + ci) % 4) * 12}%`,
                         animationDelay: `${i * 60}ms`,

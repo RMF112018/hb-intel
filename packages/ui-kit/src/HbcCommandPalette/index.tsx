@@ -22,6 +22,7 @@ import { Search, SparkleIcon } from '../icons/index.js';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { HbcConfirmDialog } from '../HbcConfirmDialog/index.js';
 import { useOnlineStatus } from '../HbcAppShell/hooks/useOnlineStatus.js';
+import { useShimmerStyles } from '../shared/index.js';
 import { useCommandPalette } from './hooks/useCommandPalette.js';
 import { useFieldModeActions } from '../HbcCommandBar/fieldModeActionsStore.js';
 import type {
@@ -231,6 +232,7 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
   className,
 }) => {
   const styles = useStyles();
+  const shimmerStyles = useShimmerStyles();
   const { isFieldMode } = useHbcTheme();
   const isMobile = useIsMobile();
   const { isOpen, close } = useCommandPalette();
@@ -518,7 +520,15 @@ export const HbcCommandPalette: React.FC<HbcCommandPaletteProps> = ({
 
           {/* AI loading */}
           {aiLoading && (
-            <div className={styles.emptyState}>Thinking...</div>
+            <div
+              className={shimmerStyles.shimmerContainer}
+              aria-busy="true"
+              aria-label="Loading AI response"
+            >
+              <div className={shimmerStyles.shimmerRowWide} />
+              <div className={shimmerStyles.shimmerRowMedium} />
+              <div className={shimmerStyles.shimmerRowNarrow} />
+            </div>
           )}
         </div>
 
