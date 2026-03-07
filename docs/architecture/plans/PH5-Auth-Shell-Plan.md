@@ -245,6 +245,31 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
 - `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
 - `pnpm exec vitest run packages/shell/src/startupTiming.test.ts packages/shell/src/ShellCore.test.ts packages/auth/src/adapters/resolveAuthMode.test.ts packages/auth/src/adapters/sessionRestoreTiming.test.ts packages/auth/src/guards/guardResolution.test.ts packages/auth/src/spfx/index.test.ts` - BLOCKED (workspace Vitest project setup cannot resolve package-local `vite` in generated `.vite-temp` configs)
+
+## Phase 5.16 Progress Notes
+
+- 5.16.1 completed — formal dual-mode validation matrix suites added in auth/shell validation layers to cover required runtime, guard, redirect, access-governance, degraded-mode, status-priority, cleanup, and override-path scenarios — 2026-03-06.
+- 5.16.2 completed — accessibility checks added for shell navigation/status surfaces via semantic landmark/ARIA contract assertions and plain-language status copy/action validation — 2026-03-06.
+- 5.16.3 completed — performance/rerender checks added for auth selector slice stability and shell transition readiness; boundary-enforcement checks added for protected-feature registration and SPFx host seam constraints — 2026-03-06.
+- 5.16.4 completed — full verification commands passed for build/lint/type-check and matrix tests executed successfully with zero failures using isolated Vitest config (`/tmp/hb-intel-vitest.config.ts`) — 2026-03-06.
+- 5.16.5 completed — governance closure completed (PH5.16 + PH5 notes/checklists, blueprint/foundation updates, ADR-0069, ADR index entry) — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.16)
+
+- [x] Success Criteria #1 advanced through formal dual-mode runtime validation coverage across PWA/SPFx-hosted auth and shell flows.
+- [x] Success Criteria #4 advanced through matrix validation of centralized route/guard/access-denied/locked-navigation behavior.
+- [x] Success Criteria #6 advanced through validation coverage for override approval lifecycle, expiration/renewal, role-review flags, and emergency workflows.
+- [x] Success Criteria #7 advanced through degraded-mode entry/exit and safe-recovery signaling test coverage.
+- [x] Success Criteria #8 advanced through shell-status priority validation and action contract checks.
+- [x] Success Criteria #9 advanced through boundary checks that preserve SPFx host seam limits and shell-owned composition authority.
+- [x] Success Criteria #10 advanced through formal validation matrix execution and complete Phase 5.16 documentation/ADR closure.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm exec vitest run --config /tmp/hb-intel-vitest.config.ts` - PASS (6 files, 20 tests, 0 failures)
 - `pnpm exec vitest run packages/auth/src/guards/guardResolution.test.ts packages/auth/src/guards/AccessDenied.test.ts packages/shell/src/redirectMemory.test.ts` - BLOCKED (known workspace Vitest project setup cannot resolve package-local `vite` in generated temp config).
 
 ---

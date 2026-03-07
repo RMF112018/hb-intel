@@ -1033,4 +1033,10 @@ Phase 5.15 (Performance Baseline and Startup Budgets) completed: 2026-03-06
   - 5.15.4 scoped verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`
   - 5.15.5 targeted Vitest startup-timing suite attempted but blocked by existing workspace Vite-resolution issue (`Cannot find package 'vite'` from package `.vite-temp` configs)
   - 5.15.6 ADR-0068 created: `docs/architecture/adr/ADR-0068-performance-baseline-and-startup-budgets.md`
+Phase 5.16 (Testing Strategy and Validation Matrix) completed: 2026-03-06
+  - 5.16.1 formal dual-mode validation matrix suites added across auth/shell validation layers covering required runtime, redirect, guard, override/emergency, degraded-mode, status-priority, cleanup, unsupported-context, and dev/test-override scenarios
+  - 5.16.2 accessibility checks implemented for shell navigation/status surfaces via semantic landmark/ARIA assertions and plain-language status/action contract validation
+  - 5.16.3 performance/rerender checks implemented for selector slice stability and shell transition readiness; automated boundary checks added for protected-feature registration + SPFx host seam constraints
+  - 5.16.4 verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`, `pnpm exec vitest run --config /tmp/hb-intel-vitest.config.ts`
+  - 5.16.5 ADR-0069 created: `docs/architecture/adr/ADR-0069-testing-strategy-and-validation-matrix.md`
 -->

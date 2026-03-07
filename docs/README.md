@@ -96,6 +96,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0066 | Accepted | [ADR-0066-audit-retention-and-traceability.md](./architecture/adr/ADR-0066-audit-retention-and-traceability.md) |
 | ADR-0067 | Accepted | [ADR-0067-spfx-boundary-and-hosting-integration.md](./architecture/adr/ADR-0067-spfx-boundary-and-hosting-integration.md) |
 | ADR-0068 | Accepted | [ADR-0068-performance-baseline-and-startup-budgets.md](./architecture/adr/ADR-0068-performance-baseline-and-startup-budgets.md) |
+| ADR-0069 | Accepted | [ADR-0069-testing-strategy-and-validation-matrix.md](./architecture/adr/ADR-0069-testing-strategy-and-validation-matrix.md) |
 
 ## Conventions
 

@@ -35,6 +35,29 @@
 
 5. Include automated boundary checks where practical to prevent feature bypass of shell/auth contracts.
 
+## 5.16 Progress Notes
+
+- 5.16.1 completed — formal dual-mode validation matrix tests implemented across auth/shell seams for required scenarios (sign-in/restore by mode, redirect restoration, role landing, unauthorized/locked navigation, request-access presentation, override lifecycle/renewal/review flags, emergency path, degraded mode, shell-status priority, sign-out cleanup, unsupported context, dev/test override behavior) — 2026-03-06.
+- 5.16.2 completed — accessibility validation checks added for shell navigation/status surfaces (landmark/ARIA contract assertions and plain-language shell-status copy/action checks) — 2026-03-06.
+- 5.16.3 completed — performance/rerender validation checks added for auth selector slice stability and shell transition readiness boundaries; automated boundary-enforcement checks added for protected-feature registration and SPFx bridge constraints — 2026-03-06.
+- 5.16.4 completed — verification gates executed (build/lint/check-types + targeted matrix test run) and all new matrix suites passed with zero test failures — 2026-03-06.
+- 5.16.5 completed — governance closure finalized (PH5.16 + PH5 progress/checklists, blueprint/foundation progress comments, ADR-0069, ADR index update) — 2026-03-06.
+
+## 5.16 Completion Checklist
+
+- [x] Formal dual-mode validation matrix implemented for all required Phase 5.16 scenario categories.
+- [x] Accessibility checks included for shell navigation and status surfaces.
+- [x] Performance/rerender checks implemented for store selectors and shell transitions.
+- [x] Automated boundary checks implemented to reduce shell/auth contract bypass risk.
+- [x] Documentation, checklist updates, and ADR deliverables completed with traceability to locked Option C decisions.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm exec vitest run --config /tmp/hb-intel-vitest.config.ts` - PASS (6 files, 20 tests, 0 failures)
+
 ---
 
 ## Recommended Implementation Sequence
