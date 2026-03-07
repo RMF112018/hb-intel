@@ -10,17 +10,23 @@ interface ITimerExecutionInput {
 }
 
 /**
- * D-PH6-13 shared timer handler for nightly deferred Step 5 processing.
- * Traceability: docs/architecture/plans/PH6.13-TimerTrigger-Step5.md §6.13.2 / §6.13.3 / §6.13.5
+ * D-PH6-13 / D-PH6-14 shared timer handler for deferred Step 5 processing,
+ * including custom telemetry for timer lifecycle, per-job outcomes, and duration metrics.
  */
 export async function runTimerFullSpec(
   context: InvocationContext,
   timer: ITimerExecutionInput = {},
 ): Promise<void> {
+  const timerStartMs = Date.now();
   const logger = createLogger(context);
   const timerCorrelationId = randomUUID();
   const services = createServiceFactory();
   const pendingJobs = await services.tableStorage.listPendingStep5Jobs();
+
+  logger.trackEvent('ProvisioningTimerStarted', {
+    timerCorrelationId,
+    pendingJobCount: pendingJobs.length,
+  });
 
   logger.info('timerFullSpec started', {
     correlationId: timerCorrelationId,
@@ -41,16 +47,40 @@ export async function runTimerFullSpec(
 
   for (const status of pendingJobs) {
     const jobCorrelationId = randomUUID();
+    const stepStartMs = Date.now();
+
     try {
       const step5Result = await executeStep5(services, status, logger);
+      const durationMs = Date.now() - stepStartMs;
       const stepIndex = status.steps.findIndex((step) => step.stepNumber === 5);
       if (stepIndex !== -1) {
         status.steps[stepIndex] = step5Result;
       }
 
+      logger.trackMetric('ProvisioningStepDurationMs', durationMs, {
+        stepNumber: '5',
+        stepName: 'Install Web Parts',
+        projectId: status.projectId,
+        projectNumber: status.projectNumber,
+        correlationId: jobCorrelationId,
+        timerCorrelationId,
+      });
+
       if (step5Result.status === 'Completed') {
         completedCount += 1;
         await markTimerSuccess(status, jobCorrelationId);
+
+        logger.trackEvent('ProvisioningStepCompleted', {
+          correlationId: jobCorrelationId,
+          projectId: status.projectId,
+          projectNumber: status.projectNumber,
+          stepNumber: 5,
+          stepName: 'Install Web Parts',
+          durationMs,
+          idempotentSkip: step5Result.idempotentSkip ?? false,
+          timerCorrelationId,
+        });
+
         logger.info('Deferred Step 5 completed by timer', {
           correlationId: jobCorrelationId,
           parentCorrelationId: timerCorrelationId,
@@ -60,9 +90,38 @@ export async function runTimerFullSpec(
         const nextRetryCount = (status.step5TimerRetryCount ?? 0) + 1;
         status.step5TimerRetryCount = nextRetryCount;
 
+        logger.trackEvent('ProvisioningStep5Deferred', {
+          correlationId: jobCorrelationId,
+          projectId: status.projectId,
+          projectNumber: status.projectNumber,
+          reason: step5Result.errorMessage ?? 'Step5DeferredToTimer',
+          step5TimerRetryCount: nextRetryCount,
+          timerCorrelationId,
+        });
+
         if (nextRetryCount >= 3) {
           failedCount += 1;
           await markTimerFailure(status, jobCorrelationId, step5Result.errorMessage);
+
+          logger.trackEvent('ProvisioningStepFailed', {
+            correlationId: jobCorrelationId,
+            projectId: status.projectId,
+            projectNumber: status.projectNumber,
+            stepNumber: 5,
+            stepName: 'Install Web Parts',
+            errorMessage: step5Result.errorMessage ?? 'Exceeded timer retry threshold',
+            attempt: nextRetryCount,
+            durationMs,
+            timerCorrelationId,
+          });
+
+          logger.trackEvent('ProvisioningTimerJobFailed', {
+            timerCorrelationId,
+            projectId: status.projectId,
+            projectNumber: status.projectNumber,
+            step5TimerRetryCount: nextRetryCount,
+          });
+
           logger.error('Deferred Step 5 exceeded retry threshold and escalated to Failed', {
             correlationId: jobCorrelationId,
             parentCorrelationId: timerCorrelationId,
@@ -101,6 +160,25 @@ export async function runTimerFullSpec(
       await services.tableStorage.upsertProvisioningStatus(status);
     } catch (error) {
       failedCount += 1;
+
+      logger.trackEvent('ProvisioningTimerJobFailed', {
+        timerCorrelationId,
+        projectId: status.projectId,
+        projectNumber: status.projectNumber,
+        step5TimerRetryCount: status.step5TimerRetryCount ?? 0,
+      });
+
+      logger.trackEvent('ProvisioningStepFailed', {
+        correlationId: jobCorrelationId,
+        projectId: status.projectId,
+        projectNumber: status.projectNumber,
+        stepNumber: 5,
+        stepName: 'Install Web Parts',
+        errorMessage: error instanceof Error ? error.message : String(error),
+        attempt: status.step5TimerRetryCount ?? 0,
+        timerCorrelationId,
+      });
+
       logger.error('Unexpected error while processing deferred Step 5 job', {
         correlationId: jobCorrelationId,
         parentCorrelationId: timerCorrelationId,
@@ -109,6 +187,14 @@ export async function runTimerFullSpec(
       });
     }
   }
+
+  const totalDurationMs = Date.now() - timerStartMs;
+  logger.trackEvent('ProvisioningTimerCompleted', {
+    timerCorrelationId,
+    completed: completedCount,
+    failed: failedCount,
+    totalDurationMs,
+  });
 
   logger.info('timerFullSpec completed', {
     correlationId: timerCorrelationId,

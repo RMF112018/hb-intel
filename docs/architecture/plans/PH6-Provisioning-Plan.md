@@ -172,8 +172,8 @@ Phase 6 is complete when HB Intel has a production-ready provisioning system tha
 - [x] 6.0.13 Full 7-step checklist visible to Admin (all projects) and Request Submitter (own project).
 - [x] 6.0.14 Admin failures dashboard live and showing failed/stalled runs.
 - [x] 6.0.15 Step 5 timeout/deferral logic functioning; timer trigger completing deferred jobs overnight.
-- [ ] 6.0.16 Correlation IDs propagated through all events; custom App Insights metrics recording.
-- [ ] 6.0.17 Stuck-run alert and timer failure alert configured and tested.
+- [x] 6.0.16 Correlation IDs propagated through all events; custom App Insights metrics recording.
+- [x] 6.0.17 Stuck-run alert and timer failure alert configured and tested.
 - [ ] 6.0.18 All Layer 1 Vitest unit tests passing in CI.
 - [ ] 6.0.19 All Layer 2 SharePoint smoke tests passing in CI (nightly + pre-merge).
 - [ ] 6.0.20 All Layer 3 Playwright E2E tests passing against staging.
@@ -240,7 +240,7 @@ Task completions:
 - PH6.11 completed: YYYY-MM-DD
 - PH6.12 completed: 2026-03-07
 - PH6.13 completed: 2026-03-07
-- PH6.14 completed: YYYY-MM-DD — docs: docs/maintenance/provisioning-observability-runbook.md
+- PH6.14 completed: 2026-03-07 — docs: docs/maintenance/provisioning-observability-runbook.md
 - PH6.15 completed: YYYY-MM-DD
 - PH6.16 completed: YYYY-MM-DD — docs: full documentation suite
 
@@ -258,3 +258,4 @@ Sign-off: Bobby Fetting — YYYY-MM-DD
 <!-- PROGRESS: 2026-03-07 PH6.10 completed. Implemented D-PH6-10 estimating app Project Setup Request UX (`/project-setup`, `/project-setup/new`, `/project-setup/$requestId`) with submission form, OpEx-deduplicated members, detail page provisioning visibility + provisioning-only SignalR connection, and 7-step checklist rendering including DeferredToTimer and site links. Added minimal support updates (`HbcPeoplePicker` in ui-kit, estimating env typing + provisioning alias/deps) and verified `pnpm turbo run build --filter=@hbc/spfx-estimating --only`, `pnpm turbo run lint --filter=@hbc/spfx-estimating --only`, `pnpm --filter @hbc/spfx-estimating exec tsc --noEmit`, and `pnpm turbo run build-storybook --filter=@hbc/ui-kit --only`. -->
 <!-- PROGRESS: 2026-03-07 PH6.12 completed. Implemented D-PH6-12 cross-app notification and admin failures foundations: added `ProvisioningNotificationBanner` to `@hbc/ui-kit` export surface, added `listFailedRuns` to `@hbc/provisioning` API client and backend `provisioning-failures` admin-only endpoint, implemented table-storage failed-run retrieval, replaced Admin failures page with `HbcDataTable` retry/escalate inbox with live row action state, and verified `pnpm turbo run build`, `pnpm turbo run lint`, `pnpm turbo run check-types`, and `pnpm turbo run build-storybook --filter=@hbc/ui-kit`. -->
 <!-- PROGRESS: 2026-03-07 PH6.13 completed. Implemented D-PH6-13 timer trigger bifurcation with shared `runTimerFullSpec` handler, nightly EST schedule (`0 0 1 * * *` with `WEBSITE_TIME_ZONE=Eastern Standard Time`), deferred Step 5 processing + retry escalation (`step5TimerRetryCount`, fail after 3 overnight retries), fire-and-forget completion audit writes, admin-only non-production manual timer endpoint, and immediate `DeferredToTimer` saga SignalR progress updates. -->
+<!-- PROGRESS: 2026-03-07 PH6.14 completed. Implemented D-PH6-14 observability by upgrading `createLogger` to emit structured custom events/metrics, instrumenting saga + timer handlers with the nine required telemetry events and three custom metrics (step duration, saga success rate, step-5 deferral rate), and adding `docs/maintenance/provisioning-observability-runbook.md` with exact Kusto query reference cards and alert rule definitions for stuck runs and timer failures. -->

@@ -26,8 +26,8 @@ const STEP_DEFINITIONS = [
 ];
 
 /**
- * D-PH6-05 / D-PH6-06: Hardened provisioning saga orchestrator with
- * correlation propagation, idempotency, retry, and compensation semantics.
+ * D-PH6-05 / D-PH6-06 / D-PH6-14: Hardened provisioning saga orchestrator with
+ * correlation propagation, idempotency, retry, compensation semantics, and telemetry.
  */
 export class SagaOrchestrator {
   constructor(
@@ -36,6 +36,7 @@ export class SagaOrchestrator {
   ) {}
 
   async execute(request: IProvisionSiteRequest): Promise<void> {
+    const sagaStartMs = Date.now();
     const { projectId, projectNumber, projectName, correlationId, triggeredBy,
             submittedBy, groupMembers } = request;
 
@@ -61,6 +62,14 @@ export class SagaOrchestrator {
       step5TimerRetryCount: 0,
       retryCount: 0,
     };
+
+    this.logger.trackEvent('ProvisioningSagaStarted', {
+      correlationId,
+      projectId,
+      projectNumber,
+      triggeredBy,
+      submittedBy,
+    });
 
     await this.services.tableStorage.upsertProvisioningStatus(status);
 
@@ -93,12 +102,29 @@ export class SagaOrchestrator {
       // D-PH6-05: idempotency guard prevents re-running completed steps during retries.
       if (this.isStepAlreadyCompleted(status, stepDef.number)) {
         this.logger.info(`Step ${stepDef.number} already completed — skipping`, { correlationId });
+        this.logger.trackEvent('ProvisioningStepCompleted', {
+          correlationId,
+          projectId,
+          projectNumber,
+          stepNumber: stepDef.number,
+          stepName: stepDef.name,
+          durationMs: 0,
+          idempotentSkip: true,
+        });
+        this.logger.trackMetric('ProvisioningStepDurationMs', 0, {
+          stepNumber: String(stepDef.number),
+          stepName: stepDef.name,
+          projectId,
+          projectNumber,
+          correlationId,
+        });
         continue;
       }
 
       status.currentStep = stepDef.number;
       await this.services.tableStorage.upsertProvisioningStatus(status);
 
+      const stepStartMs = Date.now();
       let result: ISagaStepResult;
       try {
         result = await withRetry(() => stepExecutors[i](), { maxAttempts: 3, baseDelayMs: 2000 });
@@ -115,6 +141,38 @@ export class SagaOrchestrator {
         });
       }
 
+      const durationMs = Date.now() - stepStartMs;
+      this.logger.trackMetric('ProvisioningStepDurationMs', durationMs, {
+        stepNumber: String(stepDef.number),
+        stepName: stepDef.name,
+        projectId,
+        projectNumber,
+        correlationId,
+      });
+
+      if (result.status === 'Failed') {
+        this.logger.trackEvent('ProvisioningStepFailed', {
+          correlationId,
+          projectId,
+          projectNumber,
+          stepNumber: stepDef.number,
+          stepName: stepDef.name,
+          errorMessage: result.errorMessage ?? 'Unknown step failure',
+          attempt: 3,
+          durationMs,
+        });
+      } else {
+        this.logger.trackEvent('ProvisioningStepCompleted', {
+          correlationId,
+          projectId,
+          projectNumber,
+          stepNumber: stepDef.number,
+          stepName: stepDef.name,
+          durationMs,
+          idempotentSkip: result.idempotentSkip ?? false,
+        });
+      }
+
       const idx = status.steps.findIndex((s) => s.stepNumber === stepDef.number);
       if (idx !== -1) status.steps[idx] = result;
 
@@ -127,6 +185,13 @@ export class SagaOrchestrator {
       }
 
       if (stepDef.number === 5 && status.step5DeferredToTimer) {
+        this.logger.trackEvent('ProvisioningStep5Deferred', {
+          correlationId,
+          projectId,
+          projectNumber,
+          reason: result.errorMessage ?? 'Step5DeferredToTimer',
+        });
+
         // D-PH6-13 immediate saga deferral must surface as WebPartsPending in real-time.
         status.overallStatus = 'WebPartsPending';
         await this.services.tableStorage.upsertProvisioningStatus(status);
@@ -157,6 +222,26 @@ export class SagaOrchestrator {
     status.overallStatus = finalStatus;
     status.completedAt = new Date().toISOString();
     await this.services.tableStorage.upsertProvisioningStatus(status);
+
+    const totalDurationMs = Date.now() - sagaStartMs;
+    this.logger.trackEvent('ProvisioningSagaCompleted', {
+      correlationId,
+      projectId,
+      projectNumber,
+      totalDurationMs,
+      step5Deferred: status.step5DeferredToTimer,
+    });
+    this.logger.trackMetric('Step5DeferralRate', status.step5DeferredToTimer ? 1 : 0, {
+      projectId,
+      projectNumber,
+      correlationId,
+    });
+    this.logger.trackMetric('ProvisioningSagaSuccessRate', 1, {
+      projectId,
+      projectNumber,
+      correlationId,
+      outcome: finalStatus,
+    });
 
     await this.services.sharePoint.writeAuditRecord({
       projectId, projectNumber, projectName, correlationId,
@@ -197,6 +282,7 @@ export class SagaOrchestrator {
     status.currentStep = stepDef.number;
     await this.services.tableStorage.upsertProvisioningStatus(status);
 
+    const stepStartMs = Date.now();
     let result: ISagaStepResult;
     try {
       result = await withRetry(() => executeStep5(this.services, status, this.logger), {
@@ -211,6 +297,47 @@ export class SagaOrchestrator {
         startedAt: new Date().toISOString(),
         errorMessage: err instanceof Error ? err.message : String(err),
       };
+    }
+
+    const durationMs = Date.now() - stepStartMs;
+    this.logger.trackMetric('ProvisioningStepDurationMs', durationMs, {
+      stepNumber: String(stepDef.number),
+      stepName: stepDef.name,
+      projectId: status.projectId,
+      projectNumber: status.projectNumber,
+      correlationId: status.correlationId,
+    });
+
+    if (result.status === 'Failed') {
+      this.logger.trackEvent('ProvisioningStepFailed', {
+        correlationId: status.correlationId,
+        projectId: status.projectId,
+        projectNumber: status.projectNumber,
+        stepNumber: stepDef.number,
+        stepName: stepDef.name,
+        errorMessage: result.errorMessage ?? 'Unknown step failure',
+        attempt: 3,
+        durationMs,
+      });
+    } else {
+      this.logger.trackEvent('ProvisioningStepCompleted', {
+        correlationId: status.correlationId,
+        projectId: status.projectId,
+        projectNumber: status.projectNumber,
+        stepNumber: stepDef.number,
+        stepName: stepDef.name,
+        durationMs,
+        idempotentSkip: result.idempotentSkip ?? false,
+      });
+    }
+
+    if (result.status === 'DeferredToTimer') {
+      this.logger.trackEvent('ProvisioningStep5Deferred', {
+        correlationId: status.correlationId,
+        projectId: status.projectId,
+        projectNumber: status.projectNumber,
+        reason: result.errorMessage ?? 'Step5DeferredToTimer',
+      });
     }
 
     const idx = status.steps.findIndex((s) => s.stepNumber === stepDef.number);
@@ -255,6 +382,26 @@ export class SagaOrchestrator {
     }
 
     await this.services.tableStorage.upsertProvisioningStatus(status);
+
+    this.logger.trackEvent('ProvisioningSagaFailed', {
+      correlationId,
+      projectId,
+      projectNumber,
+      failedAtStep: status.currentStep,
+      errorMessage: status.steps.find((s) => s.status === 'Failed')?.errorMessage ?? 'Unknown saga failure',
+    });
+    this.logger.trackMetric('ProvisioningSagaSuccessRate', 0, {
+      correlationId,
+      projectId,
+      projectNumber,
+      outcome: 'Failed',
+    });
+    this.logger.trackMetric('Step5DeferralRate', status.step5DeferredToTimer ? 1 : 0, {
+      projectId,
+      projectNumber,
+      correlationId,
+    });
+
     await this.services.sharePoint.writeAuditRecord({
       projectId, projectNumber, projectName, correlationId,
       event: 'Failed', triggeredBy, submittedBy,
