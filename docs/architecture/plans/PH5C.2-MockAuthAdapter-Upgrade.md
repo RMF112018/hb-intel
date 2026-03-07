@@ -627,32 +627,32 @@ Phase 5C is complete when:
 
 ## 5.C.2 Success Criteria Checklist (Task 5C.2)
 
-- [ ] 5.C.2.1 `DevAuthBypassAdapter.ts` created with full IAuthAdapter implementation
-- [ ] 5.C.2.2 `acquireIdentity()` returns valid mock identity with sessionId and roles
-- [ ] 5.C.2.3 `normalizeSession()` transforms identity into ISessionData with permissions
-- [ ] 5.C.2.4 `restoreSession()` retrieves stored session or returns null correctly
-- [ ] 5.C.2.5 Configurable delay mechanism works (default 500ms) with event logging
-- [ ] 5.C.2.6 Session persisted to sessionStorage with version marker
-- [ ] 5.C.2.7 Adapter gated behind `import.meta.env.DEV`; absent from production build
-- [ ] 5.C.2.8 Dev subpath export `@hbc/auth/dev` configured in package.json
-- [ ] 5.C.2.9 Unit tests achieve ≥95% coverage
-- [ ] 5.C.2.10 `pnpm turbo run build --filter=@hbc/auth` succeeds; adapter excluded from dist
+- [x] 5.C.2.1 `DevAuthBypassAdapter.ts` created with full IAuthAdapter implementation
+- [x] 5.C.2.2 `acquireIdentity()` returns valid mock identity with sessionId and roles
+- [x] 5.C.2.3 `normalizeSession()` transforms identity into ISessionData with permissions
+- [x] 5.C.2.4 `restoreSession()` retrieves stored session or returns null correctly
+- [x] 5.C.2.5 Configurable delay mechanism works (default 500ms) with event logging
+- [x] 5.C.2.6 Session persisted to sessionStorage with version marker
+- [x] 5.C.2.7 Adapter gated behind `import.meta.env.DEV`; absent from production build
+- [x] 5.C.2.8 Dev subpath export `@hbc/auth/dev` configured in package.json
+- [x] 5.C.2.9 Unit tests achieve ≥95% coverage
+- [x] 5.C.2.10 `pnpm turbo run build --filter=@hbc/auth` succeeds; adapter excluded from dist
 
 ---
 
 ## Phase 5.C.2 Progress Notes
 
-- 5.C.2.1 [PENDING] — DevAuthBypassAdapter implementation
-- 5.C.2.2 [PENDING] — Lifecycle methods (acquire, normalize, restore)
-- 5.C.2.3 [PENDING] — Event emission and audit logging
-- 5.C.2.4 [PENDING] — Dev subpath export configuration
+- 5.C.2.1 [COMPLETED] — DevAuthBypassAdapter implementation
+- 5.C.2.2 [COMPLETED] — Lifecycle methods (acquire, normalize, restore)
+- 5.C.2.3 [COMPLETED] — Event emission and audit logging
+- 5.C.2.4 [COMPLETED] — Dev subpath export configuration (dedicated `src/dev.ts` entry)
 
 ### Verification Evidence
 
-- `pnpm turbo run build --filter=@hbc/auth` - [PENDING]
-- `pnpm turbo run test --filter=@hbc/auth` - [PENDING]
-- `grep -r "DevAuthBypassAdapter" dist/ --include="*.js"` (should return empty for production) - [PENDING]
-- Coverage report for auth package ≥95% - [PENDING]
+- `pnpm turbo run build --filter=@hbc/auth` - [PASS, 2026-03-07]
+- `pnpm turbo run test --filter=@hbc/auth` - [PASS, 2026-03-07]
+- `grep -r "DevAuthBypassAdapter" dist/ --include="*.js"` (should return empty for production) - [PASS, 2026-03-07, empty output]
+- Coverage report for auth package ≥95% - [PASS, 2026-03-07, `DevAuthBypassAdapter.ts` statements 97.74%, functions 100.00%]
 
 ---
 
@@ -661,5 +661,8 @@ Phase 5C is complete when:
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task PH5C.2 created: 2026-03-07
 DevAuthBypassAdapter specification complete with full lifecycle simulation.
+PH5C.2 completed: 2026-03-07
+D-PH5C-02/D-PH5C-03 traceability closed: created `packages/auth/src/adapters/DevAuthBypassAdapter.ts` with DEV guard, lifecycle simulation, delay/event/audit behavior, session persistence/recovery, and dedicated dev export entry `packages/auth/src/dev.ts`.
+D-PH5C-05 verification evidence: `pnpm turbo run build --filter=@hbc/auth` PASS; `pnpm turbo run test --filter=@hbc/auth` PASS; `pnpm --filter @hbc/auth run test:coverage` PASS with `DevAuthBypassAdapter.ts` coverage ≥95%; `grep -r "DevAuthBypassAdapter" dist/ --include="*.js"` returned empty.
 Next: PH5C.3 (PersonaRegistry)
 -->

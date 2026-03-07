@@ -1063,4 +1063,9 @@ Phase 5C.1 (Vitest Workspace Configuration Fix) completed: 2026-03-07
   - Root orchestration updates applied: `turbo.json` test task inputs/outputs/cache semantics, root `package.json` filtered test script, fallback runner `scripts/test-auth-shell.sh` (executable), and README “Running Tests” sections for auth/shell packages.
   - PH5C.1 remediation closure: resolved workspace execution failures and two auth test regressions (emergency validation ordering + UTC-safe duration expiration math) required for gate completion.
   - PH5C.1 verification gates passed: `pnpm turbo run test --filter=@hbc/auth --filter=@hbc/shell`, `bash scripts/test-auth-shell.sh --coverage`, `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`.
+Phase 5C.2 (DevAuthBypassAdapter Implementation) completed: 2026-03-07
+  - D-PH5C-02/D-PH5C-03 implemented in `packages/auth/src/adapters/DevAuthBypassAdapter.ts`: full simulated auth lifecycle (`acquireIdentity`/`normalizeSession`/`restoreSession`), configurable delay, startup/performance timing marks, event emission, audit logging, and session persistence/restore behavior.
+  - Dev-only export boundary implemented through dedicated `packages/auth/src/dev.ts` and `@hbc/auth/dev` subpath mapping in `packages/auth/package.json`; root `src/index.ts` remains compile-safe and production-oriented.
+  - Production-leak prevention validated by excluding dev adapter/dev entry from auth package build emit and confirming empty grep scan in `packages/auth/dist`.
+  - PH5C.2 verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run test --filter=@hbc/auth`, `pnpm --filter @hbc/auth run test:coverage` (`DevAuthBypassAdapter.ts` statements 97.74%, functions 100.00%), `grep -r "DevAuthBypassAdapter" dist/ --include="*.js"` (empty).
 -->

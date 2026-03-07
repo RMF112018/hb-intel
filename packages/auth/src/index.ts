@@ -259,6 +259,11 @@ export {
   toSpfxIdentityBridgeInput,
 } from './spfx/index.js';
 
+// D-PH5C-02:
+// Dev-only adapter exports are intentionally isolated behind the package subpath
+// entrypoint `@hbc/auth/dev` via `src/dev.ts` to keep root index exports valid
+// under TypeScript/ESM static export rules.
+
 // Startup timing bridge (PH5.15 — cross-package startup phase instrumentation seam)
 export {
   startStartupPhase,

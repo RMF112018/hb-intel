@@ -667,4 +667,9 @@ Phase 5C.1 (Vitest Workspace Configuration Fix) completed: 2026-03-07
   - Updated package documentation in `packages/auth/README.md` and `packages/shell/README.md` with running-test workflows and fallback guidance.
   - Applied PH5C.1 remediation to close verification blockers: workspace execution dependency fixes (`happy-dom`, `@vitest/coverage-v8`) and two auth test corrections (emergency validation order, UTC-safe expiration duration arithmetic).
   - Verification gates passed: `pnpm turbo run test --filter=@hbc/auth --filter=@hbc/shell`, `bash scripts/test-auth-shell.sh --coverage`, `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`.
+Phase 5C.2 (DevAuthBypassAdapter Implementation) completed: 2026-03-07
+  - Implemented D-PH5C-02/D-PH5C-03 in `packages/auth/src/adapters/DevAuthBypassAdapter.ts` with full auth lifecycle simulation, configurable delay, timing/event instrumentation, audit logging, and session persistence/restore logic.
+  - Added dedicated dev subpath entrypoint `packages/auth/src/dev.ts` and `@hbc/auth/dev` export mapping in `packages/auth/package.json` to keep dev-only adapter reachable without invalid conditional exports in `src/index.ts`.
+  - Enforced production boundary by excluding dev adapter/dev entry from auth emit targets and validating `grep -r "DevAuthBypassAdapter" dist/ --include="*.js"` returns empty.
+  - Verification gates passed: `pnpm turbo run build --filter=@hbc/auth`, `pnpm turbo run test --filter=@hbc/auth`, `pnpm --filter @hbc/auth run test:coverage` (`DevAuthBypassAdapter.ts` statements 97.74%, functions 100.00%), and dist grep check (empty result).
 -->

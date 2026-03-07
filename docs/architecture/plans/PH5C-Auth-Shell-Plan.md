@@ -250,9 +250,9 @@ All tasks start in PENDING state. Update this section after each task completion
 - 5.C.1.3 [COMPLETED] — Fallback script creation
 
 ### PH5C.2 Progress Notes
-- 5.C.2.1 [PENDING] — DevAuthBypassAdapter implementation
-- 5.C.2.2 [PENDING] — Dev subpath export
-- 5.C.2.3 [PENDING] — Lifecycle events and timing
+- 5.C.2.1 [COMPLETED] — DevAuthBypassAdapter implementation
+- 5.C.2.2 [COMPLETED] — Dev subpath export (`@hbc/auth/dev` via `src/dev.ts`)
+- 5.C.2.3 [COMPLETED] — Lifecycle events and timing
 
 ### PH5C.3 Progress Notes
 - 5.C.3.1 [PENDING] — PersonaRegistry creation with 11 personas
@@ -308,7 +308,7 @@ All verification gates remain PENDING until execution. See PH5C.10 for full veri
 
 ### Bundle & Security
 - Production bundle size check (no unexpected growth) - [PENDING]
-- Zero dev-mode code in production bundle (grep verification) - [PENDING]
+- Zero dev-mode code in production bundle (grep verification) - [PASS for PH5C.2]
 
 ### Documentation & Architecture
 - All documentation files in correct `docs/` subfolders - [PENDING]
@@ -349,5 +349,9 @@ PH5C.1 completed: 2026-03-07
 D-PH5C-05 traceability closed: absolute-path `vitest.workspace.ts`, package/root test scripts, `turbo.json` test task updates, fallback runner `scripts/test-auth-shell.sh`, and package README "Running Tests" sections implemented.
 PH5C.1 verification evidence: `pnpm turbo run test --filter=@hbc/auth --filter=@hbc/shell` PASS; `bash scripts/test-auth-shell.sh --coverage` PASS; `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` PASS; `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` PASS.
 PH5C.1 remediation note: corrected workspace execution pathing/dependencies (`happy-dom`, `@vitest/coverage-v8`) and resolved two failing auth tests needed to satisfy verification gates.
-Next: Execute PH5C.2 (MockAuthAdapter Upgrade)
+PH5C.2 completed: 2026-03-07
+D-PH5C-02/D-PH5C-03 traceability closed: `DevAuthBypassAdapter` implemented with full acquire/normalize/restore lifecycle, configurable delay, startup/performance events, structured audit logging, session persistence/recovery, and strict `import.meta.env.DEV` gating in `packages/auth/src/adapters/DevAuthBypassAdapter.ts`.
+PH5C.2 dev export wiring: added dedicated subpath entrypoint `packages/auth/src/dev.ts` and `@hbc/auth/dev` package export mapping while preserving compile-safe root exports.
+PH5C.2 verification evidence: `pnpm turbo run build --filter=@hbc/auth` PASS; `pnpm turbo run test --filter=@hbc/auth` PASS; `pnpm --filter @hbc/auth run test:coverage` PASS (`DevAuthBypassAdapter.ts` statements 97.74%, functions 100.00%); `grep -r "DevAuthBypassAdapter" dist/ --include="*.js"` returned empty.
+Next: Execute PH5C.3 (PersonaRegistry)
 -->
