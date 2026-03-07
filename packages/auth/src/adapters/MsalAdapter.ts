@@ -29,7 +29,23 @@ export class MsalAdapter implements IAuthAdapter {
   public constructor(
     private readonly config: IMsalConfig,
     private readonly acquireMsalUser: (() => Promise<ICurrentUser | null>) | null,
-  ) {}
+  ) {
+    // Phase 5.2 Option C boundary hardening: adapter-owned provider config
+    // validation must reject missing MSAL identity parameters deterministically.
+    MsalAdapter.assertRequiredConfig(config);
+  }
+
+  private static assertRequiredConfig(config: IMsalConfig): void {
+    if (!config.clientId?.trim()) {
+      throw new Error('MSAL clientId is required');
+    }
+    if (!config.authority?.trim()) {
+      throw new Error('MSAL authority is required');
+    }
+    if (!config.redirectUri?.trim()) {
+      throw new Error('MSAL redirectUri is required');
+    }
+  }
 
   public async acquireIdentity(): Promise<AuthResult<AdapterIdentityPayload>> {
     if (!this.acquireMsalUser) {

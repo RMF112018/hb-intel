@@ -10,7 +10,7 @@ import {
 } from '@azure/msal-browser';
 import type { ICurrentUser } from '@hbc/models';
 import { useAuthStore, usePermissionStore } from '@hbc/auth';
-import { msalConfig, LOGIN_SCOPES } from './msal-config.js';
+import { LOGIN_SCOPES, getValidatedMsalRuntimeConfig, toMsalBrowserConfig } from './msal-config.js';
 
 let msalInstance: PublicClientApplication | null = null;
 
@@ -41,7 +41,10 @@ export async function initializeMsalAuth(): Promise<void> {
   setLoading(true);
 
   try {
-    msalInstance = new PublicClientApplication(msalConfig);
+    // Phase 5 remediation: fail fast on missing/blank MSAL config before any
+    // outbound auth request, preventing AADSTS900144 (`client_id` missing).
+    const runtimeMsalConfig = getValidatedMsalRuntimeConfig();
+    msalInstance = new PublicClientApplication(toMsalBrowserConfig(runtimeMsalConfig));
     await msalInstance.initialize();
 
     // Handle redirect promise (back from Azure AD login page)

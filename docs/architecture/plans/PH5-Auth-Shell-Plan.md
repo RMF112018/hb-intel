@@ -385,18 +385,29 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - 5.2.5 completed - session normalization and restoration utilities implemented with required contract fields and typed restore outcomes - 2026-03-06.
 - 5.2.6 completed - root barrel exports updated for canonical contracts + backward compatibility paths - 2026-03-06.
 - 5.2.7 completed - ADR-0055 created and ADR index updated with full traceability to PH5.2 and locked Option C decisions - 2026-03-06.
+- 5.2.8 remediation completed - resolved PWA Microsoft sign-in runtime failure `AADSTS900144` (missing `client_id`) by enforcing non-empty `clientId` validation in MSAL runtime config resolution (`apps/pwa/src/auth/msal-config.ts` + `apps/pwa/src/auth/msal-init.ts`) and at the `@hbc/auth` adapter boundary (`packages/auth/src/adapters/MsalAdapter.ts`) before provider bootstrap requests - 2026-03-07.
+- 5.2.9 remediation documentation closure - ADR not required (corrective configuration enforcement only; no new architectural decision), with direct traceability to Phase 5 Option C adapter boundary rules and the observed runtime error evidence - 2026-03-07.
 
 ## Phase 5 Success Criteria Checklist Progress (5.2)
 
 - [x] Success Criteria #1 trajectory validated for dual-mode runtime architecture implementation scope.
 - [x] Success Criteria #2 validated for auth-difference encapsulation in adapters and normalized session contract.
 - [x] Success Criteria #3 validated for centralized session normalization contract and typed restore/failure handling.
+- [x] Success Criteria #1 remediation complete - dual-mode PWA MSAL startup now fails fast on invalid provider configuration to prevent invalid outbound sign-in requests (`client_id` omissions).
+- [x] Success Criteria #2 remediation complete - provider-specific config validation remains encapsulated within approved PWA/auth adapter seams without feature-layer leakage.
 
 ### Verification Evidence (2026-03-06)
 
 - `pnpm turbo run build --filter=@hbc/auth` - PASS
 - `pnpm turbo run lint --filter=@hbc/auth` - PASS (0 errors)
 - `pnpm turbo run check-types --filter=@hbc/auth` - PASS
+
+### Verification Evidence (2026-03-07)
+
+- `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run build --filter=@hbc/pwa` - PASS
 
 ---
 
