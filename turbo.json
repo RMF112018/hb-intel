@@ -39,9 +39,16 @@
       "outputs": []
     },
     "test": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$"],
-      "outputs": ["coverage/**"]
+      "dependsOn": ["build"],
+      "inputs": [
+        "src/**",
+        "*.test.ts",
+        "*.spec.ts",
+        "vitest.config.*",
+        "vitest.workspace.ts"
+      ],
+      "outputs": ["coverage/**"],
+      "cache": true
     },
     "dev": {
       "cache": false,

@@ -64,3 +64,19 @@ These concerns are owned by `@hbc/auth`.
 - Contracts/reference set: `docs/reference/auth-shell-*.md`
 - ADR chain: `docs/architecture/adr/ADR-0054-*.md` through `ADR-0071-*.md`
 - Blueprint anchors: `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md` §§1e, 1f, 2b, 2c, 2e
+
+## Running Tests
+
+Use the package-local scripts:
+
+- `pnpm test`
+- `pnpm test:watch`
+- `pnpm test:coverage`
+
+These scripts run through the root Vitest workspace (`vitest.workspace.ts`) and target the
+`@hbc/shell` workspace project.
+
+Fallback runner from repo root:
+
+- `bash scripts/test-auth-shell.sh`
+- `bash scripts/test-auth-shell.sh --coverage`

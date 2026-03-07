@@ -661,4 +661,10 @@ Phase 5.19 (Final Acceptance Criteria Structure) completed: 2026-03-06
   - 5.19.3 named sign-off capture continuity documented through canonical release checklist package reference and release-lock policy
   - 5.19.4 final verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`, `pnpm exec vitest run --config /tmp/hb-intel-vitest.config.ts`
   - 5.19.5 ADR-0072 created: `docs/architecture/adr/ADR-0072-phase-5-final-acceptance-criteria-and-sign-off.md`
+Phase 5C.1 (Vitest Workspace Configuration Fix) completed: 2026-03-07
+  - Implemented D-PH5C-05 root-cause Vitest workspace fix with explicit absolute paths in `vitest.workspace.ts` for `@hbc/auth` and `@hbc/shell` and package-scoped test environment/coverage configuration.
+  - Added package test scripts (`test`, `test:watch`, `test:coverage`) for `@hbc/auth` and `@hbc/shell`; wired root test orchestration in `package.json`, `turbo.json`, and executable fallback script `scripts/test-auth-shell.sh`.
+  - Updated package documentation in `packages/auth/README.md` and `packages/shell/README.md` with running-test workflows and fallback guidance.
+  - Applied PH5C.1 remediation to close verification blockers: workspace execution dependency fixes (`happy-dom`, `@vitest/coverage-v8`) and two auth test corrections (emergency validation order, UTC-safe expiration duration arithmetic).
+  - Verification gates passed: `pnpm turbo run test --filter=@hbc/auth --filter=@hbc/shell`, `bash scripts/test-auth-shell.sh --coverage`, `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`.
 -->

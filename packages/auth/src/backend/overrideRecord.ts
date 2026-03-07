@@ -181,12 +181,12 @@ export function markDependentOverridesForRoleReview(params: {
 }
 
 function validateEmergencyRequest(request: AccessOverrideRequest): void {
-  if (request.emergency && !request.expiresAt) {
-    throw new Error('Emergency overrides require a short explicit expiration timestamp.');
-  }
-
   if (request.emergency && request.reason.trim().length < 10) {
     throw new Error('Emergency overrides require a detailed reason.');
+  }
+
+  if (request.emergency && !request.expiresAt) {
+    throw new Error('Emergency overrides require a short explicit expiration timestamp.');
   }
 }
 

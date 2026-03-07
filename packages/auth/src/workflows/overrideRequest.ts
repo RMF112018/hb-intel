@@ -166,9 +166,10 @@ function resolveRequestedExpiration(
     return command.requestedExpiresAt;
   }
 
-  const requestedAtDate = new Date(requestedAt);
-  requestedAtDate.setHours(requestedAtDate.getHours() + (command.requestedDurationHours ?? policy.defaultExpirationHours));
-  return requestedAtDate.toISOString();
+  const durationHours = command.requestedDurationHours ?? policy.defaultExpirationHours;
+  const requestedAtTime = new Date(requestedAt).getTime();
+  const expirationTime = requestedAtTime + durationHours * 60 * 60 * 1000;
+  return new Date(expirationTime).toISOString();
 }
 
 function normalizeValues(values: string[]): string[] {
