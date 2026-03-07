@@ -1,0 +1,112 @@
+name: Deploy Azure Functions
+# D-PH6-16: Environment-aware Functions deployment pipeline (staging on main, production on tags/manual gate).
+
+on:
+  # D-PH6-16 trigger strategy: auto-deploy staging from main; allow manual environment override.
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+permissions:
+  id-token: write  # Required for OIDC login
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared packages
+        run: pnpm turbo run build --filter=@hbc/models --filter=@hbc/provisioning
+
+      - name: Build Functions
+        run: pnpm turbo run build --filter=backend-functions
+
+      - name: Run unit tests (gate)
+        run: pnpm turbo run test --filter=backend-functions --filter=@hbc/provisioning
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
+
+      - name: Package Functions artifact
+        run: |
+          cd backend/functions
+          zip -r ../../functions-artifact.zip dist/ host.json package.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: functions-artifact
+          path: functions-artifact.zip
+          retention-days: 7
+
+  deploy-staging:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+    # D-PH6-16 environment strategy: staging deploy on main or explicit staging dispatch.
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: functions-artifact
+
+      - name: Azure Login
+        # D-PH6-16 secrets: tenant/client/subscription are sourced from GitHub encrypted secrets.
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Staging Function App
+        uses: azure/functions-action@v1
+        with:
+          app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME_STAGING }}
+          package: functions-artifact.zip
+          respect-funcignore: true
+
+  deploy-production:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    # D-PH6-16 release gate: production deploy allowed only for semantic version tags or explicit production dispatch.
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: functions-artifact
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Production Function App
+        uses: azure/functions-action@v1
+        with:
+          app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME_PROD }}
+          package: functions-artifact.zip
+          respect-funcignore: true

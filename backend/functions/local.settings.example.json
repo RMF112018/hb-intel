@@ -1,0 +1,18 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "WEBSITE_NODE_DEFAULT_VERSION": "~20",
+    "AZURE_TENANT_ID": "<your-tenant-id>",
+    "AZURE_CLIENT_ID": "<app-registration-client-id>",
+    "AZURE_CLIENT_SECRET": "<app-registration-client-secret-for-local-dev>",
+    "AZURE_STORAGE_CONNECTION_STRING": "UseDevelopmentStorage=true",
+    "AzureSignalRConnectionString": "<signalr-connection-string>",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": "<app-insights-connection-string>",
+    "SHAREPOINT_TENANT_URL": "https://hbconstruction.sharepoint.com",
+    "SHAREPOINT_HUB_SITE_ID": "<hub-site-guid>",
+    "HBC_ADAPTER_MODE": "mock",
+    "PROVISIONING_STEP5_TIMEOUT_MS": "90000"
+  }
+}

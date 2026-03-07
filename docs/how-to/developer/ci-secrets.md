@@ -1,24 +1,33 @@
-# CI Secrets Reference
+# How to Configure GitHub Actions Secrets
 
-## Purpose
+**Traceability:** D-PH6-16
 
-D-PH6-15 documentation for GitHub Actions secrets required by Layer 1 (unit), Layer 2 (smoke), and Layer 3 (E2E) provisioning test workflows.
+This guide is for the CI/CD administrator. All secrets must be set before any deployment workflow can succeed.
 
 ## Required Secrets
 
-- `AZURE_TENANT_ID`: Microsoft Entra tenant ID for test and smoke authentication.
-- `AZURE_CLIENT_ID_TEST`: App registration client ID used by smoke tests.
-- `AZURE_CLIENT_SECRET_TEST`: App registration client secret used by smoke tests.
-- `SHAREPOINT_TENANT_URL`: SharePoint tenant root URL, for example `https://hbconstruction.sharepoint.com`.
-- `SHAREPOINT_HUB_SITE_ID`: Hub site GUID used in Step 7 smoke coverage.
-- `SHAREPOINT_TEST_SITE_COLLECTION`: Dedicated smoke-test site collection URL.
-- `SHAREPOINT_APP_CATALOG_URL`: Tenant app catalog URL used by provisioning setup.
-- `HB_INTEL_SPFX_APP_ID`: SPFx app ProductId for web part install scenarios.
-- `STAGING_ESTIMATING_URL`: Deployed staging URL for estimating app E2E runs.
-- `STAGING_ACCOUNTING_URL`: Deployed staging URL for accounting app E2E runs.
+| Secret Name | Where to find the value |
+|---|---|
+| `AZURE_TENANT_ID` | Azure Portal → Microsoft Entra ID → Overview → Tenant ID |
+| `AZURE_CLIENT_ID` | Azure Portal → App Registrations → hb-intel-functions → Application (client) ID |
+| `AZURE_CLIENT_SECRET` | Azure Portal → App Registrations → hb-intel-functions → Certificates & secrets → New client secret |
+| `AZURE_CLIENT_ID_TEST` | Same as above but for the test app registration (`hb-intel-functions-test`) |
+| `AZURE_CLIENT_SECRET_TEST` | Same as above |
+| `AZURE_SUBSCRIPTION_ID` | Azure Portal → Subscriptions → your subscription → Subscription ID |
+| `AZURE_RESOURCE_GROUP` | Azure Portal → Resource groups → the production resource group name |
+| `AZURE_FUNCTIONAPP_NAME_STAGING` | Azure Portal → Function Apps → staging app → name |
+| `AZURE_FUNCTIONAPP_NAME_PROD` | Azure Portal → Function Apps → production app → name |
+| `SHAREPOINT_TENANT_URL` | Always `https://hbconstruction.sharepoint.com` |
+| `SHAREPOINT_HUB_SITE_ID` | SharePoint Admin Center → Active sites → HB Intel hub → GUID in URL |
+| `SHAREPOINT_TEST_SITE_COLLECTION` | Full URL of the dedicated test site collection |
+| `STAGING_ESTIMATING_URL` | Full URL of the staging Estimating SPFx app deployment |
+| `STAGING_ACCOUNTING_URL` | Full URL of the staging Accounting SPFx app deployment |
 
-## Workflow Mapping
+## How to add a secret
+1. Go to the GitHub repository → Settings → Secrets and variables → Actions.
+2. Click **New repository secret**.
+3. Enter the name exactly as shown above.
+4. Paste the value and click **Add secret**.
 
-- `ci.yml` (Layer 1): uses local Azurite and does not require production secrets for table tests.
-- `smoke-tests.yml` (Layer 2): requires SharePoint and Entra secrets listed above.
-- `e2e.yml` (Layer 3): requires staging app URLs to execute the provisioning journey.
+## Rotating secrets
+When a client secret expires, generate a new one in Azure Portal, then update the GitHub secret value. The workflow will automatically use the new value on the next run.

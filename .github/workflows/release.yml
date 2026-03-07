@@ -1,0 +1,52 @@
+name: Release
+# D-PH6-16: Production release workflow enforcing tag format, E2E gate, deploy gate, and GitHub release publication.
+
+on:
+  # D-PH6-16 trigger strategy: only semantic tags can initiate production release orchestration.
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  validate-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate tag format
+        run: |
+          TAG="${{ github.ref_name }}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag $TAG does not match required format vMAJOR.MINOR.PATCH"
+            exit 1
+          fi
+          echo "Tag $TAG is valid"
+
+  e2e-gate:
+    # D-PH6-16 release gate: staging E2E must succeed before production deployment.
+    needs: validate-tag
+    uses: ./.github/workflows/e2e.yml
+    secrets: inherit
+
+  deploy-production:
+    # D-PH6-16 release gate: reusable deploy workflow executes only after successful E2E gate.
+    needs: e2e-gate
+    uses: ./.github/workflows/deploy-functions.yml
+    with:
+      environment: production
+    secrets: inherit
+
+  create-github-release:
+    # D-PH6-16 completion gate: publish release notes only after production deploy job success.
+    needs: deploy-production
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          draft: false

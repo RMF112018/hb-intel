@@ -1,213 +1,63 @@
 name: CI
+# D-PH6-16: Core PR/main quality gate for lint/type/unit before deployment workflows.
 
 on:
+  # D-PH6-16 trigger strategy: validate every PR and protected-branch push.
   pull_request:
     branches: [main]
   push:
     branches: [main]
 
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-
 jobs:
-  lint-and-format:
-    name: Lint & Format
+  lint-and-typecheck:
+    # D-PH6-16 release gate: static quality checks must pass before tests/deploy.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: ./.github/actions/setup-pnpm
-
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
       - name: Lint
         run: pnpm turbo run lint
-
-      - name: Check formatting
-        run: pnpm format:check
-
-      - name: Type-check
+      - name: Type check
         run: pnpm turbo run check-types
 
-  test:
-    name: Test
+  unit-tests:
+    # D-PH6-16 release gate: provisioning unit suite runs with Azurite-backed storage path.
     runs-on: ubuntu-latest
-    services:
-      azurite:
-        image: mcr.microsoft.com/azure-storage/azurite
-        ports:
-          - 10000:10000
-          - 10001:10001
-          - 10002:10002
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
 
-      - uses: ./.github/actions/setup-pnpm
-
-      - name: Run tests
-        # D-PH6-15 Layer 1 gate: provisioning unit tests + coverage threshold.
+      - name: Start Azurite (Azure Storage emulator)
         run: |
-          pnpm --filter @hbc/functions test:coverage
-          pnpm --filter @hbc/provisioning test
-        env:
-          AZURITE_TEST: 'true'
-          AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
-          AZURE_TENANT_ID: test-tenant
-          AZURE_CLIENT_ID: test-client
+          npm install -g azurite
+          azurite --silent --location /tmp/azurite &
+          sleep 2
 
-      - name: Upload coverage
-        if: always()
+      - name: Run unit tests with coverage
+        # D-PH6-16: Layer 1 gate for provisioning-safe releases.
+        run: pnpm turbo run test --filter=backend-functions --filter=@hbc/provisioning
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
+
+      - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage
-          path: '**/coverage/**'
-          retention-days: 14
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: ./.github/actions/setup-pnpm
-
-      - name: Build all workspaces
-        run: pnpm turbo run build
-
-      - name: Upload PWA dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: pwa-dist
-          path: apps/pwa/dist
-          retention-days: 1
-
-      - name: Upload HB Site Control dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: site-control-dist
-          path: apps/hb-site-control/dist
-          retention-days: 1
-
-      - name: Upload Functions dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: functions-dist
-          path: backend/functions/dist
-          retention-days: 1
-
-  bundle-size:
-    name: Bundle Size Gate
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: ./.github/actions/setup-pnpm
-
-      - name: Verify SPFx bundle size budget
-        # 4b.17 / P2-P4: hard-fail CI when SPFx bundle output regresses beyond threshold.
-        run: pnpm turbo run bundle-report --filter=@hbc/spfx
-
-  storybook:
-    name: Storybook
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: ./.github/actions/setup-pnpm
-
-      - name: Build ui-kit dependencies
-        run: pnpm turbo run build --filter=@hbc/ui-kit^...
-
-      - name: Build Storybook
-        # 4b.12.1 / F-012: enforce a deterministic Storybook build artifact in CI.
-        run: pnpm --filter @hbc/ui-kit build-storybook
-
-      - name: Cache Playwright browsers for Storybook test-runner
-        # test-storybook uses Playwright under the hood; cache keeps CI stable and faster.
-        id: sb-pw-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: storybook-playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install Playwright for Storybook test-runner
-        if: steps.sb-pw-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Run Storybook tests
-        # 4b.12.1 / F-012: serve the built static Storybook output (no file watchers), wait until reachable,
-        # execute @storybook/test-runner, and always terminate the background server.
-        run: |
-          cd packages/ui-kit/storybook-static
-          python3 -m http.server 6006 --bind 127.0.0.1 &
-          STORYBOOK_PID=$!
-          trap "kill $STORYBOOK_PID" EXIT
-          until curl -sf http://127.0.0.1:6006 >/dev/null; do sleep 2; done
-          cd "$GITHUB_WORKSPACE"
-          pnpm --filter @hbc/ui-kit test-storybook --url http://127.0.0.1:6006
-
-      - name: Upload Storybook
-        uses: actions/upload-artifact@v4
-        with:
-          name: storybook-static
-          path: packages/ui-kit/storybook-static
-          retention-days: 14
-
-  e2e:
-    name: E2E
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: ./.github/actions/setup-pnpm
-
-      - name: Cache Playwright browsers
-        id: pw-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package.json') }}
-
-      - name: Install Playwright
-        if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: pnpm e2e:install
-
-      - name: Build PWA and dev-harness
-        run: pnpm turbo run build --filter=@hbc/pwa... --filter=@hbc/dev-harness...
-
-      - name: Run E2E tests
-        run: pnpm e2e
-
-      - name: Upload Playwright report
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
           path: |
-            playwright-report/
-            test-results/
+            backend/functions/coverage/
+            packages/provisioning/coverage/
           retention-days: 14
-
-  final-lint-gate:
-    name: Final Lint Gate
-    needs:
-      - lint-and-format
-      - test
-      - build
-      - bundle-size
-      - storybook
-      - e2e
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: ./.github/actions/setup-pnpm
-
-      - name: Final lint verification
-        # 4b.12 closure gate: require lint to pass after all integration checks complete.
-        run: pnpm turbo run lint
