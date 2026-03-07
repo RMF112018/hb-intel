@@ -5,6 +5,7 @@ import { createServiceFactory } from '../../services/service-factory.js';
 import { SagaOrchestrator } from './saga-orchestrator.js';
 import { createLogger } from '../../utils/logger.js';
 import { validateToken, unauthorizedResponse, type IValidatedClaims } from '../../middleware/validateToken.js';
+import { runTimerFullSpec } from '../timerFullSpec/handler.js';
 
 app.http('provisionProjectSite', {
   methods: ['POST'],
@@ -135,6 +136,33 @@ app.http('listFailedRuns', {
     const services = createServiceFactory();
     const failedRuns = await services.tableStorage.listFailedRuns();
     return { status: 200, jsonBody: failedRuns };
+  },
+});
+
+app.http('triggerTimerManually', {
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  route: 'admin/trigger-timer',
+  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+    let claims: IValidatedClaims;
+    try {
+      claims = await validateToken(request);
+    } catch {
+      return unauthorizedResponse('Invalid or missing Bearer token');
+    }
+
+    // D-PH6-13 manual timer trigger is limited to explicit admin roles.
+    if (!claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
+      return { status: 403, jsonBody: { error: 'Admin role required' } };
+    }
+
+    // D-PH6-13 safety guard: manual timer execution is forbidden in production.
+    if (process.env.AZURE_FUNCTIONS_ENVIRONMENT === 'Production') {
+      return { status: 403, jsonBody: { error: 'Manual trigger not available in production' } };
+    }
+
+    await runTimerFullSpec(context, { isPastDue: false });
+    return { status: 200, jsonBody: { message: 'Timer logic executed manually' } };
   },
 });
 

@@ -38,6 +38,8 @@ export interface IProvisioningStatus {
     completedAt?: string;
     failedAt?: string;
     step5DeferredToTimer: boolean;
+    /** D-PH6-13 count of consecutive overnight timer retries for deferred Step 5. */
+    step5TimerRetryCount: number;
     retryCount: number;
     escalatedBy?: string;
 }

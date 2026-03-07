@@ -52,6 +52,7 @@ export class RealTableStorageService implements ITableStorageService {
         completedAt: status.completedAt ?? '',
         failedAt: status.failedAt ?? '',
         step5DeferredToTimer: status.step5DeferredToTimer,
+        step5TimerRetryCount: status.step5TimerRetryCount,
         retryCount: status.retryCount,
         escalatedBy: status.escalatedBy ?? '',
       },
@@ -145,6 +146,7 @@ export class RealTableStorageService implements ITableStorageService {
       completedAt: (entity.completedAt as string) || undefined,
       failedAt: (entity.failedAt as string) || undefined,
       step5DeferredToTimer: entity.step5DeferredToTimer as boolean,
+      step5TimerRetryCount: (entity.step5TimerRetryCount as number) ?? 0,
       retryCount: entity.retryCount as number,
       escalatedBy: (entity.escalatedBy as string) || undefined,
     };

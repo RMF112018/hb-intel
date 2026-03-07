@@ -104,3 +104,9 @@ pnpm exec tsx scripts/create-projects-list.ts
 ```
 
 Administrator guide: `docs/how-to/administrator/create-projects-list.md`.
+
+### Phase 6.13 Timer Trigger Configuration (D-PH6-13)
+
+- Set `WEBSITE_TIME_ZONE=Eastern Standard Time` in Azure Function App settings.
+- `timerFullSpec` uses CRON `0 0 1 * * *` and relies on the timezone setting above to execute at 1:00 AM EST.
+- `POST /api/admin/trigger-timer` is admin-only and blocked when `AZURE_FUNCTIONS_ENVIRONMENT=Production`.

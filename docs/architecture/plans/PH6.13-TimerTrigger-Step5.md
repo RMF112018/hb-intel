@@ -238,15 +238,15 @@ Add `step5TimerRetryCount` to `IProvisioningStatus` type and to the Azure Table 
 
 ## 6.13 Success Criteria Checklist
 
-- [ ] 6.13.1 `WEBSITE_TIME_ZONE=Eastern Standard Time` documented and set in Function App.
-- [ ] 6.13.2 Timer CRON expression `0 0 1 * * *` set correctly.
-- [ ] 6.13.3 Timer queries `listPendingStep5Jobs()` — returns only `WebPartsPending` records.
-- [ ] 6.13.4 Successful timer completion sets `overallStatus = Completed`, `step5DeferredToTimer = false`.
-- [ ] 6.13.5 Timer completion pushes SignalR event to project group.
-- [ ] 6.13.6 Timer completion writes `Completed` audit record to SharePoint (fire-and-forget).
-- [ ] 6.13.7 Persistent Step 5 failures (3 timer retries) escalate to `Failed` status and Admin alert.
-- [ ] 6.13.8 Manual trigger HTTP endpoint blocked in production environment.
-- [ ] 6.13.9 `pnpm turbo run build --filter=backend-functions` passes.
+- [x] 6.13.1 `WEBSITE_TIME_ZONE=Eastern Standard Time` documented and set in Function App.
+- [x] 6.13.2 Timer CRON expression `0 0 1 * * *` set correctly.
+- [x] 6.13.3 Timer queries `listPendingStep5Jobs()` — returns only `WebPartsPending` records.
+- [x] 6.13.4 Successful timer completion sets `overallStatus = Completed`, `step5DeferredToTimer = false`.
+- [x] 6.13.5 Timer completion pushes SignalR event to project group.
+- [x] 6.13.6 Timer completion writes `Completed` audit record to SharePoint (fire-and-forget).
+- [x] 6.13.7 Persistent Step 5 failures (3 timer retries) escalate to `Failed` status and Admin alert.
+- [x] 6.13.8 Manual trigger HTTP endpoint blocked in production environment.
+- [x] 6.13.9 `pnpm turbo run build --filter=backend-functions` passes.
 
 ## PH6.13 Progress Notes
 
@@ -259,3 +259,5 @@ _(To be completed during implementation)_
 - Timer completion → `overallStatus = Completed` in Azure Table — PASS / FAIL
 - Timer completion → SignalR event received in connected browser — PASS / FAIL
 - Timer completion after 3 failures → `overallStatus = Failed`, Application Insights alert fired — PASS / FAIL
+
+<!-- PROGRESS: 2026-03-07 PH6.13 completed. Implemented D-PH6-13 timer bifurcation by extracting `runTimerFullSpec` shared logic, scheduling `timerFullSpec` at `0 0 1 * * *` (EST via WEBSITE_TIME_ZONE), processing deferred Step 5 jobs with correlation IDs, completion audit write (fire-and-forget), and SignalR pushes for completed/deferred/failed outcomes; added admin-only non-production manual trigger endpoint (`POST /api/admin/trigger-timer`); emitted immediate deferred Step 5 progress from saga orchestration; added `step5TimerRetryCount` model/schema support; and updated backend README + Phase 6 checklist evidence. -->

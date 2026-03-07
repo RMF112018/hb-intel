@@ -57,6 +57,8 @@ export class SagaOrchestrator {
       groupMembers,
       startedAt: new Date().toISOString(),
       step5DeferredToTimer: false,
+      // D-PH6-13 tracks overnight Step 5 retry attempts across timer executions.
+      step5TimerRetryCount: 0,
       retryCount: 0,
     };
 
@@ -125,6 +127,26 @@ export class SagaOrchestrator {
       }
 
       if (stepDef.number === 5 && status.step5DeferredToTimer) {
+        // D-PH6-13 immediate saga deferral must surface as WebPartsPending in real-time.
+        status.overallStatus = 'WebPartsPending';
+        await this.services.tableStorage.upsertProvisioningStatus(status);
+        await this.services.signalR.pushProvisioningProgress({
+          projectId: status.projectId,
+          projectNumber: status.projectNumber,
+          projectName: status.projectName,
+          correlationId: status.correlationId,
+          stepNumber: 5,
+          stepName: 'Install Web Parts',
+          status: 'DeferredToTimer',
+          overallStatus: 'WebPartsPending',
+          timestamp: new Date().toISOString(),
+          errorMessage: result.errorMessage,
+        }).catch((err) => {
+          this.logger.warn('Non-critical: deferred Step 5 SignalR push failed', {
+            correlationId: status.correlationId,
+            error: err instanceof Error ? err.message : String(err),
+          });
+        });
         this.logger.info('Step 5 deferred to overnight timer — continuing with steps 6 and 7', {
           correlationId,
         });
@@ -196,6 +218,7 @@ export class SagaOrchestrator {
 
     if (result.status === 'Completed') {
       status.step5DeferredToTimer = false;
+      status.step5TimerRetryCount = 0;
       status.overallStatus = 'Completed';
       status.completedAt = new Date().toISOString();
     } else if (result.status === 'Failed') {
