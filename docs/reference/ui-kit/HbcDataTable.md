@@ -1,5 +1,7 @@
 # HbcDataTable
 
+**Decision Reference:** D-PH4C-12
+
 Virtualized data table with sorting, pagination, and density controls.
 
 ## Import

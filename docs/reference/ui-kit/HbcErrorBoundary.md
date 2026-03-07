@@ -1,47 +1,89 @@
-# HbcErrorBoundary
+# HbcErrorBoundary Component Reference
 
-Error boundary wrapper for graceful error handling and recovery UI.
+**Version:** 1.0
+**Date:** 2026-03-07
+**Status:** Documented in PH4C.8
+**Decision Reference:** D-PH4C-12
 
-## Import
+## Overview
 
-```tsx
-import { HbcErrorBoundary } from '@hbc/ui-kit';
-```
+HbcErrorBoundary is a React Error Boundary wrapper that catches unhandled errors
+in child components and displays a user-friendly error UI instead of a blank page.
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| fallback | ReactNode | undefined | Custom fallback UI when error occurs |
-| onError | (error: Error, info: ErrorInfo) => void | undefined | Callback invoked on error capture |
-| children | ReactNode | required | Child components to wrap |
+```typescript
+interface HbcErrorBoundaryProps {
+  children: React.ReactNode;
 
-## Usage
+  /** Optional fallback UI to display on error */
+  fallback?: React.ReactNode;
 
+  /** Optional callback when error is caught */
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+
+  /** Show error details in development mode */
+  showDetails?: boolean;
+
+  /** CSS class name for custom styling */
+  className?: string;
+}
+```
+
+## Usage Examples
+
+### Basic Error Boundary
+```tsx
+import { HbcErrorBoundary } from '@hbc/ui-kit';
+
+export const App = () => (
+  <HbcErrorBoundary>
+    <MyComplexComponent />
+  </HbcErrorBoundary>
+);
+```
+
+### With Custom Fallback
 ```tsx
 <HbcErrorBoundary
-  onError={(error, info) => console.error('Error:', error)}
-  fallback={<HbcEmptyState title="Something went wrong" description="Please refresh the page." />}
+  fallback={
+    <div>Something went wrong. Please refresh the page.</div>
+  }
+  onError={(error) => logErrorToService(error)}
 >
   <MyComponent />
 </HbcErrorBoundary>
+```
 
-<HbcErrorBoundary>
-  <DashboardContent />
+### With Development Details
+```tsx
+<HbcErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
+  <MyComponent />
 </HbcErrorBoundary>
 ```
 
-## Field Mode Behavior
-
-Error styling adapts in Field Mode with increased contrast for error messages and backgrounds. Error icons and text use brighter hues suitable for dark backgrounds.
-
 ## Accessibility
 
-- Displays error UI with `role="alert"` to announce failures to screen readers
-- Error message is descriptive and actionable
-- Recovery actions (buttons) are keyboard accessible
-- Error context is provided without overwhelming users
+- Error message is always visible and announced to screen readers
+- Error details are logically structured with clear headings
+- Keyboard navigation to dismiss or retry is supported
 
-## SPFx Constraints
+## Testing
 
-No SPFx-specific constraints.
+Test error boundaries using:
+```tsx
+// Test component that throws an error
+const BadComponent = () => {
+  throw new Error('Test error');
+};
+
+// In test:
+<HbcErrorBoundary>
+  <BadComponent />
+</HbcErrorBoundary>
+```
+
+## Related Components
+
+- `HbcEmptyState` — No-data state display
+- `HbcLoadingState` — Loading skeleton placeholder

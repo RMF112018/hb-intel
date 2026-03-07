@@ -1,50 +1,88 @@
-# HbcEmptyState
+# HbcEmptyState Component Reference
 
-Empty state placeholder for displaying when no data or content is available.
+**Version:** 1.0
+**Date:** 2026-03-07
+**Status:** Documented in PH4C.8
+**Decision Reference:** D-PH4C-12
 
-## Import
+## Overview
 
-```tsx
-import { HbcEmptyState } from '@hbc/ui-kit';
-```
+HbcEmptyState is a flexible empty state component for displaying no-data or placeholder content.
+It supports optional icons, titles, descriptions, and call-to-action buttons.
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| icon | ReactNode | required | Icon or illustration element |
-| title | string | required | Primary empty state heading |
-| description | string | required | Descriptive text explaining the empty state |
-| action | ReactNode | undefined | Optional CTA element (button, link) |
+```typescript
+interface HbcEmptyStateProps {
+  /** Icon to display (Fluent Icon component or null) */
+  icon?: React.ReactNode;
 
-## Usage
+  /** Title text */
+  title: string;
 
+  /** Description or explanation text */
+  description?: string;
+
+  /** Optional primary action button */
+  primaryAction?: {
+    label: string;
+    onClick: () => void;
+  };
+
+  /** Optional secondary action button */
+  secondaryAction?: {
+    label: string;
+    onClick: () => void;
+  };
+
+  /** CSS class name for custom styling */
+  className?: string;
+
+  /** Optional aria-label for accessibility */
+  'aria-label'?: string;
+}
+```
+
+## Usage Examples
+
+### Basic Empty State
+```tsx
+import { HbcEmptyState } from '@hbc/ui-kit';
+import { SearchIcon } from '@fluentui/react-icons';
+
+export const MyComponent = () => (
+  <HbcEmptyState
+    icon={<SearchIcon />}
+    title="No Results Found"
+    description="Try adjusting your search filters and try again."
+  />
+);
+```
+
+### With Actions
 ```tsx
 <HbcEmptyState
-  icon={<DocumentIcon />}
-  title="No Documents"
-  description="Create your first document to get started."
-  action={<HbcButton onClick={handleCreate}>Create Document</HbcButton>}
-/>
-
-<HbcEmptyState
-  icon={<SearchIcon />}
-  title="No Results"
-  description="Try adjusting your search filters."
+  title="No Data Available"
+  description="Get started by importing your first project."
+  primaryAction={{
+    label: 'Import Project',
+    onClick: () => handleImport(),
+  }}
 />
 ```
 
-## Field Mode Behavior
-
-The muted background adapts to Field Mode with a darker, less saturated tone. Icon and text colors remain visible on the darker surface. The overall card background uses hbcFieldTheme elevation levels.
-
 ## Accessibility
 
-- Implements `role="status"` to announce empty state to screen readers
-- Title is semantic heading (h2 level)
-- Description provides context for the empty condition
-- Action button is keyboard accessible and properly labeled
+- Always provide a meaningful `title` — this is the primary text for screen readers
+- Use `description` for supplementary information, not as the only content
+- Include action buttons with clear labels
+- Component automatically handles focus management for keyboard navigation
 
-## SPFx Constraints
+## Testing
 
-No SPFx-specific constraints.
+See `.stories.tsx` file for visual and accessibility test cases.
+
+## Related Components
+
+- `HbcErrorBoundary` — Error handling wrapper
+- `HbcLoadingState` — Loading skeleton placeholder
