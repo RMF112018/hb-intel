@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./dev-toolbar": {
+      "types": "./dist/devToolbar/index.d.ts",
+      "import": "./dist/devToolbar/index.js"
     }
   },
   "scripts": {

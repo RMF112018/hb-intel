@@ -177,6 +177,61 @@ export class DevAuthBypassAdapter implements IAuthAdapter {
   }
 
   /**
+   * normalizeSessionWithPermissions()
+   * ===================================
+   * D-PH6F-02: Variant of normalizeSession() that accepts an explicit permissions map.
+   * Use this when a PERSONA_REGISTRY entry is available so that the registry-defined
+   * permissions are used directly rather than regenerated from roles.
+   *
+   * This is the preferred method when called from useDevAuthBypass.selectPersona().
+   */
+  async normalizeSessionWithPermissions(
+    rawIdentity: IMockIdentity,
+    explicitPermissions: Record<string, boolean>
+  ): Promise<ISessionData> {
+    const startTime = performance.now();
+    performance.mark('auth:normalize-session-with-perms-start');
+
+    await this.delay(50);
+
+    const expiresAt = Date.now() + 8 * 60 * 60 * 1000; // 8 hours
+
+    const session: ISessionData = {
+      sessionId: rawIdentity.metadata.sessionId,
+      userId: rawIdentity.userId,
+      displayName: rawIdentity.displayName,
+      email: rawIdentity.email,
+      roles: rawIdentity.roles,
+      permissions: explicitPermissions, // use registry-defined permissions directly
+      expiresAt,
+      acquiredAt: rawIdentity.metadata.loginTimestamp,
+    };
+
+    // Persist to sessionStorage
+    sessionStorage.setItem(
+      'hb-auth-dev-session',
+      JSON.stringify({ version: 1, session })
+    );
+
+    const elapsedMs = performance.now() - startTime;
+    performance.mark('auth:normalize-session-with-perms-end');
+    performance.measure(
+      'auth:normalize-session-with-perms',
+      'auth:normalize-session-with-perms-start',
+      'auth:normalize-session-with-perms-end'
+    );
+
+    this.auditLog('NORMALIZE_SESSION_WITH_PERMS', rawIdentity.userId, elapsedMs);
+    this.emit('auth:session-normalized', { session, elapsedMs });
+
+    console.log(
+      `[HB-AUTH-DEV] normalizeSessionWithPermissions completed in ${elapsedMs.toFixed(2)}ms`
+    );
+
+    return session;
+  }
+
+  /**
    * restoreSession() — retrieves stored session from sessionStorage
    * D-PH5C-03: Returns null if session expired or not found
    */
@@ -275,35 +330,49 @@ export class DevAuthBypassAdapter implements IAuthAdapter {
 
   /**
    * Map roles to feature permissions
-   * D-PH5C-04: Maps personas to their allowed features
+   * D-PH6F-02: Full 17-key permission set aligned with IPersona.permissions in personaRegistry.ts.
    */
   private mapRolesToPermissions(
     roles: string[]
   ): Record<string, boolean> {
-    const permissions: Record<string, boolean> = {
-      // Default permissions for all users
+    // D-PH6F-02: Full 17-key permission set aligned with IPersona.permissions in personaRegistry.ts.
+    // Order matches personaRegistry.ts key order for diff readability.
+    const isAdmin = roles.includes('Administrator');
+    const isAccounting = roles.includes('AccountingUser');
+    const isEstimating = roles.includes('EstimatingUser');
+    const isProject = roles.includes('ProjectUser');
+    const isExecutive = roles.includes('Executive') || roles.includes('Manager');
+    const canApprove = isAdmin || isEstimating || isExecutive;
+    const canWrite = isAdmin || isAccounting || isEstimating || isProject;
+    const canDelete = isAdmin;
+    const canRead = true; // All authenticated users have read access
+
+    return {
+      // Administrative features
+      'feature:admin-panel': isAdmin,
+      'feature:user-management': isAdmin,
+      'feature:system-settings': isAdmin,
+      'feature:override-requests': isAdmin, // DA-09 - was missing
+      'feature:audit-logs': isAdmin || isExecutive, // DA-09 - was missing
+
+      // Module-specific features
+      'feature:accounting-invoice': isAdmin || isAccounting || isExecutive,
+      'feature:accounting-reports': isAdmin || isAccounting || isExecutive,
+      'feature:estimating-projects': isAdmin || isEstimating || isExecutive,
+      'feature:estimating-quotes': isAdmin || isEstimating || isExecutive,
+      'feature:project-hub': isAdmin || isProject || isExecutive,
+      'feature:project-tracking': isAdmin || isProject || isExecutive,
+
+      // Universal features
       'feature:view-dashboard': true,
       'feature:view-profile': true,
 
-      // Admin permissions
-      'feature:admin-panel': roles.includes('Administrator'),
-      'feature:user-management': roles.includes('Administrator'),
-      'feature:system-settings': roles.includes('Administrator'),
-
-      // Accounting module
-      'feature:accounting-invoice': roles.includes('AccountingUser'),
-      'feature:accounting-reports': roles.includes('AccountingUser'),
-
-      // Estimating module
-      'feature:estimating-projects': roles.includes('EstimatingUser'),
-      'feature:estimating-quotes': roles.includes('EstimatingUser'),
-
-      // Project module
-      'feature:project-hub': roles.includes('ProjectUser'),
-      'feature:project-tracking': roles.includes('ProjectUser'),
+      // Standard action permissions - DA-09, were entirely missing
+      'action:read': canRead,
+      'action:write': canWrite,
+      'action:delete': canDelete,
+      'action:approve': canApprove,
     };
-
-    return permissions;
   }
 }
 
