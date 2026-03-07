@@ -105,6 +105,12 @@ export function useDevAuthBypass(): IDevAuthBypassState {
 
     setSelectedPersona(persona);
 
+    // D-PH6F-04: Signal auth transition to suppress stale permission checks during delay.
+    // Only flash bootstrapping state if the adapter delay is perceptible (>100ms).
+    if (authDelay > 100) {
+      useAuthStore.getState().beginBootstrap('mock');
+    }
+
     try {
       const identity = await adapter.acquireIdentity();
       // D-PH6F-01: Use normalizeSessionWithPermissions so persona.permissions override role defaults
@@ -120,16 +126,62 @@ export function useDevAuthBypass(): IDevAuthBypassState {
       );
       setCurrentSession(enrichedSession);
 
-      // D-PH6F-01: Sync to global auth and permission stores so feature gates react
+      // D-PH6F-04: Handle _session:expired supplemental persona flag.
+      // Simulates expired session — transition to 'reauth-required' instead of 'authenticated'.
+      if (persona.permissions['_session:expired'] === true) {
+        sessionStorage.removeItem('hb-auth-dev-session');
+        setCurrentSession(null);
+        useAuthStore.getState().markReauthRequired({
+          code: 'expired-session',
+          message: '[DEV] Simulated session expiry via ExpiredSession persona',
+          recoverable: true,
+        });
+        usePermissionStore.getState().clear();
+
+        if (auditLoggingEnabled) {
+          console.log(
+            '[HB-AUTH-DEV] ExpiredSession persona: transitioning to reauth-required',
+          );
+        }
+        return;
+      }
+
+      // D-PH6F-01: Sync to global auth and permission stores so feature gates react.
+      // setUser() transitions lifecyclePhase → 'authenticated'.
       useAuthStore.getState().setUser(sessionDataToCurrentUser(enrichedSession));
       usePermissionStore
         .getState()
         .setPermissions(extractGrantedPermissions(enrichedSession.permissions));
 
+      // D-PH6F-04: Handle _system:degraded supplemental persona flag.
+      // Override feature flags to simulate degraded system state.
+      if (persona.permissions['_system:degraded'] === true) {
+        usePermissionStore.getState().setFeatureFlags({
+          'buyout-schedule': false,
+          'risk-matrix': false,
+          'ai-insights': false,
+          'procore-sync': false,
+          '_degraded-mode': true,
+        });
+        if (auditLoggingEnabled) {
+          console.log(
+            '[HB-AUTH-DEV] DegradedMode persona: feature flags set to degraded state',
+          );
+        }
+      }
+
       if (auditLoggingEnabled) {
-        console.log(`[HB-AUTH-DEV] Persona selected: ${persona.id}`);
+        console.log(
+          `[HB-AUTH-DEV] Persona selected: ${persona.id} | phase: authenticated`,
+        );
       }
     } catch (error) {
+      // D-PH6F-04: On failure, transition to error state with structured error.
+      useAuthStore.getState().setStructuredError({
+        code: 'provider-bootstrap-failure',
+        message: `[DEV] Failed to switch persona to ${persona.id}`,
+        recoverable: true,
+      });
       console.error('[HB-AUTH-DEV] Failed to select persona:', error);
     }
   };

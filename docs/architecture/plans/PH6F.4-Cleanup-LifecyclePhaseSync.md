@@ -286,8 +286,13 @@ pnpm --filter dev-harness dev
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task created: 2026-03-07
-Status: Pending implementation
-Execution: Fourth in sequence (after PH6F.1, PH6F.2, PH6F.3)
-Note: Apply as additive changes to the PH6F.1 useDevAuthBypass.ts modifications
-Key items: beginBootstrap transitional call, _session:expired special handling
+Phase PH6F.4 completed: 2026-03-07
+Changes applied to: packages/shell/src/devToolbar/useDevAuthBypass.ts
+  - selectPersona(): conditional beginBootstrap('mock') when authDelay > 100ms
+  - selectPersona(): _session:expired → markReauthRequired() + clear() + early return
+  - selectPersona(): _system:degraded → setFeatureFlags() override after normal sync
+  - selectPersona() catch: setStructuredError() with 'provider-bootstrap-failure'
+  - Type corrections: 'session-expired' → 'expired-session', 'dev-persona-switch-failed' → 'provider-bootstrap-failure'
+  - Audit log updated to include lifecycle phase
+Next: Build verification (pnpm turbo run build --filter=@hbc/shell --filter=@hbc/auth)
 -->
