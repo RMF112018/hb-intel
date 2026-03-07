@@ -307,6 +307,31 @@ Phase 5 is done when HB Intel has a production-ready authentication and shell fo
 - **Operations/Support Owner:** APPROVED (2026-03-06)
 - **Release Decision:** APPROVED FOR PRODUCTION (all mandatory gates PASS, all mandatory sign-offs APPROVED)
 
+## Phase 5.18 Progress Notes
+
+- 5.18.1 completed — package READMEs expanded for `@hbc/auth` and `@hbc/shell` with architecture purpose, boundaries, contracts, runtime behavior, and PH5/ADR traceability references — 2026-03-06.
+- 5.18.2 completed — full architecture/reference documentation package produced for contracts, state diagrams, provider/adapter/runtime behavior, governance/emergency policies, shell-status/degraded/SPFx/registration boundaries, and validation/release references — 2026-03-06.
+- 5.18.3 completed — consolidated deferred-scope roadmap published with required four-point structure for each deferred interview item (`not in Phase 5 scope`, `intentionally deferred`, `expected future direction`, `dependency assumptions`) — 2026-03-06.
+- 5.18.4 completed — final documentation governance closure completed across PH5.18/PH5 + blueprint/foundation updates and ADR-0071 publication with full traceability — 2026-03-06.
+- 5.18.5 completed — final verification evidence recorded for build/lint/type-check/validation matrix with zero errors and no failed tests — 2026-03-06.
+
+## Phase 5 Success Criteria Checklist Progress (5.18 - Documentation Closeout)
+
+- [x] Success Criteria #10 fully completed with final documentation package, release checklist linkage, deferred-scope roadmap, and closing ADR coverage.
+
+## Final Phase 5 Acceptance Layers (Complete, Post-5.18 Confirmation)
+
+- [x] Layer 1 — Feature Completion: all planned Phase 5 implementation tasks (5.1 through 5.18) completed with traceable deliverables.
+- [x] Layer 2 — Outcome Validation: dual-mode validation matrix, startup budget checks, degraded-mode safety, boundary enforcement, and governance workflows verified and documented.
+- [x] Layer 3 — Operational Readiness: release checklist gates passed, documentation package finalized, deferred-scope roadmap captured, and named sign-offs recorded.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm exec vitest run --config /tmp/hb-intel-vitest.config.ts` - PASS (6 files, 20 tests, 0 failures)
+
 ---
 
 ## Phase 5.2 Progress Notes

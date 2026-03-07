@@ -649,4 +649,10 @@ Phase 5.17 (Release Gating and Sign-Off) completed: 2026-03-06
   - 5.17.3 full Phase 5 success criteria marked complete with explicit Layer 1/Layer 2/Layer 3 acceptance closure
   - 5.17.4 final verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`, `pnpm exec vitest run --config /tmp/hb-intel-vitest.config.ts`
   - 5.17.5 ADR-0070 created: `docs/architecture/adr/ADR-0070-phase-5-final-release-gating-and-sign-off.md`
+Phase 5.18 (Documentation Package) completed: 2026-03-06
+  - 5.18.1 package READMEs for `@hbc/auth` + `@hbc/shell` expanded with purpose summaries, architecture responsibilities, contracts, runtime boundaries, and traceability
+  - 5.18.2 complete architecture/reference documentation set produced in `docs/architecture/` + `docs/reference/` for contracts/state diagrams/provider-adapter-runtime/governance/emergency/shell-status/degraded/SPFx-boundary/feature-registration/validation/release topics
+  - 5.18.3 consolidated deferred-scope roadmap produced in `docs/reference/auth-shell-deferred-scope-roadmap.md` with required four-point deferred-item structure and future dependency assumptions
+  - 5.18.4 final Phase 5 documentation and governance closure completed in PH5.18/PH5 plans + blueprint/foundation logs with ADR-0071 publication and ADR index update
+  - 5.18.5 final verification gates passed: `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell`, `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell`, `pnpm exec vitest run --config /tmp/hb-intel-vitest.config.ts`
 -->

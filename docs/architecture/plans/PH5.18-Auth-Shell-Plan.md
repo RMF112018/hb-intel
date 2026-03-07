@@ -34,6 +34,29 @@
    - expected future direction
    - dependency assumptions for later implementation
 
+## 5.18 Progress Notes
+
+- 5.18.1 completed — package documentation expanded in `packages/auth/README.md` and `packages/shell/README.md` with architecture purpose, ownership boundaries, major contracts, runtime boundaries, and PH5/ADR traceability links — 2026-03-06.
+- 5.18.2 completed — architecture/reference documentation set produced under `docs/architecture/` + `docs/reference/` covering architecture overviews, store contracts/state diagrams, provider/adapter/runtime docs, permission/governance/emergency policies, shell-status/degraded-mode hierarchy, SPFx boundary, protected feature registration, validation matrix, and release checklist references — 2026-03-06.
+- 5.18.3 completed — deferred-scope roadmap consolidated in `docs/reference/auth-shell-deferred-scope-roadmap.md` with required four-point structure for each deferred interview item (not in scope, intentionally deferred, future direction, dependency assumptions) — 2026-03-06.
+- 5.18.4 completed — final governance documentation closure completed (PH5.18 + PH5 updates, blueprint/foundation progress notes, ADR-0071, ADR index update, and full traceability) — 2026-03-06.
+- 5.18.5 completed — final verification evidence recorded with zero errors for build/lint/type-check and validation matrix execution — 2026-03-06.
+
+## 5.18 Completion Checklist
+
+- [x] Full technical and operational documentation package produced for `@hbc/auth` and `@hbc/shell`.
+- [x] All required documentation categories from PH5.18 covered and cross-referenced.
+- [x] Deferred-scope roadmap documented with required four-point structure for each deferred item.
+- [x] Final Phase 5 success criteria and acceptance layers fully marked complete in Phase 5 plan.
+- [x] Closing ADR and documentation index updates completed.
+
+### Verification Evidence (2026-03-06)
+
+- `pnpm turbo run build --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm turbo run lint --filter=@hbc/auth --filter=@hbc/shell` - PASS (0 errors)
+- `pnpm turbo run check-types --filter=@hbc/auth --filter=@hbc/shell` - PASS
+- `pnpm exec vitest run --config /tmp/hb-intel-vitest.config.ts` - PASS
+
 ---
 
 ## Recommended Implementation Sequence
