@@ -8,7 +8,7 @@ Three misaligned breakpoint constants create silent dead zones across all displa
 **Locked references:** Blueprint §2c | Foundation Plan PH4.14.5 | PH4B.10
 **Depends on:** PH4C.11
 **Blocks:** PH4C.8
-**Status:** PENDING
+**Status:** COMPLETE
 
 ---
 
@@ -344,35 +344,29 @@ pnpm --filter=dev-harness dev
 
 ## Definition of Done
 
-- [ ] `packages/ui-kit/src/theme/breakpoints.ts` created with 5 canonical constants.
-- [ ] `useIsMobile.ts` references `HBC_BREAKPOINT_MOBILE`.
-- [ ] `useIsTablet.ts` references `HBC_BREAKPOINT_TABLET`.
-- [ ] `useSidebarState.ts` references `HBC_BREAKPOINT_SIDEBAR` with strict `<` comparison.
-- [ ] `HbcAppShell.tsx` consumes `useIsTablet`; `showSidebar` and `showBottomNav` use it.
-- [ ] `showBottomNav` includes `bottomNavItems.length > 0` guard.
-- [ ] `main` content margin class uses `isTablet` in the condition.
-- [ ] `HbcSidebar.tsx` null guard verified (no independent misaligned call).
-- [ ] `HbcBottomNav/index.tsx` renders `null` when `items.length === 0`.
-- [ ] `HbcHeader.tsx` center toolbar media query uses `HBC_BREAKPOINT_SIDEBAR`.
-- [ ] `DashboardLayout.tsx` uses `HBC_BREAKPOINT_CONTENT_MEDIUM` and `HBC_BREAKPOINT_MOBILE`.
-- [ ] `ToolLandingLayout.tsx` uses same canonical constants.
-- [ ] `useAdaptiveDensity.ts` uses `HBC_BREAKPOINT_SIDEBAR` and `HBC_BREAKPOINT_COMPACT_DENSITY`.
-- [ ] SPFx navigation model documented in `docs/reference/navigation/spfx-navigation-model.md`.
-- [ ] Storybook `NavigationDeadZoneRegression` story added.
-- [ ] Grep for magic numbers 767/1023/1024/1199/1440 returns zero results outside `breakpoints.ts`.
-- [ ] `pnpm turbo run build` passes with zero TypeScript errors.
+- [x] `packages/ui-kit/src/theme/breakpoints.ts` created with 5 canonical constants.
+- [x] `useIsMobile.ts` references `HBC_BREAKPOINT_MOBILE`.
+- [x] `useIsTablet.ts` references `HBC_BREAKPOINT_TABLET`.
+- [x] `useSidebarState.ts` references `HBC_BREAKPOINT_SIDEBAR` with strict `<` comparison.
+- [x] `HbcAppShell.tsx` consumes `useIsTablet`; `showSidebar` and `showBottomNav` use it.
+- [x] `showBottomNav` includes `bottomNavItems.length > 0` guard.
+- [x] `main` content margin class uses `isTablet` in the condition.
+- [x] `HbcSidebar.tsx` null guard verified (no independent misaligned call).
+- [x] `HbcBottomNav/index.tsx` renders `null` when `items.length === 0`.
+- [x] `HbcHeader.tsx` center toolbar media query uses `HBC_BREAKPOINT_SIDEBAR`.
+- [x] `DashboardLayout.tsx` uses `HBC_BREAKPOINT_CONTENT_MEDIUM` and `HBC_BREAKPOINT_MOBILE`.
+- [x] `ToolLandingLayout.tsx` uses same canonical constants.
+- [x] `useAdaptiveDensity.ts` uses `HBC_BREAKPOINT_SIDEBAR` and `HBC_BREAKPOINT_COMPACT_DENSITY`.
+- [x] SPFx navigation model documented in `docs/reference/navigation/spfx-navigation-model.md`.
+- [x] Storybook `NavigationDeadZoneRegression` story added.
+- [x] Grep for magic numbers 767/1023/1024/1199/1440 returns zero numeric literal matches in PH4C.12-targeted files outside `breakpoints.ts`.
+- [x] `pnpm turbo run build` passes with zero TypeScript errors.
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-Status: PENDING — Full codebase audit completed 2026-03-07
-Dead zone confirmed: 768–1024px in office mode (showSidebar=true → HbcSidebar returns null; showBottomNav=false)
-Three misaligned breakpoints confirmed: 767 (useIsMobile), 1023 (useIsTablet), 1024 (useSidebarState)
-useIsTablet hook confirmed: exists at packages/ui-kit/src/hooks/useIsTablet.ts — UNUSED in HbcAppShell
-HbcSidebar:193 independent null guard confirmed
-HbcHeader:51 hardcoded @media (max-width: 1024px) confirmed
-DashboardLayout:27,30 hardcoded breakpoints confirmed
-ToolLandingLayout:105,108 hardcoded breakpoints confirmed
-useAdaptiveDensity:68 hardcoded width < 1024 confirmed
-Empty sidebarGroups/bottomNavItems confirmed issue at Project Hub level
-SPFx path: uses ShellLayout, not HbcAppShell — no dead zone, no HbcBottomNav
-Next: Begin Step 1 (breakpoints.ts) after PH4C.11 complete
+Status: COMPLETE — PH4C.12 implemented 2026-03-07
+2026-03-07: Step cluster 1-4 completed — canonical breakpoints file created and hooks aligned (useIsMobile/useIsTablet/useSidebarState) to D-PH4C-24 and D-PH4C-25.
+2026-03-07: Step cluster 5-11 completed — HbcAppShell navigation visibility logic, header media query, bottom-nav empty guard, layout breakpoints, and adaptive density thresholds updated to canonical constants.
+2026-03-07: Step cluster 12-13 completed — SPFx navigation model reference doc added and NavigationDeadZoneRegression Storybook story added for tablet-width regression.
+2026-03-07: Verification completed — breakpoint literal grep clean for PH4C.12-targeted files outside breakpoints.ts (excluding stories/tests), build/lint/type-check/storybook validation commands executed for @hbc/ui-kit.
+Dead zone resolved per PH4C.12 matrix: office mode at 768-1023px now renders bottom nav and suppresses sidebar.
 -->

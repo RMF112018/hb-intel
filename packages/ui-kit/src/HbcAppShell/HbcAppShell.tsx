@@ -1,6 +1,7 @@
 /**
  * HbcAppShell — Orchestrator component
  * PH4.4 §Step 6 | Blueprint §1f, §2c
+ * Traceability: D-PH4C-24, D-PH4C-25
  *
  * Composes: HbcConnectivityBar + HbcHeader + HbcSidebar + <main>
  */
@@ -14,6 +15,7 @@ import { HbcHeader } from './HbcHeader.js';
 import { HbcSidebar } from './HbcSidebar.js';
 import { HbcBottomNav } from '../HbcBottomNav/index.js';
 import { useSidebarState } from './hooks/useSidebarState.js';
+import { useIsTablet } from '../hooks/useIsTablet.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
 import type { HbcAppShellProps } from './types.js';
@@ -79,6 +81,7 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   onNavigate,
 }) => {
   const { isExpanded, isMobile } = useSidebarState();
+  const isTablet = useIsTablet();
   const connectivityStatus = useOnlineStatus();
   const { mode: appMode } = useHbcTheme();
   const syncedActiveItemId = useNavStore((s) => s.activeItemId);
@@ -112,13 +115,14 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
     [sidebarGroups],
   );
 
-  // PH4B.10: Field mode → bottom nav (no sidebar); Office mode → sidebar (no bottom nav)
-  const showBottomNav = appMode === 'field' && !isFocusModeActive;
-  const showSidebar = appMode === 'office';
+  // PH4C.12 / D-PH4C-24: sidebar must never render in tablet/mobile territory.
+  const showSidebar = appMode === 'office' && !isTablet && !isFocusModeActive;
+  // PH4C.12 / D-PH4C-25: bottom nav owns tablet/mobile and field mode; avoid empty visible rail.
+  const showBottomNav = (appMode === 'field' || isTablet) && !isFocusModeActive && bottomNavItems.length > 0;
 
   const mainClass = mergeClasses(
     styles.main,
-    appMode === 'field'
+    (appMode === 'field' || isTablet)
       ? styles.mainMobile
       : isMobile ? styles.mainMobile : isExpanded && !isFocusModeActive ? styles.mainExpanded : styles.mainCollapsed,
     isFocusModeActive && styles.mainFocusMode,

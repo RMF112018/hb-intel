@@ -1,10 +1,11 @@
 /**
  * useAdaptiveDensity — Adaptive density tier detection for HbcDataTable
  * PH4.7 §7.1 | Blueprint §1d
+ * Traceability: D-PH4C-24, D-PH4C-25
  *
  * Tiers:
- *  - touch:    pointer: coarse + width < 1024 → 64px row, 16px font, 56px target
- *  - compact:  pointer: fine + width >= 1440  → 36px row, 13px font, 36px target
+ *  - touch:    pointer: coarse + width < HBC_BREAKPOINT_SIDEBAR → 64px row, 16px font, 56px target
+ *  - compact:  pointer: fine + width >= HBC_BREAKPOINT_COMPACT_DENSITY  → 36px row, 13px font, 36px target
  *  - standard: else                           → 48px row, 14px font, 44px target
  *
  * Re-evaluates on resize and orientation change.
@@ -13,6 +14,10 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { DensityTier } from '../../HbcCommandBar/types.js';
+import {
+  HBC_BREAKPOINT_COMPACT_DENSITY,
+  HBC_BREAKPOINT_SIDEBAR,
+} from '../../theme/breakpoints.js';
 
 export interface DensityConfig {
   rowHeight: number;
@@ -65,8 +70,9 @@ function detectTier(): DensityTier {
   if (typeof window === 'undefined') return 'standard';
   const coarse = window.matchMedia('(pointer: coarse)').matches;
   const width = window.innerWidth;
-  if (coarse && width < 1024) return 'touch';
-  if (!coarse && width >= 1440) return 'compact';
+  // PH4C.12: density thresholds align with canonical navigation boundaries.
+  if (coarse && width < HBC_BREAKPOINT_SIDEBAR) return 'touch';
+  if (!coarse && width >= HBC_BREAKPOINT_COMPACT_DENSITY) return 'compact';
   return 'standard';
 }
 

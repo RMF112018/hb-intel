@@ -1,14 +1,15 @@
 /**
  * useSidebarState — Manages sidebar expand/collapse + responsive breakpoint
  * PH4.4 §Step 1 | Blueprint §2c
+ * Traceability: D-PH4C-24, D-PH4C-25
  *
  * Persists expanded state to localStorage 'hbc-sidebar-state'.
- * Mobile (< 1024px) = sidebar hidden entirely.
+ * Mobile (< HBC_BREAKPOINT_SIDEBAR) = sidebar hidden entirely.
  */
 import { useState, useEffect, useCallback } from 'react';
+import { HBC_BREAKPOINT_SIDEBAR } from '../../theme/breakpoints.js';
 
 const STORAGE_KEY = 'hbc-sidebar-state';
-const MOBILE_BREAKPOINT = 1024;
 
 export interface UseSidebarStateReturn {
   isExpanded: boolean;
@@ -25,7 +26,8 @@ function getInitialExpanded(): boolean {
 
 function getIsMobile(): boolean {
   if (typeof window === 'undefined') return false;
-  return window.innerWidth < MOBILE_BREAKPOINT;
+  // PH4C.12: strict < keeps 1024px in desktop/sidebar territory and <=1023px in tablet/mobile.
+  return window.innerWidth < HBC_BREAKPOINT_SIDEBAR;
 }
 
 export function useSidebarState(): UseSidebarStateReturn {
@@ -36,7 +38,7 @@ export function useSidebarState(): UseSidebarStateReturn {
     if (typeof window === 'undefined') return;
 
     const handleResize = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+      setIsMobile(window.innerWidth < HBC_BREAKPOINT_SIDEBAR);
     };
 
     window.addEventListener('resize', handleResize);

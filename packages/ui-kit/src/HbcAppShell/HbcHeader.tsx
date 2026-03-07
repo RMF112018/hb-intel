@@ -1,6 +1,7 @@
 /**
  * HbcHeader — 56px dark header bar
  * PH4.4 §Step 4 | Blueprint §1f, §2c
+ * Traceability: D-PH4C-24, D-PH4C-25
  *
  * Layout: Logo + ProjectSelector | Toolbox + Favorites + Search | Create + M365 + Notifications + UserMenu
  */
@@ -8,6 +9,7 @@ import * as React from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
 import { HBC_DARK_HEADER, HBC_HEADER_TEXT } from '../theme/tokens.js';
 import { Z_INDEX } from '../theme/z-index.js';
+import { HBC_BREAKPOINT_SIDEBAR } from '../theme/breakpoints.js';
 import { ViewGrid } from '../icons/index.js';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
@@ -48,7 +50,8 @@ const useStyles = makeStyles({
     gap: '8px',
     flexGrow: 1,
     justifyContent: 'center',
-    '@media (max-width: 1024px)': {
+    // PH4C.12: align toolbar collapse with canonical sidebar boundary.
+    [`@media (max-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
       display: 'none',
     },
   },

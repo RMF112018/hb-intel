@@ -149,6 +149,11 @@ interface ThemeHarnessProps {
   readonly children: React.ReactNode;
 }
 
+interface ViewportWidthHarnessProps {
+  readonly width: number;
+  readonly children: React.ReactNode;
+}
+
 /**
  * Storybook-only theme harness for deterministic overlay verification.
  * Enforces D-12/D-13 validation scenarios without changing runtime app behavior.
@@ -203,6 +208,22 @@ const ThemeHarness: React.FC<ThemeHarnessProps> = ({
       window.matchMedia = originalMatchMedia;
     };
   }, [forceFieldMode, hbSiteControlContext, forceOsDark]);
+
+  return <>{children}</>;
+};
+
+// PH4C.12: force deterministic width so useIsTablet/useSidebarState receive tablet resize signals in CI.
+const ViewportWidthHarness: React.FC<ViewportWidthHarnessProps> = ({ width, children }) => {
+  React.useEffect(() => {
+    const originalWidth = window.innerWidth;
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: width });
+    window.dispatchEvent(new Event('resize'));
+
+    return () => {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: originalWidth });
+      window.dispatchEvent(new Event('resize'));
+    };
+  }, [width]);
 
   return <>{children}</>;
 };
@@ -351,4 +372,32 @@ export const A11yTest: Story = {
 export const RouterBackForwardSync: Story = {
   name: 'Router Back/Forward Sync',
   render: () => <RouteSyncDemo />,
+};
+
+export const NavigationDeadZoneRegression: Story = {
+  name: 'Navigation Dead Zone Regression (900px)',
+  parameters: {
+    viewport: {
+      defaultViewport: 'tablet',
+    },
+  },
+  render: () => (
+    <ViewportWidthHarness width={900}>
+      <div style={{ width: '900px', maxWidth: '100%', margin: '0 auto', overflow: 'hidden' }}>
+        <HbcAppShell user={mockUser} sidebarGroups={mockGroups} mode="pwa">
+          <div style={{ padding: '24px' }}>
+            <h1>Navigation Dead Zone Regression</h1>
+            <p>Traceability: D-PH4C-24 / D-PH4C-25.</p>
+          </div>
+        </HbcAppShell>
+      </div>
+    </ViewportWidthHarness>
+  ),
+  // PH4C.12: verify tablet-width renders bottom nav and suppresses sidebar.
+  play: async ({ canvasElement }) => {
+    const sidebar = canvasElement.querySelector('[data-hbc-ui="sidebar"]');
+    const bottomNav = canvasElement.querySelector('[data-hbc-ui="bottom-nav"]');
+    if (sidebar) throw new Error('Expected sidebar to be absent at tablet width.');
+    if (!bottomNav) throw new Error('Expected bottom nav to be visible at tablet width.');
+  },
 };

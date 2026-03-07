@@ -90,6 +90,14 @@ export {
   hbcSpacingCSSVars,
   hbcMediaQuery,
 } from './theme/index.js';
+// PH4C.12 traceability: D-PH4C-24 / D-PH4C-25 canonical breakpoints are exported for package consumers.
+export {
+  HBC_BREAKPOINT_MOBILE,
+  HBC_BREAKPOINT_TABLET,
+  HBC_BREAKPOINT_SIDEBAR,
+  HBC_BREAKPOINT_CONTENT_MEDIUM,
+  HBC_BREAKPOINT_COMPACT_DENSITY,
+} from './theme/breakpoints.js';
 export type { HbcSemanticTokens, HbcTheme, HbcSpacingKey, HbcBreakpointConfig, ZIndexLayer } from './theme/index.js';
 
 // Theme V2.1 — Density & canonical hooks

@@ -1,6 +1,7 @@
 /**
  * HbcBottomNav — Fixed bottom navigation bar for tablet/mobile viewports
  * PH4.14.5 | Blueprint §1d, §1f
+ * Traceability: D-PH4C-24, D-PH4C-25
  *
  * Features:
  * - Fixed to viewport bottom, 56px height
@@ -172,6 +173,8 @@ export const HbcBottomNav: React.FC<HbcBottomNavProps> = ({
     setIsSheetOpen(false);
   };
 
+  // PH4C.12: guard against rendering an empty nav rail in tablet/field modes.
+  if (!items || items.length === 0) return null;
   if (isFocusHidden) return null;
 
   return (

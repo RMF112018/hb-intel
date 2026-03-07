@@ -1,6 +1,7 @@
 /**
  * ToolLandingLayout — Tool list/dashboard page layout
  * PH4.5 §Step 2 | Blueprint §1f, §2c
+ * Traceability: D-PH4C-24, D-PH4C-25
  *
  * Structure: Page Header (sticky) → Command Bar (sticky) → KPI Cards → Content → Status Bar (sticky bottom)
  */
@@ -8,6 +9,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { heading1, label as labelType } from '../theme/typography.js';
 import { HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
+import { HBC_BREAKPOINT_CONTENT_MEDIUM, HBC_BREAKPOINT_MOBILE } from '../theme/breakpoints.js';
 import { elevationRest } from '../theme/elevation.js';
 import {
   HBC_SURFACE_LIGHT,
@@ -102,10 +104,11 @@ const useStyles = makeStyles({
     paddingTop: `${HBC_SPACE_LG}px`,
     paddingBottom: `${HBC_SPACE_LG}px`,
     gridTemplateColumns: 'repeat(4, 1fr)',
-    '@media (max-width: 1199px)': {
+    // PH4C.12: layout breakpoints are centralized to keep shell and content transitions aligned.
+    [`@media (max-width: ${HBC_BREAKPOINT_CONTENT_MEDIUM}px)`]: {
       gridTemplateColumns: 'repeat(2, 1fr)',
     },
-    '@media (max-width: 767px)': {
+    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
       gridTemplateColumns: '1fr',
     },
   },
