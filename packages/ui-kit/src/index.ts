@@ -193,6 +193,7 @@ export type {
   UseUnsavedChangesBlockerOptions,
   UseUnsavedChangesBlockerReturn,
 } from './hooks/useUnsavedChangesBlocker.js';
+export { useComplexity } from './hooks/useComplexity.js';
 
 export { HbcCommandBar } from './HbcCommandBar/index.js';
 export { useFieldModeActions, setFieldModeActions } from './HbcCommandBar/fieldModeActionsStore.js';

@@ -644,3 +644,16 @@ node -e "
 # 4. Storybook smoke test (verify stories load without errors)
 pnpm --filter @hbc/bic-next-move storybook --ci
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF02-T05 Components: COMPLETE — 2026-03-08
+  Step 1: Created useComplexity stub in @hbc/ui-kit/src/hooks/useComplexity.ts
+          Exported via hooks/index.ts, app-shell.ts, index.ts
+  Step 2: Created _utils.ts with 5 exports (urgencyClass, urgencyLabel, relativeDate, truncate, resolveVariant)
+  Step 3: Replaced HbcBicBlockedBanner.tsx — D-09 onNavigate + anchor fallback, D-05 tiers, dev-mode warning
+  Step 4: Replaced HbcBicBadge.tsx — D-04 unassigned amber badge, D-05 tiers, SPFx-safe import
+  Step 5: Replaced HbcBicDetail.tsx — D-04 callout, D-05 tiers, D-08 collapsible history, sub-components
+          Removed duplicate IBicTransfer import per plan correction
+  Step 6: Updated components/index.ts — explicit named + type exports
+  Step 7: Verification passed — ui-kit build OK, bic-next-move typecheck OK, bic-next-move build OK
+-->

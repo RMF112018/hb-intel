@@ -250,5 +250,13 @@ SF02-T04 Hooks: COMPLETE — 2026-03-08
   Updated hooks/index.ts barrel with explicit resolveFullBicState re-export
   Created recordBicTransfer.ts minimal typed stub for T04 compilation (full impl in T06)
   Verifications passed: typecheck (zero errors), build (dist/ with .d.ts)
-Next: SF02-T05 Components
+SF02-T05 Components: COMPLETE — 2026-03-08
+  Created useComplexity stub in @hbc/ui-kit (hooks/useComplexity.ts) — exported via index.ts, app-shell.ts, hooks/index.ts
+  Created _utils.ts — urgencyClass, urgencyLabel, relativeDate, truncate, resolveVariant
+  Replaced HbcBicBlockedBanner.tsx stub — D-09 onNavigate/anchor fallback, D-05 three tiers, dev-mode warning
+  Replaced HbcBicBadge.tsx stub — D-04 unassigned amber, D-05 three tiers, SPFx-safe useComplexity import
+  Replaced HbcBicDetail.tsx stub — D-04 unassigned callout, D-05 tiers, D-08 collapsible history, OwnerChip/ChainNode/TransferRow
+  Updated components/index.ts barrel with explicit named + type exports
+  Verifications passed: ui-kit build (zero errors), bic-next-move typecheck (zero errors), bic-next-move build (zero errors)
+Next: SF02-T06 Transfer Detection
 -->

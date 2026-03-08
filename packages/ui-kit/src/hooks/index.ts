@@ -14,3 +14,4 @@ export type {
   UseUnsavedChangesBlockerOptions,
   UseUnsavedChangesBlockerReturn,
 } from './useUnsavedChangesBlocker.js';
+export { useComplexity } from './useComplexity.js';
