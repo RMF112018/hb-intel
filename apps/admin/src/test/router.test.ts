@@ -5,7 +5,9 @@ import { createWebpartRouter } from '../router/index.js';
 
 describe('createWebpartRouter (admin)', () => {
   beforeEach(() => {
-    // Admin routes require admin:access-control:view to avoid redirect loop
+    // Admin routes require admin:access-control:view to avoid redirect loop.
+    // The Administrator persona now includes this permission (personaRegistry.ts),
+    // but we set it explicitly here for test isolation.
     usePermissionStore.setState({ permissions: ['admin:access-control:view', 'admin:read'] });
   });
 

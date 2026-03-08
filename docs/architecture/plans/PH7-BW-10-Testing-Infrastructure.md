@@ -401,11 +401,12 @@ Additional corrections discovered during implementation:
   - Admin router test: pre-populates admin:access-control:view permission to avoid redirect loop in requireAdminAccessControl()
   - Back-to-project-hub E2E: 5 domains have showBackToProjectHub: false (project-hub, admin, business-development, operational-excellence, human-resources)
   - Back-to-project-hub text: actual rendered text is "Back to the Project Hub" (with "the")
-  - Admin E2E: marked test.fixme — pre-existing issue where admin tab renders empty in dev-harness (route guard permission mismatch)
+  - Admin E2E: originally marked test.fixme — pre-existing issue where admin tab renders empty in dev-harness (route guard permission mismatch)
+  - Admin E2E fix (2026-03-08): Added 'admin:access-control:view': true to Administrator persona in personaRegistry.ts; removed test.fixme markers from e2e/webparts/admin.spec.ts
 File counts: 76 file operations (as planned) + 11 tsconfig.json updates (unplanned fix)
 Unit tests: 22 test files (2 per domain × 11), 66 assertions, all pass
 RBAC tests: 1 test file, 4 assertions, all pass
-E2E tests: 11 spec files, 26 passed + 2 fixme (admin pre-existing), 0 failed
+E2E tests: 11 spec files, 28 passed, 0 skipped, 0 failed
 Build: 24/24 green
 -->
 

@@ -33,6 +33,7 @@ const BASE_PERSONAS: IPersona[] = [
       'feature:system-settings': true,
       'feature:override-requests': true,
       'feature:audit-logs': true,
+      'admin:access-control:view': true,
       'feature:accounting-invoice': true,
       'feature:accounting-reports': true,
       'feature:estimating-projects': true,
