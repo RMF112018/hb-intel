@@ -260,7 +260,7 @@ Testing sub-path published. ≥95% coverage enforced. ADR and SPFx guide written
 | File | Contents |
 |---|---|
 | `SF03-T01-Package-Scaffold.md` | Directory tree, `package.json`, `tsconfig.json`, `vitest.config.ts`, barrel stubs | ✅ Done 2026-03-08 |
-| `SF03-T02-TypeScript-Contracts.md` | `IComplexity.ts`, `IComplexityPreference.ts`, role map types, storage schema |
+| `SF03-T02-TypeScript-Contracts.md` | `IComplexity.ts`, `IComplexityPreference.ts`, role map types, storage schema | ✅ Done 2026-03-08 |
 | `SF03-T03-Context-and-Provider.md` | `ComplexityContext.ts`, `ComplexityProvider.tsx` (full hydration flow, lock, StorageEvent) |
 | `SF03-T04-Hooks.md` | `useComplexity.ts`, `useComplexityGate.ts` — full implementations |
 | `SF03-T05-Components.md` | `HbcComplexityGate.tsx` (D-04, D-09), `HbcComplexityDial.tsx` (D-06, header + settings) |

@@ -279,3 +279,17 @@ node -e "
 "
 # Expected: TIER_ORDER: ['essential','standard','expert'], ranks: 0, 2
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF03-T02 completed: 2026-03-08
+- IComplexity.ts: ComplexityTier, TIER_ORDER, tierRank(), ComplexityLockSource, IComplexityContext,
+  DEFAULT_COMPLEXITY_CONTEXT, IComplexityGateCondition, IComplexityAwareProps,
+  IRoleComplexityMapEntry, IRoleComplexityConfig
+- IComplexityPreference.ts: IComplexityPreference, COMPLEXITY_STORAGE_KEY,
+  COMPLEXITY_OPTIMISTIC_DEFAULT, isPreferenceLocked()
+- Existing barrel re-exports pick up all new named exports automatically
+- Typecheck: zero errors
+- Build: zero errors
+- Tests: still pass (no test changes in T02)
+Next: SF03-T03 (Context and Provider)
+-->
