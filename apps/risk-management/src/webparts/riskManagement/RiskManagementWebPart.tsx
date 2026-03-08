@@ -5,6 +5,7 @@
  * This is the bridge between SharePoint page context and the React app.
  *
  * @see docs/architecture/plans/PH7-BW-1-SPFx-Entry-Points.md
+ * @decision D-PH7-BW-7 — RBAC permission mapping wired
  */
 import {
   type IPropertyPaneConfiguration,
@@ -13,8 +14,7 @@ import {
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { createRoot, type Root } from 'react-dom/client';
 import { App } from '../../App.js';
-// bootstrapSpfxAuth is available from @hbc/auth — wiring deferred to BW-2.
-// import { bootstrapSpfxAuth } from '@hbc/auth';
+import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
 
 export interface IRiskManagementWebPartProps {
   description: string;
@@ -32,16 +32,15 @@ export default class RiskManagementWebPart extends BaseClientSideWebPart<IRiskMa
   private _root: Root | undefined;
 
   /**
-   * Called by SharePoint before render(). This is the ONLY place where
-   * `this.context` (WebPartContext) is available for async bootstrapping.
+   * Called by SharePoint before render(). Resolves SP group membership
+   * into HB Intel permission keys, then bootstraps the auth store.
    *
-   * TODO [BW-2]: Wire WebPartContext → ISpfxPageContext adapter and call
-   * bootstrapSpfxAuth(). The type bridge does not exist yet — BW-2 will
-   * create the adapter that extracts fields from this.context.pageContext.
+   * @decision D-PH7-BW-7 — RBAC permission mapping
    */
   public async onInit(): Promise<void> {
     await super.onInit();
-    // await bootstrapSpfxAuth({ ... }); // BW-2: wire context adapter
+    const permissionKeys = await resolveSpfxPermissions(this.context);
+    await bootstrapSpfxAuth(this.context, permissionKeys);
   }
 
   /**

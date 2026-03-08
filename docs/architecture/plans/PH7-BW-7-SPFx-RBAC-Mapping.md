@@ -245,12 +245,22 @@ node -e "
 
 ## Definition of Done
 
-- [ ] `packages/auth/src/spfx/SpfxRbacAdapter.ts` created with `SP_GROUP_TO_PERMISSIONS` map and `resolveSpfxPermissions()`
-- [ ] `resolveSpfxPermissions()` exported from `packages/auth/src/spfx/index.ts`
-- [ ] All 11 `[Domain]WebPart.ts` files updated to call `resolveSpfxPermissions()` before `bootstrapSpfxAuth()`
-- [ ] Permission map covers all 12 SP group names
-- [ ] Permission map is consistent with PersonaRegistry permission assignments (cross-reference verified)
-- [ ] `resolveSpfxPermissions()` has error fallback (does not crash webpart on permission resolution failure)
-- [ ] `@pnp/sp` dependency added to `packages/auth/package.json`
+- [x] `packages/auth/src/spfx/SpfxRbacAdapter.ts` created with `SP_GROUP_TO_PERMISSIONS` map and `resolveSpfxPermissions()`
+- [x] `resolveSpfxPermissions()` exported from `packages/auth/src/spfx/index.ts`
+- [x] All 11 `[Domain]WebPart.ts` files updated to call `resolveSpfxPermissions()` before `bootstrapSpfxAuth()`
+- [x] Permission map covers all 12 SP group names
+- [x] Permission map is consistent with PersonaRegistry permission assignments (cross-reference verified)
+- [x] `resolveSpfxPermissions()` has error fallback (does not crash webpart on permission resolution failure)
+- [x] `@pnp/sp` dependency added to `packages/auth/package.json`
 - [ ] TypeScript compiles without errors
 - [ ] Domain-specific permission gating table documented above is referenced in each domain's feature plan
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+BW-7 implemented: 2026-03-08
+- Created packages/auth/src/spfx/SpfxRbacAdapter.ts with SP_GROUP_TO_PERMISSIONS (12 groups) and resolveSpfxPermissions()
+- Exported resolveSpfxPermissions and SP_GROUP_TO_PERMISSIONS from packages/auth/src/spfx/index.ts
+- Updated all 11 [Domain]WebPart.tsx files: replaced commented-out stubs with live resolveSpfxPermissions() → bootstrapSpfxAuth() calls
+- Added @pnp/sp ^4.0.0 to packages/auth/package.json dependencies
+- Error fallback returns ['project:read', 'action:read'] minimum safe default
+- 14 file operations total (1 new, 13 modified)
+-->

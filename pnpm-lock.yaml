@@ -1062,6 +1062,9 @@ importers:
       '@hbc/models':
         specifier: workspace:*
         version: link:../models
+      '@pnp/sp':
+        specifier: ^4.0.0
+        version: 4.18.0
       react:
         specifier: ^18.0.0
         version: 18.3.1

@@ -5,3 +5,4 @@
  * IMPORTANT: Do NOT re-export from root @hbc/auth — would pull sp-webpart-base into PWA bundle.
  */
 export { bootstrapSpfxAuth, getSpfxContext } from './SpfxContextAdapter.js';
+export { resolveSpfxPermissions, SP_GROUP_TO_PERMISSIONS } from './SpfxRbacAdapter.js';
