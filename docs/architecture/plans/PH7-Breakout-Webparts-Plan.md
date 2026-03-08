@@ -14,10 +14,23 @@ This is the **master index and summary plan** for Phase 7 Breakout SPFx Webparts
 
 Phase 7 has **two distinct layers**:
 
-1. **Infrastructure Layer** (this plan) — The SPFx-specific scaffolding that every webpart needs before feature work can proceed. Covered by task files `PH7-BW-1` through `PH7-BW-11`.
+1. **Infrastructure Layer** (this plan) — The SPFx-specific scaffolding that every webpart needs before feature work can proceed. Covered by task files `PH7-BW-0` through `PH7-BW-11`.
 2. **Feature Layer** (separate domain plans) — The actual pages, data, and business logic for each domain. Covered by the `PH7-[Domain]-*` plan files listed in §6 below.
 
 The infrastructure layer must be substantially complete **before** feature work begins on any new domain. Accounting and Estimating are the first two domains and have the most critical infrastructure dependencies (provisioning trigger, SPFx auth context).
+
+### Single Build Source, Two Deployment Targets
+
+Each domain produces **two separate build outputs** (PWA bundle + SPFx `.sppkg`), but all feature page components live in a **single shared location**: `packages/features/[domain]/`. Apps contain only routing configuration, entry points, and bootstrapping — never page components.
+
+```
+packages/features/estimating/src/ProjectSetupPage.tsx   ← written ONCE
+        ↙                                                      ↘
+apps/estimating/ (routes.ts imports it)          apps/pwa/ (router imports it)
+  → Vite build → SPFx .sppkg                      → Vite build → PWA bundle
+```
+
+This pattern is formalized in **`PH7-BW-0-Shared-Feature-Package.md`** and is a mandatory pre-requisite before any feature page is written. No page component is ever created directly in `apps/*/src/pages/`.
 
 ---
 
@@ -27,6 +40,7 @@ All 11 webpart apps exist at `apps/[domain]/` and share the same scaffolded stru
 
 | Concern | Status | Task |
 |---|---|---|
+| `packages/features/[domain]/` shared page package structure | ❌ Does not exist | **BW-0** |
 | `App.tsx` provider stack (Theme > Query > ErrorBoundary > Router) | ✅ All 11 apps | — |
 | `main.tsx` with dual-mode bootstrap (`resolveAuthMode()`) | ✅ All 11 apps | — |
 | Memory router (`createMemoryHistory`) + simplified shell | ✅ All 11 apps | — |
@@ -60,24 +74,26 @@ All 11 webpart apps exist at `apps/[domain]/` and share the same scaffolded stru
 
 ## Implementation Sequence
 
-Execute BW tasks in this order. BW-1 through BW-5 are the "entry gate" before any feature route work begins on a new domain.
+Execute BW tasks in this order. **BW-0 must be completed before any feature page is written.** BW-1 through BW-5 are the "entry gate" for SPFx infrastructure before feature route work begins on a new domain.
 
 ```
-BW-1 (SPFx Entry Points)
-  └── BW-2 (Auth Bridge)        ← requires BW-1
-        └── BW-3 (Config/Manifests)  ← requires BW-1 + BW-2
-              └── BW-4 (Vite Config)  ← requires BW-3 for manifest IDs
-
-BW-5 (Bootstrap Alignment)     ← independent; do in parallel with BW-1 to BW-4
-
-BW-6 (Simplified Shell Nav)    ← requires BW-1 through BW-4 for at least one webpart
-BW-7 (RBAC Mapping)            ← requires BW-2
-
-BW-8 (Dev Harness)             ← requires BW-4 (Vite configs)
-BW-9 (CI/CD)                   ← requires BW-3 (package-solution.json)
-
-BW-10 (Testing Infrastructure) ← requires BW-4 + BW-8
-BW-11 (Domain Feature Plans)   ← reference document; no blockers
+BW-0 (Shared Feature Package)   ← FIRST — locks page component location before any feature code is written
+  │
+  ├── BW-1 (SPFx Entry Points)
+  │     └── BW-2 (Auth Bridge)        ← requires BW-1
+  │           └── BW-3 (Config/Manifests)  ← requires BW-1 + BW-2
+  │                 └── BW-4 (Vite Config)  ← requires BW-3 for manifest IDs
+  │
+  ├── BW-5 (Bootstrap Alignment)     ← independent; do in parallel with BW-1 to BW-4
+  │
+  ├── BW-6 (Simplified Shell Nav)    ← requires BW-1 through BW-4 for at least one webpart
+  ├── BW-7 (RBAC Mapping)            ← requires BW-2
+  │
+  ├── BW-8 (Dev Harness)             ← requires BW-4 (Vite configs)
+  ├── BW-9 (CI/CD)                   ← requires BW-3 (package-solution.json)
+  │
+  ├── BW-10 (Testing Infrastructure) ← requires BW-4 + BW-8
+  └── BW-11 (Domain Feature Plans)   ← reference document; no blockers
 ```
 
 **Domain sequencing within each BW task:**
@@ -90,6 +106,7 @@ Execute per-domain work in this order (Blueprint §2i, CLAUDE.md §2 MVP priorit
 
 | File | Title | Priority | Blocked By |
 |---|---|---|---|
+| `PH7-BW-0-Shared-Feature-Package.md` | packages/features/[domain]/ pattern — one source, two builds | **CRITICAL** | — |
 | `PH7-BW-1-SPFx-Entry-Points.md` | BaseClientSideWebPart.ts for all 11 apps | HIGH | — |
 | `PH7-BW-2-SPFx-Auth-Bridge.md` | bootstrapSpfxAuth() + SP context adapter | HIGH | BW-1 |
 | `PH7-BW-3-SPFx-Config-Manifests.md` | config/ directory: manifests, package-solution, serve | HIGH | BW-1 |
@@ -106,6 +123,12 @@ Execute per-domain work in this order (Blueprint §2i, CLAUDE.md §2 MVP priorit
 
 ## Affected Files Summary
 
+**New shared feature packages (× 11):**
+- `packages/features/[domain]/package.json`
+- `packages/features/[domain]/tsconfig.json`
+- `packages/features/[domain]/src/index.ts`
+- `packages/features/[domain]/src/[Page]Page.tsx` (migrated from `apps/[domain]/src/pages/`)
+
 **New files per webpart app (× 11):**
 - `apps/[domain]/src/webparts/[domain]/[Domain]WebPart.ts`
 - `apps/[domain]/src/webparts/[domain]/[Domain]WebPart.manifest.json`
@@ -118,6 +141,8 @@ Execute per-domain work in this order (Blueprint §2i, CLAUDE.md §2 MVP priorit
 - `apps/[domain]/src/bootstrap.ts` — PersonaRegistry alignment
 - `apps/[domain]/src/main.tsx` — call `bootstrapSpfxAuth()` in spfx mode
 - `apps/[domain]/src/router/root-route.tsx` — back-to-project-hub + tool picker props
+- `apps/[domain]/src/router/routes.ts` — import pages from `@hbc/features-[domain]` (not local pages/)
+- `apps/[domain]/src/pages/` — directory removed or emptied (pages migrate to `packages/features/`)
 
 **Shared package changes:**
 - `packages/auth/src/spfx/SpfxContextAdapter.ts` — implement or verify SP context bootstrap
@@ -155,6 +180,9 @@ See `PH7-BW-11-Domain-Feature-Plans.md` for the roadmap and scoping notes for th
 
 Phase 7 infrastructure is complete when all of the following pass:
 
+- [ ] `packages/features/` added to `pnpm-workspace.yaml`; all 11 domain feature package skeletons exist (`package.json` + `tsconfig.json` + `src/index.ts`)
+- [ ] `ADR 0013` documents the shared feature package decision
+- [ ] No feature page components exist in any `apps/*/src/pages/` directory
 - [ ] All 11 `BaseClientSideWebPart.ts` files exist and compile without errors
 - [ ] `bootstrapSpfxAuth()` is called in SPFx mode and populates `useAuthStore` from SP page context
 - [ ] All 11 apps have valid `config/package-solution.json` with unique solution GUIDs

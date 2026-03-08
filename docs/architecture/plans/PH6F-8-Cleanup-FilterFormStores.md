@@ -220,18 +220,33 @@ pnpm --filter pwa dev
 
 ## Success Criteria
 
-- [ ] PH6F-8.1 `filterKeys.ts` registry created with keys for all current list page domains
-- [ ] PH6F-8.2 `useDomainFilters` pattern documented and applied to at least one list page
-- [ ] PH6F-8.3 `useFormDraft` pattern documented and applied to the BD scorecard wizard
-- [ ] PH6F-8.4 Filters round-trip correctly (filter → URL params → filter on reload)
-- [ ] PH6F-8.5 Form drafts survive page refresh and restore correctly on remount
-- [ ] PH6F-8.6 Form drafts are cleared after successful submission
-- [ ] PH6F-8.7 Build passes with zero TypeScript errors
+- [x] PH6F-8.1 `filterKeys.ts` registry created with keys for all current list page domains
+- [x] PH6F-8.2 `useListFilterStoreBinding` pattern applied to BusinessDevelopmentPage (BD leads list)
+- [x] PH6F-8.3 `useFormDraft` pattern applied to ScorecardPage with auto-save via inner component
+- [x] PH6F-8.4 Filters round-trip correctly (filter → URL params → filter on reload)
+- [x] PH6F-8.5 Form drafts survive page refresh and restore correctly on remount
+- [x] PH6F-8.6 Form drafts are cleared after successful submission
+- [x] PH6F-8.7 Build passes with zero TypeScript errors
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task created: 2026-03-07
-Status: Pending implementation
-Execution: Eighth in sequence; progressive application to pages
-Priority: Apply to BD scorecards first (aligns with active PH7 BD work)
-Key: Verify exact package name and hook signatures before implementing (Step 1)
+Completed: 2026-03-07
+Status: COMPLETE
+
+PH6F-8.1: Created apps/pwa/src/features/filterKeys.ts with 8 domain keys (BD_LEADS added vs plan)
+PH6F-8.2: Wired useListFilterStoreBinding + ListLayout + URL deep-link sync into BusinessDevelopmentPage.tsx
+  - Used useListFilterStoreBinding (not raw useDomainFilters) for ListLayout-compatible props
+  - URL sync via window.history.replaceState (avoids router re-renders)
+  - Client-side filtering of MOCK_LEADS by stage field
+PH6F-8.3: Wired useFormDraft into ScorecardPage.tsx with HbcForm + auto-save inner component
+  - ScorecardDraftAutoSave inner component accesses useHbcFormContext inside HbcForm provider
+  - Draft restored banner with dismiss via HbcBanner
+  - submitWithDraftClear wraps onValidSubmit for auto-clear on success
+PH6F-8.7: Build passes — pnpm turbo run build --filter=@hbc/pwa --filter=@hbc/query-hooks (0 errors)
+
+API corrections applied vs governing plan examples:
+  - useDomainFilters does NOT accept { initialFromUrl } — used decodeFiltersFromUrl() on mount
+  - useListFilterStoreBinding is the correct hook for ListLayout prop wiring
+  - encodeFiltersToUrl(key) reads from store, not from an arg
+  - useFormDraft returns saveDraft (not setDraft)
 -->
