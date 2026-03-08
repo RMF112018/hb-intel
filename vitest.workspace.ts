@@ -56,4 +56,28 @@ export default defineWorkspace([
       hookTimeout: 10000,
     },
   },
+  {
+    name: '@hbc/sharepoint-docs',
+    root: path.resolve(__dirname, 'packages/sharepoint-docs'),
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'src/**/*.spec.ts', 'src/**/*.spec.tsx'],
+      exclude: ['dist/**', 'node_modules/**'],
+      setupFiles: ['./src/__tests__/setup.ts'],
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json', 'html'],
+        include: ['src/**/*.ts', 'src/**/*.tsx'],
+        exclude: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'src/**/*.spec.ts', 'src/**/*.spec.tsx', 'src/index.ts', 'src/types/**', 'src/constants/**'],
+        all: true,
+        lines: 95,
+        functions: 95,
+        branches: 95,
+        statements: 95,
+      },
+      testTimeout: 10000,
+      hookTimeout: 10000,
+    },
+  },
 ]);

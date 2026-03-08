@@ -336,8 +336,14 @@ Create `docs/architecture/adr/0010-sharepoint-docs-pre-provisioning-storage.md` 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Plan authored: 2026-03-08
 Interview conducted: 2026-03-08 (12 questions, all decisions locked)
-Wave 1 status: Not started
+Wave 1 status: In progress
+  - SF01-T01 Package Scaffold: COMPLETE (2026-03-08)
+    - 51 new files created, 2 existing files modified
+    - All verification commands pass (typecheck, build, test, turbo build)
+  - SF01-T02 TypeScript Contracts: Not started
+  - SF01-T03 SharePoint Infrastructure: Not started
+  - SF01-T04 Upload Service: Not started
 Documentation added: docs/architecture/plans/shared-features/SF01-Sharepoint-Docs.md
 ADR required: docs/architecture/adr/0010-sharepoint-docs-pre-provisioning-storage.md
-Next: Begin SF01-T01 Package Scaffold
+Next: SF01-T02 TypeScript Contracts
 -->

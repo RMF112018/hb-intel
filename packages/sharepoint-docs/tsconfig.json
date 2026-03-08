@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "paths": {
+      "@hbc/auth": ["../auth/src/index.ts"],
+      "@hbc/models": ["../models/src/index.ts"],
+      "@hbc/data-access": ["../data-access/src/index.ts"],
+      "@hbc/ui-kit": ["../ui-kit/src/index.ts"],
+      "@hbc/ui-kit/app-shell": ["../ui-kit/src/app-shell/index.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"]
+}

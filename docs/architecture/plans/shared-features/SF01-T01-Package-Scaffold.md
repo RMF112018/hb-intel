@@ -330,3 +330,17 @@ pnpm turbo run build
 ```
 
 All four commands must exit with code 0 before proceeding to SF01-T02.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF01-T01 completed: 2026-03-08
+- All 51 stub files created under packages/sharepoint-docs/
+- 2 existing files modified: tsconfig.base.json (path mappings), vitest.workspace.ts (workspace entry)
+- Discrepancy resolutions applied: removed @hbc/tsconfig devDep, added check-types alias, aligned vitest to ^3.2.4, react as peerDep only, ESM __dirname fix, plugin-react ^4.4.0, vite ^6.0.0
+- passWithNoTests added to vitest.config.ts for empty test suite
+- Verification results:
+  - pnpm --filter @hbc/sharepoint-docs check-types → exit 0
+  - pnpm --filter @hbc/sharepoint-docs build → exit 0, dist/ populated
+  - pnpm --filter @hbc/sharepoint-docs test → 0 tests, 0 failures, exit 0
+  - pnpm turbo run build → 25/25 tasks successful, zero errors
+Next: SF01-T02 TypeScript Contracts
+-->
