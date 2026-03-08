@@ -235,5 +235,46 @@ gulp serve --nobrowser
 Task created: 2026-03-07
 Status: BLOCKED — requires apps/spfx/ to exist (PH8 prerequisite)
 Execution: Last in sequence; blocked on PH8
-No action needed until PH8 begins
+
+PH6F-9 wiring attempted: 2026-03-07
+Block confirmed: `apps/spfx/` does not exist. No SPFx webpart scaffold in the monorepo.
+Unblock dependency: PH7-BW-1 (creates webpart classes) → PH8 (SPFx integration phase).
+Parent plan (PH6F-DeadWiring-Cleanup-Plan.md) already records PH6F-9 as BLOCKED — no update needed there.
+
+Shell bridge infrastructure verified built and tested in @hbc/shell:
+- packages/shell/src/spfxHostBridge.ts — exports all three functions
+- packages/shell/src/types.ts:145-178 — all SPFx types defined
+
+CORRECTIONS TO PLAN CODE EXAMPLES (must apply when unblocked):
+
+1. Interface name: The real interface is `SpfxHostBridge` (not `ISpfxHostBridge` as shown in §Architecture Context and Steps 1/3).
+   Source: packages/shell/src/types.ts:173
+
+2. Bridge shape mismatch: The plan examples show `signals.theme`, `signals.isTeamsContext`,
+   `signals.locale`, `signals.userDisplayName`, `signals.userEmail`, and an `applySignals` callback.
+   Actual shape (types.ts:173-178):
+     - hostContainer: SpfxHostContainerMetadata { hostId, domElementId?, siteUrl?, webPartInstanceId? }
+     - identityContextRef: string
+     - signals?: SpfxHostSignalSnapshot { themeKey?, widthPx?, pathname? }
+     - handlers?: SpfxHostSignalHandlers { onThemeChange?, onResize?, onLocationChange? }
+
+3. Factory params: `createSpfxShellEnvironmentAdapter` takes `{ bridge, adapter? }`,
+   NOT `{ webpartContext, bridge }` as shown in Step 1.
+   Source: packages/shell/src/spfxHostBridge.ts:42-44
+
+4. Validation scope: `assertValidSpfxHostBridge` validates `hostContainer.hostId` and
+   `identityContextRef` only — not Teams context or user fields.
+   Source: packages/shell/src/spfxHostBridge.ts:15-26
+
+When unblocked, Step 1 onInit should build the bridge as:
+  const bridge: SpfxHostBridge = {
+    hostContainer: { hostId: this.context.instanceId },
+    identityContextRef: this.context.pageContext.user.loginName,
+    signals: { themeKey: '...', widthPx: ..., pathname: '...' },
+    handlers: { onThemeChange: ..., onResize: ..., onLocationChange: ... },
+  };
+  assertValidSpfxHostBridge(bridge);
+  this._shellAdapter = createSpfxShellEnvironmentAdapter({ bridge });
+
+No action needed until PH7-BW-1/PH8 begins.
 -->
