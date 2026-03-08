@@ -360,5 +360,12 @@ Wave 2 status: In progress
     - 6 stub files replaced with full implementations + 2 methods added to RegistryClient
     - 4 plan code-block issues fixed (uuid→crypto.randomUUID, pendingDocs type, missing methods, IConflictResolution typing)
     - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
-Next: SF01-T08 Offline Queue (Wave 2) or SF01-T06 React Hooks & Components (Wave 3)
+Wave 3 status: In progress
+  - SF01-T06 React Hooks & Components: COMPLETE (2026-03-08)
+    - 2 new files created (internal hooks: useSharePointDocsServices, useNetworkStatus)
+    - 21 files modified (1 API method, 5 hooks, 11 components, 1 barrel, 2 plan docs)
+    - 8 gaps fixed: missing internal dir, getJobByContextId, useOfflineQueue placeholder,
+      HbcUploadQueue/QueueEntry stubs, TombstoneRow, UploadProgressRow, refetchInterval x2
+    - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
+Next: SF01-T07 (SPFx Integration, Wave 3) or SF01-T08 (Offline Queue, Wave 2)
 -->

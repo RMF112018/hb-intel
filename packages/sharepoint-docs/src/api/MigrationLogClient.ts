@@ -118,6 +118,18 @@ export class MigrationLogClient {
     await this.updateJobField(jobId, MIGLOG.CHECKPOINT, 'conflict-watchdog-scheduled');
   }
 
+  async getJobByContextId(contextId: string): Promise<IScheduledMigration | null> {
+    const headers = await this.getAuthHeader();
+    const filter = `${MIGLOG.RECORD_ID} eq '${contextId}' and ${MIGLOG.DOCUMENT_ID} eq 'JOB_LEVEL'`;
+    const res = await fetch(
+      `${this.listEndpoint}/items?$filter=${encodeURIComponent(filter)}&$top=1&$orderby=${MIGLOG.ATTEMPTED_AT} desc`,
+      { headers }
+    );
+    const data = await res.json();
+    if (!data.value?.length) return null;
+    return this.mapToScheduledMigration(data.value[0]);
+  }
+
   async getScheduledJob(jobId: string): Promise<IScheduledMigration | null> {
     const headers = await this.getAuthHeader();
     const filter = `${MIGLOG.JOB_ID} eq '${jobId}' and ${MIGLOG.DOCUMENT_ID} eq 'JOB_LEVEL'`;

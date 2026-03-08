@@ -26,6 +26,10 @@ export { MigrationService } from './services/MigrationService.js';
 export { MigrationScheduler } from './services/MigrationScheduler.js';
 export { ConflictResolver } from './services/ConflictResolver.js';
 
+// Provider
+export { SharePointDocsProvider } from './hooks/internal/useSharePointDocsServices.js';
+export type { SharePointDocsServices, SharePointDocsProviderProps } from './hooks/internal/useSharePointDocsServices.js';
+
 // Hooks
 export { useDocumentContext } from './hooks/useDocumentContext.js';
 export { useDocumentUpload } from './hooks/useDocumentUpload.js';

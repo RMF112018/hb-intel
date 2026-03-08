@@ -913,3 +913,35 @@ pnpm --filter @hbc/sharepoint-docs test
 #   MigrationStatusBadge — renders correct label and class for each status
 #   ConflictRow — both version links open in new tab
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF01-T06 completed: 2026-03-08
+Files created (2):
+  - src/hooks/internal/useSharePointDocsServices.ts (Gap 1: React context + provider + hook)
+  - src/hooks/internal/useNetworkStatus.ts (Gap 1: navigator.onLine wrapper)
+Files modified (21):
+  - src/api/MigrationLogClient.ts — added getJobByContextId() method (Gap 2)
+  - src/hooks/useDocumentContext.ts — plan §2 exact
+  - src/hooks/useDocumentUpload.ts — plan §2 exact
+  - src/hooks/useDocumentList.ts — plan §2 + Gap 7 fix (refetchInterval query signature)
+  - src/hooks/useMigrationStatus.ts — plan §2 + Gap 8 fix (refetchInterval query signature)
+  - src/hooks/useOfflineQueue.ts — Gap 3 placeholder (no-op, real impl SF01-T08)
+  - src/components/HbcDocumentAttachment/DropZone.tsx — plan §3 exact
+  - src/components/HbcDocumentAttachment/LargeFileConfirmDialog.tsx — plan §3 exact
+  - src/components/HbcDocumentAttachment/UploadProgressRow.tsx — Gap 6 minimal impl
+  - src/components/HbcDocumentAttachment/HbcDocumentAttachment.tsx — plan §3 exact
+  - src/components/HbcDocumentList/HbcDocumentList.tsx — plan §3 exact
+  - src/components/HbcDocumentList/MigrationStatusBadge.tsx — plan §3 exact
+  - src/components/HbcDocumentList/TombstoneRow.tsx — Gap 5 minimal impl
+  - src/components/HbcConflictResolutionPanel/HbcConflictResolutionPanel.tsx — plan §3 exact
+  - src/components/HbcConflictResolutionPanel/ConflictRow.tsx — plan §3 exact
+  - src/components/HbcUploadQueue/HbcUploadQueue.tsx — Gap 4 minimal stub
+  - src/components/HbcUploadQueue/QueueEntry.tsx — Gap 4 minimal stub
+  - src/components/HbcMigrationSummaryBanner.tsx — plan §3 exact
+  - src/index.ts — added SharePointDocsProvider export
+Gaps fixed: All 8 (missing internal dir, getJobByContextId, useOfflineQueue placeholder,
+  HbcUploadQueue/QueueEntry stubs, TombstoneRow, UploadProgressRow, refetchInterval x2)
+Verification: typecheck ✓, build ✓, turbo build 25/25 ✓
+Next: SF01-T07 (SPFx Integration) or SF01-T08 (Offline Queue)
+-->
+
