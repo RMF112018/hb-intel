@@ -384,3 +384,26 @@ npm run serve
 # 4. Property pane fields (contextId, contextType, contextLabel) work correctly
 # 5. No direct @hbc/ui-kit imports appear in SPFx bundle analysis (only app-shell)
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF01-T07 SPFx Integration: COMPLETE (2026-03-08)
+Files created:
+  - packages/sharepoint-docs/src/components/spfx/DocumentsPanelSection.tsx (inline integration)
+  - packages/sharepoint-docs/src/components/spfx/index.ts (barrel)
+  - packages/spfx/src/webparts/hbcDocumentManager/HbcDocumentManagerRoot.tsx (standalone root)
+  - packages/spfx/src/webparts/hbcDocumentManager/HbcDocumentManagerWebPart.ts (webpart class)
+  - packages/spfx/src/webparts/hbcDocumentManager/HbcDocumentManagerWebPart.manifest.json (manifest)
+Files modified:
+  - packages/sharepoint-docs/src/index.ts (added spfx export)
+  - packages/spfx/package.json (added @hbc/auth, @hbc/sharepoint-docs, @tanstack/react-query, SP devDeps)
+  - packages/spfx/src/index.ts (added HbcDocumentManagerWebPart export)
+  - packages/spfx/tsconfig.json (added jsx, paths, composite)
+6 gaps fixed:
+  - Gap 1: HbcCollapsibleSection → <details>/<summary> inline
+  - Gap 2: HbcSkeleton → simple div with aria-busy
+  - Gap 3: useAuth → useCurrentUser(); email as UPN; lastName from displayName
+  - Gap 4: package-solution.json → .manifest.json per existing pattern
+  - Gap 5: ReactDom.render → createRoot (React 18)
+  - Gap 6: Missing auth bootstrap → onInit with resolveSpfxPermissions + bootstrapSpfxAuth
+All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
+-->

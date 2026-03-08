@@ -3,7 +3,20 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "paths": {}
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "paths": {
+      "@hbc/auth": ["../auth/src/index.ts"],
+      "@hbc/auth/spfx": ["../auth/src/spfx/index.ts"],
+      "@hbc/models": ["../models/src/index.ts"],
+      "@hbc/sharepoint-docs": ["../sharepoint-docs/src/index.ts"],
+      "@hbc/ui-kit": ["../ui-kit/src/index.ts"],
+      "@hbc/ui-kit/app-shell": ["../ui-kit/src/app-shell/index.ts"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

@@ -18,9 +18,15 @@
     "bundle:size": "node ./scripts/report-bundle-size.mjs"
   },
   "dependencies": {
-    "@hbc/ui-kit": "workspace:*"
+    "@hbc/auth": "workspace:*",
+    "@hbc/sharepoint-docs": "workspace:*",
+    "@hbc/ui-kit": "workspace:*",
+    "@tanstack/react-query": "^5.0.0"
   },
   "devDependencies": {
+    "@microsoft/sp-core-library": "^1.20.0",
+    "@microsoft/sp-property-pane": "^1.20.0",
+    "@microsoft/sp-webpart-base": "^1.20.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0"
   },

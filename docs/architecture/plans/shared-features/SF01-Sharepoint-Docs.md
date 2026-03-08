@@ -367,5 +367,11 @@ Wave 3 status: In progress
     - 8 gaps fixed: missing internal dir, getJobByContextId, useOfflineQueue placeholder,
       HbcUploadQueue/QueueEntry stubs, TombstoneRow, UploadProgressRow, refetchInterval x2
     - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
-Next: SF01-T07 (SPFx Integration, Wave 3) or SF01-T08 (Offline Queue, Wave 2)
+  - SF01-T07 SPFx Integration: COMPLETE (2026-03-08)
+    - 5 new files created, 4 existing files modified
+    - Inline integration: DocumentsPanelSection.tsx in sharepoint-docs/components/spfx/
+    - Standalone webpart: HbcDocumentManagerWebPart in packages/spfx/webparts/hbcDocumentManager/
+    - 6 gaps fixed (collapsible, skeleton, auth hook, manifest, React 18, auth bootstrap)
+    - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
+Next: SF01-T08 (Offline Queue, Wave 2)
 -->

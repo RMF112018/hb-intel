@@ -39,6 +39,10 @@ export { useMigrationStatus } from './hooks/useMigrationStatus.js';
 
 // Components
 export { HbcDocumentAttachment } from './components/HbcDocumentAttachment/index.js';
+
+// SPFx integration
+export { DocumentsPanelSection } from './components/spfx/index.js';
+export type { DocumentsPanelSectionProps } from './components/spfx/index.js';
 export { HbcDocumentList } from './components/HbcDocumentList/index.js';
 export { HbcUploadQueue } from './components/HbcUploadQueue/index.js';
 export { HbcConflictResolutionPanel } from './components/HbcConflictResolutionPanel/index.js';
