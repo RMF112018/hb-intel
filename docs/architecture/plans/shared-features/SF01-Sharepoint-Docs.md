@@ -355,5 +355,10 @@ Wave 1 status: In progress
     - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
 Documentation added: docs/architecture/plans/shared-features/SF01-Sharepoint-Docs.md
 ADR required: docs/architecture/adr/0010-sharepoint-docs-pre-provisioning-storage.md
-Next: SF01-T05 Migration Service (Wave 2)
+Wave 2 status: In progress
+  - SF01-T05 Migration Service: COMPLETE (2026-03-08)
+    - 6 stub files replaced with full implementations + 2 methods added to RegistryClient
+    - 4 plan code-block issues fixed (uuid→crypto.randomUUID, pendingDocs type, missing methods, IConflictResolution typing)
+    - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
+Next: SF01-T08 Offline Queue (Wave 2) or SF01-T06 React Hooks & Components (Wave 3)
 -->

@@ -977,3 +977,21 @@ pnpm --filter @hbc/sharepoint-docs test:coverage
 
 # Coverage must be ≥95% on MigrationService and ConflictResolver
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF01-T05 completed: 2026-03-08
+Files modified (7):
+  - src/api/RegistryClient.ts — added recordConflictResolution() and listExpiredConflicts() methods
+  - src/api/MigrationLogClient.ts — replaced stub with full implementation (§8)
+  - src/api/TombstoneWriter.ts — replaced stub with full implementation (§5)
+  - src/api/ConflictDetector.ts — replaced stub with full implementation (§6, uuid→crypto.randomUUID)
+  - src/services/ConflictResolver.ts — replaced stub with full implementation (§7, IConflictResolution typed)
+  - src/services/MigrationService.ts — replaced stub with full implementation (§3, uuid removed, pendingDocs fix)
+  - src/services/MigrationScheduler.ts — replaced stub with full implementation (§4, uuid→crypto.randomUUID)
+Plan code-block issues fixed (4):
+  1. uuid dependency removed — all 3 files use crypto.randomUUID() instead
+  2. MigrationService pendingDocs type mismatch — split into pendingIds + filter
+  3. RegistryClient missing methods — added recordConflictResolution and listExpiredConflicts
+  4. ConflictResolver recordConflictResolution — typed with IConflictResolution interface
+Verification: typecheck ✓, build ✓, turbo build 25/25 ✓, zero uuid imports ✓
+-->

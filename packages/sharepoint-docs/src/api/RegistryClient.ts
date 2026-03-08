@@ -1,4 +1,4 @@
-import type { IUploadedDocument } from '../types/index.js';
+import type { IUploadedDocument, IConflictResolution } from '../types/index.js';
 import { REG } from '../constants/registryColumns.js';
 
 export class RegistryClient {
@@ -75,6 +75,31 @@ export class RegistryClient {
     );
     const data = await res.json();
     return data.value[0].id as number;
+  }
+
+  async recordConflictResolution(documentId: string, data: IConflictResolution): Promise<void> {
+    const headers = await this.getAuthHeader();
+    const itemId = await this.getListItemIdByDocumentId(documentId);
+    await fetch(`${this.listEndpoint}/items(${itemId})`, {
+      method: 'PATCH',
+      headers: { ...headers, 'Content-Type': 'application/json', 'If-Match': '*' },
+      body: JSON.stringify({
+        [REG.CONFLICT_RES]: data.resolution,
+        [REG.CONFLICT_RES_BY]: data.resolvedBy,
+      }),
+    });
+  }
+
+  async listExpiredConflicts(): Promise<IUploadedDocument[]> {
+    const headers = await this.getAuthHeader();
+    const filter = `${REG.MIGRATION_STATUS} eq 'conflict'`;
+    const res = await fetch(
+      `${this.listEndpoint}/items?$filter=${encodeURIComponent(filter)}`,
+      { headers }
+    );
+    if (!res.ok) throw new Error(`RegistryClient.listExpiredConflicts failed: ${res.status}`);
+    const data = await res.json();
+    return (data.value as Record<string, unknown>[]).map(item => this.fromListItem(item));
   }
 
   private toListItem(doc: IUploadedDocument): Record<string, unknown> {
