@@ -1,0 +1,106 @@
+name: SPFx Deploy to App Catalog
+# D-PH7-BW-9: Deployment pipeline for SPFx .sppkg files to SharePoint App Catalog (staging + production).
+
+on:
+  # D-PH7-BW-9 trigger strategy: auto-deploy staging after successful build on main; manual dispatch for targeted deploys.
+  workflow_run:
+    workflows: ['SPFx Build and Package']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      domain:
+        description: 'Domain to deploy (or all)'
+        required: false
+        type: string
+
+jobs:
+  deploy-staging:
+    # D-PH7-BW-9: auto-deploy to staging App Catalog on successful build or manual staging dispatch.
+    name: Deploy to Staging App Catalog
+    runs-on: ubuntu-latest
+    environment: spfx-staging
+    if: ${{ github.event.workflow_run.conclusion == 'success' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging') }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download .sppkg artifacts
+        # D-PH7-BW-9: cross-workflow artifact access requires explicit run-id.
+        uses: actions/download-artifact@v4
+        with:
+          name: spfx-packages
+          path: dist/sppkg/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install PnP PowerShell
+        # D-PH7-BW-9: each job runs on a fresh runner — must install PnP module.
+        shell: pwsh
+        run: Install-Module -Name PnP.PowerShell -Force -AllowClobber -Scope CurrentUser
+
+      - name: Deploy to Staging App Catalog
+        # D-PH7-BW-9: connect via Azure AD app registration and upload all .sppkg files.
+        shell: pwsh
+        env:
+          STAGING_SITE_URL: ${{ secrets.SPFX_STAGING_SITE_URL }}
+          STAGING_CLIENT_ID: ${{ secrets.SPFX_STAGING_CLIENT_ID }}
+          STAGING_CLIENT_SECRET: ${{ secrets.SPFX_STAGING_CLIENT_SECRET }}
+        run: |
+          Connect-PnPOnline -Url $env:STAGING_SITE_URL `
+            -ClientId $env:STAGING_CLIENT_ID `
+            -ClientSecret $env:STAGING_CLIENT_SECRET
+
+          Get-ChildItem -Path "dist/sppkg/*.sppkg" | ForEach-Object {
+            Write-Host "Deploying $_"
+            Add-PnPApp -Path $_.FullName -Scope Tenant -Overwrite -Publish
+          }
+
+  deploy-production:
+    # D-PH7-BW-9: production deploy requires manual approval via GitHub Environment protection rule.
+    name: Deploy to Production App Catalog
+    runs-on: ubuntu-latest
+    environment: spfx-production
+    needs: [deploy-staging]
+    if: ${{ github.event.workflow_run.conclusion == 'success' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production') }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download .sppkg artifacts
+        # D-PH7-BW-9: re-download artifacts for production job (fresh runner).
+        uses: actions/download-artifact@v4
+        with:
+          name: spfx-packages
+          path: dist/sppkg/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install PnP PowerShell
+        # D-PH7-BW-9: production job runs on fresh runner — must install PnP module independently.
+        shell: pwsh
+        run: Install-Module -Name PnP.PowerShell -Force -AllowClobber -Scope CurrentUser
+
+      - name: Deploy to Production App Catalog
+        # D-PH7-BW-9: production App Catalog upload with tenant-wide publish.
+        shell: pwsh
+        env:
+          PROD_SITE_URL: ${{ secrets.SPFX_PROD_SITE_URL }}
+          PROD_CLIENT_ID: ${{ secrets.SPFX_PROD_CLIENT_ID }}
+          PROD_CLIENT_SECRET: ${{ secrets.SPFX_PROD_CLIENT_SECRET }}
+        run: |
+          Connect-PnPOnline -Url $env:PROD_SITE_URL `
+            -ClientId $env:PROD_CLIENT_ID `
+            -ClientSecret $env:PROD_CLIENT_SECRET
+
+          Get-ChildItem -Path "dist/sppkg/*.sppkg" | ForEach-Object {
+            Write-Host "Deploying $_"
+            Add-PnPApp -Path $_.FullName -Scope Tenant -Overwrite -Publish
+          }

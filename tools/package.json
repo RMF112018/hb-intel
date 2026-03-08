@@ -3,5 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Shared build and test tooling for the HB Intel monorepo"
+  "description": "Shared build and test tooling for the HB Intel monorepo",
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  }
 }

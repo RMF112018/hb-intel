@@ -1,0 +1,147 @@
+name: SPFx Build and Package
+# D-PH7-BW-9: CI pipeline for building, validating, and packaging all 11 SPFx webpart apps.
+
+on:
+  # D-PH7-BW-9 trigger strategy: build on main/develop push (SPFx paths), PR to main, or manual dispatch.
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/accounting/**'
+      - 'apps/estimating/**'
+      - 'apps/project-hub/**'
+      - 'apps/leadership/**'
+      - 'apps/business-development/**'
+      - 'apps/admin/**'
+      - 'apps/safety/**'
+      - 'apps/quality-control-warranty/**'
+      - 'apps/risk-management/**'
+      - 'apps/operational-excellence/**'
+      - 'apps/human-resources/**'
+      - 'packages/**'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      domain:
+        description: 'Domain to build (leave empty for all)'
+        required: false
+        type: choice
+        options:
+          - all
+          - accounting
+          - estimating
+          - project-hub
+          - leadership
+          - business-development
+          - admin
+          - safety
+          - quality-control-warranty
+          - risk-management
+          - operational-excellence
+          - human-resources
+
+jobs:
+  build-spfx:
+    # D-PH7-BW-9: Build all SPFx webparts, validate bundles/manifests, and package .sppkg files.
+    name: Build SPFx Webparts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        # D-PH7-BW-9: fetch-depth 2 for Turborepo change detection.
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      # D-PH7-BW-9: pnpm before node — matches ci.yml and deploy-functions.yml convention.
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore Turborepo cache
+        # D-PH7-BW-9: Turborepo remote cache key for incremental builds.
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Build shared packages
+        # D-PH7-BW-9: shared packages must build before webpart apps.
+        run: pnpm turbo run build --filter="./packages/*"
+
+      - name: Build SPFx webpart apps
+        # D-PH7-BW-9: domain filter for manual dispatch; build all on push/PR.
+        run: |
+          if [ "${{ inputs.domain }}" = "" ] || [ "${{ inputs.domain }}" = "all" ]; then
+            pnpm turbo run build \
+              --filter="./apps/accounting" \
+              --filter="./apps/estimating" \
+              --filter="./apps/project-hub" \
+              --filter="./apps/leadership" \
+              --filter="./apps/business-development" \
+              --filter="./apps/admin" \
+              --filter="./apps/safety" \
+              --filter="./apps/quality-control-warranty" \
+              --filter="./apps/risk-management" \
+              --filter="./apps/operational-excellence" \
+              --filter="./apps/human-resources"
+          else
+            pnpm turbo run build --filter="./apps/${{ inputs.domain }}"
+          fi
+
+      - name: Check bundle sizes
+        # D-PH7-BW-9: enforce < 1 MB total JS per webpart domain.
+        run: npx tsx tools/spfx-bundle-check.ts
+
+      - name: Validate manifests (unique GUIDs)
+        # D-PH7-BW-9: ensure no GUID/port collisions across 11 apps.
+        run: npx tsx tools/validate-manifests.ts
+
+      - name: Package .sppkg files
+        # D-PH7-BW-9: create ZIP archives for App Catalog upload.
+        run: npx tsx tools/package-sppkg.ts
+
+      - name: Upload .sppkg artifacts
+        # D-PH7-BW-9: retain packaged .sppkg files for deploy workflow.
+        uses: actions/upload-artifact@v4
+        with:
+          name: spfx-packages
+          path: 'dist/sppkg/*.sppkg'
+          retention-days: 30
+
+  lint-and-typecheck:
+    # D-PH7-BW-9: parallel quality gate — lint + type check for all SPFx apps and packages.
+    name: Lint and TypeCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm turbo run lint --filter="./apps/*" --filter="./packages/*"
+
+      - name: Type check
+        # D-PH7-BW-9: turbo task is 'check-types' (not 'typecheck').
+        run: pnpm turbo run check-types --filter="./apps/*" --filter="./packages/*"
