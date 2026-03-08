@@ -348,8 +348,12 @@ Wave 1 status: In progress
     - 9 new files created in packages/sharepoint-docs/infrastructure/
     - 5 PowerShell scripts, 2 PnP XML templates, 1 JSON config, 1 README
     - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
-  - SF01-T04 Upload Service: Not started
+  - SF01-T04 Upload Service: COMPLETE (2026-03-08)
+    - 5 stub files replaced with full implementations
+    - 3 plan code-block issues fixed (named args, fullControlGroups, uuid)
+    - 2 additional TypeScript type fixes applied
+    - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
 Documentation added: docs/architecture/plans/shared-features/SF01-Sharepoint-Docs.md
 ADR required: docs/architecture/adr/0010-sharepoint-docs-pre-provisioning-storage.md
-Next: SF01-T03 SharePoint Infrastructure
+Next: SF01-T05 Migration Service (Wave 2)
 -->

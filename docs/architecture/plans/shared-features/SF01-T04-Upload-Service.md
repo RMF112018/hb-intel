@@ -849,3 +849,20 @@ pnpm --filter @hbc/sharepoint-docs test
 #   UploadService.validate — correctly blocks .exe, large files, returns null for valid files
 #   UploadService.upload — routes <4MB to uploadSmallFile, >4MB to uploadInChunks
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF01-T04 completed: 2026-03-08
+Files replaced (5):
+  - src/api/SharePointDocsApi.ts — §5 exact code block
+  - src/api/RegistryClient.ts — §6 exact code block + 1 type fix (unknown[] → Record<string, unknown>[])
+  - src/api/PermissionManager.ts — §3 with 2 fixes: positional `false` for breakFolderInheritance; replaced fullControlGroups with executiveReadGroups (Read role)
+  - src/api/FolderManager.ts — §2 exact code block
+  - src/services/UploadService.ts — §4 with 1 fix: uuid → crypto.randomUUID(); 1 type fix: UploadProgressCallback adapter for uploadSmallFile
+Fixes applied:
+  - Issue 1: copyRoleAssignments: false → false (positional arg) — 2 occurrences in PermissionManager
+  - Issue 2: Removed fullControlGroups loop; added executiveReadGroups loop with 'Read' role
+  - Issue 3: Replaced uuid import with crypto.randomUUID()
+  - Type fix: RegistryClient.listByContextId cast unknown[] → Record<string, unknown>[]
+  - Type fix: UploadService.upload wrapped onProgress for uploadSmallFile to match narrower callback signature
+Verification: pnpm typecheck ✓ | pnpm build ✓ | pnpm turbo run build 25/25 ✓
+-->
