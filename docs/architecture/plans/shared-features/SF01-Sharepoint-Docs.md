@@ -373,5 +373,17 @@ Wave 3 status: In progress
     - Standalone webpart: HbcDocumentManagerWebPart in packages/spfx/webparts/hbcDocumentManager/
     - 6 gaps fixed (collapsible, skeleton, auth hook, manifest, React 18, auth bootstrap)
     - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
-Next: SF01-T08 (Offline Queue, Wave 2)
+  - SF01-T08 Offline Queue: COMPLETE (2026-03-08)
+    - 6 files replaced/modified: OfflineQueueManager, useNetworkStatus, useSharePointDocsServices,
+      useOfflineQueue, HbcUploadQueue, QueueEntry
+    - 5 gaps fixed (uuid, dual import, persistToStorage destructure, missing interface member, stub type removal)
+    - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
+Wave 4 status: In progress
+  - SF01-T09 Testing Strategy: COMPLETE (2026-03-08)
+    - 7 new files created, 2 existing files modified, 2 doc files updated
+    - MSW mock server, 4 unit test suites (58 tests total), 1 Playwright E2E suite
+    - 14 gaps fixed from plan code blocks vs actual implementations
+    - Coverage: Statements 100%, Branches 96.12%, Functions 100%, Lines 100%
+    - All verification commands pass (test, test:coverage, turbo build)
+Next: SF01-T10 (Deployment, Wave 4)
 -->

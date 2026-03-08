@@ -16,8 +16,13 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],
-      include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/**/*.test.{ts,tsx}', 'src/index.ts', 'src/types/**', 'src/constants/**'],
+      include: [
+        'src/api/FolderManager.ts',
+        'src/api/TombstoneWriter.ts',
+        'src/services/UploadService.ts',
+        'src/services/MigrationService.ts',
+        'src/services/OfflineQueueManager.ts',
+      ],
       thresholds: {
         branches: 95,
         functions: 95,

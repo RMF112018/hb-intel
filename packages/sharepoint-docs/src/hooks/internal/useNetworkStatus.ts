@@ -1,22 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useSyncExternalStore } from 'react';
 
-export function useNetworkStatus(): { isOnline: boolean } {
-  const [isOnline, setIsOnline] = useState(
-    typeof navigator !== 'undefined' ? navigator.onLine : true
-  );
+/** Subscribes to browser online/offline events. */
+function subscribeToOnlineStatus(callback: () => void): () => void {
+  window.addEventListener('online', callback);
+  window.addEventListener('offline', callback);
+  return () => {
+    window.removeEventListener('online', callback);
+    window.removeEventListener('offline', callback);
+  };
+}
 
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+function getOnlineSnapshot(): boolean {
+  return navigator.onLine;
+}
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
+export function useNetworkStatus() {
+  const isOnline = useSyncExternalStore(subscribeToOnlineStatus, getOnlineSnapshot);
   return { isOnline };
 }

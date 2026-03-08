@@ -597,3 +597,21 @@ pnpm --filter @hbc/sharepoint-docs test
 #   Attach a file ≤ 50 MB → confirm queue indicator appears
 #   Set throttle back to "No throttling" → confirm file uploads automatically
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF01-T08 completed: 2026-03-08
+Files replaced/modified:
+  - OfflineQueueManager.ts: Full implementation with enqueue, remove, syncAll, retryEntry, pruneExpired
+  - useNetworkStatus.ts: Refactored to useSyncExternalStore (React 18 concurrency safe)
+  - useSharePointDocsServices.ts: Added offlineQueueManager to SharePointDocsServices interface
+  - useOfflineQueue.ts: Full implementation with auto-sync on reconnect, useSyncExternalStore
+  - HbcUploadQueue.tsx: Full component with status bar, expand/collapse, expiry notice
+  - QueueEntry.tsx: Full component with status labels, conditional Retry/Remove buttons
+Gaps fixed (5):
+  - Gap 1: uuid → crypto.randomUUID() (consistent with T04, T05)
+  - Gap 2: OFFLINE_QUEUE_TTL_HOURS imported from migrationSchedule.js only; SIZE_OFFLINE_MAX from fileSizeLimits.js only
+  - Gap 3: persistToStorage uses _file.name/_file.size instead of rest.file?.name/rest.file?.size
+  - Gap 4: Added offlineQueueManager: OfflineQueueManager to SharePointDocsServices interface
+  - Gap 5: OfflineQueueAddRequest stub type removed; new useOfflineQueue(contextId?) is a superset
+Verification: typecheck ✓, build ✓, turbo build 25/25 ✓
+-->

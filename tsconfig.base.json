@@ -54,7 +54,9 @@
       "@hbc/features-human-resources": ["packages/features/human-resources/src/index.ts"],
       "@hbc/features-human-resources/*": ["packages/features/human-resources/src/*"],
       "@hbc/sharepoint-docs": ["packages/sharepoint-docs/src/index.ts"],
-      "@hbc/sharepoint-docs/*": ["packages/sharepoint-docs/src/*"]
+      "@hbc/sharepoint-docs/*": ["packages/sharepoint-docs/src/*"],
+      "@hbc/bic-next-move": ["packages/bic-next-move/src/index.ts"],
+      "@hbc/bic-next-move/*": ["packages/bic-next-move/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"]

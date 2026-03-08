@@ -4,6 +4,7 @@ import type { UploadService } from '../../services/UploadService.js';
 import type { RegistryClient } from '../../api/RegistryClient.js';
 import type { MigrationLogClient } from '../../api/MigrationLogClient.js';
 import type { ConflictResolver } from '../../services/ConflictResolver.js';
+import type { OfflineQueueManager } from '../../services/OfflineQueueManager.js';
 
 export interface SharePointDocsServices {
   folderManager: FolderManager;
@@ -11,6 +12,7 @@ export interface SharePointDocsServices {
   registry: RegistryClient;
   migrationLog: MigrationLogClient;
   conflictResolver: ConflictResolver;
+  offlineQueueManager: OfflineQueueManager;
 }
 
 const SharePointDocsContext = createContext<SharePointDocsServices | null>(null);

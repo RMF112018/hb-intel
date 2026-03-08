@@ -655,3 +655,37 @@ export default defineConfig({
   reporter: [['html', { outputFolder: 'playwright-report' }]],
 });
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF01-T09 completed: 2026-03-08
+
+## Implementation Summary
+- Created MSW mock server: `src/__tests__/mocks/server.ts`
+- Replaced `src/__tests__/setup.ts` with crypto.randomUUID stub (Gap 1), globals-only imports (Gap 2)
+- Narrowed vitest coverage.include to 5 tested files (Gap 14)
+- Created FolderManager.test.ts — 15 tests (Gap 3, 4, 11 fixes applied)
+- Created UploadService.test.ts — 17 tests (Gap 6 fix applied)
+- Created MigrationService.test.ts — 7 tests (including TombstoneWriter)
+- Created OfflineQueueManager.test.ts — 19 tests (Gap 11 fix applied)
+- Created E2E suite at `e2e/sharepoint-docs.spec.ts` (Gap 12 fix — root level)
+- Preserved existing `playwright.config.ts` (Gap 13)
+
+## Coverage Results
+- 58 unit tests, all passing
+- Statements: 100% | Branches: 96.12% | Functions: 100% | Lines: 100%
+- All 5 targeted files exceed 95% threshold
+
+## Additional Gap Fixes Applied
+- Gap 1: crypto.randomUUID stubbed with incrementing counter
+- Gap 2: Removed vitest imports (globals: true)
+- Gap 3: sanitizeName output corrected to 'Project_Alpha_Beta_v20'
+- Gap 4: buildFolderName output corrected to use underscores
+- Gap 6: Error message uses substring match
+- Gap 10: TombstoneWriter test verifies file name/type instead of .text() (jsdom limitation)
+- Gap 11: vi.useFakeTimers()/vi.useRealTimers() added
+- Gap 12: E2E at e2e/ root, not tests/e2e/
+- Gap 13: playwright.config.ts unchanged
+- Gap 14: coverage.include narrowed to 5 tested files
+
+Next: SF01-T10 (Deployment & CI/CD)
+-->

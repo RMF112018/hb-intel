@@ -348,3 +348,16 @@ node -e "import('@hbc/bic-next-move/testing').then(m => console.log(Object.keys(
 ```
 
 Expected: all commands exit 0. Test run reports "No test files found" (not an error at this stage).
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF02-T01 completed: 2026-03-08
+- Created full directory scaffold: 33 new files
+- package.json with dual exports (D-10 testing sub-path), aligned devDeps to workspace versions (vitest ^3.2.4, vite ^6.0.0)
+- tsconfig.json extends ../../tsconfig.base.json with composite: true
+- vitest.config.ts with passWithNoTests: true, 95% coverage thresholds
+- All barrel index files, source stubs, testing stubs, and test stubs created
+- Path aliases registered in tsconfig.base.json
+- Verification: pnpm ls ✓ | typecheck ✓ | build ✓ | test ✓ (7 files, 0 tests, exit 0)
+Discrepancy resolutions applied: #1 (extends path), #2 (remove @hbc/tsconfig), #3 (react peerDeps only), #4 (vitest ^3.2.4), #5 (composite: true), #6 (check-types script), #7 (passWithNoTests)
+Next: SF02-T02 (TypeScript Contracts)
+-->

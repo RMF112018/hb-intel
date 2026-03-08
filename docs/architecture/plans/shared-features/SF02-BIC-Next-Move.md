@@ -231,3 +231,9 @@ Testing sub-path published. ≥95% coverage enforced. ADR and migration docs wri
 | `SF02-T06-Transfer-Detection.md` | `recordBicTransfer.ts`, `TransferDeduplicator.ts`, notification-intelligence wiring |
 | `SF02-T07-Testing-Strategy.md` | `testing/` sub-path exports, unit tests, Storybook stories, Playwright E2E scenarios |
 | `SF02-T08-Deployment.md` | Pre-deployment checklist, ADR content, migration guide, verification commands |
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF02-T01 Package Scaffold: COMPLETE — 2026-03-08
+  33 files created, all verifications passed (pnpm ls, typecheck, build, test)
+Next: SF02-T02 TypeScript Contracts
+-->
