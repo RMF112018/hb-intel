@@ -123,6 +123,21 @@ export const adminRoute = createRoute({
   ),
 });
 
+// D-PH6F-6: Provisioning progress detail route (not a workspace — detail view with projectId param).
+export const provisioningRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'provisioning/$projectId',
+  beforeLoad: () => {
+    requireAuth();
+  },
+  component: lazyRouteComponent(
+    () =>
+      import('../routes/provisioning/ProvisioningProgressView.js').then((m) => ({
+        default: m.ProvisioningProgressView,
+      })),
+  ),
+});
+
 export const siteControlRoute = createWorkspaceRoute(
   'site-control',
   () => import('../pages/SiteControlPage.js').then((m) => ({ default: m.SiteControlPage })),
@@ -178,6 +193,7 @@ export const allRoutes = [
   scorecardRoute,
   pmpRoute,
   adminRoute,
+  provisioningRoute,
   siteControlRoute,
   safetyRoute,
   qualityControlWarrantyRoute,

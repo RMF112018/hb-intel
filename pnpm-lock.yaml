@@ -693,6 +693,9 @@ importers:
       '@hbc/models':
         specifier: workspace:*
         version: link:../../packages/models
+      '@hbc/provisioning':
+        specifier: workspace:*
+        version: link:../../packages/provisioning
       '@hbc/query-hooks':
         specifier: workspace:*
         version: link:../../packages/query-hooks

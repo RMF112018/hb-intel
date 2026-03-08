@@ -220,17 +220,26 @@ pnpm --filter pwa dev
 
 ## Success Criteria
 
-- [ ] PH6F-6.1 `useProvisioningSignalR` mounted in the provisioning progress component
-- [ ] PH6F-6.2 `isConnected` reflects the actual SignalR connection state
-- [ ] PH6F-6.3 `progressEvents` are populated from SignalR messages in real time
-- [ ] PH6F-6.4 Connection auto-reconnects on disconnect (via `withAutomaticReconnect` config)
-- [ ] PH6F-6.5 Hook cleans up the SignalR connection on component unmount
-- [ ] PH6F-6.6 `VITE_API_BASE_URL` controls the negotiate endpoint base URL
-- [ ] PH6F-6.7 Build passes with zero TypeScript errors
+- [x] PH6F-6.1 `useProvisioningSignalR` mounted in the provisioning progress component
+- [x] PH6F-6.2 `isConnected` reflects the actual SignalR connection state
+- [x] PH6F-6.3 `progressEvents` are populated from SignalR messages in real time
+- [x] PH6F-6.4 Connection auto-reconnects on disconnect (via `withAutomaticReconnect` config)
+- [x] PH6F-6.5 Hook cleans up the SignalR connection on component unmount
+- [x] PH6F-6.6 `VITE_API_BASE_URL` controls the negotiate endpoint base URL
+- [x] PH6F-6.7 Build passes with zero TypeScript errors
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task created: 2026-03-07
-Status: Partially blocked — requires provisioning route to exist
-Execution: Seventh in sequence; implement when provisioning UI route is available
-Key: Verify useProvisioningSignalR package location before implementing
+PH6F-6 completed: 2026-03-07
+Status: COMPLETE — all success criteria met
+Implementation summary:
+  - @hbc/provisioning dependency added to apps/pwa/package.json
+  - apps/pwa/.env.development created with VITE_API_BASE_URL=http://localhost:7071
+  - VITE_API_BASE_URL added to apps/pwa/src/env.d.ts
+  - ProvisioningProgressView.tsx created at apps/pwa/src/routes/provisioning/
+  - provisioningRoute registered in workspace-routes.ts (path: provisioning/$projectId)
+  - useProvisioningSignalR wired with negotiateUrl, projectId, getToken, enabled
+  - Token resolution follows proven pattern from apps/estimating/src/pages/RequestDetailPage.tsx
+  - latestEventByProjectId read from useProvisioningStore (auto-populated by hook)
+  - Build passes: pnpm turbo run build --filter=@hbc/pwa (zero TS errors)
 -->

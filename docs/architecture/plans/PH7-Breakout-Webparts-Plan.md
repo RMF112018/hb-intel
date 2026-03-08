@@ -1,266 +1,193 @@
-# PH7-Breakout-Webparts-Plan.md
+# PH7 — Breakout SPFx Webparts: Master Infrastructure Plan
 
-**Phase 7 Development Plan – Breakout SPFx Webparts (All 11 Independent Webparts)**
+**Version:** 2.0 (split into summary + task files — supersedes v1.0 monolithic plan)
+**Governed by:** CLAUDE.md v1.2 · HB-Intel-Blueprint-V4.md §1, §2a, §2b, §2c · `hb-intel-foundation-plan.md` Phase 7
+**Date:** 2026-03-07
+**Status:** ACTIVE — Infrastructure tasks pending; feature work may begin on Accounting after BW-1 through BW-5 are complete
+**Audience:** Implementation agent, tech leads, DevOps, product owner
 
-**Version:** 1.0 (fully aligned with HB-Intel-Blueprint-V4.md §1, §2 and all decisions locked during the structured interview)  
-**Purpose:** This document provides exhaustive, numbered, manual step-by-step instructions with complete copy-paste-ready code and file names for implementing all 11 breakout SPFx webparts (project-hub, estimating, business-development, accounting, safety, quality-control-warranty, risk-management, leadership, operational-excellence, human-resources, and admin). It is designed so that any developer unfamiliar with the project can execute Phase 7 flawlessly and produce production-ready, comprehensively documented SPFx components. All decisions follow the choices we finalized (template folder with scripted duplication, template-driven simplified shell with basic overrides, sequential prioritization by business value, template with route factory for domain-specific routes, comprehensive testing with 95% coverage, CI/CD-integrated deployment, adapter-based proxy integration for backend, domain-specific RBAC with guidelines, full rewrite using new patterns for pages/components, advanced automated performance optimizations, guided domain-specific error handling/audit logging, and dedicated Diátaxis-aligned phase guide). This plan incorporates the enhanced additional details (SPFx & Vite setup, security & permissions, monitoring & observability, testing strategy, performance & bundle considerations, and legacy code mapping & migration).
+---
 
-## Refined Blueprint Section for Phase 7 (Updated for Interview-Locked Decisions)
+## Purpose of This Document
 
-**Phase 7: Breakout SPFx Webparts (All 11 Independent Webparts)**  
-Convert the functionality from the monolithic SPFx webpart into 11 independent breakout SPFx webparts using the new shared packages and simplified shell.
+This is the **master index and summary plan** for Phase 7 Breakout SPFx Webparts. It replaces the v1.0 monolithic plan with a lean summary + individual task files following the same pattern established in PH6F.
 
-**Locked Decisions:**  
-- Template Folder with Scripted Duplication (Option B: Shared template in `tools/spfx-template/` with duplication script for efficient, consistent setup of all 11 webparts).  
-- Template-Driven Simplified Shell with Basic Overrides (Option B: Baseline shell integration in template, with props for domain-specific tool picker/sidebar overrides).  
-- Sequential Prioritization by Business Value (Option A: Migrate one webpart at a time starting with Accounting and Estimating, ensuring each is complete before proceeding).  
-- Template with Route Factory for Domain-Specific Routes (Option B: Reusable `createDomainRoutes()` factory in template for type-safe, customizable routing per webpart).  
-- Comprehensive Testing with Full Coverage Goals (Option A: 95% coverage using Vitest, Playwright, and Storybook, enforced sequentially per webpart).  
-- CI/CD-Integrated Deployment (Option C: Automated bundling, App Catalog uploads, and installations via GitHub Actions workflows with manual approvals).  
-- Adapter-Based Proxy Integration (Option B: Extend `@hbc/data-access` adapters for secure backend calls in SPFx mode, e.g., for provisioning).  
-- Domain-Specific Integration with Guidelines (Option B: Baseline RBAC in template, with plan guidelines for tailored guards/hooks per domain).  
-- Full Rewrite Using New Patterns (Option C: Complete rewrite of pages/components with TanStack Query, Zustand, and ui-kit during migration, superseding wrappers).  
-- Advanced Automated Optimizations (Option C: CI/CD-integrated Vite plugins for compression, tree-shaking, budgets, and alerts).  
-- Guided Domain-Specific Enhancements (Option B: Baseline error boundaries/logging in template, with guidelines for domain-tailored toasts/logs).  
-- Dedicated Phase Guide with Diátaxis Alignment (Option B: Structured docs in `docs/how-to/developer/phase-7-spfx-webparts-guide.md` plus ADRs).
+Phase 7 has **two distinct layers**:
 
-**Additional Enhancements:**  
-- Comprehensive SPFx & Vite Setup (pinned SPFx 1.18+, Vite configs with aliases, unique manifests, dev ports 4001–4011).  
-- Comprehensive Security & Permissions (SPFx context auth, least-privilege adapters, runbook for Azure AD/SP groups).  
-- Comprehensive Monitoring & Observability (App Insights metrics for loads/errors, correlation IDs, alerts, observability runbook).  
-- Comprehensive Testing Strategy (unit/integration/end-to-end/chaos, CI enforcement with thresholds).  
-- Comprehensive Performance & Bundle Considerations (automated budgets <1MB, lazy loading, metrics, production runbook).  
-- Comprehensive Legacy Code Mapping & Migration (detailed references to monolithic files, phased rollout with flags, risk mitigation, onboarding guide).
+1. **Infrastructure Layer** (this plan) — The SPFx-specific scaffolding that every webpart needs before feature work can proceed. Covered by task files `PH7-BW-1` through `PH7-BW-11`.
+2. **Feature Layer** (separate domain plans) — The actual pages, data, and business logic for each domain. Covered by the `PH7-[Domain]-*` plan files listed in §6 below.
 
-**Success Criteria:** These 11 webparts are production-deployable and fully functional inside SharePoint sites.  
-**Deliverables:** Complete set of 11 focused SPFx webparts.
+The infrastructure layer must be substantially complete **before** feature work begins on any new domain. Accounting and Estimating are the first two domains and have the most critical infrastructure dependencies (provisioning trigger, SPFx auth context).
 
-## Exhaustive Step-by-Step Implementation Instructions
+---
 
-### 7.1 Tools & Template Setup
+## Current State of Each SPFx App (as of 2026-03-07)
 
-1. From the monorepo root, create the SPFx template folder:  
-   ```bash
-   mkdir -p tools/spfx-template
-   ```
+All 11 webpart apps exist at `apps/[domain]/` and share the same scaffolded structure. The table below shows what is already in place (✅), what is missing (❌), and what needs alignment (⚠️).
 
-2. In `tools/spfx-template/package.json`, add the baseline dependencies (copy-paste-ready):  
-   ```json
-   {
-     "name": "@hbc/spfx-template",
-     "version": "0.0.0",
-     "private": true,
-     "dependencies": {
-       "@hbc/models": "workspace:*",
-       "@hbc/data-access": "workspace:*",
-       "@hbc/query-hooks": "workspace:*",
-       "@hbc/ui-kit": "workspace:*",
-       "@hbc/auth": "workspace:*",
-       "@hbc/shell": "workspace:*",
-       "react": "^18.0.0",
-       "@tanstack/react-router": "^1.0.0",
-       "@tanstack/react-query": "^5.0.0",
-       "zustand": "^5.0.0",
-       "@microsoft/sp-core-library": "^1.18.0",
-       "@microsoft/sp-webpart-base": "^1.18.0",
-       "@pnp/sp": "^3.0.0"
-     },
-     "devDependencies": {
-       "vite": "^6.0.0",
-       "@vitejs/plugin-react": "^4.0.0"
-     }
-   }
-   ```
+| Concern | Status | Task |
+|---|---|---|
+| `App.tsx` provider stack (Theme > Query > ErrorBoundary > Router) | ✅ All 11 apps | — |
+| `main.tsx` with dual-mode bootstrap (`resolveAuthMode()`) | ✅ All 11 apps | — |
+| Memory router (`createMemoryHistory`) + simplified shell | ✅ All 11 apps | — |
+| `ShellLayout mode="simplified"` in root-route.tsx | ✅ All 11 apps | — |
+| Stub pages (domain-specific placeholder components) | ✅ All 11 apps | — |
+| `bootstrap.ts` with `bootstrapMockEnvironment()` | ⚠️ Uses hardcoded `MOCK_USER` | BW-5 |
+| `BaseClientSideWebPart.ts` SPFx entry point | ❌ Does not exist in any app | BW-1 |
+| `bootstrapSpfxAuth()` implementation | ❌ Comment-only "future phase" | BW-2 |
+| `config/package-solution.json`, manifests, serve config | ❌ No `config/` directory | BW-3 |
+| `vite.config.ts` tuned for SPFx bundle budgets | ❌ No vite.config.ts in any webpart app | BW-4 |
+| Back-to-Project-Hub wiring in simplified shell | ❌ ShellLayout renders but no nav wiring | BW-6 |
+| Domain tool picker entries in simplified shell | ❌ Not configured per domain | BW-6 |
+| SharePoint group → permission key RBAC mapping | ❌ No SP context RBAC adapter | BW-7 |
+| Dev harness SPFx preview tabs | ❌ No webpart tabs in dev-harness | BW-8 |
+| GitHub Actions `.sppkg` build + App Catalog CI/CD | ❌ No SPFx workflow | BW-9 |
+| Per-webpart Vitest + Playwright test setup | ❌ No test files in webpart apps | BW-10 |
+| Remaining domain feature plans (Safety, QC/W, Risk, OE, HR) | ❌ No detailed feature plans | BW-11 |
 
-3. Create `tools/spfx-template/vite.config.ts` with SPFx optimizations (code splitting, aliases):  
-   ```ts
-   import { defineConfig } from 'vite';
-   import react from '@vitejs/plugin-react';
+---
 
-   export default defineConfig({
-     plugins: [react()],
-     build: {
-       rollupOptions: {
-         output: {
-           entryFileNames: '[name].js',
-           chunkFileNames: '[name].js'
-         }
-       }
-     },
-     server: {
-       port: 4000 // Placeholder, overridden per webpart
-     },
-     resolve: {
-       alias: {
-         '@hbc': '/packages' // Monorepo alias
-       }
-     }
-   });
-   ```
+## Pre-Requisites Before Starting BW Tasks
 
-4. Add baseline `tools/spfx-template/src/App.tsx` with simplified shell, auth, router factory, error boundary:  
-   ```ts
-   import { ShellLayout } from '@hbc/shell';
-   import { FluentProvider } from '@hbc/ui-kit';
-   import { QueryClientProvider } from '@tanstack/react-query';
-   import { RouterProvider } from '@tanstack/react-router';
-   import { bootstrapSpfxAuth } from '@hbc/auth';
-   import { HbcErrorBoundary } from '@hbc/ui-kit';
-   import { createDomainRoutes } from './router/factory'; // Factory from template
+| Pre-requisite | Plan | Status |
+|---|---|---|
+| PH6F-3: Feature Registration initialized in PWA | PH6F-3-Cleanup-FeatureRegistration.md | ⏳ Pending |
+| PH6F.2: `mapRolesToPermissions()` aligned to 17 keys | PH6F.2-Cleanup-PersonaRegistryAlignment.md | ⏳ Pending |
+| `@hbc/auth/spfx` adapter exports (`bootstrapSpfxAuth`, `SpfxContextAdapter`) | packages/auth/src/spfx/ | ⚠️ Needs verification |
+| `ShellLayout` simplified mode props API locked | packages/shell/src/ShellLayout/ | ✅ Exists |
 
-   // Bootstrap auth (SPFx mode)
-   bootstrapSpfxAuth();
+---
 
-   const router = createDomainRoutes('workspaceId'); // Replaced with actual ID
+## Implementation Sequence
 
-   export function App() {
-     return (
-       <FluentProvider theme="hbcLightTheme">
-         <QueryClientProvider>
-           <HbcErrorBoundary>
-             <ShellLayout mode="simplified">
-               <RouterProvider router={router} />
-             </ShellLayout>
-           </HbcErrorBoundary>
-         </QueryClientProvider>
-       </FluentProvider>
-     );
-   }
-   ```
+Execute BW tasks in this order. BW-1 through BW-5 are the "entry gate" before any feature route work begins on a new domain.
 
-5. Implement the route factory in `tools/spfx-template/src/router/factory.ts`:  
-   ```ts
-   import { createRouter, rootRoute } from '@tanstack/react-router';
+```
+BW-1 (SPFx Entry Points)
+  └── BW-2 (Auth Bridge)        ← requires BW-1
+        └── BW-3 (Config/Manifests)  ← requires BW-1 + BW-2
+              └── BW-4 (Vite Config)  ← requires BW-3 for manifest IDs
 
-   export function createDomainRoutes(workspaceId: string) {
-     const root = rootRoute.addChildren([
-       // Domain-specific routes added here via overrides
-     ]);
-     return createRouter({ routeTree: root });
-   }
-   ```
+BW-5 (Bootstrap Alignment)     ← independent; do in parallel with BW-1 to BW-4
 
-6. Create the duplication script `tools/generate-webpart.ts` (Node.js executable):  
-   ```ts
-   import fs from 'fs-extra';
-   import path from 'path';
+BW-6 (Simplified Shell Nav)    ← requires BW-1 through BW-4 for at least one webpart
+BW-7 (RBAC Mapping)            ← requires BW-2
 
-   const webpartName = process.argv[2];
-   if (!webpartName) throw new Error('Provide webpart name');
+BW-8 (Dev Harness)             ← requires BW-4 (Vite configs)
+BW-9 (CI/CD)                   ← requires BW-3 (package-solution.json)
 
-   const targetDir = path.join(__dirname, '../../apps', webpartName);
-   fs.copySync(path.join(__dirname, 'spfx-template'), targetDir);
+BW-10 (Testing Infrastructure) ← requires BW-4 + BW-8
+BW-11 (Domain Feature Plans)   ← reference document; no blockers
+```
 
-   // Customize: Update manifest.json, port, etc.
-   const manifestPath = path.join(targetDir, 'src/webparts', webpartName, `${webpartName}.manifest.json`);
-   fs.writeJSONSync(manifestPath, { id: `unique-${webpartName}-id`, alias: webpartName });
+**Domain sequencing within each BW task:**
+Execute per-domain work in this order (Blueprint §2i, CLAUDE.md §2 MVP priority):
+`accounting → estimating → project-hub → leadership → business-development → admin → safety → quality-control-warranty → risk-management → operational-excellence → human-resources`
 
-   console.log(`Generated ${webpartName}`);
-   ```
+---
 
-7. Run the script for all 11 webparts (example for accounting):  
-   ```bash
-   node tools/generate-webpart.ts accounting
-   ```
-   Repeat for estimating, project-hub, leadership, business-development, admin, risk-management, safety, quality-control-warranty, operational-excellence, human-resources.
+## Task File Index
 
-8. Update `pnpm-workspace.yaml` to include all new apps/* folders.
+| File | Title | Priority | Blocked By |
+|---|---|---|---|
+| `PH7-BW-1-SPFx-Entry-Points.md` | BaseClientSideWebPart.ts for all 11 apps | HIGH | — |
+| `PH7-BW-2-SPFx-Auth-Bridge.md` | bootstrapSpfxAuth() + SP context adapter | HIGH | BW-1 |
+| `PH7-BW-3-SPFx-Config-Manifests.md` | config/ directory: manifests, package-solution, serve | HIGH | BW-1 |
+| `PH7-BW-4-Vite-Bundle-Config.md` | Per-webpart vite.config.ts with SPFx budgets | HIGH | BW-3 |
+| `PH7-BW-5-Bootstrap-Alignment.md` | Replace MOCK_USER with PersonaRegistry in all 11 | MEDIUM | PH6F.2 |
+| `PH7-BW-6-Simplified-Shell-Nav.md` | Back-to-ProjectHub, tool picker, workspace context | MEDIUM | BW-1–4 |
+| `PH7-BW-7-SPFx-RBAC-Mapping.md` | SharePoint groups → permission keys per domain | MEDIUM | BW-2 |
+| `PH7-BW-8-DevHarness-Integration.md` | SPFx preview tabs in dev-harness | MEDIUM | BW-4 |
+| `PH7-BW-9-CI-CD-Pipeline.md` | GitHub Actions: .sppkg build + App Catalog deploy | MEDIUM | BW-3 |
+| `PH7-BW-10-Testing-Infrastructure.md` | Vitest unit + Playwright E2E per webpart | LOW | BW-4, BW-8 |
+| `PH7-BW-11-Domain-Feature-Plans.md` | Roadmap for remaining 5 domain feature plans | REFERENCE | — |
 
-### 7.2 Sequential Migration & Full Rewrites
+---
 
-1. Start with Accounting: Navigate to `apps/accounting/`.  
-   Reference legacy: `src/webparts/hbcProjectControls/components/pages/Accounting.tsx`, `AccountingSetup.tsx`.  
-   Rewrite `src/pages/AccountingSetup.tsx` using new patterns (example snippet):  
-   ```ts
-   import { useMutation } from '@hbc/query-hooks';
-   import { HbcForm, HbcDataTable } from '@hbc/ui-kit';
-   import { PermissionGate } from '@hbc/auth';
+## Affected Files Summary
 
-   export function AccountingSetup() {
-     const mutation = useMutation('provisionSite', async (data) => {
-       // Use adapter-based proxy for backend call
-     });
+**New files per webpart app (× 11):**
+- `apps/[domain]/src/webparts/[domain]/[Domain]WebPart.ts`
+- `apps/[domain]/src/webparts/[domain]/[Domain]WebPart.manifest.json`
+- `apps/[domain]/config/package-solution.json`
+- `apps/[domain]/config/serve.json`
+- `apps/[domain]/config/deploy-azure-storage.json`
+- `apps/[domain]/vite.config.ts`
 
-     return (
-       <PermissionGate permission="provision:write">
-         <HbcForm onSubmit={mutation.mutateAsync}>
-           {/* Form fields with ui-kit */}
-         </HbcForm>
-       </PermissionGate>
-     );
-   }
-   ```
+**Modified files per webpart app (× 11):**
+- `apps/[domain]/src/bootstrap.ts` — PersonaRegistry alignment
+- `apps/[domain]/src/main.tsx` — call `bootstrapSpfxAuth()` in spfx mode
+- `apps/[domain]/src/router/root-route.tsx` — back-to-project-hub + tool picker props
 
-2. Apply domain-specific overrides: Add tool picker items to shell props, custom routes via factory.  
-   Integrate provisioning trigger with adapter proxy.
+**Shared package changes:**
+- `packages/auth/src/spfx/SpfxContextAdapter.ts` — implement or verify SP context bootstrap
+- `packages/auth/src/spfx/index.ts` — export `bootstrapSpfxAuth`
+- `packages/shell/src/ShellLayout/` — verify simplified mode accepts nav props
 
-3. Add guided RBAC: Use `RoleGate` for sections, per guidelines.
+**New infrastructure files:**
+- `.github/workflows/spfx-build.yml` — CI/CD for all 11 webparts
+- `tools/spfx-bundle-check.ts` — bundle size validation script
+- `apps/dev-harness/src/webpart-tabs/` — SPFx preview tab components
 
-4. Implement error handling: Wrap in `HbcErrorBoundary`, add domain toasts/logs.
+---
 
-5. Repeat sequentially for Estimating (reference: `Estimating.tsx`, `EstimatingTracker.tsx`), rewriting with query hooks/ui-kit.  
-   Integrate real-time checklist if applicable (cross-phase note).
+## Domain Feature Plan Cross-Reference
 
-6. Proceed to Project Hub, Leadership, etc., following the order. For each, map legacy files, rewrite pages (e.g., `ProjectDashboard.tsx` for project-hub), apply overrides/guidelines.
+| Domain | Feature Plan | Sub-Task Files | Status |
+|---|---|---|---|
+| Business Development | `PH7-BD-Features.md` | PH7-BD-1 through PH7-BD-9 | ✅ Plans complete |
+| Project Hub | `PH7-ProjectHub-Features-Plan.md` | PH7-ProjectHub-1 through PH7-ProjectHub-16 | ✅ Plans complete |
+| Estimating | `PH7-Estimating-Feature-Plan.md` | (monolithic — needs splitting) | ⚠️ Plan exists, task split pending |
+| Admin | `PH7-Admin-Feature-Plan.md` | (monolithic) | ⚠️ Plan exists, task split pending |
+| Accounting | — | — | ❌ No detailed feature plan |
+| Leadership | — | — | ❌ No detailed feature plan |
+| Safety | — | — | ❌ No detailed feature plan |
+| Quality Control/Warranty | — | — | ❌ No detailed feature plan |
+| Risk Management | — | — | ❌ No detailed feature plan |
+| Operational Excellence | — | — | ❌ No detailed feature plan |
+| Human Resources | — | — | ❌ No detailed feature plan |
 
-### 7.3 Testing & Performance
+See `PH7-BW-11-Domain-Feature-Plans.md` for the roadmap and scoping notes for the five missing domain plans.
 
-1. For each webpart, add Vitest tests in `src/**/*.test.ts` (aim 95% coverage):  
-   ```ts
-   import { render } from '@testing-library/react';
-   test('AccountingSetup renders', () => {
-     const { getByText } = render(<AccountingSetup />);
-     expect(getByText('Provision Site')).toBeInTheDocument();
-   });
-   ```
+---
 
-2. Configure Playwright E2E in `e2e/accounting.spec.ts` (example):  
-   ```ts
-   import { test } from '@playwright/test';
-   test('Provisioning trigger', async ({ page }) => {
-     await page.goto('/accounting');
-     await page.click('button[aria-label="Save + Provision"]');
-     // Assert redirect and checklist
-   });
-   ```
+## Definition of Done
 
-3. Update Storybook stories for UI components.
+Phase 7 infrastructure is complete when all of the following pass:
 
-4. Integrate advanced optimizations: In root `vite.config.ts`, add plugins; in CI/CD `cd.yml`, add budget checks:  
-   ```yaml
-   jobs:
-     deploy-spfx:
-       runs-on: ubuntu-latest
-       steps:
-         - name: Bundle Analysis
-           run: pnpm analyze-bundle --max-size 1MB
-   ```
+- [ ] All 11 `BaseClientSideWebPart.ts` files exist and compile without errors
+- [ ] `bootstrapSpfxAuth()` is called in SPFx mode and populates `useAuthStore` from SP page context
+- [ ] All 11 apps have valid `config/package-solution.json` with unique solution GUIDs
+- [ ] All 11 `vite.config.ts` files enforce bundle budget < 1 MB
+- [ ] All 11 `bootstrap.ts` files use `PersonaRegistry` (no `MOCK_USER` literals)
+- [ ] Back-to-Project-Hub link renders correctly in simplified shell for all non-Project-Hub domains
+- [ ] SharePoint group membership resolves to the correct permission keys via `SpfxContextAdapter`
+- [ ] All 11 webpart apps are visible as tabs in dev-harness
+- [ ] GitHub Actions `spfx-build.yml` produces valid `.sppkg` for all 11 apps on push to `main`
+- [ ] Vitest unit coverage ≥ 80% for each webpart's router, bootstrap, and RBAC logic
+- [ ] `pnpm turbo run build` succeeds across all 11 apps
+- [ ] All documentation created in correct `docs/` Diátaxis locations
 
-### 7.4 CI/CD & Deployment
+---
 
-1. Update `.github/workflows/cd.yml` for SPFx: Add jobs for .sppkg build, upload via PnPjs, install to sites.  
-   Use env vars for credentials.
+## Verification Commands
 
-2. For each webpart, verify deployment: Trigger pipeline, confirm in App Catalog.
+```bash
+# Build all webpart apps
+pnpm turbo run build --filter="./apps/accounting" --filter="./apps/estimating" --filter="./apps/project-hub"
 
-### 7.5 Documentation
+# Check bundle sizes
+node tools/spfx-bundle-check.ts
 
-1. Create `docs/how-to/developer/phase-7-spfx-webparts-guide.md` (Diátaxis: tutorials for migration, references for templates).  
-2. Add ADR `docs/architecture/adr/0012-spfx-breakout.md`.  
-3. Update `docs/explanation/design-decisions/phase-7.md` with rationale.
+# Run webpart unit tests
+pnpm turbo run test --filter="./apps/accounting"
 
-## Verification & Phase Completion
+# Validate package-solution GUIDs are unique
+node tools/validate-manifests.ts
+```
 
-1. In dev-harness, set `HBC_ADAPTER_MODE=sharepoint` and load each webpart preview.  
-2. Confirm:  
-   - Simplified shell renders without picker/launcher.  
-   - Rewritten pages fetch data via query hooks, apply RBAC guards.  
-   - Backend calls (e.g., provisioning) succeed via adapters.  
-   - Error boundaries catch failures, logs audit actions.  
-   - Performance: Bundles <1MB, loads <5s in SPFx iframe simulation.  
-3. Success Criteria Checklist:  
-   - All 11 webparts deploy via CI/CD and function in SharePoint sites.  
-   - 95% test coverage passed in pipeline.  
-   - Legacy mappings verified with side-by-side diff.  
-   - Security: Permissions enforced, no unauthorized access.  
-4. Incremental Migration: Use feature flags for rollout; rollback via git branches if needed.
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Version 2.0: 2026-03-07 — Rewritten as master summary/index. Individual task files PH7-BW-1 through PH7-BW-11 created.
+Previous version (v1.0 monolithic) content superseded by task files.
+Next: Begin BW-1 (SPFx Entry Points) for accounting app first.
+-->
