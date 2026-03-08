@@ -24,6 +24,7 @@ As of 2026-03-07, detailed feature plans (summary + task sub-files) exist for:
 - ❌ Risk Management — no detailed feature plan
 - ❌ Operational Excellence — no detailed feature plan
 - ❌ Human Resources — no detailed feature plan
+- ❌ Site Controls — no detailed feature plan
 
 This document provides:
 1. Scoping notes for the 5 missing domain plans (what each plan must cover)

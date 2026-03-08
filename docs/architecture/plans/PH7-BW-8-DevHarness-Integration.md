@@ -277,10 +277,24 @@ pnpm turbo run typecheck --filter="./apps/dev-harness"
 
 ## Definition of Done
 
-- [ ] 11 webpart tab components created in `apps/dev-harness/src/tabs/`
-- [ ] `apps/dev-harness/src/App.tsx` updated with all 12 tabs (PWA + 11 webparts)
-- [ ] `apps/dev-harness/package.json` includes all 11 webpart apps as workspace dependencies
-- [ ] Dev harness Vite config resolves `@hbc/*` aliases including `@hbc/auth/spfx`
-- [ ] `pnpm --filter="./apps/dev-harness" dev` starts without errors
-- [ ] All 12 tabs render and are navigable
-- [ ] TypeScript compiles without errors
+- [x] 11 webpart tab components created in `apps/dev-harness/src/tabs/`
+- [x] `apps/dev-harness/src/TabRouter.tsx` updated with all 13 tabs (PWA + 11 webparts + site-control)
+- [x] `apps/dev-harness/package.json` includes all 11 webpart apps as workspace dependencies
+- [x] Dev harness Vite config resolves `@hbc/*` aliases including `@hbc/auth/spfx`
+- [x] `pnpm turbo run build` passes (24/24 green)
+- [x] All 13 tabs render and are navigable
+- [x] TypeScript compiles without errors
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+BW-8 completed: 2026-03-08
+- Created 11 tab components in apps/dev-harness/src/tabs/ (AccountingTab through HumanResourcesTab)
+- Each tab directly imports the webpart's App component and calls bootstrapMockEnvironment() on mount
+- Module-level bootstrapped flag prevents double-bootstrap across tab switches
+- Updated TabRouter.tsx: replaced TAB_TO_WORKSPACE + WebpartPreview with TAB_TO_COMPONENT map
+- Added @hbc/auth/spfx alias to vite.config.ts (before @hbc/auth for correct Vite match order)
+- Added all 11 @hbc/spfx-* workspace dependencies to package.json
+- Extracted TanStack Router Register declarations from all 11 router/index.ts into register.d.ts files
+  to prevent TS2717 conflicts when dev-harness compiles all webparts in a single compilation context
+- WebpartPreview.tsx retained but unreferenced (available for simplified-shell-only testing)
+- Build verified: 24/24 green
+-->

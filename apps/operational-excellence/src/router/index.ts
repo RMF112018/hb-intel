@@ -8,4 +8,3 @@ export function createWebpartRouter() {
   return createRouter({ routeTree, history: createMemoryHistory({ initialEntries: ['/'] }) });
 }
 export type WebpartRouter = ReturnType<typeof createWebpartRouter>;
-declare module '@tanstack/react-router' { interface Register { router: WebpartRouter; } }

@@ -9,7 +9,3 @@ export function createWebpartRouter() {
 }
 
 export type WebpartRouter = ReturnType<typeof createWebpartRouter>;
-
-declare module '@tanstack/react-router' {
-  interface Register { router: WebpartRouter; }
-}

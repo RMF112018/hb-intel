@@ -9,6 +9,7 @@ export default defineConfig({
       '@hbc/models': path.resolve(__dirname, '../../packages/models/src'),
       '@hbc/data-access': path.resolve(__dirname, '../../packages/data-access/src'),
       '@hbc/query-hooks': path.resolve(__dirname, '../../packages/query-hooks/src'),
+      '@hbc/auth/spfx': path.resolve(__dirname, '../../packages/auth/src/spfx/index.ts'),
       '@hbc/auth': path.resolve(__dirname, '../../packages/auth/src'),
       // Subpath alias must come before the root @hbc/shell alias — Vite matches aliases
       // in order, so the more specific entry wins over the bare package alias.

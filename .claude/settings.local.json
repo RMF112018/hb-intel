@@ -60,7 +60,11 @@
       "Bash(for app in admin business-development human-resources leadership operational-excellence quality-control-warranty risk-management safety)",
       "Read(//Users/bobbyfetting/hb-intel/apps/$app/src/webparts/**)",
       "Bash(npx tsx:*)",
-      "Bash(do:*)"
+      "Bash(do:*)",
+      "Bash(for app in project-hub leadership business-development admin safety quality-control-warranty risk-management operational-excellence human-resources)",
+      "Read(//Users/bobbyfetting/hb-intel/apps/$app/**)",
+      "Bash(for dir in accounting estimating project-hub leadership business-development admin safety quality-control-warranty risk-management operational-excellence human-resources)",
+      "Read(//Users/bobbyfetting/hb-intel/apps/$dir/src/router/**)"
     ]
   }
 }

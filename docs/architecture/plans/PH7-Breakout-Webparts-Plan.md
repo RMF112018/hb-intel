@@ -54,7 +54,7 @@ All 11 webpart apps exist at `apps/[domain]/` and share the same scaffolded stru
 | Back-to-Project-Hub wiring in simplified shell | ❌ ShellLayout renders but no nav wiring | BW-6 |
 | Domain tool picker entries in simplified shell | ❌ Not configured per domain | BW-6 |
 | SharePoint group → permission key RBAC mapping | ❌ No SP context RBAC adapter | BW-7 |
-| Dev harness SPFx preview tabs | ❌ No webpart tabs in dev-harness | BW-8 |
+| Dev harness SPFx preview tabs | ✅ 11 direct-import tab components | BW-8 |
 | GitHub Actions `.sppkg` build + App Catalog CI/CD | ❌ No SPFx workflow | BW-9 |
 | Per-webpart Vitest + Playwright test setup | ❌ No test files in webpart apps | BW-10 |
 | Remaining domain feature plans (Safety, QC/W, Risk, OE, HR) | ❌ No detailed feature plans | BW-11 |
@@ -225,5 +225,6 @@ BW-4 completed: 2026-03-08 — All 11 vite.config.ts files transformed with SPFx
 BW-5 completed: 2026-03-08 — All 11 bootstrap.ts files transformed to use PersonaRegistry pattern (resolveBootstrapPersona/personaToCurrentUser/resolveBootstrapPermissions). Removed MOCK_USER constants, '*:*' wildcards, ICurrentUser imports. Added domain-specific feature flags, JSDoc with D-PH7-BW-5 ref, console.log persona output. 11 file operations.
 BW-6 completed: 2026-03-08 — SimplifiedShellConfig type + resolveProjectHubUrl utility added to @hbc/shell. BackToProjectHub enhanced with projectHubUrl prop. ShellLayout extended with simplifiedConfig prop. All 11 root-route.tsx files updated with domain-specific config (workspace name, tool picker items, Back-to-Project-Hub classification). 18 file operations. Build verified (24/24 green).
 BW-7 completed: 2026-03-08 — SpfxRbacAdapter.ts created with SP_GROUP_TO_PERMISSIONS (12 SP groups → permission keys) and resolveSpfxPermissions(). @pnp/sp ^4.0.0 added to @hbc/auth. All 11 [Domain]WebPart.tsx files wired: resolveSpfxPermissions(this.context) → bootstrapSpfxAuth(this.context, permissionKeys). Error fallback returns ['project:read', 'action:read']. 14 file operations.
-Next: BW-8 (Dev Harness Integration)
+BW-8 completed: 2026-03-08 — 11 webpart tab components created in apps/dev-harness/src/tabs/. TabRouter.tsx updated with TAB_TO_COMPONENT map replacing WebpartPreview fallback. @hbc/auth/spfx alias added to vite.config.ts. All 11 @hbc/spfx-* workspace deps added. TanStack Router Register declarations extracted to register.d.ts files (11 webparts) to prevent TS2717 conflicts. 27 file operations. Build verified (24/24 green).
+Next: BW-9 (CI/CD Pipeline)
 -->

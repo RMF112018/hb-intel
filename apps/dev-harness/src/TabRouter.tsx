@@ -6,8 +6,18 @@ import { useState } from 'react';
 import { TabList, Tab } from '@hbc/ui-kit';
 import type { SelectTabData } from '@hbc/ui-kit';
 import { PwaPreview } from './tabs/PwaPreview.js';
-import { WebpartPreview } from './tabs/WebpartPreview.js';
 import { SiteControlPreview } from './tabs/SiteControlPreview.js';
+import { AccountingTab } from './tabs/AccountingTab.js';
+import { EstimatingTab } from './tabs/EstimatingTab.js';
+import { ProjectHubTab } from './tabs/ProjectHubTab.js';
+import { LeadershipTab } from './tabs/LeadershipTab.js';
+import { BusinessDevelopmentTab } from './tabs/BusinessDevelopmentTab.js';
+import { AdminTab } from './tabs/AdminTab.js';
+import { SafetyTab } from './tabs/SafetyTab.js';
+import { QualityControlWarrantyTab } from './tabs/QualityControlWarrantyTab.js';
+import { RiskManagementTab } from './tabs/RiskManagementTab.js';
+import { OperationalExcellenceTab } from './tabs/OperationalExcellenceTab.js';
+import { HumanResourcesTab } from './tabs/HumanResourcesTab.js';
 
 type TabId =
   | 'pwa'
@@ -45,19 +55,19 @@ const TABS: TabDef[] = [
   { id: 'site-control', label: 'HB Site Control' },
 ];
 
-/** Map tab IDs to WorkspaceId for WebpartPreview (Phase 5 — corrected). */
-const TAB_TO_WORKSPACE: Record<string, string> = {
-  'project-hub': 'project-hub',
-  accounting: 'accounting',
-  estimating: 'estimating',
-  'business-development': 'business-development',
-  safety: 'safety',
-  'quality-control-warranty': 'quality-control-warranty',
-  'risk-management': 'risk-management',
-  leadership: 'leadership',
-  'operational-excellence': 'operational-excellence',
-  'human-resources': 'human-resources',
-  admin: 'admin',
+/** Map webpart tab IDs to their direct-import tab components (D-PH7-BW-8). */
+const TAB_TO_COMPONENT: Partial<Record<TabId, React.ComponentType>> = {
+  accounting: AccountingTab,
+  estimating: EstimatingTab,
+  'project-hub': ProjectHubTab,
+  leadership: LeadershipTab,
+  'business-development': BusinessDevelopmentTab,
+  admin: AdminTab,
+  safety: SafetyTab,
+  'quality-control-warranty': QualityControlWarrantyTab,
+  'risk-management': RiskManagementTab,
+  'operational-excellence': OperationalExcellenceTab,
+  'human-resources': HumanResourcesTab,
 };
 
 const VALID_TAB_IDS = new Set<TabId>(TABS.map((tab) => tab.id));
@@ -93,8 +103,8 @@ function syncTabToLocation(tabId: TabId): void {
 function renderTab(activeTab: TabId) {
   if (activeTab === 'pwa') return <PwaPreview />;
   if (activeTab === 'site-control') return <SiteControlPreview />;
-  const workspaceId = TAB_TO_WORKSPACE[activeTab];
-  if (workspaceId) return <WebpartPreview workspaceId={workspaceId} />;
+  const Component = TAB_TO_COMPONENT[activeTab];
+  if (Component) return <Component />;
   return null;
 }
 

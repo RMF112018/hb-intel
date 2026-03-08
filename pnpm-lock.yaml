@@ -260,6 +260,39 @@ importers:
       '@hbc/shell':
         specifier: workspace:*
         version: link:../../packages/shell
+      '@hbc/spfx-accounting':
+        specifier: workspace:*
+        version: link:../accounting
+      '@hbc/spfx-admin':
+        specifier: workspace:*
+        version: link:../admin
+      '@hbc/spfx-business-development':
+        specifier: workspace:*
+        version: link:../business-development
+      '@hbc/spfx-estimating':
+        specifier: workspace:*
+        version: link:../estimating
+      '@hbc/spfx-human-resources':
+        specifier: workspace:*
+        version: link:../human-resources
+      '@hbc/spfx-leadership':
+        specifier: workspace:*
+        version: link:../leadership
+      '@hbc/spfx-operational-excellence':
+        specifier: workspace:*
+        version: link:../operational-excellence
+      '@hbc/spfx-project-hub':
+        specifier: workspace:*
+        version: link:../project-hub
+      '@hbc/spfx-quality-control-warranty':
+        specifier: workspace:*
+        version: link:../quality-control-warranty
+      '@hbc/spfx-risk-management':
+        specifier: workspace:*
+        version: link:../risk-management
+      '@hbc/spfx-safety':
+        specifier: workspace:*
+        version: link:../safety
       '@hbc/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui-kit
