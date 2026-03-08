@@ -166,7 +166,14 @@ pnpm --filter pwa dev
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task created: 2026-03-07
-Status: Pending implementation
-Execution: Fifth in sequence — implement in same useEffect as PH6F-4 for efficiency
-Note: Verify resolveRoleLandingPath role name strings match DevAuthBypassAdapter output
+Phase PH6F-5 completed: 2026-03-07
+- [x] PH6F-5.1 AccountingUser → /project-hub (falls through; /accounting not in resolveRoleLandingPath — by design per §2b)
+- [x] PH6F-5.2 Administrator → /admin
+- [x] PH6F-5.3 ProjectUser → /project-hub
+- [x] PH6F-5.4 EstimatingUser → /project-hub (falls through; module access gated by permissions, not routing)
+- [x] PH6F-5.5 Redirect memory takes priority over role landing (return guard after restore)
+- [x] PH6F-5.6 pathname === '/' guard prevents redirect on non-root paths
+- [x] PH6F-5.7 Build passes: pnpm turbo run build --filter=@hbc/pwa --filter=@hbc/shell — 0 errors
+Implementation: Added resolveRoleLandingPath import and Priority 2 branch to PH6F-4 useEffect in root-route.tsx
+Note: resolveRoleLandingPath maps Administrator→/admin, Executive→/leadership, all others→/project-hub (ShellCore.tsx:108-116)
 -->

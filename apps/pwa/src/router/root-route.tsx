@@ -13,6 +13,7 @@ import {
   restoreRedirectTarget,
   clearRedirectMemory,
   isSafeRedirectPath,
+  resolveRoleLandingPath,
   type ShellConnectivitySignal,
 } from '@hbc/shell';
 import { HbcAppShell, HbcConnectivityBar } from '@hbc/ui-kit';
@@ -63,16 +64,26 @@ function RootComponent(): React.ReactNode {
     return () => stopNavSync();
   }, [router, startNavSync, stopNavSync]);
 
-  // D-PH6F-4: Restore intended destination after successful auth.
+  // D-PH6F-4 + D-PH6F-5: Post-auth navigation — redirect memory (priority 1) then role landing (priority 2).
   React.useEffect(() => {
     if (lifecyclePhase !== 'authenticated') return;
 
+    // Priority 1: Restore redirect memory (PH6F-4)
     const restored = restoreRedirectTarget({ runtimeMode: 'pwa' });
     if (restored && restored.pathname !== router.state.location.pathname) {
       clearRedirectMemory();
       void router.navigate({ to: restored.pathname, replace: true });
+      return;
     }
-    // If no redirect memory, PH6F-5 will handle role-based landing
+
+    // Priority 2: Role-based landing when user is at root (PH6F-5)
+    if (router.state.location.pathname === '/' || router.state.location.pathname === '') {
+      const resolvedRoles = useAuthStore.getState().session?.resolvedRoles ?? [];
+      const roleLandingPath = resolveRoleLandingPath(resolvedRoles);
+      if (roleLandingPath && roleLandingPath !== '/') {
+        void router.navigate({ to: roleLandingPath, replace: true });
+      }
+    }
   }, [lifecyclePhase, router]);
 
   const shellUser = mapCurrentUserToShellUser(currentUser);
