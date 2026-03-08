@@ -1044,6 +1044,204 @@ importers:
         specifier: ^8.57.0
         version: 8.57.1
 
+  packages/features/accounting:
+    dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../../auth
+      '@hbc/models':
+        specifier: workspace:*
+        version: link:../../models
+      '@hbc/query-hooks':
+        specifier: workspace:*
+        version: link:../../query-hooks
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../ui-kit
+
+  packages/features/admin:
+    dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../../auth
+      '@hbc/models':
+        specifier: workspace:*
+        version: link:../../models
+      '@hbc/query-hooks':
+        specifier: workspace:*
+        version: link:../../query-hooks
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../ui-kit
+
+  packages/features/business-development:
+    dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../../auth
+      '@hbc/models':
+        specifier: workspace:*
+        version: link:../../models
+      '@hbc/query-hooks':
+        specifier: workspace:*
+        version: link:../../query-hooks
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../ui-kit
+
+  packages/features/estimating:
+    dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../../auth
+      '@hbc/models':
+        specifier: workspace:*
+        version: link:../../models
+      '@hbc/query-hooks':
+        specifier: workspace:*
+        version: link:../../query-hooks
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../ui-kit
+
+  packages/features/human-resources:
+    dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../../auth
+      '@hbc/models':
+        specifier: workspace:*
+        version: link:../../models
+      '@hbc/query-hooks':
+        specifier: workspace:*
+        version: link:../../query-hooks
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../ui-kit
+
+  packages/features/leadership:
+    dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../../auth
+      '@hbc/models':
+        specifier: workspace:*
+        version: link:../../models
+      '@hbc/query-hooks':
+        specifier: workspace:*
+        version: link:../../query-hooks
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../ui-kit
+
+  packages/features/operational-excellence:
+    dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../../auth
+      '@hbc/models':
+        specifier: workspace:*
+        version: link:../../models
+      '@hbc/query-hooks':
+        specifier: workspace:*
+        version: link:../../query-hooks
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../ui-kit
+
+  packages/features/project-hub:
+    dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../../auth
+      '@hbc/models':
+        specifier: workspace:*
+        version: link:../../models
+      '@hbc/query-hooks':
+        specifier: workspace:*
+        version: link:../../query-hooks
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../ui-kit
+
+  packages/features/quality-control-warranty:
+    dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../../auth
+      '@hbc/models':
+        specifier: workspace:*
+        version: link:../../models
+      '@hbc/query-hooks':
+        specifier: workspace:*
+        version: link:../../query-hooks
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../ui-kit
+
+  packages/features/risk-management:
+    dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../../auth
+      '@hbc/models':
+        specifier: workspace:*
+        version: link:../../models
+      '@hbc/query-hooks':
+        specifier: workspace:*
+        version: link:../../query-hooks
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../ui-kit
+
+  packages/features/safety:
+    dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../../auth
+      '@hbc/models':
+        specifier: workspace:*
+        version: link:../../models
+      '@hbc/query-hooks':
+        specifier: workspace:*
+        version: link:../../query-hooks
+      '@hbc/shell':
+        specifier: workspace:*
+        version: link:../../shell
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../ui-kit
+
   packages/models:
     devDependencies:
       '@types/react':

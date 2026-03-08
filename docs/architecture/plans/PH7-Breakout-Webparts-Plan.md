@@ -217,5 +217,6 @@ node tools/validate-manifests.ts
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Version 2.0: 2026-03-07 — Rewritten as master summary/index. Individual task files PH7-BW-1 through PH7-BW-11 created.
 Previous version (v1.0 monolithic) content superseded by task files.
+BW-0 completed: 2026-03-07 — All 11 packages/features/[domain]/ scaffolded, workspace/tsconfig/vite wired, ADR-0079 created, build verified (24/24 green).
 Next: Begin BW-1 (SPFx Entry Points) for accounting app first.
 -->

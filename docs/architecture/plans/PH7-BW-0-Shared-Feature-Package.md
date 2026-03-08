@@ -478,3 +478,18 @@ grep -rn "features-estimating" packages/features/accounting/
 - [ ] This decision referenced in the header of every domain feature plan file
 - [ ] `pnpm install` resolves all 11 feature package workspace dependencies without errors
 - [ ] TypeScript project references updated in `tsconfig.base.json` or root `tsconfig.json` to include `packages/features/*`
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase PH7-BW-0 completed: 2026-03-07
+All 11 feature packages scaffolded: packages/features/[domain]/ with package.json, tsconfig.json, src/index.ts
+pnpm-workspace.yaml updated with "packages/features/*" glob
+tsconfig.base.json updated with 22 path entries (11 packages × bare + wildcard)
+All 14 app vite.config.ts files updated with @hbc/features-* aliases
+tools/vitest-webpart.config.ts created with shared Vitest alias config
+tools/package.json created for workspace resolution
+ADR-0079-shared-feature-packages.md created (ADR-0013 was already allocated; used next available number)
+Corrected tsconfig extends path: ../../../tsconfig.base.json (3 levels, not 2 as in plan)
+Corrected tsconfig references: ../../models (not ../../packages/models)
+pnpm install + pnpm turbo run build: 24/24 tasks successful
+Next: BW-1 (SPFx Entry Points)
+-->

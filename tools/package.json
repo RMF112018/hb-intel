@@ -1,0 +1,7 @@
+{
+  "name": "@hbc/tools",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared build and test tooling for the HB Intel monorepo"
+}
