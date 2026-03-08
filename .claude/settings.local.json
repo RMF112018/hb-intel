@@ -52,7 +52,8 @@
       "Bash(git rm:*)",
       "Bash(git rebase:*)",
       "Bash(test:*)",
-      "Bash(do mkdir:*)"
+      "Bash(do mkdir:*)",
+      "Bash(do find:*)"
     ]
   }
 }

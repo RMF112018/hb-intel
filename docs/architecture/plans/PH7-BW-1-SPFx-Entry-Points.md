@@ -270,3 +270,19 @@ pnpm tsc --noEmit -p apps/accounting/tsconfig.json
 - [ ] All 11 `main.tsx` files updated with clarifying comment
 - [ ] SPFx peer dependencies added to all 11 `package.json` files
 - [ ] TypeScript compiles without errors
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+BW-1 completed: 2026-03-08
+- All 11 [Domain]WebPart.tsx files created (used .tsx extension for JSX support)
+- File extension changed from plan's .ts → .tsx because render() contains JSX (<App />)
+- Import from @hbc/auth (root), not @hbc/auth/spfx (doesn't exist) — deferred to BW-2
+- bootstrapSpfxAuth() call commented out with TODO [BW-2] — type bridge not yet available
+- SPFx packages added as devDependencies: @microsoft/sp-property-pane, @microsoft/sp-webpart-base
+- Removed @microsoft/sp-core-library from direct devDependencies — pnpm strict mode caused duplicate
+  Version type copies between direct and transitive (via sp-webpart-base) installs. dataVersion getter
+  removed; base class provides default. Will be re-added in BW-3 if manifests need it.
+- All 11 main.tsx files updated with DEV MODE ONLY clarifying comment
+- project-hub main.tsx: replaced '// spfx mode:' comment with new clarifying block
+- pnpm turbo run build: 24/24 tasks successful
+Next: BW-2 (Auth Bridge) — wire WebPartContext → ISpfxPageContext adapter
+-->
