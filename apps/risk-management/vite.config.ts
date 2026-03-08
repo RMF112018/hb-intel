@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
+import { resolve } from 'path';
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ command, mode }) => ({
   plugins: [react()],
   resolve: {
     alias: {
@@ -10,8 +11,12 @@ export default defineConfig(({ mode }) => ({
       '@hbc/data-access': path.resolve(__dirname, '../../packages/data-access/src'),
       '@hbc/query-hooks': path.resolve(__dirname, '../../packages/query-hooks/src'),
       '@hbc/auth': path.resolve(__dirname, '../../packages/auth/src'),
+      '@hbc/auth/spfx': resolve(__dirname, '../../packages/auth/src/spfx/index.ts'),
       '@hbc/shell': path.resolve(__dirname, '../../packages/shell/src'),
       '@hbc/ui-kit': path.resolve(__dirname, '../../packages/ui-kit/src'),
+      '@hbc/ui-kit/app-shell': resolve(__dirname, '../../packages/ui-kit/src/app-shell.ts'),
+      '@hbc/ui-kit/theme': resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts'),
+      '@hbc/provisioning': resolve(__dirname, '../../packages/provisioning/src/index.ts'),
       '@hbc/features-accounting': path.resolve(__dirname, '../../packages/features/accounting/src/index.ts'),
       '@hbc/features-estimating': path.resolve(__dirname, '../../packages/features/estimating/src/index.ts'),
       '@hbc/features-project-hub': path.resolve(__dirname, '../../packages/features/project-hub/src/index.ts'),
@@ -25,9 +30,41 @@ export default defineConfig(({ mode }) => ({
       '@hbc/features-human-resources': path.resolve(__dirname, '../../packages/features/human-resources/src/index.ts'),
     },
   },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    sourcemap: command === 'serve',
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      external: [
+        /^@microsoft\//,
+        /^@msinternal\//,
+      ],
+      input: {
+        'risk-management-webpart': resolve(__dirname, 'src/webparts/riskManagement/RiskManagementWebPart.tsx'),
+      },
+      output: {
+        entryFileNames: '[name].js',
+        chunkFileNames: '[name].js',
+        assetFileNames: '[name].[ext]',
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-tanstack': ['@tanstack/react-router', '@tanstack/react-query'],
+          'vendor-fluent': ['@fluentui/react-components'],
+          'vendor-zustand': ['zustand'],
+        },
+      },
+    },
+  },
+  server: {
+    port: 4009,
+    https: true,
+    strictPort: true,
+    cors: true,
+  },
   define: {
     'process.env.HBC_ADAPTER_MODE': mode === 'development' ? '"mock"' : '"proxy"',
     'process.env.HBC_AUTH_MODE': mode === 'development' ? '"mock"' : '"spfx"',
+    'process.env.NODE_ENV': JSON.stringify(command === 'serve' ? 'development' : 'production'),
   },
-  server: { port: 4009 },
 }));

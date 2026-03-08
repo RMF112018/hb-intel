@@ -59,7 +59,8 @@
       "Read(//Users/bobbyfetting/hb-intel/apps/**)",
       "Bash(for app in admin business-development human-resources leadership operational-excellence quality-control-warranty risk-management safety)",
       "Read(//Users/bobbyfetting/hb-intel/apps/$app/src/webparts/**)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(do:*)"
     ]
   }
 }

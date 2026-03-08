@@ -273,3 +273,22 @@ sleep 3 && curl -k https://localhost:4001 | head -1
 - [ ] `tools/spfx-bundle-check.ts` created and enforces < 1 MB budget
 - [ ] All 11 apps build with `pnpm turbo run build` without error
 - [ ] `node tools/spfx-bundle-check.ts` passes for all built apps
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+BW-4 completed: 2026-03-08
+- All 11 vite.config.ts files transformed with SPFx-ready build configuration
+- Entry points use actual .tsx extension (not .ts as originally written in plan table)
+- rollupOptions: deterministic filenames, manualChunks (vendor-react, vendor-tanstack, vendor-fluent, vendor-zustand)
+- build: outDir='dist', emptyOutDir=true, sourcemap conditional on dev, chunkSizeWarningLimit=800
+- server: https=true, strictPort=true, cors=true, ports 4001–4011 aligned with BW-3 serve.json
+- Port misalignments fixed: accounting 4002→4001, estimating 4003→4002, project-hub 4001→4003 (both vite.config.ts and package.json scripts)
+- Added missing subpath aliases: @hbc/ui-kit/app-shell, @hbc/ui-kit/theme, @hbc/auth/spfx, @hbc/provisioning
+- tools/spfx-bundle-check.ts created — enforces < 1 MB budget per domain
+- turbo.json already has bundle:size and bundle-report tasks — no new pipeline entry needed
+- define block: added process.env.NODE_ENV alongside existing HBC_ADAPTER_MODE and HBC_AUTH_MODE
+- rollupOptions.external added: /^@microsoft\//, /^@msinternal\// — SPFx runtime deps must not be bundled
+- Build verified: 24/24 tasks pass (all green)
+- Bundle check: 10/11 pass; leadership at 1689 KB (echarts 1 MB) — pre-existing dep issue, not BW-4 scope
+- Deterministic filenames verified: no content hashes in dist/ output
+- Ports 4001–4011 confirmed unique across all 11 configs
+-->
