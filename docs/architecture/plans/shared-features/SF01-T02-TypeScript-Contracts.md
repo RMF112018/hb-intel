@@ -684,3 +684,14 @@ pnpm turbo run typecheck
 ```
 
 Both commands must exit with code 0 before proceeding to SF01-T03.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF01-T02 completed: 2026-03-08
+Files modified: 12 stubs replaced with full implementations (7 types + 1 type barrel + 4 constants)
+Barrel update: Added registryColumns.ts export to src/index.ts
+Verification:
+  - pnpm --filter @hbc/sharepoint-docs typecheck → exit 0
+  - pnpm --filter @hbc/sharepoint-docs build → exit 0
+  - pnpm turbo run build → 25/25 tasks successful, no regressions
+Next: SF01-T03 SharePoint Infrastructure
+-->

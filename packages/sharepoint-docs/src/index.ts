@@ -8,6 +8,7 @@ export * from './types/index.js';
 export * from './constants/fileSizeLimits.js';
 export * from './constants/blockedExtensions.js';
 export * from './constants/migrationSchedule.js';
+export * from './constants/registryColumns.js';
 
 // API layer
 export { FolderManager } from './api/FolderManager.js';

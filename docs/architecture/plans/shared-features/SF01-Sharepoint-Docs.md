@@ -340,10 +340,13 @@ Wave 1 status: In progress
   - SF01-T01 Package Scaffold: COMPLETE (2026-03-08)
     - 51 new files created, 2 existing files modified
     - All verification commands pass (typecheck, build, test, turbo build)
-  - SF01-T02 TypeScript Contracts: Not started
+  - SF01-T02 TypeScript Contracts: COMPLETE (2026-03-08)
+    - 12 files replaced: 7 type stubs + 1 type barrel + 4 constant stubs
+    - Added registryColumns.ts export to src/index.ts barrel
+    - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
   - SF01-T03 SharePoint Infrastructure: Not started
   - SF01-T04 Upload Service: Not started
 Documentation added: docs/architecture/plans/shared-features/SF01-Sharepoint-Docs.md
 ADR required: docs/architecture/adr/0010-sharepoint-docs-pre-provisioning-storage.md
-Next: SF01-T02 TypeScript Contracts
+Next: SF01-T03 SharePoint Infrastructure
 -->
