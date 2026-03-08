@@ -258,5 +258,11 @@ SF02-T05 Components: COMPLETE — 2026-03-08
   Replaced HbcBicDetail.tsx stub — D-04 unassigned callout, D-05 tiers, D-08 collapsible history, OwnerChip/ChainNode/TransferRow
   Updated components/index.ts barrel with explicit named + type exports
   Verifications passed: ui-kit build (zero errors), bic-next-move typecheck (zero errors), bic-next-move build (zero errors)
-Next: SF02-T06 Transfer Detection
+SF02-T06 Transfer Detection: COMPLETE — 2026-03-08
+  Replaced TransferDeduplicator.ts stub — module-level singleton dedup on 60s bucket key (D-03), auto-expire at 2×
+  Replaced recordBicTransfer.ts stub — BicTransferPayload type, dedup guard, lazy notification-intelligence, DOM custom event
+  Replaced transfer/index.ts — explicit named exports
+  Added @hbc/notification-intelligence ambient module declaration in vite-env.d.ts
+  Verifications passed: typecheck (zero errors), build (zero errors)
+Next: SF02-T07 Testing Strategy
 -->

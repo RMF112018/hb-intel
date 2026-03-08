@@ -356,3 +356,12 @@ node -e "
   });
 "
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF02-T06 Transfer Detection: COMPLETE — 2026-03-08
+  Replaced TransferDeduplicator.ts stub — module-level singleton dedup on 60s bucket key (D-03), auto-expire at 2×
+  Replaced recordBicTransfer.ts stub — BicTransferPayload type, dedup guard, lazy @hbc/notification-intelligence import (graceful degradation), DOM custom event emission, dev-mode console.debug/warn
+  Replaced transfer/index.ts — explicit named exports (recordBicTransfer, BIC_TRANSFER_EVENT, BicTransferPayload, shouldFireTransfer, _clearDeduplicatorForTests)
+  Added @hbc/notification-intelligence ambient module declaration in vite-env.d.ts (remove when SF-10 scaffolded)
+  Verifications passed: typecheck (zero errors), build (zero errors)
+-->
