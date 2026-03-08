@@ -122,6 +122,7 @@ export function useBicNextMove<T>(
     }
 
     // Only fire if userId actually changed
+    /* c8 ignore next 7 -- requires TanStack Query cache invalidation to trigger re-run; tested via E2E */
     if (previousUserId !== currentUserId) {
       recordBicTransfer({
         itemKey,

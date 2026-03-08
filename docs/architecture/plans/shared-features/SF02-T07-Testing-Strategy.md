@@ -775,3 +775,46 @@ node -e "
 # 4. Playwright E2E
 pnpm exec playwright test e2e/bic-next-move.spec.ts
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF02-T07 completed: 2026-03-08
+
+Testing sub-path (D-10):
+- testing/MockBicItem.ts — canonical mock item interface
+- testing/createMockBicOwner.ts — IBicOwner factory with defaults
+- testing/createMockBicConfig.ts — full IBicNextMoveConfig<MockBicItem> factory with all 8 resolvers
+- testing/mockBicStates.ts — 7 canonical IBicNextMoveState fixtures
+
+Unit tests (113 tests, 9 files):
+- useBicNextMove.test.ts — 21 tests (resolveFullBicState + hook rendering)
+- TransferDeduplicator.test.ts — 6 tests (dedup logic)
+- BicModuleRegistry.test.ts — 15 tests (registry, fan-out, sorting, manifest guard, server stub)
+- HbcBicBadge.test.tsx — 12 tests (all variants, unassigned, blocked, accessibility)
+- HbcBicDetail.test.tsx — 16 tests (all variants, chain, transfer history, groupContext, escalation)
+- HbcBicBlockedBanner.test.tsx — 10 tests (SPA link, anchor fallback, dev warning, variants)
+- recordBicTransfer.test.ts — 9 tests (DOM events, dedup, notification registration, error handling)
+- _utils.test.ts — 19 tests (urgencyClass, urgencyLabel, relativeDate, truncate, resolveVariant)
+- useBicMyItems.test.ts — 5 tests (hook rendering, filters, error handling)
+
+Coverage: ≥95% lines/functions/branches/statements (verified)
+
+Vitest config updates:
+- Added @hbc/ui-kit/app-shell alias
+- Added @hbc/notification-intelligence mock alias
+- Excluded __stories__/, types/ from coverage
+
+Storybook stories (3 files):
+- HbcBicBadge.stories.tsx — 7 canonical states with variant switcher
+- HbcBicDetail.stories.tsx — 7 canonical states with chain/history support
+- HbcBicBlockedBanner.stories.tsx — 4 stories (reason-only, SPA link, anchor fallback, expert escalation)
+
+Playwright E2E:
+- e2e/bic-next-move.spec.ts — 8 scenarios covering D-03, D-04, D-05, D-06, D-08, D-09
+
+tsconfig.json updates:
+- Expanded rootDir to "." to include testing/ sub-path
+- Added @hbc/ui-kit/app-shell path alias
+- Excluded __stories__/ from typecheck
+
+Next: Phase 2 continues with remaining shared packages
+-->

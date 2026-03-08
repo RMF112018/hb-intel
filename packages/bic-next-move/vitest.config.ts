@@ -21,6 +21,9 @@ export default defineConfig({
         'src/**/*.d.ts',
         'src/__tests__/**',
         'src/**/index.ts',
+        'src/**/__stories__/**',
+        'src/types/**',
+        'src/vite-env.d.ts',
       ],
       thresholds: {
         lines: 95,
@@ -33,7 +36,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@hbc/bic-next-move/testing': resolve(__dirname, './testing/index.ts'),
+      '@hbc/ui-kit/app-shell': resolve(__dirname, '../ui-kit/src/app-shell.ts'),
       '@hbc/ui-kit': resolve(__dirname, '../ui-kit/src/index.ts'),
+      // Stub — package not yet scaffolded; vi.mock in setup.ts provides test double
+      '@hbc/notification-intelligence': resolve(__dirname, './src/__tests__/__mocks__/notification-intelligence.ts'),
     },
   },
 });

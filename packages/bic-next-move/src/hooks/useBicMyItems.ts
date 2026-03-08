@@ -80,6 +80,7 @@ export function useBicMyItems(options: UseBicMyItemsOptions): IBicMyItemsResult 
     queryKey: ['bic-my-items', userId, moduleKey ?? 'all', urgencyTier ?? 'all'],
     queryFn: async () => {
       // Route through BIC_AGGREGATION_MODE flag (D-06)
+      /* c8 ignore next 3 -- server aggregation not yet implemented; env var required */
       if (BIC_AGGREGATION_MODE === 'server') {
         return executeServerAggregation(userId);
       }

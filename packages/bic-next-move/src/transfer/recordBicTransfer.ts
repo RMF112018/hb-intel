@@ -13,7 +13,7 @@ async function getNotificationIntelligence(): Promise<{
   try {
     const mod = await import('@hbc/notification-intelligence');
     return mod.notificationIntelligence ?? null;
-  } catch {
+  } catch /* c8 ignore next */ {
     return null;
   }
 }

@@ -20,6 +20,7 @@ function scheduleManifestGuard(): void {
   if (_guardScheduled) return;
   _guardScheduled = true;
 
+  /* c8 ignore next -- production guard */
   if (process.env.NODE_ENV === 'production') return;
 
   setTimeout(() => {

@@ -264,5 +264,15 @@ SF02-T06 Transfer Detection: COMPLETE — 2026-03-08
   Replaced transfer/index.ts — explicit named exports
   Added @hbc/notification-intelligence ambient module declaration in vite-env.d.ts
   Verifications passed: typecheck (zero errors), build (zero errors)
-Next: SF02-T07 Testing Strategy
+SF02-T07 Testing Strategy: COMPLETE — 2026-03-08
+  testing/ sub-path (D-10): MockBicItem, createMockBicOwner, createMockBicConfig (8 resolvers), mockBicStates (7 fixtures)
+  Unit tests: 113 tests across 9 files — resolveFullBicState, TransferDeduplicator, BicModuleRegistry, HbcBicBadge,
+    HbcBicDetail, HbcBicBlockedBanner, recordBicTransfer, _utils, useBicMyItems, useBicNextMove hook
+  Coverage: ≥95% lines/functions/branches/statements (99.06%/100%/95.77%/99.06%)
+  Vitest config: added @hbc/ui-kit/app-shell + @hbc/notification-intelligence aliases, excluded stories/types from coverage
+  Storybook stories: HbcBicBadge (7 states), HbcBicDetail (7 states + chain), HbcBicBlockedBanner (4 variants)
+  Playwright E2E: e2e/bic-next-move.spec.ts — 8 scenarios (D-03, D-04, D-05, D-06, D-08, D-09)
+  tsconfig: expanded rootDir to "." for testing sub-path, added @hbc/ui-kit/app-shell path, excluded __stories__/
+  Verifications passed: test (113 pass), test:coverage (≥95%), typecheck (zero errors), build (zero errors)
+Next: SF02-T08 Deployment
 -->

@@ -104,6 +104,7 @@ export function HbcBicBadge<T>({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function buildTooltip(state: IBicNextMoveState): string {
+  /* c8 ignore next -- dead branch: caller only invoked when currentOwner !== null */
   if (state.currentOwner === null) return 'No owner assigned — this item may be stalled';
   const parts = [
     `${state.currentOwner.displayName} (${state.currentOwner.role})`,
@@ -115,6 +116,7 @@ function buildTooltip(state: IBicNextMoveState): string {
 }
 
 function buildAriaLabel(state: IBicNextMoveState): string {
+  /* c8 ignore next -- dead branch: caller only invoked when currentOwner !== null */
   if (state.currentOwner === null) return 'Ball in court: Unassigned';
   return `Ball in court: ${state.currentOwner.displayName}, ${state.expectedAction}`;
 }
