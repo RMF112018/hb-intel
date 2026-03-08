@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "hb-intel-business-development",
+    "id": "c7a1a2ae-cab2-4d37-89b6-008b44a454e0",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "HB Caldwell",
+      "websiteUrl": "https://hbcaldwell.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": ""
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "HB Intel BusinessDevelopment workspace"
+      },
+      "longDescription": {
+        "default": "HB Intel BusinessDevelopment workspace for construction project management."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "hb-intel-business-development Feature",
+        "description": "Deploys HB Intel BusinessDevelopment webpart assets.",
+        "id": "f3511fee-63aa-402c-a198-2002c79572a5",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/hb-intel-business-development.sppkg"
+  }
+}

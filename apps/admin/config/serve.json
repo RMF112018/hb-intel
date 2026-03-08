@@ -1,0 +1,20 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/serve.schema.json",
+  "port": 4006,
+  "https": true,
+  "serveConfigurations": {
+    "default": {
+      "pageUrl": "https://hbcaldwell.sharepoint.com/sites/hb-intel/_layouts/workbench.aspx",
+      "webParts": [
+        {
+          "id": "cfade002-7ec3-4939-92bf-4aec3e2162e7",
+          "preconfiguredEntries": [
+            {
+              "default": "HB Intel Admin"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

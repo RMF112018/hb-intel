@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "hb-intel-admin",
+    "id": "a77a1dbc-7ba3-42e1-b8f1-3524550dd136",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "HB Caldwell",
+      "websiteUrl": "https://hbcaldwell.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": ""
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "HB Intel Admin workspace"
+      },
+      "longDescription": {
+        "default": "HB Intel Admin workspace for construction project management."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "hb-intel-admin Feature",
+        "description": "Deploys HB Intel Admin webpart assets.",
+        "id": "5a33a204-be56-448d-8dc3-bce7631594db",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/hb-intel-admin.sppkg"
+  }
+}

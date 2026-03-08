@@ -1,0 +1,20 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/serve.schema.json",
+  "port": 4008,
+  "https": true,
+  "serveConfigurations": {
+    "default": {
+      "pageUrl": "https://hbcaldwell.sharepoint.com/sites/hb-intel/_layouts/workbench.aspx",
+      "webParts": [
+        {
+          "id": "d4c56ae6-c4cf-4505-a663-a68293e1651c",
+          "preconfiguredEntries": [
+            {
+              "default": "HB Intel QualityControlWarranty"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

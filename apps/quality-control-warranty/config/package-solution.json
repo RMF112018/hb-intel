@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "hb-intel-quality-control-warranty",
+    "id": "95508e50-b68a-48a5-b505-0d5f05c6c954",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "HB Caldwell",
+      "websiteUrl": "https://hbcaldwell.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": ""
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "HB Intel QualityControlWarranty workspace"
+      },
+      "longDescription": {
+        "default": "HB Intel QualityControlWarranty workspace for construction project management."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "hb-intel-quality-control-warranty Feature",
+        "description": "Deploys HB Intel QualityControlWarranty webpart assets.",
+        "id": "65168a80-fa11-46c4-b595-55cdc78c0233",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/hb-intel-quality-control-warranty.sppkg"
+  }
+}

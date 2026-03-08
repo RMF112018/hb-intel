@@ -56,7 +56,10 @@
       "Bash(do find:*)",
       "Bash(git mv:*)",
       "Bash(for app in accounting admin business-development estimating human-resources leadership operational-excellence project-hub quality-control-warranty risk-management safety)",
-      "Read(//Users/bobbyfetting/hb-intel/apps/**)"
+      "Read(//Users/bobbyfetting/hb-intel/apps/**)",
+      "Bash(for app in admin business-development human-resources leadership operational-excellence quality-control-warranty risk-management safety)",
+      "Read(//Users/bobbyfetting/hb-intel/apps/$app/src/webparts/**)",
+      "Bash(npx tsx:*)"
     ]
   }
 }

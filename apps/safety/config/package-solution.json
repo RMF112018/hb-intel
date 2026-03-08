@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "hb-intel-safety",
+    "id": "e78a16be-7853-40a4-be18-3b01b3ca405d",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "HB Caldwell",
+      "websiteUrl": "https://hbcaldwell.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": ""
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "HB Intel Safety workspace"
+      },
+      "longDescription": {
+        "default": "HB Intel Safety workspace for construction project management."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "hb-intel-safety Feature",
+        "description": "Deploys HB Intel Safety webpart assets.",
+        "id": "2673ffd9-9581-4cdb-9261-7b8bfb604baa",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/hb-intel-safety.sppkg"
+  }
+}

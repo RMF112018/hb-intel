@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "hb-intel-human-resources",
+    "id": "01e48e3d-fc8f-4271-a8c9-958f4a037ece",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "HB Caldwell",
+      "websiteUrl": "https://hbcaldwell.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": ""
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "HB Intel HumanResources workspace"
+      },
+      "longDescription": {
+        "default": "HB Intel HumanResources workspace for construction project management."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "hb-intel-human-resources Feature",
+        "description": "Deploys HB Intel HumanResources webpart assets.",
+        "id": "d5c485ac-c705-48a7-95cd-e881d8e3027e",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/hb-intel-human-resources.sppkg"
+  }
+}

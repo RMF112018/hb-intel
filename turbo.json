@@ -77,6 +77,15 @@
       ],
       "outputs": []
     },
-    "format:check": {}
+    "format:check": {},
+    "validate-manifests": {
+      "dependsOn": [],
+      "inputs": [
+        "apps/*/config/**",
+        "apps/*/src/webparts/**/*.manifest.json",
+        "tools/validate-manifests.ts"
+      ],
+      "outputs": []
+    }
   }
 }

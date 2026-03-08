@@ -1,0 +1,20 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/serve.schema.json",
+  "port": 4009,
+  "https": true,
+  "serveConfigurations": {
+    "default": {
+      "pageUrl": "https://hbcaldwell.sharepoint.com/sites/hb-intel/_layouts/workbench.aspx",
+      "webParts": [
+        {
+          "id": "639db52b-2e01-4a45-9cc7-2fcd94ab7997",
+          "preconfiguredEntries": [
+            {
+              "default": "HB Intel RiskManagement"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

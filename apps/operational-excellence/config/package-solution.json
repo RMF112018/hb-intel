@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "hb-intel-operational-excellence",
+    "id": "18cb387e-74fa-4de2-8b23-3da666b393fb",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "HB Caldwell",
+      "websiteUrl": "https://hbcaldwell.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": ""
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "HB Intel OperationalExcellence workspace"
+      },
+      "longDescription": {
+        "default": "HB Intel OperationalExcellence workspace for construction project management."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "hb-intel-operational-excellence Feature",
+        "description": "Deploys HB Intel OperationalExcellence webpart assets.",
+        "id": "5f4db6cf-047f-4c73-bad2-eb1ec057ecc9",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/hb-intel-operational-excellence.sppkg"
+  }
+}
