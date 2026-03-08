@@ -222,19 +222,23 @@ pnpm --filter pwa dev
 
 ## Success Criteria
 
-- [ ] PH6F-7.1 `runtime-detection` phase instrumented with `startPhase`/`endPhase`
-- [ ] PH6F-7.2 `auth-bootstrap` phase instrumented for both mock and MSAL paths
-- [ ] PH6F-7.3 `session-restore` phase instrumented for both mock and MSAL paths
-- [ ] PH6F-7.4 `permission-resolution` phase instrumented
-- [ ] PH6F-7.5 `getSnapshot()` returns non-empty timing records for all 4 app-side phases
-- [ ] PH6F-7.6 `validateBudgets()` logs budget violations in DEV mode
-- [ ] PH6F-7.7 `window.__HBC_STARTUP_TIMING_BRIDGE__` accessible in browser console
-- [ ] PH6F-7.8 Build passes with zero TypeScript errors
+- [x] PH6F-7.1 `runtime-detection` phase instrumented with `startPhase`/`endPhase`
+- [x] PH6F-7.2 `auth-bootstrap` phase instrumented for both mock and MSAL paths
+- [x] PH6F-7.3 `session-restore` phase instrumented for both mock and MSAL paths
+- [x] PH6F-7.4 `permission-resolution` phase instrumented
+- [x] PH6F-7.5 `getSnapshot()` returns non-empty timing records for all 4 app-side phases
+- [x] PH6F-7.6 `validateBudgets()` logs budget violations in DEV mode
+- [x] PH6F-7.7 `window.__HBC_STARTUP_TIMING_BRIDGE__` accessible in browser console
+- [x] PH6F-7.8 Build passes with zero TypeScript errors
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task created: 2026-03-07
-Status: Pending implementation
+Completed: 2026-03-07
+Status: COMPLETE
 Execution: Sixth in sequence
-Key: Verify startPhase/endPhase export names before implementing (Step 1)
-Note: ShellCore already instruments first-protected-shell-render — don't duplicate
+Files modified:
+  - apps/pwa/src/main.tsx — startPhase/endPhase for runtime-detection, mock auth-bootstrap/session-restore, permission-resolution
+  - apps/pwa/src/auth/msal-init.ts — startPhase/endPhase for MSAL auth-bootstrap + session-restore (with error-path safety)
+  - apps/pwa/src/router/root-route.tsx — DEV-mode validateBudgets() useEffect
+Build verified: pnpm turbo run build --filter=@hbc/pwa --filter=@hbc/shell — zero errors
 -->

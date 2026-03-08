@@ -14,6 +14,8 @@ import {
   clearRedirectMemory,
   isSafeRedirectPath,
   resolveRoleLandingPath,
+  getSnapshot,
+  validateBudgets,
   type ShellConnectivitySignal,
 } from '@hbc/shell';
 import { HbcAppShell, HbcConnectivityBar } from '@hbc/ui-kit';
@@ -85,6 +87,20 @@ function RootComponent(): React.ReactNode {
       }
     }
   }, [lifecyclePhase, router]);
+
+  // D-PH6F-07: DEV-mode startup budget validation.
+  // Runs once after first render — all four app-side phases should be complete by this point.
+  // first-protected-shell-render is recorded separately by ShellCore.
+  React.useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const snapshot = getSnapshot();
+    const validation = validateBudgets(snapshot.records);
+    if (!validation.ok) {
+      console.warn('[HB Intel Startup] Budget violations:', validation.failures);
+    } else {
+      console.info('[HB Intel Startup] All startup phases within budget.', snapshot);
+    }
+  }, []);
 
   const shellUser = mapCurrentUserToShellUser(currentUser);
   const sidebarGroups = React.useMemo(
