@@ -1,2 +1,2 @@
-export * from './useComplexity';
-export * from './useComplexityGate';
+export { useComplexity } from './useComplexity';
+export { useComplexityGate, evaluateGate } from './useComplexityGate';

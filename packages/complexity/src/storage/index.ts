@@ -1,2 +1,2 @@
-export * from './getStorage';
-export * from './complexityStorage';
+export { getStorage } from './getStorage';
+export { readPreference, writePreference, clearPreference } from './complexityStorage';

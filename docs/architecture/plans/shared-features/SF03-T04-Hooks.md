@@ -179,3 +179,14 @@ node -e "
   });
 "
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+T04 completed: 2026-03-08
+- useComplexity.ts: verbatim from spec — useContext(ComplexityContext) with JSDoc
+- useComplexityGate.ts: verbatim from spec — hook + pure evaluateGate function
+- hooks/index.ts: named exports (useComplexity, useComplexityGate, evaluateGate)
+- Typecheck: zero errors
+- Build: zero errors
+- Tests: passing (no test changes in T04; tests deferred to T08)
+Next: T05 (Components — HbcComplexityGate, HbcComplexityDial)
+-->

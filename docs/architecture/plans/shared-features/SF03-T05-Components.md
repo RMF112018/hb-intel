@@ -524,3 +524,15 @@ node -e "
   });
 "
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF03-T05 completed: 2026-03-08
+- Created src/css.d.ts (CSS module declaration for tsc)
+- Created src/components/complexity.css (D-09 fade-in, D-06 locked dial, header pill, settings cards)
+- Implemented HbcComplexityGate (D-04 unmount + keepMounted, D-09 CSS fade-in)
+- Implemented HbcComplexityDial (D-06 locked state, D-07 showCoaching toggle, header + settings variants)
+- Updated src/components/index.ts with named exports
+- Typecheck: zero errors
+- Build: zero errors
+- Tests: still passing (test stubs from T01)
+-->

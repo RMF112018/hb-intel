@@ -261,10 +261,10 @@ Testing sub-path published. ≥95% coverage enforced. ADR and SPFx guide written
 |---|---|
 | `SF03-T01-Package-Scaffold.md` | Directory tree, `package.json`, `tsconfig.json`, `vitest.config.ts`, barrel stubs | ✅ Done 2026-03-08 |
 | `SF03-T02-TypeScript-Contracts.md` | `IComplexity.ts`, `IComplexityPreference.ts`, role map types, storage schema | ✅ Done 2026-03-08 |
-| `SF03-T03-Context-and-Provider.md` | `ComplexityContext.ts`, `ComplexityProvider.tsx` (full hydration flow, lock, StorageEvent) |
-| `SF03-T04-Hooks.md` | `useComplexity.ts`, `useComplexityGate.ts` — full implementations |
-| `SF03-T05-Components.md` | `HbcComplexityGate.tsx` (D-04, D-09), `HbcComplexityDial.tsx` (D-06, header + settings) |
-| `SF03-T06-Persistence-and-Sync.md` | `getStorage.ts`, `complexityStorage.ts`, StorageEvent sync, role map loader, API client |
+| `SF03-T03-Context-and-Provider.md` | `ComplexityContext.ts`, `ComplexityProvider.tsx` (full hydration flow, lock, StorageEvent) | ✅ Done 2026-03-08 |
+| `SF03-T04-Hooks.md` | `useComplexity.ts`, `useComplexityGate.ts` — full implementations | ✅ Done 2026-03-08 |
+| `SF03-T05-Components.md` | `HbcComplexityGate.tsx` (D-04, D-09), `HbcComplexityDial.tsx` (D-06, header + settings) | ✅ Done 2026-03-08 |
+| `SF03-T06-Persistence-and-Sync.md` | `getStorage.ts`, `complexityStorage.ts`, StorageEvent sync, role map loader, API client | ✅ Done 2026-03-08 |
 | `SF03-T07-Retrofit-Audit.md` | Sensitivity table, `complexityMinTier` prop pattern, 5 retrofitted components |
 | `SF03-T08-Testing-Strategy.md` | `testing/` sub-path, unit tests, Storybook stories, Playwright E2E scenarios |
 | `SF03-T09-Deployment.md` | Pre-deployment checklist, ADR content, SPFx guide, verification commands |

@@ -371,3 +371,17 @@ node -e "
   });
 "
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF03-T03 completed: 2026-03-08
+- Created storage stubs: complexityApiClient.ts (fetchPreference, patchPreference, deriveInitialTierFromADGroups)
+- Populated getStorage.ts with localStorage/sessionStorage/SSR fallback
+- Populated complexityStorage.ts with readPreference/writePreference
+- Updated storage/index.ts barrel with complexityApiClient export
+- Implemented ComplexityContext.ts verbatim from spec
+- Implemented ComplexityProvider.tsx verbatim from spec (hydration, API sync, StorageEvent, lock polling)
+- Typecheck: zero errors
+- Build: zero errors
+- Tests: all pass (no test changes — tests written in T08)
+Next: SF03-T04 (Hooks)
+-->

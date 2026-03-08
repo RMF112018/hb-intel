@@ -393,3 +393,16 @@ node -e "
   });
 "
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF03-T06 completed: 2026-03-08
+- getStorage.ts: replaced SSR check with try/catch storage probe + createInMemoryStorage fallback + dev warning
+- complexityStorage.ts: added tier shape validation, dev warning on write failure, clearPreference function
+- config/roleComplexityMap.ts: populated with ROLE_COMPLEXITY_CONFIG (11 AD group mappings) + deriveInitialTier
+- complexityApiClient.ts: replaced stubs with real fetchPreference (GET), patchPreference (PATCH → IComplexityPreference | null), deriveInitialTierFromADGroups (GET groups → deriveInitialTier)
+- storage/index.ts: updated to named exports, added clearPreference, removed complexityApiClient re-export
+- Typecheck: zero errors
+- Build: zero errors
+- Tests: pass (stubs — T08 populates)
+Next: T07 Retrofit Audit
+-->
