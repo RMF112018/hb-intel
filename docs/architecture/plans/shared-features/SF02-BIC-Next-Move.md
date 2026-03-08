@@ -235,5 +235,9 @@ Testing sub-path published. ≥95% coverage enforced. ADR and migration docs wri
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF02-T01 Package Scaffold: COMPLETE — 2026-03-08
   33 files created, all verifications passed (pnpm ls, typecheck, build, test)
-Next: SF02-T02 TypeScript Contracts
+SF02-T02 TypeScript Contracts: COMPLETE — 2026-03-08
+  Populated IBicNextMove.ts (all interfaces/types), urgencyThresholds.ts (constants + helpers), manifest.ts (manifest + feature flags)
+  Added vite-env.d.ts for import.meta.env support
+  Verifications passed: typecheck (zero errors), build (dist/ with .d.ts)
+Next: SF02-T03 Module Registry
 -->

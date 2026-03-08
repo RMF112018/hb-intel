@@ -404,3 +404,14 @@ Expected: `IBicNextMoveConfig`, `IBicOwner`, `IBicNextMoveState`, `IBicTransfer`
 `BIC_MODULE_MANIFEST`, `BIC_AGGREGATION_MODE`, `BIC_STALE_TIME_SINGLE_ITEM_MS`,
 `BIC_STALE_TIME_MY_ITEMS_MS`, `BIC_REFETCH_INTERVAL_IMMEDIATE_MS`,
 `BIC_TRANSFER_DEDUP_BUCKET_MS` all exported.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF02-T02 TypeScript Contracts: COMPLETE — 2026-03-08
+Files populated:
+  - src/types/IBicNextMove.ts — all interfaces and type aliases (D-01, D-02, D-04, D-05, D-06, D-07, D-08)
+  - src/constants/urgencyThresholds.ts — default thresholds + businessDaysBetween + computeUrgencyTier + computeIsOverdue (D-01)
+  - src/constants/manifest.ts — BIC_MODULE_MANIFEST + BicModuleKey + BIC_AGGREGATION_MODE + stale times + dedup bucket (D-02, D-03, D-06, D-07)
+  - src/vite-env.d.ts — added for import.meta.env type support
+Barrel exports verified: src/types/index.ts and src/index.ts already correct from T01
+Verification: typecheck zero errors, build produces dist/ with .d.ts declarations
+-->
