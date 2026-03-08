@@ -7,9 +7,9 @@ export default defineConfig(({ command, mode }) => ({
   plugins: [react()],
   resolve: {
     alias: {
-      '@hbc/models': path.resolve(__dirname, '../../packages/models/src'),
-      '@hbc/data-access': path.resolve(__dirname, '../../packages/data-access/src'),
-      '@hbc/query-hooks': path.resolve(__dirname, '../../packages/query-hooks/src'),
+      '@hbc/models': path.resolve(__dirname, '../../packages/models/src/index.ts'),
+      '@hbc/data-access': path.resolve(__dirname, '../../packages/data-access/src/index.ts'),
+      '@hbc/query-hooks': path.resolve(__dirname, '../../packages/query-hooks/src/index.ts'),
       '@hbc/auth': path.resolve(__dirname, '../../packages/auth/src'),
       '@hbc/auth/spfx': resolve(__dirname, '../../packages/auth/src/spfx/index.ts'),
       '@hbc/shell': path.resolve(__dirname, '../../packages/shell/src'),

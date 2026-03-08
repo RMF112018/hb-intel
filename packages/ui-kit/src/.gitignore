@@ -1,0 +1,5 @@
+# Prevent stale tsc output from being committed to src/ (outDir is dist/)
+*.js
+*.js.map
+*.d.ts
+*.d.ts.map

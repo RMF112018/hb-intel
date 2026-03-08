@@ -28,9 +28,9 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       'react-native': 'react-native-web',
-      '@hbc/models': path.resolve(__dirname, '../../packages/models/src'),
-      '@hbc/data-access': path.resolve(__dirname, '../../packages/data-access/src'),
-      '@hbc/query-hooks': path.resolve(__dirname, '../../packages/query-hooks/src'),
+      '@hbc/models': path.resolve(__dirname, '../../packages/models/src/index.ts'),
+      '@hbc/data-access': path.resolve(__dirname, '../../packages/data-access/src/index.ts'),
+      '@hbc/query-hooks': path.resolve(__dirname, '../../packages/query-hooks/src/index.ts'),
       '@hbc/auth': path.resolve(__dirname, '../../packages/auth/src'),
       '@hbc/shell': path.resolve(__dirname, '../../packages/shell/src'),
       '@hbc/ui-kit': path.resolve(__dirname, '../../packages/ui-kit/src'),
