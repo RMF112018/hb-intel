@@ -290,3 +290,26 @@ pnpm --filter @hbc/complexity build
 # 4. Testing sub-path resolves
 node -e "import('@hbc/complexity/testing').then(m => console.log(Object.keys(m)))"
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF03-T01 completed: 2026-03-08
+
+Spec adaptations applied (lessons from SF02-T01 bic-next-move scaffold):
+1. @hbc/tsconfig doesn't exist — extends ../../tsconfig.base.json directly
+2. rootDir: "." instead of "src" — prevents TS6059 when testing/ imports from ../src/
+3. Vitest ^3.2.4 / @vitest/coverage-v8 ^3.2.4 — matches workspace versions
+4. react only in peerDependencies (not duplicated in dependencies)
+5. passWithNoTests: true in vitest config — all test files are stubs
+6. composite: true in tsconfig — enables project references
+7. Barrel files use `export *` instead of named re-exports — compatible with `export {}` stubs
+8. Added check-types script (turbo.json references it)
+9. @testing-library/react ^15.0.0 / vite ^6.0.0 / @vitejs/plugin-react ^4.4.0 — workspace-aligned
+
+Verification results:
+- pnpm ls --filter @hbc/complexity — package visible ✅
+- pnpm --filter @hbc/complexity typecheck — zero errors ✅
+- pnpm --filter @hbc/complexity build — zero errors, dist/ created ✅
+- pnpm --filter @hbc/complexity test — 5 test files, 0 tests, all passed ✅
+
+Next: SF03-T02 (TypeScript Contracts)
+-->

@@ -56,7 +56,9 @@
       "@hbc/sharepoint-docs": ["packages/sharepoint-docs/src/index.ts"],
       "@hbc/sharepoint-docs/*": ["packages/sharepoint-docs/src/*"],
       "@hbc/bic-next-move": ["packages/bic-next-move/src/index.ts"],
-      "@hbc/bic-next-move/*": ["packages/bic-next-move/src/*"]
+      "@hbc/bic-next-move/*": ["packages/bic-next-move/src/*"],
+      "@hbc/complexity": ["packages/complexity/src/index.ts"],
+      "@hbc/complexity/*": ["packages/complexity/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"]
