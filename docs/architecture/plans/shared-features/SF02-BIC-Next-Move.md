@@ -239,5 +239,16 @@ SF02-T02 TypeScript Contracts: COMPLETE — 2026-03-08
   Populated IBicNextMove.ts (all interfaces/types), urgencyThresholds.ts (constants + helpers), manifest.ts (manifest + feature flags)
   Added vite-env.d.ts for import.meta.env support
   Verifications passed: typecheck (zero errors), build (dist/ with .d.ts)
-Next: SF02-T03 Module Registry
+SF02-T03 Module Registry: COMPLETE — 2026-03-08
+  Populated BicModuleRegistry.ts — registerBicModule(), getRegistry(), getModuleRegistration(),
+  _clearRegistryForTests(), dev-mode manifest guard (D-02), executeBicFanOut (D-06),
+  executeServerAggregation stub (D-06). Barrel export already correct from T01.
+  Verifications passed: typecheck (zero errors), build (dist/ with .d.ts)
+SF02-T04 Hooks: COMPLETE — 2026-03-08
+  Populated useBicNextMove.ts — resolveFullBicState (pure) + useBicNextMove hook (D-01, D-03, D-04, D-07)
+  Populated useBicMyItems.ts — fan-out via BIC_AGGREGATION_MODE (D-06), 3-min stale + refetch (D-07)
+  Updated hooks/index.ts barrel with explicit resolveFullBicState re-export
+  Created recordBicTransfer.ts minimal typed stub for T04 compilation (full impl in T06)
+  Verifications passed: typecheck (zero errors), build (dist/ with .d.ts)
+Next: SF02-T05 Components
 -->

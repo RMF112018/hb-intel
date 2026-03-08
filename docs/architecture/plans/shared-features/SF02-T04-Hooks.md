@@ -356,3 +356,16 @@ node -e "
   });
 "
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF02-T04 Hooks: COMPLETE — 2026-03-08
+Files populated:
+  - src/hooks/useBicNextMove.ts — resolveFullBicState pure function (D-01, D-04, D-08) +
+    useBicNextMove hook with TanStack Query caching (D-07) and ref-based transfer diff detection (D-03)
+  - src/hooks/useBicMyItems.ts — useBicMyItems hook with BIC_AGGREGATION_MODE routing (D-06),
+    3-minute staleness + window focus refetch (D-07), client-side moduleKey/urgencyTier filters
+  - src/hooks/index.ts — updated barrel with explicit resolveFullBicState re-export
+  - src/transfer/recordBicTransfer.ts — minimal typed stub (no-op) for T04 compilation;
+    full implementation deferred to SF02-T06
+Verification: typecheck zero errors, build produces dist/ with .d.ts declarations
+-->
