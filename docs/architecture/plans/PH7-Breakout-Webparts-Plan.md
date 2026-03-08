@@ -219,5 +219,6 @@ Version 2.0: 2026-03-07 — Rewritten as master summary/index. Individual task f
 Previous version (v1.0 monolithic) content superseded by task files.
 BW-0 completed: 2026-03-07 — All 11 packages/features/[domain]/ scaffolded, workspace/tsconfig/vite wired, ADR-0079 created, build verified (24/24 green).
 BW-1 completed: 2026-03-08 — All 11 BaseClientSideWebPart.tsx files created, main.tsx comments updated, SPFx type packages added. Build verified (24/24 green).
-Next: BW-2 (SPFx Auth Bridge)
+BW-2 completed: 2026-03-08 — SpfxContextAdapter.ts created with bootstrapSpfxAuth(WebPartContext) + getSpfxContext(). Dual export strategy: hostBridge.ts (lightweight, root import) + SpfxContextAdapter.ts (WebPartContext, @hbc/auth/spfx subpath). Build verified (24/24 green).
+Next: BW-3 (SPFx Config/Manifests)
 -->

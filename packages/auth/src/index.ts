@@ -257,7 +257,7 @@ export {
   bootstrapSpfxAuth,
   assertValidSpfxHostBridgeInput,
   toSpfxIdentityBridgeInput,
-} from './spfx/index.js';
+} from './spfx/hostBridge.js';
 
 // D-PH5C-02:
 // Dev-only adapter exports are intentionally isolated behind the package subpath
@@ -284,7 +284,7 @@ export type {
   StartupPhase as AuthStartupPhase,
   StartupTimingPhaseMetadata as AuthStartupTimingPhaseMetadata,
 } from './startup/startupTimingBridge.js';
-export type { SpfxHostBridgeInput } from './spfx/index.js';
+export type { SpfxHostBridgeInput } from './spfx/hostBridge.js';
 
 // MSAL helpers (Blueprint §2b — Phase 4)
 export { mapMsalAccountToUser, validateMsalConfig } from './msal/index.js';

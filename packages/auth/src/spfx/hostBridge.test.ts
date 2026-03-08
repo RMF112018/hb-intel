@@ -5,7 +5,7 @@ import {
   assertValidSpfxHostBridgeInput,
   bootstrapSpfxAuth,
   toSpfxIdentityBridgeInput,
-} from './index.js';
+} from './hostBridge.js';
 
 const pageContext = {
   user: {

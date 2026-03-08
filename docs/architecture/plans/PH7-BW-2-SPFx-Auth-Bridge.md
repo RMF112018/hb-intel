@@ -258,12 +258,29 @@ grep -r "AuthMode" packages/auth/src/stores/authStore.ts
 
 ## Definition of Done
 
-- [ ] `packages/auth/src/spfx/SpfxContextAdapter.ts` created with `bootstrapSpfxAuth()` and `getSpfxContext()`
-- [ ] `packages/auth/src/spfx/index.ts` created with named exports
-- [ ] `packages/auth/package.json` exports field includes `./spfx` subpath
-- [ ] `AuthMode` type includes `'spfx'`
-- [ ] `resolveAuthMode()` detects `window._spPageContextInfo` for SPFx context
-- [ ] SharePoint data-access adapter uses `getSpfxContext()` for PnPjs initialization
-- [ ] No `@microsoft/sp-webpart-base` imports in main `@hbc/auth` entry point
-- [ ] TypeScript compiles without errors
-- [ ] `bootstrapSpfxAuth()` correctly populates `useAuthStore` and `usePermissionStore`
+- [x] `packages/auth/src/spfx/SpfxContextAdapter.ts` created with `bootstrapSpfxAuth()` and `getSpfxContext()`
+- [x] `packages/auth/src/spfx/index.ts` created with named exports
+- [x] `packages/auth/package.json` exports field includes `./spfx` subpath
+- [x] `AuthMode` type includes `'spfx'` — already existed as `LegacyAuthMode`
+- [x] `resolveAuthMode()` detects `window._spPageContextInfo` for SPFx context — already existed via `hasSpfxRuntimeContext()`
+- [ ] SharePoint data-access adapter uses `getSpfxContext()` for PnPjs initialization — deferred to data-access wiring task
+- [x] No `@microsoft/sp-webpart-base` imports in main `@hbc/auth` entry point
+- [x] TypeScript compiles without errors
+- [x] `bootstrapSpfxAuth()` correctly populates `useAuthStore` and `usePermissionStore`
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+Phase 7-BW-2 completed: 2026-03-08
+Implementation approach: Dual export strategy — renamed existing spfx/index.ts to spfx/hostBridge.ts
+  (lightweight, no sp-webpart-base dependency) and created new SpfxContextAdapter.ts with WebPartContext-based
+  bootstrapSpfxAuth(). New spfx/index.ts re-exports from SpfxContextAdapter only, serving as @hbc/auth/spfx
+  subpath entry point. Root index.ts imports from hostBridge.ts — preserves backward compatibility.
+Files changed:
+  - packages/auth/src/spfx/hostBridge.ts (renamed from index.ts — git mv)
+  - packages/auth/src/spfx/SpfxContextAdapter.ts (NEW)
+  - packages/auth/src/spfx/index.ts (NEW — subpath entry)
+  - packages/auth/src/spfx/hostBridge.test.ts (renamed from index.test.ts — git mv)
+  - packages/auth/src/index.ts (updated import paths)
+  - packages/auth/package.json (added ./spfx export + @microsoft/sp-webpart-base devDep)
+Build verified: 24/24 green
+Next: BW-3 (SPFx Config/Manifests)
+-->
