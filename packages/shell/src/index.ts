@@ -24,6 +24,8 @@ export type {
   StartupBudgetFailure,
   StartupBudgetValidationResult,
   StartupTimingSnapshot,
+  SimplifiedToolPickerEntry,
+  SimplifiedShellConfig,
 } from './types.js';
 export { WORKSPACE_IDS } from './types.js';
 
@@ -150,6 +152,7 @@ export {
   isSafeRedirectPath,
 } from './redirectMemory.js';
 export { useShellStatusState, useDegradedModeVisibilityRules } from './hooks.js';
+export { resolveProjectHubUrl } from './utils/resolveProjectHubUrl.js';
 export {
   createDefaultShellSignOutCleanupDependencies,
   runShellSignOutCleanup,

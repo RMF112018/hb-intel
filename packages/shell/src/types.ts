@@ -265,3 +265,18 @@ export interface StartupTimingSnapshot {
   budgets: StartupBudgetDefinition[];
   validation: StartupBudgetValidationResult;
 }
+
+/** Path-based navigation entry for simplified shell tool picker (D-PH7-BW-6). */
+export interface SimplifiedToolPickerEntry {
+  label: string;
+  path: string;
+  icon?: string;
+}
+
+/** Configuration for simplified shell mode — webpart domain-specific nav (D-PH7-BW-6). */
+export interface SimplifiedShellConfig {
+  workspaceName: string;
+  toolPickerItems: SimplifiedToolPickerEntry[];
+  showBackToProjectHub: boolean;
+  projectHubUrl?: string;
+}

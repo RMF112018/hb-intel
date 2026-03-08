@@ -223,5 +223,6 @@ BW-2 completed: 2026-03-08 — SpfxContextAdapter.ts created with bootstrapSpfxA
 BW-3 completed: 2026-03-08 — 33 GUIDs generated and locked. Created 44 files: 11 package-solution.json, 11 serve.json, 11 deploy-azure-storage.json, 11 manifest files. tools/validate-manifests.ts created, validate-manifests task added to turbo.json. All validations pass (33 unique GUIDs, 11 unique ports, 44 files). Build verified (24/24 green).
 BW-4 completed: 2026-03-08 — All 11 vite.config.ts files transformed with SPFx build config (rollupOptions, manualChunks, deterministic filenames, HTTPS dev server, bundle budget). Port misalignments fixed (accounting/estimating/project-hub). tools/spfx-bundle-check.ts created. 17 file operations total.
 BW-5 completed: 2026-03-08 — All 11 bootstrap.ts files transformed to use PersonaRegistry pattern (resolveBootstrapPersona/personaToCurrentUser/resolveBootstrapPermissions). Removed MOCK_USER constants, '*:*' wildcards, ICurrentUser imports. Added domain-specific feature flags, JSDoc with D-PH7-BW-5 ref, console.log persona output. 11 file operations.
-Next: BW-6 (Simplified Shell Nav)
+BW-6 completed: 2026-03-08 — SimplifiedShellConfig type + resolveProjectHubUrl utility added to @hbc/shell. BackToProjectHub enhanced with projectHubUrl prop. ShellLayout extended with simplifiedConfig prop. All 11 root-route.tsx files updated with domain-specific config (workspace name, tool picker items, Back-to-Project-Hub classification). 18 file operations. Build verified (24/24 green).
+Next: BW-7 (RBAC Mapping)
 -->

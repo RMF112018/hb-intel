@@ -249,12 +249,25 @@ grep -rn "simplifiedConfig" apps/*/src/router/root-route.tsx
 
 ## Definition of Done
 
-- [ ] `ShellLayout` accepts `SimplifiedShellConfig` prop in `simplified` mode
-- [ ] `BackToProjectHub` component created in `packages/shell/`
-- [ ] All 11 `root-route.tsx` files updated with domain-specific `SimplifiedShellConfig`
-- [ ] Back-to-project-hub shows correct project name from `useProjectStore`
-- [ ] Back-to-project-hub link omitted for project-hub, admin, business-development, operational-excellence, human-resources
-- [ ] Tool picker items match routes in each domain's `routes.ts`
-- [ ] `resolveProjectHubUrl()` handles SPFx and mock modes
-- [ ] TypeScript compiles without errors
+- [x] `ShellLayout` accepts `SimplifiedShellConfig` prop in `simplified` mode
+- [x] `BackToProjectHub` component created in `packages/shell/`
+- [x] All 11 `root-route.tsx` files updated with domain-specific `SimplifiedShellConfig`
+- [x] Back-to-project-hub shows correct project name from `useProjectStore`
+- [x] Back-to-project-hub link omitted for project-hub, admin, business-development, operational-excellence, human-resources
+- [x] Tool picker items match routes in each domain's `routes.ts`
+- [x] `resolveProjectHubUrl()` handles SPFx and mock modes
+- [x] TypeScript compiles without errors
 - [ ] Visual manual test confirms simplified shell renders correctly in dev harness
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+BW-6 completed: 2026-03-08
+- Added SimplifiedToolPickerEntry + SimplifiedShellConfig types to packages/shell/src/types.ts
+- Enhanced BackToProjectHub with projectHubUrl prop (renders actual URL with ?projectId= query param)
+- Created packages/shell/src/utils/resolveProjectHubUrl.ts (SPFx vs mock mode resolution)
+- Extended ShellLayout with simplifiedConfig prop (workspace name in leftSlot, BackToProjectHub rendering)
+- Updated all 11 root-route.tsx files with domain-specific config, tool picker nav, and useNavigate wiring
+- Project-scoped domains (6): accounting, estimating, leadership, safety, quality-control-warranty, risk-management
+- Non-project-scoped domains (5): project-hub, business-development, admin, operational-excellence, human-resources
+- Build verified: 24/24 green (pnpm turbo run build)
+- Pending: Visual manual test in dev harness
+-->

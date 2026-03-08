@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import { HeaderBar } from '../HeaderBar/index.js';
 import type { HeaderBarProps } from '../HeaderBar/index.js';
 import { ContextualSidebar } from '../ContextualSidebar/index.js';
+import { BackToProjectHub } from '../BackToProjectHub/index.js';
+import type { SimplifiedShellConfig } from '../types.js';
 
 export interface ShellLayoutProps {
   /** 'full' = PWA (default), 'simplified' = SPFx / HB Site Control. */
@@ -21,10 +23,12 @@ export interface ShellLayoutProps {
   onSidebarNavigate?: (id: string) => void;
   /** Called when a tool-picker item is clicked. */
   onToolSelect?: (id: string) => void;
+  /** D-PH7-BW-6: Domain-specific config for simplified shell mode. */
+  simplifiedConfig?: SimplifiedShellConfig;
 }
 
 /**
- * Shell layout surface — Blueprint §1f, §2c.
+ * Shell layout surface — Blueprint §1f, §2c, D-PH7-BW-6.
  *
  * Phase 5.5 narrow-boundary rule:
  * - This component remains presentational only.
@@ -40,15 +44,25 @@ export function ShellLayout({
   showSidebar = mode === 'full',
   onSidebarNavigate,
   onToolSelect,
+  simplifiedConfig,
 }: ShellLayoutProps): ReactNode {
+  const resolvedLeftSlot = leftSlot ?? (
+    mode === 'simplified' && simplifiedConfig
+      ? <span data-hbc-shell="workspace-name">{simplifiedConfig.workspaceName}</span>
+      : undefined
+  );
+
   return (
     <div data-hbc-shell="shell-layout" data-mode={mode}>
       <HeaderBar
-        leftSlot={leftSlot}
+        leftSlot={resolvedLeftSlot}
         toolPickerSlot={toolPickerSlot}
         rightSlot={rightSlot}
         onToolSelect={onToolSelect}
       />
+      {mode === 'simplified' && simplifiedConfig?.showBackToProjectHub && (
+        <BackToProjectHub projectHubUrl={simplifiedConfig.projectHubUrl} />
+      )}
       <div data-hbc-shell="shell-body">
         {showSidebar && (
           <ContextualSidebar sidebarSlot={sidebarSlot} onNavigate={onSidebarNavigate} />
