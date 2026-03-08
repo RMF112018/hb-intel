@@ -192,11 +192,25 @@ pnpm turbo run typecheck --filter="./apps/estimating"
 
 ## Definition of Done
 
-- [ ] All 11 `apps/[domain]/src/bootstrap.ts` files updated to use `resolveBootstrapPersona()`
-- [ ] No `MOCK_USER` literal in any webpart `bootstrap.ts`
-- [ ] No `permissions: ['*:*']` wildcard in any webpart `bootstrap.ts`
-- [ ] Each app's `bootstrapMockEnvironment()` calls `resolveBootstrapPermissions(persona)`
-- [ ] Each app uses the correct workspace key from the table above
-- [ ] Each app has domain-appropriate feature flags set
-- [ ] TypeScript compiles without errors
+- [x] All 11 `apps/[domain]/src/bootstrap.ts` files updated to use `resolveBootstrapPersona()`
+- [x] No `MOCK_USER` literal in any webpart `bootstrap.ts`
+- [x] No `permissions: ['*:*']` wildcard in any webpart `bootstrap.ts`
+- [x] Each app's `bootstrapMockEnvironment()` calls `resolveBootstrapPermissions(persona)`
+- [x] Each app uses the correct workspace key from the table above
+- [x] Each app has domain-appropriate feature flags set
+- [x] TypeScript compiles without errors
 - [ ] DevToolbar persona selection in dev mode is respected by all 11 apps (manual test)
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+PH7-BW-5 implemented: 2026-03-08
+All 11 webpart bootstrap.ts files transformed:
+  - Removed MOCK_USER constant and ICurrentUser import
+  - Added resolveBootstrapPersona/personaToCurrentUser/resolveBootstrapPermissions imports from @hbc/auth
+  - Replaced hardcoded '*:*' permissions with resolveBootstrapPermissions(persona)
+  - Set domain-specific feature flags per plan table
+  - Added JSDoc with D-PH7-BW-5 reference
+  - Added console.log with persona name (matching PWA pattern)
+  - Preserved existing MOCK_PROJECTS arrays unchanged
+Verification: grep confirms zero MOCK_USER in 11 apps, zero '*:*', 11 resolveBootstrapPersona matches
+Next: Build verification (pnpm turbo run build)
+-->

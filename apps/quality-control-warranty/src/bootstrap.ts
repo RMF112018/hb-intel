@@ -1,20 +1,35 @@
-import type { ICurrentUser, IActiveProject } from '@hbc/models';
-import { useAuthStore, usePermissionStore } from '@hbc/auth';
+/**
+ * Synchronous mock environment bootstrap for Quality Control & Warranty webpart.
+ * D-PH7-BW-5: Updated to use PERSONA_REGISTRY as source of truth for dev identity.
+ * Checks localStorage for a persisted DevToolbar persona selection before falling back
+ * to the default Administrator persona.
+ */
+import type { IActiveProject } from '@hbc/models';
+import {
+  useAuthStore,
+  usePermissionStore,
+  resolveBootstrapPersona,
+  personaToCurrentUser,
+  resolveBootstrapPermissions,
+} from '@hbc/auth';
 import { useProjectStore, useNavStore } from '@hbc/shell';
 
-const MOCK_USER: ICurrentUser = {
-  id: 'user-001', displayName: 'Dev Admin', email: 'dev.admin@hbintel.local',
-  roles: [{ id: 'role-admin', name: 'Administrator', permissions: ['*:*'] }],
-};
 const MOCK_PROJECTS: IActiveProject[] = [
   { id: 'PRJ-001', name: 'Harbor View Medical Center', number: 'HV-2025-001', status: 'Active', startDate: '2025-01-15', endDate: '2027-06-30' },
 ];
 
 export function bootstrapMockEnvironment(): void {
-  useAuthStore.getState().setUser(MOCK_USER);
-  usePermissionStore.getState().setPermissions(['*:*']);
-  usePermissionStore.getState().setFeatureFlags({ 'buyout-schedule': true, 'risk-matrix': true });
+  // D-PH7-BW-5: Use PERSONA_REGISTRY — respects DevToolbar persona selection
+  const persona = resolveBootstrapPersona();
+
+  useAuthStore.getState().setUser(personaToCurrentUser(persona));
+  usePermissionStore.getState().setPermissions(resolveBootstrapPermissions(persona));
+  usePermissionStore.getState().setFeatureFlags({ 'punch-list': true, 'warranty-claims': true });
   useProjectStore.getState().setAvailableProjects(MOCK_PROJECTS);
   useProjectStore.getState().setActiveProject(MOCK_PROJECTS[0]);
   useNavStore.getState().setActiveWorkspace('quality-control-warranty');
+
+  console.log(
+    `[HB-BOOTSTRAP] Quality Control & Warranty mock environment bootstrapped as: ${persona.name} (${persona.id})`,
+  );
 }

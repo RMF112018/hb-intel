@@ -222,5 +222,6 @@ BW-1 completed: 2026-03-08 — All 11 BaseClientSideWebPart.tsx files created, m
 BW-2 completed: 2026-03-08 — SpfxContextAdapter.ts created with bootstrapSpfxAuth(WebPartContext) + getSpfxContext(). Dual export strategy: hostBridge.ts (lightweight, root import) + SpfxContextAdapter.ts (WebPartContext, @hbc/auth/spfx subpath). Build verified (24/24 green).
 BW-3 completed: 2026-03-08 — 33 GUIDs generated and locked. Created 44 files: 11 package-solution.json, 11 serve.json, 11 deploy-azure-storage.json, 11 manifest files. tools/validate-manifests.ts created, validate-manifests task added to turbo.json. All validations pass (33 unique GUIDs, 11 unique ports, 44 files). Build verified (24/24 green).
 BW-4 completed: 2026-03-08 — All 11 vite.config.ts files transformed with SPFx build config (rollupOptions, manualChunks, deterministic filenames, HTTPS dev server, bundle budget). Port misalignments fixed (accounting/estimating/project-hub). tools/spfx-bundle-check.ts created. 17 file operations total.
-Next: BW-5 (Bootstrap Alignment)
+BW-5 completed: 2026-03-08 — All 11 bootstrap.ts files transformed to use PersonaRegistry pattern (resolveBootstrapPersona/personaToCurrentUser/resolveBootstrapPermissions). Removed MOCK_USER constants, '*:*' wildcards, ICurrentUser imports. Added domain-specific feature flags, JSDoc with D-PH7-BW-5 ref, console.log persona output. 11 file operations.
+Next: BW-6 (Simplified Shell Nav)
 -->
