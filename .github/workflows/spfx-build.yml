@@ -101,6 +101,22 @@ jobs:
             pnpm turbo run build --filter="./apps/${{ inputs.domain }}"
           fi
 
+      - name: Run webpart unit tests
+        # D-PH7-BW-10: run Vitest unit tests for all 11 SPFx webpart apps.
+        run: |
+          pnpm turbo run test \
+            --filter="./apps/accounting" \
+            --filter="./apps/estimating" \
+            --filter="./apps/project-hub" \
+            --filter="./apps/leadership" \
+            --filter="./apps/business-development" \
+            --filter="./apps/admin" \
+            --filter="./apps/safety" \
+            --filter="./apps/quality-control-warranty" \
+            --filter="./apps/risk-management" \
+            --filter="./apps/operational-excellence" \
+            --filter="./apps/human-resources"
+
       - name: Check bundle sizes
         # D-PH7-BW-9: enforce < 1 MB total JS per webpart domain.
         run: npx tsx tools/spfx-bundle-check.ts

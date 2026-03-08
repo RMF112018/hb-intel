@@ -1,45 +1,75 @@
 /**
- * Shared Vitest configuration for SPFx webpart apps.
+ * Shared Vitest factory for all 11 SPFx webpart apps.
+ * Each app's vitest.config.ts is a one-liner calling this factory.
  *
- * Provides resolve aliases for all @hbc/* workspace packages including
- * the 11 @hbc/features-* domain packages. Import this config in each
- * webpart app's vitest.config.ts via mergeConfig().
- *
- * @see docs/architecture/plans/PH7-BW-0-Shared-Feature-Package.md
+ * @decision D-PH7-BW-10
+ * @see docs/architecture/plans/PH7-BW-10-Testing-Infrastructure.md
  */
 import { defineConfig } from 'vitest/config';
-import path from 'node:path';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 
-const root = path.resolve(import.meta.dirname, '..');
+export function createWebpartVitestConfig(appDir: string) {
+  const root = resolve(appDir, '../..');
 
-export default defineConfig({
-  resolve: {
-    alias: {
-      // Core workspace packages
-      '@hbc/models': path.resolve(root, 'packages/models/src'),
-      '@hbc/data-access': path.resolve(root, 'packages/data-access/src'),
-      '@hbc/query-hooks': path.resolve(root, 'packages/query-hooks/src'),
-      '@hbc/auth': path.resolve(root, 'packages/auth/src'),
-      '@hbc/shell': path.resolve(root, 'packages/shell/src'),
-      '@hbc/ui-kit': path.resolve(root, 'packages/ui-kit/src'),
-      '@hbc/provisioning': path.resolve(root, 'packages/provisioning/src'),
-
-      // Feature domain packages
-      '@hbc/features-accounting': path.resolve(root, 'packages/features/accounting/src/index.ts'),
-      '@hbc/features-estimating': path.resolve(root, 'packages/features/estimating/src/index.ts'),
-      '@hbc/features-project-hub': path.resolve(root, 'packages/features/project-hub/src/index.ts'),
-      '@hbc/features-business-development': path.resolve(root, 'packages/features/business-development/src/index.ts'),
-      '@hbc/features-leadership': path.resolve(root, 'packages/features/leadership/src/index.ts'),
-      '@hbc/features-admin': path.resolve(root, 'packages/features/admin/src/index.ts'),
-      '@hbc/features-safety': path.resolve(root, 'packages/features/safety/src/index.ts'),
-      '@hbc/features-quality-control-warranty': path.resolve(root, 'packages/features/quality-control-warranty/src/index.ts'),
-      '@hbc/features-risk-management': path.resolve(root, 'packages/features/risk-management/src/index.ts'),
-      '@hbc/features-operational-excellence': path.resolve(root, 'packages/features/operational-excellence/src/index.ts'),
-      '@hbc/features-human-resources': path.resolve(root, 'packages/features/human-resources/src/index.ts'),
+  return defineConfig({
+    plugins: [react()],
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: ['./src/test/setup.ts'],
+      include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+      exclude: ['dist/**', 'node_modules/**'],
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'lcov', 'html'],
+        thresholds: {
+          global: {
+            statements: 80,
+            branches: 80,
+            functions: 80,
+            lines: 80,
+          },
+        },
+        exclude: [
+          '**/node_modules/**',
+          '**/dist/**',
+          '**/*.config.ts',
+          '**/test/**',
+          '**/*.d.ts',
+        ],
+      },
     },
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-  },
-});
+    resolve: {
+      alias: {
+        // Shared packages
+        '@hbc/models': resolve(root, 'packages/models/src/index.ts'),
+        '@hbc/data-access': resolve(root, 'packages/data-access/src/index.ts'),
+        '@hbc/query-hooks': resolve(root, 'packages/query-hooks/src/index.ts'),
+        '@hbc/auth': resolve(root, 'packages/auth/src/index.ts'),
+        '@hbc/auth/spfx': resolve(root, 'packages/auth/src/spfx/index.ts'),
+        '@hbc/shell': resolve(root, 'packages/shell/src/index.ts'),
+        '@hbc/ui-kit': resolve(root, 'packages/ui-kit/src/index.ts'),
+        '@hbc/ui-kit/app-shell': resolve(root, 'packages/ui-kit/src/app-shell.ts'),
+        '@hbc/ui-kit/theme': resolve(root, 'packages/ui-kit/src/theme/index.ts'),
+        '@hbc/provisioning': resolve(root, 'packages/provisioning/src/index.ts'),
+        // Feature packages
+        '@hbc/features-accounting': resolve(root, 'packages/features/accounting/src/index.ts'),
+        '@hbc/features-estimating': resolve(root, 'packages/features/estimating/src/index.ts'),
+        '@hbc/features-project-hub': resolve(root, 'packages/features/project-hub/src/index.ts'),
+        '@hbc/features-business-development': resolve(root, 'packages/features/business-development/src/index.ts'),
+        '@hbc/features-leadership': resolve(root, 'packages/features/leadership/src/index.ts'),
+        '@hbc/features-admin': resolve(root, 'packages/features/admin/src/index.ts'),
+        '@hbc/features-safety': resolve(root, 'packages/features/safety/src/index.ts'),
+        '@hbc/features-quality-control-warranty': resolve(root, 'packages/features/quality-control-warranty/src/index.ts'),
+        '@hbc/features-risk-management': resolve(root, 'packages/features/risk-management/src/index.ts'),
+        '@hbc/features-operational-excellence': resolve(root, 'packages/features/operational-excellence/src/index.ts'),
+        '@hbc/features-human-resources': resolve(root, 'packages/features/human-resources/src/index.ts'),
+        // Mock SPFx SDK — not available in jsdom
+        '@microsoft/sp-core-library': resolve(root, 'tools/mocks/sp-core-library.ts'),
+        '@microsoft/sp-webpart-base': resolve(root, 'tools/mocks/sp-webpart-base.ts'),
+        '@microsoft/sp-property-pane': resolve(root, 'tools/mocks/sp-property-pane.ts'),
+      },
+    },
+  });
+}
