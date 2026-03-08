@@ -38,6 +38,12 @@ These concerns are owned by `@hbc/auth`.
 - Protected feature contracts: registration/validation/registry interfaces.
 - Startup diagnostics: startup phase, budget, and snapshot contracts.
 
+## Component Export Tiers
+
+Not all exports from `@hbc/shell` are designed for direct app use.
+See [docs/reference/shell/component-exports.md](../../docs/reference/shell/component-exports.md)
+for the full export tier reference.
+
 ## Runtime Boundaries
 
 - PWA/SPFx/HB Site Control/dev-override are all host environments for one shell.

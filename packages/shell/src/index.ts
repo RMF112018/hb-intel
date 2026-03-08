@@ -35,7 +35,20 @@ export type { NavState } from './stores/index.js';
 export { useShellCoreStore } from './stores/index.js';
 export type { ShellCoreState, ShellBootstrapPhase } from './stores/index.js';
 
-// Components (Blueprint §1f, §2c — Procore-inspired shell)
+/**
+ * @internal Shell layout components — designed for use inside ShellCore only.
+ *
+ * These components are exported for ShellCore's internal composition.
+ * Direct app usage outside of ShellCore is NOT supported and may result in:
+ * - Missing React context (shell state, auth lifecycle, startup timing)
+ * - Rendering in incorrect auth/permission state
+ * - Silent failures in experience state management
+ *
+ * Use `ShellCore` as the integration surface instead.
+ *
+ * @see ShellCore
+ * @see docs/reference/shell/component-exports.md
+ */
 export { HeaderBar } from './HeaderBar/index.js';
 export type { HeaderBarProps } from './HeaderBar/index.js';
 export { AppLauncher } from './AppLauncher/index.js';

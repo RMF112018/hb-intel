@@ -231,7 +231,16 @@ ls docs/reference/shell/
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 Task created: 2026-03-07
-Status: Pending implementation
+Status: COMPLETE — 2026-03-07
 Execution: Last in sequence; documentation-only, no code behavior changes
 Diátaxis classification: Reference (technical facts about the shell package API)
+
+Phase completed: 2026-03-07
+- [x] PH6F-10.1 HeaderBar, AppLauncher, ProjectPicker, BackToProjectHub, ContextualSidebar, ShellLayout annotated with @internal JSDoc
+- [x] PH6F-10.2 JSDoc includes reference to ShellCore as the correct integration surface
+- [x] PH6F-10.3 docs/reference/shell/component-exports.md created in correct Diátaxis location
+- [x] PH6F-10.4 Reference doc covers all three export tiers with examples
+- [x] PH6F-10.5 Build passes with zero TypeScript errors
+Documentation added: docs/reference/shell/component-exports.md
+README updated: packages/shell/README.md (Component Export Tiers section)
 -->
