@@ -1,0 +1,8 @@
+{
+  "comment": "Azure AD group names for the 3-tier staging permission model (D-04). Update per environment.",
+  "tier2_bd_managers": "HB Intel BD Managers",
+  "tier2_bd_directors": "HB Intel BD Directors",
+  "tier2_estimating_managers": "HB Intel Estimating Managers",
+  "tier2_estimating_directors": "HB Intel Estimating Directors",
+  "tier3_executives": "HB Intel Executives"
+}

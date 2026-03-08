@@ -398,3 +398,22 @@ pnpm --filter @hbc/sharepoint-docs test:infra
 # 7. Confirm BD Managers group has Read on BD Leads/
 # 8. Confirm Executives group has Read on both staging root folders
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF01-T03 completed: 2026-03-08
+Files created (9):
+  - infrastructure/provision-all.ps1 (orchestrator, §7 exact code block)
+  - infrastructure/provision-lists.ps1 (list provisioning, §8 exact code block)
+  - infrastructure/provision-folders.ps1 (folder provisioning, §9 exact code block)
+  - infrastructure/provision-permissions.ps1 (3-tier D-04 model, derived from §6)
+  - infrastructure/teardown.ps1 (dev/test cleanup, derived from §2)
+  - infrastructure/permission-groups.json (§6 exact code block)
+  - infrastructure/templates/HBCDocumentRegistry.xml (PnP template, 19 columns, 6 views, derived from §3)
+  - infrastructure/templates/HBCMigrationLog.xml (PnP template, 10 columns, derived from §4)
+  - infrastructure/README.md (prerequisites, quick start, verification checklist, derived from §2/§10)
+Verification:
+  - pnpm --filter @hbc/sharepoint-docs typecheck → exit 0
+  - pnpm --filter @hbc/sharepoint-docs build → exit 0
+  - pnpm turbo run build → 25/25 tasks green (24 cached + 1 built)
+Next: SF01-T04 Upload Service
+-->

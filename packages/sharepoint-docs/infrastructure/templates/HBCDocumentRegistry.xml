@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pnp:Provisioning xmlns:pnp="http://schemas.dev.office.com/PnP/2021/03/ProvisioningSchema">
+  <pnp:Templates ID="HBCDocumentRegistryTemplate">
+    <pnp:ProvisioningTemplate ID="HBCDocumentRegistry" Version="1" DisplayName="HBC Document Registry">
+      <pnp:Lists>
+        <pnp:ListInstance Title="HBCDocumentRegistry"
+                          Description="HB Intel Document Lifecycle Registry — tracks all document events from upload through migration."
+                          TemplateType="100"
+                          Url="Lists/HBCDocumentRegistry"
+                          EnableVersioning="true"
+                          MaxVersionLimit="10"
+                          OnQuickLaunch="false">
+          <pnp:Fields>
+            <!-- 1. Module Type (Choice, Required, Indexed) -->
+            <Field ID="{A1B2C301-0001-4000-8000-000000000001}"
+                   Name="HbcModuleType" DisplayName="Module Type"
+                   Type="Choice" Required="TRUE" Indexed="TRUE">
+              <CHOICES>
+                <CHOICE>bd-lead</CHOICE>
+                <CHOICE>estimating-pursuit</CHOICE>
+                <CHOICE>project</CHOICE>
+                <CHOICE>system</CHOICE>
+              </CHOICES>
+            </Field>
+            <!-- 2. Record ID (Text, Required, Indexed) -->
+            <Field ID="{A1B2C301-0002-4000-8000-000000000002}"
+                   Name="HbcRecordId" DisplayName="Record ID"
+                   Type="Text" MaxLength="255" Required="TRUE" Indexed="TRUE" />
+            <!-- 3. Project ID (Text, Optional, Indexed) -->
+            <Field ID="{A1B2C301-0003-4000-8000-000000000003}"
+                   Name="HbcProjectId" DisplayName="Project ID"
+                   Type="Text" MaxLength="255" Required="FALSE" Indexed="TRUE" />
+            <!-- 4. Document ID (Text, Required, Indexed) -->
+            <Field ID="{A1B2C301-0004-4000-8000-000000000004}"
+                   Name="HbcDocumentId" DisplayName="Document ID"
+                   Type="Text" MaxLength="255" Required="TRUE" Indexed="TRUE" />
+            <!-- 5. File Name (Text, Required) -->
+            <Field ID="{A1B2C301-0005-4000-8000-000000000005}"
+                   Name="HbcFileName" DisplayName="File Name"
+                   Type="Text" MaxLength="255" Required="TRUE" />
+            <!-- 6. Folder Name (Text, Required) -->
+            <Field ID="{A1B2C301-0006-4000-8000-000000000006}"
+                   Name="HbcFolderName" DisplayName="Folder Name"
+                   Type="Text" MaxLength="255" Required="TRUE" />
+            <!-- 7. File Size (Number, Required) -->
+            <Field ID="{A1B2C301-0007-4000-8000-000000000007}"
+                   Name="HbcFileSize" DisplayName="File Size"
+                   Type="Number" Decimals="0" Required="TRUE" />
+            <!-- 8. MIME Type (Text, Optional) -->
+            <Field ID="{A1B2C301-0008-4000-8000-000000000008}"
+                   Name="HbcMimeType" DisplayName="MIME Type"
+                   Type="Text" MaxLength="100" Required="FALSE" />
+            <!-- 9. SharePoint URL (URL, Required) -->
+            <Field ID="{A1B2C301-0009-4000-8000-000000000009}"
+                   Name="HbcSharePointUrl" DisplayName="SharePoint URL"
+                   Type="URL" Required="TRUE" />
+            <!-- 10. Staging URL (URL, Required) -->
+            <Field ID="{A1B2C301-000A-4000-8000-00000000000A}"
+                   Name="HbcStagingUrl" DisplayName="Staging URL"
+                   Type="URL" Required="TRUE" />
+            <!-- 11. Migrated URL (URL, Optional) -->
+            <Field ID="{A1B2C301-000B-4000-8000-00000000000B}"
+                   Name="HbcMigratedUrl" DisplayName="Migrated URL"
+                   Type="URL" Required="FALSE" />
+            <!-- 12. Migration Status (Choice, Required, Indexed) -->
+            <Field ID="{A1B2C301-000C-4000-8000-00000000000C}"
+                   Name="HbcMigrationStatus" DisplayName="Migration Status"
+                   Type="Choice" Required="TRUE" Indexed="TRUE">
+              <CHOICES>
+                <CHOICE>pending</CHOICE>
+                <CHOICE>scheduled</CHOICE>
+                <CHOICE>in-progress</CHOICE>
+                <CHOICE>migrated</CHOICE>
+                <CHOICE>conflict</CHOICE>
+                <CHOICE>failed</CHOICE>
+                <CHOICE>not-applicable</CHOICE>
+              </CHOICES>
+            </Field>
+            <!-- 13. Tombstone URL (URL, Optional) -->
+            <Field ID="{A1B2C301-000D-4000-8000-00000000000D}"
+                   Name="HbcTombstoneUrl" DisplayName="Tombstone URL"
+                   Type="URL" Required="FALSE" />
+            <!-- 14. Conflict Resolution (Choice, Optional) -->
+            <Field ID="{A1B2C301-000E-4000-8000-00000000000E}"
+                   Name="HbcConflictResolution" DisplayName="Conflict Resolution"
+                   Type="Choice" Required="FALSE">
+              <CHOICES>
+                <CHOICE>keep-staging</CHOICE>
+                <CHOICE>keep-project</CHOICE>
+                <CHOICE>keep-both</CHOICE>
+                <CHOICE>pending</CHOICE>
+                <CHOICE>auto-project-site-wins</CHOICE>
+              </CHOICES>
+            </Field>
+            <!-- 15. Conflict Resolved By (User, Optional) -->
+            <Field ID="{A1B2C301-000F-4000-8000-00000000000F}"
+                   Name="HbcConflictResolvedBy" DisplayName="Conflict Resolved By"
+                   Type="User" Required="FALSE" UserSelectionMode="PeopleOnly" />
+            <!-- 16. Uploaded By (User, Required) -->
+            <Field ID="{A1B2C301-0010-4000-8000-000000000010}"
+                   Name="HbcUploadedBy" DisplayName="Uploaded By"
+                   Type="User" Required="TRUE" UserSelectionMode="PeopleOnly" />
+            <!-- 17. Uploaded At (DateTime, Required, Indexed, UTC) -->
+            <Field ID="{A1B2C301-0011-4000-8000-000000000011}"
+                   Name="HbcUploadedAt" DisplayName="Uploaded At"
+                   Type="DateTime" Format="DateTime" StorageTZ="TRUE"
+                   Required="TRUE" Indexed="TRUE" />
+            <!-- 18. Migrated At (DateTime, Optional, UTC) -->
+            <Field ID="{A1B2C301-0012-4000-8000-000000000012}"
+                   Name="HbcMigratedAt" DisplayName="Migrated At"
+                   Type="DateTime" Format="DateTime" StorageTZ="TRUE"
+                   Required="FALSE" />
+            <!-- 19. Display Name (Text, Required) -->
+            <Field ID="{A1B2C301-0013-4000-8000-000000000013}"
+                   Name="HbcDisplayName" DisplayName="Display Name"
+                   Type="Text" MaxLength="512" Required="TRUE" />
+          </pnp:Fields>
+          <pnp:Views>
+            <!-- Default view: All Documents -->
+            <View DisplayName="All Documents" DefaultView="TRUE" MobileView="TRUE"
+                  MobileDefaultView="TRUE" Type="HTML" SetupPath="pages\viewpage.aspx">
+              <ViewFields>
+                <FieldRef Name="HbcModuleType" />
+                <FieldRef Name="HbcRecordId" />
+                <FieldRef Name="HbcProjectId" />
+                <FieldRef Name="HbcDocumentId" />
+                <FieldRef Name="HbcFileName" />
+                <FieldRef Name="HbcFolderName" />
+                <FieldRef Name="HbcFileSize" />
+                <FieldRef Name="HbcMimeType" />
+                <FieldRef Name="HbcSharePointUrl" />
+                <FieldRef Name="HbcStagingUrl" />
+                <FieldRef Name="HbcMigratedUrl" />
+                <FieldRef Name="HbcMigrationStatus" />
+                <FieldRef Name="HbcTombstoneUrl" />
+                <FieldRef Name="HbcConflictResolution" />
+                <FieldRef Name="HbcConflictResolvedBy" />
+                <FieldRef Name="HbcUploadedBy" />
+                <FieldRef Name="HbcUploadedAt" />
+                <FieldRef Name="HbcMigratedAt" />
+                <FieldRef Name="HbcDisplayName" />
+              </ViewFields>
+              <Query>
+                <OrderBy>
+                  <FieldRef Name="HbcUploadedAt" Ascending="FALSE" />
+                </OrderBy>
+              </Query>
+            </View>
+            <!-- BD Lead Documents -->
+            <View DisplayName="BD Lead Documents" DefaultView="FALSE" Type="HTML"
+                  SetupPath="pages\viewpage.aspx">
+              <ViewFields>
+                <FieldRef Name="HbcRecordId" />
+                <FieldRef Name="HbcDocumentId" />
+                <FieldRef Name="HbcFileName" />
+                <FieldRef Name="HbcFolderName" />
+                <FieldRef Name="HbcMigrationStatus" />
+                <FieldRef Name="HbcUploadedBy" />
+                <FieldRef Name="HbcUploadedAt" />
+                <FieldRef Name="HbcDisplayName" />
+              </ViewFields>
+              <Query>
+                <Where>
+                  <Eq>
+                    <FieldRef Name="HbcModuleType" />
+                    <Value Type="Choice">bd-lead</Value>
+                  </Eq>
+                </Where>
+                <OrderBy>
+                  <FieldRef Name="HbcUploadedAt" Ascending="FALSE" />
+                </OrderBy>
+              </Query>
+            </View>
+            <!-- Estimating Documents -->
+            <View DisplayName="Estimating Documents" DefaultView="FALSE" Type="HTML"
+                  SetupPath="pages\viewpage.aspx">
+              <ViewFields>
+                <FieldRef Name="HbcRecordId" />
+                <FieldRef Name="HbcDocumentId" />
+                <FieldRef Name="HbcFileName" />
+                <FieldRef Name="HbcFolderName" />
+                <FieldRef Name="HbcMigrationStatus" />
+                <FieldRef Name="HbcUploadedBy" />
+                <FieldRef Name="HbcUploadedAt" />
+                <FieldRef Name="HbcDisplayName" />
+              </ViewFields>
+              <Query>
+                <Where>
+                  <Eq>
+                    <FieldRef Name="HbcModuleType" />
+                    <Value Type="Choice">estimating-pursuit</Value>
+                  </Eq>
+                </Where>
+                <OrderBy>
+                  <FieldRef Name="HbcUploadedAt" Ascending="FALSE" />
+                </OrderBy>
+              </Query>
+            </View>
+            <!-- Project Documents -->
+            <View DisplayName="Project Documents" DefaultView="FALSE" Type="HTML"
+                  SetupPath="pages\viewpage.aspx">
+              <ViewFields>
+                <FieldRef Name="HbcRecordId" />
+                <FieldRef Name="HbcDocumentId" />
+                <FieldRef Name="HbcFileName" />
+                <FieldRef Name="HbcFolderName" />
+                <FieldRef Name="HbcMigrationStatus" />
+                <FieldRef Name="HbcUploadedBy" />
+                <FieldRef Name="HbcUploadedAt" />
+                <FieldRef Name="HbcDisplayName" />
+              </ViewFields>
+              <Query>
+                <Where>
+                  <Eq>
+                    <FieldRef Name="HbcModuleType" />
+                    <Value Type="Choice">project</Value>
+                  </Eq>
+                </Where>
+                <OrderBy>
+                  <FieldRef Name="HbcUploadedAt" Ascending="FALSE" />
+                </OrderBy>
+              </Query>
+            </View>
+            <!-- Pending Migration -->
+            <View DisplayName="Pending Migration" DefaultView="FALSE" Type="HTML"
+                  SetupPath="pages\viewpage.aspx">
+              <ViewFields>
+                <FieldRef Name="HbcModuleType" />
+                <FieldRef Name="HbcRecordId" />
+                <FieldRef Name="HbcDocumentId" />
+                <FieldRef Name="HbcFileName" />
+                <FieldRef Name="HbcMigrationStatus" />
+                <FieldRef Name="HbcUploadedAt" />
+                <FieldRef Name="HbcDisplayName" />
+              </ViewFields>
+              <Query>
+                <Where>
+                  <Or>
+                    <Eq>
+                      <FieldRef Name="HbcMigrationStatus" />
+                      <Value Type="Choice">pending</Value>
+                    </Eq>
+                    <Eq>
+                      <FieldRef Name="HbcMigrationStatus" />
+                      <Value Type="Choice">scheduled</Value>
+                    </Eq>
+                  </Or>
+                </Where>
+                <OrderBy>
+                  <FieldRef Name="HbcUploadedAt" Ascending="TRUE" />
+                </OrderBy>
+              </Query>
+            </View>
+            <!-- Conflicts Requiring Resolution -->
+            <View DisplayName="Conflicts Requiring Resolution" DefaultView="FALSE" Type="HTML"
+                  SetupPath="pages\viewpage.aspx">
+              <ViewFields>
+                <FieldRef Name="HbcModuleType" />
+                <FieldRef Name="HbcRecordId" />
+                <FieldRef Name="HbcDocumentId" />
+                <FieldRef Name="HbcFileName" />
+                <FieldRef Name="HbcConflictResolution" />
+                <FieldRef Name="HbcConflictResolvedBy" />
+                <FieldRef Name="HbcUploadedAt" />
+                <FieldRef Name="HbcDisplayName" />
+              </ViewFields>
+              <Query>
+                <Where>
+                  <Eq>
+                    <FieldRef Name="HbcMigrationStatus" />
+                    <Value Type="Choice">conflict</Value>
+                  </Eq>
+                </Where>
+                <OrderBy>
+                  <FieldRef Name="HbcUploadedAt" Ascending="FALSE" />
+                </OrderBy>
+              </Query>
+            </View>
+          </pnp:Views>
+        </pnp:ListInstance>
+      </pnp:Lists>
+    </pnp:ProvisioningTemplate>
+  </pnp:Templates>
+</pnp:Provisioning>

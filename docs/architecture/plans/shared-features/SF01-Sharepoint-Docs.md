@@ -344,7 +344,10 @@ Wave 1 status: In progress
     - 12 files replaced: 7 type stubs + 1 type barrel + 4 constant stubs
     - Added registryColumns.ts export to src/index.ts barrel
     - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
-  - SF01-T03 SharePoint Infrastructure: Not started
+  - SF01-T03 SharePoint Infrastructure: COMPLETE (2026-03-08)
+    - 9 new files created in packages/sharepoint-docs/infrastructure/
+    - 5 PowerShell scripts, 2 PnP XML templates, 1 JSON config, 1 README
+    - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
   - SF01-T04 Upload Service: Not started
 Documentation added: docs/architecture/plans/shared-features/SF01-Sharepoint-Docs.md
 ADR required: docs/architecture/adr/0010-sharepoint-docs-pre-provisioning-storage.md

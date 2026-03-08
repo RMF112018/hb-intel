@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pnp:Provisioning xmlns:pnp="http://schemas.dev.office.com/PnP/2021/03/ProvisioningSchema">
+  <pnp:Templates ID="HBCMigrationLogTemplate">
+    <pnp:ProvisioningTemplate ID="HBCMigrationLog" Version="1" DisplayName="HBC Migration Log">
+      <pnp:Lists>
+        <pnp:ListInstance Title="HBCMigrationLog"
+                          Description="HB Intel Migration Event Log — append-only log of all migration attempt events."
+                          TemplateType="100"
+                          Url="Lists/HBCMigrationLog"
+                          EnableVersioning="false"
+                          OnQuickLaunch="false">
+          <pnp:Fields>
+            <!-- 1. Job ID (Text, Required) -->
+            <Field ID="{B2C3D401-0001-4000-8000-000000000001}"
+                   Name="HbcJobId" DisplayName="Job ID"
+                   Type="Text" MaxLength="255" Required="TRUE" />
+            <!-- 2. Record ID (Text, Required) -->
+            <Field ID="{B2C3D401-0002-4000-8000-000000000002}"
+                   Name="HbcRecordId" DisplayName="Record ID"
+                   Type="Text" MaxLength="255" Required="TRUE" />
+            <!-- 3. Document ID (Text, Required) -->
+            <Field ID="{B2C3D401-0003-4000-8000-000000000003}"
+                   Name="HbcDocumentId" DisplayName="Document ID"
+                   Type="Text" MaxLength="255" Required="TRUE" />
+            <!-- 4. File Checkpoint (Choice, Required) -->
+            <Field ID="{B2C3D401-0004-4000-8000-000000000004}"
+                   Name="HbcCheckpoint" DisplayName="File Checkpoint"
+                   Type="Choice" Required="TRUE">
+              <CHOICES>
+                <CHOICE>pending</CHOICE>
+                <CHOICE>in-progress</CHOICE>
+                <CHOICE>completed</CHOICE>
+                <CHOICE>failed</CHOICE>
+                <CHOICE>skipped-conflict</CHOICE>
+              </CHOICES>
+            </Field>
+            <!-- 5. Attempt Number (Number, Required) -->
+            <Field ID="{B2C3D401-0005-4000-8000-000000000005}"
+                   Name="HbcAttemptNumber" DisplayName="Attempt Number"
+                   Type="Number" Decimals="0" Required="TRUE" />
+            <!-- 6. Attempted At (DateTime, Required, UTC) -->
+            <Field ID="{B2C3D401-0006-4000-8000-000000000006}"
+                   Name="HbcAttemptedAt" DisplayName="Attempted At"
+                   Type="DateTime" Format="DateTime" StorageTZ="TRUE"
+                   Required="TRUE" />
+            <!-- 7. Error Message (Note/Multi-line, Optional) -->
+            <Field ID="{B2C3D401-0007-4000-8000-000000000007}"
+                   Name="HbcErrorMessage" DisplayName="Error Message"
+                   Type="Note" NumLines="6" RichText="FALSE" Required="FALSE" />
+            <!-- 8. Scheduled Window (Text, Required) -->
+            <Field ID="{B2C3D401-0008-4000-8000-000000000008}"
+                   Name="HbcScheduledWindow" DisplayName="Scheduled Window"
+                   Type="Text" MaxLength="100" Required="TRUE" />
+            <!-- 9. Pre-notification Sent (Boolean, Required, Default=0) -->
+            <Field ID="{B2C3D401-0009-4000-8000-000000000009}"
+                   Name="HbcNotifiedPM" DisplayName="Pre-notification Sent"
+                   Type="Boolean" Required="TRUE">
+              <Default>0</Default>
+            </Field>
+            <!-- 10. Escalated to Director (Boolean, Required, Default=0) -->
+            <Field ID="{B2C3D401-000A-4000-8000-00000000000A}"
+                   Name="HbcEscalated" DisplayName="Escalated to Director"
+                   Type="Boolean" Required="TRUE">
+              <Default>0</Default>
+            </Field>
+          </pnp:Fields>
+        </pnp:ListInstance>
+      </pnp:Lists>
+    </pnp:ProvisioningTemplate>
+  </pnp:Templates>
+</pnp:Provisioning>
