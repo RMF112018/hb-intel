@@ -12,6 +12,7 @@
     "paths": {
       "@hbc/ui-kit": ["../ui-kit/src/index.ts"],
       "@hbc/ui-kit/app-shell": ["../ui-kit/src/app-shell.ts"],
+      "@hbc/complexity": ["../complexity/src/index.ts"],
       "@hbc/acknowledgment/testing": ["./testing/index.ts"]
     }
   },

@@ -422,3 +422,24 @@ Legend:
 pnpm --filter @hbc/acknowledgment typecheck
 pnpm --filter @hbc/acknowledgment test -- --reporter=verbose components/HbcAcknowledgmentPanel
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF04-T04 completed: 2026-03-09
+Files created:
+  - src/components/panel/EssentialCTA.tsx — Essential tier CTA with complete/declined/waiting/action states
+  - src/components/panel/StandardPartyList.tsx — Standard tier party list with inline Avatar, StatusBadge, LockIcon, PartyRow
+  - src/components/panel/ExpertAuditTrail.tsx — Expert tier audit trail extending party list with timestamps, IP, bypass flags, pending sync
+Files modified:
+  - src/components/HbcAcknowledgmentPanel.tsx — Full implementation with complexity-gated rendering, modal integration, DeclineBlockedBanner, CompletionBanner, PanelSkeleton
+  - src/components/HbcAcknowledgmentModal.tsx — Updated stub to accept props (Record<string, any>) for T05 forward-compatibility
+  - package.json — Added @hbc/complexity dependency
+  - tsconfig.json — Added @hbc/complexity path mapping
+Adaptations from spec:
+  - ComplexityTier imported from @hbc/complexity (not ../types)
+  - Avatar, StatusBadge, LockIcon implemented inline (not imported from @hbc/ui-kit)
+  - formatDateTime implemented as inline helper
+  - HbcAcknowledgmentPanelProps<T> defined locally in component file
+  - Config cast to IAcknowledgmentConfig<unknown> for sub-component props compatibility
+Verification: check-types ✓, build ✓
+Next: SF04-T05 (Badge and Modal)
+-->
