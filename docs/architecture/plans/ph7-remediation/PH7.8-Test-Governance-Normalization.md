@@ -124,4 +124,9 @@ PH7.8.1 — Cyclic Dependency Remediation: 2026-03-09
 - Fix: removed @hbc/ui-kit from complexity/package.json dependencies and removed unused tsconfig path aliases. Zero runtime impact.
 - The legitimate direction (@hbc/ui-kit → @hbc/complexity) remains — 6 ui-kit components import useComplexityGate/useComplexity/IComplexityAwareProps.
 - Turbo cyclic dependency blocker: RESOLVED.
+
+PH7.8.2 — Pre-existing Build and Test Failures Remediation: 2026-03-09
+- sharepoint-docs build fix: added `src/**/__tests__/**` to tsconfig.json exclude array. The setup file `src/__tests__/setup.ts` used vitest globals without type declarations and escaped the `*.test.ts` exclusion pattern.
+- shell test fix: added `resolve.alias` block to shell workspace entry in `vitest.workspace.ts`, redirecting `@hbc/complexity` to source. Without this, DevToolbar.wrapper.test.ts transitively hit `complexity/dist` which contains `import './complexity.css'` (tsc doesn't copy CSS to dist). Alias pattern matches bic-next-move and complexity entries.
+- Updated package-testing-matrix.md alias table to reflect shell's new alias requirement.
 -->

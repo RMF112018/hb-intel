@@ -57,6 +57,11 @@ export default defineWorkspace([
       testTimeout: 10000,
       hookTimeout: 10000,
     },
+    resolve: {
+      alias: {
+        '@hbc/complexity': resolve(__dirname, './packages/complexity/src/index.ts'),
+      },
+    },
   },
   {
     name: '@hbc/sharepoint-docs',
