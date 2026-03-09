@@ -233,5 +233,6 @@ User clicks "Acknowledge"
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF04-T01 completed: 2026-03-09 — Package scaffold created with all config, barrels, and testing sub-path
-Next: SF04-T02 (TypeScript contracts + ACK_CONTEXT_TYPES)
+SF04-T02 completed: 2026-03-09 — TypeScript contracts (11 types/interfaces), ACK_CONTEXT_TYPES (7 entries), acknowledgmentLogic.ts (5 functions + 2 constants)
+Next: SF04-T03 (Hooks)
 -->

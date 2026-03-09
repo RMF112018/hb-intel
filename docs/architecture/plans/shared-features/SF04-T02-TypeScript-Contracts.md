@@ -380,3 +380,15 @@ node -e "
 # Expected: ['PROJECT_HUB_PMP', 'PROJECT_HUB_TURNOVER', 'PROJECT_HUB_MONTHLY_REVIEW',
 #            'BD_SCORECARD', 'ESTIMATING_BID_RECEIPT', 'ADMIN_PROVISIONING', 'WORKFLOW_HANDOFF']
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF04-T02 completed: 2026-03-09
+- Replaced IAcknowledgment.ts placeholder with full contracts (11 types/interfaces)
+- Replaced contextTypes.ts placeholder with ACK_CONTEXT_TYPES registry (7 entries)
+- Created src/utils/acknowledgmentLogic.ts with 5 pure functions + 2 constants
+- Updated main barrel (src/index.ts) to export utils
+- Note: spec filename had typo "acknowledmentLogic.ts"; corrected to "acknowledgmentLogic.ts"
+- Added import of AckContextType at top of IAcknowledgment.ts (spec used re-export only; import needed for inline usage)
+- Verification: check-types ✓, build ✓, test ✓ (passWithNoTests)
+Next: SF04-T03 (Hooks)
+-->
