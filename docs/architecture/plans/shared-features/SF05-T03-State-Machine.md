@@ -419,3 +419,18 @@ describe('guardReopen', () => {
 pnpm --filter @hbc/step-wizard typecheck
 pnpm --filter @hbc/step-wizard test -- --reporter=verbose state/
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF05-T03 completed: 2026-03-09
+- Implemented testing utilities (createMockWizardConfig, mockWizardStates) as prerequisite for tests
+- Implemented full state machine verbatim from spec: buildWizardState, guardMarkComplete, guardGoTo, guardReopen, applyStatusUpdate, applyVisit, applyCompletionFired
+- Created test suite: 19 tests covering D-01, D-02, D-03, D-05, D-07
+- Typecheck: zero errors
+- Tests: 19/19 passed
+Files created/modified:
+  - packages/step-wizard/testing/createMockWizardConfig.ts (overwrite — minimal mock factory)
+  - packages/step-wizard/testing/mockWizardStates.ts (overwrite — preset draft states)
+  - packages/step-wizard/src/state/stepStateMachine.ts (overwrite — full state machine)
+  - packages/step-wizard/src/state/__tests__/stepStateMachine.test.ts (create — test suite)
+Next: SF05-T04 (React Hooks)
+-->
