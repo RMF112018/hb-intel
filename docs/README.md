@@ -112,6 +112,32 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 
 - [Platform Primitives Registry](./reference/platform-primitives.md) — Tier-1 shared-feature packages: policy, decision tree, adoption matrix, and non-duplication rule
 
+## Document Classification System
+
+All HB Intel architecture documents are classified to prevent confusion between present truth, active plans, historical context, and deferred scope. The authoritative classification matrix lives in **[§2 of the Current-State Architecture Map](./architecture/blueprint/current-state-map.md#2-document-classification-matrix)**.
+
+**Six classes are in use:**
+
+| Class | What it means | Where to find it |
+|-------|--------------|-----------------|
+| **Canonical Current-State** | What the repo currently contains — governs present truth | `current-state-map.md`, `docs/README.md` |
+| **Canonical Normative Plan** | What must be built next in an active phase | PH7 domain plans, PH7 remediation plans (`ph7-remediation/`), Blueprint V4 |
+| **Historical Foundational** | Completed phase planning; locked for audit trail | PH4–PH6 plans, Foundation Plan, SF01–SF03 shared-feature plans |
+| **Deferred Scope** | Planned work not yet assigned to an active phase | SF04–SF06 plans (~19 docs), PH7-RM-* plans (9 files) |
+| **Superseded / Archived Reference** | Replaced by a newer document or approach | Old PH7 root-level plans (deleted from git index) |
+| **Permanent Decision Rationale** | Locked architectural decisions — ADRs | `docs/architecture/adr/` (76 indexed; see §2.2 for catalog conflict detail) |
+
+**Living Reference (Diátaxis)** is used for the 200+ operational docs in the Diátaxis quadrant tree (`tutorials/`, `how-to/`, `reference/`, `explanation/`, etc.). These are classified by their quadrant placement — no inline banner needed.
+
+**Reading order for a given topic:**
+1. Start with `current-state-map.md` (Canonical Current-State) — what exists today.
+2. Consult the active phase plan in `ph7-remediation/` (Canonical Normative Plan) — what is being built.
+3. If historical context is needed, check completed phase plans PH4–PH6 or the Foundation Plan (Historical Foundational).
+4. For locked decisions, check `docs/architecture/adr/` (Permanent Decision Rationale).
+5. Ignore Deferred Scope and Superseded documents for current implementation work.
+
+Tier 1 inline banners appear immediately below the H1 title of high-risk documents that could be misread as authoritative current-state when they are not. All other documents are classified by their row in the §2 matrix.
+
 ## Conventions
 
 - All files are Markdown, version-controlled, and updated with every code change ("Docs as code")

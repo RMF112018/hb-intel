@@ -1,6 +1,8 @@
 ```markdown
 # HB-Intel-Blueprint.md
 
+> **Doc Classification:** Canonical Normative Plan — locked target architecture defining what HB Intel must become; governs design intent when implementation decisions must be made.
+
 **HB Intel: Architecture Redesign Blueprint**
 
 **Version:** 4

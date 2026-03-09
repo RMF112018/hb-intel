@@ -1,5 +1,7 @@
 # PH7.12 — Final Verification & Sign-Off
 
+> **Doc Classification:** Canonical Normative Plan — the Phase 7 gate plan; all P1 stabilization work must satisfy this plan's acceptance criteria before platform expansion resumes.
+
 **Version:** 1.0  
 **Purpose:** Verify closure of all Phase 7 P1 issues and produce the evidence package required to resume broad platform expansion safely.  
 **Audience:** Implementation agent(s), architecture owner, maintainers, and reviewers.  

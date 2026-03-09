@@ -1,5 +1,7 @@
 # Phase 5 Development Plan – Authentication & Shell Foundation
 
+> **Doc Classification:** Historical Foundational — Phase 5 is complete; this master plan is sealed and retained for audit trail. Do not modify for current work.
+
 **Version:** 2.0 (refined from interview-locked decisions and intended to supersede/expand the current Phase 5 plan)  
 **Purpose:** This document defines the comprehensive Phase 5 implementation plan for a production-ready HB Intel authentication and shell foundation that satisfies the dual PWA / SPFx operating model. It consolidates the architectural direction established in the current Phase 5 plan and hard-locks the additional interview decisions around runtime mode handling, shell governance, permission modeling, override administration, degraded-mode behavior, release gating, and documentation standards.  
 **Audience:** Implementation agent(s), technical reviewers, product owner, operations/support stakeholders, and future maintainers.  

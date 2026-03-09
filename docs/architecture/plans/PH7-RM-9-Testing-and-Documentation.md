@@ -1,5 +1,8 @@
 # PH7-RM-9 — Testing and Documentation
 
+
+> **Doc Classification:** Deferred Scope — remediation scope item identified during Phase 7 but not yet assigned to an active execution phase; confirm scheduling status before PH7.12 sign-off.
+
 **Version:** 1.0
 **Governed by:** CLAUDE.md v1.2 · HB-Intel-Blueprint-V4.md
 **Date:** 2026-03-08

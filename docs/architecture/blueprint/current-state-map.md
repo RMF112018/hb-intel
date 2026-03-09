@@ -14,7 +14,7 @@
 | 1 | This file (`current-state-map.md`) | Canonical Current-State | Living — updated with each structural change | Present implementation truth |
 | 2 | [Blueprint V4](./blueprint/HB-Intel-Blueprint-V4.md) | Canonical Normative Plan | Locked — comment-only updates | Target architecture intent |
 | 3 | [Foundation Plan](./plans/hb-intel-foundation-plan.md) | Historical Foundational | Locked — comment-only updates | Original implementation instructions |
-| 4 | [ADRs](./adr/) (73 records) | Permanent Decision Rationale | Append-only | Individual architectural decisions |
+| 4 | [ADRs](./adr/) (76 indexed in this file; 93 files on disk — see §2.2 for conflict detail) | Permanent Decision Rationale | Append-only | Individual architectural decisions |
 | 5 | Phase/Task Plans (`plans/ph7-*`, `plans/PH*.md`) | Time-bound Execution | Historical after completion | Phase-scoped implementation details |
 | 6 | Package READMEs (`packages/*/README.md`) | Current Implementation Detail | Living | Package-specific API and usage |
 
@@ -28,18 +28,63 @@
 
 ## 2. Document Classification Matrix
 
-| Document | Classification | Notes |
-|----------|---------------|-------|
-| `docs/architecture/current-state-map.md` | **Canonical Current-State** | This file; governs present truth |
-| `docs/README.md` | **Canonical Current-State** | Living documentation index |
-| `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md` | **Canonical Normative Plan** | Locked target architecture |
-| `docs/architecture/plans/hb-intel-foundation-plan.md` | **Historical Foundational** | Locked original implementation instructions |
-| `docs/architecture/adr/ADR-0001` through `ADR-0073` | **Permanent Decision Rationale** | Append-only; 73 accepted records |
-| `docs/architecture/adr/ADR-PH5C-01` | **Permanent Decision Rationale** | Phase 5C-specific decision |
-| SF01–SF06 plans (completed shared-feature work) | **Historical Foundational** | Execution complete; retained for audit trail |
-| PH7 domain plans (`ph7-business-development/`, `ph7-estimating/`, `ph7-project-hub/`) | **Canonical Normative Plan** | Active execution plans for Phase 7 |
-| PH7 root-level plans (deleted from git index) | **Superseded / Archived Reference** | Replaced by reorganized subdirectory plans |
-| `ph7-breakout-webparts/` plans | **Canonical Normative Plan** | Active execution plans for SPFx breakout |
+> **Classification Authority:** This matrix is the single source of truth for doc classification in the HB Intel monorepo. `docs/README.md` links here for navigational guidance. See §2.1 for the maintenance rule and §2.2 for ADR catalog conflict details. Six classes plus one Diátaxis notation are the only permitted vocabulary.
+
+| Document / Group | Classification | Tier / Catalog Status |
+|------------------|---------------|----------------------|
+| `docs/architecture/blueprint/current-state-map.md` | **Canonical Current-State** | Infrastructure/exempt — no Tier 1 banner (circular dependency) |
+| `docs/README.md` | **Canonical Current-State** | Infrastructure/exempt — no Tier 1 banner |
+| `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md` | **Canonical Normative Plan** | Tier 1 banner applied |
+| `docs/architecture/plans/hb-intel-foundation-plan.md` | **Historical Foundational** | Tier 1 banner applied |
+| `docs/architecture/adr/` (all files) | **Permanent Decision Rationale** | Exempt from inline banner; 76 records indexed here; see §2.2 for conflicts |
+| SF01–SF03 plans (completed shared-feature work: bic-next-move, complexity, sharepoint-docs) | **Historical Foundational** | Tier 2 — matrix classification only |
+| SF04–SF06 shared-feature plans (~19 docs, packages not yet built) | **Deferred Scope** | Tier 2 — matrix classification only; must not be updated without explicit phase activation |
+| PH4 phase plans (`plans/PH4-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH4-Shell-Consolidation.md` (master plan) |
+| PH5 phase plans (`plans/PH5-*.md`, `plans/PH5C-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH5-Auth-Shell-Plan.md` and `PH5C-Auth-Shell-Plan.md` |
+| PH6 phase plans (`plans/PH6-*.md`, `plans/PH6F-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH6-Provisioning-Plan.md`; sub-plans Tier 2 |
+| PH7 domain plans (`ph7-business-development/`, `ph7-estimating/`, `ph7-project-hub/`) | **Canonical Normative Plan** | Tier 2 — matrix classification only |
+| PH7 remediation plans (`plans/ph7-remediation/PH7.1`–`PH7.12`) | **Canonical Normative Plan** | Tier 1 banner applied to `PH7.12-Final-Verification-and-Sign-Off.md`; sub-plans Tier 2 |
+| PH7-RM-* plans (`plans/PH7-RM-*.md`, 9 files) | **Deferred Scope** | Tier 1 banner applied to all 9 files; status must be confirmed before PH7.12 sign-off |
+| PH7 root-level plans (deleted from git index) | **Superseded / Archived Reference** | Tier 2 — matrix classification only |
+| `ph7-breakout-webparts/` plans | **Canonical Normative Plan** | Tier 2 — matrix classification only |
+| `docs/architecture/release/*` (release checklists, sign-off docs) | **Historical Foundational** | Tier 2 — matrix classification only; sealed docs |
+| Diátaxis output docs (`docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/`, `docs/user-guide/`, `docs/administrator-guide/`, `docs/maintenance/`, `docs/troubleshooting/`, `docs/security/`, `docs/release-notes/`, `docs/faq.md`) | **Living Reference (Diátaxis)** | 200+ files; quadrant breakdown: tutorials, how-to, reference, explanation, user-guide, administrator-guide, maintenance, troubleshooting, security, release-notes, faq; updated continuously as features ship; exempt from inline banner |
+
+### 2.1 Classification Maintenance Rule
+
+Every new architecture, plan, reference, or release document must declare one of the following six classes at creation time — either via an inline Tier 1 banner or by being added to the matrix above (Tier 2):
+
+| Class | When to Use | Tier |
+|-------|-------------|------|
+| **Canonical Current-State** | Describes what the repo currently contains | Infrastructure docs only; Tier 1 for any new current-state reference doc |
+| **Canonical Normative Plan** | Describes what must be built next in an active phase | Tier 1 for master/gate plans; Tier 2 for subtask plans |
+| **Historical Foundational** | Completed phase or feature planning; locked for audit | Tier 1 for master plans; Tier 2 for sub-plans |
+| **Deferred Scope** | Describes planned work not yet assigned to an active phase | Tier 1 banner required on the doc; matrix row for the group |
+| **Superseded / Archived Reference** | Replaced by a newer document or approach | Tier 2 sufficient |
+| **Permanent Decision Rationale** | ADRs — locked architectural decisions | No banner required; append-only policy is the classification signal |
+
+**Living Reference (Diátaxis)** is a Diátaxis-specific notation within the model, not a seventh class. New Diátaxis output docs are classified by their quadrant placement; no inline banner required.
+
+**Transition rule — Deferred Scope:** When a Deferred Scope document's feature or package enters active development in a named phase milestone, reclassify it to Canonical Normative Plan, add it to the active phase's plan index, and update this matrix. The PH7-RM-* plans must be reviewed and reclassified as needed before PH7.12 sign-off.
+
+**ADR rule:** New ADRs are always Permanent Decision Rationale. Sequential numbering resumes at ADR-0084 (ADR-0083 is reserved for the release-readiness taxonomy ADR to be created in PH7.11).
+
+**Banner format (Tier 1):**
+```
+> **Doc Classification:** [Class Name] — [one-sentence purpose statement]
+```
+
+### 2.2 ADR Catalog Conflict Registry
+
+The following conflicts were identified during PH7.10R validation (2026-03-09). Resolution is deferred to PH7.11 §7.11.2. No files are renamed, deleted, or re-indexed during PH7.10.
+
+| Conflict | Detail | Deferred Action |
+|----------|--------|-----------------|
+| Filesystem vs. index discrepancy | 93 ADR files on disk; 74 entries in `docs/README.md` index; 76 referenced in this file | PH7.11: reconcile filesystem with index |
+| Duplicate-numbered pairs (4) | ADR-0013, ADR-0053, ADR-0054, ADR-0055 — each number has two files on disk | PH7.11: determine canonical file per number; archive duplicates |
+| Un-prefixed PH6 ADRs (4) | ADR-0060 through ADR-0063 have non-standard filenames (missing `-description` suffix) | PH7.11: standardize filenames |
+| Index gap (ADR-0073–ADR-0079) | These numbers appear in the filesystem but are absent from the `docs/README.md` index | PH7.11: add missing entries to index |
+| ADR-0082 not indexed | ADR-0082 (sharepoint-docs-pre-provisioning-storage, created PH7.7) missing from `docs/README.md` | PH7.11: add to index |
 
 ---
 

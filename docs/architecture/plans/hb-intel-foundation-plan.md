@@ -1,5 +1,7 @@
 # HB Intel Foundation Development Plan
 
+> **Doc Classification:** Historical Foundational — original exhaustive implementation instructions, locked for audit; use `current-state-map.md` and active phase plans for current implementation guidance.
+
 **Version:** 1.0 (aligned with Blueprint V4)  
 **Purpose:** This document contains exhaustive, numbered, manual step-by-step instructions with complete copy-paste-ready code for every layer of the foundation. It was built from the interview-locked decisions (Option A for every package and app) and the HB Intel Design System vision. Any competent developer or AI coding agent can follow this plan sequentially and produce a flawless, production-ready foundation.
 

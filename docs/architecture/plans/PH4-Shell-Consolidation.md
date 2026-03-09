@@ -1,5 +1,7 @@
 # PH4 Shell Consolidation — Removal of `@hbc/app-shell`
 
+> **Doc Classification:** Historical Foundational — Phase 4 is complete; this plan is sealed and retained for audit trail. Do not modify for current work.
+
 **Date:** 2026-03-05
 **Phase:** 4 (Shell Consolidation)
 **Base Commit:** e26faa719e3edcd3ae997c1973b6ce5fca34416d

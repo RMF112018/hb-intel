@@ -1,5 +1,7 @@
 # Phase 6 Development Plan – Provisioning Modernization
 
+> **Doc Classification:** Historical Foundational — Phase 6 is complete; this plan is sealed and retained for audit trail. Do not modify for current work.
+
 **Version:** 2.0 (supersedes v1.0 — fully re-derived from the structured interview conducted 2026-03-07; all decisions locked and documented below)
 **Purpose:** This document is the master plan for Phase 6: the first business-value delivery of HB Intel. It defines the complete provisioning modernization feature — from the Estimating Coordinator's Project Setup Request through the Controller's approval trigger, the 7-step SharePoint saga, real-time progress visibility across seven apps, and the overnight Step 5 fallback. It consolidates every architectural decision made during the structured interview and serves as the authoritative index for all 16 individual task files.
 **Audience:** Implementation agent(s), technical reviewers, product owner, operations/support stakeholders, and future maintainers.

@@ -137,3 +137,50 @@ Notes:
 - deferred items with rationale:
 -->
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+PH7.10 started: 2026-03-09
+PH7.10 completed: 2026-03-09
+
+Artifacts produced:
+- `docs/architecture/blueprint/current-state-map.md` §1 ADR count updated; §2 matrix extended with new rows (Deferred Scope, Permanent Decision Rationale formalized, Living Reference (Diátaxis), ADR conflict notation, PH7-RM-*, SF04-SF06, PH4–PH6 completed phase plans, PH7 remediation plans, release docs); §2.1 Classification Maintenance Rule added; §2.2 ADR Catalog Conflict Registry added — Amendments A, B, C, D, E, G
+- `docs/README.md` — Document Classification System section added (6-class table, reading order, Tier 1 banner explanation) — §7.10.3
+- Tier 1 classification banners applied to 16 files — Amendment F:
+  - `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md` (Canonical Normative Plan)
+  - `docs/architecture/plans/hb-intel-foundation-plan.md` (Historical Foundational)
+  - `docs/architecture/plans/PH6-Provisioning-Plan.md` (Historical Foundational)
+  - `docs/architecture/plans/ph7-remediation/PH7.12-Final-Verification-and-Sign-Off.md` (Canonical Normative Plan)
+  - `docs/architecture/plans/PH4-Shell-Consolidation.md` (Historical Foundational)
+  - `docs/architecture/plans/PH5-Auth-Shell-Plan.md` (Historical Foundational)
+  - `docs/architecture/plans/PH5C-Auth-Shell-Plan.md` (Historical Foundational)
+  - `docs/architecture/plans/PH7-RM-1-Package-Foundation.md` (Deferred Scope)
+  - `docs/architecture/plans/PH7-RM-2-Shell-and-Layout.md` (Deferred Scope)
+  - `docs/architecture/plans/PH7-RM-3-NavigationSidebar.md` (Deferred Scope)
+  - `docs/architecture/plans/PH7-RM-4-RecordCard-and-EditDrawer.md` (Deferred Scope)
+  - `docs/architecture/plans/PH7-RM-5-ActionItems.md` (Deferred Scope)
+  - `docs/architecture/plans/PH7-RM-6-SessionSummary.md` (Deferred Scope)
+  - `docs/architecture/plans/PH7-RM-7-EstimatingIntegration.md` (Deferred Scope)
+  - `docs/architecture/plans/PH7-RM-8-Backend-API.md` (Deferred Scope)
+  - `docs/architecture/plans/PH7-RM-9-Testing-and-Documentation.md` (Deferred Scope)
+- Maintenance rule documented in `current-state-map.md §2.1` with transition trigger for Deferred Scope reclassification — §7.10.5, Amendment G
+
+Deferred to PH7.11:
+- ADR catalog conflict resolution (§2.2): 4 duplicate-numbered pairs, 19-file index discrepancy, 4 un-prefixed PH6 ADRs, ADR-0082 missing from README index
+
+Acceptance criteria status:
+[x] Six classes defined (incl. Permanent Decision Rationale)
+[x] Deferred Scope boundary case rules documented (SF04–SF06, PH7-RM-*, completed phases)
+[x] current-state-map.md §2 extended — no competing matrix created
+[x] Living Reference (Diátaxis) row with file count, quadrant breakdown, banner exemption
+[x] ADR conflicts documented with PH7.11 deferral
+[x] docs/README.md classification navigation section added
+[x] Tier 1 banners on 16 high-risk files; remaining files classified by matrix row
+[x] Structural-classification docs and Diátaxis output docs exempt from banners
+[x] PH7-RM-* plans classified Deferred Scope with reclassification trigger
+[x] Maintenance rule specifies vocabulary constraint and transition triggers
+[x] docs/README.md explains how to navigate classified doc system
+[x] Major docs are classified
+[x] High-value docs visibly indicate their role
+[x] Future maintenance rule is documented
+-->
+

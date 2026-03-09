@@ -1,5 +1,7 @@
 # Phase 5C Development Plan – Authentication & Shell Foundation Completion
 
+> **Doc Classification:** Historical Foundational — Phase 5C is complete; this master plan is sealed and retained for audit trail. Do not modify for current work.
+
 **Version:** 2.0 (Auth Shell Hardening & Developer Experience)
 **Purpose:** This document defines the complete Phase 5C implementation roadmap to elevate Phase 5 (Authentication & Shell Foundation) from 92.5% audit coverage to 100% and production-ready status through targeted hardening, developer tooling, and comprehensive documentation.
 **Audience:** Implementation agents, engineering leads, quality assurance, and technical stakeholders.
