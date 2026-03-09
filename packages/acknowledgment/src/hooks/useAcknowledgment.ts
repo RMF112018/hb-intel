@@ -11,6 +11,7 @@ import {
 } from '../utils/acknowledgmentLogic';
 import type {
   AckContextType,
+  IAcknowledgmentQueueEntry,
   IAcknowledgmentState,
   ISubmitAcknowledgmentParams,
   ISubmitAcknowledgmentRequest,
@@ -152,11 +153,21 @@ export function useAcknowledgment<T>(
           acknowledgedAt: new Date().toISOString(),
           bypassSequentialOrder: params.bypassSequentialOrder,
         };
-        await offlineQueue.enqueue({
-          endpoint: '/api/acknowledgments',
-          method: 'POST',
-          body,
-        });
+
+        // Idempotency check — avoid double-queuing if onError fires twice
+        const idempotencyKey = `${config.contextType}:${contextId}:${currentUserId}`;
+        const alreadyQueued = await offlineQueue.has(idempotencyKey);
+        if (!alreadyQueued) {
+          const entry: IAcknowledgmentQueueEntry = {
+            queue: 'acknowledgments',
+            endpoint: '/api/acknowledgments',
+            method: 'POST',
+            body,
+            enqueuedAt: new Date().toISOString(),
+            idempotencyKey,
+          };
+          await offlineQueue.enqueue(entry);
+        }
 
         // Mark optimistic event as pending sync (D-02)
         const current = queryClient.getQueryData<IAcknowledgmentState>(queryKey);

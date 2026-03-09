@@ -137,6 +137,19 @@ export interface ISubmitAcknowledgmentResponse {
   isComplete: boolean;
 }
 
+// ─── Offline Queue Entry (D-02) ──────────────────────────────────────────────
+
+export interface IAcknowledgmentQueueEntry {
+  queue: 'acknowledgments';
+  endpoint: '/api/acknowledgments';
+  method: 'POST';
+  body: ISubmitAcknowledgmentRequest;
+  /** Client-side ISO timestamp at the moment of the original submission attempt. */
+  enqueuedAt: string;
+  /** Unique key — prevents duplicate entries if network drops mid-flight. */
+  idempotencyKey: string; // `${contextType}:${contextId}:${partyUserId}`
+}
+
 // ─── Hook Return Types ───────────────────────────────────────────────────────
 
 export interface IUseAcknowledgmentReturn {

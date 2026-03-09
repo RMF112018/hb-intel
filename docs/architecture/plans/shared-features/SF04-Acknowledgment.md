@@ -238,5 +238,7 @@ SF04-T03 completed: 2026-03-09 — useAcknowledgment hook (fetch, mutation, opti
 SF04-T04 completed: 2026-03-09 — HbcAcknowledgmentPanel with complexity-gated rendering (essential/standard/expert), EssentialCTA, StandardPartyList, ExpertAuditTrail sub-components, modal integration, decline/completion banners
 SF04-T05 completed: 2026-03-09 — HbcAcknowledgmentBadge (complexity floor D-07, expert tooltip, all visual states) + HbcAcknowledgmentModal (D-03 phrase validation, D-04 decline radios/free-text, "Other" dedup), 25 new tests (36 total), @testing-library/jest-dom added to setup
 SF04-T06 completed: 2026-03-09 — Azure Function POST/GET /api/acknowledgments, IAcknowledgmentService (Real+Mock), HbcAcknowledgmentEvents SharePoint list setup script, @hbc/acknowledgment/server sub-entry-point, displayName added to IValidatedClaims, BIC/notification stubs
-Next: SF04-T07 (Offline Queue)
+SF04-T07 completed: 2026-03-09 — IAcknowledgmentQueueEntry type, useOfflineQueue has() + typed entry, idempotency check in useAcknowledgment onError, useAcknowledgmentQueueReplay stub, EssentialCTA pending-sync message, 4 offline tests (40 total passing)
+SF04-T08 completed: 2026-03-09 — Testing utilities (5 stubs → full), 3 new test files (57 new tests, 97 total), coverage ≥95% all metrics, Storybook config + 21 stories, Playwright E2E 8 stubs
+SF04-T09 completed: 2026-03-09 — Pre-deployment gates passed (build, check-types, lint, 97 tests ≥95% coverage). ADR-0092 created. Adoption guide and package README written. Blueprint and Foundation Plan progress comments inserted. SF04 complete.
 -->

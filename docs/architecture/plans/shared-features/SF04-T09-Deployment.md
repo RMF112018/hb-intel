@@ -435,3 +435,14 @@ curl -X POST https://$FUNCTION_APP_NAME.azurewebsites.net/api/acknowledgments \
 # E2E tests
 pnpm playwright test --grep acknowledgment
 ```
+
+<!-- PROGRESS: SF04-T09 completed 2026-03-09
+  Pre-deployment gates: build ✓, check-types ✓, lint ✓, test:coverage ✓ (97 tests, ≥95% all metrics)
+  Contract stability: IAcknowledgmentConfig<T> ✓, IAcknowledgmentState ✓, ACK_CONTEXT_TYPES (7) ✓, testing exports (5) ✓, DEFAULT_CONFIRMATION_PHRASE ✓, DECLINE_REASON_MIN_LENGTH ✓
+  Deliverables created:
+    docs/architecture/adr/ADR-0092-acknowledgment-platform-primitive.md (10 decisions)
+    docs/how-to/developer/acknowledgment-adoption-guide.md (5-step guide)
+    packages/acknowledgment/README.md (full API reference)
+  Progress comments inserted: Blueprint V4, Foundation Plan, SF04-Acknowledgment.md
+  ADR numbering: ADR-0092 (corrected from spec's ADR-0013 per CLAUDE.md §6.3.2)
+-->

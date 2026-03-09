@@ -193,19 +193,3 @@ After every change:
 
 **End of CLAUDE.md**
 This file is the single source of truth. Future updates must be versioned and aligned with a new Blueprint version.
-
----
-
-**Summary of Changes in v1.3**
-- Added `docs/architecture/blueprint/current-state-map.md` as the third Locked Source alongside Blueprint V4 and the Foundation Plan.
-- Updated §1 directive 1 (Read-First Rule) to explicitly require reading the current-state-map before any action.
-- Updated §1 directive 2 (Zero-Deviation Rule) to include active ADRs and the current-state-map.
-- Added §1 directive 4 (Document Classification Rule) — every new document must declare a classification class at creation time.
-- Added §2 Phase 7 status note (PH7.12 gate blocks all feature-expansion work until satisfied).
-- Added §3 Addendum — package boundary enforcement via ESLint is non-optional; bypass requires ADR.
-- Added §4 note on ADR numbering (next available: ADR-0091) and `current-state-map.md §2` update requirement.
-- Added §5 bullet for current-state-map living-document update policy.
-- Added new **§6.3 Phase 7 Governance Rules (Binding)** with four subsections: binding ADR table (0083–0090), source-of-truth and classification rules, mechanical enforcement gate table, PH7-RM-* deferred scope protection.
-- Expanded §7 Common Pitfalls with four new v1.3 auto-rejection rules.
-- Expanded §8 Verification Protocol from 3 steps to 8 steps (adds lint, type-check, P1 test, classification confirmation, current-state-map update check).
-- Updated Agent Session Anchor to v1.3 with all four required reads and governance binding statement.

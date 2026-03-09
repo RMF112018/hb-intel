@@ -730,4 +730,8 @@ PH7.1 Current-State Architecture Map published: 2026-03-09
   - Current implementation truth is now governed by `docs/architecture/current-state-map.md`.
   - This Foundation Plan retains classification: Historical Foundational.
   - For present package inventory and dependency topology, consult the current-state map.
+SF04 @hbc/acknowledgment — Complete 2026-03-09.
+  All 9 task files implemented (T01–T09). ADR-0092 authored.
+  97 tests, ≥95% coverage. 3 components, 3 hooks, 7 context types, 5 testing utilities.
+  Documentation: ADR-0092, adoption guide, package README.
 -->

@@ -1,16 +1,14 @@
 /**
  * Stub for offline queue functionality.
- * TODO: Replace with @hbc/session-state import in SF04-T07
+ * TODO: Replace with @hbc/session-state import when that package is activated.
  */
 
-interface IQueueItem {
-  endpoint: string;
-  method: string;
-  body: unknown;
-}
+import type { IAcknowledgmentQueueEntry } from '../types';
 
 interface IOfflineQueue {
-  enqueue: (item: IQueueItem) => Promise<void>;
+  enqueue: (item: IAcknowledgmentQueueEntry) => Promise<void>;
+  /** Check whether an entry with this idempotency key is already queued. */
+  has: (idempotencyKey: string) => Promise<boolean>;
 }
 
 /**
@@ -19,12 +17,19 @@ interface IOfflineQueue {
  */
 export function useOfflineQueue(_key: string): IOfflineQueue {
   return {
-    enqueue: async (item: IQueueItem): Promise<void> => {
-      // TODO: Replace with @hbc/session-state offline queue in SF04-T07
+    enqueue: async (item: IAcknowledgmentQueueEntry): Promise<void> => {
+      // TODO: Replace with @hbc/session-state offline queue
       console.warn(
         '[@hbc/acknowledgment] Offline queue stub: item queued locally but will not be replayed.',
         item
       );
+    },
+    has: async (_idempotencyKey: string): Promise<boolean> => {
+      // TODO: Replace with @hbc/session-state persistence check
+      console.warn(
+        '[@hbc/acknowledgment] Offline queue stub: has() always returns false (no persistence).'
+      );
+      return false;
     },
   };
 }

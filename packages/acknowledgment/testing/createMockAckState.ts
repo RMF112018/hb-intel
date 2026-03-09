@@ -1,4 +1,8 @@
-// Placeholder — populated in SF04-T08
-export function createMockAckState() {
-  return {};
+import type { IAcknowledgmentState } from '../src/types/IAcknowledgment';
+import { mockAckStates } from './mockAckStates';
+
+export function createMockAckState(
+  overrides?: Partial<IAcknowledgmentState>
+): IAcknowledgmentState {
+  return { ...mockAckStates.pending, ...overrides };
 }

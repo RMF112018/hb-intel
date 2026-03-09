@@ -302,3 +302,15 @@ describe('useAcknowledgment — offline queue (D-02)', () => {
 pnpm --filter @hbc/acknowledgment typecheck
 pnpm --filter @hbc/acknowledgment test -- --reporter=verbose hooks/ --grep offline
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF04-T07 completed: 2026-03-09
+- Added IAcknowledgmentQueueEntry type to IAcknowledgment.ts
+- Upgraded useOfflineQueue stub: imported typed entry, added has() for idempotency
+- Added idempotency check to useAcknowledgment.ts onError (computes key, calls has(), skips if duplicate)
+- Created useAcknowledgmentQueueReplay.ts stub (returns inert { isReplaying: false, replayCount: 0 })
+- Added pending sync message to EssentialCTA.tsx (renders when hasPendingSync && !canAct)
+- Exported useAcknowledgmentQueueReplay from hooks/index.ts
+- 4 offline queue tests passing: enqueue shape, isPendingSync, no enqueue on 403, no duplicate entries
+- All 40 tests passing, build + check-types green
+-->

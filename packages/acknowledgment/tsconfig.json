@@ -17,5 +17,5 @@
     }
   },
   "include": ["src/**/*", "testing/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", ".storybook", "src/**/*.stories.tsx"]
 }

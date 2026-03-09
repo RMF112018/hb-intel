@@ -31,6 +31,15 @@ export function EssentialCTA({
     );
   }
 
+  const hasPendingSync = state.events.some((e) => e.isPendingSync);
+  if (hasPendingSync && !canAct) {
+    return (
+      <p className="hbc-ack-panel__pending-sync-msg" role="status">
+        Your acknowledgment will sync when you reconnect.
+      </p>
+    );
+  }
+
   if (!canAct) {
     return (
       <p className="hbc-ack-panel__waiting-msg">

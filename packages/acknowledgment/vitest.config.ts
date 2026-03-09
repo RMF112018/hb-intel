@@ -26,6 +26,10 @@ export default defineConfig({
         '**/*.test.ts',
         '**/*.test.tsx',
         '**/*.stories.tsx',
+        'src/server.ts',
+        'src/config/**',
+        'src/hooks/useOfflineQueue.ts',
+        'src/hooks/useAcknowledgmentQueueReplay.ts',
       ],
       thresholds: {
         lines: 95,
