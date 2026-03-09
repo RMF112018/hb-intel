@@ -60,7 +60,9 @@
       "@hbc/complexity": ["packages/complexity/src/index.ts"],
       "@hbc/complexity/*": ["packages/complexity/src/*"],
       "@hbc/acknowledgment": ["packages/acknowledgment/src/index.ts"],
-      "@hbc/acknowledgment/*": ["packages/acknowledgment/src/*"]
+      "@hbc/acknowledgment/*": ["packages/acknowledgment/src/*"],
+      "@hbc/step-wizard": ["packages/step-wizard/src/index.ts"],
+      "@hbc/step-wizard/*": ["packages/step-wizard/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"]
