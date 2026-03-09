@@ -236,5 +236,6 @@ SF04-T01 completed: 2026-03-09 — Package scaffold created with all config, bar
 SF04-T02 completed: 2026-03-09 — TypeScript contracts (11 types/interfaces), ACK_CONTEXT_TYPES (7 entries), acknowledgmentLogic.ts (5 functions + 2 constants)
 SF04-T03 completed: 2026-03-09 — useAcknowledgment hook (fetch, mutation, optimistic update, offline queue stub), useAcknowledgmentGate selector, ackKeys factory, 11 unit tests passing
 SF04-T04 completed: 2026-03-09 — HbcAcknowledgmentPanel with complexity-gated rendering (essential/standard/expert), EssentialCTA, StandardPartyList, ExpertAuditTrail sub-components, modal integration, decline/completion banners
-Next: SF04-T05 (Badge and Modal)
+SF04-T05 completed: 2026-03-09 — HbcAcknowledgmentBadge (complexity floor D-07, expert tooltip, all visual states) + HbcAcknowledgmentModal (D-03 phrase validation, D-04 decline radios/free-text, "Other" dedup), 25 new tests (36 total), @testing-library/jest-dom added to setup
+Next: SF04-T06 (Testing Utilities)
 -->

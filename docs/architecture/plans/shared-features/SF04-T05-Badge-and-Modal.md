@@ -504,3 +504,12 @@ pnpm --filter @hbc/acknowledgment typecheck
 pnpm --filter @hbc/acknowledgment test -- --reporter=verbose components/HbcAcknowledgmentBadge
 pnpm --filter @hbc/acknowledgment test -- --reporter=verbose components/HbcAcknowledgmentModal
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF04-T05 completed: 2026-03-09
+- HbcAcknowledgmentBadge: complexity floor (essential→standard), expert tooltip via HbcTooltip, all visual states (pending/partial/acknowledged/declined/bypassed), BadgeSkeleton
+- HbcAcknowledgmentModal: AcknowledgeContent (D-03 phrase validation, aria-invalid, mismatch hint), DeclineContent (D-04 radios with "Other" dedup, free-text min 10 chars, char count), dialog shell with Escape handler
+- Adaptations: HbcTooltip instead of generic Tooltip, ComplexityTier from @hbc/complexity, "Other" dedup in decline radio list, constants exported for test assertions
+- Tests: 10 badge tests (mocked hooks), 15 modal tests (pure props), all passing
+- Added @hbc/complexity alias to vitest.config.ts, @testing-library/jest-dom to test setup
+-->
