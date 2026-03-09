@@ -71,7 +71,10 @@
       "Read(//Users/bobbyfetting/hb-intel/packages/$pkg/**)",
       "Bash(pkill:*)",
       "Bash(cat:*)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npx eslint:*)"
     ]
   },
   "enabledPlugins": {

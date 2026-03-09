@@ -12,6 +12,15 @@ import type {
   NormalizedAuthSession,
   SessionRestoreResult,
 } from '../types.js';
+import {
+  buildBootstrapEndMetadata,
+  buildBootstrapStartMetadata,
+  buildCompatSession,
+  buildRestoreAuditPayload,
+  buildSignInAuditPayload,
+  buildSignOutAuditPayload,
+  mapRestoreOutcomeToLifecycle,
+} from './helpers/authStoreHelpers.js';
 
 // ALIGNMENT: authStore v1.0 - PH5C.2, PH5C.3 - Session storage & normalization
 /**
@@ -51,11 +60,7 @@ export const useAuthStore = create<AuthStoreSlice>((set) => ({
   beginBootstrap: (runtimeMode) =>
     set((state) => {
       const resolvedRuntime = runtimeMode ?? state.runtimeMode;
-      startStartupPhase('auth-bootstrap', {
-        source: 'auth-store',
-        runtimeMode: resolvedRuntime ?? undefined,
-        outcome: 'pending',
-      });
+      startStartupPhase('auth-bootstrap', buildBootstrapStartMetadata(resolvedRuntime ?? undefined));
 
       return {
         ...state,
@@ -79,14 +84,7 @@ export const useAuthStore = create<AuthStoreSlice>((set) => ({
       const session = params?.session ?? state.session;
       const permissionsReady = params?.permissionsReady ?? state.shellBootstrap.permissionsReady;
       const hasSession = Boolean(session);
-      endStartupPhase('auth-bootstrap', {
-        source: 'auth-store',
-        runtimeMode: session?.runtimeMode ?? state.runtimeMode ?? undefined,
-        outcome: hasSession ? 'success' : 'failure',
-        details: {
-          permissionsReady,
-        },
-      });
+      endStartupPhase('auth-bootstrap', buildBootstrapEndMetadata(session, state.runtimeMode, permissionsReady));
 
       return {
         ...state,
@@ -124,32 +122,13 @@ export const useAuthStore = create<AuthStoreSlice>((set) => ({
       const hasSession = Boolean(nextSession);
       const permissionsReady = hasSession;
 
-      recordStructuredAuditEvent({
-        eventType: result.outcome === 'restored' ? 'session-restore-success' : 'session-restore-failure',
-        actorId: nextSession?.user.id ?? state.session?.user.id ?? 'system',
-        subjectUserId: nextSession?.user.id ?? state.session?.user.id ?? 'system',
-        runtimeMode: nextSession?.runtimeMode ?? 'unknown',
-        source: 'auth-store',
-        correlationId: `restore-${state.restoreState.lastAttemptedAt ?? 'unknown'}`,
-        outcome: result.outcome === 'restored' ? 'success' : 'failure',
-        details: {
-          outcome: result.outcome,
-          shellTransition: result.shellStatusTransition,
-          failureCode: result.failure?.code,
-          failureMessage: result.failure?.message,
-        },
-      });
+      recordStructuredAuditEvent(
+        buildRestoreAuditPayload(result, nextSession, state.session, state.restoreState.lastAttemptedAt),
+      );
 
       return {
         ...state,
-        lifecyclePhase:
-          result.outcome === 'restored'
-            ? 'authenticated'
-            : result.outcome === 'reauth-required'
-              ? 'reauth-required'
-              : result.outcome === 'fatal'
-                ? 'error'
-                : 'signed-out',
+        lifecyclePhase: mapRestoreOutcomeToLifecycle(result.outcome),
         session: hasSession ? nextSession : null,
         runtimeMode: nextSession?.runtimeMode ?? state.runtimeMode,
         currentUser: nextSession?.user ?? null,
@@ -173,20 +152,7 @@ export const useAuthStore = create<AuthStoreSlice>((set) => ({
 
   signInSuccess: (session: NormalizedAuthSession) =>
     set((state) => {
-      recordStructuredAuditEvent({
-        eventType: 'sign-in',
-        actorId: session.user.id,
-        subjectUserId: session.user.id,
-        runtimeMode: session.runtimeMode,
-        source: 'auth-store',
-        correlationId: `signin-${session.issuedAt}`,
-        outcome: 'success',
-        details: {
-          providerIdentityRef: session.providerIdentityRef,
-          roles: session.resolvedRoles,
-        },
-        occurredAt: session.validatedAt,
-      });
+      recordStructuredAuditEvent(buildSignInAuditPayload(session));
 
       return {
         ...state,
@@ -207,16 +173,9 @@ export const useAuthStore = create<AuthStoreSlice>((set) => ({
 
   signOut: () =>
     set((state) => {
-      const signer = state.session?.user.id ?? state.currentUser?.id ?? 'system';
-      recordStructuredAuditEvent({
-        eventType: 'sign-out',
-        actorId: signer,
-        subjectUserId: signer,
-        runtimeMode: state.session?.runtimeMode ?? 'unknown',
-        source: 'auth-store',
-        correlationId: `signout-${new Date().toISOString()}`,
-        outcome: 'success',
-      });
+      recordStructuredAuditEvent(
+        buildSignOutAuditPayload(state.session?.user.id, state.currentUser?.id, state.session?.runtimeMode),
+      );
 
       return {
         ...state,
@@ -292,36 +251,13 @@ export const useAuthStore = create<AuthStoreSlice>((set) => ({
         };
       }
 
-      const nowIso = new Date().toISOString();
-      const fallbackMode = state.runtimeMode ?? 'mock';
-      const runtimeMode =
-        fallbackMode === 'msal'
-          ? 'pwa-msal'
-          : fallbackMode === 'spfx'
-            ? 'spfx-context'
-            : fallbackMode;
-
-      const session: NormalizedAuthSession = {
-        user,
-        providerIdentityRef: user.email,
-        resolvedRoles: user.roles.map((role) => role.name),
-        permissionSummary: {
-          grants: user.roles.flatMap((role) => role.permissions),
-          overrides: [],
-        },
-        runtimeMode,
-        issuedAt: nowIso,
-        validatedAt: nowIso,
-        restoreMetadata: {
-          source: 'memory',
-        },
-      };
+      const session = buildCompatSession(user, state.runtimeMode);
 
       return {
         ...state,
         lifecyclePhase: 'authenticated',
         session,
-        runtimeMode,
+        runtimeMode: session.runtimeMode,
         currentUser: user,
         structuredError: null,
         error: null,

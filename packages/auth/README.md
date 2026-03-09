@@ -28,6 +28,21 @@ It guarantees one shared auth model across PWA and SPFx-hosted runtime modes.
 
 These concerns are owned by `@hbc/shell`.
 
+## Internal Ownership Boundaries
+
+| Layer | Owns | Does Not Own |
+|-------|------|-------------|
+| `stores/authStore.ts` | Central auth/session/permission state, atomic transitions, selectors, public API | Audit payload assembly, timing metadata construction, compat session building |
+| `stores/helpers/` | Pure helper functions for audit payloads, timing metadata, restore-outcome mapping, compat session construction | State ownership, side effects, store subscriptions |
+| `stores/permissionStore.ts` | Permission grants, feature flags, feature registrations | Auth lifecycle, session state |
+| `stores/permissionResolution.ts` | Deterministic permission evaluation logic | State storage, UI concerns |
+| `adapters/` | Provider SDK normalization, identity acquisition | Store mutations, guard decisions |
+| `guards/` | Access-control decision logic, React gate components | Auth state mutations, adapter calls |
+| `audit/` | Event recording, retention, operational visibility | Auth flow orchestration |
+| `startup/` | Timing bridge emission (optional globalThis bridge) | Phase sequencing decisions |
+
+**Rule:** `stores/helpers/` must not import from `adapters/` (prevents circular dependency).
+
 ## Major Public Contracts
 
 - Session + runtime contracts: `CanonicalAuthMode`, `NormalizedAuthSession`, `AuthFailure`.
