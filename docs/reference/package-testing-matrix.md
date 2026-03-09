@@ -52,7 +52,7 @@ Packages that depend on workspace siblings at source level require `resolve.alia
 | `@hbc/shell` | None |
 | `@hbc/sharepoint-docs` | None (aliases in local config only) |
 | `@hbc/bic-next-move` | `@hbc/bic-next-move/testing`, `@hbc/complexity`, `@hbc/ui-kit/app-shell`, `@hbc/ui-kit`, `@hbc/notification-intelligence` |
-| `@hbc/complexity` | `@hbc/complexity/testing`, `@hbc/ui-kit/app-shell`, `@hbc/ui-kit` |
+| `@hbc/complexity` | `@hbc/complexity/testing`, `@hbc/ui-kit/app-shell`, `@hbc/ui-kit` (vitest aliases only — no package.json dependency on ui-kit; removed in PH7.8.1 to break cycle) |
 
 ---
 

@@ -10,8 +10,6 @@
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "paths": {
-      "@hbc/ui-kit": ["../ui-kit/src/index.ts"],
-      "@hbc/ui-kit/app-shell": ["../ui-kit/src/app-shell.ts"],
       "@hbc/complexity/testing": ["./testing/index.ts"]
     }
   },

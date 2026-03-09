@@ -118,4 +118,10 @@ Verification:
 Notes:
 - Pre-existing blocker: turbo graph rejects ALL commands due to @hbc/ui-kit → @hbc/complexity cycle (added in SF03-T07). CI job will also be blocked until the cycle is resolved. This is a separate architectural issue requiring its own remediation.
 - Package test scripts already normalized from prior PH7 phases — no additional script changes needed.
+
+PH7.8.1 — Cyclic Dependency Remediation: 2026-03-09
+- Root cause: @hbc/complexity declared @hbc/ui-kit as a dependency (package.json + tsconfig paths) but zero source files imported from it. Phantom dependency introduced in SF03-T07 (commit bf91688).
+- Fix: removed @hbc/ui-kit from complexity/package.json dependencies and removed unused tsconfig path aliases. Zero runtime impact.
+- The legitimate direction (@hbc/ui-kit → @hbc/complexity) remains — 6 ui-kit components import useComplexityGate/useComplexity/IComplexityAwareProps.
+- Turbo cyclic dependency blocker: RESOLVED.
 -->
