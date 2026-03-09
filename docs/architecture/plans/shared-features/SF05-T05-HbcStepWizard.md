@@ -462,3 +462,15 @@ export function HbcStepWizard<T>({
 pnpm --filter @hbc/step-wizard typecheck
 pnpm --filter @hbc/step-wizard test -- --reporter=verbose components/HbcStepWizard
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF05-T05 completed: 2026-03-09
+Files created:
+  - packages/step-wizard/src/components/shared/StepStatusIcon.tsx (status icon set)
+  - packages/step-wizard/src/components/shared/WizardSidebar.tsx (sidebar + SidebarStepRow + inline helpers)
+  - packages/step-wizard/src/components/HbcStepWizard.tsx (root + VerticalWizard + HorizontalWizard + WizardNav)
+Verification: typecheck zero errors, 26/26 tests pass
+Inline helpers (Avatar, LockIcon, formatDateTime) follow @hbc/acknowledgment pattern
+HbcCoachingCallout imported from @hbc/ui-kit (real name, not spec alias)
+Next: SF05-T06 (HbcStepProgress + HbcStepSidebar)
+-->
