@@ -61,3 +61,32 @@ jobs:
             backend/functions/coverage/
             packages/provisioning/coverage/
           retention-days: 14
+
+  unit-tests-p1:
+    # PH7.8: P1 platform package test gate — no Azurite needed.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run P1 unit tests with coverage
+        run: pnpm turbo run test --filter=@hbc/auth --filter=@hbc/shell --filter=@hbc/sharepoint-docs --filter=@hbc/bic-next-move --filter=@hbc/complexity
+
+      - name: Upload P1 coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-p1
+          path: |
+            packages/auth/coverage/
+            packages/shell/coverage/
+            packages/sharepoint-docs/coverage/
+            packages/bic-next-move/coverage/
+            packages/complexity/coverage/
+          retention-days: 14

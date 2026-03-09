@@ -79,7 +79,8 @@
       "Bash(bash:*)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=16384\" pnpm vitest:*)",
       "Bash(for app in estimating project-hub leadership business-development admin safety quality-control-warranty risk-management operational-excellence human-resources)",
-      "Read(//Users/bobbyfetting/hb-intel/apps/$app/src/**)"
+      "Read(//Users/bobbyfetting/hb-intel/apps/$app/src/**)",
+      "Bash(for pkg in auth shell sharepoint-docs bic-next-move complexity)"
     ]
   },
   "enabledPlugins": {
