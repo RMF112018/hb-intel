@@ -1,4 +1,5 @@
-export * from './ComplexityTestProvider';
-export * from './createComplexityWrapper';
-export * from './mockComplexityContext';
-export * from './allTiers';
+export { ComplexityTestProvider } from './ComplexityTestProvider';
+export type { ComplexityTestProviderProps } from './ComplexityTestProvider';
+export { createComplexityWrapper } from './createComplexityWrapper';
+export { mockComplexityContext } from './mockComplexityContext';
+export { allTiers } from './allTiers';

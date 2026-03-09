@@ -652,3 +652,46 @@ node -e "
 # 3. Playwright E2E
 pnpm exec playwright test e2e/complexity-dial.spec.ts --reporter=list
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF03-T08 completed: 2026-03-08
+
+Testing sub-path populated:
+- testing/allTiers.ts — typed const array of all tiers
+- testing/mockComplexityContext.ts — factory with vi.fn() spies
+- testing/ComplexityTestProvider.tsx — drop-in test provider
+- testing/createComplexityWrapper.tsx — Testing Library wrapper factory
+- testing/index.ts — barrel re-exports
+
+Unit tests (99 tests, 9 files, all passing):
+- useComplexityGate.test.ts — 19 evaluateGate tests (minTier, maxTier, both, none)
+- useComplexity.test.ts — 15 tests (atLeast, is, showCoaching defaults)
+- HbcComplexityGate.test.tsx — 9 tests (unmount, keepMounted, fallback, maxTier, fade-in)
+- HbcComplexityDial.test.tsx — 10 tests (header, locked, settings, coaching toggle)
+- complexityStorage.test.ts — 8 tests (CRUD, corruption, sessionStorage)
+- complexityStorageErrors.test.ts — 3 tests (error paths via mocked getStorage)
+- ComplexityProvider.test.tsx — 21 tests (defaults, cache, API sync, StorageEvent, lock polling, SPFx)
+- complexityApiClient.test.ts — 10 tests (fetch, patch, AD group derivation)
+- getStorage.test.ts — 4 tests (localStorage, sessionStorage, in-memory fallback)
+
+Coverage results:
+- Statements: 100%
+- Branches: 96.68%
+- Functions: 96.87%
+- Lines: 100%
+All above 95% threshold. ✅
+
+Storybook stories created:
+- HbcComplexityGate.stories.tsx — 6 stories
+- HbcComplexityDial.stories.tsx — 6 stories
+
+Playwright E2E:
+- e2e/complexity-dial.spec.ts — 8 scenarios (aspirational, pending dev-harness)
+
+Vitest config updated:
+- Added e2e/** to exclude list (prevents Playwright import conflicts)
+
+Import path note: Spec used ../../ relative paths from __tests__, corrected to ../ (files are under src/__tests__/).
+
+Next: SF03-T09 Deployment
+-->

@@ -266,5 +266,5 @@ Testing sub-path published. ≥95% coverage enforced. ADR and SPFx guide written
 | `SF03-T05-Components.md` | `HbcComplexityGate.tsx` (D-04, D-09), `HbcComplexityDial.tsx` (D-06, header + settings) | ✅ Done 2026-03-08 |
 | `SF03-T06-Persistence-and-Sync.md` | `getStorage.ts`, `complexityStorage.ts`, StorageEvent sync, role map loader, API client | ✅ Done 2026-03-08 |
 | `SF03-T07-Retrofit-Audit.md` | Sensitivity table, `complexityMinTier` prop pattern, 5 retrofitted components | ✅ Done 2026-03-08 |
-| `SF03-T08-Testing-Strategy.md` | `testing/` sub-path, unit tests, Storybook stories, Playwright E2E scenarios |
+| `SF03-T08-Testing-Strategy.md` | `testing/` sub-path, unit tests, Storybook stories, Playwright E2E scenarios | ✅ Done 2026-03-08 |
 | `SF03-T09-Deployment.md` | Pre-deployment checklist, ADR content, SPFx guide, verification commands |
