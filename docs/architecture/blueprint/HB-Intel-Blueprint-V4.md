@@ -1113,4 +1113,8 @@ Phase 5C.10 (Final Verification & Sign-Off) completed: 2026-03-07
   - PH5C master closure completed in `docs/architecture/plans/PH5C-Auth-Shell-Plan.md` with PH5C.10 progress notes marked complete, verification/audit sections marked PASS, and all final sign-off roles approved (dated 2026-03-07).
   - Layered acceptance continuity explicitly preserved: Layer 1 Feature Completion, Layer 2 Outcome Validation, and Layer 3 Operational Readiness remain closed under locked Phase 5 governance.
   - ADR created: `docs/architecture/adr/ADR-0073-phase-5c-final-verification-and-sign-off.md`.
+PH7.1 Current-State Architecture Map published: 2026-03-09
+  - Current implementation truth is now governed by `docs/architecture/current-state-map.md`.
+  - This Blueprint remains the locked normative target architecture (classification: Canonical Normative Plan).
+  - When actual repo structure differs from Blueprint V4 descriptions, consult the current-state map for present truth.
 -->

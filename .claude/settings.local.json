@@ -70,7 +70,8 @@
       "Bash(for pkg in models data-access query-hooks shell ui-kit)",
       "Read(//Users/bobbyfetting/hb-intel/packages/$pkg/**)",
       "Bash(pkill:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(git:*)"
     ]
   },
   "enabledPlugins": {

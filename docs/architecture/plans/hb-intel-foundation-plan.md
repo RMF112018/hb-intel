@@ -724,4 +724,8 @@ Phase 4C (Code Quality Remediation) closure recorded: 2026-03-07
   - Audit score recorded via `node scripts/audit-score.js`: **100.00%** (target >= 99.0%).
   - Evidence package created: `docs/architecture/plans/PH4C-Release-Gate-Evidence.md`.
   - Sign-off recorded: Architecture Owner `HB-INTEL-ARCH` (2026-03-07), Product Owner `HB-INTEL-PO` (2026-03-07).
+PH7.1 Current-State Architecture Map published: 2026-03-09
+  - Current implementation truth is now governed by `docs/architecture/current-state-map.md`.
+  - This Foundation Plan retains classification: Historical Foundational.
+  - For present package inventory and dependency topology, consult the current-state map.
 -->

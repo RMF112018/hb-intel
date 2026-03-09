@@ -19,6 +19,10 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | [Security](./security/) | Compliance and security documentation | Administrators, Security |
 | [FAQ](./faq.md) | Frequently asked questions | All audiences |
 
+## Current-State Architecture
+
+- **[Current-State Architecture Map](./architecture/current-state-map.md)** — Authoritative reference for the present implementation state of the monorepo. When this document differs from historical plans, it governs present truth.
+
 ## Locked Architecture Documents
 
 - [Blueprint V4](./architecture/blueprint/HB-Intel-Blueprint-V4.md) — Complete target architecture (read-only, comment-only updates)
