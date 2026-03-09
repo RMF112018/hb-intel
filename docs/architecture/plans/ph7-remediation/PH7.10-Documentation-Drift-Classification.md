@@ -86,20 +86,20 @@
 
 ## Acceptance Criteria Checklist
 
-- [ ] Classification model defines all six classes: Canonical Current-State, Canonical Normative Plan, Historical Foundational, Deferred Scope, Superseded/Archived Reference, Permanent Decision Rationale (Amendment B).
-- [ ] Deferred Scope class includes boundary case rules: SF04–SF06 plans, PH7-RM-\* plans, and completed phase plans (Amendment A).
-- [ ] `current-state-map.md §2` matrix extended with new rows and conflict notations — no competing standalone matrix file created (Amendment C).
-- [ ] Living Reference (Diátaxis) row present in matrix with file count, quadrant breakdown, and banner exemption note (Amendment D).
-- [ ] ADR catalog conflicts documented in matrix with explicit deferral to PH7.11 §7.11.2 for resolution (Amendment E).
-- [ ] `docs/README.md` has a classification navigation section linking to `current-state-map.md §2` (§7.10.3).
-- [ ] Tier 1 inline classification banners applied to ~15–20 high-risk files; remaining files classified via matrix row membership (Amendment F).
-- [ ] Structural-classification docs and Diátaxis output docs are explicitly exempt from mandatory banners (Amendment H).
-- [ ] PH7-RM-\* plans classified as Deferred Scope with reclassification trigger documented (Amendment G).
-- [ ] Ongoing maintenance rule specifies vocabulary constraint and transition triggers (§7.10.5, Amendment G).
-- [ ] `docs/README.md` explains how to navigate the classified doc system.
-- [ ] Major docs are classified.
-- [ ] High-value docs visibly indicate their role (Tier 1 banners).
-- [ ] Future maintenance rule is documented.
+- [x] Classification model defines all six classes: Canonical Current-State, Canonical Normative Plan, Historical Foundational, Deferred Scope, Superseded/Archived Reference, Permanent Decision Rationale (Amendment B).
+- [x] Deferred Scope class includes boundary case rules: SF04–SF06 plans, PH7-RM-\* plans, and completed phase plans (Amendment A).
+- [x] `current-state-map.md §2` matrix extended with new rows and conflict notations — no competing standalone matrix file created (Amendment C).
+- [x] Living Reference (Diátaxis) row present in matrix with file count, quadrant breakdown, and banner exemption note (Amendment D).
+- [x] ADR catalog conflicts documented in matrix with explicit deferral to PH7.11 §7.11.2 for resolution (Amendment E).
+- [x] `docs/README.md` has a classification navigation section linking to `current-state-map.md §2` (§7.10.3).
+- [x] Tier 1 inline classification banners applied to ~15–20 high-risk files; remaining files classified via matrix row membership (Amendment F).
+- [x] Structural-classification docs and Diátaxis output docs are explicitly exempt from mandatory banners (Amendment H).
+- [x] PH7-RM-\* plans classified as Deferred Scope with reclassification trigger documented (Amendment G).
+- [x] Ongoing maintenance rule specifies vocabulary constraint and transition triggers (§7.10.5, Amendment G).
+- [x] `docs/README.md` explains how to navigate the classified doc system.
+- [x] Major docs are classified.
+- [x] High-value docs visibly indicate their role (Tier 1 banners).
+- [x] Future maintenance rule is documented.
 
 ---
 
