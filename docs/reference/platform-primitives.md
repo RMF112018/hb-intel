@@ -93,6 +93,9 @@ A package qualifies as Tier-1 when it meets **all five** of the following:
 - [`packages/bic-next-move/README.md`](../../packages/bic-next-move/README.md)
 - [ADR-0080](../architecture/adr/ADR-0080-bic-next-move-platform-primitive.md)
 - [SF02 Master Plan](../architecture/plans/shared-features/SF02-BIC-Next-Move.md)
+- [API Reference](bic-next-move/api.md)
+- [Module Adoption Guide](../how-to/developer/bic-module-adoption.md)
+- [Server Aggregation Migration](../how-to/developer/bic-server-aggregation-migration.md)
 
 ---
 
@@ -183,38 +186,72 @@ Current adoption status across all active feature packages and applications.
 
 | Feature Package | `@hbc/sharepoint-docs` | `@hbc/bic-next-move` | `@hbc/complexity` |
 |----------------|----------------------|---------------------|-------------------|
-| `@hbc/features-accounting` | Planned | Planned | Planned |
-| `@hbc/features-estimating` | Planned | Planned | Planned |
-| `@hbc/features-project-hub` | Planned | Planned | Planned |
-| `@hbc/features-leadership` | N/A | Planned | Planned |
-| `@hbc/features-business-development` | Planned | Planned | Planned |
-| `@hbc/features-admin` | N/A | N/A | Planned |
-| `@hbc/features-safety` | Planned | Planned | Planned |
-| `@hbc/features-quality-control-warranty` | Planned | Planned | Planned |
-| `@hbc/features-risk-management` | Planned | Planned | Planned |
-| `@hbc/features-operational-excellence` | N/A | Planned | Planned |
-| `@hbc/features-human-resources` | N/A | N/A | Planned |
+| `@hbc/features-accounting` | Planned | Required — manifest key pending | Planned |
+| `@hbc/features-estimating` | Planned | Required (workflows: estimating-pursuit, estimating-kickoff) | Planned |
+| `@hbc/features-project-hub` | Planned | Required (workflows: project-hub-pmp, project-hub-turnover, project-hub-constraints, project-hub-permits, project-hub-monthly-review) | Planned |
+| `@hbc/features-leadership` | N/A | Required — manifest key pending | Planned |
+| `@hbc/features-business-development` | Planned | Required (workflows: bd-scorecard, bd-department-sections) | Planned |
+| `@hbc/features-admin` | N/A | Required (workflows: admin-provisioning) | Planned |
+| `@hbc/features-safety` | Planned | Required — manifest key pending | Planned |
+| `@hbc/features-quality-control-warranty` | Planned | Required — manifest key pending | Planned |
+| `@hbc/features-risk-management` | Planned | Required — manifest key pending | Planned |
+| `@hbc/features-operational-excellence` | N/A | Required — manifest key pending | Planned |
+| `@hbc/features-human-resources` | N/A | N/A (no action-owning workflows) | Planned |
 
 ### Applications (14)
 
 | Application | `@hbc/sharepoint-docs` | `@hbc/bic-next-move` | `@hbc/complexity` |
 |------------|----------------------|---------------------|-------------------|
-| `@hbc/spfx-accounting` | Planned | Planned | Planned |
-| `@hbc/spfx-estimating` | Planned | Planned | Planned |
-| `@hbc/spfx-project-hub` | Planned | Planned | Planned |
-| `@hbc/spfx-leadership` | N/A | Planned | Planned |
-| `@hbc/spfx-business-development` | Planned | Planned | Planned |
-| `@hbc/spfx-admin` | N/A | N/A | Planned |
-| `@hbc/spfx-safety` | Planned | Planned | Planned |
-| `@hbc/spfx-quality-control-warranty` | Planned | Planned | Planned |
-| `@hbc/spfx-risk-management` | Planned | Planned | Planned |
-| `@hbc/spfx-operational-excellence` | N/A | Planned | Planned |
-| `@hbc/spfx-human-resources` | N/A | N/A | Planned |
+| `@hbc/spfx-accounting` | Planned | Required — manifest key pending | Planned |
+| `@hbc/spfx-estimating` | Planned | Required (workflows: estimating-pursuit, estimating-kickoff) | Planned |
+| `@hbc/spfx-project-hub` | Planned | Required (workflows: project-hub-pmp, project-hub-turnover, project-hub-constraints, project-hub-permits, project-hub-monthly-review) | Planned |
+| `@hbc/spfx-leadership` | N/A | Required — manifest key pending | Planned |
+| `@hbc/spfx-business-development` | Planned | Required (workflows: bd-scorecard, bd-department-sections) | Planned |
+| `@hbc/spfx-admin` | N/A | Required (workflows: admin-provisioning) | Planned |
+| `@hbc/spfx-safety` | Planned | Required — manifest key pending | Planned |
+| `@hbc/spfx-quality-control-warranty` | Planned | Required — manifest key pending | Planned |
+| `@hbc/spfx-risk-management` | Planned | Required — manifest key pending | Planned |
+| `@hbc/spfx-operational-excellence` | N/A | Required — manifest key pending | Planned |
+| `@hbc/spfx-human-resources` | N/A | N/A (no action-owning workflows) | Planned |
 | `@hbc/dev-harness` | N/A | N/A | Planned |
-| `@hbc/pwa` | Planned | Planned | Planned |
-| `@hbc/hb-site-control` | Planned | Planned | Planned |
+| `@hbc/pwa` | Planned | Required | Planned |
+| `@hbc/hb-site-control` | Planned | Required | Planned |
 
-> **Note:** All feature packages and apps are currently at v0.0.0 (scaffold stage) with zero adoption of any Tier-1 primitive. "Planned" status indicates the concern area is expected to be present when feature development begins. Statuses will be updated to "Implemented" as PH7.5+ phases execute adoption.
+> **Note:** All feature packages and apps are currently at v0.0.0 (scaffold stage) with zero adoption of any Tier-1 primitive. "Required" status indicates the concern area is confirmed present; manifest keys are either assigned or pending. Statuses will be updated to "Implemented" as adoption phases execute.
+
+---
+
+## Release Gate Rule
+
+**Rule:** No module with action-owning workflows ships without one of:
+
+1. **Full BIC integration** — registered via `registerBicModule()`, UI wired with `HbcBicBadge`/`HbcBicDetail`, tests passing with canonical fixtures from `@hbc/bic-next-move/testing`.
+2. **Explicit "N/A" classification** — documented rationale that the module has no action-owning workflows (e.g., `@hbc/features-human-resources`).
+3. **ADR exception** — architecture owner approval with an ADR in `docs/architecture/adr/` referencing [ADR-0080](../architecture/adr/ADR-0080-bic-next-move-platform-primitive.md).
+
+**Enforcement:** Release review must verify BIC status against this registry before approving any feature module for production deployment.
+
+---
+
+## BIC Adoption Detail
+
+Per-module BIC integration status under `@hbc/bic-next-move`.
+
+| Feature Package | Manifest Key(s) | Registration | UI Components | Testing | Release Gate | Exception ADR |
+|----------------|-----------------|-------------|---------------|---------|-------------|---------------|
+| `@hbc/features-business-development` | `bd-scorecard`, `bd-department-sections` | Pending | Pending | Pending | Blocked | — |
+| `@hbc/features-estimating` | `estimating-pursuit`, `estimating-kickoff` | Pending | Pending | Pending | Blocked | — |
+| `@hbc/features-project-hub` | `project-hub-pmp`, `project-hub-turnover`, `project-hub-constraints`, `project-hub-permits`, `project-hub-monthly-review` | Pending | Pending | Pending | Blocked | — |
+| `@hbc/features-admin` | `admin-provisioning` | Pending | Pending | Pending | Blocked | — |
+| `@hbc/features-accounting` | Pending | Pending | Pending | Pending | Blocked | — |
+| `@hbc/features-leadership` | Pending | Pending | Pending | Pending | Blocked | — |
+| `@hbc/features-safety` | Pending | Pending | Pending | Pending | Blocked | — |
+| `@hbc/features-quality-control-warranty` | Pending | Pending | Pending | Pending | Blocked | — |
+| `@hbc/features-risk-management` | Pending | Pending | Pending | Pending | Blocked | — |
+| `@hbc/features-operational-excellence` | Pending | Pending | Pending | Pending | Blocked | — |
+| `@hbc/features-human-resources` | N/A | N/A | N/A | N/A | N/A — no action-owning workflows | — |
+
+> **BIC Registration Standard:** See [`docs/reference/bic-next-move/api.md`](bic-next-move/api.md) for compliance requirements.
 
 ---
 
@@ -274,4 +311,14 @@ Created: 2026-03-09
 Sections: Tier-1 policy (§7.4.1), registry (§7.4.2), decision tree (§7.4.3),
           adoption matrix (§7.4.4), non-duplication rule (§7.4.5),
           developer planning guidance (§7.4.6)
+-->
+<!-- PH7.6 — BIC Standardization & Registration Enforcement
+Updated: 2026-03-09
+Changes:
+  - BIC adoption matrix refined from coarse "Planned" to per-workflow classification (§7.6.2, §7.6.5)
+  - Admin-provisioning conflict resolved: Option A — kept manifest key, updated matrix to "Required" (§7.6.2)
+  - Release Gate Rule added (§7.6.4)
+  - BIC Adoption Detail table added (§7.6.5)
+  - Canonical docs links added to @hbc/bic-next-move package detail
+  - Applications table updated to mirror feature package BIC classifications
 -->

@@ -16,7 +16,7 @@ Complete the documentation suite, write the ADR, produce the server-aggregation 
 
 ## 3-Line Plan
 
-1. Write ADR `0011-bic-next-move-platform-primitive.md` documenting all 10 interview decisions.
+1. Confirm ADR `ADR-0080-bic-next-move-platform-primitive.md` exists (created PH7.4R) — no new ADR required.
 2. Write `docs/how-to/developer/bic-server-aggregation-migration.md` (D-06 requirement).
 3. Execute pre-deployment checklist and verify `pnpm turbo run build` passes cleanly.
 
@@ -38,7 +38,7 @@ Complete the documentation suite, write the ADR, produce the server-aggregation 
 - [ ] `BIC_AGGREGATION_MODE` defaults to `'client'` with `'server'` stub present
 
 ### Documentation
-- [ ] ADR `docs/architecture/adr/0011-bic-next-move-platform-primitive.md` written
+- [x] ADR `docs/architecture/adr/ADR-0080-bic-next-move-platform-primitive.md` exists (created PH7.4R — confirmed present)
 - [ ] `docs/how-to/developer/bic-server-aggregation-migration.md` written (D-06)
 - [ ] `docs/how-to/developer/bic-module-adoption.md` written (module registration guide)
 - [ ] `docs/reference/bic-next-move/api.md` written (complete API reference)
@@ -62,10 +62,10 @@ Complete the documentation suite, write the ADR, produce the server-aggregation 
 
 ---
 
-## ADR: `docs/architecture/adr/0011-bic-next-move-platform-primitive.md`
+## ADR: `docs/architecture/adr/ADR-0080-bic-next-move-platform-primitive.md` (already created PH7.4R — do not recreate)
 
 ```markdown
-# ADR-0011: BIC Next Move as a Platform-Wide Ownership Primitive
+# ADR-0080: BIC Next Move as a Platform-Wide Ownership Primitive
 
 **Date:** 2026-03-08
 **Status:** Accepted
@@ -437,7 +437,7 @@ grep -r "from '@hbc/project-hub" packages/bic-next-move/src/
 # Expected: zero matches for all three
 
 # 6. Verify ADR and docs exist
-test -f docs/architecture/adr/0011-bic-next-move-platform-primitive.md && echo "ADR OK"
+test -f docs/architecture/adr/ADR-0080-bic-next-move-platform-primitive.md && echo "ADR OK"
 test -f docs/how-to/developer/bic-server-aggregation-migration.md && echo "Migration guide OK"
 test -f docs/how-to/developer/bic-module-adoption.md && echo "Adoption guide OK"
 
@@ -467,7 +467,7 @@ Documentation added:
   - docs/architecture/plans/shared-features/SF02-T08-Deployment.md
   - docs/how-to/developer/bic-module-adoption.md
   - docs/how-to/developer/bic-server-aggregation-migration.md
-ADR created: docs/architecture/adr/0011-bic-next-move-platform-primitive.md
+ADR exists: docs/architecture/adr/ADR-0080-bic-next-move-platform-primitive.md (created PH7.4R)
 Next: SF03 (per PH7-Shared-Features-Evaluation.md build sequence)
 -->
 ```

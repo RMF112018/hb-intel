@@ -275,4 +275,16 @@ SF02-T07 Testing Strategy: COMPLETE — 2026-03-08
   tsconfig: expanded rootDir to "." for testing sub-path, added @hbc/ui-kit/app-shell path, excluded __stories__/
   Verifications passed: test (113 pass), test:coverage (≥95%), typecheck (zero errors), build (zero errors)
 Next: SF02-T08 Deployment
+
+PH7.6 BIC Standardization & Registration Enforcement: COMPLETE — 2026-03-09
+  SF02-T08 ADR corrections applied: all 5 ADR-0011 references corrected to ADR-0080
+  BIC registration standard published: docs/reference/bic-next-move/api.md
+  3 documentation files extracted/authored:
+    - docs/reference/bic-next-move/api.md (API reference with vocabulary, types, hooks, components, registry, constants, testing, registration standard)
+    - docs/how-to/developer/bic-module-adoption.md (extracted from SF02-T08)
+    - docs/how-to/developer/bic-server-aggregation-migration.md (extracted from SF02-T08)
+  Adoption matrix extended with per-workflow BIC classification in docs/reference/platform-primitives.md
+  Admin-provisioning conflict resolved: Option A — kept manifest key, updated matrix to "Required"
+  Release gate rule documented in platform-primitives.md
+  BIC Adoption Detail table added to platform-primitives.md
 -->

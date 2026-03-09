@@ -206,15 +206,15 @@
 
 ## Acceptance Criteria Checklist
 
-- [ ] Platform ownership vocabulary is published (`docs/reference/bic-next-move/api.md` or glossary doc).
-- [ ] BIC_MODULE_MANIFEST keys are explicitly mapped to feature packages; admin-provisioning conflict resolved.
-- [ ] `docs/how-to/developer/bic-module-adoption.md` exists on disk (extracted from SF02-T08).
-- [ ] `docs/how-to/developer/bic-server-aggregation-migration.md` exists on disk (extracted from SF02-T08).
-- [ ] BIC registration standard is documented (compliance criteria, shadow-model prohibition, ADR exception process).
-- [ ] Release-gate rule for action-owning modules is documented.
-- [ ] `docs/reference/platform-primitives.md` adoption matrix extended with BIC per-workflow classification.
-- [ ] SF02-T08-Deployment.md corrected: all 5 ADR-0011 references updated to ADR-0080.
-- [ ] `SF02-BIC-Next-Move.md` reflects standardization status and next adoption steps.
+- [x] Platform ownership vocabulary is published (`docs/reference/bic-next-move/api.md` or glossary doc).
+- [x] BIC_MODULE_MANIFEST keys are explicitly mapped to feature packages; admin-provisioning conflict resolved.
+- [x] `docs/how-to/developer/bic-module-adoption.md` exists on disk (extracted from SF02-T08).
+- [x] `docs/how-to/developer/bic-server-aggregation-migration.md` exists on disk (extracted from SF02-T08).
+- [x] BIC registration standard is documented (compliance criteria, shadow-model prohibition, ADR exception process).
+- [x] Release-gate rule for action-owning modules is documented.
+- [x] `docs/reference/platform-primitives.md` adoption matrix extended with BIC per-workflow classification.
+- [x] SF02-T08-Deployment.md corrected: all 5 ADR-0011 references updated to ADR-0080.
+- [x] `SF02-BIC-Next-Move.md` reflects standardization status and next adoption steps.
 
 ---
 
@@ -277,5 +277,30 @@ Validation findings (5 amendments applied):
     references documented with exact locations and correct replacements (ADR-0080);
     ADR-0080 already exists (created PH7.4R).
 
-Next: PH7.6 implementation (awaiting user confirmation)
+PH7.6 Implementation: 2026-03-09
+  All 9 acceptance criteria satisfied.
+
+  Artifacts produced:
+    - docs/reference/bic-next-move/api.md (new — API reference with platform ownership vocabulary,
+      types, hooks, components, registry, constants, testing sub-path, BIC registration standard,
+      PH7.8 readiness note)
+    - docs/how-to/developer/bic-module-adoption.md (new — extracted from SF02-T08 lines 302-411)
+    - docs/how-to/developer/bic-server-aggregation-migration.md (new — extracted from SF02-T08 lines 194-298)
+    - docs/reference/platform-primitives.md (extended — BIC per-workflow classification replacing
+      coarse "Planned", release gate rule, BIC adoption detail table, canonical docs links)
+    - SF02-T08-Deployment.md (corrected — all 5 ADR-0011 references updated to ADR-0080)
+    - SF02-BIC-Next-Move.md (updated — PH7.6 progress comment appended)
+
+  Admin-provisioning resolution: Option A — kept manifest key, updated matrix to "Required"
+  Manifest.ts broken link (line 13) now resolves: docs/how-to/developer/bic-module-adoption.md exists
+
+  Verification:
+    - 3 new doc files: PASS (all exist on disk)
+    - SF02-T08 ADR-0011 references: 0 remaining (all corrected to ADR-0080)
+    - Admin row in platform-primitives.md: "Required (workflows: admin-provisioning)"
+    - Release gate rule: present in platform-primitives.md
+    - No source code changes (documentation-only phase)
+    - Existing tests: 113 pass, >=95% coverage (unaffected)
+
+  Next: PH7.7
 -->
