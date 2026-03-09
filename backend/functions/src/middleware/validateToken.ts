@@ -12,6 +12,8 @@ export interface IValidatedClaims {
   upn: string;
   oid: string;
   roles: string[];
+  /** Display name from JWT `name` claim. Falls back to UPN if absent. */
+  displayName?: string;
 }
 
 /**
@@ -37,6 +39,7 @@ export async function validateToken(request: HttpRequest): Promise<IValidatedCla
     preferred_username?: string;
     oid?: string;
     roles?: string[];
+    name?: string;
   };
 
   const upn = (claims.upn ?? claims.preferred_username) ?? '';
@@ -48,6 +51,7 @@ export async function validateToken(request: HttpRequest): Promise<IValidatedCla
     upn,
     oid: claims.oid,
     roles: claims.roles ?? [],
+    displayName: claims.name ?? upn,
   };
 }
 

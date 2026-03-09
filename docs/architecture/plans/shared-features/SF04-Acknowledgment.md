@@ -237,5 +237,6 @@ SF04-T02 completed: 2026-03-09 — TypeScript contracts (11 types/interfaces), A
 SF04-T03 completed: 2026-03-09 — useAcknowledgment hook (fetch, mutation, optimistic update, offline queue stub), useAcknowledgmentGate selector, ackKeys factory, 11 unit tests passing
 SF04-T04 completed: 2026-03-09 — HbcAcknowledgmentPanel with complexity-gated rendering (essential/standard/expert), EssentialCTA, StandardPartyList, ExpertAuditTrail sub-components, modal integration, decline/completion banners
 SF04-T05 completed: 2026-03-09 — HbcAcknowledgmentBadge (complexity floor D-07, expert tooltip, all visual states) + HbcAcknowledgmentModal (D-03 phrase validation, D-04 decline radios/free-text, "Other" dedup), 25 new tests (36 total), @testing-library/jest-dom added to setup
-Next: SF04-T06 (Testing Utilities)
+SF04-T06 completed: 2026-03-09 — Azure Function POST/GET /api/acknowledgments, IAcknowledgmentService (Real+Mock), HbcAcknowledgmentEvents SharePoint list setup script, @hbc/acknowledgment/server sub-entry-point, displayName added to IValidatedClaims, BIC/notification stubs
+Next: SF04-T07 (Offline Queue)
 -->

@@ -365,3 +365,36 @@ curl -X POST https://$FUNCTION_APP_NAME.azurewebsites.net/api/acknowledgments \
         "acknowledgedAt": "2026-03-08T10:01:00Z" }'
 # Expected: 403 Sequential order violation
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF04-T06 completed: 2026-03-09
+
+Files created:
+- packages/acknowledgment/src/server.ts — React-free barrel (types + config + utils only)
+- backend/functions/src/services/acknowledgment-service.ts — IAcknowledgmentService + Real (SharePoint) + Mock (in-memory)
+- backend/functions/src/functions/acknowledgments/stubs.ts — triggerBicCompletion, triggerCompletionNotification, notifyNextPendingParty
+- backend/functions/src/functions/acknowledgments/index.ts — POST + GET /api/acknowledgments handlers
+- scripts/create-acknowledgment-list.ts — idempotent HbcAcknowledgmentEvents SharePoint list setup (12 columns, 7 context types)
+
+Files modified:
+- packages/acknowledgment/package.json — added ./server export entry (dist/src/server.js)
+- backend/functions/package.json — added @hbc/acknowledgment workspace dependency
+- backend/functions/src/middleware/validateToken.ts — added optional displayName to IValidatedClaims, populated from JWT name claim
+- backend/functions/src/services/service-factory.ts — registered acknowledgments service (Real + Mock)
+- backend/functions/src/index.ts — imported acknowledgments function registration
+
+Spec adaptations applied:
+- Used validateToken() + unauthorizedResponse() (not getAADClaims)
+- claims.roles.includes('AcknowledgmentAdmin') for bypass validation
+- Client sends parties[] + mode with POST body (no server-side config registry)
+- deriveAcknowledgmentState() called with 3 args (config, parties, events)
+- BIC/notification as stub functions with logger output
+- ./server sub-entry-point uses .js extensions for Node16 compatibility
+
+Verification:
+- pnpm --filter @hbc/acknowledgment build ✓
+- pnpm --filter @hbc/functions build ✓
+- pnpm --filter @hbc/acknowledgment check-types ✓
+- pnpm --filter @hbc/functions check-types ✓
+- pnpm --filter @hbc/acknowledgment test ✓ (36 tests passing)
+-->

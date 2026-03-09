@@ -2,6 +2,9 @@
   "buildCommand": "cd ../.. && pnpm turbo run build --filter=@hbc/pwa...",
   "outputDirectory": "dist",
   "framework": null,
+  "git": {
+    "deploymentEnabled": false
+  },
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
     {

@@ -1093,6 +1093,9 @@ importers:
       '@azure/identity':
         specifier: ^4.5.0
         version: 4.13.0
+      '@hbc/acknowledgment':
+        specifier: workspace:*
+        version: link:../../packages/acknowledgment
       '@hbc/models':
         specifier: workspace:*
         version: link:../../packages/models

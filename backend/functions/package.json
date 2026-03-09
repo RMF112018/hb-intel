@@ -17,6 +17,7 @@
     "@azure/data-tables": "^13.3.2",
     "@azure/functions": "^4.6.0",
     "@azure/identity": "^4.5.0",
+    "@hbc/acknowledgment": "workspace:*",
     "@hbc/models": "workspace:*",
     "@pnp/graph": "^4.18.0",
     "@pnp/logging": "^4.18.0",

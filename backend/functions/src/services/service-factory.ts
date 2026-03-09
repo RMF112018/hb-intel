@@ -4,12 +4,14 @@ import type { IRedisCacheService } from './redis-cache-service.js';
 import type { ISignalRPushService } from './signalr-push-service.js';
 import type { IMsalOboService } from './msal-obo-service.js';
 import type { IProjectRequestsService } from './project-requests-service.js';
+import type { IAcknowledgmentService } from './acknowledgment-service.js';
 import { MockSharePointService, SharePointService } from './sharepoint-service.js';
 import { MockTableStorageService, RealTableStorageService } from './table-storage-service.js';
 import { MockRedisCacheService } from './redis-cache-service.js';
 import { MockSignalRPushService } from './signalr-push-service.js';
 import { ManagedIdentityOboService, MockMsalOboService } from './msal-obo-service.js';
 import { MockProjectRequestsService, RealProjectRequestsService } from './project-requests-service.js';
+import { MockAcknowledgmentService, RealAcknowledgmentService } from './acknowledgment-service.js';
 
 export interface IServiceContainer {
   sharePoint: ISharePointService;
@@ -18,6 +20,7 @@ export interface IServiceContainer {
   signalR: ISignalRPushService;
   msalObo: IMsalOboService;
   projectRequests: IProjectRequestsService;
+  acknowledgments: IAcknowledgmentService;
 }
 
 let singletonContainer: IServiceContainer | null = null;
@@ -40,6 +43,8 @@ export function createServiceFactory(): IServiceContainer {
     msalObo,
     // D-PH6-08: Project Setup Request lifecycle persistence adapter.
     projectRequests: isMock ? new MockProjectRequestsService() : new RealProjectRequestsService(),
+    // SF04-T06: Acknowledgment event persistence adapter.
+    acknowledgments: isMock ? new MockAcknowledgmentService() : new RealAcknowledgmentService(),
   };
 
   console.log(`[ServiceFactory] Initialized services in "${isMock ? 'mock' : 'real'}" mode`);

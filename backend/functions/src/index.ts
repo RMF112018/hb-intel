@@ -6,3 +6,4 @@ import './functions/proxy/index.js';
 import './functions/timerFullSpec/index.js';
 import './functions/signalr/index.js';
 import './functions/projectRequests/index.js';
+import './functions/acknowledgments/index.js';
