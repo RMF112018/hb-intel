@@ -5,7 +5,7 @@
 **Source Spec:** `docs/explanation/feature-decisions/PH7-SF-02-Shared-Feature-BIC-Next-Move.md`
 **Priority Tier:** 1 — Foundation (must exist before any domain module)
 **Estimated Effort:** 3–4 sprint-weeks
-**ADR Required:** `docs/architecture/adr/0011-bic-next-move-platform-primitive.md`
+**ADR Required:** `docs/architecture/adr/ADR-0080-bic-next-move-platform-primitive.md` <!-- PH7.4R: corrected from 0011 to 0080; ADR-0011 is ADR-0011-verification-deployment.md -->
 
 ---
 
@@ -214,7 +214,7 @@ Testing sub-path published. ≥95% coverage enforced. ADR and migration docs wri
 - [ ] Unit test coverage ≥95% on all resolver functions and hooks
 - [ ] Storybook stories for all three components in: `upcoming`, `watch`, `immediate`, `overdue`, `blocked`, `unassigned`, `with-full-chain` states
 - [ ] `docs/how-to/developer/bic-server-aggregation-migration.md` written (D-06)
-- [ ] ADR `0011-bic-next-move-platform-primitive.md` written
+- [ ] ADR `ADR-0080-bic-next-move-platform-primitive.md` written <!-- PH7.4R: corrected from 0011 to 0080 -->
 - [ ] `pnpm turbo run build` passes with zero errors
 
 ---

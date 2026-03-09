@@ -67,7 +67,7 @@
 
 ### Category C: Shared-Feature Primitives (3)
 
-These packages provide optional cross-cutting capabilities that sit between the core platform and feature layers. Features opt in; none are mandatory.
+These packages are **Tier-1 Platform Primitives** — mandatory-use when their concern area is present in a feature. See [Platform Primitives Registry](../../reference/platform-primitives.md) for policy, decision tree, adoption matrix, and non-duplication rule. <!-- PH7.4: elevated from optional to Tier-1 per §7.4.1 -->
 
 | Package | Name | Primary Responsibility | Dependency Role | Maturity | Doc Entrypoint |
 |---------|------|----------------------|-----------------|----------|----------------|
@@ -149,7 +149,7 @@ Blueprint V4 described core platform packages and feature modules but did not an
 - **@hbc/complexity** — Three-tier density context (Complexity Dial), allowing features to adapt UI density.
 - **@hbc/sharepoint-docs** — Document lifecycle management, wrapping Microsoft Graph document operations.
 
-These are classified as **controlled evolution (a)**. They follow the same ports/adapters pattern as core packages and do not violate Blueprint V4's layering rules. Features opt in; none are mandatory.
+These are classified as **controlled evolution (a)**. They follow the same ports/adapters pattern as core packages and do not violate Blueprint V4's layering rules. As of PH7.4, these are designated **Tier-1 Platform Primitives** — mandatory-use when their concern area is present. See [Platform Primitives Registry](../../reference/platform-primitives.md). <!-- PH7.4: Tier-1 elevation -->
 
 ### 4.2 Feature Packages Materialized
 
@@ -181,7 +181,7 @@ This file + package READMEs + the codebase itself. For any question about what e
 Use the Classification Matrix in Section 2. Documents labeled **Canonical Current-State** describe what exists. Documents labeled **Canonical Normative Plan** describe what should be built next. **Historical Foundational** documents describe what was planned originally and may have evolved.
 
 **Which shared-feature packages are mandatory?**
-None. Features opt in to `@hbc/bic-next-move`, `@hbc/complexity`, and `@hbc/sharepoint-docs` as needed. Core platform packages (Category A) are the mandatory foundation.
+As of PH7.4, `@hbc/bic-next-move`, `@hbc/complexity`, and `@hbc/sharepoint-docs` are **Tier-1 Platform Primitives** — mandatory when their concern area is present in a feature. See the [Platform Primitives Registry](../../reference/platform-primitives.md) for the decision tree and adoption matrix. Core platform packages (Category A) remain the mandatory foundation for all features. <!-- PH7.4: updated from "none mandatory" to Tier-1 policy -->
 
 **Where do I add a new feature?**
 1. Create `packages/features/<domain>/` with `package.json`, `tsconfig.json`, and `src/index.ts`.
@@ -254,6 +254,6 @@ None. Features opt in to `@hbc/bic-next-move`, `@hbc/complexity`, and `@hbc/shar
 | Backend services | 1 |
 | Build tooling packages | 1 |
 | **Total workspace members** | **40** |
-| Architecture Decision Records | 73 + 1 (PH5C) |
+| Architecture Decision Records | 75 + 1 (PH5C) | <!-- PH7.4: added ADR-0080, ADR-0081 -->
 | TSConfig path aliases | 62 |
 | Vite dev server ports | 14 (3000, 4000–4012) |

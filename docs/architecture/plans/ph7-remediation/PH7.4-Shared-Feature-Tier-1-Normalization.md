@@ -75,11 +75,11 @@
 
 ## Acceptance Criteria Checklist
 
-- [ ] Tier-1 primitive policy is documented.
-- [ ] The three in-scope packages are explicitly listed as Tier-1.
-- [ ] Feature authors have a clear decision tree for when to use each primitive.
-- [ ] An adoption matrix exists and covers active packages/apps.
-- [ ] Non-duplication rule is published and discoverable.
+- [x] Tier-1 primitive policy is documented.
+- [x] The three in-scope packages are explicitly listed as Tier-1.
+- [x] Feature authors have a clear decision tree for when to use each primitive.
+- [x] An adoption matrix exists and covers active packages/apps.
+- [x] Non-duplication rule is published and discoverable.
 
 ---
 
@@ -149,4 +149,24 @@ Amendments applied:
 - Progress Notes template: updated artifact list to match amended Deliverables section.
 
 Next: PH7.4 implementation (awaiting user confirmation to proceed).
+
+PH7.4 implementation completed: 2026-03-09
+
+Artifacts created:
+- docs/reference/platform-primitives.md (§7.4.1 policy, §7.4.2 registry, §7.4.3 decision tree,
+  §7.4.4 adoption matrix, §7.4.5 non-duplication rule, §7.4.6 developer planning guidance)
+- packages/sharepoint-docs/README.md (§7.4.2 per-package README)
+- packages/bic-next-move/README.md (§7.4.2 per-package README)
+- packages/complexity/README.md (§7.4.2 per-package README)
+- docs/architecture/adr/ADR-0080-bic-next-move-platform-primitive.md (§7.4.2 ADR governance)
+- docs/architecture/adr/ADR-0081-complexity-dial-platform-primitive.md (§7.4.2 ADR governance)
+
+Documents updated:
+- SF02-BIC-Next-Move.md — corrected ADR reference from 0011 to ADR-0080 (2 locations)
+- SF03-Complexity-Dial.md — corrected ADR reference from 0012 to ADR-0081 (2 locations)
+- docs/README.md — added ADR-0080, ADR-0081 to index; added platform-primitives.md cross-reference
+- docs/architecture/blueprint/current-state-map.md — updated Category C description from optional
+  to Tier-1 mandatory-use; updated §4.1 and §5 FAQ; updated ADR count from 73 to 75
+
+All five acceptance criteria marked complete.
 -->

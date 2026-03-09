@@ -5,7 +5,7 @@
 **Source Spec:** `docs/explanation/feature-decisions/PH7-SF-03-Shared-Feature-Complexity-Dial.md`
 **Priority Tier:** 1 — Foundation (must exist before domain modules render adaptive UI)
 **Estimated Effort:** 2–3 sprint-weeks (spec) + retrofit audit scope
-**ADR Required:** `docs/architecture/adr/0012-complexity-dial-platform-primitive.md`
+**ADR Required:** `docs/architecture/adr/ADR-0081-complexity-dial-platform-primitive.md` <!-- PH7.4R: corrected from 0012 to 0081; ADR-0012 is ADR-0012-models-comprehensive-structure.md -->
 
 ---
 
@@ -250,7 +250,7 @@ Testing sub-path published. ≥95% coverage enforced. ADR and SPFx guide written
 - [ ] Unit test coverage ≥95% on `atLeast`, `is`, gate logic, lock expiry, StorageEvent
 - [ ] Storybook stories: all three tiers for `HbcComplexityGate` and `HbcComplexityDial`
 - [ ] SPFx Application Customizer integration verified
-- [ ] ADR `0012-complexity-dial-platform-primitive.md` written
+- [ ] ADR `ADR-0081-complexity-dial-platform-primitive.md` written <!-- PH7.4R: corrected from 0012 to 0081 -->
 - [ ] `pnpm turbo run build` passes with zero errors
 
 ---
