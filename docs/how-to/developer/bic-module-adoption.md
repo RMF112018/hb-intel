@@ -2,6 +2,12 @@
 
 **Time to implement:** ~2 hours for a direct-assignee module, ~4 hours for workflow-state-derived.
 
+## Tier-1 Mandatory-Use Policy
+
+BIC Next Move is a **Tier-1 Platform Primitive** (per [ADR-0080](../../architecture/adr/ADR-0080-bic-next-move-platform-primitive.md) and the [Platform Primitives Registry](../../reference/platform-primitives.md)). If your feature's domain includes ball-in-court or ownership tracking, you **must** consume `@hbc/bic-next-move`. Reimplementing ownership/BIC logic outside the primitive is prohibited.
+
+---
+
 ## Step 1: Add dependency
 
 ```json

@@ -229,24 +229,24 @@ Evaluate whether any Phase 7 decisions should be mechanically enforced. Only add
 
 ## Acceptance Criteria Checklist
 
-- [ ] ADR-0083, ADR-0084, ADR-0085 created and accepted (Amendment A).
-- [ ] ADR-0086 and ADR-0087: either created (if gap confirmed) or "no new ADR" explicitly recorded in progress notes (Amendment A).
-- [ ] `ADR-0088-hbc-theme-context.md` exists; original `ADR-0013-hbc-theme-context.md` removed/archived (Amendment B-3, B Task B-4).
-- [ ] `ADR-0089-fluent-tokens-over-hbc-constants.md` exists; original un-prefixed file removed/archived (Amendment B-4).
-- [ ] Four duplicate-numbered pairs resolved per canonical rulings in §7.11.2 Task B-3; stale copies archived.
-- [ ] Un-prefixed files 0060–0063 archived (canonical ADR-0076–ADR-0078 confirmed); 0063 signalr ruling recorded in progress notes (Amendment B-4).
-- [ ] `docs/architecture/adr/README.md` rebuilt with all ADRs and correct next-available number (Amendment B-1).
-- [ ] `docs/README.md` ADR index gap filled (ADR-0073 through ADR-0089) (Amendment B-2).
-- [ ] `current-state-map.md §2.2` updated to mark resolved conflicts (Amendment B).
-- [ ] PH7.9 prerequisite check performed and recorded in progress notes; readiness taxonomy and sign-off template either confirmed to exist or created here (Amendment C).
-- [ ] `docs/README.md` Reference Documents section links: `package-testing-matrix.md`, `complexity-sensitivity.md`, auth-shell group (6 docs), readiness taxonomy, sign-off template (Amendment C).
-- [ ] `integrate-auth-with-your-feature.md` updated with Tier-1 primitive mandatory-use section (Amendment D).
-- [ ] `local-dev-setup.md` updated with test governance section (Amendment D).
-- [ ] `bic-module-adoption.md` updated with Tier-1 policy cross-reference (Amendment D).
-- [ ] `docs/how-to/developer/phase-7-governance-guide.md` created with all five governance sections (Amendment D).
-- [ ] Lint evaluation record present in §7.11.5; no new lint rules added (Amendment E).
-- [ ] Definitive next-available ADR number after PH7.11 recorded in progress notes (Amendment F).
-- [ ] Phase 7 governance is durable rather than relying on memory or chat history.
+- [x] ADR-0083, ADR-0084, ADR-0085 created and accepted (Amendment A).
+- [x] ADR-0086 and ADR-0087: either created (if gap confirmed) or "no new ADR" explicitly recorded in progress notes (Amendment A).
+- [x] `ADR-0088-hbc-theme-context.md` exists; original `ADR-0013-hbc-theme-context.md` removed/archived (Amendment B-3, B Task B-4).
+- [x] `ADR-0089-fluent-tokens-over-hbc-constants.md` exists; original un-prefixed file removed/archived (Amendment B-4).
+- [x] Four duplicate-numbered pairs resolved per canonical rulings in §7.11.2 Task B-3; stale copies archived.
+- [x] Un-prefixed files 0060–0063 archived (canonical ADR-0076–ADR-0078 confirmed); 0063 signalr ruling recorded in progress notes (Amendment B-4).
+- [x] `docs/architecture/adr/README.md` rebuilt with all ADRs and correct next-available number (Amendment B-1).
+- [x] `docs/README.md` ADR index gap filled (ADR-0073 through ADR-0090) (Amendment B-2).
+- [x] `current-state-map.md §2.2` updated to mark resolved conflicts (Amendment B).
+- [x] PH7.9 prerequisite check performed and recorded in progress notes; readiness taxonomy and sign-off template either confirmed to exist or created here (Amendment C).
+- [x] `docs/README.md` Reference Documents section links: `package-testing-matrix.md`, `complexity-sensitivity.md`, auth-shell group (6 docs), readiness taxonomy, sign-off template (Amendment C).
+- [x] `integrate-auth-with-your-feature.md` updated with Tier-1 primitive mandatory-use section (Amendment D).
+- [x] `local-dev-setup.md` updated with test governance section (Amendment D).
+- [x] `bic-module-adoption.md` updated with Tier-1 policy cross-reference (Amendment D).
+- [x] `docs/how-to/developer/phase-7-governance-guide.md` created with all five governance sections (Amendment D).
+- [x] Lint evaluation record present in §7.11.5; no new lint rules added (Amendment E).
+- [x] Definitive next-available ADR number after PH7.11 recorded in progress notes (Amendment F).
+- [x] Phase 7 governance is durable rather than relying on memory or chat history.
 
 ---
 
@@ -262,48 +262,47 @@ Evaluate whether any Phase 7 decisions should be mechanically enforced. Only add
 
 ## Progress Notes Template
 
-```markdown
 <!-- IMPLEMENTATION PROGRESS & NOTES
-PH7.11 started: YYYY-MM-DD
-PH7.11 completed: YYYY-MM-DD
+PH7.11 started: 2026-03-09
+PH7.11 completed: 2026-03-09
 
 ADRs created:
-- ADR-0083: release-readiness-taxonomy.md
-- ADR-0084: current-state-governance-model.md
-- ADR-0085: test-governance-normalization.md
-- ADR-0086: [created / not required — see ADR-0053/0056/0057]
-- ADR-0087: [created / not required — see ADR-0058]
-- ADR-0088: hbc-theme-context.md (renumbered from ADR-0013 duplicate)
+- ADR-0083: release-readiness-taxonomy.md — Accepted
+- ADR-0084: current-state-governance-model.md — Accepted
+- ADR-0085: test-governance-normalization.md — Accepted
+- ADR-0086: not required — audit of ADR-0053/0056/0057 confirmed Phase 5 auth decisions comprehensively cover Phase 7 shell/auth hardening; no gap exists
+- ADR-0087: not required — audit of ADR-0058 confirmed Phase 5 shell decomposition decision covers Phase 7 scope; no gap exists
+- ADR-0088: hbc-theme-context.md (renumbered from ADR-0013-hbc-theme-context.md duplicate)
 - ADR-0089: fluent-tokens-over-hbc-constants.md (prefixed from un-prefixed 0014)
+- ADR-0090: signalr-per-project-groups.md (prefixed/renumbered from un-prefixed 0063; distinct decision from ADR-0063-access-control)
 
 ADR catalog conflict resolution:
-- Duplicate pairs resolved: ADR-0013, ADR-0053, ADR-0054, ADR-0055
-- Un-prefixed files handled: 0014 (→ 0089), 0060 (archived), 0061 (archived), 0062 (archived), 0063 (ruling: [RECORD HERE])
-- ADR-0055-deprecated-token ruling: [RECORD CANONICAL DECISION]
-- Next-available ADR number after PH7.11: ADR-00XX
+- Duplicate pairs resolved: ADR-0013 (hbc-theme-context → ADR-0088), ADR-0053 (shimmer archived → canonical ADR-0074), ADR-0054 (dev-auth-bypass archived → canonical ADR-0075), ADR-0055 (deprecated-token archived → canonical ADR-PH4C-02)
+- Un-prefixed files handled: 0014 (→ ADR-0089), 0060 (archived, canonical ADR-0076), 0061 (archived, canonical ADR-0077), 0062 (archived, canonical ADR-0078), 0063 (→ ADR-0090, distinct SignalR decision not superseded by ADR-0063-access-control)
+- ADR-0055-deprecated-token ruling: same decision as ADR-PH4C-02; 0055 copy archived, ADR-PH4C-02 retained as canonical
+- Next-available ADR number after PH7.11: ADR-0091
 
 PH7.9 prerequisite:
-- release-readiness-taxonomy.md: [existed / created here]
-- release-signoff-template.md: [existed / created here]
+- release-readiness-taxonomy.md: existed (created PH7.9, 2026-03-09)
+- release-signoff-template.md: existed (created PH7.9, 2026-03-09)
 
 Indexes updated:
-- docs/architecture/adr/README.md: rebuilt with all XX ADRs
-- docs/README.md: ADR index filled (gaps closed), reference docs section expanded
+- docs/architecture/adr/README.md: rebuilt with all 90 active ADRs + 6 archived, organized by phase/domain
+- docs/README.md: ADR index filled (ADR-0073 through ADR-0090), reference docs section expanded with package-testing-matrix, complexity-sensitivity, auth-shell group (6 docs), readiness taxonomy, sign-off template
 
 Developer guides:
-- integrate-auth-with-your-feature.md: updated
-- local-dev-setup.md: updated
-- bic-module-adoption.md: updated
-- phase-7-governance-guide.md: created
+- integrate-auth-with-your-feature.md: updated with Tier-1 Platform Primitives mandatory-use section
+- local-dev-setup.md: updated with Test Governance section
+- bic-module-adoption.md: updated with Tier-1 mandatory-use policy cross-reference
+- phase-7-governance-guide.md: created with 5 sections (source-of-truth hierarchy, doc classification, test governance, release-readiness terminology, Tier-1 platform primitives)
 
 Verification:
-- build: PASS/FAIL
-- lint: PASS/FAIL
-- check-types: PASS/FAIL
-- link validation: PASS/FAIL
+- build: pending
+- lint: N/A (no code changes)
+- check-types: N/A (no code changes)
+- link validation: manual review complete
 
 Notes:
-- unresolved items:
-- deferred items with rationale:
+- unresolved items: none
+- deferred items with rationale: none
 -->
-```

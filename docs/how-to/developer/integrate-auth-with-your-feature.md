@@ -440,6 +440,20 @@ ls -lh dist/accounting/ dist/auth/ dist/shell/
 
 ---
 
+## Tier-1 Platform Primitives: Mandatory Use
+
+If your feature's concern area overlaps with any Tier-1 Platform Primitive, you **must** consume the primitive package. Reimplementing the same capability is prohibited.
+
+| Primitive | Concern Area | Package | ADR |
+|-----------|-------------|---------|-----|
+| BIC Next Move | Ball-in-court / ownership tracking | `@hbc/bic-next-move` | [ADR-0080](../../architecture/adr/ADR-0080-bic-next-move-platform-primitive.md) |
+| Complexity Dial | UI density adaptation | `@hbc/complexity` | [ADR-0081](../../architecture/adr/ADR-0081-complexity-dial-platform-primitive.md) |
+| SharePoint Docs | Document lifecycle management | `@hbc/sharepoint-docs` | [ADR-0082](../../architecture/adr/ADR-0082-sharepoint-docs-pre-provisioning-storage.md) |
+
+Use the decision tree in the [Platform Primitives Registry](../../reference/platform-primitives.md) to determine if your feature must adopt a primitive. See also [ADR-0079](../../architecture/adr/ADR-0079-shared-feature-packages.md) for the shared-feature package policy.
+
+---
+
 ## Next Steps
 
 - Explore `docs/reference/auth/permissions.md` for complete permission reference

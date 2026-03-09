@@ -105,12 +105,39 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0071 | Accepted | [ADR-0071-phase-5-documentation-package-and-release-sign-off.md](./architecture/adr/ADR-0071-phase-5-documentation-package-and-release-sign-off.md) |
 | ADR-0072 | Accepted | [ADR-0072-phase-5-final-acceptance-criteria-and-sign-off.md](./architecture/adr/ADR-0072-phase-5-final-acceptance-criteria-and-sign-off.md) |
 | ADR-PH5C-01 | Accepted | [ADR-PH5C-01-dev-auth-bypass.md](./architecture/adr/ADR-PH5C-01-dev-auth-bypass.md) |
+| ADR-0073 | Accepted | [ADR-0073-phase-5c-final-verification-and-sign-off.md](./architecture/adr/ADR-0073-phase-5c-final-verification-and-sign-off.md) |
+| ADR-0074 | Accepted | [ADR-0074-shimmer-utility-convention.md](./architecture/adr/ADR-0074-shimmer-utility-convention.md) |
+| ADR-0075 | Accepted | [ADR-0075-dev-auth-bypass-storybook-boundary.md](./architecture/adr/ADR-0075-dev-auth-bypass-storybook-boundary.md) |
+| ADR-0076 | Accepted | [ADR-0076-project-identifier-model.md](./architecture/adr/ADR-0076-project-identifier-model.md) |
+| ADR-0077 | Accepted | [ADR-0077-provisioning-package-boundary.md](./architecture/adr/ADR-0077-provisioning-package-boundary.md) |
+| ADR-0078 | Accepted | [ADR-0078-security-managed-identity.md](./architecture/adr/ADR-0078-security-managed-identity.md) |
+| ADR-0079 | Accepted | [ADR-0079-shared-feature-packages.md](./architecture/adr/ADR-0079-shared-feature-packages.md) |
 | ADR-0080 | Accepted | [ADR-0080-bic-next-move-platform-primitive.md](./architecture/adr/ADR-0080-bic-next-move-platform-primitive.md) |
 | ADR-0081 | Accepted | [ADR-0081-complexity-dial-platform-primitive.md](./architecture/adr/ADR-0081-complexity-dial-platform-primitive.md) |
+| ADR-0082 | Accepted | [ADR-0082-sharepoint-docs-pre-provisioning-storage.md](./architecture/adr/ADR-0082-sharepoint-docs-pre-provisioning-storage.md) |
+| ADR-0083 | Accepted | [ADR-0083-release-readiness-taxonomy.md](./architecture/adr/ADR-0083-release-readiness-taxonomy.md) |
+| ADR-0084 | Accepted | [ADR-0084-current-state-governance-model.md](./architecture/adr/ADR-0084-current-state-governance-model.md) |
+| ADR-0085 | Accepted | [ADR-0085-test-governance-normalization.md](./architecture/adr/ADR-0085-test-governance-normalization.md) |
+| ADR-0088 | Accepted | [ADR-0088-hbc-theme-context.md](./architecture/adr/ADR-0088-hbc-theme-context.md) |
+| ADR-0089 | Accepted | [ADR-0089-fluent-tokens-over-hbc-constants.md](./architecture/adr/ADR-0089-fluent-tokens-over-hbc-constants.md) |
+| ADR-0090 | Accepted | [ADR-0090-signalr-per-project-groups.md](./architecture/adr/ADR-0090-signalr-per-project-groups.md) |
 
 ## Reference Documents
 
 - [Platform Primitives Registry](./reference/platform-primitives.md) — Tier-1 shared-feature packages: policy, decision tree, adoption matrix, and non-duplication rule
+- [Package Testing Matrix](./reference/package-testing-matrix.md) — P1 package test governance: environments, coverage thresholds, CI jobs
+- [UI Kit Complexity Sensitivity](./reference/ui-kit/complexity-sensitivity.md) — Complexity Dial sensitivity configuration reference
+- [Release-Readiness Taxonomy](./reference/release-readiness-taxonomy.md) — Three-level readiness vocabulary and usage rules
+- [Release Sign-Off Template](./architecture/release/release-signoff-template.md) — Staged sign-off model for phase releases
+
+### Auth & Shell Reference
+
+- [Architecture Contracts](./reference/auth-shell-architecture-contracts.md)
+- [Governance and Policies](./reference/auth-shell-governance-and-policies.md)
+- [Store Contracts and State Diagrams](./reference/auth-shell-store-contracts-and-state-diagrams.md)
+- [Provider Adapter and Runtime Modes](./reference/auth-shell-provider-adapter-and-runtime-modes.md)
+- [Deferred Scope Roadmap](./reference/auth-shell-deferred-scope-roadmap.md)
+- [Validation and Release Package](./reference/auth-shell-validation-and-release-package.md)
 
 ## Document Classification System
 

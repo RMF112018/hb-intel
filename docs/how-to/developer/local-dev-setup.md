@@ -40,5 +40,29 @@ The Functions host starts on `http://localhost:7071`.
 pnpm turbo run test --filter=backend-functions --filter=@hbc/provisioning
 ```
 
+## Test Governance
+
+The monorepo enforces test governance for five P1 (platform-critical) packages via the root `vitest.workspace.ts`.
+
+**P1 packages:** `@hbc/auth`, `@hbc/shell`, `@hbc/sharepoint-docs`, `@hbc/bic-next-move`, `@hbc/complexity`
+
+**Key conventions:**
+- Each P1 package has its own `vitest.config.ts` with environment and coverage thresholds.
+- Coverage thresholds: lines 95, functions 95, branches 90–95, statements 95.
+- CI runs a dedicated `unit-tests-p1` job for these packages (no Azurite needed).
+
+**Run P1 tests locally:**
+```bash
+pnpm test --filter @hbc/auth
+pnpm test --filter @hbc/shell
+pnpm test --filter @hbc/sharepoint-docs
+pnpm test --filter @hbc/bic-next-move
+pnpm test --filter @hbc/complexity
+```
+
+For the full test matrix (environments, thresholds, alias requirements, CI jobs), see [`docs/reference/package-testing-matrix.md`](../../reference/package-testing-matrix.md).
+
+---
+
 ## Switching to Real SharePoint (integration testing)
 Set `HBC_ADAPTER_MODE=real` in `local.settings.json` and provide real Azure credentials for the test app registration (`AZURE_CLIENT_ID_TEST`, `AZURE_CLIENT_SECRET_TEST`). Tests will run against `https://hbconstruction.sharepoint.com/sites/hb-intel-test`.
