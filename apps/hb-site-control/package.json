@@ -16,6 +16,7 @@
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
+    "@hbc/complexity": "workspace:*",
     "@azure/msal-browser": "^4.0.0",
     "@azure/msal-react": "^3.0.0",
     "@fluentui/react-components": "^9.56.0",

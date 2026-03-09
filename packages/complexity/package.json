@@ -21,7 +21,7 @@
     "testing"
   ],
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --project tsconfig.json && cp src/components/complexity.css dist/src/components/complexity.css",
     "dev": "tsc --project tsconfig.json --watch",
     "test": "vitest run",
     "test:watch": "vitest",

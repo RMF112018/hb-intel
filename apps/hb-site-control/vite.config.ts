@@ -34,6 +34,7 @@ export default defineConfig(({ mode }) => ({
       '@hbc/auth': path.resolve(__dirname, '../../packages/auth/src'),
       '@hbc/shell': path.resolve(__dirname, '../../packages/shell/src'),
       '@hbc/ui-kit': path.resolve(__dirname, '../../packages/ui-kit/src'),
+      '@hbc/complexity': path.resolve(__dirname, '../../packages/complexity/src'),
       '@hbc/features-accounting': path.resolve(__dirname, '../../packages/features/accounting/src/index.ts'),
       '@hbc/features-estimating': path.resolve(__dirname, '../../packages/features/estimating/src/index.ts'),
       '@hbc/features-project-hub': path.resolve(__dirname, '../../packages/features/project-hub/src/index.ts'),

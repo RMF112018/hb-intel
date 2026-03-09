@@ -135,4 +135,10 @@ PH7.8.3 — hb-site-control Process Type Errors Remediation: 2026-03-09
 - Fix: created packages/complexity/src/env.d.ts with minimal ambient process.env.NODE_ENV declaration. Added /// <reference path="./env.d.ts" /> to complexity barrel (src/index.ts) so all consumers automatically pick up the declaration.
 - No changes to hb-site-control tsconfig or complexity dependencies. Fix is at the source package level.
 - Updated package-testing-matrix.md with env.d.ts documentation.
+
+PH7.8.4 — Rollup CSS Artifact Issue Remediation: 2026-03-09
+- Root cause: complexity builds with bare tsc which preserves `import './complexity.css'` in compiled .js output but does NOT copy CSS to dist. hb-site-control transitively resolves complexity via dist → Rollup error on missing CSS file.
+- Fix (Part 1 — dist completeness): added post-build `cp` to complexity build script: `tsc --project tsconfig.json && cp src/components/complexity.css dist/src/components/complexity.css`.
+- Fix (Part 2 — alias consistency): added `@hbc/complexity` source alias to hb-site-control vite.config.ts and added `@hbc/complexity: workspace:*` dependency to hb-site-control package.json. Matches monorepo pattern where all @hbc/* packages are aliased to source in consuming apps.
+- Updated package-testing-matrix.md with CSS copy documentation.
 -->

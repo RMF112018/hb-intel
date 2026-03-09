@@ -72,3 +72,11 @@ Both jobs run independently (no `needs:` dependency) and must pass before PR mer
 | Package | File | Purpose |
 |---------|------|---------|
 | `@hbc/complexity` | `src/env.d.ts` | Minimal ambient `process.env.NODE_ENV` declaration. Required because complexity uses `process.env.NODE_ENV` for dev-only warnings, and consumers with restricted `types` (e.g., `types: ["vite/client"]`) would otherwise get TS2591 errors when resolving complexity source via path aliases. The barrel (`src/index.ts`) includes a `/// <reference path="./env.d.ts" />` directive so the declaration is automatically available to all consumers. (Added PH7.8.3) |
+
+---
+
+## CSS Artifact Copy Requirement
+
+| Package | Asset | Build Script Detail | Reason |
+|---------|-------|---------------------|--------|
+| `@hbc/complexity` | `src/components/complexity.css` | Post-build `cp` copies CSS to `dist/src/components/complexity.css` | tsc transpiles `.tsx` → `.js` but does not copy non-TS assets. The compiled `.js` files retain `import './complexity.css'` statements. Without the copy step, any consumer resolving to `dist/` (e.g., SPFx webparts, or apps without source aliases) encounters a Rollup/bundler error on the missing CSS file. Consuming apps with Vite source aliases (dev-harness, accounting-pwa, hb-site-control) resolve to source where Vite handles CSS natively, but the dist must still be complete for non-aliased consumers. (Added PH7.8.4) |
