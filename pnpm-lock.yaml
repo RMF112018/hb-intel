@@ -1744,6 +1744,9 @@ importers:
 
   packages/step-wizard:
     dependencies:
+      '@hbc/bic-next-move':
+        specifier: workspace:*
+        version: link:../bic-next-move
       '@hbc/complexity':
         specifier: workspace:*
         version: link:../complexity

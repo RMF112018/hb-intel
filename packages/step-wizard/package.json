@@ -31,6 +31,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hbc/bic-next-move": "workspace:*",
     "@hbc/complexity": "workspace:*",
     "@hbc/ui-kit": "workspace:*"
   },

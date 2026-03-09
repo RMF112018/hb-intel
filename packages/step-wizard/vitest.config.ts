@@ -38,6 +38,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@hbc/step-wizard/testing': resolve(__dirname, './testing/index.ts'),
+      '@hbc/bic-next-move': resolve(__dirname, '../bic-next-move/src/index.ts'),
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../ui-kit/src/app-shell.ts'),
       '@hbc/ui-kit': resolve(__dirname, '../ui-kit/src/index.ts'),
       '@hbc/complexity': resolve(__dirname, '../complexity/src/index.ts'),

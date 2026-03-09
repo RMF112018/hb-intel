@@ -363,3 +363,13 @@ export function resolveUnlockedSteps(
 ```bash
 pnpm --filter @hbc/step-wizard typecheck
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF05-T02 completed: 2026-03-09
+- Added @hbc/bic-next-move workspace dependency (package.json, tsconfig.json paths, vitest.config.ts alias)
+- Wrote src/types/IStepWizard.ts — all interfaces verbatim from spec (StepStatus, StepOrderMode, IStep<T>, IStepWizardConfig<T>, IStepRuntimeEntry, IStepWizardState, IUseStepWizardReturn, IUseStepProgressReturn)
+- Wrote src/state/draftPayload.ts — draft schema + monotonic merge utilities verbatim from spec (IStepWizardDraft, STATUS_RANK, TERMINAL_STATUSES, isTerminalStatus, mergeStepStatus, mergeDraft, resolveDraftKey, computeIsComplete, computePercentComplete, resolveUnlockedSteps)
+- Barrels already correct (no changes needed)
+- Verification: typecheck ✅ zero errors, build ✅ dist/ output
+Next: SF05-T03 (State Machine)
+-->
