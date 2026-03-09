@@ -7,6 +7,8 @@
 **Audience:** Implementation agent(s), technical reviewers, product owner, operations/support stakeholders, and future maintainers.
 **Implementation Objective:** Deliver a production-ready SharePoint site provisioning system where an Estimating Coordinator submits a Project Setup Request, a Controller approves and triggers provisioning, and all relevant stakeholders see real-time or start/finish progress across seven HB Intel apps — with full security, observability, testing, and rollback coverage.
 
+> **Terminology Note (PH7.9 — 2026-03-09):** "Production-ready" in this Implementation Objective refers to the **Code-Ready** scope for Phase 6 implementation. Full Production-Ready status requires Environment-Ready and Operations-Ready gates, which are tracked separately per the [Release Readiness Taxonomy](../../reference/release-readiness-taxonomy.md).
+
 ---
 
 ## Refined Blueprint Section for Phase 6

@@ -710,6 +710,8 @@ Before tagging a `v*` release, a designated reviewer must confirm each item:
 
 _D-PH6-16 evidence note (2026-03-07): checklist marked complete based on this phase's documented workflow, file, and verification evidence._
 
+> **Readiness Classification (PH7.9 — 2026-03-09):** This release sign-off checklist covers **Code-Ready** gates (build, lint, type-check, tests) and **Environment-Ready** gates (infrastructure verification items). Operations-Ready and Production-Ready status are tracked separately per the [Release Readiness Taxonomy](../../reference/release-readiness-taxonomy.md).
+
 **Infrastructure**
 - [x] Azure Function App (production) has `WEBSITE_TIME_ZONE=Eastern Standard Time` configured.
 - [x] Azure Function App (production) has `HBC_ADAPTER_MODE=real` set (or variable absent, which defaults to real).

@@ -46,6 +46,7 @@
 ## 7.12.5 — Capture Readiness Classification for Phase 7
 
 - Record whether Phase 7 is Code-Ready, Environment-Ready, and Operations-Ready.
+  > See [Release Readiness Taxonomy](../../reference/release-readiness-taxonomy.md) for canonical definitions of each level.
 
 ## 7.12.6 — Final Sign-Off
 

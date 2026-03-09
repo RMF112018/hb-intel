@@ -58,3 +58,4 @@ Production release is **blocked** unless every checklist section below is marked
 - **Release Decision:** APPROVED FOR PRODUCTION
 - **Decision Date:** 2026-03-06
 - **Decision Basis:** All pass/fail release gates are `PASS` and all required named sign-offs are `APPROVED`.
+<!-- PH7.9 Taxonomy Note (2026-03-09): This document predates the Release Readiness Taxonomy (see docs/reference/release-readiness-taxonomy.md). It can be retroactively interpreted as Operations-Ready (all three levels satisfied) as of its sign-off date 2026-03-06. -->

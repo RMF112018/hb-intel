@@ -83,17 +83,17 @@
 
 ## Acceptance Criteria Checklist
 
-- [ ] Code-Ready, Environment-Ready, Operations-Ready, and N/A/Deferred are defined (Amendment A).
-- [ ] "Production-ready" has a constrained meaning and the language rules include the grandfather clause for locked historical documents (Amendment B).
-- [ ] `docs/architecture/release/release-signoff-template.md` exists with per-level date fields and staged sign-off model (Amendment C).
-- [ ] PH5 sealed release doc is annotated only — not structurally modified (Amendment C).
-- [ ] PH6.16 §6.16.12 has a readiness classification annotation (Amendment C).
-- [ ] Terminology notes added to the four named active plans: PH6 master plan, PH7-ProjectHub-15, PH7-Estimating-12, PH7.12 (Amendment D).
-- [ ] Reference doc contains all six mandatory sections including grandfathered-language registry, anti-pattern example, and sign-off template (Amendment E).
-- [ ] Staged vs. all-or-nothing sign-off model is ruled explicitly in the reference doc (Amendment F).
-- [ ] Reference doc contains ADR-0083 placeholder note (Amendment G).
-- [ ] PH7.9 annotations applied before PH7.10 runs its classification pass (Amendment G coordination).
-- [ ] Future contributors have examples and template snippets.
+- [x] Code-Ready, Environment-Ready, Operations-Ready, and N/A/Deferred are defined (Amendment A).
+- [x] "Production-ready" has a constrained meaning and the language rules include the grandfather clause for locked historical documents (Amendment B).
+- [x] `docs/architecture/release/release-signoff-template.md` exists with per-level date fields and staged sign-off model (Amendment C).
+- [x] PH5 sealed release doc is annotated only — not structurally modified (Amendment C).
+- [x] PH6.16 §6.16.12 has a readiness classification annotation (Amendment C).
+- [x] Terminology notes added to the four named active plans: PH6 master plan, PH7-ProjectHub-15, PH7-Estimating-12, PH7.12 (Amendment D).
+- [x] Reference doc contains all six mandatory sections including grandfathered-language registry, anti-pattern example, and sign-off template (Amendment E).
+- [x] Staged vs. all-or-nothing sign-off model is ruled explicitly in the reference doc (Amendment F).
+- [x] Reference doc contains ADR-0083 placeholder note (Amendment G).
+- [x] PH7.9 annotations applied before PH7.10 runs its classification pass (Amendment G coordination).
+- [x] Future contributors have examples and template snippets.
 
 ---
 
@@ -110,24 +110,26 @@
 
 ```markdown
 <!-- IMPLEMENTATION PROGRESS & NOTES
-PH7.9 started: YYYY-MM-DD
-PH7.9 completed: YYYY-MM-DD
+PH7.9 started: 2026-03-09
+PH7.9 completed: 2026-03-09
 
 Artifacts:
-- `docs/reference/release-readiness-taxonomy.md`
-- `docs/architecture/release/release-signoff-template.md`
-- annotation on `docs/architecture/release/PH5-final-release-checklist-and-signoff.md`
-- annotation on `PH6.16-CICD-Documentation.md §6.16.12`
-- terminology notes in PH6-Provisioning-Plan.md, PH7-ProjectHub-15-Backend-API.md, PH7-Estimating-12-Documentation.md, PH7.12-Final-Verification-and-Sign-Off.md
+- `docs/reference/release-readiness-taxonomy.md` — created (6 mandatory sections + ADR-0083 placeholder)
+- `docs/architecture/release/release-signoff-template.md` — created (per-level date fields, staged sign-off model, 3 named roles)
+- annotation on `docs/architecture/release/PH5-final-release-checklist-and-signoff.md` — 1-line HTML comment appended (sealed doc preserved)
+- annotation on `PH6.16-CICD-Documentation.md §6.16.12` — readiness classification blockquote added
+- terminology notes in PH6-Provisioning-Plan.md, PH7-ProjectHub-15-Backend-API.md, PH7-Estimating-12-Documentation.md (2 notes), PH7.12-Final-Verification-and-Sign-Off.md
 
 Verification:
-- build: PASS/FAIL
-- lint: PASS/FAIL
-- check-types: PASS/FAIL
-- test / validation: PASS/FAIL
+- build: PASS (docs-only changes)
+- PH5 sealed doc: 1 line added (HTML comment), no structural changes
+- PH6.16 §6.16.12: blockquote annotation present
+- PH6 terminology note: after line 8 (Implementation Objective)
+- PH7.12 cross-link: after §7.12.5
 
 Notes:
-- unresolved items:
-- deferred items with rationale:
+- All annotations applied before PH7.10 classification pass (Amendment G coordination satisfied)
+- unresolved items: none
+- deferred items with rationale: none
 -->
 ```

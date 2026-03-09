@@ -1058,6 +1058,8 @@ Next: Review with Product Owner, merge to main branch, mark as LOCKED
 
 I have created four comprehensive, production-ready architecture plan documents for the HB Intel Estimating module:
 
+> **Terminology Note (PH7.9 — 2026-03-09):** "Production-ready architecture plan documents" here refers to **Code-Ready** scope — plans are complete and verified for developer handoff. Full Production-Ready status requires Environment-Ready and Operations-Ready gates per the [Release Readiness Taxonomy](../../../reference/release-readiness-taxonomy.md).
+
 ### **File 1: PH7-Estimating-9-CrossModule.md**
 Specifies two critical cross-module integration contracts:
 - **Estimating → Project Hub Navigation** — Row-click navigation with data contract (projectNumber as linking key)
@@ -1087,6 +1089,7 @@ Two critical documentation deliverables:
 
 **All files are:**
 - ✅ Production-ready for developer handoff
+  > _Terminology Note (PH7.9): "Production-ready for developer handoff" = Code-Ready scope per the [Release Readiness Taxonomy](../../../reference/release-readiness-taxonomy.md)._
 - ✅ Cross-referenced (no broken links)
 - ✅ Compliant with CLAUDE.md v1.2 (comment-only updates to locked sources, full documentation generation)
 - ✅ Aligned with Diátaxis framework (how-to is goal-oriented, ADR is decision documentation)

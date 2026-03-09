@@ -6,6 +6,8 @@
 **Audience:** Implementation agent(s), technical reviewers.
 **Implementation Objective:** A complete, production-ready backend layer that all Project Hub frontend pages consume. Every endpoint validates the caller's Bearer token, checks project membership, and operates via Managed Identity for SharePoint writes.
 
+> **Terminology Note (PH7.9 — 2026-03-09):** "Production-ready backend layer" in this Implementation Objective refers to the **Code-Ready** scope. Full Production-Ready status requires Environment-Ready and Operations-Ready gates, which are tracked separately per the [Release Readiness Taxonomy](../../../reference/release-readiness-taxonomy.md).
+
 ---
 
 ## Prerequisites
