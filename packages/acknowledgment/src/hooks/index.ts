@@ -1,2 +1,2 @@
-export { useAcknowledgment } from './useAcknowledgment';
+export { useAcknowledgment, ackKeys } from './useAcknowledgment';
 export { useAcknowledgmentGate } from './useAcknowledgmentGate';

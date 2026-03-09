@@ -388,3 +388,14 @@ describe('useAcknowledgmentGate', () => {
 pnpm --filter @hbc/acknowledgment typecheck
 pnpm --filter @hbc/acknowledgment test -- --reporter=verbose hooks/
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF04-T03 completed: 2026-03-09
+- useAcknowledgment: TanStack Query fetch (D-05), optimistic update/rollback (D-02), offline queue stub (D-02, pending SF04-T07)
+- useAcknowledgmentGate: pure selector across single/parallel/sequential modes (D-01, D-09)
+- useOfflineQueue stub created (replaced by @hbc/session-state in SF04-T07)
+- ackKeys query key factory exported from barrel
+- 11 unit tests covering full truth table (9 scenarios + 2 edge cases)
+- Verification: check-types ✓, test ✓ (11/11), build ✓
+Next: SF04-T04 (Panel component)
+-->
