@@ -10,5 +10,3 @@ export type {
   SidebarNavGroup,
   ShellUser,
 } from './HbcAppShell/index.js';
-
-export { useComplexity } from './hooks/useComplexity.js';

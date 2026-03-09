@@ -36,6 +36,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@hbc/bic-next-move/testing': resolve(__dirname, './testing/index.ts'),
+      '@hbc/complexity': resolve(__dirname, '../complexity/src/index.ts'),
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../ui-kit/src/app-shell.ts'),
       '@hbc/ui-kit': resolve(__dirname, '../ui-kit/src/index.ts'),
       // Stub — package not yet scaffolded; vi.mock in setup.ts provides test double

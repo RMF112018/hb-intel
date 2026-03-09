@@ -51,7 +51,7 @@ export default class AccountingWebPart extends BaseClientSideWebPart<IAccounting
     if (!this._root) {
       this._root = createRoot(this.domElement);
     }
-    this._root.render(<App />);
+    this._root.render(<App spfxContext={this.context} />);
   }
 
   /**

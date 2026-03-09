@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useComplexity } from '@hbc/ui-kit';           // Full ui-kit — PWA/non-SPFx only
+import { useComplexity } from '@hbc/complexity';
 import type {
   IBicNextMoveConfig,
   IBicNextMoveState,
@@ -50,7 +50,7 @@ export function HbcBicDetail<T>({
   blockedByItem,
   className = '',
 }: HbcBicDetailProps<T>): React.ReactElement {
-  const { variant: contextVariant } = useComplexity();
+  const { tier: contextVariant } = useComplexity();
   const variant = resolveVariant(forceVariant, contextVariant);
   const [historyExpanded, setHistoryExpanded] = useState(false);
 

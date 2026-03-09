@@ -268,3 +268,24 @@ Testing sub-path published. ≥95% coverage enforced. ADR and SPFx guide written
 | `SF03-T07-Retrofit-Audit.md` | Sensitivity table, `complexityMinTier` prop pattern, 5 retrofitted components | ✅ Done 2026-03-08 |
 | `SF03-T08-Testing-Strategy.md` | `testing/` sub-path, unit tests, Storybook stories, Playwright E2E scenarios | ✅ Done 2026-03-08 |
 | `SF03-T09-Deployment.md` | Pre-deployment checklist, ADR content, SPFx guide, verification commands |
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+PH7.5 Complexity Retrofit Completion: 2026-03-09
+
+Actions completed:
+  - Removed ui-kit useComplexity stub (packages/ui-kit/src/hooks/useComplexity.ts deleted)
+  - Removed 3 export lines from ui-kit barrels (hooks/index.ts, index.ts, app-shell.ts)
+  - Migrated bic-next-move call sites from @hbc/ui-kit → @hbc/complexity (variant → tier)
+  - Updated 3 bic-next-move test mocks to mock @hbc/complexity with full IComplexityContext shape
+  - Wired ComplexityProvider into PWA root (apps/pwa/src/App.tsx)
+  - Wired ComplexityProvider into dev-harness root (apps/dev-harness/src/App.tsx)
+  - Wired ComplexityProvider with spfxContext into all 11 SPFx App.tsx files
+  - Updated all 11 SPFx WebPart.tsx files to pass this.context as spfxContext prop
+  - Added @hbc/complexity dependency to 14 package.json files (bic-next-move + PWA + dev-harness + 11 SPFx)
+  - Expanded complexity-sensitivity.md with Per-Surface Tier Behavior, Coaching Behavior, Storage Mode Notes, Cross-webpart Consistency Note
+  - Added Retrofit Audit Results (6 compliant components + 2 intentional exclusions)
+  - Corrected all 0012-complexity references to ADR-0081 in SF03-T09-Deployment.md
+
+SF03 shared-feature plan loop closed.
+Next: PH7.6 or Phase 8 per Foundation Plan sequencing.
+-->

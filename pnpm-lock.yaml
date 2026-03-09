@@ -59,6 +59,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -126,6 +129,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -193,6 +199,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -260,6 +269,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -354,6 +366,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -506,6 +521,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -573,6 +591,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -640,6 +661,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -707,6 +731,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -780,6 +807,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -850,6 +880,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -917,6 +950,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -984,6 +1020,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -1151,6 +1190,9 @@ importers:
 
   packages/bic-next-move:
     dependencies:
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../complexity
       '@hbc/ui-kit':
         specifier: workspace:*
         version: link:../ui-kit

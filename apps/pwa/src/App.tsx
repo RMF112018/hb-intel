@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider } from '@tanstack/react-router';
 import { HbcThemeProvider, HbcErrorBoundary } from '@hbc/ui-kit';
+import { ComplexityProvider } from '@hbc/complexity';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import type { AuthMode } from '@hbc/auth';
 import { createAppRouter } from './router/index.js';
@@ -46,7 +47,9 @@ export function App({ authMode }: AppProps): React.ReactNode {
   return (
     <HbcThemeProvider>
       <HbcErrorBoundary>
-        {authMode === 'msal' ? <MsalGuard>{routerContent}</MsalGuard> : routerContent}
+        <ComplexityProvider>
+          {authMode === 'msal' ? <MsalGuard>{routerContent}</MsalGuard> : routerContent}
+        </ComplexityProvider>
       </HbcErrorBoundary>
       {import.meta.env.DEV && DevToolbar ? (
         <Suspense fallback={null}>

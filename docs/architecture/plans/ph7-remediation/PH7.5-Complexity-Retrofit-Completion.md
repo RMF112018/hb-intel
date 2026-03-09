@@ -81,12 +81,12 @@
 
 ## Acceptance Criteria Checklist
 
-- [ ] `@hbc/complexity` is clearly the canonical source for complexity behavior.
-- [ ] Sensitivity matrix is published and complete for relevant surfaces.
-- [ ] App-root integration is documented and intentional.
-- [ ] Transitional/stub complexity paths are removed or explicitly documented.
-- [ ] Complexity-sensitive UI surfaces are audited and classified.
-- [ ] `SF03-Complexity-Dial.md` reflects true completion state.
+- [x] `@hbc/complexity` is clearly the canonical source for complexity behavior.
+- [x] Sensitivity matrix is published and complete for relevant surfaces.
+- [x] App-root integration is documented and intentional.
+- [x] Transitional/stub complexity paths are removed or explicitly documented.
+- [x] Complexity-sensitive UI surfaces are audited and classified.
+- [x] `SF03-Complexity-Dial.md` reflects true completion state.
 
 ---
 
@@ -164,4 +164,29 @@ Amendments applied:
   content block.
 
 Next: PH7.5 implementation (awaiting user confirmation to proceed).
+
+PH7.5 implementation completed: 2026-03-09
+
+Actions:
+- Deleted packages/ui-kit/src/hooks/useComplexity.ts (11-line stub)
+- Removed useComplexity export from hooks/index.ts, index.ts, app-shell.ts
+- Migrated bic-next-move HbcBicBadge.tsx and HbcBicDetail.tsx imports from @hbc/ui-kit → @hbc/complexity
+- Changed destructure from { variant } to { tier } in both components
+- Updated 3 test mock files to mock @hbc/complexity with full IComplexityContext shape
+- Added @hbc/complexity alias to bic-next-move vitest.config.ts
+- Added @hbc/complexity dependency to bic-next-move package.json
+- Wired ComplexityProvider into PWA App.tsx (no spfxContext prop — localStorage + StorageEvent)
+- Wired ComplexityProvider into dev-harness App.tsx (no spfxContext prop — same as PWA)
+- Wired ComplexityProvider with spfxContext prop into all 11 SPFx App.tsx files
+- Updated all 11 SPFx WebPart.tsx render() calls to pass this.context as spfxContext
+- Added @hbc/complexity dependency to all 13 app package.json files (PWA + dev-harness + 11 SPFx)
+- Expanded complexity-sensitivity.md with Per-Surface Tier Behavior, Coaching Behavior, Storage Mode Notes, Cross-webpart Consistency sections
+- Added Retrofit Audit Results section (6 compliant + 2 intentional exclusions)
+- Corrected all 0012-complexity ADR references to ADR-0081 in SF03-T09-Deployment.md
+- Appended progress comment to SF03-Complexity-Dial.md
+- Marked all acceptance criteria as complete
+
+Files modified: ~52 (1 deleted, 3 ui-kit exports, 2 bic-next-move source, 3 bic-next-move tests,
+  2 bic-next-move config, 2 PWA, 2 dev-harness, 11 SPFx App.tsx, 11 SPFx WebPart.tsx,
+  11 SPFx package.json, 3 docs)
 -->

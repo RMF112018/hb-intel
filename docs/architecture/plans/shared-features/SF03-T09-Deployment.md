@@ -15,7 +15,7 @@ Produce the pre-deployment checklist, the ADR documenting all ten locked decisio
 ## 3-Line Plan
 
 1. Run the pre-deployment checklist to confirm all prior tasks (T01–T08) meet the Definition of Done.
-2. Write `docs/architecture/adr/0012-complexity-dial-platform-primitive.md` documenting all ten decisions with full context, rationale, and consequences.
+2. Write `docs/architecture/adr/ADR-0081-complexity-dial-platform-primitive.md` documenting all ten decisions with full context, rationale, and consequences.
 3. Publish the SPFx integration guide and the administrator role-mapping guide; insert the blueprint progress comment.
 
 ---
@@ -43,7 +43,7 @@ Produce the pre-deployment checklist, the ADR documenting all ten locked decisio
 
 ### Documentation
 
-- [ ] `docs/architecture/adr/0012-complexity-dial-platform-primitive.md` written and merged
+- [ ] `docs/architecture/adr/ADR-0081-complexity-dial-platform-primitive.md` written and merged
 - [ ] `docs/reference/ui-kit/complexity-sensitivity.md` published (output of T07)
 - [ ] `docs/how-to/administrator/complexity-role-mapping.md` written and merged
 - [ ] `docs/how-to/developer/complexity-integration-guide.md` written and merged (SPFx + PWA placement)
@@ -89,7 +89,7 @@ Produce the pre-deployment checklist, the ADR documenting all ten locked decisio
 
 ---
 
-## ADR: `docs/architecture/adr/0012-complexity-dial-platform-primitive.md`
+## ADR: `docs/architecture/adr/ADR-0081-complexity-dial-platform-primitive.md`
 
 ```markdown
 # ADR-0012 — Complexity Dial as Platform Primitive
@@ -621,7 +621,7 @@ Task files produced:
   docs/architecture/plans/shared-features/SF03-T09-Deployment.md
 
 Documentation added:
-  docs/architecture/adr/0012-complexity-dial-platform-primitive.md
+  docs/architecture/adr/ADR-0081-complexity-dial-platform-primitive.md
   docs/how-to/developer/complexity-integration-guide.md
   docs/how-to/administrator/complexity-role-mapping.md
   docs/reference/ui-kit/complexity-sensitivity.md (produced by T07)
@@ -676,7 +676,7 @@ pnpm turbo run typecheck
 pnpm turbo run test
 
 # 9. Confirm documentation files exist
-ls docs/architecture/adr/0012-complexity-dial-platform-primitive.md
+ls docs/architecture/adr/ADR-0081-complexity-dial-platform-primitive.md
 ls docs/how-to/developer/complexity-integration-guide.md
 ls docs/how-to/administrator/complexity-role-mapping.md
 ls docs/reference/ui-kit/complexity-sensitivity.md

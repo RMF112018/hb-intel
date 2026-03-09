@@ -10,6 +10,7 @@ import type { ComponentType } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { HbcThemeProvider, HbcErrorBoundary, useHbcTheme } from '@hbc/ui-kit';
+import { ComplexityProvider } from '@hbc/complexity';
 import { defaultQueryOptions, defaultMutationOptions } from '@hbc/query-hooks';
 import { TabRouter } from './TabRouter.js';
 import { DevControls } from './DevControls.js';
@@ -37,10 +38,12 @@ function HarnessRoot(): React.ReactNode {
   return (
     <QueryClientProvider client={queryClient}>
       <HbcErrorBoundary>
-        <div className="harness-root">
-          <TabRouter />
-          <DevControls isDark={isDark} onToggleTheme={toggleFieldMode} />
-        </div>
+        <ComplexityProvider>
+          <div className="harness-root">
+            <TabRouter />
+            <DevControls isDark={isDark} onToggleTheme={toggleFieldMode} />
+          </div>
+        </ComplexityProvider>
       </HbcErrorBoundary>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

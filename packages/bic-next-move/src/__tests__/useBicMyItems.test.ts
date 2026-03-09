@@ -10,8 +10,8 @@ import {
 import { mockBicStates } from '@hbc/bic-next-move/testing';
 
 // Mock useComplexity (not used by this hook, but transitively imported)
-vi.mock('@hbc/ui-kit', () => ({
-  useComplexity: () => ({ variant: 'standard' }),
+vi.mock('@hbc/complexity', () => ({
+  useComplexity: () => ({ tier: 'standard', atLeast: () => true, is: () => false, setTier: vi.fn(), showCoaching: false, setShowCoaching: vi.fn(), isLocked: false }),
 }));
 
 function createWrapper() {

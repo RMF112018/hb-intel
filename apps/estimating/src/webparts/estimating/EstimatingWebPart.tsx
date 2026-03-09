@@ -51,7 +51,7 @@ export default class EstimatingWebPart extends BaseClientSideWebPart<IEstimating
     if (!this._root) {
       this._root = createRoot(this.domElement);
     }
-    this._root.render(<App />);
+    this._root.render(<App spfxContext={this.context} />);
   }
 
   /**

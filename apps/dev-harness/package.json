@@ -15,6 +15,7 @@
     "@hbc/query-hooks": "workspace:*",
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
+    "@hbc/complexity": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@hbc/spfx-accounting": "workspace:*",
     "@hbc/spfx-estimating": "workspace:*",

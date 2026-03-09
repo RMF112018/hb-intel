@@ -1,5 +1,5 @@
 import React from 'react';
-import { useComplexity } from '@hbc/ui-kit/app-shell'; // SPFx-safe import
+import { useComplexity } from '@hbc/complexity';
 import type { IBicNextMoveConfig, IBicNextMoveState, BicComplexityVariant } from '../types/IBicNextMove';
 import { resolveFullBicState } from '../hooks/useBicNextMove';
 import { urgencyClass, urgencyLabel, truncate, resolveVariant } from './_utils';
@@ -36,7 +36,7 @@ export function HbcBicBadge<T>({
   forceVariant,
   className = '',
 }: HbcBicBadgeProps<T>): React.ReactElement {
-  const { variant: contextVariant } = useComplexity();
+  const { tier: contextVariant } = useComplexity();
   const variant = resolveVariant(forceVariant, contextVariant);
 
   // Resolve state synchronously — no additional API calls (spec requirement)

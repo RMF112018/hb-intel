@@ -6,8 +6,8 @@ import type { MockBicItem } from '@hbc/bic-next-move/testing';
 import type { IBicNextMoveState } from '../types/IBicNextMove';
 
 // Mock useComplexity context
-vi.mock('@hbc/ui-kit/app-shell', () => ({
-  useComplexity: () => ({ variant: 'standard' }),
+vi.mock('@hbc/complexity', () => ({
+  useComplexity: () => ({ tier: 'standard', atLeast: () => true, is: () => false, setTier: vi.fn(), showCoaching: false, setShowCoaching: vi.fn(), isLocked: false }),
 }));
 
 function makeMockItem(state: IBicNextMoveState): MockBicItem {
