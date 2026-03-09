@@ -20,6 +20,7 @@ export default defineConfig({
       exclude: [
         'src/**/*.d.ts',
         'src/test/**',
+        'src/__mocks__/**',
         'src/**/index.ts',
         'src/types/**',
         'testing/**',
@@ -38,6 +39,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@hbc/step-wizard/testing': resolve(__dirname, './testing/index.ts'),
+      '@hbc/session-state': resolve(__dirname, './src/__mocks__/session-state.ts'),
+      '@hbc/notification-intelligence': resolve(__dirname, './src/__mocks__/notification-intelligence.ts'),
       '@hbc/bic-next-move': resolve(__dirname, '../bic-next-move/src/index.ts'),
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../ui-kit/src/app-shell.ts'),
       '@hbc/ui-kit': resolve(__dirname, '../ui-kit/src/index.ts'),

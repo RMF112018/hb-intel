@@ -392,3 +392,21 @@ describe('useStepWizard', () => {
 pnpm --filter @hbc/step-wizard typecheck
 pnpm --filter @hbc/step-wizard test -- --reporter=verbose hooks/
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF05-T04 completed: 2026-03-09
+Steps completed:
+  - Step 1: Created ambient type declarations (vite-env.d.ts) for @hbc/session-state and @hbc/notification-intelligence
+  - Step 2: Created mock files (__mocks__/session-state.ts, __mocks__/notification-intelligence.ts)
+  - Step 3: Updated vitest.config.ts with resolve aliases + coverage exclude
+  - Step 4: Updated tsconfig.json with path mappings
+  - Step 5: Implemented createWizardWrapper testing utility
+  - Step 6: Updated test setup with __resetMockDraft in afterEach
+  - Step 7: Implemented useStepWizard and useStepProgress hooks (verbatim from spec)
+  - Step 8: Created test suite (7 tests, all passing)
+  - Step 9: Barrel already re-exports both hooks (no change needed)
+  - Step 10: Verified — typecheck zero errors, 26 tests pass (19 state machine + 7 hooks)
+Implementation note: Overdue polling effect optimized with early return when no steps have dueDate,
+  and Set comparison to avoid unnecessary re-renders in test environment.
+Next: SF05-T05
+-->
