@@ -38,11 +38,22 @@ export interface UploadResult {
   registryItemId: number;
 }
 
+/**
+ * PH7.7 changes:
+ *   - Constructor now requires `hbIntelSiteUrl: string` (injected from SharePointDocsProvider).
+ *     The private getHbIntelSiteUrl() env-fallback method has been removed.
+ *   - Bracket access `this.folderManager['getParentPath'](...)` at the former line 103 has been
+ *     replaced with `resolvedContext.relativeFolderPath`, which FolderManager now returns as
+ *     part of its public IResolvedDocumentContext contract (see IDocumentContext.ts).
+ *   - upload() path-building simplified: fullDestinationPath is derived entirely from
+ *     resolvedContext.relativeFolderPath, eliminating the redundant destinationPath intermediate.
+ */
 export class UploadService {
   constructor(
     private api: SharePointDocsApi,
     private folderManager: FolderManager,
-    private registry: RegistryClient
+    private registry: RegistryClient,
+    private hbIntelSiteUrl: string
   ) {}
 
   /**
@@ -91,17 +102,16 @@ export class UploadService {
       }
     }
 
-    // Ensure context folder exists
+    // Ensure context folder exists; resolvedContext now carries relativeFolderPath
     const resolvedContext = await this.folderManager.resolveOrCreate(contextConfig);
 
-    // Build the destination file path
-    const destinationPath = subFolder
-      ? `${resolvedContext.folderName}/${subFolder}/${file.name}`
-      : `${resolvedContext.folderName}/${file.name}`;
+    // Build the full SharePoint-relative destination path from the public contract.
+    // relativeFolderPath = e.g. 'Shared Documents/BD Leads/20260308_Test_Smith'
+    const fullDestinationPath = subFolder
+      ? `${resolvedContext.relativeFolderPath}/${subFolder}/${file.name}`
+      : `${resolvedContext.relativeFolderPath}/${file.name}`;
 
-    const siteUrl = contextConfig.siteUrl ?? this.getHbIntelSiteUrl();
-    const parentPath = this.folderManager['getParentPath'](contextConfig.contextType);
-    const fullDestinationPath = `${parentPath}/${destinationPath}`;
+    const siteUrl = contextConfig.siteUrl ?? this.hbIntelSiteUrl;
 
     let uploadedUrl: string;
 
@@ -182,9 +192,5 @@ export class UploadService {
   private getExtension(fileName: string): string {
     const lastDot = fileName.lastIndexOf('.');
     return lastDot === -1 ? '' : fileName.slice(lastDot);
-  }
-
-  private getHbIntelSiteUrl(): string {
-    return process.env.VITE_HBINTEL_SITE_URL ?? '';
   }
 }

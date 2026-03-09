@@ -297,7 +297,7 @@ Full test suite and deployment runbook.
 - [ ] Standalone `HBCDocumentManagerWebpart` registered and functional
 - [ ] Unit tests ≥95% coverage on `FolderManager`, `UploadService`, `MigrationService`, `OfflineQueueManager`
 - [ ] Playwright E2E: upload → offline queue → reconnect sync → migration → tombstone → conflict resolution
-- [ ] ADR created: `docs/architecture/adr/0010-sharepoint-docs-pre-provisioning-storage.md`
+- [ ] ADR created: `docs/architecture/adr/ADR-0082-sharepoint-docs-pre-provisioning-storage.md`
 - [ ] `pnpm turbo run build` passes with zero errors
 
 ---
@@ -321,7 +321,7 @@ Full test suite and deployment runbook.
 
 ## 12. ADR Requirement
 
-Create `docs/architecture/adr/0010-sharepoint-docs-pre-provisioning-storage.md` documenting:
+Create `docs/architecture/adr/ADR-0082-sharepoint-docs-pre-provisioning-storage.md` documenting:
 
 - The decision to use a staging area in the root site collection (vs. per-record OneDrive, vs. Azure Blob Storage)
 - The Move & Archive tombstone pattern (vs. copy-and-keep, vs. true delete)
@@ -354,7 +354,8 @@ Wave 1 status: In progress
     - 2 additional TypeScript type fixes applied
     - All verification commands pass (typecheck, build, turbo build — 25/25 tasks green)
 Documentation added: docs/architecture/plans/shared-features/SF01-Sharepoint-Docs.md
-ADR required: docs/architecture/adr/0010-sharepoint-docs-pre-provisioning-storage.md
+ADR created: docs/architecture/adr/ADR-0082-sharepoint-docs-pre-provisioning-storage.md
+  (corrected from 0010 in PH7.7 — ADR-0010 was occupied by ADR-0010-ci-cd-pipeline.md)
 Wave 2 status: In progress
   - SF01-T05 Migration Service: COMPLETE (2026-03-08)
     - 6 stub files replaced with full implementations + 2 methods added to RegistryClient

@@ -1,6 +1,8 @@
 import { FolderManager } from '../../api/FolderManager.js';
 import type { IDocumentContextConfig } from '../../types/index.js';
 
+const TEST_SITE_URL = 'https://contoso.sharepoint.com/sites/hb-intel';
+
 const makeConfig = (overrides: Partial<IDocumentContextConfig> = {}): IDocumentContextConfig => ({
   contextId: 'ctx-123',
   contextType: 'bd-lead',
@@ -16,7 +18,8 @@ describe('FolderManager.buildFolderName', () => {
 
   beforeEach(() => {
     vi.useFakeTimers();
-    fm = new FolderManager(null as never, null as never, null as never);
+    // PH7.7: FolderManager now requires hbIntelSiteUrl as 4th constructor argument
+    fm = new FolderManager(null as never, null as never, null as never, TEST_SITE_URL);
     vi.setSystemTime(new Date('2026-03-08T14:30:00Z'));
   });
 
@@ -81,7 +84,7 @@ describe('FolderManager.resolveOrCreate', () => {
         uploadedAt: '2026-03-08T10:00:00Z',
       }),
     };
-    const fm = new FolderManager(null as never, null as never, mockRegistry as never);
+    const fm = new FolderManager(null as never, null as never, mockRegistry as never, TEST_SITE_URL);
     const result = await fm.resolveOrCreate(makeConfig());
     expect(result.wasExisting).toBe(true);
     expect(mockRegistry.findByContextId).toHaveBeenCalledWith('ctx-123');
@@ -95,7 +98,7 @@ describe('FolderManager.resolveOrCreate', () => {
     };
     const mockPermissions = { applyDefaultPermissions: vi.fn().mockResolvedValue(undefined) };
     const mockRegistry = { findByContextId: vi.fn().mockResolvedValue(null) };
-    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never);
+    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never, TEST_SITE_URL);
     const result = await fm.resolveOrCreate(makeConfig());
     expect(result.wasExisting).toBe(false);
     expect(mockApi.createFolder).toHaveBeenCalled();
@@ -119,7 +122,7 @@ describe('FolderManager.resolveOrCreate', () => {
       applyCustomPermissions: vi.fn().mockResolvedValue(undefined),
     };
     const mockRegistry = { findByContextId: vi.fn().mockResolvedValue(null) };
-    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never);
+    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never, TEST_SITE_URL);
     const cfg = makeConfig({ permissions: customPermissions });
     await fm.resolveOrCreate(cfg);
     expect(mockPermissions.applyCustomPermissions).toHaveBeenCalled();
@@ -134,7 +137,7 @@ describe('FolderManager.resolveOrCreate', () => {
     };
     const mockPermissions = { applyDefaultPermissions: vi.fn() };
     const mockRegistry = { findByContextId: vi.fn().mockResolvedValue(null) };
-    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never);
+    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never, TEST_SITE_URL);
     const result = await fm.resolveOrCreate(makeConfig());
     expect(result.wasExisting).toBe(true);
     expect(mockApi.createFolder).not.toHaveBeenCalled();
@@ -148,7 +151,7 @@ describe('FolderManager.resolveOrCreate', () => {
     };
     const mockPermissions = { applyDefaultPermissions: vi.fn().mockResolvedValue(undefined) };
     const mockRegistry = { findByContextId: vi.fn().mockResolvedValue(null) };
-    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never);
+    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never, TEST_SITE_URL);
     await fm.resolveOrCreate(makeConfig({ contextType: 'estimating-pursuit' }));
     // Root folder + 2 subfolders (Bid Documents, Supporting)
     expect(mockApi.createFolder).toHaveBeenCalledTimes(3);
@@ -162,7 +165,7 @@ describe('FolderManager.resolveOrCreate', () => {
     };
     const mockPermissions = { applyDefaultPermissions: vi.fn().mockResolvedValue(undefined) };
     const mockRegistry = { findByContextId: vi.fn().mockResolvedValue(null) };
-    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never);
+    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never, TEST_SITE_URL);
     await fm.resolveOrCreate(makeConfig({ contextType: 'project', siteUrl: 'https://contoso.sharepoint.com/sites/project-1' }));
     // Root folder only, no subfolders
     expect(mockApi.createFolder).toHaveBeenCalledTimes(1);
@@ -176,7 +179,7 @@ describe('FolderManager.resolveOrCreate', () => {
     };
     const mockPermissions = { applyDefaultPermissions: vi.fn().mockResolvedValue(undefined) };
     const mockRegistry = { findByContextId: vi.fn().mockResolvedValue(null) };
-    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never);
+    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never, TEST_SITE_URL);
     await fm.resolveOrCreate(makeConfig({ contextType: 'system' }));
     expect(mockApi.createFolder).toHaveBeenCalledTimes(1);
   });
@@ -189,8 +192,58 @@ describe('FolderManager.resolveOrCreate', () => {
     };
     const mockPermissions = { applyDefaultPermissions: vi.fn().mockResolvedValue(undefined) };
     const mockRegistry = { findByContextId: vi.fn().mockResolvedValue(null) };
-    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never);
+    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never, TEST_SITE_URL);
     await fm.resolveOrCreate(makeConfig({ siteUrl: 'https://custom.sharepoint.com/sites/x' }));
     expect(mockApi.folderExists).toHaveBeenCalledWith('https://custom.sharepoint.com/sites/x', expect.any(String));
+  });
+
+  // ─── PH7.7 Boundary Tests ───────────────────────────────────────────────
+
+  it('returns relativeFolderPath on the resolved context for new folder (bd-lead)', async () => {
+    const mockApi = {
+      folderExists: vi.fn().mockResolvedValue(false),
+      createFolder: vi.fn().mockResolvedValue(undefined),
+      getFolderAbsoluteUrl: vi.fn().mockResolvedValue('https://contoso.sharepoint.com/sites/hb-intel/Shared Documents/BD Leads/20260308_BD_Lead_Riverside_Martinez'),
+    };
+    const mockPermissions = { applyDefaultPermissions: vi.fn().mockResolvedValue(undefined) };
+    const mockRegistry = { findByContextId: vi.fn().mockResolvedValue(null) };
+    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never, TEST_SITE_URL);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-08T14:30:00Z'));
+    const result = await fm.resolveOrCreate(makeConfig());
+    vi.useRealTimers();
+    // relativeFolderPath must be parentPath/folderName — no private methods needed by consumers
+    expect(result.relativeFolderPath).toBe(
+      'Shared Documents/BD Leads/20260308_BD_Lead_Riverside_Medical_Center_Expansion_Martinez'
+    );
+  });
+
+  it('returns relativeFolderPath on the resolved context for registry hit', async () => {
+    const mockRegistry = {
+      findByContextId: vi.fn().mockResolvedValue({
+        stagingUrl: 'https://contoso.sharepoint.com/sites/hb-intel/Shared Documents/BD Leads/20260308_Test_Smith/test.pdf',
+        fileName: 'test.pdf',
+        folderName: '20260308_Test_Smith',
+        uploadedAt: '2026-03-08T10:00:00Z',
+      }),
+    };
+    const fm = new FolderManager(null as never, null as never, mockRegistry as never, TEST_SITE_URL);
+    const result = await fm.resolveOrCreate(makeConfig());
+    // Registry branch must also populate relativeFolderPath — parentPath derived from contextType
+    expect(result.relativeFolderPath).toBe('Shared Documents/BD Leads/20260308_Test_Smith');
+  });
+
+  it('uses injected hbIntelSiteUrl when config.siteUrl is null', async () => {
+    const mockApi = {
+      folderExists: vi.fn().mockResolvedValue(false),
+      createFolder: vi.fn().mockResolvedValue(undefined),
+      getFolderAbsoluteUrl: vi.fn().mockResolvedValue('https://contoso.sharepoint.com/...'),
+    };
+    const mockPermissions = { applyDefaultPermissions: vi.fn().mockResolvedValue(undefined) };
+    const mockRegistry = { findByContextId: vi.fn().mockResolvedValue(null) };
+    const fm = new FolderManager(mockApi as never, mockPermissions as never, mockRegistry as never, TEST_SITE_URL);
+    // config.siteUrl = null → should fall back to injected TEST_SITE_URL
+    await fm.resolveOrCreate(makeConfig({ siteUrl: null }));
+    expect(mockApi.folderExists).toHaveBeenCalledWith(TEST_SITE_URL, expect.any(String));
   });
 });

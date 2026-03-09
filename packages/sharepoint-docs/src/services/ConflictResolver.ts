@@ -15,13 +15,20 @@ import { TombstoneWriter } from '../api/TombstoneWriter.js';
  *
  * In production: driven by Azure Function timer that runs every hour and checks
  * HBCDocumentRegistry for conflict entries where expiresAt < now.
+ *
+ * PH7.7 (extended scope — found during implementation verification):
+ *   Constructor now requires `hbIntelSiteUrl: string` (injected from createSharePointDocsServices).
+ *   Two `process.env.VITE_HBINTEL_SITE_URL ?? ''` reads in resolve() have been replaced
+ *   with this.hbIntelSiteUrl, consistent with the pattern applied to UploadService,
+ *   FolderManager, and MigrationService.
  */
 export class ConflictResolver {
   constructor(
     private registry: RegistryClient,
     private migrationLog: MigrationLogClient,
     private api: SharePointDocsApi,
-    private tombstoneWriter: TombstoneWriter
+    private tombstoneWriter: TombstoneWriter,
+    private hbIntelSiteUrl: string
   ) {}
 
   /**
@@ -56,7 +63,7 @@ export class ConflictResolver {
       case 'keep-staging': {
         // Move the staging version to destination, overwriting the project site version
         const destinationUrl = await this.api.moveFile(
-          process.env.VITE_HBINTEL_SITE_URL ?? '',
+          this.hbIntelSiteUrl,
           '', // source path from registry
           destSiteUrl,
           `${destFolderPath}/${destFileName}`
@@ -80,7 +87,7 @@ export class ConflictResolver {
         const renamedFileName = `${base}_staging_${timestamp}${ext}`;
 
         const destinationUrl = await this.api.moveFile(
-          process.env.VITE_HBINTEL_SITE_URL ?? '',
+          this.hbIntelSiteUrl,
           '',
           destSiteUrl,
           `${destFolderPath}/${renamedFileName}`

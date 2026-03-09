@@ -91,6 +91,15 @@ export interface IResolvedDocumentContext extends IDocumentContextConfig {
   folderUrl: string;
   /** The exact folder name as created in SharePoint (yyyymmdd_{Name}_{LastName}). */
   folderName: string;
+  /**
+   * SharePoint-relative path to the context's root folder, suitable for use as an
+   * upload destination prefix. Eliminates the need for consumers to reconstruct this
+   * path independently. Example: 'Shared Documents/BD Leads/20260308_Test_Smith'
+   *
+   * Added in PH7.7: resolves the encapsulation breach where UploadService was
+   * reaching into FolderManager's private getParentPath() via bracket notation.
+   */
+  relativeFolderPath: string;
   /** UTC timestamp when the folder was first created. */
   createdAt: string;
   /** Whether the folder already existed (true) or was just created (false). */

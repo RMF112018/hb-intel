@@ -22,21 +22,38 @@ import { RegistryClient } from './RegistryClient.js';
  *   - LastName: ownerLastName from IDocumentContextConfig, stripped to alpha chars only
  *   - Folder name is immutable after creation — even if the record is renamed in HB Intel
  *   - The HBCDocumentRegistry.HbcDisplayName column is updated on rename; folder name is not
+ *
+ * PH7.7 changes:
+ *   - Constructor now requires `hbIntelSiteUrl: string` (injected from SharePointDocsProvider).
+ *     The private getHbIntelSiteUrl() env-fallback method has been removed.
+ *   - resolveOrCreate() now populates `relativeFolderPath` on IResolvedDocumentContext,
+ *     eliminating the need for UploadService to access private getParentPath() via bracket notation.
  */
 export class FolderManager {
   private api: SharePointDocsApi;
   private permissions: PermissionManager;
   private registry: RegistryClient;
+  private hbIntelSiteUrl: string;
 
-  constructor(api: SharePointDocsApi, permissions: PermissionManager, registry: RegistryClient) {
+  constructor(
+    api: SharePointDocsApi,
+    permissions: PermissionManager,
+    registry: RegistryClient,
+    hbIntelSiteUrl: string
+  ) {
     this.api = api;
     this.permissions = permissions;
     this.registry = registry;
+    this.hbIntelSiteUrl = hbIntelSiteUrl;
   }
 
   /**
    * Resolves the context folder for a given config. Creates it if it does not exist.
    * This is the primary entry point called by useDocumentContext.
+   *
+   * Returns `relativeFolderPath` on the resolved context — the SP-relative path to the
+   * folder root (e.g. 'Shared Documents/BD Leads/20260308_Test_Smith'). Consumers use
+   * this to build upload destination paths without needing internal path knowledge.
    */
   async resolveOrCreate(config: IDocumentContextConfig): Promise<IResolvedDocumentContext> {
     const folderName = this.buildFolderName(config);
@@ -50,27 +67,27 @@ export class FolderManager {
         ...config,
         folderUrl: registryEntry.stagingUrl.replace(`/${registryEntry.fileName}`, ''),
         folderName: registryEntry.folderName,
+        relativeFolderPath: `${parentPath}/${registryEntry.folderName}`,
         createdAt: registryEntry.uploadedAt,
         wasExisting: true,
       };
     }
 
     // Folder not in registry — check SharePoint directly
-    const exists = await this.api.folderExists(config.siteUrl ?? this.getHbIntelSiteUrl(), fullFolderPath);
+    const siteUrl = config.siteUrl ?? this.hbIntelSiteUrl;
+    const exists = await this.api.folderExists(siteUrl, fullFolderPath);
 
     if (!exists) {
       await this.createFolderWithSubfolders(config, fullFolderPath);
     }
 
-    const folderUrl = await this.api.getFolderAbsoluteUrl(
-      config.siteUrl ?? this.getHbIntelSiteUrl(),
-      fullFolderPath
-    );
+    const folderUrl = await this.api.getFolderAbsoluteUrl(siteUrl, fullFolderPath);
 
     return {
       ...config,
       folderUrl,
       folderName,
+      relativeFolderPath: fullFolderPath,
       createdAt: new Date().toISOString(),
       wasExisting: exists,
     };
@@ -146,7 +163,7 @@ export class FolderManager {
     config: IDocumentContextConfig,
     fullFolderPath: string
   ): Promise<void> {
-    const siteUrl = config.siteUrl ?? this.getHbIntelSiteUrl();
+    const siteUrl = config.siteUrl ?? this.hbIntelSiteUrl;
 
     // Create the root record folder
     await this.api.createFolder(siteUrl, fullFolderPath);
@@ -176,10 +193,5 @@ export class FolderManager {
       case 'system':
         return [];
     }
-  }
-
-  private getHbIntelSiteUrl(): string {
-    // Read from environment config — injected via @hbc/auth context in real usage
-    return process.env.VITE_HBINTEL_SITE_URL ?? '';
   }
 }

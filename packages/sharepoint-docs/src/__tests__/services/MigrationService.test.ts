@@ -41,7 +41,8 @@ describe('MigrationService.execute — checkpoint resume', () => {
 
     const svc = new MigrationService(
       mockApi as never, mockRegistry as never, mockMigrationLog as never,
-      mockTombstone as never, mockConflictDetector as never, mockConflictResolver as never
+      mockTombstone as never, mockConflictDetector as never, mockConflictResolver as never,
+      'https://contoso.sharepoint.com/sites/hb-intel'
     );
 
     const result = await svc.execute(makeScheduledMigration());
@@ -81,7 +82,8 @@ describe('MigrationService.execute — checkpoint resume', () => {
 
     const svc = new MigrationService(
       mockApi as never, mockRegistry as never, mockMigrationLog as never,
-      mockTombstone as never, mockConflictDetector as never, mockConflictResolver as never
+      mockTombstone as never, mockConflictDetector as never, mockConflictResolver as never,
+      'https://contoso.sharepoint.com/sites/hb-intel'
     );
 
     const result = await svc.execute(makeScheduledMigration());
@@ -114,7 +116,8 @@ describe('MigrationService.execute — checkpoint resume', () => {
 
     const svc = new MigrationService(
       mockApi as never, mockRegistry as never, mockMigrationLog as never,
-      mockTombstone as never, mockConflictDetector as never, mockConflictResolver as never
+      mockTombstone as never, mockConflictDetector as never, mockConflictResolver as never,
+      'https://contoso.sharepoint.com/sites/hb-intel'
     );
 
     const result = await svc.execute(makeScheduledMigration());
@@ -147,7 +150,8 @@ describe('MigrationService.execute — checkpoint resume', () => {
 
     const svc = new MigrationService(
       mockApi as never, mockRegistry as never, mockMigrationLog as never,
-      mockTombstone as never, mockConflictDetector as never, mockConflictResolver as never
+      mockTombstone as never, mockConflictDetector as never, mockConflictResolver as never,
+      'https://contoso.sharepoint.com/sites/hb-intel'
     );
 
     const result = await svc.execute(makeScheduledMigration());
@@ -178,7 +182,8 @@ describe('MigrationService.execute — checkpoint resume', () => {
 
     const svc = new MigrationService(
       mockApi as never, mockRegistry as never, mockMigrationLog as never,
-      mockTombstone as never, mockConflictDetector as never, mockConflictResolver as never
+      mockTombstone as never, mockConflictDetector as never, mockConflictResolver as never,
+      'https://contoso.sharepoint.com/sites/hb-intel'
     );
 
     const result = await svc.execute(makeScheduledMigration());
@@ -190,7 +195,7 @@ describe('MigrationService.execute — checkpoint resume', () => {
     expect(mockConflictResolver.scheduleWatchdogs).not.toHaveBeenCalled();
   });
 
-  it('uses default destination path when destinationLibraryPath is omitted', async () => {
+  it('throws when destinationLibraryPath is omitted (no hardcoded fallback)', async () => {
     const docId = 'doc-default';
 
     const mockRegistry = {
@@ -206,30 +211,22 @@ describe('MigrationService.execute — checkpoint resume', () => {
     };
 
     const mockConflictDetector = { check: vi.fn().mockResolvedValue(null) };
-    const mockApi = { moveFile: vi.fn().mockResolvedValue('https://sp.com/project/test.pdf') };
-    const mockTombstone = { create: vi.fn().mockResolvedValue('https://sp.com/test.pdf.migrated.url') };
+    const mockApi = { moveFile: vi.fn() };
+    const mockTombstone = { create: vi.fn() };
     const mockConflictResolver = { scheduleWatchdogs: vi.fn() };
 
     const svc = new MigrationService(
       mockApi as never, mockRegistry as never, mockMigrationLog as never,
-      mockTombstone as never, mockConflictDetector as never, mockConflictResolver as never
+      mockTombstone as never, mockConflictDetector as never, mockConflictResolver as never,
+      'https://contoso.sharepoint.com/sites/hb-intel'
     );
 
-    // Remove destinationLibraryPath to hit the default path
     const migration = makeScheduledMigration();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (migration as any).destinationLibraryPath = undefined;
 
-    const result = await svc.execute(migration);
-
-    expect(result.migratedCount).toBe(1);
-    // moveFile should use 'Shared Documents/Project Documents' as the default
-    expect(mockApi.moveFile).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.any(String),
-      expect.any(String),
-      expect.stringContaining('Shared Documents/Project Documents'),
-    );
+    await expect(svc.execute(migration)).rejects.toThrow('destinationLibraryPath is required');
+    expect(mockApi.moveFile).not.toHaveBeenCalled();
   });
 });
 

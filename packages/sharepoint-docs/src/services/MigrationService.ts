@@ -25,6 +25,15 @@ import { ConflictResolver } from './ConflictResolver.js';
  *   If the job is interrupted, only files with checkpoint = 'pending' are retried.
  *   Files with checkpoint = 'completed' or 'skipped-conflict' are never re-processed.
  *   This guarantees exactly-once migration semantics.
+ *
+ * PH7.7 changes:
+ *   - Constructor now requires `hbIntelSiteUrl: string` (injected from SharePointDocsProvider).
+ *     The private getHbIntelSiteUrl() env-fallback method has been removed.
+ *   - getDefaultDestinationPath() now throws — the "simplified example" placeholder that
+ *     hardcoded 'Shared Documents/Project Documents' regardless of context type has been
+ *     replaced with an explicit error. Callers must always supply destinationLibraryPath on
+ *     IScheduledMigration; context-type routing must be implemented before this service
+ *     is used in production. See PH7.7 Amendment B LEAK 4 for details.
  */
 export class MigrationService {
   constructor(
@@ -33,7 +42,8 @@ export class MigrationService {
     private migrationLog: MigrationLogClient,
     private tombstoneWriter: TombstoneWriter,
     private conflictDetector: ConflictDetector,
-    private conflictResolver: ConflictResolver
+    private conflictResolver: ConflictResolver,
+    private hbIntelSiteUrl: string
   ) {}
 
   /**
@@ -92,7 +102,7 @@ export class MigrationService {
 
         // No conflict — execute the move
         const destinationUrl = await this.api.moveFile(
-          this.getHbIntelSiteUrl(),
+          this.hbIntelSiteUrl,
           this.buildSourcePath(document),
           scheduledMigration.destinationSiteUrl,
           `${destPath}/${document.fileName}`
@@ -100,7 +110,7 @@ export class MigrationService {
 
         // Create tombstone at source (D-01)
         const tombstoneUrl = await this.tombstoneWriter.create({
-          siteUrl: this.getHbIntelSiteUrl(),
+          siteUrl: this.hbIntelSiteUrl,
           sourceFolderPath: this.buildSourceFolderPath(document),
           originalFileName: document.fileName,
           destinationUrl,
@@ -176,13 +186,22 @@ export class MigrationService {
     return fullPath.replace(`/${document.fileName}`, '');
   }
 
-  private getDefaultDestinationPath(sourceContextId: string): string {
-    // Convention: BD leads go to BD Heritage/, Estimating pursuits go to Estimating/
-    // The sourceContextType is known from the registry; this is a simplified example.
-    return 'Shared Documents/Project Documents';
-  }
-
-  private getHbIntelSiteUrl(): string {
-    return process.env.VITE_HBINTEL_SITE_URL ?? '';
+  private getDefaultDestinationPath(_sourceContextId: string): never {
+    // PH7.7: The prior hardcoded fallback ('Shared Documents/Project Documents') was a
+    // placeholder that produced incorrect routing for all context types. It has been
+    // replaced with an explicit error so callers are forced to provide a correct
+    // destinationLibraryPath on IScheduledMigration.
+    //
+    // To implement correctly: resolve the document's contextType from the registry using
+    // sourceContextId, then map contextType → destination path:
+    //   'bd-lead'             → 'BD Heritage/{projectFolderName}'
+    //   'estimating-pursuit'  → 'Estimating/{projectFolderName}'
+    // This routing belongs in MigrationScheduler (D-02) when building IScheduledMigration,
+    // not as a runtime fallback in the migration executor.
+    throw new Error(
+      '[sharepoint-docs] MigrationService: destinationLibraryPath is required on ' +
+      'IScheduledMigration. getDefaultDestinationPath() is not implemented — ' +
+      'context-type-based destination routing must be provided by MigrationScheduler.'
+    );
   }
 }

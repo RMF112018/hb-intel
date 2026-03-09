@@ -36,7 +36,7 @@ Complete every item before proceeding to environment deployment. Do not proceed 
 - [ ] SharePoint throttle retry (429 → exponential backoff) tested manually
 
 ### ADR
-- [ ] `docs/architecture/adr/0010-sharepoint-docs-pre-provisioning-storage.md` created with all decisions documented
+- [ ] `docs/architecture/adr/ADR-0082-sharepoint-docs-pre-provisioning-storage.md` created with all decisions documented
 
 ---
 
@@ -274,10 +274,10 @@ Remove-PnPField -List "HBCDocumentRegistry" -Identity "OffendingColumnName" -For
 
 ## 7. ADR Creation
 
-Create `docs/architecture/adr/0010-sharepoint-docs-pre-provisioning-storage.md` with the following content outline:
+Create `docs/architecture/adr/ADR-0082-sharepoint-docs-pre-provisioning-storage.md` with the following content outline:
 
 ```markdown
-# ADR-0010: SharePoint Document Pre-Provisioning Storage Strategy
+# ADR-0082: SharePoint Document Pre-Provisioning Storage Strategy
 
 **Status:** Accepted
 **Date:** 2026-03-08
@@ -315,7 +315,8 @@ with the following sub-decisions all locked via structured product-owner intervi
 Plan authored: 2026-03-08
 Interview conducted: 2026-03-08 (12 questions, all decisions locked)
 All 10 task files written: SF01-T01 through SF01-T10
-ADR required: docs/architecture/adr/0010-sharepoint-docs-pre-provisioning-storage.md
+ADR created: docs/architecture/adr/ADR-0082-sharepoint-docs-pre-provisioning-storage.md
+  (corrected from 0010 in PH7.7 — ADR-0010 was occupied by ADR-0010-ci-cd-pipeline.md)
 Build verification: Run `pnpm turbo run build` after completing SF01-T01
 Next phase: Begin Wave 1 implementation (SF01-T01 scaffold → SF01-T02 contracts → SF01-T03 infra → SF01-T04 upload)
 -->
