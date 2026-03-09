@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@hbc/auth": "workspace:*",
+    "@hbc/complexity": "workspace:*",
     "@hbc/models": "workspace:*",
     "@hookform/resolvers": "^3.9.1",
     "@fluentui/react-components": "^9.56.0",

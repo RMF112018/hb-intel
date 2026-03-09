@@ -267,6 +267,24 @@ export type {
   UseVoiceDictationReturn,
 } from './HbcInput/index.js';
 
+// ---------------------------------------------------------------------------
+// SF03-T07: Complexity-aware component stubs (D-08)
+// ---------------------------------------------------------------------------
+export { HbcAuditTrailPanel } from './HbcAuditTrailPanel/index.js';
+export type { HbcAuditTrailPanelProps } from './HbcAuditTrailPanel/index.js';
+
+export { HbcFormField } from './HbcFormField/index.js';
+export type { HbcFormFieldProps } from './HbcFormField/index.js';
+
+export { HbcStatusTimeline } from './HbcStatusTimeline/index.js';
+export type { HbcStatusTimelineProps, IStatusEntry } from './HbcStatusTimeline/index.js';
+
+export { HbcPermissionMatrix } from './HbcPermissionMatrix/index.js';
+export type { HbcPermissionMatrixProps, IRole, IPermission } from './HbcPermissionMatrix/index.js';
+
+export { HbcCoachingCallout } from './HbcCoachingCallout/index.js';
+export type { HbcCoachingCalloutProps } from './HbcCoachingCallout/index.js';
+
 // PH4.12 Interaction Pattern Library
 export { HbcConfirmDialog } from './HbcConfirmDialog/index.js';
 export type { HbcConfirmDialogProps } from './HbcConfirmDialog/types.js';

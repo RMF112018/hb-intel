@@ -300,3 +300,28 @@ pnpm --filter @hbc/dev-harness dev
 # (Pass complexityMinTier="standard" to HbcAuditTrailPanel)
 # Confirm: Panel visible at Standard when override applied
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF03-T07 completed: 2026-03-08
+
+Implementation summary:
+- Added @hbc/complexity as workspace dependency to @hbc/ui-kit
+- Fixed @hbc/complexity package.json exports to match actual dist/src/ layout (rootDir=".")
+- Created 5 new complexity-aware component stubs:
+  - HbcAuditTrailPanel (expert default)
+  - HbcFormField (standard default, conditional via complexitySensitive flag)
+  - HbcStatusTimeline (standard default)
+  - HbcPermissionMatrix (expert default)
+  - HbcCoachingCallout (essential–standard, also checks showCoaching D-07)
+- Retrofitted HbcDataTable with IComplexityAwareProps + useComplexityGate for advanced filters
+- Exported all new components from ui-kit barrel (src/index.ts)
+- Created docs/reference/ui-kit/complexity-sensitivity.md (authoritative sensitivity table)
+- useComplexity stub in ui-kit left as-is for backward compatibility with bic-next-move
+
+Verification:
+- pnpm --filter @hbc/ui-kit check-types: ✅ zero errors
+- pnpm --filter @hbc/ui-kit build: ✅ zero errors
+- docs/reference/ui-kit/complexity-sensitivity.md: ✅ created with full 18-component table
+
+Next: T08 Testing Strategy
+-->

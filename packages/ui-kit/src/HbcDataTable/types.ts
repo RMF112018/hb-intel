@@ -1,6 +1,7 @@
 /** HbcDataTable — Blueprint §1d, PH4.7 §7.1–7.4 virtualized data table */
 import type { ColumnDef, SortingState, RowSelectionState } from '@tanstack/react-table';
 import type { DensityTier } from '../HbcCommandBar/types.js';
+import type { IComplexityAwareProps } from '@hbc/complexity';
 import type { SavedViewEntry } from './saved-views-types.js';
 
 /** Empty state configuration for zero-data display */
@@ -50,7 +51,7 @@ export interface HbcDataTableSavedViewsConfig {
   onViewApplied?: (viewId: string, view: SavedViewEntry) => void;
 }
 
-export interface HbcDataTableProps<TData> {
+export interface HbcDataTableProps<TData> extends IComplexityAwareProps {
   /** Table data array */
   data: TData[];
   /** TanStack Table column definitions */
@@ -145,4 +146,8 @@ export interface HbcDataTableProps<TData> {
   // --- PH4.13 Step 1: Frozen Columns ---
   /** Column accessor keys to freeze (sticky left). Columns stay fixed during horizontal scroll. */
   frozenColumns?: string[];
+
+  // --- SF03-T07: Complexity gate for advanced filters ---
+  // complexityMinTier and complexityMaxTier (from IComplexityAwareProps) apply to
+  // the advanced filter row only, not the table itself. Default: expert.
 }

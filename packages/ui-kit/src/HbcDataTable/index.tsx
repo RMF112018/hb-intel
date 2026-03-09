@@ -44,6 +44,7 @@ import { HbcDataTableCard } from './HbcDataTableCard.js';
 import { useShimmerStyles } from '../shared/index.js';
 import { useSavedViews } from './hooks/useSavedViews.js';
 import type { SavedViewConfig, SavedViewEntry } from './saved-views-types.js';
+import { useComplexityGate } from '@hbc/complexity';
 import type { HbcDataTableProps, HbcDataTableSavedViewsConfig } from './types.js';
 
 const useStyles = makeStyles({
@@ -429,9 +430,20 @@ export function HbcDataTable<TData>({
   emptyStateConfig,
   // PH4.13 Step 1: Frozen Columns
   frozenColumns,
+  // SF03-T07: Complexity gate for advanced filters
+  complexityMinTier = 'expert',
+  complexityMaxTier,
 }: HbcDataTableProps<TData>): React.JSX.Element {
   const styles = useStyles();
   const shimmerStyles = useShimmerStyles();
+
+  // T07: advanced filter row gated by complexity — gate hook is called unconditionally
+  // to satisfy Rules of Hooks. The gate result will control advanced filter rendering
+  // when the advanced filter feature is implemented.
+  const _showAdvancedFilters = useComplexityGate({
+    minTier: complexityMinTier,
+    maxTier: complexityMaxTier,
+  });
   // D-PH4C-10: Stable per-instance prefix keeps th/td associations deterministic and unique.
   const tableIdPrefix = React.useId().replace(/:/g, '');
   const parentRef = React.useRef<HTMLDivElement>(null);
