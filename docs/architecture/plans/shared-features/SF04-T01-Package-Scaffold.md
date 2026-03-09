@@ -263,3 +263,17 @@ pnpm --filter @hbc/acknowledgment build
 node -e "import('@hbc/acknowledgment/testing').then(m => console.log(Object.keys(m)))"
 # Expected: [] (empty stubs — populated in T10)
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF04-T01 completed: 2026-03-09
+- Created packages/acknowledgment/ with full directory structure
+- package.json aligned with @hbc/bic-next-move conventions (vitest ^3.2.4, @testing-library/react ^15, vite ^6, jsdom ^25, react as peerDependency only)
+- tsconfig.json extends ../../tsconfig.base.json with rootDir ".", includes src/**/* and testing/**/*
+- vitest.config.ts uses ESM fileURLToPath pattern, passWithNoTests enabled
+- All barrel stubs created: src/index.ts, types/, config/, hooks/, components/, testing/
+- Testing sub-path (D-10) with 5 placeholder utilities
+- Added @hbc/acknowledgment path mapping to tsconfig.base.json
+- @hbc/session-state dependency deferred (package not yet scaffolded); add in SF04-T07
+- Verification: pnpm install ✓, check-types ✓, build ✓, test (passWithNoTests) ✓
+Next: SF04-T02 (TypeScript contracts + ACK_CONTEXT_TYPES)
+-->

@@ -230,3 +230,8 @@ User clicks "Acknowledge"
 | `SF04-T07-Offline-Queue.md` | `@hbc/session-state` integration, replay logic, "pending sync" indicator |
 | `SF04-T08-Testing-Strategy.md` | Testing sub-path, unit tests, Storybook stories, Playwright E2E |
 | `SF04-T09-Deployment.md` | Pre-deployment checklist, ADR-0013, integration guide, blueprint progress comment |
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF04-T01 completed: 2026-03-09 — Package scaffold created with all config, barrels, and testing sub-path
+Next: SF04-T02 (TypeScript contracts + ACK_CONTEXT_TYPES)
+-->

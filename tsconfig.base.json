@@ -58,7 +58,9 @@
       "@hbc/bic-next-move": ["packages/bic-next-move/src/index.ts"],
       "@hbc/bic-next-move/*": ["packages/bic-next-move/src/*"],
       "@hbc/complexity": ["packages/complexity/src/index.ts"],
-      "@hbc/complexity/*": ["packages/complexity/src/*"]
+      "@hbc/complexity/*": ["packages/complexity/src/*"],
+      "@hbc/acknowledgment": ["packages/acknowledgment/src/index.ts"],
+      "@hbc/acknowledgment/*": ["packages/acknowledgment/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"]
