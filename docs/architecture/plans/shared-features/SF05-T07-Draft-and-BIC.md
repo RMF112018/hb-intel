@@ -312,3 +312,16 @@ pnpm --filter @hbc/step-wizard test -- --reporter=verbose state/__tests__/draftP
 # Verify SF02 amendments compile correctly
 pnpm --filter @hbc/bic-next-move typecheck
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF05-T07 completed: 2026-03-09
+Deliverables:
+  1. draftPersistence.test.ts — 3 tests covering D-02, D-05, D-07 mergeDraft contracts
+  2. getActionableStepIds() — pure function in draftPayload.ts (D-04 mode-specific rules)
+  3. BIC_DYNAMIC_PREFIXES — additive constant in manifest.ts (preserves BIC_MODULE_MANIFEST array)
+  4. isKnownModuleKey() — extracted helper in BicModuleRegistry.ts, manifest guard updated
+  5. 4 new tests in BicModuleRegistry.test.ts (isKnownModuleKey + dynamic prefix guard)
+Key deviation: BIC_MODULE_MANIFEST kept as const tuple array (not converted to object) to avoid breaking BicModuleKey type, .includes(), and for...of iteration.
+BIC lifecycle functions (registerStepBicEntry, closeStepBicEntry) remain specification-only — bicClient.open()/close() do not yet exist.
+Next: SF05-T08
+-->

@@ -5,6 +5,7 @@ import {
   getModuleRegistration,
   executeBicFanOut,
   executeServerAggregation,
+  isKnownModuleKey,
   _clearRegistryForTests,
 } from '../registry/BicModuleRegistry';
 import { mockBicStates } from '@hbc/bic-next-move/testing';
@@ -75,6 +76,44 @@ describe('manifest guard (D-02)', () => {
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining('unknown key "unknown-module-xyz"')
     );
+
+    warnSpy.mockRestore();
+    vi.useRealTimers();
+  });
+});
+
+describe('isKnownModuleKey (SF05-T07)', () => {
+  it('returns true for exact manifest key', () => {
+    expect(isKnownModuleKey('bd-scorecard')).toBe(true);
+  });
+
+  it('returns true for dynamic prefix key', () => {
+    expect(isKnownModuleKey('step-wizard:scorecard:step-1')).toBe(true);
+  });
+
+  it('returns false for unknown key', () => {
+    expect(isKnownModuleKey('unknown-module')).toBe(false);
+  });
+});
+
+describe('manifest guard — dynamic prefix (SF05-T07)', () => {
+  it('does NOT warn for dynamic prefix keys', () => {
+    vi.useFakeTimers();
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    registerBicModule({
+      key: 'step-wizard:scorecard:step-1',
+      label: 'Step 1',
+      queryFn: async () => [],
+    });
+
+    vi.advanceTimersByTime(6000);
+
+    // Should NOT have a warning about "unknown key" for step-wizard prefixed keys
+    const unknownKeyWarnings = warnSpy.mock.calls.filter(
+      (call) => typeof call[0] === 'string' && call[0].includes('unknown key "step-wizard:')
+    );
+    expect(unknownKeyWarnings).toHaveLength(0);
 
     warnSpy.mockRestore();
     vi.useRealTimers();

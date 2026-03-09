@@ -1,6 +1,7 @@
 import type { IBicModuleRegistration, IBicRegisteredItem } from '../types/IBicNextMove';
 import {
   BIC_MODULE_MANIFEST,
+  BIC_DYNAMIC_PREFIXES,
   BIC_MANIFEST_GUARD_DELAY_MS,
   type BicModuleKey,
 } from '../constants/manifest';
@@ -16,6 +17,15 @@ let _guardScheduled = false;
 // Dev-mode manifest guard (D-02)
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Returns true if the key is either an exact match in BIC_MODULE_MANIFEST
+ * or matches a dynamic prefix (e.g. 'step-wizard:*').
+ */
+export function isKnownModuleKey(key: string): boolean {
+  if ((BIC_MODULE_MANIFEST as readonly string[]).includes(key)) return true;
+  return BIC_DYNAMIC_PREFIXES.some((prefix) => key.startsWith(prefix));
+}
+
 function scheduleManifestGuard(): void {
   if (_guardScheduled) return;
   _guardScheduled = true;
@@ -26,7 +36,7 @@ function scheduleManifestGuard(): void {
   setTimeout(() => {
     // Check 1: Registered keys that are NOT in the manifest (typo detection)
     for (const [key] of _registry) {
-      if (!(BIC_MODULE_MANIFEST as readonly string[]).includes(key)) {
+      if (!isKnownModuleKey(key)) {
         console.warn(
           `[bic-next-move] Module registered with unknown key "${key}". ` +
           `This key is not in BIC_MODULE_MANIFEST. Check for typos or add it to the manifest. ` +

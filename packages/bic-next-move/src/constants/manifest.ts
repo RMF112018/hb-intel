@@ -28,6 +28,16 @@ export const BIC_MODULE_MANIFEST = [
 export type BicModuleKey = typeof BIC_MODULE_MANIFEST[number];
 
 /**
+ * Dynamic prefix patterns for module keys that are registered at runtime.
+ * Keys matching any prefix here are recognised by the manifest guard
+ * without requiring an entry in BIC_MODULE_MANIFEST.
+ *
+ * SF05-T07: step-wizard registers keys like 'step-wizard:scorecard:step-1'.
+ */
+export const BIC_DYNAMIC_PREFIXES = ['step-wizard:'] as const;
+export type BicDynamicPrefix = typeof BIC_DYNAMIC_PREFIXES[number];
+
+/**
  * BIC_AGGREGATION_MODE — controls whether useBicMyItems uses client-side fan-out
  * or a future server-side aggregation endpoint (D-06).
  *

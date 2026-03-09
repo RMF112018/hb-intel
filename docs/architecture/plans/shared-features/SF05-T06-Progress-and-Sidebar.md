@@ -343,3 +343,14 @@ pnpm --filter @hbc/step-wizard typecheck
 pnpm --filter @hbc/step-wizard test -- --reporter=verbose components/HbcStepProgress
 pnpm --filter @hbc/step-wizard test -- --reporter=verbose components/HbcStepSidebar
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF05-T06 completed: 2026-03-09
+- HbcStepProgress: root + FractionVariant + BarVariant + RingVariant implemented with D-09 self-fetch via useStepProgress
+- HbcStepSidebar: standalone sidebar wrapping WizardSidebar, accepts external activeStepId/onStepSelect
+- 4 test cases for HbcStepProgress (fraction count, complete state, bar aria, stale indicator)
+- 2 test cases for HbcStepSidebar (unlocked click fires, locked click blocked)
+- Barrel export verified — components/index.ts already re-exports both
+- All 32 tests pass (26 existing + 6 new), zero TS errors
+Next: SF05-T07
+-->

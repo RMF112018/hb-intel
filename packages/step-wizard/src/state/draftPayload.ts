@@ -134,6 +134,46 @@ export function computePercentComplete(
   return Math.round((completed / required.length) * 100);
 }
 
+// ─── BIC Actionable Step Resolution (D-04) ───────────────────────────────────
+
+/**
+ * Returns the set of step IDs that are currently actionable for BIC entry purposes.
+ *
+ * Mode-specific rules (D-04):
+ * - sequential: only the active step
+ * - parallel: all non-complete steps
+ * - sequential-with-jumps: visited non-complete steps
+ */
+export function getActionableStepIds(
+  steps: Array<{ stepId: string }>,
+  statuses: Record<string, StepStatus>,
+  visitedStepIds: string[],
+  activeStepId: string | null,
+  orderMode: string
+): Set<string> {
+  if (orderMode === 'sequential') {
+    return activeStepId ? new Set([activeStepId]) : new Set();
+  }
+  if (orderMode === 'parallel') {
+    return new Set(
+      steps
+        .filter((s) => (statuses[s.stepId] ?? 'not-started') !== 'complete')
+        .map((s) => s.stepId)
+    );
+  }
+  // sequential-with-jumps: visited non-complete steps
+  const visited = new Set(visitedStepIds);
+  return new Set(
+    steps
+      .filter(
+        (s) =>
+          visited.has(s.stepId) &&
+          (statuses[s.stepId] ?? 'not-started') !== 'complete'
+      )
+      .map((s) => s.stepId)
+  );
+}
+
 // ─── sequential-with-jumps Unlock Logic (D-01) ───────────────────────────────
 
 /**
