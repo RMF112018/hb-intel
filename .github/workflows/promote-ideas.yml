@@ -1,0 +1,55 @@
+name: Promote Ideas to Issues
+
+on:
+  push:
+    paths:
+      - "docs/product/ideas/IDEA-INBOX.md"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  promote-ideas:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Promote ideas
+        uses: actions/github-script@v8
+        env:
+          IDEA_FILE: docs/product/ideas/IDEA-INBOX.md
+        with:
+          script: |
+            const path = require('path');
+            const fs = require('fs');
+            const { promoteIdeas } = await import(
+              'file://' + path.join(process.env.GITHUB_WORKSPACE, 'scripts', 'promote-ideas.mjs')
+            );
+
+            const result = await promoteIdeas({
+              github,
+              context,
+              filePath: process.env.IDEA_FILE,
+              workspace: process.env.GITHUB_WORKSPACE,
+            });
+
+            core.setOutput('created_count', String(result.createdCount));
+            core.setOutput('changed_file', result.changed ? 'true' : 'false');
+
+      - name: Commit updated IDEA-INBOX
+        if: steps.promote-ideas.outputs.changed_file == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/product/ideas/IDEA-INBOX.md
+          git commit -m "chore(ideas): record promoted idea issue numbers"
+          git push

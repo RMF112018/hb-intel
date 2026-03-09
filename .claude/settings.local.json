@@ -74,7 +74,10 @@
       "Bash(git:*)",
       "Bash(npx tsc:*)",
       "Bash(npx vitest:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=8192\" pnpm vitest:*)",
+      "Bash(bash:*)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=16384\" pnpm vitest:*)"
     ]
   },
   "enabledPlugins": {

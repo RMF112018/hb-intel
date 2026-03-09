@@ -62,6 +62,23 @@ for the full export tier reference.
 - Feature modules must not bypass protected feature registration + shell/auth contracts.
 - SPFx-specific integrations must remain in documented boundary seams.
 
+## Internal Architecture (PH7.3)
+
+`ShellCore.tsx` is a thin coordinator that delegates orchestration to 7 internal hooks:
+
+| Layer | Owns | Does Not Own |
+|-------|------|-------------|
+| `ShellCore.tsx` | Thin coordination, experience rendering branches, slot composition | Inline orchestration logic |
+| `useRouteEnforcement` | Route evaluation, access decisions | Rendering, store mutations |
+| `useShellDegradedRecovery` | Degraded eligibility, experience state, recovery state, `wasDegraded` tracking | Store sync, status rail |
+| `useShellStatusRail` | Status snapshot, action mediation, rail rendering | Auth lifecycle, degraded policies |
+| `useRedirectRestore` | Redirect memory restore with double-call semantics | Route enforcement |
+| `useStartupTimingCompletion` | First protected render timing, monotonic clock | Phase recording (delegates to `startupTiming.ts`) |
+| `useShellBootstrapSync` | Lifecycle→bootstrap mapping, store sync | State computation |
+| `useSpfxHostAdapter` | SPFx bridge validation, signal normalization | Auth lifecycle |
+
+Supporting pure-function modules: `degradedMode.ts`, `shellStatus.ts`, `redirectMemory.ts`, `startupTiming.ts`, `spfxHostBridge.ts`, `shellModeRules.ts`, `signOutCleanup.ts`, `shellExperience.ts`.
+
 ## Documentation and Traceability
 
 - Phase plan: `docs/architecture/plans/PH5-Auth-Shell-Plan.md`

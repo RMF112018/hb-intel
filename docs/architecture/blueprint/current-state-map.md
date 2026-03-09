@@ -37,7 +37,7 @@
 | `docs/architecture/adr/ADR-0001` through `ADR-0073` | **Permanent Decision Rationale** | Append-only; 73 accepted records |
 | `docs/architecture/adr/ADR-PH5C-01` | **Permanent Decision Rationale** | Phase 5C-specific decision |
 | SF01–SF06 plans (completed shared-feature work) | **Historical Foundational** | Execution complete; retained for audit trail |
-| PH7 domain plans (`ph7-business-development/`, `ph7-estimating/`, `ph7-project-hub/`, `ph7-remediation/`) | **Canonical Normative Plan** | Active execution plans for Phase 7 |
+| PH7 domain plans (`ph7-business-development/`, `ph7-estimating/`, `ph7-project-hub/`) | **Canonical Normative Plan** | Active execution plans for Phase 7 |
 | PH7 root-level plans (deleted from git index) | **Superseded / Archived Reference** | Replaced by reorganized subdirectory plans |
 | `ph7-breakout-webparts/` plans | **Canonical Normative Plan** | Active execution plans for SPFx breakout |
 

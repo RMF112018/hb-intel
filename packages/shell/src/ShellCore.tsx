@@ -1,49 +1,43 @@
 import { AccessDenied, useAuthStore } from '@hbc/auth';
 import type { ComponentType, ReactNode } from 'react';
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  resolveDegradedEligibility,
-  resolveRestrictedZones,
-  resolveSafeRecoveryState,
-  resolveSensitiveActionPolicy,
-  type DegradedEligibilityResult,
-  type ShellRestrictedZoneInput,
-  type ShellRestrictedZoneState,
-  type ShellRecoveryState,
-  type ShellSensitiveActionIntent,
-  type ShellSensitiveActionPolicyResult,
-} from './degradedMode.js';
+import { Suspense, lazy, useMemo } from 'react';
+import type { ShellRestrictedZoneState, ShellSensitiveActionPolicyResult } from './degradedMode.js';
 import type { HeaderBarProps } from './HeaderBar/index.js';
 import { AppLauncher } from './AppLauncher/index.js';
 import { BackToProjectHub } from './BackToProjectHub/index.js';
 import { ProjectPicker } from './ProjectPicker/index.js';
 import { ShellLayout } from './ShellLayout/index.js';
-import { clearRedirectMemory, resolvePostGuardRedirect, restoreRedirectTarget } from './redirectMemory.js';
 import { resolveShellModeRules } from './shellModeRules.js';
-import { assertValidSpfxHostBridge, normalizeSpfxHostSignals } from './spfxHostBridge.js';
-import { getSnapshot, recordPhase } from './startupTiming.js';
-import {
-  isShellStatusActionAllowed,
-  resolveShellStatusSnapshot,
-  type ShellConnectivitySignal,
-  type ShellDegradedSectionInput,
-  type ShellStatusAction,
-  type ShellStatusSnapshot,
+import type {
+  ShellConnectivitySignal,
+  ShellDegradedSectionInput,
+  ShellStatusAction,
+  ShellStatusSnapshot,
 } from './shellStatus.js';
-import {
-  createDefaultShellSignOutCleanupDependencies,
-  runShellSignOutCleanup,
-} from './signOutCleanup.js';
+import type { ShellRecoveryState, ShellSensitiveActionIntent, ShellRestrictedZoneInput } from './degradedMode.js';
 import { useNavStore } from './stores/navStore.js';
 import { useShellCoreStore } from './stores/shellCoreStore.js';
 import type {
   ShellCacheRetentionTier,
   ShellEnvironmentAdapter,
   ShellExperienceState,
-  ShellRouteEnforcementDecision,
   StartupTimingSnapshot,
   WorkspaceId,
 } from './types.js';
+import {
+  createDefaultShellSignOutCleanupDependencies,
+  runShellSignOutCleanup,
+} from './signOutCleanup.js';
+import { useSpfxHostAdapter } from './useSpfxHostAdapter.js';
+import { useRouteEnforcement } from './useRouteEnforcement.js';
+import { useShellDegradedRecovery } from './useShellDegradedRecovery.js';
+import { useShellBootstrapSync } from './useShellBootstrapSync.js';
+import { useShellStatusRail } from './useShellStatusRail.js';
+import { useRedirectRestore } from './useRedirectRestore.js';
+import { useStartupTimingCompletion } from './useStartupTimingCompletion.js';
+
+// Re-export for backward compat (D1 — index.ts unchanged for this symbol)
+export { resolveShellExperienceState } from './shellExperience.js';
 
 // ALIGNMENT: ShellCore.tsx v1.0 - PH5C.4, PH5C.2 - Shell core component with dev toolbar integration
 // ALIGNMENT: DevToolbar Integration PH5C.4
@@ -116,49 +110,6 @@ export function resolveRoleLandingPath(resolvedRoles: readonly string[]): string
 }
 
 /**
- * Centralized selector for shell experience surfaces.
- */
-export function resolveShellExperienceState(params: {
-  lifecyclePhase: string;
-  routeDecision: ShellRouteEnforcementDecision | null;
-  degradedEligibility?: DegradedEligibilityResult;
-  forcedExperienceState?: Exclude<ShellExperienceState, 'access-denied'> | null;
-}): ShellExperienceState {
-  if (params.routeDecision && !params.routeDecision.allow) {
-    return 'access-denied';
-  }
-
-  if (params.forcedExperienceState) {
-    return params.forcedExperienceState;
-  }
-
-  if (params.lifecyclePhase === 'bootstrapping' || params.lifecyclePhase === 'restoring') {
-    return 'recovery';
-  }
-
-  if (params.lifecyclePhase === 'error' || params.lifecyclePhase === 'reauth-required') {
-    return params.degradedEligibility?.eligible === true ? 'degraded' : 'recovery';
-  }
-
-  return 'ready';
-}
-
-/**
- * Determine when first protected shell render is eligible to be marked complete.
- */
-export function canCompleteFirstProtectedShellRender(params: {
-  lifecyclePhase: string;
-  experienceState: ShellExperienceState;
-  routeDecision: ShellRouteEnforcementDecision | null;
-}): boolean {
-  return (
-    params.lifecyclePhase === 'authenticated' &&
-    params.experienceState === 'ready' &&
-    params.routeDecision?.allow === true
-  );
-}
-
-/**
  * Shared shell orchestrator for Phase 5.5.
  *
  * Non-goals:
@@ -209,229 +160,84 @@ export function ShellCore({
   const setBootstrapPhase = useShellCoreStore((s) => s.setBootstrapPhase);
   const setActiveWorkspaceSnapshot = useShellCoreStore((s) => s.setActiveWorkspaceSnapshot);
   const setLastResolvedLandingPath = useShellCoreStore((s) => s.setLastResolvedLandingPath);
-  const [routeDecision, setRouteDecision] = useState<ShellRouteEnforcementDecision | null>(null);
-  const [wasDegraded, setWasDegraded] = useState(false);
-  const [firstProtectedRenderRecorded, setFirstProtectedRenderRecorded] = useState(false);
-  const startupMountTimeMs = useRef<number>(resolveMonotonicNowMs());
 
   const rules = useMemo(() => resolveShellModeRules(adapter.environment), [adapter.environment]);
-  useEffect(() => {
-    if (adapter.environment !== 'spfx' && adapter.spfxHostBridge) {
-      throw new Error('SPFx host bridge can only be supplied for spfx shell environment adapters.');
-    }
-    if (adapter.environment === 'spfx' && adapter.spfxHostBridge) {
-      assertValidSpfxHostBridge(adapter.spfxHostBridge);
-    }
-  }, [adapter]);
   const resolvedRoles = session?.resolvedRoles ?? [];
   const landingPath = resolveRoleLandingPath(resolvedRoles);
-  // Controlled degraded mode is gated by strict policy, not direct lifecycle state.
-  const degradedEligibility = useMemo(
-    () =>
-      resolveDegradedEligibility({
-        lifecyclePhase,
-        sessionValidatedAt: session?.validatedAt ?? null,
-        sections: degradedSections,
-      }),
-    [degradedSections, lifecyclePhase, session?.validatedAt],
-  );
-  const experienceState = resolveShellExperienceState({
-    lifecyclePhase,
-    routeDecision,
-    degradedEligibility,
-    forcedExperienceState,
-  });
   const resolvedConnectivitySignal: ShellConnectivitySignal =
     connectivitySignal ??
     (typeof navigator !== 'undefined' && navigator.onLine ? 'connected' : 'reconnecting');
-  // Centralized sensitive-action resolver enforces blocked categories in degraded mode.
-  const sensitiveActionPolicy = useMemo(
-    () =>
-      resolveSensitiveActionPolicy({
-        isDegradedMode: experienceState === 'degraded',
-        intents: sensitiveActionIntents,
-      }),
-    [experienceState, sensitiveActionIntents],
-  );
-  // Restricted zones remain visible in degraded mode to make constraints explicit.
-  const resolvedRestrictedZones = useMemo(
-    () =>
-      resolveRestrictedZones({
-        isDegradedMode: experienceState === 'degraded',
-        zones: restrictedZones,
-      }),
-    [experienceState, restrictedZones],
-  );
-  // Recovery is explicit and safe only once authenticated + connected state is restored.
-  const recoveryState = useMemo(
-    () =>
-      resolveSafeRecoveryState({
-        wasDegraded,
-        isDegraded: experienceState === 'degraded',
-        lifecyclePhase,
-        connectivitySignal: resolvedConnectivitySignal,
-      }),
-    [experienceState, lifecyclePhase, resolvedConnectivitySignal, wasDegraded],
-  );
-  const statusSnapshot = useMemo(
-    () =>
-      resolveShellStatusSnapshot({
-        lifecyclePhase,
-        experienceState,
-        hasAccessValidationIssue: Boolean(routeDecision && !routeDecision.allow),
-        hasFatalError: Boolean(structuredError),
-        connectivitySignal: resolvedConnectivitySignal,
-        degradedSections,
-        hasRecoveredFromDegraded: recoveryState.recovered,
-      }),
-    [
-      lifecyclePhase,
-      experienceState,
-      routeDecision,
-      structuredError,
-      resolvedConnectivitySignal,
-      degradedSections,
-      recoveryState.recovered,
-    ],
-  );
 
-  useEffect(() => {
-    setExperienceState(experienceState);
-  }, [experienceState, setExperienceState]);
+  // --- Hook calls ---
+  useSpfxHostAdapter({ adapter });
 
-  useEffect(() => {
-    // Track whether shell has entered degraded mode to power one-shot recovery signaling.
-    if (experienceState === 'degraded') {
-      setWasDegraded(true);
-      return;
-    }
-
-    if (recoveryState.recovered) {
-      setWasDegraded(false);
-    }
-  }, [experienceState, recoveryState.recovered]);
-
-  useEffect(() => {
-    onSensitiveActionPolicyResolved?.(sensitiveActionPolicy);
-  }, [onSensitiveActionPolicyResolved, sensitiveActionPolicy]);
-
-  useEffect(() => {
-    onRestrictedZonesResolved?.(resolvedRestrictedZones);
-  }, [onRestrictedZonesResolved, resolvedRestrictedZones]);
-
-  useEffect(() => {
-    onRecoveryStateResolved?.(recoveryState);
-  }, [onRecoveryStateResolved, recoveryState]);
-
-  useEffect(() => {
-    setBootstrapPhase(
-      lifecyclePhase === 'bootstrapping' || lifecyclePhase === 'restoring'
-        ? 'bootstrapping'
-        : lifecyclePhase === 'error' || lifecyclePhase === 'reauth-required'
-          ? 'recovering'
-          : lifecyclePhase === 'authenticated'
-            ? 'ready'
-            : 'idle',
-    );
-  }, [lifecyclePhase, setBootstrapPhase]);
-
-  useEffect(() => {
-    setActiveWorkspaceSnapshot(activeWorkspace);
-  }, [activeWorkspace, setActiveWorkspaceSnapshot]);
-
-  useEffect(() => {
-    if (adapter.environment !== 'spfx') {
-      return;
-    }
-
-    const signals = normalizeSpfxHostSignals(adapter.spfxHostBridge?.signals);
-    void adapter.applySpfxHostSignals?.(signals);
-  }, [adapter]);
-
-  useEffect(() => {
-    const evaluateRoute = async (): Promise<void> => {
-      if (!adapter.enforceRoute) {
-        setRouteDecision({ allow: true });
-        return;
-      }
-
-      const decision = await adapter.enforceRoute({
-        pathname: currentPathname,
-        intendedPathname,
-        activeWorkspace,
-        resolvedRoles: [...resolvedRoles],
-      });
-      setRouteDecision(decision);
-    };
-
-    void evaluateRoute();
-  }, [activeWorkspace, adapter, currentPathname, intendedPathname, resolvedRoles]);
-
-  useEffect(() => {
-    if (
-      firstProtectedRenderRecorded ||
-      !canCompleteFirstProtectedShellRender({
-        lifecyclePhase,
-        experienceState,
-        routeDecision,
-      })
-    ) {
-      return;
-    }
-
-    const elapsedMs = Math.max(resolveMonotonicNowMs() - startupMountTimeMs.current, 0);
-    recordPhase('first-protected-shell-render', elapsedMs, {
-      source: 'shell-core',
-      environment: adapter.environment,
-      outcome: 'success',
-      details: {
-        lifecyclePhase,
-      },
-    });
-    setFirstProtectedRenderRecorded(true);
-    onStartupTimingSnapshot?.(getSnapshot());
-  }, [
-    adapter.environment,
-    experienceState,
-    firstProtectedRenderRecorded,
-    lifecyclePhase,
-    onStartupTimingSnapshot,
-    routeDecision,
-  ]);
-
-  useEffect(() => {
-    if (!session || !rules.supportsRedirectRestore || !onNavigate) {
-      return;
-    }
-
-    const resolvedPath = resolvePostGuardRedirect({
-      runtimeMode: adapter.environment,
-      fallbackPath: landingPath,
-      isTargetAllowed: (pathname) => pathname !== currentPathname,
-    });
-
-    const restored = restoreRedirectTarget({ runtimeMode: adapter.environment });
-    if (restored && restored.pathname === resolvedPath) {
-      setLastResolvedLandingPath(resolvedPath);
-      onNavigate(resolvedPath);
-      clearRedirectMemory();
-      return;
-    }
-
-    if (currentPathname === '/') {
-      setLastResolvedLandingPath(resolvedPath);
-      onNavigate(resolvedPath);
-    }
-  }, [
-    adapter.environment,
+  const routeDecision = useRouteEnforcement({
+    adapter,
     currentPathname,
-    landingPath,
-    onNavigate,
-    rules.supportsRedirectRestore,
-    session,
-    setLastResolvedLandingPath,
-  ]);
+    intendedPathname,
+    activeWorkspace,
+    resolvedRoles,
+  });
 
+  const { experienceState, sensitiveActionPolicy, resolvedRestrictedZones, recoveryState } =
+    useShellDegradedRecovery({
+      lifecyclePhase,
+      session,
+      degradedSections,
+      sensitiveActionIntents,
+      restrictedZones,
+      routeDecision,
+      forcedExperienceState,
+      connectivitySignal: resolvedConnectivitySignal,
+      onSensitiveActionPolicyResolved,
+      onRestrictedZonesResolved,
+      onRecoveryStateResolved,
+    });
+
+  useShellBootstrapSync({
+    lifecyclePhase,
+    experienceState,
+    activeWorkspace,
+    setExperienceState,
+    setBootstrapPhase,
+    setActiveWorkspaceSnapshot,
+  });
+
+  const { statusSnapshot, resolvedStatusRail } = useShellStatusRail({
+    lifecyclePhase,
+    experienceState,
+    routeDecision,
+    structuredError,
+    connectivitySignal: resolvedConnectivitySignal,
+    degradedSections,
+    recoveryState,
+    renderStatusRail,
+    statusSlot,
+    onRetry,
+    onSignInAgain,
+    onLearnMore,
+    onShellStatusAction,
+  });
+
+  useRedirectRestore({
+    session,
+    rules,
+    onNavigate,
+    adapterEnvironment: adapter.environment,
+    landingPath,
+    currentPathname,
+    setLastResolvedLandingPath,
+  });
+
+  useStartupTimingCompletion({
+    lifecyclePhase,
+    experienceState,
+    routeDecision,
+    adapter,
+    onStartupTimingSnapshot,
+  });
+
+  // --- Layout slot composition ---
   const layoutLeftSlot =
     rules.supportsProjectPicker && activeWorkspace === 'project-hub' ? (
       <ProjectPicker
@@ -449,32 +255,7 @@ export function ShellCore({
       <AppLauncher onWorkspaceSelect={onWorkspaceSelect} />
     ) : undefined);
 
-  const handleShellStatusAction = (action: ShellStatusAction): void => {
-    if (!isShellStatusActionAllowed(statusSnapshot, action)) {
-      return;
-    }
-
-    if (action === 'retry') {
-      onRetry?.();
-    }
-    if (action === 'sign-in-again') {
-      onSignInAgain?.();
-    }
-    if (action === 'learn-more') {
-      onLearnMore?.();
-    }
-
-    onShellStatusAction?.(action, statusSnapshot);
-  };
-
-  const resolvedStatusRail =
-    renderStatusRail != null
-      ? renderStatusRail({
-          snapshot: statusSnapshot,
-          onAction: handleShellStatusAction,
-        })
-      : statusSlot;
-
+  // --- Experience-state rendering branches ---
   if (experienceState === 'access-denied') {
     return (
       accessDeniedSlot ?? (
@@ -550,14 +331,6 @@ export function ShellCore({
       ) : null}
     </div>
   );
-}
-
-function resolveMonotonicNowMs(): number {
-  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
-    return performance.now();
-  }
-
-  return Date.now();
 }
 
 /**

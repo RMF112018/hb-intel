@@ -66,11 +66,11 @@ export type { ShellLayoutProps } from './ShellLayout/index.js';
 export {
   ShellCore,
   performShellSignOut,
-  canCompleteFirstProtectedShellRender,
   resolveRoleLandingPath,
   resolveShellExperienceState,
 } from './ShellCore.js';
 export type { ShellCoreProps } from './ShellCore.js';
+export { canCompleteFirstProtectedShellRender } from './useStartupTimingCompletion.js';
 export {
   RECENT_AUTH_WINDOW_MS,
   TRUSTED_SECTION_FRESHNESS_WINDOW_MS,
