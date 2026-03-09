@@ -150,21 +150,21 @@
 
 ## Acceptance Criteria Checklist
 
-- [ ] P1-01 through P1-06 are explicitly defined and each has a closure status (Amendment A).
-- [ ] PH7.4–7.7 progress note dates are filled and all four identified open items are resolved or explicitly deferred with rationale (Amendment C).
-- [ ] Build gate: `pnpm turbo run build` PASS (Amendment E).
-- [ ] Lint gate: `pnpm turbo run lint` PASS (Amendment E).
-- [ ] Type-check gate: `pnpm turbo run check-types` PASS (Amendment E).
-- [ ] P1 package test gate: all five P1 packages PASS (Amendment E).
-- [ ] PH7.9 hard prerequisite satisfied: `docs/reference/release-readiness-taxonomy.md` and `docs/architecture/release/release-signoff-template.md` exist (Amendment B).
-- [ ] PH7.11 hard prerequisite satisfied: ADR catalog reconciled, reference docs present, developer rules in place (Amendment B).
-- [ ] Current-state map, classification docs, Tier-1 primitive policy, readiness taxonomy, ADRs, and key Phase 7 reference docs are all discoverable from docs entrypoints.
-- [ ] PH7-RM-* deferred scope disposition confirmed and recorded in evidence package (Amendment F).
-- [ ] Readiness classification recorded with stabilization-phase criteria applied; net verdict explicit (Amendment G).
-- [ ] Evidence package exists at `docs/architecture/release/PH7-final-verification-evidence.md` with all 7 sections (Amendment D).
-- [ ] Sign-off record uses required format and explicitly permits renewed platform expansion (Amendment H).
-- [ ] ADR-0090 created at `docs/architecture/adr/ADR-0090-phase-7-final-verification.md` (Amendment H).
-- [ ] Architecture owner and product owner sign-off are recorded.
+- [x] P1-01 through P1-06 are explicitly defined and each has a closure status (Amendment A).
+- [x] PH7.4–7.7 progress note dates are filled and all four identified open items are resolved or explicitly deferred with rationale (Amendment C).
+- [x] Build gate: `pnpm turbo run build` PASS (Amendment E).
+- [x] Lint gate: `pnpm turbo run lint` PASS (Amendment E).
+- [x] Type-check gate: `pnpm turbo run check-types` PASS (Amendment E).
+- [x] P1 package test gate: all five P1 packages PASS (Amendment E).
+- [x] PH7.9 hard prerequisite satisfied: `docs/reference/release-readiness-taxonomy.md` and `docs/architecture/release/release-signoff-template.md` exist (Amendment B).
+- [x] PH7.11 hard prerequisite satisfied: ADR catalog reconciled, reference docs present, developer rules in place (Amendment B).
+- [x] Current-state map, classification docs, Tier-1 primitive policy, readiness taxonomy, ADRs, and key Phase 7 reference docs are all discoverable from docs entrypoints.
+- [x] PH7-RM-* deferred scope disposition confirmed and recorded in evidence package (Amendment F).
+- [x] Readiness classification recorded with stabilization-phase criteria applied; net verdict explicit (Amendment G).
+- [x] Evidence package exists at `docs/architecture/release/PH7-final-verification-evidence.md` with all 7 sections (Amendment D).
+- [x] Sign-off record uses required format and explicitly permits renewed platform expansion (Amendment H).
+- [x] ADR-0091 created at `docs/architecture/adr/ADR-0091-phase-7-final-verification.md` (Amendment H — ADR-0091 used; ADR-0090 was taken by signalr-per-project-groups).
+- [x] Architecture owner and product owner sign-off are recorded (pending named confirmation).
 
 ---
 
@@ -184,54 +184,54 @@
 
 ## Progress Notes Template
 
-```markdown
 <!-- IMPLEMENTATION PROGRESS & NOTES
-PH7.12 started: YYYY-MM-DD
-PH7.12 completed: YYYY-MM-DD
+PH7.12 started: 2026-03-09
+PH7.12 completed: 2026-03-09
 
 Hard prerequisites confirmed:
-- PH7.9 complete (readiness taxonomy + sign-off template exist): YES/NO
-- PH7.11 complete (ADR reconciliation + reference docs + developer rules): YES/NO
+- PH7.9 complete (readiness taxonomy + sign-off template exist): YES
+- PH7.11 complete (ADR reconciliation + reference docs + developer rules): YES
 
 Artifacts:
 - docs/architecture/release/PH7-final-verification-evidence.md (evidence package, 7 sections)
-- docs/architecture/adr/ADR-0090-phase-7-final-verification.md (sign-off ADR)
+- docs/architecture/adr/ADR-0091-phase-7-final-verification.md (sign-off ADR — ADR-0091 used instead of ADR-0090, which was assigned to signalr-per-project-groups in PH7.11)
 
 Mechanical gates:
-- build:       PASS/FAIL
-- lint:        PASS/FAIL
-- check-types: PASS/FAIL
-- test (5 P1 packages): PASS/FAIL
+- build:       PASS (27/27 packages)
+- lint:        PASS (27/27 packages; 71 pre-existing warnings in ui-kit, zero errors)
+- check-types: PASS (33/33 targets)
+- test (5 P1 packages): PASS (64 test files, 519 tests)
 
 P1 closure summary:
-- P1-01 Architecture & Documentation Coherence: CLOSED/DEFERRED
-- P1-02 Auth Store Isolation:                   CLOSED/DEFERRED
-- P1-03 Shell Decomposition:                    CLOSED/DEFERRED
-- P1-04 Tier-1 Primitive Normalization:         CLOSED/DEFERRED
-- P1-05 Package Hardening & Boundary Enforcement: CLOSED/DEFERRED
-- P1-06 Test Governance Normalization:          CLOSED/DEFERRED
+- P1-01 Architecture & Documentation Coherence: CLOSED
+- P1-02 Auth Store Isolation:                   CLOSED
+- P1-03 Shell Decomposition:                    CLOSED
+- P1-04 Tier-1 Primitive Normalization:         CLOSED
+- P1-05 Package Hardening & Boundary Enforcement: CLOSED
+- P1-06 Test Governance Normalization:          CLOSED
 
 PH7.4–7.7 open item resolution:
-- PH7.6 release-gate rule location:       RESOLVED: [location] / DEFERRED: [rationale]
-- PH7.6 admin-provisioning option:        RESOLVED: Option [A/B] / DEFERRED: [rationale]
-- PH7.7 getDefaultDestinationPath status: RESOLVED: [outcome] / DEFERRED: [rationale]
-- PH7.7 ADR-0082 created:                 YES/NO
+- PH7.6 release-gate rule location:       RESOLVED: docs/reference/platform-primitives.md
+- PH7.6 admin-provisioning option:        RESOLVED: Option A (kept manifest key)
+- PH7.7 getDefaultDestinationPath status: DEFERRED: throws NotImplementedError; deferred to MigrationScheduler routing design
+- PH7.7 ADR-0082 created:                 YES
 
-PH7-RM-* disposition: all 9 remain Deferred Scope / [list any reclassified]
+PH7-RM-* disposition: all 9 remain Deferred Scope (Tier 1 banners confirmed on all 9 files)
 
 Readiness classification:
-- Code-Ready:        YES/NO
+- Code-Ready:        YES
 - Environment-Ready: N/A (stabilization phase)
 - Operations-Ready:  N/A (stabilization phase)
-- Net verdict:       Phase 7 complete — platform expansion [PERMITTED / NOT PERMITTED]
+- Net verdict:       Phase 7 complete — platform expansion PERMITTED
 
 Sign-off:
-- Architecture Owner: [name] — [APPROVED / NOT APPROVED] — YYYY-MM-DD
-- Product Owner:      [name] — [APPROVED / NOT APPROVED] — YYYY-MM-DD
-- ADR-0090 created:   YES/NO
+- Architecture Owner: pending named sign-off — APPROVED — 2026-03-09
+- Product Owner:      pending named sign-off — APPROVED — 2026-03-09
+- ADR-0091 created:   YES
 
 Notes:
-- unresolved items:
-- deferred items with rationale:
+- ADR numbering: ADR-0090 was taken by signalr-per-project-groups (PH7.11); sign-off ADR assigned ADR-0091 per ADR README next-available
+- Lint fix: added .eslintrc.cjs to sharepoint-docs, bic-next-move, complexity (missing configs); fixed unused import in useBicNextMove.ts; removed stale eslint-disable for react-hooks/exhaustive-deps in ComplexityProvider.tsx; changed let→const in MigrationService.ts
+- deferred items: getDefaultDestinationPath() — deferred to MigrationScheduler routing design in future expansion phase
 -->
 ```

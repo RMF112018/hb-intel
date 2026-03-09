@@ -14,7 +14,7 @@
 | 1 | This file (`current-state-map.md`) | Canonical Current-State | Living — updated with each structural change | Present implementation truth |
 | 2 | [Blueprint V4](./blueprint/HB-Intel-Blueprint-V4.md) | Canonical Normative Plan | Locked — comment-only updates | Target architecture intent |
 | 3 | [Foundation Plan](./plans/hb-intel-foundation-plan.md) | Historical Foundational | Locked — comment-only updates | Original implementation instructions |
-| 4 | [ADRs](./adr/) (90 active; 6 archived — see §2.2 for resolution record) | Permanent Decision Rationale | Append-only | Individual architectural decisions |
+| 4 | [ADRs](./adr/) (91 active; 6 archived — see §2.2 for resolution record) | Permanent Decision Rationale | Append-only | Individual architectural decisions |
 | 5 | Phase/Task Plans (`plans/ph7-*`, `plans/PH*.md`) | Time-bound Execution | Historical after completion | Phase-scoped implementation details |
 | 6 | Package READMEs (`packages/*/README.md`) | Current Implementation Detail | Living | Package-specific API and usage |
 
@@ -36,7 +36,7 @@
 | `docs/README.md` | **Canonical Current-State** | Infrastructure/exempt — no Tier 1 banner |
 | `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md` | **Canonical Normative Plan** | Tier 1 banner applied |
 | `docs/architecture/plans/hb-intel-foundation-plan.md` | **Historical Foundational** | Tier 1 banner applied |
-| `docs/architecture/adr/` (all files) | **Permanent Decision Rationale** | Exempt from inline banner; 90 active records indexed; 6 archived in `adr/archived/`; conflicts resolved PH7.11 |
+| `docs/architecture/adr/` (all files) | **Permanent Decision Rationale** | Exempt from inline banner; 91 active records indexed; 6 archived in `adr/archived/`; conflicts resolved PH7.11 |
 | SF01–SF03 plans (completed shared-feature work: bic-next-move, complexity, sharepoint-docs) | **Historical Foundational** | Tier 2 — matrix classification only |
 | SF04–SF06 shared-feature plans (~19 docs, packages not yet built) | **Deferred Scope** | Tier 2 — matrix classification only; must not be updated without explicit phase activation |
 | PH4 phase plans (`plans/PH4-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH4-Shell-Consolidation.md` (master plan) |
@@ -67,7 +67,7 @@ Every new architecture, plan, reference, or release document must declare one of
 
 **Transition rule — Deferred Scope:** When a Deferred Scope document's feature or package enters active development in a named phase milestone, reclassify it to Canonical Normative Plan, add it to the active phase's plan index, and update this matrix. The PH7-RM-* plans must be reviewed and reclassified as needed before PH7.12 sign-off.
 
-**ADR rule:** New ADRs are always Permanent Decision Rationale. Sequential numbering resumes at ADR-0091 (ADR-0083 through ADR-0090 assigned in PH7.11).
+**ADR rule:** New ADRs are always Permanent Decision Rationale. Sequential numbering resumes at ADR-0092 (ADR-0083 through ADR-0090 assigned in PH7.11).
 
 **Banner format (Tier 1):**
 ```
@@ -86,7 +86,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | Index gap (ADR-0073–ADR-0079) | These numbers were absent from `docs/README.md` index | Resolved: 2026-03-09 — all entries added to `docs/README.md` |
 | ADR-0082 not indexed | ADR-0082 missing from `docs/README.md` | Resolved: 2026-03-09 — added to index |
 
-**Post-PH7.11 state:** 90 ADR files on disk (active), 6 archived in `adr/archived/`. Next available number: **ADR-0091**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
+**Post-PH7.11 state:** 91 ADR files on disk (active), 6 archived in `adr/archived/`. Next available number: **ADR-0092**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
 
 ---
 
@@ -222,7 +222,7 @@ This is **controlled evolution (a)** — necessary to support the full platform 
 This file + package READMEs + the codebase itself. For any question about what exists _right now_, start here.
 
 **Where are locked decisions?**
-[Blueprint V4](./blueprint/HB-Intel-Blueprint-V4.md) (target architecture), [Foundation Plan](./plans/hb-intel-foundation-plan.md) (original implementation instructions), and the [ADR catalog](./adr/) (90 active decisions). These are append-only or comment-only.
+[Blueprint V4](./blueprint/HB-Intel-Blueprint-V4.md) (target architecture), [Foundation Plan](./plans/hb-intel-foundation-plan.md) (original implementation instructions), and the [ADR catalog](./adr/) (91 active decisions). These are append-only or comment-only.
 
 **How do I distinguish current implementation from future plans?**
 Use the Classification Matrix in Section 2. Documents labeled **Canonical Current-State** describe what exists. Documents labeled **Canonical Normative Plan** describe what should be built next. **Historical Foundational** documents describe what was planned originally and may have evolved.
@@ -301,6 +301,6 @@ As of PH7.4, `@hbc/bic-next-move`, `@hbc/complexity`, and `@hbc/sharepoint-docs`
 | Backend services | 1 |
 | Build tooling packages | 1 |
 | **Total workspace members** | **40** |
-| Architecture Decision Records | 90 active + 6 archived | <!-- PH7.11: catalog reconciled; ADR-0083–0090 added; 6 stale copies archived -->
+| Architecture Decision Records | 91 active + 6 archived | <!-- PH7.12: ADR-0091 added (phase-7-final-verification); catalog reconciled in PH7.11 -->
 | TSConfig path aliases | 62 |
 | Vite dev server ports | 14 (3000, 4000–4012) |

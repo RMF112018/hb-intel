@@ -67,7 +67,7 @@ export class MigrationService {
     let migratedCount = 0;
     let conflictCount = 0;
     let failedCount = 0;
-    let skippedCount = documents.length - pendingDocs.length; // already-completed
+    const skippedCount = documents.length - pendingDocs.length; // already-completed
 
     const destPath = scheduledMigration.destinationLibraryPath
       ?? this.getDefaultDestinationPath(scheduledMigration.sourceContextId);

@@ -121,6 +121,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0088 | Accepted | [ADR-0088-hbc-theme-context.md](./architecture/adr/ADR-0088-hbc-theme-context.md) |
 | ADR-0089 | Accepted | [ADR-0089-fluent-tokens-over-hbc-constants.md](./architecture/adr/ADR-0089-fluent-tokens-over-hbc-constants.md) |
 | ADR-0090 | Accepted | [ADR-0090-signalr-per-project-groups.md](./architecture/adr/ADR-0090-signalr-per-project-groups.md) |
+| ADR-0091 | Accepted | [ADR-0091-phase-7-final-verification.md](./architecture/adr/ADR-0091-phase-7-final-verification.md) |
 
 ## Reference Documents
 

@@ -104,7 +104,6 @@ export function ComplexityProvider({
 
     void syncFromApi();
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Runs once on mount — intentional
 
   // ── Step 3: StorageEvent cross-tab sync (D-05) ─────────────────────────
