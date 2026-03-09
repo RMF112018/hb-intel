@@ -64,3 +64,11 @@ Packages that depend on workspace siblings at source level require `resolve.alia
 | `unit-tests-p1` | All 5 P1 packages | No | `.github/workflows/ci.yml` |
 
 Both jobs run independently (no `needs:` dependency) and must pass before PR merge.
+
+---
+
+## Ambient Type Declarations
+
+| Package | File | Purpose |
+|---------|------|---------|
+| `@hbc/complexity` | `src/env.d.ts` | Minimal ambient `process.env.NODE_ENV` declaration. Required because complexity uses `process.env.NODE_ENV` for dev-only warnings, and consumers with restricted `types` (e.g., `types: ["vite/client"]`) would otherwise get TS2591 errors when resolving complexity source via path aliases. The barrel (`src/index.ts`) includes a `/// <reference path="./env.d.ts" />` directive so the declaration is automatically available to all consumers. (Added PH7.8.3) |

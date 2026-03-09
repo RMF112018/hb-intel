@@ -129,4 +129,10 @@ PH7.8.2 — Pre-existing Build and Test Failures Remediation: 2026-03-09
 - sharepoint-docs build fix: added `src/**/__tests__/**` to tsconfig.json exclude array. The setup file `src/__tests__/setup.ts` used vitest globals without type declarations and escaped the `*.test.ts` exclusion pattern.
 - shell test fix: added `resolve.alias` block to shell workspace entry in `vitest.workspace.ts`, redirecting `@hbc/complexity` to source. Without this, DevToolbar.wrapper.test.ts transitively hit `complexity/dist` which contains `import './complexity.css'` (tsc doesn't copy CSS to dist). Alias pattern matches bic-next-move and complexity entries.
 - Updated package-testing-matrix.md alias table to reflect shell's new alias requirement.
+
+PH7.8.3 — hb-site-control Process Type Errors Remediation: 2026-03-09
+- Root cause: hb-site-control tsconfig restricts types to ["vite/client"], excluding @types/node. When tsc follows path aliases into complexity source, process.env.NODE_ENV has no type declaration → 10 TS2591 errors.
+- Fix: created packages/complexity/src/env.d.ts with minimal ambient process.env.NODE_ENV declaration. Added /// <reference path="./env.d.ts" /> to complexity barrel (src/index.ts) so all consumers automatically pick up the declaration.
+- No changes to hb-site-control tsconfig or complexity dependencies. Fix is at the source package level.
+- Updated package-testing-matrix.md with env.d.ts documentation.
 -->
