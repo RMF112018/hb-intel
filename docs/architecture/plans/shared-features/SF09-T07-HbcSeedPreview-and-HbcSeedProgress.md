@@ -561,7 +561,11 @@ pnpm --filter @hbc/data-seeding test -- --grep "HbcSeedProgress.*bar|progress.*s
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF09-T07 not yet started.
+SF09-T07 completed: 2026-03-10
+- HbcSeedPreview: full implementation with Essential summary, Standard table (20 rows), Expert table (50 rows + error column)
+- HbcSeedProgress: segmented progress bar, terminal state actions, Expert batch detail
+- Fix applied: useComplexity() returns `tier` not `variant` (4 occurrences in Preview, 2 in Progress)
+- Verification: check-types ✓, build ✓, lint ✓ (zero errors)
 Note: HbcSeedPreview's error cell tooltip uses title attribute for simplicity.
 For Expert tier, a Popover from @hbc/ui-kit/app-shell should be considered
 if tooltip accessibility requirements exceed what title provides.

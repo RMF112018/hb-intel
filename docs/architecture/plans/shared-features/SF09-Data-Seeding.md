@@ -226,7 +226,7 @@ packages/data-seeding/
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF09 master plan created: 2026-03-10
-Status: In progress — T01–T03 complete, T04–T09 pending.
+Status: In progress — T01–T07 complete, T08–T09 pending.
 ADR to be created: docs/architecture/adr/0094-data-seeding-import-primitive.md
 Source spec ADR reference (ADR-0018) superseded by CLAUDE.md §7 governance.
 SF09-T01 completed: 2026-03-10 — Package scaffold with all stubs, dual entry points verified.
@@ -235,5 +235,6 @@ SF09-T03 completed: 2026-03-10 — XlsxParser, CsvParser, ProcoreExportParser, v
 SF09-T04 completed: 2026-03-10 — SeedApi implemented (importBatch, parseStreaming, recordCompletion, getHistory, getImport, getErrorReportUrl); configureSeedApiFetch DI; api/index.ts barrel created; main barrel updated. All gates pass.
 SF09-T05 completed: 2026-03-10 — useSeedImport (full state machine) and useSeedHistory (TanStack Query wrapper) implemented. crypto.randomUUID() used instead of uuid dep. IImportCompleteRequest extended with 3 fields. seedHistoryQueryKey exported. All gates pass.
 SF09-T06 completed: 2026-03-10 — HbcSeedUploader and HbcSeedMapper implemented. Three spec fixes applied: (1) useComplexity().variant → .tier; (2) DocumentApi dynamic import replaced with uploadFile callback prop (IoC/ports-adapters); (3) @hbc/sharepoint-docs dependency not needed. All gates pass.
-Next: SF09-T07-HbcSeedPreview-and-HbcSeedProgress.md
+SF09-T07 completed: 2026-03-10 — HbcSeedPreview (Essential summary, Standard/Expert table with error highlighting) and HbcSeedProgress (segmented bar, terminal actions, Expert batch detail) implemented. useComplexity().variant → .tier fix applied (6 occurrences). All gates pass.
+Next: SF09-T08-Platform-Wiring.md
 -->
