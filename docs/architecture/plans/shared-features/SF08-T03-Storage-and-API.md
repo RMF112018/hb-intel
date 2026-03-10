@@ -367,6 +367,18 @@ curl -X POST http://localhost:7071/api/workflow-handoff \
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF08-T03 not yet started.
+SF08-T03 completed: 2026-03-10
+- Replaced HandoffApi.ts stub with full spec code block (verbatim from §SF08-T03 lines 104–301)
+- apiFetch<T> internal helper using HANDOFF_API_BASE
+- mapListItem<TSource, TDest> raw SharePoint list item → IHandoffPackage mapper with JSON parse/fallback
+- HandoffApi const object (as const) with 9 public methods: create, get, inbox, outbox, send, markReceived, acknowledge, reject, updateContextNotes
+- IHandoffApi derived type export
+- Barrel export confirmed: src/api/index.ts already exports './HandoffApi' (no change needed)
+- Verification: check-types (zero errors), build (compiles to dist/), full workspace build (32/32 tasks successful)
 Next: SF08-T04 (Hooks)
+
+SF08-T03 remediation completed: 2026-03-10
+- Created .eslintrc.cjs (SF07 field-annotations pattern) — lint gate now operational
+- Removed unused imports: HandoffStatus (type), IBicOwner (external) — spec defect; SF07 AnnotationApi precedent has zero unused imports
+- Verification: check-types (zero errors), build (compiles to dist/), lint (zero warnings --max-warnings 0), full workspace build (32/32)
 -->

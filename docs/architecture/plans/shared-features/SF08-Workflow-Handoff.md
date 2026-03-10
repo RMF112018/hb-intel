@@ -260,5 +260,23 @@ Note: Source spec referenced ADR-0017 — this was a pre-PH7 numbering; ADR-0092
 SF08-T01 completed: 2026-03-10
 - Package scaffold created (30 files), SF07-aligned adjustments applied
 - All verification gates passed: check-types, build, test, full workspace build
-Next: SF08-T02 (TypeScript Contracts)
+
+SF08-T02 completed: 2026-03-10
+- Full TypeScript contract layer: 14 types/interfaces in IWorkflowHandoff.ts
+- Full constants layer: 9 exports in handoffDefaults.ts
+- IBicOwner re-export from @hbc/bic-next-move (SF07 pattern)
+- Verification: check-types, build, runtime exports, full workspace build — all passed
+
+SF08-T03 completed: 2026-03-10
+- HandoffApi.ts: full implementation replacing export {} stub
+- 9 public methods: create, get, inbox, outbox, send, markReceived, acknowledge, reject, updateContextNotes
+- Internal helpers: apiFetch<T>, mapListItem<TSource, TDest> (D-01 snapshot overflow handling)
+- IHandoffApi derived type export
+- Verification: check-types, build, full workspace build (32/32) — all passed
+Next: SF08-T04 (Hooks)
+
+SF08-T03 remediation completed: 2026-03-10
+- Created .eslintrc.cjs — lint gate now passes (--max-warnings 0)
+- Removed unused imports (HandoffStatus, IBicOwner) from HandoffApi.ts — spec defect fix
+- All gates green: check-types, build, lint, full workspace build (32/32)
 -->
