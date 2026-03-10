@@ -218,6 +218,7 @@ export interface IUseVersionHistoryResult {
   error: Error | null;
   showSuperseded: boolean;
   setShowSuperseded: (show: boolean) => void;
+  hasSuperseded: boolean;
   refresh: () => void;
 }
 

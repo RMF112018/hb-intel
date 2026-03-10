@@ -77,6 +77,15 @@ Work through every item below. No deployment proceeds until all 30 items are che
 - [ ] Versioned-record snapshot with `tag: 'handoff'` visible in version history after acknowledge
 - [ ] Storybook stories render all five `HandoffStatus` states for `HbcHandoffStatusBadge` without errors
 
+### Documentation
+
+- [ ] `docs/architecture/adr/0092-workflow-handoff-platform-primitive.md` written and accepted
+- [ ] `docs/how-to/developer/workflow-handoff-adoption-guide.md` written
+- [ ] `docs/reference/workflow-handoff/api.md` written
+- [ ] `packages/workflow-handoff/README.md` written (see Package README section below)
+- [ ] `docs/README.md` ADR index updated with ADR-0092 entry (see ADR Index Update section below)
+- [ ] `current-state-map.md §2` updated with SF08 classification row
+
 ---
 
 ## ADR-0092: Workflow Handoff Platform Primitive
@@ -557,6 +566,159 @@ Publish the following cross-reference table as the canonical API surface for `@h
 
 ---
 
+## Package README
+
+**File:** `packages/workflow-handoff/README.md`
+
+Create this file as part of the T09 implementation deliverables. It is the primary developer-facing entry point for anyone consuming `@hbc/workflow-handoff` directly from the monorepo.
+
+````markdown
+# @hbc/workflow-handoff
+
+Structured, auditable cross-module handoff primitive for the HB Intel platform.
+
+## Overview
+
+`@hbc/workflow-handoff` implements the 5-state handoff machine (`draft → sent → received → acknowledged | rejected`) and all associated UI components, hooks, and API client. It is the single platform primitive for any cross-module transfer of record custody — BD → Estimating, Estimating → Project Hub, and future routes.
+
+**Locked ADR:** ADR-0092 — `docs/architecture/adr/0092-workflow-handoff-platform-primitive.md`
+
+---
+
+## Installation
+
+This package is internal to the HB Intel monorepo. Add it as a workspace dependency:
+
+```json
+{
+  "dependencies": {
+    "@hbc/workflow-handoff": "workspace:*"
+  }
+}
+```
+
+---
+
+## Quick Start
+
+```typescript
+import type { IHandoffConfig } from '@hbc/workflow-handoff';
+import { HbcHandoffComposer, HbcHandoffReceiver, HbcHandoffStatusBadge } from '@hbc/workflow-handoff';
+
+// 1. Implement IHandoffConfig<TSource, TDest> for your route
+const myHandoffConfig: IHandoffConfig<ISourceRecord, IDestRecord> = {
+  sourceModule: 'source-module',
+  sourceRecordType: 'source-record',
+  destinationModule: 'dest-module',
+  destinationRecordType: 'dest-record',
+  routeLabel: 'Source Win → Dest Record',
+  acknowledgeDescription: 'A Dest Record will be created from this data.',
+  mapSourceToDestination: (src) => ({ /* ... */ }),
+  resolveDocuments: async (src) => [],
+  resolveRecipient: (src) => ({ userId: src.recipientId, displayName: src.recipientName, role: 'PM' }),
+  validateReadiness: (src) => src.isReady ? null : 'Record not ready for handoff.',
+  onAcknowledged: async (pkg) => { /* create dest record */ return { destinationRecordId: 'new-id' }; },
+  onRejected: async (pkg) => { /* return to sender */ },
+};
+
+// 2. Mount composer (sender side)
+<HbcHandoffComposer config={myHandoffConfig} sourceRecord={record} onClose={() => {}} />
+
+// 3. Mount receiver (recipient side)
+<HbcHandoffReceiver handoffId={handoffId} config={myHandoffConfig} onClose={() => {}} />
+
+// 4. Mount status badge (sender record detail)
+<HbcHandoffStatusBadge handoffId={record.activeHandoffId} />
+```
+
+---
+
+## Exports
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `IHandoffPackage<S,D>` | Interface | Core generic handoff package type |
+| `IHandoffConfig<S,D>` | Interface | Per-route configuration supplied by consuming module |
+| `IHandoffDocument` | Interface | Document link metadata |
+| `IHandoffContextNote` | Interface | Context note attached to a package |
+| `HandoffStatus` | Union type | `'draft' \| 'sent' \| 'received' \| 'acknowledged' \| 'rejected'` |
+| `HandoffNoteCategory` | Union type | `'context' \| 'key-decision' \| 'risk' \| 'action-item'` |
+| `usePrepareHandoff<S,D>` | Hook | Assembles package from config; manages pre-flight, documents, seed data |
+| `useHandoffInbox<S,D>` | Hook | Loads received handoffs for current user |
+| `useHandoffStatus<S,D>` | Hook | Polls for status; stops at terminal state |
+| `HandoffApi` | Object | REST client (`create`, `get`, `inbox`, `outbox`, `send`, `receive`, `acknowledge`, `reject`, `addNote`) |
+| `HbcHandoffComposer` | Component | 4-step sender-side composition and send flow |
+| `HbcHandoffReceiver` | Component | Recipient-side review, acknowledge, and reject flow |
+| `HbcHandoffStatusBadge` | Component | Complexity-gated inline status badge |
+| `HANDOFF_LIST_TITLE` | Constant | `'HBC_HandoffPackages'` |
+| `HANDOFF_API_BASE` | Constant | `'/api/workflow-handoff'` |
+| `HANDOFF_SNAPSHOT_INLINE_MAX_BYTES` | Constant | `260_000` |
+
+### Testing Sub-Path
+
+```typescript
+import { createMockHandoffPackage, mockHandoffStates } from '@hbc/workflow-handoff/testing';
+```
+
+> **Note:** The `testing/` sub-path is excluded from the production bundle (`sideEffects: false`). Import only in test files.
+
+---
+
+## Architecture Boundaries
+
+This package **must not** import from:
+
+- `@hbc/bic-next-move` — except the `IBicOwner` type
+- `@hbc/versioned-record` — consuming module handles snapshot creation in `onAcknowledged`
+- `@hbc/notification-intelligence` — Azure Function triggers notifications server-side
+- `@hbc/field-annotations` — at module level; types only via consuming-module props
+
+Verify with:
+
+```bash
+grep -r "from '@hbc/versioned-record'" packages/workflow-handoff/src/    # expect 0 matches
+grep -r "from '@hbc/notification-intelligence'" packages/workflow-handoff/src/  # expect 0 matches
+```
+
+---
+
+## Related Plans & References
+
+- `docs/architecture/plans/shared-features/SF08-Workflow-Handoff.md` — Master plan
+- `docs/architecture/plans/shared-features/SF08-T02-TypeScript-Contracts.md` — Full type definitions
+- `docs/architecture/plans/shared-features/SF08-T03-Storage-and-API.md` — SharePoint schema & Azure Functions
+- `docs/architecture/plans/shared-features/SF08-T07-Reference-Implementations.md` — `bdToEstimatingHandoffConfig`
+- `docs/how-to/developer/workflow-handoff-adoption-guide.md` — Step-by-step wiring guide
+- `docs/reference/workflow-handoff/api.md` — Full API reference
+- `docs/architecture/adr/0092-workflow-handoff-platform-primitive.md` — Locked ADR
+````
+
+---
+
+## ADR Index Update
+
+**File:** `docs/README.md`
+
+At implementation time, locate the ADR index table in `docs/README.md` (search for the `## Architecture Decision Records` section or the table header `| ADR | Title | Status | Date |`). Append the following row:
+
+```markdown
+| [ADR-0092](architecture/adr/0092-workflow-handoff-platform-primitive.md) | Workflow Handoff Platform Primitive | Accepted | 2026-03-10 |
+```
+
+If no ADR index table yet exists, create one under `## Architecture Decision Records` with the following structure before appending the row:
+
+```markdown
+## Architecture Decision Records
+
+| ADR | Title | Status | Date |
+|-----|-------|--------|------|
+| [ADR-0092](architecture/adr/0092-workflow-handoff-platform-primitive.md) | Workflow Handoff Platform Primitive | Accepted | 2026-03-10 |
+```
+
+> **Rule (CLAUDE.md §4):** The ADR catalog is append-only. Never delete or renumber existing rows. Always add new rows in ascending ADR number order.
+
+---
+
 ## Final Verification Commands
 
 ```bash
@@ -600,6 +762,14 @@ pnpm turbo run test \
 
 # ── Full Gate ─────────────────────────────────────────────────────────────────
 pnpm turbo run build && pnpm turbo run lint && pnpm turbo run check-types
+
+# ── Documentation Deliverables ────────────────────────────────────────────────
+
+# Confirm package README exists
+test -f packages/workflow-handoff/README.md && echo "README OK" || echo "README MISSING"
+
+# Confirm ADR-0092 entry is present in docs/README.md
+grep -c "ADR-0092" docs/README.md
 ```
 
 ---
@@ -617,6 +787,8 @@ ADR created: docs/architecture/adr/0092-workflow-handoff-platform-primitive.md
 Documentation added:
   - docs/how-to/developer/workflow-handoff-adoption-guide.md
   - docs/reference/workflow-handoff/api.md
+  - packages/workflow-handoff/README.md  (implementation-time deliverable — see T09 Package README section)
+docs/README.md ADR index updated: ADR-0092 row appended  (implementation-time deliverable — see T09 ADR Index Update section)
 current-state-map.md §2 updated: SF08 classification row added.
 Next: Activate consuming modules per SF08-T07 confirmed handoff routes table.
   Priority: BD → Estimating (P0), then Estimating → Project Hub (P1).

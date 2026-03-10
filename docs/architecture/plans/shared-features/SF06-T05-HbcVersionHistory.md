@@ -824,3 +824,20 @@ cd packages/versioned-record
 pnpm test -- --reporter=verbose src/components/__tests__/HbcVersionHistory.test.tsx
 pnpm typecheck
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF06-T05 completed: 2026-03-10
+Files created/modified:
+  - src/api/VersionApi.ts — typed restoreSnapshot<T> signature (IRestoreSnapshotInput<T> → IRestoreSnapshotResult<T>)
+  - src/components/HbcVersionHistory.tsx — full implementation (HbcVersionHistory, VersionEntry, AuthorAvatar, RelativeTimestamp, RollbackConfirmModal)
+  - src/components/HbcVersionHistory.css — complete CSS (160 lines, HB Design System custom properties)
+  - src/components/__tests__/HbcVersionHistory.test.tsx — 8 tests, all passing
+  - src/types/IVersionedRecord.ts — added hasSuperseded to IUseVersionHistoryResult (hook returns unfiltered superseded count)
+  - src/hooks/useVersionHistory.ts — returns hasSuperseded field
+Verification:
+  - check-types: zero errors (38/38 tasks)
+  - build: zero errors (30/30 tasks)
+  - lint: zero warnings
+  - tests: 75/75 passing (67 prior + 8 new component tests)
+Next: T06 (HbcVersionBadge), T08 (Storybook stories)
+-->

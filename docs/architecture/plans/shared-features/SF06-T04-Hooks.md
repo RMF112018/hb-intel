@@ -531,3 +531,13 @@ pnpm test -- --reporter=verbose src/hooks/__tests__/
 # TypeScript strict check
 pnpm typecheck
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF06-T04 completed: 2026-03-10
+- Replaced 3 hook stubs with full implementations (useVersionHistory, useVersionSnapshot, useVersionDiff)
+- Added typed method signatures to VersionApi stub (getMetadataList, getSnapshot, getSnapshotById)
+- Created 3 test files with 11 tests total — all passing
+- Full monorepo gates: build 30/30, check-types 38/38, lint clean, 67 package tests passing
+- Minor deviations from spec: prefixed unused `config` param with underscore in useVersionHistory; used `as unknown as string[]` cast for excludeFields in useVersionDiff
+Next: T05 (HbcVersionHistory component)
+-->

@@ -54,6 +54,8 @@ Complete the documentation suite, write ADR-0091, produce the developer adoption
 - [ ] `docs/architecture/adr/ADR-0091-field-annotations-platform-primitive.md` written and accepted
 - [ ] `docs/how-to/developer/field-annotations-adoption.md` written
 - [ ] `docs/reference/field-annotations/api.md` written
+- [ ] `packages/field-annotations/README.md` written (see Package README section below)
+- [ ] `docs/README.md` ADR index updated with ADR-0091 entry (see ADR Index Update section below)
 - [ ] `current-state-map.md §2` updated with SF07 plan files classification
 
 ### Integration Verification
@@ -327,6 +329,127 @@ See `docs/reference/field-annotations/api.md` for all testing utilities.
 
 ---
 
+## Package README
+
+**File:** `packages/field-annotations/README.md`
+
+Create this file as part of T09. It is the primary entry point for any developer who opens the package directory. Content must be derived from the codebase specs in T01–T08.
+
+```markdown
+# @hbc/field-annotations
+
+Field-level collaborative annotation primitive for HB Intel. Enables reviewers to attach
+comments, clarification requests, and revision flags to individual form fields on any record
+type. Integrates with BIC Next Move, Versioned Record, and Notification Intelligence via
+inversion-of-control.
+
+## Installation
+
+\`\`\`bash
+pnpm add @hbc/field-annotations
+\`\`\`
+
+## Quick Start
+
+\`\`\`tsx
+import { HbcAnnotationMarker, HbcAnnotationSummary } from '@hbc/field-annotations';
+import type { IFieldAnnotationConfig } from '@hbc/field-annotations';
+
+const config: IFieldAnnotationConfig = {
+  recordType: 'bd-scorecard',
+  blocksBicOnOpenAnnotations: true,
+  allowAssignment: true,
+  requireResolutionNote: true,
+  visibleToViewers: true,
+  versionAware: false,
+};
+
+// In a form — adjacent to each annotatable field:
+<HbcAnnotationMarker
+  recordType="bd-scorecard"
+  recordId={record.id}
+  fieldKey="projectSquareFootage"
+  fieldLabel="Project Square Footage"
+  config={config}
+  canAnnotate={canAnnotate}
+  canResolve={canResolve}
+/>
+
+// In the record detail sidebar (PWA only):
+<HbcAnnotationSummary
+  recordType="bd-scorecard"
+  recordId={record.id}
+  config={config}
+  onFieldFocus={(fieldKey) => scrollToField(fieldKey)}
+/>
+\`\`\`
+
+## Exports
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `IFieldAnnotation` | Interface | Core annotation record |
+| `IFieldAnnotationConfig` | Interface | Per-record-type configuration |
+| `IAnnotationCounts` | Interface | Aggregated open/resolved counts (used for BIC blocking) |
+| `AnnotationIntent` | Union type | `'comment' \| 'clarification-request' \| 'flag-for-revision'` |
+| `AnnotationStatus` | Union type | `'open' \| 'resolved' \| 'withdrawn'` |
+| `useFieldAnnotations` | Hook | Record-level annotation list + counts |
+| `useFieldAnnotation` | Hook | Single-field annotation + replies |
+| `useAnnotationActions` | Hook | Create, reply, resolve, withdraw mutations |
+| `AnnotationApi` | Object | REST client for all annotation CRUD operations |
+| `HbcAnnotationMarker` | Component | Complexity-gated field-adjacent marker (Standard: dot; Expert: dot+count badge) |
+| `HbcAnnotationThread` | Component | Anchored Popover showing annotation list and inline actions |
+| `HbcAnnotationSummary` | Component | Record-level summary panel (PWA only) |
+| `ANNOTATION_LIST_TITLE` | Constant | `'HBC_FieldAnnotations'` |
+| `ANNOTATION_MAX_REPLIES` | Constant | `50` |
+| `intentColorClass` | Constant | CSS color class map per `AnnotationIntent` |
+| `intentLabel` | Constant | Display label map per `AnnotationIntent` |
+| `resolveAnnotationConfig` | Function | Merges partial config with defaults |
+
+## Testing
+
+\`\`\`typescript
+import {
+  createMockAnnotation,
+  createMockAnnotationReply,
+  createMockAnnotationConfig,
+  mockAnnotationStates,
+} from '@hbc/field-annotations/testing';
+\`\`\`
+
+Six canonical states: `empty`, `openComment`, `openClarification`, `openRevisionFlag`,
+`resolved`, `mixed`.
+
+## Architecture Boundaries
+
+This package does **not** import `@hbc/bic-next-move` (except the `IBicOwner` type),
+`@hbc/versioned-record`, or `@hbc/notification-intelligence`. All integrations are
+implemented as inversion-of-control patterns in the consuming module.
+
+## Related
+
+- ADR: `docs/architecture/adr/ADR-0091-field-annotations-platform-primitive.md`
+- Adoption guide: `docs/how-to/developer/field-annotations-adoption.md`
+- API reference: `docs/reference/field-annotations/api.md`
+- Plan family: `docs/architecture/plans/shared-features/SF07-Field-Annotations.md`
+```
+
+---
+
+## ADR Index Update
+
+**File:** `docs/README.md`
+
+After creating `docs/architecture/adr/ADR-0091-field-annotations-platform-primitive.md`, add an entry to the ADR index table in `docs/README.md`. Locate the ADR index section (search for `| ADR-` rows) and append the following row in sequential order:
+
+```
+| ADR-0091 | Field-Level Annotations as a Platform-Wide Collaborative Review Primitive | Accepted | 2026-03-09 |
+```
+
+The row must follow the established column order of the existing ADR index table. If the table uses a different column layout (e.g., number, title, status, date, package), match that format exactly. Do not restructure existing rows.
+
+---
+
 ## Final Verification Commands
 
 ```bash
@@ -351,10 +474,15 @@ grep -r "from '@hbc/versioned-record'" packages/field-annotations/src/
 grep -r "from '@hbc/notification-intelligence'" packages/field-annotations/src/
 # Expected: zero matches for all three (IBicOwner type import from bic-next-move is the only exception)
 
-# 6. Verify ADR and docs exist
+# 6. Verify ADR, package README, and docs exist
 test -f docs/architecture/adr/ADR-0091-field-annotations-platform-primitive.md && echo "ADR OK"
 test -f docs/how-to/developer/field-annotations-adoption.md && echo "Adoption guide OK"
 test -f docs/reference/field-annotations/api.md && echo "API reference OK"
+test -f packages/field-annotations/README.md && echo "Package README OK"
+
+# 7. Verify ADR-0091 entry present in docs/README.md ADR index
+grep -c "ADR-0091" docs/README.md
+# Expected: 1 (exactly one entry)
 
 # 7. SPFx compliance check
 grep -r "from '@hbc/ui-kit'" packages/field-annotations/src/components/HbcAnnotationThread.tsx
@@ -395,6 +523,8 @@ Documentation added:
   - docs/architecture/plans/shared-features/SF07-T08-Testing-Strategy.md
   - docs/architecture/plans/shared-features/SF07-T09-Deployment.md
 ADR to create at implementation time: ADR-0091-field-annotations-platform-primitive.md
+Package README to create at implementation time: packages/field-annotations/README.md
+docs/README.md ADR index to update at implementation time: add ADR-0091 row.
 -->
 ```
 
