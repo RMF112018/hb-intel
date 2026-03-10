@@ -935,7 +935,16 @@ Next: Activate consuming modules per SF09-T08 reference implementations.
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF09-T09 not yet started.
-This is the final task in the SF09 plan family.
-After T09 completes, update current-state-map.md §2 with the SF09 classification row.
+SF09-T09 completed: 2026-03-10
+Testing sub-path: 5 factory stubs replaced with real implementations.
+Unit tests: XlsxParser, CsvParser, ProcoreExportParser, autoMapHeaders, validateRow, useSeedImport, useSeedHistory, HbcSeedUploader, HbcSeedMapper, HbcSeedPreview, HbcSeedProgress.
+Storybook stories: HbcSeedUploader, HbcSeedMapper, HbcSeedPreview, HbcSeedProgress.
+Playwright E2E: 5 scenarios (test.skip — dev-harness routes not yet wired).
+ADR created: docs/architecture/adr/ADR-0098-data-seeding-import-primitive.md (note: spec referenced ADR-0094, which is taken by versioned-record).
+Documentation added:
+  - docs/how-to/developer/data-seeding-adoption-guide.md
+  - docs/reference/data-seeding/api.md
+  - packages/data-seeding/README.md
+docs/README.md ADR index updated: ADR-0098 row appended.
+current-state-map.md §2 updated: SF09 reclassified from Canonical Normative Plan to Historical Foundational; ADR-0098, adoption guide, and API reference rows added.
 -->

@@ -14,7 +14,7 @@
 | 1 | This file (`current-state-map.md`) | Canonical Current-State | Living — updated with each structural change | Present implementation truth |
 | 2 | [Blueprint V4](./blueprint/HB-Intel-Blueprint-V4.md) | Canonical Normative Plan | Locked — comment-only updates | Target architecture intent |
 | 3 | [Foundation Plan](./plans/hb-intel-foundation-plan.md) | Historical Foundational | Locked — comment-only updates | Original implementation instructions |
-| 4 | [ADRs](./adr/) (92 active; 6 archived — see §2.2 for resolution record) | Permanent Decision Rationale | Append-only | Individual architectural decisions |
+| 4 | [ADRs](./adr/) (97 active; 6 archived — see §2.2 for resolution record) | Permanent Decision Rationale | Append-only | Individual architectural decisions |
 | 5 | Phase/Task Plans (`plans/ph7-*`, `plans/PH*.md`) | Time-bound Execution | Historical after completion | Phase-scoped implementation details |
 | 6 | Package READMEs (`packages/*/README.md`) | Current Implementation Detail | Living | Package-specific API and usage |
 
@@ -36,13 +36,15 @@
 | `docs/README.md` | **Canonical Current-State** | Infrastructure/exempt — no Tier 1 banner |
 | `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md` | **Canonical Normative Plan** | Tier 1 banner applied |
 | `docs/architecture/plans/hb-intel-foundation-plan.md` | **Historical Foundational** | Tier 1 banner applied |
-| `docs/architecture/adr/` (all files) | **Permanent Decision Rationale** | Exempt from inline banner; 93 active records indexed; 6 archived in `adr/archived/`; conflicts resolved PH7.11 |
+| `docs/architecture/adr/` (all files) | **Permanent Decision Rationale** | Exempt from inline banner; 97 active records indexed; 6 archived in `adr/archived/`; conflicts resolved PH7.11 |
 | SF01–SF03 plans (completed shared-feature work: bic-next-move, complexity, sharepoint-docs) | **Historical Foundational** | Tier 2 — matrix classification only |
 | SF04 shared-feature plans (10 files: `SF04-Acknowledgment.md` through `SF04-T09-Deployment.md`) | **Historical Foundational** | Tier 2 — matrix classification only; completed 2026-03-09 |
+| `docs/architecture/adr/ADR-0092-acknowledgment-platform-primitive.md` | **Permanent Decision Rationale** | SF04 acknowledgment platform primitive; 10 locked decisions |
 | SF05 shared-feature plans (10 files: `SF05-Step-Wizard.md` through `SF05-T09-Deployment.md`) | **Historical Foundational** | Tier 2 — matrix classification only; completed 2026-03-09 |
-| SF06 shared-feature plans (packages not yet built) | **Deferred Scope** | Tier 2 — matrix classification only; must not be updated without explicit phase activation |
+| SF06 shared-feature plans (10 files: `SF06-Versioned-Record.md` through `SF06-T09-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `packages/versioned-record` scaffold created (v0.0.1); ADR-0094; pending PH7.12 sign-off (ADR-0090) before full implementation |
 | `docs/architecture/adr/ADR-0093-step-wizard-platform-primitive.md` | **Permanent Decision Rationale** | SF05 step-wizard platform primitive; 10 locked decisions |
 | `docs/how-to/developer/step-wizard-adoption-guide.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; step-wizard module adoption |
+| `docs/architecture/adr/ADR-0094-versioned-record-platform-primitive.md` | **Permanent Decision Rationale** | SF06 versioned-record platform primitive; 10 locked decisions |
 | SF07 shared-feature plans (10 files: `SF07-Field-Annotations.md` through `SF07-T09-Deployment.md`) | **Historical Foundational** | Tier 2 — matrix classification only; T01–T09 complete 2026-03-10; package `@hbc/field-annotations` implemented |
 | `docs/architecture/adr/ADR-0096-field-annotations-platform-primitive.md` | **Permanent Decision Rationale** | SF07 field-annotations platform primitive; 10 locked decisions |
 | `docs/how-to/developer/field-annotations-adoption.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; field-annotations module adoption |
@@ -51,9 +53,12 @@
 | `docs/architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md` | **Permanent Decision Rationale** | SF08 workflow-handoff platform primitive; 10 locked decisions |
 | `docs/how-to/developer/workflow-handoff-adoption-guide.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; workflow-handoff module adoption |
 | `docs/reference/workflow-handoff/api.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; workflow-handoff API reference |
-| SF09 shared-feature plans (10 files: `SF09-Data-Seeding.md` through `SF09-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; pending PH7.12 sign-off (ADR-0090) before implementation begins |
-| SF10 shared-feature plans (10 files: `SF10-Notification-Intelligence.md` through `SF10-T09-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/notification-intelligence`; ADR-0096; pending PH7.12 sign-off (ADR-0090) before implementation begins |
-| `docs/architecture/adr/0096-notification-intelligence-tiered-model.md` | **Permanent Decision Rationale** | SF10 notification intelligence tiered model; 10 locked decisions (D-01–D-10); authored 2026-03-10 |
+| SF09 shared-feature plans (10 files: `SF09-Data-Seeding.md` through `SF09-T09-Testing-and-Deployment.md`) | **Historical Foundational** | Tier 2 — matrix classification only; T01–T09 complete 2026-03-10; package `@hbc/data-seeding` implemented |
+| `docs/architecture/adr/ADR-0098-data-seeding-import-primitive.md` | **Permanent Decision Rationale** | SF09 data-seeding platform primitive; 10 locked decisions (D-01–D-10) |
+| `docs/how-to/developer/data-seeding-adoption-guide.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; data-seeding module adoption |
+| `docs/reference/data-seeding/api.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; data-seeding API reference |
+| SF10 shared-feature plans (10 files: `SF10-Notification-Intelligence.md` through `SF10-T09-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/notification-intelligence`; ADR-0099 (reserved); pending PH7.12 sign-off (ADR-0090) before implementation. Note: SF10 plan files reference ADR-0096 — this is a plan-file discrepancy; canonical number is ADR-0099 per this document. |
+| `docs/architecture/adr/0099-notification-intelligence-tiered-model.md` | **Permanent Decision Rationale** | SF10 notification intelligence tiered model; 10 locked decisions (D-01–D-10); to be authored when SF10 enters active development |
 | PH4 phase plans (`plans/PH4-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH4-Shell-Consolidation.md` (master plan) |
 | PH5 phase plans (`plans/PH5-*.md`, `plans/PH5C-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH5-Auth-Shell-Plan.md` and `PH5C-Auth-Shell-Plan.md` |
 | PH6 phase plans (`plans/PH6-*.md`, `plans/PH6F-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH6-Provisioning-Plan.md`; sub-plans Tier 2 |
@@ -90,7 +95,7 @@ Every new architecture, plan, reference, or release document must declare one of
 
 **Transition rule — Deferred Scope:** When a Deferred Scope document's feature or package enters active development in a named phase milestone, reclassify it to Canonical Normative Plan, add it to the active phase's plan index, and update this matrix. The PH7-RM-* plans must be reviewed and reclassified as needed before PH7.12 sign-off.
 
-**ADR rule:** New ADRs are always Permanent Decision Rationale. Sequential numbering resumes at ADR-0092 (ADR-0083 through ADR-0090 assigned in PH7.11).
+**ADR rule:** New ADRs are always Permanent Decision Rationale. ADR-0091 through ADR-0097 were assigned after PH7.11. ADR-0098 is reserved for SF09 (data-seeding) and ADR-0099 is reserved for SF10 (notification-intelligence). Next unreserved number: **ADR-0100**.
 
 **Banner format (Tier 1):**
 ```
@@ -109,7 +114,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | Index gap (ADR-0073–ADR-0079) | These numbers were absent from `docs/README.md` index | Resolved: 2026-03-09 — all entries added to `docs/README.md` |
 | ADR-0082 not indexed | ADR-0082 missing from `docs/README.md` | Resolved: 2026-03-09 — added to index |
 
-**Post-PH7.11 state:** 91 ADR files on disk (active), 6 archived in `adr/archived/`. Next available number: **ADR-0098**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
+**Post-PH7.11 state (updated 2026-03-10):** 97 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (phase-7-final-verification, acknowledgment, step-wizard, versioned-record, stub-detection, field-annotations, workflow-handoff). ADR-0098 reserved for SF09 (data-seeding); ADR-0099 reserved for SF10 (notification-intelligence). Next unreserved number: **ADR-0100**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
 
 ---
 
@@ -135,15 +140,23 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | `packages/spfx` | @hbc/spfx | SPFx webpart scaffolding & utilities | Depends on auth, sharepoint-docs, ui-kit | v0.0.1 | `packages/spfx/README.md` |
 | `packages/eslint-plugin-hbc` | @hb-intel/eslint-plugin-hbc | Component consumption lint rules | None (standalone tool) | v1.0.0 | `packages/eslint-plugin-hbc/README.md` |
 
-### Category C: Shared-Feature Primitives (3)
+### Category C: Shared-Feature Primitives (9)
 
 These packages are **Tier-1 Platform Primitives** — mandatory-use when their concern area is present in a feature. See [Platform Primitives Registry](../../reference/platform-primitives.md) for policy, decision tree, adoption matrix, and non-duplication rule. <!-- PH7.4: elevated from optional to Tier-1 per §7.4.1 -->
+
+The original three (SF01–SF03) emerged organically; SF04–SF10 are planned primitives being built in sequence. SF04, SF05, SF07, SF08 are fully implemented. SF06, SF09 are scaffold stage. SF10 is planned.
 
 | Package | Name | Primary Responsibility | Dependency Role | Maturity | Doc Entrypoint |
 |---------|------|----------------------|-----------------|----------|----------------|
 | `packages/bic-next-move` | @hbc/bic-next-move | Ball-in-court & ownership primitives | Depends on ui-kit | v0.1.0 | `packages/bic-next-move/README.md` |
 | `packages/complexity` | @hbc/complexity | 3-tier density context (Complexity Dial) | Depends on ui-kit | v0.1.0 | `packages/complexity/README.md` |
 | `packages/sharepoint-docs` | @hbc/sharepoint-docs | Document lifecycle management | Depends on auth, models, data-access, ui-kit | v0.1.0 | `packages/sharepoint-docs/README.md` |
+| `packages/acknowledgment` | @hbc/acknowledgment | Reusable acknowledgment / sign-off primitive | Depends on ui-kit, complexity | v0.1.0 | `packages/acknowledgment/README.md` |
+| `packages/step-wizard` | @hbc/step-wizard | Multi-step guided workflow primitive | Depends on ui-kit, complexity | v0.1.0 | `packages/step-wizard/README.md` |
+| `packages/versioned-record` | @hbc/versioned-record | Immutable versioned record management | Depends on models, data-access, ui-kit | v0.0.1 | `packages/versioned-record/README.md` |
+| `packages/field-annotations` | @hbc/field-annotations | Inline field-level annotation and comment threads | Depends on auth, models, ui-kit | v0.1.0 | `packages/field-annotations/README.md` |
+| `packages/workflow-handoff` | @hbc/workflow-handoff | Cross-module workflow handoff and routing | Depends on models, ui-kit, bic-next-move | v0.1.0 | `packages/workflow-handoff/README.md` |
+| `packages/data-seeding` | @hbc/data-seeding | Development / demo data seeding primitives | Depends on models, data-access | v0.0.1 | `packages/data-seeding/README.md` |
 
 ### Category D: Feature Packages (11)
 
@@ -213,13 +226,22 @@ The monorepo has undergone three controlled evolutionary shifts since Blueprint 
 
 ### 4.1 Shared-Feature Primitives Emerged
 
-Blueprint V4 described core platform packages and feature modules but did not anticipate a middle layer of optional cross-cutting primitives. Three packages now occupy this space:
+Blueprint V4 described core platform packages and feature modules but did not anticipate a middle layer of optional cross-cutting primitives. Three packages emerged organically (SF01–SF03):
 
 - **@hbc/bic-next-move** — Ball-in-court and ownership tracking, used by features that need task-assignment visibility.
 - **@hbc/complexity** — Three-tier density context (Complexity Dial), allowing features to adapt UI density.
 - **@hbc/sharepoint-docs** — Document lifecycle management, wrapping Microsoft Graph document operations.
 
-These are classified as **controlled evolution (a)**. They follow the same ports/adapters pattern as core packages and do not violate Blueprint V4's layering rules. As of PH7.4, these are designated **Tier-1 Platform Primitives** — mandatory-use when their concern area is present. See [Platform Primitives Registry](../../reference/platform-primitives.md). <!-- PH7.4: Tier-1 elevation -->
+Six additional primitives have since been planned and built as part of the SF04–SF10 shared-feature series:
+
+- **@hbc/acknowledgment** (SF04) — Reusable acknowledgment and sign-off primitive; v0.1.0 complete.
+- **@hbc/step-wizard** (SF05) — Multi-step guided workflow primitive; v0.1.0 complete.
+- **@hbc/versioned-record** (SF06) — Immutable versioned record management; v0.0.1 scaffold.
+- **@hbc/field-annotations** (SF07) — Inline field-level annotation and comment threads; v0.1.0 complete.
+- **@hbc/workflow-handoff** (SF08) — Cross-module workflow handoff and routing; v0.1.0 complete.
+- **@hbc/data-seeding** (SF09) — Development / demo data seeding primitives; v0.0.1 scaffold.
+
+All nine are classified as **controlled evolution (a)**. They follow the same ports/adapters pattern as core packages and do not violate Blueprint V4's layering rules. As of PH7.4, these are designated **Tier-1 Platform Primitives** — mandatory-use when their concern area is present. See [Platform Primitives Registry](../../reference/platform-primitives.md). <!-- PH7.4: Tier-1 elevation; SF04–SF09 added 2026-03-10 -->
 
 ### 4.2 Feature Packages Materialized
 
@@ -251,7 +273,7 @@ This file + package READMEs + the codebase itself. For any question about what e
 Use the Classification Matrix in Section 2. Documents labeled **Canonical Current-State** describe what exists. Documents labeled **Canonical Normative Plan** describe what should be built next. **Historical Foundational** documents describe what was planned originally and may have evolved.
 
 **Which shared-feature packages are mandatory?**
-As of PH7.4, `@hbc/bic-next-move`, `@hbc/complexity`, and `@hbc/sharepoint-docs` are **Tier-1 Platform Primitives** — mandatory when their concern area is present in a feature. See the [Platform Primitives Registry](../../reference/platform-primitives.md) for the decision tree and adoption matrix. Core platform packages (Category A) remain the mandatory foundation for all features. <!-- PH7.4: updated from "none mandatory" to Tier-1 policy -->
+As of PH7.4, all Category C packages are **Tier-1 Platform Primitives** — mandatory when their concern area is present in a feature. The original three (`@hbc/bic-next-move`, `@hbc/complexity`, `@hbc/sharepoint-docs`) plus six SF04–SF09 primitives (`@hbc/acknowledgment`, `@hbc/step-wizard`, `@hbc/versioned-record`, `@hbc/field-annotations`, `@hbc/workflow-handoff`, `@hbc/data-seeding`). See the [Platform Primitives Registry](../../reference/platform-primitives.md) for the decision tree and adoption matrix. Core platform packages (Category A) remain the mandatory foundation for all features. <!-- PH7.4: updated from "none mandatory" to Tier-1 policy; SF04–SF09 primitives added 2026-03-10 -->
 
 **Where do I add a new feature?**
 1. Create `packages/features/<domain>/` with `package.json`, `tsconfig.json`, and `src/index.ts`.
@@ -303,7 +325,7 @@ As of PH7.4, `@hbc/bic-next-move`, `@hbc/complexity`, and `@hbc/sharepoint-docs`
 - `data-access` and `auth` depend only on `models`.
 - `query-hooks` bridges `data-access` into React via TanStack Query.
 - `shell` provides navigation/layout; `app-shell` aggregates shell + auth + ui-kit.
-- Shared-feature primitives (`complexity`, `bic-next-move`, `sharepoint-docs`) depend on core packages and are consumed optionally by features.
+- Shared-feature primitives (`complexity`, `bic-next-move`, `sharepoint-docs`, and SF04–SF09 primitives) depend on core packages and are consumed as Tier-1 primitives by features when their concern area is present.
 - Feature packages consume core + optional shared-feature primitives.
 - SPFx apps are thin shells that host their corresponding feature package.
 - `dev-harness` loads all 11 SPFx apps for unified development.
@@ -317,13 +339,13 @@ As of PH7.4, `@hbc/bic-next-move`, `@hbc/complexity`, and `@hbc/sharepoint-docs`
 |--------|-------|
 | Core platform packages | 8 |
 | Shared infrastructure packages | 2 |
-| Shared-feature primitives | 3 |
+| Shared-feature primitives | 9 |
 | Feature packages | 11 |
 | SPFx applications | 11 |
 | Standalone applications | 3 |
 | Backend services | 1 |
 | Build tooling packages | 1 |
-| **Total workspace members** | **40** |
-| Architecture Decision Records | 91 active + 6 archived | <!-- PH7.12: ADR-0091 added (phase-7-final-verification); catalog reconciled in PH7.11 -->
+| **Total workspace members** | **46** |
+| Architecture Decision Records | 97 active + 6 archived | <!-- Updated 2026-03-10: ADR-0091–0097 added since PH7.11; ADR-0098 reserved SF09; ADR-0099 reserved SF10 -->
 | TSConfig path aliases | 62 |
 | Vite dev server ports | 14 (3000, 4000–4012) |

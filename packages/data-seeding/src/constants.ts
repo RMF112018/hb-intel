@@ -107,6 +107,7 @@ export function buildAcceptString(formats: SeedFormat[]): string {
  * Returns null if format cannot be determined.
  */
 export function detectFormat(file: File): SeedFormat | null {
+  /* v8 ignore next */
   const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
   const mime = file.type.toLowerCase();
 

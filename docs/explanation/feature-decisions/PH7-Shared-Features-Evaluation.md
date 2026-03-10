@@ -218,6 +218,524 @@ Each shared package reduces per-module development time for every subsequent mod
 | Cross-module relationship opacity | `@hbc/related-items` work graph panel | SF-14 |
 
 ---
+---
+
+## Addendum A — Recommended Additional Shared Packages
+
+**Addendum version:** 1.1  
+**Date:** 2026-03-10  
+**Status:** Recommended for formal evaluation and future PH7/PH8 planning; not yet locked in the March 8, 2026 interview record.
+
+This addendum captures six additional shared packages identified during follow-on architecture review against the current `hb-intel` monorepo structure and the governing shared-package standard already established in this document. These recommendations follow the same core rule used throughout Phase 7:
+
+> **A capability should become a shared package only when it is configuration-driven, reused by multiple domain modules, free of domain-specific dependencies, and materially reduces duplicate implementation effort.**
+
+The following candidates satisfy that standard. They are appended here as recommended platform primitives to be converted into individual plan files if approved.
+
+### Why These Six Were Elevated
+
+Across the current and planned domain modules, six additional structural patterns repeat with sufficient consistency to justify shared infrastructure beyond SF-01 through SF-16:
+
+| Pattern | Appears In | Recommended Package |
+|---|---|---|
+| Structured record creation with shared draft/save/submit lifecycle | BD forms, Estimating intake, Project Hub creation flows, Admin records | `@hbc/record-form` |
+| Consistent export rendering of tables, reports, and branded outputs | Financial reports, scorecards, logs, schedules, executive reporting | `@hbc/export-runtime` |
+| Governed publication/distribution of finalized outputs | SharePoint publication, PDF issue, downstream distribution, approvals | `@hbc/publish-workflow` |
+| User-saved filters, layouts, and reusable data views | All data-heavy modules and tables | `@hbc/saved-views` |
+| Multi-select actions against work queues and tabular data | Notifications, records, imports, logs, approvals | `@hbc/bulk-actions` |
+| Cross-module record history, audit trail, and activity feed | All modules, all workflows | `@hbc/activity-timeline` |
+
+### Important Boundary Decision — Not a Shared Package
+
+The previously considered “full-screen-view” capability is **not** recommended as a standalone shared package. It is better implemented as a standardized shell / UI Kit surface (`HbcFullscreenSurface`, `HbcDataGridWorkspace`, `useFullscreenSurface`) because full-screen behavior is a presentation concern, not an independent business capability with its own cross-module contract.
+
+---
+
+## Recommended Shared Package Index — Candidate Extensions
+
+If approved, these should be appended to the Shared Package Index as future shared-feature plan files.
+
+### Tier 2A — Shared Record Lifecycle & Output Infrastructure
+
+These packages sit above the existing Foundation tier and should be built once SF-01 through SF-08 are stable, but before large-scale implementation duplication begins inside domain modules.
+
+| # | Package | Recommended Individual Spec | Strategic Source |
+|---|---|---|---|
+| SF-23 | `@hbc/record-form` | `PH7-SF-23-Shared-Feature-Record-Form.md` | UX-MB §10 (Workflow Composer); con-tech §5 (Progressive Disclosure) |
+| SF-24 | `@hbc/export-runtime` | `PH7-SF-24-Shared-Feature-Export-Runtime.md` | UX-MB §3 (Work Graph); UX-MB §11 (Implementation Truth) |
+| SF-25 | `@hbc/publish-workflow` | `PH7-SF-25-Shared-Feature-Publish-Workflow.md` | UX-MB §4 (Responsibility Attribution); con-tech §8 (Accountability) |
+
+### Tier 2B — Shared Data Workspace Utilities
+
+These packages should be implemented alongside modules with high table density and operational queue management.
+
+| # | Package | Recommended Individual Spec | Strategic Source |
+|---|---|---|---|
+| SF-26 | `@hbc/saved-views` | `PH7-SF-26-Shared-Feature-Saved-Views.md` | UX-MB §1 (Role-Based Project Canvas); con-tech §12 (Workflow Configurability) |
+| SF-27 | `@hbc/bulk-actions` | `PH7-SF-27-Shared-Feature-Bulk-Actions.md` | UX-MB §4 (Universal Next Move); con-tech §13 (Attention Management) |
+| SF-28 | `@hbc/activity-timeline` | `PH7-SF-28-Shared-Feature-Activity-Timeline.md` | UX-MB §3 (Unified Work Graph); UX-MB §11 (Transparent Systems) |
+
+---
+
+## SF-23 — `@hbc/record-form`
+
+### Recommendation
+
+Build `@hbc/record-form` as a shared package.
+
+### Why It Qualifies as Shared Infrastructure
+
+The application will create new records across multiple domain modules. Although each module defines different fields and business rules, the structural workflow is consistent:
+
+1. Render a configured form or multi-step creation flow.
+2. Inject defaults and contextual metadata.
+3. Validate required fields and business gates.
+4. Persist draft state.
+5. Submit to the module's backing store (SharePoint list in MVP; Azure data layer in future phases).
+6. Return a normalized success / error / acknowledgment state.
+
+This repeated lifecycle is too substantial to duplicate per module, but too generic to embed into a single domain module. It therefore fits the established shared package standard.
+
+### Architectural Model
+
+`@hbc/record-form` should follow the same Review Mode pattern used throughout this document:
+
+1. Package scaffold under `packages/record-form/`
+2. Generic configuration contract, e.g. `IRecordFormConfig<TRecord, TContext>`
+3. Shared rendering, lifecycle state, validation orchestration, and submission adapter hooks
+4. Per-module opt-in via configuration objects and module-owned schemas
+5. Zero domain dependencies; depends only on `@hbc/ui-kit`, `@hbc/models`, `@hbc/data-access`, `@hbc/auth`, and existing shared packages where required
+
+### Intended Scope
+
+**Included**
+- Schema-driven field rendering
+- Step orchestration when paired with `@hbc/step-wizard`
+- Draft persistence handoff to `@hbc/session-state`
+- Shared validation lifecycle
+- Standard submit / save-as-draft / cancel behaviors
+- Metadata injection (project, user, role, timestamps, routing context)
+- Adapter boundary for SharePoint today and Azure tomorrow
+
+**Excluded**
+- Module-specific field definitions
+- Module-specific business rules beyond configurable hooks
+- Custom calculations unique to one module
+- Domain-specific post-submit automations
+
+### Expected Consumers
+
+- Business Development lead and pursuit forms
+- Estimating intake / kickoff / bid-adjacent record creation
+- Project Hub record creation flows (plans, logs, meeting records, safety forms)
+- Admin-managed configuration records
+- Future field execution and operations modules
+
+### Dependencies
+
+| Type | Packages |
+|---|---|
+| Hard dependencies | `@hbc/ui-kit`, `@hbc/models`, `@hbc/data-access` |
+| Strong integrations | SF-05 `@hbc/step-wizard`, SF-12 `@hbc/session-state`, SF-06 `@hbc/versioned-record` |
+| Optional integrations | SF-04 `@hbc/acknowledgment`, SF-08 `@hbc/workflow-handoff`, SF-10 `@hbc/notification-intelligence` |
+
+### Implementation Priority
+
+**Recommended priority:** Early Tier 2A  
+Build after SF-05 and SF-12 are stable, before multiple modules independently implement complex creation forms.
+
+### Strategic Value
+
+Building `@hbc/record-form` once prevents repeated creation-form drift, standardizes the SharePoint-to-Azure migration boundary, and ensures every record-creation workflow inherits the same draft, validation, and submission discipline.
+
+---
+
+## SF-24 — `@hbc/export-runtime`
+
+### Recommendation
+
+Build `@hbc/export-runtime` as a shared package.
+
+### Why It Qualifies as Shared Infrastructure
+
+Multiple feature packages will need to export data in a polished, branded, and structurally consistent manner. The rendering problem is shared even when the data source is not:
+
+- Tables need CSV / XLSX export.
+- Branded summaries need print / PDF export.
+- Logs, scorecards, and reports need stable output formatting.
+- Future intelligence modules will need shareable executive-ready output without re-authoring presentation logic each time.
+
+Because export is an output-runtime concern rather than a module-specific workflow, it belongs in shared infrastructure.
+
+### Architectural Model
+
+`@hbc/export-runtime` should provide configuration-driven output adapters with reusable renderers and export contracts:
+
+- `ITableExportConfig`
+- `IReportExportConfig`
+- `IExportAdapter`
+- `IExportResult`
+
+Each module provides data mapping and export intent; the package provides formatting, output generation, file naming standards, and delivery hooks.
+
+### Intended Scope
+
+**Included**
+- CSV, XLSX, print, and PDF export orchestration
+- Shared file naming conventions
+- Branded page header / footer / watermark support
+- Table-to-export mapping helpers
+- Report composition primitives for polished output
+- Export status and error handling model
+
+**Excluded**
+- Distribution approval workflows
+- SharePoint publishing governance
+- Module-specific report narratives unique to one feature package
+
+### Expected Consumers
+
+- Financial reporting and forecast modules
+- Business Development scorecards and pursuit summaries
+- Project Hub meeting records, logs, and status reports
+- Scheduler, analytics, and executive dashboard outputs
+- Future audit and compliance reporting tools
+
+### Dependencies
+
+| Type | Packages |
+|---|---|
+| Hard dependencies | `@hbc/ui-kit`, `@hbc/models` |
+| Strong integrations | SF-06 `@hbc/versioned-record` |
+| Optional integrations | SF-25 `@hbc/publish-workflow`, SF-28 `@hbc/activity-timeline` |
+
+### Implementation Priority
+
+**Recommended priority:** Mid Tier 2A  
+Build once there are at least two production-grade modules that need user-facing export consistency.
+
+### Strategic Value
+
+A shared export runtime protects output quality, reduces duplicated report logic, and makes “executive-ready” export a platform capability rather than a per-module customization effort.
+
+---
+
+## SF-25 — `@hbc/publish-workflow`
+
+### Recommendation
+
+Build `@hbc/publish-workflow` as a shared package.
+
+### Why It Qualifies as Shared Infrastructure
+
+Publishing is not the same as exporting. Export generates an artifact; publishing governs how finalized information is formally issued, versioned, stored, distributed, and acknowledged. That pattern repeats across multiple modules:
+
+- Publish a finalized scorecard or review output.
+- Issue a project report to SharePoint.
+- Distribute an exported package to stakeholders.
+- Capture who published it, when, under what version, and to whom.
+
+Because this is a workflow/governance problem with repeated accountability patterns, it warrants shared infrastructure.
+
+### Architectural Model
+
+`@hbc/publish-workflow` should provide a generalized publication pipeline using configuration contracts such as:
+
+- `IPublishConfig<TArtifact>`
+- `IPublishTarget`
+- `IPublishApprovalRule`
+- `IPublishResult`
+
+The package should orchestrate publication state, target resolution, version stamping, routing, and downstream notification without owning the module's business content.
+
+### Intended Scope
+
+**Included**
+- Publish-state model (`draft`, `ready`, `published`, `superseded`, `revoked`)
+- Publication target definitions (SharePoint, download, distribution list, future Teams/email)
+- Version stamp and issue metadata
+- Approval / acknowledgment hooks before or after publish
+- Shared audit hooks and result surface
+
+**Excluded**
+- Low-level artifact rendering (belongs to `@hbc/export-runtime`)
+- Module-specific approval logic beyond configurable rules
+- Enterprise records-retention policy engine
+
+### Expected Consumers
+
+- BD scorecards and strategic summaries
+- Project Hub reports, plans, meeting minutes, and turnover records
+- Forecast / schedule / executive reporting outputs
+- Future transmittal-style and compliance publication flows
+
+### Dependencies
+
+| Type | Packages |
+|---|---|
+| Hard dependencies | SF-01 `@hbc/sharepoint-docs`, SF-06 `@hbc/versioned-record`, `@hbc/models` |
+| Strong integrations | SF-04 `@hbc/acknowledgment`, SF-10 `@hbc/notification-intelligence`, SF-24 `@hbc/export-runtime` |
+| Optional integrations | SF-28 `@hbc/activity-timeline`, SF-08 `@hbc/workflow-handoff` |
+
+### Implementation Priority
+
+**Recommended priority:** Late Tier 2A  
+Build after export-runtime and versioned-record are stable enough to support governed issue workflows.
+
+### Strategic Value
+
+A shared publish workflow turns ad hoc output distribution into a controlled, auditable, reusable platform behavior — essential for records that carry accountability, downstream reliance, or formal issue status.
+
+---
+
+## SF-26 — `@hbc/saved-views`
+
+### Recommendation
+
+Build `@hbc/saved-views` as a shared package.
+
+### Why It Qualifies as Shared Infrastructure
+
+The platform is increasingly table- and queue-driven. Users will repeatedly need to preserve and recall how they work with data:
+
+- column visibility and ordering
+- filters and filter groups
+- sorts and groupings
+- density preferences
+- personal versus shared team views
+
+This problem will recur in nearly every operational grid. A shared saved-view layer prevents inconsistent table UX and aligns directly with the Mold Breaker goal of adapting complexity and context to the user.
+
+### Architectural Model
+
+`@hbc/saved-views` should provide a normalized view-definition contract decoupled from any one grid implementation:
+
+- `ISavedViewDefinition`
+- `ISavedViewScope` (`personal`, `team`, `role`, `system`)
+- `ISavedViewStateMapper<T>`
+
+The package stores, restores, and manages serialized view state while allowing each consuming module to define its own columns and filters.
+
+### Intended Scope
+
+**Included**
+- Save / update / delete views
+- Personal and shared view scopes
+- Persisted table layout state
+- Default system views and role-based starter views
+- Reapply serialized filters, sorts, grouping, and density
+
+**Excluded**
+- Full-screen workspace behavior
+- Domain-specific filter logic definitions
+- BI-grade analytical bookmarking outside standard operational tables
+
+### Expected Consumers
+
+- My Work and action queues
+- Estimating logs and pursuit lists
+- Project Hub tables and registers
+- Admin configuration / governance tables
+- Future operations, procurement, and reporting workspaces
+
+### Dependencies
+
+| Type | Packages |
+|---|---|
+| Hard dependencies | `@hbc/ui-kit`, `@hbc/models`, optional local storage / persistence adapter |
+| Strong integrations | SF-03 `@hbc/complexity`, SF-13 `@hbc/project-canvas` |
+| Optional integrations | SF-27 `@hbc/bulk-actions`, UI Kit table abstractions |
+
+### Implementation Priority
+
+**Recommended priority:** Early Tier 2B  
+Build as soon as shared table patterns begin to stabilize across two or more major modules.
+
+### Strategic Value
+
+Saved views materially reduce cognitive load, improve repeatability for power users, and make large operational tables feel purpose-built to the user rather than generic.
+
+---
+
+## SF-27 — `@hbc/bulk-actions`
+
+### Recommendation
+
+Build `@hbc/bulk-actions` as a shared package.
+
+### Why It Qualifies as Shared Infrastructure
+
+As soon as the platform contains meaningful work queues and operational tables, users will expect to act on more than one item at a time. The interaction pattern is repeated and platform-wide:
+
+- bulk publish
+- bulk assign / reassign
+- bulk acknowledge
+- bulk status change
+- bulk archive or close
+- bulk export
+
+The infrastructure for selection, action gating, progress feedback, result summaries, and partial-failure handling should be shared rather than reinvented per module.
+
+### Architectural Model
+
+`@hbc/bulk-actions` should expose generic action definitions and execution contracts:
+
+- `IBulkAction<TItem>`
+- `IBulkActionGuard<TItem>`
+- `IBulkActionResult`
+- `IBulkSelectionState`
+
+Each module supplies the allowed actions and item-level eligibility rules; the package supplies the interaction model and execution lifecycle.
+
+### Intended Scope
+
+**Included**
+- Shared multi-select state model
+- Action menus and confirmation surfaces
+- Guardrail messaging for mixed-eligibility selections
+- Progress / completion / partial-failure UI
+- Shared batch execution result summary
+
+**Excluded**
+- Module-specific batch business logic
+- Long-running backend orchestration engine
+- Domain-specific undo semantics beyond configurable hooks
+
+### Expected Consumers
+
+- Notification queues
+- Record lists and logs
+- Publishing and export workspaces
+- Admin governance tables
+- Future procurement, staffing, and operations queues
+
+### Dependencies
+
+| Type | Packages |
+|---|---|
+| Hard dependencies | `@hbc/ui-kit`, `@hbc/models` |
+| Strong integrations | SF-02 `@hbc/bic-next-move`, SF-10 `@hbc/notification-intelligence`, SF-26 `@hbc/saved-views` |
+| Optional integrations | SF-25 `@hbc/publish-workflow`, SF-28 `@hbc/activity-timeline` |
+
+### Implementation Priority
+
+**Recommended priority:** Mid Tier 2B  
+Build after at least one queue-heavy module demonstrates repeated need for shared batch interaction.
+
+### Strategic Value
+
+Bulk actions are a force multiplier for operational efficiency and become essential once the platform is trusted for real work at scale.
+
+---
+
+## SF-28 — `@hbc/activity-timeline`
+
+### Recommendation
+
+Build `@hbc/activity-timeline` as a shared package.
+
+### Why It Qualifies as Shared Infrastructure
+
+The Mold Breaker strategy repeatedly emphasizes accountability, context, and transparent systems. A shared activity timeline operationalizes that thesis by giving every significant record a consistent history surface:
+
+- who created it
+- who changed it
+- who published it
+- who acknowledged it
+- what moved next
+- when key milestones occurred
+
+That pattern is cross-module and foundational to trust. It should not be reconstructed differently in each module.
+
+### Architectural Model
+
+`@hbc/activity-timeline` should provide a normalized event-feed contract such as:
+
+- `IActivityEvent`
+- `IActivityActor`
+- `IActivityTarget`
+- `IActivityTimelineConfig`
+
+The package should render and manage timeline presentation while allowing modules to register their own event producers.
+
+### Intended Scope
+
+**Included**
+- Standardized activity event model
+- Timeline rendering components
+- Event grouping, labeling, and actor attribution
+- Configurable filtering of activity types
+- Support for cross-linked events from other shared packages
+
+**Excluded**
+- Full enterprise observability / telemetry system
+- Domain-specific narrative generation
+- Immutable legal records system
+
+### Expected Consumers
+
+- Versioned forms and records
+- Published artifacts
+- Workflow handoffs
+- Acknowledgment-driven records
+- Admin governance surfaces
+- Future cross-module record pages and project canvases
+
+### Dependencies
+
+| Type | Packages |
+|---|---|
+| Hard dependencies | `@hbc/models`, `@hbc/ui-kit` |
+| Strong integrations | SF-06 `@hbc/versioned-record`, SF-08 `@hbc/workflow-handoff`, SF-25 `@hbc/publish-workflow` |
+| Optional integrations | SF-02 `@hbc/bic-next-move`, SF-04 `@hbc/acknowledgment`, SF-10 `@hbc/notification-intelligence` |
+
+### Implementation Priority
+
+**Recommended priority:** Late Tier 2B / Early Tier 3  
+Build once at least two shared packages are emitting stable event metadata worth surfacing in a user-facing timeline.
+
+### Strategic Value
+
+`@hbc/activity-timeline` makes accountability visible, preserves operational context, and reinforces the platform’s differentiator: work is never separated from the history and responsibility chain that gives it meaning.
+
+---
+
+## Addendum Dependency Notes
+
+These candidate packages extend — but do not alter — the original dependency graph.
+
+```
+SF-23  @hbc/record-form ◄──── SF-05 · SF-12 · SF-06 ───────────────┐
+SF-24  @hbc/export-runtime ◄─ SF-06 ───────────────────────────────┤
+SF-25  @hbc/publish-workflow ◄ SF-01 · SF-04 · SF-06 · SF-10 · SF-24 ┤
+SF-26  @hbc/saved-views ◄──── SF-03 · SF-13 ───────────────────────┤
+SF-27  @hbc/bulk-actions ◄─── SF-02 · SF-10 · SF-26 ───────────────┤
+SF-28  @hbc/activity-timeline ◄ SF-06 · SF-08 · SF-25 ──────────────┘
+```
+
+### Recommended Build Sequence for the Addendum Packages
+
+1. **SF-23 `@hbc/record-form`** — implement before creation logic proliferates across modules.
+2. **SF-24 `@hbc/export-runtime`** — implement before polished output patterns diverge module by module.
+3. **SF-25 `@hbc/publish-workflow`** — implement once export/runtime and version discipline are established.
+4. **SF-26 `@hbc/saved-views`** — implement when shared table patterns solidify.
+5. **SF-27 `@hbc/bulk-actions`** — implement when queue-heavy operational tables are active.
+6. **SF-28 `@hbc/activity-timeline`** — implement once the platform emits enough stable event metadata to justify a unified history surface.
+
+### Net Effect on the PH7 / PH8 Roadmap
+
+These six packages extend the original SF-01 through SF-16 platform into three additional capability bands:
+
+- **Shared record lifecycle infrastructure** (`@hbc/record-form`)
+- **Shared output governance infrastructure** (`@hbc/export-runtime`, `@hbc/publish-workflow`)
+- **Shared operational data workspace infrastructure** (`@hbc/saved-views`, `@hbc/bulk-actions`, `@hbc/activity-timeline`)
+
+Together they strengthen the same Mold Breaker thesis already driving this document: users should not experience HB Intel as a collection of disconnected modules, but as a coherent operational system where creation, action, output, and context behave consistently everywhere.
+
+---
+
+*End of Addendum A — Recommended Additional Shared Packages*
+
 
 *End of PH7-Shared-Features-Evaluation.md*
-*Individual feature specifications: see PH7-SF-01 through PH7-SF-22 in this directory.*
+*Individual feature specifications: see PH7-SF-01 through PH7-SF-28 in this directory.*

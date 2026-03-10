@@ -5,9 +5,9 @@
 **Source Spec:** `docs/explanation/feature-decisions/PH7-SF-10-Shared-Feature-Notification-Intelligence.md`
 **Priority Tier:** 1 — Foundation (every module's notification integration depends on this package)
 **Estimated Effort:** 5–6 sprint-weeks
-**ADR Required:** `docs/architecture/adr/0096-notification-intelligence-tiered-model.md`
-**ADR Number:** ADR-0096
-**Note:** Source spec referenced ADR-0019. Per CLAUDE.md §7, all numbers below ADR-0091 are taken. ADR-0091 through ADR-0095 are assigned (SF07, SF08, SF05, SF09, PH7.13). The canonical locked ADR for this feature is ADR-0096.
+**ADR Required:** `docs/architecture/adr/0099-notification-intelligence-tiered-model.md`
+**ADR Number:** ADR-0099
+**Note:** Source spec referenced ADR-0019. Per CLAUDE.md §7, all numbers below ADR-0091 are taken. ADR-0092–0097 are assigned (acknowledgment, step-wizard, versioned-record, stub-detection, field-annotations, workflow-handoff); ADR-0098 reserved for SF09. The canonical locked ADR for this feature is ADR-0099 per current-state-map.md §2.2 (2026-03-10 validation).
 
 > **Doc Classification:** Canonical Normative Plan — SF10 implementation master plan for `@hbc/notification-intelligence`; governs all task files SF10-T01 through SF10-T09.
 
@@ -107,7 +107,7 @@ packages/notification-intelligence/
 | T06 | `SF10-T06-Core-Components.md` | `HbcNotificationCenter` (tab panel); `HbcNotificationBadge` (header bell) | 0.75 sw |
 | T07 | `SF10-T07-Interaction-Components.md` | `HbcNotificationBanner` (Immediate alert); `HbcNotificationPreferences` (settings panel) | 0.75 sw |
 | T08 | `SF10-T08-Azure-Functions-Backend.md` | Event processor, push (Azure Notification Hubs), email (SendGrid), digest scheduler | 1.0 sw |
-| T09 | `SF10-T09-Deployment.md` | Testing sub-path, unit/E2E tests, ADR-0096, README, adoption guide, API reference, mechanical gates | 0.75 sw |
+| T09 | `SF10-T09-Deployment.md` | Testing sub-path, unit/E2E tests, ADR-0099, README, adoption guide, API reference, mechanical gates | 0.75 sw |
 
 **Recommended implementation order:** T01 → T02 → T03 → T04 → T05 → T06 → T07 → T08 → T09
 
@@ -161,7 +161,7 @@ Next: platform modules register their event types; SF10 enables module-level not
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF10 authored: 2026-03-10
-ADR-0096 assigned (spec referenced ADR-0019; remapped per CLAUDE.md §7 — all numbers below ADR-0091 are taken).
+ADR corrected to ADR-0099 (initial plan used ADR-0096, which conflicts with field-annotations; corrected during current-state-map validation 2026-03-10).
 Status: Master plan complete — ready for T01 implementation.
 Pending: PH7.12 sign-off (ADR-0090) before feature-expansion phases begin.
 Next: SF10-T01 (Package Scaffold)

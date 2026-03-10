@@ -12,7 +12,7 @@
 
 ## Objective
 
-Implement the `@hbc/notification-intelligence/testing` sub-path with canonical fixtures and state factories. Write unit tests for the registry, API layer, hooks, and all four components. Write Playwright E2E scenarios covering the full notification lifecycle. Gate all mechanical enforcement checks, produce ADR-0096, and publish the developer adoption guide and API reference.
+Implement the `@hbc/notification-intelligence/testing` sub-path with canonical fixtures and state factories. Write unit tests for the registry, API layer, hooks, and all four components. Write Playwright E2E scenarios covering the full notification lifecycle. Gate all mechanical enforcement checks, produce ADR-0099, and publish the developer adoption guide and API reference.
 
 ---
 
@@ -20,7 +20,7 @@ Implement the `@hbc/notification-intelligence/testing` sub-path with canonical f
 
 1. Implement the `testing/` sub-path: `createMockNotification`, `createMockNotificationPreferences`, `createMockNotificationRegistration`, `mockNotificationTiers`, `mockNotificationChannels`.
 2. Write unit tests for `NotificationRegistry`, `NotificationApi`, `PreferencesApi`, all three hooks, and all four components; produce Storybook stories; write 3 Playwright E2E scenarios.
-3. Run all four mechanical enforcement gates, create ADR-0096, and publish `docs/how-to/developer/notification-intelligence-adoption-guide.md` and `docs/reference/notification-intelligence/api.md`.
+3. Run all four mechanical enforcement gates, create ADR-0099, and publish `docs/how-to/developer/notification-intelligence-adoption-guide.md` and `docs/reference/notification-intelligence/api.md`.
 
 ---
 
@@ -230,11 +230,11 @@ And the effectiveTier stored in HbcNotifications is 'immediate' (not 'watch')
 
 Wave 4 — Documentation and governance closure (all items required before SF10 is considered complete):
 
-- [ ] **ADR-0096** — `docs/architecture/adr/0096-notification-intelligence-tiered-model.md` written and accepted
+- [ ] **ADR-0099** — `docs/architecture/adr/0099-notification-intelligence-tiered-model.md` written and accepted
 - [ ] **Adoption guide** — `docs/how-to/developer/notification-intelligence-adoption-guide.md` written for module integration
 - [ ] **API reference** — `docs/reference/notification-intelligence/api.md` documenting all exported types, API methods, hooks, and components
 - [ ] **Package README** — `packages/notification-intelligence/README.md` written with quickstart and registry pattern
-- [ ] **ADR Index** — `docs/README.md` updated with ADR-0096 row
+- [ ] **ADR Index** — `docs/README.md` updated with ADR-0099 row
 - [ ] **Current-state-map** — `current-state-map.md §2` updated with SF10 task file rows
 
 ---
@@ -246,7 +246,7 @@ Wave 4 — Documentation and governance closure (all items required before SF10 
 
 Priority-tiered smart notification system for HB Intel.
 
-**ADR:** ADR-0096 | **Phase:** SF10 | **Priority:** P1 Foundation
+**ADR:** ADR-0099 | **Phase:** SF10 | **Priority:** P1 Foundation
 
 ## Overview
 
@@ -339,7 +339,7 @@ import {
 Add the following row to the ADR index table in `docs/README.md`. Insert in numeric order after ADR-0095:
 
 ```markdown
-| [ADR-0096](architecture/adr/0096-notification-intelligence-tiered-model.md) | Notification Intelligence Tiered Model | Accepted | 2026-03-10 |
+| [ADR-0099](architecture/adr/0099-notification-intelligence-tiered-model.md) | Notification Intelligence Tiered Model | Accepted | 2026-03-10 |
 ```
 
 ---
@@ -371,11 +371,11 @@ Next: platform modules register event types; SF10 enables module-level notificat
 # ── Documentation Deliverables ────────────────────────────────────────────────
 
 # 1. Confirm ADR file exists
-test -f docs/architecture/adr/0096-notification-intelligence-tiered-model.md \
-  && echo "ADR-0096 OK" || echo "ADR-0096 MISSING"
+test -f docs/architecture/adr/0099-notification-intelligence-tiered-model.md \
+  && echo "ADR-0099 OK" || echo "ADR-0099 MISSING"
 
-# 2. Confirm ADR-0096 row is in the ADR index
-grep -c "ADR-0096" docs/README.md
+# 2. Confirm ADR-0099 row is in the ADR index
+grep -c "ADR-0099" docs/README.md
 # Expected: 1
 
 # 3. Confirm package README exists

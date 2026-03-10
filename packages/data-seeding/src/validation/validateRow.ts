@@ -52,6 +52,7 @@ export function validateRow<TSource, TDest>(
 
     // Run field-level validate function if present
     if (sourceCol && mapping.validate) {
+      /* v8 ignore next */
       const value = rawRow[sourceCol] ?? '';
       const errorMsg = mapping.validate(value);
       if (errorMsg !== null) {

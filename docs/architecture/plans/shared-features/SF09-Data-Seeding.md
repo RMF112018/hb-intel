@@ -237,5 +237,8 @@ SF09-T05 completed: 2026-03-10 — useSeedImport (full state machine) and useSee
 SF09-T06 completed: 2026-03-10 — HbcSeedUploader and HbcSeedMapper implemented. Three spec fixes applied: (1) useComplexity().variant → .tier; (2) DocumentApi dynamic import replaced with uploadFile callback prop (IoC/ports-adapters); (3) @hbc/sharepoint-docs dependency not needed. All gates pass.
 SF09-T07 completed: 2026-03-10 — HbcSeedPreview (Essential summary, Standard/Expert table with error highlighting) and HbcSeedProgress (segmented bar, terminal actions, Expert batch detail) implemented. useComplexity().variant → .tier fix applied (6 occurrences). All gates pass.
 SF09-T08 completed: 2026-03-10 — Platform wiring: uploadToSystemContext() added to @hbc/sharepoint-docs UploadService; 5 reference ISeedConfig implementations in packages/data-seeding/src/reference-configs/ (bdLeads, estimatingBidCalendar, projectHub, adminUser, strategicIntelWinLoss). Architecture boundary verification passed (0 forbidden imports). All gates pass.
-Next: SF09-T09-Testing-and-Deployment.md
+SF09-T09 completed: 2026-03-10 — Testing sub-path factories implemented (5 files), unit tests for all parsers/validation/hooks/components, Storybook stories (4), Playwright E2E stubs (5 scenarios), ADR-0098 created (not ADR-0094 — that number is taken by versioned-record), adoption guide, API reference, package README. All gates pass.
+Status: T01–T09 complete. SF09 fully implemented.
+ADR: docs/architecture/adr/ADR-0098-data-seeding-import-primitive.md (canonical; plan files referenced ADR-0094 which is taken).
+Next: Activate consuming modules per SF09-T08 reference implementations. Priority: BD Leads (P0), Estimating Bid Calendar (P0), then Project Hub (P1).
 -->

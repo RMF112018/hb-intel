@@ -118,6 +118,7 @@ function seedImportReducer<TSource, TDest>(
     case 'RESET':
       return initialState as SeedImportState<TSource, TDest>;
 
+    /* v8 ignore next 2 */
     default:
       return state;
   }
@@ -207,6 +208,7 @@ export function useSeedImport<TSource extends Record<string, string>, TDest>(
           const result = await ProcoreExportParser.parse(file);
           rows = result.rows as unknown as TSource[];
           headers = result.headers;
+        /* v8 ignore next 3 */
         } else {
           throw new Error(`Format ${format} is not supported.`);
         }

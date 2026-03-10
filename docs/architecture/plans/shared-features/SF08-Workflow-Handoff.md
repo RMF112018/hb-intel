@@ -5,7 +5,7 @@
 **Source Spec:** `docs/explanation/feature-decisions/PH7-SF-08-Shared-Feature-Workflow-Handoff.md`
 **Priority Tier:** 1 — Foundation (must exist before any cross-module transition is implemented)
 **Estimated Effort:** 5–6 sprint-weeks
-**ADR Required:** `docs/architecture/adr/ADR-0092-workflow-handoff-platform-primitive.md`
+**ADR Required:** `docs/architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md`
 
 > **Doc Classification:** Canonical Normative Plan — SF08 implementation master plan for `@hbc/workflow-handoff`; governs all task files SF08-T01 through SF08-T09.
 
@@ -185,7 +185,7 @@ packages/workflow-handoff/
 | T06 HbcHandoffReceiver + StatusBadge | Receiver review/acknowledge/reject panel + status badge (5 states) | 1.0 sw |
 | T07 Reference Implementations | BD→Estimating config + Estimating→Project config + platform wiring patterns | 0.75 sw |
 | T08 Testing Strategy | Testing sub-path, unit tests, Storybook stories, Playwright E2E | 0.75 sw |
-| T09 Deployment | Pre-deploy checklist, ADR-0092, adoption how-to, API reference | 0.25 sw |
+| T09 Deployment | Pre-deploy checklist, ADR-0097, adoption how-to, API reference | 0.25 sw |
 | **Total** | | **6.25 sprint-weeks** |
 
 > Note: Source spec estimated 5–6 sprint-weeks. Additional 0.25 sw accounts for generic type contract complexity (D-09), `@hbc/acknowledgment` + `@hbc/field-annotations` bi-directional integration (T07), and D-10 testing sub-path. The Composer (T05) is the most complex deliverable — 4-step multi-panel with async pre-flight, document assembly, and recipient confirmation.
@@ -204,7 +204,7 @@ Foundation layer. All types locked, `HandoffApi` operational, all three hooks fu
 BD-to-Estimating config complete and integrated. Estimating-to-Project config complete. BIC transfer pattern validated. All integration points confirmed in dev-harness.
 
 ### Wave 4 — Testing, Docs & Deployment (T08 + T09)
-Testing sub-path published. ≥95% coverage enforced. ADR-0092 written. Developer adoption guide and API reference authored.
+Testing sub-path published. ≥95% coverage enforced. ADR-0097 written. Developer adoption guide and API reference authored.
 
 ---
 
@@ -228,8 +228,8 @@ Testing sub-path published. ≥95% coverage enforced. ADR-0092 written. Develope
 - [ ] Notification registration: sent → Immediate (recipient); acknowledgment → Watch (sender); rejection → Watch (sender with reason) — registered by Azure Functions
 - [ ] `@hbc/workflow-handoff/testing` sub-path exports all 5 utilities (D-10)
 - [ ] Unit tests ≥95% on state machine transitions, field mapping, pre-flight validation, and hook mutations
-- [ ] `docs/architecture/adr/ADR-0092-workflow-handoff-platform-primitive.md` written and accepted
-- [ ] `docs/how-to/developer/workflow-handoff-adoption.md` written
+- [ ] `docs/architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md` written and accepted
+- [ ] `docs/how-to/developer/workflow-handoff-adoption-guide.md` written
 - [ ] `docs/reference/workflow-handoff/api.md` written
 - [ ] `pnpm turbo run build --filter @hbc/workflow-handoff...` passes with zero errors
 - [ ] `current-state-map.md §2` updated with SF08 plan classification
@@ -248,14 +248,14 @@ Testing sub-path published. ≥95% coverage enforced. ADR-0092 written. Develope
 | `SF08-T06-HbcHandoffReceiver-and-StatusBadge.md` | Receiver panel (summary / docs / notes / CTAs) + 5-state StatusBadge |
 | `SF08-T07-Reference-Implementations.md` | BD→Estimating config, Estimating→Project config, platform wiring patterns (BIC, versioned-record, notifications) |
 | `SF08-T08-Testing-Strategy.md` | `testing/` sub-path exports, unit tests, Storybook stories, Playwright E2E scenarios |
-| `SF08-T09-Deployment.md` | Pre-deploy checklist, ADR-0092 content, adoption how-to, API reference, verification commands |
+| `SF08-T09-Deployment.md` | Pre-deploy checklist, ADR-0097 content, adoption how-to, API reference, verification commands |
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF08 master plan created: 2026-03-09
 Status: In progress — T01 complete
 Classification: Canonical Normative Plan
-ADR required: ADR-0092 (next available after ADR-0091 used by SF07)
-Note: Source spec referenced ADR-0017 — this was a pre-PH7 numbering; ADR-0092 is correct per CLAUDE.md §7
+ADR required: ADR-0097 (allocated after ADR-0096 on disk)
+Note: Source spec referenced ADR-0017 — this was a pre-PH7 numbering; ADR-0097 is correct per CLAUDE.md §7
 
 SF08-T01 completed: 2026-03-10
 - Package scaffold created (30 files), SF07-aligned adjustments applied

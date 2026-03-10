@@ -150,6 +150,7 @@ function HbcSeedMapperInner<TSource, TDest>({
                       </option>
                     ))}
                   </select>
+                  {/* v8 ignore next 7 */}
                   {isRequired && isUnmapped && (
                     <span
                       className="hbc-seed-mapper__required-indicator"

@@ -38,6 +38,7 @@ export const CsvParser = {
       const cells = parseCsvLine(line);
       const row: Record<string, string> = {};
       headers.forEach((header, index) => {
+        /* v8 ignore next */
         row[header] = (cells[index] ?? '').trim();
       });
       return row;

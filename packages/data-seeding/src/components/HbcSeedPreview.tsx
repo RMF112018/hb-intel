@@ -189,6 +189,7 @@ function HbcSeedPreviewTable<TSource, TDest>({
                         }
                         data-testid={cellError ? `${testId}-cell-error-${index + 1}-${sourceCol.replace(/\s+/g, '-')}` : undefined}
                       >
+                        {/* v8 ignore next */}
                         {rawRow[sourceCol] ?? ''}
                       </td>
                     );

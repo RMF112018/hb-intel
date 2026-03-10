@@ -12,14 +12,14 @@
 
 ## Objective
 
-Gate the `@hbc/workflow-handoff` package against all mechanical enforcement gates, produce the ADR-0092 locked decision record, write the developer adoption guide, and publish the API reference. This task is the formal Definition of Done for the SF-08 implementation.
+Gate the `@hbc/workflow-handoff` package against all mechanical enforcement gates, produce the ADR-0097 locked decision record, write the developer adoption guide, and publish the API reference. This task is the formal Definition of Done for the SF-08 implementation.
 
 ---
 
 ## 3-Line Plan
 
 1. Run all four mechanical enforcement gates; zero errors required before proceeding.
-2. Create `docs/architecture/adr/0092-workflow-handoff-platform-primitive.md` with all ten locked decisions.
+2. Create `docs/architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md` with all ten locked decisions.
 3. Create `docs/how-to/developer/workflow-handoff-adoption-guide.md` and `docs/reference/workflow-handoff/api.md` as required Diátaxis deliverables.
 
 ---
@@ -79,21 +79,21 @@ Work through every item below. No deployment proceeds until all 30 items are che
 
 ### Documentation
 
-- [ ] `docs/architecture/adr/0092-workflow-handoff-platform-primitive.md` written and accepted
+- [ ] `docs/architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md` written and accepted
 - [ ] `docs/how-to/developer/workflow-handoff-adoption-guide.md` written
 - [ ] `docs/reference/workflow-handoff/api.md` written
 - [ ] `packages/workflow-handoff/README.md` written (see Package README section below)
-- [ ] `docs/README.md` ADR index updated with ADR-0092 entry (see ADR Index Update section below)
+- [ ] `docs/README.md` ADR index updated with ADR-0097 entry (see ADR Index Update section below)
 - [ ] `current-state-map.md §2` updated with SF08 classification row
 
 ---
 
-## ADR-0092: Workflow Handoff Platform Primitive
+## ADR-0097: Workflow Handoff Platform Primitive
 
-**File:** `docs/architecture/adr/0092-workflow-handoff-platform-primitive.md`
+**File:** `docs/architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md`
 
 ```markdown
-# ADR-0092 — Workflow Handoff Platform Primitive
+# ADR-0097 — Workflow Handoff Platform Primitive
 
 **Status:** Accepted
 **Date:** 2026-03-10
@@ -101,7 +101,7 @@ Work through every item below. No deployment proceeds until all 30 items are che
 **Supersedes:** None
 **Note:** The source specification (PH7-SF-08) referenced ADR-0017 as its target number.
 This conflicts with CLAUDE.md §7 (all numbers below ADR-0091 are reserved). The canonical
-locked ADR for this feature is ADR-0092. The source spec's ADR-0017 reference is superseded
+locked ADR for this feature is ADR-0097. The source spec's ADR-0017 reference is superseded
 by this document.
 
 ---
@@ -307,7 +307,7 @@ implementation contract for `@hbc/workflow-handoff` and all consuming modules.
 
 **Audience:** Module developers implementing a new cross-module handoff route
 **Prerequisites:** Familiarity with `IHandoffConfig`, `IHandoffPackage`, and `HandoffStatus`
-**Related:** `SF08-Workflow-Handoff.md` (master plan), ADR-0092
+**Related:** `SF08-Workflow-Handoff.md` (master plan), ADR-0097
 
 ---
 
@@ -581,7 +581,7 @@ Structured, auditable cross-module handoff primitive for the HB Intel platform.
 
 `@hbc/workflow-handoff` implements the 5-state handoff machine (`draft → sent → received → acknowledged | rejected`) and all associated UI components, hooks, and API client. It is the single platform primitive for any cross-module transfer of record custody — BD → Estimating, Estimating → Project Hub, and future routes.
 
-**Locked ADR:** ADR-0092 — `docs/architecture/adr/0092-workflow-handoff-platform-primitive.md`
+**Locked ADR:** ADR-0097 — `docs/architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md`
 
 ---
 
@@ -690,7 +690,7 @@ grep -r "from '@hbc/notification-intelligence'" packages/workflow-handoff/src/  
 - `docs/architecture/plans/shared-features/SF08-T07-Reference-Implementations.md` — `bdToEstimatingHandoffConfig`
 - `docs/how-to/developer/workflow-handoff-adoption-guide.md` — Step-by-step wiring guide
 - `docs/reference/workflow-handoff/api.md` — Full API reference
-- `docs/architecture/adr/0092-workflow-handoff-platform-primitive.md` — Locked ADR
+- `docs/architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md` — Locked ADR
 ````
 
 ---
@@ -702,7 +702,7 @@ grep -r "from '@hbc/notification-intelligence'" packages/workflow-handoff/src/  
 At implementation time, locate the ADR index table in `docs/README.md` (search for the `## Architecture Decision Records` section or the table header `| ADR | Title | Status | Date |`). Append the following row:
 
 ```markdown
-| [ADR-0092](architecture/adr/0092-workflow-handoff-platform-primitive.md) | Workflow Handoff Platform Primitive | Accepted | 2026-03-10 |
+| [ADR-0097](architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md) | Workflow Handoff Platform Primitive | Accepted | 2026-03-10 |
 ```
 
 If no ADR index table yet exists, create one under `## Architecture Decision Records` with the following structure before appending the row:
@@ -712,7 +712,7 @@ If no ADR index table yet exists, create one under `## Architecture Decision Rec
 
 | ADR | Title | Status | Date |
 |-----|-------|--------|------|
-| [ADR-0092](architecture/adr/0092-workflow-handoff-platform-primitive.md) | Workflow Handoff Platform Primitive | Accepted | 2026-03-10 |
+| [ADR-0097](architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md) | Workflow Handoff Platform Primitive | Accepted | 2026-03-10 |
 ```
 
 > **Rule (CLAUDE.md §4):** The ADR catalog is append-only. Never delete or renumber existing rows. Always add new rows in ascending ADR number order.
@@ -768,8 +768,8 @@ pnpm turbo run build && pnpm turbo run lint && pnpm turbo run check-types
 # Confirm package README exists
 test -f packages/workflow-handoff/README.md && echo "README OK" || echo "README MISSING"
 
-# Confirm ADR-0092 entry is present in docs/README.md
-grep -c "ADR-0092" docs/README.md
+# Confirm ADR-0097 entry is present in docs/README.md
+grep -c "ADR-0097" docs/README.md
 ```
 
 ---
@@ -783,12 +783,12 @@ After all gates pass, add this comment block to `SF08-Workflow-Handoff.md`:
 SF08 completed: {DATE}
 T01-T09 implemented.
 All four mechanical enforcement gates passed.
-ADR created: docs/architecture/adr/0092-workflow-handoff-platform-primitive.md
+ADR created: docs/architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md
 Documentation added:
   - docs/how-to/developer/workflow-handoff-adoption-guide.md
   - docs/reference/workflow-handoff/api.md
   - packages/workflow-handoff/README.md  (implementation-time deliverable — see T09 Package README section)
-docs/README.md ADR index updated: ADR-0092 row appended  (implementation-time deliverable — see T09 ADR Index Update section)
+docs/README.md ADR index updated: ADR-0097 row appended  (implementation-time deliverable — see T09 ADR Index Update section)
 current-state-map.md §2 updated: SF08 classification row added.
 Next: Activate consuming modules per SF08-T07 confirmed handoff routes table.
   Priority: BD → Estimating (P0), then Estimating → Project Hub (P1).

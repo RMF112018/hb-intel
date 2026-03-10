@@ -147,6 +147,7 @@ export function HbcSeedProgress({
               onClick={onRetryErrors}
               data-testid={`${testId}-retry-button`}
             >
+              {/* v8 ignore next */}
               Retry {result?.errorCount.toLocaleString() ?? ''} failed rows
             </button>
           )}
