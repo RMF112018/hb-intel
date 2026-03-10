@@ -387,6 +387,13 @@ curl -s "http://localhost:7071/api/field-annotations?recordType=bd-scorecard&rec
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF07-T03 not yet started.
+SF07-T03 completed: 2026-03-10
+- Replaced src/api/AnnotationApi.ts stub with full implementation (plan lines 149–326 verbatim)
+- apiFetch<T>() generic fetch wrapper with JSON parsing and error handling
+- mapListItemToAnnotation() mapper: IRawAnnotationListItem → IFieldAnnotation with RepliesJson parsing and IBicOwner construction
+- AnnotationApi object (as const) with six public methods: list, get, create, addReply, resolve, withdraw
+- IAnnotationApi type export (inferred from AnnotationApi)
+- Barrel exports already wired from T01 (src/api/index.ts → src/index.ts)
+- Verification: check-types ✓ | build ✓ | lint ✓
 Next: SF07-T04 (Hooks)
 -->
