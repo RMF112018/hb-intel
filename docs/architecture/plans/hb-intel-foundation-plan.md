@@ -734,4 +734,18 @@ SF04 @hbc/acknowledgment — Complete 2026-03-09.
   All 9 task files implemented (T01–T09). ADR-0092 authored.
   97 tests, ≥95% coverage. 3 components, 3 hooks, 7 context types, 5 testing utilities.
   Documentation: ADR-0092, adoption guide, package README.
+SF05 @hbc/step-wizard — Complete 2026-03-09.
+  T01 Package scaffold ✓
+  T02 TypeScript contracts ✓
+  T03 State machine (monotonic merge, sequential-with-jumps unlock) ✓
+  T04 useStepWizard + useStepProgress hooks ✓
+  T05 HbcStepWizard (horizontal + vertical, all modes, complexity gating) ✓
+  T06 HbcStepProgress (bar/ring/fraction) + HbcStepSidebar ✓
+  T07 Draft persistence + BIC integration (SF02 amendment documented) ✓
+  T08 Testing sub-path (6 canonical states, config factory, hook stub, wrapper) ✓
+  T09 Deployment (ADR-0093, adoption guide, checklist) ✓
+  Coverage: ≥95% state machine, hooks, completion logic (142 tests)
+  Storybook: 16 stories (10 wizard + 6 progress)
+  E2E: 10 Playwright scenarios
+  SF02 amendment: BIC_MODULE_MANIFEST step-wizard:* prefix (SF02-T02, SF02-T03)
 -->

@@ -594,3 +594,13 @@ ls docs/how-to/developer/step-wizard-adoption-guide.md
 # 10 — Verify SF02 amendment files still consistent
 pnpm --filter @hbc/bic-next-move typecheck
 ```
+
+<!-- PROGRESS: SF05-T09 Deployment — COMPLETE 2026-03-09
+Pre-deployment checklist: all 37 items verified (typecheck, 142 tests, ≥95% coverage, full monorepo build)
+ADR created: docs/architecture/adr/ADR-0093-step-wizard-platform-primitive.md (corrected from spec's ADR-0014)
+Adoption guide: docs/how-to/developer/step-wizard-adoption-guide.md
+Blueprint progress comment appended
+Foundation plan progress comment appended
+Current-state-map §2 updated: ADR count → 93, SF04/SF05 reclassified to Historical Foundational, 2 new doc rows added, next ADR → 0094
+SF05 feature complete — all 9 tasks (T01–T09) delivered.
+-->

@@ -1139,4 +1139,12 @@ Phase 2 — Shared Package: @hbc/acknowledgment (SF04) completed: 2026-03-09
   97 tests passing, ≥95% coverage on all metrics.
   Estimated effort: 3.5 sprint-weeks.
   Next: SF05 or Phase 3 (dev-harness) per Foundation Plan sequencing.
+Phase 2 — Shared Package: @hbc/step-wizard (SF05) completed: 2026-03-09
+  Package: packages/step-wizard/
+  ADR created: docs/architecture/adr/ADR-0093-step-wizard-platform-primitive.md
+  Adoption guide: docs/how-to/developer/step-wizard-adoption-guide.md
+  Cross-package: SF02 amendment required (step-wizard:* BIC_MODULE_MANIFEST prefix)
+  All 10 decisions locked (D-01 through D-10). 20-item DoD verified. Testing sub-path exported.
+  142 tests, ≥95% coverage. 16 Storybook stories, 10 E2E scenarios.
+  Next: SF06 or first consuming module integration.
 -->

@@ -36,9 +36,14 @@
 | `docs/README.md` | **Canonical Current-State** | Infrastructure/exempt — no Tier 1 banner |
 | `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md` | **Canonical Normative Plan** | Tier 1 banner applied |
 | `docs/architecture/plans/hb-intel-foundation-plan.md` | **Historical Foundational** | Tier 1 banner applied |
-| `docs/architecture/adr/` (all files) | **Permanent Decision Rationale** | Exempt from inline banner; 91 active records indexed; 6 archived in `adr/archived/`; conflicts resolved PH7.11 |
+| `docs/architecture/adr/` (all files) | **Permanent Decision Rationale** | Exempt from inline banner; 93 active records indexed; 6 archived in `adr/archived/`; conflicts resolved PH7.11 |
 | SF01–SF03 plans (completed shared-feature work: bic-next-move, complexity, sharepoint-docs) | **Historical Foundational** | Tier 2 — matrix classification only |
-| SF04–SF06 shared-feature plans (~19 docs, packages not yet built) | **Deferred Scope** | Tier 2 — matrix classification only; must not be updated without explicit phase activation |
+| SF04 shared-feature plans (10 files: `SF04-Acknowledgment.md` through `SF04-T09-Deployment.md`) | **Historical Foundational** | Tier 2 — matrix classification only; completed 2026-03-09 |
+| SF05 shared-feature plans (10 files: `SF05-Step-Wizard.md` through `SF05-T09-Deployment.md`) | **Historical Foundational** | Tier 2 — matrix classification only; completed 2026-03-09 |
+| SF06 shared-feature plans (packages not yet built) | **Deferred Scope** | Tier 2 — matrix classification only; must not be updated without explicit phase activation |
+| `docs/architecture/adr/ADR-0093-step-wizard-platform-primitive.md` | **Permanent Decision Rationale** | SF05 step-wizard platform primitive; 10 locked decisions |
+| `docs/how-to/developer/step-wizard-adoption-guide.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; step-wizard module adoption |
+| SF07 shared-feature plans (10 files: `SF07-Field-Annotations.md` through `SF07-T09-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; pending PH7.12 sign-off (ADR-0090) before implementation begins |
 | PH4 phase plans (`plans/PH4-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH4-Shell-Consolidation.md` (master plan) |
 | PH5 phase plans (`plans/PH5-*.md`, `plans/PH5C-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH5-Auth-Shell-Plan.md` and `PH5C-Auth-Shell-Plan.md` |
 | PH6 phase plans (`plans/PH6-*.md`, `plans/PH6F-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH6-Provisioning-Plan.md`; sub-plans Tier 2 |
@@ -86,7 +91,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | Index gap (ADR-0073–ADR-0079) | These numbers were absent from `docs/README.md` index | Resolved: 2026-03-09 — all entries added to `docs/README.md` |
 | ADR-0082 not indexed | ADR-0082 missing from `docs/README.md` | Resolved: 2026-03-09 — added to index |
 
-**Post-PH7.11 state:** 91 ADR files on disk (active), 6 archived in `adr/archived/`. Next available number: **ADR-0092**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
+**Post-PH7.11 state:** 91 ADR files on disk (active), 6 archived in `adr/archived/`. Next available number: **ADR-0094**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
 
 ---
 
