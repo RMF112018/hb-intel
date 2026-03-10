@@ -168,7 +168,8 @@ SF10-T03 completed: 2026-03-10 — NotificationRegistry singleton (register/getA
 SF10-T04 completed: 2026-03-10 — NotificationApi (send/getCenter/markRead/markAllRead/dismiss) + PreferencesApi (getPreferences/updatePreferences). 9 API tests + 10 registry tests = 19 passing. ADR ref ADR-0099.
 SF10-T05 completed: 2026-03-10 — React hooks (useNotificationCenter with useInfiniteQuery + 3 mutations, useNotificationBadge with 60s polling, useNotificationPreferences with optimistic update/rollback). Query key factory (notificationKeys). All 19 existing tests pass; check-types zero errors; build zero errors.
 SF10-T06 completed: 2026-03-10 — Core components (HbcNotificationBadge with Notifications icon + Immediate unread badge; HbcNotificationCenter with tier tab bar, notification cards, mark-read/dismiss/mark-all-read, load-more pagination). Icon adapted: Notifications replaces BellIcon, size="md" replaces size={20}. 21 new component tests (9 badge + 12 center). @testing-library/jest-dom added. @hbc/ui-kit/icons alias added to vitest config. All 40 tests pass; check-types zero errors; build zero errors.
-Status: T06 done — ready for T07 implementation (Interaction Components).
+SF10-T07 completed: 2026-03-10 — Interaction components (HbcNotificationBanner with 30s auto-dismiss D-04, ARIA role="alert"; HbcNotificationPreferences Expert-only panel with registry-driven tier overrides, digest schedule, push toggle D-05/D-06/D-07/D-08). 26 new tests (11 banner + 15 preferences). All 66 tests pass; check-types zero errors; build zero errors.
+Status: T07 done — ready for T08 implementation (Azure Functions Backend).
 Pending: PH7.12 sign-off (ADR-0090) before feature-expansion phases begin.
-Next: SF10-T07 (Interaction Components — HbcNotificationBanner + HbcNotificationPreferences)
+Next: SF10-T08 (Azure Functions Backend)
 -->

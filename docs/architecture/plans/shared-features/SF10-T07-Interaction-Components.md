@@ -338,6 +338,10 @@ const pkg = require('./packages/notification-intelligence/dist/index.js');
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF10-T07 not yet started.
+SF10-T07 completed: 2026-03-10
+- HbcNotificationBanner: Immediate-tier dismissible banner with 30s auto-dismiss (D-04), ARIA role="alert" (D-08)
+- HbcNotificationPreferences: Expert-only registry-driven preferences panel with tier overrides, digest schedule, push toggle (D-05/D-06/D-07/D-08)
+- 11 HbcNotificationBanner tests + 15 HbcNotificationPreferences tests (26 new, 66 total)
+- All verification gates passed: check-types, test, build
 Next: SF10-T08 (Azure Functions Backend)
 -->
