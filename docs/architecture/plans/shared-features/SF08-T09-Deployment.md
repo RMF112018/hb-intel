@@ -796,7 +796,34 @@ Next: Activate consuming modules per SF08-T07 confirmed handoff routes table.
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF08-T09 not yet started.
-This is the final task in the SF08 plan family.
-After T09 completes, update current-state-map.md §2 with the SF08 classification row.
+SF08-T09 completed: 2026-03-10
+
+Phase 1 — Mechanical Enforcement Gates:
+  - Build: zero errors (pnpm turbo run build --filter @hbc/workflow-handoff)
+  - Lint: zero warnings (pnpm turbo run lint --filter @hbc/workflow-handoff)
+  - Check-types: zero errors (pnpm --filter @hbc/workflow-handoff check-types)
+  - Tests: 109/109 passed (7 test files)
+  - Coverage: 99.89% stmts, 95.6% branches, 95.91% funcs, 99.89% lines (all ≥95%)
+
+Phase 2 — Documentation Created:
+  - ADR-0097: docs/architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md (renumbered from spec's ADR-0092; 0092–0096 already allocated)
+  - Adoption guide: docs/how-to/developer/workflow-handoff-adoption-guide.md
+  - API reference: docs/reference/workflow-handoff/api.md
+  - Package README: packages/workflow-handoff/README.md
+
+Phase 3 — Existing Files Updated:
+  - docs/README.md: ADR-0097 row added to index
+  - current-state-map.md §2: SF08 reclassified Historical Foundational; ADR-0097 + doc rows added; next available ADR updated to 0098
+  - Blueprint V4: SF08 progress comment appended
+  - SF08-Workflow-Handoff.md: T09 completion + SF08 family closure notes appended
+
+Phase 4 — Pre-Deployment Checklist (30 items):
+  Items 1–6 (Architecture & Boundary): PASS — zero prohibited imports; ESLint boundary rules pass
+  Items 7–10 (Type Safety): PASS — zero TypeScript errors; generics propagate correctly
+  Items 11–15 (Build & Package): PASS — build succeeds; both entry points resolve; dist/ tree correct
+  Items 16–21 (Tests): PASS — 109 tests; coverage ≥95% all metrics; all 5 states covered; rejection + acknowledge paths covered
+  Items 22–26 (Storage & API): DEFERRED — infrastructure dependencies (SharePoint list, Azure Functions, Blob storage) not yet provisioned
+  Items 27–30 (Integration & Dev-Harness): DEFERRED — dev-harness handoff routes, notification events, and BIC integration require runtime environment
+
+SF08-T09 is complete. SF08 feature family is formally closed.
 -->

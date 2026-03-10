@@ -327,5 +327,18 @@ SF08-T08 completed: 2026-03-10
 - Playwright E2E: 5 lifecycle scenarios as test.skip stubs (awaiting dev-harness routes)
 - ~30 spec-vs-reality corrections applied during implementation
 - Verification: check-types ✓, build ✓, lint ✓, test:coverage ✓
-Next: SF08-T09 (Deployment)
+
+SF08-T09 completed: 2026-03-10
+- All four mechanical enforcement gates passed (build, lint, check-types, test)
+- Coverage: 99.89% stmts, 95.6% branches, 95.91% functions, 99.89% lines
+- ADR-0097 created (renumbered from spec's ADR-0092; 0092–0096 already allocated on disk)
+- Documentation deliverables: adoption guide, API reference, package README
+- docs/README.md updated with ADR-0097 row
+- current-state-map.md §2 updated: SF08 → Historical Foundational; doc rows added; next ADR → 0098
+- Blueprint V4: SF08 progress comment appended
+- Checklist items 22–30 deferred to environment provisioning (SharePoint, Azure Functions, Blob storage)
+
+SF08 FEATURE FAMILY CLOSED: 2026-03-10
+All 9 tasks (T01–T09) complete. Package @hbc/workflow-handoff is code-ready.
+Next: Activate consuming modules per confirmed handoff routes table (BD→Estimating P0, Estimating→ProjectHub P1).
 -->

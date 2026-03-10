@@ -47,7 +47,10 @@
 | `docs/architecture/adr/ADR-0096-field-annotations-platform-primitive.md` | **Permanent Decision Rationale** | SF07 field-annotations platform primitive; 10 locked decisions |
 | `docs/how-to/developer/field-annotations-adoption.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; field-annotations module adoption |
 | `docs/reference/field-annotations/api.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; field-annotations API reference |
-| SF08 shared-feature plans (10 files: `SF08-Workflow-Handoff.md` through `SF08-T09-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; pending PH7.12 sign-off (ADR-0090) before implementation begins |
+| SF08 shared-feature plans (10 files: `SF08-Workflow-Handoff.md` through `SF08-T09-Deployment.md`) | **Historical Foundational** | Tier 2 — matrix classification only; T01–T09 complete 2026-03-10; package `@hbc/workflow-handoff` implemented |
+| `docs/architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md` | **Permanent Decision Rationale** | SF08 workflow-handoff platform primitive; 10 locked decisions |
+| `docs/how-to/developer/workflow-handoff-adoption-guide.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; workflow-handoff module adoption |
+| `docs/reference/workflow-handoff/api.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; workflow-handoff API reference |
 | SF09 shared-feature plans (10 files: `SF09-Data-Seeding.md` through `SF09-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; pending PH7.12 sign-off (ADR-0090) before implementation begins |
 | PH4 phase plans (`plans/PH4-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH4-Shell-Consolidation.md` (master plan) |
 | PH5 phase plans (`plans/PH5-*.md`, `plans/PH5C-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH5-Auth-Shell-Plan.md` and `PH5C-Auth-Shell-Plan.md` |
@@ -104,7 +107,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | Index gap (ADR-0073–ADR-0079) | These numbers were absent from `docs/README.md` index | Resolved: 2026-03-09 — all entries added to `docs/README.md` |
 | ADR-0082 not indexed | ADR-0082 missing from `docs/README.md` | Resolved: 2026-03-09 — added to index |
 
-**Post-PH7.11 state:** 91 ADR files on disk (active), 6 archived in `adr/archived/`. Next available number: **ADR-0094**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
+**Post-PH7.11 state:** 91 ADR files on disk (active), 6 archived in `adr/archived/`. Next available number: **ADR-0098**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
 
 ---
 

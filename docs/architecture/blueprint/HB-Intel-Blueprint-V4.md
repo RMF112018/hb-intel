@@ -1207,3 +1207,19 @@ Documentation added:
 All four mechanical enforcement gates passed.
 current-state-map.md §2 updated: SF07 reclassified to Historical Foundational; ADR-0096 and doc rows added.
 -->
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF08 workflow-handoff implemented: 2026-03-10
+Package: @hbc/workflow-handoff (T01–T09 complete)
+ADR created: docs/architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md
+Documentation added:
+  - docs/how-to/developer/workflow-handoff-adoption-guide.md
+  - docs/reference/workflow-handoff/api.md
+  - packages/workflow-handoff/README.md
+docs/README.md ADR index updated: ADR-0097 row appended.
+All four mechanical enforcement gates passed.
+Coverage: 99.89% stmts, 95.6% branches, 95.91% functions, 99.89% lines.
+current-state-map.md §2 updated: SF08 reclassified to Historical Foundational; ADR-0097 and doc rows added.
+Next: Activate consuming modules per SF08-T07 confirmed handoff routes table.
+  Priority: BD → Estimating (P0), then Estimating → Project Hub (P1).
+-->
