@@ -1,4 +1,9 @@
-// Populated by T03
 export { XlsxParser } from './XlsxParser';
+export type { IParseResult } from './XlsxParser';
 export { CsvParser } from './CsvParser';
-export { ProcoreExportParser } from './ProcoreExportParser';
+export { ProcoreExportParser, ProcoreFormatError } from './ProcoreExportParser';
+export type {
+  IProcoreProjectExport,
+  IProcoreProject,
+  IProcoreProjectRow,
+} from './ProcoreExportParser';

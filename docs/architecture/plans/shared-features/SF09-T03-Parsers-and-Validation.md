@@ -615,8 +615,14 @@ pnpm --filter @hbc/data-seeding test -- --grep "ProcoreExportParser"
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF09-T03 not yet started.
-Parsers and validation engine are the most unique technical layer in this package.
-Unit tests for parsers should use real fixture files in src/parsers/__fixtures__/.
+SF09-T03 completed: 2026-03-10
+All three parsers (XlsxParser, CsvParser, ProcoreExportParser) implemented per spec.
+Validation engine (validateRow, validateAllRows, autoMapHeaders) implemented per spec.
+Barrel exports updated for parsers/index.ts and validation/index.ts.
+ESLint config (.eslintrc.cjs) added to package (was missing from T01 scaffold).
+Removed unused SEED_PREVIEW_ROW_COUNT_EXPERT import from XlsxParser (spec included it but code doesn't use it).
+Fixed TS2352 cast errors: Record<string, unknown> → unknown → string[] (double-cast for SheetJS raw row arrays).
+Gates: check-types ✅ | build ✅ | lint ✅ (0 errors) | test ✅ (passWithNoTests)
+SheetJS confinement: verified — zero xlsx imports outside XlsxParser.ts.
 Next: SF09-T04-Storage-and-API.md
 -->

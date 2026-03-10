@@ -1,3 +1,2 @@
-// Populated by T03
-export { validateRow } from './validateRow';
-export { autoMapHeaders } from './autoMapHeaders';
+export { validateRow, validateAllRows } from './validateRow';
+export { autoMapHeaders, FUZZY_MATCH_THRESHOLD } from './autoMapHeaders';

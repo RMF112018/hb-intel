@@ -354,8 +354,11 @@ node -e "import('@hbc/data-seeding').then(m => console.log('SeedApi:', typeof m.
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF09-T04 not yet started.
-The seedImportBatch Azure Function requires a dispatch table registration
-mechanism that must be designed before implementing consuming module configs.
+SF09-T04 completed: 2026-03-10
+- SeedApi implemented with 6 methods: importBatch, parseStreaming, recordCompletion, getHistory, getImport, getErrorReportUrl
+- configureSeedApiFetch exported for DI of authenticated fetch
+- api/index.ts barrel created; src/index.ts updated to import from ./api
+- Removed unused imports (ISeedResult, SEED_IMPORTS_LIST_TITLE) from SeedApi.ts — spec included them for JSDoc context but they cause lint warnings
+- Verification: check-types ✓, build ✓, lint ✓ (zero errors)
 Next: SF09-T05-Hooks.md
 -->

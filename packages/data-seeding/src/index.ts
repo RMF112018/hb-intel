@@ -7,4 +7,4 @@ export * from './parsers';
 export * from './validation';
 export * from './hooks';
 export * from './components';
-export { SeedApi } from './api/SeedApi';
+export { SeedApi, configureSeedApiFetch } from './api';
