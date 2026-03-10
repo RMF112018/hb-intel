@@ -110,6 +110,9 @@ pnpm eslint /tmp/test-ts-ignore-ok.ts
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-PH7.13-T01 not yet started.
+PH7.13-T01 completed: 2026-03-10
+- Added `no-warning-comments` (warn) and `@typescript-eslint/ban-ts-comment` (error) to `.eslintrc.base.js`
+- Verification: all 4 checks passed (grep confirm, lint exit 0, bare @ts-ignore error, described @ts-ignore pass)
+- `pnpm turbo run lint` — 30/30 tasks successful, zero errors
 Next: PH7.13-T02 (no-stub-implementations ESLint Rule)
 -->

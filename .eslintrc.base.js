@@ -30,6 +30,23 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/consistent-type-imports': 'warn',
+
+    // PH7.13 T01-D01 — Surface TODO/FIXME/HACK/XXX at lint time.
+    // Warn (not error) to avoid immediately blocking CI on existing debt.
+    // Reviewers may escalate individual TODOs to errors at PR time.
+    'no-warning-comments': ['warn', {
+      terms: ['TODO', 'FIXME', 'HACK', 'XXX'],
+      location: 'anywhere',
+    }],
+
+    // PH7.13 T01-D02 — Require a description when suppressing TypeScript errors.
+    // Bare @ts-ignore is an error; @ts-ignore with ≥10-char description is allowed.
+    '@typescript-eslint/ban-ts-comment': ['error', {
+      'ts-ignore': 'allow-with-description',
+      'ts-expect-error': 'allow-with-description',
+      'ts-nocheck': true,
+      minimumDescriptionLength: 10,
+    }],
   },
   overrides: [
     {
