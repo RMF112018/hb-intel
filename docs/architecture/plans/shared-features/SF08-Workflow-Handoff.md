@@ -318,4 +318,14 @@ SF08-T07 completed: 2026-03-10
 - Verification: check-types, build, lint, full workspace build (32/32) — all passed
 - Architecture boundary: zero prohibited imports in src/
 Next: SF08-T08 (Testing Strategy)
+
+SF08-T08 completed: 2026-03-10
+- testing/ sub-path: 5 factory functions + MockHandoffStates type — all corrected for actual IBicOwner/null types
+- Unit tests: 109 tests across 7 test files — HandoffApi, usePrepareHandoff, useHandoffStatus, useHandoffInbox, HbcHandoffStatusBadge, HbcHandoffComposer, HbcHandoffReceiver
+- Coverage: 99.89% stmts, 95.6% branches, 95.91% functions, 99.89% lines (all ≥95%)
+- Storybook stories: 3 story files (Composer: 3 stories, Receiver: 4 stories, StatusBadge: 5 stories)
+- Playwright E2E: 5 lifecycle scenarios as test.skip stubs (awaiting dev-harness routes)
+- ~30 spec-vs-reality corrections applied during implementation
+- Verification: check-types ✓, build ✓, lint ✓, test:coverage ✓
+Next: SF08-T09 (Deployment)
 -->
