@@ -673,3 +673,13 @@ pnpm test:coverage -- --include 'src/engine/**'
 # TypeScript check
 pnpm typecheck
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF06-T03 completed: 2026-03-10
+- Replaced diffEngine.ts stub with full ~280-line implementation (8 exported + 5 internal functions)
+- Created diffEngine.test.ts with 42 test cases across 8 describe blocks — all passing
+- Updated src/index.ts with Engine export block (8 functions)
+- Fixed Myers backtracking algorithm (spec had bug in snake/edit tracking; corrected tie-breaking for removal-before-addition ordering)
+- Gates: build ✓ | lint ✓ | check-types ✓ | 42/42 tests ✓ | monorepo build 30/30 ✓ | monorepo check-types 38/38 ✓
+Next: T04 (hooks — useVersionDiff)
+-->

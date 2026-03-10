@@ -48,6 +48,18 @@ export {
   getSnapshotIdsToSupersede,
 } from './utils/versionUtils';
 
+// Engine
+export {
+  computeDiff,
+  computeCharDiff,
+  formatNumericDelta,
+  humanizeFieldPath,
+  flattenRecord,
+  classifyChange,
+  valuesAreEqual,
+  serializeValue,
+} from './engine/diffEngine';
+
 // API
 export { VersionApi } from './api/VersionApi';
 
