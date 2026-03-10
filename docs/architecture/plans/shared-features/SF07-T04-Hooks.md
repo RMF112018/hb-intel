@@ -325,6 +325,12 @@ node -e "
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF07-T04 not yet started.
+SF07-T04 completed: 2026-03-10
+- useFieldAnnotations: query key factories, computeAnnotationCounts helper, record-level query hook
+- useFieldAnnotation: field-level query hook with shared query key factory
+- useAnnotationActions: create, addReply, resolve, withdraw mutations with cache invalidation
+- Removed unused fieldAnnotationQueryKey import from useAnnotationActions (lint fix)
+- Barrel exports confirmed wired from T01 scaffold (no changes needed)
+- All gates passed: check-types, build, lint (zero errors, zero warnings)
 Next: SF07-T05 (HbcAnnotationMarker)
 -->
