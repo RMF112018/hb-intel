@@ -316,6 +316,12 @@ node -e "import('@hbc/workflow-handoff/testing').then(m => console.log('testing 
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF08-T01 not yet started.
+SF08-T01 completed: 2026-03-10
+- Created 30 files under packages/workflow-handoff/ (config, barrels, stubs, tests)
+- SF07-aligned adjustments applied: dist/src/ export paths, testing compiled to dist/testing/,
+  __dirname ESM resolution in vitest.config.ts, resolve.alias (not test.alias),
+  include testing/**/* in tsconfig, typecheck script, --max-warnings 0, SF07 devDep versions
+- Verification: pnpm ls ✓, check-types ✓, build ✓, test (0 tests, passWithNoTests) ✓,
+  testing sub-path compiles to dist/testing/ ✓, full workspace build (32/32) ✓
 Next: SF08-T02 (TypeScript Contracts)
 -->

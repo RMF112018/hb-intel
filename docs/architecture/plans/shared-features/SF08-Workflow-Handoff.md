@@ -252,8 +252,13 @@ Testing sub-path published. ≥95% coverage enforced. ADR-0092 written. Develope
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF08 master plan created: 2026-03-09
-Status: Not yet started — pending PH7.12 sign-off (ADR-0090)
+Status: In progress — T01 complete
 Classification: Canonical Normative Plan
 ADR required: ADR-0092 (next available after ADR-0091 used by SF07)
 Note: Source spec referenced ADR-0017 — this was a pre-PH7 numbering; ADR-0092 is correct per CLAUDE.md §7
+
+SF08-T01 completed: 2026-03-10
+- Package scaffold created (30 files), SF07-aligned adjustments applied
+- All verification gates passed: check-types, build, test, full workspace build
+Next: SF08-T02 (TypeScript Contracts)
 -->
