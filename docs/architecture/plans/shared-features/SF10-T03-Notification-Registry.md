@@ -326,6 +326,12 @@ pnpm --filter @hbc/notification-intelligence check-types
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF10-T03 not yet started.
+SF10-T03 completed: 2026-03-10
+- NotificationRegistry singleton implemented in src/registry/NotificationRegistry.ts
+- Private Map store, register() with validation (duplicate/tier/channels), Object.freeze on insert
+- getAll(), getByEventType(), getByModule(), size(), _clearForTesting() implemented
+- ADR reference corrected from 0096 to ADR-0099 per SF10 master plan
+- Unit tests: 10 tests passing (register success/multiple/duplicate/invalidTier/emptyChannels/frozen, getAll ordering, getByEventType hit/miss, getByModule filtering)
+- Verification: test ✓, check-types ✓, build ✓
 Next: SF10-T04 (API Layer)
 -->
