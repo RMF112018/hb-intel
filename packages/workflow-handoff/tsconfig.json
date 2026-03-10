@@ -13,6 +13,6 @@
       "@hbc/workflow-handoff/testing": ["./testing/index.ts"]
     }
   },
-  "include": ["src/**/*", "testing/**/*"],
+  "include": ["src/**/*", "testing/**/*", "examples/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "src/**/__stories__/**"]
 }

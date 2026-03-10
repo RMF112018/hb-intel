@@ -395,6 +395,32 @@ pnpm --filter @hbc/workflow-handoff check-types
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF08-T07 not yet started.
+SF08-T07 completed: 2026-03-10
+
+Files created:
+- packages/workflow-handoff/examples/reference-types.ts — IGoNoGoScorecardRef, IEstimatingPursuitRef, IProjectRecordRef
+- packages/workflow-handoff/examples/reference-apis.ts — DocumentApiRef, EstimatingApiRef, ScorecardApiRef, ProjectHubApiRef
+- packages/workflow-handoff/examples/bdToEstimatingHandoffConfig.ts — P0 BD→Estimating reference config
+- packages/workflow-handoff/examples/estimatingToProjectHubConfig.ts — P1 Estimating→ProjectHub reference config
+- packages/workflow-handoff/examples/versioned-record.d.ts — ambient module declaration for @hbc/versioned-record
+- packages/workflow-handoff/tsconfig.build.json — build config excluding examples/ from dist
+
+Files modified:
+- packages/workflow-handoff/tsconfig.json — added examples/**/* to include array
+- packages/workflow-handoff/package.json — build script uses tsconfig.build.json; added @hbc/versioned-record devDependency
+
+Key spec corrections applied:
+- VersionApi.createSnapshot uses ICreateSnapshotInput<T> (recordType, recordId, config, snapshot, tag, changeSummary, createdBy) — NOT the spec's non-existent contextPayload field
+- Handoff context encoded in changeSummary string instead
+- All file paths relocated from non-existent consuming packages to examples/ within @hbc/workflow-handoff
+- Cross-package imports replaced with local reference stubs
+
+Verification:
+- check-types: passed (examples/ type-checked via tsconfig.json)
+- build: passed (examples/ excluded from dist via tsconfig.build.json)
+- lint: passed (zero warnings)
+- Full workspace build: 32/32 passed
+- Architecture boundary: zero @hbc/versioned-record or @hbc/notification-intelligence imports in src/
+
 Next: SF08-T08 (Testing Strategy)
 -->

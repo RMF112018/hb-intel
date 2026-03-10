@@ -305,4 +305,17 @@ SF08-T06 completed: 2026-03-10
 - 5 lint-compliance fixes: removed unused React/IBicOwner imports, prefixed _handoffId/_isTerminal, fixed tier vs variant destructuring
 - Verification: check-types, build, lint, full workspace build (32/32) — all passed
 Next: SF08-T07 (Reference Implementations)
+
+SF08-T07 completed: 2026-03-10
+- examples/reference-types.ts: IGoNoGoScorecardRef (14 fields), IEstimatingPursuitRef (17 fields), IProjectRecordRef (10 fields)
+- examples/reference-apis.ts: DocumentApiRef, EstimatingApiRef, ScorecardApiRef, ProjectHubApiRef stub APIs
+- examples/bdToEstimatingHandoffConfig.ts: P0 BD→Estimating IHandoffConfig with correct VersionApi.createSnapshot signature
+- examples/estimatingToProjectHubConfig.ts: P1 Estimating→ProjectHub IHandoffConfig with correct VersionApi.createSnapshot signature
+- examples/versioned-record.d.ts: ambient module declaration for type-checking without pulling full source tree
+- tsconfig.build.json: build config excluding examples/ from dist output
+- tsconfig.json: includes examples/**/* for type-checking
+- Key correction: spec used non-existent contextPayload field; corrected to use real ICreateSnapshotInput signature (config, changeSummary, createdBy)
+- Verification: check-types, build, lint, full workspace build (32/32) — all passed
+- Architecture boundary: zero prohibited imports in src/
+Next: SF08-T08 (Testing Strategy)
 -->

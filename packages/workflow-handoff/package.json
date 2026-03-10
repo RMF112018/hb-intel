@@ -21,7 +21,7 @@
     "testing"
   ],
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --project tsconfig.build.json",
     "dev": "tsc --project tsconfig.json --watch",
     "check-types": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
@@ -39,6 +39,7 @@
     "@tanstack/react-query": "^5.0.0"
   },
   "devDependencies": {
+    "@hbc/versioned-record": "workspace:*",
     "@testing-library/react": "^15.0.0",
     "@testing-library/user-event": "^14.5.0",
     "@types/react": "^18.3.0",
