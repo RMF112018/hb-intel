@@ -463,6 +463,10 @@ pnpm --filter @hbc/data-seeding check-types
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF09-T02 not yet started.
+SF09-T02 completed: 2026-03-10
+- Replaced IDataSeeding.ts placeholder with full type contracts (13 types/interfaces) verbatim from spec.
+- Created src/constants.ts with 8 constants, 3 lookup maps, 2 helper functions verbatim from spec.
+- Updated src/index.ts barrel to re-export constants.
+- Verification: check-types zero errors, build zero errors, dist/src/constants.js confirmed.
 Next: SF09-T03-Parsers-and-Validation.md
 -->

@@ -226,9 +226,10 @@ packages/data-seeding/
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF09 master plan created: 2026-03-10
-Status: In progress — T01 complete, T02–T09 pending.
+Status: In progress — T01–T02 complete, T03–T09 pending.
 ADR to be created: docs/architecture/adr/0094-data-seeding-import-primitive.md
 Source spec ADR reference (ADR-0018) superseded by CLAUDE.md §7 governance.
 SF09-T01 completed: 2026-03-10 — Package scaffold with all stubs, dual entry points verified.
-Next: SF09-T02-TypeScript-Contracts.md
+SF09-T02 completed: 2026-03-10 — Full type contracts (IDataSeeding.ts) and constants.ts; barrel updated; check-types + build pass.
+Next: SF09-T03-Parsers-and-Validation.md
 -->
