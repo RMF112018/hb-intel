@@ -843,3 +843,14 @@ pnpm test -- --reporter=verbose src/components/__tests__/HbcVersionDiff.test.tsx
 pnpm test -- --reporter=verbose src/components/__tests__/HbcVersionBadge.test.tsx
 pnpm typecheck
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF06-T06 completed: 2026-03-10
+- HbcVersionDiff.tsx: full implementation (6 sub-components) replacing stub
+- HbcVersionBadge.tsx: full implementation replacing stub
+- HbcVersionDiff.css: created (both components' styles)
+- HbcVersionDiff.test.tsx: 4 tests passing
+- HbcVersionBadge.test.tsx: 6 tests passing
+- All gates green: check-types ✓, build ✓, lint ✓ (zero warnings), tests 85/85 ✓
+Next: T08 (Storybook stories)
+-->
