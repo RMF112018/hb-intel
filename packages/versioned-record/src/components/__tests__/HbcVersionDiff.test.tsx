@@ -86,4 +86,123 @@ describe('HbcVersionDiff', () => {
       expect(screen.getByText(/No differences found/)).toBeInTheDocument();
     });
   });
+
+  it('renders CharDiffDisplay for text field changes', async () => {
+    const textSnapA = { ...snapA, snapshot: { projectName: 'Hello world', totalScore: 42 } };
+    const textSnapB = { ...snapB, snapshot: { projectName: 'Hello earth', totalScore: 42 } };
+    vi.mocked(VersionApi.getSnapshot).mockImplementation(async (_rt, _id, ver) =>
+      ver === 1 ? (textSnapA as never) : (textSnapB as never)
+    );
+
+    render(
+      <HbcVersionDiff
+        recordType="bd-scorecard"
+        recordId="rec-1"
+        versionA={1}
+        versionB={2}
+        config={mockConfig}
+      />
+    );
+    await waitFor(() => {
+      // CharDiffDisplay renders <mark> elements for changes
+      const marks = document.querySelectorAll('mark');
+      expect(marks.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('displays error state when getSnapshot rejects', async () => {
+    vi.mocked(VersionApi.getSnapshot).mockRejectedValue(new Error('Network failure'));
+
+    render(
+      <HbcVersionDiff
+        recordType="bd-scorecard"
+        recordId="rec-1"
+        versionA={1}
+        versionB={2}
+        config={mockConfig}
+      />
+    );
+    await waitFor(() => {
+      expect(screen.getByText(/Failed to load diff/)).toBeInTheDocument();
+      expect(screen.getByText(/Network failure/)).toBeInTheDocument();
+    });
+  });
+
+  it('fires onDiffModeChange callback when mode is toggled', async () => {
+    const onModeChange = vi.fn();
+    render(
+      <HbcVersionDiff
+        recordType="bd-scorecard"
+        recordId="rec-1"
+        versionA={1}
+        versionB={2}
+        config={mockConfig}
+        onDiffModeChange={onModeChange}
+      />
+    );
+    await waitFor(() => screen.getByText('Unified'));
+    fireEvent.click(screen.getByText('Unified'));
+    expect(onModeChange).toHaveBeenCalledWith('unified');
+  });
+
+  it('renders added field with dash in before column', async () => {
+    const addSnapA = { ...snapA, snapshot: { projectName: 'Alpha' } };
+    const addSnapB = { ...snapB, snapshot: { projectName: 'Alpha', description: 'New field' } };
+    vi.mocked(VersionApi.getSnapshot).mockImplementation(async (_rt, _id, ver) =>
+      ver === 1 ? (addSnapA as never) : (addSnapB as never)
+    );
+
+    render(
+      <HbcVersionDiff
+        recordType="bd-scorecard"
+        recordId="rec-1"
+        versionA={1}
+        versionB={2}
+        config={mockConfig}
+      />
+    );
+    await waitFor(() => {
+      // Added fields show a dash in the "before" column
+      expect(screen.getByText('—')).toBeInTheDocument();
+    });
+  });
+
+  it('renders removed field with dash in after column', async () => {
+    const remSnapA = { ...snapA, snapshot: { projectName: 'Alpha', legacy: 'old' } };
+    const remSnapB = { ...snapB, snapshot: { projectName: 'Alpha' } };
+    vi.mocked(VersionApi.getSnapshot).mockImplementation(async (_rt, _id, ver) =>
+      ver === 1 ? (remSnapA as never) : (remSnapB as never)
+    );
+
+    render(
+      <HbcVersionDiff
+        recordType="bd-scorecard"
+        recordId="rec-1"
+        versionA={1}
+        versionB={2}
+        config={mockConfig}
+      />
+    );
+    await waitFor(() => {
+      // For removed fields there should be 2 dashes (one in the after column for removed,
+      // and possibly one in the added row's before column)
+      const dashes = screen.getAllByText('—');
+      expect(dashes.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  it('toggles "Show unchanged fields" button text on click', async () => {
+    render(
+      <HbcVersionDiff
+        recordType="bd-scorecard"
+        recordId="rec-1"
+        versionA={1}
+        versionB={2}
+        config={mockConfig}
+      />
+    );
+    await waitFor(() => screen.getByText('Show unchanged fields'));
+    fireEvent.click(screen.getByText('Show unchanged fields'));
+    expect(screen.getByText('Hide unchanged fields')).toBeInTheDocument();
+  });
 });

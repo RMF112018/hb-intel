@@ -104,4 +104,40 @@ describe('useVersionHistory', () => {
     await act(async () => result.current.refresh());
     await waitFor(() => expect(result.current.metadata).toHaveLength(2));
   });
+
+  it('does not call API when recordType is empty', async () => {
+    const { result } = renderHook(() =>
+      useVersionHistory('', 'rec-1', mockConfig)
+    );
+
+    // Should not be loading since it short-circuits
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(VersionApi.getMetadataList).not.toHaveBeenCalled();
+    expect(result.current.metadata).toHaveLength(0);
+  });
+
+  it('wraps non-Error rejection in Error', async () => {
+    vi.mocked(VersionApi.getMetadataList).mockRejectedValue('string error');
+
+    const { result } = renderHook(() =>
+      useVersionHistory('bd-scorecard', 'rec-1', mockConfig)
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error?.message).toBe('string error');
+  });
+
+  it('hasSuperseded is true when metadata contains superseded tags', async () => {
+    vi.mocked(VersionApi.getMetadataList).mockResolvedValue([
+      makeMetadata(1, 'approved'),
+      makeMetadata(2, 'superseded'),
+    ]);
+
+    const { result } = renderHook(() =>
+      useVersionHistory('bd-scorecard', 'rec-1', mockConfig)
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.hasSuperseded).toBe(true);
+  });
 });

@@ -38,4 +38,23 @@ describe('useVersionSnapshot', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.snapshot).toBeNull();
   });
+
+  it('sets error state when getSnapshotById rejects with Error', async () => {
+    vi.mocked(VersionApi.getSnapshotById).mockRejectedValue(new Error('Snapshot not found'));
+
+    const { result } = renderHook(() => useVersionSnapshot('snap-fail'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error?.message).toBe('Snapshot not found');
+    expect(result.current.snapshot).toBeNull();
+  });
+
+  it('wraps non-Error rejection in Error', async () => {
+    vi.mocked(VersionApi.getSnapshotById).mockRejectedValue('string error');
+
+    const { result } = renderHook(() => useVersionSnapshot('snap-fail'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error?.message).toBe('string error');
+  });
 });

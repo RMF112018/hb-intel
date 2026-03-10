@@ -12,6 +12,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     passWithNoTests: true,
+    exclude: ['e2e/**', 'node_modules/**'],
     setupFiles: ['./src/test/setup.ts'],
     coverage: {
       provider: 'v8',
@@ -27,6 +28,7 @@ export default defineConfig({
         '**/*.test.ts',
         '**/*.test.tsx',
         '**/*.stories.tsx',
+        'src/components/__storybook-types.ts',
       ],
       thresholds: {
         lines: 95,

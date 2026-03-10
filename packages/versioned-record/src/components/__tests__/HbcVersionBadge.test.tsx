@@ -31,6 +31,16 @@ describe('HbcVersionBadge', () => {
     expect(handler).toHaveBeenCalledOnce();
   });
 
+  it('renders correct aria-label without tag', () => {
+    render(<HbcVersionBadge currentVersion={3} onClick={vi.fn()} />);
+    expect(screen.getByLabelText('Version 3. Click to view history.')).toBeInTheDocument();
+  });
+
+  it('renders correct aria-label with tag', () => {
+    render(<HbcVersionBadge currentVersion={3} currentTag="approved" onClick={vi.fn()} />);
+    expect(screen.getByLabelText('Version 3, Approved. Click to view history.')).toBeInTheDocument();
+  });
+
   it('renders all tag states without error', () => {
     const tags = ['draft', 'submitted', 'approved', 'rejected', 'archived', 'handoff', 'superseded'] as const;
     for (const tag of tags) {

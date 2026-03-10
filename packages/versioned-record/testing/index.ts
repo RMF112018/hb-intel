@@ -11,3 +11,4 @@ export {
 } from './mockVersionedRecordStates';
 export { mockUseVersionHistory } from './mockUseVersionHistory';
 export { createVersionedRecordWrapper } from './createVersionedRecordWrapper';
+export type { VersionedRecordWrapperOptions } from './createVersionedRecordWrapper';

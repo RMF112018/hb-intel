@@ -142,4 +142,173 @@ describe('HbcVersionHistory', () => {
       expect(screen.getByText('Show archived versions')).toBeInTheDocument();
     });
   });
+
+  it('shows empty history message when metadata is empty', async () => {
+    vi.mocked(VersionApi.getMetadataList).mockResolvedValue([]);
+
+    renderComponent();
+    await waitFor(() => {
+      expect(screen.getByText('No versions recorded yet.')).toBeInTheDocument();
+    });
+  });
+
+  it('fires onVersionSelect callback when entry is clicked', async () => {
+    const onVersionSelect = vi.fn();
+    renderComponent({ onVersionSelect });
+    await waitFor(() => screen.getByText('v2'));
+
+    fireEvent.click(screen.getByLabelText('View version 2'));
+    expect(onVersionSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ snapshotId: 'snap-2', version: 2 })
+    );
+  });
+
+  it('shows error state with retry button when API fails', async () => {
+    vi.mocked(VersionApi.getMetadataList).mockRejectedValue(new Error('Network error'));
+
+    renderComponent();
+    await waitFor(() => {
+      expect(screen.getByText(/Failed to load version history/)).toBeInTheDocument();
+      expect(screen.getByText('Retry')).toBeInTheDocument();
+    });
+  });
+
+  it('shows rollback error in modal when restoreSnapshot fails', async () => {
+    vi.mocked(VersionApi.restoreSnapshot).mockRejectedValue(new Error('Restore failed'));
+
+    renderComponent({ allowRollback: true });
+    await waitFor(() => screen.getAllByText(/Restore to v/));
+
+    fireEvent.click(screen.getAllByText(/Restore to v/)[0]!);
+
+    const dialog = screen.getByRole('dialog');
+    const confirmButton = dialog.querySelector('.hbc-rollback-modal__confirm') as HTMLElement;
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Restore failed/)).toBeInTheDocument();
+    });
+  });
+
+  it('displays "1 version" singular when only one entry', async () => {
+    vi.mocked(VersionApi.getMetadataList).mockResolvedValue([
+      {
+        snapshotId: 'snap-1',
+        version: 1,
+        tag: 'draft',
+        createdAt: '2026-01-10T09:00:00Z',
+        createdBy: { userId: 'u1', displayName: 'Alice', role: 'PM' },
+        changeSummary: 'Only version',
+      },
+    ]);
+
+    renderComponent();
+    await waitFor(() => {
+      expect(screen.getByText('1 version')).toBeInTheDocument();
+    });
+  });
+
+  it('displays change summary when present', async () => {
+    renderComponent();
+    await waitFor(() => {
+      expect(screen.getByText('Approved for submission')).toBeInTheDocument();
+    });
+  });
+
+  it('hides rollback CTA for superseded entries', async () => {
+    vi.mocked(VersionApi.getMetadataList).mockResolvedValue([
+      {
+        snapshotId: 'snap-1',
+        version: 1,
+        tag: 'superseded',
+        createdAt: '2026-01-01T00:00:00Z',
+        createdBy: { userId: 'u1', displayName: 'Alice', role: 'PM' },
+        changeSummary: '',
+      },
+    ]);
+
+    renderComponent({ allowRollback: true });
+    await waitFor(() => screen.getByText('Show archived versions'));
+    // Click to reveal superseded entries
+    fireEvent.click(screen.getByText('Show archived versions'));
+    // The superseded entry should NOT have a rollback CTA
+    expect(screen.queryByText(/Restore to v/)).not.toBeInTheDocument();
+  });
+
+  it('formatRelativeTime renders correct labels for various offsets', async () => {
+    // Use standard tier so relative timestamps are displayed (expert shows absolute)
+    vi.mocked(useComplexity).mockReturnValue({ tier: 'standard' } as never);
+    const now = Date.now();
+
+    vi.mocked(VersionApi.getMetadataList).mockResolvedValue([
+      {
+        snapshotId: 'snap-sec',
+        version: 7,
+        tag: 'draft',
+        createdAt: new Date(now - 30 * 1000).toISOString(), // 30 seconds ago
+        createdBy: { userId: 'u1', displayName: 'Alice', role: 'PM' },
+        changeSummary: '',
+      },
+      {
+        snapshotId: 'snap-min',
+        version: 6,
+        tag: 'draft',
+        createdAt: new Date(now - 5 * 60 * 1000).toISOString(), // 5 minutes ago
+        createdBy: { userId: 'u1', displayName: 'Alice', role: 'PM' },
+        changeSummary: '',
+      },
+      {
+        snapshotId: 'snap-hour',
+        version: 5,
+        tag: 'draft',
+        createdAt: new Date(now - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
+        createdBy: { userId: 'u1', displayName: 'Alice', role: 'PM' },
+        changeSummary: '',
+      },
+      {
+        snapshotId: 'snap-day',
+        version: 4,
+        tag: 'draft',
+        createdAt: new Date(now - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+        createdBy: { userId: 'u1', displayName: 'Alice', role: 'PM' },
+        changeSummary: '',
+      },
+      {
+        snapshotId: 'snap-week',
+        version: 3,
+        tag: 'draft',
+        createdAt: new Date(now - 2 * 7 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks ago
+        createdBy: { userId: 'u1', displayName: 'Alice', role: 'PM' },
+        changeSummary: '',
+      },
+      {
+        snapshotId: 'snap-month',
+        version: 2,
+        tag: 'draft',
+        createdAt: new Date(now - 60 * 24 * 60 * 60 * 1000).toISOString(), // ~2 months ago
+        createdBy: { userId: 'u1', displayName: 'Alice', role: 'PM' },
+        changeSummary: '',
+      },
+      {
+        snapshotId: 'snap-year',
+        version: 1,
+        tag: 'draft',
+        createdAt: new Date(now - 400 * 24 * 60 * 60 * 1000).toISOString(), // > 1 year ago
+        createdBy: { userId: 'u1', displayName: 'Alice', role: 'PM' },
+        changeSummary: '',
+      },
+    ]);
+
+    renderComponent();
+    await waitFor(() => screen.getByText('v7'));
+
+    // Verify that relative time labels are present
+    expect(screen.getByText('just now')).toBeInTheDocument();
+    expect(screen.getByText('5m ago')).toBeInTheDocument();
+    expect(screen.getByText('3h ago')).toBeInTheDocument();
+    expect(screen.getByText('3d ago')).toBeInTheDocument();
+    expect(screen.getByText('2w ago')).toBeInTheDocument();
+    expect(screen.getByText('2mo ago')).toBeInTheDocument();
+    expect(screen.getByText('1y ago')).toBeInTheDocument();
+  });
 });

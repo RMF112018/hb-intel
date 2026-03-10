@@ -43,6 +43,19 @@ describe('flattenRecord', () => {
     expect(flat.get('team[0].name')).toBe('Alice');
     expect(flat.get('team[1].name')).toBe('Bob');
   });
+
+  it('handles arrays with null and undefined values', () => {
+    const flat = flattenRecord({ items: [null, undefined, 'value'] });
+    expect(flat.get('items[0]')).toBeNull();
+    expect(flat.get('items[1]')).toBeUndefined();
+    expect(flat.get('items[2]')).toBe('value');
+  });
+
+  it('handles nested arrays inside arrays', () => {
+    const flat = flattenRecord({ matrix: [[1, 2], [3, 4]] });
+    expect(flat.get('matrix[0][0]')).toBe(1);
+    expect(flat.get('matrix[1][1]')).toBe(4);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -266,5 +279,21 @@ describe('computeCharDiff', () => {
     // Should have: equal('a'), removed('b'), added('x'), equal('c')
     const types = tokens.map((t) => t.type);
     expect(types).toEqual(['equal', 'removed', 'added', 'equal']);
+  });
+
+  it('handles empty string comparison', () => {
+    const tokens = computeCharDiff('', 'abc');
+    expect(tokens.length).toBeGreaterThan(0);
+    const addedText = tokens.filter((t) => t.type === 'added').map((t) => t.text).join('');
+    expect(addedText).toBe('abc');
+  });
+
+  it('falls back to two-token when both strings exceed max length', () => {
+    const long1 = 'a'.repeat(6000);
+    const long2 = 'b'.repeat(6000);
+    const tokens = computeCharDiff(long1, long2);
+    expect(tokens).toHaveLength(2);
+    expect(tokens[0]!.type).toBe('removed');
+    expect(tokens[1]!.type).toBe('added');
   });
 });

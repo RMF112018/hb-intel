@@ -1,16 +1,19 @@
 // src/utils/__tests__/versionUtils.test.ts
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
+  isApprovedTag,
+  isSupersededTag,
   isVisibleByDefault,
   filterMetadataForDisplay,
   serializeSnapshot,
   requiresFileStorage,
   getSnapshotIdsToSupersede,
   nextVersionNumber,
+  defaultChangeSummary,
   VERSION_TAG_LABELS,
   LARGE_SNAPSHOT_THRESHOLD_BYTES,
 } from '../versionUtils';
-import type { IVersionMetadata } from '../../types';
+import type { IVersionMetadata, IVersionedRecordConfig } from '../../types';
 
 const makeMetadata = (
   version: number,
@@ -24,6 +27,40 @@ const makeMetadata = (
   changeSummary: `v${version}`,
   tag,
 });
+
+// ---------------------------------------------------------------------------
+// isApprovedTag
+// ---------------------------------------------------------------------------
+
+describe('isApprovedTag', () => {
+  it('returns true for approved', () => {
+    expect(isApprovedTag('approved')).toBe(true);
+  });
+  it('returns false for other tags', () => {
+    expect(isApprovedTag('draft')).toBe(false);
+    expect(isApprovedTag('superseded')).toBe(false);
+    expect(isApprovedTag('submitted')).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// isSupersededTag
+// ---------------------------------------------------------------------------
+
+describe('isSupersededTag', () => {
+  it('returns true for superseded', () => {
+    expect(isSupersededTag('superseded')).toBe(true);
+  });
+  it('returns false for other tags', () => {
+    expect(isSupersededTag('approved')).toBe(false);
+    expect(isSupersededTag('draft')).toBe(false);
+    expect(isSupersededTag('archived')).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// isVisibleByDefault
+// ---------------------------------------------------------------------------
 
 describe('isVisibleByDefault', () => {
   it('returns true for draft, submitted, approved, rejected, handoff', () => {
@@ -107,5 +144,43 @@ describe('VERSION_TAG_LABELS', () => {
     for (const tag of tags) {
       expect(VERSION_TAG_LABELS[tag]).toBeTruthy();
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// defaultChangeSummary
+// ---------------------------------------------------------------------------
+
+describe('defaultChangeSummary', () => {
+  it('uses custom generator when provided', () => {
+    const config = {
+      recordType: 'bd-scorecard',
+      triggers: [],
+      getStakeholders: () => [],
+      generateChangeSummary: vi.fn().mockReturnValue('Custom summary'),
+    } as unknown as IVersionedRecordConfig<{ score: number }>;
+
+    expect(defaultChangeSummary(config, { score: 1 }, { score: 2 })).toBe('Custom summary');
+    expect(config.generateChangeSummary).toHaveBeenCalledWith({ score: 1 }, { score: 2 });
+  });
+
+  it('returns "Initial version" when previous is null and no generator', () => {
+    const config = {
+      recordType: 'bd-scorecard',
+      triggers: [],
+      getStakeholders: () => [],
+    } as unknown as IVersionedRecordConfig<{ score: number }>;
+
+    expect(defaultChangeSummary(config, null, { score: 42 })).toBe('Initial version');
+  });
+
+  it('returns generic message when previous is non-null and no generator', () => {
+    const config = {
+      recordType: 'bd-scorecard',
+      triggers: [],
+      getStakeholders: () => [],
+    } as unknown as IVersionedRecordConfig<{ score: number }>;
+
+    expect(defaultChangeSummary(config, { score: 1 }, { score: 2 })).toBe('Updated bd-scorecard');
   });
 });
