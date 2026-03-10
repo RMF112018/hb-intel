@@ -64,7 +64,9 @@
       "@hbc/step-wizard": ["packages/step-wizard/src/index.ts"],
       "@hbc/step-wizard/*": ["packages/step-wizard/src/*"],
       "@hbc/versioned-record": ["packages/versioned-record/src/index.ts"],
-      "@hbc/versioned-record/*": ["packages/versioned-record/src/*"]
+      "@hbc/versioned-record/*": ["packages/versioned-record/src/*"],
+      "@hbc/field-annotations": ["packages/field-annotations/src/index.ts"],
+      "@hbc/field-annotations/*": ["packages/field-annotations/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"]

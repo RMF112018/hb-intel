@@ -339,6 +339,13 @@ node -e "import('@hbc/field-annotations/testing').then(m => console.log('testing
 Expected: all commands exit 0. Test run reports "No test files found" or similar (not an error with `passWithNoTests: true`).
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF07-T01 not yet started.
+SF07-T01 completed: 2026-03-10
+- Created 31 files in packages/field-annotations/ (src, testing, config, stubs)
+- Four plan corrections applied: exports → dist/src/, include → ["src/**/*", "testing/**/*"], resolve.alias only, react peerDeps only
+- .eslintrc.cjs added (matches @hbc/complexity pattern)
+- Registered in tsconfig.base.json (2 path aliases after @hbc/versioned-record)
+- DevDep versions aligned with @hbc/complexity catalog
+- All gates pass: build ✓, check-types ✓, test (7 files, 0 tests, passWithNoTests) ✓, lint ✓
+- Full workspace: build 31/31 ✓, check-types 39/39 ✓
 Next: SF07-T02 (TypeScript Contracts)
 -->
