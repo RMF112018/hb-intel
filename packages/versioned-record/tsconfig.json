@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "paths": {
+      "@hbc/notification-intelligence": ["./src/__mocks__/notification-intelligence.ts"],
+      "@hbc/ui-kit": ["../ui-kit/src/index.ts"],
+      "@hbc/ui-kit/app-shell": ["../ui-kit/src/app-shell.ts"],
+      "@hbc/complexity": ["../complexity/src/index.ts"],
+      "@hbc/versioned-record/testing": ["./testing/index.ts"]
+    }
+  },
+  "include": ["src/**/*", "testing/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"]
+}

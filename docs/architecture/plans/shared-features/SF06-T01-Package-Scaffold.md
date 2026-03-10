@@ -267,6 +267,28 @@ export { mockUseVersionHistory } from './mockUseVersionHistory';
 export { createVersionedRecordWrapper } from './createVersionedRecordWrapper';
 ```
 
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF06-T01 completed: 2026-03-10
+
+Adaptations from spec (documented in implementation plan):
+1. "extends": "../../tsconfig.base.json" (no @hbc/tsconfig package exists)
+2. Removed @hbc/notification-intelligence dep; added src/__mocks__/notification-intelligence.ts mock
+3. Aligned devDep versions with step-wizard: vitest ^3.2.4, @vitest/coverage-v8 ^3.2.4, vite ^6.0.0
+4. Added missing devDeps: @vitejs/plugin-react, jsdom, vite
+5. Added check-types script alongside typecheck
+6. Added fileURLToPath ESM __dirname pattern in vitest.config.ts
+7. Added .eslintrc.cjs (required for lint to find config)
+8. tsconfig paths + vitest aliases for mock resolution
+
+Verification:
+- build: zero errors (30/30 monorepo tasks)
+- check-types: zero errors (38/38 monorepo tasks)
+- lint: zero errors, zero warnings
+- test: 0 tests, passWithNoTests — no error
+
+All success criteria satisfied. Package scaffold ready for T02–T08.
+-->
+
 ---
 
 ## Stub File Templates
