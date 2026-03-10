@@ -59,6 +59,29 @@ module.exports = {
         '@hb-intel/hbc/require-feature-registration-contract': 'error',
       },
     },
+    {
+      files: [
+        'packages/*/src/**/*.ts',
+        'packages/*/src/**/*.tsx',
+        'apps/**/*.ts',
+        'apps/**/*.tsx',
+        'backend/**/*.ts',
+      ],
+      excludedFiles: [
+        '**/*.test.ts',
+        '**/*.test.tsx',
+        '**/*.spec.ts',
+        '**/*.spec.tsx',
+        '**/*.stories.tsx',
+        'tools/mocks/**',
+        '**/testing/**',
+      ],
+      rules: {
+        // PH7.13 T02-D03 — Error on stub throw patterns in source files.
+        // Use // stub-approved: <reason> above the throw to exempt intentional stubs.
+        '@hb-intel/hbc/no-stub-implementations': 'error',
+      },
+    },
   ],
   ignorePatterns: ['dist/', 'node_modules/', 'coverage/', '*.js', '*.cjs'],
 };

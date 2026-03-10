@@ -220,6 +220,11 @@ pnpm turbo run lint
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-PH7.13-T02 not yet started.
+PH7.13-T02 completed: 2026-03-10
+- Created: packages/eslint-plugin-hbc/src/rules/no-stub-implementations.js (rule implementation)
+- Edited: packages/eslint-plugin-hbc/src/index.js (rule registration, header table updated to 12 rules)
+- Edited: .eslintrc.base.js (added second overrides entry for stub detection in source files)
+- Verification: All 5 checks passed (file exists, rule registered, stub fires error, escape hatch suppresses, full lint gate zero errors)
+- Full lint gate: 30/30 tasks passed, 0 errors, warnings only (pre-existing)
 Next: PH7.13-T03 (CI Grep Scan)
 -->

@@ -2,7 +2,7 @@
  * @hb-intel/eslint-plugin-hbc — ESLint plugin for HBC Design System enforcement
  * PH4B.11 §4b.11.1 — Component Consumption Enforcement
  *
- * Implements 11 rules enforcing binding decisions D-01 through D-10:
+ * Implements 12 rules enforcing binding decisions D-01 through D-10 + PH7.13:
  *
  * | Rule                          | Decision | Severity (apps) |
  * |-------------------------------|----------|-----------------|
@@ -13,6 +13,7 @@
  * | no-manual-nav-active          | D-04     | error           |
  * | no-inline-feedback            | D-08     | warn            |
  * | no-raw-form-elements          | D-07     | error           |
+ * | no-stub-implementations       | PH7.13   | error           |
  * | require-layout-variant        | D-02     | error           |
  * | no-page-breakpoints           | D-09     | warn            |
  * | no-direct-spinner             | D-06     | warn            |
@@ -33,6 +34,7 @@ module.exports = {
     'no-manual-nav-active': require('./rules/no-manual-nav-active'),
     'no-inline-feedback': require('./rules/no-inline-feedback'),
     'no-raw-form-elements': require('./rules/no-raw-form-elements'),
+    'no-stub-implementations': require('./rules/no-stub-implementations'),
     'require-layout-variant': require('./rules/require-layout-variant'),
     'no-page-breakpoints': require('./rules/no-page-breakpoints'),
     'no-direct-spinner': require('./rules/no-direct-spinner'),
