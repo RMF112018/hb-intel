@@ -323,6 +323,13 @@ console.log('dismiss:', typeof NotificationApi.dismiss);
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF10-T04 not yet started.
+SF10-T04 completed: 2026-03-10
+- NotificationApi: 5 methods (send, getCenter, markRead, markAllRead, dismiss) + fetchJSON helper
+- PreferencesApi: 2 methods (getPreferences, updatePreferences) + fetchJSON helper
+- send() validates eventType against NotificationRegistry before dispatching
+- ADR reference corrected to ADR-0099 (per SF10 master plan)
+- 7 NotificationApi tests + 2 PreferencesApi tests = 9 API tests passing
+- All 19 tests passing (registry + API), check-types clean, build clean
+Documentation updated: SF10-Notification-Intelligence.md progress notes
 Next: SF10-T05 (React Hooks)
 -->

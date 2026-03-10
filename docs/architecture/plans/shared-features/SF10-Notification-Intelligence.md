@@ -165,7 +165,8 @@ ADR corrected to ADR-0099 (initial plan used ADR-0096, which conflicts with fiel
 SF10-T01 completed: 2026-03-10 — Package scaffold (27 files), dual entry points, all barrel stubs compile-safe.
 SF10-T02 completed: 2026-03-10 — Full TypeScript contracts (INotificationEvent, INotificationRegistration, INotificationPreferences, NotificationSendPayload, INotificationCenterResult, INotificationCenterFilter). All T01 stubs updated for compile safety.
 SF10-T03 completed: 2026-03-10 — NotificationRegistry singleton (register/getAll/getByEventType/getByModule/size/_clearForTesting). 10 unit tests passing. ADR ref corrected to ADR-0099.
-Status: T03 done — ready for T04 implementation.
+SF10-T04 completed: 2026-03-10 — NotificationApi (send/getCenter/markRead/markAllRead/dismiss) + PreferencesApi (getPreferences/updatePreferences). 9 API tests + 10 registry tests = 19 passing. ADR ref ADR-0099.
+Status: T04 done — ready for T05 implementation (React hooks).
 Pending: PH7.12 sign-off (ADR-0090) before feature-expansion phases begin.
-Next: SF10-T04 (API Layer)
+Next: SF10-T05 (React Hooks)
 -->
