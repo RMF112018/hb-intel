@@ -84,7 +84,8 @@
       "Bash(mv:*)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=8192\" pnpm:*)",
       "Bash(kill %1:*)",
-      "Bash(gh:*)"
+      "Bash(gh:*)",
+      "Bash(do python3:*)"
     ]
   },
   "enabledPlugins": {

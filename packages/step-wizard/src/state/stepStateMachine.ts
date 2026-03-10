@@ -7,12 +7,10 @@ import type {
   StepOrderMode,
 } from '../types/IStepWizard';
 import {
-  mergeStepStatus,
   computeIsComplete,
   computePercentComplete,
   resolveUnlockedSteps,
   isTerminalStatus,
-  STATUS_RANK,
   type IStepWizardDraft,
 } from './draftPayload';
 
@@ -84,7 +82,7 @@ export function buildWizardState<T>(
 
 function deriveActiveStepId(
   steps: IStepRuntimeEntry[],
-  orderMode: StepOrderMode
+  _orderMode: StepOrderMode
 ): string | null {
   // Prefer in-progress step
   const inProgress = steps.find((s) => s.status === 'in-progress' && s.isUnlocked);
@@ -161,7 +159,7 @@ export function guardMarkComplete<T>(
  * - In sequential-with-jumps: step is not unlocked (not yet visited in order) (D-01)
  * - In sequential: step is not the current active step (no jumps)
  */
-export function guardGoTo<T>(
+export function guardGoTo(
   targetStepId: string,
   activeStepId: string | null,
   unlockedStepIds: Set<string>,

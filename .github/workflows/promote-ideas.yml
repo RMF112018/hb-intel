@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   promote-ideas:
+    if: false # Disabled until scripts/promote-ideas.mjs is implemented
     runs-on: ubuntu-latest
 
     steps:

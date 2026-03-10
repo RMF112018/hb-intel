@@ -3,7 +3,7 @@
 
 import type { IPersona } from '@hbc/auth/dev';
 import { mergeClasses, makeStyles } from '@griffel/react';
-import { HbcStatusBadge } from '../../../ui-kit/dist/index.js';
+import { HbcStatusBadge } from '@hbc/ui-kit';
 
 export interface PersonaCardProps {
   persona: IPersona;

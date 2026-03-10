@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { HbcStepWizard } from '../HbcStepWizard';
-import { mockWizardStates } from '@hbc/step-wizard/testing';
-import type { IStepWizardConfig, IStepWizardState, IUseStepWizardReturn } from '../../types/IStepWizard';
+import type { IStepWizardConfig } from '../../types/IStepWizard';
 
 // ── Story Helpers ────────────────────────────────────────────────────────────
 

@@ -60,6 +60,7 @@ export default defineWorkspace([
     resolve: {
       alias: {
         '@hbc/complexity': resolve(__dirname, './packages/complexity/src/index.ts'),
+        '@hbc/ui-kit': resolve(__dirname, './packages/ui-kit/src/index.ts'),
       },
     },
   },

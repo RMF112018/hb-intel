@@ -7,7 +7,7 @@ import { useState } from 'react';
 import type { LayoutTab } from '@hbc/models';
 import { PERSONA_REGISTRY } from '@hbc/auth/dev';
 import { makeStyles } from '@griffel/react';
-import { HbcButton, HbcStatusBadge, HbcTabs } from '../../../ui-kit/dist/index.js';
+import { HbcButton, HbcStatusBadge, HbcTabs } from '@hbc/ui-kit';
 import { PersonaCard } from './PersonaCard.js';
 import { useDevAuthBypass } from './useDevAuthBypass.js';
 import './devToolbarTokens.css';
