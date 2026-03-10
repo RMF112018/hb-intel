@@ -148,6 +148,20 @@ pnpm turbo run lint
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-PH7.13-T04 not yet started.
+PH7.13-T04 completed: 2026-03-10
+
+Edits applied:
+- S-01: Added file-level `// stub-approved:` comment to `backend/functions/src/functions/acknowledgments/stubs.ts` (line 4)
+- S-02: Added `// stub-approved:` comment above `executeServerAggregation` in `packages/bic-next-move/src/registry/BicModuleRegistry.ts` (line 203)
+- S-06: Replaced stub echo with `# stub-approved:` YAML comment + updated echo in `.github/workflows/cd.yml` (line 120)
+
+No-action confirmations:
+- S-03/04/05: `tools/mocks/` directory has no ESLint config — inherently exempt from linting (D-06 confirmed)
+
+Verification results:
+- All three `stub-approved` markers confirmed via grep
+- CI grep simulation returned empty (zero unapproved stubs)
+- `pnpm turbo run lint`: 30/30 tasks passed, 0 errors
+
 Next: PH7.13-T05 (scan-stubs Developer Tool)
 -->

@@ -117,4 +117,6 @@ jobs:
       #   3. Upload .sppkg to SharePoint App Catalog via CLI for Microsoft 365
       #   4. Deploy/retract as needed
       # Blocked on: .sppkg packaging toolchain (non-trivial, deferred)
-      - run: echo "SPFx deploy is stubbed — see TODO comments"
+      # stub-approved: SPFx deployment pending Vite-to-.sppkg packaging pipeline (PH8 CI/CD phase).
+      # The deploy job is intentionally disabled (if: false) until PH8 establishes the build pipeline.
+      - run: echo "SPFx deploy is not yet active — see PH8 CI/CD plan."

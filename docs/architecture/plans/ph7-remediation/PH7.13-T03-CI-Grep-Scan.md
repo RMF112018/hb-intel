@@ -163,5 +163,11 @@ python3 -c "import yaml; yaml.safe_load(open('.github/workflows/ci.yml'))" && ec
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 PH7.13-T03 not yet started.
+PH7.13-T03 completed: 2026-03-10
+- Inserted "Scan for unapproved stub patterns" step in .github/workflows/ci.yml
+- Step placed immediately after the Lint step in lint-and-typecheck job
+- Full grep block with all exclusions (D-06) and stub-approved: filter intact
+- YAML validity confirmed
+- Local simulation scan executed
 Next: PH7.13-T04 (Stub Inventory Remediation)
 -->

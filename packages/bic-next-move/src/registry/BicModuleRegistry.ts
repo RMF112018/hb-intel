@@ -200,6 +200,9 @@ export async function executeBicFanOut(userId: string): Promise<IBicFanOutResult
  *
  * @internal — do not call directly; useBicMyItems routes via BIC_AGGREGATION_MODE
  */
+// stub-approved: server-side BIC aggregation deferred per ADR-0095 D-07.
+// This endpoint will aggregate BIC state across modules via the backend aggregation
+// service. Implement when the backend aggregation endpoint is activated in PH8 CI/CD phase.
 export async function executeServerAggregation(
   _userId: string
 ): Promise<IBicFanOutResult> {

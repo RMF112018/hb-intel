@@ -1,6 +1,10 @@
 import type { ILogger } from '../../utils/logger.js';
 import type { IAcknowledgmentListItem } from '../../services/acknowledgment-service.js';
 
+// stub-approved: intentional BIC-completion and notification stubs pending SF04
+// full platform integration. Implement when @hbc/acknowledgment T07 is activated
+// and the Azure Functions trigger pipeline is established.
+
 /**
  * SF04-T06 D-06: Trigger BIC (Business Intelligence/Completion) side-effects
  * when all required parties have acknowledged.
