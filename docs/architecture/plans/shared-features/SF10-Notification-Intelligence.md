@@ -166,7 +166,8 @@ SF10-T01 completed: 2026-03-10 — Package scaffold (27 files), dual entry point
 SF10-T02 completed: 2026-03-10 — Full TypeScript contracts (INotificationEvent, INotificationRegistration, INotificationPreferences, NotificationSendPayload, INotificationCenterResult, INotificationCenterFilter). All T01 stubs updated for compile safety.
 SF10-T03 completed: 2026-03-10 — NotificationRegistry singleton (register/getAll/getByEventType/getByModule/size/_clearForTesting). 10 unit tests passing. ADR ref corrected to ADR-0099.
 SF10-T04 completed: 2026-03-10 — NotificationApi (send/getCenter/markRead/markAllRead/dismiss) + PreferencesApi (getPreferences/updatePreferences). 9 API tests + 10 registry tests = 19 passing. ADR ref ADR-0099.
-Status: T04 done — ready for T05 implementation (React hooks).
+SF10-T05 completed: 2026-03-10 — React hooks (useNotificationCenter with useInfiniteQuery + 3 mutations, useNotificationBadge with 60s polling, useNotificationPreferences with optimistic update/rollback). Query key factory (notificationKeys). All 19 existing tests pass; check-types zero errors; build zero errors.
+Status: T05 done — ready for T06 implementation (Core Components).
 Pending: PH7.12 sign-off (ADR-0090) before feature-expansion phases begin.
-Next: SF10-T05 (React Hooks)
+Next: SF10-T06 (Core Components — HbcNotificationCenter + HbcNotificationBadge)
 -->

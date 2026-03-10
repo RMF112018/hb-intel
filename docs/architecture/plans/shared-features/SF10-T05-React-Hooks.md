@@ -296,6 +296,14 @@ const pkg = require('./packages/notification-intelligence/dist/index.js');
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF10-T05 not yet started.
+SF10-T05 completed: 2026-03-10
+Files created/rewritten:
+  - src/hooks/queryKeys.ts — stable query key factory (notificationKeys.all/center/badge/preferences)
+  - src/hooks/useNotificationCenter.ts — useInfiniteQuery + markRead/dismiss/markAllRead mutations
+  - src/hooks/useNotificationBadge.ts — useQuery with 60s polling, Immediate-only unread count
+  - src/hooks/useNotificationPreferences.ts — useQuery + useMutation with optimistic update/rollback
+  - src/hooks/index.ts — barrel updated with notificationKeys export
+Verification: check-types ✓ | test 19/19 pass ✓ | build ✓
+Removed unused InfiniteData import from useNotificationCenter (was in plan template but not referenced in function body).
 Next: SF10-T06 (Core Components — HbcNotificationCenter + HbcNotificationBadge)
 -->

@@ -63,6 +63,10 @@
 | `docs/architecture/adr/ADR-0100-smart-empty-state-platform-primitive.md` | **Permanent Decision Rationale** | SF11 smart-empty-state platform primitive; 10 locked decisions (D-01–D-10); to be authored when SF11 enters active development |
 | SF12 shared-feature plans (10 files: `SF12-Session-State.md` through `SF12-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/session-state` planning family authored 2026-03-10; ADR-0101 reserved; pending PH7.12 sign-off (ADR-0090) before implementation |
 | `docs/architecture/adr/ADR-0101-session-state-offline-persistence.md` | **Permanent Decision Rationale** | SF12 session-state offline persistence primitive; 10 locked decisions (D-01–D-10); to be authored when SF12 enters active development |
+| SF13 shared-feature plans (10 files: `SF13-Project-Canvas.md` through `SF13-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/project-canvas` planning family authored 2026-03-10; ADR-0102 reserved; pending PH7.12 sign-off (ADR-0090) before implementation |
+| `docs/architecture/adr/ADR-0102-project-canvas-role-based-dashboard.md` | **Permanent Decision Rationale** | SF13 project-canvas role-based dashboard primitive; 10 locked decisions (D-01–D-10); to be authored when SF13 enters active development |
+| SF14 shared-feature plans (10 files: `SF14-Related-Items.md` through `SF14-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/related-items` planning family authored 2026-03-10; ADR-0103 reserved; pending PH7.12 sign-off (ADR-0090) before implementation |
+| `docs/architecture/adr/ADR-0103-related-items-unified-work-graph.md` | **Permanent Decision Rationale** | SF14 related-items unified work graph primitive; 10 locked decisions (D-01–D-10); to be authored when SF14 enters active development |
 | PH4 phase plans (`plans/PH4-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH4-Shell-Consolidation.md` (master plan) |
 | PH5 phase plans (`plans/PH5-*.md`, `plans/PH5C-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH5-Auth-Shell-Plan.md` and `PH5C-Auth-Shell-Plan.md` |
 | PH6 phase plans (`plans/PH6-*.md`, `plans/PH6F-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH6-Provisioning-Plan.md`; sub-plans Tier 2 |
@@ -99,7 +103,7 @@ Every new architecture, plan, reference, or release document must declare one of
 
 **Transition rule — Deferred Scope:** When a Deferred Scope document's feature or package enters active development in a named phase milestone, reclassify it to Canonical Normative Plan, add it to the active phase's plan index, and update this matrix. The PH7-RM-* plans must be reviewed and reclassified as needed before PH7.12 sign-off.
 
-**ADR rule:** New ADRs are always Permanent Decision Rationale. ADR-0091 through ADR-0097 were assigned after PH7.11. ADR-0098 is reserved for SF09 (data-seeding), ADR-0099 is reserved for SF10 (notification-intelligence), ADR-0100 is reserved for SF11 (smart-empty-state), and ADR-0101 is reserved for SF12 (session-state). Next unreserved number: **ADR-0102**.
+**ADR rule:** New ADRs are always Permanent Decision Rationale. ADR-0091 through ADR-0097 were assigned after PH7.11. ADR-0098 is reserved for SF09 (data-seeding), ADR-0099 is reserved for SF10 (notification-intelligence), ADR-0100 is reserved for SF11 (smart-empty-state), ADR-0101 is reserved for SF12 (session-state), ADR-0102 is reserved for SF13 (project-canvas), and ADR-0103 is reserved for SF14 (related-items). Next unreserved number: **ADR-0104**.
 
 **Banner format (Tier 1):**
 ```
@@ -118,7 +122,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | Index gap (ADR-0073–ADR-0079) | These numbers were absent from `docs/README.md` index | Resolved: 2026-03-09 — all entries added to `docs/README.md` |
 | ADR-0082 not indexed | ADR-0082 missing from `docs/README.md` | Resolved: 2026-03-09 — added to index |
 
-**Post-PH7.11 state (updated 2026-03-10):** 97 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (phase-7-final-verification, acknowledgment, step-wizard, versioned-record, stub-detection, field-annotations, workflow-handoff). ADR-0098 reserved for SF09 (data-seeding); ADR-0099 reserved for SF10 (notification-intelligence); ADR-0100 reserved for SF11 (smart-empty-state); ADR-0101 reserved for SF12 (session-state). Next unreserved number: **ADR-0102**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
+**Post-PH7.11 state (updated 2026-03-10):** 97 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (phase-7-final-verification, acknowledgment, step-wizard, versioned-record, stub-detection, field-annotations, workflow-handoff). ADR-0098 reserved for SF09 (data-seeding); ADR-0099 reserved for SF10 (notification-intelligence); ADR-0100 reserved for SF11 (smart-empty-state); ADR-0101 reserved for SF12 (session-state); ADR-0102 reserved for SF13 (project-canvas); ADR-0103 reserved for SF14 (related-items). Next unreserved number: **ADR-0104**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
 
 ---
 
@@ -350,6 +354,6 @@ As of PH7.4, all Category C packages are **Tier-1 Platform Primitives** — mand
 | Backend services | 1 |
 | Build tooling packages | 1 |
 | **Total workspace members** | **46** |
-| Architecture Decision Records | 97 active + 6 archived | <!-- Updated 2026-03-10: ADR-0091–0097 added since PH7.11; ADR-0098 reserved SF09; ADR-0099 reserved SF10; ADR-0100 reserved SF11; ADR-0101 reserved SF12 -->
+| Architecture Decision Records | 97 active + 6 archived | <!-- Updated 2026-03-10: ADR-0091–0097 added since PH7.11; ADR-0098 reserved SF09; ADR-0099 reserved SF10; ADR-0100 reserved SF11; ADR-0101 reserved SF12; ADR-0102 reserved SF13; ADR-0103 reserved SF14 -->
 | TSConfig path aliases | 62 |
 | Vite dev server ports | 14 (3000, 4000–4012) |
