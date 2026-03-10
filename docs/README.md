@@ -124,6 +124,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0091 | Accepted | [ADR-0091-phase-7-final-verification.md](./architecture/adr/ADR-0091-phase-7-final-verification.md) |
 | ADR-0094 | Accepted | [ADR-0094-versioned-record-platform-primitive.md](./architecture/adr/ADR-0094-versioned-record-platform-primitive.md) |
 | ADR-0095 | Accepted | [0095-stub-detection-enforcement-standard.md](./architecture/adr/0095-stub-detection-enforcement-standard.md) |
+| ADR-0096 | Accepted | [ADR-0096-field-annotations-platform-primitive.md](./architecture/adr/ADR-0096-field-annotations-platform-primitive.md) |
 
 ## Reference Documents
 

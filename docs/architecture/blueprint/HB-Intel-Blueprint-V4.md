@@ -1185,3 +1185,25 @@ All four mechanical enforcement gates passed.
 current-state-map.md §2 updated: PH7.13 task file rows added.
 Next: PH7.12 final verification or PH8 CI/CD expansion per Foundation Plan sequencing.
 -->
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF07 field-annotations implemented: 2026-03-10
+Package: @hbc/field-annotations (T01–T09 complete)
+ADR created: docs/architecture/adr/ADR-0096-field-annotations-platform-primitive.md
+Documentation added:
+  - docs/architecture/plans/shared-features/SF07-Field-Annotations.md (master plan)
+  - docs/architecture/plans/shared-features/SF07-T01-Package-Scaffold.md
+  - docs/architecture/plans/shared-features/SF07-T02-TypeScript-Contracts.md
+  - docs/architecture/plans/shared-features/SF07-T03-Storage-and-API.md
+  - docs/architecture/plans/shared-features/SF07-T04-Hooks.md
+  - docs/architecture/plans/shared-features/SF07-T05-HbcAnnotationMarker.md
+  - docs/architecture/plans/shared-features/SF07-T06-HbcAnnotationThread-and-Summary.md
+  - docs/architecture/plans/shared-features/SF07-T07-Platform-Wiring.md
+  - docs/architecture/plans/shared-features/SF07-T08-Testing-Strategy.md
+  - docs/architecture/plans/shared-features/SF07-T09-Deployment.md
+  - docs/how-to/developer/field-annotations-adoption.md
+  - docs/reference/field-annotations/api.md
+  - packages/field-annotations/README.md
+All four mechanical enforcement gates passed.
+current-state-map.md §2 updated: SF07 reclassified to Historical Foundational; ADR-0096 and doc rows added.
+-->

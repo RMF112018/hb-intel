@@ -96,7 +96,8 @@
       "Bash(cp /tmp/fake-stub.ts packages/shell/src/fake-stub.ts && pnpm scan-stubs 2>&1; echo \"Exit code: $?\")",
       "Bash(rm packages/shell/src/fake-stub.ts && pnpm scan-stubs 2>&1; echo \"Exit code: $?\")",
       "Bash(for f:*)",
-      "Read(//Users/bobbyfetting/hb-intel/**)"
+      "Read(//Users/bobbyfetting/hb-intel/**)",
+      "Bash(grep -r \"from '@hbc/bic-next-move'\" packages/field-annotations/src/ | grep -v \"IBicOwner\" ; grep -r \"from '@hbc/versioned-record'\" packages/field-annotations/src/ ; grep -r \"from '@hbc/notification-intelligence'\" packages/field-annotations/src/ ; echo \"Architecture boundary check done \\(empty = pass\\)\")"
     ]
   },
   "enabledPlugins": {

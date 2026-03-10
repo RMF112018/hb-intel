@@ -539,5 +539,13 @@ Add the following row to the Document Classification Matrix in `docs/architectur
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF07-T09 not yet started.
+SF07-T09 completed: 2026-03-10
+ADR created: docs/architecture/adr/ADR-0096-field-annotations-platform-primitive.md (ADR-0096 — next available after ADR-0095)
+Package README created: packages/field-annotations/README.md
+Developer adoption guide created: docs/how-to/developer/field-annotations-adoption.md
+API reference created: docs/reference/field-annotations/api.md
+docs/README.md ADR index updated: ADR-0096 row added after ADR-0095
+current-state-map.md §2 updated: SF07 row reclassified from Canonical Normative Plan to Historical Foundational; ADR-0096, adoption guide, and API reference rows added
+Blueprint progress comment appended to HB-Intel-Blueprint-V4.md
+All four mechanical enforcement gates passed.
 -->

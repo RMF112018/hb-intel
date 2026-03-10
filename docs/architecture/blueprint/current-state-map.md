@@ -43,7 +43,10 @@
 | SF06 shared-feature plans (packages not yet built) | **Deferred Scope** | Tier 2 — matrix classification only; must not be updated without explicit phase activation |
 | `docs/architecture/adr/ADR-0093-step-wizard-platform-primitive.md` | **Permanent Decision Rationale** | SF05 step-wizard platform primitive; 10 locked decisions |
 | `docs/how-to/developer/step-wizard-adoption-guide.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; step-wizard module adoption |
-| SF07 shared-feature plans (10 files: `SF07-Field-Annotations.md` through `SF07-T09-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; pending PH7.12 sign-off (ADR-0090) before implementation begins |
+| SF07 shared-feature plans (10 files: `SF07-Field-Annotations.md` through `SF07-T09-Deployment.md`) | **Historical Foundational** | Tier 2 — matrix classification only; T01–T09 complete 2026-03-10; package `@hbc/field-annotations` implemented |
+| `docs/architecture/adr/ADR-0096-field-annotations-platform-primitive.md` | **Permanent Decision Rationale** | SF07 field-annotations platform primitive; 10 locked decisions |
+| `docs/how-to/developer/field-annotations-adoption.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; field-annotations module adoption |
+| `docs/reference/field-annotations/api.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; field-annotations API reference |
 | SF08 shared-feature plans (10 files: `SF08-Workflow-Handoff.md` through `SF08-T09-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; pending PH7.12 sign-off (ADR-0090) before implementation begins |
 | SF09 shared-feature plans (10 files: `SF09-Data-Seeding.md` through `SF09-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; pending PH7.12 sign-off (ADR-0090) before implementation begins |
 | PH4 phase plans (`plans/PH4-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH4-Shell-Consolidation.md` (master plan) |
