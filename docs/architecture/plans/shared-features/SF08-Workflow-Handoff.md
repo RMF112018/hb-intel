@@ -298,4 +298,11 @@ SF08-T05 completed: 2026-03-10
 - No barrel changes needed (components/index.ts already wired in T01)
 - Verification: check-types, build, lint, full workspace build (32/32) — all passed
 Next: SF08-T06 (HbcHandoffReceiver and HbcHandoffStatusBadge)
+
+SF08-T06 completed: 2026-03-10
+- HbcHandoffReceiver.tsx: full recipient review panel (4 internal + 1 exported component)
+- HbcHandoffStatusBadge.tsx: 5-state complexity-gated badge (1 exported component)
+- 5 lint-compliance fixes: removed unused React/IBicOwner imports, prefixed _handoffId/_isTerminal, fixed tier vs variant destructuring
+- Verification: check-types, build, lint, full workspace build (32/32) — all passed
+Next: SF08-T07 (Reference Implementations)
 -->

@@ -558,6 +558,19 @@ pnpm --filter @hbc/dev-harness storybook
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF08-T06 not yet started.
+SF08-T06 completed: 2026-03-10
+- HbcHandoffReceiver.tsx: full recipient review panel replacing export {} stub
+- 4 internal components: SourceSummarySection, DocumentsSection, ContextNotesSection, RejectForm
+- 1 exported component: HbcHandoffReceiver with load/markReceived/acknowledge/reject lifecycle
+- HbcHandoffStatusBadge.tsx: full 5-state complexity-gated badge replacing export {} stub
+- 1 exported component: HbcHandoffStatusBadge with essential/standard/expert gating (D-08)
+- Lint-compliance fixes applied:
+  - Removed unused React import (both files) — react-jsx automatic transform
+  - Removed unused IBicOwner type import (Receiver) — accessed via pkg.sender/recipient
+  - Prefixed unused handoffId → _handoffId in SourceSummarySection (future annotation slot)
+  - Fixed useComplexity() destructuring: tier not variant (StatusBadge) — matches @hbc/bic-next-move pattern
+  - Prefixed unused isTerminal → _isTerminal in HbcHandoffReceiver (status used inline)
+- No barrel changes needed (components/index.ts already wired in T01)
+- Verification: check-types, build, lint (--max-warnings 0), full workspace build (32/32) — all passed
 Next: SF08-T07 (Reference Implementations)
 -->
