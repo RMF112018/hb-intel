@@ -396,6 +396,13 @@ pnpm --filter @hbc/dev-harness storybook
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF07-T05 not yet started.
+SF07-T05 completed: 2026-03-10
+- Created src/css.d.ts (CSS module type declaration, same pattern as @hbc/complexity)
+- Created src/components/HbcAnnotationMarker.css (all visual states + badge + position: relative fix)
+- Replaced HbcAnnotationThread.tsx stub with typed placeholder component (compilable for T06)
+- Replaced HbcAnnotationMarker.tsx stub with full implementation
+- Correction applied: useComplexity() returns { tier }, not { variant } — destructured as { tier: contextTier }
+- Barrel exports already wired from T01 scaffolding (no changes needed)
+- Verification: check-types ✓ | build ✓ | lint ✓
 Next: SF07-T06 (HbcAnnotationThread and HbcAnnotationSummary)
 -->

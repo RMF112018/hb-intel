@@ -1,0 +1,53 @@
+/* Base marker — positioned inline-flex adjacent to form field */
+.hbc-annotation-marker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+}
+
+.hbc-annotation-marker--red    { background-color: var(--hbc-color-red-500); }
+.hbc-annotation-marker--amber  { background-color: var(--hbc-color-amber-500); }
+.hbc-annotation-marker--blue   { background-color: var(--hbc-color-blue-500); }
+.hbc-annotation-marker--grey   { background-color: var(--hbc-color-grey-400); }
+.hbc-annotation-marker--add-only {
+  background-color: transparent;
+  border: 1.5px dashed var(--hbc-color-grey-300);
+  opacity: 0; /* hidden until the field row is hovered */
+}
+.hbc-annotation-marker--add-only:focus,
+.field-with-annotation:hover .hbc-annotation-marker--add-only {
+  opacity: 1;
+}
+
+/* Expert mode count badge */
+.hbc-annotation-marker__count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 14px;
+  height: 14px;
+  background: var(--hbc-color-grey-700);
+  color: white;
+  font-size: 9px;
+  border-radius: 7px;
+  padding: 0 3px;
+  line-height: 14px;
+  text-align: center;
+}
+
+/* Resolved checkmark */
+.hbc-annotation-marker__resolved-icon {
+  font-size: 8px;
+  color: white;
+  line-height: 1;
+}
