@@ -772,6 +772,42 @@ pnpm --filter @hbc/dev-harness storybook
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF07-T08 not yet started.
+SF07-T08 completed: 2026-03-10
+
+Batch 1 — Testing sub-path (4 factory/fixture files):
+  - testing/createMockAnnotationReply.ts — IAnnotationReply factory
+  - testing/createMockAnnotation.ts — IFieldAnnotation factory
+  - testing/createMockAnnotationConfig.ts — IFieldAnnotationConfig factory
+  - testing/mockAnnotationStates.ts — 6 canonical states (empty, openComment, openClarification, openRevisionFlag, resolved, mixed)
+  - testing/index.ts — re-exports all (already correct)
+
+Batch 2 — Vitest unit tests (7 test files, 97 tests):
+  - AnnotationApi.test.ts — 20 tests (all 6 methods, mapListItemToAnnotation, RepliesJson parsing, error handling, resolveAnnotationConfig)
+  - useFieldAnnotations.test.ts — 8 tests (computeAnnotationCounts, query behavior, enabled=false, empty/mixed counts)
+  - useFieldAnnotation.test.ts — 5 tests (fieldKey filter, openCount, enabled=false)
+  - useAnnotationActions.test.ts — 5 tests (create/reply/resolve/withdraw mutations, cache invalidation, pending states)
+  - HbcAnnotationMarker.test.tsx — 16 tests (essential→null, viewer hidden, add-only, red/amber/blue/grey dots, expert badge, forceVariant, thread open/close)
+  - HbcAnnotationThread.test.tsx — 25 tests (popover, cards, replies, reply form, resolve form, withdraw, resolved toggle, escape close, add form, intent placeholders)
+  - HbcAnnotationSummary.test.tsx — 18 tests (essential→null, loading, empty, counts, expert breakdown, field focus, standard summary, singular/plural text)
+  Coverage: 100% statements/functions/lines, 95.19% branches (passes 95% threshold)
+
+Batch 3 — Storybook stories (3 story files + config):
+  - .storybook/main.ts — Storybook 8 react-vite config
+  - HbcAnnotationMarker.stories.tsx — 9 stories
+  - HbcAnnotationThread.stories.tsx — 7 stories
+  - HbcAnnotationSummary.stories.tsx — 4 stories
+
+Batch 4 — Playwright E2E + docs:
+  - e2e/field-annotations.spec.ts — 9 test.skip() stubs (D-03, D-05, D-06, D-07, D-08, D-09 coverage)
+
+Spec discrepancies corrected:
+  1. variant→tier (useComplexity returns { tier })
+  2. Import paths (../api → correct for src/__tests__/)
+  3. CJS require()→ESM vi.mock pattern
+  4. Missing fireEvent import (added)
+  5. AnnotationApi mock path corrected
+  6. Testing sub-path imports validated
+
+All gates pass: build, lint, check-types, test:coverage
 Next: SF07-T09 (Deployment)
 -->

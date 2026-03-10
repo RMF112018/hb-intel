@@ -239,5 +239,6 @@ SF07-T04 completed: 2026-03-09 — Field annotations hooks
 SF07-T05 completed: 2026-03-10 — HbcAnnotationMarker component
 SF07-T06 completed: 2026-03-10 — HbcAnnotationThread and HbcAnnotationSummary components
 SF07-T07 completed: 2026-03-10 — Platform wiring verification (all boundary checks, type contracts, complexity gating, build gates passed)
-Next: SF07-T08 (Testing Strategy)
+SF07-T08 completed: 2026-03-10 — Testing strategy (97 Vitest tests, 95.19% branch coverage, 4 testing sub-path factories, 20 Storybook stories, 9 Playwright E2E stubs)
+Next: SF07-T09 (Deployment)
 -->

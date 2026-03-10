@@ -94,7 +94,9 @@
       "Bash(pnpm scan-stubs:*)",
       "Bash(pnpm scan-stubs:all 2>&1; echo \"Exit code: $?\")",
       "Bash(cp /tmp/fake-stub.ts packages/shell/src/fake-stub.ts && pnpm scan-stubs 2>&1; echo \"Exit code: $?\")",
-      "Bash(rm packages/shell/src/fake-stub.ts && pnpm scan-stubs 2>&1; echo \"Exit code: $?\")"
+      "Bash(rm packages/shell/src/fake-stub.ts && pnpm scan-stubs 2>&1; echo \"Exit code: $?\")",
+      "Bash(for f:*)",
+      "Read(//Users/bobbyfetting/hb-intel/**)"
     ]
   },
   "enabledPlugins": {
