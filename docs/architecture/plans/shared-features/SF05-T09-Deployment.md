@@ -114,6 +114,15 @@ Complete the deployment of `@hbc/step-wizard`: execute the pre-deployment checkl
 - [ ] `@hbc/step-wizard` added to `pnpm-workspace.yaml` if not already present
 - [ ] Turborepo `turbo.json` pipeline entries correct for `build`, `test`, `typecheck`, `lint`
 
+### Documentation
+
+- [ ] `docs/architecture/adr/ADR-0093-step-wizard-platform-primitive.md` written and accepted
+- [ ] `docs/how-to/developer/step-wizard-adoption-guide.md` written
+- [ ] `docs/reference/step-wizard/api.md` written
+- [ ] `packages/step-wizard/README.md` written (see Package README section below)
+- [ ] `docs/README.md` ADR index updated with ADR-0093 entry (see ADR Index Update section below)
+- [ ] `current-state-map.md §2` updated with SF05 plan files classification row
+
 ---
 
 ## ADR-0014: Step Wizard as Platform Primitive
@@ -529,8 +538,12 @@ const { result } = renderHook(
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF05 completed: 2026-03-08
 Package: packages/step-wizard/
-ADR created: docs/architecture/adr/0014-step-wizard-platform-primitive.md
+ADR created: docs/architecture/adr/ADR-0093-step-wizard-platform-primitive.md
 Adoption guide: docs/how-to/developer/step-wizard-adoption-guide.md
+API reference: docs/reference/step-wizard/api.md
+Package README: packages/step-wizard/README.md  (implementation-time deliverable — see T09 Package README section)
+docs/README.md ADR index updated: ADR-0093 row appended  (implementation-time deliverable — see T09 ADR Index Update section)
+current-state-map.md §2 updated: SF05 classification row added.
 Cross-package: SF02 amendment required (step-wizard:* BIC_MODULE_MANIFEST prefix)
 All 10 decisions locked. 20-item DoD verified. Testing sub-path exported.
 Next: SF06 or first consuming module integration
@@ -556,6 +569,149 @@ E2E: 10 Playwright scenarios
 SF02 amendment: BIC_MODULE_MANIFEST step-wizard:* prefix (SF02-T02, SF02-T03)
 -->
 ```
+
+---
+
+## Package README
+
+**File:** `packages/step-wizard/README.md`
+
+Create this file as part of the T09 implementation deliverables.
+
+````markdown
+# @hbc/step-wizard
+
+Multi-step guided workflow primitive for the HB Intel platform.
+
+## Overview
+
+`@hbc/step-wizard` provides a configurable multi-step wizard with three progression modes (sequential, parallel, sequential-with-jumps), BIC-aware assignment tracking, draft persistence, overdue polling, and complexity-gated UI. It is the platform primitive for any module that requires a structured guided workflow.
+
+**Locked ADR:** ADR-0093 — `docs/architecture/adr/ADR-0093-step-wizard-platform-primitive.md`
+
+---
+
+## Installation
+
+```json
+{ "dependencies": { "@hbc/step-wizard": "workspace:*" } }
+```
+
+---
+
+## Quick Start
+
+```typescript
+import type { IStepWizardConfig, IStep } from '@hbc/step-wizard';
+import { HbcStepWizard, HbcStepProgress, useStepWizard } from '@hbc/step-wizard';
+
+const steps: IStep<IMyRecord>[] = [
+  { id: 'details', label: 'Details', component: DetailsStep, validate: (r) => r.name ? null : 'Name required' },
+  { id: 'review', label: 'Review', component: ReviewStep },
+  { id: 'submit', label: 'Submit', component: SubmitStep },
+];
+
+const wizardConfig: IStepWizardConfig<IMyRecord> = {
+  steps,
+  mode: 'sequential',
+  draftKey: (record) => `my-wizard:${record.id}`,
+  allowReopen: true,
+  onAllComplete: (record) => void submitRecord(record),
+};
+
+// Render the wizard
+<HbcStepWizard config={wizardConfig} item={record} variant="horizontal" />
+
+// Or the progress bar only
+<HbcStepProgress config={wizardConfig} item={record} variant="bar" />
+```
+
+---
+
+## Exports
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `IStep<T>` | Interface | Single step definition (id, label, component, validate, resolveAssignee, dueDate) |
+| `IStepWizardConfig<T>` | Interface | Full wizard configuration |
+| `IStepWizardState` | Interface | Derived runtime state |
+| `IStepWizardDraft` | Interface | Persisted draft shape |
+| `StepStatus` | Union type | `'pending' \| 'in-progress' \| 'complete' \| 'blocked' \| 'skipped'` |
+| `StepOrderMode` | Union type | `'sequential' \| 'parallel' \| 'sequential-with-jumps'` |
+| `useStepWizard<T>` | Hook | Full wizard state machine; exposes `advance`, `goTo`, `markComplete`, `markBlocked`, `reopenStep` |
+| `useStepProgress<T>` | Hook | Lightweight progress reader; no network calls |
+| `HbcStepWizard` | Component | Full wizard UI — horizontal and vertical variants; all three modes |
+| `HbcStepProgress` | Component | Progress display — bar, ring, and fraction variants |
+| `HbcStepSidebar` | Component | Standalone stateless sidebar; accepts `activeStepId` + `onStepSelect` |
+| `STATUS_RANK` | Constant | Rank map for monotonic `mergeStepStatus()` |
+| `TERMINAL_STATUSES` | Constant | Set of statuses that cannot transition further |
+| `STALE_THRESHOLD_MS` | Constant | `86_400_000` (24 h) — draft stale indicator threshold |
+
+### Progression Modes
+
+| Mode | Unlock Rule |
+|------|------------|
+| `sequential` | Only the current step is unlocked |
+| `parallel` | All steps unlocked simultaneously |
+| `sequential-with-jumps` | All steps up to last-visited + 1 are unlocked |
+
+### Complexity Gating
+
+| Complexity | Sidebar | Step Body | Validation Message |
+|-----------|---------|-----------|-------------------|
+| Essential | Current + adjacent steps only | Coaching callout if `showCoaching: true` | `"This step is incomplete"` |
+| Standard | All steps + status icons + assignee avatars | No coaching | Full `validate()` error string |
+| Expert | All steps + `completedAt` timestamps + warning dots | No coaching | Full `validate()` error string |
+
+### Testing Sub-Path
+
+```typescript
+import { createMockWizardConfig, mockWizardStates, mockUseStepWizard, createWizardWrapper }
+  from '@hbc/step-wizard/testing';
+// mockWizardStates: notStarted, inProgress, complete, withBlocked, withSkipped, partialParallel
+```
+
+---
+
+## BIC Integration (D-04)
+
+`registerStepBicEntry()` and `closeStepBicEntry()` are called automatically by `useStepWizard`. Consuming modules must register the `step-wizard:*` prefix in `@hbc/bic-next-move`'s `BIC_MODULE_MANIFEST` (see SF02 Amendment Notice in SF05-T09).
+
+---
+
+## Related Plans & References
+
+- `docs/architecture/plans/shared-features/SF05-Step-Wizard.md` — Master plan
+- `docs/architecture/plans/shared-features/SF05-T03-State-Machine.md` — Monotonic merge, state transitions
+- `docs/architecture/plans/shared-features/SF05-T07-Draft-Persistence-and-BIC.md` — Draft + BIC wiring
+- `docs/how-to/developer/step-wizard-adoption-guide.md` — Step-by-step wiring guide
+- `docs/reference/step-wizard/api.md` — Full API reference
+- `docs/architecture/adr/ADR-0093-step-wizard-platform-primitive.md` — Locked ADR
+````
+
+---
+
+## ADR Index Update
+
+**File:** `docs/README.md`
+
+Locate the ADR index table in `docs/README.md`. Append the following row:
+
+```markdown
+| [ADR-0093](architecture/adr/ADR-0093-step-wizard-platform-primitive.md) | Step Wizard Platform Primitive | Accepted | 2026-03-08 |
+```
+
+If no ADR index table exists, create one:
+
+```markdown
+## Architecture Decision Records
+
+| ADR | Title | Status | Date |
+|-----|-------|--------|------|
+| [ADR-0093](architecture/adr/ADR-0093-step-wizard-platform-primitive.md) | Step Wizard Platform Primitive | Accepted | 2026-03-08 |
+```
+
+> **Rule (CLAUDE.md §4):** ADR catalog is append-only. Always add rows in ascending ADR number order.
 
 ---
 
@@ -593,12 +749,21 @@ ls docs/how-to/developer/step-wizard-adoption-guide.md
 
 # 10 — Verify SF02 amendment files still consistent
 pnpm --filter @hbc/bic-next-move typecheck
+
+# 11 — Package README exists
+test -f packages/step-wizard/README.md && echo "README OK" || echo "README MISSING"
+
+# 12 — ADR-0093 entry in docs/README.md ADR index
+grep -c "ADR-0093" docs/README.md
 ```
 
 <!-- PROGRESS: SF05-T09 Deployment — COMPLETE 2026-03-09
 Pre-deployment checklist: all 37 items verified (typecheck, 142 tests, ≥95% coverage, full monorepo build)
 ADR created: docs/architecture/adr/ADR-0093-step-wizard-platform-primitive.md (corrected from spec's ADR-0014)
 Adoption guide: docs/how-to/developer/step-wizard-adoption-guide.md
+API reference: docs/reference/step-wizard/api.md
+Package README created: packages/step-wizard/README.md  (see T09 Package README section)
+docs/README.md ADR index updated: ADR-0093 row  (see T09 ADR Index Update section)
 Blueprint progress comment appended
 Foundation plan progress comment appended
 Current-state-map §2 updated: ADR count → 93, SF04/SF05 reclassified to Historical Foundational, 2 new doc rows added, next ADR → 0094

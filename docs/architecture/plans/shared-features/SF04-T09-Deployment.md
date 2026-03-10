@@ -45,6 +45,10 @@ Produce the pre-deployment checklist, the ADR documenting all ten locked decisio
 
 - [ ] `docs/architecture/adr/0013-acknowledgment-platform-primitive.md` written and merged
 - [ ] `docs/how-to/developer/acknowledgment-adoption-guide.md` written and merged
+- [ ] `docs/reference/acknowledgment/api.md` written
+- [ ] `packages/acknowledgment/README.md` written (see Package README section below)
+- [ ] `docs/README.md` ADR index updated with ADR-0013 entry (see ADR Index Update section below)
+- [ ] `current-state-map.md §2` updated with SF04 plan files classification row
 - [ ] Blueprint progress comment inserted
 - [ ] Foundation Plan progress comment inserted
 
@@ -376,6 +380,10 @@ Task files produced:
 Documentation added:
   docs/architecture/adr/0013-acknowledgment-platform-primitive.md
   docs/how-to/developer/acknowledgment-adoption-guide.md
+  docs/reference/acknowledgment/api.md
+  packages/acknowledgment/README.md  (implementation-time deliverable — see T09 Package README section)
+docs/README.md ADR index updated: ADR-0013 row appended  (implementation-time deliverable — see T09 ADR Index Update section)
+current-state-map.md §2 updated: SF04 classification row added.
 
 All 10 decisions locked (D-01 through D-10).
 Estimated effort: 3.5 sprint-weeks.
@@ -393,6 +401,125 @@ Next: SF05 or Phase 3 (dev-harness) per Foundation Plan sequencing.
   Implementation begins Wave 1 (T01+T02+T06): scaffold, contracts, SharePoint list.
 -->
 ```
+
+---
+
+## Package README
+
+**File:** `packages/acknowledgment/README.md`
+
+Create this file as part of the T09 implementation deliverables.
+
+````markdown
+# @hbc/acknowledgment
+
+Sequential, auditable acknowledgment primitive for the HB Intel platform.
+
+## Overview
+
+`@hbc/acknowledgment` implements structured multi-party acknowledgment workflows with sequential ordering, offline-first sync, BIC blocking, and an Azure Functions backend. It is the platform primitive for any process that requires formal confirmation from named parties.
+
+**Locked ADR:** ADR-0013 — `docs/architecture/adr/0013-acknowledgment-platform-primitive.md`
+
+---
+
+## Installation
+
+```json
+{ "dependencies": { "@hbc/acknowledgment": "workspace:*" } }
+```
+
+---
+
+## Quick Start
+
+```typescript
+import type { IAcknowledgmentConfig } from '@hbc/acknowledgment';
+import { HbcAcknowledgmentPanel, useAcknowledgment, ACK_CONTEXT_TYPES } from '@hbc/acknowledgment';
+
+const scorecardAckConfig: IAcknowledgmentConfig<IBdScorecard> = {
+  contextType: ACK_CONTEXT_TYPES.BD_SCORECARD_DIRECTOR_APPROVAL,
+  mode: 'single',
+  confirmationPhrase: 'I CONFIRM',   // DEFAULT_CONFIRMATION_PHRASE
+  requireDeclineReason: true,
+  parties: (record) => [
+    { userId: record.directorId, displayName: record.directorName, role: 'Director', sequenceOrder: 1 },
+  ],
+};
+
+// Mount the panel
+<HbcAcknowledgmentPanel config={scorecardAckConfig} record={scorecard} currentUser={user} />
+```
+
+---
+
+## Exports
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `IAcknowledgmentConfig<T>` | Interface | Per-context config supplied by consuming module |
+| `IAcknowledgmentState` | Interface | Current acknowledgment state snapshot |
+| `useAcknowledgment<T>` | Hook | Full state machine + optimistic updates + offline queue |
+| `useAcknowledgmentGate` | Hook | Returns `canAcknowledge` boolean |
+| `AcknowledgmentApi` | Object | `submit`, `bypass`, `getState`, `listEvents` |
+| `HbcAcknowledgmentPanel` | Component | Complexity-gated acknowledgment UI |
+| `HbcAcknowledgmentBadge` | Component | Inline status badge |
+| `ACK_CONTEXT_TYPES` | Constant | 7 stable kebab-case context-type strings (D-08) |
+| `DEFAULT_CONFIRMATION_PHRASE` | Constant | `'I CONFIRM'` (D-03) |
+| `DECLINE_REASON_MIN_LENGTH` | Constant | `10` (D-04) |
+
+### Complexity Gating
+
+`HbcAcknowledgmentPanel` at Essential tier renders the CTA only — no party list rendered (D-07).
+
+### Testing Sub-Path
+
+```typescript
+import { createMockAckConfig, createMockAckState, mockAckStates,
+         mockUseAcknowledgment, createAckWrapper } from '@hbc/acknowledgment/testing';
+```
+
+---
+
+## Architecture Boundaries
+
+- All writes go through Azure Function `POST /api/acknowledgments` — no direct SharePoint writes from client
+- Offline queue uses `@hbc/session-state` for persistence
+- BIC blocking integrated via `@hbc/bic-next-move` open/close on acknowledgment completion
+
+---
+
+## Related Plans & References
+
+- `docs/architecture/plans/shared-features/SF04-Acknowledgment.md` — Master plan
+- `docs/how-to/developer/acknowledgment-adoption-guide.md` — Wiring guide
+- `docs/reference/acknowledgment/api.md` — Full API reference
+- `docs/architecture/adr/0013-acknowledgment-platform-primitive.md` — Locked ADR
+````
+
+---
+
+## ADR Index Update
+
+**File:** `docs/README.md`
+
+Locate the ADR index table in `docs/README.md`. Append the following row:
+
+```markdown
+| [ADR-0013](architecture/adr/0013-acknowledgment-platform-primitive.md) | Acknowledgment Platform Primitive | Accepted | 2026-03-08 |
+```
+
+If no ADR index table exists, create one:
+
+```markdown
+## Architecture Decision Records
+
+| ADR | Title | Status | Date |
+|-----|-------|--------|------|
+| [ADR-0013](architecture/adr/0013-acknowledgment-platform-primitive.md) | Acknowledgment Platform Primitive | Accepted | 2026-03-08 |
+```
+
+> **Rule (CLAUDE.md §4):** ADR catalog is append-only. Always add rows in ascending ADR number order.
 
 ---
 
@@ -419,6 +546,12 @@ pnpm turbo run test
 ls docs/architecture/adr/0013-acknowledgment-platform-primitive.md
 ls docs/how-to/developer/acknowledgment-adoption-guide.md
 
+# Package README exists
+test -f packages/acknowledgment/README.md && echo "README OK" || echo "README MISSING"
+
+# ADR-0013 entry in docs/README.md ADR index
+grep -c "ADR-0013" docs/README.md
+
 # SharePoint list deployed
 m365 spo list get --title "HbcAcknowledgmentEvents" --webUrl $SP_SITE_URL
 
@@ -440,9 +573,11 @@ pnpm playwright test --grep acknowledgment
   Pre-deployment gates: build ✓, check-types ✓, lint ✓, test:coverage ✓ (97 tests, ≥95% all metrics)
   Contract stability: IAcknowledgmentConfig<T> ✓, IAcknowledgmentState ✓, ACK_CONTEXT_TYPES (7) ✓, testing exports (5) ✓, DEFAULT_CONFIRMATION_PHRASE ✓, DECLINE_REASON_MIN_LENGTH ✓
   Deliverables created:
-    docs/architecture/adr/ADR-0092-acknowledgment-platform-primitive.md (10 decisions)
+    docs/architecture/adr/0013-acknowledgment-platform-primitive.md (10 decisions)
     docs/how-to/developer/acknowledgment-adoption-guide.md (5-step guide)
-    packages/acknowledgment/README.md (full API reference)
+    docs/reference/acknowledgment/api.md
+    packages/acknowledgment/README.md  (see T09 Package README section)
+  docs/README.md ADR index updated: ADR-0013 row  (see T09 ADR Index Update section)
+  current-state-map.md §2: SF04 classification row added
   Progress comments inserted: Blueprint V4, Foundation Plan, SF04-Acknowledgment.md
-  ADR numbering: ADR-0092 (corrected from spec's ADR-0013 per CLAUDE.md §6.3.2)
 -->

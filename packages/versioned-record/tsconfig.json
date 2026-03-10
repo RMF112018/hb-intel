@@ -10,7 +10,7 @@
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "paths": {
-      "@hbc/notification-intelligence": ["./src/__mocks__/notification-intelligence.ts"],
+      "@hbc/notification-intelligence": ["packages/versioned-record/src/__mocks__/notification-intelligence.ts"],
       "@hbc/ui-kit": ["../ui-kit/src/index.ts"],
       "@hbc/ui-kit/app-shell": ["../ui-kit/src/app-shell.ts"],
       "@hbc/complexity": ["../complexity/src/index.ts"],

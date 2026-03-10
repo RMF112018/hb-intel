@@ -761,3 +761,17 @@ describe('VersionApi.getMetadataList', () => {
   });
 });
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF06-T07 completed: 2026-03-10
+Files created/modified:
+  - src/api/VersionApi.ts — full implementation replacing stub (CRUD, D-02 routing, D-09 notifications, D-03 rollback)
+  - src/__mocks__/notification-intelligence.ts — added NotificationRegistry + NotificationApi exports
+  - scripts/provision-versioned-record.ps1 — SP list provisioning script
+  - src/api/__tests__/VersionApi.test.ts — 5 tests (createSnapshot v1, notifications, callback, metadata, storageRef)
+  - tsconfig.json — fixed @hbc/notification-intelligence path mapping (baseUrl-relative)
+Import fix: split spec's single versionUtils import into two (constants from ../constants, utilities from ../utils/versionUtils)
+Window cast fix: used `window as unknown as Record<string, unknown>` for strict TS compliance
+Verification: build ✅ | check-types ✅ | lint ✅ | 90 tests pass (85 prior + 5 new) ✅
+Next: T08 (testing), T04/T05/T06 (hooks/components — now unblocked)
+-->

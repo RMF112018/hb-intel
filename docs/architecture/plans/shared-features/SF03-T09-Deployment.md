@@ -49,6 +49,10 @@ Produce the pre-deployment checklist, the ADR documenting all ten locked decisio
 - [ ] `docs/how-to/developer/complexity-integration-guide.md` written and merged (SPFx + PWA placement)
 - [ ] Blueprint progress comment inserted at end of `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md`
 - [ ] Foundation Plan progress comment inserted at end of `docs/architecture/plans/hb-intel-foundation-plan.md`
+- [ ] `docs/reference/complexity/api.md` written
+- [ ] `packages/complexity/README.md` written (see Package README section below)
+- [ ] `docs/README.md` ADR index updated with ADR-0081 entry (see ADR Index Update section below)
+- [ ] `current-state-map.md §2` updated with SF03 plan files classification row
 
 ### Integration Verification
 
@@ -625,6 +629,10 @@ Documentation added:
   docs/how-to/developer/complexity-integration-guide.md
   docs/how-to/administrator/complexity-role-mapping.md
   docs/reference/ui-kit/complexity-sensitivity.md (produced by T07)
+  docs/reference/complexity/api.md
+  packages/complexity/README.md  (implementation-time deliverable — see T09 Package README section)
+docs/README.md ADR index updated: ADR-0081 row appended  (implementation-time deliverable — see T09 ADR Index Update section)
+current-state-map.md §2 updated: SF03 classification row added.
 
 All 10 decisions locked (D-01 through D-10).
 Estimated effort: 4.0 sprint-weeks.
@@ -644,6 +652,125 @@ Insert under the SF03 entry in `docs/architecture/plans/hb-intel-foundation-plan
   Implementation begins Wave 1 (T01+T02+T06+T03): contracts, storage, context.
 -->
 ```
+
+---
+
+## Package README
+
+**File:** `packages/complexity/README.md`
+
+Create this file as part of the T09 implementation deliverables.
+
+````markdown
+# @hbc/complexity
+
+Complexity-tier context and gating primitive for the HB Intel platform.
+
+## Overview
+
+`@hbc/complexity` provides the `ComplexityProvider`, context hooks (`useComplexity`, `useComplexityGate`), tier-persistence (localStorage/sessionStorage), and cross-tab synchronization. Every UI surface gates its advanced features through this primitive.
+
+**Locked ADR:** ADR-0081 — `docs/architecture/adr/ADR-0081-complexity-dial-platform-primitive.md`
+
+---
+
+## Installation
+
+```json
+{ "dependencies": { "@hbc/complexity": "workspace:*" } }
+```
+
+---
+
+## Quick Start
+
+```tsx
+// 1. Wrap root with provider
+import { ComplexityProvider } from '@hbc/complexity';
+<ComplexityProvider><App /></ComplexityProvider>
+
+// 2. Gate features by tier
+import { useComplexityGate } from '@hbc/complexity';
+const showAdvanced = useComplexityGate({ minTier: 'standard' });
+
+// 3. Read current tier
+import { useComplexity } from '@hbc/complexity';
+const { tier, setTier, isLocked } = useComplexity();
+```
+
+---
+
+## Exports
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `ComplexityProvider` | Component | Root provider — wraps `RouterProvider` (PWA) or `AppShell` (SPFx) |
+| `useComplexity` | Hook | Returns `tier`, `atLeast`, `is`, `setTier`, `showCoaching`, `setShowCoaching`, `isLocked`, `lockedBy`, `lockedUntil` |
+| `useComplexityGate` | Hook | Returns `boolean` — `true` if current tier satisfies `{ minTier?, maxTier? }` |
+| `IComplexityContext` | Interface | Full context shape |
+| `IComplexityPreference` | Interface | Persisted preference shape |
+| `COMPLEXITY_STORAGE_KEY` | Constant | `'hbc::complexity::v1'` |
+| `COMPLEXITY_OPTIMISTIC_DEFAULT` | Constant | `{ tier: 'essential', showCoaching: true }` |
+
+### Complexity Tiers
+
+| Tier | Description |
+|------|-------------|
+| `essential` | Simplified UI: coaching callouts, reduced table rows, no advanced controls |
+| `standard` | Full UI without timestamps or confidence scores |
+| `expert` | All features: timestamps, confidence scores, advanced analytics |
+
+### Testing Sub-Path
+
+```typescript
+import { ComplexityTestProvider, createComplexityWrapper, mockComplexityContext, allTiers }
+  from '@hbc/complexity/testing';
+```
+
+---
+
+## SPFx Integration
+
+In SPFx Application Customizer, pass `spfxContext` prop to force `sessionStorage`:
+
+```tsx
+<ComplexityProvider spfxContext={this.context}><AppShell /></ComplexityProvider>
+```
+
+---
+
+## Related Plans & References
+
+- `docs/architecture/plans/shared-features/SF03-Complexity-Dial.md` — Master plan
+- `docs/how-to/developer/complexity-integration-guide.md` — Wiring guide
+- `docs/how-to/administrator/complexity-role-mapping.md` — Role-mapping guide
+- `docs/reference/complexity/api.md` — Full API reference
+- `docs/architecture/adr/ADR-0081-complexity-dial-platform-primitive.md` — Locked ADR
+````
+
+---
+
+## ADR Index Update
+
+**File:** `docs/README.md`
+
+Locate the ADR index table in `docs/README.md`. Append the following row:
+
+```markdown
+| [ADR-0081](architecture/adr/ADR-0081-complexity-dial-platform-primitive.md) | Complexity Dial Platform Primitive | Accepted | 2026-03-08 |
+```
+
+If no ADR index table exists, create one:
+
+```markdown
+## Architecture Decision Records
+
+| ADR | Title | Status | Date |
+|-----|-------|--------|------|
+| [ADR-0081](architecture/adr/ADR-0081-complexity-dial-platform-primitive.md) | Complexity Dial Platform Primitive | Accepted | 2026-03-08 |
+```
+
+> **Rule (CLAUDE.md §4):** ADR catalog is append-only. Always add rows in ascending ADR number order.
 
 ---
 
@@ -680,4 +807,10 @@ ls docs/architecture/adr/ADR-0081-complexity-dial-platform-primitive.md
 ls docs/how-to/developer/complexity-integration-guide.md
 ls docs/how-to/administrator/complexity-role-mapping.md
 ls docs/reference/ui-kit/complexity-sensitivity.md
+
+# 10. Package README exists
+test -f packages/complexity/README.md && echo "README OK" || echo "README MISSING"
+
+# 11. ADR-0081 entry in docs/README.md ADR index
+grep -c "ADR-0081" docs/README.md
 ```

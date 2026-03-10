@@ -656,6 +656,140 @@ export default defineConfig({
 });
 ```
 
+---
+
+## Documentation Checklist
+
+> **T09 Standard (mandatory — all 6 items required before deployment is considered complete):**
+
+- [ ] `docs/architecture/adr/0082-sharepoint-docs-pre-provisioning-storage.md` written and accepted
+- [ ] `docs/how-to/developer/sharepoint-docs-adoption-guide.md` written
+- [ ] `docs/reference/sharepoint-docs/api.md` written
+- [ ] `packages/sharepoint-docs/README.md` written (see Package README section below)
+- [ ] `docs/README.md` ADR index updated with ADR-0082 entry (see ADR Index Update section below)
+- [ ] `current-state-map.md §2` updated with SF01 plan files classification row
+
+---
+
+## Package README
+
+**File:** `packages/sharepoint-docs/README.md`
+
+Create this file as part of the T09 implementation deliverables.
+
+````markdown
+# @hbc/sharepoint-docs
+
+Pre-provisioned SharePoint document storage primitive for the HB Intel platform.
+
+## Overview
+
+`@hbc/sharepoint-docs` manages the full document lifecycle: folder provisioning, file upload (small and large), offline queueing, staged migration, and conflict resolution. It is the single platform primitive for all SharePoint document I/O operations.
+
+**Locked ADR:** ADR-0082 — `docs/architecture/adr/0082-sharepoint-docs-pre-provisioning-storage.md`
+
+---
+
+## Installation
+
+```json
+{ "dependencies": { "@hbc/sharepoint-docs": "workspace:*" } }
+```
+
+---
+
+## Quick Start
+
+```typescript
+import { FolderManager, UploadService, MigrationService, OfflineQueueManager } from '@hbc/sharepoint-docs';
+
+// Ensure folder exists before uploading
+const folderUrl = await FolderManager.ensureFolder({ contextType: 'bd-lead', contextId: record.id });
+
+// Upload a file
+const result = await UploadService.upload({ file, folderUrl, contextType: 'bd-lead', contextId: record.id });
+
+// Process offline queue on reconnect
+await OfflineQueueManager.replayQueue();
+```
+
+---
+
+## Exports
+
+| Export | Kind | Description |
+|--------|------|-------------|
+| `FolderManager` | Object | `ensureFolder`, `getFolderAbsoluteUrl`, `buildFolderName` |
+| `UploadService` | Object | `upload` (small files via multipart), `uploadLarge` (chunked session) |
+| `MigrationService` | Object | `migrate` (BD lead → project site transfer), `writeTombstone` |
+| `OfflineQueueManager` | Object | `enqueue`, `replayQueue`, `clearQueue` — offline-first uploads |
+| `DocumentApi` | Object | `list`, `delete`, `uploadToSystemContext` |
+| `FOLDER_NAMING_CONVENTION` | Constant | `'{YYYYMMDD}_{RecordName}_{OwnerLastName}'` |
+| `OFFLINE_QUEUE_STORAGE_KEY` | Constant | `'hbc::offline-queue::v1'` |
+
+### Testing Sub-Path
+
+```typescript
+import { createMockFolderManager, mockUploadStates } from '@hbc/sharepoint-docs/testing';
+```
+
+---
+
+## Architecture Boundaries
+
+- `@hbc/sharepoint-docs` is a leaf package — it has no dependencies on other `@hbc/*` feature packages
+- All Graph API calls route through the Azure Functions proxy at `/api/sharepoint/*`
+- Direct Graph API calls from the client are prohibited (D-03)
+- `OfflineQueueManager` uses `sessionStorage` in SPFx context, `localStorage` in PWA context
+
+---
+
+## Related Plans & References
+
+- `docs/architecture/plans/shared-features/SF01-T09-Testing-Strategy.md` — Testing strategy and E2E specs
+- `docs/how-to/developer/sharepoint-docs-adoption-guide.md` — Wiring guide
+- `docs/reference/sharepoint-docs/api.md` — Full API reference
+- `docs/architecture/adr/0082-sharepoint-docs-pre-provisioning-storage.md` — Locked ADR
+````
+
+---
+
+## ADR Index Update
+
+**File:** `docs/README.md`
+
+Locate the ADR index table in `docs/README.md`. Append the following row:
+
+```markdown
+| [ADR-0082](architecture/adr/0082-sharepoint-docs-pre-provisioning-storage.md) | `@hbc/sharepoint-docs` Pre-Provisioned Storage | Accepted | 2026-03-08 |
+```
+
+If no ADR index table exists, create one:
+
+```markdown
+## Architecture Decision Records
+
+| ADR | Title | Status | Date |
+|-----|-------|--------|------|
+| [ADR-0082](architecture/adr/0082-sharepoint-docs-pre-provisioning-storage.md) | `@hbc/sharepoint-docs` Pre-Provisioned Storage | Accepted | 2026-03-08 |
+```
+
+> **Rule (CLAUDE.md §4):** ADR catalog is append-only. Always add rows in ascending ADR number order.
+
+---
+
+## Documentation Verification Commands
+
+```bash
+# Confirm package README exists
+test -f packages/sharepoint-docs/README.md && echo "README OK" || echo "README MISSING"
+
+# Confirm ADR-0082 entry in docs/README.md
+grep -c "ADR-0082" docs/README.md
+```
+
+---
+
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF01-T09 completed: 2026-03-08
 
@@ -687,5 +821,7 @@ SF01-T09 completed: 2026-03-08
 - Gap 13: playwright.config.ts unchanged
 - Gap 14: coverage.include narrowed to 5 tested files
 
+Package README to create at implementation time: packages/sharepoint-docs/README.md  (see Documentation Checklist and Package README sections above)
+docs/README.md ADR index update: ADR-0082 row  (see ADR Index Update section above)
 Next: SF01-T10 (Deployment & CI/CD)
 -->
