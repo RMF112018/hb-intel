@@ -1147,4 +1147,25 @@ Phase 2 — Shared Package: @hbc/step-wizard (SF05) completed: 2026-03-09
   All 10 decisions locked (D-01 through D-10). 20-item DoD verified. Testing sub-path exported.
   142 tests, ≥95% coverage. 16 Storybook stories, 10 E2E scenarios.
   Next: SF06 or first consuming module integration.
+Phase 2 SF06 completed: 2026-03-10
+  Package: packages/versioned-record/ (@hbc/versioned-record)
+  Documentation added:
+    - docs/architecture/plans/shared-features/SF06-Versioned-Record.md
+    - docs/architecture/plans/shared-features/SF06-T01-Package-Scaffold.md
+    - docs/architecture/plans/shared-features/SF06-T02-TypeScript-Contracts.md
+    - docs/architecture/plans/shared-features/SF06-T03-Diff-Engine.md
+    - docs/architecture/plans/shared-features/SF06-T04-Hooks.md
+    - docs/architecture/plans/shared-features/SF06-T05-HbcVersionHistory.md
+    - docs/architecture/plans/shared-features/SF06-T06-HbcVersionDiff-and-Badge.md
+    - docs/architecture/plans/shared-features/SF06-T07-Storage-and-Integration.md
+    - docs/architecture/plans/shared-features/SF06-T08-Testing-Strategy.md
+    - docs/architecture/plans/shared-features/SF06-T09-Deployment.md
+  ADR created: docs/architecture/adr/ADR-0094-versioned-record-platform-primitive.md
+  Adoption guide: docs/how-to/developer/versioned-record-adoption-guide.md
+  Package README created: packages/versioned-record/README.md
+  docs/README.md ADR index updated: ADR-0094 row appended
+  Key decisions: full JSON snapshots (D-01), transparent 255KB routing (D-02),
+    append-only rollback with superseded tag (D-03), client-side diff engine (D-05),
+    metadata-first loading (D-06), getStakeholders notification pattern (D-09)
+  Next: SF07 (next shared feature per PH7 evaluation doc)
 -->

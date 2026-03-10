@@ -652,3 +652,18 @@ test -f packages/versioned-record/README.md && echo "README OK" || echo "README 
 # 14. ADR-0015 entry in docs/README.md ADR index
 grep -c "ADR-0015" docs/README.md
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF06-T09 Deployment completed: 2026-03-10
+ADR number: ADR-0094 (spec said ADR-0015 but that was a reserved gap; next available number used per user decision)
+Files created:
+  - docs/architecture/adr/ADR-0094-versioned-record-platform-primitive.md
+  - docs/how-to/developer/versioned-record-adoption-guide.md
+  - packages/versioned-record/README.md
+Files updated:
+  - docs/architecture/blueprint/HB-Intel-Blueprint-V4.md (progress comment appended)
+  - docs/architecture/plans/hb-intel-foundation-plan.md (progress comment appended)
+  - docs/README.md (ADR-0094 row appended to ADR index)
+Verification: build ✓, check-types ✓, 139 tests pass ✓, coverage ≥95% all metrics ✓
+All Wave 1–4 checklist items satisfied.
+-->

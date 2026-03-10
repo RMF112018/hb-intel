@@ -748,4 +748,10 @@ SF05 @hbc/step-wizard — Complete 2026-03-09.
   Storybook: 16 stories (10 wizard + 6 progress)
   E2E: 10 Playwright scenarios
   SF02 amendment: BIC_MODULE_MANIFEST step-wizard:* prefix (SF02-T02, SF02-T03)
+Phase 2.SF06 completed: 2026-03-10
+  @hbc/versioned-record — Immutable Version History & Change Audit Trail
+  Status: Plan files complete; implementation ready to begin Wave 1
+  Blocking: None (standalone package; @hbc/notification-intelligence peer dep expected in workspace)
+  Blocked by this: BD scorecard director approval workflow, Project Hub PMP monthly update cycle
+  Effort: 3.5 sprint-weeks (Wave 1: 1.0, Wave 2: 0.75, Wave 3: 1.0, Wave 4: 0.75)
 -->

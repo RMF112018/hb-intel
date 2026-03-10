@@ -51,7 +51,13 @@
 | PH6 phase plans (`plans/PH6-*.md`, `plans/PH6F-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH6-Provisioning-Plan.md`; sub-plans Tier 2 |
 | PH7 domain plans (`ph7-business-development/`, `ph7-estimating/`, `ph7-project-hub/`) | **Canonical Normative Plan** | Tier 2 — matrix classification only |
 | PH7 remediation plans (`plans/ph7-remediation/PH7.1`–`PH7.12`) | **Canonical Normative Plan** | Tier 1 banner applied to `PH7.12-Final-Verification-and-Sign-Off.md`; sub-plans Tier 2 |
-| `plans/ph7-remediation/PH7.13-Stub-Detection-Enforcement.md` | **Canonical Normative Plan** | Tier 1 banner applied; quality-infrastructure addition; ADR-0095; independent of PH7.12 sign-off gate |
+| `plans/ph7-remediation/PH7.13-Stub-Detection-Enforcement.md` | **Canonical Normative Plan** | Tier 1 banner applied; master plan / task index for stub enforcement; ADR-0095; independent of PH7.12 sign-off gate |
+| `plans/ph7-remediation/PH7.13-T01-ESLint-Base-Config.md` | **Canonical Normative Plan** | Tier 2 — matrix classification only; sub-plan of PH7.13; D-01 (no-warning-comments), D-02 (ban-ts-comment) |
+| `plans/ph7-remediation/PH7.13-T02-No-Stub-Implementations-Rule.md` | **Canonical Normative Plan** | Tier 2 — matrix classification only; sub-plan of PH7.13; D-03 (error level), D-04 (stub-approved escape hatch) |
+| `plans/ph7-remediation/PH7.13-T03-CI-Grep-Scan.md` | **Canonical Normative Plan** | Tier 2 — matrix classification only; sub-plan of PH7.13; D-05 (CI grep as Layer 2 enforcement) |
+| `plans/ph7-remediation/PH7.13-T04-Stub-Inventory-Remediation.md` | **Canonical Normative Plan** | Tier 2 — matrix classification only; sub-plan of PH7.13; D-06 (tools/mocks exempt), D-07 (BIC aggregation deferred), D-08 (full closure) |
+| `plans/ph7-remediation/PH7.13-T05-Scan-Stubs-Tool.md` | **Canonical Normative Plan** | Tier 2 — matrix classification only; sub-plan of PH7.13; tools/scan-stubs.ts + pnpm scan-stubs scripts |
+| `plans/ph7-remediation/PH7.13-T09-Deployment.md` | **Canonical Normative Plan** | Tier 2 — matrix classification only; sub-plan of PH7.13; ADR-0095 write, eslint-plugin-hbc README update, ADR index update |
 | `docs/architecture/adr/0095-stub-detection-enforcement-standard.md` | **Permanent Decision Rationale** | PH7.13 stub enforcement standard; 8 locked decisions (D-01–D-08); authored 2026-03-10 |
 | PH7-RM-* plans (`plans/PH7-RM-*.md`, 9 files) | **Deferred Scope** | Tier 1 banner applied to all 9 files; status must be confirmed before PH7.12 sign-off |
 | PH7 root-level plans (deleted from git index) | **Superseded / Archived Reference** | Tier 2 — matrix classification only |
