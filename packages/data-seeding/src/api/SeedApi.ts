@@ -63,6 +63,9 @@ interface IImportCompleteRequest {
   errorCount: number;
   skippedCount: number;
   errors: ISeedValidationError[];
+  importedAt: string;
+  importedBy: string;
+  importedByName: string;
   sourceDocumentId: string;
   sourceDocumentUrl: string;
   sourceFileName: string;

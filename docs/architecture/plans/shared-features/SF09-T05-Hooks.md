@@ -490,11 +490,16 @@ node -e "
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF09-T05 not yet started.
+SF09-T05 completed: 2026-03-10
+- useSeedImport: full state machine (reducer + hook) with onFileSelected, onMappingConfirmed, onImportConfirmed, onRetryErrors, onReset, derived state
+- useSeedHistory: TanStack Query wrapper with seedHistoryQueryKey factory
+- Fix applied: crypto.randomUUID() used instead of uuid dependency
+- Fix applied: IImportCompleteRequest extended with importedAt, importedBy, importedByName fields
+- Fix applied: hooks/index.ts barrel exports seedHistoryQueryKey
+- All gates pass: check-types (0 errors), build (0 errors), lint (0 errors)
 Note: useSeedImport's onFileSelected currently throws for large files
 rather than delegating to the server — HbcSeedUploader (T06) must handle
 the large-file path by calling DocumentApi.uploadToSystemContext first,
 then calling a separate onLargeFileUploaded handler on the hook.
-This pattern should be finalized in T06 before T05 is implemented.
 Next: SF09-T06-HbcSeedUploader-and-HbcSeedMapper.md
 -->
