@@ -1102,6 +1102,9 @@ importers:
       '@hbc/models':
         specifier: workspace:*
         version: link:../../packages/models
+      '@hbc/notification-intelligence':
+        specifier: workspace:*
+        version: link:../../packages/notification-intelligence
       '@pnp/graph':
         specifier: ^4.18.0
         version: 4.18.0

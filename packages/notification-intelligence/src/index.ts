@@ -1,8 +1,8 @@
 // @hbc/notification-intelligence — public barrel
 // Populated by T02–T07
 
-export * from './types';
-export * from './registry';
-export * from './api';
-export * from './hooks';
-export * from './components';
+export * from './types/index.js';
+export * from './registry/index.js';
+export * from './api/index.js';
+export * from './hooks/index.js';
+export * from './components/index.js';

@@ -360,6 +360,22 @@ curl -X POST http://localhost:7071/api/notifications/send \
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF10-T08 not yet started.
+SF10-T08 completed: 2026-03-10
+- Created 17 new files: 10 function files + 1 barrel + 6 lib helpers
+- Functions: SendNotification (HTTP POST), GetCenter (HTTP GET), MarkRead (HTTP PATCH),
+  Dismiss (HTTP PATCH), MarkAllRead (HTTP POST), GetPreferences (HTTP GET),
+  UpdatePreferences (HTTP PATCH), ProcessNotification (queue trigger),
+  SendNotificationEmail (queue trigger), SendDigestEmail (timer trigger)
+- Lib helpers: tierResolver, channelRouter, notificationStore, preferencesStore,
+  pushDelivery (stub), emailDelivery (stub)
+- SDK adaptation: Used output.storageQueue() binding objects instead of inline extraOutputs
+  with string keys (plan code used pre-v4 SDK patterns)
+- Added @hbc/notification-intelligence workspace dependency to @hbc/functions
+- Fixed notification-intelligence barrel imports for Node16 moduleResolution compatibility
+  (added .js extensions to all barrel re-exports)
+- Override paths: {} in functions tsconfig.json to use node_modules resolution
+  instead of source paths (Node16 compatibility)
+- Verification: check-types zero errors; build zero errors; existing tests unaffected
+  (pre-existing validateToken.test.ts failure is separate)
 Next: SF10-T09 (Testing Strategy and Deployment)
 -->

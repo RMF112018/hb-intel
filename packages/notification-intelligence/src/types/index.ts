@@ -1,2 +1,2 @@
 // Populated by T02
-export * from './INotification';
+export * from './INotification.js';

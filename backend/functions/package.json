@@ -19,6 +19,7 @@
     "@azure/identity": "^4.5.0",
     "@hbc/acknowledgment": "workspace:*",
     "@hbc/models": "workspace:*",
+    "@hbc/notification-intelligence": "workspace:*",
     "@pnp/graph": "^4.18.0",
     "@pnp/logging": "^4.18.0",
     "@pnp/nodejs-commonjs": "^2.15.0",
