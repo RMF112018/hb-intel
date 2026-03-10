@@ -311,6 +311,42 @@ pnpm --filter @hbc/field-annotations check-types
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF07-T07 not yet started.
+SF07-T07 completed: 2026-03-10
+
+Boundary grep checks (all 6 passed):
+  1a. @hbc/bic-next-move — exactly 2 type-only imports in IFieldAnnotation.ts (IBicOwner re-export + import) ✓
+  1b. @hbc/versioned-record — zero matches ✓
+  1c. @hbc/notification-intelligence — zero matches ✓
+  1d. @hbc/acknowledgment — zero matches ✓
+  1e. @hbc/workflow-handoff — zero matches ✓
+  1f. Only allowed @hbc deps (@hbc/complexity, @hbc/ui-kit, @hbc/bic-next-move type-only) ✓
+
+Type contract verification (D-03 BIC blocking):
+  - IAnnotationCounts: all 5 fields (totalOpen, openClarificationRequests, openRevisionFlags, openComments, totalResolved) — lines 195–203 ✓
+  - computeAnnotationCounts() filters correctly — useFieldAnnotations.ts line 31 ✓
+  - useFieldAnnotations() returns counts — line 79 ✓
+  - AnnotationApi.list() supports status: 'open' filter — line 102 ✓
+  - IFieldAnnotationConfig.blocksBicOnOpenAnnotations — line 156 ✓
+
+Type contract verification (D-04 versioned-record):
+  - IFieldAnnotation.createdAtVersion: number | null — line 104 ✓
+  - IFieldAnnotation.resolvedAtVersion: number | null — line 124 ✓
+  - ICreateAnnotationInput.createdAtVersion?: number | null — line 243 ✓
+  - IResolveAnnotationInput.resolvedAtVersion?: number | null — line 256 ✓
+  - IRawAnnotationListItem.CreatedAtVersion/.ResolvedAtVersion mapped with ?? null — lines 71, 82 ✓
+  - AnnotationApi.resolve() sends resolvedAtVersion in PATCH body — line 156 ✓
+  - IFieldAnnotationConfig.versionAware — line 186 ✓
+
+Complexity gating verification (D-05):
+  - All 3 components use { tier: contextTier } = useComplexity() ✓
+  - HbcAnnotationMarker: Essential return null, Standard colored dot, Expert dot + badge ✓
+  - HbcAnnotationThread: Essential never mounts, Standard popover + reply btn, Expert inline reply form ✓
+  - HbcAnnotationSummary: Essential return null, Standard collapsed count, Expert expanded per-field ✓
+
+Build gates (all 3 passed):
+  - pnpm turbo run build --filter @hbc/field-annotations... — zero errors ✓
+  - pnpm --filter @hbc/field-annotations check-types — zero errors ✓
+  - pnpm --filter @hbc/field-annotations lint — zero warnings ✓
+
 Next: SF07-T08 (Testing Strategy)
 -->

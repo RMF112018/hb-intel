@@ -229,7 +229,15 @@ Testing sub-path published with 6 canonical fixtures. ≥95% coverage enforced. 
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF07 master plan created: 2026-03-09
-Status: Not yet started — pending PH7.12 sign-off (ADR-0090)
 Classification: Canonical Normative Plan
 ADR required: ADR-0091 (next available number per current-state-map.md §2.1)
+
+SF07-T01 completed: 2026-03-09 — Package scaffold
+SF07-T02 completed: 2026-03-09 — TypeScript contracts
+SF07-T03 completed: 2026-03-09 — Storage and API layer
+SF07-T04 completed: 2026-03-09 — Field annotations hooks
+SF07-T05 completed: 2026-03-10 — HbcAnnotationMarker component
+SF07-T06 completed: 2026-03-10 — HbcAnnotationThread and HbcAnnotationSummary components
+SF07-T07 completed: 2026-03-10 — Platform wiring verification (all boundary checks, type contracts, complexity gating, build gates passed)
+Next: SF07-T08 (Testing Strategy)
 -->

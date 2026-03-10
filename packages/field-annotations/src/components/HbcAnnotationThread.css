@@ -1,0 +1,442 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+ * HbcAnnotationThread — Thread container
+ * Uses HB Intel Design System CSS custom properties
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-annotation-thread {
+  background: var(--hbc-color-surface-primary, #ffffff);
+  border: 1px solid var(--hbc-color-border-default, #e0e0e0);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  width: 360px;
+  padding: 0;
+}
+
+.hbc-annotation-thread__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--hbc-color-border-default, #e0e0e0);
+}
+
+.hbc-annotation-thread__title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hbc-annotation-thread__open-count {
+  font-size: 12px;
+  color: var(--hbc-color-text-secondary, #666666);
+  white-space: nowrap;
+}
+
+.hbc-annotation-thread__close {
+  appearance: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px;
+  color: var(--hbc-color-text-secondary, #666666);
+  border-radius: 4px;
+}
+
+.hbc-annotation-thread__close:hover {
+  background: var(--hbc-color-surface-hover, #f5f5f5);
+}
+
+.hbc-annotation-thread__open-list {
+  padding: 8px 0;
+}
+
+.hbc-annotation-thread__empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--hbc-color-text-secondary, #666666);
+  font-size: 13px;
+  margin: 0;
+}
+
+.hbc-annotation-thread__resolved-section {
+  border-top: 1px solid var(--hbc-color-border-default, #e0e0e0);
+  padding: 8px 16px;
+}
+
+.hbc-annotation-thread__resolved-toggle {
+  appearance: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--hbc-color-text-secondary, #666666);
+  padding: 4px 0;
+  text-decoration: underline;
+}
+
+.hbc-annotation-thread__resolved-toggle:hover {
+  color: var(--hbc-color-text-primary, #333333);
+}
+
+.hbc-annotation-thread__resolved-list {
+  padding-top: 8px;
+}
+
+.hbc-annotation-thread__add-section {
+  border-top: 1px solid var(--hbc-color-border-default, #e0e0e0);
+  padding: 12px 16px;
+}
+
+.hbc-annotation-thread__add-label {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Annotation Card
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-annotation-card {
+  padding: 12px 16px;
+  border-left: 3px solid transparent;
+}
+
+.hbc-annotation-card + .hbc-annotation-card {
+  border-top: 1px solid var(--hbc-color-border-subtle, #f0f0f0);
+}
+
+.hbc-annotation-card--red {
+  border-left-color: var(--hbc-color-red-500, #d32f2f);
+}
+
+.hbc-annotation-card--amber {
+  border-left-color: var(--hbc-color-amber-500, #f57c00);
+}
+
+.hbc-annotation-card--blue {
+  border-left-color: var(--hbc-color-blue-500, #1976d2);
+}
+
+.hbc-annotation-card--grey {
+  border-left-color: var(--hbc-color-grey-400, #bdbdbd);
+}
+
+.hbc-annotation-card[data-status="resolved"],
+.hbc-annotation-card[data-status="withdrawn"] {
+  opacity: 0.7;
+}
+
+.hbc-annotation-card__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.hbc-annotation-card__author {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hbc-color-text-primary, #333333);
+}
+
+.hbc-annotation-card__role {
+  font-weight: 400;
+  color: var(--hbc-color-text-secondary, #666666);
+}
+
+.hbc-annotation-card__timestamp {
+  font-size: 11px;
+  color: var(--hbc-color-text-secondary, #666666);
+  margin-left: auto;
+}
+
+.hbc-annotation-card__body {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 6px;
+  color: var(--hbc-color-text-primary, #333333);
+}
+
+.hbc-annotation-card__assignee {
+  font-size: 12px;
+  color: var(--hbc-color-text-secondary, #666666);
+  margin: 4px 0;
+}
+
+.hbc-annotation-card__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.hbc-annotation-card__action-btn {
+  appearance: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--hbc-color-blue-600, #1565c0);
+  padding: 2px 0;
+}
+
+.hbc-annotation-card__action-btn:hover {
+  text-decoration: underline;
+}
+
+.hbc-annotation-card__action-btn--resolve {
+  color: var(--hbc-color-green-600, #2e7d32);
+}
+
+.hbc-annotation-card__action-btn--withdraw {
+  color: var(--hbc-color-text-secondary, #666666);
+}
+
+.hbc-annotation-card__resolution {
+  font-size: 12px;
+  color: var(--hbc-color-text-secondary, #666666);
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--hbc-color-surface-subtle, #fafafa);
+  border-radius: 4px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Annotation Badge
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-annotation-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  line-height: 1.4;
+}
+
+.hbc-annotation-badge--red {
+  background: var(--hbc-color-red-50, #ffebee);
+  color: var(--hbc-color-red-700, #c62828);
+}
+
+.hbc-annotation-badge--amber {
+  background: var(--hbc-color-amber-50, #fff3e0);
+  color: var(--hbc-color-amber-700, #e65100);
+}
+
+.hbc-annotation-badge--blue {
+  background: var(--hbc-color-blue-50, #e3f2fd);
+  color: var(--hbc-color-blue-700, #1565c0);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Replies
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-annotation-replies {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0 0 0 12px;
+  border-left: 2px solid var(--hbc-color-border-subtle, #f0f0f0);
+}
+
+.hbc-annotation-reply {
+  padding: 6px 0;
+}
+
+.hbc-annotation-reply + .hbc-annotation-reply {
+  border-top: 1px solid var(--hbc-color-border-subtle, #f0f0f0);
+}
+
+.hbc-annotation-reply__author {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hbc-color-text-primary, #333333);
+}
+
+.hbc-annotation-reply__body {
+  font-size: 13px;
+  margin: 2px 0;
+  color: var(--hbc-color-text-primary, #333333);
+}
+
+.hbc-annotation-reply__time {
+  font-size: 11px;
+  color: var(--hbc-color-text-secondary, #666666);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Reply Form
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-annotation-reply-form {
+  margin-top: 8px;
+  padding: 8px 0 0;
+}
+
+.hbc-annotation-reply-form__textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  font-size: 13px;
+  border: 1px solid var(--hbc-color-border-default, #e0e0e0);
+  border-radius: 4px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.hbc-annotation-reply-form__textarea:focus {
+  outline: 2px solid var(--hbc-color-blue-500, #1976d2);
+  outline-offset: -1px;
+}
+
+.hbc-annotation-reply-form__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Resolve Form
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-annotation-resolve-form {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--hbc-color-surface-subtle, #fafafa);
+  border-radius: 4px;
+}
+
+.hbc-annotation-resolve-form__label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.hbc-annotation-resolve-form__textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  font-size: 13px;
+  border: 1px solid var(--hbc-color-border-default, #e0e0e0);
+  border-radius: 4px;
+  resize: vertical;
+  font-family: inherit;
+  margin-top: 4px;
+}
+
+.hbc-annotation-resolve-form__textarea:focus {
+  outline: 2px solid var(--hbc-color-blue-500, #1976d2);
+  outline-offset: -1px;
+}
+
+.hbc-annotation-resolve-form__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Add Annotation Form
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-annotation-add-form__intent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.hbc-annotation-add-form__intent-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.hbc-annotation-add-form__intent-select {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 13px;
+  border: 1px solid var(--hbc-color-border-default, #e0e0e0);
+  border-radius: 4px;
+  background: var(--hbc-color-surface-primary, #ffffff);
+  font-family: inherit;
+}
+
+.hbc-annotation-add-form__textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  font-size: 13px;
+  border: 1px solid var(--hbc-color-border-default, #e0e0e0);
+  border-radius: 4px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.hbc-annotation-add-form__textarea:focus {
+  outline: 2px solid var(--hbc-color-blue-500, #1976d2);
+  outline-offset: -1px;
+}
+
+.hbc-annotation-add-form__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  justify-content: flex-end;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Shared Buttons
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  border-radius: 4px;
+  transition: background-color 150ms ease;
+}
+
+.hbc-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hbc-btn--primary {
+  background: var(--hbc-color-blue-600, #1565c0);
+  color: #ffffff;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.hbc-btn--primary:hover:not(:disabled) {
+  background: var(--hbc-color-blue-700, #0d47a1);
+}
+
+.hbc-btn--ghost {
+  background: transparent;
+  color: var(--hbc-color-text-secondary, #666666);
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.hbc-btn--ghost:hover:not(:disabled) {
+  background: var(--hbc-color-surface-hover, #f5f5f5);
+}
+
+.hbc-btn--sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}

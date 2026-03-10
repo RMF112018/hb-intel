@@ -10,3 +10,6 @@ export type {
   SidebarNavGroup,
   ShellUser,
 } from './HbcAppShell/index.js';
+
+export { HbcAnchoredPopover as Popover } from './HbcAnchoredPopover/index.js';
+export type { HbcAnchoredPopoverProps as PopoverProps } from './HbcAnchoredPopover/index.js';

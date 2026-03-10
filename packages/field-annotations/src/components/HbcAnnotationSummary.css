@@ -1,0 +1,177 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+ * HbcAnnotationSummary — Record-level open annotation panel
+ * Uses HB Intel Design System CSS custom properties
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-annotation-summary {
+  background: var(--hbc-color-surface-primary, #ffffff);
+  border: 1px solid var(--hbc-color-border-default, #e0e0e0);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.hbc-annotation-summary--loading {
+  text-align: center;
+}
+
+.hbc-annotation-summary--empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hbc-annotation-summary__loading-text {
+  font-size: 13px;
+  color: var(--hbc-color-text-secondary, #666666);
+}
+
+.hbc-annotation-summary__empty-text {
+  font-size: 13px;
+  color: var(--hbc-color-text-secondary, #666666);
+}
+
+.hbc-annotation-summary__resolved-count {
+  font-size: 12px;
+  color: var(--hbc-color-text-secondary, #666666);
+  padding: 2px 8px;
+  background: var(--hbc-color-surface-subtle, #fafafa);
+  border-radius: 12px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Header
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-annotation-summary__header {
+  margin-bottom: 12px;
+}
+
+.hbc-annotation-summary__title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--hbc-color-text-primary, #333333);
+}
+
+.hbc-annotation-summary__breakdown {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hbc-annotation-summary__breakdown-item {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.hbc-annotation-summary__breakdown-item--red {
+  background: var(--hbc-color-red-50, #ffebee);
+  color: var(--hbc-color-red-700, #c62828);
+}
+
+.hbc-annotation-summary__breakdown-item--amber {
+  background: var(--hbc-color-amber-50, #fff3e0);
+  color: var(--hbc-color-amber-700, #e65100);
+}
+
+.hbc-annotation-summary__breakdown-item--blue {
+  background: var(--hbc-color-blue-50, #e3f2fd);
+  color: var(--hbc-color-blue-700, #1565c0);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Field list (Expert mode)
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-annotation-summary__field-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hbc-annotation-summary__field-item {
+  padding: 8px 0;
+}
+
+.hbc-annotation-summary__field-item + .hbc-annotation-summary__field-item {
+  border-top: 1px solid var(--hbc-color-border-subtle, #f0f0f0);
+}
+
+.hbc-annotation-summary__field-btn {
+  appearance: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-align: left;
+  gap: 8px;
+}
+
+.hbc-annotation-summary__field-btn:hover {
+  background: var(--hbc-color-surface-hover, #f5f5f5);
+}
+
+.hbc-annotation-summary__field-label {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hbc-color-text-primary, #333333);
+}
+
+.hbc-annotation-summary__field-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hbc-color-text-secondary, #666666);
+  background: var(--hbc-color-surface-subtle, #fafafa);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Annotation rows within a field (Expert mode)
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-annotation-summary__annotation-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0 0 0 16px;
+}
+
+.hbc-annotation-summary__annotation-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: 12px;
+}
+
+.hbc-annotation-summary__annotation-author {
+  font-weight: 600;
+  color: var(--hbc-color-text-primary, #333333);
+  white-space: nowrap;
+}
+
+.hbc-annotation-summary__annotation-excerpt {
+  color: var(--hbc-color-text-secondary, #666666);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Standard mode field count summary
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.hbc-annotation-summary__field-count-summary {
+  font-size: 13px;
+  color: var(--hbc-color-text-secondary, #666666);
+  margin: 0;
+}

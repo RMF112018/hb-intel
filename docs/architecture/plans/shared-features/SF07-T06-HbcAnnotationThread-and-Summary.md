@@ -745,6 +745,12 @@ pnpm --filter @hbc/dev-harness storybook
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF07-T06 not yet started.
+SF07-T06 completed: 2026-03-10
+- Created HbcAnchoredPopover in @hbc/ui-kit (lightweight, SPFx-safe, no Griffel)
+- Exported as Popover/PopoverProps from @hbc/ui-kit/app-shell
+- Implemented HbcAnnotationThread with full CRUD (cards, replies, resolve, withdraw, add)
+- Implemented HbcAnnotationSummary with D-05 complexity rendering (standard vs expert)
+- Applied corrections: tier not variant from useComplexity, inline props, hooks before early return, RefObject<T | null>
+- All gates pass: check-types, build, lint (zero warnings)
 Next: SF07-T07 (Platform Wiring)
 -->
