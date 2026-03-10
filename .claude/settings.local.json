@@ -83,7 +83,8 @@
       "Bash(for pkg in auth shell sharepoint-docs bic-next-move complexity)",
       "Bash(mv:*)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=8192\" pnpm:*)",
-      "Bash(kill %1:*)"
+      "Bash(kill %1:*)",
+      "Bash(gh:*)"
     ]
   },
   "enabledPlugins": {
