@@ -265,6 +265,14 @@ grep -r "from 'xlsx'" packages/data-seeding/src/ | grep -v XlsxParser
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF09-T01 not yet started.
+SF09-T01 completed: 2026-03-10
+- Created packages/data-seeding/ with full directory structure
+- package.json with dual entry points (./dist/src/index.js, ./dist/testing/index.js), private: true
+- tsconfig.json + tsconfig.build.json matching workflow-handoff pattern
+- vitest.config.ts with passWithNoTests, resolve aliases, 95% coverage thresholds
+- All 8 barrel stubs and 17 module stubs created
+- tsconfig.base.json updated with @hbc/data-seeding path aliases
+- Deviation: removed @hbc/app-types devDependency (package does not exist in workspace)
+- Build: zero errors | check-types: zero errors | test: passes (no test files)
 Next: SF09-T02-TypeScript-Contracts.md
 -->

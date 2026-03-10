@@ -66,7 +66,9 @@
       "@hbc/versioned-record": ["packages/versioned-record/src/index.ts"],
       "@hbc/versioned-record/*": ["packages/versioned-record/src/*"],
       "@hbc/field-annotations": ["packages/field-annotations/src/index.ts"],
-      "@hbc/field-annotations/*": ["packages/field-annotations/src/*"]
+      "@hbc/field-annotations/*": ["packages/field-annotations/src/*"],
+      "@hbc/data-seeding": ["packages/data-seeding/src/index.ts"],
+      "@hbc/data-seeding/*": ["packages/data-seeding/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"]
