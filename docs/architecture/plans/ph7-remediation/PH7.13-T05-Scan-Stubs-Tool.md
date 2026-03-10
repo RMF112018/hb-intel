@@ -206,6 +206,12 @@ rm packages/shared-kernel/src/fake-stub.ts
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-PH7.13-T05 not yet started.
+PH7.13-T05 completed: 2026-03-10
+- Created tools/scan-stubs.ts with dual-grep approach:
+  - runThrowScan(): throw-pattern grep for unapproved stub detection (CI-equivalent)
+  - runApprovedScan(): separate grep for stub-approved: markers across TS/TSX/YML/YAML + .github/
+  - Fixes spec design gap where single throw-pattern grep missed approved stubs (S-01 uses logger.info, S-02 multi-line throw, S-06 is YAML)
+- Added scan-stubs and scan-stubs:all scripts to root package.json
+- Added tsx as root devDependency for TypeScript execution
 Next: PH7.13-T09 (Deployment — Documentation, ADR, README, ADR Index Update)
 -->

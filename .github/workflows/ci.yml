@@ -43,7 +43,7 @@ jobs:
             --exclude-dir=node_modules \
             --exclude-dir=coverage \
             --exclude-dir=".git" \
-            -E "(throw new Error\(['\"\`][^'\"]+not.?impl|throw new Error\(['\"\`][^'\"]+placeholder)" \
+            -E "(throw new Error\(['\"\`][^'\"]*not.?impl|throw new Error\(['\"\`][^'\"]*placeholder)" \
             packages/ apps/ backend/ 2>/dev/null \
             | grep -v "stub-approved:" \
             | grep -v "\.test\.\|\.spec\.\|tools/mocks" \

@@ -90,7 +90,11 @@
       "Bash(cat > /Users/bobbyfetting/hb-intel/_test-ts-ignore.ts << 'EOF'\n// @ts-ignore\nconst x: any = 'test';\nEOF\npnpm eslint _test-ts-ignore.ts 2>&1; echo \"EXIT: $?\")",
       "Bash(cat > /Users/bobbyfetting/hb-intel/_test-ts-ignore-ok.ts << 'EOF'\n// @ts-ignore: third-party type stub missing generics — upstream tracked\nconst x: any = 'test';\nEOF\npnpm eslint _test-ts-ignore-ok.ts 2>&1; echo \"EXIT: $?\")",
       "Bash(ls /Users/bobbyfetting/hb-intel/packages/shared-kernel/package.json && grep -A2 '\"lint\"' /Users/bobbyfetting/hb-intel/packages/shared-kernel/package.json)",
-      "Bash(cd /Users/bobbyfetting/hb-intel/packages/shell && cat > /tmp/_test-ok.ts << 'EOF'\n// @ts-ignore: third-party type stub missing generics — upstream tracked\nconst x: any = 'test';\nEOF\npnpm eslint --config .eslintrc.cjs /tmp/_test-ok.ts 2>&1; echo \"EXIT: $?\")"
+      "Bash(cd /Users/bobbyfetting/hb-intel/packages/shell && cat > /tmp/_test-ok.ts << 'EOF'\n// @ts-ignore: third-party type stub missing generics — upstream tracked\nconst x: any = 'test';\nEOF\npnpm eslint --config .eslintrc.cjs /tmp/_test-ok.ts 2>&1; echo \"EXIT: $?\")",
+      "Bash(pnpm scan-stubs:*)",
+      "Bash(pnpm scan-stubs:all 2>&1; echo \"Exit code: $?\")",
+      "Bash(cp /tmp/fake-stub.ts packages/shell/src/fake-stub.ts && pnpm scan-stubs 2>&1; echo \"Exit code: $?\")",
+      "Bash(rm packages/shell/src/fake-stub.ts && pnpm scan-stubs 2>&1; echo \"Exit code: $?\")"
     ]
   },
   "enabledPlugins": {

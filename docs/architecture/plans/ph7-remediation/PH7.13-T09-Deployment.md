@@ -28,12 +28,12 @@ Complete all documentation, governance, and closure deliverables for PH7.13. Thi
 
 Wave 4 — Documentation and governance closure (all items required before PH7.13 is considered complete):
 
-- [ ] **ADR-0095** — `docs/architecture/adr/0095-stub-detection-enforcement-standard.md` written and accepted
-- [ ] **Adoption guide** — `docs/how-to/developer/stub-detection-guide.md` written for developer onboarding
-- [ ] **API/rule reference** — `no-stub-implementations` rule documented in `packages/eslint-plugin-hbc/README.md`
-- [ ] **Package README** — `packages/eslint-plugin-hbc/README.md` updated with stub enforcement section
-- [ ] **ADR Index** — `docs/README.md` updated with ADR-0095 row
-- [ ] **Current-state-map** — `current-state-map.md §2` updated with PH7.13 task file rows
+- [x] **ADR-0095** — `docs/architecture/adr/0095-stub-detection-enforcement-standard.md` written and accepted
+- [x] **Adoption guide** — `docs/how-to/developer/stub-detection-guide.md` written for developer onboarding
+- [x] **API/rule reference** — `no-stub-implementations` rule documented in `packages/eslint-plugin-hbc/README.md`
+- [x] **Package README** — `packages/eslint-plugin-hbc/README.md` updated with stub enforcement section
+- [x] **ADR Index** — `docs/README.md` updated with ADR-0095 row
+- [x] **Current-state-map** — `current-state-map.md §2` updated with PH7.13 task file rows
 
 ---
 
@@ -358,8 +358,13 @@ pnpm scan-stubs:all
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-PH7.13-T09 not yet started.
-Depends on: T01 (ESLint base config), T02 (no-stub-implementations rule),
-            T03 (CI grep scan), T04 (stub inventory remediation), T05 (scan-stubs tool).
-Next: All tasks complete → record Blueprint Progress Comment → PH7.13 closed.
+PH7.13-T09 completed: 2026-03-10
+All six documentation checklist items satisfied:
+  - ADR-0095 created: docs/architecture/adr/0095-stub-detection-enforcement-standard.md
+  - Developer how-to guide: docs/how-to/developer/stub-detection-guide.md
+  - ESLint plugin README updated: packages/eslint-plugin-hbc/README.md (no-stub-implementations section)
+  - ADR index updated: docs/README.md (ADR-0095 row)
+  - current-state-map.md updated: ADR count 91→92, Last Updated 2026-03-10
+  - Blueprint progress comment appended to HB-Intel-Blueprint-V4.md
+PH7.13 is now fully closed (T01–T05 code tasks + T09 documentation).
 -->

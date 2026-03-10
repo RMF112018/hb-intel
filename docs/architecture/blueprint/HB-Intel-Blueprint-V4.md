@@ -1169,3 +1169,19 @@ Phase 2 SF06 completed: 2026-03-10
     metadata-first loading (D-06), getStakeholders notification pattern (D-09)
   Next: SF07 (next shared feature per PH7 evaluation doc)
 -->
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+PH7.13 completed: 2026-03-10
+Stub Detection and Incomplete Implementation Enforcement — three-layer enforcement added.
+Layer 1: ESLint rules (no-warning-comments, ban-ts-comment, no-stub-implementations)
+Layer 2: CI grep scan in lint-and-typecheck job
+Layer 3: All 6 known stubs remediated or exempted with stub-approved markers
+ADR created: docs/architecture/adr/0095-stub-detection-enforcement-standard.md
+Package README updated: packages/eslint-plugin-hbc/README.md (no-stub-implementations docs)
+Developer guide added: docs/how-to/developer/stub-detection-guide.md
+ADR index updated: docs/README.md (ADR-0095 row)
+Tool added: tools/scan-stubs.ts (pnpm scan-stubs)
+All four mechanical enforcement gates passed.
+current-state-map.md §2 updated: PH7.13 task file rows added.
+Next: PH7.12 final verification or PH8 CI/CD expansion per Foundation Plan sequencing.
+-->

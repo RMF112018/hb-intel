@@ -68,3 +68,51 @@ node --test tests/rules/*.test.js
 - PH4B-UI-Design-Plan.md v1.2 §§2, 14, 16, 17 (D-10)
 - ADR-0045-component-consumption-enforcement.md
 - ADR-0034-audit-remediation.md
+
+## `no-stub-implementations`
+
+**Added:** PH7.13 (2026-03-10)
+**Severity:** `error` on source files; not applied to test files or `tools/mocks/`
+**ADR:** ADR-0095
+
+Detects `throw new Error(msg)` statements where the error message matches a stub or
+not-implemented pattern, indicating that a function body has not been implemented.
+
+### Detected Patterns
+
+```js
+throw new Error('not implemented');         // ❌ error
+throw new Error('Not yet implemented');      // ❌ error
+throw new Error('stub — replace this');      // ❌ error
+throw new Error('placeholder');              // ❌ error
+throw new Error(`TODO: implement ${name}`);  // ❌ error
+```
+
+### Escape Hatch: `stub-approved`
+
+Intentional stubs that are durably deferred may be exempted by adding a
+`// stub-approved: <non-empty reason>` comment on the line immediately preceding
+the stub throw:
+
+```typescript
+// stub-approved: pending SF04 @hbc/acknowledgment T07 activation — tracked backlog #42
+throw new Error('not implemented');  // ✅ no error — exempted by stub-approved comment
+```
+
+The reason must be non-empty. A blank `// stub-approved:` comment does not satisfy the
+escape hatch and will still produce an error.
+
+### Exclusions
+
+The rule is not applied to:
+- `**/*.test.ts`, `**/*.test.tsx`, `**/*.spec.ts`, `**/*.spec.tsx` — test files
+- `**/*.stories.tsx` — Storybook story files
+- `tools/mocks/**` — SPFx SDK mocks (globally exempt per ADR-0095 D-06)
+- `**/testing/**` — testing sub-path utilities
+
+### Developer Tool
+
+Use `pnpm scan-stubs` to scan the codebase locally for unapproved stubs.
+Use `pnpm scan-stubs:all` to also list all `stub-approved` entries for inventory review.
+
+See: `docs/architecture/plans/ph7-remediation/PH7.13-Stub-Detection-Enforcement.md`

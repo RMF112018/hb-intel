@@ -123,6 +123,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0090 | Accepted | [ADR-0090-signalr-per-project-groups.md](./architecture/adr/ADR-0090-signalr-per-project-groups.md) |
 | ADR-0091 | Accepted | [ADR-0091-phase-7-final-verification.md](./architecture/adr/ADR-0091-phase-7-final-verification.md) |
 | ADR-0094 | Accepted | [ADR-0094-versioned-record-platform-primitive.md](./architecture/adr/ADR-0094-versioned-record-platform-primitive.md) |
+| ADR-0095 | Accepted | [0095-stub-detection-enforcement-standard.md](./architecture/adr/0095-stub-detection-enforcement-standard.md) |
 
 ## Reference Documents
 

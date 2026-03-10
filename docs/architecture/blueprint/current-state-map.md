@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Status:** Canonical Current-State
-**Last Updated:** 2026-03-09
+**Last Updated:** 2026-03-10
 **Purpose:** Single authoritative reference for the present implementation state of the HB Intel monorepo. When this document differs from historical plans or locked blueprints regarding _what exists today_, this document governs present truth.
 
 ---
@@ -14,7 +14,7 @@
 | 1 | This file (`current-state-map.md`) | Canonical Current-State | Living — updated with each structural change | Present implementation truth |
 | 2 | [Blueprint V4](./blueprint/HB-Intel-Blueprint-V4.md) | Canonical Normative Plan | Locked — comment-only updates | Target architecture intent |
 | 3 | [Foundation Plan](./plans/hb-intel-foundation-plan.md) | Historical Foundational | Locked — comment-only updates | Original implementation instructions |
-| 4 | [ADRs](./adr/) (91 active; 6 archived — see §2.2 for resolution record) | Permanent Decision Rationale | Append-only | Individual architectural decisions |
+| 4 | [ADRs](./adr/) (92 active; 6 archived — see §2.2 for resolution record) | Permanent Decision Rationale | Append-only | Individual architectural decisions |
 | 5 | Phase/Task Plans (`plans/ph7-*`, `plans/PH*.md`) | Time-bound Execution | Historical after completion | Phase-scoped implementation details |
 | 6 | Package READMEs (`packages/*/README.md`) | Current Implementation Detail | Living | Package-specific API and usage |
 
