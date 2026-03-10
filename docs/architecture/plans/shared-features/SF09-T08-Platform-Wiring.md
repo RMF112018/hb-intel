@@ -796,8 +796,17 @@ grep -r "ISeedConfig" packages/project-hub/src/seeding/
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF09-T08 not yet started.
-Prerequisite: @hbc/sharepoint-docs must have DocumentApi.uploadToSystemContext
-before this platform wiring can be completed.
+SF09-T08 completed: 2026-03-10
+Deviation: Reference ISeedConfig implementations placed in packages/data-seeding/src/reference-configs/
+  instead of consuming packages (packages/business-development/, etc.) which are not yet scaffolded.
+  Configs use relative imports (from '../types', from '../parsers') and type-check as part of data-seeding.
+  They can be moved to consuming packages when those are scaffolded.
+Work completed:
+  1. @hbc/sharepoint-docs: Added ISystemContext.ts types, uploadToSystemContext() method on UploadService,
+     exported UploadProgressCallback type from index.ts.
+  2. @hbc/data-seeding: 5 reference ISeedConfig implementations (bdLeads, estimatingBidCalendar,
+     projectHub, adminUser, strategicIntelWinLoss) with inline TSource/TDest types, no dead imports.
+  3. All spec fixes applied: dead imports removed, relative import paths used, configs in reference-configs/.
+Verification: check-types ✓ | build ✓ | lint ✓ (0 errors) | boundary grep ✓ (0 forbidden imports)
 Next: SF09-T09-Testing-and-Deployment.md
 -->

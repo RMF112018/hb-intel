@@ -236,5 +236,6 @@ SF09-T04 completed: 2026-03-10 — SeedApi implemented (importBatch, parseStream
 SF09-T05 completed: 2026-03-10 — useSeedImport (full state machine) and useSeedHistory (TanStack Query wrapper) implemented. crypto.randomUUID() used instead of uuid dep. IImportCompleteRequest extended with 3 fields. seedHistoryQueryKey exported. All gates pass.
 SF09-T06 completed: 2026-03-10 — HbcSeedUploader and HbcSeedMapper implemented. Three spec fixes applied: (1) useComplexity().variant → .tier; (2) DocumentApi dynamic import replaced with uploadFile callback prop (IoC/ports-adapters); (3) @hbc/sharepoint-docs dependency not needed. All gates pass.
 SF09-T07 completed: 2026-03-10 — HbcSeedPreview (Essential summary, Standard/Expert table with error highlighting) and HbcSeedProgress (segmented bar, terminal actions, Expert batch detail) implemented. useComplexity().variant → .tier fix applied (6 occurrences). All gates pass.
-Next: SF09-T08-Platform-Wiring.md
+SF09-T08 completed: 2026-03-10 — Platform wiring: uploadToSystemContext() added to @hbc/sharepoint-docs UploadService; 5 reference ISeedConfig implementations in packages/data-seeding/src/reference-configs/ (bdLeads, estimatingBidCalendar, projectHub, adminUser, strategicIntelWinLoss). Architecture boundary verification passed (0 forbidden imports). All gates pass.
+Next: SF09-T09-Testing-and-Deployment.md
 -->

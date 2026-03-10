@@ -5,3 +5,4 @@ export * from './IMigrationCheckpoint.js';
 export * from './IOfflineQueueEntry.js';
 export * from './IConflict.js';
 export * from './ITombstone.js';
+export * from './ISystemContext.js';

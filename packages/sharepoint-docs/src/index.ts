@@ -21,6 +21,7 @@ export { PermissionManager } from './api/PermissionManager.js';
 
 // Services
 export { UploadService } from './services/UploadService.js';
+export type { UploadProgressCallback } from './services/UploadService.js';
 export { OfflineQueueManager } from './services/OfflineQueueManager.js';
 export { MigrationService } from './services/MigrationService.js';
 export { MigrationScheduler } from './services/MigrationScheduler.js';

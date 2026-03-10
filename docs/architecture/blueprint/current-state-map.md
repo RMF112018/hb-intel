@@ -52,6 +52,8 @@
 | `docs/how-to/developer/workflow-handoff-adoption-guide.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; workflow-handoff module adoption |
 | `docs/reference/workflow-handoff/api.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; workflow-handoff API reference |
 | SF09 shared-feature plans (10 files: `SF09-Data-Seeding.md` through `SF09-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; pending PH7.12 sign-off (ADR-0090) before implementation begins |
+| SF10 shared-feature plans (10 files: `SF10-Notification-Intelligence.md` through `SF10-T09-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/notification-intelligence`; ADR-0096; pending PH7.12 sign-off (ADR-0090) before implementation begins |
+| `docs/architecture/adr/0096-notification-intelligence-tiered-model.md` | **Permanent Decision Rationale** | SF10 notification intelligence tiered model; 10 locked decisions (D-01–D-10); authored 2026-03-10 |
 | PH4 phase plans (`plans/PH4-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH4-Shell-Consolidation.md` (master plan) |
 | PH5 phase plans (`plans/PH5-*.md`, `plans/PH5C-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH5-Auth-Shell-Plan.md` and `PH5C-Auth-Shell-Plan.md` |
 | PH6 phase plans (`plans/PH6-*.md`, `plans/PH6F-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH6-Provisioning-Plan.md`; sub-plans Tier 2 |

@@ -1,4 +1,5 @@
 import type { IDocumentContextConfig, IUploadedDocument } from '../types/index.js';
+import type { ISystemContextUploadOptions, ISystemContextUploadResult } from '../types/ISystemContext.js';
 import {
   SIZE_STANDARD_MAX,
   SIZE_HARD_BLOCK,
@@ -187,6 +188,38 @@ export class UploadService {
 
     // Shouldn't reach here if Graph API behaves correctly
     throw new Error(`Chunked upload did not return a final URL for: ${file.name}`);
+  }
+
+  /**
+   * Convenience method for uploading files to the System context folder (D-06).
+   * Used by @hbc/data-seeding to store seed import files for audit traceability.
+   */
+  async uploadToSystemContext(options: ISystemContextUploadOptions): Promise<ISystemContextUploadResult> {
+    const { file, contextId, contextLabel, ownerUpn, ownerLastName, onProgress } = options;
+
+    const contextConfig: IDocumentContextConfig = {
+      contextId,
+      contextType: 'system',
+      contextLabel: contextLabel ?? `seed-import-${contextId}`,
+      siteUrl: null,
+      ownerUpn,
+      ownerLastName,
+    };
+
+    const result = await this.upload({
+      file,
+      contextConfig,
+      subFolder: 'seed-imports',
+      onProgress,
+    });
+
+    return {
+      documentId: result.document.id,
+      sharepointUrl: result.document.sharepointUrl,
+      fileName: result.document.fileName,
+      fileSizeBytes: result.document.fileSize,
+      uploadedAt: result.document.uploadedAt,
+    };
   }
 
   private getExtension(fileName: string): string {
