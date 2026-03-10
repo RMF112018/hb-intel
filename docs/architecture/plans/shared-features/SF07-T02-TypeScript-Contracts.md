@@ -464,6 +464,11 @@ node -e "
 Expected exports include: `ANNOTATION_LIST_TITLE`, `ANNOTATION_API_BASE`, `ANNOTATION_MAX_REPLIES`, `ANNOTATION_STALE_TIME_RECORD_MS`, `ANNOTATION_STALE_TIME_FIELD_MS`, `intentColorClass`, `intentLabel`, `resolveAnnotationConfig` — plus all interfaces as type-only exports.
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF07-T02 not yet started.
+SF07-T02 completed: 2026-03-10
+- Populated src/types/IFieldAnnotation.ts with full contract layer (IBicOwner re-export, AnnotationIntent, AnnotationStatus, IAnnotationReply, IFieldAnnotation, IFieldAnnotationConfig, IAnnotationCounts, IUseFieldAnnotationsResult, IUseFieldAnnotationResult, ICreateAnnotationInput, IAddReplyInput, IResolveAnnotationInput, IWithdrawAnnotationInput, IUseAnnotationActionsResult, IRawAnnotationListItem)
+- Populated src/constants/annotationDefaults.ts with SharePoint/API constants, stale times, default config values, intent mappings, and resolveAnnotationConfig() helper
+- Correction applied: import path in annotationDefaults.ts changed from './IFieldAnnotation' to '../types/IFieldAnnotation'
+- Barrel exports verified: types/index.ts, constants/index.ts, src/index.ts all resolve correctly
+- Gates passed: check-types (zero errors), build (zero errors), lint (zero errors)
 Next: SF07-T03 (Storage and API Layer)
 -->
