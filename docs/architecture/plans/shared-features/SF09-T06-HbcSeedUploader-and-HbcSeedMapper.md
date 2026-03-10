@@ -547,9 +547,13 @@ pnpm --filter @hbc/data-seeding test -- --grep "drag.*drop|file.*drop"
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF09-T06 not yet started.
-Large-file flow: DocumentApi.uploadToSystemContext must be available from
-@hbc/sharepoint-docs. If the System context upload method does not yet exist,
-it must be added to sharepoint-docs before SF09 can be implemented.
+SF09-T06 completed: 2026-03-10
+Three compatibility fixes applied during implementation:
+1. useComplexity() returns `tier`, not `variant` — changed in HbcSeedMapper (3 occurrences).
+2. DocumentApi.uploadToSystemContext() does not exist — replaced with `uploadFile` callback prop
+   injected by the consuming module (IoC / ports-adapters pattern per Blueprint §2d).
+3. @hbc/sharepoint-docs dependency not needed — callback approach removes the import entirely.
+Documentation updated: SF09-Data-Seeding.md task index comment.
+All gates pass: check-types ✓, build ✓, lint ✓ (zero errors).
 Next: SF09-T07-HbcSeedPreview-and-HbcSeedProgress.md
 -->

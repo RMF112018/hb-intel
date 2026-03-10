@@ -234,5 +234,6 @@ SF09-T02 completed: 2026-03-10 — Full type contracts (IDataSeeding.ts) and con
 SF09-T03 completed: 2026-03-10 — XlsxParser, CsvParser, ProcoreExportParser, validateRow, validateAllRows, autoMapHeaders implemented. ESLint config added. All gates pass.
 SF09-T04 completed: 2026-03-10 — SeedApi implemented (importBatch, parseStreaming, recordCompletion, getHistory, getImport, getErrorReportUrl); configureSeedApiFetch DI; api/index.ts barrel created; main barrel updated. All gates pass.
 SF09-T05 completed: 2026-03-10 — useSeedImport (full state machine) and useSeedHistory (TanStack Query wrapper) implemented. crypto.randomUUID() used instead of uuid dep. IImportCompleteRequest extended with 3 fields. seedHistoryQueryKey exported. All gates pass.
-Next: SF09-T06-HbcSeedUploader-and-HbcSeedMapper.md
+SF09-T06 completed: 2026-03-10 — HbcSeedUploader and HbcSeedMapper implemented. Three spec fixes applied: (1) useComplexity().variant → .tier; (2) DocumentApi dynamic import replaced with uploadFile callback prop (IoC/ports-adapters); (3) @hbc/sharepoint-docs dependency not needed. All gates pass.
+Next: SF09-T07-HbcSeedPreview-and-HbcSeedProgress.md
 -->
