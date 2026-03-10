@@ -754,3 +754,23 @@ pnpm test -- --reporter=verbose src/utils/__tests__/versionUtils.test.ts
 # Confirm all types are exported from the public barrel
 node -e "const m = require('./dist/index.js'); console.log(Object.keys(m).join('\n'))"
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF06-T02 completed: 2026-03-10
+Files created/updated:
+  - src/types/IBicOwner.ts (new — extracted interface)
+  - src/types/IVersionedRecord.ts (replaced T01 stub with full 293-line contracts)
+  - src/types/index.ts (explicit named type exports, 17 types)
+  - src/constants.ts (new — 6 as-const exports)
+  - src/utils/versionUtils.ts (new — 15 pure utility exports)
+  - src/utils/__tests__/versionUtils.test.ts (new — 14 tests across 7 describe blocks)
+  - src/index.ts (expanded barrel — types, constants, utils, API, hooks, components)
+Verification:
+  - check-types: 38/38 passed (zero errors)
+  - build: 30/30 passed (zero errors)
+  - lint: zero errors/warnings
+  - unit tests: 14/14 passed
+Note: constants.ts uses literal 261120 instead of `255 * 1024 as const` (TS1355 — const assertion disallowed on computed expressions).
+Note: Removed unused `IVersionSnapshot` import from versionUtils.ts (lint --max-warnings 0).
+Next: T03 (diff engine)
+-->
