@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
 // Mock @hbc/complexity to isolate notification-intelligence unit tests

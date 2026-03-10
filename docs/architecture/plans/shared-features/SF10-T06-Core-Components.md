@@ -338,6 +338,14 @@ const pkg = require('./packages/notification-intelligence/dist/index.js');
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF10-T06 not yet started.
+SF10-T06 completed: 2026-03-10
+- HbcNotificationBadge: Bell icon (Notifications from @hbc/ui-kit/icons, size="md"), Immediate unread count badge, red/grey color, 99+ cap, D-08 essential guard.
+- HbcNotificationCenter: 4-tab bar (All/Immediate/Watch/Digest), tier border classes (D-02), mark-read/dismiss/mark-all-read controls, loading/empty states, load-more pagination, internal NotificationCard + formatRelativeTime.
+- Icon adaptation: Notifications replaces BellIcon (plan specified BellIcon but actual export is Notifications); size="md" replaces size={20} (prop accepts string union, not number).
+- @hbc/ui-kit/icons alias added to vitest.config.ts resolve.alias.
+- @testing-library/jest-dom added to devDependencies and test-setup.ts.
+- 21 new component tests (9 badge + 12 center); all 40 package tests pass.
+- Barrel (src/components/index.ts) already correct from T01 — no edit needed.
+- check-types: zero errors. build: zero errors.
 Next: SF10-T07 (Interaction Components — HbcNotificationBanner + HbcNotificationPreferences)
 -->

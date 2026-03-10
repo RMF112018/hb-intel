@@ -167,7 +167,8 @@ SF10-T02 completed: 2026-03-10 — Full TypeScript contracts (INotificationEvent
 SF10-T03 completed: 2026-03-10 — NotificationRegistry singleton (register/getAll/getByEventType/getByModule/size/_clearForTesting). 10 unit tests passing. ADR ref corrected to ADR-0099.
 SF10-T04 completed: 2026-03-10 — NotificationApi (send/getCenter/markRead/markAllRead/dismiss) + PreferencesApi (getPreferences/updatePreferences). 9 API tests + 10 registry tests = 19 passing. ADR ref ADR-0099.
 SF10-T05 completed: 2026-03-10 — React hooks (useNotificationCenter with useInfiniteQuery + 3 mutations, useNotificationBadge with 60s polling, useNotificationPreferences with optimistic update/rollback). Query key factory (notificationKeys). All 19 existing tests pass; check-types zero errors; build zero errors.
-Status: T05 done — ready for T06 implementation (Core Components).
+SF10-T06 completed: 2026-03-10 — Core components (HbcNotificationBadge with Notifications icon + Immediate unread badge; HbcNotificationCenter with tier tab bar, notification cards, mark-read/dismiss/mark-all-read, load-more pagination). Icon adapted: Notifications replaces BellIcon, size="md" replaces size={20}. 21 new component tests (9 badge + 12 center). @testing-library/jest-dom added. @hbc/ui-kit/icons alias added to vitest config. All 40 tests pass; check-types zero errors; build zero errors.
+Status: T06 done — ready for T07 implementation (Interaction Components).
 Pending: PH7.12 sign-off (ADR-0090) before feature-expansion phases begin.
-Next: SF10-T06 (Core Components — HbcNotificationCenter + HbcNotificationBadge)
+Next: SF10-T07 (Interaction Components — HbcNotificationBanner + HbcNotificationPreferences)
 -->
