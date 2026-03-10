@@ -60,4 +60,28 @@ describe('HbcStepProgress', () => {
     render(<HbcStepProgress item={{}} config={config} />);
     expect(screen.getByTitle('Progress data may be out of date')).toBeInTheDocument();
   });
+
+  it('renders ring variant with correct percentage text', () => {
+    vi.mocked(useStepProgress).mockReturnValue({
+      completedCount: 1,
+      requiredCount: 3,
+      percentComplete: 33,
+      isComplete: false,
+      isStale: false,
+    });
+    render(<HbcStepProgress item={{}} config={config} variant="ring" />);
+    expect(screen.getByText('33%')).toBeInTheDocument();
+  });
+
+  it('renders ring variant with checkmark when complete', () => {
+    vi.mocked(useStepProgress).mockReturnValue({
+      completedCount: 3,
+      requiredCount: 3,
+      percentComplete: 100,
+      isComplete: true,
+      isStale: false,
+    });
+    render(<HbcStepProgress item={{}} config={config} variant="ring" />);
+    expect(screen.getByText('✓')).toBeInTheDocument();
+  });
 });

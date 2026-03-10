@@ -109,4 +109,20 @@ describe('HbcStepSidebar', () => {
     await user.click(lockedButton);
     expect(onStepSelect).not.toHaveBeenCalledWith('step-2');
   });
+
+  it('uses context tier when complexityTier prop is omitted', () => {
+    mockWizardReturn();
+    const onStepSelect = vi.fn();
+
+    render(
+      <HbcStepSidebar
+        item={{}}
+        config={config}
+        activeStepId="step-1"
+        onStepSelect={onStepSelect}
+      />,
+    );
+    // Should render without error using context tier (standard from mock)
+    expect(screen.getByRole('navigation', { name: 'Wizard steps' })).toBeInTheDocument();
+  });
 });

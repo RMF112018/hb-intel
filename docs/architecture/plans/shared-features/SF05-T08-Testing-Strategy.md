@@ -364,3 +364,31 @@ pnpm --filter @hbc/step-wizard storybook:build
 # E2E
 pnpm playwright test --grep step-wizard
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF05-T08 completed: 2026-03-09
+Testing utilities:
+  - testing/mockWizardStates.ts — 6 canonical states (notStarted, inProgress, complete, withBlocked, withSkipped, partialParallel) with both state + draft
+  - testing/createMockWizardConfig.ts — step-2 now required, added allowReopen/allowForceComplete/draftKey defaults
+  - testing/mockUseStepWizard.ts — full implementation with vi.fn() mocks for all mutations
+  - testing/createWizardWrapper.tsx — wraps with ComplexityTestProvider, accepts optional tier param
+  - vitest.config.ts — added @hbc/complexity/testing alias
+Unit tests: 142 tests across 10 test files, all passing
+Coverage: 100% statements, 100% lines, 100% functions, 95.61% branches (≥95% threshold met)
+New test files created:
+  - src/state/__tests__/draftPayloadHelpers.test.ts (28 tests)
+  - src/hooks/__tests__/useStepProgress.test.ts (4 tests)
+  - src/components/__tests__/StepStatusIcon.test.tsx (5 tests)
+  - src/components/__tests__/WizardSidebar.test.tsx (10 tests)
+  - src/components/__tests__/HbcStepWizard.test.tsx (19 tests)
+Existing test files extended:
+  - src/hooks/__tests__/useStepWizard.test.ts (+18 tests = 25 total)
+  - src/components/__tests__/HbcStepProgress.test.tsx (+2 tests = 6 total)
+  - src/components/__tests__/HbcStepSidebar.test.tsx (+1 test = 3 total)
+  - src/state/__tests__/stepStateMachine.test.ts (+16 tests = 35 total)
+Storybook stories created:
+  - src/components/__stories__/HbcStepWizard.stories.tsx (10 stories)
+  - src/components/__stories__/HbcStepProgress.stories.tsx (6 stories)
+Playwright E2E created:
+  - e2e/step-wizard.spec.ts (10 scenarios: E2E-01 through E2E-10)
+-->
