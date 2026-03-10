@@ -1,38 +1,9 @@
-# SF10-T02 — TypeScript Contracts: `@hbc/notification-intelligence`
-
-**Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
-**Spec Source:** `docs/explanation/feature-decisions/PH7-SF-10-Shared-Feature-Notification-Intelligence.md`
-**Decisions Applied:** D-02 (three-tier model), D-03 (badge count semantics), D-04 (banner behavior), D-05 (registry pattern), D-06 (digest schedule), D-09 (Phase 1 static tiers)
-**Estimated Effort:** 0.25 sprint-weeks
-**Depends On:** T01 (scaffold in place)
-
-> **Doc Classification:** Canonical Normative Plan — SF10-T02 types task; sub-plan of `SF10-Notification-Intelligence.md`.
-
----
-
-## Objective
-
-Implement `src/types/INotification.ts` — the complete TypeScript contract for the notification intelligence package. All other tasks consume these types directly. No runtime code; types only.
-
----
-
-## 3-Line Plan
-
-1. Write `INotification.ts` with `NotificationTier`, `NotificationChannel`, `INotificationEvent`, `INotificationRegistration`, `INotificationPreferences`, and the `NotificationSendPayload` input type.
-2. Export all from `src/types/index.ts`.
-3. Run type-check — zero errors; confirm all consuming barrels (stubs from T01) resolve cleanly.
-
----
-
-## `src/types/INotification.ts`
-
-```typescript
 /**
  * @hbc/notification-intelligence — Core TypeScript Contracts
  * SF10-T02 — D-02: Three-tier model; D-05: Registry pattern; D-06: Digest schedule
  *
  * @see docs/explanation/feature-decisions/PH7-SF-10-Shared-Feature-Notification-Intelligence.md
- * @see docs/architecture/adr/0096-notification-intelligence-tiered-model.md
+ * @see docs/architecture/adr/0099-notification-intelligence-tiered-model.md
  */
 
 // ─── Primitive Union Types ────────────────────────────────────────────────────
@@ -204,41 +175,3 @@ export interface INotificationCenterFilter {
   cursor?: string;
   pageSize?: number;
 }
-```
-
----
-
-## Verification Commands
-
-```bash
-# Type-check the package with the new types file in place
-pnpm --filter @hbc/notification-intelligence check-types
-# Expected: zero TypeScript errors
-
-# Confirm the types barrel re-exports correctly
-node -e "
-const { execSync } = require('child_process');
-execSync('pnpm --filter @hbc/notification-intelligence build', { stdio: 'inherit' });
-"
-# Expected: build succeeds
-
-# Confirm all type names are exported from the dist
-grep -l "NotificationTier\|INotificationEvent\|INotificationRegistration" \
-  packages/notification-intelligence/dist/types/INotification.d.ts
-# Expected: file path returned (file exists and contains type declarations)
-```
-
----
-
-<!-- IMPLEMENTATION PROGRESS & NOTES
-SF10-T02 completed: 2026-03-10
-All canonical TypeScript contracts implemented in src/types/INotification.ts:
-  - NotificationTier, NotificationChannel (updated values)
-  - INotificationEvent (replaces INotification — 15 fields)
-  - INotificationRegistration (expanded to 5 fields)
-  - INotificationPreferences (expanded to 5 fields)
-  - NotificationSendPayload, INotificationCenterResult, INotificationCenterFilter (new)
-All T01 dependent stubs updated for compile safety.
-Verification: check-types zero errors, build zero errors, all type declarations emitted in dist.
-Next: SF10-T03 (NotificationRegistry)
--->

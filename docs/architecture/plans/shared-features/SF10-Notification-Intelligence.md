@@ -162,7 +162,9 @@ Next: platform modules register their event types; SF10 enables module-level not
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF10 authored: 2026-03-10
 ADR corrected to ADR-0099 (initial plan used ADR-0096, which conflicts with field-annotations; corrected during current-state-map validation 2026-03-10).
-Status: Master plan complete — ready for T01 implementation.
+SF10-T01 completed: 2026-03-10 — Package scaffold (27 files), dual entry points, all barrel stubs compile-safe.
+SF10-T02 completed: 2026-03-10 — Full TypeScript contracts (INotificationEvent, INotificationRegistration, INotificationPreferences, NotificationSendPayload, INotificationCenterResult, INotificationCenterFilter). All T01 stubs updated for compile safety.
+Status: T02 done — ready for T03 implementation.
 Pending: PH7.12 sign-off (ADR-0090) before feature-expansion phases begin.
-Next: SF10-T01 (Package Scaffold)
+Next: SF10-T03 (NotificationRegistry)
 -->

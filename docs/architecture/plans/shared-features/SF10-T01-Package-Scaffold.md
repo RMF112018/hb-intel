@@ -245,6 +245,12 @@ cat packages/notification-intelligence/package.json | grep '"dependencies"' -A 3
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF10-T01 not yet started.
+SF10-T01 completed: 2026-03-10
+Package scaffold created with 27 files: package.json, tsconfig.json, tsconfig.build.json, vitest.config.ts,
+test-setup.ts, 6 barrel stubs (src + testing), 11 placeholder source modules, 5 testing mock factories.
+Reconciliation corrections applied: dist/src/ paths, tsconfig.build.json, workspace-current devDep versions,
+resolve aliases, private:true, react-dom peer dep, sourceMap/lib, additional scripts, files array.
+Root tsconfig.base.json updated with @hbc/notification-intelligence path mappings.
+Verification: build ✓, check-types ✓, test (passWithNoTests) ✓, dist/src/index.js ✓, dist/testing/index.js ✓.
 Next: SF10-T02 (TypeScript Contracts)
 -->
