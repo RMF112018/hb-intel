@@ -279,4 +279,23 @@ SF08-T03 remediation completed: 2026-03-10
 - Created .eslintrc.cjs — lint gate now passes (--max-warnings 0)
 - Removed unused imports (HandoffStatus, IBicOwner) from HandoffApi.ts — spec defect fix
 - All gates green: check-types, build, lint, full workspace build (32/32)
+
+SF08-T04 completed: 2026-03-10
+- handoffQueryKeys.ts: query key factory (4 keys: inbox, outbox, package, outboundBySource)
+- usePrepareHandoff.ts: full assembly hook with buildPreflightChecks helper (D-03, D-04, D-06)
+- useHandoffInbox.ts: TanStack Query inbox hook with 90s staleTime
+- useHandoffStatus.ts: TanStack Query status hook with conditional 30s polling (D-02)
+- Barrel export updated: handoffQueryKeys added to hooks/index.ts
+- IHandoffContextNote import kept per spec (unused at lint — removed during implementation)
+- Verification: check-types, build, lint, full workspace build (32/32) — all passed
+Next: SF08-T05 (HbcHandoffComposer)
+
+SF08-T05 completed: 2026-03-10
+- HbcHandoffComposer.tsx: full 4-step sender panel replacing export {} stub
+- 5 internal components: StepIndicator, PreflightStep, ReviewStep, RecipientStep, SendStep
+- 1 exported component: HbcHandoffComposer with state machine orchestrator
+- 3 lint-compliance fixes applied: removed unused React/useMemo imports, removed unused IHandoffDocument import, prefixed unused _onRecipientOverride param
+- No barrel changes needed (components/index.ts already wired in T01)
+- Verification: check-types, build, lint, full workspace build (32/32) — all passed
+Next: SF08-T06 (HbcHandoffReceiver and HbcHandoffStatusBadge)
 -->

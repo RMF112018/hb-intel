@@ -619,6 +619,16 @@ pnpm --filter @hbc/dev-harness storybook
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF08-T05 not yet started.
+SF08-T05 completed: 2026-03-10
+- Replaced export {} stub with full 530-line 4-step composer implementation
+- 5 internal components: StepIndicator, PreflightStep (D-03), ReviewStep (D-04/D-06), RecipientStep (D-05), SendStep (D-05)
+- 1 exported component: HbcHandoffComposer — state machine orchestrator with useQueryClient cache invalidation
+- handleSend: HandoffApi.create() → HandoffApi.send() → invalidate inbox/outbox queries
+- 3 lint-compliance fixes applied vs spec:
+  1. Removed unused React and useMemo imports (react-jsx automatic transform)
+  2. Removed unused IHandoffDocument type import (accessed via pkg.documents generic)
+  3. Prefixed unused onRecipientOverride as _onRecipientOverride (future recipient picker placeholder)
+- No barrel changes needed — components/index.ts already wired in T01
+- Verification: check-types (0 errors), build (dist/), lint (0 warnings), full workspace build (32/32)
 Next: SF08-T06 (HbcHandoffReceiver and HbcHandoffStatusBadge)
 -->

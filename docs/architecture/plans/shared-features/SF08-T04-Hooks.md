@@ -321,6 +321,15 @@ node -e "
 ```
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF08-T04 not yet started.
+SF08-T04 completed: 2026-03-10
+- handoffQueryKeys.ts created: 4 query key functions (inbox, outbox, package, outboundBySource)
+- usePrepareHandoff.ts: full implementation replacing stub; 4-step assembly (preflight → map → docs → recipient)
+  - buildPreflightChecks helper (non-exported)
+  - reassembleCount.current in useEffect deps kept per spec (functionally redundant but not harmful)
+  - IHandoffContextNote import from spec omitted — unused (contextNotes typed by inference as never[])
+- useHandoffInbox.ts: TanStack Query wrapper; staleTime 90s; returns pending, pendingCount, isLoading, isError, refetch
+- useHandoffStatus.ts: TanStack Query wrapper; staleTime 30s; conditional refetchInterval 30s for sent/received; stops on terminal
+- hooks/index.ts: added handoffQueryKeys export
+- Verification: check-types ✓, build ✓, lint ✓ (--max-warnings 0), full workspace build (32/32) ✓
 Next: SF08-T05 (HbcHandoffComposer)
 -->
