@@ -11,6 +11,7 @@ import type { ComplexityTier } from '../types/index.js';
 import { useProjectCanvas } from '../hooks/useProjectCanvas.js';
 import { useCanvasRecommendations } from '../hooks/useCanvasRecommendations.js';
 import { CanvasTileCard } from './CanvasTileCard.js';
+import { HbcCanvasEditor } from './HbcCanvasEditor.js';
 
 export interface HbcProjectCanvasProps {
   projectId: string;
@@ -27,7 +28,7 @@ export function HbcProjectCanvas({
   complexityTier = 'standard',
   editable = false,
 }: HbcProjectCanvasProps): React.ReactElement {
-  const { tiles, isLoading, error, reset, isMandatory, isLocked } = useProjectCanvas(
+  const { tiles, isLoading, error, save, reset, isMandatory, isLocked } = useProjectCanvas(
     projectId,
     userId,
     role,
@@ -109,7 +110,17 @@ export function HbcProjectCanvas({
 
       {isEditing && (
         <div data-testid="canvas-editor-active">
-          <button onClick={() => setIsEditing(false)}>Cancel</button>
+          <HbcCanvasEditor
+            projectId={projectId}
+            tiles={tiles}
+            isMandatory={isMandatory}
+            isLocked={isLocked}
+            onSave={async (editedTiles) => {
+              await save(editedTiles);
+              setIsEditing(false);
+            }}
+            onCancel={() => setIsEditing(false)}
+          />
         </div>
       )}
     </div>

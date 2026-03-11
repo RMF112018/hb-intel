@@ -40,3 +40,16 @@ Implement edit-mode operations and tile catalog selection flow.
 pnpm --filter @hbc/project-canvas test -- HbcCanvasEditor HbcTileCatalog
 pnpm --filter @hbc/project-canvas build
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF13-T06 completed: 2026-03-11
+Files modified:
+  - src/components/HbcCanvasEditor.tsx — full editor with toolbar, grid, tile cards, catalog overlay
+  - src/components/HbcTileCatalog.tsx — catalog browser with filtering, sorting, mandatory badges
+  - src/components/HbcProjectCanvas.tsx — wired HbcCanvasEditor into isEditing block, destructured save
+  - src/__tests__/HbcCanvasEditor.test.tsx — 14 tests (toolbar, governance, catalog integration)
+  - src/__tests__/HbcTileCatalog.test.tsx — 8 tests (filtering, add action, empty state, mandatory badge)
+Verification: 10 test files, 106 tests passed; zero type/build/lint errors
+DnD deferred: reorder via move-up/move-down buttons using reorderTiles(fromIndex, toIndex)
+Next: T07 (Reference Integrations)
+-->
