@@ -1,20 +1,40 @@
-import type { IUseEmptyStateResult, IEmptyStateConfig } from '../types/ISmartEmptyState.js';
+import { useMemo } from 'react';
+import type {
+  IEmptyStateContext,
+  IEmptyStateVisitStore,
+  ISmartEmptyStateConfig,
+  IUseEmptyStateResult,
+} from '../types/ISmartEmptyState.js';
+import { classifyEmptyState } from '../classification/classifyEmptyState.js';
+import { useFirstVisit } from './useFirstVisit.js';
 
-const defaultResolved: IEmptyStateConfig = {
-  module: '',
-  view: '',
-  classification: 'truly-empty',
-  heading: '',
-  description: '',
-};
+export interface UseEmptyStateParams {
+  config: ISmartEmptyStateConfig;
+  context: Omit<IEmptyStateContext, 'isFirstVisit'> & { isFirstVisit?: boolean };
+  firstVisitStore?: IEmptyStateVisitStore;
+}
 
-/**
- * Combined empty state hook.
- * Stub implementation — returns 'truly-empty' with default resolved config. Will be expanded in T04.
- */
-export function useEmptyState(_module: string, _view: string): IUseEmptyStateResult {
-  return {
-    classification: 'truly-empty',
-    resolved: defaultResolved,
+export function useEmptyState(params: UseEmptyStateParams): IUseEmptyStateResult {
+  const { config, context, firstVisitStore } = params;
+
+  const { isFirstVisit: storeFirstVisit } = useFirstVisit({
+    module: context.module,
+    view: context.view,
+    store: firstVisitStore,
+  });
+
+  const isFirstVisit = context.isFirstVisit ?? storeFirstVisit;
+
+  const normalizedContext: IEmptyStateContext = {
+    ...context,
+    isFirstVisit,
   };
+
+  const classification = classifyEmptyState(normalizedContext);
+  const resolved = config.resolve(normalizedContext);
+
+  return useMemo(
+    () => ({ classification, resolved }),
+    [classification, resolved],
+  );
 }

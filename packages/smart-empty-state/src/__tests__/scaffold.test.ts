@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { createElement } from 'react';
 import {
   EMPTY_STATE_VISIT_KEY_PREFIX,
@@ -53,23 +54,64 @@ describe('@hbc/smart-empty-state scaffold', () => {
 
   it('exports useFirstVisit returning IUseFirstVisitResult', () => {
     expect(typeof useFirstVisit).toBe('function');
-    const result = useFirstVisit('test', 'list');
-    expect(result.isFirstVisit).toBe(true);
-    expect(typeof result.markVisited).toBe('function');
-    expect(result.markVisited()).toBeUndefined();
+    const { result } = renderHook(() => useFirstVisit({ module: 'test', view: 'list' }));
+    expect(result.current.isFirstVisit).toBe(true);
+    expect(typeof result.current.markVisited).toBe('function');
   });
 
   it('exports useEmptyState returning IUseEmptyStateResult', () => {
     expect(typeof useEmptyState).toBe('function');
-    const result = useEmptyState('test', 'list');
-    expect(result.classification).toBe('truly-empty');
-    expect(result.resolved).toBeDefined();
-    expect(result.resolved.heading).toBeDefined();
-    expect(result.resolved.description).toBeDefined();
+    const { result } = renderHook(() =>
+      useEmptyState({
+        config: {
+          resolve: (ctx) => ({
+            module: ctx.module,
+            view: ctx.view,
+            classification: 'truly-empty',
+            heading: 'No data',
+            description: 'Nothing here',
+          }),
+        },
+        context: {
+          module: 'test',
+          view: 'list',
+          hasActiveFilters: false,
+          hasPermission: true,
+          isFirstVisit: false,
+          currentUserRole: 'user',
+          isLoadError: false,
+        },
+      }),
+    );
+    expect(result.current.classification).toBe('truly-empty');
+    expect(result.current.resolved).toBeDefined();
+    expect(result.current.resolved.heading).toBeDefined();
+    expect(result.current.resolved.description).toBeDefined();
   });
 
   it('renders HbcSmartEmptyState', () => {
-    const { container } = render(createElement(HbcSmartEmptyState));
+    const { container } = render(
+      createElement(HbcSmartEmptyState, {
+        config: {
+          resolve: () => ({
+            module: 'test',
+            view: 'list',
+            classification: 'truly-empty' as const,
+            heading: 'No data',
+            description: 'Nothing here',
+          }),
+        },
+        context: {
+          module: 'test',
+          view: 'list',
+          hasActiveFilters: false,
+          hasPermission: true,
+          isFirstVisit: false,
+          currentUserRole: 'user',
+          isLoadError: false,
+        },
+      }),
+    );
     expect(container).toBeDefined();
   });
 

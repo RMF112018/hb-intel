@@ -25,8 +25,11 @@ export { createEmptyStateVisitStore } from './classification/index.js';
 
 // Hooks
 export { useFirstVisit } from './hooks/index.js';
+export type { UseFirstVisitParams } from './hooks/index.js';
 export { useEmptyState } from './hooks/index.js';
+export type { UseEmptyStateParams } from './hooks/index.js';
 
 // Components
 export { HbcSmartEmptyState } from './components/index.js';
+export type { HbcSmartEmptyStateProps } from './components/index.js';
 export { HbcEmptyStateIllustration } from './components/index.js';

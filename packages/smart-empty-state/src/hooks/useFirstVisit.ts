@@ -1,12 +1,23 @@
-import type { IUseFirstVisitResult } from '../types/ISmartEmptyState.js';
+import { useState, useCallback } from 'react';
+import type { IEmptyStateVisitStore, IUseFirstVisitResult } from '../types/ISmartEmptyState.js';
+import { createEmptyStateVisitStore } from '../classification/emptyStateVisitStore.js';
 
-/**
- * Hook to detect first visit for a module context.
- * Stub implementation — returns isFirstVisit: true. Will be expanded in T04.
- */
-export function useFirstVisit(_module: string, _view: string): IUseFirstVisitResult {
-  return {
-    isFirstVisit: true,
-    markVisited: () => {},
-  };
+export interface UseFirstVisitParams {
+  module: string;
+  view: string;
+  store?: IEmptyStateVisitStore;
+}
+
+const defaultStore = createEmptyStateVisitStore();
+
+export function useFirstVisit(params: UseFirstVisitParams): IUseFirstVisitResult {
+  const { module, view, store = defaultStore } = params;
+  const [isFirstVisit, setIsFirstVisit] = useState(() => !store.hasVisited(module, view));
+
+  const markVisited = useCallback(() => {
+    store.markVisited(module, view);
+    setIsFirstVisit(false);
+  }, [store, module, view]);
+
+  return { isFirstVisit, markVisited };
 }

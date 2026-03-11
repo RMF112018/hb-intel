@@ -67,3 +67,17 @@ interface HbcSmartEmptyStateProps {
 pnpm --filter @hbc/smart-empty-state test -- HbcSmartEmptyState
 pnpm --filter @hbc/smart-empty-state build
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF11-T05 completed: 2026-03-11
+- HbcSmartEmptyState.tsx rewritten from stub to full renderer consuming useEmptyState + useComplexity
+- Renders heading/description/CTAs per classification with full-page/inline variant support
+- D-05 coaching behavior: essential=inline, standard=disclosure, expert=hidden
+- Accessibility: region with aria-labelledby/aria-describedby, decorative icon aria-hidden, keyboard-accessible actions
+- HbcSmartEmptyStateProps type exported from barrel (components/index.ts + src/index.ts)
+- setup.ts global mock updated with useComplexity default
+- scaffold.test.ts updated to pass required props
+- 17 new component tests in HbcSmartEmptyState.test.tsx; 75 total package tests; 100% coverage all metrics
+- Full monorepo build verified (35/35)
+- Next: T06 HbcEmptyStateIllustration & Layout
+-->

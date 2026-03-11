@@ -75,3 +75,14 @@ Behavior:
 pnpm --filter @hbc/smart-empty-state check-types
 pnpm --filter @hbc/smart-empty-state test -- useFirstVisit useEmptyState
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF11-T04 completed: 2026-03-11
+- useFirstVisit: params-object signature, module-level defaultStore, useState initializer, useCallback markVisited
+- useEmptyState: params-object signature, internal useFirstVisit delegation, D-01 classification, config.resolve(), useMemo return
+- UseFirstVisitParams and UseEmptyStateParams exported from hooks/index.ts and src/index.ts
+- Scaffold test updated from positional args to params objects with renderHook
+- 10 useFirstVisit tests: store read, markVisited state flip, injected store, default store, callback stability, independence, idempotency, mount-once read, void return
+- 10 useEmptyState tests: D-01 classification, resolved config, explicit isFirstVisit override (true/false), store fallback, normalized context passthrough, determinism, loading-failed/permission-empty/filter-empty branches
+- All gates pass: check-types (0 errors), build (0 errors), test:coverage (100% all metrics, 58 total tests), full monorepo build (35/35)
+-->

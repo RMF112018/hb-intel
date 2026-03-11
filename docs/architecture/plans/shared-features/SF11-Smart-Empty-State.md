@@ -194,4 +194,19 @@ SF11-T03 completed: 2026-03-11
 - 29 new tests (12 classification + 17 visit store); 38 total package tests; 100% coverage all metrics
 - Full monorepo build verified (35/35)
 - Next: T04 Hooks
+
+SF11-T04 completed: 2026-03-11
+- useFirstVisit and useEmptyState rewritten from stubs to full implementations with params-object signatures
+- UseFirstVisitParams and UseEmptyStateParams types exported from package
+- 20 new hook tests (10 useFirstVisit + 10 useEmptyState); 58 total package tests; 100% coverage all metrics
+- Full monorepo build verified (35/35)
+- Next: T05 HbcSmartEmptyState
+
+SF11-T05 completed: 2026-03-11
+- HbcSmartEmptyState.tsx rewritten from stub to full renderer (useEmptyState + useComplexity + useId)
+- All 5 classification branches rendered with heading/description/CTAs, D-05 coaching tiers, full-page/inline variants
+- HbcSmartEmptyStateProps exported; setup.ts mock updated; scaffold.test.ts updated for required props
+- 17 new component tests; 75 total package tests; 100% coverage all metrics
+- Full monorepo build verified (35/35)
+- Next: T06 HbcEmptyStateIllustration & Layout
 -->
