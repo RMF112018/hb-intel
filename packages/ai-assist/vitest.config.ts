@@ -30,6 +30,7 @@ export default defineConfig({
         'src/api/**',
         'src/hooks/**',
         'src/components/**',
+        'src/reference/**',
       ],
       thresholds: {
         lines: 95,

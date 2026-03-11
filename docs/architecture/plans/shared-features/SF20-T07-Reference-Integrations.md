@@ -2,8 +2,8 @@
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
 **Spec Source:** `docs/explanation/feature-decisions/PH7-SF-20-Module-Feature-BD-Heritage-Panel.md`
-**Decisions Applied:** D-06 through D-09
-**Estimated Effort:** 0.7 sprint-weeks
+**Decisions Applied:** L-01 through L-06
+**Estimated Effort:** 0.8 sprint-weeks
 **Depends On:** T03-T06
 
 > **Doc Classification:** Canonical Normative Plan - SF20-T07 integration task; sub-plan of `SF20-BD-Heritage-Panel.md`.
@@ -12,40 +12,41 @@
 
 ## Objective
 
-Document boundary-safe integration contracts across shared features and module surfaces.
+Document boundary-safe integration contracts across SF20 adapter surfaces, `@hbc/strategic-intelligence`, and required Tier-1 primitives.
 
 ---
 
 ## Integration Contracts
 
-- `@hbc/workflow-handoff`
-  - provides handoff snapshot source for heritage data
-- `@hbc/versioned-record`
-  - intelligence revisions and approved snapshots versioned for auditability
-- `@hbc/acknowledgment`
-  - approval action flow uses single-party acknowledgment pattern
-- `@hbc/notification-intelligence`
-  - pending approval -> immediate approver alert; approve/reject -> contributor watch notification
-- `@hbc/sharepoint-docs`
-  - supporting document attachments referenced by entry metadata
-- `@hbc/search`
-  - approved entries only indexed
-- `@hbc/project-canvas`
-  - BD heritage tile renders latest approved strategic intelligence summary
+- `@hbc/strategic-intelligence`
+  - canonical heritage/intelligence model, lifecycle APIs, sync-state contracts, and telemetry output
+- `@hbc/bic-next-move`
+  - per-entry strategic gap ownership, blockers-first sequencing, avatar projection
 - `@hbc/complexity`
-  - controls surface depth across all three tiers
-- SF19 / SF22 via `@hbc/score-benchmark`
-  - strategic intelligence contexts feed score benchmark primitive recompute inputs
-  - score-benchmark gap/outcome signals feed post-bid loop enrichment and heritage evidence weighting
+  - Essential/Standard/Expert behavior control across panel/feed/form/queue
+- `@hbc/versioned-record`
+  - immutable provenance, audit history, snapshot freezing, offline replay
+- `@hbc/related-items`
+  - direct deep-links from intelligence entries and strategic gaps
+- `@hbc/project-canvas`
+  - automatic My Work placement for assigned strategic gaps
+- `@hbc/notification-intelligence`
+  - pending-approval immediate alerts and decision routing notifications
+- `@hbc/health-indicator`
+  - shared threshold/status semantics for operations-grade KPI interpretation
+- `@hbc/score-benchmark`
+  - bidirectional context interop for SF19/SF22 intelligence enrichment flows
+- SF22 post-bid learning loop
+  - approved win/loss factors enrich downstream intelligence datasets
 
 ---
 
 ## Boundary Rules
 
-- no direct app-route imports into package runtime
-- approval authority always resolved through admin policy API
-- pending/rejected entries never emitted to search index pipeline
-- cross-feature integration with SF19 occurs through `@hbc/score-benchmark` public interfaces only
+- no app-route imports into package runtime
+- approval authority resolved through admin policy APIs only
+- pending/rejected entries never emitted to search index
+- SF20-SF19 interop occurs through public primitive interfaces (`@hbc/strategic-intelligence`, `@hbc/score-benchmark`)
 
 ---
 
@@ -53,5 +54,6 @@ Document boundary-safe integration contracts across shared features and module s
 
 ```bash
 pnpm --filter @hbc/features-business-development test -- integrations
-rg -n "from 'apps/" packages/features/business-development/src packages/score-benchmark/src
+pnpm --filter @hbc/strategic-intelligence test -- integrations
+rg -n "from 'apps/" packages/features/business-development/src packages/strategic-intelligence/src packages/score-benchmark/src
 ```

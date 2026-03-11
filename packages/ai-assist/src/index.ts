@@ -59,6 +59,7 @@ export {
   HbcAiGovernancePortal,
   HbcAiActionMenu,
   HbcAiLoadingState,
+  HbcAiResultPanel,
 } from './components/index.js';
 
 export type {
@@ -67,4 +68,16 @@ export type {
   HbcAiGovernancePortalProps,
   HbcAiActionMenuProps,
   HbcAiLoadingStateProps,
+  HbcAiResultPanelProps,
 } from './components/index.js';
+
+// Reference integrations
+export {
+  REFERENCE_MODELS,
+  REFERENCE_ACTIONS,
+  REFERENCE_ACTION_BINDINGS,
+  REFERENCE_POLICY,
+  ReferenceExecutor,
+  createReferenceExecutor,
+  seedReferenceIntegrations,
+} from './reference/index.js';

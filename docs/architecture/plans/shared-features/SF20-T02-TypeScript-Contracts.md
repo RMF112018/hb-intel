@@ -1,9 +1,9 @@
-# SF20-T02 - TypeScript Contracts: Heritage & Strategic Intelligence
+# SF20-T02 - TypeScript Contracts: Strategic Intelligence Primitive + BD Adapter
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
 **Spec Source:** `docs/explanation/feature-decisions/PH7-SF-20-Module-Feature-BD-Heritage-Panel.md`
-**Decisions Applied:** D-02 through D-07, D-10
-**Estimated Effort:** 0.7 sprint-weeks
+**Decisions Applied:** L-01 through L-06
+**Estimated Effort:** 0.8 sprint-weeks
 **Depends On:** T01
 
 > **Doc Classification:** Canonical Normative Plan - SF20-T02 contracts task; sub-plan of `SF20-BD-Heritage-Panel.md`.
@@ -12,11 +12,11 @@
 
 ## Objective
 
-Lock public contracts for heritage data, intelligence entries, approval states, queue items, and hook return types.
+Lock primitive-owned public contracts for heritage data, intelligence entries, approval/queue state, telemetry, and version metadata. BD contracts are adapter projections only.
 
 ---
 
-## Types to Define
+## Primitive Contracts to Define (`@hbc/strategic-intelligence`)
 
 ```ts
 export interface IBdHeritageData {
@@ -24,27 +24,15 @@ export interface IBdHeritageData {
   scorecardVersion: number;
   projectName: string;
   ownerName: string;
-  ownerContactName: string;
-  ownerContactRole: string;
   decision: 'GO' | 'NO-GO' | 'WAIT';
   decisionRationale: string;
   clientPriorities: string[];
   competitiveContext: string;
   keyRelationships: string;
-  estimatedValue: number;
-  projectType: string;
   intelligenceEntries: IStrategicIntelligenceEntry[];
-  bdTeam: IBicOwner[];
   handoffDate: string;
+  version: VersionedRecord;
 }
-
-export type IntelligenceEntryType =
-  | 'client-preference'
-  | 'competitor-intel'
-  | 'market-condition'
-  | 'relationship-note'
-  | 'risk-observation'
-  | 'win-loss-factor';
 
 export interface IStrategicIntelligenceEntry {
   entryId: string;
@@ -53,7 +41,6 @@ export interface IStrategicIntelligenceEntry {
   body: string;
   tags: string[];
   projectId: string;
-  clientName: string;
   contributor: IBicOwner;
   submittedAt: string;
   approvalStatus: 'pending-approval' | 'approved' | 'rejected';
@@ -61,13 +48,16 @@ export interface IStrategicIntelligenceEntry {
   approvedAt: string | null;
   rejectionReason: string | null;
   version: number;
+  bicRecordId?: string;
   relatedScorecardId?: string;
 }
 
-export interface IStrategicIntelligenceApprovalAction {
-  entryId: string;
-  action: 'approve' | 'reject';
-  reason?: string;
+export interface IStrategicIntelligenceTelemetryState {
+  timeToHandoffContextReviewMs: number | null;
+  intelligenceContributionLatencyMs: number | null;
+  pctHeritagePanelsViewed: number | null;
+  heritageReuseRate: number | null;
+  strategicIntelligenceCes: number | null;
 }
 
 export interface IStrategicIntelligenceApprovalQueueItem {
@@ -79,26 +69,26 @@ export interface IStrategicIntelligenceApprovalQueueItem {
 
 ---
 
-## Hook Return Contracts
+## Adapter Contracts (`@hbc/features-business-development`)
 
-- `useBdHeritage` returns heritage data, loading/error, refresh.
-- `useStrategicIntelligence` returns approved/pending entries, submit/revise actions.
-- `useIntelligenceApprovalQueue` returns pending queue and approve/reject actions.
+- adapter contracts map primitive outputs into BD panel/feed/form/queue view models
+- adapter contracts must preserve primitive provenance and sync-status fields
+- adapter contracts must not re-implement approval-state machine or telemetry schema
 
 ---
 
 ## Constants to Lock
 
-- `HERITAGE_DATA_STALE_MS = 300_000`
-- `INTELLIGENCE_APPROVAL_QUEUE_LIST_TITLE = 'HBC_StrategicIntelligenceQueue'`
-- `INTELLIGENCE_ENTRIES_LIST_TITLE = 'HBC_StrategicIntelligenceEntries'`
-- `INTELLIGENCE_INDEXING_VISIBILITY = 'approved-only'`
+- `STRATEGIC_INTELLIGENCE_STALE_MS = 300_000`
+- `STRATEGIC_INTELLIGENCE_SYNC_QUEUE_KEY = 'strategic-intelligence-sync-queue'`
+- `STRATEGIC_INTELLIGENCE_INDEXING_VISIBILITY = 'approved-only'`
 
 ---
 
 ## Verification Commands
 
 ```bash
+pnpm --filter @hbc/strategic-intelligence check-types
+pnpm --filter @hbc/strategic-intelligence test -- contracts
 pnpm --filter @hbc/features-business-development check-types
-pnpm --filter @hbc/features-business-development test -- contracts
 ```

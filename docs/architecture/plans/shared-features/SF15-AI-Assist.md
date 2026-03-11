@@ -141,6 +141,6 @@ All six actions are curated built-in defaults in `@hbc/ai-assist` and must be fu
 | `SF15-T04-Hooks.md` | `useAiAction` + `useAiActions` behavior ✅ completed 2026-03-11 |
 | `SF15-T05-HbcAiActionMenu.md` | global toolbar action trigger/popover behavior ✅ completed 2026-03-11 |
 | `SF15-T06-HbcAiResultPanel-and-LoadingState.md` | Smart Insert overlay + Trust Meter + loading/cancel behavior ✅ completed 2026-03-11 |
-| `SF15-T07-Reference-Integrations.md` | canvas/auth/versioning/notifications/handoff/annotations/governance references |
+| `SF15-T07-Reference-Integrations.md` | canvas/auth/versioning/notifications/handoff/annotations/governance references ✅ completed 2026-03-11 |
 | `SF15-T08-Testing-Strategy.md` | testing fixtures + test matrix |
 | `SF15-T09-Testing-and-Deployment.md` | checklist, ADR/docs/index/state-map updates |

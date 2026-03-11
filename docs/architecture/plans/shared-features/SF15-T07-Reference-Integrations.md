@@ -41,3 +41,19 @@ Document required cross-package integration patterns for unified entrypoint, Sma
 rg -n "registerAiActions|project-canvas|AiModelRegistry|IAiAuditRecord|ai-assisted|notification-intelligence|GovernancePortal" packages
 pnpm turbo run check-types --filter packages/business-development...
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF15-T07 completed: 2026-03-11
+Files created:
+  - packages/ai-assist/src/reference/referenceModels.ts (2 IAiModelRegistration entries)
+  - packages/ai-assist/src/reference/referenceActions.ts (6 IAiAction definitions with buildPrompt/parseResponse)
+  - packages/ai-assist/src/reference/referenceExecutor.ts (ReferenceExecutor with keyword-based deterministic responses)
+  - packages/ai-assist/src/reference/seedReferenceIntegrations.ts (full registry seeding + REFERENCE_POLICY)
+  - packages/ai-assist/src/reference/index.ts (barrel)
+  - packages/ai-assist/src/reference/referenceIntegrations.test.ts (36 integration tests — 10 groups)
+Files edited:
+  - packages/ai-assist/src/index.ts (added reference exports + HbcAiResultPanel gap fill)
+  - packages/ai-assist/vitest.config.ts (added src/reference/** to coverage exclude)
+Verification: check-types ✅ | build ✅ | 169 tests pass (36 new) ✅
+Next: SF15-T08 (Testing Strategy)
+-->
