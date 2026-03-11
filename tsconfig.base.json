@@ -76,7 +76,9 @@
       "@hbc/session-state": ["packages/session-state/src/index.ts"],
       "@hbc/session-state/*": ["packages/session-state/src/*"],
       "@hbc/project-canvas": ["packages/project-canvas/src/index.ts"],
-      "@hbc/project-canvas/*": ["packages/project-canvas/src/*"]
+      "@hbc/project-canvas/*": ["packages/project-canvas/src/*"],
+      "@hbc/ai-assist": ["packages/ai-assist/src/index.ts"],
+      "@hbc/ai-assist/*": ["packages/ai-assist/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"]

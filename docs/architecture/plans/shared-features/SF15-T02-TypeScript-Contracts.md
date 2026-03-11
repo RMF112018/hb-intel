@@ -160,3 +160,16 @@ pnpm --filter @hbc/ai-assist check-types
 pnpm --filter @hbc/ai-assist build
 rg -n "registerAiAction|registerAiActions|AiActionDefinition|IAiAuditRecord|AiModelRegistry|confidenceDetails" packages/ai-assist/src
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF15-T02 completed: 2026-03-11
+- Replaced placeholder types with 17 authoritative contracts per §Core Contracts
+- Added @hbc/complexity dependency for ComplexityTier in IAiAction.minComplexity and IAiActionInvokeContext.complexity
+- Added 4 constant groups: AI_OUTPUT_TYPES, AI_CONFIDENCE_BADGES, AI_POLICY_DECISIONS, AI_ACTION_OUTCOMES
+- Updated barrel exports (removed IAiActionDefinition, added all new types + constants + ComplexityTier re-export)
+- Updated downstream stubs: AiActionRegistry, RelevanceScoringEngine, AiAssistApi, hooks (IAiActionDefinition → IAiAction, actionId → actionKey)
+- Rewrote all 6 testing mock factories to match new type shapes
+- Removed IMockPromptPayload local type in favor of IAiPromptPayload from src/types
+- Verification: check-types ✅ | build ✅ | test ✅ (passWithNoTests)
+Next: SF15-T03 (AiAssistApi and Action Registry implementation)
+-->

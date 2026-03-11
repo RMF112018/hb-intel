@@ -89,3 +89,15 @@ pnpm --filter @hbc/ai-assist test --coverage
 test -f packages/ai-assist/README.md
 rg -n "Mandatory Pre-Implementation Research Directive" packages/ai-assist/README.md
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF15-T01 completed: 2026-03-11
+- Package scaffold created with dual exports (".", "./testing")
+- All source directories with barrel files: types, constants, registry, governance, api, hooks, components
+- 5 component stubs: HbcAiSmartInsertOverlay, HbcAiTrustMeter, HbcAiGovernancePortal, HbcAiActionMenu, HbcAiLoadingState
+- 6 testing mock factories + mockAiActionStates
+- README with all 10 required sections including mandatory research directive
+- tsconfig.base.json updated with @hbc/ai-assist path aliases
+- Verification: check-types ✅, build ✅, test --coverage ✅ (passWithNoTests), README ✅
+Next: SF15-T02 (TypeScript Contracts)
+-->
