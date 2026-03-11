@@ -121,3 +121,35 @@ pnpm --filter @hbc/smart-empty-state test --coverage
 pnpm --filter @hbc/smart-empty-state storybook
 pnpm exec playwright test --grep "smart-empty-state"
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF11-T08 completed: 2026-03-11
+Implementation:
+- createMockEmptyStateConfig rewritten: returns IEmptyStateConfig (flat) with Partial<IEmptyStateConfig> overrides; defaults match plan (estimating/pursuits/truly-empty)
+- createMockEmptyStateContext defaults updated: module='estimating', view='pursuits', currentUserRole='Estimator'
+- useEmptyState.test.ts: 10 call sites updated to use inline ISmartEmptyStateConfig resolver wrappers
+- mockEmptyStateClassifications: unchanged (already matched plan)
+
+Storybook:
+- .storybook/main.ts: Storybook 8 config (react-vite, essentials + a11y addons)
+- .storybook/preview.tsx: preview with centered layout
+- src/stories/HbcSmartEmptyState.stories.tsx: 13 stories total
+  - 5 classifications × full-page variant
+  - 5 classifications × inline variant
+  - 3 complexity scenarios (Essential/Standard/Expert)
+- package.json: @storybook/react-vite, addon-essentials, addon-a11y, storybook devDeps + script
+
+Playwright:
+- Scenarios documented in T08 plan; actual E2E implementation deferred to T09/dev-harness
+
+Gates:
+- check-types: 0 errors (47/47)
+- build: 0 errors (35/35)
+- lint: 0 errors (smart-empty-state clean; @hbc/acknowledgment has pre-existing warning — not T08)
+- tests: 118 pass (8 test files)
+- coverage: 100% statements, branches, functions, lines (exceeds 95% threshold)
+
+Lint fix (2026-03-11):
+- setup.ts:23 — replaced `require('react')` with `await import('react')` in async vi.mock factory
+  to resolve @typescript-eslint/no-var-requires error
+-->

@@ -226,4 +226,14 @@ SF11-T07 completed: 2026-03-11
 - Dependency wiring: 4× package.json, 4× tsconfig.json references, 4× barrel exports, vitest aliases added
 - All gates pass: check-types (0 errors), build (35/35), tests (118 pass)
 - Next: T08 Testing Strategy
+
+SF11-T08 completed: 2026-03-11
+- Testing sub-path factories aligned to T08 plan: createMockEmptyStateConfig returns IEmptyStateConfig (flat), createMockEmptyStateContext defaults to estimating/pursuits/Estimator
+- useEmptyState.test.ts updated: all 10 call sites wrapped in inline ISmartEmptyStateConfig resolvers
+- Storybook 8 setup: .storybook/main.ts + preview.tsx, 13 stories (5 classifications × 2 variants + 3 complexity scenarios)
+- Package.json updated with @storybook/react-vite, addon-essentials, addon-a11y, storybook devDeps + storybook script
+- All gates pass: check-types (47/47), build (35/35), lint (0 errors), tests (118/118), coverage (100% all metrics, exceeds 95% threshold)
+- Lint fix: setup.ts require('react') → await import('react') in async vi.mock factory
+- Pre-existing @hbc/acknowledgment lint warning confirmed unrelated to T08
+- Next: T09 Testing & Deployment
 -->

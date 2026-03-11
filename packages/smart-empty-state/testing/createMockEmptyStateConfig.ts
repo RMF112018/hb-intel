@@ -1,18 +1,21 @@
-import type { ISmartEmptyStateConfig, IEmptyStateContext, IEmptyStateConfig } from '../src/types/ISmartEmptyState.js';
+import type { IEmptyStateConfig } from '../src/types/ISmartEmptyState.js';
 
 /**
- * Factory stub for creating mock empty state configs in tests.
+ * Factory for creating mock empty state configs in tests.
+ * Returns a flat IEmptyStateConfig per D-02 resolver output contract.
+ *
+ * @see SF11-T08 — canonical testing factory
  */
 export function createMockEmptyStateConfig(
-  resolveFn?: (context: IEmptyStateContext) => IEmptyStateConfig,
-): ISmartEmptyStateConfig {
+  overrides: Partial<IEmptyStateConfig> = {},
+): IEmptyStateConfig {
   return {
-    resolve: resolveFn ?? ((_context: IEmptyStateContext): IEmptyStateConfig => ({
-      module: 'test-module',
-      view: 'test-view',
-      classification: 'truly-empty',
-      heading: 'No data yet',
-      description: 'There is nothing to display.',
-    })),
+    module: 'estimating',
+    view: 'pursuits',
+    classification: 'truly-empty',
+    heading: 'No items yet',
+    description: 'Create your first record to get started.',
+    primaryAction: { label: 'Create', href: '/new' },
+    ...overrides,
   };
 }

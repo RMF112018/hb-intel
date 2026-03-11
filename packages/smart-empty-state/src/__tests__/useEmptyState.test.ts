@@ -3,7 +3,11 @@ import { renderHook } from '@testing-library/react';
 import { useEmptyState } from '../hooks/useEmptyState.js';
 import { createEmptyStateVisitStore } from '../classification/emptyStateVisitStore.js';
 import { createMockEmptyStateConfig } from '@hbc/smart-empty-state/testing';
-import type { IEmptyStateContext, IEmptyStateVisitStore } from '../types/ISmartEmptyState.js';
+import type { IEmptyStateContext, IEmptyStateVisitStore, ISmartEmptyStateConfig } from '../types/ISmartEmptyState.js';
+
+function mockResolverConfig(): ISmartEmptyStateConfig {
+  return { resolve: () => createMockEmptyStateConfig() };
+}
 
 describe('useEmptyState', () => {
   function createFreshStore(): IEmptyStateVisitStore {
@@ -14,7 +18,7 @@ describe('useEmptyState', () => {
     const store = createFreshStore();
     const { result } = renderHook(() =>
       useEmptyState({
-        config: createMockEmptyStateConfig(),
+        config: mockResolverConfig(),
         context: {
           module: 'test',
           view: 'list',
@@ -35,7 +39,7 @@ describe('useEmptyState', () => {
     store.markVisited('test', 'list');
     const { result } = renderHook(() =>
       useEmptyState({
-        config: createMockEmptyStateConfig(),
+        config: mockResolverConfig(),
         context: {
           module: 'test',
           view: 'list',
@@ -48,8 +52,8 @@ describe('useEmptyState', () => {
       }),
     );
     expect(result.current.resolved).toBeDefined();
-    expect(result.current.resolved.heading).toBe('No data yet');
-    expect(result.current.resolved.description).toBe('There is nothing to display.');
+    expect(result.current.resolved.heading).toBe('No items yet');
+    expect(result.current.resolved.description).toBe('Create your first record to get started.');
   });
 
   it('uses explicit context.isFirstVisit = true over store', () => {
@@ -57,7 +61,7 @@ describe('useEmptyState', () => {
     store.markVisited('test', 'list'); // store says not first visit
     const { result } = renderHook(() =>
       useEmptyState({
-        config: createMockEmptyStateConfig(),
+        config: mockResolverConfig(),
         context: {
           module: 'test',
           view: 'list',
@@ -78,7 +82,7 @@ describe('useEmptyState', () => {
     // store has no record → would be first visit
     const { result } = renderHook(() =>
       useEmptyState({
-        config: createMockEmptyStateConfig(),
+        config: mockResolverConfig(),
         context: {
           module: 'test',
           view: 'list',
@@ -99,7 +103,7 @@ describe('useEmptyState', () => {
     // no visit recorded → store says first visit
     const { result } = renderHook(() =>
       useEmptyState({
-        config: createMockEmptyStateConfig(),
+        config: mockResolverConfig(),
         context: {
           module: 'test',
           view: 'list',
@@ -117,16 +121,18 @@ describe('useEmptyState', () => {
   it('passes normalized context with resolved isFirstVisit to config.resolve()', () => {
     const store = createFreshStore();
     let capturedContext: IEmptyStateContext | undefined;
-    const config = createMockEmptyStateConfig((ctx) => {
-      capturedContext = ctx;
-      return {
-        module: ctx.module,
-        view: ctx.view,
-        classification: 'truly-empty',
-        heading: 'Test',
-        description: 'Test desc',
-      };
-    });
+    const config: ISmartEmptyStateConfig = {
+      resolve: (ctx) => {
+        capturedContext = ctx;
+        return {
+          module: ctx.module,
+          view: ctx.view,
+          classification: 'truly-empty',
+          heading: 'Test',
+          description: 'Test desc',
+        };
+      },
+    };
 
     renderHook(() =>
       useEmptyState({
@@ -151,7 +157,7 @@ describe('useEmptyState', () => {
     const store = createFreshStore();
     store.markVisited('test', 'list');
     const params = {
-      config: createMockEmptyStateConfig(),
+      config: mockResolverConfig(),
       context: {
         module: 'test' as const,
         view: 'list' as const,
@@ -174,7 +180,7 @@ describe('useEmptyState', () => {
     const store = createFreshStore();
     const { result } = renderHook(() =>
       useEmptyState({
-        config: createMockEmptyStateConfig(),
+        config: mockResolverConfig(),
         context: {
           module: 'test',
           view: 'list',
@@ -193,7 +199,7 @@ describe('useEmptyState', () => {
     const store = createFreshStore();
     const { result } = renderHook(() =>
       useEmptyState({
-        config: createMockEmptyStateConfig(),
+        config: mockResolverConfig(),
         context: {
           module: 'test',
           view: 'list',
@@ -213,7 +219,7 @@ describe('useEmptyState', () => {
     store.markVisited('test', 'list');
     const { result } = renderHook(() =>
       useEmptyState({
-        config: createMockEmptyStateConfig(),
+        config: mockResolverConfig(),
         context: {
           module: 'test',
           view: 'list',

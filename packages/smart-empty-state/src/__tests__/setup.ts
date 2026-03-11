@@ -19,11 +19,11 @@ vi.mock('@hbc/complexity', () => ({
 }));
 
 // Mock @hbc/ui-kit/icons to avoid cross-package dependency in tests
-vi.mock('@hbc/ui-kit/icons', () => {
-  const { createElement } = require('react');
+vi.mock('@hbc/ui-kit/icons', async () => {
+  const React = await import('react');
   const createMockIcon = (name: string) => {
     const MockIcon = (props: Record<string, unknown>) =>
-      createElement('span', { 'data-testid': `icon-${name}`, 'data-size': props.size });
+      React.createElement('span', { 'data-testid': `icon-${name}`, 'data-size': props.size });
     MockIcon.displayName = name;
     return MockIcon;
   };

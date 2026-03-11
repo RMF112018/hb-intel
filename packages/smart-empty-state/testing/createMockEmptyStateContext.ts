@@ -1,16 +1,19 @@
 import type { IEmptyStateContext } from '../src/types/ISmartEmptyState.js';
 
 /**
- * Factory stub for creating mock empty state contexts in tests.
+ * Factory for creating mock empty state contexts in tests.
+ * Defaults match the canonical estimating/pursuits module per D-09.
+ *
+ * @see SF11-T08 — canonical testing factory
  */
 export function createMockEmptyStateContext(overrides: Partial<IEmptyStateContext> = {}): IEmptyStateContext {
   return {
-    module: 'test-module',
-    view: 'test-view',
+    module: 'estimating',
+    view: 'pursuits',
     hasActiveFilters: false,
     hasPermission: true,
     isFirstVisit: false,
-    currentUserRole: 'user',
+    currentUserRole: 'Estimator',
     isLoadError: false,
     ...overrides,
   };
