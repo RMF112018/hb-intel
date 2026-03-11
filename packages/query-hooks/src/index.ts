@@ -191,6 +191,7 @@ export {
   // Deprecated consumer path kept for compatibility; prefer useFormDraft.
   useFormDraftStore,
   useFormDraft,
+  useFormDraftPersisted,
   useListFilterStoreBinding,
   encodeFiltersToUrl,
   decodeFiltersFromUrl,

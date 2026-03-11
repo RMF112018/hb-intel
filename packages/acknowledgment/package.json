@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@hbc/complexity": "workspace:*",
+    "@hbc/session-state": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@tanstack/react-query": "^5.0.0"
   },

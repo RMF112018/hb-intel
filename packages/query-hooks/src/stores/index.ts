@@ -28,3 +28,5 @@ export type { FormDraftState } from './useFormDraftStore.js';
 
 export { useFormDraft } from './useFormDraft.js';
 export type { UseFormDraftReturn } from './useFormDraft.js';
+
+export { useFormDraftPersisted } from './useFormDraftPersisted.js';

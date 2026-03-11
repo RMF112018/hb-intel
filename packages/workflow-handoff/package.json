@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@hbc/bic-next-move": "workspace:*",
+    "@hbc/session-state": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@hbc/complexity": "workspace:*",
     "@hbc/acknowledgment": "workspace:*",

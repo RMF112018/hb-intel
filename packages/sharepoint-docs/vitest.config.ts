@@ -36,6 +36,8 @@ export default defineConfig({
       '@hbc/auth': resolve(__dirname, '../auth/src/index.ts'),
       '@hbc/models': resolve(__dirname, '../models/src/index.ts'),
       '@hbc/data-access': resolve(__dirname, '../data-access/src/index.ts'),
+      '@hbc/session-state/testing': resolve(__dirname, '../session-state/testing/index.ts'),
+      '@hbc/session-state': resolve(__dirname, '../session-state/src/index.ts'),
       '@hbc/ui-kit': resolve(__dirname, '../ui-kit/src/index.ts'),
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../ui-kit/src/app-shell/index.ts'),
     },

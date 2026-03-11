@@ -1,35 +1,40 @@
-/**
- * Stub for offline queue functionality.
- * TODO: Replace with @hbc/session-state import when that package is activated.
- */
-
+import { useCallback, useMemo } from 'react';
+import { useSessionState } from '@hbc/session-state';
 import type { IAcknowledgmentQueueEntry } from '../types';
 
 interface IOfflineQueue {
-  enqueue: (item: IAcknowledgmentQueueEntry) => Promise<void>;
-  /** Check whether an entry with this idempotency key is already queued. */
-  has: (idempotencyKey: string) => Promise<boolean>;
+  enqueue: (item: IAcknowledgmentQueueEntry) => void;
+  has: (idempotencyKey: string) => boolean;
 }
 
-/**
- * Stub implementation of useSessionStateQueue.
- * Logs queued items to console until @hbc/session-state is available.
- */
 export function useOfflineQueue(_key: string): IOfflineQueue {
-  return {
-    enqueue: async (item: IAcknowledgmentQueueEntry): Promise<void> => {
-      // TODO: Replace with @hbc/session-state offline queue
-      console.warn(
-        '[@hbc/acknowledgment] Offline queue stub: item queued locally but will not be replayed.',
-        item
-      );
+  const { queueOperation, queuedOperations } = useSessionState();
+
+  const enqueue = useCallback(
+    (item: IAcknowledgmentQueueEntry) => {
+      queueOperation({
+        type: 'acknowledgment',
+        target: item.endpoint,
+        payload: {
+          body: item.body,
+          idempotencyKey: item.idempotencyKey,
+          enqueuedAt: item.enqueuedAt,
+        },
+        maxRetries: 3,
+      });
     },
-    has: async (_idempotencyKey: string): Promise<boolean> => {
-      // TODO: Replace with @hbc/session-state persistence check
-      console.warn(
-        '[@hbc/acknowledgment] Offline queue stub: has() always returns false (no persistence).'
-      );
-      return false;
-    },
-  };
+    [queueOperation],
+  );
+
+  const has = useCallback(
+    (idempotencyKey: string): boolean =>
+      queuedOperations.some(
+        (op) =>
+          op.type === 'acknowledgment' &&
+          (op.payload as Record<string, unknown>)?.idempotencyKey === idempotencyKey,
+      ),
+    [queuedOperations],
+  );
+
+  return useMemo(() => ({ enqueue, has }), [enqueue, has]);
 }

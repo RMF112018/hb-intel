@@ -219,4 +219,14 @@ SF12-T06 completed: 2026-03-11
 - Coverage: 98.83% stmts, 97.77% branches, 95.55% functions — all above 95%
 - All 3 gates pass: check-types ✓ | test ✓ | build ✓
 Next: SF12-T07 (useDraft Integration Recipes)
+
+SF12-T07 completed: 2026-03-11
+- 5 hooks across 4 consuming packages: useSessionUploadQueue, useOfflineQueue (rewrite), useAcknowledgmentQueueReplay (rewrite), useFormDraftPersisted, useComposerDraft
+- 18 new tests across 4 packages; all pass
+- @hbc/session-state workspace dep added to sharepoint-docs, acknowledgment, workflow-handoff, query-hooks
+- Barrel exports updated in all consuming packages
+- query-hooks: added vitest.config.ts + testing devDependencies
+- acknowledgment: removed stub coverage exclusions (hooks are now real implementations)
+- All 4 packages pass check-types ✓ and test ✓
+Next: SF12-T08 (Testing Strategy)
 -->

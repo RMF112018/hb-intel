@@ -37,6 +37,8 @@ export { useDocumentUpload } from './hooks/useDocumentUpload.js';
 export { useDocumentList } from './hooks/useDocumentList.js';
 export { useOfflineQueue } from './hooks/useOfflineQueue.js';
 export { useMigrationStatus } from './hooks/useMigrationStatus.js';
+export { useSessionUploadQueue } from './hooks/useSessionUploadQueue.js';
+export type { SessionUploadParams } from './hooks/useSessionUploadQueue.js';
 
 // Components
 export { HbcDocumentAttachment } from './components/HbcDocumentAttachment/index.js';
