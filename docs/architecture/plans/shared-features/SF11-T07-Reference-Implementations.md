@@ -106,3 +106,27 @@ rg -n "ISmartEmptyStateConfig" packages/features
 pnpm turbo run check-types --filter packages/features/business-development...
 pnpm turbo run check-types --filter packages/features/estimating...
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF11-T07 completed: 2026-03-11
+Implementation:
+- estimatingPursuitsEmptyStateConfig: estimator role-aware first-use variant
+- bdScorecardsEmptyStateConfig: executive role-aware first-use variant
+- projectHubProjectsEmptyStateConfig: project-manager role-aware first-use variant
+- adminProvisioningEmptyStateConfig: non-admin role-aware permission-empty variant
+- All configs implement full D-01 precedence chain
+- filterClearAction only on filter-empty; coachingTip only on first-use
+- 4× barrel exports, package.json deps, tsconfig references wired
+- vitest.config.ts aliases added for cross-package integration tests
+
+Testing:
+- 31 new integration tests (referenceConfigs.integration.test.ts)
+- 7 per-config tests × 4 configs + 3 cross-config tests
+- 118 total package tests passing
+
+Gates:
+- check-types: 0 errors (47/47)
+- build: 0 errors (35/35)
+- tests: 118 pass
+- Pre-existing lint error in setup.ts:23 (not from T07)
+-->

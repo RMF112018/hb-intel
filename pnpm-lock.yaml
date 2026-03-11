@@ -1425,6 +1425,9 @@ importers:
       '@hbc/shell':
         specifier: workspace:*
         version: link:../../shell
+      '@hbc/smart-empty-state':
+        specifier: workspace:*
+        version: link:../../smart-empty-state
       '@hbc/ui-kit':
         specifier: workspace:*
         version: link:../../ui-kit
@@ -1443,6 +1446,9 @@ importers:
       '@hbc/shell':
         specifier: workspace:*
         version: link:../../shell
+      '@hbc/smart-empty-state':
+        specifier: workspace:*
+        version: link:../../smart-empty-state
       '@hbc/ui-kit':
         specifier: workspace:*
         version: link:../../ui-kit
@@ -1461,6 +1467,9 @@ importers:
       '@hbc/shell':
         specifier: workspace:*
         version: link:../../shell
+      '@hbc/smart-empty-state':
+        specifier: workspace:*
+        version: link:../../smart-empty-state
       '@hbc/ui-kit':
         specifier: workspace:*
         version: link:../../ui-kit
@@ -1533,6 +1542,9 @@ importers:
       '@hbc/shell':
         specifier: workspace:*
         version: link:../../shell
+      '@hbc/smart-empty-state':
+        specifier: workspace:*
+        version: link:../../smart-empty-state
       '@hbc/ui-kit':
         specifier: workspace:*
         version: link:../../ui-kit

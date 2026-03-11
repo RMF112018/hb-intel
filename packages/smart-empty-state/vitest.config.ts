@@ -36,6 +36,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@hbc/smart-empty-state/testing': resolve(__dirname, './testing/index.ts'),
+      '@hbc/features-estimating': resolve(__dirname, '../features/estimating/src/index.ts'),
+      '@hbc/features-business-development': resolve(__dirname, '../features/business-development/src/index.ts'),
+      '@hbc/features-project-hub': resolve(__dirname, '../features/project-hub/src/index.ts'),
+      '@hbc/features-admin': resolve(__dirname, '../features/admin/src/index.ts'),
       '@hbc/complexity': resolve(__dirname, '../complexity/src/index.ts'),
       '@hbc/ui-kit/icons': resolve(__dirname, '../ui-kit/src/icons/index.tsx'),
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../ui-kit/src/app-shell.ts'),

@@ -11,6 +11,7 @@
     { "path": "../../query-hooks" },
     { "path": "../../ui-kit" },
     { "path": "../../auth" },
-    { "path": "../../shell" }
+    { "path": "../../shell" },
+    { "path": "../../smart-empty-state" }
   ]
 }

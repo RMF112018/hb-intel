@@ -217,4 +217,13 @@ SF11-T06 completed: 2026-03-11
 - 12 new illustration tests; 87 total package tests; 100% coverage all metrics
 - Full monorepo build verified (35/35)
 - Next: T07 Reference Implementations
+
+SF11-T07 completed: 2026-03-11
+- 4 canonical ISmartEmptyStateConfig reference configs created in feature packages (estimating, business-development, project-hub, admin)
+- Each config implements full D-01 precedence: loading-failed → permission-empty → filter-empty → first-use → truly-empty
+- Role-aware variants: estimator (estimating first-use), executive (BD first-use), project-manager (project-hub first-use), non-admin (admin permission-empty)
+- 31 new integration tests in referenceConfigs.integration.test.ts (7 per config + 3 cross-config); 118 total package tests
+- Dependency wiring: 4× package.json, 4× tsconfig.json references, 4× barrel exports, vitest aliases added
+- All gates pass: check-types (0 errors), build (35/35), tests (118 pass)
+- Next: T08 Testing Strategy
 -->

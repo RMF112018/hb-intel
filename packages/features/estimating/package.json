@@ -12,6 +12,7 @@
     "@hbc/query-hooks": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@hbc/auth": "workspace:*",
-    "@hbc/shell": "workspace:*"
+    "@hbc/shell": "workspace:*",
+    "@hbc/smart-empty-state": "workspace:*"
   }
 }
