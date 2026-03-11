@@ -52,3 +52,15 @@ pnpm --filter @hbc/ai-assist test -- HbcAiActionMenu
 pnpm --filter @hbc/ai-assist build
 rg -n "project-canvas-toolbar|registerAiActions|relevance" packages/ai-assist/src/components/HbcAiActionMenu.tsx
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF15-T05 completed: 2026-03-11
+- Rewrote HbcAiActionMenu.tsx from scaffold to full implementation
+- Props: record, host, recordType, recordId, userId, currentRole, complexityTier, policyContext, contextTags, onActionSelect
+- State machine: empty/ready/open via useMemo; no loading state (synchronous discovery)
+- Governance-aware: per-action AiGovernanceApi.evaluatePolicy for allowed/blocked/approval-required
+- 13 tests in HbcAiActionMenu.test.tsx (all passing)
+- Barrel exports unchanged (already in place from T01 scaffold)
+- Build: zero errors; Type-check: zero errors; Tests: 97 passing across 9 files
+Next: SF15-T06 (Smart Insert Overlay + Trust Meter + Loading State)
+-->

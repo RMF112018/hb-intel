@@ -139,7 +139,7 @@ All six actions are curated built-in defaults in `@hbc/ai-assist` and must be fu
 | `SF15-T02-TypeScript-Contracts.md` | AI contracts + constants ✅ completed 2026-03-11 |
 | `SF15-T03-AiAssistApi-and-Action-Registry.md` | API invoke contract + action/model registry ✅ completed 2026-03-11 |
 | `SF15-T04-Hooks.md` | `useAiAction` + `useAiActions` behavior ✅ completed 2026-03-11 |
-| `SF15-T05-HbcAiActionMenu.md` | global toolbar action trigger/popover behavior |
+| `SF15-T05-HbcAiActionMenu.md` | global toolbar action trigger/popover behavior ✅ completed 2026-03-11 |
 | `SF15-T06-HbcAiResultPanel-and-LoadingState.md` | Smart Insert overlay + Trust Meter + loading/cancel behavior |
 | `SF15-T07-Reference-Integrations.md` | canvas/auth/versioning/notifications/handoff/annotations/governance references |
 | `SF15-T08-Testing-Strategy.md` | testing fixtures + test matrix |
