@@ -1,10 +1,13 @@
-import type { EmptyStateClassification } from '../types/ISmartEmptyState.js';
-import type { IEmptyStateContext } from '../types/ISmartEmptyState.js';
+import type { EmptyStateClassification, IEmptyStateContext } from '../types/ISmartEmptyState.js';
 
 /**
- * Classifies the empty state for a given module context.
- * Stub implementation — returns 'truly-empty'. Will be expanded in T03.
+ * Classifies an empty state using locked D-01 precedence order.
+ * Precedence: loading-failed > permission-empty > filter-empty > first-use > truly-empty
  */
-export function classifyEmptyState(_context: IEmptyStateContext): EmptyStateClassification {
+export function classifyEmptyState(context: IEmptyStateContext): EmptyStateClassification {
+  if (context.isLoadError) return 'loading-failed';
+  if (!context.hasPermission) return 'permission-empty';
+  if (context.hasActiveFilters) return 'filter-empty';
+  if (context.isFirstVisit) return 'first-use';
   return 'truly-empty';
 }

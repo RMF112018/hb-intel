@@ -21,6 +21,7 @@ export {
 // Classification
 export { classifyEmptyState } from './classification/index.js';
 export { noopVisitStore } from './classification/index.js';
+export { createEmptyStateVisitStore } from './classification/index.js';
 
 // Hooks
 export { useFirstVisit } from './hooks/index.js';

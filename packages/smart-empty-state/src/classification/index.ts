@@ -1,2 +1,2 @@
 export { classifyEmptyState } from './classifyEmptyState.js';
-export { noopVisitStore } from './emptyStateVisitStore.js';
+export { noopVisitStore, createEmptyStateVisitStore } from './emptyStateVisitStore.js';
