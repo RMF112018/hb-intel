@@ -131,4 +131,57 @@ describe('useProjectCanvas (D-SF13-T04, orchestrator)', () => {
     expect(mandatory?.colSpan).toBe(6);
     expect(mandatory?.isLocked).toBe(true);
   });
+
+  it('falls back to empty tiles for unknown role not in ROLE_DEFAULT_TILES (D-SF13-T08)', async () => {
+    setupMocks({ config: null });
+
+    const { result } = renderHook(() => useProjectCanvas('project-001', 'user-001', 'Unknown Role'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    // Unknown role has no defaults in ROLE_DEFAULT_TILES — falls back to empty
+    expect(result.current.tiles).toEqual([]);
+  });
+
+  it('does not duplicate mandatory tile already present in config (D-SF13-T08)', async () => {
+    const mandatoryTile = createMockTileDefinition({
+      tileKey: 'tile-a',
+      mandatory: true,
+      lockable: true,
+    });
+    const configTiles = [createMockTilePlacement({ tileKey: 'tile-a' })];
+    setupMocks({
+      config: createMockCanvasConfig({ tiles: configTiles }),
+      mandatoryTiles: [mandatoryTile],
+    });
+
+    const { result } = renderHook(() => useProjectCanvas('project-001', 'user-001', 'Project Manager'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    const matchingTiles = result.current.tiles.filter((t) => t.tileKey === 'tile-a');
+    expect(matchingTiles).toHaveLength(1);
+  });
+
+  it('mandatory tile placed after last existing tile row (D-SF13-T08)', async () => {
+    const configTiles = [
+      createMockTilePlacement({ tileKey: 'tile-a', rowStart: 3 }),
+    ];
+    const mandatoryTile = createMockTileDefinition({
+      tileKey: 'mandatory-c',
+      mandatory: true,
+      lockable: true,
+      defaultColSpan: 4,
+      defaultRowSpan: 1,
+    });
+    setupMocks({
+      config: createMockCanvasConfig({ tiles: configTiles }),
+      mandatoryTiles: [mandatoryTile],
+    });
+
+    const { result } = renderHook(() => useProjectCanvas('project-001', 'user-001', 'Project Manager'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    const added = result.current.tiles.find((t) => t.tileKey === 'mandatory-c');
+    expect(added).toBeDefined();
+    expect(added!.rowStart).toBe(4); // placed after row 3 (max row in config)
+  });
 });

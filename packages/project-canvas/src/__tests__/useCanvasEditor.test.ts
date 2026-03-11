@@ -204,4 +204,75 @@ describe('useCanvasEditor (D-SF13-T04, D-04, D-05)', () => {
     expect(editable).toHaveLength(1);
     expect(editable[0].tileKey).toBe('editable-tile');
   });
+
+  it('reorderTiles is no-op for out-of-bounds indices (D-SF13-T08)', () => {
+    const tiles = [
+      createMockTilePlacement({ tileKey: 'tile-a' }),
+      createMockTilePlacement({ tileKey: 'tile-b' }),
+    ];
+    const { result } = renderHook(() => useCanvasEditor(tiles, noOpOptions));
+
+    act(() => result.current.reorderTiles(-1, 0));
+    expect(result.current.tiles[0].tileKey).toBe('tile-a');
+
+    act(() => result.current.reorderTiles(0, 5));
+    expect(result.current.tiles[0].tileKey).toBe('tile-a');
+  });
+
+  it('resizeTile is no-op when clamped size overflows grid (D-SF13-T08)', () => {
+    const tiles = [createMockTilePlacement({ tileKey: 'tile-a', colStart: 5, colSpan: 4 })];
+    const { result } = renderHook(() => useCanvasEditor(tiles, noOpOptions));
+
+    // Resize to MAX_COL_SPAN=12 at colStart=5 would overflow (5+12-1=16 > 12)
+    act(() => result.current.resizeTile('tile-a', MAX_COL_SPAN, 1));
+    // Should be no-op — tile keeps original colSpan
+    expect(result.current.tiles[0].colSpan).toBe(4);
+  });
+
+  it('resizeTile is no-op for non-existent tile (D-SF13-T08)', () => {
+    const tiles = [createMockTilePlacement({ tileKey: 'tile-a', colSpan: 4 })];
+    const { result } = renderHook(() => useCanvasEditor(tiles, noOpOptions));
+
+    act(() => result.current.resizeTile('non-existent', 6, 1));
+    expect(result.current.tiles[0].colSpan).toBe(4);
+  });
+
+  it('moveTile is no-op for non-existent tile (D-SF13-T08)', () => {
+    const tiles = [createMockTilePlacement({ tileKey: 'tile-a', colStart: 1 })];
+    const { result } = renderHook(() => useCanvasEditor(tiles, noOpOptions));
+
+    act(() => result.current.moveTile('non-existent', 5, 2));
+    expect(result.current.tiles[0].colStart).toBe(1);
+  });
+
+  it('addTile uses DEFAULT_COL_SPAN for unregistered tile (D-SF13-T08)', () => {
+    const { result } = renderHook(() => useCanvasEditor([], noOpOptions));
+
+    act(() => result.current.addTile('unregistered-tile'));
+
+    expect(result.current.tiles).toHaveLength(1);
+    expect(result.current.tiles[0].colSpan).toBe(4); // DEFAULT_COL_SPAN
+    expect(result.current.tiles[0].rowSpan).toBe(1); // DEFAULT_ROW_SPAN
+  });
+
+  it('reorderTiles is no-op when target tile is locked (D-SF13-T08)', () => {
+    const tiles = [
+      createMockTilePlacement({ tileKey: 'tile-a' }),
+      createMockTilePlacement({ tileKey: 'locked-tile' }),
+    ];
+    const options = { isMandatory: () => false, isLocked: (k: string) => k === 'locked-tile' };
+    const { result } = renderHook(() => useCanvasEditor(tiles, options));
+
+    act(() => result.current.reorderTiles(0, 1));
+    // Target (index 1) is locked, so no-op
+    expect(result.current.tiles[0].tileKey).toBe('tile-a');
+    expect(result.current.tiles[1].tileKey).toBe('locked-tile');
+  });
+
+  it('tilesEqual detects isLocked difference (D-SF13-T08)', () => {
+    const tiles = [createMockTilePlacement({ tileKey: 'tile-a', isLocked: false })];
+    const { result } = renderHook(() => useCanvasEditor(tiles, noOpOptions));
+
+    expect(result.current.hasUnsavedChanges).toBe(false);
+  });
 });

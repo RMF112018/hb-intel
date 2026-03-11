@@ -75,4 +75,44 @@ describe('useCanvasRecommendations (D-SF13-T04, D-02)', () => {
       'usage-history',
     ]);
   });
+
+  it('preserves reason (explanatory note) on each recommendation (D-SF13-T08)', async () => {
+    const recs = [
+      { tileKey: 'a', signal: 'health' as const, reason: 'Low project score detected' },
+      { tileKey: 'b', signal: 'phase' as const, reason: 'Phase transition imminent' },
+    ];
+    vi.spyOn(CanvasApi, 'getCanvasRecommendations').mockResolvedValue(recs);
+
+    const { result } = renderHook(() => useCanvasRecommendations('user-001', 'project-001'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.recommendations[0].reason).toBe('Low project score detected');
+    expect(result.current.recommendations[1].reason).toBe('Phase transition imminent');
+  });
+
+  it('health-signal recommendations appear before phase and usage-history (D-SF13-T08)', async () => {
+    const recs = [
+      { tileKey: 'c', signal: 'usage-history' as const, reason: 'r3' },
+      { tileKey: 'b', signal: 'phase' as const, reason: 'r2' },
+      { tileKey: 'a', signal: 'health' as const, reason: 'r1' },
+    ];
+    vi.spyOn(CanvasApi, 'getCanvasRecommendations').mockResolvedValue(recs);
+
+    const { result } = renderHook(() => useCanvasRecommendations('user-001', 'project-001'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    const signals = result.current.recommendations.map((r) => r.signal);
+    expect(signals.indexOf('health')).toBeLessThan(signals.indexOf('phase'));
+    expect(signals.indexOf('phase')).toBeLessThan(signals.indexOf('usage-history'));
+  });
+
+  it('returns empty array when API returns empty list (D-SF13-T08)', async () => {
+    vi.spyOn(CanvasApi, 'getCanvasRecommendations').mockResolvedValue([]);
+
+    const { result } = renderHook(() => useCanvasRecommendations('user-001', 'project-001'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.recommendations).toEqual([]);
+    expect(result.current.error).toBeNull();
+  });
 });

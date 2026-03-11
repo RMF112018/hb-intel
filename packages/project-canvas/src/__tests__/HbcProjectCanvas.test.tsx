@@ -41,6 +41,13 @@ vi.mock('../hooks/useCanvasRecommendations.js', () => ({
   })),
 }));
 
+vi.mock('../hooks/useCanvasEditor.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../hooks/useCanvasEditor.js')>();
+  return {
+    useCanvasEditor: vi.fn(actual.useCanvasEditor),
+  };
+});
+
 // --- Mock registry ---
 
 const MockTileComponent = (props: ICanvasTileProps) => (
@@ -85,8 +92,10 @@ vi.mock('../api/index.js', () => ({
 }));
 
 import { useProjectCanvas } from '../hooks/useProjectCanvas.js';
+import { useCanvasRecommendations } from '../hooks/useCanvasRecommendations.js';
 
 const mockUseProjectCanvas = vi.mocked(useProjectCanvas);
+const mockUseCanvasRecommendations = vi.mocked(useCanvasRecommendations);
 
 function setupMock(overrides: Partial<typeof defaultHookReturn> = {}) {
   mockUseProjectCanvas.mockReturnValue({ ...defaultHookReturn, ...overrides });
@@ -256,5 +265,70 @@ describe('HbcProjectCanvas (D-SF13-T05)', () => {
     await waitFor(() => {
       expect(screen.getByTestId('tile-data-source-badge')).toHaveTextContent('Live');
     });
+  });
+
+  it('data-recommendations attribute reflects recommendation count (D-SF13-T08)', () => {
+    mockUseCanvasRecommendations.mockReturnValueOnce({
+      recommendations: [
+        { tileKey: 'a', signal: 'health', reason: 'r1' },
+        { tileKey: 'b', signal: 'phase', reason: 'r2' },
+      ],
+      isLoading: false,
+      error: null,
+      refresh: vi.fn(),
+    });
+    setupMock({ tiles: [createMockTilePlacement({ tileKey: 'tile-a' })] });
+    render(<HbcProjectCanvas {...baseProps} />);
+    const root = screen.getByTestId('hbc-project-canvas');
+    expect(root).toHaveAttribute('data-recommendations', '2');
+  });
+
+  it('renders normally with zero recommendations (D-SF13-T08)', () => {
+    setupMock({ tiles: [createMockTilePlacement({ tileKey: 'tile-a' })] });
+    render(<HbcProjectCanvas {...baseProps} />);
+    const root = screen.getByTestId('hbc-project-canvas');
+    expect(root).toHaveAttribute('data-recommendations', '0');
+    expect(root).toHaveAttribute('data-state', 'ready');
+  });
+
+  it('editor onSave callback calls save and exits editing (D-SF13-T08)', async () => {
+    const { useCanvasEditor: mockUseCanvasEditor } = vi.mocked(await import('../hooks/useCanvasEditor.js'));
+    const saveTiles = [createMockTilePlacement({ tileKey: 'tile-a' })];
+    mockUseCanvasEditor.mockReturnValueOnce({
+      tiles: saveTiles,
+      hasUnsavedChanges: true,
+      addTile: vi.fn(),
+      removeTile: vi.fn(),
+      moveTile: vi.fn(),
+      resizeTile: vi.fn(),
+      reorderTiles: vi.fn(),
+      cancel: vi.fn(),
+      getEditableTiles: vi.fn().mockReturnValue([]),
+    });
+    setupMock({ tiles: [createMockTilePlacement({ tileKey: 'tile-a' })] });
+    render(<HbcProjectCanvas {...baseProps} editable />);
+    fireEvent.click(screen.getByTestId('canvas-edit-button'));
+    expect(screen.getByTestId('canvas-editor-active')).toBeInTheDocument();
+    // Save button should be enabled because hasUnsavedChanges=true
+    fireEvent.click(screen.getByTestId('editor-save-button'));
+    await waitFor(() => {
+      expect(mockSave).toHaveBeenCalledWith(saveTiles);
+    });
+  });
+
+  it('renders normally when recommendations hook has recommendations (notification-summary contract, D-SF13-T08)', () => {
+    mockUseCanvasRecommendations.mockReturnValueOnce({
+      recommendations: [
+        { tileKey: 'x', signal: 'health', reason: 'Alert' },
+      ],
+      isLoading: false,
+      error: null,
+      refresh: vi.fn(),
+    });
+    setupMock({ tiles: [createMockTilePlacement({ tileKey: 'tile-a' })] });
+    render(<HbcProjectCanvas {...baseProps} />);
+    const root = screen.getByTestId('hbc-project-canvas');
+    expect(root).toHaveAttribute('data-state', 'ready');
+    expect(root).toHaveAttribute('data-recommendations', '1');
   });
 });

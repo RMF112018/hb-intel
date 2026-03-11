@@ -105,4 +105,73 @@ describe('useCanvasConfig (D-SF13-T04, D-03)', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.config).toBeNull();
   });
+
+  it('save sets error when saveConfig rejects (D-SF13-T08)', async () => {
+    vi.spyOn(CanvasApi, 'getConfig').mockResolvedValue(createMockCanvasConfig({ tiles: [] }));
+    vi.spyOn(CanvasApi, 'saveConfig').mockRejectedValue(new Error('Save failed'));
+
+    const { result } = renderHook(() => useCanvasConfig('user-001', 'project-001'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.save(createMockCanvasConfig({ tiles: [] }));
+    });
+
+    expect(result.current.error?.message).toBe('Save failed');
+  });
+
+  it('save wraps non-Error thrown value (D-SF13-T08)', async () => {
+    vi.spyOn(CanvasApi, 'getConfig').mockResolvedValue(createMockCanvasConfig({ tiles: [] }));
+    vi.spyOn(CanvasApi, 'saveConfig').mockRejectedValue('string error');
+
+    const { result } = renderHook(() => useCanvasConfig('user-001', 'project-001'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.save(createMockCanvasConfig({ tiles: [] }));
+    });
+
+    expect(result.current.error?.message).toBe('string error');
+  });
+
+  it('reset sets error when resetToRoleDefault rejects (D-SF13-T08)', async () => {
+    vi.spyOn(CanvasApi, 'getConfig').mockResolvedValue(createMockCanvasConfig({ tiles: [] }));
+    vi.spyOn(CanvasApi, 'resetToRoleDefault').mockRejectedValue(new Error('Reset failed'));
+
+    const { result } = renderHook(() => useCanvasConfig('user-001', 'project-001'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.reset('Project Manager');
+    });
+
+    expect(result.current.error?.message).toBe('Reset failed');
+  });
+
+  it('reset wraps non-Error thrown value (D-SF13-T08)', async () => {
+    vi.spyOn(CanvasApi, 'getConfig').mockResolvedValue(createMockCanvasConfig({ tiles: [] }));
+    vi.spyOn(CanvasApi, 'resetToRoleDefault').mockRejectedValue('reset string');
+
+    const { result } = renderHook(() => useCanvasConfig('user-001', 'project-001'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.reset('Project Manager');
+    });
+
+    expect(result.current.error?.message).toBe('reset string');
+  });
+
+  it('fetch wraps non-Error thrown value (D-SF13-T08)', async () => {
+    vi.spyOn(CanvasApi, 'getConfig').mockRejectedValue(42);
+
+    const { result } = renderHook(() => useCanvasConfig('user-001', 'project-001'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error?.message).toBe('42');
+  });
 });

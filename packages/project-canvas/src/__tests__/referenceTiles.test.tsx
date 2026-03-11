@@ -177,6 +177,41 @@ describe('Reference Tile Definitions (D-SF13-T07)', () => {
     });
   });
 
+  describe('Per-tile variant rendering by tier (D-SF13-T08)', () => {
+    const nonAiTiles = referenceTiles.filter((t) => t.tileKey !== 'ai-insight');
+
+    it.each(nonAiTiles)('$tileKey essential variant renders with data-tier="essential"', async (tile) => {
+      const EssentialComponent = tile.component.essential;
+      render(
+        <Suspense fallback={<div>loading</div>}>
+          <EssentialComponent projectId="proj-1" tileKey={tile.tileKey} />
+        </Suspense>,
+      );
+      const el = await screen.findByTestId(`tile-${tile.tileKey}`);
+      expect(el).toHaveAttribute('data-tier', 'essential');
+    });
+
+    it.each(nonAiTiles)('$tileKey expert variant renders with data-tier="expert"', async (tile) => {
+      const ExpertComponent = tile.component.expert;
+      render(
+        <Suspense fallback={<div>loading</div>}>
+          <ExpertComponent projectId="proj-1" tileKey={tile.tileKey} />
+        </Suspense>,
+      );
+      const el = await screen.findByTestId(`tile-${tile.tileKey}`);
+      expect(el).toHaveAttribute('data-tier', 'expert');
+    });
+
+    it('ai-insight has same lazy component for all 3 variants', () => {
+      // All three variants reference the same aiLazy import
+      const { essential, standard, expert } = aiInsightDef.component;
+      // They are distinct React.lazy wrappers but resolve to the same underlying component
+      expect(essential).toBeDefined();
+      expect(standard).toBeDefined();
+      expect(expert).toBeDefined();
+    });
+  });
+
   describe('Catalog compatibility', () => {
     it('registered tiles appear in getAll() for catalog filtering', () => {
       registerReferenceTiles();

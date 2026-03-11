@@ -89,4 +89,43 @@ describe('useCanvasMandatoryTiles (D-SF13-T04, D-05)', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.error?.message).toBe('Forbidden');
   });
+
+  it('applyToAllProjects sets error on failure (D-SF13-T08)', async () => {
+    vi.spyOn(CanvasApi, 'getRoleMandatoryTiles').mockResolvedValue([]);
+    vi.spyOn(CanvasApi, 'applyMandatoryTilesToAllProjects').mockRejectedValue(new Error('Apply failed'));
+
+    const { result } = renderHook(() => useCanvasMandatoryTiles('Project Manager'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.applyToAllProjects();
+    });
+
+    expect(result.current.error?.message).toBe('Apply failed');
+  });
+
+  it('applyToAllProjects wraps non-Error thrown value (D-SF13-T08)', async () => {
+    vi.spyOn(CanvasApi, 'getRoleMandatoryTiles').mockResolvedValue([]);
+    vi.spyOn(CanvasApi, 'applyMandatoryTilesToAllProjects').mockRejectedValue('string err');
+
+    const { result } = renderHook(() => useCanvasMandatoryTiles('Project Manager'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.applyToAllProjects();
+    });
+
+    expect(result.current.error?.message).toBe('string err');
+  });
+
+  it('wraps non-Error thrown value from getRoleMandatoryTiles (D-SF13-T08)', async () => {
+    vi.spyOn(CanvasApi, 'getRoleMandatoryTiles').mockRejectedValue(404);
+
+    const { result } = renderHook(() => useCanvasMandatoryTiles('Project Manager'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error?.message).toBe('404');
+  });
 });

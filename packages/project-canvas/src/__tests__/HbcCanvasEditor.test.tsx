@@ -46,6 +46,9 @@ vi.mock('../registry/index.js', () => ({
   getAll: vi.fn().mockReturnValue([]),
 }));
 
+import { getAll as mockGetAllFn } from '../registry/index.js';
+const mockGetAll = vi.mocked(mockGetAllFn);
+
 // --- Helpers ---
 
 const mockOnSave = vi.fn();
@@ -170,5 +173,46 @@ describe('HbcCanvasEditor (D-SF13-T06)', () => {
     editorHasUnsavedChanges = true;
     setup();
     expect(screen.getByTestId('editor-unsaved-indicator')).toBeInTheDocument();
+  });
+
+  it('catalog add calls editor.addTile via handleAddTile (D-SF13-T08)', () => {
+    const allTiles = [createMockTileDefinition({ tileKey: 'new-tile', title: 'New Tile' })];
+    mockGetAll.mockReturnValueOnce(allTiles);
+
+    setup();
+    fireEvent.click(screen.getByTestId('editor-add-tile-button'));
+    // Catalog is now open — click add on the tile
+    fireEvent.click(screen.getByTestId('catalog-add-new-tile'));
+    expect(mockAddTile).toHaveBeenCalledWith('new-tile');
+  });
+
+  it('move-down button calls reorderTiles (D-SF13-T08)', () => {
+    editorTiles = [
+      createMockTilePlacement({ tileKey: 'tile-a' }),
+      createMockTilePlacement({ tileKey: 'tile-b', colStart: 5 }),
+    ];
+    setup();
+    fireEvent.click(screen.getByTestId('editor-tile-move-down-tile-a'));
+    expect(mockReorderTiles).toHaveBeenCalledWith(0, 1);
+  });
+
+  it('move-up button calls reorderTiles (D-SF13-T08)', () => {
+    editorTiles = [
+      createMockTilePlacement({ tileKey: 'tile-a' }),
+      createMockTilePlacement({ tileKey: 'tile-b', colStart: 5 }),
+    ];
+    setup();
+    fireEvent.click(screen.getByTestId('editor-tile-move-up-tile-b'));
+    expect(mockReorderTiles).toHaveBeenCalledWith(1, 0);
+  });
+
+  it('move-up button hidden for first tile, move-down hidden for last tile (D-SF13-T08)', () => {
+    editorTiles = [
+      createMockTilePlacement({ tileKey: 'tile-a' }),
+      createMockTilePlacement({ tileKey: 'tile-b', colStart: 5 }),
+    ];
+    setup();
+    expect(screen.queryByTestId('editor-tile-move-up-tile-a')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('editor-tile-move-down-tile-b')).not.toBeInTheDocument();
   });
 });

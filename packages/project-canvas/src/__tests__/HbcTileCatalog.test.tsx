@@ -107,4 +107,21 @@ describe('HbcTileCatalog (D-SF13-T06)', () => {
     expect(screen.queryByTestId('catalog-tile-placed-2')).not.toBeInTheDocument();
     expect(screen.getByTestId('catalog-tile-available-1')).toBeInTheDocument();
   });
+
+  it('sorts mandatory tiles before non-mandatory, then alphabetical (D-SF13-T08)', () => {
+    mockGetAll.mockReturnValue([
+      createMockTileDefinition({ tileKey: 'tile-z', title: 'Zebra', mandatory: false }),
+      createMockTileDefinition({ tileKey: 'tile-a', title: 'Alpha', mandatory: false }),
+      createMockTileDefinition({ tileKey: 'tile-m', title: 'Mandatory Z', mandatory: true }),
+      createMockTileDefinition({ tileKey: 'tile-n', title: 'Mandatory A', mandatory: true }),
+    ]);
+    setup();
+    const list = screen.getByTestId('catalog-list');
+    const items = list.querySelectorAll('[data-testid^="catalog-tile-tile-"]');
+    // Mandatory tiles first (sorted: Mandatory A, Mandatory Z), then non-mandatory (Alpha, Zebra)
+    expect(items[0].getAttribute('data-testid')).toBe('catalog-tile-tile-n');
+    expect(items[1].getAttribute('data-testid')).toBe('catalog-tile-tile-m');
+    expect(items[2].getAttribute('data-testid')).toBe('catalog-tile-tile-a');
+    expect(items[3].getAttribute('data-testid')).toBe('catalog-tile-tile-z');
+  });
 });
