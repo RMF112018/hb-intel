@@ -1,59 +1,67 @@
-# SF19-T03 - Benchmark Aggregation and API
+# SF19-T03 - Benchmark Lifecycle and API
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
 **Spec Source:** `docs/explanation/feature-decisions/PH7-SF-19-Module-Feature-BD-Score-Benchmark.md`
-**Decisions Applied:** D-02 through D-06
-**Estimated Effort:** 0.95 sprint-weeks
+**Decisions Applied:** L-01, L-02, L-04, L-06
+**Estimated Effort:** 1.0 sprint-weeks
 **Depends On:** T02
 
-> **Doc Classification:** Canonical Normative Plan - SF19-T03 aggregation/api task; sub-plan of `SF19-BD-Score-Benchmark.md`.
+> **Doc Classification:** Canonical Normative Plan - SF19-T03 lifecycle/api task; sub-plan of `SF19-BD-Score-Benchmark.md`.
 
 ---
 
 ## Objective
 
-Define nightly benchmark aggregation, storage semantics, and read APIs for score overlay consumers.
+Define primitive-owned benchmark lifecycle, storage semantics, and API contracts for BD and future module adapters.
 
 ---
 
-## Aggregation Pipeline
+## Benchmark Lifecycle (`@hbc/score-benchmark`)
 
 - source inputs:
-  - closed BD scorecards with outcomes
+  - closed scorecards with outcomes
   - seeded historical data imports
   - post-bid learning loop outcome enrichments
-- schedule: nightly timer function (`BENCHMARK_REFRESH_CRON`)
-- output granularity: aggregate rows by criterion + filter dimensions
-- privacy rule: store aggregate statistics only, never raw pursuit-level details in overlay list
+- lifecycle behavior:
+  - scheduled recompute job for baseline aggregates
+  - on-demand recompute hooks for admin-governed refresh scenarios
+- output granularity:
+  - aggregate rows by criterion + filter dimensions
+- privacy/governance:
+  - aggregate benchmark values in read path
+  - immutable version and provenance metadata via `@hbc/versioned-record`
+  - Go/No-Go snapshot freeze support
 
 ---
 
-## Significance and Win Zone Rules
+## Win Zone and Significance Rules
 
 - if `sampleSize < BENCHMARK_MIN_SAMPLE_SIZE`, mark criterion insufficient
-- win zone is `[winZoneMin, winZoneMax]` from won-distribution percentile band
-- `distanceToWinZone` uses overall score against overall win-zone minimum
+- Win Zone range is computed from won-distribution benchmark model
+- `distanceToWinZone` compares current overall score to win-zone entry threshold
+- each below-zone criterion emits BIC ownership projection contract (`@hbc/bic-next-move`)
 
 ---
 
 ## API Contracts
 
 `ScoreBenchmarkApi`:
-
-- `getOverlayState(scorecardId, filterContext)`
+- `getOverlayState(entityId, filterContext)`
 - `getCriterionBenchmarks(filterContext)`
 - `getOverallSummary(filterContext)`
+- `queueBenchmarkMutation(mutation)` for offline/queued writes
 
-`ScoreBenchmarkAggregationApi`:
-
-- `runNightlyAggregation()`
-- `rebuildForFilterContext(filterContext)` (admin/manual)
+`ScoreBenchmarkLifecycleApi`:
+- `runScheduledRecompute()`
+- `runOnDemandRecompute(filterContext, requestedBy)`
+- `freezeSnapshot(entityId, snapshotReason)`
 
 ---
 
 ## Verification Commands
 
 ```bash
-pnpm --filter @hbc/features-business-development test -- aggregation
-pnpm --filter @hbc/features-business-development test -- api
+pnpm --filter @hbc/score-benchmark test -- lifecycle
+pnpm --filter @hbc/score-benchmark test -- api
+pnpm --filter @hbc/score-benchmark check-types
 ```

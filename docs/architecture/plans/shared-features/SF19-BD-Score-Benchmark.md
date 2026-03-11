@@ -1,11 +1,11 @@
-# SF19 - BD Score Benchmark Ghost Overlay (`@hbc/features-business-development`)
+# SF19 - BD Score Benchmark Ghost Overlay (`@hbc/features-business-development` adapter over `@hbc/score-benchmark`)
 
-**Plan Version:** 1.0
+**Plan Version:** 2.0
 **Date:** 2026-03-11
 **Source Spec:** `docs/explanation/feature-decisions/PH7-SF-19-Module-Feature-BD-Score-Benchmark.md`
 **Priority Tier:** 2 - Application Layer (BD differentiator)
 **Estimated Effort:** 3-4 sprint-weeks
-**ADR Required:** `docs/architecture/adr/ADR-0108-bd-score-benchmark-ghost-overlay.md`
+**ADR Required:** `docs/architecture/adr/0103-bd-score-benchmark-ghost-overlay.md` + companion `@hbc/score-benchmark` ADR
 
 > **Doc Classification:** Canonical Normative Plan - SF19 implementation master plan for BD score benchmarking; governs SF19-T01 through SF19-T09.
 
@@ -13,24 +13,35 @@
 
 ## Purpose
 
-SF19 turns BD scorecards into benchmarked decision support by overlaying historical win/loss criterion context, win-zone distance, and actionable deltas directly on active score evaluation workflows.
+SF19 now implements BD score benchmarking as a domain adapter over the reusable Tier-1 `@hbc/score-benchmark` primitive. BD owns profile defaults, UX composition, and module fit; core benchmark computation/state/versioning/telemetry contracts are owned by the primitive.
 
 ---
 
-## Locked Interview Decisions
+## Locked Decisions
 
 | # | Decision | Locked Choice |
 |---|---|---|
-| D-01 | Package alignment | Implement in `@hbc/features-business-development`; no standalone benchmark package |
-| D-02 | Benchmark model | Pre-aggregated criterion benchmark stats with win/loss averages and win-zone range |
-| D-03 | Sample threshold | Minimum 5 comparable records required for benchmark rendering |
-| D-04 | Privacy strategy | Store aggregate statistics only (no raw outcome payload exposure in overlay path) |
-| D-05 | Refresh strategy | Nightly benchmark aggregation job writes cached benchmark snapshots |
-| D-06 | Filter context | Project type, value range, geography, and owner type are canonical comparison filters |
-| D-07 | Complexity behavior | Essential: hidden; Standard: summary + win-zone indicator; Expert: full per-criterion ghost overlay + filters |
-| D-08 | Integration behavior | Versioned closed outcomes + post-bid learning feed benchmark datasets; AI risk-assessment can consume benchmark summary context |
-| D-09 | SPFx constraints | app-shell-safe overlays, tooltips, and filter controls only |
-| D-10 | Testing sub-path | `@hbc/features-business-development/testing` exports canonical benchmark fixtures |
+| L-01 | Primitive abstraction | Entire benchmark model is provided by Tier-1 `@hbc/score-benchmark` |
+| L-02 | Criterion ownership | Per-criterion Win Zone gap ownership via `@hbc/bic-next-move`; blockers-first with avatar projection |
+| L-03 | Progressive disclosure | `@hbc/complexity` controls Essential/Standard/Expert behavior (Essential badge only; Standard summary + ghost context; Expert full overlays + filters) |
+| L-04 | Offline resilience | Service worker caching + IndexedDB persistence via `@hbc/versioned-record` + Background Sync + optimistic indicators |
+| L-05 | AI embedding | Ghost Overlay and WinZoneIndicator expose inline AI actions with cited sources, explicit approval, and auto-created BIC records; no sidecar chat |
+| L-06 | Deep-linking, provenance, telemetry | `@hbc/related-items` deep-links, `@hbc/project-canvas` My Work placement, immutable `@hbc/versioned-record` provenance/snapshot freeze, five UX KPIs |
+
+---
+
+## Governance Alignment (PH7 Shared Features Evaluation)
+
+SF19 aligns with the PH7 shared-feature governance rule: capabilities become shared primitives only when configuration-driven, reused across modules, domain-agnostic, and materially reducing duplicated implementation. `@hbc/score-benchmark` satisfies this rule; SF19 is a bounded BD profile over that primitive.
+
+---
+
+## Evidence-Informed Design Notes
+
+- CRM scoring systems establish factor-based scoring and explainability patterns, but do not provide SF19-style per-criterion active ghost overlays on live Go/No-Go scorecards.
+- Offline runtime follows established PWA patterns: explicit cache strategy, durable IndexedDB state, and deferred sync replay for queued writes.
+- KPI surfaces follow operations-grade indicator guidance: thresholded status bands, trend visibility, and consistent target comparison.
+- Provenance and governance language maps to version history/approval/retention expectations via `@hbc/versioned-record`.
 
 ---
 
@@ -38,65 +49,42 @@ SF19 turns BD scorecards into benchmarked decision support by overlaying histori
 
 ```text
 packages/features/business-development/
-|- package.json
-|- README.md
-|- tsconfig.json
-|- vitest.config.ts
 |- src/
-|  |- index.ts
 |  |- score-benchmark/
-|  |  |- types/
-|  |  |  |- IScoreBenchmark.ts
-|  |  |  |- index.ts
-|  |  |- model/
-|  |  |  |- computeWinZoneDistance.ts
-|  |  |  |- resolveBenchmarkSignificance.ts
-|  |  |  |- applyBenchmarkFilters.ts
-|  |  |  |- index.ts
-|  |  |- api/
-|  |  |  |- ScoreBenchmarkApi.ts
-|  |  |  |- ScoreBenchmarkAggregationApi.ts
-|  |  |  |- index.ts
+|  |  |- profiles/
+|  |  |  |- businessDevelopmentScoreBenchmarkProfile.ts
+|  |  |- adapters/
+|  |  |  |- mapBdScorecardToScoreBenchmarkItem.ts
+|  |  |  |- mapScoreBenchmarkStateToBdView.ts
 |  |  |- hooks/
 |  |  |  |- useScoreBenchmark.ts
-|  |  |  |- useBenchmarkFilters.ts
-|  |  |  |- index.ts
 |  |  |- components/
 |  |  |  |- ScoreBenchmarkGhostOverlay.tsx
 |  |  |  |- BenchmarkSummaryPanel.tsx
 |  |  |  |- WinZoneIndicator.tsx
 |  |  |  |- BenchmarkFilterPanel.tsx
-|  |  |  |- index.ts
+|  |  |- telemetry/
+|  |  |  |- scoreBenchmarkKpiEmitter.ts
 |  |  |- index.ts
 |  |- testing/
-|     |- index.ts
-|     |- createMockScorecardBenchmark.ts
-|     |- createMockGhostOverlayState.ts
-|     |- createMockBenchmarkFilterContext.ts
-|     |- mockScoreBenchmarkStates.ts
-|  |- __tests__/
-|     |- setup.ts
-|     |- computeWinZoneDistance.test.ts
-|     |- applyBenchmarkFilters.test.ts
-|     |- useScoreBenchmark.test.ts
-|     |- ScoreBenchmarkGhostOverlay.test.tsx
-|     |- BenchmarkSummaryPanel.test.tsx
-|     |- WinZoneIndicator.test.tsx
-|     |- BenchmarkFilterPanel.test.tsx
+|     |- createMockScoreBenchmarkState.ts
+|     |- createMockScoreBenchmarkProfile.ts
 ```
+
+Core benchmark computation, filter semantics, version lifecycle, and telemetry schema live in `@hbc/score-benchmark`.
 
 ---
 
 ## Definition of Done
 
-- [ ] benchmark contracts and significance semantics documented
-- [ ] nightly pre-aggregation and list/API model documented
-- [ ] ghost overlay, summary panel, indicator, and filter panel contracts documented
-- [ ] complexity-gated rendering model documented
-- [ ] data-seeding/versioned-record/ai-assist/post-bid-learning integration boundaries documented
-- [ ] testing fixture sub-path documented
-- [ ] SF19-T09 includes SF11-grade documentation/deployment requirements
-- [ ] `current-state-map.md` updated with SF19 + ADR-0108 linkage
+- [ ] all SF19 docs use locked L-01 through L-06 and no legacy D-* semantics
+- [ ] SF19 contracts reference `IScoreBenchmark*` as canonical core contracts
+- [ ] BIC blockers-first ownership and avatar projection into overlay tooltip/My Work are documented
+- [ ] complexity behavior is explicit for Essential/Standard/Expert across all benchmark surfaces
+- [ ] offline strategy includes service worker caching, IndexedDB, Background Sync, optimistic state badges
+- [ ] inline AI actions include source citation + explicit approval + auto-BIC creation constraints
+- [ ] `@hbc/related-items`, `@hbc/project-canvas`, `@hbc/versioned-record`, `@hbc/notification-intelligence`, `@hbc/health-indicator`, and KPI telemetry contracts are documented
+- [ ] T09 closure includes companion primitive ADR and KPI validation evidence
 
 ---
 
@@ -104,12 +92,12 @@ packages/features/business-development/
 
 | File | Contents |
 |---|---|
-| `SF19-T01-Package-Scaffold.md` | package scaffold + README requirement |
-| `SF19-T02-TypeScript-Contracts.md` | benchmark contracts/constants |
-| `SF19-T03-Benchmark-Aggregation-and-API.md` | nightly aggregation model + APIs |
-| `SF19-T04-Hooks-and-State-Model.md` | useScoreBenchmark/useBenchmarkFilters |
-| `SF19-T05-ScoreBenchmarkGhostOverlay-and-Summary.md` | per-criterion overlay and summary contracts |
-| `SF19-T06-WinZoneIndicator-and-BenchmarkFilterPanel.md` | spectrum and filtering UX contracts |
-| `SF19-T07-Reference-Integrations.md` | shared-feature integration boundaries |
-| `SF19-T08-Testing-Strategy.md` | fixtures and test matrix |
-| `SF19-T09-Testing-and-Deployment.md` | checklist, ADR/docs/index/state-map updates |
+| `SF19-T01-Package-Scaffold.md` | primitive + adapter scaffold, exports, README and boundary rules |
+| `SF19-T02-TypeScript-Contracts.md` | canonical primitive contracts + SF19 adapter aliases |
+| `SF19-T03-Benchmark-Aggregation-and-API.md` | primitive lifecycle, recompute model, provenance-aware API boundaries |
+| `SF19-T04-Hooks-and-State-Model.md` | hook orchestration from primitive state to BD UX state + offline replay |
+| `SF19-T05-ScoreBenchmarkGhostOverlay-and-Summary.md` | complexity-aware overlay and summary behavior |
+| `SF19-T06-WinZoneIndicator-and-BenchmarkFilterPanel.md` | indicator/filter contracts + inline AI action controls |
+| `SF19-T07-Reference-Integrations.md` | Tier-1 integration contracts and boundary rules |
+| `SF19-T08-Testing-Strategy.md` | fixtures, scenario matrix, offline/AI/KPI verification |
+| `SF19-T09-Testing-and-Deployment.md` | closure checklist, ADR/docs/index/state-map updates |

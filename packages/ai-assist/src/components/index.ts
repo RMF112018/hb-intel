@@ -16,3 +16,6 @@ export type { HbcAiActionMenuProps } from './HbcAiActionMenu.js';
 
 export { HbcAiLoadingState } from './HbcAiLoadingState.js';
 export type { HbcAiLoadingStateProps } from './HbcAiLoadingState.js';
+
+export { HbcAiResultPanel } from './HbcAiResultPanel.js';
+export type { HbcAiResultPanelProps } from './HbcAiResultPanel.js';

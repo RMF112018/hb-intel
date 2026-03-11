@@ -34,8 +34,9 @@ Document boundary-safe integration contracts across shared features and module s
   - BD heritage tile renders latest approved strategic intelligence summary
 - `@hbc/complexity`
   - controls surface depth across all three tiers
-- SF19 / SF22
-  - strategic intelligence contexts feed score benchmark analysis and post-bid loop enrichment points
+- SF19 / SF22 via `@hbc/score-benchmark`
+  - strategic intelligence contexts feed score benchmark primitive recompute inputs
+  - score-benchmark gap/outcome signals feed post-bid loop enrichment and heritage evidence weighting
 
 ---
 
@@ -44,6 +45,7 @@ Document boundary-safe integration contracts across shared features and module s
 - no direct app-route imports into package runtime
 - approval authority always resolved through admin policy API
 - pending/rejected entries never emitted to search index pipeline
+- cross-feature integration with SF19 occurs through `@hbc/score-benchmark` public interfaces only
 
 ---
 
@@ -51,5 +53,5 @@ Document boundary-safe integration contracts across shared features and module s
 
 ```bash
 pnpm --filter @hbc/features-business-development test -- integrations
-rg -n "from 'apps/" packages/features/business-development/src
+rg -n "from 'apps/" packages/features/business-development/src packages/score-benchmark/src
 ```

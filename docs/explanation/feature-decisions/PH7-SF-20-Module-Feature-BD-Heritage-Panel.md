@@ -15,7 +15,7 @@ This creates two compounding problems:
 1. **Context loss at handoff**: The PM starts a project with no historical context
 2. **Dead-end BD knowledge**: BD intelligence becomes stale and project-specific; it is never used for the next similar pursuit
 
-**The BD Heritage Panel** solves Problem 1 by surfacing BD context on every project record view — making BD intelligence visible to the project team throughout delivery.
+**The BD Heritage Panel** solves Problem 1 by surfacing BD context on every project record view — making BD intelligence visible to the project team throughout delivery. Every strategic gap, client-preference risk, or heritage-derived insight is automatically surfaced as a granular BIC record in `@hbc/bic-next-move` (blockers first), with ownership avatars appearing directly in the panel and in the `@hbc/project-canvas` "My Work" lane.
 
 **Living Strategic Intelligence** solves Problem 2 by creating a continuously enriched knowledge base: team members can contribute observations, client preferences, market intelligence, and competitor intel throughout the project lifecycle — not just at pursuit time. This intelligence is visible to future BD efforts on similar clients or project types.
 
@@ -25,118 +25,69 @@ This creates two compounding problems:
 
 The ux-mold-breaker.md Signature Solution #3 (Unified Work Graph) specifies: "The relationship between a project and its BD origin is always visible, always current, and always actionable." The con-tech UX study §4 documents that BD-to-delivery context loss is universal — every platform treats BD and delivery as separate systems with no knowledge transfer.
 
-Living Strategic Intelligence extends this with Operating Principle §7.2 (Responsibility-first): every intelligence contribution has an author, a timestamp, an approval status, and a responsible approver — making it a structured, governed knowledge asset rather than a shared comment thread.
+Living Strategic Intelligence extends this with Operating Principle §7.2 (Responsibility-first): every intelligence contribution has an author, a timestamp, an approval status, and a responsible approver — making it a structured, governed knowledge asset rather than a shared comment thread. The feature is the foundation of the new reusable Tier-1 `@hbc/strategic-intelligence` primitive.
 
 ---
 
-## Feature 1: BD Heritage Panel
-
-### What It Shows
-
-The BD Heritage Panel is a read-only panel rendered in:
-1. **Project Hub project records** — full BD heritage context from originating scorecard
-2. **Estimating Active Pursuit records** — BD heritage from the Go/No-Go phase
+## Data Model
 
 ```typescript
-// BD Heritage Panel data model
+// In @hbc/strategic-intelligence primitive (new Tier-1 package)
+
 export interface IBdHeritageData {
-  /** Source BD Scorecard */
   scorecardId: string;
-  scorecardVersion: number; // version at handoff moment
+  scorecardVersion: number;
   projectName: string;
   ownerName: string;
   ownerContactName: string;
   ownerContactRole: string;
-  /** Go/No-Go decision and rationale */
   decision: 'GO' | 'NO-GO' | 'WAIT';
   decisionRationale: string;
-  /** Key strategic context captured during BD */
   clientPriorities: string[];
   competitiveContext: string;
   keyRelationships: string;
   estimatedValue: number;
   projectType: string;
-  /** Linked Living Strategic Intelligence entries */
   intelligenceEntries: IStrategicIntelligenceEntry[];
-  /** BD team members who worked the pursuit */
   bdTeam: IBicOwner[];
   handoffDate: string;
+  version: VersionedRecord; // from @hbc/versioned-record
+  telemetry: IStrategicIntelligenceTelemetryState;
 }
-```
 
-### BD Heritage Panel UI
-
-```typescript
-// Component in Project Hub and Estimating modules
-interface BdHeritagePanelProps {
-  projectId: string; // or pursuitsId
-  heritageData: IBdHeritageData;
-}
-```
-
-**Visual behavior:**
-- Collapsible sidebar panel titled "BD Heritage"
-- Header: client name, decision badge (GO/NO-GO/WAIT), handoff date
-- Section: **Strategic Context** — client priorities, competitive context, key relationships
-- Section: **BD Team** — avatars of BD team members with "Contact" links
-- Section: **Living Strategic Intelligence** — latest intelligence entries (see Feature 2)
-- Link: "View Full BD Scorecard (v{N})" → navigates to the versioned scorecard snapshot
-- Lock icon: "Read-only — BD heritage is the record at handoff" (cannot be edited from this panel)
-
----
-
-## Feature 2: Living Strategic Intelligence
-
-### What It Is
-
-A continuously enriched, governed knowledge base attached to each client/project combination. Anyone with project permissions can contribute an intelligence entry; the entry is reviewed and approved by the configured approver (Director of Preconstruction or Chief Estimator, per Admin approval authority config from SF-17).
-
-### Intelligence Entry Types
-
-| Type | Description | Example |
-|---|---|---|
-| Client Preference | Observed client preferences or requirements | "Client strongly prefers weekly written progress updates" |
-| Competitor Intel | Observed competitor activity or strategy | "Acme Construction bidding aggressively below cost in this geography" |
-| Market Condition | Regional market observation | "Electrical sub shortage in this metro; bid early" |
-| Relationship Note | Key relationship context | "Owner's rep is a former HB employee — strong rapport" |
-| Risk Observation | Strategic risk for future pursuits | "Client changes scope late in construction — price risk" |
-| Win/Loss Factor | Retrospective factor in this project's outcome | "Won on schedule commitment, not price" |
-
-### Intelligence Entry Lifecycle
-
-```
-Contributor submits entry (anyone with project permissions)
-    → Entry in 'pending-approval' status
-    → Approver notified (Immediate notification via @hbc/notification-intelligence)
-    → Approver reviews: Approve OR Reject with reason
-    → Approved: entry visible in BD Heritage Panel + searchable
-    → Rejected: contributor notified with reason; can revise and resubmit
-```
-
-```typescript
 export interface IStrategicIntelligenceEntry {
   entryId: string;
   type: IntelligenceEntryType;
   title: string;
   body: string;
   tags: string[];
-  /** Associated project/client context */
   projectId: string;
   clientName: string;
-  /** Contributor */
   contributor: IBicOwner;
   submittedAt: string;
-  /** Approval */
   approvalStatus: 'pending-approval' | 'approved' | 'rejected';
   approver: IBicOwner | null;
   approvedAt: string | null;
   rejectionReason: string | null;
-  /** Version (each revision creates a new version) */
   version: number;
-  /** Cross-reference: related BD scorecard, if applicable */
   relatedScorecardId?: string;
+  bicRecordId?: string; // link to @hbc/bic-next-move for risk/gap entries
+}
+
+export interface IStrategicIntelligenceTelemetryState {
+  timeToHandoffContextReviewMs: number | null;
+  intelligenceContributionLatencyMs: number | null;
+  pctHeritagePanelsViewed: number | null;
+  heritageReuseRate: number | null;
+  strategicIntelligenceCes: number | null;
 }
 ```
+
+**Model behavior notes:**
+- `IBdHeritageData` is immutable at handoff snapshot time, with controlled additive intelligence updates over time
+- `IStrategicIntelligenceEntry` supports revisioned resubmission after rejection without mutating prior approved versions
+- `bicRecordId` is required for entries classified as strategic gap/risk that require accountable closure
+- KPI telemetry is emitted by primitive hooks and consumed by both canvas and governance dashboards
 
 ---
 
@@ -144,87 +95,136 @@ export interface IStrategicIntelligenceEntry {
 
 ```
 apps/business-development/src/features/strategic-intelligence/
-├── BdHeritagePanel.tsx             # read-only heritage panel (BD, Project Hub, Estimating)
-├── StrategicIntelligenceFeed.tsx   # approved entries feed for a project
+├── useStrategicIntelligence.ts     # now delegates to @hbc/strategic-intelligence
+├── BdHeritagePanel.tsx             # read-only heritage panel
+├── StrategicIntelligenceFeed.tsx   # approved entries feed
 ├── IntelligenceEntryForm.tsx       # new entry submission form
-├── IntelligenceApprovalQueue.tsx   # approver view: pending entries for review
-├── useStrategicIntelligence.ts     # loads entries, submits, approves
+├── IntelligenceApprovalQueue.tsx   # approver view
 └── types.ts
 ```
 
----
+(The entire model, offline logic, AI actions, gap BIC ownership, and telemetry are now provided by the new `@hbc/strategic-intelligence` primitive.)
 
-## Contributor Permission Model
-
-Per the Q13 interview decision: **anyone with permissions for the specific project** can contribute a strategic intelligence entry. This means:
-- Project Manager, Superintendent, PE, Estimator, BD Manager — anyone on the project team can submit an entry
-- The entry enters a pending-approval queue before becoming part of the official knowledge base
-- Approval authority is configured in the Admin module (SF-17): Director of Preconstruction OR Chief Estimator
-
-This democratizes intelligence collection while maintaining governance over what enters the canonical knowledge base.
-
----
-
-## Cross-Module Surface Points
+**Cross-module surface points:**
 
 | Module | Surface | Content |
 |---|---|---|
 | Business Development | Scorecard detail view | Full intelligence feed for this client |
 | Estimating | Active Pursuit sidebar | BD Heritage panel + recent intelligence entries |
 | Project Hub | Project record sidebar | BD Heritage panel + all intelligence entries |
-| `@hbc/project-canvas` | BD Heritage Canvas Tile | Summary of latest approved intelligence entries |
-| `@hbc/search` | Indexed | Intelligence entry body + tags searchable cross-module |
+| `@hbc/project-canvas` | Strategic Intelligence tile | Summary of latest approved entries + open gaps |
+| `@hbc/search` | Indexed | Approved entry title/body/tags searchable cross-module |
 
 ---
 
-## Integration Points
+## Component Specifications
+
+**BD Heritage Panel & Intelligence Feed (Complexity-aware):**
+- Essential: collapsed `BD Heritage & Intelligence` badge only
+- Standard: read-only Heritage Panel + approved intelligence feed (simplified contribution button)
+- Expert: full entry form, approval queue, and `Configure approvers` link
+
+**Approval and contribution behavior:**
+- Anyone with permissions for the specific project can submit entries
+- Entries route to approver queue based on SF-17 admin-configured approval authority
+- Approved entries project deep-links and ownership into panel/feed/canvas contexts
+
+**BIC ownership behavior:**
+- Risk/gap entries auto-create or link granular BIC records in `@hbc/bic-next-move`
+- Panel/feed rows show owning avatar and status hints
+- My Work lane receives automatic role-aware assignment cards via `@hbc/project-canvas`
+
+**Inline AI actions** appear in the entry form and feed (Standard/Expert only).
+
+**Intelligence entry types:**
+
+| Type | Description | Example |
+|---|---|---|
+| Client Preference | Observed client preferences or requirements | `Client strongly prefers weekly written progress updates` |
+| Competitor Intel | Observed competitor activity or strategy | `Regional competitor bidding aggressively below cost` |
+| Market Condition | Regional market observation | `Electrical sub shortage in this metro; bid early` |
+| Relationship Note | Key relationship context | `Owner rep has strong prior HB relationship` |
+| Risk Observation | Strategic risk for future pursuits | `Client changes scope late in construction` |
+| Win/Loss Factor | Retrospective factor in project outcome | `Won on schedule commitment, not price` |
+
+**Approval lifecycle:**
+1. Contributor submits entry from panel/feed/form context
+2. Entry status becomes `pending-approval`
+3. Configured approver receives immediate notification
+4. Approver approves or rejects with reason
+5. Approved entries become searchable and reusable in future pursuits
+
+---
+
+## AI Action Layer Integration
+
+AI suggestions (`Draft from daily logs`, `Summarize heritage for new pursuit`, `Suggest risk tags`) appear as contextual inline buttons and smart placeholders in form/feed/panel surfaces. Suggestions cite sources, require explicit approval, auto-populate entries, and integrate natively with `@hbc/versioned-record` and `@hbc/bic-next-move`. No separate chat interface.
+
+AI outputs remain proposal-state until user approval commits the change. Approved AI actions retain provenance links to source entries, generated suggestions, and resulting BIC records to preserve implementation-truth traceability.
+
+---
+
+## Integration Points (All Tier-1 Primitives)
 
 | Package | Integration |
 |---|---|
-| `@hbc/versioned-record` | Intelligence entries are versioned; approved entries create `'approved'` version snapshots |
-| `@hbc/acknowledgment` | Approval flow uses `@hbc/acknowledgment` single-party pattern with Admin-configured approvers |
-| `@hbc/sharepoint-docs` | Intelligence entries may include supporting document attachments |
-| `@hbc/notification-intelligence` | New entry pending approval → Immediate notification to approver; approval/rejection → Watch to contributor |
-| `@hbc/search` | Approved intelligence entries indexed and searchable by client, project type, tags, body text |
-| `@hbc/complexity` | Essential: Heritage panel collapsed; Standard: Heritage panel visible; Expert: Full intelligence feed with all entries and approval history |
-| PH7-SF-19 Score Benchmark | Intelligence entries contribute market context to benchmark data analysis |
-| PH7-SF-22 Post-Bid Learning Loop | Win/Loss Factor entries are seeded from completed post-bid autopsies |
+| `@hbc/strategic-intelligence` | New Tier-1 primitive providing the entire model |
+| `@hbc/bic-next-move` | Granular BIC ownership for risk/gap entries with avatar projection |
+| `@hbc/complexity` | Essential/Standard/Expert progressive disclosure |
+| `@hbc/versioned-record` | Immutable provenance, audit trail, snapshot freezing |
+| `@hbc/related-items` | Direct deep-links from every intelligence entry/gap |
+| `@hbc/project-canvas` | Automatic placement in role-aware My Work lane |
+| `@hbc/acknowledgment` | Approval flow |
+| `@hbc/notification-intelligence` | Pending approval & decision notifications |
+| `@hbc/strategic-intelligence` telemetry | Five KPIs (time-to-handoff-context-review, intelligence-contribution latency, % heritage panels viewed, heritage-reuse rate, strategic-intelligence CES) surfaced in canvas and admin dashboard |
+
+---
+
+## Offline / PWA Resilience
+
+Full tablet-native behavior: service worker caches the Heritage Panel, feed, form, and queue; IndexedDB + `@hbc/versioned-record` persists drafts and state; Background Sync replays changes with optimistic UI and `Saved locally / Queued to sync` indicators. Works identically to Punch List, RFI drafts, Bid Readiness Signal, and Score Benchmark gaps.
+
+Offline state guarantees:
+- Read paths resolve from cached heritage snapshots when network is unavailable
+- Draft submissions persist locally without blocking panel/feed navigation
+- Approval actions queue locally for authorized approvers and replay in-order on reconnect
+- Conflict resolution preserves immutable version history rather than overwriting accepted records
 
 ---
 
 ## Priority & ROI
 
-**Priority:** P1 — Solves a pervasive pain point (BD context loss at handoff) and creates the first continuously enriched project intelligence system in construction management
-**Estimated build effort:** 5–6 sprint-weeks (BD heritage panel, intelligence feed, entry form, approval queue, cross-module surfaces)
-**ROI:** Eliminates BD knowledge loss at project handoff; creates compounding intelligence value over time (each project enriches future BD decisions); democratizes contribution while maintaining governance; surfaces the organizational knowledge currently trapped in individuals' email inboxes
+**Priority:** P1 — Solves a pervasive pain point and creates the first continuously enriched project intelligence system in construction management; seed for the platform-wide `@hbc/strategic-intelligence` primitive.
+**Estimated build effort:** 5–6 sprint-weeks (now accelerated by reusing existing primitives).
+**ROI:** Eliminates BD knowledge loss; creates compounding intelligence value; measurable impact via UX telemetry.
+**Operational value:** Makes handoff context review and strategic insight reuse visible, measurable, and accountable across BD, Estimating, and Project Hub.
+**KPI tracking expectations:**
+- time-to-handoff-context-review
+- intelligence-contribution latency
+- % heritage panels viewed
+- heritage-reuse rate
+- strategic-intelligence CES
+- Metrics are role-aware and complexity-aware in canvas/admin surfaces.
 
 ---
 
 ## Definition of Done
 
-**BD Heritage Panel:**
-- [ ] `IBdHeritageData` type defined; sourced from handoff snapshot (`@hbc/workflow-handoff`)
-- [ ] `BdHeritagePanel` renders in Project Hub project records
-- [ ] `BdHeritagePanel` renders in Estimating Active Pursuit records
-- [ ] Link to versioned BD scorecard snapshot functional
-- [ ] `@hbc/project-canvas` BD Heritage tile implemented
-
-**Living Strategic Intelligence:**
-- [ ] `IStrategicIntelligenceEntry` type defined with all entry types
-- [ ] `IntelligenceEntryForm` allows any project-permissioned user to submit entries
-- [ ] Approval workflow uses `@hbc/acknowledgment` + Admin-configured approver (SF-17)
-- [ ] `StrategicIntelligenceFeed` renders approved entries with type badges and contributor info
-- [ ] `IntelligenceApprovalQueue` allows approvers to review, approve, or reject pending entries
-- [ ] Supporting document attachments via `@hbc/sharepoint-docs`
-- [ ] `@hbc/versioned-record` integration: approved entries versioned
-- [ ] `@hbc/search` integration: approved entries indexed and searchable
-- [ ] Notification integration: pending approval → Immediate; decision → Watch
-- [ ] `@hbc/complexity` integration: all three tiers
-- [ ] Unit tests on approval state machine and contributor permission checks
-- [ ] E2E test: contributor submits entry → approver receives notification → approves → entry visible in BD Heritage panel
+- [ ] New `@hbc/strategic-intelligence` Tier-1 primitive created and published
+- [ ] All six locked integration patterns implemented and tested
+- [ ] Offline/PWA resilience verified on tablet
+- [ ] Embedded AI actions with provenance and approval guardrails
+- [ ] Progressive disclosure via `@hbc/complexity` across all three modes
+- [ ] Deep-links and canvas integration via `@hbc/related-items` and `@hbc/project-canvas`
+- [ ] Versioned audit trail and admin governance via `@hbc/versioned-record`
+- [ ] Five UX telemetry KPIs wired and surfaced
+- [ ] Unit tests, Storybook stories for all modes and offline states
+- [ ] ADR-0105-strategic-intelligence-primitive created
 
 ---
 
 ## ADR Reference
 
-Create `docs/architecture/adr/0029-bd-heritage-living-strategic-intelligence.md` documenting the BD Heritage Panel data sourcing strategy (from handoff snapshot), the Living Strategic Intelligence contributor permission model (anyone with project permissions), the approval authority configuration approach (Admin-configurable), and the cross-module surface strategy.
+Create `docs/architecture/adr/0105-bd-heritage-living-strategic-intelligence.md` (and companion ADR for the new `@hbc/strategic-intelligence` primitive) documenting the BD Heritage Panel data sourcing strategy, the Living Strategic Intelligence contributor permission model, the approval authority configuration approach, granular BIC integration for gaps, complexity-adaptive disclosure, offline strategy, AI Action Layer embedding, cross-module deep-linking, versioning/governance, and telemetry KPIs.
+
+---

@@ -52,3 +52,18 @@ pnpm --filter @hbc/ai-assist test -- HbcAiResultPanel HbcAiLoadingState
 pnpm --filter @hbc/ai-assist build
 rg -n "Smart Insert|confidenceDetails|Trust Meter|ai-assisted|cancel" packages/ai-assist/src/components
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF15-T06 completed: 2026-03-11
+Components implemented:
+  - HbcAiTrustMeter.tsx — rewritten from scaffold; progressive disclosure (Essential/Standard/Expert), badge color derivation, expandable rationale, cited sources, token usage
+  - HbcAiLoadingState.tsx — rewritten from scaffold; streaming indicator, streamed content preview, expert token telemetry, cancel affordance
+  - HbcAiSmartInsertOverlay.tsx — rewritten from scaffold; conditional cascade (loading→null→text→bullet-list→structured-object→fallback), per-field accept with state tracking, Apply All, Commit, Dismiss, drag handle, TrustMeter integration
+  - HbcAiResultPanel.tsx — new thin wrapper with className passthrough
+Barrel updated: src/components/index.ts (added HbcAiResultPanel export)
+Testing factory added: testing/createMockSmartInsertResult.ts
+Tests added: 36 new tests (10+8+14+4) across 4 test files — all passing
+Total package tests: 133 passing (13 files)
+Verification: check-types ✅ | build ✅ | test ✅
+Next: SF15-T07
+-->
