@@ -19,13 +19,17 @@ Without historical context, the Go/No-Go Scorecard is a scoring exercise, not a 
 - The current scorecard's position relative to these benchmarks
 - The "distance to win threshold" — how many more points would move this pursuit into the Win Zone
 
+Every Win Zone gap is automatically surfaced as a granular BIC record in `@hbc/bic-next-move` (blockers first), with ownership avatars appearing directly in the ghost overlay tooltip and in the `@hbc/project-canvas` "My Work" lane.
+
 ---
 
 ## Mold Breaker Rationale
 
 The ux-mold-breaker.md Signature Solution #12 (Implementation Truth Layer) applied to BD: the Implementation Truth at the scorecard level is not just the current score — it's the current score in the context of what history says that score means. Signature Solution #4 (Universal Next Move) provides the accountability: the ghost overlay surfaces what action would most improve the score toward the Win Zone.
 
-No construction platform currently provides per-criterion historical benchmarking on active scorecards. CRM tools (Salesforce, HubSpot) provide some win/loss analytics but not per-criterion overlays on active evaluations. This is a genuine industry first.
+No construction platform currently provides per-criterion historical benchmarking on active scorecards. CRM tools (Salesforce, HubSpot) provide some win/loss analytics but not per-criterion overlays on active evaluations. The Ghost Overlay is a genuine industry first and the foundation of the new reusable Tier-1 `@hbc/score-benchmark` primitive.
+
+Decision 6 is locked: the entire benchmark model (Win Zone computation, ghost rendering, filters, AI actions, gap BIC ownership, versioning) is abstracted into `@hbc/score-benchmark` with five role- and complexity-aware UX telemetry KPIs surfaced in project canvas and admin governance.
 
 ---
 
@@ -36,46 +40,48 @@ Historical benchmark data is sourced from:
 2. **Living Strategic Intelligence** contributions that include competitive market data
 3. **Post-Bid Learning Loop** outcomes (SF-22) — each completed autopsy enriches the benchmark dataset
 
-```typescript
-// In BD module domain types
+The persisted model is immutable and provenance-aware via `@hbc/versioned-record`, with snapshot freezing at Go/No-Go submission and replay-safe offline writes.
 
+---
+
+## Interface Contract
+
+```typescript
+// In @hbc/score-benchmark primitive (new Tier-1 package)
 export interface IScorecardBenchmark {
   criterionId: string;
   criterionLabel: string;
-  /** Average score on Won pursuits (null if insufficient data) */
   winAvg: number | null;
-  /** Average score on Lost pursuits */
   lossAvg: number | null;
-  /** Min/max of Won scores (defines the Win Zone band) */
   winZoneMin: number | null;
   winZoneMax: number | null;
-  /** Number of historical records contributing to this benchmark */
   sampleSize: number;
-  /** Whether sample size is sufficient for statistical confidence */
   isStatisticallySignificant: boolean;
 }
-
 export interface IScoreGhostOverlayState {
-  /** Benchmark data per criterion */
   benchmarks: IScorecardBenchmark[];
-  /** Aggregate benchmarks for overall score */
   overallWinAvg: number | null;
   overallLossAvg: number | null;
   overallWinZoneMin: number | null;
   overallWinZoneMax: number | null;
-  /** Distance from current score to Win Zone entry (positive = above, negative = below) */
   distanceToWinZone: number | null;
-  /** Project type and market filters applied */
   filterContext: IBenchmarkFilterContext;
-  /** Data freshness */
   benchmarkGeneratedAt: string;
+  version: VersionedRecord; // from @hbc/versioned-record
+  telemetry: IScoreBenchmarkTelemetryState;
 }
-
 export interface IBenchmarkFilterContext {
-  projectType?: string;      // filter: only compare similar project types
-  valueRange?: [number, number]; // filter: comparable project values
-  geography?: string;        // filter: regional market conditions
-  ownerType?: string;        // filter: public vs private owner
+  projectType?: string;
+  valueRange?: [number, number];
+  geography?: string;
+  ownerType?: string;
+}
+export interface IScoreBenchmarkTelemetryState {
+  timeToGoNoGoMs: number | null;
+  gapClosureLatencyMs: number | null;
+  pctScorecardsReachingWinZone: number | null;
+  winRateCorrelationLift: number | null;
+  benchmarkCes: number | null;
 }
 ```
 
@@ -85,12 +91,14 @@ export interface IBenchmarkFilterContext {
 
 ```
 apps/business-development/src/features/score-benchmark/
-├── useScoreBenchmark.ts           # loads benchmark data, applies filters
+├── useScoreBenchmark.ts           # now delegates to @hbc/score-benchmark
 ├── ScoreBenchmarkGhostOverlay.tsx # per-criterion ghost bar overlay
 ├── BenchmarkSummaryPanel.tsx      # overall benchmark comparison panel
 ├── WinZoneIndicator.tsx           # distance to win zone visualization
 └── BenchmarkFilterPanel.tsx       # context filter controls
 ```
+
+(The entire model, offline logic, AI actions, gap BIC ownership, and telemetry are now provided by the new `@hbc/score-benchmark` primitive.)
 
 ---
 
@@ -98,104 +106,96 @@ apps/business-development/src/features/score-benchmark/
 
 ### `ScoreBenchmarkGhostOverlay` — Per-Criterion Overlay
 
-Rendered within the existing scorecard criterion scoring UI. Each criterion's score input gets a ghost overlay showing historical context.
-
-**Visual behavior:**
-- Behind each criterion's score bar: a translucent "Win Zone" band in green (min–max range of historical wins)
-- A dashed line at `winAvg` (win average)
-- A dashed line at `lossAvg` (loss average)
-- The current score bar is rendered on top
-- If current score is within the Win Zone: "In Win Zone" tooltip
-- If current score is below Win Zone: "X points below Win Zone" tooltip
-- Low sample size: overlay shows with warning: "Limited data (N records)"
+**Visual behavior (Complexity-aware):**
+- Essential: single "Benchmark context available" badge on overall score
+- Standard: translucent Win Zone band + dashed avg lines + tooltip
+- Expert: full ghost bars + owning avatar from `@hbc/bic-next-move`
+- Hover tooltip shows points below Win Zone and inline AI actions
 
 ### `BenchmarkSummaryPanel` — Overall Comparison Card
 
-A compact summary panel in the scorecard sidebar:
-
 **Visual behavior:**
-- Current total score vs. Win Zone range: "72/100 · Win Zone: 68–82"
-- "Distance to Win Zone" metric (if below): "You're 4 points below the Win Zone entry threshold"
-- Historical context: "Based on N comparable projects (similar type, value range, owner type)"
-- Link to `BenchmarkFilterPanel` to adjust comparison context
+- Current total score vs. Win Zone range
+- "Distance to Win Zone" metric
+- Historical context with sample size
+- Read-only in Standard mode
 
 ### `WinZoneIndicator` — Progress Visualization
 
-A large progress indicator showing the scorecard's position on the win/loss spectrum:
-
 **Visual behavior:**
-- Horizontal spectrum: "Loss Zone" (red) | "Borderline" (amber) | "Win Zone" (green)
-- Current score marker on the spectrum
+- Horizontal spectrum with current score marker
 - Win Zone boundaries labeled
-- Historical win average marker
+- Inline AI insight buttons in Standard/Expert modes
 
 ### `BenchmarkFilterPanel` — Context Controls
 
-```typescript
-interface BenchmarkFilterPanelProps {
-  currentFilter: IBenchmarkFilterContext;
-  onFilterChange: (filter: IBenchmarkFilterContext) => void;
-}
-```
-
 **Visual behavior:**
-- Dropdown: Project Type (building type options)
-- Slider: Project Value Range
-- Dropdown: Geography (regional market)
-- Dropdown: Owner Type (public/private/institutional)
-- "Reset to defaults" (auto-matches current scorecard's characteristics)
+- Dropdowns and sliders for project type, value range, geography, owner type
+- Visible only in Expert mode
 
 ---
 
-## Benchmark Data Refresh Strategy
+## Admin Configuration & Governance
 
-Benchmark data is pre-computed by an Azure Functions timer job (nightly) and stored as aggregate statistics, not raw records:
-
-- Preserves privacy of individual pursuit outcomes
-- Fast query performance (pre-aggregated, not computed at query time)
-- Stored in `HbcScorecardBenchmarks` SharePoint list (aggregate statistics per criterion per filter combination)
-
-A minimum of 5 comparable records is required to display benchmark data for a criterion; otherwise, "Insufficient historical data" is shown with a note about how many more records would unlock the benchmark.
+- Benchmark filters and minimum sample size thresholds are configurable in the Admin module (Expert mode only)
+- Full immutable audit trail via `@hbc/versioned-record`
+- Admins can freeze/lock a benchmark snapshot at Go/No-Go submission
+- Governance dashboard shows provenance of hybrid data sources, BIC ownership history for gaps, and KPI trend cards
 
 ---
 
-## Integration Points
+## AI Action Layer Integration
+
+AI insights ("Why is this 6 points below the Win Zone?", "Suggest next move to close the gap") appear as contextual inline buttons and tooltips inside the Ghost Overlay and WinZoneIndicator. Suggestions cite sources, require explicit approval, auto-create BIC records for gap-closing actions, and update both the criterion and the corresponding BIC record. No separate chat interface.
+
+---
+
+## Integration Points (All Tier-1 Primitives)
 
 | Package | Integration |
 |---|---|
-| `@hbc/data-seeding` | Historical win/loss data seeded during onboarding enriches benchmarks immediately |
-| `@hbc/versioned-record` | Each closed scorecard version (Won/Lost tag) contributes to benchmark dataset |
-| `@hbc/ai-assist` | `risk-assessment` AI action uses benchmark data as context for its analysis |
-| `@hbc/complexity` | Essential: no overlay; Standard: Win Zone indicator + summary panel; Expert: full per-criterion ghost bars + filter controls |
-| PH7-SF-22 Post-Bid Learning Loop | Each completed post-bid autopsy updates the benchmark dataset with confirmed outcome data |
+| `@hbc/score-benchmark` | New Tier-1 primitive providing Win Zone computation, ghost rendering, filters, AI actions, gap ownership wiring, and telemetry |
+| `@hbc/bic-next-move` | Granular per-criterion BIC ownership for Win Zone gaps with avatars in overlay tooltip and My Work |
+| `@hbc/complexity` | Essential/Standard/Expert progressive disclosure |
+| `@hbc/versioned-record` | Immutable provenance, audit trail, snapshot freezing, and offline-safe version persistence |
+| `@hbc/related-items` | Direct deep-links from every benchmark gap |
+| `@hbc/project-canvas` | Automatic placement in role-aware My Work lane and KPI surfacing |
+| `@hbc/ai-assist` | Contextual gap-closing suggestions embedded inline |
+| `@hbc/data-seeding` | Historical win/loss data seeding |
+| `@hbc/score-benchmark` telemetry | Five KPIs (time-to-Go/No-Go, gap-closure latency, % reaching Win Zone, win-rate correlation lift, benchmark CES) surfaced in canvas and admin dashboard |
+
+---
+
+## Offline / PWA Resilience
+
+Full tablet-native behavior: service worker caches the Ghost Overlay, summary panel, and filter context; IndexedDB + `@hbc/versioned-record` persists drafts and state; Background Sync replays changes with optimistic UI and "Saved locally / Queued to sync" indicators. Works identically to Punch List, RFI drafts, and the PH7-SF-18 Bid Readiness Signal.
 
 ---
 
 ## Priority & ROI
 
-**Priority:** P1 — BD module's most visible intelligence differentiator; transforms scorecard from a form into a decision-support tool
-**Estimated build effort:** 3–4 sprint-weeks (benchmark compute job, four components, filter system, data model)
-**ROI:** Makes Go/No-Go decisions data-driven rather than instinct-driven; creates competitive advantage as HB Intel accumulates its own historical win/loss dataset; no construction platform offers this today
+**Priority:** P1 — BD module's most visible intelligence differentiator and the seed for the platform-wide `@hbc/score-benchmark` primitive.
+**Estimated build effort:** 3–4 sprint-weeks (now accelerated by reusing existing primitives).
+**ROI:** Makes Go/No-Go decisions data-driven rather than instinct-driven; creates measurable operational impact via UX telemetry; positions HB Intel as the first platform with a universal benchmark primitive.
 
 ---
 
 ## Definition of Done
 
-- [ ] `IScorecardBenchmark` and `IScoreGhostOverlayState` types defined
-- [ ] `useScoreBenchmark` loads pre-computed benchmarks with filter application
-- [ ] Azure Functions nightly job computes aggregate benchmark statistics from closed scorecards
-- [ ] `ScoreBenchmarkGhostOverlay` renders Win Zone band + avg markers on each criterion
-- [ ] `BenchmarkSummaryPanel` renders overall comparison with distance-to-win-zone metric
-- [ ] `WinZoneIndicator` renders position-on-spectrum visualization
-- [ ] `BenchmarkFilterPanel` renders context filters (project type, value, geography, owner type)
-- [ ] Minimum sample size check: "Insufficient data" state when <5 comparable records
-- [ ] `@hbc/data-seeding` integration: historical data seeding enriches benchmarks on import
-- [ ] `@hbc/complexity` integration: overlay hidden in Essential, summary in Standard, full overlay in Expert
-- [ ] Unit tests on benchmark computation aggregation logic
-- [ ] Storybook: in Win Zone, below Win Zone, insufficient data states
+- [ ] New `@hbc/score-benchmark` Tier-1 primitive created and published
+- [ ] All six locked integration patterns implemented and tested
+- [ ] Offline/PWA resilience verified on tablet (service worker + IndexedDB + Background Sync)
+- [ ] Embedded AI actions with provenance and approval guardrails
+- [ ] Progressive disclosure via `@hbc/complexity` across all three modes
+- [ ] Deep-links and canvas integration via `@hbc/related-items` and `@hbc/project-canvas`
+- [ ] Versioned audit trail and admin governance via `@hbc/versioned-record`
+- [ ] Five UX telemetry KPIs wired and surfaced
+- [ ] Unit tests, Storybook stories for all modes and offline states
+- [ ] ADR-00xx-score-benchmark-primitive created
 
 ---
 
 ## ADR Reference
 
-Create `docs/architecture/adr/0028-bd-score-benchmark-ghost-overlay.md` documenting the pre-aggregated benchmark computation strategy, the Win Zone definition model, the minimum sample size threshold, and the privacy rationale for storing only aggregate statistics.
+Create `docs/architecture/adr/0103-bd-score-benchmark-ghost-overlay.md` (and companion ADR for the new `@hbc/score-benchmark` primitive) documenting the pre-aggregated benchmark computation strategy, the Win Zone definition model, the minimum sample size threshold, granular BIC integration for gaps, complexity-adaptive disclosure, offline strategy, AI Action Layer embedding, cross-module deep-linking, versioning/governance, and telemetry KPIs.
+---

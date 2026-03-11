@@ -50,7 +50,7 @@ export type { IAiAssistApi, IAiActionExecutor } from './api/index.js';
 
 // Hooks
 export { useAiAction, useAiActions } from './hooks/index.js';
-export type { UseAiActionResult, UseAiActionsResult } from './hooks/index.js';
+export type { UseAiActionResult, UseAiActionsResult, UseAiActionsParams } from './hooks/index.js';
 
 // Components
 export {

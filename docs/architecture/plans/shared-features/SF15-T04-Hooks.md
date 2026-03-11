@@ -46,3 +46,16 @@ pnpm --filter @hbc/ai-assist test -- useAiActions useAiAction
 pnpm --filter @hbc/ai-assist check-types
 rg -n "useAiActions|useAiAction|relevance|confidenceDetails|ai-assisted|modelKey" packages/ai-assist/src/hooks
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF15-T04 completed: 2026-03-11
+Files created:
+  - packages/ai-assist/src/hooks/useAiActions.ts (discovery + relevance ranking via AiActionRegistry.getForContext + RelevanceScoringEngine.scoreActions)
+  - packages/ai-assist/src/hooks/useAiAction.ts (invoke lifecycle with AiAssistApi, cancel, mounted guard)
+  - packages/ai-assist/src/hooks/index.ts (barrel re-export)
+  - packages/ai-assist/src/hooks/useAiActions.test.ts (8 tests)
+  - packages/ai-assist/src/hooks/useAiAction.test.ts (7 tests)
+Exported types: UseAiActionsParams, UseAiActionsResult, UseAiActionResult
+All 84 tests pass across 8 test files. check-types and build clean.
+Next: SF15-T05 (HbcAiActionMenu)
+-->
