@@ -1,6 +1,7 @@
 export type {
   ComplexityTier,
   DataSourceBadge,
+  IDataSourceTooltip,
   ICanvasTileDefinition,
   ICanvasTileProps,
   ICanvasUserConfig,

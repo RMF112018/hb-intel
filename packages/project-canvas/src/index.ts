@@ -2,6 +2,7 @@
 export type {
   ComplexityTier,
   DataSourceBadge,
+  IDataSourceTooltip,
   ICanvasTileDefinition,
   ICanvasTileProps,
   ICanvasUserConfig,
@@ -13,13 +14,26 @@ export {
   CANVAS_GRID_COLUMNS,
   DEFAULT_COL_SPAN,
   DEFAULT_ROW_SPAN,
+  ROLE_DEFAULT_TILES,
+  MIN_COL_SPAN,
+  MAX_COL_SPAN,
+  MIN_ROW_SPAN,
+  MAX_ROW_SPAN,
+  RECOMMENDATION_SIGNALS,
+  DATA_SOURCE_BADGES,
+  DATA_SOURCE_TOOLTIP_SCHEMA,
+  MANDATORY_GOVERNANCE_APPLY_MODE,
+  MANDATORY_TILE_LOCK_ICON,
 } from './constants/index.js';
 
+export type { RecommendationSignal } from './constants/index.js';
+
 // Registry
-export { register, getAll, get } from './registry/index.js';
+export { register, registerMany, get, getAll } from './registry/index.js';
 
 // API
-export { getConfig, saveConfig } from './api/index.js';
+export { CanvasApi } from './api/index.js';
+export type { ICanvasApi } from './api/index.js';
 
 // Hooks
 export {

@@ -1,5 +1,5 @@
 /**
- * Project Canvas type contracts — D-SF13-T01, D-01 (TileRegistry), D-07 (SPFx constraints)
+ * Project Canvas type contracts — D-SF13-T01, D-SF13-T02, D-01 (TileRegistry), D-07 (SPFx constraints), D-08 (data-source)
  *
  * Defines the core interfaces for the role-based configurable project dashboard canvas.
  * See PH7-SF-13 spec lines 72–124 for the authoritative contract.
@@ -11,6 +11,16 @@ export type ComplexityTier = 'essential' | 'standard' | 'expert';
 
 /** Data-source badge displayed on each tile */
 export type DataSourceBadge = 'Live' | 'Manual' | 'Hybrid';
+
+/** Tooltip metadata for data-source badges — D-08 */
+export interface IDataSourceTooltip {
+  badge: DataSourceBadge;
+  label: string;
+  description: string;
+  showLastSync: boolean;
+  showSourceSystem: boolean;
+  showQuickControls: boolean;
+}
 
 /** Definition of a registerable canvas tile — D-01 TileRegistry */
 export interface ICanvasTileDefinition {

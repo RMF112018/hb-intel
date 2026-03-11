@@ -1,23 +1,51 @@
 /**
- * TileRegistry — D-SF13-T01, D-01 (TileRegistry)
+ * TileRegistry — D-SF13-T03, D-01 (TileRegistry), D-05 (governance), D-06 (complexity)
  *
- * Stub registry for canvas tile definitions. Full implementation in T03.
+ * Map-based singleton registry for canvas tile definitions.
  */
 import type { ICanvasTileDefinition } from '../types/index.js';
 
-/** Registers a tile definition in the global registry */
-export function register(_definition: ICanvasTileDefinition): void {
-  // Stub — T03 implementation
+const _registry = new Map<string, ICanvasTileDefinition>();
+
+/** Validates all 3 complexity variants are present — D-06 */
+function validateVariants(tile: ICanvasTileDefinition): void {
+  const { essential, standard, expert } = tile.component;
+  if (!essential || !standard || !expert) {
+    throw new Error(
+      `[project-canvas] Tile "${tile.tileKey}" must provide essential, standard, and expert component variants.`,
+    );
+  }
 }
 
-/** Returns all registered tile definitions */
+/** Register a single tile — throws on duplicate key */
+export function register(tile: ICanvasTileDefinition): void {
+  if (_registry.has(tile.tileKey)) {
+    throw new Error(
+      `[project-canvas] Tile "${tile.tileKey}" is already registered. Duplicate registration is not allowed.`,
+    );
+  }
+  validateVariants(tile);
+  _registry.set(tile.tileKey, tile);
+}
+
+/** Register multiple tiles — D-01 batch registration */
+export function registerMany(tiles: ICanvasTileDefinition[]): void {
+  for (const tile of tiles) {
+    register(tile);
+  }
+}
+
+/** Get a single tile by key */
+export function get(tileKey: string): ICanvasTileDefinition | undefined {
+  return _registry.get(tileKey);
+}
+
+/** Get all registered tiles */
 export function getAll(): ICanvasTileDefinition[] {
-  // Stub — T03 implementation
-  return [];
+  return Array.from(_registry.values());
 }
 
-/** Returns a single tile definition by key, or undefined if not registered */
-export function get(_tileKey: string): ICanvasTileDefinition | undefined {
-  // Stub — T03 implementation
-  return undefined;
+/** @internal — test-only clear helper */
+export function _clearRegistryForTests(): void {
+  _registry.clear();
 }
