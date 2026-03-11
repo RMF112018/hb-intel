@@ -1,9 +1,83 @@
 /**
  * @hbc/features-admin
  *
- * Shared feature page components for the Admin domain.
- * Consumed by both apps/pwa/ and apps/admin/ via workspace dependency.
+ * Admin Intelligence feature package — monitors, probes, approval authority,
+ * and infrastructure health for HB Intel.
  *
- * @see docs/architecture/plans/PH7-BW-0-Shared-Feature-Package.md
+ * @see docs/architecture/plans/shared-features/SF17-Admin-Intelligence.md
  */
+
+// Empty State (preserved from initial scaffold)
 export { adminProvisioningEmptyStateConfig } from './empty-state/index.js';
+
+// Types
+export type {
+  AlertSeverity,
+  AlertCategory,
+  ProbeHealthStatus,
+  ApprovalContext,
+  IAdminAlert,
+  IAdminAlertBadge,
+  IInfrastructureProbeResult,
+  IInfrastructureProbe,
+  IProbeSnapshot,
+  IApprovalAuthorityRule,
+  IApprovalEligibilityResult,
+  UseAdminAlertsResult,
+  UseInfrastructureProbesResult,
+  UseApprovalAuthorityResult,
+} from './types/index.js';
+
+// Constants
+export {
+  ADMIN_ALERTS_POLL_MS,
+  PROBE_SCHEDULER_DEFAULT_MS,
+  PROBE_MAX_RETRY,
+  APPROVAL_RULE_LIST_TITLE,
+  ADMIN_ALERT_LIST_TITLE,
+  INFRA_PROBE_LIST_TITLE,
+} from './constants/index.js';
+
+// Monitors
+export {
+  monitorRegistry,
+  provisioningFailureMonitor,
+  permissionAnomalyMonitor,
+  stuckWorkflowMonitor,
+  overdueProvisioningMonitor,
+  upcomingExpirationMonitor,
+  staleRecordMonitor,
+} from './monitors/index.js';
+
+// Probes
+export {
+  probeScheduler,
+  sharePointProbe,
+  azureFunctionsProbe,
+  searchProbe,
+  notificationProbe,
+  moduleRecordHealthProbe,
+} from './probes/index.js';
+
+// API
+export {
+  ApprovalAuthorityApi,
+  AdminAlertsApi,
+  InfrastructureProbeApi,
+} from './api/index.js';
+
+// Hooks
+export {
+  useAdminAlerts,
+  useInfrastructureProbes,
+  useApprovalAuthority,
+} from './hooks/index.js';
+
+// Components
+export {
+  AdminAlertBadge,
+  AdminAlertDashboard,
+  ImplementationTruthDashboard,
+  ApprovalAuthorityTable,
+  ApprovalRuleEditor,
+} from './components/index.js';

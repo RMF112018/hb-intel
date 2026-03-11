@@ -142,5 +142,19 @@ All six actions are curated built-in defaults in `@hbc/ai-assist` and must be fu
 | `SF15-T05-HbcAiActionMenu.md` | global toolbar action trigger/popover behavior ✅ completed 2026-03-11 |
 | `SF15-T06-HbcAiResultPanel-and-LoadingState.md` | Smart Insert overlay + Trust Meter + loading/cancel behavior ✅ completed 2026-03-11 |
 | `SF15-T07-Reference-Integrations.md` | canvas/auth/versioning/notifications/handoff/annotations/governance references ✅ completed 2026-03-11 |
-| `SF15-T08-Testing-Strategy.md` | testing fixtures + test matrix |
-| `SF15-T09-Testing-and-Deployment.md` | checklist, ADR/docs/index/state-map updates |
+| `SF15-T08-Testing-Strategy.md` | testing fixtures + test matrix ✅ completed 2026-03-11 |
+| `SF15-T09-Testing-and-Deployment.md` | checklist, ADR/docs/index/state-map updates ✅ completed 2026-03-11 |
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF15 completed: 2026-03-11
+T01–T09 implemented.
+All four mechanical enforcement gates passed.
+ADR created: docs/architecture/adr/ADR-0104-ai-assist-azure-foundry-integration.md
+Documentation added:
+  - docs/how-to/developer/ai-assist-adoption-guide.md
+  - docs/reference/ai-assist/api.md
+  - packages/ai-assist/README.md
+docs/README.md ADR index updated: ADR-0104 row appended.
+current-state-map.md §2 updated with SF15 and ADR-0104 rows.
+Mandatory pre-implementation research directive completed and verified before implementation start.
+-->

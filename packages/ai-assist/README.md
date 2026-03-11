@@ -74,9 +74,10 @@ The admin-only **AI Governance Portal** (`HbcAiGovernancePortal`) provides:
 | `HbcAiTrustMeter` | Confidence disclosure |
 | `HbcAiGovernancePortal` | Admin governance portal |
 | `HbcAiLoadingState` | Streaming-aware loading |
+| `HbcAiResultPanel` | Compatibility wrapper for Smart Insert |
 
 **Testing sub-path** (`@hbc/ai-assist/testing`):
-`createMockAiAction`, `createMockPromptPayload`, `createMockAiActionResult`, `createMockAiAuditRecord`, `createMockAiModelRegistration`, `mockAiActionStates`
+`createMockAiAction`, `createMockPromptPayload`, `createMockAiActionResult`, `createMockAiAuditRecord`, `createMockAiModelRegistration`, `createMockSmartInsertResult`, `mockAiActionStates`
 
 ## 8. Architecture Boundary Rules
 
@@ -89,7 +90,9 @@ The admin-only **AI Governance Portal** (`HbcAiGovernancePortal`) provides:
 
 - **SF15 Master Plan:** `docs/architecture/plans/shared-features/SF15-AI-Assist.md`
 - **SF15-T09 Testing & Deployment:** `docs/architecture/plans/shared-features/SF15-T09-Testing-and-Deployment.md`
-- **ADR-0104 (target):** `docs/architecture/adr/ADR-0104-ai-assist-azure-foundry-integration.md`
+- **ADR-0104:** `docs/architecture/adr/ADR-0104-ai-assist-azure-foundry-integration.md`
+- **Adoption Guide:** `docs/how-to/developer/ai-assist-adoption-guide.md`
+- **API Reference:** `docs/reference/ai-assist/api.md`
 
 ## 10. Mandatory Pre-Implementation Research Directive
 

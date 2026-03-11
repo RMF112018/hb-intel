@@ -77,8 +77,10 @@
 | `docs/architecture/adr/0103-related-items-unified-work-graph.md` | **Permanent Decision Rationale** | SF14 related-items unified work graph primitive; 10 locked decisions (D-01–D-10) |
 | `docs/how-to/developer/related-items-adoption-guide.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; related-items module adoption |
 | `docs/reference/related-items/api.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; related-items API reference |
-| SF15 shared-feature plans (10 files: `SF15-AI-Assist.md` through `SF15-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/ai-assist` planning family authored 2026-03-10; ADR-0104 reserved; pending PH7.12 sign-off (ADR-0090) before implementation |
-| `docs/architecture/adr/ADR-0104-ai-assist-azure-foundry-integration.md` | **Permanent Decision Rationale** | SF15 ai-assist Azure Foundry integration primitive; 10 locked decisions (D-01–D-10); to be authored when SF15 enters active development |
+| SF15 shared-feature plans (10 files: `SF15-AI-Assist.md` through `SF15-T09-Testing-and-Deployment.md`) | **Historical Foundational** | Tier 2 — matrix classification only; T01–T09 complete 2026-03-11; package `@hbc/ai-assist` implemented |
+| `docs/architecture/adr/ADR-0104-ai-assist-azure-foundry-integration.md` | **Permanent Decision Rationale** | SF15 ai-assist Azure Foundry integration primitive; 10 locked decisions (D-01–D-10) |
+| `docs/how-to/developer/ai-assist-adoption-guide.md` | **Living Reference (Diataxis)** | How-to quadrant; developer audience; ai-assist module adoption |
+| `docs/reference/ai-assist/api.md` | **Living Reference (Diataxis)** | Reference quadrant; developer audience; ai-assist API reference |
 | SF16 shared-feature plans (10 files: `SF16-Search.md` through `SF16-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/search` planning family authored 2026-03-11; ADR-0105 reserved; pending PH7.12 sign-off (ADR-0090) before implementation |
 | `docs/architecture/adr/ADR-0105-search-azure-cognitive-search.md` | **Permanent Decision Rationale** | SF16 search Azure Cognitive Search primitive; 10 locked decisions (D-01–D-10); to be authored when SF16 enters active development |
 | SF17 shared-feature plans (10 files: `SF17-Admin-Intelligence.md` through `SF17-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/features-admin` admin-intelligence planning family authored 2026-03-11; ADR-0106 reserved; pending PH7.12 sign-off (ADR-0090) before implementation |
@@ -146,7 +148,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | Index gap (ADR-0073–ADR-0079) | These numbers were absent from `docs/README.md` index | Resolved: 2026-03-09 — all entries added to `docs/README.md` |
 | ADR-0082 not indexed | ADR-0082 missing from `docs/README.md` | Resolved: 2026-03-09 — added to index |
 
-**Post-PH7.11 state (updated 2026-03-11):** 98 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (phase-7-final-verification, acknowledgment, step-wizard, versioned-record, stub-detection, field-annotations, workflow-handoff). ADR-0098 reserved for SF09 (data-seeding); ADR-0099 reserved for SF10 (notification-intelligence); ADR-0100 reserved for SF11 (smart-empty-state); ADR-0101 authored for SF12 (session-state); ADR-0102 authored for SF13 (project-canvas); ADR-0103 reserved for SF14 (related-items); ADR-0104 reserved for SF15 (ai-assist); ADR-0105 reserved for SF16 (search); ADR-0106 reserved for SF17 (admin-intelligence); ADR-0107 reserved for SF18 (estimating bid-readiness); ADR-0108 reserved for SF19 (bd score benchmark); ADR-0109 reserved for SF20 (bd heritage intelligence); ADR-0110 reserved for SF21 (project health pulse). Next unreserved number: **ADR-0111**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
+**Post-PH7.11 state (updated 2026-03-11):** 99 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (phase-7-final-verification, acknowledgment, step-wizard, versioned-record, stub-detection, field-annotations, workflow-handoff). ADR-0098 reserved for SF09 (data-seeding); ADR-0099 reserved for SF10 (notification-intelligence); ADR-0100 reserved for SF11 (smart-empty-state); ADR-0101 authored for SF12 (session-state); ADR-0102 authored for SF13 (project-canvas); ADR-0103 reserved for SF14 (related-items); ADR-0104 authored for SF15 (ai-assist); ADR-0105 reserved for SF16 (search); ADR-0106 reserved for SF17 (admin-intelligence); ADR-0107 reserved for SF18 (estimating bid-readiness); ADR-0108 reserved for SF19 (bd score benchmark); ADR-0109 reserved for SF20 (bd heritage intelligence); ADR-0110 reserved for SF21 (project health pulse). Next unreserved number: **ADR-0111**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
 
 ---
 
@@ -176,7 +178,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 
 These packages are **Tier-1 Platform Primitives** — mandatory-use when their concern area is present in a feature. See [Platform Primitives Registry](../../reference/platform-primitives.md) for policy, decision tree, adoption matrix, and non-duplication rule. <!-- PH7.4: elevated from optional to Tier-1 per §7.4.1 -->
 
-The original three (SF01–SF03) emerged organically; SF04–SF13 are planned primitives being built in sequence. SF04, SF05, SF07, SF08, SF10, SF11, SF12, SF13 are fully implemented. SF06, SF09 are scaffold stage.
+The original three (SF01–SF03) emerged organically; SF04–SF15 are planned primitives being built in sequence. SF04, SF05, SF07, SF08, SF10, SF11, SF12, SF13, SF14, SF15 are fully implemented. SF06, SF09 are scaffold stage.
 
 | Package | Name | Primary Responsibility | Dependency Role | Maturity | Doc Entrypoint |
 |---------|------|----------------------|-----------------|----------|----------------|
@@ -380,6 +382,6 @@ As of PH7.4, all Category C packages are **Tier-1 Platform Primitives** — mand
 | Backend services | 1 |
 | Build tooling packages | 1 |
 | **Total workspace members** | **48** |
-| Architecture Decision Records | 98 active + 6 archived | <!-- Updated 2026-03-11: ADR-0091–0097 added since PH7.11; ADR-0098 reserved SF09; ADR-0099 reserved SF10; ADR-0100 reserved SF11; ADR-0101 reserved SF12; ADR-0102 reserved SF13; ADR-0103 reserved SF14; ADR-0104 reserved SF15; ADR-0105 reserved SF16; ADR-0106 reserved SF17; ADR-0107 reserved SF18; ADR-0108 reserved SF19; ADR-0109 reserved SF20; ADR-0110 reserved SF21 -->
+| Architecture Decision Records | 99 active + 6 archived | <!-- Updated 2026-03-11: ADR-0091–0097 added since PH7.11; ADR-0098 reserved SF09; ADR-0099 reserved SF10; ADR-0100 reserved SF11; ADR-0101 reserved SF12; ADR-0102 reserved SF13; ADR-0103 reserved SF14; ADR-0104 reserved SF15; ADR-0105 reserved SF16; ADR-0106 reserved SF17; ADR-0107 reserved SF18; ADR-0108 reserved SF19; ADR-0109 reserved SF20; ADR-0110 reserved SF21 -->
 | TSConfig path aliases | 62 |
 | Vite dev server ports | 14 (3000, 4000–4012) |

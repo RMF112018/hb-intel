@@ -127,3 +127,15 @@ export interface IApprovalEligibilityResult {
 pnpm --filter @hbc/features-admin check-types
 pnpm --filter @hbc/features-admin test -- contracts
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF17-T02 completed: 2026-03-11
+- New type files: AlertSeverity, AlertCategory, IAdminAlertBadge, ProbeHealthStatus, IInfrastructureProbeResult, IProbeSnapshot, ApprovalContext, IApprovalEligibilityResult, UseAdminAlertsResult, UseInfrastructureProbesResult, UseApprovalAuthorityResult
+- Replaced T01 stubs: IAdminAlert (full contract with alertId/category/severity/timestamps/cta), IApprovalAuthorityRule (ruleId/approvalContext/approverIds/approvalMode), IInfrastructureProbe (re-exports IInfrastructureProbeResult)
+- Constants barrel: src/constants/index.ts (6 constants locked)
+- Hook return types: all three hooks now typed with T02 contracts (placeholder implementations retained for T04)
+- Testing fixtures: updated to match new contracts; added createMockProbeResult factory; mockAdminIntelligenceStates uses snapshots model
+- Barrel exports: src/types/index.ts and src/index.ts expanded with all new types + constants
+- Verification: check-types ✓, build ✓, test ✓ (passWithNoTests)
+Next: SF17-T03 (Alert Monitors and Probe Engine)
+-->

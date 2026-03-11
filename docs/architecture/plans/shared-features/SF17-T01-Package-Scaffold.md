@@ -71,3 +71,23 @@ pnpm --filter @hbc/features-admin build
 pnpm --filter @hbc/features-admin test --coverage
 test -f packages/features/admin/README.md
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF17-T01 completed: 2026-03-11
+- package.json: dual exports (./  ./testing), scripts, devDependencies, v0.0.1
+- tsconfig.json: declaration/declarationMap/sourceMap/jsx/paths for testing alias
+- tsconfig.build.json: extends local tsconfig, excludes tests/stories
+- vitest.config.ts: jsdom, react plugin, 95% coverage thresholds, scaffold dirs excluded
+- src/__tests__/setup.ts: vitest globals + jest-dom
+- src/index.ts: re-exports all barrel modules preserving empty-state export
+- src/types/: IAdminAlert, IInfrastructureProbe, IApprovalAuthorityRule
+- src/monitors/: 6 monitors + monitorRegistry (placeholder stubs)
+- src/probes/: 5 probes + probeScheduler (placeholder stubs)
+- src/api/: ApprovalAuthorityApi, AdminAlertsApi, InfrastructureProbeApi (class stubs)
+- src/hooks/: useAdminAlerts, useInfrastructureProbes, useApprovalAuthority (hook stubs)
+- src/components/: AdminAlertBadge, AdminAlertDashboard, ImplementationTruthDashboard, ApprovalAuthorityTable, ApprovalRuleEditor (component stubs)
+- testing/: createMockAdminAlert, createMockProbeSnapshot, createMockApprovalAuthorityRule, mockAdminIntelligenceStates
+- README.md: 7 required sections
+- Verification: check-types ✓, build ✓, test ✓ (passWithNoTests)
+Next: SF17-T02 (TypeScript Contracts)
+-->

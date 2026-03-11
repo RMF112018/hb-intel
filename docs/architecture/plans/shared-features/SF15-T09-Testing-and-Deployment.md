@@ -280,3 +280,15 @@ current-state-map.md §2 updated with SF15 and ADR-0104 rows.
 Mandatory pre-implementation research directive completed and verified before implementation start.
 -->
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF15-T09 completed: 2026-03-11
+ADR-0104 authored: docs/architecture/adr/ADR-0104-ai-assist-azure-foundry-integration.md
+Adoption guide authored: docs/how-to/developer/ai-assist-adoption-guide.md
+API reference authored: docs/reference/ai-assist/api.md
+docs/README.md ADR index updated with ADR-0104 row.
+current-state-map.md §2 updated: SF15 row → Historical Foundational; ADR-0104 row → authored; adoption guide + API reference rows added.
+SF15-AI-Assist.md T08/T09 rows marked complete; blueprint progress comment appended.
+packages/ai-assist/README.md exports table updated with HbcAiResultPanel and createMockSmartInsertResult.
+All mechanical enforcement gates passed.
+-->

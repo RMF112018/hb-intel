@@ -121,8 +121,8 @@ packages/features/admin/
 
 | File | Contents |
 |---|---|
-| `SF17-T01-Package-Scaffold.md` | package scaffold + README requirement |
-| `SF17-T02-TypeScript-Contracts.md` | admin intelligence contracts/constants |
+| `SF17-T01-Package-Scaffold.md` | package scaffold + README requirement — **COMPLETE 2026-03-11** |
+| `SF17-T02-TypeScript-Contracts.md` | admin intelligence contracts/constants — **COMPLETE 2026-03-11** |
 | `SF17-T03-Alert-Monitors-and-Probe-Engine.md` | monitor registry + probe scheduler + persistence contracts |
 | `SF17-T04-Hooks-and-State-Model.md` | useAdminAlerts/useInfrastructureProbes/useApprovalAuthority |
 | `SF17-T05-AdminAlertBadge-and-Dashboard.md` | alert UX components |
