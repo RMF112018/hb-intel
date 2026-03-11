@@ -52,3 +52,6 @@ export {
   HbcTileCatalog,
   AIInsightTile,
 } from './components/index.js';
+
+// Reference tile definitions — D-SF13-T07
+export { referenceTiles, registerReferenceTiles } from './tiles/index.js';
