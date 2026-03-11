@@ -207,4 +207,16 @@ SF12-T05 completed: 2026-03-11
 - Coverage: 98.5% stmts, 97.35% branches, 95.34% functions — all above 95%
 - All 3 gates pass: check-types ✓ | test ✓ | build ✓
 Next: SF12-T06 (UI Components)
+
+SF12-T06 completed: 2026-03-11
+- HbcConnectivityBar: online/degraded/offline/syncing states, showWhenOnline prop, role="status" + aria-live="polite"
+- HbcSyncStatusBadge: pending count badge, green synced state, native <details>/<summary> popover, keyboard-focusable <button> trigger
+- Inline CSS-in-JS styles only (app-shell-safe, SPFx-compatible, no ui-kit dependency)
+- Reconnect "syncing" transient state: useRef + useEffect tracking offline->online transition, 3s timeout
+- components/ barrel exports both components + prop types; root barrel updated
+- vitest.config.ts: removed src/components/** from coverage exclusions
+- 14 new tests (7 per component); 91 total pass
+- Coverage: 98.83% stmts, 97.77% branches, 95.55% functions — all above 95%
+- All 3 gates pass: check-types ✓ | test ✓ | build ✓
+Next: SF12-T07 (useDraft Integration Recipes)
 -->

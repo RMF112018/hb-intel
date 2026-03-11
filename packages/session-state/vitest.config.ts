@@ -24,7 +24,6 @@ export default defineConfig({
         'src/types/**',
         'src/**/*.stories.{ts,tsx}',
         'src/constants/**',
-        'src/components/**',
         'testing/**',
       ],
       thresholds: {

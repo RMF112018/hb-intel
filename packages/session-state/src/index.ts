@@ -67,3 +67,7 @@ export type { SessionStateProviderProps } from './context/index.js';
 
 // Hooks
 export { useSessionState, useDraft, useConnectivity } from './hooks/index.js';
+
+// Components
+export { HbcConnectivityBar, HbcSyncStatusBadge } from './components/index.js';
+export type { HbcConnectivityBarProps, HbcSyncStatusBadgeProps } from './components/index.js';
