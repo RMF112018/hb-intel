@@ -74,7 +74,9 @@
       "@hbc/smart-empty-state": ["packages/smart-empty-state/src/index.ts"],
       "@hbc/smart-empty-state/*": ["packages/smart-empty-state/src/*"],
       "@hbc/session-state": ["packages/session-state/src/index.ts"],
-      "@hbc/session-state/*": ["packages/session-state/src/*"]
+      "@hbc/session-state/*": ["packages/session-state/src/*"],
+      "@hbc/project-canvas": ["packages/project-canvas/src/index.ts"],
+      "@hbc/project-canvas/*": ["packages/project-canvas/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"]

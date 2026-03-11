@@ -34,6 +34,9 @@ Finalize `@hbc/project-canvas` with SF11/SF12-grade testing and documentation cl
 - [ ] app-shell-safe component usage validated
 - [ ] dnd implementation confined to editor paths
 - [ ] boundary grep checks return zero prohibited matches
+- [ ] tile registry enforces Essential/Standard/Expert variant contract
+- [ ] AIInsightTile container registration boundary validated
+- [ ] mandatory governance tier with role-wide apply behavior validated
 
 ### Type Safety
 
@@ -58,6 +61,10 @@ Finalize `@hbc/project-canvas` with SF11/SF12-grade testing and documentation cl
 - [ ] hook tests for defaults/editor/project canvas complete
 - [ ] component tests for canvas/editor/catalog complete
 - [ ] Playwright edit/save/reload scenario passing
+- [ ] recommendation ordering and PH Pulse smart-default tests complete
+- [ ] data-source badge and tooltip tests complete
+- [ ] notification-summary intelligent hub behavior tests complete
+- [ ] AIInsightTile contract tests complete
 
 ### Storage/API (Canvas Config Persistence)
 
@@ -72,6 +79,8 @@ Finalize `@hbc/project-canvas` with SF11/SF12-grade testing and documentation cl
 - [ ] complexity-specific tile rendering validated
 - [ ] role-default tile sets validated for all six roles
 - [ ] admin lock behavior validated end-to-end
+- [ ] PH7-SF-21 signal integration for recommendations/smart defaults validated
+- [ ] mandatory governance source integration validated
 
 ### Documentation
 
@@ -107,7 +116,7 @@ Generic dashboards fail role-specific workflows in construction project delivery
 Central tile registry with lazy-loaded tile components.
 
 ### D-02 — Role Defaults
-Role-specific default tile sets are mandatory.
+Role-specific default tile sets are mandatory with first-load smart-defaulting from Project Health Pulse signals.
 
 ### D-03 — Persistence
 User/project canvas layouts persisted via backend API.
@@ -116,10 +125,10 @@ User/project canvas layouts persisted via backend API.
 Add/remove/rearrange/resize with unsaved-change tracking.
 
 ### D-05 — Locking
-Admin lock prevents tile removal/repositioning.
+Admin lock and mandatory tiers prevent prohibited tile removal/repositioning, with role-wide apply support.
 
 ### D-06 — Complexity
-Essential summary tiles, Expert detail tiles.
+Every tile provides Essential/Standard/Expert lazy variants rendered by user complexity tier.
 
 ### D-07 — Platform Compatibility
 SPFx-safe rendering and backend API persistence.
@@ -128,7 +137,7 @@ SPFx-safe rendering and backend API persistence.
 `@dnd-kit/core` for drag/rearrange interactions.
 
 ### D-09 — Integration Baseline
-Cross-package tile integrations required.
+Cross-package tile integrations include dynamic recommendation inputs, intelligent notification hub behavior, and AIInsightTile-ready registration paths.
 
 ### D-10 — Testing Sub-Path
 `@hbc/project-canvas/testing` exports canonical fixtures.
@@ -150,8 +159,11 @@ Required sections:
 2. Registering tiles in `TileRegistry`
 3. Defining role-default tile sets
 4. Enabling editor mode and save/reset flows
-5. Applying lock semantics for accountability tiles
-6. Using testing fixtures from `@hbc/project-canvas/testing`
+5. Applying lock and mandatory governance semantics (including role-wide apply)
+6. Implementing recommendation-first catalog behavior and PH Pulse smart defaults
+7. Applying data-source badge transparency and intelligent notification-summary behavior
+8. Registering future AI modules via `AIInsightTile`
+9. Using testing fixtures from `@hbc/project-canvas/testing`
 
 ---
 
@@ -173,6 +185,7 @@ Must include export table entries for:
 - `HbcProjectCanvas`
 - `HbcCanvasEditor`
 - `HbcTileCatalog`
+- `AIInsightTile`
 - testing exports (`createMockTileDefinition`, `createMockCanvasConfig`, `createMockTilePlacement`, `mockRoleDefaultCanvases`)
 
 ---

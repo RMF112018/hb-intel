@@ -23,7 +23,10 @@ Provide canonical tile wiring references and role default mappings.
 - `DocumentActivityTile` (`@hbc/sharepoint-docs`)
 - `WorkflowHandoffInboxTile` (`@hbc/workflow-handoff`)
 - `RelatedItemsTile` (`@hbc/related-items`)
-- `NotificationSummaryTile` (`@hbc/notification-intelligence`)
+- `NotificationSummaryTile` (`@hbc/notification-intelligence`) as intelligent hub behavior
+- PH7-SF-21 signal integration for smart-default and recommendation inputs
+- mandatory governance source integration (SharePoint admin list/central config)
+- AIInsightTile container registration path for future AI modules
 
 Include full role-default map for:
 

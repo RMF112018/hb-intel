@@ -30,10 +30,13 @@ interface HbcProjectCanvasProps {
 ## Behavior
 
 - renders placement grid from `useProjectCanvas`
-- each tile card includes title and lock indicator
+- each tile card includes title, lock indicator, and data-source badge (`Live`/`Manual`/`Hybrid`)
+- data-source badge tooltip shows source system(s), last sync time, and quick controls
 - edit entry action opens `HbcCanvasEditor`
 - tile components lazy-load independently
-- supports complexity-aware tile body rendering hooks
+- supports complexity-aware tile body rendering with Essential/Standard/Expert lazy variants
+- mandatory tiles render as locked non-removable surfaces
+- `notification-summary` tile operates as the single intelligent Immediate/Watch hub with one-click source navigation
 
 ---
 

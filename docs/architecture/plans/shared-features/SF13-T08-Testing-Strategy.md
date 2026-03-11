@@ -30,9 +30,16 @@ Define fixture factories and test coverage for registry, hooks, editor interacti
 - TileRegistry register/get/duplicate handling
 - CanvasApi get/save/reset flows
 - role-default resolution correctness
+- PH Pulse-aware smart-default adjustments on first load
+- dynamic recommendation ordering and explanatory-note rendering
 - editor add/remove/move/resize + lock constraints
+- mandatory tile non-removal and role-wide apply propagation
 - component render checks for canvas/editor/catalog
-- Storybook variants: role + complexity + edit states
+- data-source badge and tooltip rendering behavior
+- notification-summary intelligent hub filtering (Immediate/Watch + role/health relevance)
+- per-tile Essential/Standard/Expert variant rendering by complexity tier
+- AIInsightTile container contract behavior (streaming, source attribution, confidence controls)
+- Storybook variants: role + complexity + edit + recommendation + data-source + mandatory states
 - Playwright: edit/save/reload persistence scenario
 
 ---

@@ -23,6 +23,9 @@ Implement tile registry and configuration API surfaces.
 - `get(tileKey: string)`
 - `getAll()`
 - duplicate key registration throws
+- registration validation enforces Essential/Standard/Expert variants
+- optional AI tile registration is supported through `aiComponent`/`AIInsightTile` contract
+- registry exposes governance metadata (`mandatory`, `lockable`, data-source support)
 
 ---
 
@@ -31,8 +34,13 @@ Implement tile registry and configuration API surfaces.
 - `getConfig(userId, projectId)`
 - `saveConfig(config: ICanvasUserConfig)`
 - `resetToRoleDefault(userId, projectId, role)`
+- `getRoleMandatoryTiles(role)`
+- `applyMandatoryTilesToAllProjects(role)`
+- `getCanvasRecommendations(userId, projectId)` (PH Pulse, phase, usage history)
+- `getTileDataSourceMetadata(projectId, tileKey)` for badge tooltip details
 
 Persistence target: `HbcCanvasConfigs` list via backend API.
+Mandatory-governance target: SharePoint admin list or central config for role-tile mandates.
 
 ---
 

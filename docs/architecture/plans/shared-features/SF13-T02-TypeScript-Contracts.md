@@ -25,7 +25,13 @@ export interface ICanvasTileDefinition {
   description: string;
   defaultForRoles: string[];
   minComplexity?: ComplexityTier;
-  component: React.LazyExoticComponent<React.ComponentType<ICanvasTileProps>>;
+  mandatory?: boolean;
+  component: {
+    essential: React.LazyExoticComponent<React.ComponentType<ICanvasTileProps>>;
+    standard: React.LazyExoticComponent<React.ComponentType<ICanvasTileProps>>;
+    expert: React.LazyExoticComponent<React.ComponentType<ICanvasTileProps>>;
+  };
+  aiComponent?: React.LazyExoticComponent<React.ComponentType<ICanvasTileProps>>;
   defaultColSpan: 3 | 4 | 6 | 12;
   defaultRowSpan: 1 | 2;
   lockable: boolean;
@@ -35,6 +41,7 @@ export interface ICanvasTileProps {
   projectId: string;
   tileKey: string;
   isLocked?: boolean;
+  dataSource?: 'Live' | 'Manual' | 'Hybrid';
 }
 
 export interface ICanvasTilePlacement {
@@ -60,6 +67,9 @@ export interface ICanvasUserConfig {
 - 12-column grid default
 - role default tile-set map
 - editor constraints (min/max col span, row span)
+- recommendation signal ordering constants (health, phase, usage-history)
+- data-source badge vocabulary and tooltip schema constants
+- mandatory-governance constants for role apply behavior
 
 ---
 

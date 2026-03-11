@@ -20,7 +20,8 @@ Implement edit-mode operations and tile catalog selection flow.
 
 - drag-to-rearrange via `@dnd-kit/core`
 - resize handles constrained to valid spans
-- remove button hidden/disabled on locked tiles
+- remove button hidden/disabled on locked and mandatory tiles
+- mandatory tiles remain non-removable and non-repositionable in editor mode
 - save/cancel controls
 
 ## Catalog Behavior
@@ -28,6 +29,8 @@ Implement edit-mode operations and tile catalog selection flow.
 - shows only role-eligible tiles not already placed
 - tile card includes title/description/preview
 - selecting tile adds to editor layout and closes catalog
+- recommendation-first ordering uses Project Health Pulse, project phase, and usage history
+- recommended tiles include short explanatory notes and still allow immediate user override
 
 ---
 

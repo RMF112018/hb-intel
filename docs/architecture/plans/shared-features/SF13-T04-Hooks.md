@@ -18,20 +18,25 @@ Implement `useProjectCanvas`, `useCanvasEditor`, and `useRoleDefaultCanvas`.
 
 ## Hook Contracts
 
-- `useRoleDefaultCanvas(role: string): ICanvasTilePlacement[]`
+- `useRoleDefaultCanvas(role: string, projectId: string): ICanvasTilePlacement[]`
+  - resolves role baseline and applies first-load PH Pulse smart adjustments
 - `useProjectCanvas(projectId: string)`
   - loads user config or falls back to role default
+  - resolves mandatory tile overlays and data-source metadata for tile headers
 - `useCanvasEditor(initialTiles)`
   - supports add/remove/move/resize
   - tracks `hasUnsavedChanges`
+  - returns dynamic recommendations (health + phase + usage history) with explanatory notes
 
 ---
 
 ## Invariants
 
 - locked tiles cannot be removed or moved
+- mandatory tiles cannot be removed and retain lock semantics across save/reset
 - tile additions deduplicate by `tileKey`
 - editor cancel restores last saved state
+- smart-default promotions never remove required role baseline tiles
 
 ---
 
