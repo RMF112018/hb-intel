@@ -242,6 +242,8 @@ SF14-T02 (TypeScript Contracts) completed: 2026-03-11
 Contracts locked for RelationshipDirection, IGovernanceMetadata, IRelationshipDefinition, and IRelatedItem
 SF14-T03 (Registry and API) completed: 2026-03-11
 Implemented bidirectional registry, AI suggestion hook registry, deterministic retrieval, batched summary API, role/governance filtering, and registry/API tests
-Task index update: T01 ✅ | T02 ✅ | T03 ✅ | T04 next
-Next task: SF14-T04 (Hooks)
+SF14-T04 (Hooks) completed: 2026-03-11
+Implemented useRelatedItems orchestration hook with deterministic sorting/grouping, role-aware API passthrough, AI suggestion derivation, and @hbc/session-state stale-safe cache fallback
+Task index update: T01 ✅ | T02 ✅ | T03 ✅ | T04 ✅ | T05 next
+Next task: SF14-T05 (HbcRelatedItemsPanel)
 -->

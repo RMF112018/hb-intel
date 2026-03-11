@@ -1850,6 +1850,9 @@ importers:
 
   packages/related-items:
     dependencies:
+      '@hbc/session-state':
+        specifier: workspace:*
+        version: link:../session-state
       react:
         specifier: ^18.3.0
         version: 18.3.1
