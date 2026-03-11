@@ -21,3 +21,12 @@ export const ADMIN_ALERT_LIST_TITLE = 'HBC_AdminAlerts';
 
 /** SharePoint list title for infrastructure probe snapshots */
 export const INFRA_PROBE_LIST_TITLE = 'HBC_InfrastructureProbeSnapshots';
+
+/** TanStack Query key for admin alerts */
+export const ADMIN_ALERTS_QUERY_KEY = ['admin-alerts'] as const;
+
+/** TanStack Query key for infrastructure probes */
+export const INFRA_PROBES_QUERY_KEY = ['infra-probes'] as const;
+
+/** TanStack Query key for approval authority rules */
+export const APPROVAL_RULES_QUERY_KEY = ['approval-rules'] as const;

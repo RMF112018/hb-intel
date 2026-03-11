@@ -80,3 +80,16 @@ Cache keys:
 pnpm --filter @hbc/features-admin test -- hooks
 pnpm --filter @hbc/features-admin check-types
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF17-T04 completed: 2026-03-11
+- Constants: ADMIN_ALERTS_QUERY_KEY, INFRA_PROBES_QUERY_KEY, APPROVAL_RULES_QUERY_KEY added
+- API: ApprovalAuthorityApi typed with getRules, upsertRule, deleteRule, testEligibility stubs
+- Helpers: computeAlertBadge (monotonic), buildProbeStatusMap, resolveEligibility created
+- Hooks: useAdminAlerts, useInfrastructureProbes, useApprovalAuthority implemented with TanStack Query
+- Tests: 11 helper tests + 18 hook tests (all passing)
+- Barrel exports updated in hooks/index.ts and src/index.ts
+- vitest.config.ts: removed src/hooks/** from coverage.exclude
+- package.json: added @tanstack/react-query dependency
+- All gates pass: check-types, build, lint (zero errors), test (53 passed)
+-->

@@ -124,7 +124,7 @@ packages/features/admin/
 | `SF17-T01-Package-Scaffold.md` | package scaffold + README requirement — **COMPLETE 2026-03-11** |
 | `SF17-T02-TypeScript-Contracts.md` | admin intelligence contracts/constants — **COMPLETE 2026-03-11** |
 | `SF17-T03-Alert-Monitors-and-Probe-Engine.md` | monitor registry + probe scheduler + persistence contracts — **COMPLETE 2026-03-11** |
-| `SF17-T04-Hooks-and-State-Model.md` | useAdminAlerts/useInfrastructureProbes/useApprovalAuthority |
+| `SF17-T04-Hooks-and-State-Model.md` | useAdminAlerts/useInfrastructureProbes/useApprovalAuthority — **COMPLETE 2026-03-11** |
 | `SF17-T05-AdminAlertBadge-and-Dashboard.md` | alert UX components |
 | `SF17-T06-ImplementationTruth-and-ApprovalAuthority.md` | truth layer and approval authority UX |
 | `SF17-T07-Reference-Integrations.md` | bic/notification/acknowledgment/versioned-record/complexity integrations |

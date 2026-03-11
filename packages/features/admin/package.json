@@ -54,6 +54,7 @@
     "@hbc/ui-kit": "workspace:*",
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
-    "@hbc/smart-empty-state": "workspace:*"
+    "@hbc/smart-empty-state": "workspace:*",
+    "@tanstack/react-query": "^5.75.0"
   }
 }

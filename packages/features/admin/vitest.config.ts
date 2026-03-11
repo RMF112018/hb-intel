@@ -27,7 +27,6 @@ export default defineConfig({
         'src/monitors/**',
         'src/probes/**',
         'src/api/**',
-        'src/hooks/**',
         'src/components/**',
         'testing/**',
       ],

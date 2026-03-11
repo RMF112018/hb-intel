@@ -39,6 +39,9 @@ export {
   APPROVAL_RULE_LIST_TITLE,
   ADMIN_ALERT_LIST_TITLE,
   INFRA_PROBE_LIST_TITLE,
+  ADMIN_ALERTS_QUERY_KEY,
+  INFRA_PROBES_QUERY_KEY,
+  APPROVAL_RULES_QUERY_KEY,
 } from './constants/index.js';
 
 // Monitors
@@ -77,6 +80,9 @@ export {
   useAdminAlerts,
   useInfrastructureProbes,
   useApprovalAuthority,
+  computeAlertBadge,
+  buildProbeStatusMap,
+  resolveEligibility,
 } from './hooks/index.js';
 
 // Components
