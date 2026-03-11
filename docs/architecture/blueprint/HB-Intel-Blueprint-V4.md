@@ -1222,4 +1222,19 @@ Coverage: 99.89% stmts, 95.6% branches, 95.91% functions, 99.89% lines.
 current-state-map.md §2 updated: SF08 reclassified to Historical Foundational; ADR-0097 and doc rows added.
 Next: Activate consuming modules per SF08-T07 confirmed handoff routes table.
   Priority: BD → Estimating (P0), then Estimating → Project Hub (P1).
+
+SF10 (Notification Intelligence) completed: 2026-03-10
+  Package: @hbc/notification-intelligence (T01–T09 all complete)
+  ADR: docs/architecture/adr/0099-notification-intelligence-tiered-model.md (ADR-0099, D-01–D-10)
+  Documentation added:
+    - docs/how-to/developer/notification-intelligence-adoption-guide.md
+    - docs/reference/notification-intelligence/api.md
+    - packages/notification-intelligence/README.md
+  docs/README.md ADR index updated: ADR-0099 row appended.
+  current-state-map.md §2 updated: SF10 reclassified to Historical Foundational; ADR-0099 and doc rows added.
+  Components: HbcNotificationBadge, HbcNotificationCenter, HbcNotificationBanner, HbcNotificationPreferences
+  Hooks: useNotificationBadge (60s polling), useNotificationCenter (infinite query), useNotificationPreferences (optimistic update)
+  Backend: 10 Azure Functions (3 HTTP + 3 PATCH + 2 queue triggers + 1 timer trigger + 1 POST)
+  Testing: 3 hook test suites, 4 component test suites, 1 registry test suite, 2 API test suites, 3 E2E stubs
+  Next: SF11 (Smart Empty State) or consuming module integration.
 -->

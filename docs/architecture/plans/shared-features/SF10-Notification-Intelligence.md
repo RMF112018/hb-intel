@@ -171,6 +171,6 @@ SF10-T06 completed: 2026-03-10 — Core components (HbcNotificationBadge with No
 SF10-T07 completed: 2026-03-10 — Interaction components (HbcNotificationBanner with 30s auto-dismiss D-04, ARIA role="alert"; HbcNotificationPreferences Expert-only panel with registry-driven tier overrides, digest schedule, push toggle D-05/D-06/D-07/D-08). 26 new tests (11 banner + 15 preferences). All 66 tests pass; check-types zero errors; build zero errors.
 Status: T07 done — ready for T08 implementation (Azure Functions Backend).
 SF10-T08 completed: 2026-03-10 — Azure Functions backend: 10 notification functions (SendNotification HTTP POST, GetCenter HTTP GET, MarkRead/Dismiss HTTP PATCH, MarkAllRead HTTP POST, GetPreferences HTTP GET, UpdatePreferences HTTP PATCH, ProcessNotification queue trigger, SendNotificationEmail queue trigger, SendDigestEmail timer trigger) + 6 lib helpers (tierResolver, channelRouter, notificationStore, preferencesStore, pushDelivery stub, emailDelivery stub). SDK-adapted from plan code using output.storageQueue() bindings. All auth via validateToken (D-PH6-03). Push/email adapters are Phase 1 stubs. check-types zero errors; build zero errors.
-Pending: PH7.12 sign-off (ADR-0090) before feature-expansion phases begin.
-Next: SF10-T09 (Testing Strategy and Deployment)
+SF10-T09 completed: 2026-03-10 — Testing sub-path validated (.js extensions); 3 hook test suites (13 tests); 4 Storybook story files (11 stories); 3 Playwright E2E stubs; ADR-0099 created; adoption guide + API reference + README published; docs/README.md updated; current-state-map.md §2 reclassified SF10 to Historical Foundational. All mechanical gates passed.
+Status: SF10 FULLY CLOSED — all T01–T09 tasks complete.
 -->

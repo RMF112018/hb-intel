@@ -58,7 +58,8 @@ export function HbcNotificationBanner({
     timerRef.current = setTimeout(handleDismiss, AUTO_DISMISS_MS);
 
     return clearTimer;
-  }, [notification?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  }, [notification?.id, clearTimer, handleDismiss]);
 
   // D-08: Not rendered in Essential
   if (tier === 'essential') return null;

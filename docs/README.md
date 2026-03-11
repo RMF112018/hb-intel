@@ -127,6 +127,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0096 | Accepted | [ADR-0096-field-annotations-platform-primitive.md](./architecture/adr/ADR-0096-field-annotations-platform-primitive.md) |
 | ADR-0097 | Accepted | [ADR-0097-workflow-handoff-platform-primitive.md](./architecture/adr/ADR-0097-workflow-handoff-platform-primitive.md) |
 | ADR-0098 | Accepted | [ADR-0098-data-seeding-import-primitive.md](./architecture/adr/ADR-0098-data-seeding-import-primitive.md) |
+| ADR-0099 | Accepted | [0099-notification-intelligence-tiered-model.md](./architecture/adr/0099-notification-intelligence-tiered-model.md) |
 
 ## Reference Documents
 

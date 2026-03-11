@@ -412,8 +412,16 @@ pnpm --filter @hbc/notification-intelligence test --coverage
 ---
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
-SF10-T09 not yet started.
-Depends on: T01 (scaffold), T02 (contracts), T03 (registry), T04 (API),
-            T05 (hooks), T06 (core components), T07 (interaction components), T08 (backend).
-Next: All tasks complete → record Blueprint Progress Comment → SF10 closed.
+SF10-T09 completed: 2026-03-10
+  - Testing sub-path: 5 fixture files validated; barrel updated with .js extensions for Node16 compat
+  - Hook tests: 3 new test suites (useNotificationBadge: 5 tests, useNotificationCenter: 5 tests, useNotificationPreferences: 3 tests)
+  - Storybook stories: 4 story files (Badge: 3 stories, Center: 3 stories, Banner: 3 stories, Preferences: 2 stories)
+  - E2E scenarios: 3 Playwright test.skip stubs (BIC Transfer lifecycle, Digest email, User override)
+  - ADR-0099 created: 0099-notification-intelligence-tiered-model.md (D-01–D-10)
+  - Documentation: adoption guide, API reference, package README
+  - docs/README.md updated: ADR-0099 row
+  - current-state-map.md §2 updated: SF10 reclassified Historical Foundational; 3 new doc rows
+  - Blueprint progress comment appended
+All mechanical enforcement gates: build, lint, check-types, P1 tests.
+SF10 fully closed.
 -->
