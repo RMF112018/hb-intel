@@ -16,26 +16,30 @@ Current construction platforms provide at best per-module search that only cover
 `@hbc/search` provides:
 - **Cross-module full-text search** across all HB Intel record types and documents
 - **Faceted filtering** by module, record type, date range, status, responsible party, BIC state
+- **AI-assisted natural-language parsing** (Standard+ and Expert tiers)
 - **Instant preview** of matching records without navigation
 - **Keyboard-first UX** for power users (⌘K global search trigger)
-- **Saved searches** for frequently used complex queries
+- **Saved searches** with governance and audit controls
+- **Seamless deep integration** with project canvas, related-items panels, and BIC state
+- **Provenance transparency** and hybrid data-source support (Expert tier)
 
 ---
 
 ## Mold Breaker Rationale
 
-The ux-mold-breaker.md Signature Solution #15 (Operations-Grade Search) specifies: "Search is not a filter — it is a command interface. Users should be able to find any record, document, or status in under 5 seconds from anywhere in the platform." Operating Principle §7.8 (Operations-grade) requires that search be fast enough (<500ms) and comprehensive enough (all record types, all documents) to serve as the primary navigation method for power users.
+The ux-mold-breaker.md Signature Solution #15 (Operations-Grade Search) specifies: "Search is not a filter — it is a command interface. Users should be able to find any record, document, or status in under 5 seconds from anywhere in the platform." Operating Principle §7.8 (Operations-grade) requires that search be fast enough (<500 ms) and comprehensive enough (all record types, all documents) to serve as the primary navigation method for power users.
 
-The con-tech UX study §14 documents that Procore's search is module-scoped and document-heavy — it finds documents well but finds project records poorly. No platform provides BIC-state-aware search (filtering by "show me all items assigned to me across all modules that are overdue"). `@hbc/search` is the first construction platform search that treats accountability as a searchable dimension.
+The con-tech UX study §14 documents that Procore's search is module-scoped and document-heavy — it finds documents well but finds project records poorly. No platform provides BIC-state-aware search (filtering by "show me all items assigned to me across all modules that are overdue"). `@hbc/search` is the first construction platform search that treats accountability as a searchable dimension, delivers true Search-First navigation, offline resilience, and provenance transparency.
 
 ---
 
 ## Azure Cognitive Search Architecture
 
 ```
-HB Intel Records (SharePoint Lists)
-    → Azure Functions Indexer (triggered on record change)
+HB Intel Records (SharePoint Lists + Microsoft Graph)
+    → Azure Functions Indexer (triggered on record change + manifest-driven discovery)
     → Azure Cognitive Search Index
+    → SearchQueryParser Function (AI natural-language to structured query)
     → @hbc/search query API (Azure Functions)
     → HbcSearchBar / HbcSearchResults
 ```
@@ -61,6 +65,10 @@ The Azure Cognitive Search index maintains a unified record across all module ty
 | `updatedAt` | DateTimeOffset | No | Yes | No |
 | `tags` | Collection(String) | Yes | Yes | Yes |
 | `sharepointUrl` | String | No | No | No |
+| `dataSource` | String | No | Yes | Yes |
+| `provenance` | String | No | Yes | No |
+
+Dedicated BIC scoring profiles and pre-computed composite fields enable sub-500 ms “My Work” queries.
 
 ---
 
@@ -109,6 +117,12 @@ export interface ISearchResult {
   excerpt?: string;
   /** Navigation URL to the full record */
   href: string;
+  /** Canvas-aware deep link (auto-populated when inside project canvas) */
+  canvasDeepLink?: string;
+  /** Direct link to pre-filtered related-items panel */
+  relatedItemsDeepLink?: string;
+  /** Data provenance for transparency (Expert tier) */
+  provenance?: string;
   /** BIC state (if available for this record type) */
   bicState?: IBicNextMoveState;
   score: number; // Azure Cognitive Search relevance score
@@ -141,14 +155,18 @@ packages/search/
 │   ├── types/
 │   │   ├── ISearch.ts
 │   │   └── index.ts
+│   ├── parser/
+│   │   └── SearchQueryParser.ts          # tenant-scoped GPT-4o-mini NL → ISearchQuery
 │   ├── indexer/
-│   │   └── SearchIndexer.ts              # Azure Functions indexer logic
+│   │   └── SearchIndexer.ts              # manifest-driven Azure Functions indexer
 │   ├── api/
 │   │   └── SearchApi.ts                  # query API wrapper
 │   ├── hooks/
 │   │   ├── useSearch.ts                  # manages query state + results
-│   │   ├── useGlobalSearch.ts            # ⌘K trigger + recent searches
-│   │   └── useSavedSearches.ts           # save/load/delete named searches
+│   │   ├── useGlobalSearch.ts            # ⌘K trigger + recent searches + quick-jump cards
+│   │   └── useSavedSearches.ts           # save/load/delete + versioned governance
+│   ├── governance/
+│   │   └── SearchGovernance.ts           # admin audit panel
 │   └── components/
 │       ├── HbcSearchBar.tsx              # inline search input with instant results
 │       ├── HbcGlobalSearch.tsx           # ⌘K modal search overlay
@@ -163,111 +181,31 @@ packages/search/
 
 ### `HbcGlobalSearch` — ⌘K Command Search Overlay
 
-The primary power-user search interface. Triggered by ⌘K (Mac) or Ctrl+K (Windows) from anywhere in the platform.
-
-```typescript
-interface HbcGlobalSearchProps {
-  onResultSelect: (result: ISearchResult) => void;
-}
-```
-
-**Visual behavior:**
-- Full-screen overlay with centered search modal
-- Type-ahead: results update as user types (debounced 200ms)
-- Recent searches shown before first keystroke
-- Results grouped by module with module icon
-- Keyboard navigation: arrow keys to select, Enter to navigate, Esc to dismiss
-- BIC state indicators on results that have ownership data
-- "See all results" link → `HbcSearchResults` full page
+Full-screen overlay with AI parsing (Standard+), quick-filter BIC chips, context-aware quick-jump cards, provenance badges (Expert tier), and Search-First Mode auto-trigger support.
 
 ### `HbcSearchBar` — Inline Module Search
 
-```typescript
-interface HbcSearchBarProps {
-  /** Pre-scoped to a module or record type */
-  scope?: { modules?: string[]; recordTypes?: string[] };
-  placeholder?: string;
-  onSearch?: (query: ISearchQuery) => void;
-  onResultSelect?: (result: ISearchResult) => void;
-}
-```
-
-**Visual behavior:**
-- Standard search input with search icon
-- Type-ahead dropdown showing top 5 results
-- "Advanced search" link → `HbcSearchResults` with scope pre-applied
+Persistent high-visibility bar in global header (Search-First Mode). Type-ahead with top results and “View Related” option.
 
 ### `HbcSearchResults` — Full Results Page
 
-```typescript
-interface HbcSearchResultsProps {
-  initialQuery?: ISearchQuery;
-}
-```
-
-**Visual behavior:**
-- Left panel: `HbcSearchFacets` for filtering
-- Right panel: paginated result list with relevance-ordered cards
-- Each result card: record type badge, module icon, title, excerpt (highlighted match), status, BIC state
-- Sort controls: Relevance / Newest / Oldest / Status
-- "Save this search" CTA (for `useSavedSearches`)
+Left panel: `HbcSearchFacets`; right panel: paginated cards with “View Related” button (opens `@hbc/related-items` pre-filtered), provenance badge (Expert), and canvas-aware navigation.
 
 ### `HbcSearchFacets` — Filter Panel
 
-```typescript
-interface HbcSearchFacetsProps {
-  facets: ISearchFacets;
-  query: ISearchQuery;
-  onQueryChange: (query: ISearchQuery) => void;
-}
-```
-
-**Visual behavior:**
-- Checkbox groups for: Module, Record Type, Status
-- Toggle filters: "Only overdue", "Only blocked", "Assigned to me"
-- Date range pickers for Created / Updated
-- "Clear all filters" link
+Includes BIC quick-filter chips and provenance-aware controls (Expert tier).
 
 ---
 
 ## Indexing Strategy
 
-Records are indexed via Azure Functions triggered on SharePoint list item change events:
+Declarative `ISearchableModule` manifest pattern. Each package exports its record types, mapping functions, searchable fields, and `dataSource` ("SharePointList" | "MicrosoftGraph" | "Hybrid"). Dynamic discovery and automatic registration. `SearchIndexer.ts` uses Azure Functions triggered on change events.
 
 ```typescript
 // SearchIndexer.ts
 export async function indexRecord(record: ISearchableRecord): Promise<void> {
-  const document = {
-    id: record.id,
-    recordType: record.recordType,
-    module: record.module,
-    title: record.title,
-    fullText: buildFullText(record), // concatenate all searchable fields
-    status: record.status,
-    responsiblePartyUserId: record.bicState?.currentOwner?.userId,
-    responsiblePartyName: record.bicState?.currentOwner?.displayName,
-    isBlocked: record.bicState?.isBlocked ?? false,
-    isOverdue: record.bicState?.isOverdue ?? false,
-    // ... other fields
-  };
+  const document = { /* ... */ dataSource: record.dataSource, provenance: record.provenance };
   await searchClient.mergeOrUploadDocuments([document]);
-}
-```
-
-Each module registers its records for indexing by implementing `ISearchableRecord`:
-
-```typescript
-export interface ISearchableRecord {
-  id: string;
-  recordType: string;
-  module: string;
-  title: string;
-  status?: string;
-  bicState?: IBicNextMoveState;
-  searchableFields: Record<string, string>; // field key → text value for full-text indexing
-  tags?: string[];
-  projectId?: string;
-  href: string;
 }
 ```
 
@@ -275,22 +213,7 @@ export interface ISearchableRecord {
 
 ## Saved Searches
 
-Power users can save frequently used complex queries:
-
-```typescript
-// Example: save a search for "all overdue items assigned to me"
-await SavedSearchApi.save({
-  name: 'My Overdue Items',
-  query: {
-    term: '',
-    responsiblePartyUserId: currentUser.id,
-    isOverdue: true,
-    sortBy: 'date-asc',
-  },
-});
-```
-
-Saved searches are stored per user in `HbcSavedSearches` SharePoint list and surfaced in `HbcGlobalSearch` "Recent & Saved" section.
+Treated as versioned records via `@hbc/versioned-record`. `HbcSavedSearches` list includes audit columns (`lastExecutedAt`, `executionCount`, `sharedWithGroupId`, `isPromotedByAdmin`). Expert-tier governance panel provides usage analytics, promote-to-team/tenant, and soft-delete.
 
 ---
 
@@ -298,51 +221,57 @@ Saved searches are stored per user in `HbcSavedSearches` SharePoint list and sur
 
 | Package | Integration |
 |---|---|
-| `@hbc/bic-next-move` | BIC state (`isBlocked`, `isOverdue`, `responsiblePartyUserId`) are searchable/filterable dimensions |
-| `@hbc/complexity` | Essential: search bar only; Standard: full results with facets; Expert: all search dimensions + saved searches |
-| `@hbc/related-items` | Search results link to related items panel of found records |
-| `@hbc/notification-intelligence` | Search for "items assigned to me" returns same results as My Work Feed; complementary navigation paths |
+| `@hbc/bic-next-move` | BIC state as first-class searchable/filterable dimension with scoring profiles |
+| `@hbc/complexity` | Progressive disclosure of AI parsing, facets, saved searches, Search-First Mode, governance |
+| `@hbc/related-items` | Direct deep-links from every result to pre-filtered relationship panels |
+| `@hbc/project-canvas` | Automatic projectId scoping + canvasDeepLink support |
+| `@hbc/versioned-record` | Saved searches and governance |
+| `@hbc/notification-intelligence` | Background sync for offline cache + performance alerts |
+| `@hbc/auth` | Tenant-scoped parser and governance visibility |
 
 ---
 
 ## SPFx Constraints
 
-- `HbcSearchBar` available in SPFx Application Customizer (global header)
+- Persistent `HbcSearchBar` in SPFx Application Customizer (Search-First Mode)
 - `HbcGlobalSearch` (⌘K overlay) available in SPFx contexts
 - `HbcSearchResults` as full-page SPFx webpart
-- All search queries route through Azure Functions backend — no direct Azure Cognitive Search calls from client
+- All calls route through Azure Functions — no direct Azure Cognitive Search calls from client
 
 ---
 
 ## Priority & ROI
 
-**Priority:** P2 — High-value for daily use; not a core workflow blocker; ship after core modules are stable
-**Estimated build effort:** 5–6 sprint-weeks (Azure Cognitive Search setup, indexer, four components, saved searches, ⌘K integration)
-**ROI:** Reduces record-finding time from 2-3 minutes (navigate + filter) to under 5 seconds; makes BIC-state search a unique differentiator; enables power user navigation that no construction platform currently offers
+**Priority:** P2 — High-value for daily use; not a core workflow blocker; ship after core modules are stable  
+**Estimated build effort:** 5–6 sprint-weeks (Azure Cognitive Search setup, indexer, parser, four components, saved searches, ⌘K integration, offline cache)  
+**ROI:** Reduces record-finding time from 2-3 minutes to under 5 seconds; makes BIC-state search, Search-First navigation, and provenance transparency unique differentiators; eliminates field-versus-office gap with offline resilience.
 
 ---
 
 ## Definition of Done
 
-- [ ] Azure Cognitive Search index deployed with full schema
-- [ ] Azure Functions indexer triggered on SharePoint list changes for all record types
-- [ ] `SearchApi.query()` implemented with full faceting and filtering
-- [ ] `useSearch` manages query state, debounced fetching, result normalization
-- [ ] `useGlobalSearch` manages ⌘K trigger, recent searches, keyboard navigation
-- [ ] `useSavedSearches` loads, saves, and deletes named searches
-- [ ] `HbcGlobalSearch` ⌘K overlay with type-ahead, grouping, keyboard nav
-- [ ] `HbcSearchBar` inline module-scoped search with type-ahead dropdown
-- [ ] `HbcSearchResults` full results page with pagination and sort
-- [ ] `HbcSearchFacets` checkbox groups for module/type/status + toggle filters
-- [ ] All Phase 7 record types registered for indexing (BD, Estimating, Project Hub, Admin)
-- [ ] BIC state dimensions indexed and filterable
-- [ ] `@hbc/complexity` integration: full search UI in Standard+; saved searches in Expert
-- [ ] Performance: search results return in <500ms (P95)
-- [ ] Unit tests on indexer record transformation and query building
-- [ ] E2E test: create BD scorecard → wait for index → search by project name → result appears
+- [ ] Azure Cognitive Search index deployed with full schema (including dataSource/provenance and BIC scoring profiles)
+- [ ] Manifest-driven Azure Functions indexer with dynamic discovery
+- [ ] Tenant-scoped `SearchQueryParser` Function with AI natural-language support
+- [ ] `SearchApi.query()` implemented with full faceting, provenance, and <500 ms P95
+- [ ] `useSearch`, `useGlobalSearch`, `useSavedSearches` updated with all new capabilities
+- [ ] `HbcGlobalSearch` with AI parsing, BIC chips, quick-jump cards, provenance (Expert)
+- [ ] `HbcSearchBar` with persistent Search-First Mode
+- [ ] `HbcSearchResults` with “View Related” buttons and canvas deep-links
+- [ ] `HbcSearchFacets` with BIC quick-filters
+- [ ] All Phase 7 record types registered via manifests
+- [ ] Saved searches as versioned records with full governance panel
+- [ ] Hybrid offline-first strategy with IndexedDB + background sync
+- [ ] Search-First Mode configuration in Expert governance panel
+- [ ] Performance monitoring via Application Insights + alerts
+- [ ] `@hbc/complexity` integration across all tiers
+- [ ] Unit tests on parser, manifest registration, and query building
+- [ ] E2E test: create record → index → natural-language search → result with provenance and related-items link
 
 ---
 
 ## ADR Reference
 
-Create `docs/architecture/adr/0025-search-azure-cognitive-search.md` documenting the Azure Cognitive Search index schema, the SharePoint list change event indexing strategy, the BIC-state-as-searchable-dimension design, and the ⌘K command search UX model.
+Create `docs/architecture/adr/0104-search-azure-cognitive-search.md` documenting the Azure Cognitive Search index schema, the manifest-driven indexing strategy, BIC-state-as-searchable-dimension design, AI query parser, Search-First navigation model, offline resilience, provenance transparency, and governance controls.
+
+---

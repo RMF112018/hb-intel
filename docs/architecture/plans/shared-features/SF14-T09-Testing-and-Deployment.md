@@ -1,3 +1,5 @@
+<!-- DIFF-SUMMARY: Corrected ADR target to /0103 path; removed conflicting dependency prohibitions; aligned closure checklist with locked DoD/integrations -->
+
 # SF14-T09 — Testing and Deployment: `@hbc/related-items`
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
@@ -29,18 +31,18 @@ Finalize `@hbc/related-items` with SF11-grade documentation/deployment closure r
 ### Architecture & Boundary Verification
 
 - [ ] `@hbc/related-items` has zero imports of `packages/features/*`
-- [ ] `@hbc/related-items` has zero imports of `@hbc/versioned-record`
-- [ ] `@hbc/related-items` has zero imports of `@hbc/session-state` unless superseded plan adds dependency
 - [ ] app-shell-safe component usage validated
 - [ ] cross-module lookups routed via backend API only
 - [ ] boundary grep checks return zero prohibited matches
+- [ ] `@hbc/versioned-record` integration present for version chips/governance history
+- [ ] offline cache path present via `@hbc/session-state` + `@hbc/sharepoint-docs`
 
 ### Type Safety
 
 - [ ] zero TypeScript errors: `pnpm --filter @hbc/related-items check-types`
 - [ ] relationship definitions and directions enforced end-to-end
-- [ ] role-visibility constraints typed and validated
-- [ ] related-item summary type contract stable
+- [ ] governance metadata (`relationshipPriority`, `resolverStrategy`, `roleRelevanceMap`) typed and validated
+- [ ] related-item summary type contract stable with `versionChip` and `aiConfidence`
 
 ### Build & Package
 
@@ -55,27 +57,29 @@ Finalize `@hbc/related-items` with SF11-grade documentation/deployment closure r
 - [ ] all tests pass
 - [ ] coverage thresholds met (lines/branches/functions/statements ≥95)
 - [ ] registry/api tests complete
-- [ ] hook tests for grouping/filtering complete
-- [ ] panel/card component tests complete
+- [ ] hook tests for grouping/filtering/priority logic complete
+- [ ] panel/card/tile component tests complete
 - [ ] relationship navigation E2E scenario passing
 
 ### Storage/API (Relationship Summary Lookup)
 
-- [ ] backend summary lookup route validated
+- [ ] batched `/api/related-items/summaries` Azure Function route validated
 - [ ] no-config/no-related graceful handling validated
 - [ ] bidirectional relationships return expected group sets
 - [ ] role visibility filtering validated
+- [ ] AI hook suggestion group payload shape validated
 
 ### Integration
 
 - [ ] BD↔Estimating relationship registrations validated
 - [ ] Estimating↔Project relationship registrations validated
-- [ ] project-canvas `RelatedItemsTile` integration validated
+- [ ] project-canvas `HbcRelatedItemsTile` top-3 + overlay integration validated
 - [ ] optional BIC state display integration validated
+- [ ] governance-admin actions emit to `@hbc/activity-timeline`
 
 ### Documentation
 
-- [ ] `docs/architecture/adr/ADR-0103-related-items-unified-work-graph.md` written and accepted
+- [ ] `docs/architecture/adr/0103-related-items-unified-work-graph.md` written and accepted
 - [ ] `docs/how-to/developer/related-items-adoption-guide.md` written
 - [ ] `docs/reference/related-items/api.md` written
 - [ ] `packages/related-items/README.md` conformance verified
@@ -86,7 +90,7 @@ Finalize `@hbc/related-items` with SF11-grade documentation/deployment closure r
 
 ## ADR-0103: Related Items Unified Work Graph Primitive
 
-**File:** `docs/architecture/adr/ADR-0103-related-items-unified-work-graph.md`
+**File:** `docs/architecture/adr/0103-related-items-unified-work-graph.md`
 
 ```markdown
 # ADR-0103 — Related Items Unified Work Graph Primitive
@@ -95,7 +99,6 @@ Finalize `@hbc/related-items` with SF11-grade documentation/deployment closure r
 **Date:** 2026-03-10
 **Deciders:** HB Intel Architecture Team
 **Supersedes:** None
-**Note:** Source spec PH7-SF-14 referenced ADR-0023. Canonical ADR number for SF14 is ADR-0103.
 
 ## Context
 
@@ -104,28 +107,28 @@ Cross-module relationships are critical to record context but are currently silo
 ## Decisions
 
 ### D-01 — Relationship Registry
-Use module-registered relationship definitions.
+Use module-registered relationship definitions with `registerBidirectionalPair()`.
 
 ### D-02 — Direction Model
 Use fixed relationship-direction union values.
 
 ### D-03 — ID Resolution Strategy
-Resolve related IDs via module-local resolver functions.
+Resolve related IDs via module-local resolver functions with governance metadata.
 
 ### D-04 — API Model
-Fetch related-item summaries via backend route.
+Fetch related-item summaries via batched backend route.
 
 ### D-05 — UI Model
-Render grouped relationship panel with item cards.
+Render grouped relationship panel with item cards and version chips.
 
 ### D-06 — Visibility Model
-Support role-gated relationship visibility.
+Support role-gated relationship visibility and role-aware empty states.
 
 ### D-07 — Complexity Behavior
-Hide panel in Essential; show progressively richer info in Standard/Expert.
+Hide panel in Essential; show progressively richer info in Standard/Expert including AI group.
 
 ### D-08 — Canvas Integration
-Expose panel as project-canvas tile.
+Expose panel as project-canvas tile with compact top-3 + overlay.
 
 ### D-09 — Bidirectional Baseline
 Require bidirectional relationship registration for key lifecycle links.
@@ -147,10 +150,10 @@ This ADR is locked and can only be superseded by explicit follow-up ADR.
 Required sections:
 
 1. When to use related-items panel
-2. Registering relationships with `RelationshipRegistry`
+2. Registering relationships with `RelationshipRegistry.registerBidirectionalPair`
 3. Designing `resolveRelatedIds` and `buildTargetUrl`
-4. Applying role visibility and complexity behavior
-5. Embedding `HbcRelatedItemsPanel` in record details/canvas tile
+4. Applying governance metadata, role visibility, and complexity behavior
+5. Embedding `HbcRelatedItemsPanel` and `HbcRelatedItemsTile` in detail/canvas flows
 6. Using testing fixtures from `@hbc/related-items/testing`
 
 ---
@@ -162,13 +165,15 @@ Required sections:
 Must include export table entries for:
 
 - `RelationshipDirection`
+- `IGovernanceMetadata`
 - `IRelationshipDefinition`
 - `IRelatedItem`
-- `RelationshipRegistry`
+- `RelationshipRegistry` (including `registerBidirectionalPair` and `registerAISuggestionHook`)
 - `RelatedItemsApi`
 - `useRelatedItems`
 - `HbcRelatedItemsPanel`
 - `HbcRelatedItemCard`
+- `HbcRelatedItemsTile`
 - testing exports (`createMockRelationshipDefinition`, `createMockRelatedItem`, `createMockSourceRecord`, `mockRelationshipDirections`)
 
 ---
@@ -181,7 +186,7 @@ Verify README contains:
 
 - purpose and unified-work-graph overview
 - quick-start setup
-- registry + API + panel behavior summary
+- registry + batched API + panel/tile behavior summary
 - role visibility and complexity summary
 - exports table
 - architecture boundary rules
@@ -196,7 +201,7 @@ Verify README contains:
 Append ADR row:
 
 ```markdown
-| [ADR-0103](architecture/adr/ADR-0103-related-items-unified-work-graph.md) | Related Items Unified Work Graph Primitive | Accepted | 2026-03-10 |
+| [ADR-0103](architecture/adr/0103-related-items-unified-work-graph.md) | Related Items Unified Work Graph Primitive | Accepted | 2026-03-10 |
 ```
 
 ---
@@ -227,10 +232,9 @@ pnpm --filter @hbc/related-items test --coverage
 
 # Boundary checks
 grep -r "from 'packages/features/" packages/related-items/src/
-grep -r "from '@hbc/versioned-record'" packages/related-items/src/
 
 # Documentation checks
-test -f docs/architecture/adr/ADR-0103-related-items-unified-work-graph.md
+test -f docs/architecture/adr/0103-related-items-unified-work-graph.md
 test -f docs/how-to/developer/related-items-adoption-guide.md
 test -f docs/reference/related-items/api.md
 test -f packages/related-items/README.md
@@ -247,7 +251,7 @@ Append to `SF14-Related-Items.md` after all gates pass:
 SF14 completed: {DATE}
 T01–T09 implemented.
 All four mechanical enforcement gates passed.
-ADR created: docs/architecture/adr/ADR-0103-related-items-unified-work-graph.md
+ADR created: docs/architecture/adr/0103-related-items-unified-work-graph.md
 Documentation added:
   - docs/how-to/developer/related-items-adoption-guide.md
   - docs/reference/related-items/api.md

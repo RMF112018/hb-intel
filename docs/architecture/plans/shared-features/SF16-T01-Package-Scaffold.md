@@ -1,3 +1,6 @@
+## Research Summary
+This scaffold aligns with Azure AI Search indexer/facet implementation constraints ([Microsoft Learn](https://learn.microsoft.com/en-us/azure/search/search-indexer-overview)), backend aggregation and boundary-safe routing ([Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-aggregation)), and construction-domain NLP search evidence for BIM workflows ([Automation in Construction, 2023](https://www.sciencedirect.com/science/article/abs/pii/S0926580523003278)).
+
 # SF16-T01 — Package Scaffold: `@hbc/search`
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
@@ -12,7 +15,7 @@
 
 ## Objective
 
-Create package scaffold with dual exports, strict coverage gates, and mandatory README scaffold.
+Create package scaffold with dual exports, strict coverage gates, parser/governance surfaces, and mandatory README scaffold.
 
 ---
 
@@ -27,9 +30,11 @@ packages/search/
 ├── src/index.ts
 ├── src/types/index.ts
 ├── src/constants/index.ts
+├── src/parser/index.ts
 ├── src/indexer/index.ts
 ├── src/api/index.ts
 ├── src/hooks/index.ts
+├── src/governance/index.ts
 ├── src/components/index.ts
 ├── testing/index.ts
 └── src/__tests__/setup.ts
@@ -45,11 +50,11 @@ Must include:
 
 1. overview + operations-grade search goals
 2. quick-start usage
-3. Azure Search + indexer architecture summary
-4. facets/command-search/saved-search behavior summary
+3. Azure Search + manifest indexer + parser architecture summary
+4. facets/command-search/saved-search/governance behavior summary
 5. exports table
 6. architecture boundary rules
-7. links to SF16 master/T09 and ADR-0105 target path
+7. links to SF16 master/T09 and ADR-0104 target path
 
 ---
 

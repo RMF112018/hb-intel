@@ -1,8 +1,4 @@
-**Locked Decision (Q8):** We adopt Suggestion B exactly as proposed. The public TypeScript contracts are extended in a backward-compatible manner with `governanceMetadata?: IGovernanceMetadata`, `IRelatedItem` additions (`versionChip`, `aiConfidence`), updated Definition of Done, expanded ADR, and refreshed Integration Points table. This is now locked.
-
-The interview for `@hbc/related-items` is complete. All eight decisions are locked on Suggestion B, delivering a true mold-breaking Unified Work Graph that eliminates cross-module silos, enforces role-aware progressive disclosure, provides admin governance, supports offline PWA resilience, and future-proofs for graph/AI without any burden on module teams.
-
----
+<!-- DIFF-SUMMARY: Updated canonical spec; removed prefatory lock prose; corrected ADR path to 0103; retained full locked PH7-SF-14 content -->
 
 # PH7-SF-14: `@hbc/related-items` — Cross-Module Record Relationship Panel
 
@@ -97,7 +93,7 @@ export interface IRelatedItem {
 
 ## Package Architecture
 
-```
+```text
 packages/related-items/
 ├── package.json
 ├── tsconfig.json
@@ -235,4 +231,12 @@ RelationshipRegistry.registerBidirectionalPair(
 
 ## ADR Reference
 
-Create `docs/architecture/adr/0023-related-items-unified-work-graph.md` documenting the bidirectional registration pattern, pluggable `resolverStrategy`, priority-based progressive disclosure, batched API, governance surface, offline caching strategy, and decision to keep module-local `resolveRelatedIds` while adding hybrid/graph/AI extensibility.
+Create `docs/architecture/adr/0103-related-items-unified-work-graph.md` documenting the bidirectional registration pattern, pluggable `resolverStrategy`, priority-based progressive disclosure, batched API, governance surface, offline caching strategy, and decision to keep module-local `resolveRelatedIds` while adding hybrid/graph/AI extensibility.
+
+---
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF14-T01 (Package Scaffold) completed: 2026-03-11
+Package: @hbc/related-items scaffold with dual exports, coverage gates, README
+Next task: SF14-T02 (TypeScript Contracts)
+-->

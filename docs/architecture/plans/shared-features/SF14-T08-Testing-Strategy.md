@@ -1,3 +1,5 @@
+<!-- DIFF-SUMMARY: Expanded coverage targets for bidirectional registry symmetry, batched API behavior, priority sorting, version chip/popover, AI group gating, and offline fallback -->
+
 # SF14-T08 — Testing Strategy: `@hbc/related-items`
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
@@ -12,7 +14,7 @@
 
 ## Objective
 
-Define fixtures and tests for relationship registry, API resolution, grouping logic, and panel/card rendering.
+Define fixtures and tests for bidirectional registry behavior, batched API resolution, priority/role grouping logic, panel/card/tile rendering, AI suggestion behavior, and offline fallback.
 
 ---
 
@@ -27,12 +29,14 @@ Define fixtures and tests for relationship registry, API resolution, grouping lo
 
 ## Required Coverage
 
-- registry duplicate and retrieval behavior
-- API resolution and role filtering behavior
-- grouping logic by direction
-- panel/card rendering and navigation behavior
+- registry bidirectional pair creation, reverse overrides, and duplicate handling
+- governance metadata priority sorting and role-relevance collapse behavior
+- API batching/chunking, resolverStrategy routing, and retry-safe partial failures
+- version-chip rendering and popover behavior in panel/card
+- smart-empty-state role variants and Expert-only AI suggestion group gating
+- offline fallback behavior via `@hbc/session-state` + `@hbc/sharepoint-docs`
 - complexity visibility behavior (Essential vs Standard/Expert)
-- storybook states for multi-group and empty-state panel
+- storybook states for multi-group, AI group, tile top-3 + overlay, and empty state
 
 ---
 

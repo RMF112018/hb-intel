@@ -1,3 +1,5 @@
+<!-- DIFF-SUMMARY: Updated panel behavior for priority collapse, role-aware smart-empty-state, Expert AI group, and version-chip popovers -->
+
 # SF14-T05 — `HbcRelatedItemsPanel`: `@hbc/related-items`
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
@@ -12,7 +14,7 @@
 
 ## Objective
 
-Implement grouped related-items sidebar/panel renderer.
+Implement grouped related-items sidebar/panel renderer with role-aware priority behavior and progressive disclosure.
 
 ---
 
@@ -29,9 +31,11 @@ interface HbcRelatedItemsPanelProps {
 
 Behavior:
 
-- grouped sections by relationship direction
+- grouped sections sorted/collapsed by `relationshipPriority` and role relevance
 - section counts and labels visible
-- empty state uses smart-empty-state inline variant
+- empty state uses role-aware `@hbc/smart-empty-state` coaching variant
+- Expert complexity shows AI suggestion group and suggest CTA
+- related item rows include version-history chip popover via `@hbc/versioned-record`
 - essential complexity hides panel; standard/expert show panel
 
 ---

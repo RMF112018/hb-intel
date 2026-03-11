@@ -1,3 +1,5 @@
+<!-- DIFF-SUMMARY: Added IGovernanceMetadata and expanded IRelationshipDefinition/IRelatedItem contracts per locked interview decisions -->
+
 # SF14-T02 — TypeScript Contracts: `@hbc/related-items`
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
@@ -12,7 +14,7 @@
 
 ## Objective
 
-Define public contracts for relationship definitions, related item summaries, direction model, and role visibility.
+Define public contracts for relationship definitions, governance metadata, related item summaries, direction model, and role visibility.
 
 ---
 
@@ -27,6 +29,14 @@ export type RelationshipDirection =
   | 'blocks'
   | 'is-blocked-by';
 
+export interface IGovernanceMetadata {
+  relationshipPriority: number;
+  resolverStrategy?: 'sharepoint' | 'graph' | 'ai-suggested' | 'hybrid';
+  roleRelevanceMap?: Record<string, RelationshipDirection[]>;
+  aiSuggestionHook?: string;
+  dataSource?: 'sharepoint' | 'graph';
+}
+
 export interface IRelationshipDefinition {
   sourceRecordType: string;
   targetRecordType: string;
@@ -36,6 +46,7 @@ export interface IRelationshipDefinition {
   resolveRelatedIds: (sourceRecord: unknown) => string[];
   buildTargetUrl: (targetRecordId: string) => string;
   visibleToRoles?: string[];
+  governanceMetadata?: IGovernanceMetadata;
 }
 
 export interface IRelatedItem {
@@ -48,8 +59,17 @@ export interface IRelatedItem {
   relationship: RelationshipDirection;
   relationshipLabel: string;
   bicState?: IBicNextMoveState;
+  versionChip?: { lastChanged: string; author: string };
+  aiConfidence?: number;
 }
 ```
+
+---
+
+## Contract Notes
+
+- Registry supports `registerBidirectionalPair()` with optional reverse override object.
+- Registry exposes `registerAISuggestionHook()` contract for Expert complexity suggestion group.
 
 ---
 

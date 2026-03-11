@@ -1,3 +1,5 @@
+<!-- DIFF-SUMMARY: Added version-history chip/popover and optional AI suggest action; aligned card behavior with locked Expert features -->
+
 # SF14-T06 — `HbcRelatedItemCard`: `@hbc/related-items`
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
@@ -12,7 +14,7 @@
 
 ## Objective
 
-Implement related item row/card with icon, label, status, optional BIC state, relationship chip, and navigation.
+Implement related item row/card with icon, label, status, optional BIC state, relationship chip, version history chip + popover, optional AI suggest action, and navigation.
 
 ---
 
@@ -28,7 +30,8 @@ Behavior:
 
 - click navigates to `item.href`
 - relationship chip rendered consistently by direction
-- expert complexity may include extended bic state details
+- version-history chip displays last changed and author in inline popover
+- expert complexity may include AI suggest action and extended BIC detail
 
 ---
 

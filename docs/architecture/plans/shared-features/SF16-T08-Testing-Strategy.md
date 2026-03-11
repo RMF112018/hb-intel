@@ -1,3 +1,6 @@
+## Research Summary
+Testing strategy follows Azure search correctness/latency expectations ([Microsoft Learn](https://learn.microsoft.com/en-us/azure/search/search-indexer-overview)), resilient API aggregation and failure-isolation patterns ([Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-aggregation)), and construction NLP retrieval research supporting parser quality and contextual grounding tests ([Automation in Construction, 2023](https://www.sciencedirect.com/science/article/abs/pii/S0926580523003278)).
+
 # SF16-T08 — Testing Strategy: `@hbc/search`
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
@@ -12,7 +15,7 @@
 
 ## Objective
 
-Define fixtures and tests for indexing, querying, filtering, keyboard UX, and saved searches.
+Define fixtures and tests for indexing, parser/querying, filtering, keyboard UX, deep links, provenance, offline cache, and saved-search governance.
 
 ---
 
@@ -27,12 +30,14 @@ Define fixtures and tests for indexing, querying, filtering, keyboard UX, and sa
 
 ## Required Coverage
 
-- indexer field mapping and BIC field projection tests
+- indexer field mapping including `dataSource` and `provenance`
+- parser tests for NL-to-structured `ISearchQuery` conversion
 - query/facet/sort/saved-search API contract tests
-- hook tests for debounce and keyboard state
-- component tests for search entry and results/facets
-- storybook states for command/search/results variants
-- Playwright scenario for create→index→find record flow
+- hook tests for debounce, keyboard state, and IndexedDB fallback
+- component tests for Search-First bar, global overlay, results/facets, and “View Related” flows
+- provenance badge and Expert-tier governance visibility tests
+- storybook states for command/search/results/provenance variants
+- Playwright scenario for create→index→NL search→deep-link flow
 
 ---
 

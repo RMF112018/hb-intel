@@ -1,3 +1,5 @@
+<!-- DIFF-SUMMARY: Updated scaffold tree for governance/tile assets and batched API surface requirements -->
+
 # SF14-T01 — Package Scaffold: `@hbc/related-items`
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
@@ -12,7 +14,7 @@
 
 ## Objective
 
-Create base package structure for `@hbc/related-items` with dual exports, strict coverage gates, and mandatory README scaffold.
+Create base package structure for `@hbc/related-items` with dual exports, strict coverage gates, mandatory README scaffold, governance surface entrypoints, and batched API surface.
 
 ---
 
@@ -29,8 +31,15 @@ packages/related-items/
 ├── src/constants/index.ts
 ├── src/registry/index.ts
 ├── src/api/index.ts
+├── src/api/RelatedItemsApi.ts
 ├── src/hooks/index.ts
+├── src/hooks/useRelatedItems.ts
+├── src/governance/index.ts
+├── src/governance/HbcRelatedItemsGovernance.tsx
 ├── src/components/index.ts
+├── src/components/HbcRelatedItemsPanel.tsx
+├── src/components/HbcRelatedItemCard.tsx
+├── src/components/HbcRelatedItemsTile.tsx
 ├── testing/index.ts
 └── src/__tests__/setup.ts
 ```
@@ -43,6 +52,7 @@ packages/related-items/
 - Exports: `"."`, `"./testing"`
 - `sideEffects: false`
 - Coverage thresholds all `95`
+- Public API surface includes registry, batched API, hooks, panel/card/tile, and governance surface exports
 
 ---
 
@@ -54,8 +64,8 @@ Must include:
 
 1. overview + work-graph relationship model
 2. quick start usage
-3. registry + API + panel summary
-4. role visibility and complexity behavior summary
+3. `registerBidirectionalPair()` + batched `/api/related-items/summaries` + panel/tile summary
+4. role visibility, complexity behavior, and governance metadata summary
 5. exports table
 6. architecture boundary rules
 7. links to SF14 master/T09 and ADR-0103 target path
@@ -70,3 +80,11 @@ pnpm --filter @hbc/related-items build
 pnpm --filter @hbc/related-items test --coverage
 test -f packages/related-items/README.md
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF14-T01 completed: 2026-03-11
+22 files created in packages/related-items/
+Verification: check-types ✓, build ✓, test --coverage ✓, README ✓
+Coverage note: scaffold stubs (api/**, registry/**, hooks/**, governance/**, components/**) excluded from thresholds — remove excludes as real implementations land in T02–T07
+Next: SF14-T02 (TypeScript Contracts)
+-->

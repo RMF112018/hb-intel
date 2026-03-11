@@ -1,3 +1,5 @@
+<!-- DIFF-SUMMARY: Expanded useRelatedItems behavior for priority/role relevance, AI group inputs, and offline caching via session-state + sharepoint-docs summaries -->
+
 # SF14-T04 — Hooks: `@hbc/related-items`
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
@@ -12,7 +14,7 @@
 
 ## Objective
 
-Implement `useRelatedItems` to load and group related records for rendering.
+Implement `useRelatedItems` to load, sort, enrich, group, and cache related records for rendering.
 
 ---
 
@@ -27,7 +29,8 @@ function useRelatedItems(params: {
   showBicState?: boolean;
 }): {
   items: IRelatedItem[];
-  groups: Record<RelationshipDirection, IRelatedItem[]>;
+  groups: Record<string, IRelatedItem[]>;
+  aiSuggestions?: IRelatedItem[];
   isLoading: boolean;
   error: string | null;
 };
@@ -37,9 +40,11 @@ function useRelatedItems(params: {
 
 ## Behavior
 
-- loads data via `RelatedItemsApi`
-- groups by relationship direction
-- applies complexity visibility expectations in consumer components
+- loads data via `RelatedItemsApi.getRelatedItems`
+- sorts/groups by `relationshipPriority` and role relevance metadata
+- includes Expert-only AI suggestion group inputs from registered hooks
+- reads/writes offline summaries via `@hbc/session-state` and `@hbc/sharepoint-docs` support path
+- returns stale-safe cached summaries in PWA standalone mode when network path is unavailable
 
 ---
 

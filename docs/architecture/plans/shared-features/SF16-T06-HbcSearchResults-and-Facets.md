@@ -1,3 +1,6 @@
+## Research Summary
+Results/facets behavior is based on Azure search facet/filter design at scale ([Microsoft Learn](https://learn.microsoft.com/en-us/azure/search/search-indexer-overview)), API-side aggregation and source-safe query brokering ([Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-aggregation)), and peer-reviewed construction search UX patterns for NL-driven BIM retrieval ([Automation in Construction, 2023](https://www.sciencedirect.com/science/article/abs/pii/S0926580523003278)).
+
 # SF16-T06 — `HbcSearchResults` and `HbcSearchFacets`: `@hbc/search`
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
@@ -12,16 +15,16 @@
 
 ## Objective
 
-Define full results experience with pagination, sorting, and facets.
+Define full results experience with pagination, sorting, facets, deep links, and provenance visibility.
 
 ---
 
 ## Components
 
-- `HbcSearchResults`: result cards + pagination + sort controls
-- `HbcSearchFacets`: module/type/status facets + toggles + date filters
+- `HbcSearchResults`: result cards + pagination + sort controls + “View Related” button + canvas-aware navigation
+- `HbcSearchFacets`: module/type/status facets + BIC quick-filter chips + date filters + provenance-aware controls (Expert)
 
-Essential behavior: minimal search only; full facet panel in Standard+.
+Essential behavior: minimal search only; full facet panel in Standard+; provenance badge in Expert.
 
 ---
 

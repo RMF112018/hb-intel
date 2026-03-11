@@ -1,9 +1,9 @@
 # PH7-SF-14: `@hbc/related-items` — Cross-Module Record Relationship Panel
 
-**Priority Tier:** 2 — Application Layer (enhances all record detail pages)
-**Package:** `packages/related-items/`
-**Interview Decision:** Q25 — Option B confirmed
-**Mold Breaker Source:** UX-MB §3 (Unified Work Graph); ux-mold-breaker.md Signature Solution #3; con-tech-ux-study §9 (Cross-module context gaps)
+**Priority Tier:** 2 — Application Layer (enhances all record detail pages)  
+**Package:** `packages/related-items/`  
+**Interview Decision:** Q25 — Option B confirmed (all 8 questions locked on Suggestion B)  
+**Mold Breaker Source:** UX-MB §3 (Unified Work Graph); ux-mold-breaker.md Signature Solution #3; con-tech-ux-study §9 (Cross-module context gaps); Operating Principle §7.1 (Role-awareness)
 
 ---
 
@@ -22,9 +22,9 @@ This creates a "silo problem" — the data exists, but the connections are invis
 
 ## Mold Breaker Rationale
 
-The ux-mold-breaker.md Signature Solution #3 (Unified Work Graph) specifies: "Every record in the system knows what it is connected to, and surfaces those connections in a consistent relationship panel." Operating Principle §7.1 (Role-awareness) extends this: the relationship panel shows the connections most relevant to the current user's role.
+The ux-mold-breaker.md Signature Solution #3 (Unified Work Graph) specifies: "Every record in the system knows what it is connected to, and surfaces those connections in a consistent relationship panel." Operating Principle §7.1 (Role-awareness) extends this: the relationship panel shows the connections most relevant to the current user's role (via `relationshipPriority` and `roleRelevanceMap`).
 
-The con-tech UX study §9 identifies cross-module context gaps as a recurring pain point — users must navigate away from their current record to check related items in other modules, then navigate back. `@hbc/related-items` collapses this navigation into a sidebar panel on every detail page.
+The con-tech UX study §9 and procore-ux-study.md identify cross-module context gaps as a recurring pain point — users must navigate away from their current record to check related items in other modules, then navigate back. `@hbc/related-items` collapses this navigation into a sidebar panel (or canvas tile) on every detail page, with offline PWA resilience, version history, and AI suggestions.
 
 ---
 
@@ -41,7 +41,7 @@ BD Scorecard
                                                 └── has → Monthly Reviews
 ```
 
-Related items are registered by each module using the `RelationshipRegistry` — a module declares that its record type has relationships to other record types, and the relationship panel renders those connections automatically.
+Related items are registered declaratively by each module using `RelationshipRegistry.registerBidirectionalPair()`. The registry automatically creates symmetric reverse entries, applies `governanceMetadata` (priority, resolverStrategy, etc.), and versions every pair via `@hbc/versioned-record`.
 
 ---
 
@@ -52,23 +52,24 @@ Related items are registered by each module using the `RelationshipRegistry` —
 
 export type RelationshipDirection = 'originated' | 'converted-to' | 'has' | 'references' | 'blocks' | 'is-blocked-by';
 
+export interface IGovernanceMetadata {
+  relationshipPriority: number; // 0–100 for dynamic sorting/collapse
+  resolverStrategy?: 'sharepoint' | 'graph' | 'ai-suggested' | 'hybrid';
+  roleRelevanceMap?: Record<string, RelationshipDirection[]>;
+  aiSuggestionHook?: string; // registered hook ID
+  dataSource?: 'sharepoint' | 'graph';
+}
+
 export interface IRelationshipDefinition {
-  /** Source record type */
   sourceRecordType: string;
-  /** Target record type */
   targetRecordType: string;
-  /** Human-readable relationship label */
   label: string;
-  /** Relationship direction */
   direction: RelationshipDirection;
-  /** Target module identifier */
   targetModule: string;
-  /** Function to resolve related record IDs from source record */
   resolveRelatedIds: (sourceRecord: unknown) => string[];
-  /** URL pattern for navigating to a related record */
   buildTargetUrl: (targetRecordId: string) => string;
-  /** Roles that can see this relationship */
   visibleToRoles?: string[];
+  governanceMetadata?: IGovernanceMetadata;
 }
 
 export interface IRelatedItem {
@@ -77,12 +78,12 @@ export interface IRelatedItem {
   label: string;
   status?: string;
   href: string;
-  /** BIC state of the related item (if applicable) */
   bicState?: IBicNextMoveState;
-  /** Module icon key */
   moduleIcon: string;
   relationship: RelationshipDirection;
   relationshipLabel: string;
+  versionChip?: { lastChanged: string; author: string }; // from @hbc/versioned-record
+  aiConfidence?: number;
 }
 ```
 
@@ -100,14 +101,17 @@ packages/related-items/
 │   │   ├── IRelatedItems.ts
 │   │   └── index.ts
 │   ├── registry/
-│   │   └── RelationshipRegistry.ts       # cross-module relationship registration
+│   │   └── RelationshipRegistry.ts       # registerBidirectionalPair + governance
 │   ├── api/
-│   │   └── RelatedItemsApi.ts            # fetch related record summaries
+│   │   └── RelatedItemsApi.ts            # batched /api/related-items/summaries
 │   ├── hooks/
-│   │   └── useRelatedItems.ts            # loads related items for a source record
+│   │   └── useRelatedItems.ts            # loads, enriches, caches offline
+│   ├── governance/
+│   │   └── HbcRelatedItemsGovernance.tsx # Admin surface
 │   └── components/
-│       ├── HbcRelatedItemsPanel.tsx      # sidebar panel showing all related items
-│       ├── HbcRelatedItemCard.tsx        # individual related item card
+│       ├── HbcRelatedItemsPanel.tsx      # role-aware, priority-sorted
+│       ├── HbcRelatedItemCard.tsx        # version chip + AI button
+│       ├── HbcRelatedItemsTile.tsx       # canvas compact variant
 │       └── index.ts
 ```
 
@@ -122,43 +126,40 @@ interface HbcRelatedItemsPanelProps {
   sourceRecordType: string;
   sourceRecordId: string;
   sourceRecord: unknown;
-  /** Whether to include BIC state for each related item */
   showBicState?: boolean;
 }
 ```
 
 **Visual behavior:**
 - Collapsible sidebar panel titled "Related Items"
-- Grouped by relationship direction: "Originated from", "Converted to", "Related records"
-- Each group shows its relationship label and count
-- Items within each group rendered as `HbcRelatedItemCard` rows
-- Empty state: "No related items" (using `@hbc/smart-empty-state` inline variant)
+- Groups sorted and collapsed by `relationshipPriority` and role relevance
+- Each group shows label and count
+- Items rendered as `HbcRelatedItemCard` with version-history chip (popover via `@hbc/versioned-record`)
+- Empty state: role-aware `@hbc/smart-empty-state` with coaching + “Suggest new relationships” button (AI at Expert only)
+- AI Suggestions group (Expert complexity only) from registered hooks
 
 ### `HbcRelatedItemCard` — Related Item Row
 
-```typescript
-interface HbcRelatedItemCardProps {
-  item: IRelatedItem;
-}
-```
-
 **Visual behavior:**
-- Module icon (left), record label (main), status badge (right)
-- BIC state indicator (if `showBicState`): owner avatar + urgency dot
-- Entire card is clickable → navigates to `item.href`
-- Relationship direction chip: "Originated" / "Converted to" / etc.
+- Module icon, label, status badge
+- BIC state (from `@hbc/bic-next-move`)
+- Version-history chip (last changed + author avatar) → inline popover
+- Relationship direction chip
+- Clickable; entire card navigates
+
+### `HbcRelatedItemsTile` — Canvas Variant
+
+Compact horizontal-scroll or single-accordion view showing only top 3 priority items. “View all” opens full panel in canvas overlay/modal. Inherits all card features and offline caching.
 
 ---
 
 ## Relationship Registration Pattern
 
-Each module registers its relationships with the `RelationshipRegistry`:
-
 ```typescript
 // In BD module initialization
 import { RelationshipRegistry } from '@hbc/related-items';
 
-RelationshipRegistry.register([
+RelationshipRegistry.registerBidirectionalPair(
   {
     sourceRecordType: 'bd-scorecard',
     targetRecordType: 'estimating-pursuit',
@@ -167,78 +168,67 @@ RelationshipRegistry.register([
     targetModule: 'estimating',
     resolveRelatedIds: (scorecard) => scorecard.linkedPursuitId ? [scorecard.linkedPursuitId] : [],
     buildTargetUrl: (id) => `/estimating/pursuits/${id}`,
-    visibleToRoles: ['BD Manager', 'Chief Estimator', 'Director of Preconstruction'],
+    visibleToRoles: ['BD Manager', 'Chief Estimator'],
+    governanceMetadata: { relationshipPriority: 90, resolverStrategy: 'sharepoint' }
   },
-]);
-
-// In Estimating module initialization
-RelationshipRegistry.register([
-  {
-    sourceRecordType: 'estimating-pursuit',
-    targetRecordType: 'bd-scorecard',
-    label: 'Originated from BD Scorecard',
-    direction: 'originated',
-    targetModule: 'business-development',
-    resolveRelatedIds: (pursuit) => pursuit.bdScorecardId ? [pursuit.bdScorecardId] : [],
-    buildTargetUrl: (id) => `/bd/scorecards/${id}`,
-  },
-  {
-    sourceRecordType: 'estimating-pursuit',
-    targetRecordType: 'project',
-    label: 'Converted to Project',
-    direction: 'converted-to',
-    targetModule: 'project-hub',
-    resolveRelatedIds: (pursuit) => pursuit.projectId ? [pursuit.projectId] : [],
-    buildTargetUrl: (id) => `/projects/${id}`,
-  },
-]);
+  { label: 'Originated from BD Scorecard' } // optional overrides
+);
 ```
 
 ---
 
 ## Integration Points
 
-| Package | Integration |
-|---|---|
-| `@hbc/bic-next-move` | Related item cards show BIC state (owner + urgency) for each linked record |
-| `@hbc/project-canvas` | `RelatedItemsTile` is a canvas tile version of `HbcRelatedItemsPanel` |
-| `@hbc/complexity` | Essential: related items panel hidden (reduces noise); Standard: panel visible; Expert: BIC state shown for each item |
-| `@hbc/search` | Search results link to related items panel of found records |
+| Package                  | Integration |
+|--------------------------|-------------|
+| `@hbc/bic-next-move`     | Live BIC enrichment in batched API + card indicators |
+| `@hbc/project-canvas`    | `HbcRelatedItemsTile` (compact top-3 + overlay) |
+| `@hbc/complexity`        | Essential: hidden; Standard: visible; Expert: BIC + AI suggestions + full priority sorting |
+| `@hbc/search`            | Automatic deep-links from search results |
+| `@hbc/versioned-record`  | Version chips + immutable governance history |
+| `@hbc/activity-timeline` | Every governance change emitted |
+| `@hbc/session-state` + `@hbc/sharepoint-docs` | Offline caching of summaries for PWA resilience |
+| `@hbc/ai-assist` (future) | Registered suggestion hooks + “Suggest” button |
 
 ---
 
 ## SPFx Constraints
 
-- `HbcRelatedItemsPanel` renders as a collapsible section within SPFx webpart (not a true sidebar in SPFx contexts)
-- `RelatedItemsApi` routes through Azure Functions backend for cross-module record lookup
-- `RelationshipRegistry` initialized at SPFx Application Customizer level for cross-webpart awareness
+- `HbcRelatedItemsPanel` renders as collapsible section (never true sidebar)
+- Batched API routes through Azure Functions
+- Registry initialized at Application Customizer level
+- Full offline caching works in PWA standalone mode
 
 ---
 
 ## Priority & ROI
 
-**Priority:** P1 — Eliminates the cross-module navigation tax on every record detail page; foundational for making the "Unified Work Graph" mold breaker principle real
-**Estimated build effort:** 3–4 sprint-weeks (registry, API, two components, cross-module relationship definitions)
-**ROI:** Collapses multi-tab navigation into a single sidebar panel; makes the chain from BD lead to active project visible at every stage; zero incremental cost per adopting module
+**Priority:** P1 — Foundational for Unified Work Graph; eliminates navigation tax on every detail page  
+**Estimated build effort:** 4–5 sprint-weeks (includes governance surface, batched API, offline caching, canvas tile)  
+**ROI:** Collapses multi-tab navigation; makes BD-to-Project chain visible at every stage; zero incremental cost per module; PWA-ready from day one
 
 ---
 
 ## Definition of Done
 
-- [ ] `IRelationshipDefinition` contract defined; `RelationshipRegistry.register()` available
-- [ ] `RelatedItemsApi.getRelatedItems()` fetches related record summaries for a source record
-- [ ] `useRelatedItems` loads and groups related items for a source record
-- [ ] `HbcRelatedItemsPanel` renders grouped related items with collapsible sections
-- [ ] `HbcRelatedItemCard` renders module icon, label, status, BIC state, navigation link
-- [ ] BD, Estimating, and Project Hub relationships registered (bidirectional)
-- [ ] `@hbc/bic-next-move` integration: BIC state shown on each related item card
-- [ ] `@hbc/complexity` integration: panel hidden in Essential, visible in Standard+
-- [ ] `@hbc/project-canvas` tile integration: `RelatedItemsTile` implemented
-- [ ] Unit tests on relationship registry and `resolveRelatedIds` functions
-- [ ] Storybook: panel with multiple relationship groups, BIC state variants
+- [ ] `IRelationshipDefinition`, `IGovernanceMetadata`, and `IRelatedItem` contracts defined
+- [ ] `RelationshipRegistry.registerBidirectionalPair()` + `registerAISuggestionHook()` available
+- [ ] Batched `RelatedItemsApi.getRelatedItems()` endpoint with BIC enrichment and hybrid routing
+- [ ] `useRelatedItems` hook with offline caching via `@hbc/session-state`
+- [ ] `HbcRelatedItemsPanel` with priority-based sorting, role-aware collapse, version chips, smart empty state
+- [ ] `HbcRelatedItemCard` with version popover and AI suggest button
+- [ ] `HbcRelatedItemsTile` for `@hbc/project-canvas` (top-3 compact view)
+- [ ] Dedicated Admin governance surface (editable priority/visibility, archiving, Preview as Role, activity-timeline emission)
+- [ ] BD, Estimating, and Project Hub relationships registered bidirectionally
+- [ ] Full integration with `@hbc/bic-next-move`, `@hbc/complexity`, `@hbc/versioned-record`, `@hbc/activity-timeline`, `@hbc/search`
+- [ ] Offline PWA resilience verified
+- [ ] Unit tests on registry, API batching, and priority logic
+- [ ] Storybook: all variants, governance surface, AI group, canvas tile
 
 ---
 
 ## ADR Reference
 
-Create `docs/architecture/adr/0023-related-items-unified-work-graph.md` documenting the relationship registry pattern, the bidirectional registration requirement, and the decision to use module-local `resolveRelatedIds` functions rather than a central graph database.
+Create `docs/architecture/adr/0103-related-items-unified-work-graph.md` documenting the bidirectional registration pattern, pluggable `resolverStrategy`, priority-based progressive disclosure, batched API, governance surface, offline caching strategy, and decision to keep module-local `resolveRelatedIds` while adding hybrid/graph/AI extensibility.
+
+---

@@ -1,3 +1,6 @@
+## Research Summary
+Deployment controls follow Azure search/indexer operational guidance ([Microsoft Learn](https://learn.microsoft.com/en-us/azure/search/search-indexer-overview)), production API aggregation and reliability boundaries ([Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-aggregation)), and construction-domain NLP retrieval evidence that supports parser/provenance governance requirements ([Automation in Construction, 2023](https://www.sciencedirect.com/science/article/abs/pii/S0926580523003278)).
+
 # SF16-T09 — Testing and Deployment: `@hbc/search`
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
@@ -18,9 +21,9 @@ Finalize `@hbc/search` with SF11-grade documentation/deployment closure requirem
 
 ## 3-Line Plan
 
-1. Complete tests for indexer/query hooks/components/facets/saved searches.
+1. Complete tests for indexer/parser/query hooks/components/facets/saved searches.
 2. Pass all mechanical enforcement gates with ≥95% coverage.
-3. Publish ADR-0105 and all required documentation/state-map/index updates.
+3. Publish ADR-0104 and all required documentation/state-map/index updates.
 
 ---
 
@@ -37,8 +40,8 @@ Finalize `@hbc/search` with SF11-grade documentation/deployment closure requirem
 ### Type Safety
 - [ ] zero TypeScript errors: `pnpm --filter @hbc/search check-types`
 - [ ] query/result/facet contracts enforced end-to-end
-- [ ] searchable-record index transform contract stable
-- [ ] saved-search serialization contract stable
+- [ ] searchable-record index transform contract stable (`dataSource`/`provenance`)
+- [ ] saved-search serialization/governance contract stable
 
 ### Build & Package
 - [ ] package build succeeds
@@ -50,45 +53,46 @@ Finalize `@hbc/search` with SF11-grade documentation/deployment closure requirem
 ### Tests
 - [ ] all tests pass
 - [ ] coverage thresholds met (lines/branches/functions/statements ≥95)
-- [ ] indexer/query/facet tests complete
-- [ ] hook tests for debounce/keyboard state complete
+- [ ] indexer/parser/query/facet tests complete
+- [ ] hook tests for debounce/keyboard state/offline cache complete
 - [ ] component tests for search surfaces complete
-- [ ] create→index→search E2E scenario passing
+- [ ] create→index→search→deep-link E2E scenario passing
 
 ### Storage/API (Search Index + Query)
 - [ ] Azure index schema validated
 - [ ] index update on record change validated
 - [ ] facet counts and filter behavior validated
 - [ ] saved search persistence validated
+- [ ] Search-First Mode and provenance behavior validated
 
 ### Integration
 - [ ] BIC searchable dimensions validated
 - [ ] related-items deep-link integration validated
+- [ ] project-canvas deep-link integration validated
 - [ ] notification-intelligence alignment validated
-- [ ] module indexing registrations validated
+- [ ] module manifest registrations validated
 
 ### Documentation
-- [ ] `docs/architecture/adr/ADR-0105-search-azure-cognitive-search.md` written and accepted
+- [ ] `docs/architecture/adr/0104-search-azure-cognitive-search.md` written and accepted
 - [ ] `docs/how-to/developer/search-adoption-guide.md` written
 - [ ] `docs/reference/search/api.md` written
 - [ ] `packages/search/README.md` conformance verified
-- [ ] `docs/README.md` ADR index updated with ADR-0105 entry
-- [ ] `current-state-map.md §2` updated with SF16 and ADR-0105 linkage
+- [ ] `docs/README.md` ADR index updated with ADR-0104 entry
+- [ ] `current-state-map.md §2` updated with SF16 and ADR-0104 linkage
 
 ---
 
-## ADR-0105: Search Azure Cognitive Search Primitive
+## ADR-0104: Search Azure Cognitive Search Primitive
 
-**File:** `docs/architecture/adr/ADR-0105-search-azure-cognitive-search.md`
+**File:** `docs/architecture/adr/0104-search-azure-cognitive-search.md`
 
 ```markdown
-# ADR-0105 — Search Azure Cognitive Search Primitive
+# ADR-0104 — Search Azure Cognitive Search Primitive
 
 **Status:** Accepted
 **Date:** 2026-03-11
 **Deciders:** HB Intel Architecture Team
 **Supersedes:** None
-**Note:** Source spec PH7-SF-16 referenced ADR-0025. Canonical ADR number for SF16 is ADR-0105.
 
 ## Context
 
@@ -103,25 +107,25 @@ Use Azure Cognitive Search as the unified index layer.
 Use typed query/result/facet contracts with explicit filters and sorts.
 
 ### D-03 — Indexing Strategy
-Update index via backend indexer on record change events.
+Update index via manifest-driven backend indexer on record change events.
 
 ### D-04 — Search UX Model
-Support command overlay + inline + full results page.
+Support command overlay + Search-First bar + full results page.
 
 ### D-05 — Facets and Toggles
-Require module/type/status facets and blocked/overdue/assigned toggles.
+Require module/type/status facets and blocked/overdue/assigned toggles and BIC chips.
 
 ### D-06 — Saved Searches
-Persist named saved searches per user.
+Persist named saved searches as versioned records with audit metadata.
 
 ### D-07 — Complexity Behavior
-Essential minimal; Standard full; Expert advanced metadata/saved search emphasis.
+Essential baseline; Standard AI parsing/facets; Expert provenance/governance.
 
 ### D-08 — Tenant Boundary
 No direct client search-index calls; backend proxy only.
 
 ### D-09 — Integration Baseline
-BIC fields searchable/filterable; related-items deep-link integration required.
+BIC fields searchable/filterable; related-items and canvas deep-link integration required.
 
 ### D-10 — Testing Sub-Path
 Expose canonical fixtures from `@hbc/search/testing`.
@@ -139,11 +143,11 @@ This ADR is locked and can only be superseded by explicit follow-up ADR.
 
 Required sections:
 
-1. making records searchable (`ISearchableRecord` mapping)
-2. registering index transforms and update triggers
-3. using inline/global search components
+1. making records searchable (`ISearchableModule` manifest + record mapping)
+2. registering parser/index transforms and update triggers
+3. using inline/global search components and Search-First Mode
 4. using full results/facets and saved-search hooks
-5. applying BIC/assignment dimensions in index mapping
+5. applying BIC/assignment dimensions and provenance fields in index mapping
 6. using testing fixtures from `@hbc/search/testing`
 
 ---
@@ -158,6 +162,7 @@ Must include export table entries for:
 - `ISearchResult`
 - `ISearchResponse`
 - `ISearchFacets`
+- `ISearchableModule`
 - `SearchApi`
 - `SavedSearchApi`
 - `useSearch`
@@ -179,11 +184,11 @@ Verify README contains:
 
 - operations-grade search overview
 - quick-start setup
-- indexer + query architecture summary
-- command search + facets + saved-search behavior summary
+- indexer + parser + query architecture summary
+- command search + facets + saved-search + governance behavior summary
 - exports table
 - architecture boundary rules
-- links to SF16 master plan, T09, ADR-0105, adoption guide, API reference
+- links to SF16 master plan, T09, ADR-0104, adoption guide, API reference
 
 ---
 
@@ -194,7 +199,7 @@ Verify README contains:
 Append ADR row:
 
 ```markdown
-| [ADR-0105](architecture/adr/ADR-0105-search-azure-cognitive-search.md) | Search Azure Cognitive Search Primitive | Accepted | 2026-03-11 |
+| [ADR-0104](architecture/adr/0104-search-azure-cognitive-search.md) | Search Azure Cognitive Search Primitive | Accepted | 2026-03-11 |
 ```
 
 ---
@@ -206,11 +211,11 @@ Append ADR row:
 At implementation closure, update §2 with:
 
 - SF16 shared-feature plans row
-- ADR-0105 row linkage
+- ADR-0104 row linkage
 - optional doc rows if authored in same pass:
   - `docs/how-to/developer/search-adoption-guide.md`
   - `docs/reference/search/api.md`
-- update next unreserved ADR number after ADR-0105 allocation
+- update next unreserved ADR number after ADR-0104 allocation
 
 ---
 
@@ -228,7 +233,7 @@ grep -r "from 'packages/features/" packages/search/src/
 grep -r "https://" packages/search/src/ | grep -v "Azure Functions endpoint constants"
 
 # Documentation checks
-test -f docs/architecture/adr/ADR-0105-search-azure-cognitive-search.md
+test -f docs/architecture/adr/0104-search-azure-cognitive-search.md
 test -f docs/how-to/developer/search-adoption-guide.md
 test -f docs/reference/search/api.md
 test -f packages/search/README.md
@@ -245,12 +250,12 @@ Append to `SF16-Search.md` after all gates pass:
 SF16 completed: {DATE}
 T01–T09 implemented.
 All four mechanical enforcement gates passed.
-ADR created: docs/architecture/adr/ADR-0105-search-azure-cognitive-search.md
+ADR created: docs/architecture/adr/0104-search-azure-cognitive-search.md
 Documentation added:
   - docs/how-to/developer/search-adoption-guide.md
   - docs/reference/search/api.md
   - packages/search/README.md
-docs/README.md ADR index updated: ADR-0105 row appended.
-current-state-map.md §2 updated with SF16 and ADR-0105 rows.
+docs/README.md ADR index updated: ADR-0104 row appended.
+current-state-map.md §2 updated with SF16 and ADR-0104 rows.
 -->
 ```
