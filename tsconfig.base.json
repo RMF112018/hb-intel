@@ -70,7 +70,9 @@
       "@hbc/data-seeding": ["packages/data-seeding/src/index.ts"],
       "@hbc/data-seeding/*": ["packages/data-seeding/src/*"],
       "@hbc/notification-intelligence": ["packages/notification-intelligence/src/index.ts"],
-      "@hbc/notification-intelligence/*": ["packages/notification-intelligence/src/*"]
+      "@hbc/notification-intelligence/*": ["packages/notification-intelligence/src/*"],
+      "@hbc/smart-empty-state": ["packages/smart-empty-state/src/index.ts"],
+      "@hbc/smart-empty-state/*": ["packages/smart-empty-state/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"]

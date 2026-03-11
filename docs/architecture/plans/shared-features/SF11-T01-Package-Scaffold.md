@@ -83,3 +83,21 @@ pnpm --filter @hbc/smart-empty-state test --coverage
 ```
 
 All commands must pass with zero errors before T02 starts.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF11-T01 completed: 2026-03-10
+- 27 files created (6 infrastructure, 8 leaf stubs, 5 barrels, 6 root/test/testing, 1 scaffold test, 1 external update)
+- package.json: dual exports (. and ./testing), NO @tanstack/react-query peer dep (D-08)
+- tsconfig.json/tsconfig.build.json: extends base, self-path alias, __tests__ excluded from type-check
+- vitest.config.ts: jsdom, 95% thresholds, passWithNoTests, setupFiles ./src/__tests__/setup.ts
+- Coverage: 100% all metrics (stmts/branches/functions/lines)
+- Build: zero errors (pnpm turbo run build — 35/35 tasks pass)
+- Type-check: zero errors
+- tsconfig.base.json updated with @hbc/smart-empty-state path aliases
+- D-02: ISmartEmptyStateConfig placeholder in types stub
+- D-04: IEmptyStateVisitStore adapter + noopVisitStore; no @hbc/session-state dep
+- D-07: no external asset imports in component stubs
+- D-08: zero @hbc/notification-intelligence imports
+- D-10: testing sub-path with 3 fixture stubs
+Next: SF11-T02 TypeScript Contracts
+-->
