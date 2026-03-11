@@ -50,3 +50,12 @@ Mandatory-governance target: SharePoint admin list or central config for role-ti
 pnpm --filter @hbc/project-canvas test -- TileRegistry CanvasApi
 pnpm --filter @hbc/project-canvas check-types
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+T03 completed: 2026-03-11
+- TileRegistry: full Map-based singleton with register, registerMany, get, getAll, _clearRegistryForTests
+- CanvasApi: object-export with 7 methods (getConfig, saveConfig, resetToRoleDefault, getRoleMandatoryTiles, applyMandatoryTilesToAllProjects, getCanvasRecommendations, getTileDataSourceMetadata)
+- Registry throws on duplicate key, validates Essential/Standard/Expert variants
+- 23 tests (14 registry + 9 API) all passing
+- Barrel exports updated: registry/index.ts, api/index.ts, src/index.ts
+-->
