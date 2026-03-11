@@ -1,12 +1,10 @@
 # PH7-SF-18: Estimating Bid Readiness Signal — Real-Time Bid Preparation Health Indicator
-
 **Priority Tier:** 2 — Application Layer (Estimating module differentiator)
 **Module:** Estimating
 **Interview Decision:** Q2 — Option B confirmed (initially; redirected to shared package framing; Bid Readiness Signal confirmed as Estimating-specific Mold Breaker)
 **Mold Breaker Source:** UX-MB §7 (Tablet-Native Field UX, applied to Estimating workflows); ux-mold-breaker.md Signature Solution #4 (Universal Next Move, applied to bid preparation); con-tech-ux-study §5 (Estimating module gaps)
 
 ---
-
 ## Problem Solved
 
 Bid preparation failures — submitting an incomplete bid, missing a bid bond requirement, forgetting to include an addendum — are among the most costly mistakes a general contractor can make. They result in bid rejection, damaged owner relationships, and in competitive markets, they eliminate the company from consideration entirely.
@@ -22,18 +20,16 @@ Current estimating software (and Procore's estimating module) shows bid status a
 - The bid value has been reviewed and signed off by the Chief Estimator
 - The submission deadline has not passed
 
-The Bid Readiness Signal computes a health score from these criteria and surfaces it at the top of every Active Pursuit — visible at a glance in the list view and detailed in the record view.
+The Bid Readiness Signal computes a health score from these criteria and surfaces it at the top of every Active Pursuit — visible at a glance in the list view and detailed in the record view. Every incomplete criterion is automatically surfaced as a granular BIC record in `@hbc/bic-next-move` (blockers first), with ownership avatars appearing directly in the compact Signal row and in the `@hbc/project-canvas` “My Work” lane.
 
 ---
-
 ## Mold Breaker Rationale
 
 This is a direct application of the `@hbc/bic-next-move` philosophy (Universal Next Move, Signature Solution #4) at the bid preparation level: every bid preparation requirement has an owner, a completion state, and a due date — and the system makes the incomplete requirements visible rather than hiding them behind a status field.
 
-No current construction platform provides real-time bid readiness computation. Procore's estimating module shows bid status but not bid health. The Bid Readiness Signal is the Estimating module's most visible UX differentiator.
+No current construction platform provides real-time bid readiness computation. Procore's estimating module shows bid status but not bid health. The Bid Readiness Signal is the Estimating module's most visible UX differentiator and the foundation of the new reusable Tier-1 `@hbc/health-indicator` primitive.
 
 ---
-
 ## Bid Readiness Score Model
 
 ### Readiness Criteria (Configurable by Admin)
@@ -56,52 +52,46 @@ No current construction platform provides real-time bid readiness computation. P
 - 🔴 **Not Ready** (<50% OR critical blocker missing)
 
 ---
-
 ## Interface Contract
 
 ```typescript
-// In Estimating module domain types
+// In @hbc/health-indicator primitive (new Tier-1 package)
 
-export interface IBidReadinessCriterion {
+export interface IHealthIndicatorCriterion {
   criterionId: string;
   label: string;
-  weight: number; // 0-1, sum across all criteria = 1
+  weight: number;
   isBlocker: boolean;
-  isComplete: (pursuit: IEstimatingPursuit) => boolean;
-  completionDescription: (pursuit: IEstimatingPursuit) => string;
-  /** Link to the section where this can be resolved */
-  actionHref: (pursuit: IEstimatingPursuit) => string;
-  /** Assignee responsible for this criterion */
-  resolveAssignee: (pursuit: IEstimatingPursuit) => IBicOwner | null;
+  isComplete: (item: IHealthIndicatorItem) => boolean;
+  completionDescription: (item: IHealthIndicatorItem) => string;
+  actionHref: (item: IHealthIndicatorItem) => string;
+  resolveAssignee: (item: IHealthIndicatorItem) => IBicOwner | null;
 }
 
-export interface IBidReadinessState {
-  score: number; // 0-100
-  status: 'ready-to-bid' | 'nearly-ready' | 'attention-needed' | 'not-ready';
-  criteria: Array<{
-    criterion: IBidReadinessCriterion;
-    isComplete: boolean;
-    assignee: IBicOwner | null;
-    actionHref: string;
-  }>;
-  blockers: IBidReadinessCriterion[]; // incomplete blockers only
+export interface IHealthIndicatorState {
+  score: number;
+  status: 'ready' | 'nearly-ready' | 'attention-needed' | 'not-ready';
+  criteria: Array<{ /* ... */ }>;
+  blockers: IHealthIndicatorCriterion[];
   daysUntilDue: number | null;
   isOverdue: boolean;
+  version: VersionedRecord; // from @hbc/versioned-record
 }
 ```
 
 ---
-
 ## Component Architecture
 
 ```
 apps/estimating/src/features/bid-readiness/
-├── useBidReadiness.ts              # computes IBidReadinessState from pursuit
+├── useBidReadiness.ts              # now delegates to @hbc/health-indicator
 ├── BidReadinessSignal.tsx          # compact indicator for list rows
 ├── BidReadinessDashboard.tsx       # full detail panel in pursuit record
 ├── BidReadinessChecklist.tsx       # expandable criterion-by-criterion checklist
 └── BidReadinessCriteria.ts         # criterion definitions (configurable)
 ```
+
+(The entire model, offline logic, AI actions, and telemetry are now provided by the new `@hbc/health-indicator` primitive.)
 
 ---
 
@@ -109,78 +99,88 @@ apps/estimating/src/features/bid-readiness/
 
 ### `BidReadinessSignal` — List Row Compact Indicator
 
-**Visual behavior:**
-- Colored status dot + label: "🟢 Ready to Bid" / "🟡 Nearly Ready" / "🟠 Attention Needed" / "🔴 Not Ready"
-- Score percentage in subdued text: "(94%)"
-- Blocker count badge: "2 blockers" in red if any blockers incomplete
-- Hovering shows tooltip: top 3 incomplete criteria by weight
+**Visual behavior (Complexity-aware):**
+- Essential: colored status dot + label + score + blocker badge only
+- Standard/Expert: + owning avatar from `@hbc/bic-next-move`
+- Hover tooltip shows top 3 incomplete criteria
 
 ### `BidReadinessDashboard` — Pursuit Record Detail Panel
 
 **Visual behavior:**
-- Large status indicator at top with score ring
-- Bid due date with countdown: "Due in 4 days" / "Overdue by 2 days"
-- Expandable `BidReadinessChecklist` below
+- Large status indicator with score ring
+- Bid due date with countdown
+- Expandable `BidReadinessChecklist` (progressive disclosure per `@hbc/complexity`)
 
 ### `BidReadinessChecklist` — Criterion-by-Criterion Status
 
 **Visual behavior:**
-- Checklist of all criteria, grouped: Blockers first, then weighted criteria
-- Each row: completion status icon, criterion label, assignee avatar, action link ("Complete bid bond", "Acknowledge addendum")
-- Blocker rows in red with "BLOCKING" badge
-- Complete rows in green with completion timestamp
+- Blockers first, then weighted criteria
+- Each row includes completion status, assignee avatar (BIC), action deep-link (`@hbc/related-items`), and inline AI action buttons
+- “Saved locally / Queued to sync” indicators when offline
 
 ---
 
-## Admin Configuration
+## Admin Configuration & Governance
 
-The criterion weights, blocker designations, and required trade coverage threshold are configurable in the Admin module:
-
-- Admin can add custom criteria (e.g., "Prequalification submitted" for specific owner types)
-- Admin can adjust weights for firm-specific priorities
-- Admin can set the trade coverage threshold (e.g., "Mechanical, Electrical, Plumbing must have ≥1 quote")
+- Weights, blocker flags, and trade coverage threshold are configurable in the Admin module (Expert mode only)
+- Full immutable audit trail via `@hbc/versioned-record`
+- Admins can freeze/lock a readiness snapshot at submission
+- Governance dashboard shows provenance of hybrid data sources and BIC ownership history
 
 ---
 
-## Integration Points
+## AI Action Layer Integration
+
+AI suggestions (“Suggest assignee”, “Draft acknowledgment from notes”, “Parse addendum from pasted email”) appear as contextual inline buttons inside the checklist. Suggestions cite sources, require explicit approval, and update both the criterion and the corresponding BIC record. No separate chat interface.
+
+---
+
+## Integration Points (All Tier-1 Primitives)
 
 | Package | Integration |
 |---|---|
-| `@hbc/bic-next-move` | Incomplete blocker criteria → BIC ownership assigned to criterion's `resolveAssignee`; blocker clears when criterion is met |
-| `@hbc/acknowledgment` | CE sign-off criterion uses `@hbc/acknowledgment` single-party acknowledgment |
-| `@hbc/sharepoint-docs` | "Bid documents attached" criterion resolves against `@hbc/sharepoint-docs` document list for the pursuit |
-| `@hbc/notification-intelligence` | Bid due within 48h with incomplete blockers → Immediate notification to Estimating Lead and CE |
-| `@hbc/complexity` | Essential: status dot only; Standard: checklist visible; Expert: full criterion weights + admin config link |
-| PH9b My Work Feed (§A) | Pursuit with incomplete blockers within 48h of due date → high-priority My Work Feed item |
+| `@hbc/health-indicator` | New Tier-1 primitive providing the entire model |
+| `@hbc/bic-next-move` | Granular per-criterion BIC ownership (blockers first) |
+| `@hbc/complexity` | Essential/Standard/Expert progressive disclosure |
+| `@hbc/versioned-record` | Immutable provenance, audit trail, snapshot freezing |
+| `@hbc/related-items` | Direct deep-links from every criterion |
+| `@hbc/project-canvas` | Automatic placement in role-aware My Work lane |
+| `@hbc/notification-intelligence` | <48h with blockers → Immediate notification |
+| `@hbc/acknowledgment` | CE sign-off criterion |
+| `@hbc/sharepoint-docs` | Bid documents criterion |
+| `@hbc/health-indicator` telemetry | Five KPIs (time-to-readiness, blocker-resolution latency, % Ready to Bid, submission error rate, checklist CES) surfaced in canvas and admin dashboard |
+
+---
+
+## Offline / PWA Resilience
+
+Full tablet-native behavior: service worker caches the Dashboard and checklist; IndexedDB + `@hbc/versioned-record` persists drafts and state; Background Sync replays changes with optimistic UI and “Saved locally / Queued to sync” indicators. Works identically to Punch List and RFI drafts.
 
 ---
 
 ## Priority & ROI
 
-**Priority:** P1 — The Estimating module's primary UX differentiator; transforms static bid status into actionable readiness intelligence
-**Estimated build effort:** 2–3 sprint-weeks (readiness model, three components, criterion definitions, admin config)
-**ROI:** Prevents bid submission failures; provides real-time accountability for bid preparation tasks; creates a visible, role-specific BIC chain across all bid preparation requirements
+**Priority:** P1 — The Estimating module's primary UX differentiator and the seed for the platform-wide `@hbc/health-indicator` primitive.
+**Estimated build effort:** 2–3 sprint-weeks (now accelerated by reusing existing primitives).
+**ROI:** Prevents bid submission failures; provides real-time accountability; creates measurable operational impact via UX telemetry; positions HB Intel as the first platform with a universal preconstruction health indicator.
 
 ---
 
 ## Definition of Done
 
-- [ ] `IBidReadinessCriterion` and `IBidReadinessState` types defined
-- [ ] `useBidReadiness` computes score and status from pursuit state + criteria
-- [ ] Default 6 criteria implemented with correct weights and blocker flags
-- [ ] `BidReadinessSignal` renders compact status dot + label + score in list rows
-- [ ] `BidReadinessDashboard` renders score ring + due date countdown
-- [ ] `BidReadinessChecklist` renders all criteria with completion status + assignee + action link
-- [ ] Admin configuration: weights, blocker flags, trade coverage threshold adjustable
-- [ ] `@hbc/bic-next-move` integration: incomplete blockers create BIC ownership records
-- [ ] `@hbc/acknowledgment` integration: CE sign-off criterion uses acknowledgment pattern
-- [ ] `@hbc/notification-intelligence`: <48h with blockers → Immediate notification
-- [ ] `@hbc/complexity` integration: all three tiers
-- [ ] Unit tests on readiness score computation and status classification
-- [ ] Storybook: all four status states, checklist with mixed completion states
+- [ ] New `@hbc/health-indicator` Tier-1 primitive created and published
+- [ ] All six locked integration patterns implemented and tested
+- [ ] Offline/PWA resilience verified on tablet (service worker + IndexedDB + Background Sync)
+- [ ] Embedded AI actions with provenance and approval guardrails
+- [ ] Progressive disclosure via `@hbc/complexity` across all three modes
+- [ ] Deep-links and canvas integration via `@hbc/related-items` and `@hbc/project-canvas`
+- [ ] Versioned audit trail and admin governance via `@hbc/versioned-record`
+- [ ] Five UX telemetry KPIs wired and surfaced
+- [ ] Unit tests, Storybook stories for all modes and offline states
+- [ ] ADR-00xx-health-indicator-primitive created
 
 ---
 
 ## ADR Reference
 
-Create `docs/architecture/adr/0027-estimating-bid-readiness-signal.md` documenting the weighted scoring model, the blocker vs. non-blocker criterion distinction, the admin configurability rationale, and the BIC integration strategy for criterion-level ownership.
+Create `docs/architecture/adr/0027-estimating-bid-readiness-signal.md` (and companion ADR for the new `@hbc/health-indicator` primitive) documenting the weighted scoring model, granular BIC integration, complexity-adaptive disclosure, offline strategy, AI Action Layer embedding, cross-module deep-linking, versioning/governance, and telemetry KPIs.

@@ -1,8 +1,8 @@
-# SF18-T03 - Readiness Model and Configuration
+# SF18-T03 - Readiness Profile and Configuration
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
 **Spec Source:** `docs/explanation/feature-decisions/PH7-SF-18-Module-Feature-Estimating-Bid-Readiness.md`
-**Decisions Applied:** D-02 through D-06
+**Decisions Applied:** L-01 through L-06
 **Estimated Effort:** 0.85 sprint-weeks
 **Depends On:** T02
 
@@ -12,63 +12,59 @@
 
 ## Objective
 
-Define deterministic scoring, blocker precedence, status classification, and admin override config merge behavior.
+Define the Estimating readiness profile that configures `@hbc/health-indicator` without duplicating core health computation.
 
 ---
 
-## Scoring and Classification
+## Profile Semantics
 
-- evaluate all criteria against the pursuit snapshot
-- compute weighted score from completed criteria (`sum(weight of complete criteria) * 100`)
-- normalize score to integer `0..100`
-- identify incomplete blockers (`criterion.isBlocker && !isComplete`)
+- scoring remains deterministic and weighted by criterion completion
+- blockers-first precedence is enforced by profile metadata and BIC ownership rules
+- status classification uses primitive outputs and SF18 profile thresholds
+- due-date urgency and overdue behavior are consumed from primitive state
 
-Status mapping:
-
-- `ready-to-bid`: score `>= readyMinScore` and no incomplete blockers and not overdue
-- `nearly-ready`: score `>= nearlyReadyMinScore` and no incomplete blockers
-- `attention-needed`: score `>= attentionNeededMinScore` or any incomplete blocker
-- `not-ready`: below attention threshold or critical blocker gap
-
-Due-date adjustment:
-
-- compute `daysUntilDue` from pursuit deadline
-- set `isOverdue` if due date is in the past
-- overdue state cannot classify above `attention-needed`
+This mirrors operations-grade weighted readiness approaches used in construction project-definition indexes and enterprise health scoring patterns.
 
 ---
 
 ## Configuration Model
 
-- default config provides the six baseline criteria and threshold policy
-- admin override may:
-  - change weights,
-  - toggle `isBlocker`,
-  - add custom criteria,
-  - set `tradeCoverageThreshold`
-- merge order: default baseline -> admin override
+- default profile provides six baseline criteria and threshold bands
+- admin overrides may adjust weights, blocker flags, and trade coverage threshold
+- merge order: baseline profile -> admin override -> runtime validation
 - validation rules:
-  - weights must be non-negative
-  - total effective weights must equal 1 after normalization
-  - threshold ordering must be descending (`ready > nearly > attention`)
+  - weights are non-negative and normalize deterministically
+  - threshold ordering remains `ready > nearly-ready > attention-needed`
+  - at least one blocker criterion remains configured
 
 ---
 
-## Persistence/API Contract
+## Provenance and Versioning
 
-`BidReadinessConfigApi` methods:
+- profile/config changes are persisted through `@hbc/versioned-record`
+- each save records immutable provenance metadata (`version`, `modifiedBy`, `modifiedAt`)
+- submission snapshot freeze records an immutable readiness artifact
+- replay/idempotency requirements apply to offline-synced configuration updates
 
-- `getConfig()`
-- `upsertConfig(config)`
-- `resetToDefault()`
+---
 
-Config writes are auditable and owned by admin roles.
+## Telemetry Contract
+
+The profile must emit five KPI signals through `@hbc/health-indicator` telemetry channels:
+
+- time-to-readiness
+- blocker-resolution latency
+- percent reaching Ready to Bid
+- submission error-rate reduction
+- checklist CES
+
+KPI emission events are role-aware and complexity-aware for canvas and governance dashboards.
 
 ---
 
 ## Verification Commands
 
 ```bash
-pnpm --filter @hbc/features-estimating test -- computeBidReadiness
-pnpm --filter @hbc/features-estimating test -- mergeBidReadinessConfig
+pnpm --filter @hbc/features-estimating test -- bidReadinessProfile
+pnpm --filter @hbc/features-estimating test -- bidReadinessConfig
 ```

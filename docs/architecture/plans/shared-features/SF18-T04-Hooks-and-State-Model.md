@@ -2,7 +2,7 @@
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
 **Spec Source:** `docs/explanation/feature-decisions/PH7-SF-18-Module-Feature-Estimating-Bid-Readiness.md`
-**Decisions Applied:** D-04 through D-08, D-10
+**Decisions Applied:** L-01 through L-06
 **Estimated Effort:** 0.7 sprint-weeks
 **Depends On:** T03
 
@@ -12,7 +12,7 @@
 
 ## Objective
 
-Define hook-level state orchestration for readiness computation, criteria loading, and configuration updates.
+Define adapter hooks that consume primitive health state and expose Estimating UX state, offline indicators, and KPI wiring.
 
 ---
 
@@ -20,51 +20,51 @@ Define hook-level state orchestration for readiness computation, criteria loadin
 
 Responsibilities:
 
-- resolve criteria/config and compute `IBidReadinessState`
-- recompute on pursuit or config changes
-- expose loading/error/refresh states
-- publish urgency metadata for `<48h + blockers` notification path
+- map pursuit data into `@hbc/health-indicator` item format
+- invoke primitive state hooks and map output to `IBidReadinessViewState`
+- expose loading/error/refresh and optimistic sync indicators
+- surface blockers-first ownership and urgency metadata
 
 Cache key:
 
-- `['bid-readiness', pursuitId]`
+- `['health-indicator', 'estimating-bid-readiness', pursuitId]`
 
 ---
 
-## `useBidReadinessCriteria`
+## `useBidReadinessProfile`
 
 Responsibilities:
 
-- return effective criteria list with source metadata
-- include blocker-first ordering for checklist rendering
-- expose criteria refresh and error state
+- return effective profile + override metadata
+- expose profile refresh and admin mutation guards
+- publish immutable version metadata from `@hbc/versioned-record`
 
 Cache key:
 
-- `['bid-readiness', 'criteria']`
+- `['health-indicator', 'estimating-bid-readiness', 'profile']`
 
 ---
 
-## `useBidReadinessConfig`
+## `useBidReadinessTelemetry`
 
 Responsibilities:
 
-- fetch admin override config and merge with defaults
-- expose mutation actions for admin config updates
-- invalidate readiness computations on config change
+- stream primitive KPI payloads for the five locked metrics
+- provide role/complexity filtered views for canvas and admin dashboards
+- expose emitter health and backfill status for offline replay
 
 Cache key:
 
-- `['bid-readiness', 'config']`
+- `['health-indicator', 'estimating-bid-readiness', 'telemetry']`
 
 ---
 
 ## State Guarantees
 
 - stable return shape across loading/success/error
-- deterministic criterion evaluation order
-- no stale blocker count after config mutation
-- due-date transitions reflected at next poll/refresh
+- deterministic blocker-first criterion ordering
+- sync indicator accuracy: `saved-locally` and `queued-to-sync`
+- no stale KPI state after background sync replay
 
 ---
 
@@ -72,5 +72,6 @@ Cache key:
 
 ```bash
 pnpm --filter @hbc/features-estimating test -- useBidReadiness
+pnpm --filter @hbc/features-estimating test -- useBidReadinessTelemetry
 pnpm --filter @hbc/features-estimating check-types
 ```

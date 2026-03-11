@@ -2,7 +2,7 @@
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
 **Spec Source:** `docs/explanation/feature-decisions/PH7-SF-18-Module-Feature-Estimating-Bid-Readiness.md`
-**Decisions Applied:** D-02 through D-10
+**Decisions Applied:** L-01 through L-06
 **Estimated Effort:** 0.75 sprint-weeks
 **Depends On:** T01-T07
 
@@ -12,45 +12,47 @@
 
 ## Objective
 
-Define fixtures, coverage expectations, and scenario matrix for readiness model, hooks, and UI components.
+Define fixtures, scenario matrix, and quality gates for primitive-backed readiness behavior, offline replay, and KPI emission.
 
 ---
 
 ## Testing Exports (`@hbc/features-estimating/testing`)
 
-- `createMockBidReadinessCriterion(overrides?)`
-- `createMockBidReadinessState(overrides?)`
+- `createMockHealthIndicatorState(overrides?)`
+- `createMockBidReadinessProfile(overrides?)`
 - `createMockEstimatingPursuitForReadiness(overrides?)`
 - `mockBidReadinessStates`
 
 Canonical states:
 
-1. ready-to-bid (no blockers)
+1. ready (no blockers)
 2. nearly-ready (no blockers)
 3. attention-needed (blockers present)
 4. not-ready (low score + blockers)
 5. overdue attention-needed
 6. due-within-48h with blockers
+7. saved-locally optimistic state
+8. queued-to-sync replay-pending state
 
 ---
 
 ## Unit Tests
 
-- weighted score computation and normalization
-- blocker precedence over raw score band
-- status classification boundary tests
-- config merge and validation rules
-- due-date and overdue transitions
+- deterministic weighted score mapping from primitive outputs
+- blockers-first ordering and ownership projection
+- status boundary mapping for all threshold edges
+- profile override validation and version metadata integrity
+- telemetry event shape for five KPI outputs
 
 ---
 
 ## Component and Hook Tests
 
-- `useBidReadiness`, `useBidReadinessCriteria`, `useBidReadinessConfig` state transitions
-- `BidReadinessSignal` rendering for all statuses
-- `BidReadinessDashboard` score ring, due-date display, blocker summary
-- `BidReadinessChecklist` row ordering, badges, action links
-- complexity-gated rendering across tiers
+- `useBidReadiness`, `useBidReadinessProfile`, `useBidReadinessTelemetry` transitions
+- Signal and Dashboard complexity behavior by tier
+- Checklist ordering, deep-links, avatars, and AI action approval gating
+- optimistic UI indicator transitions (`Saved locally`, `Queued to sync`)
+- sync replay idempotency after reconnect
 
 ---
 
@@ -60,14 +62,15 @@ Storybook matrix:
 
 - status x complexity tier
 - blocker/no-blocker
-- due date windows (normal, 48h, overdue)
+- sync status (`synced`, `saved-locally`, `queued-to-sync`)
 
 Playwright scenarios:
 
-1. criterion completion improves score and status
-2. blocker introduction downgrades readiness state
-3. CE sign-off completion clears criterion
-4. `<48h + blockers` triggers urgency path and UI indicator
+1. criterion completion improves status and score projection
+2. blocker introduction downgrades state and routes My Work item
+3. inline AI suggestion requires approval before mutation
+4. offline action shows optimistic badge and replays on reconnect
+5. KPI events are emitted and visible in telemetry consumer stubs
 
 ---
 

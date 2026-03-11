@@ -2,7 +2,7 @@
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
 **Spec Source:** `docs/explanation/feature-decisions/PH7-SF-18-Module-Feature-Estimating-Bid-Readiness.md`
-**Decisions Applied:** D-07 through D-09
+**Decisions Applied:** L-01 through L-06
 **Estimated Effort:** 0.65 sprint-weeks
 **Depends On:** T03-T06
 
@@ -12,33 +12,51 @@
 
 ## Objective
 
-Document boundary-safe integration patterns between bid readiness and dependent shared features.
+Document boundary-safe integration patterns between the SF18 adapter and required Tier-1 primitives.
 
 ---
 
 ## Integration Contracts
 
+- `@hbc/health-indicator`
+  - canonical scoring/state/profile/telemetry contracts and computation runtime
 - `@hbc/bic-next-move`
-  - incomplete blocker criteria generate ownership records for `resolveAssignee`
-- `@hbc/acknowledgment`
-  - CE sign-off criterion completion reads acknowledgment state
-- `@hbc/sharepoint-docs`
-  - bid-documents criterion validates plans/specs attachment presence
-- `@hbc/notification-intelligence`
-  - if due within 48 hours and blockers exist, emit immediate urgency notification
+  - per-criterion ownership with blockers-first sequencing and avatar projection
 - `@hbc/complexity`
-  - controls signal/checklist/diagnostic depth by tier
-- PH9b My Work Feed
-  - `<48h + blockers` readiness state is eligible for high-priority feed item
+  - Essential/Standard/Expert behavior control across Signal, Dashboard, Checklist
+- `@hbc/versioned-record`
+  - immutable provenance, audit history, snapshot freeze, and offline record replay
+- `@hbc/related-items`
+  - criterion-level deep-links for direct remediation actions
+- `@hbc/project-canvas`
+  - auto placement of actionable blockers in role-aware My Work lane
+- `@hbc/notification-intelligence`
+  - urgency routing for `<48h + blockers`
+- `@hbc/acknowledgment`
+  - CE sign-off criterion source of truth
+- `@hbc/sharepoint-docs`
+  - plans/specs attachment criterion source of truth
+
+---
+
+## Telemetry Integration
+
+Five KPI outputs are emitted by the primitive and surfaced in canvas/governance views:
+
+- time-to-readiness
+- blocker-resolution latency
+- percent bids reaching Ready to Bid
+- submission error-rate reduction
+- checklist CES
 
 ---
 
 ## Boundary Rules
 
 - no imports from app route pages into package runtime
-- readiness model remains pure and side-effect free
-- notifications emitted through notification-intelligence interfaces only
-- acknowledgment integration consumes public API only
+- no duplicate scoring engine in `@hbc/features-estimating`
+- all side effects route through public primitive APIs
+- integrations consume public contracts only and remain app-shell-safe
 
 ---
 
@@ -47,4 +65,5 @@ Document boundary-safe integration patterns between bid readiness and dependent 
 ```bash
 pnpm --filter @hbc/features-estimating test -- integrations
 rg -n "from 'apps/" packages/features/estimating/src
+rg -n "@hbc/health-indicator|@hbc/versioned-record|@hbc/project-canvas|@hbc/related-items" packages/features/estimating/src
 ```

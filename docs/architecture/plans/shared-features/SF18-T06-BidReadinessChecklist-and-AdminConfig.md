@@ -2,7 +2,7 @@
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
 **Spec Source:** `docs/explanation/feature-decisions/PH7-SF-18-Module-Feature-Estimating-Bid-Readiness.md`
-**Decisions Applied:** D-05 through D-07, D-09
+**Decisions Applied:** L-01 through L-06
 **Estimated Effort:** 0.75 sprint-weeks
 **Depends On:** T04
 
@@ -12,7 +12,7 @@
 
 ## Objective
 
-Define criterion-level checklist rendering and admin configuration interaction patterns.
+Define checklist/admin UX for blockers-first execution, inline AI actions, and offline-safe interaction states.
 
 ---
 
@@ -20,16 +20,23 @@ Define criterion-level checklist rendering and admin configuration interaction p
 
 Behavior:
 
-- blockers first, then non-blocker criteria by descending weight
-- row fields: completion icon, label, assignee avatar, action link, completion description
-- blocker rows include `BLOCKING` badge
-- completed rows may include completion timestamp
+- blockers first, then non-blockers by effective weight
+- row fields: completion status, label, assignee avatar, deep-link action, completion text
+- row-level sync status badges: `Saved locally`, `Queued to sync`
+- completion and ownership actions use optimistic UI with background replay
 
 Complexity:
 
-- Essential: hidden
-- Standard: visible checklist with status/actions
-- Expert: includes weights and diagnostics metadata
+- Essential: checklist hidden
+- Standard: checklist visible with status/actions/avatars
+- Expert: Standard + weights + provenance/version context
+
+Inline AI actions:
+
+- rendered as row-level contextual buttons only
+- no sidecar or chat panel
+- each suggestion includes source citation references
+- applying AI suggestions requires explicit user approval
 
 ---
 
@@ -37,20 +44,21 @@ Complexity:
 
 Admin controls:
 
-- modify criterion weights
-- toggle blocker flags
-- adjust trade-coverage threshold
-- add optional custom criteria
+- modify criterion weights and blocker flags
+- adjust trade coverage threshold
+- manage criterion visibility by complexity tier
+- freeze readiness snapshot at submission
 
 Validation:
 
-- normalized weight total must equal 1
-- at least one blocker criterion must exist
-- threshold ordering must be valid before save
+- normalized weight set remains deterministic
+- blocker coverage is preserved for submission safety
+- threshold ordering is valid before save
 
-Audit:
+Audit and provenance:
 
-- config changes capture `modifiedBy` and `modifiedAt`
+- all config writes persist via `@hbc/versioned-record`
+- immutable metadata includes version, author, and timestamp
 
 ---
 

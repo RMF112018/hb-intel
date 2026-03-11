@@ -65,3 +65,37 @@ pnpm --filter @hbc/ai-assist test -- AiAssistApi
 pnpm --filter @hbc/ai-assist check-types
 rg -n "registerAiAction|registerAiActions|AiModelRegistry|IAiAuditRecord|modelKey|confidenceDetails" packages/ai-assist/src
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF15-T03 completed: 2026-03-11
+
+Implementations delivered:
+- AiActionRegistry: composite-key registry (recordType::actionKey), validation, duplicate protection,
+  getByRecordType/getForContext filtering (role/complexity/policy), wildcard recordType, deterministic sort,
+  _clearForTests — pattern: RelationshipRegistry
+- AiModelRegistry: IAiModelRegistry conformance, registerModel validation, resolveModel with role auth,
+  listModels, _clearForTests
+- RelevanceScoringEngine: weighted 4-factor scoring (basePriority 40%, tagMatch 30%, complexityAlignment 15%,
+  roleMatch 15%), factors breakdown, sorted desc by composite score
+- AiGovernanceApi: mutable policy, in-memory audit trail, evaluatePolicy (allowed/blocked/approval-required),
+  checkRateLimit (hourly window), getAuditTrail with filters, recordAudit, getPolicyStatus, getRateLimitStatus
+- AiAuditWriter: field validation, delegates to AiGovernanceApi.recordAudit, injectable onWrite callback
+- AiAssistApi: injectable IAiActionExecutor pattern, full invoke orchestration (model resolution → policy check →
+  buildPrompt → execute → parseResponse → audit), cancel via AbortController, default executor placeholder
+
+Barrel exports created:
+- src/registry/index.ts
+- src/governance/index.ts (includes IPolicyEvaluation, IRateLimitStatus, IAuditTrailFilters type exports)
+- src/index.ts updated with barrel paths + IAiActionExecutor type export
+
+Tests: 6 test files, 69 tests passing
+- src/registry/AiActionRegistry.test.ts (21 tests)
+- src/registry/AiModelRegistry.test.ts (10 tests)
+- src/registry/RelevanceScoringEngine.test.ts (9 tests)
+- src/governance/AiGovernanceApi.test.ts (14 tests)
+- src/governance/AiAuditWriter.test.ts (8 tests)
+- src/api/AiAssistApi.test.ts (7 tests)
+
+Verification: check-types ✅ | build ✅ | test ✅ (69/69)
+Next: SF15-T04 (Hooks)
+-->

@@ -36,17 +36,17 @@ export {
   AiActionRegistry,
   registerAiAction,
   registerAiActions,
-} from './registry/AiActionRegistry.js';
-export { AiModelRegistry } from './registry/AiModelRegistry.js';
-export { RelevanceScoringEngine } from './registry/RelevanceScoringEngine.js';
+  AiModelRegistry,
+  RelevanceScoringEngine,
+} from './registry/index.js';
 
 // Governance
-export { AiGovernanceApi } from './governance/AiGovernanceApi.js';
-export { AiAuditWriter } from './governance/AiAuditWriter.js';
+export { AiGovernanceApi, AiAuditWriter } from './governance/index.js';
+export type { IPolicyEvaluation, IRateLimitStatus, IAuditTrailFilters } from './governance/index.js';
 
 // API
 export { AiAssistApi } from './api/index.js';
-export type { IAiAssistApi } from './api/index.js';
+export type { IAiAssistApi, IAiActionExecutor } from './api/index.js';
 
 // Hooks
 export { useAiAction, useAiActions } from './hooks/index.js';

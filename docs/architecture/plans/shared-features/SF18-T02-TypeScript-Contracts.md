@@ -1,8 +1,8 @@
-# SF18-T02 - TypeScript Contracts: Bid Readiness
+# SF18-T02 - TypeScript Contracts: Bid Readiness Adapter
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
 **Spec Source:** `docs/explanation/feature-decisions/PH7-SF-18-Module-Feature-Estimating-Bid-Readiness.md`
-**Decisions Applied:** D-02 through D-07, D-10
+**Decisions Applied:** L-01 through L-06
 **Estimated Effort:** 0.6 sprint-weeks
 **Depends On:** T01
 
@@ -12,7 +12,15 @@
 
 ## Objective
 
-Lock all public contracts for readiness criteria, computed state, threshold policy, configuration, and hook return types.
+Lock SF18 adapter contracts around canonical `@hbc/health-indicator` types and explicitly retire `IBidReadiness*` as core contracts.
+
+---
+
+## Canonical Contract Direction
+
+- canonical core contracts: `IHealthIndicatorCriterion`, `IHealthIndicatorState`, `IHealthIndicatorProfile`, `IHealthIndicatorTelemetry`
+- SF18 may expose compatibility aliases for consuming Estimating surfaces only
+- adapter contracts must carry immutable version metadata from `@hbc/versioned-record`
 
 ---
 
@@ -20,49 +28,46 @@ Lock all public contracts for readiness criteria, computed state, threshold poli
 
 ```ts
 export type BidReadinessStatus =
-  | 'ready-to-bid'
+  | 'ready'
   | 'nearly-ready'
   | 'attention-needed'
   | 'not-ready';
 
-export interface IBidReadinessCriterion {
-  criterionId: string;
-  label: string;
-  weight: number;
-  isBlocker: boolean;
-  isComplete: (pursuit: IEstimatingPursuit) => boolean;
-  completionDescription: (pursuit: IEstimatingPursuit) => string;
-  actionHref: (pursuit: IEstimatingPursuit) => string;
-  resolveAssignee: (pursuit: IEstimatingPursuit) => IBicOwner | null;
+export interface IEstimatingBidReadinessProfile {
+  profileId: 'estimating-bid-readiness';
+  criteria: IHealthIndicatorCriterion[];
+  thresholds: {
+    readyMinScore: number;
+    nearlyReadyMinScore: number;
+    attentionNeededMinScore: number;
+  };
 }
 
-export interface IBidReadinessCriterionEvaluation {
-  criterion: IBidReadinessCriterion;
-  isComplete: boolean;
-  assignee: IBicOwner | null;
-  actionHref: string;
-  completedAt?: string;
-}
+/** Compatibility alias for adapter-level usage only. */
+export type IBidReadinessState = IHealthIndicatorState;
 
-export interface IBidReadinessThresholdPolicy {
-  readyMinScore: number;
-  nearlyReadyMinScore: number;
-  attentionNeededMinScore: number;
-}
-
-export interface IBidReadinessConfig {
-  criteria: IBidReadinessCriterion[];
-  thresholdPolicy: IBidReadinessThresholdPolicy;
-  tradeCoverageThreshold: number;
-}
-
-export interface IBidReadinessState {
-  score: number;
+export interface IBidReadinessViewState {
   status: BidReadinessStatus;
-  criteria: IBidReadinessCriterionEvaluation[];
-  blockers: IBidReadinessCriterion[];
+  score: number;
+  blockers: IHealthIndicatorCriterion[];
+  criteria: Array<{
+    criterion: IHealthIndicatorCriterion;
+    isComplete: boolean;
+    assignee: IBicOwner | null;
+    actionHref: string;
+  }>;
   daysUntilDue: number | null;
   isOverdue: boolean;
+  version: VersionedRecord;
+  syncIndicator: 'synced' | 'saved-locally' | 'queued-to-sync';
+}
+
+export interface IBidReadinessTelemetry {
+  timeToReadinessMs: number | null;
+  blockerResolutionLatencyMs: number | null;
+  readyToBidRate: number | null;
+  submissionErrorRateReduction: number | null;
+  checklistCes: number | null;
 }
 ```
 
@@ -70,18 +75,18 @@ export interface IBidReadinessState {
 
 ## Hook Return Contracts
 
-- `useBidReadiness` returns `IBidReadinessState`, loading/error state, and refresh.
-- `useBidReadinessCriteria` returns resolved criteria set and source metadata.
-- `useBidReadinessConfig` returns merged config and admin override state.
+- `useBidReadiness` returns mapped `IBidReadinessViewState`, loading/error, and refresh/mutate actions
+- `useBidReadinessProfile` returns effective profile + configuration source metadata
+- `useBidReadinessTelemetry` returns KPI snapshots emitted by primitive events
 
 ---
 
 ## Constants to Lock
 
-- `BID_READINESS_DEFAULT_THRESHOLDS`
-- `BID_READINESS_CONFIG_LIST_TITLE = 'HBC_BidReadinessConfig'`
-- `BID_READINESS_POLL_MS = 60_000`
-- `BID_READINESS_NOTIFICATION_URGENCY_WINDOW_HOURS = 48`
+- `BID_READINESS_PROFILE_ID = 'estimating-bid-readiness'`
+- `BID_READINESS_SYNC_INDICATORS = ['saved-locally', 'queued-to-sync']`
+- `BID_READINESS_URGENCY_WINDOW_HOURS = 48`
+- `BID_READINESS_TELEMETRY_KEYS = ['time-to-readiness','blocker-resolution-latency','readyToBidRate','submission-error-rate-reduction','checklist-ces']`
 
 ---
 
