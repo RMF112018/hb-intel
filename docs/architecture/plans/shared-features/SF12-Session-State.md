@@ -170,4 +170,12 @@ SF12-T01 completed: 2026-03-11
 - All verification gates passed (check-types, build, test, README)
 - tsconfig.base.json updated with @hbc/session-state path aliases
 Next: SF12-T02 (TypeScript Contracts)
+
+SF12-T02 completed: 2026-03-11
+- Full contract surface implemented in ISessionState.ts (6 types/interfaces)
+- 7 constants defined in sessionStateDefaults.ts
+- Barrel exports wired through types/index.ts, constants/index.ts, src/index.ts
+- All 4 testing factories tightened from Record<string, unknown> to proper typed signatures
+- Verification: check-types zero errors, build compiles to dist/
+Next: SF12-T03 (IndexedDB & Stores)
 -->

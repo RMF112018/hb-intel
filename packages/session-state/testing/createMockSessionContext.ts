@@ -1,16 +1,20 @@
+import type { ISessionStateContext } from '../src/types/ISessionState.js';
+
 /**
- * Creates a mock session context for testing — SF12-T01 placeholder.
- * Types will be tightened in T02 when proper interfaces land.
+ * Creates a mock session context for testing.
  */
 export function createMockSessionContext(
-  overrides: Record<string, unknown> = {},
-): Record<string, unknown> {
+  overrides: Partial<ISessionStateContext> = {},
+): ISessionStateContext {
   return {
-    isOnline: true,
     connectivity: 'online',
-    pendingOperations: 0,
-    drafts: [],
-    syncStatus: 'idle',
+    queuedOperations: [],
+    pendingCount: 0,
+    triggerSync: () => Promise.resolve(),
+    saveDraft: () => {},
+    loadDraft: <T>() => null as T | null,
+    clearDraft: () => {},
+    queueOperation: () => {},
     ...overrides,
   };
 }

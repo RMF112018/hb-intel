@@ -1,4 +1,8 @@
-/**
- * Session-state type definitions — SF12-T02
- */
-export {};
+export type {
+  ConnectivityStatus,
+  QueuedOperationType,
+  IQueuedOperation,
+  IDraftEntry,
+  ISessionStateContext,
+  IUseDraftResult,
+} from './ISessionState.js';

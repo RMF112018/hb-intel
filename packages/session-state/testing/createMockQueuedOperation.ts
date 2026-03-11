@@ -1,17 +1,21 @@
+import type { IQueuedOperation } from '../src/types/ISessionState.js';
+
 /**
- * Creates a mock queued operation for testing — SF12-T01 placeholder.
- * Types will be tightened in T02 when proper interfaces land.
+ * Creates a mock queued operation for testing.
  */
 export function createMockQueuedOperation(
-  overrides: Record<string, unknown> = {},
-): Record<string, unknown> {
+  overrides: Partial<IQueuedOperation> = {},
+): IQueuedOperation {
   return {
-    id: 'op-1',
-    type: 'create',
-    entity: 'record',
+    operationId: 'op-1',
+    type: 'upload',
+    target: '/api/records',
     payload: {},
+    retryCount: 0,
+    maxRetries: 5,
     createdAt: new Date().toISOString(),
-    status: 'pending',
+    lastAttemptAt: null,
+    lastError: null,
     ...overrides,
   };
 }

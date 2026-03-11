@@ -1,4 +1,9 @@
-/**
- * Session-state constants — SF12-T02
- */
-export {};
+export {
+  SESSION_DB_NAME,
+  SESSION_DB_VERSION,
+  DRAFT_STORE_NAME,
+  QUEUE_STORE_NAME,
+  DRAFT_DEFAULT_TTL_HOURS,
+  QUEUE_DEFAULT_MAX_RETRIES,
+  SPFX_SYNC_POLL_INTERVAL_MS,
+} from './sessionStateDefaults.js';

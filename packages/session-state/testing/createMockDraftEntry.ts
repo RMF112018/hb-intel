@@ -1,17 +1,16 @@
+import type { IDraftEntry } from '../src/types/ISessionState.js';
+
 /**
- * Creates a mock draft entry for testing — SF12-T01 placeholder.
- * Types will be tightened in T02 when proper interfaces land.
+ * Creates a mock draft entry for testing.
  */
 export function createMockDraftEntry(
-  overrides: Record<string, unknown> = {},
-): Record<string, unknown> {
+  overrides: Partial<IDraftEntry> = {},
+): IDraftEntry {
   return {
-    id: 'draft-1',
-    entityType: 'record',
-    data: {},
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ttl: 86400000,
+    draftKey: 'draft-1',
+    value: {},
+    savedAt: new Date().toISOString(),
+    ttlHours: 72,
     ...overrides,
   };
 }

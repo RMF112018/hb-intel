@@ -1,4 +1,10 @@
+import type { ConnectivityStatus } from '../src/types/ISessionState.js';
+
 /**
- * Mock connectivity states for testing — SF12-T01 placeholder.
+ * All connectivity states for exhaustive testing.
  */
-export const mockConnectivityStates = ['online', 'offline', 'degraded'] as const;
+export const mockConnectivityStates: readonly ConnectivityStatus[] = [
+  'online',
+  'offline',
+  'degraded',
+] as const;

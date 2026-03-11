@@ -92,3 +92,12 @@ export const SPFX_SYNC_POLL_INTERVAL_MS = 30_000;
 pnpm --filter @hbc/session-state check-types
 pnpm --filter @hbc/session-state build
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF12-T02 completed: 2026-03-11
+- ISessionState.ts: ConnectivityStatus, QueuedOperationType, IQueuedOperation, IDraftEntry, ISessionStateContext, IUseDraftResult<T>
+- sessionStateDefaults.ts: SESSION_DB_NAME, SESSION_DB_VERSION, DRAFT_STORE_NAME, QUEUE_STORE_NAME, DRAFT_DEFAULT_TTL_HOURS, QUEUE_DEFAULT_MAX_RETRIES, SPFX_SYNC_POLL_INTERVAL_MS
+- Barrel exports wired: types/index.ts, constants/index.ts, src/index.ts
+- Testing factories tightened: createMockQueuedOperation, createMockDraftEntry, createMockSessionContext typed with proper interfaces; mockConnectivityStates typed as readonly ConnectivityStatus[]
+- Verification: check-types zero errors, build compiles to dist/
+-->
