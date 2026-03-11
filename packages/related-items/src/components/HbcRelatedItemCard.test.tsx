@@ -99,6 +99,54 @@ describe('HbcRelatedItemCard (SF14-T06)', () => {
     expect(screen.getByTestId('related-item-ai-suggest')).toBeInTheDocument();
   });
 
+  it('renders remaining direction labels: references, blocks, and unknown default', () => {
+    const { rerender } = render(
+      <HbcRelatedItemCard item={createItem({ relationship: 'references', relationshipLabel: 'References' })} />,
+    );
+    expect(screen.getByTestId('related-item-direction')).toHaveTextContent('References');
+
+    rerender(<HbcRelatedItemCard item={createItem({ relationship: 'blocks', relationshipLabel: 'Blocks' })} />);
+    expect(screen.getByTestId('related-item-direction')).toHaveTextContent('Blocks');
+
+    rerender(<HbcRelatedItemCard item={createItem({ relationship: 'unknown-dir' as never, relationshipLabel: 'Other' })} />);
+    expect(screen.getByTestId('related-item-direction')).toHaveTextContent('Related');
+  });
+
+  it('renders module icon fallback using recordType when moduleIcon is empty', () => {
+    render(
+      <HbcRelatedItemCard
+        item={createItem({ moduleIcon: undefined as never, recordType: 'permit-log' })}
+      />,
+    );
+
+    const icon = screen.getByLabelText('Module permit-log');
+    expect(icon).toBeInTheDocument();
+    expect(icon.textContent).toBe('PE');
+  });
+
+  it('renders module icon ? fallback when both moduleIcon and recordType are empty', () => {
+    render(
+      <HbcRelatedItemCard
+        item={createItem({ moduleIcon: '', recordType: '' })}
+      />,
+    );
+
+    const icon = screen.getByLabelText('Module related-record');
+    expect(icon).toBeInTheDocument();
+  });
+
+  it('falls back to raw lastChanged string when date is invalid', () => {
+    render(
+      <HbcRelatedItemCard
+        item={createItem({
+          versionChip: { lastChanged: 'not-a-date', author: 'Agent' },
+        })}
+      />,
+    );
+
+    expect(screen.getByText(/Last changed:/)).toHaveTextContent('Last changed: not-a-date');
+  });
+
   it('handles partial/minimal item data with deterministic fallback labeling', () => {
     render(
       <HbcRelatedItemCard

@@ -131,6 +131,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0100 | Accepted | [ADR-0100-smart-empty-state-platform-primitive.md](./architecture/adr/ADR-0100-smart-empty-state-platform-primitive.md) |
 | ADR-0101 | Accepted | [ADR-0101-session-state-offline-persistence.md](./architecture/adr/ADR-0101-session-state-offline-persistence.md) |
 | ADR-0102 | Accepted | [ADR-0102-project-canvas-role-based-dashboard.md](./architecture/adr/ADR-0102-project-canvas-role-based-dashboard.md) |
+| ADR-0103 | Accepted | [0103-related-items-unified-work-graph.md](./architecture/adr/0103-related-items-unified-work-graph.md) |
 
 ## Reference Documents
 

@@ -240,6 +240,23 @@ test -f docs/reference/related-items/api.md
 test -f packages/related-items/README.md
 ```
 
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF14-T09 completed: 2026-03-11
+ADR created: docs/architecture/adr/0103-related-items-unified-work-graph.md
+Documentation added:
+  - docs/how-to/developer/related-items-adoption-guide.md
+  - docs/reference/related-items/api.md
+  - packages/related-items/README.md (updated with full T09 content)
+docs/README.md ADR index updated: ADR-0103 row appended.
+current-state-map.md §2 updated: SF14 → Historical Foundational; ADR-0103 note removed; adoption-guide and api.md rows added.
+All four mechanical enforcement gates passed:
+  - check-types: zero errors
+  - build: zero errors
+  - lint: zero errors (4 warnings)
+  - test: 103 tests, 96.03% branches, 99.51% statements, 100% functions
+Boundary check: zero prohibited feature imports.
+-->
+
 ---
 
 ## Blueprint Progress Comment

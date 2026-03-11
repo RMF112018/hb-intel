@@ -47,3 +47,32 @@ pnpm --filter @hbc/related-items test --coverage
 pnpm --filter @hbc/related-items storybook
 pnpm exec playwright test --grep "related-items"
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF14-T08 completed: 2026-03-11
+
+Testing utilities created:
+- testing/createMockSourceRecord.ts — generic source record factory
+- testing/mockRelationshipDirections.ts — all 6 directions + reverse-pair mapping
+
+Coverage exclusions removed:
+- src/api/** (real implementation since T03)
+- src/registry/** (real implementation since T03)
+- src/hooks/** (real implementation since T04)
+
+Gap tests added (40 new tests across 6 files):
+- RelationshipRegistry.test.ts: +8 (tiebreaker, NaN priority, validation edges, getAll, empty fields)
+- RelatedItemsApi.test.ts: +16 (array normalization, unexpected shape, role exclusion, resolver throw, invalid summaries, empty label, AI hook failure/skip/defaults, dedup, no-role, same-priority sort, recordId tiebreaker, non-string IDs)
+- useRelatedItems.test.ts: +3 (non-Error mapErrorMessage, loadDraft throw, recordId tiebreaker)
+- HbcRelatedItemsPanel.test.tsx: +3 (resolve load-error, resolve first-use/truly-empty, priority dedup skip, expert AI filter)
+- HbcRelatedItemCard.test.tsx: +2 (remaining direction labels, icon fallback, invalid date)
+- HbcRelatedItemsTile.test.tsx: +3 (icon fallback, Unknown role, auth role passthrough)
+
+Storybook created:
+- .storybook/main.ts + preview.ts (follows @hbc/session-state pattern)
+- src/components/__stories__/HbcRelatedItemsPanel.stories.tsx (8 stories)
+- src/components/__stories__/HbcRelatedItemsTile.stories.tsx (6 stories)
+
+Final metrics: 103 tests, 96.03% branches, 99.51% stmts, 100% funcs, 100% lines (components)
+All 4 gates pass: check-types ✓ | build ✓ | lint ✓ | test ✓
+-->

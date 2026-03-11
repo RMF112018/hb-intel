@@ -290,6 +290,575 @@ describe('RelatedItemsApi (SF14-T03)', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('normalizes summary response when API returns a raw array instead of { summaries }', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: { relationshipPriority: 70, resolverStrategy: 'sharepoint' },
+        resolveRelatedIds: () => ['risk-1'],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse([
+          {
+            recordType: 'risk',
+            recordId: 'risk-1',
+            label: 'Risk One',
+            moduleIcon: 'risk',
+          },
+        ]);
+      }
+
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+
+      throw new Error(`Unexpected fetch path: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toHaveLength(1);
+    expect(results[0].recordId).toBe('risk-1');
+  });
+
+  it('normalizes summary response when API returns an unexpected shape', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: { relationshipPriority: 70, resolverStrategy: 'sharepoint' },
+        resolveRelatedIds: () => ['risk-1'],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse({ unexpected: true });
+      }
+
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+
+      throw new Error(`Unexpected fetch path: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toEqual([]);
+  });
+
+  it('excludes definitions when roleRelevanceMap does not include current direction', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'safety-log',
+        direction: 'has',
+        label: 'Safety Logs',
+        visibleToRoles: undefined,
+        governanceMetadata: {
+          relationshipPriority: 70,
+          resolverStrategy: 'sharepoint',
+          roleRelevanceMap: {
+            Superintendent: ['references'],
+          },
+        },
+        resolveRelatedIds: () => ['safety-1'],
+      }),
+    );
+
+    const fetchMock = vi.fn(async () => jsonResponse({ summaries: [] }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems(
+      'project',
+      'project-1',
+      {},
+      'Superintendent',
+    );
+
+    expect(results).toEqual([]);
+  });
+
+  it('handles resolveRelatedIds throwing an exception gracefully', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'doc',
+        direction: 'has',
+        label: 'Documents',
+        visibleToRoles: undefined,
+        governanceMetadata: { relationshipPriority: 50, resolverStrategy: 'sharepoint' },
+        resolveRelatedIds: () => {
+          throw new Error('resolver failed');
+        },
+      }),
+    );
+
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toEqual([]);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('skips summary records with missing recordType or recordId', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: { relationshipPriority: 70, resolverStrategy: 'sharepoint' },
+        resolveRelatedIds: () => ['risk-1'],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse({
+          summaries: [
+            null,
+            { recordType: 'risk' },
+            { recordId: 'risk-1' },
+            { recordType: 'risk', recordId: 'risk-1', label: 'Valid Risk' },
+          ],
+        });
+      }
+
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+
+      throw new Error(`Unexpected fetch path: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toHaveLength(1);
+    expect(results[0].label).toBe('Valid Risk');
+  });
+
+  it('uses fallback label when summary label is empty', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: { relationshipPriority: 70, resolverStrategy: 'sharepoint' },
+        resolveRelatedIds: () => ['risk-1'],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse({
+          summaries: [
+            { recordType: 'risk', recordId: 'risk-1', label: '  ' },
+          ],
+        });
+      }
+
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+
+      throw new Error(`Unexpected fetch path: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toHaveLength(1);
+    expect(results[0].label).toBe('risk risk-1');
+  });
+
+  it('handles AI suggestion hook failure gracefully', async () => {
+    RelationshipRegistry.registerAISuggestionHook('failing-hook', async () => {
+      throw new Error('AI service unavailable');
+    });
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: {
+          relationshipPriority: 70,
+          resolverStrategy: 'sharepoint',
+          aiSuggestionHook: 'failing-hook',
+        },
+        resolveRelatedIds: () => [],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse({ summaries: [] });
+      }
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+      throw new Error(`Unexpected fetch path: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toEqual([]);
+  });
+
+  it('deduplicates related items by composite key', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: { relationshipPriority: 70, resolverStrategy: 'sharepoint' },
+        resolveRelatedIds: () => ['risk-1', 'risk-1'],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse({
+          summaries: [
+            { recordType: 'risk', recordId: 'risk-1', label: 'Risk 1' },
+          ],
+        });
+      }
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+      throw new Error(`Unexpected fetch path: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toHaveLength(1);
+  });
+
+  it('applies isVisibleForRole with no role provided (all visible)', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: ['PM'],
+        governanceMetadata: {
+          relationshipPriority: 70,
+          resolverStrategy: 'sharepoint',
+          roleRelevanceMap: { PM: ['has'] },
+        },
+        resolveRelatedIds: () => ['risk-1'],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse({
+          summaries: [{ recordType: 'risk', recordId: 'risk-1', label: 'Risk 1' }],
+        });
+      }
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+      throw new Error(`Unexpected fetch path: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {});
+    expect(results).toHaveLength(1);
+  });
+
+  it('skips unregistered AI suggestion hooks gracefully', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: {
+          relationshipPriority: 70,
+          resolverStrategy: 'sharepoint',
+          aiSuggestionHook: 'nonexistent-hook',
+        },
+        resolveRelatedIds: () => ['risk-1'],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse({
+          summaries: [{ recordType: 'risk', recordId: 'risk-1', label: 'Risk 1' }],
+        });
+      }
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+      throw new Error(`Unexpected fetch path: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toHaveLength(1);
+    expect(results[0].recordId).toBe('risk-1');
+  });
+
+  it('AI suggestion items use defaults for missing fields', async () => {
+    RelationshipRegistry.registerAISuggestionHook('default-hook', async () => [
+      {
+        recordType: 'project',
+        recordId: 'ai-1',
+        label: 'AI Project',
+      } as never,
+    ]);
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: {
+          relationshipPriority: 70,
+          resolverStrategy: 'sharepoint',
+          aiSuggestionHook: 'default-hook',
+        },
+        resolveRelatedIds: () => [],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse({ summaries: [] });
+      }
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+      throw new Error(`Unexpected fetch path: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toHaveLength(1);
+    expect(results[0].relationshipLabel).toBe('AI Suggestion');
+    expect(results[0].relationship).toBe('references');
+    expect(results[0].moduleIcon).toBe('ai-assist');
+    expect(results[0].href).toBe('');
+  });
+
+  it('filters invalid AI suggestion items (null, missing recordType/recordId)', async () => {
+    RelationshipRegistry.registerAISuggestionHook('partial-hook', async () => [
+      null as never,
+      { recordType: 'project' } as never,
+      { recordId: 'ai-2' } as never,
+      {
+        recordType: 'project',
+        recordId: 'ai-valid',
+        label: 'Valid AI',
+        href: '/valid',
+        moduleIcon: 'ai',
+        relationship: 'references' as const,
+        relationshipLabel: 'AI Suggestion',
+      },
+    ]);
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: {
+          relationshipPriority: 70,
+          resolverStrategy: 'sharepoint',
+          aiSuggestionHook: 'partial-hook',
+        },
+        resolveRelatedIds: () => [],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse({ summaries: [] });
+      }
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+      throw new Error(`Unexpected: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toHaveLength(1);
+    expect(results[0].recordId).toBe('ai-valid');
+  });
+
+  it('sorts items by relationshipLabel when same priority, different labels', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: { relationshipPriority: 50, resolverStrategy: 'sharepoint' },
+        resolveRelatedIds: () => ['risk-1'],
+      }),
+    );
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'constraint',
+        direction: 'blocks',
+        label: 'Constraints',
+        visibleToRoles: undefined,
+        governanceMetadata: { relationshipPriority: 50, resolverStrategy: 'sharepoint' },
+        resolveRelatedIds: () => ['constraint-1'],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse({
+          summaries: [
+            { recordType: 'risk', recordId: 'risk-1', label: 'Risk 1', moduleIcon: 'risk' },
+            { recordType: 'constraint', recordId: 'constraint-1', label: 'Constraint 1', moduleIcon: 'constraints' },
+          ],
+        });
+      }
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+      throw new Error(`Unexpected: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toHaveLength(2);
+    // Same priority → sorted by relationshipLabel alphabetically
+    expect(results[0].relationshipLabel).toBe('Constraints');
+    expect(results[1].relationshipLabel).toBe('Risks');
+  });
+
+  it('applies compareRelatedItems recordId tiebreaker for identical labels', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: { relationshipPriority: 70, resolverStrategy: 'sharepoint' },
+        resolveRelatedIds: () => ['risk-2', 'risk-1'],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse({
+          summaries: [
+            { recordType: 'risk', recordId: 'risk-1', label: 'Same Label', moduleIcon: 'risk' },
+            { recordType: 'risk', recordId: 'risk-2', label: 'Same Label', moduleIcon: 'risk' },
+          ],
+        });
+      }
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+      throw new Error(`Unexpected: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toHaveLength(2);
+    // Same label → tiebroken by recordId alphabetically
+    expect(results[0].recordId).toBe('risk-1');
+    expect(results[1].recordId).toBe('risk-2');
+  });
+
+  it('normalizeStringArray filters non-string values from resolved IDs', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: { relationshipPriority: 70, resolverStrategy: 'sharepoint' },
+        resolveRelatedIds: () => [42 as never, null as never, 'valid-1'],
+      }),
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith('/api/related-items/summaries')) {
+        return jsonResponse({
+          summaries: [{ recordType: 'risk', recordId: 'valid-1', label: 'Valid Risk' }],
+        });
+      }
+      if (path.endsWith('/api/related-items/bic-enrichment')) {
+        return jsonResponse({ states: [] });
+      }
+      throw new Error(`Unexpected: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toHaveLength(1);
+    expect(results[0].recordId).toBe('valid-1');
+  });
+
+  it('resolveRelatedIds returning non-array is normalized safely', async () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        direction: 'has',
+        label: 'Risks',
+        visibleToRoles: undefined,
+        governanceMetadata: { relationshipPriority: 70, resolverStrategy: 'sharepoint' },
+        resolveRelatedIds: () => 'single-id' as never,
+      }),
+    );
+
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await RelatedItemsApi.getRelatedItems('project', 'project-1', {}, 'PM');
+    expect(results).toEqual([]);
+  });
+
   it('skips invalid/empty resolved IDs and safely handles bic enrichment failures', async () => {
     RelationshipRegistry.registerBidirectionalPair(
       createMockRelationshipDefinition({

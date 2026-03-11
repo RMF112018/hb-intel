@@ -122,6 +122,121 @@ describe('RelationshipRegistry (SF14-T03)', () => {
     expect(RelationshipRegistry.getRelationships('project')).toEqual(retrieved);
   });
 
+  it('compareRelationshipDefinitions tiebreaker: equal priority + equal label → targetRecordType', () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'bravo-type',
+        label: 'Same Label',
+        direction: 'has',
+        governanceMetadata: { relationshipPriority: 50 },
+      }),
+    );
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'alpha-type',
+        label: 'Same Label',
+        direction: 'blocks',
+        governanceMetadata: { relationshipPriority: 50 },
+      }),
+    );
+
+    const retrieved = RelationshipRegistry.getBySourceRecordType('project');
+    expect(retrieved).toHaveLength(2);
+    expect(retrieved[0].targetRecordType).toBe('alpha-type');
+    expect(retrieved[1].targetRecordType).toBe('bravo-type');
+  });
+
+  it('validates governance metadata with NaN priority', () => {
+    expect(() => {
+      RelationshipRegistry.registerBidirectionalPair(
+        createMockRelationshipDefinition({
+          governanceMetadata: { relationshipPriority: NaN },
+        }),
+      );
+    }).toThrow(/relationshipPriority must be a valid number/i);
+  });
+
+  it('validates roleRelevanceMap entry is an array', () => {
+    expect(() => {
+      RelationshipRegistry.registerBidirectionalPair(
+        createMockRelationshipDefinition({
+          governanceMetadata: {
+            relationshipPriority: 50,
+            roleRelevanceMap: {
+              PM: 'has' as never,
+            },
+          },
+        }),
+      );
+    }).toThrow(/must be an array of relationship directions/i);
+  });
+
+  it('getAll() returns all registered definitions in deterministic order', () => {
+    RelationshipRegistry.registerBidirectionalPair(
+      createMockRelationshipDefinition({
+        sourceRecordType: 'project',
+        targetRecordType: 'risk',
+        label: 'Risks',
+        direction: 'has',
+        governanceMetadata: { relationshipPriority: 40 },
+      }),
+    );
+
+    const all = RelationshipRegistry.getAll();
+    expect(all).toHaveLength(2);
+    expect(all[0].sourceRecordType).toBeDefined();
+    expect(all[1].sourceRecordType).toBeDefined();
+  });
+
+  it('rejects definitions with empty sourceRecordType or targetRecordType', () => {
+    expect(() => {
+      RelationshipRegistry.registerBidirectionalPair(
+        createMockRelationshipDefinition({ sourceRecordType: '  ' }),
+      );
+    }).toThrow(/sourceRecordType must be a non-empty string/i);
+
+    expect(() => {
+      RelationshipRegistry.registerBidirectionalPair(
+        createMockRelationshipDefinition({ targetRecordType: '' }),
+      );
+    }).toThrow(/targetRecordType must be a non-empty string/i);
+  });
+
+  it('rejects definitions where sourceRecordType equals targetRecordType', () => {
+    expect(() => {
+      RelationshipRegistry.registerBidirectionalPair(
+        createMockRelationshipDefinition({
+          sourceRecordType: 'project',
+          targetRecordType: 'project',
+        }),
+      );
+    }).toThrow(/sourceRecordType and targetRecordType must differ/i);
+  });
+
+  it('rejects definitions with non-function resolveRelatedIds or buildTargetUrl', () => {
+    expect(() => {
+      RelationshipRegistry.registerBidirectionalPair(
+        createMockRelationshipDefinition({ resolveRelatedIds: null as never }),
+      );
+    }).toThrow(/resolveRelatedIds must be a function/i);
+
+    expect(() => {
+      RelationshipRegistry.registerBidirectionalPair(
+        createMockRelationshipDefinition({ buildTargetUrl: 'not-a-fn' as never }),
+      );
+    }).toThrow(/buildTargetUrl must be a function/i);
+  });
+
+  it('rejects definitions with non-array visibleToRoles', () => {
+    expect(() => {
+      RelationshipRegistry.registerBidirectionalPair(
+        createMockRelationshipDefinition({ visibleToRoles: 'PM' as never }),
+      );
+    }).toThrow(/visibleToRoles must be an array/i);
+  });
+
   it('registers and retrieves AI suggestion hooks with duplicate protection', () => {
     const resolver = () => [];
     RelationshipRegistry.registerAISuggestionHook('sf14-ai-hook', resolver);

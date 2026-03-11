@@ -248,6 +248,14 @@ SF14-T05 (HbcRelatedItemsPanel) completed: 2026-03-11
 Implemented complexity-aware grouped panel rendering, deterministic governance ordering, role-aware smart-empty-state handling, expert AI group/CTA, and panel/card component tests
 SF14-T06 (HbcRelatedItemCard) completed: 2026-03-11
 Hardened card-level deterministic rendering for direction/relationship context, metadata/version display, AI indicator behavior, and partial-data fallbacks with T06-aligned tests
-Task index update: T01 ✅ | T02 ✅ | T03 ✅ | T04 ✅ | T05 ✅ | T06 ✅ | T07 next
-Next task: SF14-T07 (Reference Integrations)
+SF14-T07 (Reference Integrations) completed: 2026-03-11
+Implemented reference layer: mock source records (2 scorecards, 3 pursuits, 2 projects), BD↔Estimating and Estimating↔Project bidirectional pair registrations, AI suggestion hook (bd-pursuit-ai-suggest), activity-timeline governance adapter, and real HbcRelatedItemsTile (top-3 compact cards + View all). 30 new tests (11 registration, 7 integration, 3 adapter, 9 tile).
+SF14-T08 (Testing Strategy) completed: 2026-03-11
+Created testing utilities (createMockSourceRecord, mockRelationshipDirections). Removed scaffold-era coverage exclusions for api/registry/hooks. Added 40 targeted gap tests across registry (8), API (16), hooks (3), panel (3), card (2), tile (3). Coverage: 96.03% branches, 99.51% stmts, 100% funcs. Created Storybook config + 14 stories (8 panel, 6 tile). 103 total tests pass. All 4 gates green.
+SF14-T09 (Testing and Deployment) completed: 2026-03-11
+ADR-0103 authored. Developer adoption guide, API reference, and README conformance completed.
+docs/README.md ADR index updated. current-state-map.md §2 updated (SF14 → Historical Foundational).
+All mechanical gates pass. SF14 complete.
+Task index update: T01 ✅ | T02 ✅ | T03 ✅ | T04 ✅ | T05 ✅ | T06 ✅ | T07 ✅ | T08 ✅ | T09 ✅
+SF14 COMPLETE
 -->

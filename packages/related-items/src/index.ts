@@ -30,6 +30,30 @@ export type { UseRelatedItemsResult } from './hooks/index.js';
 export { HbcRelatedItemsGovernance } from './governance/index.js';
 export type { HbcRelatedItemsGovernanceProps } from './governance/index.js';
 
+// Reference integrations
+export {
+  registerReferenceRelationships,
+  registerReferenceAIHooks,
+  emitGovernanceEvent,
+  MOCK_BD_SCORECARD_001,
+  MOCK_BD_SCORECARD_002,
+  MOCK_BD_SCORECARDS,
+  MOCK_ESTIMATING_PURSUIT_001,
+  MOCK_ESTIMATING_PURSUIT_002,
+  MOCK_ESTIMATING_PURSUIT_003,
+  MOCK_ESTIMATING_PURSUITS,
+  MOCK_PROJECT_001,
+  MOCK_PROJECT_002,
+  MOCK_PROJECTS,
+} from './reference/index.js';
+
+export type {
+  IBdScorecardRecord,
+  IEstimatingPursuitRecord,
+  IProjectRecord,
+  IGovernanceTimelineEvent,
+} from './reference/index.js';
+
 // Components
 export {
   HbcRelatedItemsPanel,

@@ -25,12 +25,9 @@ export default defineConfig({
         'src/**/*.stories.{ts,tsx}',
         'src/constants/**',
         'testing/**',
-        // Scaffold-phase stubs — remove excludes as real implementations land in T02–T07
-        'src/api/**',
-        'src/registry/**',
-        'src/hooks/**',
+        // Governance stub (T09 scope) and reference demo data remain excluded
         'src/governance/**',
-        'src/components/**',
+        'src/reference/**',
       ],
       thresholds: {
         lines: 95,

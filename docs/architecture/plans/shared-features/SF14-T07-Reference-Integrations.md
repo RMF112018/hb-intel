@@ -50,3 +50,25 @@ pnpm turbo run check-types --filter packages/business-development...
 pnpm turbo run check-types --filter packages/estimating...
 pnpm turbo run check-types --filter packages/project-hub...
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF14-T07 completed: 2026-03-11
+Files created:
+  - src/reference/types.ts (IBdScorecardRecord, IEstimatingPursuitRecord, IProjectRecord)
+  - src/reference/mockSourceRecords.ts (2 scorecards, 3 pursuits, 2 projects)
+  - src/reference/referenceRegistrations.ts (BD↔Estimating, Estimating↔Project)
+  - src/reference/referenceAISuggestionHook.ts (bd-pursuit-ai-suggest hook)
+  - src/reference/activityTimelineAdapter.ts (emitGovernanceEvent no-op adapter)
+  - src/reference/index.ts (barrel)
+  - src/reference/__tests__/referenceRegistrations.test.ts (11 cases)
+  - src/reference/__tests__/activityTimelineAdapter.test.ts (3 cases)
+  - src/reference/__tests__/referenceIntegration.test.ts (7 cases)
+  - src/components/HbcRelatedItemsTile.test.tsx (9 cases)
+  - .eslintrc.cjs (missing config added)
+Files modified:
+  - src/components/HbcRelatedItemsTile.tsx (stub → real tile with top-3 + View all)
+  - src/index.ts (reference exports added)
+  - vitest.config.ts (coverage: src/components removed, src/reference added)
+Gates: check-types ✓ | build ✓ | lint ✓ (0 errors) | test ✓ (63 passed, 30 new)
+Next: SF14-T08
+-->

@@ -207,6 +207,109 @@ describe('useRelatedItems (SF14-T04)', () => {
     expect(result.current.aiSuggestions).toHaveLength(2);
   });
 
+  it('maps non-Error thrown values to string via mapErrorMessage', async () => {
+    vi.mocked(RelatedItemsApi.getRelatedItems).mockRejectedValue('string error');
+    vi.mocked(loadDraft).mockResolvedValue(null);
+
+    const { result } = renderHook(() =>
+      useRelatedItems({
+        sourceRecordType: 'project',
+        sourceRecordId: 'project-err-1',
+        sourceRecord: {},
+        currentUserRole: 'PM',
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.error).toBe('string error');
+    expect(result.current.items).toEqual([]);
+  });
+
+  it('maps number thrown values to string via mapErrorMessage', async () => {
+    vi.mocked(RelatedItemsApi.getRelatedItems).mockRejectedValue(42);
+    vi.mocked(loadDraft).mockResolvedValue(null);
+
+    const { result } = renderHook(() =>
+      useRelatedItems({
+        sourceRecordType: 'project',
+        sourceRecordId: 'project-err-2',
+        sourceRecord: {},
+        currentUserRole: 'PM',
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.error).toBe('42');
+  });
+
+  it('gracefully handles loadDraft throwing an exception', async () => {
+    vi.mocked(RelatedItemsApi.getRelatedItems).mockRejectedValue(new Error('API down'));
+    vi.mocked(loadDraft).mockRejectedValue(new Error('cache corrupt'));
+
+    const { result } = renderHook(() =>
+      useRelatedItems({
+        sourceRecordType: 'project',
+        sourceRecordId: 'project-cache-fail',
+        sourceRecord: {},
+        currentUserRole: 'PM',
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.error).toBe('API down');
+    expect(result.current.items).toEqual([]);
+  });
+
+  it('compareItems applies recordId tiebreaker when labels and relationshipLabels match', async () => {
+    const items: IRelatedItem[] = [
+      {
+        recordType: 'project',
+        recordId: 'p-beta',
+        label: 'Same Label',
+        href: '/projects/p-beta',
+        moduleIcon: 'project',
+        relationship: 'has',
+        relationshipLabel: 'Same Group',
+      },
+      {
+        recordType: 'project',
+        recordId: 'p-alpha',
+        label: 'Same Label',
+        href: '/projects/p-alpha',
+        moduleIcon: 'project',
+        relationship: 'has',
+        relationshipLabel: 'Same Group',
+      },
+    ];
+    vi.mocked(RelatedItemsApi.getRelatedItems).mockResolvedValue(items);
+    vi.mocked(saveDraft).mockResolvedValue(null);
+
+    const { result } = renderHook(() =>
+      useRelatedItems({
+        sourceRecordType: 'project',
+        sourceRecordId: 'project-tiebreak',
+        sourceRecord: {},
+        currentUserRole: 'PM',
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.items[0].recordId).toBe('p-alpha');
+    expect(result.current.items[1].recordId).toBe('p-beta');
+  });
+
   it('hides bicState when showBicState is false and keeps deterministic ordering across rerenders', async () => {
     vi.mocked(RelatedItemsApi.getRelatedItems).mockResolvedValue(createMockItems());
     vi.mocked(saveDraft).mockResolvedValue(null);
