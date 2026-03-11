@@ -68,3 +68,18 @@ Behavior:
 pnpm --filter @hbc/session-state test -- SessionDb DraftStore QueueStore
 pnpm --filter @hbc/session-state check-types
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF12-T03 completed: 2026-03-11
+- SessionDb: idb-based lazy singleton connection manager with typed SessionDbSchema
+- DraftStore: saveDraft, loadDraft (with TTL expiry check), clearDraft, purgeExpiredDrafts (cursor-based range purge)
+- QueueStore: enqueue (crypto.randomUUID), listPending (sorted by createdAt ASC), markAttempt, remove, markFailed
+- IDraftEntryRecord extends IDraftEntry with computed expiresAt for index-based purge
+- EnqueueInput type for consumer-friendly queue API
+- All functions return safe defaults (null/[]) when IDB unavailable; no throws to consumers
+- 39 tests across 4 test files (SessionDb, DraftStore, QueueStore, db-unavailable), 100% coverage
+- Barrel exports wired: db/index.ts → src/index.ts (with removeOperation alias for remove)
+- Dependencies: idb ^8.0.3 (runtime), fake-indexeddb ^6.2.5 (devDep)
+- Verification: check-types zero errors, build compiles, test:coverage 100%
+Next: SF12-T04 (Sync Engine & Connectivity)
+-->

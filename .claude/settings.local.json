@@ -99,7 +99,9 @@
       "Read(//Users/bobbyfetting/hb-intel/**)",
       "Bash(grep -r \"from '@hbc/bic-next-move'\" packages/field-annotations/src/ | grep -v \"IBicOwner\" ; grep -r \"from '@hbc/versioned-record'\" packages/field-annotations/src/ ; grep -r \"from '@hbc/notification-intelligence'\" packages/field-annotations/src/ ; echo \"Architecture boundary check done \\(empty = pass\\)\")",
       "Bash(grep -r \"from 'xlsx'\" packages/data-seeding/src/ | grep -v XlsxParser 2>&1; echo \"Exit: $?\")",
-      "mcp__plugin_context-mode_context-mode__ctx_batch_execute"
+      "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_execute_file",
+      "mcp__plugin_context-mode_context-mode__ctx_execute"
     ]
   },
   "enabledPlugins": {

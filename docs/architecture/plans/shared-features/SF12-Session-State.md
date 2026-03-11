@@ -177,5 +177,10 @@ SF12-T02 completed: 2026-03-11
 - Barrel exports wired through types/index.ts, constants/index.ts, src/index.ts
 - All 4 testing factories tightened from Record<string, unknown> to proper typed signatures
 - Verification: check-types zero errors, build compiles to dist/
-Next: SF12-T03 (IndexedDB & Stores)
+
+SF12-T03 completed: 2026-03-11
+- idb-based IndexedDB layer: SessionDb (connection manager), DraftStore (TTL CRUD), QueueStore (retry queue)
+- IDraftEntryRecord, SessionDbSchema, EnqueueInput types exported
+- 39 tests, 100% coverage; all 3 verification gates pass
+Next: SF12-T04 (Sync Engine & Connectivity)
 -->

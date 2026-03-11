@@ -18,3 +18,25 @@ export {
   QUEUE_DEFAULT_MAX_RETRIES,
   SPFX_SYNC_POLL_INTERVAL_MS,
 } from './constants/index.js';
+
+// DB — functions
+export {
+  openSessionDb,
+  closeSessionDb,
+  saveDraft,
+  loadDraft,
+  clearDraft,
+  purgeExpiredDrafts,
+  enqueue,
+  listPending,
+  markAttempt,
+  remove as removeOperation,
+  markFailed,
+} from './db/index.js';
+
+// DB — types
+export type {
+  IDraftEntryRecord,
+  SessionDbSchema,
+  EnqueueInput,
+} from './db/index.js';

@@ -23,6 +23,11 @@ export default defineConfig({
         'src/**/index.ts',
         'src/types/**',
         'src/**/*.stories.{ts,tsx}',
+        'src/constants/**',
+        'src/sync/**',
+        'src/context/**',
+        'src/hooks/**',
+        'src/components/**',
         'testing/**',
       ],
       thresholds: {
