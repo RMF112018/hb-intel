@@ -162,7 +162,12 @@ packages/session-state/
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF12 master plan authored: 2026-03-10
-Status: Canonical Normative Plan (planning complete; implementation pending)
+Status: Canonical Normative Plan (implementation in progress)
 ADR required: ADR-0101
-T09 follows SF11 documentation/deployment rigor.
+
+SF12-T01 completed: 2026-03-11
+- Package scaffold created with dual exports, 95% coverage thresholds, README
+- All verification gates passed (check-types, build, test, README)
+- tsconfig.base.json updated with @hbc/session-state path aliases
+Next: SF12-T02 (TypeScript Contracts)
 -->

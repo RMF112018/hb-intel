@@ -1,0 +1,4 @@
+/**
+ * HbcSyncStatusBadge — Sync status indicator badge — SF12-T06, D-08
+ */
+export {};

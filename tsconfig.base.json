@@ -72,7 +72,9 @@
       "@hbc/notification-intelligence": ["packages/notification-intelligence/src/index.ts"],
       "@hbc/notification-intelligence/*": ["packages/notification-intelligence/src/*"],
       "@hbc/smart-empty-state": ["packages/smart-empty-state/src/index.ts"],
-      "@hbc/smart-empty-state/*": ["packages/smart-empty-state/src/*"]
+      "@hbc/smart-empty-state/*": ["packages/smart-empty-state/src/*"],
+      "@hbc/session-state": ["packages/session-state/src/index.ts"],
+      "@hbc/session-state/*": ["packages/session-state/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"]

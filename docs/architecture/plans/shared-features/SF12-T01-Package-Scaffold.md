@@ -85,3 +85,16 @@ pnpm --filter @hbc/session-state build
 pnpm --filter @hbc/session-state test --coverage
 test -f packages/session-state/README.md
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF12-T01 completed: 2026-03-11
+- Package scaffold created with all 22 source barrel stubs (src/ + testing/)
+- Dual exports configured: "." (runtime) and "./testing" (test factories)
+- tsconfig.json, tsconfig.build.json, vitest.config.ts with 95/95/95/95 thresholds
+- 4 testing factories: createMockQueuedOperation, createMockDraftEntry, createMockSessionContext, mockConnectivityStates
+- README.md created with all 7 required sections
+- tsconfig.base.json updated with @hbc/session-state path aliases
+- pnpm workspace registered
+- All verification gates passed: check-types ✓, build ✓, test (passWithNoTests) ✓, README exists ✓
+Next: SF12-T02 (TypeScript Contracts)
+-->
