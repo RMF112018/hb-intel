@@ -55,6 +55,10 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@hbc/session-state": "workspace:*"
+    "@hbc/auth": "workspace:*",
+    "@hbc/complexity": "workspace:*",
+    "@hbc/session-state": "workspace:*",
+    "@hbc/smart-empty-state": "workspace:*",
+    "@hbc/versioned-record": "workspace:*"
   }
 }

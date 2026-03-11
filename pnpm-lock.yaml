@@ -1850,9 +1850,21 @@ importers:
 
   packages/related-items:
     dependencies:
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../complexity
       '@hbc/session-state':
         specifier: workspace:*
         version: link:../session-state
+      '@hbc/smart-empty-state':
+        specifier: workspace:*
+        version: link:../smart-empty-state
+      '@hbc/versioned-record':
+        specifier: workspace:*
+        version: link:../versioned-record
       react:
         specifier: ^18.3.0
         version: 18.3.1

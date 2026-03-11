@@ -244,6 +244,10 @@ SF14-T03 (Registry and API) completed: 2026-03-11
 Implemented bidirectional registry, AI suggestion hook registry, deterministic retrieval, batched summary API, role/governance filtering, and registry/API tests
 SF14-T04 (Hooks) completed: 2026-03-11
 Implemented useRelatedItems orchestration hook with deterministic sorting/grouping, role-aware API passthrough, AI suggestion derivation, and @hbc/session-state stale-safe cache fallback
-Task index update: T01 ✅ | T02 ✅ | T03 ✅ | T04 ✅ | T05 next
-Next task: SF14-T05 (HbcRelatedItemsPanel)
+SF14-T05 (HbcRelatedItemsPanel) completed: 2026-03-11
+Implemented complexity-aware grouped panel rendering, deterministic governance ordering, role-aware smart-empty-state handling, expert AI group/CTA, and panel/card component tests
+SF14-T06 (HbcRelatedItemCard) completed: 2026-03-11
+Hardened card-level deterministic rendering for direction/relationship context, metadata/version display, AI indicator behavior, and partial-data fallbacks with T06-aligned tests
+Task index update: T01 ✅ | T02 ✅ | T03 ✅ | T04 ✅ | T05 ✅ | T06 ✅ | T07 next
+Next task: SF14-T07 (Reference Integrations)
 -->
