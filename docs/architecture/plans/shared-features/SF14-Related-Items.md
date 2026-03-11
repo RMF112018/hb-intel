@@ -238,5 +238,10 @@ Create `docs/architecture/adr/0103-related-items-unified-work-graph.md` document
 <!-- IMPLEMENTATION PROGRESS & NOTES
 SF14-T01 (Package Scaffold) completed: 2026-03-11
 Package: @hbc/related-items scaffold with dual exports, coverage gates, README
-Next task: SF14-T02 (TypeScript Contracts)
+SF14-T02 (TypeScript Contracts) completed: 2026-03-11
+Contracts locked for RelationshipDirection, IGovernanceMetadata, IRelationshipDefinition, and IRelatedItem
+SF14-T03 (Registry and API) completed: 2026-03-11
+Implemented bidirectional registry, AI suggestion hook registry, deterministic retrieval, batched summary API, role/governance filtering, and registry/API tests
+Task index update: T01 ✅ | T02 ✅ | T03 ✅ | T04 next
+Next task: SF14-T04 (Hooks)
 -->

@@ -41,4 +41,33 @@ Implement bidirectional relationship registration, AI suggestion hook registrati
 ```bash
 pnpm --filter @hbc/related-items test -- RelationshipRegistry RelatedItemsApi
 pnpm --filter @hbc/related-items check-types
+pnpm --filter @hbc/related-items build
 ```
+
+---
+
+## SF14-T03 Success Criteria
+
+- [x] Bidirectional relationship registration implemented with deterministic reverse creation.
+- [x] AI suggestion hook registration implemented with duplicate and resolver validation.
+- [x] Deterministic source-based retrieval implemented (`getBySourceRecordType`) with compatibility alias (`getRelationships`).
+- [x] Batched related-item retrieval API implemented with strategy routing, role visibility filtering, AI suggestion inclusion, and non-fatal BIC enrichment.
+- [x] Registry/API unit tests added for duplicate handling, validation rules, deterministic retrieval, batching, filtering, AI suggestions, and partial-failure safety.
+
+---
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF14-T03 completed: 2026-03-11
+- Implemented registry singleton store with bidirectional pair registration, composite duplicate protection, governance validation, deterministic sorting, and AI suggestion hook resolver registry.
+- Implemented RelatedItemsApi.getRelatedItems(sourceRecordType, sourceRecordId, sourceRecord, role) with resolver-strategy batching to /api/related-items/summaries, role/governance filtering, non-fatal /api/related-items/bic-enrichment pass, and AI hook suggestion expansion.
+- Added tests:
+  - packages/related-items/src/registry/RelationshipRegistry.test.ts
+  - packages/related-items/src/api/RelatedItemsApi.test.ts
+- Updated testing contract compatibility:
+  - packages/related-items/testing/mockRelationshipRegistry.ts
+- Verification evidence (all pass):
+  - pnpm --filter @hbc/related-items test -- RelationshipRegistry RelatedItemsApi
+  - pnpm --filter @hbc/related-items check-types
+  - pnpm --filter @hbc/related-items build
+Next task: SF14-T04 (Hooks)
+-->
