@@ -6,6 +6,9 @@ export type {
   IDraftEntry,
   ISessionStateContext,
   IUseDraftResult,
+  OperationExecutor,
+  ISyncEngine,
+  ISyncEngineOptions,
 } from './types/index.js';
 
 // Constants
@@ -17,6 +20,10 @@ export {
   DRAFT_DEFAULT_TTL_HOURS,
   QUEUE_DEFAULT_MAX_RETRIES,
   SPFX_SYNC_POLL_INTERVAL_MS,
+  SYNC_BACKOFF_BASE_MS,
+  SYNC_BACKOFF_MAX_MS,
+  CONNECTIVITY_PROBE_TIMEOUT_MS,
+  CONNECTIVITY_PROBE_INTERVAL_MS,
 } from './constants/index.js';
 
 // DB — functions
@@ -40,3 +47,16 @@ export type {
   SessionDbSchema,
   EnqueueInput,
 } from './db/index.js';
+
+// Sync — functions
+export {
+  createConnectivityMonitor,
+  createSyncEngine,
+  SyncEngine,
+} from './sync/index.js';
+
+// Sync — types
+export type {
+  IConnectivityMonitor,
+  ConnectivityListener,
+} from './sync/index.js';

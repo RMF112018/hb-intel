@@ -47,3 +47,18 @@ export interface IUseDraftResult<T> {
   save: (value: T, ttlHours?: number) => void;
   clear: () => void;
 }
+
+export type OperationExecutor = (operation: IQueuedOperation) => Promise<void>;
+
+export interface ISyncEngine {
+  triggerSync(): Promise<void>;
+  registerBackgroundSync?(): Promise<void>;
+  processQueue(): Promise<void>;
+  dispose(): void;
+}
+
+export interface ISyncEngineOptions {
+  executor: OperationExecutor;
+  probeUrl?: string;
+  pollIntervalMs?: number;
+}

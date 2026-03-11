@@ -5,3 +5,7 @@ export const QUEUE_STORE_NAME = 'queue';
 export const DRAFT_DEFAULT_TTL_HOURS = 72;
 export const QUEUE_DEFAULT_MAX_RETRIES = 5;
 export const SPFX_SYNC_POLL_INTERVAL_MS = 30_000;
+export const SYNC_BACKOFF_BASE_MS = 1_000;
+export const SYNC_BACKOFF_MAX_MS = 60_000;
+export const CONNECTIVITY_PROBE_TIMEOUT_MS = 5_000;
+export const CONNECTIVITY_PROBE_INTERVAL_MS = 30_000;

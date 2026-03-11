@@ -63,3 +63,19 @@ Backoff: exponential (bounded) per item.
 pnpm --filter @hbc/session-state test -- SyncEngine
 pnpm --filter @hbc/session-state check-types
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF12-T04 completed: 2026-03-11
+Implementation:
+- src/sync/connectivity.ts — createConnectivityMonitor with probe, subscribe, dispose
+- src/sync/SyncEngine.ts — SyncEngine class with processQueue, triggerSync, registerBackgroundSync, polling, dispose
+- src/sync/index.ts — barrel re-exports
+- Constants added: SYNC_BACKOFF_BASE_MS, SYNC_BACKOFF_MAX_MS, CONNECTIVITY_PROBE_TIMEOUT_MS, CONNECTIVITY_PROBE_INTERVAL_MS
+- Types added: OperationExecutor, ISyncEngine, ISyncEngineOptions
+- vitest.config.ts updated: sync/ removed from coverage exclusions
+Tests:
+- src/__tests__/connectivity.test.ts — 10 tests (probe, subscribe, dispose, safe defaults)
+- src/__tests__/SyncEngine.test.ts — 14 tests (processQueue, backoff, retry, polling, background sync, re-entrancy, connectivity recovery)
+Verification: check-types ✓ | test 63 pass ✓ | build ✓
+Next: SF12-T05 (Provider & Hooks)
+-->

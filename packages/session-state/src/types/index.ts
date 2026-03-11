@@ -5,4 +5,7 @@ export type {
   IDraftEntry,
   ISessionStateContext,
   IUseDraftResult,
+  OperationExecutor,
+  ISyncEngine,
+  ISyncEngineOptions,
 } from './ISessionState.js';

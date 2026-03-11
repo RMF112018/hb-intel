@@ -183,4 +183,15 @@ SF12-T03 completed: 2026-03-11
 - IDraftEntryRecord, SessionDbSchema, EnqueueInput types exported
 - 39 tests, 100% coverage; all 3 verification gates pass
 Next: SF12-T04 (Sync Engine & Connectivity)
+
+SF12-T04 completed: 2026-03-11
+- connectivity.ts: createConnectivityMonitor (probe, subscribe, dispose, safe SSR defaults)
+- SyncEngine.ts: class with processQueue, triggerSync, registerBackgroundSync, startPolling/stopPolling, dispose
+- Exponential bounded backoff: min(base * 2^retryCount, max)
+- Background Sync API guarded (no-op when unavailable — SPFx safe)
+- 4 new constants, 3 new type exports, sync barrel + root barrel updated
+- vitest.config.ts: sync/ removed from coverage exclusions
+- 24 new tests (10 connectivity + 14 SyncEngine); 63 total pass
+- All 3 gates pass: check-types ✓ | test ✓ | build ✓
+Next: SF12-T05 (Provider & Hooks)
 -->
