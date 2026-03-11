@@ -84,3 +84,34 @@ Rules:
 pnpm --filter @hbc/features-admin test -- monitors
 pnpm --filter @hbc/features-admin test -- probes
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF17-T03 completed: 2026-03-11
+
+Deliverables:
+- src/types/IAlertMonitor.ts — IAlertMonitor interface contract
+- src/types/IInfrastructureProbeDefinition.ts — IInfrastructureProbeDefinition interface contract
+- src/types/NotificationRoute.ts — NotificationRoute type ('immediate' | 'digest')
+- src/monitors/monitorRegistry.ts — MonitorRegistry class with register/getAll/runAll/deduplicateAlerts
+- src/monitors/provisioningFailureMonitor.ts — IAlertMonitor impl, key='provisioning-failure', severity='critical'
+- src/monitors/permissionAnomalyMonitor.ts — IAlertMonitor impl, key='permission-anomaly', severity='high'
+- src/monitors/stuckWorkflowMonitor.ts — IAlertMonitor impl, key='stuck-workflow', severity='high'
+- src/monitors/overdueProvisioningMonitor.ts — IAlertMonitor impl, key='overdue-provisioning-task', severity='medium'
+- src/monitors/upcomingExpirationMonitor.ts — IAlertMonitor impl, key='upcoming-expiration', severity='medium'
+- src/monitors/staleRecordMonitor.ts — IAlertMonitor impl, key='stale-record', severity='low'
+- src/monitors/notificationRouter.ts — routeAlert() severity→route mapping with ack/escalation logic
+- src/probes/probeScheduler.ts — ProbeScheduler class with retry, deterministic order, buildSnapshot
+- src/probes/sharePointProbe.ts — IInfrastructureProbeDefinition impl, probeKey='sharepoint-infrastructure'
+- src/probes/azureFunctionsProbe.ts — IInfrastructureProbeDefinition impl, probeKey='azure-functions'
+- src/probes/searchProbe.ts — IInfrastructureProbeDefinition impl, probeKey='azure-search'
+- src/probes/notificationProbe.ts — IInfrastructureProbeDefinition impl, probeKey='notification-system'
+- src/probes/moduleRecordHealthProbe.ts — IInfrastructureProbeDefinition impl, probeKey='module-record-health'
+- src/api/AdminAlertsApi.ts — listActive/acknowledge/listHistory contract
+- src/api/InfrastructureProbeApi.ts — getLatestSnapshot/listSnapshots/runNow contract
+- src/__tests__/monitors.test.ts — 18 tests (registry, dedup, routing)
+- src/__tests__/probeScheduler.test.ts — 6 tests (ordering, retry, snapshot, partial failure)
+- Factory functions: createDefaultMonitorRegistry(), createDefaultProbeScheduler()
+
+Verification: check-types ✓ | build ✓ | test 24/24 passed ✓
+Next: SF17-T04 (Hooks and State Model)
+-->

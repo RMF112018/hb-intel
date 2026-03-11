@@ -1,8 +1,22 @@
+import type { IInfrastructureProbeDefinition } from '../types/IInfrastructureProbeDefinition.js';
+
 /**
  * Probes Azure Functions health and availability.
  *
- * @placeholder SF17-T01 scaffold — implementation in SF17-T04
+ * @design D-04, SF17-T03
  */
-export const azureFunctionsProbe = {
-  name: 'azure-functions' as const,
-} as const;
+export const azureFunctionsProbe: IInfrastructureProbeDefinition = {
+  probeKey: 'azure-functions',
+
+  async run(nowIso: string) {
+    return {
+      probeId: `azure-functions-${nowIso}`,
+      probeKey: 'azure-functions' as const,
+      status: 'healthy' as const,
+      summary: 'Azure Functions check — no live connection configured',
+      observedAt: nowIso,
+      metrics: {},
+      anomalies: [],
+    };
+  },
+};

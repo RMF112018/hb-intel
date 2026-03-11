@@ -24,13 +24,15 @@ The **Post-Bid Learning Loop** is a structured, triggered autopsy process that:
 4. Feeds approved findings into Living Strategic Intelligence (SF-20)
 5. Updates the Score Benchmark dataset (SF-19) with confirmed outcome data
 
+Every autopsy section gap, win/loss factor, or intelligence contribution automatically becomes a granular BIC record in `@hbc/bic-next-move` (blockers first), with ownership avatars appearing directly in the wizard and in the `@hbc/project-canvas` "My Work" lane.
+
 ---
 
 ## Mold Breaker Rationale
 
 The ux-mold-breaker.md Signature Solution #3 (Unified Work Graph) specifies: "The graph includes closed records and their outcomes — the system learns from history." The con-tech UX study §4 identifies post-bid intelligence capture as a universally absent feature: no platform closes the loop between bid outcomes and future BD/Estimating strategy.
 
-The Post-Bid Learning Loop is the mechanism that makes HB Intel's historical intelligence grow over time. The Score Benchmark (SF-19) starts with seeded data but compounds in value with every completed autopsy. The Living Strategic Intelligence knowledge base grows with every confirmed win/loss factor. This compounding intelligence is the long-term competitive moat of HB Intel's BD module.
+The Post-Bid Learning Loop is the mechanism that makes HB Intel's historical intelligence grow over time. The Score Benchmark (SF-19) and Living Strategic Intelligence (SF-20) compound in value with every completed autopsy. This compounding intelligence is the long-term competitive moat of HB Intel and the foundation of the new reusable Tier-1 `@hbc/post-bid-autopsy` primitive.
 
 ---
 
@@ -38,58 +40,59 @@ The Post-Bid Learning Loop is the mechanism that makes HB Intel's historical int
 
 **Trigger:** When an Active Pursuit's status changes to `Won`, `Lost`, or `No-Bid`:
 1. A Post-Bid Autopsy record is automatically created
-2. BIC is assigned to the Estimating Lead (primary) with BD Manager as co-author
-3. An Immediate-tier notification is sent to both parties
+2. Granular BIC records are created for each section/gap via `@hbc/bic-next-move`
+3. An Immediate-tier notification is sent
 4. A 5-business-day completion window begins
 
-**Escalation:** If the autopsy is not completed within the window, an escalation notification is sent to the Chief Estimator.
+**Assignment model:**
+- Estimating Lead is the primary author
+- BD Manager is co-author and cross-module reviewer
+- Section-level BIC ownership is auto-resolved and visible in wizard rows
+
+**Escalation:** Overdue autopsies escalate to Chief Estimator with ownership preservation and reminder history.
 
 ---
 
 ## Autopsy Structure
 
-The autopsy is a structured form with five sections, using `@hbc/step-wizard` in sequential mode:
+The autopsy is a structured 5-section form using `@hbc/step-wizard` in sequential mode and complexity-aware behavior.
 
 ### Section 1: Outcome & Context
-- Final bid result: Won / Lost / No-Bid
-- Awarded contractor (if Lost): text field
-- Awarded bid value (if known): number field
-- HB Intel's bid value: number field
-- Bid price delta (if known): auto-computed
-- Was this outcome expected at Go/No-Go? Yes / No / Partially
+- Final bid result and awarded contractor/value context
+- HB bid value and auto-computed deltas
+- Was the outcome expected at Go/No-Go
 
 ### Section 2: Why We Won / Why We Lost
-- Primary deciding factor (select from configurable list + free text):
-  - Price (lowest bid) / Schedule Commitment / Safety Record / Subcontractor Relationships / Relationship with Owner / Technical Approach / Other
-- Supporting factors (multi-select)
-- Competitor intelligence: "What did the awarded contractor do differently?" (free text)
-- Self-assessment: "What was the single biggest thing we could have done differently?" (free text)
+- Primary deciding factor and supporting factors
+- Competitor intelligence observations
+- Self-assessment on what should have been done differently
 
 ### Section 3: Estimating Accuracy Review
-- Which cost categories were closest to actual bid? (multi-select)
-- Which cost categories had the largest variance? (multi-select)
-- Were subcontractor quotes representative of market? Yes / No / Partially
-- Key assumption that proved wrong (free text, optional)
+- Accurate/inaccurate cost categories
+- Subquote representativeness assessment
+- Key assumption that proved wrong
 
 ### Section 4: Go/No-Go Retrospective
-- In hindsight, was the Go/No-Go decision correct? Yes / No
-- Which scoring criteria most accurately predicted the outcome?
-- Which scoring criteria were misleading?
-- Would you change the score? (slider: adjust each criterion in retrospect)
+- Decision correctness in hindsight
+- Predictive vs misleading criteria
+- Retrospective score adjustment sliders (Expert mode)
 
-### Section 5: Intelligence Contributions (Pre-seeded for SF-20)
-- Automatically creates draft Living Strategic Intelligence entries from:
-  - Primary deciding factor → "Win/Loss Factor" entry
-  - Competitor intelligence → "Competitor Intel" entry
-  - Market observations → "Market Condition" entry
-- Each draft entry can be edited before submission to the approval queue
+### Section 5: Intelligence Contributions
+- Draft strategic intelligence entries auto-seeded from prior sections
+- Entry edits prior to approval queue submission
+- Deep-link and BIC relationship metadata attached to each seeded entry
+
+**Complexity behavior:**
+- Essential: collapsed autopsy badge with guided completion CTA
+- Standard: full wizard and section completion controls
+- Expert: full wizard + retrospective sliders + expanded insights dashboard
 
 ---
 
 ## Interface Contract
 
 ```typescript
-// In BD/Estimating domain types
+// In @hbc/post-bid-autopsy primitive (new Tier-1 package)
 
 export type AutopsyOutcome = 'won' | 'lost' | 'no-bid';
 export type AutopsyStatus = 'not-started' | 'in-progress' | 'complete' | 'overdue';
@@ -97,17 +100,13 @@ export type AutopsyStatus = 'not-started' | 'in-progress' | 'complete' | 'overdu
 export interface IPostBidAutopsy {
   autopsyId: string;
   pursuitId: string;
-  scorecardId: string; // originating BD scorecard
+  scorecardId: string;
   outcome: AutopsyOutcome;
   status: AutopsyStatus;
-  /** Primary author (Estimating Lead) */
   primaryAuthor: IBicOwner;
-  /** Co-author (BD Manager) */
   coAuthor: IBicOwner;
-  /** Completion deadline */
   dueDate: string;
   completedAt: string | null;
-  /** Structured answers by section */
   sections: {
     outcomeContext: IAutopsyOutcomeContext | null;
     winLossFactors: IAutopsyWinLossFactors | null;
@@ -115,40 +114,22 @@ export interface IPostBidAutopsy {
     goNoGoRetrospective: IAutopsyGoNoGoRetro | null;
     intelligenceContributions: IStrategicIntelligenceEntry[];
   };
-  /** Version snapshot ID of the pursuit at autopsy time */
   pursuitSnapshotId: string;
+  bicRecords: IBicRecord[]; // granular per-section/gap ownership
+  version: VersionedRecord; // from @hbc/versioned-record
+  telemetry: IAutopsyTelemetryState;
 }
 
-export interface IAutopsyOutcomeContext {
-  finalResult: AutopsyOutcome;
-  awardedContractor?: string;
-  awardedBidValue?: number;
-  hbBidValue: number;
-  bidPriceDelta?: number;
-  outcomeWasExpected: 'yes' | 'no' | 'partially';
-}
-
-export interface IAutopsyWinLossFactors {
-  primaryFactor: string;
-  supportingFactors: string[];
-  competitorIntelligence: string;
-  selfAssessment: string;
-}
-
-export interface IAutopsyEstimatingAccuracy {
-  accurateCostCategories: string[];
-  inaccurateCostCategories: string[];
-  subquotesRepresentative: 'yes' | 'no' | 'partially';
-  keyWrongAssumption?: string;
-}
-
-export interface IAutopsyGoNoGoRetro {
-  decisionCorrectInRetrospect: 'yes' | 'no';
-  mostPredictiveCriteria: string[];
-  misleadingCriteria: string[];
-  retrospectiveScoreAdjustments: Record<string, number>; // criterion key → adjusted score
+export interface IAutopsyTelemetryState {
+  autopsyCompletionLatency: number | null;
+  repeatErrorReductionRate: number | null;
+  intelligenceSeedingConversionRate: number | null;
+  benchmarkAccuracyLift: number | null;
+  autopsyCes: number | null;
 }
 ```
+
+(The entire model, offline logic, AI actions, gap BIC ownership, intelligence seeding, and telemetry are now provided by the new `@hbc/post-bid-autopsy` primitive.)
 
 ---
 
@@ -156,12 +137,12 @@ export interface IAutopsyGoNoGoRetro {
 
 ```
 apps/business-development/src/features/post-bid-learning/
-apps/estimating/src/features/post-bid-learning/  (shared via package reference)
-├── PostBidAutopsyWizard.tsx         # full 5-section autopsy form (uses @hbc/step-wizard)
-├── AutopsySummaryCard.tsx           # completed autopsy summary for record display
-├── AutopsyListView.tsx              # list of all autopsies (BD/Estimating admin view)
-├── LearningInsightsDashboard.tsx    # aggregated insights from all autopsies
-├── usePostBidAutopsy.ts             # loads, saves, submits autopsy
+apps/estimating/src/features/post-bid-learning/  (shared)
+├── PostBidAutopsyWizard.tsx
+├── AutopsySummaryCard.tsx
+├── AutopsyListView.tsx
+├── LearningInsightsDashboard.tsx
+├── usePostBidAutopsy.ts     # delegates to @hbc/post-bid-autopsy
 └── types.ts
 ```
 
@@ -171,53 +152,45 @@ apps/estimating/src/features/post-bid-learning/  (shared via package reference)
 
 ### `PostBidAutopsyWizard` — 5-Step Autopsy Form
 
-Uses `@hbc/step-wizard` in sequential mode:
-
-```typescript
-interface PostBidAutopsyWizardProps {
-  autopsyId: string;
-  pursuit: IEstimatingPursuit;
-  scorecard: IGoNoGoScorecard;
-}
-```
+Uses `@hbc/step-wizard` in sequential mode with draft and sync-state projection.
 
 **Visual behavior:**
-- 5-step vertical wizard (sidebar nav + content)
-- Auto-populates: bid values from pursuit, scorecard criteria from scorecard
-- Each section saves as a draft (via `@hbc/session-state`) on every field change
-- Section 5 (Intelligence Contributions) pre-populates draft entries from Section 2 answers
-- "Submit Autopsy" CTA on final section → marks autopsy complete → submits intelligence entries to approval queue → updates pursuit status → updates benchmark dataset
+- Essential: collapsed badge + guided resume entry point
+- Standard: full 5-step wizard with per-step validation and save
+- Expert: full wizard + retrospective sliders + expanded comparative insights
+- Inline AI actions available in section context (no sidecar)
+- BIC owner avatars shown at section/gap level and mirrored to My Work lane
 
 ### `AutopsySummaryCard` — Completed Autopsy Display
 
-A compact summary of key autopsy findings rendered on the pursuit record after completion:
+A compact summary of key autopsy findings rendered on pursuit records.
 
 **Visual behavior:**
-- Outcome badge (Won/Lost/No-Bid), primary deciding factor, key self-assessment quote
-- Link: "View Full Autopsy"
+- Outcome badge (Won/Lost/No-Bid)
+- Primary deciding factor and key retrospective insight
+- Inline links to seeded intelligence entries and benchmark impact markers
 
 ### `LearningInsightsDashboard` — Aggregated Intelligence View
 
 Available to BD Manager, Chief Estimator, Director of Preconstruction, VP of Operations.
 
 **Visual behavior:**
-- "Win Rate by Project Type" chart
-- "Top Win Factors" ranked list
-- "Top Loss Factors" ranked list
-- "Estimating Accuracy by Cost Category" heat map
-- "Go/No-Go Decision Accuracy Rate" metric (what % of GO decisions resulted in wins)
-- Filters: date range, project type, geography, client type
+- Win/loss factor trend surfaces
+- Estimating variance and repeat-error reduction indicators
+- Go/No-Go retrospective alignment metrics
+- Filters by date, project type, geography, client type
 
 ---
 
 ## Benchmark Dataset Update
 
 When an autopsy is marked complete:
-1. The retrospective score adjustments update the `HbcScorecardBenchmarks` compute job's input data
-2. The outcome (Won/Lost) + primary factor is added to the benchmark dataset
-3. The `useScoreBenchmark` hook (SF-19) will reflect this data at the next nightly refresh
+1. Retrospective score adjustments and outcome metadata are published via `@hbc/post-bid-autopsy`
+2. Outcome + deciding factors are written to benchmark update inputs
+3. Score Benchmark consumers (`@hbc/score-benchmark`) receive updated dataset signals on next refresh
+4. Approved Section 5 entries are seeded into `@hbc/strategic-intelligence` approval flow
 
-This is the primary mechanism by which the Score Benchmark Ghost Overlay becomes more accurate over time.
+This primitive-owned update path is the primary mechanism by which benchmark accuracy and strategy intelligence improve over time.
 
 ---
 
@@ -225,48 +198,75 @@ This is the primary mechanism by which the Score Benchmark Ghost Overlay becomes
 
 | Package | Integration |
 |---|---|
-| `@hbc/step-wizard` | 5-section autopsy uses step wizard in sequential mode with draft persistence |
-| `@hbc/session-state` | Draft autopsy answers persisted across sessions |
-| `@hbc/bic-next-move` | Autopsy BIC assigned to Estimating Lead on trigger; transfers to BD Manager for co-author review |
-| `@hbc/notification-intelligence` | Autopsy triggered → Immediate to Estimating Lead + BD Manager; overdue → Immediate escalation to CE |
-| `@hbc/versioned-record` | Pursuit snapshot captured at autopsy completion; tagged `'autopsy-complete'` |
-| PH7-SF-19 Score Benchmark | Completed autopsies update benchmark dataset; Go/No-Go retrospective adjustments improve benchmark accuracy |
-| PH7-SF-20 Living Strategic Intelligence | Section 5 pre-seeds draft intelligence entries from autopsy findings |
-| `@hbc/complexity` | Essential: autopsy wizard in simplified mode; Expert: full retrospective score adjustment controls |
+| `@hbc/post-bid-autopsy` | New Tier-1 primitive providing the entire model |
+| `@hbc/bic-next-move` | Granular BIC for sections/gaps with avatar ownership projection |
+| `@hbc/complexity` | Essential/Standard/Expert progressive disclosure |
+| `@hbc/versioned-record` | Immutable provenance, audit trail, snapshot freezing |
+| `@hbc/related-items` | Direct deep-links from findings |
+| `@hbc/project-canvas` | Automatic placement in role-aware My Work lane |
+| `@hbc/step-wizard` | 5-section sequential wizard |
+| `@hbc/strategic-intelligence` | Intelligence seeding |
+| `@hbc/score-benchmark` | Benchmark dataset update |
+| `@hbc/post-bid-autopsy` telemetry | Five KPIs (autopsy-completion latency, repeat-error reduction rate, intelligence-seeding conversion rate, benchmark-accuracy lift, autopsy CES) surfaced in canvas and admin dashboard |
+
+---
+
+## Offline / PWA Resilience
+
+Full tablet-native behavior: service worker caches wizard, summary card, and insights dashboard; IndexedDB + `@hbc/versioned-record` persists drafts and state; Background Sync replays changes with optimistic UI and `Saved locally / Queued to sync` indicators.
+
+Offline state guarantees:
+- Field edits and section transitions persist locally when disconnected
+- Submit and approval actions queue with deterministic replay order
+- Version snapshots are preserved; replay never mutates prior accepted versions
+- BIC ownership links and related-item deep-links are restored after reconnect
+
+UX indicators:
+- `Saved locally` appears immediately after local persistence
+- `Queued to sync` appears when network delivery is deferred
+- Sync completion removes queue badge and records version metadata
+
+Operational parity:
+- Matches offline behavior used in Score Benchmark, Strategic Intelligence, and Bid Readiness
+- Uses the same resilience primitives and guardrails across BD and Estimating surfaces
+
+Failure handling:
+- If replay fails, entries remain queued and retry with backoff
+- Conflicted updates are written as new versions for approver review
+- Escalation notifications resume only after successful sync commit
+
+Security and governance:
+- Local drafts remain scoped to authorized user/session context
+- Snapshot freeze metadata is included in replay payloads
+- Audit trail includes local-save timestamp and sync-commit timestamp
 
 ---
 
 ## Priority & ROI
 
-**Priority:** P1 — The flywheel mechanism that makes HB Intel's intelligence accumulate over time; without it, SF-19 (Score Benchmark) relies entirely on seeded historical data that never grows
-**Estimated build effort:** 4–5 sprint-weeks (5-section wizard, summary card, insights dashboard, benchmark integration, intelligence entry seeding)
-**ROI:** Creates compounding intelligence value: each completed autopsy improves future BD decisions; makes Go/No-Go decision quality measurable over time; closes the loop between estimating assumptions and actual bid outcomes; builds the data moat that makes HB Intel increasingly valuable the longer it is used
+**Priority:** P1 — The flywheel mechanism that makes HB Intel's intelligence accumulate over time; seed for the platform-wide `@hbc/post-bid-autopsy` primitive.
+**Estimated build effort:** 4–5 sprint-weeks (now accelerated by reusing existing primitives).
+**ROI:** Creates compounding intelligence value; makes Go/No-Go decision quality measurable; closes the loop between estimating assumptions and actual outcomes; measurable impact via UX telemetry.
 
 ---
 
 ## Definition of Done
 
-- [ ] `IPostBidAutopsy` type defined with all 5 section types
-- [ ] Autopsy auto-triggered when pursuit status changes to Won/Lost/No-Bid
-- [ ] BIC assigned: Estimating Lead (primary); BD Manager (co-author)
-- [ ] 5-day completion SLA with escalation to Chief Estimator on overdue
-- [ ] `PostBidAutopsyWizard` 5-section form using `@hbc/step-wizard`
-- [ ] Auto-population from pursuit + scorecard data
-- [ ] Section 5 pre-seeds intelligence entries from Sections 2 and 3 answers
-- [ ] Draft persistence via `@hbc/session-state` on every field change
-- [ ] `AutopsySummaryCard` renders on completed pursuit records
-- [ ] `AutopsyListView` renders all autopsies (BD/Estimating admin view)
-- [ ] `LearningInsightsDashboard` renders aggregated win/loss analytics
-- [ ] Benchmark dataset update: outcome + factors written to benchmark compute input
-- [ ] Intelligence entry seeding: Section 5 entries submitted to SF-20 approval queue
-- [ ] `@hbc/versioned-record` integration: pursuit snapshot on completion
-- [ ] `@hbc/notification-intelligence`: trigger → Immediate; overdue → escalation
-- [ ] `@hbc/complexity` integration: all three tiers
-- [ ] Unit tests on autopsy trigger logic, benchmark data update, intelligence entry seeding
-- [ ] E2E test: pursuit → status change to Lost → autopsy triggered → wizard complete → intelligence entry created → benchmark updated
+- [ ] New `@hbc/post-bid-autopsy` Tier-1 primitive created and published
+- [ ] All six locked integration patterns implemented and tested
+- [ ] Offline/PWA resilience verified on tablet
+- [ ] Embedded AI actions with provenance and approval guardrails
+- [ ] Progressive disclosure via `@hbc/complexity` across all three modes
+- [ ] Deep-links and canvas integration via `@hbc/related-items` and `@hbc/project-canvas`
+- [ ] Versioned audit trail and admin governance via `@hbc/versioned-record`
+- [ ] Five UX telemetry KPIs wired and surfaced
+- [ ] Unit tests, Storybook stories for all modes and offline states
+- [ ] ADR-0111-post-bid-autopsy-primitive created
 
 ---
 
 ## ADR Reference
 
-Create `docs/architecture/adr/0031-post-bid-learning-loop.md` documenting the autopsy trigger mechanism, the 5-section structure, the benchmark dataset update strategy, the intelligence entry seeding approach, and the compounding value rationale for making this a core platform feature rather than a reporting afterthought.
+Create `docs/architecture/adr/0111-post-bid-learning-loop.md` (and companion ADR for the new `@hbc/post-bid-autopsy` primitive) documenting the autopsy trigger mechanism, the 5-section structure, the benchmark dataset update strategy, the intelligence entry seeding approach, granular BIC integration, complexity-adaptive disclosure, offline strategy, AI Action Layer embedding, cross-module deep-linking, versioning/governance, and telemetry KPIs.
+
+---

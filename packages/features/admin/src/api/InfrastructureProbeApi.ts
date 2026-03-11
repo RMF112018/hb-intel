@@ -1,11 +1,27 @@
+import type { IProbeSnapshot } from '../types/IProbeSnapshot.js';
+
 /**
  * API client for infrastructure probe snapshot retrieval.
  *
- * @placeholder SF17-T01 scaffold — implementation in SF17-T05
+ * @design D-04, SF17-T03
  */
 export class InfrastructureProbeApi {
-  /** Placeholder — returns empty array */
-  async getSnapshots(): Promise<readonly unknown[]> {
+  async getLatestSnapshot(): Promise<IProbeSnapshot | null> {
+    return null;
+  }
+
+  async listSnapshots(_range?: {
+    from: string;
+    to: string;
+  }): Promise<IProbeSnapshot[]> {
     return [];
+  }
+
+  async runNow(): Promise<IProbeSnapshot> {
+    return {
+      snapshotId: `on-demand-${new Date().toISOString()}`,
+      capturedAt: new Date().toISOString(),
+      results: [],
+    };
   }
 }

@@ -26,6 +26,9 @@ export type {
   UseAdminAlertsResult,
   UseInfrastructureProbesResult,
   UseApprovalAuthorityResult,
+  IAlertMonitor,
+  IInfrastructureProbeDefinition,
+  NotificationRoute,
 } from './types/index.js';
 
 // Constants
@@ -40,23 +43,26 @@ export {
 
 // Monitors
 export {
-  monitorRegistry,
+  MonitorRegistry,
   provisioningFailureMonitor,
   permissionAnomalyMonitor,
   stuckWorkflowMonitor,
   overdueProvisioningMonitor,
   upcomingExpirationMonitor,
   staleRecordMonitor,
+  routeAlert,
+  createDefaultMonitorRegistry,
 } from './monitors/index.js';
 
 // Probes
 export {
-  probeScheduler,
+  ProbeScheduler,
   sharePointProbe,
   azureFunctionsProbe,
   searchProbe,
   notificationProbe,
   moduleRecordHealthProbe,
+  createDefaultProbeScheduler,
 } from './probes/index.js';
 
 // API

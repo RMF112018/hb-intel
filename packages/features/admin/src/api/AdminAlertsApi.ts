@@ -1,11 +1,23 @@
+import type { IAdminAlert } from '../types/IAdminAlert.js';
+
 /**
  * API client for admin alert retrieval and acknowledgment.
  *
- * @placeholder SF17-T01 scaffold — implementation in SF17-T05
+ * @design D-02, SF17-T03
  */
 export class AdminAlertsApi {
-  /** Placeholder — returns empty array */
-  async getAlerts(): Promise<readonly unknown[]> {
+  async listActive(): Promise<IAdminAlert[]> {
+    return [];
+  }
+
+  async acknowledge(_alertId: string, _acknowledgedBy: string): Promise<void> {
+    // Persistence implementation deferred to SF17-T05
+  }
+
+  async listHistory(_range?: {
+    from: string;
+    to: string;
+  }): Promise<IAdminAlert[]> {
     return [];
   }
 }

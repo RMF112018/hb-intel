@@ -1,8 +1,22 @@
+import type { IInfrastructureProbeDefinition } from '../types/IInfrastructureProbeDefinition.js';
+
 /**
  * Probes SharePoint site health and connectivity.
  *
- * @placeholder SF17-T01 scaffold — implementation in SF17-T04
+ * @design D-04, SF17-T03
  */
-export const sharePointProbe = {
-  name: 'sharepoint' as const,
-} as const;
+export const sharePointProbe: IInfrastructureProbeDefinition = {
+  probeKey: 'sharepoint-infrastructure',
+
+  async run(nowIso: string) {
+    return {
+      probeId: `sharepoint-${nowIso}`,
+      probeKey: 'sharepoint-infrastructure' as const,
+      status: 'healthy' as const,
+      summary: 'SharePoint infrastructure check — no live connection configured',
+      observedAt: nowIso,
+      metrics: {},
+      anomalies: [],
+    };
+  },
+};

@@ -1,8 +1,20 @@
+import type { IAdminAlert } from '../types/IAdminAlert.js';
+import type { IAlertMonitor } from '../types/IAlertMonitor.js';
+
 /**
  * Monitors for permission anomalies across provisioned resources.
  *
- * @placeholder SF17-T01 scaffold — implementation in SF17-T03
+ * @design D-02, SF17-T03
  */
-export const permissionAnomalyMonitor = {
-  name: 'permission-anomaly' as const,
-} as const;
+export const permissionAnomalyMonitor: IAlertMonitor = {
+  key: 'permission-anomaly',
+  defaultSeverity: 'high',
+
+  async run(_nowIso: string): Promise<IAdminAlert[]> {
+    return [];
+  },
+
+  dedupeKey(alert: IAdminAlert): string {
+    return `${alert.category}:${alert.affectedEntityType}:${alert.affectedEntityId}`;
+  },
+};

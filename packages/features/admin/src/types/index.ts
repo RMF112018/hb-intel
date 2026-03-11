@@ -12,6 +12,11 @@ export type { IProbeSnapshot } from './IProbeSnapshot.js';
 export type { IApprovalAuthorityRule } from './IApprovalAuthorityRule.js';
 export type { IApprovalEligibilityResult } from './IApprovalEligibilityResult.js';
 
+// Monitor & probe contracts
+export type { IAlertMonitor } from './IAlertMonitor.js';
+export type { IInfrastructureProbeDefinition } from './IInfrastructureProbeDefinition.js';
+export type { NotificationRoute } from './NotificationRoute.js';
+
 // Hook return types
 export type { UseAdminAlertsResult } from './UseAdminAlertsResult.js';
 export type { UseInfrastructureProbesResult } from './UseInfrastructureProbesResult.js';
