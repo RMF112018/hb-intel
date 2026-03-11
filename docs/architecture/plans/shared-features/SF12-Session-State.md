@@ -229,4 +229,34 @@ SF12-T07 completed: 2026-03-11
 - acknowledgment: removed stub coverage exclusions (hooks are now real implementations)
 - All 4 packages pass check-types ✓ and test ✓
 Next: SF12-T08 (Testing Strategy)
+
+SF12-T08 completed: 2026-03-11
+- Factory defaults aligned to T08 plan signatures (4 factories, 3 changed)
+- Storybook 8 configured: .storybook/main.ts + preview.ts, ^8.6.0 deps
+- 10 stories created: HbcConnectivityBar (5) + HbcSyncStatusBadge (5)
+- .eslintrc.cjs created (was missing); stale eslint-disable comment removed
+- All gates pass: build ✓ | lint ✓ | check-types ✓ | test 91/91 ✓ | coverage 95%+ ✓
+- All 4 consuming packages pass after factory default changes
+Next: SF12-T09 (Testing & Deployment)
+
+SF12-T09 completed: 2026-03-11
+- All 30 pre-deployment checklist items validated
+- All 4 mechanical enforcement gates passed (build ✓ | lint ✓ | check-types ✓ | test 91/91 ✓)
+- Coverage: 98.83% stmts, 97.77% branches, 95.55% functions — all above 95%
+- Boundary checks: zero prohibited imports
+- ADR-0101 created on disk
+- Documentation deliverables: adoption guide, API reference, README conformance rewrite
+- docs/README.md ADR index updated
+- current-state-map.md §1/§2/§3 updated (98 active ADRs, 10 Category C primitives, 47 workspace members)
+
+SF12 completed: 2026-03-11
+T01–T09 implemented.
+All four mechanical enforcement gates passed.
+ADR created: docs/architecture/adr/ADR-0101-session-state-offline-persistence.md
+Documentation added:
+  - docs/how-to/developer/session-state-adoption-guide.md
+  - docs/reference/session-state/api.md
+  - packages/session-state/README.md
+docs/README.md ADR index updated: ADR-0101 row appended.
+current-state-map.md §2 updated with SF12 and ADR-0101 rows.
 -->

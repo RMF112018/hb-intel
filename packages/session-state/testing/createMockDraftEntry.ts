@@ -7,9 +7,9 @@ export function createMockDraftEntry(
   overrides: Partial<IDraftEntry> = {},
 ): IDraftEntry {
   return {
-    draftKey: 'draft-1',
-    value: {},
-    savedAt: new Date().toISOString(),
+    draftKey: 'form:001',
+    value: { name: 'Demo' },
+    savedAt: '2026-03-10T12:00:00Z',
     ttlHours: 72,
     ...overrides,
   };

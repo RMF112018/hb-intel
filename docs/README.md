@@ -129,6 +129,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0098 | Accepted | [ADR-0098-data-seeding-import-primitive.md](./architecture/adr/ADR-0098-data-seeding-import-primitive.md) |
 | ADR-0099 | Accepted | [0099-notification-intelligence-tiered-model.md](./architecture/adr/0099-notification-intelligence-tiered-model.md) |
 | ADR-0100 | Accepted | [ADR-0100-smart-empty-state-platform-primitive.md](./architecture/adr/ADR-0100-smart-empty-state-platform-primitive.md) |
+| ADR-0101 | Accepted | [ADR-0101-session-state-offline-persistence.md](./architecture/adr/ADR-0101-session-state-offline-persistence.md) |
 
 ## Reference Documents
 

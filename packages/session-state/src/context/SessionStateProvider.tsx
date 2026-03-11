@@ -73,7 +73,6 @@ export function SessionStateProvider({
       engineRef.current = null;
       monitorRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const contextValue = useMemo<ISessionStateContext>(() => ({

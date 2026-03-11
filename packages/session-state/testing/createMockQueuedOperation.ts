@@ -7,10 +7,10 @@ export function createMockQueuedOperation(
   overrides: Partial<IQueuedOperation> = {},
 ): IQueuedOperation {
   return {
-    operationId: 'op-1',
-    type: 'upload',
-    target: '/api/records',
-    payload: {},
+    operationId: 'op-001',
+    type: 'api-mutation',
+    target: '/api/example',
+    payload: { id: 'abc' },
     retryCount: 0,
     maxRetries: 5,
     createdAt: new Date().toISOString(),

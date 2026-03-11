@@ -10,7 +10,7 @@ export function createMockSessionContext(
     connectivity: 'online',
     queuedOperations: [],
     pendingCount: 0,
-    triggerSync: () => Promise.resolve(),
+    triggerSync: async () => {},
     saveDraft: () => {},
     loadDraft: <T>() => null as T | null,
     clearDraft: () => {},
