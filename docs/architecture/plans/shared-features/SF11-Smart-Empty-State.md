@@ -236,4 +236,16 @@ SF11-T08 completed: 2026-03-11
 - Lint fix: setup.ts require('react') → await import('react') in async vi.mock factory
 - Pre-existing @hbc/acknowledgment lint warning confirmed unrelated to T08
 - Next: T09 Testing & Deployment
+
+SF11-T09 completed: 2026-03-11
+SF11 completed: 2026-03-11
+T01–T09 implemented.
+All four mechanical enforcement gates passed.
+ADR created: docs/architecture/adr/ADR-0100-smart-empty-state-platform-primitive.md
+Documentation added:
+  - docs/how-to/developer/smart-empty-state-adoption-guide.md
+  - docs/reference/smart-empty-state/api.md
+  - packages/smart-empty-state/README.md
+docs/README.md ADR index updated: ADR-0100 row appended.
+current-state-map.md §2 updated with SF11 and ADR-0100 rows.
 -->
