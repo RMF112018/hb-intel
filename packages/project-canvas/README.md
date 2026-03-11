@@ -67,4 +67,6 @@ The `AIInsightTile` component provides a standardized container for AI-driven in
 
 - [SF13 Master Plan](../../docs/architecture/plans/shared-features/SF13-Project-Canvas.md)
 - [SF13-T09 Testing & Deployment](../../docs/architecture/plans/shared-features/SF13-T09-Testing-and-Deployment.md)
-- ADR-0102 (pending — will document canvas architecture decisions)
+- [ADR-0102 — Project Canvas Role-Based Dashboard Primitive](../../docs/architecture/adr/ADR-0102-project-canvas-role-based-dashboard.md)
+- [Adoption Guide](../../docs/how-to/developer/project-canvas-adoption-guide.md)
+- [API Reference](../../docs/reference/project-canvas/api.md)

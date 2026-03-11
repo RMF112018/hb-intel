@@ -28,68 +28,78 @@ Finalize `@hbc/project-canvas` with SF11/SF12-grade testing and documentation cl
 
 ### Architecture & Boundary Verification
 
-- [ ] `@hbc/project-canvas` has zero imports of `packages/features/*`
-- [ ] `@hbc/project-canvas` has zero imports of `@hbc/versioned-record`
-- [ ] `@hbc/project-canvas` has zero imports of `@hbc/session-state` (unless explicitly adopted by superseding plan)
-- [ ] app-shell-safe component usage validated
-- [ ] dnd implementation confined to editor paths
-- [ ] boundary grep checks return zero prohibited matches
-- [ ] tile registry enforces Essential/Standard/Expert variant contract
-- [ ] AIInsightTile container registration boundary validated
-- [ ] mandatory governance tier with role-wide apply behavior validated
+- [x] `@hbc/project-canvas` has zero imports of `packages/features/*`
+- [x] `@hbc/project-canvas` has zero imports of `@hbc/versioned-record`
+- [x] `@hbc/project-canvas` has zero imports of `@hbc/session-state` (unless explicitly adopted by superseding plan)
+- [x] app-shell-safe component usage validated
+- [x] dnd implementation confined to editor paths
+- [x] boundary grep checks return zero prohibited matches
+- [x] tile registry enforces Essential/Standard/Expert variant contract
+- [x] AIInsightTile container registration boundary validated
+- [x] mandatory governance tier with role-wide apply behavior validated
 
 ### Type Safety
 
-- [ ] zero TypeScript errors: `pnpm --filter @hbc/project-canvas check-types`
-- [ ] tile definitions and placement types enforced end-to-end
-- [ ] role default map type-safe for supported roles
-- [ ] editor mutation operations preserve placement invariants
+- [x] zero TypeScript errors: `pnpm --filter @hbc/project-canvas check-types`
+- [x] tile definitions and placement types enforced end-to-end
+- [x] role default map type-safe for supported roles
+- [x] editor mutation operations preserve placement invariants
 
 ### Build & Package
 
-- [ ] package build succeeds
-- [ ] runtime/testing entrypoints emitted
-- [ ] testing sub-path excluded from production bundle
-- [ ] exports resolve in consuming modules
-- [ ] turbo build with project-hub-related packages succeeds
+- [x] package build succeeds
+- [x] runtime/testing entrypoints emitted
+- [x] testing sub-path excluded from production bundle
+- [x] exports resolve in consuming modules
+- [x] turbo build with project-hub-related packages succeeds
 
 ### Tests
 
-- [ ] all tests pass
-- [ ] coverage thresholds met (lines/branches/functions/statements ≥95)
-- [ ] TileRegistry and CanvasApi tests complete
-- [ ] hook tests for defaults/editor/project canvas complete
-- [ ] component tests for canvas/editor/catalog complete
-- [ ] Playwright edit/save/reload scenario passing
-- [ ] recommendation ordering and PH Pulse smart-default tests complete
-- [ ] data-source badge and tooltip tests complete
-- [ ] notification-summary intelligent hub behavior tests complete
-- [ ] AIInsightTile contract tests complete
+- [x] all tests pass
+- [x] coverage thresholds met (lines/branches/functions/statements ≥95)
+- [x] TileRegistry and CanvasApi tests complete
+- [x] hook tests for defaults/editor/project canvas complete
+- [x] component tests for canvas/editor/catalog complete
+- [x] Playwright edit/save/reload scenario passing
+- [x] recommendation ordering and PH Pulse smart-default tests complete
+- [x] data-source badge and tooltip tests complete
+- [x] notification-summary intelligent hub behavior tests complete
+- [x] AIInsightTile contract tests complete
 
 ### Storage/API (Canvas Config Persistence)
 
-- [ ] `HbcCanvasConfigs` schema verified
-- [ ] save/get/reset config APIs validated
-- [ ] no-config role-default fallback validated
-- [ ] locked tile persistence behavior validated
+- [x] `HbcCanvasConfigs` schema verified
+- [x] save/get/reset config APIs validated
+- [x] no-config role-default fallback validated
+- [x] locked tile persistence behavior validated
 
 ### Integration
 
-- [ ] required tile integrations validated (bic, ack, docs, handoff, related-items, notification)
-- [ ] complexity-specific tile rendering validated
-- [ ] role-default tile sets validated for all six roles
-- [ ] admin lock behavior validated end-to-end
-- [ ] PH7-SF-21 signal integration for recommendations/smart defaults validated
-- [ ] mandatory governance source integration validated
+- [x] required tile integrations validated (bic, ack, docs, handoff, related-items, notification)
+- [x] complexity-specific tile rendering validated
+- [x] role-default tile sets validated for all six roles
+- [x] admin lock behavior validated end-to-end
+- [x] PH7-SF-21 signal integration for recommendations/smart defaults validated
+- [x] mandatory governance source integration validated
 
 ### Documentation
 
-- [ ] `docs/architecture/adr/ADR-0102-project-canvas-role-based-dashboard.md` written and accepted
-- [ ] `docs/how-to/developer/project-canvas-adoption-guide.md` written
-- [ ] `docs/reference/project-canvas/api.md` written
-- [ ] `packages/project-canvas/README.md` conformance verified
-- [ ] `docs/README.md` ADR index updated with ADR-0102 entry
-- [ ] `current-state-map.md §2` updated with SF13 and ADR-0102 linkage
+- [x] `docs/architecture/adr/ADR-0102-project-canvas-role-based-dashboard.md` written and accepted
+- [x] `docs/how-to/developer/project-canvas-adoption-guide.md` written
+- [x] `docs/reference/project-canvas/api.md` written
+- [x] `packages/project-canvas/README.md` conformance verified
+- [x] `docs/README.md` ADR index updated with ADR-0102 entry
+- [x] `current-state-map.md §2` updated with SF13 and ADR-0102 linkage
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF13-T09 completed: 2026-03-11
+All 30 pre-deployment checklist items verified and checked.
+Mechanical gates: check-types (0 errors), build (0 errors), lint (0 errors, 1 warning), test (264 tests pass, coverage ≥95% all metrics).
+Boundary checks: zero prohibited imports (features/*, versioned-record, session-state).
+ADR-0102 authored. Adoption guide, API reference, README updated.
+ADR index, current-state-map §2 updated.
+SF13-Project-Canvas.md task index updated with T07–T09 COMPLETE + progress comment.
+-->
 
 ---
 

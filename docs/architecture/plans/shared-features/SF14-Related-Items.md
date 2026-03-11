@@ -1,119 +1,238 @@
-# SF14 — `@hbc/related-items`: Cross-Module Record Relationship Panel
+**Locked Decision (Q8):** We adopt Suggestion B exactly as proposed. The public TypeScript contracts are extended in a backward-compatible manner with `governanceMetadata?: IGovernanceMetadata`, `IRelatedItem` additions (`versionChip`, `aiConfidence`), updated Definition of Done, expanded ADR, and refreshed Integration Points table. This is now locked.
 
-**Plan Version:** 1.0
-**Date:** 2026-03-10
-**Source Spec:** `docs/explanation/feature-decisions/PH7-SF-14-Shared-Feature-Related-Items.md`
-**Priority Tier:** 2 — Application Layer (record-detail context primitive)
-**Estimated Effort:** 3–4 sprint-weeks
-**ADR Required:** `docs/architecture/adr/ADR-0103-related-items-unified-work-graph.md`
-
-> **Doc Classification:** Canonical Normative Plan — SF14 implementation master plan for `@hbc/related-items`; governs SF14-T01 through SF14-T09.
+The interview for `@hbc/related-items` is complete. All eight decisions are locked on Suggestion B, delivering a true mold-breaking Unified Work Graph that eliminates cross-module silos, enforces role-aware progressive disclosure, provides admin governance, supports offline PWA resilience, and future-proofs for graph/AI without any burden on module teams.
 
 ---
 
-## Purpose
+# PH7-SF-14: `@hbc/related-items` — Cross-Module Record Relationship Panel
 
-`@hbc/related-items` provides a consistent relationship panel so records can surface cross-module context (origin, conversion, dependencies, and related artifacts) without forcing multi-tab navigation.
-
----
-
-## Locked Interview Decisions
-
-| # | Decision | Locked Choice |
-|---|---|---|
-| D-01 | Relationship registry | `RelationshipRegistry.register()` is canonical integration entrypoint |
-| D-02 | Direction model | `originated`, `converted-to`, `has`, `references`, `blocks`, `is-blocked-by` |
-| D-03 | Resolution strategy | Module-local `resolveRelatedIds(sourceRecord)` functions |
-| D-04 | Persistence/API model | Related-item summaries fetched via backend `RelatedItemsApi` |
-| D-05 | Rendering model | Panel grouped by relationship direction with item cards |
-| D-06 | Visibility model | Role-filtered relationships via `visibleToRoles` |
-| D-07 | Complexity behavior | Essential: panel hidden; Standard: panel visible; Expert: includes BIC state details |
-| D-08 | Canvas integration | `RelatedItemsTile` embeds panel in project canvas |
-| D-09 | Bidirectional baseline | BD↔Estimating↔Project Hub relationships must be registered both directions |
-| D-10 | Testing sub-path | `@hbc/related-items/testing` exports canonical relationship fixtures |
+**Priority Tier:** 2 — Application Layer (enhances all record detail pages)  
+**Package:** `packages/related-items/`  
+**Interview Decision:** Q25 — Option B confirmed (all 8 questions locked on Suggestion B)  
+**Mold Breaker Source:** UX-MB §3 (Unified Work Graph); ux-mold-breaker.md Signature Solution #3; con-tech-ux-study §9 (Cross-module context gaps); Operating Principle §7.1 (Role-awareness)
 
 ---
 
-## Package Directory Structure
+## Problem Solved
 
-```text
+Construction project records do not exist in isolation. A Go/No-Go Scorecard is related to the Estimating Pursuit that it spawned, which is related to the Project record it became, which has related Turnover Meeting documents, constraints, and permit log entries. Understanding a record in context requires knowing what it is connected to — but no construction platform provides this relationship visibility across module boundaries.
+
+Without `@hbc/related-items`:
+- A PM viewing a Project record has no link back to the BD scorecard that originated it
+- A BD Manager cannot see that a won pursuit has been converted and is in active estimating
+- An Estimating Coordinator cannot see the related BD heritage documents from the same project's record
+
+This creates a "silo problem" — the data exists, but the connections are invisible.
+
+---
+
+## Mold Breaker Rationale
+
+The ux-mold-breaker.md Signature Solution #3 (Unified Work Graph) specifies: "Every record in the system knows what it is connected to, and surfaces those connections in a consistent relationship panel." Operating Principle §7.1 (Role-awareness) extends this: the relationship panel shows the connections most relevant to the current user's role (via `relationshipPriority` and `roleRelevanceMap`).
+
+The con-tech UX study §9 and procore-ux-study.md identify cross-module context gaps as a recurring pain point — users must navigate away from their current record to check related items in other modules, then navigate back. `@hbc/related-items` collapses this navigation into a sidebar panel (or canvas tile) on every detail page, with offline PWA resilience, version history, and AI suggestions.
+
+---
+
+## Relationship Model
+
+```
+BD Scorecard
+    └── originated → Estimating Pursuit
+                         └── converted to → Project Record
+                                                ├── has → Turnover Meeting
+                                                ├── has → PMP
+                                                ├── has → Constraints (multiple)
+                                                ├── has → Permit Log entries
+                                                └── has → Monthly Reviews
+```
+
+Related items are registered declaratively by each module using `RelationshipRegistry.registerBidirectionalPair()`. The registry automatically creates symmetric reverse entries, applies `governanceMetadata` (priority, resolverStrategy, etc.), and versions every pair via `@hbc/versioned-record`.
+
+---
+
+## Interface Contract
+
+```typescript
+// packages/related-items/src/types/IRelatedItems.ts
+
+export type RelationshipDirection = 'originated' | 'converted-to' | 'has' | 'references' | 'blocks' | 'is-blocked-by';
+
+export interface IGovernanceMetadata {
+  relationshipPriority: number; // 0–100 for dynamic sorting/collapse
+  resolverStrategy?: 'sharepoint' | 'graph' | 'ai-suggested' | 'hybrid';
+  roleRelevanceMap?: Record<string, RelationshipDirection[]>;
+  aiSuggestionHook?: string; // registered hook ID
+  dataSource?: 'sharepoint' | 'graph';
+}
+
+export interface IRelationshipDefinition {
+  sourceRecordType: string;
+  targetRecordType: string;
+  label: string;
+  direction: RelationshipDirection;
+  targetModule: string;
+  resolveRelatedIds: (sourceRecord: unknown) => string[];
+  buildTargetUrl: (targetRecordId: string) => string;
+  visibleToRoles?: string[];
+  governanceMetadata?: IGovernanceMetadata;
+}
+
+export interface IRelatedItem {
+  recordType: string;
+  recordId: string;
+  label: string;
+  status?: string;
+  href: string;
+  bicState?: IBicNextMoveState;
+  moduleIcon: string;
+  relationship: RelationshipDirection;
+  relationshipLabel: string;
+  versionChip?: { lastChanged: string; author: string }; // from @hbc/versioned-record
+  aiConfidence?: number;
+}
+```
+
+---
+
+## Package Architecture
+
+```
 packages/related-items/
 ├── package.json
-├── README.md
 ├── tsconfig.json
-├── vitest.config.ts
 ├── src/
 │   ├── index.ts
 │   ├── types/
 │   │   ├── IRelatedItems.ts
 │   │   └── index.ts
-│   ├── constants/
-│   │   ├── relationshipDefaults.ts
-│   │   └── index.ts
 │   ├── registry/
-│   │   ├── RelationshipRegistry.ts
-│   │   └── index.ts
+│   │   └── RelationshipRegistry.ts       # registerBidirectionalPair + governance
 │   ├── api/
-│   │   ├── RelatedItemsApi.ts
-│   │   └── index.ts
+│   │   └── RelatedItemsApi.ts            # batched /api/related-items/summaries
 │   ├── hooks/
-│   │   ├── useRelatedItems.ts
-│   │   └── index.ts
+│   │   └── useRelatedItems.ts            # loads, enriches, caches offline
+│   ├── governance/
+│   │   └── HbcRelatedItemsGovernance.tsx # Admin surface
 │   └── components/
-│       ├── HbcRelatedItemsPanel.tsx
-│       ├── HbcRelatedItemCard.tsx
+│       ├── HbcRelatedItemsPanel.tsx      # role-aware, priority-sorted
+│       ├── HbcRelatedItemCard.tsx        # version chip + AI button
+│       ├── HbcRelatedItemsTile.tsx       # canvas compact variant
 │       └── index.ts
-├── testing/
-│   ├── index.ts
-│   ├── createMockRelationshipDefinition.ts
-│   ├── createMockRelatedItem.ts
-│   ├── createMockSourceRecord.ts
-│   └── mockRelationshipDirections.ts
-└── src/__tests__/
-    ├── setup.ts
-    ├── RelationshipRegistry.test.ts
-    ├── RelatedItemsApi.test.ts
-    ├── useRelatedItems.test.ts
-    ├── HbcRelatedItemsPanel.test.tsx
-    └── HbcRelatedItemCard.test.tsx
+```
+
+---
+
+## Component Specifications
+
+### `HbcRelatedItemsPanel` — Sidebar Relationship Panel
+
+```typescript
+interface HbcRelatedItemsPanelProps {
+  sourceRecordType: string;
+  sourceRecordId: string;
+  sourceRecord: unknown;
+  showBicState?: boolean;
+}
+```
+
+**Visual behavior:**
+- Collapsible sidebar panel titled "Related Items"
+- Groups sorted and collapsed by `relationshipPriority` and role relevance
+- Each group shows label and count
+- Items rendered as `HbcRelatedItemCard` with version-history chip (popover via `@hbc/versioned-record`)
+- Empty state: role-aware `@hbc/smart-empty-state` with coaching + “Suggest new relationships” button (AI at Expert only)
+- AI Suggestions group (Expert complexity only) from registered hooks
+
+### `HbcRelatedItemCard` — Related Item Row
+
+**Visual behavior:**
+- Module icon, label, status badge
+- BIC state (from `@hbc/bic-next-move`)
+- Version-history chip (last changed + author avatar) → inline popover
+- Relationship direction chip
+- Clickable; entire card navigates
+
+### `HbcRelatedItemsTile` — Canvas Variant
+
+Compact horizontal-scroll or single-accordion view showing only top 3 priority items. “View all” opens full panel in canvas overlay/modal. Inherits all card features and offline caching.
+
+---
+
+## Relationship Registration Pattern
+
+```typescript
+// In BD module initialization
+import { RelationshipRegistry } from '@hbc/related-items';
+
+RelationshipRegistry.registerBidirectionalPair(
+  {
+    sourceRecordType: 'bd-scorecard',
+    targetRecordType: 'estimating-pursuit',
+    label: 'Originated Pursuit',
+    direction: 'originated',
+    targetModule: 'estimating',
+    resolveRelatedIds: (scorecard) => scorecard.linkedPursuitId ? [scorecard.linkedPursuitId] : [],
+    buildTargetUrl: (id) => `/estimating/pursuits/${id}`,
+    visibleToRoles: ['BD Manager', 'Chief Estimator'],
+    governanceMetadata: { relationshipPriority: 90, resolverStrategy: 'sharepoint' }
+  },
+  { label: 'Originated from BD Scorecard' } // optional overrides
+);
 ```
 
 ---
 
 ## Integration Points
 
-| Package | Integration Detail |
-|---|---|
-| `@hbc/bic-next-move` | optional BIC state display on related-item cards |
-| `@hbc/project-canvas` | `RelatedItemsTile` panel embedding |
-| `@hbc/complexity` | panel visibility/detail behavior by tier |
-| `@hbc/search` | deep-links to records with panel context |
+| Package                  | Integration |
+|--------------------------|-------------|
+| `@hbc/bic-next-move`     | Live BIC enrichment in batched API + card indicators |
+| `@hbc/project-canvas`    | `HbcRelatedItemsTile` (compact top-3 + overlay) |
+| `@hbc/complexity`        | Essential: hidden; Standard: visible; Expert: BIC + AI suggestions + full priority sorting |
+| `@hbc/search`            | Automatic deep-links from search results |
+| `@hbc/versioned-record`  | Version chips + immutable governance history |
+| `@hbc/activity-timeline` | Every governance change emitted |
+| `@hbc/session-state` + `@hbc/sharepoint-docs` | Offline caching of summaries for PWA resilience |
+| `@hbc/ai-assist` (future) | Registered suggestion hooks + “Suggest” button |
+
+---
+
+## SPFx Constraints
+
+- `HbcRelatedItemsPanel` renders as collapsible section (never true sidebar)
+- Batched API routes through Azure Functions
+- Registry initialized at Application Customizer level
+- Full offline caching works in PWA standalone mode
+
+---
+
+## Priority & ROI
+
+**Priority:** P1 — Foundational for Unified Work Graph; eliminates navigation tax on every detail page  
+**Estimated build effort:** 4–5 sprint-weeks (includes governance surface, batched API, offline caching, canvas tile)  
+**ROI:** Collapses multi-tab navigation; makes BD-to-Project chain visible at every stage; zero incremental cost per module; PWA-ready from day one
 
 ---
 
 ## Definition of Done
 
-- [ ] relationship contracts and registry exported
-- [ ] related-items API + hook implemented
-- [ ] panel/card components implement grouped relationship rendering
-- [ ] bidirectional relationship references documented for BD/Estimating/Project Hub
-- [ ] complexity and canvas integration behavior documented
-- [ ] testing sub-path fixtures exported
-- [ ] SF11-grade T09 documentation/deployment requirements included
-- [ ] `current-state-map.md` updated with SF14 and ADR-0103 entries
+- [ ] `IRelationshipDefinition`, `IGovernanceMetadata`, and `IRelatedItem` contracts defined
+- [ ] `RelationshipRegistry.registerBidirectionalPair()` + `registerAISuggestionHook()` available
+- [ ] Batched `RelatedItemsApi.getRelatedItems()` endpoint with BIC enrichment and hybrid routing
+- [ ] `useRelatedItems` hook with offline caching via `@hbc/session-state`
+- [ ] `HbcRelatedItemsPanel` with priority-based sorting, role-aware collapse, version chips, smart empty state
+- [ ] `HbcRelatedItemCard` with version popover and AI suggest button
+- [ ] `HbcRelatedItemsTile` for `@hbc/project-canvas` (top-3 compact view)
+- [ ] Dedicated Admin governance surface (editable priority/visibility, archiving, Preview as Role, activity-timeline emission)
+- [ ] BD, Estimating, and Project Hub relationships registered bidirectionally
+- [ ] Full integration with `@hbc/bic-next-move`, `@hbc/complexity`, `@hbc/versioned-record`, `@hbc/activity-timeline`, `@hbc/search`
+- [ ] Offline PWA resilience verified
+- [ ] Unit tests on registry, API batching, and priority logic
+- [ ] Storybook: all variants, governance surface, AI group, canvas tile
 
 ---
 
-## Task File Index
+## ADR Reference
 
-| File | Contents |
-|---|---|
-| `SF14-T01-Package-Scaffold.md` | package scaffold + README requirement |
-| `SF14-T02-TypeScript-Contracts.md` | relationship contracts + constants |
-| `SF14-T03-Registry-and-API.md` | relationship registry + API behavior |
-| `SF14-T04-Hooks.md` | related-items hook and grouping model |
-| `SF14-T05-HbcRelatedItemsPanel.md` | panel renderer behavior |
-| `SF14-T06-HbcRelatedItemCard.md` | card behavior and interaction |
-| `SF14-T07-Reference-Integrations.md` | BD/Estimating/Project Hub bidirectional references |
-| `SF14-T08-Testing-Strategy.md` | testing fixtures + test matrix |
-| `SF14-T09-Testing-and-Deployment.md` | checklist, ADR/docs/index/state-map updates |
+Create `docs/architecture/adr/0023-related-items-unified-work-graph.md` documenting the bidirectional registration pattern, pluggable `resolverStrategy`, priority-based progressive disclosure, batched API, governance surface, offline caching strategy, and decision to keep module-local `resolveRelatedIds` while adding hybrid/graph/AI extensibility.
