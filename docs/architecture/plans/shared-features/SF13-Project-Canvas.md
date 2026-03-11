@@ -136,7 +136,7 @@ packages/project-canvas/
 | `SF13-T02-TypeScript-Contracts.md` | canvas contracts + constants — **COMPLETE 2026-03-11** |
 | `SF13-T03-Registry-and-API.md` | tile registry + CanvasApi — **COMPLETE 2026-03-11** |
 | `SF13-T04-Hooks.md` | canvas/editor/default hooks — **COMPLETE 2026-03-11** |
-| `SF13-T05-HbcProjectCanvas.md` | grid renderer + lazy tile loading |
+| `SF13-T05-HbcProjectCanvas.md` | grid renderer + lazy tile loading — **COMPLETE 2026-03-11** |
 | `SF13-T06-HbcCanvasEditor-and-TileCatalog.md` | editor mode + catalog + DnD behavior |
 | `SF13-T07-Reference-Integrations.md` | cross-package tile references and defaults |
 | `SF13-T08-Testing-Strategy.md` | testing sub-path + test matrix |

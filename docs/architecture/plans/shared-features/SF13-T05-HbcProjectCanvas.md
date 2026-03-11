@@ -46,3 +46,16 @@ interface HbcProjectCanvasProps {
 pnpm --filter @hbc/project-canvas test -- HbcProjectCanvas
 pnpm --filter @hbc/project-canvas build
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF13-T05 completed: 2026-03-11
+Files created:
+  - src/components/CanvasTileCard.tsx (internal tile card sub-component)
+  - src/__tests__/HbcProjectCanvas.test.tsx (18 tests)
+  - .eslintrc.cjs (ESLint config for package)
+Files rewritten:
+  - src/components/HbcProjectCanvas.tsx (full orchestrator replacing placeholder)
+Barrel verified: src/components/index.ts already exports HbcProjectCanvas; CanvasTileCard stays internal
+Gates passed: check-types ✓ | build ✓ | test (84/84) ✓ | lint ✓
+Next: T06 (HbcCanvasEditor + TileCatalog)
+-->

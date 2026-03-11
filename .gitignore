@@ -56,3 +56,4 @@ storybook-static/
 *.swo
 playwright-report/
 test-results/
+.claude/plans/spicy-forging-knuth.md
