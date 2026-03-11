@@ -2,6 +2,7 @@ import { useId, useCallback } from 'react';
 import type { ReactElement } from 'react';
 import { useComplexity } from '@hbc/complexity';
 import { useEmptyState } from '../hooks/useEmptyState.js';
+import { HbcEmptyStateIllustration } from './HbcEmptyStateIllustration.js';
 import { EMPTY_STATE_COACHING_COLLAPSE_LABEL } from '../constants/emptyStateDefaults.js';
 import type {
   EmptyStateClassification,
@@ -91,28 +92,30 @@ export function HbcSmartEmptyState({
       data-classification={classification}
       className={`hbc-empty-state hbc-empty-state--${variant}`}
     >
-      <span
-        className="hbc-empty-state__icon"
-        data-classification={classification}
-        aria-hidden="true"
+      <HbcEmptyStateIllustration
+        classification={classification}
+        illustrationKey={resolved.illustration}
+        size={variant === 'full-page' ? 'lg' : 'sm'}
       />
 
-      <h2 id={headingId} className="hbc-empty-state__heading">
-        {resolved.heading}
-      </h2>
+      <div className="hbc-empty-state__content">
+        <h2 id={headingId} className="hbc-empty-state__heading">
+          {resolved.heading}
+        </h2>
 
-      <p id={descriptionId} className="hbc-empty-state__description">
-        {resolved.description}
-      </p>
+        <p id={descriptionId} className="hbc-empty-state__description">
+          {resolved.description}
+        </p>
 
-      {renderCoachingTip()}
+        {renderCoachingTip()}
 
-      <div className="hbc-empty-state__actions">
-        {resolved.primaryAction && renderAction(resolved.primaryAction)}
-        {resolved.secondaryAction && renderAction(resolved.secondaryAction)}
-        {classification === 'filter-empty' &&
-          resolved.filterClearAction &&
-          renderAction(resolved.filterClearAction)}
+        <div className="hbc-empty-state__actions">
+          {resolved.primaryAction && renderAction(resolved.primaryAction)}
+          {resolved.secondaryAction && renderAction(resolved.secondaryAction)}
+          {classification === 'filter-empty' &&
+            resolved.filterClearAction &&
+            renderAction(resolved.filterClearAction)}
+        </div>
       </div>
     </section>
   );

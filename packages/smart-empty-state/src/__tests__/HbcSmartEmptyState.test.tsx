@@ -236,13 +236,13 @@ describe('HbcSmartEmptyState', () => {
     expect(region.getAttribute('aria-describedby')).toBe(desc.id);
   });
 
-  it('decorative icon has aria-hidden', () => {
+  it('decorative illustration has aria-hidden', () => {
     const { container } = render(
       <HbcSmartEmptyState config={makeConfig()} context={makeContext()} />,
     );
-    const icon = container.querySelector('.hbc-empty-state__icon');
-    expect(icon).not.toBeNull();
-    expect(icon!.getAttribute('aria-hidden')).toBe('true');
+    const illustration = container.querySelector('.hbc-empty-state__illustration');
+    expect(illustration).not.toBeNull();
+    expect(illustration!.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('action with href renders as anchor and fires onActionFired on click', async () => {

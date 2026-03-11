@@ -209,4 +209,12 @@ SF11-T05 completed: 2026-03-11
 - 17 new component tests; 75 total package tests; 100% coverage all metrics
 - Full monorepo build verified (35/35)
 - Next: T06 HbcEmptyStateIllustration & Layout
+
+SF11-T06 completed: 2026-03-11
+- HbcEmptyStateIllustration.tsx rewritten: classification→icon mapping (Search, StatusDraftIcon, Filter, HardHat, StatusAttentionIcon), illustrationKey override with fallback to StatusInfoIcon, sm/md/lg size variants, aria-hidden decorative
+- HbcSmartEmptyState.tsx updated: placeholder <span> replaced with <HbcEmptyStateIllustration>, content wrapper div added, size varies by variant (lg full-page, sm inline)
+- Barrel exports updated with HbcEmptyStateIllustrationProps; setup.ts global mock for @hbc/ui-kit/icons added
+- 12 new illustration tests; 87 total package tests; 100% coverage all metrics
+- Full monorepo build verified (35/35)
+- Next: T07 Reference Implementations
 -->

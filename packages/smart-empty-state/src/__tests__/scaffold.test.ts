@@ -116,7 +116,7 @@ describe('@hbc/smart-empty-state scaffold', () => {
   });
 
   it('renders HbcEmptyStateIllustration', () => {
-    const { container } = render(createElement(HbcEmptyStateIllustration));
+    const { container } = render(createElement(HbcEmptyStateIllustration, { classification: 'truly-empty' }));
     expect(container).toBeDefined();
   });
 });

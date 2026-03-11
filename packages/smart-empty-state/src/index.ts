@@ -33,3 +33,4 @@ export type { UseEmptyStateParams } from './hooks/index.js';
 export { HbcSmartEmptyState } from './components/index.js';
 export type { HbcSmartEmptyStateProps } from './components/index.js';
 export { HbcEmptyStateIllustration } from './components/index.js';
+export type { HbcEmptyStateIllustrationProps } from './components/index.js';

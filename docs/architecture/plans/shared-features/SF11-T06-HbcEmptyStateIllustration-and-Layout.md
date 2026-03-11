@@ -57,3 +57,15 @@ Requirements:
 pnpm --filter @hbc/smart-empty-state test -- HbcEmptyStateIllustration
 pnpm --filter @hbc/smart-empty-state build
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF11-T06 completed: 2026-03-11
+- HbcEmptyStateIllustration.tsx: classification→icon mapping (5 classifications), illustrationKey override with ICON_KEY_MAP registry, StatusInfoIcon fallback, sm/md/lg size support, aria-hidden decorative
+- HbcSmartEmptyState.tsx: placeholder <span> replaced with <HbcEmptyStateIllustration>, content wrapper <div class="hbc-empty-state__content"> added, size varies by variant (lg for full-page, sm for inline)
+- Barrel exports: HbcEmptyStateIllustrationProps added to components/index.ts and src/index.ts
+- setup.ts: global vi.mock for @hbc/ui-kit/icons with createElement-based mock icons
+- scaffold.test.ts: updated to pass required classification prop
+- HbcSmartEmptyState.test.tsx: test #16 selector updated from .hbc-empty-state__icon to .hbc-empty-state__illustration
+- HbcEmptyStateIllustration.test.tsx: 12 new tests (5 classification defaults, key override, unknown key fallback, 3 size variants, aria-hidden, data-classification)
+- All gates pass: check-types (0 errors), build (0 errors), test:coverage (100% all metrics, 87 tests), full monorepo build (35/35)
+-->
