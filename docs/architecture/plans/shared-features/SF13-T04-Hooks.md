@@ -46,3 +46,23 @@ Implement `useProjectCanvas`, `useCanvasEditor`, and `useRoleDefaultCanvas`.
 pnpm --filter @hbc/project-canvas test -- useRoleDefaultCanvas useProjectCanvas useCanvasEditor
 pnpm --filter @hbc/project-canvas check-types
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+T04 completed: 2026-03-11
+Hooks implemented (6 total):
+  - useRoleDefaultCanvas — role-default tile resolution with auto-layout (useMemo, pure computation)
+  - useCanvasConfig — config load/save/reset via CanvasApi (useState + useEffect + useCallback)
+  - useCanvasMandatoryTiles — mandatory tile resolution + isMandatory/isLocked helpers
+  - useCanvasRecommendations — recommendation fetch with signal-priority sorting + graceful degradation
+  - useCanvasEditor — full editor with add/remove/move/resize/reorder + constraint enforcement (no-op on locked/mandatory)
+  - useProjectCanvas — orchestrator composing config + defaults + mandatory overlay
+Tests created (5 suites, 43 tests):
+  - useCanvasConfig.test.ts (7 tests)
+  - useCanvasEditor.test.ts (17 tests)
+  - useCanvasRecommendations.test.ts (5 tests)
+  - useCanvasMandatoryTiles.test.ts (7 tests)
+  - useProjectCanvas.test.ts (7 tests)
+Barrel exports updated: src/hooks/index.ts, src/index.ts
+Verification: check-types ✓, build ✓, test 66/66 ✓
+Next: T05 (HbcProjectCanvas grid renderer)
+-->

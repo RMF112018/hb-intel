@@ -38,9 +38,11 @@ export type { ICanvasApi } from './api/index.js';
 // Hooks
 export {
   useProjectCanvas,
+  useCanvasConfig,
   useCanvasEditor,
   useRoleDefaultCanvas,
   useCanvasRecommendations,
+  useCanvasMandatoryTiles,
 } from './hooks/index.js';
 
 // Components
