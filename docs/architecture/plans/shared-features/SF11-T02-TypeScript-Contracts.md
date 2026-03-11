@@ -114,3 +114,15 @@ export const emptyStateClassificationLabel: Record<
 pnpm --filter @hbc/smart-empty-state check-types
 pnpm --filter @hbc/smart-empty-state build
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF11-T02 completed: 2026-03-11
+- Rewrote ISmartEmptyState.ts with 5 classification values, 2 variants, 6 interfaces
+- Rewrote emptyStateDefaults.ts with 3 constants (EMPTY_STATE_VISIT_KEY_PREFIX, EMPTY_STATE_COACHING_COLLAPSE_LABEL, emptyStateClassificationLabel)
+- Updated all barrel exports (types/index.ts, constants/index.ts, src/index.ts)
+- Updated downstream stubs: classifyEmptyState (IEmptyStateContext param), noopVisitStore (hasVisited/markVisited), useFirstVisit (IUseFirstVisitResult), useEmptyState (IUseEmptyStateResult)
+- Updated testing fixtures: mockEmptyStateClassifications (5 new values), createMockEmptyStateConfig (ISmartEmptyStateConfig with resolve), createMockEmptyStateContext (IEmptyStateContext)
+- Updated scaffold.test.ts for all new contracts
+- All gates pass: check-types (0 errors), build (0 errors), test:coverage (100% all metrics), full monorepo build (35/35)
+- Next: T03 Classification & Persistence
+-->

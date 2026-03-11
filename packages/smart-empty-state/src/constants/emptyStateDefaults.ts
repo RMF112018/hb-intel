@@ -1,9 +1,12 @@
-import type { ISmartEmptyStateConfig } from '../types/ISmartEmptyState.js';
+import type { EmptyStateClassification } from '../types/ISmartEmptyState.js';
 
-/**
- * Default configuration values for smart empty state classification.
- */
-export const EMPTY_STATE_DEFAULTS: Readonly<Required<ISmartEmptyStateConfig>> = {
-  moduleId: 'unknown',
-  enableFirstVisit: true,
-} as const;
+export const EMPTY_STATE_VISIT_KEY_PREFIX = 'hbc::empty-state::visited';
+export const EMPTY_STATE_COACHING_COLLAPSE_LABEL = 'Need help getting started?';
+
+export const emptyStateClassificationLabel: Record<EmptyStateClassification, string> = {
+  'first-use': 'First Use',
+  'truly-empty': 'No Data',
+  'filter-empty': 'No Filter Matches',
+  'permission-empty': 'No Access',
+  'loading-failed': 'Load Failed',
+};

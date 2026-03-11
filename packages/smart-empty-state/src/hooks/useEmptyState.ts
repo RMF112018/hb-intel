@@ -1,13 +1,20 @@
-import type { EmptyStateClassification } from '../types/ISmartEmptyState.js';
+import type { IUseEmptyStateResult, IEmptyStateConfig } from '../types/ISmartEmptyState.js';
 
-export interface UseEmptyStateResult {
-  readonly classification: EmptyStateClassification;
-}
+const defaultResolved: IEmptyStateConfig = {
+  module: '',
+  view: '',
+  classification: 'truly-empty',
+  heading: '',
+  description: '',
+};
 
 /**
  * Combined empty state hook.
- * Stub implementation — returns 'truly-empty'. Will be expanded in T04.
+ * Stub implementation — returns 'truly-empty' with default resolved config. Will be expanded in T04.
  */
-export function useEmptyState(_moduleId: string): UseEmptyStateResult {
-  return { classification: 'truly-empty' };
+export function useEmptyState(_module: string, _view: string): IUseEmptyStateResult {
+  return {
+    classification: 'truly-empty',
+    resolved: defaultResolved,
+  };
 }

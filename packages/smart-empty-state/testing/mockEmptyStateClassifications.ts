@@ -4,9 +4,9 @@ import type { EmptyStateClassification } from '../src/types/ISmartEmptyState.js'
  * All possible empty state classification values for exhaustive testing.
  */
 export const mockEmptyStateClassifications: readonly EmptyStateClassification[] = [
+  'first-use',
   'truly-empty',
-  'not-yet-configured',
-  'filtered-to-zero',
-  'error',
-  'loading',
+  'filter-empty',
+  'permission-empty',
+  'loading-failed',
 ] as const;

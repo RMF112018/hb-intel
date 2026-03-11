@@ -181,4 +181,10 @@ SF11-T01 completed: 2026-03-10
 - All gates pass: build (0 errors), check-types (0 errors), test:coverage (100% all metrics)
 - Full monorepo build verified (35/35 tasks)
 - Next: T02 TypeScript Contracts
+
+SF11-T02 completed: 2026-03-11
+- Canonical T02 contracts implemented: 5 classifications, 2 variants, 6 interfaces, 3 constants
+- All downstream stubs and testing fixtures updated to compile against new contracts
+- All gates pass: check-types (0 errors), build (0 errors), test:coverage (100% all metrics), full monorepo build (35/35)
+- Next: T03 Classification & Persistence
 -->

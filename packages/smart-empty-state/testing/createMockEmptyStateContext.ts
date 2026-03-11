@@ -1,13 +1,17 @@
+import type { IEmptyStateContext } from '../src/types/ISmartEmptyState.js';
+
 /**
  * Factory stub for creating mock empty state contexts in tests.
- * Will be expanded in later tasks.
  */
-export function createMockEmptyStateContext(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+export function createMockEmptyStateContext(overrides: Partial<IEmptyStateContext> = {}): IEmptyStateContext {
   return {
-    moduleId: 'test-module',
-    hasData: false,
-    hasFilters: false,
-    isConfigured: false,
+    module: 'test-module',
+    view: 'test-view',
+    hasActiveFilters: false,
+    hasPermission: true,
+    isFirstVisit: false,
+    currentUserRole: 'user',
+    isLoadError: false,
     ...overrides,
   };
 }

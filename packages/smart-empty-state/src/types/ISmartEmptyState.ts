@@ -1,26 +1,59 @@
-/**
- * Classification of an empty state context.
- *
- * - `truly-empty` — No data exists for this module/context.
- * - `not-yet-configured` — Module exists but requires setup.
- * - `filtered-to-zero` — Data exists but current filters yield no results.
- * - `error` — Classification failed due to an error.
- * - `loading` — Classification is in progress.
- */
-export type EmptyStateClassification =
-  | 'truly-empty'
-  | 'not-yet-configured'
-  | 'filtered-to-zero'
-  | 'error'
-  | 'loading';
+// T02 canonical types — exactly per SF11-T02-TypeScript-Contracts.md
 
-/**
- * Configuration interface for the smart empty state resolver.
- * Placeholder — will be expanded in T02/T03.
- */
+export type EmptyStateClassification =
+  | 'first-use'
+  | 'truly-empty'
+  | 'filter-empty'
+  | 'permission-empty'
+  | 'loading-failed';
+
+export type EmptyStateVariant = 'full-page' | 'inline';
+
+export interface IEmptyStateAction {
+  label: string;
+  href?: string;
+  onClick?: () => void;
+  variant?: 'button' | 'link';
+}
+
+export interface IEmptyStateContext {
+  module: string;
+  view: string;
+  hasActiveFilters: boolean;
+  hasPermission: boolean;
+  isFirstVisit: boolean;
+  currentUserRole: string;
+  isLoadError: boolean;
+}
+
+export interface IEmptyStateConfig {
+  module: string;
+  view: string;
+  classification: EmptyStateClassification;
+  illustration?: string;
+  heading: string;
+  description: string;
+  primaryAction?: IEmptyStateAction;
+  secondaryAction?: IEmptyStateAction;
+  filterClearAction?: IEmptyStateAction;
+  coachingTip?: string;
+}
+
 export interface ISmartEmptyStateConfig {
-  /** Module identifier for classification context */
-  readonly moduleId: string;
-  /** Whether to enable first-visit detection */
-  readonly enableFirstVisit?: boolean;
+  resolve: (context: IEmptyStateContext) => IEmptyStateConfig;
+}
+
+export interface IEmptyStateVisitStore {
+  hasVisited: (module: string, view: string) => boolean;
+  markVisited: (module: string, view: string) => void;
+}
+
+export interface IUseFirstVisitResult {
+  isFirstVisit: boolean;
+  markVisited: () => void;
+}
+
+export interface IUseEmptyStateResult {
+  classification: EmptyStateClassification;
+  resolved: IEmptyStateConfig;
 }
