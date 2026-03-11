@@ -194,4 +194,17 @@ SF12-T04 completed: 2026-03-11
 - 24 new tests (10 connectivity + 14 SyncEngine); 63 total pass
 - All 3 gates pass: check-types ✓ | test ✓ | build ✓
 Next: SF12-T05 (Provider & Hooks)
+
+SF12-T05 completed: 2026-03-11
+- SessionStateContext: createContext<ISessionStateContext | null>(null)
+- SessionStateProvider: mounts SyncEngine + ConnectivityMonitor, purges expired drafts, exposes memoized context value
+- useSessionState: context consumer with throw-if-outside-provider guard
+- useDraft<T>: async load on mount/key change, save/clear with local state + store persistence
+- useConnectivity: thin selector returning ConnectivityStatus
+- context/ and hooks/ barrels, root barrel updated with 3 hooks + provider + context exports
+- vitest.config.ts: context/ and hooks/ removed from coverage exclusions
+- 14 new tests (provider lifecycle, hooks, cleanup, queue integration); 77 total pass
+- Coverage: 98.5% stmts, 97.35% branches, 95.34% functions — all above 95%
+- All 3 gates pass: check-types ✓ | test ✓ | build ✓
+Next: SF12-T06 (UI Components)
 -->

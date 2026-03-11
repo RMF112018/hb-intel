@@ -24,8 +24,6 @@ export default defineConfig({
         'src/types/**',
         'src/**/*.stories.{ts,tsx}',
         'src/constants/**',
-        'src/context/**',
-        'src/hooks/**',
         'src/components/**',
         'testing/**',
       ],

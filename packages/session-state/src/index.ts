@@ -60,3 +60,10 @@ export type {
   IConnectivityMonitor,
   ConnectivityListener,
 } from './sync/index.js';
+
+// Context
+export { SessionStateContext, SessionStateProvider } from './context/index.js';
+export type { SessionStateProviderProps } from './context/index.js';
+
+// Hooks
+export { useSessionState, useDraft, useConnectivity } from './hooks/index.js';
