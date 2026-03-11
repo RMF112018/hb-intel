@@ -70,3 +70,19 @@ Accessibility:
 pnpm --filter @hbc/features-admin test -- AdminAlertBadge
 pnpm --filter @hbc/features-admin test -- AdminAlertDashboard
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF17-T05 completed: 2026-03-11
+
+Files created:
+- src/components/helpers.ts — severityToVariant, severityOrder, groupAlertsBySeverity, formatAlertTimestamp
+- src/components/AdminAlertBadge.tsx — full implementation with HbcStatusBadge, HbcTooltip, aria attrs
+- src/components/AdminAlertDashboard.tsx — full implementation with filters, grouped list, acknowledge action
+- src/__tests__/components.test.tsx — 18 render tests covering badge, dashboard, filters, a11y
+
+Config changes:
+- vitest.config.ts — removed src/components/** from coverage.exclude (now excludes only src/components/index.ts)
+
+Verification: check-types ✓ | build ✓ | lint ✓ | test ✓ (71 tests, 5 files)
+Next: SF17-T06 (ImplementationTruth and ApprovalAuthority UX)
+-->

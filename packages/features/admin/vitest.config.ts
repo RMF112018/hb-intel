@@ -27,7 +27,7 @@ export default defineConfig({
         'src/monitors/**',
         'src/probes/**',
         'src/api/**',
-        'src/components/**',
+        'src/components/index.ts',
         'testing/**',
       ],
       thresholds: {

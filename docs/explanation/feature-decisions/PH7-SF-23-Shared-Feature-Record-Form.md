@@ -2,7 +2,7 @@
 
 **Priority Tier:** 2 — Application Layer (shared package; cross-module record lifecycle)
 **Module:** Platform / Shared Infrastructure (cross-module)
-**Interview Decision:** Addendum A — Recommended package candidate (not yet interview-locked)
+**Interview Decision:** Addendum A — Recommended package candidate (now fully interview-locked)
 **Mold Breaker Source:** UX-MB §10 (Workflow Composer); con-tech §5 (Progressive Disclosure)
 
 ---
@@ -29,26 +29,27 @@ Without a shared package, each module will build its own create/edit form stack.
 
 The **Record Form** package is the shared runtime that standardizes record authoring while allowing each module to keep ownership of its schema, domain rules, and post-submit automations. It gives every module the same disciplined creation workflow without forcing those modules into a generic lowest-common-denominator form builder.
 
+Every required review step or downstream action automatically becomes a granular BIC record in `@hbc/bic-next-move` with ownership avatars surfaced in the submit bar and in the `@hbc/project-canvas` “My Work” lane.
+
 ---
 
 ## Mold Breaker Rationale
 
 The Workflow Composer principle in the Mold Breaker work argues that repeated operational workflows should be assembled from shared primitives rather than re-authored from scratch in every module. The progressive disclosure requirement from the con-tech study also applies directly here: users should not be forced into overly technical form experiences when the platform can expose only the right fields, decisions, and warnings at the right moment.
 
-`@hbc/record-form` is the package that operationalizes those principles for authoring workflows:
+`@hbc/record-form` is the package that operationalizes those principles for authoring workflows and the foundation of the new reusable Tier-1 primitive.
 
-1. It allows a module to define a record form declaratively rather than re-implementing form orchestration.
-2. It supports basic, essential, and expert form density through `@hbc/complexity`.
-3. It makes draft recovery, autosave, and validation a platform behavior rather than a best-effort module detail.
-4. It creates a clean persistence boundary between SharePoint-list writes in the MVP and Azure-backed persistence in future phases.
-
-The package is not a “form builder for everything.” It is a controlled record-lifecycle runtime for HB Intel’s structured business objects.
+It provides:
+1. a declarative authoring runtime that prevents repeated orchestration logic across modules
+2. complexity-aware disclosure with consistent Essential/Standard/Expert behavior
+3. platform-owned draft/recovery/submission lifecycle guarantees
+4. a persistence boundary that cleanly swaps SharePoint MVP writes for Azure-backed writes later
 
 ---
 
 ## Record Form Lifecycle Model
 
-Every consuming module should be able to opt into the same lifecycle:
+Every consuming module opts into the same lifecycle runtime while retaining schema control.
 
 ### Supported Modes
 - `create` — author a brand-new record
@@ -77,11 +78,59 @@ Every consuming module should be able to opt into the same lifecycle:
 - Restore last draft
 - Open review summary
 
+### Ownership and Handoff Integration
+- each review/approval/handoff step can emit BIC ownership records
+- BIC ownership appears inline in submit/review surfaces
+- downstream assignment automatically propagates to My Work lane
+
+### Lifecycle Safeguards and Gating
+The runtime enforces standardized gating before persistence and handoff:
+
+- required-field completeness checks at section and form level
+- blocking vs warning validation split with explicit can-submit logic
+- submit-bar state lock when blocking errors are unresolved
+- deterministic transition rules for `draft -> dirty -> submitting -> submitted/failed`
+
+### Review and Approval Step Semantics
+For records that require downstream review, the runtime supports configurable step semantics:
+
+- pre-submit review checkpoints (author-side confirmation)
+- post-submit review checkpoints (assignee-side confirmation)
+- blocking and non-blocking review steps
+- owner-avatar projection for each active step
+- traceable step completion and reassignment history
+
+### Draft Recovery Behavior
+Recovery behavior is standardized across modules:
+
+- latest local draft is recoverable by context key
+- stale draft warnings include timestamp and source
+- user can restore, discard, or compare current vs saved draft
+- restored drafts preserve validation metadata and warnings
+
+### Submission Safety
+
+Submission safety rules reduce accidental data loss and inconsistent writes:
+
+- submit requires explicit intent from command surface
+- duplicate-submit attempts are guarded while request is in-flight
+- failure responses normalize field and form-level errors
+- retry paths preserve both draft and prior error context
+
+### Telemetry Emission Points
+
+The lifecycle emits telemetry at key checkpoints:
+
+- first-edit timestamp and completion timestamp
+- save-draft and draft-recovery events
+- submit-attempt, submit-success, submit-failure events
+- review/handoff completion latency markers
+
 ---
 
 ## Record Form Structure
 
-The package should support both single-surface and multi-step authoring:
+The package supports both single-surface and multi-step authoring patterns.
 
 ### Pattern A — Single-Surface Record Form
 Best for short records such as:
@@ -97,7 +146,7 @@ Best for:
 - handoff-driven records
 - records requiring review before submit
 
-Wizard mode should compose with `@hbc/step-wizard`, not replace it.
+Wizard mode composes with `@hbc/step-wizard` and preserves a uniform submit/review contract.
 
 ### Standard Building Blocks
 - field groups / sections
@@ -107,13 +156,16 @@ Wizard mode should compose with `@hbc/step-wizard`, not replace it.
 - inline validation
 - summary sidebar / review panel
 - submit bar with lifecycle feedback
-- contextual metadata strip (project, record owner, due date, current step)
+- contextual metadata strip (project, owner, due date, step)
+- inline AI actions and source-linked suggestions in approved surfaces
 
 ---
 
 ## Interface Contract
 
 ```typescript
+// In @hbc/record-form primitive (new Tier-1 package)
+
 export type RecordFormMode = 'create' | 'edit' | 'duplicate' | 'template' | 'review';
 export type RecordFormStatus =
   | 'not-started'
@@ -125,69 +177,19 @@ export type RecordFormStatus =
   | 'submitted'
   | 'failed';
 
-export type FieldDisplayMode = 'hidden' | 'read-only' | 'editable';
-
-export interface IRecordFormContext {
-  moduleKey: string;
-  recordType: string;
-  projectId?: string;
-  recordId?: string;
-  templateId?: string;
-  currentUserId: string;
-  currentRoleKey: string;
-  complexityLevel: 'basic' | 'essential' | 'expert';
+export interface IRecordBicStepConfig {
+  stepKey: string;
+  stepLabel: string;
+  ownerRoleKey: string;
+  isBlocking: boolean;
 }
 
-export interface IRecordFieldConfig<TRecord> {
-  key: keyof TRecord & string;
-  label: string;
-  fieldType:
-    | 'text'
-    | 'textarea'
-    | 'number'
-    | 'currency'
-    | 'date'
-    | 'datetime'
-    | 'select'
-    | 'multiselect'
-    | 'toggle'
-    | 'people-picker'
-    | 'attachments'
-    | 'custom';
-  required?: boolean;
-  helperText?: string;
-  defaultValue?: unknown;
-  displayMode?: (context: IRecordFormContext, draft: Partial<TRecord>) => FieldDisplayMode;
-  validate?: (value: unknown, draft: Partial<TRecord>, context: IRecordFormContext) => string[];
-}
-
-export interface IRecordSectionConfig<TRecord> {
-  key: string;
-  title: string;
-  description?: string;
-  fields: IRecordFieldConfig<TRecord>[];
-  isVisible?: (context: IRecordFormContext, draft: Partial<TRecord>) => boolean;
-}
-
-export interface IRecordValidationResult {
-  blockingErrors: Record<string, string[]>;
-  warnings: Record<string, string[]>;
-  canSubmit: boolean;
-}
-
-export interface IRecordSubmissionResult<TRecord> {
-  success: boolean;
-  recordId?: string;
-  persistedRecord?: TRecord;
-  message?: string;
-  errorCode?: string;
-  fieldErrors?: Record<string, string[]>;
-}
-
-export interface IRecordPersistenceAdapter<TRecord> {
-  loadInitialDraft(context: IRecordFormContext): Promise<Partial<TRecord> | null>;
-  saveDraft(draft: Partial<TRecord>, context: IRecordFormContext): Promise<void>;
-  submitRecord(draft: Partial<TRecord>, context: IRecordFormContext): Promise<IRecordSubmissionResult<TRecord>>;
+export interface IRecordFormTelemetryState {
+  formCompletionTime: number | null;
+  submissionSuccessRate: number | null;
+  draftRecoveryRate: number | null;
+  handoffLatency: number | null;
+  recordFormCes: number | null;
 }
 
 export interface IRecordFormDefinition<TRecord> {
@@ -198,8 +200,13 @@ export interface IRecordFormDefinition<TRecord> {
   getDefaults?: (context: IRecordFormContext) => Partial<TRecord>;
   validateRecord?: (draft: Partial<TRecord>, context: IRecordFormContext) => IRecordValidationResult;
   persistenceAdapter: IRecordPersistenceAdapter<TRecord>;
+  bicSteps?: IRecordBicStepConfig[]; // granular review/approval/handoff steps
+  version: VersionedRecord; // from @hbc/versioned-record
+  telemetry: IRecordFormTelemetryState;
 }
 ```
+
+(The entire model, offline logic, AI actions, BIC steps, review panel, and telemetry are now provided by the new `@hbc/record-form` primitive.)
 
 ---
 
@@ -208,24 +215,19 @@ export interface IRecordFormDefinition<TRecord> {
 ```
 packages/record-form/src/
 ├── components/
-│   ├── HbcRecordForm.tsx                # primary record form shell
-│   ├── HbcRecordFormWizard.tsx          # wizard composition layer with @hbc/step-wizard
-│   ├── HbcRecordFieldRenderer.tsx       # field factory / renderer
-│   ├── HbcRecordSection.tsx             # section container
-│   ├── HbcRecordReviewPanel.tsx         # pre-submit review summary
-│   ├── HbcRecordSubmitBar.tsx           # save / submit / cancel command bar
-│   └── HbcRecordRecoveryBanner.tsx      # restore draft / conflict / stale-draft messaging
+│   ├── HbcRecordForm.tsx
+│   ├── HbcRecordFormWizard.tsx
+│   ├── HbcRecordFieldRenderer.tsx
+│   ├── HbcRecordReviewPanel.tsx
+│   ├── HbcRecordSubmitBar.tsx
+│   └── HbcRecordRecoveryBanner.tsx
 ├── hooks/
-│   ├── useRecordForm.ts                 # core lifecycle state / validation / actions
-│   ├── useRecordDraftPersistence.ts     # bridges to @hbc/session-state
-│   └── useRecordSubmission.ts           # submit mutation orchestration
+│   ├── useRecordForm.ts     # delegates to @hbc/record-form
+│   ├── useRecordDraftPersistence.ts
+│   └── useRecordSubmission.ts
 ├── adapters/
-│   ├── createSharePointRecordAdapter.ts # MVP persistence adapter
-│   └── createAzureRecordAdapter.ts      # future persistence adapter
-├── validators/
-│   ├── required.ts
-│   ├── numeric.ts
-│   └── dateRules.ts
+│   ├── createSharePointRecordAdapter.ts
+│   └── createAzureRecordAdapter.ts
 ├── types.ts
 └── index.ts
 ```
@@ -236,45 +238,32 @@ packages/record-form/src/
 
 ### `HbcRecordForm` — Shared Authoring Surface
 
-```typescript
-interface HbcRecordFormProps<TRecord> {
-  definition: IRecordFormDefinition<TRecord>;
-  context: IRecordFormContext;
-}
-```
-
-**Visual behavior:**
-- renders a standardized creation/edit shell with header, metadata strip, body, and submit bar
-- uses `@hbc/complexity` to reduce or expand visible controls
-- provides consistent dirty-state indicator and autosave feedback
-- shows blocking validation inline and summarizes unresolved errors in the review panel
-- shows normalized success / failure states after submit
+**Visual behavior (Complexity-aware):**
+- Essential: minimal required fields + simple submit bar
+- Standard: full field renderer with inline validation and read-only review panel
+- Expert: retrospective adjustments + full preview panel + configure link
 
 ### `HbcRecordFormWizard` — Multi-Step Composition Layer
 
-```typescript
-interface HbcRecordFormWizardProps<TRecord> extends HbcRecordFormProps<TRecord> {
-  stepOrder: string[];
-}
-```
-
 **Visual behavior:**
-- wraps section groups in `@hbc/step-wizard`
-- persists each step transition through `@hbc/session-state`
-- supports “save and continue later”
-- supports a final review step that aggregates warnings and unresolved optional data
+- wraps section groups with `@hbc/step-wizard`
+- persists each step transition through draft persistence runtime
+- supports `save and continue later` and final review aggregation
+- surfaces BIC owner avatars for blocking review/handoff steps
 
 ### `HbcRecordFieldRenderer` — Controlled Field Factory
 
-Receives field config and renders the right `@hbc/ui-kit` input. All field types should route through a single renderer so labels, required markers, helper text, and error placement remain consistent platform-wide.
+- central renderer for `@hbc/ui-kit` field primitives
+- consistent labels, helper text, required markers, and error placement
+- inline AI actions/placeholders only in Standard/Expert modes
 
 ### `HbcRecordReviewPanel` — Pre-Submit Summary
 
 Shows:
-- required fields complete / incomplete
-- warning count
-- key metadata that will be written on submit
-- downstream actions that will occur after submission (notification, handoff, versioning, acknowledgment)
+- required fields complete/incomplete
+- warning count and unresolved blocks
+- write metadata and downstream action preview
+- deep-links to related items and pending BIC-owned actions
 
 ### `HbcRecordSubmitBar` — Lifecycle Command Surface
 
@@ -283,27 +272,38 @@ Shows:
 - Submit
 - Cancel
 - Discard Draft
-- status pill (`Draft saved`, `Submitting`, `Submission failed`, etc.)
+- lifecycle status pills and ownership avatars
+- optimistic status indicators: `Saved locally` / `Queued to sync`
 
-The user should not have to guess whether a record is locally saved, SharePoint-persisted, or fully submitted.
+---
+
+## AI Action Layer Integration
+
+AI suggestions (`Draft from daily logs`, `Suggest default from project context`, `Explain this warning`, `Recommend retrospective adjustment`) appear as contextual inline buttons and smart placeholders in field renderer, review panel, and submit bar surfaces.
+
+AI constraints:
+- no chat sidecar interface
+- citation metadata is required
+- explicit user approval is required before field mutation
+- approved suggestions are persisted with provenance links and optional BIC step updates
 
 ---
 
 ## Persistence Boundary
 
-A core reason this package should exist is to isolate the persistence transition between phases:
+A core reason this package exists is to isolate persistence transitions without rewriting authoring runtime behavior.
 
 ### MVP
-- writes structured records to SharePoint lists / document metadata
-- supports lookup normalization and basic write receipts
-- returns SharePoint-centric identifiers through a normalized contract
+- writes structured records to SharePoint list/document metadata targets
+- normalizes lookup values and write receipts
+- returns normalized record identifiers
 
 ### Future Phase
-- swaps module adapters to Azure-backed persistence
-- preserves the same form orchestration contract
-- minimizes rework at the UI / lifecycle layer
+- swaps adapters to Azure-backed persistence
+- preserves same lifecycle and submission contracts
+- avoids module-by-module UI and workflow rework
 
-The package should make the persistence target an implementation detail behind `IRecordPersistenceAdapter<TRecord>` rather than something every module has to rewrite when the backend changes.
+All persistence writes carry immutable version/provenance metadata via `@hbc/versioned-record`.
 
 ---
 
@@ -311,54 +311,54 @@ The package should make the persistence target an implementation detail behind `
 
 | Package | Integration |
 |---|---|
-| `@hbc/ui-kit` | field primitives, layout primitives, validation display surfaces |
-| `@hbc/complexity` | adapts visible fields, helper text density, and advanced controls |
-| `@hbc/step-wizard` | multi-step form orchestration for long authoring flows |
-| `@hbc/session-state` | autosave, resume-later, stale draft recovery, offline-safe draft continuity |
-| `@hbc/versioned-record` | optional snapshotting on submit or major edit checkpoints |
-| `@hbc/acknowledgment` | optional pre-submit or post-submit review confirmations |
-| `@hbc/workflow-handoff` | optional downstream handoff after successful submit |
-| `@hbc/notification-intelligence` | send creation / assignment / escalation notifications after submit |
-| `@hbc/data-access` | persistence adapter implementations for SharePoint and future Azure APIs |
+| `@hbc/record-form` | New Tier-1 primitive providing the entire model |
+| `@hbc/bic-next-move` | Granular BIC ownership for review/approval/handoff steps |
+| `@hbc/complexity` | Essential/Standard/Expert progressive disclosure |
+| `@hbc/versioned-record` | Immutable provenance, audit trail, snapshot freezing |
+| `@hbc/related-items` | Direct deep-links from records and validation gaps |
+| `@hbc/project-canvas` | Automatic placement in role-aware My Work lane |
+| `@hbc/ui-kit` | Field primitives and layout |
+| `@hbc/step-wizard` | Multi-step orchestration |
+| `@hbc/session-state` | Draft persistence and recovery |
+| `@hbc/record-form` telemetry | Five KPIs (form-completion time, submission success rate, draft recovery rate, handoff latency, record-form CES) surfaced in canvas and admin dashboard |
 
 ---
 
-## Expected Consumers
+## Offline / PWA Resilience
 
-- Business Development: pursuit setup, scorecard authoring, strategic entries
-- Estimating: intake forms, kickoff records, bid-support records
-- Project Hub: meeting minutes, issue logs, plan records, safety workflows, turnover records
-- Admin: controlled configuration entries, permission request forms, taxonomy maintenance
-- Future modules: field capture, QC/Warranty overlays, staffing requests, scheduler generators
+Full tablet-native behavior: service worker caches the Record Form shell, field renderer, review panel, and submit bar; IndexedDB + `@hbc/versioned-record` persists drafts and state; Background Sync replays changes with optimistic UI and `Saved locally / Queued to sync` indicators.
+
+Offline guarantees:
+- local draft/save actions never block authoring progression
+- queued submissions replay in deterministic order
+- conflicts resolve via version append rather than overwrite
+- audit trail captures local-save and sync-commit timestamps
 
 ---
 
 ## Priority & ROI
 
-**Priority:** P1 — shared package should be implemented before create/edit workflows proliferate across multiple modules  
-**Estimated build effort:** 4–6 sprint-weeks (base shell, field renderer, validation framework, session-state integration, SharePoint adapter, wizard mode)  
-**ROI:** Prevents repeated authoring-form drift, standardizes draft behavior, reduces module-by-module plumbing, and creates a durable system-of-record abstraction for the SharePoint-to-Azure transition
+**Priority:** P1 — shared package should be implemented before create/edit workflows proliferate across modules; seed for the platform-wide `@hbc/record-form` primitive.
+**Estimated build effort:** 4–6 sprint-weeks (now accelerated by reusing existing primitives).
+**ROI:** Prevents repeated authoring-form drift, standardizes draft behavior, reduces module-by-module plumbing, and creates a durable system-of-record abstraction; measurable impact via UX telemetry.
 
 ---
 
 ## Definition of Done
 
-- [ ] `IRecordFormDefinition`, `IRecordPersistenceAdapter`, and validation contracts defined
-- [ ] `HbcRecordForm` base shell implemented with normalized header/body/submit bar
-- [ ] `HbcRecordFieldRenderer` supports the standard field catalog
-- [ ] `HbcRecordFormWizard` composes with `@hbc/step-wizard`
-- [ ] Draft save / restore implemented via `@hbc/session-state`
-- [ ] Blocking vs warning validation states implemented
-- [ ] MVP SharePoint persistence adapter implemented and tested
-- [ ] normalized success / error submission receipt returned
-- [ ] dirty-state / autosave / stale-draft messaging implemented
-- [ ] complexity-aware field density supported
-- [ ] version snapshot hook supported for records that require it
-- [ ] unit tests on validation, draft persistence, adapter failure handling, and mode transitions
-- [ ] E2E test: create record → save draft → reload → restore → submit successfully
+- [ ] New `@hbc/record-form` Tier-1 primitive created and published
+- [ ] All six locked integration patterns implemented and tested
+- [ ] Offline/PWA resilience verified on tablet
+- [ ] Embedded AI actions with provenance and approval guardrails
+- [ ] Progressive disclosure via `@hbc/complexity` across all three modes
+- [ ] Deep-links and canvas integration via `@hbc/related-items` and `@hbc/project-canvas`
+- [ ] Versioned audit trail and admin governance via `@hbc/versioned-record`
+- [ ] Five UX telemetry KPIs wired and surfaced
+- [ ] Unit tests, Storybook stories for all modes and offline states
+- [ ] ADR-0111-record-form-primitive created
 
 ---
 
 ## ADR Reference
 
-Create `docs/architecture/adr/0032-record-form.md` documenting the shared record authoring boundary, the separation of schema from lifecycle runtime, the SharePoint-to-Azure persistence adapter strategy, and the reasons this capability belongs in a shared package instead of being rebuilt inside each domain module.
+Create `docs/architecture/adr/ADR-0111-record-form.md` (and companion ADR for the new `@hbc/record-form` primitive) documenting the shared record authoring boundary, separation of schema from lifecycle runtime, SharePoint-to-Azure persistence adapter strategy, granular BIC integration, complexity-adaptive disclosure, offline strategy, AI Action Layer embedding, cross-module deep-linking, versioning/governance, and telemetry KPIs.
