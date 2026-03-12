@@ -9,3 +9,4 @@ export * from './governance/index.js';
 export * from './telemetry/index.js';
 export * from './hooks/index.js';
 export * from './components/index.js';
+export * from './integrations/index.js';

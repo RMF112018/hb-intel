@@ -1,6 +1,6 @@
 # @hbc/features-project-hub
 
-Project Hub feature package for HB Intel, including the SF21 Project Health Pulse scaffold.
+Project Hub feature package for HB Intel, including SF21 Project Health Pulse contracts, computation, hooks, UI surfaces, and reference integrations.
 
 ## 1. Pulse Overview and Value Proposition
 
@@ -44,9 +44,10 @@ Triage capabilities are modeled as part of the health-pulse domain boundary and 
 ## 7. Boundary Rules and Telemetry Emission Notes
 
 - Health-pulse computors, governance, and telemetry are explicit package boundaries.
+- Health-pulse integration adapters live under `src/health-pulse/integrations` and are deterministic projection helpers (no app-route coupling, no side-effect emission).
 - App routes must not be imported into package runtime.
 - Consumers should use declared package exports (`.` and `./testing`) rather than internal file paths.
-- Telemetry ownership seam is defined at `src/health-pulse/telemetry`; real emission logic is deferred to SF21-T07.
+- Telemetry payload mapping preserves reason-code and confidence context for downstream emitters; emission side effects remain in consuming layers.
 
 ## 8. Related SF21 Links
 

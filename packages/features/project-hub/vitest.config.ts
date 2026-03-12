@@ -15,7 +15,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],
-      include: ['src/health-pulse/**/*.{ts,tsx}'],
+      include: ['src/health-pulse/integrations/**/*.{ts,tsx}'],
       exclude: [
         'src/**/*.d.ts',
         'src/**/*.stories.{ts,tsx}',

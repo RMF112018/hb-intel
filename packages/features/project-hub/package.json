@@ -35,9 +35,13 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@hbc/bic-next-move": "workspace:*",
     "@hbc/models": "workspace:*",
+    "@hbc/notification-intelligence": "workspace:*",
+    "@hbc/project-canvas": "workspace:*",
     "@hbc/query-hooks": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
+    "@hbc/versioned-record": "workspace:*",
     "@hbc/complexity": "workspace:*",
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
