@@ -1,17 +1,18 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "composite": true,
-    "rootDir": "./src",
-    "outDir": "./dist"
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "paths": {
+      "@hbc/features-estimating/testing": ["./testing/index.ts"]
+    }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "references": [
-    { "path": "../../models" },
-    { "path": "../../query-hooks" },
-    { "path": "../../ui-kit" },
-    { "path": "../../auth" },
-    { "path": "../../shell" },
-    { "path": "../../smart-empty-state" }
-  ]
+  "include": ["src/**/*", "testing/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/*.stories.ts", "**/*.stories.tsx", "src/__tests__/**"]
 }

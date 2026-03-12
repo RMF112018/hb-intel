@@ -70,3 +70,18 @@ pnpm --filter @hbc/features-estimating build
 pnpm --filter @hbc/features-estimating test --coverage
 test -f packages/features/estimating/README.md
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF18-T01 completed: 2026-03-12
+- All 11 required files created per §Required Files
+- package.json: v0.0.1, dual exports (. + ./testing), admin pattern scripts, 95/95/95/95 coverage thresholds
+- tsconfig.json/tsconfig.build.json: admin pattern (rootDir ".", declaration, declarationMap, sourceMap, jsx react-jsx, paths alias)
+- vitest.config.ts: jsdom, globals, passWithNoTests, setup file, v8 coverage with scaffold exclusions
+- src/index.ts: re-exports empty-state (preserved) + bid-readiness barrel
+- src/bid-readiness/: profiles, adapters, hooks, components, telemetry barrels with stub implementations
+- testing/: createMockHealthIndicatorState + createMockBidReadinessProfile factories
+- README.md: all 7 required sections (architecture, profiles, complexity, offline, AI, KPIs, links)
+- @hbc/health-indicator dependency deferred (package not yet in workspace); will be added when primitive is scaffolded
+- Verification: check-types ✓, build ✓, test --coverage ✓ (passWithNoTests)
+Next: SF18-T02 (TypeScript Contracts)
+-->
