@@ -38,6 +38,7 @@
     "@hbc/models": "workspace:*",
     "@hbc/query-hooks": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
+    "@hbc/complexity": "workspace:*",
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
     "@hbc/smart-empty-state": "workspace:*",
