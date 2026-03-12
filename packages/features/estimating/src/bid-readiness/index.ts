@@ -56,6 +56,31 @@ export {
   validateAdminChecklistDefinitions,
 } from './checklist/index.js';
 
+// Integrations
+export {
+  projectBidReadinessToBicNextMove,
+  resolveBidReadinessNotifications,
+  createBidReadinessVersionedSnapshot,
+  gateBidReadinessByComplexity,
+  resolveBidReadinessApprovalAuthority,
+  createBidReadinessReferenceIntegrations,
+} from './integrations/index.js';
+
+export type {
+  IBicNextMoveReferenceAction,
+  IBidReadinessBicNextMoveProjection,
+  BidReadinessNotificationType,
+  BidReadinessNotificationUrgency,
+  IBidReadinessNotificationReference,
+  IBidReadinessVersionedSnapshot,
+  BidReadinessComplexityTier,
+  BidReadinessGovernanceAudience,
+  IBidReadinessComplexityGatedView,
+  IBidReadinessApprovalRequirement,
+  IBidReadinessApprovalResolution,
+  IBidReadinessReferenceIntegrations,
+} from './integrations/index.js';
+
 // Components
 export {
   BidReadinessSignal,

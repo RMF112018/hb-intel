@@ -67,3 +67,29 @@ pnpm --filter @hbc/features-estimating test -- integrations
 rg -n "from 'apps/" packages/features/estimating/src
 rg -n "@hbc/health-indicator|@hbc/versioned-record|@hbc/project-canvas|@hbc/related-items" packages/features/estimating/src
 ```
+
+---
+
+## Progress Notes
+
+### 2026-03-12 - T07 implementation complete
+
+- Implemented deterministic reference integration adapters under `packages/features/estimating/src/bid-readiness/integrations/` for:
+  - BIC Next Move projection
+  - Notification dispatch projection
+  - Versioned-record snapshot projection
+  - Complexity gating
+  - Approval authority resolution
+- Added integration barrel export plus deterministic adapter-registry factory for mockable integration initialization.
+- Updated bid-readiness and root package barrels so integration functions/types are exposed via public package surfaces.
+- Added integration tests covering:
+  - adapter initialization
+  - deterministic output
+  - error-safe fallback behavior
+  - governance filtering
+  - complexity gating behavior
+  - recommendation integration mapping
+- Verified zero-error gates:
+  - `pnpm --filter @hbc/features-estimating check-types`
+  - `pnpm --filter @hbc/features-estimating build`
+  - `pnpm --filter @hbc/features-estimating test`
