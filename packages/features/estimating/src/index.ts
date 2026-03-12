@@ -12,6 +12,59 @@
 // Empty State (preserved from initial scaffold)
 export { estimatingPursuitsEmptyStateConfig } from './empty-state/index.js';
 
+// Types
+export type {
+  BidReadinessStatus,
+  IBicOwner,
+  VersionedRecord,
+  IReadinessScore,
+  ScoringDimensionKey,
+  IScoringDimensionScore,
+  IReadinessCategoryBreakdown,
+  IQualificationMetadata,
+  IRiskMetadata,
+  ICompletenessMetadata,
+  IReadinessActionPayload,
+  IReadinessRecommendation,
+  IReadinessGovernanceMetadata,
+  IReadinessSummaryPayload,
+  IEstimatingPackageReadinessCriteria,
+  IHealthIndicatorCriterion,
+  IHealthIndicatorState,
+  IEstimatingBidReadinessProfile,
+  IBidReadinessState,
+  IBidReadinessViewState,
+} from './types/index.js';
+
+// Constants
+export {
+  READINESS_STATES,
+  SCORING_BANDS,
+  RISK_LEVELS,
+  RECOMMENDATION_CATEGORIES,
+  PRIORITY_LEVELS,
+  GOVERNANCE_STATES,
+  TELEMETRY_KEYS,
+  READINESS_PROFILE_IDENTIFIERS,
+  BID_READINESS_SYNC_INDICATORS,
+  CONFIDENCE_LEVELS,
+  SEVERITY_LEVELS,
+} from './constants/index.js';
+
+export type {
+  ReadinessState,
+  ScoringBand,
+  RiskLevel,
+  RecommendationCategory,
+  PriorityLevel,
+  GovernanceState,
+  TelemetryKey,
+  ReadinessProfileIdentifier,
+  SyncIndicator,
+  ConfidenceLevel,
+  SeverityLevel,
+} from './constants/index.js';
+
 // Bid Readiness (SF18 adapter surface)
 export {
   estimatingBidReadinessProfile,

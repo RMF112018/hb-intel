@@ -96,3 +96,29 @@ export interface IBidReadinessTelemetry {
 pnpm --filter @hbc/features-estimating check-types
 pnpm --filter @hbc/features-estimating test -- contracts
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF18-T02 completed: 2026-03-12
+- Contract-only surface implemented in `packages/features/estimating/src/types` with full D-SF18-T02 JSDoc across all public interfaces/types.
+- Added expanded readiness contract coverage:
+  - readiness score structures and summary payload types
+  - estimator/package readiness criteria contracts
+  - qualification/risk metadata and completeness metadata
+  - recommendation/action payload contracts
+  - governance metadata and readiness category breakdown contracts
+  - scoring dimension utility types
+  - status/severity/confidence typing
+- Canonical barrels added:
+  - `src/types/index.ts`
+  - `src/constants/index.ts`
+  - root `src/index.ts` extended to expose full public contract surface.
+- Constants layer added in `src/constants/readiness.ts` with `as const` groups and derived union types:
+  - readiness states, scoring bands, risk levels, recommendation categories, priority levels
+  - governance states, telemetry keys, readiness profile identifiers, sync indicators
+  - confidence/severity taxonomies for metadata typing.
+- Runtime logic remained unchanged (no scoring engine, evaluation pipeline, or registry additions).
+- Verification:
+  - `pnpm --filter @hbc/features-estimating check-types` ✓
+  - `pnpm --filter @hbc/features-estimating build` ✓
+Next: SF18-T03 (Readiness Profile and Configuration)
+-->

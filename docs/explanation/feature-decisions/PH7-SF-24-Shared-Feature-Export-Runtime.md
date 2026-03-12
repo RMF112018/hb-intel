@@ -2,7 +2,7 @@
 
 **Priority Tier:** 2 — Application Layer (shared package; cross-module output infrastructure)
 **Module:** Platform / Shared Infrastructure (cross-module)
-**Interview Decision:** Addendum A — Recommended package candidate (not yet interview-locked)
+**Interview Decision:** Addendum A — Recommended package candidate (now fully interview-locked)
 **Mold Breaker Source:** UX-MB §3 (Unified Work Graph); UX-MB §11 (Implementation Truth)
 
 ---
@@ -28,26 +28,29 @@ Without a shared export layer, each module will produce its own export implement
 
 The **Export Runtime** package is the shared infrastructure that generates polished artifacts from live module data while preserving output consistency, version context, and downstream portability.
 
+Every export intent that includes review/approval automatically creates a granular BIC record in `@hbc/bic-next-move`, with ownership avatars surfaced in `ExportActionMenu` and in the `@hbc/project-canvas` "My Work" lane.
+
 ---
 
 ## Mold Breaker Rationale
 
 The Work Graph and Implementation Truth principles both matter here. A user should be able to export what the system actually knows — not a disconnected screenshot or an ad hoc report whose relationship to the underlying record is ambiguous. Export should be a reliable projection of record state, selected filters, visible columns, or a configured report narrative.
 
-`@hbc/export-runtime` is the package that makes output trustworthy and reusable:
+`@hbc/export-runtime` is the package that makes output trustworthy and reusable and the foundation of a new Tier-1 primitive:
 
 1. It provides a normalized way to turn tables, reports, and summary cards into artifacts.
 2. It keeps file structure, naming, branding, and formatting consistent across modules.
 3. It preserves context: filters, sort order, selected record version, and export timestamp.
-4. It becomes the base layer for formal publishing workflows without itself taking on approval and governance responsibilities.
+4. It binds review/approval and handoff accountability directly into export flow using granular BIC ownership.
+5. It emits role-aware telemetry so export quality and operational handoff performance are measurable over time.
 
-This package is not a one-off report generator. It is the platform’s shared output engine.
+This package is not a one-off report generator. It is the platform’s shared output engine with implementation truth, ownership, and governance integrity.
 
 ---
 
 ## Export Runtime Model
 
-The package should support several export intents while keeping the data-to-artifact path explicit.
+The package supports several export intents while keeping the data-to-artifact path explicit and primitive-owned.
 
 ### Export Intents
 - **Working Data Export** — CSV / XLSX outputs for analysis and operational handling
@@ -60,8 +63,8 @@ The package should support several export intents while keeping the data-to-arti
 1. Resolve source data and export intent
 2. Project source data into normalized export models
 3. Apply formatting and branding rules
-4. Generate artifact
-5. Return artifact metadata, filename, status, and optional publish hook
+4. Generate artifact with version/view truth stamps and owner-ready receipt metadata
+5. Return artifact metadata, filename, status, BIC handoff projection, and optional publish hook
 
 ### Supported Output Formats
 - `csv`
@@ -70,47 +73,27 @@ The package should support several export intents while keeping the data-to-arti
 - `print`
 - future: `json`, `pptx` packaging hook if ever needed
 
+### Complexity-Aware Disclosure
+- Essential: simple "Export current view" action limited to CSV/XLSX
+- Standard: full export menu with branded PDF/Print and summary receipt metadata
+- Expert: report composition layer, full receipt card, and configure-link access
+
 ---
 
 ## Export Surface Structure
 
-The package should support two shared output structures:
-
-### Structure A — Table Export
-For:
-- data grids
-- filtered work queues
-- logs
-- benchmark tables
-- schedule or cost tables
-
-Includes:
-- column mapping
-- visible column honor / override rules
-- formatting transforms
-- totals/footer rows
-- filter/sort stamp in metadata
-
-### Structure B — Report Export
-For:
-- narrative summaries
-- scorecards
-- meeting/report packets
-- executive-ready one-pagers
-- multi-section review outputs
-
-Includes:
-- title page / cover metadata
-- section composition
-- brand header/footer
-- charts/tables inserted from configured adapters
-- issue/version metadata
+The runtime supports two canonical composition structures:
+- Table Export: normalized column/row projection with filter and sort stamps
+- Report Export: section-based narrative composition with brand templates and metadata cover
+Both structures preserve version/view stamps, BIC handoff metadata, and receipt context.
 
 ---
 
 ## Interface Contract
 
 ```typescript
+// In @hbc/export-runtime primitive (new Tier-1 package)
+
 export type ExportFormat = 'csv' | 'xlsx' | 'pdf' | 'print';
 export type ExportStatus = 'queued' | 'rendering' | 'complete' | 'failed';
 
@@ -174,6 +157,17 @@ export interface IExportRequest {
   format: ExportFormat;
   context: IExportContext;
   payload: ITableExportConfig<unknown> | IReportExportConfig;
+  bicSteps?: IExportBicStepConfig[]; // granular review/approval/handoff steps
+  version: VersionedRecord; // from @hbc/versioned-record
+  telemetry: IExportTelemetryState;
+}
+
+export interface IExportTelemetryState {
+  exportCompletionTime: number | null;
+  artifactConsistencyRate: number | null;
+  handoffLatency: number | null;
+  auditTraceabilityScore: number | null;
+  exportRuntimeCes: number | null;
 }
 
 export interface IExportResult {
@@ -187,6 +181,8 @@ export interface IExportAdapter {
   render(request: IExportRequest): Promise<IExportResult>;
 }
 ```
+
+(The entire model, offline logic, AI actions, BIC steps, receipt metadata, and telemetry are now provided by the new `@hbc/export-runtime` primitive.)
 
 ---
 
@@ -212,7 +208,7 @@ packages/export-runtime/src/
 │   ├── localBrowserExportAdapter.ts    # immediate browser-based export
 │   └── serverRenderExportAdapter.ts    # future long-running/server-side export
 ├── hooks/
-│   └── useExportRuntime.ts
+│   └── useExportRuntime.ts           # delegates to @hbc/export-runtime
 ├── templates/
 │   ├── brandHeader.ts
 │   ├── brandFooter.ts
@@ -238,8 +234,11 @@ interface ExportActionMenuProps {
 **Visual behavior:**
 - appears in the same location and interaction pattern across modules
 - exposes only valid formats for the current payload
-- shows artifact type hints such as “Export filtered table to XLSX” or “Export current report snapshot to PDF”
-- disables unavailable formats rather than hiding them silently
+- projects BIC owner avatars for review/approval handoff exports
+- supports complexity-adaptive behavior:
+  - Essential: simple export action limited to CSV/XLSX
+  - Standard: full menu with branded PDF/Print options
+  - Expert: full menu + report composition entrypoint + configure link
 
 ### `composeTableExport` — Shared Table Projection Helper
 
@@ -261,6 +260,7 @@ This helper assembles:
 - narrative blocks
 - embedded tables / charts
 - brand template selection
+- receipt card stamps for version/view/export context and sync status
 
 It gives module teams a consistent way to build polished report output without each team writing its own print/PDF assembly stack.
 
@@ -271,24 +271,25 @@ Shows:
 - format
 - export timestamp
 - record/version/view state that the artifact reflects
-- artifact availability (download ready, render failed, etc.)
+- artifact availability (download ready, render failed, queued, etc.)
+- optimistic offline indicators (`Saved locally`, `Queued to sync`)
+- projected handoff ownership and deep-link references for downstream review
 
 This is important because the platform should make it obvious what was exported, not just that “something downloaded.”
 
 ---
 
-## Output Truth & Version Discipline
+## AI Action Layer Integration
 
-The package should preserve export truth by stamping:
+AI suggestions ("Summarize narrative from this table data", "Suggest branded PDF layout from module template", "Explain this version/context stamp in plain English", "Recommend file-naming convention") appear as contextual inline buttons and smart placeholders inside `ExportActionMenu`, the composition layer, and `ExportReceiptCard`.
 
-- export timestamp
-- module and record context
-- record version ID where applicable
-- active saved-view ID or filter summary where applicable
-- exporting user identity
-- export format and file name
+AI guardrails are mandatory:
+- inline only (no sidecar chat)
+- source citation required for every recommendation
+- explicit user approval required before artifact mutation or persistence
+- AI-generated actions can auto-create linked BIC records for review/handoff where configured
 
-When a user exports a scorecard, log, or report, the artifact should be traceable to the system state that produced it. That traceability is what differentiates a controlled operational platform from generic ad hoc exports.
+This keeps AI assist contextual, auditable, and compatible with immutable export provenance.
 
 ---
 
@@ -296,52 +297,51 @@ When a user exports a scorecard, log, or report, the artifact should be traceabl
 
 | Package | Integration |
 |---|---|
-| `@hbc/ui-kit` | action menus, dialogs, layout sections, status toasts |
-| `@hbc/versioned-record` | optional record-version stamp on artifact metadata |
-| `@hbc/saved-views` | exports can honor current view definitions and filter states |
-| `@hbc/activity-timeline` | optional event emission that an export occurred |
-| `@hbc/publish-workflow` | publishes artifacts that were first generated by export-runtime |
-| `@hbc/data-access` | future server-side export jobs and artifact retrieval |
-| domain chart/table packages | source projections for report sections |
+| `@hbc/export-runtime` | New Tier-1 primitive providing the entire model |
+| `@hbc/bic-next-move` | Granular BIC for review/approval steps and post-export handoffs |
+| `@hbc/complexity` | Essential/Standard/Expert progressive disclosure |
+| `@hbc/versioned-record` | Immutable provenance, audit trail, snapshot freezing, offline state |
+| `@hbc/related-items` | Direct deep-links from every export artifact and receipt row |
+| `@hbc/project-canvas` | Automatic placement in role-aware My Work lane |
+| `@hbc/export-runtime` telemetry | Five KPIs (export-completion time, artifact-consistency rate, handoff latency, audit-traceability score, export-runtime CES) surfaced in canvas and admin dashboard |
 
 ---
 
-## Expected Consumers
+## Offline / PWA Resilience
 
-- Business Development: scorecards, pursuit summaries, strategic intelligence packets
-- Estimating: bid summaries, comparison tables, review outputs
-- Project Hub: meeting minutes packages, logs, report packets, turnover-related exports
-- Executive dashboards: forecast summaries, variance tables, KPI packets
-- Scheduler / analytics: status snapshots, milestone tables, comparison reports
-- Admin / governance: audit extracts, configuration lists, change logs
+Full tablet-native behavior: service worker caches `ExportActionMenu`, composition surfaces, and `ExportReceiptCard`; IndexedDB + `@hbc/versioned-record` persists export requests and receipt state; Background Sync replays queued export generations with optimistic UI and `Saved locally / Queued to sync` indicators shown on the receipt card.
+
+Operational guarantees:
+- queued exports replay in deterministic order with immutable version snapshots
+- version/view/context stamps are preserved through offline/online transitions
+- failed replays remain queued for retry and surface actionable error details
+- ownership avatars and deep-links are restored after reconnect without state drift
 
 ---
 
 ## Priority & ROI
 
-**Priority:** P1 — should be implemented before polished export patterns diverge across modules  
-**Estimated build effort:** 4–5 sprint-weeks (projection helpers, renderer pipeline, action menu, naming rules, version/context stamps, basic PDF/XLSX support)  
-**ROI:** avoids repeated export logic, standardizes executive-ready outputs, protects artifact quality, and creates a shared artifact engine that future publish workflows can build on
+**Priority:** P1 — should be implemented before polished export patterns diverge across modules; seed for the platform-wide `@hbc/export-runtime` primitive.  
+**Estimated build effort:** 4–5 sprint-weeks (now accelerated by reusing existing primitives).  
+**ROI:** avoids repeated export logic, standardizes executive-ready outputs, protects artifact quality, and creates a shared artifact engine; measurable impact via UX telemetry.
 
 ---
 
 ## Definition of Done
 
-- [ ] export contracts defined for table and report payloads
-- [ ] CSV and XLSX renderers implemented
-- [ ] PDF / print renderer path implemented for branded reports
-- [ ] centralized file naming convention implemented
-- [ ] `ExportActionMenu` implemented with standard UX pattern
-- [ ] table projection helper honors columns, filters, sort order, and optional row selection
-- [ ] report composition helper supports multi-section exports
-- [ ] export receipt includes version/view/timestamp metadata
-- [ ] export failure states normalized and user-visible
-- [ ] optional event emission hook available for timeline tracking
-- [ ] unit tests on file naming, projection helpers, renderer contracts, and error handling
-- [ ] E2E test: export filtered table to XLSX and export report snapshot to PDF
+- [ ] New `@hbc/export-runtime` Tier-1 primitive created and published
+- [ ] All six locked integration patterns implemented and tested
+- [ ] Offline/PWA resilience verified on tablet
+- [ ] Embedded AI actions with provenance and approval guardrails
+- [ ] Progressive disclosure via `@hbc/complexity` across all three modes
+- [ ] Deep-links and canvas integration via `@hbc/related-items` and `@hbc/project-canvas`
+- [ ] Versioned audit trail and admin governance via `@hbc/versioned-record`
+- [ ] Five UX telemetry KPIs wired and surfaced
+- [ ] Unit tests, Storybook stories for all modes and offline states
+- [ ] ADR-0108-export-runtime-primitive created
 
 ---
 
 ## ADR Reference
 
-Create `docs/architecture/adr/0033-export-runtime.md` documenting the separation between export generation and formal publish workflows, the requirement to preserve record/view/version truth in all artifacts, the supported renderer strategy, and the decision to make artifact composition a shared platform service rather than a per-module implementation.
+Create `docs/architecture/adr/0108-export-runtime.md` (and companion ADR for the new `@hbc/export-runtime` primitive) documenting the separation between export generation and formal publish workflows, the requirement to preserve record/view/version truth in all artifacts, granular BIC integration, complexity-adaptive disclosure, offline strategy, AI Action Layer embedding, cross-module deep-linking, versioning/governance, and telemetry KPIs.
