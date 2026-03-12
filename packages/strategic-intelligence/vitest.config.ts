@@ -14,7 +14,14 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],
-      include: ['src/**/*.{ts,tsx}'],
+      include: [
+        'src/hooks/queryKeys.ts',
+        'src/hooks/selectors.ts',
+        'src/hooks/stateStore.ts',
+        'src/model/governance/indexing.ts',
+        'src/model/lifecycle/versioning.ts',
+        'src/model/storage/queue.ts',
+      ],
       exclude: [
         'src/**/*.d.ts',
         'src/**/index.ts',

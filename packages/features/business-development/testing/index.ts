@@ -10,3 +10,8 @@ export {
 export {
   createMockStrategicIntelligenceProfile,
 } from './createMockStrategicIntelligenceProfile.js';
+
+export {
+  createMockBdStrategicIntelligenceView,
+  type MockBdStrategicIntelligenceView,
+} from './createMockBdStrategicIntelligenceView.js';

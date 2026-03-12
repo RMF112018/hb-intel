@@ -1,6 +1,9 @@
 import React from 'react';
 import { createSuggestedIntelligenceMatch } from '@hbc/strategic-intelligence';
-import { createMockStrategicIntelligenceState } from '@hbc/strategic-intelligence/testing';
+import {
+  createMockStrategicIntelligenceState,
+  mockStrategicIntelligenceStates,
+} from '@hbc/strategic-intelligence/testing';
 import {
   BdHeritagePanel,
   IntelligenceExplainabilityDrawer,
@@ -8,25 +11,9 @@ import {
 } from './index.js';
 
 const storyState = createMockStrategicIntelligenceState('story-strategic-intelligence');
-storyState.livingEntries = [
-  {
-    ...storyState.livingEntries[0],
-    entryId: 'story-entry-approved',
-    lifecycleState: 'approved',
-    sensitivity: 'public-internal',
-  },
-  {
-    ...storyState.livingEntries[0],
-    entryId: 'story-entry-pending',
-    lifecycleState: 'pending-approval',
-    sensitivity: 'restricted-project',
-    trust: {
-      ...storyState.livingEntries[0].trust,
-      isStale: true,
-      reliabilityTier: 'review-required',
-    },
-  },
-];
+const queueState = mockStrategicIntelligenceStates.pendingRejectedRevisionQueue;
+const trustState = mockStrategicIntelligenceStates.trustTierMatrix;
+const redactedState = mockStrategicIntelligenceStates.sensitivityRedactedVsFull;
 
 const suggestions = [
   createSuggestedIntelligenceMatch({ suggestionId: 'story-heritage', reason: 'heritage snapshot match' }),
@@ -35,8 +22,16 @@ const suggestions = [
 
 export const storybookMatrix = {
   complexityModes: ['Essential', 'Standard', 'Expert'],
-  lifecycleStates: ['approved', 'pending-approval', 'rejected'],
-  sensitivityStates: ['public-internal', 'restricted-project', 'confidential'],
+  lifecycleStates: ['inherited', 'approved', 'pending-approval', 'rejected', 'stale', 'conflicted'],
+  trustTiers: ['high', 'moderate', 'low', 'review-required'],
+  provenanceClasses: [
+    'firsthand-observation',
+    'meeting-summary',
+    'project-outcome-learning',
+    'inferred-observation',
+    'ai-assisted-draft',
+  ],
+  visibilityStates: ['full', 'redacted'],
   suggestionVariants: ['Suggested Heritage', 'Suggested Intelligence'],
   syncVariants: ['synced', 'saved-locally', 'queued-to-sync'],
 } as const;
@@ -48,9 +43,9 @@ export default {
 export const HeritagePanelStandard = () => (
   <BdHeritagePanel
     heritageSnapshot={storyState.heritageSnapshot}
-    livingEntries={storyState.livingEntries}
+    livingEntries={queueState.livingEntries}
     commitments={storyState.commitmentRegister}
-    handoffReview={storyState.handoffReview}
+    handoffReview={mockStrategicIntelligenceStates.handoffAcknowledgmentIncomplete.handoffReview}
     suggestions={suggestions}
     complexity="Standard"
     syncBadge="Saved locally"
@@ -59,9 +54,20 @@ export const HeritagePanelStandard = () => (
 
 export const LivingFeedExpert = () => (
   <StrategicIntelligenceFeed
-    entries={storyState.livingEntries}
+    entries={trustState.livingEntries}
+    suggestions={mockStrategicIntelligenceStates.suggestedHeritageAndIntelligence.livingEntries.flatMap(
+      (entry) => entry.suggestedMatches
+    )}
+    canViewNonApproved
+  />
+);
+
+export const RedactedFeedStandard = () => (
+  <StrategicIntelligenceFeed
+    entries={redactedState.livingEntries}
     suggestions={suggestions}
     canViewNonApproved
+    canViewSensitiveContent={false}
   />
 );
 

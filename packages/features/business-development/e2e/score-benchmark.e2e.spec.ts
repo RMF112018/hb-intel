@@ -4,12 +4,12 @@ import {
   useBenchmarkDecisionSupport,
   useScoreBenchmarkFilters,
   useScoreBenchmarkState,
-} from '@hbc/score-benchmark';
+} from '../../../score-benchmark/src/index.js';
 import {
   createMockBenchmarkFilterContext,
   createMockScoreGhostOverlayState,
   mockScoreBenchmarkStates,
-} from '@hbc/score-benchmark/testing';
+} from '../../../score-benchmark/testing/index.ts';
 import {
   createReviewerConsensusSummary,
   mapScoreBenchmarkReferenceIntegrations,

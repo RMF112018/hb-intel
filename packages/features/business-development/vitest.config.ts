@@ -15,13 +15,15 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],
-      include: ['src/score-benchmark/integrations/**/*.{ts,tsx}'],
+      include: [
+        'src/strategic-intelligence/components/**/*.{ts,tsx}',
+        'src/strategic-intelligence/hooks/**/*.{ts,tsx}',
+        'src/strategic-intelligence/integrations/**/*.{ts,tsx}',
+      ],
       exclude: [
-        'src/score-benchmark/**/*.d.ts',
-        'src/score-benchmark/**/index.ts',
-        'src/score-benchmark/integrations/bicNextMoveAdapter.ts',
-        'src/score-benchmark/integrations/healthIndicatorAdapter.ts',
-        'src/score-benchmark/integrations/projectCanvasAdapter.ts',
+        'src/strategic-intelligence/**/*.d.ts',
+        'src/strategic-intelligence/**/index.ts',
+        'src/strategic-intelligence/components/setupTests.ts',
         'testing/**',
       ],
       thresholds: {
