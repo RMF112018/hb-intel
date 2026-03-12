@@ -253,3 +253,15 @@ docs/README.md ADR index updated: ADR-0106 row appended.
 current-state-map.md section 2 updated with SF17 and ADR-0106 rows.
 -->
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF17-T09 completed: 2026-03-12
+All documentation deliverables created:
+  - docs/architecture/adr/ADR-0106-admin-intelligence-layer.md (10 decisions, D-01–D-10)
+  - docs/how-to/developer/admin-intelligence-adoption-guide.md (6 sections)
+  - docs/reference/admin-intelligence/api.md (full export table)
+  - packages/features/admin/README.md updated with exports table, boundary rules, links
+  - docs/README.md ADR index updated: ADR-0106 row appended after ADR-0104
+  - current-state-map.md §2 updated: SF17 reclassified Historical Foundational; ADR-0106 authored; adoption-guide + api.md rows added; ADR count updated to 100
+Next: SF17 completion sign-off in SF17-Admin-Intelligence.md
+-->

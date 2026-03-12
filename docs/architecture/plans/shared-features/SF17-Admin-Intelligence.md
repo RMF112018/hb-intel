@@ -129,4 +129,17 @@ packages/features/admin/
 | `SF17-T06-ImplementationTruth-and-ApprovalAuthority.md` | truth layer and approval authority UX — **COMPLETE 2026-03-11** |
 | `SF17-T07-Reference-Integrations.md` | bic/notification/acknowledgment/versioned-record/complexity integrations — **COMPLETE 2026-03-11** |
 | `SF17-T08-Testing-Strategy.md` | test fixtures and coverage matrix — **COMPLETE 2026-03-12** |
-| `SF17-T09-Testing-and-Deployment.md` | checklist, ADR/docs/index/state-map updates |
+| `SF17-T09-Testing-and-Deployment.md` | checklist, ADR/docs/index/state-map updates — **COMPLETE 2026-03-12** |
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF17 completed: 2026-03-12
+T01-T09 implemented.
+All four mechanical enforcement gates passed.
+ADR created: docs/architecture/adr/ADR-0106-admin-intelligence-layer.md
+Documentation added:
+  - docs/how-to/developer/admin-intelligence-adoption-guide.md
+  - docs/reference/admin-intelligence/api.md
+  - packages/features/admin/README.md
+docs/README.md ADR index updated: ADR-0106 row appended.
+current-state-map.md section 2 updated with SF17 and ADR-0106 rows.
+-->
