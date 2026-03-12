@@ -135,9 +135,10 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0104 | Accepted | [ADR-0104-ai-assist-azure-foundry-integration.md](./architecture/adr/ADR-0104-ai-assist-azure-foundry-integration.md) |
 | ADR-0106 | Accepted | [ADR-0106-admin-intelligence-layer.md](./architecture/adr/ADR-0106-admin-intelligence-layer.md) |
 | ADR-0107 | Accepted | [ADR-0107-estimating-bid-readiness-signal.md](./architecture/adr/ADR-0107-estimating-bid-readiness-signal.md) |
-| ADR-0108 | Reserved | Reserved for SF19 BD Score Benchmark Ghost Overlay (to be authored when SF19 enters implementation). |
+| ADR-0108 | Accepted | [ADR-0108-bd-score-benchmark-ghost-overlay.md](./architecture/adr/ADR-0108-bd-score-benchmark-ghost-overlay.md) |
 | ADR-0109 | Reserved | Reserved for SF20 BD Heritage Panel & Living Strategic Intelligence (to be authored when SF20 enters implementation). |
 | ADR-0111 | Accepted | [ADR-0111-health-indicator-readiness-primitive-runtime.md](./architecture/adr/ADR-0111-health-indicator-readiness-primitive-runtime.md) |
+| ADR-0112 | Accepted | [ADR-0112-score-benchmark-primitive-runtime.md](./architecture/adr/ADR-0112-score-benchmark-primitive-runtime.md) |
 
 ## Reference Documents
 
@@ -148,6 +149,8 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 - [Release Sign-Off Template](./architecture/release/release-signoff-template.md) — Staged sign-off model for phase releases
 - [Estimating Bid Readiness API](./reference/estimating/api.md) — SF18 adapter-over-primitive API contracts and testing exports
 - [Estimating Bid Readiness Adoption Guide](./how-to/developer/estimating-bid-readiness-adoption-guide.md) — Integration and validation guidance for downstream consumers
+- [BD Score Benchmark API](./reference/bd-score-benchmark/api.md) — SF19 primitive + adapter API contracts and testing exports
+- [BD Score Benchmark Adoption Guide](./how-to/developer/bd-score-benchmark-adoption-guide.md) — Integration and validation guidance for downstream consumers
 
 ### Auth & Shell Reference
 

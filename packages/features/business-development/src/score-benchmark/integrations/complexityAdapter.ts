@@ -10,9 +10,9 @@ export interface IScoreBenchmarkComplexityProjection {
 }
 
 const modeByTier: Record<ComplexityTier, ScoreBenchmarkComplexityMode> = {
-  essential: 'essential',
-  standard: 'standard',
-  expert: 'expert',
+  essential: 'Essential',
+  standard: 'Standard',
+  expert: 'Expert',
 };
 
 export const gateScoreBenchmarkByComplexity = (

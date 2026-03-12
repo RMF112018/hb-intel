@@ -150,5 +150,53 @@ describe('ScoreBenchmarkApi', () => {
         'reviewer-1'
       )
     ).toThrow(/persisted artifact/i);
+
+    expect(() =>
+      api.saveNoBidRationale(
+        'entity-1',
+        {
+          artifactId: 'artifact-1',
+          rationale: 'approved no-bid rationale',
+          citations: [],
+          approvedAt: '',
+        },
+        ''
+      )
+    ).toThrow(/approval metadata/i);
+  });
+
+  it('covers default benchmark fallbacks and null-summary branches', () => {
+    const api = new ScoreBenchmarkApi();
+    const defaults = api.getCriterionBenchmarks({});
+    expect(defaults.length).toBeGreaterThan(0);
+
+    const nullOverlay = createOverlay();
+    nullOverlay.version.snapshotId = 'entity-null';
+    nullOverlay.benchmarks = [
+      {
+        ...nullOverlay.benchmarks[0]!,
+        winAvg: null,
+        lossAvg: null,
+        winZoneMin: null,
+      },
+    ];
+    const seeded = new ScoreBenchmarkApi({ overlays: [nullOverlay], approvedCohorts: ['default'] });
+    const summary = seeded.getOverallSummary({});
+    expect(summary.overallWinAvg).toBeNull();
+    expect(summary.overallLossAvg).toBeNull();
+  });
+
+  it('handles empty benchmark overlays and suppresses ownership projections for pursue path', () => {
+    const overlay = createOverlay();
+    overlay.version.snapshotId = 'entity-empty';
+    overlay.benchmarks = [];
+    overlay.lossRiskOverlap = false;
+    overlay.overallWinAvg = 90;
+    overlay.overallWinZoneMin = 70;
+    const api = new ScoreBenchmarkApi({ overlays: [overlay], approvedCohorts: ['default'] });
+
+    const response = api.getOverlayState('entity-empty', {});
+    expect(response.state.recommendation.state).toBe('pursue-with-caution');
+    expect(response.bicOwnershipProjections).toEqual([]);
   });
 });

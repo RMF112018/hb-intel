@@ -184,7 +184,7 @@ describe('score benchmark T07 integrations', () => {
     const learning = integrations.consumeLearningSignals([createLearningSignal()]);
 
     expect(bicActions.length).toBeGreaterThanOrEqual(1);
-    expect(complexity.mode).toBe('expert');
+    expect(complexity.mode).toBe('Expert');
     expect(versioned.replaySafe).toBe(true);
     expect(related.criterionLinks[0]?.relationship).toBe('references');
     expect(canvas.tileKey).toBe('bic-my-items');

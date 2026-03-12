@@ -19,6 +19,8 @@ Lock primitive-owned public contracts for heritage snapshot, living intelligence
 ## Primitive Contracts to Define (`@hbc/strategic-intelligence`)
 
 ```ts
+import type { IVersionMetadata } from '@hbc/versioned-record';
+
 export type ReliabilityTier = 'high' | 'moderate' | 'low' | 'review-required';
 export type ProvenanceClass =
   | 'firsthand-observation'
@@ -55,7 +57,7 @@ export interface IHeritageSnapshot {
   riskAssumptions: string[];
   pursuitStrategy: string;
   immutable: true;
-  version: VersionedRecord;
+  version: IVersionMetadata;
 }
 
 export interface ICommitmentRegisterItem {
@@ -113,45 +115,59 @@ export interface IStrategicIntelligenceEntry {
     competitorReferences?: string[];
     lifecyclePhase?: string;
     riskCategory?: string;
-    confidenceTier?: ReliabilityTier;
-    tags: string[];
   };
   trust: IIntelligenceTrustMetadata;
-  sensitivity: {
-    class: SensitivityClass;
-    redactionRequired: boolean;
-    visibleToRoles?: string[];
-  };
-  contributor: IBicOwner;
-  submittedAt: string;
-  approvalStatus: IntelligenceLifecycleState;
-  approver: IBicOwner | null;
-  approvedAt: string | null;
-  rejectionReason: string | null;
+  lifecycleState: IntelligenceLifecycleState;
+  sensitivity: SensitivityClass;
   conflicts: IIntelligenceConflict[];
-  suggestions: ISuggestedIntelligenceMatch[];
-  version: number;
-  bicRecordId?: string;
-  relatedScorecardId?: string;
+  suggestedMatches: ISuggestedIntelligenceMatch[];
+  commitmentIds: string[];
+  createdAt: string;
+  createdBy: string;
+  approvedAt?: string;
+  approvedBy?: string;
+  supersededByEntryId?: string;
+  version: IVersionMetadata;
 }
 
-export interface IHandoffParticipantAcknowledgment {
-  participantRole: 'project-manager' | 'project-executive' | 'estimating-lead' | 'bd-lead';
-  userId: string;
+export interface IHandoffReviewParticipant {
+  participantId: string;
+  displayName: string;
+  role: string;
   acknowledgedAt: string | null;
-  status: 'pending' | 'acknowledged' | 'declined';
-  declineReason?: string;
+  acknowledgmentNote?: string;
 }
 
 export interface IHandoffReviewState {
   reviewId: string;
-  snapshotId: string;
-  stepsCompleted: Array<
-    'snapshot-walkthrough' | 'commitment-verification' | 'strategic-risk-discussion' | 'acknowledgment-confirmation'
-  >;
-  participantAcknowledgments: IHandoffParticipantAcknowledgment[];
-  isComplete: boolean;
-  completedAt: string | null;
+  scorecardId: string;
+  startedAt: string;
+  startedBy: string;
+  participants: IHandoffReviewParticipant[];
+  completionStatus: 'not-started' | 'in-progress' | 'completed';
+  outstandingCommitmentIds: string[];
+  completionNotes?: string;
+  version: IVersionMetadata;
+}
+
+export interface IRedactedProjection {
+  entryId: string;
+  title: string;
+  summary: string;
+  sensitivity: SensitivityClass;
+  redactionReason?: string;
+  trust: Pick<IIntelligenceTrustMetadata, 'reliabilityTier' | 'isStale' | 'aiTrustDowngraded'>;
+}
+
+export interface IStrategicIntelligenceApprovalQueueItem {
+  queueItemId: string;
+  entryId: string;
+  submittedBy: string;
+  submittedAt: string;
+  approvalStatus: 'pending' | 'approved' | 'rejected' | 'revision-requested';
+  reviewedBy?: string;
+  reviewedAt?: string;
+  reviewNotes?: string;
 }
 
 export interface IStrategicIntelligenceTelemetryState {
@@ -177,7 +193,7 @@ export interface IStrategicIntelligenceState {
   handoffReview: IHandoffReviewState | null;
   approvalQueue: IStrategicIntelligenceApprovalQueueItem[];
   telemetry: IStrategicIntelligenceTelemetryState;
-  version: VersionedRecord;
+  version: IVersionMetadata;
   syncStatus: 'synced' | 'saved-locally' | 'queued-to-sync';
 }
 ```

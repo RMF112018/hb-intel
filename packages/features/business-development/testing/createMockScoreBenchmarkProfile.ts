@@ -1,6 +1,8 @@
 import type { ScoreBenchmarkProfile } from '@hbc/score-benchmark';
 
-export const createMockScoreBenchmarkProfile = (): ScoreBenchmarkProfile => ({
+export const createMockScoreBenchmarkProfile = (
+  overrides?: Partial<ScoreBenchmarkProfile>
+): ScoreBenchmarkProfile => ({
   profileId: 'business-development-mock',
   recommendationCutoffs: {
     pursue: 80,
@@ -11,4 +13,5 @@ export const createMockScoreBenchmarkProfile = (): ScoreBenchmarkProfile => ({
     approvedCohorts: ['default'],
     warningDeltaThreshold: 0.25,
   },
+  ...overrides,
 });

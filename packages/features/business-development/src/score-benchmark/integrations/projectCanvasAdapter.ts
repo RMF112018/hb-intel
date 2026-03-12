@@ -13,7 +13,7 @@ export const projectScoreBenchmarkToCanvasPlacement = (
   routeHref: string
 ): IScoreBenchmarkCanvasPlacement => ({
   tileKey: 'bic-my-items',
-  recommendationSignal: state.hasLossRiskOverlap ? 'deadline-change' : 'usage-history',
+  recommendationSignal: state.hasLossRiskOverlap ? 'health' : 'usage-history',
   routeHref,
   escalationTargetIds: state.bicOwnershipProjections
     .map((projection) => projection.owner?.userId)

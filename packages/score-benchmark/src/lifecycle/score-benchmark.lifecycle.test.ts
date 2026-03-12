@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ScoreBenchmarkLifecycleApi } from '../api/ScoreBenchmarkLifecycleApi.js';
 import type { IScoreGhostOverlayState } from '../types/index.js';
+import type { PostBidLearningSignal } from '@hbc/post-bid-autopsy';
 
 const overlayState: IScoreGhostOverlayState = {
   benchmarks: [
@@ -115,6 +116,30 @@ describe('ScoreBenchmarkLifecycleApi', () => {
     expect(drift.emittedSignals.length).toBeGreaterThan(0);
   });
 
+  it('does not emit drift signals when thresholds and sample size remain healthy', () => {
+    const healthyOverlay: IScoreGhostOverlayState = {
+      ...overlayState,
+      benchmarks: [
+        {
+          ...overlayState.benchmarks[0]!,
+          sampleSize: 12,
+        },
+      ],
+      telemetry: {
+        ...overlayState.telemetry,
+        predictiveAccuracyByCriterion: 0.1,
+      },
+    };
+    const lifecycle = new ScoreBenchmarkLifecycleApi([healthyOverlay]);
+    const drift = lifecycle.runPredictiveDriftMonitor({
+      fromIso: new Date(0).toISOString(),
+      toIso: new Date().toISOString(),
+      driftThreshold: 0.5,
+    });
+
+    expect(drift.emittedSignals.length).toBe(0);
+  });
+
   it('freezes snapshots with immutable version metadata context', () => {
     const lifecycle = new ScoreBenchmarkLifecycleApi([overlayState]);
     const frozen = lifecycle.freezeSnapshot('entity-1', 'go-no-go-submission');
@@ -122,5 +147,47 @@ describe('ScoreBenchmarkLifecycleApi', () => {
     expect(frozen.entityId).toBe('entity-1');
     expect(frozen.snapshotReason).toBe('go-no-go-submission');
     expect(frozen.version.changeSummary).toContain('Snapshot frozen');
+  });
+
+  it('emits direct recalibration signals and consumes published learning-loop signals', () => {
+    const lifecycle = new ScoreBenchmarkLifecycleApi([overlayState]);
+    const emitted = lifecycle.emitRecalibrationSignals([
+      {
+        signalId: 'manual-1',
+        criterionId: 'c1',
+        predictiveDrift: 0.2,
+        triggeredBy: 'admin-request',
+        correlationKeys: ['manual'],
+        triggeredAt: new Date().toISOString(),
+      },
+    ]);
+    expect(emitted.emittedCount).toBe(1);
+
+    const learningSignal: PostBidLearningSignal = {
+      signalType: 'benchmark-dataset-enrichment',
+      signalId: 'learn-1',
+      autopsyId: 'auto-1',
+      pursuitId: 'p-1',
+      scorecardId: 's-1',
+      status: 'published',
+      outcome: 'lost',
+      confidenceTier: 'moderate',
+      confidenceScore: 0.7,
+      evidenceCoverage: 0.8,
+      sensitivityVisibility: 'internal',
+      reasonCodes: ['owner-type-mismatch'],
+      publishedAt: new Date().toISOString(),
+      benchmarkDimensionKeys: ['projectType'],
+      criterionImpacts: [{ criterionId: 'c1', impactDirection: 'negative', weight: 0.2 }],
+    };
+
+    const consumed = lifecycle.consumePublishedLearningSignals([learningSignal]);
+    expect(consumed.consumedSignals).toBe(1);
+    expect(consumed.emittedSignals.length).toBe(1);
+  });
+
+  it('throws when freeze is requested without overlay state', () => {
+    const lifecycle = new ScoreBenchmarkLifecycleApi([]);
+    expect(() => lifecycle.freezeSnapshot('missing', 'no-data')).toThrow(/No overlay state available/);
   });
 });

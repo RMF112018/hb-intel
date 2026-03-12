@@ -2,7 +2,7 @@
   "name": "@hbc/features-business-development",
   "version": "0.0.1",
   "private": true,
-  "description": "Business Development feature package — score benchmark adapter over @hbc/score-benchmark and BD composition surfaces.",
+  "description": "Business Development feature package — adapter surfaces over @hbc/score-benchmark and @hbc/strategic-intelligence.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/src/index.js",
@@ -12,6 +12,10 @@
     ".": {
       "types": "./dist/src/index.d.ts",
       "import": "./dist/src/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "import": "./dist/testing/index.js"
     }
   },
   "files": [
@@ -22,7 +26,9 @@
     "dev": "tsc --project tsconfig.json --watch",
     "check-types": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "storybook:test": "vitest run --passWithNoTests -- storybook-matrix",
+    "test:e2e": "pnpm exec playwright test --config playwright.score-benchmark.config.ts"
   },
   "peerDependencies": {
     "react": "^18.3.0",
@@ -54,6 +60,7 @@
     "@hbc/notification-intelligence": "workspace:*",
     "@hbc/health-indicator": "workspace:*",
     "@hbc/ai-assist": "workspace:*",
-    "@hbc/post-bid-autopsy": "workspace:*"
+    "@hbc/post-bid-autopsy": "workspace:*",
+    "@hbc/strategic-intelligence": "workspace:*"
   }
 }

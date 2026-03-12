@@ -4,29 +4,39 @@
 
 Business Development feature package adapters and composition surfaces.
 
-## BD Score Benchmark Adapter Overview
+## SF20 Strategic Intelligence Adapter Usage
 
-The `score-benchmark` surface in this package is an adapter/composition layer over `@hbc/score-benchmark`. It owns profile defaults, recommendation copy scaffolding, and UI composition for Business Development.
+The `strategic-intelligence` surface is an adapter/composition layer over `@hbc/strategic-intelligence`. It is designed for Business Development and reusable adapter patterns consumed by Estimating and Project Hub integration seams.
 
-## Profile Defaults and Composition Points
+## Complexity Behavior Summary
 
-- profile defaults are defined in `src/score-benchmark/profiles`
-- adapter mapping functions are defined in `src/score-benchmark/adapters`
-- composition hooks are defined in `src/score-benchmark/hooks`
-- recommendation/explainability/consensus side-panel surfaces are defined in `src/score-benchmark/components`
+Complexity-mode rendering behavior remains adapter-owned presentation:
 
-## Complexity and Side-Panel Behavior Summary
+- Essential: compact handoff summary and commitment counts
+- Standard: commitment and suggestion panels
+- Expert: explainability and richer projection context
 
-Scaffolded side-panel surfaces for SF19 include:
+Primitive trust/workflow/governance contracts remain in `@hbc/strategic-intelligence`.
 
-- `SimilarPursuitsPanel`
-- `BenchmarkExplainabilityPanel`
-- `ReviewerConsensusPanel`
+## Profile and Projection Contracts
 
-These are composition-layer components and do not own primitive governance or recalibration logic.
+- profile defaults are defined in `src/strategic-intelligence/profiles`
+- adapter projections are defined in `src/strategic-intelligence/adapters`
+- composition hooks are defined in `src/strategic-intelligence/hooks`
+- composition components are defined in `src/strategic-intelligence/components`
+
+## Sensitivity and Redaction Rendering Expectations
+
+Sensitivity and redaction policies are primitive-owned. Adapter components render redacted or non-redacted fields according to primitive-projected policy outputs and do not redefine sensitivity rules.
+
+## Existing SF19 Adapter Surface
+
+The package also includes the SF19 `score-benchmark` adapter surface over `@hbc/score-benchmark`.
 
 ## Linkbacks
 
-- Primitive package docs: [`@hbc/score-benchmark`](../../score-benchmark/README.md)
-- SF19 plan family: [SF19 master](../../../docs/architecture/plans/shared-features/SF19-BD-Score-Benchmark.md)
-- SF19 package scaffold task: [SF19-T01](../../../docs/architecture/plans/shared-features/SF19-T01-Package-Scaffold.md)
+- Primitive package docs: [`@hbc/strategic-intelligence`](../../strategic-intelligence/README.md)
+- SF20 plan family: [SF20 master](../../../docs/architecture/plans/shared-features/SF20-BD-Heritage-Panel.md)
+- SF20 package scaffold task: [SF20-T01](../../../docs/architecture/plans/shared-features/SF20-T01-Package-Scaffold.md)
+- SF20 decisions reference: [PH7-SF-20 feature decisions](../../../docs/explanation/feature-decisions/PH7-SF-20-Module-Feature-BD-Heritage-Panel.md)
+- Existing SF19 primitive docs: [`@hbc/score-benchmark`](../../score-benchmark/README.md)

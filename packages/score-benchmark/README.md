@@ -54,7 +54,11 @@ The primitive contract is aligned for offline-first consumption:
 Import testing helpers from:
 
 ```ts
-import { createMockScoreBenchmarkProfile } from '@hbc/score-benchmark/testing';
+import {
+  createMockScoreGhostOverlayState,
+  createMockScorecardBenchmark,
+  mockScoreBenchmarkStates,
+} from '@hbc/score-benchmark/testing';
 ```
 
 ## Linked Plans and ADRs
@@ -62,4 +66,4 @@ import { createMockScoreBenchmarkProfile } from '@hbc/score-benchmark/testing';
 - [SF19 master plan](../../docs/architecture/plans/shared-features/SF19-BD-Score-Benchmark.md)
 - [SF19-T09 testing and deployment](../../docs/architecture/plans/shared-features/SF19-T09-Testing-and-Deployment.md)
 - [ADR-0108 BD score benchmark ghost overlay](../../docs/architecture/adr/ADR-0108-bd-score-benchmark-ghost-overlay.md)
-- [Companion primitive ADR target (ADR-0112)](../../docs/architecture/adr/ADR-0112-score-benchmark-primitive-runtime.md)
+- [Companion primitive ADR (ADR-0112)](../../docs/architecture/adr/ADR-0112-score-benchmark-primitive-runtime.md)

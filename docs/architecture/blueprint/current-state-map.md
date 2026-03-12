@@ -92,9 +92,12 @@
 | `docs/architecture/adr/ADR-0111-health-indicator-readiness-primitive-runtime.md` | **Permanent Decision Rationale** | Companion primitive ADR for `@hbc/health-indicator` runtime ownership and boundary rules; authored 2026-03-12 |
 | `docs/how-to/developer/estimating-bid-readiness-adoption-guide.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; SF18 adapter adoption and validation guidance |
 | `docs/reference/estimating/api.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; SF18 API/contract surface and testing exports |
-| SF19 shared-feature plans (10 files: `SF19-BD-Score-Benchmark.md` through `SF19-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/features-business-development` score-benchmark planning family authored 2026-03-11 and realigned 2026-03-12 to confidence/similarity/recommendation/governance model; ADR-0108 reserved; pending PH7.12 sign-off (ADR-0090) before implementation |
-| `docs/architecture/adr/ADR-0108-bd-score-benchmark-ghost-overlay.md` | **Permanent Decision Rationale** | SF19 BD score benchmark ghost overlay primitive; 10 locked decisions (D-01–D-10); to be authored when SF19 enters active development |
-| SF20 shared-feature plans (10 files: `SF20-BD-Heritage-Panel.md` through `SF20-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/features-business-development` heritage-intelligence planning family authored 2026-03-11 and realigned 2026-03-12 to snapshot/living separation, trust/workflow governance, and reuse explainability model; ADR-0109 reserved; pending PH7.12 sign-off (ADR-0090) before implementation |
+| SF19 shared-feature plans (10 files: `SF19-BD-Score-Benchmark.md` through `SF19-T09-Testing-and-Deployment.md`) | **Historical Foundational** | Tier 2 — matrix classification only; T01–T09 complete 2026-03-12; `@hbc/features-business-development` implemented as adapter over `@hbc/score-benchmark` with T09 closure evidence recorded |
+| `docs/architecture/adr/ADR-0108-bd-score-benchmark-ghost-overlay.md` | **Permanent Decision Rationale** | SF19 BD score benchmark adapter-over-primitive governance lock; authored 2026-03-12 |
+| `docs/architecture/adr/ADR-0112-score-benchmark-primitive-runtime.md` | **Permanent Decision Rationale** | Companion primitive ADR for `@hbc/score-benchmark` runtime ownership and closure governance; authored 2026-03-12 |
+| `docs/how-to/developer/bd-score-benchmark-adoption-guide.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; SF19 adapter adoption and validation guidance |
+| `docs/reference/bd-score-benchmark/api.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; SF19 primitive + adapter API/reference surface |
+| SF20 shared-feature plans (10 files: `SF20-BD-Heritage-Panel.md` through `SF20-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; SF20-T01 scaffold implemented 2026-03-12 with `@hbc/strategic-intelligence` primitive + `@hbc/features-business-development` adapter surface realigned to snapshot/living separation and primitive-owned trust/workflow governance; ADR-0109 reserved; pending PH7.12 sign-off (ADR-0090) for full SF20 completion |
 | `docs/architecture/adr/ADR-0109-bd-heritage-living-strategic-intelligence.md` | **Permanent Decision Rationale** | SF20 BD heritage panel and living strategic intelligence primitive; 10 locked decisions (D-01–D-10); to be authored when SF20 enters active development |
 | SF21 shared-feature plans (10 files: `SF21-Project-Health-Pulse.md` through `SF21-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/features-project-hub` health-pulse planning family authored 2026-03-11; ADR-0110 reserved; pending PH7.12 sign-off (ADR-0090) before implementation |
 | `docs/architecture/adr/ADR-0110-project-health-pulse-multi-dimension-indicator.md` | **Permanent Decision Rationale** | SF21 project health pulse multi-dimension indicator primitive; 10 locked decisions (D-01–D-10); to be authored when SF21 enters active development |
@@ -135,7 +138,7 @@ Every new architecture, plan, reference, or release document must declare one of
 
 **Transition rule — Deferred Scope:** When a Deferred Scope document's feature or package enters active development in a named phase milestone, reclassify it to Canonical Normative Plan, add it to the active phase's plan index, and update this matrix. The PH7-RM-* plans must be reviewed and reclassified as needed before PH7.12 sign-off.
 
-**ADR rule:** New ADRs are always Permanent Decision Rationale. ADR-0091 through ADR-0097 were assigned after PH7.11. ADR-0098 is reserved for SF09 (data-seeding), ADR-0099 is reserved for SF10 (notification-intelligence), ADR-0100 is reserved for SF11 (smart-empty-state), ADR-0101 is authored for SF12 (session-state), ADR-0102 is authored for SF13 (project-canvas), ADR-0103 is authored for SF14 (related-items), ADR-0104 is authored for SF15 (ai-assist), ADR-0105 is reserved for SF16 (search), ADR-0106 is authored for SF17 (admin-intelligence), ADR-0107 is authored for SF18 (estimating bid-readiness), ADR-0108 is reserved for SF19 (bd score benchmark), ADR-0109 is reserved for SF20 (bd heritage intelligence), ADR-0110 is reserved for SF21 (project health pulse), and ADR-0111 is authored as companion primitive governance for SF18. Next unreserved number: **ADR-0112**.
+**ADR rule:** New ADRs are always Permanent Decision Rationale. ADR-0091 through ADR-0097 were assigned after PH7.11. ADR-0098 is reserved for SF09 (data-seeding), ADR-0099 is reserved for SF10 (notification-intelligence), ADR-0100 is reserved for SF11 (smart-empty-state), ADR-0101 is authored for SF12 (session-state), ADR-0102 is authored for SF13 (project-canvas), ADR-0103 is authored for SF14 (related-items), ADR-0104 is authored for SF15 (ai-assist), ADR-0105 is reserved for SF16 (search), ADR-0106 is authored for SF17 (admin-intelligence), ADR-0107 is authored for SF18 (estimating bid-readiness), ADR-0108 is authored for SF19 (bd score benchmark), ADR-0109 is reserved for SF20 (bd heritage intelligence), ADR-0110 is reserved for SF21 (project health pulse), ADR-0111 is authored as companion primitive governance for SF18, and ADR-0112 is authored as companion primitive governance for SF19. Next unreserved number: **ADR-0113**.
 
 **Banner format (Tier 1):**
 ```
@@ -154,7 +157,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | Index gap (ADR-0073–ADR-0079) | These numbers were absent from `docs/README.md` index | Resolved: 2026-03-09 — all entries added to `docs/README.md` |
 | ADR-0082 not indexed | ADR-0082 missing from `docs/README.md` | Resolved: 2026-03-09 — added to index |
 
-**Post-PH7.11 state (updated 2026-03-12):** 102 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (phase-7-final-verification, acknowledgment, step-wizard, versioned-record, stub-detection, field-annotations, workflow-handoff). ADR-0098 reserved for SF09 (data-seeding); ADR-0099 reserved for SF10 (notification-intelligence); ADR-0100 reserved for SF11 (smart-empty-state); ADR-0101 authored for SF12 (session-state); ADR-0102 authored for SF13 (project-canvas); ADR-0103 authored for SF14 (related-items); ADR-0104 authored for SF15 (ai-assist); ADR-0105 reserved for SF16 (search); ADR-0106 authored for SF17 (admin-intelligence); ADR-0107 authored for SF18 (estimating bid-readiness); ADR-0108 reserved for SF19 (bd score benchmark); ADR-0109 reserved for SF20 (bd heritage intelligence); ADR-0110 reserved for SF21 (project health pulse); ADR-0111 authored as companion primitive governance for SF18. Next unreserved number: **ADR-0112**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
+**Post-PH7.11 state (updated 2026-03-12):** 104 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (phase-7-final-verification, acknowledgment, step-wizard, versioned-record, stub-detection, field-annotations, workflow-handoff). ADR-0098 reserved for SF09 (data-seeding); ADR-0099 reserved for SF10 (notification-intelligence); ADR-0100 reserved for SF11 (smart-empty-state); ADR-0101 authored for SF12 (session-state); ADR-0102 authored for SF13 (project-canvas); ADR-0103 authored for SF14 (related-items); ADR-0104 authored for SF15 (ai-assist); ADR-0105 reserved for SF16 (search); ADR-0106 authored for SF17 (admin-intelligence); ADR-0107 authored for SF18 (estimating bid-readiness); ADR-0108 authored for SF19 (bd score benchmark); ADR-0109 reserved for SF20 (bd heritage intelligence); ADR-0110 reserved for SF21 (project health pulse); ADR-0111 authored as companion primitive governance for SF18; ADR-0112 authored as companion primitive governance for SF19. Next unreserved number: **ADR-0113**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
 
 ---
 
@@ -180,7 +183,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | `packages/spfx` | @hbc/spfx | SPFx webpart scaffolding & utilities | Depends on auth, sharepoint-docs, ui-kit | v0.0.1 | `packages/spfx/README.md` |
 | `packages/eslint-plugin-hbc` | @hb-intel/eslint-plugin-hbc | Component consumption lint rules | None (standalone tool) | v1.0.0 | `packages/eslint-plugin-hbc/README.md` |
 
-### Category C: Shared-Feature Primitives (12)
+### Category C: Shared-Feature Primitives (13)
 
 These packages are **Tier-1 Platform Primitives** — mandatory-use when their concern area is present in a feature. See [Platform Primitives Registry](../../reference/platform-primitives.md) for policy, decision tree, adoption matrix, and non-duplication rule. <!-- PH7.4: elevated from optional to Tier-1 per §7.4.1 -->
 
@@ -200,6 +203,7 @@ The original three (SF01–SF03) emerged organically; SF04–SF15 are planned pr
 | `packages/session-state` | @hbc/session-state | Offline-safe session persistence & sync | Depends on idb (runtime); peer: react | v0.0.1 | `packages/session-state/README.md` |
 | `packages/project-canvas` | @hbc/project-canvas | Role-based configurable project dashboard canvas | Depends on ui-kit, complexity, @dnd-kit/core; peer: react | v0.0.1 | `packages/project-canvas/README.md` |
 | `packages/post-bid-autopsy` | @hbc/post-bid-autopsy | Read-only post-bid learning-loop signal contracts for benchmark enrichment, recalibration, and drift inputs | None (contract-only primitive) | v0.0.1 | `packages/post-bid-autopsy/README.md` |
+| `packages/strategic-intelligence` | @hbc/strategic-intelligence | Heritage snapshot and living strategic intelligence primitive contracts with trust/workflow/governance ownership seams | None (contract-first primitive scaffold) | v0.0.1 | `packages/strategic-intelligence/README.md` |
 
 ### Category D: Feature Packages (11)
 
@@ -382,13 +386,13 @@ As of PH7.4, all Category C packages are **Tier-1 Platform Primitives** — mand
 |--------|-------|
 | Core platform packages | 8 |
 | Shared infrastructure packages | 2 |
-| Shared-feature primitives | 12 |
+| Shared-feature primitives | 13 |
 | Feature packages | 11 |
 | SPFx applications | 11 |
 | Standalone applications | 3 |
 | Backend services | 1 |
 | Build tooling packages | 1 |
-| **Total workspace members** | **49** |
-| Architecture Decision Records | 102 active + 6 archived | <!-- Updated 2026-03-12: ADR-0106 authored for SF17 admin-intelligence; ADR-0107 authored for SF18 estimating adapter-over-primitive; ADR-0111 authored for health-indicator companion primitive governance; ADR-0091–0097 added since PH7.11; ADR-0098 reserved SF09; ADR-0099 reserved SF10; ADR-0100 reserved SF11; ADR-0101 authored SF12; ADR-0102 authored SF13; ADR-0103 authored SF14; ADR-0104 authored SF15; ADR-0105 reserved SF16; ADR-0108 reserved SF19; ADR-0109 reserved SF20; ADR-0110 reserved SF21 -->
+| **Total workspace members** | **50** |
+| Architecture Decision Records | 104 active + 6 archived | <!-- Updated 2026-03-12: ADR-0106 authored for SF17 admin-intelligence; ADR-0107 authored for SF18 estimating adapter-over-primitive; ADR-0108 authored for SF19 BD score benchmark adapter boundary; ADR-0111 authored for health-indicator companion primitive governance; ADR-0112 authored for score-benchmark companion primitive governance; ADR-0091–0097 added since PH7.11; ADR-0098 reserved SF09; ADR-0099 reserved SF10; ADR-0100 reserved SF11; ADR-0101 authored SF12; ADR-0102 authored SF13; ADR-0103 authored SF14; ADR-0104 authored SF15; ADR-0105 reserved SF16; ADR-0109 reserved SF20; ADR-0110 reserved SF21 -->
 | TSConfig path aliases | 64 |
 | Vite dev server ports | 14 (3000, 4000–4012) |

@@ -8,3 +8,4 @@
  */
 export { bdScorecardsEmptyStateConfig } from './empty-state/index.js';
 export * from './score-benchmark/index.js';
+export * from './strategic-intelligence/index.js';

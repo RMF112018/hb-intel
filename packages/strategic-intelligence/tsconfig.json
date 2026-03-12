@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "paths": {
+      "@hbc/strategic-intelligence/testing": ["./testing/index.ts"],
+      "@hbc/versioned-record": ["packages/versioned-record/dist/src/index.d.ts"],
+      "@hbc/versioned-record/*": ["packages/versioned-record/dist/src/*"]
+    }
+  },
+  "include": ["src/**/*", "testing/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "src/__tests__/**"]
+}

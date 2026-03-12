@@ -59,9 +59,13 @@ export function BenchmarkFilterPanel({
   const [valueMax, setValueMax] = useState(initial.valueRange?.[1]?.toString() ?? '');
   const [geography, setGeography] = useState(initial.geography ?? '');
   const [ownerType, setOwnerType] = useState(initial.ownerType ?? '');
-  const [incumbentRelationship, setIncumbentRelationship] = useState(initial.incumbentRelationship ?? 'unknown');
+  const [incumbentRelationship, setIncumbentRelationship] = useState<
+    NonNullable<IBenchmarkFilterContext['incumbentRelationship']>
+  >(initial.incumbentRelationship ?? 'unknown');
   const [competitorCount, setCompetitorCount] = useState(initial.competitorCount?.toString() ?? '');
-  const [scheduleComplexity, setScheduleComplexity] = useState(initial.scheduleComplexity ?? 'moderate');
+  const [scheduleComplexity, setScheduleComplexity] = useState<
+    NonNullable<IBenchmarkFilterContext['scheduleComplexity']>
+  >(initial.scheduleComplexity ?? 'moderate');
 
   const readOnlySummary = useMemo(
     () => changeSummary(filters.filterContext),
@@ -171,7 +175,11 @@ export function BenchmarkFilterPanel({
           Incumbent Relationship
           <select
             value={incumbentRelationship}
-            onChange={(e) => setIncumbentRelationship(e.target.value as IBenchmarkFilterContext['incumbentRelationship'])}
+            onChange={(e) =>
+              setIncumbentRelationship(
+                e.target.value as NonNullable<IBenchmarkFilterContext['incumbentRelationship']>
+              )
+            }
             data-testid="filter-incumbentRelationship"
           >
             <option value="incumbent">incumbent</option>
@@ -189,7 +197,9 @@ export function BenchmarkFilterPanel({
           Schedule Complexity
           <select
             value={scheduleComplexity}
-            onChange={(e) => setScheduleComplexity(e.target.value)}
+            onChange={(e) =>
+              setScheduleComplexity(e.target.value as NonNullable<IBenchmarkFilterContext['scheduleComplexity']>)
+            }
             data-testid="filter-scheduleComplexity"
           >
             <option value="low">low</option>

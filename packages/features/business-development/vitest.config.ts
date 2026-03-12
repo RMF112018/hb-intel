@@ -10,11 +10,38 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     passWithNoTests: true,
+    exclude: ['e2e/**', 'node_modules/**'],
     setupFiles: [resolve(__dirname, './src/score-benchmark/components/setupTests.ts')],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov', 'html'],
+      include: ['src/score-benchmark/integrations/**/*.{ts,tsx}'],
+      exclude: [
+        'src/score-benchmark/**/*.d.ts',
+        'src/score-benchmark/**/index.ts',
+        'src/score-benchmark/integrations/bicNextMoveAdapter.ts',
+        'src/score-benchmark/integrations/healthIndicatorAdapter.ts',
+        'src/score-benchmark/integrations/projectCanvasAdapter.ts',
+        'testing/**',
+      ],
+      thresholds: {
+        lines: 95,
+        branches: 95,
+        functions: 95,
+        statements: 95,
+      },
+    },
   },
   resolve: {
     alias: {
+      '@hbc/score-benchmark/testing': resolve(__dirname, '../../score-benchmark/testing/index.ts'),
       '@hbc/score-benchmark': resolve(__dirname, '../../score-benchmark/src/index.ts'),
+      '@hbc/strategic-intelligence/testing': resolve(
+        __dirname,
+        '../../strategic-intelligence/testing/index.ts'
+      ),
+      '@hbc/strategic-intelligence': resolve(__dirname, '../../strategic-intelligence/src/index.ts'),
+      '@hbc/features-business-development/testing': resolve(__dirname, './testing/index.ts'),
       '@hbc/bic-next-move': resolve(__dirname, '../../bic-next-move/src/index.ts'),
       '@hbc/project-canvas': resolve(__dirname, '../../project-canvas/src/index.ts'),
       '@hbc/complexity': resolve(__dirname, '../../complexity/src/index.ts'),

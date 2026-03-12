@@ -223,6 +223,30 @@ describe('score benchmark hooks', () => {
     expect(decisionSupport.mostSimilarPursuits.length).toBeGreaterThan(0);
   });
 
+  it('loads explainability detail and supports open/close panel url actions', () => {
+    const api = new ScoreBenchmarkApi({ overlays: [createOverlay()], approvedCohorts: ['default'] });
+
+    const decisionSupport = useBenchmarkDecisionSupport(
+      {
+        entityId: 'entity-1',
+        filterContext: {},
+        reviewerContext,
+        urlSearch: '?sbPanel=explainability&sbCriterionId=criterion-1',
+      },
+      {
+        api,
+      }
+    );
+
+    expect(decisionSupport.explainability.length).toBeGreaterThan(0);
+    const opened = decisionSupport.actions.openPanel('reviewer-consensus', {
+      criterionId: 'criterion-1',
+    });
+    expect(opened).toContain('sbPanel=reviewer-consensus');
+    const closed = decisionSupport.actions.closePanel();
+    expect(closed.includes('sbPanel=')).toBe(false);
+  });
+
   it('queues recommendation override and replays queued mutations to synced state', () => {
     const api = new ScoreBenchmarkApi({ overlays: [createOverlay()], approvedCohorts: ['default'] });
 
@@ -242,5 +266,108 @@ describe('score benchmark hooks', () => {
 
     const replayed = queuedState.actions.replayQueuedMutations();
     expect(replayed.sync.badgeLabel).toBe('Synced');
+  });
+
+  it('handles refresh and error fallback branches with stable shape', () => {
+    const failingApi = {
+      getOverlayState: () => {
+        throw new Error('forced failure');
+      },
+    } as unknown as ScoreBenchmarkApi;
+
+    const errored = useScoreBenchmarkState(
+      {
+        entityId: 'entity-err',
+        filterContext: {},
+        reviewerContext,
+      },
+      {
+        api: failingApi,
+      }
+    );
+
+    expect(errored.isError).toBe(true);
+    const refreshed = errored.actions.refresh();
+    expect(refreshed.isError).toBe(true);
+
+    const queued = errored.actions.queueLocalMutation('governance-event', { source: 'test' });
+    expect(queued.sync.badgeLabel).toBe('Queued to sync');
+  });
+
+  it('covers saved-local sync mapping, success refresh actions, and default dependency branches', () => {
+    const seeded = createOverlay();
+    seeded.syncStatus = 'saved-locally';
+    seeded.version.createdAt = new Date(0).toISOString();
+    seeded.benchmarkGeneratedAt = new Date(1).toISOString();
+
+    const api = new ScoreBenchmarkApi({ overlays: [seeded], approvedCohorts: ['default'] });
+
+    const state = useScoreBenchmarkState(
+      {
+        entityId: 'entity-1',
+        filterContext: {},
+        reviewerContext,
+      },
+      { api }
+    );
+
+    expect(state.sync.badgeLabel).toBe('Saved locally');
+    expect(state.actions.refresh().status).toBe('success');
+    expect(state.actions.queueLocalMutation('filter-context-change', { source: 'coverage' }).sync.badgeLabel).toBe(
+      'Queued to sync'
+    );
+
+    const defaultDepsState = useBenchmarkDecisionSupport({
+      entityId: 'default-deps',
+      filterContext: {},
+      reviewerContext,
+    });
+    expect(defaultDepsState.panelHydration.baseHydrated).toBe(true);
+  });
+
+  it('returns null normalized distance when win-zone minimum is non-positive', () => {
+    const seeded = createOverlay();
+    seeded.version.snapshotId = 'entity-zero-zone';
+    seeded.overallWinZoneMin = 0;
+    seeded.distanceToWinZone = 2;
+    seeded.version.createdAt = new Date(Date.now() + 1_000).toISOString();
+    seeded.benchmarkGeneratedAt = new Date(0).toISOString();
+
+    const api = new ScoreBenchmarkApi({ overlays: [seeded], approvedCohorts: ['default'] });
+    const state = useScoreBenchmarkState(
+      {
+        entityId: 'entity-zero-zone',
+        filterContext: {},
+        reviewerContext,
+      },
+      { api }
+    );
+
+    expect(state.normalizedDistanceToWinZone).toBeNull();
+  });
+
+  it('handles decision-support fallback when base state is not hydrated', () => {
+    const failingApi = {
+      getOverlayState: () => {
+        throw 'non-error-failure';
+      },
+      getMostSimilarPursuits: () => [{ pursuitId: 'x' }],
+      getExplainability: () => [{ criterionId: 'x' }],
+    } as unknown as ScoreBenchmarkApi;
+
+    const state = useBenchmarkDecisionSupport(
+      {
+        entityId: 'entity-no-hydrate',
+        filterContext: {},
+        reviewerContext,
+      },
+      { api: failingApi }
+    );
+
+    expect(state.baseState.status).toBe('error');
+    expect(state.confidenceReasons).toEqual([]);
+    expect(state.recommendationRationale).toEqual([]);
+    expect(state.recalibrationSummaries).toEqual([]);
+    expect(state.panelHydration.detailHydrated).toBe(false);
   });
 });
