@@ -1,9 +1,12 @@
 /**
  * @hbc/features-project-hub
  *
- * Shared feature page components for the Project Hub domain.
- * Consumed by both apps/pwa/ and apps/project-hub/ via workspace dependency.
+ * Shared feature package surface for the Project Hub domain.
+ * SF21 health-pulse boundaries are exported here as package-level domain modules.
  *
- * @see docs/architecture/plans/PH7-BW-0-Shared-Feature-Package.md
+ * @see docs/architecture/plans/shared-features/SF21-T01-Package-Scaffold.md
  */
+
 export { projectHubProjectsEmptyStateConfig } from './empty-state/index.js';
+
+export * from './health-pulse/index.js';
