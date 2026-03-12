@@ -55,6 +55,23 @@ export {
   useStrategicIntelligenceState,
   type UseStrategicIntelligenceStateInput,
   type UseStrategicIntelligenceStateResult,
+  useStrategicIntelligenceApprovalQueue,
+  type UseStrategicIntelligenceApprovalQueueInput,
+  type UseStrategicIntelligenceApprovalQueueResult,
+  useHandoffReviewWorkflow,
+  type UseHandoffReviewWorkflowInput,
+  type UseHandoffReviewWorkflowResult,
+  useSuggestedIntelligence,
+  type UseSuggestedIntelligenceInput,
+  type UseSuggestedIntelligenceResult,
+  type ISuggestedIntelligenceExplainabilityPayload,
+  createStrategicIntelligenceStateQueryKey,
+  createStrategicIntelligenceApprovalQueueQueryKey,
+  createStrategicIntelligenceFeedQueryKey,
+  createStrategicIntelligenceCanvasProjectionQueryKey,
+  type StrategicIntelligenceSyncBadge,
+  type StrategicIntelligenceSuggestionOutcome,
+  type IStrategicIntelligenceTelemetryDelta,
 } from './hooks/index.js';
 
 export {

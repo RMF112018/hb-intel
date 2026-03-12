@@ -10,6 +10,11 @@ export {
 } from './adapters/index.js';
 
 export {
+  useStrategicIntelligence,
+  type UseStrategicIntelligenceInput,
+  type UseStrategicIntelligenceResult,
+  type BdStrategicIntelligenceBicOwnerAvatarProjection,
+  type BdStrategicIntelligenceCanvasAssignmentProjection,
   useBusinessDevelopmentStrategicIntelligence,
   type UseBusinessDevelopmentStrategicIntelligenceInput,
   type UseBusinessDevelopmentStrategicIntelligenceResult,

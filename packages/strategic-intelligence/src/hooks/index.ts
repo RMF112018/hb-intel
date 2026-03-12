@@ -1,17 +1,37 @@
-import {
-  createStrategicIntelligenceState,
-  type StrategicIntelligenceRuntimeInput,
-} from '../api/index.js';
-import type { IStrategicIntelligenceState } from '../types/index.js';
+export {
+  useStrategicIntelligenceState,
+  type UseStrategicIntelligenceStateInput,
+  type UseStrategicIntelligenceStateResult,
+} from './useStrategicIntelligenceState.js';
 
-export interface UseStrategicIntelligenceStateInput extends StrategicIntelligenceRuntimeInput {}
+export {
+  useStrategicIntelligenceApprovalQueue,
+  type UseStrategicIntelligenceApprovalQueueInput,
+  type UseStrategicIntelligenceApprovalQueueResult,
+} from './useStrategicIntelligenceApprovalQueue.js';
 
-export interface UseStrategicIntelligenceStateResult {
-  state: IStrategicIntelligenceState;
-}
+export {
+  useHandoffReviewWorkflow,
+  type UseHandoffReviewWorkflowInput,
+  type UseHandoffReviewWorkflowResult,
+} from './useHandoffReviewWorkflow.js';
 
-export const useStrategicIntelligenceState = (
-  input: UseStrategicIntelligenceStateInput
-): UseStrategicIntelligenceStateResult => ({
-  state: createStrategicIntelligenceState(input),
-});
+export {
+  useSuggestedIntelligence,
+  type UseSuggestedIntelligenceInput,
+  type UseSuggestedIntelligenceResult,
+  type ISuggestedIntelligenceExplainabilityPayload,
+} from './useSuggestedIntelligence.js';
+
+export {
+  createStrategicIntelligenceStateQueryKey,
+  createStrategicIntelligenceApprovalQueueQueryKey,
+  createStrategicIntelligenceFeedQueryKey,
+  createStrategicIntelligenceCanvasProjectionQueryKey,
+} from './queryKeys.js';
+
+export type {
+  StrategicIntelligenceSyncBadge,
+  StrategicIntelligenceSuggestionOutcome,
+  IStrategicIntelligenceTelemetryDelta,
+} from './stateStore.js';
