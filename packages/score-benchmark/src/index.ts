@@ -29,6 +29,17 @@ export type {
   IPredictiveDriftMonitorResult,
   ISnapshotFreezeResult,
   IScoreBenchmarkApiState,
+  ScoreBenchmarkSyncBadge,
+  ScoreBenchmarkLoadStatus,
+  ScoreBenchmarkPanelId,
+  IScoreBenchmarkReviewerContext,
+  IScoreBenchmarkPanelContext,
+  IScoreBenchmarkStateInput,
+  IScoreBenchmarkStateResult,
+  IScoreBenchmarkFiltersInput,
+  IScoreBenchmarkFiltersResult,
+  IScoreBenchmarkDecisionSupportInput,
+  IScoreBenchmarkDecisionSupportResult,
 } from './types/index.js';
 
 export {
@@ -68,6 +79,15 @@ export { ScoreBenchmarkApi, ScoreBenchmarkLifecycleApi } from './api/index.js';
 
 export { useScoreBenchmarkSnapshot } from './hooks/index.js';
 export type { UseScoreBenchmarkSnapshotInput } from './hooks/index.js';
+export {
+  useScoreBenchmarkState,
+  useScoreBenchmarkFilters,
+  useBenchmarkDecisionSupport,
+  createScoreBenchmarkStateQueryKey,
+  createScoreBenchmarkFiltersQueryKey,
+  parseScoreBenchmarkPanelContext,
+  serializeScoreBenchmarkPanelContext,
+} from './hooks/index.js';
 
 export { createScoreBenchmarkPanelModel } from './components/index.js';
 export type { ScoreBenchmarkPanelModel } from './components/index.js';

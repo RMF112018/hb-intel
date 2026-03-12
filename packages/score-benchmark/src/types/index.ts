@@ -206,7 +206,8 @@ export interface IScoreBenchmarkMutation {
     | 'recompute-request'
     | 'filter-context-change'
     | 'governance-event'
-    | 'no-bid-rationale';
+    | 'no-bid-rationale'
+    | 'recommendation-override';
   entityId?: string;
   payload: Record<string, unknown>;
   queuedAt: string;
@@ -280,6 +281,118 @@ export interface IScoreBenchmarkApiState {
   overlays: IScoreGhostOverlayState[];
   criterionBenchmarks: IScorecardBenchmark[];
   approvedCohorts: string[];
+}
+
+export type ScoreBenchmarkSyncBadge = 'Synced' | 'Saved locally' | 'Queued to sync';
+
+export type ScoreBenchmarkLoadStatus = 'loading' | 'success' | 'error';
+
+export type ScoreBenchmarkPanelId =
+  | 'similar-pursuits'
+  | 'explainability'
+  | 'reviewer-consensus';
+
+export interface IScoreBenchmarkReviewerContext {
+  reviewerId: string;
+  role: ReviewerRole;
+}
+
+export interface IScoreBenchmarkPanelContext {
+  panel: ScoreBenchmarkPanelId | null;
+  pursuitId?: string;
+  criterionId?: string;
+}
+
+export interface IScoreBenchmarkStateInput {
+  entityId: string;
+  filterContext: IBenchmarkFilterContext;
+  reviewerContext: IScoreBenchmarkReviewerContext;
+}
+
+export interface IScoreBenchmarkStateResult {
+  cacheKey: readonly ['score-benchmark', string, IBenchmarkFilterContext, IScoreBenchmarkReviewerContext];
+  status: ScoreBenchmarkLoadStatus;
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage: string | null;
+  overlay: IScoreGhostOverlayState | null;
+  bicOwnershipProjections: IBicOwnershipProjection[];
+  normalizedDistanceToWinZone: number | null;
+  hasLossRiskOverlap: boolean;
+  governanceWarning: {
+    triggered: boolean;
+    message: string | null;
+  };
+  stale: {
+    isStale: boolean;
+    staleMs: number;
+  };
+  sync: {
+    status: IScoreGhostOverlayState['syncStatus'];
+    badgeLabel: ScoreBenchmarkSyncBadge;
+    queuedCount: number;
+    lastReplayedAt: string | null;
+  };
+  actions: {
+    refresh: () => IScoreBenchmarkStateResult;
+    replayQueuedMutations: () => IScoreBenchmarkStateResult;
+    queueLocalMutation: (
+      mutationType: IScoreBenchmarkMutation['mutationType'],
+      payload: Record<string, unknown>
+    ) => IScoreBenchmarkStateResult;
+  };
+}
+
+export interface IScoreBenchmarkFiltersInput {
+  entityId: string;
+  actorUserId: string;
+  reviewerContext: IScoreBenchmarkReviewerContext;
+  initialContext?: IBenchmarkFilterContext;
+  approvedCohorts?: readonly string[];
+  defaultCohortId?: string;
+}
+
+export interface IScoreBenchmarkFiltersResult {
+  cacheKey: readonly ['score-benchmark', 'filters', string];
+  filterContext: IBenchmarkFilterContext;
+  invalidatedQueryKeys: ReadonlyArray<readonly unknown[]>;
+  applyFilterContext: (nextContext: IBenchmarkFilterContext) => IScoreBenchmarkFiltersResult;
+  resetToDefaultCohort: () => IScoreBenchmarkFiltersResult;
+}
+
+export interface IScoreBenchmarkDecisionSupportInput {
+  entityId: string;
+  filterContext: IBenchmarkFilterContext;
+  reviewerContext: IScoreBenchmarkReviewerContext;
+  urlSearch?: string;
+}
+
+export interface IScoreBenchmarkDecisionSupportResult {
+  baseState: IScoreBenchmarkStateResult;
+  confidenceReasons: string[];
+  recommendationRationale: string[];
+  noBidRationaleDraft: string;
+  mostSimilarPursuits: ISimilarityModelResult['mostSimilarPursuits'];
+  explainability: IBenchmarkExplainability[];
+  recalibrationSummaries: IRecalibrationSignal[];
+  panelContext: IScoreBenchmarkPanelContext;
+  panelHydration: {
+    baseHydrated: boolean;
+    detailHydrated: boolean;
+  };
+  actions: {
+    setNoBidRationaleDraft: (value: string) => void;
+    queueRecommendationOverride: (reason: string) => IScoreBenchmarkStateResult;
+    queueNoBidRationaleSave: (approvedBy: string) => INoBidRationaleRecord;
+    openPanel: (
+      panel: ScoreBenchmarkPanelId,
+      meta?: {
+        pursuitId?: string;
+        criterionId?: string;
+      }
+    ) => string;
+    closePanel: () => string;
+  };
 }
 
 // T01 compatibility contracts retained for scaffold consumers.

@@ -6,6 +6,8 @@ import {
   businessDevelopmentScoreBenchmarkProfile,
 } from '../profiles/index.js';
 
+export { useScoreBenchmark, type UseScoreBenchmarkInput, type UseScoreBenchmarkResult } from './useScoreBenchmark.js';
+
 export interface UseBusinessDevelopmentScoreBenchmarkInput
   extends Omit<UseScoreBenchmarkSnapshotInput, 'profile'> {}
 
