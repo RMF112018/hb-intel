@@ -23,6 +23,16 @@ export {
   type ReviewerConsensusPanelProps,
 } from './ReviewerConsensusPanel.js';
 
+export {
+  WinZoneIndicator,
+  type WinZoneIndicatorProps,
+} from './WinZoneIndicator.js';
+
+export {
+  BenchmarkFilterPanel,
+  type BenchmarkFilterPanelProps,
+} from './BenchmarkFilterPanel.js';
+
 export type {
   ScoreBenchmarkComplexityMode,
 } from './displayModel.js';
