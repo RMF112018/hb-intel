@@ -19,7 +19,15 @@ export {
 } from './hooks/index.js';
 
 export {
+  ScoreBenchmarkGhostOverlay,
+  BenchmarkSummaryPanel,
   SimilarPursuitsPanel,
   BenchmarkExplainabilityPanel,
   ReviewerConsensusPanel,
+  type ScoreBenchmarkGhostOverlayProps,
+  type BenchmarkSummaryPanelProps,
+  type SimilarPursuitsPanelProps,
+  type BenchmarkExplainabilityPanelProps,
+  type ReviewerConsensusPanelProps,
+  type ScoreBenchmarkComplexityMode,
 } from './components/index.js';

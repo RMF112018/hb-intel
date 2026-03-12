@@ -1,20 +1,28 @@
 export {
+  ScoreBenchmarkGhostOverlay,
+  type ScoreBenchmarkGhostOverlayProps,
+} from './ScoreBenchmarkGhostOverlay.js';
+
+export {
+  BenchmarkSummaryPanel,
+  type BenchmarkSummaryPanelProps,
+} from './BenchmarkSummaryPanel.js';
+
+export {
   SimilarPursuitsPanel,
-} from './SimilarPursuitsPanel.js';
-export type {
-  SimilarPursuitsPanelProps,
+  type SimilarPursuitsPanelProps,
 } from './SimilarPursuitsPanel.js';
 
 export {
   BenchmarkExplainabilityPanel,
-} from './BenchmarkExplainabilityPanel.js';
-export type {
-  BenchmarkExplainabilityPanelProps,
+  type BenchmarkExplainabilityPanelProps,
 } from './BenchmarkExplainabilityPanel.js';
 
 export {
   ReviewerConsensusPanel,
+  type ReviewerConsensusPanelProps,
 } from './ReviewerConsensusPanel.js';
+
 export type {
-  ReviewerConsensusPanelProps,
-} from './ReviewerConsensusPanel.js';
+  ScoreBenchmarkComplexityMode,
+} from './displayModel.js';

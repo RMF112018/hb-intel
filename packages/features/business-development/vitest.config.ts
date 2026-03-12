@@ -8,8 +8,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'node',
+    environment: 'jsdom',
     passWithNoTests: true,
+    setupFiles: [resolve(__dirname, './src/score-benchmark/components/setupTests.ts')],
   },
   resolve: {
     alias: {
