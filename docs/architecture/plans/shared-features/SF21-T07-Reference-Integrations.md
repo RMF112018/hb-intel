@@ -1,9 +1,9 @@
 # SF21-T07 - Reference Integrations
 
-**Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
-**Spec Source:** `docs/explanation/feature-decisions/PH7-SF-21-Module-Feature-Project-Health-Pulse.md`
-**Decisions Applied:** D-07 through D-09
-**Estimated Effort:** 0.65 sprint-weeks
+**Phase Reference:** Foundation Plan Phase 2 (Shared Packages)  
+**Spec Source:** `docs/explanation/feature-decisions/PH7-SF-21-Module-Feature-Project-Health-Pulse.md`  
+**Decisions Applied:** D-07 through D-13  
+**Estimated Effort:** 0.8 sprint-weeks  
 **Depends On:** T03-T06
 
 > **Doc Classification:** Canonical Normative Plan - SF21-T07 integration task; sub-plan of `SF21-Project-Health-Pulse.md`.
@@ -12,32 +12,36 @@
 
 ## Objective
 
-Document boundary-safe integration patterns for pulse data, recommended actions, and role-based surfaces.
+Document boundary-safe integration patterns for pulse data, confidence/compound escalation, recommendation reason provenance, governance audit trails, triage workflows, and telemetry emissions.
 
 ---
 
 ## Integration Contracts
 
 - `@hbc/bic-next-move`
-  - office health and top recommended action inputs
+  - office health signals and top recommended action inputs/ownership
 - `@hbc/notification-intelligence`
-  - urgency/escalation signals for immediate action conditions
+  - escalation signals for at-risk/critical and compound-risk conditions
+  - confidence-degradation and triage-priority notifications where configured
 - `@hbc/auth`
-  - write permissions for inline edit; admin access for settings panel
+  - inline edit permission gates and governance approval visibility
 - `@hbc/complexity`
-  - controls compact/detail/diagnostic depth
+  - controls compact/detail/diagnostic disclosure depth
 - `@hbc/project-canvas`
-  - pulse tile consumption for role-based canvases
+  - pulse tile consumption and project drill-in context
+- `@hbc/versioned-record`
+  - manual override provenance, action reason traceability, and policy change audit lineage
 - Procore-stub/manual-entry path
-  - metric freshness and manual entry persistence integration
+  - freshness and manual-entry persistence integration
 
 ---
 
 ## Boundary Rules
 
 - no app-route imports into package runtime
-- pulse compute engine remains pure and deterministic
-- recommendations consume BIC/notification APIs; no direct side effects in calculators
+- compute engine remains pure and deterministic
+- recommendation and triage ranking are deterministic projections; side effects remain in integration consumers
+- telemetry emission must preserve reason-code and confidence context without coupling to UI-only state
 
 ---
 

@@ -1,9 +1,9 @@
 # SF21-T04 - Hooks and State Model
 
-**Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
-**Spec Source:** `docs/explanation/feature-decisions/PH7-SF-21-Module-Feature-Project-Health-Pulse.md`
-**Decisions Applied:** D-05 through D-10
-**Estimated Effort:** 0.75 sprint-weeks
+**Phase Reference:** Foundation Plan Phase 2 (Shared Packages)  
+**Spec Source:** `docs/explanation/feature-decisions/PH7-SF-21-Module-Feature-Project-Health-Pulse.md`  
+**Decisions Applied:** D-05 through D-14  
+**Estimated Effort:** 0.9 sprint-weeks  
 **Depends On:** T03
 
 > **Doc Classification:** Canonical Normative Plan - SF21-T04 hooks task; sub-plan of `SF21-Project-Health-Pulse.md`.
@@ -12,7 +12,7 @@
 
 ## Objective
 
-Define state orchestration for pulse computation, config retrieval/mutation, and recommended-action refresh.
+Define state orchestration for pulse computation, confidence/compound/explainability projection, triage metadata, and admin governance policy updates.
 
 ---
 
@@ -22,7 +22,11 @@ Responsibilities:
 
 - assemble four dimensions + composite pulse
 - enforce stale exclusion/re-normalization behavior
-- attach top recommended action metadata
+- attach top recommended action metadata (with reason code)
+- attach confidence tiers and degradation reasons
+- attach compound-risk signals
+- attach explainability payload
+- attach triage projection metadata
 - expose loading/error/refresh and compute timestamp
 
 Cache key:
@@ -36,8 +40,8 @@ Cache key:
 Responsibilities:
 
 - load active admin config singleton
-- validate and persist weight/threshold updates
-- trigger pulse recalculation invalidation on config change
+- validate and persist weights/threshold/governance/suppression settings
+- trigger pulse recomputation invalidation on config changes
 
 Cache key:
 
@@ -48,8 +52,10 @@ Cache key:
 ## State Guarantees
 
 - stable return shape across loading/success/error
+- confidence/compound/explainability keys always present (nullable where required)
 - config mutation invalidates all visible pulse queries
-- stale-exclusion effects reflected immediately after edits
+- stale-exclusion and governance effects reflected after edits
+- triage projection refreshes when confidence, compound risk, or top action changes
 
 ---
 

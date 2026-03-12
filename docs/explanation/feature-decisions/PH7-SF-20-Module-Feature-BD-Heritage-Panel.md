@@ -302,6 +302,6 @@ Expected benefits:
 
 ## ADR Reference
 
-Create `docs/architecture/adr/0105-bd-heritage-living-strategic-intelligence.md` (and companion ADR for the new `@hbc/strategic-intelligence` primitive) documenting the BD Heritage Panel data sourcing strategy, the Living Strategic Intelligence contributor permission model, the approval authority configuration approach, granular BIC integration for gaps, complexity-adaptive disclosure, offline strategy, AI Action Layer embedding, cross-module deep-linking, versioning/governance, and telemetry KPIs.
+Create `docs/architecture/adr/ADR-0109-bd-heritage-living-strategic-intelligence.md` (and companion ADR for the new `@hbc/strategic-intelligence` primitive) documenting the BD Heritage Panel data sourcing strategy, the Living Strategic Intelligence contributor permission model, the approval authority configuration approach, granular BIC integration for gaps, complexity-adaptive disclosure, offline strategy, AI Action Layer embedding, cross-module deep-linking, versioning/governance, and telemetry KPIs.
 
 ---

@@ -113,6 +113,8 @@
 - [ADR-0085: Test Governance Normalization](./ADR-0085-test-governance-normalization.md)
 - [ADR-0091: Phase 7 Final Verification & Sign-Off](./ADR-0091-phase-7-final-verification.md)
 - [ADR-0107: Estimating Bid Readiness Signal (Adapter over Primitive)](./ADR-0107-estimating-bid-readiness-signal.md)
+- ADR-0108: Reserved for SF19 BD Score Benchmark Ghost Overlay (to be authored when SF19 enters implementation)
+- ADR-0109: Reserved for SF20 BD Heritage Panel & Living Strategic Intelligence (to be authored when SF20 enters implementation)
 - [ADR-0111: Health Indicator Readiness Primitive Runtime](./ADR-0111-health-indicator-readiness-primitive-runtime.md)
 
 ## Archived

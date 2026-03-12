@@ -1,9 +1,9 @@
 # SF22-T01 - Package Scaffold: `@hbc/post-bid-autopsy` primitive + SF22 adapters
 
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
-**Spec Source:** `docs/explanation/feature-decisions/PH7-SF-22-Module-Feature-Post-Bid-Learning-Loop.md`
-**Decisions Applied:** L-01, L-03, L-04, L-06
-**Estimated Effort:** 0.6 sprint-weeks
+**Spec Source:** `docs/explanation/feature-decisions/PH7-SF-22-Module-Feature-Post-Bid-Learning-Loop_UPDATED.md` (required canonical target; currently missing) and `docs/explanation/feature-decisions/PH7-SF-22-Module-Feature-Post-Bid-Learning-Loop.md` (interim baseline)
+**Decisions Applied:** L-01, L-03, L-04, L-06, L-07, L-08, L-10, L-12, L-14
+**Estimated Effort:** 0.7 sprint-weeks
 **Depends On:** SF22 master plan
 
 > **Doc Classification:** Canonical Normative Plan - SF22-T01 scaffold task; sub-plan of `SF22-Post-Bid-Learning-Loop.md`.
@@ -12,7 +12,7 @@
 
 ## Objective
 
-Define SF22 scaffolding across `@hbc/post-bid-autopsy` and the BD/Estimating adapter surfaces with dual runtime/testing exports, coverage gates, and README requirements.
+Define SF22 scaffolding across `@hbc/post-bid-autopsy` and BD/Estimating adapter surfaces with explicit module boundaries for evidence/confidence/taxonomy/governance/publication/telemetry.
 
 ---
 
@@ -20,31 +20,28 @@ Define SF22 scaffolding across `@hbc/post-bid-autopsy` and the BD/Estimating ada
 
 ```text
 packages/post-bid-autopsy/
-|- package.json
-|- README.md
-|- tsconfig.json
-|- vitest.config.ts
 |- src/index.ts
 |- src/types/index.ts
 |- src/model/index.ts
+|- src/model/evidence/index.ts
+|- src/model/confidence/index.ts
+|- src/model/taxonomy/index.ts
+|- src/model/governance/index.ts
+|- src/model/publication/index.ts
 |- src/api/index.ts
 |- src/hooks/index.ts
 |- src/components/index.ts
+|- src/telemetry/index.ts
 |- testing/index.ts
 
 packages/features/business-development/src/post-bid-learning/
-|- index.ts
-|- profiles/index.ts
-|- adapters/index.ts
-|- hooks/index.ts
-|- components/index.ts
-
 packages/features/estimating/src/post-bid-learning/
 |- index.ts
 |- profiles/index.ts
 |- adapters/index.ts
 |- hooks/index.ts
 |- components/index.ts
+|- telemetry/index.ts
 ```
 
 ---
@@ -54,20 +51,22 @@ packages/features/estimating/src/post-bid-learning/
 - primitive package name is `@hbc/post-bid-autopsy`
 - adapters consume primitive public exports only
 - testing entrypoints excluded from production bundles
-- coverage thresholds are `95/95/95/95` (lines/branches/functions/statements)
+- coverage thresholds are `95/95/95/95`
 - scripts include primitive and adapter check-types/build/test targets
+- scaffold boundaries must prevent UI-layer reimplementation of lifecycle/governance engines
 
 ---
 
 ## README Requirement (Mandatory in T01)
 
 Must include:
-1. post-bid autopsy flywheel overview
+1. post-bid intelligence flywheel overview
 2. adapter-over-primitive boundary rules
-3. trigger/SLA + offline replay model summary
-4. exports table
-5. testing entrypoint guidance (`@hbc/post-bid-autopsy/testing`)
-6. links to SF22 master, SF22-T09, ADR-0111 and companion primitive ADR
+3. evidence/confidence/taxonomy/governance model summary
+4. lifecycle/publication gating summary
+5. exports table
+6. testing entrypoint guidance (`@hbc/post-bid-autopsy/testing`)
+7. links to SF22 master, SF22-T09, ADR-0112 and companion primitive ADR
 
 ---
 

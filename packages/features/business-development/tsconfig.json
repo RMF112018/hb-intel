@@ -1,17 +1,16 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "composite": true,
-    "rootDir": "./src",
-    "outDir": "./dist"
+    "paths": {
+      "@hbc/score-benchmark": ["packages/score-benchmark/dist/src/index.d.ts"],
+      "@hbc/score-benchmark/testing": ["packages/score-benchmark/dist/testing/index.d.ts"]
+    }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "references": [
-    { "path": "../../models" },
-    { "path": "../../query-hooks" },
-    { "path": "../../ui-kit" },
-    { "path": "../../auth" },
-    { "path": "../../shell" },
-    { "path": "../../smart-empty-state" }
-  ]
+  "include": ["src/**/*", "testing/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "src/__tests__/**"]
 }

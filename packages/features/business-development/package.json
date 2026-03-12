@@ -1,11 +1,37 @@
 {
   "name": "@hbc/features-business-development",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
+  "description": "Business Development feature package — score benchmark adapter over @hbc/score-benchmark and BD composition surfaces.",
   "type": "module",
-  "main": "./src/index.ts",
+  "sideEffects": false,
+  "main": "./dist/src/index.js",
+  "module": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsc --project tsconfig.json --watch",
+    "check-types": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "peerDependencies": {
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "typescript": "^5.4.0",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@hbc/models": "workspace:*",
@@ -13,6 +39,7 @@
     "@hbc/ui-kit": "workspace:*",
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
-    "@hbc/smart-empty-state": "workspace:*"
+    "@hbc/smart-empty-state": "workspace:*",
+    "@hbc/score-benchmark": "workspace:*"
   }
 }

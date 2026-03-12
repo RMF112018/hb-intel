@@ -1,9 +1,9 @@
 # SF21-T02 - TypeScript Contracts: Project Health Pulse
 
-**Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
-**Spec Source:** `docs/explanation/feature-decisions/PH7-SF-21-Module-Feature-Project-Health-Pulse.md`
-**Decisions Applied:** D-02 through D-07, D-10
-**Estimated Effort:** 0.7 sprint-weeks
+**Phase Reference:** Foundation Plan Phase 2 (Shared Packages)  
+**Spec Source:** `docs/explanation/feature-decisions/PH7-SF-21-Module-Feature-Project-Health-Pulse.md`  
+**Decisions Applied:** D-02 through D-14  
+**Estimated Effort:** 0.9 sprint-weeks  
 **Depends On:** T01
 
 > **Doc Classification:** Canonical Normative Plan - SF21-T02 contracts task; sub-plan of `SF21-Project-Health-Pulse.md`.
@@ -12,19 +12,24 @@
 
 ## Objective
 
-Lock all public contracts for health metrics, dimensions, pulse aggregate, and admin configuration settings.
+Lock all public contracts for pulse computation, confidence, compound risk, explainability, recommendation prioritization, manual governance, triage projection, and telemetry.
 
 ---
 
 ## Types to Define
 
 ```ts
-export type HealthStatus =
-  | 'on-track'
-  | 'watch'
-  | 'at-risk'
-  | 'critical'
-  | 'data-pending';
+export type HealthStatus = 'on-track' | 'watch' | 'at-risk' | 'critical' | 'data-pending';
+export type PulseConfidenceTier = 'high' | 'moderate' | 'low' | 'unreliable';
+
+export interface IManualOverrideMetadata {
+  reason: string;
+  enteredBy: string;
+  enteredAt: string;
+  requiresApproval?: boolean;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+}
 
 export interface IHealthMetric {
   key: string;
@@ -34,6 +39,37 @@ export interface IHealthMetric {
   isManualEntry: boolean;
   lastUpdatedAt: string | null;
   weight: 'leading' | 'lagging';
+  manualOverride?: IManualOverrideMetadata | null;
+}
+
+export interface IPulseConfidence {
+  tier: PulseConfidenceTier;
+  score: number;
+  reasons: string[];
+}
+
+export interface ICompoundRiskSignal {
+  code: 'time-field-deterioration' | 'cost-time-correlation' | 'office-field-amplification' | 'custom';
+  severity: 'low' | 'moderate' | 'high' | 'critical';
+  affectedDimensions: Array<'cost' | 'time' | 'field' | 'office'>;
+  summary: string;
+}
+
+export interface IHealthExplainability {
+  whyThisStatus: string[];
+  whatChanged: string[];
+  topContributors: string[];
+  whatMattersMost: string;
+}
+
+export interface ITopRecommendedAction {
+  actionText: string;
+  actionLink: string | null;
+  reasonCode: string;
+  owner: string | null;
+  urgency: number;
+  impact: number;
+  confidenceWeight: number;
 }
 
 export interface IHealthDimension {
@@ -46,35 +82,64 @@ export interface IHealthDimension {
   keyMetric: string;
   trend: 'improving' | 'stable' | 'declining' | 'unknown';
   hasExcludedMetrics: boolean;
+  confidence: IPulseConfidence;
 }
 
-export interface IProjectHealthWeights {
-  field: number;
-  time: number;
-  cost: number;
-  office: number;
+export interface IPortfolioTriageProjection {
+  bucket: 'attention-now' | 'trending-down' | 'data-quality-risk' | 'recovering';
+  sortScore: number;
+  triageReasons: string[];
 }
 
 export interface IProjectHealthPulse {
   projectId: string;
   computedAt: string;
-  weights: IProjectHealthWeights;
   overallScore: number;
   overallStatus: HealthStatus;
+  overallConfidence: IPulseConfidence;
   dimensions: {
     cost: IHealthDimension;
     time: IHealthDimension;
     field: IHealthDimension;
     office: IHealthDimension;
   };
-  topRecommendedAction: string | null;
-  topRecommendedActionLink: string | null;
+  compoundRisks: ICompoundRiskSignal[];
+  topRecommendedAction: ITopRecommendedAction | null;
+  explainability: IHealthExplainability;
+  triage: IPortfolioTriageProjection;
+}
+
+export interface IManualEntryGovernanceConfig {
+  approvalRequiredMetricKeys: string[];
+  maxManualInfluencePercent: number;
+  maxOverrideAgeDays: number;
+}
+
+export interface IOfficeSuppressionPolicy {
+  lowImpactSuppressionEnabled: boolean;
+  duplicateClusterWindowHours: number;
+  severityWeights: Record<'minor' | 'major' | 'critical', number>;
 }
 
 export interface IHealthPulseAdminConfig {
-  weights: IProjectHealthWeights;
+  weights: { field: number; time: number; cost: number; office: number; };
   stalenessThresholdDays: number;
   metricStalenessOverrides: Record<string, number>;
+  manualEntryGovernance: IManualEntryGovernanceConfig;
+  officeHealthSuppression: IOfficeSuppressionPolicy;
+  portfolioTriageDefaults: {
+    defaultBucket: IPortfolioTriageProjection['bucket'];
+    defaultSort: 'deterioration-velocity' | 'compound-risk-severity' | 'unresolved-action-backlog';
+  };
+}
+
+export interface IProjectHealthTelemetry {
+  interventionLeadTime: number | null;
+  falseAlarmRate: number | null;
+  preLagDetectionRate: number | null;
+  actionAdoptionRate: number | null;
+  portfolioReviewCycleTime: number | null;
+  suppressionImpactRate: number | null;
 }
 ```
 
@@ -82,8 +147,8 @@ export interface IHealthPulseAdminConfig {
 
 ## Hook Return Contracts
 
-- `useProjectHealthPulse` returns pulse state, loading/error, refresh.
-- `useHealthPulseAdminConfig` returns config state, save/reset, validation status.
+- `useProjectHealthPulse` returns pulse state, loading/error/refresh, and confidence/governance derivation metadata.
+- `useHealthPulseAdminConfig` returns config state, save/reset, validation status, and policy validation issues.
 
 ---
 
@@ -93,6 +158,7 @@ export interface IHealthPulseAdminConfig {
 - `HEALTH_DIMENSION_LEADING_WEIGHT = 0.7`
 - `HEALTH_DIMENSION_LAGGING_WEIGHT = 0.3`
 - `HEALTH_PULSE_ADMIN_CONFIG_LIST_TITLE = 'HBC_HealthPulseAdminConfig'`
+- `HEALTH_PULSE_TRIAGE_BUCKETS` and `HEALTH_PULSE_CONFIDENCE_TIERS`
 
 ---
 

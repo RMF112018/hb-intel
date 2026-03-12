@@ -353,7 +353,7 @@ Original Definition of Done retained with additional requirements:
 Create:
 
 ```
-docs/architecture/adr/0103-bd-score-benchmark-ghost-overlay.md
+docs/architecture/adr/ADR-0108-bd-score-benchmark-ghost-overlay.md
 ```
 
 Document:
