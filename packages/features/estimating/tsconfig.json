@@ -10,7 +10,7 @@
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "paths": {
-      "@hbc/features-estimating/testing": ["./testing/index.ts"]
+      "@hbc/features-estimating/testing": ["packages/features/estimating/testing/index.ts"]
     }
   },
   "include": ["src/**/*", "testing/**/*"],

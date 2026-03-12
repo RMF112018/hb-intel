@@ -34,25 +34,54 @@ export {
   useBidReadiness,
   useBidReadinessProfile,
   useBidReadinessTelemetry,
+  useBidReadinessChecklist,
+  useBidReadinessAdminConfig,
 } from './hooks/index.js';
 
 export type {
   UseBidReadinessParams,
   UseBidReadinessProfileParams,
   UseBidReadinessTelemetryParams,
+  UseBidReadinessChecklistParams,
+  UseBidReadinessAdminConfigParams,
 } from './hooks/index.js';
+
+// Checklist model
+export {
+  createChecklistItems,
+  sortChecklistItems,
+  groupChecklistItems,
+  computeChecklistCompletion,
+  applyChecklistDraft,
+  validateAdminChecklistDefinitions,
+} from './checklist/index.js';
 
 // Components
 export {
   BidReadinessSignal,
   BidReadinessDashboard,
   BidReadinessChecklist,
+  ChecklistItem,
+  ChecklistCompletionIndicator,
+  ChecklistSection,
+  BidReadinessAdminConfig,
+  ReadinessCriteriaEditor,
+  ChecklistDefinitionEditor,
+  ScoringWeightEditor,
 } from './components/index.js';
 
 export type {
   BidReadinessComplexityMode,
   BidReadinessSignalProps,
   BidReadinessDashboardProps,
+  BidReadinessChecklistProps,
+  ChecklistItemProps,
+  ChecklistCompletionIndicatorProps,
+  ChecklistSectionProps,
+  BidReadinessAdminConfigProps,
+  ReadinessCriteriaEditorProps,
+  ChecklistDefinitionEditorProps,
+  ScoringWeightEditorProps,
 } from './components/index.js';
 
 // Telemetry

@@ -38,6 +38,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@hbc/features-estimating/testing': resolve(__dirname, './testing/index.ts'),
+      '@hbc/health-indicator': resolve(__dirname, '../../health-indicator/src/index.ts'),
     },
   },
 });

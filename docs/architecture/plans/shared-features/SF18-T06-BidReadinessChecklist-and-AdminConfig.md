@@ -113,3 +113,19 @@ T06 cannot be marked complete until canonical evaluation/profile/telemetry runti
 pnpm --filter @hbc/features-estimating test -- BidReadinessChecklist
 pnpm --filter @hbc/features-estimating test -- BidReadinessConfig
 ```
+
+---
+
+## Progress Notes
+
+### 2026-03-12 - T06a + T06b implementation complete
+
+- Implemented checklist model layer in `packages/features/estimating/src/bid-readiness/checklist/` with deterministic ordering/grouping, blocker support, recompute triggers, and partial/missing snapshot fallback handling.
+- Implemented checklist/admin hooks (`useBidReadinessChecklist`, `useBidReadinessAdminConfig`) and checklist/admin UI surfaces in `packages/features/estimating/src/bid-readiness/components/` with deterministic loading/success/empty/error/degraded behavior.
+- Added T06 contracts in `src/types/` for checklist items, admin config, and hook result envelopes as additive compatibility-safe extensions.
+- Completed T06b extraction gate by introducing canonical runtime ownership in `packages/health-indicator` and rewiring estimating profile/scoring/telemetry runtime wrappers to consume `@hbc/health-indicator`.
+- Verification gates passed with zero errors:
+  - `pnpm --filter @hbc/features-estimating check-types`
+  - `pnpm --filter @hbc/features-estimating build`
+  - `pnpm --filter @hbc/features-estimating test`
+- T06 completion gate satisfied: canonical evaluation runtime has been extracted to `@hbc/health-indicator` before marking T06 complete.

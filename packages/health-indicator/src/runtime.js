@@ -1,0 +1,309 @@
+/**
+ * Canonical health-indicator runtime primitives.
+ *
+ * Runtime logic is deterministic and side-effect free to support adapter-level
+ * reuse across shared features without duplicating scoring engines.
+ *
+ * @design D-SF18-T06
+ */
+function cloneCriterion(criterion) {
+    return {
+        ...criterion,
+        completeness: { ...criterion.completeness },
+        assignee: criterion.assignee ? { ...criterion.assignee } : null,
+        risk: criterion.risk ? { ...criterion.risk } : undefined,
+    };
+}
+function cloneProfile(profile) {
+    return {
+        ...profile,
+        criteria: profile.criteria.map(cloneCriterion),
+        thresholds: { ...profile.thresholds },
+    };
+}
+function findDuplicateCriterionIds(overrides) {
+    const seen = new Set();
+    const duplicates = new Set();
+    for (const item of overrides) {
+        if (seen.has(item.criterionId)) {
+            duplicates.add(item.criterionId);
+        }
+        seen.add(item.criterionId);
+    }
+    return [...duplicates].sort();
+}
+function normalizeWeights(criteria) {
+    const total = criteria.reduce((sum, criterion) => sum + criterion.weight, 0);
+    if (total <= 0) {
+        return criteria.map((criterion) => ({ ...criterion, weight: 0 }));
+    }
+    const normalized = criteria.map((criterion) => ({
+        ...criterion,
+        weight: Number(((criterion.weight / total) * 100).toFixed(4)),
+    }));
+    const running = normalized.slice(0, -1).reduce((sum, criterion) => sum + criterion.weight, 0);
+    const remainder = Number((100 - running).toFixed(4));
+    if (normalized.length > 0) {
+        normalized[normalized.length - 1] = {
+            ...normalized[normalized.length - 1],
+            weight: remainder,
+        };
+    }
+    return normalized;
+}
+function resolveStatus(score, blockers, thresholds) {
+    const hasIncompleteBlocker = blockers.some((criterion) => !criterion.isComplete);
+    if (!hasIncompleteBlocker && score >= thresholds.readyMinScore) {
+        return 'ready';
+    }
+    if (!hasIncompleteBlocker && score >= thresholds.nearlyReadyMinScore) {
+        return 'nearly-ready';
+    }
+    if (score >= thresholds.attentionNeededMinScore) {
+        return 'attention-needed';
+    }
+    return 'not-ready';
+}
+function resolveBand(score) {
+    if (score >= 90) {
+        return 'excellent';
+    }
+    if (score >= 70) {
+        return 'strong';
+    }
+    if (score >= 50) {
+        return 'moderate';
+    }
+    return 'weak';
+}
+function computeWeightedScore(criteria) {
+    const totalWeight = criteria.reduce((sum, criterion) => sum + criterion.weight, 0);
+    if (totalWeight <= 0) {
+        return 0;
+    }
+    const completedWeight = criteria
+        .filter((criterion) => criterion.isComplete)
+        .reduce((sum, criterion) => sum + criterion.weight, 0);
+    return Number(((completedWeight / totalWeight) * 100).toFixed(2));
+}
+function buildCompleteness(criteria) {
+    const requiredCount = criteria.length;
+    const completedCount = criteria.filter((criterion) => criterion.isComplete).length;
+    const missingCount = Math.max(0, requiredCount - completedCount);
+    const completionPercent = requiredCount === 0
+        ? 0
+        : Number(((completedCount / requiredCount) * 100).toFixed(2));
+    return {
+        requiredCount,
+        completedCount,
+        missingCount,
+        completionPercent,
+    };
+}
+function resolveDimension(criterionId) {
+    if (criterionId === 'cost-sections-populated' || criterionId === 'bid-documents-attached') {
+        return 'scope-completeness';
+    }
+    if (criterionId === 'subcontractor-coverage') {
+        return 'coverage';
+    }
+    if (criterionId === 'ce-sign-off') {
+        return 'governance';
+    }
+    return 'compliance';
+}
+function buildCategoryBreakdown(criteria) {
+    const buckets = new Map();
+    for (const criterion of criteria) {
+        const dimension = resolveDimension(criterion.criterionId);
+        const key = `dimension:${dimension}`;
+        const current = buckets.get(key) ?? {
+            label: dimension,
+            dimension,
+            score: 0,
+            maxScore: 0,
+            blockerCount: 0,
+        };
+        current.maxScore += criterion.weight;
+        if (criterion.isComplete) {
+            current.score += criterion.weight;
+        }
+        if (criterion.isBlocker && !criterion.isComplete) {
+            current.blockerCount += 1;
+        }
+        buckets.set(key, current);
+    }
+    return [...buckets.entries()]
+        .map(([categoryId, bucket]) => ({
+        categoryId,
+        label: bucket.label,
+        dimension: bucket.dimension,
+        score: Number(bucket.score.toFixed(2)),
+        maxScore: Number(bucket.maxScore.toFixed(2)),
+        completionPercent: bucket.maxScore <= 0
+            ? 0
+            : Number(((bucket.score / bucket.maxScore) * 100).toFixed(2)),
+        blockerCount: bucket.blockerCount,
+    }))
+        .sort((left, right) => left.categoryId.localeCompare(right.categoryId));
+}
+function buildRecommendations(criteria, score) {
+    const blockers = criteria.filter((criterion) => criterion.isBlocker && !criterion.isComplete);
+    const nonBlockers = criteria.filter((criterion) => !criterion.isBlocker && !criterion.isComplete);
+    const recommendations = [];
+    if (blockers.length > 0) {
+        recommendations.push({
+            recommendationId: 'resolve-blockers',
+            category: 'blocker-resolution',
+            priority: 'critical',
+            title: 'Resolve blocker criteria',
+            summary: `${blockers.length} blocker criteria must be completed before bid submission readiness.`,
+            actions: blockers.map((criterion) => ({
+                actionId: `resolve-${criterion.criterionId}`,
+                label: `Complete ${criterion.label}`,
+                actionHref: criterion.actionHref,
+                ownerUserId: criterion.assignee?.userId,
+            })),
+        });
+    }
+    if (nonBlockers.length > 0) {
+        recommendations.push({
+            recommendationId: 'complete-non-blockers',
+            category: 'documentation-completion',
+            priority: blockers.length > 0 ? 'medium' : 'high',
+            title: 'Complete remaining readiness criteria',
+            summary: `${nonBlockers.length} non-blocker criteria remain incomplete.`,
+            actions: nonBlockers.map((criterion) => ({
+                actionId: `complete-${criterion.criterionId}`,
+                label: `Address ${criterion.label}`,
+                actionHref: criterion.actionHref,
+                ownerUserId: criterion.assignee?.userId,
+            })),
+        });
+    }
+    if (score < 70) {
+        recommendations.push({
+            recommendationId: 'improve-readiness-score',
+            category: 'coverage-improvement',
+            priority: 'high',
+            title: 'Increase readiness score',
+            summary: 'Current readiness score is below nearly-ready threshold; prioritize high-weight criteria.',
+            actions: [],
+        });
+    }
+    return recommendations;
+}
+/**
+ * Resolves effective profile config with deterministic validation and fallback.
+ *
+ * @design D-SF18-T06
+ */
+export function resolveHealthIndicatorProfileConfig(params) {
+    const { baseline, override, telemetryKeys, defaultVersion, defaultGovernance } = params;
+    const baselineClone = cloneProfile(baseline);
+    const errors = [];
+    if (!override) {
+        return {
+            profile: baselineClone,
+            governance: {
+                ...defaultGovernance,
+                telemetryKeys,
+            },
+            version: defaultVersion,
+            source: 'baseline',
+            fallbackApplied: false,
+            validationErrors: errors,
+        };
+    }
+    const duplicateIds = override.criteria ? findDuplicateCriterionIds(override.criteria) : [];
+    if (duplicateIds.length > 0) {
+        errors.push(`Duplicate criterion overrides: ${duplicateIds.join(', ')}`);
+    }
+    const criteriaById = new Map(baselineClone.criteria.map((criterion) => [criterion.criterionId, cloneCriterion(criterion)]));
+    for (const criterionOverride of override.criteria ?? []) {
+        const target = criteriaById.get(criterionOverride.criterionId);
+        if (!target) {
+            errors.push(`Unknown criterion override id: ${criterionOverride.criterionId}`);
+            continue;
+        }
+        const nextWeight = criterionOverride.weight ?? target.weight;
+        if (nextWeight < 0) {
+            errors.push(`Negative weight for criterion: ${criterionOverride.criterionId}`);
+            continue;
+        }
+        criteriaById.set(criterionOverride.criterionId, {
+            ...target,
+            label: criterionOverride.label ?? target.label,
+            weight: nextWeight,
+            isBlocker: criterionOverride.isBlocker ?? target.isBlocker,
+            actionHref: criterionOverride.actionHref ?? target.actionHref,
+        });
+    }
+    const resolvedThresholds = {
+        readyMinScore: override.thresholds?.readyMinScore ?? baselineClone.thresholds.readyMinScore,
+        nearlyReadyMinScore: override.thresholds?.nearlyReadyMinScore ?? baselineClone.thresholds.nearlyReadyMinScore,
+        attentionNeededMinScore: override.thresholds?.attentionNeededMinScore ?? baselineClone.thresholds.attentionNeededMinScore,
+    };
+    if (!(resolvedThresholds.readyMinScore > resolvedThresholds.nearlyReadyMinScore
+        && resolvedThresholds.nearlyReadyMinScore > resolvedThresholds.attentionNeededMinScore)) {
+        errors.push('Threshold ordering invalid: ready > nearly-ready > attention-needed is required.');
+    }
+    let criteria = normalizeWeights([...criteriaById.values()]);
+    if (criteria.every((criterion) => !criterion.isBlocker)) {
+        errors.push('At least one blocker criterion is required.');
+    }
+    if (criteria.some((criterion) => criterion.weight < 0)) {
+        errors.push('Criteria weights must be non-negative after normalization.');
+    }
+    criteria = [...criteria].sort((left, right) => {
+        if (left.isBlocker !== right.isBlocker) {
+            return left.isBlocker ? -1 : 1;
+        }
+        if (left.weight !== right.weight) {
+            return right.weight - left.weight;
+        }
+        return left.label.localeCompare(right.label);
+    });
+    const fallbackApplied = errors.length > 0;
+    const profile = fallbackApplied
+        ? baselineClone
+        : {
+            profileId: override.profileId ?? baselineClone.profileId,
+            criteria,
+            thresholds: resolvedThresholds,
+        };
+    return {
+        profile,
+        governance: {
+            ...defaultGovernance,
+            ...override.governance,
+            telemetryKeys: override.governance?.telemetryKeys ?? telemetryKeys,
+        },
+        version: override.version ?? defaultVersion,
+        source: fallbackApplied ? 'fallback' : 'admin-override',
+        fallbackApplied,
+        validationErrors: errors,
+    };
+}
+/**
+ * Builds deterministic readiness summary from criteria and resolved config.
+ *
+ * @design D-SF18-T06
+ */
+export function buildHealthIndicatorSummary(criteria, config, computedAt = new Date().toISOString()) {
+    const scoreValue = computeWeightedScore(criteria);
+    const blockers = criteria.filter((criterion) => criterion.isBlocker);
+    return {
+        score: {
+            value: scoreValue,
+            status: resolveStatus(scoreValue, blockers, config.profile.thresholds),
+            band: resolveBand(scoreValue),
+            computedAt,
+        },
+        completeness: buildCompleteness(criteria),
+        categoryBreakdown: buildCategoryBreakdown(criteria),
+        recommendations: buildRecommendations(criteria, scoreValue),
+        governance: config.governance,
+    };
+}
+//# sourceMappingURL=runtime.js.map

@@ -1562,6 +1562,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../auth
+      '@hbc/health-indicator':
+        specifier: workspace:*
+        version: link:../../health-indicator
       '@hbc/models':
         specifier: workspace:*
         version: link:../../models
@@ -1792,6 +1795,15 @@ importers:
       vite:
         specifier: ^6.0.0
         version: 6.4.1(@types/node@20.19.35)(terser@5.46.0)(tsx@4.21.0)
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@20.19.35)(happy-dom@18.0.1)(jsdom@25.0.1)(msw@2.12.10(@types/node@20.19.35)(typescript@5.9.3))(terser@5.46.0)(tsx@4.21.0)
+
+  packages/health-indicator:
+    devDependencies:
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@20.19.35)(happy-dom@18.0.1)(jsdom@25.0.1)(msw@2.12.10(@types/node@20.19.35)(typescript@5.9.3))(terser@5.46.0)(tsx@4.21.0)

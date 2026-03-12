@@ -6,7 +6,7 @@
  *
  * @design D-SF18-T04, L-01, L-02, L-04, L-06
  */
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BID_READINESS_SYNC_INDICATORS,
@@ -14,7 +14,14 @@ import {
 } from '../../constants/index.js';
 import type {
   BidReadinessDataState,
+  IBidReadinessAdminConfigDraft,
+  IBidReadinessAdminConfigSnapshot,
+  IBidReadinessChecklistDefinition,
+  IBidReadinessChecklistItem,
+  IBidReadinessViewState,
   IHealthIndicatorCriterion,
+  UseBidReadinessAdminConfigResult,
+  UseBidReadinessChecklistResult,
   UseBidReadinessResult,
   UseBidReadinessProfileResult,
   UseBidReadinessTelemetryResult,
@@ -29,6 +36,14 @@ import {
   evaluateReadinessSummary,
   type IEstimatingBidReadinessAdminOverride,
 } from '../profiles/index.js';
+import {
+  applyChecklistDraft,
+  computeChecklistCompletion,
+  createChecklistItems,
+  groupChecklistItems,
+  sortChecklistItems,
+  validateAdminChecklistDefinitions,
+} from '../checklist/index.js';
 import {
   bidReadinessKpiEmitter,
   type BidReadinessComplexity,
@@ -54,6 +69,16 @@ export interface UseBidReadinessTelemetryParams {
   readonly audience?: BidReadinessTelemetryAudience;
   readonly staleAfterMs?: number;
   readonly fallbackSnapshot?: IBidReadinessTelemetrySnapshot;
+  readonly enabled?: boolean;
+}
+
+export interface UseBidReadinessChecklistParams {
+  readonly viewState: IBidReadinessViewState | null;
+  readonly enabled?: boolean;
+}
+
+export interface UseBidReadinessAdminConfigParams {
+  readonly profileOverride?: IEstimatingBidReadinessAdminOverride | null;
   readonly enabled?: boolean;
 }
 
@@ -357,5 +382,285 @@ export function useBidReadinessTelemetry({
     lastEmittedAt: snapshot?.emittedAt ?? null,
     error: query.error as Error | null,
     refresh,
+  };
+}
+
+/**
+ * Checklist state hook for estimator completion workflow and rationale tracking.
+ *
+ * @design D-SF18-T06
+ */
+export function useBidReadinessChecklist({
+  viewState,
+  enabled = true,
+}: UseBidReadinessChecklistParams): UseBidReadinessChecklistResult {
+  const [draftOverrides, setDraftOverrides] = useState<
+    Readonly<Record<string, Pick<IBidReadinessChecklistItem, 'isComplete' | 'rationale'>>>
+  >({});
+
+  const baseItems = useMemo(() => {
+    if (!viewState || !enabled) {
+      return [] as IBidReadinessChecklistItem[];
+    }
+    return sortChecklistItems(createChecklistItems(viewState));
+  }, [viewState, enabled]);
+
+  const items = useMemo(
+    () => sortChecklistItems(applyChecklistDraft(baseItems, draftOverrides)),
+    [baseItems, draftOverrides],
+  );
+
+  const grouped = useMemo(() => groupChecklistItems(items), [items]);
+  const completionPercent = useMemo(() => computeChecklistCompletion(items), [items]);
+  const recomputeRequired = useMemo(
+    () => Object.keys(draftOverrides).length > 0,
+    [draftOverrides],
+  );
+
+  const updateCompletion = useCallback((checklistItemId: string, isComplete: boolean) => {
+    setDraftOverrides((previous) => {
+      const previousEntry = previous[checklistItemId];
+      return {
+        ...previous,
+        [checklistItemId]: {
+          isComplete,
+          rationale: previousEntry?.rationale ?? '',
+        },
+      };
+    });
+  }, []);
+
+  const updateRationale = useCallback((checklistItemId: string, rationale: string) => {
+    setDraftOverrides((previous) => {
+      const previousEntry = previous[checklistItemId];
+      return {
+        ...previous,
+        [checklistItemId]: {
+          isComplete: previousEntry?.isComplete ?? baseItems.find((item) => item.checklistItemId === checklistItemId)?.isComplete ?? false,
+          rationale,
+        },
+      };
+    });
+  }, [baseItems]);
+
+  const resetDraft = useCallback(() => {
+    setDraftOverrides({});
+  }, []);
+
+  const dataState = buildDataState({
+    isLoading: false,
+    hasData: Boolean(viewState),
+    hasError: false,
+    isDegraded: false,
+    isEmpty: !viewState || items.length === 0,
+  });
+
+  return {
+    state: dataState,
+    items,
+    grouped,
+    completionPercent,
+    blockingIncompleteCount: grouped.blockers.filter((item) => !item.isComplete).length,
+    recomputeRequired,
+    isLoading: false,
+    isDegraded: false,
+    error: null,
+    updateCompletion,
+    updateRationale,
+    resetDraft,
+  };
+}
+
+/**
+ * Admin configuration hook for readiness criteria/checklist governance editing.
+ *
+ * @design D-SF18-T06
+ */
+export function useBidReadinessAdminConfig({
+  profileOverride = null,
+  enabled = true,
+}: UseBidReadinessAdminConfigParams = {}): UseBidReadinessAdminConfigResult {
+  const query = useQuery({
+    queryKey: ['health-indicator', 'estimating-bid-readiness', 'admin-config', profileOverride ? JSON.stringify(profileOverride) : 'none'],
+    enabled,
+    queryFn: async () => resolveBidReadinessProfileConfig(profileOverride ?? undefined),
+  });
+
+  const [draft, setDraft] = useState<IBidReadinessAdminConfigDraft | null>(null);
+  const [savedSnapshot, setSavedSnapshot] = useState<IBidReadinessAdminConfigSnapshot | null>(null);
+
+  useEffect(() => {
+    if (!query.data) {
+      return;
+    }
+
+    const checklistDefinitions: IBidReadinessChecklistDefinition[] = query.data.profile.criteria.map((criterion, index) => ({
+      checklistItemId: `checklist-${criterion.criterionId}`,
+      criterionId: criterion.criterionId,
+      required: true,
+      blocking: criterion.isBlocker,
+      order: index,
+    }));
+
+    setDraft({
+      profile: query.data.profile,
+      checklistDefinitions,
+      governance: query.data.governance,
+      version: query.data.version,
+      dirty: false,
+    });
+
+    setSavedSnapshot({
+      profile: query.data.profile,
+      checklistDefinitions,
+      governance: query.data.governance,
+      version: query.data.version,
+      savedAt: new Date().toISOString(),
+    });
+  }, [query.data]);
+
+  const setCriterionWeight = useCallback((criterionId: string, weight: number) => {
+    setDraft((previous) => {
+      if (!previous) {
+        return previous;
+      }
+      return {
+        ...previous,
+        dirty: true,
+        profile: {
+          ...previous.profile,
+          criteria: previous.profile.criteria.map((criterion) => (
+            criterion.criterionId === criterionId ? { ...criterion, weight } : criterion
+          )),
+        },
+      };
+    });
+  }, []);
+
+  const setCriterionBlocker = useCallback((criterionId: string, isBlocker: boolean) => {
+    setDraft((previous) => {
+      if (!previous) {
+        return previous;
+      }
+      return {
+        ...previous,
+        dirty: true,
+        profile: {
+          ...previous.profile,
+          criteria: previous.profile.criteria.map((criterion) => (
+            criterion.criterionId === criterionId ? { ...criterion, isBlocker } : criterion
+          )),
+        },
+        checklistDefinitions: previous.checklistDefinitions.map((definition) => (
+          definition.criterionId === criterionId ? { ...definition, blocking: isBlocker } : definition
+        )),
+      };
+    });
+  }, []);
+
+  const setThreshold = useCallback((
+    name: 'readyMinScore' | 'nearlyReadyMinScore' | 'attentionNeededMinScore',
+    value: number,
+  ) => {
+    setDraft((previous) => {
+      if (!previous) {
+        return previous;
+      }
+      return {
+        ...previous,
+        dirty: true,
+        profile: {
+          ...previous.profile,
+          thresholds: {
+            ...previous.profile.thresholds,
+            [name]: value,
+          },
+        },
+      };
+    });
+  }, []);
+
+  const validationErrors = useMemo(() => {
+    if (!draft) {
+      return [] as string[];
+    }
+
+    const errors = [...validateAdminChecklistDefinitions(draft.checklistDefinitions)];
+    const thresholds = draft.profile.thresholds;
+    if (!(thresholds.readyMinScore > thresholds.nearlyReadyMinScore
+      && thresholds.nearlyReadyMinScore > thresholds.attentionNeededMinScore)) {
+      errors.push('Threshold ordering invalid: ready > nearly-ready > attention-needed is required.');
+    }
+    if (draft.profile.criteria.some((criterion) => criterion.weight < 0)) {
+      errors.push('Criterion weights must be non-negative.');
+    }
+    return errors;
+  }, [draft]);
+
+  const saveDraft = useCallback((): IBidReadinessAdminConfigSnapshot | null => {
+    if (!draft || validationErrors.length > 0) {
+      return null;
+    }
+
+    const snapshot: IBidReadinessAdminConfigSnapshot = {
+      profile: draft.profile,
+      checklistDefinitions: draft.checklistDefinitions,
+      governance: {
+        ...draft.governance,
+        recordedAt: new Date().toISOString(),
+      },
+      version: {
+        ...draft.version,
+        version: draft.version.version + 1,
+        updatedAt: new Date().toISOString(),
+      },
+      savedAt: new Date().toISOString(),
+    };
+
+    setSavedSnapshot(snapshot);
+    setDraft({
+      ...draft,
+      governance: snapshot.governance,
+      version: snapshot.version,
+      dirty: false,
+    });
+
+    return snapshot;
+  }, [draft, validationErrors]);
+
+  const resetDraft = useCallback(() => {
+    if (!savedSnapshot) {
+      return;
+    }
+    setDraft({
+      profile: savedSnapshot.profile,
+      checklistDefinitions: savedSnapshot.checklistDefinitions,
+      governance: savedSnapshot.governance,
+      version: savedSnapshot.version,
+      dirty: false,
+    });
+  }, [savedSnapshot]);
+
+  const dataState = buildDataState({
+    isLoading: query.isLoading,
+    hasData: Boolean(draft),
+    hasError: Boolean(query.error),
+    isDegraded: Boolean(query.error) && Boolean(draft),
+    isEmpty: Boolean(draft && draft.profile.criteria.length === 0),
+  });
+
+  return {
+    state: dataState,
+    snapshot: savedSnapshot,
+    draft,
+    validationErrors,
+    isLoading: query.isLoading,
+    isDegraded: Boolean(query.error) && Boolean(draft),
+    error: query.error as Error | null,
+    setCriterionWeight,
+    setCriterionBlocker,
+    setThreshold,
+    saveDraft,
+    resetDraft,
   };
 }

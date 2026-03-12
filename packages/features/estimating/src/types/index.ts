@@ -27,3 +27,11 @@ export type { BidReadinessDataState } from './BidReadinessDataState.js';
 export type { UseBidReadinessResult } from './UseBidReadinessResult.js';
 export type { UseBidReadinessProfileResult } from './UseBidReadinessProfileResult.js';
 export type { UseBidReadinessTelemetryResult } from './UseBidReadinessTelemetryResult.js';
+export type { IBidReadinessChecklistItem } from './IBidReadinessChecklistItem.js';
+export type {
+  IBidReadinessChecklistDefinition,
+  IBidReadinessAdminConfigSnapshot,
+  IBidReadinessAdminConfigDraft,
+} from './IBidReadinessAdminConfig.js';
+export type { UseBidReadinessChecklistResult } from './UseBidReadinessChecklistResult.js';
+export type { UseBidReadinessAdminConfigResult } from './UseBidReadinessAdminConfigResult.js';
