@@ -188,5 +188,5 @@ Core health computation, version lifecycle, and telemetry schema live in `@hbc/h
 | `SF18-T05-BidReadinessSignal-and-Dashboard.md` | coordinated-signal signal/dashboard behavior (`eligibility + readiness + confidence`) over adapter output — **COMPLETE 2026-03-12** |
 | `SF18-T06-BidReadinessChecklist-and-AdminConfig.md` | eligibility profiles, immutable/conditional gates, bid-day/team-state admin/checklist UX; primitive extraction gate enforced — **COMPLETE 2026-03-12** |
 | `SF18-T07-Reference-Integrations.md` | tier-1 integration contracts and boundary rules — **COMPLETE 2026-03-12** |
-| `SF18-T08-Testing-Strategy.md` | fixtures, scenario matrix, offline and KPI verification |
+| `SF18-T08-Testing-Strategy.md` | fixtures, scenario matrix, offline and KPI verification — **COMPLETE 2026-03-12** |
 | `SF18-T09-Testing-and-Deployment.md` | closure checklist, ADR/docs/index/state-map updates |

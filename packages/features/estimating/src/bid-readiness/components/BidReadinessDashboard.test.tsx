@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import { mapHealthIndicatorStateToBidReadinessView, mapPursuitToHealthIndicatorItem } from '../adapters/index.js';
 import { BidReadinessDashboard } from './index.js';
@@ -18,6 +18,24 @@ function createViewState() {
   });
 
   return mapHealthIndicatorStateToBidReadinessView(healthState);
+}
+
+function createDueEdgeViewState() {
+  const healthState = mapPursuitToHealthIndicatorItem({
+    pursuitId: 'p-3002',
+    costSectionsPopulated: true,
+    bidBondConfirmed: true,
+    addendaAcknowledged: true,
+    subcontractorCoverageMet: true,
+    bidDocumentsAttached: true,
+    ceSignOff: true,
+  });
+
+  return {
+    ...mapHealthIndicatorStateToBidReadinessView(healthState),
+    daysUntilDue: null,
+    isOverdue: true,
+  };
 }
 
 describe('BidReadinessDashboard', () => {
@@ -63,6 +81,20 @@ describe('BidReadinessDashboard', () => {
     expect(screen.getByText('No bid readiness dashboard data is available.')).toBeInTheDocument();
   });
 
+  it('renders null-state fallback for success and non-canonical state copy branch', () => {
+    const { rerender } = render(
+      <BidReadinessDashboard
+        state={null}
+        complexity="Standard"
+        dataState={'unknown-state' as unknown as 'loading'}
+      />,
+    );
+    expect(screen.getByTestId('bid-readiness-dashboard-state')).toBeInTheDocument();
+
+    rerender(<BidReadinessDashboard state={null} complexity="Standard" dataState="success" />);
+    expect(screen.getByText('No bid readiness dashboard data is available.')).toBeInTheDocument();
+  });
+
   it('renders degraded fallback copy for stale/partial dashboard data', () => {
     const state = createViewState();
 
@@ -87,5 +119,29 @@ describe('BidReadinessDashboard', () => {
 
     expect(screen.getByTestId('dashboard-no-visible-criteria')).toBeInTheDocument();
     expect(screen.getByTestId('dashboard-no-recommendations')).toBeInTheDocument();
+  });
+
+  it('supports optional checklist callback affordance', () => {
+    const state = createViewState();
+    const onOpenChecklist = vi.fn();
+
+    render(
+      <BidReadinessDashboard
+        state={state}
+        complexity="Standard"
+        dataState="success"
+        onOpenChecklist={onOpenChecklist}
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId('dashboard-open-checklist'));
+    expect(onOpenChecklist).toHaveBeenCalledTimes(1);
+  });
+
+  it('supports default dataState derivation and due metadata edge branches', () => {
+    const state = createDueEdgeViewState();
+    render(<BidReadinessDashboard state={state} complexity="Standard" />);
+    expect(screen.getByTestId('dashboard-due-metadata')).toHaveTextContent('No submission date set');
+    expect(screen.getByTestId('dashboard-due-metadata')).toHaveTextContent('Overdue');
   });
 });

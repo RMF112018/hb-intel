@@ -22,9 +22,9 @@ export default defineConfig({
         'src/**/*.d.ts',
         'src/**/index.ts',
         'src/types/**',
+        'src/**/*.test.{ts,tsx}',
         'src/**/*.stories.{ts,tsx}',
         'src/empty-state/**',
-        'src/bid-readiness/**',
         'testing/**',
       ],
       thresholds: {

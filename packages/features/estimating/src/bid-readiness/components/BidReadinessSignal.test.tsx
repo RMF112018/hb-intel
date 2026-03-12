@@ -62,6 +62,26 @@ describe('BidReadinessSignal', () => {
     expect(screen.getByText('No bid readiness signal is available.')).toBeInTheDocument();
   });
 
+  it('renders null-state fallback for success and unknown state-copy branch', () => {
+    const { rerender } = render(
+      <BidReadinessSignal
+        state={null}
+        complexity="Standard"
+        dataState={'unknown-state' as unknown as 'loading'}
+      />,
+    );
+    expect(screen.getByTestId('bid-readiness-signal-state')).toBeInTheDocument();
+
+    rerender(<BidReadinessSignal state={null} complexity="Standard" dataState="success" />);
+    expect(screen.getByText('No bid readiness signal is available.')).toBeInTheDocument();
+  });
+
+  it('supports default dataState derivation when omitted', () => {
+    const state = createViewState();
+    render(<BidReadinessSignal state={state} complexity="Standard" />);
+    expect(screen.getByTestId('signal-bid-readiness-score')).toBeInTheDocument();
+  });
+
   it('renders degraded copy when degraded state has fallback snapshot', () => {
     const state = createViewState();
 

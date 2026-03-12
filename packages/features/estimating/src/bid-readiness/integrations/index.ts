@@ -6,10 +6,15 @@
  *
  * @design D-SF18-T07
  */
+import { projectBidReadinessToBicNextMove } from './bicNextMoveAdapter.js';
+import { resolveBidReadinessNotifications } from './notificationDispatchAdapter.js';
+import { createBidReadinessVersionedSnapshot } from './versionedRecordAdapter.js';
+import { gateBidReadinessByComplexity } from './complexityGatingAdapter.js';
+import { resolveBidReadinessApprovalAuthority } from './approvalAuthorityAdapter.js';
+
 export {
   projectBidReadinessToBicNextMove,
 } from './bicNextMoveAdapter.js';
-import { projectBidReadinessToBicNextMove } from './bicNextMoveAdapter.js';
 
 export type {
   IBicNextMoveReferenceAction,
@@ -19,7 +24,6 @@ export type {
 export {
   resolveBidReadinessNotifications,
 } from './notificationDispatchAdapter.js';
-import { resolveBidReadinessNotifications } from './notificationDispatchAdapter.js';
 
 export type {
   BidReadinessNotificationType,
@@ -30,7 +34,6 @@ export type {
 export {
   createBidReadinessVersionedSnapshot,
 } from './versionedRecordAdapter.js';
-import { createBidReadinessVersionedSnapshot } from './versionedRecordAdapter.js';
 
 export type {
   IBidReadinessVersionedSnapshot,
@@ -39,7 +42,6 @@ export type {
 export {
   gateBidReadinessByComplexity,
 } from './complexityGatingAdapter.js';
-import { gateBidReadinessByComplexity } from './complexityGatingAdapter.js';
 
 export type {
   BidReadinessComplexityTier,
@@ -50,7 +52,6 @@ export type {
 export {
   resolveBidReadinessApprovalAuthority,
 } from './approvalAuthorityAdapter.js';
-import { resolveBidReadinessApprovalAuthority } from './approvalAuthorityAdapter.js';
 
 export type {
   IBidReadinessApprovalRequirement,
@@ -58,11 +59,11 @@ export type {
 } from './approvalAuthorityAdapter.js';
 
 export interface IBidReadinessReferenceIntegrations {
-  readonly projectToBicNextMove: typeof import('./bicNextMoveAdapter.js').projectBidReadinessToBicNextMove;
-  readonly resolveNotifications: typeof import('./notificationDispatchAdapter.js').resolveBidReadinessNotifications;
-  readonly createVersionedSnapshot: typeof import('./versionedRecordAdapter.js').createBidReadinessVersionedSnapshot;
-  readonly applyComplexityGating: typeof import('./complexityGatingAdapter.js').gateBidReadinessByComplexity;
-  readonly resolveApprovalAuthority: typeof import('./approvalAuthorityAdapter.js').resolveBidReadinessApprovalAuthority;
+  readonly projectToBicNextMove: typeof projectBidReadinessToBicNextMove;
+  readonly resolveNotifications: typeof resolveBidReadinessNotifications;
+  readonly createVersionedSnapshot: typeof createBidReadinessVersionedSnapshot;
+  readonly applyComplexityGating: typeof gateBidReadinessByComplexity;
+  readonly resolveApprovalAuthority: typeof resolveBidReadinessApprovalAuthority;
 }
 
 /**

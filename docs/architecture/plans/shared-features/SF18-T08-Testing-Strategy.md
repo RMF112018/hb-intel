@@ -80,3 +80,28 @@ Playwright scenarios:
 - branches >= 95
 - functions >= 95
 - statements >= 95
+
+---
+
+## Progress Notes
+
+### 2026-03-12 - T08 implementation complete
+
+- Expanded shared testing exports in `@hbc/features-estimating/testing`:
+  - `createMockEstimatingPursuitForReadiness(overrides?)`
+  - `mockBidReadinessStates` (all 8 canonical T08 states)
+  - `renderWithQueryClient` and deterministic clock helper for stable hook/component tests.
+- Added deterministic coverage across T01-T07 surfaces:
+  - constants/contracts invariants
+  - primitive compatibility checks against `@hbc/health-indicator`
+  - expanded hook/component/integration branch/state scenarios
+  - governance/role visibility and degraded/fallback behavior checks.
+- Added runnable Storybook assets and interaction stories for Signal, Dashboard, and Checklist matrix states under `src/bid-readiness/components/*.stories.tsx` with package Storybook scripts/config.
+- Coverage gates now satisfy T08 thresholds (>=95 across lines/branches/functions/statements) with bid-readiness surfaces included.
+- Verified zero-error gates:
+  - `pnpm --filter @hbc/features-estimating check-types`
+  - `pnpm --filter @hbc/features-estimating build`
+  - `pnpm --filter @hbc/features-estimating lint`
+  - `pnpm --filter @hbc/features-estimating test`
+  - `pnpm --filter @hbc/features-estimating test:coverage`
+  - `pnpm --filter @hbc/features-estimating build-storybook`
