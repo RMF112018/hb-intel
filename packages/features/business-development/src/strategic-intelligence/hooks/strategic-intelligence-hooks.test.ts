@@ -22,6 +22,8 @@ describe('BD strategic intelligence hooks', () => {
     expect(projected.view?.syncStatus).toBe(primitive.state?.syncStatus);
     expect(projected.primitive.state.state?.syncStatus).toBe(primitive.state?.syncStatus);
     expect(projected.primitive.state.sync.badgeLabel).toBe('Synced');
+    expect(projected.integrations.searchIndex.excludedEntryIds.length).toBeGreaterThanOrEqual(1);
+    expect(projected.integrations.versioned?.replaySafe).toBe(true);
   });
 
   it('projects BIC owner avatar metadata and project-canvas assignment metadata', () => {
@@ -38,5 +40,7 @@ describe('BD strategic intelligence hooks', () => {
     expect(projected.canvasAssignments.length).toBeGreaterThan(0);
     expect(projected.canvasAssignments[0]?.assignment.tileKey).toBe('bd-strategic-intelligence-feed');
     expect(projected.canvasAssignments[0]?.assignment.projectId).toBe('bd-strategic-hooks-2');
+    expect(projected.integrations.projectCanvas.tasks.length).toBeGreaterThan(0);
+    expect(projected.integrations.complexity.mode).toBe('Standard');
   });
 });

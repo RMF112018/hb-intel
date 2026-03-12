@@ -1,6 +1,7 @@
 import { StrategicIntelligenceApi } from '../api/StrategicIntelligenceApi.js';
 import { StrategicIntelligenceLifecycleApi } from '../api/StrategicIntelligenceLifecycleApi.js';
 import type {
+  IRedactedProjection,
   IStrategicIntelligenceMutation,
   IStrategicIntelligenceState,
   IStrategicIntelligenceTelemetryState,
@@ -104,6 +105,11 @@ export interface UseStrategicIntelligenceStateResult {
     queuedCount: number;
     lastReplayedAt: string | null;
   };
+  policy: {
+    indexableEntryIds: string[];
+    excludedEntryIds: string[];
+    redactedProjections: IRedactedProjection[];
+  };
   actions: {
     refresh: () => UseStrategicIntelligenceStateResult;
     queueLocalMutation: (
@@ -133,6 +139,7 @@ export const useStrategicIntelligenceState = (
 
   try {
     const baseState = api.getState(scorecardId);
+    const indexingPayload = api.getIndexingPayload(scorecardId);
     const queuedMutations = api.getQueuedMutations(scorecardId);
     const telemetryDeltas = getTelemetryDeltas(scorecardId);
     const state: IStrategicIntelligenceState = {
@@ -163,6 +170,11 @@ export const useStrategicIntelligenceState = (
         badgeLabel: toSyncBadge(syncStatus, queuedMutations.length),
         queuedCount: queuedMutations.length,
         lastReplayedAt: getLastReplayAt(scorecardId),
+      },
+      policy: {
+        indexableEntryIds: indexingPayload.indexableEntries.map((entry) => entry.entryId),
+        excludedEntryIds: indexingPayload.excludedEntryIds,
+        redactedProjections: indexingPayload.redactedProjections,
       },
       actions: {
         refresh: () =>
@@ -249,6 +261,11 @@ export const useStrategicIntelligenceState = (
         badgeLabel: toSyncBadge('saved-locally', 0),
         queuedCount: 0,
         lastReplayedAt: getLastReplayAt(scorecardId),
+      },
+      policy: {
+        indexableEntryIds: [],
+        excludedEntryIds: [],
+        redactedProjections: [],
       },
       actions: {
         refresh: () =>

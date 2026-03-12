@@ -58,6 +58,7 @@
     "@hbc/versioned-record": "workspace:*",
     "@hbc/related-items": "workspace:*",
     "@hbc/notification-intelligence": "workspace:*",
+    "@hbc/acknowledgment": "workspace:*",
     "@hbc/health-indicator": "workspace:*",
     "@hbc/ai-assist": "workspace:*",
     "@hbc/post-bid-autopsy": "workspace:*",

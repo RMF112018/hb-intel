@@ -18,6 +18,7 @@
       "@hbc/related-items": ["packages/related-items/dist/src/index.d.ts"],
       "@hbc/project-canvas": ["packages/project-canvas/dist/src/index.d.ts"],
       "@hbc/notification-intelligence": ["packages/notification-intelligence/dist/src/index.d.ts"],
+      "@hbc/acknowledgment": ["packages/acknowledgment/src/index.ts"],
       "@hbc/health-indicator": ["packages/health-indicator/dist/index.d.ts"],
       "@hbc/ai-assist": ["packages/ai-assist/dist/src/index.d.ts"],
       "@hbc/post-bid-autopsy": ["packages/post-bid-autopsy/dist/src/index.d.ts"]

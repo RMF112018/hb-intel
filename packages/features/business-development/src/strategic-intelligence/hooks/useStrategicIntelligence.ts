@@ -1,3 +1,4 @@
+import type { ComplexityTier } from '@hbc/complexity';
 import type { IBicOwner } from '@hbc/bic-next-move';
 import type { ICanvasTilePlacement } from '@hbc/project-canvas';
 import {
@@ -11,11 +12,26 @@ import {
   mapStrategicIntelligenceStateToBdView,
   type BdStrategicIntelligenceViewModel,
 } from '../adapters/index.js';
+import {
+  createStrategicIntelligenceReferenceIntegrations,
+  type IBdStrategicIntelligenceNotificationProjection,
+  type IStrategicIntelligenceAcknowledgmentProjection,
+  type IStrategicIntelligenceBicOwnershipAction,
+  type IStrategicIntelligenceCanvasProjection,
+  type IStrategicIntelligenceComplexityProjection,
+  type IStrategicIntelligenceHealthProjection,
+  type IStrategicIntelligenceLearningSignalProjection,
+  type IStrategicIntelligenceRelatedItemsProjection,
+  type IStrategicIntelligenceScoreBenchmarkInteropProjection,
+  type IStrategicIntelligenceVersionedProjection,
+} from '../integrations/index.js';
 
 export interface UseStrategicIntelligenceInput extends UseStrategicIntelligenceStateInput {
   actorUserId: string;
   roleContext?: string;
   assignmentTileKey?: string;
+  complexityTier?: ComplexityTier;
+  basePath?: string;
 }
 
 export interface BdStrategicIntelligenceBicOwnerAvatarProjection {
@@ -57,6 +73,22 @@ export interface UseStrategicIntelligenceResult {
     unresolvedCommitmentCount: number;
     unacknowledgedParticipantCount: number;
   };
+  integrations: {
+    bicActions: IStrategicIntelligenceBicOwnershipAction[];
+    complexity: IStrategicIntelligenceComplexityProjection;
+    versioned: IStrategicIntelligenceVersionedProjection | null;
+    relatedItems: IStrategicIntelligenceRelatedItemsProjection;
+    projectCanvas: IStrategicIntelligenceCanvasProjection;
+    notifications: IBdStrategicIntelligenceNotificationProjection[];
+    acknowledgment: IStrategicIntelligenceAcknowledgmentProjection | null;
+    health: IStrategicIntelligenceHealthProjection | null;
+    scoreBenchmark: IStrategicIntelligenceScoreBenchmarkInteropProjection | null;
+    postBidLearning: IStrategicIntelligenceLearningSignalProjection;
+    searchIndex: {
+      indexableEntryIds: string[];
+      excludedEntryIds: string[];
+    };
+  };
   primitive: {
     state: ReturnType<typeof useStrategicIntelligenceState>;
     approvalQueue: ReturnType<typeof useStrategicIntelligenceApprovalQueue>;
@@ -77,6 +109,10 @@ const toOwnerAvatar = (
 export const useStrategicIntelligence = (
   input: UseStrategicIntelligenceInput
 ): UseStrategicIntelligenceResult => {
+  const integrationAdapters = createStrategicIntelligenceReferenceIntegrations();
+  const basePath = input.basePath ?? '/bd/strategic-intelligence';
+  const complexityTier = input.complexityTier ?? 'standard';
+
   const state = useStrategicIntelligenceState({
     projectId: input.projectId,
     visibilityContext: input.visibilityContext,
@@ -117,6 +153,31 @@ export const useStrategicIntelligence = (
         snapshotAligned: false,
         unresolvedCommitmentCount: 0,
         unacknowledgedParticipantCount: 0,
+      },
+      integrations: {
+        bicActions: [],
+        complexity: integrationAdapters.applyComplexityGating(complexityTier),
+        versioned: null,
+        relatedItems: {
+          entryLinks: [],
+        },
+        projectCanvas: {
+          tileKey: 'bic-my-items',
+          tasks: [],
+        },
+        notifications: [],
+        acknowledgment: null,
+        health: null,
+        scoreBenchmark: null,
+        postBidLearning: {
+          consumedCount: 0,
+          approvedSignalCount: 0,
+          signalIds: [],
+        },
+        searchIndex: {
+          indexableEntryIds: [],
+          excludedEntryIds: [],
+        },
       },
       primitive: {
         state,
@@ -176,6 +237,34 @@ export const useStrategicIntelligence = (
       snapshotAligned: handoff.snapshotAligned,
       unresolvedCommitmentCount: handoff.completionGate.unresolvedCommitments.length,
       unacknowledgedParticipantCount,
+    },
+    integrations: {
+      bicActions: integrationAdapters.projectToBicActions(state.state.livingEntries, bicOwnerAvatars),
+      complexity: integrationAdapters.applyComplexityGating(complexityTier),
+      versioned: integrationAdapters.createVersionedProjection(state.state),
+      relatedItems: integrationAdapters.projectRelatedItems(
+        state.state.livingEntries,
+        state.policy.redactedProjections,
+        basePath
+      ),
+      projectCanvas: integrationAdapters.projectCanvasPlacement(
+        input.projectId,
+        basePath,
+        state.state.livingEntries,
+        state.state.commitmentRegister
+      ),
+      notifications: integrationAdapters.resolveNotifications(
+        state.state.livingEntries,
+        state.state.approvalQueue
+      ),
+      acknowledgment: integrationAdapters.projectAcknowledgment(state.state.handoffReview),
+      health: integrationAdapters.mapToHealthIndicator(state.state),
+      scoreBenchmark: integrationAdapters.projectScoreBenchmarkInterop(state.state),
+      postBidLearning: integrationAdapters.consumeLearningSignals(state.state),
+      searchIndex: {
+        indexableEntryIds: state.policy.indexableEntryIds,
+        excludedEntryIds: state.policy.excludedEntryIds,
+      },
     },
     primitive: {
       state,

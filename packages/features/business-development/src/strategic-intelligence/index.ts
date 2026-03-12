@@ -10,6 +10,34 @@ export {
 } from './adapters/index.js';
 
 export {
+  createStrategicIntelligenceReferenceIntegrations,
+  projectStrategicIntelligenceToBicActions,
+  gateStrategicIntelligenceByComplexity,
+  projectStrategicIntelligenceVersionedSnapshot,
+  projectStrategicIntelligenceRelatedItems,
+  projectStrategicIntelligenceToCanvasPlacement,
+  resolveStrategicIntelligenceNotifications,
+  projectStrategicIntelligenceAcknowledgment,
+  mapStrategicIntelligenceToHealthIndicator,
+  projectStrategicIntelligenceToScoreBenchmark,
+  projectStrategicIntelligenceToPostBidLearning,
+  type IStrategicIntelligenceReferenceIntegrations,
+  type IStrategicIntelligenceBicOwnerAvatarProjection,
+  type IStrategicIntelligenceBicOwnershipAction,
+  type IStrategicIntelligenceComplexityProjection,
+  type IStrategicIntelligenceVersionedProjection,
+  type IStrategicIntelligenceRelatedItemsProjection,
+  type IStrategicIntelligenceCanvasProjection,
+  type IStrategicIntelligenceCanvasTask,
+  type StrategicIntelligenceCanvasTaskType,
+  type IBdStrategicIntelligenceNotificationProjection,
+  type IStrategicIntelligenceAcknowledgmentProjection,
+  type IStrategicIntelligenceHealthProjection,
+  type IStrategicIntelligenceScoreBenchmarkInteropProjection,
+  type IStrategicIntelligenceLearningSignalProjection,
+} from './integrations/index.js';
+
+export {
   useStrategicIntelligence,
   type UseStrategicIntelligenceInput,
   type UseStrategicIntelligenceResult,
