@@ -78,7 +78,9 @@
       "@hbc/project-canvas": ["packages/project-canvas/src/index.ts"],
       "@hbc/project-canvas/*": ["packages/project-canvas/src/*"],
       "@hbc/ai-assist": ["packages/ai-assist/src/index.ts"],
-      "@hbc/ai-assist/*": ["packages/ai-assist/src/*"]
+      "@hbc/ai-assist/*": ["packages/ai-assist/src/*"],
+      "@hbc/post-bid-autopsy": ["packages/post-bid-autopsy/src/index.ts"],
+      "@hbc/post-bid-autopsy/*": ["packages/post-bid-autopsy/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"]

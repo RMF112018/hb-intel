@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Status:** Canonical Current-State
-**Last Updated:** 2026-03-10
+**Last Updated:** 2026-03-12
 **Purpose:** Single authoritative reference for the present implementation state of the HB Intel monorepo. When this document differs from historical plans or locked blueprints regarding _what exists today_, this document governs present truth.
 
 ---
@@ -98,6 +98,7 @@
 | `docs/architecture/adr/ADR-0109-bd-heritage-living-strategic-intelligence.md` | **Permanent Decision Rationale** | SF20 BD heritage panel and living strategic intelligence primitive; 10 locked decisions (D-01–D-10); to be authored when SF20 enters active development |
 | SF21 shared-feature plans (10 files: `SF21-Project-Health-Pulse.md` through `SF21-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/features-project-hub` health-pulse planning family authored 2026-03-11; ADR-0110 reserved; pending PH7.12 sign-off (ADR-0090) before implementation |
 | `docs/architecture/adr/ADR-0110-project-health-pulse-multi-dimension-indicator.md` | **Permanent Decision Rationale** | SF21 project health pulse multi-dimension indicator primitive; 10 locked decisions (D-01–D-10); to be authored when SF21 enters active development |
+| SF22 shared-feature plans (10 files: `SF22-Post-Bid-Learning-Loop.md` through `SF22-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/post-bid-autopsy` planning family authored 2026-03-12; package scaffold and public read-only learning-loop signal seam added as SF19-T07 unblock prerequisite |
 | PH4 phase plans (`plans/PH4-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH4-Shell-Consolidation.md` (master plan) |
 | PH5 phase plans (`plans/PH5-*.md`, `plans/PH5C-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH5-Auth-Shell-Plan.md` and `PH5C-Auth-Shell-Plan.md` |
 | PH6 phase plans (`plans/PH6-*.md`, `plans/PH6F-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH6-Provisioning-Plan.md`; sub-plans Tier 2 |
@@ -179,7 +180,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | `packages/spfx` | @hbc/spfx | SPFx webpart scaffolding & utilities | Depends on auth, sharepoint-docs, ui-kit | v0.0.1 | `packages/spfx/README.md` |
 | `packages/eslint-plugin-hbc` | @hb-intel/eslint-plugin-hbc | Component consumption lint rules | None (standalone tool) | v1.0.0 | `packages/eslint-plugin-hbc/README.md` |
 
-### Category C: Shared-Feature Primitives (11)
+### Category C: Shared-Feature Primitives (12)
 
 These packages are **Tier-1 Platform Primitives** — mandatory-use when their concern area is present in a feature. See [Platform Primitives Registry](../../reference/platform-primitives.md) for policy, decision tree, adoption matrix, and non-duplication rule. <!-- PH7.4: elevated from optional to Tier-1 per §7.4.1 -->
 
@@ -198,6 +199,7 @@ The original three (SF01–SF03) emerged organically; SF04–SF15 are planned pr
 | `packages/data-seeding` | @hbc/data-seeding | Development / demo data seeding primitives | Depends on models, data-access | v0.0.1 | `packages/data-seeding/README.md` |
 | `packages/session-state` | @hbc/session-state | Offline-safe session persistence & sync | Depends on idb (runtime); peer: react | v0.0.1 | `packages/session-state/README.md` |
 | `packages/project-canvas` | @hbc/project-canvas | Role-based configurable project dashboard canvas | Depends on ui-kit, complexity, @dnd-kit/core; peer: react | v0.0.1 | `packages/project-canvas/README.md` |
+| `packages/post-bid-autopsy` | @hbc/post-bid-autopsy | Read-only post-bid learning-loop signal contracts for benchmark enrichment, recalibration, and drift inputs | None (contract-only primitive) | v0.0.1 | `packages/post-bid-autopsy/README.md` |
 
 ### Category D: Feature Packages (11)
 
@@ -380,13 +382,13 @@ As of PH7.4, all Category C packages are **Tier-1 Platform Primitives** — mand
 |--------|-------|
 | Core platform packages | 8 |
 | Shared infrastructure packages | 2 |
-| Shared-feature primitives | 11 |
+| Shared-feature primitives | 12 |
 | Feature packages | 11 |
 | SPFx applications | 11 |
 | Standalone applications | 3 |
 | Backend services | 1 |
 | Build tooling packages | 1 |
-| **Total workspace members** | **48** |
+| **Total workspace members** | **49** |
 | Architecture Decision Records | 102 active + 6 archived | <!-- Updated 2026-03-12: ADR-0106 authored for SF17 admin-intelligence; ADR-0107 authored for SF18 estimating adapter-over-primitive; ADR-0111 authored for health-indicator companion primitive governance; ADR-0091–0097 added since PH7.11; ADR-0098 reserved SF09; ADR-0099 reserved SF10; ADR-0100 reserved SF11; ADR-0101 authored SF12; ADR-0102 authored SF13; ADR-0103 authored SF14; ADR-0104 authored SF15; ADR-0105 reserved SF16; ADR-0108 reserved SF19; ADR-0109 reserved SF20; ADR-0110 reserved SF21 -->
-| TSConfig path aliases | 62 |
+| TSConfig path aliases | 64 |
 | Vite dev server ports | 14 (3000, 4000–4012) |
