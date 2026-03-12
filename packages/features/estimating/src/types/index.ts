@@ -23,3 +23,7 @@ export type { IHealthIndicatorState } from './IHealthIndicatorState.js';
 export type { IEstimatingBidReadinessProfile } from './IEstimatingBidReadinessProfile.js';
 export type { IBidReadinessState } from './IBidReadinessState.js';
 export type { IBidReadinessViewState } from './IBidReadinessViewState.js';
+export type { BidReadinessDataState } from './BidReadinessDataState.js';
+export type { UseBidReadinessResult } from './UseBidReadinessResult.js';
+export type { UseBidReadinessProfileResult } from './UseBidReadinessProfileResult.js';
+export type { UseBidReadinessTelemetryResult } from './UseBidReadinessTelemetryResult.js';

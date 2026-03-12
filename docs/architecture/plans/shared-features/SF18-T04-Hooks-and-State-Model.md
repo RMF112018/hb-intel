@@ -75,3 +75,40 @@ pnpm --filter @hbc/features-estimating test -- useBidReadiness
 pnpm --filter @hbc/features-estimating test -- useBidReadinessTelemetry
 pnpm --filter @hbc/features-estimating check-types
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF18-T04 completed: 2026-03-12
+- Replaced hook scaffold with canonical SF18 hook/state-model layer in
+  `packages/features/estimating/src/bid-readiness/hooks/index.ts`:
+  - `useBidReadiness`
+  - `useBidReadinessProfile`
+  - `useBidReadinessTelemetry`
+- Hook orchestration is strictly T03/T02-driven:
+  - `useBidReadiness` composes adapter mappings (`mapPursuitToHealthIndicatorItem`,
+    `mapHealthIndicatorStateToBidReadinessView`) and exposes deterministic
+    blocker-first/grouped derived state.
+  - `useBidReadinessProfile` resolves profile/config via
+    `resolveBidReadinessProfileConfig` with stable source/validation metadata.
+  - `useBidReadinessTelemetry` consumes deterministic emitter snapshots via
+    `bidReadinessKpiEmitter.getView(...)` with stale/degraded/backfill flags.
+- Added T04 hook/state return contracts in `src/types`:
+  - `BidReadinessDataState`
+  - `UseBidReadinessResult`
+  - `UseBidReadinessProfileResult`
+  - `UseBidReadinessTelemetryResult`
+- Updated public export surfaces:
+  - `src/bid-readiness/index.ts` now exports all three hooks and hook params
+  - `src/types/index.ts` exports T04 hook/state contracts
+  - `src/index.ts` exports T04 hook/state contracts and hook params
+- Added T04 hook tests:
+  - `src/bid-readiness/hooks/useBidReadiness.test.tsx`
+  - `src/bid-readiness/hooks/useBidReadinessTelemetry.test.tsx`
+  - tests cover loading/success/empty/degraded states, deterministic ordering/grouping,
+    profile fallback behavior, telemetry stale/backfill behavior, and fallback snapshot behavior.
+- Verification (zero errors):
+  - `pnpm --filter @hbc/features-estimating test -- useBidReadiness` ✓
+  - `pnpm --filter @hbc/features-estimating test -- useBidReadinessTelemetry` ✓
+  - `pnpm --filter @hbc/features-estimating check-types` ✓
+  - `pnpm --filter @hbc/features-estimating build` ✓
+- T04 success criteria complete. Work stopped before T05 per phase instruction.
+-->

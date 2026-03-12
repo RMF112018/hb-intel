@@ -1,186 +1,286 @@
-# PH7-SF-18: Estimating Bid Readiness Signal — Real-Time Bid Preparation Health Indicator
-**Priority Tier:** 2 — Application Layer (Estimating module differentiator)
-**Module:** Estimating
-**Interview Decision:** Q2 — Option B confirmed (initially; redirected to shared package framing; Bid Readiness Signal confirmed as Estimating-specific Mold Breaker)
-**Mold Breaker Source:** UX-MB §7 (Tablet-Native Field UX, applied to Estimating workflows); ux-mold-breaker.md Signature Solution #4 (Universal Next Move, applied to bid preparation); con-tech-ux-study §5 (Estimating module gaps)
 
----
-## Problem Solved
+# PH7-SF-18-Module-Feature-Estimating-Bid-Readiness.md
+## Shared Feature: Estimating – Bid Readiness Signal (Updated)
 
-Bid preparation failures — submitting an incomplete bid, missing a bid bond requirement, forgetting to include an addendum — are among the most costly mistakes a general contractor can make. They result in bid rejection, damaged owner relationships, and in competitive markets, they eliminate the company from consideration entirely.
+## Objective
+Provide a continuously evaluated **Bid Readiness Signal** that indicates whether a pursuit is operationally prepared for submission. The signal replaces static bid-stage labels with a **dynamic readiness model** composed of eligibility gates, readiness scoring, and confidence indicators.
 
-Current estimating software (and Procore's estimating module) shows bid status as a simple stage label: "Active" / "Pending" / "Submitted". This tells the estimator nothing about readiness. The Bid Readiness Signal replaces the static stage label with a **real-time health indicator** that answers: "Is this bid actually ready to submit?"
-
-**What makes a bid ready:**
-- All required cost sections are populated with values (no blank line items in required categories)
-- Bid bond / bid security is confirmed and documented
-- All addenda have been acknowledged by the Estimating Lead
-- Subcontractor coverage meets the required trade coverage threshold
-- Bid documents have been attached (plans, specs, contract form)
-- The bid value has been reviewed and signed off by the Chief Estimator
-- The submission deadline has not passed
-
-The Bid Readiness Signal computes a health score from these criteria and surfaces it at the top of every Active Pursuit — visible at a glance in the list view and detailed in the record view. Every incomplete criterion is automatically surfaced as a granular BIC record in `@hbc/bic-next-move` (blockers first), with ownership avatars appearing directly in the compact Signal row and in the `@hbc/project-canvas` “My Work” lane.
-
----
-## Mold Breaker Rationale
-
-This is a direct application of the `@hbc/bic-next-move` philosophy (Universal Next Move, Signature Solution #4) at the bid preparation level: every bid preparation requirement has an owner, a completion state, and a due date — and the system makes the incomplete requirements visible rather than hiding them behind a status field.
-
-No current construction platform provides real-time bid readiness computation. Procore's estimating module shows bid status but not bid health. The Bid Readiness Signal is the Estimating module's most visible UX differentiator and the foundation of the new reusable Tier-1 `@hbc/health-indicator` primitive.
-
----
-## Bid Readiness Score Model
-
-### Readiness Criteria (Configurable by Admin)
-
-| Criterion | Weight | Completion Condition | Blocker? |
-|---|---|---|---|
-| Cost sections populated | 30% | All required cost categories have at least one line item with a value | Yes |
-| Bid bond confirmed | 15% | Bid bond document attached OR "Not Required" marked | Yes |
-| Addenda acknowledged | 15% | All issued addenda acknowledged by Estimating Lead | Yes |
-| Subcontractor coverage | 20% | Required trade categories have ≥1 sub quote | No |
-| Bid documents attached | 10% | Plans + specs attached in `@hbc/sharepoint-docs` context | No |
-| CE sign-off | 10% | Chief Estimator has reviewed (via `@hbc/acknowledgment`) | Yes |
-
-**Readiness Score:** Weighted sum of completed criteria (0–100%)
-
-**Status Labels:**
-- 🟢 **Ready to Bid** (90–100%, no blockers)
-- 🟡 **Nearly Ready** (70–89%, no blocking gaps)
-- 🟠 **Attention Needed** (50–69% OR any blocker incomplete)
-- 🔴 **Not Ready** (<50% OR critical blocker missing)
-
----
-## Interface Contract
-
-```typescript
-// In @hbc/health-indicator primitive (new Tier-1 package)
-
-export interface IHealthIndicatorCriterion {
-  criterionId: string;
-  label: string;
-  weight: number;
-  isBlocker: boolean;
-  isComplete: (item: IHealthIndicatorItem) => boolean;
-  completionDescription: (item: IHealthIndicatorItem) => string;
-  actionHref: (item: IHealthIndicatorItem) => string;
-  resolveAssignee: (item: IHealthIndicatorItem) => IBicOwner | null;
-}
-
-export interface IHealthIndicatorState {
-  score: number;
-  status: 'ready' | 'nearly-ready' | 'attention-needed' | 'not-ready';
-  criteria: Array<{ /* ... */ }>;
-  blockers: IHealthIndicatorCriterion[];
-  daysUntilDue: number | null;
-  isOverdue: boolean;
-  version: VersionedRecord; // from @hbc/versioned-record
-}
-```
-
----
-## Component Architecture
-
-```
-apps/estimating/src/features/bid-readiness/
-├── useBidReadiness.ts              # now delegates to @hbc/health-indicator
-├── BidReadinessSignal.tsx          # compact indicator for list rows
-├── BidReadinessDashboard.tsx       # full detail panel in pursuit record
-├── BidReadinessChecklist.tsx       # expandable criterion-by-criterion checklist
-└── BidReadinessCriteria.ts         # criterion definitions (configurable)
-```
-
-(The entire model, offline logic, AI actions, and telemetry are now provided by the new `@hbc/health-indicator` primitive.)
+This update introduces **Eligibility Profiles** so immutable submission requirements vary appropriately by **project/bid type** (public hard bid, private negotiated, GMP proposal, conceptual estimate, etc.).
 
 ---
 
-## Component Specifications
+# Core Concept
 
-### `BidReadinessSignal` — List Row Compact Indicator
+Bid readiness is represented by **three coordinated signals**:
 
-**Visual behavior (Complexity-aware):**
-- Essential: colored status dot + label + score + blocker badge only
-- Standard/Expert: + owning avatar from `@hbc/bic-next-move`
-- Hover tooltip shows top 3 incomplete criteria
+1. **Submission Eligibility**
+2. **Bid Readiness Score**
+3. **Estimate Confidence Indicator**
 
-### `BidReadinessDashboard` — Pursuit Record Detail Panel
-
-**Visual behavior:**
-- Large status indicator with score ring
-- Bid due date with countdown
-- Expandable `BidReadinessChecklist` (progressive disclosure per `@hbc/complexity`)
-
-### `BidReadinessChecklist` — Criterion-by-Criterion Status
-
-**Visual behavior:**
-- Blockers first, then weighted criteria
-- Each row includes completion status, assignee avatar (BIC), action deep-link (`@hbc/related-items`), and inline AI action buttons
-- “Saved locally / Queued to sync” indicators when offline
+These signals together indicate whether a bid is:
+- legally/commercially eligible to submit
+- operationally prepared
+- financially trustworthy
 
 ---
 
-## Admin Configuration & Governance
+# Submission Eligibility
 
-- Weights, blocker flags, and trade coverage threshold are configurable in the Admin module (Expert mode only)
-- Full immutable audit trail via `@hbc/versioned-record`
-- Admins can freeze/lock a readiness snapshot at submission
-- Governance dashboard shows provenance of hybrid data sources and BIC ownership history
+Submission eligibility determines whether the bid can be submitted from a **contractual or procedural standpoint**.
 
----
+Eligibility is governed by **Eligibility Profiles**, which define immutable requirements for a pursuit type.
 
-## AI Action Layer Integration
+Eligibility status:
 
-AI suggestions (“Suggest assignee”, “Draft acknowledgment from notes”, “Parse addendum from pasted email”) appear as contextual inline buttons inside the checklist. Suggestions cite sources, require explicit approval, and update both the criterion and the corresponding BIC record. No separate chat interface.
+| Status | Meaning |
+|------|------|
+| Eligible | All immutable requirements satisfied |
+| Conditionally Eligible | Core requirements met but conditional gates unresolved |
+| Ineligible | One or more immutable requirements unmet |
 
----
-
-## Integration Points (All Tier-1 Primitives)
-
-| Package | Integration |
-|---|---|
-| `@hbc/health-indicator` | New Tier-1 primitive providing the entire model |
-| `@hbc/bic-next-move` | Granular per-criterion BIC ownership (blockers first) |
-| `@hbc/complexity` | Essential/Standard/Expert progressive disclosure |
-| `@hbc/versioned-record` | Immutable provenance, audit trail, snapshot freezing |
-| `@hbc/related-items` | Direct deep-links from every criterion |
-| `@hbc/project-canvas` | Automatic placement in role-aware My Work lane |
-| `@hbc/notification-intelligence` | <48h with blockers → Immediate notification |
-| `@hbc/acknowledgment` | CE sign-off criterion |
-| `@hbc/sharepoint-docs` | Bid documents criterion |
-| `@hbc/health-indicator` telemetry | Five KPIs (time-to-readiness, blocker-resolution latency, % Ready to Bid, submission error rate, checklist CES) surfaced in canvas and admin dashboard |
+Immutable requirements are **profile-driven**, not global.
 
 ---
 
-## Offline / PWA Resilience
+# Eligibility Profiles
 
-Full tablet-native behavior: service worker caches the Dashboard and checklist; IndexedDB + `@hbc/versioned-record` persists drafts and state; Background Sync replays changes with optimistic UI and “Saved locally / Queued to sync” indicators. Works identically to Punch List and RFI drafts.
+Eligibility Profiles define immutable submission requirements by pursuit type.
+
+Profiles are configured using:
+
+- delivery method
+- owner type
+- project category
+- jurisdiction (optional)
+- procurement type
+
+### Example Profiles
+
+#### Public Hard Bid
+Immutable Gates:
+- Bid Bond uploaded
+- Addenda acknowledged
+- Contractor license verified
+- Required bid forms attached
+- Compliance documentation validated
+
+Conditional Gates:
+- subcontractor listing required
+- insurance verification required
+
+#### Private Invited Bid
+Immutable Gates:
+- proposal narrative completed
+- scope alignment confirmed
+- executive pricing review
+
+Conditional Gates:
+- client clarification log updated
+- design coordination review
+
+#### Negotiated GMP
+Immutable Gates:
+- cost model finalized
+- allowances documented
+- VE log reviewed
+
+Conditional Gates:
+- owner review complete
+- risk register acknowledged
+
+#### Conceptual Budget
+Immutable Gates:
+- none
+
+Readiness scoring still applies.
 
 ---
 
-## Priority & ROI
+# Bid Readiness Score
 
-**Priority:** P1 — The Estimating module's primary UX differentiator and the seed for the platform-wide `@hbc/health-indicator` primitive.
-**Estimated build effort:** 2–3 sprint-weeks (now accelerated by reusing existing primitives).
-**ROI:** Prevents bid submission failures; provides real-time accountability; creates measurable operational impact via UX telemetry; positions HB Intel as the first platform with a universal preconstruction health indicator.
+The readiness score measures **operational preparation**, not submission legality.
+
+Score Range:
+0–100
+
+Score components include:
+
+- estimate completion
+- subcontractor coverage
+- document review status
+- addenda impact review
+- bid strategy alignment
+- internal review completion
+
+The readiness score answers:
+
+> “How operationally prepared is this bid?”
+
+Not:
+
+> “Can this bid legally be submitted?”
 
 ---
 
-## Definition of Done
+# Estimate Confidence Indicator
 
-- [ ] New `@hbc/health-indicator` Tier-1 primitive created and published
-- [ ] All six locked integration patterns implemented and tested
-- [ ] Offline/PWA resilience verified on tablet (service worker + IndexedDB + Background Sync)
-- [ ] Embedded AI actions with provenance and approval guardrails
-- [ ] Progressive disclosure via `@hbc/complexity` across all three modes
-- [ ] Deep-links and canvas integration via `@hbc/related-items` and `@hbc/project-canvas`
-- [ ] Versioned audit trail and admin governance via `@hbc/versioned-record`
-- [ ] Five UX telemetry KPIs wired and surfaced
-- [ ] Unit tests, Storybook stories for all modes and offline states
-- [ ] ADR-00xx-health-indicator-primitive created
+Confidence measures **financial reliability** of the estimate.
+
+Indicators include:
+
+- percent of cost backed by vendor/sub quotes
+- age of major assumptions
+- variance to historical benchmarks
+- proportion of allowances
+- unresolved estimator notes
+
+Confidence states:
+
+| Level | Meaning |
+|------|------|
+| High | Estimate supported by current market inputs |
+| Moderate | Some assumptions or limited quote coverage |
+| Low | Significant placeholders or outdated assumptions |
 
 ---
 
-## ADR Reference
+# Subcontractor Coverage Quality
 
-Create `docs/architecture/adr/0027-estimating-bid-readiness-signal.md` (and companion ADR for the new `@hbc/health-indicator` primitive) documenting the weighted scoring model, granular BIC integration, complexity-adaptive disclosure, offline strategy, AI Action Layer embedding, cross-module deep-linking, versioning/governance, and telemetry KPIs.
+Coverage is evaluated by **quality and redundancy**, not just presence.
+
+Coverage levels:
+
+| Level | Description |
+|------|------|
+| None | No quotes |
+| Minimal | One quote |
+| Adequate | Two qualified quotes |
+| Strong | Three or more qualified quotes |
+
+Additional factors:
+
+- quote recency
+- subcontractor qualification status
+- scope review completed
+- exclusions normalized
+
+---
+
+# Addenda Impact Intelligence
+
+Addenda processing includes:
+
+- acknowledgment status
+- cost-impact evaluation
+- impacted CSI divisions
+- impacted takeoff groups
+- reviewer assignment
+
+Addenda states:
+
+- Issued
+- Acknowledged
+- Cost Impact Evaluated
+- Impact Resolved
+
+---
+
+# Bid-Day Mode
+
+As submission deadlines approach, the system transitions to **Bid-Day Mode**.
+
+Trigger windows:
+
+- 72 hours
+- 24 hours
+- 4 hours
+- 1 hour
+
+Bid-Day Mode features:
+
+- simplified readiness dashboard
+- final eligibility checklist
+- submission packet preview
+- unresolved blocker alerts
+- responsibility handoff indicators
+
+---
+
+# Score Explainability
+
+Users can open a **Why This Score?** panel.
+
+The panel shows:
+
+- criterion weight breakdown
+- score deltas since previous evaluation
+- top actions to increase readiness
+- provenance of each data source
+
+Sources may include:
+
+- user-entered data
+- document ingestion
+- integrations
+- administrative configuration
+
+---
+
+# Team Bid-Room Visibility
+
+Bid readiness reflects **team operational state**, not just checklist completion.
+
+Team view includes:
+
+- criterion ownership (BIC)
+- reviewer matrix
+- outstanding approvals
+- blocked dependencies
+- signoff progression
+
+---
+
+# Metrics and Telemetry
+
+Key performance metrics:
+
+- average readiness score at submission
+- bid-day blocker rate
+- eligibility failure incidents
+- estimator time-to-green
+- bid preparation cycle time
+- confidence variance by trade category
+
+---
+
+# Definition of Done
+
+The feature is complete when:
+
+- Eligibility Profiles configurable via admin interface
+- Immutable gate logic enforced by profile
+- Eligibility, readiness score, and confidence displayed together
+- Score explainability panel implemented
+- Addenda impact tracking functional
+- Subcontractor coverage quality evaluated
+- Bid-Day Mode operational
+- Team visibility dashboard active
+- Telemetry metrics captured
+
+---
+
+# Mold Breaker Impact
+
+Traditional estimating systems track **bid artifacts**.
+
+This feature tracks **bid readiness risk**.
+
+The system provides:
+
+- live submission eligibility validation
+- readiness intelligence
+- estimate confidence signals
+- accountability routing
+- operational bid-room visibility
+
+The result is a system that actively reduces bid risk rather than simply managing bid documents.

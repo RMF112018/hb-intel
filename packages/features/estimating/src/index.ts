@@ -34,6 +34,10 @@ export type {
   IEstimatingBidReadinessProfile,
   IBidReadinessState,
   IBidReadinessViewState,
+  BidReadinessDataState,
+  UseBidReadinessResult,
+  UseBidReadinessProfileResult,
+  UseBidReadinessTelemetryResult,
 } from './types/index.js';
 
 // Constants
@@ -71,8 +75,16 @@ export {
   mapPursuitToHealthIndicatorItem,
   mapHealthIndicatorStateToBidReadinessView,
   useBidReadiness,
+  useBidReadinessProfile,
+  useBidReadinessTelemetry,
   BidReadinessSignal,
   BidReadinessDashboard,
   BidReadinessChecklist,
   bidReadinessKpiEmitter,
+} from './bid-readiness/index.js';
+
+export type {
+  UseBidReadinessParams,
+  UseBidReadinessProfileParams,
+  UseBidReadinessTelemetryParams,
 } from './bid-readiness/index.js';

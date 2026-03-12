@@ -30,7 +30,17 @@ export type {
 } from './adapters/index.js';
 
 // Hooks
-export { useBidReadiness } from './hooks/index.js';
+export {
+  useBidReadiness,
+  useBidReadinessProfile,
+  useBidReadinessTelemetry,
+} from './hooks/index.js';
+
+export type {
+  UseBidReadinessParams,
+  UseBidReadinessProfileParams,
+  UseBidReadinessTelemetryParams,
+} from './hooks/index.js';
 
 // Components
 export {
