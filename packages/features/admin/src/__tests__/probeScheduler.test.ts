@@ -140,6 +140,77 @@ describe('ProbeScheduler', () => {
     expect(snapshot.results).not.toBe(results); // defensive copy
   });
 
+  it('applies exponential backoff timing between retries', async () => {
+    vi.useFakeTimers();
+    const scheduler = new ProbeScheduler();
+    const callTimestamps: number[] = [];
+
+    scheduler.register(
+      makeProbe('sharepoint-infrastructure', async () => {
+        callTimestamps.push(Date.now());
+        throw new Error('fail');
+      }),
+    );
+
+    const resultPromise = scheduler.runAll('2026-03-11T00:00:00Z');
+
+    // 1st retry delay: 2^0 * 100 = 100ms
+    await vi.advanceTimersByTimeAsync(100);
+    // 2nd retry delay: 2^1 * 100 = 200ms
+    await vi.advanceTimersByTimeAsync(200);
+
+    await resultPromise;
+
+    expect(callTimestamps).toHaveLength(3); // PROBE_MAX_RETRY = 3
+    // Verify exponential gaps: ~100ms then ~200ms
+    const gap1 = callTimestamps[1] - callTimestamps[0];
+    const gap2 = callTimestamps[2] - callTimestamps[1];
+    expect(gap1).toBe(100);
+    expect(gap2).toBe(200);
+
+    vi.useRealTimers();
+  });
+
+  it('aggregates degraded status across multiple probes in snapshot', async () => {
+    const scheduler = new ProbeScheduler();
+
+    scheduler.register(
+      makeProbe('sharepoint-infrastructure', async (nowIso) => ({
+        probeId: `sp-${nowIso}`,
+        probeKey: 'sharepoint-infrastructure',
+        status: 'degraded' as const,
+        summary: 'Elevated latency',
+        observedAt: nowIso,
+        metrics: {},
+        anomalies: ['Latency > 2s'],
+      })),
+    );
+    scheduler.register(
+      makeProbe('azure-functions', async (nowIso) => ({
+        probeId: `af-${nowIso}`,
+        probeKey: 'azure-functions',
+        status: 'degraded' as const,
+        summary: 'Cold start delays',
+        observedAt: nowIso,
+        metrics: {},
+        anomalies: ['Cold start > 5s'],
+      })),
+    );
+    scheduler.register(makeProbe('azure-search'));
+
+    const results = await scheduler.runAll('2026-03-11T00:00:00Z');
+    const snapshot = scheduler.buildSnapshot(results, 'snap-deg', '2026-03-11T00:00:00Z');
+
+    expect(snapshot.results).toHaveLength(3);
+    const degradedResults = snapshot.results.filter((r) => r.status === 'degraded');
+    expect(degradedResults).toHaveLength(2);
+    expect(degradedResults.map((r) => r.probeKey)).toEqual([
+      'sharepoint-infrastructure',
+      'azure-functions',
+    ]);
+    expect(snapshot.results[2].status).toBe('healthy');
+  });
+
   it('createDefaultProbeScheduler registers all 5 probes in correct order', () => {
     const scheduler = createDefaultProbeScheduler();
     expect(scheduler.size).toBe(5);

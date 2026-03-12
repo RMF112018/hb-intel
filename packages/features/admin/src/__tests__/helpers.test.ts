@@ -145,4 +145,38 @@ describe('resolveEligibility', () => {
     expect(result.eligible).toBe(false);
     expect(result.matchedBy).toBe('none');
   });
+
+  it('returns direct-user eligibility with any-mode rule', () => {
+    const rules = [
+      createMockApprovalAuthorityRule({
+        approvalContext: 'provisioning-task-completion',
+        approvalMode: 'any',
+        approverUserIds: ['user-001', 'user-002'],
+        approverGroupIds: ['group-001'],
+      }),
+    ];
+    // In `any` mode, a single match is sufficient — direct-user should resolve
+    const result = resolveEligibility(rules, 'provisioning-task-completion', 'user-002');
+    expect(result.eligible).toBe(true);
+    expect(result.matchedBy).toBe('direct-user');
+    // TODO: group-membership path deferred — resolveEligibility only implements direct-user
+  });
+
+  it('returns direct-user eligibility with all-mode rule', () => {
+    const rules = [
+      createMockApprovalAuthorityRule({
+        approvalContext: 'provisioning-task-completion',
+        approvalMode: 'all',
+        approverUserIds: ['user-001', 'user-002'],
+        approverGroupIds: ['group-001'],
+      }),
+    ];
+    // Current implementation: resolveEligibility checks direct-user presence regardless of mode.
+    // In a full `all` mode, all approvers would need to approve — but eligibility check
+    // only tests whether this user CAN approve, not whether approval is sufficient.
+    const result = resolveEligibility(rules, 'provisioning-task-completion', 'user-001');
+    expect(result.eligible).toBe(true);
+    expect(result.matchedBy).toBe('direct-user');
+    // TODO: group-membership path deferred — resolveEligibility only implements direct-user
+  });
 });

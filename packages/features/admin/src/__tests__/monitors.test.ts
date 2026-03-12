@@ -83,6 +83,48 @@ describe('MonitorRegistry', () => {
     expect(result[1].alertId).toBe('a-3');
   });
 
+  it('deduplicates alerts with same category and entity', () => {
+    const registry = new MonitorRegistry();
+    registry.register(provisioningFailureMonitor);
+
+    const alerts = [
+      makeAlert({ alertId: 'a-1', category: 'provisioning-failure', affectedEntityId: 'e-1' }),
+      makeAlert({ alertId: 'a-2', category: 'provisioning-failure', affectedEntityId: 'e-1' }),
+      makeAlert({ alertId: 'a-3', category: 'provisioning-failure', affectedEntityId: 'e-2' }),
+    ];
+
+    const result = registry.deduplicateAlerts(alerts);
+    // Same category + same entity → same dedupeKey → first wins
+    expect(result).toHaveLength(2);
+    expect(result[0].alertId).toBe('a-1');
+    expect(result[1].alertId).toBe('a-3');
+  });
+
+  it('auto-resolves: alert with resolvedAt is excluded from active set', async () => {
+    const registry = new MonitorRegistry();
+    const resolvedAlert = makeAlert({
+      alertId: 'a-resolved',
+      resolvedAt: '2026-03-11T01:00:00Z',
+    });
+    const activeAlert = makeAlert({ alertId: 'a-active' });
+
+    const mockMonitor = {
+      key: 'provisioning-failure' as const,
+      defaultSeverity: 'critical' as const,
+      run: async () => [resolvedAlert, activeAlert],
+      dedupeKey: (a: IAdminAlert) => a.alertId,
+    };
+
+    registry.register(mockMonitor);
+    const results = await registry.runAll('2026-03-11T02:00:00Z');
+
+    // Both returned by run; consumer filters by resolvedAt
+    expect(results).toHaveLength(2);
+    const active = results.filter((a) => !a.resolvedAt);
+    expect(active).toHaveLength(1);
+    expect(active[0].alertId).toBe('a-active');
+  });
+
   it('createDefaultMonitorRegistry registers all 6 monitors', () => {
     const registry = createDefaultMonitorRegistry();
     expect(registry.size).toBe(6);

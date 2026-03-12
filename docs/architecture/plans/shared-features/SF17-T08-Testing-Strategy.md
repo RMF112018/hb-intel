@@ -75,3 +75,24 @@ Playwright scenarios:
 - branches >= 95
 - functions >= 95
 - statements >= 95
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF17-T08 completed: 2026-03-12
+Files modified:
+  - testing/mockAdminIntelligenceStates.ts — added 3 canonical states (approvalRuleAny, approvalRuleAll, mixedSeverityAcknowledged)
+  - src/__tests__/probeScheduler.test.ts — added 2 tests (exponential backoff timing, degraded aggregation)
+  - src/__tests__/monitors.test.ts — added 2 tests (category+entity dedupe, auto-resolve filtering)
+  - src/__tests__/helpers.test.ts — added 2 tests (any-mode eligibility, all-mode eligibility)
+  - package.json — added storybook devDependencies + script
+Files created:
+  - .storybook/main.ts — Storybook 8 config
+  - .storybook/preview.tsx — QueryClientProvider decorator
+  - src/components/AdminAlertBadge.stories.tsx — severity × count matrix
+  - src/components/ImplementationTruthDashboard.stories.tsx — probe status × staleness matrix
+  - src/components/ApprovalAuthorityTable.stories.tsx — approval mode × eligibility matrix + ApprovalRuleEditor composition
+Notes:
+  - Playwright e2e scenarios deferred (no e2e infra in package) — TODO comments in stories
+  - resolveEligibility only implements direct-user; group-membership is future — documented gap in tests
+  - monitors/probes/api/integrations excluded from coverage — new tests improve confidence without threshold impact
+Next: SF17-T09
+-->

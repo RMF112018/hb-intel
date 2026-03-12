@@ -128,5 +128,5 @@ packages/features/admin/
 | `SF17-T05-AdminAlertBadge-and-Dashboard.md` | alert UX components — **COMPLETE 2026-03-11** |
 | `SF17-T06-ImplementationTruth-and-ApprovalAuthority.md` | truth layer and approval authority UX — **COMPLETE 2026-03-11** |
 | `SF17-T07-Reference-Integrations.md` | bic/notification/acknowledgment/versioned-record/complexity integrations — **COMPLETE 2026-03-11** |
-| `SF17-T08-Testing-Strategy.md` | test fixtures and coverage matrix |
+| `SF17-T08-Testing-Strategy.md` | test fixtures and coverage matrix — **COMPLETE 2026-03-12** |
 | `SF17-T09-Testing-and-Deployment.md` | checklist, ADR/docs/index/state-map updates |
