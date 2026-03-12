@@ -21,10 +21,14 @@ export {
 } from './hooks/index.js';
 
 export {
+  BdHeritagePanel,
+  StrategicIntelligenceFeed,
   HandoffReviewPanel,
   CommitmentRegisterPanel,
   SuggestedIntelligenceCard,
   IntelligenceExplainabilityDrawer,
+  type BdHeritagePanelProps,
+  type StrategicIntelligenceFeedProps,
   type HandoffReviewPanelProps,
   type CommitmentRegisterPanelProps,
   type SuggestedIntelligenceCardProps,

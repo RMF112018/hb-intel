@@ -1,4 +1,14 @@
 export {
+  BdHeritagePanel,
+  type BdHeritagePanelProps,
+} from './BdHeritagePanel.js';
+
+export {
+  StrategicIntelligenceFeed,
+  type StrategicIntelligenceFeedProps,
+} from './StrategicIntelligenceFeed.js';
+
+export {
   HandoffReviewPanel,
   type HandoffReviewPanelProps,
 } from './HandoffReviewPanel.js';
