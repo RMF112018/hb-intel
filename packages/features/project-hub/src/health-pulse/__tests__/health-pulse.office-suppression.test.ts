@@ -38,6 +38,22 @@ describe('health pulse office suppression', () => {
     expect(result.summary.severityWeightedOverdueScore).toBe(40);
   });
 
+  it('suppresses the candidate when a duplicate cluster metric is older than existing', () => {
+    const result = applyOfficeSuppressionPolicy(
+      [
+        {
+          ...metric('office-major-overdue-a', 'major overdue existing', 10),
+          lastUpdatedAt: '2026-03-11T00:00:00.000Z',
+        },
+        metric('office-major-overdue-b', 'major overdue older candidate', 20),
+      ],
+      policy
+    );
+
+    expect(result.retainedMetrics).toHaveLength(1);
+    expect(result.summary.suppressedMetricKeys).toContain('office-major-overdue-b');
+  });
+
   it('keeps low-impact metrics when suppression is disabled', () => {
     const result = applyOfficeSuppressionPolicy(
       [metric('office-low-impact-reminder', 'low impact reminder overdue', 5)],

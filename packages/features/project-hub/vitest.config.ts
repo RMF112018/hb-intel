@@ -20,6 +20,7 @@ export default defineConfig({
         'src/**/*.d.ts',
         'src/**/*.stories.{ts,tsx}',
         'src/__tests__/**',
+        'src/health-pulse/types/**',
         'testing/**',
       ],
       thresholds: {
