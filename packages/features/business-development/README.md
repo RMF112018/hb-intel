@@ -38,5 +38,7 @@ The package also includes the SF19 `score-benchmark` adapter surface over `@hbc/
 - Primitive package docs: [`@hbc/strategic-intelligence`](../../strategic-intelligence/README.md)
 - SF20 plan family: [SF20 master](../../../docs/architecture/plans/shared-features/SF20-BD-Heritage-Panel.md)
 - SF20 package scaffold task: [SF20-T01](../../../docs/architecture/plans/shared-features/SF20-T01-Package-Scaffold.md)
+- SF20 API reference: [BD Heritage Strategic Intelligence API](../../../docs/reference/bd-heritage-strategic-intelligence/api.md)
+- SF20 adoption guide: [BD Heritage Strategic Intelligence Adoption Guide](../../../docs/how-to/developer/bd-heritage-strategic-intelligence-adoption-guide.md)
 - SF20 decisions reference: [PH7-SF-20 feature decisions](../../../docs/explanation/feature-decisions/PH7-SF-20-Module-Feature-BD-Heritage-Panel.md)
 - Existing SF19 primitive docs: [`@hbc/score-benchmark`](../../score-benchmark/README.md)

@@ -33,6 +33,22 @@ const createProps = () => {
 };
 
 describe('IntelligenceEntryForm', () => {
+  it('renders unauthorized state when contributor permissions are missing', () => {
+    const props = createProps();
+
+    render(
+      <IntelligenceEntryForm
+        canContribute={false}
+        actorUserId={props.actorUserId}
+        defaultMetadata={props.defaultMetadata}
+        commitments={props.commitments}
+        queue={props.queue}
+      />
+    );
+
+    expect(screen.getByTestId('intelligence-entry-form-unauthorized')).toBeInTheDocument();
+  });
+
   it('validates required fields and accessible errors', () => {
     const onSubmit = vi.fn();
     const props = createProps();
@@ -113,5 +129,42 @@ describe('IntelligenceEntryForm', () => {
       'revision-requested'
     );
     expect(screen.getByText('Review rationale: Please provide citation links.')).toBeInTheDocument();
+  });
+
+  it('submits non-AI draft with optional links and commitments', () => {
+    const onSubmit = vi.fn();
+    const props = createProps();
+
+    render(
+      <IntelligenceEntryForm
+        canContribute
+        actorUserId={props.actorUserId}
+        defaultMetadata={props.defaultMetadata}
+        commitments={props.commitments}
+        queue={props.queue}
+        onSubmit={onSubmit}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText('Type'), { target: { value: 'relationship-intelligence' } });
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Relationship summary' } });
+    fireEvent.change(screen.getByLabelText('Body'), { target: { value: 'Contributor-authored intelligence.' } });
+    fireEvent.change(screen.getByLabelText('Supporting links (comma-separated)'), {
+      target: { value: 'https://one.example, https://two.example' },
+    });
+    const commitmentsSelect = screen.getByLabelText('Related commitments') as HTMLSelectElement;
+    commitmentsSelect.options[0].selected = true;
+    fireEvent.change(commitmentsSelect);
+    fireEvent.click(screen.getByRole('button', { name: 'Submit intelligence entry' }));
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit.mock.calls[0]?.[0].provenanceClass).toBe('meeting-summary');
+    expect(onSubmit.mock.calls[0]?.[0].supportingLinks).toEqual([
+      'https://one.example',
+      'https://two.example',
+    ]);
+    expect(onSubmit.mock.calls[0]?.[0].relatedCommitmentIds).toEqual([
+      props.commitments[0]?.commitmentId,
+    ]);
   });
 });

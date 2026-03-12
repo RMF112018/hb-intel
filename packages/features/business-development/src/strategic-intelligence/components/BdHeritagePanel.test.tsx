@@ -139,4 +139,34 @@ describe('BdHeritagePanel', () => {
     expect(workflowAction).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('expert-workflow-cta')).toBeInTheDocument();
   });
+
+  it('renders fallback client context and complete acknowledgment copy', () => {
+    const state = createPanelState();
+    state.heritageSnapshot.clientPriorities = [];
+    state.handoffReview = {
+      ...state.handoffReview!,
+      participants: state.handoffReview!.participants.map((participant) => ({
+        ...participant,
+        acknowledgedAt: new Date().toISOString(),
+      })),
+    };
+
+    render(
+      <BdHeritagePanel
+        heritageSnapshot={state.heritageSnapshot}
+        livingEntries={state.livingEntries}
+        commitments={state.commitmentRegister.map((item) => ({
+          ...item,
+          fulfillmentStatus: 'fulfilled',
+        }))}
+        handoffReview={state.handoffReview}
+        suggestions={[]}
+        complexity="Standard"
+      />
+    );
+
+    expect(screen.getByText('Client context: Not set')).toBeInTheDocument();
+    expect(screen.getByText('Acknowledgment complete')).toBeInTheDocument();
+    expect(screen.getByText('Unresolved commitments: 0')).toBeInTheDocument();
+  });
 });

@@ -50,4 +50,23 @@ describe('CommitmentRegisterPanel', () => {
 
     expect(onUpdateFulfillmentStatus).toHaveBeenCalledWith('commitment-risk', 'fulfilled');
   });
+
+  it('renders standard mode without expert update controls and handles non-risk commitments', () => {
+    const state = createMockStrategicIntelligenceState('commitment-panel-test-3');
+    state.commitmentRegister = [
+      {
+        ...state.commitmentRegister[0],
+        commitmentId: 'commitment-safe',
+        fulfillmentStatus: 'fulfilled',
+      },
+    ];
+
+    render(<CommitmentRegisterPanel commitments={state.commitmentRegister} complexity="Standard" />);
+
+    expect(screen.getByText('Status: fulfilled')).toBeInTheDocument();
+    expect(screen.queryByText(/at risk/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText('Update fulfillment status for commitment-safe')
+    ).not.toBeInTheDocument();
+  });
 });

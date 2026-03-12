@@ -124,4 +124,87 @@ describe('IntelligenceApprovalQueue', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Resolve conflict conflict-open-1' }));
     expect(onResolveConflict).toHaveBeenCalledWith('conflict-open-1', 'Resolved from approval queue');
   });
+
+  it('handles unauthorized expert view, missing entry rows, and empty stale/conflict states', () => {
+    const { queue, entries } = createQueueData();
+    const onOpenConfigureApprovers = vi.fn();
+
+    const { rerender } = render(
+      <IntelligenceApprovalQueue
+        complexity="Expert"
+        isApprover={false}
+        queue={queue}
+        entries={entries}
+      />
+    );
+
+    expect(screen.getByTestId('intelligence-approval-queue-unauthorized')).toBeInTheDocument();
+
+    rerender(
+      <IntelligenceApprovalQueue
+        complexity="Expert"
+        isApprover
+        queue={[...queue, { ...queue[0], queueItemId: 'queue-missing', entryId: 'missing-entry' }]}
+        entries={[
+          {
+            ...entries[0],
+            trust: {
+              ...entries[0].trust,
+              isStale: false,
+            },
+            conflicts: [],
+          },
+        ]}
+        onOpenConfigureApprovers={onOpenConfigureApprovers}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Configure approvers route' }));
+    expect(onOpenConfigureApprovers).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('No stale entries.')).toBeInTheDocument();
+    expect(screen.getByText('No open conflicts.')).toBeInTheDocument();
+    expect(screen.queryByTestId('approval-queue-item-queue-missing')).not.toBeInTheDocument();
+  });
+
+  it('renders all provenance label branches for queue entries', () => {
+    const state = createMockStrategicIntelligenceState('approval-queue-provenance');
+    const provenances = [
+      'firsthand-observation',
+      'meeting-summary',
+      'project-outcome-learning',
+      'inferred-observation',
+    ] as const;
+
+    const entries = provenances.map((provenance, index) => ({
+      ...state.livingEntries[0],
+      entryId: `entry-${index}`,
+      title: `Entry ${index}`,
+      trust: {
+        ...state.livingEntries[0].trust,
+        provenanceClass: provenance,
+      },
+    }));
+
+    const queue = entries.map((entry, index) => ({
+      queueItemId: `queue-${index}`,
+      entryId: entry.entryId,
+      submittedBy: `author-${index}`,
+      submittedAt: new Date().toISOString(),
+      approvalStatus: 'pending' as const,
+    }));
+
+    render(
+      <IntelligenceApprovalQueue
+        complexity="Expert"
+        isApprover
+        queue={queue}
+        entries={entries}
+      />
+    );
+
+    expect(screen.getByText('Provenance: Firsthand observation')).toBeInTheDocument();
+    expect(screen.getByText('Provenance: Meeting summary')).toBeInTheDocument();
+    expect(screen.getByText('Provenance: Project outcome learning')).toBeInTheDocument();
+    expect(screen.getByText('Provenance: Inferred observation')).toBeInTheDocument();
+  });
 });

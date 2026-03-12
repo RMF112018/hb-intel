@@ -24,6 +24,7 @@ export default defineConfig({
         'src/strategic-intelligence/**/*.d.ts',
         'src/strategic-intelligence/**/index.ts',
         'src/strategic-intelligence/components/setupTests.ts',
+        'src/strategic-intelligence/**/*.stories.{ts,tsx}',
         'testing/**',
       ],
       thresholds: {

@@ -54,4 +54,4 @@ Import testing helpers from `@hbc/strategic-intelligence/testing`.
 - [SF20 master plan](../../docs/architecture/plans/shared-features/SF20-BD-Heritage-Panel.md)
 - [SF20-T09 testing and deployment](../../docs/architecture/plans/shared-features/SF20-T09-Testing-and-Deployment.md)
 - [ADR-0109 BD heritage living strategic intelligence](../../docs/architecture/adr/ADR-0109-bd-heritage-living-strategic-intelligence.md)
-- [Companion primitive ADR (reserved next assignment for SF20 primitive governance)](../../docs/architecture/adr/README.md)
+- [ADR-0113 strategic intelligence primitive runtime](../../docs/architecture/adr/ADR-0113-strategic-intelligence-primitive-runtime.md)

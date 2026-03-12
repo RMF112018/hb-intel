@@ -114,3 +114,13 @@ Core intelligence lifecycle/workflow, trust/reliability, sensitivity/redaction, 
 | `SF20-T09-Testing-and-Deployment.md` | closure gates, ADR/docs/index/state-map governance, and decision/workflow telemetry validation |
 | `SF20-T05A-Trust-Suggestions-and-Explainability-Surfaces.md` | optional risk-isolation task for high-complexity trust/suggestion UI surfaces |
 | `SF20-T06A-Handoff-and-Commitment-Governance-Workflows.md` | optional risk-isolation task for handoff acknowledgment + commitment workflows |
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF20 completed: 2026-03-12
+Adapter-over-primitive boundary verified (`@hbc/features-business-development` -> `@hbc/strategic-intelligence`).
+Locked decisions L-01..L-10 validated across docs and tests.
+ADR-0109 updated and companion strategic-intelligence ADR linked.
+Trust/workflow/sensitivity/conflict/suggestion contracts verified.
+Offline replay, inline AI approval path, handoff acknowledgment workflow, commitment accountability, BIC ownership projection, and KPI telemetry verified.
+All mechanical enforcement gates passed.
+-->

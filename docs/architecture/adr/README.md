@@ -114,9 +114,10 @@
 - [ADR-0091: Phase 7 Final Verification & Sign-Off](./ADR-0091-phase-7-final-verification.md)
 - [ADR-0107: Estimating Bid Readiness Signal (Adapter over Primitive)](./ADR-0107-estimating-bid-readiness-signal.md)
 - [ADR-0108: BD Score Benchmark Ghost Overlay (Adapter over Primitive)](./ADR-0108-bd-score-benchmark-ghost-overlay.md)
-- ADR-0109: Reserved for SF20 BD Heritage Panel & Living Strategic Intelligence (to be authored when SF20 enters implementation)
+- [ADR-0109: BD Heritage and Living Strategic Intelligence (Adapter over Primitive)](./ADR-0109-bd-heritage-living-strategic-intelligence.md)
 - [ADR-0111: Health Indicator Readiness Primitive Runtime](./ADR-0111-health-indicator-readiness-primitive-runtime.md)
 - [ADR-0112: Score Benchmark Primitive Runtime](./ADR-0112-score-benchmark-primitive-runtime.md)
+- [ADR-0113: Strategic Intelligence Primitive Runtime](./ADR-0113-strategic-intelligence-primitive-runtime.md)
 
 ## Archived
 
@@ -131,7 +132,7 @@ Stale duplicate copies moved to `archived/` during PH7.11 conflict resolution:
 
 ## How to Add a New ADR
 
-1. Use the next available number: **ADR-0113**
+1. Use the next available number: **ADR-0114**
 2. Create a file: `ADR-XXXX-short-title.md`
 3. Use the standard format: Title, Status, Date, Context, Decision, Consequences
 4. Add entry to this README under the appropriate section

@@ -59,6 +59,8 @@ describe('StrategicIntelligenceFeed', () => {
     const state = createFeedState();
     const onFilterChange = vi.fn();
     const onOpenResolutionNote = vi.fn();
+    const onSuggestionOutcome = vi.fn();
+    const onOpenExplainability = vi.fn();
 
     render(
       <StrategicIntelligenceFeed
@@ -80,6 +82,8 @@ describe('StrategicIntelligenceFeed', () => {
         canViewNonApproved
         onFilterChange={onFilterChange}
         onOpenResolutionNote={onOpenResolutionNote}
+        onSuggestionOutcome={onSuggestionOutcome}
+        onOpenExplainability={onOpenExplainability}
         onOpenRelatedItem={(entryId) => `/related/${entryId}`}
         syncBadge="Queued to sync"
       />
@@ -89,14 +93,32 @@ describe('StrategicIntelligenceFeed', () => {
     expect(screen.getByTestId('strategic-intelligence-sync-badge')).toHaveTextContent('Queued to sync');
     expect(screen.getByTestId('strategic-intelligence-owner-entry-approved')).toHaveTextContent('Casey Owner');
     expect(screen.getByText('Stale intelligence')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Open resolution note conflict-2/i }));
+    expect(onOpenResolutionNote).toHaveBeenCalledWith('conflict-2');
+    fireEvent.click(screen.getAllByRole('button', { name: 'Accept suggested intelligence' })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Open suggestion explainability' })[0]);
+    expect(onSuggestionOutcome).toHaveBeenCalled();
+    expect(onOpenExplainability).toHaveBeenCalled();
+    const relatedLinks = screen.getAllByRole('link', { name: 'Open related item' });
+    expect(relatedLinks.length).toBeGreaterThan(0);
+    expect(relatedLinks[0]).toHaveAttribute('href');
 
     fireEvent.change(screen.getByLabelText('Filter by lifecycle state'), {
       target: { value: 'pending-approval' },
     });
+    fireEvent.change(screen.getByLabelText('Filter by intelligence type'), {
+      target: { value: 'market-insight' },
+    });
+    fireEvent.change(screen.getByLabelText('Filter by tag'), {
+      target: { value: 'Healthcare' },
+    });
+    fireEvent.change(screen.getByLabelText('Filter by trust tier'), {
+      target: { value: 'review-required' },
+    });
+    fireEvent.change(screen.getByLabelText('Filter by stale status'), {
+      target: { value: 'stale' },
+    });
     expect(onFilterChange).toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole('button', { name: /Open resolution note conflict-2/i }));
-    expect(onOpenResolutionNote).toHaveBeenCalledWith('conflict-2');
   });
 
   it('renders redacted projection and empty-state CTA for unauthorized contexts', () => {

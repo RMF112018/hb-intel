@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import {
   gateStrategicIntelligenceByComplexity,
   mapStrategicIntelligenceToHealthIndicator,
+  projectStrategicIntelligenceToCanvasPlacement,
   projectStrategicIntelligenceAcknowledgment,
   resolveStrategicIntelligenceNotifications,
 } from './index.js';
@@ -141,5 +142,58 @@ describe('strategic intelligence integration branch coverage', () => {
 
     expect(completeProjected?.overallStatus).toBe('acknowledged');
     expect(completeProjected?.isComplete).toBe(true);
+  });
+
+  it('covers non-pending notifications, null acknowledgment, and canvas continuation branches', () => {
+    const entry = createLivingStrategicIntelligenceEntry({
+      entryId: 'entry-branch-4',
+      lifecycleState: 'approved',
+      trust: {
+        ...createLivingStrategicIntelligenceEntry({ entryId: 'seed' }).trust,
+        isStale: false,
+      },
+      conflicts: [
+        {
+          conflictId: 'closed-conflict',
+          type: 'supersession',
+          relatedEntryIds: ['entry-branch-4'],
+          resolutionStatus: 'resolved',
+        },
+      ],
+    });
+
+    const notifications = resolveStrategicIntelligenceNotifications(
+      [entry],
+      [
+        {
+          queueItemId: 'queue-reviewed',
+          entryId: entry.entryId,
+          submittedBy: 'author-1',
+          submittedAt: '2026-03-01T00:00:00.000Z',
+          approvalStatus: 'approved',
+        },
+      ]
+    );
+
+    expect(notifications).toEqual([]);
+    expect(projectStrategicIntelligenceAcknowledgment(null)).toBeNull();
+
+    const canvas = projectStrategicIntelligenceToCanvasPlacement(
+      'project-4',
+      '/strategic-intelligence',
+      [entry],
+      [
+        {
+          commitmentId: 'commitment-closed',
+          description: 'Closed commitment',
+          source: 'handoff',
+          responsibleRole: 'BD Lead',
+          fulfillmentStatus: 'fulfilled',
+        },
+      ]
+    );
+
+    expect(canvas.tasks.some((task) => task.taskType === 'conflict')).toBe(false);
+    expect(canvas.tasks.some((task) => task.taskType === 'unresolved-commitment')).toBe(false);
   });
 });

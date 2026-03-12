@@ -83,4 +83,31 @@ describe('HandoffReviewPanel', () => {
     expect(screen.getByText('Ready to complete handoff review')).toBeInTheDocument();
     expect(screen.getByText('Snapshot alignment: Aligned to heritage snapshot')).toBeInTheDocument();
   });
+
+  it('renders missing participant and null-review branches', () => {
+    const review = createReview();
+    review.participants = review.participants.filter((item) => item.role !== 'BD Lead');
+
+    const { rerender } = render(
+      <HandoffReviewPanel
+        review={review}
+        snapshotAligned={false}
+        unresolvedCommitmentIds={[]}
+        unacknowledgedParticipantIds={[]}
+      />
+    );
+
+    expect(screen.getAllByText('Missing participant').length).toBeGreaterThan(0);
+
+    rerender(
+      <HandoffReviewPanel
+        review={null}
+        snapshotAligned={false}
+        unresolvedCommitmentIds={[]}
+        unacknowledgedParticipantIds={[]}
+      />
+    );
+
+    expect(screen.getAllByText('Missing participant').length).toBe(4);
+  });
 });

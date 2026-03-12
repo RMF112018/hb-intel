@@ -136,9 +136,10 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0106 | Accepted | [ADR-0106-admin-intelligence-layer.md](./architecture/adr/ADR-0106-admin-intelligence-layer.md) |
 | ADR-0107 | Accepted | [ADR-0107-estimating-bid-readiness-signal.md](./architecture/adr/ADR-0107-estimating-bid-readiness-signal.md) |
 | ADR-0108 | Accepted | [ADR-0108-bd-score-benchmark-ghost-overlay.md](./architecture/adr/ADR-0108-bd-score-benchmark-ghost-overlay.md) |
-| ADR-0109 | Reserved | Reserved for SF20 BD Heritage Panel & Living Strategic Intelligence (to be authored when SF20 enters implementation). |
+| ADR-0109 | Accepted | [ADR-0109-bd-heritage-living-strategic-intelligence.md](./architecture/adr/ADR-0109-bd-heritage-living-strategic-intelligence.md) |
 | ADR-0111 | Accepted | [ADR-0111-health-indicator-readiness-primitive-runtime.md](./architecture/adr/ADR-0111-health-indicator-readiness-primitive-runtime.md) |
 | ADR-0112 | Accepted | [ADR-0112-score-benchmark-primitive-runtime.md](./architecture/adr/ADR-0112-score-benchmark-primitive-runtime.md) |
+| ADR-0113 | Accepted | [ADR-0113-strategic-intelligence-primitive-runtime.md](./architecture/adr/ADR-0113-strategic-intelligence-primitive-runtime.md) |
 
 ## Reference Documents
 
@@ -151,6 +152,8 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 - [Estimating Bid Readiness Adoption Guide](./how-to/developer/estimating-bid-readiness-adoption-guide.md) — Integration and validation guidance for downstream consumers
 - [BD Score Benchmark API](./reference/bd-score-benchmark/api.md) — SF19 primitive + adapter API contracts and testing exports
 - [BD Score Benchmark Adoption Guide](./how-to/developer/bd-score-benchmark-adoption-guide.md) — Integration and validation guidance for downstream consumers
+- [BD Heritage Strategic Intelligence API](./reference/bd-heritage-strategic-intelligence/api.md) — SF20 primitive + adapter API contracts and testing exports
+- [BD Heritage Strategic Intelligence Adoption Guide](./how-to/developer/bd-heritage-strategic-intelligence-adoption-guide.md) — Integration and validation guidance for downstream consumers
 
 ### Auth & Shell Reference
 

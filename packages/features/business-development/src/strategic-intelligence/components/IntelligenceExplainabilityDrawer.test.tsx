@@ -41,4 +41,19 @@ describe('IntelligenceExplainabilityDrawer', () => {
 
     expect(screen.queryByTestId('intelligence-explainability-drawer')).not.toBeInTheDocument();
   });
+
+  it('renders fallback metadata text when no matched dimensions exist', () => {
+    render(
+      <IntelligenceExplainabilityDrawer
+        suggestion={{
+          suggestionId: 'drawer-3',
+          reason: 'no matched dimensions',
+          matchedDimensions: [],
+          reuseHistoryCount: 1,
+        }}
+      />
+    );
+
+    expect(screen.getByText('Matched metadata: None')).toBeInTheDocument();
+  });
 });
