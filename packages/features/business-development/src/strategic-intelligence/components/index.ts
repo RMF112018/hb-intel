@@ -1,4 +1,16 @@
 export {
+  IntelligenceEntryForm,
+  type IntelligenceEntryFormProps,
+  type IntelligenceEntryFormDraft,
+  type IntelligenceEntryFormAiSuggestion,
+} from './IntelligenceEntryForm.js';
+
+export {
+  IntelligenceApprovalQueue,
+  type IntelligenceApprovalQueueProps,
+} from './IntelligenceApprovalQueue.js';
+
+export {
   BdHeritagePanel,
   type BdHeritagePanelProps,
 } from './BdHeritagePanel.js';

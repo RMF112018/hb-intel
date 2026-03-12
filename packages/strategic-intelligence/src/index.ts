@@ -56,6 +56,7 @@ export {
   type UseStrategicIntelligenceStateInput,
   type UseStrategicIntelligenceStateResult,
   useStrategicIntelligenceApprovalQueue,
+  type UseStrategicIntelligenceApprovalDraft,
   type UseStrategicIntelligenceApprovalQueueInput,
   type UseStrategicIntelligenceApprovalQueueResult,
   useHandoffReviewWorkflow,

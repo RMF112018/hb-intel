@@ -6,6 +6,7 @@ export {
 
 export {
   useStrategicIntelligenceApprovalQueue,
+  type UseStrategicIntelligenceApprovalDraft,
   type UseStrategicIntelligenceApprovalQueueInput,
   type UseStrategicIntelligenceApprovalQueueResult,
 } from './useStrategicIntelligenceApprovalQueue.js';

@@ -35,6 +35,28 @@ export interface UseStrategicIntelligenceResult {
   view: BdStrategicIntelligenceViewModel | null;
   bicOwnerAvatars: BdStrategicIntelligenceBicOwnerAvatarProjection[];
   canvasAssignments: BdStrategicIntelligenceCanvasAssignmentProjection[];
+  queueSummary: {
+    pendingCount: number;
+    staleEntryIds: string[];
+    openConflictIds: string[];
+  };
+  formDefaults: {
+    metadata: {
+      client?: string;
+      ownerOrganization?: string;
+      projectType?: string;
+      sector?: string;
+      deliveryMethod?: string;
+      geography?: string;
+      lifecyclePhase?: string;
+      riskCategory?: string;
+    };
+  };
+  handoffSummary: {
+    snapshotAligned: boolean;
+    unresolvedCommitmentCount: number;
+    unacknowledgedParticipantCount: number;
+  };
   primitive: {
     state: ReturnType<typeof useStrategicIntelligenceState>;
     approvalQueue: ReturnType<typeof useStrategicIntelligenceApprovalQueue>;
@@ -83,6 +105,19 @@ export const useStrategicIntelligence = (
       view: null,
       bicOwnerAvatars: [],
       canvasAssignments: [],
+      queueSummary: {
+        pendingCount: 0,
+        staleEntryIds: [],
+        openConflictIds: [],
+      },
+      formDefaults: {
+        metadata: {},
+      },
+      handoffSummary: {
+        snapshotAligned: false,
+        unresolvedCommitmentCount: 0,
+        unacknowledgedParticipantCount: 0,
+      },
       primitive: {
         state,
         approvalQueue,
@@ -106,11 +141,42 @@ export const useStrategicIntelligence = (
       role: commitment.responsibleRole,
     },
   }));
+  const fallbackMetadata = state.state.livingEntries[0]?.metadata ?? {};
+  const openConflictIds = state.state.livingEntries
+    .flatMap((entry) => entry.conflicts)
+    .filter((conflict) => conflict.resolutionStatus === 'open')
+    .map((conflict) => conflict.conflictId);
+  const unacknowledgedParticipantCount =
+    handoff.review?.participants.filter((participant) => participant.acknowledgedAt === null).length ?? 0;
 
   return {
     view,
     bicOwnerAvatars,
     canvasAssignments,
+    queueSummary: {
+      pendingCount: approvalQueue.queue.filter((item) => item.approvalStatus === 'pending').length,
+      staleEntryIds: state.state.livingEntries
+        .filter((entry) => entry.trust.isStale)
+        .map((entry) => entry.entryId),
+      openConflictIds,
+    },
+    formDefaults: {
+      metadata: {
+        client: fallbackMetadata.client,
+        ownerOrganization: fallbackMetadata.ownerOrganization,
+        projectType: fallbackMetadata.projectType,
+        sector: fallbackMetadata.sector,
+        deliveryMethod: fallbackMetadata.deliveryMethod,
+        geography: fallbackMetadata.geography,
+        lifecyclePhase: fallbackMetadata.lifecyclePhase,
+        riskCategory: fallbackMetadata.riskCategory,
+      },
+    },
+    handoffSummary: {
+      snapshotAligned: handoff.snapshotAligned,
+      unresolvedCommitmentCount: handoff.completionGate.unresolvedCommitments.length,
+      unacknowledgedParticipantCount,
+    },
     primitive: {
       state,
       approvalQueue,

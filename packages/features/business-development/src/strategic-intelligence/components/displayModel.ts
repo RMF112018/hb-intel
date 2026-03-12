@@ -7,6 +7,19 @@ import type {
 } from '@hbc/strategic-intelligence';
 
 export type StrategicIntelligenceComplexityMode = 'Essential' | 'Standard' | 'Expert';
+export const HANDOFF_REQUIRED_ROLES = [
+  'Project Manager',
+  'Project Executive',
+  'Estimating Lead',
+  'BD Lead',
+] as const;
+
+export const HANDOFF_STEPS = [
+  'heritage snapshot walkthrough',
+  'commitment register verification',
+  'strategic risk discussion',
+  'acknowledgment confirmation',
+] as const;
 
 export interface IStrategicIntelligenceComplexityFlags {
   readonly isEssential: boolean;
@@ -228,3 +241,9 @@ export const classifySuggestion = (
 
   return 'Suggested Intelligence';
 };
+
+export const parseCsv = (value: string): string[] =>
+  value
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);

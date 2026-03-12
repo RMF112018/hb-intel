@@ -21,12 +21,18 @@ export {
 } from './hooks/index.js';
 
 export {
+  IntelligenceEntryForm,
+  IntelligenceApprovalQueue,
   BdHeritagePanel,
   StrategicIntelligenceFeed,
   HandoffReviewPanel,
   CommitmentRegisterPanel,
   SuggestedIntelligenceCard,
   IntelligenceExplainabilityDrawer,
+  type IntelligenceEntryFormProps,
+  type IntelligenceEntryFormDraft,
+  type IntelligenceEntryFormAiSuggestion,
+  type IntelligenceApprovalQueueProps,
   type BdHeritagePanelProps,
   type StrategicIntelligenceFeedProps,
   type HandoffReviewPanelProps,

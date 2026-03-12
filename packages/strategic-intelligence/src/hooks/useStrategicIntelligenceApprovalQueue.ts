@@ -80,11 +80,19 @@ export interface UseStrategicIntelligenceApprovalQueueInput {
   scorecardId?: string;
 }
 
+export interface UseStrategicIntelligenceApprovalDraft {
+  entry: IStrategicIntelligenceEntry;
+  reviewNotes?: string;
+}
+
 export interface UseStrategicIntelligenceApprovalQueueResult {
   cacheKey: readonly ['strategic-intelligence', 'approval-queue', string];
   queue: IStrategicIntelligenceApprovalQueueItem[];
   invalidatedQueryKeys: ReadonlyArray<readonly unknown[]>;
   actions: {
+    submitForApproval: (
+      draft: UseStrategicIntelligenceApprovalDraft
+    ) => UseStrategicIntelligenceApprovalQueueResult;
     approve: (queueItemId: string) => UseStrategicIntelligenceApprovalQueueResult;
     reject: (
       queueItemId: string,
@@ -93,6 +101,14 @@ export interface UseStrategicIntelligenceApprovalQueueResult {
     requestRevision: (
       queueItemId: string,
       reason: string
+    ) => UseStrategicIntelligenceApprovalQueueResult;
+    renewStaleReview: (
+      entryId: string,
+      reviewBy: string | null
+    ) => UseStrategicIntelligenceApprovalQueueResult;
+    resolveConflict: (
+      conflictId: string,
+      resolutionNote: string
     ) => UseStrategicIntelligenceApprovalQueueResult;
   };
 }
@@ -162,6 +178,92 @@ export const useStrategicIntelligenceApprovalQueue = (
     });
   };
 
+  const submitForApproval = (
+    draft: UseStrategicIntelligenceApprovalDraft
+  ): UseStrategicIntelligenceApprovalQueueResult => {
+    const submittedAt = now().toISOString();
+    const draftEntry: IStrategicIntelligenceEntry = {
+      ...clone(draft.entry),
+      lifecycleState: 'pending-approval',
+      createdAt: draft.entry.createdAt || submittedAt,
+      createdBy: draft.entry.createdBy || input.actorUserId,
+      trust: {
+        ...draft.entry.trust,
+        provenanceClass: 'ai-assisted-draft',
+        aiTrustDowngraded: true,
+      },
+    };
+
+    lifecycleApi.appendLivingIntelligenceEntryVersion(scorecardId, draftEntry);
+
+    const currentQueue = getApprovalQueueOverride(scorecardId) ?? api.getApprovalQueue(scorecardId);
+    const queueItem: IStrategicIntelligenceApprovalQueueItem = {
+      queueItemId: `${scorecardId}-queue-${Date.now()}`,
+      entryId: draftEntry.entryId,
+      submittedBy: input.actorUserId,
+      submittedAt,
+      approvalStatus: 'pending',
+      reviewNotes: draft.reviewNotes,
+    };
+
+    setApprovalQueueOverride(scorecardId, [...currentQueue, queueItem]);
+
+    return useStrategicIntelligenceApprovalQueue(input, {
+      api,
+      lifecycleApi,
+      now,
+    });
+  };
+
+  const renewStaleReview = (
+    entryId: string,
+    reviewBy: string | null
+  ): UseStrategicIntelligenceApprovalQueueResult => {
+    const entry = api.getLivingEntries(scorecardId).find((item) => item.entryId === entryId);
+    if (!entry) {
+      return useStrategicIntelligenceApprovalQueue(input, {
+        api,
+        lifecycleApi,
+        now,
+      });
+    }
+
+    lifecycleApi.appendLivingIntelligenceEntryVersion(scorecardId, {
+      ...entry,
+      trust: {
+        ...entry.trust,
+        isStale: false,
+        staleReason: undefined,
+        lastValidatedAt: now().toISOString(),
+        reviewBy,
+      },
+    });
+
+    return useStrategicIntelligenceApprovalQueue(input, {
+      api,
+      lifecycleApi,
+      now,
+    });
+  };
+
+  const resolveConflict = (
+    conflictId: string,
+    resolutionNote: string
+  ): UseStrategicIntelligenceApprovalQueueResult => {
+    lifecycleApi.applySupersessionOrContradictionResolution(
+      scorecardId,
+      conflictId,
+      resolutionNote,
+      input.actorUserId
+    );
+
+    return useStrategicIntelligenceApprovalQueue(input, {
+      api,
+      lifecycleApi,
+      now,
+    });
+  };
+
   const invalidatedQueryKeys: ReadonlyArray<readonly unknown[]> = [
     createStrategicIntelligenceStateQueryKey(input.projectId, 'adapter-default'),
     createStrategicIntelligenceApprovalQueueQueryKey(input.projectId),
@@ -174,10 +276,13 @@ export const useStrategicIntelligenceApprovalQueue = (
     queue,
     invalidatedQueryKeys,
     actions: {
+      submitForApproval,
       approve: (queueItemId) => transition(queueItemId, 'approved'),
       reject: (queueItemId, reason) => transition(queueItemId, 'rejected', reason),
       requestRevision: (queueItemId, reason) =>
         transition(queueItemId, 'revision-requested', reason),
+      renewStaleReview,
+      resolveConflict,
     },
   };
 };
