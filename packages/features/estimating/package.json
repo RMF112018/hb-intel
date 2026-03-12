@@ -28,7 +28,12 @@
     "test:coverage": "vitest run --coverage",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test-storybook": "test-storybook"
+    "test-storybook": "test-storybook",
+    "test:storybook:ci": "node ./scripts/runStorybookCi.mjs",
+    "test:playwright:smoke": "pnpm build-storybook && pnpm exec playwright test --config playwright.smoke.config.ts",
+    "verify:boundaries": "node ./scripts/verifyBoundaries.mjs",
+    "verify:docs": "node ./scripts/verifyDocs.mjs",
+    "verify:release": "pnpm check-types && pnpm lint && pnpm build && pnpm test:coverage && pnpm verify:boundaries && pnpm verify:docs && pnpm test:storybook:ci && pnpm test:playwright:smoke"
   },
   "peerDependencies": {
     "react": "^18.3.0",

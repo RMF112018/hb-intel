@@ -112,6 +112,8 @@
 - [ADR-0084: Current-State Source-of-Truth and Documentation Governance Model](./ADR-0084-current-state-governance-model.md)
 - [ADR-0085: Test Governance Normalization](./ADR-0085-test-governance-normalization.md)
 - [ADR-0091: Phase 7 Final Verification & Sign-Off](./ADR-0091-phase-7-final-verification.md)
+- [ADR-0107: Estimating Bid Readiness Signal (Adapter over Primitive)](./ADR-0107-estimating-bid-readiness-signal.md)
+- [ADR-0111: Health Indicator Readiness Primitive Runtime](./ADR-0111-health-indicator-readiness-primitive-runtime.md)
 
 ## Archived
 
@@ -126,7 +128,7 @@ Stale duplicate copies moved to `archived/` during PH7.11 conflict resolution:
 
 ## How to Add a New ADR
 
-1. Use the next available number: **ADR-0092**
+1. Use the next available number: **ADR-0112**
 2. Create a file: `ADR-XXXX-short-title.md`
 3. Use the standard format: Title, Status, Date, Context, Decision, Consequences
 4. Add entry to this README under the appropriate section

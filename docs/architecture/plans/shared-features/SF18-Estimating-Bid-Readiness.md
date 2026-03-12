@@ -163,17 +163,17 @@ Core health computation, version lifecycle, and telemetry schema live in `@hbc/h
 
 ## Definition of Done
 
-- [ ] all SF18 docs use the six locked decisions and no legacy decision-ID semantics
-- [ ] coordinated-signal model (eligibility/readiness/confidence) is implemented and documented
-- [ ] primitive seam contracts are in place before T05 runtime work
-- [ ] primitive extraction to `@hbc/health-indicator` completes before T06 sign-off
-- [ ] SF18 contracts reference `IHealthIndicator*` as canonical core contracts
-- [ ] BIC blockers-first ownership and avatar projection into Signal/My Work are documented
-- [ ] complexity behavior is explicit for Essential/Standard/Expert across all three surfaces
-- [ ] offline strategy includes SW caching, IndexedDB, Background Sync, optimistic state badges
-- [ ] inline AI action behavior includes source citation + explicit approval constraints
-- [ ] `@hbc/related-items`, `@hbc/project-canvas`, `@hbc/versioned-record`, and KPI telemetry contracts are documented
-- [ ] T09 closure includes companion primitive ADR and KPI validation evidence
+- [x] all SF18 docs use the six locked decisions and no legacy decision-ID semantics
+- [x] coordinated-signal model (eligibility/readiness/confidence) is implemented and documented
+- [x] primitive seam contracts are in place before T05 runtime work
+- [x] primitive extraction to `@hbc/health-indicator` completes before T06 sign-off
+- [x] SF18 contracts reference `IHealthIndicator*` as canonical core contracts
+- [x] BIC blockers-first ownership and avatar projection into Signal/My Work are documented
+- [x] complexity behavior is explicit for Essential/Standard/Expert across all three surfaces
+- [x] offline strategy includes SW caching, IndexedDB, Background Sync, optimistic state badges
+- [x] inline AI action behavior includes source citation + explicit approval constraints
+- [x] `@hbc/related-items`, `@hbc/project-canvas`, `@hbc/versioned-record`, and KPI telemetry contracts are documented
+- [x] T09 closure includes companion primitive ADR and KPI validation evidence
 
 ---
 
@@ -189,4 +189,14 @@ Core health computation, version lifecycle, and telemetry schema live in `@hbc/h
 | `SF18-T06-BidReadinessChecklist-and-AdminConfig.md` | eligibility profiles, immutable/conditional gates, bid-day/team-state admin/checklist UX; primitive extraction gate enforced — **COMPLETE 2026-03-12** |
 | `SF18-T07-Reference-Integrations.md` | tier-1 integration contracts and boundary rules — **COMPLETE 2026-03-12** |
 | `SF18-T08-Testing-Strategy.md` | fixtures, scenario matrix, offline and KPI verification — **COMPLETE 2026-03-12** |
-| `SF18-T09-Testing-and-Deployment.md` | closure checklist, ADR/docs/index/state-map updates |
+| `SF18-T09-Testing-and-Deployment.md` | closure checklist, ADR/docs/index/state-map updates — **COMPLETE 2026-03-12** |
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF18 completed: 2026-03-12
+T01-T09 implemented.
+Adapter-over-primitive boundary verified (`@hbc/features-estimating` -> `@hbc/health-indicator`).
+Offline replay and optimistic indicators verified.
+KPI telemetry validated for all five required metrics.
+ADR-0107 updated and companion health-indicator ADR linked.
+Documentation/index/state-map updates completed.
+-->

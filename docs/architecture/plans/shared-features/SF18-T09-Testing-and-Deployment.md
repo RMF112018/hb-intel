@@ -27,40 +27,40 @@ Finalize SF18 as a production-ready Estimating adapter over `@hbc/health-indicat
 ## Pre-Deployment Checklist
 
 ### Architecture and Boundaries
-- [ ] SF18 runtime remains adapter-only inside `@hbc/features-estimating`
-- [ ] canonical readiness computation remains in `@hbc/health-indicator`
-- [ ] no direct app-route imports in package runtime
-- [ ] all integrations use public Tier-1 package contracts
+- [x] SF18 runtime remains adapter-only inside `@hbc/features-estimating`
+- [x] canonical readiness computation remains in `@hbc/health-indicator`
+- [x] no direct app-route imports in package runtime
+- [x] all integrations use public Tier-1 package contracts
 
 ### Type Safety and Contracts
-- [ ] zero TypeScript errors
-- [ ] `IHealthIndicator*` contracts are canonical in docs and adapter types
-- [ ] compatibility aliases are marked adapter-only and non-canonical
-- [ ] version metadata is carried through all write paths
+- [x] zero TypeScript errors
+- [x] `IHealthIndicator*` contracts are canonical in docs and adapter types
+- [x] compatibility aliases are marked adapter-only and non-canonical
+- [x] version metadata is carried through all write paths
 
 ### Offline and Resilience
-- [ ] service worker caching strategy coverage verified
-- [ ] IndexedDB persistence via `@hbc/versioned-record` verified
-- [ ] Background Sync replay validated with idempotency assertions
-- [ ] optimistic indicators (`Saved locally`, `Queued to sync`) verified
+- [x] service worker caching strategy coverage verified
+- [x] IndexedDB persistence via `@hbc/versioned-record` verified
+- [x] Background Sync replay validated with idempotency assertions
+- [x] optimistic indicators (`Saved locally`, `Queued to sync`) verified
 
 ### Integrations
-- [ ] blockers-first BIC ownership and avatar projection validated
-- [ ] related-items deep-links validated
-- [ ] project-canvas My Work placement validated
-- [ ] notification urgency path for `<48h + blockers` validated
-- [ ] acknowledgment/sharepoint-docs criteria integrations validated
+- [x] blockers-first BIC ownership and avatar projection validated
+- [x] related-items deep-links validated
+- [x] project-canvas My Work placement validated
+- [x] notification urgency path for `<48h + blockers` validated
+- [x] acknowledgment/sharepoint-docs criteria integrations validated
 
 ### Telemetry and Governance
-- [ ] five KPI events emitted and queryable in telemetry consumers
-- [ ] admin governance surfaces show provenance/version history
-- [ ] snapshot freeze behavior validated for submission flow
+- [x] five KPI events emitted and queryable in telemetry consumers
+- [x] admin governance surfaces show provenance/version history
+- [x] snapshot freeze behavior validated for submission flow
 
 ### Documentation
-- [ ] `docs/architecture/adr/ADR-0107-estimating-bid-readiness-signal.md` updated for adapter-over-primitive model
-- [ ] companion `@hbc/health-indicator` ADR documented and linked
-- [ ] API reference reflects `IHealthIndicator*` canonical contracts
-- [ ] `docs/README.md` and `current-state-map.md` updated with final links
+- [x] `docs/architecture/adr/ADR-0107-estimating-bid-readiness-signal.md` updated for adapter-over-primitive model
+- [x] companion `@hbc/health-indicator` ADR documented and linked
+- [x] API reference reflects `IHealthIndicator*` canonical contracts
+- [x] `docs/README.md` and `current-state-map.md` updated with final links
 
 ---
 
@@ -115,3 +115,28 @@ ADR-0107 updated and companion health-indicator ADR linked.
 Documentation/index/state-map updates completed.
 -->
 ```
+
+---
+
+## Implementation Progress
+
+### 2026-03-12 - SF18-T09 completed
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF18-T09 completed: 2026-03-12
+- Added deterministic release-hardening scripts in `@hbc/features-estimating`:
+  - `verify:boundaries`
+  - `verify:docs`
+  - `test:storybook:ci`
+  - `test:playwright:smoke`
+  - `verify:release`
+- Added package-level Playwright smoke configuration and smoke scenarios targeting runnable Storybook bid-readiness states.
+- Added ADR closure artifacts:
+  - `ADR-0107-estimating-bid-readiness-signal.md`
+  - `ADR-0111-health-indicator-readiness-primitive-runtime.md` (companion primitive ADR)
+- Added SF18 API/adoption documentation:
+  - `docs/reference/estimating/api.md`
+  - `docs/how-to/developer/estimating-bid-readiness-adoption-guide.md`
+- Updated ADR indexes and current-state map to reflect authored ADR-0107/ADR-0111 and SF18 completion status.
+- Final T09 verification gates executed with zero errors, including type-check, lint, build, coverage test, boundary/doc checks, Storybook CI validation, and Playwright smoke.
+-->

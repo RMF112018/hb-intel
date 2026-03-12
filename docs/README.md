@@ -134,6 +134,8 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0103 | Accepted | [0103-related-items-unified-work-graph.md](./architecture/adr/0103-related-items-unified-work-graph.md) |
 | ADR-0104 | Accepted | [ADR-0104-ai-assist-azure-foundry-integration.md](./architecture/adr/ADR-0104-ai-assist-azure-foundry-integration.md) |
 | ADR-0106 | Accepted | [ADR-0106-admin-intelligence-layer.md](./architecture/adr/ADR-0106-admin-intelligence-layer.md) |
+| ADR-0107 | Accepted | [ADR-0107-estimating-bid-readiness-signal.md](./architecture/adr/ADR-0107-estimating-bid-readiness-signal.md) |
+| ADR-0111 | Accepted | [ADR-0111-health-indicator-readiness-primitive-runtime.md](./architecture/adr/ADR-0111-health-indicator-readiness-primitive-runtime.md) |
 
 ## Reference Documents
 
@@ -142,6 +144,8 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 - [UI Kit Complexity Sensitivity](./reference/ui-kit/complexity-sensitivity.md) — Complexity Dial sensitivity configuration reference
 - [Release-Readiness Taxonomy](./reference/release-readiness-taxonomy.md) — Three-level readiness vocabulary and usage rules
 - [Release Sign-Off Template](./architecture/release/release-signoff-template.md) — Staged sign-off model for phase releases
+- [Estimating Bid Readiness API](./reference/estimating/api.md) — SF18 adapter-over-primitive API contracts and testing exports
+- [Estimating Bid Readiness Adoption Guide](./how-to/developer/estimating-bid-readiness-adoption-guide.md) — Integration and validation guidance for downstream consumers
 
 ### Auth & Shell Reference
 

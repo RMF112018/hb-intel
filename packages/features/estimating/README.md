@@ -55,7 +55,15 @@ These KPIs surface in the Admin Intelligence dashboard and Leadership reporting 
 
 ## 7. Related Documentation
 
-- [SF18 Master Plan](../../docs/architecture/plans/shared-features/SF18-Estimating-Bid-Readiness.md)
-- [SF18-T09 Testing and Deployment](../../docs/architecture/plans/shared-features/SF18-T09-Testing-and-Deployment.md)
-- [ADR-0107 Estimating Bid Readiness Signal](../../docs/architecture/adr/ADR-0107-estimating-bid-readiness-signal.md)
-- Companion `@hbc/health-indicator` primitive ADR (created alongside ADR-0107)
+- [SF18 Master Plan](../../../docs/architecture/plans/shared-features/SF18-Estimating-Bid-Readiness.md)
+- [SF18-T09 Testing and Deployment](../../../docs/architecture/plans/shared-features/SF18-T09-Testing-and-Deployment.md)
+- [ADR-0107 Estimating Bid Readiness Signal](../../../docs/architecture/adr/ADR-0107-estimating-bid-readiness-signal.md)
+- [ADR-0111 Health Indicator Readiness Primitive Runtime](../../../docs/architecture/adr/ADR-0111-health-indicator-readiness-primitive-runtime.md)
+
+## 8. T09 Verification Commands
+
+```bash
+pnpm --filter @hbc/features-estimating verify:release
+pnpm --filter @hbc/features-estimating test:storybook:ci
+pnpm --filter @hbc/features-estimating test:playwright:smoke
+```
