@@ -30,6 +30,105 @@ This file is the single binding operating manual for Claude Code (claude.ai/code
 4. **Document Classification Rule (mandatory for every new file)**
    Every new architecture, plan, reference, or release document must declare one of the six permitted document classes at creation time — either via an inline Tier 1 banner or by being added to the matrix in `current-state-map.md §2`. The six classes and their usage rules are defined in `current-state-map.md §2.1`. Creating an unclassified document is a violation of the Zero-Deviation Rule. Deferred Scope documents may not be updated or acted upon without a reclassification to Canonical Normative Plan and an active phase assignment.
 
+## 5. **Guarded Commit Rule (mandatory for all repository commits)**
+
+All coding agents **must use the repository’s Guarded Auto-Commit workflow** for every commit. Direct use of `git commit` by an agent is strictly prohibited.
+
+The guarded commit workflow enforces deterministic, auditable commits that only occur when a task is fully complete and the repository is in a validated state.
+
+### Required commit mechanism
+
+Agents must commit using:
+
+```bash
+pnpm guarded:commit --config <task-config>
+```
+
+The guarded commit CLI (`scripts/guarded-auto-commit.ts`) enforces the following mandatory gates:
+
+### Completion Gate
+
+The task configuration must declare:
+
+```json
+taskStatus: "complete"
+```
+
+If the task is not marked complete, the commit is refused.
+
+### Path Scope Gate
+
+All changed files must match the `approvedPaths` allowlist defined in the task configuration.
+
+The workflow validates changed files using:
+
+```
+git status --porcelain=1 -z
+```
+
+If any changed file falls outside the approved paths, the commit is refused.
+
+### Quality Gates
+
+The following validation commands must succeed before a commit is allowed:
+
+1. tests
+2. typecheck
+3. build
+
+These commands are defined in the task configuration and executed sequentially. Any failure blocks the commit.
+
+### Commit Metadata Gate
+
+The commit subject must include:
+
+* the task identifier (`taskId`)
+* a concise completion summary
+
+Example:
+
+```
+chore(sf18): complete SF18-T04 — Hooks & State Model implemented
+```
+
+The repository’s existing commit style template is the default format.
+
+### Safety and Auditability Requirements
+
+The guarded commit workflow must always:
+
+* create **local commits only** (never push automatically)
+* output explicit `[PASS]`, `[FAIL]`, or `[SKIP]` logs for each gate
+* refuse commits with a clear failure reason
+* support `--dry-run` mode for validation without committing
+* refuse execution when `--disable-guard` is used unless explicitly allowed by configuration
+
+Example dry-run:
+
+```bash
+pnpm guarded:commit --config <task-config> --dry-run
+```
+
+### Agent Compliance Requirements
+
+Agents **must**:
+
+* commit only through `pnpm guarded:commit`
+* ensure `taskStatus="complete"`
+* restrict file changes to approved paths
+* pass tests, typecheck, and build before committing
+* include the task identifier in the commit subject
+
+Agents **must not**:
+
+* run `git commit` directly
+* bypass validation gates
+* commit failing builds or tests
+* commit files outside the task scope
+* push commits automatically
+
+Violating this rule constitutes a **Zero-Deviation Rule breach**.
+
 ## 2. Development Sequence (Strictly Enforced)
 Follow `docs/architecture/plans/hb-intel-foundation-plan.md` **exactly** in order:
 Phase 0 → Phase 1 (root config) → Phase 2 (shared packages) → Phase 3 (dev-harness) → Phase 4 (PWA) → Phase 5 (SPFx webparts) → Phase 6 (HB Site Control) → Phase 7 (backend) → Phase 8 (CI/CD) → Phase 9 (verification).

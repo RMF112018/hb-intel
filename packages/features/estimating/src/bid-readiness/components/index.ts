@@ -1,15 +1,31 @@
 /**
- * Bid Readiness UI components — complexity-aware surfaces
- * that render health-indicator output for the Estimating domain.
+ * SF18-T05 component exports for Bid Readiness signal and dashboard surfaces.
  *
- * Stubs: implementation deferred to SF18-T05/T06.
+ * @design D-SF18-T05, D-SF18-T04, D-SF18-T03, D-SF18-T02
  */
 
-/** Compact signal badge showing overall bid readiness. */
-export const BidReadinessSignal = (() => null) as unknown as React.FC;
+export {
+  BidReadinessSignal,
+} from './BidReadinessSignal.js';
 
-/** Full dashboard view with criterion breakdown. */
-export const BidReadinessDashboard = (() => null) as unknown as React.FC;
+export type {
+  BidReadinessComplexityMode,
+  BidReadinessSignalProps,
+} from './BidReadinessSignal.js';
 
-/** Checklist view with per-criterion actions and inline AI. */
-export const BidReadinessChecklist = (() => null) as unknown as React.FC;
+export {
+  BidReadinessDashboard,
+} from './BidReadinessDashboard.js';
+
+export type {
+  BidReadinessDashboardProps,
+} from './BidReadinessDashboard.js';
+
+/**
+ * Checklist is implemented in SF18-T06.
+ *
+ * @design D-SF18-T05
+ */
+export function BidReadinessChecklist(): null {
+  return null;
+}

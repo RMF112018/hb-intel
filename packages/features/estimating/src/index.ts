@@ -87,4 +87,7 @@ export type {
   UseBidReadinessParams,
   UseBidReadinessProfileParams,
   UseBidReadinessTelemetryParams,
+  BidReadinessComplexityMode,
+  BidReadinessSignalProps,
+  BidReadinessDashboardProps,
 } from './bid-readiness/index.js';

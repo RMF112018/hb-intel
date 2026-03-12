@@ -12,6 +12,7 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,md,json,yaml}\"",
     "scan-stubs": "tsx tools/scan-stubs.ts",
     "scan-stubs:all": "tsx tools/scan-stubs.ts --include-approved",
+    "guarded:commit": "tsx scripts/guarded-auto-commit.ts",
     "e2e": "playwright test",
     "e2e:install": "playwright install --with-deps chromium",
     "test:webparts:e2e": "playwright test --config=playwright.webparts.config.ts",

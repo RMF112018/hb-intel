@@ -49,6 +49,12 @@ export {
   BidReadinessChecklist,
 } from './components/index.js';
 
+export type {
+  BidReadinessComplexityMode,
+  BidReadinessSignalProps,
+  BidReadinessDashboardProps,
+} from './components/index.js';
+
 // Telemetry
 export {
   createBidReadinessKpiSnapshot,

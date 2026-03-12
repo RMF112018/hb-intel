@@ -114,3 +114,20 @@ pnpm --filter @hbc/features-estimating test -- BidReadinessDashboard
 
 T05 may use transitional coordinated-signal contracts within the estimating feature package.  
 T05 does **not** waive the SF18 master requirement: primitive extraction to `@hbc/health-indicator` must complete before T06 can be closed.
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF18-T05 completed: 2026-03-12
+- Replaced scaffold stubs with concrete `BidReadinessSignal` and `BidReadinessDashboard` components in `packages/features/estimating/src/bid-readiness/components/`.
+- Implemented deterministic T05 coordinated-signal display composition (`Submission Eligibility`, `Bid Readiness Score`, `Estimate Confidence`) over finalized T04 hook/T03 summary outputs without introducing a duplicate scoring runtime.
+- Added pure display-model helpers for deterministic grouping/sorting, policy-aware criterion filtering, and degraded fallback signal/dashboard copy.
+- Added component-level policy visibility support for criteria and recommendations with stable empty-section fallbacks.
+- Added component tests:
+  - `BidReadinessSignal.test.tsx`
+  - `BidReadinessDashboard.test.tsx`
+- Verification completed with zero errors:
+  - `pnpm --filter @hbc/features-estimating test -- BidReadinessSignal` ✓
+  - `pnpm --filter @hbc/features-estimating test -- BidReadinessDashboard` ✓
+  - `pnpm --filter @hbc/features-estimating check-types` ✓
+  - `pnpm --filter @hbc/features-estimating build` ✓
+- T05 remains aligned to transitional compatibility rules. Primitive extraction to `@hbc/health-indicator` is still required before T06 completion.
+-->

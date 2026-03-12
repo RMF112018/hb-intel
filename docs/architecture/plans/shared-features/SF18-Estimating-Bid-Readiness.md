@@ -185,7 +185,7 @@ Core health computation, version lifecycle, and telemetry schema live in `@hbc/h
 | `SF18-T02-TypeScript-Contracts.md` | `IHealthIndicator*` canonical contracts + SF18 adapter aliases — **COMPLETE 2026-03-12** |
 | `SF18-T03-Readiness-Model-and-Configuration.md` | estimating profile defaults, admin controls, provenance and KPI contracts — **COMPLETE 2026-03-12** |
 | `SF18-T04-Hooks-and-State-Model.md` | hook orchestration from primitive state to estimating UX state — **COMPLETE 2026-03-12** |
-| `SF18-T05-BidReadinessSignal-and-Dashboard.md` | coordinated-signal signal/dashboard behavior (`eligibility + readiness + confidence`) over adapter output |
+| `SF18-T05-BidReadinessSignal-and-Dashboard.md` | coordinated-signal signal/dashboard behavior (`eligibility + readiness + confidence`) over adapter output — **COMPLETE 2026-03-12** |
 | `SF18-T06-BidReadinessChecklist-and-AdminConfig.md` | eligibility profiles, immutable/conditional gates, bid-day/team-state admin/checklist UX; primitive extraction gate enforced |
 | `SF18-T07-Reference-Integrations.md` | tier-1 integration contracts and boundary rules |
 | `SF18-T08-Testing-Strategy.md` | fixtures, scenario matrix, offline and KPI verification |

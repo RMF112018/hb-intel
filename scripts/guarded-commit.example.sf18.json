@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "taskId": "SF18-T04",
+  "taskStatus": "complete",
+  "approvedPaths": [
+    "packages/features/estimating/**",
+    "docs/architecture/plans/shared-features/SF18*.md",
+    "docs/explanation/feature-decisions/PH7-SF-18-*.md"
+  ],
+  "validation": {
+    "tests": "pnpm --filter @hbc/features-estimating test",
+    "typecheck": "pnpm exec tsc --noEmit -p packages/features/estimating/tsconfig.build.json",
+    "build": "pnpm --filter @hbc/features-estimating build"
+  },
+  "commit": {
+    "summary": "Hooks & State Model implemented",
+    "body": "Implements SF18-T04 hooks/state model with tests and documentation updates."
+  },
+  "dryRun": true,
+  "allowDisabledBypass": false
+}
