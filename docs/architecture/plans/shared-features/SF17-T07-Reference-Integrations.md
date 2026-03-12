@@ -53,3 +53,20 @@ Provide boundary-safe integration patterns across dependent shared features and 
 pnpm --filter @hbc/features-admin test -- integrations
 rg -n "from 'packages/features/" packages/features/admin/src
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF17-T07 completed: 2026-03-11
+Files created:
+  - src/integrations/bicNextMoveAdapter.ts (IBicBlockingContext, IBicNextMoveAdapter, ReferenceBicNextMoveAdapter)
+  - src/integrations/notificationDispatchAdapter.ts (IAdminNotificationEvent, INotificationDispatchAdapter, ReferenceNotificationDispatchAdapter)
+  - src/integrations/acknowledgmentAdapter.ts (IApprovalPartyResolution, IAcknowledgmentApprovalAdapter, ReferenceAcknowledgmentAdapter)
+  - src/integrations/versionedRecordAdapter.ts (IGovernanceSnapshotPayload, IGovernanceSnapshotAdapter, ReferenceGovernanceSnapshotAdapter)
+  - src/integrations/complexityGatingAdapter.ts (AdminComplexityTier, IAdminComplexityGating, ReferenceComplexityGatingAdapter)
+  - src/integrations/index.ts (barrel)
+  - src/__tests__/integrations.test.ts (26 tests)
+Files modified:
+  - src/index.ts (added Integrations export section)
+  - vitest.config.ts (added src/integrations/** to coverage exclude)
+Verification: check-types ✓ | build ✓ | lint ✓ | test ✓ (112 tests, 26 new)
+Next: SF17-T08
+-->

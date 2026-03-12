@@ -1,0 +1,84 @@
+# SF23-T01 - Package Scaffold: `@hbc/record-form` primitive + SF23 adapters
+
+**Phase Reference:** Foundation Plan Phase 2 (Shared Packages)
+**Spec Source:** `docs/explanation/feature-decisions/PH7-SF-23-Shared-Feature-Record-Form.md`
+**Decisions Applied:** L-01, L-03, L-04, L-06
+**Estimated Effort:** 0.7 sprint-weeks
+**Depends On:** SF23 master plan
+
+> **Doc Classification:** Canonical Normative Plan - SF23-T01 scaffold task; sub-plan of `SF23-Record-Form.md`.
+
+---
+
+## Objective
+
+Define scaffolding across `@hbc/record-form` and module adapter surfaces with dual runtime/testing exports, coverage gates, and README boundary requirements.
+
+---
+
+## Required Files
+
+```text
+packages/record-form/
+|- package.json
+|- README.md
+|- tsconfig.json
+|- vitest.config.ts
+|- src/index.ts
+|- src/types/index.ts
+|- src/model/index.ts
+|- src/api/index.ts
+|- src/hooks/index.ts
+|- src/components/index.ts
+|- src/adapters/index.ts
+|- testing/index.ts
+
+packages/features/business-development/src/record-form/
+|- index.ts
+|- profiles/index.ts
+|- adapters/index.ts
+|- hooks/index.ts
+|- components/index.ts
+
+packages/features/estimating/src/record-form/
+|- index.ts
+|- profiles/index.ts
+|- adapters/index.ts
+|- hooks/index.ts
+|- components/index.ts
+```
+
+---
+
+## Package Contract Requirements
+
+- primitive package name is `@hbc/record-form`
+- adapters consume primitive public exports only
+- module schemas/rules remain adapter-owned and projection-only
+- testing entrypoints excluded from production bundles
+- coverage thresholds are `95/95/95/95` (lines/branches/functions/statements)
+- scripts include primitive and adapter check-types/build/test targets
+
+---
+
+## README Requirement (Mandatory in T01)
+
+Must include:
+1. shared record authoring runtime overview
+2. adapter-over-primitive boundary rules
+3. offline queue/replay + optimistic status model summary
+4. exports table
+5. testing entrypoint guidance (`@hbc/record-form/testing`)
+6. links to SF23 master, SF23-T09, ADR-0111 and companion primitive ADR
+
+---
+
+## Verification Commands
+
+```bash
+pnpm --filter @hbc/record-form check-types
+pnpm --filter @hbc/record-form build
+pnpm --filter @hbc/record-form test --coverage
+pnpm --filter @hbc/features-business-development check-types
+pnpm --filter @hbc/features-estimating check-types
+```

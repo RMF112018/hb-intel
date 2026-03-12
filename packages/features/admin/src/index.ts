@@ -85,6 +85,29 @@ export {
   resolveEligibility,
 } from './hooks/index.js';
 
+// Integrations
+export {
+  ReferenceBicNextMoveAdapter,
+  ReferenceNotificationDispatchAdapter,
+  ReferenceAcknowledgmentAdapter,
+  ReferenceGovernanceSnapshotAdapter,
+  ReferenceComplexityGatingAdapter,
+} from './integrations/index.js';
+
+export type {
+  IBicBlockingContext,
+  IBicNextMoveAdapter,
+  IAdminNotificationEvent,
+  INotificationDispatchAdapter,
+  IApprovalPartyResolution,
+  IAcknowledgmentApprovalAdapter,
+  IGovernanceSnapshotPayload,
+  IGovernanceSnapshotAdapter,
+  AdminComplexityTier,
+  IAdminComplexityGating,
+  IAdminComplexityGatingAdapter,
+} from './integrations/index.js';
+
 // Components
 export {
   AdminAlertBadge,
