@@ -154,7 +154,10 @@ describe('ProjectHealthPulseCard', () => {
 
     expect(screen.getByText('Project Health Pulse')).toBeInTheDocument();
     expect(screen.getByText(/Overall: watch/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^Confidence: Low$/i })).toBeInTheDocument();
+    const confidenceButton = screen
+      .getAllByRole('button')
+      .find((button) => button.textContent?.trim() === 'Confidence: Low');
+    expect(confidenceButton).toBeDefined();
     expect(screen.getByText(/Escalate critical path blockers./i)).toBeInTheDocument();
     expect(screen.getByText(/Reason code: CRITICAL_PATH_BLOCKERS/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Cost: 62/i })).toBeInTheDocument();
@@ -192,7 +195,11 @@ describe('ProjectHealthPulseCard', () => {
       expect(screen.getByRole('tab', { name: 'Time' })).toHaveAttribute('aria-selected', 'true');
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /^Confidence: Low$/i }));
+    const confidenceButton = screen
+      .getAllByRole('button')
+      .find((button) => button.textContent?.trim() === 'Confidence: Low');
+    expect(confidenceButton).toBeDefined();
+    fireEvent.click(confidenceButton!);
     await waitFor(() => {
       expect(screen.getByText('Health Explainability')).toBeInTheDocument();
       expect(screen.getByText(/Current confidence tier: Low./i)).toBeInTheDocument();
