@@ -26,5 +26,7 @@ describe('BD score benchmark hook projections', () => {
     expect(result.panelRoutes.similarPursuitsHref.startsWith('/bd/score-benchmark?')).toBe(true);
     expect(result.myWorkPlacement.tileKey).toBe('bic-my-items');
     expect(result.myWorkPlacement.recommendationSignal).toBe('usage-history');
+    expect(result.integrations).not.toBeNull();
+    expect(result.integrations?.complexity.mode).toBe('standard');
   });
 });

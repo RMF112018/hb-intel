@@ -31,7 +31,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@hbc/score-benchmark/testing': resolve(__dirname, './testing/index.ts')
+      '@hbc/score-benchmark/testing': resolve(__dirname, './testing/index.ts'),
+      '@hbc/post-bid-autopsy': resolve(__dirname, '../post-bid-autopsy/src/index.ts'),
     }
   }
 });

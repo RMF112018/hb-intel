@@ -59,3 +59,6 @@ export const createScoreBenchmarkSnapshot = (
 
 export { ScoreBenchmarkApi } from './ScoreBenchmarkApi.js';
 export { ScoreBenchmarkLifecycleApi } from './ScoreBenchmarkLifecycleApi.js';
+export {
+  mapPostBidLearningSignalToRecalibrationSignal,
+} from '../model/recalibration/index.js';

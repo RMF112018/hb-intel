@@ -8,13 +8,18 @@ import {
 import {
   createReviewerConsensusSummary,
   mapDecisionSupportToPanelRoutes,
+  mapScoreBenchmarkReferenceIntegrations,
   mapScoreBenchmarkSnapshotToBdView,
   mapStateToMyWorkPlacement,
+  type BdReferenceIntegrationProjection,
   type BdMyWorkPlacementProjection,
   type BdPanelRouteProjection,
   type BdScoreBenchmarkViewModel,
+  type MapScoreBenchmarkIntegrationsInput,
   type ReviewerConsensusSummary,
 } from '../adapters/index.js';
+import type { ComplexityTier } from '@hbc/complexity';
+import type { PostBidLearningSignal } from '@hbc/post-bid-autopsy';
 
 export interface UseScoreBenchmarkInput {
   entityId: string;
@@ -25,6 +30,8 @@ export interface UseScoreBenchmarkInput {
   defaultCohortId?: string;
   urlSearch?: string;
   basePath?: string;
+  complexityTier?: ComplexityTier;
+  learningSignals?: readonly PostBidLearningSignal[];
 }
 
 export interface UseScoreBenchmarkResult {
@@ -32,6 +39,7 @@ export interface UseScoreBenchmarkResult {
   panelRoutes: BdPanelRouteProjection;
   myWorkPlacement: BdMyWorkPlacementProjection;
   reviewerConsensus: ReviewerConsensusSummary | null;
+  integrations: BdReferenceIntegrationProjection | null;
   primitive: {
     state: ReturnType<typeof useScoreBenchmarkState>;
     filters: ReturnType<typeof useScoreBenchmarkFilters>;
@@ -71,12 +79,26 @@ export const useScoreBenchmark = (
     decisionSupport,
     input.basePath ?? '/business-development/score-benchmark'
   );
+  const basePath = input.basePath ?? '/business-development/score-benchmark';
+  const integrationInput: MapScoreBenchmarkIntegrationsInput | null = overlay
+    ? {
+      overlay,
+      state,
+      decisionSupport,
+      basePath,
+      complexityTier: input.complexityTier ?? 'standard',
+      learningSignals: input.learningSignals,
+    }
+    : null;
 
   return {
     viewModel,
     panelRoutes,
     myWorkPlacement: mapStateToMyWorkPlacement(state, panelRoutes.similarPursuitsHref),
     reviewerConsensus,
+    integrations: integrationInput
+      ? mapScoreBenchmarkReferenceIntegrations(integrationInput)
+      : null,
     primitive: {
       state,
       filters,

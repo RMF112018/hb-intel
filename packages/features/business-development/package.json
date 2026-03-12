@@ -47,6 +47,13 @@
     "@hbc/smart-empty-state": "workspace:*",
     "@hbc/score-benchmark": "workspace:*",
     "@hbc/bic-next-move": "workspace:*",
-    "@hbc/project-canvas": "workspace:*"
+    "@hbc/project-canvas": "workspace:*",
+    "@hbc/complexity": "workspace:*",
+    "@hbc/versioned-record": "workspace:*",
+    "@hbc/related-items": "workspace:*",
+    "@hbc/notification-intelligence": "workspace:*",
+    "@hbc/health-indicator": "workspace:*",
+    "@hbc/ai-assist": "workspace:*",
+    "@hbc/post-bid-autopsy": "workspace:*"
   }
 }

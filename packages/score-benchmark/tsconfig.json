@@ -12,7 +12,9 @@
       "@hbc/bic-next-move": ["packages/bic-next-move/dist/index.d.ts"],
       "@hbc/bic-next-move/*": ["packages/bic-next-move/dist/*"],
       "@hbc/versioned-record": ["packages/versioned-record/dist/src/index.d.ts"],
-      "@hbc/versioned-record/*": ["packages/versioned-record/dist/src/*"]
+      "@hbc/versioned-record/*": ["packages/versioned-record/dist/src/*"],
+      "@hbc/post-bid-autopsy": ["packages/post-bid-autopsy/dist/src/index.d.ts"],
+      "@hbc/post-bid-autopsy/*": ["packages/post-bid-autopsy/dist/src/*"]
     }
   },
   "include": ["src/**/*", "testing/**/*"],

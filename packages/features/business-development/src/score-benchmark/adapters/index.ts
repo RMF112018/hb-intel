@@ -2,14 +2,29 @@ import type { IBicOwner } from '@hbc/bic-next-move';
 import type {
   RecommendationSignal,
 } from '@hbc/project-canvas';
+import type { ComplexityTier } from '@hbc/complexity';
+import type { PostBidLearningSignal } from '@hbc/post-bid-autopsy';
 import type {
   BenchmarkRecommendationState,
+  IBenchmarkExplainability,
   IFilterGovernanceEvent,
   IReviewerConsensus,
   IScoreBenchmarkDecisionSupportResult,
   IScoreBenchmarkStateResult,
   IScoreGhostOverlayState,
 } from '@hbc/score-benchmark';
+import {
+  createScoreBenchmarkReferenceIntegrations,
+  type IBdBicOwnershipAction,
+  type IHbiActionProjection,
+  type IScoreBenchmarkCanvasPlacement,
+  type IScoreBenchmarkComplexityProjection,
+  type IScoreBenchmarkHealthProjection,
+  type IScoreBenchmarkLearningSignalProjection,
+  type IScoreBenchmarkRelatedItemsProjection,
+  type IScoreBenchmarkVersionedProjection,
+  type IBdScoreBenchmarkNotificationProjection,
+} from '../integrations/index.js';
 
 export interface BdScoreBenchmarkViewModel {
   recommendationLabel: BenchmarkRecommendationState;
@@ -43,6 +58,18 @@ export interface BdMyWorkPlacementProjection {
     criterionId: string;
     owner: IBicOwner | null;
   }>;
+}
+
+export interface BdReferenceIntegrationProjection {
+  bicActions: IBdBicOwnershipAction[];
+  complexity: IScoreBenchmarkComplexityProjection;
+  versioned: IScoreBenchmarkVersionedProjection;
+  relatedItems: IScoreBenchmarkRelatedItemsProjection;
+  canvas: IScoreBenchmarkCanvasPlacement;
+  notifications: IBdScoreBenchmarkNotificationProjection[];
+  health: IScoreBenchmarkHealthProjection;
+  hbiActions: IHbiActionProjection[];
+  learningSignals: IScoreBenchmarkLearningSignalProjection;
 }
 
 const recommendationCopyByState: Record<BenchmarkRecommendationState, string> = {
@@ -96,3 +123,31 @@ export const mapStateToMyWorkPlacement = (
     owner: projection.owner,
   })),
 });
+
+export interface MapScoreBenchmarkIntegrationsInput {
+  overlay: IScoreGhostOverlayState;
+  state: IScoreBenchmarkStateResult;
+  decisionSupport: IScoreBenchmarkDecisionSupportResult;
+  basePath: string;
+  complexityTier: ComplexityTier;
+  learningSignals?: readonly PostBidLearningSignal[];
+}
+
+export const mapScoreBenchmarkReferenceIntegrations = (
+  input: MapScoreBenchmarkIntegrationsInput
+): BdReferenceIntegrationProjection => {
+  const integrations = createScoreBenchmarkReferenceIntegrations();
+  const explainability: IBenchmarkExplainability[] = input.overlay.benchmarks.map((benchmark) => benchmark.explainability);
+
+  return {
+    bicActions: integrations.projectToBicActions(input.state, explainability),
+    complexity: integrations.applyComplexityGating(input.complexityTier, input.state),
+    versioned: integrations.createVersionedProjection(input.overlay),
+    relatedItems: integrations.projectRelatedItems(input.overlay, input.decisionSupport, input.basePath),
+    canvas: integrations.projectCanvasPlacement(input.state, input.basePath),
+    notifications: integrations.resolveNotifications(input.overlay, input.overlay.consensus),
+    health: integrations.mapToHealthIndicator(input.overlay),
+    hbiActions: integrations.projectHbiActions(input.overlay),
+    learningSignals: integrations.consumeLearningSignals(input.learningSignals ?? []),
+  };
+};

@@ -70,6 +70,7 @@ export {
   deriveRecommendationState,
   evaluateFilterGovernance,
   createRecalibrationAssessment,
+  mapPostBidLearningSignalToRecalibrationSignal,
   buildExplainability,
 } from './model/index.js';
 

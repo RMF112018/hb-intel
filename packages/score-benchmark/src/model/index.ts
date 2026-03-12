@@ -20,6 +20,7 @@ export type { GovernanceInput } from './governance/index.js';
 
 export {
   createRecalibrationAssessment,
+  mapPostBidLearningSignalToRecalibrationSignal,
 } from './recalibration/index.js';
 export type { RecalibrationInput } from './recalibration/index.js';
 

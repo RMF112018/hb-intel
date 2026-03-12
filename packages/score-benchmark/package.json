@@ -32,7 +32,8 @@
   },
   "dependencies": {
     "@hbc/bic-next-move": "workspace:*",
-    "@hbc/versioned-record": "workspace:*"
+    "@hbc/versioned-record": "workspace:*",
+    "@hbc/post-bid-autopsy": "workspace:*"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^3.2.4",

@@ -1,4 +1,5 @@
 import type { IVersionMetadata } from '@hbc/versioned-record';
+import type { PostBidLearningSignal } from '@hbc/post-bid-autopsy';
 import {
   BENCHMARK_MIN_SAMPLE_SIZE,
 } from '../constants/index.js';
@@ -8,6 +9,9 @@ import {
   deriveConfidence,
   hasZoneOverlap,
 } from '../model/lifecycle/index.js';
+import {
+  mapPostBidLearningSignalToRecalibrationSignal,
+} from '../model/recalibration/index.js';
 import type {
   IBenchmarkFilterContext,
   IPredictiveDriftMonitorResult,
@@ -134,6 +138,24 @@ export class ScoreBenchmarkLifecycleApi {
   emitRecalibrationSignals(signals: IRecalibrationSignal[]): { emittedCount: number } {
     this.emittedSignals = [...this.emittedSignals, ...clone(signals)];
     return { emittedCount: signals.length };
+  }
+
+  consumePublishedLearningSignals(
+    signals: readonly PostBidLearningSignal[]
+  ): { consumedSignals: number; emittedSignals: IRecalibrationSignal[] } {
+    const emittedSignals = signals.map(mapPostBidLearningSignalToRecalibrationSignal);
+    this.emittedSignals = [...this.emittedSignals, ...clone(emittedSignals)];
+
+    this.overlays = this.overlays.map((overlay) => ({
+      ...overlay,
+      recalibrationSignals: [...overlay.recalibrationSignals, ...clone(emittedSignals)],
+      syncStatus: 'queued-to-sync',
+    }));
+
+    return {
+      consumedSignals: signals.length,
+      emittedSignals: clone(emittedSignals),
+    };
   }
 
   freezeSnapshot(entityId: string, snapshotReason: string): ISnapshotFreezeResult {
