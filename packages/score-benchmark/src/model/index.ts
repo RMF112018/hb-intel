@@ -27,3 +27,16 @@ export {
   buildExplainability,
 } from './explainability/index.js';
 export type { ExplainabilityInput } from './explainability/index.js';
+
+export {
+  computeZoneRange,
+  hasZoneOverlap,
+  computeDistanceToWinZone,
+  deriveConfidence,
+  deriveRecommendation,
+} from './lifecycle/index.js';
+export type {
+  ZoneRange,
+  ConfidenceSignals,
+  RecommendationSignals,
+} from './lifecycle/index.js';

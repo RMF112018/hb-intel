@@ -1,4 +1,5 @@
 import type { IVersionMetadata } from '@hbc/versioned-record';
+import type { IBicOwner as BicOwner } from '@hbc/bic-next-move';
 
 export type BenchmarkConfidenceTier = 'high' | 'moderate' | 'low' | 'insufficient';
 
@@ -195,6 +196,90 @@ export interface IScoreGhostOverlayState {
   version: IVersionMetadata;
   telemetry: IScoreBenchmarkTelemetryState;
   syncStatus: 'synced' | 'saved-locally' | 'queued-to-sync';
+}
+
+export type ScoreBenchmarkOutcome = 'won' | 'lost' | 'no-bid';
+
+export interface IScoreBenchmarkMutation {
+  mutationId: string;
+  mutationType:
+    | 'recompute-request'
+    | 'filter-context-change'
+    | 'governance-event'
+    | 'no-bid-rationale';
+  entityId?: string;
+  payload: Record<string, unknown>;
+  queuedAt: string;
+  replaySafe: boolean;
+}
+
+export interface INoBidRationalePayload {
+  artifactId: string;
+  rationale: string;
+  citations: string[];
+  approvedAt: string;
+}
+
+export interface INoBidRationaleRecord {
+  entityId: string;
+  payload: INoBidRationalePayload;
+  approvedBy: string;
+  savedAt: string;
+}
+
+export interface IScoreBenchmarkOverallSummary {
+  criterionCount: number;
+  overallWinAvg: number | null;
+  overallLossAvg: number | null;
+  winZoneMin: number | null;
+  winZoneMax: number | null;
+  lossRiskZoneMin: number | null;
+  lossRiskZoneMax: number | null;
+  overlap: boolean;
+}
+
+export interface IBicOwnershipProjection {
+  criterionId: string;
+  criterionLabel: string;
+  owner: BicOwner | null;
+  distanceToWinZone: number;
+}
+
+export interface IScoreBenchmarkOverlayResponse {
+  state: IScoreGhostOverlayState;
+  bicOwnershipProjections: IBicOwnershipProjection[];
+}
+
+export interface IRecomputeResult {
+  jobType: 'scheduled' | 'on-demand';
+  processedEntities: number;
+  updatedBenchmarks: number;
+  emittedSignals: number;
+  computedAt: string;
+}
+
+export interface IPredictiveDriftMonitorWindow {
+  fromIso: string;
+  toIso: string;
+  driftThreshold: number;
+}
+
+export interface IPredictiveDriftMonitorResult {
+  window: IPredictiveDriftMonitorWindow;
+  emittedSignals: IRecalibrationSignal[];
+}
+
+export interface ISnapshotFreezeResult {
+  entityId: string;
+  snapshotReason: string;
+  frozenAt: string;
+  version: IVersionMetadata;
+}
+
+export interface IScoreBenchmarkApiState {
+  overlays: IScoreGhostOverlayState[];
+  criterionBenchmarks: IScorecardBenchmark[];
+  approvedCohorts: string[];
 }
 
 // T01 compatibility contracts retained for scaffold consumers.

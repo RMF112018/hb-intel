@@ -17,6 +17,18 @@ export type {
   IRecalibrationSignal,
   IScoreBenchmarkTelemetryState,
   IScoreGhostOverlayState,
+  ScoreBenchmarkOutcome,
+  IScoreBenchmarkMutation,
+  INoBidRationalePayload,
+  INoBidRationaleRecord,
+  IScoreBenchmarkOverallSummary,
+  IBicOwnershipProjection,
+  IScoreBenchmarkOverlayResponse,
+  IRecomputeResult,
+  IPredictiveDriftMonitorWindow,
+  IPredictiveDriftMonitorResult,
+  ISnapshotFreezeResult,
+  IScoreBenchmarkApiState,
 } from './types/index.js';
 
 export {
@@ -52,6 +64,7 @@ export {
 
 export { createScoreBenchmarkSnapshot } from './api/index.js';
 export type { ScoreBenchmarkRuntimeInput } from './api/index.js';
+export { ScoreBenchmarkApi, ScoreBenchmarkLifecycleApi } from './api/index.js';
 
 export { useScoreBenchmarkSnapshot } from './hooks/index.js';
 export type { UseScoreBenchmarkSnapshotInput } from './hooks/index.js';

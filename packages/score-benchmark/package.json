@@ -31,6 +31,7 @@
     "test:coverage": "vitest run --coverage --passWithNoTests"
   },
   "dependencies": {
+    "@hbc/bic-next-move": "workspace:*",
     "@hbc/versioned-record": "workspace:*"
   },
   "devDependencies": {

@@ -56,3 +56,6 @@ export const createScoreBenchmarkSnapshot = (
     reasonCodes: input.reasonCodes,
   }),
 });
+
+export { ScoreBenchmarkApi } from './ScoreBenchmarkApi.js';
+export { ScoreBenchmarkLifecycleApi } from './ScoreBenchmarkLifecycleApi.js';

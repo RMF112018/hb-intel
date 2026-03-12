@@ -9,6 +9,8 @@
     "composite": true,
     "paths": {
       "@hbc/score-benchmark/testing": ["./testing/index.ts"],
+      "@hbc/bic-next-move": ["packages/bic-next-move/dist/index.d.ts"],
+      "@hbc/bic-next-move/*": ["packages/bic-next-move/dist/*"],
       "@hbc/versioned-record": ["packages/versioned-record/dist/src/index.d.ts"],
       "@hbc/versioned-record/*": ["packages/versioned-record/dist/src/*"]
     }
