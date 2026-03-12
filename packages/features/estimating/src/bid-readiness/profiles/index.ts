@@ -1,9 +1,21 @@
 /**
- * Estimating Bid Readiness profile — default criterion weights,
- * thresholds, and admin-override configuration.
+ * SF18-T03 readiness profile + configuration exports.
  *
- * Stub: implementation deferred to SF18-T03.
+ * @design D-SF18-T03
  */
+export { estimatingBidReadinessProfile } from './estimatingBidReadinessProfile.js';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export const estimatingBidReadinessProfile = {} as Record<string, unknown>;
+export {
+  resolveBidReadinessProfileConfig,
+} from './readinessConfigResolver.js';
+
+export type {
+  ICriterionOverride,
+  IEstimatingBidReadinessAdminOverride,
+  IResolvedBidReadinessConfig,
+} from './readinessConfigResolver.js';
+
+export {
+  buildReadinessSummary,
+  evaluateReadinessSummary,
+} from './readinessScoring.js';

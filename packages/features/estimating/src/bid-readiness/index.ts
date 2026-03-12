@@ -6,12 +6,27 @@
  */
 
 // Profiles
-export { estimatingBidReadinessProfile } from './profiles/index.js';
+export {
+  estimatingBidReadinessProfile,
+  resolveBidReadinessProfileConfig,
+  buildReadinessSummary,
+  evaluateReadinessSummary,
+} from './profiles/index.js';
+
+export type {
+  ICriterionOverride,
+  IEstimatingBidReadinessAdminOverride,
+  IResolvedBidReadinessConfig,
+} from './profiles/index.js';
 
 // Adapters
 export {
   mapPursuitToHealthIndicatorItem,
   mapHealthIndicatorStateToBidReadinessView,
+} from './adapters/index.js';
+
+export type {
+  IEstimatingPursuitReadinessInput,
 } from './adapters/index.js';
 
 // Hooks
@@ -25,4 +40,14 @@ export {
 } from './components/index.js';
 
 // Telemetry
-export { bidReadinessKpiEmitter } from './telemetry/index.js';
+export {
+  createBidReadinessKpiSnapshot,
+  getTelemetryView,
+  bidReadinessKpiEmitter,
+} from './telemetry/index.js';
+
+export type {
+  BidReadinessComplexity,
+  BidReadinessTelemetryAudience,
+  IBidReadinessTelemetrySnapshot,
+} from './telemetry/index.js';

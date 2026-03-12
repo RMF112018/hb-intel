@@ -84,7 +84,7 @@ Core health computation, version lifecycle, and telemetry schema live in `@hbc/h
 |---|---|
 | `SF18-T01-Package-Scaffold.md` | adapter scaffold, exports, README and dependency boundaries | <!-- ✅ completed 2026-03-12 -->
 | `SF18-T02-TypeScript-Contracts.md` | `IHealthIndicator*` canonical contracts + SF18 adapter aliases — **COMPLETE 2026-03-12** |
-| `SF18-T03-Readiness-Model-and-Configuration.md` | estimating profile defaults, admin controls, provenance and KPI contracts |
+| `SF18-T03-Readiness-Model-and-Configuration.md` | estimating profile defaults, admin controls, provenance and KPI contracts — **COMPLETE 2026-03-12** |
 | `SF18-T04-Hooks-and-State-Model.md` | hook orchestration from primitive state to estimating UX state |
 | `SF18-T05-BidReadinessSignal-and-Dashboard.md` | complexity-aware signal/dashboard behavior over primitive output |
 | `SF18-T06-BidReadinessChecklist-and-AdminConfig.md` | checklist/admin UX, inline AI actions, offline state indicators |

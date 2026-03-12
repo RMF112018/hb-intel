@@ -1,16 +1,21 @@
 /**
- * Factory for mock bid-readiness profile configurations used in
- * Estimating Bid Readiness tests.
+ * Typed fixture factory for SF18 bid-readiness profile tests.
  *
- * Stub: full implementation deferred to SF18-T08.
+ * @design D-SF18-T03
  */
+import { estimatingBidReadinessProfile } from '../src/bid-readiness/profiles/index.js';
+import type { IEstimatingBidReadinessProfile } from '../src/types/index.js';
+
 export function createMockBidReadinessProfile(
-  overrides: Record<string, unknown> = {},
-): Record<string, unknown> {
+  overrides: Partial<IEstimatingBidReadinessProfile> = {},
+): IEstimatingBidReadinessProfile {
   return {
-    name: 'estimating-default',
-    thresholds: { green: 0.8, yellow: 0.5 },
-    criterionWeights: {},
+    ...estimatingBidReadinessProfile,
     ...overrides,
+    criteria: overrides.criteria ?? estimatingBidReadinessProfile.criteria,
+    thresholds: {
+      ...estimatingBidReadinessProfile.thresholds,
+      ...overrides.thresholds,
+    },
   };
 }

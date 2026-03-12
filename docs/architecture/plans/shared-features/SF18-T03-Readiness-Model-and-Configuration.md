@@ -68,3 +68,38 @@ KPI emission events are role-aware and complexity-aware for canvas and governanc
 pnpm --filter @hbc/features-estimating test -- bidReadinessProfile
 pnpm --filter @hbc/features-estimating test -- bidReadinessConfig
 ```
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF18-T03 completed: 2026-03-12
+- Replaced T03 scope stubs with deterministic model/config implementation:
+  - `src/bid-readiness/profiles/estimatingBidReadinessProfile.ts`
+  - `src/bid-readiness/profiles/readinessConfigResolver.ts`
+  - `src/bid-readiness/profiles/readinessScoring.ts`
+  - `src/bid-readiness/adapters/index.ts`
+  - `src/bid-readiness/telemetry/index.ts`
+- Implemented baseline six-criterion estimating profile and threshold bands aligned to SF18 score model.
+- Implemented config resolution merge order (baseline -> admin override -> validation) with:
+  - non-negative deterministic weight normalization
+  - threshold ordering enforcement (`ready > nearly-ready > attention-needed`)
+  - blocker-presence validation
+  - duplicate criterion override detection
+  - deterministic fallback to baseline profile on invalid/partial config states.
+- Implemented pure scoring/summary composition:
+  - weighted score computation
+  - status and scoring-band classification
+  - category breakdown composition
+  - completeness summary
+  - recommendation/action derivation for blocker and non-blocker gaps.
+- Implemented version/governance-aware config outputs and typed telemetry KPI projection helpers for the five locked metrics.
+- Updated barrels/exports for clean T03 model/config public surface from `src/bid-readiness/index.ts`.
+- Replaced T03 testing fixture stubs with typed deterministic factories in `testing/`.
+- Added T03 tests:
+  - `src/bid-readiness/profiles/bidReadinessProfile.test.ts`
+  - `src/bid-readiness/profiles/bidReadinessConfig.test.ts`
+- Verification (zero errors):
+  - `pnpm --filter @hbc/features-estimating test -- bidReadinessProfile` ✓
+  - `pnpm --filter @hbc/features-estimating test -- bidReadinessConfig` ✓
+  - `pnpm --filter @hbc/features-estimating check-types` ✓
+  - `pnpm --filter @hbc/features-estimating build` ✓
+- T03 success criteria complete. Work stopped before T04 per phase instruction.
+-->
