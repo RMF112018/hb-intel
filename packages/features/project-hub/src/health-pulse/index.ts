@@ -3,6 +3,7 @@
  */
 
 export * from './types/index.js';
+export * from './constants/index.js';
 export * from './computors/index.js';
 export * from './governance/index.js';
 export * from './telemetry/index.js';

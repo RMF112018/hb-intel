@@ -3,4 +3,8 @@
  * Consumers should import SF21 fixtures from this subpath instead of deep internals.
  */
 
-export { createMockProjectHealthPulseSnapshot } from './createMockProjectHealthPulseSnapshot.js';
+export {
+  createMockProjectHealthPulseSnapshot,
+  createMockHealthPulseAdminConfig,
+  createMockProjectHealthTelemetry,
+} from './createMockProjectHealthPulseSnapshot.js';

@@ -38,7 +38,7 @@ Triage capabilities are modeled as part of the health-pulse domain boundary and 
 
 | Subpath | Purpose | Intended Use |
 |---|---|---|
-| `@hbc/features-project-hub` | Runtime feature surface (including `health-pulse` barrels) | App/runtime consumption |
+| `@hbc/features-project-hub` | Runtime feature surface (including `health-pulse` contracts, constants, and barrels) | App/runtime consumption |
 | `@hbc/features-project-hub/testing` | Stable SF21 test fixtures and helpers | Unit tests, Storybook, E2E, harnesses |
 
 ## 7. Boundary Rules and Telemetry Emission Notes
