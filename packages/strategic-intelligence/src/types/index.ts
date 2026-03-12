@@ -23,6 +23,8 @@ export type SensitivityClass =
   | 'restricted-project'
   | 'confidential';
 
+export type StrategicIntelligenceSyncStatus = 'synced' | 'saved-locally' | 'queued-to-sync';
+
 export interface IHeritageSnapshot {
   snapshotId: string;
   scorecardId: string;
@@ -174,7 +176,70 @@ export interface IStrategicIntelligenceState {
   approvalQueue: IStrategicIntelligenceApprovalQueueItem[];
   telemetry: IStrategicIntelligenceTelemetryState;
   version: IVersionMetadata;
-  syncStatus: 'synced' | 'saved-locally' | 'queued-to-sync';
+  syncStatus: StrategicIntelligenceSyncStatus;
+}
+
+export interface IStrategicIntelligenceMutationProvenance {
+  recordedAt: string;
+  actorUserId: string;
+  actorRole: string;
+  source: 'offline-queue' | 'direct-write' | 'replay';
+  provenanceClass: ProvenanceClass;
+}
+
+export type StrategicIntelligenceMutationType =
+  | 'append-entry'
+  | 'acknowledgment-update'
+  | 'commitment-update'
+  | 'conflict-event'
+  | 'handoff-review-update';
+
+export interface IStrategicIntelligenceMutation {
+  mutationId: string;
+  scorecardId: string;
+  mutationType: StrategicIntelligenceMutationType;
+  payload: Record<string, unknown>;
+  queuedAt: string;
+  replaySafe: boolean;
+  localStatus: Extract<StrategicIntelligenceSyncStatus, 'saved-locally' | 'queued-to-sync'>;
+  provenance: IStrategicIntelligenceMutationProvenance;
+}
+
+export interface IStrategicIntelligenceGovernanceEvent {
+  eventId: string;
+  scorecardId: string;
+  eventType:
+    | 'conflict-resolution-note'
+    | 'supersession-recorded'
+    | 'stale-review-renewal'
+    | 'acknowledgment-recorded'
+    | 'commitment-updated';
+  note: string;
+  immutable: true;
+  createdAt: string;
+  createdBy: string;
+  relatedEntryIds: string[];
+  version: IVersionMetadata;
+}
+
+export interface IStrategicIntelligenceReplayResult {
+  replayedMutationIds: string[];
+  conflictsCreated: number;
+  governanceEventsAppended: number;
+  resultingSyncStatus: StrategicIntelligenceSyncStatus;
+}
+
+export interface IStrategicIntelligenceIndexingPayload {
+  scorecardId: string;
+  indexableEntries: IStrategicIntelligenceEntry[];
+  excludedEntryIds: string[];
+  redactedProjections: IRedactedProjection[];
+}
+
+export interface IStrategicIntelligenceFreezeResult {
+  scorecardId: string;
+  frozenAt: string;
+  snapshot: IHeritageSnapshot;
 }
 
 // Adapter/default-profile contract used by consuming modules.

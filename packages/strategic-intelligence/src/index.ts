@@ -15,6 +15,14 @@ export type {
   IStrategicIntelligenceApprovalQueueItem,
   IStrategicIntelligenceTelemetryState,
   IStrategicIntelligenceState,
+  StrategicIntelligenceSyncStatus,
+  IStrategicIntelligenceMutationProvenance,
+  StrategicIntelligenceMutationType,
+  IStrategicIntelligenceMutation,
+  IStrategicIntelligenceGovernanceEvent,
+  IStrategicIntelligenceReplayResult,
+  IStrategicIntelligenceIndexingPayload,
+  IStrategicIntelligenceFreezeResult,
   StrategicIntelligenceProfile,
 } from './types/index.js';
 
@@ -39,6 +47,8 @@ export {
 export {
   createStrategicIntelligenceState,
   type StrategicIntelligenceRuntimeInput,
+  StrategicIntelligenceApi,
+  StrategicIntelligenceLifecycleApi,
 } from './api/index.js';
 
 export {
