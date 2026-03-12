@@ -8,7 +8,9 @@
     "sourceMap": true,
     "composite": true,
     "paths": {
-      "@hbc/score-benchmark/testing": ["./testing/index.ts"]
+      "@hbc/score-benchmark/testing": ["./testing/index.ts"],
+      "@hbc/versioned-record": ["packages/versioned-record/dist/src/index.d.ts"],
+      "@hbc/versioned-record/*": ["packages/versioned-record/dist/src/*"]
     }
   },
   "include": ["src/**/*", "testing/**/*"],

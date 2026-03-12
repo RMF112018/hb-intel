@@ -30,6 +30,9 @@
     "test:watch": "vitest --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests"
   },
+  "dependencies": {
+    "@hbc/versioned-record": "workspace:*"
+  },
   "devDependencies": {
     "@vitest/coverage-v8": "^3.2.4",
     "typescript": "^5.4.0",

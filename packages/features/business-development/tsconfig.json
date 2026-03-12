@@ -2,13 +2,14 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "composite": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
     "paths": {
-      "@hbc/score-benchmark": ["packages/score-benchmark/dist/src/index.d.ts"],
-      "@hbc/score-benchmark/testing": ["packages/score-benchmark/dist/testing/index.d.ts"]
+      "@hbc/score-benchmark": ["packages/score-benchmark/src/index.ts"],
+      "@hbc/score-benchmark/testing": ["packages/score-benchmark/testing/index.ts"],
+      "@hbc/versioned-record": ["packages/versioned-record/dist/src/index.d.ts"],
+      "@hbc/versioned-record/*": ["packages/versioned-record/dist/src/*"]
     }
   },
   "include": ["src/**/*", "testing/**/*"],

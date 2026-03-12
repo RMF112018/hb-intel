@@ -19,6 +19,8 @@ Lock primitive-owned public contracts for criterion benchmarks, confidence/simil
 ## Primitive Contracts to Define (`@hbc/score-benchmark`)
 
 ```ts
+import type { IVersionMetadata } from '@hbc/versioned-record';
+
 export type BenchmarkConfidenceTier = 'high' | 'moderate' | 'low' | 'insufficient';
 export type SimilarityStrengthBand = 'highly-similar' | 'moderately-similar' | 'loosely-similar';
 export type BenchmarkRecommendationState =
@@ -197,7 +199,7 @@ export interface IScoreGhostOverlayState {
   filterGovernanceEvents: IFilterGovernanceEvent[];
   recalibrationSignals: IRecalibrationSignal[];
   benchmarkGeneratedAt: string;
-  version: VersionedRecord;
+  version: IVersionMetadata;
   telemetry: IScoreBenchmarkTelemetryState;
   syncStatus: 'synced' | 'saved-locally' | 'queued-to-sync';
 }
