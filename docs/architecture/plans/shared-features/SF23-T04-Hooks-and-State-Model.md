@@ -12,25 +12,29 @@
 
 ## Objective
 
-Define primitive and adapter hook orchestration for form state, draft persistence, review/handoff projection, queue sync, and KPI emission.
+Define primitive and adapter hook orchestration for lifecycle truth, draft persistence, recovery, review/handoff projection, queue sync, next recommended action, and KPI emission without duplicating lifecycle engines in adapters.
 
 ---
 
 ## Primitive Hooks
 
 - `useRecordFormState`
-  - loads definition, mode, values, validation, and submit readiness
+  - loads definition, mode, values, validation, lifecycle state, trust/confidence state, and submit readiness
+  - derives blocked reasons, warning reasons, review-step state, and top recommended action
   - exposes loading/error/refresh + queue status + commit metadata
 - `useRecordDraftPersistence`
   - persists draft deltas and recovery snapshots
+  - distinguishes local, server, restored, and stale-restored draft states
   - emits optimistic statuses and replay-safe mutation handles
 - `useRecordSubmission`
-  - orchestrates review/approval gates, submit transitions, and handoff BIC creation
+  - orchestrates review/approval gates, submit transitions, retry state, and handoff BIC creation
 
 Cache keys:
+
 - `['record-form', moduleId, recordType, formId]`
 - `['record-form', moduleId, recordType, formId, 'draft']`
 - `['record-form', moduleId, recordType, formId, 'queue']`
+- `['record-form', moduleId, recordType, formId, 'recovery']`
 
 ---
 
@@ -38,6 +42,22 @@ Cache keys:
 
 - adapters map primitive state to module-specific labels/routes and field groupings
 - adapters project BIC avatar ownership and My Work placement metadata
+- adapters must not re-compute lifecycle truth, trust state, or next recommended action outside primitive selectors
+
+---
+
+## Derived State Requirements
+
+Primitive state must derive:
+
+- explainability fields for blocked, warning, recovery, and review-step gating states
+- next recommended action with reason and owner-side classification
+- confidence/trust state
+- recovery-banner state
+- replay/conflict state
+- downstream handoff preview state
+
+These derived fields are mandatory so every consuming form does not invent its own lifecycle interpretation.
 
 ---
 
@@ -45,6 +65,7 @@ Cache keys:
 
 - stable return shape across loading/success/error
 - explicit optimistic statuses: `Saved locally`, `Queued to sync`
+- visible degraded, partially recovered, and recovered-needs-review states
 - replay completion emits immutable version metadata
 - handoff ownership remains deterministic through retry/replay and approval transitions
 

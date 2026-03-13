@@ -12,7 +12,7 @@
 
 ## Objective
 
-Define scaffolding across `@hbc/export-runtime` and module adapter surfaces with dual runtime/testing exports, coverage gates, and README boundary requirements.
+Define scaffolding across `@hbc/export-runtime` and module adapter surfaces with runtime/testing exports, truth/receipt/progress seams, and README boundary requirements that match current package-governance rules.
 
 ---
 
@@ -48,6 +48,16 @@ packages/features/estimating/src/export-runtime/
 |- components/index.ts
 ```
 
+Scaffold expectations must leave explicit room for:
+
+- export-truth state
+- receipt state
+- artifact-confidence state
+- progress and retry state
+- review-step and handoff state
+- top recommended export derivation
+- restored receipt and stale-artifact diagnostics
+
 ---
 
 ## Package Contract Requirements
@@ -58,18 +68,39 @@ packages/features/estimating/src/export-runtime/
 - testing entrypoints excluded from production bundles
 - coverage thresholds are `95/95/95/95` (lines/branches/functions/statements)
 - scripts include primitive and adapter check-types/build/test targets
+- runtime/orchestration ownership remains in `@hbc/export-runtime`
+- reusable visual primitives and presentational components belong in `@hbc/ui-kit` per `CLAUDE.md`
+- local components in `@hbc/export-runtime` must remain thin composition shells over runtime state and `@hbc/ui-kit` building blocks
 
 ---
 
 ## README Requirement (Mandatory in T01)
 
 Must include:
+
 1. shared export runtime overview
 2. adapter-over-primitive boundary rules
-3. offline queue/replay + optimistic status model summary
-4. renderer/composer/template export table
-5. testing entrypoint guidance (`@hbc/export-runtime/testing`)
-6. links to SF24 master, SF24-T09, ADR-0108 and companion primitive ADR
+3. export-truth vocabulary and explainability contract summary
+4. receipt/progress/replay and local-vs-remote-vs-restored receipt model summary
+5. top recommended export and review/handoff semantics summary
+6. renderer/composer/template export table
+7. testing entrypoint guidance (`@hbc/export-runtime/testing`)
+8. links to SF24 master, SF24-T09, ADR-0114 and companion primitive ADR
+
+---
+
+## Export Expectations
+
+Primitive exports must reserve public surface for:
+
+- truth/context stamp models
+- receipt-state models
+- artifact-confidence models
+- review-step models
+- next recommended export selectors
+- retry/failure/restore diagnostics
+
+These exports are required so adapters do not re-invent export lifecycle interpretation locally.
 
 ---
 
@@ -82,4 +113,3 @@ pnpm --filter @hbc/export-runtime test --coverage
 pnpm --filter @hbc/features-business-development check-types
 pnpm --filter @hbc/features-estimating check-types
 ```
-

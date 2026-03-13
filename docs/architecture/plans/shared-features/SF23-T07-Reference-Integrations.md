@@ -12,26 +12,26 @@
 
 ## Objective
 
-Document boundary-safe integration contracts across `@hbc/record-form`, module adapters, and required Tier-1 primitives.
+Document boundary-safe integration contracts across `@hbc/record-form`, module adapters, and required Tier-1 primitives with explicit trust, provenance, recovery, and workflow-intelligence obligations.
 
 ---
 
 ## Integration Contracts
 
 - `@hbc/record-form`
-  - canonical lifecycle runtime, sync, AI-action, BIC-step, and telemetry contracts
+  - canonical lifecycle runtime, sync, explanation, next-step, AI-action, BIC-step, and telemetry contracts
 - `@hbc/bic-next-move`
-  - review/approval and handoff ownership, blockers-first sequencing, avatar projection
+  - review/approval and handoff ownership, blockers-first sequencing, avatar projection, downstream owner visibility
 - `@hbc/complexity`
-  - Essential/Standard/Expert behavior control
+  - Essential/Standard/Expert behavior control without lifecycle contradiction
 - `@hbc/versioned-record`
-  - immutable provenance, audit history, snapshot freezing, replay safety
+  - immutable provenance, audit history, snapshot freezing, replay safety, and comparison basis for restored drafts
 - `@hbc/project-canvas`
-  - My Work placement for review and handoff ownership steps
+  - My Work placement for review and handoff ownership steps plus trust-aware downstream visibility
 - `@hbc/related-items`
-  - deep-links from validation issues, review tasks, and submitted records
+  - deep-links from validation issues, review tasks, submitted records, and conflict-resolution context
 - `@hbc/notification-intelligence`
-  - review required, approval decision, and handoff routing notifications
+  - review required, approval decision, handoff routing, and degraded/retry attention routing notifications
 - `@hbc/strategic-intelligence`
   - optional intelligence contribution routing for approved record insights
 - `@hbc/score-benchmark`
@@ -41,19 +41,22 @@ Document boundary-safe integration contracts across `@hbc/record-form`, module a
 - `@hbc/post-bid-autopsy`
   - shared authoring runtime reuse for autopsy section submissions
 - `@hbc/step-wizard`
-  - multi-step orchestration where module forms require staged completion
+  - multi-step orchestration where module forms require staged completion; wizard composition must not fork lifecycle truth
 - `@hbc/session-state`
-  - draft continuity and reconnect state handoff
+  - draft continuity, reconnect state handoff, local queue persistence, and replay-safe operation boundaries
 - `@hbc/ui-kit`
-  - field primitives, layout, and interaction patterns
+  - field primitives, layout, interaction patterns, and any reusable visual review/recovery surfaces
 
 ---
 
 ## Boundary Rules
 
 - public interfaces only; no route-layer imports
-- adapters do not re-implement primitive lifecycle/telemetry engines
+- adapters do not re-implement primitive lifecycle, trust, or telemetry engines
+- review-step ownership and reassignment truth remains primitive-derived
 - pending/unapproved outputs are excluded from downstream indexed/reporting surfaces
+- My Work and Canvas projections must reflect the same review/handoff truth as the form runtime
+- reusable visual primitives added during implementation must land in `@hbc/ui-kit`, not `@hbc/record-form`
 
 ---
 

@@ -12,7 +12,7 @@
 
 ## Objective
 
-Define scaffolding across `@hbc/record-form` and module adapter surfaces with dual runtime/testing exports, coverage gates, and README boundary requirements.
+Define scaffolding across `@hbc/record-form` and module adapter surfaces with runtime/testing exports, trust/recovery/review seams, and README boundary requirements that match current package-governance rules.
 
 ---
 
@@ -48,6 +48,15 @@ packages/features/estimating/src/record-form/
 |- components/index.ts
 ```
 
+Scaffold expectations must leave explicit room for:
+
+- explanation state
+- recovery state
+- review-step state
+- next recommended action derivation
+- state-confidence derivation
+- replay/conflict diagnostics
+
 ---
 
 ## Package Contract Requirements
@@ -58,18 +67,38 @@ packages/features/estimating/src/record-form/
 - testing entrypoints excluded from production bundles
 - coverage thresholds are `95/95/95/95` (lines/branches/functions/statements)
 - scripts include primitive and adapter check-types/build/test targets
+- runtime/orchestration ownership remains in `@hbc/record-form`
+- reusable visual primitives and presentational components belong in `@hbc/ui-kit` per `CLAUDE.md`
+- local components in `@hbc/record-form` must remain thin composition shells over runtime state and `@hbc/ui-kit` building blocks
 
 ---
 
 ## README Requirement (Mandatory in T01)
 
 Must include:
+
 1. shared record authoring runtime overview
 2. adapter-over-primitive boundary rules
-3. offline queue/replay + optimistic status model summary
-4. exports table
-5. testing entrypoint guidance (`@hbc/record-form/testing`)
-6. links to SF23 master, SF23-T09, ADR-0111 and companion primitive ADR
+3. trust-state vocabulary and explainability contract summary
+4. recovery/replay and local-vs-server-vs-restored draft model summary
+5. next recommended action and review-step semantics summary
+6. testing entrypoint guidance (`@hbc/record-form/testing`)
+7. links to SF23 master, SF23-T09, ADR-0114 and companion primitive ADR
+
+---
+
+## Export Expectations
+
+Primitive exports must reserve public surface for:
+
+- explanation-state models
+- review-step models
+- recovery-state models
+- sync/trust-state models
+- next recommended action selectors
+- conflict and replay diagnostics
+
+These exports are required so adapters do not re-invent lifecycle interpretation locally.
 
 ---
 

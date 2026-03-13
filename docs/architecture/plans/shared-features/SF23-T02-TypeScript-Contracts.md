@@ -12,15 +12,44 @@
 
 ## Objective
 
-Lock primitive-owned public contracts for record lifecycle runtime, BIC handoff steps, provenance/versioning, and telemetry. Module contracts remain projection-only.
+Lock primitive-owned public contracts for lifecycle truth, review-step semantics, trust/explainability state, recovery state, provenance/versioning, and operational telemetry. Module contracts remain projection-only.
 
 ---
 
 ## Types to Define
 
 ```ts
-export type RecordFormMode = 'create' | 'edit' | 'duplicate' | 'template';
-export type RecordFormStatus = 'draft' | 'ready-for-review' | 'submitted' | 'failed';
+export type RecordFormMode =
+  | 'create'
+  | 'edit'
+  | 'duplicate'
+  | 'template'
+  | 'review';
+
+export type RecordFormStatus =
+  | 'not-started'
+  | 'draft'
+  | 'dirty'
+  | 'valid-with-warnings'
+  | 'blocked'
+  | 'submitting'
+  | 'submitted'
+  | 'failed';
+
+export type RecordSyncState =
+  | 'local-only'
+  | 'saved-locally'
+  | 'queued-to-sync'
+  | 'synced'
+  | 'degraded'
+  | 'partially-recovered';
+
+export type RecordStateConfidence =
+  | 'trusted-synced'
+  | 'local-unsynced'
+  | 'recovered-needs-review'
+  | 'degraded-submission'
+  | 'partially-resolved';
 
 export interface IRecordFormDefinition<TRecord> {
   formId: string;
@@ -30,26 +59,71 @@ export interface IRecordFormDefinition<TRecord> {
   schemaVersion: string;
   record: TRecord;
   validation: IRecordValidationState;
+  explanation: IRecordFormExplanationState;
+  recovery: IRecordRecoveryState | null;
+  reviewSteps: IRecordReviewStepState[];
+  nextRecommendedAction: IRecordNextRecommendedAction | null;
+  sync: IRecordSyncState;
+  confidence: IRecordStateConfidence;
   bicSteps?: IRecordBicStepConfig[];
   version: VersionedRecord;
   telemetry: IRecordFormTelemetryState;
 }
-
-export interface IRecordFormTelemetryState {
-  formCompletionTime: number | null;
-  submissionSuccessRate: number | null;
-  draftRecoveryRate: number | null;
-  handoffLatency: number | null;
-  recordFormCes: number | null;
-}
 ```
+
+Additional contracts must include:
+
+- `IRecordFormExplanationState`
+- `IRecordValidationState`
+- `IRecordValidationWarning`
+- `IRecordBlockedReason`
+- `IRecordRecoveryState`
+- `IRecordDraftComparisonState`
+- `IRecordReviewStepState`
+- `IRecordReviewStepHistoryEntry`
+- `IRecordNextRecommendedAction`
+- `IRecordSubmitGuardState`
+- `IRecordConflictState`
+- `IRecordRetryState`
 
 ---
 
-## Hook Return Contracts
+## Semantic Contract Requirements
 
-- primitive hooks return state, loading/error, refresh, queue status, and commit metadata
-- adapter hooks return module-projected view models and route labels only
+- explanation state must answer:
+  - why the form is blocked
+  - why a warning is visible
+  - why a review step exists
+  - why recovery is offered
+  - why submission is suppressed, deferred, or retryable
+- recovery state must distinguish:
+  - local draft
+  - server draft
+  - restored draft
+  - stale restored draft
+- review-step state must distinguish:
+  - blocking vs non-blocking
+  - pre-submit vs post-submit
+  - current owner
+  - reassignment history
+  - completion semantics
+- next recommended action must include:
+  - action kind
+  - human-readable reason
+  - whether the action is author-side or downstream-owner-side
+  - whether the issue is data completion, sync completion, review completion, or approval dependency
+
+---
+
+## Reason-Code Enums to Lock
+
+- `RecordBlockedReasonCode`
+- `RecordWarningReasonCode`
+- `RecordRecoveryReasonCode`
+- `RecordDeferReasonCode`
+- `RecordRetryReasonCode`
+
+These enums are required so user-facing explanations and telemetry are deterministic and testable.
 
 ---
 
@@ -58,6 +132,7 @@ export interface IRecordFormTelemetryState {
 - `RECORD_FORM_SYNC_QUEUE_KEY = 'record-form-sync-queue'`
 - `RECORD_FORM_SYNC_STATUSES = ['Saved locally', 'Queued to sync']`
 - `RECORD_FORM_COMPLEXITY_PROFILES = ['essential', 'standard', 'expert']`
+- `RECORD_FORM_TRUST_STATES = ['trusted-synced', 'local-unsynced', 'recovered-needs-review', 'degraded-submission', 'partially-resolved']`
 
 ---
 

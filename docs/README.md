@@ -137,6 +137,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0107 | Accepted | [ADR-0107-estimating-bid-readiness-signal.md](./architecture/adr/ADR-0107-estimating-bid-readiness-signal.md) |
 | ADR-0108 | Accepted | [ADR-0108-bd-score-benchmark-ghost-overlay.md](./architecture/adr/ADR-0108-bd-score-benchmark-ghost-overlay.md) |
 | ADR-0109 | Accepted | [ADR-0109-bd-heritage-living-strategic-intelligence.md](./architecture/adr/ADR-0109-bd-heritage-living-strategic-intelligence.md) |
+| ADR-0110 | Accepted | [ADR-0110-project-health-pulse-multi-dimension-indicator.md](./architecture/adr/ADR-0110-project-health-pulse-multi-dimension-indicator.md) |
 | ADR-0111 | Accepted | [ADR-0111-health-indicator-readiness-primitive-runtime.md](./architecture/adr/ADR-0111-health-indicator-readiness-primitive-runtime.md) |
 | ADR-0112 | Accepted | [ADR-0112-score-benchmark-primitive-runtime.md](./architecture/adr/ADR-0112-score-benchmark-primitive-runtime.md) |
 | ADR-0113 | Accepted | [ADR-0113-strategic-intelligence-primitive-runtime.md](./architecture/adr/ADR-0113-strategic-intelligence-primitive-runtime.md) |

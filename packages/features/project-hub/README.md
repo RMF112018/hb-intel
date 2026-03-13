@@ -4,42 +4,52 @@ Project Hub feature package for HB Intel, including SF21 Project Health Pulse co
 
 ## 1. Pulse Overview and Value Proposition
 
-Project Health Pulse provides a multi-dimension, confidence-aware health signal for project and portfolio decision-making. The SF21-T01 deliverable creates package boundaries and public contracts only; business computation logic is intentionally deferred.
+Project Health Pulse provides a production-ready, multi-dimension health model for project and portfolio decisions. The package now includes deterministic computation, confidence tiers/reasons, compound-risk escalation, explainability projections, governance controls, triage behavior, and telemetry mapping.
 
 ## 2. Confidence + Compound-Risk + Explainability Architecture Summary
 
-The scaffold introduces explicit domain seams under `src/health-pulse` for:
+Health Pulse is organized by explicit domain seams under `src/health-pulse`:
 
-- confidence computation boundaries
-- compound-risk boundaries
-- recommendation boundaries
-- explainability-ready type contracts
+- `computors/*`: deterministic scoring, confidence, compound-risk, recommendation, office suppression
+- `governance/*`: admin policy validation and governance rule enforcement
+- `hooks/*`: query/state orchestration and invalidation wiring
+- `components/*`: card/detail/tab/admin/inline-edit UI composition
+- `integrations/*`: deterministic projections for BIC/notifications/auth/complexity/project-canvas/versioned-record/telemetry
 
-These boundaries are package/domain modules and are not UI-only behavior.
+These boundaries are package-domain modules and are not UI-only behavior.
 
 ## 3. Top Recommended Action Prioritization Model Summary
 
-The recommendation seam is modeled as a dedicated computor boundary (`computors/recommendation`) so future ranking logic can combine urgency, impact, confidence weighting, and reason codes without coupling to presentation layers.
+Top action ranking is computed from urgency, impact, reversibility window, owner availability, and confidence weighting. Each output includes a reason code and optional source link for auditable action provenance across UI and telemetry consumers.
 
 ## 4. Manual-Entry Governance and Office Suppression Policy Summary
 
-Governance and office suppression boundaries are explicitly separated:
+Governance and suppression controls are explicit, validated model inputs:
 
-- `governance`: manual-entry metadata, policy, and approval semantics
-- `computors/office-suppression`: office signal suppression/noise policy seam
+- manual override metadata: reason, actor, timestamp, approval visibility fields
+- admin policy validation: weights sum, staleness/override constraints, triage defaults
+- office suppression policy: low-impact suppression, clustering window, severity weighting
+- override aging and sensitive approval visibility surfaced through hook/component contracts
 
-T01 provides compile-safe placeholders only; policy implementation is deferred to later SF21 tasks.
+Manual-entry behavior remains deterministic and policy-driven; no app-route coupling or ad hoc component-only policy logic is used.
 
 ## 5. Portfolio Triage Mode Summary
 
-Triage capabilities are modeled as part of the health-pulse domain boundary and will be implemented in later SF21 tasks. The T01 scaffold ensures triage-related contracts can evolve through the package public API instead of internal deep imports.
+Portfolio triage includes canonical buckets (`attention-now`, `trending-down`, `data-quality-risk`, `recovering`) with deterministic sort/filter behavior and reason projection. Triage updates are driven by pulse recomputation (confidence, compound risk, and recommendation changes) via hook invalidation flows.
 
 ## 6. Public Exports
 
 | Subpath | Purpose | Intended Use |
 |---|---|---|
-| `@hbc/features-project-hub` | Runtime feature surface (including `health-pulse` contracts, constants, and barrels) | App/runtime consumption |
+| `@hbc/features-project-hub` | Runtime feature surface (contracts, computors, hooks, components, integrations) | App/runtime consumption |
 | `@hbc/features-project-hub/testing` | Stable SF21 test fixtures and helpers | Unit tests, Storybook, E2E, harnesses |
+
+Testing exports include canonical fixture factories and state presets:
+
+- `createMockProjectHealthPulse(overrides?)`
+- `createMockHealthDimension(overrides?)`
+- `createMockHealthMetric(overrides?)`
+- `mockProjectHealthStates`
 
 ## 7. Boundary Rules and Telemetry Emission Notes
 
@@ -47,7 +57,7 @@ Triage capabilities are modeled as part of the health-pulse domain boundary and 
 - Health-pulse integration adapters live under `src/health-pulse/integrations` and are deterministic projection helpers (no app-route coupling, no side-effect emission).
 - App routes must not be imported into package runtime.
 - Consumers should use declared package exports (`.` and `./testing`) rather than internal file paths.
-- Telemetry payload mapping preserves reason-code and confidence context for downstream emitters; emission side effects remain in consuming layers.
+- Telemetry payload mapping preserves reason code, confidence context, triage context, compound-risk escalation flag, and decision-quality KPI fields for downstream emitters; emission side effects remain in consuming layers.
 
 ## 8. Related SF21 Links
 

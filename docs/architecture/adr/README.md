@@ -115,6 +115,7 @@
 - [ADR-0107: Estimating Bid Readiness Signal (Adapter over Primitive)](./ADR-0107-estimating-bid-readiness-signal.md)
 - [ADR-0108: BD Score Benchmark Ghost Overlay (Adapter over Primitive)](./ADR-0108-bd-score-benchmark-ghost-overlay.md)
 - [ADR-0109: BD Heritage and Living Strategic Intelligence (Adapter over Primitive)](./ADR-0109-bd-heritage-living-strategic-intelligence.md)
+- [ADR-0110: Project Health Pulse Multi-Dimension Indicator](./ADR-0110-project-health-pulse-multi-dimension-indicator.md)
 - [ADR-0111: Health Indicator Readiness Primitive Runtime](./ADR-0111-health-indicator-readiness-primitive-runtime.md)
 - [ADR-0112: Score Benchmark Primitive Runtime](./ADR-0112-score-benchmark-primitive-runtime.md)
 - [ADR-0113: Strategic Intelligence Primitive Runtime](./ADR-0113-strategic-intelligence-primitive-runtime.md)

@@ -12,7 +12,7 @@
 
 ## Objective
 
-Lock primitive-owned public contracts for export lifecycle, artifact context stamping, BIC handoff steps, provenance/versioning, and telemetry. Module contracts remain projection-only.
+Lock primitive-owned public contracts for export lifecycle truth, receipt semantics, artifact confidence, context stamping, BIC handoff steps, provenance/versioning, and operational telemetry. Module contracts remain projection-only.
 
 ---
 
@@ -20,44 +20,98 @@ Lock primitive-owned public contracts for export lifecycle, artifact context sta
 
 ```ts
 export type ExportFormat = 'csv' | 'xlsx' | 'pdf' | 'print';
-export type ExportStatus = 'queued' | 'rendering' | 'complete' | 'failed';
+export type ExportIntent =
+  | 'working-data'
+  | 'current-view'
+  | 'record-snapshot'
+  | 'presentation'
+  | 'composite-report';
+
+export type ExportStatus =
+  | 'saved-locally'
+  | 'queued-to-sync'
+  | 'rendering'
+  | 'complete'
+  | 'failed'
+  | 'degraded'
+  | 'restored-receipt';
+
+export type ExportArtifactConfidence =
+  | 'trusted-synced'
+  | 'queued-local-only'
+  | 'completed-with-degraded-truth'
+  | 'failed-or-partial'
+  | 'restored-needs-review';
 
 export interface IExportRequest {
   requestId: string;
   format: ExportFormat;
-  context: IExportContextStamp;
+  intent: ExportIntent;
+  context: IExportSourceTruthStamp;
   payload: ITableExportPayload | IReportExportPayload;
+  receipt: IExportReceiptState | null;
+  reviewSteps: IExportReviewStepState[];
+  nextRecommendedAction: IExportNextRecommendedAction | null;
+  failure: IExportFailureState | null;
+  retry: IExportRetryState | null;
+  confidence: ExportArtifactConfidence;
   bicSteps?: IExportBicStepConfig[];
   version: VersionedRecord;
   telemetry: IExportTelemetryState;
 }
-
-export interface IExportContextStamp {
-  moduleKey: string;
-  projectId?: string;
-  recordId?: string;
-  recordVersionId?: string;
-  viewId?: string;
-  exportedByUserId: string;
-  exportedAtIso: string;
-  fileName: string;
-}
-
-export interface IExportTelemetryState {
-  exportCompletionTime: number | null;
-  artifactConsistencyRate: number | null;
-  handoffLatency: number | null;
-  auditTraceabilityScore: number | null;
-  exportRuntimeCes: number | null;
-}
 ```
+
+Additional contracts must include:
+
+- `IExportSourceTruthStamp`
+- `IExportTruthState`
+- `IExportReceiptState`
+- `IExportArtifactMetadata`
+- `IExportReviewStepState`
+- `IExportReviewHistoryEntry`
+- `IExportNextRecommendedAction`
+- `IExportFailureState`
+- `IExportRetryState`
+- `IExportSuppressedFormatState`
+- `IExportContextDeltaState`
 
 ---
 
-## Hook Return Contracts
+## Semantic Contract Requirements
 
-- primitive hooks return state, loading/error, refresh, queue status, and commit metadata
-- adapter hooks return module-projected view models and route labels only
+- truth state must answer:
+  - what record/view/version the artifact represents
+  - whether filters, sorts, visible columns, selected rows, or composed sections were applied
+  - whether the artifact is a snapshot or current-view projection
+  - whether source truth changed materially before render completion
+- receipt state must distinguish:
+  - local-only queued request
+  - remote render in progress
+  - completed artifact
+  - failed artifact
+  - restored receipt
+- review-step state must distinguish:
+  - blocking vs non-blocking
+  - current owner
+  - reassignment history
+  - completion semantics
+- next recommended action must include:
+  - export option or follow-up action kind
+  - human-readable reason
+  - whether the next step is download, review, approve, circulate, or publish
+  - whether the export is intended for analysis, presentation, audit, or handoff
+
+---
+
+## Reason-Code Enums to Lock
+
+- `ExportUnavailableReasonCode`
+- `ExportTrustDowngradeReasonCode`
+- `ExportRetryReasonCode`
+- `ExportQueueReasonCode`
+- `ExportFailureReasonCode`
+
+These enums are required so user-facing explanations and telemetry are deterministic and testable.
 
 ---
 
@@ -66,6 +120,7 @@ export interface IExportTelemetryState {
 - `EXPORT_RUNTIME_SYNC_QUEUE_KEY = 'export-runtime-sync-queue'`
 - `EXPORT_RUNTIME_SYNC_STATUSES = ['Saved locally', 'Queued to sync']`
 - `EXPORT_RUNTIME_COMPLEXITY_PROFILES = ['essential', 'standard', 'expert']`
+- `EXPORT_RUNTIME_CONFIDENCE_STATES = ['trusted-synced', 'queued-local-only', 'completed-with-degraded-truth', 'failed-or-partial', 'restored-needs-review']`
 
 ---
 
@@ -77,4 +132,3 @@ pnpm --filter @hbc/export-runtime test -- contracts
 pnpm --filter @hbc/features-business-development check-types
 pnpm --filter @hbc/features-estimating check-types
 ```
-

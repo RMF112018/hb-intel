@@ -12,23 +12,34 @@
 
 ## Objective
 
-Define export entry and format-picker contracts, including complexity behavior, review/handoff ownership cues, inline AI actions, and deep-link behavior.
+Define export entry and format-picker contracts, including complexity behavior, recommended export logic, format-availability explainability, review/handoff ownership cues, and clear differentiation between analysis exports and presentation/report exports.
 
 ---
 
 ## `ExportActionMenu`
 
 Behavior:
+
 - normalized export entry across modules with primitive-controlled format availability
 - inline review/handoff ownership avatar projection for BIC-linked export intents
 - entrypoint to composition and receipt surfaces where format/profile permits
+- top recommended export option surfaced with explicit reason
+
+User-facing explainability requirements:
+
+- show why a format is recommended in the current context
+- show why a format is disabled, suppressed, or deferred
+- distinguish whether the current export is intended for working analysis, presentation circulation, record audit, or handoff
+- surface downstream owner visibility when the chosen export enters review or handoff flow
 
 Complexity:
-- Essential: simple export action limited to CSV/XLSX
-- Standard: full menu with branded PDF/Print options
-- Expert: full menu + report composition entrypoint + configure link
+
+- Essential: reduced-choice menu limited to the highest-value CSV/XLSX or equivalent low-friction default
+- Standard: full menu with branded PDF/Print options and trust-aware hints
+- Expert: full menu + report composition entrypoint + configure link + deeper diagnostics
 
 AI constraints:
+
 - inline only (no sidecar)
 - source citation required
 - explicit approval required before persistence or artifact mutation
@@ -38,13 +49,30 @@ AI constraints:
 ## `ExportFormatPicker`
 
 Behavior:
-- enforces format compatibility with payload type and module policy
+
+- enforces format compatibility with payload type, module policy, and trust requirements
 - surfaces context stamp preview before request submission
-- blocks invalid format/output combinations with explicit guidance
+- blocks invalid or unsupported format/output combinations with explicit guidance
+- remembers safe preferred formats where product policy allows
+
+Safety requirements:
+
+- clear differentiation between working-data export and presentation/report export
+- duplicate accidental export generation is guarded where in-flight equivalent requests already exist
+- unsupported-format fallback must remain visible and non-destructive
 
 Offline states:
+
 - must preserve user-selected format in queued request model
 - must project `Saved locally` and `Queued to sync` through linked receipt flow
+- must clearly distinguish queued local request success from remotely rendered artifact success
+
+---
+
+## UI Ownership Rule
+
+Any reusable visual picker, receipt, or progress primitive introduced during SF24 implementation must live in `@hbc/ui-kit`.
+`@hbc/export-runtime` consumes those primitives and supplies export lifecycle/truth/review state.
 
 ---
 
@@ -56,4 +84,3 @@ pnpm --filter @hbc/export-runtime test -- ExportFormatPicker
 pnpm --filter @hbc/features-business-development test -- export-runtime-ui
 pnpm --filter @hbc/features-estimating test -- export-runtime-ui
 ```
-
