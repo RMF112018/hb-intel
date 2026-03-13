@@ -274,4 +274,63 @@ describe('ProjectHealthPulseCard', () => {
     expect(screen.getByText(/No top recommendation is currently available./i)).toBeInTheDocument();
     expect(screen.queryByText(/Open action link/i)).not.toBeInTheDocument();
   });
+
+  it('renders governance warning and omits deep-link text when action link is missing', () => {
+    mockUseProjectHealthPulse.mockReturnValue({
+      ...hookResult,
+      derivation: {
+        ...hookResult.derivation,
+        governanceReasonCodes: ['manual-influence-cap'],
+      },
+      pulse: {
+        ...hookResult.pulse!,
+        dimensions: {
+          ...hookResult.pulse!.dimensions,
+          cost: { ...hookResult.pulse!.dimensions.cost, hasExcludedMetrics: false },
+          time: { ...hookResult.pulse!.dimensions.time, hasExcludedMetrics: false },
+          field: { ...hookResult.pulse!.dimensions.field, hasExcludedMetrics: false },
+          office: { ...hookResult.pulse!.dimensions.office, hasExcludedMetrics: false },
+        },
+        topRecommendedAction: {
+          ...hookResult.pulse!.topRecommendedAction!,
+          actionLink: null,
+        },
+      },
+    });
+
+    render(
+      <ProjectHealthPulseCard
+        projectId="p-card"
+        metricsByDimension={{ cost: [], time: [], field: [], office: [] }}
+      />
+    );
+
+    expect(
+      screen.getByText(/Excluded or governance-impacted metrics detected/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Open action link/i)).not.toBeInTheDocument();
+  });
+
+  it('invokes open callbacks when detail and explainability triggers are used', async () => {
+    const onOpenDetail = vi.fn();
+    const onOpenExplainability = vi.fn();
+
+    render(
+      <ProjectHealthPulseCard
+        projectId="p-card"
+        metricsByDimension={{ cost: [], time: [], field: [], office: [] }}
+        onOpenDetail={onOpenDetail}
+        onOpenExplainability={onOpenExplainability}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Overall: watch/i }));
+    expect(onOpenDetail).toHaveBeenCalledWith('cost');
+
+    const confidenceButton = screen
+      .getAllByRole('button')
+      .find((button) => button.textContent?.trim() === 'Confidence: Low');
+    fireEvent.click(confidenceButton!);
+    expect(onOpenExplainability).toHaveBeenCalledWith('confidence');
+  });
 });

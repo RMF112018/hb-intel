@@ -142,6 +142,32 @@ describe('health pulse hooks orchestration', () => {
     });
   });
 
+  it('computes pulse deterministically when admin-config query cache is seeded', async () => {
+    const queryClient = createQueryClient();
+    queryClient.setQueryData([...HEALTH_PULSE_ADMIN_CONFIG_QUERY_KEY], config);
+    const wrapper = createWrapper(queryClient);
+
+    const { result } = renderHook(
+      () =>
+        useProjectHealthPulse({
+          projectId: 'p-hooks-cache',
+          now: () => new Date('2026-03-12T00:00:00.000Z'),
+          metricsByDimension: {
+            cost: [metric('forecast-confidence', 90)],
+            time: [metric('look-ahead-reliability', 90)],
+            field: [metric('production-throughput-reliability', 90)],
+            office: [metric('clustering', 90)],
+          },
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.pulse?.projectId).toBe('p-hooks-cache');
+    });
+  });
+
   it('keeps stable error shape when admin config is missing', async () => {
     const queryClient = createQueryClient();
     const wrapper = createWrapper(queryClient);
@@ -167,6 +193,31 @@ describe('health pulse hooks orchestration', () => {
       governanceReasonCodes: [],
       hasManualInfluence: false,
       evaluatedAt: null,
+    });
+  });
+
+  it('uses default clock when now is not provided', async () => {
+    const queryClient = createQueryClient();
+    const wrapper = createWrapper(queryClient);
+    const { result } = renderHook(
+      () =>
+        useProjectHealthPulse({
+          projectId: 'p-hooks-default-now',
+          adminConfig: config,
+          metricsByDimension: {
+            cost: [metric('forecast-confidence', 90)],
+            time: [metric('look-ahead-reliability', 90)],
+            field: [metric('production-throughput-reliability', 90)],
+            office: [metric('clustering', 90)],
+          },
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.pulse?.projectId).toBe('p-hooks-default-now');
+      expect(result.current.pulse?.computedAt).toMatch(/T/);
     });
   });
 

@@ -374,6 +374,7 @@ describe('health pulse integrations', () => {
     expect(unknownAgeFreshness.ageDays).toBeNull();
 
     const pulse = createMockProjectHealthPulseSnapshot();
+    pulse.topRecommendedAction = null;
     const telemetry = createMockProjectHealthTelemetry();
     const payload = projectHealthPulseToTelemetryPayload(pulse, telemetry);
     expect(payload.eventType).toBe('project-health-pulse.snapshot');

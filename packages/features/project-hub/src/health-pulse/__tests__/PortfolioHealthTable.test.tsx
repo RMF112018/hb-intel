@@ -160,4 +160,17 @@ describe('PortfolioHealthTable', () => {
     rerender(<PortfolioHealthTable rows={[]} onOpenProject={() => {}} />);
     expect(screen.getByText('No portfolio health rows')).toBeInTheDocument();
   });
+
+  it('renders no matching rows when filters exclude all projects', () => {
+    renderWithTheme(<PortfolioHealthTable rows={rowsFixture} onOpenProject={() => {}} />);
+    const checkboxes = screen.getAllByRole('checkbox');
+    fireEvent.click(checkboxes[0]);
+    fireEvent.click(checkboxes[1]);
+    fireEvent.click(checkboxes[2]);
+    fireEvent.change(screen.getByLabelText('Status filter'), {
+      target: { value: 'critical' },
+    });
+
+    expect(screen.getByText('No matching projects')).toBeInTheDocument();
+  });
 });

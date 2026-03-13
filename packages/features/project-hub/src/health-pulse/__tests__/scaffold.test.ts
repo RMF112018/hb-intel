@@ -30,6 +30,6 @@ describe('SF21 scaffold boundaries', () => {
 
     expect(snapshot.projectId).toBe('project-sf21-fixture');
     expect(snapshot.dimensions.field.label).toBe('Field');
-    expect(snapshot.explainability.whyThisStatus[0]).toBe('SF21-T02 deterministic fixture');
+    expect(snapshot.explainability.whyThisStatus[0]).toBe('Time and cost are showing mild variance.');
   });
 });

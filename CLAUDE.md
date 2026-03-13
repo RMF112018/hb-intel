@@ -30,7 +30,7 @@ This file is the single binding operating manual for Claude Code (claude.ai/code
 4. **Document Classification Rule (mandatory for every new file)**
    Every new architecture, plan, reference, or release document must declare one of the six permitted document classes at creation time — either via an inline Tier 1 banner or by being added to the matrix in `current-state-map.md §2`. The six classes and their usage rules are defined in `current-state-map.md §2.1`. Creating an unclassified document is a violation of the Zero-Deviation Rule. Deferred Scope documents may not be updated or acted upon without a reclassification to Canonical Normative Plan and an active phase assignment.
 
-## 5. **Guarded Commit Rule (mandatory for all repository commits)**
+5. **Guarded Commit Rule (mandatory for all repository commits)**
 
 All coding agents **must use the repository’s Guarded Auto-Commit workflow** for every commit. Direct use of `git commit` by an agent is strictly prohibited.
 
@@ -108,6 +108,14 @@ Example dry-run:
 ```bash
 pnpm guarded:commit --config <task-config> --dry-run
 ```
+
+6. **UI Ownership Rule**
+   All reusable visual UI components must be owned by `@hbc/ui-kit`. No package outside `@hbc/ui-kit` may introduce new standalone presentational components, visual primitives, or duplicate component implementations. Feature and shared packages may only:
+   - compose `@hbc/ui-kit` components,
+   - provide headless/domain logic, adapters, hooks, and state orchestration,
+   - define thin feature-local composition shells only when they contain no reusable visual primitive behavior.
+
+   If a package requires new reusable UI, that UI must be created or extended in `@hbc/ui-kit` first and then imported into the consuming package. Any exception requires an ADR.
 
 ### Agent Compliance Requirements
 

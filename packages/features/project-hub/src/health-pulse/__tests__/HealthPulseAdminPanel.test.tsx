@@ -169,4 +169,123 @@ describe('HealthPulseAdminPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Reset' }));
     expect(reset).toHaveBeenCalledTimes(1);
   });
+
+  it('renders loading and error states and supports panel mode close', () => {
+    const onClose = vi.fn();
+    mockUseHealthPulseAdminConfig.mockReturnValue({
+      config: null,
+      draft: null,
+      isLoading: true,
+      isSaving: false,
+      isValid: false,
+      error: new Error('admin load failed'),
+      validationIssues: [],
+      save: vi.fn(async () => {}),
+      reset: vi.fn(),
+      refresh: vi.fn(async () => {}),
+    });
+
+    renderWithTheme(<HealthPulseAdminPanel initialConfig={baseConfig} open onClose={onClose} />);
+
+    expect(screen.getByText('Loading admin configuration')).toBeInTheDocument();
+    expect(screen.getByText(/Unable to load admin configuration: admin load failed/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('updates all policy inputs and forwards saved callback', async () => {
+    const onSaved = vi.fn();
+    const save = vi.fn(async () => {});
+    mockUseHealthPulseAdminConfig.mockReturnValue({
+      config: baseConfig,
+      draft: baseConfig,
+      isLoading: false,
+      isSaving: false,
+      isValid: true,
+      error: null,
+      validationIssues: [],
+      save,
+      reset: vi.fn(),
+      refresh: vi.fn(async () => {}),
+    });
+
+    renderWithTheme(<HealthPulseAdminPanel initialConfig={baseConfig} onSaved={onSaved} />);
+
+    fireEvent.change(screen.getByLabelText('Per-metric staleness overrides'), {
+      target: { value: 'forecast-confidence=10' },
+    });
+    fireEvent.change(screen.getByLabelText('Approval-required metric keys'), {
+      target: { value: 'forecast-confidence, pending-change-order-aging' },
+    });
+    fireEvent.change(screen.getByLabelText('Max manual influence %'), {
+      target: { value: '40' },
+    });
+    fireEvent.change(screen.getByLabelText('Max override age days'), {
+      target: { value: '30' },
+    });
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.change(screen.getByLabelText('Duplicate cluster window hours'), {
+      target: { value: '36' },
+    });
+    fireEvent.change(screen.getByLabelText('Minor severity weight'), {
+      target: { value: '2' },
+    });
+    fireEvent.change(screen.getByLabelText('Major severity weight'), {
+      target: { value: '3' },
+    });
+    fireEvent.change(screen.getByLabelText('Critical severity weight'), {
+      target: { value: '4' },
+    });
+    fireEvent.change(screen.getByLabelText('Default bucket'), {
+      target: { value: 'recovering' },
+    });
+    fireEvent.change(screen.getByLabelText('Default sort'), {
+      target: { value: 'compound-risk-severity' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Save configuration/i }));
+
+    await waitFor(() => {
+      expect(save).toHaveBeenCalledTimes(1);
+      expect(onSaved).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('shows hook validation issues and blocks save while invalid/saving', () => {
+    mockUseHealthPulseAdminConfig.mockReturnValue({
+      config: baseConfig,
+      draft: baseConfig,
+      isLoading: false,
+      isSaving: true,
+      isValid: false,
+      error: null,
+      validationIssues: [
+        { path: 'weights', message: 'weights must sum to 1.0', severity: 'error' },
+      ],
+      save: vi.fn(async () => {}),
+      reset: vi.fn(),
+      refresh: vi.fn(async () => {}),
+    });
+
+    renderWithTheme(<HealthPulseAdminPanel initialConfig={baseConfig} />);
+    expect(screen.getByText(/weights: weights must sum to 1.0/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Save configuration/i })).toBeDisabled();
+  });
+
+  it('supports panel mode close fallback when onClose is not provided', () => {
+    renderWithTheme(<HealthPulseAdminPanel initialConfig={baseConfig} open />);
+    expect(() => {
+      fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    }).not.toThrow();
+  });
+
+  it('parses non-numeric weight edits to zero via deterministic parser path', async () => {
+    renderWithTheme(<HealthPulseAdminPanel initialConfig={baseConfig} />);
+    fireEvent.change(screen.getByLabelText('Field %'), {
+      target: { value: 'not-a-number' },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Current sum: 60%/i)).toBeInTheDocument();
+    });
+  });
 });

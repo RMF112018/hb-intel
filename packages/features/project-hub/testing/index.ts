@@ -4,7 +4,21 @@
  */
 
 export {
-  createMockProjectHealthPulseSnapshot,
+  createMockProjectHealthPulse,
   createMockHealthPulseAdminConfig,
   createMockProjectHealthTelemetry,
+} from './createMockProjectHealthPulse.js';
+
+export {
+  createMockHealthDimension,
+} from './createMockHealthDimension.js';
+
+export {
+  createMockHealthMetric,
+} from './createMockHealthMetric.js';
+
+export { mockProjectHealthStates } from './mockProjectHealthStates.js';
+
+export {
+  createMockProjectHealthPulseSnapshot,
 } from './createMockProjectHealthPulseSnapshot.js';

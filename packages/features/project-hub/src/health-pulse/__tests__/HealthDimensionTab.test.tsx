@@ -103,6 +103,7 @@ describe('HealthDimensionTab', () => {
 
   it('opens inline edit and emits save payload', () => {
     const onMetricSave = vi.fn();
+    const onOpenInlineEdit = vi.fn();
     renderWithTheme(
       <HealthDimensionTab
         dimensionKey="cost"
@@ -113,11 +114,13 @@ describe('HealthDimensionTab', () => {
           maxOverrideAgeDays: 14,
         }}
         onMetricSave={onMetricSave}
+        onOpenInlineEdit={onOpenInlineEdit}
         now={() => new Date('2026-03-12T00:00:00.000Z')}
       />
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    expect(onOpenInlineEdit).toHaveBeenCalledTimes(1);
     const [metricValueInput, reasonInput] = screen.getAllByRole('textbox');
     fireEvent.change(metricValueInput, { target: { value: '48' } });
     fireEvent.change(reasonInput, {
@@ -131,5 +134,31 @@ describe('HealthDimensionTab', () => {
     expect(onMetricSave.mock.calls[0]?.[0].manualOverride?.reason).toBe(
       'Validated with latest estimate'
     );
+  });
+
+  it('omits exclusion banner when there are no excluded metrics', () => {
+    renderWithTheme(
+      <HealthDimensionTab
+        dimensionKey="cost"
+        dimension={{
+          ...dimensionFixture,
+          hasExcludedMetrics: false,
+          metrics: [
+            {
+              ...dimensionFixture.metrics[0],
+              value: 62,
+              isStale: false,
+            },
+          ],
+        }}
+        governance={{
+          approvalRequiredMetricKeys: [],
+          maxManualInfluencePercent: 30,
+          maxOverrideAgeDays: 14,
+        }}
+      />
+    );
+
+    expect(screen.queryByText(/Excluded metrics detected/i)).not.toBeInTheDocument();
   });
 });

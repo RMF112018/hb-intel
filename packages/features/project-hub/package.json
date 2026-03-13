@@ -15,7 +15,9 @@
     "dev": "tsc --project tsconfig.json --watch",
     "check-types": "tsc --noEmit",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "storybook:test": "vitest run --passWithNoTests -- storybook-matrix",
+    "test:e2e": "pnpm exec playwright test --config playwright.health-pulse.config.ts"
   },
   "peerDependencies": {
     "react": "^18.3.0",
