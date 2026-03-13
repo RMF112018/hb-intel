@@ -1,5 +1,9 @@
 import { AUTOPSY_SLA_BUSINESS_DAYS } from '../constants/index.js';
-import { createAutopsyCommitMetadata, createAutopsyQueueState, createAutopsyQueryInvalidationResult } from '../hooks/index.js';
+import {
+  createAutopsyCommitMetadata,
+  createAutopsyQueueState,
+  createAutopsyQueryInvalidationResult,
+} from '../hooks/selectors.js';
 import {
   addBusinessDays,
   appendAutopsyVersionEnvelope,
@@ -138,6 +142,13 @@ export class PostBidAutopsyApi {
     return clone(this.state.records.get(autopsyId) ?? null);
   }
 
+  getRecordByPursuitId(pursuitId: string): IAutopsyRecordSnapshot | null {
+    const record = [...this.state.records.values()].find(
+      (candidate) => candidate.autopsy.pursuitId === pursuitId
+    );
+    return clone(record ?? null);
+  }
+
   listRecords(): IAutopsyRecordSnapshot[] {
     return [...this.state.records.values()].map((record) => clone(record));
   }
@@ -146,8 +157,38 @@ export class PostBidAutopsyApi {
     return clone(this.state.versions.get(autopsyId) ?? null);
   }
 
+  getVersionEnvelopeByPursuitId(pursuitId: string): IAutopsyVersionEnvelope | null {
+    const record = this.getRecordByPursuitId(pursuitId);
+    if (!record) {
+      return null;
+    }
+
+    return this.getVersionEnvelope(record.autopsy.autopsyId);
+  }
+
+  listQueuedMutations(autopsyId?: string): IAutopsyStorageMutation[] {
+    const queue = autopsyId
+      ? this.state.queue.filter((mutation) => mutation.autopsyId === autopsyId)
+      : this.state.queue;
+    return queue.map((mutation) => clone(mutation));
+  }
+
   setRecordForTesting(record: IAutopsyRecordSnapshot): void {
-    this.state.records.set(record.autopsy.autopsyId, clone(record));
+    const clonedRecord = clone(record);
+    this.state.records.set(clonedRecord.autopsy.autopsyId, clonedRecord);
+
+    if (!this.state.versions.has(clonedRecord.autopsy.autopsyId)) {
+      const actor = clonedRecord.assignments.primaryAuthor;
+      this.state.versions.set(
+        clonedRecord.autopsy.autopsyId,
+        createInitialAutopsyVersionEnvelope(
+          clonedRecord,
+          clonedRecord.auditTrail.at(-1)?.occurredAt ?? clonedRecord.sla.startedAt,
+          actor,
+          'Testing seed record'
+        )
+      );
+    }
   }
 
   async processTrigger(input: IAutopsyTriggerInput): Promise<IAutopsyTriggerResult> {
@@ -415,7 +456,9 @@ export class PostBidAutopsyApi {
     await this.queueStore.saveQueue([]);
 
     const invalidated = queue.flatMap((mutation) =>
-      createAutopsyQueryInvalidationResult(mutation.autopsyId).invalidatedQueryKeys
+      createAutopsyQueryInvalidationResult(
+        this.state.records.get(mutation.autopsyId)?.autopsy.pursuitId ?? mutation.autopsyId
+      ).invalidatedQueryKeys
     );
 
     return consumeAutopsyReplayResult(

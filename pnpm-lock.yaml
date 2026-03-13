@@ -1629,6 +1629,9 @@ importers:
       '@hbc/models':
         specifier: workspace:*
         version: link:../../models
+      '@hbc/post-bid-autopsy':
+        specifier: workspace:*
+        version: link:../../post-bid-autopsy
       '@hbc/query-hooks':
         specifier: workspace:*
         version: link:../../query-hooks
@@ -2001,10 +2004,44 @@ importers:
         version: 3.2.4(@types/node@20.19.35)(happy-dom@18.0.1)(jsdom@25.0.1)(msw@2.12.10(@types/node@20.19.35)(typescript@5.9.3))(terser@5.46.0)(tsx@4.21.0)
 
   packages/post-bid-autopsy:
+    dependencies:
+      '@hbc/bic-next-move':
+        specifier: workspace:*
+        version: link:../bic-next-move
+      '@hbc/score-benchmark':
+        specifier: workspace:*
+        version: link:../score-benchmark
+      '@hbc/strategic-intelligence':
+        specifier: workspace:*
+        version: link:../strategic-intelligence
+      '@hbc/versioned-record':
+        specifier: workspace:*
+        version: link:../versioned-record
+      '@tanstack/react-query':
+        specifier: ^5.75.0
+        version: 5.90.21(react@18.3.1)
     devDependencies:
+      '@testing-library/react':
+        specifier: ^15.0.0
+        version: 15.0.7(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@types/react':
+        specifier: ^18.3.0
+        version: 18.3.28
+      '@types/react-dom':
+        specifier: ^18.3.0
+        version: 18.3.7(@types/react@18.3.28)
       '@vitest/coverage-v8':
         specifier: ^3.2.4
         version: 3.2.4(vitest@3.2.4(@types/node@20.19.35)(happy-dom@18.0.1)(jsdom@25.0.1)(msw@2.12.10(@types/node@20.19.35)(typescript@5.9.3))(terser@5.46.0)(tsx@4.21.0))
+      jsdom:
+        specifier: ^25.0.0
+        version: 25.0.1
+      react:
+        specifier: ^18.3.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.0
+        version: 18.3.1(react@18.3.1)
       typescript:
         specifier: ^5.4.0
         version: 5.9.3

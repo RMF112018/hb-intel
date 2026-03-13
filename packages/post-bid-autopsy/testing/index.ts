@@ -10,7 +10,7 @@ import type {
 import {
   createPostBidAutopsyApiScaffold,
   createPostBidAutopsyRecord,
-  createPostBidAutopsyRecordQueryKey,
+  createPostBidAutopsyStateQueryKey,
 } from '../src/index.js';
 
 export const createMockPostBidAutopsyRecord = (
@@ -115,6 +115,7 @@ export const createMockAutopsyRecordSnapshot = (
         createdAt: '2026-03-13T00:00:00.000Z',
       },
     ],
+  sectionDrafts: overrides.sectionDrafts ?? [],
   sla:
     overrides.sla ?? {
       startedAt: '2026-03-13T00:00:00.000Z',
@@ -159,5 +160,5 @@ export const createMockAutopsyStorageMutation = (
     },
 });
 
-export const createMockAutopsyQueryInvalidation = (autopsyId = 'autopsy-mock') =>
-  createPostBidAutopsyRecordQueryKey(autopsyId);
+export const createMockAutopsyQueryInvalidation = (pursuitId = 'pursuit-mock') =>
+  createPostBidAutopsyStateQueryKey(pursuitId);

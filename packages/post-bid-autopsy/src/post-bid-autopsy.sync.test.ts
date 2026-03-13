@@ -57,8 +57,8 @@ describe('post-bid autopsy sync', () => {
     expect(replayed.replayedMutationIds).toEqual(['mutation-1', 'mutation-2']);
     expect(replayed.invalidatedQueryKeys).toEqual(
       expect.arrayContaining([
-        ['post-bid-autopsy', 'record', trigger.autopsyId],
-        ['post-bid-autopsy', 'sync-queue', trigger.autopsyId],
+        ['post-bid-autopsy', trigger.record.autopsy.pursuitId],
+        ['post-bid-autopsy', trigger.record.autopsy.pursuitId, 'queue'],
       ])
     );
   });

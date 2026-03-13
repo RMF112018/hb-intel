@@ -1,8 +1,8 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import type {
-  AutopsyStatus,
   ConfidenceTier,
+  IPostBidAutopsyStateView,
   IUseAutopsyPublicationGateResult,
   IUseAutopsyReviewGovernanceResult,
   IUseAutopsySyncQueueResult,
@@ -18,11 +18,11 @@ import {
   createAutopsyCompletenessState,
   createAutopsyPublicationBlockerSummary,
   createAutopsyQueueState,
-  createPostBidAutopsyPublicationGateQueryKey,
+  createPostBidAutopsyQueueQueryKey,
   createPostBidAutopsyRecord,
-  createPostBidAutopsyRecordQueryKey,
-  createPostBidAutopsyReviewGovernanceQueryKey,
-  createPostBidAutopsySyncQueueQueryKey,
+  createPostBidAutopsyReviewQueryKey,
+  createPostBidAutopsySectionsQueryKey,
+  createPostBidAutopsyStateQueryKey,
 } from '@hbc/post-bid-autopsy';
 import {
   createMockBenchmarkDatasetSignal,
@@ -43,7 +43,15 @@ describe('post-bid autopsy contracts', () => {
     expect(AUTOPSY_SYNC_QUEUE_KEY).toBe('post-bid-autopsy-sync-queue');
     expect(AUTOPSY_MIN_PUBLISH_CONFIDENCE).toBe('moderate');
 
-    expectTypeOf<(typeof AUTOPSY_STATUS_ORDER)[number]>().toEqualTypeOf<AutopsyStatus>();
+    expectTypeOf<(typeof AUTOPSY_STATUS_ORDER)[number]>().toMatchTypeOf<
+      | 'draft'
+      | 'review'
+      | 'approved'
+      | 'published'
+      | 'superseded'
+      | 'archived'
+      | 'overdue'
+    >();
     expectTypeOf<typeof AUTOPSY_MIN_PUBLISH_CONFIDENCE>().toEqualTypeOf<ConfidenceTier>();
   });
 
@@ -63,21 +71,21 @@ describe('post-bid autopsy contracts', () => {
     const completeness = createAutopsyCompletenessState(autopsy);
     const blockers = createAutopsyPublicationBlockerSummary(autopsy);
 
-    expect(createPostBidAutopsyRecordQueryKey('aut-1')).toEqual(['post-bid-autopsy', 'record', 'aut-1']);
-    expect(createPostBidAutopsyReviewGovernanceQueryKey('aut-1')).toEqual([
+    expect(createPostBidAutopsyStateQueryKey('pursuit-1')).toEqual(['post-bid-autopsy', 'pursuit-1']);
+    expect(createPostBidAutopsySectionsQueryKey('pursuit-1')).toEqual([
       'post-bid-autopsy',
-      'review-governance',
-      'aut-1',
+      'pursuit-1',
+      'sections',
     ]);
-    expect(createPostBidAutopsyPublicationGateQueryKey('aut-1')).toEqual([
+    expect(createPostBidAutopsyReviewQueryKey('pursuit-1')).toEqual([
       'post-bid-autopsy',
-      'publication-gate',
-      'aut-1',
+      'pursuit-1',
+      'review',
     ]);
-    expect(createPostBidAutopsySyncQueueQueryKey('aut-1')).toEqual([
+    expect(createPostBidAutopsyQueueQueryKey('pursuit-1')).toEqual([
       'post-bid-autopsy',
-      'sync-queue',
-      'aut-1',
+      'pursuit-1',
+      'queue',
     ]);
     expect(queueState.syncQueueKey).toBe(AUTOPSY_SYNC_QUEUE_KEY);
     expect(commitMetadata.source).toBe('offline-queue');
@@ -85,7 +93,7 @@ describe('post-bid autopsy contracts', () => {
     expect(blockers.blockers).toEqual(['missing-evidence']);
     expect(POST_BID_AUTOPSY_HOOK_SURFACES).toHaveLength(4);
 
-    expectTypeOf<IUsePostBidAutopsyResult['state']>().toEqualTypeOf<typeof autopsy | null>();
+    expectTypeOf<IUsePostBidAutopsyResult['state']>().toEqualTypeOf<IPostBidAutopsyStateView>();
     expectTypeOf<IUseAutopsyReviewGovernanceResult['queueStatus']>().toEqualTypeOf<typeof queueState>();
     expectTypeOf<IUseAutopsyPublicationGateResult['publicationBlockers']>().toEqualTypeOf<
       typeof blockers

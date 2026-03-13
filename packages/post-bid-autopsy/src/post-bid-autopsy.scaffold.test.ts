@@ -29,10 +29,10 @@ import {
   createAutopsyPublicationBlockerSummary,
   createAutopsyQueueState,
   createPostBidAutopsyHookScaffold,
-  createPostBidAutopsyPublicationGateQueryKey,
-  createPostBidAutopsyRecordQueryKey,
-  createPostBidAutopsyReviewGovernanceQueryKey,
-  createPostBidAutopsySyncQueueQueryKey,
+  createPostBidAutopsyQueueQueryKey,
+  createPostBidAutopsyReviewQueryKey,
+  createPostBidAutopsySectionsQueryKey,
+  createPostBidAutopsyStateQueryKey,
 } from './hooks/index.js';
 import {
   POST_BID_AUTOPSY_TELEMETRY_EVENTS,
@@ -83,25 +83,24 @@ describe('post-bid autopsy scaffold surfaces', () => {
     expect(createPostBidAutopsyApiScaffold().surfaces).toEqual(POST_BID_AUTOPSY_API_SURFACES);
     expect(createMockPostBidAutopsyApi().surfaces).toHaveLength(2);
     expect(createPostBidAutopsyHookScaffold().surfaces).toEqual(POST_BID_AUTOPSY_HOOK_SURFACES);
-    expect(createPostBidAutopsyRecordQueryKey('aut-1')).toEqual([
+    expect(createPostBidAutopsyStateQueryKey('pursuit-1')).toEqual([
       'post-bid-autopsy',
-      'record',
-      'aut-1',
+      'pursuit-1',
     ]);
-    expect(createPostBidAutopsyReviewGovernanceQueryKey('aut-1')).toEqual([
+    expect(createPostBidAutopsySectionsQueryKey('pursuit-1')).toEqual([
       'post-bid-autopsy',
-      'review-governance',
-      'aut-1',
+      'pursuit-1',
+      'sections',
     ]);
-    expect(createPostBidAutopsyPublicationGateQueryKey('aut-1')).toEqual([
+    expect(createPostBidAutopsyReviewQueryKey('pursuit-1')).toEqual([
       'post-bid-autopsy',
-      'publication-gate',
-      'aut-1',
+      'pursuit-1',
+      'review',
     ]);
-    expect(createPostBidAutopsySyncQueueQueryKey('aut-1')).toEqual([
+    expect(createPostBidAutopsyQueueQueryKey('pursuit-1')).toEqual([
       'post-bid-autopsy',
-      'sync-queue',
-      'aut-1',
+      'pursuit-1',
+      'queue',
     ]);
     expect(createAutopsyQueueState().syncQueueKey).toBe('post-bid-autopsy-sync-queue');
     expect(createAutopsyCommitMetadata().source).toBe('unknown');

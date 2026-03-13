@@ -33,10 +33,21 @@
     "@hbc/bic-next-move": "workspace:*",
     "@hbc/score-benchmark": "workspace:*",
     "@hbc/strategic-intelligence": "workspace:*",
-    "@hbc/versioned-record": "workspace:*"
+    "@hbc/versioned-record": "workspace:*",
+    "@tanstack/react-query": "^5.75.0"
+  },
+  "peerDependencies": {
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
   },
   "devDependencies": {
+    "@testing-library/react": "^15.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
     "@vitest/coverage-v8": "^3.2.4",
+    "jsdom": "^25.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
     "typescript": "^5.4.0",
     "vitest": "^3.2.4"
   }

@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'node',
+    environment: 'jsdom',
     passWithNoTests: true,
     exclude: ['e2e/**', 'node_modules/**'],
     coverage: {
@@ -23,7 +23,7 @@ export default defineConfig({
         'src/model/storage/*.ts',
         'src/model/index.ts',
         'src/api/index.ts',
-        'src/hooks/index.ts',
+        'src/hooks/*.ts',
         'src/telemetry/index.ts',
         'testing/index.ts',
       ],

@@ -14,7 +14,12 @@ export {
 
 export {
   createEstimatingPostBidLearningQueryKey,
-  createEstimatingPostBidLearningHookScaffold,
+  useEstimatingPostBidLearning,
+  type IEstimatingTrustIndicator,
+  type IEstimatingTriageAction,
+  type IEstimatingAvatarOwnership,
+  type IEstimatingMyWorkPlacement,
+  type IEstimatingPostBidLearningHookState,
   type IUseEstimatingPostBidLearningInput,
   type IUseEstimatingPostBidLearningResult,
 } from './hooks/index.js';

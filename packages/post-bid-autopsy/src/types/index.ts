@@ -240,11 +240,26 @@ export interface IAutopsyQueueState {
 }
 
 export interface IUsePostBidAutopsyInput {
-  autopsyId: string;
+  pursuitId: string;
+}
+
+export interface IAutopsyTelemetrySummary {
+  autopsyCompletionLatency: number | null;
+  intelligenceSeedingConversionRate: number | null;
+  staleIntelligenceRate: number | null;
+  revalidationLatency: number | null;
+  benchmarkAccuracyLift: number | null;
+}
+
+export interface IPostBidAutopsyStateView {
+  autopsy: IPostBidAutopsy | null;
+  lifecycleStatus: AutopsyStatus | null;
+  publicationGate: IPublicationGate | null;
+  telemetrySummary: IAutopsyTelemetrySummary;
 }
 
 export interface IUsePostBidAutopsyResult {
-  state: IPostBidAutopsy | null;
+  state: IPostBidAutopsyStateView;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -254,19 +269,71 @@ export interface IUsePostBidAutopsyResult {
   publicationBlockers: IAutopsyPublicationBlockerSummary;
 }
 
+export interface IAutopsySectionDraftState {
+  sectionKey: string;
+  draftValue: string;
+  updatedAt: string;
+  updatedBy: string;
+}
+
+export interface IAutopsySectionValidationState {
+  sectionKey: string;
+  owner: IBicOwner;
+  title: string;
+  evidenceCount: number;
+  evidenceComplete: boolean;
+  validationErrors: string[];
+  draftValue: string;
+}
+
+export interface IUsePostBidAutopsySectionsInput {
+  pursuitId: string;
+}
+
+export interface IPostBidAutopsySectionsState {
+  autopsyId: string | null;
+  sections: IAutopsySectionValidationState[];
+}
+
+export interface IUsePostBidAutopsySectionsResult {
+  state: IPostBidAutopsySectionsState;
+  loading: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
+  queueStatus: IAutopsyQueueState;
+  commitMetadata: IAutopsyCommitMetadata;
+  completeness: IAutopsyCompletenessState;
+  publicationBlockers: IAutopsyPublicationBlockerSummary;
+  updateSectionDraft: (
+    sectionKey: string,
+    draftValue: string,
+    actor: IBicOwner,
+    updatedAt: string
+  ) => Promise<void>;
+}
+
 export interface IUseAutopsyReviewGovernanceInput {
-  autopsyId: string;
+  pursuitId: string;
 }
 
 export interface IAutopsyReviewGovernanceState {
+  autopsyId: string | null;
   reviewDecisions: IReviewDecision[];
   disagreements: IDisagreementRecord[];
   overrideGovernance: IOverrideGovernance | null;
   sensitivity: ISensitivityPolicy;
+  publicationGate: IPublicationGate | null;
+  escalationEvents: IAutopsyEscalationEvent[];
+}
+
+export interface IAutopsyDisagreementTriageState {
+  hasOpenDisagreements: boolean;
+  escalationRequired: boolean;
+  escalationTargets: string[];
 }
 
 export interface IUseAutopsyReviewGovernanceResult {
-  state: IAutopsyReviewGovernanceState | null;
+  state: IAutopsyReviewGovernanceState;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -274,10 +341,13 @@ export interface IUseAutopsyReviewGovernanceResult {
   commitMetadata: IAutopsyCommitMetadata;
   completeness: IAutopsyCompletenessState;
   publicationBlockers: IAutopsyPublicationBlockerSummary;
+  triage: IAutopsyDisagreementTriageState;
+  transition: (command: IAutopsyTransitionCommand) => Promise<IAutopsyTransitionResult>;
+  escalateDeadlock: (createdAt: string, reason: string) => Promise<IAutopsyEscalationEvent | null>;
 }
 
 export interface IUseAutopsyPublicationGateInput {
-  autopsyId: string;
+  pursuitId: string;
 }
 
 export interface IAutopsyPublicationGateState {
@@ -298,20 +368,32 @@ export interface IUseAutopsyPublicationGateResult {
 }
 
 export interface IUseAutopsySyncQueueInput {
-  autopsyId: string;
+  pursuitId: string;
+}
+
+export interface IAutopsyQueueReplayProjection {
+  completedAt: string | null;
+  version: IVersionMetadata | null;
+  replayedMutationIds: string[];
+  resultingSyncStatus: AutopsyQueueStatus;
 }
 
 export interface IAutopsySyncQueueState {
-  autopsyId: string;
+  autopsyId: string | null;
+  queuedMutations: IAutopsyStorageMutation[];
+  optimisticStatusLabel: 'Saved locally' | 'Queued to sync' | null;
+  replayInFlight: boolean;
+  replayCompletion: IAutopsyQueueReplayProjection;
   queueStatus: IAutopsyQueueState;
   commitMetadata: IAutopsyCommitMetadata;
 }
 
 export interface IUseAutopsySyncQueueResult {
-  state: IAutopsySyncQueueState | null;
+  state: IAutopsySyncQueueState;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
+  replay: () => Promise<void>;
   queueStatus: IAutopsyQueueState;
   commitMetadata: IAutopsyCommitMetadata;
   completeness: IAutopsyCompletenessState;
@@ -405,6 +487,7 @@ export interface IAutopsyRecordSnapshot {
   autopsy: IPostBidAutopsy;
   assignments: IAutopsyAssignmentState;
   sectionBicRecords: IAutopsySectionBicRecord[];
+  sectionDrafts?: IAutopsySectionDraftState[];
   sla: IAutopsySlaState;
   auditTrail: IAutopsyLifecycleAuditEntry[];
   escalationEvents: IAutopsyEscalationEvent[];

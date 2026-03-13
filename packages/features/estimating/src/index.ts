@@ -139,7 +139,7 @@ export {
   estimatingPostBidLearningProfile,
   mapPostBidAutopsyToEstimatingView,
   createEstimatingPostBidLearningQueryKey,
-  createEstimatingPostBidLearningHookScaffold,
+  useEstimatingPostBidLearning,
   ESTIMATING_POST_BID_LEARNING_COMPONENTS,
   createEstimatingPostBidLearningComponents,
   ESTIMATING_POST_BID_LEARNING_TELEMETRY,
@@ -155,4 +155,9 @@ export type {
   IEstimatingBenchmarkRecommendationProjection,
   IUseEstimatingPostBidLearningInput,
   IUseEstimatingPostBidLearningResult,
+  IEstimatingTrustIndicator,
+  IEstimatingTriageAction,
+  IEstimatingAvatarOwnership,
+  IEstimatingMyWorkPlacement,
+  IEstimatingPostBidLearningHookState,
 } from './post-bid-learning/index.js';
