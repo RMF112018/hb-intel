@@ -68,6 +68,7 @@
     "@hbc/smart-empty-state": "workspace:*",
     "@hbc/health-indicator": "workspace:*",
     "@hbc/post-bid-autopsy": "workspace:*",
+    "@hbc/step-wizard": "workspace:*",
     "@tanstack/react-query": "^5.75.0"
   }
 }

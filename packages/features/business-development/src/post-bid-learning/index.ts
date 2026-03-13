@@ -25,8 +25,22 @@ export {
 } from './hooks/index.js';
 
 export {
+  PostBidAutopsyWizard,
+  AutopsySummaryCard,
   BUSINESS_DEVELOPMENT_POST_BID_LEARNING_COMPONENTS,
   createBusinessDevelopmentPostBidLearningComponents,
+} from './components/index.js';
+
+export type {
+  PostBidAutopsyWizardProps,
+  AutopsySummaryCardProps,
+  AutopsyAiSuggestion,
+  AutopsyComparatorCallout,
+  AutopsyComplexityTier,
+  AutopsyDeepLink,
+  AutopsyImpactPreview,
+  AutopsyPursuitSnapshot,
+  PostBidAutopsyWizardSubmitPayload,
 } from './components/index.js';
 
 export {

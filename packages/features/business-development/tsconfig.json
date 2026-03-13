@@ -21,7 +21,8 @@
       "@hbc/acknowledgment": ["packages/acknowledgment/src/index.ts"],
       "@hbc/health-indicator": ["packages/health-indicator/dist/index.d.ts"],
       "@hbc/ai-assist": ["packages/ai-assist/dist/src/index.d.ts"],
-      "@hbc/post-bid-autopsy": ["packages/post-bid-autopsy/dist/src/index.d.ts"]
+      "@hbc/post-bid-autopsy": ["packages/post-bid-autopsy/dist/src/index.d.ts"],
+      "@hbc/step-wizard": ["packages/step-wizard/dist/src/index.d.ts"]
     }
   },
   "include": ["src/**/*", "testing/**/*"],

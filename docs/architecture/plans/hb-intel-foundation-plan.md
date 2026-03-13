@@ -755,3 +755,10 @@ Phase 2.SF06 completed: 2026-03-10
   Blocked by this: BD scorecard director approval workflow, Project Hub PMP monthly update cycle
   Effort: 3.5 sprint-weeks (Wave 1: 1.0, Wave 2: 0.75, Wave 3: 1.0, Wave 4: 0.75)
 -->
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF22-T05 completed: 2026-03-13
+  - Business Development and Estimating adapter packages now expose `PostBidAutopsyWizard` and `AutopsySummaryCard`.
+  - The SF22 primitive remains the owner of lifecycle/storage/governance/publication state; adapter UI composes primitive hooks only.
+  - Locked-source and package README text updated to replace stale scaffold-only SF22 adapter wording.
+-->

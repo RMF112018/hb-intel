@@ -62,6 +62,7 @@
     "@hbc/health-indicator": "workspace:*",
     "@hbc/ai-assist": "workspace:*",
     "@hbc/post-bid-autopsy": "workspace:*",
+    "@hbc/step-wizard": "workspace:*",
     "@hbc/strategic-intelligence": "workspace:*"
   }
 }

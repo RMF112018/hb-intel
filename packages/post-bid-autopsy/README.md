@@ -14,7 +14,7 @@ The primitive establishes the model surface for the post-bid learning loop:
 - gate publication before downstream benchmark or intelligence reuse
 - emit reusable published learning signals for other primitives and adapters
 
-T01 provides the package boundary and public contracts only. It does not implement lifecycle engines, storage, publication processors, or UI workflows.
+The primitive now provides the package boundary, public contracts, lifecycle/storage runtime, hook-state orchestration, and adapter-facing component contracts that BD and Estimating compose into their SF22 UI surfaces. Adapter UI remains outside the primitive boundary.
 
 ## 2. Adapter-over-Primitive Boundary Rules
 
@@ -32,17 +32,17 @@ T01 provides the package boundary and public contracts only. It does not impleme
 - `model/governance`: sensitivity, visibility, disagreement-capture, and override policy contract
 - `model/publication`: primitive-owned publication gate contract
 
-These modules are scaffolded with deterministic factory helpers so T02-T09 can build on explicit ownership seams without feature-package duplication.
+These modules are scaffolded with deterministic factory helpers and runtime descriptors so T02-T09 can build on explicit ownership seams without feature-package duplication.
 
 ## 4. Lifecycle and Publication Gating Summary
 
-The primitive contract reserves lifecycle ownership for `draft`, `review`, `approved`, `published`, `superseded`, `archived`, and `overdue` states. Publication remains primitive-governed through explicit gate descriptors and blocker summaries. T01/T02 do not implement transition engines or persistence; they define the contract boundary that later SF22 tasks must honor.
+The primitive owns lifecycle transitions for `draft`, `review`, `approved`, `published`, `superseded`, `archived`, and `overdue`, plus append-only storage, replay metadata, publication gate evaluation, and downstream publish projections. Publication remains primitive-governed through explicit gate descriptors and blocker summaries, while BD and Estimating consume those outputs through adapter hooks and UI composition only.
 
 ## 5. Exports
 
 | Export Path | Purpose |
 |---|---|
-| `@hbc/post-bid-autopsy` | Runtime scaffold contracts for types, model boundaries, API surfaces, hook surfaces, component contracts, telemetry descriptors, and published learning signals |
+| `@hbc/post-bid-autopsy` | Runtime contracts and primitive runtime surfaces for types, model boundaries, API, lifecycle/storage orchestration, hooks, component contracts, telemetry descriptors, and published learning signals |
 | `@hbc/post-bid-autopsy/testing` | Public test fixtures and mock factory helpers for scaffold-safe consumption |
 
 Compatibility note:

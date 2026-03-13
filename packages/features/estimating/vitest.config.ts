@@ -40,6 +40,7 @@ export default defineConfig({
       '@hbc/features-estimating/testing': resolve(__dirname, './testing/index.ts'),
       '@hbc/health-indicator': resolve(__dirname, '../../health-indicator/src/index.ts'),
       '@hbc/post-bid-autopsy': resolve(__dirname, '../../post-bid-autopsy/src/index.ts'),
+      '@hbc/step-wizard': resolve(__dirname, '../../step-wizard/src/index.ts'),
     },
   },
 });

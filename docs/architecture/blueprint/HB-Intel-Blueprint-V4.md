@@ -1171,6 +1171,14 @@ Phase 2 SF06 completed: 2026-03-10
 -->
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
+SF22-T05 adapter UI composition completed: 2026-03-13
+  - `@hbc/features-business-development` now ships `PostBidAutopsyWizard` and `AutopsySummaryCard` as adapter-layer UI over `@hbc/post-bid-autopsy`.
+  - `@hbc/features-estimating` now ships `PostBidAutopsyWizard` and `AutopsySummaryCard` as adapter-layer UI over `@hbc/post-bid-autopsy`.
+  - `@hbc/step-wizard` is used for guided SF22 wizard orchestration; `@hbc/ui-kit` remains the primary UI composition surface.
+  - current-state-map.md and package READMEs updated to reflect that SF22 is no longer adapter-scaffold-only at T05.
+-->
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
 PH7.13 completed: 2026-03-10
 Stub Detection and Incomplete Implementation Enforcement — three-layer enforcement added.
 Layer 1: ESLint rules (no-warning-comments, ban-ts-comment, no-stub-implementations)

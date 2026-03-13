@@ -54,6 +54,7 @@ export default defineConfig({
       '@hbc/health-indicator': resolve(__dirname, '../../health-indicator/src/index.ts'),
       '@hbc/ai-assist': resolve(__dirname, '../../ai-assist/src/index.ts'),
       '@hbc/post-bid-autopsy': resolve(__dirname, '../../post-bid-autopsy/src/index.ts'),
+      '@hbc/step-wizard': resolve(__dirname, '../../step-wizard/src/index.ts'),
     },
   },
 });
