@@ -7,5 +7,6 @@
  * @see docs/architecture/plans/PH7-BW-0-Shared-Feature-Package.md
  */
 export { bdScorecardsEmptyStateConfig } from './empty-state/index.js';
+export * from './post-bid-learning/index.js';
 export * from './score-benchmark/index.js';
 export * from './strategic-intelligence/index.js';

@@ -8,6 +8,6 @@
     "sourceMap": true,
     "composite": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "testing/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "src/__tests__/**"]
 }

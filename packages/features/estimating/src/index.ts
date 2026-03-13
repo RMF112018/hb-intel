@@ -134,3 +134,25 @@ export type {
   ChecklistDefinitionEditorProps,
   ScoringWeightEditorProps,
 } from './bid-readiness/index.js';
+
+export {
+  estimatingPostBidLearningProfile,
+  mapPostBidAutopsyToEstimatingView,
+  createEstimatingPostBidLearningQueryKey,
+  createEstimatingPostBidLearningHookScaffold,
+  ESTIMATING_POST_BID_LEARNING_COMPONENTS,
+  createEstimatingPostBidLearningComponents,
+  ESTIMATING_POST_BID_LEARNING_TELEMETRY,
+  createEstimatingPostBidLearningTelemetry,
+} from './post-bid-learning/index.js';
+
+export type { IEstimatingPostBidLearningView } from './post-bid-learning/index.js';
+export type {
+  IEstimatingPostBidLearningProfile,
+  IEstimatingPostBidLearningRowProjection,
+  IEstimatingPostBidLearningSummaryProjection,
+  IEstimatingAutopsyEvidenceProjection,
+  IEstimatingBenchmarkRecommendationProjection,
+  IUseEstimatingPostBidLearningInput,
+  IUseEstimatingPostBidLearningResult,
+} from './post-bid-learning/index.js';

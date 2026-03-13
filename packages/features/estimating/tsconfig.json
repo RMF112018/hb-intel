@@ -10,6 +10,8 @@
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "paths": {
+      "@hbc/post-bid-autopsy": ["packages/post-bid-autopsy/dist/src/index.d.ts"],
+      "@hbc/post-bid-autopsy/testing": ["packages/post-bid-autopsy/dist/testing/index.d.ts"],
       "@hbc/features-estimating/testing": ["packages/features/estimating/testing/index.ts"]
     }
   },

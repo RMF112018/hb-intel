@@ -33,6 +33,10 @@ Sensitivity and redaction policies are primitive-owned. Adapter components rende
 
 The package also includes the SF19 `score-benchmark` adapter surface over `@hbc/score-benchmark`.
 
+## SF22 Post-Bid Learning Adapter Usage
+
+The `post-bid-learning` surface is a scaffold-only adapter over `@hbc/post-bid-autopsy`. It owns BD profile defaults, deterministic projections, and telemetry mapping only. Evidence, confidence, taxonomy, governance, publication, and testing contracts remain primitive-owned.
+
 ## Linkbacks
 
 - Primitive package docs: [`@hbc/strategic-intelligence`](../../strategic-intelligence/README.md)
