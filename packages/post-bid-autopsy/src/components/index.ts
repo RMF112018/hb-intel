@@ -13,6 +13,11 @@ export const POST_BID_AUTOPSY_COMPONENT_CONTRACTS: readonly IPostBidAutopsyCompo
       role: 'headless',
     },
     {
+      componentId: 'AutopsyListView',
+      ownership: 'primitive',
+      role: 'contract',
+    },
+    {
       componentId: 'LearningInsightsDashboard',
       ownership: 'primitive',
       role: 'contract',

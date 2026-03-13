@@ -142,6 +142,7 @@ export {
   useEstimatingPostBidLearning,
   PostBidAutopsyWizard,
   AutopsySummaryCard,
+  AutopsyListView,
   ESTIMATING_POST_BID_LEARNING_COMPONENTS,
   createEstimatingPostBidLearningComponents,
   ESTIMATING_POST_BID_LEARNING_TELEMETRY,
@@ -169,6 +170,10 @@ export type {
   AutopsyComplexityTier,
   AutopsyDeepLink,
   AutopsyImpactPreview,
+  AutopsyListPursuitMetadata,
   AutopsyPursuitSnapshot,
+  AutopsyTriageQueue,
+  EstimatingAutopsyViewerRole,
+  AutopsyListViewProps,
   PostBidAutopsyWizardSubmitPayload,
 } from './post-bid-learning/index.js';

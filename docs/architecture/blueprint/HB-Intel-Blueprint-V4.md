@@ -1179,6 +1179,14 @@ SF22-T05 adapter UI composition completed: 2026-03-13
 -->
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
+SF22-T06 list and insights UI composition completed: 2026-03-13
+  - `@hbc/features-business-development` now ships `AutopsyListView` and `LearningInsightsDashboard` as adapter-layer UI over `@hbc/post-bid-autopsy`.
+  - `@hbc/features-estimating` now ships `AutopsyListView` as adapter-layer UI over `@hbc/post-bid-autopsy`; no cross-pursuit Estimating insights dashboard was added at T06.
+  - `@hbc/ui-kit` remains the primary list/table/dashboard composition surface; primitive lifecycle, confidence, stale/supersession, and publication semantics remain primitive-owned.
+  - current-state-map.md and package READMEs updated to reflect the shipped T06 adapter surfaces.
+-->
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
 PH7.13 completed: 2026-03-10
 Stub Detection and Incomplete Implementation Enforcement — three-layer enforcement added.
 Layer 1: ESLint rules (no-warning-comments, ban-ts-comment, no-stub-implementations)

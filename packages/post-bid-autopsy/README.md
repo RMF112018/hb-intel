@@ -14,7 +14,7 @@ The primitive establishes the model surface for the post-bid learning loop:
 - gate publication before downstream benchmark or intelligence reuse
 - emit reusable published learning signals for other primitives and adapters
 
-The primitive now provides the package boundary, public contracts, lifecycle/storage runtime, hook-state orchestration, and adapter-facing component contracts that BD and Estimating compose into their SF22 UI surfaces. Adapter UI remains outside the primitive boundary.
+The primitive now provides the package boundary, public contracts, lifecycle/storage runtime, hook-state orchestration, and adapter-facing component contracts that BD and Estimating compose into their SF22 UI surfaces. Adapter UI remains outside the primitive boundary; current adapter consumers include wizard, summary-card, and list/dashboard surfaces layered over primitive-owned semantics.
 
 ## 2. Adapter-over-Primitive Boundary Rules
 

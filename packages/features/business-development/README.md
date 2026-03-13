@@ -35,7 +35,7 @@ The package also includes the SF19 `score-benchmark` adapter surface over `@hbc/
 
 ## SF22 Post-Bid Learning Adapter Usage
 
-The `post-bid-learning` surface is a Business Development adapter over `@hbc/post-bid-autopsy`. It owns BD profile defaults, deterministic projections, hook composition, and the `PostBidAutopsyWizard` / `AutopsySummaryCard` UI surfaces. Evidence, confidence, taxonomy, governance, publication, lifecycle, and testing contracts remain primitive-owned.
+The `post-bid-learning` surface is a Business Development adapter over `@hbc/post-bid-autopsy`. It owns BD profile defaults, deterministic projections, hook composition, and the `PostBidAutopsyWizard`, `AutopsySummaryCard`, `AutopsyListView`, and `LearningInsightsDashboard` UI surfaces. Evidence, confidence, taxonomy, governance, publication, lifecycle, stale/supersession handling, and testing contracts remain primitive-owned.
 
 ## Linkbacks
 

@@ -119,7 +119,7 @@ describe('post-bid autopsy scaffold surfaces', () => {
         })
       ).blockers
     ).toEqual(['review-pending']);
-    expect(POST_BID_AUTOPSY_COMPONENT_CONTRACTS).toHaveLength(3);
+    expect(POST_BID_AUTOPSY_COMPONENT_CONTRACTS).toHaveLength(4);
     expect(POST_BID_AUTOPSY_TELEMETRY_EVENTS).toContain('post-bid-autopsy.signal-published');
   });
 

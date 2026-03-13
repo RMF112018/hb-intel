@@ -762,3 +762,10 @@ SF22-T05 completed: 2026-03-13
   - The SF22 primitive remains the owner of lifecycle/storage/governance/publication state; adapter UI composes primitive hooks only.
   - Locked-source and package README text updated to replace stale scaffold-only SF22 adapter wording.
 -->
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF22-T06 completed: 2026-03-13
+  - `@hbc/features-business-development` now exposes `AutopsyListView` and `LearningInsightsDashboard`.
+  - `@hbc/features-estimating` now exposes `AutopsyListView`; T06 intentionally leaves cross-pursuit insights dashboarding out of the Estimating adapter surface.
+  - The SF22 primitive remains the owner of lifecycle/confidence/publication/stale/supersession semantics; T06 adds adapter-level list and dashboard composition only.
+-->

@@ -21,7 +21,7 @@ describe('post-bid autopsy public exports', () => {
     expect(record.autopsyId).toBe('autopsy-mock');
     expect(AUTOPSY_STATUS_ORDER).toContain('overdue');
     expect(POST_BID_AUTOPSY_API_SURFACES).toHaveLength(2);
-    expect(POST_BID_AUTOPSY_COMPONENT_CONTRACTS).toHaveLength(3);
+    expect(POST_BID_AUTOPSY_COMPONENT_CONTRACTS).toHaveLength(4);
     expect(POST_BID_AUTOPSY_TELEMETRY_EVENTS).toContain('post-bid-autopsy.evidence-reviewed');
   });
 });

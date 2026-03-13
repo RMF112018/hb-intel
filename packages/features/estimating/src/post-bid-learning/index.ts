@@ -27,6 +27,7 @@ export {
 export {
   PostBidAutopsyWizard,
   AutopsySummaryCard,
+  AutopsyListView,
   ESTIMATING_POST_BID_LEARNING_COMPONENTS,
   createEstimatingPostBidLearningComponents,
 } from './components/index.js';
@@ -39,7 +40,11 @@ export type {
   AutopsyComplexityTier,
   AutopsyDeepLink,
   AutopsyImpactPreview,
+  AutopsyListPursuitMetadata,
   AutopsyPursuitSnapshot,
+  AutopsyTriageQueue,
+  EstimatingAutopsyViewerRole,
+  AutopsyListViewProps,
   PostBidAutopsyWizardSubmitPayload,
 } from './components/index.js';
 

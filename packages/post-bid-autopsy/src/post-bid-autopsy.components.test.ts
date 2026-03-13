@@ -6,11 +6,12 @@ import {
 } from './components/index.js';
 
 describe('post-bid autopsy components', () => {
-  it('keeps the wizard and summary card contracts visible at the primitive boundary', () => {
+  it('keeps the wizard, list, summary, and insights contracts visible at the primitive boundary', () => {
     expect(createPostBidAutopsyComponentContracts()).toEqual(POST_BID_AUTOPSY_COMPONENT_CONTRACTS);
     expect(POST_BID_AUTOPSY_COMPONENT_CONTRACTS.map((contract) => contract.componentId)).toEqual([
       'PostBidAutopsyWizard',
       'AutopsySummaryCard',
+      'AutopsyListView',
       'LearningInsightsDashboard',
     ]);
   });
