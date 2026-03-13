@@ -29,6 +29,12 @@
     "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests"
   },
+  "dependencies": {
+    "@hbc/bic-next-move": "workspace:*",
+    "@hbc/score-benchmark": "workspace:*",
+    "@hbc/strategic-intelligence": "workspace:*",
+    "@hbc/versioned-record": "workspace:*"
+  },
   "devDependencies": {
     "@vitest/coverage-v8": "^3.2.4",
     "typescript": "^5.4.0",

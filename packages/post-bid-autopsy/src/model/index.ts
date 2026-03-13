@@ -32,6 +32,31 @@ export {
   createSupersessionLink,
   createRootCauseTag,
 };
+export {
+  ACTIVE_AUTOPSY_STATUSES,
+  AUTOPSY_TRANSITION_GRAPH,
+  addBusinessDays,
+  applyAutopsyTransition,
+  isAutopsyTransitionAllowed,
+  isBusinessDayOverdue,
+} from './lifecycle/index.js';
+export {
+  appendAutopsyVersionEnvelope,
+  consumeAutopsyReplayResult,
+  createAutopsyVersionMetadata,
+  createInitialAutopsyVersionEnvelope,
+  IndexedDbAutopsyQueueStore,
+  InMemoryAutopsyQueueStore,
+  mapAutopsyStatusToVersionTag,
+  normalizeAutopsyMutationQueue,
+  queueAutopsyMutation,
+} from './storage/index.js';
+export { buildAutopsyPublishProjections } from './publication/projections.js';
+export {
+  createPublicationBlockerSummary,
+  hasOpenDisagreements,
+  requiresOverrideApproval,
+} from './governance/blockers.js';
 
 export const createPostBidAutopsyRecord = (
   overrides: Partial<IPostBidAutopsy> = {}

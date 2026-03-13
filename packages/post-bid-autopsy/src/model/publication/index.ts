@@ -24,3 +24,5 @@ export const createSupersessionLink = (
   supersededByAutopsyId: overrides.supersededByAutopsyId,
   reason: overrides.reason,
 });
+
+export { buildAutopsyPublishProjections } from './projections.js';

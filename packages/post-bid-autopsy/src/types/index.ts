@@ -1,3 +1,48 @@
+export interface IBicOwner {
+  userId: string;
+  displayName: string;
+  role: string;
+  groupContext?: string;
+}
+
+export type AutopsyVersionTag =
+  | 'draft'
+  | 'submitted'
+  | 'approved'
+  | 'rejected'
+  | 'archived'
+  | 'handoff'
+  | 'superseded';
+
+export interface IVersionMetadata {
+  snapshotId: string;
+  version: number;
+  createdAt: string;
+  createdBy: IBicOwner;
+  changeSummary: string;
+  tag: AutopsyVersionTag;
+  storageRef?: string;
+}
+
+export interface IVersionSnapshot<T> extends IVersionMetadata {
+  snapshot: T;
+}
+
+export type StrategicIntelligenceSensitivity =
+  | 'public-internal'
+  | 'restricted-role'
+  | 'restricted-project'
+  | 'confidential';
+
+export interface IAutopsyRecalibrationSignal {
+  signalId: string;
+  criterionId?: string;
+  predictiveDrift: number;
+  triggeredBy: 'sf22-outcome' | 'scheduled-monitor' | 'admin-request';
+  correlationKeys: string[];
+  triggeredAt: string;
+}
+
 export type AutopsyOutcome = 'won' | 'lost' | 'no-bid';
 
 export type AutopsyStatus =
@@ -49,6 +94,24 @@ export type ReviewDecisionOutcome = 'approved' | 'changes-requested' | 'rejected
 export type DisagreementResolutionStatus = 'open' | 'resolved' | 'escalated';
 
 export type AutopsyQueueStatus = 'synced' | 'saved-locally' | 'queued-to-sync';
+
+export type AutopsyTerminalPursuitStatus = 'Won' | 'Lost' | 'No-Bid';
+
+export type AutopsyTransitionFailureReason =
+  | 'autopsy-not-found'
+  | 'invalid-transition'
+  | 'open-disagreements'
+  | 'publication-gate-failed'
+  | 'override-approval-required'
+  | 'override-metadata-required'
+  | 'sensitivity-policy-blocked';
+
+export type AutopsyStorageMutationType =
+  | 'trigger-create'
+  | 'save-draft'
+  | 'transition'
+  | 'mark-overdue'
+  | 'revalidate';
 
 export interface IAutopsyEvidence {
   evidenceId: string;
@@ -271,4 +334,206 @@ export interface IPostBidAutopsyComponentContract {
   readonly componentId: string;
   readonly ownership: 'primitive';
   readonly role: 'headless' | 'contract';
+}
+
+export interface IAutopsyAssignmentState {
+  primaryAuthor: IBicOwner;
+  coAuthors: IBicOwner[];
+  chiefEstimator: IBicOwner;
+}
+
+export interface IAutopsySectionTemplate {
+  sectionKey: string;
+  title: string;
+  owner: IBicOwner;
+  nextOwner?: IBicOwner | null;
+  blockedReason?: string | null;
+}
+
+export interface IAutopsySectionBicRecord {
+  bicRecordId: string;
+  autopsyId: string;
+  sectionKey: string;
+  title: string;
+  currentOwner: IBicOwner;
+  nextOwner: IBicOwner | null;
+  escalationOwner: IBicOwner;
+  expectedAction: string;
+  dueDate: string;
+  blockedReason: string | null;
+  createdAt: string;
+}
+
+export interface IAutopsySlaState {
+  startedAt: string;
+  dueAt: string;
+  businessDays: number;
+}
+
+export interface IAutopsyLifecycleAuditEntry {
+  auditId: string;
+  autopsyId: string;
+  fromStatus: AutopsyStatus | null;
+  toStatus: AutopsyStatus;
+  occurredAt: string;
+  actor: IBicOwner;
+  reason: string;
+  changeSummary: string;
+}
+
+export interface IAutopsyEscalationEvent {
+  escalationId: string;
+  autopsyId: string;
+  eventType: 'overdue' | 'disagreement-deadlock';
+  target: IBicOwner;
+  createdAt: string;
+  reason: string;
+  sectionKeys: string[];
+}
+
+export interface IAutopsyNotificationPayload {
+  notificationId: string;
+  autopsyId: string;
+  recipientUserId: string;
+  type: 'autopsy-created' | 'autopsy-overdue' | 'disagreement-escalated' | 'revalidation-required';
+  createdAt: string;
+  title: string;
+  message: string;
+}
+
+export interface IAutopsyRecordSnapshot {
+  autopsy: IPostBidAutopsy;
+  assignments: IAutopsyAssignmentState;
+  sectionBicRecords: IAutopsySectionBicRecord[];
+  sla: IAutopsySlaState;
+  auditTrail: IAutopsyLifecycleAuditEntry[];
+  escalationEvents: IAutopsyEscalationEvent[];
+  notifications: IAutopsyNotificationPayload[];
+  syncStatus: AutopsyQueueStatus;
+}
+
+export interface IAutopsyVersionEnvelope {
+  recordType: 'post-bid-autopsy';
+  recordId: string;
+  currentVersion: IVersionMetadata;
+  versions: IVersionMetadata[];
+  snapshots: IVersionSnapshot<IAutopsyRecordSnapshot>[];
+}
+
+export interface IAutopsyTriggerInput {
+  pursuitId: string;
+  scorecardId: string;
+  status: AutopsyTerminalPursuitStatus;
+  triggeredAt: string;
+  triggeredBy: IBicOwner;
+  primaryAuthor: IBicOwner;
+  coAuthors?: IBicOwner[];
+  chiefEstimator: IBicOwner;
+  sectionTemplates: IAutopsySectionTemplate[];
+}
+
+export interface IAutopsyTriggerResult {
+  created: boolean;
+  autopsyId: string;
+  record: IAutopsyRecordSnapshot;
+  version: IAutopsyVersionEnvelope;
+  notifications: IAutopsyNotificationPayload[];
+}
+
+export interface IAutopsyTransitionCommand {
+  autopsyId: string;
+  toStatus: AutopsyStatus;
+  actor: IBicOwner;
+  occurredAt: string;
+  reason: string;
+  changeSummary?: string;
+  relatedAutopsyId?: string;
+  overrideGovernance?: IOverrideGovernance | null;
+}
+
+export interface IAutopsyTransitionSuccess {
+  ok: true;
+  record: IAutopsyRecordSnapshot;
+  version: IAutopsyVersionEnvelope;
+}
+
+export interface IAutopsyTransitionFailure {
+  ok: false;
+  reason: AutopsyTransitionFailureReason;
+  message: string;
+}
+
+export type IAutopsyTransitionResult = IAutopsyTransitionSuccess | IAutopsyTransitionFailure;
+
+export interface IAutopsyStorageMutation {
+  mutationId: string;
+  mutationType: AutopsyStorageMutationType;
+  autopsyId: string;
+  sequence: number;
+  queuedAt: string;
+  replaySafe: boolean;
+  localStatus: Extract<AutopsyQueueStatus, 'saved-locally' | 'queued-to-sync'>;
+  idempotencyKey: string;
+  baseVersion: number;
+  payload: {
+    snapshot: IAutopsyRecordSnapshot;
+    actor: IBicOwner;
+  };
+}
+
+export interface IAutopsyStorageReceipt {
+  record: IAutopsyRecordSnapshot;
+  version: IAutopsyVersionEnvelope;
+  queueStatus: IAutopsyQueueState;
+  commitMetadata: IAutopsyCommitMetadata;
+}
+
+export interface IAutopsyReplayResult {
+  replayedMutationIds: string[];
+  conflictsCreated: number;
+  resultingSyncStatus: AutopsyQueueStatus;
+  invalidatedQueryKeys: ReadonlyArray<readonly string[]>;
+}
+
+export interface IAutopsyStalenessEvaluation {
+  autopsyId: string;
+  isStale: boolean;
+  requiresRevalidation: boolean;
+  publishedVersion: number | null;
+  evaluatedAt: string;
+  reason: string | null;
+}
+
+export interface IAutopsyBenchmarkPublishProjection {
+  benchmarkSignalId: string;
+  recalibrationSignal: IAutopsyRecalibrationSignal;
+  affectedCriterionIds: string[];
+}
+
+export interface IAutopsyStrategicIntelligenceDraft {
+  autopsyId: string;
+  scorecardId: string;
+  title: string;
+  body: string;
+  sensitivity: StrategicIntelligenceSensitivity;
+  redacted: boolean;
+  rootCauseCodes: string[];
+  sourceEvidenceIds: string[];
+}
+
+export interface IAutopsyPublishResult {
+  publishable: boolean;
+  benchmarkProjection: IAutopsyBenchmarkPublishProjection | null;
+  intelligenceDraft: IAutopsyStrategicIntelligenceDraft | null;
+  redactedDraft: IAutopsyStrategicIntelligenceDraft | null;
+}
+
+export interface IAutopsyQueryInvalidationResult {
+  invalidatedQueryKeys: ReadonlyArray<readonly string[]>;
+}
+
+export interface IAutopsyVersionMutationResult {
+  record: IAutopsyRecordSnapshot;
+  version: IAutopsyVersionEnvelope;
+  tag: AutopsyVersionTag;
 }

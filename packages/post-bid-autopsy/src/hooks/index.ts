@@ -3,6 +3,7 @@ import type {
   IAutopsyCommitMetadata,
   IAutopsyCompletenessState,
   IAutopsyPublicationBlockerSummary,
+  IAutopsyQueryInvalidationResult,
   IAutopsyQueueState,
   IPostBidAutopsyHookSurface,
   IUseAutopsyPublicationGateInput,
@@ -27,6 +28,20 @@ export const createPostBidAutopsyPublicationGateQueryKey = (autopsyId: string) =
 
 export const createPostBidAutopsySyncQueueQueryKey = (autopsyId: string) =>
   ['post-bid-autopsy', 'sync-queue', autopsyId] as const;
+
+export const createPostBidAutopsyListQueryKey = () => ['post-bid-autopsy', 'list'] as const;
+
+export const createAutopsyQueryInvalidationResult = (
+  autopsyId: string
+): IAutopsyQueryInvalidationResult => ({
+  invalidatedQueryKeys: [
+    createPostBidAutopsyListQueryKey(),
+    createPostBidAutopsyRecordQueryKey(autopsyId),
+    createPostBidAutopsyReviewGovernanceQueryKey(autopsyId),
+    createPostBidAutopsyPublicationGateQueryKey(autopsyId),
+    createPostBidAutopsySyncQueueQueryKey(autopsyId),
+  ],
+});
 
 export const createAutopsyQueueState = (
   overrides: Partial<IAutopsyQueueState> = {}
@@ -104,4 +119,5 @@ export type {
   IAutopsyCommitMetadata,
   IAutopsyCompletenessState,
   IAutopsyPublicationBlockerSummary,
+  IAutopsyQueryInvalidationResult,
 };
