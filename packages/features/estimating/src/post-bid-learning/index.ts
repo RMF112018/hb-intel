@@ -52,3 +52,13 @@ export {
   ESTIMATING_POST_BID_LEARNING_TELEMETRY,
   createEstimatingPostBidLearningTelemetry,
 } from './telemetry/index.js';
+
+export {
+  createEstimatingPostBidLearningReferenceIntegrations,
+  projectEstimatingAutopsyRoutes,
+} from './integrations/index.js';
+
+export type {
+  IEstimatingAutopsyIntegrationContext,
+  EstimatingPostBidLearningReferenceIntegrations,
+} from './integrations/index.js';

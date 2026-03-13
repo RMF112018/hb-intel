@@ -25,6 +25,7 @@ export default defineConfig({
         'src/api/index.ts',
         'src/hooks/*.ts',
         'src/telemetry/index.ts',
+        'src/integrations/*.ts',
         'testing/index.ts',
       ],
       exclude: ['**/*.test.ts', '**/*.test.tsx'],

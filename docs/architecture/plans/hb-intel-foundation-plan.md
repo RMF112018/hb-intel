@@ -769,3 +769,9 @@ SF22-T06 completed: 2026-03-13
   - `@hbc/features-estimating` now exposes `AutopsyListView`; T06 intentionally leaves cross-pursuit insights dashboarding out of the Estimating adapter surface.
   - The SF22 primitive remains the owner of lifecycle/confidence/publication/stale/supersession semantics; T06 adds adapter-level list and dashboard composition only.
 -->
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
+SF22-T07 completed: 2026-03-13
+  - `@hbc/post-bid-autopsy` now exposes a dedicated reference-integration barrel for downstream publish envelopes, redacted projections, notification/reminder payloads, KPI-semantic mapping, and step-wizard alignment.
+  - Any BD/Estimating SF22 integration helpers remain route/label/context wrappers only; primitive gating and redaction stay primitive-owned.
+-->

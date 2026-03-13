@@ -38,6 +38,14 @@ These modules are scaffolded with deterministic factory helpers and runtime desc
 
 The primitive owns lifecycle transitions for `draft`, `review`, `approved`, `published`, `superseded`, `archived`, and `overdue`, plus append-only storage, replay metadata, publication gate evaluation, and downstream publish projections. Publication remains primitive-governed through explicit gate descriptors and blocker summaries, while BD and Estimating consume those outputs through adapter hooks and UI composition only.
 
+## 4.1 Reference Integrations
+
+The primitive now exports a dedicated `integrations` barrel for boundary-safe reference projections to BIC, project-canvas, related-items, notification-intelligence, strategic-intelligence, score-benchmark, health-indicator, and step-wizard.
+
+- Primitive ownership: publish gating, redaction mode, reason-code derivation, reminder eligibility, and downstream publish envelopes.
+- Adapter ownership: routes, labels, and local context wrappers only.
+- Downstream publish projections emit only for `approved` or `published` autopsies whose primitive publication gate is `publishable`.
+
 ## 5. Exports
 
 | Export Path | Purpose |

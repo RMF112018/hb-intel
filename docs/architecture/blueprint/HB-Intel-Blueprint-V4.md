@@ -1187,6 +1187,12 @@ SF22-T06 list and insights UI composition completed: 2026-03-13
 -->
 
 <!-- IMPLEMENTATION PROGRESS & NOTES
+SF22-T07 reference integrations completed: 2026-03-13
+  - `@hbc/post-bid-autopsy` now owns a dedicated `integrations/` layer for BIC, project-canvas, related-items, notifications, strategic-intelligence, score-benchmark, health-indicator, and step-wizard alignment.
+  - SF22 BD and Estimating adapter integration helpers remain route/label/context wrappers only and do not override primitive publish gating or redaction decisions.
+-->
+
+<!-- IMPLEMENTATION PROGRESS & NOTES
 PH7.13 completed: 2026-03-10
 Stub Detection and Incomplete Implementation Enforcement — three-layer enforcement added.
 Layer 1: ESLint rules (no-warning-comments, ban-ts-comment, no-stub-implementations)

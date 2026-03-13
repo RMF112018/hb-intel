@@ -176,4 +176,11 @@ export type {
   EstimatingAutopsyViewerRole,
   AutopsyListViewProps,
   PostBidAutopsyWizardSubmitPayload,
+  IEstimatingAutopsyIntegrationContext,
+  EstimatingPostBidLearningReferenceIntegrations,
+} from './post-bid-learning/index.js';
+
+export {
+  createEstimatingPostBidLearningReferenceIntegrations,
+  projectEstimatingAutopsyRoutes,
 } from './post-bid-learning/index.js';

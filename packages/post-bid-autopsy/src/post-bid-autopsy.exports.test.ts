@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { PostBidLearningSignal } from '@hbc/post-bid-autopsy';
 import {
   AUTOPSY_STATUS_ORDER,
+  POST_BID_AUTOPSY_INTEGRATIONS_SCOPE,
   POST_BID_AUTOPSY_API_SURFACES,
   POST_BID_AUTOPSY_COMPONENT_CONTRACTS,
   POST_BID_AUTOPSY_TELEMETRY_EVENTS,
@@ -23,5 +24,6 @@ describe('post-bid autopsy public exports', () => {
     expect(POST_BID_AUTOPSY_API_SURFACES).toHaveLength(2);
     expect(POST_BID_AUTOPSY_COMPONENT_CONTRACTS).toHaveLength(4);
     expect(POST_BID_AUTOPSY_TELEMETRY_EVENTS).toContain('post-bid-autopsy.evidence-reviewed');
+    expect(POST_BID_AUTOPSY_INTEGRATIONS_SCOPE).toBe('post-bid-autopsy/integrations');
   });
 });

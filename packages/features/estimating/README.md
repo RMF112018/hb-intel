@@ -55,7 +55,7 @@ These KPIs surface in the Admin Intelligence dashboard and Leadership reporting 
 
 ## 7. SF22 Post-Bid Learning Adapter Surface
 
-The `post-bid-learning` surface is an Estimating adapter over `@hbc/post-bid-autopsy`. It adds Estimating profile defaults, deterministic view projections, hook composition, and the `PostBidAutopsyWizard`, `AutopsySummaryCard`, and `AutopsyListView` UI surfaces without duplicating primitive-owned evidence, confidence, taxonomy, governance, publication, stale/supersession handling, or lifecycle logic.
+The `post-bid-learning` surface is an Estimating adapter over `@hbc/post-bid-autopsy`. It adds Estimating profile defaults, deterministic view projections, hook composition, the `PostBidAutopsyWizard`, `AutopsySummaryCard`, and `AutopsyListView` UI surfaces, plus route/label/context wrappers over primitive reference integrations without duplicating primitive-owned evidence, confidence, taxonomy, governance, publication, stale/supersession handling, or lifecycle logic.
 
 ## 8. Related Documentation
 

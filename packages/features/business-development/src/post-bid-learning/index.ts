@@ -54,3 +54,13 @@ export {
   BUSINESS_DEVELOPMENT_POST_BID_LEARNING_TELEMETRY,
   createBusinessDevelopmentPostBidLearningTelemetry,
 } from './telemetry/index.js';
+
+export {
+  createBusinessDevelopmentPostBidLearningReferenceIntegrations,
+  projectBusinessDevelopmentAutopsyRoutes,
+} from './integrations/index.js';
+
+export type {
+  IBusinessDevelopmentAutopsyIntegrationContext,
+  BusinessDevelopmentPostBidLearningReferenceIntegrations,
+} from './integrations/index.js';

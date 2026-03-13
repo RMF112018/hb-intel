@@ -128,6 +128,165 @@ export const createMockAutopsyRecordSnapshot = (
   syncStatus: overrides.syncStatus ?? 'synced',
 });
 
+export const createMockPublishableAutopsyRecordSnapshot = (
+  overrides: Partial<IAutopsyRecordSnapshot> = {}
+): IAutopsyRecordSnapshot =>
+  createMockAutopsyRecordSnapshot({
+    ...overrides,
+    autopsy:
+      overrides.autopsy ??
+      createMockPostBidAutopsyRecord({
+        status: 'approved',
+        publicationGate: {
+          publishable: true,
+          blockers: [],
+          minimumConfidenceTier: 'moderate',
+          requiredEvidenceCount: 1,
+        },
+        confidence: {
+          tier: 'high',
+          score: 0.91,
+          reasons: ['pricing-discipline', 'client-alignment'],
+          evidenceCoverage: 0.95,
+        },
+        rootCauseTags: [
+          {
+            tagId: 'tag-pricing',
+            domain: 'pricing',
+            label: 'Pricing discipline',
+            normalizedCode: 'pricing-discipline',
+          },
+        ],
+      }),
+  });
+
+export const createMockRedactedAutopsyRecordSnapshot = (
+  overrides: Partial<IAutopsyRecordSnapshot> = {}
+): IAutopsyRecordSnapshot =>
+  createMockPublishableAutopsyRecordSnapshot({
+    ...overrides,
+    autopsy:
+      overrides.autopsy ??
+      createMockPostBidAutopsyRecord({
+        status: 'published',
+        publicationGate: {
+          publishable: true,
+          blockers: [],
+          minimumConfidenceTier: 'moderate',
+          requiredEvidenceCount: 1,
+        },
+        sensitivity: {
+          visibility: 'cross-module-redacted',
+          redactionRequired: true,
+        },
+      }),
+  });
+
+export const createMockStaleAutopsyRecordSnapshot = (
+  overrides: Partial<IAutopsyRecordSnapshot> = {}
+): IAutopsyRecordSnapshot =>
+  createMockPublishableAutopsyRecordSnapshot({
+    ...overrides,
+    autopsy:
+      overrides.autopsy ??
+      createMockPostBidAutopsyRecord({
+        status: 'published',
+        publicationGate: {
+          publishable: true,
+          blockers: [],
+          minimumConfidenceTier: 'moderate',
+          requiredEvidenceCount: 1,
+        },
+        telemetry: {
+          autopsyCompletionLatency: 3,
+          repeatErrorReductionRate: 0.1,
+          intelligenceSeedingConversionRate: 0.4,
+          benchmarkAccuracyLift: 0.2,
+          corroborationRate: 0.7,
+          staleIntelligenceRate: 0.55,
+          revalidationLatency: 6,
+          reinsertionAdoptionRate: 0.2,
+          autopsyCes: 0.88,
+        },
+      }),
+  });
+
+export const createMockSupersededAutopsyRecordSnapshot = (
+  overrides: Partial<IAutopsyRecordSnapshot> = {}
+): IAutopsyRecordSnapshot =>
+  createMockAutopsyRecordSnapshot({
+    ...overrides,
+    autopsy:
+      overrides.autopsy ??
+      createMockPostBidAutopsyRecord({
+        status: 'superseded',
+        supersession: {
+          supersededByAutopsyId: 'autopsy-next',
+          reason: 'Validated replacement record',
+        },
+      }),
+  });
+
+export const createMockDisagreementAutopsyRecordSnapshot = (
+  overrides: Partial<IAutopsyRecordSnapshot> = {}
+): IAutopsyRecordSnapshot =>
+  createMockAutopsyRecordSnapshot({
+    ...overrides,
+    autopsy:
+      overrides.autopsy ??
+      createMockPostBidAutopsyRecord({
+        status: 'review',
+        disagreements: [
+          {
+            disagreementId: 'disagreement-1',
+            criterion: 'pricing',
+            participants: ['primary-1', 'chief-1'],
+            summary: 'Pricing narrative needs corroboration.',
+            escalationRequired: true,
+            resolutionStatus: 'open',
+          },
+        ],
+      }),
+    escalationEvents:
+      overrides.escalationEvents ??
+      [
+        {
+          escalationId: 'escalation-deadlock-1',
+          autopsyId: 'autopsy-mock',
+          eventType: 'disagreement-deadlock',
+          createdAt: '2026-03-15T00:00:00.000Z',
+          target: createMockAutopsyOwner({ userId: 'chief-1', role: 'Chief Estimator' }),
+          reason: 'Cross-functional disagreement deadlock.',
+          sectionKeys: ['pricing'],
+        },
+      ],
+  });
+
+export const createMockOverdueAutopsyRecordSnapshot = (
+  overrides: Partial<IAutopsyRecordSnapshot> = {}
+): IAutopsyRecordSnapshot =>
+  createMockAutopsyRecordSnapshot({
+    ...overrides,
+    autopsy:
+      overrides.autopsy ??
+      createMockPostBidAutopsyRecord({
+        status: 'overdue',
+      }),
+    escalationEvents:
+      overrides.escalationEvents ??
+      [
+        {
+          escalationId: 'escalation-overdue-1',
+          autopsyId: 'autopsy-mock',
+          eventType: 'overdue',
+          createdAt: '2026-03-21T00:00:00.000Z',
+          target: createMockAutopsyOwner({ userId: 'chief-1', role: 'Chief Estimator' }),
+          reason: 'Autopsy SLA breached.',
+          sectionKeys: ['pricing'],
+        },
+      ],
+  });
+
 export const createMockAutopsyTransitionCommand = (
   overrides: Partial<IAutopsyTransitionCommand> = {}
 ): IAutopsyTransitionCommand => ({

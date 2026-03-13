@@ -184,3 +184,42 @@ export {
   POST_BID_AUTOPSY_TELEMETRY_EVENTS,
   createAutopsyTelemetryState,
 } from './telemetry/index.js';
+
+export {
+  POST_BID_AUTOPSY_INTEGRATIONS_SCOPE,
+  createPostBidAutopsyReferenceIntegrations,
+  projectAutopsyToBicActions,
+  projectAutopsySectionToBicAction,
+  projectAutopsyToCanvasTasks,
+  projectAutopsyToRelatedItems,
+  projectAutopsyToNotificationPayloads,
+  projectAutopsyToStrategicIntelligenceSeed,
+  projectAutopsyToScoreBenchmarkSignal,
+  projectAutopsyToHealthIndicatorTelemetry,
+  createAutopsyStepWizardConfig,
+  createAutopsyIntegrationDedupeKey,
+  createAutopsyPublishEnvelope,
+  createAutopsyReasonCodes,
+  createAutopsyRedactionMode,
+  createAutopsyWizardSections,
+  isAutopsyPublishEligible,
+  redactAutopsyText,
+} from './integrations/index.js';
+
+export type {
+  IPostBidAutopsyReferenceIntegrations,
+  IAutopsyBicActionProjection,
+  AutopsyCanvasTaskType,
+  IAutopsyCanvasTaskProjection,
+  IAutopsyRelatedItemProjection,
+  IAutopsyNotificationProjection,
+  IAutopsyStrategicIntelligenceSeedProjection,
+  IAutopsyScoreBenchmarkProjection,
+  IAutopsyHealthIndicatorTelemetryProjection,
+  IAutopsyWizardModel,
+  IAutopsyStepWizardConfig,
+  IAutopsyStepWizardStep,
+  AutopsyIntegrationRedactionMode,
+  IAutopsyPublishEnvelope,
+  IAutopsyWizardSectionProjection,
+} from './integrations/index.js';
