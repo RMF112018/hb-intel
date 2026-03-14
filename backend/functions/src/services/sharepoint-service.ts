@@ -35,6 +35,9 @@ export interface ISharePointService {
   /** W0-G2-T07: Uploads a single template file to a document library. Returns false if asset is missing. */
   uploadTemplateFile(siteUrl: string, entry: { fileName: string; targetLibrary: string; assetPath: string }): Promise<boolean>;
 
+  /** T08 §3.4: Check if a file exists in a document library. */
+  fileExists(siteUrl: string, libraryName: string, fileName: string): Promise<boolean>;
+
   /**
    * W0-G1-T02: Assigns an Entra ID security group to a SharePoint permission level on the site.
    */
@@ -365,11 +368,28 @@ export class SharePointService implements ISharePointService {
     if (!fs.existsSync(fullPath)) {
       return false;
     }
+    // T08 §3.4: Never overwrite existing files — idempotent skip if already present.
+    const alreadyExists = await this.fileExists(siteUrl, entry.targetLibrary, entry.fileName);
+    if (alreadyExists) {
+      return true;
+    }
     const sp: any = await this.getSP(siteUrl);
     const folderUrl = `/${new URL(siteUrl).pathname.slice(1)}/${entry.targetLibrary}`;
     const folder = sp.web.getFolderByServerRelativePath(folderUrl);
-    await folder.files.addUsingPath(entry.fileName, fs.readFileSync(fullPath), { Overwrite: true });
+    await folder.files.addUsingPath(entry.fileName, fs.readFileSync(fullPath), { Overwrite: false });
     return true;
+  }
+
+  /** T08 §3.4: Check if a file exists in a document library. */
+  async fileExists(siteUrl: string, libraryName: string, fileName: string): Promise<boolean> {
+    const sp: any = await this.getSP(siteUrl);
+    const relUrl = `/${new URL(siteUrl).pathname.slice(1)}/${libraryName}/${fileName}`;
+    try {
+      await sp.web.getFileByServerRelativePath(relUrl).select('Exists')();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -503,6 +523,11 @@ export class MockSharePointService implements ISharePointService {
     _entry: { fileName: string; targetLibrary: string; assetPath: string }
   ): Promise<boolean> {
     return true;
+  }
+
+  /** T08 §3.4: Mock — file never exists (allows upload path to proceed). */
+  async fileExists(_siteUrl: string, _libraryName: string, _fileName: string): Promise<boolean> {
+    return false;
   }
 
   /** W0-G1-T02: Mock — logs the group-to-permission-level assignment. */

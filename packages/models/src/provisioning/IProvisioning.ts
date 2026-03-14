@@ -80,6 +80,8 @@ export interface ISagaStepResult {
   errorMessage?: string;
   /** Whether this step was skipped because idempotency check confirmed it was already done. */
   idempotentSkip?: boolean;
+  /** T08: Structured metadata for step reporting (missing assets, skip counts, etc.) */
+  metadata?: Record<string, unknown>;
 }
 
 /**

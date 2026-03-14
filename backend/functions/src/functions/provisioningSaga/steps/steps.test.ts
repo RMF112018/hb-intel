@@ -83,7 +83,7 @@ describe('D-PH6-15 step executors (1-7)', () => {
     const status = makeStatus();
 
     const ok = await executeStep3(services, status);
-    services.sharePoint.uploadTemplateFiles.mockRejectedValueOnce(new Error('upload failed'));
+    services.sharePoint.uploadTemplateFile.mockRejectedValueOnce(new Error('upload failed'));
     const fail = await executeStep3(services, status);
 
     expect(ok.status).toBe('Completed');

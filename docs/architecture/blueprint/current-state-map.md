@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Status:** Canonical Current-State
-**Last Updated:** 2026-03-13
+**Last Updated:** 2026-03-14
 **Purpose:** Single authoritative reference for the present implementation state of the HB Intel monorepo. When this document differs from historical plans or locked blueprints regarding _what exists today_, this document governs present truth.
 
 ---
@@ -158,6 +158,21 @@
 | `backend/functions/src/config/project-controls-list-definitions.ts` | **Canonical Current-State** | Project-controls-family (T05) list definitions; 3 flat lists with T01-compliant pid/indexing; produced by W0-G2-T05 |
 | `backend/functions/src/config/financial-list-definitions.ts` | **Canonical Current-State** | Financial-family (T06) list definitions; 5 lists (1 parent, 1 child, 3 flat) with T01-compliant pid/indexing/parent-child; produced by W0-G2-T06 |
 | `backend/functions/src/config/workflow-list-definitions.ts` | **Canonical Current-State** | Composed workflow-family list definitions (26 lists, 5 families); produced by W0-G2-T07 |
+| `backend/functions/src/validation/` | **Canonical Current-State** | G2 provisioning validation helper module (list, department, template validators); produced by W0-G2-T08 |
+| `docs/reference/provisioning/g2-validation-rules.md` | **Canonical Current-State** | Consolidated G2 validation rules reference (T09 source of truth); produced by W0-G2-T08 |
+| `docs/reference/provisioning/seeded-file-manifest.md` | **Canonical Current-State** | Seeded file manifest reference with disk-presence tracking; produced by W0-G2-T08 |
+| `docs/reference/provisioning/department-library-folders.md` | **Canonical Current-State** | Department library pruning and folder tree reference; produced by W0-G2-T08 |
+| `plans/MVP/G2/W0-G2-Backend-Hardening-and-Workflow-Data-Foundations-Plan.md` (and T01 through T09, 9 task files) | **Canonical Normative Plan** | Tier 2 — matrix classification only; Group 2 master plan + task files T01–T09; backend hardening and SharePoint list schema tranche; ADR-0090 required before implementation |
+| `plans/MVP/G3/W0-G3-Shared-Platform-Wiring-and-Workflow-Experience-Plan.md` (and T01 through T08, 8 task files) | **Canonical Normative Plan** | Tier 2 — matrix classification only; Group 3 master plan + task files T01–T08; shared-platform wiring and workflow experience tranche; produces 9 reference documents under `docs/reference/workflow-experience/`; ADR-0090 required before implementation |
+| `plans/MVP/G4/W0-G4-SPFx-Surfaces-and-Workflow-Experience-Plan.md` | **Canonical Normative Plan** | Tier 2 — matrix classification only; Group 4 master umbrella plan; SPFx surfaces and workflow experience tranche; governs T01–T08; defines 10 locked interview decisions, 4-surface map (Estimating/Accounting/Admin/Project Hub), package boundary doctrine; requires G3 acceptance gate + ADR-0090 before implementation; created 2026-03-14 |
+| `plans/MVP/G4/W0-G4-T01-Estimating-Requester-Guided-Setup-Surface.md` (and T02 through T08, 7 additional task files) | **Canonical Normative Plan** | Tier 2 — matrix classification only; Group 4 task plans T01–T08; SPFx surface implementation specifications for Estimating requester flow (T01), coordinator visibility/retry (T02), controller queue/review (T03), admin oversight/recovery (T04), completion/handoff (T05), complexity/visibility rules (T06), responsive/failure-modes (T07), testing/verification (T08); ADR-0090 required before implementation; created 2026-03-14 |
+| `docs/reference/spfx-surfaces/estimating-requester-surface.md` | **Living Reference (Diátaxis)** | Reference quadrant; SPFx surface audience; requester guided setup surface spec and route map; produced by W0-G4-T01; pending implementation |
+| `docs/reference/spfx-surfaces/coordinator-visibility-spec.md` | **Living Reference (Diátaxis)** | Reference quadrant; SPFx surface audience; coordinator visibility and retry boundary specification; produced by W0-G4-T02; pending implementation |
+| `docs/reference/spfx-surfaces/controller-review-surface.md` | **Living Reference (Diátaxis)** | Reference quadrant; SPFx surface audience; controller queue and structured review surface spec; produced by W0-G4-T03; pending implementation |
+| `docs/reference/spfx-surfaces/admin-recovery-boundary.md` | **Living Reference (Diátaxis)** | Reference quadrant; SPFx surface audience; admin oversight and recovery boundary definition; produced by W0-G4-T04; pending implementation |
+| `docs/reference/spfx-surfaces/completion-handoff-spec.md` | **Living Reference (Diátaxis)** | Reference quadrant; SPFx surface audience; completion confirmation and optional Project Hub handoff spec; produced by W0-G4-T05; pending implementation |
+| `docs/reference/spfx-surfaces/complexity-application-map.md` | **Living Reference (Diátaxis)** | Reference quadrant; SPFx surface audience; cross-surface complexity gate application map, STATE_BADGE_VARIANTS constant, roleComplexityMap validation; produced by W0-G4-T06; pending implementation |
+| `docs/reference/spfx-surfaces/responsive-failure-catalog.md` | **Living Reference (Diátaxis)** | Reference quadrant; SPFx surface audience; responsive breakpoints, tablet-safe requirements, cross-app navigation URLs, failure mode catalog; produced by W0-G4-T07; pending implementation |
 | Diátaxis output docs (`docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/`, `docs/user-guide/`, `docs/administrator-guide/`, `docs/maintenance/`, `docs/troubleshooting/`, `docs/security/`, `docs/release-notes/`, `docs/faq.md`) | **Living Reference (Diátaxis)** | 200+ files; quadrant breakdown: tutorials, how-to, reference, explanation, user-guide, administrator-guide, maintenance, troubleshooting, security, release-notes, faq; updated continuously as features ship; exempt from inline banner |
 
 ### 2.1 Classification Maintenance Rule

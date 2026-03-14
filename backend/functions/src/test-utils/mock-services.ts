@@ -31,6 +31,9 @@ export interface IMockServices extends IServiceContainer {
     associateHub: Mock;
     removeHubAssociation: Mock;
     assignGroupToPermissionLevel: Mock;
+    uploadTemplateFile: Mock;
+    createFolderIfNotExists: Mock;
+    fileExists: Mock;
   };
   tableStorage: {
     upsertProvisioningStatus: Mock;
@@ -99,6 +102,9 @@ export function createMockServices(): IMockServices {
       associateHub: vi.fn(async (_siteUrl: string, _hubSiteUrl: string) => {}),
       removeHubAssociation: vi.fn(async (_siteUrl: string) => {}),
       assignGroupToPermissionLevel: vi.fn(async (_siteUrl: string, _groupId: string, _level: string) => {}),
+      uploadTemplateFile: vi.fn(async () => true),
+      createFolderIfNotExists: vi.fn(async () => {}),
+      fileExists: vi.fn(async () => false),
     },
     graph: {
       createSecurityGroup: vi.fn(async (_displayName: string, _description: string) => 'mock-group-id'),

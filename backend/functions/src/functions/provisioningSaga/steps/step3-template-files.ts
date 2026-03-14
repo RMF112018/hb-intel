@@ -23,9 +23,15 @@ export async function executeStep3(
     startedAt: new Date().toISOString(),
   };
   try {
+    // T08: Collect missing-asset information for structured reporting.
+    const missingAssets: string[] = [];
+
     // W0-G2-T07: Core template files — manifest-driven per-file upload.
     for (const entry of TEMPLATE_FILE_MANIFEST) {
-      await services.sharePoint.uploadTemplateFile(status.siteUrl!, entry);
+      const uploaded = await services.sharePoint.uploadTemplateFile(status.siteUrl!, entry);
+      if (!uploaded) {
+        missingAssets.push(entry.fileName);
+      }
     }
 
     // W0-G2-T07: Add-on template file upload — activated.
@@ -35,7 +41,10 @@ export async function executeStep3(
         const definition = ADD_ON_DEFINITIONS[addOnKey];
         if (!definition) continue;
         for (const fileEntry of definition.templateFiles) {
-          await services.sharePoint.uploadTemplateFile(status.siteUrl!, fileEntry);
+          const uploaded = await services.sharePoint.uploadTemplateFile(status.siteUrl!, fileEntry);
+          if (!uploaded) {
+            missingAssets.push(fileEntry.fileName);
+          }
         }
       }
     }
@@ -57,6 +66,11 @@ export async function executeStep3(
           await services.sharePoint.createFolderIfNotExists(status.siteUrl!, folderTree.libraryName, folderPath);
         }
       }
+    }
+
+    // T08: Surface missing-asset information in step metadata for T09 assertions and operational visibility.
+    if (missingAssets.length > 0) {
+      result.metadata = { missingAssets, missingAssetCount: missingAssets.length };
     }
 
     result.status = 'Completed';

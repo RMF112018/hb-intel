@@ -1,313 +1,330 @@
-# W0-G2-T08 — Validation, Idempotency, Migration, and Seed Rules
+# W0-G2-T09 — Testing, Validation, and Provisioning Verification
 
 ## Context
 
-T08 turns the G2 provisioning correctness rules (structural validation, PID contract, idempotency, migration posture, seed rules) into concrete, testable seams in the repo. T09 will write integration tests against these seams. The goal is backend validation helpers + reference docs — NOT runtime UI enforcement.
+T09 implements comprehensive test coverage for all G2 provisioning work. The T09 plan document (`docs/architecture/plans/MVP/G2/W0-G2-T09-Testing-Validation-and-Provisioning-Verification.md`) defines 62 test cases across 10 categories. This implementation plan adapts T09 to repo truth, fixes a critical mock gap that breaks existing tests, and delivers 69 concrete test cases.
 
 **Key repo findings:**
-- `IMockServices` is missing `uploadTemplateFile`, `createFolderIfNotExists` (added by T07) — TypeScript should catch this since it extends `IServiceContainer`. Must fix.
-- `uploadTemplateFile` uses `{ Overwrite: true }` — T08 IDEM-9 mandates no-overwrite on re-run.
-- No `fileExists` method on `ISharePointService` — needed for the no-overwrite check.
-- No `validation/` directory exists — starting fresh.
-- T08 plan says "25 G2 lists" but repo has 26 — repo truth governs.
-- 6 parent/child Lookup pairs exist across startup(2), closeout(1), safety(2), financial(1).
+- `IMockServices` / `createMockServices()` are **missing** `uploadTemplateFile` and `createFolderIfNotExists` — added by T07 to `ISharePointService` but never added to test mocks
+- The existing step 3 test in `steps.test.ts:81` is **broken** — it calls `executeStep3` which invokes `services.sharePoint.uploadTemplateFile(...)`, but that method doesn't exist on the mock → TypeError caught → returns `Failed` instead of `Completed`
+- T08 validation module was **never implemented** — `backend/functions/src/validation/` does not exist
+- `fileExists` method does **not** exist on `ISharePointService` (T08 scope, not done)
+- No Step 4b — single `step4-data-lists.ts` handles both core (8) + workflow (26) lists
+- Template manifest: **18** entries (4 core + 4 startup + 2 closeout + 4 safety + 1 project-controls + 3 financial)
+- Workflow lists: **26** (not 25 as T09 plan states — repo truth governs)
+- Parent/child pairs: **6** (startup×2, closeout×1, safety×2, financial×1)
+- Department types: `commercial` (34 folders), `luxury-residential` (37 folders)
+- Add-ons: 2 (`safety-pack`, `closeout-pack`)
+- `vitest.config.ts` coverage includes are missing several T07 source files
 
-**Authoritative source:** `docs/architecture/plans/MVP/G2/W0-G2-T08-Validation-Idempotency-Migration-and-Seed-Rules.md`
+**Authoritative source:** `docs/architecture/plans/MVP/G2/W0-G2-T09-Testing-Validation-and-Provisioning-Verification.md`
 
 ---
 
 ## Implementation Steps
 
-### Step 1 — Validation Types (`backend/functions/src/validation/types.ts`) [NEW]
+### Step 1 — Fix `mock-services.ts` (Prerequisite for ALL step tests)
 
-Standard validation result contract for all validators and T09 test assertions:
+**File:** `backend/functions/src/test-utils/mock-services.ts` [EDIT]
 
+Add to `IMockServices.sharePoint` interface:
 ```typescript
-export interface IValidationResult {
-  rule: string;        // e.g., 'V-STRUCT-1', 'V-PID-1', 'IDEM-9'
-  passed: boolean;
-  message: string;
-  severity: 'error' | 'warning';
-  details?: unknown;
-}
-
-export interface IValidationReport {
-  category: string;    // 'structural' | 'pid' | 'idempotency' | 'file' | 'migration'
-  results: IValidationResult[];
-  allPassed: boolean;
-}
+uploadTemplateFile: Mock;
+createFolderIfNotExists: Mock;
 ```
 
-Pure types file, no runtime deps.
-
----
-
-### Step 2 — Structural Validators (`backend/functions/src/validation/structural-validators.ts`) [NEW]
-
-Pure functions that validate config definition arrays (NOT live SharePoint). Each returns `IValidationResult[]`.
-
-| Function | T08 Rules | Input Constants | Validates |
-|----------|-----------|-----------------|-----------|
-| `validateCoreListsIntact` | V-STRUCT-1, V-STRUCT-2 | `HB_INTEL_LIST_DEFINITIONS` | 8 core lists present; PunchBatchId is only additive change; no G2 properties (pid, listFamily, provisioningOrder) leaked |
-| `validateG2PidPresence` | V-STRUCT-3, V-STRUCT-4 | `HB_INTEL_WORKFLOW_LIST_DEFINITIONS` | Every G2 list has `pid` field: Text, required, indexed |
-| `validateG2StatusPresence` | V-STRUCT-5 | `HB_INTEL_WORKFLOW_LIST_DEFINITIONS` | Every G2 list has `Status` Choice field |
-| `validateParentChildLookups` | V-STRUCT-6 | `HB_INTEL_WORKFLOW_LIST_DEFINITIONS` | All 6 parent/child pairs: parent exists, child has ParentRecord Lookup pointing to correct parent, provisioningOrder parent < child |
-| `validateDepartmentLibraries` | V-LIB-1, V-LIB-2 | `DEPARTMENT_LIBRARIES`, `CORE_LIBRARIES` | Department pruning correct (2 departments, 1 library each, distinct names); 3 core libraries always present with versioning |
-| `validateFolderTrees` | V-LIB-2 | `DEPARTMENT_FOLDER_TREES` | Every subfolder's parent is also in the list; parent-first ordering |
-| `runAllStructuralValidations` | All V-STRUCT + V-LIB | All config constants | Aggregates all above into `IValidationReport` |
-
----
-
-### Step 3 — PID Validators (`backend/functions/src/validation/pid-validators.ts`) [NEW]
-
-Pure functions validating PID contract compliance across all 26 workflow lists.
-
-| Function | T08 Rules | Validates |
-|----------|-----------|-----------|
-| `validatePidDisplayName` | V-PID-1 | Every G2 list's pid field has `displayName: 'Project ID'` |
-| `validatePidDefaultValue` | V-PID-2 | Every G2 list's pid field has `defaultValue: '{{projectNumber}}'` |
-| `validatePidFullContract` | V-PID-3 | pid field matches full contract: type Text, required, indexed, defaultValue pattern |
-| `runAllPidValidations` | All V-PID | Aggregates into `IValidationReport` |
-
----
-
-### Step 4 — File Validators (`backend/functions/src/validation/file-validators.ts`) [NEW]
-
-Validates template file manifest and local asset presence.
-
-| Function | T08 Rules | Validates |
-|----------|-----------|-----------|
-| `validateTemplateManifest` | V-FILE-1 | All entries have non-empty fileName, targetLibrary, assetPath; targetLibrary matches a CORE_LIBRARIES name |
-| `validateTemplateAssets` | V-FILE-2 | Check local filesystem for each asset; missing = `warning` severity (not error); returns report of present/missing |
-| `validateAddOnAssets` | V-FILE-2 | Same for add-on definition template files |
-| `runAllFileValidations` | All V-FILE | Aggregates into `IValidationReport` |
-
-`validateTemplateAssets` accepts optional `basePath` parameter for testability (default: `path.resolve(__dirname, '../assets/templates/')`).
-
----
-
-### Step 5 — Idempotency Rules (`backend/functions/src/validation/idempotency-rules.ts`) [NEW]
-
-Code-as-documentation module. Typed rule objects that T09 uses to derive test scenarios.
-
+Add to `createMockServices()` factory sharePoint object:
 ```typescript
-export interface IIdempotencyRule {
-  ruleId: string;           // 'IDEM-1' through 'IDEM-9'
-  description: string;
-  implementedBy: string;    // e.g., 'SharePointService.listExists → createDataLists skip'
-  testScenario: string;     // What T09 should test
-}
+uploadTemplateFile: vi.fn(async () => true),
+createFolderIfNotExists: vi.fn(async () => {}),
+```
 
-export const IDEMPOTENCY_RULES: readonly IIdempotencyRule[] = [
-  { ruleId: 'IDEM-1', description: 'Existing list → skip creation, log idempotentSkip', implementedBy: 'SharePointService.createDataLists', testScenario: 'Mock listExists=true, verify createDataLists skips' },
-  // ... IDEM-2 through IDEM-9
-];
+Keep existing `uploadTemplateFiles` (old bulk method) for backward compatibility.
 
-export const RERUN_SCENARIOS = [
-  { id: 'A', name: 'Clean first run', description: 'All items created' },
-  { id: 'B', name: 'Full retry on complete site', description: 'All idempotently skipped' },
-  { id: 'C', name: 'Partial failure mid-list', description: 'Created lists skipped, remaining created' },
-  { id: 'D', name: 'Step 3 folder failure', description: 'Existing folders skipped, remaining created' },
-] as const;
+---
+
+### Step 2 — Fix Broken Step 3 Test in `steps.test.ts`
+
+**File:** `backend/functions/src/functions/provisioningSaga/steps/steps.test.ts` [EDIT]
+
+Replace the step 3 test (lines 81-91) to use T07 per-file contract:
+- First call: assert `ok.status === 'Completed'` and `uploadTemplateFile` was called
+- Second call: mock `uploadTemplateFile` to reject, assert `fail.status === 'Failed'`
+
+Also verify step 4 test still passes after mock fix (it uses `createDataLists` which is already in mock — should be fine).
+
+---
+
+### Step 3 — Create `retry.test.ts` (TC-FAIL: 6 tests)
+
+**File:** `backend/functions/src/utils/retry.test.ts` [NEW]
+
+| TC ID | Test |
+|-------|------|
+| TC-FAIL-01 | Succeeds on first attempt without retry |
+| TC-FAIL-02 | Retries transient 429 error and succeeds on attempt 2 |
+| TC-FAIL-03 | Exhausts maxAttempts and throws last error |
+| TC-FAIL-04 | Does NOT retry non-transient errors |
+| TC-FAIL-05 | Honors Retry-After header — delay ≥ retryAfterMs * 1000 |
+| TC-FAIL-06 | Calls `onRetry` callback with correct (error, attempt, delay) args |
+
+**Implementation:** Use `vi.useFakeTimers()` + `vi.advanceTimersByTimeAsync()`. For TC-FAIL-05, attach `response.headers` with `get('Retry-After')` returning a numeric string to the error object. The `isTransient` default checks for '429' in the error message.
+
+---
+
+### Step 4 — Create `step3-template-files.test.ts` (TC-STEP 1–6, TC-SEED, TC-DEPT runtime: 18 tests)
+
+**File:** `backend/functions/src/functions/provisioningSaga/steps/step3-template-files.test.ts` [NEW]
+
+| TC ID | Category | Test |
+|-------|----------|------|
+| TC-STEP-01 | STEP | Returns Completed with stepNumber=3, stepName='Upload Template Files' |
+| TC-STEP-02 | STEP | Calls `uploadTemplateFile` once per manifest entry (18 calls) |
+| TC-STEP-03 | STEP | Returns Failed with errorMessage when uploadTemplateFile rejects |
+| TC-STEP-04 | STEP | With addOns=['safety-pack'], uploads safety-pack template file |
+| TC-STEP-05 | STEP | With addOns=['closeout-pack'], uploads closeout-pack template file |
+| TC-STEP-06 | STEP | With unknown addOn key, skips gracefully |
+| TC-SEED-01 | SEED | Each uploadTemplateFile call receives correct {fileName, targetLibrary, assetPath} |
+| TC-SEED-02 | SEED | With no addOns on status, only uploads core manifest files |
+| TC-SEED-03 | SEED | With empty addOns array, only uploads core manifest files |
+| TC-DEPT-01 | DEPT | department='commercial' → creates 'Commercial Documents' library |
+| TC-DEPT-02 | DEPT | department='commercial' → skips createDocumentLibrary when documentLibraryExists=true |
+| TC-DEPT-03 | DEPT | department='commercial' → calls createFolderIfNotExists 34 times |
+| TC-DEPT-04 | DEPT | department='luxury-residential' → creates 'Luxury Residential Documents' library |
+| TC-DEPT-05 | DEPT | department='luxury-residential' → calls createFolderIfNotExists 37 times |
+| TC-DEPT-06 | DEPT | No department → skips library creation and folder provisioning entirely |
+| TC-DEPT-07 | DEPT | Unknown department → skips gracefully |
+| TC-DEPT-08 | DEPT | Folder paths created in parent-first order (verified via mock call order) |
+
+**Implementation:** Import `TEMPLATE_FILE_MANIFEST`, `ADD_ON_DEFINITIONS`, `DEPARTMENT_LIBRARIES`, `DEPARTMENT_FOLDER_TREES`. Set `status.department` and `(status as any).addOns` for scenario variation. Use `createMockServices()` from Step 1.
+
+---
+
+### Step 5 — Create `step4-data-lists.test.ts` (TC-STEP 7–10: 4 tests)
+
+**File:** `backend/functions/src/functions/provisioningSaga/steps/step4-data-lists.test.ts` [NEW]
+
+| TC ID | Test |
+|-------|------|
+| TC-STEP-07 | Returns Completed with stepNumber=4, stepName='Create Data Lists' |
+| TC-STEP-08 | Calls createDataLists twice: first with core (8 lists), second with workflow (26 lists) |
+| TC-STEP-09 | Passes `{ projectNumber: status.projectNumber }` as context to second createDataLists call |
+| TC-STEP-10 | Returns Failed with errorMessage when createDataLists rejects |
+
+**Implementation:** Import `HB_INTEL_LIST_DEFINITIONS` and `HB_INTEL_WORKFLOW_LIST_DEFINITIONS`. Use `toHaveBeenNthCalledWith` for argument verification.
+
+---
+
+### Step 6 — Create `schema-validation.test.ts` (TC-SCHEMA: 14 tests)
+
+**File:** `backend/functions/src/config/schema-validation.test.ts` [NEW]
+
+Cross-cutting schema correctness across ALL list definitions (core + workflow = 34 lists).
+
+| TC ID | Test |
+|-------|------|
+| TC-SCHEMA-01 | HB_INTEL_LIST_DEFINITIONS has exactly 8 core lists |
+| TC-SCHEMA-02 | HB_INTEL_WORKFLOW_LIST_DEFINITIONS has exactly 26 workflow lists |
+| TC-SCHEMA-03 | Every list has a non-empty `title` |
+| TC-SCHEMA-04 | Every list has a non-empty `description` |
+| TC-SCHEMA-05 | Every list has `template: 100` |
+| TC-SCHEMA-06 | Every list has at least one field |
+| TC-SCHEMA-07 | Every field has non-empty `internalName` and `displayName` |
+| TC-SCHEMA-08 | Field `type` is one of the 9 allowed values |
+| TC-SCHEMA-09 | Choice fields have a non-empty `choices` array |
+| TC-SCHEMA-10 | No duplicate `internalName` within any single list |
+| TC-SCHEMA-11 | No duplicate list titles across all 34 definitions |
+| TC-SCHEMA-12 | Lookup fields have `lookupListTitle` defined |
+| TC-SCHEMA-13 | All workflow lists have `listFamily` and `provisioningOrder` defined |
+| TC-SCHEMA-14 | Every list with `parentListTitle` references an existing list |
+
+**Implementation:** Import both definition arrays. Combine into `ALL_LISTS = [...core, ...workflow]` for cross-cutting checks.
+
+---
+
+### Step 7 — Create `pid-contract.test.ts` (TC-PID: 4 tests)
+
+**File:** `backend/functions/src/config/pid-contract.test.ts` [NEW]
+
+| TC ID | Test |
+|-------|------|
+| TC-PID-01 | Every workflow list has a `pid` field with `internalName: 'pid'` |
+| TC-PID-02 | Every `pid` field has `required: true` and `indexed: true` |
+| TC-PID-03 | Every `pid` field has `defaultValue` containing `{{projectNumber}}` |
+| TC-PID-04 | No core list has a `pid` field (pid is workflow-only) |
+
+---
+
+### Step 8 — Create `parent-child-lookup.test.ts` (TC-PARENT: 4 tests)
+
+**File:** `backend/functions/src/config/parent-child-lookup.test.ts` [NEW]
+
+| TC ID | Test |
+|-------|------|
+| TC-PARENT-01 | Exactly 6 lists have `parentListTitle` defined |
+| TC-PARENT-02 | Every `parentListTitle` references an existing list title in the workflow set |
+| TC-PARENT-03 | Every child list has at least one Lookup field with `lookupListTitle` matching its parent |
+| TC-PARENT-04 | Parent lists have lower `provisioningOrder` than their children |
+
+---
+
+### Step 9 — Create `department-libraries.test.ts` (TC-DEPT config: 8 tests)
+
+**File:** `backend/functions/src/config/department-libraries.test.ts` [NEW]
+
+Config-level tests (distinct from Step 4's runtime behavior tests).
+
+| TC ID | Test |
+|-------|------|
+| TC-DEPT-CFG-01 | DEPARTMENT_LIBRARIES has exactly 2 keys: 'commercial', 'luxury-residential' |
+| TC-DEPT-CFG-02 | Commercial has 1 library: 'Commercial Documents' with versioning=true |
+| TC-DEPT-CFG-03 | Luxury Residential has 1 library: 'Luxury Residential Documents' with versioning=true |
+| TC-DEPT-CFG-04 | DEPARTMENT_FOLDER_TREES keys match DEPARTMENT_LIBRARIES keys |
+| TC-DEPT-CFG-05 | Commercial folder tree has 34 paths |
+| TC-DEPT-CFG-06 | Luxury Residential folder tree has 37 paths |
+| TC-DEPT-CFG-07 | All folder paths are non-empty, no leading/trailing slashes |
+| TC-DEPT-CFG-08 | Folder tree `libraryName` matches corresponding DEPARTMENT_LIBRARIES name |
+
+---
+
+### Step 10 — Create `idempotency.test.ts` (TC-IDEM: 5 tests)
+
+**File:** `backend/functions/src/functions/provisioningSaga/__tests__/idempotency.test.ts` [NEW]
+
+| TC ID | Test |
+|-------|------|
+| TC-IDEM-01 | Step 3 called twice → both return Completed |
+| TC-IDEM-02 | Step 4 called twice → both return Completed |
+| TC-IDEM-03 | Step 3 with department: documentLibraryExists=true → skips createDocumentLibrary |
+| TC-IDEM-04 | Step 3 with department: documentLibraryExists=false → calls createDocumentLibrary |
+| TC-IDEM-05 | Step 4 partial failure on first call → second call passes same definitions |
+
+---
+
+### Step 11 — Create `migration-coexistence.test.ts` (TC-MCOEX: 4 tests)
+
+**File:** `backend/functions/src/functions/provisioningSaga/__tests__/migration-coexistence.test.ts` [NEW]
+
+| TC ID | Test |
+|-------|------|
+| TC-MCOEX-01 | `uploadTemplateFiles` (old bulk) method exists on MockSharePointService |
+| TC-MCOEX-02 | `uploadTemplateFile` (new per-file) method exists on MockSharePointService |
+| TC-MCOEX-03 | `createFolderIfNotExists` method exists on MockSharePointService |
+| TC-MCOEX-04 | Step 3 uses per-file `uploadTemplateFile`, not bulk `uploadTemplateFiles` |
+
+**Implementation:** Instantiate `MockSharePointService` from `sharepoint-service.ts`. Assert method existence via typeof. For TC-MCOEX-04, run step3 with mocks and verify `uploadTemplateFile` called, `uploadTemplateFiles` NOT called.
+
+---
+
+### Step 12 — Create `integration.test.ts` (TC-PILOT: 2 tests, env-gated)
+
+**File:** `backend/functions/src/functions/provisioningSaga/__tests__/integration.test.ts` [NEW]
+
+**Env gate:** `describe.runIf(process.env.SHAREPOINT_INTEGRATION_TEST_ENABLED === 'true')`
+
+| TC ID | Test |
+|-------|------|
+| TC-PILOT-01 | Full Step 3 + Step 4 against live SharePoint (18 templates, 34 lists) — measures duration |
+| TC-PILOT-02 | Step 3 with department='commercial' creates library + 34 folders on live site |
+
+**Implementation:** Follows `smoke.test.ts` pattern — real `SharePointService`, unique site per test, cleanup in `afterEach`, 180s timeout.
+
+---
+
+### Step 13 — Update `vitest.config.ts`
+
+**File:** `backend/functions/vitest.config.ts` [EDIT]
+
+**13a. Coverage includes** — add:
+```
+'src/utils/retry.ts',
+'src/config/core-libraries.ts',
+'src/config/add-on-definitions.ts',
+'src/config/list-definitions.ts',
+'src/config/workflow-list-definitions.ts',
+'src/config/startup-list-definitions.ts',
+'src/config/closeout-list-definitions.ts',
+'src/config/safety-list-definitions.ts',
+'src/config/project-controls-list-definitions.ts',
+'src/config/financial-list-definitions.ts',
+```
+
+**13b. Unit project exclude** — add integration test:
+```
+'src/functions/provisioningSaga/**/__tests__/integration.test.ts'
+```
+
+**13c. Smoke project include** — add integration test:
+```
+'src/functions/provisioningSaga/**/__tests__/integration.test.ts'
 ```
 
 ---
 
-### Step 6 — Migration Rules (`backend/functions/src/validation/migration-rules.ts`) [NEW]
+### Step 14 — Update `current-state-map.md` §2
 
-Codifies the 5 MIGR rules from T08 §4 as typed reference. Pure data.
+**File:** `docs/architecture/blueprint/current-state-map.md` [EDIT]
 
-```typescript
-export const MIGRATION_RULES = [
-  { ruleId: 'MIGR-1', description: 'File is active operational source during Wave 0; list is structural only', phase: 'wave-0' },
-  { ruleId: 'MIGR-2', description: 'G2 creates empty list structures only — no data migration', phase: 'wave-0' },
-  { ruleId: 'MIGR-3', description: 'Loading existing data into lists is Wave 1 scope', phase: 'wave-1' },
-  { ruleId: 'MIGR-4', description: 'Seeded files are project-team owned; template refresh out of G2 scope', phase: 'wave-0' },
-  { ruleId: 'MIGR-5', description: 'Template file version in assets/ does not auto-update provisioned sites', phase: 'wave-0' },
-] as const;
-
-export const COEXISTENCE_DOCTRINE = {
-  wave0: 'File and list coexist but are NOT synchronized. File is operational source.',
-  wave1: 'Per-feature migration moves operational truth from file to list.',
-  noAutoSync: 'Changing a template asset does NOT propagate to already-provisioned sites.',
-} as const;
+Add classification rows for T09 test artifacts:
 ```
-
----
-
-### Step 7 — Barrel Export (`backend/functions/src/validation/index.ts`) [NEW]
-
-Re-exports all validators, types, and rule constants from a single entry point.
-
----
-
-### Step 8 — Add `fileExists` to SharePointService [EDIT]
-
-**File:** `backend/functions/src/services/sharepoint-service.ts`
-
-**8a. Interface addition:**
-```typescript
-fileExists(siteUrl: string, libraryName: string, fileName: string): Promise<boolean>;
-```
-
-**8b. `SharePointService` implementation:**
-```typescript
-async fileExists(siteUrl: string, libraryName: string, fileName: string): Promise<boolean> {
-  const sp: any = await this.getSP(siteUrl);
-  const fileUrl = `/${new URL(siteUrl).pathname.slice(1)}/${libraryName}/${fileName}`;
-  try {
-    await sp.web.getFileByServerRelativePath(fileUrl).select('Exists')();
-    return true;
-  } catch {
-    return false;
-  }
-}
-```
-
-**8c. `MockSharePointService` implementation:**
-```typescript
-async fileExists(_siteUrl: string, _libraryName: string, _fileName: string): Promise<boolean> {
-  return false;
-}
-```
-
-**8d. Fix `uploadTemplateFile` — IDEM-9 no-overwrite:**
-```typescript
-async uploadTemplateFile(siteUrl, entry): Promise<boolean> {
-  const fullPath = path.resolve(__dirname, '../assets/templates/', entry.assetPath);
-  if (!fs.existsSync(fullPath)) return false;
-
-  // IDEM-9: Do not overwrite existing files on re-run
-  const alreadyExists = await this.fileExists(siteUrl, entry.targetLibrary, entry.fileName);
-  if (alreadyExists) return true;
-
-  const sp: any = await this.getSP(siteUrl);
-  const folderUrl = `/${new URL(siteUrl).pathname.slice(1)}/${entry.targetLibrary}`;
-  const folder = sp.web.getFolderByServerRelativePath(folderUrl);
-  await folder.files.addUsingPath(entry.fileName, fs.readFileSync(fullPath), { Overwrite: false });
-  return true;
-}
-```
-
----
-
-### Step 9 — Fix Mock Services [EDIT]
-
-**File:** `backend/functions/src/test-utils/mock-services.ts`
-
-Add missing mocks to both `IMockServices` interface and `createMockServices()`:
-
-| Mock | Default Return |
-|------|---------------|
-| `uploadTemplateFile: Mock` | `vi.fn(async () => true)` |
-| `createFolderIfNotExists: Mock` | `vi.fn(async () => {})` |
-| `fileExists: Mock` | `vi.fn(async () => false)` |
-
----
-
-### Step 10 — Validation Tests (`backend/functions/src/validation/structural-validators.test.ts`) [NEW]
-
-Tests for the validation module itself (~20 assertions):
-- `runAllStructuralValidations` returns all-passed for current config
-- `runAllPidValidations` returns all-passed for current config
-- `validateParentChildLookups` correctly identifies all 6 parent/child pairs
-- `validateTemplateManifest` passes for current 18-entry manifest
-- `validateTemplateAssets` returns warnings (not errors) for 0-byte placeholder files
-- `validateCoreListsIntact` passes with current 8 core lists
-- `validateFolderTrees` validates parent-first ordering
-
----
-
-### Step 11 — Reference Documentation [NEW — 3 docs]
-
-**11a. `docs/reference/provisioning/g2-validation-rules.md`**
-
-Comprehensive reference listing all validation rules organized by category:
-- Structural (V-STRUCT-1 through V-STRUCT-6, V-LIB-1, V-LIB-2, V-FILE-1, V-FILE-2)
-- PID (V-PID-1, V-PID-2, V-PID-3)
-- Idempotency (IDEM-1 through IDEM-9, re-run scenarios A–D)
-- Migration (MIGR-1 through MIGR-5, coexistence doctrine)
-- Readiness gates (§5.1–5.6 from T08)
-- Cross-references to validation module functions
-
-**11b. `docs/reference/provisioning/seeded-file-manifest.md`**
-
-Reference listing all 18 template entries + 2 add-on entries:
-- Columns: fileName, targetLibrary, assetPath, family origin, asset status
-- Missing-asset behavior documentation
-- Add-on activation rules
-
-**11c. `docs/reference/provisioning/department-library-folders.md`**
-
-Reference listing:
-- 3 core libraries (all projects)
-- 2 department-specific libraries with folder trees
-- Pruning rule (only department-matched library is created)
-- Folder parent-first ordering requirement
-
----
-
-### Step 12 — Update `current-state-map.md` §2 [EDIT]
-
-Add classification rows:
-```
-| `backend/functions/src/validation/` | **Canonical Current-State** | G2 provisioning validation module (structural, PID, file, idempotency, migration rules); produced by W0-G2-T08 |
-| `docs/reference/provisioning/g2-validation-rules.md` | **Living Reference (Diátaxis)** | G2 validation rules reference — structural, PID, idempotency, migration; produced by W0-G2-T08 |
-| `docs/reference/provisioning/seeded-file-manifest.md` | **Living Reference (Diátaxis)** | Seeded template file manifest reference; produced by W0-G2-T08 |
-| `docs/reference/provisioning/department-library-folders.md` | **Living Reference (Diátaxis)** | Department library + folder tree reference; produced by W0-G2-T08 |
+| `backend/functions/src/utils/retry.test.ts` | **Canonical Current-State** | withRetry Retry-After + backoff tests (TC-FAIL-01–06); produced by W0-G2-T09 |
+| `backend/functions/src/config/schema-validation.test.ts` | **Canonical Current-State** | Cross-cutting schema validation tests (TC-SCHEMA-01–14); produced by W0-G2-T09 |
+| `backend/functions/src/config/pid-contract.test.ts` | **Canonical Current-State** | PID contract compliance tests (TC-PID-01–04); produced by W0-G2-T09 |
+| `backend/functions/src/config/parent-child-lookup.test.ts` | **Canonical Current-State** | Parent/child Lookup structure tests (TC-PARENT-01–04); produced by W0-G2-T09 |
+| `backend/functions/src/config/department-libraries.test.ts` | **Canonical Current-State** | Department library + folder tree config tests (TC-DEPT-CFG-01–08); produced by W0-G2-T09 |
 ```
 
 ---
 
 ## Files Summary
 
-| File | Action | Category |
-|------|--------|----------|
-| `backend/functions/src/validation/types.ts` | NEW | Code |
-| `backend/functions/src/validation/structural-validators.ts` | NEW | Code |
-| `backend/functions/src/validation/pid-validators.ts` | NEW | Code |
-| `backend/functions/src/validation/file-validators.ts` | NEW | Code |
-| `backend/functions/src/validation/idempotency-rules.ts` | NEW | Code |
-| `backend/functions/src/validation/migration-rules.ts` | NEW | Code |
-| `backend/functions/src/validation/index.ts` | NEW | Code |
-| `backend/functions/src/validation/structural-validators.test.ts` | NEW | Test |
-| `backend/functions/src/services/sharepoint-service.ts` | EDIT | Code (fileExists + IDEM-9 fix) |
-| `backend/functions/src/test-utils/mock-services.ts` | EDIT | Code (3 missing mocks) |
-| `docs/reference/provisioning/g2-validation-rules.md` | NEW | Docs |
-| `docs/reference/provisioning/seeded-file-manifest.md` | NEW | Docs |
-| `docs/reference/provisioning/department-library-folders.md` | NEW | Docs |
-| `docs/architecture/blueprint/current-state-map.md` | EDIT | Docs (4 new rows) |
+| # | File | Action | Tests |
+|---|------|--------|-------|
+| 1 | `src/test-utils/mock-services.ts` | EDIT | — |
+| 2 | `src/functions/provisioningSaga/steps/steps.test.ts` | EDIT | fix 1 |
+| 3 | `src/utils/retry.test.ts` | NEW | 6 |
+| 4 | `src/functions/provisioningSaga/steps/step3-template-files.test.ts` | NEW | 18 |
+| 5 | `src/functions/provisioningSaga/steps/step4-data-lists.test.ts` | NEW | 4 |
+| 6 | `src/config/schema-validation.test.ts` | NEW | 14 |
+| 7 | `src/config/pid-contract.test.ts` | NEW | 4 |
+| 8 | `src/config/parent-child-lookup.test.ts` | NEW | 4 |
+| 9 | `src/config/department-libraries.test.ts` | NEW | 8 |
+| 10 | `src/functions/provisioningSaga/__tests__/idempotency.test.ts` | NEW | 5 |
+| 11 | `src/functions/provisioningSaga/__tests__/migration-coexistence.test.ts` | NEW | 4 |
+| 12 | `src/functions/provisioningSaga/__tests__/integration.test.ts` | NEW | 2 |
+| 13 | `vitest.config.ts` | EDIT | — |
+| 14 | `docs/architecture/blueprint/current-state-map.md` | EDIT | — |
+
+**Total: 10 new test files, 4 edited files, 69 new test cases + 1 fixed test**
 
 ---
 
-## What T09 Gets to Test Against
+## T09 Coverage by Category
 
-1. **Structural validators** — `runAllStructuralValidations()` returns all-passed for current config; individual validators testable per-rule
-2. **PID validators** — `runAllPidValidations()` verifies contract across all 26 lists
-3. **File validators** — `validateTemplateAssets()` reports present/missing with correct severity
-4. **Idempotency rules** — `IDEMPOTENCY_RULES` array + `RERUN_SCENARIOS` for structured test generation; `fileExists` method enables mock-based upload-skip testing
-5. **Migration rules** — `MIGRATION_RULES` + `COEXISTENCE_DOCTRINE` for documentation-level assertions
-6. **Mock services** — Complete mock coverage for `uploadTemplateFile`, `createFolderIfNotExists`, `fileExists`
+| Category | Unit Tests | Integration (env-gated) | TC IDs |
+|----------|-----------|------------------------|--------|
+| Schema/Config | 14 | — | TC-SCHEMA-01–14 |
+| Step Behavior | 22 (6 step3 + 12 dept-runtime + 4 step4) | — | TC-STEP-01–10, TC-DEPT-01–08, TC-SEED-01–03 |
+| Failure/Retry | 6 | — | TC-FAIL-01–06 |
+| PID Contract | 4 | — | TC-PID-01–04 |
+| Parent/Child | 4 | — | TC-PARENT-01–04 |
+| Dept Config | 8 | — | TC-DEPT-CFG-01–08 |
+| Idempotency | 5 | — | TC-IDEM-01–05 |
+| Migration | 4 | — | TC-MCOEX-01–04 |
+| Pilot/Perf | — | 2 | TC-PILOT-01–02 |
 
-## What T08 Implements Now vs. Defers
+---
 
-**Implements:**
-- All V-STRUCT, V-PID, V-LIB, V-FILE validation as pure config-level validators
-- IDEM-9 fix (no-overwrite) in SharePointService
-- `fileExists` service method
-- Mock services completeness
-- All 3 reference documents
-- Typed idempotency/migration rule contracts
+## Deviations from T09 Plan (Repo-Driven)
 
-**Defers to T09:**
-- Integration tests exercising idempotency with mocked SharePoint (scenarios A–D)
-- Throttle simulation tests for withRetry
-- Staging duration measurement for Step 4b decision
-- Asset-existence verification against live SharePoint
-- Folder idempotency integration tests
-
-**Defers to Wave 1:**
-- Data migration, pre-seeded rows, template refresh, UI validation screens
+| T09 Plan States | Repo Truth | Adaptation |
+|-----------------|------------|------------|
+| 25 G2 workflow lists | 26 lists | Tests assert 26 |
+| `fileExists` method available | Does not exist (T08 not implemented) | Skip IDEM-9 no-overwrite tests |
+| Step 4b may exist | No Step 4b | Test single step4 only |
+| Test file structure in `tests/` directory | Repo uses colocation (`src/**/*.test.ts`) | Follow colocation convention |
+| TC-SEED-02 "uploaded files are non-zero-byte" | Cannot verify via mock | Defer to integration test |
+| TC-SEED-05 "safety-critical templates present on disk" | 0-byte placeholder files | Covered by existing template-file-manifest.test.ts asset checks |
 
 ---
 
@@ -315,9 +332,40 @@ Add classification rows:
 
 ```bash
 cd backend/functions
-npx vitest run src/validation/                                       # New T08 validation tests
-npx vitest run src/config/list-definitions.test.ts                   # Core regression
-npx vitest run src/config/workflow-list-definitions.test.ts          # Composition regression
-npx vitest run src/config/template-file-manifest.test.ts             # Manifest regression
-npx tsc --noEmit                                                     # Type-check (mock services fix should resolve interface mismatch)
+
+# Step 1-2 fix validation
+npx vitest run src/functions/provisioningSaga/steps/steps.test.ts
+
+# New T09 unit tests
+npx vitest run src/utils/retry.test.ts
+npx vitest run src/config/schema-validation.test.ts
+npx vitest run src/config/pid-contract.test.ts
+npx vitest run src/config/parent-child-lookup.test.ts
+npx vitest run src/config/department-libraries.test.ts
+npx vitest run src/functions/provisioningSaga/steps/step3-template-files.test.ts
+npx vitest run src/functions/provisioningSaga/steps/step4-data-lists.test.ts
+npx vitest run src/functions/provisioningSaga/__tests__/idempotency.test.ts
+npx vitest run src/functions/provisioningSaga/__tests__/migration-coexistence.test.ts
+
+# Full regression
+npx vitest run
+
+# Type-check
+npx tsc --noEmit
 ```
+
+---
+
+## Execution Order
+
+```
+Step 1 (mock fix) ──→ Step 2 (steps.test.ts fix) ──→ Steps 3-11 (all independent)
+                                                              │
+                                                        Step 12 (integration)
+                                                              │
+                                                        Step 13 (vitest.config)
+                                                              │
+                                                        Step 14 (current-state-map)
+```
+
+Steps 3–11 are independent and can be implemented in any order after Steps 1–2.

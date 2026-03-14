@@ -49,6 +49,7 @@ export default defineConfig({
             'src/middleware/validateToken.test.ts',
             'src/services/*.test.ts',
             'src/config/*.test.ts',
+            'src/validation/*.test.ts',
             'src/utils/*.test.ts',
             'src/state-machine.test.ts',
           ],

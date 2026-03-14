@@ -84,4 +84,32 @@ T09 test cases covering `pid` contract compliance:
 
 ---
 
-*End of PID Field Contract v1.0*
+## T08 Validation Enforcement
+
+W0-G2-T08 introduced automated validation of the PID contract via pure helper functions in `backend/functions/src/validation/list-validation.ts`.
+
+### `validatePidContract(lists)`
+
+Checks every list in the provided array for PID compliance:
+
+| Property | Expected Value |
+|----------|---------------|
+| `internalName` | `'pid'` |
+| `type` | `'Text'` |
+| `required` | `true` |
+| `indexed` | `true` |
+| `defaultValue` | Contains `'{{projectNumber}}'` |
+
+Returns an `IValidationResult[]` with one entry per list. Failed entries include specific violation messages.
+
+### No-Overwrite Idempotency Rule
+
+The PID default value is set once at list creation time via `createDataLists`. If the list already exists (detected by `listExists`), the entire list creation is skipped — the PID default value is never overwritten on an existing list. This ensures that re-running provisioning does not alter the project number binding on lists that may already contain data.
+
+### Test Coverage
+
+The `list-validation.test.ts` suite validates PID contract compliance against all 26 workflow list definitions imported from the actual config modules, ensuring that any schema change that breaks the PID contract is caught immediately.
+
+---
+
+*End of PID Field Contract v1.1*
