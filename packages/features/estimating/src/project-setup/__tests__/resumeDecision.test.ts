@@ -5,6 +5,7 @@ import {
 } from '../config/resumeDecision.js';
 
 describe('resolveResumeDecision', () => {
+  // TC-DRAFT-05: new-request with draft → prompt-user
   it('new-request with draft → prompt-user', () => {
     expect(resolveResumeDecision('new-request', true)).toBe('prompt-user');
   });
@@ -13,10 +14,12 @@ describe('resolveResumeDecision', () => {
     expect(resolveResumeDecision('new-request', false)).toBe('fresh-start');
   });
 
+  // TC-DRAFT-06 / TC-CLAR-06: clarification-return → auto-continue
   it('clarification-return with draft → auto-continue', () => {
     expect(resolveResumeDecision('clarification-return', true)).toBe('auto-continue');
   });
 
+  // TC-DRAFT-06 / TC-CLAR-06: clarification-return without draft → auto-continue
   it('clarification-return without draft → auto-continue', () => {
     expect(resolveResumeDecision('clarification-return', false)).toBe('auto-continue');
   });

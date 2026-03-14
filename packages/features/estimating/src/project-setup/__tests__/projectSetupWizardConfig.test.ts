@@ -12,6 +12,7 @@ describe('PROJECT_SETUP_WIZARD_CONFIG', () => {
     expect(PROJECT_SETUP_WIZARD_CONFIG.title).toBe('New Project Setup');
   });
 
+  // TC-FLOW-04: Sequential order mode
   it('uses sequential order mode', () => {
     expect(PROJECT_SETUP_WIZARD_CONFIG.orderMode).toBe('sequential');
   });
@@ -79,6 +80,7 @@ describe('getAddOnsForDepartment', () => {
   });
 });
 
+// TC-CLAR-03 (partial): Clarification draft key construction
 describe('buildClarificationDraftKey', () => {
   it('prefixes request ID with clarification prefix', () => {
     expect(buildClarificationDraftKey('req-abc-123')).toBe(

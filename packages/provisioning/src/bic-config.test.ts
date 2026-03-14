@@ -32,6 +32,7 @@ function makeRequest(overrides?: Partial<IProjectSetupRequest>): IProjectSetupRe
 
 // ─── deriveCurrentOwner ──────────────────────────────────────────────────────
 
+// TC-OWN-02, TC-OWN-03: Ownership resolution for null/failed states
 describe('deriveCurrentOwner', () => {
   it('returns Controller for Submitted', () => {
     const owner = deriveCurrentOwner(makeRequest({ state: 'Submitted' }));
@@ -55,10 +56,12 @@ describe('deriveCurrentOwner', () => {
     expect(owner!.role).toBe(BIC_ROLE_CONTROLLER);
   });
 
+  // TC-OWN-02: null-owner states
   it('returns null for ReadyToProvision (system-owned)', () => {
     expect(deriveCurrentOwner(makeRequest({ state: 'ReadyToProvision' }))).toBeNull();
   });
 
+  // TC-OWN-02: null-owner states
   it('returns null for Provisioning (system-owned)', () => {
     expect(deriveCurrentOwner(makeRequest({ state: 'Provisioning' }))).toBeNull();
   });
@@ -76,11 +79,13 @@ describe('deriveCurrentOwner', () => {
     expect(owner!.userId).toBe('coordinator@example.com');
   });
 
+  // TC-OWN-03: Failed ownership
   it('returns Admin for Failed', () => {
     const owner = deriveCurrentOwner(makeRequest({ state: 'Failed' }));
     expect(owner!.role).toBe(BIC_ROLE_ADMIN);
   });
 
+  // TC-OWN-03: Failed ownership with escalation
   it('returns Admin for Failed with requesterRetryUsed', () => {
     const owner = deriveCurrentOwner(
       makeRequest({ state: 'Failed', requesterRetryUsed: true }),
@@ -91,8 +96,11 @@ describe('deriveCurrentOwner', () => {
 
 // ─── resolveExpectedAction ───────────────────────────────────────────────────
 
+// TC-OWN-01: 8-state lifecycle action map coverage
 describe('resolveExpectedAction', () => {
   it('returns canonical action string for each lifecycle state', () => {
+    // TC-OWN-01: Verify exactly 8 lifecycle states
+    expect(Object.keys(PROJECT_SETUP_ACTION_MAP)).toHaveLength(8);
     const states = Object.keys(PROJECT_SETUP_ACTION_MAP) as Array<
       keyof typeof PROJECT_SETUP_ACTION_MAP
     >;
@@ -150,6 +158,7 @@ describe('resolveDueDate', () => {
 
 // ─── resolveIsBlocked / resolveBlockedReason ─────────────────────────────────
 
+// TC-OWN-05: Blocked state resolution
 describe('resolveIsBlocked', () => {
   it('returns true for AwaitingExternalSetup', () => {
     expect(

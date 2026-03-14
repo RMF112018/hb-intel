@@ -18,6 +18,7 @@ describe('PROVISIONING_NOTIFICATION_REGISTRATIONS', () => {
     }
   });
 
+  // TC-NOTIF-01: Expected event type coverage
   it('contains expected event types', () => {
     const types = PROVISIONING_NOTIFICATION_REGISTRATIONS.map((r) => r.eventType);
     // G1-T03 baseline (8)
@@ -64,6 +65,7 @@ describe('PROVISIONING_NOTIFICATION_REGISTRATIONS', () => {
     expect(reg.channels).toContain('in-app');
   });
 
+  // TC-NOTIF-04: clarification-requested is immediate
   it('clarification-requested is immediate and not overridable', () => {
     const reg = PROVISIONING_NOTIFICATION_REGISTRATIONS.find(
       (r) => r.eventType === 'provisioning.clarification-requested'
@@ -74,6 +76,7 @@ describe('PROVISIONING_NOTIFICATION_REGISTRATIONS', () => {
     expect(reg.channels).toContain('push');
   });
 
+  // TC-NOTIF-05: completed is watch tier
   it('completed is watch tier with in-app and email channels (T04 channel update)', () => {
     const reg = PROVISIONING_NOTIFICATION_REGISTRATIONS.find(
       (r) => r.eventType === 'provisioning.completed'
@@ -117,6 +120,7 @@ describe('PROVISIONING_NOTIFICATION_REGISTRATIONS', () => {
     expect(reg.channels).toContain('in-app');
   });
 
+  // TC-NOTIF-02: Non-overridable → immediate classification
   it('G3-D8 classification: all non-overridable events must be immediate tier', () => {
     for (const reg of PROVISIONING_NOTIFICATION_REGISTRATIONS) {
       if (!reg.tierOverridable) {
@@ -125,6 +129,7 @@ describe('PROVISIONING_NOTIFICATION_REGISTRATIONS', () => {
     }
   });
 
+  // TC-NOTIF-03: Overridable → non-immediate classification
   it('G3-D8 classification: all overridable events must not be immediate tier', () => {
     for (const reg of PROVISIONING_NOTIFICATION_REGISTRATIONS) {
       if (reg.tierOverridable) {

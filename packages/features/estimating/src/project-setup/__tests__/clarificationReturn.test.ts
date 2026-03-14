@@ -56,6 +56,7 @@ describe('getOpenClarifications', () => {
   });
 });
 
+// TC-CLAR-02: Clarification return state derivation
 describe('buildClarificationReturnState', () => {
   it('returns all steps complete and null activeStepId when no clarifications', () => {
     const result = buildClarificationReturnState([]);

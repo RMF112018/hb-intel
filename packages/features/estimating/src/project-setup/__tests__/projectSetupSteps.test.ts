@@ -28,7 +28,9 @@ function validRequest(overrides?: Partial<IProjectSetupRequest>): IProjectSetupR
   };
 }
 
+// TC-FLOW-01: Step count/order, TC-FLOW-02: Required-step validation, TC-FLOW-03: Template-addons optional
 describe('PROJECT_SETUP_STEPS', () => {
+  // TC-FLOW-01: 5 steps in sequential order
   it('contains exactly 5 steps in sequential order', () => {
     expect(PROJECT_SETUP_STEPS).toHaveLength(5);
     expect(PROJECT_SETUP_STEPS.map((s) => s.stepId)).toEqual([
@@ -46,6 +48,7 @@ describe('PROJECT_SETUP_STEPS', () => {
     });
   });
 
+  // TC-FLOW-02: Required steps, TC-FLOW-03: Step 4 optional
   it('marks steps 1, 2, 3, 5 as required and step 4 as optional', () => {
     expect(PROJECT_SETUP_STEPS.map((s) => s.required)).toEqual([
       true,

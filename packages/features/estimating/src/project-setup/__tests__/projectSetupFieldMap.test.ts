@@ -4,6 +4,7 @@ import {
   resolveStepsForClarification,
 } from '../config/projectSetupFieldMap.js';
 
+// TC-CLAR-01: Field-to-step mapping for clarification routing
 describe('PROJECT_SETUP_FIELD_MAP', () => {
   it('maps all Step 1 fields to project-info', () => {
     expect(PROJECT_SETUP_FIELD_MAP['projectName']).toBe('project-info');

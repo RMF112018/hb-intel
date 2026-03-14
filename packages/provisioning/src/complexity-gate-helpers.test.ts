@@ -79,10 +79,12 @@ describe('isSummaryFieldVisible', () => {
     expect(isSummaryFieldVisible(expertField, 'essential')).toBe(false);
   });
 
+  // TC-CMPLX-04: Expert field NOT visible at standard
   it('expert field NOT visible at standard', () => {
     expect(isSummaryFieldVisible(expertField, 'standard')).toBe(false);
   });
 
+  // TC-CMPLX-05: Expert field visible at expert
   it('expert field visible at expert', () => {
     expect(isSummaryFieldVisible(expertField, 'expert')).toBe(true);
   });
@@ -110,7 +112,9 @@ describe('isHistoryContentVisible', () => {
 
 // ─── getVisibleSummaryFields ─────────────────────────────────────────────────
 
+// TC-CMPLX-02, TC-CMPLX-03: Standard/expert tier field filtering
 describe('getVisibleSummaryFields', () => {
+  // TC-CMPLX-01: Essential tier returns only ungated fields
   it('essential tier returns only ungated fields', () => {
     const visible = getVisibleSummaryFields(PROJECT_SETUP_SUMMARY_FIELDS, 'essential');
     expect(visible).toHaveLength(9);

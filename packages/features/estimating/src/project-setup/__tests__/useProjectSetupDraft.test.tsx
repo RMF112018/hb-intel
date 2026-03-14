@@ -48,6 +48,7 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('useProjectSetupDraft', () => {
+  // TC-DRAFT-01 (partial): 3 distinct draft keys per mode
   describe('draft key resolution', () => {
     it('uses PROJECT_SETUP_DRAFT_KEY for new-request mode', () => {
       renderHook(() => useProjectSetupDraft('new-request'));
@@ -57,6 +58,7 @@ describe('useProjectSetupDraft', () => {
       );
     });
 
+    // TC-CLAR-03: Clarification draft key
     it('uses buildClarificationDraftKey for clarification-return mode', () => {
       renderHook(() => useProjectSetupDraft('clarification-return', 'req-123'));
       expect(mockUseAutoSaveDraft).toHaveBeenCalledWith(
