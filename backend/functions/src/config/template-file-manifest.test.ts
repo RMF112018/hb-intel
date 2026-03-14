@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { TEMPLATE_FILE_MANIFEST, type ITemplateFileEntry } from './template-file-manifest.js';
 
 describe('TEMPLATE_FILE_MANIFEST', () => {
-  it('has exactly 10 entries', () => {
-    expect(TEMPLATE_FILE_MANIFEST).toHaveLength(10);
+  it('has exactly 15 entries', () => {
+    expect(TEMPLATE_FILE_MANIFEST).toHaveLength(15);
   });
 
   it('all entries target "Project Documents" library', () => {
@@ -32,6 +32,19 @@ describe('TEMPLATE_FILE_MANIFEST', () => {
     const fileNames = TEMPLATE_FILE_MANIFEST.map((e) => e.fileName);
     expect(fileNames).toContain('Project Closeout Guide.docx');
     expect(fileNames).toContain('Closeout Checklist Reference.pdf');
+  });
+
+  it('contains T04 safety-family file names', () => {
+    const fileNames = TEMPLATE_FILE_MANIFEST.map((e) => e.fileName);
+    expect(fileNames).toContain('JHA Form Template.docx');
+    expect(fileNames).toContain('JHA Instructions.docx');
+    expect(fileNames).toContain('Incident Report Form.docx');
+    expect(fileNames).toContain('Site Specific Safety Plan Template.docx');
+  });
+
+  it('contains T05 project-controls-family file names', () => {
+    const fileNames = TEMPLATE_FILE_MANIFEST.map((e) => e.fileName);
+    expect(fileNames).toContain('Required Inspections Template.xlsx');
   });
 
   it('each entry has correct assetPaths matching fileNames', () => {

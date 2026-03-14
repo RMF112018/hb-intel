@@ -289,13 +289,304 @@ T02–T06 use these patterns as defaults. Workflow-specific deviations must be d
 
 ## T04 — Safety / JHA / Incident Schemas
 
-*Section populated by T04 implementation. Placeholder for list field schemas.*
+> **Source:** W0-G2-T04 — Safety, JHA, and Incident Data Model
+> **Module:** `backend/functions/src/config/safety-list-definitions.ts`
+> **List Family:** `safety` — 8 lists (1 parent, 2 children, 5 flat)
+
+### Parent/Child Relationships
+
+| Parent List | Child List | Lookup Field | Lookup Target |
+|-------------|-----------|--------------|---------------|
+| JHA Log | JHA Steps | `ParentRecord` | `JHA Log:ID` |
+| JHA Log | JHA Attendees | `ParentRecord` | `JHA Log:ID` |
+| Incident Log | *(flat — no children)* | — | — |
+| Site Safety Plans | *(flat — no children)* | — | — |
+| Toolbox Talk Log | *(flat — no children)* | — | — |
+| Safety Walk Log | *(flat — no children)* | — | — |
+| Sub Safety Certifications | *(flat — no children)* | — | — |
+
+### Relationship to Core Safety Log
+
+The core `Safety Log` in `HB_INTEL_LIST_DEFINITIONS` captures lightweight daily safety observations. The T04 `Incident Log` captures detailed incident investigation data at a different level of detail. These are **complementary** — there is no Lookup relationship between them. The core Safety Log is not modified by T04.
+
+### 4.1 JHA Log (parent, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Status | `Status` | Choice | Yes | `Draft \| Active \| Superseded \| Archived` |
+| JHA Date | `JHADate` | DateTime | Yes | |
+| Subcontractor Name | `SubcontractorName` | Text | No | |
+| Supervisor | `Supervisor` | User | No | |
+| Crew Size | `CrewSize` | Number | No | |
+| Work Task | `WorkTask` | Text | Yes | |
+| Location | `Location` | Text | No | |
+| Requires Confined Space Permit | `RequiresConfinedSpacePermit` | Boolean | No | |
+| Confined Space Permit Number | `ConfinedSpacePermitNumber` | Text | No | Cross-ref: Project Controls (T05) permit tracking |
+| Requires Hot Work Permit | `RequiresHotWorkPermit` | Boolean | No | |
+| Hot Work Permit Number | `HotWorkPermitNumber` | Text | No | Cross-ref: Project Controls (T05) permit tracking |
+| Emergency Contact | `EmergencyContact` | Text | No | |
+| Nearest Hospital | `NearestHospital` | Text | No | |
+| Reviewed By | `ReviewedBy` | User | No | |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 4.2 JHA Steps (child, provisioningOrder=20)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Parent Record | `ParentRecord` | Lookup | Yes | → `JHA Log:ID` |
+| Step Number | `StepNumber` | Number | Yes | |
+| Step Description | `StepDescription` | MultiLineText | Yes | |
+| Hazards | `Hazards` | MultiLineText | Yes | |
+| Controls | `Controls` | MultiLineText | Yes | |
+| PPE Hard Hat | `PPE_HardHat` | Boolean | No | |
+| PPE Safety Glasses | `PPE_SafetyGlasses` | Boolean | No | |
+| PPE Hi-Vis | `PPE_HiVis` | Boolean | No | |
+| PPE Gloves | `PPE_Gloves` | Boolean | No | |
+| PPE Hearing Protection | `PPE_HearingProtection` | Boolean | No | |
+| PPE Respirator | `PPE_Respirator` | Boolean | No | |
+| PPE Harness | `PPE_Harness` | Boolean | No | |
+| PPE Work Boots | `PPE_WorkBoots` | Boolean | No | |
+| PPE Other | `PPE_Other` | Text | No | Free-text for unlisted PPE |
+| Risk Level | `RiskLevel` | Choice | No | `Low \| Medium \| High` |
+
+### 4.3 JHA Attendees (child, provisioningOrder=20)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Parent Record | `ParentRecord` | Lookup | Yes | → `JHA Log:ID` |
+| Company | `Company` | Text | No | |
+| Acknowledged Date | `AcknowledgedDate` | DateTime | No | |
+| Signature Method | `SignatureMethod` | Choice | No | `Physical \| Digital \| Verbal Acknowledgment` |
+
+### 4.4 Incident Log (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Status | `Status` | Choice | Yes | `Open \| Under Investigation \| Corrective Action \| Closed` |
+| Incident Type | `IncidentType` | Choice | Yes | `Near Miss \| Unsafe Condition \| Equipment Damage \| First Aid \| Medical Treatment \| Lost Time \| Fatality \| Property Damage \| Other` |
+| Incident Date | `IncidentDate` | DateTime | Yes | |
+| Reported Date | `ReportedDate` | DateTime | No | |
+| Location | `Location` | Text | Yes | |
+| Person Completing | `PersonCompleting` | User | No | |
+| Company of Reporter | `CompanyOfReporter` | Text | No | |
+| Employees Involved | `EmployeesInvolved` | MultiLineText | No | |
+| Description | `Description` | MultiLineText | Yes | |
+| Immediate Causes | `ImmediateCauses` | MultiLineText | No | |
+| Contributing Factors | `ContributingFactors` | MultiLineText | No | |
+| Corrective Actions | `CorrectiveActions` | MultiLineText | No | |
+| Corrective Actions Complete | `CorrectiveActionsComplete` | Boolean | No | |
+| OSHA Recordable | `OSHARecordable` | Boolean | No | Not required — per Risk T04-R3 regulatory sensitivity |
+| Reviewed By | `ReviewedBy` | User | No | |
+
+### 4.5 Site Safety Plans (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Plan Type | `PlanType` | Choice | Yes | `HBC SSSP \| Subcontractor SSSP \| Hurricane Preparedness \| Emergency Action Plan \| Other` |
+| Status | `Status` | Choice | Yes | `Not Submitted \| Submitted \| Under Review \| Approved \| Expired \| Superseded` |
+| Subcontractor Name | `SubcontractorName` | Text | No | |
+| Submitted Date | `SubmittedDate` | DateTime | No | |
+| Approved Date | `ApprovedDate` | DateTime | No | |
+| Expiration Date | `ExpirationDate` | DateTime | No | |
+| Document Link | `DocumentLink` | URL | No | Link to document in SharePoint or external system |
+| Reviewed By | `ReviewedBy` | User | No | |
+| Notes | `Notes` | MultiLineText | No | |
+
+> **Cross-ref (T02):** SSSP submission status tracked here complements Startup Checklist `Services & Equipment` category items that may reference safety plan readiness.
+
+### 4.6 Toolbox Talk Log (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Talk Date | `TalkDate` | DateTime | Yes | |
+| Facilitator | `Facilitator` | User | No | |
+| Attendee Count | `AttendeeCount` | Number | No | |
+| Status | `Status` | Choice | Yes | `Conducted \| Missed \| Rescheduled` |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 4.7 Safety Walk Log (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Walk Date | `WalkDate` | DateTime | Yes | |
+| Conducted By | `ConductedBy` | User | No | |
+| Findings Count | `FindingsCount` | Number | No | |
+| Findings Resolved | `FindingsResolved` | Number | No | |
+| Status | `Status` | Choice | Yes | `Scheduled \| Conducted \| Findings Pending \| Complete` |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 4.8 Sub Safety Certifications (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Subcontractor Name | `SubcontractorName` | Text | Yes | |
+| Certification Type | `CertificationType` | Choice | Yes | `OSHA 10 \| OSHA 30 \| Competent Person \| Equipment Operator \| First Aid/CPR \| Other` |
+| Holder Name | `HolderName` | Text | No | |
+| Issue Date | `IssueDate` | DateTime | No | |
+| Expiration Date | `ExpirationDate` | DateTime | No | |
+| Status | `Status` | Choice | Yes | `Active \| Expiring Soon \| Expired \| Not Submitted` |
+| Document Link | `DocumentLink` | URL | No | Link to certification document |
+
+### Seeded File Mapping
+
+| File Name | Format | Target Library | Classification |
+|-----------|--------|---------------|----------------|
+| JHA Form Template.docx | Word | Project Documents | Reference file only |
+| JHA Instructions.docx | Word | Project Documents | Reference file only |
+| Incident Report Form.docx | Word | Project Documents | Reference file only |
+| Site Specific Safety Plan Template.docx | Word | Project Documents | Reference file only |
+
+> **Open item (T07 — T04-R2):** G1 `safety-pack` add-on provisions `Safety Plan Template.docx`. T04 seeds `Site Specific Safety Plan Template.docx`. These may represent the same intent under different names. T07 must resolve whether to consolidate or keep both assets. Both exist independently until then.
+
+### Cross-Family References
+
+- **Project Controls (T05):** JHA Log permit number fields (`ConfinedSpacePermitNumber`, `HotWorkPermitNumber`) cross-reference permit tracking in T05 project controls lists. Cross-family Lookup fields are Wave 1 scope; T04 stores permit numbers as plain Text for now (per §4.1).
+- **Startup (T02):** Site Safety Plans `Status` field (SSSP submission tracking) complements Startup Checklist items that may reference safety plan readiness as a project startup milestone.
+
+### Limitations and Deferred Decisions
+
+- **JHA manual-entry limitation (T04-R1):** The JHA 3-list structure (Log → Steps → Attendees) is schema-ready but has no entry-form UI in Wave 0. JHA data entry requires direct list interaction until the Wave 1 JHA entry form is built.
+- **Safety-pack add-on coordination (T04-R2):** Naming resolution between `Safety Plan Template.docx` (G1 safety-pack) and `Site Specific Safety Plan Template.docx` (T04) deferred to T07 provisioning wiring.
+- **T07:** Wiring safety definitions into Step 4 provisioning dispatch.
+- **T09:** Integration tests for safety list provisioning.
+- **Wave 1:** JHA entry form UI, safety dashboard, incident management workflows, OSHA recordkeeping integration.
 
 ---
 
-## T05 — Project Controls / Permits / Inspections Schemas
+## T05 — Project Controls / Permits / Inspections / Constraints Schemas
 
-*Section populated by T05 implementation. Placeholder for list field schemas.*
+> **Source:** W0-G2-T05 — Project Controls, Permits, Inspections, and Constraints Data Model
+> **Module:** `backend/functions/src/config/project-controls-list-definitions.ts`
+> **List Family:** `project-controls` — 3 lists (all flat, no parent/child relationships)
+
+### Relationship to Core Lists
+
+T05 lists are **complementary** to — and do not duplicate — any core `HB_INTEL_LIST_DEFINITIONS` lists:
+
+- **Permit Log** — tracks permit lifecycle (application → issuance → expiration → final inspection). No equivalent in core lists.
+- **Required Inspections** — tracks AHJ/private/third-party inspections with pass/fail results. No equivalent in core lists.
+- **Constraints Log** — tracks prerequisites for work to begin (proactive, schedule-driven). Distinct from the core **Issues Log** which tracks problems that have occurred (reactive, general-purpose). See §5.4 below.
+
+No Lookup fields exist between T05 lists and core lists. All cross-references use Text fields containing permit numbers or constraint descriptions.
+
+### 5.1 Permit Log (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Permit Name / Description | `Title` | Text | Yes | E.g., "Master Building Permit — Town of Palm Beach" |
+| Permit Type | `PermitType` | Choice | Yes | `Master Building \| Roofing \| Plumbing \| HVAC \| Electrical \| Fire Suppression \| Fire Alarm \| Elevator \| Demolition \| Site / Civil \| Environmental \| Sub Permit \| Other` |
+| Issuing Authority | `IssuingAuthority` | Text | No | E.g., "Town of Palm Beach Building Dept" |
+| Permit Number | `PermitNumber` | Text | No | Official permit number once issued |
+| Status | `Status` | Choice | Yes | `Not Applied \| Applied \| Under Review \| Issued \| Active \| Expired \| Revisions Required \| Final` |
+| Application Date | `ApplicationDate` | DateTime | No | |
+| Issued Date | `IssuedDate` | DateTime | No | |
+| Expiration Date | `ExpirationDate` | DateTime | No | |
+| Final Inspection Date | `FinalInspectionDate` | DateTime | No | Date final inspection was passed |
+| Permit Holder | `HolderType` | Choice | No | `HBC \| Subcontractor \| Owner` |
+| Subcontractor Name | `SubcontractorName` | Text | No | Applicable when HolderType = Subcontractor |
+| Permit Cost | `CostAmount` | Number | No | |
+| Permit Document | `DocumentLink` | URL | No | Link to permit PDF in document library |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 5.2 Required Inspections (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Inspection Description | `Title` | Text | Yes | E.g., "Electrical Rough-In Inspection" |
+| Trade | `Trade` | Choice | Yes | `Building \| Structural \| Plumbing \| HVAC \| Electrical \| Fire Suppression \| Fire Alarm \| Roofing \| Civil \| Elevator \| Special Inspection \| Other` |
+| Inspection Category | `InspectionCategory` | Choice | Yes | `Required (AHJ) \| Private Provider \| Third-Party Special \| Owner Required` |
+| Related Permit # | `PermitNumber` | Text | No | Cross-reference to `Permit Log` permit number (same family, Text-based, not Lookup) |
+| Status | `Status` | Choice | Yes | `Pending \| Scheduled \| Passed \| Failed \| Rescheduled \| N/A` |
+| Scheduled Date | `ScheduledDate` | DateTime | No | |
+| Inspection Date | `InspectionDate` | DateTime | No | Actual inspection date |
+| Inspector Name | `InspectorName` | Text | No | |
+| Inspector Agency | `InspectorAgency` | Text | No | |
+| Result | `Result` | Choice | No | `Pass \| Partial Pass \| Fail \| Deferred` |
+| Failure Reason | `FailureReason` | MultiLineText | No | Expected when Result = Fail |
+| Corrective Action Due Date | `CorrectiveActionDue` | DateTime | No | |
+| Re-inspection Date | `ReinspectionDate` | DateTime | No | |
+| Inspection Report | `InspectionReportLink` | URL | No | |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 5.3 Constraints Log (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Constraint Description | `Title` | Text | Yes | Brief description of the constraint |
+| Constraint Type | `ConstraintType` | Choice | Yes | `Information Required \| Approval Pending \| Material Lead Time \| Access / Sequencing \| Subcontractor \| Owner Decision \| Permit \| Weather \| Other` |
+| Status | `Status` | Choice | Yes | `Open \| In Progress \| Resolved \| Deferred` |
+| Work Activity Blocked | `WorkActivityBlocked` | Text | No | What work cannot proceed because of this constraint |
+| Constraint Owner | `Owner` | User | No | Person responsible for resolving |
+| Date Identified | `DateIdentified` | DateTime | Yes | |
+| Target Resolution Date | `TargetResolutionDate` | DateTime | No | |
+| Actual Resolution Date | `ActualResolutionDate` | DateTime | No | |
+| Impact if Unresolved | `ImpactIfUnresolved` | Choice | No | `No Impact \| Minor Delay \| Moderate Delay \| Critical Path Impact` |
+| Related Permit # | `RelatedPermit` | Text | No | Cross-reference to Permit Log |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 5.4 Constraints Log vs Issues Log Distinction
+
+These two lists occupy **related but distinct** operational domains:
+
+| Aspect | Issues Log (core G1) | Constraints Log (T05) |
+|--------|---------------------|----------------------|
+| **Purpose** | Tracks problems that have occurred | Tracks prerequisites for work to begin |
+| **Orientation** | Reactive — respond to issues | Proactive — prevent schedule delays |
+| **Context** | General-purpose issue tracking | Schedule-driven, tied to 3-week look-ahead |
+| **Lifecycle** | Issue arises → investigated → resolved | Constraint identified → tracked → removed before work starts |
+| **Examples** | Design error found, material defect, coordination failure | Awaiting RFI response, material on order, owner decision pending |
+
+No Lookup relationship exists between them. A constraint may become an issue if unresolved past the target date, but this transition is operational, not schema-enforced.
+
+### 5.5 3-Week Look-Ahead Treatment
+
+The 3-week look-ahead / schedule artifact is classified as **reference-file-only** in the T05 seeded-file classification model. No list is created in Wave 0:
+
+- Schedule data is currently managed in external tools (Primavera P6, MS Project) with exports stored in `ResDir/08-Schedule/3 Week Look Ahead/`
+- A structured list would require schedule integration that is out of scope for Wave 0
+- The `Constraints Log` captures the constraint-management aspect of look-ahead planning
+- **Wave 1 scope:** The `@hbc/bic-next-move` package will consume `Constraints Log` data for schedule-risk intelligence. A digital 3-week look-ahead list may be created at that time.
+
+### Seeded File Mapping
+
+| File Name | Format | Target Library | Classification |
+|-----------|--------|---------------|----------------|
+| Required Inspections Template.xlsx | Excel | Project Documents | Seed now |
+
+### Cross-Family References
+
+- **Safety (T04):** JHA Log permit number fields (`ConfinedSpacePermitNumber`, `HotWorkPermitNumber`) cross-reference permit tracking in T05's `Permit Log`. No Lookup — stored as plain Text per T04 §4.1.
+- **Startup (T02):** Startup Checklist items in the `Permits` category reference permit application status tracked in T05's `Permit Log`.
+- **Closeout (T03):** Closeout Checklist items in the `Inspections` category reference final inspection completion tracked in T05's `Required Inspections` list. Final inspections as closeout milestones.
+- **Within T05:** `PermitNumber` (Text) on Required Inspections cross-references Permit Log permit numbers. `RelatedPermit` (Text) on Constraints Log cross-references Permit Log. All intra-family references are Text-based, not Lookup.
+
+### Deferred Decisions
+
+- **Pre-seeded inspection rows (T05-R2):** Whether to insert default Required Inspections rows at provisioning time is explicitly deferred to T07. T07 will decide insert-at-provision vs. leave-empty based on operational feedback.
+- **Constraints Log description (T05-R3):** T07 must document the Constraints Log vs Issues Log distinction in the list description field to avoid operational confusion.
+- **Permit jurisdiction variance (T05-R1):** `PermitType` choice list represents common Florida construction permits. The `Other` catch-all covers jurisdictional variance. Wave 1 will allow jurisdiction-specific permit type configuration without schema changes.
+- **T07:** Wiring project-controls definitions into Step 4 provisioning dispatch.
+- **T09:** Integration tests for project-controls list provisioning.
+- **Wave 1:** Permit expiration alerting, inspection dashboard, schedule-risk intelligence (`@hbc/bic-next-move`), 3-week look-ahead digital list.
 
 ---
 

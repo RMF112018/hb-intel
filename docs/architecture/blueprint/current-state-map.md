@@ -154,6 +154,8 @@
 | `docs/reference/data-model/workflow-list-schemas.md` | **Living Reference (Diátaxis)** | Reference quadrant; data model audience; consolidated G2 list schema reference (scaffold); mandatory fields, naming conventions, choice patterns, seeded-file classification; produced by W0-G2-T01; populated incrementally by T02–T06 |
 | `backend/functions/src/config/startup-list-definitions.ts` | **Canonical Current-State** | Startup-family (T02) list definitions; 5 lists with T01-compliant pid/indexing/parent-child; produced by W0-G2-T02 |
 | `backend/functions/src/config/closeout-list-definitions.ts` | **Canonical Current-State** | Closeout-family (T03) list definitions; 5 lists with T01-compliant pid/indexing/parent-child; produced by W0-G2-T03 |
+| `backend/functions/src/config/safety-list-definitions.ts` | **Canonical Current-State** | Safety-family (T04) list definitions; 8 lists (1 parent, 2 children, 5 flat) with T01-compliant pid/indexing/parent-child; produced by W0-G2-T04 |
+| `backend/functions/src/config/project-controls-list-definitions.ts` | **Canonical Current-State** | Project-controls-family (T05) list definitions; 3 flat lists with T01-compliant pid/indexing; produced by W0-G2-T05 |
 | Diátaxis output docs (`docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/`, `docs/user-guide/`, `docs/administrator-guide/`, `docs/maintenance/`, `docs/troubleshooting/`, `docs/security/`, `docs/release-notes/`, `docs/faq.md`) | **Living Reference (Diátaxis)** | 200+ files; quadrant breakdown: tutorials, how-to, reference, explanation, user-guide, administrator-guide, maintenance, troubleshooting, security, release-notes, faq; updated continuously as features ship; exempt from inline banner |
 
 ### 2.1 Classification Maintenance Rule

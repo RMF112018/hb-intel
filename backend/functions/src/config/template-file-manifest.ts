@@ -71,4 +71,31 @@ export const TEMPLATE_FILE_MANIFEST: ITemplateFileEntry[] = [
     targetLibrary: 'Project Documents',
     assetPath: 'Closeout Checklist Reference.pdf',
   },
+  // W0-G2-T04: Safety-family seeded template files
+  {
+    fileName: 'JHA Form Template.docx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'JHA Form Template.docx',
+  },
+  {
+    fileName: 'JHA Instructions.docx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'JHA Instructions.docx',
+  },
+  {
+    fileName: 'Incident Report Form.docx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Incident Report Form.docx',
+  },
+  {
+    fileName: 'Site Specific Safety Plan Template.docx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Site Specific Safety Plan Template.docx',
+  },
+  // W0-G2-T05: Project-controls-family seeded template files
+  {
+    fileName: 'Required Inspections Template.xlsx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Required Inspections Template.xlsx',
+  },
 ];
