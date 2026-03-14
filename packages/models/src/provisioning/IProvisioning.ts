@@ -135,6 +135,12 @@ export interface IProjectSetupRequest {
   viewerUPNs?: string[];
   /** W0-G3-T01: Step 4 — selected add-on pack slugs (optional). */
   addOns?: string[];
+  /** W0-G3-T02: ISO 8601 timestamp when clarification was requested (for BIC due-date calculation). */
+  clarificationRequestedAt?: string;
+  /** W0-G3-T02: Whether the requester has already used their one retry opportunity on failure. */
+  requesterRetryUsed?: boolean;
+  /** W0-G3-T02: Provisioned SharePoint site URL (populated after provisioning completes). */
+  siteUrl?: string;
 }
 
 export type ProjectSetupRequestState =

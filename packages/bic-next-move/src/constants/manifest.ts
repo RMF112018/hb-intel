@@ -23,6 +23,7 @@ export const BIC_MODULE_MANIFEST = [
   'project-hub-permits',
   'project-hub-monthly-review',
   'admin-provisioning',
+  'provisioning',
 ] as const;
 
 export type BicModuleKey = typeof BIC_MODULE_MANIFEST[number];

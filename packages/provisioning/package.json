@@ -23,7 +23,9 @@
   },
   "dependencies": {
     "@hbc/auth": "workspace:*",
+    "@hbc/bic-next-move": "workspace:*",
     "@hbc/notification-intelligence": "workspace:*",
+    "@hbc/workflow-handoff": "workspace:*",
     "@microsoft/signalr": "^8.0.7",
     "immer": "^10.1.1",
     "@hbc/models": "workspace:*"

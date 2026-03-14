@@ -2121,12 +2121,18 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../auth
+      '@hbc/bic-next-move':
+        specifier: workspace:*
+        version: link:../bic-next-move
       '@hbc/models':
         specifier: workspace:*
         version: link:../models
       '@hbc/notification-intelligence':
         specifier: workspace:*
         version: link:../notification-intelligence
+      '@hbc/workflow-handoff':
+        specifier: workspace:*
+        version: link:../workflow-handoff
       '@microsoft/signalr':
         specifier: ^8.0.7
         version: 8.0.17

@@ -10,7 +10,13 @@ export default defineConfig({
     },
     sourcemap: true,
     rollupOptions: {
-      external: ['react', 'zustand', '@hbc/models'],
+      external: [
+        'react',
+        'zustand',
+        '@hbc/models',
+        '@hbc/bic-next-move',
+        '@hbc/workflow-handoff',
+      ],
     },
   },
   test: {
@@ -24,6 +30,9 @@ export default defineConfig({
       include: [
         'src/notification-registrations.ts',
         'src/notification-templates.ts',
+        'src/bic-config.ts',
+        'src/bic-registration.ts',
+        'src/handoff-config.ts',
       ],
       exclude: ['src/**/*.test.ts'],
       all: true,
