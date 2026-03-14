@@ -1,10 +1,17 @@
 # Phase 4 Development Plan — UX-Enhanced PWA, My Work Feed, Onboarding & Metrics Layer
 
-**Version:** 1.0  
-**Supersedes:** PH9b-UX-Enhancement-Plan.md V2.1  
-**Governed by:** HB-Intel-Blueprint-V4.md · CLAUDE.md v1.2  
-**Date:** March 2026  
-**Author:** HB Intel Orchestration Agent  
+> **Doc Classification:** Deferred Scope — post-Phase-7 UX enhancement plan (My Work Feed, Role-Aware Coaching, Draft Persistence, UX Instrumentation); not yet assigned to an active phase milestone. PH7.12 sign-off is required before this work can be activated.
+>
+> **Status after consolidation:** Deferred Scope — confirmed 2026-03-14
+> **Current authoritative source for status:** `docs/architecture/blueprint/current-state-map.md` §2
+> **When activated:** Reclassify to Canonical Normative Plan, add to active phase plan index, and update `current-state-map.md §2`.
+> **Note on title:** The H1 title ("Phase 4 Development Plan") is a carry-over artifact from the previous document name and does not accurately reflect this plan's scope. This is the PH9b UX Enhancement Plan (V3.0), not a Phase 4 plan.
+
+**Version:** 1.0
+**Supersedes:** PH9b-UX-Enhancement-Plan.md V2.1
+**Governed by:** HB-Intel-Blueprint-V4.md · CLAUDE.md v1.2
+**Date:** March 2026
+**Author:** HB Intel Orchestration Agent
 
 **V3.0 Change Summary:** This document extends PH4-UI-Design-Plan.md V2.1 with four new implementation layers derived from a structured competitive UX analysis of seven leading construction technology platforms (March 2026) and a subsequent structured interview with the HB Intel product owner. V2.1 decisions remain fully in force. This plan adds:
 

@@ -3,6 +3,7 @@ import type { IListDefinition } from '../services/sharepoint-service.js';
 /**
  * D-PH6-05: Single source of truth for Step 4 list provisioning schema.
  * PH6.4 Standard v1 baseline (product-owner-selected source for this phase).
+ * W0-G1-T01: All 8 lists confirmed core by product owner 2026-03-14.
  */
 export const HB_INTEL_LIST_DEFINITIONS: IListDefinition[] = [
   {

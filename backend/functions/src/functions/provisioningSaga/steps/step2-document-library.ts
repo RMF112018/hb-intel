@@ -1,10 +1,11 @@
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
 import type { IServiceContainer } from '../../../services/service-factory.js';
-
-const LIBRARY_NAME = 'Project Documents';
+import { CORE_LIBRARIES } from '../../../config/core-libraries.js';
 
 /**
- * D-PH6-05 Step 2: Creates the project document library with an idempotency existence check.
+ * W0-G1-T01 Step 2: Creates core document libraries with idempotency existence checks.
+ * Previously created only "Project Documents"; now iterates CORE_LIBRARIES
+ * (Project Documents, Drawings, Specifications) with versioning enabled.
  */
 export async function executeStep2(
   services: IServiceContainer,
@@ -12,20 +13,24 @@ export async function executeStep2(
 ): Promise<ISagaStepResult> {
   const result: ISagaStepResult = {
     stepNumber: 2,
-    stepName: 'Create Document Library',
+    stepName: 'Create Document Libraries',
     status: 'InProgress',
     startedAt: new Date().toISOString(),
   };
   try {
-    const alreadyExists = await services.sharePoint.documentLibraryExists(
-      status.siteUrl!,
-      LIBRARY_NAME
-    );
-    if (!alreadyExists) {
-      await services.sharePoint.createDocumentLibrary(status.siteUrl!, LIBRARY_NAME);
+    let allSkipped = true;
+    for (const lib of CORE_LIBRARIES) {
+      const alreadyExists = await services.sharePoint.documentLibraryExists(
+        status.siteUrl!,
+        lib.name
+      );
+      if (!alreadyExists) {
+        await services.sharePoint.createDocumentLibrary(status.siteUrl!, lib.name);
+        allSkipped = false;
+      }
     }
     result.status = 'Completed';
-    result.idempotentSkip = alreadyExists;
+    result.idempotentSkip = allSkipped;
     result.completedAt = new Date().toISOString();
   } catch (err) {
     result.status = 'Failed';

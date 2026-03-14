@@ -21,7 +21,15 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 
 ## Current-State Architecture
 
-- **[Current-State Architecture Map](./architecture/current-state-map.md)** — Authoritative reference for the present implementation state of the monorepo. When this document differs from historical plans, it governs present truth.
+- **[Current-State Architecture Map](./architecture/blueprint/current-state-map.md)** — Authoritative reference for the present implementation state of the monorepo. When this document differs from historical plans, it governs present truth.
+
+## Blueprint & Program Navigation
+
+- **[HB Intel Unified Blueprint](./architecture/blueprint/HB-Intel-Unified-Blueprint.md)** — The master summary architecture and program narrative for HB Intel. Covers product thesis, operating principles, target architecture, current-state summary, role/device model, provisioning doctrine, all 20 interview-locked doctrine decisions, shared-feature primitives, delivery history, and the active roadmap. **Start here** for a complete picture of what HB Intel is and where it is going.
+
+- **[HB Intel Delivery Roadmap](./architecture/blueprint/HB-Intel-Dev-Roadmap.md)** — Consolidated execution delivery roadmap. Defines the wave structure (Foundation/Wave 0 → Wave 1 → Wave 2 → Wave 3 → Convergence), dual-stream SPFx/PWA sequencing doctrine, readiness gates (app pilot, MVP-complete, PWA MVP, SPFx retirement), and long-range convergence strategy. **Read after the Unified Blueprint** for delivery sequence and sprint-level planning context.
+
+- **[Blueprint Crosswalk & Program Navigation Guide](./architecture/blueprint/HB-Intel-Blueprint-Crosswalk.md)** — Document family map, phase delivery sequence, PH7 clarification, active delivery streams, preserved historical progress notes, and superseded-document record. Use this for navigating between specific document families or for the historical narrative.
 
 ## Locked Architecture Documents
 
@@ -155,6 +163,11 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 - [BD Score Benchmark Adoption Guide](./how-to/developer/bd-score-benchmark-adoption-guide.md) — Integration and validation guidance for downstream consumers
 - [BD Heritage Strategic Intelligence API](./reference/bd-heritage-strategic-intelligence/api.md) — SF20 primitive + adapter API contracts and testing exports
 - [BD Heritage Strategic Intelligence Adoption Guide](./how-to/developer/bd-heritage-strategic-intelligence-adoption-guide.md) — Integration and validation guidance for downstream consumers
+
+### Provisioning Reference
+
+- [Site Template Specification](./reference/provisioning/site-template.md) — Core libraries, template file manifest, add-on packs, department pruning model, and template versioning scheme
+- [Saga Steps Reference](./reference/provisioning/saga-steps.md) — Step-by-step provisioning saga contract with idempotency and compensation details
 
 ### Auth & Shell Reference
 

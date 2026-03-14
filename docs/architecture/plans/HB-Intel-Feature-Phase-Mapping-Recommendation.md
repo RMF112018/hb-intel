@@ -1,10 +1,17 @@
 # HB-Intel Feature-Phase Mapping Recommendation
 
+> **Doc Classification:** Superseded / Archived Reference — pre-Phase-6 feature placement recommendation; all Phase 6 content is now complete and all Phase 7 decisions are superseded by active PH7 domain master plans. Retained as historical reference only.
+>
+> **Status after consolidation:** SUPERSEDED (2026-03-14)
+> **Superseded by:** Active PH7 domain master plans (`PH7-Estimating-Features.md`, `PH7-ProjectHub-Features-Plan.md`, `PH7-BD-Features.md`), MVP plans (`MVP/MVP-Project-Setup-Plan.md`), and `current-state-map.md` for present truth.
+> **Progress notes preserved at:** `docs/architecture/blueprint/HB-Intel-Blueprint-Crosswalk.md` §9.1
+> **Do NOT use this document for implementation decisions.** Phase 6 is complete; Phase 7 plans govern Phase 7 work.
+
 **Document type:** Architecture recommendation
 **Governed by:** CLAUDE.md v1.2 · HB-Intel-Blueprint-V4.md · `hb-intel-foundation-plan.md`
 **Prepared:** 2026-03-07
 **Prepared by:** HB Intel Implementation Agent
-**Status:** FINAL — Awaiting product-owner confirmation before Phase 6 kickoff
+**Status:** FINAL — Awaiting product-owner confirmation before Phase 6 kickoff _(historical; Phase 6 is now complete)_
 
 ---
 

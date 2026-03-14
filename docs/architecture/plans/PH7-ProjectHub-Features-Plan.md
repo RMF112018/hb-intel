@@ -1,5 +1,7 @@
 # PH7 — Project Hub Module: Master Feature Plan
 
+> **Doc Classification:** Canonical Normative Plan — master summary and locked-decisions index for the Project Hub module feature build-out; governs `ph7-project-hub/PH7-ProjectHub-1` through `PH7-ProjectHub-16` task files. Implementation pending PH7.12 sign-off (ADR-0090) and BW infrastructure layer completion.
+
 **Version:** 1.0
 **Governed by:** CLAUDE.md v1.2 · HB-Intel-Blueprint-V4.md · `hb-intel-foundation-plan.md`
 **Date:** 2026-03-07

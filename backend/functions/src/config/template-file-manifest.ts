@@ -1,0 +1,42 @@
+/**
+ * W0-G1-T01: Template file manifest for provisioning saga Step 3.
+ * Each entry describes a file to be uploaded from the template asset store
+ * into the target SharePoint document library on a newly provisioned project site.
+ */
+
+export interface ITemplateFileEntry {
+  /** File name as it appears in the target library. */
+  fileName: string;
+  /** Target document library name. Must match a CORE_LIBRARIES entry. */
+  targetLibrary: string;
+  /** Relative path within the template asset directory (backend/functions/src/assets/templates/). */
+  assetPath: string;
+}
+
+/**
+ * Core template files uploaded to every project site during Step 3.
+ * Actual template asset files (.xlsx, .docx) are G2 scope — Step 3 will
+ * gracefully skip any entry whose asset file is not yet on disk.
+ */
+export const TEMPLATE_FILE_MANIFEST: ITemplateFileEntry[] = [
+  {
+    fileName: 'Project Setup Checklist.xlsx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Project Setup Checklist.xlsx',
+  },
+  {
+    fileName: 'Submittal Register Template.xlsx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Submittal Register Template.xlsx',
+  },
+  {
+    fileName: 'Meeting Agenda Template.docx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Meeting Agenda Template.docx',
+  },
+  {
+    fileName: 'RFI Log Template.xlsx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'RFI Log Template.xlsx',
+  },
+];

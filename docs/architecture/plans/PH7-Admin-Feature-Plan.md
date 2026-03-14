@@ -1,5 +1,7 @@
 # PH7-Admin-Feature-Plan.md
 
+> **Doc Classification:** Canonical Normative Plan — complete feature build-out plan for the Admin module; all locked interview decisions included. Implementation pending PH7.12 sign-off (ADR-0090) and BW infrastructure layer completion.
+
 **Phase 7 — Admin Module: Complete Feature Build-Out**
 
 **Version:** 1.0

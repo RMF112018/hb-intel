@@ -42,7 +42,7 @@ const provisioningRoute = createRoute({
     requireAdminAccessControl();
     useNavStore.getState().setActiveWorkspace('admin');
   },
-  component: lazyRouteComponent(() => import('../pages/SystemSettingsPage.js').then((m) => ({ default: () => m.SystemSettingsPage({ initialSection: 'role-change-review' }) }))),
+  component: lazyRouteComponent(() => import('../pages/ProvisioningFailuresPage.js').then((m) => ({ default: m.ProvisioningFailuresPage }))),
 });
 
 export const webpartRoutes = [indexRoute, errorLogRoute, provisioningRoute];

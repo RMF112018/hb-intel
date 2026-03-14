@@ -1,5 +1,7 @@
 # NGX Modernization Tracker
 
+> **Doc Classification:** Historical Foundational — completion tracker for the Phase 4.15 NGX modernization audit; all 8 areas are confirmed complete as of Phase 4.15 (2026-03-04). This document is a sealed historical record; do not update or act upon it.
+
 **Phase:** 4.15 | **Last Updated:** 2026-03-04 | **Reference:** PH4.15-UI-Design-Plan.md §15
 
 ## Status Overview

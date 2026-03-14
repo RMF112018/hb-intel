@@ -1,5 +1,12 @@
 # PH7-Estimating-Feature-Plan.md
 
+> **Doc Classification:** Superseded / Archived Reference — v1.0 monolithic plan explicitly superseded by `PH7-Estimating-Features.md` v2.0, which split this content into numbered task files. Retained as archive for provenance only.
+>
+> **Status after consolidation:** SUPERSEDED (2026-03-07, per `PH7-Estimating-Features.md` v2.0 header)
+> **Superseded by:** `docs/architecture/plans/PH7-Estimating-Features.md` v2.0 (master summary + task index) and the numbered task files in `docs/architecture/plans/ph7-estimating/`
+> **Progress notes preserved at:** `docs/architecture/blueprint/HB-Intel-Blueprint-Crosswalk.md` §9.2
+> **Do NOT use this document for implementation.** Use `PH7-Estimating-Features.md` and the `ph7-estimating/` task files.
+
 **Phase 7 — Estimating Module: Complete Feature Build-Out**
 
 **Version:** 1.0

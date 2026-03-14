@@ -1,5 +1,11 @@
 # PH7-ReviewMode-Plan — Review Mode Master Summary
 
+> **Doc Classification:** Deferred Scope — master plan for the Review Mode feature (`@hbc/review-mode`); the associated task files (`PH7-RM-1-Package-Foundation.md` through `PH7-RM-9-Testing-and-Documentation.md`) are classified Deferred Scope in `current-state-map.md §2`. This master plan shares that classification. Review Mode may not begin implementation without reclassification to Canonical Normative Plan and assignment to a named phase milestone.
+>
+> **Status after consolidation:** Deferred Scope — confirmed 2026-03-14
+> **Current authoritative source for implementation status:** `docs/architecture/blueprint/current-state-map.md` §2 (row: `PH7-RM-* plans`)
+> **When activated:** Reclassify to Canonical Normative Plan, add to active phase plan index, and update `current-state-map.md §2`.
+
 **Version:** 1.0
 **Governed by:** CLAUDE.md v1.2 · HB-Intel-Blueprint-V4.md · `hb-intel-foundation-plan.md`
 **Date:** 2026-03-08

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@hbc/complexity": "workspace:*",
+    "@hbc/provisioning": "workspace:*",
     "@hbc/models": "workspace:*",
     "@hbc/data-access": "workspace:*",
     "@hbc/query-hooks": "workspace:*",
