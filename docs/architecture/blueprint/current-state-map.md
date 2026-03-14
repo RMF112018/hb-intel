@@ -198,6 +198,9 @@
 | `packages/provisioning/src/history-level-registry.ts` (T06 addition) | **Canonical Current-State** | History level model (Level 0/1/2), content descriptors, visibility helpers; produced by W0-G3-T06 |
 | `packages/provisioning/src/coaching-prompt-registry.ts` (T06 addition) | **Canonical Current-State** | Coaching prompt registry for Essential tier; 4 prompts; produced by W0-G3-T06 |
 | `packages/provisioning/src/complexity-gate-helpers.ts` (T06 addition) | **Canonical Current-State** | Pure complexity gate visibility helpers for summary fields and history content; produced by W0-G3-T06 |
+| `docs/reference/workflow-experience/primitive-integration-checklist.md` | **Canonical Normative Plan** | Integration rules (7), failure modes (10), boundary drift prevention, G4/G5 validation checklist; produced by W0-G3-T07 |
+| `packages/provisioning/src/integration-rules.ts` (T07 addition) | **Canonical Current-State** | Typed integration rule registry; 7 rules with package pairs, anti-patterns, correct patterns; produced by W0-G3-T07 |
+| `packages/provisioning/src/failure-modes.ts` (T07 addition) | **Canonical Current-State** | Typed failure mode registry; FM-01 through FM-10 with scenarios and expected degradation; produced by W0-G3-T07 |
 | Diátaxis output docs (`docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/`, `docs/user-guide/`, `docs/administrator-guide/`, `docs/maintenance/`, `docs/troubleshooting/`, `docs/security/`, `docs/release-notes/`, `docs/faq.md`) | **Living Reference (Diátaxis)** | 200+ files; quadrant breakdown: tutorials, how-to, reference, explanation, user-guide, administrator-guide, maintenance, troubleshooting, security, release-notes, faq; updated continuously as features ship; exempt from inline banner |
 
 ### 2.1 Classification Maintenance Rule

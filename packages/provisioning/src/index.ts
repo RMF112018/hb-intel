@@ -73,3 +73,17 @@ export {
   getVisibleSummaryFields,
   getVisibleHistoryContent,
 } from './complexity-gate-helpers.js';
+
+// W0-G3-T07: Integration rule registry
+export type { IIntegrationRule } from './integration-rules.js';
+export {
+  PROJECT_SETUP_INTEGRATION_RULES,
+  getIntegrationRule,
+} from './integration-rules.js';
+
+// W0-G3-T07: Failure mode registry
+export type { IFailureMode } from './failure-modes.js';
+export {
+  PROJECT_SETUP_FAILURE_MODES,
+  getFailureMode,
+} from './failure-modes.js';
