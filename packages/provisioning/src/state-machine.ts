@@ -42,6 +42,7 @@ export const STATE_NOTIFICATION_TARGETS: Partial<
   Record<ProjectSetupRequestState, ('submitter' | 'controller' | 'group' | 'admin')[]>
 > = {
   Submitted: ['controller'], // Controller receives new request for review.
+  UnderReview: ['submitter'], // Submitter notified when review begins (request-approved event).
   NeedsClarification: ['submitter'], // Request submitter must provide missing details.
   ReadyToProvision: ['controller'], // Controller gets action-ready signal.
   Provisioning: ['group'], // Project group gets start notification.
