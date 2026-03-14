@@ -171,6 +171,10 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 - [Entra ID Group Model](./reference/provisioning/entra-id-group-model.md) — Three-group permission model (Leaders/Team/Viewers), naming conventions, initial membership, and Graph API scope
 - [Notification Event Matrix](./reference/provisioning/notification-event-matrix.md) — 8-event provisioning notification contract, recipient resolution, and pipeline integration pattern
 
+### Configuration Reference
+
+- [Wave 0 Config Registry](./reference/configuration/wave-0-config-registry.md) — Two-bucket governance model, complete environment variable registry, environment separation matrix, and fail-fast validation reference
+
 ### Auth & Shell Reference
 
 - [Architecture Contracts](./reference/auth-shell-architecture-contracts.md)

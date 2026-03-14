@@ -13,6 +13,17 @@
     "SHAREPOINT_TENANT_URL": "https://hbconstruction.sharepoint.com",
     "SHAREPOINT_HUB_SITE_ID": "<hub-site-guid>",
     "HBC_ADAPTER_MODE": "mock",
-    "PROVISIONING_STEP5_TIMEOUT_MS": "90000"
+    "PROVISIONING_STEP5_TIMEOUT_MS": "90000",
+    "OPEX_MANAGER_UPN": "<opex-manager-upn@company.com>",
+    "CONTROLLER_UPNS": "<controller1@company.com,controller2@company.com>",
+    "ADMIN_UPNS": "<admin1@company.com,admin2@company.com>",
+    "STRUCTURAL_OWNER_UPNS": "",
+    "DEPT_BACKGROUND_ACCESS_COMMERCIAL": "<viewer-upn@company.com>",
+    "DEPT_BACKGROUND_ACCESS_LUXURY_RESIDENTIAL": "<viewer-upn@company.com>",
+    "EMAIL_DELIVERY_API_KEY": "<sendgrid-api-key>",
+    "EMAIL_FROM_ADDRESS": "hb-intel@hbconstruction.com",
+    "NOTIFICATION_API_BASE_URL": "http://localhost:7071",
+    "HB_INTEL_SPFX_APP_ID": "<spfx-app-package-guid>",
+    "SHAREPOINT_APP_CATALOG_URL": "<app-catalog-url>"
   }
 }
