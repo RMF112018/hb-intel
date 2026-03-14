@@ -5,6 +5,11 @@ export type {
   IClarificationReturnState,
   IClarificationResponse,
   IClarificationResubmission,
+  ISetupFormDraft,
+  IClarificationDraft,
+  IControllerReviewDraft,
+  ResumeDecision,
+  IResumeContext,
 } from './IProjectSetupWizard.js';
 
 export {
@@ -13,4 +18,8 @@ export {
   PROJECT_SETUP_CLARIFICATION_DRAFT_KEY_PREFIX,
   CLARIFICATION_DRAFT_TTL_HOURS,
   buildClarificationDraftKey,
+  PROJECT_SETUP_CONTROLLER_REVIEW_DRAFT_KEY_PREFIX,
+  buildControllerReviewDraftKey,
+  NEW_REQUEST_DRAFT_TTL_HOURS,
+  CONTROLLER_REVIEW_DRAFT_TTL_HOURS,
 } from './IProjectSetupWizard.js';

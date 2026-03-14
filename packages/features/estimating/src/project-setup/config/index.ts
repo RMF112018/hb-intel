@@ -24,3 +24,8 @@ export {
   buildClarificationReturnState,
   buildClarificationResponsePayload,
 } from './clarificationReturn.js';
+
+export {
+  resolveResumeDecision,
+  buildResumeContext,
+} from './resumeDecision.js';

@@ -24,6 +24,7 @@ export {
   SYNC_BACKOFF_MAX_MS,
   CONNECTIVITY_PROBE_TIMEOUT_MS,
   CONNECTIVITY_PROBE_INTERVAL_MS,
+  AUTO_SAVE_DEBOUNCE_MS,
 } from './constants/index.js';
 
 // DB — functions
@@ -66,7 +67,8 @@ export { SessionStateContext, SessionStateProvider } from './context/index.js';
 export type { SessionStateProviderProps } from './context/index.js';
 
 // Hooks
-export { useSessionState, useDraft, useConnectivity } from './hooks/index.js';
+export { useSessionState, useDraft, useConnectivity, useAutoSaveDraft } from './hooks/index.js';
+export type { IAutoSaveDraftResult } from './hooks/index.js';
 
 // Components
 export { HbcConnectivityBar, HbcSyncStatusBadge } from './components/index.js';

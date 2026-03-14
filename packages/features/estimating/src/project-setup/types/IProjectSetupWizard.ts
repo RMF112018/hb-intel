@@ -42,9 +42,64 @@ export function buildClarificationDraftKey(requestId: string): string {
 }
 
 /** Opening mode passed to the consuming surface (not to the wizard config). */
-export type ProjectSetupWizardMode = 'new-request' | 'clarification-return';
+export type ProjectSetupWizardMode = 'new-request' | 'clarification-return' | 'controller-review';
 
-import type { ProjectDepartment, IRequestClarification } from '@hbc/models';
+import type { ProjectDepartment, IRequestClarification, IProjectSetupRequest } from '@hbc/models';
+import type { StepStatus } from '@hbc/step-wizard';
+
+// ─── T05: Controller Review Draft Key ─────────────────────────────────────────
+export const PROJECT_SETUP_CONTROLLER_REVIEW_DRAFT_KEY_PREFIX =
+  'project-setup-controller-review-' as const;
+
+/** Build a controller-review draft key for a specific request. */
+export function buildControllerReviewDraftKey(requestId: string): string {
+  return `${PROJECT_SETUP_CONTROLLER_REVIEW_DRAFT_KEY_PREFIX}${requestId}`;
+}
+
+// ─── T05: TTL Constants ───────────────────────────────────────────────────────
+/** TTL for new-request drafts (hours). */
+export const NEW_REQUEST_DRAFT_TTL_HOURS = 48;
+/** TTL for controller-review drafts (hours). */
+export const CONTROLLER_REVIEW_DRAFT_TTL_HOURS = 24;
+
+// ─── T05: Draft Storage Shapes ───────────────────────────────────────────────
+/** Draft shape for new-request wizard sessions. */
+export interface ISetupFormDraft {
+  fields: Partial<IProjectSetupRequest>;
+  stepStatuses: Record<string, StepStatus>;
+  lastSavedAt: string;
+}
+
+/** Draft shape for clarification-return wizard sessions. */
+export interface IClarificationDraft {
+  requestId: string;
+  fieldChanges: Partial<IProjectSetupRequest>;
+  stepStatuses: Record<string, StepStatus>;
+  clarificationResponses: Record<string, string>;
+  lastSavedAt: string;
+}
+
+/** Draft shape for controller-review sessions. */
+export interface IControllerReviewDraft {
+  requestId: string;
+  projectNumberInProgress?: string;
+  pendingAnnotations: Array<{
+    fieldId: string;
+    stepId: string;
+    message: string;
+  }>;
+  lastSavedAt: string;
+}
+
+// ─── T05: Resume Decision Types ──────────────────────────────────────────────
+export type ResumeDecision = 'prompt-user' | 'auto-continue' | 'fresh-start';
+
+export interface IResumeContext<T> {
+  mode: ProjectSetupWizardMode;
+  existingDraft: T | null;
+  decision: ResumeDecision;
+  draftTimestamp: string | null;
+}
 
 /**
  * W0-G3-T03: TTL for clarification-return drafts (hours).

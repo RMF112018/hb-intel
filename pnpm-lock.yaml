@@ -1644,6 +1644,9 @@ importers:
       '@hbc/query-hooks':
         specifier: workspace:*
         version: link:../../query-hooks
+      '@hbc/session-state':
+        specifier: workspace:*
+        version: link:../../session-state
       '@hbc/shell':
         specifier: workspace:*
         version: link:../../shell
@@ -2020,9 +2023,6 @@ importers:
       '@hbc/bic-next-move':
         specifier: workspace:*
         version: link:../bic-next-move
-      '@hbc/score-benchmark':
-        specifier: workspace:*
-        version: link:../score-benchmark
       '@hbc/strategic-intelligence':
         specifier: workspace:*
         version: link:../strategic-intelligence

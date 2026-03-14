@@ -189,6 +189,10 @@
 | `docs/reference/workflow-experience/my-work-alignment-contract.md` | **Canonical Normative Plan** | My Work alignment contract; IMyWorkItem shape (illustrative/provisional), 3 interim hooks, 4 prohibited stopgaps, source enumeration; produced by W0-G3-T04 |
 | `packages/provisioning/src/notification-registrations.ts` (T04 update) | **Canonical Current-State** | Expanded from 8 to 15 event registrations; request-submitted reclassified immediate/non-overridable; completed channels updated; 7 new events; produced by W0-G3-T04 |
 | `packages/provisioning/src/notification-templates.ts` (T04 update) | **Canonical Current-State** | Expanded from 8 to 15 template factories; 7 new templates for T04 events; produced by W0-G3-T04 |
+| `docs/reference/workflow-experience/draft-key-registry.md` | **Canonical Normative Plan** | Draft key registry for project setup; 3 keys, TTL, auto-save, resume, failure modes; produced by W0-G3-T05 |
+| `packages/session-state/src/hooks/useAutoSaveDraft.ts` (T05 addition) | **Canonical Current-State** | Generic debounced auto-save draft hook; 1.5s default debounce, flush-on-unmount; produced by W0-G3-T05 |
+| `packages/features/estimating/src/project-setup/hooks/useProjectSetupDraft.ts` | **Canonical Current-State** | Feature-local draft hook; mode-aware key/TTL resolution, resume context; produced by W0-G3-T05 |
+| `packages/features/estimating/src/project-setup/config/resumeDecision.ts` | **Canonical Current-State** | Pure resume decision helpers; prompt-user / auto-continue / fresh-start; produced by W0-G3-T05 |
 | Diátaxis output docs (`docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/`, `docs/user-guide/`, `docs/administrator-guide/`, `docs/maintenance/`, `docs/troubleshooting/`, `docs/security/`, `docs/release-notes/`, `docs/faq.md`) | **Living Reference (Diátaxis)** | 200+ files; quadrant breakdown: tutorials, how-to, reference, explanation, user-guide, administrator-guide, maintenance, troubleshooting, security, release-notes, faq; updated continuously as features ship; exempt from inline banner |
 
 ### 2.1 Classification Maintenance Rule

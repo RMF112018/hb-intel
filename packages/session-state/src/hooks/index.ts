@@ -4,3 +4,5 @@
 export { useSessionState } from './useSessionState.js';
 export { useDraft } from './useDraft.js';
 export { useConnectivity } from './useConnectivity.js';
+export { useAutoSaveDraft } from './useAutoSaveDraft.js';
+export type { IAutoSaveDraftResult } from './useAutoSaveDraft.js';

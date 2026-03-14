@@ -15,6 +15,11 @@ export type {
   IClarificationReturnState,
   IClarificationResponse,
   IClarificationResubmission,
+  ISetupFormDraft,
+  IClarificationDraft,
+  IControllerReviewDraft,
+  ResumeDecision,
+  IResumeContext,
 } from './types/index.js';
 
 export {
@@ -23,6 +28,10 @@ export {
   PROJECT_SETUP_CLARIFICATION_DRAFT_KEY_PREFIX,
   CLARIFICATION_DRAFT_TTL_HOURS,
   buildClarificationDraftKey,
+  PROJECT_SETUP_CONTROLLER_REVIEW_DRAFT_KEY_PREFIX,
+  buildControllerReviewDraftKey,
+  NEW_REQUEST_DRAFT_TTL_HOURS,
+  CONTROLLER_REVIEW_DRAFT_TTL_HOURS,
 } from './types/index.js';
 
 // Config
@@ -41,4 +50,10 @@ export {
   getOpenClarifications,
   buildClarificationReturnState,
   buildClarificationResponsePayload,
+  resolveResumeDecision,
+  buildResumeContext,
 } from './config/index.js';
+
+// Hooks
+export { useProjectSetupDraft } from './hooks/index.js';
+export type { IUseProjectSetupDraftResult } from './hooks/index.js';
