@@ -590,9 +590,182 @@ The 3-week look-ahead / schedule artifact is classified as **reference-file-only
 
 ---
 
-## T06 — Financial / Buyout / Forecast Schemas
+## T06 — Financial / Buyout / Forecast / Draw / Subcontract Schemas
 
-*Section populated by T06 implementation. Placeholder for list field schemas.*
+> **Source:** W0-G2-T06 — Financial, Buyout, Forecast, Draw, and Subcontract Data Model
+> **Module:** `backend/functions/src/config/financial-list-definitions.ts`
+> **List Family:** `financial` — 5 lists (1 parent, 1 child, 3 flat)
+
+### Parent/Child Relationships
+
+| Parent List | Child List | Lookup Field | Lookup Target |
+|-------------|-----------|--------------|---------------|
+| Buyout Log | Buyout Bid Lines | `ParentRecord` | `Buyout Log:ID` |
+| Draw Schedule | *(flat — no children)* | — | — |
+| Financial Forecast Status | *(flat — no children)* | — | — |
+| Subcontract Compliance Log | *(flat — no children)* | — | — |
+
+### 6.1 Buyout Log (parent, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Scope Package Name | `Title` | Text | Yes | |
+| Status | `Status` | Choice | Yes | `Pending Bids \| Bids Received \| Under Review \| Awarded \| Executed \| On Hold` |
+| Division | `Division` | Choice | No | `Division 01 \| Division 02 \| Division 03 \| Division 04 \| Division 05 \| Division 06 \| Division 07 \| Division 08 \| Division 09 \| Division 10 \| Division 11 \| Division 12 \| Division 13 \| Division 14 \| Division 15 \| Division 16 \| Other` |
+| Budget Amount | `BudgetAmount` | Number | No | |
+| Award Amount | `AwardAmount` | Number | No | |
+| Awarded To | `AwardedTo` | Text | No | |
+| Award Date | `AwardDate` | DateTime | No | |
+| Contract Executed Date | `ContractExecutedDate` | DateTime | No | |
+| NTP Date | `NTPDate` | DateTime | No | Notice to Proceed |
+| Scheduled Start Date | `ScheduledStartDate` | DateTime | No | |
+| Scheduled Completion Date | `ScheduledCompletionDate` | DateTime | No | |
+| Insurance COI Received | `InsuranceCOIReceived` | Boolean | No | |
+| Bonding Required | `BondingRequired` | Boolean | No | |
+| Bond Received | `BondReceived` | Boolean | No | |
+| Procore Subcontract ID | `ProcoreSubcontractId` | Text | No | Bridge to Procore post-award contract (see §6.6) |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 6.2 Buyout Bid Lines (child, provisioningOrder=20)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Bid Description | `Title` | Text | Yes | |
+| Buyout Log | `ParentRecord` | Lookup | Yes | → `Buyout Log:ID` |
+| Subcontractor Name | `SubcontractorName` | Text | Yes | |
+| Bid Amount | `BidAmount` | Number | No | |
+| Bid Date | `BidDate` | DateTime | No | |
+| Bid Status | `BidStatus` | Choice | No | `Invited \| Pending \| Submitted \| Declined \| Awarded \| Alternate \| Rejected` |
+| Scope | `Scope` | MultiLineText | No | |
+| Contact Name | `ContactName` | Text | No | |
+| Contact Email | `ContactEmail` | Text | No | |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 6.3 Draw Schedule (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Line Item Description | `Title` | Text | Yes | |
+| Cost Code | `CostCode` | Text | No | |
+| Contract Budget | `ContractBudget` | Number | No | |
+| Current Forecast | `CurrentForecast` | Number | No | |
+| Billed to Date | `BilledToDate` | Number | No | |
+| Remaining Budget | `RemainingBudget` | Number | No | |
+| Percent Complete | `PercentComplete` | Number | No | |
+| Status | `Status` | Choice | Yes | `On Track \| At Risk \| Over Budget \| Complete` |
+| Last Updated | `LastUpdated` | DateTime | No | |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 6.4 Financial Forecast Status (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Forecast Period | `Title` | Text | Yes | |
+| Forecast Month | `ForecastMonth` | DateTime | Yes | |
+| Status | `Status` | Choice | Yes | `Not Started \| In Progress \| Submitted \| Approved` |
+| Procore Budget Updated | `ProcoreBudgetUpdated` | Boolean | No | Checklist gate |
+| Forecast Summary Complete | `ForecastSummaryComplete` | Boolean | No | Checklist gate |
+| Vendor Quotes Received | `VendorQuotesReceived` | Boolean | No | Checklist gate |
+| GC-GR Updated | `GCGRUpdated` | Boolean | No | Checklist gate |
+| Contract Type | `ContractType` | Choice | No | `CM/GMP \| Lump Sum \| Cost Plus \| Other` |
+| Project Type | `ProjectType` | Choice | No | `New Construction \| Renovation \| Other` |
+| Submitted By | `SubmittedBy` | User | No | |
+| Submission Date | `SubmissionDate` | DateTime | No | |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 6.5 Subcontract Compliance Log (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Requirement Description | `Title` | Text | Yes | |
+| Subcontractor Name | `SubcontractorName` | Text | Yes | |
+| Requirement Type | `RequirementType` | Choice | Yes | `General Liability Insurance \| Workers Comp Insurance \| Auto Insurance \| Professional Liability \| Umbrella \| Payment Bond \| Performance Bond \| Safety Program \| OSHA Compliance \| W-9 \| Other` |
+| Status | `Status` | Choice | Yes | `Required — Not Received \| Received \| Verified \| Expired \| Waived` |
+| Date Requested | `DateRequested` | DateTime | No | |
+| Date Received | `DateReceived` | DateTime | No | |
+| Expiration Date | `ExpirationDate` | DateTime | No | |
+| Document Link | `DocumentLink` | URL | No | Link to compliance document |
+| Waiver Approval | `WaiverApproval` | Text | No | |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 6.6 Buyout Log vs Procore Boundary
+
+The Buyout Log and Procore occupy **complementary but distinct** domains in the subcontract lifecycle:
+
+| Aspect | Buyout Log (HB Intel) | Procore |
+|--------|----------------------|---------|
+| **Phase** | Pre-award bidding intelligence | Post-award contract authority |
+| **Scope** | Scope packages, bid solicitation, award decisions | Executed contracts, cost codes, actuals |
+| **Authority** | Operative during bidding and award | Authoritative after contract execution |
+| **Data** | Budget estimates, bid comparisons, award rationale | Committed values, change orders, invoices |
+
+**Bridge:** The `ProcoreSubcontractId` field on Buyout Log links a scope package to its corresponding Procore subcontract record after award. This is a one-directional Text reference (not a live integration). During transition: Buyout Log is operative pre-award; Procore is authoritative post-award.
+
+### 6.7 Draw Schedule — Simplified Model
+
+The Draw Schedule list uses a **row-per-budget-line** structure rather than a monthly exploded matrix:
+
+- SharePoint custom lists cannot natively replicate a monthly cash-flow matrix (columns-per-month) without schema changes each period
+- The simplified structure tracks cumulative budget, forecast, billed, and remaining per line item
+- The seeded `Draw Schedule Template.xlsx` is the operational tool for detailed monthly draw management during the transition period
+- Wave 1 financial intelligence features will consume the simplified list data for project-level financial health indicators
+
+### 6.8 Subcontract Compliance (T06) vs Sub Safety Certifications (T04) Boundary
+
+These two lists track **mutually exclusive** compliance domains for subcontractors:
+
+| Aspect | Subcontract Compliance Log (T06) | Sub Safety Certifications (T04) |
+|--------|----------------------------------|--------------------------------|
+| **Domain** | Legal and insurance compliance | Safety training and certification |
+| **Tracks** | General liability, workers comp, auto, professional liability, umbrella insurance; payment and performance bonds; W-9s | OSHA 10/30 certs, competent person certs, equipment operator certs, first aid/CPR |
+| **Owner** | Project management / accounting | Safety department |
+| **Family** | `financial` | `safety` |
+
+No overlapping records — a subcontractor's insurance COI goes in T06; their OSHA 30 card goes in T04. The `Safety Program` and `OSHA Compliance` choices in T06's `RequirementType` refer to program-level documentation (does the sub have a written safety program?), not individual certifications.
+
+### GC-GR Treatment
+
+The GC-GR (General Conditions / General Requirements) analysis is classified as **reference-file-only** in the T06 seeded-file model. No dedicated list is created:
+
+- GC-GR tracking is document-centric (spreadsheet analysis of line-item costs)
+- The `GCGRUpdated` Boolean field on `Financial Forecast Status` tracks whether the GC-GR analysis has been refreshed as part of each forecast cycle
+- GC-GR analysis workflows are Wave 1 scope (`@hbc/post-bid-autopsy` or dedicated financial intelligence module)
+
+### Future Feature Targets
+
+The following are recognized but receive **no G2 provisioning action** — they are logged as Wave 1+ inputs:
+
+- **Lessons Learned** → Future feature target for `@hbc/post-bid-autopsy` (Wave 2+)
+- **Subcontractor Scorecard SOP** → Future feature target for `@hbc/post-bid-autopsy` (Wave 2+)
+
+### Seeded File Mapping
+
+| File Name | Format | Target Library | Classification |
+|-----------|--------|---------------|----------------|
+| Buyout Log Template.xlsx | Excel | Project Documents | Reference file only |
+| Draw Schedule Template.xlsx | Excel | Project Documents | Seed now |
+| Financial Forecast Checklist.xlsx | Excel | Project Documents | Reference file only |
+
+### Cross-Family References
+
+- **Closeout (T03):** Closeout Checklist completion milestones may correlate with final payment milestones tracked in Draw Schedule. Cross-family Lookup fields are Wave 1 scope.
+- **Project Controls (T05):** Permit costs tracked in T05's `Permit Log` (`CostAmount`) relate to budget line items in Draw Schedule. No Lookup — tracked independently.
+- **Safety (T04):** Sub Safety Certifications (T04) and Subcontract Compliance Log (T06) are complementary but mutually exclusive (see §6.8). No cross-family Lookup.
+
+### Deferred Decisions
+
+- **T07:** Wiring financial definitions into Step 4 provisioning dispatch.
+- **T07 (T06-R2):** Draw Schedule model confirmation — simplified row-per-line vs. monthly exploded matrix. T06 implements simplified; T07 must confirm or amend.
+- **T07 (T06-R3):** Buyout Log vs Procore boundary documentation in list description field.
+- **T07 (T06-R4):** Subcontract Compliance vs T04 Sub Safety Certifications boundary enforcement in list descriptions.
+- **T09:** Integration tests for financial list provisioning.
+- **Wave 1:** Financial intelligence features, GC-GR analysis workflows, draw schedule monthly matrix, financial health dashboard.
+- **Wave 2+:** Lessons Learned, Subcontractor Scorecard SOP (`@hbc/post-bid-autopsy`).
 
 ---
 

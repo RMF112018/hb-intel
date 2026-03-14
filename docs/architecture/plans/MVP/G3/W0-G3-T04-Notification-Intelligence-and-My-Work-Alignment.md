@@ -28,10 +28,12 @@ G1-T03 defined the notification delivery model and the event-to-notification mat
 
 The G3-D8 locked decision requires explicit separation of awareness/informational notifications from action-required notifications. This is not just a tier assignment — it governs whether `tierOverridable` is `true` (awareness events can be downgraded by users) or `false` (action-required events cannot).
 
-The My Work alignment contract must exist now because:
-1. The `registerBicModule()` call (T02) is the minimum interim hook point — it must be wired at G4/G5 implementation time
-2. The item model shape that My Work will consume must be stable before G4/G5 ships — if the shape is not defined now, My Work integration will require G4/G5 rework
-3. Without the alignment contract, G4/G5 teams might build bespoke "my items" surfaces that conflict with My Work's future aggregation model
+The My Work alignment contract must be documented now because:
+1. The `registerBicModule()` call (T02) is the only justified interim hook point — it must be wired at G4/G5 implementation time (this is real Wave 0 work)
+2. The planned item model shape that My Work will eventually consume should be recorded before G4/G5 ships — so that when SF-29 is activated, the mapping can be implemented without requiring G4/G5 rework to fix a previously undefined contract
+3. Without the alignment contract as a documented guard, G4/G5 teams might inadvertently build bespoke "my items" surfaces that conflict with My Work's future aggregation model
+
+> **Scope clarification:** Items 1 and 3 above are binding G4/G5 requirements. Item 2 is a planning record — the mapping shape is documented here but **not implemented** until SF-29 is activated.
 
 ---
 
@@ -283,24 +285,34 @@ Exception: The handoff notification (`provisioning.handoff-received`) is fired b
 
 The G3-D7 locked decision specifies: define the full future-ready contract now, wire only the minimum justified interim hook points now. The minimum justified interim hook point is `registerBicModule()` (specified in T02). This alignment contract defines what My Work will consume so the contract is stable when My Work ships.
 
-### My Work Item Model for Project Setup
+### My Work Item Model for Project Setup *(Future Contract Shape — SF-29, Not Yet Implemented)*
 
-Each project setup request that the My Work feed will surface must map to the `IMyWorkItem` shape (from SF-29 spec). The G3 contract defines this mapping:
+Each project setup request that the My Work feed will surface must map to the `IMyWorkItem` shape (from the SF-29 spec). The following is the **planned future contract shape** for this mapping. It is defined here now so that G4/G5 implementation decisions do not conflict with My Work's aggregation model when SF-29 ships.
+
+> **`@hbc/my-work-feed` does not currently exist as a package.** It is a P2 research-stage feature (SF-29). No G3, G4, or G5 code should import from it. The TypeScript below is a non-binding, illustrative shape — defined here as a stable planning contract only. Treat all types, function signatures, and field names as provisional pending the SF-29 implementation.
 
 ```typescript
-import {
-  MyWorkItemClass,
-  MyWorkPriority,
-  MyWorkState,
-  MyWorkSource,
-  IMyWorkContext,
-} from '@hbc/my-work-feed'; // future package — contract defined here, not yet imported
+// ─────────────────────────────────────────────────────────────────────────────
+// FUTURE CONTRACT SHAPE — ILLUSTRATIVE ONLY — DO NOT IMPLEMENT IN G3/G4/G5
+//
+// `@hbc/my-work-feed` is a planned future package (SF-29, P2 research stage).
+// It does not currently exist. Do NOT import from '@hbc/my-work-feed' in any
+// G3, G4, or G5 implementation. This shape is defined here solely to ensure
+// the mapping contract is stable before G4/G5 ships, so My Work integration
+// requires no rework when SF-29 is eventually activated.
+// ─────────────────────────────────────────────────────────────────────────────
 
-// Mapping from IProjectSetupRequest to IMyWorkItem (future shape)
+// Illustrative future imports — not yet available, not yet importable:
+// import {
+//   MyWorkItemClass, MyWorkPriority, MyWorkState, MyWorkSource, IMyWorkContext,
+// } from '@hbc/my-work-feed';
+
+// Planned mapping from IProjectSetupRequest → IMyWorkItem (future shape).
+// Return type IMyWorkItem is from the future SF-29 package — not yet defined.
 function mapSetupRequestToMyWorkItem(
   request: IProjectSetupRequest,
   bicState: IBicNextMoveState,
-): IMyWorkItem {
+): IMyWorkItem /* future type — illustrative only */ {
   return {
     itemId: `provisioning:${request.id}`,
     itemClass: resolveItemClass(request, bicState),
@@ -348,7 +360,7 @@ function resolvePriority(bicState: IBicNextMoveState): MyWorkPriority {
 }
 ```
 
-**Note for G4/G5 implementation:** This mapping function should be defined in the provisioning package or a G3 init module and kept stable. When My Work ships, it will call the module's `queryFn` which uses this mapping. The mapping must not be defined independently in each surface.
+**Important — G4/G5 implementation boundary:** The mapping function shape above is a future-ready contract defined here for planning stability, **not code to write during G4/G5**. Do not implement `mapSetupRequestToMyWorkItem` as a real function during Wave 0, and do not add `@hbc/my-work-feed` as a package dependency. When My Work ships (SF-29), the implementing agent will create this function in the provisioning package or a G3 init module using SF-29's actual published interface. The shape above is the stable design target that SF-29 implementation must satisfy.
 
 ### Minimum Interim Hook Points (Wave 0 Required)
 

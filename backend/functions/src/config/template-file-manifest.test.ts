@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { TEMPLATE_FILE_MANIFEST, type ITemplateFileEntry } from './template-file-manifest.js';
 
 describe('TEMPLATE_FILE_MANIFEST', () => {
-  it('has exactly 15 entries', () => {
-    expect(TEMPLATE_FILE_MANIFEST).toHaveLength(15);
+  it('has exactly 18 entries', () => {
+    expect(TEMPLATE_FILE_MANIFEST).toHaveLength(18);
   });
 
   it('all entries target "Project Documents" library', () => {
@@ -45,6 +45,13 @@ describe('TEMPLATE_FILE_MANIFEST', () => {
   it('contains T05 project-controls-family file names', () => {
     const fileNames = TEMPLATE_FILE_MANIFEST.map((e) => e.fileName);
     expect(fileNames).toContain('Required Inspections Template.xlsx');
+  });
+
+  it('contains T06 financial-family file names', () => {
+    const fileNames = TEMPLATE_FILE_MANIFEST.map((e) => e.fileName);
+    expect(fileNames).toContain('Buyout Log Template.xlsx');
+    expect(fileNames).toContain('Draw Schedule Template.xlsx');
+    expect(fileNames).toContain('Financial Forecast Checklist.xlsx');
   });
 
   it('each entry has correct assetPaths matching fileNames', () => {

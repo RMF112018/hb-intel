@@ -5,7 +5,7 @@
 **Phase Reference:** Wave 0 Group 3 — Shared-Platform Wiring and Workflow Experience Plan
 **Depends On:** T01–T07 (all contracts must be stable before test cases can be finalized)
 **Unlocks:** G4/G5 pilot readiness gate — G3 tests must pass before the first pilot project goes live
-**Repo Paths Governed:** `apps/estimating/tests/`, `apps/accounting/tests/`, `apps/admin/tests/`, `apps/pwa/tests/` (or equivalent test directories per app)
+**Repo Paths Governed:** `apps/estimating/`, `apps/accounting/`, `apps/admin/`, `apps/pwa/` — G3 contract tests required across all four apps; exact test directory layout deferred to each app's existing conventions (verify at implementation time)
 
 ---
 
@@ -29,24 +29,22 @@ The final section defines the pilot readiness gate — what must pass before the
 
 ## Test Organization
 
-### Test File Locations
+### Test Ownership Boundaries
 
-```
-apps/estimating/tests/
-├── unit/
-│   ├── bic-config.test.ts              # TC-OWN-* ownership and action contract tests
-│   ├── notification-registry.test.ts   # TC-NOTIF-* registration contract tests
-│   ├── draft-keys.test.ts              # TC-DRAFT-* draft key and TTL tests
-│   └── complexity-gates.test.ts        # TC-CMPLX-* complexity gate spec tests
-├── behavior/
-│   ├── step-wizard-flow.test.ts        # TC-FLOW-* guided flow tests
-│   ├── clarification-loop.test.ts      # TC-CLAR-* clarification loop tests
-│   ├── failure-modes.test.ts           # TC-FAIL-* failure mode tests
-│   └── my-work-hooks.test.ts           # TC-MYWK-* My Work contract tests
-└── integration/
-    ├── summary-view.test.ts            # TC-SUMM-* summary and history tests
-    └── notification-dispatch.test.ts   # TC-NOTIF-INT-* notification integration tests
-```
+G3 tests must be co-located with the code they test and must follow each app and package's **existing test directory conventions** — the exact directory layout is not prescribed here and must be discovered by the implementing agent at execution time (e.g., `__tests__/`, `tests/`, `src/**/*.test.ts`, or other per-app conventions).
+
+The required ownership boundaries are:
+
+**Shared-primitive and contract tests (unit):**
+Tests for `PROJECT_SETUP_BIC_CONFIG`, `PROJECT_SETUP_WIZARD_CONFIG`, notification registration tables, draft key constants, and complexity gate spec compliance must live in the package or module that owns those configs — the provisioning package or a G3 init module. These tests are portable: they do not depend on any one app's test harness.
+
+**App surface behavior tests:**
+Tests that simulate user interaction — step wizard flow, clarification return, draft save/resume, summary view rendering — must live in the relevant consuming app's test suite. Each of `apps/estimating`, `apps/accounting`, `apps/admin`, and `apps/pwa` is responsible for its own behavior coverage.
+
+**Integration tests:**
+Tests that require multiple packages collaborating (notification dispatch with real registry, full summary-view render tree, session-state + wizard round-trip) must be explicitly marked as integration tests and must skip gracefully when `SHAREPOINT_INTEGRATION_TEST_ENABLED` is not set.
+
+**Implementing agent instruction:** Before creating test files, inspect the existing test structure in each app (`ls -la apps/estimating/`, check for `vitest.config.*`, existing `*.test.ts` locations, etc.) and place new files following the established convention. The test IDs below (`TC-*`) are the stable reference — file paths are a local implementation detail.
 
 ### Test ID Convention
 

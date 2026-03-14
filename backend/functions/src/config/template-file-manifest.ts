@@ -98,4 +98,20 @@ export const TEMPLATE_FILE_MANIFEST: ITemplateFileEntry[] = [
     targetLibrary: 'Project Documents',
     assetPath: 'Required Inspections Template.xlsx',
   },
+  // W0-G2-T06: Financial-family seeded template files
+  {
+    fileName: 'Buyout Log Template.xlsx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Buyout Log Template.xlsx',
+  },
+  {
+    fileName: 'Draw Schedule Template.xlsx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Draw Schedule Template.xlsx',
+  },
+  {
+    fileName: 'Financial Forecast Checklist.xlsx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Financial Forecast Checklist.xlsx',
+  },
 ];
