@@ -30,6 +30,7 @@ export interface IMockServices extends IServiceContainer {
     setPermissions: Mock;
     associateHub: Mock;
     removeHubAssociation: Mock;
+    assignGroupToPermissionLevel: Mock;
   };
   tableStorage: {
     upsertProvisioningStatus: Mock;
@@ -60,6 +61,14 @@ export interface IMockServices extends IServiceContainer {
     getRequest: Mock;
     listRequests: Mock;
   };
+  graph: {
+    createSecurityGroup: Mock;
+    addGroupMembers: Mock;
+    getGroupByDisplayName: Mock;
+  };
+  notifications: {
+    send: Mock;
+  };
 }
 
 /**
@@ -89,6 +98,15 @@ export function createMockServices(): IMockServices {
       setPermissions: vi.fn(async (_siteUrl: string, _projectId: string) => {}),
       associateHub: vi.fn(async (_siteUrl: string, _hubSiteUrl: string) => {}),
       removeHubAssociation: vi.fn(async (_siteUrl: string) => {}),
+      assignGroupToPermissionLevel: vi.fn(async (_siteUrl: string, _groupId: string, _level: string) => {}),
+    },
+    graph: {
+      createSecurityGroup: vi.fn(async (_displayName: string, _description: string) => 'mock-group-id'),
+      addGroupMembers: vi.fn(async (_groupId: string, _memberUpns: string[]) => {}),
+      getGroupByDisplayName: vi.fn(async (_displayName: string) => null),
+    },
+    notifications: {
+      send: vi.fn(async () => {}),
     },
     tableStorage: {
       upsertProvisioningStatus: vi.fn(async (_status: IProvisioningStatus) => {}),

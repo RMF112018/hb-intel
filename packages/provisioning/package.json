@@ -15,7 +15,7 @@
     "build": "vite build",
     "lint": "eslint src/ --ext .ts,.tsx --config ../../.eslintrc.base.js",
     "check-types": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --coverage"
   },
   "peerDependencies": {
     "react": "^18.0.0",

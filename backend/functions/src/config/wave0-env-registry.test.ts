@@ -1,0 +1,79 @@
+import { describe, it, expect } from 'vitest';
+import {
+  WAVE0_REQUIRED_CONFIG,
+  WAVE0_OPTIONAL_CONFIG,
+  type IConfigEntry,
+} from './wave0-env-registry.js';
+
+describe('WAVE0_REQUIRED_CONFIG', () => {
+  it('has at least 10 entries', () => {
+    expect(WAVE0_REQUIRED_CONFIG.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('all entries have requiredInProd: true', () => {
+    for (const entry of WAVE0_REQUIRED_CONFIG) {
+      expect(entry.requiredInProd).toBe(true);
+    }
+  });
+
+  it('contains both infrastructure and business bucket entries', () => {
+    const buckets = new Set(WAVE0_REQUIRED_CONFIG.map((e) => e.bucket));
+    expect(buckets.has('infrastructure')).toBe(true);
+    expect(buckets.has('business')).toBe(true);
+  });
+
+  it('has no duplicate names', () => {
+    const names = WAVE0_REQUIRED_CONFIG.map((e) => e.name);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('every entry satisfies IConfigEntry shape', () => {
+    for (const entry of WAVE0_REQUIRED_CONFIG) {
+      const typed: IConfigEntry = entry;
+      expect(typeof typed.name).toBe('string');
+      expect(typeof typed.bucket).toBe('string');
+      expect(typeof typed.description).toBe('string');
+      expect(typeof typed.requiredInProd).toBe('boolean');
+      expect(['infrastructure', 'business']).toContain(typed.bucket);
+    }
+  });
+});
+
+describe('WAVE0_OPTIONAL_CONFIG', () => {
+  it('has at least 3 entries', () => {
+    expect(WAVE0_OPTIONAL_CONFIG.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('all entries have requiredInProd: false', () => {
+    for (const entry of WAVE0_OPTIONAL_CONFIG) {
+      expect(entry.requiredInProd).toBe(false);
+    }
+  });
+
+  it('includes SITES_PERMISSION_MODEL', () => {
+    const names = WAVE0_OPTIONAL_CONFIG.map((e) => e.name);
+    expect(names).toContain('SITES_PERMISSION_MODEL');
+  });
+
+  it('every entry satisfies IConfigEntry shape', () => {
+    for (const entry of WAVE0_OPTIONAL_CONFIG) {
+      const typed: IConfigEntry = entry;
+      expect(typeof typed.name).toBe('string');
+      expect(typeof typed.bucket).toBe('string');
+      expect(typeof typed.description).toBe('string');
+      expect(typeof typed.requiredInProd).toBe('boolean');
+    }
+  });
+
+  it('has no duplicate names', () => {
+    const names = WAVE0_OPTIONAL_CONFIG.map((e) => e.name);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('no overlap with required config names', () => {
+    const requiredNames = new Set(WAVE0_REQUIRED_CONFIG.map((e) => e.name));
+    for (const entry of WAVE0_OPTIONAL_CONFIG) {
+      expect(requiredNames.has(entry.name)).toBe(false);
+    }
+  });
+});
