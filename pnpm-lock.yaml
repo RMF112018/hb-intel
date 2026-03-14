@@ -2124,6 +2124,9 @@ importers:
       '@hbc/bic-next-move':
         specifier: workspace:*
         version: link:../bic-next-move
+      '@hbc/complexity':
+        specifier: workspace:*
+        version: link:../complexity
       '@hbc/models':
         specifier: workspace:*
         version: link:../models

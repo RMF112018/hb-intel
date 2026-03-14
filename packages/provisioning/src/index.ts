@@ -39,3 +39,37 @@ export {
   SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG,
   validateSetupHandoffReadiness,
 } from './handoff-config.js';
+
+// W0-G3-T06: Summary field registry, status labels, department labels, urgency indicators
+export type { SummaryFieldSource, ISummaryFieldDescriptor, IUrgencyIndicator } from './summary-field-registry.js';
+export {
+  PROJECT_SETUP_STATUS_LABELS,
+  DEPARTMENT_DISPLAY_LABELS,
+  URGENCY_INDICATOR_MAP,
+  PROJECT_SETUP_SUMMARY_FIELDS,
+  CORE_SUMMARY_FIELD_IDS,
+} from './summary-field-registry.js';
+
+// W0-G3-T06: History level model and content descriptors
+export type { HistoryLevel, IHistoryContentDescriptor } from './history-level-registry.js';
+export {
+  HISTORY_LEVEL_LABELS,
+  PROJECT_SETUP_HISTORY_CONTENT,
+  getHistoryContentByLevel,
+  isHistoryLevelVisible,
+} from './history-level-registry.js';
+
+// W0-G3-T06: Coaching prompt registry
+export type { ICoachingPrompt } from './coaching-prompt-registry.js';
+export {
+  PROJECT_SETUP_COACHING_PROMPTS,
+  getCoachingPrompt,
+} from './coaching-prompt-registry.js';
+
+// W0-G3-T06: Complexity gate visibility helpers
+export {
+  isSummaryFieldVisible,
+  isHistoryContentVisible,
+  getVisibleSummaryFields,
+  getVisibleHistoryContent,
+} from './complexity-gate-helpers.js';

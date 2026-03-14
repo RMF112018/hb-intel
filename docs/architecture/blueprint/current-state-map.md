@@ -193,6 +193,11 @@
 | `packages/session-state/src/hooks/useAutoSaveDraft.ts` (T05 addition) | **Canonical Current-State** | Generic debounced auto-save draft hook; 1.5s default debounce, flush-on-unmount; produced by W0-G3-T05 |
 | `packages/features/estimating/src/project-setup/hooks/useProjectSetupDraft.ts` | **Canonical Current-State** | Feature-local draft hook; mode-aware key/TTL resolution, resume context; produced by W0-G3-T05 |
 | `packages/features/estimating/src/project-setup/config/resumeDecision.ts` | **Canonical Current-State** | Pure resume decision helpers; prompt-user / auto-continue / fresh-start; produced by W0-G3-T05 |
+| `docs/reference/workflow-experience/complexity-gate-spec.md` | **Canonical Normative Plan** | Summary field registry, expandable history levels, complexity gate spec tables, coaching prompts, anti-patterns; produced by W0-G3-T06 |
+| `packages/provisioning/src/summary-field-registry.ts` (T06 addition) | **Canonical Current-State** | Summary field registry, status labels, department labels, urgency indicators; produced by W0-G3-T06 |
+| `packages/provisioning/src/history-level-registry.ts` (T06 addition) | **Canonical Current-State** | History level model (Level 0/1/2), content descriptors, visibility helpers; produced by W0-G3-T06 |
+| `packages/provisioning/src/coaching-prompt-registry.ts` (T06 addition) | **Canonical Current-State** | Coaching prompt registry for Essential tier; 4 prompts; produced by W0-G3-T06 |
+| `packages/provisioning/src/complexity-gate-helpers.ts` (T06 addition) | **Canonical Current-State** | Pure complexity gate visibility helpers for summary fields and history content; produced by W0-G3-T06 |
 | Diátaxis output docs (`docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/`, `docs/user-guide/`, `docs/administrator-guide/`, `docs/maintenance/`, `docs/troubleshooting/`, `docs/security/`, `docs/release-notes/`, `docs/faq.md`) | **Living Reference (Diátaxis)** | 200+ files; quadrant breakdown: tutorials, how-to, reference, explanation, user-guide, administrator-guide, maintenance, troubleshooting, security, release-notes, faq; updated continuously as features ship; exempt from inline banner |
 
 ### 2.1 Classification Maintenance Rule
