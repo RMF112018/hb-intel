@@ -31,7 +31,6 @@
   },
   "dependencies": {
     "@hbc/bic-next-move": "workspace:*",
-    "@hbc/score-benchmark": "workspace:*",
     "@hbc/strategic-intelligence": "workspace:*",
     "@hbc/versioned-record": "workspace:*",
     "@tanstack/react-query": "^5.75.0"

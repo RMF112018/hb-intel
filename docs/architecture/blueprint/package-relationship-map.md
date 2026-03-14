@@ -104,7 +104,7 @@ Layer 1 — Domain Types
 
 **Known violations or tensions:**
 1. `@hbc/ui-kit` (Layer 4) depends on `@hbc/auth` (Layer 3) — auth-aware UI components. This creates a tight coupling that means auth must be initialized before the design system renders. [verified]
-2. `@hbc/score-benchmark` and `@hbc/post-bid-autopsy` appear to have a circular dependency (each lists the other as a prod dependency). This is a boundary risk. [verified — requires resolution]
+2. `@hbc/score-benchmark` and `@hbc/post-bid-autopsy` had a circular dependency (each listed the other as a prod dependency). **Resolved 2026-03-14 — ADR-0114.** The unused `@hbc/score-benchmark` entry was removed from `post-bid-autopsy/package.json`; the remaining type-only import from score-benchmark → post-bid-autopsy is a legitimate, directionally correct dependency and is retained. [verified — resolved]
 3. `@hbc/complexity` (Layer 2) depends on `@tanstack/react-query` (external) — unusual for a density context provider. May be for complexity-aware query behavior. [verified — intent uncertain]
 
 ---
@@ -781,19 +781,19 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 | **Path** | `packages/score-benchmark/` |
 | **Layer** | 8 — Intelligence Scaffolds |
 | **Depends on** | `@hbc/bic-next-move`, `@hbc/versioned-record`, `@hbc/post-bid-autopsy` |
-| **Used by** | `@hbc/post-bid-autopsy`, `@hbc/features-business-development` |
+| **Used by** | `@hbc/features-business-development` |
 | **Maturity** | Scaffold |
 
 **Purpose:** Confidence/similarity/recommendation scoring primitive. Defines the framework for comparing estimates against historical data, benchmarking against similar projects, and producing scoring recommendations with explainability.
 
 **Key exports:** Score model types, benchmark orchestration framework, explainability interfaces.
 
-**⚠️ Circular dependency risk:** `@hbc/score-benchmark` lists `@hbc/post-bid-autopsy` as a prod dependency, and `@hbc/post-bid-autopsy` lists `@hbc/score-benchmark` as a prod dependency. This is a circular dependency and must be resolved before either package can be used in production. [verified]
+**✅ Circular dependency resolved (ADR-0114, 2026-03-14):** The false cycle with `@hbc/post-bid-autopsy` has been eliminated. `@hbc/score-benchmark` retains a legitimate type-only import of `PostBidLearningSignal` from post-bid-autopsy; this is directionally correct and not a cycle.
 
-**Correct usage:** Define scoring models and benchmarks against this framework. Do not use for production until the circular dependency with `@hbc/post-bid-autopsy` is resolved.
+**Correct usage:** Define scoring models and benchmarks against this framework. Scaffold implementation must be completed before production use (Risk 3 remains open).
 
 **Anti-patterns / must not:**
-- Must not be used in Wave 0 or Wave 1 critical paths until implementation is complete and circular dependency is resolved.
+- Must not be used in Wave 0 or Wave 1 critical paths until scaffold implementation is complete.
 
 ---
 
@@ -824,15 +824,15 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 |-------|-------|
 | **Path** | `packages/post-bid-autopsy/` |
 | **Layer** | 8 — Intelligence Scaffolds |
-| **Depends on** | `@hbc/bic-next-move`, `@hbc/score-benchmark`, `@hbc/strategic-intelligence`, `@hbc/versioned-record`, `@tanstack/react-query ^5.75.0` |
-| **Used by** | `@hbc/score-benchmark` (circular), `@hbc/features-estimating`, `@hbc/features-business-development` |
+| **Depends on** | `@hbc/bic-next-move`, `@hbc/strategic-intelligence`, `@hbc/versioned-record`, `@tanstack/react-query ^5.75.0` |
+| **Used by** | `@hbc/features-estimating`, `@hbc/features-business-development` |
 | **Maturity** | Scaffold |
 
 **Purpose:** Post-bid analysis primitive. Aggregates evidence from bid outcomes, assigns confidence scores, classifies learning signals by taxonomy, governs publication of findings, and updates the institutional intelligence store.
 
-**Key exports:** Autopsy model, evidence aggregation framework, learning signal publication interface.
+**Key exports:** Autopsy model, evidence aggregation framework, learning signal publication interface (including `PostBidLearningSignal` consumed by `@hbc/score-benchmark`).
 
-**⚠️ Same circular dependency risk as `@hbc/score-benchmark`.**
+**✅ Circular dependency resolved (ADR-0114, 2026-03-14):** The unused `@hbc/score-benchmark` production dependency has been removed from `package.json`. `@hbc/score-benchmark` retains a type-only import of `PostBidLearningSignal` from this package; that direction is correct and not a cycle.
 
 ---
 
@@ -1023,8 +1023,8 @@ The headless provisioning package is ready; Wave 0's gap is the consumer UX surf
 **6. `@hbc/bic-next-move` → Workflow Primitives**
 All three Layer 7 workflow primitives (`@hbc/step-wizard`, `@hbc/field-annotations`, `@hbc/workflow-handoff`) depend on `@hbc/bic-next-move`. Ownership visibility is a foundational concern woven into every structured workflow.
 
-**7. Intelligence Scaffold Circular Dependency**
-`@hbc/score-benchmark` ↔ `@hbc/post-bid-autopsy` is a circular dependency. This cannot be used in production as-is. Resolution options: (a) extract shared types to a new package, (b) merge the two packages, (c) break the cycle by inverting one dependency. An ADR is required.
+**7. Intelligence Scaffold Circular Dependency — ✅ Resolved (ADR-0114, 2026-03-14)**
+The `@hbc/score-benchmark` ↔ `@hbc/post-bid-autopsy` circular dependency has been eliminated. Source-code inspection confirmed the cycle was false: `@hbc/post-bid-autopsy` declared `@hbc/score-benchmark` as a prod dependency but never imported from it. The unused declaration was removed. The remaining `score-benchmark → post-bid-autopsy` type-only import of `PostBidLearningSignal` is a correct, directionally valid edge and is retained.
 
 ### Standard Feature Package Composition Pattern
 
@@ -1044,11 +1044,12 @@ This pattern is the correct template for any new feature package.
 
 ## Dependency / Boundary Risks
 
-### Risk 1 — Circular Dependency: `@hbc/score-benchmark` ↔ `@hbc/post-bid-autopsy`
-**Severity:** Critical (blocks production use of either package)
-**Evidence:** Both packages list each other as prod dependencies in `package.json`. [verified]
-**Impact:** Features depending on these packages (`@hbc/features-estimating`, `@hbc/features-business-development`) cannot use this functionality in production.
-**Resolution required:** Create an ADR to resolve the cycle before Wave 1 intelligence features are built.
+### Risk 1 — Circular Dependency: `@hbc/score-benchmark` ↔ `@hbc/post-bid-autopsy` — ✅ RESOLVED
+**Resolved:** 2026-03-14 — ADR-0114
+**Original severity:** Critical (blocked production use of either package)
+**Root cause:** `@hbc/post-bid-autopsy/package.json` declared `@hbc/score-benchmark` as a prod dependency but never imported from it. The cycle was a false cycle caused by an unused declaration.
+**Resolution applied:** Removed `"@hbc/score-benchmark": "workspace:*"` from `packages/post-bid-autopsy/package.json` dependencies. The `score-benchmark → post-bid-autopsy` type-only import of `PostBidLearningSignal` is retained (directionally correct, erased at compile time).
+**Remaining constraint:** Risk 3 (scaffold maturity) continues to govern Wave 1 production readiness for both packages independently.
 
 ### Risk 2 — `@hbc/ui-kit` → `@hbc/auth` Tight Coupling
 **Severity:** Medium (architectural smell, practical workaround exists)
