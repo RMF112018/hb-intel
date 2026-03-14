@@ -43,5 +43,22 @@ See: [Entra ID Group Model](./entra-id-group-model.md) for full reference.
 ## Step 5 Special Behavior
 Step 5 uses a 90-second timeout (`PROVISIONING_STEP5_TIMEOUT_MS`). If the timeout is exceeded after 2 attempts, the step is recorded as `DeferredToTimer` and the overall saga status becomes `WebPartsPending`. The 1:00 AM EST timer trigger (`timerInstallWebParts`) will retry step 5 for all deferred jobs.
 
+## Notification Dispatch (W0-G1-T03)
+
+The saga dispatches non-blocking notifications at key lifecycle points via `dispatchProvisioningNotification()`:
+
+| Saga Point | Event Type | Recipients |
+|-----------|-----------|-----------|
+| After status persisted (saga start) | `provisioning.started` | group |
+| After all steps complete | `provisioning.completed` | group, submitter |
+| After compensation (first failure) | `provisioning.first-failure` | controller, submitter |
+| After compensation (retry failure) | `provisioning.second-failure-escalated` | controller, submitter, admin |
+
+Request lifecycle events (`request-submitted`, `clarification-requested`, `ready-to-provision`, `recovery-resolved`) are dispatched from request lifecycle handlers (G3/T07 scope).
+
+All notification dispatches follow the D-PH6-06 non-blocking pattern — failures are caught and logged as warnings without affecting saga execution.
+
+See: [Notification Event Matrix](./notification-event-matrix.md) for the complete 8-event contract.
+
 ## Retry Policy
 Each step uses `withRetry` with up to 3 attempts and exponential backoff (2s, 4s, 8s). Transient errors (HTTP 429, throttle, network reset) are retried. Non-transient errors (400, 403, 404) fail immediately.

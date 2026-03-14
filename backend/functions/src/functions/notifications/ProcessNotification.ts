@@ -7,6 +7,9 @@
  * instead of inline extraOutputs with string keys.
  */
 
+// W0-G1-T03: Bootstrap provisioning notification registrations before processing.
+import './notificationBootstrap.js';
+
 import { app, output, type InvocationContext } from '@azure/functions';
 import type { NotificationSendPayload } from '@hbc/notification-intelligence';
 import { NotificationRegistry } from '@hbc/notification-intelligence';

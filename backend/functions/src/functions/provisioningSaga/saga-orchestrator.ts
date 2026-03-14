@@ -14,6 +14,8 @@ import { executeStep4 } from './steps/step4-data-lists.js';
 import { executeStep5 } from './steps/step5-web-parts.js';
 import { executeStep6 } from './steps/step6-permissions.js';
 import { executeStep7, compensateStep7 } from './steps/step7-hub-association.js';
+import { dispatchProvisioningNotification } from './notification-dispatch.js';
+import { PROVISIONING_NOTIFICATION_TEMPLATES } from '@hbc/provisioning';
 
 const STEP_DEFINITIONS = [
   { number: 1, name: 'Create Site' },
@@ -87,6 +89,21 @@ export class SagaOrchestrator {
     });
 
     await this.pushProgress(status, 0, 'Create Site', 'InProgress');
+
+    // W0-G1-T03: Dispatch provisioning.started notification to project group.
+    const startedTemplate = PROVISIONING_NOTIFICATION_TEMPLATES['provisioning.started'](
+      projectNumber, projectName, projectId,
+    );
+    dispatchProvisioningNotification(this.services, this.logger, {
+      eventType: 'provisioning.started',
+      title: startedTemplate.subject,
+      body: startedTemplate.body,
+      actionUrl: startedTemplate.actionUrl,
+      actionLabel: startedTemplate.actionLabel,
+      sourceRecordId: projectId,
+      recipientGroups: ['group'],
+      status,
+    });
 
     const stepExecutors = [
       () => executeStep1(this.services, status),
@@ -243,6 +260,21 @@ export class SagaOrchestrator {
       projectNumber,
       correlationId,
       outcome: finalStatus,
+    });
+
+    // W0-G1-T03: Dispatch provisioning.completed notification to group + submitter.
+    const completedTemplate = PROVISIONING_NOTIFICATION_TEMPLATES['provisioning.completed'](
+      projectNumber, projectName, status.siteUrl ?? '',
+    );
+    dispatchProvisioningNotification(this.services, this.logger, {
+      eventType: 'provisioning.completed',
+      title: completedTemplate.subject,
+      body: completedTemplate.body,
+      actionUrl: completedTemplate.actionUrl,
+      actionLabel: completedTemplate.actionLabel,
+      sourceRecordId: projectId,
+      recipientGroups: ['group', 'submitter'],
+      status,
     });
 
     await this.services.sharePoint.writeAuditRecord({
@@ -404,6 +436,26 @@ export class SagaOrchestrator {
       projectId,
       projectNumber,
       correlationId,
+    });
+
+    // W0-G1-T03: Dispatch failure notification — first-failure or second-failure-escalated based on retryCount.
+    const isEscalated = (status.retryCount ?? 0) >= 1;
+    const failEventType = isEscalated ? 'provisioning.second-failure-escalated' : 'provisioning.first-failure';
+    const failTemplate = isEscalated
+      ? PROVISIONING_NOTIFICATION_TEMPLATES['provisioning.second-failure-escalated'](projectNumber, projectName)
+      : PROVISIONING_NOTIFICATION_TEMPLATES['provisioning.first-failure'](projectNumber, projectName);
+    const failRecipients: ('submitter' | 'controller' | 'group' | 'admin')[] = isEscalated
+      ? ['controller', 'submitter', 'admin']
+      : ['controller', 'submitter'];
+    dispatchProvisioningNotification(this.services, this.logger, {
+      eventType: failEventType,
+      title: failTemplate.subject,
+      body: failTemplate.body,
+      actionUrl: failTemplate.actionUrl,
+      actionLabel: failTemplate.actionLabel,
+      sourceRecordId: projectId,
+      recipientGroups: failRecipients,
+      status,
     });
 
     await this.services.sharePoint.writeAuditRecord({

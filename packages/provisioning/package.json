@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@hbc/auth": "workspace:*",
+    "@hbc/notification-intelligence": "workspace:*",
     "@microsoft/signalr": "^8.0.7",
     "immer": "^10.1.1",
     "@hbc/models": "workspace:*"

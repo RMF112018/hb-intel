@@ -169,6 +169,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 - [Site Template Specification](./reference/provisioning/site-template.md) — Core libraries, template file manifest, add-on packs, department pruning model, and template versioning scheme
 - [Saga Steps Reference](./reference/provisioning/saga-steps.md) — Step-by-step provisioning saga contract with idempotency and compensation details
 - [Entra ID Group Model](./reference/provisioning/entra-id-group-model.md) — Three-group permission model (Leaders/Team/Viewers), naming conventions, initial membership, and Graph API scope
+- [Notification Event Matrix](./reference/provisioning/notification-event-matrix.md) — 8-event provisioning notification contract, recipient resolution, and pipeline integration pattern
 
 ### Auth & Shell Reference
 

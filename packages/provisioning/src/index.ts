@@ -5,6 +5,7 @@ export * from './api-client.js';
 export * from './store.js';
 export * from './visibility.js';
 export * from './notification-templates.js';
+export * from './notification-registrations.js';
 export { useProvisioningSignalR } from './hooks/useProvisioningSignalR.js';
 export {
   isValidTransition,

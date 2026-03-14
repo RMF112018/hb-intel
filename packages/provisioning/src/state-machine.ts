@@ -39,8 +39,9 @@ export function isValidTransition(from: ProjectSetupRequestState, to: ProjectSet
  * Each target value names recipient groups used by notification handlers.
  */
 export const STATE_NOTIFICATION_TARGETS: Partial<
-  Record<ProjectSetupRequestState, ('submitter' | 'controller' | 'group')[]>
+  Record<ProjectSetupRequestState, ('submitter' | 'controller' | 'group' | 'admin')[]>
 > = {
+  Submitted: ['controller'], // Controller receives new request for review.
   NeedsClarification: ['submitter'], // Request submitter must provide missing details.
   ReadyToProvision: ['controller'], // Controller gets action-ready signal.
   Provisioning: ['group'], // Project group gets start notification.
