@@ -83,3 +83,52 @@ describe.runIf(SMOKE_TEST)('D-PH6-15 SharePoint smoke tests', () => {
     await expect(service.associateHubSite(siteUrl, hubSiteId)).resolves.not.toThrow();
   }, 180_000);
 });
+
+/**
+ * W0-G2-T09: Integration test scaffolds for live SharePoint verification.
+ * Gated by SHAREPOINT_INTEGRATION_TEST=true — separate from SMOKE_TEST.
+ * These are .todo() placeholders that register the TC ID and will be
+ * implemented when a safe dev-tenant is available.
+ */
+describe.runIf(process.env.SHAREPOINT_INTEGRATION_TEST === 'true')(
+  'W0-G2-T09: Integration — live SharePoint verification',
+  () => {
+    // pid contract verification
+    it.todo('TC-PID-02: pid default value is projectNumber on live site');
+    it.todo('TC-PID-04: pid consistent across all list insertions');
+
+    // Parent/child relationship verification
+    it.todo('TC-PARENT-01: All parent lists exist after provisioning');
+    it.todo('TC-PARENT-02: All child lists exist after provisioning');
+    it.todo('TC-PARENT-03: ParentRecord Lookup points to correct parent');
+    it.todo('TC-PARENT-04: Lookup target list is reachable');
+
+    // Department library/folder verification
+    it.todo('TC-DEPT-01: Commercial has Commercial Documents, not Luxury');
+    it.todo('TC-DEPT-02: Luxury-residential has LR Documents, not Commercial');
+    it.todo('TC-DEPT-03: Core libraries exist regardless of department');
+    it.todo('TC-DEPT-04: Commercial L1 folders match spec');
+    it.todo('TC-DEPT-05: Commercial L2 folders match spec');
+    it.todo('TC-DEPT-06: Luxury-residential L1 folders match spec');
+    it.todo('TC-DEPT-07: Luxury-residential L2 folders match spec');
+    it.todo('TC-DEPT-08: No L3 folders created');
+
+    // Seeded file verification
+    it.todo('TC-SEED-01: All available-asset entries present on live site');
+    it.todo('TC-SEED-02: Uploaded files are non-zero-byte');
+
+    // Idempotency verification
+    it.todo('TC-IDEM-01: Full clean run — all structures created');
+    it.todo('TC-IDEM-02: Full retry — all structures idempotently skipped');
+    it.todo('TC-IDEM-05: Full retry produces identical site state');
+
+    // Migration/coexistence verification
+    it.todo('TC-MCOEX-01: G2 lists are empty at provisioning time');
+    it.todo('TC-MCOEX-02: Empty list query does not throw');
+    it.todo('TC-MCOEX-03: Seeded file and list coexist without conflict');
+
+    // Pilot readiness verification
+    it.todo('TC-PILOT-01: Step 4 duration within Azure Function timeout');
+    it.todo('TC-PILOT-02: withRetry under concurrent provisioning load');
+  }
+);

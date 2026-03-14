@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`W0-G2-T09: Schema contract validation > TC-SCHEMA-06: majority of G2 workflow lists have a Status field 1`] = `
+[
+  "Buyout Bid Lines",
+  "JHA Attendees",
+  "JHA Steps",
+  "Project Responsibility Matrix",
+  "Subcontractor Evaluations",
+]
+`;
