@@ -25,9 +25,9 @@ export const ADD_ON_DEFINITIONS: Record<string, IAddOnDefinition> = {
     displayName: 'Safety Pack',
     templateFiles: [
       {
-        fileName: 'Safety Plan Template.docx',
+        fileName: 'Site Specific Safety Plan Template.docx',
         targetLibrary: 'Project Documents',
-        assetPath: 'add-ons/safety-pack/Safety Plan Template.docx',
+        assetPath: 'add-ons/safety-pack/Site Specific Safety Plan Template.docx',
       },
     ],
     lists: [],

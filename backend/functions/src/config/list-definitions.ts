@@ -86,6 +86,7 @@ export const HB_INTEL_LIST_DEFINITIONS: IListDefinition[] = [
       { internalName: 'AssignedTo', displayName: 'Assigned To', type: 'User' },
       { internalName: 'Status', displayName: 'Status', type: 'Choice', required: true, choices: ['Open', 'In Progress', 'Ready for Review', 'Closed'] },
       { internalName: 'DueDate', displayName: 'Due Date', type: 'DateTime' },
+      { internalName: 'PunchBatchId', displayName: 'Punch Batch Reference', type: 'Text' },
     ],
   },
   {

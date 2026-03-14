@@ -2,6 +2,7 @@ export interface IRetryOptions {
   maxAttempts: number;
   baseDelayMs: number;
   isTransient?: (error: unknown) => boolean;
+  onRetry?: (error: unknown, attempt: number, delayMs: number) => void;
 }
 
 const DEFAULT_TRANSIENT: (e: unknown) => boolean = (e) => {
@@ -27,7 +28,7 @@ export async function withRetry<T>(
   fn: () => Promise<T>,
   options: Partial<IRetryOptions> = {}
 ): Promise<T> {
-  const { maxAttempts = 3, baseDelayMs = 2000, isTransient = DEFAULT_TRANSIENT } = options;
+  const { maxAttempts = 3, baseDelayMs = 2000, isTransient = DEFAULT_TRANSIENT, onRetry } = options;
 
   let lastError: unknown;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -38,7 +39,22 @@ export async function withRetry<T>(
       if (attempt === maxAttempts || !isTransient(err)) {
         throw err;
       }
-      const delay = baseDelayMs * Math.pow(2, attempt - 1);
+
+      // W0-G2-T07: Honor Retry-After header on 429 responses.
+      let retryAfterMs = 0;
+      const headers = (err as any)?.response?.headers;
+      const retryAfterValue = typeof headers?.get === 'function'
+        ? headers.get('Retry-After')
+        : headers?.['retry-after'];
+      if (retryAfterValue) {
+        const parsed = parseInt(String(retryAfterValue), 10);
+        if (!isNaN(parsed) && parsed > 0) {
+          retryAfterMs = parsed * 1000;
+        }
+      }
+
+      const delay = Math.max(retryAfterMs, baseDelayMs * Math.pow(2, attempt - 1));
+      onRetry?.(err, attempt, delay);
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }

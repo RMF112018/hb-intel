@@ -77,4 +77,13 @@ describe('HB_INTEL_LIST_DEFINITIONS — core list regression guards', () => {
       expect(list.listFamily).toBeUndefined();
     }
   });
+
+  // W0-G2-T07: PunchBatchId amendment to core Punch List.
+  it('Punch List contains PunchBatchId field', () => {
+    const punchList = HB_INTEL_LIST_DEFINITIONS.find((l) => l.title === 'Punch List');
+    expect(punchList).toBeDefined();
+    const field = punchList!.fields.find((f) => f.internalName === 'PunchBatchId');
+    expect(field).toBeDefined();
+    expect(field!.type).toBe('Text');
+  });
 });

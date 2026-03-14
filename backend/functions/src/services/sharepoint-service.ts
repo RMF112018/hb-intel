@@ -1,3 +1,5 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { DefaultAzureCredential } from '@azure/identity';
 import { spfi } from '@pnp/sp';
 import '@pnp/nodejs-commonjs';
@@ -26,6 +28,12 @@ export interface ISharePointService {
   isHubAssociated(siteUrl: string): Promise<boolean>;
   disassociateHubSite(siteUrl: string): Promise<void>;
   writeAuditRecord(record: IProvisioningAuditRecord): Promise<void>;
+
+  /** W0-G2-T07: Creates a folder inside a document library if it does not already exist. */
+  createFolderIfNotExists(siteUrl: string, libraryName: string, folderPath: string): Promise<void>;
+
+  /** W0-G2-T07: Uploads a single template file to a document library. Returns false if asset is missing. */
+  uploadTemplateFile(siteUrl: string, entry: { fileName: string; targetLibrary: string; assetPath: string }): Promise<boolean>;
 
   /**
    * W0-G1-T02: Assigns an Entra ID security group to a SharePoint permission level on the site.
@@ -337,6 +345,33 @@ export class SharePointService implements ISharePointService {
     });
   }
 
+  /** W0-G2-T07: Creates a folder inside a document library if it does not already exist. */
+  async createFolderIfNotExists(siteUrl: string, libraryName: string, folderPath: string): Promise<void> {
+    const sp: any = await this.getSP(siteUrl);
+    const relUrl = `/${new URL(siteUrl).pathname.slice(1)}/${libraryName}/${folderPath}`;
+    try {
+      await sp.web.getFolderByServerRelativePath(relUrl).select('Exists')();
+    } catch {
+      await sp.web.folders.addUsingPath(relUrl);
+    }
+  }
+
+  /** W0-G2-T07: Uploads a single template file to a document library. Returns false if asset is missing. */
+  async uploadTemplateFile(
+    siteUrl: string,
+    entry: { fileName: string; targetLibrary: string; assetPath: string }
+  ): Promise<boolean> {
+    const fullPath = path.resolve(__dirname, '../assets/templates/', entry.assetPath);
+    if (!fs.existsSync(fullPath)) {
+      return false;
+    }
+    const sp: any = await this.getSP(siteUrl);
+    const folderUrl = `/${new URL(siteUrl).pathname.slice(1)}/${entry.targetLibrary}`;
+    const folder = sp.web.getFolderByServerRelativePath(folderUrl);
+    await folder.files.addUsingPath(entry.fileName, fs.readFileSync(fullPath), { Overwrite: true });
+    return true;
+  }
+
   /**
    * W0-G1-T02: Assigns an Entra ID group to a SharePoint permission level.
    * G2 scaffold — real implementation pending T05 Group.ReadWrite.All confirmation.
@@ -457,6 +492,17 @@ export class MockSharePointService implements ISharePointService {
 
   async removeHubAssociation(siteUrl: string): Promise<void> {
     await this.disassociateHubSite(siteUrl);
+  }
+
+  /** W0-G2-T07: Mock — no-op folder creation. */
+  async createFolderIfNotExists(_siteUrl: string, _libraryName: string, _folderPath: string): Promise<void> {}
+
+  /** W0-G2-T07: Mock — always returns true. */
+  async uploadTemplateFile(
+    _siteUrl: string,
+    _entry: { fileName: string; targetLibrary: string; assetPath: string }
+  ): Promise<boolean> {
+    return true;
   }
 
   /** W0-G1-T02: Mock — logs the group-to-permission-level assignment. */

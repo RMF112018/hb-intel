@@ -157,7 +157,7 @@ T02–T06 use these patterns as defaults. Workflow-specific deviations must be d
 
 ### Deferred Decisions
 
-- **Pre-seeded checklist items:** Whether to insert default rows into `Startup Checklist Items` or `Kickoff Responsibility Items` at provisioning time is deferred to T07. T07 will decide insert-at-provision vs. leave-empty based on operational feedback.
+- **Pre-seeded checklist items:** ~~Deferred to T07~~ — **T07 Decision: Leave empty.** Pre-seeded rows deferred to Wave 1. Lists are provisioned empty; operational teams populate via UI or future bulk-import tooling.
 - **Cross-family references:** No startup-family list references lists from other families. Future cross-family Lookups (e.g., linking to closeout lists) are Wave 1 scope.
 
 ---
@@ -230,7 +230,7 @@ T02–T06 use these patterns as defaults. Workflow-specific deviations must be d
 | Conducted By | `ConductedBy` | User | No | |
 | Notes | `Notes` | MultiLineText | No | |
 
-> **Deferred (T07):** Punch List Batch → core Punch List linkage via `PunchBatchId` Lookup field amendment (T03-R1).
+> **Resolved (T07):** `PunchBatchId` added to the core Punch List as a plain `Text` field (`Punch Batch Reference`). Uses Text (not Lookup) to avoid cross-list dependency at provisioning time. Operational linkage to Punch List Batches is by convention; formal Lookup upgrade is Wave 1 scope.
 
 ### 3.4 Turnover Package Log (flat, provisioningOrder=10)
 
@@ -281,8 +281,8 @@ T02–T06 use these patterns as defaults. Workflow-specific deviations must be d
 
 ### Deferred Decisions
 
-- **Pre-seeded closeout checklist items:** Whether to insert default rows into `Closeout Checklist Items` at provisioning time is deferred to T07.
-- **PunchBatchId amendment (T03-R1):** Adding a `PunchBatchId` Lookup field to the core Punch List (linking items to batches) is deferred to T07.
+- **Pre-seeded closeout checklist items:** ~~Deferred to T07~~ — **T07 Decision: Leave empty.** Pre-seeded rows deferred to Wave 1. Lists are provisioned empty.
+- **PunchBatchId amendment (T03-R1):** ~~Deferred to T07~~ — **Resolved by T07.** `PunchBatchId` added to core Punch List as plain `Text` field. See §3.3 note above.
 - **Cross-family Lookups:** Linking closeout lists to financial or project controls lists is Wave 1 scope.
 
 ---
@@ -452,7 +452,7 @@ The core `Safety Log` in `HB_INTEL_LIST_DEFINITIONS` captures lightweight daily 
 | Incident Report Form.docx | Word | Project Documents | Reference file only |
 | Site Specific Safety Plan Template.docx | Word | Project Documents | Reference file only |
 
-> **Open item (T07 — T04-R2):** G1 `safety-pack` add-on provisions `Safety Plan Template.docx`. T04 seeds `Site Specific Safety Plan Template.docx`. These may represent the same intent under different names. T07 must resolve whether to consolidate or keep both assets. Both exist independently until then.
+> **Resolved (T07 — T04-R2):** G1 `safety-pack` add-on consolidated. The add-on now provisions `Site Specific Safety Plan Template.docx` (matching T04's canonical name). The prior `Safety Plan Template.docx` name is retired. Single asset, single name.
 
 ### Cross-Family References
 
@@ -462,8 +462,8 @@ The core `Safety Log` in `HB_INTEL_LIST_DEFINITIONS` captures lightweight daily 
 ### Limitations and Deferred Decisions
 
 - **JHA manual-entry limitation (T04-R1):** The JHA 3-list structure (Log → Steps → Attendees) is schema-ready but has no entry-form UI in Wave 0. JHA data entry requires direct list interaction until the Wave 1 JHA entry form is built.
-- **Safety-pack add-on coordination (T04-R2):** Naming resolution between `Safety Plan Template.docx` (G1 safety-pack) and `Site Specific Safety Plan Template.docx` (T04) deferred to T07 provisioning wiring.
-- **T07:** Wiring safety definitions into Step 4 provisioning dispatch.
+- **Safety-pack add-on coordination (T04-R2):** ~~Deferred to T07~~ — **Resolved by T07.** Consolidated to `Site Specific Safety Plan Template.docx`. See template asset note above.
+- ~~**T07:** Wiring safety definitions into Step 4 provisioning dispatch.~~ — **Done.** Safety lists wired into `workflow-list-definitions.ts` and provisioned via Step 4.
 - **T09:** Integration tests for safety list provisioning.
 - **Wave 1:** JHA entry form UI, safety dashboard, incident management workflows, OSHA recordkeeping integration.
 
@@ -581,10 +581,10 @@ The 3-week look-ahead / schedule artifact is classified as **reference-file-only
 
 ### Deferred Decisions
 
-- **Pre-seeded inspection rows (T05-R2):** Whether to insert default Required Inspections rows at provisioning time is explicitly deferred to T07. T07 will decide insert-at-provision vs. leave-empty based on operational feedback.
-- **Constraints Log description (T05-R3):** T07 must document the Constraints Log vs Issues Log distinction in the list description field to avoid operational confusion.
+- **Pre-seeded inspection rows (T05-R2):** ~~Deferred to T07~~ — **T07 Decision: Leave empty.** Pre-seeded rows deferred to Wave 1. Lists are provisioned empty.
+- **Constraints Log description (T05-R3):** ~~Deferred to T07~~ — **Resolved by T08.** List description enrichment (including Constraints Log vs Issues Log distinction) is T08 scope (validation rules and description enrichment).
 - **Permit jurisdiction variance (T05-R1):** `PermitType` choice list represents common Florida construction permits. The `Other` catch-all covers jurisdictional variance. Wave 1 will allow jurisdiction-specific permit type configuration without schema changes.
-- **T07:** Wiring project-controls definitions into Step 4 provisioning dispatch.
+- ~~**T07:** Wiring project-controls definitions into Step 4 provisioning dispatch.~~ — **Done.** Project-controls lists wired into `workflow-list-definitions.ts` and provisioned via Step 4.
 - **T09:** Integration tests for project-controls list provisioning.
 - **Wave 1:** Permit expiration alerting, inspection dashboard, schedule-risk intelligence (`@hbc/bic-next-move`), 3-week look-ahead digital list.
 
@@ -759,14 +759,14 @@ The following are recognized but receive **no G2 provisioning action** — they 
 
 ### Deferred Decisions
 
-- **T07:** Wiring financial definitions into Step 4 provisioning dispatch.
-- **T07 (T06-R2):** Draw Schedule model confirmation — simplified row-per-line vs. monthly exploded matrix. T06 implements simplified; T07 must confirm or amend.
-- **T07 (T06-R3):** Buyout Log vs Procore boundary documentation in list description field.
-- **T07 (T06-R4):** Subcontract Compliance vs T04 Sub Safety Certifications boundary enforcement in list descriptions.
+- ~~**T07:** Wiring financial definitions into Step 4 provisioning dispatch.~~ — **Done.** Financial lists wired into `workflow-list-definitions.ts` and provisioned via Step 4.
+- **T07 (T06-R2):** ~~Deferred to T07~~ — **T07 Decision: Simplified model confirmed.** Row-per-budget-line structure is the production model. Monthly exploded matrix deferred to Wave 1 financial intelligence features. `Draw Schedule Template.xlsx` remains the operational bridge.
+- **T07 (T06-R3):** ~~Deferred to T07~~ — **Resolved by T08.** Buyout Log vs Procore boundary documentation deferred to T08 list description enrichment scope.
+- **T07 (T06-R4):** ~~Deferred to T07~~ — **Resolved by T08.** Subcontract Compliance vs T04 Sub Safety Certifications boundary enforcement deferred to T08 list description enrichment scope.
 - **T09:** Integration tests for financial list provisioning.
 - **Wave 1:** Financial intelligence features, GC-GR analysis workflows, draw schedule monthly matrix, financial health dashboard.
 - **Wave 2+:** Lessons Learned, Subcontractor Scorecard SOP (`@hbc/post-bid-autopsy`).
 
 ---
 
-*End of Workflow List Schemas v1.0 — scaffold; populated incrementally by T02–T06*
+*End of Workflow List Schemas v1.1 — T07 resolved: all 5 families wired into provisioning, PunchBatchId added, safety-pack consolidated, pre-seeded items deferred to Wave 1, Draw Schedule simplified model confirmed, T06-R3/R4 description enrichment deferred to T08*
