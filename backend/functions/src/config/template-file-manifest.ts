@@ -60,4 +60,15 @@ export const TEMPLATE_FILE_MANIFEST: ITemplateFileEntry[] = [
     targetLibrary: 'Project Documents',
     assetPath: 'Procore Startup Checklist Reference.pdf',
   },
+  // W0-G2-T03: Closeout-family seeded template files
+  {
+    fileName: 'Project Closeout Guide.docx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Project Closeout Guide.docx',
+  },
+  {
+    fileName: 'Closeout Checklist Reference.pdf',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Closeout Checklist Reference.pdf',
+  },
 ];

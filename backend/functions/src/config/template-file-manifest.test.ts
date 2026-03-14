@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { TEMPLATE_FILE_MANIFEST, type ITemplateFileEntry } from './template-file-manifest.js';
 
 describe('TEMPLATE_FILE_MANIFEST', () => {
-  it('has exactly 8 entries', () => {
-    expect(TEMPLATE_FILE_MANIFEST).toHaveLength(8);
+  it('has exactly 10 entries', () => {
+    expect(TEMPLATE_FILE_MANIFEST).toHaveLength(10);
   });
 
   it('all entries target "Project Documents" library', () => {
@@ -26,6 +26,12 @@ describe('TEMPLATE_FILE_MANIFEST', () => {
     expect(fileNames).toContain('Responsibility Matrix Template.xlsx');
     expect(fileNames).toContain('Project Management Plan Template.docx');
     expect(fileNames).toContain('Procore Startup Checklist Reference.pdf');
+  });
+
+  it('contains T03 closeout-family file names', () => {
+    const fileNames = TEMPLATE_FILE_MANIFEST.map((e) => e.fileName);
+    expect(fileNames).toContain('Project Closeout Guide.docx');
+    expect(fileNames).toContain('Closeout Checklist Reference.pdf');
   });
 
   it('each entry has correct assetPaths matching fileNames', () => {

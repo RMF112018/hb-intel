@@ -164,7 +164,126 @@ T02–T06 use these patterns as defaults. Workflow-specific deviations must be d
 
 ## T03 — Closeout / Turnover / Punch Schemas
 
-*Section populated by T03 implementation. Placeholder for list field schemas.*
+> **Source:** W0-G2-T03 — Closeout, Turnover, and Punch Data Model
+> **Module:** `backend/functions/src/config/closeout-list-definitions.ts`
+> **List Family:** `closeout` — 5 lists (1 parent, 1 child, 3 flat)
+
+### Parent/Child Relationships
+
+| Parent List | Child List | Lookup Field | Lookup Target |
+|-------------|-----------|--------------|---------------|
+| Closeout Checklist | Closeout Checklist Items | `ParentRecord` | `Closeout Checklist:ID` |
+| Punch List Batches | *(flat — no children)* | — | — |
+| Turnover Package Log | *(flat — no children)* | — | — |
+| Subcontractor Evaluations | *(flat — no children)* | — | — |
+
+> **Open item (T07):** `PunchBatchId` Lookup amendment to the core Punch List will link individual punch items to a batch record. Deferred to T07 per T03-R1.
+
+### 3.1 Closeout Checklist (parent, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Status | `Status` | Choice | Yes | `Not Started \| In Progress \| Punch Phase \| Turnover Phase \| Complete` |
+| Target Substantial Completion | `TargetSubstantialCompletion` | DateTime | No | |
+| Actual Substantial Completion | `ActualSubstantialCompletion` | DateTime | No | |
+| Target Final Completion | `TargetFinalCompletion` | DateTime | No | |
+| Actual Final Completion | `ActualFinalCompletion` | DateTime | No | |
+| Stage 1 Complete | `Stage1Complete` | Boolean | No | |
+| Stage 2 Complete | `Stage2Complete` | Boolean | No | |
+| Stage 3 Complete | `Stage3Complete` | Boolean | No | |
+| Stage 4 Complete | `Stage4Complete` | Boolean | No | |
+| Certificate of Occupancy | `CertificateOfOccupancy` | Boolean | No | |
+| CO Date | `CODate` | DateTime | No | |
+| Punch List Items Total | `PunchListItemsTotal` | Number | No | |
+| Punch List Items Closed | `PunchListItemsClosed` | Number | No | |
+| Project Manager | `ProjectManager` | User | No | |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 3.2 Closeout Checklist Items (child, provisioningOrder=20)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Parent Record | `ParentRecord` | Lookup | Yes | → `Closeout Checklist:ID` |
+| Category | `Category` | Choice | Yes | `Tasks \| Document Tracking \| Inspections \| Turnover \| Post Turnover \| Closeout Documents` |
+| Status | `Status` | Choice | Yes | `N/A \| Open \| In Progress \| Complete` |
+| Assigned To | `AssignedTo` | User | No | |
+| Due Date | `DueDate` | DateTime | No | |
+| Completed Date | `CompletedDate` | DateTime | No | |
+| Responsible Party | `ResponsibleParty` | Choice | No | `HBC \| Owner \| Architect \| Sub \| AHJ` |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 3.3 Punch List Batches (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Walk Date | `WalkDate` | DateTime | No | |
+| Walk Type | `WalkType` | Choice | No | `Owner \| Architect \| HBC Internal \| AHJ` |
+| Status | `Status` | Choice | Yes | `Open \| In Progress \| Complete` |
+| Items Total | `ItemsTotal` | Number | No | |
+| Items Closed | `ItemsClosed` | Number | No | |
+| Conducted By | `ConductedBy` | User | No | |
+| Notes | `Notes` | MultiLineText | No | |
+
+> **Deferred (T07):** Punch List Batch → core Punch List linkage via `PunchBatchId` Lookup field amendment (T03-R1).
+
+### 3.4 Turnover Package Log (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Category | `Category` | Choice | Yes | `O&M Manual \| As-Built Drawing \| Warranty \| Certification \| Survey \| Commissioning Report \| Other` |
+| Status | `Status` | Choice | Yes | `Pending \| Requested \| Received \| Reviewed \| Submitted to Owner \| Accepted` |
+| Subcontractor Name | `SubcontractorName` | Text | No | |
+| Date Requested | `DateRequested` | DateTime | No | |
+| Date Received | `DateReceived` | DateTime | No | |
+| Date Submitted to Owner | `DateSubmittedToOwner` | DateTime | No | |
+| Storage Location | `StorageLocation` | URL | No | Link to document in SharePoint or external system |
+| Notes | `Notes` | MultiLineText | No | |
+
+> **O&M Manual Log consolidation:** T03 plan §1 lists "O&M Manual Log" as a separate classification row, but §2 provides no separate schema. The `Turnover Package Log` covers O&M manuals via its `Category` choice field (`O&M Manual`). This is intentional consolidation, not a gap.
+
+### 3.5 Subcontractor Evaluations (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Subcontractor Name | `SubcontractorName` | Text | Yes | |
+| Trade | `Trade` | Text | No | |
+| Overall Rating | `OverallRating` | Choice | No | `Excellent \| Good \| Satisfactory \| Poor \| Unacceptable` |
+| Safety Rating | `SafetyRating` | Choice | No | `Excellent \| Good \| Satisfactory \| Poor \| Unacceptable` |
+| Quality Rating | `QualityRating` | Choice | No | `Excellent \| Good \| Satisfactory \| Poor \| Unacceptable` |
+| Schedule Rating | `ScheduleRating` | Choice | No | `Excellent \| Good \| Satisfactory \| Poor \| Unacceptable` |
+| Communication Rating | `CommunicationRating` | Choice | No | `Excellent \| Good \| Satisfactory \| Poor \| Unacceptable` |
+| Recommend for Future Work | `RecommendForFutureWork` | Boolean | No | |
+| Evaluated By | `EvaluatedBy` | User | No | |
+| Evaluation Date | `EvaluationDate` | DateTime | No | |
+| Notes | `Notes` | MultiLineText | No | |
+
+### Seeded File Mapping
+
+| File Name | Format | Target Library | Classification |
+|-----------|--------|---------------|----------------|
+| Project Closeout Guide.docx | Word | Project Documents | Reference file only |
+| Closeout Checklist Reference.pdf | PDF | Project Documents | Reference file only |
+
+### Cross-Family References
+
+- **Financial (T06):** Closeout Checklist completion milestones may correlate with final payment milestones tracked in T06 financial lists. Cross-family Lookup fields are Wave 1 scope.
+- **Project Controls (T05):** Punch List Batches relate to inspection workflows in T05. Cross-family linkage deferred to Wave 1.
+
+### Deferred Decisions
+
+- **Pre-seeded closeout checklist items:** Whether to insert default rows into `Closeout Checklist Items` at provisioning time is deferred to T07.
+- **PunchBatchId amendment (T03-R1):** Adding a `PunchBatchId` Lookup field to the core Punch List (linking items to batches) is deferred to T07.
+- **Cross-family Lookups:** Linking closeout lists to financial or project controls lists is Wave 1 scope.
 
 ---
 
