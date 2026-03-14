@@ -184,3 +184,28 @@ export {
   createEstimatingPostBidLearningReferenceIntegrations,
   projectEstimatingAutopsyRoutes,
 } from './post-bid-learning/index.js';
+
+// Project Setup (W0-G3-T01 — step-wizard integration)
+export type {
+  ProjectSetupStepId,
+  ProjectSetupWizardMode,
+  IProjectSetupAddOnDefinition,
+} from './project-setup/index.js';
+
+export {
+  PROJECT_SETUP_STEP_IDS,
+  PROJECT_SETUP_DRAFT_KEY,
+  PROJECT_SETUP_CLARIFICATION_DRAFT_KEY_PREFIX,
+  buildClarificationDraftKey,
+  STEP_PROJECT_INFO,
+  STEP_DEPARTMENT,
+  STEP_TEAM,
+  STEP_TEMPLATE,
+  STEP_REVIEW,
+  PROJECT_SETUP_STEPS,
+  PROJECT_SETUP_WIZARD_CONFIG,
+  PROJECT_SETUP_FIELD_MAP,
+  resolveStepsForClarification,
+  ADD_ON_DEFINITIONS,
+  getAddOnsForDepartment,
+} from './project-setup/index.js';

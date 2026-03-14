@@ -121,6 +121,20 @@ export interface IProjectSetupRequest {
   clarificationNote?: string;
   completedBy?: string;
   completedAt?: string;
+  /** W0-G3-T01: Step 1 — estimated contract value (optional). */
+  estimatedValue?: number;
+  /** W0-G3-T01: Step 1 — client / owner name (optional). */
+  clientName?: string;
+  /** W0-G3-T01: Step 1 — anticipated start date, ISO 8601 (optional). */
+  startDate?: string;
+  /** W0-G3-T01: Step 2 — contract type classification (optional). */
+  contractType?: string;
+  /** W0-G3-T01: Step 3 — UPN of the project lead (PM/Superintendent). Required for submission. */
+  projectLeadId?: string;
+  /** W0-G3-T01: Step 3 — read-only viewer UPNs (optional). */
+  viewerUPNs?: string[];
+  /** W0-G3-T01: Step 4 — selected add-on pack slugs (optional). */
+  addOns?: string[];
 }
 
 export type ProjectSetupRequestState =
