@@ -24,6 +24,7 @@
     "EMAIL_FROM_ADDRESS": "hb-intel@hbconstruction.com",
     "NOTIFICATION_API_BASE_URL": "http://localhost:7071",
     "HB_INTEL_SPFX_APP_ID": "<spfx-app-package-guid>",
-    "SHAREPOINT_APP_CATALOG_URL": "<app-catalog-url>"
+    "SHAREPOINT_APP_CATALOG_URL": "<app-catalog-url>",
+    "SITES_PERMISSION_MODEL": "sites-selected"
   }
 }

@@ -78,6 +78,8 @@ The `GraphService` requires `Group.ReadWrite.All` application permission in Entr
 - `GraphService` (real) throws "G2 pending" errors on all methods
 - `MockGraphService` provides a functional in-memory implementation for tests and mock mode
 
+For the full permission model (Sites.Selected vs. FullControl fallback), staging validation test cases, and IT/Security engagement guidance, see [Sites.Selected Validation](../configuration/sites-selected-validation.md).
+
 ## Auth Boundary
 
 Per T02 §@hbc/auth Authorization Boundary, this implementation does **not** modify `packages/auth/`. The Entra ID group model operates at the backend provisioning layer only. Frontend authorization continues to use the existing `@hbc/auth` dual-mode system.

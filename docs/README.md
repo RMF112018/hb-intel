@@ -174,6 +174,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 ### Configuration Reference
 
 - [Wave 0 Config Registry](./reference/configuration/wave-0-config-registry.md) — Two-bucket governance model, complete environment variable registry, environment separation matrix, and fail-fast validation reference
+- [Sites.Selected Validation](./reference/configuration/sites-selected-validation.md) — Permission model validation (Sites.Selected vs. FullControl fallback), staging test cases, IT/Security engagement template, and G2 entry condition matrix
 
 ### Auth & Shell Reference
 

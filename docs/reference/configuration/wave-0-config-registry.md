@@ -61,6 +61,7 @@ These settings control backend operational behavior and are managed by the platf
 | `HB_INTEL_SPFX_APP_ID` | A | Yes | SPFx app package GUID for tenant-scoped deployment verification |
 | `NOTIFICATION_API_BASE_URL` | A | Yes | Base URL for notification dispatch endpoint (self-referential in single function app) |
 | `EMAIL_FROM_ADDRESS` | A | Yes | Sender address for transactional emails; must match SendGrid verified sender |
+| `SITES_PERMISSION_MODEL` | A | No | Permission model for SharePoint site access: `sites-selected` (default, Path A) or `fullcontrol` (Path B fallback, requires ADR). See [Sites.Selected Validation](./sites-selected-validation.md) |
 
 ### 2.4 Business-Operational Settings (Bucket B)
 
@@ -132,3 +133,4 @@ To configure local development:
 - [Site Template Specification](../provisioning/site-template.md) — Template and library definitions consuming these settings
 - [Entra ID Group Model](../provisioning/entra-id-group-model.md) — Group lifecycle using `AZURE_*` credentials
 - [Notification Event Matrix](../provisioning/notification-event-matrix.md) — Notification dispatch using `EMAIL_*` and `NOTIFICATION_*` settings
+- [Sites.Selected Validation](./sites-selected-validation.md) — Permission model validation, fallback path governance, and staging test cases

@@ -194,4 +194,11 @@ export const WAVE0_OPTIONAL_CONFIG: readonly IConfigEntry[] = [
     description: 'Comma-separated UPNs of structural owners; empty if none',
     requiredInProd: false,
   },
+  {
+    name: 'SITES_PERMISSION_MODEL',
+    bucket: 'infrastructure',
+    description:
+      'Permission model for SharePoint site access: sites-selected (default, Path A) or fullcontrol (Path B fallback, requires ADR)',
+    requiredInProd: false,
+  },
 ] as const;
