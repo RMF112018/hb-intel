@@ -18,7 +18,7 @@ export interface ISharePointService {
   createDocumentLibrary(siteUrl: string, libraryName: string): Promise<void>;
   documentLibraryExists(siteUrl: string, libraryName: string): Promise<boolean>;
   uploadTemplateFiles(siteUrl: string, libraryName: string): Promise<void>;
-  createDataLists(siteUrl: string, listDefinitions: IListDefinition[]): Promise<void>;
+  createDataLists(siteUrl: string, listDefinitions: IListDefinition[], context?: { projectNumber?: string }): Promise<void>;
   listExists(siteUrl: string, listTitle: string): Promise<boolean>;
   installWebParts(siteUrl: string): Promise<void>;
   setGroupPermissions(siteUrl: string, memberUpns: string[], opexUpn: string): Promise<void>;
@@ -48,14 +48,21 @@ export interface IListDefinition {
   description: string;
   template: number;
   fields: IFieldDefinition[];
+  provisioningOrder?: number;
+  parentListTitle?: string;
+  listFamily?: string;
 }
 
 export interface IFieldDefinition {
   internalName: string;
   displayName: string;
-  type: 'Text' | 'Number' | 'DateTime' | 'Boolean' | 'Choice' | 'User' | 'URL';
+  type: 'Text' | 'Number' | 'DateTime' | 'Boolean' | 'Choice' | 'User' | 'URL' | 'Lookup' | 'MultiLineText';
   required?: boolean;
   choices?: string[];
+  defaultValue?: string;
+  indexed?: boolean;
+  lookupListTitle?: string;
+  lookupFieldName?: string;
 }
 
 /**
@@ -145,14 +152,26 @@ export class SharePointService implements ISharePointService {
     );
   }
 
-  async createDataLists(siteUrl: string, listDefinitions: IListDefinition[]): Promise<void> {
+  async createDataLists(siteUrl: string, listDefinitions: IListDefinition[], context?: { projectNumber?: string }): Promise<void> {
     const sp: any = await this.getSP(siteUrl);
-    for (const def of listDefinitions) {
+
+    // Sort by provisioningOrder so parent lists are created before child lists with Lookup columns.
+    const sorted = [...listDefinitions].sort(
+      (a, b) => (a.provisioningOrder ?? 0) - (b.provisioningOrder ?? 0)
+    );
+
+    for (const def of sorted) {
       const alreadyExists = await this.listExists(siteUrl, def.title);
       if (alreadyExists) continue;
 
       const { list } = await sp.web.lists.add(def.title, def.description, def.template, true);
       for (const field of def.fields) {
+        // Resolve {{projectNumber}} placeholder in defaultValue when context is provided.
+        const resolvedDefault =
+          field.defaultValue !== undefined && context?.projectNumber
+            ? field.defaultValue.replace(/\{\{projectNumber\}\}/g, context.projectNumber)
+            : field.defaultValue;
+
         switch (field.type) {
           case 'Number':
             await list.fields.addNumber(field.internalName, {
@@ -191,6 +210,25 @@ export class SharePointService implements ISharePointService {
               Title: field.displayName,
             });
             break;
+          case 'Lookup': {
+            // Resolve the target list GUID by title, then create the lookup column.
+            const targetList = sp.web.lists.getByTitle(field.lookupListTitle ?? '');
+            const targetInfo = await targetList.select('Id')();
+            await list.fields.addLookup(field.internalName, {
+              Required: field.required ?? false,
+              Title: field.displayName,
+              LookupListId: targetInfo.Id,
+              LookupFieldName: field.lookupFieldName ?? 'ID',
+            });
+            break;
+          }
+          case 'MultiLineText':
+            await list.fields.addMultilineText(field.internalName, {
+              Required: field.required ?? false,
+              Title: field.displayName,
+              RichText: false,
+            });
+            break;
           case 'Text':
           default:
             await list.fields.addText(field.internalName, {
@@ -198,6 +236,14 @@ export class SharePointService implements ISharePointService {
               Title: field.displayName,
             });
             break;
+        }
+
+        // Post-processing: apply indexing and default value if specified.
+        if (field.indexed === true) {
+          await list.fields.getByInternalNameOrTitle(field.internalName).update({ Indexed: true });
+        }
+        if (resolvedDefault !== undefined) {
+          await list.fields.getByInternalNameOrTitle(field.internalName).update({ DefaultValue: resolvedDefault });
         }
       }
     }
@@ -377,7 +423,7 @@ export class MockSharePointService implements ISharePointService {
 
   async uploadTemplateFiles(_siteUrl: string, _libraryName: string): Promise<void> {}
 
-  async createDataLists(_siteUrl: string, _listDefinitions: IListDefinition[]): Promise<void> {}
+  async createDataLists(_siteUrl: string, _listDefinitions: IListDefinition[], _context?: { projectNumber?: string }): Promise<void> {}
 
   async listExists(_siteUrl: string, _listTitle: string): Promise<boolean> {
     return false;

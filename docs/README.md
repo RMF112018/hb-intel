@@ -171,6 +171,12 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 - [Entra ID Group Model](./reference/provisioning/entra-id-group-model.md) — Three-group permission model (Leaders/Team/Viewers), naming conventions, initial membership, and Graph API scope
 - [Notification Event Matrix](./reference/provisioning/notification-event-matrix.md) — 8-event provisioning notification contract, recipient resolution, and pipeline integration pattern
 
+### Data Model Reference
+
+- [PID Field Contract](./reference/data-model/pid-contract.md) — PID relational column specification and alignment rationale for all G2 workflow-family lists
+- [Workflow-Family Ownership Map](./reference/data-model/workflow-family-map.md) — G2 workflow family ownership matrix, parent/child structures, and cross-reference rules
+- [Workflow List Schemas](./reference/data-model/workflow-list-schemas.md) — Consolidated G2 list schema reference (scaffold; populated by T02–T06)
+
 ### Configuration Reference
 
 - [Wave 0 Config Registry](./reference/configuration/wave-0-config-registry.md) — Two-bucket governance model, complete environment variable registry, environment separation matrix, and fail-fast validation reference
