@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { TEMPLATE_FILE_MANIFEST, type ITemplateFileEntry } from './template-file-manifest.js';
 
 describe('TEMPLATE_FILE_MANIFEST', () => {
-  it('has exactly 4 entries', () => {
-    expect(TEMPLATE_FILE_MANIFEST).toHaveLength(4);
+  it('has exactly 8 entries', () => {
+    expect(TEMPLATE_FILE_MANIFEST).toHaveLength(8);
   });
 
   it('all entries target "Project Documents" library', () => {
@@ -18,6 +18,14 @@ describe('TEMPLATE_FILE_MANIFEST', () => {
     expect(fileNames).toContain('Submittal Register Template.xlsx');
     expect(fileNames).toContain('Meeting Agenda Template.docx');
     expect(fileNames).toContain('RFI Log Template.xlsx');
+  });
+
+  it('contains T02 startup-family file names', () => {
+    const fileNames = TEMPLATE_FILE_MANIFEST.map((e) => e.fileName);
+    expect(fileNames).toContain('Estimating Kickoff Template.xlsx');
+    expect(fileNames).toContain('Responsibility Matrix Template.xlsx');
+    expect(fileNames).toContain('Project Management Plan Template.docx');
+    expect(fileNames).toContain('Procore Startup Checklist Reference.pdf');
   });
 
   it('each entry has correct assetPaths matching fileNames', () => {

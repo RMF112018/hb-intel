@@ -39,4 +39,25 @@ export const TEMPLATE_FILE_MANIFEST: ITemplateFileEntry[] = [
     targetLibrary: 'Project Documents',
     assetPath: 'RFI Log Template.xlsx',
   },
+  // W0-G2-T02: Startup-family seeded template files
+  {
+    fileName: 'Estimating Kickoff Template.xlsx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Estimating Kickoff Template.xlsx',
+  },
+  {
+    fileName: 'Responsibility Matrix Template.xlsx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Responsibility Matrix Template.xlsx',
+  },
+  {
+    fileName: 'Project Management Plan Template.docx',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Project Management Plan Template.docx',
+  },
+  {
+    fileName: 'Procore Startup Checklist Reference.pdf',
+    targetLibrary: 'Project Documents',
+    assetPath: 'Procore Startup Checklist Reference.pdf',
+  },
 ];

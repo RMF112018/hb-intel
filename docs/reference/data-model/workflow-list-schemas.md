@@ -63,7 +63,102 @@ T02–T06 use these patterns as defaults. Workflow-specific deviations must be d
 
 ## T02 — Startup / Kickoff / Handoff Schemas
 
-*Section populated by T02 implementation. Placeholder for list field schemas.*
+> **Source:** W0-G2-T02 — Startup, Kickoff, and Handoff Data Model
+> **Module:** `backend/functions/src/config/startup-list-definitions.ts`
+> **List Family:** `startup` — 5 lists (3 parent/flat, 2 child)
+
+### Parent/Child Relationships
+
+| Parent List | Child List | Lookup Field | Lookup Target |
+|-------------|-----------|--------------|---------------|
+| Startup Checklist | Startup Checklist Items | `ParentRecord` | `Startup Checklist:ID` |
+| Estimating Kickoff Log | Kickoff Responsibility Items | `ParentRecord` | `Estimating Kickoff Log:ID` |
+| Project Responsibility Matrix | *(flat — no children)* | — | — |
+
+### 2.1 Startup Checklist (parent, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Status | `Status` | Choice | Yes | `Open \| In Progress \| Complete` |
+| Project Manager | `ProjectManager` | User | No | |
+| Project Executive | `ProjectExecutive` | User | No | |
+| Superintendent | `Superintendent` | User | No | |
+| Contract Date | `ContractDate` | DateTime | No | |
+| Project Start Date | `ProjectStartDate` | DateTime | No | |
+| Procore Project ID | `ProcoreProjectId` | Text | No | |
+| Department | `Department` | Choice | Yes | `commercial \| luxury-residential` |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 2.2 Startup Checklist Items (child, provisioningOrder=20)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Parent Record | `ParentRecord` | Lookup | Yes | → `Startup Checklist:ID` |
+| Category | `Category` | Choice | Yes | `Contract Review \| Job Setup \| Services & Equipment \| Permits \| Procore Setup \| Other` |
+| Status | `Status` | Choice | Yes | `N/A \| Open \| Complete` |
+| Assigned To | `AssignedTo` | User | No | |
+| Due Date | `DueDate` | DateTime | No | |
+| Completed Date | `CompletedDate` | DateTime | No | |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 2.3 Estimating Kickoff Log (parent, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Status | `Status` | Choice | Yes | `Scheduled \| In Progress \| Complete` |
+| Kickoff Date | `KickoffDate` | DateTime | No | |
+| Estimating Lead | `EstimatingLead` | User | No | |
+| Operations Lead | `OperationsLead` | User | No | |
+| Contract Type | `ContractType` | Choice | No | `Lump Sum \| GMP \| Cost Plus \| CM \| Other` |
+| Budget Transferred | `BudgetTransferred` | Boolean | No | |
+| Schedule Received | `ScheduleReceived` | Boolean | No | |
+| Drawings Transferred | `DrawingsTransferred` | Boolean | No | |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 2.4 Kickoff Responsibility Items (child, provisioningOrder=20)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Parent Record | `ParentRecord` | Lookup | Yes | → `Estimating Kickoff Log:ID` |
+| Category | `Category` | Choice | Yes | `Owner Notices \| RFI \| Submittal \| Change Order \| Budget \| Schedule \| Safety \| Quality \| Subcontractor \| Other` |
+| Primary Owner | `PrimaryOwner` | User | No | |
+| Support Owner | `SupportOwner` | User | No | |
+| Status | `Status` | Choice | Yes | `Open \| Acknowledged \| Complete` |
+| Notes | `Notes` | MultiLineText | No | |
+
+### 2.5 Project Responsibility Matrix (flat, provisioningOrder=10)
+
+| Field | InternalName | Type | Required | Choices / Notes |
+|-------|-------------|------|----------|-----------------|
+| Project ID | `pid` | Text | Yes | indexed, default=`{{projectNumber}}` |
+| Title | `Title` | Text | Yes | |
+| Category | `Category` | Choice | Yes | `Project Management \| Field \| Safety \| Quality \| Finance \| Executive` |
+| Primary Role | `PrimaryRole` | Choice | No | `PX \| Sr. PM \| PM \| PA \| Superintendent \| Safety \| QAQC \| Other` |
+| Primary Person | `PrimaryPerson` | User | No | |
+| Support Person | `SupportPerson` | User | No | |
+| Notes | `Notes` | Text | No | Plain Text (not MultiLineText) per T02 §2.5 |
+
+### Seeded File Mapping
+
+| File Name | Format | Target Library | Classification |
+|-----------|--------|---------------|----------------|
+| Estimating Kickoff Template.xlsx | Excel | Project Documents | Reference file only |
+| Responsibility Matrix Template.xlsx | Excel | Project Documents | Reference file only |
+| Project Management Plan Template.docx | Word | Project Documents | Reference file only |
+| Procore Startup Checklist Reference.pdf | PDF | Project Documents | Reference file only |
+
+### Deferred Decisions
+
+- **Pre-seeded checklist items:** Whether to insert default rows into `Startup Checklist Items` or `Kickoff Responsibility Items` at provisioning time is deferred to T07. T07 will decide insert-at-provision vs. leave-empty based on operational feedback.
+- **Cross-family references:** No startup-family list references lists from other families. Future cross-family Lookups (e.g., linking to closeout lists) are Wave 1 scope.
 
 ---
 

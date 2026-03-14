@@ -1,0 +1,102 @@
+import type { IListDefinition } from '../services/sharepoint-service.js';
+
+/**
+ * W0-G2-T02: Startup-family list definitions for provisioning saga Step 4.
+ * Separate module from core HB_INTEL_LIST_DEFINITIONS to preserve G1 regression guard.
+ * T07 will combine core + family arrays for provisioning dispatch.
+ */
+export const STARTUP_LIST_DEFINITIONS: IListDefinition[] = [
+  {
+    title: 'Startup Checklist',
+    description: 'Master startup checklist tracking project readiness milestones.',
+    template: 100,
+    listFamily: 'startup',
+    provisioningOrder: 10,
+    fields: [
+      { internalName: 'pid', displayName: 'Project ID', type: 'Text', required: true, indexed: true, defaultValue: '{{projectNumber}}' },
+      { internalName: 'Title', displayName: 'Title', type: 'Text', required: true },
+      { internalName: 'Status', displayName: 'Status', type: 'Choice', required: true, choices: ['Open', 'In Progress', 'Complete'] },
+      { internalName: 'ProjectManager', displayName: 'Project Manager', type: 'User' },
+      { internalName: 'ProjectExecutive', displayName: 'Project Executive', type: 'User' },
+      { internalName: 'Superintendent', displayName: 'Superintendent', type: 'User' },
+      { internalName: 'ContractDate', displayName: 'Contract Date', type: 'DateTime' },
+      { internalName: 'ProjectStartDate', displayName: 'Project Start Date', type: 'DateTime' },
+      { internalName: 'ProcoreProjectId', displayName: 'Procore Project ID', type: 'Text' },
+      { internalName: 'Department', displayName: 'Department', type: 'Choice', required: true, choices: ['commercial', 'luxury-residential'] },
+      { internalName: 'Notes', displayName: 'Notes', type: 'MultiLineText' },
+    ],
+  },
+  {
+    title: 'Startup Checklist Items',
+    description: 'Individual checklist items linked to a parent startup checklist record.',
+    template: 100,
+    listFamily: 'startup',
+    provisioningOrder: 20,
+    parentListTitle: 'Startup Checklist',
+    fields: [
+      { internalName: 'pid', displayName: 'Project ID', type: 'Text', required: true, indexed: true, defaultValue: '{{projectNumber}}' },
+      { internalName: 'Title', displayName: 'Title', type: 'Text', required: true },
+      { internalName: 'ParentRecord', displayName: 'Parent Record', type: 'Lookup', required: true, lookupListTitle: 'Startup Checklist', lookupFieldName: 'ID' },
+      { internalName: 'Category', displayName: 'Category', type: 'Choice', required: true, choices: ['Contract Review', 'Job Setup', 'Services & Equipment', 'Permits', 'Procore Setup', 'Other'] },
+      { internalName: 'Status', displayName: 'Status', type: 'Choice', required: true, choices: ['N/A', 'Open', 'Complete'] },
+      { internalName: 'AssignedTo', displayName: 'Assigned To', type: 'User' },
+      { internalName: 'DueDate', displayName: 'Due Date', type: 'DateTime' },
+      { internalName: 'CompletedDate', displayName: 'Completed Date', type: 'DateTime' },
+      { internalName: 'Notes', displayName: 'Notes', type: 'MultiLineText' },
+    ],
+  },
+  {
+    title: 'Estimating Kickoff Log',
+    description: 'Estimating-to-operations kickoff meeting log and handoff tracker.',
+    template: 100,
+    listFamily: 'startup',
+    provisioningOrder: 10,
+    fields: [
+      { internalName: 'pid', displayName: 'Project ID', type: 'Text', required: true, indexed: true, defaultValue: '{{projectNumber}}' },
+      { internalName: 'Title', displayName: 'Title', type: 'Text', required: true },
+      { internalName: 'Status', displayName: 'Status', type: 'Choice', required: true, choices: ['Scheduled', 'In Progress', 'Complete'] },
+      { internalName: 'KickoffDate', displayName: 'Kickoff Date', type: 'DateTime' },
+      { internalName: 'EstimatingLead', displayName: 'Estimating Lead', type: 'User' },
+      { internalName: 'OperationsLead', displayName: 'Operations Lead', type: 'User' },
+      { internalName: 'ContractType', displayName: 'Contract Type', type: 'Choice', choices: ['Lump Sum', 'GMP', 'Cost Plus', 'CM', 'Other'] },
+      { internalName: 'BudgetTransferred', displayName: 'Budget Transferred', type: 'Boolean' },
+      { internalName: 'ScheduleReceived', displayName: 'Schedule Received', type: 'Boolean' },
+      { internalName: 'DrawingsTransferred', displayName: 'Drawings Transferred', type: 'Boolean' },
+      { internalName: 'Notes', displayName: 'Notes', type: 'MultiLineText' },
+    ],
+  },
+  {
+    title: 'Kickoff Responsibility Items',
+    description: 'Individual responsibility items linked to a parent estimating kickoff record.',
+    template: 100,
+    listFamily: 'startup',
+    provisioningOrder: 20,
+    parentListTitle: 'Estimating Kickoff Log',
+    fields: [
+      { internalName: 'pid', displayName: 'Project ID', type: 'Text', required: true, indexed: true, defaultValue: '{{projectNumber}}' },
+      { internalName: 'Title', displayName: 'Title', type: 'Text', required: true },
+      { internalName: 'ParentRecord', displayName: 'Parent Record', type: 'Lookup', required: true, lookupListTitle: 'Estimating Kickoff Log', lookupFieldName: 'ID' },
+      { internalName: 'Category', displayName: 'Category', type: 'Choice', required: true, choices: ['Owner Notices', 'RFI', 'Submittal', 'Change Order', 'Budget', 'Schedule', 'Safety', 'Quality', 'Subcontractor', 'Other'] },
+      { internalName: 'PrimaryOwner', displayName: 'Primary Owner', type: 'User' },
+      { internalName: 'SupportOwner', displayName: 'Support Owner', type: 'User' },
+      { internalName: 'Status', displayName: 'Status', type: 'Choice', required: true, choices: ['Open', 'Acknowledged', 'Complete'] },
+      { internalName: 'Notes', displayName: 'Notes', type: 'MultiLineText' },
+    ],
+  },
+  {
+    title: 'Project Responsibility Matrix',
+    description: 'Role-based responsibility assignments for project team members.',
+    template: 100,
+    listFamily: 'startup',
+    provisioningOrder: 10,
+    fields: [
+      { internalName: 'pid', displayName: 'Project ID', type: 'Text', required: true, indexed: true, defaultValue: '{{projectNumber}}' },
+      { internalName: 'Title', displayName: 'Title', type: 'Text', required: true },
+      { internalName: 'Category', displayName: 'Category', type: 'Choice', required: true, choices: ['Project Management', 'Field', 'Safety', 'Quality', 'Finance', 'Executive'] },
+      { internalName: 'PrimaryRole', displayName: 'Primary Role', type: 'Choice', choices: ['PX', 'Sr. PM', 'PM', 'PA', 'Superintendent', 'Safety', 'QAQC', 'Other'] },
+      { internalName: 'PrimaryPerson', displayName: 'Primary Person', type: 'User' },
+      { internalName: 'SupportPerson', displayName: 'Support Person', type: 'User' },
+      { internalName: 'Notes', displayName: 'Notes', type: 'Text' },
+    ],
+  },
+];
