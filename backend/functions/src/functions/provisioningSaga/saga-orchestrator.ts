@@ -38,7 +38,7 @@ export class SagaOrchestrator {
   async execute(request: IProvisionSiteRequest): Promise<void> {
     const sagaStartMs = Date.now();
     const { projectId, projectNumber, projectName, correlationId, triggeredBy,
-            submittedBy, groupMembers } = request;
+            submittedBy, groupMembers, groupLeaders, department } = request;
 
     const status: IProvisioningStatus = {
       projectId,
@@ -56,6 +56,8 @@ export class SagaOrchestrator {
       triggeredBy,
       submittedBy,
       groupMembers,
+      groupLeaders: groupLeaders ?? [],
+      department,
       startedAt: new Date().toISOString(),
       step5DeferredToTimer: false,
       // D-PH6-13 tracks overnight Step 5 retry attempts across timer executions.
@@ -273,6 +275,8 @@ export class SagaOrchestrator {
       triggeredBy: status.triggeredBy,
       submittedBy: status.submittedBy,
       groupMembers: status.groupMembers,
+      groupLeaders: status.groupLeaders ?? [],
+      department: status.department,
     };
     await this.execute(request);
   }

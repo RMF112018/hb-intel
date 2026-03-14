@@ -1,11 +1,22 @@
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
 import type { IServiceContainer } from '../../../services/service-factory.js';
+import {
+  ENTRA_GROUP_DEFINITIONS,
+  buildGroupDisplayName,
+  buildGroupDescription,
+  getDepartmentBackgroundViewers,
+} from '../../../config/entra-group-definitions.js';
 
 const OPEX_UPN = process.env.OPEX_MANAGER_UPN!;
 
 /**
- * D-PH6-05 Step 6 permission assignment.
- * Applies project member Contribute access and guarantees OpEx manager inclusion via deduplicated UPN set.
+ * W0-G1-T02 Step 6: Entra ID three-group permission assignment.
+ *
+ * Phase 1 — Create or find three Entra ID security groups (idempotent).
+ * Phase 2 — Populate initial group membership.
+ * Phase 3 — Assign groups to SharePoint permission levels.
+ *
+ * Stores created group IDs in `status.entraGroups` for post-provisioning management.
  */
 export async function executeStep6(
   services: IServiceContainer,
@@ -25,10 +36,61 @@ export async function executeStep6(
   }
 
   try {
-    // Includes team-selected members plus default participants; OpEx is always included.
-    const members = Array.from(new Set([...(status.groupMembers ?? []), OPEX_UPN].filter(Boolean)));
+    const groupIds: string[] = [];
 
-    await services.sharePoint.setGroupPermissions(status.siteUrl, members, OPEX_UPN);
+    // ── Phase 1: Create / find Entra ID security groups (idempotent) ──
+    for (const def of ENTRA_GROUP_DEFINITIONS) {
+      const displayName = buildGroupDisplayName(status.projectNumber, def.roleSuffix);
+      const description = buildGroupDescription(
+        def.descriptionTemplate,
+        status.projectNumber,
+        status.projectName
+      );
+
+      // Idempotency: check if the group already exists before creating.
+      let groupId = await services.graph.getGroupByDisplayName(displayName);
+      if (!groupId) {
+        groupId = await services.graph.createSecurityGroup(displayName, description);
+      }
+      groupIds.push(groupId);
+    }
+
+    const [leadersGroupId, teamGroupId, viewersGroupId] = groupIds;
+
+    // ── Phase 2: Populate initial membership ──
+
+    // Leaders: groupLeaders + OPEX_UPN; fallback to triggeredBy if no leaders specified.
+    const leaders = status.groupLeaders && status.groupLeaders.length > 0
+      ? status.groupLeaders
+      : [status.triggeredBy];
+    const leaderMembers = Array.from(
+      new Set([...leaders, OPEX_UPN].filter(Boolean))
+    );
+    await services.graph.addGroupMembers(leadersGroupId, leaderMembers);
+
+    // Team: groupMembers + submittedBy.
+    const teamMembers = Array.from(
+      new Set([...(status.groupMembers ?? []), status.submittedBy].filter(Boolean))
+    );
+    await services.graph.addGroupMembers(teamGroupId, teamMembers);
+
+    // Viewers: department background access UPNs.
+    const viewerMembers = getDepartmentBackgroundViewers(status.department);
+    if (viewerMembers.length > 0) {
+      await services.graph.addGroupMembers(viewersGroupId, viewerMembers);
+    }
+
+    // ── Phase 3: Assign groups to SharePoint permission levels ──
+    for (let i = 0; i < ENTRA_GROUP_DEFINITIONS.length; i++) {
+      await services.sharePoint.assignGroupToPermissionLevel(
+        status.siteUrl,
+        groupIds[i],
+        ENTRA_GROUP_DEFINITIONS[i].sharePointPermissionLevel
+      );
+    }
+
+    // Store group IDs on status for post-provisioning membership management.
+    status.entraGroups = { leadersGroupId, teamGroupId, viewersGroupId };
 
     result.status = 'Completed';
     result.completedAt = new Date().toISOString();
@@ -40,4 +102,7 @@ export async function executeStep6(
   return result;
 }
 
-// D-PH6-05: No compensation needed; Step 1 site deletion removes all permission assignments.
+// W0-G1-T02 Compensation gap: Entra ID group deletion is NOT yet implemented.
+// Site deletion (Step 1 compensation) removes SharePoint permission assignments
+// but does not delete the Entra ID groups. Orphaned groups are inert and can be
+// cleaned up manually. Automated group cleanup is planned for a future wave.

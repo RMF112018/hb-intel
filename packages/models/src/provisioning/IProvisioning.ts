@@ -1,4 +1,19 @@
 /**
+ * W0-G1-T02: Department classification for background viewer access lookup.
+ */
+export type ProjectDepartment = 'commercial' | 'luxury-residential';
+
+/**
+ * W0-G1-T02: Entra ID security group IDs created during provisioning Step 6.
+ * Stored on IProvisioningStatus for post-provisioning membership management.
+ */
+export interface IEntraGroupSet {
+  leadersGroupId: string;
+  teamGroupId: string;
+  viewersGroupId: string;
+}
+
+/**
  * D-PH6-01: Request body for triggering a new provisioning saga.
  * Traceability: docs/architecture/plans/PH6.1-Foundation-DataModel.md §6.1.2
  */
@@ -13,10 +28,14 @@ export interface IProvisionSiteRequest {
   triggeredBy: string;
   /** Correlation ID for this provisioning run (UUID v4, generated at trigger time). */
   correlationId: string;
-  /** Members to be added to the project SharePoint group. Array of UPNs. */
+  /** Members to be added to the project Team group. Array of UPNs. */
   groupMembers: string[];
   /** UPN of the Estimating Coordinator who submitted the Project Setup Request. */
   submittedBy: string;
+  /** W0-G1-T02: UPNs for the Leaders group (Full Control). */
+  groupLeaders?: string[];
+  /** W0-G1-T02: Department for background viewer access lookup. */
+  department?: ProjectDepartment;
 }
 
 /**
@@ -43,6 +62,12 @@ export interface IProvisioningStatus {
   step5TimerRetryCount: number;
   retryCount: number;
   escalatedBy?: string;
+  /** W0-G1-T02: UPNs for the Leaders group (Full Control). */
+  groupLeaders?: string[];
+  /** W0-G1-T02: Department for background viewer access lookup. */
+  department?: ProjectDepartment;
+  /** W0-G1-T02: Entra ID group IDs created during Step 6. */
+  entraGroups?: IEntraGroupSet;
 }
 
 /** D-PH6-01: Result for a single saga step execution. */
@@ -87,6 +112,10 @@ export interface IProjectSetupRequest {
   state: ProjectSetupRequestState;
   projectNumber?: string;
   groupMembers: string[];
+  /** W0-G1-T02: UPNs for the Leaders group (Full Control). */
+  groupLeaders?: string[];
+  /** W0-G1-T02: Department for background viewer access lookup. */
+  department?: ProjectDepartment;
   clarificationNote?: string;
   completedBy?: string;
   completedAt?: string;

@@ -27,6 +27,15 @@ export interface ISharePointService {
   disassociateHubSite(siteUrl: string): Promise<void>;
   writeAuditRecord(record: IProvisioningAuditRecord): Promise<void>;
 
+  /**
+   * W0-G1-T02: Assigns an Entra ID security group to a SharePoint permission level on the site.
+   */
+  assignGroupToPermissionLevel(
+    siteUrl: string,
+    entraGroupId: string,
+    permissionLevel: string
+  ): Promise<void>;
+
   // Backward-compatible methods retained for transition compatibility.
   applyWebParts(siteUrl: string): Promise<void>;
   setPermissions(siteUrl: string, projectId: string): Promise<void>;
@@ -282,6 +291,20 @@ export class SharePointService implements ISharePointService {
     });
   }
 
+  /**
+   * W0-G1-T02: Assigns an Entra ID group to a SharePoint permission level.
+   * G2 scaffold — real implementation pending T05 Group.ReadWrite.All confirmation.
+   */
+  async assignGroupToPermissionLevel(
+    _siteUrl: string,
+    _entraGroupId: string,
+    _permissionLevel: string
+  ): Promise<void> {
+    throw new Error(
+      'SharePointService.assignGroupToPermissionLevel is a G2 scaffold — pending T05'
+    );
+  }
+
   /** Compatibility wrapper for older Step 5 callsites. */
   async applyWebParts(siteUrl: string): Promise<void> {
     await this.installWebParts(siteUrl);
@@ -388,5 +411,16 @@ export class MockSharePointService implements ISharePointService {
 
   async removeHubAssociation(siteUrl: string): Promise<void> {
     await this.disassociateHubSite(siteUrl);
+  }
+
+  /** W0-G1-T02: Mock — logs the group-to-permission-level assignment. */
+  async assignGroupToPermissionLevel(
+    siteUrl: string,
+    entraGroupId: string,
+    permissionLevel: string
+  ): Promise<void> {
+    console.log(
+      `[MockSharePoint] Assigned group ${entraGroupId} → ${permissionLevel} on ${siteUrl}`
+    );
   }
 }

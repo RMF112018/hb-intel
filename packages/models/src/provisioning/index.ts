@@ -12,6 +12,8 @@ export type {
   IProjectSetupRequest,
   ProjectSetupRequestState,
   IProvisioningAuditRecord,
+  ProjectDepartment,
+  IEntraGroupSet,
 } from './IProvisioning.js';
 export type { IProvisionSiteFormData } from './IProvisioningFormData.js';
 export type { ProvisioningOverallStatus, SagaStepStatus } from './ProvisioningEnums.js';
