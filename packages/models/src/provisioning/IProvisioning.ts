@@ -101,6 +101,8 @@ export interface IProvisioningProgressEvent {
   errorMessage?: string;
 }
 
+import type { IRequestClarification } from './IRequestClarification.js';
+
 /** D-PH6-01: Project Setup Request — submitted by Estimating Coordinator. */
 export interface IProjectSetupRequest {
   requestId: string;
@@ -139,6 +141,8 @@ export interface IProjectSetupRequest {
   clarificationRequestedAt?: string;
   /** W0-G3-T02: Whether the requester has already used their one retry opportunity on failure. */
   requesterRetryUsed?: boolean;
+  /** W0-G3-T03: Structured clarification items raised by controller during review. */
+  clarificationItems?: IRequestClarification[];
   /** W0-G3-T02: Provisioned SharePoint site URL (populated after provisioning completes). */
   siteUrl?: string;
 }

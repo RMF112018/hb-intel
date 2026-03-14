@@ -18,3 +18,9 @@ export {
   ADD_ON_DEFINITIONS,
   getAddOnsForDepartment,
 } from './addOnDefinitions.js';
+
+export {
+  getOpenClarifications,
+  buildClarificationReturnState,
+  buildClarificationResponsePayload,
+} from './clarificationReturn.js';

@@ -15,6 +15,12 @@ export type {
   ProjectDepartment,
   IEntraGroupSet,
 } from './IProvisioning.js';
+export type {
+  IRequestClarification,
+  ClarificationStatus,
+  IRequestClarificationInput,
+  IClarificationResponseInput,
+} from './IRequestClarification.js';
 export type { IProvisionSiteFormData } from './IProvisioningFormData.js';
 export type { ProvisioningOverallStatus, SagaStepStatus } from './ProvisioningEnums.js';
 export type { SagaStepNumber } from './types.js';

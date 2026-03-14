@@ -7,4 +7,8 @@ export type {
   IProvisioningAuditRecord,
   ISagaStepResult,
   ProjectSetupRequestState,
+  IRequestClarification,
+  ClarificationStatus,
+  IRequestClarificationInput,
+  IClarificationResponseInput,
 } from '@hbc/models';

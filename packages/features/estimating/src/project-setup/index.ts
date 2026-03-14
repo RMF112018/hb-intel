@@ -12,12 +12,16 @@ export type {
   ProjectSetupStepId,
   ProjectSetupWizardMode,
   IProjectSetupAddOnDefinition,
+  IClarificationReturnState,
+  IClarificationResponse,
+  IClarificationResubmission,
 } from './types/index.js';
 
 export {
   PROJECT_SETUP_STEP_IDS,
   PROJECT_SETUP_DRAFT_KEY,
   PROJECT_SETUP_CLARIFICATION_DRAFT_KEY_PREFIX,
+  CLARIFICATION_DRAFT_TTL_HOURS,
   buildClarificationDraftKey,
 } from './types/index.js';
 
@@ -34,4 +38,7 @@ export {
   resolveStepsForClarification,
   ADD_ON_DEFINITIONS,
   getAddOnsForDepartment,
+  getOpenClarifications,
+  buildClarificationReturnState,
+  buildClarificationResponsePayload,
 } from './config/index.js';
