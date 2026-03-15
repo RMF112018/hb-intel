@@ -38,11 +38,14 @@ const errorLogRoute = createRoute({
 const provisioningRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/provisioning-failures',
+  validateSearch: (search: Record<string, unknown>) => ({
+    projectId: typeof search.projectId === 'string' ? search.projectId : undefined,
+  }),
   beforeLoad: () => {
     requireAdminAccessControl();
     useNavStore.getState().setActiveWorkspace('admin');
   },
-  component: lazyRouteComponent(() => import('../pages/ProvisioningFailuresPage.js').then((m) => ({ default: m.ProvisioningFailuresPage }))),
+  component: lazyRouteComponent(() => import('../pages/ProvisioningOversightPage.js').then((m) => ({ default: m.ProvisioningOversightPage }))),
 });
 
 export const webpartRoutes = [indexRoute, errorLogRoute, provisioningRoute];

@@ -12,7 +12,7 @@ const ADMIN_SHELL_CONFIG: SimplifiedShellConfig = {
   toolPickerItems: [
     { label: 'System Settings', path: '/' },
     { label: 'Error Log', path: '/error-log' },
-    { label: 'Provisioning Failures', path: '/provisioning-failures' },
+    { label: 'Provisioning Oversight', path: '/provisioning-failures' },
   ],
 };
 

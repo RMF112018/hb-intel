@@ -14,8 +14,16 @@ export interface IProvisioningApiClient {
   ): Promise<IProjectSetupRequest>;
   getProvisioningStatus(projectId: string): Promise<IProvisioningStatus | null>;
   listFailedRuns(): Promise<IProvisioningStatus[]>;
+  /** W0-G4-T04: List all provisioning runs, optionally filtered by overallStatus. */
+  listProvisioningRuns(status?: string): Promise<IProvisioningStatus[]>;
   retryProvisioning(projectId: string): Promise<void>;
   escalateProvisioning(projectId: string, escalatedBy: string): Promise<void>;
+  /** W0-G4-T04: Archive a failed provisioning run (admin-only). */
+  archiveFailure(projectId: string): Promise<void>;
+  /** W0-G4-T04: Acknowledge an escalated provisioning run (admin-only). */
+  acknowledgeEscalation(projectId: string): Promise<void>;
+  /** W0-G4-T04: Force a provisioning run into a specific state (admin expert-tier only). */
+  forceStateTransition(projectId: string, targetState: string): Promise<void>;
 }
 
 /**
@@ -85,6 +93,23 @@ export function createProvisioningApiClient(
       await authFetch(`/provisioning-escalate/${projectId}`, {
         method: 'POST',
         body: JSON.stringify({ escalatedBy }),
+      });
+    },
+    async listProvisioningRuns(status) {
+      const qs = status ? `?status=${status}` : '';
+      const res = await authFetch(`/provisioning-runs${qs}`);
+      return res.json();
+    },
+    async archiveFailure(projectId) {
+      await authFetch(`/provisioning-archive/${projectId}`, { method: 'POST' });
+    },
+    async acknowledgeEscalation(projectId) {
+      await authFetch(`/provisioning-escalation-ack/${projectId}`, { method: 'POST' });
+    },
+    async forceStateTransition(projectId, targetState) {
+      await authFetch(`/provisioning-force-state/${projectId}`, {
+        method: 'POST',
+        body: JSON.stringify({ targetState }),
       });
     },
   };

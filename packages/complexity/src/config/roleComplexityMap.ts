@@ -42,8 +42,13 @@ export const ROLE_COMPLEXITY_CONFIG: IRoleComplexityConfig = {
     },
     {
       adGroup: 'HBC-Admin',
-      initialTier: 'standard',
-      description: 'Administrative staff — full operational view',
+      initialTier: 'expert',
+      description: 'Administrative staff — full diagnostic and recovery view',
+    },
+    {
+      adGroup: 'HBIntelAdmin',
+      initialTier: 'expert',
+      description: 'HB Intel admin users — full diagnostic and recovery view',
     },
     {
       adGroup: 'HBC-ProjectManager',
