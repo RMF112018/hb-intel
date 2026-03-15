@@ -56,6 +56,34 @@ describe('useMyWork', () => {
     expect(callArgs.query).toEqual({ projectId: 'proj-001', limit: 10 });
   });
 
+  it('exposes healthState.freshness === "partial" from feed result', async () => {
+    const partialFeed = createMockMyWorkFeedResult({
+      healthState: { freshness: 'partial', degradedSourceCount: 1 },
+    });
+    mockAggregateFeed.mockResolvedValue(partialFeed);
+    const { result } = renderHook(() => useMyWork(), { wrapper: createTestWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.feed?.healthState?.freshness).toBe('partial');
+  });
+
+  it('exposes isStale when feed is cached', async () => {
+    const staleFeed = createMockMyWorkFeedResult({ isStale: true });
+    mockAggregateFeed.mockResolvedValue(staleFeed);
+    const { result } = renderHook(() => useMyWork(), { wrapper: createTestWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.feed?.isStale).toBe(true);
+  });
+
+  it('exposes healthState.freshness === "queued"', async () => {
+    const queuedFeed = createMockMyWorkFeedResult({
+      healthState: { freshness: 'queued' },
+    });
+    mockAggregateFeed.mockResolvedValue(queuedFeed);
+    const { result } = renderHook(() => useMyWork(), { wrapper: createTestWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.feed?.healthState?.freshness).toBe('queued');
+  });
+
   it('exposes refetch function', async () => {
     const { result } = renderHook(() => useMyWork(), { wrapper: createTestWrapper() });
     await waitFor(() => expect(result.current.isLoading).toBe(false));

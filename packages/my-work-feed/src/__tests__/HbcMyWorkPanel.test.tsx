@@ -238,6 +238,22 @@ describe('HbcMyWorkPanel', () => {
     expect(onOpenFeed).toHaveBeenCalledOnce();
   });
 
+  it('planning bar receives counts matching useMyWork feed', () => {
+    const counts = { totalCount: 5, unreadCount: 3, nowCount: 2, blockedCount: 1, waitingCount: 1, deferredCount: 0 };
+    mockUseMyWorkPanel.mockReturnValue({
+      groups: createGroups(),
+      counts,
+      isPanelOpen: true,
+      isLoading: false,
+      isError: false,
+      closePanel: mockClosePanel,
+      openPanel: vi.fn(),
+      togglePanel: vi.fn(),
+    });
+    render(<HbcMyWorkPanel />);
+    expect(screen.getByTestId('planning-bar')).toHaveAttribute('data-has-counts', 'true');
+  });
+
   it('does not render View All when onOpenFeed is not provided', () => {
     render(<HbcMyWorkPanel />);
     expect(screen.queryByTestId('btn-view-all')).not.toBeInTheDocument();

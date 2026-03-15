@@ -287,6 +287,158 @@ describe('rankItems', () => {
     expect(ranked[1].workItemId).toBe('overdue-b');
   });
 
+  it('unread fresh item scores higher than stale unread item', () => {
+    const fresh = createMockMyWorkItem({
+      workItemId: 'fresh-unread',
+      isUnread: true,
+      isOverdue: false,
+      isBlocked: false,
+      offlineCapable: false,
+      sourceMeta: [{ source: 'module', sourceItemId: 'src-1', sourceUpdatedAtIso: '2026-01-19T10:00:00.000Z' }],
+      context: { moduleKey: 'bic' },
+      lifecycle: { previousStepLabel: null, currentStepLabel: null, nextStepLabel: null, blockedDependencyLabel: null, impactedRecordLabel: null },
+      timestamps: { createdAtIso: '2026-01-19T10:00:00.000Z', updatedAtIso: '2026-01-19T10:00:00.000Z', markedReadAtIso: null, markedDeferredAtIso: null, deferredUntilIso: null },
+    });
+    const stale = createMockMyWorkItem({
+      workItemId: 'stale-unread',
+      isUnread: true,
+      isOverdue: false,
+      isBlocked: false,
+      offlineCapable: false,
+      sourceMeta: [{ source: 'module', sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-05T10:00:00.000Z' }],
+      context: { moduleKey: 'bic' },
+      lifecycle: { previousStepLabel: null, currentStepLabel: null, nextStepLabel: null, blockedDependencyLabel: null, impactedRecordLabel: null },
+      timestamps: { createdAtIso: '2026-01-05T10:00:00.000Z', updatedAtIso: '2026-01-05T10:00:00.000Z', markedReadAtIso: null, markedDeferredAtIso: null, deferredUntilIso: null },
+    });
+
+    expect(computeRankingScore(fresh, baseCtx)).toBeGreaterThan(computeRankingScore(stale, baseCtx));
+  });
+
+  it('6-item deterministic ranking produces expected order', () => {
+    const items = [
+      createMockMyWorkItem({
+        workItemId: 'bare-minimum',
+        canonicalKey: 'f-key',
+        isOverdue: false,
+        isBlocked: false,
+        isUnread: false,
+        offlineCapable: false,
+        dueDateIso: null,
+        sourceMeta: [{ source: 'module', sourceItemId: 'src-6', sourceUpdatedAtIso: '2026-01-10T10:00:00.000Z' }],
+        context: { moduleKey: 'bic' },
+        lifecycle: { previousStepLabel: null, currentStepLabel: null, nextStepLabel: null, blockedDependencyLabel: null, impactedRecordLabel: null },
+      }),
+      createMockMyWorkItem({
+        workItemId: 'context-only',
+        canonicalKey: 'e-key',
+        isOverdue: false,
+        isBlocked: false,
+        isUnread: false,
+        offlineCapable: false,
+        dueDateIso: null,
+        sourceMeta: [{ source: 'module', sourceItemId: 'src-5', sourceUpdatedAtIso: '2026-01-10T10:00:00.000Z' }],
+        context: { moduleKey: 'bic', projectId: 'proj-001' },
+        lifecycle: { previousStepLabel: null, currentStepLabel: null, nextStepLabel: null, blockedDependencyLabel: null, impactedRecordLabel: null },
+      }),
+      createMockMyWorkItem({
+        workItemId: 'unread-handoff',
+        canonicalKey: 'd-key',
+        class: 'inbound-handoff',
+        isOverdue: false,
+        isBlocked: false,
+        isUnread: true,
+        offlineCapable: false,
+        dueDateIso: null,
+        sourceMeta: [{ source: 'module', sourceItemId: 'src-4', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+        context: { moduleKey: 'bic' },
+        lifecycle: { previousStepLabel: null, currentStepLabel: null, nextStepLabel: null, blockedDependencyLabel: null, impactedRecordLabel: null },
+      }),
+      createMockMyWorkItem({
+        workItemId: 'blocked-bic',
+        canonicalKey: 'c-key',
+        isOverdue: false,
+        isBlocked: true,
+        isUnread: false,
+        offlineCapable: false,
+        dueDateIso: null,
+        sourceMeta: [{ source: 'bic-next-move', sourceItemId: 'src-3', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+        context: { moduleKey: 'bic' },
+        lifecycle: { previousStepLabel: null, currentStepLabel: null, nextStepLabel: null, blockedDependencyLabel: null, impactedRecordLabel: null },
+      }),
+      createMockMyWorkItem({
+        workItemId: 'overdue-only',
+        canonicalKey: 'b-key',
+        isOverdue: true,
+        isBlocked: false,
+        isUnread: false,
+        offlineCapable: false,
+        dueDateIso: '2026-01-18T00:00:00.000Z',
+        sourceMeta: [{ source: 'module', sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+        context: { moduleKey: 'bic' },
+        lifecycle: { previousStepLabel: null, currentStepLabel: null, nextStepLabel: null, blockedDependencyLabel: null, impactedRecordLabel: null },
+      }),
+      createMockMyWorkItem({
+        workItemId: 'overdue-blocked',
+        canonicalKey: 'a-key',
+        isOverdue: true,
+        isBlocked: true,
+        isUnread: false,
+        offlineCapable: false,
+        dueDateIso: '2026-01-18T00:00:00.000Z',
+        sourceMeta: [{ source: 'bic-next-move', sourceItemId: 'src-1', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+        context: { moduleKey: 'bic' },
+        lifecycle: { previousStepLabel: null, currentStepLabel: null, nextStepLabel: null, blockedDependencyLabel: null, impactedRecordLabel: null },
+      }),
+    ];
+
+    const ranked = rankItems(items, baseCtx);
+    expect(ranked.map((i) => i.workItemId)).toEqual([
+      'overdue-blocked',
+      'overdue-only',
+      'unread-handoff',
+      'blocked-bic',
+      'context-only',
+      'bare-minimum',
+    ]);
+  });
+
+  it('identical primary scores fall through all 5 tie-break levels', () => {
+    // Two items with forced equal everything except canonicalKey
+    const items = [
+      createMockMyWorkItem({
+        workItemId: 'w-z',
+        canonicalKey: 'z-key',
+        isOverdue: false,
+        isBlocked: false,
+        isUnread: false,
+        offlineCapable: false,
+        dueDateIso: null,
+        sourceMeta: [{ source: 'module', sourceItemId: 'src-1', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+        context: { moduleKey: 'bic' },
+        lifecycle: { previousStepLabel: null, currentStepLabel: null, nextStepLabel: null, blockedDependencyLabel: null, impactedRecordLabel: null },
+        timestamps: { createdAtIso: '2026-01-15T10:00:00.000Z', updatedAtIso: '2026-01-15T10:00:00.000Z', markedReadAtIso: null, markedDeferredAtIso: null, deferredUntilIso: null },
+      }),
+      createMockMyWorkItem({
+        workItemId: 'w-a',
+        canonicalKey: 'a-key',
+        isOverdue: false,
+        isBlocked: false,
+        isUnread: false,
+        offlineCapable: false,
+        dueDateIso: null,
+        sourceMeta: [{ source: 'module', sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+        context: { moduleKey: 'bic' },
+        lifecycle: { previousStepLabel: null, currentStepLabel: null, nextStepLabel: null, blockedDependencyLabel: null, impactedRecordLabel: null },
+        timestamps: { createdAtIso: '2026-01-15T10:00:00.000Z', updatedAtIso: '2026-01-15T10:00:00.000Z', markedReadAtIso: null, markedDeferredAtIso: null, deferredUntilIso: null },
+      }),
+    ];
+
+    const ranked = rankItems(items, baseCtx);
+    // Same score, same overdue, same blocked, same source weight, same timestamp → lexical canonicalKey asc
+    expect(ranked[0].workItemId).toBe('w-a');
+    expect(ranked[1].workItemId).toBe('w-z');
+  });
+
   it('sorts by freshest updatedAtIso in tie-break', () => {
     const items = [
       createMockMyWorkItem({

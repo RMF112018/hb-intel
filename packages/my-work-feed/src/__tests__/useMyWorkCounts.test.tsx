@@ -50,6 +50,35 @@ describe('useMyWorkCounts', () => {
     expect(result.current.counts).toBeUndefined();
   });
 
+  it('counts remain stable across re-renders with same data', async () => {
+    const items = [
+      createMockMyWorkItem({ workItemId: '1', priority: 'now', isUnread: true }),
+      createMockMyWorkItem({ workItemId: '2', priority: 'soon', isUnread: false }),
+    ];
+    mockAggregateFeed.mockResolvedValue(createMockMyWorkFeedResult({ items }));
+
+    const { result, rerender } = renderHook(() => useMyWorkCounts(), { wrapper: createTestWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const firstCounts = result.current.counts;
+    rerender();
+    expect(result.current.counts).toEqual(firstCounts);
+  });
+
+  it('deferred items are counted in deferredCount', async () => {
+    const items = [
+      createMockMyWorkItem({ workItemId: '1', state: 'deferred' }),
+      createMockMyWorkItem({ workItemId: '2', state: 'deferred' }),
+      createMockMyWorkItem({ workItemId: '3', state: 'active' }),
+    ];
+    mockAggregateFeed.mockResolvedValue(createMockMyWorkFeedResult({ items }));
+
+    const { result } = renderHook(() => useMyWorkCounts(), { wrapper: createTestWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.counts?.deferredCount).toBe(2);
+  });
+
   it('passes query to aggregateFeed', async () => {
     mockAggregateFeed.mockResolvedValue(createMockMyWorkFeedResult({ items: [] }));
     const query = { projectId: 'proj-001' };

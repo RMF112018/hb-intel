@@ -231,6 +231,84 @@ describe('dedupeItems', () => {
     expect(result.canonical[0].permissionState.cannotActReason).toBe('Role mismatch');
   });
 
+  it('3-way dedupe merges all sourceMeta into single survivor', () => {
+    const items = [
+      createMockMyWorkItem({
+        workItemId: 'w-bic',
+        dedupeKey: 'triple',
+        sourceMeta: [{ source: 'bic-next-move', sourceItemId: 'src-1', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+      }),
+      createMockMyWorkItem({
+        workItemId: 'w-handoff',
+        dedupeKey: 'triple',
+        sourceMeta: [{ source: 'workflow-handoff', sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-15T11:00:00.000Z' }],
+      }),
+      createMockMyWorkItem({
+        workItemId: 'w-module',
+        dedupeKey: 'triple',
+        sourceMeta: [{ source: 'module', sourceItemId: 'src-3', sourceUpdatedAtIso: '2026-01-15T09:00:00.000Z' }],
+      }),
+    ];
+
+    const result = dedupeItems(items);
+    expect(result.canonical).toHaveLength(1);
+    expect(result.canonical[0].sourceMeta).toHaveLength(3);
+    expect(result.mergeEvents).toHaveLength(2);
+  });
+
+  it('isOverdue from merged item does not propagate to survivor', () => {
+    const items = [
+      createMockMyWorkItem({
+        workItemId: 'w-survivor',
+        dedupeKey: 'shared',
+        isOverdue: false,
+        sourceMeta: [{ source: 'bic-next-move', sourceItemId: 'src-1', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+      }),
+      createMockMyWorkItem({
+        workItemId: 'w-merged',
+        dedupeKey: 'shared',
+        isOverdue: true,
+        sourceMeta: [{ source: 'workflow-handoff', sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-15T11:00:00.000Z' }],
+      }),
+    ];
+
+    const result = dedupeItems(items);
+    // Documents current behavior: dedupe merges isBlocked and canAct, but not isOverdue
+    expect(result.canonical[0].isOverdue).toBe(false);
+  });
+
+  it('survivor lifecycle fields are preserved over merged item lifecycle', () => {
+    const items = [
+      createMockMyWorkItem({
+        workItemId: 'w-survivor',
+        dedupeKey: 'shared',
+        sourceMeta: [{ source: 'bic-next-move', sourceItemId: 'src-1', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+        lifecycle: {
+          previousStepLabel: null,
+          currentStepLabel: 'Survivor Step',
+          nextStepLabel: null,
+          blockedDependencyLabel: null,
+          impactedRecordLabel: null,
+        },
+      }),
+      createMockMyWorkItem({
+        workItemId: 'w-merged',
+        dedupeKey: 'shared',
+        sourceMeta: [{ source: 'workflow-handoff', sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-15T11:00:00.000Z' }],
+        lifecycle: {
+          previousStepLabel: null,
+          currentStepLabel: 'Merged Step',
+          nextStepLabel: null,
+          blockedDependencyLabel: null,
+          impactedRecordLabel: null,
+        },
+      }),
+    ];
+
+    const result = dedupeItems(items);
+    expect(result.canonical[0].lifecycle.currentStepLabel).toBe('Survivor Step');
+  });
+
   it('returns null cannotActReason when no items have a reason and none can act', () => {
     const items = [
       createMockMyWorkItem({

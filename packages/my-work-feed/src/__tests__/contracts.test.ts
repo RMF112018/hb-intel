@@ -16,6 +16,7 @@ import {
   MY_WORK_REPLAYABLE_ACTIONS,
   MY_WORK_SYNC_STATUSES,
 } from '../constants/index.js';
+import { buildReasoningPayload } from '../hooks/useMyWorkReasoning.js';
 
 describe('contracts', () => {
   // ─── Factory completeness ────────────────────────────────────────────────
@@ -131,6 +132,61 @@ describe('contracts', () => {
       const result = createMockMyWorkFeedResult();
       expect(Array.isArray(result.items)).toBe(true);
       expect(result.items[0].workItemId).toBeDefined();
+    });
+  });
+
+  // ─── Explainability payload construction ────────────────────────────────
+
+  describe('explainability payload construction', () => {
+    it('extracts workItemId, canonicalKey, title, rankingReason, lifecycle, permissionState, sourceMeta', () => {
+      const item = createMockMyWorkItem();
+      const payload = buildReasoningPayload(item);
+
+      expect(payload.workItemId).toBe(item.workItemId);
+      expect(payload.canonicalKey).toBe(item.canonicalKey);
+      expect(payload.title).toBe(item.title);
+      expect(payload.rankingReason).toEqual(item.rankingReason);
+      expect(payload.lifecycle).toEqual(item.lifecycle);
+      expect(payload.permissionState).toEqual(item.permissionState);
+      expect(payload.sourceMeta).toEqual(item.sourceMeta);
+    });
+
+    it('includes dedupeInfo when item has dedupe metadata', () => {
+      const dedupeData = {
+        dedupeKey: 'dk-001',
+        mergedSourceMeta: [{ source: 'notification-intelligence' as const, sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-15T09:00:00.000Z' }],
+        mergeReason: 'Same record',
+      };
+      const item = createMockMyWorkItem({ dedupe: dedupeData });
+      const payload = buildReasoningPayload(item);
+
+      expect(payload.dedupeInfo).toEqual(dedupeData);
+    });
+
+    it('includes supersessionInfo when item has supersession metadata', () => {
+      const supersessionData = {
+        supersededByWorkItemId: 'work-002',
+        supersessionReason: 'Higher-truth source',
+        originalRankingReason: { primaryReason: 'Old', contributingReasons: [] as string[], score: 0.3 },
+      };
+      const item = createMockMyWorkItem({ supersession: supersessionData });
+      const payload = buildReasoningPayload(item);
+
+      expect(payload.supersessionInfo).toEqual(supersessionData);
+    });
+
+    it('dedupeInfo is undefined when item has no dedupe', () => {
+      const item = createMockMyWorkItem();
+      const payload = buildReasoningPayload(item);
+
+      expect(payload.dedupeInfo).toBeUndefined();
+    });
+
+    it('supersessionInfo is undefined when item has no supersession', () => {
+      const item = createMockMyWorkItem();
+      const payload = buildReasoningPayload(item);
+
+      expect(payload.supersessionInfo).toBeUndefined();
     });
   });
 

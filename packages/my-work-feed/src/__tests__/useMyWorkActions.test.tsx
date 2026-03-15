@@ -166,6 +166,50 @@ describe('useMyWorkActions', () => {
     );
   });
 
+  it('queues action when offline and calls queueOperation', async () => {
+    mockUseConnectivity.mockReturnValue('offline');
+    const item = createMockMyWorkItem({ state: 'new' });
+    const { result } = renderHook(() => useMyWorkActions(), { wrapper: createTestWrapper() });
+
+    act(() => result.current.executeAction({ actionKey: 'mark-read', item }));
+    await waitFor(() => expect(result.current.isPending).toBe(false));
+
+    expect(mockQueueOperation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'api-mutation',
+        target: `my-work/mark-read/${item.workItemId}`,
+      }),
+    );
+  });
+
+  it('second identical offline action calls queueOperation again', async () => {
+    mockUseConnectivity.mockReturnValue('offline');
+    const item = createMockMyWorkItem({ state: 'active' });
+    const { result } = renderHook(() => useMyWorkActions(), { wrapper: createTestWrapper() });
+
+    act(() => result.current.executeAction({ actionKey: 'defer', item }));
+    await waitFor(() => expect(result.current.isPending).toBe(false));
+
+    act(() => result.current.executeAction({ actionKey: 'defer', item }));
+    await waitFor(() => expect(result.current.isPending).toBe(false));
+
+    expect(mockQueueOperation).toHaveBeenCalledTimes(2);
+  });
+
+  it('queued action result persists across rerender', async () => {
+    mockUseConnectivity.mockReturnValue('offline');
+    const item = createMockMyWorkItem({ state: 'active' });
+    const { result, rerender } = renderHook(() => useMyWorkActions(), { wrapper: createTestWrapper() });
+
+    act(() => result.current.executeAction({ actionKey: 'defer', item }));
+    await waitFor(() => expect(result.current.isPending).toBe(false));
+
+    const lastResult = result.current.lastResult;
+    expect(lastResult).toBeDefined();
+    rerender();
+    expect(result.current.lastResult).toEqual(lastResult);
+  });
+
   it('starts with isPending false and no lastResult', () => {
     const { result } = renderHook(() => useMyWorkActions(), { wrapper: createTestWrapper() });
     expect(result.current.isPending).toBe(false);

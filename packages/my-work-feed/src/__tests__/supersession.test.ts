@@ -173,6 +173,56 @@ describe('applySupersession', () => {
     expect(result.active).toHaveLength(1);
   });
 
+  it('transitive supersession: 3 sources, lowest 2 superseded', () => {
+    const items = [
+      createMockMyWorkItem({
+        workItemId: 'w-bic',
+        context: { moduleKey: 'bic', recordType: 'transfer', recordId: 'rec-001' },
+        sourceMeta: [{ source: 'bic-next-move', sourceItemId: 'src-1', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+      }),
+      createMockMyWorkItem({
+        workItemId: 'w-notif',
+        context: { moduleKey: 'bic', recordType: 'transfer', recordId: 'rec-001' },
+        sourceMeta: [{ source: 'notification-intelligence', sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+      }),
+      createMockMyWorkItem({
+        workItemId: 'w-module',
+        context: { moduleKey: 'bic', recordType: 'transfer', recordId: 'rec-001' },
+        sourceMeta: [{ source: 'module', sourceItemId: 'src-3', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+      }),
+    ];
+
+    const result = applySupersession(items);
+    expect(result.active).toHaveLength(1);
+    expect(result.active[0].workItemId).toBe('w-bic');
+    expect(result.superseded).toHaveLength(2);
+    expect(result.supersessionEvents).toHaveLength(2);
+  });
+
+  it('superseded item preserves original ranking reason in metadata', () => {
+    const originalReason = {
+      primaryReason: 'Module-sourced item',
+      contributingReasons: ['Low priority', 'Stale data'],
+      score: 0.35,
+    };
+    const items = [
+      createMockMyWorkItem({
+        workItemId: 'w-winner',
+        context: { moduleKey: 'bic', recordType: 'transfer', recordId: 'rec-001' },
+        sourceMeta: [{ source: 'bic-next-move', sourceItemId: 'src-1', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+      }),
+      createMockMyWorkItem({
+        workItemId: 'w-loser',
+        context: { moduleKey: 'bic', recordType: 'transfer', recordId: 'rec-001' },
+        sourceMeta: [{ source: 'module', sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+        rankingReason: originalReason,
+      }),
+    ];
+
+    const result = applySupersession(items);
+    expect(result.superseded[0].supersession?.originalRankingReason).toEqual(originalReason);
+  });
+
   it('handles empty input', () => {
     const result = applySupersession([]);
     expect(result.active).toHaveLength(0);

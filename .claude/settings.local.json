@@ -109,7 +109,8 @@
       "Bash(git check-ignore:*)",
       "Bash(for id:*)",
       "Read(//private/tmp/claude-501/-Users-bobbyfetting-hb-intel/015315e5-8c49-48e0-8b87-497b4f91ec4e/tasks/**)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(echo:*)"
     ]
   },
   "enabledPlugins": {

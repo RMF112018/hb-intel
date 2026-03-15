@@ -156,6 +156,17 @@ describe('HbcMyWorkTile', () => {
     expect(screen.queryByTestId('btn-view-all')).not.toBeInTheDocument();
   });
 
+  it('tile count badges match mocked feed counts', () => {
+    mockUseMyWorkCounts.mockReturnValue({
+      counts: { totalCount: 5, unreadCount: 1, nowCount: 3, blockedCount: 2, waitingCount: 0, deferredCount: 0 },
+      isLoading: false,
+      isError: false,
+    });
+    render(<HbcMyWorkTile projectId="proj-1" />);
+    expect(screen.getByText('3 now')).toBeInTheDocument();
+    expect(screen.getByText('2 blocked')).toBeInTheDocument();
+  });
+
   it('applies className', () => {
     render(<HbcMyWorkTile projectId="proj-1" className="custom" />);
     expect(screen.getByTestId('card')).toHaveClass('custom');

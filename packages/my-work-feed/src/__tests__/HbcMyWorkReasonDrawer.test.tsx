@@ -212,6 +212,43 @@ describe('HbcMyWorkReasonDrawer', () => {
     expect(screen.getByText('Superseded: Replaced by newer version')).toBeInTheDocument();
   });
 
+  it('renders delegate permission info at standard tier', () => {
+    mockUseMyWorkReasoning.mockReturnValue({
+      reasoning: createReasoning({
+        permissionState: {
+          canOpen: true,
+          canAct: true,
+          canDelegate: true,
+          cannotActReason: null,
+        },
+      }),
+      isLoading: false,
+      isError: false,
+    });
+    render(<HbcMyWorkReasonDrawer itemId="work-001" open={true} onClose={onClose} />);
+    expect(screen.getByText('You can act on this item')).toBeInTheDocument();
+  });
+
+  it('returns null at essential tier regardless of permissions', () => {
+    vi.mocked(useComplexity).mockReturnValue({ tier: 'essential' });
+    mockUseMyWorkReasoning.mockReturnValue({
+      reasoning: createReasoning({
+        permissionState: {
+          canOpen: true,
+          canAct: true,
+          canDelegate: true,
+          cannotActReason: null,
+        },
+      }),
+      isLoading: false,
+      isError: false,
+    });
+    const { container } = render(
+      <HbcMyWorkReasonDrawer itemId="work-001" open={true} onClose={onClose} />,
+    );
+    expect(container.innerHTML).toBe('');
+  });
+
   it('applies className to tearsheet', () => {
     render(
       <HbcMyWorkReasonDrawer itemId="work-001" open={true} onClose={onClose} className="custom" />,
