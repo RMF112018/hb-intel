@@ -44,3 +44,40 @@ If the timer trigger fails to install web parts:
 2. If no recent timer events, verify the Function App is running and the CRON schedule is correct in `function.json`.
 3. Check Function App → Monitor → Invocations for the timer function to see if it was triggered but failed.
 4. If the timer ran but web parts failed to install, see "How to Re-run Step 5 Manually" above.
+
+---
+
+## Supportability Verification (Wave 0 Closeout)
+
+**Date:** 2026-03-15
+
+This section confirms that common provisioning failure modes can be diagnosed and addressed through the UI and admin surface without requiring developer-only knowledge.
+
+### Failure Mode Coverage
+
+All 10 documented failure modes (FM-01 through FM-10 in `packages/provisioning/src/failure-modes.ts`) have recovery paths:
+
+| Failure Mode | Diagnosable From UI | Recovery Action |
+|-------------|-------------------|-----------------|
+| FM-01 IndexedDB unavailable | Form continues; auto-save indicator absent | Re-enter data after navigation; no admin action needed |
+| FM-02 BIC owner resolves null | Badge shows "In Progress" | System-owned state; no human action required |
+| FM-03 Notification registration missing | Backend falls back to raw event type | Admin can verify via App Insights query |
+| FM-04 Handoff validation fails | HbcHandoffComposer blocks with error | Fix prerequisite data; retry handoff |
+| FM-05 API submission fails after wizard complete | Error shown; draft retained; retry available | User retries from Review step |
+| FM-06 Clarification draft TTL expires | Falls back to server data | Re-enter in-progress responses |
+| FM-07 BIC module query fails | Other modules continue; empty items returned | Check API health; module self-recovers on next poll |
+| FM-08 Complexity tier cannot be derived | Falls back to Essential tier | User sees minimum info; can manually adjust |
+| FM-09 SignalR disconnected | Falls back to 30s polling; "Live updates paused" shown | Automatic reconnect; no admin action needed |
+| FM-10 Handoff recipient cannot be resolved | Handoff blocked with reason | Fix projectLeadId in request data |
+
+### Escalation Path
+
+1. **Self-service:** User retries the operation from the UI (wizard retry, re-enter data, reconnect)
+2. **Admin oversight:** Admin uses the Provisioning Oversight page (force retry, archive, ack escalation, state override)
+3. **Manual intervention:** Admin uses Azure Table Storage diagnostics (see "How to Check Azure Table Storage State" above)
+
+### Cross-References
+
+- **Observability:** See `docs/maintenance/provisioning-observability-runbook.md` for KQL query templates and alert rule definitions.
+- **Verification evidence:** See `docs/reference/provisioning/verification-matrix.md` for the full pass/fail matrix.
+- **Admin permissions:** See `packages/auth/README.md` § Provisioning Override Permissions for the 6 granular permission constants.

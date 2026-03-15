@@ -93,3 +93,36 @@ customEvents
 - Provisioning telemetry depends on `APPLICATIONINSIGHTS_CONNECTION_STRING` in Function App settings.
 - Correlation continuity depends on preserving `correlationId` across saga status writes, SignalR events, and telemetry payloads.
 - Azure alert rules are configured in the Azure Portal/ARM and are not directly created from this repository.
+
+---
+
+## Admin Intervention Path Verification (Wave 0 Closeout)
+
+**Date:** 2026-03-15
+
+This section confirms that all admin intervention actions are permission-gated and drive the operational dashboards.
+
+### Admin Actions & Permission Gates
+
+| Action | Permission Required | Surface | Tier |
+|--------|-------------------|---------|------|
+| Retry failed provisioning | `admin:provisioning:retry` | Provisioning Oversight detail modal | Standard |
+| Escalate to higher-tier admin | `admin:provisioning:escalate` | Provisioning Oversight detail modal | Standard |
+| Archive from active queue | `admin:provisioning:archive` | Provisioning Oversight detail modal | Standard |
+| Force state override | `admin:provisioning:force-state` | Provisioning Oversight detail modal | Expert |
+| View full alert detail | `admin:provisioning:alert:full-detail` | Operational Dashboards | Standard |
+| Manage approval authority | `admin:approval:manage` | System Settings | Standard |
+
+### Alert Routing → Dashboards
+
+- `AlertPollingService` polls for active provisioning alerts when a backend URL is configured
+- Alert count drives the failures inbox badge on the Operational Dashboards page (`/dashboards`)
+- `useProbePolling` polls infrastructure health probes (Azure Functions, SharePoint)
+- Both services skip polling when no backend URL is present (dev-harness safe)
+
+### Verification Evidence
+
+- Admin actions tested: `apps/admin/src/test/ProvisioningOversightPage.test.tsx` (17 tests)
+- Alert polling tested: `apps/admin/src/test/alertPollingService.test.ts` (9 tests)
+- Dashboards tested: `apps/admin/src/test/OperationalDashboardPage.test.tsx` (10 tests)
+- Full verification matrix: `docs/reference/provisioning/verification-matrix.md`
