@@ -1,6 +1,6 @@
 {
   "name": "@hbc/step-wizard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Multi-step guided workflow primitive for HB Intel",
   "type": "module",
