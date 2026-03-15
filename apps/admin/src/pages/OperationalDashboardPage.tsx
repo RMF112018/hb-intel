@@ -9,11 +9,12 @@ import {
 import type { IProjectSetupRequest, ProjectSetupRequestState } from '@hbc/models';
 import { createProvisioningApiClient } from '@hbc/provisioning';
 import { AdminAlertDashboard, ImplementationTruthDashboard } from '@hbc/features-admin';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import {
   HbcBanner,
   HbcCard,
   HbcCoachingCallout,
-  HbcEmptyState,
   HbcStatusBadge,
   HbcTypography,
   WorkspacePageShell,
@@ -91,6 +92,31 @@ const useStyles = makeStyles({
     marginBottom: '12px',
   },
 });
+
+const DASHBOARD_EMPTY_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: context.isLoadError ? 'loading-failed' : 'truly-empty',
+    heading: 'No provisioning requests',
+    description: 'Provisioning requests will appear here once submitted.',
+    primaryAction: {
+      label: 'Go to Provisioning Oversight',
+      href: '/provisioning-failures',
+    },
+    coachingTip: 'This dashboard shows queue health metrics once provisioning requests are active.',
+  }),
+};
+
+const DASHBOARD_EMPTY_CONTEXT: IEmptyStateContext = {
+  module: 'admin',
+  view: 'operational-dashboard',
+  hasActiveFilters: false,
+  hasPermission: true,
+  isFirstVisit: false,
+  currentUserRole: 'admin',
+  isLoadError: false,
+};
 
 /**
  * G6-T03: Operational dashboard page — queue overview, alert dashboard,
@@ -207,9 +233,10 @@ export function OperationalDashboardPage(): ReactNode {
       {/* ── Queue Overview by State ───────────────────────────────────── */}
       <HbcTypography intent="heading2">Queue Overview</HbcTypography>
       {requests.length === 0 && !loading ? (
-        <HbcEmptyState
-          title="No provisioning requests"
-          description="Provisioning requests will appear here once submitted."
+        <HbcSmartEmptyState
+          config={DASHBOARD_EMPTY_CONFIG}
+          context={DASHBOARD_EMPTY_CONTEXT}
+          variant="inline"
         />
       ) : (
         <div className={styles.stateGrid}>
