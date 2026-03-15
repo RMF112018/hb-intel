@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G6/W0-G6-Admin-Support-and-Observability-Plan.md`
 > **Related:** `packages/provisioning/src/failure-modes.ts`; `packages/features/admin/src/`
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G6
 **Locked decisions served:** LD-01, LD-02, LD-03, LD-04, LD-09, LD-10
 
@@ -147,9 +147,12 @@ Before T07 is ready for review:
 
 During active T07 work:
 
-- Record any integration rule violations found and corrected
-- Record whether all admin failure modes in AFM-01–AFM-09 have confirmed UI handling
-- Record any scope boundary violations found and corrected
+- ✅ **Integration rule violations found:** 0. All integration points (DI boundary, permission enforcement, component sourcing) confirmed correct.
+- ✅ **DI boundary verified:** `@hbc/provisioning` does NOT appear in `packages/features/admin/package.json`. Monitors receive data via `IProvisioningDataProvider` injection. Only `apps/admin/` imports `@hbc/provisioning`.
+- ✅ **Admin failure modes AFM-01–AFM-09:** All confirmed as handled. AFM-01 moot in Wave 0 (in-memory stores). AFM-02/03 have `.catch()` error handlers in polling services. AFM-04–06 handled by `runAction()` error/toast pattern. AFM-07 handled by `requireAdminAccessControl()` redirect. AFM-08 handled by fire-and-forget dispatch pattern. AFM-09 throws on not-found, caught by caller.
+- ✅ **Scope boundary violations found:** 0. No coordinator/requester/MyWork/notification-intelligence imports in `apps/admin/`.
+- ✅ **Configuration constants consolidated:** Extracted `ADMIN_RETRY_CEILING = 3` to `@hbc/features-admin/constants` — eliminated duplicate definitions in `ProvisioningOversightPage.tsx` (was `MAX_RETRY_ATTEMPTS`) and `provisioningFailureMonitor.ts` (was `RETRY_CEILING`). Consolidated duplicate `PROBE_STALENESS_MS` — removed local definition from `components/helpers.ts`, now re-exports from `constants/index.ts`.
+- ✅ **No magic numbers:** All timing, threshold, and retry values in `apps/admin/` use named constants from `@hbc/features-admin/constants`.
 
 ---
 

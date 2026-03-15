@@ -2,13 +2,10 @@ import type { AlertSeverity } from '../types/AlertSeverity.js';
 import type { IAdminAlert } from '../types/IAdminAlert.js';
 import type { ProbeHealthStatus } from '../types/ProbeHealthStatus.js';
 import type { StatusVariant } from '@hbc/ui-kit';
+import { PROBE_STALENESS_MS } from '../constants/index.js';
 
-/**
- * Staleness threshold for infrastructure probe results (30 minutes).
- *
- * @design SF17-T06
- */
-export const PROBE_STALENESS_MS = 30 * 60 * 1000;
+// Re-export for backward compatibility with consumers importing from helpers
+export { PROBE_STALENESS_MS };
 
 /**
  * Map probe health status to HbcStatusBadge variant.

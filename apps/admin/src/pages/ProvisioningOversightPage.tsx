@@ -12,6 +12,7 @@ import {
 import { HbcComplexityDial, HbcComplexityGate } from '@hbc/complexity';
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
 import { createProvisioningApiClient } from '@hbc/provisioning';
+import { ADMIN_RETRY_CEILING } from '@hbc/features-admin';
 import {
   HbcBanner,
   HbcButton,
@@ -53,9 +54,6 @@ const FILTER_TABS: LayoutTab[] = [
   { id: 'completed', label: 'Completed' },
   { id: 'all', label: 'All' },
 ];
-
-/** G6-T01: Retry ceiling per provisioning-runbook.md alert thresholds. */
-const MAX_RETRY_ATTEMPTS = 3;
 
 const useStyles = makeStyles({
   actionRow: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
@@ -285,7 +283,7 @@ export function ProvisioningOversightPage(): ReactNode {
         cell: ({ row }) => {
           const run = row.original;
           const isBusy = Boolean(activeActionByProjectId[run.projectId]);
-          const retryExhausted = run.retryCount >= MAX_RETRY_ATTEMPTS;
+          const retryExhausted = run.retryCount >= ADMIN_RETRY_CEILING;
           return (
             <div className={styles.actionRow}>
               <HbcButton size="sm" variant="secondary" onClick={() => setSelectedRun(run)}>
@@ -307,7 +305,7 @@ export function ProvisioningOversightPage(): ReactNode {
                       >
                         {activeActionByProjectId[run.projectId] === 'Retrying'
                           ? 'Retrying…'
-                          : `Retry (${run.retryCount}/${MAX_RETRY_ATTEMPTS})`}
+                          : `Retry (${run.retryCount}/${ADMIN_RETRY_CEILING})`}
                       </HbcButton>
                     )}
                   </PermissionGate>
@@ -460,7 +458,7 @@ export function ProvisioningOversightPage(): ReactNode {
         description={(() => {
           const retryRun = confirmAction ? allRuns.find((r) => r.projectId === confirmAction.projectId) : undefined;
           const attempt = (retryRun?.retryCount ?? 0) + 1;
-          return `This is retry attempt ${attempt} of ${MAX_RETRY_ATTEMPTS}. Force-retrying a structural or permissions failure may produce duplicate partial state if the failed step was not idempotent. Confirm only if you have investigated the failure cause.`;
+          return `This is retry attempt ${attempt} of ${ADMIN_RETRY_CEILING}. Force-retrying a structural or permissions failure may produce duplicate partial state if the failed step was not idempotent. Confirm only if you have investigated the failure cause.`;
         })()}
         confirmLabel="Force Retry"
         variant="danger"
@@ -546,7 +544,7 @@ function ProvisioningDetailContent({
   return (
     <>
       {/* ── G6-T05: Contextual coaching callouts ──────────────────────── */}
-      {run.retryCount >= MAX_RETRY_ATTEMPTS && (
+      {run.retryCount >= ADMIN_RETRY_CEILING && (
         <HbcCoachingCallout
           message="Maximum retries reached. Escalation is required. See the escalation procedure in the runbook."
           actionLabel="Escalation Steps"

@@ -16,6 +16,9 @@ export const PROBE_MAX_RETRY = 3;
 /** Staleness threshold for probe data — 30 minutes (2× probe interval). */
 export const PROBE_STALENESS_MS = 1_800_000;
 
+/** Maximum provisioning retry attempts before escalation is required (provisioning-runbook.md). */
+export const ADMIN_RETRY_CEILING = 3;
+
 /** SharePoint list title for approval authority rules */
 export const APPROVAL_RULE_LIST_TITLE = 'HBC_ApprovalAuthorityRules';
 
