@@ -1,6 +1,6 @@
 {
   "name": "@hbc/spfx-admin",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,6 +20,7 @@
     "@hbc/query-hooks": "workspace:*",
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
+    "@hbc/smart-empty-state": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@hbc/features-admin": "workspace:*",
     "@fluentui/react-components": "^9.56.0",

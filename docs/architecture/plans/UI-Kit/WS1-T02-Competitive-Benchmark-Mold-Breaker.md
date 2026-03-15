@@ -3,6 +3,7 @@
 > **Doc Classification:** Canonical Normative Plan — Workstream I task plan for competitive benchmarking and mold-breaker doctrine. Produces the directional authority that governs visual decision-making across T03–T08. Must be complete before T03 visual language work begins.
 
 **Workstream Reference:** Workstream I — UI Kit Production Scrub Plan
+**Read With:** docs/architecture/plans/UI-Kit/WS1-UI-Kit-Production-Scrub-Plan.md
 **Sequencing:** Phase A (parallel with T01, no dependencies within the workstream)
 **Depends On:** Uploaded market studies (Procore, ACC, InEight, CMiC competitive analysis)
 **Unlocks:** T03 visual language direction; T04 hierarchy doctrine; T05 density/field doctrine; T06 data surface direction; T07 component quality bar

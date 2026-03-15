@@ -3,6 +3,7 @@
 > **Doc Classification:** Canonical Normative Plan — Workstream I task plan for UI kit inventory and maturity assessment. Must be completed before any T03–T07 implementation begins; outputs govern prioritization across all subsequent tasks.
 
 **Workstream Reference:** Workstream I — UI Kit Production Scrub Plan
+**Read With:** docs/architecture/plans/UI-Kit/WS1-UI-Kit-Production-Scrub-Plan.md
 **Sequencing:** Phase A (parallel with T02, no dependencies within the workstream)
 **Depends On:** None
 **Unlocks:** T02–T13 prioritization; T07 component selection order; T12 consumer audit scope
