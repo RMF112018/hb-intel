@@ -12,6 +12,7 @@ const ACCOUNTING_SHELL_CONFIG: SimplifiedShellConfig = {
   projectHubUrl: resolveProjectHubUrl(),
   toolPickerItems: [
     { label: 'Overview', path: '/' },
+    { label: 'Project Review', path: '/project-review' },
     { label: 'Invoices', path: '/invoices' },
     { label: 'Budgets', path: '/budgets' },
   ],

@@ -16,6 +16,8 @@ export default defineConfig(({ command, mode }) => ({
       '@hbc/ui-kit': path.resolve(__dirname, '../../packages/ui-kit/src'),
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../../packages/ui-kit/src/app-shell.ts'),
       '@hbc/ui-kit/theme': resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts'),
+      '@hbc/bic-next-move': path.resolve(__dirname, '../../packages/bic-next-move/src/index.ts'),
+      '@hbc/complexity': path.resolve(__dirname, '../../packages/complexity/src/index.ts'),
       '@hbc/provisioning': resolve(__dirname, '../../packages/provisioning/src/index.ts'),
       '@hbc/features-accounting': path.resolve(__dirname, '../../packages/features/accounting/src/index.ts'),
       '@hbc/features-estimating': path.resolve(__dirname, '../../packages/features/estimating/src/index.ts'),

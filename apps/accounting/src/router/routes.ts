@@ -21,4 +21,20 @@ const invoicesRoute = createRoute({
   component: lazyRouteComponent(() => import('../pages/InvoicesPage.js').then((m) => ({ default: m.InvoicesPage }))),
 });
 
-export const webpartRoutes = [indexRoute, budgetsRoute, invoicesRoute];
+const projectReviewQueueRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/project-review',
+  component: lazyRouteComponent(() =>
+    import('../pages/ProjectReviewQueuePage.js').then((m) => ({ default: m.ProjectReviewQueuePage }))
+  ),
+});
+
+const projectReviewDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/project-review/$requestId',
+  component: lazyRouteComponent(() =>
+    import('../pages/ProjectReviewDetailPage.js').then((m) => ({ default: m.ProjectReviewDetailPage }))
+  ),
+});
+
+export const webpartRoutes = [indexRoute, budgetsRoute, invoicesRoute, projectReviewQueueRoute, projectReviewDetailRoute];

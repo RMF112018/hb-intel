@@ -18,6 +18,8 @@
     "@hbc/data-access": "workspace:*",
     "@hbc/query-hooks": "workspace:*",
     "@hbc/auth": "workspace:*",
+    "@hbc/bic-next-move": "workspace:*",
+    "@hbc/provisioning": "workspace:*",
     "@hbc/shell": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@fluentui/react-components": "^9.56.0",

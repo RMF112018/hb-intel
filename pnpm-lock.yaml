@@ -62,6 +62,9 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/bic-next-move':
+        specifier: workspace:*
+        version: link:../../packages/bic-next-move
       '@hbc/complexity':
         specifier: workspace:*
         version: link:../../packages/complexity
@@ -71,6 +74,9 @@ importers:
       '@hbc/models':
         specifier: workspace:*
         version: link:../../packages/models
+      '@hbc/provisioning':
+        specifier: workspace:*
+        version: link:../../packages/provisioning
       '@hbc/query-hooks':
         specifier: workspace:*
         version: link:../../packages/query-hooks
