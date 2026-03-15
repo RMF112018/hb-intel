@@ -7,7 +7,9 @@
 
 This file is the canonical location for AppInsights KQL query templates used to investigate
 and monitor the HB Intel provisioning saga. Copy queries directly into the Azure Portal
-Log Analytics workspace or Application Insights Logs blade.
+Log Analytics workspace or Application Insights Logs blade. Queries work against any Log
+Analytics workspace or Application Insights resource with access to the HB Intel Azure
+Function App telemetry. Standard AppInsights ingestion latency applies (typically 2–5 minutes).
 
 ---
 
@@ -45,6 +47,7 @@ customEvents
 ## Query 3 — Average step durations
 
 Use to identify which saga step is the bottleneck when provisioning is slow.
+Results are ordered by duration descending (slowest first).
 
 ```kusto
 customMetrics
@@ -71,6 +74,7 @@ customEvents
 ## Query 5 — Step 5 deferral rate trend (weekly)
 
 Use to monitor the timer-deferral pattern and confirm overnight retry cadence is healthy.
+Results are expressed as percentages (0–100).
 
 ```kusto
 customMetrics
@@ -83,5 +87,5 @@ customMetrics
 ## Notes
 
 - All queries require `APPLICATIONINSIGHTS_CONNECTION_STRING` configured in the Azure Function App settings.
-- `correlationId` is the primary correlation key across saga status writes, SignalR events, and telemetry payloads.
+- `correlationId` is the primary correlation key across saga status writes, SignalR events, and telemetry payloads. Obtain it from provisioning failure alerts, the admin failures inbox (`/provisioning-failures`), or request detail views in the provisioning status UI. Use it as the `<CORRELATION_ID>` placeholder in Query 1.
 - Alert rule KQL (stuck workflow, timer completion missing) is in `docs/maintenance/provisioning-observability-runbook.md §Alert Rule Definitions`.
