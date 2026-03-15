@@ -39,3 +39,8 @@ export async function executeStep4(
   }
   return result;
 }
+
+/** D-PH6-05 compensation: no-op — Step 1 site deletion removes all provisioned lists. */
+export async function compensateStep4(): Promise<void> {
+  // no-op: Step 1 site deletion removes all provisioned lists.
+}

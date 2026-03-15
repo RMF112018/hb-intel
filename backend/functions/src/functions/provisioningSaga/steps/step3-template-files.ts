@@ -81,3 +81,8 @@ export async function executeStep3(
   }
   return result;
 }
+
+/** D-PH6-05 compensation: no-op — Step 1 site deletion removes all template files and department libraries. */
+export async function compensateStep3(): Promise<void> {
+  // no-op: Step 1 site deletion removes all template files and department libraries.
+}

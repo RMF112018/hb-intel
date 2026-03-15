@@ -9,8 +9,8 @@ import type {
 import { withRetry } from '../../utils/retry.js';
 import { executeStep1, compensateStep1 } from './steps/step1-create-site.js';
 import { executeStep2, compensateStep2 } from './steps/step2-document-library.js';
-import { executeStep3 } from './steps/step3-template-files.js';
-import { executeStep4 } from './steps/step4-data-lists.js';
+import { executeStep3, compensateStep3 } from './steps/step3-template-files.js';
+import { executeStep4, compensateStep4 } from './steps/step4-data-lists.js';
 import { executeStep5 } from './steps/step5-web-parts.js';
 import { executeStep6 } from './steps/step6-permissions.js';
 import { executeStep7, compensateStep7 } from './steps/step7-hub-association.js';
@@ -403,6 +403,12 @@ export class SagaOrchestrator {
     try {
       if (status.steps.find((s) => s.stepNumber === 7)?.status === 'Completed') {
         await compensateStep7(this.services, status);
+      }
+      if (status.steps.find((s) => s.stepNumber === 4)?.status === 'Completed') {
+        await compensateStep4();
+      }
+      if (status.steps.find((s) => s.stepNumber === 3)?.status === 'Completed') {
+        await compensateStep3();
       }
       if (status.steps.find((s) => s.stepNumber === 2)?.status === 'Completed') {
         await compensateStep2();
