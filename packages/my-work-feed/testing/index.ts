@@ -1,3 +1,11 @@
-// @hbc/my-work-feed/testing — test factories and mocks
-// Populated by T02+
-export {};
+export { createMockMyWorkItem } from './createMockMyWorkItem.js';
+export { createMockMyWorkQuery } from './createMockMyWorkQuery.js';
+export { createMockMyWorkFeedResult } from './createMockMyWorkFeedResult.js';
+export {
+  mockItemClasses,
+  mockPriorityLanes,
+  mockStates,
+  mockOwnerTypes,
+  mockSources,
+  mockSyncStatuses,
+} from './mockMyWorkUnions.js';
