@@ -12,6 +12,12 @@ export interface IProvisioningApiClient {
     newState: ProjectSetupRequestState,
     extras?: { projectNumber?: string; clarificationNote?: string }
   ): Promise<IProjectSetupRequest>;
+  /**
+   * W0-G5-T01: List project setup requests owned by a specific submitter.
+   * Secure, requester-scoped alternative to the global `listRequests`.
+   * The server filters by `submittedBy` — callers must pass the authenticated user's UPN.
+   */
+  listMyRequests(submitterId: string, state?: ProjectSetupRequestState): Promise<IProjectSetupRequest[]>;
   getProvisioningStatus(projectId: string): Promise<IProvisioningStatus | null>;
   listFailedRuns(): Promise<IProvisioningStatus[]>;
   /** W0-G4-T04: List all provisioning runs, optionally filtered by overallStatus. */
@@ -68,6 +74,12 @@ export function createProvisioningApiClient(
     async listRequests(state) {
       const qs = state ? `?state=${state}` : '';
       const res = await authFetch(`/project-setup-requests${qs}`);
+      return res.json();
+    },
+    async listMyRequests(submitterId, state) {
+      const params = new URLSearchParams({ submitterId });
+      if (state) params.set('state', state);
+      const res = await authFetch(`/project-setup-requests?${params.toString()}`);
       return res.json();
     },
     async advanceState(requestId, newState, extras = {}) {

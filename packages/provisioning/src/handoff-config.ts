@@ -57,6 +57,20 @@ export function validateSetupHandoffReadiness(request: IProjectSetupRequest): st
   return null;
 }
 
+/**
+ * W0-G5-T05: Canonical resolver for the Project Hub URL from a completed setup request.
+ * Returns the provisioned SharePoint site URL when the request is in Completed state
+ * and the URL is available; returns null otherwise.
+ *
+ * This is the single source of truth for T05 completion surfaces that need the Project Hub link.
+ */
+export function resolveProjectHubUrl(request: IProjectSetupRequest): string | null {
+  if (request.state === 'Completed' && request.siteUrl) {
+    return request.siteUrl;
+  }
+  return null;
+}
+
 // ─── Handoff Config ──────────────────────────────────────────────────────────
 
 export const SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG: IHandoffConfig<

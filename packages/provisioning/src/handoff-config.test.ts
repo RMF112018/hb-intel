@@ -3,6 +3,7 @@ import type { IProjectSetupRequest } from '@hbc/models';
 import {
   SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG,
   validateSetupHandoffReadiness,
+  resolveProjectHubUrl,
 } from './handoff-config.js';
 
 function makeRequest(overrides?: Partial<IProjectSetupRequest>): IProjectSetupRequest {
@@ -62,6 +63,30 @@ describe('validateSetupHandoffReadiness', () => {
       makeRequest({ state: 'Provisioning', siteUrl: undefined }),
     );
     expect(result).toContain('fully completed');
+  });
+});
+
+// ─── resolveProjectHubUrl ───────────────────────────────────────────────────
+
+describe('resolveProjectHubUrl', () => {
+  it('returns siteUrl for a completed request with a site URL', () => {
+    expect(resolveProjectHubUrl(makeRequest())).toBe('https://hbc.sharepoint.com/sites/proj-1');
+  });
+
+  it('returns null when state is not Completed', () => {
+    expect(resolveProjectHubUrl(makeRequest({ state: 'Provisioning' }))).toBeNull();
+  });
+
+  it('returns null when siteUrl is undefined', () => {
+    expect(resolveProjectHubUrl(makeRequest({ siteUrl: undefined }))).toBeNull();
+  });
+
+  it('returns null when siteUrl is empty string', () => {
+    expect(resolveProjectHubUrl(makeRequest({ siteUrl: '' }))).toBeNull();
+  });
+
+  it('returns null when state is not Completed even if siteUrl is present', () => {
+    expect(resolveProjectHubUrl(makeRequest({ state: 'Failed', siteUrl: 'https://example.com' }))).toBeNull();
   });
 });
 

@@ -38,6 +38,7 @@ export type { IProjectHubSeedData } from './handoff-config.js';
 export {
   SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG,
   validateSetupHandoffReadiness,
+  resolveProjectHubUrl,
 } from './handoff-config.js';
 
 // W0-G3-T06: Summary field registry, status labels, department labels, urgency indicators
@@ -50,6 +51,7 @@ export {
   CORE_SUMMARY_FIELD_IDS,
   STATE_BADGE_VARIANTS,
   getStateBadgeVariant,
+  REQUEST_STATE_KEBAB_MAP,
 } from './summary-field-registry.js';
 
 // W0-G3-T06: History level model and content descriptors

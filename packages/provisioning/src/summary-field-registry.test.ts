@@ -5,6 +5,7 @@ import {
   URGENCY_INDICATOR_MAP,
   PROJECT_SETUP_SUMMARY_FIELDS,
   CORE_SUMMARY_FIELD_IDS,
+  REQUEST_STATE_KEBAB_MAP,
 } from './summary-field-registry.js';
 
 // ─── PROJECT_SETUP_STATUS_LABELS ─────────────────────────────────────────────
@@ -115,5 +116,30 @@ describe('CORE_SUMMARY_FIELD_IDS', () => {
   it('does not contain gated fields', () => {
     expect(CORE_SUMMARY_FIELD_IDS).not.toContain('bicDetail');
     expect(CORE_SUMMARY_FIELD_IDS).not.toContain('entraGroupIds');
+  });
+});
+
+// ─── REQUEST_STATE_KEBAB_MAP ────────────────────────────────────────────────
+
+describe('REQUEST_STATE_KEBAB_MAP', () => {
+  it('has exactly 8 entries matching all states', () => {
+    expect(Object.keys(REQUEST_STATE_KEBAB_MAP)).toHaveLength(8);
+  });
+
+  it('maps every state to a non-empty kebab-case string', () => {
+    for (const value of Object.values(REQUEST_STATE_KEBAB_MAP)) {
+      expect(typeof value).toBe('string');
+      expect(value.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('covers the same keys as PROJECT_SETUP_STATUS_LABELS', () => {
+    expect(Object.keys(REQUEST_STATE_KEBAB_MAP).sort()).toEqual(
+      Object.keys(PROJECT_SETUP_STATUS_LABELS).sort(),
+    );
+  });
+
+  it('maps NeedsClarification to clarification-needed (G5 parity)', () => {
+    expect(REQUEST_STATE_KEBAB_MAP.NeedsClarification).toBe('clarification-needed');
   });
 });

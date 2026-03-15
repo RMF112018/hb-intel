@@ -125,6 +125,28 @@ export function getStateBadgeVariant(state: ProjectSetupRequestState): string {
   return STATE_BADGE_VARIANTS[state] ?? 'neutral';
 }
 
+// ─── State Kebab-Case Map ────────────────────────────────────────────────────
+
+/**
+ * W0-G5-T02: PascalCase → kebab-case mapping for project setup request states.
+ *
+ * Internal model types use PascalCase (e.g. 'NeedsClarification').
+ * G5 parity contracts use kebab-case (e.g. 'clarification-needed').
+ *
+ * Note: NeedsClarification maps to 'clarification-needed' (not 'needs-clarification')
+ * per the G5 parity contract specification.
+ */
+export const REQUEST_STATE_KEBAB_MAP: Readonly<Record<ProjectSetupRequestState, string>> = {
+  Submitted: 'submitted',
+  UnderReview: 'under-review',
+  NeedsClarification: 'clarification-needed',
+  AwaitingExternalSetup: 'awaiting-external-setup',
+  ReadyToProvision: 'ready-to-provision',
+  Provisioning: 'provisioning',
+  Completed: 'completed',
+  Failed: 'failed',
+};
+
 /** Core summary fields (no tier gate). */
 export const CORE_SUMMARY_FIELD_IDS = PROJECT_SETUP_SUMMARY_FIELDS
   .filter((f) => !f.minTier)
