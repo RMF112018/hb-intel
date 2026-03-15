@@ -21,6 +21,7 @@
     "@hbc/step-wizard": "workspace:*",
     "@hbc/session-state": "workspace:*",
     "@hbc/smart-empty-state": "workspace:*",
+    "@hbc/features-estimating": "workspace:*",
     "@azure/msal-browser": "^4.0.0",
     "@azure/msal-react": "^3.0.0",
     "@fluentui/react-components": "^9.56.0",

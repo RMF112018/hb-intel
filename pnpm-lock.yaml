@@ -867,6 +867,9 @@ importers:
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
+      '@hbc/features-estimating':
+        specifier: workspace:*
+        version: link:../../packages/features/estimating
       '@hbc/models':
         specifier: workspace:*
         version: link:../../packages/models

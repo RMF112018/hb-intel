@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G5/W0-G5-Hosted-PWA-Requester-Surfaces-Plan.md`
 > **Related:** `docs/explanation/feature-decisions/PH7-SF-12-Shared-Feature-Session-State.md`; `docs/explanation/feature-decisions/PH7-SF-05-Shared-Feature-Step-Wizard.md`
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G5
 **Locked decisions served:** LD-01, LD-02, LD-03
 
@@ -179,3 +179,41 @@ Before T03 can be closed:
 - All acceptance criteria verified and checked off
 - TypeScript compilation clean
 - No undocumented `[TODO]` items related to draft persistence logic
+
+---
+
+## Closure Record
+
+**Date:** 2026-03-15
+
+### Gate Check Outcomes
+
+**`@hbc/session-state`:** READY. Full IndexedDB draft layer, `useDraft<T>`, `useAutoSaveDraft`, `useDraftStore`, `SessionStateProvider` all stable and integrated.
+
+**`@hbc/step-wizard`:** READY. Step IDs, `StepStatus`, ordering modes, and `draftKey` config all stable. Step wizard manages its own step progression state via `useDraftStore` internally.
+
+**`@hbc/notification-intelligence`:** READY FOR PWA. `buildActionUrl()` already generates PWA-compatible clarification-return URLs (test coverage confirms `/project-setup?mode=clarification-return&requestId=...` pattern). No polling fallback needed.
+
+### Draft Key Strategy (Finalized)
+
+- **New request:** Single draft per user via `PROJECT_SETUP_DRAFT_KEY` (`'project-setup-form-draft'`). Multiple simultaneous drafts are not a Wave 0 concern.
+- **Clarification-return:** Per-request draft via `buildClarificationDraftKey(requestId)` (`'project-setup-clarification-{requestId}'`).
+
+### Draft TTL Values (Finalized)
+
+- **New-request draft:** 48 hours (`NEW_REQUEST_DRAFT_TTL_HOURS`) — aligned with G4.
+- **Clarification-return draft:** 168 hours / 7 days (`CLARIFICATION_DRAFT_TTL_HOURS`) — aligned with G4.
+
+### Draft Payload Type Location
+
+Draft payload types (`ISetupFormDraft`, `IClarificationDraft`) are defined in `packages/features/estimating/src/project-setup/types/IProjectSetupWizard.ts` and consumed by the PWA via `@hbc/features-estimating` import. No duplicate type definition in PWA-local code.
+
+### Notification vs. Polling Decision
+
+Notification routing via `@hbc/notification-intelligence` is functional for PWA. No polling fallback implemented. Clarification-return is surfaced via:
+1. Notification deep-link (via `buildActionUrl()`)
+2. Status list action button in `/projects` (click "Respond" on `NeedsClarification` rows)
+
+### T01 Parity Corrections Applied
+
+As part of T03 execution, the T01 wizard config was replaced with the canonical `PROJECT_SETUP_WIZARD_CONFIG` from `@hbc/features-estimating`. Step IDs, labels, field groupings, and validation rules now match the G4 contract per T02 parity contract §9.

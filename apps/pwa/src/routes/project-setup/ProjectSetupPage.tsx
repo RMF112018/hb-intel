@@ -1,90 +1,226 @@
 /**
- * W0-G5-T01: Project Setup wizard page.
- * Uses HbcStepWizard with the project setup config. On completion, submits
- * via useSubmitProjectRequest and navigates to /projects.
+ * W0-G5-T03: Project Setup wizard page with draft persistence and clarification-return.
+ * Follows the proven SPFx pattern from apps/estimating/src/pages/NewRequestPage.tsx.
+ * Uses canonical PROJECT_SETUP_WIZARD_CONFIG from @hbc/features-estimating.
  */
-import { useState, useCallback } from 'react';
-import type { ReactElement, ReactNode } from 'react';
-import { useRouter } from '@tanstack/react-router';
-import { HbcStepWizard } from '@hbc/step-wizard';
-import { WorkspacePageShell } from '@hbc/ui-kit';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useRouter, useSearch } from '@tanstack/react-router';
+import { useCurrentSession } from '@hbc/auth';
+import type { ISetupFormDraft, ProjectSetupWizardMode } from '@hbc/features-estimating';
+import {
+  PROJECT_SETUP_WIZARD_CONFIG,
+  useProjectSetupDraft,
+  buildClarificationReturnState,
+} from '@hbc/features-estimating';
 import type { IProjectSetupRequest } from '@hbc/models';
-import { useCurrentUser } from '@hbc/auth';
-import { useSubmitProjectRequest } from '../../hooks/provisioning/index.js';
-import { PROJECT_SETUP_WIZARD_CONFIG } from './projectSetupWizardConfig.js';
-import { ProjectDetailsStep } from './steps/ProjectDetailsStep.js';
-import { ContractInfoStep } from './steps/ContractInfoStep.js';
-import { TeamAssignmentStep } from './steps/TeamAssignmentStep.js';
-import { AddOnsStep } from './steps/AddOnsStep.js';
-import { ReviewStep } from './steps/ReviewStep.js';
+import { createProvisioningApiClient } from '@hbc/provisioning';
+import type { IStepWizardConfig } from '@hbc/step-wizard';
+import { HbcStepWizard } from '@hbc/step-wizard';
+import { HbcSyncStatusBadge } from '@hbc/session-state';
+import { HbcBanner, WorkspacePageShell } from '@hbc/ui-kit';
+import type { NormalizedAuthSession } from '@hbc/auth';
+import { ResumeBanner } from './ResumeBanner.js';
+import { ProjectInfoStep } from './steps/ProjectInfoStep.js';
+import { DepartmentStep } from './steps/DepartmentStep.js';
+import { TeamStep } from './steps/TeamStep.js';
+import { TemplateAddOnsStep } from './steps/TemplateAddOnsStep.js';
+import { ReviewSubmitStep } from './steps/ReviewSubmitStep.js';
 
-function createBlankRequest(submittedBy: string): Partial<IProjectSetupRequest> {
-  return {
-    requestId: crypto.randomUUID(),
-    projectId: crypto.randomUUID(),
-    submittedBy,
-    groupMembers: [],
-  };
+const EMPTY_DEFAULTS: Partial<IProjectSetupRequest> = {
+  projectName: '',
+  projectLocation: '',
+  projectType: 'GC',
+  projectStage: 'Pursuit',
+  groupMembers: [],
+};
+
+function resolveSessionToken(session: NormalizedAuthSession | null): string {
+  const payload = session?.rawContext?.payload;
+  if (payload && typeof payload === 'object') {
+    const rawToken =
+      (payload as Record<string, unknown>).accessToken ??
+      (payload as Record<string, unknown>).token;
+    if (typeof rawToken === 'string' && rawToken.trim().length > 0) return rawToken;
+  }
+  return session?.providerIdentityRef ?? 'mock-token';
 }
 
-export function ProjectSetupPage(): ReactElement {
+export function ProjectSetupPage(): ReactNode {
   const router = useRouter();
-  const currentUser = useCurrentUser();
-  const submitMutation = useSubmitProjectRequest();
+  const { mode: rawMode, requestId } = useSearch({ strict: false }) as {
+    mode?: string;
+    requestId?: string;
+  };
+  const session = useCurrentSession();
+  const authToken = useMemo(() => resolveSessionToken(session), [session]);
 
-  const [item, setItem] = useState<Partial<IProjectSetupRequest>>(() =>
-    createBlankRequest(currentUser?.email ?? ''),
-  );
+  const mode = (rawMode ?? 'new-request') as ProjectSetupWizardMode;
+  const { draft, saveDraft, clearDraft, resumeContext, isSavePending } =
+    useProjectSetupDraft(mode, requestId);
 
-  const handleChange = useCallback((patch: Partial<IProjectSetupRequest>) => {
-    setItem((prev) => ({ ...prev, ...patch }));
-  }, []);
+  const [request, setRequest] = useState<Partial<IProjectSetupRequest>>(() => {
+    if (resumeContext.decision === 'auto-continue' && draft && 'fields' in draft) {
+      return (draft as ISetupFormDraft).fields;
+    }
+    return { ...EMPTY_DEFAULTS };
+  });
 
-  const handleSubmit = useCallback(() => {
-    submitMutation.mutate(
-      { ...item, submittedAt: new Date().toISOString(), state: 'Submitted' },
-      {
-        onSuccess: () => {
-          void router.navigate({ to: '/projects' });
-        },
-      },
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Clarification-return: load existing request data when mode requires it
+  useEffect(() => {
+    if (mode !== 'clarification-return' || !requestId) return;
+    let mounted = true;
+
+    const client = createProvisioningApiClient(
+      import.meta.env.VITE_API_BASE_URL ?? '',
+      async () => authToken,
     );
-  }, [item, submitMutation, router]);
 
-  const renderStep = useCallback(
-    (stepId: string, wizardItem: Partial<IProjectSetupRequest>): ReactNode => {
-      switch (stepId) {
-        case 'details':
-          return <ProjectDetailsStep item={wizardItem} onChange={handleChange} />;
-        case 'contract':
-          return <ContractInfoStep item={wizardItem} onChange={handleChange} />;
-        case 'team':
-          return <TeamAssignmentStep item={wizardItem} onChange={handleChange} />;
-        case 'addons':
-          return <AddOnsStep item={wizardItem} onChange={handleChange} />;
-        case 'review':
-          return (
-            <ReviewStep
-              item={wizardItem}
-              onSubmit={handleSubmit}
-              isSubmitting={submitMutation.isPending}
-            />
-          );
-        default:
-          return null;
+    (async () => {
+      const listed = await client.listRequests();
+      if (!mounted) return;
+      const existing = listed.find((r) => r.requestId === requestId);
+      if (existing) {
+        setRequest(existing);
+        buildClarificationReturnState(existing.clarificationItems ?? []);
       }
+    })().catch(() => {
+      // Preserve fallback rendering on API failure.
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [mode, requestId, authToken]);
+
+  const handleChange = useCallback(
+    (updates: Partial<IProjectSetupRequest>) => {
+      setRequest((prev) => {
+        const next = { ...prev, ...updates };
+        saveDraft({
+          fields: next,
+          stepStatuses: {},
+          lastSavedAt: new Date().toISOString(),
+        } as ISetupFormDraft);
+        return next;
+      });
     },
-    [handleChange, handleSubmit, submitMutation.isPending],
+    [saveDraft],
   );
+
+  const handleResume = useCallback(() => {
+    if (draft && 'fields' in draft) {
+      setRequest((draft as ISetupFormDraft).fields);
+    }
+  }, [draft]);
+
+  const handleStartNew = useCallback(() => {
+    clearDraft();
+    setRequest({ ...EMPTY_DEFAULTS });
+  }, [clearDraft]);
+
+  const handleSubmit = useCallback(async () => {
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const client = createProvisioningApiClient(
+        import.meta.env.VITE_API_BASE_URL ?? '',
+        async () => authToken,
+      );
+
+      await client.submitRequest({
+        projectName: request.projectName ?? '',
+        projectLocation: request.projectLocation ?? '',
+        projectType: request.projectType ?? 'GC',
+        projectStage: (request.projectStage as 'Pursuit' | 'Active') ?? 'Pursuit',
+        groupMembers: request.groupMembers ?? [],
+        department: request.department,
+        projectLeadId: request.projectLeadId,
+        viewerUPNs: request.viewerUPNs,
+        addOns: request.addOns,
+        estimatedValue: request.estimatedValue,
+        clientName: request.clientName,
+        startDate: request.startDate,
+        contractType: request.contractType,
+      });
+
+      // IR-01: Clear draft only on API success
+      clearDraft();
+      void router.navigate({ to: '/projects' });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Submission failed');
+    } finally {
+      setSubmitting(false);
+    }
+  }, [authToken, request, clearDraft, router]);
+
+  const wizardConfig: IStepWizardConfig<IProjectSetupRequest> = useMemo(
+    () => ({
+      ...PROJECT_SETUP_WIZARD_CONFIG,
+      onAllComplete: () => handleSubmit(),
+    }),
+    [handleSubmit],
+  );
+
+  function renderStepBody(stepId: string, _item: IProjectSetupRequest): ReactNode {
+    switch (stepId) {
+      case 'project-info':
+        return <ProjectInfoStep request={request} onChange={handleChange} />;
+      case 'department':
+        return <DepartmentStep request={request} onChange={handleChange} />;
+      case 'project-team':
+        return <TeamStep request={request} onChange={handleChange} />;
+      case 'template-addons':
+        return <TemplateAddOnsStep request={request} onChange={handleChange} />;
+      case 'review-submit':
+        return (
+          <ReviewSubmitStep
+            request={request}
+            onSubmit={handleSubmit}
+            submitting={submitting}
+            mode={mode}
+          />
+        );
+      default:
+        return null;
+    }
+  }
+
+  // Session loading guard
+  if (!session) {
+    return (
+      <WorkspacePageShell layout="landing" title="Loading..." isLoading>
+        {null}
+      </WorkspacePageShell>
+    );
+  }
 
   return (
-    <WorkspacePageShell layout="landing" title="New Project Setup">
-      <HbcStepWizard
-        item={item}
-        config={PROJECT_SETUP_WIZARD_CONFIG}
-        renderStep={renderStep}
+    <WorkspacePageShell layout="landing" title="New Project Setup Request">
+      <ResumeBanner
+        resumeContext={resumeContext as ReturnType<typeof useProjectSetupDraft>['resumeContext'] & { existingDraft: ISetupFormDraft | null }}
+        onResume={handleResume}
+        onStartNew={handleStartNew}
+      />
+
+      <HbcSyncStatusBadge />
+
+      {error && <HbcBanner variant="error">{error}</HbcBanner>}
+
+      <HbcStepWizard<IProjectSetupRequest>
+        item={request as IProjectSetupRequest}
+        config={wizardConfig}
+        renderStep={renderStepBody}
         variant="horizontal"
       />
+
+      {isSavePending && (
+        <p aria-live="polite">Saving draft...</p>
+      )}
     </WorkspacePageShell>
   );
 }

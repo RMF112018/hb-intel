@@ -169,10 +169,14 @@ export const humanResourcesRoute = createWorkspaceRoute(
   () => import('../pages/HumanResourcesPage.js').then((m) => ({ default: m.HumanResourcesPage })),
 );
 
-// W0-G5-T01: Project setup wizard route (non-workspace, auth-gated).
+// W0-G5-T03: Project setup wizard route with search params for mode/requestId.
 export const projectSetupRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'project-setup',
+  validateSearch: (search: Record<string, unknown>): { mode: string; requestId?: string } => ({
+    mode: (search.mode as string) ?? 'new-request',
+    requestId: typeof search.requestId === 'string' ? search.requestId : undefined,
+  }),
   beforeLoad: () => {
     requireAuth();
   },

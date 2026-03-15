@@ -68,7 +68,7 @@ export function ProjectsPage(): ReactElement {
   );
 
   const handleNewRequest = useCallback(() => {
-    void router.navigate({ to: '/project-setup' });
+    void router.navigate({ to: '/project-setup', search: { mode: 'new-request' } });
   }, [router]);
 
   if (isLoading) {
@@ -106,6 +106,7 @@ export function ProjectsPage(): ReactElement {
             <th>Type</th>
             <th>Status</th>
             <th>Submitted</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -130,6 +131,23 @@ export function ProjectsPage(): ReactElement {
                 {PROJECT_SETUP_STATUS_LABELS[req.state]}
               </td>
               <td>{req.submittedAt ? new Date(req.submittedAt).toLocaleDateString() : '—'}</td>
+              <td>
+                {req.state === 'NeedsClarification' && (
+                  <button
+                    type="button"
+                    className="hbc-btn hbc-btn--ghost hbc-btn--sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void router.navigate({
+                        to: '/project-setup',
+                        search: { mode: 'clarification-return', requestId: req.requestId },
+                      });
+                    }}
+                  >
+                    Respond
+                  </button>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
