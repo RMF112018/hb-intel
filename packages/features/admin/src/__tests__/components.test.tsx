@@ -247,7 +247,7 @@ describe('AdminAlertDashboard', () => {
     render(React.createElement(Wrapper, null,
       React.createElement(AdminAlertDashboard),
     ));
-    expect(screen.getByText('No alerts match the current filters.')).toBeInTheDocument();
+    expect(screen.getByText('No alerts')).toBeInTheDocument();
   });
 
   it('renders alerts grouped by severity', () => {
