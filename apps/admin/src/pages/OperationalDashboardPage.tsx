@@ -12,12 +12,14 @@ import { AdminAlertDashboard, ImplementationTruthDashboard } from '@hbc/features
 import {
   HbcBanner,
   HbcCard,
+  HbcCoachingCallout,
   HbcEmptyState,
   HbcStatusBadge,
   HbcTypography,
   WorkspacePageShell,
 } from '@hbc/ui-kit';
 import { resolveSessionToken } from '../utils/resolveSessionToken.js';
+import { RUNBOOK_LINKS } from '../constants/runbookLinks.js';
 import {
   computeStateCounts,
   computeQueueHealthSummary,
@@ -186,6 +188,11 @@ export function OperationalDashboardPage(): ReactNode {
         </HbcCard>
       </div>
 
+      {/* ── G6-T05: Healthy state guidance ─────────────────────────────── */}
+      {healthSummary.overallHealth === 'healthy' && bottlenecks.length === 0 && (
+        <HbcCoachingCallout message="No active failures or stuck workflows. All systems operating normally." />
+      )}
+
       {/* ── Bottleneck Indicators ─────────────────────────────────────── */}
       {bottlenecks.length > 0 && (
         <div className={styles.bottleneckRow}>
@@ -224,6 +231,11 @@ export function OperationalDashboardPage(): ReactNode {
           <HbcBanner variant="info">
             Wave 0: alerts are in-memory only and do not persist across page reloads.
           </HbcBanner>
+          <HbcCoachingCallout
+            message="Alert thresholds are documented in the Provisioning Runbook."
+            actionLabel="Alert Thresholds"
+            onAction={() => window.open(RUNBOOK_LINKS.ALERT_THRESHOLDS, '_blank')}
+          />
           <AdminAlertDashboard />
         </div>
       </PermissionGate>
@@ -235,6 +247,11 @@ export function OperationalDashboardPage(): ReactNode {
           <HbcBanner variant="info">
             Probe data is stub until T06 implements live connections.
           </HbcBanner>
+          <HbcCoachingCallout
+            message="Run probes manually to check current infrastructure health. Results are cached for 30 minutes."
+            actionLabel="KQL Queries"
+            onAction={() => window.open(RUNBOOK_LINKS.KQL_QUERIES, '_blank')}
+          />
           <ImplementationTruthDashboard />
         </div>
       </PermissionGate>

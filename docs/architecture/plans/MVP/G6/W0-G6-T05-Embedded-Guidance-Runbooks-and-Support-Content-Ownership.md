@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G6/W0-G6-Admin-Support-and-Observability-Plan.md`
 > **Related:** `docs/maintenance/provisioning-runbook.md`; `docs/maintenance/provisioning-observability-runbook.md`; `packages/ui-kit/` (HbcCoachingCallout)
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G6
 **Locked decisions served:** LD-06, LD-07, LD-08, LD-09
 
@@ -152,7 +152,7 @@ Before T05 is ready for review:
 
 *(Record outcome of `@hbc/ui-kit` coaching callout inspection here before implementation begins.)*
 
-**`HbcCoachingCallout`:** `[VERIFY FROM UI-KIT]` — Inspect `packages/ui-kit/src/` to confirm export name and props.
+**`HbcCoachingCallout`:** ✅ Confirmed exported from `@hbc/ui-kit` (line 284 of barrel). Props: `message: string`, `actionLabel?: string`, `onAction?: () => void`, extends `IComplexityAwareProps`. Visible to Essential+Standard tiers, hidden at Expert. Gated by `showCoaching` context flag.
 
 ---
 
@@ -160,9 +160,10 @@ Before T05 is ready for review:
 
 During active T05 work:
 
-- Record the `@hbc/ui-kit` coaching callout component name and props once confirmed
-- Record the confirmed runbook link format for the deployment context
-- Note any callout text reviewed and approved by business-ops leads
+- ✅ **Coaching callout component:** `HbcCoachingCallout` from `@hbc/ui-kit`. Props: `message`, `actionLabel`, `onAction`. Complexity-gated (Essential+Standard only, hidden at Expert).
+- ✅ **Runbook link format:** Relative doc paths stored as constants in `apps/admin/src/constants/runbookLinks.ts`. Wave 0 format is `docs/maintenance/*.md#anchor`. Production SPFx mapping to SharePoint doc library URLs is a deployment concern.
+- ✅ **Callout text:** Reviewed and implemented. Content ownership documented in Support Content Ownership table — callout text is business-ops-owned, modifiable via PR without admin/dev review unless touching behavior.
+- ✅ **Verified anchors:** All 6 runbook section anchors confirmed to exist in the markdown source files.
 
 ---
 

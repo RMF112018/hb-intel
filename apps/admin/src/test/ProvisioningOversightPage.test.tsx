@@ -480,4 +480,23 @@ describe('ProvisioningOversightPage', () => {
       expect(screen.getByText(/retry attempt 3 of 3/)).toBeInTheDocument();
     });
   });
+
+  // ── G6-T05: Embedded guidance ──────────────────────────────────────────
+
+  // G6-T05-001: Failed requests show coaching callout
+  it('shows coaching callout with runbook link when failed requests are visible', async () => {
+    const failedRun = createTestProvisioningStatus({
+      projectId: 'p-1',
+      overallStatus: 'Failed',
+    });
+    mockClient.listProvisioningRuns.mockResolvedValueOnce([failedRun]);
+
+    renderWithProviders(<ProvisioningOversightPage />, { showCoaching: true });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Provisioning failure detected/)).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Open Runbook')).toBeInTheDocument();
+  });
 });

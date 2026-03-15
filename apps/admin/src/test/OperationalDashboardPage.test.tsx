@@ -37,9 +37,9 @@ const FULL_ADMIN_PERMISSIONS = [
  */
 function renderWithProviders(
   ui: React.ReactElement,
-  options: { permissions?: string[] } = {},
+  options: { permissions?: string[]; showCoaching?: boolean } = {},
 ): ReturnType<typeof render> {
-  const { permissions = FULL_ADMIN_PERMISSIONS } = options;
+  const { permissions = FULL_ADMIN_PERMISSIONS, showCoaching = false } = options;
   const session = createTestSession();
   useAuthStore.setState({ session });
   usePermissionStore.setState({ permissions });
@@ -51,7 +51,7 @@ function renderWithProviders(
     <QueryClientProvider client={queryClient}>
       <HbcThemeProvider>
         <HbcToastProvider>
-          <ComplexityProvider _testPreference={{ tier: 'essential', showCoaching: false }}>
+          <ComplexityProvider _testPreference={{ tier: 'essential', showCoaching }}>
             {ui}
           </ComplexityProvider>
         </HbcToastProvider>
@@ -169,5 +169,49 @@ describe('OperationalDashboardPage', () => {
       expect(screen.getByText(/in-memory only/)).toBeInTheDocument();
       expect(screen.getByText(/stub until T06/)).toBeInTheDocument();
     });
+  });
+
+  // ── G6-T05: Embedded guidance ──────────────────────────────────────────
+
+  // G6-T05-002: Healthy state coaching callout
+  it('shows healthy state coaching callout when no failures or bottlenecks', async () => {
+    mockClient.listRequests.mockResolvedValueOnce([
+      createTestRequest({ state: 'Submitted' }),
+    ]);
+
+    renderWithProviders(<OperationalDashboardPage />, { showCoaching: true });
+
+    await waitFor(() => {
+      expect(screen.getByText(/No active failures or stuck workflows/)).toBeInTheDocument();
+    });
+  });
+
+  // G6-T05-003: Technical admin sees alert threshold guidance
+  it('shows alert threshold coaching callout for technical admins', async () => {
+    mockClient.listRequests.mockResolvedValueOnce([]);
+
+    renderWithProviders(<OperationalDashboardPage />, { showCoaching: true });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Alert thresholds are documented/)).toBeInTheDocument();
+      expect(screen.getByText('Alert Thresholds')).toBeInTheDocument();
+    });
+  });
+
+  // G6-T05-004: Business-ops user does not see runbook links in dashboards
+  it('hides runbook guidance from business-ops users', async () => {
+    mockClient.listRequests.mockResolvedValueOnce([]);
+
+    renderWithProviders(<OperationalDashboardPage />, {
+      permissions: ['admin:access-control:view'],
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Queue Health Summary')).toBeInTheDocument();
+    });
+
+    // Dashboard coaching callouts (inside PermissionGate) should not be visible
+    expect(screen.queryByText('Alert Thresholds')).not.toBeInTheDocument();
+    expect(screen.queryByText('KQL Queries')).not.toBeInTheDocument();
   });
 });

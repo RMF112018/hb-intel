@@ -23,11 +23,13 @@ import {
   HbcSelect,
   HbcStatusBadge,
   HbcTabs,
+  HbcCoachingCallout,
   HbcTypography,
   WorkspacePageShell,
   useToast,
 } from '@hbc/ui-kit';
 import type { ColumnDef, LayoutTab } from '@hbc/ui-kit';
+import { RUNBOOK_LINKS } from '../constants/runbookLinks.js';
 import { resolveSessionToken } from '../utils/resolveSessionToken.js';
 import {
   FAILURE_CLASS_LABELS,
@@ -419,6 +421,15 @@ export function ProvisioningOversightPage(): ReactNode {
         </HbcBanner>
       )}
 
+      {/* G6-T05: Embedded guidance for failures tab */}
+      {activeTab === 'failures' && filteredRuns.some((r) => r.overallStatus === 'Failed') && (
+        <HbcCoachingCallout
+          message="Provisioning failure detected. Review the error detail and check the Provisioning Runbook for retry and escalation steps."
+          actionLabel="Open Runbook"
+          onAction={() => window.open(RUNBOOK_LINKS.RETRY_PROCEDURE, '_blank')}
+        />
+      )}
+
       <HbcTabs tabs={FILTER_TABS} activeTabId={activeTab} onTabChange={setActiveTab} />
 
       {filteredRuns.length === 0 && !loading ? (
@@ -534,6 +545,22 @@ function ProvisioningDetailContent({
 
   return (
     <>
+      {/* ── G6-T05: Contextual coaching callouts ──────────────────────── */}
+      {run.retryCount >= MAX_RETRY_ATTEMPTS && (
+        <HbcCoachingCallout
+          message="Maximum retries reached. Escalation is required. See the escalation procedure in the runbook."
+          actionLabel="Escalation Steps"
+          onAction={() => window.open(RUNBOOK_LINKS.ESCALATION_PROCEDURE, '_blank')}
+        />
+      )}
+      {isStuckInTransitional(run) && (
+        <HbcCoachingCallout
+          message="This request appears stuck. Check Azure Function timer status in the Observability Runbook."
+          actionLabel="Observability Runbook"
+          onAction={() => window.open(RUNBOOK_LINKS.STUCK_ALERT_RULE, '_blank')}
+        />
+      )}
+
       {/* ── Essential tier: Core summary ──────────────────────────────── */}
       <div className={styles.badgeRow}>
         <HbcStatusBadge

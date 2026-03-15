@@ -9,6 +9,7 @@ import type { IProjectSetupRequest, IProvisioningStatus } from '@hbc/models';
 
 interface RenderOptions {
   tier?: 'essential' | 'standard' | 'expert';
+  showCoaching?: boolean;
   session?: NormalizedAuthSession | null;
   permissions?: string[];
   requests?: IProjectSetupRequest[];
@@ -51,6 +52,7 @@ export function renderWithProviders(
 ): RenderResult {
   const {
     tier = 'essential',
+    showCoaching = false,
     session = createTestSession(),
     permissions,
     requests = [],
@@ -68,7 +70,7 @@ export function renderWithProviders(
     return (
       <HbcThemeProvider>
         <HbcToastProvider>
-          <ComplexityProvider _testPreference={{ tier, showCoaching: false }}>
+          <ComplexityProvider _testPreference={{ tier, showCoaching }}>
             {children}
           </ComplexityProvider>
         </HbcToastProvider>
