@@ -11,3 +11,19 @@ Object.defineProperty(window, '_spPageContextInfo', {
   value: undefined,
   writable: true,
 });
+
+// Mock window.matchMedia for jsdom (used by ui-kit components).
+// Uses a plain function (not vi.fn) so vi.resetAllMocks() does not clear it.
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  }),
+});

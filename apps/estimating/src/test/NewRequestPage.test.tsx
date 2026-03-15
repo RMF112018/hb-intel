@@ -282,4 +282,14 @@ describe('NewRequestPage', () => {
       expect(mockClient.submitRequest).toHaveBeenCalled();
     });
   });
+
+  // ── Failure modes (W0-G4-T07) ──────────────────────────────────────────
+  describe('failure modes', () => {
+    // G4-T07-001: Wizard renders at 768px without overflow
+    it('wizard composition renders without error (768px overflow is CSS — manual per R3)', () => {
+      renderPage();
+      expect(screen.getByTestId('step-wizard')).toBeInTheDocument();
+      // jsdom cannot test CSS overflow; this confirms the component tree is valid.
+    });
+  });
 });

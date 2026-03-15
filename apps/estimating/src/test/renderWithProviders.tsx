@@ -1,6 +1,8 @@
 import React from 'react';
 import { render, type RenderResult } from '@testing-library/react';
+import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { ComplexityProvider } from '@hbc/complexity';
+import { HbcThemeContext } from '@hbc/ui-kit';
 import { useAuthStore } from '@hbc/auth';
 import { useProvisioningStore } from '@hbc/provisioning';
 import type { NormalizedAuthSession } from '@hbc/auth';
@@ -57,11 +59,24 @@ export function renderWithProviders(
   useAuthStore.setState({ session });
   useProvisioningStore.setState({ requests, statusByProjectId });
 
+  // Minimal theme context to satisfy useHbcTheme() in ui-kit components
+  const themeContextValue = {
+    isFieldMode: false,
+    mode: 'office' as const,
+    toggleFieldMode: () => {},
+    theme: 'light' as const,
+    resolvedTheme: webLightTheme,
+  };
+
   function TestWrapper({ children }: { children: React.ReactNode }): React.ReactElement {
     return (
-      <ComplexityProvider _testPreference={{ tier, showCoaching: false }}>
-        {children}
-      </ComplexityProvider>
+      <HbcThemeContext.Provider value={themeContextValue}>
+        <FluentProvider theme={webLightTheme}>
+          <ComplexityProvider _testPreference={{ tier, showCoaching: false }}>
+            {children}
+          </ComplexityProvider>
+        </FluentProvider>
+      </HbcThemeContext.Provider>
     );
   }
 

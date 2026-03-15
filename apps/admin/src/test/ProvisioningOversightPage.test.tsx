@@ -22,9 +22,26 @@ vi.mock('@hbc/provisioning', async (importOriginal) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Lazily import the mocked factory so we can restore its implementation after reset
+const getFactory = async () => {
+  const mod = await import('@hbc/provisioning');
+  return mod.createProvisioningApiClient as ReturnType<typeof vi.fn>;
+};
+
 describe('ProvisioningOversightPage', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+
+    // Restore default implementations after vi.resetAllMocks() from setup.ts
+    mockClient.listProvisioningRuns.mockResolvedValue([]);
+    mockClient.listFailedRuns.mockResolvedValue([]);
+    mockClient.retryProvisioning.mockResolvedValue(undefined);
+    mockClient.archiveFailure.mockResolvedValue(undefined);
+    mockClient.acknowledgeEscalation.mockResolvedValue(undefined);
+    mockClient.forceStateTransition.mockResolvedValue(undefined);
+    const factory = await getFactory();
+    factory.mockImplementation(() => mockClient);
+
     // Reset query params
     Object.defineProperty(window, 'location', {
       value: { ...window.location, search: '' },

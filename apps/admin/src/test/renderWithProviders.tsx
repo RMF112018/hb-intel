@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, type RenderResult } from '@testing-library/react';
 import { ComplexityProvider } from '@hbc/complexity';
-import { HbcToastProvider } from '@hbc/ui-kit';
+import { HbcThemeProvider, HbcToastProvider } from '@hbc/ui-kit';
 import { useAuthStore } from '@hbc/auth';
 import { useProvisioningStore } from '@hbc/provisioning';
 import type { NormalizedAuthSession } from '@hbc/auth';
@@ -61,11 +61,13 @@ export function renderWithProviders(
 
   function TestWrapper({ children }: { children: React.ReactNode }): React.ReactElement {
     return (
-      <HbcToastProvider>
-        <ComplexityProvider _testPreference={{ tier, showCoaching: false }}>
-          {children}
-        </ComplexityProvider>
-      </HbcToastProvider>
+      <HbcThemeProvider>
+        <HbcToastProvider>
+          <ComplexityProvider _testPreference={{ tier, showCoaching: false }}>
+            {children}
+          </ComplexityProvider>
+        </HbcToastProvider>
+      </HbcThemeProvider>
     );
   }
 

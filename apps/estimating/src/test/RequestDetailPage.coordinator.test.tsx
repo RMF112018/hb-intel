@@ -226,4 +226,19 @@ describe('RequestDetailPage — coordinator retry/failure', () => {
     });
     expect(screen.queryByText('Failure Detail')).not.toBeInTheDocument();
   });
+
+  // ── Failure modes (W0-G4-T07) ──────────────────────────────────────────
+  describe('failure modes', () => {
+    // G4-T07-002: Retry button tappable at 768px
+    it('retry button renders at standard tier (768px tap target is CSS — manual per R3)', () => {
+      renderRetrySection({
+        overallStatus: 'Failed',
+        failureClass: 'transient',
+        retryCount: 0,
+        escalatedBy: undefined,
+      });
+      expect(screen.getByText('Retry Provisioning')).toBeInTheDocument();
+      // jsdom cannot test CSS touch targets; this confirms the button renders.
+    });
+  });
 });

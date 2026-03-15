@@ -273,4 +273,27 @@ describe('ProjectReviewDetailPage', () => {
     expect(screen.queryByRole('button', { name: /retry/i })).toBeNull();
     expect(screen.queryByRole('button', { name: /force retry/i })).toBeNull();
   });
+
+  // ── Failure modes (W0-G4-T07) ──────────────────────────────────────────
+  describe('failure modes', () => {
+    // G4-T07-009: Cross-app URL missing → warning banner
+    it('shows warning banner and hides "Send to Admin" when admin URL is missing', async () => {
+      // Re-mock getAdminAppUrl to return undefined
+      const crossAppUrls = await import('../utils/crossAppUrls.js');
+      vi.mocked(crossAppUrls.getAdminAppUrl).mockReturnValue(null as any);
+
+      const failedRequest = createTestRequest({ requestId: 'req-1', state: 'Failed' });
+
+      renderWithProviders(<ProjectReviewDetailPage />, {
+        tier: 'standard',
+        requests: [failedRequest],
+      });
+
+      expect(screen.getByText(/Admin navigation is not configured/)).toBeTruthy();
+      expect(screen.queryByRole('button', { name: 'Send to Admin' })).toBeNull();
+
+      // Restore the mock
+      vi.mocked(crossAppUrls.getAdminAppUrl).mockReturnValue('https://admin.example.com');
+    });
+  });
 });
