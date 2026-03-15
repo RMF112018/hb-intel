@@ -13,13 +13,16 @@ function dedupeKey(alert: IAdminAlert): string {
   return `${alert.category}:${alert.affectedEntityType}:${alert.affectedEntityId}`;
 }
 
+/** Retry ceiling matching provisioning-runbook.md threshold. */
+const RETRY_CEILING = 3;
+
 /**
  * Creates a configured provisioning-failure monitor that detects failed
  * project setup requests via the injected data provider.
  *
- * Severity rules:
- * - `critical` when no retry has been attempted (`retryCount === 0`)
- * - `high` when at least one retry has already been attempted
+ * Severity rules (G6-T04 severity model):
+ * - `high` for initial failures (`retryCount < RETRY_CEILING`)
+ * - `critical` when retry ceiling is reached (`retryCount >= RETRY_CEILING`)
  */
 export function createProvisioningFailureMonitor(
   provider: IProvisioningDataProvider,
@@ -33,7 +36,7 @@ export function createProvisioningFailureMonitor(
       return failed.map((req) => ({
         alertId: `pf-${req.requestId}`,
         category: 'provisioning-failure' as const,
-        severity: req.retryCount > 0 ? ('high' as const) : ('critical' as const),
+        severity: req.retryCount >= RETRY_CEILING ? ('critical' as const) : ('high' as const),
         title: `Provisioning failed: ${req.projectName}`,
         description: `Project ${req.projectId} is in Failed state (retryCount: ${req.retryCount}).`,
         affectedEntityType: 'record' as const,

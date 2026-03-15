@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
 import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router';
 import { ShellLayout } from '@hbc/shell';
 import type { SimplifiedShellConfig } from '@hbc/shell';
-import { AdminAlertBadge, computeAlertBadge } from '@hbc/features-admin';
+import { AdminAlertBadge, useAdminAlerts } from '@hbc/features-admin';
+import { useAlertPolling } from '../hooks/useAlertPolling.js';
 
 /**
  * D-PH7-BW-6: Admin root route with simplified shell config.
@@ -22,8 +22,11 @@ const ADMIN_SHELL_CONFIG: SimplifiedShellConfig = {
 function RootComponent(): React.ReactNode {
   const navigate = useNavigate();
 
-  // G6-T03: Alert badge visible from all admin routes (stub data until T04)
-  const alertBadge = useMemo(() => computeAlertBadge([]), []);
+  // G6-T04: Start monitor polling when session is available
+  useAlertPolling();
+
+  // G6-T04: Live badge from useAdminAlerts (auto-polls via React Query)
+  const { badge: alertBadge } = useAdminAlerts();
 
   return (
     <ShellLayout

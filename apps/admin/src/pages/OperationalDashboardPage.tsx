@@ -222,7 +222,7 @@ export function OperationalDashboardPage(): ReactNode {
         <div className={styles.section}>
           <HbcTypography intent="heading2">Alert Dashboard</HbcTypography>
           <HbcBanner variant="info">
-            Alert data is stub until T04 implements live monitors.
+            Wave 0: alerts are in-memory only and do not persist across page reloads.
           </HbcBanner>
           <AdminAlertDashboard />
         </div>

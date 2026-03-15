@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G6/W0-G6-Admin-Support-and-Observability-Plan.md`
 > **Related:** `packages/features/admin/src/monitors/`; `packages/features/admin/src/monitors/notificationRouter.ts`; `docs/maintenance/provisioning-runbook.md`
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G6
 **Locked decisions served:** LD-01, LD-02, LD-04, LD-05, LD-09
 
@@ -219,10 +219,15 @@ Before T04 is ready for review:
 
 During active T04 work:
 
-- Record whether SharePoint list persistence or a fallback is used for `AdminAlertsApi`
-- Record the confirmed Teams webhook target when available
-- Record whether Teams/email delivery is wired or deferred
-- Document which monitors are implemented vs. deferred as follow-on tasks
+- ✅ **AdminAlertsApi persistence:** In-memory `Map` store (Wave 0). SharePoint `HBC_AdminAlerts` list is the Wave 1 target.
+- ✅ **Teams webhook target:** Configurable via `VITE_TEAMS_WEBHOOK_URL` env var. `TeamsWebhookDispatchAdapter` sends Adaptive Card payloads. Wave 0: best-effort fire-and-forget; console-logs when no webhook configured.
+- ✅ **Email relay:** `hbtech@hedrickbrothers.com` configured in `useAlertPolling` hook. Wave 0: console-logged only (no SMTP).
+- ✅ **Teams/email delivery status:** Wired via `TeamsWebhookDispatchAdapter`. Webhook delivery is fire-and-forget. Email relay is logged, not sent. Both are documented Wave 0 limitations.
+- ✅ **Monitors implemented:** `provisioningFailureMonitor` (detects Failed requests, severity high→critical at retry ceiling) and `stuckWorkflowMonitor` (detects InProgress >30 min, escalates to critical at 2h).
+- ✅ **Monitors deferred (P3):** `overdueProvisioningMonitor`, `staleRecordMonitor`, `permissionAnomalyMonitor`, `upcomingExpirationMonitor` — remain stubs, tracked as post-Wave-0 follow-on.
+- ✅ **Severity model corrected:** Initial failure (`retryCount < 3`) = `high`; retry ceiling reached (`retryCount >= 3`) = `critical`. Matches T04 severity rules table.
+- ✅ **DI wiring:** `AlertPollingService` in `apps/admin/src/services/alertPollingService.ts` bridges `@hbc/provisioning` → `IProvisioningDataProvider`. `useAlertPolling` hook initializes on session availability with cleanup on unmount.
+- ✅ **Polling lifecycle:** `AlertPollingService.start()` runs monitors immediately then every `ADMIN_ALERTS_POLL_MS` (30s). `stop()` clears interval on unmount.
 
 ---
 

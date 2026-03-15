@@ -159,14 +159,14 @@ describe('OperationalDashboardPage', () => {
     });
   });
 
-  // G6-T03-007: Stub data banners shown
-  it('shows stub data info banners for alert and probe dashboards', async () => {
+  // G6-T03-007 / G6-T04: Wave 0 limitation banners shown
+  it('shows Wave 0 limitation banners for alert and probe dashboards', async () => {
     mockClient.listRequests.mockResolvedValueOnce([]);
 
     renderWithProviders(<OperationalDashboardPage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/stub until T04/)).toBeInTheDocument();
+      expect(screen.getByText(/in-memory only/)).toBeInTheDocument();
       expect(screen.getByText(/stub until T06/)).toBeInTheDocument();
     });
   });

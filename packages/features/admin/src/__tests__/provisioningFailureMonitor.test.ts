@@ -50,20 +50,28 @@ describe('createProvisioningFailureMonitor', () => {
     expect(alert.alertId).toBe('pf-req-1');
   });
 
-  it('sets severity to critical when retryCount is 0', async () => {
+  it('sets severity to high for initial failure (retryCount < 3)', async () => {
     const monitor = createProvisioningFailureMonitor(
       mockProvider([makeRequest({ retryCount: 0 })]),
     );
     const [alert] = await monitor.run(NOW);
-    expect(alert.severity).toBe('critical');
+    expect(alert.severity).toBe('high');
   });
 
-  it('downgrades severity to high when retryCount > 0', async () => {
+  it('sets severity to high when retryCount is below ceiling', async () => {
     const monitor = createProvisioningFailureMonitor(
       mockProvider([makeRequest({ retryCount: 2 })]),
     );
     const [alert] = await monitor.run(NOW);
     expect(alert.severity).toBe('high');
+  });
+
+  it('escalates severity to critical when retryCount reaches ceiling', async () => {
+    const monitor = createProvisioningFailureMonitor(
+      mockProvider([makeRequest({ retryCount: 3 })]),
+    );
+    const [alert] = await monitor.run(NOW);
+    expect(alert.severity).toBe('critical');
   });
 
   it('populates all required IAdminAlert fields', async () => {
