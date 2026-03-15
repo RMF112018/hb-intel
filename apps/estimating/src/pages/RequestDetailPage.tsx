@@ -2,29 +2,26 @@ import { useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useCurrentSession } from '@hbc/auth';
+import { useBicNextMove } from '@hbc/bic-next-move';
+import { HbcComplexityGate } from '@hbc/complexity';
 import type { IProjectSetupRequest } from '@hbc/models';
 import {
+  PROJECT_SETUP_BIC_CONFIG,
   createProvisioningApiClient,
   getProvisioningVisibility,
   useProvisioningSignalR,
   useProvisioningStore,
 } from '@hbc/provisioning';
-import { WorkspacePageShell } from '@hbc/ui-kit';
+import { HbcCard, HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
+import { ClarificationBanner } from '../components/project-setup/ClarificationBanner.js';
+import { RequestCoreSummary } from '../components/project-setup/RequestCoreSummary.js';
+import { RequestStateContext } from '../components/project-setup/RequestStateContext.js';
 import { ProvisioningChecklist } from '../components/ProvisioningChecklist.js';
-
-function resolveSessionToken(session: ReturnType<typeof useCurrentSession>): string {
-  const payload = session?.rawContext?.payload;
-  if (payload && typeof payload === 'object') {
-    const rawToken =
-      (payload as Record<string, unknown>).accessToken ??
-      (payload as Record<string, unknown>).token;
-    if (typeof rawToken === 'string' && rawToken.trim().length > 0) return rawToken;
-  }
-  return session?.providerIdentityRef ?? 'mock-token';
-}
+import { resolveSessionToken } from '../utils/resolveSessionToken.js';
 
 /**
- * D-PH6-10 request detail page with provisioning visibility and real-time updates.
+ * W0-G4-T01 request detail page with BIC ownership, state context,
+ * clarification banner, and provisioning visibility with real-time updates.
  * Traceability: docs/architecture/plans/PH6.10-Estimating-App.md §6.10.3
  */
 export function RequestDetailPage(): ReactNode {
@@ -42,6 +39,13 @@ export function RequestDetailPage(): ReactNode {
   const projectId = request?.projectId;
   const provisioningStatus = projectId ? statusByProjectId[projectId] : undefined;
   const visibility = getProvisioningVisibility(session, request?.submittedBy ?? '');
+
+  // BIC ownership resolution
+  const { state: bicState } = useBicNextMove(
+    request ?? ({} as IProjectSetupRequest),
+    PROJECT_SETUP_BIC_CONFIG,
+    { itemKey: `project-setup::${requestId}`, enabled: !!request },
+  );
 
   // D-PH6-10 SignalR should only connect while provisioning is active.
   useProvisioningSignalR({
@@ -80,19 +84,39 @@ export function RequestDetailPage(): ReactNode {
 
   return (
     <WorkspacePageShell layout="detail" title={`${request.projectName} — Setup Request`}>
-      <p>Current request state: {request.state}</p>
+      <RequestCoreSummary request={request} bicState={bicState} />
+      <RequestStateContext state={request.state} />
 
-      {visibility === 'full' && provisioningStatus ? (
+      {request.state === 'NeedsClarification' && (
+        <ClarificationBanner requestId={requestId} clarificationNote={request.clarificationNote} />
+      )}
+
+      {visibility === 'full' && provisioningStatus && (
         <ProvisioningChecklist status={provisioningStatus} showStepDetail />
-      ) : null}
+      )}
 
-      {visibility === 'full' && !provisioningStatus && request.state === 'Provisioning' ? (
+      {visibility === 'full' && !provisioningStatus && request.state === 'Provisioning' && (
         <p>Connecting to live progress…</p>
-      ) : null}
+      )}
 
-      {visibility !== 'full' && request.state === 'Provisioning' ? (
+      {visibility !== 'full' && request.state === 'Provisioning' && (
         <p>Site provisioning is in progress. You will be notified when it is ready.</p>
-      ) : null}
+      )}
+
+      <HbcComplexityGate minTier="standard">
+        <HbcCard>
+          <HbcTypography intent="heading3">Extended Details</HbcTypography>
+          {bicState?.isBlocked && bicState.blockedReason && (
+            <p><strong>Blocked:</strong> {bicState.blockedReason}</p>
+          )}
+          {request.groupMembers.length > 0 && (
+            <p><strong>Team:</strong> {request.groupMembers.join(', ')}</p>
+          )}
+          {request.addOns && request.addOns.length > 0 && (
+            <p><strong>Add-ons:</strong> {request.addOns.join(', ')}</p>
+          )}
+        </HbcCard>
+      </HbcComplexityGate>
     </WorkspacePageShell>
   );
 }

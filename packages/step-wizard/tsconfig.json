@@ -10,8 +10,8 @@
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "paths": {
-      "@hbc/session-state": ["./src/__mocks__/session-state.ts"],
-      "@hbc/notification-intelligence": ["./src/__mocks__/notification-intelligence.ts"],
+      "@hbc/session-state": ["../session-state/src/index.ts"],
+      "@hbc/notification-intelligence": ["../notification-intelligence/src/index.ts"],
       "@hbc/bic-next-move": ["../bic-next-move/src/index.ts"],
       "@hbc/ui-kit": ["../ui-kit/src/index.ts"],
       "@hbc/ui-kit/app-shell": ["../ui-kit/src/app-shell.ts"],

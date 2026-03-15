@@ -6,21 +6,11 @@ import { useCurrentSession } from '@hbc/auth';
 import type { IProjectSetupRequest } from '@hbc/models';
 import { createProvisioningApiClient, useProvisioningStore } from '@hbc/provisioning';
 import { HbcButton, WorkspacePageShell } from '@hbc/ui-kit';
+import { resolveSessionToken } from '../utils/resolveSessionToken.js';
 
 const useStyles = makeStyles({
   actionRow: { marginBottom: '16px' },
 });
-
-function resolveSessionToken(session: ReturnType<typeof useCurrentSession>): string {
-  const payload = session?.rawContext?.payload;
-  if (payload && typeof payload === 'object') {
-    const rawToken =
-      (payload as Record<string, unknown>).accessToken ??
-      (payload as Record<string, unknown>).token;
-    if (typeof rawToken === 'string' && rawToken.trim().length > 0) return rawToken;
-  }
-  return session?.providerIdentityRef ?? 'mock-token';
-}
 
 /**
  * D-PH6-10 Project Setup request list page for Estimating coordinators.
@@ -47,7 +37,7 @@ export function ProjectSetupPage(): ReactNode {
   return (
     <WorkspacePageShell layout="list" title="Project Setup Requests">
       <div className={styles.actionRow}>
-        <Link to="/project-setup/new">
+        <Link to="/project-setup/new" search={{ mode: 'new-request', requestId: undefined }}>
           <HbcButton>New Project Setup Request</HbcButton>
         </Link>
       </div>

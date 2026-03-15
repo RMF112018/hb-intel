@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@hbc/complexity": "workspace:*",
+    "@hbc/notification-intelligence": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@tanstack/react-query": "^5.0.0"
   },

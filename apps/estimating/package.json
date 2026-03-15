@@ -13,8 +13,12 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@hbc/bic-next-move": "workspace:*",
     "@hbc/complexity": "workspace:*",
+    "@hbc/features-estimating": "workspace:*",
     "@hbc/provisioning": "workspace:*",
+    "@hbc/session-state": "workspace:*",
+    "@hbc/step-wizard": "workspace:*",
     "@hbc/models": "workspace:*",
     "@hbc/data-access": "workspace:*",
     "@hbc/query-hooks": "workspace:*",

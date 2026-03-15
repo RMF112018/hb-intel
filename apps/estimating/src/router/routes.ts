@@ -26,6 +26,10 @@ const projectSetupRoute = createRoute({
 const newProjectSetupRequestRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/project-setup/new',
+  validateSearch: (search: Record<string, unknown>) => ({
+    mode: (search.mode as 'new-request' | 'clarification-return') ?? 'new-request',
+    requestId: search.requestId as string | undefined,
+  }),
   component: lazyRouteComponent(() => import('../pages/NewRequestPage.js').then((m) => ({ default: m.NewRequestPage }))),
 });
 

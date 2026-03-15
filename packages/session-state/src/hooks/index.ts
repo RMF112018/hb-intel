@@ -6,3 +6,5 @@ export { useDraft } from './useDraft.js';
 export { useConnectivity } from './useConnectivity.js';
 export { useAutoSaveDraft } from './useAutoSaveDraft.js';
 export type { IAutoSaveDraftResult } from './useAutoSaveDraft.js';
+export { useDraftStore } from './useDraftStore.js';
+export type { IUseDraftStoreResult } from './useDraftStore.js';

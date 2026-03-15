@@ -67,8 +67,8 @@ export { SessionStateContext, SessionStateProvider } from './context/index.js';
 export type { SessionStateProviderProps } from './context/index.js';
 
 // Hooks
-export { useSessionState, useDraft, useConnectivity, useAutoSaveDraft } from './hooks/index.js';
-export type { IAutoSaveDraftResult } from './hooks/index.js';
+export { useSessionState, useDraft, useConnectivity, useAutoSaveDraft, useDraftStore } from './hooks/index.js';
+export type { IAutoSaveDraftResult, IUseDraftStoreResult } from './hooks/index.js';
 
 // Components
 export { HbcConnectivityBar, HbcSyncStatusBadge } from './components/index.js';

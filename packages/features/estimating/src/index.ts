@@ -193,6 +193,10 @@ export type {
   IClarificationReturnState,
   IClarificationResponse,
   IClarificationResubmission,
+  ISetupFormDraft,
+  ResumeDecision,
+  IResumeContext,
+  IUseProjectSetupDraftResult,
 } from './project-setup/index.js';
 
 export {
@@ -215,4 +219,5 @@ export {
   getOpenClarifications,
   buildClarificationReturnState,
   buildClarificationResponsePayload,
+  useProjectSetupDraft,
 } from './project-setup/index.js';
