@@ -111,6 +111,7 @@ describe('Accounting — complexity gate tests', () => {
       requests: [request],
     });
 
-    expect(document.querySelector('[data-hbc-ui="HbcComplexityDial"]')).toBeTruthy();
+    // HbcComplexityDial renders a group with aria-label="Complexity level"
+    expect(screen.getByRole('group', { name: 'Complexity level' })).toBeTruthy();
   });
 });

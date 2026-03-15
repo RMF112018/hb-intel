@@ -49,15 +49,6 @@ describe('ProvisioningOversightPage', () => {
     });
   });
 
-  // Debug: verify virtualizer mock and data loading
-  it('debug: virtualizer mock works and data loads', async () => {
-    const { useVirtualizer } = await import('@tanstack/react-virtual');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = (useVirtualizer as any)({ count: 3 });
-    const items = result.getVirtualItems();
-    expect(items).toHaveLength(3);
-  });
-
   // G4-T04-001: Default tabs and table load
   it('renders with Failures tab active and displays failed runs in data table', async () => {
     const failedRuns = [
