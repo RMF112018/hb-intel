@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G5/W0-G5-Hosted-PWA-Requester-Surfaces-Plan.md`
 > **Related:** `docs/explanation/feature-decisions/PH7-SF-12-Shared-Feature-Session-State.md`
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G5
 **Locked decisions served:** LD-03, LD-08
 
@@ -202,3 +202,44 @@ Before T04 can be closed:
 - The Wave 0 resilience boundary (what is not promised) is documented as a user-facing note in the relevant UI surface (tooltip, help text, or footer note on the status list)
 - All acceptance criteria verified and checked off
 - Accessibility check result recorded
+
+---
+
+## Closure Record
+
+**Date:** 2026-03-15
+
+### Gate Check: `@hbc/app-shell`
+
+**Outcome:** PWA must NOT import from `@hbc/app-shell` (confirmed by package README). Connectivity bar is correctly mounted from `@hbc/ui-kit` at root-route level. No change needed.
+
+### Executor Configuration
+
+**Approach:** `pwaExecutor` in `apps/pwa/src/App.tsx` — imperative `useAuthStore.getState()` for token resolution, routes `api-mutation/submitRequest` operations to `createProvisioningApiClient().submitRequest()`. Wave 0 scope: only `submitRequest` is queued. Unknown operation types are logged and skipped.
+
+### Connectivity Indicator
+
+- **Component:** `HbcConnectivityBar` from `@hbc/ui-kit` — mounted in root-route above `HbcAppShell`
+- **Source:** `useConnectivity()` from `@hbc/session-state` → maps to `ShellConnectivitySignal` (`connected`/`reconnecting`)
+- **Degraded mapping:** `ConnectivityStatus.degraded` maps to `ShellConnectivitySignal.reconnecting` (amber bar) because `ShellConnectivitySignal` has no `degraded` value
+- **Pending sync badge:** `HbcSyncStatusBadge` from `@hbc/session-state` — mounted site-wide in root layout inside `HbcAppShell`, above `<Outlet />`
+
+### Offline Action Feedback
+
+When a requester attempts to submit while offline/degraded:
+- Operation is queued via `useSessionState().queueOperation()` with type `api-mutation`, target `submitRequest`
+- `HbcBanner` (info variant) displays: "You're offline. Your request has been saved and will be submitted automatically when you reconnect."
+- Draft is NOT cleared (per IR-01: draft cleared only on confirmed API success)
+
+### Wave 0 Resilience Boundary
+
+Communicated via footer note on `/projects` status list page:
+> "Draft progress is saved automatically. Submissions require an active connection. Status information reflects the last successful sync."
+
+### Degraded-State Detection
+
+`@hbc/session-state` `ConnectivityMonitor` detects degraded state via probe-based latency (>500ms response to probeUrl). This is adequate for Wave 0. No gaps found.
+
+### No Custom Connectivity Logic
+
+No `navigator.onLine` references or custom WebSocket/polling code added in feature modules. All connectivity state comes from `@hbc/session-state`.

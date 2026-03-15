@@ -13,8 +13,12 @@ import { RouterProvider } from '@tanstack/react-router';
 import { HbcThemeProvider, HbcErrorBoundary } from '@hbc/ui-kit';
 import { ComplexityProvider } from '@hbc/complexity';
 import { SessionStateProvider } from '@hbc/session-state';
+import type { OperationExecutor } from '@hbc/session-state';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import type { AuthMode } from '@hbc/auth';
+import { useAuthStore } from '@hbc/auth';
+import { createProvisioningApiClient } from '@hbc/provisioning';
+import { resolveSessionToken } from './utils/resolveSessionToken.js';
 import { createAppRouter } from './router/index.js';
 import { MsalGuard } from './auth/MsalGuard.js';
 
@@ -31,8 +35,29 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: defaultQueryOptions },
 });
 
-/** No-op executor — draft persistence is IndexedDB-local only (T03 out of scope). */
-const noopExecutor = async () => {};
+/**
+ * W0-G5-T04: Operation executor for queued offline actions.
+ * Runs outside React (called by SyncEngine on reconnect).
+ * Resolves auth imperatively via useAuthStore.getState().
+ */
+const pwaExecutor: OperationExecutor = async (operation) => {
+  const session = useAuthStore.getState().session;
+  const token = resolveSessionToken(session);
+  const client = createProvisioningApiClient(
+    import.meta.env.VITE_API_BASE_URL ?? '',
+    async () => token,
+  );
+
+  if (operation.type === 'api-mutation' && operation.target === 'submitRequest') {
+    await client.submitRequest(operation.payload as Parameters<typeof client.submitRequest>[0]);
+    return;
+  }
+
+  // Wave 0: only submitRequest is queued. Log and skip unknown types.
+  if (import.meta.env.DEV) {
+    console.warn(`[PWA Executor] Unhandled operation type: ${operation.type}/${operation.target}`);
+  }
+};
 
 
 const router = createAppRouter();
@@ -53,7 +78,7 @@ export function App({ authMode }: AppProps): React.ReactNode {
     <HbcThemeProvider>
       <HbcErrorBoundary>
         <ComplexityProvider>
-          <SessionStateProvider executor={noopExecutor}>
+          <SessionStateProvider executor={pwaExecutor}>
             {authMode === 'msal' ? <MsalGuard>{routerContent}</MsalGuard> : routerContent}
           </SessionStateProvider>
         </ComplexityProvider>

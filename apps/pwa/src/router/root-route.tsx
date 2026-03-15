@@ -19,7 +19,7 @@ import {
 } from '@hbc/shell';
 import { HbcAppShell, HbcConnectivityBar } from '@hbc/ui-kit';
 import { useCurrentUser, useAuthStore } from '@hbc/auth';
-import { useConnectivity } from '@hbc/session-state';
+import { useConnectivity, HbcSyncStatusBadge } from '@hbc/session-state';
 import { buildSidebarGroupsFromRegistry, mapCurrentUserToShellUser } from '../utils/shell-bridge.js';
 import { performPwaSignOut } from '../auth/signOut.js';
 
@@ -124,6 +124,8 @@ function RootComponent(): React.ReactNode {
           });
         }}
       >
+        {/* W0-G5-T04: Site-wide pending sync badge — visible on all G5 routes */}
+        <HbcSyncStatusBadge />
         <Outlet />
       </HbcAppShell>
     </>

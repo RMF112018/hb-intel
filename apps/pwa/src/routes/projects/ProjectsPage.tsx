@@ -152,6 +152,14 @@ export function ProjectsPage(): ReactElement {
           ))}
         </tbody>
       </table>
+
+      {/* W0-G5-T04: Resilience boundary — communicate what is/isn't promised */}
+      <footer className="hbc-page__footer" role="contentinfo">
+        <p className="hbc-page__footer-note">
+          Draft progress is saved automatically. Submissions require an active connection.
+          Status information reflects the last successful sync.
+        </p>
+      </footer>
     </WorkspacePageShell>
   );
 }

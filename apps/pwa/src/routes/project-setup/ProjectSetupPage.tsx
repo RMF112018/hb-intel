@@ -17,9 +17,9 @@ import type { IProjectSetupRequest } from '@hbc/models';
 import { createProvisioningApiClient } from '@hbc/provisioning';
 import type { IStepWizardConfig } from '@hbc/step-wizard';
 import { HbcStepWizard } from '@hbc/step-wizard';
-import { HbcSyncStatusBadge } from '@hbc/session-state';
+import { useSessionState } from '@hbc/session-state';
 import { HbcBanner, WorkspacePageShell } from '@hbc/ui-kit';
-import type { NormalizedAuthSession } from '@hbc/auth';
+import { resolveSessionToken } from '../../utils/resolveSessionToken.js';
 import { ResumeBanner } from './ResumeBanner.js';
 import { ProjectInfoStep } from './steps/ProjectInfoStep.js';
 import { DepartmentStep } from './steps/DepartmentStep.js';
@@ -34,17 +34,6 @@ const EMPTY_DEFAULTS: Partial<IProjectSetupRequest> = {
   projectStage: 'Pursuit',
   groupMembers: [],
 };
-
-function resolveSessionToken(session: NormalizedAuthSession | null): string {
-  const payload = session?.rawContext?.payload;
-  if (payload && typeof payload === 'object') {
-    const rawToken =
-      (payload as Record<string, unknown>).accessToken ??
-      (payload as Record<string, unknown>).token;
-    if (typeof rawToken === 'string' && rawToken.trim().length > 0) return rawToken;
-  }
-  return session?.providerIdentityRef ?? 'mock-token';
-}
 
 export function ProjectSetupPage(): ReactNode {
   const router = useRouter();
@@ -66,8 +55,10 @@ export function ProjectSetupPage(): ReactNode {
     return { ...EMPTY_DEFAULTS };
   });
 
+  const { connectivity, queueOperation } = useSessionState();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [queuedMessage, setQueuedMessage] = useState<string | null>(null);
 
   // Clarification-return: load existing request data when mode requires it
   useEffect(() => {
@@ -123,8 +114,39 @@ export function ProjectSetupPage(): ReactNode {
   }, [clearDraft]);
 
   const handleSubmit = useCallback(async () => {
+    const submitPayload: Partial<IProjectSetupRequest> = {
+      projectName: request.projectName ?? '',
+      projectLocation: request.projectLocation ?? '',
+      projectType: request.projectType ?? 'GC',
+      projectStage: (request.projectStage as 'Pursuit' | 'Active') ?? 'Pursuit',
+      groupMembers: request.groupMembers ?? [],
+      department: request.department,
+      projectLeadId: request.projectLeadId,
+      viewerUPNs: request.viewerUPNs,
+      addOns: request.addOns,
+      estimatedValue: request.estimatedValue,
+      clientName: request.clientName,
+      startDate: request.startDate,
+      contractType: request.contractType,
+    };
+
+    // W0-G5-T04: Queue operation when offline/degraded instead of calling API directly
+    if (connectivity !== 'online') {
+      queueOperation({
+        type: 'api-mutation',
+        target: 'submitRequest',
+        payload: submitPayload,
+        maxRetries: 5,
+      });
+      setQueuedMessage(
+        "You're offline. Your request has been saved and will be submitted automatically when you reconnect.",
+      );
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
+    setQueuedMessage(null);
 
     try {
       const client = createProvisioningApiClient(
@@ -132,21 +154,7 @@ export function ProjectSetupPage(): ReactNode {
         async () => authToken,
       );
 
-      await client.submitRequest({
-        projectName: request.projectName ?? '',
-        projectLocation: request.projectLocation ?? '',
-        projectType: request.projectType ?? 'GC',
-        projectStage: (request.projectStage as 'Pursuit' | 'Active') ?? 'Pursuit',
-        groupMembers: request.groupMembers ?? [],
-        department: request.department,
-        projectLeadId: request.projectLeadId,
-        viewerUPNs: request.viewerUPNs,
-        addOns: request.addOns,
-        estimatedValue: request.estimatedValue,
-        clientName: request.clientName,
-        startDate: request.startDate,
-        contractType: request.contractType,
-      });
+      await client.submitRequest(submitPayload);
 
       // IR-01: Clear draft only on API success
       clearDraft();
@@ -156,7 +164,7 @@ export function ProjectSetupPage(): ReactNode {
     } finally {
       setSubmitting(false);
     }
-  }, [authToken, request, clearDraft, router]);
+  }, [authToken, request, clearDraft, router, connectivity, queueOperation]);
 
   const wizardConfig: IStepWizardConfig<IProjectSetupRequest> = useMemo(
     () => ({
@@ -207,8 +215,7 @@ export function ProjectSetupPage(): ReactNode {
         onStartNew={handleStartNew}
       />
 
-      <HbcSyncStatusBadge />
-
+      {queuedMessage && <HbcBanner variant="info">{queuedMessage}</HbcBanner>}
       {error && <HbcBanner variant="error">{error}</HbcBanner>}
 
       <HbcStepWizard<IProjectSetupRequest>
