@@ -109,7 +109,9 @@ describe('RequestDetailPage — coordinator retry/failure', () => {
       'standard',
     );
     expect(screen.getByText('Transient Failure')).toBeInTheDocument();
-    expect(screen.getByText(/Retry Count.*1/)).toBeInTheDocument();
+    // "Retry Count:" is in a <strong> and "1" is adjacent text — check separately
+    expect(screen.getByText('Retry Count:')).toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
   });
 
   // G4-T02-003

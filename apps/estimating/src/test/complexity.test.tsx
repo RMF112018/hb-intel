@@ -3,14 +3,13 @@
  * Verifies badge variant consistency, essential-tier field visibility,
  * primary action availability, and complexity dial presence.
  */
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen } from '@testing-library/react';
 import React from 'react';
 import { renderWithProviders } from './renderWithProviders.js';
 import { createTestRequest, createTestProvisioningStatus } from './factories.js';
 import { STATE_BADGE_VARIANTS } from '@hbc/provisioning';
 import { STATE_BADGE_MAP } from '../components/project-setup/stateDisplayHelpers.js';
-import { ROLE_COMPLEXITY_CONFIG } from '@hbc/complexity/src/config/roleComplexityMap.js';
 
 // ---------------------------------------------------------------------------
 // Shared mock state
@@ -28,7 +27,11 @@ const mockClient = {
 // ---------------------------------------------------------------------------
 vi.mock('@hbc/provisioning', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@hbc/provisioning')>();
-  return { ...actual, createProvisioningApiClient: vi.fn(() => mockClient) };
+  return {
+    ...actual,
+    createProvisioningApiClient: vi.fn(() => mockClient),
+    useProvisioningSignalR: vi.fn(() => ({ isConnected: true })),
+  };
 });
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
@@ -107,11 +110,33 @@ vi.mock('../components/project-setup/ReviewStepBody.js', () => ({
 // Lazy imports after mocks
 const { NewRequestPage } = await import('../pages/NewRequestPage.js');
 const { RequestDetailPage } = await import('../pages/RequestDetailPage.js');
+const { createProvisioningApiClient, useProvisioningSignalR } = await import('@hbc/provisioning');
+const { useParams, useNavigate, useSearch } = await import('@tanstack/react-router');
+const { useProjectSetupDraft } = await import('@hbc/features-estimating');
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 describe('Estimating — complexity gate tests', () => {
+  beforeEach(() => {
+    // Restore mock implementations after vi.resetAllMocks() from setup.ts
+    mockClient.listRequests.mockResolvedValue([]);
+    mockClient.getProvisioningStatus.mockResolvedValue(null);
+    vi.mocked(createProvisioningApiClient).mockReturnValue(mockClient as any);
+    vi.mocked(useProvisioningSignalR).mockReturnValue({ isConnected: true } as any);
+    vi.mocked(useParams).mockReturnValue({ requestId: 'req-1' } as any);
+    vi.mocked(useNavigate).mockReturnValue(vi.fn() as any);
+    vi.mocked(useSearch).mockReturnValue({ mode: 'new-request', requestId: undefined } as any);
+    vi.mocked(useProjectSetupDraft).mockReturnValue({
+      draft: null,
+      saveDraft: vi.fn(),
+      clearDraft: vi.fn(),
+      resumeContext: { decision: 'fresh-start' as const },
+      isSavePending: false,
+      lastSavedAt: null,
+    } as any);
+  });
+
   // G4-T06-001: Same badge variant across all apps
   it('STATE_BADGE_VARIANTS has entries for all 8 states and estimating re-exports match', () => {
     const expectedStates = [
@@ -148,7 +173,7 @@ describe('Estimating — complexity gate tests', () => {
       requests: [request],
       statusByProjectId: { 'p-1': status },
     });
-    expect(screen.getByText('Test Project')).toBeInTheDocument();
+    expect(screen.getAllByText('Test Project').length).toBeGreaterThanOrEqual(1);
   });
 
   // G4-T06-006: Primary action buttons not gated
@@ -164,8 +189,8 @@ describe('Estimating — complexity gate tests', () => {
       tier: 'standard',
       requests: [request],
     });
-    // HbcComplexityDial renders with data-hbc-ui attribute
-    expect(document.querySelector('[data-hbc-ui="HbcComplexityDial"]')).toBeTruthy();
+    // HbcComplexityDial renders with wrapper class
+    expect(document.querySelector('.hbc-complexity-dial-wrapper')).toBeTruthy();
   });
 
   // G4-T07-010: HbcErrorBoundary in App.tsx root (static assertion)

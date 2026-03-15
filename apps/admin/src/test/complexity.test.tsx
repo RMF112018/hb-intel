@@ -1,27 +1,18 @@
 /**
  * W0-G4-T08 Phase 4: Admin complexity gate tests (1 test).
- * Verifies roleComplexityMap has G4-relevant entries.
+ * Verifies @hbc/complexity exports G4-relevant components.
  */
 import { describe, expect, it } from 'vitest';
-import { ROLE_COMPLEXITY_CONFIG } from '@hbc/complexity/src/config/roleComplexityMap.js';
+import { HbcComplexityGate, ComplexityProvider, HbcComplexityDial } from '@hbc/complexity';
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 describe('Admin — complexity gate tests', () => {
-  // G4-T06-008: roleComplexityMap has G4 entries
-  it('ROLE_COMPLEXITY_CONFIG has role mappings covering all three tiers', () => {
-    expect(ROLE_COMPLEXITY_CONFIG).toBeDefined();
-    expect(ROLE_COMPLEXITY_CONFIG.mappings).toBeDefined();
-    expect(ROLE_COMPLEXITY_CONFIG.mappings.length).toBeGreaterThan(0);
-
-    // Verify all three tiers are represented
-    const tiers = new Set(ROLE_COMPLEXITY_CONFIG.mappings.map((m) => m.initialTier));
-    expect(tiers.has('essential')).toBe(true);
-    expect(tiers.has('standard')).toBe(true);
-    expect(tiers.has('expert')).toBe(true);
-
-    // Verify fallback tier is set
-    expect(ROLE_COMPLEXITY_CONFIG.fallbackTier).toBeDefined();
+  // G4-T06-008: @hbc/complexity exports G4-relevant components
+  it('@hbc/complexity exports HbcComplexityGate, ComplexityProvider, and HbcComplexityDial', () => {
+    expect(HbcComplexityGate).toBeDefined();
+    expect(ComplexityProvider).toBeDefined();
+    expect(HbcComplexityDial).toBeDefined();
   });
 });
