@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import { useCurrentSession } from '@hbc/auth';
-import { HbcComplexityGate } from '@hbc/complexity';
+import { HbcComplexityDial, HbcComplexityGate } from '@hbc/complexity';
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
 import { createProvisioningApiClient } from '@hbc/provisioning';
 import {
@@ -59,6 +59,7 @@ const useStyles = makeStyles({
  * Shows all provisioning runs (active, failed, completed) with state filter tabs.
  * Provides admin-exclusive actions: force retry, archive, escalation acknowledgment,
  * and expert-tier manual state override.
+ * W0-G4-T07: Session guard, load-error via shell, dismissible error banners.
  *
  * Traceability: docs/architecture/plans/MVP/G4/W0-G4-T04 §5.2
  */
@@ -70,6 +71,7 @@ export function ProvisioningOversightPage(): ReactNode {
   const [allRuns, setAllRuns] = useState<IProvisioningStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('failures');
   const [selectedRun, setSelectedRun] = useState<IProvisioningStatus | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -96,7 +98,7 @@ export function ProvisioningOversightPage(): ReactNode {
   const loadRuns = useCallback(async (): Promise<void> => {
     if (!session) return;
     setLoading(true);
-    setError(null);
+    setLoadError(null);
     try {
       const runs = await client.listProvisioningRuns();
       setAllRuns(runs);
@@ -107,7 +109,7 @@ export function ProvisioningOversightPage(): ReactNode {
         const failedRuns = await client.listFailedRuns();
         setAllRuns(failedRuns);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load provisioning runs');
+        setLoadError(err instanceof Error ? err.message : 'Failed to load provisioning runs');
       }
     } finally {
       setLoading(false);
@@ -352,9 +354,41 @@ export function ProvisioningOversightPage(): ReactNode {
     [],
   );
 
+  // W0-G4-T07: Session loading guard (after all hooks)
+  if (!session) {
+    return (
+      <WorkspacePageShell layout="list" title="Loading..." isLoading>
+        {null}
+      </WorkspacePageShell>
+    );
+  }
+
+  // W0-G4-T07: Full load error — no data at all
+  if (loadError && allRuns.length === 0 && !loading) {
+    return (
+      <WorkspacePageShell
+        layout="list"
+        title="Provisioning Oversight"
+        isError
+        errorMessage={loadError}
+        onRetry={() => { setLoadError(null); loadRuns().catch(() => {}); }}
+      >
+        {null}
+      </WorkspacePageShell>
+    );
+  }
+
   return (
     <WorkspacePageShell layout="list" title="Provisioning Oversight">
-      {error && <HbcBanner variant="error">{error}</HbcBanner>}
+      {/* W0-G4-T06: Complexity dial for tier selection */}
+      <HbcComplexityDial variant="header" />
+
+      {/* W0-G4-T07: Dismissible action error banner */}
+      {error && (
+        <HbcBanner variant="error" onDismiss={() => setError(null)}>
+          {error}
+        </HbcBanner>
+      )}
 
       <HbcTabs tabs={FILTER_TABS} activeTabId={activeTab} onTabChange={setActiveTab} />
 

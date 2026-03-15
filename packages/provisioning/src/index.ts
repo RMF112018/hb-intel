@@ -48,6 +48,8 @@ export {
   URGENCY_INDICATOR_MAP,
   PROJECT_SETUP_SUMMARY_FIELDS,
   CORE_SUMMARY_FIELD_IDS,
+  STATE_BADGE_VARIANTS,
+  getStateBadgeVariant,
 } from './summary-field-registry.js';
 
 // W0-G3-T06: History level model and content descriptors

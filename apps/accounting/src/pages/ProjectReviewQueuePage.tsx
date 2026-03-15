@@ -43,6 +43,7 @@ const TAB_STATE_FILTER: Record<FilterTabId, string> = {
 /**
  * W0-G4-T03: Controller project setup review queue.
  * Displays submitted requests filtered by state with tabbed navigation.
+ * W0-G4-T07: Session guard, load-error state.
  * Traceability: docs/architecture/plans/MVP/G4/W0-G4-T03
  */
 export function ProjectReviewQueuePage(): ReactNode {
@@ -50,6 +51,7 @@ export function ProjectReviewQueuePage(): ReactNode {
   const session = useCurrentSession();
   const navigate = useNavigate();
   const { requests, setRequests } = useProvisioningStore();
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const authToken = useMemo(() => resolveSessionToken(session), [session]);
   const client = useMemo(
@@ -58,13 +60,15 @@ export function ProjectReviewQueuePage(): ReactNode {
   );
 
   useEffect(() => {
+    if (!session) return;
+    setLoadError(null);
     client
       .listRequests()
       .then((listed: IProjectSetupRequest[]) => setRequests(listed))
       .catch(() => {
-        // Empty-state fallback — queue renders with no rows.
+        setLoadError('Unable to load review queue. Check your connection and try again.');
       });
-  }, [client, setRequests]);
+  }, [client, session, setRequests]);
 
   const filteredRequests = useMemo(() => {
     const stateFilter = TAB_STATE_FILTER[activeTab as FilterTabId];
@@ -149,6 +153,30 @@ export function ProjectReviewQueuePage(): ReactNode {
     ],
     [handleOpen],
   );
+
+  // W0-G4-T07: Session loading guard (after all hooks)
+  if (!session) {
+    return (
+      <WorkspacePageShell layout="list" title="Loading..." isLoading>
+        {null}
+      </WorkspacePageShell>
+    );
+  }
+
+  // W0-G4-T07: Load error state
+  if (loadError && requests.length === 0) {
+    return (
+      <WorkspacePageShell
+        layout="list"
+        title="Project Setup Review"
+        isError
+        errorMessage={loadError}
+        onRetry={() => { setLoadError(null); }}
+      >
+        {null}
+      </WorkspacePageShell>
+    );
+  }
 
   return (
     <WorkspacePageShell layout="list" title="Project Setup Review">

@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { useParams } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { useCurrentSession } from '@hbc/auth';
-import { HbcComplexityGate } from '@hbc/complexity';
+import { HbcComplexityDial, HbcComplexityGate } from '@hbc/complexity';
 import type { IProjectSetupRequest } from '@hbc/models';
 import {
   createProvisioningApiClient,
@@ -10,7 +10,7 @@ import {
   useProvisioningSignalR,
   useProvisioningStore,
 } from '@hbc/provisioning';
-import { HbcCard, HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
+import { HbcBanner, HbcCard, HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
 import { ClarificationBanner } from '../components/project-setup/ClarificationBanner.js';
 import { CompletionConfirmationCard } from '../components/project-setup/CompletionConfirmationCard.js';
 import { FailureDetailCard } from '../components/project-setup/FailureDetailCard.js';
@@ -24,12 +24,15 @@ import { resolveSessionToken } from '../utils/resolveSessionToken.js';
  * W0-G4-T01 request detail page with BIC ownership, state context,
  * clarification banner, and provisioning visibility with real-time updates.
  * W0-G4-T02: Added coordinator-tier failure detail, retry/escalation, and detailed checklist.
+ * W0-G4-T07: Breadcrumbs, session guard, load-error state, SignalR fallback, missing status banner.
  * Traceability: docs/architecture/plans/PH6.10-Estimating-App.md §6.10.3
  */
 export function RequestDetailPage(): ReactNode {
   const { requestId } = useParams({ strict: false }) as { requestId: string };
+  const navigate = useNavigate();
   const session = useCurrentSession();
   const { requests, setRequests, statusByProjectId, setProvisioningStatus } = useProvisioningStore();
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const authToken = useMemo(() => resolveSessionToken(session), [session]);
   const client = useMemo(
@@ -43,7 +46,7 @@ export function RequestDetailPage(): ReactNode {
   const visibility = getProvisioningVisibility(session, request?.submittedBy ?? '');
 
   // D-PH6-10 SignalR should only connect while provisioning is active.
-  useProvisioningSignalR({
+  const { isConnected } = useProvisioningSignalR({
     negotiateUrl: `${import.meta.env.VITE_FUNCTION_APP_URL}/api/provisioning-negotiate`,
     projectId: projectId ?? '',
     getToken: async () => authToken,
@@ -61,9 +64,10 @@ export function RequestDetailPage(): ReactNode {
   }, [client, requestId, setProvisioningStatus, setRequests]);
 
   useEffect(() => {
-    if (!requestId) return;
+    if (!requestId || !session) return;
     let mounted = true;
 
+    setLoadError(null);
     (async () => {
       const listed = await client.listRequests();
       if (!mounted) return;
@@ -75,25 +79,111 @@ export function RequestDetailPage(): ReactNode {
       const status = await client.getProvisioningStatus(matched.projectId);
       if (status && mounted) setProvisioningStatus(status);
     })().catch(() => {
-      // Preserve fallback rendering.
+      if (mounted) {
+        setLoadError('Unable to load request data. Check your connection and try again.');
+      }
     });
 
     return () => {
       mounted = false;
     };
-  }, [client, requestId, setProvisioningStatus, setRequests]);
+  }, [client, requestId, session, setProvisioningStatus, setRequests]);
 
+  // W0-G4-T07: SignalR polling fallback
+  useEffect(() => {
+    if (isConnected || request?.state !== 'Provisioning') return;
+    const interval = setInterval(() => {
+      refreshData().catch(() => {});
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [isConnected, request?.state, refreshData]);
+
+  // W0-G4-T07: Session loading guard
+  if (!session) {
+    return (
+      <WorkspacePageShell layout="detail" title="Loading..." isLoading>
+        {null}
+      </WorkspacePageShell>
+    );
+  }
+
+  // W0-G4-T07: Load error — no data at all
+  if (loadError && !request) {
+    return (
+      <WorkspacePageShell
+        layout="detail"
+        title="Setup Request"
+        isError
+        errorMessage={loadError}
+        onRetry={() => { setLoadError(null); }}
+        breadcrumbs={[
+          { label: 'Project Setup', href: '/project-setup' },
+          { label: 'Error' },
+        ]}
+      >
+        {null}
+      </WorkspacePageShell>
+    );
+  }
+
+  // W0-G4-T07: Not found → HbcEmptyState via shell
   if (!request) {
-    return <WorkspacePageShell layout="detail" title="Request Not Found">Request not found.</WorkspacePageShell>;
+    return (
+      <WorkspacePageShell
+        layout="detail"
+        title="Request Not Found"
+        isEmpty
+        emptyMessage="The project setup request was not found. It may have been removed or you may not have access."
+        emptyActionLabel="Back to Project Setup"
+        onEmptyAction={() => navigate({ to: '/project-setup' })}
+        breadcrumbs={[
+          { label: 'Project Setup', href: '/project-setup' },
+          { label: 'Not Found' },
+        ]}
+      >
+        {null}
+      </WorkspacePageShell>
+    );
   }
 
   return (
-    <WorkspacePageShell layout="detail" title={`${request.projectName} — Setup Request`}>
+    <WorkspacePageShell
+      layout="detail"
+      title={`${request.projectName} — Setup Request`}
+      breadcrumbs={[
+        { label: 'Project Setup', href: '/project-setup' },
+        { label: request.projectName },
+      ]}
+    >
+      {/* W0-G4-T06: Complexity dial for tier selection */}
+      <HbcComplexityDial variant="header" />
+
+      {/* W0-G4-T07: Stale data warning when refresh failed but we have cached data */}
+      {loadError && (
+        <HbcBanner variant="warning" onDismiss={() => setLoadError(null)}>
+          Live status unavailable — showing last known state.
+        </HbcBanner>
+      )}
+
       <RequestCoreSummary request={request} />
       <RequestStateContext state={request.state} />
 
       {request.state === 'NeedsClarification' && (
         <ClarificationBanner requestId={requestId} clarificationNote={request.clarificationNote} />
+      )}
+
+      {/* W0-G4-T07: SignalR disconnect indicator */}
+      {request.state === 'Provisioning' && !isConnected && (
+        <HbcBanner variant="warning">
+          Real-time connection lost. Status updates are refreshing every 30 seconds.
+        </HbcBanner>
+      )}
+
+      {/* W0-G4-T07: Provisioning status missing after completion */}
+      {request.state === 'Completed' && !provisioningStatus && (
+        <HbcBanner variant="warning">
+          Provisioning details are not yet available. The site may still be accessible — check back shortly.
+        </HbcBanner>
       )}
 
       {/* W0-G4-T05: Completion confirmation — shown when request is Completed */}
@@ -115,11 +205,13 @@ export function RequestDetailPage(): ReactNode {
       )}
 
       {visibility === 'full' && !provisioningStatus && request.state === 'Provisioning' && (
-        <p>Connecting to live progress…</p>
+        <HbcBanner variant="info">Connecting to live progress…</HbcBanner>
       )}
 
       {visibility !== 'full' && request.state === 'Provisioning' && (
-        <p>Site provisioning is in progress. You will be notified when it is ready.</p>
+        <HbcBanner variant="info">
+          Site provisioning is in progress. You will be notified when it is ready.
+        </HbcBanner>
       )}
 
       {/* W0-G4-T02: Failed state — failure detail card + retry/escalation section */}

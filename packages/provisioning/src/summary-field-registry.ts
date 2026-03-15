@@ -103,6 +103,28 @@ export const PROJECT_SETUP_SUMMARY_FIELDS: readonly ISummaryFieldDescriptor[] = 
   { fieldId: 'lastSagaStep', label: 'Last Saga Step', source: 'provisioning', sourcePath: 'ISagaStepResult (last completed)', minTier: 'expert' },
 ] as const;
 
+// ─── State Badge Variant Map ─────────────────────────────────────────────────
+
+/**
+ * W0-G4-T06: Canonical state-to-badge-variant mapping for all G4 surfaces.
+ * Typed as string to respect Rule R6 (headless package — no ui-kit dependency).
+ * Consumers narrow to StatusVariant at the call site.
+ */
+export const STATE_BADGE_VARIANTS: Readonly<Record<ProjectSetupRequestState, string>> = {
+  Submitted: 'pending',
+  UnderReview: 'inProgress',
+  NeedsClarification: 'warning',
+  AwaitingExternalSetup: 'pending',
+  ReadyToProvision: 'pending',
+  Provisioning: 'inProgress',
+  Completed: 'completed',
+  Failed: 'error',
+};
+
+export function getStateBadgeVariant(state: ProjectSetupRequestState): string {
+  return STATE_BADGE_VARIANTS[state] ?? 'neutral';
+}
+
 /** Core summary fields (no tier gate). */
 export const CORE_SUMMARY_FIELD_IDS = PROJECT_SETUP_SUMMARY_FIELDS
   .filter((f) => !f.minTier)

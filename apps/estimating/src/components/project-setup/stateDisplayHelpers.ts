@@ -1,19 +1,13 @@
 import type { ProjectSetupRequestState } from '@hbc/models';
 import type { StatusVariant } from '@hbc/ui-kit';
+import { STATE_BADGE_VARIANTS as _STATE_BADGE_VARIANTS, getStateBadgeVariant as _getStateBadgeVariant } from '@hbc/provisioning';
 
-export const STATE_BADGE_MAP: Record<ProjectSetupRequestState, StatusVariant> = {
-  Submitted: 'pending',
-  UnderReview: 'inProgress',
-  NeedsClarification: 'warning',
-  AwaitingExternalSetup: 'pending',
-  ReadyToProvision: 'pending',
-  Provisioning: 'inProgress',
-  Completed: 'completed',
-  Failed: 'error',
-};
+// W0-G4-T06: Centralized badge variant mapping from @hbc/provisioning.
+// Narrow string → StatusVariant at the consumer boundary (Rule R6: provisioning is headless).
+export const STATE_BADGE_MAP = _STATE_BADGE_VARIANTS as unknown as Record<ProjectSetupRequestState, StatusVariant>;
 
 export function getStateBadgeVariant(state: ProjectSetupRequestState): StatusVariant {
-  return STATE_BADGE_MAP[state] ?? 'neutral';
+  return _getStateBadgeVariant(state) as StatusVariant;
 }
 
 export const STATE_CONTEXT_TEXT: Record<ProjectSetupRequestState, string> = {

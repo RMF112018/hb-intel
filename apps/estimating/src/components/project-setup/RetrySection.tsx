@@ -5,6 +5,7 @@ import { HbcComplexityGate } from '@hbc/complexity';
 import type { IProvisioningStatus } from '@hbc/models';
 import { createProvisioningApiClient } from '@hbc/provisioning';
 import { HbcBanner, HbcButton } from '@hbc/ui-kit';
+import { getAdminAppUrl } from '../../utils/crossAppUrls.js';
 import {
   FAILURE_CLASS_DESCRIPTIONS,
   canCoordinatorRetry,
@@ -34,6 +35,7 @@ export function RetrySection({ status, projectId, onRetryComplete }: RetrySectio
 
   const [loading, setLoading] = useState(false);
   const [retryError, setRetryError] = useState<string | null>(null);
+  const adminUrl = useMemo(() => getAdminAppUrl(), []);
 
   const handleRetry = useCallback(async () => {
     setLoading(true);
@@ -82,8 +84,20 @@ export function RetrySection({ status, projectId, onRetryComplete }: RetrySectio
           </p>
           <p>{FAILURE_CLASS_DESCRIPTIONS[status.failureClass]}</p>
           <HbcButton variant="secondary" onClick={handleEscalate} loading={loading} disabled={loading}>
-            Open Admin Recovery
+            Escalate to Admin
           </HbcButton>
+          {adminUrl && (
+            <HbcButton
+              variant="secondary"
+              onClick={() => window.open(
+                `${adminUrl}/provisioning-oversight?projectId=${projectId}`,
+                '_blank',
+              )}
+              disabled={loading}
+            >
+              Open Admin Recovery
+            </HbcButton>
+          )}
         </HbcBanner>
       )}
     </HbcComplexityGate>

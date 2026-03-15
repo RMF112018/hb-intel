@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Link, useNavigate, useParams } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { makeStyles } from '@griffel/react';
 import { useCurrentSession } from '@hbc/auth';
 import { HbcBicDetail } from '@hbc/bic-next-move';
-import { HbcComplexityGate } from '@hbc/complexity';
+import { HbcComplexityDial, HbcComplexityGate } from '@hbc/complexity';
 import type { IProjectSetupRequest } from '@hbc/models';
 import type { IStatusEntry } from '@hbc/ui-kit';
 import {
@@ -30,6 +30,7 @@ import {
 } from '@hbc/ui-kit';
 import { resolveSessionToken } from '../utils/resolveSessionToken.js';
 import { getStateBadgeVariant, getStateContextText } from '../utils/stateDisplayHelpers.js';
+import { getAdminAppUrl } from '../utils/crossAppUrls.js';
 
 const useStyles = makeStyles({
   actionRow: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
@@ -39,6 +40,7 @@ const useStyles = makeStyles({
 /**
  * W0-G4-T03: Controller structured review detail page.
  * Supports approve, request-clarification, place-on-hold, and route-to-admin actions.
+ * W0-G4-T07: Breadcrumbs, session guard, load-error state, dismissible banners, env-sourced admin URL.
  * Traceability: docs/architecture/plans/MVP/G4/W0-G4-T03 §7.2
  */
 export function ProjectReviewDetailPage(): ReactNode {
@@ -62,14 +64,20 @@ export function ProjectReviewDetailPage(): ReactNode {
   const [holdOpen, setHoldOpen] = useState(false);
   const [clarifyOpen, setClarifyOpen] = useState(false);
   const [clarificationNote, setClarificationNote] = useState('');
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const adminUrl = useMemo(() => getAdminAppUrl(), []);
 
   // ── Data loading ────────────────────────────────────────────────────────
   useEffect(() => {
+    if (!session) return;
+    setLoadError(null);
     client
       .listRequests()
       .then((listed: IProjectSetupRequest[]) => setRequests(listed))
-      .catch(() => {});
-  }, [client, setRequests]);
+      .catch(() => {
+        setLoadError('Unable to load review data. Check your connection and try again.');
+      });
+  }, [client, session, setRequests]);
 
   const request = requests.find((r) => r.requestId === requestId);
 
@@ -138,12 +146,50 @@ export function ProjectReviewDetailPage(): ReactNode {
     return entries;
   }, [request]);
 
+  // ── W0-G4-T07: Session loading guard (after all hooks) ────────────────
+  if (!session) {
+    return (
+      <WorkspacePageShell layout="detail" title="Loading..." isLoading>
+        {null}
+      </WorkspacePageShell>
+    );
+  }
+
+  // ── W0-G4-T07: Load error state ──────────────────────────────────────
+  if (loadError && !request) {
+    return (
+      <WorkspacePageShell
+        layout="detail"
+        title="Project Review"
+        isError
+        errorMessage={loadError}
+        onRetry={() => { setLoadError(null); }}
+        breadcrumbs={[
+          { label: 'Project Review', href: '/project-review' },
+          { label: 'Error' },
+        ]}
+      >
+        {null}
+      </WorkspacePageShell>
+    );
+  }
+
   // ── Not found ───────────────────────────────────────────────────────────
   if (!request) {
     return (
-      <WorkspacePageShell layout="detail" title="Request Not Found">
-        <p>Request not found.</p>
-        <Link to="/project-review">← Back to Queue</Link>
+      <WorkspacePageShell
+        layout="detail"
+        title="Request Not Found"
+        isEmpty
+        emptyMessage="The review request was not found. It may have been removed or you may not have access."
+        emptyActionLabel="Back to Review Queue"
+        onEmptyAction={() => navigate({ to: '/project-review' })}
+        breadcrumbs={[
+          { label: 'Project Review', href: '/project-review' },
+          { label: 'Not Found' },
+        ]}
+      >
+        {null}
       </WorkspacePageShell>
     );
   }
@@ -152,12 +198,23 @@ export function ProjectReviewDetailPage(): ReactNode {
   const isFailed = request.state === 'Failed';
 
   return (
-    <WorkspacePageShell layout="detail" title={`${request.projectName} — Review`}>
-      {/* ── Back navigation ──────────────────────────────────────────── */}
-      <Link to="/project-review">← Back to Queue</Link>
+    <WorkspacePageShell
+      layout="detail"
+      title={`${request.projectName} — Review`}
+      breadcrumbs={[
+        { label: 'Project Review', href: '/project-review' },
+        { label: request.projectName },
+      ]}
+    >
+      {/* W0-G4-T06: Complexity dial for tier selection */}
+      <HbcComplexityDial variant="header" />
 
-      {/* ── Error banner ─────────────────────────────────────────────── */}
-      {actionError && <HbcBanner variant="error">{actionError}</HbcBanner>}
+      {/* ── Error banner (dismissible) ────────────────────────────────── */}
+      {actionError && (
+        <HbcBanner variant="error" onDismiss={() => setActionError(null)}>
+          {actionError}
+        </HbcBanner>
+      )}
 
       {/* ── Core Summary ─────────────────────────────────────────────── */}
       <HbcTypography intent="heading2">{request.projectName}</HbcTypography>
@@ -181,49 +238,51 @@ export function ProjectReviewDetailPage(): ReactNode {
       <p><strong>Submitted By:</strong> {request.submittedBy}</p>
       <p><strong>Submitted:</strong> {new Date(request.submittedAt).toLocaleDateString()}</p>
 
-      {/* ── Request Detail ───────────────────────────────────────────── */}
-      <HbcCard>
-        <HbcTypography intent="heading3">Request Details</HbcTypography>
+      {/* ── Request Detail (standard-tier) ────────────────────────────── */}
+      <HbcComplexityGate minTier="standard">
+        <HbcCard>
+          <HbcTypography intent="heading3">Request Details</HbcTypography>
 
-        {request.groupMembers.length > 0 && (
-          <p><strong>Team Members:</strong> {request.groupMembers.join(', ')}</p>
-        )}
-        {request.groupLeaders && request.groupLeaders.length > 0 && (
-          <p><strong>Group Leaders:</strong> {request.groupLeaders.join(', ')}</p>
-        )}
-        {request.projectLeadId && (
-          <p><strong>Project Lead:</strong> {request.projectLeadId}</p>
-        )}
-        {request.contractType && (
-          <p><strong>Contract Type:</strong> {request.contractType}</p>
-        )}
-        {request.estimatedValue != null && (
-          <p><strong>Estimated Value:</strong> ${request.estimatedValue.toLocaleString()}</p>
-        )}
-        {request.clientName && (
-          <p><strong>Client Name:</strong> {request.clientName}</p>
-        )}
-        {request.startDate && (
-          <p><strong>Start Date:</strong> {new Date(request.startDate).toLocaleDateString()}</p>
-        )}
-        {request.addOns && request.addOns.length > 0 && (
-          <p><strong>Add-ons:</strong> {request.addOns.join(', ')}</p>
-        )}
-        {request.clarificationItems && request.clarificationItems.length > 0 && (
-          <>
-            <HbcTypography intent="heading4">Clarification Items</HbcTypography>
-            <ul>
-              {request.clarificationItems.map((item) => (
-                <li key={item.clarificationId}>
-                  <strong>{item.fieldId}:</strong> {item.message}
-                  {item.status === 'responded' && ' (Responded)'}
-                  {item.responseNote && <em> — {item.responseNote}</em>}
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </HbcCard>
+          {request.groupMembers.length > 0 && (
+            <p><strong>Team Members:</strong> {request.groupMembers.join(', ')}</p>
+          )}
+          {request.groupLeaders && request.groupLeaders.length > 0 && (
+            <p><strong>Group Leaders:</strong> {request.groupLeaders.join(', ')}</p>
+          )}
+          {request.projectLeadId && (
+            <p><strong>Project Lead:</strong> {request.projectLeadId}</p>
+          )}
+          {request.contractType && (
+            <p><strong>Contract Type:</strong> {request.contractType}</p>
+          )}
+          {request.estimatedValue != null && (
+            <p><strong>Estimated Value:</strong> ${request.estimatedValue.toLocaleString()}</p>
+          )}
+          {request.clientName && (
+            <p><strong>Client Name:</strong> {request.clientName}</p>
+          )}
+          {request.startDate && (
+            <p><strong>Start Date:</strong> {new Date(request.startDate).toLocaleDateString()}</p>
+          )}
+          {request.addOns && request.addOns.length > 0 && (
+            <p><strong>Add-ons:</strong> {request.addOns.join(', ')}</p>
+          )}
+          {request.clarificationItems && request.clarificationItems.length > 0 && (
+            <>
+              <HbcTypography intent="heading4">Clarification Items</HbcTypography>
+              <ul>
+                {request.clarificationItems.map((item) => (
+                  <li key={item.clarificationId}>
+                    <strong>{item.fieldId}:</strong> {item.message}
+                    {item.status === 'responded' && ' (Responded)'}
+                    {item.responseNote && <em> — {item.responseNote}</em>}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </HbcCard>
+      </HbcComplexityGate>
 
       {/* ── Standard-gated operational detail ─────────────────────────── */}
       <HbcComplexityGate minTier="standard">
@@ -267,9 +326,21 @@ export function ProjectReviewDetailPage(): ReactNode {
       {isFailed && (
         <HbcCard>
           <HbcTypography intent="heading3">Actions</HbcTypography>
-          <a href="/admin/provisioning-failures">
-            <HbcButton variant="secondary">Send to Admin</HbcButton>
-          </a>
+          {adminUrl ? (
+            <HbcButton
+              variant="secondary"
+              onClick={() => window.open(
+                `${adminUrl}/provisioning-oversight?projectId=${request.projectId}`,
+                '_blank',
+              )}
+            >
+              Send to Admin
+            </HbcButton>
+          ) : (
+            <HbcBanner variant="warning">
+              Admin navigation is not configured in this environment. Contact your system administrator.
+            </HbcBanner>
+          )}
         </HbcCard>
       )}
 

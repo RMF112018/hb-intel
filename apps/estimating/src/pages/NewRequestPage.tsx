@@ -188,6 +188,15 @@ export function NewRequestPage(): ReactNode {
     }
   }
 
+  // W0-G4-T07: Session loading guard (after all hooks)
+  if (!session) {
+    return (
+      <WorkspacePageShell layout="form" title="Loading..." isLoading>
+        {null}
+      </WorkspacePageShell>
+    );
+  }
+
   return (
     <WorkspacePageShell
       layout="form"

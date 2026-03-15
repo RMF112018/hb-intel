@@ -13,7 +13,7 @@ import {
   PROJECT_SETUP_STATUS_LABELS,
   useProvisioningStore,
 } from '@hbc/provisioning';
-import { HbcBanner, HbcButton, HbcDataTable, HbcStatusBadge, WorkspacePageShell } from '@hbc/ui-kit';
+import { HbcBanner, HbcButton, HbcDataTable, HbcEmptyState, HbcStatusBadge, WorkspacePageShell } from '@hbc/ui-kit';
 import type { ColumnDef } from '@tanstack/react-table';
 import { getStateBadgeVariant } from '../components/project-setup/stateDisplayHelpers.js';
 import { canCoordinatorRetry } from '../utils/failureClassification.js';
@@ -26,6 +26,7 @@ const useStyles = makeStyles({
 /**
  * D-PH6-10 Project Setup request list page for Estimating coordinators.
  * W0-G4-T02: Standard+ tier renders HbcDataTable with columns, row actions, and BIC ownership.
+ * W0-G4-T07: Session guard, load-error state, HbcEmptyState for empty list.
  */
 export function ProjectSetupPage(): ReactNode {
   const styles = useStyles();
@@ -33,6 +34,7 @@ export function ProjectSetupPage(): ReactNode {
   const { requests, setRequests, statusByProjectId } = useProvisioningStore();
   const authToken = useMemo(() => resolveSessionToken(session), [session]);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const client = useMemo(
     () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL, async () => authToken),
@@ -40,13 +42,15 @@ export function ProjectSetupPage(): ReactNode {
   );
 
   useEffect(() => {
+    if (!session) return;
+    setLoadError(null);
     client
       .listRequests()
       .then((listed: IProjectSetupRequest[]) => setRequests(listed))
       .catch(() => {
-        // Preserve rendering with empty-state fallback.
+        setLoadError('Unable to load project setup requests. Check your connection and try again.');
       });
-  }, [client, setRequests]);
+  }, [client, session, setRequests]);
 
   const handleRetry = useCallback(
     async (projectId: string) => {
@@ -155,6 +159,30 @@ export function ProjectSetupPage(): ReactNode {
     [statusByProjectId, handleRetry, handleEscalate],
   );
 
+  // W0-G4-T07: Session loading guard (after all hooks)
+  if (!session) {
+    return (
+      <WorkspacePageShell layout="list" title="Loading..." isLoading>
+        {null}
+      </WorkspacePageShell>
+    );
+  }
+
+  // W0-G4-T07: Load error state
+  if (loadError && requests.length === 0) {
+    return (
+      <WorkspacePageShell
+        layout="list"
+        title="Project Setup Requests"
+        isError
+        errorMessage={loadError}
+        onRetry={() => { setLoadError(null); }}
+      >
+        {null}
+      </WorkspacePageShell>
+    );
+  }
+
   return (
     <WorkspacePageShell layout="list" title="Project Setup Requests">
       <div className={styles.actionRow}>
@@ -163,10 +191,17 @@ export function ProjectSetupPage(): ReactNode {
         </Link>
       </div>
 
-      {actionError && <HbcBanner variant="error">{actionError}</HbcBanner>}
+      {actionError && (
+        <HbcBanner variant="error" onDismiss={() => setActionError(null)}>
+          {actionError}
+        </HbcBanner>
+      )}
 
       {requests.length === 0 ? (
-        <p>No project setup requests submitted yet.</p>
+        <HbcEmptyState
+          title="No project setup requests yet."
+          description="Create a new request to get started."
+        />
       ) : (
         <>
           {/* W0-G4-T02: Standard+ tier — coordinator queue table */}
