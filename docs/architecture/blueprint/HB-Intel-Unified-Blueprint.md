@@ -2,9 +2,9 @@
 
 > **Doc Classification:** Canonical Normative Plan — program narrative and master summary architecture for HB Intel. This document summarizes target-state intent, operating doctrine, delivery history, and roadmap. It does **not** govern present-state truth; that role belongs exclusively to `current-state-map.md` (Tier 1). Status assertions in this document are narrative summaries — always verify implementation truth against `current-state-map.md` and package READMEs.
 
-**Version:** 1.1 (Refined — 2026-03-14)
+**Version:** 1.2 (Reconciled — 2026-03-15)
 **Originally Created:** 2026-03-14
-**Refined:** 2026-03-14
+**Refined:** 2026-03-15
 **Governed by:** `CLAUDE.md` v1.3 · ADR-0084 · `current-state-map.md` (Tier 1) · Blueprint V4 (Tier 2)
 
 ---
@@ -184,7 +184,7 @@ Per the auth system architecture (`@hbc/auth`, `@hbc/auth-core`), seven roles sp
 - **Estimating** — Department-site webpart; pursuit tracking, bid readiness, kickoff management; project setup status page ownership.
 - **Accounting** — Department-site webpart; project setup controller; triggers "Save + Provision Site"; Controller Inbox.
 - **Business Development** — Department-site webpart; lead tracking, score benchmarking, heritage intelligence.
-- **Leadership** — Leadership workspace; portfolio dashboards, health indicators.
+- **Leadership** — Leadership value is delivered through role-aware visibility features, portfolio cards, escalation views, and drill-in surfaces within the Personal Work Hub and Project Hub — not through a standalone leadership application. The existing `@hbc/spfx-leadership` and `@hbc/features-leadership` packages remain as implementation containers for these role-aware surfaces.
 - **Admin** — Admin workspace; provisioning failures, error logging, user management, feature flags, support escalation surface.
 - **Safety / QC / Risk / OE / HR** — Department-specific webparts; scoped to their domains; post-MVP rollout priorities.
 
@@ -510,6 +510,8 @@ An MVP that achieves provisioning without improving daily work experience has on
 
 Accounting → Estimating → Project Hub → Leadership → Business Development
 
+> **Clarification (2026-03-15):** This sequence remains locked per Interview Decision. Leadership value in this sequence is delivered through role-aware visibility features within the Personal Work Hub and Project Hub surfaces, not as a standalone leadership application deployment. The sequence reflects the order in which department-specific value is proven, with leadership-facing features surfacing through the operating layer rather than a dedicated leadership app deployment.
+
 ### 15.3 Launch Success Hierarchy (Locked Doctrine — Interview Decision 11)
 
 1. **Adoption and trust.** Users choose to use HB Intel for their real work.
@@ -623,7 +625,7 @@ The following are not MVP requirements. Including them in MVP scope or coding th
 - Mobile-native HB Site Control application.
 - Full PWA feature set across all 14 workspaces.
 - Review Mode (PH7-ReviewMode-Plan + PH7-RM-1 through PH7-RM-9 — Deferred Scope).
-- My Work Feed / PH9b UX enhancements (requires Phase 7 modules live first).
+- PH9b UX polish deferrals — progressive coaching sequences, draft persistence instrumentation, and advanced CES/task-flow instrumentation remain deferred until Phase 7 modules are live. The core Personal Work Hub operating layer (powered by `@hbc/my-work-feed`, SF29, implemented) is Wave 1 scope and is NOT a non-goal.
 - Advanced search (SF16 — planning stage only, pending ADR-0090).
 - Post-bid autopsy workflow (SF22 T08–T09 — not yet defined).
 
@@ -643,7 +645,7 @@ The following are expected future directions but carry no current implementation
 The following are deferred per formal classification in `current-state-map.md §2` as Deferred Scope. They may not be activated without reclassification to Canonical Normative Plan and assignment to a named phase:
 
 - All PH7-RM-* plans (SF-layer Review Mode).
-- PH9b UX Enhancement Plan.
+- PH9b UX Enhancement Plan — limited to coaching, advanced instrumentation, and UX polish items. The core my-work-feed aggregation layer (`@hbc/my-work-feed`, SF29) is implemented and is Wave 1 scope.
 - SF16 Search implementation.
 - SF22 Post-Bid Learning Loop T08–T09.
 
@@ -727,6 +729,16 @@ For the adoption matrix, decision tree, and non-duplication rules, see `docs/ref
 
 > **Delivery sequencing companion:** For the full wave structure (Foundation/Wave 0–3/Convergence), dual-stream SPFx/PWA doctrine, readiness gate definitions, and long-range SPFx sunset strategy, see `docs/architecture/blueprint/HB-Intel-Dev-Roadmap.md`. This section covers active phase streams; the roadmap covers staged delivery planning above the phase level.
 
+### 20.0 Wave 0 — Confirmed Complete (2026-03-15)
+
+Wave 0 (Groups G1–G6) is confirmed complete. See `current-state-map.md §7` for the full closeout baseline. Wave 0 established:
+- Provisioning contracts, configuration, and backend hardening (G1–G2)
+- Shared platform wiring and workflow experience primitives (G3)
+- SPFx surfaces for Estimating, Accounting, Admin, and Project Hub (G4)
+- Hosted PWA requester surfaces with SPFx parity (G5)
+- Admin support, observability, and alert routing (G6)
+- `@hbc/my-work-feed` (SF29) — the aggregation primitive powering the Personal Work Hub operating layer in Wave 1
+
 ### 20.1 PH7 Stabilization vs PH7 Expansion (Critical Distinction)
 
 Phase 7 has two distinct branches that must not be confused:
@@ -755,7 +767,7 @@ The MVP plan branch (`docs/architecture/plans/MVP/`) is the next concrete implem
 | Stream | Files | Classification | Activation Requirement |
 |--------|-------|----------------|----------------------|
 | Review Mode | PH7-ReviewMode-Plan.md + PH7-RM-1 through PH7-RM-9 | Deferred Scope | Reclassify to Canonical Normative Plan + assign to named phase |
-| PH9b UX Enhancements | PH9b-UX-Enhancement-Plan.md | Deferred Scope | Requires Phase 7 modules live |
+| PH9b UX Enhancements (coaching, advanced instrumentation, UX polish only) | PH9b-UX-Enhancement-Plan.md | Deferred Scope | Requires Phase 7 modules live; core `@hbc/my-work-feed` (SF29) is Wave 1 scope |
 | SF16 Search | SF16-Search.md + planning files | Canonical Normative Plan (planning) | Pending ADR-0090 |
 | SF22 Post-Bid Learning Loop T08–T09 | Not yet authored | N/A | Pending authoring |
 
@@ -788,7 +800,7 @@ Any action that would reverse, weaken, or work around these decisions requires a
 | ADR-0090 | Phase 7 Final Verification and Sign-Off (gate ADR — must exist before expansion) | PH7.12 |
 | ADR-0092 through ADR-0113 | SF04–SF21 platform primitive governance | PH7 concurrent |
 
-**Next unreserved ADR number: ADR-0114.**
+**Next unreserved ADR number: ADR-0116.**
 
 ### 21.2 ADR Catalog Reference
 
@@ -820,12 +832,13 @@ The full ADR catalog (111+ active, 6 archived) is maintained at `docs/architectu
 **Classification:** Canonical Normative Plan (program narrative layer — does not govern present-state truth)
 **Classification Banner:** Applied (see top of file; banner format per ADR-0084 §2.1)
 **Row in current-state-map.md §2:** Added 2026-03-14
-**Version:** 1.1 (Refined 2026-03-14)
-**Refinement scope:** Status-language precision; governance-safe classification; non-goals section added; telemetry doctrine expanded; support/operability model strengthened; external collaboration guardrail added; implementation-trust doctrine sharpened.
+**Version:** 1.2 (Reconciled 2026-03-15)
+**Refinement scope (v1.1):** Status-language precision; governance-safe classification; non-goals section added; telemetry doctrine expanded; support/operability model strengthened; external collaboration guardrail added; implementation-trust doctrine sharpened.
+**Reconciliation scope (v1.2):** Personal Work Hub promoted to Wave 1 operating layer; Leadership reframed as role-aware visibility (not standalone app); My Dashboard removed (subsumed by PWH); PH9b scope split (core SF29 is Wave 1, polish items remain deferred); ADR counter corrected; Wave 0 confirmed complete.
 **Next review:** When ADR-0090 ships — update §20.1 PH7 stabilization status.
 
 ---
 
-*End of HB Intel Unified Blueprint v1.1*
+*End of HB Intel Unified Blueprint v1.2*
 *Authoring report: `docs/architecture/blueprint/HB-Intel-Unified-Blueprint-Authoring-Report.md`*
 *Refinement report: `docs/architecture/blueprint/HB-Intel-Unified-Blueprint-Refinement-Report.md`*

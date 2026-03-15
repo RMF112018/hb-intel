@@ -40,6 +40,8 @@ The architecture is governed by five core principles: **scalability**, **stabili
 
 **MVP rollout priority:** Accounting → Estimating → Project Hub → Leadership → Business Development
 
+*Clarification (2026-03-15): Leadership value in this sequence is delivered through role-aware visibility features within the Personal Work Hub and Project Hub, not as a standalone leadership application deployment.*
+
 ---
 
 ## 2. How to Read This Repo — The 5 Reading Layers
@@ -194,7 +196,7 @@ MVP Plans (MVP-Project-Setup-Plan + T01-T09) — needs refinement per Plan Revie
 DEFERRED SCOPE (must not begin without reclassification)
 ════════════════════════════════════════════════════════
 Review Mode (@hbc/review-mode — PH7-ReviewMode-Plan + PH7-RM-1 through 9)
-PH9b UX Enhancements (My Work Feed, coaching, draft persistence, instrumentation)
+PH9b UX Enhancements (coaching, draft persistence, advanced instrumentation — core `@hbc/my-work-feed` (SF29) is implemented and classified Wave 1 scope)
 SF16 Search (@hbc/search)
 SF22 Post-Bid Learning Loop (partial — T08-T09 not yet defined)
 
@@ -323,7 +325,7 @@ The following deferral decisions were made at Phase 6 planning time (2026-03-07)
 - **BD → Projects list integration → Phase 7:** Explicitly deferred per Phase 6 locked decision 8; BD integration required Phase 6 Projects list schema to stabilize first.
 - **In-App Clarification Thread → Phase 7:** Out-of-band clarification (email/Teams) was sufficient for Phase 6 volume; `NeedsClarification` state with out-of-band note satisfied MVP needs.
 - **Sage Intacct / Procore API → Phase 8+:** External systems remained manual during Phase 6; API integration classified as a separate initiative.
-- **My Work Feed → Post-Phase 7 (PH9b):** Cannot be meaningfully populated until at least 2–3 data sources exist from Phase 7. Aggregators are defined (scorecards, Estimating kickoffs, etc.) but require Phase 7 modules to be live.
+- **My Work Feed → Wave 1 (core) / PH9b (polish):** The core `@hbc/my-work-feed` (SF29) aggregation primitive is implemented (ADR-0115) and classified as Wave 1 scope, powering the Personal Work Hub operating layer. Remaining PH9b items (progressive coaching, advanced instrumentation, draft persistence polish) remain deferred until Phase 7 modules are live.
 
 #### Phase 6 Locked Decisions (Historical Context — Now Complete)
 
@@ -332,7 +334,7 @@ The following deferral decisions were made at Phase 6 planning time (2026-03-07)
 | PH6 sequence: PH6.1→6.2→6.3→6.6→6.4→6.5→6.7→6.8→6.9→6.10→6.11 | PH6-Provisioning-Plan.md | Estimating form (6.10) and Accounting inbox (6.11) could not start until 6.9 (`@hbc/provisioning` package) was complete |
 | `projectCode` elimination | PH6 Decision 8 | All features referencing project identifiers must use `projectId` (UUID) + `projectNumber` (##-###-##) exclusively — no `projectCode` anywhere |
 | Frontend package architecture | PH6 Decision 5 | `@hbc/provisioning` owns headless logic only; visual UI lives in each consuming app |
-| Sequential SPFx migration | PH7 Decision Option A | Phase 7 proceeds Accounting → Estimating → Project Hub → Leadership → BD; no webpart can skip ahead |
+| Sequential SPFx migration | PH7 Decision Option A | Phase 7 proceeds Accounting → Estimating → Project Hub → Leadership → BD; no webpart can skip ahead. *Clarification (2026-03-15): Leadership in this sequence refers to role-aware leadership surfaces delivered within the Personal Work Hub and Project Hub operating layer, not a standalone leadership application deployment.* |
 
 #### Phase 7 Foundation Readiness Assessment (Historical — Taken at Phase 5C Sign-Off)
 
@@ -429,10 +431,10 @@ Blueprint V4 defines the following target-architecture principles that remain bi
 | Property | Value |
 |----------|-------|
 | Original role | Post-Phase-7 UX enhancements plan (My Work Feed, coaching, draft persistence, instrumentation) |
-| Current status | **Deferred Scope** |
-| Why deferred | Post-Phase-7 work not yet assigned to an active phase. PH7.12 sign-off is a prerequisite for activation. |
+| Current status | **Deferred Scope** (reduced — core my-work-feed reclassified) |
+| Why deferred | Post-Phase-7 work not yet assigned to an active phase. PH7.12 sign-off is a prerequisite for activation. Core `@hbc/my-work-feed` (SF29) is implemented and reclassified to Wave 1 scope; remaining PH9b scope is coaching, advanced instrumentation, and draft persistence polish only. |
 | Progress notes preserved | Fully retained in source file |
-| Authoritative replacement | N/A — deferred |
+| Authoritative replacement | Core my-work-feed: `@hbc/my-work-feed` (SF29, ADR-0115) — Wave 1. Polish items: PH9b remains deferred. |
 | Header action | Deferred Scope classification banner added |
 
 ---

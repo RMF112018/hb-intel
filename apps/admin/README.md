@@ -8,6 +8,7 @@ Admin Intelligence SPFx web part for HB Intel — system settings, provisioning 
 |-------|------|--------|
 | `/` | System Settings | Active — access control and configuration |
 | `/provisioning-failures` | Provisioning Oversight | Active — monitor, retry, escalate, archive provisioning runs |
+| `/dashboards` | Operational Dashboards | Active — alert summary, probe health, infrastructure status |
 | `/error-log` | Error Log | Deferred — SF17-T05 |
 
 ## Development
@@ -19,6 +20,15 @@ pnpm --filter @hbc/spfx-admin lint            # Lint
 pnpm --filter @hbc/spfx-admin test            # Run tests
 pnpm --filter @hbc/spfx-admin test:coverage   # Run tests with coverage
 ```
+
+## Alert and Probe Polling
+
+The admin app runs two background polling services when a backend URL is configured:
+
+- **AlertPollingService** (`services/alertPollingService.ts`) — polls for active provisioning alerts at a configurable interval. Drives the failures inbox badge count and alert summary on the Operational Dashboards page.
+- **useProbePolling** (`hooks/useProbePolling.ts`) — polls infrastructure health probes (Azure Functions, SharePoint) and surfaces results on the dashboards page.
+
+Both services skip polling when no backend URL is configured (dev-harness without backend), preventing DOCTYPE parse errors from HTML fallback responses.
 
 ## Deferred Pages
 

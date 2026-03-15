@@ -392,6 +392,25 @@ See `src/types.ts` and the barrel exports in `src/index.ts` for the full set.
 
 ---
 
+## Provisioning Override Permissions
+
+G6-T02 introduced 6 granular permission constants for admin provisioning actions. These are exported from `@hbc/auth` and gate the admin-only actions in the provisioning oversight and dashboards pages.
+
+| Constant | Permission String | Purpose |
+|----------|------------------|---------|
+| `ADMIN_PROVISIONING_RETRY` | `admin:provisioning:retry` | Retry a failed provisioning run (transient failures only) |
+| `ADMIN_PROVISIONING_ESCALATE` | `admin:provisioning:escalate` | Escalate a failed run to a higher-tier admin |
+| `ADMIN_PROVISIONING_ARCHIVE` | `admin:provisioning:archive` | Archive a failed run from the active queue |
+| `ADMIN_PROVISIONING_FORCE_STATE` | `admin:provisioning:force-state` | Force a run into a specific state (expert-tier only) |
+| `ADMIN_PROVISIONING_ALERT_FULL_DETAIL` | `admin:provisioning:alert:full-detail` | View full alert detail (error payloads, step metadata) |
+| `ADMIN_APPROVAL_MANAGE` | `admin:approval:manage` | Manage approval authority rules (technical admin only) |
+
+Convenience exports: `PROVISIONING_OVERRIDE_PERMISSIONS` (aggregate map), `ALL_PROVISIONING_OVERRIDE_PERMISSIONS` (readonly array for bulk-granting), `ADMIN_PROVISIONING_OVERRIDE` (organizational label — not a wildcard grant).
+
+The global wildcard `*:*` grants all of these. Individual grants are explicit.
+
+---
+
 ## Architecture boundaries
 
 ### What @hbc/auth owns vs does not own

@@ -6,8 +6,8 @@
 >
 > **Read with:** `CLAUDE.md` → `docs/architecture/blueprint/current-state-map.md` → `docs/architecture/blueprint/HB-Intel-Unified-Blueprint.md` → this roadmap → detailed branch plans.
 
-**Version:** 1.0  
-**Date:** 2026-03-14  
+**Version:** 1.1
+**Date:** 2026-03-15
 **Roadmap Basis:** Refined Unified Blueprint + roadmap interview decisions  
 **Primary Audience:** Product owner, architecture/code agents, implementation planning, leadership reviewers
 
@@ -283,6 +283,7 @@ This stream is considered proven when it demonstrates:
 ### 9.1 Wave 1 app families
 
 Wave 1 should focus on:
+- **Personal Work Hub** — the primary operating layer; the first thing users see when opening HB Intel; role-aware personal work aggregation powered by `@hbc/my-work-feed` (SF29, implemented)
 - **Project Hub**
 - **Estimating**
 - **Business Development**
@@ -290,6 +291,7 @@ Wave 1 should focus on:
 ### 9.2 Why these come first
 
 This wave best proves:
+- the personal-first paradigm is real from day one (per §7.1 locked UX doctrine in the Unified Blueprint),
 - lifecycle continuity upstream of active construction,
 - project-context centrality,
 - cross-department movement into the project,
@@ -311,7 +313,7 @@ Wave 1 users should encounter real value through the SPFx apps in the department
 The PWA should support Wave 1 by proving:
 - RBAC-controlled app visibility,
 - clean app launch/navigation,
-- and a personal home layer that feels trustworthy enough to be a real entry point.
+- and the Personal Work Hub as the trustworthy personal entry point for day-to-day use.
 
 ### 9.6 Shared-platform emphasis for Wave 1
 
@@ -327,39 +329,36 @@ Wave 1 should pull shared capabilities into real use where needed, especially ar
 ### 9.7 Wave 1 exit criteria
 
 Wave 1 is complete when:
-- Project Hub, Estimating, and Business Development are each usable enough in both SPFx and PWA contexts,
+- the Personal Work Hub, Project Hub, Estimating, and Business Development are each usable enough in both SPFx and PWA contexts,
 - users trust the workflows,
 - and the PWA has proven enough unified value to support the case for broader hosted investment.
 
 ---
 
-## 10. MVP Wave 2 — Operational Visibility and Operating Layer Expansion
+## 10. MVP Wave 2 — Operational Depth and Operating Layer Growth
 
 ### 10.1 Wave 2 app families
 
 Wave 2 should focus on:
-- **Leadership**
 - **Operational Excellence**
-- **My Dashboard**
+- Selected downstream operating-layer growth (deeper role-aware visibility, analytics, expanded notification intelligence)
 
-> **Note:** `My Dashboard` currently has no repo footprint. The roadmap should therefore treat it as a planned app stream that requires explicit definition, likely with dependencies on shared packages already in development.
+**Reframing note (2026-03-15):** Leadership value is delivered through role-aware visibility, cards, escalation views, and drill-in surfaces within the Personal Work Hub and Project Hub established in Wave 1 — not through a standalone leadership application. The `@hbc/spfx-leadership` and `@hbc/features-leadership` packages remain as implementation containers for these role-aware surfaces. My Dashboard has been subsumed by the Personal Work Hub operating layer in Wave 1.
 
 ### 10.2 Why Wave 2 matters
 
-Wave 2 strengthens the platform’s operating layer.
+Wave 2 deepens the platform’s operating layer.
 
 It should prove that HB Intel can provide:
-- role-centered entry and visibility,
-- a better personal work starting point,
 - company-level operational perspective,
-- and a stronger connection between app-level workflows and leadership-facing insight.
+- deeper analytics and operational oversight,
+- and a stronger connection between app-level workflows and cross-department insight.
 
 ### 10.3 Strategic purpose
 
 Wave 2 helps move the platform from “useful project/workflow tools” toward “a coherent operating environment” by improving:
-- personal home experience,
-- operating oversight,
-- and leadership-level value visibility.
+- operational oversight and department-level visibility,
+- and cross-department analytics that build on the Personal Work Hub and Project Hub foundations from Wave 1.
 
 ### 10.4 SPFx expectation
 
@@ -372,19 +371,19 @@ Wave 2 is where the PWA should become more visibly real as a unified home and na
 ### 10.6 Exit criteria
 
 Wave 2 is complete when:
-- Leadership, Operational Excellence, and My Dashboard have credible user value,
-- the PWA clearly functions as a trustworthy personal/work launch layer,
+- Operational Excellence has credible user value,
+- role-aware visibility features within the Personal Work Hub and Project Hub demonstrate leadership value without requiring a standalone leadership application,
 - and broader sponsorship for the next expansion stages is established.
 
 ---
 
-## 11. MVP Wave 3 — Broader Department Collaboration and Leadership Expansion
+## 11. MVP Wave 3 — Broader Department Collaboration and Operational Depth
 
 ### 11.1 Wave 3 focus
 
 Wave 3 should generally emphasize:
 - broader department collaboration / support functions,
-- and stronger leadership visibility / analytics.
+- and deeper analytics and intelligence surfaces.
 
 ### 11.2 Purpose
 
@@ -401,7 +400,7 @@ Wave 3 should use a blended deployment rule:
 Wave 3 may include, depending on readiness and sponsorship:
 - support-function department apps,
 - wider collaboration tools,
-- stronger leadership analytics surfaces,
+- deeper analytics and intelligence surfaces,
 - and additional project-support experiences that expand cross-department continuity.
 
 ### 11.5 Exit criteria
@@ -557,9 +556,9 @@ Sponsorship is app-dependent:
 | Stage | Primary Focus | Strategic Purpose |
 |---|---|---|
 | **Foundation / Wave 0** | Project Setup / SharePoint provisioning, site management, maintenance | Establish trust, standardization, and platform footing |
-| **Wave 1** | Project Hub + Estimating + Business Development | Prove lifecycle continuity and cross-department project value |
-| **Wave 2** | Leadership + Operational Excellence + My Dashboard | Strengthen operating layer, visibility, and personal home experience |
-| **Wave 3** | Broader collaboration + leadership expansion | Extend platform reach across the company |
+| **Wave 1** | Personal Work Hub + Project Hub + Estimating + Business Development | Prove personal-first paradigm, lifecycle continuity, and cross-department project value |
+| **Wave 2** | Operational Excellence + operating-layer growth | Deepen operational oversight and role-aware analytics |
+| **Wave 3** | Broader collaboration + operational depth | Extend platform reach across the company |
 | **Future Production Stages** | Additional app families, deeper lifecycle coverage, wider operating platform | Complete the broader platform vision |
 | **Convergence Stage** | App-by-app PWA-first transition and SPFx retirement | Move toward unified PWA primary use |
 
@@ -595,7 +594,7 @@ This roadmap instead provides the **single consolidated sequencing model** those
 ## 19. Immediate Next Planning Actions
 
 1. Align the detailed MVP plan branch to this staged wave model.
-2. Define a concrete `My Dashboard` app stream since it currently lacks repo footprint.
+2. Define Wave 1 Personal Work Hub scope, leveraging the completed `@hbc/my-work-feed` (SF29) primitive and the §7.1 locked UX doctrine in the Unified Blueprint.
 3. Create explicit dependency mapping between Wave 1 / Wave 2 apps and shared packages already in progress.
 4. Add a clear app inventory by wave to future roadmap revisions as sponsorship/readiness becomes clearer.
 5. Define app-level PWA readiness checklists using the gate model in this document.

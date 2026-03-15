@@ -134,7 +134,7 @@
 | `plans/PH7-ProjectHub-Features-Plan.md` | **Canonical Normative Plan** | Tier 1 banner applied 2026-03-14; master summary and locked-decisions index for `ph7-project-hub/` task files; pending PH7.12 sign-off |
 | `plans/PH7-Admin-Feature-Plan.md` | **Canonical Normative Plan** | Tier 1 banner applied 2026-03-14; complete feature plan for Admin module; pending PH7.12 sign-off |
 | `plans/PH7-ReviewMode-Plan.md` | **Deferred Scope** | Tier 1 banner applied 2026-03-14; master summary for Review Mode feature; associated `PH7-RM-*` task files are Deferred Scope; must reclassify before activation |
-| `plans/PH9b-UX-Enhancement-Plan.md` | **Deferred Scope** | Tier 1 banner applied 2026-03-14; post-Phase-7 UX enhancements plan (My Work Feed, coaching, draft persistence, instrumentation); pending PH7.12 sign-off |
+| `plans/PH9b-UX-Enhancement-Plan.md` | **Deferred Scope** | Tier 1 banner applied 2026-03-14; post-Phase-7 UX polish plan (coaching, advanced instrumentation, draft persistence); core `@hbc/my-work-feed` (SF29, complete 2026-03-15) reclassified to Wave 1 scope; remaining PH9b items pending PH7.12 sign-off |
 | `docs/architecture/ngx-tracker.md` | **Historical Foundational** | Tier 1 banner applied 2026-03-14; NGX modernization completion tracker; all 8 areas complete as of Phase 4.15 (2026-03-04) |
 | `plans/HB-Intel-Feature-Phase-Mapping-Recommendation.md` | **Superseded / Archived Reference** | Tier 1 banner applied 2026-03-14; pre-Phase-6 feature mapping recommendation; Phase 6 complete; superseded by active PH7 plans and MVP plans; historical notes preserved in `HB-Intel-Blueprint-Crosswalk.md §9.1` |
 | `plans/MVP/MVP-Plan-Review-2026-03-13.md` | **Canonical Current-State** | Tier 1 banner present; evidence-based architectural review of MVP Project Setup plan set; identifies corrections needed before implementation (2026-03-13) |
@@ -256,7 +256,7 @@ Every new architecture, plan, reference, or release document must declare one of
 
 **Transition rule — Deferred Scope:** When a Deferred Scope document's feature or package enters active development in a named phase milestone, reclassify it to Canonical Normative Plan, add it to the active phase's plan index, and update this matrix. The PH7-RM-* plans must be reviewed and reclassified as needed before PH7.12 sign-off.
 
-**ADR rule:** New ADRs are always Permanent Decision Rationale. ADR-0091 through ADR-0097 were assigned after PH7.11. ADR-0098 is reserved for SF09 (data-seeding), ADR-0099 is reserved for SF10 (notification-intelligence), ADR-0100 is reserved for SF11 (smart-empty-state), ADR-0101 is authored for SF12 (session-state), ADR-0102 is authored for SF13 (project-canvas), ADR-0103 is authored for SF14 (related-items), ADR-0104 is authored for SF15 (ai-assist), ADR-0105 is reserved for SF16 (search), ADR-0106 is authored for SF17 (admin-intelligence), ADR-0107 is authored for SF18 (estimating bid-readiness), ADR-0108 is authored for SF19 (bd score benchmark), ADR-0109 is authored for SF20 (bd heritage adapter boundary), ADR-0110 is authored for SF21 (project health pulse), ADR-0111 is authored as companion primitive governance for SF18, ADR-0112 is authored as companion primitive governance for SF19, ADR-0113 is authored as companion primitive governance for SF20, and ADR-0114 is authored to resolve the score-benchmark ↔ post-bid-autopsy circular dependency (2026-03-14). Next unreserved number: **ADR-0115**.
+**ADR rule:** New ADRs are always Permanent Decision Rationale. ADR-0091 through ADR-0097 were assigned after PH7.11. ADR-0098 is reserved for SF09 (data-seeding), ADR-0099 is reserved for SF10 (notification-intelligence), ADR-0100 is reserved for SF11 (smart-empty-state), ADR-0101 is authored for SF12 (session-state), ADR-0102 is authored for SF13 (project-canvas), ADR-0103 is authored for SF14 (related-items), ADR-0104 is authored for SF15 (ai-assist), ADR-0105 is reserved for SF16 (search), ADR-0106 is authored for SF17 (admin-intelligence), ADR-0107 is authored for SF18 (estimating bid-readiness), ADR-0108 is authored for SF19 (bd score benchmark), ADR-0109 is authored for SF20 (bd heritage adapter boundary), ADR-0110 is authored for SF21 (project health pulse), ADR-0111 is authored as companion primitive governance for SF18, ADR-0112 is authored as companion primitive governance for SF19, ADR-0113 is authored as companion primitive governance for SF20, and ADR-0114 is authored to resolve the score-benchmark ↔ post-bid-autopsy circular dependency (2026-03-14). Next unreserved number: **ADR-0116**.
 
 **Banner format (Tier 1):**
 ```
@@ -275,7 +275,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | Index gap (ADR-0073–ADR-0079) | These numbers were absent from `docs/README.md` index | Resolved: 2026-03-09 — all entries added to `docs/README.md` |
 | ADR-0082 not indexed | ADR-0082 missing from `docs/README.md` | Resolved: 2026-03-09 — added to index |
 
-**Post-PH7.11 state (updated 2026-03-14):** 112 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (phase-7-final-verification, acknowledgment, step-wizard, versioned-record, stub-detection, field-annotations, workflow-handoff). ADR-0098 reserved for SF09 (data-seeding); ADR-0099 reserved for SF10 (notification-intelligence); ADR-0100 reserved for SF11 (smart-empty-state); ADR-0101 authored for SF12 (session-state); ADR-0102 authored for SF13 (project-canvas); ADR-0103 authored for SF14 (related-items); ADR-0104 authored for SF15 (ai-assist); ADR-0105 reserved for SF16 (search); ADR-0106 authored for SF17 (admin-intelligence); ADR-0107 authored for SF18 (estimating bid-readiness); ADR-0108 authored for SF19 (bd score benchmark); ADR-0109 authored for SF20 (bd heritage adapter boundary); ADR-0110 authored for SF21 (project health pulse); ADR-0111 authored as companion primitive governance for SF18; ADR-0112 authored as companion primitive governance for SF19; ADR-0113 authored as companion primitive governance for SF20; ADR-0114 authored 2026-03-14 to resolve score-benchmark ↔ post-bid-autopsy circular dependency. Next unreserved number: **ADR-0115**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
+**Post-PH7.11 state (updated 2026-03-14):** 112 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (phase-7-final-verification, acknowledgment, step-wizard, versioned-record, stub-detection, field-annotations, workflow-handoff). ADR-0098 reserved for SF09 (data-seeding); ADR-0099 reserved for SF10 (notification-intelligence); ADR-0100 reserved for SF11 (smart-empty-state); ADR-0101 authored for SF12 (session-state); ADR-0102 authored for SF13 (project-canvas); ADR-0103 authored for SF14 (related-items); ADR-0104 authored for SF15 (ai-assist); ADR-0105 reserved for SF16 (search); ADR-0106 authored for SF17 (admin-intelligence); ADR-0107 authored for SF18 (estimating bid-readiness); ADR-0108 authored for SF19 (bd score benchmark); ADR-0109 authored for SF20 (bd heritage adapter boundary); ADR-0110 authored for SF21 (project health pulse); ADR-0111 authored as companion primitive governance for SF18; ADR-0112 authored as companion primitive governance for SF19; ADR-0113 authored as companion primitive governance for SF20; ADR-0114 authored 2026-03-14 to resolve score-benchmark ↔ post-bid-autopsy circular dependency. Next unreserved number: **ADR-0116**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
 
 ---
 
@@ -285,14 +285,14 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 
 | Package | Name | Primary Responsibility | Dependency Role | Maturity | Doc Entrypoint |
 |---------|------|----------------------|-----------------|----------|----------------|
-| `packages/models` | @hbc/models | Data types & TypeScript contracts | Foundation — no dependencies | v0.0.1 | `packages/models/README.md` |
+| `packages/models` | @hbc/models | Data types & TypeScript contracts | Foundation — no dependencies | v0.1.0 | `packages/models/README.md` |
 | `packages/data-access` | @hbc/data-access | Ports/adapters data layer | Depends on models | v0.0.1 | `packages/data-access/README.md` |
 | `packages/query-hooks` | @hbc/query-hooks | TanStack Query React hooks | Depends on data-access, models | v0.0.1 | `packages/query-hooks/README.md` |
-| `packages/auth` | @hbc/auth | Dual-mode authentication (MSAL/dev) | Depends on models | v0.0.1 | `packages/auth/README.md` |
+| `packages/auth` | @hbc/auth | Dual-mode authentication (MSAL/dev) | Depends on models | v0.2.0 | `packages/auth/README.md` |
 | `packages/shell` | @hbc/shell | Global navigation & layout | Depends on auth, models | v0.0.1 | `packages/shell/README.md` |
-| `packages/app-shell` | @hbc/app-shell | Shell aggregator (read-only surface) | Depends on shell, auth, ui-kit | v0.0.1 | `packages/app-shell/README.md` |
+| `packages/app-shell` | @hbc/app-shell | Shell aggregator (read-only surface) | Depends on shell, auth, ui-kit | v0.0.2 | `packages/app-shell/README.md` |
 | `packages/ui-kit` | @hbc/ui-kit | Design system & component library | Depends on auth, complexity, models | v2.1.0 | `packages/ui-kit/DESIGN_SYSTEM.md` |
-| `packages/provisioning` | @hbc/provisioning | SignalR provisioning saga | Depends on auth, models | v0.1.0 | `packages/provisioning/README.md` |
+| `packages/provisioning` | @hbc/provisioning | SignalR provisioning saga | Depends on auth, models | v0.2.0 | `packages/provisioning/README.md` |
 
 ### Category B: Shared Infrastructure (2)
 
@@ -301,11 +301,11 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | `packages/spfx` | @hbc/spfx | SPFx webpart scaffolding & utilities | Depends on auth, sharepoint-docs, ui-kit | v0.0.1 | `packages/spfx/README.md` |
 | `packages/eslint-plugin-hbc` | @hb-intel/eslint-plugin-hbc | Component consumption lint rules | None (standalone tool) | v1.0.0 | `packages/eslint-plugin-hbc/README.md` |
 
-### Category C: Shared-Feature Primitives (14)
+### Category C: Shared-Feature Primitives (20)
 
 These packages are **Tier-1 Platform Primitives** — mandatory-use when their concern area is present in a feature. See [Platform Primitives Registry](../../reference/platform-primitives.md) for policy, decision tree, adoption matrix, and non-duplication rule. <!-- PH7.4: elevated from optional to Tier-1 per §7.4.1 -->
 
-The original three (SF01–SF03) emerged organically; SF04–SF15 are planned primitives being built in sequence. SF04, SF05, SF07, SF08, SF10, SF11, SF12, SF13, SF14, SF15 are fully implemented. SF06, SF09 are scaffold stage. SF29 (`@hbc/my-work-feed`) is fully implemented.
+The original three (SF01–SF03) emerged organically; SF04–SF15 are planned primitives being built in sequence. SF04, SF05, SF06, SF07, SF08, SF09, SF10, SF11, SF12, SF13, SF14, SF15 are fully implemented. SF29 (`@hbc/my-work-feed`) is fully implemented.
 
 | Package | Name | Primary Responsibility | Dependency Role | Maturity | Doc Entrypoint |
 |---------|------|----------------------|-----------------|----------|----------------|
@@ -313,7 +313,7 @@ The original three (SF01–SF03) emerged organically; SF04–SF15 are planned pr
 | `packages/complexity` | @hbc/complexity | 3-tier density context (Complexity Dial) | Depends on ui-kit | v0.1.0 | `packages/complexity/README.md` |
 | `packages/sharepoint-docs` | @hbc/sharepoint-docs | Document lifecycle management | Depends on auth, models, data-access, ui-kit | v0.1.0 | `packages/sharepoint-docs/README.md` |
 | `packages/acknowledgment` | @hbc/acknowledgment | Reusable acknowledgment / sign-off primitive | Depends on ui-kit, complexity | v0.1.0 | `packages/acknowledgment/README.md` |
-| `packages/step-wizard` | @hbc/step-wizard | Multi-step guided workflow primitive | Depends on ui-kit, complexity | v0.1.0 | `packages/step-wizard/README.md` |
+| `packages/step-wizard` | @hbc/step-wizard | Multi-step guided workflow primitive | Depends on ui-kit, complexity | v0.1.1 | `packages/step-wizard/README.md` |
 | `packages/versioned-record` | @hbc/versioned-record | Immutable versioned record management | Depends on models, data-access, ui-kit | v0.0.1 | `packages/versioned-record/README.md` |
 | `packages/field-annotations` | @hbc/field-annotations | Inline field-level annotation and comment threads | Depends on auth, models, ui-kit | v0.1.0 | `packages/field-annotations/README.md` |
 | `packages/workflow-handoff` | @hbc/workflow-handoff | Cross-module workflow handoff and routing | Depends on models, ui-kit, bic-next-move | v0.1.0 | `packages/workflow-handoff/README.md` |
@@ -323,24 +323,30 @@ The original three (SF01–SF03) emerged organically; SF04–SF15 are planned pr
 | `packages/post-bid-autopsy` | @hbc/post-bid-autopsy | Tier-1 post-bid autopsy primitive for evidence, confidence, taxonomy, governance, publication, telemetry, lifecycle/storage orchestration, hook-state surfaces, and published learning-signal contracts consumed by BD and Estimating adapters | Depends on `versioned-record`, `bic-next-move`, `strategic-intelligence`, `@tanstack/react-query`; peer: react (circular dep with score-benchmark **resolved** — ADR-0114) | v0.0.1 | `packages/post-bid-autopsy/README.md` |
 | `packages/strategic-intelligence` | @hbc/strategic-intelligence | Heritage snapshot and living strategic intelligence primitive contracts with trust/workflow/governance ownership seams | None (contract-first primitive scaffold) | v0.0.1 | `packages/strategic-intelligence/README.md` |
 | `packages/my-work-feed` | @hbc/my-work-feed | Cross-module personal work aggregation feed | Depends on bic-next-move, complexity, notification-intelligence, session-state, ui-kit, workflow-handoff; peer: react, react-dom, @tanstack/react-query | v0.0.1 | `packages/my-work-feed/README.md` |
+| `packages/ai-assist` | @hbc/ai-assist | Contextual AI action layer — Azure AI Foundry integration | Depends on auth, complexity, versioned-record | v0.0.1 | `packages/ai-assist/README.md` |
+| `packages/health-indicator` | @hbc/health-indicator | Health-indicator scoring/config/telemetry runtime for readiness models | None (standalone primitive) | v0.0.1 | `packages/health-indicator/README.md` |
+| `packages/notification-intelligence` | @hbc/notification-intelligence | Priority-tiered smart notification system | None (standalone primitive) | v0.0.2 | `packages/notification-intelligence/README.md` |
+| `packages/related-items` | @hbc/related-items | Cross-module record relationship panel | Depends on auth, complexity, session-state, smart-empty-state, versioned-record | v0.0.1 | `packages/related-items/README.md` |
+| `packages/score-benchmark` | @hbc/score-benchmark | Score benchmark primitive for confidence, similarity, and recommendation | Depends on bic-next-move, versioned-record, post-bid-autopsy | v0.0.1 | `packages/score-benchmark/README.md` |
+| `packages/smart-empty-state` | @hbc/smart-empty-state | Context-aware empty state classification and guided onboarding | None (standalone primitive) | v0.0.1 | `packages/smart-empty-state/README.md` |
 
 ### Category D: Feature Packages (11)
 
-All feature packages are at v0.0.0 (scaffold stage), export source directly (`main: "./src/index.ts"`), and share the same core dependency set: `@hbc/{models, query-hooks, ui-kit, auth, shell}`.
+Feature packages export source directly (`main: "./src/index.ts"`) and share the same core dependency set: `@hbc/{models, query-hooks, ui-kit, auth, shell}`.
 
-| Package | Name | Domain |
-|---------|------|--------|
-| `packages/features/accounting` | @hbc/features-accounting | Accounting |
-| `packages/features/estimating` | @hbc/features-estimating | Estimating |
-| `packages/features/project-hub` | @hbc/features-project-hub | Project Hub |
-| `packages/features/leadership` | @hbc/features-leadership | Leadership |
-| `packages/features/business-development` | @hbc/features-business-development | Business Development |
-| `packages/features/admin` | @hbc/features-admin | Admin |
-| `packages/features/safety` | @hbc/features-safety | Safety |
-| `packages/features/quality-control-warranty` | @hbc/features-quality-control-warranty | Quality Control & Warranty |
-| `packages/features/risk-management` | @hbc/features-risk-management | Risk Management |
-| `packages/features/operational-excellence` | @hbc/features-operational-excellence | Operational Excellence |
-| `packages/features/human-resources` | @hbc/features-human-resources | Human Resources |
+| Package | Name | Domain | Version |
+|---------|------|--------|---------|
+| `packages/features/accounting` | @hbc/features-accounting | Accounting | v0.0.0 |
+| `packages/features/estimating` | @hbc/features-estimating | Estimating | v0.0.1 |
+| `packages/features/project-hub` | @hbc/features-project-hub | Project Hub | v0.0.1 |
+| `packages/features/leadership` | @hbc/features-leadership | Leadership | v0.0.0 |
+| `packages/features/business-development` | @hbc/features-business-development | Business Development | v0.0.1 |
+| `packages/features/admin` | @hbc/features-admin | Admin | v0.2.1 |
+| `packages/features/safety` | @hbc/features-safety | Safety | v0.0.0 |
+| `packages/features/quality-control-warranty` | @hbc/features-quality-control-warranty | Quality Control & Warranty | v0.0.0 |
+| `packages/features/risk-management` | @hbc/features-risk-management | Risk Management | v0.0.0 |
+| `packages/features/operational-excellence` | @hbc/features-operational-excellence | Operational Excellence | v0.0.0 |
+| `packages/features/human-resources` | @hbc/features-human-resources | Human Resources | v0.0.0 |
 
 ### Category E: Applications (14)
 
@@ -402,10 +408,10 @@ Six additional primitives have since been planned and built as part of the SF04�
 
 - **@hbc/acknowledgment** (SF04) — Reusable acknowledgment and sign-off primitive; v0.1.0 complete.
 - **@hbc/step-wizard** (SF05) — Multi-step guided workflow primitive; v0.1.0 complete.
-- **@hbc/versioned-record** (SF06) — Immutable versioned record management; v0.0.1 scaffold.
+- **@hbc/versioned-record** (SF06) — Immutable versioned record management; v0.0.1 implemented.
 - **@hbc/field-annotations** (SF07) — Inline field-level annotation and comment threads; v0.1.0 complete.
 - **@hbc/workflow-handoff** (SF08) — Cross-module workflow handoff and routing; v0.1.0 complete.
-- **@hbc/data-seeding** (SF09) — Development / demo data seeding primitives; v0.0.1 scaffold.
+- **@hbc/data-seeding** (SF09) — Development / demo data seeding primitives; v0.0.1 implemented.
 
 All nine are classified as **controlled evolution (a)**. They follow the same ports/adapters pattern as core packages and do not violate Blueprint V4's layering rules. As of PH7.4, these are designated **Tier-1 Platform Primitives** — mandatory-use when their concern area is present. See [Platform Primitives Registry](../../reference/platform-primitives.md). <!-- PH7.4: Tier-1 elevation; SF04–SF09 added 2026-03-10 -->
 
@@ -439,7 +445,7 @@ This file + package READMEs + the codebase itself. For any question about what e
 Use the Classification Matrix in Section 2. Documents labeled **Canonical Current-State** describe what exists. Documents labeled **Canonical Normative Plan** describe what should be built next. **Historical Foundational** documents describe what was planned originally and may have evolved.
 
 **Which shared-feature packages are mandatory?**
-As of PH7.4, all Category C packages are **Tier-1 Platform Primitives** — mandatory when their concern area is present in a feature. The original three (`@hbc/bic-next-move`, `@hbc/complexity`, `@hbc/sharepoint-docs`) plus six SF04–SF09 primitives (`@hbc/acknowledgment`, `@hbc/step-wizard`, `@hbc/versioned-record`, `@hbc/field-annotations`, `@hbc/workflow-handoff`, `@hbc/data-seeding`). See the [Platform Primitives Registry](../../reference/platform-primitives.md) for the decision tree and adoption matrix. Core platform packages (Category A) remain the mandatory foundation for all features. <!-- PH7.4: updated from "none mandatory" to Tier-1 policy; SF04–SF09 primitives added 2026-03-10 -->
+As of PH7.4, all Category C packages are **Tier-1 Platform Primitives** — mandatory when their concern area is present in a feature. See the [Platform Primitives Registry](../../reference/platform-primitives.md) for the decision tree and adoption matrix. Core platform packages (Category A) remain the mandatory foundation for all features. <!-- PH7.4: updated from "none mandatory" to Tier-1 policy; SF04–SF09 primitives added 2026-03-10; SF10–SF15 and SF29 added during Wave 0 -->
 
 **Where do I add a new feature?**
 1. Create `packages/features/<domain>/` with `package.json`, `tsconfig.json`, and `src/index.ts`.
@@ -505,13 +511,50 @@ As of PH7.4, all Category C packages are **Tier-1 Platform Primitives** — mand
 |--------|-------|
 | Core platform packages | 8 |
 | Shared infrastructure packages | 2 |
-| Shared-feature primitives | 13 |
+| Shared-feature primitives | 20 |
 | Feature packages | 11 |
 | SPFx applications | 11 |
 | Standalone applications | 3 |
 | Backend services | 1 |
 | Build tooling packages | 1 |
-| **Total workspace members** | **50** |
-| Architecture Decision Records | 112 active + 6 archived | <!-- Updated 2026-03-14: ADR-0114 authored to resolve score-benchmark ↔ post-bid-autopsy circular dependency; ADR-0106 authored for SF17 admin-intelligence; ADR-0107 authored for SF18 estimating adapter-over-primitive; ADR-0108 authored for SF19 BD score benchmark adapter boundary; ADR-0109 authored for SF20 BD heritage adapter-over-primitive boundary; ADR-0110 authored for SF21 project health pulse multi-dimension indicator; ADR-0111 authored for health-indicator companion primitive governance; ADR-0112 authored for score-benchmark companion primitive governance; ADR-0113 authored for strategic-intelligence companion primitive governance; ADR-0091–0097 added since PH7.11; ADR-0098 reserved SF09; ADR-0099 reserved SF10; ADR-0100 reserved SF11; ADR-0101 authored SF12; ADR-0102 authored SF13; ADR-0103 authored SF14; ADR-0104 authored SF15; ADR-0105 reserved SF16 -->
+| **Total workspace members** | **56** |
+| Architecture Decision Records | 113 active + 6 archived | <!-- Updated 2026-03-15: ADR-0114 authored to resolve score-benchmark ↔ post-bid-autopsy circular dependency; ADR-0106 authored for SF17 admin-intelligence; ADR-0107 authored for SF18 estimating adapter-over-primitive; ADR-0108 authored for SF19 BD score benchmark adapter boundary; ADR-0109 authored for SF20 BD heritage adapter-over-primitive boundary; ADR-0110 authored for SF21 project health pulse multi-dimension indicator; ADR-0111 authored for health-indicator companion primitive governance; ADR-0112 authored for score-benchmark companion primitive governance; ADR-0113 authored for strategic-intelligence companion primitive governance; ADR-0091–0097 added since PH7.11; ADR-0098 reserved SF09; ADR-0099 reserved SF10; ADR-0100 reserved SF11; ADR-0101 authored SF12; ADR-0102 authored SF13; ADR-0103 authored SF14; ADR-0104 authored SF15; ADR-0105 reserved SF16 -->
 | TSConfig path aliases | 64 |
 | Vite dev server ports | 14 (3000, 4000–4012) |
+
+---
+
+## 7. Wave 0 Closeout Baseline
+
+**Established:** 2026-03-15
+**Scope:** Groups G1–G6 of the Wave 0 buildout plan.
+
+This section records the verified completion state at Wave 0 closeout. It serves as the trusted baseline for Wave 1 planning.
+
+### 7.1 Confirmed Complete (G1–G6)
+
+- **G1 — Contracts and Configuration:** Project hub workspace, viewer groups, department routing, site template specification, Entra ID group model, notification event matrix, config registry, Sites.Selected validation.
+- **G2 — Backend Hardening and Workflow Data Foundations:** Saga steps 1–7, compensation chain (incl. G2.3 audit fix), template files, data lists, 5-family list definitions (26 lists), validation module, seeded-file manifest, department library pruning, G2 verification test suite (35 unit tests).
+- **G3 — Shared Platform Wiring and Workflow Experience:** Project setup wizard contract, BIC action/ownership contract, clarification re-entry spec, notification registrations (8→15 events), draft key registry and auto-save hooks, complexity gate spec and summary field registry, primitive integration rules and failure modes, cross-contract verification suite.
+- **G4 — SPFx Surfaces and Workflow Experience:** Estimating requester guided setup, coordinator visibility/retry, controller queue/review (Accounting), admin oversight/recovery, completion/handoff, complexity application map, responsive/failure catalog, G4 verification test suite.
+- **G5 — Hosted PWA Requester Surfaces:** PWA project setup (5-step wizard matching SPFx), project list/request detail, provisioning progress view, offline-queuing via session-state operation executor, PWA parity test suite, error states, Vitest + MSW + Playwright infrastructure.
+- **G6 — Admin Support and Observability:** Admin failures inbox, provisioning override permissions (6 granular permissions), retry boundaries, operational dashboards, alert routing (AlertPollingService, monitors), embedded guidance (coaching callouts, runbook), observability probes (Azure Functions, SharePoint), integration audit, T08 verification.
+- **SF29 — My Work Feed:** `@hbc/my-work-feed` personal work aggregation feed implemented (ADR-0115); Wave 1 operating-layer primitive powering the Personal Work Hub.
+
+### 7.2 Active but Incomplete
+
+- **SF17 persistence layer:** `AdminAlertsApi`, `ApprovalAuthorityApi`, `InfrastructureProbeApi` are in-memory only — no SharePoint list backing.
+- **Teams webhook delivery:** Fire-and-forget pattern with no delivery confirmation.
+- **Email relay:** Console-logged only — no live SMTP transport.
+- **Deferred monitors (4):** Overdue workflow, stale request, permission anomaly, override expiration.
+- **Deferred probes (3):** Search, notification, module-record-health.
+- **ErrorLogPage:** Intentional deferral to SF17-T05 — renders `HbcEmptyState` placeholder.
+
+### 7.3 Intentionally Deferred to Wave 1
+
+- SharePoint list persistence for alerts, probes, and approval rules.
+- Frontend Application Insights SDK (architecture constraint — backend-only observability in Wave 0).
+- Historical trend charts (Wave 0 is current-state only).
+- Bulk queue actions (bulk retry, bulk archive).
+- Coordinator/requester admin views.
+- Live SMTP email relay.
