@@ -127,6 +127,7 @@ export function TabRouter() {
             </Tab>
           ))}
         </TabList>
+        <span className="harness-tabs-count">{TABS.length} surfaces</span>
       </div>
       <div className="harness-content">
         {renderTab(activeTab)}
