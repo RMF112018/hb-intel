@@ -39,6 +39,7 @@ const BASE_PERSONAS: IPersona[] = [
       'admin:provisioning:archive': true,
       'admin:provisioning:force-state': true,
       'admin:provisioning:alert:full-detail': true,
+      'admin:approval:manage': true,
       'feature:accounting-invoice': true,
       'feature:accounting-reports': true,
       'feature:estimating-projects': true,

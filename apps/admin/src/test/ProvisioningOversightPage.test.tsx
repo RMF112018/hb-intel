@@ -352,8 +352,8 @@ describe('ProvisioningOversightPage', () => {
 
   // ── G6-T01: Action boundary enforcement ──────────────────────────────────
 
-  // G6-T01-001: Retry disabled when retryCount >= MAX_RETRY_ATTEMPTS
-  it('disables retry button when retryCount reaches threshold', async () => {
+  // G6-T01-001 / G6-T02-001: Post-ceiling shows escalation guidance instead of retry button
+  it('shows escalation guidance when retryCount reaches threshold', async () => {
     const exhaustedRun = createTestProvisioningStatus({
       projectId: 'p-1',
       overallStatus: 'Failed',
@@ -364,11 +364,12 @@ describe('ProvisioningOversightPage', () => {
     renderWithProviders(<ProvisioningOversightPage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Retry \(3\/3\)/)).toBeInTheDocument();
+      expect(screen.getByText(/Retry limit reached/)).toBeInTheDocument();
     });
 
-    const retryButton = screen.getByText(/Retry \(3\/3\)/);
-    expect(retryButton.closest('button')).toBeDisabled();
+    expect(screen.getByText(/escalation required/)).toBeInTheDocument();
+    // No retry button should be present
+    expect(screen.queryByText(/Retry \(\d\/\d\)/)).not.toBeInTheDocument();
   });
 
   // G6-T01-002: Retry count shown in button label

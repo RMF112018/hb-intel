@@ -295,17 +295,23 @@ export function ProvisioningOversightPage(): ReactNode {
               </HbcButton>
               {run.overallStatus === 'Failed' && (
                 <>
-                  {/* G6-T01: Retry gated by permission + retry threshold */}
+                  {/* G6-T01/T02: Retry gated by permission + retry threshold with post-ceiling guidance */}
                   <PermissionGate action={ADMIN_PROVISIONING_RETRY}>
-                    <HbcButton
-                      size="sm"
-                      disabled={isBusy || retryExhausted}
-                      onClick={() => setConfirmAction({ type: 'forceRetry', projectId: run.projectId })}
-                    >
-                      {activeActionByProjectId[run.projectId] === 'Retrying'
-                        ? 'Retrying…'
-                        : `Retry (${run.retryCount}/${MAX_RETRY_ATTEMPTS})`}
-                    </HbcButton>
+                    {retryExhausted ? (
+                      <HbcTypography intent="bodySmall">
+                        Retry limit reached — escalation required
+                      </HbcTypography>
+                    ) : (
+                      <HbcButton
+                        size="sm"
+                        disabled={isBusy}
+                        onClick={() => setConfirmAction({ type: 'forceRetry', projectId: run.projectId })}
+                      >
+                        {activeActionByProjectId[run.projectId] === 'Retrying'
+                          ? 'Retrying…'
+                          : `Retry (${run.retryCount}/${MAX_RETRY_ATTEMPTS})`}
+                      </HbcButton>
+                    )}
                   </PermissionGate>
                   {/* G6-T01: Archive gated by permission */}
                   <PermissionGate action={ADMIN_PROVISIONING_ARCHIVE}>

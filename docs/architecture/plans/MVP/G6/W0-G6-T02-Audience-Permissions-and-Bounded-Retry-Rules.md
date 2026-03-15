@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G6/W0-G6-Admin-Support-and-Observability-Plan.md`
 > **Related:** `docs/architecture/plans/MVP/G6/W0-G6-T01-Admin-Failures-Inbox-and-Action-Boundaries.md`; `packages/auth/`; `packages/provisioning/`
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G6
 **Locked decisions served:** LD-03, LD-04, LD-10
 
@@ -77,15 +77,15 @@ The following table defines the intended permission model. All `[VERIFY FROM AUT
 | Surface / Action | Business-Ops Lead | Technical Admin | Permission Gate |
 |---|---|---|---|
 | View `/provisioning-failures` (read-only list) | ✅ Yes | ✅ Yes | `admin:access-control:view` |
-| Retry action | ❌ No | ✅ Yes | `[VERIFY FROM AUTH]` |
-| Escalate action | ❌ No | ✅ Yes | `[VERIFY FROM AUTH]` |
-| Archive action | ❌ No | ✅ Yes | `[VERIFY FROM AUTH]` |
-| Force-state-transition | ❌ No | ✅ Yes | `[VERIFY FROM AUTH]` |
+| Retry action | ❌ No | ✅ Yes | `admin:provisioning:retry` |
+| Escalate action | ❌ No | ✅ Yes | `admin:provisioning:escalate` |
+| Archive action | ❌ No | ✅ Yes | `admin:provisioning:archive` |
+| Force-state-transition | ❌ No | ✅ Yes | `admin:provisioning:force-state` |
 | View alert badge count | ✅ Yes | ✅ Yes | `admin:access-control:view` |
-| View full alert detail | ❌ No | ✅ Yes | `[VERIFY FROM AUTH]` |
+| View full alert detail | ❌ No | ✅ Yes | `admin:provisioning:alert:full-detail` |
 | View summary health counts | ✅ Yes | ✅ Yes | `admin:access-control:view` |
-| View `ApprovalAuthorityTable` | ❌ No | ✅ Yes | `[VERIFY FROM AUTH]` |
-| Edit approval authority rules | ❌ No | ✅ Yes | `[VERIFY FROM AUTH]` |
+| View `ApprovalAuthorityTable` | ❌ No | ✅ Yes | `admin:approval:manage` |
+| Edit approval authority rules | ❌ No | ✅ Yes | `admin:approval:manage` |
 | View system settings | ❌ No | ✅ Yes | `admin:access-control:view` |
 
 ---
@@ -94,11 +94,11 @@ The following table defines the intended permission model. All `[VERIFY FROM AUT
 
 | Rule | Value | Source |
 |---|---|---|
-| Maximum retry attempts | 3 (confirm) | `docs/maintenance/provisioning-runbook.md` — "3 retries before escalation recommended" |
-| Retry ceiling enforcement | Client-side: disable retry button when `retryCount >= max`; server-side: `retryProvisioning` must reject or no-op | Verify server-side enforcement from `@hbc/provisioning` API client |
-| Post-ceiling action | Escalate is the required next action when retry ceiling is reached | `docs/maintenance/provisioning-runbook.md` |
-| Retry state validity | Only valid from `Failed` state per `STATE_TRANSITIONS` | `packages/provisioning/src/state-machine.ts` |
-| Retry count source | `retryCount` field on `IProjectSetupRequest` (verify field name) | `packages/models/src/provisioning/IProvisioning.ts` |
+| Maximum retry attempts | **3** (confirmed) | `docs/maintenance/provisioning-runbook.md` — "3 retries before escalation recommended". Hardcoded as `MAX_RETRY_ATTEMPTS` in `ProvisioningOversightPage.tsx`. |
+| Retry ceiling enforcement | **Client-side:** retry button replaced with "Retry limit reached — escalation required" text when `retryCount >= 3`. Server-side enforcement deferred to backend team. | `ProvisioningOversightPage.tsx` — inline post-ceiling guidance (G6-T02) |
+| Post-ceiling action | **Escalation required.** Inline text guidance shown when ceiling hit. Escalate action already available via separate `PermissionGate`. | `docs/maintenance/provisioning-runbook.md` |
+| Retry state validity | Only valid from `Failed` state — retry button only rendered when `run.overallStatus === 'Failed'` | `ProvisioningOversightPage.tsx` line 296 |
+| Retry count source | **`IProvisioningStatus.retryCount`** (number) — confirmed on the provisioning run record. Also added to `IProjectSetupRequest` in G6-T02 (models). | `packages/models/src/provisioning/IProvisioning.ts` |
 
 ---
 
@@ -157,11 +157,12 @@ Before T02 is ready for review:
 
 During active T02 work:
 
-- Record the outcome of the `@hbc/auth` inspection: exact permission strings, whether a business-ops / technical admin split is role-based or permission-based
-- Record whether `retryCount` exists on `IProjectSetupRequest` or needs to be added
-- Record the confirmed retry threshold and the decision about whether to hardcode or read from config
-- Update the Permission Contract table when all `[VERIFY FROM AUTH]` items are resolved
-- Update the Retry Boundary Rules table when values are confirmed
+- ✅ **Auth inspection outcome:** Business-ops vs technical admin split is **permission-based** (not role-based). Individual `admin:provisioning:*` permissions gate provisioning actions; `admin:approval:manage` gates approval authority configuration. All permission strings defined in `packages/auth/src/permissions/provisioningOverride.ts`.
+- ✅ **`retryCount` availability:** Field exists on both `IProvisioningStatus.retryCount` (number) and `IProjectSetupRequest.retryCount` (number, added in G6-T02 models task).
+- ✅ **Retry threshold:** 3, hardcoded as `MAX_RETRY_ATTEMPTS` in `ProvisioningOversightPage.tsx`. Reading from config deferred to post-Wave-0.
+- ✅ **Permission Contract table:** All `[VERIFY FROM AUTH]` entries resolved — see table above.
+- ✅ **Retry Boundary Rules table:** All values confirmed — see table above.
+- ✅ **New permission added:** `admin:approval:manage` created in `@hbc/auth` for approval authority UI gating.
 
 ---
 

@@ -8,6 +8,7 @@ export {
   PROVISIONING_OVERRIDE_PERMISSIONS,
   ADMIN_PROVISIONING_OVERRIDE,
   ALL_PROVISIONING_OVERRIDE_PERMISSIONS,
+  ADMIN_APPROVAL_MANAGE,
 } from './permissions/index.js';
 
 // Audit logging + retention (PH5.13 — structured traceability and governance)

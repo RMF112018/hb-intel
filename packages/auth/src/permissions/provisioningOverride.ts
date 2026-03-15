@@ -24,6 +24,9 @@ export const ADMIN_PROVISIONING_FORCE_STATE = 'admin:provisioning:force-state' a
 /** View full alert detail for provisioning failures (error payloads, step metadata). */
 export const ADMIN_PROVISIONING_ALERT_FULL_DETAIL = 'admin:provisioning:alert:full-detail' as const;
 
+/** G6-T02: Manage approval authority rules (technical admin only). */
+export const ADMIN_APPROVAL_MANAGE = 'admin:approval:manage' as const;
+
 /**
  * Convenience aggregate map for all provisioning override permissions.
  * Consumers can iterate or destructure: `PROVISIONING_OVERRIDE_PERMISSIONS.RETRY`.
@@ -34,6 +37,7 @@ export const PROVISIONING_OVERRIDE_PERMISSIONS = {
   ARCHIVE: ADMIN_PROVISIONING_ARCHIVE,
   FORCE_STATE: ADMIN_PROVISIONING_FORCE_STATE,
   ALERT_FULL_DETAIL: ADMIN_PROVISIONING_ALERT_FULL_DETAIL,
+  APPROVAL_MANAGE: ADMIN_APPROVAL_MANAGE,
 } as const;
 
 /**
@@ -53,4 +57,5 @@ export const ALL_PROVISIONING_OVERRIDE_PERMISSIONS = [
   ADMIN_PROVISIONING_ARCHIVE,
   ADMIN_PROVISIONING_FORCE_STATE,
   ADMIN_PROVISIONING_ALERT_FULL_DETAIL,
+  ADMIN_APPROVAL_MANAGE,
 ] as const;
