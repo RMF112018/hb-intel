@@ -156,6 +156,9 @@ importers:
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
+      '@hbc/features-admin':
+        specifier: workspace:*
+        version: link:../../packages/features/admin
       '@hbc/models':
         specifier: workspace:*
         version: link:../../packages/models

@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { useCurrentSession } from '@hbc/auth';
+import {
+  useCurrentSession,
+  PermissionGate,
+  ADMIN_PROVISIONING_RETRY,
+  ADMIN_PROVISIONING_ESCALATE,
+  ADMIN_PROVISIONING_ARCHIVE,
+  ADMIN_PROVISIONING_FORCE_STATE,
+} from '@hbc/auth';
 import { HbcComplexityDial, HbcComplexityGate } from '@hbc/complexity';
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
 import { createProvisioningApiClient } from '@hbc/provisioning';
@@ -21,6 +28,8 @@ import {
   useToast,
 } from '@hbc/ui-kit';
 import type { ColumnDef, LayoutTab } from '@hbc/ui-kit';
+import { AdminAlertBadge, computeAlertBadge } from '@hbc/features-admin';
+import type { IAdminAlertBadge } from '@hbc/features-admin';
 import { resolveSessionToken } from '../utils/resolveSessionToken.js';
 import {
   FAILURE_CLASS_LABELS,
@@ -44,6 +53,9 @@ const FILTER_TABS: LayoutTab[] = [
   { id: 'completed', label: 'Completed' },
   { id: 'all', label: 'All' },
 ];
+
+/** G6-T01: Retry ceiling per provisioning-runbook.md alert thresholds. */
+const MAX_RETRY_ATTEMPTS = 3;
 
 const useStyles = makeStyles({
   actionRow: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
@@ -86,6 +98,9 @@ export function ProvisioningOversightPage(): ReactNode {
 
   // State override select state
   const [overrideTarget, setOverrideTarget] = useState<string>('');
+
+  // G6-T01: Alert badge (stub data acceptable; T04 will wire live monitors)
+  const [alertBadge] = useState<IAdminAlertBadge>(() => computeAlertBadge([]));
 
   const authToken = useMemo(() => resolveSessionToken(session), [session]);
   const functionAppUrl = (import.meta.env as Record<string, string | undefined>).VITE_FUNCTION_APP_URL ?? '';
@@ -272,6 +287,7 @@ export function ProvisioningOversightPage(): ReactNode {
         cell: ({ row }) => {
           const run = row.original;
           const isBusy = Boolean(activeActionByProjectId[run.projectId]);
+          const retryExhausted = run.retryCount >= MAX_RETRY_ATTEMPTS;
           return (
             <div className={styles.actionRow}>
               <HbcButton size="sm" variant="secondary" onClick={() => setSelectedRun(run)}>
@@ -279,32 +295,43 @@ export function ProvisioningOversightPage(): ReactNode {
               </HbcButton>
               {run.overallStatus === 'Failed' && (
                 <>
-                  <HbcButton
-                    size="sm"
-                    disabled={isBusy}
-                    onClick={() => setConfirmAction({ type: 'forceRetry', projectId: run.projectId })}
-                  >
-                    {activeActionByProjectId[run.projectId] === 'Retrying' ? 'Retrying…' : 'Force Retry'}
-                  </HbcButton>
+                  {/* G6-T01: Retry gated by permission + retry threshold */}
+                  <PermissionGate action={ADMIN_PROVISIONING_RETRY}>
+                    <HbcButton
+                      size="sm"
+                      disabled={isBusy || retryExhausted}
+                      onClick={() => setConfirmAction({ type: 'forceRetry', projectId: run.projectId })}
+                    >
+                      {activeActionByProjectId[run.projectId] === 'Retrying'
+                        ? 'Retrying…'
+                        : `Retry (${run.retryCount}/${MAX_RETRY_ATTEMPTS})`}
+                    </HbcButton>
+                  </PermissionGate>
+                  {/* G6-T01: Archive gated by permission */}
+                  <PermissionGate action={ADMIN_PROVISIONING_ARCHIVE}>
+                    <HbcButton
+                      size="sm"
+                      variant="secondary"
+                      disabled={isBusy}
+                      onClick={() => setConfirmAction({ type: 'archive', projectId: run.projectId })}
+                    >
+                      {activeActionByProjectId[run.projectId] === 'Archiving' ? 'Archiving…' : 'Archive'}
+                    </HbcButton>
+                  </PermissionGate>
+                </>
+              )}
+              {run.escalatedBy && (
+                /* G6-T01: Escalation ack gated by permission */
+                <PermissionGate action={ADMIN_PROVISIONING_ESCALATE}>
                   <HbcButton
                     size="sm"
                     variant="secondary"
                     disabled={isBusy}
-                    onClick={() => setConfirmAction({ type: 'archive', projectId: run.projectId })}
+                    onClick={() => handleAcknowledgeEscalation(run.projectId)}
                   >
-                    {activeActionByProjectId[run.projectId] === 'Archiving' ? 'Archiving…' : 'Archive'}
+                    {activeActionByProjectId[run.projectId] === 'Acknowledging' ? 'Acknowledging…' : 'Ack Escalation'}
                   </HbcButton>
-                </>
-              )}
-              {run.escalatedBy && (
-                <HbcButton
-                  size="sm"
-                  variant="secondary"
-                  disabled={isBusy}
-                  onClick={() => handleAcknowledgeEscalation(run.projectId)}
-                >
-                  {activeActionByProjectId[run.projectId] === 'Acknowledging' ? 'Acknowledging…' : 'Ack Escalation'}
-                </HbcButton>
+                </PermissionGate>
               )}
             </div>
           );
@@ -383,6 +410,9 @@ export function ProvisioningOversightPage(): ReactNode {
       {/* W0-G4-T06: Complexity dial for tier selection */}
       <HbcComplexityDial variant="header" />
 
+      {/* G6-T01: Alert badge — stub data until T04 wires live monitors */}
+      <AdminAlertBadge badge={alertBadge} onOpenDashboard={() => {/* T04 will wire dashboard navigation */}} />
+
       {/* W0-G4-T07: Dismissible action error banner */}
       {error && (
         <HbcBanner variant="error" onDismiss={() => setError(null)}>
@@ -417,7 +447,11 @@ export function ProvisioningOversightPage(): ReactNode {
         onClose={() => setConfirmAction(null)}
         onConfirm={handleForceRetry}
         title="Force Retry"
-        description="Force-retrying a structural or permissions failure may produce duplicate partial state if the failed step was not idempotent. Confirm only if you have investigated the failure cause."
+        description={(() => {
+          const retryRun = confirmAction ? allRuns.find((r) => r.projectId === confirmAction.projectId) : undefined;
+          const attempt = (retryRun?.retryCount ?? 0) + 1;
+          return `This is retry attempt ${attempt} of ${MAX_RETRY_ATTEMPTS}. Force-retrying a structural or permissions failure may produce duplicate partial state if the failed step was not idempotent. Confirm only if you have investigated the failure cause.`;
+        })()}
         confirmLabel="Force Retry"
         variant="danger"
         loading={actionLoading}
@@ -606,33 +640,35 @@ function ProvisioningDetailContent({
           )}
         </HbcCard>
 
-        {/* Manual state override — expert-tier only, transitional states */}
-        {isStuckInTransitional(run) && (
-          <HbcCard>
-            <HbcTypography intent="heading3">Manual State Override</HbcTypography>
-            <HbcBanner variant="warning">
-              This is a last-resort recovery action. Only use if the provisioning saga is stuck and cannot recover automatically.
-            </HbcBanner>
-            <div className={styles.overrideSection}>
-              <HbcSelect
-                label="Target State"
-                value={overrideTarget}
-                onChange={onOverrideTargetChange}
-                placeholder="Select target state…"
-                options={PROVISIONING_STATUS_VALUES
-                  .filter((s) => s !== run.overallStatus)
-                  .map((s) => ({ value: s, label: PROVISIONING_STATUS_LABELS[s] }))}
-              />
-              <HbcButton
-                variant="primary"
-                disabled={!overrideTarget}
-                onClick={() => onConfirmOverride(run.projectId, overrideTarget)}
-              >
-                Override State
-              </HbcButton>
-            </div>
-          </HbcCard>
-        )}
+        {/* G6-T01: Manual state override — expert-tier + permission-gated */}
+        <PermissionGate action={ADMIN_PROVISIONING_FORCE_STATE}>
+          {isStuckInTransitional(run) && (
+            <HbcCard>
+              <HbcTypography intent="heading3">Manual State Override</HbcTypography>
+              <HbcBanner variant="warning">
+                This is a last-resort recovery action. Only use if the provisioning saga is stuck and cannot recover automatically.
+              </HbcBanner>
+              <div className={styles.overrideSection}>
+                <HbcSelect
+                  label="Target State"
+                  value={overrideTarget}
+                  onChange={onOverrideTargetChange}
+                  placeholder="Select target state…"
+                  options={PROVISIONING_STATUS_VALUES
+                    .filter((s) => s !== run.overallStatus)
+                    .map((s) => ({ value: s, label: PROVISIONING_STATUS_LABELS[s] }))}
+                />
+                <HbcButton
+                  variant="primary"
+                  disabled={!overrideTarget}
+                  onClick={() => onConfirmOverride(run.projectId, overrideTarget)}
+                >
+                  Override State
+                </HbcButton>
+              </div>
+            </HbcCard>
+          )}
+        </PermissionGate>
       </HbcComplexityGate>
     </>
   );

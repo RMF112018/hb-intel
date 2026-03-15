@@ -2,7 +2,7 @@ import React from 'react';
 import { render, type RenderResult } from '@testing-library/react';
 import { ComplexityProvider } from '@hbc/complexity';
 import { HbcThemeProvider, HbcToastProvider } from '@hbc/ui-kit';
-import { useAuthStore } from '@hbc/auth';
+import { useAuthStore, usePermissionStore } from '@hbc/auth';
 import { useProvisioningStore } from '@hbc/provisioning';
 import type { NormalizedAuthSession } from '@hbc/auth';
 import type { IProjectSetupRequest, IProvisioningStatus } from '@hbc/models';
@@ -10,6 +10,7 @@ import type { IProjectSetupRequest, IProvisioningStatus } from '@hbc/models';
 interface RenderOptions {
   tier?: 'essential' | 'standard' | 'expert';
   session?: NormalizedAuthSession | null;
+  permissions?: string[];
   requests?: IProjectSetupRequest[];
   statusByProjectId?: Record<string, IProvisioningStatus>;
 }
@@ -51,6 +52,7 @@ export function renderWithProviders(
   const {
     tier = 'essential',
     session = createTestSession(),
+    permissions,
     requests = [],
     statusByProjectId = {},
   } = options;
@@ -58,6 +60,9 @@ export function renderWithProviders(
   // Pre-seed Zustand stores before render
   useAuthStore.setState({ session });
   useProvisioningStore.setState({ requests, statusByProjectId });
+  if (permissions) {
+    usePermissionStore.setState({ permissions });
+  }
 
   function TestWrapper({ children }: { children: React.ReactNode }): React.ReactElement {
     return (

@@ -1,6 +1,6 @@
 {
   "name": "@hbc/spfx-admin",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -21,6 +21,7 @@
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
+    "@hbc/features-admin": "workspace:*",
     "@fluentui/react-components": "^9.56.0",
     "@griffel/react": "^1.5.0",
     "@tanstack/react-query": "^5.75.0",

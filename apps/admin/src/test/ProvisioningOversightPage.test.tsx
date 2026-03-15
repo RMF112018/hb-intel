@@ -1,8 +1,18 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { usePermissionStore } from '@hbc/auth';
 import { renderWithProviders } from './renderWithProviders';
 import { createTestProvisioningStatus } from './factories';
 import { ProvisioningOversightPage } from '../pages/ProvisioningOversightPage';
+
+/** G6-T01: Full admin permissions for tests that need action buttons visible. */
+const FULL_ADMIN_PERMISSIONS = [
+  'admin:access-control:view',
+  'admin:provisioning:retry',
+  'admin:provisioning:escalate',
+  'admin:provisioning:archive',
+  'admin:provisioning:force-state',
+];
 
 // ── Module-level mocks ──────────────────────────────────────────────────────
 
@@ -42,6 +52,9 @@ describe('ProvisioningOversightPage', () => {
     const factory = await getFactory();
     factory.mockImplementation(() => mockClient);
 
+    // G6-T01: Seed full admin permissions so existing action tests continue to pass
+    usePermissionStore.setState({ permissions: FULL_ADMIN_PERMISSIONS });
+
     // Reset query params
     Object.defineProperty(window, 'location', {
       value: { ...window.location, search: '' },
@@ -75,29 +88,29 @@ describe('ProvisioningOversightPage', () => {
   });
 
   // G4-T04-002: Force-retry button for failed requests
-  it('shows Force Retry button for failed runs', async () => {
+  it('shows Retry button for failed runs', async () => {
     const failedRun = createTestProvisioningStatus({ projectId: 'p-1', overallStatus: 'Failed' });
     mockClient.listProvisioningRuns.mockResolvedValueOnce([failedRun]);
 
     renderWithProviders(<ProvisioningOversightPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Force Retry')).toBeInTheDocument();
+      expect(screen.getByText('Retry (0/3)')).toBeInTheDocument();
     });
   });
 
   // G4-T04-003: Force-retry confirm shows risk warning
-  it('shows danger confirmation dialog with risk warning when Force Retry is clicked', async () => {
+  it('shows danger confirmation dialog with risk warning when Retry is clicked', async () => {
     const failedRun = createTestProvisioningStatus({ projectId: 'p-1', overallStatus: 'Failed' });
     mockClient.listProvisioningRuns.mockResolvedValueOnce([failedRun]);
 
     renderWithProviders(<ProvisioningOversightPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Force Retry')).toBeInTheDocument();
+      expect(screen.getByText('Retry (0/3)')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Force Retry'));
+    fireEvent.click(screen.getByText('Retry (0/3)'));
 
     await waitFor(() => {
       expect(screen.getByText(/structural or permissions failure/)).toBeInTheDocument();
@@ -115,20 +128,20 @@ describe('ProvisioningOversightPage', () => {
     renderWithProviders(<ProvisioningOversightPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Force Retry')).toBeInTheDocument();
+      expect(screen.getByText('Retry (0/3)')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Force Retry'));
+    fireEvent.click(screen.getByText('Retry (0/3)'));
 
     await waitFor(() => {
       expect(screen.getByText(/structural or permissions failure/)).toBeInTheDocument();
     });
 
     // The confirm button in the dialog has confirmLabel="Force Retry"
-    // There are now two "Force Retry" texts: the row button and the dialog confirm button
-    const forceRetryButtons = screen.getAllByText('Force Retry');
-    // Click the confirm button (last one, in the dialog)
-    fireEvent.click(forceRetryButtons[forceRetryButtons.length - 1]);
+    // The title "Force Retry" also appears as an h3, so use getAllByText and pick the button
+    const forceRetryElements = screen.getAllByText('Force Retry');
+    const confirmButton = forceRetryElements.find((el) => el.tagName === 'BUTTON') ?? forceRetryElements[forceRetryElements.length - 1];
+    fireEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(mockClient.retryProvisioning).toHaveBeenCalledWith('p-1');
@@ -328,12 +341,156 @@ describe('ProvisioningOversightPage', () => {
     renderWithProviders(<ProvisioningOversightPage />, { tier: 'expert' });
 
     await waitFor(() => {
-      expect(screen.getByText('Force Retry')).toBeInTheDocument();
+      expect(screen.getByText(/Retry/)).toBeInTheDocument();
     });
 
     // No wizard-related content should be present
     expect(screen.queryByText(/wizard/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/guided setup/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/step wizard/i)).not.toBeInTheDocument();
+  });
+
+  // ── G6-T01: Action boundary enforcement ──────────────────────────────────
+
+  // G6-T01-001: Retry disabled when retryCount >= MAX_RETRY_ATTEMPTS
+  it('disables retry button when retryCount reaches threshold', async () => {
+    const exhaustedRun = createTestProvisioningStatus({
+      projectId: 'p-1',
+      overallStatus: 'Failed',
+      retryCount: 3,
+    });
+    mockClient.listProvisioningRuns.mockResolvedValueOnce([exhaustedRun]);
+
+    renderWithProviders(<ProvisioningOversightPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Retry \(3\/3\)/)).toBeInTheDocument();
+    });
+
+    const retryButton = screen.getByText(/Retry \(3\/3\)/);
+    expect(retryButton.closest('button')).toBeDisabled();
+  });
+
+  // G6-T01-002: Retry count shown in button label
+  it('shows retry count in retry button label', async () => {
+    const run = createTestProvisioningStatus({
+      projectId: 'p-1',
+      overallStatus: 'Failed',
+      retryCount: 1,
+    });
+    mockClient.listProvisioningRuns.mockResolvedValueOnce([run]);
+
+    renderWithProviders(<ProvisioningOversightPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Retry (1/3)')).toBeInTheDocument();
+    });
+  });
+
+  // G6-T01-003: Actions hidden for read-only users (no provisioning permissions)
+  it('hides action buttons for users without provisioning override permissions', async () => {
+    const failedRun = createTestProvisioningStatus({
+      projectId: 'p-1',
+      overallStatus: 'Failed',
+      escalatedBy: 'coordinator@hb.com',
+    });
+    mockClient.listProvisioningRuns.mockResolvedValueOnce([failedRun]);
+
+    // Seed only view permission — no provisioning override permissions
+    usePermissionStore.setState({ permissions: ['admin:access-control:view'] });
+
+    renderWithProviders(<ProvisioningOversightPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument();
+    });
+
+    // Details button should still be visible (not permission-gated)
+    expect(screen.getByText('Details')).toBeInTheDocument();
+
+    // Action buttons should be hidden
+    expect(screen.queryByText(/Retry/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Archive')).not.toBeInTheDocument();
+    expect(screen.queryByText('Ack Escalation')).not.toBeInTheDocument();
+  });
+
+  // G6-T01-004: Force-state hidden without permission
+  it('hides Manual State Override without force-state permission at expert tier', async () => {
+    const stuckRun = createTestProvisioningStatus({
+      projectId: 'p-1',
+      overallStatus: 'InProgress',
+      failureClass: undefined,
+      steps: [
+        { stepNumber: 1, stepName: 'Create Site', status: 'Completed', startedAt: '2026-01-15T12:00:00.000Z', completedAt: '2026-01-15T12:00:01.000Z' },
+        { stepNumber: 2, stepName: 'Apply Template', status: 'InProgress', startedAt: '2026-01-15T12:00:01.000Z' },
+      ],
+    });
+    mockClient.listProvisioningRuns.mockResolvedValueOnce([stuckRun]);
+
+    // Grant all permissions EXCEPT force-state
+    usePermissionStore.setState({
+      permissions: [
+        'admin:access-control:view',
+        'admin:provisioning:retry',
+        'admin:provisioning:escalate',
+        'admin:provisioning:archive',
+      ],
+    });
+
+    renderWithProviders(<ProvisioningOversightPage />, { tier: 'expert' });
+
+    await waitFor(() => {
+      expect(screen.getByText('Active Runs')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Active Runs'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Details')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Details'));
+
+    // Expert-only content should be visible
+    await waitFor(() => {
+      expect(screen.getByText('Internal Identifiers')).toBeInTheDocument();
+    });
+
+    // But Manual State Override should NOT be visible (no force-state permission)
+    expect(screen.queryByText('Manual State Override')).not.toBeInTheDocument();
+  });
+
+  // G6-T01-005: AdminAlertBadge integration point exists
+  it('does not render alert badge with zero alerts (renders null)', async () => {
+    mockClient.listProvisioningRuns.mockResolvedValueOnce([]);
+
+    renderWithProviders(<ProvisioningOversightPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Provisioning Oversight')).toBeInTheDocument();
+    });
+
+    // AdminAlertBadge renders null when totalCount is 0
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  // G6-T01-006: Retry count visible in confirmation dialog
+  it('shows retry attempt number in force retry confirmation dialog', async () => {
+    const run = createTestProvisioningStatus({
+      projectId: 'p-1',
+      overallStatus: 'Failed',
+      retryCount: 2,
+    });
+    mockClient.listProvisioningRuns.mockResolvedValueOnce([run]);
+
+    renderWithProviders(<ProvisioningOversightPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Retry (2/3)')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Retry (2/3)'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/retry attempt 3 of 3/)).toBeInTheDocument();
+    });
   });
 });

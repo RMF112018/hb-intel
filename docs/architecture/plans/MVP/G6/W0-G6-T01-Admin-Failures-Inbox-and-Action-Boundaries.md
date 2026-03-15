@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G6/W0-G6-Admin-Support-and-Observability-Plan.md`
 > **Related:** `docs/maintenance/provisioning-runbook.md`; `packages/features/admin/src/pages/ProvisioningOversightPage.tsx`
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G6
 **Locked decisions served:** LD-01, LD-02, LD-03, LD-04, LD-09, LD-10
 
@@ -143,9 +143,13 @@ Before T01 is ready for review:
 
 During active T01 work:
 
-- Record the actual permission name for provisioning override actions once verified from `@hbc/auth`
-- Record whether `retryCount` is available in the provisioning model or needs to be added
-- Record the confirmed retry threshold value
+- ✅ Permission names confirmed from `@hbc/auth` (`packages/auth/src/permissions/provisioningOverride.ts`):
+  - `admin:provisioning:retry` — gates Force Retry button
+  - `admin:provisioning:escalate` — gates Ack Escalation button
+  - `admin:provisioning:archive` — gates Archive button
+  - `admin:provisioning:force-state` — gates Manual State Override (expert-tier)
+- ✅ `retryCount` is available on `IProvisioningStatus.retryCount` (type `number`) — added to `IProjectSetupRequest` in G6-T02
+- ✅ Retry threshold: **3** (from `docs/maintenance/provisioning-runbook.md`), enforced as `MAX_RETRY_ATTEMPTS` constant in `ProvisioningOversightPage.tsx`
 
 ---
 
