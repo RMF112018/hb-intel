@@ -25,3 +25,6 @@ export type { UseApprovalAuthorityResult } from './UseApprovalAuthorityResult.js
 
 // Legacy alias — T01 name kept for backward compatibility during T02 transition
 export type { IInfrastructureProbeResult as IInfrastructureProbe } from './IInfrastructureProbe.js';
+
+// Probe configuration
+export type { ProbeConnectionConfig } from '../probes/azureFunctionsProbe.js';

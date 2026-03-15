@@ -30,6 +30,7 @@ export type {
   IInfrastructureProbeDefinition,
   NotificationRoute,
   IProvisioningDataProvider,
+  ProbeConnectionConfig,
 } from './types/index.js';
 
 // Constants
@@ -37,6 +38,7 @@ export {
   ADMIN_ALERTS_POLL_MS,
   PROBE_SCHEDULER_DEFAULT_MS,
   PROBE_MAX_RETRY,
+  PROBE_STALENESS_MS,
   APPROVAL_RULE_LIST_TITLE,
   ADMIN_ALERT_LIST_TITLE,
   INFRA_PROBE_LIST_TITLE,
@@ -64,7 +66,9 @@ export {
 export {
   ProbeScheduler,
   sharePointProbe,
+  createSharePointProbe,
   azureFunctionsProbe,
+  createAzureFunctionsProbe,
   searchProbe,
   notificationProbe,
   moduleRecordHealthProbe,

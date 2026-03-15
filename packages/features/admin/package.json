@@ -1,6 +1,6 @@
 {
   "name": "@hbc/features-admin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Admin Intelligence feature package — monitors, probes, and approval authority for HB Intel",
   "type": "module",

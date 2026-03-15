@@ -31,3 +31,16 @@ If the timer trigger fails to install web parts:
 ## Alert Thresholds
 - **Stuck run:** Overall status `InProgress` for >30 minutes → Severity 2 alert.
 - **Timer failure:** No `ProvisioningStep5TimerCompleted` event within 2 hours of midnight EST → Severity 1 alert.
+
+## Timer Support
+
+### Dev/Staging Manual Timer Trigger
+1. Open Azure Portal → Function App → Functions → `ProvisioningStep5Timer`.
+2. Click **Code + Test** → **Test/Run** → set body to `{}` → click **Run**.
+3. Monitor the run in Application Insights custom events: `customEvents | where name startswith "ProvisioningTimer" | order by timestamp desc | take 10`.
+
+### Timer Failure Diagnostics
+1. Check Application Insights for recent timer events: `customEvents | where name == "ProvisioningTimerStarted" | order by timestamp desc | take 5`.
+2. If no recent timer events, verify the Function App is running and the CRON schedule is correct in `function.json`.
+3. Check Function App → Monitor → Invocations for the timer function to see if it was triggered but failed.
+4. If the timer ran but web parts failed to install, see "How to Re-run Step 5 Manually" above.

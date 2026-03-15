@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G6/W0-G6-Admin-Support-and-Observability-Plan.md`
 > **Related:** `docs/maintenance/provisioning-observability-runbook.md`; `packages/features/admin/src/probes/`
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G6
 **Locked decisions served:** LD-01, LD-02, LD-06, LD-09
 
@@ -177,7 +177,7 @@ Before T06 is ready for review:
 
 *(Record outcome of `InfrastructureProbeApi` inspection here before implementation begins.)*
 
-**`InfrastructureProbeApi`:** `[VERIFY BEFORE IMPLEMENTATION]` — Inspect `packages/features/admin/src/api/InfrastructureProbeApi.ts` to confirm stub vs. real status.
+**`InfrastructureProbeApi`:** ✅ Was STUB — `getLatestSnapshot()` returned null, `runNow()` returned empty snapshot. T06 replaced with in-memory `Map`-backed implementation with `saveSnapshot()`, `getLatestSnapshot()` (tracks latest by `capturedAt`), `listSnapshots(range?)`, and `runNow()` (returns latest or empty).
 
 ---
 
@@ -185,11 +185,16 @@ Before T06 is ready for review:
 
 During active T06 work:
 
-- Record the `InfrastructureProbeApi` stub/ready status
-- Record the Azure Functions health endpoint URL and access method confirmed for `azureFunctionsProbe`
-- Record the SharePoint list access method confirmed for `sharePointProbe`
-- Record any KQL query changes made to the observability runbook
-- Record the Alert Rule 1 configuration status (configured vs. documented-pending)
+- ✅ **InfrastructureProbeApi:** Was STUB, now in-memory `Map` implementation (same pattern as `AdminAlertsApi`). SharePoint `HBC_InfrastructureProbeSnapshots` list is Wave 1 target.
+- ✅ **Azure Functions health endpoint:** `{baseUrl}/api/health` with Bearer token auth. `createAzureFunctionsProbe(config)` factory calls it and returns healthy/degraded/error based on HTTP status.
+- ✅ **SharePoint connectivity check:** `{baseUrl}/api/project-setup-requests?state=Submitted` used as lightweight connectivity probe. `createSharePointProbe(config)` factory wraps the call.
+- ✅ **KQL queries:** All 5 queries in `provisioning-observability-runbook.md` verified against current schema — no changes needed.
+- ✅ **Alert Rule 1:** Stuck provisioning (>30m) already documented and configured per observability runbook §Alert Rule 1.
+- ✅ **Timer diagnostics:** Added "Timer Support" section to `provisioning-runbook.md` with dev/staging manual trigger procedure and timer failure diagnostic steps.
+- ✅ **Probe DI pattern:** `ProbeConnectionConfig` interface + factory functions mirror the monitor DI pattern. `createDefaultProbeScheduler(config?)` wires configured probes when config provided.
+- ✅ **PROBE_STALENESS_MS:** Added as constant = 1,800,000 (30 min = 2× probe interval).
+- ✅ **Deferred probes:** `searchProbe`, `notificationProbe`, `moduleRecordHealthProbe` remain stubs — tracked as post-Wave-0 follow-on.
+- ✅ **Frontend telemetry:** No browser-side Application Insights SDK — documented as known architecture characteristic, not a bug. Backend-only observability via Azure Functions.
 
 ---
 

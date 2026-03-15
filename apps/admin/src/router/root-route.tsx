@@ -3,6 +3,7 @@ import { ShellLayout } from '@hbc/shell';
 import type { SimplifiedShellConfig } from '@hbc/shell';
 import { AdminAlertBadge, useAdminAlerts } from '@hbc/features-admin';
 import { useAlertPolling } from '../hooks/useAlertPolling.js';
+import { useProbePolling } from '../hooks/useProbePolling.js';
 
 /**
  * D-PH7-BW-6: Admin root route with simplified shell config.
@@ -24,6 +25,9 @@ function RootComponent(): React.ReactNode {
 
   // G6-T04: Start monitor polling when session is available
   useAlertPolling();
+
+  // G6-T06: Start probe polling when session is available
+  useProbePolling();
 
   // G6-T04: Live badge from useAdminAlerts (auto-polls via React Query)
   const { badge: alertBadge } = useAdminAlerts();
