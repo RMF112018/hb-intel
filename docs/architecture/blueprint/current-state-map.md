@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Status:** Canonical Current-State
-**Last Updated:** 2026-03-14
+**Last Updated:** 2026-03-15
 **Purpose:** Single authoritative reference for the present implementation state of the HB Intel monorepo. When this document differs from historical plans or locked blueprints regarding _what exists today_, this document governs present truth.
 
 ---
@@ -210,6 +210,18 @@
 | `docs/reference/spfx-surfaces/estimating-requester-surface.md` | **Living Reference (Diátaxis)** | Reference quadrant; Estimating requester surface route map, component hierarchy, step wizard config, draft persistence, clarification-return flow, BIC ownership display, complexity gating rules; produced by W0-G4-T01 |
 | `apps/estimating/src/components/project-setup/` | **Canonical Current-State** | Estimating requester guided setup surface components; step body renderers, resume banner, state display helpers, request detail compositions (core summary, state context, clarification banner); produced by W0-G4-T01; extended by W0-G4-T02 with FailureDetailCard and RetrySection |
 | `apps/estimating/src/utils/failureClassification.ts` | **Canonical Current-State** | Failure classification display constants, canCoordinatorRetry() 5-condition check, getFailedStep() helper; NO inference from error strings (spec §8.2); produced by W0-G4-T02 |
+| `apps/estimating/src/test/NewRequestPage.test.tsx` | **Canonical Current-State** | G4-T08 Estimating guided setup tests; draft auto-save, resume banner, clarification return, submission success/failure, complexity gating; produced by W0-G4-T08 |
+| `apps/estimating/src/test/RequestDetailPage.test.tsx` | **Canonical Current-State** | G4-T08 Estimating request detail tests; state badge, ownership display, complexity-gated fields, clarification banner; produced by W0-G4-T08 |
+| `apps/estimating/src/test/RequestDetailPage.coordinator.test.tsx` | **Canonical Current-State** | G4-T08 Coordinator retry tests; failure classification, retry eligibility, retry action, coordinator queue filtering; produced by W0-G4-T08 |
+| `apps/estimating/src/test/RequestDetailPage.completion.test.tsx` | **Canonical Current-State** | G4-T08 Completion handoff tests; completion card, Project Hub URL, stay-in-estimating dismissal, handoff assembly; produced by W0-G4-T08 |
+| `apps/accounting/src/test/ProjectReviewQueuePage.test.tsx` | **Canonical Current-State** | G4-T08 Accounting review queue tests; filter tabs, queue columns, action routing, complexity gating; produced by W0-G4-T08 |
+| `apps/accounting/src/test/ProjectReviewDetailPage.test.tsx` | **Canonical Current-State** | G4-T08 Accounting review detail tests; structured review actions (approve/clarify/hold/route-to-admin), complexity-gated fields; produced by W0-G4-T08 |
+| `apps/admin/src/test/ProvisioningOversightPage.test.tsx` | **Canonical Current-State** | G4-T08 Admin oversight tests; state filter tabs, detail modal, admin-exclusive actions, cross-app navigation; produced by W0-G4-T08 |
+| `apps/estimating/src/test/complexity.test.tsx` | **Canonical Current-State** | G4-T08 Complexity gating tests for Estimating surfaces; tier-based field visibility; produced by W0-G4-T08 |
+| `apps/accounting/src/test/complexity.test.tsx` | **Canonical Current-State** | G4-T08 Complexity gating tests for Accounting surfaces; tier-based field visibility; produced by W0-G4-T08 |
+| `apps/admin/src/test/complexity.test.tsx` | **Canonical Current-State** | G4-T08 Complexity gating tests for Admin surfaces; tier-based field visibility; produced by W0-G4-T08 |
+| `apps/project-hub/src/test/completion-welcome.test.tsx` | **Canonical Current-State** | G4-T08 Deferred stubs; 2 it.todo stubs for completion welcome card blocked on IActiveProject.provisionedAt; produced by W0-G4-T08 |
+| `tools/check-no-role-branch.sh` | **Canonical Current-State** | G4-T08 Role-check gate script; CI-safe validation that no role-branch assumptions leak into test files; produced by W0-G4-T08 |
 | Diátaxis output docs (`docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/`, `docs/user-guide/`, `docs/administrator-guide/`, `docs/maintenance/`, `docs/troubleshooting/`, `docs/security/`, `docs/release-notes/`, `docs/faq.md`) | **Living Reference (Diátaxis)** | 200+ files; quadrant breakdown: tutorials, how-to, reference, explanation, user-guide, administrator-guide, maintenance, troubleshooting, security, release-notes, faq; updated continuously as features ship; exempt from inline banner |
 
 ### 2.1 Classification Maintenance Rule
