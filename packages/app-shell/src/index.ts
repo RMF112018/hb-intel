@@ -58,7 +58,12 @@ export type {
   ModuleDetailConfig,
 } from '@hbc/shell';
 
-// UI-kit shell components
+/**
+ * UI-kit shell components re-exported for SPFx / Project Hub shell contexts.
+ * PWA consumers should import these directly from '@hbc/ui-kit' to avoid
+ * pulling in SPFx-oriented transitive dependencies from this facade.
+ * @see {@link packages/app-shell/README.md | "Using HbcConnectivityBar in the PWA"}
+ */
 export {
   HbcAppShell,
   HbcConnectivityBar,
