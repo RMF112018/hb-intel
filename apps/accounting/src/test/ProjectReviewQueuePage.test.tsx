@@ -134,4 +134,23 @@ describe('ProjectReviewQueuePage', () => {
     expect(link.closest('a')).toBeTruthy();
     expect(link.closest('a')?.getAttribute('href')).toBe('/project-review/$requestId');
   });
+
+  // ── Failure modes (W0-G4-T07) ──────────────────────────────────────────
+  describe('failure modes', () => {
+    // G4-T07-003: Queue table fits at 768px
+    it('queue page renders without error (768px layout is CSS — manual per R3)', () => {
+      const requests = [
+        createTestRequest({ requestId: 'req-1', projectName: 'Alpha', state: 'UnderReview' }),
+      ];
+      mockClient.listRequests.mockResolvedValue(requests);
+
+      renderWithProviders(<ProjectReviewQueuePage />, {
+        tier: 'essential',
+        requests,
+      });
+
+      expect(screen.getByText(/Alpha/)).toBeTruthy();
+      // jsdom cannot test CSS layout; this confirms the component tree is valid.
+    });
+  });
 });
