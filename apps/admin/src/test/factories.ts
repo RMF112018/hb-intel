@@ -20,6 +20,7 @@ export function createTestRequest(
     submittedAt: now,
     state: 'Submitted',
     groupMembers: ['team@hb.com'],
+    retryCount: 0,
     ...overrides,
   };
 }

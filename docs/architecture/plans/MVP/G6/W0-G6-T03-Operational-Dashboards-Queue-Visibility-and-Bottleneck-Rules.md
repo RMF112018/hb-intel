@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G6/W0-G6-Admin-Support-and-Observability-Plan.md`
 > **Related:** `docs/architecture/plans/MVP/G6/W0-G6-T01-Admin-Failures-Inbox-and-Action-Boundaries.md`; `docs/architecture/plans/MVP/G6/W0-G6-T02-Audience-Permissions-and-Bounded-Retry-Rules.md`; `docs/maintenance/provisioning-runbook.md`
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G6
 **Locked decisions served:** LD-01, LD-02, LD-03, LD-08, LD-09
 
@@ -158,9 +158,10 @@ Before T03 is ready for review:
 
 During active T03 work:
 
-- Record whether `lastStateChangedAt` exists on `IProjectSetupRequest` or needs to be derived/added
-- Record any changes made to bottleneck thresholds after product owner confirmation
-- Note if business-ops summary view definition changes based on stakeholder feedback
+- ✅ **`lastStateChangedAt`:** Does NOT exist on `IProjectSetupRequest`. Stuck provisioning detection (>30 min) deferred to T04 monitors which use `IProvisioningStatus.startedAt` via `createStuckWorkflowMonitor`. Queue-side bottleneck detection uses `Failed` count, `clarificationRequestedAt` aging, and `submittedAt` aging.
+- ✅ **Bottleneck thresholds:** Implemented as constants in `bottleneckRules.ts` — `FAILED_THRESHOLD=1`, `CLARIFICATION_AGING_HOURS=48`, `EXTERNAL_SETUP_AGING_DAYS=5`.
+- ✅ **Business-ops summary:** Implemented as `QueueHealthSummary` with activeCount, needsAttentionCount, completedRecentCount (7d), overallHealth (healthy/degraded). No individual request names or alert details visible to business-ops.
+- ✅ **AdminAlertBadge:** Moved from ProvisioningOversightPage to root-route.tsx shell, visible from all admin routes. Navigates to `/dashboards` on click.
 
 ---
 

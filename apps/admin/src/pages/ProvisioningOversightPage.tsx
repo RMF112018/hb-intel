@@ -28,8 +28,6 @@ import {
   useToast,
 } from '@hbc/ui-kit';
 import type { ColumnDef, LayoutTab } from '@hbc/ui-kit';
-import { AdminAlertBadge, computeAlertBadge } from '@hbc/features-admin';
-import type { IAdminAlertBadge } from '@hbc/features-admin';
 import { resolveSessionToken } from '../utils/resolveSessionToken.js';
 import {
   FAILURE_CLASS_LABELS,
@@ -99,8 +97,6 @@ export function ProvisioningOversightPage(): ReactNode {
   // State override select state
   const [overrideTarget, setOverrideTarget] = useState<string>('');
 
-  // G6-T01: Alert badge (stub data acceptable; T04 will wire live monitors)
-  const [alertBadge] = useState<IAdminAlertBadge>(() => computeAlertBadge([]));
 
   const authToken = useMemo(() => resolveSessionToken(session), [session]);
   const functionAppUrl = (import.meta.env as Record<string, string | undefined>).VITE_FUNCTION_APP_URL ?? '';
@@ -415,9 +411,6 @@ export function ProvisioningOversightPage(): ReactNode {
     <WorkspacePageShell layout="list" title="Provisioning Oversight">
       {/* W0-G4-T06: Complexity dial for tier selection */}
       <HbcComplexityDial variant="header" />
-
-      {/* G6-T01: Alert badge — stub data until T04 wires live monitors */}
-      <AdminAlertBadge badge={alertBadge} onOpenDashboard={() => {/* T04 will wire dashboard navigation */}} />
 
       {/* W0-G4-T07: Dismissible action error banner */}
       {error && (

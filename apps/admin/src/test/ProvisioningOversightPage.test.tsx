@@ -459,20 +459,6 @@ describe('ProvisioningOversightPage', () => {
     expect(screen.queryByText('Manual State Override')).not.toBeInTheDocument();
   });
 
-  // G6-T01-005: AdminAlertBadge integration point exists
-  it('does not render alert badge with zero alerts (renders null)', async () => {
-    mockClient.listProvisioningRuns.mockResolvedValueOnce([]);
-
-    renderWithProviders(<ProvisioningOversightPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Provisioning Oversight')).toBeInTheDocument();
-    });
-
-    // AdminAlertBadge renders null when totalCount is 0
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
-  });
-
   // G6-T01-006: Retry count visible in confirmation dialog
   it('shows retry attempt number in force retry confirmation dialog', async () => {
     const run = createTestProvisioningStatus({

@@ -48,4 +48,14 @@ const provisioningRoute = createRoute({
   component: lazyRouteComponent(() => import('../pages/ProvisioningOversightPage.js').then((m) => ({ default: m.ProvisioningOversightPage }))),
 });
 
-export const webpartRoutes = [indexRoute, errorLogRoute, provisioningRoute];
+const dashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboards',
+  beforeLoad: () => {
+    requireAdminAccessControl();
+    useNavStore.getState().setActiveWorkspace('admin');
+  },
+  component: lazyRouteComponent(() => import('../pages/OperationalDashboardPage.js').then((m) => ({ default: m.OperationalDashboardPage }))),
+});
+
+export const webpartRoutes = [indexRoute, errorLogRoute, provisioningRoute, dashboardRoute];

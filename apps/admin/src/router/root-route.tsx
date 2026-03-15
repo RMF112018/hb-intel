@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router';
 import { ShellLayout } from '@hbc/shell';
 import type { SimplifiedShellConfig } from '@hbc/shell';
+import { AdminAlertBadge, computeAlertBadge } from '@hbc/features-admin';
 
 /**
  * D-PH7-BW-6: Admin root route with simplified shell config.
@@ -11,6 +13,7 @@ const ADMIN_SHELL_CONFIG: SimplifiedShellConfig = {
   showBackToProjectHub: false,
   toolPickerItems: [
     { label: 'System Settings', path: '/' },
+    { label: 'Dashboards', path: '/dashboards' },
     { label: 'Error Log', path: '/error-log' },
     { label: 'Provisioning Oversight', path: '/provisioning-failures' },
   ],
@@ -18,6 +21,10 @@ const ADMIN_SHELL_CONFIG: SimplifiedShellConfig = {
 
 function RootComponent(): React.ReactNode {
   const navigate = useNavigate();
+
+  // G6-T03: Alert badge visible from all admin routes (stub data until T04)
+  const alertBadge = useMemo(() => computeAlertBadge([]), []);
+
   return (
     <ShellLayout
       mode="simplified"
@@ -33,6 +40,10 @@ function RootComponent(): React.ReactNode {
               {item.label}
             </button>
           ))}
+          <AdminAlertBadge
+            badge={alertBadge}
+            onOpenDashboard={() => navigate({ to: '/dashboards' })}
+          />
         </nav>
       }
     >
