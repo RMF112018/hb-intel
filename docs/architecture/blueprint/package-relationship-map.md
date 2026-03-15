@@ -63,9 +63,9 @@ Layer 9 — Domain Data Infrastructure
   (@hbc/data-seeding)
   Domain-agnostic import/seeding utilities
 
-Layer 8 — Intelligence Scaffolds
-  (@hbc/health-indicator, @hbc/score-benchmark, @hbc/strategic-intelligence, @hbc/post-bid-autopsy)
-  Scoring, analysis, and learning signal primitives — currently scaffolded
+Layer 8 — Intelligence Scaffolds & Shared-Feature Primitives
+  (@hbc/health-indicator, @hbc/score-benchmark, @hbc/strategic-intelligence, @hbc/post-bid-autopsy, @hbc/my-work-feed)
+  Scoring, analysis, learning signal, and cross-module aggregation primitives
 
 Layer 7 — Workflow Primitives
   (@hbc/step-wizard, @hbc/field-annotations, @hbc/workflow-handoff)
@@ -833,6 +833,32 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 **Key exports:** Autopsy model, evidence aggregation framework, learning signal publication interface (including `PostBidLearningSignal` consumed by `@hbc/score-benchmark`).
 
 **✅ Circular dependency resolved (ADR-0114, 2026-03-14):** The unused `@hbc/score-benchmark` production dependency has been removed from `package.json`. `@hbc/score-benchmark` retains a type-only import of `PostBidLearningSignal` from this package; that direction is correct and not a cycle.
+
+---
+
+#### `@hbc/my-work-feed` · v0.0.1 · [Complete]
+
+| Field | Value |
+|-------|-------|
+| **Path** | `packages/my-work-feed/` |
+| **Layer** | 8 — Shared-Feature Primitives |
+| **Depends on** | `@hbc/bic-next-move`, `@hbc/complexity`, `@hbc/notification-intelligence`, `@hbc/session-state`, `@hbc/ui-kit`, `@hbc/workflow-handoff`; peer: `react`, `react-dom`, `@tanstack/react-query` |
+| **Used by** | Apps consuming personal work aggregation (PWA shell, project canvas tiles) |
+| **Maturity** | Complete |
+
+**Purpose:** Cross-module personal work aggregation feed. Source modules register adapters via a central registry; the package normalizes, dedupes, supersedes, ranks, and renders work items across composite UI surfaces (badge, tile, panel, full feed, team feed).
+
+**Key exports:** `IMyWorkItem` domain model, `MyWorkRegistry`, 5 built-in adapters (BIC, handoff, acknowledgment, notification, draft-resume), 7 hooks, 12 components, normalization pipeline (dedupe, supersession, ranking), telemetry, testing factories via `@hbc/my-work-feed/testing`.
+
+**Correct usage:** Register a source adapter, wrap with `MyWorkProvider`, consume via hooks and components. All visual components compose `@hbc/ui-kit` primitives.
+
+**Anti-patterns / must not:**
+- Must not own domain data — source modules retain authority over their work items.
+- Must not allow adapters to import from each other — the registry is the only coordination point.
+- Must not duplicate design-system-grade primitives that belong in `@hbc/ui-kit`.
+- Must not implement its own IndexedDB layer — offline persistence is owned by `@hbc/session-state`.
+
+**ADR:** [ADR-0115 — My Work Feed Architecture](../../docs/architecture/adr/ADR-0115-my-work-feed-architecture.md)
 
 ---
 

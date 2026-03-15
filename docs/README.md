@@ -149,6 +149,8 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 | ADR-0111 | Accepted | [ADR-0111-health-indicator-readiness-primitive-runtime.md](./architecture/adr/ADR-0111-health-indicator-readiness-primitive-runtime.md) |
 | ADR-0112 | Accepted | [ADR-0112-score-benchmark-primitive-runtime.md](./architecture/adr/ADR-0112-score-benchmark-primitive-runtime.md) |
 | ADR-0113 | Accepted | [ADR-0113-strategic-intelligence-primitive-runtime.md](./architecture/adr/ADR-0113-strategic-intelligence-primitive-runtime.md) |
+| ADR-0114 | Accepted | [ADR-0114-resolve-score-benchmark-post-bid-autopsy-circular-dependency.md](./architecture/adr/ADR-0114-resolve-score-benchmark-post-bid-autopsy-circular-dependency.md) |
+| ADR-0115 | Accepted | [ADR-0115-my-work-feed-architecture.md](./architecture/adr/ADR-0115-my-work-feed-architecture.md) |
 
 ## Reference Documents
 
@@ -163,6 +165,8 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 - [BD Score Benchmark Adoption Guide](./how-to/developer/bd-score-benchmark-adoption-guide.md) — Integration and validation guidance for downstream consumers
 - [BD Heritage Strategic Intelligence API](./reference/bd-heritage-strategic-intelligence/api.md) — SF20 primitive + adapter API contracts and testing exports
 - [BD Heritage Strategic Intelligence Adoption Guide](./how-to/developer/bd-heritage-strategic-intelligence-adoption-guide.md) — Integration and validation guidance for downstream consumers
+- [My Work Feed API](./reference/my-work-feed/api.md) — SF29 multi-source aggregation feed API contracts and testing exports
+- [My Work Feed Adoption Guide](./how-to/developer/my-work-feed-adoption-guide.md) — Integration and validation guidance for downstream consumers
 
 ### Provisioning Reference
 

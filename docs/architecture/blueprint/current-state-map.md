@@ -104,6 +104,10 @@
 | `docs/architecture/adr/ADR-0110-project-health-pulse-multi-dimension-indicator.md` | **Permanent Decision Rationale** | SF21 project health pulse multi-dimension indicator governance lock; authored 2026-03-12 |
 | SF22 shared-feature plans (10 files: `SF22-Post-Bid-Learning-Loop.md` through `SF22-T09-Testing-and-Deployment.md`) | **Canonical Normative Plan** | Tier 2 — matrix classification only; `@hbc/post-bid-autopsy` planning family authored 2026-03-12; T01-T07 now cover primitive scaffold/contracts/lifecycle/hooks plus boundary-safe primitive reference integrations, BD adapter wizard/summary/list/dashboard UI surfaces, and Estimating wizard/summary/list UI surfaces while preserving published learning-signal compatibility |
 | `docs/architecture/adr/ADR-0114-resolve-score-benchmark-post-bid-autopsy-circular-dependency.md` | **Permanent Decision Rationale** | Resolves critical circular dependency between `@hbc/score-benchmark` and `@hbc/post-bid-autopsy`; confirms false-cycle root cause (unused `package.json` declaration in post-bid-autopsy); removes unused dep; retains legitimate type-only edge score-benchmark → post-bid-autopsy; unblocks Wave 1 intelligence/scoring feature work; authored 2026-03-14 |
+| SF29 shared-feature plans (10 files: `SF29-My-Work-Feed.md` through `SF29-T09-Testing-and-Deployment.md`) | **Historical Foundational** | Tier 2 — matrix classification only; T01–T09 complete 2026-03-15; package `@hbc/my-work-feed` implemented |
+| `docs/architecture/adr/ADR-0115-my-work-feed-architecture.md` | **Permanent Decision Rationale** | SF29 my-work-feed multi-source aggregation architecture; 10 locked decisions (D-01–D-10) |
+| `docs/how-to/developer/my-work-feed-adoption-guide.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; my-work-feed module adoption |
+| `docs/reference/my-work-feed/api.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; my-work-feed API reference |
 | PH4 phase plans (`plans/PH4-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH4-Shell-Consolidation.md` (master plan) |
 | PH5 phase plans (`plans/PH5-*.md`, `plans/PH5C-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH5-Auth-Shell-Plan.md` and `PH5C-Auth-Shell-Plan.md` |
 | PH6 phase plans (`plans/PH6-*.md`, `plans/PH6F-*.md`) | **Historical Foundational** | Tier 1 banner applied to `PH6-Provisioning-Plan.md`; sub-plans Tier 2 |
@@ -286,11 +290,11 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | `packages/spfx` | @hbc/spfx | SPFx webpart scaffolding & utilities | Depends on auth, sharepoint-docs, ui-kit | v0.0.1 | `packages/spfx/README.md` |
 | `packages/eslint-plugin-hbc` | @hb-intel/eslint-plugin-hbc | Component consumption lint rules | None (standalone tool) | v1.0.0 | `packages/eslint-plugin-hbc/README.md` |
 
-### Category C: Shared-Feature Primitives (13)
+### Category C: Shared-Feature Primitives (14)
 
 These packages are **Tier-1 Platform Primitives** — mandatory-use when their concern area is present in a feature. See [Platform Primitives Registry](../../reference/platform-primitives.md) for policy, decision tree, adoption matrix, and non-duplication rule. <!-- PH7.4: elevated from optional to Tier-1 per §7.4.1 -->
 
-The original three (SF01–SF03) emerged organically; SF04–SF15 are planned primitives being built in sequence. SF04, SF05, SF07, SF08, SF10, SF11, SF12, SF13, SF14, SF15 are fully implemented. SF06, SF09 are scaffold stage.
+The original three (SF01–SF03) emerged organically; SF04–SF15 are planned primitives being built in sequence. SF04, SF05, SF07, SF08, SF10, SF11, SF12, SF13, SF14, SF15 are fully implemented. SF06, SF09 are scaffold stage. SF29 (`@hbc/my-work-feed`) is fully implemented.
 
 | Package | Name | Primary Responsibility | Dependency Role | Maturity | Doc Entrypoint |
 |---------|------|----------------------|-----------------|----------|----------------|
@@ -307,6 +311,7 @@ The original three (SF01–SF03) emerged organically; SF04–SF15 are planned pr
 | `packages/project-canvas` | @hbc/project-canvas | Role-based configurable project dashboard canvas | Depends on ui-kit, complexity, @dnd-kit/core; peer: react | v0.0.1 | `packages/project-canvas/README.md` |
 | `packages/post-bid-autopsy` | @hbc/post-bid-autopsy | Tier-1 post-bid autopsy primitive for evidence, confidence, taxonomy, governance, publication, telemetry, lifecycle/storage orchestration, hook-state surfaces, and published learning-signal contracts consumed by BD and Estimating adapters | Depends on `versioned-record`, `bic-next-move`, `strategic-intelligence`, `@tanstack/react-query`; peer: react (circular dep with score-benchmark **resolved** — ADR-0114) | v0.0.1 | `packages/post-bid-autopsy/README.md` |
 | `packages/strategic-intelligence` | @hbc/strategic-intelligence | Heritage snapshot and living strategic intelligence primitive contracts with trust/workflow/governance ownership seams | None (contract-first primitive scaffold) | v0.0.1 | `packages/strategic-intelligence/README.md` |
+| `packages/my-work-feed` | @hbc/my-work-feed | Cross-module personal work aggregation feed | Depends on bic-next-move, complexity, notification-intelligence, session-state, ui-kit, workflow-handoff; peer: react, react-dom, @tanstack/react-query | v0.0.1 | `packages/my-work-feed/README.md` |
 
 ### Category D: Feature Packages (11)
 
