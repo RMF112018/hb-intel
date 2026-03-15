@@ -391,5 +391,5 @@
   | Gap | Verification |
   |-----|-------------|
   | GAP-1 | `compensateStep3` and `compensateStep4` exported; orchestrator calls them in order 7→4→3→2→1; `compensation.test.ts` all green |
-  | GAP-2 | `grep "G5\|G6" docs/architecture/blueprint/current-state-map.md` returns 10+ new rows |
+  | GAP-2 | `grep "G5\|G6" docs/architecture/blueprint/current-state-map.md` returns 9 new rows (1 G5 plan + 4 G5 deliverables + 1 G6 plan + 3 G6 deliverables) |
   | GAP-3 | `ls docs/maintenance/appinsights-queries.md` confirms file exists; contains 5 KQL blocks |

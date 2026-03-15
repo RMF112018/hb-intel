@@ -47,6 +47,7 @@ app.http('submitProjectSetupRequest', {
       submittedAt: new Date().toISOString(),
       state: 'Submitted',
       groupMembers: body.groupMembers,
+      retryCount: 0,
     };
 
     await services.projectRequests.upsertRequest(newRequest);

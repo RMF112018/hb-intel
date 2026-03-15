@@ -127,6 +127,7 @@ export class RealProjectRequestsService implements IProjectRequestsService {
       clarificationNote: (item.ClarificationNote as string) || undefined,
       completedBy: (item.CompletedBy as string) || undefined,
       completedAt: (item.CompletedAt as string) || undefined,
+      retryCount: typeof item.RetryCount === 'number' ? item.RetryCount : 0,
     };
   }
 
