@@ -86,7 +86,7 @@ The HB Intel repo uses a strict five-layer document hierarchy established by ADR
 | PH5C (`PH5C-Auth-Shell-Plan.md`, `PH5C.1–PH5C.10-*`) | ~11 | Historical Foundational | Complete — signed off 2026-03-07 |
 | PH6 (`PH6-Provisioning-Plan.md`, `PH6.1–PH6.16-*`) | ~18 | Historical Foundational | Complete |
 | PH6F (`PH6F-DeadWiring-*`, `PH6F-1–PH6F-10-*`, `PH6F.1–PH6F.5-*`) | ~18 | Historical Foundational | Complete |
-| PH7 remediation (`ph7-remediation/PH7.1–PH7.13-*`) | ~20 | Canonical Normative Plan | PH7.12 is the gate plan; PH7.13 active |
+| PH7 remediation (`ph7-remediation/PH7.1–PH7.13-*`) | ~20 | Canonical Normative Plan | PH7.12 signed off 2026-03-09 (ADR-0091); PH7.13 complete 2026-03-10 |
 | PH7 breakout webparts (`PH7-Breakout-Webparts-Plan.md` + `ph7-breakout-webparts/PH7-BW-0–BW-11`) | 13 | Canonical Normative Plan | Active infrastructure layer |
 | PH7 Estimating feature (`PH7-Estimating-Features.md` + `ph7-estimating/PH7-Estimating-1–12`) | 13 | Canonical Normative Plan | Awaiting BW infrastructure completion |
 | PH7 Project Hub feature (`PH7-ProjectHub-Features-Plan.md` + `ph7-project-hub/PH7-ProjectHub-1–16`) | 17 | Canonical Normative Plan | Awaiting BW infrastructure completion |
@@ -104,7 +104,7 @@ The HB Intel repo uses a strict five-layer document hierarchy established by ADR
 | SF01–SF03 (sharepoint-docs, bic-next-move, complexity) | `@hbc/sharepoint-docs`, `@hbc/bic-next-move`, `@hbc/complexity` | Historical Foundational | Complete — Tier-1 primitives |
 | SF04 (acknowledgment) | `@hbc/acknowledgment` | Historical Foundational | Complete v0.1.0 |
 | SF05 (step-wizard) | `@hbc/step-wizard` | Historical Foundational | Complete v0.1.0 |
-| SF06 (versioned-record) | `@hbc/versioned-record` | Canonical Normative Plan | Scaffold v0.0.1 — pending PH7.12 sign-off |
+| SF06 (versioned-record) | `@hbc/versioned-record` | Historical Foundational | Implemented v0.0.1 — PH7 gate satisfied (ADR-0091) |
 | SF07 (field-annotations) | `@hbc/field-annotations` | Historical Foundational | Complete v0.1.0 |
 | SF08 (workflow-handoff) | `@hbc/workflow-handoff` | Historical Foundational | Complete v0.1.0 |
 | SF09 (data-seeding) | `@hbc/data-seeding` | Historical Foundational | Scaffold v0.0.1 |
@@ -171,20 +171,20 @@ PH7.8   Test Governance Normalization (Vitest P1 workspace; branches: 95)
 PH7.9   Release Semantics & Readiness Taxonomy (ADR-0083)
 PH7.10  Documentation Drift Classification (ADR-0084)
 PH7.11  ADRs, Reference Docs & Developer Rules (ADR catalog rebuilt; conflicts resolved)
-PH7.12  Final Verification & Sign-Off ← GATE: must pass before feature expansion
-PH7.13  Stub Detection Enforcement (PH7.13-T01 through T09 — independent of PH7.12 gate)
+PH7.12  Final Verification & Sign-Off ← GATE ✓ SIGNED OFF 2026-03-09 (ADR-0091)
+PH7.13  Stub Detection Enforcement ✓ COMPLETE 2026-03-10 (ADR-0095)
 
 Shared Features SF04–SF21 built in parallel with PH7 stabilization:
-  SF04 acknowledgment ✅ | SF05 step-wizard ✅ | SF06 versioned-record (scaffold)
-  SF07 field-annotations ✅ | SF08 workflow-handoff ✅ | SF09 data-seeding (scaffold)
+  SF04 acknowledgment ✅ | SF05 step-wizard ✅ | SF06 versioned-record ✅
+  SF07 field-annotations ✅ | SF08 workflow-handoff ✅ | SF09 data-seeding ✅
   SF10 notification-intelligence ✅ | SF11 smart-empty-state ✅ | SF12 session-state ✅
   SF13 project-canvas ✅ | SF14 related-items ✅ | SF15 ai-assist ✅
   SF16 search (planning) | SF17 admin-intelligence ✅ | SF18 estimating bid-readiness ✅
   SF19 bd score benchmark ✅ | SF20 bd heritage ✅ | SF21 project health pulse ✅
   SF22 post-bid learning loop (planning — T01–T07 defined)
 
-PHASE 7 EXPANSION — PENDING PH7.12 SIGN-OFF
-═══════════════════════════════════════════
+PHASE 7 EXPANSION — GATE SATISFIED (ADR-0091, 2026-03-09)
+══════════════════════════════════════════════════════════
 PH7 BW   Breakout Webparts Infrastructure (PH7-BW-0 through BW-11)
 PH7 Est  Estimating module feature build-out (PH7-Estimating-1 through 12)
 PH7 PHb  Project Hub module feature build-out (PH7-ProjectHub-1 through 16)
@@ -215,15 +215,15 @@ Phase 7 has two distinct branches that use overlapping naming and must not be co
 ### PH7 Stabilization (P1 Remediation Series)
 - **Files:** `docs/architecture/plans/ph7-remediation/PH7.1` through `PH7.13`
 - **Purpose:** P1 technical debt remediation, governance normalization, and quality gates
-- **Gate:** PH7.12 (`Final Verification and Sign-Off`) is the gate plan. ADR-0090 must exist on disk before any feature-expansion phase begins
-- **Status:** PH7.1–PH7.11 complete; PH7.12 and PH7.13 active
+- **Gate:** PH7.12 (`Final Verification and Sign-Off`) is the gate plan. ADR-0091 exists on disk; gate satisfied.
+- **Status:** PH7.1–PH7.13 complete. PH7.12 signed off 2026-03-09 (ADR-0091); PH7.13 enforcement live 2026-03-10 (ADR-0095).
 - **Classification:** Canonical Normative Plan (PH7.12, PH7.13 with Tier 1 banners; sub-plans Tier 2)
 
 ### PH7 Expansion (Feature Build-Out Series)
 - **Files:** `PH7-Breakout-Webparts-Plan.md`, `PH7-Estimating-Features.md`, `PH7-ProjectHub-Features-Plan.md`, `PH7-BD-Features.md`, `PH7-Admin-Feature-Plan.md`, and all domain sub-task files in `ph7-breakout-webparts/`, `ph7-estimating/`, `ph7-project-hub/`, `ph7-business-development/`
 - **Purpose:** Building the 11 SPFx feature modules with full business logic, testing, and documentation
-- **Gate:** May not begin until PH7.12 acceptance criteria are fully satisfied and ADR-0090 exists on disk
-- **Status:** Plans authored; implementation pending PH7.12 gate
+- **Gate:** May not begin until PH7.12 acceptance criteria are fully satisfied and ADR-0091 exists on disk
+- **Status:** Plans authored; gate satisfied (ADR-0091 on disk). Expansion permitted.
 - **Classification:** Canonical Normative Plan
 
 ### Root-Level PH7 Plans vs Domain Sub-Plans Relationship
@@ -238,16 +238,16 @@ The master summary is the entry point; task files contain code-level specificati
 
 ---
 
-## 6. Active Delivery Streams (As of 2026-03-14)
+## 6. Active Delivery Streams (As of 2026-03-15)
 
 | Stream | Entry Point | Status | Gate/Prerequisite |
 |--------|-------------|--------|-------------------|
-| PH7.12 Final Verification | `ph7-remediation/PH7.12-Final-Verification-and-Sign-Off.md` | Active gate plan | Must complete before feature expansion |
-| PH7.13 Stub Detection | `ph7-remediation/PH7.13-Stub-Detection-Enforcement.md` | Active — independent of PH7.12 | ADR-0095 in place |
-| SF22 Post-Bid Learning Loop | `shared-features/SF22-Post-Bid-Learning-Loop.md` | T01–T07 defined; T08–T09 pending | Pending PH7.12 |
-| SF16 Search | `shared-features/SF16-Search.md` | Planning complete; ADR-0105 reserved | Pending PH7.12 |
-| MVP Project Setup | `MVP/MVP-Project-Setup-Plan.md` | Plan authored; needs refinement per review | Review items must be resolved; ADR-0090 required |
-| PH7 Feature Expansion | Multiple master plans (§3.2) | Plans authored; pending gate | PH7.12 sign-off + ADR-0090 on disk |
+| PH7.12 Final Verification | `ph7-remediation/PH7.12-Final-Verification-and-Sign-Off.md` | **Complete** (2026-03-09) | ADR-0091 signed off; expansion permitted |
+| PH7.13 Stub Detection | `ph7-remediation/PH7.13-Stub-Detection-Enforcement.md` | **Complete** (2026-03-10) | ADR-0095 governs |
+| SF22 Post-Bid Learning Loop | `shared-features/SF22-Post-Bid-Learning-Loop.md` | T01–T07 defined; T08–T09 pending | PH7 gate satisfied |
+| SF16 Search | `shared-features/SF16-Search.md` | Planning complete; ADR-0105 reserved | PH7 gate satisfied; pending activation |
+| MVP Project Setup | `MVP/MVP-Project-Setup-Plan.md` | Plan authored; needs refinement per review | Review items must be resolved; ADR-0091 on disk; gate satisfied |
+| PH7 Feature Expansion | Multiple master plans (§3.2) | Plans authored; gate satisfied | ADR-0091 on disk; expansion permitted |
 
 ---
 
@@ -289,7 +289,7 @@ The MVP plan branch (`docs/architecture/plans/MVP/`) represents the **next concr
 
 **Relationship to Phase 6:** The MVP plans are a refined, focused successor to the Phase 6 provisioning work. They build on the completed Phase 6 foundation (`@hbc/provisioning`, backend saga, SignalR, state engine) and extend it into a production-grade MVP delivery. They are not a duplicate of Phase 6; they are the next increment.
 
-**Gate:** ADR-0090 (`Phase 7 Final Verification & Sign-Off`) must exist on disk before MVP implementation begins.
+**Gate:** ADR-0091 (`Phase 7 Final Verification & Sign-Off`) must exist on disk before MVP implementation begins. Gate satisfied — ADR-0091 signed off 2026-03-09.
 
 ---
 

@@ -531,7 +531,7 @@ The MVP launch uses a **high-touch pilot**:
 
 ### 15.5 MVP Gate
 
-**ADR-0090** (Phase 7 Final Verification and Sign-Off) must exist on disk before any MVP coding phase begins.
+**ADR-0091** (Phase 7 Final Verification and Sign-Off) must exist on disk before any MVP coding phase begins. Gate satisfied — ADR-0091 signed off 2026-03-09.
 
 ### 15.6 MVP Plan Branch Reference
 
@@ -626,7 +626,7 @@ The following are not MVP requirements. Including them in MVP scope or coding th
 - Full PWA feature set across all 14 workspaces.
 - Review Mode (PH7-ReviewMode-Plan + PH7-RM-1 through PH7-RM-9 — Deferred Scope).
 - PH9b UX polish deferrals — progressive coaching sequences, draft persistence instrumentation, and advanced CES/task-flow instrumentation remain deferred until Phase 7 modules are live. The core Personal Work Hub operating layer (powered by `@hbc/my-work-feed`, SF29, implemented) is Wave 1 scope and is NOT a non-goal.
-- Advanced search (SF16 — planning stage only, pending ADR-0090).
+- Advanced search (SF16 — planning stage only, pending activation).
 - Post-bid autopsy workflow (SF22 T08–T09 — not yet defined).
 
 ### 17.2 Architectural Bets That Are Not Yet Committed
@@ -718,8 +718,8 @@ For the adoption matrix, decision tree, and non-duplication rules, see `docs/ref
 
 | Stream | Entry Point | Gate/Prerequisite |
 |--------|-------------|-------------------|
-| PH7.12 Final Verification | `ph7-remediation/PH7.12-Final-Verification-and-Sign-Off.md` | Must complete before feature expansion; ADR-0090 required |
-| PH7.13 Stub Detection Enforcement | `ph7-remediation/PH7.13-Stub-Detection-Enforcement.md` | Independent of PH7.12 (ADR-0095) |
+| PH7.12 Final Verification | `ph7-remediation/PH7.12-Final-Verification-and-Sign-Off.md` | **Complete (2026-03-09).** ADR-0091 signed off; evidence at `PH7-final-verification-evidence.md`. Feature expansion permitted. |
+| PH7.13 Stub Detection Enforcement | `ph7-remediation/PH7.13-Stub-Detection-Enforcement.md` | **Complete (2026-03-10).** Three-layer enforcement active; ADR-0095 governs. |
 | SF22 Post-Bid Learning Loop | `shared-features/SF22-Post-Bid-Learning-Loop.md` | T01–T07 defined; T08–T09 pending |
 | SF16 Search | `shared-features/SF16-Search.md` | Planning complete; implementation deferred |
 
@@ -745,14 +745,14 @@ Phase 7 has two distinct branches that must not be confused:
 
 **PH7 Stabilization (Remediation Series PH7.1–PH7.13)**
 - Purpose: P1 technical debt, governance normalization, quality gates.
-- Gate: PH7.12 Final Verification. ADR-0090 must exist on disk before any expansion begins.
-- Status (per current-state-map): PH7.1–PH7.11 complete; PH7.12 and PH7.13 active.
+- Gate: PH7.12 Final Verification. ADR-0091 (Phase 7 Final Verification) must exist on disk before any expansion begins.
+- Status: **PH7.1–PH7.13 complete.** PH7.12 signed off 2026-03-09 (ADR-0091); PH7.13 enforcement live 2026-03-10 (ADR-0095). Evidence package: `docs/architecture/release/PH7-final-verification-evidence.md`.
 
 **PH7 Expansion (Feature Build-Out Series)**
 - Purpose: Building the 11 SPFx feature modules with full business logic, testing, and documentation.
 - Files: PH7-Breakout-Webparts-Plan.md + BW-0 through BW-11; PH7-Estimating-Features.md + task files; PH7-ProjectHub-Features-Plan.md + task files; PH7-BD-Features.md + task files; PH7-Admin-Feature-Plan.md.
-- Gate: **May not begin** until PH7.12 acceptance criteria are satisfied and ADR-0090 is on disk.
-- Status: Plans authored; implementation pending ADR-0090.
+- Gate: **May not begin** until PH7.12 acceptance criteria are satisfied and ADR-0091 is on disk.
+- Status: Plans authored; gate satisfied (ADR-0091 on disk). Expansion permitted.
 
 ### 20.2 MVP Stream
 
@@ -760,7 +760,7 @@ The MVP plan branch (`docs/architecture/plans/MVP/`) is the next concrete implem
 
 - **Master plan:** `MVP-Project-Setup-Plan.md` with T01–T09 task files.
 - **Plan review status:** `MVP-Plan-Review-2026-03-13.md` identified four categories of corrections needed before coding. These corrections must be applied before any coding agent begins.
-- **Gate:** ADR-0090 must exist on disk.
+- **Gate:** ADR-0091 (PH7 sign-off) exists on disk. Gate satisfied.
 
 ### 20.3 Deferred Streams (Must Not Begin Without Reclassification)
 
@@ -768,7 +768,7 @@ The MVP plan branch (`docs/architecture/plans/MVP/`) is the next concrete implem
 |--------|-------|----------------|----------------------|
 | Review Mode | PH7-ReviewMode-Plan.md + PH7-RM-1 through PH7-RM-9 | Deferred Scope | Reclassify to Canonical Normative Plan + assign to named phase |
 | PH9b UX Enhancements (coaching, advanced instrumentation, UX polish only) | PH9b-UX-Enhancement-Plan.md | Deferred Scope | Requires Phase 7 modules live; core `@hbc/my-work-feed` (SF29) is Wave 1 scope |
-| SF16 Search | SF16-Search.md + planning files | Canonical Normative Plan (planning) | Pending ADR-0090 |
+| SF16 Search | SF16-Search.md + planning files | Canonical Normative Plan (planning) | Pending activation; PH7 gate satisfied (ADR-0091) |
 | SF22 Post-Bid Learning Loop T08–T09 | Not yet authored | N/A | Pending authoring |
 
 ### 20.4 Future Streams (Phase 8+ — No Current Commitment)
@@ -797,7 +797,8 @@ Any action that would reverse, weaken, or work around these decisions requires a
 | ADR-0085 | Test governance normalization (Vitest P1 workspace; branches: 95; CI job) | PH7.8 |
 | ADR-0088 | hbc-theme-context renaming | PH7.11 |
 | ADR-0089 | fluent-tokens renaming | PH7.11 |
-| ADR-0090 | Phase 7 Final Verification and Sign-Off (gate ADR — must exist before expansion) | PH7.12 |
+| ADR-0090 | SignalR per-project groups for provisioning progress | PH6 |
+| ADR-0091 | Phase 7 Final Verification and Sign-Off (gate ADR — signed off 2026-03-09) | PH7.12 |
 | ADR-0092 through ADR-0113 | SF04–SF21 platform primitive governance | PH7 concurrent |
 
 **Next unreserved ADR number: ADR-0116.**
@@ -834,8 +835,8 @@ The full ADR catalog (111+ active, 6 archived) is maintained at `docs/architectu
 **Row in current-state-map.md §2:** Added 2026-03-14
 **Version:** 1.2 (Reconciled 2026-03-15)
 **Refinement scope (v1.1):** Status-language precision; governance-safe classification; non-goals section added; telemetry doctrine expanded; support/operability model strengthened; external collaboration guardrail added; implementation-trust doctrine sharpened.
-**Reconciliation scope (v1.2):** Personal Work Hub promoted to Wave 1 operating layer; Leadership reframed as role-aware visibility (not standalone app); My Dashboard removed (subsumed by PWH); PH9b scope split (core SF29 is Wave 1, polish items remain deferred); ADR counter corrected; Wave 0 confirmed complete.
-**Next review:** When ADR-0090 ships — update §20.1 PH7 stabilization status.
+**Reconciliation scope (v1.2):** Personal Work Hub promoted to Wave 1 operating layer; Leadership reframed as role-aware visibility (not standalone app); My Dashboard removed (subsumed by PWH); PH9b scope split (core SF29 is Wave 1, polish items remain deferred); ADR counter corrected; Wave 0 confirmed complete. PH7 stabilization closure: ADR-0090→0091 gate reference corrected; PH7.12 and PH7.13 status updated to complete; expansion gate satisfied.
+**Next review:** When Wave 1 implementation begins — update §20.2 MVP Stream status.
 
 ---
 
