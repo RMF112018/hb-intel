@@ -104,7 +104,8 @@
       "mcp__plugin_context-mode_context-mode__ctx_execute",
       "mcp__plugin_context-mode_context-mode__ctx_search",
       "mcp__plugin_context-mode_context-mode__ctx_index",
-      "Bash(mkdir -p /Users/bobbyfetting/hb-intel/backend/functions/src/assets/templates/add-ons/safety-pack && mkdir -p /Users/bobbyfetting/hb-intel/backend/functions/src/assets/templates/add-ons/closeout-pack && mkdir -p /Users/bobbyfetting/hb-intel/docs/reference/provisioning)"
+      "Bash(mkdir -p /Users/bobbyfetting/hb-intel/backend/functions/src/assets/templates/add-ons/safety-pack && mkdir -p /Users/bobbyfetting/hb-intel/backend/functions/src/assets/templates/add-ons/closeout-pack && mkdir -p /Users/bobbyfetting/hb-intel/docs/reference/provisioning)",
+      "Bash(pnpm turbo:*)"
     ]
   },
   "enabledPlugins": {

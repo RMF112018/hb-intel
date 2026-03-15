@@ -12,6 +12,7 @@ import {
 } from '@hbc/provisioning';
 import { HbcCard, HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
 import { ClarificationBanner } from '../components/project-setup/ClarificationBanner.js';
+import { CompletionConfirmationCard } from '../components/project-setup/CompletionConfirmationCard.js';
 import { FailureDetailCard } from '../components/project-setup/FailureDetailCard.js';
 import { RequestCoreSummary } from '../components/project-setup/RequestCoreSummary.js';
 import { RequestStateContext } from '../components/project-setup/RequestStateContext.js';
@@ -93,6 +94,14 @@ export function RequestDetailPage(): ReactNode {
 
       {request.state === 'NeedsClarification' && (
         <ClarificationBanner requestId={requestId} clarificationNote={request.clarificationNote} />
+      )}
+
+      {/* W0-G4-T05: Completion confirmation — shown when request is Completed */}
+      {request.state === 'Completed' && (
+        <CompletionConfirmationCard
+          request={request}
+          provisioningStatus={provisioningStatus}
+        />
       )}
 
       {/* W0-G4-T02: Detailed provisioning checklist for coordinator tier */}

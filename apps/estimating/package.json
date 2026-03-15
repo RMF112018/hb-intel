@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@hbc/bic-next-move": "workspace:*",
+    "@hbc/workflow-handoff": "workspace:*",
     "@hbc/complexity": "workspace:*",
     "@hbc/features-estimating": "workspace:*",
     "@hbc/provisioning": "workspace:*",

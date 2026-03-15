@@ -411,6 +411,9 @@ importers:
       '@hbc/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui-kit
+      '@hbc/workflow-handoff':
+        specifier: workspace:*
+        version: link:../../packages/workflow-handoff
       '@microsoft/signalr':
         specifier: ^8.0.7
         version: 8.0.17

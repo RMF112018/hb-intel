@@ -17,6 +17,7 @@ export default defineConfig(({ command, mode }) => ({
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../../packages/ui-kit/src/app-shell.ts'),
       '@hbc/ui-kit/theme': resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts'),
       '@hbc/provisioning': path.resolve(__dirname, '../../packages/provisioning/src/index.ts'),
+      '@hbc/workflow-handoff': path.resolve(__dirname, '../../packages/workflow-handoff/src/index.ts'),
       '@hbc/step-wizard': path.resolve(__dirname, '../../packages/step-wizard/src/index.ts'),
       '@hbc/session-state': path.resolve(__dirname, '../../packages/session-state/src/index.ts'),
       '@hbc/bic-next-move': path.resolve(__dirname, '../../packages/bic-next-move/src/index.ts'),
