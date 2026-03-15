@@ -5,6 +5,8 @@
  * Traceability: docs/reference/workflow-experience/setup-notification-registrations.md
  */
 
+import { buildActionUrl } from '@hbc/notification-intelligence';
+
 export const PROVISIONING_NOTIFICATION_TEMPLATES = {
   'provisioning.request-submitted': (projectName: string, requestId: string) => ({
     subject: `New Project Setup Request: "${projectName}"`,
@@ -16,7 +18,7 @@ export const PROVISIONING_NOTIFICATION_TEMPLATES = {
   'provisioning.clarification-requested': (projectName: string, note: string, requestId: string) => ({
     subject: `Action Required: Clarification needed for "${projectName}" Project Setup Request`,
     body: `The Controller has reviewed your Project Setup Request for "${projectName}" and requires additional information before proceeding.\n\nNote: ${note}\n\nPlease update your request in the Estimating app.`,
-    actionUrl: `/estimating/requests/${requestId}`,
+    actionUrl: buildActionUrl('/project-setup/new', { mode: 'clarification-return', requestId }),
     actionLabel: 'Update Request',
   }),
 

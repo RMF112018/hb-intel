@@ -62,6 +62,51 @@ const { items, markRead, dismiss } = useNotificationCenter();
 | `HbcNotificationCenter` | Full notification panel with tier tabs |
 | `HbcNotificationBanner` | Immediate-tier auto-dismiss banner (D-04) |
 | `HbcNotificationPreferences` | Expert-mode preference panel |
+| `buildActionUrl` | Relative action-URL builder with query-param support |
+
+## Action URL Pattern
+
+All notification `actionUrl` values must be **relative paths**. This is a deliberate cross-surface design: the same notification payload works on both PWA and SPFx because each surface resolves the relative path against its own origin.
+
+Use `buildActionUrl()` to construct action URLs with query parameters:
+
+```typescript
+import { buildActionUrl } from '@hbc/notification-intelligence';
+
+// Simple path — no query params
+buildActionUrl('/accounting/requests/req-42');
+// → '/accounting/requests/req-42'
+
+// Path with query params
+buildActionUrl('/project-setup/new', {
+  mode: 'clarification-return',
+  requestId: 'req-42',
+});
+// → '/project-setup/new?mode=clarification-return&requestId=req-42'
+
+// Undefined values are omitted
+buildActionUrl('/foo', { a: 'yes', b: undefined });
+// → '/foo?a=yes'
+```
+
+Do not build absolute URLs in notification templates. Absolute URLs are only appropriate when the target is an external resource (e.g. a SharePoint site URL passed through as-is).
+
+## PWA Integration
+
+Domain packages import `buildActionUrl` from `@hbc/notification-intelligence` and use it inside their notification template factories. For example, provisioning uses it to build a direct deep-link into the clarification wizard:
+
+```typescript
+import { buildActionUrl } from '@hbc/notification-intelligence';
+
+// Inside PROVISIONING_NOTIFICATION_TEMPLATES
+actionUrl: buildActionUrl('/project-setup/new', {
+  mode: 'clarification-return',
+  requestId,
+}),
+// → '/project-setup/new?mode=clarification-return&requestId=req-123'
+```
+
+Wave-0 badge polling: `useNotificationBadge` uses 60-second polling for immediate-tier unread counts. Full push delivery is deferred to a later wave.
 
 ## Testing
 

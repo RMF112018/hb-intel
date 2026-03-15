@@ -43,13 +43,15 @@ describe('PROVISIONING_NOTIFICATION_TEMPLATES', () => {
     expect(result.actionUrl).toContain('req-42');
   });
 
-  it('clarification-requested interpolates projectName and note', () => {
+  it('clarification-requested interpolates projectName and note with deep-link URL', () => {
     const result = PROVISIONING_NOTIFICATION_TEMPLATES['provisioning.clarification-requested'](
       'Beta Project', 'Need more info', 'req-55'
     );
     expect(result.subject).toContain('Beta Project');
     expect(result.body).toContain('Need more info');
-    expect(result.actionUrl).toContain('req-55');
+    expect(result.actionUrl).toBe(
+      '/project-setup/new?mode=clarification-return&requestId=req-55'
+    );
   });
 
   it('started interpolates projectNumber and projectName', () => {
