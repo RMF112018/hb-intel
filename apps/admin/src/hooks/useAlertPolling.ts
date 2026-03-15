@@ -20,7 +20,7 @@ export function useAlertPolling(): AlertPollingService | null {
     (import.meta.env as Record<string, string | undefined>).VITE_FUNCTION_APP_URL ?? '';
 
   useEffect(() => {
-    if (!session) return;
+    if (!session || !functionAppUrl) return;
 
     const client = createProvisioningApiClient(functionAppUrl, async () => authToken);
     const service = new AlertPollingService({
