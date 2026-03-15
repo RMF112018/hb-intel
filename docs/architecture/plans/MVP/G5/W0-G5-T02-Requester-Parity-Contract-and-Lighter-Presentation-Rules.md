@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G5/W0-G5-Hosted-PWA-Requester-Surfaces-Plan.md`
 > **Related:** `docs/architecture/plans/MVP/HB-Intel-Wave-0-Buildout-Plan.md` §G5.1; SPFx Group 4 task plans
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G5
 **Locked decisions served:** LD-01, LD-02, LD-06
 
@@ -20,7 +20,7 @@
 
 ### Gate Outcome
 
-If `@hbc/step-wizard`'s step states and ordering modes are not yet stable, defer the parity contract table in this task until Step Wizard stabilizes. The parity contract may be drafted speculatively but must not be treated as locked until the Step Wizard implementation is verified.
+**PASS.** `@hbc/step-wizard` step states (`not-started`, `in-progress`, `complete`, `blocked`, `skipped`) and ordering modes (`sequential`, `parallel`, `sequential-with-jumps`) are implemented and stable in `packages/step-wizard/src/types/IStepWizard.ts`. The parity contract is locked.
 
 ---
 
@@ -69,7 +69,7 @@ This task does not implement UI. It defines the contract that implementation in 
 
 ## Parity Contract (To Be Finalized During T02 Execution)
 
-The following tables define the contract. Items marked `[DERIVE FROM G4]` require inspection of the SPFx Group 4 implementation before they can be finalized.
+The following tables define the contract. All items previously marked `[DERIVE FROM G4]` have been resolved via live G4 code inspection (see Derivation Source Record below). The full locked parity contract is committed at `docs/architecture/plans/MVP/G5/W0-G5-T02-Requester-Parity-Contract.md`.
 
 ### Workflow Lifecycle States — Identical Across Surfaces
 
@@ -77,14 +77,17 @@ The hosted PWA must represent all of the following states with the same lifecycl
 
 | State | Meaning | PWA Required? |
 |---|---|---|
-| `not-started` | Request has not been initiated by the requester | Yes — entry point |
-| `draft` | Request initiated but not yet submitted | Yes — save/resume context |
-| `submitted` | Requester has completed required inputs and submitted | Yes — terminal requester action |
-| `provisioning` | Backend provisioning is in progress | Yes — status visibility |
-| `clarification-needed` | Workflow paused; requester action required | Yes — clarification-return context |
-| `provisioning-complete` | Provisioning succeeded; project is accessible | Yes — completion summary context |
-| `provisioning-failed` | Provisioning failed after retries | Yes — failure state display |
-| Additional states | `[DERIVE FROM G4]` | Verify against G4 implementation |
+| (local draft) | Request initiated but not yet submitted; persisted via `@hbc/session-state` | Yes — save/resume context |
+| `Submitted` | Requester has completed required inputs and submitted | Yes — terminal requester action |
+| `UnderReview` | Controller is reviewing the request | Yes — status visibility |
+| `NeedsClarification` | Controller raised questions; requester action required | Yes — clarification-return context |
+| `AwaitingExternalSetup` | External IT/security prerequisites in progress | Yes — status visibility |
+| `ReadyToProvision` | Approved; queued for provisioning saga | Yes — status visibility |
+| `Provisioning` | Backend provisioning saga is in progress | Yes — status + live updates |
+| `Completed` | Site provisioned and accessible | Yes — completion summary + handoff |
+| `Failed` | Provisioning failed after retries; admin notified | Yes — failure state display |
+
+All states derived from `ProjectSetupRequestState` in `packages/models/src/provisioning/IProvisioning.ts` and verified against `PROJECT_SETUP_STATUS_LABELS` in `packages/provisioning/src/summary-field-registry.ts`.
 
 ### Required Requester Actions — Identical Outcomes Across Surfaces
 
@@ -107,9 +110,10 @@ The following presentation choices may be different in the hosted PWA. "Lighter"
 |---|---|---|
 | Navigation chrome | SharePoint ribbon and navigation | PWA app shell nav — simpler, no ribbon |
 | Step progress indicator | Full step header with icons and labels | Compact progress indicator is acceptable if step count and current position are clear |
-| Step transition animation | `[DERIVE FROM G4]` | Reduced or simplified animation acceptable |
-| Secondary action affordances | Full action bar | Inline or bottom-sheet action menu acceptable on mobile |
-| Help / guidance text | `[DERIVE FROM G4]` | Contextual tooltips or expandable guidance acceptable |
+| Step transition animation | CSS fade between step bodies | Reduced or no animation acceptable |
+| Secondary action affordances | Full action bar in step footer | Inline or bottom-sheet action menu acceptable on mobile |
+| Help / guidance text | `HbcCoachingCallout` shown at Essential complexity tier | Same coaching callout or contextual tooltip acceptable |
+| People picker | `HbcPeoplePicker` with Graph API integration | UPN text input acceptable initially; people picker in later wave |
 | Branding / header | Full SharePoint-context header | PWA-context header (lighter treatment acceptable) |
 
 ### Presentation Elements — Must Remain Identical
@@ -123,30 +127,25 @@ The following presentation choices may be different in the hosted PWA. "Lighter"
 | Clarification-state display | When the workflow is in `clarification-needed`, the requester must be shown the clarification request prominently in both surfaces |
 | Blocked step behavior | A blocked step in the SPFx Step Wizard must also be presented as blocked in the PWA Step Wizard |
 
-### Draft Payload Type (To Be Finalized in T03)
+### Draft Payload Type (Finalized)
 
-The draft payload persisted by `@hbc/session-state` must include at minimum:
+The draft payload persisted by `@hbc/session-state` uses the `ISetupFormDraft` shape from `@hbc/features-estimating`:
 
 ```typescript
-interface RequestDraftPayload {
-  /** Stable request ID or ephemeral draft key */
-  requestId: string | null;
-  /** Step state map: stepId → { status, fieldValues } */
-  steps: Record<string, {
-    status: StepStatus; // from @hbc/step-wizard
-    fieldValues: Record<string, unknown>;
-    lastSavedAt: string; // ISO 8601
-  }>;
-  /** Workflow lifecycle state at last save */
-  workflowState: WorkflowState; // subset of provisioning lifecycle
-  /** Surface identifier for audit/debugging */
-  surface: 'pwa' | 'spfx';
-  /** Draft version for conflict detection */
-  draftVersion: number;
+/** Draft shape for new-request wizard sessions. */
+interface ISetupFormDraft {
+  fields: Partial<IProjectSetupRequest>;
+  stepStatuses: Record<string, StepStatus>;
+  lastSavedAt: string; // ISO 8601
 }
 ```
 
-This type must be finalized in coordination with T03 and must be compatible with `IDraftEntry` from `@hbc/session-state`.
+**Source:** `packages/features/estimating/src/project-setup/types/IProjectSetupWizard.ts`
+
+Draft key: `'project-setup-form-draft'` (`PROJECT_SETUP_DRAFT_KEY`), TTL: 48 hours.
+Clarification-return key: `'project-setup-clarification-{requestId}'` (`buildClarificationDraftKey()`), TTL: 168 hours.
+
+This type is compatible with `IDraftEntry` from `@hbc/session-state` (stored as `value: unknown` in IndexedDB). T03 implements the save/resume mechanics on top of this type.
 
 ---
 
@@ -204,3 +203,35 @@ Before T02 is closed:
 - The draft payload type must be agreed and recorded in a location accessible to T03
 - This task file's Status header must be updated to "complete"
 - If any Wave 0 plan language about G5.1 or G5.2 is found to be inaccurate relative to the parity contract, a note must be added to `W0-G5-Hosted-PWA-Requester-Surfaces-Plan.md` under a "Known Corrections" section
+
+---
+
+## Derivation Source Record
+
+**Date:** 2026-03-15
+**Source:** Live G4 code inspection (not plan-only derivation)
+
+Files inspected:
+- `packages/features/estimating/src/project-setup/config/projectSetupSteps.ts` — canonical step definitions
+- `packages/features/estimating/src/project-setup/config/projectSetupWizardConfig.ts` — canonical wizard config
+- `packages/features/estimating/src/project-setup/types/IProjectSetupWizard.ts` — step IDs, draft keys, TTLs, draft shapes
+- `packages/provisioning/src/summary-field-registry.ts` — status labels, badge variants
+- `packages/provisioning/src/state-machine.ts` — state transitions
+- `packages/provisioning/src/api-client.ts` — requester-facing API actions
+- `packages/models/src/provisioning/IProvisioning.ts` — `IProjectSetupRequest`, `ProjectSetupRequestState`
+- `packages/models/src/provisioning/IRequestClarification.ts` — clarification types
+- `packages/session-state/src/types/ISessionState.ts` — `IDraftEntry` compatibility
+- `apps/estimating/src/pages/NewRequestPage.tsx` — SPFx requester entry point
+- `apps/estimating/src/pages/RequestDetailPage.tsx` — post-submit status display
+- `apps/estimating/src/components/project-setup/` — step body components, resume banner, clarification banner, completion card
+
+**`[DERIVE FROM G4]` Resolution:**
+- Step transition animation: CSS fade between step bodies (from `HbcStepWizard` component rendering)
+- Help/guidance text: `HbcCoachingCallout` at Essential complexity tier (from step body components)
+- Additional lifecycle states: All 8 `ProjectSetupRequestState` values verified; speculative states (`not-started`, `draft`, `provisioning-complete`, `provisioning-failed`) replaced with canonical model values
+
+---
+
+## Known Corrections
+
+**T01 parity gaps identified during T02 execution.** The T01 implementation (`apps/pwa/src/routes/project-setup/`) was built before this parity contract was locked and uses divergent step IDs, labels, field groupings, and validation rules. A full correction list is documented in the parity contract artifact at `docs/architecture/plans/MVP/G5/W0-G5-T02-Requester-Parity-Contract.md` §9.
