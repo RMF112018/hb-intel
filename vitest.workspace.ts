@@ -152,4 +152,33 @@ export default defineWorkspace([
       },
     },
   },
+  {
+    name: '@hbc/pwa',
+    root: path.resolve(__dirname, 'apps/pwa'),
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+      exclude: ['dist/**', 'node_modules/**'],
+      setupFiles: ['./src/test/setup.ts'],
+      testTimeout: 10000,
+      hookTimeout: 10000,
+    },
+    resolve: {
+      alias: {
+        '@hbc/models': resolve(__dirname, './packages/models/src/index.ts'),
+        '@hbc/auth': resolve(__dirname, './packages/auth/src'),
+        '@hbc/shell': resolve(__dirname, './packages/shell/src'),
+        '@hbc/ui-kit': resolve(__dirname, './packages/ui-kit/src'),
+        '@hbc/provisioning': resolve(__dirname, './packages/provisioning/src/index.ts'),
+        '@hbc/session-state': resolve(__dirname, './packages/session-state/src/index.ts'),
+        '@hbc/step-wizard': resolve(__dirname, './packages/step-wizard/src/index.ts'),
+        '@hbc/smart-empty-state': resolve(__dirname, './packages/smart-empty-state/src/index.ts'),
+        '@hbc/complexity': resolve(__dirname, './packages/complexity/src/index.ts'),
+        '@hbc/features-estimating': resolve(__dirname, './packages/features/estimating/src/index.ts'),
+        '@hbc/query-hooks': resolve(__dirname, './packages/query-hooks/src/index.ts'),
+        '@hbc/notification-intelligence': resolve(__dirname, './packages/notification-intelligence/src/index.ts'),
+      },
+    },
+  },
 ]);

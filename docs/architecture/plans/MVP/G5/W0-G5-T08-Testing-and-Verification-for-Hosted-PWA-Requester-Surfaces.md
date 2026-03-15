@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G5/W0-G5-Hosted-PWA-Requester-Surfaces-Plan.md`
 > **Related:** `docs/reference/developer/verification-commands.md`
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G5
 **Locked decisions served:** All (T08 verifies all 10 locked G5 decisions)
 
@@ -318,3 +318,53 @@ Before T08 can be closed:
 - The verification-commands.md is updated if any new test commands are added for G5
 - All G5 task plans (T01–T07) have their closure documentation requirements met
 - `docs/architecture/blueprint/current-state-map.md` is updated to reflect G5 surfaces as implemented and verified
+
+---
+
+## Closure Record
+
+**Date:** 2026-03-15
+
+### Test Infrastructure Setup
+
+**Vitest configuration:** `apps/pwa/vitest.config.ts` — jsdom environment, MSW setup, resolve aliases matching vite.config.ts. Added to `vitest.workspace.ts` as `@hbc/pwa` entry.
+
+**Test setup:** `apps/pwa/src/test/setup.ts` — MSW server lifecycle, browser mocks (matchMedia, navigator.onLine, crypto.randomUUID).
+
+**MSW mock server:** `apps/pwa/src/test/mocks/server.ts` + `handlers.ts` — provisioning API handlers for list, submit, status endpoints.
+
+**Test scripts:** `pnpm --filter @hbc/pwa test` (vitest run), `pnpm --filter @hbc/pwa test:watch` (vitest).
+
+**tsconfig:** Test files excluded from production typecheck via `tsconfig.json` exclude array.
+
+### Test Results Summary
+
+**Unit tests:** 17 tests, 3 files — all passing
+- `resolveSessionToken.test.ts` — 5 tests (token extraction, fallbacks, null session)
+- `wizardConfig.test.ts` — 7 tests (step IDs, labels, required flags, order mode, draft key)
+- `stateLabels.test.ts` — 5 tests (all 8 states have labels, badge variants valid)
+
+**E2E specs created:** `e2e/g5-requester-flow.spec.ts` — navigation smoke tests for G5 routes and boundary verification (no unauthorized routes).
+
+### G5 Task Closure Status
+
+| Task | Status | Closure Record |
+|------|--------|----------------|
+| T01 — Guided Setup Surface | Complete | Routes registered, wizard functional, step components built |
+| T02 — Parity Contract | Complete | Contract committed, all [DERIVE FROM G4] resolved |
+| T03 — Draft/Save/Resume | Complete | useProjectSetupDraft wired, ResumeBanner, clarification-return |
+| T04 — Interruption/Trust-State | Complete | Real executor, site-wide sync badge, offline queueing |
+| T05 — Completion Summary | Complete | RequestDetailPage, Project Hub link, draft clearing |
+| T06 — Install/Mobile Posture | Complete | Icons, manifest, Apple meta, responsive step forms |
+| T07 — Integration Rules | Complete | Error state handling, RBAC verified, boundaries documented |
+| T08 — Testing/Verification | Complete | Test infrastructure, 17 unit tests, E2E specs |
+
+### Verification Commands
+
+```bash
+pnpm --filter @hbc/pwa test        # Unit/integration tests (17 tests)
+pnpm --filter @hbc/pwa exec tsc --noEmit  # Typecheck
+pnpm --filter @hbc/pwa lint        # Lint (0 errors)
+pnpm --filter @hbc/pwa build       # Production build
+pnpm e2e                           # Playwright E2E (requires built PWA)
+```
