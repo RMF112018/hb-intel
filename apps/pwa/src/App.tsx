@@ -12,6 +12,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider } from '@tanstack/react-router';
 import { HbcThemeProvider, HbcErrorBoundary } from '@hbc/ui-kit';
 import { ComplexityProvider } from '@hbc/complexity';
+import { SessionStateProvider } from '@hbc/session-state';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import type { AuthMode } from '@hbc/auth';
 import { createAppRouter } from './router/index.js';
@@ -29,6 +30,10 @@ if (import.meta.env.DEV) {
 const queryClient = new QueryClient({
   defaultOptions: { queries: defaultQueryOptions },
 });
+
+/** No-op executor — draft persistence is IndexedDB-local only (T03 out of scope). */
+const noopExecutor = async () => {};
+
 
 const router = createAppRouter();
 
@@ -48,7 +53,9 @@ export function App({ authMode }: AppProps): React.ReactNode {
     <HbcThemeProvider>
       <HbcErrorBoundary>
         <ComplexityProvider>
-          {authMode === 'msal' ? <MsalGuard>{routerContent}</MsalGuard> : routerContent}
+          <SessionStateProvider executor={noopExecutor}>
+            {authMode === 'msal' ? <MsalGuard>{routerContent}</MsalGuard> : routerContent}
+          </SessionStateProvider>
         </ComplexityProvider>
       </HbcErrorBoundary>
       {import.meta.env.DEV && DevToolbar ? (

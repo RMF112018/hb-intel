@@ -16,10 +16,10 @@ import {
   resolveRoleLandingPath,
   getSnapshot,
   validateBudgets,
-  type ShellConnectivitySignal,
 } from '@hbc/shell';
 import { HbcAppShell, HbcConnectivityBar } from '@hbc/ui-kit';
 import { useCurrentUser, useAuthStore } from '@hbc/auth';
+import { useConnectivity } from '@hbc/session-state';
 import { buildSidebarGroupsFromRegistry, mapCurrentUserToShellUser } from '../utils/shell-bridge.js';
 import { performPwaSignOut } from '../auth/signOut.js';
 
@@ -32,21 +32,9 @@ function RootComponent(): React.ReactNode {
   const lifecyclePhase = useAuthStore((s) => s.lifecyclePhase);
   const structuredError = useAuthStore((s) => s.structuredError);
 
-  // D-PH6F-1: Online/offline connectivity signal
-  const [onlineStatus, setOnlineStatus] = React.useState<ShellConnectivitySignal>(
-    typeof navigator !== 'undefined' && navigator.onLine ? 'connected' : 'reconnecting',
-  );
-
-  React.useEffect(() => {
-    const setOnline = () => setOnlineStatus('connected');
-    const setOffline = () => setOnlineStatus('reconnecting');
-    window.addEventListener('online', setOnline);
-    window.addEventListener('offline', setOffline);
-    return () => {
-      window.removeEventListener('online', setOnline);
-      window.removeEventListener('offline', setOffline);
-    };
-  }, []);
+  // D-PH6F-1: Online/offline connectivity signal — delegated to @hbc/session-state
+  const connectivity = useConnectivity();
+  const onlineStatus = connectivity === 'online' ? 'connected' as const : 'reconnecting' as const;
 
   const shellStatusSnapshot = React.useMemo(
     () =>

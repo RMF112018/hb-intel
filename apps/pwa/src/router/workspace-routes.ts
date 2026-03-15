@@ -169,6 +169,36 @@ export const humanResourcesRoute = createWorkspaceRoute(
   () => import('../pages/HumanResourcesPage.js').then((m) => ({ default: m.HumanResourcesPage })),
 );
 
+// W0-G5-T01: Project setup wizard route (non-workspace, auth-gated).
+export const projectSetupRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'project-setup',
+  beforeLoad: () => {
+    requireAuth();
+  },
+  component: lazyRouteComponent(
+    () =>
+      import('../routes/project-setup/ProjectSetupPage.js').then((m) => ({
+        default: m.ProjectSetupPage,
+      })),
+  ),
+});
+
+// W0-G5-T01: Requester's own request status list (non-workspace, auth-gated).
+export const projectsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'projects',
+  beforeLoad: () => {
+    requireAuth();
+  },
+  component: lazyRouteComponent(
+    () =>
+      import('../routes/projects/ProjectsPage.js').then((m) => ({
+        default: m.ProjectsPage,
+      })),
+  ),
+});
+
 // 404 catch-all
 export const notFoundRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -200,5 +230,7 @@ export const allRoutes = [
   riskManagementRoute,
   operationalExcellenceRoute,
   humanResourcesRoute,
+  projectSetupRoute,
+  projectsRoute,
   notFoundRoute,
 ];
