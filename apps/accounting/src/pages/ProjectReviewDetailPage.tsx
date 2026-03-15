@@ -52,7 +52,7 @@ export function ProjectReviewDetailPage(): ReactNode {
 
   const authToken = useMemo(() => resolveSessionToken(session), [session]);
   const client = useMemo(
-    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL, async () => authToken),
+    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL ?? '', async () => authToken),
     [authToken],
   );
 

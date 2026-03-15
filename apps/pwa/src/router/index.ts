@@ -20,10 +20,3 @@ export function createAppRouter(history?: RouterHistory) {
 }
 
 export type AppRouter = ReturnType<typeof createAppRouter>;
-
-// Type registration for TanStack Router
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: AppRouter;
-  }
-}
