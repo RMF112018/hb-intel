@@ -1,3 +1,15 @@
+// Permission constants (G6-T02 — granular provisioning override permissions)
+export {
+  ADMIN_PROVISIONING_RETRY,
+  ADMIN_PROVISIONING_ESCALATE,
+  ADMIN_PROVISIONING_ARCHIVE,
+  ADMIN_PROVISIONING_FORCE_STATE,
+  ADMIN_PROVISIONING_ALERT_FULL_DETAIL,
+  PROVISIONING_OVERRIDE_PERMISSIONS,
+  ADMIN_PROVISIONING_OVERRIDE,
+  ALL_PROVISIONING_OVERRIDE_PERMISSIONS,
+} from './permissions/index.js';
+
 // Audit logging + retention (PH5.13 — structured traceability and governance)
 export {
   DEFAULT_AUDIT_RETENTION_POLICY,
