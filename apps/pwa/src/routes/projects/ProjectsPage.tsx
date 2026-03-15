@@ -6,7 +6,7 @@
 import { useCallback, useMemo } from 'react';
 import type { ReactElement } from 'react';
 import { useRouter } from '@tanstack/react-router';
-import { WorkspacePageShell } from '@hbc/ui-kit';
+import { WorkspacePageShell, HbcBanner } from '@hbc/ui-kit';
 import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
 import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import {
@@ -48,7 +48,7 @@ function BadgeVariant({ variant }: { variant: string }): ReactElement {
 export function ProjectsPage(): ReactElement {
   const router = useRouter();
   const currentUser = useCurrentUser();
-  const { data: requests, isLoading, isError } = useMyProjectRequests();
+  const { data: requests, isLoading, isError, refetch } = useMyProjectRequests();
 
   const emptyContext = useMemo<IEmptyStateContext>(() => ({
     module: 'provisioning',
@@ -75,6 +75,23 @@ export function ProjectsPage(): ReactElement {
     return (
       <WorkspacePageShell layout="list" title="My Project Requests" isLoading>
         {null}
+      </WorkspacePageShell>
+    );
+  }
+
+  if (isError) {
+    return (
+      <WorkspacePageShell layout="list" title="My Project Requests">
+        <HbcBanner variant="error">
+          Unable to load your requests. Check your connection and try again.
+        </HbcBanner>
+        <button
+          type="button"
+          className="hbc-btn hbc-btn--primary"
+          onClick={() => void refetch()}
+        >
+          Try Again
+        </button>
       </WorkspacePageShell>
     );
   }

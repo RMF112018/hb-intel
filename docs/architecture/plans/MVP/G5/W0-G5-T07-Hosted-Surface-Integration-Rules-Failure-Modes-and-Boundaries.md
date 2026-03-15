@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G5/W0-G5-Hosted-PWA-Requester-Surfaces-Plan.md`
 > **Related:** `docs/architecture/blueprint/package-relationship-map.md`; `docs/architecture/plans/MVP/HB-Intel-Wave-0-Buildout-Plan.md` §G5.3, §G5.4
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G5
 **Locked decisions served:** LD-01, LD-04, LD-05, LD-09, LD-10
 
@@ -213,3 +213,75 @@ Before T07 can be closed:
 - Gate check outcomes are recorded in this task file
 - All acceptance criteria verified and checked off
 - TypeScript compilation clean
+
+---
+
+## Closure Record
+
+**Date:** 2026-03-15
+
+### Gate Check Outcomes
+
+**`@hbc/auth`:** PASS. Permission store populated on auth via `useAuthStore`. Supports arbitrary permission strings + wildcard `*:*`. `requireAuth()` and `requireAdminAccessControl()` guards enforce route-level access. `usePermission(action)` hook available for component-level checks. Store is extensible for future coordinator roles.
+
+**`@hbc/provisioning`:** PASS. API client includes typed error handling (throws on non-ok response with parsed error message). Failure modes module (`failure-modes.ts`) provides 10 typed failure scenarios. `listMyRequests(submitterId)` enforces server-side RBAC filtering. Status labels and badge variants provide requester-readable state display.
+
+**`@hbc/app-shell`:** PASS (with caveat). PWA does NOT import from `@hbc/app-shell` per package README guidance. Route isolation is handled at the `workspace-routes.ts` level. Navigation structure via `workspace-config.ts` + sidebar registry is extensible. The app shell pattern supports adding new workspace routes and nav items without structural rework.
+
+### RBAC Filtering Approach
+
+**Server-side (data-layer)** via `useMyProjectRequests(submitterId)`:
+- `submitterId` is the authenticated user's email from `useCurrentUser()`
+- Backend filters by `submittedBy` field — a requester cannot see other requesters' submissions
+- Enabled only when `submitterId` is non-empty (prevents unauthenticated queries)
+- No display-layer filtering needed — the API returns only the user's own records
+
+### Coordinator Extensibility Evidence
+
+The architecture is future-ready for coordinator surfaces:
+
+1. **Router:** TanStack Router with `createRoute()` and `beforeLoad` guards. A future `/coordinator` or `/review` route can be added with `requirePermission('coordinator:review-requests')` guard. No namespace conflicts.
+2. **Permission store:** `usePermissionStore` supports arbitrary permission strings and wildcard grants. Adding `coordinator:review-requests` permission requires only backend role mapping.
+3. **Feature registry:** Extensible pattern in `main.tsx`. A `feature:coordinator-panel` can be registered with `visibility: 'discoverable-locked'`.
+4. **App shell navigation:** Sidebar items sourced from workspace config registry. Coordinator nav items can be added without modifying the shell component.
+5. **Auth store:** Stores resolved roles from session. Backend can add a `COORDINATOR` role without frontend changes.
+
+**What would need to be built (not present today, intentionally deferred per LD-09):**
+- Route definition in `workspace-routes.ts`
+- Permission guard function (e.g., `requireCoordinatorAccess()`)
+- Coordinator-specific page components
+- Feature registration entry
+- Sidebar/nav configuration entry
+
+### Known Surface-Boundary Limitations (Wave 0)
+
+1. **PWA-SPFx draft isolation:** A draft created in the PWA (IndexedDB via `@hbc/session-state`) is not visible in SPFx, and vice versa. Submitted requests (backend records) are visible in both surfaces. This is acceptable for Wave 0.
+
+2. **Coordinator surfaces deferred:** No coordinator routes, data fetching, or UI components exist in the PWA. Controllers who access the PWA see the requester view only. Coordinator surfaces belong to a later group (per LD-09).
+
+3. **Admin route present but guarded:** The admin route exists with `requireAdminAccessControl()` guard. Non-admin users are redirected to `/project-hub`. This route was inherited from the workspace route set and is appropriately isolated.
+
+4. **Single draft per user:** New-request drafts use a singleton key (`PROJECT_SETUP_DRAFT_KEY`). Multiple simultaneous drafts are not supported in Wave 0.
+
+### Failure Mode Handling
+
+| Failure Scenario | Handling | Status |
+|-----------------|----------|--------|
+| Auth token expired | `requireAuth()` redirects to `/`; `captureIntendedDestination` preserves return path; IndexedDB drafts survive page reload | PASS |
+| API timeout on request creation | Error caught in `handleSubmit`; `HbcBanner variant="error"` shows message; draft NOT cleared (IR-01) | PASS |
+| API error on step submission | Error state captured; banner displayed with server message; form data preserved | PASS |
+| RBAC 403 on list fetch | `isError` triggers `HbcBanner variant="error"` with "Unable to load your requests" + retry button | PASS |
+| Provisioning failure (terminal) | `RequestDetailPage` shows `FailureSummary` with requester-friendly message and next steps | PASS |
+| Backend unavailable (500) | Caught as API error; retry button available; draft preserved | PASS |
+| Offline submission | T04: `queueOperation()` + info banner; auto-resubmit on reconnect via `pwaExecutor` | PASS |
+| Service worker fetch failure | vite-plugin-pwa Workbox falls back to network; precache only (no API caching) | PASS |
+
+### Acceptance Criteria Verification
+
+1. **AC1:** Grep for `controller|coordinator` in `apps/pwa/src/router/` — only the guarded `admin` route found. No controller/coordinator routes. PASS.
+2. **AC2:** `useMyProjectRequests(submitterId)` — server-side RBAC. User A cannot see User B's requests. PASS.
+3. **AC3:** Auth failure preserves draft (IndexedDB survives redirect). `captureIntendedDestination` preserves return path. PASS.
+4. **AC4:** API errors show `HbcBanner variant="error"` with message + retry. PASS.
+5. **AC5:** 403 errors trigger `isError` → error banner with retry. PASS.
+6. **AC6:** Coordinator extension evidence documented above. PASS.
+7. **AC7:** Known limitations documented in this closure record. PASS.
