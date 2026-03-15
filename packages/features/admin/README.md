@@ -66,6 +66,10 @@ const event = adapter.dispatch(alert);
 - Teams webhook delivery is best-effort fire-and-forget.
 - Email relay is console-logged only (no SMTP client in Wave 0).
 - Only `provisioning-failure` and `stuck-workflow` monitors are wired; remaining four monitors are P3/deferred stubs.
+- Probe snapshot store is in-memory only — SharePoint-list–backed persistence (`HBC_InfrastructureProbeSnapshots`) is the Wave 1 target.
+- Only `azure-functions` and `sharepoint-infrastructure` probes have live connections; remaining three probes (`search`, `notification`, `module-record-health`) are deferred stubs.
+- `ErrorLogPage` is intentionally deferred (SF17-T05) with a clear empty state.
+- `ApprovalAuthorityApi` is a stub — rules are not persisted until SF17-T05.
 
 ## Installation
 
@@ -107,10 +111,10 @@ pnpm --filter @hbc/features-admin lint           # Lint
 
 | Category | Exports |
 |----------|---------|
-| Types | `AlertSeverity`, `AlertCategory`, `ProbeHealthStatus`, `ApprovalContext`, `IAdminAlert`, `IAdminAlertBadge`, `IInfrastructureProbeResult`, `IInfrastructureProbe`, `IProbeSnapshot`, `IApprovalAuthorityRule`, `IApprovalEligibilityResult`, `UseAdminAlertsResult`, `UseInfrastructureProbesResult`, `UseApprovalAuthorityResult`, `IAlertMonitor`, `IInfrastructureProbeDefinition`, `NotificationRoute` |
-| Constants | `ADMIN_ALERTS_POLL_MS`, `PROBE_SCHEDULER_DEFAULT_MS`, `PROBE_MAX_RETRY`, `APPROVAL_RULE_LIST_TITLE`, `ADMIN_ALERT_LIST_TITLE`, `INFRA_PROBE_LIST_TITLE`, `ADMIN_ALERTS_QUERY_KEY`, `INFRA_PROBES_QUERY_KEY`, `APPROVAL_RULES_QUERY_KEY` |
+| Types | `AlertSeverity`, `AlertCategory`, `ProbeHealthStatus`, `ApprovalContext`, `IAdminAlert`, `IAdminAlertBadge`, `IInfrastructureProbeResult`, `IInfrastructureProbe`, `IProbeSnapshot`, `IApprovalAuthorityRule`, `IApprovalEligibilityResult`, `UseAdminAlertsResult`, `UseInfrastructureProbesResult`, `UseApprovalAuthorityResult`, `IAlertMonitor`, `IInfrastructureProbeDefinition`, `NotificationRoute`, `IProvisioningDataProvider`, `ProbeConnectionConfig` |
+| Constants | `ADMIN_ALERTS_POLL_MS`, `PROBE_SCHEDULER_DEFAULT_MS`, `PROBE_MAX_RETRY`, `PROBE_STALENESS_MS`, `ADMIN_RETRY_CEILING`, `APPROVAL_RULE_LIST_TITLE`, `ADMIN_ALERT_LIST_TITLE`, `INFRA_PROBE_LIST_TITLE`, `ADMIN_ALERTS_QUERY_KEY`, `INFRA_PROBES_QUERY_KEY`, `APPROVAL_RULES_QUERY_KEY` |
 | Monitors | `MonitorRegistry`, `provisioningFailureMonitor`, `createProvisioningFailureMonitor`, `permissionAnomalyMonitor`, `stuckWorkflowMonitor`, `createStuckWorkflowMonitor`, `overdueProvisioningMonitor`, `upcomingExpirationMonitor`, `staleRecordMonitor`, `routeAlert`, `createDefaultMonitorRegistry` |
-| Probes | `ProbeScheduler`, `sharePointProbe`, `azureFunctionsProbe`, `searchProbe`, `notificationProbe`, `moduleRecordHealthProbe`, `createDefaultProbeScheduler` |
+| Probes | `ProbeScheduler`, `sharePointProbe`, `createSharePointProbe`, `azureFunctionsProbe`, `createAzureFunctionsProbe`, `searchProbe`, `notificationProbe`, `moduleRecordHealthProbe`, `createDefaultProbeScheduler` |
 | API | `ApprovalAuthorityApi`, `AdminAlertsApi`, `InfrastructureProbeApi` |
 | Hooks | `useAdminAlerts`, `useInfrastructureProbes`, `useApprovalAuthority`, `computeAlertBadge`, `buildProbeStatusMap`, `resolveEligibility` |
 | Integrations | `ReferenceBicNextMoveAdapter`, `ReferenceNotificationDispatchAdapter`, `ReferenceAcknowledgmentAdapter`, `ReferenceGovernanceSnapshotAdapter`, `ReferenceComplexityGatingAdapter`, `TeamsWebhookDispatchAdapter` |
