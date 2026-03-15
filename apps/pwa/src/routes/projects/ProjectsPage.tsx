@@ -62,7 +62,7 @@ export function ProjectsPage(): ReactElement {
 
   const handleRowClick = useCallback(
     (request: IProjectSetupRequest) => {
-      void router.navigate({ to: `/provisioning/${request.projectId}` });
+      void router.navigate({ to: `/projects/${request.requestId}` });
     },
     [router],
   );

@@ -4,7 +4,7 @@
 > **Governing plan:** `docs/architecture/plans/MVP/G5/W0-G5-Hosted-PWA-Requester-Surfaces-Plan.md`
 > **Related:** `docs/explanation/feature-decisions/PH7-SF-08-Shared-Feature-Workflow-Handoff.md`; `apps/project-hub/`
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G5
 **Locked decisions served:** LD-04, LD-05
 
@@ -172,3 +172,59 @@ Before T05 can be closed:
 - All acceptance criteria verified and checked off
 - TypeScript compilation clean
 - No broken Project Hub links in any test scenario
+
+---
+
+## Closure Record
+
+**Date:** 2026-03-15
+
+### Gate Check: `@hbc/workflow-handoff`
+
+**Decision:** Not used for Wave 0 PWA. The full handoff lifecycle (prepare → send → acknowledge) adds complexity without benefit — the PWA completion summary only needs the provisioned site URL. Used `resolveProjectHubUrl(request)` from `@hbc/provisioning` directly. Handoff package adoption deferred to Wave 1 when handoff acknowledgment is implemented.
+
+### Gate Check: `@hbc/provisioning`
+
+**Outcome:** READY. `resolveProjectHubUrl()`, `getProvisioningStatus()`, `PROJECT_SETUP_STATUS_LABELS`, `STATE_BADGE_VARIANTS`, `DEPARTMENT_DISPLAY_LABELS` all available and consumed.
+
+### Gate Check: `@hbc/ui-kit`
+
+**Outcome:** READY. `WorkspacePageShell`, `HbcBanner` (success/error/warning variants), `HbcFormSection`, `HbcFormLayout` all used.
+
+### Completion Summary Behavior
+
+**Route:** `/projects/$requestId` — request detail page with state-specific content.
+
+**For `Completed` state:**
+- Success banner (green): "Your project site has been provisioned and is ready to use."
+- Project details card: name, department, type, lead, team members, completion timestamp
+- Project Hub handoff: "Open Project Hub" button → `window.open(url, '_blank', 'noopener,noreferrer')`
+- Link hidden when `resolveProjectHubUrl()` returns null (AC7)
+- Fallback message: "Project Hub link is not yet available. Check back shortly."
+- "Back to My Requests" navigation to `/projects`
+
+**For `Failed` state:**
+- Error banner (red): "Site provisioning encountered an error."
+- Requester-friendly next steps: "An administrator has been notified... You do not need to resubmit."
+- No retry/escalation buttons (those are coordinator-only per LD-09)
+
+**For non-terminal states:** State context text per `STATE_CONTEXT_TEXT` map.
+
+### Project Hub Link Rules
+
+- Opens in new tab (`target="_blank"`, `noopener,noreferrer`)
+- No forced redirect — requester must click deliberately
+- Link absent when URL unavailable (no broken links, no placeholder `#` href)
+- URL from `resolveProjectHubUrl(request)` — canonical source, not hardcoded
+
+### URL Timing Strategy
+
+`useProvisioningStatus(projectId)` polls every 10 seconds when request is in Completed state and provisioning status is being fetched. `resolveProjectHubUrl()` returns null until `siteUrl` is available.
+
+### Draft Clearing
+
+On mount of `RequestDetailPage`, if request is in terminal state (`Completed` or `Failed`), `clearDraft(PROJECT_SETUP_DRAFT_KEY)` is called to prevent stale resume prompts.
+
+### Failure Message Mapping
+
+Requester-facing messages use the `STATE_CONTEXT_TEXT` map pattern (derived from SPFx `stateDisplayHelpers.ts`). Raw error codes and coordinator-level failure classification are not exposed. The failure summary tells the requester what happened and what to expect next.

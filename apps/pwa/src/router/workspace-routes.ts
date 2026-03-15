@@ -203,6 +203,21 @@ export const projectsRoute = createRoute({
   ),
 });
 
+// W0-G5-T05: Request detail / completion summary (non-workspace, auth-gated).
+export const requestDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'projects/$requestId',
+  beforeLoad: () => {
+    requireAuth();
+  },
+  component: lazyRouteComponent(
+    () =>
+      import('../routes/projects/RequestDetailPage.js').then((m) => ({
+        default: m.RequestDetailPage,
+      })),
+  ),
+});
+
 // 404 catch-all
 export const notFoundRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -236,5 +251,6 @@ export const allRoutes = [
   humanResourcesRoute,
   projectSetupRoute,
   projectsRoute,
+  requestDetailRoute,
   notFoundRoute,
 ];
