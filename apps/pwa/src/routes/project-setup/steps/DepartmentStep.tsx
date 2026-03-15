@@ -4,7 +4,7 @@
  * Aligned with canonical G4 step definition per T02 parity contract.
  */
 import type { ReactElement } from 'react';
-import { HbcSelect, HbcFormLayout } from '@hbc/ui-kit';
+import { HbcSelect, HbcFormLayout, useIsMobile } from '@hbc/ui-kit';
 import type { IProjectSetupRequest, ProjectDepartment } from '@hbc/models';
 
 const DEPARTMENT_OPTIONS = [
@@ -38,8 +38,9 @@ interface DepartmentStepProps {
 }
 
 export function DepartmentStep({ request, onChange }: DepartmentStepProps): ReactElement {
+  const isMobile = useIsMobile();
   return (
-    <HbcFormLayout columns={2} gap="medium">
+    <HbcFormLayout columns={isMobile ? 1 : 2} gap="medium">
       <HbcSelect
         label="Department"
         value={request.department ?? ''}

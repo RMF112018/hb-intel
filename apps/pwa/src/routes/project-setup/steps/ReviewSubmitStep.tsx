@@ -3,7 +3,7 @@
  * Read-only summary of all fields + Submit button.
  */
 import type { ReactElement } from 'react';
-import { HbcFormLayout, HbcFormSection } from '@hbc/ui-kit';
+import { HbcFormLayout, HbcFormSection, useIsMobile } from '@hbc/ui-kit';
 import type { IProjectSetupRequest } from '@hbc/models';
 import type { ProjectSetupWizardMode } from '@hbc/features-estimating';
 
@@ -24,6 +24,8 @@ function SummaryField({ label, value }: { label: string; value: string | undefin
 }
 
 export function ReviewSubmitStep({ request, onSubmit, submitting, mode }: ReviewSubmitStepProps): ReactElement {
+  const isMobile = useIsMobile();
+  const cols = isMobile ? 1 : 2;
   return (
     <div>
       {mode === 'clarification-return' && (
@@ -33,7 +35,7 @@ export function ReviewSubmitStep({ request, onSubmit, submitting, mode }: Review
       )}
 
       <HbcFormSection title="Project Information">
-        <HbcFormLayout columns={2} gap="medium">
+        <HbcFormLayout columns={cols} gap="medium">
           <SummaryField label="Project Name" value={request.projectName} />
           <SummaryField label="Location" value={request.projectLocation} />
           <SummaryField label="Estimated Value" value={request.estimatedValue != null ? `$${request.estimatedValue.toLocaleString()}` : undefined} />
@@ -43,7 +45,7 @@ export function ReviewSubmitStep({ request, onSubmit, submitting, mode }: Review
       </HbcFormSection>
 
       <HbcFormSection title="Department & Type">
-        <HbcFormLayout columns={2} gap="medium">
+        <HbcFormLayout columns={cols} gap="medium">
           <SummaryField label="Department" value={request.department} />
           <SummaryField label="Project Type" value={request.projectType} />
           <SummaryField label="Stage" value={request.projectStage} />
@@ -52,7 +54,7 @@ export function ReviewSubmitStep({ request, onSubmit, submitting, mode }: Review
       </HbcFormSection>
 
       <HbcFormSection title="Project Team">
-        <HbcFormLayout columns={2} gap="medium">
+        <HbcFormLayout columns={cols} gap="medium">
           <SummaryField label="Project Lead" value={request.projectLeadId} />
           <SummaryField label="Team Members" value={request.groupMembers?.join(', ')} />
           <SummaryField label="Viewers" value={request.viewerUPNs?.join(', ')} />

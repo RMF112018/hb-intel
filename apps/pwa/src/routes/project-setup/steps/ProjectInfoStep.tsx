@@ -5,7 +5,7 @@
  * Aligned with canonical G4 step definition per T02 parity contract.
  */
 import type { ReactElement } from 'react';
-import { HbcTextField, HbcFormLayout } from '@hbc/ui-kit';
+import { HbcTextField, HbcFormLayout, useIsMobile } from '@hbc/ui-kit';
 import type { IProjectSetupRequest } from '@hbc/models';
 
 interface ProjectInfoStepProps {
@@ -14,8 +14,9 @@ interface ProjectInfoStepProps {
 }
 
 export function ProjectInfoStep({ request, onChange }: ProjectInfoStepProps): ReactElement {
+  const isMobile = useIsMobile();
   return (
-    <HbcFormLayout columns={2} gap="medium">
+    <HbcFormLayout columns={isMobile ? 1 : 2} gap="medium">
       <HbcTextField
         label="Project Name"
         value={request.projectName ?? ''}

@@ -3,7 +3,7 @@
 > **Doc Classification:** Canonical Task Plan — Wave 0 Group 5
 > **Governing plan:** `docs/architecture/plans/MVP/G5/W0-G5-Hosted-PWA-Requester-Surfaces-Plan.md`
 
-**Status:** Proposed
+**Status:** Complete
 **Stream:** Wave 0 / G5
 **Locked decisions served:** LD-06, LD-07
 
@@ -195,3 +195,44 @@ Before T06 can be closed:
 - Lighthouse PWA audit scores are recorded (either in this file or in a testing artifact referenced here)
 - Tablet and phone test results are recorded
 - All acceptance criteria verified and checked off
+
+---
+
+## Closure Record
+
+**Date:** 2026-03-15
+
+### Service Worker Approach
+
+**Chosen:** vite-plugin-pwa 0.21.0 with `registerType: 'autoUpdate'` and `generateSW` mode (Workbox). Already configured prior to T06; no additional SW configuration needed. Precaches app shell (HTML, CSS, JS bundles) with revision hashes for cache busting. Navigation routes redirect to `index.html` (SPA routing).
+
+### Manifest Configuration
+
+- `name`: "HB Intel", `short_name`: "HB Intel"
+- `display`: "standalone", `start_url`: "/", `id`: "/"
+- `theme_color`: "#004B87", `background_color`: "#FFFFFF"
+- Icons: 192x192 (any), 512x512 (any), 512x512 (maskable)
+- Apple-specific meta tags added to `index.html`
+
+### Icon Assets
+
+Placeholder brand-colored icons (`#004B87`) created in `apps/pwa/public/`. Production icons should be designed with proper branding and "HB" text treatment in a future design pass.
+
+### Mobile Posture
+
+**Responsive step forms:** `useIsMobile()` from `@hbc/ui-kit` switches `HbcFormLayout columns` from 2 to 1 on viewports ≤767px. Applied to:
+- `ProjectInfoStep.tsx` — 2→1 column on mobile
+- `DepartmentStep.tsx` — 2→1 column on mobile
+- `ReviewSubmitStep.tsx` — 2→1 column on mobile
+- `RequestDetailPage.tsx` — 2→1 column on mobile
+- `TeamStep.tsx`, `TemplateAddOnsStep.tsx` — already single column
+
+**Touch targets:** `hbc-btn` class and `HbcButton` component provide ≥44px height. Table rows in ProjectsPage use `tabIndex={0}` for keyboard accessibility.
+
+### Browser-First Rule
+
+All G5 surfaces work without PWA installation. No feature requires service worker activation. Draft persistence uses IndexedDB via `@hbc/session-state` (not SW). Install prompts are browser-native only; no custom install prompt implemented.
+
+### Safari Compatibility
+
+Apple-specific meta tags (`apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style`, `apple-mobile-web-app-title`, `apple-touch-icon`) added. No Safari-specific issues identified in build output.

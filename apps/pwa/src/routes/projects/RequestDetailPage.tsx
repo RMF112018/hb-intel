@@ -15,7 +15,7 @@ import {
 import type { IProjectSetupRequest, ProjectSetupRequestState } from '@hbc/models';
 import { PROJECT_SETUP_DRAFT_KEY } from '@hbc/features-estimating';
 import { clearDraft } from '@hbc/session-state';
-import { HbcBanner, WorkspacePageShell, HbcFormSection, HbcFormLayout } from '@hbc/ui-kit';
+import { HbcBanner, WorkspacePageShell, HbcFormSection, HbcFormLayout, useIsMobile } from '@hbc/ui-kit';
 import { useMyProjectRequests, useProvisioningStatus } from '../../hooks/provisioning/index.js';
 
 /** Requester-facing state context messages. */
@@ -44,6 +44,8 @@ function SummaryField({ label, value }: { label: string; value: string | undefin
 }
 
 function CompletionSummary({ request }: { request: IProjectSetupRequest }): ReactElement {
+  const isMobile = useIsMobile();
+  const cols = isMobile ? 1 : 2;
   const projectHubUrl = resolveProjectHubUrl(request);
   const { data: provisioningStatus } = useProvisioningStatus(
     request.projectId,
@@ -57,7 +59,7 @@ function CompletionSummary({ request }: { request: IProjectSetupRequest }): Reac
       </HbcBanner>
 
       <HbcFormSection title="Project Details">
-        <HbcFormLayout columns={2} gap="medium">
+        <HbcFormLayout columns={cols} gap="medium">
           <SummaryField label="Project Name" value={request.projectName} />
           <SummaryField label="Department" value={request.department ? DEPARTMENT_DISPLAY_LABELS[request.department] : undefined} />
           <SummaryField label="Type" value={request.projectType} />
@@ -90,6 +92,8 @@ function CompletionSummary({ request }: { request: IProjectSetupRequest }): Reac
 }
 
 function FailureSummary({ request }: { request: IProjectSetupRequest }): ReactElement {
+  const isMobile = useIsMobile();
+  const cols = isMobile ? 1 : 2;
   return (
     <>
       <HbcBanner variant="error">
@@ -97,7 +101,7 @@ function FailureSummary({ request }: { request: IProjectSetupRequest }): ReactEl
       </HbcBanner>
 
       <HbcFormSection title="Request Details">
-        <HbcFormLayout columns={2} gap="medium">
+        <HbcFormLayout columns={cols} gap="medium">
           <SummaryField label="Project Name" value={request.projectName} />
           <SummaryField label="Department" value={request.department ? DEPARTMENT_DISPLAY_LABELS[request.department] : undefined} />
           <SummaryField label="Type" value={request.projectType} />
