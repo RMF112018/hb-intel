@@ -31,6 +31,14 @@ const STATUS_COLORS: Record<ISagaStepResult['status'], string> = {
   DeferredToTimer: HBC_STATUS_COLORS.warning,
 };
 
+/** W0-G4-T02: Compute step duration from startedAt → completedAt. */
+function formatDuration(startedAt?: string, completedAt?: string): string | null {
+  if (!startedAt || !completedAt) return null;
+  const ms = new Date(completedAt).getTime() - new Date(startedAt).getTime();
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
 const useStyles = makeStyles({
   root: {
     display: 'grid',
@@ -57,6 +65,7 @@ const useStyles = makeStyles({
   note: { margin: '4px 0 0 0', fontSize: '12px', color: HBC_STATUS_COLORS.warning },
   errorText: { margin: '4px 0 0 0', fontSize: '12px', color: HBC_STATUS_COLORS.error },
   timeText: { margin: '4px 0 0 0', fontSize: '12px', color: HBC_SURFACE_LIGHT['text-muted'] },
+  metadataText: { margin: '4px 0 0 0', fontSize: '11px', fontFamily: 'monospace', color: HBC_SURFACE_LIGHT['text-muted'] },
   link: {
     textAlign: 'center',
     color: HBC_SURFACE_LIGHT['surface-0'],
@@ -86,16 +95,23 @@ const useStyles = makeStyles({
 
 /**
  * D-PH6-10 submitter-facing 7-step provisioning checklist.
+ * W0-G4-T02: Added `detailLevel` prop for coordinator-tier step detail (duration, timestamps, metadata).
  * Traceability: docs/architecture/plans/PH6.10-Estimating-App.md §6.10.4
  */
 export function ProvisioningChecklist({
   status,
   showStepDetail = false,
+  detailLevel,
 }: {
   status: IProvisioningStatus;
   showStepDetail?: boolean;
+  /** W0-G4-T02: 'detailed' shows step duration, start timestamps, and metadata notes. */
+  detailLevel?: 'summary' | 'detailed';
 }): ReactNode {
   const styles = useStyles();
+  // Backward compat: derive effective detail from detailLevel or legacy showStepDetail
+  const showDetail = detailLevel === 'detailed' || (detailLevel === undefined && showStepDetail);
+  const showExtendedDetail = detailLevel === 'detailed';
 
   return (
     <div className={styles.root}>
@@ -113,15 +129,27 @@ export function ProvisioningChecklist({
               <span className={step.status === 'InProgress' ? styles.inProgressText : undefined}>
                 {STEP_LABELS[step.stepNumber] ?? step.stepName}
               </span>
-              {showStepDetail && step.status === 'DeferredToTimer' ? (
+              {showDetail && step.status === 'DeferredToTimer' ? (
                 <p className={styles.note}>Will complete overnight — site is ready to use now.</p>
               ) : null}
-              {showStepDetail && step.status === 'Failed' && step.errorMessage ? (
+              {showDetail && step.status === 'Failed' && step.errorMessage ? (
                 <p className={styles.errorText}>{step.errorMessage}</p>
               ) : null}
-              {showStepDetail && step.completedAt && step.status === 'Completed' ? (
+              {showDetail && step.completedAt && step.status === 'Completed' ? (
                 <p className={styles.timeText}>{new Date(step.completedAt).toLocaleTimeString()}</p>
               ) : null}
+              {showExtendedDetail && step.status === 'Completed' && (
+                (() => {
+                  const dur = formatDuration(step.startedAt, step.completedAt);
+                  return dur ? <p className={styles.timeText}>Duration: {dur}</p> : null;
+                })()
+              )}
+              {showExtendedDetail && step.status === 'InProgress' && step.startedAt && (
+                <p className={styles.timeText}>Started: {new Date(step.startedAt).toLocaleTimeString()}</p>
+              )}
+              {showExtendedDetail && step.metadata && Object.keys(step.metadata).length > 0 && (
+                <p className={styles.metadataText}>{JSON.stringify(step.metadata)}</p>
+              )}
             </div>
           </li>
         ))}

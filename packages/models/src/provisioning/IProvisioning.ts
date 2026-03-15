@@ -4,6 +4,12 @@
 export type ProjectDepartment = 'commercial' | 'luxury-residential';
 
 /**
+ * W0-G4-T02: Backend-assigned failure classification for coordinator retry gating.
+ * Only the backend may assign this value — agents must NOT infer it from error strings.
+ */
+export type ProvisioningFailureClass = 'transient' | 'structural' | 'permissions' | 'repeated' | 'admin-class';
+
+/**
  * W0-G1-T02: Entra ID security group IDs created during provisioning Step 6.
  * Stored on IProvisioningStatus for post-provisioning membership management.
  */
@@ -68,6 +74,12 @@ export interface IProvisioningStatus {
   department?: ProjectDepartment;
   /** W0-G1-T02: Entra ID group IDs created during Step 6. */
   entraGroups?: IEntraGroupSet;
+  /** W0-G4-T02: Backend-assigned failure classification for coordinator retry gating. */
+  failureClass?: ProvisioningFailureClass;
+  /** W0-G4-T02: ISO timestamp of the most recent retry attempt. */
+  lastRetryAt?: string;
+  /** W0-G4-T02: ISO timestamp when the failure was escalated to admin. */
+  escalatedAt?: string;
 }
 
 /** D-PH6-01: Result for a single saga step execution. */

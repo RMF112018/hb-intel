@@ -14,6 +14,7 @@ export type {
   IProvisioningAuditRecord,
   ProjectDepartment,
   IEntraGroupSet,
+  ProvisioningFailureClass,
 } from './IProvisioning.js';
 export type {
   IRequestClarification,
