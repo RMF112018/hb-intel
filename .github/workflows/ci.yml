@@ -119,3 +119,31 @@ jobs:
             packages/bic-next-move/coverage/
             packages/complexity/coverage/
           retention-days: 14
+
+  unit-tests-apps:
+    # Wave 1: App-level test gate for admin, estimating, accounting, PWA + role-branch enforcement.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+
+      - name: Admin app tests
+        run: pnpm --filter @hbc/spfx-admin test
+
+      - name: Estimating app tests
+        run: pnpm --filter @hbc/spfx-estimating test
+
+      - name: Accounting app tests
+        run: pnpm --filter @hbc/spfx-accounting test
+
+      - name: PWA tests
+        run: pnpm --filter @hbc/pwa test
+
+      - name: Role-branch gate
+        # G4-T06-002: Verify no hardcoded role === checks in app source.
+        run: bash tools/check-no-role-branch.sh
