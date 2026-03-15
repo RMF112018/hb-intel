@@ -37,6 +37,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@hbc/my-work-feed/testing': resolve(__dirname, './testing/index.ts'),
+      '@hbc/session-state': resolve(__dirname, '../session-state/src/index.ts'),
+      '@hbc/complexity': resolve(__dirname, '../complexity/src/index.ts'),
+      '@hbc/ui-kit/icons': resolve(__dirname, '../ui-kit/src/icons/index.tsx'),
+      '@hbc/ui-kit': resolve(__dirname, '../ui-kit/src/index.ts'),
     },
   },
 });
