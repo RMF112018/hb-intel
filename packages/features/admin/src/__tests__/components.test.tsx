@@ -370,7 +370,7 @@ describe('ImplementationTruthDashboard', () => {
     render(React.createElement(Wrapper, null,
       React.createElement(ImplementationTruthDashboard),
     ));
-    expect(screen.getAllByText('No data available for this probe.')).toHaveLength(5);
+    expect(screen.getAllByText('No probe data')).toHaveLength(5);
   });
 
   it('renders 5 probe sections', () => {
@@ -454,7 +454,7 @@ describe('ApprovalAuthorityTable', () => {
     render(React.createElement(Wrapper, null,
       React.createElement(ApprovalAuthorityTable, { onEditRule: vi.fn() }),
     ));
-    expect(screen.getByText('No approval rules configured.')).toBeInTheDocument();
+    expect(screen.getByText('No approval rules configured')).toBeInTheDocument();
   });
 
   it('renders rules in table', () => {

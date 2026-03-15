@@ -1,5 +1,7 @@
 import { type FC, useMemo } from 'react';
 import { HbcStatusBadge, HbcSpinner, HbcBanner, HbcButton } from '@hbc/ui-kit';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig } from '@hbc/smart-empty-state';
 import { useInfrastructureProbes } from '../hooks/useInfrastructureProbes.js';
 import type { IInfrastructureProbeResult } from '../types/IInfrastructureProbeResult.js';
 import { probeStatusToVariant, formatAlertTimestamp, PROBE_STALENESS_MS } from './helpers.js';
@@ -11,6 +13,17 @@ const PROBE_SECTIONS: { key: IInfrastructureProbeResult['probeKey']; label: stri
   { key: 'notification-system', label: 'Notification System' },
   { key: 'module-record-health', label: 'Module Record Health' },
 ];
+
+const PROBE_EMPTY_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: 'truly-empty',
+    heading: 'No probe data',
+    description: 'No data available for this probe. Run probes to collect current health status.',
+    coachingTip: 'Probe data is cached for 30 minutes after each run.',
+  }),
+};
 
 export interface ImplementationTruthDashboardProps {
   readonly onRunProbes?: () => void;
@@ -108,7 +121,19 @@ export const ImplementationTruthDashboard: FC<ImplementationTruthDashboardProps>
                 )}
               </>
             ) : (
-              <p>No data available for this probe.</p>
+              <HbcSmartEmptyState
+                config={PROBE_EMPTY_CONFIG}
+                context={{
+                  module: 'admin',
+                  view: `probe-${key}`,
+                  hasActiveFilters: false,
+                  hasPermission: true,
+                  isFirstVisit: false,
+                  currentUserRole: 'admin',
+                  isLoadError: false,
+                }}
+                variant="inline"
+              />
             )}
           </section>
         );

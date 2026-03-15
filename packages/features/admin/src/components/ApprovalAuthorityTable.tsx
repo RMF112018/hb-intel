@@ -1,8 +1,31 @@
 import type { FC } from 'react';
 import { HbcSpinner, HbcBanner, HbcButton } from '@hbc/ui-kit';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import type { IApprovalAuthorityRule } from '../types/IApprovalAuthorityRule.js';
 import { useApprovalAuthority } from '../hooks/useApprovalAuthority.js';
 import { formatAlertTimestamp } from './helpers.js';
+
+const RULES_EMPTY_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: 'truly-empty',
+    heading: 'No approval rules configured',
+    description: 'Approval authority rules will appear here once created.',
+    coachingTip: 'Rules are not persisted in Wave 0. Configuration changes will be lost on page reload (SF17-T05).',
+  }),
+};
+
+const RULES_EMPTY_CONTEXT: IEmptyStateContext = {
+  module: 'admin',
+  view: 'approval-rules',
+  hasActiveFilters: false,
+  hasPermission: true,
+  isFirstVisit: false,
+  currentUserRole: 'admin',
+  isLoadError: false,
+};
 
 export interface ApprovalAuthorityTableProps {
   readonly onEditRule: (rule: IApprovalAuthorityRule) => void;
@@ -33,7 +56,13 @@ export const ApprovalAuthorityTable: FC<ApprovalAuthorityTableProps> = ({ onEdit
   }
 
   if (rules.length === 0) {
-    return <p>No approval rules configured.</p>;
+    return (
+      <HbcSmartEmptyState
+        config={RULES_EMPTY_CONFIG}
+        context={RULES_EMPTY_CONTEXT}
+        variant="inline"
+      />
+    );
   }
 
   return (
