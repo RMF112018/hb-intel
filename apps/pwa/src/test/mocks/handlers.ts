@@ -17,6 +17,7 @@ const MOCK_REQUEST: IProjectSetupRequest = {
   submittedAt: '2026-03-01T00:00:00.000Z',
   state: 'Submitted',
   groupMembers: ['member@test.com'],
+  retryCount: 0,
 };
 
 const MOCK_COMPLETED_REQUEST: IProjectSetupRequest = {

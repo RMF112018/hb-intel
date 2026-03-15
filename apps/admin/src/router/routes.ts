@@ -32,7 +32,7 @@ const errorLogRoute = createRoute({
     requireAdminAccessControl();
     useNavStore.getState().setActiveWorkspace('admin');
   },
-  component: lazyRouteComponent(() => import('../pages/SystemSettingsPage.js').then((m) => ({ default: () => m.SystemSettingsPage({ initialSection: 'audit-log' }) }))),
+  component: lazyRouteComponent(() => import('../pages/ErrorLogPage.js').then((m) => ({ default: m.ErrorLogPage }))),
 });
 
 const provisioningRoute = createRoute({

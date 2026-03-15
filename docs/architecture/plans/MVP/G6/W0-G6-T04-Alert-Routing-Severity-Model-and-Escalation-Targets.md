@@ -21,7 +21,7 @@
 | `@hbc/features-admin` `MonitorRegistry` | `packages/features/admin/src/monitors/monitorRegistry.ts` | Monitor orchestration | **READY.** `MonitorRegistry.runAll()`, `register()`, `deduplicateAlerts()` are implemented. |
 | `@hbc/features-admin` `notificationRouter.ts` | `packages/features/admin/src/monitors/notificationRouter.ts` | Routing logic (immediate vs. digest) | **READY.** `routeAlert()` correctly routes critical/high → `immediate`, medium/low → `digest`. |
 | `@hbc/features-admin` `notificationDispatchAdapter.ts` | `packages/features/admin/src/integrations/notificationDispatchAdapter.ts` | Dispatch contract | **CONTRACT-READY.** `INotificationDispatchAdapter` interface and `ReferenceNotificationDispatchAdapter` exist. No actual Teams/email wiring. T04 must wire the actual delivery or document as a known limitation. |
-| `@hbc/provisioning` | `packages/provisioning/` | `ProjectSetupRequestState`, `STATE_TRANSITIONS` for failure detection | **READY.** |
+| `IProvisioningDataProvider` (to be defined in `@hbc/features-admin`) | `packages/features/admin/src/types/` | Monitor data access | **DEFINE IN T04.** `@hbc/features-admin` must define `IProvisioningDataProvider` — a minimal projection interface that monitors use to query request data. Monitors must not import `@hbc/provisioning` directly; that would create a cross-feature dependency violating `03-package-boundaries.md`. The concrete adapter is wired in `apps/admin/` (see DI Pattern section below). |
 
 ### Gate Outcome
 
@@ -50,6 +50,56 @@ Implement the alert detection, routing, and escalation target wiring for Wave 0.
 ---
 
 ## Scope
+
+### Monitor Data Access: Dependency Injection Pattern
+
+`@hbc/features-admin` monitors cannot import `@hbc/provisioning` directly — that would create a cross-feature package dependency, violating `03-package-boundaries.md`. The resolved approach is dependency injection via a minimal interface defined inside `@hbc/features-admin`.
+
+**`IProvisioningDataProvider`** — defined in `packages/features/admin/src/types/IProvisioningDataProvider.ts`:
+
+```typescript
+export interface IProvisioningRequestSummary {
+  readonly requestId: string;
+  readonly state: string;                  // matches ProjectSetupRequestState values
+  readonly lastStateChangedAt?: string;    // ISO timestamp for stuck-workflow detection
+  readonly retryCount?: number;            // for failure severity classification
+}
+
+export interface IProvisioningDataProvider {
+  listRequests(): Promise<ReadonlyArray<IProvisioningRequestSummary>>;
+}
+```
+
+**Factory function** — defined in `packages/features/admin/src/monitors/createDefaultMonitorRegistry.ts`:
+
+```typescript
+export interface MonitorRegistryDeps {
+  readonly provisioningData: IProvisioningDataProvider;
+}
+
+export function createDefaultMonitorRegistry(deps: MonitorRegistryDeps): MonitorRegistry {
+  const registry = new MonitorRegistry();
+  registry.register(createProvisioningFailureMonitor(deps.provisioningData));
+  registry.register(createStuckWorkflowMonitor(deps.provisioningData));
+  return registry;
+}
+```
+
+Existing stub `const` exports (`provisioningFailureMonitor`, `stuckWorkflowMonitor`) are preserved as-is for backward compatibility with any existing consumers.
+
+**Adapter wiring** — in `apps/admin/src/bootstrap.ts` (or equivalent), where `@hbc/provisioning` CAN be imported:
+
+```typescript
+const monitorRegistry = createDefaultMonitorRegistry({
+  provisioningData: {
+    listRequests: () => provisioningApiClient.listRequests(),
+  },
+});
+```
+
+`apps/admin/` is the only layer permitted to bridge `@hbc/features-admin` and `@hbc/provisioning`. The packages remain decoupled.
+
+---
 
 ### Monitor Implementation (minimum Wave 0 subset)
 
@@ -118,7 +168,7 @@ The following severity assignment rules govern how T04 monitor implementations m
 | Dependency | Type | Notes |
 |---|---|---|
 | `@hbc/features-admin` | Primary | All monitor types, `MonitorRegistry`, `notificationRouter`, `AdminAlertsApi`, dispatch adapter |
-| `@hbc/provisioning` | Required | `listRequests`, `ProjectSetupRequestState`, state data for monitor queries |
+| `@hbc/provisioning` | `apps/admin/` only | Consumed via `IProvisioningDataProvider` adapter wired in `apps/admin/`. **Not imported by `@hbc/features-admin` monitors directly.** |
 | `@hbc/ui-kit` | Required | Any new visual components for alert delivery status display |
 | `apps/admin` | Target app | Monitor polling wired into admin app lifecycle |
 
@@ -157,7 +207,7 @@ Before T04 is ready for review:
 
 **SharePoint list access.** `AdminAlertsApi` uses `HBC_AdminAlerts` SharePoint list. If the SharePoint list does not exist in the dev/staging environment, the API cannot persist alerts. Define a fallback (in-memory or IndexedDB) for local development.
 
-**Monitor trigger mechanism.** Monitors need provisioning request data to evaluate. The `run()` method receives `nowIso: string` but not a data source. Confirm whether monitors call `@hbc/provisioning` internally or receive data injected by the `MonitorRegistry` caller. If the former, the monitor has a package dependency on `@hbc/provisioning`.
+**DI adapter wiring location.** The `IProvisioningDataProvider` adapter must be wired in `apps/admin/` before `createDefaultMonitorRegistry` is called. Confirm on first implementation pass that the monitor polling loop is initialized after the adapter is available, not before. Early initialization with an uninitialised adapter will produce empty alert results without an error.
 
 **Teams webhook availability.** The Teams webhook for alert dispatch may not be available in Wave 0. If absent, surface the routing decision visually and document as a known limitation.
 

@@ -17,6 +17,56 @@ The package follows the ports-and-adapters pattern established across HB Intel:
 - **Hooks** — React hooks for state access
 - **Components** — UI components for admin dashboards
 
+## G6 Alert & Monitoring
+
+### Dependency injection for monitors
+
+Monitors that need provisioning data accept an `IProvisioningDataProvider` via factory functions. This preserves the package boundary — `@hbc/features-admin` never imports `@hbc/provisioning` directly.
+
+```typescript
+import { createDefaultMonitorRegistry } from '@hbc/features-admin';
+import type { IProvisioningDataProvider } from '@hbc/features-admin';
+
+// Wire with your provisioning API client
+const provider: IProvisioningDataProvider = {
+  listRequests: (state) => apiClient.listRequests(state),
+  listProvisioningRuns: (status) => apiClient.listProvisioningRuns(status),
+};
+
+const registry = createDefaultMonitorRegistry(provider);
+const alerts = await registry.runAll(new Date().toISOString());
+```
+
+### AdminAlertsApi (in-memory store)
+
+```typescript
+import { AdminAlertsApi } from '@hbc/features-admin';
+
+const api = new AdminAlertsApi();
+api.ingestAlerts(alerts);                          // write from monitor runs
+const active = await api.listActive();             // read unacknowledged/unresolved
+await api.acknowledge('alert-id', 'admin@co.com'); // mark acknowledged
+```
+
+### TeamsWebhookDispatchAdapter
+
+```typescript
+import { TeamsWebhookDispatchAdapter } from '@hbc/features-admin';
+
+const adapter = new TeamsWebhookDispatchAdapter({
+  webhookUrl: process.env.TEAMS_WEBHOOK_URL,
+  emailRelay: 'hbtech@hedrickbrothers.com',
+});
+const event = adapter.dispatch(alert);
+```
+
+### Wave 0 known limitations
+
+- Alert store is in-memory only — does not persist across page reloads. SharePoint-list–backed persistence (`HBC_AdminAlerts`) is the Wave 1 target.
+- Teams webhook delivery is best-effort fire-and-forget.
+- Email relay is console-logged only (no SMTP client in Wave 0).
+- Only `provisioning-failure` and `stuck-workflow` monitors are wired; remaining four monitors are P3/deferred stubs.
+
 ## Installation
 
 ```bash
@@ -59,11 +109,11 @@ pnpm --filter @hbc/features-admin lint           # Lint
 |----------|---------|
 | Types | `AlertSeverity`, `AlertCategory`, `ProbeHealthStatus`, `ApprovalContext`, `IAdminAlert`, `IAdminAlertBadge`, `IInfrastructureProbeResult`, `IInfrastructureProbe`, `IProbeSnapshot`, `IApprovalAuthorityRule`, `IApprovalEligibilityResult`, `UseAdminAlertsResult`, `UseInfrastructureProbesResult`, `UseApprovalAuthorityResult`, `IAlertMonitor`, `IInfrastructureProbeDefinition`, `NotificationRoute` |
 | Constants | `ADMIN_ALERTS_POLL_MS`, `PROBE_SCHEDULER_DEFAULT_MS`, `PROBE_MAX_RETRY`, `APPROVAL_RULE_LIST_TITLE`, `ADMIN_ALERT_LIST_TITLE`, `INFRA_PROBE_LIST_TITLE`, `ADMIN_ALERTS_QUERY_KEY`, `INFRA_PROBES_QUERY_KEY`, `APPROVAL_RULES_QUERY_KEY` |
-| Monitors | `MonitorRegistry`, `provisioningFailureMonitor`, `permissionAnomalyMonitor`, `stuckWorkflowMonitor`, `overdueProvisioningMonitor`, `upcomingExpirationMonitor`, `staleRecordMonitor`, `routeAlert`, `createDefaultMonitorRegistry` |
+| Monitors | `MonitorRegistry`, `provisioningFailureMonitor`, `createProvisioningFailureMonitor`, `permissionAnomalyMonitor`, `stuckWorkflowMonitor`, `createStuckWorkflowMonitor`, `overdueProvisioningMonitor`, `upcomingExpirationMonitor`, `staleRecordMonitor`, `routeAlert`, `createDefaultMonitorRegistry` |
 | Probes | `ProbeScheduler`, `sharePointProbe`, `azureFunctionsProbe`, `searchProbe`, `notificationProbe`, `moduleRecordHealthProbe`, `createDefaultProbeScheduler` |
 | API | `ApprovalAuthorityApi`, `AdminAlertsApi`, `InfrastructureProbeApi` |
 | Hooks | `useAdminAlerts`, `useInfrastructureProbes`, `useApprovalAuthority`, `computeAlertBadge`, `buildProbeStatusMap`, `resolveEligibility` |
-| Integrations | `ReferenceBicNextMoveAdapter`, `ReferenceNotificationDispatchAdapter`, `ReferenceAcknowledgmentAdapter`, `ReferenceGovernanceSnapshotAdapter`, `ReferenceComplexityGatingAdapter` |
+| Integrations | `ReferenceBicNextMoveAdapter`, `ReferenceNotificationDispatchAdapter`, `ReferenceAcknowledgmentAdapter`, `ReferenceGovernanceSnapshotAdapter`, `ReferenceComplexityGatingAdapter`, `TeamsWebhookDispatchAdapter` |
 | Components | `AdminAlertBadge`, `AdminAlertDashboard`, `ImplementationTruthDashboard`, `ApprovalAuthorityTable`, `ApprovalRuleEditor` |
 | Testing | `createMockAdminAlert`, `createMockProbeResult`, `createMockProbeSnapshot`, `createMockApprovalAuthorityRule`, `mockAdminIntelligenceStates` |
 

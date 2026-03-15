@@ -16,6 +16,7 @@ export type { IApprovalEligibilityResult } from './IApprovalEligibilityResult.js
 export type { IAlertMonitor } from './IAlertMonitor.js';
 export type { IInfrastructureProbeDefinition } from './IInfrastructureProbeDefinition.js';
 export type { NotificationRoute } from './NotificationRoute.js';
+export type { IProvisioningDataProvider } from './IProvisioningDataProvider.js';
 
 // Hook return types
 export type { UseAdminAlertsResult } from './UseAdminAlertsResult.js';

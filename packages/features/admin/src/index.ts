@@ -29,6 +29,7 @@ export type {
   IAlertMonitor,
   IInfrastructureProbeDefinition,
   NotificationRoute,
+  IProvisioningDataProvider,
 } from './types/index.js';
 
 // Constants
@@ -48,8 +49,10 @@ export {
 export {
   MonitorRegistry,
   provisioningFailureMonitor,
+  createProvisioningFailureMonitor,
   permissionAnomalyMonitor,
   stuckWorkflowMonitor,
+  createStuckWorkflowMonitor,
   overdueProvisioningMonitor,
   upcomingExpirationMonitor,
   staleRecordMonitor,
@@ -92,6 +95,7 @@ export {
   ReferenceAcknowledgmentAdapter,
   ReferenceGovernanceSnapshotAdapter,
   ReferenceComplexityGatingAdapter,
+  TeamsWebhookDispatchAdapter,
 } from './integrations/index.js';
 
 export type {
@@ -106,6 +110,7 @@ export type {
   AdminComplexityTier,
   IAdminComplexityGating,
   IAdminComplexityGatingAdapter,
+  TeamsWebhookConfig,
 } from './integrations/index.js';
 
 // Components

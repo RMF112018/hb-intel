@@ -26,6 +26,7 @@ function makeRequest(overrides?: Partial<IProjectSetupRequest>): IProjectSetupRe
     groupMembers: ['member@example.com'],
     department: 'commercial',
     projectLeadId: 'lead@example.com',
+    retryCount: 0,
     ...overrides,
   };
 }

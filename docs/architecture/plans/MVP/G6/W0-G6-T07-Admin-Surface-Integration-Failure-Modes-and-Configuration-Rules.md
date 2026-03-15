@@ -47,7 +47,8 @@ Document and enforce the following integration boundary rules:
 |---|---|
 | `apps/admin/` → `@hbc/features-admin` | Admin app may consume types, hooks, and components from `@hbc/features-admin`. It must not re-implement types, create parallel hooks, or duplicate component logic. |
 | `apps/admin/` → `@hbc/provisioning` | Admin app consumes `IProvisioningApiClient`, `STATE_TRANSITIONS`, and `ProjectSetupRequestState`. Admin app must not call provisioning API methods that require requester identity (those are G5 scope). |
-| `@hbc/features-admin` monitors → `@hbc/provisioning` | Monitors may call provisioning API methods to query request state. This dependency must be explicit in `@hbc/features-admin/package.json` as a declared dependency. |
+| `@hbc/features-admin` monitors → `IProvisioningDataProvider` | Monitors receive provisioning request data via constructor injection (`IProvisioningDataProvider`). **`@hbc/features-admin` must not import `@hbc/provisioning` directly** — that would create a cross-feature dependency violating `03-package-boundaries.md`. The interface is owned by `@hbc/features-admin`; the concrete adapter is wired only in `apps/admin/`. |
+| `apps/admin/` → `IProvisioningDataProvider` wiring | `apps/admin/` creates the concrete `IProvisioningDataProvider` implementation by delegating to `@hbc/provisioning`'s `IProvisioningApiClient`, then passes it to `createDefaultMonitorRegistry(deps)`. This is the only location in the codebase where admin intelligence and provisioning data are bridged. |
 | `apps/admin/` → `@hbc/auth` | All permission enforcement uses `@hbc/auth` guard components or `usePermissionStore`. No custom permission logic in `apps/admin/`. |
 | `@hbc/features-admin` → `@hbc/ui-kit` | Feature-local composition components in `@hbc/features-admin` may use `@hbc/ui-kit`. They must not create reusable visual primitives. |
 | `apps/admin/` → `@hbc/notification-intelligence` | Admin alert dispatch must go through `INotificationDispatchAdapter`. Admin app must not call `@hbc/notification-intelligence` directly. |
@@ -120,7 +121,7 @@ The following feature types must never appear in the G6 admin surface. Any code 
 
 4. **Scope boundary clean:** No coordinator, requester, or My Work Feed features have been introduced to the admin surface during G6 execution.
 
-5. **Package dependency declarations correct:** If monitors in `@hbc/features-admin` call `@hbc/provisioning`, the dependency is declared in `packages/features/admin/package.json`.
+5. **DI boundary enforced:** `packages/features/admin/package.json` does **not** declare `@hbc/provisioning` as a dependency. Monitors receive data exclusively via `IProvisioningDataProvider`. If `@hbc/provisioning` appears in `@hbc/features-admin/package.json`, that is a boundary violation and must be corrected before T07 closes.
 
 ---
 
@@ -138,7 +139,7 @@ Before T07 is ready for review:
 
 **T07 depends on T01–T06 being substantially complete.** Running T07 earlier produces a documentation-only task with nothing to enforce. The preferred approach is to run T07 as a final integration review pass.
 
-**`@hbc/features-admin` → `@hbc/provisioning` dependency.** If monitor implementations call `@hbc/provisioning` directly, the package dependency must be declared. This may not have been enforced during T04 implementation. T07 must check `packages/features/admin/package.json` and add the dependency if needed.
+**DI boundary regression check.** T04 implements monitors via `IProvisioningDataProvider` injection, keeping `@hbc/features-admin` free of a `@hbc/provisioning` dependency. T07 must verify this held during implementation: check that `@hbc/provisioning` does not appear in `packages/features/admin/package.json` and that no monitor file contains a direct import from `@hbc/provisioning`. If found, correct before T07 closes — this is a hard boundary rule, not a style concern.
 
 ---
 

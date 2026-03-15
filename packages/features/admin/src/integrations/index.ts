@@ -23,3 +23,7 @@ export { ReferenceGovernanceSnapshotAdapter } from './versionedRecordAdapter.js'
 // Complexity Gating
 export type { AdminComplexityTier, IAdminComplexityGating, IAdminComplexityGatingAdapter } from './complexityGatingAdapter.js';
 export { ReferenceComplexityGatingAdapter } from './complexityGatingAdapter.js';
+
+// Teams Webhook Dispatch
+export type { TeamsWebhookConfig } from './teamsWebhookDispatchAdapter.js';
+export { TeamsWebhookDispatchAdapter } from './teamsWebhookDispatchAdapter.js';

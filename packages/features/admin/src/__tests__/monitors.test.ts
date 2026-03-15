@@ -138,6 +138,41 @@ describe('MonitorRegistry', () => {
       'stale-record',
     ]);
   });
+
+  it('createDefaultMonitorRegistry with provider wires configured monitors', async () => {
+    const provider = {
+      async listRequests() {
+        return [
+          {
+            requestId: 'req-1',
+            projectId: 'proj-1',
+            projectName: 'Fail Project',
+            projectLocation: 'NY',
+            projectType: 'GU',
+            projectStage: 'Pursuit' as const,
+            submittedBy: 'u@test.com',
+            submittedAt: '2026-03-01T00:00:00Z',
+            state: 'Failed' as const,
+            groupMembers: [],
+            retryCount: 0,
+          },
+        ];
+      },
+      async listProvisioningRuns() { return []; },
+    };
+    const registry = createDefaultMonitorRegistry(provider);
+    expect(registry.size).toBe(6);
+    const alerts = await registry.runAll('2026-03-15T12:00:00Z');
+    // provisioning-failure monitor should produce 1 alert from the provider
+    expect(alerts.length).toBeGreaterThanOrEqual(1);
+    expect(alerts[0].category).toBe('provisioning-failure');
+  });
+
+  it('createDefaultMonitorRegistry without provider uses stubs (backward compat)', async () => {
+    const registry = createDefaultMonitorRegistry();
+    const alerts = await registry.runAll('2026-03-15T12:00:00Z');
+    expect(alerts).toEqual([]);
+  });
 });
 
 describe('Individual monitors', () => {

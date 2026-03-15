@@ -157,6 +157,8 @@ export interface IProjectSetupRequest {
   clarificationItems?: IRequestClarification[];
   /** W0-G3-T02: Provisioned SharePoint site URL (populated after provisioning completes). */
   siteUrl?: string;
+  /** G6-T02: Count of provisioning retries for admin retry-eligibility gating. */
+  retryCount: number;
 }
 
 export type ProjectSetupRequestState =

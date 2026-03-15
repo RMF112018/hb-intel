@@ -22,6 +22,7 @@ function makeRequest(overrides?: Partial<IProjectSetupRequest>): IProjectSetupRe
     department: 'commercial',
     projectLeadId: 'lead@example.com',
     siteUrl: 'https://hbc.sharepoint.com/sites/proj-1',
+    retryCount: 0,
     ...overrides,
   };
 }
