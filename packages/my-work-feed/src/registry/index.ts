@@ -1,2 +1,1 @@
-// Populated by T03
-export {};
+export { MyWorkRegistry } from './MyWorkRegistry.js';
