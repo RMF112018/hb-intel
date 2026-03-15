@@ -19,7 +19,9 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   beforeLoad: () => {
-    requireAdminAccessControl();
+    // Note: requireAdminAccessControl() intentionally omitted here to prevent
+    // infinite redirect loop (/ → no permission → redirect to / → ...).
+    // Non-index routes still enforce the guard and redirect here on failure.
     useNavStore.getState().setActiveWorkspace('admin');
   },
   component: lazyRouteComponent(() => import('../pages/SystemSettingsPage.js').then((m) => ({ default: m.SystemSettingsPage }))),
