@@ -19,6 +19,8 @@
     "paths": {
       "@hbc/models": ["packages/models/src/index.ts"],
       "@hbc/models/*": ["packages/models/src/*"],
+      "@hbc/my-work-feed": ["packages/my-work-feed/src/index.ts"],
+      "@hbc/my-work-feed/*": ["packages/my-work-feed/src/*"],
       "@hbc/data-access": ["packages/data-access/src/index.ts"],
       "@hbc/data-access/*": ["packages/data-access/src/*"],
       "@hbc/query-hooks": ["packages/query-hooks/src/index.ts"],
