@@ -50,6 +50,7 @@ export function createWebpartVitestConfig(appDir: string) {
         '@hbc/auth': resolve(root, 'packages/auth/src/index.ts'),
         '@hbc/shell': resolve(root, 'packages/shell/src/index.ts'),
         '@hbc/ui-kit/app-shell': resolve(root, 'packages/ui-kit/src/app-shell.ts'),
+        '@hbc/ui-kit/icons': resolve(root, 'packages/ui-kit/src/icons/index.tsx'),
         '@hbc/ui-kit/theme': resolve(root, 'packages/ui-kit/src/theme/index.ts'),
         '@hbc/ui-kit': resolve(root, 'packages/ui-kit/src/index.ts'),
         '@hbc/provisioning': resolve(root, 'packages/provisioning/src/index.ts'),

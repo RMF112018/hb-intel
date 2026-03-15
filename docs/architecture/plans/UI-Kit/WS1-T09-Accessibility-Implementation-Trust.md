@@ -3,6 +3,7 @@
 > **Doc Classification:** Canonical Normative Plan — Workstream I task plan for accessibility audit and implementation trust hardening. Visual excellence cannot come at the expense of usability or trust. Must be complete before T13 closes the workstream.
 
 **Workstream Reference:** Workstream I — UI Kit Production Scrub Plan
+**Read With:** docs/architecture/plans/UI-Kit/WS1-UI-Kit-Production-Scrub-Plan.md
 **Sequencing:** Phase D (after T07 stabilizes; may proceed concurrently with T08)
 **Depends On:** T07 (polished component set as the audit target); T05 (field-readability contrast and target size minimums)
 **Unlocks:** T11 (accessibility automation coverage); T13 (accessibility dimension of production scorecard)

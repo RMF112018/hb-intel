@@ -3,6 +3,7 @@
 > **Doc Classification:** Canonical Normative Plan — Workstream I task plan for Storybook completion and visual reference documentation. Turns Storybook into a release-grade visual reference and produces the developer-facing documentation suite that Wave 1 teams depend on.
 
 **Workstream Reference:** Workstream I — UI Kit Production Scrub Plan
+**Read With:** docs/architecture/plans/UI-Kit/WS1-UI-Kit-Production-Scrub-Plan.md
 **Sequencing:** Phase E (after T08 and T09 complete; may proceed concurrently with T11 and T12)
 **Depends On:** T07 (polished components); T08 (composition patterns and page pattern library); T09 (accessibility findings resolved)
 **Unlocks:** T13 (documentation completeness dimension of production scorecard)

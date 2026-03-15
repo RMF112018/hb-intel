@@ -13,13 +13,14 @@ import { HbcComplexityDial, HbcComplexityGate } from '@hbc/complexity';
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
 import { createProvisioningApiClient } from '@hbc/provisioning';
 import { ADMIN_RETRY_CEILING } from '@hbc/features-admin';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import {
   HbcBanner,
   HbcButton,
   HbcCard,
   HbcConfirmDialog,
   HbcDataTable,
-  HbcEmptyState,
   HbcModal,
   HbcSelect,
   HbcStatusBadge,
@@ -63,6 +64,31 @@ const useStyles = makeStyles({
   diagnosticBlock: { fontFamily: 'monospace', fontSize: '12px', whiteSpace: 'pre-wrap', wordBreak: 'break-all' },
   overrideSection: { marginTop: '16px', display: 'flex', gap: '8px', alignItems: 'flex-end' },
 });
+
+const OVERSIGHT_EMPTY_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => {
+    const isFailuresView = context.view === 'failures';
+    const isFiltered = context.hasActiveFilters;
+
+    return {
+      module: context.module,
+      view: context.view,
+      classification: isFiltered ? 'filter-empty' : 'truly-empty',
+      heading: isFailuresView
+        ? 'No failed provisioning runs'
+        : 'No provisioning runs',
+      description: isFailuresView
+        ? 'Failed runs will appear here with recovery actions.'
+        : 'Provisioning runs matching this filter will appear here.',
+      filterClearAction: isFiltered
+        ? { label: 'Show All Runs' }
+        : undefined,
+      coachingTip: isFailuresView
+        ? 'When a provisioning run fails, it appears here with retry and escalation actions.'
+        : undefined,
+    };
+  },
+};
 
 /**
  * W0-G4-T04: Admin provisioning oversight page — expanded from ProvisioningFailuresPage.
@@ -159,6 +185,16 @@ export function ProvisioningOversightPage(): ReactNode {
         return allRuns;
     }
   }, [allRuns, activeTab]);
+
+  const emptyContext = useMemo<IEmptyStateContext>(() => ({
+    module: 'admin',
+    view: activeTab,
+    hasActiveFilters: activeTab !== 'all',
+    hasPermission: true,
+    isFirstVisit: false,
+    currentUserRole: 'admin',
+    isLoadError: Boolean(loadError),
+  }), [activeTab, loadError]);
 
   // ── Action helpers ──────────────────────────────────────────────────────
   const runAction = useCallback(
@@ -431,11 +467,13 @@ export function ProvisioningOversightPage(): ReactNode {
       <HbcTabs tabs={FILTER_TABS} activeTabId={activeTab} onTabChange={setActiveTab} />
 
       {filteredRuns.length === 0 && !loading ? (
-        <HbcEmptyState
-          title={activeTab === 'failures' ? 'No failed provisioning runs' : 'No provisioning runs'}
-          description={activeTab === 'failures'
-            ? 'Failed runs will appear here with recovery actions.'
-            : 'Provisioning runs matching this filter will appear here.'}
+        <HbcSmartEmptyState
+          config={OVERSIGHT_EMPTY_CONFIG}
+          context={emptyContext}
+          variant="inline"
+          onActionFired={(label) => {
+            if (label === 'Show All Runs') setActiveTab('all');
+          }}
         />
       ) : (
         <HbcDataTable<IProvisioningStatus>

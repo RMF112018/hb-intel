@@ -3,6 +3,7 @@
 > **Doc Classification:** Canonical Normative Plan — Workstream I task plan for verification overhaul. Establishes automated test coverage sufficient to release `@hbc/ui-kit` with confidence. Release confidence must be driven by automated verification, not only visual inspection.
 
 **Workstream Reference:** Workstream I — UI Kit Production Scrub Plan
+**Read With:** docs/architecture/plans/UI-Kit/WS1-UI-Kit-Production-Scrub-Plan.md
 **Sequencing:** Phase E (after T08 and T09 complete; may proceed concurrently with T10 and T12)
 **Depends On:** T07 (stable component set as the test target); T09 (accessibility findings list for automation coverage)
 **Unlocks:** T13 (verification coverage dimension of production scorecard)
