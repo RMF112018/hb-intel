@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig } from '@hbc/smart-empty-state';
 import {
   HbcBanner,
   HbcButton,
   HbcCard,
   HbcCheckbox,
-  HbcEmptyState,
   HbcForm,
   HbcFormRow,
   HbcFormSection,
@@ -44,6 +45,17 @@ const TRIAGE_SORT_OPTIONS = [
 const parseInteger = (value: string): number => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const ADMIN_PERMISSION_EMPTY_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: 'permission-empty',
+    heading: 'Admin access required',
+    description: 'hbc-admin permission is required to edit health pulse configuration.',
+    coachingTip: 'Contact your system administrator to request health pulse configuration access.',
+  }),
 };
 
 export const HealthPulseAdminPanel = ({
@@ -103,9 +115,18 @@ export const HealthPulseAdminPanel = ({
         </HbcBanner>
       )}
       {!isAdmin && (
-        <HbcEmptyState
-          title="Admin access required"
-          description="`hbc-admin` permission is required to edit health pulse configuration."
+        <HbcSmartEmptyState
+          config={ADMIN_PERMISSION_EMPTY_CONFIG}
+          context={{
+            module: 'project-hub',
+            view: 'health-pulse-admin',
+            hasActiveFilters: false,
+            hasPermission: false,
+            isFirstVisit: false,
+            currentUserRole: 'user',
+            isLoadError: false,
+          }}
+          variant="inline"
         />
       )}
 

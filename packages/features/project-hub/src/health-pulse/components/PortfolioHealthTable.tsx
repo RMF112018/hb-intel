@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig } from '@hbc/smart-empty-state';
 import {
   HbcCheckbox,
   HbcDataTable,
-  HbcEmptyState,
   HbcFormRow,
   HbcSelect,
   HbcSpinner,
@@ -45,6 +46,17 @@ const SORT_OPTIONS: Array<{ value: PortfolioHealthSortMode; label: string }> = [
   { value: 'compound-risk-severity', label: 'Compound risk severity' },
   { value: 'unresolved-action-backlog', label: 'Unresolved action backlog' },
 ];
+
+const PORTFOLIO_EMPTY_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: 'truly-empty',
+    heading: 'No portfolio health rows',
+    description: 'Portfolio triage data is not available.',
+    coachingTip: 'Portfolio health data populates once project health pulses are configured and collected.',
+  }),
+};
 
 export const PortfolioHealthTable = ({
   rows,
@@ -155,9 +167,18 @@ export const PortfolioHealthTable = ({
 
   if (rows.length === 0) {
     return (
-      <HbcEmptyState
-        title="No portfolio health rows"
-        description="Portfolio triage data is not available."
+      <HbcSmartEmptyState
+        config={PORTFOLIO_EMPTY_CONFIG}
+        context={{
+          module: 'project-hub',
+          view: 'portfolio-health',
+          hasActiveFilters: false,
+          hasPermission: true,
+          isFirstVisit: false,
+          currentUserRole: 'user',
+          isLoadError: false,
+        }}
+        variant="inline"
       />
     );
   }

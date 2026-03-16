@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig } from '@hbc/smart-empty-state';
 import {
   HbcBanner,
   HbcButton,
-  HbcEmptyState,
   HbcLineChart,
   HbcPanel,
   HbcSpinner,
@@ -45,6 +46,17 @@ const DIMENSION_TAB_LABELS: Record<HealthDimensionKey, string> = {
 const formatMetricValue = (metric: IHealthMetric): string => {
   if (metric.value === null) return 'No data';
   return `${Math.round(metric.value)}`;
+};
+
+const DETAIL_PENDING_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: 'truly-empty',
+    heading: 'Health data pending',
+    description: 'Project health pulse is not available yet.',
+    coachingTip: 'Health pulse detail populates once the project health configuration is active.',
+  }),
 };
 
 export const ProjectHealthPulseDetail = ({
@@ -172,7 +184,19 @@ export const ProjectHealthPulseDetail = ({
         )}
 
         {!pulseState.isLoading && !pulseState.error && !pulse && (
-          <HbcEmptyState title="Health data pending" description="Project health pulse is not available yet." />
+          <HbcSmartEmptyState
+            config={DETAIL_PENDING_CONFIG}
+            context={{
+              module: 'project-hub',
+              view: 'health-pulse-detail',
+              hasActiveFilters: false,
+              hasPermission: true,
+              isFirstVisit: false,
+              currentUserRole: 'user',
+              isLoadError: false,
+            }}
+            variant="inline"
+          />
         )}
 
         {!pulseState.isLoading && !pulseState.error && pulse && (

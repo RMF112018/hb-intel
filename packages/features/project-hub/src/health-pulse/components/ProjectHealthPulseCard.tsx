@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig } from '@hbc/smart-empty-state';
 import {
   HbcBanner,
   HbcButton,
   HbcCard,
-  HbcEmptyState,
   HbcSpinner,
   HbcStatusBadge,
   HbcTypography,
@@ -36,6 +37,17 @@ const DIMENSION_GRID_STYLE = {
   gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
   gap: 8,
   marginTop: 12,
+};
+
+const PULSE_PENDING_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: 'truly-empty',
+    heading: 'Health data pending',
+    description: 'Project health data is not available yet.',
+    coachingTip: 'Health pulse data populates once the project health configuration is active.',
+  }),
 };
 
 export const ProjectHealthPulseCard = ({
@@ -87,7 +99,19 @@ export const ProjectHealthPulseCard = ({
         )}
 
         {!pulseState.isLoading && !pulseState.error && !pulse && (
-          <HbcEmptyState title="Health data pending" description="Project health data is not available yet." />
+          <HbcSmartEmptyState
+            config={PULSE_PENDING_CONFIG}
+            context={{
+              module: 'project-hub',
+              view: 'health-pulse-card',
+              hasActiveFilters: false,
+              hasPermission: true,
+              isFirstVisit: false,
+              currentUserRole: 'user',
+              isLoadError: false,
+            }}
+            variant="inline"
+          />
         )}
 
         {!pulseState.isLoading && !pulseState.error && pulse && (
