@@ -9,7 +9,7 @@
 **Governed by:** CLAUDE.md v1.6 → `current-state-map.md` → G3 master plan → G4 master plan → this document
 **Depends on:** T01 (RequestDetailPage composition, Completed state slot reservation)
 **Unlocks:** T07 (handoff failure modes), T08 (completion handoff tests)
-**Phase 7 gate:** ADR-0090 must exist on disk before implementation begins
+**Phase 7 gate:** ADR-0091 must exist on disk before implementation begins
 
 ---
 

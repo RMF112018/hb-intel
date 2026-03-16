@@ -829,7 +829,7 @@ These checks are not automated tests but must be manually verified as part of th
 - [ ] `docs/reference/provisioning/department-library-folders.md` exists and is classified
 - [ ] `docs/reference/provisioning/seeded-file-manifest.md` exists and is classified
 - [ ] All four reference documents have been added to `current-state-map.md §2`
-- [ ] ADR-0090 (Phase 7 sign-off) exists on disk (required before any G2 implementation begins per CLAUDE.md §6.3)
+- [ ] ADR-0091 (Phase 7 sign-off) exists on disk (required before any G2 implementation begins per CLAUDE.md §6.3)
 
 ### 12.3 Mechanical Gate for Pilot
 

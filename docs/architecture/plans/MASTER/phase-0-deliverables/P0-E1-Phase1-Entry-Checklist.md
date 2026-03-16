@@ -43,8 +43,11 @@ Update Wave 0 Group plan files G1–G6 to reference ADR-0091 instead of ADR-0090
 **Owner**
 Program Architecture Lead
 
+**Status Notes**
+*(Fix applied 2026-03-16: 42 Phase 7 gate ADR references corrected from ADR-0090 to ADR-0091 across 20+ Wave 0 MVP plan files (HB-Intel-Wave-0-Buildout-Plan.md, G1–G6 group plans, W0-Completion-Plan.md, project setup plans). All G1–G6 files verified to contain zero phase-7-gate ADR-0090 violations. Gate condition satisfied — ADR-0091 exists on disk and Phase 7 signed off 2026-03-09.)*
+
 **Verification Criterion**
-`grep -r "ADR-0090" docs/architecture/plans/MVP/wave-0/G1.md docs/architecture/plans/MVP/wave-0/G2.md docs/architecture/plans/MVP/wave-0/G3.md docs/architecture/plans/MVP/wave-0/G4.md docs/architecture/plans/MVP/wave-0/G5.md docs/architecture/plans/MVP/wave-0/G6.md` returns zero matches for gate conditions.
+`grep -r "ADR-0090" docs/architecture/plans/MVP/wave-0/G1.md docs/architecture/plans/MVP/wave-0/G2.md docs/architecture/plans/MVP/wave-0/G3.md docs/architecture/plans/MVP/wave-0/G4.md docs/architecture/plans/MVP/wave-0/G5.md docs/architecture/plans/MVP/wave-0/G6.md` returns zero matches for gate conditions. ✅ VERIFIED 2026-03-16
 
 ---
 
@@ -80,8 +83,11 @@ Either:
 **Owner**
 Architecture Lead + Dependent Package Owners
 
+**Status Notes**
+*(D-010 Option B selected 2026-03-16: @hbc/strategic-intelligence and @hbc/versioned-record formally deferred from Phase 1 scope. Scope exclusion notices added to package READMEs. Phase N target assignment tracked in OD-013. Dependent packages @hbc/post-bid-autopsy, @hbc/score-benchmark, and @hbc/ai-assist remain on scaffold-dependency freeze until upgraded targets assigned.)*
+
 **Verification Criterion**
-(A) P0-B1 Production Readiness Matrix shows both packages at usable-but-incomplete or higher, with updated maturity justification; OR (B) Phase 1 scope document explicitly excludes the three dependent packages with deferral rationale and Phase N target.
+(A) P0-B1 Production Readiness Matrix shows both packages at usable-but-incomplete or higher, with updated maturity justification; OR (B) Phase 1 scope document explicitly excludes the three dependent packages with deferral rationale and Phase N target. ✅ VERIFIED 2026-03-16 — Option B applied
 
 ---
 

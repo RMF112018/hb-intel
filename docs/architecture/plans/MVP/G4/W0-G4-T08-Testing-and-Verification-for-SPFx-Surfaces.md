@@ -8,7 +8,7 @@
 **Parent Plan:** `W0-G4-SPFx-Surfaces-and-Workflow-Experience-Plan.md`
 **Governed by:** CLAUDE.md v1.6 → `current-state-map.md` → G3-T08 → G4 master plan → this document
 **Depends on:** T01–T07 (all surface and behavior specifications)
-**Phase 7 gate:** ADR-0090 must exist on disk before implementation begins
+**Phase 7 gate:** ADR-0091 must exist on disk before implementation begins
 
 ---
 

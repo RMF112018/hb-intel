@@ -62,7 +62,7 @@ This log records all identified divergences between architectural planning docum
 | **Area** | Governance — ADR References |
 | **Description** | Wave 0 Group plans G1–G6 each state "ADR-0090 required before implementation." However, ADR-0090 on disk is `ADR-0090-signalr-per-project-groups.md` (a PH6 SignalR decision). The actual Phase 7 Final Verification and Sign-Off ADR is ADR-0091. The v1.1 validation correction applied to `HB-Intel-Wave-0-Buildout-Plan.md` inadvertently pointed to the wrong ADR number. ADR-0091 exists on disk and Phase 7 signed off 2026-03-09, meaning the gate condition is **already satisfied** — but the Wave 0 plan documents contain a stale cross-reference. |
 | **Classification** | **(c) Superseded / stale reference** |
-| **Resolution** | The gate is satisfied. Wave 0 Group plan files (G1–G6) must be updated to reference ADR-0091 (Phase 7 Final Verification) instead of ADR-0090. Errata note to be issued. **Action owner:** Program architecture lead. **Priority:** High (blocks Phase 1 entry gate sign-off). |
+| **Resolution** | ✅ RESOLVED (2026-03-16). The gate condition is satisfied — ADR-0091 (`ADR-0091-phase-7-final-verification.md`) exists on disk, Phase 7 signed off 2026-03-09. All Phase 7 gate references in Wave 0 MVP plan files corrected from ADR-0090 to ADR-0091 (HB-Intel-Wave-0-Buildout-Plan.md, G1–G4 group plans, W0-Completion-Plan.md, project-setup plans — 42 occurrences across 20+ files). Errata note added to wave-0-validation-report.md. See branch fix/p0-d004-adr-gate-references. |
 
 ---
 
@@ -73,7 +73,7 @@ This log records all identified divergences between architectural planning docum
 | **Area** | Governance — Plan Approval |
 | **Description** | `docs/architecture/plans/MVP/HB-Intel-Wave-0-Buildout-Plan.md` v1.1 header states "Status: Proposed — awaiting review." Phase 0 has discovered that Wave 0 surface work (G4 and G5 T01–T08) is already built and recorded as `Canonical Current-State` in `current-state-map.md`. The plan's formal approval status has not caught up with the implementation work that was completed. |
 | **Classification** | **(c) Superseded — plan status is stale relative to actual implementation state** |
-| **Resolution** | The Wave 0 plan must be formally approved/signed-off by product owner and architecture owner. The plan header should be updated to "Approved" and individual group plans should record "Implementation complete" where that is true. **Action owner:** Product owner + architecture lead. **Blocker:** Yes — Phase 1 entry gate item. |
+| **Resolution** | PARTIAL — Document preparation complete (2026-03-16). Wave 0 Buildout Plan updated with: G4/G5 implementation evidence, formal approval checklist with signature table. Status changed from "Proposed — awaiting review" to "Proposed — Implementation Evidence Available; Ready for Formal Approval." ADR-0090 gate references corrected to ADR-0091 per D-004. Awaiting Product Owner + Architecture Owner signature to complete approval. **This item remains a Phase 1 entry blocker (BLOCKER-02 in P0-E1) until signed.** |
 
 ---
 
@@ -84,7 +84,7 @@ This log records all identified divergences between architectural planning docum
 | **Area** | Planning — Document Classification |
 | **Description** | Nine Review Mode plans (`PH7-RM-1` through `PH7-RM-9`) are classified as "Deferred Scope" per `current-state-map.md` §2.1. Per the transition rule, these must be reclassified to "Canonical Normative Plan" when entering active development, or formally archived if out of scope. No reclassification decision has been made. |
 | **Classification** | **(b) Not-yet-implemented** |
-| **Resolution** | Requires an explicit decision: (1) assign to a named phase milestone and reclassify, or (2) formally archive. Add to Open Decisions Register (P0-E2). **Decision owner:** Delivery/program lead. **Deadline:** Phase 1 entry gate review. |
+| **Resolution** | Decision pending — tracked in P0-E2 OD-006. Recommendation: Assign PH7-RM-1 through PH7-RM-9 (review-mode feature suite) to Phase 3 (Project Hub and Project Context) milestone. Classification would change from "Deferred Scope" to "Canonical Normative Plan" upon Phase 3 scope confirmation. PH7-RM-* banners updated (2026-03-16) to reflect PH7.12 completion and pending Phase assignment. Pending product owner + delivery lead approval per OD-006. |
 
 ---
 
@@ -106,7 +106,7 @@ This log records all identified divergences between architectural planning docum
 | **Area** | Planning — Document Classification |
 | **Description** | This document (at `docs/architecture/plans/`) is an early phase mapping recommendation that has been superseded by the full MASTER plan set and active PH7 plans. It is not classified in the `current-state-map.md` matrix. |
 | **Classification** | **(c) Superseded / Archived Reference** |
-| **Resolution** | Reclassify as "Superseded" and add a classification banner. Optionally archive under a `docs/architecture/plans/_archive/` prefix. **Priority:** Low (documentation housekeeping). |
+| **Resolution** | ✅ RESOLVED (pre-2026-03-16). Classification banner already applied to `docs/architecture/plans/HB-Intel-Feature-Phase-Mapping-Recommendation.md`: "Superseded / Archived Reference — pre-Phase-6 feature placement recommendation." Status: SUPERSEDED (2026-03-14). No further action required. |
 
 ---
 
@@ -151,17 +151,17 @@ The following divergences were identified and resolved during Phase 7 or prior, 
 |----------------|-------|-------|
 | **(a) Controlled evolution** — no action | 3 | Known and intentional divergences; documented |
 | **(b) Not-yet-implemented** — track in Phase 1 or decisions register | 4 | Planned work not yet built; requires Phase 1 scope decision |
-| **(c) Superseded / stale** — correction action required | 3 | Documents or refs need updating; some are blockers |
-| **Total active divergences** | **10** | — |
-| **Pre-Phase-0 resolved** | **4** | Historical resolution record |
+| **(c) Superseded / stale** — correction action required | 1 | D-005 remains open; D-004, D-008 resolved 2026-03-16 |
+| **Total active divergences** | **8** | — |
+| **Phase 0 resolved** | **2** | D-004 (ADR-0090 gate refs), D-008 (Feature-Phase-Mapping already classified) |
+| **Pre-Phase-0 resolved** | **4** | Historical resolution record from Phase 7 |
 
 ---
 
 ## 6. Next Steps
 
-- **High-priority corrections (blockers):** D-004, D-005, D-010 must be resolved before Phase 1 entry gate sign-off.
+- **High-priority corrections (blockers):** D-005, D-010 must be resolved before Phase 1 entry gate sign-off.
 - **Open decisions:** D-006, D-007 require explicit decision within Phase 0 exit governance (P0-E2 Open Decisions Register).
-- **Documentation housekeeping:** D-008 is low-priority but should be addressed in Phase 1 documentation reconciliation.
 - **Awareness / classification:** D-009 requires developer documentation and tooling guidance to prevent misinterpretation.
 
 ---

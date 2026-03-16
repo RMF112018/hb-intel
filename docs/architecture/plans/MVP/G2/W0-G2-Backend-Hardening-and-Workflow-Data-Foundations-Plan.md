@@ -4,7 +4,7 @@
 
 **Version:** 1.0
 **Date:** 2026-03-14
-**Status:** Active — ready for implementation once Group 1 acceptance gate is satisfied and ADR-0090 exists on disk
+**Status:** Active — ready for implementation once Group 1 acceptance gate is satisfied and ADR-0091 exists on disk
 **Governs:** `W0-G2-T01` through `W0-G2-T09`
 **Read with:** `CLAUDE.md` v1.6 → `current-state-map.md` → `HB-Intel-Wave-0-Buildout-Plan.md` v1.1 → `W0-G1-Contracts-and-Configuration-Plan.md` v1.1 → this document → individual T01–T09 plans
 **Wave 0 umbrella reference:** `docs/architecture/plans/MVP/HB-Intel-Wave-0-Buildout-Plan.md` §Group 2
@@ -94,7 +94,7 @@ The MVP Project Setup plan set (`docs/architecture/plans/MVP/project-setup/`) is
 
 All Group 2 plans are governed by CLAUDE.md v1.6 in full. Critical constraints:
 
-- **Phase 7 Gate (§6.3):** G2 implementation may not begin until ADR-0090 exists on disk. G2 planning may proceed before ADR-0090 is created, but no implementation task may start.
+- **Phase 7 Gate (§6.3):** G2 implementation may not begin until ADR-0091 exists on disk. G2 planning may proceed before ADR-0091 is created, but no implementation task may start.
 - **Zero-Deviation Rule (§1.2):** Any deviation from the locked G2 decisions (§3 below) or locked G1 contracts requires a superseding ADR.
 - **Guarded Commit Rule (§1.5):** All G2 code and documentation changes must commit through `pnpm guarded:commit`. No direct `git commit`.
 - **Document Classification Rule (§1.4):** Every new document produced by G2 must carry a classification.

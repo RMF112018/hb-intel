@@ -4,11 +4,11 @@
 
 **Version:** 1.0
 **Date:** 2026-03-14
-**Status:** Active — implementation may not begin until G3 acceptance gate is satisfied and ADR-0090 exists on disk
+**Status:** Active — implementation may not begin until G3 acceptance gate is satisfied and ADR-0091 exists on disk
 **Parent Plan:** `W0-G4-SPFx-Surfaces-and-Workflow-Experience-Plan.md`
 **Governed by:** CLAUDE.md v1.6 → `current-state-map.md` → G3 master plan → G4 master plan → this document
 **Unlocks:** T02 (coordinator layer on same RequestDetailPage surface), T05 (completion entry point in Estimating), T07 (wizard failure modes)
-**Phase 7 gate:** ADR-0090 must exist on disk before implementation begins
+**Phase 7 gate:** ADR-0091 must exist on disk before implementation begins
 
 ---
 

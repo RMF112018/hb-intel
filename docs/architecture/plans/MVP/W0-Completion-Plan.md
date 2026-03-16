@@ -152,7 +152,7 @@ Finish the technical and governance gate that must close before any broad featur
 The blueprint states that:
 - **PH7.12 Final Verification** must complete before feature expansion,
 - **PH7.13 Stub Detection Enforcement** is active,
-- PH7 expansion may not begin until PH7.12 acceptance criteria are satisfied and ADR-0090 is on disk. fileciteturn8file3
+- PH7 expansion may not begin until PH7.12 acceptance criteria are satisfied and ADR-0091 is on disk. fileciteturn8file3
 
 ## Scope
 
@@ -169,7 +169,7 @@ Each finding must be either:
 - or deferred with explicit classification and rationale.
 
 ### B4. Verify ADR requirements
-Confirm that ADR-0090 and any other gating ADR artifacts required by the governing docs are present, correct, and linked.
+Confirm that ADR-0091 and any other gating ADR artifacts required by the governing docs are present, correct, and linked.
 
 ## Deliverables
 - PH7 Final Verification Sign-Off Packet,

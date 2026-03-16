@@ -9,7 +9,7 @@
 **Read with:** `CLAUDE.md` v1.6 → `current-state-map.md` → `HB-Intel-Wave-0-Buildout-Plan.md` v1.1 → `W0-G1-Contracts-and-Configuration-Plan.md` v1.1 → `W0-G2-Backend-Hardening-and-Workflow-Data-Foundations-Plan.md` → `W0-G3-Shared-Platform-Wiring-and-Workflow-Experience-Plan.md` → this document → individual T01–T08 plans
 **Wave 0 umbrella reference:** `docs/architecture/plans/MVP/HB-Intel-Wave-0-Buildout-Plan.md`
 **Validation basis:** `docs/architecture/plans/MVP/wave-0-validation-report.md`
-**Phase 7 gate:** ADR-0090 must exist on disk before G4 implementation proceeds (CLAUDE.md §6.3)
+**Phase 7 gate:** ADR-0091 must exist on disk before G4 implementation proceeds (CLAUDE.md §6.3)
 **Next ADR available:** ADR-0114 (G1 plan context; G4 may consume ADR-0117 and beyond depending on G1–G3 ADR consumption)
 
 ---
@@ -410,7 +410,7 @@ G4 implementation may not begin until all G3 acceptance gate conditions are sati
 5. G3-T05 locked: draft key registry is defined
 6. G3-T06 locked: complexity gate spec table is defined
 7. G3-T07 locked: shared primitive integration rules and failure mode catalog are defined
-8. ADR-0090 exists on disk (Phase 7 closure gate per CLAUDE.md §6.3)
+8. ADR-0091 exists on disk (Phase 7 closure gate per CLAUDE.md §6.3)
 
 ### Later-Group Entry Condition
 
@@ -511,7 +511,7 @@ Group 4 is complete at the planning level when all of the following conditions a
 - [ ] All seven reference documents are added to `current-state-map.md §2`
 - [ ] G4 acceptance gate conditions do not require G3 contract gaps to be patched inside G4 — any gaps raised are captured as G3 amendments
 - [ ] No G4 implementation task has begun without the G3 entry condition being satisfied
-- [ ] ADR-0090 exists on disk before any G4 implementation begins
+- [ ] ADR-0091 exists on disk before any G4 implementation begins
 
 ---
 

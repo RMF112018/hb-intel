@@ -19,7 +19,7 @@ However, the plans contain four categories of material issues that must be corre
 
 1. **Undiscovered codebase issues** the plans do not yet surface (admin router bug, admin missing package.json dependency, state machine duplication).
 2. **Incomplete package dependency declarations** — `apps/accounting` and `apps/admin` are missing multiple declared dependencies required for their planned surfaces.
-3. **A missing governance gate** — the plans do not acknowledge that ADR-0090 (Phase 7 Final Verification & Sign-Off) must exist on disk before any feature-expansion work begins (CLAUDE.md §7, last bullet).
+3. **A missing governance gate** — the plans do not acknowledge that ADR-0091 (Phase 7 Final Verification & Sign-Off) must exist on disk before any feature-expansion work begins (CLAUDE.md §7, last bullet).
 4. **Speculative references** — one path reference in T06 (`packages/auth/src/backend/*`) does not exist, and one T04 wording ("or equivalent") creates ambiguity around mandatory platform-primitive usage.
 
 The plans are **not safe to hand directly to a coding agent without the refinement pass described in this review**.
@@ -39,7 +39,7 @@ The following locked constraints from CLAUDE.md, `current-state-map.md`, Bluepri
 
 **From CLAUDE.md §6.3 (Phase 7 Governance):**
 - ADR-0083 through ADR-0090 are permanently binding.
-- ADR-0090 must exist on disk and be signed off **before any feature-expansion phase begins.**
+- ADR-0091 must exist on disk and be signed off **before any feature-expansion phase begins.**
 - The four mechanical enforcement gates (build, lint, type-check, P1 tests) must pass before any phase is considered complete.
 - PH7-RM-* plans (Deferred Scope) may not be activated without reclassification.
 
@@ -107,7 +107,7 @@ The following locked constraints from CLAUDE.md, `current-state-map.md`, Bluepri
 | Project number uniqueness check | No server-side duplicate detection in `advanceState` | Medium |
 | `@hbc/provisioning` in `apps/admin/package.json` | Import exists in code, undeclared in manifest | Medium |
 | `@hbc/versioned-record` maturity | Scaffold only — plans correctly don't rely on it, but should explicitly confirm this exclusion | Low |
-| ADR-0090 gate | Master plan doesn't acknowledge the PH7.12 sign-off requirement | Medium |
+| ADR-0091 gate | Master plan doesn't acknowledge the PH7.12 sign-off requirement | Medium |
 
 ---
 
@@ -227,12 +227,12 @@ The following locked constraints from CLAUDE.md, `current-state-map.md`, Bluepri
 - Current-state validation summary (§ "Already present" / "Still missing") is mostly accurate.
 
 **Weak / Speculative:**
-- Does not acknowledge ADR-0090 gate (CLAUDE.md §6.3 — "No feature-expansion phase may begin until PH7.12 acceptance criteria are fully satisfied and ADR-0090 exists on disk").
+- Does not acknowledge ADR-0091 gate (CLAUDE.md §6.3 — "No feature-expansion phase may begin until PH7.12 acceptance criteria are fully satisfied and ADR-0091 exists on disk").
 - "Already present" section lists "backend request lifecycle APIs" and "Admin failed-runs page with retry/escalate actions" — both are true but omit the `@hbc/provisioning` undeclared dependency in admin and the admin router bug.
 - "Still missing" section does not list: state machine duplication problem, admin router bug, admin missing package.json dependency.
 
 **Missing:**
-- No explicit reference to ADR-0090 gate condition.
+- No explicit reference to ADR-0091 gate condition.
 - No acknowledgment that `backend/functions` has more mature notification infrastructure than the plan's framing implies.
 - No note on state machine duplication (backend + provisioning package copies).
 - Verification envelope uses `@hbc/spfx-estimating`, `@hbc/spfx-accounting`, `@hbc/spfx-admin` — these match actual package names (confirmed). `@hbc/functions` also confirmed correct.
@@ -458,7 +458,7 @@ grep -E "@hbc/provisioning|bic-next-move|field-annotations|step-wizard|notificat
 | Item | Revision Required |
 |------|-----------------|
 | Master plan "Already present" / "Still missing" | Add: admin router bug, admin undeclared dependency, state machine duplication, existing backend notifications infrastructure |
-| Master plan — governance gate | Add explicit acknowledgment of ADR-0090 pre-condition |
+| Master plan — governance gate | Add explicit acknowledgment of ADR-0091 pre-condition |
 | T01 — dependency drift section | Expand to include all missing package.json entries for all three apps (admin, accounting, estimating) |
 | T01 — verification commands | Add checks for admin router correctness and new package.json dependencies |
 | T02 — state machine update instruction | Explicitly require updating both `packages/provisioning/src/state-machine.ts` AND `backend/functions/src/state-machine.ts` |
@@ -488,7 +488,7 @@ Nothing should be removed from the current plan set. The scope, decisions, and r
 
 | Item | Where |
 |------|-------|
-| ADR-0090 gate acknowledgment | Master plan, before "Recommended Task Sequence" |
+| ADR-0091 gate acknowledgment | Master plan, before "Recommended Task Sequence" |
 | Explicit ADR requirement (not "Recommended") | Master plan |
 | Admin router bug fix | T01 |
 | `@hbc/versioned-record` explicit exclusion note | T01 |
@@ -513,7 +513,7 @@ The following describes the order in which the plan files themselves should be r
 
 ### Pass 1 — Governance and Gate Fixes (30 minutes)
 
-1. **Master plan:** Add ADR-0090 gate acknowledgment before "Recommended Task Sequence." Upgrade "ADR Recommended" to "ADR Required."
+1. **Master plan:** Add ADR-0091 gate acknowledgment before "Recommended Task Sequence." Upgrade "ADR Recommended" to "ADR Required."
 2. **Master plan "Still missing" section:** Add: admin router bug, admin undeclared dependency, state machine duplication, existing backend notifications infrastructure.
 
 ### Pass 2 — T01 Expansion (45 minutes)
@@ -568,7 +568,7 @@ Listed in order of severity if plans were implemented without refinement.
 
 | # | Risk | Impact | Mitigation |
 |---|------|--------|-----------|
-| 1 | **ADR-0090 not confirmed** — Plans could be implemented before Phase 7 sign-off, violating CLAUDE.md §6.3 | Zero-Deviation Rule breach; work may need to be undone | Add gate acknowledgment to master plan; confirm ADR-0090 exists before implementing T01 |
+| 1 | **ADR-0091 not confirmed** — Plans could be implemented before Phase 7 sign-off, violating CLAUDE.md §6.3 | Zero-Deviation Rule breach; work may need to be undone | Add gate acknowledgment to master plan; confirm ADR-0091 exists before implementing T01 |
 | 2 | **State machine divergence** — T02 updates only one of two duplicate state machines | Backend and package transition rules diverge; `'Canceled'` state unavailable in backend | T02 must update both files explicitly |
 | 3 | **Admin router bug** — `/provisioning-failures` renders wrong page | T07 admin recovery work is built on a broken foundation | Fix in T01 |
 | 4 | **Accounting app missing dependencies and routes** — coding agent may not realize the scope of T03 | T03 work incomplete or builds on wrong foundation | T03 scope expansion in Pass 4 |
@@ -616,10 +616,10 @@ Do not implement code during this pass. Only revise plan text.
 
 This plan is classified as a feature-expansion phase. Per CLAUDE.md §6.3 and the binding governance rule in ADR-0085, no implementation task in this plan set may begin until:
 
-- [ ] ADR-0090 (Phase 7 Final Verification & Sign-Off) exists on disk and is signed off
+- [ ] ADR-0091 (Phase 7 Final Verification & Sign-Off) exists on disk and is signed off
 - [ ] All four mechanical enforcement gates pass: build, lint, type-check, P1 tests
 
-Confirm ADR-0090 exists before executing T01.
+Confirm ADR-0091 exists before executing T01.
 ```
 
 ### REVISE "Already present" section — add:

@@ -4,11 +4,11 @@
 
 **Version:** 1.0
 **Date:** 2026-03-14
-**Status:** Active — implementation requires G3 acceptance gate to be satisfied and ADR-0090 to exist on disk
+**Status:** Active — implementation requires G3 acceptance gate to be satisfied and ADR-0091 to exist on disk
 **Parent Plan:** `W0-G4-SPFx-Surfaces-and-Workflow-Experience-Plan.md`
 **Governed by:** CLAUDE.md v1.6 → `current-state-map.md` → G3 master plan → G4 master plan → this document
 **Unlocks:** T07 (admin failure modes), T08 (admin boundary tests)
-**Phase 7 gate:** ADR-0090 must exist on disk before implementation begins
+**Phase 7 gate:** ADR-0091 must exist on disk before implementation begins
 
 ---
 

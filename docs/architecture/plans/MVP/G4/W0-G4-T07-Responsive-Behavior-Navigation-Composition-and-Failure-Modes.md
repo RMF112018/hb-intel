@@ -9,7 +9,7 @@
 **Governed by:** CLAUDE.md v1.6 → `current-state-map.md` → G3-T07 → G4 master plan → this document
 **Depends on:** T01–T06 (all primary surfaces and complexity rules)
 **Unlocks:** T08 (failure-mode tests, responsive verification)
-**Phase 7 gate:** ADR-0090 must exist on disk before implementation begins
+**Phase 7 gate:** ADR-0091 must exist on disk before implementation begins
 
 ---
 
