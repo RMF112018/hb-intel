@@ -4,7 +4,7 @@
 **Spec Source:** `MVP-Project-Setup.md` + MVP Blueprint + MVP Roadmap
 **Decisions Applied:** D-01, D-02, D-10, D-12, D-15 + R-01 through R-08
 **Estimated Effort:** 0.5 sprint-weeks
-**Depends On:** master plan only; ADR-0090 must exist on disk before this task begins
+**Depends On:** master plan only; ADR-0091 must exist on disk before this task begins
 > **Doc Classification:** Canonical Normative Plan — scaffold/documentation task; sub-plan of `MVP-Project-Setup-Plan.md`.
 
 ---

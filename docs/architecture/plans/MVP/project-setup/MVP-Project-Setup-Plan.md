@@ -14,7 +14,7 @@
 
 This plan is a feature-expansion phase. Per CLAUDE.md §6.3 and ADR-0085, **no implementation task in this plan set may begin until all of the following are confirmed:**
 
-- [ ] ADR-0090 (Phase 7 Final Verification & Sign-Off) exists on disk and is signed off
+- [ ] ADR-0091 (Phase 7 Final Verification & Sign-Off) exists on disk and is signed off
 - [ ] `pnpm turbo run build` passes with zero errors
 - [ ] `pnpm turbo run lint` passes with zero errors
 - [ ] `pnpm turbo run check-types` passes with zero TypeScript errors
