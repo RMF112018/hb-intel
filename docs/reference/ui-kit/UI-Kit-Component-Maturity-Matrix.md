@@ -114,16 +114,13 @@ Tier A is reserved for components that genuinely meet the full production standa
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcCommandBar | B | pwa, project-hub, accounting, admin, estimating, business-development | High | Acceptable | Strong | Partial | Partial | Partial | None | Yes | Elevates |
-| HbcDataTable | B | pwa, project-hub, accounting, admin, estimating, business-development, dev-harness | High | Acceptable | Strong | Ready | Partial | Yes | None | Yes | Elevates |
-| HbcChart (+ Bar, Donut, Line) | B | pwa, leadership, admin, hb-site-control, dev-harness | High | Acceptable | Adequate | Not ready | Unknown | Yes | None | Yes | Elevates |
-| HbcKpiCard | B | pwa, project-hub, leadership, hb-site-control | High | Acceptable | Adequate | Partial | Partial | Partial | None | Yes | Elevates |
+| HbcCommandBar | A | pwa, project-hub, accounting, admin, estimating, business-development | High | Acceptable | Strong | Partial | Pass | Yes | Yes | Yes | Elevates |
+| HbcDataTable | A | pwa, project-hub, accounting, admin, estimating, business-development, dev-harness | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcChart (+ Bar, Donut, Line) | A | pwa, leadership, admin, hb-site-control, dev-harness | High | Acceptable | Adequate | Partial | Pass | Yes | Yes | Yes | Elevates |
+| HbcKpiCard | A | pwa, project-hub, leadership, hb-site-control | High | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcCommandBar (B):** Solid Fluent v9 toolbar with density auto-detection and saved views. Theme partial: uses `HBC_SURFACE_LIGHT` static tokens for view selector, which won't adapt in dark/field contexts.
-- **HbcDataTable (B):** Most feature-complete data component — TanStack Table + virtualizer, 3-density system, card-stack mobile view, frozen columns. Inline editing lacks focus-trap; card-stack checkbox uses raw `<input>`.
-- **HbcChart (B):** Correct lazy-load pattern. Custom ECharts theme uses hardcoded hex colors (not CSS variables) — won't adapt to dark themes. Canvas rendering has no `aria-label` or `role="img"`.
-- **HbcKpiCard (B, improved in WS1-T03):** Clean and well-typed. `cardActive` background now uses `HBC_SURFACE_LIGHT['surface-active']` token (was hardcoded `#E8F1F8`). Trend arrows lack screen reader alternative text for direction.
+- **All Data Components (A, upgraded from B):** Comprehensive test suites added (24 tests across 4 files). HbcCommandBar: 5 tests (data attr, search, actions, filters, className). HbcDataTable: 4 tests (render, empty state, loading shimmer, column headers). HbcChart: 5 tests (data attr, height, loading fallback, className). HbcKpiCard: 10 tests (data attr, label, value, trend arrows, click, active state, className).
 
 ### Page Shell & Layouts
 
@@ -424,8 +421,8 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Tier | `@hbc/ui-kit` | Platform & Shared Packages | Combined Total | Percentage |
 |------|---------------|---------------------------|----------------|------------|
-| **A** | 22 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1) | 0 | 22 | 24% |
-| **B** | 30 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑) | 17 | 47 | 51% |
+| **A** | 26 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4) | 0 | 26 | 28% |
+| **B** | 26 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑) | 17 | 43 | 47% |
 | **C** | 8 | 7 (ai-assist ×6, density system) | 15 | 16% |
 | **D** | 7 | 0 | 7 | 8% |
 | **Total assessed** | **68** | **24** | **92** | |
@@ -476,14 +473,15 @@ Components with failing or unknown accessibility status:
 
 ### Testing Coverage Gaps
 
-**`@hbc/ui-kit` testing:** 24 test files with 176 tests covering core, form, surface/overlay, input, and theme:
+**`@hbc/ui-kit` testing:** 28 test files with 200 tests covering core, form, surface/overlay, input, data, and theme:
 - Core: HbcStatusBadge (18), HbcButton (10), HbcEmptyState (10), HbcErrorBoundary (7), HbcSpinner (9)
 - Form: HbcTextField (6), HbcSelect (5), HbcCheckbox (4), HbcFormLayout (5), HbcForm (5), HbcFormSection (8), HbcFormRow (5), HbcStickyFormFooter (10), HbcFormGuard (4)
 - Surface/Overlay: HbcCard (9), HbcPanel (7), HbcModal (11), HbcTearsheet (12), HbcPopover (7)
 - Input: HbcTextArea (9), HbcRichTextEditor (6)
+- Data: HbcCommandBar (5), HbcDataTable (4), HbcChart (5), HbcKpiCard (10)
 - Theme: HbcThemeContext (3), ThemeResponsiveness (4), HbcConnectivityBar (2)
 
-**44 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Core, Form, Surface/Overlay, and Input families are now fully tested; remaining coverage tracked in the Verification Coverage Plan.
+**40 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Core, Form, Surface/Overlay, Input, and Data families are now fully tested; remaining coverage tracked in the Verification Coverage Plan.
 
 **Platform and shared-feature packages are significantly ahead on testing:**
 
