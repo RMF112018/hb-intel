@@ -10,6 +10,7 @@ src/theme/
 ├── theme.ts           # Fluent UI theme objects (light, field, dark)
 ├── typography.ts      # Intent-based type scale
 ├── radii.ts           # Intent-based border-radius tokens (V2.1.1)
+├── hierarchy.ts       # Visual hierarchy rules, zone distinctions, card weights (V2.1.2)
 ├── grid.ts            # Spacing, breakpoints, media queries
 ├── animations.ts      # Keyframes, transitions, timing
 ├── elevation.ts       # Dual-shadow elevation (light & field)
@@ -130,6 +131,24 @@ Seven canonical surface roles define which token combinations to use for each vi
 | **Overlays** | `hbcColorSurface0` | `hbcColorTextPrimary` | `hbcColorBorderDefault` | `elevationLevel3` | `xl` |
 | **Focused work zones** | `hbcColorSurface0` | `hbcColorTextPrimary` | `hbcColorBorderFocus` | `elevationLevel2` | `xl` |
 
+### Visual Hierarchy System (V2.1.2 — WS1-T04)
+
+Import from `@hbc/ui-kit` or `@hbc/ui-kit/theme`. See `docs/reference/ui-kit/UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` for the full reference.
+
+**`HBC_CONTENT_LEVELS`** — 12 content levels mapping content importance to typography, color, spacing, and priority rank. Levels: pageTitle, sectionTitle, summaryMetric, bodyContent, metadata, secondaryAnnotation, helperText, statusIndicator, urgencyIndicator, primaryAction, secondaryAction, destructiveAction.
+
+**`HBC_ZONE_DISTINCTIONS`** — 7 page zone types with surface role, padding, spacing, elevation, and visual weight. Zones: pageHeader, commandArea, filterArea, summaryArea, primaryContent, secondaryDetail, activityHistory.
+
+**`HBC_CARD_WEIGHTS`** — 3 card weight classes for anti-flatness differentiation:
+
+| Weight | Elevation | Border | Background | Use For |
+|--------|-----------|--------|------------|---------|
+| `primary` | Level 2 | 2px brand-focus | surface-0 | Most important current-context cards |
+| `standard` | Level 1 | 1px default | surface-0 | Default card treatment |
+| `supporting` | Level 0 | 1px default | surface-1 | Metadata, history, secondary context |
+
+**`HBC_THREE_SECOND_STANDARD`** — Testable evaluation criteria for Wave 1 compositions. Page title identifiable <1s, primary content distinguishable <2s, primary CTA obvious <3s.
+
 ### Spacing Tokens (4px base unit)
 
 | Token | Value | Use For |
@@ -163,7 +182,8 @@ Seven canonical surface roles define which token combinations to use for each vi
 | `elevationLevel0` | Flat surface (no shadow) | `elevationFieldLevel0` |
 | `elevationLevel1` / `elevationCard` | Cards, table containers | `elevationFieldLevel1` |
 | `elevationLevel2` | Popovers, dropdowns, floating | `elevationFieldLevel2` |
-| `elevationLevel3` / `elevationModal` | Dialogs, panels, tearsheets | `elevationFieldLevel3` |
+| `elevationLevel3` / `elevationModal` | Overlays, side panels, drawers | `elevationFieldLevel3` |
+| `elevationLevel4` / `elevationBlocking` | Blocking modals, confirmation overlays | `elevationFieldLevel4` |
 
 ### Breakpoints
 

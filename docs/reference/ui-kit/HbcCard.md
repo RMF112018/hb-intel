@@ -1,6 +1,6 @@
 # HbcCard
 
-Elevated surface container for grouping related content.
+Elevated surface container for grouping related content with visual weight differentiation.
 
 ## Import
 
@@ -12,26 +12,36 @@ import { HbcCard } from '@hbc/ui-kit';
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| elevation | 0 \| 1 \| 2 \| 3 | 1 | Shadow depth level for visual hierarchy |
-| padding | 'none' \| 'small' \| 'medium' \| 'large' | 'medium' | Inner padding around content |
-| onClick | (event: React.MouseEvent) => void | undefined | Click handler for interactive cards |
-| children | ReactNode | required | Card content |
+| children | ReactNode | required | Card body content |
+| header | ReactNode | undefined | Optional header content (rendered above body with border divider) |
+| footer | ReactNode | undefined | Optional footer content (rendered below body with border divider) |
+| className | string | undefined | Additional CSS class |
+| weight | `'primary'` \| `'standard'` \| `'supporting'` | `'standard'` | Visual weight class — controls elevation, border, and padding treatment |
+
+### Weight Classes (WS1-T04)
+
+| Weight | Elevation | Border | Background | Padding | Use For |
+|--------|-----------|--------|------------|---------|---------|
+| `primary` | Level 2 (raised) | 2px brand-focus border | surface-0 | Generous (24px body, 20px header) | Most important current-context information |
+| `standard` | Level 1 (card) | 1px default border | surface-0 | Standard (24px body, 16px header) | Default card treatment |
+| `supporting` | Level 0 (flat) | 1px default border | surface-1 | Compact (16px body, 12px header) | Metadata, history, secondary context |
 
 ## Usage
 
 ```tsx
-<HbcCard elevation={1} padding="medium">
-  <HbcTypography intent="h3">Card Title</HbcTypography>
-  <p>Card content goes here.</p>
+{/* Primary card draws attention */}
+<HbcCard weight="primary" header={<h2>Active Project</h2>}>
+  <p>Key metrics and urgent items.</p>
 </HbcCard>
 
-<HbcCard elevation={2} padding="large" onClick={handleCardClick}>
-  <h3>Clickable Card</h3>
-  <p>Click to expand details.</p>
+{/* Standard card (default) */}
+<HbcCard header={<h3>Project Details</h3>}>
+  <p>General content container.</p>
 </HbcCard>
 
-<HbcCard elevation={0} padding="none">
-  <img src="image.jpg" alt="Card image" />
+{/* Supporting card recedes */}
+<HbcCard weight="supporting" header={<h4>Recent Activity</h4>}>
+  <p>Change log and secondary context.</p>
 </HbcCard>
 ```
 
@@ -41,10 +51,9 @@ Shadow and elevation are adjusted for Field Mode using darker shadow colors and 
 
 ## Accessibility
 
-- When interactive, implements `role="region"` with descriptive `aria-label`
 - Semantic heading structure for card titles
-- Click targets are at least 44x44px for touch accessibility
-- Keyboard navigation supported for interactive cards
+- Weight classes maintain sufficient contrast between border treatments
+- `data-hbc-card-weight` attribute available for testing and inspection
 
 ## SPFx Constraints
 

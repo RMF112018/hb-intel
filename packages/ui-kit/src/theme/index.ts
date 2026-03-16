@@ -91,6 +91,10 @@ export {
   elevationFieldLevel1,
   elevationFieldLevel2,
   elevationFieldLevel3,
+  // V2.1.2 (WS1-T04)
+  elevationLevel4,
+  elevationBlocking,
+  elevationFieldLevel4,
   // Deprecated aliases
   elevationRest,
   elevationHover,
@@ -98,6 +102,23 @@ export {
   elevationOverlay,
   elevationDialog,
 } from './elevation.js';
+
+// Hierarchy system (V2.1.2 — WS1-T04)
+export {
+  HBC_CONTENT_LEVELS,
+  HBC_ZONE_DISTINCTIONS,
+  HBC_CARD_WEIGHTS,
+  HBC_THREE_SECOND_STANDARD,
+} from './hierarchy.js';
+export type {
+  ContentLevel,
+  ContentLevelSpec,
+  PageZone,
+  ZoneSpec,
+  CardWeight,
+  CardWeightSpec,
+  ThreeSecondStandard,
+} from './hierarchy.js';
 
 // Z-Index
 export { Z_INDEX } from './z-index.js';

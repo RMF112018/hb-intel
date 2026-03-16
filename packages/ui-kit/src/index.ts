@@ -5,7 +5,7 @@
  * Unified component library for the HB Intel construction intelligence platform.
  * Supports PWA (Next.js 14) and SPFx (SharePoint Framework) dual-target rendering.
  *
- * @version 2.1.1
+ * @version 2.1.2
  * @see docs/reference/ui-kit/ for per-component documentation
  */
 
@@ -80,6 +80,13 @@ export {
   elevationFieldLevel1,
   elevationFieldLevel2,
   elevationFieldLevel3,
+  elevationLevel4,
+  elevationBlocking,
+  elevationFieldLevel4,
+  HBC_CONTENT_LEVELS,
+  HBC_ZONE_DISTINCTIONS,
+  HBC_CARD_WEIGHTS,
+  HBC_THREE_SECOND_STANDARD,
   elevationRest,
   elevationHover,
   elevationRaised,
@@ -110,7 +117,10 @@ export {
   HBC_BREAKPOINT_CONTENT_MEDIUM,
   HBC_BREAKPOINT_COMPACT_DENSITY,
 } from './theme/breakpoints.js';
-export type { HbcSemanticTokens, HbcTheme, HbcSpacingKey, HbcBreakpointConfig, ZIndexLayer, HbcRadiusKey } from './theme/index.js';
+export type {
+  HbcSemanticTokens, HbcTheme, HbcSpacingKey, HbcBreakpointConfig, ZIndexLayer, HbcRadiusKey,
+  ContentLevel, ContentLevelSpec, PageZone, ZoneSpec, CardWeightSpec, ThreeSecondStandard,
+} from './theme/index.js';
 
 // Theme V2.1 — Density & canonical hooks
 export {
@@ -181,7 +191,7 @@ export type { HbcPanelProps, PanelSize } from './HbcPanel/index.js';
 
 // PH4.8 Overlay & Surface System
 export { HbcCard } from './HbcCard/index.js';
-export type { HbcCardProps } from './HbcCard/index.js';
+export type { HbcCardProps, CardWeight } from './HbcCard/index.js';
 
 export { HbcModal } from './HbcModal/index.js';
 export type { HbcModalProps, ModalSize } from './HbcModal/index.js';

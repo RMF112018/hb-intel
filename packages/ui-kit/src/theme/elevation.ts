@@ -21,13 +21,19 @@ export const elevationLevel1 =
 export const elevationLevel2 =
   '0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06)' as const;
 
-/** Level 3 — modal: dialogs, panels, tearsheets */
+/** Level 3 — overlay: side panels, drawers, dropdowns */
 export const elevationLevel3 =
   '0 10px 20px rgba(0, 0, 0, 0.10), 0 6px 6px rgba(0, 0, 0, 0.08)' as const;
+
+/** Level 4 — blocking: modal dialogs, confirmation overlays, tearsheets (V2.1.2 — WS1-T04) */
+export const elevationLevel4 =
+  '0 16px 32px rgba(0, 0, 0, 0.12), 0 8px 12px rgba(0, 0, 0, 0.10)' as const;
 
 /** Semantic aliases */
 export const elevationCard = elevationLevel1;
 export const elevationModal = elevationLevel3;
+/** Semantic alias — blocking overlays that demand exclusive attention (V2.1.2) */
+export const elevationBlocking = elevationLevel4;
 
 // ---------------------------------------------------------------------------
 // Field Mode Variants (opacity +50%)
@@ -44,9 +50,13 @@ export const elevationFieldLevel1 =
 export const elevationFieldLevel2 =
   '0 4px 6px rgba(0, 0, 0, 0.11), 0 2px 4px rgba(0, 0, 0, 0.09)' as const;
 
-/** Field Mode Level 3 — modal with increased opacity */
+/** Field Mode Level 3 — overlay with increased opacity */
 export const elevationFieldLevel3 =
   '0 10px 20px rgba(0, 0, 0, 0.15), 0 6px 6px rgba(0, 0, 0, 0.12)' as const;
+
+/** Field Mode Level 4 — blocking with increased opacity (V2.1.2 — WS1-T04) */
+export const elevationFieldLevel4 =
+  '0 16px 32px rgba(0, 0, 0, 0.18), 0 8px 12px rgba(0, 0, 0, 0.15)' as const;
 
 /** Complete Field Mode elevation scale */
 export const hbcElevationField = {
@@ -54,6 +64,7 @@ export const hbcElevationField = {
   level1: elevationFieldLevel1,
   level2: elevationFieldLevel2,
   level3: elevationFieldLevel3,
+  level4: elevationFieldLevel4,
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -89,4 +100,7 @@ export const hbcElevation = {
   level1: elevationLevel1,
   level2: elevationLevel2,
   level3: elevationLevel3,
+  // V2.1.2 levels (WS1-T04)
+  level4: elevationLevel4,
+  blocking: elevationBlocking,
 } as const;

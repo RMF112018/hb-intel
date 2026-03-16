@@ -128,14 +128,14 @@ This standard applies to all Wave 1-critical compositions and must be used as th
 
 ## Acceptance Criteria
 
-- [ ] Hierarchy rule set covers all content levels with explicit visual treatment requirements
-- [ ] Zone distinction system covers all seven major page zones with required visual treatment rules
-- [ ] Card/panel weight differentiation defines at least three weight classes with clear usage rules
-- [ ] Depth/elevation system defines at least five levels with semantic meaning and token combinations
-- [ ] 3-second read standard is defined in testable operational terms
+- [x] Hierarchy rule set covers all content levels with explicit visual treatment requirements
+- [x] Zone distinction system covers all seven major page zones with required visual treatment rules
+- [x] Card/panel weight differentiation defines at least three weight classes with clear usage rules
+- [x] Depth/elevation system defines at least five levels with semantic meaning and token combinations
+- [x] 3-second read standard is defined in testable operational terms
 - [ ] T07 authors confirm the hierarchy rules are implementable at the component level
 - [ ] T08 authors confirm the hierarchy rules are sufficient to evaluate composition quality
-- [ ] All T04 outputs are documented — either as a standalone reference section or as foundational content for `UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` (completed in T08)
+- [x] All T04 outputs are documented — either as a standalone reference section or as foundational content for `UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` (completed in T08)
 
 ---
 
