@@ -128,12 +128,12 @@
   Verdict: APPROVED / NOT APPROVED
   Statement: "All Phase 7 P1 stabilization issues are closed or explicitly dispositioned.
                Renewed platform expansion is permitted as of [date]."
-  ADR reference: ADR-0090 — Phase 7 Final Verification & Sign-Off
+  ADR reference: ADR-0091 — Phase 7 Final Verification & Sign-Off
   ```
 
   The sign-off must explicitly state that renewed platform expansion is permitted (or, if NOT APPROVED, enumerate the blocking items that must be resolved before the verdict can change).
 
-- **[Amendment H — Phase 7 sign-off ADR]** As part of PH7.12 completion, a new ADR must be created at `docs/architecture/adr/ADR-0090-phase-7-final-verification.md`. This ADR is the last ADR in the PH7 series (ADR-0089 is the last assigned in PH7.11). The ADR must record:
+- **[Amendment H — Phase 7 sign-off ADR]** As part of PH7.12 completion, a new ADR must be created at `docs/architecture/adr/ADR-0091-phase-7-final-verification.md` (ADR-0091 used; ADR-0090 was taken by signalr-per-project-groups in PH7.11). The ADR must record:
   - **Context:** Phase 7 P1 stabilization scope, the six P1 issues, and the remediation phases executed.
   - **Decision:** All P1 issues are closed or explicitly dispositioned; platform expansion is resumed.
   - **Consequences:** The PH7-RM-* plans remain Deferred Scope; the next expansion phase activates on the PH7-RM-* scope as needed.
@@ -144,7 +144,7 @@
 ## Deliverables
 
 - **[Amendment D]** consolidated evidence package at `docs/architecture/release/PH7-final-verification-evidence.md` (7 sections: P1 closure matrix, mechanical gate results, documentation discoverability review, package-boundary outcomes, PH7-RM-* disposition, readiness classification, sign-off record)
-- **[Amendment H]** Phase 7 sign-off ADR at `docs/architecture/adr/ADR-0090-phase-7-final-verification.md`
+- **[Amendment H]** Phase 7 sign-off ADR at `docs/architecture/adr/ADR-0091-phase-7-final-verification.md`
 
 ---
 
@@ -178,7 +178,7 @@
 - PH7-RM-* disposition table
 - readiness classification record (with stabilization-phase N/A rulings)
 - sign-off record (format per Amendment H)
-- ADR-0090 created
+- ADR-0091 created (ADR-0090 was taken by signalr-per-project-groups)
 
 ---
 

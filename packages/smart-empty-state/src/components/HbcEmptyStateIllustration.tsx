@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import type { ReactElement, FC } from 'react';
+import { makeStyles } from '@griffel/react';
 import {
   Search,
   StatusDraftIcon,
@@ -9,6 +10,16 @@ import {
   StatusInfoIcon,
 } from '@hbc/ui-kit/icons';
 import type { EmptyStateClassification } from '../types/ISmartEmptyState.js';
+
+const useStyles = makeStyles({
+  root: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    maxWidth: '120px',
+    maxHeight: '120px',
+  },
+});
 
 export interface HbcEmptyStateIllustrationProps {
   classification: EmptyStateClassification;
@@ -42,6 +53,8 @@ export function HbcEmptyStateIllustration({
   illustrationKey,
   size = 'md',
 }: HbcEmptyStateIllustrationProps): ReactElement {
+  const styles = useStyles();
+
   let Icon: IconComponent;
 
   if (illustrationKey) {
@@ -52,7 +65,8 @@ export function HbcEmptyStateIllustration({
 
   return (
     <span
-      className="hbc-empty-state__illustration"
+      className={styles.root}
+      data-testid="empty-state-illustration"
       data-classification={classification}
       data-size={size}
       aria-hidden="true"

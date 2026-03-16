@@ -117,7 +117,8 @@
       "Read(//tmp/**)",
       "Bash(for pkg:*)",
       "Bash(for comp:*)",
-      "Read(//Users/bobbyfetting/hb-intel/packages/ui-kit/src/**)"
+      "Read(//Users/bobbyfetting/hb-intel/packages/ui-kit/src/**)",
+      "Bash(head:*)"
     ]
   },
   "enabledPlugins": {

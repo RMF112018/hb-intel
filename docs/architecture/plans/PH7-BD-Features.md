@@ -1,6 +1,6 @@
 # PH7 — Business Development Module: Master Feature Plan
 
-> **Doc Classification:** Canonical Normative Plan — master summary and locked-decisions index for the Business Development module feature build-out; governs `ph7-business-development/PH7-BD-1` through `PH7-BD-9` task files. Implementation pending PH7.12 sign-off (ADR-0090) and BW infrastructure layer completion.
+> **Doc Classification:** Canonical Normative Plan — master summary and locked-decisions index for the Business Development module feature build-out; governs `ph7-business-development/PH7-BD-1` through `PH7-BD-9` task files. Implementation pending PH7.12 sign-off (ADR-0091) and BW infrastructure layer completion.
 
 **Version:** 1.0
 **Governed by:** CLAUDE.md v1.2 · HB-Intel-Blueprint-V4.md · `hb-intel-foundation-plan.md`

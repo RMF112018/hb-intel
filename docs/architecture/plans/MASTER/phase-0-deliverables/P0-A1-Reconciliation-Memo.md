@@ -102,7 +102,7 @@ Blueprint V4 (Canonical Normative Plan, locked) remains the authoritative target
 
 ## 5. Divergence Summary
 
-Ten active divergences were identified and logged in P0-A2-Divergence-Log.md. Three are controlled-evolution items requiring no correction; four are not-yet-implemented plan items tracked for Phase 1 decisions; three require correction before Phase 1 entry.
+Ten active divergences were identified and logged in P0-A2-Divergence-Log.md. Three are controlled-evolution items requiring no correction; three are not-yet-implemented plan items tracked for Phase 1 decisions; one requires human approval before Phase 1 entry; three have been resolved during Phase 0.
 
 **Controlled evolution (no action required):**
 - D-001: Shared-Feature Primitive layer emergence (SF01–SF29)
@@ -113,12 +113,14 @@ Ten active divergences were identified and logged in P0-A2-Divergence-Log.md. Th
 - D-006: Nine Review Mode plans (PH7-RM-1 through PH7-RM-9) require reclassification decision
 - D-007: SF16 (Search) and SF22 (post-bid-autopsy T08–T09) pending activation decision
 - D-009: Six feature packages at v0.0.0 scaffold-only; explicitly classified to prevent false-baseline assumptions
-- D-010: `@hbc/versioned-record` and `@hbc/strategic-intelligence` scaffold-only but depended on by production-path packages; production use must be blocked until upgrade
 
-**Requires correction (Phase 1 entry blocker):**
-- D-004: ADR-0090 gate reference in Wave 0 Group plans is stale; should reference ADR-0091 (Phase 7 Final Verification). Gate condition already satisfied.
+**Requires human approval (Phase 1 entry blocker):**
 - D-005: Wave 0 plan formal approval status has not caught up with implementation. Plan must be signed off by product owner and architecture owner.
-- D-008: `HB-Intel-Feature-Phase-Mapping-Recommendation.md` is unclassified; superseded by active MASTER plan set; requires reclassification banner.
+
+**Resolved during Phase 0:**
+- D-004: ✅ ADR-0090 gate references corrected to ADR-0091 across all Wave 0 plan files (2026-03-16)
+- D-008: ✅ `HB-Intel-Feature-Phase-Mapping-Recommendation.md` classified as "Superseded / Archived Reference" (2026-03-14)
+- D-010: ✅ Scaffold-dependent packages formally deferred from Phase 1 scope (2026-03-16)
 
 **Resolved pre-Phase-0 divergences (for completeness):**
 - Four ADR catalog conflicts reconciled in PH7.11 (2026-03-09): filesystem vs. index discrepancy, duplicate-numbered pairs, un-prefixed PH6 ADRs, index gaps.
@@ -127,7 +129,7 @@ Ten active divergences were identified and logged in P0-A2-Divergence-Log.md. Th
 
 ## 6. Milestone M0.1 Assessment
 
-Milestone M0.1 — Planning Hierarchy Confirmed — is **conditionally satisfied** pending two outstanding correction actions.
+Milestone M0.1 — Planning Hierarchy Confirmed — is **conditionally satisfied** pending one outstanding human-approval action (D-005).
 
 ### 6.1 M0.1 satisfaction criteria
 
@@ -146,23 +148,20 @@ Milestone M0.1 — Planning Hierarchy Confirmed — is **conditionally satisfied
 - **Deadline:** Phase 0 exit gate (2026-03-20 target)
 - **Blocker:** Yes — Phase 1 entry gate
 
-**Action 2: ADR-0090/ADR-0091 errata in Wave 0 Group plans (D-004)**
+**Action 2: ADR-0090/ADR-0091 errata in Wave 0 Group plans (D-004)** — ✅ COMPLETED (2026-03-16)
 - **Scope:** Update stale ADR-0090 cross-references in Wave 0 Group plan files (G1–G6) to reference ADR-0091 (Phase 7 Final Verification). Issue errata note.
 - **Owner:** Program architecture lead
-- **Deadline:** Phase 0 exit gate (2026-03-20 target)
-- **Blocker:** Yes — Phase 1 entry gate
+- **Result:** All stale Phase 7 gate references corrected across 20+ files. Errata banner added to `wave-0-validation-report.md`. See P0-A2 D-004 for details.
 
-**Action 3: Unclassified document reclassification (D-008)**
-- **Scope:** Add Canonical Current-State banner to `HB-Intel-Feature-Phase-Mapping-Recommendation.md` or formally archive under `docs/architecture/plans/_archive/`.
-- **Owner:** Architecture documentation lead
-- **Deadline:** Phase 0 exit gate (convenience item)
-- **Blocker:** No — documentation housekeeping
+**Action 3: Unclassified document reclassification (D-008)** — ✅ COMPLETED (pre-2026-03-16)
+- **Scope:** Add classification banner to `HB-Intel-Feature-Phase-Mapping-Recommendation.md`.
+- **Result:** "Superseded / Archived Reference" banner was already applied (2026-03-14). No further action required. See P0-A2 D-008.
 
 ### 6.3 Conditional M0.1 status
 
-M0.1 is conditionally satisfied: all baseline conditions are met (hierarchy agreed, divergences logged, no unresolved conflicts), but formal closure requires Actions 1 and 2 to be completed. Until those two corrections are applied, Phase 1 entry is not fully gated.
+M0.1 is conditionally satisfied: all baseline conditions are met (hierarchy agreed, divergences logged, no unresolved conflicts). Action 2 (D-004 errata) and Action 3 (D-008 reclassification) are completed. Formal closure requires only Action 1 (D-005 — Wave 0 plan formal approval by product owner and architecture owner).
 
-**Progress indicator:** 1 of 2 critical actions completed; 1 of 2 ready for execution.
+**Progress indicator:** 2 of 2 agent-actionable corrections completed. 1 human-approval action remains (D-005).
 
 ---
 
@@ -181,10 +180,10 @@ This memo is built from the following authoritative sources, all dated or update
 
 ## Next Steps
 
-1. **Complete Actions 1 and 2** (Wave 0 approval and ADR-0091 errata)
+1. **Complete Action 1 (D-005)** — Wave 0 plan formal approval by product owner and architecture owner
 2. **Conduct Phase 1 entry gate review** with product and architecture owners
-3. **Activate P0-E2 decisions register** to track D-006, D-007, D-009, D-010 resolutions
-4. **Formally close M0.1** once Actions 1 and 2 are verified
+3. **Activate P0-E2 decisions register** to track D-006, D-007, D-009 resolutions (D-010 already resolved)
+4. **Formally close M0.1** once Action 1 is verified
 5. **Proceed to Phase 1 mobilization**
 
 ---

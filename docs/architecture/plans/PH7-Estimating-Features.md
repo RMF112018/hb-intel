@@ -1,6 +1,6 @@
 # PH7-Estimating-Features — Estimating Module Master Summary
 
-> **Doc Classification:** Canonical Normative Plan — master summary and locked-decisions index for the Estimating module feature build-out; governs `ph7-estimating/PH7-Estimating-1` through `PH7-Estimating-12` task files. This is v2.0 which superseded the monolithic `PH7-Estimating-Feature-Plan.md` v1.0. Implementation pending PH7.12 sign-off (ADR-0090) and BW infrastructure layer completion.
+> **Doc Classification:** Canonical Normative Plan — master summary and locked-decisions index for the Estimating module feature build-out; governs `ph7-estimating/PH7-Estimating-1` through `PH7-Estimating-12` task files. This is v2.0 which superseded the monolithic `PH7-Estimating-Feature-Plan.md` v1.0. Implementation pending PH7.12 sign-off (ADR-0091) and BW infrastructure layer completion.
 
 **Version:** 2.0 (Rewritten — split into task files)
 **Governed by:** CLAUDE.md v1.2 · HB-Intel-Blueprint-V4.md · `hb-intel-foundation-plan.md`

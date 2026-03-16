@@ -1,6 +1,6 @@
 # SF09 — `@hbc/data-seeding`: Structured Data Import & Initial State Population
 
-> **Doc Classification:** Canonical Normative Plan — SF09 master plan; pending PH7.12 sign-off (ADR-0090) before implementation begins.
+> **Doc Classification:** Canonical Normative Plan — SF09 master plan; pending PH7.12 sign-off (ADR-0091) before implementation begins.
 
 **Package:** `packages/data-seeding/`
 **Phase Reference:** Foundation Plan Phase 2 (Shared Packages)

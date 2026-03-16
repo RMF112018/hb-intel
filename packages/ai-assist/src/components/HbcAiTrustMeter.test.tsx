@@ -77,7 +77,7 @@ describe('HbcAiTrustMeter', () => {
       />,
     );
     const badge = screen.getByTestId('ai-trust-meter-badge');
-    expect(badge.style.background).toBe('rgb(40, 167, 69)');
+    expect(badge.style.background).toBe('rgb(0, 200, 150)');
   });
 
   it('badge color amber for medium confidence', () => {
@@ -88,7 +88,7 @@ describe('HbcAiTrustMeter', () => {
       />,
     );
     const badge = screen.getByTestId('ai-trust-meter-badge');
-    expect(badge.style.background).toBe('rgb(255, 193, 7)');
+    expect(badge.style.background).toBe('rgb(255, 176, 32)');
   });
 
   it('badge color red for low confidence', () => {
@@ -99,7 +99,7 @@ describe('HbcAiTrustMeter', () => {
       />,
     );
     const badge = screen.getByTestId('ai-trust-meter-badge');
-    expect(badge.style.background).toBe('rgb(220, 53, 69)');
+    expect(badge.style.background).toBe('rgb(255, 77, 77)');
   });
 
   it('expert: expandable rationale uses <details>', () => {
@@ -133,6 +133,6 @@ describe('HbcAiTrustMeter', () => {
     render(<HbcAiTrustMeter trustLevel="essential" confidence={0.85} />);
     const badge = screen.getByTestId('ai-trust-meter-badge');
     expect(badge.textContent).toBe('High');
-    expect(badge.style.background).toBe('rgb(40, 167, 69)');
+    expect(badge.style.background).toBe('rgb(0, 200, 150)');
   });
 });

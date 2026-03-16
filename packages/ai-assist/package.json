@@ -1,6 +1,6 @@
 {
   "name": "@hbc/ai-assist",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "Contextual AI action layer for HB Intel — Azure AI Foundry integration",
   "type": "module",
@@ -49,8 +49,10 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@griffel/react": "^1.5.0",
     "@hbc/auth": "workspace:*",
     "@hbc/complexity": "workspace:*",
+    "@hbc/ui-kit": "workspace:*",
     "@hbc/versioned-record": "workspace:*"
   }
 }

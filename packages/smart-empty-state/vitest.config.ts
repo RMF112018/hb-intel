@@ -41,6 +41,7 @@ export default defineConfig({
       '@hbc/features-project-hub': resolve(__dirname, '../features/project-hub/src/index.ts'),
       '@hbc/features-admin': resolve(__dirname, '../features/admin/src/index.ts'),
       '@hbc/complexity': resolve(__dirname, '../complexity/src/index.ts'),
+      '@hbc/ui-kit/theme': resolve(__dirname, '../ui-kit/src/theme/index.ts'),
       '@hbc/ui-kit/icons': resolve(__dirname, '../ui-kit/src/icons/index.tsx'),
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../ui-kit/src/app-shell.ts'),
       '@hbc/ui-kit': resolve(__dirname, '../ui-kit/src/index.ts'),

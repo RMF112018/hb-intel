@@ -5,6 +5,15 @@
  * for Essential/Standard/Expert trust tiers.
  */
 import { useMemo, type FC } from 'react';
+import { makeStyles } from '@griffel/react';
+import {
+  HBC_PRIMARY_BLUE,
+  HBC_SURFACE_LIGHT,
+  HBC_STATUS_COLORS,
+  HBC_STATUS_RAMP_AMBER,
+  HBC_SPACE_SM,
+  HBC_RADIUS_XL,
+} from '@hbc/ui-kit/theme';
 
 import type { AiTrustLevel, IAiConfidenceDetails } from '../types/index.js';
 
@@ -16,17 +25,70 @@ export interface HbcAiTrustMeterProps {
   readonly variant?: 'badge' | 'inline' | 'expanded';
 }
 
-const BADGE_COLORS: Record<string, string> = {
-  high: '#28a745',
-  medium: '#ffc107',
-  low: '#dc3545',
+const TOKEN_COLORS: Record<string, string> = {
+  high: HBC_STATUS_COLORS.success,
+  medium: HBC_STATUS_RAMP_AMBER[50],
+  low: HBC_STATUS_COLORS.error,
 };
 
-function badgeColorFromScore(score: number): string {
-  if (score >= 0.7) return BADGE_COLORS['high'] as string;
-  if (score >= 0.4) return BADGE_COLORS['medium'] as string;
-  return BADGE_COLORS['low'] as string;
+function tokenColorFromScore(score: number): string {
+  if (score >= 0.7) return TOKEN_COLORS['high'] as string;
+  if (score >= 0.4) return TOKEN_COLORS['medium'] as string;
+  return TOKEN_COLORS['low'] as string;
 }
+
+const useStyles = makeStyles({
+  badge: {
+    display: 'inline-block',
+    paddingTop: '2px',
+    paddingBottom: '2px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
+    borderRadius: HBC_RADIUS_XL,
+    fontSize: '0.75em',
+    fontWeight: 600,
+    color: HBC_SURFACE_LIGHT['surface-0'],
+  },
+  disclaimer: {
+    marginLeft: `${HBC_SPACE_SM}px`,
+    fontSize: '0.8em',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
+  rationaleShort: {
+    marginLeft: `${HBC_SPACE_SM}px`,
+    fontSize: '0.85em',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
+  expertBlock: {
+    marginTop: '6px',
+    fontSize: '0.85em',
+  },
+  score: {
+    color: HBC_SURFACE_LIGHT['text-primary'],
+  },
+  rationale: {
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    marginTop: '2px',
+  },
+  detailsSummary: {
+    cursor: 'pointer',
+    color: HBC_PRIMARY_BLUE,
+  },
+  detailsParagraph: {
+    marginTop: '4px',
+    marginBottom: '0',
+    color: HBC_SURFACE_LIGHT['text-primary'],
+  },
+  sourcesList: {
+    marginTop: '4px',
+    marginBottom: '0',
+    paddingLeft: '18px',
+  },
+  modelInfo: {
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    marginTop: '2px',
+  },
+});
 
 /**
  * HbcAiTrustMeter — renders confidence badge, rationale, and source
@@ -38,11 +100,12 @@ export const HbcAiTrustMeter: FC<HbcAiTrustMeterProps> = ({
   confidenceDetails,
   variant: _variant,
 }) => {
+  const styles = useStyles();
   const badgeLevel = confidenceDetails?.confidenceBadge;
 
   const badgeColor = useMemo(() => {
-    if (badgeLevel) return BADGE_COLORS[badgeLevel] ?? BADGE_COLORS['medium'] as string;
-    return badgeColorFromScore(confidence);
+    if (badgeLevel) return TOKEN_COLORS[badgeLevel] ?? TOKEN_COLORS['medium'] as string;
+    return tokenColorFromScore(confidence);
   }, [badgeLevel, confidence]);
 
   const badgeLabel = useMemo(() => {
@@ -57,15 +120,8 @@ export const HbcAiTrustMeter: FC<HbcAiTrustMeterProps> = ({
       {/* Badge pill — always shown */}
       <span
         data-testid="ai-trust-meter-badge"
-        style={{
-          display: 'inline-block',
-          padding: '2px 8px',
-          borderRadius: 12,
-          fontSize: '0.75em',
-          fontWeight: 600,
-          color: '#fff',
-          background: badgeColor,
-        }}
+        className={styles.badge}
+        style={{ background: badgeColor }}
       >
         {badgeLabel}
       </span>
@@ -74,7 +130,7 @@ export const HbcAiTrustMeter: FC<HbcAiTrustMeterProps> = ({
       {trustLevel === 'essential' ? (
         <span
           data-testid="ai-trust-meter-disclaimer"
-          style={{ marginLeft: 8, fontSize: '0.8em', color: '#666' }}
+          className={styles.disclaimer}
         >
           AI-generated content. Verify before use.
         </span>
@@ -84,7 +140,7 @@ export const HbcAiTrustMeter: FC<HbcAiTrustMeterProps> = ({
       {trustLevel === 'standard' && confidenceDetails?.rationaleShort ? (
         <span
           data-testid="ai-trust-meter-rationale-short"
-          style={{ marginLeft: 8, fontSize: '0.85em', color: '#555' }}
+          className={styles.rationaleShort}
         >
           {confidenceDetails.rationaleShort}
         </span>
@@ -92,26 +148,26 @@ export const HbcAiTrustMeter: FC<HbcAiTrustMeterProps> = ({
 
       {/* Expert: full details */}
       {trustLevel === 'expert' ? (
-        <div data-testid="ai-trust-meter-expert" style={{ marginTop: 6, fontSize: '0.85em' }}>
-          <div data-testid="ai-trust-meter-score" style={{ color: '#333' }}>
+        <div data-testid="ai-trust-meter-expert" className={styles.expertBlock}>
+          <div data-testid="ai-trust-meter-score" className={styles.score}>
             Score: {confidenceDetails?.confidenceScore ?? confidence}
           </div>
 
           {confidenceDetails?.rationaleShort ? (
-            <div data-testid="ai-trust-meter-rationale-short" style={{ color: '#555', marginTop: 2 }}>
+            <div data-testid="ai-trust-meter-rationale-short" className={styles.rationale}>
               {confidenceDetails.rationaleShort}
             </div>
           ) : null}
 
           {confidenceDetails?.rationaleLong ? (
-            <details data-testid="ai-trust-meter-rationale-long" style={{ marginTop: 4 }}>
-              <summary style={{ cursor: 'pointer', color: '#0066cc' }}>Full rationale</summary>
-              <p style={{ margin: '4px 0', color: '#444' }}>{confidenceDetails.rationaleLong}</p>
+            <details data-testid="ai-trust-meter-rationale-long" style={{ marginTop: '4px' }}>
+              <summary className={styles.detailsSummary}>Full rationale</summary>
+              <p className={styles.detailsParagraph}>{confidenceDetails.rationaleLong}</p>
             </details>
           ) : null}
 
           {confidenceDetails?.citedSources && confidenceDetails.citedSources.length > 0 ? (
-            <ul data-testid="ai-trust-meter-sources" style={{ margin: '4px 0', paddingLeft: 18 }}>
+            <ul data-testid="ai-trust-meter-sources" className={styles.sourcesList}>
               {confidenceDetails.citedSources.map((src) => (
                 <li key={src.key}>{src.label}</li>
               ))}
@@ -119,13 +175,13 @@ export const HbcAiTrustMeter: FC<HbcAiTrustMeterProps> = ({
           ) : null}
 
           {confidenceDetails?.modelDeploymentName ? (
-            <div data-testid="ai-trust-meter-model" style={{ color: '#888', marginTop: 2 }}>
+            <div data-testid="ai-trust-meter-model" className={styles.modelInfo}>
               Model: {confidenceDetails.modelDeploymentName} v{confidenceDetails.modelDeploymentVersion}
             </div>
           ) : null}
 
           {confidenceDetails?.tokenUsage ? (
-            <div data-testid="ai-trust-meter-token-usage" style={{ color: '#888', marginTop: 2 }}>
+            <div data-testid="ai-trust-meter-token-usage" className={styles.modelInfo}>
               Tokens: {confidenceDetails.tokenUsage.prompt} prompt + {confidenceDetails.tokenUsage.completion} completion = {confidenceDetails.tokenUsage.total} total
             </div>
           ) : null}

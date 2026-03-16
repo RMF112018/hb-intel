@@ -153,14 +153,14 @@ The following divergences were identified and resolved during Phase 7 or prior, 
 | **(b) Not-yet-implemented** — track in Phase 1 or decisions register | 4 | Planned work not yet built; requires Phase 1 scope decision |
 | **(c) Superseded / stale** — correction action required | 1 | D-005 remains open; D-004, D-008 resolved 2026-03-16 |
 | **Total active divergences** | **8** | — |
-| **Phase 0 resolved** | **2** | D-004 (ADR-0090 gate refs), D-008 (Feature-Phase-Mapping already classified) |
+| **Phase 0 resolved** | **3** | D-004 (ADR-0090 gate refs), D-008 (Feature-Phase-Mapping already classified), D-010 (scaffold dependency deferral) |
 | **Pre-Phase-0 resolved** | **4** | Historical resolution record from Phase 7 |
 
 ---
 
 ## 6. Next Steps
 
-- **High-priority corrections (blockers):** D-005, D-010 must be resolved before Phase 1 entry gate sign-off.
+- **High-priority corrections (blockers):** D-005 (Wave 0 plan formal approval) must be resolved before Phase 1 entry gate sign-off. D-004, D-008, and D-010 are resolved.
 - **Open decisions:** D-006, D-007 require explicit decision within Phase 0 exit governance (P0-E2 Open Decisions Register).
 - **Awareness / classification:** D-009 requires developer documentation and tooling guidance to prevent misinterpretation.
 

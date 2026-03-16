@@ -176,8 +176,8 @@ Per `current-state-map.md §3–§4`, Phases 0 through 6F are recorded as comple
 
 ### 3.2 What Is Not Yet Built (Per current-state-map.md)
 
-- Feature-level business logic in the 11 SPFx webpart applications (awaiting PH7.12 sign-off + ADR-0090).
-- MVP provisioning flow (next concrete increment, awaiting plan refinement and ADR-0090 on disk).
+- Feature-level business logic in the 11 SPFx webpart applications (awaiting PH7.12 sign-off + ADR-0091).
+- MVP provisioning flow (next concrete increment, awaiting plan refinement and ADR-0091 on disk).
 - Full PWA build (Phase 9A — post PH7 expansion).
 - HB Site Control application (Phase 11).
 - SF16 Search, SF22 Post-Bid Learning Loop (planning stage only per current-state-map §2).

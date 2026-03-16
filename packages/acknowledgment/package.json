@@ -1,6 +1,6 @@
 {
   "name": "@hbc/acknowledgment",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Universal acknowledgment and sign-off platform primitive",
   "type": "module",
@@ -35,6 +35,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@griffel/react": "^1.5.0",
     "@hbc/complexity": "workspace:*",
     "@hbc/session-state": "workspace:*",
     "@hbc/ui-kit": "workspace:*",

@@ -9,9 +9,11 @@
  * - SF14-T04 useRelatedItems hook output
  */
 import { useMemo, type FC } from 'react';
+import { makeStyles } from '@griffel/react';
 import { useCurrentUser } from '@hbc/auth';
 import { useComplexity } from '@hbc/complexity';
 import { HbcSmartEmptyState, type ISmartEmptyStateConfig, type IEmptyStateContext } from '@hbc/smart-empty-state';
+import { HBC_SPACE_SM } from '@hbc/ui-kit/theme';
 import { DEFAULT_RELATIONSHIP_PRIORITY, RELATED_ITEMS_PANEL_TITLE } from '../constants/index.js';
 import { useRelatedItems } from '../hooks/index.js';
 import { RelationshipRegistry } from '../registry/index.js';
@@ -23,6 +25,23 @@ export interface HbcRelatedItemsPanelProps {
   sourceRecord: unknown;
   showBicState?: boolean;
 }
+
+const useStyles = makeStyles({
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  grid: {
+    display: 'grid',
+    gap: `${HBC_SPACE_SM}px`,
+    marginTop: `${HBC_SPACE_SM}px`,
+  },
+  aiGrid: {
+    display: 'grid',
+    gap: `${HBC_SPACE_SM}px`,
+  },
+});
 
 const RELATED_ITEMS_EMPTY_STATE_CONFIG: ISmartEmptyStateConfig = {
   resolve: (context: IEmptyStateContext) => {
@@ -77,6 +96,7 @@ export const HbcRelatedItemsPanel: FC<HbcRelatedItemsPanelProps> = ({
   sourceRecord,
   showBicState = true,
 }) => {
+  const styles = useStyles();
   const user = useCurrentUser();
   const { tier } = useComplexity();
   const currentUserRole = user?.roles[0]?.name ?? 'Unknown';
@@ -170,7 +190,7 @@ export const HbcRelatedItemsPanel: FC<HbcRelatedItemsPanelProps> = ({
 
   return (
     <section data-testid="related-items-panel">
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header className={styles.header}>
         <h2>{RELATED_ITEMS_PANEL_TITLE}</h2>
         <span data-testid="related-items-total-count">{items.length}</span>
       </header>
@@ -187,7 +207,7 @@ export const HbcRelatedItemsPanel: FC<HbcRelatedItemsPanelProps> = ({
             <span>{label}</span>{' '}
             <span data-testid="related-items-group-count">({groupItems.length})</span>
           </summary>
-          <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
+          <div className={styles.grid}>
             {groupItems.map((item) => (
               <HbcRelatedItemCard
                 key={`${item.recordType}:${item.recordId}:${item.relationshipLabel}`}
@@ -201,11 +221,11 @@ export const HbcRelatedItemsPanel: FC<HbcRelatedItemsPanelProps> = ({
 
       {tier === 'expert' && aiSuggestions && aiSuggestions.length > 0 ? (
         <section data-testid="related-items-ai-group">
-          <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <header className={styles.header}>
             <h3>AI Suggestions ({aiSuggestions.length})</h3>
             <button type="button" data-testid="related-items-ai-cta">Suggest new relationships</button>
           </header>
-          <div style={{ display: 'grid', gap: 8 }}>
+          <div className={styles.aiGrid}>
             {aiSuggestions.map((item) => (
               <HbcRelatedItemCard
                 key={`ai:${item.recordType}:${item.recordId}:${item.relationshipLabel}`}

@@ -1,6 +1,65 @@
 import * as React from 'react';
+import { makeStyles, mergeClasses } from '@griffel/react';
+import {
+  HBC_SURFACE_LIGHT,
+  HBC_STATUS_COLORS,
+  HBC_PRIMARY_BLUE,
+  HBC_RADIUS_FULL,
+  label as labelTypo,
+} from '@hbc/ui-kit/theme';
 import { useStepProgress } from '../hooks/useStepProgress';
 import type { IStepWizardConfig } from '../types/IStepWizard';
+
+// ── Styles ──────────────────────────────────────────────────────────────────
+
+const useStyles = makeStyles({
+  root: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    columnGap: '4px',
+  },
+  complete: {
+    color: HBC_STATUS_COLORS.success,
+  },
+  stale: {
+    opacity: 0.7,
+  },
+  fraction: {
+    fontFamily: labelTypo.fontFamily,
+    fontSize: labelTypo.fontSize,
+    fontWeight: labelTypo.fontWeight as React.CSSProperties['fontWeight'],
+    lineHeight: labelTypo.lineHeight,
+    letterSpacing: labelTypo.letterSpacing,
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
+  fractionComplete: {
+    color: HBC_STATUS_COLORS.success,
+  },
+  check: {
+    marginRight: '2px',
+  },
+  barWrap: {
+    display: 'inline-flex',
+    width: '80px',
+    height: '6px',
+    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    borderRadius: HBC_RADIUS_FULL,
+    overflow: 'hidden',
+  },
+  barFill: {
+    height: '100%',
+    backgroundColor: HBC_STATUS_COLORS.success,
+    borderRadius: HBC_RADIUS_FULL,
+    transitionProperty: 'width',
+    transitionDuration: '300ms',
+    transitionTimingFunction: 'ease',
+  },
+  staleIndicator: {
+    fontFamily: labelTypo.fontFamily,
+    fontSize: labelTypo.fontSize,
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
+});
 
 // ── Props ───────────────────────────────────────────────────────────────────
 
@@ -18,19 +77,17 @@ export function HbcStepProgress<T>({
   config,
   variant = 'fraction',
 }: HbcStepProgressProps<T>): React.ReactElement {
+  const styles = useStyles();
   const { completedCount, requiredCount, percentComplete, isComplete, isStale } =
     useStepProgress(config, item);
 
   return (
     <span
-      className={[
-        'hbc-step-progress',
-        `hbc-step-progress--${variant}`,
-        isComplete && 'hbc-step-progress--complete',
-        isStale && 'hbc-step-progress--stale',
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      className={mergeClasses(
+        styles.root,
+        isComplete && styles.complete,
+        isStale && styles.stale,
+      )}
       aria-label={`${completedCount} of ${requiredCount} steps complete`}
     >
       {variant === 'fraction' && (
@@ -48,7 +105,7 @@ export function HbcStepProgress<T>({
       )}
       {isStale && (
         <span
-          className="hbc-step-progress__stale-indicator"
+          className={styles.staleIndicator}
           title="Progress data may be out of date"
         >
           ↻
@@ -69,11 +126,12 @@ function FractionVariant({
   requiredCount: number;
   isComplete: boolean;
 }): React.ReactElement {
+  const styles = useStyles();
   return (
-    <span className="hbc-step-progress__fraction">
+    <span className={mergeClasses(styles.fraction, isComplete && styles.fractionComplete)}>
       {isComplete ? (
         <>
-          <span className="hbc-step-progress__check">✓</span> Complete
+          <span className={styles.check}>✓</span> Complete
         </>
       ) : (
         <>
@@ -92,10 +150,11 @@ function BarVariant({
   percentComplete: number;
   isComplete: boolean;
 }): React.ReactElement {
+  const styles = useStyles();
   return (
-    <span className="hbc-step-progress__bar-wrap">
+    <span className={styles.barWrap}>
       <span
-        className="hbc-step-progress__bar-fill"
+        className={styles.barFill}
         style={{ width: `${percentComplete}%` }}
         role="progressbar"
         aria-valuenow={percentComplete}
@@ -122,7 +181,6 @@ function RingVariant({
 
   return (
     <svg
-      className="hbc-step-progress__ring"
       width="40"
       height="40"
       viewBox="0 0 40 40"
@@ -134,7 +192,7 @@ function RingVariant({
         cy="20"
         r={RADIUS}
         fill="none"
-        stroke="var(--hbc-color-neutral-200)"
+        stroke={HBC_SURFACE_LIGHT['surface-2']}
         strokeWidth="3"
       />
       {/* Fill */}
@@ -143,7 +201,7 @@ function RingVariant({
         cy="20"
         r={RADIUS}
         fill="none"
-        stroke={isComplete ? 'var(--hbc-color-success)' : 'var(--hbc-color-primary)'}
+        stroke={isComplete ? HBC_STATUS_COLORS.success : HBC_PRIMARY_BLUE}
         strokeWidth="3"
         strokeDasharray={CIRCUMFERENCE}
         strokeDashoffset={dashOffset}
@@ -156,7 +214,7 @@ function RingVariant({
         y="24"
         textAnchor="middle"
         fontSize="10"
-        fill="var(--hbc-color-neutral-700)"
+        fill={HBC_SURFACE_LIGHT['text-muted']}
       >
         {isComplete ? '✓' : `${percentComplete}%`}
       </text>

@@ -42,6 +42,7 @@ export default defineConfig({
     alias: {
       '@hbc/versioned-record/testing': resolve(__dirname, './testing/index.ts'),
       '@hbc/notification-intelligence': resolve(__dirname, './src/__mocks__/notification-intelligence.ts'),
+      '@hbc/ui-kit/theme': resolve(__dirname, '../ui-kit/src/theme/index.ts'),
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../ui-kit/src/app-shell.ts'),
       '@hbc/ui-kit': resolve(__dirname, '../ui-kit/src/index.ts'),
       '@hbc/complexity/testing': resolve(__dirname, '../complexity/testing/index.ts'),

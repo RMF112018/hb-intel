@@ -216,7 +216,7 @@ describe('HbcStepWizard', () => {
     setupMock({ state: lockedState });
     render(<HbcStepWizard item={{}} config={config} renderStep={renderStep} variant="horizontal" complexityTier="standard" />);
     const dots = screen.getAllByRole('button', { name: /Step \d:/ });
-    expect(dots[2].className).toContain('locked');
+    expect(dots[2]).toBeDisabled();
   });
 
   it('horizontal variant: clicking step dot calls goTo', async () => {

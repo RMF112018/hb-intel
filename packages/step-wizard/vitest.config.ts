@@ -43,6 +43,7 @@ export default defineConfig({
       '@hbc/notification-intelligence': resolve(__dirname, './src/__mocks__/notification-intelligence.ts'),
       '@hbc/bic-next-move': resolve(__dirname, '../bic-next-move/src/index.ts'),
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../ui-kit/src/app-shell.ts'),
+      '@hbc/ui-kit/theme': resolve(__dirname, '../ui-kit/src/theme/index.ts'),
       '@hbc/ui-kit': resolve(__dirname, '../ui-kit/src/index.ts'),
       '@hbc/complexity/testing': resolve(__dirname, '../complexity/testing/index.ts'),
       '@hbc/complexity': resolve(__dirname, '../complexity/src/index.ts'),

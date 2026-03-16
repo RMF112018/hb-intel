@@ -93,7 +93,7 @@ describe('HbcEmptyStateIllustration', () => {
     const { container } = render(
       <HbcEmptyStateIllustration classification="truly-empty" />,
     );
-    const root = container.querySelector('.hbc-empty-state__illustration');
+    const root = container.querySelector('[data-testid="empty-state-illustration"]');
     expect(root).not.toBeNull();
     expect(root!.getAttribute('aria-hidden')).toBe('true');
   });
@@ -102,7 +102,7 @@ describe('HbcEmptyStateIllustration', () => {
     const { container } = render(
       <HbcEmptyStateIllustration classification="truly-empty" />,
     );
-    const root = container.querySelector('.hbc-empty-state__illustration');
+    const root = container.querySelector('[data-testid="empty-state-illustration"]');
     expect(root).not.toBeNull();
     expect(root!.getAttribute('data-classification')).toBe('truly-empty');
   });

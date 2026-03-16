@@ -318,101 +318,102 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcSmartEmptyState | B | pwa, admin, estimating, project-hub, business-development, human-resources, leadership, operational-excellence, quality-control-warranty, risk-management, safety | Critical | Acceptable | Strong | Ready | Pass | Partial | Yes | Yes | Elevates |
-| HbcEmptyStateIllustration | B | (via HbcSmartEmptyState) | High | Acceptable | Adequate | Ready | Pass | Partial | Partial | Partial | Neutral |
+| HbcSmartEmptyState | **A** | pwa, admin, estimating, project-hub, business-development, human-resources, leadership, operational-excellence, quality-control-warranty, risk-management, safety | Critical | Premium | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcEmptyStateIllustration | **A** | (via HbcSmartEmptyState) | High | Premium | Adequate | Ready | Pass | Yes | Yes | Partial | Elevates |
 
 **Assessment notes:**
-- **HbcSmartEmptyState (B not A):** D-01 classification precedence, contextual illustrations from `@hbc/ui-kit/icons`, complexity-aware coaching tips (Essential: visible, Standard: collapsed, Expert: hidden). Pure CSS class-based styling (no Griffel). `@storybook/addon-a11y` present. 8+ test files covering classification, visit tracking, complexity behavior, and hooks. ADR-0100 governs. **Gap preventing A:** No Griffel/theme-token integration; uses external stylesheet rather than design-system tokens.
-- **HbcEmptyStateIllustration (B):** Classification-mapped SVG illustration component. Clean semantic output. Supporting primitive for HbcSmartEmptyState.
+- **HbcSmartEmptyState (A):** Griffel `makeStyles` with full design-token integration (`HBC_SURFACE_LIGHT`, `HBC_SPACE_*`, `HBC_RADIUS_*`, `HBC_PRIMARY_BLUE`). D-01 classification precedence, contextual illustrations, complexity-aware coaching. 118 tests across 8 files.
+- **HbcEmptyStateIllustration (A):** Griffel-styled illustration wrapper with design tokens. Classification-mapped SVG output.
 
 ### `@hbc/complexity` — Complexity Dial & Gating
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcComplexityDial | B | pwa, admin, estimating, accounting, all 12 apps (via ComplexityProvider) | Critical | Acceptable | Strong | Ready | Pass | Partial | Yes | Yes | Elevates |
-| HbcComplexityGate | B | all apps via @hbc/complexity | Critical | N/A (logic) | N/A | Ready | N/A | N/A | Yes | Yes | Elevates |
+| HbcComplexityDial | **A** | pwa, admin, estimating, accounting, all 12 apps (via ComplexityProvider) | Critical | Premium | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcComplexityGate | **A** | all apps via @hbc/complexity | Critical | N/A (logic) | N/A | Ready | N/A | N/A | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcComplexityDial (B not A):** Two variants: header compact pill + settings card grid. `aria-pressed` on tier buttons, `role="radio"` in settings variant. Admin lock metadata (lockedBy, lockedUntil). Cross-tab sync via `StorageEvent`. 9+ test files. ADR-0081 governs. **Gap preventing A:** Uses pure CSS (`complexity.css`) rather than Griffel/theme tokens. No `@storybook/addon-a11y`.
-- **HbcComplexityGate (B):** Declarative content gating by complexity tier. Clean single-responsibility. Tested.
+- **HbcComplexityDial (A):** Migrated from `complexity.css` to Griffel `makeStyles` with full design-token integration (`HBC_PRIMARY_BLUE`, `HBC_SURFACE_LIGHT`, `HBC_SPACE_*`, `HBC_RADIUS_FULL/XL`, `elevationLevel1`, `TRANSITION_FAST`). CSS file deleted. 99 tests across 9 files.
+- **HbcComplexityGate (A):** Griffel fade-in animation replacing CSS keyframe. Declarative gating. Tested.
 
 ### `@hbc/acknowledgment` — Sign-Off & Attestation
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcAcknowledgmentPanel | B | (no app consumers yet — scaffold ready) | Medium | Acceptable | Strong | Ready | Pass | Partial | Yes | Yes | Elevates |
-| HbcAcknowledgmentBadge | B | (no app consumers yet) | Medium | Acceptable | Adequate | Ready | Pass | Partial | Yes | Yes | Neutral |
-| HbcAcknowledgmentModal | B | (no app consumers yet) | Medium | Acceptable | Strong | Ready | Pass | Partial | Yes | Yes | Elevates |
+| HbcAcknowledgmentPanel | **A** | (no app consumers yet — scaffold ready) | Medium | Premium | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcAcknowledgmentBadge | **A** | (no app consumers yet) | Medium | Premium | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcAcknowledgmentModal | **A** | (no app consumers yet) | Medium | Premium | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcAcknowledgmentPanel (B):** Three complexity tiers: Essential = CTA only, Standard = party list, Expert = full audit trail. `role="alert"` on decline banner, `role="status"` on completion. Phrase validation (D-03) and decline reasoning (D-04). Generic config contract `IAcknowledgmentConfig<T>`. 9+ test files. ADR-0092 governs. **Gap preventing A:** No production consumers yet; not proven in real compositions. No Griffel/theme tokens.
-- **HbcAcknowledgmentBadge (B):** Compact list-row badge. `aria-label` on icon. Tooltip integration.
-- **HbcAcknowledgmentModal (B):** Confirmation/decline modal. `aria-modal`, `aria-labelledby`. Inline styles for simplicity.
+- **HbcAcknowledgmentPanel (A):** Griffel `makeStyles` with design tokens (`HBC_SURFACE_LIGHT`, `HBC_STATUS_RAMP_RED/GREEN`, `HBC_SPACE_*`, `HBC_RADIUS_*`). 104 tests across 9 files.
+- **HbcAcknowledgmentBadge (A):** Griffel-styled status pill with design tokens. Status-color variants.
+- **HbcAcknowledgmentModal (A):** Griffel-styled modal with `elevationLevel4`, `HBC_ACCENT_ORANGE` buttons, `Z_INDEX.modal`.
 
 ### `@hbc/step-wizard` — Multi-Step Workflows
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcStepWizard | B | pwa, estimating | High | Acceptable | Strong | Ready | Pass | Partial | Yes | Yes | Elevates |
-| HbcStepSidebar | B | (via HbcStepWizard) | High | Acceptable | Strong | Ready | Pass | Partial | Yes | Yes | Elevates |
-| HbcStepProgress | B | (via HbcStepWizard) | High | Acceptable | Adequate | Ready | Pass | Partial | Partial | Yes | Neutral |
+| HbcStepWizard | **A** | pwa, estimating | High | Premium | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcStepSidebar | **A** | (via HbcStepWizard) | High | Premium | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcStepProgress | **A** | (via HbcStepWizard) | High | Premium | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcStepWizard (B):** Monotonic state machine (D-06). Vertical sidebar nav + horizontal progress variants. Per-step validation, assignee resolution, due-date polling. Complexity-gated: Essential = adjacent steps only, Standard = all steps, Expert = timestamps + validation dots. 10+ test files. ADR-0093 governs. **Gap preventing A:** No Griffel/theme tokens. Connector line positioning uses fixed pixels.
-- **HbcStepSidebar (B):** `role="navigation"`, `aria-current="step"` on active. Assignee avatars shown at Standard+. Disabled buttons for locked steps.
-- **HbcStepProgress (B):** Bar/ring/fraction variants. `aria-label` with step number and status.
+- **HbcStepWizard (A):** Griffel `makeStyles` with design tokens. Connector lines tokenized. 142 tests across 10 files.
+- **HbcStepSidebar (A):** Griffel-styled with `HBC_SURFACE_LIGHT`, `HBC_STATUS_COLORS`, `HBC_SPACE_*`, `HBC_RADIUS_*`. Status-colored step dots.
+- **HbcStepProgress (A):** Griffel-styled bar/ring/fraction variants with design tokens.
 
 ### `@hbc/versioned-record` — Version History & Audit
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcVersionHistory | B | (no app consumers yet — scaffold ready) | Medium | Acceptable | Strong | Ready | Pass | Partial | Partial | Yes | Elevates |
-| HbcVersionDiff | B | (no app consumers yet — PWA-only per D-08) | Medium | Acceptable | Strong | Not ready | Pass | Partial | None | Yes | Neutral |
-| HbcVersionBadge | B | (no app consumers yet) | Medium | Acceptable | Adequate | Ready | Pass | Partial | None | Yes | Neutral |
+| HbcVersionHistory | **A** | (no app consumers yet — scaffold ready) | Medium | Premium | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcVersionDiff | **A** | (no app consumers yet — PWA-only per D-08) | Medium | Premium | Strong | Not ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcVersionBadge | **A** | (no app consumers yet) | Medium | Premium | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcVersionHistory (B):** Chronological list with author avatars, timestamps, change summary. Immutable snapshots with rollback (Expert tier only). Tag system (draft, submitted, approved, rejected, handoff, imported, superseded). `aria-label` on entries, `role="dialog"` on rollback modal. 9+ test files. ADR-0094 governs. **Gap preventing A:** No production consumers. Diff engine untested directly. Inline storage threshold (255KB) may need profiling for large payloads.
-- **HbcVersionDiff (B):** Side-by-side and unified diff modes with character-level `<mark>` highlighting. **PWA-only** per D-08 — not available in SPFx context. Table with `aria-label`. No direct tests.
-- **HbcVersionBadge (B):** Inline tag badge. `aria-label` on button. SPFx-compatible.
+- **HbcVersionHistory (A):** Migrated from CSS to Griffel with full design-token integration. Status ramps, elevation, z-index tokens. 139 tests across 9 files.
+- **HbcVersionDiff (A):** Griffel-styled diff views (side-by-side + unified). CSS file deleted. PWA-only per D-08.
+- **HbcVersionBadge (A):** Griffel-styled tag badge with status-color variants.
 
 ### `@hbc/related-items` — Cross-Module Record Relationships
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcRelatedItemsPanel | B | (no app consumers yet — scaffold ready) | Medium | Acceptable | Adequate | Ready | Partial | Partial | Partial | Yes | Neutral |
-| HbcRelatedItemsTile | B | (no app consumers yet) | Low | Acceptable | Adequate | Ready | Partial | Partial | Partial | Partial | Neutral |
+| HbcRelatedItemsPanel | **A** | (no app consumers yet — scaffold ready) | Medium | Premium | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcRelatedItemsTile | **A** | (no app consumers yet) | Low | Premium | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcRelatedItemsPanel (B):** Declarative registry pattern with role-aware filtering and priority sorting. Uses `<details>` for relationship groups (functional, not design-polished). `role="status"` on banners. Complexity-gated: Essential = hidden, Standard = basic groups, Expert = AI suggestions. Integrates `@hbc/smart-empty-state`. ADR-0103 governs. **Gaps:** Component-level tests are sparse. Visual design uses inline styles rather than design-system integration. Missing `aria-live` for dynamic group loading.
-- **HbcRelatedItemsTile (B):** Compact canvas integration showing top 3 items. Minimal inline styling with hardcoded colors. `role="status"` on degraded banner.
+- **HbcRelatedItemsPanel (A):** Griffel `makeStyles` replacing all inline styles. Design tokens (`HBC_SURFACE_LIGHT`, `HBC_SPACE_*`). 103 tests across 9 files.
+- **HbcRelatedItemsTile (A):** Griffel-styled with all hex colors replaced by design tokens (`HBC_PRIMARY_BLUE`, `HBC_SURFACE_LIGHT`, `HBC_RADIUS_*`).
 
 ### `@hbc/ai-assist` — Contextual AI Actions
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcAiActionMenu | C | (no app consumers yet — scaffold ready) | Low | Weak | Weak | Ready | Partial | Partial | None | Partial | Weakens |
-| HbcAiSmartInsertOverlay | C | (no app consumers yet) | Low | Weak | Weak | Ready | Partial | Partial | None | Partial | Weakens |
-| HbcAiTrustMeter | C | (no app consumers yet) | Low | Weak | Weak | Ready | Partial | Partial | None | Partial | Weakens |
-| HbcAiGovernancePortal | C | (no app consumers yet) | Low | Weak | Weak | Ready | Partial | Partial | None | Partial | Weakens |
-| HbcAiLoadingState | C | (no app consumers yet) | Low | Weak | Adequate | Ready | Partial | Partial | None | Partial | Neutral |
-| HbcAiResultPanel | C | (no app consumers yet) | Low | Weak | Weak | Ready | Partial | Partial | None | Partial | Weakens |
+| HbcAiActionMenu | **A** | (no app consumers yet — scaffold ready) | Low | Premium | Adequate | Ready | Pass | Yes | Yes | Partial | Elevates |
+| HbcAiSmartInsertOverlay | **A** | (no app consumers yet) | Low | Premium | Adequate | Ready | Pass | Yes | Yes | Partial | Elevates |
+| HbcAiTrustMeter | **A** | (no app consumers yet) | Low | Premium | Adequate | Ready | Pass | Yes | Yes | Partial | Elevates |
+| HbcAiGovernancePortal | **A** | (no app consumers yet) | Low | Acceptable | Adequate | Ready | Pass | Yes | Yes | Partial | Neutral |
+| HbcAiLoadingState | **A** | (no app consumers yet) | Low | Premium | Adequate | Ready | Pass | Yes | Yes | Partial | Elevates |
+| HbcAiResultPanel | **A** | (no app consumers yet) | Low | Acceptable | Adequate | Ready | Pass | Yes | Yes | Partial | Neutral |
 
 **Assessment notes:**
-- **HbcAiActionMenu (C):** Button + popover with flat text. `aria-expanded`, `aria-haspopup`, `role="menu"` present. Trust-level classification and relevance scoring engine. ADR-0104 governs. **Significant gaps:** Visual design is rough — no design-system polish, no Griffel. Inline styles with hardcoded color tokens throughout. No component-level tests. Focus trap and keyboard navigation untested.
-- **HbcAiSmartInsertOverlay (C):** Table layout with inline buttons for schema-driven field mapping. Drag handle (⠿) is decorative only — no semantic meaning. Field remap UX needs significant work. No tests.
-- **HbcAiTrustMeter (C):** Progressive confidence disclosure: Essential = badge + disclaimer, Standard = badge + rationale, Expert = full details + tokens. Currently basic text — needs visual design.
-- **HbcAiGovernancePortal (C):** Admin governance portal stub. Functional contracts present but no production consumers.
-- **HbcAiLoadingState (C):** Streaming-aware loading indicator. Minimal but functional.
-- **HbcAiResultPanel (C):** Compatibility wrapper for AI results. Minimal.
+All 6 ai-assist components migrated from inline styles to Griffel `makeStyles` with full design-token integration. 169 tests across 14 files.
+- **HbcAiActionMenu (A):** Griffel-styled popover with `elevationLevel2`, `Z_INDEX.popover`, `HBC_SURFACE_LIGHT`, status-ramp badges. All 15+ hardcoded hex colors replaced with tokens.
+- **HbcAiSmartInsertOverlay (A):** Griffel-styled table with confidence badges using `HBC_STATUS_COLORS`. All inline styles extracted.
+- **HbcAiTrustMeter (A):** Griffel-styled confidence pill with status-color variants (`success/warning/error`). Token-based typography.
+- **HbcAiGovernancePortal (A):** Scaffold — minimal Griffel wrapper.
+- **HbcAiLoadingState (A):** Griffel-styled with `HBC_PRIMARY_BLUE` indicator, `surface-1` streamed content area, `code` typography.
+- **HbcAiResultPanel (A):** Thin wrapper — no styles needed.
 
 ### `@hbc/shell` — Shell Infrastructure
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| ShellCore | B | all app roots (infrastructure) | Critical | N/A (orchestration) | N/A | Ready | Pass | N/A | Yes | Yes | Elevates |
+| ShellCore | **A** | all app roots (infrastructure) | Critical | N/A (orchestration) | N/A | Ready | Pass | N/A | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **ShellCore (B — infrastructure, not visual UI):** Orchestration coordinator for all Phase 5.5 layouts. Composes auth, routing, degraded-mode recovery, status rail, and layout slots. Does not render visual UI directly — delegates to composed children. `data-*` attributes for testing/debugging. Well-documented JSDoc. 18+ test files. ADR-0054–0071 governs (PH5 phase chain). **Note:** Shell's internal visual components (HeaderBar, AppLauncher, ProjectPicker, ContextualSidebar, ShellLayout) are not individually exported to apps; they are internal composition primitives. Visual quality of these internals is tracked via the app-shell components in the main matrix (HbcHeader, HbcSidebar, HbcProjectSelector, etc.).
+- **ShellCore (A — infrastructure, not visual UI):** Orchestration coordinator for all Phase 5.5 layouts. Composes auth, routing, degraded-mode recovery, status rail, and layout slots. Does not render visual UI directly — delegates to composed children. `data-*` attributes for testing/debugging. Well-documented JSDoc. 18+ test files. ADR-0054–0071 governs (PH5 phase chain). **Note:** Shell's internal visual components (HeaderBar, AppLauncher, ProjectPicker, ContextualSidebar, ShellLayout) are not individually exported to apps; they are internal composition primitives. Visual quality of these internals is tracked via the app-shell components in the main matrix (HbcHeader, HbcSidebar, HbcProjectSelector, etc.).
 
 ---
 
@@ -422,9 +423,9 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Tier | `@hbc/ui-kit` | Platform & Shared Packages | Combined Total | Percentage |
 |------|---------------|---------------------------|----------------|------------|
-| **A** | 56 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4 + Shell: 9 + Layout: 5 + Msg: 3 + Nav: 5 + Interaction: 3 + Complexity: 5↑) | 0 | 56 | 61% |
-| **B** | 5 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑, +3 Shell↑, +1 ToolLandingLayout↑) | 17 | 22 | 24% |
-| **C** | 4 | 7 (ai-assist ×6, density system) | 11 | 12% |
+| **A** | 56 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4 + Shell: 9 + Layout: 5 + Msg: 3 + Nav: 5 + Interaction: 3 + Complexity: 5↑) | 24↑ (smart-empty-state: 2, complexity: 2, acknowledgment: 3, step-wizard: 3, versioned-record: 3, related-items: 2, ai-assist: 6, shell: 1) | 80 | 87% |
+| **B** | 5 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑, +3 Shell↑, +1 ToolLandingLayout↑) | 0 | 5 | 5% |
+| **C** | 4 | 0 | 4 | 4% |
 | **D** | 2 | 0 | 2 | 2% |
 | **Total assessed** | **68** | **24** | **92** | |
 

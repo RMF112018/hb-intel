@@ -38,6 +38,7 @@ export default defineConfig({
     alias: {
       '@hbc/complexity/testing': resolve(__dirname, './testing/index.ts'),
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../ui-kit/src/app-shell.ts'),
+      '@hbc/ui-kit/theme': resolve(__dirname, '../ui-kit/src/theme/index.ts'),
       '@hbc/ui-kit': resolve(__dirname, '../ui-kit/src/index.ts'),
     },
   },

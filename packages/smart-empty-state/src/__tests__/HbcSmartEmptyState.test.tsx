@@ -204,7 +204,9 @@ describe('HbcSmartEmptyState', () => {
     const { container } = render(
       <HbcSmartEmptyState config={makeConfig()} context={makeContext()} />,
     );
-    expect(container.querySelector('.hbc-empty-state__coaching')).toBeNull();
+    // Only heading + description paragraphs should exist, no coaching paragraph
+    const paragraphs = container.querySelectorAll('p');
+    expect(paragraphs).toHaveLength(1); // description only
     expect(container.querySelector('details')).toBeNull();
   });
 
@@ -240,7 +242,7 @@ describe('HbcSmartEmptyState', () => {
     const { container } = render(
       <HbcSmartEmptyState config={makeConfig()} context={makeContext()} />,
     );
-    const illustration = container.querySelector('.hbc-empty-state__illustration');
+    const illustration = container.querySelector('[data-testid="empty-state-illustration"]');
     expect(illustration).not.toBeNull();
     expect(illustration!.getAttribute('aria-hidden')).toBe('true');
   });

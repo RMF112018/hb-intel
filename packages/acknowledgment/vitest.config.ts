@@ -43,6 +43,7 @@ export default defineConfig({
       '@hbc/session-state/testing': resolve(__dirname, '../session-state/testing/index.ts'),
       '@hbc/session-state': resolve(__dirname, '../session-state/src/index.ts'),
       '@hbc/ui-kit/app-shell': resolve(__dirname, '../ui-kit/src/app-shell.ts'),
+      '@hbc/ui-kit/theme': resolve(__dirname, '../ui-kit/src/theme/index.ts'),
       '@hbc/ui-kit': resolve(__dirname, '../ui-kit/src/index.ts'),
       '@hbc/complexity': resolve(__dirname, '../complexity/src/index.ts'),
     },

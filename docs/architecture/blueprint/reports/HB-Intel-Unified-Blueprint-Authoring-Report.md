@@ -122,7 +122,7 @@ The following strategic/operating sections are **new to the blueprint corpus** �
 
 ## Remaining Gaps or Follow-Up Notes
 
-1. **ADR-0090 does not yet exist on disk.** The unified blueprint's §19.1 and §15.5 note this as an active gate. The blueprint reflects the current state accurately — this is not a blueprint authoring gap.
+1. **ADR-0091 (Phase 7 Final Verification) now exists on disk** (accepted 2026-03-09). The PH7.12 gate is satisfied. Original note referred to ADR-0090 in error; the correct Phase 7 gate ADR is ADR-0091.
 
 2. **SF22 T08–T09 are not yet defined.** The blueprint §17 and §19 reflect this accurately as "T01–T07 defined; T08–T09 pending."
 

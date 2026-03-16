@@ -4,6 +4,7 @@
 **Classification:** Phase Master Plan  
 **Status:** Draft for working use  
 **Primary Role:** Replace mock-first behavior with real production-backed data, service, and integration paths
+**Read With** docs/architecture/plans/MASTER/00_HB-Intel_Master-Development-Summary-Plan.md
 
 ## 1. Purpose
 

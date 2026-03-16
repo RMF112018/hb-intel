@@ -1,7 +1,24 @@
 import React, { useRef, useState, useEffect } from 'react';
-import './complexity.css';
+import { makeStyles } from '@griffel/react';
+import { TRANSITION_FAST } from '@hbc/ui-kit/theme';
 import { useComplexityGate } from '../hooks/useComplexityGate';
 import type { IComplexityGateCondition } from '../types/IComplexity';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Griffel styles
+// ─────────────────────────────────────────────────────────────────────────────
+
+const useStyles = makeStyles({
+  entering: {
+    animationName: {
+      from: { opacity: 0 },
+      to: { opacity: 1 },
+    },
+    animationDuration: TRANSITION_FAST,
+    animationTimingFunction: 'ease-out',
+    animationFillMode: 'forwards',
+  },
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Props
@@ -61,6 +78,7 @@ export function HbcComplexityGate({
   fallback = null,
   keepMounted = false,
 }: HbcComplexityGateProps): React.ReactElement | null {
+  const styles = useStyles();
   const isOpen = useComplexityGate({ minTier, maxTier });
 
   // Track previous open state to detect transitions (for fade-in animation)
@@ -85,7 +103,7 @@ export function HbcComplexityGate({
         <div
           aria-hidden={!isOpen}
           style={{ display: isOpen ? undefined : 'none' }}
-          className={isEntering ? 'hbc-complexity-gate__content--entering' : undefined}
+          className={isEntering ? styles.entering : undefined}
         >
           {children}
         </div>
@@ -101,7 +119,7 @@ export function HbcComplexityGate({
 
   return (
     <div
-      className={isEntering ? 'hbc-complexity-gate__content--entering' : undefined}
+      className={isEntering ? styles.entering : undefined}
     >
       {children}
     </div>

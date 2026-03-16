@@ -40,6 +40,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@hbc/related-items/testing': resolve(__dirname, './testing/index.ts'),
+      '@hbc/ui-kit/theme': resolve(__dirname, '../ui-kit/src/theme/index.ts'),
+      '@hbc/ui-kit': resolve(__dirname, '../ui-kit/src/index.ts'),
     },
   },
 });

@@ -1,8 +1,52 @@
 import * as React from 'react';
+import { makeStyles, mergeClasses } from '@griffel/react';
 import { useComplexity, type ComplexityTier } from '@hbc/complexity';
 import { HbcTooltip } from '@hbc/ui-kit';
+import {
+  HBC_STATUS_COLORS,
+  HBC_SPACE_XS,
+  HBC_SPACE_SM,
+  HBC_RADIUS_FULL,
+  label as labelTypo,
+} from '@hbc/ui-kit/theme';
 import { useAcknowledgment } from '../hooks/useAcknowledgment';
 import type { IAcknowledgmentConfig, IAcknowledgmentState } from '../types';
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
+const useStyles = makeStyles({
+  badge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    columnGap: `${HBC_SPACE_XS}px`,
+    borderRadius: HBC_RADIUS_FULL,
+    paddingTop: `${HBC_SPACE_XS}px`,
+    paddingBottom: `${HBC_SPACE_XS}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
+    fontFamily: labelTypo.fontFamily,
+    fontSize: labelTypo.fontSize,
+    fontWeight: labelTypo.fontWeight as React.CSSProperties['fontWeight'],
+    lineHeight: labelTypo.lineHeight,
+    letterSpacing: labelTypo.letterSpacing,
+  },
+  success: {
+    backgroundColor: `${HBC_STATUS_COLORS.success}1A`,
+    color: HBC_STATUS_COLORS.success,
+  },
+  warning: {
+    backgroundColor: `${HBC_STATUS_COLORS.warning}1A`,
+    color: HBC_STATUS_COLORS.warning,
+  },
+  danger: {
+    backgroundColor: `${HBC_STATUS_COLORS.error}1A`,
+    color: HBC_STATUS_COLORS.error,
+  },
+  neutral: {
+    backgroundColor: `${HBC_STATUS_COLORS.neutral}1A`,
+    color: HBC_STATUS_COLORS.neutral,
+  },
+});
 
 // ─── Props ──────────────────────────────────────────────────────────────────
 
@@ -17,33 +61,36 @@ export interface HbcAcknowledgmentBadgeProps<T> {
 // ─── Skeleton ───────────────────────────────────────────────────────────────
 
 function BadgeSkeleton() {
+  const styles = useStyles();
   return (
-    <span className="hbc-ack-badge hbc-ack-badge--neutral" aria-busy="true">
-      <span className="hbc-ack-badge__label">Loading…</span>
+    <span className={mergeClasses(styles.badge, styles.neutral)} aria-busy="true">
+      <span>Loading…</span>
     </span>
   );
 }
 
 // ─── Display Resolver ───────────────────────────────────────────────────────
 
+type ColorVariant = 'success' | 'warning' | 'danger' | 'neutral';
+
 function resolveBadgeDisplay(
   overallStatus: IAcknowledgmentState['overallStatus'],
   acknowledgedCount: number,
   requiredCount: number,
   hasBypass: boolean,
-): { icon: string; label: string; colorClass: string } {
+): { icon: string; label: string; colorVariant: ColorVariant } {
   if (overallStatus === 'declined') {
-    return { icon: '✗', label: 'Declined', colorClass: 'danger' };
+    return { icon: '✗', label: 'Declined', colorVariant: 'danger' };
   }
   if (overallStatus === 'acknowledged') {
     return hasBypass
-      ? { icon: '✓', label: 'Complete (with bypass)', colorClass: 'warning' }
-      : { icon: '✓', label: 'Complete', colorClass: 'success' };
+      ? { icon: '✓', label: 'Complete (with bypass)', colorVariant: 'warning' }
+      : { icon: '✓', label: 'Complete', colorVariant: 'success' };
   }
   return {
     icon: '⏳',
     label: `${acknowledgedCount} of ${requiredCount} acknowledged`,
-    colorClass: acknowledgedCount > 0 ? 'warning' : 'neutral',
+    colorVariant: acknowledgedCount > 0 ? 'warning' : 'neutral',
   };
 }
 
@@ -55,6 +102,7 @@ export function HbcAcknowledgmentBadge<T>({
   contextId,
   complexityTier: complexityTierProp,
 }: HbcAcknowledgmentBadgeProps<T>) {
+  const styles = useStyles();
   const { tier: contextTier } = useComplexity();
   // D-07: floor = standard — Essential renders same as Standard
   const effectiveTier: ComplexityTier =
@@ -83,7 +131,7 @@ export function HbcAcknowledgmentBadge<T>({
   );
   const hasBypass = state.events.some((e) => e.isBypass);
 
-  const { icon, label, colorClass } = resolveBadgeDisplay(
+  const { icon, label, colorVariant } = resolveBadgeDisplay(
     state.overallStatus,
     acknowledged.length,
     required.length,
@@ -92,13 +140,13 @@ export function HbcAcknowledgmentBadge<T>({
 
   const badgeEl = (
     <span
-      className={`hbc-ack-badge hbc-ack-badge--${colorClass}`}
+      className={mergeClasses(styles.badge, styles[colorVariant])}
       aria-label={label}
     >
-      <span className="hbc-ack-badge__icon" aria-hidden="true">
+      <span aria-hidden="true">
         {icon}
       </span>
-      <span className="hbc-ack-badge__label">{label}</span>
+      <span>{label}</span>
     </span>
   );
 

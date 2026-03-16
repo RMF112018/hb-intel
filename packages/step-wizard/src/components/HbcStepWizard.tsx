@@ -1,10 +1,170 @@
 import * as React from 'react';
+import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { useComplexity } from '@hbc/complexity';
 import type { ComplexityTier } from '@hbc/complexity';
 import { HbcCoachingCallout } from '@hbc/ui-kit';
+import {
+  HBC_ACCENT_ORANGE,
+  HBC_ACCENT_ORANGE_HOVER,
+  HBC_ACCENT_ORANGE_PRESSED,
+  HBC_SURFACE_LIGHT,
+  HBC_STATUS_COLORS,
+  HBC_SPACE_SM,
+  HBC_SPACE_MD,
+  HBC_RADIUS_MD,
+  HBC_RADIUS_FULL,
+  body as bodyTypo,
+} from '@hbc/ui-kit/theme';
 import type { IStepWizardConfig, IUseStepWizardReturn } from '../types/IStepWizard';
 import { useStepWizard } from '../hooks/useStepWizard';
 import { WizardSidebar } from './shared/WizardSidebar';
+
+// ── Styles ──────────────────────────────────────────────────────────────────
+
+const useStyles = makeStyles({
+  wizardVertical: {
+    display: 'flex',
+    flexDirection: 'row',
+    columnGap: `${HBC_SPACE_MD}px`,
+  },
+  wizardHorizontal: {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: `${HBC_SPACE_MD}px`,
+  },
+  content: {
+    display: 'flex',
+    flexDirection: 'column',
+    flexGrow: 1,
+  },
+  stepBody: {
+    flexGrow: 1,
+  },
+  progressHeader: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    rowGap: `${HBC_SPACE_SM}px`,
+  },
+  progressTrack: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: `${HBC_SPACE_SM}px`,
+  },
+  stepDot: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '32px',
+    height: '32px',
+    borderRadius: HBC_RADIUS_FULL,
+    ...shorthands.border('2px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+    fontFamily: bodyTypo.fontFamily,
+    fontSize: bodyTypo.fontSize,
+    fontWeight: '500',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    cursor: 'pointer',
+    ':disabled': {
+      opacity: 0.4,
+      cursor: 'not-allowed',
+    },
+  },
+  stepDotActive: {
+    ...shorthands.borderColor(HBC_ACCENT_ORANGE),
+    color: HBC_ACCENT_ORANGE,
+    fontWeight: '700',
+  },
+  stepDotComplete: {
+    ...shorthands.borderColor(HBC_STATUS_COLORS.success),
+    backgroundColor: HBC_STATUS_COLORS.success,
+    color: '#FFFFFF',
+  },
+  stepDotLocked: {
+    opacity: 0.4,
+  },
+  progressLine: {
+    width: '24px',
+    height: '2px',
+    backgroundColor: HBC_SURFACE_LIGHT['border-default'],
+  },
+  progressLineComplete: {
+    backgroundColor: HBC_STATUS_COLORS.success,
+  },
+  stepLabel: {
+    fontFamily: bodyTypo.fontFamily,
+    fontSize: bodyTypo.fontSize,
+    lineHeight: bodyTypo.lineHeight,
+    color: HBC_SURFACE_LIGHT['text-primary'],
+  },
+  nav: {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: `${HBC_SPACE_SM}px`,
+    marginTop: `${HBC_SPACE_MD}px`,
+  },
+  navError: {
+    fontFamily: bodyTypo.fontFamily,
+    fontSize: bodyTypo.fontSize,
+    color: HBC_STATUS_COLORS.error,
+  },
+  navActions: {
+    display: 'flex',
+    flexDirection: 'row',
+    columnGap: `${HBC_SPACE_SM}px`,
+    justifyContent: 'flex-end',
+  },
+  btnPrimary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    borderRadius: HBC_RADIUS_MD,
+    ...shorthands.borderWidth('0'),
+    backgroundColor: HBC_ACCENT_ORANGE,
+    color: '#FFFFFF',
+    fontFamily: bodyTypo.fontFamily,
+    fontSize: bodyTypo.fontSize,
+    fontWeight: '600',
+    cursor: 'pointer',
+    ':hover': {
+      backgroundColor: HBC_ACCENT_ORANGE_HOVER,
+    },
+    ':active': {
+      backgroundColor: HBC_ACCENT_ORANGE_PRESSED,
+    },
+  },
+  btnGhost: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    borderRadius: HBC_RADIUS_MD,
+    ...shorthands.borderWidth('0'),
+    backgroundColor: 'transparent',
+    color: HBC_SURFACE_LIGHT['text-primary'],
+    fontFamily: bodyTypo.fontFamily,
+    fontSize: bodyTypo.fontSize,
+    fontWeight: '500',
+    cursor: 'pointer',
+    ':hover': {
+      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    },
+  },
+  completeMsg: {
+    fontFamily: bodyTypo.fontFamily,
+    fontSize: bodyTypo.fontSize,
+    color: HBC_STATUS_COLORS.success,
+    fontWeight: '600',
+  },
+});
 
 // ── Props ───────────────────────────────────────────────────────────────────
 
@@ -71,12 +231,13 @@ function VerticalWizard<T>({
   showCoaching,
   wizard,
 }: VerticalWizardProps<T>): React.ReactElement {
+  const styles = useStyles();
   const activeStep = wizard.state.steps.find(
     (s) => s.stepId === wizard.state.activeStepId,
   );
 
   return (
-    <div className="hbc-wizard hbc-wizard--vertical">
+    <div className={styles.wizardVertical}>
       <WizardSidebar
         steps={wizard.state.steps}
         activeStepId={wizard.state.activeStepId}
@@ -87,7 +248,7 @@ function VerticalWizard<T>({
         getValidationError={wizard.getValidationError}
       />
 
-      <div className="hbc-wizard__content" role="main">
+      <div className={styles.content} role="main">
         {/* Essential coaching callout (D-06) */}
         {tier === 'essential' && showCoaching && activeStep && (
           <HbcCoachingCallout
@@ -98,7 +259,7 @@ function VerticalWizard<T>({
         {/* Step body via render prop */}
         {wizard.state.activeStepId && (
           <div
-            className="hbc-wizard__step-body"
+            className={styles.stepBody}
             key={wizard.state.activeStepId}
             role="region"
             aria-label={activeStep?.label ?? 'Step'}
@@ -134,6 +295,7 @@ function HorizontalWizard<T>({
   showCoaching,
   wizard,
 }: HorizontalWizardProps<T>): React.ReactElement {
+  const styles = useStyles();
   const totalSteps = wizard.state.steps.length;
   const activeIdx = wizard.state.steps.findIndex(
     (s) => s.stepId === wizard.state.activeStepId,
@@ -141,26 +303,23 @@ function HorizontalWizard<T>({
   const activeStep = wizard.state.steps[activeIdx];
 
   return (
-    <div className="hbc-wizard hbc-wizard--horizontal">
+    <div className={styles.wizardHorizontal}>
       {/* Top progress bar with step dots */}
       <div
-        className="hbc-wizard__progress-header"
+        className={styles.progressHeader}
         role="navigation"
         aria-label="Step progress"
       >
-        <div className="hbc-wizard__progress-track">
+        <div className={styles.progressTrack}>
           {wizard.state.steps.map((step, idx) => (
             <React.Fragment key={step.stepId}>
               <button
-                className={[
-                  'hbc-wizard__step-dot',
-                  step.stepId === wizard.state.activeStepId &&
-                    'hbc-wizard__step-dot--active',
-                  step.status === 'complete' && 'hbc-wizard__step-dot--complete',
-                  !step.isUnlocked && 'hbc-wizard__step-dot--locked',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
+                className={mergeClasses(
+                  styles.stepDot,
+                  step.stepId === wizard.state.activeStepId && styles.stepDotActive,
+                  step.status === 'complete' && styles.stepDotComplete,
+                  !step.isUnlocked && styles.stepDotLocked,
+                )}
                 onClick={() => wizard.goTo(step.stepId)}
                 disabled={!step.isUnlocked}
                 aria-current={
@@ -172,20 +331,17 @@ function HorizontalWizard<T>({
               </button>
               {idx < totalSteps - 1 && (
                 <div
-                  className={[
-                    'hbc-wizard__progress-line',
-                    step.status === 'complete' &&
-                      'hbc-wizard__progress-line--complete',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
+                  className={mergeClasses(
+                    styles.progressLine,
+                    step.status === 'complete' && styles.progressLineComplete,
+                  )}
                 />
               )}
             </React.Fragment>
           ))}
         </div>
 
-        <p className="hbc-wizard__step-label" aria-live="polite">
+        <p className={styles.stepLabel} aria-live="polite">
           Step {activeIdx + 1} of {totalSteps}: {activeStep?.label}
         </p>
       </div>
@@ -197,7 +353,7 @@ function HorizontalWizard<T>({
         />
       )}
       <div
-        className="hbc-wizard__step-body"
+        className={styles.stepBody}
         key={wizard.state.activeStepId}
         role="region"
         aria-label={activeStep?.label ?? 'Step'}
@@ -230,6 +386,7 @@ function WizardNav<T>({
   tier,
   validationError,
 }: WizardNavProps<T>): React.ReactElement {
+  const styles = useStyles();
   const activeIdx = wizard.state.steps.findIndex(
     (s) => s.stepId === wizard.state.activeStepId,
   );
@@ -241,22 +398,22 @@ function WizardNav<T>({
   const isComplete = wizard.state.isComplete;
 
   return (
-    <div className="hbc-wizard__nav" role="group" aria-label="Step navigation">
+    <div className={styles.nav} role="group" aria-label="Step navigation">
       {validationError && (
-        <p className="hbc-wizard__nav-error" role="alert">
+        <p className={styles.navError} role="alert">
           {/* D-06: simplified message at Essential; full message at Standard+ */}
           {tier === 'essential' ? 'This step is incomplete.' : validationError}
         </p>
       )}
 
-      <div className="hbc-wizard__nav-actions">
+      <div className={styles.navActions}>
         {canGoBack && (
           <button
             onClick={() => {
               const prev = wizard.state.steps[activeIdx - 1];
               if (prev) wizard.goTo(prev.stepId);
             }}
-            className="hbc-btn hbc-btn--ghost"
+            className={styles.btnGhost}
           >
             Back
           </button>
@@ -266,7 +423,7 @@ function WizardNav<T>({
           <>
             <button
               onClick={() => wizard.markComplete(wizard.state.activeStepId!)}
-              className="hbc-btn hbc-btn--primary"
+              className={styles.btnPrimary}
             >
               {isLastStep ? 'Complete' : 'Mark Complete & Next'}
             </button>
@@ -276,7 +433,7 @@ function WizardNav<T>({
                 onClick={() =>
                   wizard.markComplete(wizard.state.activeStepId!, true)
                 }
-                className="hbc-btn hbc-btn--ghost"
+                className={styles.btnGhost}
               >
                 Complete Anyway
               </button>
@@ -285,7 +442,7 @@ function WizardNav<T>({
         )}
 
         {isComplete && (
-          <p className="hbc-wizard__complete-msg" role="status">
+          <p className={styles.completeMsg} role="status">
             ✓ All steps complete
           </p>
         )}

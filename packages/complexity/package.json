@@ -1,6 +1,6 @@
 {
   "name": "@hbc/complexity",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Three-tier Complexity Dial — platform-wide UI density context",
   "type": "module",
@@ -21,7 +21,7 @@
     "testing"
   ],
   "scripts": {
-    "build": "tsc --project tsconfig.json && cp src/components/complexity.css dist/src/components/complexity.css",
+    "build": "tsc --project tsconfig.json",
     "dev": "tsc --project tsconfig.json --watch",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -31,6 +31,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@griffel/react": "^1.5.0",
+    "@hbc/ui-kit": "workspace:*",
     "@tanstack/react-query": "^5.0.0"
   },
   "devDependencies": {

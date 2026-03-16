@@ -194,7 +194,7 @@ Summary of the three doctrine areas materially strengthened in v1.1:
 
 4. **§17.2 architectural bets (Procore, Azure Monitor, etc.) are unresolved.** These are documented as directions, not commitments. Each will require an ADR before implementation. No action is required now.
 
-5. **ADR-0090 remains the gate for all feature-expansion work.** This report documents v1.1 doctrine refinements only. The PH7.12 stabilization gate is not affected by this pass. ADR-0090 must still be created and accepted before any feature-expansion phase begins.
+5. **ADR-0091 remains the gate for all feature-expansion work.** This report documents v1.1 doctrine refinements only. The PH7.12 stabilization gate is not affected by this pass. ADR-0091 (Phase 7 Final Verification) must exist on disk and be accepted before any feature-expansion phase begins.
 
 6. **SF22 T08–T09 remain undefined.** Both this document (§17.3) and the authoring report note this gap. The tasks remain in Deferred Scope status.
 

@@ -10,8 +10,17 @@
  * - @hbc/auth for current user role fallback
  */
 import type { FC, ReactElement } from 'react';
+import { makeStyles, shorthands } from '@griffel/react';
 import { useCurrentUser } from '@hbc/auth';
 import { useComplexity } from '@hbc/complexity';
+import {
+  HBC_PRIMARY_BLUE,
+  HBC_SURFACE_LIGHT,
+  HBC_SPACE_XS,
+  HBC_SPACE_SM,
+  HBC_RADIUS_LG,
+  HBC_RADIUS_FULL,
+} from '@hbc/ui-kit/theme';
 import { MAX_TILE_ITEMS } from '../constants/index.js';
 import { useRelatedItems } from '../hooks/index.js';
 
@@ -23,24 +32,66 @@ export interface HbcRelatedItemsTileProps {
   onViewAll?: () => void;
 }
 
-function renderModuleIcon(moduleIcon: string): ReactElement {
+const useStyles = makeStyles({
+  moduleIcon: {
+    display: 'inline-flex',
+    width: '20px',
+    height: '20px',
+    borderRadius: HBC_RADIUS_FULL,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    color: HBC_PRIMARY_BLUE,
+    fontSize: '9px',
+    fontWeight: 700,
+  },
+  cardList: {
+    display: 'flex',
+    gap: `${HBC_SPACE_SM}px`,
+    flexWrap: 'wrap',
+  },
+  card: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    borderRadius: HBC_RADIUS_LG,
+    paddingTop: `${HBC_SPACE_XS}px`,
+    paddingBottom: `${HBC_SPACE_XS}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
+    fontSize: '12px',
+    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+  },
+  badge: {
+    fontSize: '10px',
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    borderRadius: HBC_RADIUS_FULL,
+    paddingTop: '1px',
+    paddingBottom: '1px',
+    paddingLeft: '6px',
+    paddingRight: '6px',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
+  viewAllButton: {
+    marginTop: '6px',
+    fontSize: '12px',
+    backgroundColor: 'transparent',
+    ...shorthands.borderWidth('0'),
+    color: HBC_PRIMARY_BLUE,
+    cursor: 'pointer',
+    paddingTop: '0',
+    paddingBottom: '0',
+    paddingLeft: '0',
+    paddingRight: '0',
+  },
+});
+
+function RenderModuleIcon({ moduleIcon }: { moduleIcon: string }): ReactElement {
+  const styles = useStyles();
   const iconToken = (moduleIcon || '?').trim().slice(0, 2).toUpperCase();
   return (
-    <span
-      aria-label={`Module ${moduleIcon}`}
-      style={{
-        display: 'inline-flex',
-        width: 20,
-        height: 20,
-        borderRadius: '50%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#e6edf4',
-        color: '#004b87',
-        fontSize: 9,
-        fontWeight: 700,
-      }}
-    >
+    <span aria-label={`Module ${moduleIcon}`} className={styles.moduleIcon}>
       {iconToken}
     </span>
   );
@@ -54,6 +105,7 @@ export const HbcRelatedItemsTile: FC<HbcRelatedItemsTileProps> = ({
   currentUserRole,
   onViewAll,
 }) => {
+  const styles = useStyles();
   const user = useCurrentUser();
   const { tier } = useComplexity();
   const resolvedRole = currentUserRole ?? user?.roles[0]?.name ?? 'Unknown';
@@ -93,33 +145,18 @@ export const HbcRelatedItemsTile: FC<HbcRelatedItemsTileProps> = ({
         </div>
       ) : null}
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div className={styles.cardList}>
         {visibleItems.map((item) => (
           <div
             key={`${item.recordType}:${item.recordId}`}
             data-testid="related-items-tile-card"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              border: '1px solid #d0d7de',
-              borderRadius: 6,
-              padding: '4px 8px',
-              fontSize: 12,
-              background: '#fff',
-            }}
+            className={styles.card}
           >
-            {renderModuleIcon(item.moduleIcon)}
+            <RenderModuleIcon moduleIcon={item.moduleIcon} />
             <span data-testid="related-items-tile-card-label">{item.label}</span>
             <span
               data-testid="related-items-tile-card-badge"
-              style={{
-                fontSize: 10,
-                border: '1px solid #d0d7de',
-                borderRadius: 999,
-                padding: '1px 6px',
-                color: '#57606a',
-              }}
+              className={styles.badge}
             >
               {item.relationshipLabel}
             </span>
@@ -132,15 +169,7 @@ export const HbcRelatedItemsTile: FC<HbcRelatedItemsTileProps> = ({
           type="button"
           data-testid="related-items-tile-view-all"
           onClick={onViewAll}
-          style={{
-            marginTop: 6,
-            fontSize: 12,
-            background: 'none',
-            border: 'none',
-            color: '#0969da',
-            cursor: 'pointer',
-            padding: 0,
-          }}
+          className={styles.viewAllButton}
         >
           View all ({items.length})
         </button>

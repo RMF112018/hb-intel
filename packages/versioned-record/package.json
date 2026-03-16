@@ -1,6 +1,6 @@
 {
   "name": "@hbc/versioned-record",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "Versioned record tracking with diff engine, history hooks, and UI components for HB Intel",
   "type": "module",
@@ -31,6 +31,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@griffel/react": "^1.5.0",
     "@hbc/complexity": "workspace:*",
     "@hbc/ui-kit": "workspace:*"
   },

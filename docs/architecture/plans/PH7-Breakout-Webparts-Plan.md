@@ -1,6 +1,6 @@
 # PH7 — Breakout SPFx Webparts: Master Infrastructure Plan
 
-> **Doc Classification:** Canonical Normative Plan — master index and summary for Phase 7 Breakout SPFx Webparts infrastructure; governs `ph7-breakout-webparts/PH7-BW-0` through `BW-11` task files. Implementation pending PH7.12 sign-off (ADR-0090). See `HB-Intel-Blueprint-Crosswalk.md §5` for the PH7 Stabilization vs Expansion distinction.
+> **Doc Classification:** Canonical Normative Plan — master index and summary for Phase 7 Breakout SPFx Webparts infrastructure; governs `ph7-breakout-webparts/PH7-BW-0` through `BW-11` task files. Implementation pending PH7.12 sign-off (ADR-0091). See `HB-Intel-Blueprint-Crosswalk.md §5` for the PH7 Stabilization vs Expansion distinction.
 
 **Version:** 2.0 (split into summary + task files — supersedes v1.0 monolithic plan)
 **Governed by:** CLAUDE.md v1.2 · HB-Intel-Blueprint-V4.md §1, §2a, §2b, §2c · `hb-intel-foundation-plan.md` Phase 7

@@ -6,6 +6,19 @@
  * Governance-aware: per-action policy evaluation via AiGovernanceApi.
  */
 import { useMemo, useState, useCallback, type FC } from 'react';
+import { makeStyles, shorthands } from '@griffel/react';
+import {
+  HBC_PRIMARY_BLUE,
+  HBC_SURFACE_LIGHT,
+  HBC_STATUS_RAMP_AMBER,
+  HBC_STATUS_COLORS,
+  HBC_SPACE_XS,
+  HBC_SPACE_SM,
+  HBC_RADIUS_MD,
+  HBC_RADIUS_LG,
+  elevationLevel2,
+  Z_INDEX,
+} from '@hbc/ui-kit/theme';
 import type { ComplexityTier, IAiAssistPolicy, IAiAction, IAiActionInvokeContext } from '../types/index.js';
 import { useAiActions } from '../hooks/index.js';
 import { AiGovernanceApi, type IPolicyEvaluation } from '../governance/index.js';
@@ -32,6 +45,94 @@ interface ActionItem {
 
 type MenuState = 'empty' | 'ready' | 'open';
 
+const useStyles = makeStyles({
+  root: {
+    position: 'relative',
+    display: 'inline-block',
+  },
+  triggerDisabled: {
+    cursor: 'not-allowed',
+    opacity: 0.5,
+  },
+  triggerEnabled: {
+    cursor: 'pointer',
+    opacity: 1,
+  },
+  popover: {
+    position: 'absolute',
+    top: '100%',
+    left: '0',
+    zIndex: Z_INDEX.popover,
+    minWidth: '240px',
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    borderRadius: HBC_RADIUS_LG,
+    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+    boxShadow: elevationLevel2,
+    paddingTop: `${HBC_SPACE_XS}px`,
+    paddingBottom: `${HBC_SPACE_XS}px`,
+    paddingLeft: `${HBC_SPACE_XS}px`,
+    paddingRight: `${HBC_SPACE_XS}px`,
+    marginTop: `${HBC_SPACE_XS}px`,
+  },
+  menuItem: {
+    display: 'block',
+    width: '100%',
+    textAlign: 'left',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: '12px',
+    paddingRight: '12px',
+    ...shorthands.borderWidth('0'),
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+    opacity: 1,
+  },
+  menuItemBlocked: {
+    display: 'block',
+    width: '100%',
+    textAlign: 'left',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: '12px',
+    paddingRight: '12px',
+    ...shorthands.borderWidth('0'),
+    backgroundColor: 'transparent',
+    cursor: 'not-allowed',
+    opacity: 0.5,
+  },
+  itemLabel: {
+    fontWeight: 500,
+  },
+  approvalBadge: {
+    marginLeft: '6px',
+    fontSize: '0.75em',
+    paddingTop: '1px',
+    paddingBottom: '1px',
+    paddingLeft: '6px',
+    paddingRight: '6px',
+    borderRadius: HBC_RADIUS_MD,
+    backgroundColor: HBC_STATUS_RAMP_AMBER[90],
+    color: HBC_STATUS_RAMP_AMBER[10],
+  },
+  relevanceScore: {
+    float: 'right',
+    fontSize: '0.8em',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
+  description: {
+    display: 'block',
+    fontSize: '0.85em',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    marginTop: '2px',
+  },
+  blockedNote: {
+    display: 'block',
+    fontSize: '0.8em',
+    color: HBC_STATUS_COLORS.error,
+    marginTop: '2px',
+  },
+});
+
 /**
  * AI Action Menu — discovery/trigger surface for contextual AI actions.
  * Renders a trigger button and a popover listing governance-evaluated actions.
@@ -48,6 +149,8 @@ export const HbcAiActionMenu: FC<HbcAiActionMenuProps> = ({
   contextTags,
   onActionSelect,
 }) => {
+  const styles = useStyles();
+
   const { actions } = useAiActions({
     recordType,
     recordId,
@@ -100,7 +203,7 @@ export const HbcAiActionMenu: FC<HbcAiActionMenuProps> = ({
   );
 
   return (
-    <div data-testid="ai-action-menu" style={{ position: 'relative', display: 'inline-block' }}>
+    <div data-testid="ai-action-menu" className={styles.root}>
       <button
         type="button"
         data-testid="ai-action-menu-trigger"
@@ -108,10 +211,7 @@ export const HbcAiActionMenu: FC<HbcAiActionMenuProps> = ({
         onClick={handleToggle}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        style={{
-          cursor: menuState === 'empty' ? 'not-allowed' : 'pointer',
-          opacity: menuState === 'empty' ? 0.5 : 1,
-        }}
+        className={menuState === 'empty' ? styles.triggerDisabled : styles.triggerEnabled}
       >
         ✨ AI Assist
       </button>
@@ -120,19 +220,7 @@ export const HbcAiActionMenu: FC<HbcAiActionMenuProps> = ({
         <div
           data-testid="ai-action-menu-popover"
           role="menu"
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            zIndex: 1000,
-            minWidth: 240,
-            border: '1px solid #ccc',
-            borderRadius: 4,
-            background: '#fff',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-            padding: 4,
-            marginTop: 4,
-          }}
+          className={styles.popover}
         >
           {actionItems.map((item) => {
             const isBlocked = item.policyDecision === 'blocked';
@@ -146,30 +234,14 @@ export const HbcAiActionMenu: FC<HbcAiActionMenuProps> = ({
                 data-testid={`ai-action-item-${item.action.actionKey}`}
                 disabled={isBlocked}
                 onClick={() => handleActionClick(item.action.actionKey)}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: '8px 12px',
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: isBlocked ? 'not-allowed' : 'pointer',
-                  opacity: isBlocked ? 0.5 : 1,
-                }}
+                className={isBlocked ? styles.menuItemBlocked : styles.menuItem}
               >
-                <span style={{ fontWeight: 500 }}>
+                <span className={styles.itemLabel}>
                   {item.action.label}
                   {needsApproval ? (
                     <span
                       data-testid={`ai-action-approval-badge-${item.action.actionKey}`}
-                      style={{
-                        marginLeft: 6,
-                        fontSize: '0.75em',
-                        padding: '1px 6px',
-                        borderRadius: 3,
-                        background: '#fff3cd',
-                        color: '#856404',
-                      }}
+                      className={styles.approvalBadge}
                     >
                       Approval Required
                     </span>
@@ -177,17 +249,17 @@ export const HbcAiActionMenu: FC<HbcAiActionMenuProps> = ({
                 </span>
                 <span
                   data-testid={`ai-action-relevance-${item.action.actionKey}`}
-                  style={{ float: 'right', fontSize: '0.8em', color: '#666' }}
+                  className={styles.relevanceScore}
                 >
                   {item.action.basePriorityScore ?? 0}
                 </span>
-                <span style={{ display: 'block', fontSize: '0.85em', color: '#666', marginTop: 2 }}>
+                <span className={styles.description}>
                   {item.action.description}
                 </span>
                 {isBlocked ? (
                   <span
                     data-testid={`ai-action-blocked-note-${item.action.actionKey}`}
-                    style={{ display: 'block', fontSize: '0.8em', color: '#dc3545', marginTop: 2 }}
+                    className={styles.blockedNote}
                   >
                     {item.policyNotes.join('; ')}
                   </span>

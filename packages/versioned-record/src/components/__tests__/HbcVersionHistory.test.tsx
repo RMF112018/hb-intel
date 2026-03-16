@@ -115,7 +115,7 @@ describe('HbcVersionHistory', () => {
 
     // Click the confirm button inside the dialog (not the list CTA)
     const dialog = screen.getByRole('dialog');
-    const confirmButton = dialog.querySelector('.hbc-rollback-modal__confirm') as HTMLElement;
+    const confirmButton = dialog.querySelector('[data-testid="rollback-confirm-btn"]') as HTMLElement;
     fireEvent.click(confirmButton);
 
     await waitFor(() =>
@@ -182,7 +182,7 @@ describe('HbcVersionHistory', () => {
     fireEvent.click(screen.getAllByText(/Restore to v/)[0]!);
 
     const dialog = screen.getByRole('dialog');
-    const confirmButton = dialog.querySelector('.hbc-rollback-modal__confirm') as HTMLElement;
+    const confirmButton = dialog.querySelector('[data-testid="rollback-confirm-btn"]') as HTMLElement;
     fireEvent.click(confirmButton);
 
     await waitFor(() => {

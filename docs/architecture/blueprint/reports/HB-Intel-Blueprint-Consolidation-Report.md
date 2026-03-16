@@ -276,7 +276,7 @@ The following relative links were validated during this consolidation pass:
 
 ### Before Generating HB-Intel-Unified-Blueprint.md
 
-1. **PH7.12 gate confirmation:** Confirm PH7.12 acceptance criteria are fully satisfied and ADR-0090 exists on disk before using the unified blueprint to plan feature expansion work.
+1. **PH7.12 gate confirmation:** Confirm PH7.12 acceptance criteria are fully satisfied and ADR-0091 (Phase 7 Final Verification) exists on disk before using the unified blueprint to plan feature expansion work.
 
 2. **MVP plan refinement pass:** The MVP Plan Review (2026-03-13) identified 4 categories of issues requiring correction before implementation. These must be resolved before any MVP coding agent begins work. The unified blueprint should reflect the corrected plan state.
 

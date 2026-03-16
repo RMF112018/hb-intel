@@ -1,8 +1,114 @@
 import React from 'react';
-import './complexity.css';
+import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
+import {
+  HBC_PRIMARY_BLUE,
+  HBC_SURFACE_LIGHT,
+  HBC_SPACE_XS,
+  HBC_SPACE_SM,
+  HBC_SPACE_MD,
+  HBC_RADIUS_FULL,
+  HBC_RADIUS_XL,
+  TRANSITION_FAST,
+} from '@hbc/ui-kit/theme';
 import { useComplexity } from '../hooks/useComplexity';
 import type { ComplexityTier } from '../types/IComplexity';
 import { TIER_ORDER } from '../types/IComplexity';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Griffel styles
+// ─────────────────────────────────────────────────────────────────────────────
+
+const useStyles = makeStyles({
+  wrapper: {},
+
+  // Header pill variant
+  headerDial: {
+    display: 'inline-flex',
+    borderRadius: HBC_RADIUS_FULL,
+    border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    overflow: 'hidden',
+  },
+
+  segment: {
+    paddingTop: `${HBC_SPACE_XS}px`,
+    paddingBottom: `${HBC_SPACE_XS}px`,
+    paddingLeft: '12px',
+    paddingRight: '12px',
+    fontSize: '0.8125rem',
+    cursor: 'pointer',
+    transitionProperty: 'background-color',
+    transitionDuration: '120ms',
+    transitionTimingFunction: 'ease',
+    border: 'none',
+    backgroundColor: 'transparent',
+  },
+
+  segmentActive: {
+    backgroundColor: HBC_PRIMARY_BLUE,
+    color: '#FFFFFF',
+    fontWeight: 600,
+  },
+
+  // Settings cards variant
+  settingsDial: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '12px',
+  },
+
+  card: {
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    border: `2px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    borderRadius: HBC_RADIUS_XL,
+    cursor: 'pointer',
+    transitionProperty: 'border-color',
+    transitionDuration: '120ms',
+    transitionTimingFunction: 'ease',
+    backgroundColor: 'transparent',
+    textAlign: 'start' as const,
+  },
+
+  cardActive: {
+    ...shorthands.borderColor(HBC_PRIMARY_BLUE),
+  },
+
+  cardHeader: {},
+  cardAudience: {},
+  cardDescription: {},
+  cardExample: {},
+
+  // Locked state
+  locked: {
+    opacity: 0.6,
+    cursor: 'not-allowed',
+    pointerEvents: 'none' as const,
+  },
+
+  lockedSegment: {
+    cursor: 'not-allowed',
+  },
+
+  lockIcon: {},
+
+  lockNotice: {},
+
+  // Coaching toggle
+  coachingToggle: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: `${HBC_SPACE_SM}px`,
+    marginTop: `${HBC_SPACE_MD}px`,
+    cursor: 'pointer',
+  },
+
+  coachingHint: {
+    fontSize: '0.75rem',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tier metadata
@@ -69,15 +175,16 @@ export interface HbcComplexityDialProps {
 export function HbcComplexityDial({
   variant = 'header',
   showCoachingToggle = false,
-  className = '',
+  className,
 }: HbcComplexityDialProps): React.ReactElement {
+  const styles = useStyles();
   const { tier, isLocked, lockedBy, lockedUntil, setTier, showCoaching, setShowCoaching } =
     useComplexity();
 
   const lockedTitle = buildLockedTooltip(lockedBy, lockedUntil);
 
   return (
-    <div className={`hbc-complexity-dial-wrapper ${className}`}>
+    <div className={mergeClasses(styles.wrapper, className)}>
       {variant === 'header' ? (
         <HeaderDial
           currentTier={tier}
@@ -112,9 +219,14 @@ interface HeaderDialProps {
 }
 
 function HeaderDial({ currentTier, isLocked, lockedTitle, onSelect }: HeaderDialProps): React.ReactElement {
+  const styles = useStyles();
+
   return (
     <div
-      className={`hbc-complexity-dial hbc-complexity-dial--header ${isLocked ? 'hbc-complexity-dial--locked' : ''}`}
+      className={mergeClasses(
+        styles.headerDial,
+        isLocked && styles.locked,
+      )}
       role="group"
       aria-label="Complexity level"
       title={isLocked ? lockedTitle : undefined}
@@ -125,7 +237,11 @@ function HeaderDial({ currentTier, isLocked, lockedTitle, onSelect }: HeaderDial
         return (
           <button
             key={tier}
-            className={`hbc-complexity-dial__segment ${isActive ? 'hbc-complexity-dial__segment--active' : ''}`}
+            className={mergeClasses(
+              styles.segment,
+              isActive && styles.segmentActive,
+              isLocked && styles.lockedSegment,
+            )}
             aria-pressed={isActive}
             aria-label={`${meta.label} — ${meta.description}`}
             title={`${meta.label}: ${meta.description}`}
@@ -139,7 +255,7 @@ function HeaderDial({ currentTier, isLocked, lockedTitle, onSelect }: HeaderDial
       })}
       {isLocked && (
         <span
-          className="hbc-complexity-dial__lock-icon"
+          className={styles.lockIcon}
           aria-label="Complexity level is managed by your organization"
         >
           🔒
@@ -168,11 +284,13 @@ function SettingsDial({
   showCoaching,
   onShowCoachingChange,
 }: SettingsDialProps): React.ReactElement {
+  const styles = useStyles();
+
   return (
     <div>
       {isLocked && (
         <p
-          className="hbc-complexity-dial__lock-notice"
+          className={styles.lockNotice}
           role="alert"
           aria-live="polite"
         >
@@ -181,7 +299,10 @@ function SettingsDial({
       )}
 
       <div
-        className={`hbc-complexity-dial hbc-complexity-dial--settings ${isLocked ? 'hbc-complexity-dial--locked' : ''}`}
+        className={mergeClasses(
+          styles.settingsDial,
+          isLocked && styles.locked,
+        )}
         role="radiogroup"
         aria-label="Complexity level"
       >
@@ -191,20 +312,23 @@ function SettingsDial({
           return (
             <button
               key={tier}
-              className={`hbc-complexity-dial__card ${isActive ? 'hbc-complexity-dial__card--active' : ''}`}
+              className={mergeClasses(
+                styles.card,
+                isActive && styles.cardActive,
+              )}
               role="radio"
               aria-checked={isActive}
               onClick={() => !isLocked && onSelect(tier)}
               disabled={isLocked}
               type="button"
             >
-              <div className="hbc-complexity-dial__card-header">
+              <div className={styles.cardHeader}>
                 <strong>{meta.label}</strong>
                 {isActive && <span aria-hidden="true"> ✓</span>}
               </div>
-              <p className="hbc-complexity-dial__card-audience">{meta.audience}</p>
-              <p className="hbc-complexity-dial__card-description">{meta.description}</p>
-              <p className="hbc-complexity-dial__card-example">
+              <p className={styles.cardAudience}>{meta.audience}</p>
+              <p className={styles.cardDescription}>{meta.description}</p>
+              <p className={styles.cardExample}>
                 <em>Example: {meta.example}</em>
               </p>
             </button>
@@ -214,7 +338,7 @@ function SettingsDial({
 
       {/* D-07: showCoaching independent toggle */}
       {showCoachingToggle && (
-        <label className="hbc-complexity-dial__coaching-toggle">
+        <label className={styles.coachingToggle}>
           <input
             type="checkbox"
             checked={showCoaching}
@@ -222,7 +346,7 @@ function SettingsDial({
             aria-label="Show guidance prompts"
           />
           <span>Show guidance prompts</span>
-          <span className="hbc-complexity-dial__coaching-hint">
+          <span className={styles.coachingHint}>
             Coaching callouts can be enabled at any complexity level.
           </span>
         </label>

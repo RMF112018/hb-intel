@@ -1,6 +1,6 @@
 {
   "name": "@hbc/step-wizard",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Multi-step guided workflow primitive for HB Intel",
   "type": "module",
@@ -31,6 +31,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@griffel/react": "^1.5.0",
     "@hbc/bic-next-move": "workspace:*",
     "@hbc/complexity": "workspace:*",
     "@hbc/notification-intelligence": "workspace:*",

@@ -1,6 +1,6 @@
 {
   "name": "@hbc/related-items",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "Cross-module record relationship panel for HB Intel — Unified Work Graph",
   "type": "module",
@@ -55,10 +55,12 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@griffel/react": "^1.5.0",
     "@hbc/auth": "workspace:*",
     "@hbc/complexity": "workspace:*",
     "@hbc/session-state": "workspace:*",
     "@hbc/smart-empty-state": "workspace:*",
+    "@hbc/ui-kit": "workspace:*",
     "@hbc/versioned-record": "workspace:*"
   }
 }
