@@ -9,7 +9,8 @@
 
 **Version:** 1.1 (Proposed — Validated 2026-03-14)
 **Date:** 2026-03-14
-**Status:** Proposed — awaiting product owner and architecture owner review
+**Status:** Proposed — Implementation Evidence Available; Ready for Formal Approval
+**Implementation Status (2026-03-16):** G4 SPFx surfaces (Estimating Requester, Estimating Coordinator, Accounting Controller, Admin Oversight, Completion Confirmation) — IMPLEMENTED (Canonical Current-State per current-state-map.md). G5 hosted PWA surfaces — IMPLEMENTED (Canonical Current-State). G1/G2/G3 contracts and platform wiring defined; backend provisioning hardening deferred. G6 — not started (post-Phase-1 scope).
 **Basis:** HB-Intel-Dev-Roadmap.md §8, current-state-map.md (Tier 1), ADRs 0083–0113, codebase inspection, external research (construction-tech + Azure/SharePoint platform best practices)
 **Next ADR Available:** ADR-0114
 **Primary Audience:** Product owner, architecture/code agents, implementation planning, leadership reviewers
@@ -916,3 +917,23 @@ All documents must be added to `current-state-map.md §2` upon creation.
 *This document must be reviewed by the product owner and architecture owner before any Wave 0 implementation work begins. Upon approval, it should be updated to remove the "Proposed" status marker and added to `current-state-map.md §2` with classification Canonical Normative Plan.*
 
 *v1.1 validation applied corrections to: Phase 7 gate ADR number (ADR-0091), backend auth model (Managed Identity / DefaultAzureCredential, not MSAL OBO), Missing section reclassifications (W0-M1/M2/M4 to Partial/Miswired), CLAUDE.md version references (v1.6), MVP Project Setup T01–T08 plan set reference, and G0.3 gate check wording. See `docs/architecture/plans/MVP/wave-0-validation-report.md`.*
+
+---
+
+## Formal Approval Record
+
+**Status:** Awaiting approval
+
+This plan is ready for formal approval. To approve: update the **Status** field at the top of this document and sign the table below.
+
+| Role | Name | Date | Signature |
+|---|---|---|---|
+| Product Owner | | | |
+| Architecture Owner | | | |
+
+**Approval triggers completed before signing:**
+- ADR-0090 gate references corrected to ADR-0091 (completed 2026-03-16 per P0-A2 D-004)
+- PH7-RM-* classification banners updated to reflect PH7.12 completion (completed 2026-03-16 per P0-A2 D-006)
+- Phase 1 entry checklist (P0-E1) and open decisions register (P0-E2) drafted
+
+**Upon signature:** Update P0-A2 D-005 to ✅ RESOLVED with the approval date.
