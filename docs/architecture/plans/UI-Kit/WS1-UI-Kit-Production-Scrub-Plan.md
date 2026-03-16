@@ -14,13 +14,21 @@
 
 ## 1. Purpose
 
-Workstream I hardens `@hbc/ui-kit` into the production visual operating layer of HB Intel. This is not a component-library compliance exercise. The goal is a beautiful, cohesive, premium, field-capable, PWA-ready design system that is strong enough to serve as the visual backbone for Personal Work Hub, Project Hub, Estimating, Business Development, and all other Wave 1 surfaces where the shared kit governs the UI layer.
+Workstream I establishes and enforces the production visual standard across the entire HB Intel UI surface — both the shared component layer and every feature-specific UI component throughout the application. `@hbc/ui-kit` is hardened as the production visual operating layer that owns all reusable, shared primitives. But the standards established here — visual hierarchy, anti-flatness, adaptive density, field readability, accessibility, and premium feel — govern every component rendered by HB Intel, regardless of which package owns it.
 
-The blueprint establishes that `@hbc/ui-kit` owns reusable visual components and that the Personal Work Hub is the primary UX orientation for Wave 1. This workstream exists to ensure the kit is genuinely production-ready before Wave 1 broadens.
+The blueprint establishes that `@hbc/ui-kit` owns reusable visual components and that the Personal Work Hub is the primary UX orientation for Wave 1. This workstream ensures both the shared kit and all application-level UI are genuinely production-ready before Wave 1 broadens.
+
+### The two-layer scope
+
+**Layer 1 — `@hbc/ui-kit` (shared primitives):** The kit is hardened as the single canonical source for all reusable visual components. Buttons, tables, forms, cards, shell, navigation, overlays, status indicators — any component used across more than one feature package lives here and must meet the full production standard.
+
+**Layer 2 — Application UI (feature-specific components):** Feature packages and app packages own composition shells and feature-specific UI logic that does not belong in the kit. These components are not subject to kit ownership rules, but they are fully subject to the same visual standards. Hierarchy, accessibility, density, field readability, and anti-flatness apply regardless of package location.
+
+The standard is uniform. The ownership boundary is preserved.
 
 ### What Workstream I is not
 
-Workstream I does not invent business workflows. It does not add app-local bespoke visual systems. It does not produce decorative experimentation with no product value. It does not dilute `@hbc/ui-kit` as the single reusable visual layer.
+Workstream I does not invent business workflows. It does not produce decorative experimentation with no product value. It does not dilute `@hbc/ui-kit` as the single reusable visual layer. It does not mandate that all UI live in the kit — only that all UI meets the same standard.
 
 ---
 
@@ -32,21 +40,21 @@ Market analysis of leading platforms (Procore, ACC, InEight, CMiC) reveals a con
 
 ### Mold-breaker position
 
-- `@hbc/ui-kit` must meet or exceed the category benchmark in professionalism, consistency, responsiveness, component quality, and enterprise readiness.
-- `@hbc/ui-kit` must surpass the category in visual hierarchy, anti-flatness, cognitive clarity, field readability, adaptive density, contextual focus, and PWA-native polish.
+- HB Intel must meet or exceed the category benchmark in professionalism, consistency, responsiveness, component quality, and enterprise readiness — across both kit components and all application UI.
+- HB Intel must surpass the category in visual hierarchy, anti-flatness, cognitive clarity, field readability, adaptive density, contextual focus, and PWA-native polish — across every surface, not only where the kit is used directly.
 - The goal is not to resemble Procore, ACC, InEight, or CMiC. The goal is to make those products feel visually older, more cluttered, and less intuitive by comparison.
 
 ---
 
 ## 3. Visual Excellence Standard
 
-The kit must emerge from this workstream with a visual language that is modern but restrained, premium but not flashy, dense but breathable, highly legible, clearly hierarchical, purposeful in depth, coherent across all surfaces, immediately scannable, field-capable in poor lighting and touch-imprecise conditions, and strong enough for both installed PWA and SharePoint-hosted contexts.
+HB Intel must emerge from this workstream with a visual language that is modern but restrained, premium but not flashy, dense but breathable, highly legible, clearly hierarchical, purposeful in depth, coherent across all surfaces, immediately scannable, field-capable in poor lighting and touch-imprecise conditions, and strong enough for both installed PWA and SharePoint-hosted contexts. This standard applies to the shared kit components and to every feature-specific UI component in the application.
 
-This workstream owns: color, shape, spacing, typography, depth/elevation, motion, surface treatment, page composition, visual hierarchy, anti-flatness, adaptive density, field readability, and overall premium feel.
+This workstream owns: color, shape, spacing, typography, depth/elevation, motion, surface treatment, page composition, visual hierarchy, anti-flatness, adaptive density, field readability, and overall premium feel — as a universal application standard, not merely as kit-package rules.
 
 ### Non-negotiable visual outcomes
 
-When complete, `@hbc/ui-kit` must produce interfaces where:
+When complete, HB Intel's full UI surface must produce interfaces where:
 
 - primary actions are obvious without shouting
 - important information stands out immediately
@@ -70,30 +78,36 @@ Wave 0 must not hand off to Wave 1 with a UI kit that is broad but uneven, techn
 All task plans in this workstream are bound by:
 
 - **Blueprint package ownership:** `@hbc/ui-kit` owns all reusable visual components. Feature packages compose it; they do not duplicate it.
-- **Anti-fork rule:** No Wave 1 consumer may create a local visual system that substitutes for kit primitives.
-- **Field-first design constraint:** Sunlight readability and touch forgiveness are first-class design constraints, not afterthoughts.
-- **Visual excellence is required:** Tokenization compliance without aesthetic quality is not acceptance.
-- **3-second read standard:** Any Wave 1-critical page composition must communicate hierarchy within 3 seconds of first view.
+- **Universal visual standards:** The visual standards established by this workstream — hierarchy, anti-flatness, density, field readability, accessibility, and premium quality — apply to every UI component in the application, not only to components inside `@hbc/ui-kit`. Package location does not exempt a component from the standard.
+- **Anti-fork rule:** No Wave 1 consumer may create a local visual system that substitutes for kit primitives. Feature-specific components that are genuinely not reusable are acceptable; local duplicates of kit primitives are not.
+- **Field-first design constraint:** Sunlight readability and touch forgiveness are first-class design constraints for all UI in the application, not afterthoughts.
+- **Visual excellence is required:** Tokenization compliance without aesthetic quality is not acceptance — whether the component lives in the kit or in a feature package.
+- **3-second read standard:** Any Wave 1-critical page composition must communicate hierarchy within 3 seconds of first view, regardless of which packages supply its components.
 
 ---
 
 ## 6. Workstream Scope
 
-**In scope:**
+**In scope — shared layer:**
 - All exported `@hbc/ui-kit` components and entry points
 - All design tokens, themes, semantic colors, spacing scales, radii, typography scales, elevation/shadow rules, borders, motion patterns, and surface treatments
 - Page-shell and composition primitives
 - Storybook and visual reference documentation
-- Accessibility, field-readability, and responsive behavior
-- Consumer-boundary audit in Wave 1-relevant apps and packages
-- Visual regression, interaction testing, and composition validation
-- Migration or replacement of weak, placeholder-grade, or visually immature components
+- Migration or replacement of weak, placeholder-grade, or visually immature kit components
+
+**In scope — application layer:**
+- All Wave 1-critical feature-specific UI components in PWA and SPFx feature packages
+- App shell and surface-level composition components outside the kit
+- Accessibility, field-readability, and responsive behavior for all application UI
+- Standards conformance audit of feature-package UI components against the workstream's visual standards
+- Consumer-boundary audit ensuring reusable primitives live in the kit and feature-local UI meets the same quality bar
+- Visual regression, interaction testing, and composition validation across the full application surface
 
 **Out of scope:**
-- Business workflow invention unrelated to the kit
-- App-local bespoke visual systems
+- Business workflow invention unrelated to UI quality
 - Decorative experimentation with no product value
 - Dilution of `@hbc/ui-kit` as the single reusable visual layer
+- Non-UI code in feature packages (data fetching, state management, API adapters)
 
 ---
 
@@ -112,7 +126,7 @@ All task plans in this workstream are bound by:
 | T09 | Accessibility and Implementation Trust | Full keyboard, ARIA, contrast, and screen-reader audit | T11, T13 acceptance |
 | T10 | Storybook and Visual Reference Hardening | Release-grade Storybook; usage guide; visual language guide; field standards | T12, T13 acceptance |
 | T11 | Verification Overhaul | Automated test suite; visual regression coverage; a11y automation | T13 acceptance |
-| T12 | Consumer Cleanup and Anti-Fork Enforcement | Entry-point compliance report; migrated local patterns | T13 acceptance |
+| T12 | Application-Wide UI Standards Enforcement | Standards conformance report; migrated local patterns; contribution governance | T13 acceptance |
 | T13 | Visual Excellence Scorecard and Production Acceptance | Production-readiness scorecard; release notes; residual debt register | Wave 1 entry gate |
 
 ---
@@ -132,7 +146,7 @@ All task plans in this workstream are bound by:
 | `UI-Kit-Usage-and-Composition-Guide.md` | T10 | `docs/reference/ui-kit/` |
 | `UI-Kit-Visual-Language-Guide.md` | T10 | `docs/reference/ui-kit/` |
 | `UI-Kit-Field-Readability-Standards.md` | T10 | `docs/reference/ui-kit/` |
-| `UI-Kit-Entry-Point-Compliance-Report.md` | T12 | `docs/reference/ui-kit/` |
+| `UI-Kit-Application-Standards-Conformance-Report.md` | T12 | `docs/reference/ui-kit/` |
 | `UI-Kit-Production-Readiness-Scorecard.md` | T13 | `docs/reference/ui-kit/` |
 | `UI-Kit-Release-Notes.md` | T13 | `docs/reference/ui-kit/` |
 | `UI-Kit-Residual-Debt-Register.md` | T13 | `docs/reference/ui-kit/` |
@@ -196,29 +210,31 @@ The following outcomes are explicitly unacceptable at workstream close:
 Workstream I is complete only when all of the following are true:
 
 - `@hbc/ui-kit` is visually cohesive and production-grade across the board
-- The kit expresses clear visual hierarchy and no longer produces flat-feeling Wave 1 pages
-- Color, shape, spacing, typography, depth, and motion are normalized and intentional
-- Field-readability and adaptive density are proven, not assumed
-- Major page compositions are beautiful, legible, and immediately understandable
-- The kit matches category leaders in professionalism and exceeds them in clarity, focus, and usability
-- Personal Work Hub can launch on top of trusted UI-kit primitives without downstream visual compensation
+- All Wave 1-critical feature-specific UI components meet the same visual standards as the kit
+- The full application UI expresses clear visual hierarchy and no longer produces flat-feeling Wave 1 pages
+- Color, shape, spacing, typography, depth, and motion are normalized and intentional across the entire UI surface
+- Field-readability and adaptive density are proven across both kit and application components
+- Major page compositions are beautiful, legible, and immediately understandable — whether composed entirely from the kit or from a mix of kit and feature components
+- HB Intel matches category leaders in professionalism and exceeds them in clarity, focus, and usability
+- Personal Work Hub can launch without downstream visual compensation in either kit or feature-level components
 - Residual visual debt is explicit, small, and non-blocking
 - All mandatory output artifacts exist and are registered in `current-state-map.md`
-- T13 scorecard passes both system compliance and visual excellence thresholds
+- T13 scorecard passes both system compliance and visual excellence thresholds across the full application UI
 
 ---
 
 ## 12. Hard No-Go Gates Before Wave 1
 
-Wave 1 must not proceed with `@hbc/ui-kit` treated as production-ready if any of these remain true:
+Wave 1 must not proceed if any of these remain true across any part of the application UI — whether the issue originates in `@hbc/ui-kit` or in a feature package:
 
 - Wave 1-critical screens still feel flat, cluttered, or weak in hierarchy
 - Primary vs. secondary information is not obvious at a glance
 - Field users cannot comfortably parse and act from the interface
-- Key components remain visually immature or placeholder-grade
-- Critical page patterns still rely on app-local visual patching
-- Visual regression and accessibility coverage remain too thin for a core platform package
-- The kit does not yet create a credible premium personal starting point for the PWA
+- Key components remain visually immature or placeholder-grade — in the kit or in feature packages
+- Critical page patterns still rely on visual patching of any kind (kit or app-level)
+- Visual regression and accessibility coverage remain too thin for the Wave 1 surface area
+- Any Wave 1-critical feature-specific component fails the same visual standards required of kit components
+- The application does not yet create a credible premium personal starting point for the PWA
 
 ---
 

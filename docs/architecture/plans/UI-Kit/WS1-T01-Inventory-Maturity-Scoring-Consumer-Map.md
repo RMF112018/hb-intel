@@ -117,13 +117,13 @@ A map from each Wave 1-relevant app or package to the UI kit components it curre
 
 ## Acceptance Criteria
 
-- [ ] Every exported component and entry point from `@hbc/ui-kit` is enumerated
-- [ ] Every exported surface is assigned a maturity tier (A–D) with all classification dimensions completed
-- [ ] `UI-Kit-Component-Maturity-Matrix.md` exists with a complete component table and a summary section
-- [ ] `UI-Kit-Wave1-Consumer-Map.md` exists with a complete consumer-to-component mapping for all Wave 1-relevant packages
-- [ ] Highest-risk components (Wave 1-critical, Tier C or D) are explicitly called out
-- [ ] Both reference documents are added to `current-state-map.md §2` as "Reference"
-- [ ] T02–T07 leads can use this output to prioritize work without additional discovery
+- [x] Every exported component and entry point from `@hbc/ui-kit` is enumerated
+- [x] Every exported surface is assigned a maturity tier (A–D) with all classification dimensions completed
+- [x] `UI-Kit-Component-Maturity-Matrix.md` exists with a complete component table and a summary section
+- [x] `UI-Kit-Wave1-Consumer-Map.md` exists with a complete consumer-to-component mapping for all Wave 1-relevant packages
+- [x] Highest-risk components (Wave 1-critical, Tier C or D) are explicitly called out
+- [x] Both reference documents are added to `current-state-map.md §2` as "Reference"
+- [x] T02–T07 leads can use this output to prioritize work without additional discovery
 
 ---
 
@@ -148,4 +148,4 @@ A map from each Wave 1-relevant app or package to the UI kit components it curre
 
 ---
 
-*End of WS1-T01 — UI Kit Inventory, Maturity Scoring, and Consumer Map v1.0 (2026-03-15)*
+*End of WS1-T01 — UI Kit Inventory, Maturity Scoring, and Consumer Map v1.1 (2026-03-16)*
