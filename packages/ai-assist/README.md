@@ -1,5 +1,7 @@
 # @hbc/ai-assist
 
+> **Phase 1 Scope:** `@hbc/ai-assist` is deferred from Phase 1 scope per P0-A2 D-010 resolution (2026-03-16). A Mandatory Pre-Implementation Research Directive applies. Core dependency `@hbc/strategic-intelligence` is scaffold-only. Phase N assignment TBD via OD-013 in P0-E2 Open Decisions Register.
+
 Contextual AI action layer for HB Intel — Azure AI Foundry integration.
 
 ## 1. Overview — Named-Action AI Model

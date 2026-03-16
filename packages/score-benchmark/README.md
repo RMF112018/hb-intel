@@ -2,6 +2,8 @@
 
 # @hbc/score-benchmark
 
+> **Phase 1 Scope:** `@hbc/score-benchmark` is deferred from Phase 1 scope per P0-A2 D-010 resolution (2026-03-16). Core dependency `@hbc/strategic-intelligence` is scaffold-only. Phase N assignment TBD via OD-013 in P0-E2 Open Decisions Register.
+
 `@hbc/score-benchmark` is the Tier-1 benchmark primitive that provides reusable decision-support contracts and runtime scaffolding for confidence, similarity, recommendation, governance, recalibration, and explainability.
 
 ## Primitive Overview and Cross-Module Usage

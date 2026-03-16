@@ -2,6 +2,8 @@
 
 # @hbc/strategic-intelligence
 
+> **Phase 1 Scope:** `@hbc/strategic-intelligence` is scaffold-only in Phase 1 per P0-A2 D-010 resolution (2026-03-16). This package has no runtime adapters and no tests. Do not build production adapters or surfaces that depend on this package until Phase N (TBD via OD-013 in P0-E2) scope is confirmed and the package reaches `usable-but-incomplete` maturity.
+
 `@hbc/strategic-intelligence` is the Tier-1 primitive for heritage snapshot context and additive living strategic intelligence across modules.
 
 ## Primitive Overview

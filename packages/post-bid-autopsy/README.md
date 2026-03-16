@@ -2,6 +2,8 @@
 
 # @hbc/post-bid-autopsy
 
+> **Phase 1 Scope:** `@hbc/post-bid-autopsy` is deferred from Phase 1 scope per P0-A2 D-010 resolution (2026-03-16). Core dependency `@hbc/strategic-intelligence` is scaffold-only; T08–T09 implementation is blocked. Phase N assignment TBD via OD-013 in P0-E2 Open Decisions Register.
+
 `@hbc/post-bid-autopsy` is the Tier-1 primitive boundary for SF22 post-bid intelligence. It owns the reusable evidence, confidence, taxonomy, governance, publication, telemetry, and published-signal seams that BD and Estimating adapters build on.
 
 ## 1. Post-Bid Intelligence Flywheel Overview

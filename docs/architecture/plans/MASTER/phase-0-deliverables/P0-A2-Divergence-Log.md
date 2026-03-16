@@ -127,8 +127,8 @@ This log records all identified divergences between architectural planning docum
 |-------|-------|
 | **Area** | Implementation — Dependency Readiness |
 | **Description** | `@hbc/versioned-record` (v0.0.1) and `@hbc/strategic-intelligence` (v0.0.1) are both scaffold-only primitives. However, they are listed as dependencies of `@hbc/post-bid-autopsy`, `@hbc/score-benchmark`, and `@hbc/ai-assist` — all of which have production-facing plans. Using these packages in production flows before they are upgraded would violate the production path restrictions. |
-| **Classification** | **(b) Not-yet-implemented** |
-| **Resolution** | Add to Phase 1 entry blockers and Open Decisions Register (P0-E2). **Gating rule:** Production use of dependent packages must be blocked until `versioned-record` and `strategic-intelligence` are upgraded from scaffold-only status. **Owner:** Architecture lead + dependent package owners. **Deadline:** Phase 1 entry gate. |
+| **Classification** | **(c) Superseded / Resolution applied** |
+| **Resolution** | ✅ RESOLVED (2026-03-16) — Option B (deferral). `@hbc/versioned-record` was upgraded to `usable-but-incomplete` during Phase 0 research. `@hbc/strategic-intelligence` remains `scaffold-only`; dependent packages (`@hbc/post-bid-autopsy`, `@hbc/score-benchmark`, `@hbc/ai-assist`) formally deferred from Phase 1 scope — Phase 1 scope exclusion notice added to each package README. Phase N assignment tracked in P0-E2 OD-013. Production use of dependent packages remains blocked per G-04 until `@hbc/strategic-intelligence` reaches `usable-but-incomplete` status in a future phase. |
 
 ---
 
