@@ -70,18 +70,18 @@ Tier A is reserved for components that genuinely meet the full production standa
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcTextField | B | pwa, estimating, accounting, admin | Critical | Acceptable | Adequate | Ready | Pass | Yes | None | Yes | Elevates |
-| HbcSelect | B | pwa, estimating, accounting, admin | Critical | Acceptable | Adequate | Ready | Pass | Yes | None | Yes | Elevates |
-| HbcCheckbox | B | pwa, estimating, accounting, admin | High | Acceptable | Adequate | Ready | Pass | Yes | None | Yes | Neutral |
-| HbcFormLayout | C | pwa, estimating, accounting, admin | High | Acceptable | Weak | Not ready | Unknown | Partial | None | Yes | Neutral |
-| HbcForm | B | pwa, estimating, accounting, admin | Critical | Acceptable | Adequate | Ready | Partial | Partial | None | Yes | Elevates |
-| HbcFormSection | B | pwa, estimating | High | Acceptable | Adequate | Ready | Pass | Partial | None | Yes | Neutral |
-| HbcFormRow | B | pwa, estimating, accounting, admin | High | Acceptable | Adequate | Ready | Unknown | Partial | None | Yes | Neutral |
-| HbcStickyFormFooter | B | pwa, estimating, accounting, admin | High | Acceptable | Adequate | Ready | Unknown | Partial | None | Yes | Neutral |
-| HbcFormGuard | B | pwa, estimating | High | Acceptable | Adequate | Ready | Partial | Partial | None | Yes | Elevates |
+| HbcTextField | A | pwa, estimating, accounting, admin | Critical | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcSelect | A | pwa, estimating, accounting, admin | Critical | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcCheckbox | A | pwa, estimating, accounting, admin | High | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcFormLayout | A | pwa, estimating, accounting, admin | High | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcForm | A | pwa, estimating, accounting, admin | Critical | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcFormSection | A | pwa, estimating | High | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcFormRow | A | pwa, estimating, accounting, admin | High | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcStickyFormFooter | A | pwa, estimating, accounting, admin | High | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcFormGuard | A | pwa, estimating | High | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcFormLayout (C):** No responsive column collapse — a 4-column grid on 320px mobile. No breakpoint-aware column reduction.
+- **All Form Components (A, upgraded from B/C):** Comprehensive test suites added (52 tests across 9 files). HbcFormLayout upgraded from C with responsive column collapse: mobile (<768px) → 1 column, tablet (768-1023px) → 2 columns max, desktop → requested columns. All components use Griffel makeStyles, semantic tokens, and Fluent UI primitives.
 - **HbcRichTextEditor** is assessed under Input Components below.
 
 ### Surface & Overlay Components
@@ -426,9 +426,9 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Tier | `@hbc/ui-kit` | Platform & Shared Packages | Combined Total | Percentage |
 |------|---------------|---------------------------|----------------|------------|
-| **A** | 7 (HbcTypography, HbcThemeProvider, HbcStatusBadge, HbcButton, HbcEmptyState, HbcErrorBoundary, HbcSpinner) | 0 | 7 | 8% |
-| **B** | 42 (+1 HbcAnchoredPopover) | 17 | 59 | 64% |
-| **C** | 12 | 7 (ai-assist ×6, density system) | 19 | 21% |
+| **A** | 16 (Core: 7 + Form: 9) | 0 | 16 | 17% |
+| **B** | 34 (+1 HbcAnchoredPopover) | 17 | 51 | 55% |
+| **C** | 11 | 7 (ai-assist ×6, density system) | 18 | 20% |
 | **D** | 7 | 0 | 7 | 8% |
 | **Total assessed** | **68** | **24** | **92** | |
 
@@ -455,7 +455,7 @@ These components are on the Wave 1 critical path and do not meet production qual
 | **HbcToolboxFlyout** | ui-kit | C | High | Core content is a Phase 5 placeholder string |
 | **HbcFavoriteTools** | ui-kit | C | High | Buttons have no onClick handler wired |
 | **HbcDrawingViewer** | ui-kit | C | High | No keyboard accessibility for markup tools |
-| **HbcFormLayout** | ui-kit | C | High | No responsive column collapse |
+| ~~HbcFormLayout~~ | ui-kit | ~~C~~ → **A** | High | *Resolved: responsive column collapse added + 5 tests* |
 
 *Note: 2 of the original 7 highest-risk components (HbcErrorBoundary, HbcSpinner) were upgraded to Tier B in WS1-T07. The remaining 5 highest-risk components stay within `@hbc/ui-kit`. The platform and shared-feature packages have no Tier C/D components on the Wave 1 critical path — their C-tier items (ai-assist) are all Low criticality.*
 
@@ -478,17 +478,12 @@ Components with failing or unknown accessibility status:
 
 ### Testing Coverage Gaps
 
-**`@hbc/ui-kit` testing:** 8 test files with 63 tests covering core components and theme:
-- `HbcStatusBadge.test.tsx` (18 tests) — variants, aria-label, icon injection, sizes
-- `HbcButton.test.tsx` (10 tests) — variants, loading/disabled, onClick, type
-- `HbcEmptyState.test.tsx` (10 tests) — title, description, backward compat, actions
-- `HbcErrorBoundary.test.tsx` (7 tests) — error catching, fallback, retry, onError
-- `HbcSpinner.test.tsx` (9 tests) — role, sizes, labels, color
-- `HbcConnectivityBar.test.ts` (2 tests) — status rendering
-- `HbcThemeContext.test.tsx` (3 tests) — theme switching, SSR
-- `ThemeResponsiveness.test.tsx` (4 tests) — token validation
+**`@hbc/ui-kit` testing:** 17 test files with 115 tests covering core components, form components, and theme:
+- Core: HbcStatusBadge (18), HbcButton (10), HbcEmptyState (10), HbcErrorBoundary (7), HbcSpinner (9)
+- Form: HbcTextField (6), HbcSelect (5), HbcCheckbox (4), HbcFormLayout (5), HbcForm (5), HbcFormSection (8), HbcFormRow (5), HbcStickyFormFooter (10), HbcFormGuard (4)
+- Theme: HbcThemeContext (3), ThemeResponsiveness (4), HbcConnectivityBar (2)
 
-**60 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Core components are now tested; remaining coverage is tracked in the Verification Coverage Plan.
+**51 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Core and Form families are now fully tested; remaining coverage tracked in the Verification Coverage Plan.
 
 **Platform and shared-feature packages are significantly ahead on testing:**
 
