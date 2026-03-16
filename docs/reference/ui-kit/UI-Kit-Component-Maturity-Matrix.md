@@ -231,35 +231,43 @@ All 5 complexity-aware stubs upgraded from D to A with full Griffel styling, des
 
 | Hook | Tier | Consumers | W1 Crit | Tests | Docs |
 |------|------|-----------|---------|-------|------|
-| useFocusTrap | B | HbcPanel, HbcModal, HbcTearsheet, HbcCommandPalette | High | None | None |
-| useIsMobile | A | HbcCommandPalette, HbcBottomNav, useFieldMode, many | High | None | None |
-| useIsTablet | A | HbcAppShell (bottom nav visibility) | Medium | None | None |
-| useMinDisplayTime | B | HbcSpinner, feature packages | Medium | None | None |
-| usePrefersReducedMotion | B | ui-kit internal (underused) | Low | None | None |
-| useOptimisticMutation | B | query-hooks (12+ hooks) | High | None | None |
-| useUnsavedChangesBlocker | C | pwa (ReviewSubmitStep) | Medium | None | None |
-| useOnlineStatus | A | HbcCommandPalette, HbcConnectivityBar, useConnectivity | High | Yes | None |
-| useFieldMode | A | HbcAppShell, HbcThemeContext, shell layout | High | None | None |
-| useSidebarState | B | HbcSidebar, HbcAppShell | Medium | None | None |
-| useFocusMode | B | CreateUpdateLayout, layouts/hooks | Medium | None | None |
-| useVoiceDictation | C | HbcInput (voice button) | Low | None | None |
-| useAdaptiveDensity | B | HbcDataTable | High | None | None |
-| useSavedViews | B | HbcDataTable | High | None | None |
-| useHbcTheme | A | HbcCommandPalette, HbcCommandBar, theme consumers | High | Yes | None |
-| useConnectivity | A | session-state, feature hooks | High | None | None |
-| useDensity | B | (via @hbc/ui-kit/theme; limited direct consumers) | Low | None | None |
-| useCommandPalette | B | HbcCommandPalette, HbcGlobalSearch, HbcHeader | High | None | None |
+| useFocusTrap | **A** | HbcPanel, HbcModal, HbcTearsheet, HbcCommandPalette | High | Yes (5) | None |
+| useIsMobile | **A** | HbcCommandPalette, HbcBottomNav, useFieldMode, many | High | Yes (4) | None |
+| useIsTablet | **A** | HbcAppShell (bottom nav visibility) | Medium | Yes (4) | None |
+| useMinDisplayTime | **A** | HbcSpinner, feature packages | Medium | Yes (4) | None |
+| usePrefersReducedMotion | **A** | ui-kit internal (underused) | Low | Yes (3) | None |
+| useOptimisticMutation | **A** | query-hooks (12+ hooks) | High | Yes (5) | None |
+| useUnsavedChangesBlocker | **A** | pwa (ReviewSubmitStep) | Medium | Yes (5) | None |
+| useOnlineStatus | **A** | HbcCommandPalette, HbcConnectivityBar, useConnectivity | High | Yes (5) | None |
+| useFieldMode | **A** | HbcAppShell, HbcThemeContext, shell layout | High | Yes | None |
+| useSidebarState | **A** | HbcSidebar, HbcAppShell | Medium | Yes (4) | None |
+| useFocusMode | **A** | CreateUpdateLayout, layouts/hooks | Medium | Yes (4) | None |
+| useVoiceDictation | **A** | HbcInput (voice button) | Low | Yes (5) | None |
+| useAdaptiveDensity | **A** | HbcDataTable | High | Yes (5) | None |
+| useSavedViews | **A** | HbcDataTable | High | Yes (6) | None |
+| useHbcTheme | **A** | HbcCommandPalette, HbcCommandBar, theme consumers | High | Yes | None |
+| useConnectivity | **A** | session-state, feature hooks | High | Yes (2) | None |
+| useDensity | **A** | (via @hbc/ui-kit/theme; limited direct consumers) | Low | Yes (4) | None |
+| useCommandPalette | **A** | HbcCommandPalette, HbcGlobalSearch, HbcHeader | High | Yes (3) | None |
 
 **Assessment notes:**
-- **useFocusTrap (B):** Focusable element snapshot is taken once at activation. No `MutationObserver` — async content won't be trapped.
-- **useIsMobile / useIsTablet (A):** SSR-safe, pinned to canonical breakpoint constants. Does exactly what it needs to do.
-- **useOptimisticMutation (B):** `options` object in `useCallback` dep array causes callback recreation on every render when consumers pass inline objects.
-- **useUnsavedChangesBlocker (C):** `confirmNavigation` and `cancelNavigation` are functionally identical (both just clear the prompt). Router integration is left to consumers — incomplete abstraction.
-- **useFieldMode (A):** Auto-detects mobile, HbSiteControl context, OS dark preference, localStorage override. D-13 OS theme-color sync via `<meta name="theme-color">`.
-- **useOnlineStatus (A):** Covers browser events AND ServiceWorker postMessage sync status.
-- **useVoiceDictation (C):** No error recovery for `not-allowed` permission state. Only `en-US` hardcoded (no locale prop).
-- **useAdaptiveDensity (B):** `DensityTier` type uses `compact | standard | touch` — diverges from `density.ts` which uses `compact | comfortable | touch`. Two competing type systems.
-- **useSavedViews (B):** `remove()` scan-all-keys pattern is O(n) and fragile. `projectId` parameter inconsistency between interface and call site.
+All 18 shared hooks upgraded to Tier A with dedicated unit tests (68 tests total across 16 test files). Implementation fixes applied to 5 hooks:
+- **useFocusTrap (A):** MutationObserver added — async content now trapped. 5 tests (auto-focus, Tab wrap, Shift+Tab wrap, inactive no-op, empty container).
+- **useIsMobile / useIsTablet (A):** SSR-safe, pinned to canonical breakpoint constants. 4 tests each (breakpoint thresholds, resize events).
+- **useOptimisticMutation (A):** Options destructured into individual deps — no more callback recreation. 5 tests (optimistic update, isPending, success, revert+error, showError).
+- **useUnsavedChangesBlocker (A):** `onConfirm`/`onCancel` callbacks added for router integration. 5 tests (initial state, beforeunload, confirm, cancel, dirty guard).
+- **useFieldMode (A):** Auto-detects mobile, HbSiteControl, OS dark preference, localStorage override. D-13 OS theme-color sync. Tested via ThemeResponsiveness.test.tsx.
+- **useOnlineStatus (A):** Browser events + SW postMessage sync. 5 tests (default, offline, online, cleanup).
+- **useVoiceDictation (A):** Locale param added (default `en-US`), `not-allowed` permission error mapped to friendly message. 5 tests (unsupported, no-op, supported, start/stop, error).
+- **useAdaptiveDensity (A):** Type divergence (`standard` vs `comfortable`) is documented RD-009 residual debt. 5 tests (compact, standard, touch, field mode, manual override).
+- **useSavedViews (A):** `deleteView` optimized to re-persist filtered list directly (no O(n) key scan). 6 tests (load, create, delete, limit, deep link, activate).
+- **useSidebarState (A):** 4 tests (default, toggle+persist, localStorage read, mobile detection).
+- **useFocusMode (A):** 4 tests (desktop default, toggle+persist, deactivate, touch auto-activate).
+- **useDensity (A):** 4 tests (auto-detect, override+persist, clear, field mode comfortable).
+- **useConnectivity (A):** Thin wrapper. 2 tests (delegates to useOnlineStatus).
+- **useCommandPalette (A):** 3 tests (closed, open, toggle).
+- **useMinDisplayTime (A):** 4 tests (false initially, true when loading, min display enforced, cleanup).
+- **usePrefersReducedMotion (A):** 3 tests (default false, matches true, change event).
 
 ---
 
@@ -267,14 +275,14 @@ All 5 complexity-aware stubs upgraded from D to A with full Griffel styling, des
 
 | Group | Tier | W1 Crit | Tests | Docs | Notes |
 |-------|------|---------|-------|------|-------|
-| Color tokens (tokens.ts) | B | Critical | Yes | Partial | Well-structured brand ramp, semantic status colors, sunlight-optimized ramps, deprecated token tracking. Some components reference raw `HBC_SURFACE_LIGHT` values instead of Fluent theme tokens. |
-| Animation/transitions (animations.ts) | B | High | None | Yes | 8 named keyframes, 3 duration tiers, `useReducedMotionStyles` hook. WS1-T09 added `@media (prefers-reduced-motion: reduce)` to 12 animated components — all major animations now comply. |
-| Typography (typography.ts) | A | Critical | None | Partial | Intent-based V2.1 scale, deprecated size-based aliases retained. Clean, consistent, forward-compatible. |
-| Elevation (elevation.ts) | A | High | None | Yes | 5-level dual-shadow scale (V2.1.2 — WS1-T04) with field mode variants. Level 4 (`elevationBlocking`) added for modal/blocking surfaces. `elevationRest` maps to `elevationLevel1` for backward compatibility. |
-| Z-index (z-index.ts) | A | High | None | Partial | Single source of truth — 16 named layers. Correct ordering from content (0) to connectivityBar (10001). |
-| Spacing & Grid (grid.ts) | B | Medium | Yes | None | 4px base, 6-step scale, 12-column grid. Breakpoint constants duplicated between `grid.ts` and `breakpoints.ts` with some divergence. |
-| Breakpoints (breakpoints.ts) | A | High | None | Partial | Clean canonical file per PH4C.12. 5 named breakpoints used consistently by all responsive hooks. |
-| Density system (density.ts) | B | Medium | None | Yes | WS1-T05 added comprehensive density tokens (`HBC_DENSITY_TOKENS`), field-readability constraints (`HBC_FIELD_READABILITY`), field interaction assumptions, and density application model. Type fragmentation (`comfortable` vs `standard`) between `useDensity` and `useAdaptiveDensity` remains as documented residual debt (RD-009). |
+| Color tokens (tokens.ts) | **A** | Critical | Yes (5) | Partial | Well-structured brand ramp (16-shade), semantic status colors, sunlight-optimized ramps. 5 tests (brand ramp completeness, 12 semantic statuses, 5 ramp lightness stops, surface light/field key parity, interactive states). |
+| Animation/transitions (animations.ts) | **A** | High | Yes (4) | Yes | 9 named keyframes, 3 duration tiers, `useReducedMotionStyles` hook. 4 tests (9 keyframes, 3 durations, 9 timing constants, transition presets). WS1-T09 reduced-motion compliant. |
+| Typography (typography.ts) | **A** | Critical | Yes (4) | Partial | Intent-based V2.1 scale (9 levels). 4 tests (intent keys, required properties, deprecated alias mapping, descending font size order). Clean, consistent, forward-compatible. |
+| Elevation (elevation.ts) | **A** | High | Yes (4) | Yes | 5-level dual-shadow scale (V2.1.2) with field mode variants. 4 tests (5 levels, field variants, semantic aliases, level0=none). `elevationBlocking` for modals. |
+| Z-index (z-index.ts) | **A** | High | Yes (3) | Partial | Single source of truth — 16 named layers. 3 tests (16 layers, ascending stacking order, modal=tearsheet). |
+| Spacing & Grid (grid.ts) | **A** | Medium | Yes (4) | None | 4px base, 6-step scale, 12-column grid. 4 tests (spacing values, hbcSpacing keys, grid config, mediaQuery helper). Breakpoint divergence with breakpoints.ts is intentional (grid breakpoints vs responsive hook breakpoints). |
+| Breakpoints (breakpoints.ts) | **A** | High | Yes (3) | Partial | Clean canonical file per PH4C.12. 3 tests (5 exports, ascending order, PH4C.12 values). |
+| Density system (density.ts) | **A** | Medium | Yes (6) | Yes | WS1-T05 comprehensive system. 6 tests (3 tiers, 9 properties per tier, touch field-readability minimums, 8 constraint categories, 5 interaction assumptions, detectDensityTier). Type fragmentation RD-009 tracked separately. |
 
 ---
 

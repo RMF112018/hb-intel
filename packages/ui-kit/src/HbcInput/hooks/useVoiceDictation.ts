@@ -43,12 +43,13 @@ function getSpeechRecognition(): SpeechRecognitionConstructor | null {
   return Ctor ?? null;
 }
 
-export function useVoiceDictation(): UseVoiceDictationReturn {
+export function useVoiceDictation(options?: { locale?: string }): UseVoiceDictationReturn {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
+  const locale = options?.locale ?? 'en-US';
   const SpeechRecognitionClass = getSpeechRecognition();
   const isSupported = SpeechRecognitionClass !== null;
 
@@ -61,7 +62,7 @@ export function useVoiceDictation(): UseVoiceDictationReturn {
     const recognition = new SpeechRecognitionClass();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = locale;
 
     recognition.onresult = (event) => {
       let finalTranscript = '';
@@ -80,7 +81,10 @@ export function useVoiceDictation(): UseVoiceDictationReturn {
     };
 
     recognition.onerror = (event) => {
-      setError(event.error || 'Recognition error');
+      const message = event.error === 'not-allowed'
+        ? 'Microphone access denied. Check browser permissions.'
+        : event.error || 'Recognition error';
+      setError(message);
       setIsListening(false);
     };
 
@@ -91,7 +95,7 @@ export function useVoiceDictation(): UseVoiceDictationReturn {
     recognitionRef.current = recognition;
     recognition.start();
     setIsListening(true);
-  }, [SpeechRecognitionClass]);
+  }, [SpeechRecognitionClass, locale]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {

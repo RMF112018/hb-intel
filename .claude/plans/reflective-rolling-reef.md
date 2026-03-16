@@ -1,459 +1,155 @@
-# Complexity-Aware Stubs → Tier A + Design Compliance
+# Theme Token Groups → All Tier A + Tests
 
 ## Context
 
-5 Complexity-Aware Stub components (SF03-T07 D-08) are at Tier D (Placeholder/minimal). Each needs full visual implementation with Griffel styles, design tokens, accessibility, and tests to reach Tier A. The types.ts files are the contract and must not change.
+8 theme token groups in the UI Kit maturity matrix. 4 are Tier A (typography, elevation, z-index, breakpoints) and 4 are Tier B (color tokens, animations, spacing/grid, density). **None have dedicated token-level tests.** The Tier A groups are classified as A based on code quality but lack test coverage. The Tier B groups have that gap plus minor issues noted in the matrix.
 
-**Components:** HbcCoachingCallout, HbcFormField, HbcStatusTimeline, HbcAuditTrailPanel, HbcPermissionMatrix
-
-**Current version:** 2.2.20 → **Target:** 2.2.21
+**Current version:** 2.2.22 → **Target:** 2.2.23
 
 ---
 
-## Implementation Order
+## Token Group Inventory
 
-1. **HbcCoachingCallout** — simplest (message + button), introduces dual-gate test pattern
-2. **HbcFormField** — simple wrapper, conditional complexity gating
-3. **HbcStatusTimeline** — data display, timeline visual with status colors
-4. **HbcAuditTrailPanel** — panel shell (no data prop in types, so styled empty container)
-5. **HbcPermissionMatrix** — most complex (styled table + keyboard grid nav)
+| # | Group | File | Tier | Tests | Gap |
+|---|-------|------|------|-------|-----|
+| 1 | Color tokens | `src/theme/tokens.ts` | B | None | Tests needed |
+| 2 | Animations | `src/theme/animations.ts` | B | None | Tests needed |
+| 3 | Typography | `src/theme/typography.ts` | A | None | Tests needed |
+| 4 | Elevation | `src/theme/elevation.ts` | A | None | Tests needed |
+| 5 | Z-index | `src/theme/z-index.ts` | A | None | Tests needed |
+| 6 | Spacing & Grid | `src/theme/grid.ts` | B | None | Tests + breakpoint duplication |
+| 7 | Breakpoints | `src/theme/breakpoints.ts` | A | None | Tests needed |
+| 8 | Density system | `src/theme/density.ts` | B | None | Tests needed (useDensity hook has separate tests) |
 
----
-
-## Step 1: HbcCoachingCallout
-
-### Source: `packages/ui-kit/src/HbcCoachingCallout/index.tsx`
-
-**Visual design:** Info-accent callout card
-- `surface-1` background, `HBC_STATUS_COLORS.info` left border (4px), `HBC_RADIUS_LG` corners, `elevationLevel1`
-- Flex row: message text (`body` size, `text-primary`) + optional action button
-- Action button: text-style, `HBC_PRIMARY_BLUE` color, `HBC_RADIUS_MD`
-- Padding: `HBC_SPACE_MD` all sides, `HBC_SPACE_SM` gap
-
-**Imports to add:**
-```tsx
-import { makeStyles, mergeClasses } from '@griffel/react';
-import { HBC_STATUS_COLORS, HBC_SURFACE_LIGHT, HBC_PRIMARY_BLUE } from '../theme/tokens.js';
-import { HBC_RADIUS_LG, HBC_RADIUS_MD } from '../theme/radii.js';
-import { elevationLevel1 } from '../theme/elevation.js';
-import { HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
-```
-
-**Styles:**
-```tsx
-const useStyles = makeStyles({
-  root: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: `${HBC_SPACE_SM}px`,
-    padding: `${HBC_SPACE_MD}px`,
-    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
-    borderLeft: `${HBC_SPACE_XS}px solid ${HBC_STATUS_COLORS.info}`,
-    borderRadius: HBC_RADIUS_LG,
-    boxShadow: elevationLevel1,
-  },
-  message: {
-    flex: '1 1 auto',
-    margin: '0',
-    fontSize: '0.875rem',
-    color: HBC_SURFACE_LIGHT['text-primary'],
-    lineHeight: '1.5',
-  },
-  action: {
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    color: HBC_PRIMARY_BLUE,
-    backgroundColor: 'transparent',
-    border: 'none',
-    borderRadius: HBC_RADIUS_MD,
-    cursor: 'pointer',
-    padding: `${HBC_SPACE_XS}px ${HBC_SPACE_SM}px`,
-    whiteSpace: 'nowrap',
-    flexShrink: 0,
-  },
-});
-```
-
-**ARIA:** Keep existing `role="note"` and `aria-label="Guidance"`.
-
-**Preserve:** Dual gate logic (`useComplexityGate` + `showCoaching`).
-
-### Test: `packages/ui-kit/src/HbcCoachingCallout/__tests__/HbcCoachingCallout.test.tsx`
-
-Use `createComplexityWrapper` and `ComplexityTestProvider` from `@hbc/complexity/testing`.
-
-**Key behavior:** `showCoaching` defaults to `tier === 'essential'` in test provider. So:
-- essential tier → showCoaching=true (default) → renders
-- standard tier → showCoaching=false (default) → does NOT render unless explicit `showCoaching={true}`
-- expert tier → gated out regardless
-
-**Tests (7):**
-1. Renders `data-hbc-ui="HbcCoachingCallout"` at essential tier
-2. Has `role="note"` with `aria-label="Guidance"`
-3. Displays message text
-4. Renders action button when `actionLabel` and `onAction` provided
-5. Does NOT render action button when `actionLabel` omitted
-6. Fires `onAction` on button click (userEvent)
-7. Returns null at expert tier (gated out)
-8. Returns null when `showCoaching=false` (use `ComplexityTestProvider` with explicit `showCoaching={false}`)
+**Note:** Radii (`radii.ts`) is not listed in the matrix as a separate group but is part of the theme. It doesn't appear in the matrix table, so it doesn't need a tier upgrade — but we can include it in the test file for completeness.
 
 ---
 
-## Step 2: HbcFormField
+## Approach
 
-### Source: `packages/ui-kit/src/HbcFormField/index.tsx`
+**No source code changes needed.** All token files are well-implemented. The matrix notes for B-tier groups are:
+- Color tokens: "Some components reference raw `HBC_SURFACE_LIGHT`" — this is a consumer migration issue, not a token file issue
+- Animations: No gaps in the token file itself
+- Spacing & Grid: "Breakpoint constants duplicated" — `grid.ts` has its own breakpoint constants that diverge from `breakpoints.ts`. These are separate systems (grid breakpoints vs responsive hook breakpoints). No change needed.
+- Density: Type fragmentation is RD-009 (residual debt tracked separately)
 
-**Visual design:** Minimal styled label wrapper
-- Vertical flex column, `HBC_SPACE_XS` gap
-- Label: `0.75rem`, weight 600, `text-muted` color
-- `htmlFor` attribute: `hbc-field-${name}` for accessibility
-- No background, no border, no elevation (wrapper only)
-
-**Imports to add:**
-```tsx
-import { makeStyles } from '@griffel/react';
-import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
-import { HBC_SPACE_XS } from '../theme/grid.js';
-```
-
-**Styles:**
-```tsx
-const useStyles = makeStyles({
-  root: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: `${HBC_SPACE_XS}px`,
-  },
-  label: {
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    color: HBC_SURFACE_LIGHT['text-muted'],
-  },
-});
-```
-
-**ARIA:** Add `htmlFor={`hbc-field-${name}`}` on the `<label>`.
-
-### Test: `packages/ui-kit/src/HbcFormField/__tests__/HbcFormField.test.tsx`
-
-**Tests (6):**
-1. Renders `data-hbc-ui="HbcFormField"` with `data-field-name`
-2. Renders label text
-3. Label has `htmlFor` matching `hbc-field-${name}`
-4. Always renders at essential tier when `complexitySensitive=false` (default)
-5. Returns null at essential tier when `complexitySensitive=true` (standard-gated)
-6. Renders at standard tier when `complexitySensitive=true`
+**Create 8 test files** — one per token group — verifying token completeness, value correctness, and structural integrity.
 
 ---
 
-## Step 3: HbcStatusTimeline
+## Test Files to Create (8)
 
-### Source: `packages/ui-kit/src/HbcStatusTimeline/index.tsx`
+All under `packages/ui-kit/src/theme/__tests__/`:
 
-**Visual design:** Vertical timeline with colored dots and connector lines
-- Each entry: 12px colored dot (left) + vertical connector line (2px) + content (right)
-- Dot color: map status string to `HBC_STATUS_COLORS` (approved→success, rejected→error, pending→neutral, in-progress→info, default→neutral)
-- Content: status text (body, `text-primary`), timestamp (bodySmall, `text-muted`), actor (bodySmall, `text-muted`)
-- Future entries: dashed connector, dot outline only, `text-muted` opacity
-- Spacing: `HBC_SPACE_MD` between entries, `HBC_SPACE_SM` dot-to-content gap
+### 1. `tokens.test.ts` — Color tokens (5 tests)
+- Brand ramp has all 16 shades (10–160)
+- `HBC_STATUS_COLORS` has all 12 semantic statuses
+- Each status ramp (GREEN/RED/AMBER/INFO/GRAY) has 5 lightness stops (10/30/50/70/90)
+- `HBC_SURFACE_LIGHT` and `HBC_SURFACE_FIELD` have same keys
+- Interactive state tokens defined (hover/pressed variants)
 
-**Imports to add:**
-```tsx
-import { makeStyles, mergeClasses } from '@griffel/react';
-import { HBC_STATUS_COLORS, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
-import { HBC_RADIUS_FULL } from '../theme/radii.js';
-import { HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
-```
+### 2. `animations.test.ts` — Animations (4 tests)
+- All 9 keyframes defined in `keyframes` object
+- 3 transition duration constants exported (FAST=150, NORMAL=250, SLOW=400)
+- `TIMING` has all 9 named timing constants
+- `transitions` object has fast/normal/slow presets
 
-**Styles:**
-```tsx
-const STATUS_COLOR_MAP: Record<string, string> = {
-  approved: HBC_STATUS_COLORS.success,
-  completed: HBC_STATUS_COLORS.completed,
-  rejected: HBC_STATUS_COLORS.error,
-  pending: HBC_STATUS_COLORS.pending,
-  'in-progress': HBC_STATUS_COLORS.inProgress,
-  draft: HBC_STATUS_COLORS.draft,
-};
+### 3. `typography.test.ts` — Typography scale (4 tests)
+- `hbcTypeScale` has all 9 intent keys (display, heading1-4, body, bodySmall, label, code)
+- Each intent level has required properties (fontFamily, fontSize, fontWeight, lineHeight)
+- Deprecated aliases map to correct intent levels
+- Font sizes are in descending order (display > heading1 > ... > bodySmall)
 
-const useStyles = makeStyles({
-  root: { display: 'flex', flexDirection: 'column' },
-  entry: {
-    display: 'flex',
-    gap: `${HBC_SPACE_SM}px`,
-    paddingBottom: `${HBC_SPACE_MD}px`,
-    position: 'relative',
-  },
-  dotColumn: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    flexShrink: 0,
-    width: '12px',
-  },
-  dot: {
-    width: '12px',
-    height: '12px',
-    borderRadius: HBC_RADIUS_FULL,
-    flexShrink: 0,
-  },
-  connector: {
-    flex: '1 1 auto',
-    width: '2px',
-    backgroundColor: HBC_SURFACE_LIGHT['border-default'],
-    marginTop: `${HBC_SPACE_XS}px`,
-  },
-  connectorDashed: {
-    backgroundColor: 'transparent',
-    borderLeft: `2px dashed ${HBC_SURFACE_LIGHT['border-default']}`,
-  },
-  futureDot: {
-    backgroundColor: 'transparent !important',
-    border: `2px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-  },
-  content: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: `${HBC_SPACE_XS}px`,
-    minWidth: 0,
-  },
-  status: { fontSize: '0.875rem', color: HBC_SURFACE_LIGHT['text-primary'], fontWeight: 500 },
-  meta: { fontSize: '0.75rem', color: HBC_SURFACE_LIGHT['text-muted'] },
-  futureEntry: { opacity: '0.6' },
-});
-```
+### 4. `elevation.test.ts` — Elevation system (4 tests)
+- All 5 standard levels defined (0–4)
+- Field mode variants have same structure as standard
+- Semantic aliases point to correct levels (card→1, modal→3, blocking→4)
+- `elevationLevel0` is `'none'`
 
-**ARIA:** Add `role="list"` + `aria-label="Status timeline"` on root. Each entry: `role="listitem"`.
+### 5. `z-index.test.ts` — Z-index layers (3 tests)
+- `Z_INDEX` has all 16 named layers
+- Layers are in ascending order (content < sidebar < header < ... < connectivityBar)
+- `ZIndexLayer` type matches Z_INDEX keys
 
-**Key logic:** Entries render normally. Future entries (determined by some heuristic — since there's no `isFuture` field on `IStatusEntry`, all entries render the same; `showFuture` controls whether future entries are included, but the component doesn't know which are future). Since the data contract doesn't indicate future vs past, render all provided `statuses` with standard styling. The `showFuture` attribute is preserved as `data-show-future` for consumer logic.
+### 6. `grid.test.ts` — Spacing & Grid (4 tests)
+- 6 spacing constants follow 4px base (XS=4, SM=8, MD=16, LG=24, XL=32, XXL=48)
+- `hbcSpacing` object contains all 6 keys
+- `hbcGrid` has 12 columns and 4px base unit
+- `hbcMediaQuery()` returns valid media query string
 
-### Test: `packages/ui-kit/src/HbcStatusTimeline/__tests__/HbcStatusTimeline.test.tsx`
+### 7. `breakpoints.test.ts` — Breakpoints (3 tests)
+- All 5 named breakpoints exported (MOBILE, TABLET, SIDEBAR, CONTENT_MEDIUM, COMPACT_DENSITY)
+- Breakpoints are in ascending order
+- Values match PH4C.12 canonical constants (767, 1023, 1024, 1199, 1440)
 
-**Tests (7):**
-1. Renders `data-hbc-ui="HbcStatusTimeline"` at standard tier
-2. Has `role="list"` with `aria-label="Status timeline"`
-3. Renders one `role="listitem"` per status entry
-4. Displays status text, timestamp, and actor
-5. Omits actor text when not provided
-6. Returns null at essential tier (standard-gated)
-7. Preserves `data-show-future` attribute
+### 8. `density.test.ts` (extend existing) — Density system (6 tests)
+
+The existing `density.test.ts` tests the `useDensity` hook. We need a NEW file for the token constants. Name it `density-tokens.test.ts` to avoid conflict.
+
+- `HBC_DENSITY_TOKENS` has all 3 tiers (compact, comfortable, touch)
+- Each tier has all 9 required properties (rowHeightMin, touchTargetMin, etc.)
+- Touch tier meets field-readability minimums (touchTarget ≥ 44, bodyText ≥ 15, contrast ≥ 7)
+- `HBC_FIELD_READABILITY` has all 8 constraint categories
+- `HBC_FIELD_INTERACTION_ASSUMPTIONS` has 5 assumptions
+- `detectDensityTier()` returns valid DensityTier
 
 ---
 
-## Step 4: HbcAuditTrailPanel
-
-### Source: `packages/ui-kit/src/HbcAuditTrailPanel/index.tsx`
-
-**Visual design:** Polished panel shell (no data prop exists — render empty container)
-- Card surface: `surface-0` bg, `border-default` border, `HBC_RADIUS_LG`, `elevationLevel1`
-- Header bar: "Audit Trail" heading (heading4 size, `text-primary`), `surface-2` background, bottom border
-- Empty body: centered muted text "No audit entries" (body, `text-muted`), `HBC_SPACE_XL` vertical padding
-- Preserves `data-item-id` and `data-max-items` attributes
-
-**Imports to add:**
-```tsx
-import { makeStyles } from '@griffel/react';
-import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
-import { HBC_RADIUS_LG } from '../theme/radii.js';
-import { elevationLevel1 } from '../theme/elevation.js';
-import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_XL } from '../theme/grid.js';
-```
-
-**Styles:**
-```tsx
-const useStyles = makeStyles({
-  root: {
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-    borderRadius: HBC_RADIUS_LG,
-    boxShadow: elevationLevel1,
-    overflow: 'hidden',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px`,
-    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
-    borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-  },
-  title: {
-    fontSize: '0.875rem',
-    fontWeight: 600,
-    color: HBC_SURFACE_LIGHT['text-primary'],
-    margin: '0',
-  },
-  body: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: `${HBC_SPACE_XL}px`,
-    paddingBottom: `${HBC_SPACE_XL}px`,
-    color: HBC_SURFACE_LIGHT['text-muted'],
-    fontSize: '0.875rem',
-  },
-});
-```
-
-**ARIA:** Add `role="log"`, `aria-label="Audit trail"` on root.
-
-**Render:** Header with "Audit Trail" title + body with "No audit entries" placeholder.
-
-### Test: `packages/ui-kit/src/HbcAuditTrailPanel/__tests__/HbcAuditTrailPanel.test.tsx`
-
-**Tests (6):**
-1. Renders `data-hbc-ui="HbcAuditTrailPanel"` at expert tier
-2. Has `role="log"` with `aria-label="Audit trail"`
-3. Renders heading "Audit Trail"
-4. Shows "No audit entries" placeholder
-5. Preserves `data-item-id` and `data-max-items` attributes
-6. Returns null at standard tier (expert-gated)
-
----
-
-## Step 5: HbcPermissionMatrix
-
-### Source: `packages/ui-kit/src/HbcPermissionMatrix/index.tsx`
-
-**Visual design:** Styled table in a card container
-- Card wrap: `surface-0` bg, `border-default` border, `HBC_RADIUS_LG`, `elevationLevel1`, `overflow: 'auto'`
-- Table: full width, collapsed borders
-- Header row: `surface-2` bg, heading4 typography, `HBC_SPACE_SM`/`HBC_SPACE_MD` padding
-- Role name cells (row headers): body typography, weight 500, `HBC_SPACE_SM`/`HBC_SPACE_MD` padding
-- Checkbox cells: centered, `HBC_SPACE_SM` padding, 18px checkbox with `accentColor: HBC_PRIMARY_BLUE`
-- Row hover: `surface-1` background
-- Cell borders: `1px solid border-default`
-
-**Imports to add:**
-```tsx
-import { makeStyles, mergeClasses } from '@griffel/react';
-import { HBC_SURFACE_LIGHT, HBC_PRIMARY_BLUE } from '../theme/tokens.js';
-import { HBC_RADIUS_LG } from '../theme/radii.js';
-import { elevationLevel1 } from '../theme/elevation.js';
-import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
-```
-
-**Styles:**
-```tsx
-const useStyles = makeStyles({
-  root: {
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-    borderRadius: HBC_RADIUS_LG,
-    boxShadow: elevationLevel1,
-    overflowX: 'auto',
-  },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  headerCell: {
-    fontSize: '0.875rem',
-    fontWeight: 600,
-    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
-    padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px`,
-    textAlign: 'left',
-    color: HBC_SURFACE_LIGHT['text-primary'],
-    borderBottom: `2px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-  },
-  bodyRow: {
-    ':hover': { backgroundColor: HBC_SURFACE_LIGHT['surface-1'] },
-  },
-  roleCell: {
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px`,
-    color: HBC_SURFACE_LIGHT['text-primary'],
-    borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-  },
-  permCell: {
-    textAlign: 'center',
-    padding: `${HBC_SPACE_SM}px`,
-    borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-  },
-  checkbox: {
-    width: '18px',
-    height: '18px',
-    accentColor: HBC_PRIMARY_BLUE,
-    cursor: 'pointer',
-  },
-});
-```
-
-**ARIA:** Add `role="grid"`, `aria-label="Permission matrix"` on table. `role="columnheader"` on header `<th>`. `role="rowheader"` on role name `<td>`. Keep existing `aria-label` on checkboxes.
-
-### Test: `packages/ui-kit/src/HbcPermissionMatrix/__tests__/HbcPermissionMatrix.test.tsx`
-
-**Tests (7):**
-1. Renders `data-hbc-ui="HbcPermissionMatrix"` at expert tier
-2. Renders role names in table rows
-3. Renders permission names as column headers
-4. Checkboxes have `aria-label` with role + permission names
-5. Fires `onPermissionChange` with correct args on checkbox toggle (userEvent)
-6. Returns null at standard tier (expert-gated)
-7. Returns null at essential tier
-
----
-
-## Step 6: Update maturity matrix
+## Matrix Update
 
 **File:** `docs/reference/ui-kit/UI-Kit-Component-Maturity-Matrix.md`
 
-Update the Complexity-Aware Stubs table rows:
-- HbcAuditTrailPanel: D → **A**, Tests: None → Yes (6)
-- HbcFormField: D → **A**, Tests: None → Yes (6)
-- HbcStatusTimeline: D → **A**, Tests: None → Yes (7)
-- HbcPermissionMatrix: D → **A**, Tests: None → Yes (7)
-- HbcCoachingCallout: D → **A**, Tests: None → Yes (8)
+All 8 groups → **Tier A**, Tests: **Yes (N)**
 
-Update assessment notes with test counts, tokenization, Griffel styling, and ARIA additions.
-
-Update Tier D summary counts (5 fewer D-tier components).
+Update table at lines 277-285 and assessment notes.
 
 ---
 
-## Step 7: Version bump
+## Version Bump
 
-`packages/ui-kit/package.json`: `"version": "2.2.20"` → `"2.2.21"`
+`packages/ui-kit/package.json`: `"version": "2.2.22"` → `"2.2.23"`
 
 ---
 
 ## Verification
 
 ```bash
-cd packages/ui-kit && npx vitest run src/HbcCoachingCallout src/HbcFormField src/HbcStatusTimeline src/HbcAuditTrailPanel src/HbcPermissionMatrix --reporter=verbose
-npx tsc --noEmit -p packages/ui-kit/tsconfig.json
+cd packages/ui-kit && npx vitest run src/theme/__tests__/tokens src/theme/__tests__/animations src/theme/__tests__/typography src/theme/__tests__/elevation src/theme/__tests__/z-index src/theme/__tests__/grid src/theme/__tests__/breakpoints src/theme/__tests__/density-tokens --reporter=verbose
+cd /Users/bobbyfetting/hb-intel && npx tsc --noEmit -p packages/ui-kit/tsconfig.json
 ```
 
 ---
 
-## Commit message
+## Commit Message
 
 ```
-test(ui-kit): add complexity-aware stub tests and tokenize spacing, upgrade all 5 to Tier A
+test(ui-kit): add theme token group tests, upgrade all 8 to Tier A
 ```
 
-## Key files
+---
 
-### Source files to modify (5)
-- `packages/ui-kit/src/HbcCoachingCallout/index.tsx`
-- `packages/ui-kit/src/HbcFormField/index.tsx`
-- `packages/ui-kit/src/HbcStatusTimeline/index.tsx`
-- `packages/ui-kit/src/HbcAuditTrailPanel/index.tsx`
-- `packages/ui-kit/src/HbcPermissionMatrix/index.tsx`
+## Key Files
 
-### Test files to create (5)
-- `packages/ui-kit/src/HbcCoachingCallout/__tests__/HbcCoachingCallout.test.tsx`
-- `packages/ui-kit/src/HbcFormField/__tests__/HbcFormField.test.tsx`
-- `packages/ui-kit/src/HbcStatusTimeline/__tests__/HbcStatusTimeline.test.tsx`
-- `packages/ui-kit/src/HbcAuditTrailPanel/__tests__/HbcAuditTrailPanel.test.tsx`
-- `packages/ui-kit/src/HbcPermissionMatrix/__tests__/HbcPermissionMatrix.test.tsx`
+### Test files to create (8)
+- `packages/ui-kit/src/theme/__tests__/tokens.test.ts`
+- `packages/ui-kit/src/theme/__tests__/animations.test.ts`
+- `packages/ui-kit/src/theme/__tests__/typography.test.ts`
+- `packages/ui-kit/src/theme/__tests__/elevation.test.ts`
+- `packages/ui-kit/src/theme/__tests__/z-index.test.ts`
+- `packages/ui-kit/src/theme/__tests__/grid.test.ts`
+- `packages/ui-kit/src/theme/__tests__/breakpoints.test.ts`
+- `packages/ui-kit/src/theme/__tests__/density-tokens.test.ts`
+
+### Source files (read-only, no changes)
+- `packages/ui-kit/src/theme/tokens.ts`
+- `packages/ui-kit/src/theme/animations.ts`
+- `packages/ui-kit/src/theme/typography.ts`
+- `packages/ui-kit/src/theme/elevation.ts`
+- `packages/ui-kit/src/theme/z-index.ts`
+- `packages/ui-kit/src/theme/grid.ts`
+- `packages/ui-kit/src/theme/breakpoints.ts`
+- `packages/ui-kit/src/theme/density.ts`
 
 ### Other files to update
-- `docs/reference/ui-kit/UI-Kit-Component-Maturity-Matrix.md` — tier changes
-- `packages/ui-kit/package.json` — version 2.2.20 → 2.2.21
-
-### Design token sources (reuse, do not modify)
-- `packages/ui-kit/src/theme/tokens.ts` — colors, surfaces, status
-- `packages/ui-kit/src/theme/grid.ts` — spacing tokens
-- `packages/ui-kit/src/theme/radii.ts` — border radius tokens
-- `packages/ui-kit/src/theme/elevation.ts` — shadow tokens
-
-### Test utilities (reuse)
-- `@hbc/complexity/testing` — `createComplexityWrapper`, `ComplexityTestProvider`, `allTiers`
+- `docs/reference/ui-kit/UI-Kit-Component-Maturity-Matrix.md` — all 8 groups to Tier A
+- `packages/ui-kit/package.json` — version 2.2.22 → 2.2.23

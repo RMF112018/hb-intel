@@ -11,6 +11,10 @@ import { useState, useEffect, useCallback } from 'react';
 export interface UseUnsavedChangesBlockerOptions {
   /** Whether the form has unsaved changes */
   isDirty: boolean;
+  /** Optional callback invoked when the user confirms navigation */
+  onConfirm?: () => void;
+  /** Optional callback invoked when the user cancels navigation */
+  onCancel?: () => void;
 }
 
 export interface UseUnsavedChangesBlockerReturn {
@@ -27,7 +31,7 @@ export interface UseUnsavedChangesBlockerReturn {
 export function useUnsavedChangesBlocker(
   options: UseUnsavedChangesBlockerOptions,
 ): UseUnsavedChangesBlockerReturn {
-  const { isDirty } = options;
+  const { isDirty, onConfirm, onCancel } = options;
   const [showPrompt, setShowPrompt] = useState(false);
 
   // Browser tab close / refresh protection
@@ -41,12 +45,14 @@ export function useUnsavedChangesBlocker(
   }, [isDirty]);
 
   const confirmNavigation = useCallback(() => {
+    onConfirm?.();
     setShowPrompt(false);
-  }, []);
+  }, [onConfirm]);
 
   const cancelNavigation = useCallback(() => {
+    onCancel?.();
     setShowPrompt(false);
-  }, []);
+  }, [onCancel]);
 
   return {
     showPrompt,

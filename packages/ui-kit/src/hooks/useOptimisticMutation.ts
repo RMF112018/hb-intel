@@ -34,31 +34,32 @@ export function useOptimisticMutation<TData = unknown, TVariables = void>(
 ): UseOptimisticMutationReturn<TVariables> {
   const [isPending, setIsPending] = useState(false);
 
+  const { mutationFn, onOptimisticUpdate, onRevert, onSuccess, onError, onShowError } = options;
+
   const mutate = useCallback(
     (variables: TVariables) => {
       // Apply optimistic update immediately
-      options.onOptimisticUpdate(variables);
+      onOptimisticUpdate(variables);
       setIsPending(true);
 
-      options
-        .mutationFn(variables)
+      mutationFn(variables)
         .then((data) => {
-          options.onSuccess?.(data, variables);
+          onSuccess?.(data, variables);
         })
         .catch((error: unknown) => {
           // Revert optimistic state
-          options.onRevert(variables);
+          onRevert(variables);
           // Show error to user
           const message =
             error instanceof Error ? error.message : 'An error occurred';
-          options.onShowError?.(message);
-          options.onError?.(error, variables);
+          onShowError?.(message);
+          onError?.(error, variables);
         })
         .finally(() => {
           setIsPending(false);
         });
     },
-    [options],
+    [mutationFn, onOptimisticUpdate, onRevert, onSuccess, onError, onShowError],
   );
 
   return { mutate, isPending };

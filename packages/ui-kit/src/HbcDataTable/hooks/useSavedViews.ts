@@ -297,11 +297,19 @@ export function useSavedViews({
 
   const deleteView = useCallback(
     (id: string) => {
-      setViews((prev) => prev.filter((v) => v.id !== id));
+      setViews((prev) => {
+        const filtered = prev.filter((v) => v.id !== id);
+        // Re-persist full list — avoids O(n) key scan in adapter.remove()
+        const key = `hbc-saved-views-${toolId}-${userId}`;
+        try {
+          const storage = isSpfxContext() ? sessionStorage : localStorage;
+          storage.setItem(key, JSON.stringify(filtered));
+        } catch { /* quota exceeded — silent */ }
+        return filtered;
+      });
       setActiveViewId((prev) => (prev === id ? null : prev));
-      adapter.remove(id);
     },
-    [adapter],
+    [toolId, userId],
   );
 
   const activateView = useCallback((id: string | null) => {

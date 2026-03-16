@@ -12,13 +12,14 @@ export function useFocusTrap(ref: React.RefObject<HTMLDivElement | null>, active
     if (!active || !ref.current) return;
 
     const container = ref.current;
-    const focusable = container.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-    );
+    const selector =
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+    const focusable = container.querySelectorAll<HTMLElement>(selector);
     if (focusable.length === 0) return;
 
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
+    let first = focusable[0];
+    let last = focusable[focusable.length - 1];
 
     const handler = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
@@ -37,6 +38,20 @@ export function useFocusTrap(ref: React.RefObject<HTMLDivElement | null>, active
 
     container.addEventListener('keydown', handler);
     first.focus();
-    return () => container.removeEventListener('keydown', handler);
+
+    // Re-scan focusable elements when container subtree changes (async content)
+    const observer = new MutationObserver(() => {
+      const updated = container.querySelectorAll<HTMLElement>(selector);
+      if (updated.length > 0) {
+        first = updated[0];
+        last = updated[updated.length - 1];
+      }
+    });
+    observer.observe(container, { childList: true, subtree: true });
+
+    return () => {
+      container.removeEventListener('keydown', handler);
+      observer.disconnect();
+    };
   }, [ref, active]);
 }
