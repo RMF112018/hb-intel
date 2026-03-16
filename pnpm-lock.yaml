@@ -250,6 +250,9 @@ importers:
       '@hbc/shell':
         specifier: workspace:*
         version: link:../../packages/shell
+      '@hbc/smart-empty-state':
+        specifier: workspace:*
+        version: link:../../packages/smart-empty-state
       '@hbc/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui-kit

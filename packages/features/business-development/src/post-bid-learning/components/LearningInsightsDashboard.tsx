@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig } from '@hbc/smart-empty-state';
 import {
   HbcBanner,
   HbcButton,
   HbcCard,
-  HbcEmptyState,
   HbcKpiCard,
   HbcLineChart,
   HbcPanel,
@@ -46,6 +47,17 @@ const styles = {
   } satisfies React.CSSProperties,
 };
 
+const INSIGHTS_EMPTY_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: 'truly-empty',
+    heading: 'No learning insights are available',
+    description: 'Seed SF22 autopsy records before opening the insights dashboard.',
+    coachingTip: 'Learning insights are derived from completed post-bid autopsy records.',
+  }),
+};
+
 export const LearningInsightsDashboard: React.FC<LearningInsightsDashboardProps> = ({
   apiScope,
   viewerRole = 'business-development',
@@ -81,9 +93,18 @@ export const LearningInsightsDashboard: React.FC<LearningInsightsDashboardProps>
 
   if (rows.length === 0) {
     return (
-      <HbcEmptyState
-        title="No learning insights are available."
-        description="Seed SF22 autopsy records before opening the insights dashboard."
+      <HbcSmartEmptyState
+        config={INSIGHTS_EMPTY_CONFIG}
+        context={{
+          module: 'business-development',
+          view: 'learning-insights',
+          hasActiveFilters: false,
+          hasPermission: true,
+          isFirstVisit: false,
+          currentUserRole: 'user',
+          isLoadError: false,
+        }}
+        variant="inline"
       />
     );
   }

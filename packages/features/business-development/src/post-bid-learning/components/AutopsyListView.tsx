@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import type { ColumnDef } from '@hbc/ui-kit';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig } from '@hbc/smart-empty-state';
 import {
   HbcBanner,
   HbcButton,
   HbcCard,
   HbcDataTable,
-  HbcEmptyState,
   HbcPanel,
   HbcSelect,
   HbcStatusBadge,
@@ -88,6 +89,17 @@ const renderDeepLink = (link: AutopsyDeepLink) => {
       {link.label}
     </button>
   );
+};
+
+const BD_AUTOPSY_LIST_EMPTY_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: 'truly-empty',
+    heading: 'No post-bid autopsies are available',
+    description: 'Create or replay SF22 autopsy records before reviewing the list view.',
+    coachingTip: 'Autopsies are generated from pursuit outcomes and can be replayed for learning insights.',
+  }),
 };
 
 export const AutopsyListView: React.FC<AutopsyListViewProps> = ({
@@ -245,9 +257,18 @@ export const AutopsyListView: React.FC<AutopsyListViewProps> = ({
 
   if (rows.length === 0) {
     return (
-      <HbcEmptyState
-        title="No post-bid autopsies are available."
-        description="Create or replay SF22 autopsy records before reviewing the list view."
+      <HbcSmartEmptyState
+        config={BD_AUTOPSY_LIST_EMPTY_CONFIG}
+        context={{
+          module: 'business-development',
+          view: 'autopsy-list',
+          hasActiveFilters: false,
+          hasPermission: true,
+          isFirstVisit: false,
+          currentUserRole: 'user',
+          isLoadError: false,
+        }}
+        variant="inline"
       />
     );
   }
