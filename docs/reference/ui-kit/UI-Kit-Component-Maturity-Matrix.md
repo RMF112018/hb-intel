@@ -103,11 +103,12 @@ Tier A is reserved for components that genuinely meet the full production standa
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcTextArea | B | accounting, estimating | Medium | Acceptable | Adequate | Partial | Partial | Partial | None | Yes | Neutral |
-| HbcRichTextEditor | C | accounting | Low | Weak | Weak | Partial | Partial | Partial | None | Yes | Weakens |
+| HbcTextArea | A | accounting, estimating | Medium | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcRichTextEditor | B | accounting | Low | Acceptable | Adequate | Partial | Partial | Partial | Yes | Yes | Neutral |
 
 **Assessment notes:**
-- **HbcRichTextEditor (C):** Uses deprecated `document.execCommand` (removed from HTML spec). Uses `prompt()` for link URL input — synchronous modal dialog violating WCAG 3.2.1. Toolbar buttons are 28px (below 44px touch minimum).
+- **HbcTextArea (A, upgraded from B):** 9 tests covering data attr, label, value, onChange, required, disabled, validation, maxLength character count, rows. Voice dictation integration via `useVoiceDictation`.
+- **HbcRichTextEditor (B, upgraded from C):** 6 tests covering data attr, label, toolbar buttons, disabled, validation, custom toolbar. Remaining B-tier gaps: uses deprecated `document.execCommand`, `prompt()` for link URL, 28px toolbar buttons below 44px touch target. Migration to TipTap/ProseMirror tracked as residual debt.
 
 ### Data Components
 
@@ -423,9 +424,9 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Tier | `@hbc/ui-kit` | Platform & Shared Packages | Combined Total | Percentage |
 |------|---------------|---------------------------|----------------|------------|
-| **A** | 21 (Core: 7 + Form: 9 + Surface/Overlay: 5) | 0 | 21 | 23% |
-| **B** | 30 (+1 HbcAnchoredPopover) | 17 | 47 | 51% |
-| **C** | 9 | 7 (ai-assist ×6, density system) | 16 | 17% |
+| **A** | 22 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1) | 0 | 22 | 24% |
+| **B** | 30 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑) | 17 | 47 | 51% |
+| **C** | 8 | 7 (ai-assist ×6, density system) | 15 | 16% |
 | **D** | 7 | 0 | 7 | 8% |
 | **Total assessed** | **68** | **24** | **92** | |
 
@@ -475,13 +476,14 @@ Components with failing or unknown accessibility status:
 
 ### Testing Coverage Gaps
 
-**`@hbc/ui-kit` testing:** 22 test files with 161 tests covering core, form, surface/overlay, and theme:
+**`@hbc/ui-kit` testing:** 24 test files with 176 tests covering core, form, surface/overlay, input, and theme:
 - Core: HbcStatusBadge (18), HbcButton (10), HbcEmptyState (10), HbcErrorBoundary (7), HbcSpinner (9)
 - Form: HbcTextField (6), HbcSelect (5), HbcCheckbox (4), HbcFormLayout (5), HbcForm (5), HbcFormSection (8), HbcFormRow (5), HbcStickyFormFooter (10), HbcFormGuard (4)
 - Surface/Overlay: HbcCard (9), HbcPanel (7), HbcModal (11), HbcTearsheet (12), HbcPopover (7)
+- Input: HbcTextArea (9), HbcRichTextEditor (6)
 - Theme: HbcThemeContext (3), ThemeResponsiveness (4), HbcConnectivityBar (2)
 
-**46 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Core, Form, and Surface/Overlay families are now fully tested; remaining coverage tracked in the Verification Coverage Plan.
+**44 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Core, Form, Surface/Overlay, and Input families are now fully tested; remaining coverage tracked in the Verification Coverage Plan.
 
 **Platform and shared-feature packages are significantly ahead on testing:**
 
