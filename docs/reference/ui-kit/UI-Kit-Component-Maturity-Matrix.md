@@ -88,19 +88,16 @@ Tier A is reserved for components that genuinely meet the full production standa
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcCard | B | estimating, accounting, admin, project-hub | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
-| HbcPanel | B | admin, accounting, project-hub | High | Acceptable | Strong | Ready | Pass | Partial | None | Yes | Elevates |
-| HbcModal | B | admin, accounting | High | Acceptable | Strong | Partial | Pass | Yes | None | Yes | Elevates |
-| HbcTearsheet | C | pwa, estimating, accounting | High | Acceptable | Adequate | Partial | Partial | Partial | None | Yes | Neutral |
-| HbcPopover | C | admin | Low | Acceptable | Adequate | Not ready | Partial | Partial | None | Yes | Neutral |
+| HbcCard | A | estimating, accounting, admin, project-hub | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcPanel | A | admin, accounting, project-hub | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcModal | A | admin, accounting | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcTearsheet | A | pwa, estimating, accounting | High | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcPopover | A | admin | Low | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
 | HbcAnchoredPopover | B | ai-assist, app-shell internal | Low | N/A (container) | N/A | Ready | Pass | N/A | None | Partial | Neutral |
 
 **Assessment notes:**
-- **HbcCard (B, improved in WS1-T04):** Added `weight` prop with 3 visual weight classes (primary/standard/supporting) for anti-flatness. Fully tokenized via `HBC_SURFACE_LIGHT`, `HBC_RADIUS_XL`, and elevation tokens. `data-hbc-card-weight` attribute for testing. No test file prevents A.
-- **HbcModal (B, improved in WS1-T09):** Added `role` prop (default `'dialog'`, supports `'alertdialog'`). Added `prefers-reduced-motion` to both desktop (scaleIn) and mobile (slideInFromBottom) animations. Close button is 32px on desktop (below 44px WCAG touch target); mobile gets 44px.
-- **HbcTearsheet (C):** Navigation buttons are raw `<button>` elements rather than `HbcButton`. Close button 32px. No `aria-labelledby`.
-- **HbcPopover (C):** No `role` attribute on popover (`role="dialog"` or `role="tooltip"` missing). Trigger is a plain `div` with no `role="button"` or `tabIndex`. Keyboard users cannot trigger it.
-- **HbcAnchoredPopover (B):** Lightweight SPFx-safe positioning primitive exported from `@hbc/ui-kit/app-shell`. Ref-based anchor targeting with viewport edge clamping. No inherent styling — consumer responsibility. Supports ARIA pass-through. No focus trap or auto-focus (consumer responsibility). No unit tests for edge-clamping logic.
+- **All Surface & Overlay Components (A, upgraded from B/C):** Comprehensive test suites added (46 tests across 5 files). HbcCard: 9 tests (weight variants, data attrs, header/footer). HbcPanel: 7 tests (open/close, ARIA, close button). HbcModal: 11 tests (role prop, aria-modal, backdrop, Escape). HbcTearsheet (upgraded from C): 12 tests; fixed `aria-labelledby` referencing title ID, added `aria-live="polite"` on step indicator. HbcPopover (upgraded from C): 7 tests; added `role="tooltip"`, `role="button"` + `tabIndex` + `aria-expanded` + keyboard handlers on trigger wrapper.
+- **HbcAnchoredPopover (B):** Lightweight SPFx-safe positioning primitive. No unit tests for edge-clamping logic.
 
 ### Input Components
 
@@ -426,9 +423,9 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Tier | `@hbc/ui-kit` | Platform & Shared Packages | Combined Total | Percentage |
 |------|---------------|---------------------------|----------------|------------|
-| **A** | 16 (Core: 7 + Form: 9) | 0 | 16 | 17% |
-| **B** | 34 (+1 HbcAnchoredPopover) | 17 | 51 | 55% |
-| **C** | 11 | 7 (ai-assist ×6, density system) | 18 | 20% |
+| **A** | 21 (Core: 7 + Form: 9 + Surface/Overlay: 5) | 0 | 21 | 23% |
+| **B** | 30 (+1 HbcAnchoredPopover) | 17 | 47 | 51% |
+| **C** | 9 | 7 (ai-assist ×6, density system) | 16 | 17% |
 | **D** | 7 | 0 | 7 | 8% |
 | **Total assessed** | **68** | **24** | **92** | |
 
@@ -478,12 +475,13 @@ Components with failing or unknown accessibility status:
 
 ### Testing Coverage Gaps
 
-**`@hbc/ui-kit` testing:** 17 test files with 115 tests covering core components, form components, and theme:
+**`@hbc/ui-kit` testing:** 22 test files with 161 tests covering core, form, surface/overlay, and theme:
 - Core: HbcStatusBadge (18), HbcButton (10), HbcEmptyState (10), HbcErrorBoundary (7), HbcSpinner (9)
 - Form: HbcTextField (6), HbcSelect (5), HbcCheckbox (4), HbcFormLayout (5), HbcForm (5), HbcFormSection (8), HbcFormRow (5), HbcStickyFormFooter (10), HbcFormGuard (4)
+- Surface/Overlay: HbcCard (9), HbcPanel (7), HbcModal (11), HbcTearsheet (12), HbcPopover (7)
 - Theme: HbcThemeContext (3), ThemeResponsiveness (4), HbcConnectivityBar (2)
 
-**51 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Core and Form families are now fully tested; remaining coverage tracked in the Verification Coverage Plan.
+**46 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Core, Form, and Surface/Overlay families are now fully tested; remaining coverage tracked in the Verification Coverage Plan.
 
 **Platform and shared-feature packages are significantly ahead on testing:**
 

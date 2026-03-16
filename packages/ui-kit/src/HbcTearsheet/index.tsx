@@ -232,13 +232,13 @@ export const HbcTearsheet: React.FC<HbcTearsheetProps> = ({
         className={mergeClasses(styles.dialog, className)}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-labelledby="hbc-tearsheet-title"
         data-hbc-ui="tearsheet"
       >
         <div className={styles.header}>
           <div className={styles.headerLeft}>
-            <h3 className={styles.title}>{title}</h3>
-            <span className={styles.stepIndicator}>
+            <h3 id="hbc-tearsheet-title" className={styles.title}>{title}</h3>
+            <span className={styles.stepIndicator} aria-live="polite">
               Step {currentStep + 1} of {steps.length}
             </span>
           </div>

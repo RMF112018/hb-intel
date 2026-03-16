@@ -137,6 +137,14 @@ export const HbcPopover: React.FC<HbcPopoverProps> = ({
     else open();
   };
 
+  const handleTriggerKeyDown = (e: React.KeyboardEvent) => {
+    if (triggerMode !== 'click') return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleTriggerClick();
+    }
+  };
+
   const handleMouseEnter = () => {
     if (triggerMode !== 'hover') return;
     if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
@@ -161,8 +169,12 @@ export const HbcPopover: React.FC<HbcPopoverProps> = ({
       ref={triggerRef}
       className={styles.wrapper}
       onClick={handleTriggerClick}
+      onKeyDown={handleTriggerKeyDown}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      tabIndex={triggerMode === 'click' ? 0 : undefined}
+      role={triggerMode === 'click' ? 'button' : undefined}
+      aria-expanded={triggerMode === 'click' ? isOpen : undefined}
     >
       {trigger}
       {isOpen && (
@@ -170,6 +182,7 @@ export const HbcPopover: React.FC<HbcPopoverProps> = ({
           ref={popoverRef}
           className={mergeClasses(styles.popover, className)}
           style={popoverStyle}
+          role="tooltip"
           data-hbc-ui="popover"
           onMouseEnter={triggerMode === 'hover' ? handleMouseEnter : undefined}
           onMouseLeave={triggerMode === 'hover' ? handleMouseLeave : undefined}
