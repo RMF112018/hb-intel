@@ -5,7 +5,7 @@
  * Unified component library for the HB Intel construction intelligence platform.
  * Supports PWA (Next.js 14) and SPFx (SharePoint Framework) dual-target rendering.
  *
- * @version 2.2.7
+ * @version 2.2.8
  * @see docs/reference/ui-kit/ for per-component documentation
  */
 
