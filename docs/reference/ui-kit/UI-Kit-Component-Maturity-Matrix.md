@@ -160,14 +160,12 @@ Tier A is reserved for components that genuinely meet the full production standa
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcBanner | B | pwa, estimating | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
-| HbcToastProvider + useToast | B | pwa, admin, accounting, estimating | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
-| HbcTooltip | B | ui-kit internal | Low | Acceptable | Strong | Partial | Partial | Partial | None | Yes | Neutral |
+| HbcBanner | A | pwa, estimating | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcToastProvider + useToast | A | pwa, admin, accounting, estimating | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcTooltip | A | ui-kit internal | Low | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcBanner (B, improved in WS1-T09):** Correct role assignment (`alert` vs `status`), `aria-live` added (assertive for error/warning, polite for info/success), token-based theming, entry animation with `prefers-reduced-motion` support. Missing dark-mode office variant.
-- **HbcToastProvider (B):** Dual-context architecture is clean. Auto-dismiss timers properly cleared on unmount. Error category correctly requires manual dismiss.
-- **HbcTooltip (B, improved in WS1-T09):** Position flip with viewport clamping is solid. Added `prefers-reduced-motion` support for fadeIn animation. Field mode tooltip bg uses hardcoded dark token.
+- **Messaging & Feedback family (A, upgraded from B):** 22 tests across 3 files. HbcBanner (10: data attrs, role/aria-live per variant, dismiss button, children). HbcToastProvider (6: provider, useToast API, aria-live, toast display, dismiss). HbcTooltip (6: trigger, visibility, hover, data attr, role=tooltip, content).
 
 ### Navigation Components
 
@@ -415,8 +413,8 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Tier | `@hbc/ui-kit` | Platform & Shared Packages | Combined Total | Percentage |
 |------|---------------|---------------------------|----------------|------------|
-| **A** | 40 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4 + Shell: 9 + Layout: 5) | 0 | 40 | 43% |
-| **B** | 16 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑, +3 Shell↑, +1 ToolLandingLayout↑) | 17 | 33 | 36% |
+| **A** | 43 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4 + Shell: 9 + Layout: 5 + Msg: 3) | 0 | 43 | 47% |
+| **B** | 13 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑, +3 Shell↑, +1 ToolLandingLayout↑) | 17 | 30 | 33% |
 | **C** | 4 | 7 (ai-assist ×6, density system) | 11 | 12% |
 | **D** | 7 | 0 | 7 | 8% |
 | **Total assessed** | **68** | **24** | **92** | |
@@ -467,7 +465,7 @@ Components with failing or unknown accessibility status:
 
 ### Testing Coverage Gaps
 
-**`@hbc/ui-kit` testing:** 44 test files with 279 tests covering core, form, surface/overlay, input, data, app shell, page shell/layouts, and theme:
+**`@hbc/ui-kit` testing:** 47 test files with 301 tests covering core, form, surface/overlay, input, data, app shell, page shell/layouts, messaging, and theme:
 - Core: HbcStatusBadge (18), HbcButton (10), HbcEmptyState (10), HbcErrorBoundary (7), HbcSpinner (9)
 - Form: HbcTextField (6), HbcSelect (5), HbcCheckbox (4), HbcFormLayout (5), HbcForm (5), HbcFormSection (8), HbcFormRow (5), HbcStickyFormFooter (10), HbcFormGuard (4)
 - Surface/Overlay: HbcCard (9), HbcPanel (7), HbcModal (11), HbcTearsheet (12), HbcPopover (7)
@@ -475,9 +473,10 @@ Components with failing or unknown accessibility status:
 - Data: HbcCommandBar (5), HbcDataTable (4), HbcChart (5), HbcKpiCard (10)
 - App Shell: HbcAppShell (4), HbcHeader (5), HbcSidebar (5), HbcProjectSelector (5), HbcCreateButton (4), HbcNotificationBell (6), HbcUserMenu (5), HbcToolboxFlyout (5), HbcFavoriteTools (5), HbcGlobalSearch (5)
 - Page Shell/Layouts: WorkspacePageShell (5), ToolLandingLayout (5), DetailLayout (5), CreateUpdateLayout (5), DashboardLayout (5), ListLayout (5)
+- Messaging: HbcBanner (10), HbcToastProvider (6), HbcTooltip (6)
 - Theme: HbcThemeContext (3), ThemeResponsiveness (4), HbcConnectivityBar (2)
 
-**24 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Core, Form, Surface/Overlay, Input, Data, App Shell, and Page Shell/Layout families are now fully tested; remaining families: Messaging & Feedback, Navigation, Interaction Patterns, Module-Specific, Complexity-Aware Stubs.
+**21 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Remaining families: Navigation, Interaction Patterns, Module-Specific, Complexity-Aware Stubs.
 
 **Platform and shared-feature packages are significantly ahead on testing:**
 
