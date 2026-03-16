@@ -51,19 +51,19 @@ Tier A is reserved for components that genuinely meet the full production standa
 | HbcPeoplePicker | D | estimating, pwa | Medium | Placeholder | Weak | Not ready | Partial | Partial | None | None | Weakens |
 | ProvisioningNotificationBanner | D | admin, pwa | Medium | Placeholder | Weak | Not ready | Partial | No | None | None | Weakens |
 | HbcEmptyState | B | pwa, estimating, accounting, admin, project-hub, business-development | High | Acceptable | Strong | Ready | Partial | Partial | None | Yes | Neutral |
-| HbcErrorBoundary | C | pwa, estimating, accounting, admin, project-hub, human-resources, safety, risk-management, operational-excellence, quality-control-warranty, leadership | Critical | Weak | Weak | Ready | Partial | Partial | None | Yes | Neutral |
+| HbcErrorBoundary | B | pwa, estimating, accounting, admin, project-hub, human-resources, safety, risk-management, operational-excellence, quality-control-warranty, leadership | Critical | Acceptable | Adequate | Ready | Partial | Partial | None | Yes | Neutral |
 | HbcButton | B | pwa, estimating, accounting, admin, project-hub | Critical | Acceptable | Adequate | Ready | Pass | Partial | None | Yes | Neutral |
 | HbcTypography | A | pwa, estimating, accounting, admin, project-hub, business-development | High | Premium | Strong | Ready | Pass | Yes | None | Yes | Elevates |
-| HbcSpinner | C | pwa, estimating, accounting, admin, project-hub | Critical | Acceptable | Weak | Ready | Partial | Partial | None | Yes | Neutral |
+| HbcSpinner | B | pwa, estimating, accounting, admin, project-hub | Critical | Acceptable | Adequate | Ready | Pass | Partial | None | Yes | Neutral |
 
 **Assessment notes:**
 - **HbcStatusBadge (B not A):** Dual-channel icons, forced-colors support, animation, full token coverage — excellent implementation. No test file prevents A.
 - **HbcPeoplePicker (D):** Raw textarea with UPN string parsing. No chip display, no Microsoft Graph search, no validation. `tenantId` and `accessToken` props are silently discarded.
 - **ProvisioningNotificationBanner (D):** Uses Tailwind utility classes (`bg-blue-50`, etc.) — completely outside the HBC token and Griffel system. Emoji icons. No stories, no docs, no tests.
-- **HbcErrorBoundary (C):** Default fallback uses inline `style` objects (not Griffel), mixes token references with hardcoded `#FFFFFF`. Functional and universally consumed, but implementation quality is below kit standard.
-- **HbcButton (B not A):** Hover states for primary and danger variants use hardcoded hex (`#D9621A`, `#BF5516`, `#E04444`, `#CC3C3C`) rather than semantic tokens. Touch auto-scale is well done.
+- **HbcErrorBoundary (B, upgraded from C in WS1-T07):** Default fallback migrated to Griffel `makeStyles` with extracted `DefaultFallback` function component. Uses semantic typography tokens (`heading2`, `body`), status color tokens, and radii tokens. No remaining inline styles or hardcoded hex values.
+- **HbcButton (B not A):** Hover states now use semantic tokens (`HBC_ACCENT_ORANGE_HOVER`, `HBC_ACCENT_ORANGE_PRESSED`, `HBC_DANGER_HOVER`, `HBC_DANGER_PRESSED`) per WS1-T03. Touch auto-scale is well done. No test file prevents A.
 - **HbcTypography (A):** Fully tokenized via `hbcTypeScale`, correct semantic element mapping, polymorphic `as` prop, truncation utility. The closest thing to production-ready in the kit.
-- **HbcSpinner (C):** No `prefers-reduced-motion` handling on continuous rotation. `borderColor` partially bypasses Griffel via inline style.
+- **HbcSpinner (B, upgraded from C in WS1-T07):** Added `prefers-reduced-motion` media query — replaces rotation with a gentle opacity pulse when user prefers reduced motion. Inline style for dimension/stroke is minimal and necessary for dynamic sizing.
 
 ### Form Components
 
@@ -438,7 +438,8 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 |------|----------|------|--------|-----|
 | **A** | 1 (HbcThemeProvider) | 1 (HbcTypography) | 0 | 0 |
 | **B** | 12 (+HbcSmartEmptyState, +HbcComplexityDial) | 28 (+HbcStepWizard, +HbcStepSidebar) | 12 (+acknowledgment ×3, +versioned-record ×3) | 4 (+HbcAnchoredPopover) |
-| **C** | 2 (HbcErrorBoundary, HbcSpinner) | 4 (HbcFormLayout, HbcToolboxFlyout, HbcFavoriteTools, HbcDrawingViewer) | 3 | 9 (+ai-assist ×6) |
+| **B** *(upgraded)* | +2 (HbcErrorBoundary↑, HbcSpinner↑ — WS1-T07) | | | |
+| **C** | 0 | 4 (HbcFormLayout, HbcToolboxFlyout, HbcFavoriteTools, HbcDrawingViewer) | 3 | 9 (+ai-assist ×6) |
 | **D** | 0 | 0 | 4 | 3 |
 
 ### Highest-Risk Components (Wave 1-Critical AND Tier C or D)
@@ -447,15 +448,15 @@ These components are on the Wave 1 critical path and do not meet production qual
 
 | Component | Package | Tier | W1 Crit | Primary Gap |
 |-----------|---------|------|---------|-------------|
-| **HbcErrorBoundary** | ui-kit | C | Critical | Inline styles, hardcoded colors, no Griffel |
-| **HbcSpinner** | ui-kit | C | Critical | No reduced-motion handling, inline style bypass |
+| ~~HbcErrorBoundary~~ | ui-kit | ~~C~~ → **B** | Critical | *Resolved in WS1-T07: migrated to Griffel, semantic tokens* |
+| ~~HbcSpinner~~ | ui-kit | ~~C~~ → **B** | Critical | *Resolved in WS1-T07: added prefers-reduced-motion* |
 | **HbcGlobalSearch** | ui-kit | C | Critical | No search panel rendered — delegates to external handler |
 | **HbcToolboxFlyout** | ui-kit | C | High | Core content is a Phase 5 placeholder string |
 | **HbcFavoriteTools** | ui-kit | C | High | Buttons have no onClick handler wired |
 | **HbcDrawingViewer** | ui-kit | C | High | No keyboard accessibility for markup tools |
 | **HbcFormLayout** | ui-kit | C | High | No responsive column collapse |
 
-*Note: All 7 highest-risk components remain within `@hbc/ui-kit`. The platform and shared-feature packages have no Tier C/D components on the Wave 1 critical path — their C-tier items (ai-assist) are all Low criticality.*
+*Note: 2 of the original 7 highest-risk components (HbcErrorBoundary, HbcSpinner) were upgraded to Tier B in WS1-T07. The remaining 5 highest-risk components stay within `@hbc/ui-kit`. The platform and shared-feature packages have no Tier C/D components on the Wave 1 critical path — their C-tier items (ai-assist) are all Low criticality.*
 
 ### Accessibility Concerns
 

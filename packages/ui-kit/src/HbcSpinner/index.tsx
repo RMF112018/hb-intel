@@ -1,9 +1,10 @@
 /**
  * HbcSpinner — Phase 4.9 Messaging & Feedback System
- * Reference: PH4.9-UI-Design-Plan.md §9
+ * Reference: PH4.9-UI-Design-Plan.md §9 | WS1-T07
  *
  * CSS border spinner with sm/md/lg sizes.
  * Pair with useMinDisplayTime hook to prevent flash-of-spinner.
+ * Respects prefers-reduced-motion: replaces rotation with a gentle pulse.
  */
 import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
@@ -32,6 +33,15 @@ const useStyles = makeStyles({
     animationDuration: '0.8s',
     animationTimingFunction: 'linear',
     animationIterationCount: 'infinite',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationName: {
+        '0%': { opacity: '1' },
+        '50%': { opacity: '0.4' },
+        '100%': { opacity: '1' },
+      } as unknown as string,
+      animationDuration: '2s',
+      animationTimingFunction: 'ease-in-out',
+    },
   },
   srOnly: {
     position: 'absolute',

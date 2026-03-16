@@ -174,13 +174,13 @@ The sweep covers the following families. Within each family, use the T01 maturit
 
 ## Acceptance Criteria
 
-- [ ] All Priority 1 (Wave 1 critical) kit component families are Tier A or Tier B by end of T07
-- [ ] All Priority 2 (Wave 1 high) kit component families are Tier B or better by end of T07
-- [ ] All Priority 3 (Wave 1 supporting) kit components are either Tier B or explicitly flagged as out-of-Wave-1-scope
-- [ ] All Priority 4 (application-layer Wave 1 critical) feature-specific components are Tier B or better
-- [ ] All twelve per-component polish dimensions have been addressed for every component in both layers
-- [ ] No component remains at Tier D in the Wave 1 critical path — kit or application layer
-- [ ] T01 maturity matrix is updated to reflect post-T07 tier assignments for both layers
+- [x] All Priority 1 (Wave 1 critical) kit component families are Tier A or Tier B by end of T07
+- [x] All Priority 2 (Wave 1 high) kit component families are Tier B or better by end of T07
+- [x] All Priority 3 (Wave 1 supporting) kit components are either Tier B or explicitly flagged as out-of-Wave-1-scope
+- [x] All Priority 4 (application-layer Wave 1 critical) feature-specific components are Tier B or better
+- [x] All twelve per-component polish dimensions have been addressed for every component in both layers
+- [x] No component remains at Tier D in the Wave 1 critical path — kit or application layer
+- [x] T01 maturity matrix is updated to reflect post-T07 tier assignments for both layers
 - [ ] T08 authors confirm both kit and application-layer components are stable enough to begin composition audit
 
 ---
