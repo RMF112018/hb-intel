@@ -137,7 +137,7 @@ describe('RequestDetailPage', () => {
   });
 
   // G4-T01-020
-  // Also covers G4-T07-007: Unknown requestId → HbcEmptyState
+  // Also covers G4-T07-007: Unknown requestId → empty state via shell
   it('shows empty state when request is not found', () => {
     renderDetail({ requests: [] });
     expect(screen.getByText('Request Not Found')).toBeInTheDocument();
@@ -176,7 +176,7 @@ describe('RequestDetailPage', () => {
       expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
 
-    // G4-T07-007: Unknown requestId → HbcEmptyState — covered by G4-T01-020 above.
+    // G4-T07-007: Unknown requestId → empty state via shell — covered by G4-T01-020 above.
 
     // G4-T07-008: Completed + missing siteUrl → warning — covered by G4-T05-004
     // in RequestDetailPage.completion.test.tsx (CompletionConfirmationCard shows

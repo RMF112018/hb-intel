@@ -34,13 +34,14 @@ Both services skip polling when no backend URL is configured (dev-harness withou
 
 ### Error Log (SF17-T05)
 
-The Error Log page is intentionally deferred. It renders a clear `HbcEmptyState` with a `HbcCoachingCallout` so the route never appears blank. All admin alert and monitoring functionality is available in the Provisioning Oversight dashboard.
+The Error Log page is intentionally deferred. It renders a clear `HbcSmartEmptyState` from `@hbc/smart-empty-state` so the route never appears blank. All admin alert and monitoring functionality is available in the Provisioning Oversight dashboard.
 
 Tracked in: SF17-T05 (error logging and audit trail).
 
 ## Dependencies
 
 - `@hbc/ui-kit` — design system components
+- `@hbc/smart-empty-state` — classification-aware empty state rendering
 - `@hbc/auth` — authentication, permissions, access control
 - `@hbc/shell` — navigation and workspace management
 - `@hbc/provisioning` — provisioning API client and store

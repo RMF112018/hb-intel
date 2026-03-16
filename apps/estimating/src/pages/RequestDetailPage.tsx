@@ -126,7 +126,7 @@ export function RequestDetailPage(): ReactNode {
     );
   }
 
-  // W0-G4-T07: Not found → HbcEmptyState via shell
+  // W0-G4-T07: Not found → empty state via shell
   if (!request) {
     return (
       <WorkspacePageShell
