@@ -1,9 +1,9 @@
 # UI Kit Component Maturity Matrix
 
-> **Doc Classification:** Living Reference (Diátaxis) — WS1-T01 maturity baseline for `@hbc/ui-kit` v2.1.0 and all platform/shared-feature UI packages; governs T07 polish sequencing, T11 test prioritization, T12 consumer audit scope, and T13 production-readiness scorecard baseline.
+> **Doc Classification:** Living Reference (Diátaxis) — Component maturity baseline for `@hbc/ui-kit` v2.2.0 and all platform/shared-feature UI packages. Updated post-WS1 completion (T01–T13) to reflect T03 tokenization, T04 hierarchy additions, T07 component polish, T09 accessibility remediation, and T11 test infrastructure.
 
-**Produced by:** WS1-T01 (UI Kit Inventory, Maturity Scoring, and Consumer Map)
-**Date:** 2026-03-16
+**Produced by:** WS1-T01 (initial baseline), updated post-WS1 completion
+**Date:** 2026-03-16 (updated)
 **Governing plan:** `docs/architecture/plans/UI-Kit/WS1-T01-Inventory-Maturity-Scoring-Consumer-Map.md`
 
 ---
@@ -50,7 +50,7 @@ Tier A is reserved for components that genuinely meet the full production standa
 | HbcStatusBadge | B | pwa, estimating, accounting, admin, project-hub, business-development, hb-site-control | High | Premium | Strong | Ready | Pass | Yes | None | Yes | Elevates |
 | HbcPeoplePicker | D | estimating, pwa | Medium | Placeholder | Weak | Not ready | Partial | Partial | None | None | Weakens |
 | ProvisioningNotificationBanner | D | admin, pwa | Medium | Placeholder | Weak | Not ready | Partial | No | None | None | Weakens |
-| HbcEmptyState | B | pwa, estimating, accounting, admin, project-hub, business-development | High | Acceptable | Strong | Ready | Partial | Partial | None | Yes | Neutral |
+| HbcEmptyState | B | pwa, estimating, accounting, admin, project-hub, business-development | High | Acceptable | Strong | Ready | Pass | Partial | None | Yes | Neutral |
 | HbcErrorBoundary | B | pwa, estimating, accounting, admin, project-hub, human-resources, safety, risk-management, operational-excellence, quality-control-warranty, leadership | Critical | Acceptable | Adequate | Ready | Partial | Partial | None | Yes | Neutral |
 | HbcButton | B | pwa, estimating, accounting, admin, project-hub | Critical | Acceptable | Adequate | Ready | Pass | Partial | None | Yes | Neutral |
 | HbcTypography | A | pwa, estimating, accounting, admin, project-hub, business-development | High | Premium | Strong | Ready | Pass | Yes | None | Yes | Elevates |
@@ -87,15 +87,16 @@ Tier A is reserved for components that genuinely meet the full production standa
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcCard | B | estimating, accounting, admin, project-hub | High | Acceptable | Adequate | Ready | Unknown | Partial | None | Yes | Neutral |
+| HbcCard | B | estimating, accounting, admin, project-hub | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
 | HbcPanel | B | admin, accounting, project-hub | High | Acceptable | Strong | Ready | Pass | Partial | None | Yes | Elevates |
-| HbcModal | B | admin, accounting | High | Acceptable | Strong | Partial | Pass | Partial | None | Yes | Elevates |
+| HbcModal | B | admin, accounting | High | Acceptable | Strong | Partial | Pass | Yes | None | Yes | Elevates |
 | HbcTearsheet | C | pwa, estimating, accounting | High | Acceptable | Adequate | Partial | Partial | Partial | None | Yes | Neutral |
 | HbcPopover | C | admin | Low | Acceptable | Adequate | Not ready | Partial | Partial | None | Yes | Neutral |
 | HbcAnchoredPopover | B | ai-assist, app-shell internal | Low | N/A (container) | N/A | Ready | Pass | N/A | None | Partial | Neutral |
 
 **Assessment notes:**
-- **HbcModal (B):** Close button is 32px on desktop (below 44px WCAG touch target); mobile gets 44px.
+- **HbcCard (B, improved in WS1-T04):** Added `weight` prop with 3 visual weight classes (primary/standard/supporting) for anti-flatness. Fully tokenized via `HBC_SURFACE_LIGHT`, `HBC_RADIUS_XL`, and elevation tokens. `data-hbc-card-weight` attribute for testing. No test file prevents A.
+- **HbcModal (B, improved in WS1-T09):** Added `role` prop (default `'dialog'`, supports `'alertdialog'`). Added `prefers-reduced-motion` to both desktop (scaleIn) and mobile (slideInFromBottom) animations. Close button is 32px on desktop (below 44px WCAG touch target); mobile gets 44px.
 - **HbcTearsheet (C):** Navigation buttons are raw `<button>` elements rather than `HbcButton`. Close button 32px. No `aria-labelledby`.
 - **HbcPopover (C):** No `role` attribute on popover (`role="dialog"` or `role="tooltip"` missing). Trigger is a plain `div` with no `role="button"` or `tabIndex`. Keyboard users cannot trigger it.
 - **HbcAnchoredPopover (B):** Lightweight SPFx-safe positioning primitive exported from `@hbc/ui-kit/app-shell`. Ref-based anchor targeting with viewport edge clamping. No inherent styling — consumer responsibility. Supports ARIA pass-through. No focus trap or auto-focus (consumer responsibility). No unit tests for edge-clamping logic.
@@ -123,7 +124,7 @@ Tier A is reserved for components that genuinely meet the full production standa
 - **HbcCommandBar (B):** Solid Fluent v9 toolbar with density auto-detection and saved views. Theme partial: uses `HBC_SURFACE_LIGHT` static tokens for view selector, which won't adapt in dark/field contexts.
 - **HbcDataTable (B):** Most feature-complete data component — TanStack Table + virtualizer, 3-density system, card-stack mobile view, frozen columns. Inline editing lacks focus-trap; card-stack checkbox uses raw `<input>`.
 - **HbcChart (B):** Correct lazy-load pattern. Custom ECharts theme uses hardcoded hex colors (not CSS variables) — won't adapt to dark themes. Canvas rendering has no `aria-label` or `role="img"`.
-- **HbcKpiCard (B):** Clean and well-typed. `cardActive` background uses hardcoded `#E8F1F8`. Trend arrows lack screen reader alternative text for direction.
+- **HbcKpiCard (B, improved in WS1-T03):** Clean and well-typed. `cardActive` background now uses `HBC_SURFACE_LIGHT['surface-active']` token (was hardcoded `#E8F1F8`). Trend arrows lack screen reader alternative text for direction.
 
 ### Page Shell & Layouts
 
@@ -174,9 +175,9 @@ Tier A is reserved for components that genuinely meet the full production standa
 | HbcTooltip | B | ui-kit internal | Low | Acceptable | Strong | Partial | Partial | Partial | None | Yes | Neutral |
 
 **Assessment notes:**
-- **HbcBanner (B):** Correct role assignment (`alert` vs `status`), token-based theming, entry animation. Missing dark-mode office variant.
+- **HbcBanner (B, improved in WS1-T09):** Correct role assignment (`alert` vs `status`), `aria-live` added (assertive for error/warning, polite for info/success), token-based theming, entry animation with `prefers-reduced-motion` support. Missing dark-mode office variant.
 - **HbcToastProvider (B):** Dual-context architecture is clean. Auto-dismiss timers properly cleared on unmount. Error category correctly requires manual dismiss.
-- **HbcTooltip (B):** Position flip with viewport clamping is solid. Missing `usePrefersReducedMotion` integration. Field mode tooltip bg uses hardcoded dark token.
+- **HbcTooltip (B, improved in WS1-T09):** Position flip with viewport clamping is solid. Added `prefers-reduced-motion` support for fadeIn animation. Field mode tooltip bg uses hardcoded dark token.
 
 ### Navigation Components
 
@@ -202,7 +203,7 @@ Tier A is reserved for components that genuinely meet the full production standa
 | HbcBottomNav | B | pwa (mobile shell) | High | Acceptable | Adequate | Ready | Partial | Yes | None | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcConfirmDialog (B):** Clean thin wrapper over `HbcModal`. Loading state propagated to both buttons. Danger/warning variant branching correct.
+- **HbcConfirmDialog (B, improved in WS1-T09):** Clean thin wrapper over `HbcModal`. Uses `role="alertdialog"` per WCAG alertdialog pattern (upgraded from `role="dialog"`). Loading state propagated to both buttons. Danger/warning variant branching correct.
 - **HbcCommandPalette (B):** Most complex interaction component. Focus trap, keyboard nav, offline awareness, mobile full-screen, field mode actions, AI query integration, confirmation for destructive actions. Recent items cannot re-execute after session end.
 - **HbcBottomNav (B):** iOS safe-area inset handled. Focus Mode integration via custom event. Missing `useFocusTrap` on More sheet; `aria-label` missing from individual nav items.
 
@@ -278,13 +279,13 @@ These are intentional complexity-gated stubs per SF03-T07 / D-08 doctrine. Each 
 | Group | Tier | W1 Crit | Tests | Docs | Notes |
 |-------|------|---------|-------|------|-------|
 | Color tokens (tokens.ts) | B | Critical | Yes | Partial | Well-structured brand ramp, semantic status colors, sunlight-optimized ramps, deprecated token tracking. Some components reference raw `HBC_SURFACE_LIGHT` values instead of Fluent theme tokens. |
-| Animation/transitions (animations.ts) | B | High | None | None | 8 named keyframes, 3 duration tiers, `useReducedMotionStyles` defined but most animated components do not consult it. |
+| Animation/transitions (animations.ts) | B | High | None | Yes | 8 named keyframes, 3 duration tiers, `useReducedMotionStyles` hook. WS1-T09 added `@media (prefers-reduced-motion: reduce)` to 12 animated components — all major animations now comply. |
 | Typography (typography.ts) | A | Critical | None | Partial | Intent-based V2.1 scale, deprecated size-based aliases retained. Clean, consistent, forward-compatible. |
-| Elevation (elevation.ts) | B | High | None | Partial | 4-level dual-shadow scale with field mode variants. `elevationRest` maps to `elevationLevel1` for backward compatibility — may surprise consumers expecting no shadow. |
+| Elevation (elevation.ts) | A | High | None | Yes | 5-level dual-shadow scale (V2.1.2 — WS1-T04) with field mode variants. Level 4 (`elevationBlocking`) added for modal/blocking surfaces. `elevationRest` maps to `elevationLevel1` for backward compatibility. |
 | Z-index (z-index.ts) | A | High | None | Partial | Single source of truth — 16 named layers. Correct ordering from content (0) to connectivityBar (10001). |
 | Spacing & Grid (grid.ts) | B | Medium | Yes | None | 4px base, 6-step scale, 12-column grid. Breakpoint constants duplicated between `grid.ts` and `breakpoints.ts` with some divergence. |
 | Breakpoints (breakpoints.ts) | A | High | None | Partial | Clean canonical file per PH4C.12. 5 named breakpoints used consistently by all responsive hooks. |
-| Density system (density.ts) | C | Medium | None | None | `DensityTier` defined as `compact | comfortable | touch` but `HbcCommandBar/types.ts` defines it as `compact | standard | touch`. Two hooks (`useDensity` and `useAdaptiveDensity`) operate on incompatible type systems — a real production risk. |
+| Density system (density.ts) | B | Medium | None | Yes | WS1-T05 added comprehensive density tokens (`HBC_DENSITY_TOKENS`), field-readability constraints (`HBC_FIELD_READABILITY`), field interaction assumptions, and density application model. Type fragmentation (`comfortable` vs `standard`) between `useDensity` and `useAdaptiveDensity` remains as documented residual debt (RD-009). |
 
 ---
 
@@ -430,7 +431,7 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 | **D** | 7 | 0 | 7 | 8% |
 | **Total assessed** | **68** | **24** | **92** | |
 
-*ui-kit hooks: A=6, B=9, C=3. Theme groups: A=3, B=4, C=1. Icons: B (single group). Shell infrastructure: B (1 orchestrator). Passthrough/re-exports excluded from tier counts.*
+*ui-kit hooks: A=6, B=9, C=3. Theme groups: A=4 (+elevation↑), B=4 (+density↑ from C), C=0. Icons: B (single group). Shell infrastructure: B (1 orchestrator). Passthrough/re-exports excluded from tier counts.*
 
 ### Wave 1-Critical Components by Tier
 
