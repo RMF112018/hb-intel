@@ -9,7 +9,7 @@
 
 **Version:** 1.1 (Proposed — Validated 2026-03-14)
 **Date:** 2026-03-14
-**Status:** Proposed — Implementation Evidence Available; Ready for Formal Approval
+**Status:** Complete
 **Implementation Status (2026-03-16):** G4 SPFx surfaces (Estimating Requester, Estimating Coordinator, Accounting Controller, Admin Oversight, Completion Confirmation) — IMPLEMENTED (Canonical Current-State per current-state-map.md). G5 hosted PWA surfaces — IMPLEMENTED (Canonical Current-State). G1/G2/G3 contracts and platform wiring defined; backend provisioning hardening deferred. G6 — not started (post-Phase-1 scope).
 **Basis:** HB-Intel-Dev-Roadmap.md §8, current-state-map.md (Tier 1), ADRs 0083–0113, codebase inspection, external research (construction-tech + Azure/SharePoint platform best practices)
 **Next ADR Available:** ADR-0114

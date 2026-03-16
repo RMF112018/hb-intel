@@ -33,6 +33,7 @@ At the end of Phase 7:
 - Release management, rollback readiness, secrets/process controls
 - Training, UAT, pilot-to-production transition, and support enablement
 - Success metrics, adoption measurements, and operating cadence after go-live
+- SF22 T08–T09 (`@hbc/post-bid-autopsy` remaining tasks) — assigned to Phase 7 per OD-007 decision (2026-03-16); gated on `@hbc/strategic-intelligence` reaching at least `usable-but-incomplete` status or redesign removing that dependency
 
 ## 5. Out of Scope
 

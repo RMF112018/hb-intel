@@ -59,9 +59,9 @@ Each item progresses through states:
 | OD-003 | Demo artifact isolation strategy | Phase 0 Plan | MEDIUM | DevSecOps | Phase 1 Start | PARTIALLY RESOLVED |
 | OD-004 | Exception-handling strictness threshold | Phase 0 Plan | MEDIUM | Arch Lead | Phase 0 Exit | PARTIALLY RESOLVED |
 | OD-005 | Documentation sync completion criteria | Phase 0 Plan | HIGH | Arch Lead | Phase 0 Exit | PARTIALLY RESOLVED |
-| OD-006 | PH7-RM-* reclassification decision | Divergence Log | MEDIUM | Delivery Lead | Phase 1 Scope | OPEN |
-| OD-007 | SF16 & SF22 T08–T09 Phase 1 scope | Divergence Log | HIGH | Product Owner | Phase 0 Exit | OPEN |
-| OD-008 | Feature-Phase-Mapping-Recommendation.md archive | Divergence Log | LOW | Arch Lead | Phase 1 Housekeeping | OPEN |
+| OD-006 | PH7-RM-* reclassification decision | Divergence Log | MEDIUM | Delivery Lead | Phase 1 Scope | RESOLVED |
+| OD-007 | SF16 & SF22 T08–T09 Phase 1 scope | Divergence Log | HIGH | Product Owner | Phase 0 Exit | RESOLVED |
+| OD-008 | Feature-Phase-Mapping-Recommendation.md archive | Divergence Log | LOW | Arch Lead | Phase 1 Housekeeping | RESOLVED |
 | OD-009 | promote-ideas.yml implementation | CI/CD & Release | MEDIUM | Platform/Core Services | Phase 1 Planning | OPEN |
 | OD-010 | App-level coverage threshold policy | CI/CD & Release | MEDIUM | DevSecOps | Phase 1 CI Config | OPEN |
 | OD-011 | SPFx production deploy automation | CI/CD & Release | HIGH | DevSecOps + Platform | Phase 1 Release SOP | OPEN |
@@ -208,9 +208,11 @@ Authorized by: Program architecture lead + Release/governance lead
 
 **Owner:** Delivery/program lead
 
-**Deadline:** Phase 1 scope entry review (not a Phase 1 start blocker; must be decided before Phase 1 sprint planning)
+**Deadline:** Phase 1 scope entry review
 
-**Status:** OPEN
+**Status:** ✅ RESOLVED (2026-03-16)
+
+**Approved Decision:** Option (a) — Assign PH7-RM-1 through PH7-RM-9 to **Phase 3 — Project Hub and Project Context**. Explicitly excluded from Phase 1 and Phase 2. Plans remain classified as "Deferred Scope" until formal Phase 3 kickoff approval, at which point they will be reclassified to "Canonical Normative Plan." Decision approved by Product Owner, Delivery Lead, and Architecture Owner.
 
 ---
 
@@ -231,7 +233,9 @@ Authorized by: Program architecture lead + Release/governance lead
 
 **Deadline:** Phase 0 exit gate (affects Phase 1 scope definition)
 
-**Status:** OPEN
+**Status:** ✅ RESOLVED (2026-03-16)
+
+**Approved Decision:** SF16 (`@hbc/search`) excluded from Phase 1 and assigned to **Phase 5 — Search, Connected Records, and Document Access**. SF22 T08–T09 (`@hbc/post-bid-autopsy`) excluded from Phase 1 and assigned to **Phase 7 — HBI Intelligence, Production Hardening, and Rollout**. Activation of SF22 T08–T09 remains gated on `@hbc/strategic-intelligence` reaching at least `usable-but-incomplete` status, or by redesign that removes that dependency. Decision approved by Product Owner with Architecture Owner concurrence.
 
 ---
 

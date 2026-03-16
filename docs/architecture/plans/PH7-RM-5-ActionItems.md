@@ -1,7 +1,7 @@
 # PH7-RM-5 — Action Items: FAB, Tray, List, and Data Layer
 
 
-> **Doc Classification:** Deferred Scope — Phase 7 remediation scope item. PH7.12 sign-off complete (2026-03-09, ADR-0091). Phase assignment decision pending (see OD-006 in P0-E2 Open Decisions Register). Do not implement until assigned to a Phase milestone.
+> **Doc Classification:** Deferred Scope — Phase 7 remediation scope item. PH7.12 sign-off complete (2026-03-09, ADR-0091). Assigned to Phase 3 — Project Hub and Project Context (OD-006 resolved 2026-03-16). Remains Deferred Scope until Phase 3 kickoff approval, at which point reclassify to Canonical Normative Plan. Do not implement until Phase 3 is formally activated.
 
 **Version:** 1.0
 **Governed by:** CLAUDE.md v1.2 · HB-Intel-Blueprint-V4.md

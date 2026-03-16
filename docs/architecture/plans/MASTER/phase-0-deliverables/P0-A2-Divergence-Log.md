@@ -73,7 +73,7 @@ This log records all identified divergences between architectural planning docum
 | **Area** | Governance — Plan Approval |
 | **Description** | `docs/architecture/plans/MVP/HB-Intel-Wave-0-Buildout-Plan.md` v1.1 header states "Status: Proposed — awaiting review." Phase 0 has discovered that Wave 0 surface work (G4 and G5 T01–T08) is already built and recorded as `Canonical Current-State` in `current-state-map.md`. The plan's formal approval status has not caught up with the implementation work that was completed. |
 | **Classification** | **(c) Superseded — plan status is stale relative to actual implementation state** |
-| **Resolution** | PARTIAL — Document preparation complete (2026-03-16). Wave 0 Buildout Plan updated with: G4/G5 implementation evidence, formal approval checklist with signature table. Status changed from "Proposed — awaiting review" to "Proposed — Implementation Evidence Available; Ready for Formal Approval." ADR-0090 gate references corrected to ADR-0091 per D-004. Awaiting Product Owner + Architecture Owner signature to complete approval. **This item remains a Phase 1 entry blocker (BLOCKER-02 in P0-E1) until signed.** |
+| **Resolution** | GOVERNANCE CLOSURE PENDING — Document preparation complete (2026-03-16). This is not an open design or strategy decision; it is a governance signature action. Wave 0 Buildout Plan updated with: G4/G5 implementation evidence, formal approval checklist with signature table. Status changed to "Proposed — Implementation Evidence Available; Ready for Formal Approval." ADR-0091 gate references corrected per D-004. **Remaining action:** Product Owner + Architecture Owner signatures. **Phase 1 entry blocker (BLOCKER-02 in P0-E1) until signed.** |
 
 ---
 
@@ -83,8 +83,8 @@ This log records all identified divergences between architectural planning docum
 |-------|-------|
 | **Area** | Planning — Document Classification |
 | **Description** | Nine Review Mode plans (`PH7-RM-1` through `PH7-RM-9`) are classified as "Deferred Scope" per `current-state-map.md` §2.1. Per the transition rule, these must be reclassified to "Canonical Normative Plan" when entering active development, or formally archived if out of scope. No reclassification decision has been made. |
-| **Classification** | **(b) Not-yet-implemented** |
-| **Resolution** | Decision pending — tracked in P0-E2 OD-006. Recommendation: Assign PH7-RM-1 through PH7-RM-9 (review-mode feature suite) to Phase 3 (Project Hub and Project Context) milestone. Classification would change from "Deferred Scope" to "Canonical Normative Plan" upon Phase 3 scope confirmation. PH7-RM-* banners updated (2026-03-16) to reflect PH7.12 completion and pending Phase assignment. Pending product owner + delivery lead approval per OD-006. |
+| **Classification** | **(b) Not-yet-implemented — RESOLVED** |
+| **Resolution** | ✅ RESOLVED (2026-03-16). **Approved decision:** PH7-RM-1 through PH7-RM-9 (Review Mode feature suite) assigned to **Phase 3 — Project Hub and Project Context**. Explicitly excluded from Phase 1 and Phase 2 scope. Plans remain classified as "Deferred Scope" until formal Phase 3 kickoff approval, at which point they will be reclassified to "Canonical Normative Plan." PH7-RM-* banners updated to reflect Phase 3 assignment. **Decision owners:** Product Owner, Delivery Lead, Architecture Owner. OD-006 resolved. |
 
 ---
 
@@ -94,8 +94,8 @@ This log records all identified divergences between architectural planning docum
 |-------|-------|
 | **Area** | Planning — Document Classification |
 | **Description** | SF16 (`@hbc/search`, Azure Cognitive Search integration) has an ADR number reserved (ADR-0105) and plans marked as Canonical Normative Plan, but has not entered active development. `@hbc/post-bid-autopsy` (SF22) T01–T07 are complete but T08–T09 remain unbuilt. |
-| **Classification** | **(b) Not-yet-implemented** |
-| **Resolution** | Phase 1 entry checklist must explicitly decide whether either enters Phase 1 scope. Deferred scope candidates; track in Open Decisions Register (P0-E2). **Decision owner:** Product owner. **Deadline:** Phase 0 exit gate. |
+| **Classification** | **(b) Not-yet-implemented — RESOLVED** |
+| **Resolution** | ✅ RESOLVED (2026-03-16). **Approved decision:** SF16 (`@hbc/search`) excluded from Phase 1 and assigned to **Phase 5 — Search, Connected Records, and Document Access**. SF22 T08–T09 (`@hbc/post-bid-autopsy`) excluded from Phase 1 and assigned to **Phase 7 — HBI Intelligence, Production Hardening, and Rollout**. Activation of SF22 T08–T09 remains gated on `@hbc/strategic-intelligence` reaching at least `usable-but-incomplete` status, or by redesign that removes that dependency. **Decision owners:** Product Owner with Architecture Owner concurrence. OD-007 resolved. |
 
 ---
 
@@ -116,8 +116,8 @@ This log records all identified divergences between architectural planning docum
 |-------|-------|
 | **Area** | Implementation — Package Maturity |
 | **Description** | Six feature packages (`features-accounting`, `features-leadership`, `features-safety`, `features-quality-control-warranty`, `features-risk-management`, `features-operational-excellence`, `features-human-resources`) and their corresponding SPFx apps are at v0.0.0. Their presence in the inventory might be interpreted as "functional" by future contributors without checking version/maturity. |
-| **Classification** | **(b) Not-yet-implemented** |
-| **Resolution** | Explicitly classified as `scaffold-only` in P0-B1 Production Readiness Matrix. No code correction required; classification prevents false-baseline assumptions. Ensure developers reference the readiness matrix before assuming feature availability. **Owner:** Architecture documentation lead. |
+| **Classification** | **Standing classification/control item** |
+| **Resolution** | Classification complete; standing awareness item. Explicitly classified as `scaffold-only` in P0-B1 Production Readiness Matrix. Scaffold-only README notices added to all 7 feature packages (2026-03-16). This is not a phase-placement or strategy decision — it is a standing readiness and communication control item. Maintain explicit `scaffold-only` labeling in readiness and contributor-facing materials. No phase assignment applies to D-009. |
 
 ---
 
@@ -149,20 +149,20 @@ The following divergences were identified and resolved during Phase 7 or prior, 
 
 | Classification | Count | Notes |
 |----------------|-------|-------|
-| **(a) Controlled evolution** — no action | 3 | Known and intentional divergences; documented |
-| **(b) Not-yet-implemented** — track in Phase 1 or decisions register | 4 | Planned work not yet built; requires Phase 1 scope decision |
-| **(c) Superseded / stale** — correction action required | 1 | D-005 remains open; D-004, D-008 resolved 2026-03-16 |
-| **Total active divergences** | **8** | — |
-| **Phase 0 resolved** | **3** | D-004 (ADR-0090 gate refs), D-008 (Feature-Phase-Mapping already classified), D-010 (scaffold dependency deferral) |
+| **(a) Controlled evolution** — no action | 3 | D-001, D-002, D-003 — known and intentional divergences; documented |
+| **(c) Governance closure pending** | 1 | D-005 — awaiting PO + Arch Owner signatures (BLOCKER-02) |
+| **Standing control item** | 1 | D-009 — scaffold-only classification and communication control |
+| **Phase 0 resolved** | **5** | D-004, D-006, D-007, D-008, D-010 |
 | **Pre-Phase-0 resolved** | **4** | Historical resolution record from Phase 7 |
+| **Total divergences tracked** | **10** | 5 resolved + 3 controlled-evolution + 1 governance-closure + 1 standing-control |
 
 ---
 
 ## 6. Next Steps
 
-- **High-priority corrections (blockers):** D-005 (Wave 0 plan formal approval) must be resolved before Phase 1 entry gate sign-off. D-004, D-008, and D-010 are resolved.
-- **Open decisions:** D-006, D-007 require explicit decision within Phase 0 exit governance (P0-E2 Open Decisions Register).
-- **Awareness / classification:** D-009 requires developer documentation and tooling guidance to prevent misinterpretation.
+- **Governance closure (blocker):** D-005 (Wave 0 plan formal approval) requires PO + Architecture Owner signatures before Phase 1 entry gate sign-off. Document preparation complete; remaining action is signature closure only.
+- **Resolved decisions:** D-006 (PH7-RM-* → Phase 3) and D-007 (SF16 → Phase 5, SF22 T08–T09 → Phase 7) approved and closed.
+- **Standing control:** D-009 (scaffold-only labeling) maintained as ongoing classification/communication item.
 
 ---
 

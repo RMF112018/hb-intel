@@ -20,7 +20,7 @@ This document defines the concrete entry criteria that must be satisfied before 
 
 | Milestone | Description | Status | Evidence |
 |---|---|---|---|
-| M0.1 | Planning hierarchy confirmed | CONDITIONALLY SATISFIED | P0-A1 confirmed hierarchy; 2 blockers (D-004, D-005) must resolve before final sign-off |
+| M0.1 | Planning hierarchy confirmed | CONDITIONALLY SATISFIED | P0-A1 confirmed hierarchy; D-004 resolved; D-005 (governance closure) pending PO + Arch Owner signatures |
 | M0.2 | Readiness matrix completed | SATISFIED | P0-B1 classifies all 57 workspace members across 6 maturity labels |
 | M0.3 | Guardrails approved | DRAFT SATISFIED | P0-C1 defines 8 guardrails; requires formal leadership sign-off to activate |
 | M0.4 | Environment and promotion model defined | SATISFIED | P0-D1 defines topology, promotion criteria, and release-control gap list |

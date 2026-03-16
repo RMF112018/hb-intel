@@ -109,13 +109,15 @@ Ten active divergences were identified and logged in P0-A2-Divergence-Log.md. Th
 - D-002: Feature package materialization as `packages/features/*`
 - D-003: Workspace scope expansion (`backend/*`, `tools/*`)
 
-**Not-yet-implemented (Phase 1 decision register):**
-- D-006: Nine Review Mode plans (PH7-RM-1 through PH7-RM-9) require reclassification decision
-- D-007: SF16 (Search) and SF22 (post-bid-autopsy T08–T09) pending activation decision
-- D-009: Six feature packages at v0.0.0 scaffold-only; explicitly classified to prevent false-baseline assumptions
+**Resolved decisions (phase assignments approved):**
+- D-006: ✅ PH7-RM-1 through PH7-RM-9 assigned to Phase 3 — Project Hub and Project Context (2026-03-16)
+- D-007: ✅ SF16 (`@hbc/search`) → Phase 5; SF22 T08–T09 → Phase 7 (2026-03-16)
 
-**Requires human approval (Phase 1 entry blocker):**
-- D-005: Wave 0 plan formal approval status has not caught up with implementation. Plan must be signed off by product owner and architecture owner.
+**Standing classification/control:**
+- D-009: Scaffold-only labeling maintained as ongoing awareness item; not a phase-placement decision
+
+**Governance closure pending (Phase 1 entry blocker):**
+- D-005: Wave 0 plan formal approval — document preparation complete; awaiting PO + Architecture Owner signatures
 
 **Resolved during Phase 0:**
 - D-004: ✅ ADR-0090 gate references corrected to ADR-0091 across all Wave 0 plan files (2026-03-16)
@@ -180,11 +182,10 @@ This memo is built from the following authoritative sources, all dated or update
 
 ## Next Steps
 
-1. **Complete Action 1 (D-005)** — Wave 0 plan formal approval by product owner and architecture owner
+1. **Complete Action 1 (D-005)** — obtain PO + Architecture Owner signatures on Wave 0 Buildout Plan
 2. **Conduct Phase 1 entry gate review** with product and architecture owners
-3. **Activate P0-E2 decisions register** to track D-006, D-007, D-009 resolutions (D-010 already resolved)
-4. **Formally close M0.1** once Action 1 is verified
-5. **Proceed to Phase 1 mobilization**
+3. **Formally close M0.1** once Action 1 signatures are verified
+4. **Proceed to Phase 1 mobilization**
 
 ---
 

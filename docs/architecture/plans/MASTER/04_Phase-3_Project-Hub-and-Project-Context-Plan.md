@@ -33,6 +33,7 @@ At the end of Phase 3:
 - Project-linked work, activity, and recent changes
 - Team / ownership visibility and accountability display
 - Entry points to project documents, records, and domain workflows
+- Review Mode feature suite (PH7-RM-1 through PH7-RM-9) — assigned to Phase 3 per OD-006 decision (2026-03-16); currently Deferred Scope, will reclassify to Canonical Normative Plan at Phase 3 kickoff
 
 ## 5. Out of Scope
 

@@ -244,8 +244,8 @@ The master summary is the entry point; task files contain code-level specificati
 |--------|-------------|--------|-------------------|
 | PH7.12 Final Verification | `ph7-remediation/PH7.12-Final-Verification-and-Sign-Off.md` | **Complete** (2026-03-09) | ADR-0091 signed off; expansion permitted |
 | PH7.13 Stub Detection | `ph7-remediation/PH7.13-Stub-Detection-Enforcement.md` | **Complete** (2026-03-10) | ADR-0095 governs |
-| SF22 Post-Bid Learning Loop | `shared-features/SF22-Post-Bid-Learning-Loop.md` | T01–T07 defined; T08–T09 pending | PH7 gate satisfied |
-| SF16 Search | `shared-features/SF16-Search.md` | Planning complete; ADR-0105 reserved | PH7 gate satisfied; pending activation |
+| SF22 Post-Bid Learning Loop | `shared-features/SF22-Post-Bid-Learning-Loop.md` | T01–T07 defined; T08–T09 assigned to Phase 7 (OD-007) | PH7 gate satisfied; gated on `@hbc/strategic-intelligence` upgrade |
+| SF16 Search | `shared-features/SF16-Search.md` | Planning complete; ADR-0105 reserved | Assigned to Phase 5 (OD-007 resolved 2026-03-16) |
 | MVP Project Setup | `MVP/MVP-Project-Setup-Plan.md` | Plan authored; needs refinement per review | Review items must be resolved; ADR-0091 on disk; gate satisfied |
 | PH7 Feature Expansion | Multiple master plans (§3.2) | Plans authored; gate satisfied | ADR-0091 on disk; expansion permitted |
 

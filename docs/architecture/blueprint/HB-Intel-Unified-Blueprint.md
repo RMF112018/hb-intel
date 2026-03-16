@@ -640,10 +640,10 @@ The following are not MVP requirements. Including them in MVP scope or coding th
 - AI/HBI-generated drafts or autonomous decisions in any workflow.
 - Mobile-native HB Site Control application.
 - Full PWA feature set across all 14 workspaces.
-- Review Mode (PH7-ReviewMode-Plan + PH7-RM-1 through PH7-RM-9 — Deferred Scope).
+- Review Mode (PH7-ReviewMode-Plan + PH7-RM-1 through PH7-RM-9 — Deferred Scope, assigned to Phase 3 per OD-006).
 - PH9b UX polish deferrals — progressive coaching sequences, draft persistence instrumentation, and advanced CES/task-flow instrumentation remain deferred until Phase 7 modules are live. The core Personal Work Hub operating layer (powered by `@hbc/my-work-feed`, SF29, implemented) is Wave 1 scope and is NOT a non-goal.
-- Advanced search (SF16 — planning stage only, pending activation).
-- Post-bid autopsy workflow (SF22 T08–T09 — not yet defined).
+- Advanced search (SF16 — assigned to Phase 5 per OD-007).
+- Post-bid autopsy workflow (SF22 T08–T09 — assigned to Phase 7 per OD-007; gated on `@hbc/strategic-intelligence` upgrade).
 
 ### 17.2 Architectural Bets That Are Not Yet Committed
 

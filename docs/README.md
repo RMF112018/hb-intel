@@ -206,7 +206,7 @@ All HB Intel architecture documents are classified to prevent confusion between 
 | **Canonical Current-State** | What the repo currently contains — governs present truth | `current-state-map.md`, `docs/README.md` |
 | **Canonical Normative Plan** | What must be built next in an active phase | PH7 domain plans, PH7 remediation plans (`ph7-remediation/`), Blueprint V4 |
 | **Historical Foundational** | Completed phase planning; locked for audit trail | PH4–PH6 plans, Foundation Plan, SF01–SF03 shared-feature plans |
-| **Deferred Scope** | Planned work not yet assigned to an active phase | SF04–SF06 plans (~19 docs), PH7-RM-* plans (9 files) |
+| **Deferred Scope** | Planned work assigned to a future phase but not yet activated | SF04–SF06 plans (~19 docs), PH7-RM-* plans (9 files, assigned to Phase 3), SF16 plans (Phase 5) |
 | **Superseded / Archived Reference** | Replaced by a newer document or approach | Old PH7 root-level plans (deleted from git index) |
 | **Permanent Decision Rationale** | Locked architectural decisions — ADRs | `docs/architecture/adr/` (76 indexed; see §2.2 for catalog conflict detail) |
 

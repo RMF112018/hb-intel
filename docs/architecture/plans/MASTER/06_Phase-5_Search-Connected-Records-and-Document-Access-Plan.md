@@ -33,6 +33,7 @@ At the end of Phase 5:
 - Search result taxonomy, ranking, and permission-aware display
 - File/source transparency and ownership cues
 - Mobile/tablet-safe document access expectations
+- SF16 (`@hbc/search`, Azure Cognitive Search) — assigned to Phase 5 per OD-007 decision (2026-03-16); ADR-0105 reserved; planning complete, implementation deferred until Phase 5
 
 ## 5. Out of Scope
 
