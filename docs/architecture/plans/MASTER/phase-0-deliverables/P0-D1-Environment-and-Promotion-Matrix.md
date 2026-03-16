@@ -178,7 +178,7 @@ This matrix defines which artifact types can deploy to which environments and un
 | **SPFx Estimating (@hbc/spfx-estimating)** | Manual | spfx-build.yml validation | Auto (spfx-deploy.yml) | Manual dispatch | CI tested; path filter: apps/estimating/** |
 | **SPFx Accounting (@hbc/spfx-accounting)** | Manual | spfx-build.yml validation | Auto (spfx-deploy.yml) | Manual dispatch | CI tested; path filter: apps/accounting/** |
 | **SPFx Other 8 apps** | Manual | spfx-build.yml validation (no CI tests) | Auto (spfx-deploy.yml) | Manual dispatch | **No CI unit tests** (see GAP-D-02); path filter covers all 11 apps in apps/** |
-| **dev-harness (@hbc/dev-harness)** | Manual (pnpm dev, port 3000) | None (not in CI pipeline) | None | None | Local development sandbox only; not deployed to external envs |
+| **dev-harness (apps/dev-harness)** | Manual (pnpm dev, port 3000) | None (not in CI pipeline) | None | None | Local development sandbox only; not deployed to external envs |
 | **Platform packages (@hbc/auth, @hbc/shell, etc.)** | Built locally via pnpm turbo run build | CI validates via unit-tests-p1 (5 packages) or no gate (15 packages) | Consumed by deployed apps | Consumed by released apps | Only 5 of 20 platform packages have CI coverage (see GAP-D-01) |
 
 ---
