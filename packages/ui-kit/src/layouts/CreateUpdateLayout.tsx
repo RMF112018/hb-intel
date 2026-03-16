@@ -14,6 +14,8 @@ import { elevationRaised } from '../theme/elevation.js';
 import {
   HBC_SURFACE_LIGHT,
   HBC_ACCENT_ORANGE,
+  HBC_HEADER_TEXT,
+  HBC_ACCENT_ORANGE_HOVER,
 } from '../theme/tokens.js';
 import { TRANSITION_NORMAL, TIMING } from '../theme/animations.js';
 import { FocusModeEnter, FocusModeExit } from '../icons/index.js';
@@ -125,9 +127,9 @@ const useStyles = makeStyles({
     transitionProperty: 'background-color, opacity',
     transitionDuration: TRANSITION_NORMAL,
     backgroundColor: HBC_ACCENT_ORANGE,
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     ':hover': {
-      backgroundColor: '#E06018',
+      backgroundColor: HBC_ACCENT_ORANGE_HOVER,
     },
     ':disabled': {
       opacity: '0.6',
@@ -178,7 +180,7 @@ const useStyles = makeStyles({
     ...shorthands.borderWidth('2px'),
     ...shorthands.borderStyle('solid'),
     ...shorthands.borderColor('rgba(255,255,255,0.3)'),
-    borderTopColor: '#FFFFFF',
+    borderTopColor: HBC_HEADER_TEXT,
     ...shorthands.borderRadius('50%'),
     animationName: {
       from: { transform: 'rotate(0deg)' },

@@ -12,6 +12,7 @@ import { makeStyles, shorthands } from '@griffel/react';
 import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { elevationLevel2 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
+import { HBC_RADIUS_XL } from '../theme/radii.js';
 import type { HbcPopoverProps, PopoverSize } from './types.js';
 
 const SIZE_MAP: Record<PopoverSize, string> = {
@@ -29,7 +30,7 @@ const useStyles = makeStyles({
     zIndex: Z_INDEX.popover,
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
     ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
-    borderRadius: '8px',
+    borderRadius: HBC_RADIUS_XL,
     boxShadow: elevationLevel2,
     paddingTop: '12px',
     paddingRight: '16px',

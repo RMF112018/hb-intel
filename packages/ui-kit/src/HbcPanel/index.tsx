@@ -19,6 +19,7 @@ import { elevationLevel3 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import { useIsMobile } from '../hooks/useIsMobile.js';
+import { HBC_RADIUS_SM, HBC_RADIUS_MD } from '../theme/radii.js';
 import type { HbcPanelProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -66,7 +67,7 @@ const useStyles = makeStyles({
     width: '36px',
     height: '4px',
     backgroundColor: HBC_SURFACE_LIGHT['surface-3'],
-    borderRadius: '2px',
+    borderRadius: HBC_RADIUS_SM,
     margin: '8px auto',
   },
   sheetHeader: {
@@ -100,7 +101,7 @@ const useStyles = makeStyles({
     fontSize: '1.25rem',
     color: HBC_SURFACE_LIGHT['text-muted'],
     padding: '4px 8px',
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
   },
 });
 

@@ -10,13 +10,14 @@ import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles, shorthands } from '@griffel/react';
 import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { elevationLevel1 } from '../theme/elevation.js';
+import { HBC_RADIUS_XL } from '../theme/radii.js';
 import type { HbcCardProps } from './types.js';
 
 const useStyles = makeStyles({
   root: {
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
     ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
-    borderRadius: '8px',
+    borderRadius: HBC_RADIUS_XL,
     boxShadow: elevationLevel1,
     overflow: 'hidden',
   },

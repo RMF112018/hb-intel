@@ -12,6 +12,7 @@ import {
   HBC_STATUS_RAMP_AMBER,
   HBC_STATUS_RAMP_GREEN,
 } from '../theme/tokens.js';
+import { HBC_RADIUS_LG, HBC_RADIUS_SM } from '../theme/radii.js';
 import type { HbcScoreBarProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -25,7 +26,7 @@ const useStyles = makeStyles({
   track: {
     position: 'relative',
     width: '100%',
-    borderRadius: '6px',
+    borderRadius: HBC_RADIUS_LG,
     overflow: 'hidden',
     display: 'flex',
   },
@@ -45,7 +46,7 @@ const useStyles = makeStyles({
     position: 'absolute',
     top: '-2px',
     width: '4px',
-    borderRadius: '2px',
+    borderRadius: HBC_RADIUS_SM,
     backgroundColor: '#1A1D23',
     transform: 'translateX(-50%)',
     pointerEvents: 'none',

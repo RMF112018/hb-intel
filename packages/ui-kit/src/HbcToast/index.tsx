@@ -25,6 +25,7 @@ import {
   TRANSITION_FAST,
   body,
 } from '../theme/index.js';
+import { HBC_RADIUS_LG, HBC_RADIUS_MD } from '../theme/radii.js';
 import {
   StatusCompleteIcon,
   StatusOverdueIcon,
@@ -78,7 +79,7 @@ const useStyles = makeStyles({
     ...shorthands.gap('10px'),
     ...shorthands.padding('12px', '16px'),
     ...shorthands.borderLeft('4px', 'solid', 'transparent'),
-    ...shorthands.borderRadius('6px'),
+    ...shorthands.borderRadius(HBC_RADIUS_LG),
     boxShadow: elevationLevel2,
     minWidth: '300px',
     maxWidth: '420px',
@@ -99,7 +100,7 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     ...shorthands.padding('4px'),
     ...shorthands.border('0px', 'solid', 'transparent'),
-    ...shorthands.borderRadius('4px'),
+    ...shorthands.borderRadius(HBC_RADIUS_MD),
     backgroundColor: 'transparent',
     cursor: 'pointer',
     transitionProperty: 'background-color',

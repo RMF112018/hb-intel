@@ -8,6 +8,7 @@
 import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { HBC_ACCENT_ORANGE, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
+import { HBC_RADIUS_LG } from '../theme/radii.js';
 import type { MarkupShapeType } from './types.js';
 
 type ActiveTool = MarkupShapeType | 'select';
@@ -55,7 +56,7 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     width: '36px',
     height: '36px',
-    borderRadius: '6px',
+    borderRadius: HBC_RADIUS_LG,
     border: 'none',
     backgroundColor: 'transparent',
     cursor: 'pointer',

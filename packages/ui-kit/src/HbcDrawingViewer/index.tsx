@@ -12,6 +12,7 @@
 import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { HBC_ACCENT_ORANGE, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
+import { HBC_RADIUS_XL, HBC_RADIUS_LG, HBC_RADIUS_MD } from '../theme/radii.js';
 import { usePdfRenderer } from './hooks/usePdfRenderer.js';
 import { useTouchGestures } from './hooks/useTouchGestures.js';
 import { useMarkupState } from './hooks/useMarkupState.js';
@@ -22,7 +23,7 @@ const useStyles = makeStyles({
   root: {
     display: 'flex',
     flexDirection: 'column',
-    borderRadius: '8px',
+    borderRadius: HBC_RADIUS_XL,
     overflow: 'hidden',
     border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
     backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
@@ -42,7 +43,7 @@ const useStyles = makeStyles({
     height: '32px',
     paddingLeft: '8px',
     paddingRight: '8px',
-    borderRadius: '6px',
+    borderRadius: HBC_RADIUS_LG,
     border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
     fontSize: '0.8125rem',
@@ -58,7 +59,7 @@ const useStyles = makeStyles({
     height: '32px',
     paddingLeft: '12px',
     paddingRight: '12px',
-    borderRadius: '6px',
+    borderRadius: HBC_RADIUS_LG,
     border: 'none',
     cursor: 'pointer',
     fontSize: '0.8125rem',
@@ -126,7 +127,7 @@ const useStyles = makeStyles({
     height: '32px',
     paddingLeft: '12px',
     paddingRight: '12px',
-    borderRadius: '6px',
+    borderRadius: HBC_RADIUS_LG,
     border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
     backgroundColor: 'transparent',
     cursor: 'pointer',
@@ -143,7 +144,7 @@ const useStyles = makeStyles({
   pageButton: {
     width: '28px',
     height: '28px',
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
     backgroundColor: 'transparent',
     cursor: 'pointer',

@@ -4,7 +4,8 @@
  * PH4.6 §Step 5 — Replace hardcoded hex with HBC tokens
  */
 import * as React from 'react';
-import { HBC_STATUS_COLORS, HBC_PRIMARY_BLUE, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
+import { HBC_STATUS_COLORS, HBC_PRIMARY_BLUE, HBC_SURFACE_LIGHT, HBC_HEADER_TEXT } from '../theme/tokens.js';
+import { HBC_RADIUS_MD } from '../theme/radii.js';
 import type { HbcErrorBoundaryProps, HbcErrorBoundaryState } from './types.js';
 
 const defaultFallbackStyles: Record<string, React.CSSProperties> = {
@@ -33,10 +34,10 @@ const defaultFallbackStyles: Record<string, React.CSSProperties> = {
     padding: '8px 24px',
     fontSize: '0.875rem',
     fontWeight: 600,
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     backgroundColor: HBC_PRIMARY_BLUE,
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     cursor: 'pointer',
   },
 };

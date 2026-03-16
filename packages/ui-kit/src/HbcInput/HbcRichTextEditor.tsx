@@ -11,6 +11,7 @@ import {
   HBC_ACCENT_ORANGE,
   HBC_SURFACE_LIGHT,
 } from '../theme/tokens.js';
+import { HBC_RADIUS_MD, HBC_RADIUS_SM } from '../theme/radii.js';
 import { keyframes } from '../theme/animations.js';
 import { useVoiceDictation } from './hooks/useVoiceDictation.js';
 import type { HbcRichTextEditorProps, RichTextToolbarAction } from './types.js';
@@ -32,8 +33,8 @@ const useStyles = makeStyles({
     padding: '4px',
     borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
     backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
-    borderTopLeftRadius: '4px',
-    borderTopRightRadius: '4px',
+    borderTopLeftRadius: HBC_RADIUS_MD,
+    borderTopRightRadius: HBC_RADIUS_MD,
   },
   toolbarButton: {
     display: 'inline-flex',
@@ -42,7 +43,7 @@ const useStyles = makeStyles({
     minWidth: '28px',
     height: '28px',
     border: 'none',
-    borderRadius: '3px',
+    borderRadius: HBC_RADIUS_SM,
     cursor: 'pointer',
     fontSize: '0.8125rem',
     fontWeight: '600',
@@ -54,7 +55,7 @@ const useStyles = makeStyles({
   },
   editorWrapper: {
     border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     overflow: 'hidden',
   },
   editorFocused: {
@@ -83,7 +84,7 @@ const useStyles = makeStyles({
     width: '28px',
     height: '28px',
     border: 'none',
-    borderRadius: '3px',
+    borderRadius: HBC_RADIUS_SM,
     cursor: 'pointer',
     backgroundColor: 'transparent',
     color: HBC_SURFACE_LIGHT['text-muted'],

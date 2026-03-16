@@ -15,6 +15,8 @@ import {
   HBC_SURFACE_LIGHT,
   HBC_ACCENT_ORANGE,
   HBC_STATUS_COLORS,
+  HBC_HEADER_TEXT,
+  HBC_ACCENT_ORANGE_HOVER,
 } from '../theme/tokens.js';
 import { TRANSITION_NORMAL } from '../theme/animations.js';
 import type { ToolLandingLayoutProps, KpiCardData, LayoutAction } from './types.js';
@@ -78,9 +80,9 @@ const useStyles = makeStyles({
   },
   actionButtonPrimary: {
     backgroundColor: HBC_ACCENT_ORANGE,
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     ':hover': {
-      backgroundColor: '#E06018',
+      backgroundColor: HBC_ACCENT_ORANGE_HOVER,
     },
   },
   commandBarSlot: {

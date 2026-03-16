@@ -10,6 +10,7 @@ import { createPortal } from 'react-dom';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import type { HbcTooltipProps, TooltipPosition } from './types.js';
 import {
+  HBC_HEADER_TEXT,
   HBC_SURFACE_LIGHT,
   Z_INDEX,
   keyframes,
@@ -18,7 +19,7 @@ import {
 } from '../theme/index.js';
 
 const TOOLTIP_BG = HBC_SURFACE_LIGHT['text-primary']; // #1A1D23
-const TOOLTIP_TEXT = '#FFFFFF';
+const TOOLTIP_TEXT = HBC_HEADER_TEXT;
 const ARROW_SIZE = 6;
 const OFFSET = 8;
 const MAX_WIDTH = 280;

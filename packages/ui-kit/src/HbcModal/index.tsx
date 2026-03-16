@@ -16,6 +16,7 @@ import { heading3 } from '../theme/typography.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import { useIsMobile } from '../hooks/useIsMobile.js';
+import { HBC_RADIUS_XL, HBC_RADIUS_MD, HBC_RADIUS_NONE } from '../theme/radii.js';
 import type { HbcModalProps, ModalSize } from './types.js';
 
 const SIZE_MAP: Record<ModalSize, string> = {
@@ -43,7 +44,7 @@ const useStyles = makeStyles({
     maxWidth: 'calc(100vw - 32px)',
     maxHeight: '90vh',
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    borderRadius: '8px',
+    borderRadius: HBC_RADIUS_XL,
     boxShadow: elevationLevel3,
     display: 'flex',
     flexDirection: 'column',
@@ -75,7 +76,7 @@ const useStyles = makeStyles({
     backgroundColor: 'transparent',
     ...shorthands.borderStyle('none'),
     cursor: 'pointer',
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     fontSize: '1.25rem',
     color: HBC_SURFACE_LIGHT['text-muted'],
     ':hover': {
@@ -112,7 +113,7 @@ const useStyles = makeStyles({
     height: '100vh',
     maxWidth: '100vw',
     maxHeight: '100vh',
-    borderRadius: '0',
+    borderRadius: HBC_RADIUS_NONE,
     animationName: keyframes.slideInFromBottom,
   },
   bodyMobile: {

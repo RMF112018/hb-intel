@@ -14,6 +14,7 @@ import {
   HBC_HEADER_ICON_MUTED,
   HBC_SURFACE_LIGHT,
   HBC_SURFACE_FIELD,
+  hbcBrandRamp,
 } from '../theme/tokens.js';
 import type { HbcBreadcrumbsProps } from './types.js';
 
@@ -67,7 +68,7 @@ const useStyles = makeStyles({
     },
   },
   linkField: {
-    color: '#337AAB',
+    color: hbcBrandRamp[80],
   },
   current: {
     fontWeight: '600',

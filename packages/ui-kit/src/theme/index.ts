@@ -17,8 +17,25 @@ export {
   HBC_SURFACE_LIGHT,
   HBC_SURFACE_FIELD,
   HBC_CONNECTIVITY,
+  HBC_ACCENT_ORANGE_HOVER,
+  HBC_ACCENT_ORANGE_PRESSED,
+  HBC_DANGER_HOVER,
+  HBC_DANGER_PRESSED,
+  HBC_SURFACE_ROLES,
 } from './tokens.js';
 export type { HbcSemanticTokens } from './tokens.js';
+
+// Radii (V2.1.1 — WS1-T03)
+export {
+  HBC_RADIUS_NONE,
+  HBC_RADIUS_SM,
+  HBC_RADIUS_MD,
+  HBC_RADIUS_LG,
+  HBC_RADIUS_XL,
+  HBC_RADIUS_FULL,
+  hbcRadii,
+} from './radii.js';
+export type { HbcRadiusKey } from './radii.js';
 
 // Themes
 export { hbcLightTheme, hbcFieldTheme, hbcDarkTheme } from './theme.js';

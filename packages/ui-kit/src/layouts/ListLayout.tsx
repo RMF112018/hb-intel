@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
-import { HBC_SURFACE_LIGHT, HBC_PRIMARY_BLUE, HBC_ACCENT_ORANGE } from '../theme/tokens.js';
+import { HBC_SURFACE_LIGHT, HBC_PRIMARY_BLUE, HBC_HEADER_TEXT } from '../theme/tokens.js';
 import { elevationRaised } from '../theme/elevation.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
 import { HbcSearch } from '../HbcSearch/index.js';
@@ -92,7 +92,7 @@ const useStyles = makeStyles({
   },
   viewToggleBtnActive: {
     backgroundColor: HBC_PRIMARY_BLUE as string,
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     ':hover': {
       backgroundColor: HBC_PRIMARY_BLUE as string,
     },
@@ -178,7 +178,7 @@ const useStyles = makeStyles({
   savedViewBtnActive: {
     backgroundColor: HBC_PRIMARY_BLUE as string,
     ...shorthands.borderColor(HBC_PRIMARY_BLUE as string),
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     ':hover': {
       backgroundColor: HBC_PRIMARY_BLUE as string,
     },
@@ -249,10 +249,10 @@ const useStyles = makeStyles({
     },
   },
   bulkActionBtnDestructive: {
-    backgroundColor: '#FEE2E2',
-    color: '#991B1B',
+    backgroundColor: HBC_SURFACE_LIGHT['destructive-bg'],
+    color: HBC_SURFACE_LIGHT['destructive-text'],
     ':hover': {
-      backgroundColor: '#FECACA',
+      backgroundColor: HBC_SURFACE_LIGHT['destructive-bg-hover'],
     },
   },
   clearSelectionBtn: {

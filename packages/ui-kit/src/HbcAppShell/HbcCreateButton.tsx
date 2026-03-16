@@ -4,8 +4,9 @@
  */
 import * as React from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
-import { HBC_ACCENT_ORANGE } from '../theme/tokens.js';
+import { HBC_ACCENT_ORANGE, HBC_ACCENT_ORANGE_HOVER, HBC_ACCENT_ORANGE_PRESSED, HBC_HEADER_TEXT } from '../theme/tokens.js';
 import { label } from '../theme/typography.js';
+import { HBC_RADIUS_MD } from '../theme/radii.js';
 import { CloudOffline, Create } from '../icons/index.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import type { HbcCreateButtonProps } from './types.js';
@@ -16,10 +17,10 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: '6px',
     backgroundColor: HBC_ACCENT_ORANGE,
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     ...label,
     ...shorthands.borderStyle('none'),
-    ...shorthands.borderRadius('4px'),
+    ...shorthands.borderRadius(HBC_RADIUS_MD),
     paddingLeft: '16px',
     paddingRight: '16px',
     paddingTop: '8px',
@@ -28,10 +29,10 @@ const useStyles = makeStyles({
     transitionProperty: 'background-color',
     transitionDuration: '150ms',
     ':hover': {
-      backgroundColor: '#E0641A',
+      backgroundColor: HBC_ACCENT_ORANGE_HOVER,
     },
     ':active': {
-      backgroundColor: '#CC5A17',
+      backgroundColor: HBC_ACCENT_ORANGE_PRESSED,
     },
   },
 });
@@ -57,7 +58,7 @@ export const HbcCreateButton: React.FC<HbcCreateButtonProps> = ({ onClick }) => 
       type="button"
       title={tooltip}
     >
-      {isOffline ? <CloudOffline size="sm" color="#FFFFFF" /> : <Create size="sm" color="#FFFFFF" />}
+      {isOffline ? <CloudOffline size="sm" color={HBC_HEADER_TEXT} /> : <Create size="sm" color={HBC_HEADER_TEXT} />}
       <span>Create</span>
     </button>
   );

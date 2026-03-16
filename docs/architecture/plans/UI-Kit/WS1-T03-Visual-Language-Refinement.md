@@ -116,14 +116,14 @@ Each surface role must have a defined token combination so any component can cor
 
 ## Acceptance Criteria
 
-- [ ] Color system is balanced, premium, and consistently applied — no ad-hoc component-level color overrides remain
-- [ ] Semantic status palette provides strong scanning distinction and is field-legible
-- [ ] Shape language is normalized across all component families with a clear radius intent model
-- [ ] All six surface roles are defined with token combinations documented
-- [ ] Typography scale has perceptible weight contrast across levels and consistent icon alignment
-- [ ] Motion patterns are purposeful, reduced-motion compliant, and documented
-- [ ] All visual inconsistencies identified in T01 maturity matrix that fall within T03 scope are resolved
-- [ ] No visually awkward or unexplained per-component styling decisions remain in `@hbc/ui-kit`
+- [x] Color system is balanced, premium, and consistently applied — no ad-hoc component-level color overrides remain
+- [x] Semantic status palette provides strong scanning distinction and is field-legible
+- [x] Shape language is normalized across all component families with a clear radius intent model
+- [x] All seven surface roles are defined with token combinations documented
+- [x] Typography scale has perceptible weight contrast across levels and consistent icon alignment
+- [x] Motion patterns are purposeful, reduced-motion compliant, and documented
+- [x] All visual inconsistencies identified in T01 maturity matrix that fall within T03 scope are resolved
+- [x] No visually awkward or unexplained per-component styling decisions remain in `@hbc/ui-kit`
 - [ ] T04 and T07 authors confirm the refined visual language is a sufficient implementation baseline
 
 ---

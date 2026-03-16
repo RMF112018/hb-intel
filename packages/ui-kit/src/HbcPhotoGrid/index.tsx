@@ -7,7 +7,8 @@
  */
 import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
+import { HBC_SURFACE_LIGHT, HBC_HEADER_TEXT } from '../theme/tokens.js';
+import { HBC_RADIUS_XL } from '../theme/radii.js';
 import type { HbcPhotoGridProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -18,7 +19,7 @@ const useStyles = makeStyles({
   tile: {
     position: 'relative',
     aspectRatio: '1',
-    borderRadius: '8px',
+    borderRadius: HBC_RADIUS_XL,
     overflow: 'hidden',
     cursor: 'pointer',
     backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
@@ -47,7 +48,7 @@ const useStyles = makeStyles({
     },
   },
   captionText: {
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     fontSize: '0.75rem',
     fontWeight: 500,
     lineHeight: '1.3',

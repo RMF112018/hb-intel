@@ -9,12 +9,13 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles, shorthands } from '@griffel/react';
-import { HBC_SURFACE_LIGHT, HBC_PRIMARY_BLUE, HBC_ACCENT_ORANGE } from '../theme/tokens.js';
+import { HBC_SURFACE_LIGHT, HBC_PRIMARY_BLUE, HBC_ACCENT_ORANGE, HBC_HEADER_TEXT } from '../theme/tokens.js';
 import { elevationLevel3 } from '../theme/elevation.js';
 import { keyframes, TRANSITION_NORMAL } from '../theme/animations.js';
 import { heading3 } from '../theme/typography.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
+import { HBC_RADIUS_XL, HBC_RADIUS_MD } from '../theme/radii.js';
 import type { HbcTearsheetProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -36,7 +37,7 @@ const useStyles = makeStyles({
     width: 'calc(100vw - 96px)',
     maxHeight: '90vh',
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    borderRadius: '8px',
+    borderRadius: HBC_RADIUS_XL,
     boxShadow: elevationLevel3,
     display: 'flex',
     flexDirection: 'column',
@@ -77,7 +78,7 @@ const useStyles = makeStyles({
     backgroundColor: 'transparent',
     ...shorthands.borderStyle('none'),
     cursor: 'pointer',
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     fontSize: '1.25rem',
     color: HBC_SURFACE_LIGHT['text-muted'],
     ':hover': {
@@ -113,7 +114,7 @@ const useStyles = makeStyles({
     paddingLeft: '16px',
     backgroundColor: 'transparent',
     ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     cursor: 'pointer',
     fontSize: '0.875rem',
     color: HBC_SURFACE_LIGHT['text-primary'],
@@ -128,10 +129,10 @@ const useStyles = makeStyles({
     paddingLeft: '16px',
     backgroundColor: HBC_PRIMARY_BLUE,
     ...shorthands.borderStyle('none'),
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     cursor: 'pointer',
     fontSize: '0.875rem',
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     ':hover': {
       opacity: '0.9',
     },
@@ -147,11 +148,11 @@ const useStyles = makeStyles({
     paddingLeft: '16px',
     backgroundColor: HBC_ACCENT_ORANGE as string,
     ...shorthands.borderStyle('none'),
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     cursor: 'pointer',
     fontSize: '0.875rem',
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     ':hover': {
       opacity: '0.9',
     },

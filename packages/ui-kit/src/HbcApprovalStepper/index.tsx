@@ -8,6 +8,7 @@
 import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { HBC_STATUS_COLORS, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
+import { HBC_RADIUS_FULL } from '../theme/radii.js';
 import type { ApprovalStep, HbcApprovalStepperProps } from './types.js';
 
 const DECISION_COLOR_MAP: Record<string, string> = {
@@ -71,7 +72,7 @@ const useStyles = makeStyles({
   avatar: {
     width: '40px',
     height: '40px',
-    borderRadius: '50%',
+    borderRadius: HBC_RADIUS_FULL,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

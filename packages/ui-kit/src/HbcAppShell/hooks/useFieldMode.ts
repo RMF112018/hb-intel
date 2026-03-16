@@ -18,6 +18,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile.js';
 import { hbcDarkTheme, hbcFieldTheme, hbcLightTheme, type HbcTheme } from '../../theme/theme.js';
+import { HBC_SURFACE_LIGHT, HBC_SURFACE_FIELD, HBC_DARK_HEADER } from '../../theme/tokens.js';
 
 const STORAGE_KEY = 'hbc-field-mode';
 
@@ -103,7 +104,7 @@ function useAppTheme(): UseFieldModeReturn {
     root.setAttribute('data-theme', theme);
 
     // Update <meta name="theme-color"> for mobile browser chrome
-    const themeColor = theme === 'field' ? '#0F1419' : theme === 'dark' ? '#111827' : '#FFFFFF';
+    const themeColor = theme === 'field' ? HBC_SURFACE_FIELD['surface-0'] : theme === 'dark' ? HBC_DARK_HEADER : HBC_SURFACE_LIGHT['surface-0'];
     let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     if (!meta) {
       meta = document.createElement('meta');

@@ -8,10 +8,16 @@ import { Button, Spinner, mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import {
   HBC_ACCENT_ORANGE,
+  HBC_ACCENT_ORANGE_HOVER,
+  HBC_ACCENT_ORANGE_PRESSED,
+  HBC_DANGER_HOVER,
+  HBC_DANGER_PRESSED,
+  HBC_HEADER_TEXT,
   HBC_STATUS_COLORS,
   HBC_SURFACE_LIGHT,
 } from '../theme/tokens.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
+import { HBC_RADIUS_MD } from '../theme/radii.js';
 import type { HbcButtonProps, ButtonSize } from './types.js';
 
 const SIZE_STYLES: Record<ButtonSize, { height: string; fontSize: string; padding: string }> = {
@@ -28,7 +34,7 @@ const useStyles = makeStyles({
     gap: '6px',
     fontWeight: '600',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     cursor: 'pointer',
     transitionProperty: 'background-color, box-shadow, opacity',
     transitionDuration: TRANSITION_FAST,
@@ -46,12 +52,12 @@ const useStyles = makeStyles({
   },
   primary: {
     backgroundColor: HBC_ACCENT_ORANGE,
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     ':hover:not(:disabled)': {
-      backgroundColor: '#D9621A',
+      backgroundColor: HBC_ACCENT_ORANGE_HOVER,
     },
     ':active:not(:disabled)': {
-      backgroundColor: '#BF5516',
+      backgroundColor: HBC_ACCENT_ORANGE_PRESSED,
     },
   },
   secondary: {
@@ -70,12 +76,12 @@ const useStyles = makeStyles({
   },
   danger: {
     backgroundColor: HBC_STATUS_COLORS.error,
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     ':hover:not(:disabled)': {
-      backgroundColor: '#E04444',
+      backgroundColor: HBC_DANGER_HOVER,
     },
     ':active:not(:disabled)': {
-      backgroundColor: '#CC3C3C',
+      backgroundColor: HBC_DANGER_PRESSED,
     },
   },
   fullWidth: {

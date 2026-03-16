@@ -9,8 +9,9 @@
  */
 import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import { HBC_ACCENT_ORANGE, HBC_SURFACE_LIGHT, HBC_SURFACE_FIELD } from '../theme/tokens.js';
+import { HBC_ACCENT_ORANGE, HBC_HEADER_TEXT, HBC_SURFACE_LIGHT, HBC_SURFACE_FIELD } from '../theme/tokens.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
+import { HBC_RADIUS_MD } from '../theme/radii.js';
 import { ChevronBack, ChevronForward } from '../icons/index.js';
 import type { HbcPaginationProps, PageSizeOption } from './types.js';
 
@@ -48,7 +49,7 @@ const useStyles = makeStyles({
     height: '32px',
     background: 'none',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     cursor: 'pointer',
     color: HBC_SURFACE_LIGHT['text-primary'],
     transitionProperty: 'background-color',
@@ -75,7 +76,7 @@ const useStyles = makeStyles({
     height: '32px',
     background: 'none',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     cursor: 'pointer',
     fontSize: '0.8125rem',
     fontFamily: 'inherit',
@@ -94,7 +95,7 @@ const useStyles = makeStyles({
   },
   pageButtonActive: {
     backgroundColor: HBC_ACCENT_ORANGE,
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     fontWeight: '600',
     ':hover': {
       backgroundColor: HBC_ACCENT_ORANGE,
@@ -122,7 +123,7 @@ const useStyles = makeStyles({
     fontSize: '0.8125rem',
     fontFamily: 'inherit',
     border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
     color: HBC_SURFACE_LIGHT['text-primary'],
     paddingLeft: '6px',

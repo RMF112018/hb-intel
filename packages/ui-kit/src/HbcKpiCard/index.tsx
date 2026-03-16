@@ -11,6 +11,7 @@ import { makeStyles } from '@griffel/react';
 import { TRANSITION_FAST } from '../theme/animations.js';
 import { HBC_PRIMARY_BLUE, HBC_STATUS_COLORS, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { hbcTypeScale } from '../theme/typography.js';
+import { HBC_RADIUS_XL } from '../theme/radii.js';
 import type { HbcKpiCardProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -22,7 +23,7 @@ const useStyles = makeStyles({
     paddingBottom: '16px',
     paddingLeft: '20px',
     paddingRight: '20px',
-    borderRadius: '8px',
+    borderRadius: HBC_RADIUS_XL,
     backgroundColor: 'var(--colorNeutralBackground1)',
     border: '1px solid var(--colorNeutralStroke2)',
     borderTopWidth: '3px',
@@ -54,7 +55,7 @@ const useStyles = makeStyles({
     borderRightWidth: '2px',
     borderRightStyle: 'solid',
     borderRightColor: HBC_PRIMARY_BLUE as string,
-    backgroundColor: '#E8F1F8',
+    backgroundColor: HBC_SURFACE_LIGHT['surface-active'],
   },
   label: {
     fontFamily: hbcTypeScale.label.fontFamily,

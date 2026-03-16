@@ -19,7 +19,7 @@ import {
 } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { elevationRaised } from '../theme/elevation.js';
-import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE, HBC_STATUS_COLORS } from '../theme/tokens.js';
+import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE, HBC_STATUS_COLORS, HBC_HEADER_TEXT, HBC_DANGER_HOVER } from '../theme/tokens.js';
 import { HbcTooltip } from '../HbcTooltip/index.js';
 import { MoreActions } from '../icons/index.js';
 import type { HbcCommandBarProps, CommandBarAction, DensityTier } from './types.js';
@@ -69,9 +69,9 @@ const useStyles = makeStyles({
   },
   destructiveBtn: {
     backgroundColor: HBC_STATUS_COLORS.error,
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     ':hover': {
-      backgroundColor: '#E04545',
+      backgroundColor: HBC_DANGER_HOVER,
     },
   },
   overflowBtn: {

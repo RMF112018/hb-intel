@@ -5,7 +5,7 @@
  * Unified component library for the HB Intel construction intelligence platform.
  * Supports PWA (Next.js 14) and SPFx (SharePoint Framework) dual-target rendering.
  *
- * @version 2.1.0
+ * @version 2.1.1
  * @see docs/reference/ui-kit/ for per-component documentation
  */
 
@@ -26,6 +26,18 @@ export {
   HBC_SURFACE_LIGHT,
   HBC_SURFACE_FIELD,
   HBC_CONNECTIVITY,
+  HBC_ACCENT_ORANGE_HOVER,
+  HBC_ACCENT_ORANGE_PRESSED,
+  HBC_DANGER_HOVER,
+  HBC_DANGER_PRESSED,
+  HBC_SURFACE_ROLES,
+  HBC_RADIUS_NONE,
+  HBC_RADIUS_SM,
+  HBC_RADIUS_MD,
+  HBC_RADIUS_LG,
+  HBC_RADIUS_XL,
+  HBC_RADIUS_FULL,
+  hbcRadii,
   hbcLightTheme,
   hbcFieldTheme,
   hbcDarkTheme,
@@ -98,7 +110,7 @@ export {
   HBC_BREAKPOINT_CONTENT_MEDIUM,
   HBC_BREAKPOINT_COMPACT_DENSITY,
 } from './theme/breakpoints.js';
-export type { HbcSemanticTokens, HbcTheme, HbcSpacingKey, HbcBreakpointConfig, ZIndexLayer } from './theme/index.js';
+export type { HbcSemanticTokens, HbcTheme, HbcSpacingKey, HbcBreakpointConfig, ZIndexLayer, HbcRadiusKey } from './theme/index.js';
 
 // Theme V2.1 — Density & canonical hooks
 export {

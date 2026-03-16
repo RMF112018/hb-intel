@@ -27,8 +27,10 @@ import { ListLayout } from '../layouts/ListLayout.js';
 import {
   HBC_STATUS_COLORS,
   HBC_STATUS_RAMP_RED,
+  HBC_HEADER_TEXT,
 } from '../theme/tokens.js';
 import { hbcSpacing } from '../theme/grid.js';
+import { HBC_RADIUS_MD, HBC_RADIUS_FULL } from '../theme/radii.js';
 import { elevationRaised } from '../theme/elevation.js';
 import { heading2, heading3, body } from '../theme/typography.js';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
@@ -112,7 +114,7 @@ const useStyles = makeStyles({
     padding: `${hbcSpacing.xl}px`,
     backgroundColor: HBC_STATUS_RAMP_RED[90],
     borderLeft: `4px solid ${HBC_STATUS_COLORS.error}`,
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
     maxWidth: '480px',
   },
   errorTitle: {
@@ -136,7 +138,7 @@ const useStyles = makeStyles({
     animationDuration: '1.5s',
     animationIterationCount: 'infinite',
     animationTimingFunction: 'ease-in-out',
-    borderRadius: '4px',
+    borderRadius: HBC_RADIUS_MD,
   },
   skeletonContainer: {
     display: 'flex',
@@ -179,11 +181,11 @@ const useStyles = makeStyles({
     right: `${hbcSpacing.md}px`,
     width: '56px',
     height: '56px',
-    borderRadius: '50%',
+    borderRadius: HBC_RADIUS_FULL,
     border: 'none',
     // Accent remains orange, but sourced from Fluent tokenized palette to stay theme-aware.
     backgroundColor: tokens.colorPalettePumpkinBackground2,
-    color: '#FFFFFF',
+    color: HBC_HEADER_TEXT,
     fontSize: '1.5rem',
     display: 'flex',
     alignItems: 'center',

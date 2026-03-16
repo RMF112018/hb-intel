@@ -9,6 +9,7 @@ src/theme/
 ├── tokens.ts          # Semantic color tokens & brand ramp
 ├── theme.ts           # Fluent UI theme objects (light, field, dark)
 ├── typography.ts      # Intent-based type scale
+├── radii.ts           # Intent-based border-radius tokens (V2.1.1)
 ├── grid.ts            # Spacing, breakpoints, media queries
 ├── animations.ts      # Keyframes, transitions, timing
 ├── elevation.ts       # Dual-shadow elevation (light & field)
@@ -91,6 +92,43 @@ src/theme/
 | `hbcColorConnOnline` | `#00C896` | Online indicator |
 | `hbcColorConnSyncing` | `#FFB020` | Sync-in-progress indicator |
 | `hbcColorConnOffline` | `#FF4D4D` | Offline indicator |
+
+### Interactive State Tokens (V2.1.1)
+
+| Token | Value | Use For |
+|-------|-------|---------|
+| `HBC_ACCENT_ORANGE_HOVER` | `#E06018` | Hover state for accent/CTA buttons |
+| `HBC_ACCENT_ORANGE_PRESSED` | `#BF5516` | Pressed state for accent/CTA buttons |
+| `HBC_DANGER_HOVER` | `#E04444` | Hover state for danger/destructive buttons |
+| `HBC_DANGER_PRESSED` | `#CC3C3C` | Pressed state for danger/destructive buttons |
+
+### Border-Radius Tokens (V2.1.1)
+
+Intent-based radius scale for normalized shape language. Import from `@hbc/ui-kit` or `@hbc/ui-kit/theme`.
+
+| Token | Value | Intent | Use For |
+|-------|-------|--------|---------|
+| `HBC_RADIUS_NONE` | `0px` | Sharp | Data-dense surfaces (tables, dense lists) |
+| `HBC_RADIUS_SM` | `2px` | Tight | Inline badges, score segments, small tags |
+| `HBC_RADIUS_MD` | `4px` | Interactive | Buttons, inputs, search, pagination |
+| `HBC_RADIUS_LG` | `6px` | Container | Toasts, toolbars, sub-panels |
+| `HBC_RADIUS_XL` | `8px` | Surface | Cards, modals, popovers, photos |
+| `HBC_RADIUS_FULL` | `50%` | Circular | FABs, spinners, avatars |
+| `hbcRadii` | `{ none, sm, md, lg, xl, full }` | — | Object form for programmatic access |
+
+### Surface Roles (V2.1.1)
+
+Seven canonical surface roles define which token combinations to use for each visual layer. Reference: `HBC_SURFACE_ROLES` in `tokens.ts`.
+
+| Surface | Background | Text | Border | Elevation | Radius |
+|---------|-----------|------|--------|-----------|--------|
+| **Base canvas** | `hbcColorSurface0` | `hbcColorTextPrimary` | `hbcColorBorderDefault` | `elevationLevel0` | `none` |
+| **Secondary canvas** | `hbcColorSurface1` | `hbcColorTextPrimary` | `hbcColorBorderDefault` | `elevationLevel0` | `none` |
+| **Cards** | `hbcColorSurface0` | `hbcColorTextPrimary` | `hbcColorBorderDefault` | `elevationLevel1` | `xl` |
+| **Inset panels** | `hbcColorSurface2` | `hbcColorTextPrimary` | `hbcColorBorderDefault` | `elevationLevel0` | `lg` |
+| **Toolbars** | `hbcColorSurface1` | `hbcColorTextPrimary` | `hbcColorBorderDefault` | `elevationLevel0` | `none` |
+| **Overlays** | `hbcColorSurface0` | `hbcColorTextPrimary` | `hbcColorBorderDefault` | `elevationLevel3` | `xl` |
+| **Focused work zones** | `hbcColorSurface0` | `hbcColorTextPrimary` | `hbcColorBorderFocus` | `elevationLevel2` | `xl` |
 
 ### Spacing Tokens (4px base unit)
 

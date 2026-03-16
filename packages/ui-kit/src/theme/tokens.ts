@@ -122,6 +122,10 @@ export const HBC_SURFACE_LIGHT = {
   'text-primary': '#1A1D23',
   'text-muted': '#6B7280',
   'responsibility-bg': '#F0F7FF',
+  'surface-active': '#E8F1F8',
+  'destructive-bg': '#FEE2E2',
+  'destructive-text': '#991B1B',
+  'destructive-bg-hover': '#FECACA',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -137,7 +141,23 @@ export const HBC_SURFACE_FIELD = {
   'text-primary': '#E8EAED',
   'text-muted': '#8B95A5',
   'responsibility-bg': '#1A2A3D',
+  'surface-active': '#1E3A5F',
+  'destructive-bg': '#4D0000',
+  'destructive-text': '#FF9999',
+  'destructive-bg-hover': '#5C0000',
 } as const;
+
+// ---------------------------------------------------------------------------
+// Interactive state constants (V2.1.1 — WS1-T03)
+// ---------------------------------------------------------------------------
+/** Accent orange hover state — darkened variant of HBC_ACCENT_ORANGE */
+export const HBC_ACCENT_ORANGE_HOVER = '#E06018' as const;
+/** Accent orange pressed state */
+export const HBC_ACCENT_ORANGE_PRESSED = '#BF5516' as const;
+/** Danger/error hover state */
+export const HBC_DANGER_HOVER = '#E04444' as const;
+/** Danger/error pressed state */
+export const HBC_DANGER_PRESSED = '#CC3C3C' as const;
 
 // ---------------------------------------------------------------------------
 // Connectivity bar colors
@@ -214,3 +234,61 @@ export interface HbcSemanticTokens {
   // Responsibility
   hbcColorResponsibilityBg: string;
 }
+
+// ---------------------------------------------------------------------------
+// Surface roles (V2.1.1 — WS1-T03)
+// Typed reference map: documents which token combinations constitute each role.
+// Components are not required to consume this programmatically; its primary
+// value is as a documented contract for consistent surface treatment.
+// ---------------------------------------------------------------------------
+export const HBC_SURFACE_ROLES = {
+  baseCanvas: {
+    background: 'hbcColorSurface0',
+    text: 'hbcColorTextPrimary',
+    border: 'hbcColorBorderDefault',
+    elevation: 'elevationLevel0',
+    radius: 'none',
+  },
+  secondaryCanvas: {
+    background: 'hbcColorSurface1',
+    text: 'hbcColorTextPrimary',
+    border: 'hbcColorBorderDefault',
+    elevation: 'elevationLevel0',
+    radius: 'none',
+  },
+  cards: {
+    background: 'hbcColorSurface0',
+    text: 'hbcColorTextPrimary',
+    border: 'hbcColorBorderDefault',
+    elevation: 'elevationLevel1',
+    radius: 'xl',
+  },
+  insetPanels: {
+    background: 'hbcColorSurface2',
+    text: 'hbcColorTextPrimary',
+    border: 'hbcColorBorderDefault',
+    elevation: 'elevationLevel0',
+    radius: 'lg',
+  },
+  toolbars: {
+    background: 'hbcColorSurface1',
+    text: 'hbcColorTextPrimary',
+    border: 'hbcColorBorderDefault',
+    elevation: 'elevationLevel0',
+    radius: 'none',
+  },
+  overlays: {
+    background: 'hbcColorSurface0',
+    text: 'hbcColorTextPrimary',
+    border: 'hbcColorBorderDefault',
+    elevation: 'elevationLevel3',
+    radius: 'xl',
+  },
+  focusedWorkZones: {
+    background: 'hbcColorSurface0',
+    text: 'hbcColorTextPrimary',
+    border: 'hbcColorBorderFocus',
+    elevation: 'elevationLevel2',
+    radius: 'xl',
+  },
+} as const;
