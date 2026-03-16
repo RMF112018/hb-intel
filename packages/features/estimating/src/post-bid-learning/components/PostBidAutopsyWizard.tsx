@@ -6,12 +6,13 @@ import {
   usePostBidAutopsyState,
 } from '@hbc/post-bid-autopsy';
 import { HbcStepProgress, useStepWizard, type IStepWizardConfig } from '@hbc/step-wizard';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig } from '@hbc/smart-empty-state';
 import {
   HbcBanner,
   HbcButton,
   HbcCard,
   HbcCheckbox,
-  HbcEmptyState,
   HbcFormSection,
   HbcModal,
   HbcPanel,
@@ -159,6 +160,17 @@ const createStepValidationMessage = (
 
 const linkKey = (link: AutopsyDeepLink): string => link.linkId;
 
+const AUTOPSY_UNAVAILABLE_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: 'truly-empty',
+    heading: 'No post-bid autopsy is available',
+    description: 'A pursuit must reach Won, Lost, or No-Bid before the autopsy wizard can resume.',
+    coachingTip: 'Post-bid autopsies become available after a pursuit outcome is recorded.',
+  }),
+};
+
 export const PostBidAutopsyWizard: React.FC<PostBidAutopsyWizardProps> = ({
   pursuitId,
   complexityTier = 'Standard',
@@ -252,9 +264,18 @@ export const PostBidAutopsyWizard: React.FC<PostBidAutopsyWizardProps> = ({
 
   if (!primitiveState.state.autopsy) {
     return (
-      <HbcEmptyState
-        title="No post-bid autopsy is available."
-        description="A pursuit must reach Won, Lost, or No-Bid before the autopsy wizard can resume."
+      <HbcSmartEmptyState
+        config={AUTOPSY_UNAVAILABLE_CONFIG}
+        context={{
+          module: 'estimating',
+          view: 'autopsy-wizard',
+          hasActiveFilters: false,
+          hasPermission: true,
+          isFirstVisit: false,
+          currentUserRole: 'estimator',
+          isLoadError: false,
+        }}
+        variant="inline"
       />
     );
   }

@@ -13,7 +13,9 @@ import {
   PROJECT_SETUP_STATUS_LABELS,
   useProvisioningStore,
 } from '@hbc/provisioning';
-import { HbcBanner, HbcButton, HbcDataTable, HbcEmptyState, HbcStatusBadge, WorkspacePageShell } from '@hbc/ui-kit';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
+import { HbcBanner, HbcButton, HbcDataTable, HbcStatusBadge, WorkspacePageShell } from '@hbc/ui-kit';
 import type { ColumnDef } from '@tanstack/react-table';
 import { getStateBadgeVariant } from '../components/project-setup/stateDisplayHelpers.js';
 import { canCoordinatorRetry } from '../utils/failureClassification.js';
@@ -23,10 +25,32 @@ const useStyles = makeStyles({
   actionRow: { marginBottom: '16px' },
 });
 
+const SETUP_EMPTY_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: context.isFirstVisit ? 'first-use' : 'truly-empty',
+    heading: 'No project setup requests yet',
+    description: 'Create a new request to get started.',
+    primaryAction: { label: 'New Project Setup Request', href: '/project-setup/new' },
+    coachingTip: 'Project setup requests go through review before provisioning begins.',
+  }),
+};
+
+const SETUP_EMPTY_CONTEXT: IEmptyStateContext = {
+  module: 'estimating',
+  view: 'project-setup',
+  hasActiveFilters: false,
+  hasPermission: true,
+  isFirstVisit: false,
+  currentUserRole: 'estimator',
+  isLoadError: false,
+};
+
 /**
  * D-PH6-10 Project Setup request list page for Estimating coordinators.
  * W0-G4-T02: Standard+ tier renders HbcDataTable with columns, row actions, and BIC ownership.
- * W0-G4-T07: Session guard, load-error state, HbcEmptyState for empty list.
+ * W0-G4-T07: Session guard, load-error state, HbcSmartEmptyState for empty list.
  */
 export function ProjectSetupPage(): ReactNode {
   const styles = useStyles();
@@ -198,10 +222,7 @@ export function ProjectSetupPage(): ReactNode {
       )}
 
       {requests.length === 0 ? (
-        <HbcEmptyState
-          title="No project setup requests yet."
-          description="Create a new request to get started."
-        />
+        <HbcSmartEmptyState config={SETUP_EMPTY_CONFIG} context={SETUP_EMPTY_CONTEXT} variant="inline" />
       ) : (
         <>
           {/* W0-G4-T02: Standard+ tier — coordinator queue table */}
