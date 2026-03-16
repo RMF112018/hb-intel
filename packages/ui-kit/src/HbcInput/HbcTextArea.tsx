@@ -9,6 +9,7 @@ import { Microphone, MicrophoneActive } from '../icons/index.js';
 import { HBC_ACCENT_ORANGE, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { keyframes } from '../theme/animations.js';
 import { useVoiceDictation } from './hooks/useVoiceDictation.js';
+import { HBC_SPACE_SM, HBC_SPACE_XL } from '../theme/grid.js';
 import type { HbcTextAreaProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -17,13 +18,13 @@ const useStyles = makeStyles({
   },
   micButton: {
     position: 'absolute',
-    right: '8px',
-    bottom: '8px',
+    right: `${HBC_SPACE_SM}px`,
+    bottom: `${HBC_SPACE_SM}px`,
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '32px',
-    height: '32px',
+    width: `${HBC_SPACE_XL}px`,
+    height: `${HBC_SPACE_XL}px`,
     border: 'none',
     borderRadius: '50%',
     cursor: 'pointer',

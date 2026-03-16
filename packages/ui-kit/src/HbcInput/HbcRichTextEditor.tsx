@@ -13,6 +13,7 @@ import {
 } from '../theme/tokens.js';
 import { HBC_RADIUS_MD, HBC_RADIUS_SM } from '../theme/radii.js';
 import { keyframes } from '../theme/animations.js';
+import { HBC_SPACE_SM } from '../theme/grid.js';
 import { useVoiceDictation } from './hooks/useVoiceDictation.js';
 import type { HbcRichTextEditorProps, RichTextToolbarAction } from './types.js';
 
@@ -66,7 +67,7 @@ const useStyles = makeStyles({
   },
   contentEditable: {
     minHeight: '100px',
-    padding: '8px 12px',
+    padding: `${HBC_SPACE_SM}px 12px`,
     fontSize: '0.875rem',
     lineHeight: '1.5',
     outline: 'none',
