@@ -19,6 +19,7 @@
     "@hbc/query-hooks": "workspace:*",
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
+    "@hbc/smart-empty-state": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@fluentui/react-components": "^9.56.0",
     "@griffel/react": "^1.5.0",
