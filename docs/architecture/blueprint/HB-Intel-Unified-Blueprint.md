@@ -112,9 +112,11 @@ Per `current-state-map.md §3`, the workspace contains 50+ members across six ca
 - Routing uses **TanStack Router v1** with isolated per-app instances and type-safe route guards.
 
 **UI ownership**
-- `@hbc/ui-kit` owns all reusable visual components (Fluent UI v9 + Griffel + HB Intel Design System).
-- No package outside `@hbc/ui-kit` may introduce new standalone presentational components or visual primitives.
-- Feature packages compose `@hbc/ui-kit` components; they do not define their own visual layers.
+- `@hbc/ui-kit` is the sole owner of reusable visual primitives, reusable layout/composition primitives, shared visual language, theme/token contracts, and cross-app presentational standards.- 
+- Other packages may contain UI-bearing components only when those components are tightly coupled to package-specific behavior, state, or runtime concerns and are not general reusable visual primitives.
+- Package location does not exempt a UI-bearing component from HB Intel’s visual, hierarchy, accessibility, theming, field-readiness, responsiveness, and verification standards.
+- No package may create a parallel visual system, independent token set, or app-local design language outside the standards governed by @hbc/ui-kit.
+- If a UI-bearing component becomes broadly reusable, visually generic, or used across multiple app families, it must migrate into @hbc/ui-kit.
 
 **Navigation and shell (Procore-aligned)**
 - Procore-style header: ProjectPicker (left, visible only in Project Hub workspace) + workspace-specific tool picker (center).
@@ -122,6 +124,13 @@ Per `current-state-map.md §3`, the workspace contains 50+ members across six ca
 - Global project persistence via Zustand `projectStore` — persists the active project across workspace navigation.
 - In non-Project-Hub workspaces, the tool picker contains an emphasized "Back to Project Hub — {Project Name}" entry.
 - Breakout SPFx webparts use the simplified shell: no project picker, no app launcher.
+
+#### 2.2.1 Governed UI-bearing exceptions (Locked - Wave 0 UI Refinement)
+
+- Certain platform/shared packages may expose UI-bearing components when the UI is inseparable from package behavior, workflow orchestration, or runtime state.
+- These packages are not exempt from the shared UI standard. They must consume @hbc/ui-kit primitives where applicable and conform to the same design-system, accessibility, theming, field-readability, and verification rules.
+- Such packages may not define independent visual primitives, independent theme systems, or ad hoc styling conventions.
+- The existence of UI-bearing surfaces outside @hbc/ui-kit is a governed exception, not a second visual ownership model.
 
 ### 2.3 Tech Stack (Locked — Blueprint §8)
 

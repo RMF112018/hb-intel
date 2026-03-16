@@ -1,6 +1,6 @@
 # WS1-T11 — Verification Overhaul
 
-> **Doc Classification:** Canonical Normative Plan — Workstream I task plan for verification overhaul. Establishes automated test coverage sufficient to release `@hbc/ui-kit` with confidence. Release confidence must be driven by automated verification, not only visual inspection.
+> **Doc Classification:** Canonical Normative Plan — Workstream I task plan for verification overhaul. Establishes automated test coverage sufficient to release `@hbc/ui-kit` and all Wave 1-critical application-layer UI with confidence. Release confidence must be driven by automated verification, not only visual inspection.
 
 **Workstream Reference:** Workstream I — UI Kit Production Scrub Plan
 **Read With:** docs/architecture/plans/UI-Kit/WS1-UI-Kit-Production-Scrub-Plan.md
@@ -13,7 +13,7 @@
 
 ## Objective
 
-Establish a standard, reliable `test` pathway for `@hbc/ui-kit` that covers unit contracts, interaction behavior, visual regression, accessibility automation, and composition smoke tests. Exit with automated coverage sufficient that a future visual regression or behavior regression in the kit cannot ship undetected.
+Establish a standard, reliable `test` pathway for `@hbc/ui-kit` and Wave 1-critical application-layer UI components that covers unit contracts, interaction behavior, visual regression, accessibility automation, and composition smoke tests. Exit with automated coverage sufficient that a future visual regression or behavior regression in either layer cannot ship undetected.
 
 ---
 
@@ -30,15 +30,15 @@ T11 exists to change that. The workstream cannot close with a core platform pack
 T11 covers:
 
 1. Establishing a standard `test` pathway (test runner, configuration, commands) for `@hbc/ui-kit`
-2. Unit tests for key component contracts
-3. Interaction tests for complex interaction patterns
-4. Visual regression coverage for critical components and page patterns
-5. Accessibility automation for the accessibility requirements identified in T09
-6. Composition smoke tests for Wave 1 layouts
+2. Unit tests for key component contracts in the kit
+3. Interaction tests for complex interaction patterns — both kit and application-layer
+4. Visual regression coverage for critical components, application-layer Priority 4 components, and page patterns
+5. Accessibility automation for the accessibility requirements identified in T09 across all UI in scope
+6. Composition smoke tests for Wave 1 layouts — covering both kit-only compositions and feature-package compositions
 
 T11 does not cover:
 
-- End-to-end tests in consuming apps (feature package concern)
+- End-to-end tests requiring live backend data (feature package concern)
 - Performance benchmarking
 - Manual visual review processes (those are T08's domain)
 
@@ -109,7 +109,8 @@ Visual regression testing must use a pixel-comparison or snapshot-comparison app
 Coverage requirements:
 - All Priority 1 components (from T07) must have visual regression baselines
 - All density mode variants of Priority 1 components must have baselines
-- All Wave 1 page pattern compositions from T08 must have baselines
+- All Priority 4 application-layer Wave 1-critical feature components (from T07) must have visual regression baselines
+- All Wave 1 page pattern compositions from T08 must have baselines — including full page compositions that combine kit and application-layer components
 - Before/after story baselines from T10 must be set to the "after" state
 
 Baseline management rules:
@@ -146,7 +147,7 @@ Smoke tests must run in a test renderer environment (not a browser) and must not
 
 ## Governing Constraints
 
-- **This is a core platform package.** The verification standard for `@hbc/ui-kit` must be higher than for a feature package. Every consumer in Wave 1 depends on it; every regression has multiplied impact.
+- **This is a core platform package.** The verification standard for `@hbc/ui-kit` must be higher than for a feature package. Every consumer in Wave 1 depends on it; every regression has multiplied impact. Application-layer Wave 1-critical components warrant equivalent verification rigor because they appear directly in Wave 1 surfaces.
 - **Automated coverage does not eliminate code review or manual testing.** It provides a regression safety net. It does not replace the judgment applied in T07, T08, and T09.
 - **Test infrastructure must be maintainable.** A test suite that is fragile, slow, or difficult to update will be abandoned. Prefer targeted, stable tests over comprehensive but brittle coverage.
 
@@ -160,7 +161,8 @@ Smoke tests must run in a test renderer environment (not a browser) and must not
 - [ ] All Priority 1 components have unit test coverage for key contracts
 - [ ] All ten interaction patterns have interaction tests
 - [ ] All Priority 1 components and density variants have visual regression baselines
-- [ ] All ten Wave 1 page pattern compositions have visual regression baselines
+- [ ] All Priority 4 application-layer Wave 1-critical feature components have visual regression baselines
+- [ ] All ten Wave 1 page pattern compositions have visual regression baselines — including compositions that combine kit and application-layer components
 - [ ] Five composition smoke tests pass
 - [ ] CI integration confirmed — test suite runs without manual intervention
 - [ ] T13 author confirms verification coverage is sufficient to support the production-readiness claim

@@ -1,19 +1,19 @@
 # WS1-T13 — Visual Excellence Scorecard and Production Acceptance
 
-> **Doc Classification:** Canonical Normative Plan — Workstream I task plan for production-readiness scoring and sign-off. The Wave 1 entry gate. Workstream I is complete only when T13 issues a passing scorecard covering both system compliance and visual excellence.
+> **Doc Classification:** Canonical Normative Plan — Workstream I task plan for production-readiness scoring and sign-off. The Wave 1 entry gate. Workstream I is complete only when T13 issues a passing scorecard covering system compliance, visual excellence, and application-wide standards conformance.
 
 **Workstream Reference:** Workstream I — UI Kit Production Scrub Plan
 **Read With:** docs/architecture/plans/UI-Kit/WS1-UI-Kit-Production-Scrub-Plan.md
 **Sequencing:** Phase F (begins only after T10, T11, and T12 are all complete)
 **Depends On:** All prior tasks (T01–T12); outputs from every mandatory document in the workstream
-**Unlocks:** Wave 1 implementation — no Wave 1 group may treat `@hbc/ui-kit` as production-ready until T13 passes
-**Hard Requirement:** The UI kit cannot be marked production-ready unless it passes both system compliance and visual excellence.
+**Unlocks:** Wave 1 implementation — no Wave 1 group may treat HB Intel UI as production-ready until T13 passes
+**Hard Requirement:** The UI kit and all Wave 1-critical application UI cannot be marked production-ready unless both pass system compliance, visual excellence, and application-wide standards conformance.
 
 ---
 
 ## Objective
 
-Evaluate `@hbc/ui-kit` against a structured production-readiness scorecard covering all dimensions of system compliance and visual excellence. Document the final state of the kit, residual debt, and the conditions under which Wave 1 may proceed. Issue release notes. Exit only when the kit genuinely meets the bar this workstream was designed to achieve.
+Evaluate `@hbc/ui-kit` and all Wave 1-critical application-layer UI against a structured production-readiness scorecard covering all dimensions of system compliance, visual excellence, and application-wide standards conformance. Document the final state of the full UI surface, residual debt, and the conditions under which Wave 1 may proceed. Issue release notes. Exit only when the application UI — both kit layer and feature-specific components — genuinely meets the bar this workstream was designed to achieve.
 
 ---
 
@@ -29,11 +29,11 @@ T13 creates that enforcement. It is not a rubber stamp. It is a structured evalu
 
 T13 covers:
 
-1. Evaluating `@hbc/ui-kit` against all scorecard dimensions
+1. Evaluating `@hbc/ui-kit` and Wave 1-critical application-layer UI against all twenty scorecard dimensions
 2. Verifying that all T01–T12 acceptance criteria are satisfied
 3. Documenting residual debt explicitly (items that are non-blocking for Wave 1 but must be tracked)
-4. Producing release notes for the production-ready version of the kit
-5. Issuing a formal go/no-go determination for Wave 1 use of `@hbc/ui-kit`
+4. Producing release notes for the production-ready version of the kit and the full application UI
+5. Issuing a formal go/no-go determination for Wave 1 use of HB Intel UI
 
 T13 does not cover:
 
@@ -44,7 +44,7 @@ T13 does not cover:
 
 ## Production-Readiness Scorecard
 
-The scorecard evaluates `@hbc/ui-kit` on the following dimensions. Each dimension is scored Pass / Partial / Fail, with written notes. The kit passes T13 only when no dimension scores Fail and no more than two dimensions score Partial.
+The scorecard evaluates `@hbc/ui-kit` and all Wave 1-critical application-layer UI on the following twenty dimensions. Each dimension is scored Pass / Partial / Fail, with written notes. The evaluation passes T13 only when no dimension scores Fail and no more than two dimensions score Partial.
 
 ### System compliance dimensions
 
@@ -74,6 +74,7 @@ The scorecard evaluates `@hbc/ui-kit` on the following dimensions. Each dimensio
 | **Category benchmark parity** | Kit meets or exceeds category leaders in professionalism, consistency, and enterprise readiness | T02 benchmark matrix; T08 review |
 | **Mold-breaker differentiation** | Kit demonstrably surpasses category in hierarchy clarity, cognitive load reduction, and field capability | T02 mold-breaker principles; T08 review |
 | **Wave 1 readiness** | Personal Work Hub and other Wave 1 surfaces can launch on kit primitives without visual patching | T12 compliance report; T08 composition review |
+| **Application-wide standards conformance** | All Wave 1-critical feature-specific UI components meet visual hierarchy, density, field readability, token compliance, and accessibility standards; no Tier C or D components without a documented exception | T12 Application Standards Conformance Report |
 
 ---
 
@@ -84,7 +85,7 @@ The scorecard evaluates `@hbc/ui-kit` on the following dimensions. Each dimensio
 Location: `docs/reference/ui-kit/UI-Kit-Production-Readiness-Scorecard.md`
 
 Must include:
-- All nineteen dimensions with Pass / Partial / Fail scores and written notes
+- All twenty dimensions with Pass / Partial / Fail scores and written notes
 - Overall go/no-go determination
 - If Partial scores exist: specific conditions under which Partial dimensions are acceptable for Wave 1 entry
 - If Fail scores exist: blocking items with required resolution actions
@@ -114,9 +115,9 @@ Must include:
 
 ### Go conditions
 
-The workstream closes as complete and Wave 1 may treat `@hbc/ui-kit` as production-ready when:
+The workstream closes as complete and Wave 1 may treat HB Intel UI as production-ready when:
 
-- All nineteen scorecard dimensions score Pass or Partial
+- All twenty scorecard dimensions score Pass or Partial
 - No more than two dimensions score Partial
 - No hard no-go gate from the workstream master plan (§12) remains unresolved
 - All mandatory output documents exist and are registered in `current-state-map.md`
@@ -136,6 +137,8 @@ Wave 1 must not proceed if any of the following remain true at T13 evaluation:
   - Critical page patterns still rely on app-local visual patching
   - Visual regression and accessibility coverage remain too thin
   - The kit does not yet create a credible premium personal starting point for the PWA
+  - Any Wave 1-critical feature-specific UI component remains at Tier C or D without a documented exception and owner
+  - Application-wide standards conformance report is incomplete or unresolved violations are undocumented
 
 ### Partial resolution path
 
@@ -153,7 +156,7 @@ A Partial score is acceptable for Wave 1 entry only when: the affected dimension
 
 ## Acceptance Criteria
 
-- [ ] All nineteen scorecard dimensions are evaluated with written notes
+- [ ] All twenty scorecard dimensions are evaluated with written notes
 - [ ] Overall go/no-go determination is issued
 - [ ] If go: all go conditions are confirmed
 - [ ] If no-go: all blocking items are identified with required resolution actions
@@ -162,6 +165,7 @@ A Partial score is acceptable for Wave 1 entry only when: the affected dimension
 - [ ] `UI-Kit-Residual-Debt-Register.md` exists with all non-blocking debt documented
 - [ ] All three documents added to `current-state-map.md §2` as "Reference"
 - [ ] All T01–T12 mandatory output documents are confirmed to exist and registered in `current-state-map.md`
+- [ ] `UI-Kit-Application-Standards-Conformance-Report.md` (T12) confirms all Wave 1-critical feature-specific components meet the standards or are logged with exceptions
 
 ---
 
@@ -175,4 +179,4 @@ A Partial score is acceptable for Wave 1 entry only when: the affected dimension
 
 ---
 
-*End of WS1-T13 — Visual Excellence Scorecard and Production Acceptance v1.0 (2026-03-15)*
+*End of WS1-T13 — Visual Excellence Scorecard and Production Acceptance v1.1 (2026-03-16)*

@@ -37,7 +37,7 @@ T02 does not cover:
 
 - Implementing any visual changes (that is T03–T07)
 - Defining specific token values, component specs, or spacing systems (that is T03)
-- Auditing current HB Intel components against the benchmark (the maturity matrix in T01 serves this purpose at the component level; T08 serves it at the composition level)
+- Auditing current HB Intel components against the benchmark (the maturity matrix in T01 `docs/reference/ui-kit/UI-Kit-Component-Maturity-Matrix.md` serves this purpose at the component level; T08 serves it at the composition level)
 
 ---
 
@@ -113,13 +113,13 @@ The full set of mold-breaker principles, each with motivation, positive requirem
 
 ## Acceptance Criteria
 
-- [ ] Benchmark matrix covers all 12 UI pattern categories with category leader pattern, strength, weakness, HB Intel target, and HB Intel mold-break recorded for each
-- [ ] Five highest-leverage differentiation opportunities are called out in the matrix summary
-- [ ] Mold-breaker principles document defines all 8 required principles with motivation, positive requirement, and anti-pattern
-- [ ] At least 5 principles are expressed in verifiable terms
-- [ ] `UI-Kit-Competitive-Benchmark-Matrix.md` exists at the required location
-- [ ] `UI-Kit-Mold-Breaker-Principles.md` exists at the required location
-- [ ] Both documents are added to `current-state-map.md §2` as "Reference"
+- [x] Benchmark matrix covers all 12 UI pattern categories with category leader pattern, strength, weakness, HB Intel target, and HB Intel mold-break recorded for each
+- [x] Five highest-leverage differentiation opportunities are called out in the matrix summary
+- [x] Mold-breaker principles document defines all 8 required principles with motivation, positive requirement, and anti-pattern
+- [x] At least 5 principles are expressed in verifiable terms
+- [x] `UI-Kit-Competitive-Benchmark-Matrix.md` exists at the required location
+- [x] `UI-Kit-Mold-Breaker-Principles.md` exists at the required location
+- [x] Both documents are added to `current-state-map.md §2` as "Reference"
 - [ ] T03 and T04 authors confirm the mold-breaker principles are sufficient directional authority to begin work
 
 ---
