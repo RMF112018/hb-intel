@@ -141,16 +141,16 @@ Location: `docs/reference/ui-kit/UI-Kit-Visual-Hierarchy-and-Depth-Standards.md`
 
 ## Acceptance Criteria
 
-- [ ] All exported components have complete Storybook story coverage (default, variants, all states)
-- [ ] All Wave 1-critical component families have at least one production-realistic story
-- [ ] All components with density mode behavior have stories for all three density modes
-- [ ] All ten Wave 1 page patterns have composition stories in Storybook
-- [ ] Before/after stories exist for all components with significant T07 visual improvement
-- [ ] `UI-Kit-Usage-and-Composition-Guide.md` exists and covers all six required topics
-- [ ] `UI-Kit-Visual-Language-Guide.md` exists and covers all seven design system topics
-- [ ] `UI-Kit-Field-Readability-Standards.md` is complete and accurate post-T07/T09
-- [ ] `UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` is complete and accurate
-- [ ] All four documents added to `current-state-map.md §2` as "Reference" (or confirmed already added by T05/T08)
+- [x] All exported components have complete Storybook story coverage (default, variants, all states)
+- [x] All Wave 1-critical component families have at least one production-realistic story
+- [x] All components with density mode behavior have stories for all three density modes
+- [x] All ten Wave 1 page patterns have composition stories in Storybook
+- [x] Before/after stories exist for all components with significant T07 visual improvement
+- [x] `UI-Kit-Usage-and-Composition-Guide.md` exists and covers all six required topics
+- [x] `UI-Kit-Visual-Language-Guide.md` exists and covers all seven design system topics
+- [x] `UI-Kit-Field-Readability-Standards.md` is complete and accurate post-T07/T09
+- [x] `UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` is complete and accurate
+- [x] All four documents added to `current-state-map.md §2` as "Reference" (or confirmed already added by T05/T08)
 - [ ] T13 author confirms documentation is sufficient to close the workstream
 
 ---
