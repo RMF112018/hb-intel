@@ -1,3 +1,5 @@
+> **ERRATA (2026-03-16):** Finding C1 in this report ("Phase 7 gate ADR number corrected (ADR-0090, not ADR-0091)") was incorrect. ADR-0090 is `ADR-0090-signalr-per-project-groups.md` (the SignalR per-project-groups decision, accepted 2026-03-07). The Phase 7 Final Verification & Sign-Off ADR is **ADR-0091** (`ADR-0091-phase-7-final-verification.md`, accepted 2026-03-09). All references to "ADR-0090 (Phase 7 Final Verification & Sign-Off)" in Wave 0 plan files have been corrected to ADR-0091. See P0-A2 Divergence Log D-004.
+
 # Wave 0 Build-Out Plan — Validation Report
 
 > **Doc Classification:** Canonical Normative Plan — Implementation report for the validation and reconciliation of `HB-Intel-Wave-0-Buildout-Plan.md` against live codebase, governing documents, and the MVP Project Setup plan set (T01–T08). Captures methodology, evidence, claim verdicts, and changes made.
