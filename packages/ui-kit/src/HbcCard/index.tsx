@@ -11,6 +11,7 @@ import { makeStyles, shorthands } from '@griffel/react';
 import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { elevationLevel0, elevationLevel1, elevationLevel2 } from '../theme/elevation.js';
 import { HBC_RADIUS_XL } from '../theme/radii.js';
+import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
 import type { HbcCardProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -32,23 +33,23 @@ const useStyles = makeStyles({
   },
   // Header/footer with default (standard) padding
   header: {
-    paddingTop: '16px',
-    paddingRight: '24px',
-    paddingBottom: '16px',
-    paddingLeft: '24px',
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingLeft: `${HBC_SPACE_LG}px`,
     ...shorthands.borderBottom('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
   },
   body: {
-    paddingTop: '24px',
-    paddingRight: '24px',
-    paddingBottom: '24px',
-    paddingLeft: '24px',
+    paddingTop: `${HBC_SPACE_LG}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
+    paddingBottom: `${HBC_SPACE_LG}px`,
+    paddingLeft: `${HBC_SPACE_LG}px`,
   },
   footer: {
-    paddingTop: '16px',
-    paddingRight: '24px',
-    paddingBottom: '16px',
-    paddingLeft: '24px',
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingLeft: `${HBC_SPACE_LG}px`,
     ...shorthands.borderTop('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
   },
   // Primary weight uses increased header padding
@@ -63,21 +64,21 @@ const useStyles = makeStyles({
   // Supporting weight uses compact padding
   headerSupporting: {
     paddingTop: '12px',
-    paddingRight: '16px',
+    paddingRight: `${HBC_SPACE_MD}px`,
     paddingBottom: '12px',
-    paddingLeft: '16px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
   },
   bodySupporting: {
-    paddingTop: '16px',
-    paddingRight: '16px',
-    paddingBottom: '16px',
-    paddingLeft: '16px',
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
   },
   footerSupporting: {
     paddingTop: '12px',
-    paddingRight: '16px',
+    paddingRight: `${HBC_SPACE_MD}px`,
     paddingBottom: '12px',
-    paddingLeft: '16px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
   },
 });
 

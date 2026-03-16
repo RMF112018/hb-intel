@@ -16,6 +16,7 @@ import { heading3 } from '../theme/typography.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import { HBC_RADIUS_XL, HBC_RADIUS_MD } from '../theme/radii.js';
+import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
 import type { HbcTearsheetProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -53,16 +54,16 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: '16px',
-    paddingRight: '24px',
-    paddingBottom: '16px',
-    paddingLeft: '24px',
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingLeft: `${HBC_SPACE_LG}px`,
     ...shorthands.borderBottom('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
   },
   headerLeft: {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
+    gap: `${HBC_SPACE_MD}px`,
   },
   title: {
     ...heading3,
@@ -91,30 +92,30 @@ const useStyles = makeStyles({
   body: {
     flex: '1 1 auto',
     overflowY: 'auto',
-    paddingTop: '24px',
-    paddingRight: '24px',
-    paddingBottom: '24px',
-    paddingLeft: '24px',
+    paddingTop: `${HBC_SPACE_LG}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
+    paddingBottom: `${HBC_SPACE_LG}px`,
+    paddingLeft: `${HBC_SPACE_LG}px`,
   },
   footer: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: '16px',
-    paddingRight: '24px',
-    paddingBottom: '16px',
-    paddingLeft: '24px',
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingLeft: `${HBC_SPACE_LG}px`,
     ...shorthands.borderTop('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
   },
   footerRight: {
     display: 'flex',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
   },
   cancelButton: {
-    paddingTop: '8px',
-    paddingRight: '16px',
-    paddingBottom: '8px',
-    paddingLeft: '16px',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
     backgroundColor: 'transparent',
     ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
     borderRadius: HBC_RADIUS_MD,
@@ -126,10 +127,10 @@ const useStyles = makeStyles({
     },
   },
   navButton: {
-    paddingTop: '8px',
-    paddingRight: '16px',
-    paddingBottom: '8px',
-    paddingLeft: '16px',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
     backgroundColor: HBC_PRIMARY_BLUE,
     ...shorthands.borderStyle('none'),
     borderRadius: HBC_RADIUS_MD,
@@ -145,10 +146,10 @@ const useStyles = makeStyles({
     },
   },
   completeButton: {
-    paddingTop: '8px',
-    paddingRight: '16px',
-    paddingBottom: '8px',
-    paddingLeft: '16px',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
     backgroundColor: HBC_ACCENT_ORANGE as string,
     ...shorthands.borderStyle('none'),
     borderRadius: HBC_RADIUS_MD,

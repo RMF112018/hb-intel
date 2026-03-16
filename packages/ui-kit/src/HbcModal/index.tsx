@@ -17,6 +17,7 @@ import { Z_INDEX } from '../theme/z-index.js';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { HBC_RADIUS_XL, HBC_RADIUS_MD, HBC_RADIUS_NONE } from '../theme/radii.js';
+import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
 import type { HbcModalProps, ModalSize } from './types.js';
 
 const SIZE_MAP: Record<ModalSize, string> = {
@@ -60,10 +61,10 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: '16px',
-    paddingRight: '24px',
-    paddingBottom: '16px',
-    paddingLeft: '24px',
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingLeft: `${HBC_SPACE_LG}px`,
     ...shorthands.borderBottom('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
   },
   title: {
@@ -90,19 +91,19 @@ const useStyles = makeStyles({
     flex: '1 1 auto',
     overflowY: 'auto',
     maxHeight: '60vh',
-    paddingTop: '24px',
-    paddingRight: '24px',
-    paddingBottom: '24px',
-    paddingLeft: '24px',
+    paddingTop: `${HBC_SPACE_LG}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
+    paddingBottom: `${HBC_SPACE_LG}px`,
+    paddingLeft: `${HBC_SPACE_LG}px`,
   },
   footer: {
     display: 'flex',
     justifyContent: 'flex-end',
-    gap: '8px',
-    paddingTop: '16px',
-    paddingRight: '24px',
-    paddingBottom: '16px',
-    paddingLeft: '24px',
+    gap: `${HBC_SPACE_SM}px`,
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingLeft: `${HBC_SPACE_LG}px`,
     ...shorthands.borderTop('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
   },
   // Mobile full-screen adaptations — PH4.14.5

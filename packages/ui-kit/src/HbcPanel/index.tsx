@@ -20,6 +20,7 @@ import { Z_INDEX } from '../theme/z-index.js';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { HBC_RADIUS_SM, HBC_RADIUS_MD } from '../theme/radii.js';
+import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
 import type { HbcPanelProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -30,7 +31,7 @@ const useStyles = makeStyles({
   footer: {
     display: 'flex',
     justifyContent: 'flex-end',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
   },
   // Mobile bottom-sheet styles
   bottomSheet: {
@@ -68,13 +69,13 @@ const useStyles = makeStyles({
     height: '4px',
     backgroundColor: HBC_SURFACE_LIGHT['surface-3'],
     borderRadius: HBC_RADIUS_SM,
-    margin: '8px auto',
+    margin: `${HBC_SPACE_SM}px auto`,
   },
   sheetHeader: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '8px 16px',
+    padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px`,
     borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
   },
   sheetTitle: {
@@ -85,13 +86,13 @@ const useStyles = makeStyles({
   sheetBody: {
     flex: '1 1 auto',
     overflowY: 'auto',
-    padding: '16px',
+    padding: `${HBC_SPACE_MD}px`,
   },
   sheetFooter: {
     display: 'flex',
     justifyContent: 'flex-end',
-    gap: '8px',
-    padding: '12px 16px',
+    gap: `${HBC_SPACE_SM}px`,
+    padding: `12px ${HBC_SPACE_MD}px`,
     borderTop: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
   },
   closeButton: {
@@ -100,7 +101,7 @@ const useStyles = makeStyles({
     cursor: 'pointer',
     fontSize: '1.25rem',
     color: HBC_SURFACE_LIGHT['text-muted'],
-    padding: '4px 8px',
+    padding: `4px ${HBC_SPACE_SM}px`,
     borderRadius: HBC_RADIUS_MD,
   },
 });

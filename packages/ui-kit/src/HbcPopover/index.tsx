@@ -13,6 +13,7 @@ import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { elevationLevel2 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { HBC_RADIUS_XL } from '../theme/radii.js';
+import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
 import type { HbcPopoverProps, PopoverSize } from './types.js';
 
 const SIZE_MAP: Record<PopoverSize, string> = {
@@ -33,9 +34,9 @@ const useStyles = makeStyles({
     borderRadius: HBC_RADIUS_XL,
     boxShadow: elevationLevel2,
     paddingTop: '12px',
-    paddingRight: '16px',
+    paddingRight: `${HBC_SPACE_MD}px`,
     paddingBottom: '12px',
-    paddingLeft: '16px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
   },
   arrow: {
     position: 'absolute',
@@ -84,13 +85,13 @@ export const HbcPopover: React.FC<HbcPopoverProps> = ({
 
     let left = rect.left + rect.width / 2 - popWidth / 2;
     // Clamp to viewport
-    if (left < 8) left = 8;
-    if (left + popWidth > window.innerWidth - 8) left = window.innerWidth - popWidth - 8;
+    if (left < HBC_SPACE_SM) left = HBC_SPACE_SM;
+    if (left + popWidth > window.innerWidth - HBC_SPACE_SM) left = window.innerWidth - popWidth - HBC_SPACE_SM;
 
     if (flipUp) {
-      setPosition({ top: rect.top - 8, left, flipUp: true });
+      setPosition({ top: rect.top - HBC_SPACE_SM, left, flipUp: true });
     } else {
-      setPosition({ top: rect.bottom + 8, left, flipUp: false });
+      setPosition({ top: rect.bottom + HBC_SPACE_SM, left, flipUp: false });
     }
   }, [size]);
 
