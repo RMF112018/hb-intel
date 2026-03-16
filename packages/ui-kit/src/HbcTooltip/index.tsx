@@ -39,6 +39,9 @@ const useStyles = makeStyles({
     animationDuration: TRANSITION_FAST,
     animationTimingFunction: 'ease-out',
     animationFillMode: 'both',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
   },
   arrow: {
     position: 'absolute',

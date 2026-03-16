@@ -152,16 +152,16 @@ Users must always be able to answer these questions from any screen in the kit:
 
 ## Acceptance Criteria
 
-- [ ] All interactive components pass the keyboard audit requirements
-- [ ] All complex interaction patterns have correct ARIA implementation
-- [ ] Focus rings meet contrast requirements and are consistent across the kit
-- [ ] Focus order follows visual reading order throughout
-- [ ] Contrast validation passes in both standard and field density modes
-- [ ] All animations respect `prefers-reduced-motion`
-- [ ] Six key flows validated with a screen reader
-- [ ] Implementation trust audit confirms all five user questions are answerable on all Wave 1-critical screens
-- [ ] Accessibility findings list produced for T11 (items requiring automated coverage)
-- [ ] No Wave 1-critical component — kit or application layer — has an unresolved WCAG AA failure at workstream close
+- [x] All interactive components pass the keyboard audit requirements
+- [x] All complex interaction patterns have correct ARIA implementation
+- [x] Focus rings meet contrast requirements and are consistent across the kit
+- [x] Focus order follows visual reading order throughout
+- [x] Contrast validation passes in both standard and field density modes
+- [x] All animations respect `prefers-reduced-motion`
+- [x] Six key flows validated with a screen reader
+- [x] Implementation trust audit confirms all five user questions are answerable on all Wave 1-critical screens
+- [x] Accessibility findings list produced for T11 (items requiring automated coverage)
+- [x] No Wave 1-critical component — kit or application layer — has an unresolved WCAG AA failure at workstream close
 
 ---
 

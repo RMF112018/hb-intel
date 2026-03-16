@@ -71,6 +71,9 @@ const useStyles = makeStyles({
     animationName: keyframes.scaleIn,
     animationDuration: TRANSITION_FAST,
     animationFillMode: 'forwards',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
   },
   searchWrapper: {
     display: 'flex',
@@ -186,6 +189,9 @@ const useStyles = makeStyles({
     maxHeight: '100vh',
     borderRadius: '0',
     animationName: keyframes.slideInFromBottom,
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
   },
   resultsMobile: {
     flex: '1 1 auto',

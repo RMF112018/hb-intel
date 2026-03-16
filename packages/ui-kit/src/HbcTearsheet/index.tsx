@@ -45,6 +45,9 @@ const useStyles = makeStyles({
     animationName: keyframes.slideInUp,
     animationDuration: TRANSITION_NORMAL,
     animationFillMode: 'forwards',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
   },
   header: {
     display: 'flex',

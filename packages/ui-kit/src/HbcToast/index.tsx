@@ -88,6 +88,9 @@ const useStyles = makeStyles({
     animationDuration: '250ms',
     animationTimingFunction: 'ease-out',
     animationFillMode: 'both',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
   },
   content: {
     ...body,

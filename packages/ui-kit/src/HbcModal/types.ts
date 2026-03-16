@@ -22,4 +22,6 @@ export interface HbcModalProps {
   preventBackdropClose?: boolean;
   /** Additional CSS class for the dialog */
   className?: string;
+  /** ARIA dialog role override — use 'alertdialog' for confirmation dialogs (WS1-T09) */
+  role?: 'dialog' | 'alertdialog';
 }

@@ -56,6 +56,9 @@ const useStyles = makeStyles({
     animationDuration: '250ms',
     animationTimingFunction: 'ease-out',
     animationFillMode: 'both',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
   },
   content: {
     ...body,
@@ -98,10 +101,12 @@ export const HbcBanner: React.FC<HbcBannerProps> = ({
   const DefaultIcon = VARIANT_ICON[variant];
 
   const role = variant === 'warning' || variant === 'error' ? 'alert' : 'status';
+  const ariaLive = variant === 'warning' || variant === 'error' ? 'assertive' as const : 'polite' as const;
 
   return (
     <div
       role={role}
+      aria-live={ariaLive}
       data-hbc-ui="banner"
       data-hbc-variant={variant}
       className={mergeClasses(classes.root, className)}

@@ -52,6 +52,9 @@ const useStyles = makeStyles({
     animationName: keyframes.scaleIn,
     animationDuration: TRANSITION_FAST,
     animationFillMode: 'forwards',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
   },
   header: {
     display: 'flex',
@@ -115,6 +118,9 @@ const useStyles = makeStyles({
     maxHeight: '100vh',
     borderRadius: HBC_RADIUS_NONE,
     animationName: keyframes.slideInFromBottom,
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
   },
   bodyMobile: {
     maxHeight: 'none',
@@ -137,6 +143,7 @@ export const HbcModal: React.FC<HbcModalProps> = ({
   footer,
   preventBackdropClose = false,
   className,
+  role: dialogRole = 'dialog',
 }) => {
   const styles = useStyles();
   const isMobile = useIsMobile();
@@ -182,7 +189,7 @@ export const HbcModal: React.FC<HbcModalProps> = ({
         ref={dialogRef}
         className={mergeClasses(styles.dialog, isMobile && styles.dialogMobile, className)}
         style={isMobile ? undefined : { width: SIZE_MAP[size] }}
-        role="dialog"
+        role={dialogRole}
         aria-modal="true"
         aria-label={title}
         data-hbc-ui="modal"

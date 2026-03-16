@@ -100,6 +100,9 @@ const useStyles = makeStyles({
     animationDuration: TRANSITION_NORMAL,
     animationTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
     animationFillMode: 'forwards',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
     maxHeight: '60vh',
     overflowY: 'auto',
   },

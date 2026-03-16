@@ -49,6 +49,9 @@ const useStyles = makeStyles({
     animationDuration: '2s',
     animationIterationCount: 'infinite',
     animationTimingFunction: 'ease-in-out',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
   },
   offline: {
     height: '4px',
@@ -57,6 +60,9 @@ const useStyles = makeStyles({
     animationDuration: '1.5s',
     animationIterationCount: 'infinite',
     animationTimingFunction: 'ease-in-out',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
   },
   railExpanded: {
     minHeight: '28px',

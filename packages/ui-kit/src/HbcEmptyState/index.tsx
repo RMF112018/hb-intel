@@ -30,6 +30,9 @@ const useStyles = makeStyles({
     },
     animationDuration: TRANSITION_NORMAL,
     animationFillMode: 'forwards',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
   },
   illustration: {
     marginBottom: '8px',
@@ -38,6 +41,9 @@ const useStyles = makeStyles({
     animationDuration: TRANSITION_NORMAL,
     animationDelay: '100ms',
     animationFillMode: 'forwards',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '0ms',
+    },
   },
   title: {
     ...heading2,

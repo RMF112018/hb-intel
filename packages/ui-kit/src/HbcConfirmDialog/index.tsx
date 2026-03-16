@@ -42,6 +42,7 @@ export const HbcConfirmDialog: React.FC<HbcConfirmDialogProps> = ({
       title={title}
       size="sm"
       preventBackdropClose
+      role="alertdialog"
       className={className}
       footer={
         <>
