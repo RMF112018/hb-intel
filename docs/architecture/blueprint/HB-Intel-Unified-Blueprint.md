@@ -53,6 +53,8 @@ Over time, HB Intel will grow into a **unified overlay across third-party system
 
 *Per Blueprint V4 (Tier 2 — target-state intent). Present build status is governed by `current-state-map.md`.*
 
+**Standalone PWA** The primary, Procore-like experience for fluent use outside SharePoint. Full workspace-switching experience across all 14 project and departmental workspaces.
+
 HB Intel's target architecture delivers three integrated delivery surfaces:
 
 - **Standalone PWA** — the primary, Procore-like experience for fluent use outside SharePoint. Full workspace-switching experience across all 14 project and departmental workspaces.
@@ -69,6 +71,7 @@ HB Intel's target architecture delivers three integrated delivery surfaces:
 
 **Unified work and accountability as the primary long-term advantage.** HB Intel's durable competitive position comes from being the single system where everyone can see who owns what, what has changed, and what is expected next — across departments and projects. Strategic intelligence (BD scoring, health indicators, post-bid analysis) and modern lifecycle management are secondary competitive extensions.
 
+**Visual coherence is part of implementation trust.** HB Intel treats visual inconsistency, weak hierarchy, inaccessible states, and field-hostile UI as product trust failures, not cosmetic defects. Shared standards apply to all UI-bearing surfaces regardless of package location so users encounter one coherent operating environment rather than a collection of loosely related modules.
 ---
 
 ## §2. Target Architecture Summary
@@ -118,19 +121,23 @@ Per `current-state-map.md §3`, the workspace contains 50+ members across six ca
 - No package may create a parallel visual system, independent token set, or app-local design language outside the standards governed by @hbc/ui-kit.
 - If a UI-bearing component becomes broadly reusable, visually generic, or used across multiple app families, it must migrate into @hbc/ui-kit.
 
+***2.2.1 Governed UI-bearing exceptions (Locked - Wave 0 UI Refinement)***
+- Certain platform/shared packages may expose UI-bearing components when the UI is inseparable from package behavior, workflow orchestration, or runtime state.
+- These packages are not exempt from the shared UI standard. They must consume @hbc/ui-kit primitives where applicable and conform to the same design-system, accessibility, theming, field-readability, and verification rules.
+- Such packages may not define independent visual primitives, independent theme systems, or ad hoc styling conventions.
+- The existence of UI-bearing surfaces outside @hbc/ui-kit is a governed exception, not a second visual ownership model.
+
+***2.2.2 Promotion / Migration Rule***
+- UI-bearing components that become reusable across multiple app families, become visually generic, or primarily exist as presentational patterns rather than behavior-coupled surfaces must be promoted into `@hbc/ui-kit`.
+- The default direction of reuse is toward `@hbc/ui-kit`, not toward repeated implementation in platform/shared packages.
+- Consumer maps and component maturity matrices are valid decision inputs for determining when promotion is required.
+
 **Navigation and shell (Procore-aligned)**
 - Procore-style header: ProjectPicker (left, visible only in Project Hub workspace) + workspace-specific tool picker (center).
 - M365 waffle app launcher (top right): opens grid of 14 workspaces.
 - Global project persistence via Zustand `projectStore` — persists the active project across workspace navigation.
 - In non-Project-Hub workspaces, the tool picker contains an emphasized "Back to Project Hub — {Project Name}" entry.
 - Breakout SPFx webparts use the simplified shell: no project picker, no app launcher.
-
-#### 2.2.1 Governed UI-bearing exceptions (Locked - Wave 0 UI Refinement)
-
-- Certain platform/shared packages may expose UI-bearing components when the UI is inseparable from package behavior, workflow orchestration, or runtime state.
-- These packages are not exempt from the shared UI standard. They must consume @hbc/ui-kit primitives where applicable and conform to the same design-system, accessibility, theming, field-readability, and verification rules.
-- Such packages may not define independent visual primitives, independent theme systems, or ad hoc styling conventions.
-- The existence of UI-bearing surfaces outside @hbc/ui-kit is a governed exception, not a second visual ownership model.
 
 ### 2.3 Tech Stack (Locked — Blueprint §8)
 

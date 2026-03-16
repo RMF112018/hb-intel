@@ -14,7 +14,7 @@
 | 1 | This file (`current-state-map.md`) | Canonical Current-State | Living — updated with each structural change | Present implementation truth |
 | 2 | [Blueprint V4](./blueprint/HB-Intel-Blueprint-V4.md) | Canonical Normative Plan | Locked — comment-only updates | Target architecture intent |
 | 3 | [Foundation Plan](./plans/hb-intel-foundation-plan.md) | Historical Foundational | Locked — comment-only updates | Original implementation instructions |
-| 4 | [ADRs](./adr/) (111 active; 6 archived — see §2.2 for resolution record) | Permanent Decision Rationale | Append-only | Individual architectural decisions |
+| 4 | [ADRs](./adr/) (114 active; 6 archived — see §2.2 for resolution record) | Permanent Decision Rationale | Append-only | Individual architectural decisions |
 | 5 | Phase/Task Plans (`plans/ph7-*`, `plans/PH*.md`) | Time-bound Execution | Historical after completion | Phase-scoped implementation details |
 | 6 | Package READMEs (`packages/*/README.md`) | Current Implementation Detail | Living | Package-specific API and usage |
 
@@ -242,6 +242,7 @@
 | `docs/reference/ui-kit/UI-Kit-Competitive-Benchmark-Matrix.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; WS1-T02 competitive benchmark across 12 UI pattern categories; governs T03–T08 visual direction |
 | `docs/reference/ui-kit/UI-Kit-Mold-Breaker-Principles.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; WS1-T02 8 governing mold-breaker principles with market evidence, positive requirements, and anti-patterns; directional authority for T03–T08 visual implementation |
 | Diátaxis output docs (`docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/`, `docs/user-guide/`, `docs/administrator-guide/`, `docs/maintenance/`, `docs/troubleshooting/`, `docs/security/`, `docs/release-notes/`, `docs/faq.md`) | **Living Reference (Diátaxis)** | 200+ files; quadrant breakdown: tutorials, how-to, reference, explanation, user-guide, administrator-guide, maintenance, troubleshooting, security, release-notes, faq; updated continuously as features ship; exempt from inline banner |
+| `docs/architecture/adr/ADR-0116-ui-doctrine-and-visual-governance.md` | **Permanent Decision Rationale** | Governs UI ownership, governed UI-bearing exceptions, promotion/migration rule, Personal Work Hub / PWA as the benchmark surface, and release-gated visual excellence doctrine across all UI-bearing surfaces; authored 2026-03-16 |
 
 ### 2.1 Classification Maintenance Rule
 
@@ -260,7 +261,7 @@ Every new architecture, plan, reference, or release document must declare one of
 
 **Transition rule — Deferred Scope:** When a Deferred Scope document's feature or package enters active development in a named phase milestone, reclassify it to Canonical Normative Plan, add it to the active phase's plan index, and update this matrix. The PH7-RM-* plans were reviewed at PH7.12 sign-off (2026-03-09) and remain Deferred Scope per evidence package §5. They must be reclassified before activation.
 
-**ADR rule:** New ADRs are always Permanent Decision Rationale. ADR-0091 through ADR-0097 were assigned after PH7.11. ADR-0098 is reserved for SF09 (data-seeding), ADR-0099 is reserved for SF10 (notification-intelligence), ADR-0100 is reserved for SF11 (smart-empty-state), ADR-0101 is authored for SF12 (session-state), ADR-0102 is authored for SF13 (project-canvas), ADR-0103 is authored for SF14 (related-items), ADR-0104 is authored for SF15 (ai-assist), ADR-0105 is reserved for SF16 (search), ADR-0106 is authored for SF17 (admin-intelligence), ADR-0107 is authored for SF18 (estimating bid-readiness), ADR-0108 is authored for SF19 (bd score benchmark), ADR-0109 is authored for SF20 (bd heritage adapter boundary), ADR-0110 is authored for SF21 (project health pulse), ADR-0111 is authored as companion primitive governance for SF18, ADR-0112 is authored as companion primitive governance for SF19, ADR-0113 is authored as companion primitive governance for SF20, and ADR-0114 is authored to resolve the score-benchmark ↔ post-bid-autopsy circular dependency (2026-03-14). Next unreserved number: **ADR-0116**.
+**ADR rule:** New ADRs are always Permanent Decision Rationale. ADR-0091 through ADR-0097 were assigned after PH7.11. ADR-0098 is reserved for SF09 (data-seeding), ADR-0099 is reserved for SF10 (notification-intelligence), ADR-0100 is reserved for SF11 (smart-empty-state), ADR-0101 is authored for SF12 (session-state), ADR-0102 is authored for SF13 (project-canvas), ADR-0103 is authored for SF14 (related-items), ADR-0104 is authored for SF15 (ai-assist), ADR-0105 is reserved for SF16 (search), ADR-0106 is authored for SF17 (admin-intelligence), ADR-0107 is authored for SF18 (estimating bid-readiness), ADR-0108 is authored for SF19 (bd score benchmark), ADR-0109 is authored for SF20 (bd heritage adapter boundary), ADR-0110 is authored for SF21 (project health pulse), ADR-0111 is authored as companion primitive governance for SF18, ADR-0112 is authored as companion primitive governance for SF19, ADR-0113 is authored as companion primitive governance for SF20, ADR-0114 is authored to resolve the score-benchmark ↔ post-bid-autopsy circular dependency (2026-03-14), ADR-0115 is authored for SF29 (my-work-feed architecture), and ADR-0116 is authored for UI doctrine and visual governance (2026-03-16). Next unreserved number: **ADR-0117**.
 
 **Banner format (Tier 1):**
 ```
@@ -279,7 +280,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | Index gap (ADR-0073–ADR-0079) | These numbers were absent from `docs/README.md` index | Resolved: 2026-03-09 — all entries added to `docs/README.md` |
 | ADR-0082 not indexed | ADR-0082 missing from `docs/README.md` | Resolved: 2026-03-09 — added to index |
 
-**Post-PH7.11 state (updated 2026-03-14):** 112 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (phase-7-final-verification, acknowledgment, step-wizard, versioned-record, stub-detection, field-annotations, workflow-handoff). ADR-0098 reserved for SF09 (data-seeding); ADR-0099 reserved for SF10 (notification-intelligence); ADR-0100 reserved for SF11 (smart-empty-state); ADR-0101 authored for SF12 (session-state); ADR-0102 authored for SF13 (project-canvas); ADR-0103 authored for SF14 (related-items); ADR-0104 authored for SF15 (ai-assist); ADR-0105 reserved for SF16 (search); ADR-0106 authored for SF17 (admin-intelligence); ADR-0107 authored for SF18 (estimating bid-readiness); ADR-0108 authored for SF19 (bd score benchmark); ADR-0109 authored for SF20 (bd heritage adapter boundary); ADR-0110 authored for SF21 (project health pulse); ADR-0111 authored as companion primitive governance for SF18; ADR-0112 authored as companion primitive governance for SF19; ADR-0113 authored as companion primitive governance for SF20; ADR-0114 authored 2026-03-14 to resolve score-benchmark ↔ post-bid-autopsy circular dependency. Next unreserved number: **ADR-0116**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
+**Post-PH7.11 state (updated 2026-03-16):** 114 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (...existing text...). ADR-0114 authored 2026-03-14 to resolve score-benchmark ↔ post-bid-autopsy circular dependency. ADR-0115 authored 2026-03-15 for my-work-feed architecture. ADR-0116 authored 2026-03-16 for UI doctrine and visual governance. Next unreserved number: **ADR-0117**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
 
 ---
 
@@ -295,7 +296,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | `packages/auth` | @hbc/auth | Dual-mode authentication (MSAL/dev) | Depends on models | v0.2.0 | `packages/auth/README.md` |
 | `packages/shell` | @hbc/shell | Global navigation & layout | Depends on auth, models | v0.0.1 | `packages/shell/README.md` |
 | `packages/app-shell` | @hbc/app-shell | Shell aggregator (read-only surface) | Depends on shell, auth, ui-kit | v0.0.2 | `packages/app-shell/README.md` |
-| `packages/ui-kit` | @hbc/ui-kit | Design system & component library | Depends on auth, complexity, models | v2.1.0 | `packages/ui-kit/DESIGN_SYSTEM.md` |
+| `packages/ui-kit` | @hbc/ui-kit | Design system, reusable visual primitives, layout/composition primitives, and shared theme/token contracts | Depends on auth, complexity, models | v2.1.0 | `packages/ui-kit/DESIGN_SYSTEM.md` |
 | `packages/provisioning` | @hbc/provisioning | SignalR provisioning saga | Depends on auth, models | v0.2.0 | `packages/provisioning/README.md` |
 
 ### Category B: Shared Infrastructure (2)
@@ -443,7 +444,7 @@ This is **controlled evolution (a)** — necessary to support the full platform 
 This file + package READMEs + the codebase itself. For any question about what exists _right now_, start here.
 
 **Where are locked decisions?**
-[Blueprint V4](./blueprint/HB-Intel-Blueprint-V4.md) (target architecture), [Foundation Plan](./plans/hb-intel-foundation-plan.md) (original implementation instructions), and the [ADR catalog](./adr/) (91 active decisions). These are append-only or comment-only.
+[Blueprint V4](./blueprint/HB-Intel-Blueprint-V4.md) (target architecture), [Foundation Plan](./plans/hb-intel-foundation-plan.md) (original implementation instructions), and the [ADR catalog](./adr/) (114 active decisions). These are append-only or comment-only.
 
 **How do I distinguish current implementation from future plans?**
 Use the Classification Matrix in Section 2. Documents labeled **Canonical Current-State** describe what exists. Documents labeled **Canonical Normative Plan** describe what should be built next. **Historical Foundational** documents describe what was planned originally and may have evolved.
@@ -462,6 +463,9 @@ As of PH7.4, all Category C packages are **Tier-1 Platform Primitives** — mand
 - `@hbc/ui-kit/app-shell` — shell-only exports (SPFx constrained contexts)
 - `@hbc/ui-kit/theme` — token/theme-only imports
 - `@hbc/ui-kit/icons` — icon-only imports
+
+**What governs UI-bearing surfaces?**
+ADR-0116 is the active UI doctrine. `@hbc/ui-kit` remains the owner of reusable visual primitives, layout/composition primitives, shared visual language, and theme/token contracts. UI-bearing components may exist outside `@hbc/ui-kit` only as governed exceptions when tightly coupled to package-specific behavior or runtime state. Package location does not exempt a surface from HB Intel’s standards for visual quality, hierarchy, theming, accessibility, field readiness, responsiveness, documentation, and verification. Current maturity and consumer-risk baselines are tracked in `docs/reference/ui-kit/UI-Kit-Component-Maturity-Matrix.md` and `docs/reference/ui-kit/UI-Kit-Wave1-Consumer-Map.md`.
 
 ---
 
