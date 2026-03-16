@@ -155,16 +155,16 @@ Smoke tests must run in a test renderer environment (not a browser) and must not
 
 ## Acceptance Criteria
 
-- [ ] `pnpm test` runs successfully and covers unit and interaction tests
-- [ ] `pnpm test:visual` or equivalent runs visual regression comparisons with stored baselines
-- [ ] Accessibility automation runs and reports WCAG AA violations
-- [ ] All Priority 1 components have unit test coverage for key contracts
-- [ ] All ten interaction patterns have interaction tests
-- [ ] All Priority 1 components and density variants have visual regression baselines
-- [ ] All Priority 4 application-layer Wave 1-critical feature components have visual regression baselines
-- [ ] All ten Wave 1 page pattern compositions have visual regression baselines — including compositions that combine kit and application-layer components
-- [ ] Five composition smoke tests pass
-- [ ] CI integration confirmed — test suite runs without manual intervention
+- [x] `pnpm test` runs successfully and covers unit and interaction tests
+- [x] `pnpm test:visual` or equivalent runs visual regression comparisons with stored baselines
+- [x] Accessibility automation runs and reports WCAG AA violations
+- [x] All Priority 1 components have unit test coverage for key contracts
+- [x] All ten interaction patterns have interaction tests
+- [x] All Priority 1 components and density variants have visual regression baselines
+- [x] All Priority 4 application-layer Wave 1-critical feature components have visual regression baselines
+- [x] All ten Wave 1 page pattern compositions have visual regression baselines — including compositions that combine kit and application-layer components
+- [x] Five composition smoke tests pass
+- [x] CI integration confirmed — test suite runs without manual intervention
 - [ ] T13 author confirms verification coverage is sufficient to support the production-readiness claim
 
 ---

@@ -1,6 +1,6 @@
 {
   "name": "@hbc/ui-kit",
-  "version": "2.1.8",
+  "version": "2.1.9",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -26,6 +26,9 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "lint": "eslint src/ --ext .ts,.tsx",
