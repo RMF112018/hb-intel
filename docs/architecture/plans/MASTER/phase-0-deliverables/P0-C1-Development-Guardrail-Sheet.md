@@ -82,9 +82,9 @@ The following packages are labeled `scaffold-only` in the Production Readiness M
 
 | Package | Category | Current Status | Blocking Condition |
 |---------|---|---|---|
-| `@hbc/post-bid-autopsy` | C | v0.0.1 scaffold-only | Incomplete: SF22 T08-T09 UI surfaces and lifecycle/storage orchestration |
-| `@hbc/strategic-intelligence` | C | v0.0.1 scaffold-only | Incomplete: Runtime adapters and BD heritage integration |
-| `@hbc/ai-assist` | C | v0.0.1 scaffold-only | Incomplete: Pre-Implementation Research Directive; Azure tenant integration and Smart Insert UI |
+| `@hbc/post-bid-autopsy` | C | v0.0.1 scaffold-only | Incomplete: SF22 T08-T09 UI surfaces and lifecycle/storage orchestration. Assigned to Phase 7 per OD-007. Deferred from Phase 1 per D-010. |
+| `@hbc/strategic-intelligence` | C | v0.0.1 scaffold-only | Incomplete: Runtime adapters and BD heritage integration. SF22 T08–T09 (Phase 7) gated on this reaching `usable-but-incomplete`; upgrade timeline tracked via OD-016. Deferred from Phase 1 per D-010. |
+| `@hbc/ai-assist` | C | v0.0.1 scaffold-only | Incomplete: Pre-Implementation Research Directive; Azure tenant integration and Smart Insert UI. Deferred from Phase 1 per D-010; phase assignment pending OD-013. |
 | `@hbc/features-accounting` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 1+ delivery scope |
 | `@hbc/features-leadership` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 2 delivery scope |
 | `@hbc/features-safety` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 3+ delivery scope |
