@@ -19,6 +19,7 @@ import {
   TRANSITION_FAST,
   body,
 } from '../theme/index.js';
+import { HBC_SPACE_MD } from '../theme/grid.js';
 import {
   StatusInfoIcon,
   StatusCompleteIcon,
@@ -48,7 +49,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('12px'),
-    ...shorthands.padding('12px', '16px'),
+    ...shorthands.padding('12px', `${HBC_SPACE_MD}px`),
     ...shorthands.borderLeft('4px', 'solid', 'transparent'),
     ...shorthands.borderRadius('0px'),
     width: '100%',

@@ -26,6 +26,7 @@ import {
   body,
 } from '../theme/index.js';
 import { HBC_RADIUS_LG, HBC_RADIUS_MD } from '../theme/radii.js';
+import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
 import {
   StatusCompleteIcon,
   StatusOverdueIcon,
@@ -66,18 +67,18 @@ const CATEGORY_ROLE: Record<ToastCategory, 'alert' | 'status'> = {
 const useStyles = makeStyles({
   container: {
     position: 'fixed',
-    bottom: '16px',
-    right: '16px',
+    bottom: `${HBC_SPACE_MD}px`,
+    right: `${HBC_SPACE_MD}px`,
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.gap('8px'),
+    ...shorthands.gap(`${HBC_SPACE_SM}px`),
     pointerEvents: 'none',
   },
   toast: {
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('10px'),
-    ...shorthands.padding('12px', '16px'),
+    ...shorthands.padding('12px', `${HBC_SPACE_MD}px`),
     ...shorthands.borderLeft('4px', 'solid', 'transparent'),
     ...shorthands.borderRadius(HBC_RADIUS_LG),
     boxShadow: elevationLevel2,
