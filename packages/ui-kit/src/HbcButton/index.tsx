@@ -18,6 +18,7 @@ import {
 } from '../theme/tokens.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
 import { HBC_RADIUS_MD } from '../theme/radii.js';
+import { DENSITY_BREAKPOINTS } from '../theme/density.js';
 import type { HbcButtonProps, ButtonSize } from './types.js';
 
 const SIZE_STYLES: Record<ButtonSize, { height: string; fontSize: string; padding: string }> = {
@@ -128,8 +129,8 @@ export const HbcButton: React.FC<HbcButtonProps> = ({
   const effectiveSize = useTouchSize(size);
   const sizeStyle = SIZE_STYLES[effectiveSize];
 
-  // For lg on coarse pointer: ensure 56px min touch target
-  const minHeight = effectiveSize === 'lg' ? '56px' : undefined;
+  // For lg on coarse pointer: ensure touch-tier min touch target per HBC_DENSITY_TOKENS
+  const minHeight = effectiveSize === 'lg' ? `${DENSITY_BREAKPOINTS.touch}px` : undefined;
 
   return (
     <button
