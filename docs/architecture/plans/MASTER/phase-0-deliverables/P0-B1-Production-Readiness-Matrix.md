@@ -54,7 +54,7 @@ Packages labeled `scaffold-only` or `excluded-from-production-path` **must not**
 | Package | Name | Version | Label | Notes |
 |---------|------|---------|-------|-------|
 | `packages/bic-next-move` | @hbc/bic-next-move | v0.1.0 | usable-but-incomplete | Ball-in-court and ownership tracking. Core contracts and hooks complete; real data integration via adapters pending. |
-| `packages/complexity` | @hbc/complexity | v0.1.0 | usable-but-incomplete | 3-tier density context (Complexity Dial). Contracts and UI complete; integration with feature-specific context pending. |
+| `packages/complexity` | @hbc/complexity | v0.1.0 | usable-but-incomplete | Core 3-tier density context and UI components complete; feature packages that consume complexity dial must wire their own density-switching callbacks — this adapter wiring, not the primitive itself, is the incomplete piece. |
 | `packages/sharepoint-docs` | @hbc/sharepoint-docs | v0.1.0 | usable-but-incomplete | Document lifecycle management. Microsoft Graph integration via data-access adapters; production validation pending. |
 | `packages/acknowledgment` | @hbc/acknowledgment | v0.1.0 | usable-but-incomplete | Reusable acknowledgment/sign-off primitive. Contracts and components complete; workflow state machine pending completion. |
 | `packages/step-wizard` | @hbc/step-wizard | v0.1.1 | usable-but-incomplete | Multi-step guided workflow primitive. Contracts, navigation, and state complete; adapter-specific step validation logic pending. |
@@ -63,7 +63,7 @@ Packages labeled `scaffold-only` or `excluded-from-production-path` **must not**
 | `packages/workflow-handoff` | @hbc/workflow-handoff | v0.1.0 | usable-but-incomplete | Cross-module workflow handoff and routing. Contracts and hand-off sequencing complete; multi-step coordination validation pending. |
 | `packages/data-seeding` | @hbc/data-seeding | v0.0.1 | excluded-from-production-path | Development/demo data seeding primitives. Intentionally excluded from production flows; used in dev harness and test scaffolds only. |
 | `packages/session-state` | @hbc/session-state | v0.0.1 | usable-but-incomplete | Offline-safe session persistence and sync via IndexedDB. Core hooks complete; offline queue replay and conflict resolution pending. |
-| `packages/project-canvas` | @hbc/project-canvas | v0.0.1 | usable-but-incomplete | Role-based configurable project dashboard canvas. Tile registry, drag-drop, role defaults, and smart defaulting complete. Mandatory governance tier and adaptive tile recommendation engine pending. |
+| `packages/project-canvas` | @hbc/project-canvas | v0.0.1 | usable-but-incomplete | Tile registry, drag-drop, role defaults, and smart defaulting complete. Adaptive tile recommendation engine pending (Phase 1 scope). Governance tier (tile audit log, permission enforcement) is required before production promotion — not yet implemented. |
 | `packages/post-bid-autopsy` | @hbc/post-bid-autopsy | v0.0.1 | scaffold-only | Tier-1 post-bid autopsy primitive for evidence, confidence, taxonomy, governance, publication, and learning-signal seams. Contracts scaffolded with deterministic factory helpers (SF22 T01-T07 complete per current-state-map). BD and Estimating adapter UI surfaces and full lifecycle/storage orchestration pending (SF22 T08-T09). Blocks production use of score-benchmark. |
 | `packages/strategic-intelligence` | @hbc/strategic-intelligence | v0.0.1 | scaffold-only | Heritage snapshot and living strategic intelligence primitive. Explicitly "contract-first primitive scaffold" per current-state-map. Trust, workflow, and governance contracts defined; runtime adapters and BD integration pending. Blocks production use of post-bid-autopsy downstream intelligence surfaces. |
 | `packages/my-work-feed` | @hbc/my-work-feed | v0.0.1 | usable-but-incomplete | Cross-module personal work aggregation feed. SF29 T01-T09 complete per Wave 0 closeout; core hooks and composition complete. Real data integration from BIC, workflow-handoff, and cross-feature sources pending. |
@@ -124,6 +124,8 @@ Packages labeled `scaffold-only` or `excluded-from-production-path` **must not**
 ---
 
 ## Blockers and Critical Gaps
+
+> **Note:** No workspace members are currently labeled `blocked` (reserved for items with an unresolved external dependency). The items below are labeled `usable-but-incomplete` or `scaffold-only` but function as practical blockers for Phase 1 production flows because downstream packages depend on their completion. Resolving these gaps is a Phase 1 entry prerequisite.
 
 The following items whose scaffold/blocked status most directly affects Phase 1 planning:
 
