@@ -171,16 +171,14 @@ Tier A is reserved for components that genuinely meet the full production standa
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcBreadcrumbs | B | pwa | Medium | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
-| HbcTabs | B | pwa, admin, estimating | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
-| HbcPagination | B | pwa, admin | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Neutral |
-| HbcSearch | B | pwa, estimating | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Neutral |
-| HbcTree | B | ui-kit internal, feature packages | Medium | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
+| HbcBreadcrumbs | A | pwa | Medium | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcTabs | A | pwa, admin, estimating | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcPagination | A | pwa, admin | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcSearch | A | pwa, estimating | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcTree | A | ui-kit internal, feature packages | Medium | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcTabs (B):** Roving tabIndex correctly implemented, skips disabled tabs. Orange 3px underline matches ADR-0023. Lazy panel rendering via optional panels prop.
-- **HbcPagination (B):** Ellipsis truncation edge case when `maxPageButtons` ≤ 5. Page size selector uses native `<select>` (non-themeable).
-- **HbcTree (B):** Full ARIA tree pattern with roving tabIndex, Home/End navigation, flat list for O(1) keyboard nav — one of the stronger nav implementations. Missing multi-select and type-ahead.
+- **Navigation family (A, upgraded from B):** 24 tests across 5 files + spacing tokenized. HbcBreadcrumbs (5: data attr, items, aria-current, truncation, onClick). HbcTabs (5: data attr, tabs, aria-selected, role=tablist, onTabChange). HbcPagination (5: data attr, page buttons, current, previous disabled, hidden single page). HbcSearch (4: data attr, input, variant, placeholder). HbcTree (5: data attr, role=tree, treeitem, selection, onNodeSelect). Spacing: 11 hardcoded 8/16/24px values replaced with HBC_SPACE_SM/MD/LG tokens.
 
 ### Interaction Patterns
 
@@ -413,8 +411,8 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Tier | `@hbc/ui-kit` | Platform & Shared Packages | Combined Total | Percentage |
 |------|---------------|---------------------------|----------------|------------|
-| **A** | 43 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4 + Shell: 9 + Layout: 5 + Msg: 3) | 0 | 43 | 47% |
-| **B** | 13 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑, +3 Shell↑, +1 ToolLandingLayout↑) | 17 | 30 | 33% |
+| **A** | 48 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4 + Shell: 9 + Layout: 5 + Msg: 3 + Nav: 5) | 0 | 48 | 52% |
+| **B** | 8 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑, +3 Shell↑, +1 ToolLandingLayout↑) | 17 | 25 | 27% |
 | **C** | 4 | 7 (ai-assist ×6, density system) | 11 | 12% |
 | **D** | 7 | 0 | 7 | 8% |
 | **Total assessed** | **68** | **24** | **92** | |
@@ -465,7 +463,7 @@ Components with failing or unknown accessibility status:
 
 ### Testing Coverage Gaps
 
-**`@hbc/ui-kit` testing:** 47 test files with 301 tests covering core, form, surface/overlay, input, data, app shell, page shell/layouts, messaging, and theme:
+**`@hbc/ui-kit` testing:** 52 test files with 325 tests covering core, form, surface/overlay, input, data, app shell, page shell/layouts, messaging, navigation, and theme:
 - Core: HbcStatusBadge (18), HbcButton (10), HbcEmptyState (10), HbcErrorBoundary (7), HbcSpinner (9)
 - Form: HbcTextField (6), HbcSelect (5), HbcCheckbox (4), HbcFormLayout (5), HbcForm (5), HbcFormSection (8), HbcFormRow (5), HbcStickyFormFooter (10), HbcFormGuard (4)
 - Surface/Overlay: HbcCard (9), HbcPanel (7), HbcModal (11), HbcTearsheet (12), HbcPopover (7)
@@ -474,9 +472,10 @@ Components with failing or unknown accessibility status:
 - App Shell: HbcAppShell (4), HbcHeader (5), HbcSidebar (5), HbcProjectSelector (5), HbcCreateButton (4), HbcNotificationBell (6), HbcUserMenu (5), HbcToolboxFlyout (5), HbcFavoriteTools (5), HbcGlobalSearch (5)
 - Page Shell/Layouts: WorkspacePageShell (5), ToolLandingLayout (5), DetailLayout (5), CreateUpdateLayout (5), DashboardLayout (5), ListLayout (5)
 - Messaging: HbcBanner (10), HbcToastProvider (6), HbcTooltip (6)
+- Navigation: HbcBreadcrumbs (5), HbcTabs (5), HbcPagination (5), HbcSearch (4), HbcTree (5)
 - Theme: HbcThemeContext (3), ThemeResponsiveness (4), HbcConnectivityBar (2)
 
-**21 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Remaining families: Navigation, Interaction Patterns, Module-Specific, Complexity-Aware Stubs.
+**16 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Remaining families: Interaction Patterns, Module-Specific, Complexity-Aware Stubs.
 
 **Platform and shared-feature packages are significantly ahead on testing:**
 

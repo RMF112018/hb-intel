@@ -14,6 +14,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { HBC_ACCENT_ORANGE, HBC_SURFACE_LIGHT, HBC_SURFACE_FIELD } from '../theme/tokens.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
+import { HBC_SPACE_SM } from '../theme/grid.js';
 import { ChevronForward, ChevronDown } from '../icons/index.js';
 import type { HbcTreeProps, HbcTreeNode } from './types.js';
 
@@ -35,7 +36,7 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: '4px',
     height: '32px',
-    paddingRight: '8px',
+    paddingRight: `${HBC_SPACE_SM}px`,
     cursor: 'pointer',
     fontSize: '0.875rem',
     fontFamily: 'inherit',
@@ -280,7 +281,7 @@ export const HbcTree: React.FC<HbcTreeProps> = ({
             isSelected && isFieldMode && styles.itemSelectedField,
             node.disabled && styles.itemDisabled,
           )}
-          style={{ paddingLeft: depth * INDENT_PX + 8 }}
+          style={{ paddingLeft: depth * INDENT_PX + HBC_SPACE_SM }}
           tabIndex={isFocused || (!focusedId && flatList[0]?.node.id === node.id) ? 0 : -1}
           onClick={() => {
             if (node.disabled) return;

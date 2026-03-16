@@ -16,6 +16,7 @@ import {
   HBC_SURFACE_FIELD,
   hbcBrandRamp,
 } from '../theme/tokens.js';
+import { HBC_SPACE_MD } from '../theme/grid.js';
 import type { HbcBreadcrumbsProps } from './types.js';
 
 const MAX_VISIBLE = 3;
@@ -32,8 +33,8 @@ const useStyles = makeStyles({
     zIndex: 1,
     backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
     borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-    paddingLeft: '16px',
-    paddingRight: '16px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
   },
   focusMode: {
     position: 'static',

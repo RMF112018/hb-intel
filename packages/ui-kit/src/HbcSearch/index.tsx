@@ -10,6 +10,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { HBC_SURFACE_LIGHT, HBC_SURFACE_FIELD, HBC_PRIMARY_BLUE } from '../theme/tokens.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
+import { HBC_SPACE_SM } from '../theme/grid.js';
 import { HBC_RADIUS_MD } from '../theme/radii.js';
 import { Search as SearchIcon, Cancel } from '../icons/index.js';
 import { HbcGlobalSearch } from '../HbcAppShell/index.js';
@@ -23,8 +24,8 @@ const useStyles = makeStyles({
     height: '36px',
     border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
     borderRadius: HBC_RADIUS_MD,
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
     transitionProperty: 'border-color',
     transitionDuration: TRANSITION_FAST,

@@ -11,6 +11,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { HBC_ACCENT_ORANGE, HBC_SURFACE_LIGHT, HBC_SURFACE_FIELD } from '../theme/tokens.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
+import { HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
 import type { HbcTabsProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -18,10 +19,10 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'stretch',
     height: '40px',
-    gap: '24px',
+    gap: `${HBC_SPACE_LG}px`,
     borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-    paddingLeft: '16px',
-    paddingRight: '16px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
   },
   tablistField: {
     borderBottom: `1px solid ${HBC_SURFACE_FIELD['border-default']}`,

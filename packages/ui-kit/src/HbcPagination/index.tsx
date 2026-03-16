@@ -11,6 +11,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { HBC_ACCENT_ORANGE, HBC_HEADER_TEXT, HBC_SURFACE_LIGHT, HBC_SURFACE_FIELD } from '../theme/tokens.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
+import { HBC_SPACE_MD } from '../theme/grid.js';
 import { HBC_RADIUS_MD } from '../theme/radii.js';
 import { ChevronBack, ChevronForward } from '../icons/index.js';
 import type { HbcPaginationProps, PageSizeOption } from './types.js';
@@ -23,8 +24,8 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'space-between',
     height: '48px',
-    paddingLeft: '16px',
-    paddingRight: '16px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
     borderTop: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
     fontSize: '0.8125rem',
     color: HBC_SURFACE_LIGHT['text-muted'],
