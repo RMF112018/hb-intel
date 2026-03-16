@@ -13,15 +13,15 @@
 
 ## Objective
 
-Perform a deep, systematic polish pass on every major component family in `@hbc/ui-kit`, prioritized by Wave 1 criticality (from the T01 maturity matrix). Apply the visual language (T03), hierarchy system (T04), density modes (T05), and data surface patterns (T06) to each component. Exit with a component set that is production-quality, visually cohesive, and capable of powering Wave 1 surfaces without downstream visual patching.
+Perform a deep, systematic polish pass on every major component across the full HB Intel UI surface — shared primitives in `@hbc/ui-kit` and Wave 1-critical feature-specific UI components in consuming packages. Apply the visual language (T03), hierarchy system (T04), density modes (T05), and data surface patterns (T06) uniformly across both layers. Exit with a UI surface that is production-quality, visually cohesive, and capable of powering Wave 1 without downstream visual patching in either the kit or the application layer.
 
 ---
 
 ## Why This Task Exists
 
-T03–T06 establish standards. T07 implements them. Without a systematic component-by-component sweep, the standards exist on paper but individual components retain their pre-workstream visual state. The result is a kit that is governed in principle but inconsistent in practice.
+T03–T06 establish standards. T07 implements them across the full application UI — not only in the kit. Without a systematic sweep of both layers, the standards exist on paper but individual components retain their pre-workstream visual state regardless of which package they live in. The result is a UI surface that is governed in principle but inconsistent in practice.
 
-T07 is the largest task in the workstream by implementation volume. It must be sequenced carefully: Wave 1-critical components first, followed by supporting components, followed by lower-criticality surfaces. The T01 maturity matrix provides the sequencing input.
+T07 is the largest task in the workstream by implementation volume. It must be sequenced carefully: Wave 1-critical components first (in both kit and application layers), followed by supporting components, followed by lower-criticality surfaces. The T01 maturity matrix provides the sequencing input for both layers.
 
 ---
 
@@ -43,11 +43,22 @@ T07 covers every major component family, with the following priority sequencing:
 - Overlays, drawers, dialogs, and side panels
 
 **Priority 3 — Wave 1 supporting**
-- All remaining exported components
+- All remaining exported kit components
+
+**Priority 4 — Application-layer Wave 1 critical (feature-specific UI)**
+- Personal Work Hub composition shell and page-level layout components
+- Wave 1 SPFx webpart composition shells
+- Feature-specific UI components in Wave 1 packages that appear in Priority 1 or 2 page patterns and are not kit primitives
+
+T07 covers two parallel sweeps:
+
+**Kit sweep:** All component families exported from `@hbc/ui-kit`, prioritized by tier and Wave 1 criticality per T01.
+
+**Application-layer sweep:** All Wave 1-critical feature-specific UI components in consuming packages (Priority 4), evaluated against the same twelve polish dimensions and brought to the same quality bar. These components remain in their feature packages — they are not being moved to the kit — but their visual quality must meet kit standards.
 
 T07 does not cover:
-- Business-logic composition (that is feature-package work)
-- App-local component variants that belong in the feature package, not the kit
+- Business-logic composition or data-fetching code in feature packages
+- Deciding whether a feature-local component belongs in the kit (that is T12)
 - Creating new Storybook stories (that is T10, though T07 should flag story gaps)
 - Accessibility auditing (that is T09, though T07 must not regress accessibility)
 
@@ -155,21 +166,22 @@ The sweep covers the following families. Within each family, use the T01 maturit
 
 ## Governing Constraints
 
-- **T01 maturity tier governs depth.** Tier A components need only a verification pass. Tier B needs targeted polish. Tier C and D components must receive full redesign or replacement — they cannot be carried as-is into Wave 1.
-- **T02 mold-breaker quality bar applies to every component.** No component should produce the anti-patterns listed in the workstream master plan (flatness, equal weight everywhere, field-hostile sizing).
-- **Remove-or-harden rule.** Any component that cannot be brought to Tier B or better within the workstream scope must either be removed from the public entry points or explicitly flagged as non-Wave-1-ready in the T01 maturity matrix update and T13 residual debt register.
+- **T01 maturity tier governs depth — for both layers.** Tier A components (kit or app-layer) need only a verification pass. Tier B needs targeted polish. Tier C and D components must receive full redesign or replacement — they cannot be carried as-is into Wave 1 regardless of which package they live in.
+- **T02 mold-breaker quality bar applies universally.** No component — kit or application-layer — should produce the anti-patterns listed in the workstream master plan (flatness, equal weight everywhere, field-hostile sizing).
+- **Remove-or-harden rule.** Any kit component that cannot be brought to Tier B or better must either be removed from the public entry points or explicitly flagged as non-Wave-1-ready. Any application-layer component that cannot be brought to Tier B or better must be flagged in the T13 residual debt register with a remediation plan.
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] All Priority 1 (Wave 1 critical) component families are Tier A or Tier B by end of T07
-- [ ] All Priority 2 (Wave 1 high) component families are Tier B or better by end of T07
-- [ ] All Priority 3 (Wave 1 supporting) components are either Tier B or explicitly flagged as out-of-Wave-1-scope
-- [ ] All twelve per-component polish dimensions have been addressed for every component family
-- [ ] No component remains at Tier D in the Wave 1 critical path
-- [ ] T01 maturity matrix is updated to reflect post-T07 tier assignments
-- [ ] T08 authors confirm components are stable enough to begin composition audit
+- [ ] All Priority 1 (Wave 1 critical) kit component families are Tier A or Tier B by end of T07
+- [ ] All Priority 2 (Wave 1 high) kit component families are Tier B or better by end of T07
+- [ ] All Priority 3 (Wave 1 supporting) kit components are either Tier B or explicitly flagged as out-of-Wave-1-scope
+- [ ] All Priority 4 (application-layer Wave 1 critical) feature-specific components are Tier B or better
+- [ ] All twelve per-component polish dimensions have been addressed for every component in both layers
+- [ ] No component remains at Tier D in the Wave 1 critical path — kit or application layer
+- [ ] T01 maturity matrix is updated to reflect post-T07 tier assignments for both layers
+- [ ] T08 authors confirm both kit and application-layer components are stable enough to begin composition audit
 
 ---
 

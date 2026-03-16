@@ -12,7 +12,7 @@
 
 ## Objective
 
-Conduct a complete accessibility and implementation trust audit across all `@hbc/ui-kit` components. Ensure that every interactive component has correct keyboard behavior, ARIA semantics, focus management, and contrast compliance. Ensure that users can always understand what is primary, what is actionable, what is waiting, what changed, and what requires their attention.
+Conduct a complete accessibility and implementation trust audit across all HB Intel UI components — both the shared primitives in `@hbc/ui-kit` and Wave 1-critical feature-specific components in consuming packages. Ensure that every interactive component, regardless of package location, has correct keyboard behavior, ARIA semantics, focus management, and contrast compliance. Ensure that users can always understand what is primary, what is actionable, what is waiting, what changed, and what requires their attention.
 
 ---
 
@@ -20,7 +20,7 @@ Conduct a complete accessibility and implementation trust audit across all `@hbc
 
 Visual polish that is inaccessible is not production-ready. The blueprint emphasizes clarity, trust, and explainability; the market benchmark assumes WCAG-aware systems; and SPFx surfaces in SharePoint are subject to Microsoft's accessibility requirements for enterprise software.
 
-More practically: enterprise construction software users include people with visual, motor, and cognitive differences. Field workers may use screen magnification. Keyboard-only navigation matters in office contexts. Focus management matters in complex overlay-heavy workflows. T09 ensures these requirements are met systematically rather than incidentally.
+More practically: enterprise construction software users include people with visual, motor, and cognitive differences. Field workers may use screen magnification. Keyboard-only navigation matters in office contexts. Focus management matters in complex overlay-heavy workflows. T09 ensures these requirements are met systematically across all UI — not only in the kit — rather than incidentally.
 
 ---
 
@@ -28,19 +28,19 @@ More practically: enterprise construction software users include people with vis
 
 T09 covers:
 
-1. Keyboard audit: every interactive component must be fully operable by keyboard alone
-2. ARIA audit: dialogs, menus, tables, search, tabs, live regions, and status messaging
-3. Focus ring and focus order consistency across the kit
-4. Contrast validation in all active themes (including field density mode per T05 requirements)
+1. Keyboard audit: every interactive component — kit and Wave 1-critical application-layer — must be fully operable by keyboard alone
+2. ARIA audit: dialogs, menus, tables, search, tabs, live regions, and status messaging across all UI in scope
+3. Focus ring and focus order consistency across both the kit and application-layer components
+4. Contrast validation in all active themes (including field density mode per T05 requirements) for all UI in scope
 5. Reduced-motion review
-6. Screen-reader validation for key flows
-7. Implementation trust audit: ensuring users can always understand system state
+6. Screen-reader validation for key flows (which may involve both kit and application-layer components)
+7. Implementation trust audit: ensuring users can always understand system state regardless of which layer owns the component
 
 T09 does not cover:
 
-- Fixing business-logic-level accessibility issues in feature packages (those are Wave 1 feature team responsibilities)
-- Accessibility of SPFx webpart host pages outside `@hbc/ui-kit` control
+- Accessibility of SPFx webpart host pages outside HB Intel's control
 - Creating automated test coverage (that is T11; T09 identifies gaps that T11 must cover)
+- Non-UI business logic in feature packages
 
 ---
 
@@ -161,7 +161,7 @@ Users must always be able to answer these questions from any screen in the kit:
 - [ ] Six key flows validated with a screen reader
 - [ ] Implementation trust audit confirms all five user questions are answerable on all Wave 1-critical screens
 - [ ] Accessibility findings list produced for T11 (items requiring automated coverage)
-- [ ] No Wave 1-critical component has an unresolved WCAG AA failure at workstream close
+- [ ] No Wave 1-critical component — kit or application layer — has an unresolved WCAG AA failure at workstream close
 
 ---
 

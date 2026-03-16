@@ -1,6 +1,6 @@
 # UI Kit Component Maturity Matrix
 
-> **Doc Classification:** Living Reference (Diátaxis) — WS1-T01 maturity baseline for `@hbc/ui-kit` v2.1.0; governs T07 polish sequencing, T11 test prioritization, T12 consumer audit scope, and T13 production-readiness scorecard baseline.
+> **Doc Classification:** Living Reference (Diátaxis) — WS1-T01 maturity baseline for `@hbc/ui-kit` v2.1.0 and all platform/shared-feature UI packages; governs T07 polish sequencing, T11 test prioritization, T12 consumer audit scope, and T13 production-readiness scorecard baseline.
 
 **Produced by:** WS1-T01 (UI Kit Inventory, Maturity Scoring, and Consumer Map)
 **Date:** 2026-03-16
@@ -92,11 +92,13 @@ Tier A is reserved for components that genuinely meet the full production standa
 | HbcModal | B | admin, accounting | High | Acceptable | Strong | Partial | Pass | Partial | None | Yes | Elevates |
 | HbcTearsheet | C | pwa, estimating, accounting | High | Acceptable | Adequate | Partial | Partial | Partial | None | Yes | Neutral |
 | HbcPopover | C | admin | Low | Acceptable | Adequate | Not ready | Partial | Partial | None | Yes | Neutral |
+| HbcAnchoredPopover | B | ai-assist, app-shell internal | Low | N/A (container) | N/A | Ready | Pass | N/A | None | Partial | Neutral |
 
 **Assessment notes:**
 - **HbcModal (B):** Close button is 32px on desktop (below 44px WCAG touch target); mobile gets 44px.
 - **HbcTearsheet (C):** Navigation buttons are raw `<button>` elements rather than `HbcButton`. Close button 32px. No `aria-labelledby`.
 - **HbcPopover (C):** No `role` attribute on popover (`role="dialog"` or `role="tooltip"` missing). Trigger is a plain `div` with no `role="button"` or `tabIndex`. Keyboard users cannot trigger it.
+- **HbcAnchoredPopover (B):** Lightweight SPFx-safe positioning primitive exported from `@hbc/ui-kit/app-shell`. Ref-based anchor targeting with viewport edge clamping. No inherent styling — consumer responsibility. Supports ARIA pass-through. No focus trap or auto-focus (consumer responsibility). No unit tests for edge-clamping logic.
 
 ### Input Components
 
@@ -310,65 +312,189 @@ These are intentional complexity-gated stubs per SF03-T07 / D-08 doctrine. Each 
 
 ---
 
+## Platform & Shared Feature Components (Outside `@hbc/ui-kit`)
+
+The following components live in dedicated packages outside `@hbc/ui-kit` but are consumed across Wave 1 apps and must be tracked for production-readiness.
+
+### `@hbc/smart-empty-state` — Context-Aware Empty States
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcSmartEmptyState | B | pwa, admin, estimating, project-hub, business-development, human-resources, leadership, operational-excellence, quality-control-warranty, risk-management, safety | Critical | Acceptable | Strong | Ready | Pass | Partial | Yes | Yes | Elevates |
+| HbcEmptyStateIllustration | B | (via HbcSmartEmptyState) | High | Acceptable | Adequate | Ready | Pass | Partial | Partial | Partial | Neutral |
+
+**Assessment notes:**
+- **HbcSmartEmptyState (B not A):** D-01 classification precedence, contextual illustrations from `@hbc/ui-kit/icons`, complexity-aware coaching tips (Essential: visible, Standard: collapsed, Expert: hidden). Pure CSS class-based styling (no Griffel). `@storybook/addon-a11y` present. 8+ test files covering classification, visit tracking, complexity behavior, and hooks. ADR-0100 governs. **Gap preventing A:** No Griffel/theme-token integration; uses external stylesheet rather than design-system tokens.
+- **HbcEmptyStateIllustration (B):** Classification-mapped SVG illustration component. Clean semantic output. Supporting primitive for HbcSmartEmptyState.
+
+### `@hbc/complexity` — Complexity Dial & Gating
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcComplexityDial | B | pwa, admin, estimating, accounting, all 12 apps (via ComplexityProvider) | Critical | Acceptable | Strong | Ready | Pass | Partial | Yes | Yes | Elevates |
+| HbcComplexityGate | B | all apps via @hbc/complexity | Critical | N/A (logic) | N/A | Ready | N/A | N/A | Yes | Yes | Elevates |
+
+**Assessment notes:**
+- **HbcComplexityDial (B not A):** Two variants: header compact pill + settings card grid. `aria-pressed` on tier buttons, `role="radio"` in settings variant. Admin lock metadata (lockedBy, lockedUntil). Cross-tab sync via `StorageEvent`. 9+ test files. ADR-0081 governs. **Gap preventing A:** Uses pure CSS (`complexity.css`) rather than Griffel/theme tokens. No `@storybook/addon-a11y`.
+- **HbcComplexityGate (B):** Declarative content gating by complexity tier. Clean single-responsibility. Tested.
+
+### `@hbc/acknowledgment` — Sign-Off & Attestation
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcAcknowledgmentPanel | B | (no app consumers yet — scaffold ready) | Medium | Acceptable | Strong | Ready | Pass | Partial | Yes | Yes | Elevates |
+| HbcAcknowledgmentBadge | B | (no app consumers yet) | Medium | Acceptable | Adequate | Ready | Pass | Partial | Yes | Yes | Neutral |
+| HbcAcknowledgmentModal | B | (no app consumers yet) | Medium | Acceptable | Strong | Ready | Pass | Partial | Yes | Yes | Elevates |
+
+**Assessment notes:**
+- **HbcAcknowledgmentPanel (B):** Three complexity tiers: Essential = CTA only, Standard = party list, Expert = full audit trail. `role="alert"` on decline banner, `role="status"` on completion. Phrase validation (D-03) and decline reasoning (D-04). Generic config contract `IAcknowledgmentConfig<T>`. 9+ test files. ADR-0092 governs. **Gap preventing A:** No production consumers yet; not proven in real compositions. No Griffel/theme tokens.
+- **HbcAcknowledgmentBadge (B):** Compact list-row badge. `aria-label` on icon. Tooltip integration.
+- **HbcAcknowledgmentModal (B):** Confirmation/decline modal. `aria-modal`, `aria-labelledby`. Inline styles for simplicity.
+
+### `@hbc/step-wizard` — Multi-Step Workflows
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcStepWizard | B | pwa, estimating | High | Acceptable | Strong | Ready | Pass | Partial | Yes | Yes | Elevates |
+| HbcStepSidebar | B | (via HbcStepWizard) | High | Acceptable | Strong | Ready | Pass | Partial | Yes | Yes | Elevates |
+| HbcStepProgress | B | (via HbcStepWizard) | High | Acceptable | Adequate | Ready | Pass | Partial | Partial | Yes | Neutral |
+
+**Assessment notes:**
+- **HbcStepWizard (B):** Monotonic state machine (D-06). Vertical sidebar nav + horizontal progress variants. Per-step validation, assignee resolution, due-date polling. Complexity-gated: Essential = adjacent steps only, Standard = all steps, Expert = timestamps + validation dots. 10+ test files. ADR-0093 governs. **Gap preventing A:** No Griffel/theme tokens. Connector line positioning uses fixed pixels.
+- **HbcStepSidebar (B):** `role="navigation"`, `aria-current="step"` on active. Assignee avatars shown at Standard+. Disabled buttons for locked steps.
+- **HbcStepProgress (B):** Bar/ring/fraction variants. `aria-label` with step number and status.
+
+### `@hbc/versioned-record` — Version History & Audit
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcVersionHistory | B | (no app consumers yet — scaffold ready) | Medium | Acceptable | Strong | Ready | Pass | Partial | Partial | Yes | Elevates |
+| HbcVersionDiff | B | (no app consumers yet — PWA-only per D-08) | Medium | Acceptable | Strong | Not ready | Pass | Partial | None | Yes | Neutral |
+| HbcVersionBadge | B | (no app consumers yet) | Medium | Acceptable | Adequate | Ready | Pass | Partial | None | Yes | Neutral |
+
+**Assessment notes:**
+- **HbcVersionHistory (B):** Chronological list with author avatars, timestamps, change summary. Immutable snapshots with rollback (Expert tier only). Tag system (draft, submitted, approved, rejected, handoff, imported, superseded). `aria-label` on entries, `role="dialog"` on rollback modal. 9+ test files. ADR-0094 governs. **Gap preventing A:** No production consumers. Diff engine untested directly. Inline storage threshold (255KB) may need profiling for large payloads.
+- **HbcVersionDiff (B):** Side-by-side and unified diff modes with character-level `<mark>` highlighting. **PWA-only** per D-08 — not available in SPFx context. Table with `aria-label`. No direct tests.
+- **HbcVersionBadge (B):** Inline tag badge. `aria-label` on button. SPFx-compatible.
+
+### `@hbc/related-items` — Cross-Module Record Relationships
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcRelatedItemsPanel | B | (no app consumers yet — scaffold ready) | Medium | Acceptable | Adequate | Ready | Partial | Partial | Partial | Yes | Neutral |
+| HbcRelatedItemsTile | B | (no app consumers yet) | Low | Acceptable | Adequate | Ready | Partial | Partial | Partial | Partial | Neutral |
+
+**Assessment notes:**
+- **HbcRelatedItemsPanel (B):** Declarative registry pattern with role-aware filtering and priority sorting. Uses `<details>` for relationship groups (functional, not design-polished). `role="status"` on banners. Complexity-gated: Essential = hidden, Standard = basic groups, Expert = AI suggestions. Integrates `@hbc/smart-empty-state`. ADR-0103 governs. **Gaps:** Component-level tests are sparse. Visual design uses inline styles rather than design-system integration. Missing `aria-live` for dynamic group loading.
+- **HbcRelatedItemsTile (B):** Compact canvas integration showing top 3 items. Minimal inline styling with hardcoded colors. `role="status"` on degraded banner.
+
+### `@hbc/ai-assist` — Contextual AI Actions
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcAiActionMenu | C | (no app consumers yet — scaffold ready) | Low | Weak | Weak | Ready | Partial | Partial | None | Partial | Weakens |
+| HbcAiSmartInsertOverlay | C | (no app consumers yet) | Low | Weak | Weak | Ready | Partial | Partial | None | Partial | Weakens |
+| HbcAiTrustMeter | C | (no app consumers yet) | Low | Weak | Weak | Ready | Partial | Partial | None | Partial | Weakens |
+| HbcAiGovernancePortal | C | (no app consumers yet) | Low | Weak | Weak | Ready | Partial | Partial | None | Partial | Weakens |
+| HbcAiLoadingState | C | (no app consumers yet) | Low | Weak | Adequate | Ready | Partial | Partial | None | Partial | Neutral |
+| HbcAiResultPanel | C | (no app consumers yet) | Low | Weak | Weak | Ready | Partial | Partial | None | Partial | Weakens |
+
+**Assessment notes:**
+- **HbcAiActionMenu (C):** Button + popover with flat text. `aria-expanded`, `aria-haspopup`, `role="menu"` present. Trust-level classification and relevance scoring engine. ADR-0104 governs. **Significant gaps:** Visual design is rough — no design-system polish, no Griffel. Inline styles with hardcoded color tokens throughout. No component-level tests. Focus trap and keyboard navigation untested.
+- **HbcAiSmartInsertOverlay (C):** Table layout with inline buttons for schema-driven field mapping. Drag handle (⠿) is decorative only — no semantic meaning. Field remap UX needs significant work. No tests.
+- **HbcAiTrustMeter (C):** Progressive confidence disclosure: Essential = badge + disclaimer, Standard = badge + rationale, Expert = full details + tokens. Currently basic text — needs visual design.
+- **HbcAiGovernancePortal (C):** Admin governance portal stub. Functional contracts present but no production consumers.
+- **HbcAiLoadingState (C):** Streaming-aware loading indicator. Minimal but functional.
+- **HbcAiResultPanel (C):** Compatibility wrapper for AI results. Minimal.
+
+### `@hbc/shell` — Shell Infrastructure
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| ShellCore | B | all app roots (infrastructure) | Critical | N/A (orchestration) | N/A | Ready | Pass | N/A | Yes | Yes | Elevates |
+
+**Assessment notes:**
+- **ShellCore (B — infrastructure, not visual UI):** Orchestration coordinator for all Phase 5.5 layouts. Composes auth, routing, degraded-mode recovery, status rail, and layout slots. Does not render visual UI directly — delegates to composed children. `data-*` attributes for testing/debugging. Well-documented JSDoc. 18+ test files. ADR-0054–0071 governs (PH5 phase chain). **Note:** Shell's internal visual components (HeaderBar, AppLauncher, ProjectPicker, ContextualSidebar, ShellLayout) are not individually exported to apps; they are internal composition primitives. Visual quality of these internals is tracked via the app-shell components in the main matrix (HbcHeader, HbcSidebar, HbcProjectSelector, etc.).
+
+---
+
 ## Summary
 
 ### Tier Distribution
 
-| Tier | Component Count | Percentage |
-|------|----------------|------------|
-| **A** | 2 (HbcTypography, HbcThemeProvider) | 3% |
-| **B** | 46 | 70% |
-| **C** | 12 | 18% |
-| **D** | 7 | 11% |
-| **Total assessed** | **67** | |
+| Tier | `@hbc/ui-kit` | Platform & Shared Packages | Combined Total | Percentage |
+|------|---------------|---------------------------|----------------|------------|
+| **A** | 2 (HbcTypography, HbcThemeProvider) | 0 | 2 | 2% |
+| **B** | 47 (+1 HbcAnchoredPopover) | 17 | 64 | 72% |
+| **C** | 12 | 7 (ai-assist ×6, density system) | 19 | 21% |
+| **D** | 7 | 0 | 7 | 8% |
+| **Total assessed** | **68** | **24** | **92** | |
 
-*Hooks: A=6, B=9, C=3. Theme groups: A=3, B=4, C=1. Icons: B (single group). Passthrough/re-exports excluded from tier counts.*
+*ui-kit hooks: A=6, B=9, C=3. Theme groups: A=3, B=4, C=1. Icons: B (single group). Shell infrastructure: B (1 orchestrator). Passthrough/re-exports excluded from tier counts.*
 
 ### Wave 1-Critical Components by Tier
 
 | Tier | Critical | High | Medium | Low |
 |------|----------|------|--------|-----|
 | **A** | 1 (HbcThemeProvider) | 1 (HbcTypography) | 0 | 0 |
-| **B** | 10 | 26 | 7 | 3 |
-| **C** | 2 (HbcErrorBoundary, HbcSpinner) | 4 (HbcFormLayout, HbcToolboxFlyout, HbcFavoriteTools, HbcDrawingViewer) | 3 | 3 |
+| **B** | 12 (+HbcSmartEmptyState, +HbcComplexityDial) | 28 (+HbcStepWizard, +HbcStepSidebar) | 12 (+acknowledgment ×3, +versioned-record ×3) | 4 (+HbcAnchoredPopover) |
+| **C** | 2 (HbcErrorBoundary, HbcSpinner) | 4 (HbcFormLayout, HbcToolboxFlyout, HbcFavoriteTools, HbcDrawingViewer) | 3 | 9 (+ai-assist ×6) |
 | **D** | 0 | 0 | 4 | 3 |
 
 ### Highest-Risk Components (Wave 1-Critical AND Tier C or D)
 
 These components are on the Wave 1 critical path and do not meet production quality:
 
-| Component | Tier | W1 Crit | Primary Gap |
-|-----------|------|---------|-------------|
-| **HbcErrorBoundary** | C | Critical | Inline styles, hardcoded colors, no Griffel |
-| **HbcSpinner** | C | Critical | No reduced-motion handling, inline style bypass |
-| **HbcGlobalSearch** | C | Critical | No search panel rendered — delegates to external handler |
-| **HbcToolboxFlyout** | C | High | Core content is a Phase 5 placeholder string |
-| **HbcFavoriteTools** | C | High | Buttons have no onClick handler wired |
-| **HbcDrawingViewer** | C | High | No keyboard accessibility for markup tools |
-| **HbcFormLayout** | C | High | No responsive column collapse |
+| Component | Package | Tier | W1 Crit | Primary Gap |
+|-----------|---------|------|---------|-------------|
+| **HbcErrorBoundary** | ui-kit | C | Critical | Inline styles, hardcoded colors, no Griffel |
+| **HbcSpinner** | ui-kit | C | Critical | No reduced-motion handling, inline style bypass |
+| **HbcGlobalSearch** | ui-kit | C | Critical | No search panel rendered — delegates to external handler |
+| **HbcToolboxFlyout** | ui-kit | C | High | Core content is a Phase 5 placeholder string |
+| **HbcFavoriteTools** | ui-kit | C | High | Buttons have no onClick handler wired |
+| **HbcDrawingViewer** | ui-kit | C | High | No keyboard accessibility for markup tools |
+| **HbcFormLayout** | ui-kit | C | High | No responsive column collapse |
+
+*Note: All 7 highest-risk components remain within `@hbc/ui-kit`. The platform and shared-feature packages have no Tier C/D components on the Wave 1 critical path — their C-tier items (ai-assist) are all Low criticality.*
 
 ### Accessibility Concerns
 
 Components with failing or unknown accessibility status:
 
-| Component | A11y Status | Issue |
-|-----------|-------------|-------|
-| HbcPopover | Partial | No role attribute, trigger not keyboard-accessible |
-| HbcTearsheet | Partial | No aria-labelledby, 32px close button |
-| HbcChart | Unknown | Canvas rendering with no aria-label or role="img" |
-| HbcFormLayout | Unknown | Layout shell — no ARIA assessment performed |
-| HbcFormRow / HbcStickyFormFooter | Unknown | Not independently assessed for ARIA |
-| HbcCard | Unknown | No role or landmark attributes assessed |
-| All 5 complexity-aware stubs | Unknown | Stub implementations — no ARIA present |
+| Component | Package | A11y Status | Issue |
+|-----------|---------|-------------|-------|
+| HbcPopover | ui-kit | Partial | No role attribute, trigger not keyboard-accessible |
+| HbcTearsheet | ui-kit | Partial | No aria-labelledby, 32px close button |
+| HbcChart | ui-kit | Unknown | Canvas rendering with no aria-label or role="img" |
+| HbcFormLayout | ui-kit | Unknown | Layout shell — no ARIA assessment performed |
+| HbcFormRow / HbcStickyFormFooter | ui-kit | Unknown | Not independently assessed for ARIA |
+| HbcCard | ui-kit | Unknown | No role or landmark attributes assessed |
+| All 5 complexity-aware stubs | ui-kit | Unknown | Stub implementations — no ARIA present |
+| HbcAiActionMenu | ai-assist | Partial | Focus trap and keyboard navigation untested |
+| HbcAiSmartInsertOverlay | ai-assist | Partial | Drag handle (⠿) lacks semantic meaning |
+| HbcRelatedItemsPanel | related-items | Partial | Missing aria-live for dynamic group loading |
 
 ### Testing Coverage Gaps
 
-**Systemic gap:** Only 3 test files exist in the entire `@hbc/ui-kit` package:
+**`@hbc/ui-kit` systemic gap:** Only 3 test files exist in the entire package:
 - `HbcConnectivityBar.test.ts`
 - `HbcThemeContext.test.tsx`
 - `ThemeResponsiveness.test.tsx`
 
-**65 of 67 assessed components have zero test coverage.** This is the most significant systemic quality gap. Storybook stories (53 files) provide visual validation for most components, but no behavioral or regression testing exists.
+**65 of 68 assessed `@hbc/ui-kit` components have zero test coverage.** This remains the most significant systemic quality gap. Storybook stories (53 files) provide visual validation for most components, but no behavioral or regression testing exists.
+
+**Platform and shared-feature packages are significantly ahead on testing:**
+
+| Package | Test Files | Storybook Stories | A11y Addon |
+|---------|-----------|-------------------|------------|
+| @hbc/smart-empty-state | 8+ | 1 | Yes |
+| @hbc/complexity | 9+ | 2 | No |
+| @hbc/acknowledgment | 9+ | 3 | No |
+| @hbc/step-wizard | 10+ | 2 | No |
+| @hbc/versioned-record | 9+ | 3 | No |
+| @hbc/related-items | sparse | 2 | Yes |
+| @hbc/ai-assist | 14+ | 0 | No |
+| @hbc/shell | 18+ | 0 | No |
 
 ### Cross-Cutting Risks
 
@@ -376,7 +502,9 @@ Components with failing or unknown accessibility status:
 2. **Field mode gaps in module-specific components:** HbcScoreBar, HbcApprovalStepper, HbcPhotoGrid, HbcCalendarGrid, HbcDrawingViewer all hard-reference `HBC_SURFACE_LIGHT` and do not adapt.
 3. **`usePrefersReducedMotion` underuse:** Defined and exported but most animated components do not consult it.
 4. **Breakpoint constant duplication:** `grid.ts` and `breakpoints.ts` both define breakpoint values with some divergence.
+5. **Theme-token gap across platform packages:** All 8 non-ui-kit packages use pure CSS or inline styles rather than Griffel/theme tokens. This is the primary gap preventing any from reaching Tier A.
+6. **Scaffold-only adoption risk:** 4 packages (acknowledgment, versioned-record, related-items, ai-assist) have zero production consumers. Tier assignments are based on code quality and architecture; real-world composition quality is unvalidated.
 
 ---
 
-*End of UI Kit Component Maturity Matrix — WS1-T01 v1.0 (2026-03-16)*
+*End of UI Kit Component Maturity Matrix — WS1-T01 v2.0 (2026-03-16)*
