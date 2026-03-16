@@ -73,7 +73,7 @@ This log records all identified divergences between architectural planning docum
 | **Area** | Governance — Plan Approval |
 | **Description** | `docs/architecture/plans/MVP/HB-Intel-Wave-0-Buildout-Plan.md` v1.1 header states "Status: Proposed — awaiting review." Phase 0 has discovered that Wave 0 surface work (G4 and G5 T01–T08) is already built and recorded as `Canonical Current-State` in `current-state-map.md`. The plan's formal approval status has not caught up with the implementation work that was completed. |
 | **Classification** | **(c) Superseded — plan status is stale relative to actual implementation state** |
-| **Resolution** | The Wave 0 plan must be formally approved/signed-off by product owner and architecture owner. The plan header should be updated to "Approved" and individual group plans should record "Implementation complete" where that is true. **Action owner:** Product owner + architecture lead. **Blocker:** Yes — Phase 1 entry gate item. |
+| **Resolution** | PARTIAL — Document preparation complete (2026-03-16). Wave 0 Buildout Plan updated with: G4/G5 implementation evidence, formal approval checklist with signature table. Status changed from "Proposed — awaiting review" to "Proposed — Implementation Evidence Available; Ready for Formal Approval." ADR-0090 gate references corrected to ADR-0091 per D-004. Awaiting Product Owner + Architecture Owner signature to complete approval. **This item remains a Phase 1 entry blocker (BLOCKER-02 in P0-E1) until signed.** |
 
 ---
 
