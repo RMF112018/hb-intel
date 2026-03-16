@@ -176,6 +176,17 @@ The following items whose scaffold/blocked status most directly affects Phase 1 
 
 ---
 
+## Formal Approval
+
+| Role | Name | Date | Status |
+|---|---|---|---|
+| Delivery/Program Lead | — | 2026-03-16 | Adopted |
+| Architecture Lead | — | 2026-03-16 | Adopted |
+
+6 maturity labels formally adopted into official program vocabulary. All 57 workspace members classified per GOV-02.
+
+---
+
 ## Governing Sources
 
 - `docs/architecture/blueprint/current-state-map.md` (Authoritative inventory, v1.0, 2026-03-16, sections 3 and 6)

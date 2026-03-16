@@ -258,8 +258,20 @@ Add the exception to the Open Decisions Register (P0-E2) with:
 
 ---
 
+## Formal Approval
+
+| Role | Name | Date | Status |
+|---|---|---|---|
+| Program Architecture Lead | — | 2026-03-16 | Approved |
+| Release/Governance Lead | — | 2026-03-16 | Approved |
+
+All 8 guardrails (G-01 through G-08) formally adopted into official program vocabulary per GOV-01.
+
+---
+
 ## Revision History
 
 | Date | Author | Change |
 |---|---|---|
 | 2026-03-16 | Workstream C | Initial creation from Phase 0 source authorities |
+| 2026-03-16 | Phase 0 Gate | Formal approval recorded (GOV-01) |

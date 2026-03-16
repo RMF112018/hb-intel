@@ -1,0 +1,119 @@
+# P0-E1 Phase 1 Entry Gate — validates all 6 Phase 1 entry blockers before v1.0.0 release.
+# Created per P0-E1 BLOCKER-06 requirement.
+
+name: "Phase 1 Entry Gate (P0-E1)"
+
+on:
+  # P0-E1: manual trigger for on-demand gate validation.
+  workflow_dispatch:
+  # P0-E1: reusable workflow for composition into release pipelines.
+  workflow_call:
+
+jobs:
+  validate-gate:
+    # P0-E1: single job validates all Phase 1 entry blockers sequentially.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+
+      - name: "BLOCKER-01: Verify ADR-0091 gate references"
+        # P0-E1 BLOCKER-01: Phase 7 gate references (ADR-0090) must not appear in MVP plan gates.
+        run: |
+          FOUND=$(grep -r "ADR-0090" \
+            docs/architecture/plans/MVP/G1/ \
+            docs/architecture/plans/MVP/G2/ \
+            docs/architecture/plans/MVP/G3/ \
+            docs/architecture/plans/MVP/G4/ \
+            2>/dev/null || true)
+
+          if [ -n "$FOUND" ]; then
+            echo "::error::BLOCKER-01 FAILED — Phase 7 gate references (ADR-0090) found in MVP plan gates."
+            echo ""
+            echo "$FOUND"
+            exit 1
+          fi
+
+          echo "BLOCKER-01 passed: no ADR-0090 references in MVP plan gates."
+
+      - name: "BLOCKER-02: Verify Wave 0 plan approval status"
+        # P0-E1 BLOCKER-02: Wave 0 buildout plan must be approved.
+        run: |
+          if ! grep -q "Status: Approved" docs/architecture/plans/MVP/HB-Intel-Wave-0-Buildout-Plan.md; then
+            echo "::error::BLOCKER-02 FAILED — Wave 0 Buildout Plan does not contain 'Status: Approved'."
+            exit 1
+          fi
+
+          echo "BLOCKER-02 passed: Wave 0 Buildout Plan is approved."
+
+      - name: "BLOCKER-03: Verify scaffold-dependent packages carry deferral notice"
+        # P0-E1 BLOCKER-03: Scaffold-dependent packages must document their deferral from Phase 1 scope.
+        run: |
+          FAILED=0
+
+          for PKG in packages/post-bid-autopsy/README.md packages/score-benchmark/README.md packages/ai-assist/README.md; do
+            if ! grep -q "deferred from Phase 1 scope" "$PKG"; then
+              echo "::error::BLOCKER-03 FAILED — $PKG missing 'deferred from Phase 1 scope' notice."
+              FAILED=1
+            fi
+          done
+
+          if [ "$FAILED" -eq 1 ]; then
+            exit 1
+          fi
+
+          echo "BLOCKER-03 passed: all scaffold-dependent packages carry deferral notice."
+
+      - name: "BLOCKER-04: Run P1 platform and feature package tests"
+        # P0-E1 BLOCKER-04: All P1 packages must have passing test suites.
+        run: >-
+          pnpm turbo run test
+          --filter=@hbc/auth
+          --filter=@hbc/shell
+          --filter=@hbc/sharepoint-docs
+          --filter=@hbc/bic-next-move
+          --filter=@hbc/complexity
+          --filter=@hbc/acknowledgment
+          --filter=@hbc/step-wizard
+          --filter=@hbc/versioned-record
+          --filter=@hbc/field-annotations
+          --filter=@hbc/workflow-handoff
+          --filter=@hbc/session-state
+          --filter=@hbc/project-canvas
+          --filter=@hbc/post-bid-autopsy
+          --filter=@hbc/strategic-intelligence
+          --filter=@hbc/my-work-feed
+          --filter=@hbc/ai-assist
+          --filter=@hbc/notification-intelligence
+          --filter=@hbc/related-items
+          --filter=@hbc/score-benchmark
+          --filter=@hbc/smart-empty-state
+          --filter=@hbc/data-seeding
+          --filter=@hbc/query-hooks
+          --filter=@hbc/health-indicator
+
+      - name: "BLOCKER-05: Run app-level test suites"
+        # P0-E1 BLOCKER-05: All app surfaces must have passing test suites.
+        run: >-
+          pnpm
+          --filter @hbc/spfx-admin
+          --filter @hbc/spfx-estimating
+          --filter @hbc/spfx-accounting
+          --filter @hbc/pwa
+          --filter @hbc/spfx-project-hub
+          --filter @hbc/spfx-business-development
+          --filter @hbc/spfx-leadership
+          --filter @hbc/spfx-safety
+          --filter @hbc/spfx-quality-control-warranty
+          --filter @hbc/spfx-risk-management
+          --filter @hbc/spfx-operational-excellence
+          --filter @hbc/spfx-human-resources
+          test
+
+      - name: "Summary: Phase 1 Entry Gate result"
+        run: echo "All P0-E1 Phase 1 Entry Gate checks passed."

@@ -21,6 +21,13 @@ jobs:
           fi
           echo "Tag $TAG is valid"
 
+  p0-e1-gate:
+    # P0-E1 BLOCKER-06: Phase 1 entry gate must pass for v1.0.0 releases.
+    needs: validate-tag
+    if: startsWith(github.ref_name, 'v1.0.')
+    uses: ./.github/workflows/P0-E1-gate.yml
+    secrets: inherit
+
   e2e-gate:
     # D-PH6-16 release gate: staging E2E must succeed before production deployment.
     needs: validate-tag
@@ -29,7 +36,9 @@ jobs:
 
   deploy-production:
     # D-PH6-16 release gate: reusable deploy workflow executes only after successful E2E gate.
-    needs: e2e-gate
+    # For v1.0.x releases, also requires P0-E1 gate pass.
+    needs: [e2e-gate]
+    if: ${{ !startsWith(github.ref_name, 'v1.0.') || needs.p0-e1-gate.result == 'success' }}
     uses: ./.github/workflows/deploy-functions.yml
     with:
       environment: production

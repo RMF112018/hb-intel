@@ -55,21 +55,21 @@ Each item progresses through states:
 | ID | Title | Category | Priority | Owner | Deadline | Status |
 |---|---|---|---|---|---|---|
 | OD-001 | Maturity label adoption | Phase 0 Plan | HIGH | Arch Lead | Phase 0 Exit | RESOLVED |
-| OD-002 | Production-ready vs pilot-ready qualification | Phase 0 Plan | HIGH | Arch Lead + Product | Phase 0 Exit | PARTIALLY RESOLVED |
-| OD-003 | Demo artifact isolation strategy | Phase 0 Plan | MEDIUM | DevSecOps | Phase 1 Start | PARTIALLY RESOLVED |
-| OD-004 | Exception-handling strictness threshold | Phase 0 Plan | MEDIUM | Arch Lead | Phase 0 Exit | PARTIALLY RESOLVED |
-| OD-005 | Documentation sync completion criteria | Phase 0 Plan | HIGH | Arch Lead | Phase 0 Exit | PARTIALLY RESOLVED |
+| OD-002 | Production-ready vs pilot-ready qualification | Phase 0 Plan | HIGH | Arch Lead + Product | Phase 0 Exit | RESOLVED |
+| OD-003 | Demo artifact isolation strategy | Phase 0 Plan | MEDIUM | DevSecOps | Phase 1 Start | RESOLVED |
+| OD-004 | Exception-handling strictness threshold | Phase 0 Plan | MEDIUM | Arch Lead | Phase 0 Exit | DEFERRED (Phase 1) |
+| OD-005 | Documentation sync completion criteria | Phase 0 Plan | HIGH | Arch Lead | Phase 0 Exit | RESOLVED |
 | OD-006 | PH7-RM-* reclassification decision | Divergence Log | MEDIUM | Delivery Lead | Phase 1 Scope | RESOLVED |
 | OD-007 | SF16 & SF22 T08–T09 Phase 1 scope | Divergence Log | HIGH | Product Owner | Phase 0 Exit | RESOLVED |
 | OD-008 | Feature-Phase-Mapping-Recommendation.md archive | Divergence Log | LOW | Arch Lead | Phase 1 Housekeeping | RESOLVED |
-| OD-009 | promote-ideas.yml implementation | CI/CD & Release | MEDIUM | Platform/Core Services | Phase 1 Planning | OPEN |
-| OD-010 | App-level coverage threshold policy | CI/CD & Release | MEDIUM | DevSecOps | Phase 1 CI Config | OPEN |
-| OD-011 | SPFx production deploy automation | CI/CD & Release | HIGH | DevSecOps + Platform | Phase 1 Release SOP | OPEN |
-| OD-012 | Staging soak period requirement | CI/CD & Release | MEDIUM | Release/Gov Lead | Phase 1 First Release | OPEN |
-| OD-013 | Phase 1 production adapter target domains | Architecture | HIGH | Product Owner + Arch | Phase 0 Exit | OPEN |
-| OD-014 | Source-of-record mapping per domain | Architecture | HIGH | Product Owner + Arch | Phase 1 Start | OPEN |
-| OD-015 | @hbc/data-access production readiness | Architecture | HIGH | Platform/Core Services | Phase 1 Start | OPEN |
-| OD-016 | @hbc/versioned-record and @hbc/strategic-intelligence upgrade timeline | Architecture | HIGH | Arch Lead + Owners | Phase 1 Start | OPEN |
+| OD-009 | promote-ideas.yml implementation | CI/CD & Release | MEDIUM | Platform/Core Services | Phase 1 Planning | DEFERRED (Phase 1) |
+| OD-010 | App-level coverage threshold policy | CI/CD & Release | MEDIUM | DevSecOps | Phase 1 CI Config | DEFERRED (Phase 1) |
+| OD-011 | SPFx production deploy automation | CI/CD & Release | HIGH | DevSecOps + Platform | Phase 1 Release SOP | DEFERRED (Phase 1) |
+| OD-012 | Staging soak period requirement | CI/CD & Release | MEDIUM | Release/Gov Lead | Phase 1 First Release | DEFERRED (Phase 1) |
+| OD-013 | Phase 1 production adapter target domains | Architecture | HIGH | Product Owner + Arch | Phase 0 Exit | RESOLVED |
+| OD-014 | Source-of-record mapping per domain | Architecture | HIGH | Product Owner + Arch | Phase 1 Start | RESOLVED |
+| OD-015 | @hbc/data-access production readiness | Architecture | HIGH | Platform/Core Services | Phase 1 Start | RESOLVED |
+| OD-016 | @hbc/versioned-record and @hbc/strategic-intelligence upgrade timeline | Architecture | HIGH | Arch Lead + Owners | Phase 1 Start | DEFERRED (Phase 7) |
 | IDEA-001 | Automated maturity badge generation | Ideas | LOW | Platform Team | Phase 2 | CURATED |
 | IDEA-002 | ADR dependency graph | Ideas | LOW | Arch Lead | Phase 2 | CURATED |
 | IDEA-003 | Readiness matrix CI enforcement | Ideas | MEDIUM | DevSecOps | Phase 1 or 2 | CURATED |
