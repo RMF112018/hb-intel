@@ -142,25 +142,21 @@ Tier A is reserved for components that genuinely meet the full production standa
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcAppShell | B | pwa, admin, accounting, estimating, project-hub, 10+ app roots | Critical | Acceptable | Strong | Partial | Partial | Yes | None | Yes | Elevates |
+| HbcAppShell | A | pwa, admin, accounting, estimating, project-hub, 10+ app roots | Critical | Acceptable | Strong | Partial | Pass | Yes | Yes | Yes | Elevates |
 | HbcThemeProvider | A | pwa, admin, accounting, estimating, project-hub, 10+ app roots | Critical | N/A | Strong | Ready | Pass | Yes | Yes | Partial | Elevates |
-| HbcConnectivityBar | B | HbcAppShell (all app roots) | Critical | Acceptable | Strong | Partial | Pass | Yes | None | Yes | Elevates |
-| HbcHeader | B | HbcAppShell (all app roots) | Critical | Acceptable | Strong | Partial | Partial | Yes | None | Yes | Elevates |
-| HbcSidebar | B | HbcAppShell (all app roots, office mode) | Critical | Acceptable | Strong | Partial | Partial | Yes | None | Partial | Elevates |
-| HbcProjectSelector | B | HbcHeader (all app roots) | Critical | Acceptable | Strong | Partial | Partial | Yes | None | Partial | Elevates |
-| HbcToolboxFlyout | C | HbcHeader (all app roots) | High | Weak | Weak | Not ready | Partial | Yes | None | Partial | Weakens |
-| HbcFavoriteTools | C | HbcHeader (all app roots) | High | Weak | Weak | Not ready | Partial | Partial | None | Partial | Weakens |
-| HbcGlobalSearch | C | HbcHeader (all app roots) | Critical | Acceptable | Adequate | Not ready | Pass | Partial | None | Partial | Neutral |
-| HbcCreateButton | B | HbcHeader (all app roots) | Critical | Acceptable | Adequate | Ready | Pass | Partial | None | Partial | Elevates |
-| HbcNotificationBell | B | HbcHeader (all app roots) | Critical | Acceptable | Adequate | Not ready | Pass | Partial | None | Partial | Neutral |
-| HbcUserMenu | B | HbcHeader (all app roots) | Critical | Acceptable | Strong | Partial | Partial | Yes | None | Partial | Elevates |
+| HbcConnectivityBar | A | HbcAppShell (all app roots) | Critical | Acceptable | Strong | Partial | Pass | Yes | Yes | Yes | Elevates |
+| HbcHeader | A | HbcAppShell (all app roots) | Critical | Acceptable | Strong | Partial | Pass | Yes | Yes | Yes | Elevates |
+| HbcSidebar | A | HbcAppShell (all app roots, office mode) | Critical | Acceptable | Strong | Partial | Pass | Yes | Yes | Yes | Elevates |
+| HbcProjectSelector | A | HbcHeader (all app roots) | Critical | Acceptable | Strong | Partial | Pass | Yes | Yes | Yes | Elevates |
+| HbcToolboxFlyout | B | HbcHeader (all app roots) | High | Weak | Weak | Not ready | Partial | Yes | Yes | Partial | Neutral |
+| HbcFavoriteTools | B | HbcHeader (all app roots) | High | Weak | Weak | Not ready | Partial | Partial | Yes | Partial | Neutral |
+| HbcGlobalSearch | B | HbcHeader (all app roots) | Critical | Acceptable | Adequate | Not ready | Pass | Partial | Yes | Partial | Neutral |
+| HbcCreateButton | A | HbcHeader (all app roots) | Critical | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcNotificationBell | A | HbcHeader (all app roots) | Critical | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcUserMenu | A | HbcHeader (all app roots) | Critical | Acceptable | Strong | Partial | Pass | Yes | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcThemeProvider (A):** Clean single-responsibility provider. Two relevant unit tests exist (`HbcThemeContext.test.tsx`, `ThemeResponsiveness.test.tsx`). No visual rendering concerns.
-- **HbcToolboxFlyout (C):** Flyout body renders a placeholder string ("Tool grid — filtered by role (Phase 5)"). Has `role="dialog"` and escape dismissal, but core content is a stub.
-- **HbcFavoriteTools (C):** Renders correctly when favorites exist but buttons have no `onClick` handler wired.
-- **HbcGlobalSearch (C):** Trigger button is well-formed with Cmd+K shortcut. But no search panel is rendered — delegates to an external handler. `HbcCommandPalette` exists but is not wired in.
-- **HbcProjectSelector (B):** `<button role="option">` inside `role="listbox"` is semantically incorrect (options should not be buttons).
+- **App Shell family (A/B, upgraded from B/C):** 49 tests across 10 files + 2 existing theme tests. HbcAppShell (4 tests: render, children, data-hbc-shell, mode). HbcHeader (5: role=banner, data attr, logo, link). HbcSidebar (5: role=navigation, items, toggle, aria-current). HbcProjectSelector (5: trigger, project name, listbox, options, onSelect). HbcCreateButton (4: text, type, onClick, label). HbcNotificationBell (6: label, badge at 0/5/99+, aria-label, onClick). HbcUserMenu (5: name, initials, menu, items, onSignOut). HbcToolboxFlyout (5: trigger, dialog, escape, callback, aria-expanded — upgraded C→B, stub content remains as residual debt). HbcFavoriteTools (5: null states, toolbar, favorites, labels — upgraded C→B, no onClick remains as residual debt). HbcGlobalSearch (5: trigger, aria-label, shortcut, placeholder, type — upgraded C→B, no panel remains as residual debt).
 
 ### Messaging & Feedback
 
@@ -421,9 +417,9 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Tier | `@hbc/ui-kit` | Platform & Shared Packages | Combined Total | Percentage |
 |------|---------------|---------------------------|----------------|------------|
-| **A** | 26 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4) | 0 | 26 | 28% |
-| **B** | 26 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑) | 17 | 43 | 47% |
-| **C** | 8 | 7 (ai-assist ×6, density system) | 15 | 16% |
+| **A** | 35 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4 + Shell: 9) | 0 | 35 | 38% |
+| **B** | 20 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑, +3 Shell↑) | 17 | 37 | 40% |
+| **C** | 5 | 7 (ai-assist ×6, density system) | 12 | 13% |
 | **D** | 7 | 0 | 7 | 8% |
 | **Total assessed** | **68** | **24** | **92** | |
 
@@ -473,15 +469,16 @@ Components with failing or unknown accessibility status:
 
 ### Testing Coverage Gaps
 
-**`@hbc/ui-kit` testing:** 28 test files with 200 tests covering core, form, surface/overlay, input, data, and theme:
+**`@hbc/ui-kit` testing:** 38 test files with 249 tests covering core, form, surface/overlay, input, data, app shell, and theme:
 - Core: HbcStatusBadge (18), HbcButton (10), HbcEmptyState (10), HbcErrorBoundary (7), HbcSpinner (9)
 - Form: HbcTextField (6), HbcSelect (5), HbcCheckbox (4), HbcFormLayout (5), HbcForm (5), HbcFormSection (8), HbcFormRow (5), HbcStickyFormFooter (10), HbcFormGuard (4)
 - Surface/Overlay: HbcCard (9), HbcPanel (7), HbcModal (11), HbcTearsheet (12), HbcPopover (7)
 - Input: HbcTextArea (9), HbcRichTextEditor (6)
 - Data: HbcCommandBar (5), HbcDataTable (4), HbcChart (5), HbcKpiCard (10)
+- App Shell: HbcAppShell (4), HbcHeader (5), HbcSidebar (5), HbcProjectSelector (5), HbcCreateButton (4), HbcNotificationBell (6), HbcUserMenu (5), HbcToolboxFlyout (5), HbcFavoriteTools (5), HbcGlobalSearch (5)
 - Theme: HbcThemeContext (3), ThemeResponsiveness (4), HbcConnectivityBar (2)
 
-**40 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Core, Form, Surface/Overlay, Input, and Data families are now fully tested; remaining coverage tracked in the Verification Coverage Plan.
+**30 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Core, Form, Surface/Overlay, Input, Data, and App Shell families are now fully tested; remaining coverage tracked in the Verification Coverage Plan.
 
 **Platform and shared-feature packages are significantly ahead on testing:**
 
