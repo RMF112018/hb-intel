@@ -47,23 +47,24 @@ Tier A is reserved for components that genuinely meet the full production standa
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcStatusBadge | B | pwa, estimating, accounting, admin, project-hub, business-development, hb-site-control | High | Premium | Strong | Ready | Pass | Yes | None | Yes | Elevates |
+| HbcStatusBadge | A | pwa, estimating, accounting, admin, project-hub, business-development, hb-site-control | High | Premium | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
 | HbcPeoplePicker | D | estimating, pwa | Medium | Placeholder | Weak | Not ready | Partial | Partial | None | None | Weakens |
 | ProvisioningNotificationBanner | D | admin, pwa | Medium | Placeholder | Weak | Not ready | Partial | No | None | None | Weakens |
-| HbcEmptyState | B | pwa, estimating, accounting, admin, project-hub, business-development | High | Acceptable | Strong | Ready | Pass | Partial | None | Yes | Neutral |
-| HbcErrorBoundary | B | pwa, estimating, accounting, admin, project-hub, human-resources, safety, risk-management, operational-excellence, quality-control-warranty, leadership | Critical | Acceptable | Adequate | Ready | Partial | Partial | None | Yes | Neutral |
-| HbcButton | B | pwa, estimating, accounting, admin, project-hub | Critical | Acceptable | Adequate | Ready | Pass | Partial | None | Yes | Neutral |
+| HbcEmptyState | A | pwa, estimating, accounting, admin, project-hub, business-development | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcErrorBoundary | A | pwa, estimating, accounting, admin, project-hub, human-resources, safety, risk-management, operational-excellence, quality-control-warranty, leadership | Critical | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcButton | A | pwa, estimating, accounting, admin, project-hub | Critical | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
 | HbcTypography | A | pwa, estimating, accounting, admin, project-hub, business-development | High | Premium | Strong | Ready | Pass | Yes | None | Yes | Elevates |
-| HbcSpinner | B | pwa, estimating, accounting, admin, project-hub | Critical | Acceptable | Adequate | Ready | Pass | Partial | None | Yes | Neutral |
+| HbcSpinner | A | pwa, estimating, accounting, admin, project-hub | Critical | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcStatusBadge (B not A):** Dual-channel icons, forced-colors support, animation, full token coverage — excellent implementation. No test file prevents A.
+- **HbcStatusBadge (A, upgraded from B):** Dual-channel icons, forced-colors support, animation, full token coverage. 18 tests covering all 12 variants, aria-label, icon injection, size, className.
 - **HbcPeoplePicker (D):** Raw textarea with UPN string parsing. No chip display, no Microsoft Graph search, no validation. `tenantId` and `accessToken` props are silently discarded.
 - **ProvisioningNotificationBanner (D):** Uses Tailwind utility classes (`bg-blue-50`, etc.) — completely outside the HBC token and Griffel system. Emoji icons. No stories, no docs, no tests.
-- **HbcErrorBoundary (B, upgraded from C in WS1-T07):** Default fallback migrated to Griffel `makeStyles` with extracted `DefaultFallback` function component. Uses semantic typography tokens (`heading2`, `body`), status color tokens, and radii tokens. No remaining inline styles or hardcoded hex values.
-- **HbcButton (B not A):** Hover states now use semantic tokens (`HBC_ACCENT_ORANGE_HOVER`, `HBC_ACCENT_ORANGE_PRESSED`, `HBC_DANGER_HOVER`, `HBC_DANGER_PRESSED`) per WS1-T03. Touch auto-scale is well done. No test file prevents A.
+- **HbcEmptyState (A, upgraded from B):** Backward-compatible dual CTA pattern (icon/illustration, primaryAction/action). Reduced-motion compliant. 10 tests covering title, description, icon/illustration compat, primaryAction/action compat, dual actions, data attributes.
+- **HbcErrorBoundary (A, upgraded from B):** Default fallback migrated to Griffel (WS1-T07). Semantic typography tokens, status color tokens, radii tokens. 7 tests covering error catching, default fallback, retry, custom fallback render prop, onError callback.
+- **HbcButton (A, upgraded from B):** Hover states use semantic tokens per WS1-T03. Touch auto-scale well done. 10 tests covering variants, sizes, loading/disabled states, onClick, type forwarding.
 - **HbcTypography (A):** Fully tokenized via `hbcTypeScale`, correct semantic element mapping, polymorphic `as` prop, truncation utility. The closest thing to production-ready in the kit.
-- **HbcSpinner (B, upgraded from C in WS1-T07):** Added `prefers-reduced-motion` media query — replaces rotation with a gentle opacity pulse when user prefers reduced motion. Inline style for dimension/stroke is minimal and necessary for dynamic sizing.
+- **HbcSpinner (A, upgraded from B):** `prefers-reduced-motion` support (WS1-T07). 9 tests covering role="status", all 3 sizes with dimension/borderWidth, labels, custom color, data attributes.
 
 ### Form Components
 
@@ -425,8 +426,8 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Tier | `@hbc/ui-kit` | Platform & Shared Packages | Combined Total | Percentage |
 |------|---------------|---------------------------|----------------|------------|
-| **A** | 2 (HbcTypography, HbcThemeProvider) | 0 | 2 | 2% |
-| **B** | 47 (+1 HbcAnchoredPopover) | 17 | 64 | 72% |
+| **A** | 7 (HbcTypography, HbcThemeProvider, HbcStatusBadge, HbcButton, HbcEmptyState, HbcErrorBoundary, HbcSpinner) | 0 | 7 | 8% |
+| **B** | 42 (+1 HbcAnchoredPopover) | 17 | 59 | 64% |
 | **C** | 12 | 7 (ai-assist ×6, density system) | 19 | 21% |
 | **D** | 7 | 0 | 7 | 8% |
 | **Total assessed** | **68** | **24** | **92** | |
@@ -437,9 +438,8 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Tier | Critical | High | Medium | Low |
 |------|----------|------|--------|-----|
-| **A** | 1 (HbcThemeProvider) | 1 (HbcTypography) | 0 | 0 |
-| **B** | 12 (+HbcSmartEmptyState, +HbcComplexityDial) | 28 (+HbcStepWizard, +HbcStepSidebar) | 12 (+acknowledgment ×3, +versioned-record ×3) | 4 (+HbcAnchoredPopover) |
-| **B** *(upgraded)* | +2 (HbcErrorBoundary↑, HbcSpinner↑ — WS1-T07) | | | |
+| **A** | 4 (HbcThemeProvider, HbcErrorBoundary↑, HbcButton↑, HbcSpinner↑) | 2 (HbcTypography, HbcStatusBadge↑) + 1 (HbcEmptyState↑) | 0 | 0 |
+| **B** | 10 (+HbcSmartEmptyState, +HbcComplexityDial) | 28 (+HbcStepWizard, +HbcStepSidebar) | 12 (+acknowledgment ×3, +versioned-record ×3) | 4 (+HbcAnchoredPopover) |
 | **C** | 0 | 4 (HbcFormLayout, HbcToolboxFlyout, HbcFavoriteTools, HbcDrawingViewer) | 3 | 9 (+ai-assist ×6) |
 | **D** | 0 | 0 | 4 | 3 |
 
@@ -478,12 +478,17 @@ Components with failing or unknown accessibility status:
 
 ### Testing Coverage Gaps
 
-**`@hbc/ui-kit` systemic gap:** Only 3 test files exist in the entire package:
-- `HbcConnectivityBar.test.ts`
-- `HbcThemeContext.test.tsx`
-- `ThemeResponsiveness.test.tsx`
+**`@hbc/ui-kit` testing:** 8 test files with 63 tests covering core components and theme:
+- `HbcStatusBadge.test.tsx` (18 tests) — variants, aria-label, icon injection, sizes
+- `HbcButton.test.tsx` (10 tests) — variants, loading/disabled, onClick, type
+- `HbcEmptyState.test.tsx` (10 tests) — title, description, backward compat, actions
+- `HbcErrorBoundary.test.tsx` (7 tests) — error catching, fallback, retry, onError
+- `HbcSpinner.test.tsx` (9 tests) — role, sizes, labels, color
+- `HbcConnectivityBar.test.ts` (2 tests) — status rendering
+- `HbcThemeContext.test.tsx` (3 tests) — theme switching, SSR
+- `ThemeResponsiveness.test.tsx` (4 tests) — token validation
 
-**65 of 68 assessed `@hbc/ui-kit` components have zero test coverage.** This remains the most significant systemic quality gap. Storybook stories (53 files) provide visual validation for most components, but no behavioral or regression testing exists.
+**60 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Core components are now tested; remaining coverage is tracked in the Verification Coverage Plan.
 
 **Platform and shared-feature packages are significantly ahead on testing:**
 
