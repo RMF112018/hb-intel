@@ -84,7 +84,7 @@ This log records all identified divergences between architectural planning docum
 | **Area** | Planning — Document Classification |
 | **Description** | Nine Review Mode plans (`PH7-RM-1` through `PH7-RM-9`) are classified as "Deferred Scope" per `current-state-map.md` §2.1. Per the transition rule, these must be reclassified to "Canonical Normative Plan" when entering active development, or formally archived if out of scope. No reclassification decision has been made. |
 | **Classification** | **(b) Not-yet-implemented** |
-| **Resolution** | Requires an explicit decision: (1) assign to a named phase milestone and reclassify, or (2) formally archive. Add to Open Decisions Register (P0-E2). **Decision owner:** Delivery/program lead. **Deadline:** Phase 1 entry gate review. |
+| **Resolution** | Decision pending — tracked in P0-E2 OD-006. Recommendation: Assign PH7-RM-1 through PH7-RM-9 (review-mode feature suite) to Phase 3 (Project Hub and Project Context) milestone. Classification would change from "Deferred Scope" to "Canonical Normative Plan" upon Phase 3 scope confirmation. PH7-RM-* banners updated (2026-03-16) to reflect PH7.12 completion and pending Phase assignment. Pending product owner + delivery lead approval per OD-006. |
 
 ---
 

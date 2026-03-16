@@ -1,7 +1,7 @@
 # PH7-RM-6 — Session Summary Screen and Export
 
 
-> **Doc Classification:** Deferred Scope — remediation scope item identified during Phase 7 but not yet assigned to an active execution phase; confirm scheduling status before PH7.12 sign-off.
+> **Doc Classification:** Deferred Scope — Phase 7 remediation scope item. PH7.12 sign-off complete (2026-03-09, ADR-0091). Phase assignment decision pending (see OD-006 in P0-E2 Open Decisions Register). Do not implement until assigned to a Phase milestone.
 
 **Version:** 1.0
 **Governed by:** CLAUDE.md v1.2 · HB-Intel-Blueprint-V4.md
