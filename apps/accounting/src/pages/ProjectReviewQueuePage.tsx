@@ -12,13 +12,14 @@ import {
   PROJECT_SETUP_BIC_CONFIG,
 } from '@hbc/provisioning';
 import { resolveFullBicState } from '@hbc/bic-next-move';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import {
   WorkspacePageShell,
   HbcDataTable,
   HbcStatusBadge,
   HbcButton,
   HbcTabs,
-  HbcEmptyState,
 } from '@hbc/ui-kit';
 import type { LayoutTab, ColumnDef } from '@hbc/ui-kit';
 import { resolveSessionToken } from '../utils/resolveSessionToken.js';
@@ -38,6 +39,22 @@ const TAB_STATE_FILTER: Record<FilterTabId, string> = {
   clarification: 'NeedsClarification',
   external: 'AwaitingExternalSetup',
   failed: 'Failed',
+};
+
+const REVIEW_QUEUE_EMPTY_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: context.hasActiveFilters ? 'filter-empty' : 'truly-empty',
+    heading: 'No requests pending review',
+    description: context.hasActiveFilters
+      ? 'No requests match this filter. Try a different tab.'
+      : 'Requests will appear here once submitted for review.',
+    filterClearAction: context.hasActiveFilters
+      ? { label: 'Show Pending Review' }
+      : undefined,
+    coachingTip: 'Submitted project setup requests are routed here for controller review.',
+  }),
 };
 
 /**
@@ -77,6 +94,16 @@ export function ProjectReviewQueuePage(): ReactNode {
       .filter((r) => r.state === stateFilter)
       .sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
   }, [requests, activeTab]);
+
+  const emptyContext = useMemo<IEmptyStateContext>(() => ({
+    module: 'accounting',
+    view: activeTab,
+    hasActiveFilters: true,
+    hasPermission: true,
+    isFirstVisit: false,
+    currentUserRole: 'controller',
+    isLoadError: Boolean(loadError),
+  }), [activeTab, loadError]);
 
   const handleOpen = useCallback(
     (requestId: string) => {
@@ -183,7 +210,14 @@ export function ProjectReviewQueuePage(): ReactNode {
       <HbcTabs tabs={FILTER_TABS} activeTabId={activeTab} onTabChange={setActiveTab} />
 
       {filteredRequests.length === 0 ? (
-        <HbcEmptyState title="No requests pending review." />
+        <HbcSmartEmptyState
+          config={REVIEW_QUEUE_EMPTY_CONFIG}
+          context={emptyContext}
+          variant="inline"
+          onActionFired={(label) => {
+            if (label === 'Show Pending Review') setActiveTab('pending');
+          }}
+        />
       ) : (
         <HbcComplexityGate
           minTier="standard"

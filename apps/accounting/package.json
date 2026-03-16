@@ -23,6 +23,7 @@
     "@hbc/provisioning": "workspace:*",
     "@hbc/query-hooks": "workspace:*",
     "@hbc/shell": "workspace:*",
+    "@hbc/smart-empty-state": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@tanstack/react-query": "^5.75.0",
     "@tanstack/react-router": "^1.120.0",
