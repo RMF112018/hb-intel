@@ -472,7 +472,7 @@ export const ListLayout: React.FC<ListLayoutProps> = ({
                     height: '36px',
                     border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
                     borderRadius: '4px',
-                    padding: '0 8px',
+                    padding: `0 ${HBC_SPACE_SM}px`,
                     fontSize: '0.8125rem',
                     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
                     color: HBC_SURFACE_LIGHT['text-primary'],
@@ -547,8 +547,8 @@ export const ListLayout: React.FC<ListLayoutProps> = ({
           style={{
             display: 'flex',
             flexWrap: 'wrap',
-            gap: '8px',
-            paddingBottom: '8px',
+            gap: `${HBC_SPACE_SM}px`,
+            paddingBottom: `${HBC_SPACE_SM}px`,
           }}
         >
           {advancedFilters!.map((filter) => (
@@ -568,7 +568,7 @@ export const ListLayout: React.FC<ListLayoutProps> = ({
                   height: '36px',
                   border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
                   borderRadius: '4px',
-                  padding: '0 8px',
+                  padding: `0 ${HBC_SPACE_SM}px`,
                   fontSize: '0.8125rem',
                   backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
                   color: HBC_SURFACE_LIGHT['text-primary'],
