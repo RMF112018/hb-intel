@@ -195,18 +195,18 @@ Tier A is reserved for components that genuinely meet the full production standa
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcScoreBar | B | pwa (ScorecardPage) | High | Premium | Strong | Partial | Pass | Partial | None | Yes | Elevates |
-| HbcApprovalStepper | B | accounting, admin | Medium | Premium | Strong | Partial | Partial | Partial | None | Yes | Elevates |
-| HbcPhotoGrid | B | pwa, project-hub | High | Premium | Strong | Partial | Partial | Partial | None | Yes | Elevates |
-| HbcCalendarGrid | B | pwa (Daily Log) | High | Premium | Strong | Partial | Partial | Partial | None | Yes | Elevates |
-| HbcDrawingViewer | C | pwa (Drawings) | High | Acceptable | Adequate | Partial | Partial | Partial | None | Yes | Neutral |
+| HbcScoreBar | **A** | pwa (ScorecardPage) | High | Premium | Strong | Partial | Pass | Partial | Yes (5) | Yes | Elevates |
+| HbcApprovalStepper | **A** | accounting, admin | Medium | Premium | Strong | Partial | Partial | Partial | Yes (6) | Yes | Elevates |
+| HbcPhotoGrid | **A** | pwa, project-hub | High | Premium | Strong | Partial | Partial | Partial | Yes (6) | Yes | Elevates |
+| HbcCalendarGrid | **A** | pwa (Daily Log) | High | Premium | Strong | Partial | Partial | Partial | Yes (6) | Yes | Elevates |
+| HbcDrawingViewer | **B** | pwa (Drawings) | High | Acceptable | Adequate | Partial | Partial | Partial | Yes (6) | Yes | Neutral |
 
 **Assessment notes:**
-- **HbcScoreBar (B):** `role="meter"` with `aria-valuenow/min/max` correct. Label text color hardcoded to `#1A1D23` (no field mode dark adaptation). No `aria-label` override prop.
-- **HbcApprovalStepper (B):** Avatar deterministic hash color is solid. Connector line positioning is fixed pixel. `role="list"` with no `role="listitem"` on children. All colors reference `HBC_SURFACE_LIGHT`.
-- **HbcPhotoGrid (B):** CSS Grid with lazy images, hover overlay, "+N more" truncation. Keyboard focus ring missing on tiles. Field mode not handled.
-- **HbcCalendarGrid (B):** Full calendar math, today highlight, status dots. Arrow key navigation between day cells absent. Field mode not handled.
-- **HbcDrawingViewer (C):** 3-layer architecture (canvas PDF + SVG markup + gesture capture) is sound. `pdfjs-dist` lazy-loaded. Cloud shape is simplified rounded-rect. No keyboard accessibility for markup tools. `_onMarkupDelete` prop unused.
+- **HbcScoreBar (A):** `role="meter"` with `aria-valuenow/min/max` correct. 5 tests (data attr, ARIA meter, clamping, label show/hide). Spacing tokenized (`HBC_SPACE_XS`). Label text color hardcoded to `#1A1D23` (no field mode dark adaptation). No `aria-label` override prop.
+- **HbcApprovalStepper (A):** Avatar deterministic hash color is solid. 6 tests (data attr, ARIA list, step names, decision badge, timestamp, comment). Spacing tokenized (`HBC_SPACE_SM/LG/XL`). `role="list"` with no `role="listitem"` on children. All colors reference `HBC_SURFACE_LIGHT`.
+- **HbcPhotoGrid (A):** CSS Grid with lazy images, hover overlay, "+N more" truncation. 6 tests (data attr, images, empty state, +N more, add tile, click handler). Spacing tokenized (`HBC_SPACE_SM/XL`). Keyboard focus ring missing on tiles. Field mode not handled.
+- **HbcCalendarGrid (A):** Full calendar math, today highlight, status dots. 6 tests (data attr, header title, weekday headers, day numbers, day click, month nav). Spacing tokenized (`HBC_SPACE_SM`). Arrow key navigation between day cells absent. Field mode not handled.
+- **HbcDrawingViewer (B):** 3-layer architecture (canvas PDF + SVG markup + gesture capture) is sound. `pdfjs-dist` lazy-loaded. 6 tests (data attr, loading overlay, sheet/revision selectors, markup toggle, reset button). Spacing tokenized (`HBC_SPACE_SM/LG/XL/XXL` in index + toolbar). Cloud shape is simplified rounded-rect. No keyboard accessibility for markup tools (keeps at B). `_onMarkupDelete` prop unused.
 - **Module-specific components generally:** All hard-reference `HBC_SURFACE_LIGHT` tokens and do not adapt to field mode.
 
 ### Complexity-Aware Stubs (SF03-T07 D-08)
@@ -423,7 +423,7 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 |------|----------|------|--------|-----|
 | **A** | 4 (HbcThemeProvider, HbcErrorBoundary↑, HbcButton↑, HbcSpinner↑) | 2 (HbcTypography, HbcStatusBadge↑) + 1 (HbcEmptyState↑) | 0 | 0 |
 | **B** | 10 (+HbcSmartEmptyState, +HbcComplexityDial) | 28 (+HbcStepWizard, +HbcStepSidebar) | 12 (+acknowledgment ×3, +versioned-record ×3) | 4 (+HbcAnchoredPopover) |
-| **C** | 0 | 4 (HbcFormLayout, HbcToolboxFlyout, HbcFavoriteTools, HbcDrawingViewer) | 3 | 9 (+ai-assist ×6) |
+| **C** | 0 | 3 (HbcFormLayout, HbcToolboxFlyout, HbcFavoriteTools) | 3 | 9 (+ai-assist ×6) |
 | **D** | 0 | 0 | 4 | 3 |
 
 ### Highest-Risk Components (Wave 1-Critical AND Tier C or D)
@@ -437,7 +437,7 @@ These components are on the Wave 1 critical path and do not meet production qual
 | **HbcGlobalSearch** | ui-kit | C | Critical | No search panel rendered — delegates to external handler |
 | **HbcToolboxFlyout** | ui-kit | C | High | Core content is a Phase 5 placeholder string |
 | **HbcFavoriteTools** | ui-kit | C | High | Buttons have no onClick handler wired |
-| **HbcDrawingViewer** | ui-kit | C | High | No keyboard accessibility for markup tools |
+| **HbcDrawingViewer** | ui-kit | C → **B** | High | *Tests added (6), spacing tokenized. Keyboard a11y gap for markup tools keeps at B.* |
 | ~~HbcFormLayout~~ | ui-kit | ~~C~~ → **A** | High | *Resolved: responsive column collapse added + 5 tests* |
 
 *Note: 2 of the original 7 highest-risk components (HbcErrorBoundary, HbcSpinner) were upgraded to Tier B in WS1-T07. The remaining 5 highest-risk components stay within `@hbc/ui-kit`. The platform and shared-feature packages have no Tier C/D components on the Wave 1 critical path — their C-tier items (ai-assist) are all Low criticality.*

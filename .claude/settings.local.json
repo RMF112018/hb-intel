@@ -115,7 +115,9 @@
       "Bash(__NEW_LINE_ef34a7777794544a__ cat:*)",
       "Bash(/tmp/audit_report.txt:*)",
       "Read(//tmp/**)",
-      "Bash(for pkg:*)"
+      "Bash(for pkg:*)",
+      "Bash(for comp:*)",
+      "Read(//Users/bobbyfetting/hb-intel/packages/ui-kit/src/**)"
     ]
   },
   "enabledPlugins": {

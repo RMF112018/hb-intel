@@ -13,6 +13,7 @@ import {
   HBC_STATUS_COLORS,
   HBC_SURFACE_LIGHT,
 } from '../theme/tokens.js';
+import { HBC_SPACE_SM } from '../theme/grid.js';
 import type { CalendarDayData, HbcCalendarGridProps } from './types.js';
 
 const STATUS_DOT_COLORS: Record<string, string> = {
@@ -74,8 +75,8 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
     backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
     fontSize: '0.75rem',
     fontWeight: 600,

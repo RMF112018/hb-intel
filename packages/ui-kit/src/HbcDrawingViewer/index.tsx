@@ -13,6 +13,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { HBC_ACCENT_ORANGE, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { HBC_RADIUS_XL, HBC_RADIUS_LG, HBC_RADIUS_MD } from '../theme/radii.js';
+import { HBC_SPACE_SM, HBC_SPACE_LG, HBC_SPACE_XL, HBC_SPACE_XXL } from '../theme/grid.js';
 import { usePdfRenderer } from './hooks/usePdfRenderer.js';
 import { useTouchGestures } from './hooks/useTouchGestures.js';
 import { useMarkupState } from './hooks/useMarkupState.js';
@@ -31,8 +32,8 @@ const useStyles = makeStyles({
   header: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    height: '48px',
+    gap: `${HBC_SPACE_SM}px`,
+    height: `${HBC_SPACE_XXL}px`,
     paddingLeft: '12px',
     paddingRight: '12px',
     backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
@@ -40,9 +41,9 @@ const useStyles = makeStyles({
     flexWrap: 'wrap',
   },
   headerSelect: {
-    height: '32px',
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    height: `${HBC_SPACE_XL}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
     borderRadius: HBC_RADIUS_LG,
     border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
@@ -56,7 +57,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
-    height: '32px',
+    height: `${HBC_SPACE_XL}px`,
     paddingLeft: '12px',
     paddingRight: '12px',
     borderRadius: HBC_RADIUS_LG,
@@ -115,16 +116,16 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'column',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
     backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
     fontSize: '0.875rem',
     color: HBC_SURFACE_LIGHT['text-muted'],
-    paddingLeft: '24px',
-    paddingRight: '24px',
+    paddingLeft: `${HBC_SPACE_LG}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
     textAlign: 'center',
   },
   resetButton: {
-    height: '32px',
+    height: `${HBC_SPACE_XL}px`,
     paddingLeft: '12px',
     paddingRight: '12px',
     borderRadius: HBC_RADIUS_LG,

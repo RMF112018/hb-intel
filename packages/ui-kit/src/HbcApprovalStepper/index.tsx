@@ -9,6 +9,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { HBC_STATUS_COLORS, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { HBC_RADIUS_FULL } from '../theme/radii.js';
+import { HBC_SPACE_SM, HBC_SPACE_LG, HBC_SPACE_XL } from '../theme/grid.js';
 import type { ApprovalStep, HbcApprovalStepperProps } from './types.js';
 
 const DECISION_COLOR_MAP: Record<string, string> = {
@@ -42,15 +43,15 @@ const useStyles = makeStyles({
     flexDirection: 'row',
     gap: '12px',
     position: 'relative',
-    paddingBottom: '24px',
+    paddingBottom: `${HBC_SPACE_LG}px`,
   },
   stepHorizontal: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
     position: 'relative',
-    paddingRight: '32px',
+    paddingRight: `${HBC_SPACE_XL}px`,
     flex: 1,
   },
   connectorVertical: {
@@ -108,8 +109,8 @@ const useStyles = makeStyles({
     gap: '4px',
     paddingTop: '2px',
     paddingBottom: '2px',
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
     borderRadius: '12px',
     fontSize: '0.6875rem',
     fontWeight: 600,

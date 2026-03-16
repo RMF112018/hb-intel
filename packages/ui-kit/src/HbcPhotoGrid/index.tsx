@@ -9,12 +9,13 @@ import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { HBC_SURFACE_LIGHT, HBC_HEADER_TEXT } from '../theme/tokens.js';
 import { HBC_RADIUS_XL } from '../theme/radii.js';
+import { HBC_SPACE_SM, HBC_SPACE_XL } from '../theme/grid.js';
 import type { HbcPhotoGridProps } from './types.js';
 
 const useStyles = makeStyles({
   grid: {
     display: 'grid',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
   },
   tile: {
     position: 'relative',
@@ -36,8 +37,8 @@ const useStyles = makeStyles({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     display: 'flex',
     alignItems: 'flex-end',
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
     paddingLeft: '10px',
     paddingRight: '10px',
     opacity: 0,
@@ -103,8 +104,8 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: '32px',
-    paddingBottom: '32px',
+    paddingTop: `${HBC_SPACE_XL}px`,
+    paddingBottom: `${HBC_SPACE_XL}px`,
     color: HBC_SURFACE_LIGHT['text-muted'],
     fontSize: '0.875rem',
   },

@@ -9,6 +9,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { HBC_ACCENT_ORANGE, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { HBC_RADIUS_LG } from '../theme/radii.js';
+import { HBC_SPACE_SM, HBC_SPACE_XXL } from '../theme/grid.js';
 import type { MarkupShapeType } from './types.js';
 
 type ActiveTool = MarkupShapeType | 'select';
@@ -43,9 +44,9 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: '2px',
-    height: '48px',
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    height: `${HBC_SPACE_XXL}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
     backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
     borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
     overflowX: 'auto',

@@ -13,6 +13,7 @@ import {
   HBC_STATUS_RAMP_GREEN,
 } from '../theme/tokens.js';
 import { HBC_RADIUS_LG, HBC_RADIUS_SM } from '../theme/radii.js';
+import { HBC_SPACE_XS } from '../theme/grid.js';
 import type { HbcScoreBarProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -21,7 +22,7 @@ const useStyles = makeStyles({
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: `${HBC_SPACE_XS}px`,
   },
   track: {
     position: 'relative',
