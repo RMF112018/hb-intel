@@ -128,4 +128,29 @@ All Wave 1-critical compositions must communicate hierarchy within 3 seconds:
 
 ---
 
-*Visual Hierarchy and Depth Standards v1.0 — WS1-T04 (2026-03-16)*
+## Composition Evidence (WS1-T08)
+
+T08 composition review validated the hierarchy system across 10 Wave 1 page patterns. All 10 compositions pass hierarchy, scanability, and perceived quality criteria.
+
+### Patterns demonstrating hierarchy effectiveness
+
+**Dashboard summary (AccountingPage, ProjectHubPage):** KPI strip (heavy weight, summaryMetric content level) → chart zone (standard) → data table (standard). Three-zone hierarchy clearly communicates priority. KPI values at heading1/700 draw the eye before body-level data.
+
+**Detail page (RequestDetailPage):** Breadcrumb (light) → detail header with status badge (heavy, sectionTitle) → tab bar (standard, heading4) → content split 8:4 (standard primary, light secondary). Four-zone progressive weight reduction guides reading flow.
+
+**Form with Focus Mode (CreateUpdateLayout):** Form header (heavy) → centered form content (standard) → sticky footer (heavy). Focus Mode dims surrounding chrome, making the form the unambiguous focal point — a distinctive premium interaction not found in category competitors.
+
+**Work queue (ListLayout):** Filter toolbar at commandArea zone (standard) → data surface at primaryContent (standard) → floating bulk action bar at primaryAction (heavy on selection). The bulk action bar's appearance on selection creates an intentional weight shift that communicates state change.
+
+### Anti-flatness validation
+
+No composition exhibited the "flatness/sameness" anti-pattern. Key differentiators:
+- Card weight classes (`primary`/`standard`/`supporting`) prevent equal-weight card grids
+- Zone distinctions ensure page header, command area, and content area carry different visual weight
+- Elevation system provides visible depth separation between cards (level 1), panels (level 2-3), and modals (level 4)
+
+See `UI-Kit-Composition-Review.md` for the full 10-pattern × 10-criteria review matrix.
+
+---
+
+*Visual Hierarchy and Depth Standards v1.1 — WS1-T04 + T08 (2026-03-16)*

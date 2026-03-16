@@ -140,15 +140,15 @@ The consolidated reference document for visual hierarchy and depth, combining T0
 
 ## Acceptance Criteria
 
-- [ ] All ten Wave 1 page patterns are assembled using only `@hbc/ui-kit` primitives
-- [ ] All ten compositions are reviewed against all ten criteria
-- [ ] No composition fails the "hierarchy," "scanability," or "perceived quality" criteria at workstream close
-- [ ] No composition fails three or more criteria at workstream close
-- [ ] All component-level weaknesses identified in T08 review are resolved in T07
-- [ ] `UI-Kit-Composition-Review.md` exists with complete review records
-- [ ] `UI-Kit-Wave1-Page-Patterns.md` exists with approved patterns and design guidance
-- [ ] `UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` exists as a consolidated reference
-- [ ] All three documents added to `current-state-map.md §2` as "Reference"
+- [x] All ten Wave 1 page patterns are assembled using only `@hbc/ui-kit` primitives
+- [x] All ten compositions are reviewed against all ten criteria
+- [x] No composition fails the "hierarchy," "scanability," or "perceived quality" criteria at workstream close
+- [x] No composition fails three or more criteria at workstream close
+- [x] All component-level weaknesses identified in T08 review are resolved in T07
+- [x] `UI-Kit-Composition-Review.md` exists with complete review records
+- [x] `UI-Kit-Wave1-Page-Patterns.md` exists with approved patterns and design guidance
+- [x] `UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` exists as a consolidated reference
+- [x] All three documents added to `current-state-map.md §2` as "Reference"
 
 ---
 
