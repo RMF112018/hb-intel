@@ -184,14 +184,12 @@ Tier A is reserved for components that genuinely meet the full production standa
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcConfirmDialog | B | pwa, admin, accounting, estimating | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
-| HbcCommandPalette | B | pwa, admin | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
-| HbcBottomNav | B | pwa (mobile shell) | High | Acceptable | Adequate | Ready | Partial | Yes | None | Yes | Elevates |
+| HbcConfirmDialog | A | pwa, admin, accounting, estimating | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcCommandPalette | A | pwa, admin | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcBottomNav | A | pwa (mobile shell) | High | Acceptable | Adequate | Ready | Pass | Yes | Yes | Yes | Elevates |
 
 **Assessment notes:**
-- **HbcConfirmDialog (B, improved in WS1-T09):** Clean thin wrapper over `HbcModal`. Uses `role="alertdialog"` per WCAG alertdialog pattern (upgraded from `role="dialog"`). Loading state propagated to both buttons. Danger/warning variant branching correct.
-- **HbcCommandPalette (B):** Most complex interaction component. Focus trap, keyboard nav, offline awareness, mobile full-screen, field mode actions, AI query integration, confirmation for destructive actions. Recent items cannot re-execute after session end.
-- **HbcBottomNav (B):** iOS safe-area inset handled. Focus Mode integration via custom event. Missing `useFocusTrap` on More sheet; `aria-label` missing from individual nav items.
+- **Interaction Patterns family (A, upgraded from B):** 14 tests across 3 files + spacing tokenized. HbcConfirmDialog (5: open/close, onClose, onConfirm, loading). HbcCommandPalette (4: render, dialog ARIA, navigation items, Escape close + spacing tokenized: 8/16/24px → SM/MD/LG). HbcBottomNav (5: data attr, items, active, onNavigate, role=navigation + spacing tokenized: margin 8px → SM, padding 16px → MD).
 
 ### Module-Specific Patterns
 
@@ -411,8 +409,8 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Tier | `@hbc/ui-kit` | Platform & Shared Packages | Combined Total | Percentage |
 |------|---------------|---------------------------|----------------|------------|
-| **A** | 48 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4 + Shell: 9 + Layout: 5 + Msg: 3 + Nav: 5) | 0 | 48 | 52% |
-| **B** | 8 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑, +3 Shell↑, +1 ToolLandingLayout↑) | 17 | 25 | 27% |
+| **A** | 51 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4 + Shell: 9 + Layout: 5 + Msg: 3 + Nav: 5 + Interaction: 3) | 0 | 51 | 55% |
+| **B** | 5 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑, +3 Shell↑, +1 ToolLandingLayout↑) | 17 | 22 | 24% |
 | **C** | 4 | 7 (ai-assist ×6, density system) | 11 | 12% |
 | **D** | 7 | 0 | 7 | 8% |
 | **Total assessed** | **68** | **24** | **92** | |
@@ -463,7 +461,7 @@ Components with failing or unknown accessibility status:
 
 ### Testing Coverage Gaps
 
-**`@hbc/ui-kit` testing:** 52 test files with 325 tests covering core, form, surface/overlay, input, data, app shell, page shell/layouts, messaging, navigation, and theme:
+**`@hbc/ui-kit` testing:** 55 test files with 339 tests covering core, form, surface/overlay, input, data, app shell, page shell/layouts, messaging, navigation, interaction patterns, and theme:
 - Core: HbcStatusBadge (18), HbcButton (10), HbcEmptyState (10), HbcErrorBoundary (7), HbcSpinner (9)
 - Form: HbcTextField (6), HbcSelect (5), HbcCheckbox (4), HbcFormLayout (5), HbcForm (5), HbcFormSection (8), HbcFormRow (5), HbcStickyFormFooter (10), HbcFormGuard (4)
 - Surface/Overlay: HbcCard (9), HbcPanel (7), HbcModal (11), HbcTearsheet (12), HbcPopover (7)
@@ -473,9 +471,10 @@ Components with failing or unknown accessibility status:
 - Page Shell/Layouts: WorkspacePageShell (5), ToolLandingLayout (5), DetailLayout (5), CreateUpdateLayout (5), DashboardLayout (5), ListLayout (5)
 - Messaging: HbcBanner (10), HbcToastProvider (6), HbcTooltip (6)
 - Navigation: HbcBreadcrumbs (5), HbcTabs (5), HbcPagination (5), HbcSearch (4), HbcTree (5)
+- Interaction: HbcConfirmDialog (5), HbcCommandPalette (4), HbcBottomNav (5)
 - Theme: HbcThemeContext (3), ThemeResponsiveness (4), HbcConnectivityBar (2)
 
-**16 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Remaining families: Interaction Patterns, Module-Specific, Complexity-Aware Stubs.
+**13 of 68 assessed `@hbc/ui-kit` components still lack test coverage.** Remaining families: Module-Specific (5), Complexity-Aware Stubs (5), HbcAnchoredPopover (1), HbcRichTextEditor (has tests but B-tier), ProvisioningNotificationBanner (D).
 
 **Platform and shared-feature packages are significantly ahead on testing:**
 

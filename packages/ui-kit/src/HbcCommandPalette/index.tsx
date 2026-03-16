@@ -13,6 +13,7 @@
 import * as React from 'react';
 import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles, shorthands } from '@griffel/react';
+import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
 import { elevationLevel3 } from '../theme/elevation.js';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { HBC_SURFACE_FIELD, HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE } from '../theme/tokens.js';
@@ -78,7 +79,7 @@ const useStyles = makeStyles({
   searchWrapper: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
     padding: '12px 16px',
     borderBottom: '1px solid var(--hbc-palette-border)',
   },
@@ -109,7 +110,10 @@ const useStyles = makeStyles({
   results: {
     flex: '1 1 auto',
     overflowY: 'auto',
-    padding: '8px 0',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingRight: '0',
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: '0',
   },
   categoryLabel: {
     fontSize: '0.6875rem',
@@ -117,13 +121,19 @@ const useStyles = makeStyles({
     textTransform: 'uppercase',
     letterSpacing: '0.04em',
     color: 'var(--hbc-palette-text-muted)',
-    padding: '8px 16px 4px',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingBottom: '4px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
   },
   resultItem: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    padding: '8px 16px',
+    gap: `${HBC_SPACE_SM}px`,
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
     cursor: 'pointer',
     fontSize: '0.875rem',
     color: 'var(--hbc-palette-text-primary)',
@@ -158,11 +168,17 @@ const useStyles = makeStyles({
   offlineNote: {
     fontSize: '0.75rem',
     color: 'var(--hbc-palette-text-muted)',
-    padding: '8px 16px',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
     fontStyle: 'italic',
   },
   emptyState: {
-    padding: '24px 16px',
+    paddingTop: `${HBC_SPACE_LG}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_LG}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
     textAlign: 'center',
     fontSize: '0.875rem',
     color: 'var(--hbc-palette-text-muted)',

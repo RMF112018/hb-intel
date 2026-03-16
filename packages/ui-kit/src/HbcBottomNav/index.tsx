@@ -13,6 +13,7 @@
  */
 import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
+import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
 import { HBC_DARK_HEADER, HBC_ACCENT_ORANGE, HBC_HEADER_ICON_MUTED } from '../theme/tokens.js';
 import { keyframes, TRANSITION_FAST, TRANSITION_NORMAL } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
@@ -111,9 +112,9 @@ const useStyles = makeStyles({
     height: '4px',
     borderRadius: '2px',
     backgroundColor: '#555',
-    marginTop: '8px',
+    marginTop: `${HBC_SPACE_SM}px`,
     marginRight: 'auto',
-    marginBottom: '8px',
+    marginBottom: `${HBC_SPACE_SM}px`,
     marginLeft: 'auto',
     display: 'block',
   },
@@ -123,9 +124,9 @@ const useStyles = makeStyles({
     gap: '12px',
     width: '100%',
     paddingTop: '12px',
-    paddingRight: '16px',
+    paddingRight: `${HBC_SPACE_MD}px`,
     paddingBottom: '12px',
-    paddingLeft: '16px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
     backgroundColor: 'transparent',
     ...shorthands.borderStyle('none'),
     ...shorthands.borderWidth('0'),
