@@ -169,7 +169,7 @@ Each finding must be either:
 - or deferred with explicit classification and rationale.
 
 ### B4. Verify ADR requirements
-Confirm that ADR-0090 and any other gating ADR artifacts required by the governing docs are present, correct, and linked.
+Confirm that ADR-0091 and any other gating ADR artifacts required by the governing docs are present, correct, and linked.
 
 ## Deliverables
 - PH7 Final Verification Sign-Off Packet,
