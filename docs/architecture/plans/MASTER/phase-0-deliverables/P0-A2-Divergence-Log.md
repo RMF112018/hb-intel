@@ -71,7 +71,7 @@ This log records all identified divergences between architectural planning docum
 | Field | Value |
 |-------|-------|
 | **Area** | Governance — Plan Approval |
-| **Description** | `HB-Intel-Wave-0-Buildout-Plan.md` v1.1 header states "Status: Proposed — awaiting review." Phase 0 has discovered that Wave 0 surface work (G4 and G5 T01–T08) is already built and recorded as `Canonical Current-State` in `current-state-map.md`. The plan's formal approval status has not caught up with the implementation work that was completed. |
+| **Description** | `docs/architecture/plans/MVP/HB-Intel-Wave-0-Buildout-Plan.md` v1.1 header states "Status: Proposed — awaiting review." Phase 0 has discovered that Wave 0 surface work (G4 and G5 T01–T08) is already built and recorded as `Canonical Current-State` in `current-state-map.md`. The plan's formal approval status has not caught up with the implementation work that was completed. |
 | **Classification** | **(c) Superseded — plan status is stale relative to actual implementation state** |
 | **Resolution** | The Wave 0 plan must be formally approved/signed-off by product owner and architecture owner. The plan header should be updated to "Approved" and individual group plans should record "Implementation complete" where that is true. **Action owner:** Product owner + architecture lead. **Blocker:** Yes — Phase 1 entry gate item. |
 
