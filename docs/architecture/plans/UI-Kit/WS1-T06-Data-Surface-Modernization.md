@@ -170,12 +170,12 @@ Must include:
 
 ## Acceptance Criteria
 
-- [ ] Four adaptive data surface types are defined with when-to-use criteria and governing rules
-- [ ] All seven data interaction patterns are standardized (toolbar, filters, saved views, selection, bulk actions, row actions, sort/group)
-- [ ] Responsive collapse rules define priority order, progressive disclosure, and card fallback
-- [ ] No data surface type relies on horizontal scrolling as its default behavior
-- [ ] `UI-Kit-Adaptive-Data-Surface-Patterns.md` exists at the required location and is complete
-- [ ] Reference document added to `current-state-map.md §2` as "Reference"
+- [x] Four adaptive data surface types are defined with when-to-use criteria and governing rules
+- [x] All seven data interaction patterns are standardized (toolbar, filters, saved views, selection, bulk actions, row actions, sort/group)
+- [x] Responsive collapse rules define priority order, progressive disclosure, and card fallback
+- [x] No data surface type relies on horizontal scrolling as its default behavior
+- [x] `UI-Kit-Adaptive-Data-Surface-Patterns.md` exists at the required location and is complete
+- [x] Reference document added to `current-state-map.md §2` as "Reference"
 - [ ] T07 authors confirm the pattern library is implementable in component form
 - [ ] T08 authors confirm the decision guide is sufficient to evaluate composition choices
 
