@@ -250,7 +250,7 @@ ALL of the following are true:
   ✓ All six Phase 1 Entry Blockers (BLOCKER-01 through BLOCKER-06) are RESOLVED
   ✓ All four Governance Actions (GOV-01 through GOV-04) are COMPLETE with documented approval
   ✓ All four Phase 1 Data-Plane Readiness conditions (DATA-01/02/03, TELEMETRY-01) are VERIFIED
-  ✓ All Phase 0 Completion Gate checkboxes (23 items above) are CHECKED
+  ✓ All Phase 0 Completion Gate checkboxes (17 items above) are CHECKED
   ✓ Phase 0 Completion Report is signed by Program Architecture Lead, Delivery/Program Lead,
     and Release/Governance Lead
   ✓ Phase 1 Team is briefed, trained on guardrails, and ready to begin data-plane work
