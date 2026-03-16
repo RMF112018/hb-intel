@@ -12,6 +12,7 @@ import { TRANSITION_FAST } from '../theme/animations.js';
 import { HBC_PRIMARY_BLUE, HBC_STATUS_COLORS, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { hbcTypeScale } from '../theme/typography.js';
 import { HBC_RADIUS_XL } from '../theme/radii.js';
+import { HBC_SPACE_MD } from '../theme/grid.js';
 import type { HbcKpiCardProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -19,8 +20,8 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
-    paddingTop: '16px',
-    paddingBottom: '16px',
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
     paddingLeft: '20px',
     paddingRight: '20px',
     borderRadius: HBC_RADIUS_XL,

@@ -34,6 +34,7 @@ import {
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
+import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
 import { elevationRest } from '../theme/elevation.js';
 import { HBC_ACCENT_ORANGE } from '../theme/tokens.js';
@@ -186,15 +187,15 @@ const useStyles = makeStyles({
   thCompact: {
     paddingTop: '4px',
     paddingBottom: '4px',
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
     fontSize: '0.6875rem',
   },
   tdCompact: {
     paddingTop: '4px',
     paddingBottom: '4px',
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
     fontSize: '0.8125rem',
   },
   // Density: standard
@@ -206,25 +207,25 @@ const useStyles = makeStyles({
     fontSize: '0.75rem',
   },
   tdStandard: {
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
     paddingLeft: '12px',
     paddingRight: '12px',
     fontSize: '0.875rem',
   },
   // Density: touch
   thTouch: {
-    paddingTop: '16px',
-    paddingBottom: '16px',
-    paddingLeft: '16px',
-    paddingRight: '16px',
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
     fontSize: '0.875rem',
   },
   tdTouch: {
-    paddingTop: '16px',
-    paddingBottom: '16px',
-    paddingLeft: '16px',
-    paddingRight: '16px',
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
     fontSize: '1rem',
   },
   // Shimmer overlay layout wrapper. Animation styles are centralized in shared/shimmer.ts.
@@ -256,10 +257,10 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     gap: '0',
-    paddingTop: '8px',
-    paddingBottom: '8px',
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
   },
   // PH4.13: Frozen columns
   frozenCell: {
@@ -279,8 +280,8 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
     paddingLeft: '12px',
     paddingRight: '12px',
     fontSize: '0.813rem',
@@ -294,8 +295,8 @@ const useStyles = makeStyles({
   pageButton: {
     paddingTop: '4px',
     paddingBottom: '4px',
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
     fontSize: '0.813rem',
     border: '1px solid var(--colorNeutralStroke2)',
     borderRadius: '4px',
@@ -309,9 +310,9 @@ const useStyles = makeStyles({
   toolbar: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    gap: `${HBC_SPACE_SM}px`,
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
     paddingLeft: '12px',
     paddingRight: '12px',
     borderBottom: '1px solid var(--colorNeutralStroke2)',
@@ -328,8 +329,8 @@ const useStyles = makeStyles({
     minWidth: '180px',
     paddingTop: '4px',
     paddingBottom: '4px',
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
     borderRadius: '4px',
     border: '1px solid var(--colorNeutralStroke2)',
     backgroundColor: 'var(--colorNeutralBackground1)',
@@ -340,8 +341,8 @@ const useStyles = makeStyles({
     minWidth: '160px',
     paddingTop: '4px',
     paddingBottom: '4px',
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
     borderRadius: '4px',
     border: '1px solid var(--colorNeutralStroke2)',
     backgroundColor: 'var(--colorNeutralBackground1)',
@@ -351,8 +352,8 @@ const useStyles = makeStyles({
   toolbarButton: {
     paddingTop: '4px',
     paddingBottom: '4px',
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
     fontSize: '0.813rem',
     border: '1px solid var(--colorNeutralStroke2)',
     borderRadius: '4px',

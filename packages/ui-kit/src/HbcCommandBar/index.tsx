@@ -21,6 +21,7 @@ import { makeStyles } from '@griffel/react';
 import { elevationRaised } from '../theme/elevation.js';
 import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE, HBC_STATUS_COLORS, HBC_HEADER_TEXT, HBC_DANGER_HOVER } from '../theme/tokens.js';
 import { HbcTooltip } from '../HbcTooltip/index.js';
+import { HBC_SPACE_SM } from '../theme/grid.js';
 import { MoreActions } from '../icons/index.js';
 import type { HbcCommandBarProps, CommandBarAction, DensityTier } from './types.js';
 
@@ -40,14 +41,14 @@ const useStyles = makeStyles({
   root: {
     display: 'flex',
     alignItems: 'center',
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
     paddingLeft: '12px',
     paddingRight: '12px',
     boxShadow: elevationRaised,
     backgroundColor: 'var(--colorNeutralBackground1)',
     borderRadius: '4px',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
     flexWrap: 'wrap',
   },
   search: {
