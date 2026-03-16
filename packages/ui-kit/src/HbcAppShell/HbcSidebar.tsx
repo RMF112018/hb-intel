@@ -16,6 +16,7 @@ import { Z_INDEX } from '../theme/z-index.js';
 import { Expand, Collapse } from '../icons/index.js';
 import { useSidebarState } from './hooks/useSidebarState.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
+import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
 import type { HbcSidebarProps, SidebarNavGroup, SidebarNavItem } from './types.js';
 
 const useStyles = makeStyles({
@@ -47,9 +48,9 @@ const useStyles = makeStyles({
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
     color: tokens.colorNeutralForeground3,
-    paddingLeft: '16px',
-    paddingRight: '16px',
-    paddingTop: '16px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingTop: `${HBC_SPACE_MD}px`,
     paddingBottom: '4px',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -68,10 +69,10 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: '12px',
     width: '100%',
-    paddingLeft: '16px',
-    paddingRight: '16px',
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
     backgroundColor: 'transparent',
     ...shorthands.borderStyle('none'),
     ...shorthands.borderLeft('3px', 'solid', 'transparent'),

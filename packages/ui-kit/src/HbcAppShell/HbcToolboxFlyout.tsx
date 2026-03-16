@@ -11,6 +11,7 @@ import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { HBC_HEADER_ICON_MUTED, HBC_SURFACE_FIELD } from '../theme/tokens.js';
 import { elevationLevel2 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
+import { HBC_SPACE_MD } from '../theme/grid.js';
 import { Toolbox } from '../icons/index.js';
 import type { HbcToolboxFlyoutProps } from './types.js';
 
@@ -44,10 +45,10 @@ const useStyles = makeStyles({
     ...shorthands.borderRadius('8px'),
     boxShadow: elevationLevel2,
     zIndex: Z_INDEX.popover,
-    paddingLeft: '16px',
-    paddingRight: '16px',
-    paddingTop: '16px',
-    paddingBottom: '16px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
   },
   placeholder: {
     fontSize: '0.875rem',

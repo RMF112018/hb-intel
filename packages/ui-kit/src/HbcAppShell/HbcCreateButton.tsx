@@ -7,6 +7,7 @@ import { makeStyles, shorthands } from '@griffel/react';
 import { HBC_ACCENT_ORANGE, HBC_ACCENT_ORANGE_HOVER, HBC_ACCENT_ORANGE_PRESSED, HBC_HEADER_TEXT } from '../theme/tokens.js';
 import { label } from '../theme/typography.js';
 import { HBC_RADIUS_MD } from '../theme/radii.js';
+import { HBC_SPACE_MD } from '../theme/grid.js';
 import { CloudOffline, Create } from '../icons/index.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import type { HbcCreateButtonProps } from './types.js';
@@ -21,8 +22,8 @@ const useStyles = makeStyles({
     ...label,
     ...shorthands.borderStyle('none'),
     ...shorthands.borderRadius(HBC_RADIUS_MD),
-    paddingLeft: '16px',
-    paddingRight: '16px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
     paddingTop: '8px',
     paddingBottom: '8px',
     cursor: 'pointer',

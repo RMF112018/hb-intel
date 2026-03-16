@@ -13,6 +13,7 @@ import { heading4 } from '../theme/typography.js';
 import { HBC_HEADER_TEXT, HBC_HEADER_ICON_MUTED, HBC_SURFACE_FIELD } from '../theme/tokens.js';
 import { elevationLevel2 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
+import { HBC_SPACE_SM } from '../theme/grid.js';
 import { ChevronDown } from '../icons/index.js';
 import type { HbcProjectSelectorProps } from './types.js';
 
@@ -26,8 +27,8 @@ const useStyles = makeStyles({
     color: HBC_HEADER_TEXT,
     backgroundColor: 'transparent',
     ...shorthands.borderStyle('none'),
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
     paddingTop: '4px',
     paddingBottom: '4px',
     ...shorthands.borderRadius('4px'),

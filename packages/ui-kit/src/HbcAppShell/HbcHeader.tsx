@@ -10,6 +10,7 @@ import { makeStyles, shorthands } from '@griffel/react';
 import { HBC_DARK_HEADER, HBC_HEADER_TEXT } from '../theme/tokens.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { HBC_BREAKPOINT_SIDEBAR } from '../theme/breakpoints.js';
+import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
 import { ViewGrid } from '../icons/index.js';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
@@ -33,8 +34,8 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingLeft: '16px',
-    paddingRight: '16px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
     boxSizing: 'border-box',
     zIndex: Z_INDEX.header,
   },
@@ -47,7 +48,7 @@ const useStyles = makeStyles({
   center: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
     flexGrow: 1,
     justifyContent: 'center',
     // PH4C.12: align toolbar collapse with canonical sidebar boundary.
@@ -58,7 +59,7 @@ const useStyles = makeStyles({
   right: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
     flexShrink: 0,
   },
   logoLink: {

@@ -6,6 +6,7 @@ import * as React from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
 import { HBC_HEADER_TEXT, HBC_STATUS_COLORS } from '../theme/tokens.js';
 import { HBC_RADIUS_MD, HBC_RADIUS_XL } from '../theme/radii.js';
+import { HBC_SPACE_SM } from '../theme/grid.js';
 import { Notifications } from '../icons/index.js';
 import type { HbcNotificationBellProps } from './types.js';
 
@@ -18,10 +19,10 @@ const useStyles = makeStyles({
     backgroundColor: 'transparent',
     ...shorthands.borderStyle('none'),
     cursor: 'pointer',
-    paddingLeft: '8px',
-    paddingRight: '8px',
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
     ...shorthands.borderRadius(HBC_RADIUS_MD),
     ':hover': {
       backgroundColor: 'rgba(255, 255, 255, 0.1)',

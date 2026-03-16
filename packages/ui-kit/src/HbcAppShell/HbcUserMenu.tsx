@@ -9,6 +9,7 @@ import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { tokens } from '@fluentui/react-components';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { HBC_HEADER_TEXT, HBC_SURFACE_FIELD } from '../theme/tokens.js';
+import { HBC_SPACE_SM } from '../theme/grid.js';
 import { elevationLevel2 } from '../theme/elevation.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import type { HbcUserMenuProps } from './types.js';
@@ -43,7 +44,7 @@ const useStyles = makeStyles({
     position: 'absolute',
     top: '100%',
     right: '0px',
-    marginTop: '8px',
+    marginTop: `${HBC_SPACE_SM}px`,
     minWidth: '200px',
     ...shorthands.borderRadius('8px'),
     boxShadow: elevationLevel2,
