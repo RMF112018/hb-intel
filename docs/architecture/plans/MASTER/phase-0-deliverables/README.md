@@ -12,11 +12,11 @@ This directory contains the seven mandatory Phase 0 deliverables as defined in [
 |------|-----------|-----------|--------|
 | P0-A1-Reconciliation-Memo.md | A — Truth Reconciliation | M0.1 | Draft |
 | P0-A2-Divergence-Log.md | A — Truth Reconciliation | M0.1 | Draft |
-| P0-B1-Production-Readiness-Matrix.md | B — Readiness Classification | M0.2 | Pending |
-| P0-C1-Development-Guardrail-Sheet.md | C — Boundary and Governance Rule Lock | M0.3 | Pending |
-| P0-D1-Environment-and-Promotion-Matrix.md | D — Release and Environment Control | M0.4 | Pending |
-| P0-E1-Phase1-Entry-Checklist.md | E — Phase 1 Entry Definition | M0.5 | Pending |
-| P0-E2-Open-Decisions-Register.md | E — Phase 1 Entry Definition | M0.5 | Pending |
+| P0-B1-Production-Readiness-Matrix.md | B — Readiness Classification | M0.2 | Draft |
+| P0-C1-Development-Guardrail-Sheet.md | C — Boundary and Governance Rule Lock | M0.3 | Draft |
+| P0-D1-Environment-and-Promotion-Matrix.md | D — Release and Environment Control | M0.4 | Draft |
+| P0-E1-Phase1-Entry-Checklist.md | E — Phase 1 Entry Definition | M0.5 | Draft |
+| P0-E2-Open-Decisions-Register.md | E — Phase 1 Entry Definition | M0.5 | Draft |
 
 ### Document Status
 
