@@ -11,10 +11,10 @@
  *  - compact:     28px (dense desktop)
  */
 import { useDensity } from '../../theme/useDensity.js';
-import type { DensityTier } from '../../theme/density.js';
+import { DENSITY_BREAKPOINTS, type DensityTier } from '../../theme/density.js';
 
 const INPUT_MIN_HEIGHT: Record<DensityTier, number> = {
-  touch: 56,
+  touch: DENSITY_BREAKPOINTS.touch,
   comfortable: 36,
   compact: 28,
 };

@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
+import { BREAKPOINT_MOBILE, BREAKPOINT_TABLET, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
 import type { HbcFormLayoutProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -17,31 +18,31 @@ const useStyles = makeStyles({
   col1: { gridTemplateColumns: '1fr' },
   col2: {
     gridTemplateColumns: '1fr',
-    '@media (min-width: 768px)': {
+    [`@media (min-width: ${BREAKPOINT_MOBILE}px)`]: {
       gridTemplateColumns: '1fr 1fr',
     },
   },
   col3: {
     gridTemplateColumns: '1fr',
-    '@media (min-width: 768px)': {
+    [`@media (min-width: ${BREAKPOINT_MOBILE}px)`]: {
       gridTemplateColumns: '1fr 1fr',
     },
-    '@media (min-width: 1024px)': {
+    [`@media (min-width: ${BREAKPOINT_TABLET}px)`]: {
       gridTemplateColumns: '1fr 1fr 1fr',
     },
   },
   col4: {
     gridTemplateColumns: '1fr',
-    '@media (min-width: 768px)': {
+    [`@media (min-width: ${BREAKPOINT_MOBILE}px)`]: {
       gridTemplateColumns: '1fr 1fr',
     },
-    '@media (min-width: 1024px)': {
+    [`@media (min-width: ${BREAKPOINT_TABLET}px)`]: {
       gridTemplateColumns: '1fr 1fr 1fr 1fr',
     },
   },
-  gapSmall: { gap: '8px' },
-  gapMedium: { gap: '16px' },
-  gapLarge: { gap: '24px' },
+  gapSmall: { gap: `${HBC_SPACE_SM}px` },
+  gapMedium: { gap: `${HBC_SPACE_MD}px` },
+  gapLarge: { gap: `${HBC_SPACE_LG}px` },
 });
 
 const COL_MAP = {

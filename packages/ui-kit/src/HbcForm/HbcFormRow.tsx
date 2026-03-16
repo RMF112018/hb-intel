@@ -7,7 +7,7 @@
  */
 import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import { BREAKPOINT_MOBILE } from '../theme/grid.js';
+import { BREAKPOINT_MOBILE, HBC_SPACE_MD } from '../theme/grid.js';
 import type { HbcFormRowProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -26,7 +26,7 @@ const useStyles = makeStyles({
 
 export const HbcFormRow: React.FC<HbcFormRowProps> = ({
   children,
-  gap = '16px',
+  gap = HBC_SPACE_MD,
   className,
 }) => {
   const styles = useStyles();

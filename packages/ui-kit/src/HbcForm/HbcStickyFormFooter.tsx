@@ -10,6 +10,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { elevationRaised } from '../theme/elevation.js';
+import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
 import { HbcButton } from '../HbcButton/index.js';
 import type { HbcStickyFormFooterProps } from './types.js';
 
@@ -18,8 +19,11 @@ const useStyles = makeStyles({
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    gap: '8px',
-    padding: '12px 16px',
+    gap: `${HBC_SPACE_SM}px`,
+    paddingTop: '12px',
+    paddingBottom: '12px',
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
     boxShadow: elevationRaised,
     borderTop: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,

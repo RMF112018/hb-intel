@@ -7,20 +7,21 @@ import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { TRANSITION_NORMAL } from '../theme/animations.js';
 import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
+import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
 import { ChevronDown, ChevronUp } from '../icons/index.js';
 import type { HbcFormSectionProps } from './types.js';
 
 const useStyles = makeStyles({
   root: {
     borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-    paddingBottom: '16px',
-    marginBottom: '16px',
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    marginBottom: `${HBC_SPACE_MD}px`,
   },
   header: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
     marginBottom: '12px',
   },
   headerClickable: {
