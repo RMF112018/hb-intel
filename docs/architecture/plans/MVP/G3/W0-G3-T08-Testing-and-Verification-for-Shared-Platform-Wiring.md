@@ -532,7 +532,7 @@ The following tests must pass before G3-integrated surfaces are deployed to the 
 - [ ] All 9 G3 reference documents exist at `docs/reference/workflow-experience/`
 - [ ] All 9 are added to `current-state-map.md §2`
 - [ ] T07 integration validation checklist has been executed and all items checked
-- [ ] ADR-0090 (Phase 7 sign-off) exists on disk
+- [ ] ADR-0091 (Phase 7 sign-off) exists on disk
 
 ### Mechanical Gate
 

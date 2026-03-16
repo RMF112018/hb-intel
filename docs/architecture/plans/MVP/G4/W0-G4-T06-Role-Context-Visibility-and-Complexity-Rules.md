@@ -9,7 +9,7 @@
 **Governed by:** CLAUDE.md v1.6 → `current-state-map.md` → G3-T06 → G4 master plan → this document
 **Depends on:** G3-T06 (complexity gate spec table), T01–T05 (surfaces to validate)
 **Unlocks:** T07 (complexity integration rules), T08 (visibility tests)
-**Phase 7 gate:** ADR-0090 must exist on disk before implementation begins
+**Phase 7 gate:** ADR-0091 must exist on disk before implementation begins
 
 ---
 

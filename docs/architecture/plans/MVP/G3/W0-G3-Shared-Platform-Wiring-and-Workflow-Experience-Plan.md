@@ -10,7 +10,7 @@
 **Wave 0 umbrella reference:** `docs/architecture/plans/MVP/HB-Intel-Wave-0-Buildout-Plan.md`
 **Validation basis:** `docs/architecture/plans/MVP/wave-0-validation-report.md`
 **Next ADR available:** ADR-0114 (see G1 plan; G3 may produce ADR-0115 and beyond)
-**Phase 7 gate:** ADR-0090 must exist on disk before G3 implementation proceeds (CLAUDE.md §6.3)
+**Phase 7 gate:** ADR-0091 must exist on disk before G3 implementation proceeds (CLAUDE.md §6.3)
 
 ---
 

@@ -70,7 +70,7 @@ Implementation agents working on any T06 or T07 task from the Project Setup plan
 All Group 1 plans are governed by CLAUDE.md v1.6 in full. Specific binding constraints applied in this group:
 
 - **Zero-Deviation Rule (§1.2):** Any deviation from locked decisions in T01–T05 requires a superseding ADR. Decision outputs from Group 1 become locked once approved.
-- **Phase 7 Gate (§6.3):** Group 1 planning may proceed before Phase 7 closes; Group 1 *implementation* (validation work, config management) may proceed concurrently with Phase 7 closure if the work is clearly bounded. Group 2 implementation may not begin until ADR-0090 exists on disk.
+- **Phase 7 Gate (§6.3):** Group 1 planning may proceed before Phase 7 closes; Group 1 *implementation* (validation work, config management) may proceed concurrently with Phase 7 closure if the work is clearly bounded. Group 2 implementation may not begin until ADR-0091 exists on disk.
 - **Guarded Commit Rule (§1.5):** Any code or documentation changes made during Group 1 must commit through `pnpm guarded:commit`.
 - **Document Classification Rule (§1.4):** All outputs produced by Group 1 must carry a document classification.
 
