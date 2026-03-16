@@ -1,0 +1,382 @@
+# UI Kit Component Maturity Matrix
+
+> **Doc Classification:** Living Reference (Diátaxis) — WS1-T01 maturity baseline for `@hbc/ui-kit` v2.1.0; governs T07 polish sequencing, T11 test prioritization, T12 consumer audit scope, and T13 production-readiness scorecard baseline.
+
+**Produced by:** WS1-T01 (UI Kit Inventory, Maturity Scoring, and Consumer Map)
+**Date:** 2026-03-16
+**Governing plan:** `docs/architecture/plans/UI-Kit/WS1-T01-Inventory-Maturity-Scoring-Consumer-Map.md`
+
+---
+
+## How to Read This Matrix
+
+### Maturity Tiers
+
+| Tier | Label | Meaning |
+|------|-------|---------|
+| **A** | Production-ready | Visually polished, accessible, tested, documented, field-capable, and proven in real compositions. No known quality gaps. |
+| **B** | Strong but needs polish | Functionally solid and visually close, but has identified gaps in polish, spacing rhythm, hierarchy expression, field readiness, or documentation. Addressable in T07. |
+| **C** | Functional but incomplete | Works correctly but visually immature, underdocumented, undertested, or missing key states. Requires significant work in T07. |
+| **D** | Placeholder / minimal | Minimal implementation that does not meet production quality. Must be upgraded or removed from the critical path. |
+
+### Column Key
+
+| Column | Values | What It Captures |
+|--------|--------|------------------|
+| **Tier** | A / B / C / D | Overall maturity classification |
+| **Consumers** | App and package names | Which packages import this component |
+| **W1 Crit** | Critical / High / Medium / Low | Wave 1 surface dependency (PWA, Project Hub, other Wave 1 apps) |
+| **Visual** | Premium / Acceptable / Weak / Placeholder | Visual polish level |
+| **Hierarchy** | Strong / Adequate / Weak | Contribution to visual hierarchy in compositions |
+| **Field** | Ready / Partial / Not ready | Usability in bright-light, imprecise-touch, gloved conditions |
+| **A11y** | Pass / Partial / Unknown / Fail | Keyboard, ARIA, contrast compliance |
+| **Theme** | Yes / Partial / No | Correct behavior across all active themes |
+| **Tests** | Yes / Partial / None | Unit, interaction, or visual regression tests |
+| **Docs** | Yes / Partial / None | Reference doc and/or Storybook stories |
+| **Comp** | Elevates / Neutral / Weakens | Contribution to overall composition quality |
+
+### Honesty Standard
+
+Tier A is reserved for components that genuinely meet the full production standard. An over-optimistic matrix wastes T07 effort and produces a false T13 baseline.
+
+---
+
+## Components — Main Entry Point (`@hbc/ui-kit`)
+
+### Core Components
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcStatusBadge | B | pwa, estimating, accounting, admin, project-hub, business-development, hb-site-control | High | Premium | Strong | Ready | Pass | Yes | None | Yes | Elevates |
+| HbcPeoplePicker | D | estimating, pwa | Medium | Placeholder | Weak | Not ready | Partial | Partial | None | None | Weakens |
+| ProvisioningNotificationBanner | D | admin, pwa | Medium | Placeholder | Weak | Not ready | Partial | No | None | None | Weakens |
+| HbcEmptyState | B | pwa, estimating, accounting, admin, project-hub, business-development | High | Acceptable | Strong | Ready | Partial | Partial | None | Yes | Neutral |
+| HbcErrorBoundary | C | pwa, estimating, accounting, admin, project-hub, human-resources, safety, risk-management, operational-excellence, quality-control-warranty, leadership | Critical | Weak | Weak | Ready | Partial | Partial | None | Yes | Neutral |
+| HbcButton | B | pwa, estimating, accounting, admin, project-hub | Critical | Acceptable | Adequate | Ready | Pass | Partial | None | Yes | Neutral |
+| HbcTypography | A | pwa, estimating, accounting, admin, project-hub, business-development | High | Premium | Strong | Ready | Pass | Yes | None | Yes | Elevates |
+| HbcSpinner | C | pwa, estimating, accounting, admin, project-hub | Critical | Acceptable | Weak | Ready | Partial | Partial | None | Yes | Neutral |
+
+**Assessment notes:**
+- **HbcStatusBadge (B not A):** Dual-channel icons, forced-colors support, animation, full token coverage — excellent implementation. No test file prevents A.
+- **HbcPeoplePicker (D):** Raw textarea with UPN string parsing. No chip display, no Microsoft Graph search, no validation. `tenantId` and `accessToken` props are silently discarded.
+- **ProvisioningNotificationBanner (D):** Uses Tailwind utility classes (`bg-blue-50`, etc.) — completely outside the HBC token and Griffel system. Emoji icons. No stories, no docs, no tests.
+- **HbcErrorBoundary (C):** Default fallback uses inline `style` objects (not Griffel), mixes token references with hardcoded `#FFFFFF`. Functional and universally consumed, but implementation quality is below kit standard.
+- **HbcButton (B not A):** Hover states for primary and danger variants use hardcoded hex (`#D9621A`, `#BF5516`, `#E04444`, `#CC3C3C`) rather than semantic tokens. Touch auto-scale is well done.
+- **HbcTypography (A):** Fully tokenized via `hbcTypeScale`, correct semantic element mapping, polymorphic `as` prop, truncation utility. The closest thing to production-ready in the kit.
+- **HbcSpinner (C):** No `prefers-reduced-motion` handling on continuous rotation. `borderColor` partially bypasses Griffel via inline style.
+
+### Form Components
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcTextField | B | pwa, estimating, accounting, admin | Critical | Acceptable | Adequate | Ready | Pass | Yes | None | Yes | Elevates |
+| HbcSelect | B | pwa, estimating, accounting, admin | Critical | Acceptable | Adequate | Ready | Pass | Yes | None | Yes | Elevates |
+| HbcCheckbox | B | pwa, estimating, accounting, admin | High | Acceptable | Adequate | Ready | Pass | Yes | None | Yes | Neutral |
+| HbcFormLayout | C | pwa, estimating, accounting, admin | High | Acceptable | Weak | Not ready | Unknown | Partial | None | Yes | Neutral |
+| HbcForm | B | pwa, estimating, accounting, admin | Critical | Acceptable | Adequate | Ready | Partial | Partial | None | Yes | Elevates |
+| HbcFormSection | B | pwa, estimating | High | Acceptable | Adequate | Ready | Pass | Partial | None | Yes | Neutral |
+| HbcFormRow | B | pwa, estimating, accounting, admin | High | Acceptable | Adequate | Ready | Unknown | Partial | None | Yes | Neutral |
+| HbcStickyFormFooter | B | pwa, estimating, accounting, admin | High | Acceptable | Adequate | Ready | Unknown | Partial | None | Yes | Neutral |
+| HbcFormGuard | B | pwa, estimating | High | Acceptable | Adequate | Ready | Partial | Partial | None | Yes | Elevates |
+
+**Assessment notes:**
+- **HbcFormLayout (C):** No responsive column collapse — a 4-column grid on 320px mobile. No breakpoint-aware column reduction.
+- **HbcRichTextEditor** is assessed under Input Components below.
+
+### Surface & Overlay Components
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcCard | B | estimating, accounting, admin, project-hub | High | Acceptable | Adequate | Ready | Unknown | Partial | None | Yes | Neutral |
+| HbcPanel | B | admin, accounting, project-hub | High | Acceptable | Strong | Ready | Pass | Partial | None | Yes | Elevates |
+| HbcModal | B | admin, accounting | High | Acceptable | Strong | Partial | Pass | Partial | None | Yes | Elevates |
+| HbcTearsheet | C | pwa, estimating, accounting | High | Acceptable | Adequate | Partial | Partial | Partial | None | Yes | Neutral |
+| HbcPopover | C | admin | Low | Acceptable | Adequate | Not ready | Partial | Partial | None | Yes | Neutral |
+
+**Assessment notes:**
+- **HbcModal (B):** Close button is 32px on desktop (below 44px WCAG touch target); mobile gets 44px.
+- **HbcTearsheet (C):** Navigation buttons are raw `<button>` elements rather than `HbcButton`. Close button 32px. No `aria-labelledby`.
+- **HbcPopover (C):** No `role` attribute on popover (`role="dialog"` or `role="tooltip"` missing). Trigger is a plain `div` with no `role="button"` or `tabIndex`. Keyboard users cannot trigger it.
+
+### Input Components
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcTextArea | B | accounting, estimating | Medium | Acceptable | Adequate | Partial | Partial | Partial | None | Yes | Neutral |
+| HbcRichTextEditor | C | accounting | Low | Weak | Weak | Partial | Partial | Partial | None | Yes | Weakens |
+
+**Assessment notes:**
+- **HbcRichTextEditor (C):** Uses deprecated `document.execCommand` (removed from HTML spec). Uses `prompt()` for link URL input — synchronous modal dialog violating WCAG 3.2.1. Toolbar buttons are 28px (below 44px touch minimum).
+
+### Data Components
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcCommandBar | B | pwa, project-hub, accounting, admin, estimating, business-development | High | Acceptable | Strong | Partial | Partial | Partial | None | Yes | Elevates |
+| HbcDataTable | B | pwa, project-hub, accounting, admin, estimating, business-development, dev-harness | High | Acceptable | Strong | Ready | Partial | Yes | None | Yes | Elevates |
+| HbcChart (+ Bar, Donut, Line) | B | pwa, leadership, admin, hb-site-control, dev-harness | High | Acceptable | Adequate | Not ready | Unknown | Yes | None | Yes | Elevates |
+| HbcKpiCard | B | pwa, project-hub, leadership, hb-site-control | High | Acceptable | Adequate | Partial | Partial | Partial | None | Yes | Elevates |
+
+**Assessment notes:**
+- **HbcCommandBar (B):** Solid Fluent v9 toolbar with density auto-detection and saved views. Theme partial: uses `HBC_SURFACE_LIGHT` static tokens for view selector, which won't adapt in dark/field contexts.
+- **HbcDataTable (B):** Most feature-complete data component — TanStack Table + virtualizer, 3-density system, card-stack mobile view, frozen columns. Inline editing lacks focus-trap; card-stack checkbox uses raw `<input>`.
+- **HbcChart (B):** Correct lazy-load pattern. Custom ECharts theme uses hardcoded hex colors (not CSS variables) — won't adapt to dark themes. Canvas rendering has no `aria-label` or `role="img"`.
+- **HbcKpiCard (B):** Clean and well-typed. `cardActive` background uses hardcoded `#E8F1F8`. Trend arrows lack screen reader alternative text for direction.
+
+### Page Shell & Layouts
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| WorkspacePageShell | B | pwa (all pages), project-hub, accounting, admin, estimating, 10+ apps | Critical | Acceptable | Strong | Partial | Partial | Yes | None | Yes | Elevates |
+| ToolLandingLayout | C | dev-harness, estimating (indirect) | Medium | Acceptable | Adequate | Not ready | Partial | Partial | None | None | Neutral |
+| DetailLayout | B | pwa, accounting, estimating | High | Acceptable | Strong | Not ready | Partial | Partial | None | None | Elevates |
+| CreateUpdateLayout | B | pwa, accounting, estimating | High | Acceptable | Strong | Not ready | Partial | Yes | None | None | Elevates |
+| DashboardLayout | B | pwa, project-hub, leadership | High | Acceptable | Strong | Not ready | Partial | Partial | None | Yes | Elevates |
+| ListLayout | B | pwa, project-hub, accounting, estimating | High | Acceptable | Strong | Not ready | Partial | Partial | None | Yes | Elevates |
+
+**Assessment notes:**
+- **WorkspacePageShell (B):** Platform's mandatory page container. Integrates breadcrumbs, banner, command bar, field-mode FAB. Still uses `HbcEmptyState` internally (not `HbcSmartEmptyState`) — known drift.
+- **ToolLandingLayout (C):** Implements its own inline KPI card rendering, duplicating what `HbcKpiCard` provides. Action buttons are raw `<button>` with inline styles.
+- **Layouts generally:** None have field mode adaptation. DetailLayout, CreateUpdateLayout, DashboardLayout, and ListLayout lack dedicated reference docs.
+
+### App Shell Components
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcAppShell | B | pwa, admin, accounting, estimating, project-hub, 10+ app roots | Critical | Acceptable | Strong | Partial | Partial | Yes | None | Yes | Elevates |
+| HbcThemeProvider | A | pwa, admin, accounting, estimating, project-hub, 10+ app roots | Critical | N/A | Strong | Ready | Pass | Yes | Yes | Partial | Elevates |
+| HbcConnectivityBar | B | HbcAppShell (all app roots) | Critical | Acceptable | Strong | Partial | Pass | Yes | None | Yes | Elevates |
+| HbcHeader | B | HbcAppShell (all app roots) | Critical | Acceptable | Strong | Partial | Partial | Yes | None | Yes | Elevates |
+| HbcSidebar | B | HbcAppShell (all app roots, office mode) | Critical | Acceptable | Strong | Partial | Partial | Yes | None | Partial | Elevates |
+| HbcProjectSelector | B | HbcHeader (all app roots) | Critical | Acceptable | Strong | Partial | Partial | Yes | None | Partial | Elevates |
+| HbcToolboxFlyout | C | HbcHeader (all app roots) | High | Weak | Weak | Not ready | Partial | Yes | None | Partial | Weakens |
+| HbcFavoriteTools | C | HbcHeader (all app roots) | High | Weak | Weak | Not ready | Partial | Partial | None | Partial | Weakens |
+| HbcGlobalSearch | C | HbcHeader (all app roots) | Critical | Acceptable | Adequate | Not ready | Pass | Partial | None | Partial | Neutral |
+| HbcCreateButton | B | HbcHeader (all app roots) | Critical | Acceptable | Adequate | Ready | Pass | Partial | None | Partial | Elevates |
+| HbcNotificationBell | B | HbcHeader (all app roots) | Critical | Acceptable | Adequate | Not ready | Pass | Partial | None | Partial | Neutral |
+| HbcUserMenu | B | HbcHeader (all app roots) | Critical | Acceptable | Strong | Partial | Partial | Yes | None | Partial | Elevates |
+
+**Assessment notes:**
+- **HbcThemeProvider (A):** Clean single-responsibility provider. Two relevant unit tests exist (`HbcThemeContext.test.tsx`, `ThemeResponsiveness.test.tsx`). No visual rendering concerns.
+- **HbcToolboxFlyout (C):** Flyout body renders a placeholder string ("Tool grid — filtered by role (Phase 5)"). Has `role="dialog"` and escape dismissal, but core content is a stub.
+- **HbcFavoriteTools (C):** Renders correctly when favorites exist but buttons have no `onClick` handler wired.
+- **HbcGlobalSearch (C):** Trigger button is well-formed with Cmd+K shortcut. But no search panel is rendered — delegates to an external handler. `HbcCommandPalette` exists but is not wired in.
+- **HbcProjectSelector (B):** `<button role="option">` inside `role="listbox"` is semantically incorrect (options should not be buttons).
+
+### Messaging & Feedback
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcBanner | B | pwa, estimating | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
+| HbcToastProvider + useToast | B | pwa, admin, accounting, estimating | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
+| HbcTooltip | B | ui-kit internal | Low | Acceptable | Strong | Partial | Partial | Partial | None | Yes | Neutral |
+
+**Assessment notes:**
+- **HbcBanner (B):** Correct role assignment (`alert` vs `status`), token-based theming, entry animation. Missing dark-mode office variant.
+- **HbcToastProvider (B):** Dual-context architecture is clean. Auto-dismiss timers properly cleared on unmount. Error category correctly requires manual dismiss.
+- **HbcTooltip (B):** Position flip with viewport clamping is solid. Missing `usePrefersReducedMotion` integration. Field mode tooltip bg uses hardcoded dark token.
+
+### Navigation Components
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcBreadcrumbs | B | pwa | Medium | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
+| HbcTabs | B | pwa, admin, estimating | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
+| HbcPagination | B | pwa, admin | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Neutral |
+| HbcSearch | B | pwa, estimating | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Neutral |
+| HbcTree | B | ui-kit internal, feature packages | Medium | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
+
+**Assessment notes:**
+- **HbcTabs (B):** Roving tabIndex correctly implemented, skips disabled tabs. Orange 3px underline matches ADR-0023. Lazy panel rendering via optional panels prop.
+- **HbcPagination (B):** Ellipsis truncation edge case when `maxPageButtons` ≤ 5. Page size selector uses native `<select>` (non-themeable).
+- **HbcTree (B):** Full ARIA tree pattern with roving tabIndex, Home/End navigation, flat list for O(1) keyboard nav — one of the stronger nav implementations. Missing multi-select and type-ahead.
+
+### Interaction Patterns
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcConfirmDialog | B | pwa, admin, accounting, estimating | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
+| HbcCommandPalette | B | pwa, admin | High | Acceptable | Strong | Ready | Pass | Yes | None | Yes | Elevates |
+| HbcBottomNav | B | pwa (mobile shell) | High | Acceptable | Adequate | Ready | Partial | Yes | None | Yes | Elevates |
+
+**Assessment notes:**
+- **HbcConfirmDialog (B):** Clean thin wrapper over `HbcModal`. Loading state propagated to both buttons. Danger/warning variant branching correct.
+- **HbcCommandPalette (B):** Most complex interaction component. Focus trap, keyboard nav, offline awareness, mobile full-screen, field mode actions, AI query integration, confirmation for destructive actions. Recent items cannot re-execute after session end.
+- **HbcBottomNav (B):** iOS safe-area inset handled. Focus Mode integration via custom event. Missing `useFocusTrap` on More sheet; `aria-label` missing from individual nav items.
+
+### Module-Specific Patterns
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcScoreBar | B | pwa (ScorecardPage) | High | Premium | Strong | Partial | Pass | Partial | None | Yes | Elevates |
+| HbcApprovalStepper | B | accounting, admin | Medium | Premium | Strong | Partial | Partial | Partial | None | Yes | Elevates |
+| HbcPhotoGrid | B | pwa, project-hub | High | Premium | Strong | Partial | Partial | Partial | None | Yes | Elevates |
+| HbcCalendarGrid | B | pwa (Daily Log) | High | Premium | Strong | Partial | Partial | Partial | None | Yes | Elevates |
+| HbcDrawingViewer | C | pwa (Drawings) | High | Acceptable | Adequate | Partial | Partial | Partial | None | Yes | Neutral |
+
+**Assessment notes:**
+- **HbcScoreBar (B):** `role="meter"` with `aria-valuenow/min/max` correct. Label text color hardcoded to `#1A1D23` (no field mode dark adaptation). No `aria-label` override prop.
+- **HbcApprovalStepper (B):** Avatar deterministic hash color is solid. Connector line positioning is fixed pixel. `role="list"` with no `role="listitem"` on children. All colors reference `HBC_SURFACE_LIGHT`.
+- **HbcPhotoGrid (B):** CSS Grid with lazy images, hover overlay, "+N more" truncation. Keyboard focus ring missing on tiles. Field mode not handled.
+- **HbcCalendarGrid (B):** Full calendar math, today highlight, status dots. Arrow key navigation between day cells absent. Field mode not handled.
+- **HbcDrawingViewer (C):** 3-layer architecture (canvas PDF + SVG markup + gesture capture) is sound. `pdfjs-dist` lazy-loaded. Cloud shape is simplified rounded-rect. No keyboard accessibility for markup tools. `_onMarkupDelete` prop unused.
+- **Module-specific components generally:** All hard-reference `HBC_SURFACE_LIGHT` tokens and do not adapt to field mode.
+
+### Complexity-Aware Stubs (SF03-T07 D-08)
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| HbcAuditTrailPanel | D | admin, accounting | Medium | Placeholder | Weak | Not ready | Unknown | No | None | None | Weakens |
+| HbcFormField | D | (no app consumers) | Low | Placeholder | Weak | Not ready | Unknown | No | None | None | Weakens |
+| HbcStatusTimeline | D | accounting | Medium | Placeholder | Weak | Not ready | Unknown | No | None | None | Weakens |
+| HbcPermissionMatrix | D | admin | Low | Placeholder | Weak | Not ready | Unknown | No | None | None | Weakens |
+| HbcCoachingCallout | D | (no app consumers) | Low | Placeholder | Weak | Not ready | Unknown | No | None | None | Weakens |
+
+**Assessment notes:**
+These are intentional complexity-gated stubs per SF03-T07 / D-08 doctrine. Each renders only a bare `<div data-hbc-ui="...">` with minimal or empty content. They correctly wire to `useComplexityGate` and `useComplexity` from `@hbc/complexity`. `HbcStatusTimeline` renders actual data rows in text form (structurally the most complete). `HbcPermissionMatrix` renders a functional but unstyled checkbox table. None have reference docs, stories, or tests.
+
+### Shared Hooks
+
+| Hook | Tier | Consumers | W1 Crit | Tests | Docs |
+|------|------|-----------|---------|-------|------|
+| useFocusTrap | B | HbcPanel, HbcModal, HbcTearsheet, HbcCommandPalette | High | None | None |
+| useIsMobile | A | HbcCommandPalette, HbcBottomNav, useFieldMode, many | High | None | None |
+| useIsTablet | A | HbcAppShell (bottom nav visibility) | Medium | None | None |
+| useMinDisplayTime | B | HbcSpinner, feature packages | Medium | None | None |
+| usePrefersReducedMotion | B | ui-kit internal (underused) | Low | None | None |
+| useOptimisticMutation | B | query-hooks (12+ hooks) | High | None | None |
+| useUnsavedChangesBlocker | C | pwa (ReviewSubmitStep) | Medium | None | None |
+| useOnlineStatus | A | HbcCommandPalette, HbcConnectivityBar, useConnectivity | High | Yes | None |
+| useFieldMode | A | HbcAppShell, HbcThemeContext, shell layout | High | None | None |
+| useSidebarState | B | HbcSidebar, HbcAppShell | Medium | None | None |
+| useFocusMode | B | CreateUpdateLayout, layouts/hooks | Medium | None | None |
+| useVoiceDictation | C | HbcInput (voice button) | Low | None | None |
+| useAdaptiveDensity | B | HbcDataTable | High | None | None |
+| useSavedViews | B | HbcDataTable | High | None | None |
+| useHbcTheme | A | HbcCommandPalette, HbcCommandBar, theme consumers | High | Yes | None |
+| useConnectivity | A | session-state, feature hooks | High | None | None |
+| useDensity | B | (via @hbc/ui-kit/theme; limited direct consumers) | Low | None | None |
+| useCommandPalette | B | HbcCommandPalette, HbcGlobalSearch, HbcHeader | High | None | None |
+
+**Assessment notes:**
+- **useFocusTrap (B):** Focusable element snapshot is taken once at activation. No `MutationObserver` — async content won't be trapped.
+- **useIsMobile / useIsTablet (A):** SSR-safe, pinned to canonical breakpoint constants. Does exactly what it needs to do.
+- **useOptimisticMutation (B):** `options` object in `useCallback` dep array causes callback recreation on every render when consumers pass inline objects.
+- **useUnsavedChangesBlocker (C):** `confirmNavigation` and `cancelNavigation` are functionally identical (both just clear the prompt). Router integration is left to consumers — incomplete abstraction.
+- **useFieldMode (A):** Auto-detects mobile, HbSiteControl context, OS dark preference, localStorage override. D-13 OS theme-color sync via `<meta name="theme-color">`.
+- **useOnlineStatus (A):** Covers browser events AND ServiceWorker postMessage sync status.
+- **useVoiceDictation (C):** No error recovery for `not-allowed` permission state. Only `en-US` hardcoded (no locale prop).
+- **useAdaptiveDensity (B):** `DensityTier` type uses `compact | standard | touch` — diverges from `density.ts` which uses `compact | comfortable | touch`. Two competing type systems.
+- **useSavedViews (B):** `remove()` scan-all-keys pattern is O(n) and fragile. `projectId` parameter inconsistency between interface and call site.
+
+---
+
+## Theme Token Groups (`@hbc/ui-kit/theme`)
+
+| Group | Tier | W1 Crit | Tests | Docs | Notes |
+|-------|------|---------|-------|------|-------|
+| Color tokens (tokens.ts) | B | Critical | Yes | Partial | Well-structured brand ramp, semantic status colors, sunlight-optimized ramps, deprecated token tracking. Some components reference raw `HBC_SURFACE_LIGHT` values instead of Fluent theme tokens. |
+| Animation/transitions (animations.ts) | B | High | None | None | 8 named keyframes, 3 duration tiers, `useReducedMotionStyles` defined but most animated components do not consult it. |
+| Typography (typography.ts) | A | Critical | None | Partial | Intent-based V2.1 scale, deprecated size-based aliases retained. Clean, consistent, forward-compatible. |
+| Elevation (elevation.ts) | B | High | None | Partial | 4-level dual-shadow scale with field mode variants. `elevationRest` maps to `elevationLevel1` for backward compatibility — may surprise consumers expecting no shadow. |
+| Z-index (z-index.ts) | A | High | None | Partial | Single source of truth — 16 named layers. Correct ordering from content (0) to connectivityBar (10001). |
+| Spacing & Grid (grid.ts) | B | Medium | Yes | None | 4px base, 6-step scale, 12-column grid. Breakpoint constants duplicated between `grid.ts` and `breakpoints.ts` with some divergence. |
+| Breakpoints (breakpoints.ts) | A | High | None | Partial | Clean canonical file per PH4C.12. 5 named breakpoints used consistently by all responsive hooks. |
+| Density system (density.ts) | C | Medium | None | None | `DensityTier` defined as `compact | comfortable | touch` but `HbcCommandBar/types.ts` defines it as `compact | standard | touch`. Two hooks (`useDensity` and `useAdaptiveDensity`) operate on incompatible type systems — a real production risk. |
+
+---
+
+## Icon Library (`@hbc/ui-kit/icons`)
+
+| Surface | Tier | Count | W1 Crit | Visual | A11y | Theme | Tests | Docs | Notes |
+|---------|------|-------|---------|--------|------|-------|-------|------|-------|
+| Icon library (createIcon factory) | B | 60+ icons in 7 categories | High | Acceptable | Pass | Yes | None | Partial | Factory-based stroke icons with size/weight presets. `role="img"/"presentation"`, `aria-label`/`aria-hidden` correct. Categories: Construction (14), Navigation (13), Action (15), Status (5), Connectivity (3), Layout (9), AI (1). No tests but uniform quality via shared factory. |
+
+---
+
+## Passthrough & Re-exports
+
+### Fluent UI Passthrough (D-10)
+
+| Surface | Tier | Count | Notes |
+|---------|------|-------|-------|
+| Fluent re-exports | N/A | 11 components + `tokens` + `SelectTabData` type | FluentProvider, Text, Badge, Switch, Spinner, TabList, Tab, Card, CardHeader, Button, tokens. Not owned by ui-kit — passthrough per PH4B.11 §4b.11.4. Apps must import from `@hbc/ui-kit`, not `@fluentui/*`. Maturity is governed by Fluent UI, not this matrix. |
+
+### Module Config Re-exports
+
+| Surface | Tier | Count | Notes |
+|---------|------|-------|-------|
+| Module configs from @hbc/shell | N/A | 15 configs + 3 types | Backward-compatibility re-exports (scorecardsLanding, rfisLanding, punchListLanding, drawingsLanding, budgetLanding, dailyLogSections, turnoverLanding, documentsLanding, etc.). Maturity tracked in `@hbc/shell`, not here. |
+
+---
+
+## Summary
+
+### Tier Distribution
+
+| Tier | Component Count | Percentage |
+|------|----------------|------------|
+| **A** | 2 (HbcTypography, HbcThemeProvider) | 3% |
+| **B** | 46 | 70% |
+| **C** | 12 | 18% |
+| **D** | 7 | 11% |
+| **Total assessed** | **67** | |
+
+*Hooks: A=6, B=9, C=3. Theme groups: A=3, B=4, C=1. Icons: B (single group). Passthrough/re-exports excluded from tier counts.*
+
+### Wave 1-Critical Components by Tier
+
+| Tier | Critical | High | Medium | Low |
+|------|----------|------|--------|-----|
+| **A** | 1 (HbcThemeProvider) | 1 (HbcTypography) | 0 | 0 |
+| **B** | 10 | 26 | 7 | 3 |
+| **C** | 2 (HbcErrorBoundary, HbcSpinner) | 4 (HbcFormLayout, HbcToolboxFlyout, HbcFavoriteTools, HbcDrawingViewer) | 3 | 3 |
+| **D** | 0 | 0 | 4 | 3 |
+
+### Highest-Risk Components (Wave 1-Critical AND Tier C or D)
+
+These components are on the Wave 1 critical path and do not meet production quality:
+
+| Component | Tier | W1 Crit | Primary Gap |
+|-----------|------|---------|-------------|
+| **HbcErrorBoundary** | C | Critical | Inline styles, hardcoded colors, no Griffel |
+| **HbcSpinner** | C | Critical | No reduced-motion handling, inline style bypass |
+| **HbcGlobalSearch** | C | Critical | No search panel rendered — delegates to external handler |
+| **HbcToolboxFlyout** | C | High | Core content is a Phase 5 placeholder string |
+| **HbcFavoriteTools** | C | High | Buttons have no onClick handler wired |
+| **HbcDrawingViewer** | C | High | No keyboard accessibility for markup tools |
+| **HbcFormLayout** | C | High | No responsive column collapse |
+
+### Accessibility Concerns
+
+Components with failing or unknown accessibility status:
+
+| Component | A11y Status | Issue |
+|-----------|-------------|-------|
+| HbcPopover | Partial | No role attribute, trigger not keyboard-accessible |
+| HbcTearsheet | Partial | No aria-labelledby, 32px close button |
+| HbcChart | Unknown | Canvas rendering with no aria-label or role="img" |
+| HbcFormLayout | Unknown | Layout shell — no ARIA assessment performed |
+| HbcFormRow / HbcStickyFormFooter | Unknown | Not independently assessed for ARIA |
+| HbcCard | Unknown | No role or landmark attributes assessed |
+| All 5 complexity-aware stubs | Unknown | Stub implementations — no ARIA present |
+
+### Testing Coverage Gaps
+
+**Systemic gap:** Only 3 test files exist in the entire `@hbc/ui-kit` package:
+- `HbcConnectivityBar.test.ts`
+- `HbcThemeContext.test.tsx`
+- `ThemeResponsiveness.test.tsx`
+
+**65 of 67 assessed components have zero test coverage.** This is the most significant systemic quality gap. Storybook stories (53 files) provide visual validation for most components, but no behavioral or regression testing exists.
+
+### Cross-Cutting Risks
+
+1. **Density type split:** `density.ts` (`comfortable`) vs `HbcCommandBar/types.ts` (`standard`) create incompatible `DensityTier` types used by `useDensity` and `useAdaptiveDensity`.
+2. **Field mode gaps in module-specific components:** HbcScoreBar, HbcApprovalStepper, HbcPhotoGrid, HbcCalendarGrid, HbcDrawingViewer all hard-reference `HBC_SURFACE_LIGHT` and do not adapt.
+3. **`usePrefersReducedMotion` underuse:** Defined and exported but most animated components do not consult it.
+4. **Breakpoint constant duplication:** `grid.ts` and `breakpoints.ts` both define breakpoint values with some divergence.
+
+---
+
+*End of UI Kit Component Maturity Matrix — WS1-T01 v1.0 (2026-03-16)*
