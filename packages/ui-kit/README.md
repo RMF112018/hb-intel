@@ -78,6 +78,24 @@ pnpm --filter @hbc/ui-kit build-storybook
 # Output: packages/ui-kit/storybook-static/
 ```
 
+## Contribution Governance (WS1-T12)
+
+These rules prevent standards drift after the WS1 production scrub closes.
+
+1. **New reusable UI primitives belong in `@hbc/ui-kit`.** Any component intended for use in more than one feature package must be proposed as a kit addition, not created as a local duplicate.
+
+2. **Visual standards apply to all application UI.** Every new feature-specific UI component — regardless of package — must meet density compliance, field readability, accessibility, and token compliance standards.
+
+3. **Kit additions require review.** New kit components must include: Storybook story, accessibility review, density compliance, token compliance, and a README entry before merge.
+
+4. **Feature packages do not own reusable primitives.** When a feature-local component becomes a candidate for kit promotion (used in 2+ features), it must be promoted via a kit PR, not copied across feature packages.
+
+5. **No hardcoded visual values.** No component may use hardcoded color values, font sizes, or spacing values. All visual values must reference kit design tokens. Enforced by `@hbc/eslint-plugin-hbc/enforce-hbc-tokens`.
+
+6. **Accessibility is not optional in any layer.** New components must meet WCAG AA keyboard, ARIA, and contrast requirements from T09 before merge.
+
+See `docs/reference/ui-kit/UI-Kit-Usage-and-Composition-Guide.md` for detailed contribution guidance.
+
 ## Architecture References
 
 - `docs/architecture/adr/ADR-0075-dev-auth-bypass-storybook-boundary.md` — MockAdapter boundary

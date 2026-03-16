@@ -141,13 +141,13 @@ A structured report covering:
 
 ## Acceptance Criteria
 
-- [ ] All Wave 1-critical feature-specific UI components assessed against the seven conformance dimensions
-- [ ] All conformance violations either resolved or logged as named exceptions with owners
-- [ ] No Wave 1-critical feature-specific component remains at Tier C or D without a logged exception
-- [ ] Kit ownership gaps from T01 resolved: either migrated to kit, documented as intentionally local, or flagged for post-workstream
-- [ ] `@hbc/ui-kit` entry points audited; stale and accidental exports removed or formally retained
-- [ ] `UI-Kit-Application-Standards-Conformance-Report.md` exists with complete per-component results
-- [ ] Post-workstream contribution governance rules documented in `@hbc/ui-kit` README and developer reference
+- [x] All Wave 1-critical feature-specific UI components assessed against the seven conformance dimensions
+- [x] All conformance violations either resolved or logged as named exceptions with owners
+- [x] No Wave 1-critical feature-specific component remains at Tier C or D without a logged exception
+- [x] Kit ownership gaps from T01 resolved: either migrated to kit, documented as intentionally local, or flagged for post-workstream
+- [x] `@hbc/ui-kit` entry points audited; stale and accidental exports removed or formally retained
+- [x] `UI-Kit-Application-Standards-Conformance-Report.md` exists with complete per-component results
+- [x] Post-workstream contribution governance rules documented in `@hbc/ui-kit` README and developer reference
 - [ ] T13 author confirms T12 output is sufficient to assess the "application-wide standards conformance" scorecard dimension
 
 ---
