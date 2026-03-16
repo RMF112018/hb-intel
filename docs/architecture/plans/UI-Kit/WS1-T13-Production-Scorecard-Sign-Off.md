@@ -156,16 +156,16 @@ A Partial score is acceptable for Wave 1 entry only when: the affected dimension
 
 ## Acceptance Criteria
 
-- [ ] All twenty scorecard dimensions are evaluated with written notes
-- [ ] Overall go/no-go determination is issued
-- [ ] If go: all go conditions are confirmed
-- [ ] If no-go: all blocking items are identified with required resolution actions
-- [ ] `UI-Kit-Production-Readiness-Scorecard.md` exists and is complete
-- [ ] `UI-Kit-Release-Notes.md` exists and covers all major changes
-- [ ] `UI-Kit-Residual-Debt-Register.md` exists with all non-blocking debt documented
-- [ ] All three documents added to `current-state-map.md §2` as "Reference"
-- [ ] All T01–T12 mandatory output documents are confirmed to exist and registered in `current-state-map.md`
-- [ ] `UI-Kit-Application-Standards-Conformance-Report.md` (T12) confirms all Wave 1-critical feature-specific components meet the standards or are logged with exceptions
+- [x] All twenty scorecard dimensions are evaluated with written notes
+- [x] Overall go/no-go determination is issued
+- [x] If go: all go conditions are confirmed
+- [x] If no-go: all blocking items are identified with required resolution actions
+- [x] `UI-Kit-Production-Readiness-Scorecard.md` exists and is complete
+- [x] `UI-Kit-Release-Notes.md` exists and covers all major changes
+- [x] `UI-Kit-Residual-Debt-Register.md` exists with all non-blocking debt documented
+- [x] All three documents added to `current-state-map.md §2` as "Reference"
+- [x] All T01–T12 mandatory output documents are confirmed to exist and registered in `current-state-map.md`
+- [x] `UI-Kit-Application-Standards-Conformance-Report.md` (T12) confirms all Wave 1-critical feature-specific components meet the standards or are logged with exceptions
 
 ---
 
