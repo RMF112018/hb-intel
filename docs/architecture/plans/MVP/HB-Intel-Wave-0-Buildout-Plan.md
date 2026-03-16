@@ -13,7 +13,7 @@
 **Basis:** HB-Intel-Dev-Roadmap.md §8, current-state-map.md (Tier 1), ADRs 0083–0113, codebase inspection, external research (construction-tech + Azure/SharePoint platform best practices)
 **Next ADR Available:** ADR-0114
 **Primary Audience:** Product owner, architecture/code agents, implementation planning, leadership reviewers
-**v1.1 Validation Note (2026-03-14):** Validated against live codebase and MVP Project Setup plan set (T01–T08). Corrections applied: (1) Phase 7 gate ADR number corrected (ADR-0090, not ADR-0091); (2) backend auth model corrected to Managed Identity (DefaultAzureCredential), not MSAL OBO; (3) W0-M1, W0-M2, W0-M4 reclassified from Missing to Partial/Miswired based on confirmed codebase evidence; (4) admin router bug fixed (ProvisioningFailuresPage now reachable); (5) CLAUDE.md version references updated to v1.6; (6) MVP Project Setup plan set reference added. See `docs/architecture/plans/MVP/wave-0-validation-report.md` for full validation details.
+**v1.1 Validation Note (2026-03-14):** Validated against live codebase and MVP Project Setup plan set (T01–T08). Corrections applied: (1) Phase 7 gate ADR number: v1.1 incorrectly set to ADR-0090; corrected to ADR-0091 per P0-A2 D-004 errata (2026-03-16); (2) backend auth model corrected to Managed Identity (DefaultAzureCredential), not MSAL OBO; (3) W0-M1, W0-M2, W0-M4 reclassified from Missing to Partial/Miswired based on confirmed codebase evidence; (4) admin router bug fixed (ProvisioningFailuresPage now reachable); (5) CLAUDE.md version references updated to v1.6; (6) MVP Project Setup plan set reference added. See `docs/architecture/plans/MVP/wave-0-validation-report.md` for full validation details.
 
 ---
 
@@ -30,7 +30,7 @@ The backend provisioning saga is architecturally mature — 7-step orchestration
 **What must still be done:**
 Three categories of work remain:
 
-1. **Precondition:** Phase 7 stabilization must close (ADR-0090 must be created, all P1 gate tests must pass) before Wave 0 feature expansion is permitted under governance rules.
+1. **Precondition:** Phase 7 stabilization must close (ADR-0091 must be created, all P1 gate tests must pass) before Wave 0 feature expansion is permitted under governance rules.
 
 2. **Backend hardening:** The provisioning saga's SharePoint service integration must be validated for production (Managed Identity / DefaultAzureCredential token acquisition, Retry-After throttle handling, Steps 3/4 compensation, timer integration for Step 5 deferral).
 
@@ -48,7 +48,7 @@ The following constraints govern all Wave 0 work. Any action that would contradi
 No deviations from the blueprint, foundation plan, current-state map, or active ADRs without an explicit superseding ADR. This applies to all Wave 0 work.
 
 **CLAUDE.md v1.6 — Phase 7 Gate:**
-Feature-expansion phases cannot begin until PH7.12 acceptance criteria are fully satisfied and ADR-0090/ADR-0091 exist on disk. Wave 0 user-facing surfaces are feature expansion. Phase 7 must close first.
+Feature-expansion phases cannot begin until PH7.12 acceptance criteria are fully satisfied and ADR-0091 exist on disk. Wave 0 user-facing surfaces are feature expansion. Phase 7 must close first.
 
 **CLAUDE.md v1.6 — UI Ownership Rule:**
 All reusable visual UI components must be owned by `@hbc/ui-kit`. No package outside `@hbc/ui-kit` may introduce new standalone presentational components. Wave 0 UX components must either consume existing `@hbc/ui-kit` primitives or contribute new reusable components to `@hbc/ui-kit` first.
@@ -469,7 +469,7 @@ The following sequencing is derived from: architectural dependency order, risk-f
 
 ### Why This Order
 
-**Preconditions must close first.** Phase 7 gates are a hard governance blocker. No Wave 0 feature expansion can proceed until ADR-0090 (Phase 7 Final Verification & Sign-Off) exists on disk and all P1 gates pass. This is non-negotiable per CLAUDE.md §6.3.
+**Preconditions must close first.** Phase 7 gates are a hard governance blocker. No Wave 0 feature expansion can proceed until ADR-0091 (Phase 7 Final Verification & Sign-Off) exists on disk and all P1 gates pass. This is non-negotiable per CLAUDE.md §6.3.
 
 **Backend hardening before UI.** Building UX over a provisioning saga that cannot handle SharePoint throttling, has incomplete compensation logic, and has an unvalidated OBO flow is inviting a broken pilot. The backend must be production-ready first.
 
@@ -489,7 +489,7 @@ This group must complete before any Wave 0 feature work begins.
 
 - G0.1: Validate all P1 package tests pass at `branches: 95` (`@hbc/auth`, `@hbc/shell`, `@hbc/sharepoint-docs`, `@hbc/bic-next-move`, `@hbc/complexity`)
 - G0.2: Verify `pnpm turbo run build`, `pnpm turbo run lint`, `pnpm turbo run check-types` all pass with zero errors
-- G0.3: Confirm ADR-0090 (Phase 7 Final Verification & Sign-Off) is on disk; if absent, create it before proceeding
+- G0.3: Confirm ADR-0091 (Phase 7 Final Verification & Sign-Off) is on disk; if absent, create it before proceeding
 - G0.4: Update `current-state-map.md` to reflect Phase 7 closure status
 
 **GROUP 1 — Contracts and Configuration Decisions**
@@ -779,7 +779,7 @@ The following conditions must all be true before Wave 0 is considered ready for 
 
 ### Code-Ready Gate (implemented and passing quality checks)
 
-- [ ] Phase 7 ADR-0090 (Final Verification & Sign-Off) confirmed on disk and Phase 7 verification gates confirmed
+- [ ] Phase 7 ADR-0091 (Final Verification & Sign-Off) confirmed on disk and Phase 7 verification gates confirmed
 - [ ] All P1 packages passing at `branches: 95` (`@hbc/auth`, `@hbc/shell`, `@hbc/sharepoint-docs`, `@hbc/bic-next-move`, `@hbc/complexity`)
 - [ ] `pnpm turbo run build` passing with zero errors
 - [ ] `pnpm turbo run lint` passing with zero errors and boundary rules enforced
@@ -858,7 +858,7 @@ If the notification delivery mechanism (email/Teams/SharePoint) is not decided b
 *Mitigation:* Treat G1.3 (notification channel decision) as a hard prerequisite for any request lifecycle work.
 
 **Risk W0-R8: Phase 7 closure is delayed, blocking Wave 0 start**
-If Phase 7 verification gates or ADR-0090 (Phase 7 Final Verification & Sign-Off) creation is delayed, Wave 0 feature work cannot legally begin under governance rules.
+If Phase 7 verification gates or ADR-0091 (Phase 7 Final Verification & Sign-Off) creation is delayed, Wave 0 feature work cannot legally begin under governance rules.
 *Mitigation:* Prioritize Phase 7 closure as an immediate action. Do not defer P1 test coverage issues or build/lint/typecheck failures. Wave 0 planning can proceed concurrently with Phase 7 closure, but implementation cannot start until the gate is satisfied.
 
 ---
@@ -915,4 +915,4 @@ All documents must be added to `current-state-map.md §2` upon creation.
 
 *This document must be reviewed by the product owner and architecture owner before any Wave 0 implementation work begins. Upon approval, it should be updated to remove the "Proposed" status marker and added to `current-state-map.md §2` with classification Canonical Normative Plan.*
 
-*v1.1 validation applied corrections to: Phase 7 gate ADR number (ADR-0090), backend auth model (Managed Identity / DefaultAzureCredential, not MSAL OBO), Missing section reclassifications (W0-M1/M2/M4 to Partial/Miswired), CLAUDE.md version references (v1.6), MVP Project Setup T01–T08 plan set reference, and G0.3 gate check wording. See `docs/architecture/plans/MVP/wave-0-validation-report.md`.*
+*v1.1 validation applied corrections to: Phase 7 gate ADR number (ADR-0091), backend auth model (Managed Identity / DefaultAzureCredential, not MSAL OBO), Missing section reclassifications (W0-M1/M2/M4 to Partial/Miswired), CLAUDE.md version references (v1.6), MVP Project Setup T01–T08 plan set reference, and G0.3 gate check wording. See `docs/architecture/plans/MVP/wave-0-validation-report.md`.*
