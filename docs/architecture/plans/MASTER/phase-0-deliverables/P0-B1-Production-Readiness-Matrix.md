@@ -146,11 +146,11 @@ The following items whose scaffold/blocked status most directly affects Phase 1 
 |-------|-------|
 | production-ready | 2 |
 | pilot-ready | 2 |
-| usable-but-incomplete | 35 |
-| scaffold-only | 15 |
+| usable-but-incomplete | 34 |
+| scaffold-only | 17 |
 | excluded-from-production-path | 2 |
 | blocked | 0 |
-| **Total** | **56** |
+| **Total** | **57** |
 
 ---
 
