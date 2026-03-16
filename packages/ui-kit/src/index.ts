@@ -5,7 +5,7 @@
  * Unified component library for the HB Intel construction intelligence platform.
  * Supports PWA (Next.js 14) and SPFx (SharePoint Framework) dual-target rendering.
  *
- * @version 2.1.2
+ * @version 2.1.3
  * @see docs/reference/ui-kit/ for per-component documentation
  */
 
@@ -134,6 +134,23 @@ export {
   useDensity,
 } from './theme/index.js';
 export type { DensityTier, UseHbcThemeReturn, UseDensityReturn } from './theme/index.js';
+
+// Theme V2.1.3 — Field Readability (WS1-T05)
+export {
+  HBC_DENSITY_TOKENS,
+  HBC_FIELD_READABILITY,
+  HBC_FIELD_INTERACTION_ASSUMPTIONS,
+  HBC_DENSITY_APPLICATION_MODEL,
+  DENSITY_MODE_LABELS,
+} from './theme/index.js';
+export type {
+  DensityTokenSet,
+  DensityModeLabel,
+  FieldReadabilityCategory,
+  FieldReadabilityConstraint,
+  FieldInteractionAssumption,
+  DensityApplicationModel,
+} from './theme/index.js';
 
 // Icons
 export * from './icons/index.js';

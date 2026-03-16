@@ -142,12 +142,12 @@ Must include:
 
 ## Acceptance Criteria
 
-- [ ] Three density modes are defined (desktop, tablet, field-first) with governing rules for each
-- [ ] Measurable field-readability minimums are defined for all six constraint categories in the table above
-- [ ] Field interaction assumptions are documented (gloved touch, bright sunlight, one-handed use, motion)
-- [ ] Density mode application model defines component API pattern, DensityProvider approach, and persistence model
-- [ ] `UI-Kit-Field-Readability-Standards.md` exists at the required location and is complete
-- [ ] Reference document added to `current-state-map.md §2` as "Reference"
+- [x] Three density modes are defined (desktop, tablet, field-first) with governing rules for each
+- [x] Measurable field-readability minimums are defined for all eight constraint categories
+- [x] Field interaction assumptions are documented (gloved touch, bright sunlight, one-handed use, motion, intermittent focus)
+- [x] Density mode application model defines component API pattern, DensityProvider approach, and persistence model
+- [x] `UI-Kit-Field-Readability-Standards.md` exists at the required location and is complete
+- [x] Reference document added to `current-state-map.md §2` as "Reference"
 - [ ] T07 authors confirm density mode definitions and field minimums are implementable per component
 - [ ] T08 authors confirm field-readability standards are sufficient to evaluate composition quality
 

@@ -154,6 +154,23 @@ export {
 } from './density.js';
 export type { DensityTier } from './density.js';
 
+// Density — Field Readability System (V2.1.3 — WS1-T05)
+export {
+  HBC_DENSITY_TOKENS,
+  HBC_FIELD_READABILITY,
+  HBC_FIELD_INTERACTION_ASSUMPTIONS,
+  HBC_DENSITY_APPLICATION_MODEL,
+  DENSITY_MODE_LABELS,
+} from './density.js';
+export type {
+  DensityTokenSet,
+  DensityModeLabel,
+  FieldReadabilityCategory,
+  FieldReadabilityConstraint,
+  FieldInteractionAssumption,
+  DensityApplicationModel,
+} from './density.js';
+
 // Canonical hooks (V2.1)
 export { useHbcTheme } from './useHbcTheme.js';
 export type { UseHbcThemeReturn } from './useHbcTheme.js';

@@ -149,6 +149,20 @@ Import from `@hbc/ui-kit` or `@hbc/ui-kit/theme`. See `docs/reference/ui-kit/UI-
 
 **`HBC_THREE_SECOND_STANDARD`** — Testable evaluation criteria for Wave 1 compositions. Page title identifiable <1s, primary content distinguishable <2s, primary CTA obvious <3s.
 
+### Adaptive Density and Field Readability (V2.1.3 — WS1-T05)
+
+The density system includes typed reference constants for per-tier tokens and field-readability constraints. Import from `@hbc/ui-kit` or `@hbc/ui-kit/theme`. See `docs/reference/ui-kit/UI-Kit-Field-Readability-Standards.md` for the full reference.
+
+**Tier name mapping:** `compact` = desktop, `comfortable` = tablet, `touch` = field-first.
+
+| Export | Description |
+|--------|-------------|
+| `HBC_DENSITY_TOKENS` | Per-tier minimums: row height, touch target, font sizes, tap spacing, contrast ratios |
+| `HBC_FIELD_READABILITY` | 8 constraint categories with standard vs. field values and WCAG references |
+| `HBC_FIELD_INTERACTION_ASSUMPTIONS` | 5 field assumptions (gloved touch, sunlight, one-handed, motion, intermittent focus) |
+| `HBC_DENSITY_APPLICATION_MODEL` | System detection, user toggle, component API, and persistence patterns |
+| `DENSITY_MODE_LABELS` | Maps tier names to mode labels (compact→desktop, comfortable→tablet, touch→field) |
+
 ### Spacing Tokens (4px base unit)
 
 | Token | Value | Use For |
