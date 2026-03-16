@@ -4,6 +4,7 @@
 **Classification:** Phase Master Plan  
 **Status:** Draft for working use  
 **Primary Role:** Establish execution truth, readiness classification, and release rules before large-scale delivery
+**Read With** docs/architecture/plans/MASTER/00_HB-Intel_Master-Development-Summary-Plan.md
 
 ## 1. Purpose
 

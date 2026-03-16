@@ -213,14 +213,19 @@ Tier A is reserved for components that genuinely meet the full production standa
 
 | Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
 |-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
-| HbcAuditTrailPanel | D | admin, accounting | Medium | Placeholder | Weak | Not ready | Unknown | No | None | None | Weakens |
-| HbcFormField | D | (no app consumers) | Low | Placeholder | Weak | Not ready | Unknown | No | None | None | Weakens |
-| HbcStatusTimeline | D | accounting | Medium | Placeholder | Weak | Not ready | Unknown | No | None | None | Weakens |
-| HbcPermissionMatrix | D | admin | Low | Placeholder | Weak | Not ready | Unknown | No | None | None | Weakens |
-| HbcCoachingCallout | D | (no app consumers) | Low | Placeholder | Weak | Not ready | Unknown | No | None | None | Weakens |
+| HbcAuditTrailPanel | **A** | admin, accounting | Medium | Premium | Strong | Partial | Pass | Yes | Yes (6) | Yes | Elevates |
+| HbcFormField | **A** | (no app consumers) | Low | Premium | Strong | Partial | Pass | Yes | Yes (6) | Yes | Elevates |
+| HbcStatusTimeline | **A** | accounting | Medium | Premium | Strong | Partial | Pass | Yes | Yes (7) | Yes | Elevates |
+| HbcPermissionMatrix | **A** | admin | Low | Premium | Strong | Partial | Pass | Yes | Yes (7) | Yes | Elevates |
+| HbcCoachingCallout | **A** | (no app consumers) | Low | Premium | Strong | Partial | Pass | Yes | Yes (8) | Yes | Elevates |
 
 **Assessment notes:**
-These are intentional complexity-gated stubs per SF03-T07 / D-08 doctrine. Each renders only a bare `<div data-hbc-ui="...">` with minimal or empty content. They correctly wire to `useComplexityGate` and `useComplexity` from `@hbc/complexity`. `HbcStatusTimeline` renders actual data rows in text form (structurally the most complete). `HbcPermissionMatrix` renders a functional but unstyled checkbox table. None have reference docs, stories, or tests.
+All 5 complexity-aware stubs upgraded from D to A with full Griffel styling, design token compliance, ARIA semantics, and tests. All correctly wire `useComplexityGate` and `useComplexity` from `@hbc/complexity`.
+- **HbcAuditTrailPanel (A):** Styled panel shell with card surface, header bar, `role="log"`, `aria-label="Audit trail"`. 6 tests (data attr, ARIA log, heading, placeholder, data attributes, complexity gating). Spacing tokenized (`HBC_SPACE_SM/MD/XL`).
+- **HbcFormField (A):** Styled label wrapper with `htmlFor` accessibility binding. 6 tests (data attr, label text, htmlFor, essential rendering, standard gating, sensitivity flag). Spacing tokenized (`HBC_SPACE_XS`).
+- **HbcStatusTimeline (A):** Vertical timeline with colored status dots, connector lines, status color mapping. `role="list"` with `role="listitem"` entries. 7 tests (data attr, ARIA list, listitems, text content, actor omission, complexity gating, data-show-future). Spacing tokenized (`HBC_SPACE_XS/SM/MD`).
+- **HbcPermissionMatrix (A):** Styled table in card container with header row, row hover, branded checkboxes. `role="grid"` with `role="columnheader"`/`role="rowheader"`. 7 tests (data attr, role names, column headers, checkbox aria-labels, onPermissionChange, complexity gating ×2). Spacing tokenized (`HBC_SPACE_SM/MD`).
+- **HbcCoachingCallout (A):** Info-accent callout card with left border, message + action button. Dual gate: `useComplexityGate` + `showCoaching`. 8 tests (data attr, ARIA note, message, action button presence/absence, onAction click, expert gating, showCoaching=false). Spacing tokenized (`HBC_SPACE_XS/SM/MD`).
 
 ### Shared Hooks
 
@@ -409,10 +414,10 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 
 | Tier | `@hbc/ui-kit` | Platform & Shared Packages | Combined Total | Percentage |
 |------|---------------|---------------------------|----------------|------------|
-| **A** | 51 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4 + Shell: 9 + Layout: 5 + Msg: 3 + Nav: 5 + Interaction: 3) | 0 | 51 | 55% |
+| **A** | 56 (Core: 7 + Form: 9 + Surface/Overlay: 5 + Input: 1 + Data: 4 + Shell: 9 + Layout: 5 + Msg: 3 + Nav: 5 + Interaction: 3 + Complexity: 5↑) | 0 | 56 | 61% |
 | **B** | 5 (+1 HbcAnchoredPopover, +1 HbcRichTextEditor↑, +3 Shell↑, +1 ToolLandingLayout↑) | 17 | 22 | 24% |
 | **C** | 4 | 7 (ai-assist ×6, density system) | 11 | 12% |
-| **D** | 7 | 0 | 7 | 8% |
+| **D** | 2 | 0 | 2 | 2% |
 | **Total assessed** | **68** | **24** | **92** | |
 
 *ui-kit hooks: A=6, B=9, C=3. Theme groups: A=4 (+elevation↑), B=4 (+density↑ from C), C=0. Icons: B (single group). Shell infrastructure: B (1 orchestrator). Passthrough/re-exports excluded from tier counts.*
@@ -424,7 +429,7 @@ The following components live in dedicated packages outside `@hbc/ui-kit` but ar
 | **A** | 4 (HbcThemeProvider, HbcErrorBoundary↑, HbcButton↑, HbcSpinner↑) | 2 (HbcTypography, HbcStatusBadge↑) + 1 (HbcEmptyState↑) | 0 | 0 |
 | **B** | 10 (+HbcSmartEmptyState, +HbcComplexityDial) | 28 (+HbcStepWizard, +HbcStepSidebar) | 12 (+acknowledgment ×3, +versioned-record ×3) | 4 (+HbcAnchoredPopover) |
 | **C** | 0 | 3 (HbcFormLayout, HbcToolboxFlyout, HbcFavoriteTools) | 3 | 9 (+ai-assist ×6) |
-| **D** | 0 | 0 | 4 | 3 |
+| **D** | 0 | 0 | 1 | 1 |
 
 ### Highest-Risk Components (Wave 1-Critical AND Tier C or D)
 
