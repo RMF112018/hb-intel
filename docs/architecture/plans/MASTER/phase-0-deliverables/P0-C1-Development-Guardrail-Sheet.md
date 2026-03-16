@@ -16,7 +16,7 @@ This sheet consolidates the architectural rules that must be followed throughout
 - Creating reusable visual primitives outside `@hbc/ui-kit` without a documented governed exception (ADR-0116) is a violation.
 - UI-bearing components exist outside `@hbc/ui-kit` only when tightly coupled to package-specific behavior or runtime state and governed by an ADR exception.
 - Package location does not exempt a surface from HB Intel's standards for visual quality, hierarchy, theming, accessibility, field readiness, responsiveness, documentation, and verification.
-- The benchmark surface for visual quality is the Personal Work Hub / PWA (per ADR-0116).
+- The benchmark surface for visual quality is the Personal Work Hub / PWA *(Personal Work Hub = the `apps/pwa` Progressive Web App; SPFx surfaces follow the same standards with `apps/pwa` as the reference implementation — see ADR-0116 for the full definition.)* (per ADR-0116).
 
 **Enforcement:**
 - Code review: Verify all new reusable UI belongs in `@hbc/ui-kit` or has ADR exception
@@ -56,6 +56,7 @@ This sheet consolidates the architectural rules that must be followed throughout
 **Enforcement:**
 - Code review: Block PRs that add cross-feature imports between feature packages
 - Architecture audit: Review each feature package quarterly to detect patterns of dependency-hub growth
+- **Automated enforcement:** Dependency cycle detection in CI is a planned Phase 1 investment. Until then, code review and quarterly architecture audits are the primary controls. Developers should run local tooling (e.g., `pnpm ls --depth=1` or workspace dependency audit) before introducing new cross-package dependencies.
 - Governing sources: `.claude/rules/03-package-boundaries.md`, `package-relationship-map.md`, ADR-0001
 
 ---
@@ -71,7 +72,7 @@ The following packages are **permanently excluded from all production data paths
 | Package | Maturity Label | Reason | When Allowed |
 |---------|---|---|---|
 | `@hbc/data-seeding` | excluded-from-production-path | Development/demo data seeding only | Dev harness, local testing, demo environments only |
-| `@hbc/dev-harness` | excluded-from-production-path | Unified development environment with mock mode | Local development, CI test sandboxes only |
+| `apps/dev-harness` | excluded-from-production-path | Unified development environment with mock mode | Local development, CI test sandboxes only |
 
 **Enforcement:** Any production code path that imports these packages is a build violation and will fail CI.
 
@@ -81,23 +82,23 @@ The following packages are labeled `scaffold-only` in the Production Readiness M
 
 | Package | Category | Current Status | Blocking Condition |
 |---------|---|---|---|
-| `@hbc/post-bid-autopsy` | C | v0.0.1 scaffold-only | SF22 T08-T09 UI surfaces and lifecycle/storage orchestration incomplete; blocks BD and Estimating features |
-| `@hbc/strategic-intelligence` | C | v0.0.1 scaffold-only | Runtime adapters and BD heritage integration not implemented |
-| `@hbc/ai-assist` | C | v0.0.1 scaffold-only | Pre-Implementation Research Directive incomplete; Azure tenant integration and Smart Insert UI not implemented |
-| `@hbc/features-accounting` | D | v0.0.0 scaffold-only | No production implementation; Phase 1+ scope |
-| `@hbc/features-leadership` | D | v0.0.0 scaffold-only | No production implementation; Phase 2 scope |
-| `@hbc/features-safety` | D | v0.0.0 scaffold-only | No production implementation; Phase 3+ scope |
-| `@hbc/features-quality-control-warranty` | D | v0.0.0 scaffold-only | No production implementation; Phase 4 scope |
-| `@hbc/features-risk-management` | D | v0.0.0 scaffold-only | No production implementation; Phase 5+ scope |
-| `@hbc/features-operational-excellence` | D | v0.0.0 scaffold-only | No production implementation; Phase 5+ scope |
-| `@hbc/features-human-resources` | D | v0.0.0 scaffold-only | No production implementation; Phase 6+ scope |
-| `@hbc/spfx-leadership` | E | scaffold-only | Depends on `@hbc/features-leadership` (v0.0.0) |
-| `@hbc/spfx-safety` | E | scaffold-only | Depends on `@hbc/features-safety` (v0.0.0) |
-| `@hbc/spfx-quality-control-warranty` | E | scaffold-only | Depends on `@hbc/features-quality-control-warranty` (v0.0.0) |
-| `@hbc/spfx-risk-management` | E | scaffold-only | Depends on `@hbc/features-risk-management` (v0.0.0) |
-| `@hbc/spfx-operational-excellence` | E | scaffold-only | Depends on `@hbc/features-operational-excellence` (v0.0.0) |
-| `@hbc/spfx-human-resources` | E | scaffold-only | Depends on `@hbc/features-human-resources` (v0.0.0) |
-| `@hbc/hb-site-control` | E | scaffold-only | No production implementation; Phase 6 scope |
+| `@hbc/post-bid-autopsy` | C | v0.0.1 scaffold-only | Incomplete: SF22 T08-T09 UI surfaces and lifecycle/storage orchestration |
+| `@hbc/strategic-intelligence` | C | v0.0.1 scaffold-only | Incomplete: Runtime adapters and BD heritage integration |
+| `@hbc/ai-assist` | C | v0.0.1 scaffold-only | Incomplete: Pre-Implementation Research Directive; Azure tenant integration and Smart Insert UI |
+| `@hbc/features-accounting` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 1+ delivery scope |
+| `@hbc/features-leadership` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 2 delivery scope |
+| `@hbc/features-safety` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 3+ delivery scope |
+| `@hbc/features-quality-control-warranty` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 4 delivery scope |
+| `@hbc/features-risk-management` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 5+ delivery scope |
+| `@hbc/features-operational-excellence` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 5+ delivery scope |
+| `@hbc/features-human-resources` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 6+ delivery scope |
+| `@hbc/spfx-leadership` | E | scaffold-only | Depends on: @hbc/features-leadership (v0.0.0) |
+| `@hbc/spfx-safety` | E | scaffold-only | Depends on: @hbc/features-safety (v0.0.0) |
+| `@hbc/spfx-quality-control-warranty` | E | scaffold-only | Depends on: @hbc/features-quality-control-warranty (v0.0.0) |
+| `@hbc/spfx-risk-management` | E | scaffold-only | Depends on: @hbc/features-risk-management (v0.0.0) |
+| `@hbc/spfx-operational-excellence` | E | scaffold-only | Depends on: @hbc/features-operational-excellence (v0.0.0) |
+| `@hbc/spfx-human-resources` | E | scaffold-only | Depends on: @hbc/features-human-resources (v0.0.0) |
+| `@hbc/hb-site-control` | E | scaffold-only | Scope: No production implementation; Phase 6 delivery scope |
 
 **Rule:** Any `import` of a `scaffold-only` package in a production module or adapter is a build violation enforced by ESLint rule `@hb-intel/hbc/no-stub-implementations` (ADR-0095). CI will fail the `lint-and-typecheck` job.
 
@@ -125,7 +126,7 @@ Examples of `usable-but-incomplete` packages currently allowed in Wave 0 product
 
 ### 4.5 Enforcement Mechanisms
 
-**Layer 1 — ESLint:** Rule `@hb-intel/hbc/no-stub-implementations` (error level) detects `throw new Error('not implemented')` and related stubs at lint time in dev and CI.
+**Layer 1 — ESLint:** Rule `@hb-intel/hbc/no-stub-implementations` (error level) detects stub patterns including `throw new Error('not implemented')`, `throw new Error('placeholder')`, and template literal variants with case-insensitive matching at lint time in dev and CI. See `docs/reference/developer/stub-enforcement-ci.md` for the complete detection pattern specification.
 
 **Layer 2 — CI grep scan:** After ESLint in the `lint-and-typecheck` job, a secondary grep scan catches edge cases (`.js` files, generated code outside ESLint scope).
 
@@ -143,20 +144,20 @@ Examples of `usable-but-incomplete` packages currently allowed in Wave 0 product
 
 ### Mandatory Use Table
 
-| Concern Area | Owning Package | Rule | Exception |
+| Concern Area | Owning Package | Rule | When Allowed |
 |---|---|---|---|
-| Auth / RBAC | `@hbc/auth` | All auth flows, permission checks, guard logic through `@hbc/auth` | None permitted |
-| Offline persistence | `@hbc/session-state` | All draft management, operation queueing, IndexedDB through `@hbc/session-state` | None permitted |
-| Action ownership / BIC | `@hbc/bic-next-move` | All action-ownership tracking and module registration through `@hbc/bic-next-move` | None permitted |
-| Notifications | `@hbc/notification-intelligence` | All notification registration, delivery, and priority tiering | None permitted |
-| Workflow handoff | `@hbc/workflow-handoff` | All cross-module work transfers | None permitted |
-| Record relationships | `@hbc/related-items` | All cross-module record relationship panels | None permitted |
-| Dashboard canvas | `@hbc/project-canvas` | Role-based configurable dashboards | None permitted |
-| Version history | `@hbc/versioned-record` | All version history, diff, badge rendering | None permitted |
+| Auth / RBAC | `@hbc/auth` | All auth flows, permission checks, guard logic through `@hbc/auth` | Never |
+| Offline persistence | `@hbc/session-state` | All draft management, operation queueing, IndexedDB through `@hbc/session-state` | Never |
+| Action ownership / BIC | `@hbc/bic-next-move` | All action-ownership tracking and module registration through `@hbc/bic-next-move` | Never |
+| Notifications | `@hbc/notification-intelligence` | All notification registration, delivery, and priority tiering | Never |
+| Workflow handoff | `@hbc/workflow-handoff` | All cross-module work transfers | Never |
+| Record relationships | `@hbc/related-items` | All cross-module record relationship panels | Never |
+| Dashboard canvas | `@hbc/project-canvas` | Role-based configurable dashboards | Never |
+| Version history | `@hbc/versioned-record` | All version history, diff, badge rendering | Never |
 | Reusable UI | `@hbc/ui-kit` | All reusable visual UI (see G-01) | Composition shells only |
-| Personal work aggregation | `@hbc/my-work-feed` | All personal work aggregation (ADR-0115) | None permitted |
-| Complexity gating | `@hbc/complexity` | All tier-based display gating | None permitted |
-| Empty states | `@hbc/smart-empty-state` | Context-aware empty states and guided onboarding | None permitted |
+| Personal work aggregation | `@hbc/my-work-feed` | All personal work aggregation (ADR-0115) | Never |
+| Complexity gating | `@hbc/complexity` | All tier-based display gating | Never |
+| Empty states | `@hbc/smart-empty-state` | Context-aware empty states and guided onboarding | Never |
 
 **Hard rule:** Any feature that re-implements a concern owned by a Tier-1 Primitive is a violation. Code review must block the PR.
 
@@ -183,7 +184,7 @@ Examples of `usable-but-incomplete` packages currently allowed in Wave 0 product
 4. Obtain approval from program architecture lead
 5. Reference the ADR in the PR and in code comments where the decision applies
 
-**Current ADR reservation:** Next unreserved ADR number is **ADR-0117**.
+**Current ADR reservation:** To determine the next available ADR number, consult `docs/architecture/adr/` catalog before filing. As of Phase 0 baseline (2026-03-16), ADR-0117 was the next unreserved number — but verify current state before use.
 
 **Governing sources:** `docs/architecture/adr/` catalog, current-state-map.md §2.1
 
@@ -205,7 +206,7 @@ Write justification in an ADR or as a comment in an ADR. Informal email or chat 
 - **G-02 (dependency direction) exceptions:** Program architecture lead
 
 ### Step 4: Set Resolution Target
-Every exception must include a target milestone for resolution or permanent promotion to an ADR-locked exception rule. Permanent exceptions must state why they cannot be avoided.
+Every exception must include a target milestone for resolution. If the exception cannot be time-bounded, it must be made permanent via a new ADR documenting why the exception cannot be avoided (see G-06 for the ADR filing process).
 
 ### Step 5: Record the Exception
 Add the exception to the Open Decisions Register (P0-E2) with:
@@ -244,6 +245,7 @@ Add the exception to the Open Decisions Register (P0-E2) with:
 | `.claude/rules/02-architecture-invariants.md` | Locked architectural guardrails | Operational doctrine |
 | `.claude/rules/03-package-boundaries.md` | UI ownership, dependency hygiene, shared logic placement | Operational doctrine |
 | `.claude/rules/05-implementation-quality.md` | Code quality priorities and testing expectations | Operational doctrine |
+| `docs/reference/developer/agent-authority-map.md` | Agent and developer source routing for authority delegation | Operational doctrine |
 | `docs/reference/developer/shared-package-no-go-rules.md` | Tier-1 Primitive mandatory use rules | Phase 0 execution |
 | `docs/reference/developer/stub-enforcement-ci.md` | Stub detection, CI enforcement, escape hatch | Phase 0 execution |
 | ADR-0001 | Monorepo bootstrap and package categories | Locked decision |
