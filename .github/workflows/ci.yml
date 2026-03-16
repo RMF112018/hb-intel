@@ -106,7 +106,31 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Run P1 unit tests with coverage
-        run: pnpm turbo run test --filter=@hbc/auth --filter=@hbc/shell --filter=@hbc/sharepoint-docs --filter=@hbc/bic-next-move --filter=@hbc/complexity
+        run: >-
+          pnpm turbo run test
+          --filter=@hbc/auth
+          --filter=@hbc/shell
+          --filter=@hbc/sharepoint-docs
+          --filter=@hbc/bic-next-move
+          --filter=@hbc/complexity
+          --filter=@hbc/acknowledgment
+          --filter=@hbc/step-wizard
+          --filter=@hbc/versioned-record
+          --filter=@hbc/field-annotations
+          --filter=@hbc/workflow-handoff
+          --filter=@hbc/session-state
+          --filter=@hbc/project-canvas
+          --filter=@hbc/post-bid-autopsy
+          --filter=@hbc/strategic-intelligence
+          --filter=@hbc/my-work-feed
+          --filter=@hbc/ai-assist
+          --filter=@hbc/notification-intelligence
+          --filter=@hbc/related-items
+          --filter=@hbc/score-benchmark
+          --filter=@hbc/smart-empty-state
+          --filter=@hbc/data-seeding
+          --filter=@hbc/query-hooks
+          --filter=@hbc/health-indicator
 
       - name: Upload P1 coverage reports
         uses: actions/upload-artifact@v4
@@ -118,6 +142,24 @@ jobs:
             packages/sharepoint-docs/coverage/
             packages/bic-next-move/coverage/
             packages/complexity/coverage/
+            packages/acknowledgment/coverage/
+            packages/step-wizard/coverage/
+            packages/versioned-record/coverage/
+            packages/field-annotations/coverage/
+            packages/workflow-handoff/coverage/
+            packages/session-state/coverage/
+            packages/project-canvas/coverage/
+            packages/post-bid-autopsy/coverage/
+            packages/strategic-intelligence/coverage/
+            packages/my-work-feed/coverage/
+            packages/ai-assist/coverage/
+            packages/notification-intelligence/coverage/
+            packages/related-items/coverage/
+            packages/score-benchmark/coverage/
+            packages/smart-empty-state/coverage/
+            packages/data-seeding/coverage/
+            packages/query-hooks/coverage/
+            packages/health-indicator/coverage/
           retention-days: 14
 
   unit-tests-apps:
@@ -143,6 +185,30 @@ jobs:
 
       - name: PWA tests
         run: pnpm --filter @hbc/pwa test
+
+      - name: Project Hub app tests
+        run: pnpm --filter @hbc/spfx-project-hub test
+
+      - name: Business Development app tests
+        run: pnpm --filter @hbc/spfx-business-development test
+
+      - name: Leadership app tests
+        run: pnpm --filter @hbc/spfx-leadership test
+
+      - name: Safety app tests
+        run: pnpm --filter @hbc/spfx-safety test
+
+      - name: Quality Control & Warranty app tests
+        run: pnpm --filter @hbc/spfx-quality-control-warranty test
+
+      - name: Risk Management app tests
+        run: pnpm --filter @hbc/spfx-risk-management test
+
+      - name: Operational Excellence app tests
+        run: pnpm --filter @hbc/spfx-operational-excellence test
+
+      - name: Human Resources app tests
+        run: pnpm --filter @hbc/spfx-human-resources test
 
       - name: Role-branch gate
         # G4-T06-002: Verify no hardcoded role === checks in app source.

@@ -99,7 +99,7 @@ git push -u origin feature/foo  # Triggers CI on PR
    - @hbc/sharepoint-docs (95% coverage threshold enforced)
    - @hbc/bic-next-move (95% coverage threshold enforced)
    - @hbc/complexity (90% coverage threshold enforced)
-   - **Note:** Only 5 of 20 Category C platform primitives have CI coverage (see GAP-D-01)
+   - **Note:** All 20 Category C primitives plus health-indicator now have CI coverage (GAP-D-01 resolved)
    - Failure blocks merge
 
 4. **`unit-tests-apps`**
@@ -108,7 +108,7 @@ git push -u origin feature/foo  # Triggers CI on PR
    - @hbc/spfx-accounting (must pass)
    - @hbc/pwa (must pass)
    - tools/check-no-role-branch.sh role-branch verification gate
-   - **Note:** Only 3 of 11 SPFx apps have CI tests; remaining 8 have no CI gate (see GAP-D-02)
+   - **Note:** 12 of 14 apps now have CI tests (GAP-D-02 resolved; hb-site-control and dev-harness excluded)
    - Failure blocks merge
 
 ---
@@ -177,9 +177,9 @@ This matrix defines which artifact types can deploy to which environments and un
 | **SPFx Admin (@hbc/spfx-admin)** | Manual (npm run dev) | spfx-build.yml (validation only) | Auto (spfx-deploy.yml after build) | Manual dispatch (spfx-deploy.yml with env=production) | 59 CI tests; tested in SPFx iframe harness |
 | **SPFx Estimating (@hbc/spfx-estimating)** | Manual | spfx-build.yml validation | Auto (spfx-deploy.yml) | Manual dispatch | CI tested; path filter: apps/estimating/** |
 | **SPFx Accounting (@hbc/spfx-accounting)** | Manual | spfx-build.yml validation | Auto (spfx-deploy.yml) | Manual dispatch | CI tested; path filter: apps/accounting/** |
-| **SPFx Other 8 apps** | Manual | spfx-build.yml validation (no CI tests) | Auto (spfx-deploy.yml) | Manual dispatch | **No CI unit tests** (see GAP-D-02); path filter covers all 11 apps in apps/** |
+| **SPFx Other 8 apps** | Manual | spfx-build.yml validation + CI unit tests | Auto (spfx-deploy.yml) | Manual dispatch | CI unit tests added (GAP-D-02 resolved); path filter covers all 11 apps in apps/** |
 | **dev-harness (apps/dev-harness)** | Manual (pnpm dev, port 3000) | None (not in CI pipeline) | None | None | Local development sandbox only; not deployed to external envs |
-| **Platform packages (@hbc/auth, @hbc/shell, etc.)** | Built locally via pnpm turbo run build | CI validates via unit-tests-p1 (5 packages) or no gate (15 packages) | Consumed by deployed apps | Consumed by released apps | Only 5 of 20 platform packages have CI coverage (see GAP-D-01) |
+| **Platform packages (@hbc/auth, @hbc/shell, etc.)** | Built locally via pnpm turbo run build | CI validates via unit-tests-p1 (all Category C + auth + shell) | Consumed by deployed apps | Consumed by released apps | All 20 Category C packages plus health-indicator now have CI coverage (GAP-D-01 resolved) |
 
 ---
 
@@ -242,8 +242,8 @@ This section details all CI jobs that enforce release control.
 |---|---|---|---|---|---|---|
 | lint-and-typecheck | ci.yml | PR + main | ALL workspace packages | N/A (no threshold) | Blocks merge | Includes ADR-0095 stub detection scan |
 | unit-tests | ci.yml | PR + main | @hbc/functions, @hbc/provisioning | N/A | Blocks merge | Uses Azurite emulator for storage testing |
-| unit-tests-p1 | ci.yml | PR + main | @hbc/auth (90%), @hbc/shell (95%), @hbc/sharepoint-docs (95%), @hbc/bic-next-move (95%), @hbc/complexity (90%) | 90–95% | Blocks merge | Only 5 of 20 Category C packages have thresholds |
-| unit-tests-apps | ci.yml | PR + main | @hbc/spfx-admin (59 tests), @hbc/spfx-estimating, @hbc/spfx-accounting, @hbc/pwa | N/A (zero-failure model) | Blocks merge | Includes check-no-role-branch.sh gate; no % threshold enforcement |
+| unit-tests-p1 | ci.yml | PR + main | @hbc/auth, @hbc/shell, @hbc/sharepoint-docs, @hbc/bic-next-move, @hbc/complexity + 18 additional Category C packages (acknowledgment, step-wizard, versioned-record, field-annotations, workflow-handoff, session-state, project-canvas, post-bid-autopsy, strategic-intelligence, my-work-feed, ai-assist, notification-intelligence, related-items, score-benchmark, smart-empty-state, data-seeding, query-hooks, health-indicator) | 90–95% per package | Blocks merge | All 20 Category C packages covered (GAP-D-01 resolved) |
+| unit-tests-apps | ci.yml | PR + main | @hbc/spfx-admin, @hbc/spfx-estimating, @hbc/spfx-accounting, @hbc/pwa + 8 additional SPFx apps (project-hub, business-development, leadership, safety, quality-control-warranty, risk-management, operational-excellence, human-resources) | N/A (zero-failure model) | Blocks merge | 12 of 14 apps covered (GAP-D-02 resolved); includes check-no-role-branch.sh gate |
 | spfx-build | spfx-build.yml | main + path filter (apps/**, packages/**) | All 11 SPFx apps | N/A (build only) | Blocks spfx-deploy | Builds all webparts; no unit tests for 8 apps |
 | check-ci | cd.yml | Triggered after ci.yml on main | Validates all 4 ci.yml jobs passed | Required pass | Blocks staging deploy | Gate job enforcing CI prerequisite before CD |
 | e2e | e2e.yml | Manual dispatch + v* tags | Playwright integration tests | N/A (all-pass model) | Blocks production deploy (v* tag path) | Requires STAGING_ESTIMATING_URL, STAGING_ACCOUNTING_URL secrets |
@@ -258,8 +258,8 @@ The following gaps in CI coverage, test automation, and environment qualificatio
 
 | ID | Description | Severity | Phase 1 Blocker | Recommended Action | Target Phase |
 |---|---|---|---|---|---|
-| **GAP-D-01** | Only 5 of 20 Category C platform primitives have CI unit test coverage. Missing coverage: @hbc/theme, @hbc/adf-integration, @hbc/entity-factory, @hbc/insights, @hbc/ui-kit, @hbc/storage, @hbc/cache, @hbc/messaging, @hbc/orchestration, @hbc/workflow, @hbc/escalation, @hbc/reporting, @hbc/analytics, @hbc/config, and 6 others. | High | **YES** | Add unit tests to all 20 Category C packages; enforce coverage thresholds in unit-tests-p1 job. Update ci.yml workflow to include all 20 packages. | Phase 1 start |
-| **GAP-D-02** | Only 3 of 11 SPFx apps have unit tests in CI (admin, estimating, accounting). Remaining 8 apps (bic-next-move, complexity, ideas, insights, reporting, escalation, workflow, orchestration) have no CI test gate and are built but not validated. | High | **YES** | Add unit tests to all 11 SPFx apps; add test step to unit-tests-apps job or create unit-tests-spfx-all job covering all 11 webparts. Enforce zero-failure requirement. | Phase 1 start |
+| **GAP-D-01** | Only 3 of 20 Category C shared-feature primitives had CI unit test coverage (sharepoint-docs, bic-next-move, complexity). The remaining 17 packages — acknowledgment, step-wizard, versioned-record, field-annotations, workflow-handoff, session-state, project-canvas, post-bid-autopsy, strategic-intelligence, my-work-feed, ai-assist, notification-intelligence, related-items, score-benchmark, smart-empty-state, data-seeding, query-hooks — plus health-indicator all had test suites but were not included in the CI workflow. Additionally, auth and shell (Category A) are tested in the same job. | High | **RESOLVED** | All 20 Category C packages plus health-indicator added to `unit-tests-p1` job in ci.yml. Tests for health-indicator runtime and telemetry created. Coverage thresholds enforced per package vitest.config.ts. | Resolved 2026-03-16 |
+| **GAP-D-02** | Only 4 of 14 apps had CI unit tests (admin, estimating, accounting, pwa). The remaining 8 SPFx apps (project-hub, business-development, leadership, safety, quality-control-warranty, risk-management, operational-excellence, human-resources) had test files (bootstrap.test.ts, router.test.ts) but were not included in the CI workflow. hb-site-control and dev-harness excluded (scaffold/dev-only). | High | **RESOLVED** | All 8 SPFx apps with test files added to `unit-tests-apps` job in ci.yml. Zero-failure requirement enforced. Total: 12 of 14 apps now have CI coverage (excluding dev-harness and hb-site-control). | Resolved 2026-03-16 |
 | **GAP-D-03** | E2E tests require staging secret URLs (STAGING_ESTIMATING_URL, STAGING_ACCOUNTING_URL) to be configured in GitHub repository secrets. Without these, e2e.yml cannot run. | Medium | No | Configure STAGING_ESTIMATING_URL and STAGING_ACCOUNTING_URL in GitHub repository secrets pointing to deployed staging URLs after Vercel staging deploy is live. Update e2e.yml to validate secret presence. | M0.4 (concurrent with Vercel setup) |
 | **GAP-D-04** | promote-ideas.yml is disabled (if: false); scripts/promote-ideas.mjs does not exist. Cannot auto-promote ideas from ideation to active plans in Phase 0. | Low | No | Either implement promote-ideas.mjs and enable workflow, or document manual promotion process in dev runbook. Defer to Phase 1 planning. | Phase 1 planning |
 | **GAP-D-05** | No explicit coverage threshold enforcement for app-level tests. @hbc/spfx-admin, @hbc/spfx-estimating, @hbc/spfx-accounting, @hbc/pwa have zero-failure requirement but no percentage threshold (unlike platform packages which enforce 90–95%). | Medium | No | Define coverage thresholds for all 4 apps (recommend 80% for apps); add coverage reporting to unit-tests-apps job; enforce via CI gate if below threshold. Update ci.yml. | Phase 1 start |
