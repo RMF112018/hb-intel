@@ -63,7 +63,7 @@ Establish the authoritative source, read/write paths, and identity strategy for 
 
 ## Entity-Level Source-of-Record and Adapter Behavior Register
 
-The domain register above captures one row per business domain. As canonical schemas mature (P1-A4 through P1-A13), each domain decomposes into discrete entities that may differ in storage target, write safety class, adapter pathway, or caching strategy. This section provides entity-level governance so adapter implementers know exactly how each canonical model is stored, read, written, and identified.
+The domain register above captures one row per business domain. As canonical schemas mature (P1-A4 through P1-A15), each domain decomposes into discrete entities that may differ in storage target, write safety class, adapter pathway, or caching strategy. This section provides entity-level governance so adapter implementers know exactly how each canonical model is stored, read, written, and identified.
 
 ### How to read this register
 

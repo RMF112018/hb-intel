@@ -419,7 +419,7 @@ All shared dictionary lists use content type `HBDictionaryItem`, are provisioned
 | 7 | Lookups | — |
 | 8 | Indexes | `csiCode` (unique), `stage`, `divisionCode` |
 | 9 | Versioning | Major versions |
-| 10 | Security | Hub site inherited; read by all project sites |
+| 10 | Security | Hub site inherited; project-site consumers resolve via adapter layer (no cross-site lookup columns) |
 | 11 | Provisioning | Created during hub site setup; populated from CSV import |
 | 12 | Governing Schema | P1-A5 Cost Code Dictionary (7,565 codes, DD-SS-DDD format) |
 
@@ -632,7 +632,7 @@ These 7 dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, C
 | 1–4 | Standard | Project Site / List / `BuyoutCommitments` / `HBBaseListItem` |
 | 5 | Required Columns | `id` (Text, native), `projectId` (Text), `commitmentTitle` (Text), `commitmentNumber` (Text), `status` (Choice) |
 | 6 | Optional Columns | `procoreCommitmentId` (Text), `vendorName` (Text), `vendorContact_name` (Text), `vendorContact_email` (Text), `vendorContact_phone` (Text), `csiCode` (Text), `csiDescription` (Text), `procurementMethod` (Choice), `contractType` (Choice), `complianceStatus` (Choice), `contractAmount` (Number), `budgetAmount` (Number), `variance` (Number), `variancePercentage` (Number), `bondsRequired` (Yes/No), `insuranceVerified` (Yes/No), `startDate` (Date), `completionDate` (Date), `bidTabLink_bidTabId` (Text), `bidTabLink_csiMatch` (Yes/No), `bidTabLink_descriptionMatch` (Number), `bidTabLink_linkedAt` (DateTime), `bidTabLink_verifiedBy` (Text), `procurementNotes` (Multi-line), `updatedBy` (Text) |
-| 7 | Lookups | `csiCode` → Shared_CSICodes, `status` → CommitmentStatuses, `procurementMethod` → ProcurementMethods, `contractType` → ContractTypes |
+| 7 | Lookups | `csiCode` → Shared_CSICodes (hub-site; adapter-resolved — see §Lookup and Reference Strategy), `status` → CommitmentStatuses (same-site), `procurementMethod` → ProcurementMethods (same-site), `contractType` → ContractTypes (same-site) |
 | 8 | Indexes | `recordId`, `projectId`, `commitmentNumber`, `status`, `csiCode` |
 | 9–11 | Standard | Major versions / Project team + financial domain team / Project site provisioning |
 | 12 | Governing Schema | P1-A1 buyout_commitment entity (34 fields) |
@@ -780,7 +780,7 @@ These 7 dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, C
 | 1–4 | Standard | Project Site / List / `BudgetLines` / `HBBaseListItem` |
 | 5 | Required Columns | `batchId` (Text), `projectId` (Text), `budgetCode` (Text), `rowType` (Choice: data/blank_excluded/summary_excluded), `isExcluded` (Yes/No) |
 | 6 | Optional Columns | `budgetCodeDescription` (Text), `subJobCode` (Text), `subJobDescription` (Text), `costCodeTier1Code` (Text), `costCodeTier1Description` (Text), `costCodeTier2Code` (Text), `costCodeTier2Description` (Text), `costCodeTier3Code` (Text), `costCodeTier3Description` (Text), `costTypeCode` (Text), `costTypeDescription` (Text), `originalBudgetAmount` (Number), `budgetModifications` (Number), `approvedCos` (Number), `revisedBudget` (Number), `pendingBudgetChanges` (Number), `projectedBudget` (Number), `committedCosts` (Number), `directCosts` (Number), `jobToDateCosts` (Number), `pendingCostChanges` (Number), `projectedCosts` (Number), `forecastToComplete` (Number), `estimatedCostAtCompletion` (Number), `projectedOverUnder` (Number), `sourceRowNumber` (Number) |
-| 7 | Lookups | `costCodeTier3Code` → Shared_CostCodes (code match) |
+| 7 | Lookups | `costCodeTier3Code` → Shared_CostCodes (hub-site; adapter-resolved — see §Lookup and Reference Strategy) |
 | 8 | Indexes | `batchId`, `projectId`, `budgetCode` |
 | 9–11 | Standard | Major versions / Financial confidential / Project site provisioning |
 | 12 | Governing Schema | P1-A6 budget_line entity (4 canonical entities). Snapshot-append model. |
@@ -1080,17 +1080,19 @@ These dictionaries are stored as SharePoint lists on the **hub site** and govern
 |----------------|---------------|-----------|----------------|--------|
 | Cost Codes | `Shared_CostCodes` | `csiCode` | `description` | P1-A5 Cost Code Dictionary |
 | CSI Codes | `Shared_CSICodes` | `csiCode` | `primaryDescription` | P1-A5 CSI Code Dictionary |
-| Project Types | `Shared_ProjectTypes` | `typeId` | `typeName` | P1-A5 (pending schema) |
-| Project Stages | `Shared_ProjectStages` | `stageId` | `stageName` | P1-A5 (pending schema) |
-| Project Regions | `Shared_ProjectRegions` | `regionId` | `regionName` | P1-A5 (pending schema) |
-| State Codes | `Shared_StateCodes` | `stateCode` | `stateName` | P1-A5 (pending schema) |
-| Country Codes | `Shared_CountryCodes` | `countryCode` | `countryName` | P1-A5 (pending schema) |
-| Delivery Methods | `Shared_DeliveryMethods` | `methodCode` | `methodName` | P1-A5 (pending schema) |
-| Sectors | `Shared_Sectors` | `sectorCode` | `sectorName` | P1-A5 (pending schema) |
+| Project Types | `Shared_ProjectTypes` | `typeId` | `typeName` | P1-A5 Simple Reference Dictionary |
+| Project Stages | `Shared_ProjectStages` | `stageId` | `stageName` | P1-A5 Simple Reference Dictionary |
+| Project Regions | `Shared_ProjectRegions` | `regionId` | `regionName` | P1-A5 Simple Reference Dictionary |
+| State Codes | `Shared_StateCodes` | `stateCode` | `stateName` | P1-A5 Simple Reference Dictionary |
+| Country Codes | `Shared_CountryCodes` | `countryCode` | `countryName` | P1-A5 Simple Reference Dictionary |
+| Delivery Methods | `Shared_DeliveryMethods` | `methodCode` | `methodName` | P1-A5 Simple Reference Dictionary |
+| Sectors | `Shared_Sectors` | `sectorCode` | `sectorName` | P1-A5 Simple Reference Dictionary |
 
 ### Domain-Local Dictionaries (Site-Scoped)
 
 These dictionaries are stored on the relevant project or shared site and are managed within their domain's schema artifact. They are NOT governed by P1-A5 unless later promoted.
+
+Domain-local dictionaries are provisioned as part of project-site setup (manually or via provisioning scripts, per the open provisioning-automation decision). They use the `HBDictionaryItem` content type, same-site lookup columns from consuming lists within the same project site, and are maintained by the owning domain team. Promotion to hub-site shared governance requires an explicit decision and migration to P1-A5 governance.
 
 | Dictionary List | Domain | Internal Name | Scope | Governing Schema |
 |----------------|--------|---------------|-------|-----------------|
@@ -1195,6 +1197,18 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 - Reference sets referenced by Choice columns should have their values populated from these dictionary lists
 - Canonical schema for reference dictionaries (keying, hierarchy, lifecycle, applicability) is governed by [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md)
 
+### Shared Dictionary Deployment Model
+
+> **Status: Frozen.** This subsection defines the architectural contract for shared dictionary deployment. Population automation (CSV, PnP, manual) remains an open implementation decision.
+
+**Authoritative storage.** Each shared dictionary is stored in exactly one authoritative SharePoint list on the hub site (enumerated in Appendix A.1). The hub-site list is the single source of truth for dictionary content. Project sites do not maintain authoritative copies or synchronized replicas of shared dictionary lists.
+
+**Project-site column contract.** Project-site records that reference a shared dictionary store the dictionary's stable key value (e.g., `csiCode`, `typeId`, `stateCode`) as a plain text column. Where the consuming domain also stores a display value (e.g., `csiDescription`, `projectTypeName`), that column is a denormalized display mirror populated at write time or adapter-resolution time — not an authoritative copy. The key column is the durable contract; the display mirror is a convenience that may lag dictionary updates until the record is next touched.
+
+**Resolution mechanism.** Cross-site SharePoint lookup columns are not used as the architectural contract between project sites and hub-site dictionaries. The adapter layer resolves dictionary key-to-display enrichment at read time, using the stable key stored on the project-site record to look up the current authoritative value from the hub-site dictionary list. This aligns with the cross-site lookup prohibition in the Cross-List Lookups subsection above and with P1-A2's Class C adapter-resolution model for read-mostly reference data.
+
+**What remains open.** Initial dictionary population mechanics (CSV upload, PnP provisioning, manual entry) and ongoing dictionary update propagation remain implementation decisions tracked in the Open Decisions table below. The frozen architectural decisions are: WHERE dictionaries live (hub site), WHAT project-site columns store (stable key + optional display mirror), and HOW cross-site resolution works (adapter layer, not SharePoint lookup columns).
+
 ---
 
 ## Indexing and Performance Considerations
@@ -1242,7 +1256,7 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 
 | Decision | Scope | Owner | Target | Why Still Open |
 |----------|-------|-------|--------|---------------|
-| **Shared dictionary deployment mechanics** | How hub-site dictionary lists are initially populated (CSV upload scripts, PnP provisioning, manual entry) and how dictionary updates propagate to project sites | Platform Architecture + DevOps | Phase 1 (implementation) | Container definitions and schemas are complete; deployment automation approach is not yet selected |
+| **Shared dictionary population automation** | How hub-site dictionary lists are initially populated (CSV upload, PnP provisioning, manual entry) and how dictionary content updates are applied to hub-site lists over time. Deployment architecture (hub-site authoritative, project-site adapter-resolved) is frozen in §Lookup and Reference Strategy | Platform Architecture + DevOps | Phase 1 (implementation) | Deployment architecture frozen (v1.8); automation tooling choice remains an implementation decision |
 | **Column-level security for financial fields** | How fields marked `Confidential Business` / `Domain Team Only` in P1-A1 are restricted in SharePoint — column-level permissions, filtered views, adapter-layer enforcement, or a combination | Platform Architecture + Security | Phase 1 (implementation) | Security model choice affects SharePoint column configuration and view design for BuyoutCommitments, AllowanceItems, VE items, ComplianceWaiverRequests, BudgetLines, SubcontractorScorecards |
 | **Content type strategy for deferred paired containers** | Custom content types for contracts, PMP, and compliance document libraries (currently deferred domains) — whether to use standard `HBDocumentItem` or domain-specific content types with enforced metadata | Platform Architecture | When deferred domains become build-ready | Build-ready domains resolved; deferred paired containers (contracts + library, PMP + library) still need content type decisions when their schemas are completed |
 | **Provisioning automation scope** | Which of the ~45 build-ready containers are auto-provisioned via PnP scripts during hub/project site creation vs created manually or on-demand | Platform Architecture + DevOps | Phase 1 (implementation) | Container definitions are complete but the provisioning execution model (scripted vs manual vs hybrid) is not yet decided |
@@ -1283,3 +1297,4 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 | 1.5 | 2026-03-17 | Architecture | Moved leads from deferred to build-ready scope (section 14). Added 2 containers: `MarketLeads` (Sales/BD site, market leads with tag child records) and `PipelineSnapshots` (Sales/BD site, division-level pipeline snapshots with JSON-embedded aggregates). Governed by P1-A14. Remaining deferred: contracts, pmp. |
 | 1.6 | 2026-03-17 | Architecture | Moved contracts from deferred to build-ready scope (section 15). Added 1 container: `PrimeContracts` (project site, single list — no paired library). Changed from original "Paired (List + Library)" to single List — evidence shows no attachments in Phase 1 source data; library deferred to Phase 2. Governed by P1-A15. Remaining deferred: pmp. |
 | 1.7 | 2026-03-17 | Architecture | Summary-layer reconciliation: add A14 and A15 to Read With, authority boundary, relationship table, and document-scope references (previously stopped at A13). Move contracts from Pattern 3 (Paired) to Pattern 1 (Single List) in canonical container patterns to match A15 single-list decision. |
+| 1.8 | 2026-03-17 | Architecture | Froze shared dictionary deployment model: hub-site authoritative, project-site stores stable keys with optional display mirrors, adapter-resolved cross-site reads (no cross-site lookup columns). Annotated 2 cross-site appendix lookup rows (BuyoutCommitments, BudgetLines). Clarified domain-local dictionary provisioning. Fixed 7 stale "pending schema" labels in summary table. Narrowed open decision to population automation only. |
