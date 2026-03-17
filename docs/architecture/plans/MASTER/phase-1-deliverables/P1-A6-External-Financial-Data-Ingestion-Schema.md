@@ -351,7 +351,7 @@ This artifact will be extended to cover additional external financial data sourc
 |----------|-------|-------|--------|
 | **Procore API integration** | Replace CSV upload with real-time Procore API sync | Platform Architecture | Phase 4+ |
 | **Budget comparison engine** | Automated cross-snapshot variance detection and reporting | Platform Architecture + Cost Controls | Phase 2–3 |
-| **Cost type reference dictionary** | Formalize LAB/LBN/MAT/OVH/SUB as governed reference set in P1-A5 | Platform Architecture | Phase 1 |
+| **Cost type reference dictionary** | **Closed** — 5 cost types (LAB, LBN, MAT, OVH, SUB) frozen as Class X in P1-A5 (v0.5). A6 consumes via `cost_type_code` field. | — | Done |
 | **Sub-job entity model** | Determine if sub-jobs warrant their own entity or remain dimension fields | Platform Architecture + Project Controls | Phase 1 (late) |
 | **Derivation validation rules** | Finalize which derivable metrics are validated and tolerance thresholds | Cost Controls | Phase 1 |
 
@@ -376,3 +376,4 @@ This artifact will be extended to cover additional external financial data sourc
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; Procore Budget with 4 canonical entities, composite key parsing, 14-metric classification (source vs derivable), snapshot-append temporal model, and downstream mapping strategy. Evidence-based from Procore_Budget.csv. |
 | 0.2 | 2026-03-17 | Architecture | Fixed storage boundary table: import batch metadata is SharePoint List (not Azure Table Storage) — budget is a named exception per P1-A2 Import-State Platform Standard. |
+| 0.3 | 2026-03-17 | Architecture | Reconciliation: close Cost Type dictionary open decision — 5 values frozen as Class X in A5 v0.5. No schema changes. |

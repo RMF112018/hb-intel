@@ -389,7 +389,7 @@ Import validation findings for kickoff workbook ingestion. Stored in Azure Table
 | **Date rule automation** | Implement milestone date auto-calculation from proposal due date | Platform Architecture | Phase 2 |
 | **Package assembly engine** | Build deliverable package tab assembly from kickoff metadata | Platform Architecture + Estimating | Phase 2–3 |
 | **Comment history volume** | Determine if note history warrants Azure Table Storage vs SharePoint list | Platform Architecture | Phase 1 (late) |
-| **Status dictionary governance** | Formalize kickoff status values in P1-A5 | Platform Architecture | Phase 1 (late) |
+| **Status dictionary governance** | **Closed** — kickoff status values governed as Class D (domain-local) per A5 structural contract (v0.5). Values owned by A8; must follow A5 key + display label pattern. | — | Done |
 | **Multi-estimator assignment** | Support multiple estimators per row | Platform Architecture | Phase 2 |
 
 ---
@@ -414,3 +414,4 @@ Import validation findings for kickoff workbook ingestion. Stored in Azure Table
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 7 canonical entities (template, template item, instance, row, evidence link, note, import batch), 3 row subtypes (task/milestone/deliverable), hybrid YES/NO and date handling, template/instance snapshot model, and package assembly metadata. Evidence-based from Estimating Kickoff.xlsx. All 16 locked interview decisions encoded. |
 | 0.2 | 2026-03-17 | Architecture | Added `kickoff_import_finding` entity per P1-A2 Import-State Platform Standard completeness requirement. Aligned storage boundary references to cite platform standard. |
 | 0.3 | 2026-03-17 | Architecture | Added cross-reference to P1-A2 Person Identity Resolution Platform Standard for person name resolution behavior. |
+| 0.4 | 2026-03-17 | Architecture | Reconciliation: close Status dictionary governance open decision — governed as Class D per A5 structural contract. No schema changes. |

@@ -368,8 +368,8 @@ Import validation findings for checklist ingestion. Stored in Azure Table Storag
 | Decision | Scope | Owner | Target |
 |----------|-------|-------|--------|
 | **Recurring safety checklists** | If safety checklists become recurring (monthly/quarterly), extend the instance model to support cadenced repetition | Operations + Safety | Phase 2 |
-| **Checklist family dictionary** | Formalize startup/safety/closeout as governed reference set in P1-A5 | Platform Architecture | Phase 1 (late) |
-| **Item type dictionary** | Formalize task/document_requirement/inspection_signoff/etc. types | Platform Architecture | Phase 1 (late) |
+| **Checklist family dictionary** | **Closed** — 3 checklist families (startup, safety, closeout) frozen as Class X in P1-A5 (v0.5). A10 binds by `checklist_family` field. | — | Done |
+| **Item type dictionary** | **Closed** — Item Type governed as Class D (domain-local) per A5 structural contract (v0.6). Code-governed; values owned by A10. | — | Done |
 | **Cross-family aggregate status** | Compute project-wide lifecycle readiness from all family statuses | Platform Architecture | Phase 2 |
 | **Procore API import** | Replace PDF/export-based import with real-time Procore Inspection API | Platform Architecture | Phase 4+ |
 
@@ -394,3 +394,4 @@ Import validation findings for checklist ingestion. Stored in Azure Table Storag
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 8 canonical entities, 3 checklist families (startup/safety/closeout), canonical outcome mapping (complete/incomplete/pass/fail/not_applicable), template/version model, evidence linkage, hybrid raw+canonical outcome preservation. Evidence-based from 3 source PDFs. All 6 locked interview decisions encoded. |
 | 0.2 | 2026-03-17 | Architecture | Added `checklist_import_finding` entity per P1-A2 Import-State Platform Standard completeness requirement. Aligned storage boundary references to cite platform standard. |
+| 0.3 | 2026-03-17 | Architecture | Reconciliation: close Checklist Family dictionary (Class X, A5 v0.5) and Item Type dictionary (Class D, A5 v0.6) open decisions. No schema changes. |

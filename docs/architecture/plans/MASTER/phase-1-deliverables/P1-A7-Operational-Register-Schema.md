@@ -274,7 +274,7 @@ The same Class G/H pattern applies to BIC identity:
 |--------|------|
 | **Raw preservation** | Store original text in `category_raw` (e.g., "28. RISK MANAGEMENT") |
 | **Parsed components** | Split on first `. ` (period-space): left = `category_number`, right = `category_label` |
-| **Dictionary candidate** | 36 category values should be governed as a reference dictionary in P1-A5 (`RegisterCategories`) |
+| **Dictionary authority** | 36 category values governed as Class X in P1-A5 (`RegisterCategories`). Values frozen; new categories require operations SME approval. |
 | **Sort order** | Category number provides natural sort order |
 
 #### BIC (Business-in-Charge)
@@ -282,7 +282,7 @@ The same Class G/H pattern applies to BIC identity:
 | Aspect | Rule |
 |--------|------|
 | **Display preservation** | Store original text in `bic_display` |
-| **Dictionary candidate** | 32 BIC values should be governed as a reference dictionary in P1-A5 (`RegisterBICTeams`) |
+| **Dictionary authority** | 32 BIC values governed as Class X in P1-A5 (`RegisterBICTeams`). Values frozen; new teams require operations SME approval. |
 | **Key resolution** | `bic_key` resolved from dictionary when available; null until dictionary is populated |
 
 ---
@@ -509,8 +509,8 @@ These are reconciliation snapshots only — canonical totals should be derived f
 | Decision | Scope | Owner | Target |
 |----------|-------|-------|--------|
 | **Record-type subtyping** | First subtype (delay) implemented in v0.2; risk/constraint/issue/action subtypes remain Phase 2 targets | Platform Architecture + Operations | Phase 2 (delay: done) |
-| **Category dictionary governance** | Formalize 36 categories as governed reference set in P1-A5 | Platform Architecture | Phase 1 (late) |
-| **BIC dictionary governance** | Formalize 32 BIC teams as governed reference set in P1-A5 | Platform Architecture | Phase 1 (late) |
+| **Category dictionary governance** | **Closed** — 36 categories frozen as Class X in P1-A5 (v0.5). A7 binds by `category_raw` → `category_label`/`category_number`. | — | Done |
+| **BIC dictionary governance** | **Closed** — 32 BIC teams frozen as Class X in P1-A5 (v0.5). A7 binds by `bic_key`. | — | Done |
 | **Identity reconciliation for assigned** | **Resolved (v0.3):** Frozen as Class G person-attribution — UPN when resolved, nullable when unresolved, display always preserved. See [Assignee Identity Resolution](#assignee-identity-resolution-frozen). | Platform Architecture | Done |
 | **Closure evidence requirements** | Define which categories require closure documents for compliance | Risk / Compliance | Phase 2 |
 
@@ -538,3 +538,4 @@ These are reconciliation snapshots only — canonical totals should be derived f
 | 0.3 | 2026-03-17 | Architecture | Freeze assignee identity resolution: `assigned_person_key`/`assigned_display` aligned to Class G (person-attribution) from A2 identity freeze. UPN when resolved, nullable when unresolved, display always preserved, adapter owns resolution. Same pattern confirmed for `bic_key`/`bic_display`. Closes open decision "Identity reconciliation for assigned." |
 | 0.4 | 2026-03-17 | Architecture | Aligned storage boundary with P1-A2 Import-State Platform Standard: import batch and finding storage references updated to cite platform standard. |
 | 0.5 | 2026-03-17 | Architecture | Added cross-reference to P1-A2 Person Identity Resolution Platform Standard in assignee identity section. |
+| 0.6 | 2026-03-17 | Architecture | Reconciliation: close Category and BIC dictionary open decisions — both frozen as Class X in A5 v0.5. Update body text from "dictionary candidate" to "dictionary authority." No schema changes. |

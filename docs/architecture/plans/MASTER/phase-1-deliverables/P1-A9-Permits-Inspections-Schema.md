@@ -334,7 +334,7 @@ Each A9 entity maps to a frozen identity class from the [P1-A2 Identity Strategy
 | **Normalized values** | Each tag becomes a `permit_tag` child record with lowercase-normalized value |
 | **Raw preservation** | `tags_raw` on permit_record preserves the original JSON array; `raw_tag_value` on each tag record |
 | **Duplicate handling** | Deduplicate within a permit; log finding if duplicates detected |
-| **Dictionary candidate** | 11 tag values should become a governed tag dictionary in P1-A5 when the set stabilizes |
+| **Dictionary authority** | 11 tag values frozen as Class X (Permit Tag) in P1-A5 (v0.6). Admin-managed; new tags require compliance SME approval. |
 
 ---
 
@@ -393,9 +393,9 @@ Each A9 entity maps to a frozen identity class from the [P1-A2 Identity Strategy
 
 | Decision | Scope | Owner | Target |
 |----------|-------|-------|--------|
-| **Authority/jurisdiction dictionary** | Formalize authority names as governed reference set in P1-A5 | Platform Architecture | Phase 1 (late) |
-| **Permit type dictionary** | Formalize 12 permit types as governed reference set | Platform Architecture | Phase 1 (late) |
-| **Tag dictionary** | Formalize tag values in P1-A5 | Platform Architecture | Phase 1 (late) |
+| **Authority/jurisdiction dictionary** | **Closed** — Permit Authority governed as Class D (domain-local) per A5 structural contract (v0.6). Admin-managed; values owned by A9. | — | Done |
+| **Permit type dictionary** | **Closed** — 12 permit types frozen as Class X in P1-A5 (v0.5). A9 binds by `permit_type` field. | — | Done |
+| **Tag dictionary** | **Closed** — 11 tag values frozen as Class X (Permit Tag) in P1-A5 (v0.6). A9 binds by `tag_value`. | — | Done |
 | **Condition tracking workflow** | Add condition_status tracking (met/pending/waived) | Operations + Compliance | Phase 2 |
 | **Re-inspection support** | Model re-inspections as linked follow-up records | Platform Architecture | Phase 2 |
 | **Document/evidence links** | Attach permit documents, certificates, inspection photos | Platform Architecture | Phase 2 |
@@ -424,3 +424,4 @@ Each A9 entity maps to a frozen identity class from the [P1-A2 Identity Strategy
 | 0.2 | 2026-03-17 | Architecture | Add identity class alignment to A2 freeze: map all 7 entities to frozen classes (B, D, E, J). Freeze contact key resolution semantics — `authority_contact_key` as Class H (vendor/party), `inspector_contact_key` as Class G (person-attribution). Both nullable if unresolved; snapshot fields always preserved. |
 | 0.3 | 2026-03-17 | Architecture | Aligned storage boundary references with P1-A2 Import-State Platform Standard. |
 | 0.4 | 2026-03-17 | Architecture | Added cross-reference to P1-A2 Person Identity Resolution Platform Standard in contact key resolution section. |
+| 0.5 | 2026-03-17 | Architecture | Reconciliation: close Permit Type (Class X, A5 v0.5), Permit Tag (Class X, A5 v0.6), and Permit Authority (Class D, A5 v0.6) dictionary open decisions. Update body text from "dictionary candidate" to "dictionary authority." No schema changes. |
