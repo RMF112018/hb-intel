@@ -11,7 +11,7 @@
 **Tech Stack:**
 - TypeScript, Vitest (mocked `fetch`)
 - Native `fetch` API (Node 18+), zero third-party HTTP libraries
-- Bearer token from frontend context; backend performs MSAL OBO internally
+- Bearer token from frontend context; backend performs MSAL OBO internally (OBO implementation is a P1-C2/backend dependency; B1 sends the token but does not validate or handle OBO failures beyond HTTP error translation)
 - Error translation: HTTP status codes → `NotFoundError`, `ValidationError`, `HbcDataAccessError`
 
 **Governance:**
@@ -64,7 +64,7 @@ This plan evolves the config contract for proxy HTTP usage:
 
 - **`accessToken?: string` → `getToken: () => Promise<string>`** — MSAL tokens expire (typically 1 hour) and must be acquired per-request via `acquireTokenSilent()`. A static token string is insufficient for production use. The `ProxyHttpClientOptions` type introduced in Task 1 replaces the static token with a token-provider function.
 - **`timeout`** — preserved. `ProxyHttpClientOptions.timeout` defaults to `DEFAULT_TIMEOUT_MS` (30,000 ms) from `adapters/proxy/constants.ts`.
-- **`retryCount`** — **deferred**. The existing `DEFAULT_RETRY_COUNT = 3` constant is preserved for future use, but this plan does NOT implement retry logic in `ProxyHttpClient`. Retry handling is a Phase 4 concern that requires decisions about which errors are retryable, backoff strategy, and interaction with token refresh. This is explicitly a pending decision.
+- **`retryCount`** — **deferred**. The existing `DEFAULT_RETRY_COUNT = 3` constant is preserved for future use, but this plan does NOT implement retry logic in `ProxyHttpClient`. Retry handling is a P1-D1 (Write Safety, Retry, Recovery) concern that requires decisions about which errors are retryable, backoff strategy, and interaction with token refresh. D1 injects retry logic at the HTTP transport layer by wrapping `ProxyHttpClient`, not inside repositories. This is explicitly a pending decision owned by D1.
 - **`ProxyConfig` itself is NOT deleted.** It remains as the stub-phase contract in `types.ts`. `ProxyHttpClientOptions` is the runtime contract used by `ProxyHttpClient`. A future cleanup pass may unify them or deprecate `ProxyConfig`.
 
 ### Timeout and Retry Reconciliation
@@ -126,19 +126,97 @@ Together these guards ensure that:
 - Prod mode activates proxy adapters explicitly
 - Missing configuration fails loudly, never silently
 
-### Dependencies on External Workstreams
+### Cross-Workstream Boundaries
 
-The following are **outside P1-B1 scope** but must be satisfied before proxy adapters function end-to-end:
+B1 is the **frontend-side HTTP client and domain adapter** workstream. It owns the proxy adapter implementation, factory wiring, and adapter-level tests. It does NOT own backend routes, auth middleware, retry/recovery, or contract validation. The following sections define where B1 ends and where each adjacent workstream begins.
 
-| Dependency | Owner | Status |
-|---|---|---|
-| Azure Functions API deployed and accessible | Backend team | Pending |
-| MSAL app registration with API scopes for Functions app | Platform/Auth | Pending |
-| Backend OBO (on-behalf-of) flow implementation | Backend team | Pending |
-| CORS configuration on Azure Functions for PWA origin | Backend/DevOps | Pending |
-| `VITE_PROXY_BASE_URL` and `VITE_API_SCOPE` env vars in deployment config | DevOps | Pending |
+#### B1 Task Responsibility Matrix
 
-Until these dependencies are met, proxy mode will authenticate and send requests but receive backend errors. The proxy adapter error translation (Task 1) will surface these as `HbcDataAccessError` with appropriate codes.
+| B1 Task | B1 Owns | Depends on C1 | Depends on C2 | Depends on D1 | Depends on E1 |
+|---|---|---|---|---|---|
+| Task 1: ProxyHttpClient | HTTP client, error translation, timeout, header injection | Error response shape (`{ message }` envelope) | Bearer token format; 401/403 behavior | Retry policy injection point (deferred to D1) | — |
+| Task 2: ProxyBaseRepository | Path building, query marshaling, paged response mapping | Paginated response shape (`{ data, total, page, pageSize }`) | — | — | — |
+| Task 3: ProxyLeadRepository | Lead adapter implementation + tests | `/api/leads` endpoint paths and response contract | Auth middleware on lead routes | — | Lead contract schema |
+| Task 4: ProxyProjectRepository | Project adapter implementation + tests | `/api/projects` endpoint paths and response contract | Auth middleware on project routes | — | Project contract schema |
+| Tasks 5–7: Remaining 9 repos | Domain adapter implementations + tests | All domain endpoint paths and response contracts | Auth middleware on all domain routes | — | All domain contract schemas |
+| Task 8: Factory wiring | `setProxyContext`, lazy `ProxyHttpClient` singleton, factory switch | — | MSAL app registration; API scopes | — | — |
+| Task 9: Integration tests | Factory-level test with mocked fetch | Expected response shapes | Token provider behavior | — | — |
+| Task 10: Full suite | Package-level verification | — | — | — | — |
+
+#### Dependency: P1-C1 — Backend Service Contract Catalog
+
+**What B1 assumes from C1:**
+- Endpoint paths (e.g., `/api/leads`, `/api/projects/{id}`, `/api/estimating/trackers`) — all paths in B1 are **provisional** and track C1's catalog
+- Response envelope shape: `{ data: T[], total, page, pageSize }` for paginated lists, `{ data: T }` for single-entity responses
+- Error response shape: `{ message: string }` in JSON body for 4xx/5xx responses
+- HTTP status code semantics: 404 for not found, 422 for validation, 401/403 for auth
+
+**Blocking semantics:**
+- B1 **can proceed before C1 is complete** because all HTTP calls are behind mocked `fetch` in tests
+- **Production activation requires C1** — real backend routes must be deployed and accessible
+- **Once C1 is frozen, B1 must reconcile** any path or response shape differences
+
+**What B1 does NOT own:**
+- Backend route handlers, middleware, request validation, database queries, response assembly — all C1
+
+#### Dependency: P1-C2 — Backend Auth and Validation Hardening
+
+**What B1 assumes from C2:**
+- Bearer token in `Authorization` header is the auth mechanism
+- Backend returns 401 for invalid/expired tokens, 403 for insufficient permissions
+- MSAL app registration exists with correct API scopes for the Functions app
+- Backend OBO flow is implemented (B1 sends the frontend token; backend exchanges it for downstream access)
+
+**Blocking semantics:**
+- B1 **can proceed before C2 is complete** because token acquisition is mocked in tests
+- **Production activation requires C2** — without auth middleware, backend will reject or ignore tokens
+- B1 error translation (401→`UNAUTHORIZED`, 403→`FORBIDDEN`) must match C2's middleware behavior
+
+**What B1 does NOT own:**
+- Token validation, role checking, permission enforcement, Zod request validation, OBO exchange — all C2
+
+#### Dependency: P1-D1 — Write Safety, Retry, and Recovery
+
+**What B1 defers to D1:**
+- Retry policy types and `withRetry` higher-order function
+- Idempotency key generation and tracking
+- Failure classification (transient vs structural vs permissions)
+- Backoff strategy and interaction with token refresh
+
+**Blocking semantics:**
+- **B1 does NOT block on D1.** B1 ships without retry capability
+- D1 injects retry logic at the HTTP transport layer by wrapping or extending `ProxyHttpClient`, not inside individual repositories
+- B1's `getProxyHttpClient()` lazy singleton in factory.ts is the injection point for D1
+- The existing `DEFAULT_RETRY_COUNT = 3` constant is preserved for D1's use but is unused in B1
+
+**What B1 does NOT own:**
+- Retry logic, idempotency guards, write-safe error states, audit trail infrastructure — all D1
+
+#### Dependency: P1-E1 — Contract Test Suite
+
+**What B1 defers to E1:**
+- Shared Zod schemas in `@hbc/models/contracts/` for runtime contract validation
+- MSW v2 handlers simulating real backend behavior in frontend tests
+- Backend route shape validation against Zod schemas
+
+**Blocking semantics:**
+- **B1 does NOT block on E1.** B1 tests are self-contained with manually mocked `fetch` responses
+- B1 tests verify adapter behavior against mocked HTTP responses, **not** against real backend contracts — this is explicitly not contract validation
+- Once E1 Zod schemas exist, B1 tests should be upgraded to validate mock responses against them as a future enhancement
+
+**What B1 does NOT own:**
+- Contract schema definition, MSW handler authoring, backend shape validation — all E1
+
+#### Operational Dependencies (Outside All Workstreams)
+
+| Dependency | Owner | Required For | Status |
+|---|---|---|---|
+| Azure Functions API deployed and accessible | Backend/DevOps | Production proxy activation | Pending |
+| CORS configuration on Azure Functions for PWA origin | Backend/DevOps | Cross-origin requests from PWA | Pending |
+| `VITE_PROXY_BASE_URL` env var in deployment config | DevOps | Proxy base URL resolution | Pending |
+| `VITE_API_SCOPE` env var in deployment config | DevOps | MSAL token scope | Pending |
+
+Until these operational dependencies are met, proxy mode will authenticate and construct requests but receive backend errors. The proxy adapter error translation (Task 1) will surface these as `HbcDataAccessError` with appropriate codes.
 
 ---
 
@@ -175,7 +253,7 @@ export interface ProxyHttpClientOptions {
  * Handles Bearer auth, request tracing (X-Request-Id), error translation,
  * and header injection for Azure Functions backend.
  *
- * Does NOT retry on failure — retry logic is deferred to a future phase.
+ * Does NOT retry on failure — retry logic is deferred to P1-D1 (Write Safety, Retry, Recovery).
  * The existing DEFAULT_RETRY_COUNT constant is preserved but unused here.
  * Does NOT handle MSAL OBO; the backend performs OBO internally.
  */
@@ -328,7 +406,9 @@ export class ProxyHttpClient {
       return body as T;
     }
 
-    // Handle errors based on status code
+    // Handle errors based on status code.
+    // Status code semantics track the P1-C1 backend contract and P1-C2 auth middleware.
+    // If C1 or C2 define different status code usage, update this mapping.
     switch (response.status) {
       case 404:
         throw new NotFoundError('Resource', 'unknown');
@@ -978,6 +1058,8 @@ export class ProxyLeadRepository
   extends ProxyBaseRepository<ILead>
   implements ILeadRepository
 {
+  // API path tracks P1-C1 backend contract catalog.
+  // If C1 finalizes a different path, update here.
   constructor(httpClient: ProxyHttpClient) {
     super(httpClient, '/api/leads');
   }
@@ -1320,6 +1402,8 @@ export class ProxyProjectRepository
   extends ProxyBaseRepository<IActiveProject>
   implements IProjectRepository
 {
+  // API path tracks P1-C1 backend contract catalog.
+  // If C1 finalizes a different path, update here.
   constructor(httpClient: ProxyHttpClient) {
     super(httpClient, '/api/projects');
   }
@@ -1444,6 +1528,8 @@ export class ProxyEstimatingRepository
   extends ProxyBaseRepository<IEstimatingTracker>
   implements IEstimatingRepository
 {
+  // API path tracks P1-C1 backend contract catalog.
+  // If C1 finalizes a different path, update here.
   constructor(httpClient: ProxyHttpClient) {
     super(httpClient, '/api/estimating/trackers');
   }
@@ -1564,6 +1650,8 @@ export class ProxyScheduleRepository
   extends ProxyBaseRepository<IScheduleActivity>
   implements IScheduleRepository
 {
+  // API path tracks P1-C1 backend contract catalog.
+  // If C1 finalizes a different path, update here.
   constructor(httpClient: ProxyHttpClient) {
     super(httpClient, '/api/schedules');
   }
@@ -1647,7 +1735,7 @@ export class ProxyScheduleRepository
 
 The Buyout domain is project-scoped and manages `IBuyoutEntry` entries plus an `IBuyoutSummary` aggregate. Methods: `getEntries(projectId)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)`. No search method.
 
-Implementation follows the same project-scoped pattern as Schedule above, substituting `IBuyoutEntry`/`IBuyoutSummary` and using resource paths under `/api/buyouts`.
+Implementation follows the same project-scoped pattern as Schedule above, substituting `IBuyoutEntry`/`IBuyoutSummary` and using resource paths under `/api/buyouts`. All API paths are provisional and track the P1-C1 backend contract catalog.
 
 **Test each:** 10+ test cases per repository, covering all domain-specific methods and error handling.
 
@@ -1681,15 +1769,15 @@ git commit -m "feat: implement ProxyBuyoutRepository with project-scoped entries
 
 **ProxyComplianceRepository:**
 
-Project-scoped. Manages `IComplianceEntry` + `IComplianceSummary`. Methods: `getEntries(projectId, options?)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)`. No search. Follows the same project-scoped pattern as Buyout (Task 5).
+Project-scoped. Manages `IComplianceEntry` + `IComplianceSummary`. Methods: `getEntries(projectId, options?)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)`. No search. Follows the same project-scoped pattern as Buyout (Task 5). All API paths are provisional and track the P1-C1 backend contract catalog.
 
 **ProxyContractRepository:**
 
-Project-scoped with two entity types. Manages `IContractInfo` + `ICommitmentApproval`. Methods: `getContracts(projectId, options?)`, `getContractById(id)`, `createContract(data)`, `updateContract(id, data)`, `deleteContract(id)`, `getApprovals(contractId)`, `createApproval(data)`. No search. The approval methods operate on a sub-resource scoped by contract ID.
+Project-scoped with two entity types. Manages `IContractInfo` + `ICommitmentApproval`. Methods: `getContracts(projectId, options?)`, `getContractById(id)`, `createContract(data)`, `updateContract(id, data)`, `deleteContract(id)`, `getApprovals(contractId)`, `createApproval(data)`. No search. The approval methods operate on a sub-resource scoped by contract ID. All API paths are provisional and track the P1-C1 backend contract catalog.
 
 **ProxyRiskRepository:**
 
-Project-scoped. Manages `IRiskCostItem` + `IRiskCostManagement`. Methods: `getItems(projectId, options?)`, `getItemById(id)`, `createItem(data)`, `updateItem(id, data)`, `deleteItem(id)`, `getManagement(projectId)`. No search. Follows the project-scoped pattern with an aggregate query.
+Project-scoped. Manages `IRiskCostItem` + `IRiskCostManagement`. Methods: `getItems(projectId, options?)`, `getItemById(id)`, `createItem(data)`, `updateItem(id, data)`, `deleteItem(id)`, `getManagement(projectId)`. No search. Follows the project-scoped pattern with an aggregate query. All API paths are provisional and track the P1-C1 backend contract catalog.
 
 **Verification:**
 
@@ -1720,11 +1808,11 @@ git commit -m "feat: implement ProxyRiskRepository with project-scoped items and
 
 **ProxyScorecardRepository:**
 
-Project-scoped with two entity types. Manages `IGoNoGoScorecard` + `IScorecardVersion`. Methods: `getScorecards(projectId, options?)`, `getScorecardById(id)`, `createScorecard(data)`, `updateScorecard(id, data)`, `deleteScorecard(id)`, `getVersions(scorecardId)`. No search. The versions method operates on a sub-resource scoped by scorecard ID.
+Project-scoped with two entity types. Manages `IGoNoGoScorecard` + `IScorecardVersion`. Methods: `getScorecards(projectId, options?)`, `getScorecardById(id)`, `createScorecard(data)`, `updateScorecard(id, data)`, `deleteScorecard(id)`, `getVersions(scorecardId)`. No search. The versions method operates on a sub-resource scoped by scorecard ID. All API paths are provisional and track the P1-C1 backend contract catalog.
 
 **ProxyPmpRepository:**
 
-Project-scoped with two entity types. Manages `IProjectManagementPlan` + `IPMPSignature`. Methods: `getPlans(projectId, options?)`, `getPlanById(id)`, `createPlan(data)`, `updatePlan(id, data)`, `deletePlan(id)`, `getSignatures(pmpId)`, `createSignature(data)`. No search. Signatures are a sub-resource scoped by PMP ID.
+Project-scoped with two entity types. Manages `IProjectManagementPlan` + `IPMPSignature`. Methods: `getPlans(projectId, options?)`, `getPlanById(id)`, `createPlan(data)`, `updatePlan(id, data)`, `deletePlan(id)`, `getSignatures(pmpId)`, `createSignature(data)`. No search. Signatures are a sub-resource scoped by PMP ID. All API paths are provisional and track the P1-C1 backend contract catalog.
 
 **ProxyAuthRepository:**
 
@@ -1756,6 +1844,8 @@ export class ProxyAuthRepository
   extends ProxyBaseRepository<ICurrentUser>
   implements IAuthRepository
 {
+  // API path tracks P1-C1 backend contract catalog.
+  // If C1 finalizes a different path, update here.
   constructor(httpClient: ProxyHttpClient) {
     super(httpClient, '/api/auth');
   }
