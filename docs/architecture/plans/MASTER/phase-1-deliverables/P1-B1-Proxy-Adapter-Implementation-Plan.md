@@ -123,6 +123,72 @@ B1 is **not done** until these are independently verified. Backend availability,
 
 ---
 
+## Blockers, Assumptions, and Open Decisions
+
+This section provides a consolidated view of execution risk for delivery planning. Items are categorized by their impact on implementation sequencing.
+
+### Current Blockers
+
+| Blocker | Impact | Resolution Path | Blocks |
+|---|---|---|---|
+| No vitest infrastructure in `@hbc/data-access` | Cannot run any tests | Task 0 adds vitest config and test script | All test tasks (1–10) |
+
+**Not a B1 blocker:** SharePoint list schema approval (pending with Product Owner + Business Domains) affects SharePoint/production adapters but does NOT block proxy adapter work. Proxy adapters target Azure Functions via HTTP, not SharePoint directly.
+
+### Explicit Assumptions
+
+B1 is proceeding under these assumptions. Each is labeled with where verification must come from.
+
+| # | Assumption | Verify With | Current Confidence | Reference |
+|---|---|---|---|---|
+| A1 | API paths follow C1 catalog patterns (e.g., `/api/leads`, `/api/projects/{id}`) | P1-C1 | Medium — Leads/Projects/Estimating paths locked; 8 domains provisional | Appendix A |
+| A2 | Collection response envelope: `{ data: T[], total, page, pageSize }` | P1-C1 | High — C1 confirms this shape | Appendix B |
+| A3 | Single-item response envelope: `{ data: T }` | P1-C1 | High — C1 confirms this shape | Appendix B |
+| A4 | Error responses contain a human-readable message field | P1-C1 | **Low** — B1 reads `.message`; C1 specifies `.error` | Appendix B |
+| A5 | Default pageSize is 20–25 | P1-C1 | **Low** — C1 specifies default 50, max 200 | Appendix B |
+| A6 | Bearer token in `Authorization` header is accepted by backend | P1-C2 | High — standard pattern | Cross-Workstream Boundaries |
+| A7 | Project-scoped routes use nested paths (`/api/projects/{id}/activities`) | P1-C1 | **Low** — C1 uses flat routes with `?projectId=` query params | Appendix A |
+| A8 | Aggregate endpoints exist (portfolio summary, metrics, summaries, management) | P1-C1 | **Low** — not in C1 catalog; B1-assumed | Appendix A |
+| A9 | Auth management routes (`/api/auth/*`) exist in backend | P1-C2 | Low — no C1 route defined; C2 owns auth subsystem | Appendix A, Tier 3 |
+
+### Open Decisions
+
+These must be resolved before production activation. B1 implementation can proceed with mocked `fetch` but the adapter code will need updates once decisions are made.
+
+| # | Decision | Owner | Impact | When Needed |
+|---|---|---|---|---|
+| D1 | Singular vs plural route paths (schedule, buyout, risk, scorecard) | P1-C1 | Path constants in 4 repos + tests | Before production activation |
+| D2 | Estimating sub-resource routing (`/trackers`, `/kickoffs`) vs flat `/api/estimating` | P1-C1 | May restructure estimating adapter | Before Task 5 implementation ideally |
+| D3 | Error envelope field name (`.message` vs `.error`) | P1-C1 + B1 | `ProxyHttpClient.handleResponse()` update | Before production activation |
+| D4 | Pagination default alignment (B1: 20–25, C1: 50) | P1-C1 + B1 | `mapPagedResponse` default + model constants | Before production activation |
+| D5 | Whether proxy adapters need PATCH support | P1-C1 | C1 defines PATCH routes; B1 uses PUT only | Before production activation |
+| D6 | Nested project-scoped paths vs flat query-param pattern | P1-C1 | Affects 8 project-scoped repos | Before production activation |
+
+### Deferred Items
+
+These are explicitly out of B1 scope and owned by other workstreams.
+
+| Item | Deferred To | Reference |
+|---|---|---|
+| Retry logic, backoff strategy, failure classification | P1-D1 (Write Safety, Retry, Recovery) | B1 provides `ProxyHttpClient` injection surface |
+| Contract testing with Zod schemas | P1-E1 (Contract Test Suite) | B1 tests use mocked `fetch`, not Zod validation |
+| SharePoint adapter implementation | P1-B2 (Adapter Completion Backlog) | Different adapter mode, different data path |
+| API adapter implementation | P1-B2 (Adapter Completion Backlog) | Future adapter mode |
+| Mock isolation policy enforcement | P1-B3 (Mock Isolation Policy) | Governs when mock mode is allowed |
+| Backend OBO token exchange | P1-C2 (Auth Hardening) | B1 sends frontend token; backend handles OBO |
+| Idempotency key generation and tracking | P1-D1 | Transport-layer concern |
+
+### Implementation Sequencing Guidance
+
+| Phase | Tasks | Status | Dependencies |
+|---|---|---|---|
+| **Proceed now** | Tasks 0–4 (vitest setup, HTTP client, base repo, Lead, Project) | No external blockers | Foundational work independent of unresolved C1 decisions |
+| **Proceed with caution** | Tasks 5–7 (remaining 9 domain repos) | API paths are provisional | Implementation valid against mocked `fetch`; paths may change when C1 freezes. Estimating adapter (Task 5) has highest C1 dependency due to sub-resource routing question (D2) |
+| **Proceed** | Tasks 8–10 (factory wiring, integration tests, full suite) | No external blockers for test scope | Factory code and mocked integration tests are independent of C1/C2 |
+| **Requires upstream resolution** | Production activation | Blocked | C1 route finalization, C2 auth middleware, MSAL registration, error envelope alignment (D3), path reconciliation (D1, D6), deployment env vars |
+
+---
+
 ## Runtime Activation and Factory Reconciliation
 
 This section explains how proxy mode is activated in production, how the existing `ProxyConfig` type relates to `ProxyHttpClientOptions`, and what external dependencies must be satisfied before proxy adapters can function.
