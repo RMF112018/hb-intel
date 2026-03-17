@@ -140,11 +140,11 @@ Use this column schema when defining individual containers in the register below
 
 This section maps P1-A1 domains to their SharePoint container definitions. Initial entries are derived from the Domain Data Classification Table in P1-A1.
 
-**Status:** All Wave 1 containers below are **build-ready** — physical container names assigned, content types referenced, key columns identified, indexing/provisioning/security documented. Column-level appendices with complete SharePoint field definitions are the next implementation step. Deferred domains remain placeholders.
+**Status:** All Phase 1 build-ready containers have physical names, content types, key columns, indexing, provisioning, and security documented in the register below, with per-container appendix blocks (Section A) providing column-level physical schema definitions. Deferred domains remain placeholders.
 
 ### Phase 1 Build-Ready Containers
 
-Containers are organized by execution dependency order. All containers below are build-ready at the register level. Column-level appendices are the next implementation step.
+Containers are organized by execution dependency order. All containers below are build-ready with per-container appendix blocks in Section A.
 
 #### 1. Shared Dictionaries (Hub Site)
 
@@ -152,13 +152,13 @@ Containers are organized by execution dependency order. All containers below are
 |--------|--------|------------------------|-------------------------|----------------|-------|-------------|-----------------|-------|
 | shared | cost_code | Cost Codes | `Shared_CostCodes` | List | Hub Site | csiCode, description, stage, divisionCode | P1-A5 | Build-ready. CT: `HBDictionaryItem`. 7,565 codes. |
 | shared | csi_code | CSI Codes | `Shared_CSICodes` | List | Hub Site | csiCode, primaryDescription, divisionCode, sectionGroup | P1-A5 | Build-ready. CT: `HBDictionaryItem`. ~6,633 codes. |
-| shared | project_types | Project Types | `Shared_ProjectTypes` | List | Hub Site | typeId, typeName | P1-A5 (pending) | Build-ready. CT: `HBDictionaryItem`. Schema pending in P1-A5. |
-| shared | project_stages | Project Stages | `Shared_ProjectStages` | List | Hub Site | stageId, stageName | P1-A5 (pending) | Build-ready. CT: `HBDictionaryItem`. Schema pending in P1-A5. |
-| shared | project_regions | Project Regions | `Shared_ProjectRegions` | List | Hub Site | regionId, regionName | P1-A5 (pending) | Build-ready. CT: `HBDictionaryItem`. |
-| shared | state_codes | State Codes | `Shared_StateCodes` | List | Hub Site | stateCode, stateName | P1-A5 (pending) | Build-ready. CT: `HBDictionaryItem`. |
-| shared | country_codes | Country Codes | `Shared_CountryCodes` | List | Hub Site | countryCode, countryName | P1-A5 (pending) | Build-ready. CT: `HBDictionaryItem`. |
-| shared | delivery_methods | Delivery Methods | `Shared_DeliveryMethods` | List | Hub Site | methodCode, methodName | P1-A5 (pending) | Build-ready. CT: `HBDictionaryItem`. |
-| shared | sectors | Sectors | `Shared_Sectors` | List | Hub Site | sectorCode, sectorName | P1-A5 (pending) | Build-ready. CT: `HBDictionaryItem`. |
+| shared | project_types | Project Types | `Shared_ProjectTypes` | List | Hub Site | typeId, typeName | P1-A5 | Build-ready. CT: `HBDictionaryItem`. Simple Reference Dictionary pattern. |
+| shared | project_stages | Project Stages | `Shared_ProjectStages` | List | Hub Site | stageId, stageName | P1-A5 | Build-ready. CT: `HBDictionaryItem`. Simple Reference Dictionary pattern. |
+| shared | project_regions | Project Regions | `Shared_ProjectRegions` | List | Hub Site | regionId, regionName | P1-A5 | Build-ready. CT: `HBDictionaryItem`. Simple Reference Dictionary pattern. |
+| shared | state_codes | State Codes | `Shared_StateCodes` | List | Hub Site | stateCode, stateName | P1-A5 | Build-ready. CT: `HBDictionaryItem`. Simple Reference Dictionary pattern. ISO-aligned. |
+| shared | country_codes | Country Codes | `Shared_CountryCodes` | List | Hub Site | countryCode, countryName | P1-A5 | Build-ready. CT: `HBDictionaryItem`. Simple Reference Dictionary pattern. ISO-aligned. |
+| shared | delivery_methods | Delivery Methods | `Shared_DeliveryMethods` | List | Hub Site | methodCode, methodName | P1-A5 | Build-ready. CT: `HBDictionaryItem`. Simple Reference Dictionary pattern. |
+| shared | sectors | Sectors | `Shared_Sectors` | List | Hub Site | sectorCode, sectorName | P1-A5 | Build-ready. CT: `HBDictionaryItem`. Simple Reference Dictionary pattern. |
 | shared | scorecard_rubric | Scorecard Rubric Templates | `Shared_ScorecardRubrics` | List | Hub Site | templateId, versionId, sectionId, criterionId | P1-A12 | Build-ready. CT: `HBDictionaryItem`. Rubric definitions for subcontractor scorecards. |
 | shared | kickoff_template | Kickoff Templates | `Shared_KickoffTemplates` | List | Hub Site | templateId, templateItemId, section, rowType | P1-A8 | Build-ready. CT: `HBDictionaryItem`. Estimating kickoff template library. |
 | shared | checklist_template | Lifecycle Checklist Templates | `Shared_ChecklistTemplates` | List | Hub Site | templateId, checklistFamily, sectionId, itemId | P1-A10 | Build-ready. CT: `HBDictionaryItem`. Startup/safety/closeout templates. |
@@ -380,7 +380,7 @@ All shared dictionary lists use content type `HBDictionaryItem`, are provisioned
 
 #### A.1.3 `Shared_ProjectTypes` through `Shared_Sectors`
 
-These 7 dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, CountryCodes, DeliveryMethods, Sectors) share a common simple structure. Full schemas pending in P1-A5.
+These 7 dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, CountryCodes, DeliveryMethods, Sectors) share the Simple Reference Dictionary pattern defined in P1-A5.
 
 | # | Property | Common Value |
 |---|----------|-------------|
@@ -395,7 +395,7 @@ These 7 dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, C
 | 9 | Versioning | Major versions |
 | 10 | Security | Hub site inherited |
 | 11 | Provisioning | Created during hub site setup |
-| 12 | Governing Schema | P1-A5 (schemas pending) |
+| 12 | Governing Schema | P1-A5 Simple Reference Dictionary pattern |
 
 #### A.1.4 `Shared_ScorecardRubrics`
 
@@ -1196,7 +1196,7 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 | Security and Compliance Lead | — | — |
 
 **Approval Status:** Active — Closeout complete (v1.2). Physical schema register with per-container appendices for all Phase 1 build-ready domains.
-**Comments:** A3 closeout completed through 12 steps: authority boundary frozen (v0.2), build-ready/deferred scope split (v0.3), shared reusable schema assets and naming conventions (v0.4–0.5), Wave 1 containers completed (v0.6), all 13 domain groups added in execution order (v0.7), per-container appendix blocks with 12-point physical schema sequence for ~46 containers (v0.8), ambiguous storage cases resolved (v0.9), non-SharePoint entities registry (v1.0), open decisions reconciled to 4 true implementation choices (v1.1), final QA pass (v1.2). Three deferred domains (leads, contracts, pmp) remain placeholders pending schema artifacts. Seven shared dictionaries have container definitions but await P1-A5 canonical schemas.
+**Comments:** A3 closeout completed through 12 steps: authority boundary frozen (v0.2), build-ready/deferred scope split (v0.3), shared reusable schema assets and naming conventions (v0.4–0.5), Wave 1 containers completed (v0.6), all 13 domain groups added in execution order (v0.7), per-container appendix blocks with 12-point physical schema sequence for ~46 containers (v0.8), ambiguous storage cases resolved (v0.9), non-SharePoint entities registry (v1.0), open decisions reconciled to 4 true implementation choices (v1.1), final QA pass (v1.2). Three deferred domains (leads, contracts, pmp) remain placeholders pending schema artifacts. All shared dictionaries now have canonical schemas in P1-A5.
 
 ---
 
@@ -1216,3 +1216,4 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 | 1.0 | 2026-03-17 | Architecture | Added Non-SharePoint Canonical Entities registry: 8 import finding entities (Azure Table Storage), 7 import batch entities without SharePoint lists, 7 mapping/provenance entities (Azure Table Storage), 11 Phase 2 deferred child entities with Phase 1 inline alternatives documented. Replaces ad-hoc inline notes with comprehensive structured tables. |
 | 1.1 | 2026-03-17 | Architecture | Reconciled open decisions: removed "Physical column schemas per domain" (resolved by appendix blocks v0.8). Narrowed "Shared dictionary deployment" to mechanics only, "Content type strategy" to deferred domains only. Added "Why Still Open" column. Documented resolved items from A3 closeout Steps 2–10 for traceability. 4 true implementation decisions remain. |
 | 1.2 | 2026-03-17 | Architecture | Final QA and closeout pass. Verified: all build-ready containers have appendix blocks, all appendices reference governing schemas, all project-site lists have indexed key/status fields, all shared dictionaries point to P1-A5, all non-SharePoint entities explicitly documented, deferred placeholders clearly separated. Updated approval status and comments to reflect completed closeout. A3 is implementation-ready for Phase 1 build-ready scope. |
+| 1.3 | 2026-03-17 | Architecture | Closed A3/A5 shared dictionary gap. Removed stale "next implementation step" language for appendices (appendices are present since v0.8). Updated 7 shared dictionary rows from "P1-A5 (pending)" to "P1-A5" referencing completed Simple Reference Dictionary pattern. Updated A.1.3 appendix and comments. |

@@ -45,7 +45,7 @@ The first dictionary fully specified here is the **Cost Code Dictionary**, based
 - SharePoint physical container definitions (P1-A3)
 - Data ownership governance decisions (P1-A1)
 - Adapter implementation details (P1-B1)
-- Full specification of every P1-A1 referenced dictionary (future versions of this document)
+- Full specification of every domain-local dictionary (future versions; domain-local dictionaries are governed by their domain schema artifacts)
 
 ---
 
@@ -553,25 +553,157 @@ CSI codes and HB Intel cost codes are **related but distinct** reference systems
 
 ---
 
-## Future Reference Dictionaries
+## Simple Reference Dictionaries (Shared Hub-Site)
 
-P1-A1 field definitions reference the following shared and domain-local dictionaries. Future versions of this document will specify their canonical schemas:
+### Simple Reference Dictionary Pattern
+
+Seven shared dictionaries used across the project domain follow a common simple structure: a code/ID key, a display name, optional description, and standard governance fields. This pattern is defined once and instantiated per dictionary.
+
+#### Common Entity Structure
+
+| Field | Type | Required | Key | Description |
+|-------|------|----------|-----|-------------|
+| `{dict}_id` | string | Yes | PK (surrogate) | HB Intel canonical identifier |
+| `{code_field}` | string | Yes | Natural key (unique) | The canonical code or ID value |
+| `{name_field}` | string | Yes | — | Display name |
+| `description` | string | No | — | Optional description or definition |
+| `is_active` | boolean | Yes | — | Whether this value is currently active (default: true) |
+| `is_deprecated` | boolean | No | — | Whether this value has been deprecated (default: false) |
+| `sort_order` | number | No | — | Explicit display sort order |
+| `source_batch_id` | string | No | — | FK to import batch (if populated via import) |
+| `notes` | text | No | — | Implementation notes |
+
+#### Common Rules
+
+| Rule | Value |
+|------|-------|
+| **Storage** | SharePoint List on hub site (shared across all project sites) |
+| **Content type** | `HBDictionaryItem` |
+| **Versioning** | Major versions |
+| **Security** | Hub site inherited; read by all project sites |
+| **Provisioning** | Created during hub site setup |
+| **Uniqueness** | Code/ID field must be unique within the dictionary |
+| **External mapping** | Not required for Phase 1; optional future extension |
+| **Hierarchy** | None (flat lookup lists) |
+| **Import/provenance** | Optional CSV/manual population; import automation deferred to Phase 2 |
+| **Lifecycle** | `is_active` / `is_deprecated` for soft-delete; no effective-dating in Phase 1 |
+
+### Dictionary Instantiations
+
+#### ProjectTypes
+
+| Property | Value |
+|----------|-------|
+| **Purpose** | Classify projects by construction type (Residential, Commercial, etc.) |
+| **Consuming domains/fields** | project (`project_type_id`, `project_type_name`); new_project_request (indirect via project linkage) |
+| **Physical container** | `Shared_ProjectTypes` (A3) |
+| **Code field** | `typeId` (number or string — matches P1-A1 `project_type_id`) |
+| **Name field** | `typeName` (string — matches P1-A1 `project_type_name`) |
+| **Uniqueness** | `typeId` unique |
+| **Value format** | Free-text name; no required format constraint |
+| **Initial values** | Populated from source system project records (e.g., Residential, Commercial, Industrial) |
+
+#### ProjectStages
+
+| Property | Value |
+|----------|-------|
+| **Purpose** | Classify projects by lifecycle stage (Preconstruction, Construction, Closeout, etc.) |
+| **Consuming domains/fields** | project (`project_stage_id`, `project_stage_name`) |
+| **Physical container** | `Shared_ProjectStages` (A3) |
+| **Code field** | `stageId` (number or string — matches P1-A1 `project_stage_id`) |
+| **Name field** | `stageName` (string — matches P1-A1 `project_stage_name`) |
+| **Uniqueness** | `stageId` unique |
+| **Value format** | Free-text name; ordered by typical project lifecycle progression |
+| **Initial values** | Populated from source system (e.g., Preconstruction, Bidding, Construction, Closeout) |
+
+#### ProjectRegions
+
+| Property | Value |
+|----------|-------|
+| **Purpose** | Classify projects by geographic operating region |
+| **Consuming domains/fields** | project (`project_region_id`) |
+| **Physical container** | `Shared_ProjectRegions` (A3) |
+| **Code field** | `regionId` (number or string — matches P1-A1 `project_region_id`) |
+| **Name field** | `regionName` (string) |
+| **Uniqueness** | `regionId` unique |
+| **Value format** | Company-defined region names |
+| **Initial values** | Populated from organizational structure (e.g., Southeast Florida, Central Florida) |
+
+#### StateCodes
+
+| Property | Value |
+|----------|-------|
+| **Purpose** | Standard US state codes for project location classification |
+| **Consuming domains/fields** | project (`state_code`), new_project_request (`state_code`) |
+| **Physical container** | `Shared_StateCodes` (A3) |
+| **Code field** | `stateCode` (string, 2-character — matches P1-A1 `state_code`) |
+| **Name field** | `stateName` (string — full state name) |
+| **Uniqueness** | `stateCode` unique |
+| **Value format** | 2-character uppercase US state/territory abbreviation (ISO 3166-2:US aligned) |
+| **Normalization** | Uppercase only; validated against known US state/territory codes |
+| **Initial values** | Prepopulated with all 50 US states + DC + relevant territories |
+
+#### CountryCodes
+
+| Property | Value |
+|----------|-------|
+| **Purpose** | Standard country codes for project location classification |
+| **Consuming domains/fields** | project (`country_code`) |
+| **Physical container** | `Shared_CountryCodes` (A3) |
+| **Code field** | `countryCode` (string, 2-character — matches P1-A1 `country_code`) |
+| **Name field** | `countryName` (string — full country name) |
+| **Uniqueness** | `countryCode` unique |
+| **Value format** | 2-character uppercase ISO 3166-1 alpha-2 code |
+| **Normalization** | Uppercase only; validated against ISO 3166-1 |
+| **Initial values** | Prepopulated with US + relevant operating countries |
+
+#### DeliveryMethods
+
+| Property | Value |
+|----------|-------|
+| **Purpose** | Classify projects by construction delivery method |
+| **Consuming domains/fields** | project (`delivery_method`), new_project_request (indirect), lessons_report_instance (`delivery_method`) |
+| **Physical container** | `Shared_DeliveryMethods` (A3) |
+| **Code field** | `methodCode` (string — short code or slug) |
+| **Name field** | `methodName` (string — display name) |
+| **Uniqueness** | `methodCode` unique |
+| **Value format** | Free-text name; company-standard terminology |
+| **Initial values** | Design-Bid-Build, Design-Build, CM at Risk, GMP, Lump Sum, IDIQ/Job Order, Public-Private (P3) — per P1-A13 Lessons Learned source |
+
+#### Sectors
+
+| Property | Value |
+|----------|-------|
+| **Purpose** | Classify projects by industry/market sector |
+| **Consuming domains/fields** | project (`sector`), lessons_report_instance (`market_sector`) |
+| **Physical container** | `Shared_Sectors` (A3) |
+| **Code field** | `sectorCode` (string — short code or slug) |
+| **Name field** | `sectorName` (string — display name) |
+| **Uniqueness** | `sectorCode` unique |
+| **Value format** | Free-text name; company-standard terminology |
+| **Initial values** | K-12 Education, Higher Education, Healthcare/Medical, Government/Civic, Office/Commercial, Industrial/Mfg, Retail/Hospitality, Residential/Mixed-Use, Transportation/Infra, Data Center/Tech, Mission Critical, Renovation/Historic, Other — per P1-A13 Lessons Learned source |
+
+---
+
+## Remaining Reference Dictionaries
+
+The following dictionaries are referenced across P1-A1 field definitions. The 7 shared dictionaries above and the Cost Code / CSI Code dictionaries are now canonically defined. The remaining dictionaries are either domain-local (governed by their domain's schema artifact) or not yet in A3 build-ready scope.
 
 ### Shared Dictionaries (Hub Site)
 
 | Dictionary | Referenced By | Status |
 |-----------|--------------|--------|
-| CSICodes / Cost Codes | buyout (csi_code, csi_description) | **Cost Code: Defined above; CSI Code: Defined above** |
-| ProjectTypes | project (project_type_id, project_type_name) | Schema pending |
-| ProjectStages | project (project_stage_id, project_stage_name) | Schema pending |
-| ProjectBidTypes | project (project_bid_type_id) | Schema pending |
-| ProjectOwnerTypes | project (project_owner_type_id) | Schema pending |
-| ProjectRegions | project (project_region_id) | Schema pending |
-| StateCodes | project (state_code), new_project_request (state_code) | Schema pending |
-| CountryCodes | project (country_code) | Schema pending |
-| DeliveryMethods | project (delivery_method) | Schema pending |
-| Sectors | project (sector) | Schema pending |
-| TimeZones | project (time_zone) | Schema pending |
+| CSICodes / Cost Codes | buyout (csi_code, csi_description) | **Defined above** (Cost Code + CSI Code dictionaries) |
+| ProjectTypes | project (project_type_id, project_type_name) | **Defined above** (Simple Reference Dictionary) |
+| ProjectStages | project (project_stage_id, project_stage_name) | **Defined above** (Simple Reference Dictionary) |
+| ProjectRegions | project (project_region_id) | **Defined above** (Simple Reference Dictionary) |
+| StateCodes | project (state_code), new_project_request (state_code) | **Defined above** (Simple Reference Dictionary) |
+| CountryCodes | project (country_code) | **Defined above** (Simple Reference Dictionary) |
+| DeliveryMethods | project (delivery_method) | **Defined above** (Simple Reference Dictionary) |
+| Sectors | project (sector) | **Defined above** (Simple Reference Dictionary) |
+| ProjectBidTypes | project (project_bid_type_id) | Schema pending — not in A3 build-ready scope |
+| ProjectOwnerTypes | project (project_owner_type_id) | Schema pending — not in A3 build-ready scope |
+| TimeZones | project (time_zone) | Schema pending — not in A3 build-ready scope; deferred |
 
 ### Domain-Local Dictionaries
 
@@ -610,7 +742,8 @@ P1-A1 field definitions reference the following shared and domain-local dictiona
 | **Multi-stage applicability** | Determine if any codes need to appear in multiple stages | Business Domains | Phase 1 (late) |
 | **Division label dictionary** | Create human-readable labels for division codes (01 = General Conditions, etc.) | Platform Architecture | Phase 1 |
 | **Shared dictionary import automation** | Automate dictionary refresh from CSV/Excel uploads | Platform Architecture | Phase 2 |
-| **Domain-local dictionary full specification** | Specify canonical schemas for all domain-local dictionaries listed above | Platform Architecture + Business Domains | Phase 1–2 |
+| **Domain-local dictionary full specification** | Specify canonical schemas for domain-local dictionaries (estimating, buyout, compliance, etc.) — governed by domain schema artifacts | Platform Architecture + Business Domains | Phase 1–2 |
+| **Remaining shared dictionaries** | ProjectBidTypes, ProjectOwnerTypes, TimeZones — not in A3 build-ready scope; define when needed | Platform Architecture | Phase 2+ |
 
 ---
 
@@ -622,8 +755,8 @@ P1-A1 field definitions reference the following shared and domain-local dictiona
 | Cost Controls / Operations Lead | — | — |
 | Estimating Lead | — | — |
 
-**Approval Status:** Pending — Cost Code schema defined; pending domain confirmation of stage applicability and hierarchy rules
-**Comments:** Schema derived from evidence in cost-code-dictionary.csv (7,565 codes, 9 stages, DD-SS-DDD format).
+**Approval Status:** Active — All shared hub-site dictionaries canonically defined for Phase 1 build-ready scope
+**Comments:** Cost Code dictionary (7,565 codes), CSI Code dictionary (~6,633 codes), and 7 Simple Reference Dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, CountryCodes, DeliveryMethods, Sectors) are canonically defined. Three shared dictionaries (ProjectBidTypes, ProjectOwnerTypes, TimeZones) remain pending — not in A3 build-ready scope. Domain-local dictionaries remain governed by their domain schema artifacts.
 
 ---
 
@@ -633,3 +766,4 @@ P1-A1 field definitions reference the following shared and domain-local dictiona
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; Cost Code dictionary with 4 canonical entities, keying rules, hierarchy parsing, stage applicability, external mapping strategy, and storage alignment. Evidence-based from cost-code-dictionary.csv. Future dictionary inventory established. |
 | 0.2 | 2026-03-17 | Architecture | Added CSI Code dictionary with 4 canonical entities, one-to-many description variant model, MasterFormat hierarchy, import cleanup rules (continuation merging, CamelCase normalization), and cross-mapping to cost codes. Evidence-based from csi-code-dictionary.csv (8,991 rows, 819 duplicate codes, 170 continuation artifacts). |
+| 0.3 | 2026-03-17 | Architecture | Added Simple Reference Dictionary pattern and 7 shared dictionary definitions (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, CountryCodes, DeliveryMethods, Sectors). Closes A3/A5 shared dictionary gap — all A3 build-ready shared dictionaries now have canonical schemas. Updated shared dictionary table from "Schema pending" to "Defined above." Three dictionaries (ProjectBidTypes, ProjectOwnerTypes, TimeZones) remain pending — not in A3 build-ready scope. |
