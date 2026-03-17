@@ -5,7 +5,7 @@
 **Classification:** Internal — Architecture
 **Status:** Draft — Schema Implemented
 **Date:** 2026-03-16
-**Read With:** [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md), [P1-A6-External-Financial-Data-Ingestion-Schema.md](./P1-A6-External-Financial-Data-Ingestion-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
+**Read With:** [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md), [P1-A6-External-Financial-Data-Ingestion-Schema.md](./P1-A6-External-Financial-Data-Ingestion-Schema.md), [P1-A7-Operational-Register-Schema.md](./P1-A7-Operational-Register-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
 
 ---
 
@@ -952,3 +952,4 @@ These items were resolved through the field-level schema design interview and ar
 | 1.0 | 2026-03-17 | Architecture | Added P1-A5-Reference-Data-Dictionary-Schema.md to Read With references. Shared and domain-local reference dictionaries referenced in field definitions are now governed by P1-A5. |
 | 1.1 | 2026-03-17 | Architecture | P1-A5 extended with CSI Code dictionary schema. CSICodes shared dictionary referenced in buyout_commitment (csi_code, csi_description) now fully governed. |
 | 1.2 | 2026-03-17 | Architecture | Added P1-A6-External-Financial-Data-Ingestion-Schema.md to Read With references for Procore Budget and external financial data ingestion. |
+| 1.3 | 2026-03-17 | Architecture | Added P1-A7-Operational-Register-Schema.md to Read With references. Risk domain in P1-A1 maps to operational register records; classified as hybrid operational register (not pure risk or constraint). |
