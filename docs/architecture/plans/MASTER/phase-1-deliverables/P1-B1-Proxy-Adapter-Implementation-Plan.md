@@ -6,7 +6,7 @@
 
 **Approach:** Test-driven development (TDD) with checkpoint commits after each task. Full TypeScript implementations, exact test harnesses, and complete factory wiring.
 
-**Architecture:** The proxy adapter follows the factory pattern established in `factory.ts`. Each domain repository (e.g., `ProxyLeadRepository`) implements the corresponding port interface (e.g., `ILeadRepository`) by delegating HTTP calls through a shared `ProxyHttpClient`. The client handles auth headers, request tracing, and error translation.
+**Architecture:** The proxy adapter follows the factory pattern established in `factory.ts`. Each domain repository (e.g., `ProxyLeadRepository`) implements the corresponding port interface (e.g., `ILeadRepository`) by delegating HTTP calls through a shared `ProxyHttpClient`. The client handles auth headers, request tracing, and error translation. Each repository has its own domain-specific contract — method names, entity types, and query patterns vary per domain. Only Lead follows a generic CRUD+search shape; most repositories are project-scoped, handle multiple entity types, or have entirely non-CRUD contracts (e.g., Auth).
 
 **Tech Stack:**
 - TypeScript, Vitest (mocked `fetch`)
@@ -571,6 +571,26 @@ export abstract class ProxyBaseRepository<T> extends BaseRepository<T> {
   }
 
   /**
+   * Build a project-scoped resource path.
+   * Most domain repositories scope queries by project.
+   * @param projectId - Project UUID
+   * @param subResource - Sub-resource name (e.g., "activities", "entries")
+   * @param id - Optional entity ID within the sub-resource
+   * @returns Path like "/api/projects/{projectId}/activities" or "/api/projects/{projectId}/activities/42"
+   */
+  protected buildProjectScopedPath(
+    projectId: string,
+    subResource: string,
+    id?: string | number,
+  ): string {
+    const base = `/api/projects/${projectId}/${subResource}`;
+    if (id !== undefined) {
+      return `${base}/${id}`;
+    }
+    return base;
+  }
+
+  /**
    * Convert query options to URL search parameters.
    * Filters out undefined or empty values.
    * @param options - Query options
@@ -669,6 +689,18 @@ describe('ProxyBaseRepository', () => {
     it('should build resource path with string ID', () => {
       const path = repo['buildPath']('uuid-123');
       expect(path).toBe('/api/items/uuid-123');
+    });
+  });
+
+  describe('buildProjectScopedPath()', () => {
+    it('should build project-scoped path without ID', () => {
+      const path = repo['buildProjectScopedPath']('proj-uuid', 'activities');
+      expect(path).toBe('/api/projects/proj-uuid/activities');
+    });
+
+    it('should build project-scoped path with numeric ID', () => {
+      const path = repo['buildProjectScopedPath']('proj-uuid', 'activities', 42);
+      expect(path).toBe('/api/projects/proj-uuid/activities/42');
     });
   });
 
@@ -1138,19 +1170,14 @@ pnpm --filter @hbc/data-access test lead-repository.test.ts
 - Create: `packages/data-access/src/adapters/proxy/project-repository.ts`
 - Create: `packages/data-access/src/adapters/proxy/project-repository.test.ts`
 
-**Implementation:** Follow exact same pattern as ProxyLeadRepository (Task 3). Key differences:
-- Resource path: `/api/projects`
-- ID type: string (UUID)
-- Implement: `IProjectRepository`
-
-Example structure (abbreviated):
+**Implementation:** The Project repository uses `IActiveProject` (not `IProject`) and `IPortfolioSummary`. Method names are domain-specific (`getProjects`, `getProjectById`, etc.) and the repository has no `search` method. IDs are strings (UUIDs). The repository also exposes a `getPortfolioSummary()` aggregate query.
 
 ```typescript
 // packages/data-access/src/adapters/proxy/project-repository.ts
 
 import type {
-  IProject,
-  IProjectFormData,
+  IActiveProject,
+  IPortfolioSummary,
   IPagedResult,
   IListQueryOptions,
 } from '@hbc/models';
@@ -1160,30 +1187,30 @@ import { ProxyBaseRepository } from './proxy-base.js';
 import { ProxyHttpClient } from './http-client.js';
 
 export class ProxyProjectRepository
-  extends ProxyBaseRepository<IProject>
+  extends ProxyBaseRepository<IActiveProject>
   implements IProjectRepository
 {
   constructor(httpClient: ProxyHttpClient) {
     super(httpClient, '/api/projects');
   }
 
-  async getAll(options?: IListQueryOptions): Promise<IPagedResult<IProject>> {
+  async getProjects(options?: IListQueryOptions): Promise<IPagedResult<IActiveProject>> {
     return this.wrapAsync(async () => {
       const params = this.buildQueryParams(options);
       const response = await this.httpClient.get<unknown>(
         '/api/projects',
         params,
       );
-      return this.mapPagedResponse<IProject>(response);
-    }, 'ProxyProjectRepository.getAll');
+      return this.mapPagedResponse<IActiveProject>(response);
+    }, 'ProxyProjectRepository.getProjects');
   }
 
-  async getById(id: string): Promise<IProject | null> {
+  async getProjectById(id: string): Promise<IActiveProject | null> {
     return this.wrapAsync(async () => {
       this.validateId(id, 'Project');
       try {
         const path = this.buildPath(id);
-        const response = await this.httpClient.get<{ data: IProject }>(path);
+        const response = await this.httpClient.get<{ data: IActiveProject }>(path);
         return response.data;
       } catch (err) {
         if (err instanceof NotFoundError) {
@@ -1191,60 +1218,54 @@ export class ProxyProjectRepository
         }
         throw err;
       }
-    }, 'ProxyProjectRepository.getById');
+    }, 'ProxyProjectRepository.getProjectById');
   }
 
-  async create(data: IProjectFormData): Promise<IProject> {
+  async createProject(data: Omit<IActiveProject, 'id'>): Promise<IActiveProject> {
     return this.wrapAsync(async () => {
-      const response = await this.httpClient.post<{ data: IProject }>(
+      const response = await this.httpClient.post<{ data: IActiveProject }>(
         '/api/projects',
         data,
       );
       return response.data;
-    }, 'ProxyProjectRepository.create');
+    }, 'ProxyProjectRepository.createProject');
   }
 
-  async update(
+  async updateProject(
     id: string,
-    data: Partial<IProjectFormData>,
-  ): Promise<IProject> {
+    data: Partial<IActiveProject>,
+  ): Promise<IActiveProject> {
     return this.wrapAsync(async () => {
       this.validateId(id, 'Project');
       const path = this.buildPath(id);
-      const response = await this.httpClient.put<{ data: IProject }>(
+      const response = await this.httpClient.put<{ data: IActiveProject }>(
         path,
         data,
       );
       return response.data;
-    }, 'ProxyProjectRepository.update');
+    }, 'ProxyProjectRepository.updateProject');
   }
 
-  async delete(id: string): Promise<void> {
+  async deleteProject(id: string): Promise<void> {
     return this.wrapAsync(async () => {
       this.validateId(id, 'Project');
       const path = this.buildPath(id);
       await this.httpClient.delete(path);
-    }, 'ProxyProjectRepository.delete');
+    }, 'ProxyProjectRepository.deleteProject');
   }
 
-  async search(
-    query: string,
-    options?: IListQueryOptions,
-  ): Promise<IPagedResult<IProject>> {
+  async getPortfolioSummary(): Promise<IPortfolioSummary> {
     return this.wrapAsync(async () => {
-      const params = this.buildQueryParams(options);
-      params.q = query;
-      const response = await this.httpClient.get<unknown>(
-        '/api/projects/search',
-        params,
+      const response = await this.httpClient.get<{ data: IPortfolioSummary }>(
+        '/api/projects/portfolio-summary',
       );
-      return this.mapPagedResponse<IProject>(response);
-    }, 'ProxyProjectRepository.search');
+      return response.data;
+    }, 'ProxyProjectRepository.getPortfolioSummary');
   }
 }
 ```
 
-**Tests:** Mirror Task 3, substituting `IProject` and string IDs. 10+ test cases covering getAll, getById, create, update, delete, search, error handling.
+**Tests:** 10+ test cases covering getProjects, getProjectById, createProject, updateProject, deleteProject, getPortfolioSummary, and error handling. String IDs throughout.
 
 **Verification:**
 
@@ -1252,14 +1273,14 @@ export class ProxyProjectRepository
 pnpm --filter @hbc/data-access test project-repository.test.ts
 
 # Expected: All tests pass
-# Commit: git commit -m "feat: implement ProxyProjectRepository (follows Lead pattern)"
+# Commit: git commit -m "feat: implement ProxyProjectRepository with domain-specific methods"
 ```
 
 ---
 
 ## Chunk 3: Remaining Domain Repositories (≈700 lines of listings + commits)
 
-**Overview:** Tasks 5–7 follow the exact pattern established in Tasks 3–4. Each repository implements its port interface by delegating to `ProxyHttpClient` through `ProxyBaseRepository`. All use the same test harness structure.
+**Overview:** Tasks 5–7 each implement their port interface by delegating to `ProxyHttpClient` through `ProxyBaseRepository`. Unlike Lead (Task 3), each repository has its own domain-specific method names, entity types, and query patterns. Most are project-scoped (taking `projectId` as a parameter on list methods) and several manage multiple entity types (e.g., tracker + kickoff, contract + approval). None of the remaining repositories have a generic `search()` method.
 
 ### Task 5: ProxyEstimatingRepository, ProxyScheduleRepository, ProxyBuyoutRepository
 
@@ -1271,16 +1292,16 @@ pnpm --filter @hbc/data-access test project-repository.test.ts
 - `packages/data-access/src/adapters/proxy/buyout-repository.ts`
 - `packages/data-access/src/adapters/proxy/buyout-repository.test.ts`
 
-**Pattern:** Each follows the exact structure of Task 3. The resource path and ID type vary; all methods follow the same CRUD+search template.
+**ProxyEstimatingRepository:**
 
-**ProxyEstimatingRepository (full example):**
+The Estimating domain manages two entity types: `IEstimatingTracker` (bid tracking) and `IEstimatingKickoff` (kickoff meetings). Methods use domain-specific names (`getAllTrackers`, `getTrackerById`, `createTracker`, etc.) rather than generic CRUD. The kickoff entity has separate `getKickoff(projectId)` and `createKickoff()` methods.
 
 ```typescript
 // packages/data-access/src/adapters/proxy/estimating-repository.ts
 
 import type {
-  IEstimate,
-  IEstimateFormData,
+  IEstimatingTracker,
+  IEstimatingKickoff,
   IPagedResult,
   IListQueryOptions,
 } from '@hbc/models';
@@ -1290,32 +1311,32 @@ import { ProxyBaseRepository } from './proxy-base.js';
 import { ProxyHttpClient } from './http-client.js';
 
 export class ProxyEstimatingRepository
-  extends ProxyBaseRepository<IEstimate>
+  extends ProxyBaseRepository<IEstimatingTracker>
   implements IEstimatingRepository
 {
   constructor(httpClient: ProxyHttpClient) {
-    super(httpClient, '/api/estimates');
+    super(httpClient, '/api/estimating/trackers');
   }
 
-  async getAll(
+  async getAllTrackers(
     options?: IListQueryOptions,
-  ): Promise<IPagedResult<IEstimate>> {
+  ): Promise<IPagedResult<IEstimatingTracker>> {
     return this.wrapAsync(async () => {
       const params = this.buildQueryParams(options);
       const response = await this.httpClient.get<unknown>(
-        '/api/estimates',
+        '/api/estimating/trackers',
         params,
       );
-      return this.mapPagedResponse<IEstimate>(response);
-    }, 'ProxyEstimatingRepository.getAll');
+      return this.mapPagedResponse<IEstimatingTracker>(response);
+    }, 'ProxyEstimatingRepository.getAllTrackers');
   }
 
-  async getById(id: number): Promise<IEstimate | null> {
+  async getTrackerById(id: number): Promise<IEstimatingTracker | null> {
     return this.wrapAsync(async () => {
-      this.validateId(id, 'Estimate');
+      this.validateId(id, 'EstimatingTracker');
       try {
         const path = this.buildPath(id);
-        const response = await this.httpClient.get<{ data: IEstimate }>(path);
+        const response = await this.httpClient.get<{ data: IEstimatingTracker }>(path);
         return response.data;
       } catch (err) {
         if (err instanceof NotFoundError) {
@@ -1323,62 +1344,182 @@ export class ProxyEstimatingRepository
         }
         throw err;
       }
-    }, 'ProxyEstimatingRepository.getById');
+    }, 'ProxyEstimatingRepository.getTrackerById');
   }
 
-  async create(data: IEstimateFormData): Promise<IEstimate> {
+  async createTracker(
+    data: Omit<IEstimatingTracker, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<IEstimatingTracker> {
     return this.wrapAsync(async () => {
-      const response = await this.httpClient.post<{ data: IEstimate }>(
-        '/api/estimates',
+      const response = await this.httpClient.post<{ data: IEstimatingTracker }>(
+        '/api/estimating/trackers',
         data,
       );
       return response.data;
-    }, 'ProxyEstimatingRepository.create');
+    }, 'ProxyEstimatingRepository.createTracker');
   }
 
-  async update(
+  async updateTracker(
     id: number,
-    data: Partial<IEstimateFormData>,
-  ): Promise<IEstimate> {
+    data: Partial<IEstimatingTracker>,
+  ): Promise<IEstimatingTracker> {
     return this.wrapAsync(async () => {
-      this.validateId(id, 'Estimate');
+      this.validateId(id, 'EstimatingTracker');
       const path = this.buildPath(id);
-      const response = await this.httpClient.put<{ data: IEstimate }>(
+      const response = await this.httpClient.put<{ data: IEstimatingTracker }>(
         path,
         data,
       );
       return response.data;
-    }, 'ProxyEstimatingRepository.update');
+    }, 'ProxyEstimatingRepository.updateTracker');
   }
 
-  async delete(id: number): Promise<void> {
+  async deleteTracker(id: number): Promise<void> {
     return this.wrapAsync(async () => {
-      this.validateId(id, 'Estimate');
+      this.validateId(id, 'EstimatingTracker');
       const path = this.buildPath(id);
       await this.httpClient.delete(path);
-    }, 'ProxyEstimatingRepository.delete');
+    }, 'ProxyEstimatingRepository.deleteTracker');
   }
 
-  async search(
-    query: string,
-    options?: IListQueryOptions,
-  ): Promise<IPagedResult<IEstimate>> {
+  async getKickoff(projectId: string): Promise<IEstimatingKickoff | null> {
     return this.wrapAsync(async () => {
-      const params = this.buildQueryParams(options);
-      params.q = query;
-      const response = await this.httpClient.get<unknown>(
-        '/api/estimates/search',
-        params,
+      try {
+        const response = await this.httpClient.get<{ data: IEstimatingKickoff }>(
+          `/api/estimating/kickoffs/${projectId}`,
+        );
+        return response.data;
+      } catch (err) {
+        if (err instanceof NotFoundError) {
+          return null;
+        }
+        throw err;
+      }
+    }, 'ProxyEstimatingRepository.getKickoff');
+  }
+
+  async createKickoff(
+    data: Omit<IEstimatingKickoff, 'id' | 'createdAt'>,
+  ): Promise<IEstimatingKickoff> {
+    return this.wrapAsync(async () => {
+      const response = await this.httpClient.post<{ data: IEstimatingKickoff }>(
+        '/api/estimating/kickoffs',
+        data,
       );
-      return this.mapPagedResponse<IEstimate>(response);
-    }, 'ProxyEstimatingRepository.search');
+      return response.data;
+    }, 'ProxyEstimatingRepository.createKickoff');
   }
 }
 ```
 
-**Schedule and Buyout:** Follow exact same pattern with their respective port interfaces, resource paths (`/api/schedules`, `/api/buyouts`), and entity types.
+**ProxyScheduleRepository:**
 
-**Test each:** 10+ test cases per repository, mirroring Task 3's test structure.
+The Schedule domain is project-scoped and manages `IScheduleActivity` entries plus an `IScheduleMetrics` aggregate. Methods: `getActivities(projectId)`, `getActivityById(id)`, `createActivity(data)`, `updateActivity(id, data)`, `deleteActivity(id)`, `getMetrics(projectId)`. No search method.
+
+```typescript
+// packages/data-access/src/adapters/proxy/schedule-repository.ts
+
+import type {
+  IScheduleActivity,
+  IScheduleMetrics,
+  IPagedResult,
+  IListQueryOptions,
+} from '@hbc/models';
+import type { IScheduleRepository } from '../../ports/IScheduleRepository.js';
+import { NotFoundError } from '../../errors/index.js';
+import { ProxyBaseRepository } from './proxy-base.js';
+import { ProxyHttpClient } from './http-client.js';
+
+export class ProxyScheduleRepository
+  extends ProxyBaseRepository<IScheduleActivity>
+  implements IScheduleRepository
+{
+  constructor(httpClient: ProxyHttpClient) {
+    super(httpClient, '/api/schedules');
+  }
+
+  async getActivities(
+    projectId: string,
+    options?: IListQueryOptions,
+  ): Promise<IPagedResult<IScheduleActivity>> {
+    return this.wrapAsync(async () => {
+      const params = this.buildQueryParams(options);
+      const response = await this.httpClient.get<unknown>(
+        this.buildProjectScopedPath(projectId, 'activities'),
+        params,
+      );
+      return this.mapPagedResponse<IScheduleActivity>(response);
+    }, 'ProxyScheduleRepository.getActivities');
+  }
+
+  async getActivityById(id: number): Promise<IScheduleActivity | null> {
+    return this.wrapAsync(async () => {
+      this.validateId(id, 'ScheduleActivity');
+      try {
+        const response = await this.httpClient.get<{ data: IScheduleActivity }>(
+          `/api/schedules/activities/${id}`,
+        );
+        return response.data;
+      } catch (err) {
+        if (err instanceof NotFoundError) {
+          return null;
+        }
+        throw err;
+      }
+    }, 'ProxyScheduleRepository.getActivityById');
+  }
+
+  async createActivity(
+    data: Omit<IScheduleActivity, 'id'>,
+  ): Promise<IScheduleActivity> {
+    return this.wrapAsync(async () => {
+      const response = await this.httpClient.post<{ data: IScheduleActivity }>(
+        '/api/schedules/activities',
+        data,
+      );
+      return response.data;
+    }, 'ProxyScheduleRepository.createActivity');
+  }
+
+  async updateActivity(
+    id: number,
+    data: Partial<IScheduleActivity>,
+  ): Promise<IScheduleActivity> {
+    return this.wrapAsync(async () => {
+      this.validateId(id, 'ScheduleActivity');
+      const response = await this.httpClient.put<{ data: IScheduleActivity }>(
+        `/api/schedules/activities/${id}`,
+        data,
+      );
+      return response.data;
+    }, 'ProxyScheduleRepository.updateActivity');
+  }
+
+  async deleteActivity(id: number): Promise<void> {
+    return this.wrapAsync(async () => {
+      this.validateId(id, 'ScheduleActivity');
+      await this.httpClient.delete(`/api/schedules/activities/${id}`);
+    }, 'ProxyScheduleRepository.deleteActivity');
+  }
+
+  async getMetrics(projectId: string): Promise<IScheduleMetrics> {
+    return this.wrapAsync(async () => {
+      const response = await this.httpClient.get<{ data: IScheduleMetrics }>(
+        this.buildProjectScopedPath(projectId, 'metrics'),
+      );
+      return response.data;
+    }, 'ProxyScheduleRepository.getMetrics');
+  }
+}
+```
+
+**ProxyBuyoutRepository:**
+
+The Buyout domain is project-scoped and manages `IBuyoutEntry` entries plus an `IBuyoutSummary` aggregate. Methods: `getEntries(projectId)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)`. No search method.
+
+Implementation follows the same project-scoped pattern as Schedule above, substituting `IBuyoutEntry`/`IBuyoutSummary` and using resource paths under `/api/buyouts`.
+
+**Test each:** 10+ test cases per repository, covering all domain-specific methods and error handling.
 
 **Verification:**
 
@@ -1391,9 +1532,9 @@ pnpm --filter @hbc/data-access test \
 
 # Expected: 30+ tests pass
 # Commit (one per repo):
-git commit -m "feat: implement ProxyEstimatingRepository (follows Lead pattern)"
-git commit -m "feat: implement ProxyScheduleRepository (follows Lead pattern)"
-git commit -m "feat: implement ProxyBuyoutRepository (follows Lead pattern)"
+git commit -m "feat: implement ProxyEstimatingRepository with tracker and kickoff methods"
+git commit -m "feat: implement ProxyScheduleRepository with project-scoped activities and metrics"
+git commit -m "feat: implement ProxyBuyoutRepository with project-scoped entries and summary"
 ```
 
 ---
@@ -1408,12 +1549,17 @@ git commit -m "feat: implement ProxyBuyoutRepository (follows Lead pattern)"
 - `packages/data-access/src/adapters/proxy/risk-repository.ts`
 - `packages/data-access/src/adapters/proxy/risk-repository.test.ts`
 
-**Implementation:** Exact same pattern as Task 5. Resource paths:
-- Compliance: `/api/compliance`
-- Contract: `/api/contracts`
-- Risk: `/api/risks`
+**ProxyComplianceRepository:**
 
-Each implements its port interface with getAll, getById, create, update, delete, search methods.
+Project-scoped. Manages `IComplianceEntry` + `IComplianceSummary`. Methods: `getEntries(projectId, options?)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)`. No search. Follows the same project-scoped pattern as Buyout (Task 5).
+
+**ProxyContractRepository:**
+
+Project-scoped with two entity types. Manages `IContractInfo` + `ICommitmentApproval`. Methods: `getContracts(projectId, options?)`, `getContractById(id)`, `createContract(data)`, `updateContract(id, data)`, `deleteContract(id)`, `getApprovals(contractId)`, `createApproval(data)`. No search. The approval methods operate on a sub-resource scoped by contract ID.
+
+**ProxyRiskRepository:**
+
+Project-scoped. Manages `IRiskCostItem` + `IRiskCostManagement`. Methods: `getItems(projectId, options?)`, `getItemById(id)`, `createItem(data)`, `updateItem(id, data)`, `deleteItem(id)`, `getManagement(projectId)`. No search. Follows the project-scoped pattern with an aggregate query.
 
 **Verification:**
 
@@ -1425,9 +1571,9 @@ pnpm --filter @hbc/data-access test \
 
 # Expected: 30+ tests pass
 # Commits (one per repo):
-git commit -m "feat: implement ProxyComplianceRepository (follows Lead pattern)"
-git commit -m "feat: implement ProxyContractRepository (follows Lead pattern)"
-git commit -m "feat: implement ProxyRiskRepository (follows Lead pattern)"
+git commit -m "feat: implement ProxyComplianceRepository with project-scoped entries and summary"
+git commit -m "feat: implement ProxyContractRepository with contracts and approval sub-resource"
+git commit -m "feat: implement ProxyRiskRepository with project-scoped items and management aggregate"
 ```
 
 ---
@@ -1442,12 +1588,109 @@ git commit -m "feat: implement ProxyRiskRepository (follows Lead pattern)"
 - `packages/data-access/src/adapters/proxy/auth-repository.ts`
 - `packages/data-access/src/adapters/proxy/auth-repository.test.ts`
 
-**Implementation:** Exact same pattern. Resource paths:
-- Scorecard: `/api/scorecards`
-- PMP: `/api/pmp`
-- Auth: `/api/auth`
+**ProxyScorecardRepository:**
 
-**Note on Auth:** The AuthRepository may have domain-specific methods (e.g., `checkAccess()`, `validateToken()`). Each still uses the standard CRUD template for any entity-level operations, plus domain-specific methods that delegate to `/api/auth/*` endpoints.
+Project-scoped with two entity types. Manages `IGoNoGoScorecard` + `IScorecardVersion`. Methods: `getScorecards(projectId, options?)`, `getScorecardById(id)`, `createScorecard(data)`, `updateScorecard(id, data)`, `deleteScorecard(id)`, `getVersions(scorecardId)`. No search. The versions method operates on a sub-resource scoped by scorecard ID.
+
+**ProxyPmpRepository:**
+
+Project-scoped with two entity types. Manages `IProjectManagementPlan` + `IPMPSignature`. Methods: `getPlans(projectId, options?)`, `getPlanById(id)`, `createPlan(data)`, `updatePlan(id, data)`, `deletePlan(id)`, `getSignatures(pmpId)`, `createSignature(data)`. No search. Signatures are a sub-resource scoped by PMP ID.
+
+**ProxyAuthRepository:**
+
+**This repository has no CRUD pattern at all.** It does not extend `ProxyBaseRepository` in a meaningful way (or uses it only for `httpClient` access). The Auth port manages users, roles, and permissions with these methods:
+
+- `getCurrentUser(): Promise<ICurrentUser>` — retrieve authenticated user profile
+- `getRoles(): Promise<IRole[]>` — list all available roles
+- `getRoleById(id: string): Promise<IRole | null>` — retrieve a single role by ID
+- `getPermissionTemplates(): Promise<IPermissionTemplate[]>` — list permission templates
+- `assignRole(userId: string, roleId: string): Promise<void>` — assign a role to a user
+- `removeRole(userId: string, roleId: string): Promise<void>` — remove a role from a user
+
+All methods delegate to `/api/auth/*` endpoints. No pagination, no entity creation/deletion in the traditional sense. IDs are strings.
+
+```typescript
+// packages/data-access/src/adapters/proxy/auth-repository.ts
+
+import type {
+  ICurrentUser,
+  IRole,
+  IPermissionTemplate,
+} from '@hbc/models';
+import type { IAuthRepository } from '../../ports/IAuthRepository.js';
+import { NotFoundError } from '../../errors/index.js';
+import { ProxyBaseRepository } from './proxy-base.js';
+import { ProxyHttpClient } from './http-client.js';
+
+export class ProxyAuthRepository
+  extends ProxyBaseRepository<ICurrentUser>
+  implements IAuthRepository
+{
+  constructor(httpClient: ProxyHttpClient) {
+    super(httpClient, '/api/auth');
+  }
+
+  async getCurrentUser(): Promise<ICurrentUser> {
+    return this.wrapAsync(async () => {
+      const response = await this.httpClient.get<{ data: ICurrentUser }>(
+        '/api/auth/me',
+      );
+      return response.data;
+    }, 'ProxyAuthRepository.getCurrentUser');
+  }
+
+  async getRoles(): Promise<IRole[]> {
+    return this.wrapAsync(async () => {
+      const response = await this.httpClient.get<{ data: IRole[] }>(
+        '/api/auth/roles',
+      );
+      return response.data;
+    }, 'ProxyAuthRepository.getRoles');
+  }
+
+  async getRoleById(id: string): Promise<IRole | null> {
+    return this.wrapAsync(async () => {
+      try {
+        const response = await this.httpClient.get<{ data: IRole }>(
+          `/api/auth/roles/${id}`,
+        );
+        return response.data;
+      } catch (err) {
+        if (err instanceof NotFoundError) {
+          return null;
+        }
+        throw err;
+      }
+    }, 'ProxyAuthRepository.getRoleById');
+  }
+
+  async getPermissionTemplates(): Promise<IPermissionTemplate[]> {
+    return this.wrapAsync(async () => {
+      const response = await this.httpClient.get<{ data: IPermissionTemplate[] }>(
+        '/api/auth/permission-templates',
+      );
+      return response.data;
+    }, 'ProxyAuthRepository.getPermissionTemplates');
+  }
+
+  async assignRole(userId: string, roleId: string): Promise<void> {
+    return this.wrapAsync(async () => {
+      await this.httpClient.post<void>(
+        `/api/auth/users/${userId}/roles`,
+        { roleId },
+      );
+    }, 'ProxyAuthRepository.assignRole');
+  }
+
+  async removeRole(userId: string, roleId: string): Promise<void> {
+    return this.wrapAsync(async () => {
+      await this.httpClient.delete(
+        `/api/auth/users/${userId}/roles/${roleId}`,
+      );
+    }, 'ProxyAuthRepository.removeRole');
+  }
+}
+```
 
 **Verification:**
 
@@ -1459,9 +1702,9 @@ pnpm --filter @hbc/data-access test \
 
 # Expected: 30+ tests pass
 # Commits:
-git commit -m "feat: implement ProxyScorecardRepository (follows Lead pattern)"
-git commit -m "feat: implement ProxyPmpRepository (follows Lead pattern)"
-git commit -m "feat: implement ProxyAuthRepository (follows Lead pattern)"
+git commit -m "feat: implement ProxyScorecardRepository with project-scoped scorecards and versions"
+git commit -m "feat: implement ProxyPmpRepository with project-scoped plans and signatures"
+git commit -m "feat: implement ProxyAuthRepository with user/role/permission methods (non-CRUD)"
 ```
 
 ---
@@ -1795,7 +2038,7 @@ pnpm --filter @hbc/data-access lint
 // packages/data-access/src/adapters/proxy/proxy-integration.test.ts
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { ILead } from '@hbc/models';
+import type { ILead, IActiveProject } from '@hbc/models';
 import {
   setProxyContext,
   createLeadRepository,
@@ -1865,7 +2108,7 @@ describe('Proxy Adapter Integration', () => {
       const projectRepo = createProjectRepository('proxy');
 
       await leadRepo.getAll();
-      await projectRepo.getAll();
+      await projectRepo.getProjects();
 
       // Both calls should use same HTTP client (evidenced by sequential fetch calls)
       expect(mockFetch).toHaveBeenCalledTimes(2);
@@ -2039,7 +2282,7 @@ git commit -m "feat: complete proxy adapter implementation - all 11 repositories
 - 11 domain repositories: Lead, Project, Estimating, Schedule, Buyout,
   Compliance, Contract, Risk, Scorecard, PMP, Auth
 - Factory integration: setProxyContext() initialization, lazy HttpClient singleton
-- 100+ tests covering CRUD, pagination, search, error handling
+- 100+ tests covering domain-specific methods, pagination, error handling
 - Integration tests verifying end-to-end factory wiring"
 ```
 
@@ -2072,6 +2315,7 @@ This plan delivers a production-ready proxy adapter across **10 sequential tasks
 - **Full error translation:** HTTP status codes → domain errors.
 - **Checkpoint commits:** After each task.
 - **100+ test cases:** Unit, integration, error path coverage.
+- **Domain-specific contracts:** Each repository implements its actual port interface — only Lead follows a generic CRUD+search pattern; others use domain-specific method names, project-scoped queries, and multi-entity contracts.
 - **Exact TypeScript examples:** Developer can copy-paste and verify.
 
 **Implementation is ready for a developer with zero HB Intel knowledge to execute end-to-end.**
