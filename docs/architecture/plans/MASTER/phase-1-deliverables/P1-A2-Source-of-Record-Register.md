@@ -3,7 +3,7 @@
 **Document ID:** P1-A2
 **Phase:** 1 (Foundation)
 **Classification:** Internal — Architecture
-**Status:** Draft — Entity-level coverage complete for A4/A6/A8/A10/A11/A12/A13; pending A5/A7/A9
+**Status:** Draft — Entity-level coverage complete for A4/A5/A6/A7/A8/A10/A11/A12/A13; pending A9
 **Date:** 2026-03-17
 **References:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md), [package-relationship-map.md](../../blueprint/package-relationship-map.md)
 
@@ -312,14 +312,72 @@ P1-A13 defines 8 canonical entities for the project lessons learned system. This
 
 P1-A3 stores the 8 canonical lessons learned entities across 2 SharePoint project-site lists (`LessonsReports` for report instances, `LessonRecords` for lesson records with keyword and linked-reference child records), 2 hub-site dictionary lists (`LessonCategories`, `LessonImpactMagnitudes`), and Azure Table Storage for import batches and findings. Keywords and linked references are compressed into the `LessonRecords` container as child records rather than separate lists; `keywords_raw` and `supporting_reference_text` fields on `lesson_record` preserve source fidelity alongside the normalized child entities. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
 
+### Reference data domain (P1-A5)
+
+P1-A5 defines 15 canonical entities across three dictionary families: **Cost Code** (4 entities), **CSI Code** (4 entities), and **Simple Reference Dictionaries** (7 entities). All canonical dictionary records are shared hub-site reference data (Class C). Import batch entities track provenance in Azure Table Storage (Class D). Two external mapping entities are deferred to Phase 4+.
+
+#### Shared canonical dictionaries (hub site)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `cost_code` | reference (shared) | SharePoint List (hub site, shared) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `code_id` (surrogate); `csi_code` natural key (unique) | Class C | list-all, filter-by-stage, filter-by-division, get-by-code | Yes (60 min) | Governed; new codes added via import batch; existing codes soft-deprecated, never hard-deleted | No conflict; governed reference data; import batches are additive | Platform Architecture | 1 |
+| `cost_code_stage` | reference (shared) | SharePoint List (hub site, shared) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `stage_id` (surrogate); `stage_name` natural key (unique) | Class C | list-all, get-by-id | Yes (60 min) | Governed; new stages additive only; no deletion of existing stages | No conflict; enumeration-style reference data | Platform Architecture | 1 |
+| `csi_code` | reference (shared) | SharePoint List (hub site, shared) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `code_id` (surrogate); `csi_code` natural key (unique) | Class C | list-all, filter-by-division, filter-by-hierarchy-level, get-by-code | Yes (60 min) | Governed; new codes added via import batch; existing codes soft-deprecated, never hard-deleted | No conflict; governed reference data; import batches are additive | Platform Architecture | 1 |
+| `csi_code_description_variant` | reference (shared, child) | SharePoint List (hub site, shared) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `variant_id` (surrogate); FK `code_id` | Class C | list-by-code | Yes (60 min) | Governed; variants added during import; existing variants soft-deprecated only | No conflict; child of governed `csi_code` | Platform Architecture | 1 |
+| `project_type_dictionary` | reference (shared) | SharePoint List (`Shared_ProjectTypes`, hub site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `{dict}_id` (surrogate); `typeId` natural key (unique) | Class C | list-all, get-by-id | Yes (60 min) | Governed; new values additive; no deletion of existing keys | No conflict; enumeration-style reference data | Operations leadership | 1 |
+| `project_stage_dictionary` | reference (shared) | SharePoint List (`Shared_ProjectStages`, hub site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `{dict}_id` (surrogate); `stageId` natural key (unique) | Class C | list-all, get-by-id | Yes (60 min) | Governed; new values additive; no deletion of existing keys | No conflict; enumeration-style reference data | Operations leadership | 1 |
+| `project_region_dictionary` | reference (shared) | SharePoint List (`Shared_ProjectRegions`, hub site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `{dict}_id` (surrogate); `regionId` natural key (unique) | Class C | list-all, get-by-id | Yes (60 min) | Governed; new values additive; no deletion of existing keys | No conflict; enumeration-style reference data | Operations leadership | 1 |
+| `state_code_dictionary` | reference (shared) | SharePoint List (`Shared_StateCodes`, hub site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `{dict}_id` (surrogate); `stateCode` natural key (unique) | Class C | list-all, get-by-code | Yes (60 min) | Governed; standard US state/territory codes; additions rare | No conflict; enumeration-style reference data | Operations leadership | 1 |
+| `country_code_dictionary` | reference (shared) | SharePoint List (`Shared_CountryCodes`, hub site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `{dict}_id` (surrogate); `countryCode` natural key (unique) | Class C | list-all, get-by-code | Yes (60 min) | Governed; ISO 3166-1 alpha-2 codes; additions rare | No conflict; enumeration-style reference data | Operations leadership | 1 |
+| `delivery_method_dictionary` | reference (shared) | SharePoint List (`Shared_DeliveryMethods`, hub site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `{dict}_id` (surrogate); `methodCode` natural key (unique) | Class C | list-all, get-by-code | Yes (60 min) | Governed; new methods additive; no deletion of existing codes | No conflict; enumeration-style reference data | Operations leadership | 1 |
+| `sector_dictionary` | reference (shared) | SharePoint List (`Shared_Sectors`, hub site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `{dict}_id` (surrogate); `sectorCode` natural key (unique) | Class C | list-all, get-by-code | Yes (60 min) | Governed; new sectors additive; no deletion of existing codes | No conflict; enumeration-style reference data | Operations leadership | 1 |
+
+#### Deferred external mapping entities
+
+| Entity | Data Class | Storage Target | Identity Key | Write Safety Class | Phase | Notes |
+|--------|-----------|----------------|-------------|-------------------|-------|-------|
+| `cost_code_external_mapping` | mapping | SharePoint List (hub site, shared) | `mapping_id` (surrogate) | Class A | 4+ | Maps HB Intel cost codes to Sage/Procore/ERP codes |
+| `csi_code_external_mapping` | mapping | SharePoint List (hub site, shared) | `mapping_id` (surrogate) | Class A | 4+ | Maps CSI codes to cost codes, ERP codes, or other classification systems |
+
+#### Operational state (non-SharePoint)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `cost_code_import_batch` | operational | Azure Table Storage | AF v4 → `@azure/data-tables` | `batch_id` (surrogate, unique per import) | Class D | get-by-id, list-by-date | No | Status progresses forward only (pending → parsing → complete/failed); immutable after completion | No conflict; each import creates a new `batch_id` | Import service | 1 |
+| `csi_code_import_batch` | operational | Azure Table Storage | AF v4 → `@azure/data-tables` | `batch_id` (surrogate, unique per import) | Class D | get-by-id, list-by-date | No | Status progresses forward only (pending → parsing → complete/failed); immutable after completion | No conflict; each import creates a new `batch_id` | Import service | 1 |
+
+#### A3 physical compression note
+
+P1-A3 stores shared reference dictionaries in dedicated hub-site SharePoint lists: one list per dictionary for the 7 simple dictionaries (`Shared_ProjectTypes`, `Shared_ProjectStages`, `Shared_ProjectRegions`, `Shared_StateCodes`, `Shared_CountryCodes`, `Shared_DeliveryMethods`, `Shared_Sectors`), plus hub-site lists for cost code and CSI code canonical records and CSI description variants. Import batch entities reside in Azure Table Storage. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
+
+### Operational register domain (P1-A7)
+
+P1-A7 defines 4 canonical entities for the project-level operational register — a unified tracking system for issues, actions, risks, constraints, and delays. The delay subtype is the first implemented extension, adding PCCO/schedule linkage and cost-impact fields. Assignee identity follows the frozen Class G (person-attribution) pattern: `assigned_person_key` (UPN when resolved, nullable when unresolved) + `assigned_display` (raw text, always preserved, never a join key).
+
+#### Project execution records (project site)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `register_record` | execution | SharePoint List (`OperationalRegister`, project site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `record_id` (surrogate); `(project_id, reference)` natural key (project-scoped) | Class A | list-by-project, filter-by-category, filter-by-status, filter-by-record-type, get-by-id | Yes (5 min) | Fully mutable while status allows; status transitions forward-only (Identified → In Progress → Pending → Closed); Closed records effectively Class D (reversal requires reason); delay-subtype fields mutable same as base; `assigned_display` always preserved; `assigned_person_key` updated on resolution; `category_raw` and `days_elapsed_source` never overwritten | Last-write-wins with `updated_at` timestamp; raw preservation fields are source-of-truth for provenance | Project team | 1 |
+| `register_record_external_mapping` | mapping | SharePoint List (project site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `mapping_id` (surrogate) | Class A | list-by-record, list-by-target-entity | Yes (5 min) | Mutable; soft-delete via `is_active` flag; no hard deletion; `mapping_basis` documents provenance | Last-write-wins; `mapping_basis` documents provenance | Project team / import service | 1 |
+
+#### Operational state (non-SharePoint)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `register_import_batch` | operational | Azure Table Storage | AF v4 → `@azure/data-tables` | `batch_id` (surrogate, unique per import) | Class D | get-by-id, list-by-project | No | Status progresses forward only (pending → parsing → validating → complete/failed); immutable after completion | No conflict; each import creates a new `batch_id` | Import service | 1 |
+| `register_import_finding` | operational (audit) | Azure Table Storage (`partition: register-findings-{batchId}`) | AF v4 → `@azure/data-tables` | `finding_id` (surrogate); `(batch_id, finding_id)` composite context | Class D | list-by-batch | No | Append-only; immutable once logged; severity (error/warning/info); category (parse_error/validation_failure/derivation_mismatch/mapping_warning) | No conflict; new imports create new findings per batch | Import service | 1 |
+
+#### A3 physical compression note
+
+P1-A3 stores operational register records in a project-site SharePoint list (`OperationalRegister`) with delay-subtype fields as optional columns. External mappings are stored alongside register data in the same project site. Import batches and findings reside in Azure Table Storage. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
+
 ### Remaining domains
 
 Entity-level rows for the following domains will be added as their schemas reach implementation-ready status:
 
 | Domain | Schema Doc | Entity Count | Status |
 |--------|-----------|-------------|--------|
-| shared (reference data) | P1-A5 | ~11 | Schema defined; entity register pending |
-| risk / compliance (operational register) | P1-A7 | 4 | Schema defined; entity register pending |
 | compliance (permits) | P1-A9 | 8 | Schema defined; entity register pending |
 
 ---
@@ -623,8 +681,8 @@ Azure Table Storage is the designated storage platform for operational and prove
 - **Lifecycle:** Import service creates; system retains indefinitely for audit; no user delete
 
 **Entities in this tier across domains:**
-- Import batch records: `schedule_import_batch`, `budget_import_batch`, `kickoff_import_batch`, `checklist_import_batch`, `responsibility_import_batch`, `scorecard_import_batch`, `lessons_import_batch`
-- Import finding records: `import_finding` (schedule), `budget_import_finding`, `scorecard_import_finding`, `lessons_import_finding`
+- Import batch records: `schedule_import_batch`, `budget_import_batch`, `kickoff_import_batch`, `checklist_import_batch`, `responsibility_import_batch`, `scorecard_import_batch`, `lessons_import_batch`, `cost_code_import_batch`, `csi_code_import_batch`, `register_import_batch`
+- Import finding records: `import_finding` (schedule), `budget_import_finding`, `scorecard_import_finding`, `lessons_import_finding`, `register_import_finding`
 - External mapping records: `budget_line_external_mapping`
 - System state: provisioning state, audit log, project identity mapping
 
@@ -653,7 +711,7 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 - [x] **Child records have stable surrogate IDs with required FK to parent.** All child entities (`kickoff_row`, `lesson_record`, `lesson_keyword`, `checklist_item`, etc.) have their own `*_id` with FK to parent.
 - [x] **Junction records have explicit composite natural keys.** `responsibility_assignment` and `criterion_score_record` have documented composite keys with uniqueness at the tuple level.
 - [x] **Field naming follows frozen suffix conventions.** `*_id`, `*_key`, `*_display`, `source_*`, `batch_id`, `created_by`/`uploaded_by`/`approved_by` suffixes are used consistently.
-- [ ] **Remaining domains (A5, A7, A9) will require identity class assignment when entity-level rows are added.** These are not yet frozen but will follow the same class system.
+- [ ] **Remaining domains (A9) will require identity class assignment when entity-level rows are added.** These are not yet frozen but will follow the same class system.
 
 ---
 
@@ -671,4 +729,6 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 | 0.8 | 2026-03-17 | Architecture | Normalize cross-cutting identity, write-safety, and operational-state rules for entity-level governance; replace stale domain-level assumptions with entity-pattern summaries; add cross-cutting archetype table; add non-SharePoint operational state section; add template-version and draft-to-approved conflict scenarios |
 | 0.9 | 2026-03-17 | Architecture | Final QA reconciliation: fix A12 container naming to match A3 (SubcontractorScorecards + ScorecardCriterionScores); update document metadata date and status; tighten domain-level summary alignment; confirm entity-level coverage complete for 7 domains with no column gaps |
 | 1.0 | 2026-03-17 | Architecture | Phase 1 Identity Strategy Freeze: add 10 frozen identity classes (A–J) covering project anchors, SP-backed records, templates, children, import batches, junctions, person-attribution, vendor/party, external mappings, and findings; freeze field naming conventions and person/vendor resolution rules; add import identity rules; add identity QA validation checklist; align companion schemas (A4–A13) to frozen rules |
+| 1.1 | 2026-03-17 | Architecture | Add entity-level reference data domain register (P1-A5): 15 entities across 3 dictionary families (cost code, CSI code, simple reference); 11 shared canonical dictionaries (Class C), 2 import batches (Class D), 2 deferred external mappings (Phase 4+); update non-SharePoint operational state enumeration; update remaining domains to A7/A9 only |
+| 1.2 | 2026-03-17 | Architecture | Add entity-level operational register domain (P1-A7): 4 entities — `register_record` (Class A), `register_record_external_mapping` (Class A), `register_import_batch` (Class D), `register_import_finding` (Class D); assignee identity frozen as Class G (UPN when resolved, nullable when unresolved, display always preserved); update non-SharePoint operational state enumeration; update remaining domains to A9 only |
 

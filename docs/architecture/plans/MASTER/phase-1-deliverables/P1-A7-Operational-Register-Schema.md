@@ -188,7 +188,7 @@ The primary operational register record. One row per tracked item.
 | description | string | Yes | — | Free-text description of the tracked item |
 | reference | string | No | — | Reference code (e.g., "RISK-001"); project-scoped, not globally unique |
 | assigned_display | string | No | — | Person display name from source (e.g., "Mark Davis") |
-| assigned_person_key | string | No | — | Stable person/assignment key (resolved during processing; null until identity reconciliation) |
+| assigned_person_key | string | No | — | Stable person identity (UPN when resolved via Entra ID); nullable if unresolved — see [Assignee Identity Resolution](#assignee-identity-resolution-frozen) |
 | bic_display | string | No | — | Business-in-Charge team display text |
 | bic_key | string | No | — | Stable BIC reference key (resolved from BIC dictionary if available) |
 | date_identified | date | No | — | Date the item was first identified |
@@ -240,6 +240,29 @@ Maps register records to related entities in other domains.
 | **`display_no` treatment** | Display-only formatted label; not used as a key or uniqueness constraint |
 | **`id` from source** | Globally unique in the sample (400/400) but treated as source-specific; HB Intel generates its own `record_id` |
 | **Repeat import handling** | Same project + reference across batches represents the same logical record; latest batch = current state |
+
+---
+
+### Assignee Identity Resolution (Frozen)
+
+The `assigned_person_key` / `assigned_display` pair follows the frozen **Class G (Person-attribution)** identity pattern from P1-A2. This decision closes the previously open "Identity reconciliation for assigned" item.
+
+| Rule | Decision |
+|------|----------|
+| **Display preservation** | `assigned_display` stores the raw person name from the import source (e.g., "Mark Davis"). Always preserved. Never used as a join key. |
+| **Stable identity** | `assigned_person_key` stores the resolved stable person identity — UPN (e.g., `mark.davis@contoso.com`) when the person is an Entra ID-resolved user. |
+| **Nullable if unresolved** | When an imported person name cannot be matched to an Entra ID user, `assigned_person_key` remains `null`. No synthetic person IDs are invented. |
+| **Resolution ownership** | The adapter/import layer owns resolution: imported display strings are matched against the Entra ID user directory (Graph API) during or after import processing. |
+| **Asynchronous resolution** | Resolution may occur post-import via manual curation or batch reconciliation. The `assigned_person_key` field is updatable when resolution succeeds. |
+| **Cross-domain consistency** | This pattern matches `evaluator_key`/`evaluator_display` (A12), `responsible_party_key`/`responsible_party_display` (A11), and `project_executive_key` (A8). |
+
+The same Class G/H pattern applies to BIC identity:
+
+| Rule | Decision |
+|------|----------|
+| **Display preservation** | `bic_display` stores the raw Business-in-Charge team text. Always preserved. |
+| **Stable identity** | `bic_key` stores the resolved canonical BIC reference key from the BIC dictionary (when populated in P1-A5). |
+| **Nullable if unresolved** | `bic_key` remains `null` until the BIC dictionary is populated and resolution is performed. |
 
 ---
 
@@ -488,7 +511,7 @@ These are reconciliation snapshots only — canonical totals should be derived f
 | **Record-type subtyping** | First subtype (delay) implemented in v0.2; risk/constraint/issue/action subtypes remain Phase 2 targets | Platform Architecture + Operations | Phase 2 (delay: done) |
 | **Category dictionary governance** | Formalize 36 categories as governed reference set in P1-A5 | Platform Architecture | Phase 1 (late) |
 | **BIC dictionary governance** | Formalize 32 BIC teams as governed reference set in P1-A5 | Platform Architecture | Phase 1 (late) |
-| **Identity reconciliation for assigned** | Map assigned display names to stable person keys from identity source | Platform Architecture | Phase 1–2 |
+| **Identity reconciliation for assigned** | **Resolved (v0.3):** Frozen as Class G person-attribution — UPN when resolved, nullable when unresolved, display always preserved. See [Assignee Identity Resolution](#assignee-identity-resolution-frozen). | Platform Architecture | Done |
 | **Closure evidence requirements** | Define which categories require closure documents for compliance | Risk / Compliance | Phase 2 |
 
 ---
@@ -512,3 +535,4 @@ These are reconciliation snapshots only — canonical totals should be derived f
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 4 canonical entities, hybrid operational register classification, category/BIC normalization, lifecycle model, days-elapsed derivation, and storage alignment. Evidence-based from constraints.json. |
 | 0.2 | 2026-03-17 | Architecture | Added delay subtype extension with 18 delay-specific fields on register_record (raw+normalized pairs for PCCO, affected task, critical path impact, cost impact, duration, dates, notification). Import batch snapshot fields for totals row. First implemented subtype establishing the pattern. Evidence-based from Project Delay Log CSV template. |
+| 0.3 | 2026-03-17 | Architecture | Freeze assignee identity resolution: `assigned_person_key`/`assigned_display` aligned to Class G (person-attribution) from A2 identity freeze. UPN when resolved, nullable when unresolved, display always preserved, adapter owns resolution. Same pattern confirmed for `bic_key`/`bic_display`. Closes open decision "Identity reconciliation for assigned." |
