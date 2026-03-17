@@ -3,7 +3,7 @@
 **Document ID:** P1-A2
 **Phase:** 1 (Foundation)
 **Classification:** Internal — Architecture
-**Status:** Draft — Entity-level coverage complete for all Phase 1 domains (A4–A13)
+**Status:** Draft — Entity-level coverage complete for all Phase 1 domains (A4–A14)
 **Date:** 2026-03-17
 **References:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md), [package-relationship-map.md](../../blueprint/package-relationship-map.md)
 
@@ -397,9 +397,37 @@ P1-A9 defines 7 canonical entities for the permits & inspections domain — a pa
 
 P1-A3 stores permit data across 2 project-site SharePoint lists: `Permits` for permit records with condition and tag child records, and `PermitInspections` for inspection records with issue child records. Import batches and findings reside in Azure Table Storage. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
 
+### Leads domain (P1-A14)
+
+P1-A14 defines 5 canonical entities for the leads and pipeline domain — two entity families serving business development: (1) individual market leads sourced from procurement portals, data services, and market intelligence, and (2) division-level pipeline health snapshots with aggregate stage/outcome data. Person attribution for matched BD representative follows the frozen Class G pattern. Pipeline snapshot nested structures (stages, wins, losses) are stored as flattened JSON — analytics summary data, not individually managed records.
+
+#### Market lead records (Sales/BD site)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `market_lead` | execution | SharePoint List (`MarketLeads`, Sales/BD site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `lead_id` (surrogate) | Class A | list-all, filter-by-sector, filter-by-region, filter-by-source, get-by-id | Yes (5 min) | Fully mutable; `matched_rep_display` always preserved; `matched_rep_key` updated on resolution; `tags_raw` never overwritten | Last-write-wins with `updated_at` timestamp; raw preservation fields are source-of-truth for provenance | BD team | 1 |
+| `market_lead_tag` | execution (child) | SharePoint List (`MarketLeads`, Sales/BD site, child records) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `tag_id` (surrogate); `(lead_id, tag_id)` composite context | Class A | list-by-lead | No | Append-only in practice; `tag_value` normalized (lowercase, trimmed); `raw_tag_value` preserved; deduplicated within lead | No conflict; additive from `tags_raw` | Import service (parser) | 1 |
+
+#### Pipeline snapshot records (Sales/BD site)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `pipeline_snapshot` | execution (analytics snapshot) | SharePoint List (`PipelineSnapshots`, Sales/BD site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `snapshot_id` (surrogate); `(division, snapshot_date)` natural key | Class A | list-by-division, filter-by-date-range, get-by-id | Yes (15 min) | Immutable once imported; newer snapshots supersede for current-state views; `stages_json`, `recent_wins_json`, `recent_losses_json` stored as JSON text | No conflict; each import creates new snapshot or supersedes same `(division, snapshot_date)` | BD team / import service | 1 |
+
+#### Operational state (non-SharePoint)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `lead_import_batch` | operational | Azure Table Storage | AF v4 → `@azure/data-tables` | `batch_id` (surrogate, unique per import) | Class D | get-by-id, list-by-source-type | No | Status progresses forward only (pending → parsing → complete/failed); immutable after completion | No conflict; each import creates a new `batch_id` | Import service | 1 |
+| `lead_import_finding` | operational (audit) | Azure Table Storage (`partition: lead-findings-{batchId}`) | AF v4 → `@azure/data-tables` | `finding_id` (surrogate); `(batch_id, finding_id)` composite context | Class D | list-by-batch | No | Append-only; immutable once logged; severity (error/warning/info); `entity_type` classifies finding scope (market_lead/pipeline_snapshot/tag) | No conflict; new imports create new findings per batch | Import service | 1 |
+
+#### A3 physical compression note
+
+P1-A3 stores lead data across 2 Sales/BD-site SharePoint lists: `MarketLeads` for market lead records with tag child records, and `PipelineSnapshots` for pipeline snapshot records with JSON-embedded aggregate data. Import batches and findings reside in Azure Table Storage. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
+
 ### Phase 1 entity-level coverage complete
 
-All Phase 1 domain schemas (A4–A13) now have entity-level SoR coverage in this register. No domains remain pending.
+All Phase 1 domain schemas (A4–A14) now have entity-level SoR coverage in this register. No domains remain pending.
 
 ---
 
@@ -702,8 +730,8 @@ Azure Table Storage is the designated storage platform for operational and prove
 - **Lifecycle:** Import service creates; system retains indefinitely for audit; no user delete
 
 **Entities in this tier across domains:**
-- Import batch records: `schedule_import_batch`, `budget_import_batch`, `kickoff_import_batch`, `checklist_import_batch`, `responsibility_import_batch`, `scorecard_import_batch`, `lessons_import_batch`, `cost_code_import_batch`, `csi_code_import_batch`, `register_import_batch`, `permit_import_batch`
-- Import finding records: `import_finding` (schedule), `budget_import_finding`, `scorecard_import_finding`, `lessons_import_finding`, `register_import_finding`, `permit_import_finding`
+- Import batch records: `schedule_import_batch`, `budget_import_batch`, `kickoff_import_batch`, `checklist_import_batch`, `responsibility_import_batch`, `scorecard_import_batch`, `lessons_import_batch`, `cost_code_import_batch`, `csi_code_import_batch`, `register_import_batch`, `permit_import_batch`, `lead_import_batch`
+- Import finding records: `import_finding` (schedule), `budget_import_finding`, `scorecard_import_finding`, `lessons_import_finding`, `register_import_finding`, `permit_import_finding`, `lead_import_finding`
 - External mapping records: `budget_line_external_mapping`
 - System state: provisioning state, audit log, project identity mapping
 
@@ -732,7 +760,7 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 - [x] **Child records have stable surrogate IDs with required FK to parent.** All child entities (`kickoff_row`, `lesson_record`, `lesson_keyword`, `checklist_item`, etc.) have their own `*_id` with FK to parent.
 - [x] **Junction records have explicit composite natural keys.** `responsibility_assignment` and `criterion_score_record` have documented composite keys with uniqueness at the tuple level.
 - [x] **Field naming follows frozen suffix conventions.** `*_id`, `*_key`, `*_display`, `source_*`, `batch_id`, `created_by`/`uploaded_by`/`approved_by` suffixes are used consistently.
-- [x] **All Phase 1 domains (A4–A13) have identity class assignments.** Entity-level rows cover A4, A5, A6, A7, A8, A10, A11, A12, A13 with frozen identity classes.
+- [x] **All Phase 1 domains (A4–A14) have identity class assignments.** Entity-level rows cover A4, A5, A6, A7, A8, A10, A11, A12, A13, A14 with frozen identity classes.
 
 ---
 
@@ -753,4 +781,5 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 | 1.1 | 2026-03-17 | Architecture | Add entity-level reference data domain register (P1-A5): 15 entities across 3 dictionary families (cost code, CSI code, simple reference); 11 shared canonical dictionaries (Class C), 2 import batches (Class D), 2 deferred external mappings (Phase 4+); update non-SharePoint operational state enumeration; update remaining domains to A7/A9 only |
 | 1.2 | 2026-03-17 | Architecture | Add entity-level operational register domain (P1-A7): 4 entities — `register_record` (Class A), `register_record_external_mapping` (Class A), `register_import_batch` (Class D), `register_import_finding` (Class D); assignee identity frozen as Class G (UPN when resolved, nullable when unresolved, display always preserved); update non-SharePoint operational state enumeration; update remaining domains to A9 only |
 | 1.3 | 2026-03-17 | Architecture | Add entity-level permits & inspections domain (P1-A9): 7 entities — `permit_record` (Class A), `permit_condition` (Class A), `permit_tag` (Class A), `permit_inspection` (Class A), `permit_inspection_issue` (Class A), `permit_import_batch` (Class D), `permit_import_finding` (Class D); contact identity frozen (`authority_contact_key` Class H, `inspector_contact_key` Class G); complete Phase 1 entity-level SoR coverage for all domains (A4–A13); identity validation checklist fully checked |
+| 1.4 | 2026-03-17 | Architecture | Add entity-level leads domain (P1-A14): 5 entities — `market_lead` (Class A), `market_lead_tag` (Class A), `pipeline_snapshot` (Class A), `lead_import_batch` (Class D), `lead_import_finding` (Class D); matched rep identity frozen as Class G; pipeline nested structures stored as flattened JSON; extend coverage to A4–A14 |
 
