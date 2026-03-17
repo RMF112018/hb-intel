@@ -49,6 +49,34 @@ The first dictionary fully specified here is the **Cost Code Dictionary**, based
 
 ---
 
+## Consolidated Entity Summary and Identity Alignment
+
+This section lists all 15 canonical entities defined across the three dictionary families in this document, with identity class alignment to the [P1-A2 Identity Strategy Freeze](./P1-A2-Source-of-Record-Register.md).
+
+| # | Canonical Entity | Dictionary Family | Identity Class | Identity Key | Natural Key | Storage Target | Write Safety | Phase |
+|---|-----------------|-------------------|---------------|-------------|-------------|----------------|-------------|-------|
+| 1 | `cost_code` | Cost Code | C (shared reference) | `code_id` (surrogate) | `csi_code` | SP List (hub) | Class C | 1 |
+| 2 | `cost_code_stage` | Cost Code | C (shared reference) | `stage_id` (surrogate) | `stage_name` | SP List (hub) | Class C | 1 |
+| 3 | `cost_code_import_batch` | Cost Code | E (import-batch) | `batch_id` (surrogate) | — | Azure Table Storage | Class D | 1 |
+| 4 | `cost_code_external_mapping` | Cost Code | I (external mapping) | `mapping_id` (surrogate) | — | SP List (hub) | Class A | 4+ |
+| 5 | `csi_code` | CSI Code | C (shared reference) | `code_id` (surrogate) | `csi_code` | SP List (hub) | Class C | 1 |
+| 6 | `csi_code_description_variant` | CSI Code | D (child record) | `variant_id` (surrogate) | — (FK `code_id`) | SP List (hub) | Class C | 1 |
+| 7 | `csi_code_import_batch` | CSI Code | E (import-batch) | `batch_id` (surrogate) | — | Azure Table Storage | Class D | 1 |
+| 8 | `csi_code_external_mapping` | CSI Code | I (external mapping) | `mapping_id` (surrogate) | — | SP List (hub) | Class A | 4+ |
+| 9 | `project_type_dictionary` | Simple Reference | C (shared reference) | `{dict}_id` (surrogate) | `typeId` | SP List (hub) — `Shared_ProjectTypes` | Class C | 1 |
+| 10 | `project_stage_dictionary` | Simple Reference | C (shared reference) | `{dict}_id` (surrogate) | `stageId` | SP List (hub) — `Shared_ProjectStages` | Class C | 1 |
+| 11 | `project_region_dictionary` | Simple Reference | C (shared reference) | `{dict}_id` (surrogate) | `regionId` | SP List (hub) — `Shared_ProjectRegions` | Class C | 1 |
+| 12 | `state_code_dictionary` | Simple Reference | C (shared reference) | `{dict}_id` (surrogate) | `stateCode` | SP List (hub) — `Shared_StateCodes` | Class C | 1 |
+| 13 | `country_code_dictionary` | Simple Reference | C (shared reference) | `{dict}_id` (surrogate) | `countryCode` | SP List (hub) — `Shared_CountryCodes` | Class C | 1 |
+| 14 | `delivery_method_dictionary` | Simple Reference | C (shared reference) | `{dict}_id` (surrogate) | `methodCode` | SP List (hub) — `Shared_DeliveryMethods` | Class C | 1 |
+| 15 | `sector_dictionary` | Simple Reference | C (shared reference) | `{dict}_id` (surrogate) | `sectorCode` | SP List (hub) — `Shared_Sectors` | Class C | 1 |
+
+**Build-ready vs deferred:** 13 entities are Phase 1 build-ready. Two external mapping entities (`cost_code_external_mapping`, `csi_code_external_mapping`) are deferred to Phase 4+ and carry schema placeholders only.
+
+**Not enumerated here:** Three shared dictionaries (`ProjectBidTypes`, `ProjectOwnerTypes`, `TimeZones`) are not in A3 build-ready scope and are not counted among the 15 entities above. They will be specified when they enter build scope.
+
+---
+
 ## Cost Code Dictionary
 
 ### Source File Analysis
@@ -592,6 +620,8 @@ Seven shared dictionaries used across the project domain follow a common simple 
 
 #### ProjectTypes
 
+**Canonical entity name:** `project_type_dictionary`
+
 | Property | Value |
 |----------|-------|
 | **Purpose** | Classify projects by construction type (Residential, Commercial, etc.) |
@@ -604,6 +634,8 @@ Seven shared dictionaries used across the project domain follow a common simple 
 | **Initial values** | Populated from source system project records (e.g., Residential, Commercial, Industrial) |
 
 #### ProjectStages
+
+**Canonical entity name:** `project_stage_dictionary`
 
 | Property | Value |
 |----------|-------|
@@ -618,6 +650,8 @@ Seven shared dictionaries used across the project domain follow a common simple 
 
 #### ProjectRegions
 
+**Canonical entity name:** `project_region_dictionary`
+
 | Property | Value |
 |----------|-------|
 | **Purpose** | Classify projects by geographic operating region |
@@ -630,6 +664,8 @@ Seven shared dictionaries used across the project domain follow a common simple 
 | **Initial values** | Populated from organizational structure (e.g., Southeast Florida, Central Florida) |
 
 #### StateCodes
+
+**Canonical entity name:** `state_code_dictionary`
 
 | Property | Value |
 |----------|-------|
@@ -645,6 +681,8 @@ Seven shared dictionaries used across the project domain follow a common simple 
 
 #### CountryCodes
 
+**Canonical entity name:** `country_code_dictionary`
+
 | Property | Value |
 |----------|-------|
 | **Purpose** | Standard country codes for project location classification |
@@ -659,6 +697,8 @@ Seven shared dictionaries used across the project domain follow a common simple 
 
 #### DeliveryMethods
 
+**Canonical entity name:** `delivery_method_dictionary`
+
 | Property | Value |
 |----------|-------|
 | **Purpose** | Classify projects by construction delivery method |
@@ -671,6 +711,8 @@ Seven shared dictionaries used across the project domain follow a common simple 
 | **Initial values** | Design-Bid-Build, Design-Build, CM at Risk, GMP, Lump Sum, IDIQ/Job Order, Public-Private (P3) — per P1-A13 Lessons Learned source |
 
 #### Sectors
+
+**Canonical entity name:** `sector_dictionary`
 
 | Property | Value |
 |----------|-------|
@@ -767,3 +809,4 @@ The following dictionaries are referenced across P1-A1 field definitions. The 7 
 | 0.1 | 2026-03-17 | Architecture | Initial schema; Cost Code dictionary with 4 canonical entities, keying rules, hierarchy parsing, stage applicability, external mapping strategy, and storage alignment. Evidence-based from cost-code-dictionary.csv. Future dictionary inventory established. |
 | 0.2 | 2026-03-17 | Architecture | Added CSI Code dictionary with 4 canonical entities, one-to-many description variant model, MasterFormat hierarchy, import cleanup rules (continuation merging, CamelCase normalization), and cross-mapping to cost codes. Evidence-based from csi-code-dictionary.csv (8,991 rows, 819 duplicate codes, 170 continuation artifacts). |
 | 0.3 | 2026-03-17 | Architecture | Added Simple Reference Dictionary pattern and 7 shared dictionary definitions (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, CountryCodes, DeliveryMethods, Sectors). Closes A3/A5 shared dictionary gap — all A3 build-ready shared dictionaries now have canonical schemas. Updated shared dictionary table from "Schema pending" to "Defined above." Three dictionaries (ProjectBidTypes, ProjectOwnerTypes, TimeZones) remain pending — not in A3 build-ready scope. |
+| 0.4 | 2026-03-17 | Architecture | Added consolidated entity summary with identity class alignment to A2 freeze (15 entities across 3 dictionary families). Added canonical entity names to all 7 simple reference dictionary instantiations. Distinguished build-ready (13 entities, Phase 1) from deferred (2 external mapping entities, Phase 4+). |
