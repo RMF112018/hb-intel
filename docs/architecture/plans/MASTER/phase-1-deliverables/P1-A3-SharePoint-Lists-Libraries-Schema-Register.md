@@ -277,11 +277,68 @@ Platform containers for auth, provisioning state, audit log, and project identit
 
 Each appendix follows the standard 12-point sequence. All containers inherit shared site columns from `HBBaseListItem` (recordId, projectId, createdAt, updatedAt, createdBy, isActive, notes, sourceBatchId, sourceRowNumber) unless noted otherwise. Only domain-specific columns are listed below.
 
-**Import findings** (parse errors, validation warnings, derivation mismatches) for all imported data are stored in **Azure Table Storage** per P1-A1/A2 storage boundary — not in SharePoint lists. They are not given container appendices here.
+### Non-SharePoint Canonical Entities
 
-**Import batch metadata** (batch ID, source file, import status, timestamps, row counts) is stored in **SharePoint lists** for user-visible import history and project-level tracking. Schedule import batches (`ScheduleImportBatches`) and budget import batches (`BudgetImportBatches`) each have their own SharePoint list and appendix block below. Other domain import batches (operational register, permits, checklists, scorecards, lessons learned) use the same adapter-layer batch tracking in their respective list's `sourceBatchId` field, with full batch records in Azure Table Storage.
+The following entities are part of the Phase 1 canonical domain model but are **NOT physically implemented as SharePoint lists or libraries**. They are listed here explicitly so A3 is clear about what it does and does not contain.
 
-**Kickoff notes history** (`kickoff_note` in P1-A8) is deferred as a separate child entity to Phase 2. In Phase 1, current notes are stored as the `notesSummary` field on `KickoffRows`. The `kickoff_evidence_link` child entity similarly uses the `currentEvidenceRef` field on `KickoffRows` for Phase 1, with structured child link records deferred to Phase 2.
+#### Azure Table Storage — Import Findings (all domains)
+
+Import findings (parse errors, validation warnings, derivation mismatches) are operational audit records stored in Azure Table Storage per P1-A1/A2 storage boundary.
+
+| Entity | Governing Schema | Storage | Phase 1 Handling |
+|--------|-----------------|---------|-----------------|
+| `schedule_import_finding` | P1-A4 `import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
+| `budget_import_finding` | P1-A6 `budget_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
+| `register_import_finding` | P1-A7 `register_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
+| `permit_import_finding` | P1-A9 `permit_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
+| `checklist_import_finding` | P1-A10 (implied) | Azure Table Storage | Operational audit; not in SharePoint |
+| `scorecard_import_finding` | P1-A12 `scorecard_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
+| `lessons_import_finding` | P1-A13 `lessons_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
+| `kickoff_import_finding` | P1-A8 (implied) | Azure Table Storage | Operational audit; not in SharePoint |
+
+#### Azure Table Storage — Import Batch Metadata (domains without SharePoint batch lists)
+
+Schedule and budget domains have dedicated SharePoint batch lists (`ScheduleImportBatches`, `BudgetImportBatches`). The following domains track batch metadata only via the `sourceBatchId` field on their respective SharePoint lists, with full batch records in Azure Table Storage.
+
+| Entity | Governing Schema | Storage | Phase 1 Handling |
+|--------|-----------------|---------|-----------------|
+| `register_import_batch` | P1-A7 | Azure Table Storage | Batch ID referenced via `sourceBatchId` on `OperationalRegister` |
+| `permit_import_batch` | P1-A9 | Azure Table Storage | Batch ID referenced via `sourceBatchId` on `Permits` |
+| `checklist_import_batch` | P1-A10 | Azure Table Storage | Batch ID referenced via `sourceBatchId` on `LifecycleChecklists` |
+| `scorecard_import_batch` | P1-A12 | Azure Table Storage | Batch ID referenced via `sourceBatchId` on `SubcontractorScorecards` |
+| `lessons_import_batch` | P1-A13 | Azure Table Storage | Batch ID referenced via `sourceBatchId` on `LessonsReports` |
+| `responsibility_import_batch` | P1-A11 | Azure Table Storage | Batch ID referenced via `sourceBatchId` on `ResponsibilityMatrices` |
+| `kickoff_import_batch` | P1-A8 | Azure Table Storage | Batch ID referenced via `sourceBatchId` on `KickoffInstances` |
+
+#### Azure Table Storage — Mapping / Provenance / Drift Records
+
+| Entity | Governing Schema | Storage | Phase 1 Handling |
+|--------|-----------------|---------|-----------------|
+| `schedule_mapping_record` | P1-A4 Layer 4 | Azure Table Storage | Source-to-canonical field mapping provenance |
+| `budget_line_external_mapping` | P1-A6 | Azure Table Storage | Budget line → cost code / CSI / commitment mappings |
+| `register_record_external_mapping` | P1-A7 | Azure Table Storage | Register record → schedule / cost / compliance linkage |
+| `cost_code_external_mapping` | P1-A5 | Azure Table Storage | Cost code → Sage / ERP / Procore mappings (Phase 4+) |
+| `csi_code_external_mapping` | P1-A5 | Azure Table Storage | CSI code → cost code cross-mappings |
+| `cost_code_import_batch` | P1-A5 | Azure Table Storage | Dictionary import provenance |
+| `csi_code_import_batch` | P1-A5 | Azure Table Storage | Dictionary import provenance |
+
+#### Phase 2 Deferred Child Entities (not yet in any storage)
+
+These entities are defined in their governing schemas but are deferred to Phase 2 as separate SharePoint lists. In Phase 1, their function is served by inline fields on parent records.
+
+| Entity | Governing Schema | Phase 1 Inline Alternative | Phase 2 Target |
+|--------|-----------------|---------------------------|----------------|
+| `kickoff_note` | P1-A8 | `notesSummary` on `KickoffRows` | Separate child list for timestamped comment history |
+| `kickoff_evidence_link` | P1-A8 | `currentEvidenceRef` on `KickoffRows` | Separate child list for multi-artifact evidence |
+| `permit_condition` | P1-A9 | `conditionsRaw` JSON on `Permits` | Separate child list for structured conditions |
+| `permit_tag` | P1-A9 | `tagsRaw` JSON on `Permits` | Separate child list for normalized tags |
+| `permit_inspection_issue` | P1-A9 | `issuesRaw` JSON on `PermitInspections` | Separate child list for structured issues |
+| `lesson_keyword` | P1-A13 | `keywordsRaw` on `LessonRecords` | Separate child list for normalized keywords |
+| `lesson_linked_reference` | P1-A13 | `supportingReferenceText` on `LessonRecords` | Separate child list for structured linked refs |
+| `csi_code_description_variant` | P1-A5 | Variant count tracked; primary description on `Shared_CSICodes` | Separate child list for one-to-many description variants |
+| `scorecard_approval` | P1-A12 | Approval fields inline on `SubcontractorScorecards` (future) | Separate child list using Approval pattern |
+| `scorecard_recommendation` | P1-A12 | Recommendation/narrative fields inline on `SubcontractorScorecards` | May remain inline or become child record |
+| `section_score_summary` / `overall_score_summary` | P1-A12 | Derived values computed from criterion scores; may be stored inline | Separate summary records using Summary pattern |
 
 ### A.1 — Shared Dictionaries (Hub Site)
 
@@ -1153,3 +1210,4 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 | 0.7 | 2026-03-17 | Architecture | Reorganized build-ready register into 13 execution-ordered sections. Added 15 new containers: shared dictionaries (9 hub-site + 4 template lists), external financial (2: budget lines + uploads lib), estimating kickoff (2: instances + rows), responsibility matrix (2: instances + assignments), lessons learned (2: reports + records). Total build-ready containers: ~46. |
 | 0.8 | 2026-03-17 | Architecture | Added per-container appendix blocks (A.1–A.13) with 12-point physical schema sequence for all build-ready containers. Covers shared dictionaries (13), project/intake (2), estimating (4), buyout (9), schedule (3), external financial (2), operational register (1), estimating kickoff (2), permits (2), lifecycle checklists (1), responsibility matrix (2), scorecard (2), lessons learned (2). |
 | 0.9 | 2026-03-17 | Architecture | Resolved 3 ambiguous storage cases. (1) kickoff_note: deferred to Phase 2 as separate child list; Phase 1 uses notesSummary field on KickoffRows. (2) schedule ScheduleImportBatches: confirmed as SharePoint list (not Azure Table Storage). (3) budget BudgetImportBatches: added as new SharePoint list + appendix A.6.2 for user-visible import history. Fixed blanket import statement to distinguish findings (Table Storage) from batch metadata (SharePoint where user-visible). |
+| 1.0 | 2026-03-17 | Architecture | Added Non-SharePoint Canonical Entities registry: 8 import finding entities (Azure Table Storage), 7 import batch entities without SharePoint lists, 7 mapping/provenance entities (Azure Table Storage), 11 Phase 2 deferred child entities with Phase 1 inline alternatives documented. Replaces ad-hoc inline notes with comprehensive structured tables. |
