@@ -1238,16 +1238,50 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 
 ## Indexing and Performance Considerations
 
-### Required Indexes
-- Every list must index its `record_id` column (or equivalent primary identifier)
-- Parent foreign key columns (`project_id`, `commitment_id`, `checklist_record_id`) must be indexed on child lists
-- Status/lifecycle columns should be indexed when used as primary filter criteria
-- Lists expected to exceed 5,000 items must have indexed columns for all common query patterns
+> **Status: Frozen.** This section defines the query-pattern-first provisioning strategy for all build-ready containers. Indexes and filtered default views are provisioning-time requirements, not post-deployment optimizations. Per-view column selections and sort orders remain implementation-time details. Adapter-layer query implementation is deferred to P1-B1.
 
-### 5,000-Item Threshold
-- SharePoint lists have a 5,000-item list view threshold
-- Use indexed columns and filtered views to keep query results under threshold
-- For high-volume lists (buyout commitments across large projects), consider partitioning strategies at the adapter layer
+### Baseline Index Requirements (Frozen)
+
+- Every build-ready list MUST have its Row 8 indexes provisioned at list creation time, not deferred to post-deployment optimization
+- Primary identifier column (`recordId` or equivalent) is indexed on every list
+- Parent foreign key columns (`projectId`, `commitmentId`, `checklistRecordId`, etc.) are indexed on every child list
+- Status/lifecycle columns used as primary filter criteria are indexed
+- These are provisioning requirements — the appendix Row 8 specifications per container are the authoritative index set
+
+### Volume Risk Classification
+
+All build-ready containers are classified by their relationship to SharePoint Online's 5,000-item list view threshold:
+
+| Risk Level | Containers | Rationale |
+|---|---|---|
+| **Exceeds threshold (>5,000 items)** | `Shared_CostCodes` (7,565), `Shared_CSICodes` (~6,633) | Already exceed 5,000; all views and queries must use indexed columns |
+| **Threshold-risk (may approach 5,000 over time)** | `ScheduleActivities` (large projects: 1,000+ activities per import), `BudgetLines` (snapshot-append: ~100–500 per batch, accumulates), `BuyoutCommitments` (moderate-high volume on large projects), `ProjectMaster` (hub-site: hundreds to low thousands across all projects) | Require indexed filtered views as operational default |
+| **Moderate volume** | `OperationalRegister`, `Permits`, `LifecycleChecklists`, `EstimateTracking`, `MarketLeads`, `KickoffRows`, `LessonRecords` | Standard indexes sufficient; monitor if volume grows |
+| **Low volume / child records** | All other build-ready containers | Standard indexes per Row 8; no special threshold handling needed |
+
+### 5,000-Item Threshold Strategy (Frozen)
+
+- SharePoint Online enforces a 5,000-item list view threshold — queries returning more than 5,000 unindexed items will be throttled
+- Lists in the "Exceeds threshold" or "Threshold-risk" categories MUST have indexed filtered views as the operational default
+- The standard "All Items" view is acceptable as a navigation entry point only for low-volume lists; for threshold-risk and above, the default view must filter on an indexed column (typically `projectId`, `batchId`, `status`, or equivalent)
+- Hub-site dictionaries exceeding 5,000 items (`Shared_CostCodes`, `Shared_CSICodes`) must have their primary lookup patterns (by code, by division, by hierarchy level) served through indexed filtered views or adapter-layer queries — not unfiltered list scans
+
+### Default View Provisioning Requirements
+
+- Every build-ready list must have a provisioned default view that filters on the most common query dimension (typically `projectId` for project-site lists, or `isActive` for hub-site dictionaries)
+- Threshold-risk and above lists must NOT use an unfiltered "All Items" view as the default
+- Suggested default view patterns:
+  - **Project-site lists:** filter by current project context (inherited from site), sorted by primary status/date column
+  - **Hub-site dictionaries:** filter by `isActive = Yes`, sorted by code or sort order
+  - **Import-related lists:** filter by latest batch (`batchId`), sorted by line/row order
+  - **Child record lists:** filter by parent FK (user navigates from parent context)
+
+### Adapter-Layer Query Routing
+
+- Cross-project aggregation queries (e.g., "all buyout commitments across all projects") must be routed through the adapter layer, not through SharePoint list views — SharePoint views are scoped to a single list on a single site
+- Adapter queries against threshold-risk lists must include indexed filter parameters (e.g., `projectId`, `batchId`) and must not perform unfiltered full-list scans
+- The adapter layer is responsible for pagination, caching, and query optimization when serving data from lists that approach or exceed the threshold
+- This aligns with P1-A2's adapter-resolution model: adapters are the query execution layer, SharePoint views are the user-facing navigation layer
 
 ---
 
@@ -1339,3 +1373,4 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 | 1.8 | 2026-03-17 | Architecture | Froze shared dictionary deployment model: hub-site authoritative, project-site stores stable keys with optional display mirrors, adapter-resolved cross-site reads (no cross-site lookup columns). Annotated 2 cross-site appendix lookup rows (BuyoutCommitments, BudgetLines). Clarified domain-local dictionary provisioning. Fixed 7 stale "pending schema" labels in summary table. Narrowed open decision to population automation only. |
 | 1.9 | 2026-03-17 | Architecture | Froze financial-sensitive data security model: list-level permission isolation via Financial Domain Team and Compliance Team SharePoint groups, service-layer enforcement mirrors the same boundary, UI/view-only conventions explicitly rejected as sole mechanism, item-level permissions rejected as default model. Standardized security terminology across 9 container appendices and 9 register entries. Narrowed open decision to group provisioning and adapter authorization mechanics. |
 | 2.0 | 2026-03-17 | Architecture | Froze content type strategy: three hub-level types (HBBaseListItem, HBDocumentItem, HBDictionaryItem) published through Content Type Gallery cover all Phase 1 containers; no domain-specific content types needed for Phase 1; paired libraries evaluate per-domain when deferred domains become build-ready; template governance at schema level not content-type level. Fixed HBDocumentItem "Used By" to reflect Phase 1 reality. Separated document library versioning rules into Phase 1 build-ready vs future guidance. Narrowed open decision to per-domain evaluation for future paired libraries. |
+| 2.1 | 2026-03-17 | Architecture | Froze indexing and query-pattern strategy: query-pattern-first provisioning (indexes at creation time, not deferred), volume risk classification for all build-ready containers, 5,000-item threshold strategy for hub-site dictionaries (CostCodes, CSICodes) and threshold-risk project-site lists, default view provisioning requirements (filtered, index-aligned), adapter-layer query routing expectations for cross-project aggregation and threshold-risk lists. |
