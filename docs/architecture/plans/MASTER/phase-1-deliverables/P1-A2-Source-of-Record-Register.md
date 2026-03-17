@@ -3,7 +3,7 @@
 **Document ID:** P1-A2
 **Phase:** 1 (Foundation)
 **Classification:** Internal — Architecture
-**Status:** Draft — Entity-level coverage complete for all Phase 1 domains (A4–A14)
+**Status:** Draft — Entity-level coverage complete for all Phase 1 domains (A4–A15)
 **Date:** 2026-03-17
 **References:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md), [package-relationship-map.md](../../blueprint/package-relationship-map.md)
 
@@ -425,9 +425,30 @@ P1-A14 defines 5 canonical entities for the leads and pipeline domain — two en
 
 P1-A3 stores lead data across 2 Sales/BD-site SharePoint lists: `MarketLeads` for market lead records with tag child records, and `PipelineSnapshots` for pipeline snapshot records with JSON-embedded aggregate data. Import batches and findings reside in Azure Table Storage. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
 
+### Prime contracts domain (P1-A15)
+
+P1-A15 defines 3 canonical entities for owner/client-facing prime contracts — the top-level contractual agreements between the general contractor and the project owner. The source data is Procore-originated; canonical identity is a surrogate `contract_id` (not the Procore `project_id`, which is preserved as `source_project_id` for federation). Financial fields include a mix of authoritative values (original amount, approved/pending/draft COs, invoiced, payments) and derived values (revised amount, % paid, remaining balance). Owner/client contact follows frozen Class H (vendor/party) pattern; primary contact follows Class G (person-attribution).
+
+#### Project execution records (project site)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `prime_contract` | execution | SharePoint List (`PrimeContracts`, project site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `contract_id` (surrogate); `contract_number` natural key (unique) | Class A | list-by-project, filter-by-status, filter-by-erp-status, get-by-id, get-by-contract-number | Yes (5 min) | Fully mutable; status transitions not enforced as forward-only (imported state may arrive in any order); `owner_client_display` and `primary_contact_display` always preserved; `owner_client_key` and `primary_contact_key` updated on resolution; derived financial fields revalidated on import; `source_project_id` never overwritten | Last-write-wins with `updated_at` timestamp; derivation mismatches logged as import findings | Project team / import service | 1 |
+
+#### Operational state (non-SharePoint)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `contract_import_batch` | operational | Azure Table Storage | AF v4 → `@azure/data-tables` | `batch_id` (surrogate, unique per import) | Class D | get-by-id, list-by-project | No | Status progresses forward only (pending → parsing → complete/failed); immutable after completion | No conflict; each import creates a new `batch_id` | Import service | 1 |
+| `contract_import_finding` | operational (audit) | Azure Table Storage (`partition: contract-findings-{batchId}`) | AF v4 → `@azure/data-tables` | `finding_id` (surrogate); `(batch_id, finding_id)` composite context | Class D | list-by-batch | No | Append-only; immutable once logged; severity (error/warning/info); category includes `derivation_mismatch` for financial field validation | No conflict; new imports create new findings per batch | Import service | 1 |
+
+#### A3 physical compression note
+
+P1-A3 stores prime contracts in a single project-site SharePoint list (`PrimeContracts`). No paired document library is needed in Phase 1 — the source data contains no attachments. A library may be added in Phase 2 when contract document management is sourced. Import batches and findings reside in Azure Table Storage. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
+
 ### Phase 1 entity-level coverage complete
 
-All Phase 1 domain schemas (A4–A14) now have entity-level SoR coverage in this register. No domains remain pending.
+All Phase 1 domain schemas (A4–A15) now have entity-level SoR coverage in this register. No domains remain pending.
 
 ---
 
@@ -730,8 +751,8 @@ Azure Table Storage is the designated storage platform for operational and prove
 - **Lifecycle:** Import service creates; system retains indefinitely for audit; no user delete
 
 **Entities in this tier across domains:**
-- Import batch records: `schedule_import_batch`, `budget_import_batch`, `kickoff_import_batch`, `checklist_import_batch`, `responsibility_import_batch`, `scorecard_import_batch`, `lessons_import_batch`, `cost_code_import_batch`, `csi_code_import_batch`, `register_import_batch`, `permit_import_batch`, `lead_import_batch`
-- Import finding records: `import_finding` (schedule), `budget_import_finding`, `scorecard_import_finding`, `lessons_import_finding`, `register_import_finding`, `permit_import_finding`, `lead_import_finding`
+- Import batch records: `schedule_import_batch`, `budget_import_batch`, `kickoff_import_batch`, `checklist_import_batch`, `responsibility_import_batch`, `scorecard_import_batch`, `lessons_import_batch`, `cost_code_import_batch`, `csi_code_import_batch`, `register_import_batch`, `permit_import_batch`, `lead_import_batch`, `contract_import_batch`
+- Import finding records: `import_finding` (schedule), `budget_import_finding`, `scorecard_import_finding`, `lessons_import_finding`, `register_import_finding`, `permit_import_finding`, `lead_import_finding`, `contract_import_finding`
 - External mapping records: `budget_line_external_mapping`
 - System state: provisioning state, audit log, project identity mapping
 
@@ -760,7 +781,7 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 - [x] **Child records have stable surrogate IDs with required FK to parent.** All child entities (`kickoff_row`, `lesson_record`, `lesson_keyword`, `checklist_item`, etc.) have their own `*_id` with FK to parent.
 - [x] **Junction records have explicit composite natural keys.** `responsibility_assignment` and `criterion_score_record` have documented composite keys with uniqueness at the tuple level.
 - [x] **Field naming follows frozen suffix conventions.** `*_id`, `*_key`, `*_display`, `source_*`, `batch_id`, `created_by`/`uploaded_by`/`approved_by` suffixes are used consistently.
-- [x] **All Phase 1 domains (A4–A14) have identity class assignments.** Entity-level rows cover A4, A5, A6, A7, A8, A10, A11, A12, A13, A14 with frozen identity classes.
+- [x] **All Phase 1 domains (A4–A15) have identity class assignments.** Entity-level rows cover A4, A5, A6, A7, A8, A10, A11, A12, A13, A14, A15 with frozen identity classes.
 
 ---
 
@@ -782,4 +803,5 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 | 1.2 | 2026-03-17 | Architecture | Add entity-level operational register domain (P1-A7): 4 entities — `register_record` (Class A), `register_record_external_mapping` (Class A), `register_import_batch` (Class D), `register_import_finding` (Class D); assignee identity frozen as Class G (UPN when resolved, nullable when unresolved, display always preserved); update non-SharePoint operational state enumeration; update remaining domains to A9 only |
 | 1.3 | 2026-03-17 | Architecture | Add entity-level permits & inspections domain (P1-A9): 7 entities — `permit_record` (Class A), `permit_condition` (Class A), `permit_tag` (Class A), `permit_inspection` (Class A), `permit_inspection_issue` (Class A), `permit_import_batch` (Class D), `permit_import_finding` (Class D); contact identity frozen (`authority_contact_key` Class H, `inspector_contact_key` Class G); complete Phase 1 entity-level SoR coverage for all domains (A4–A13); identity validation checklist fully checked |
 | 1.4 | 2026-03-17 | Architecture | Add entity-level leads domain (P1-A14): 5 entities — `market_lead` (Class A), `market_lead_tag` (Class A), `pipeline_snapshot` (Class A), `lead_import_batch` (Class D), `lead_import_finding` (Class D); matched rep identity frozen as Class G; pipeline nested structures stored as flattened JSON; extend coverage to A4–A14 |
+| 1.5 | 2026-03-17 | Architecture | Add entity-level prime contracts domain (P1-A15): 3 entities — `prime_contract` (Class A), `contract_import_batch` (Class D), `contract_import_finding` (Class D); canonical identity frozen as surrogate `contract_id` with `contract_number` natural key and `source_project_id` for Procore federation; financial field classification (authoritative vs derived); owner/client contact as Class H, primary contact as Class G; extend coverage to A4–A15 |
 
