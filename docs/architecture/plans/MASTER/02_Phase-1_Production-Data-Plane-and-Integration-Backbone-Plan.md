@@ -63,6 +63,7 @@ At the end of Phase 1:
 - Estimating kickoff schema (template-based pursuit coordination and deliverable assembly)
 - Permits & inspections schema (permit lifecycle, inspections, issues, compliance tracking)
 - Project lifecycle checklist schema (unified startup/safety/closeout checklists)
+- Responsibility matrix schema (governed task-role assignment with project tailoring)
 
 ### 6.2 Workstream B — Adapter Completion
 **Goal:** complete production-capable repository adapters.
@@ -150,6 +151,7 @@ Mandatory deliverables for Phase 1:
 - Estimating Kickoff Schema (template-based pursuit coordination and deliverable assembly)
 - Permits & Inspections Schema (permit lifecycle, inspections, issues, compliance tracking)
 - Project Lifecycle Checklist Schema (unified startup/safety/closeout checklists)
+- Responsibility Matrix Schema (governed task-role assignment with project tailoring)
 - Adapter Completion Backlog and Status Tracker
 - Service Contract Catalog
 - Error / Retry / Recovery Design Note
