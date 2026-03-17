@@ -207,7 +207,8 @@ Containers are organized by execution dependency order. All containers below are
 | Domain | Entity | Logical Container Name | Physical Container Name | Container Type | Scope | Purpose | Primary Record Type | Parent / Related Container | Key Columns / Required Fields | Lookup / Join Dependencies | Document Pairing Pattern | Versioning Requirement | Indexing / Scale Notes | Provisioning Requirement | Security / Visibility Notes | Related Adapter / Package Owner | Notes |
 |--------|--------|------------------------|-------------------------|----------------|-------|---------|--------------------|-----------------------------|-------------------------------|---------------------------|--------------------------|------------------------|------------------------|--------------------------|----------------------------|--------------------------------|-------|
 | financial | budget_line | Budget Lines | `BudgetLines` | List | Project Site | Canonical Procore budget line items with parsed dimensions and 14 financial metrics | Budget line | ProjectMaster (project_id FK) | line_id, batch_id, project_id, budget_code | — | — | Major versions | Index: batch_id, project_id, budget_code; ~100–500 lines per import | Created during project site provisioning | Project team scoped; financial fields confidential | @hbc/data-access | Build-ready. CT: `HBBaseListItem`. P1-A6 governs 4 canonical entities. Snapshot-append model. |
-| financial | _budget uploads_ | Budget Uploads Library | `BudgetUploadsLib` | Document Library | Project Site | Raw uploaded Procore budget CSV files retained for provenance | Budget file | ProjectMaster (project_id FK) | file name, upload_date, source_system | — | Paired with BudgetLines (batch_id) | Major versions | Low volume | Created during project site provisioning | Project team scoped | @hbc/data-access | Build-ready. CT: `HBDocumentItem`. Raw source files. |
+| financial | budget_import_batch | Budget Import Batches | `BudgetImportBatches` | List | Project Site | Import batch tracking for Procore budget file uploads | Import batch | ProjectMaster (project_id FK) | batchId, projectId, sourceSystem, importStatus | — | — | Major versions | Index: projectId, importStatus; low volume | Created during project site provisioning | Project team scoped | @hbc/data-access | Build-ready. CT: `HBBaseListItem`. P1-A6 governs. SharePoint for user-visible import history. |
+| financial | _budget uploads_ | Budget Uploads Library | `BudgetUploadsLib` | Document Library | Project Site | Raw uploaded Procore budget CSV files retained for provenance | Budget file | ProjectMaster (project_id FK) | file name, upload_date, source_system | — | Paired with BudgetImportBatches (batch_id) | Major versions | Low volume | Created during project site provisioning | Project team scoped | @hbc/data-access | Build-ready. CT: `HBDocumentItem`. Raw source files. |
 
 #### 7. Operational Register (P1-A7)
 
@@ -276,7 +277,11 @@ Platform containers for auth, provisioning state, audit log, and project identit
 
 Each appendix follows the standard 12-point sequence. All containers inherit shared site columns from `HBBaseListItem` (recordId, projectId, createdAt, updatedAt, createdBy, isActive, notes, sourceBatchId, sourceRowNumber) unless noted otherwise. Only domain-specific columns are listed below.
 
-**Import findings and import batch metadata** for all imported data are stored in **Azure Table Storage** per P1-A1/A2 storage boundary — not in SharePoint lists. They are not given container appendices here.
+**Import findings** (parse errors, validation warnings, derivation mismatches) for all imported data are stored in **Azure Table Storage** per P1-A1/A2 storage boundary — not in SharePoint lists. They are not given container appendices here.
+
+**Import batch metadata** (batch ID, source file, import status, timestamps, row counts) is stored in **SharePoint lists** for user-visible import history and project-level tracking. Schedule import batches (`ScheduleImportBatches`) and budget import batches (`BudgetImportBatches`) each have their own SharePoint list and appendix block below. Other domain import batches (operational register, permits, checklists, scorecards, lessons learned) use the same adapter-layer batch tracking in their respective list's `sourceBatchId` field, with full batch records in Azure Table Storage.
+
+**Kickoff notes history** (`kickoff_note` in P1-A8) is deferred as a separate child entity to Phase 2. In Phase 1, current notes are stored as the `notesSummary` field on `KickoffRows`. The `kickoff_evidence_link` child entity similarly uses the `currentEvidenceRef` field on `KickoffRows` for Phase 1, with structured child link records deferred to Phase 2.
 
 ### A.1 — Shared Dictionaries (Hub Site)
 
@@ -661,7 +666,19 @@ These 7 dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, C
 | 9–11 | Standard | Major versions / Financial confidential / Project site provisioning |
 | 12 | Governing Schema | P1-A6 budget_line entity (4 canonical entities). Snapshot-append model. |
 
-#### A.6.2 `BudgetUploadsLib`
+#### A.6.2 `BudgetImportBatches`
+
+| # | Property | Value |
+|---|----------|-------|
+| 1–4 | Standard | Project Site / List / `BudgetImportBatches` / `HBBaseListItem` |
+| 5 | Required Columns | `batchId` (Text), `projectId` (Text), `sourceSystem` (Text), `sourceFileName` (Text), `importStatus` (Choice: pending/parsing/validating/complete/failed), `uploadedBy` (Text), `uploadedAt` (DateTime) |
+| 6 | Optional Columns | `snapshotDate` (Date), `totalLinesImported` (Number), `totalLinesExcluded` (Number), `totalWarnings` (Number), `totalErrors` (Number), `totalDerivationMismatches` (Number), `completedAt` (DateTime), `importedTotalPotentialCostImpact` (Number), `importedTotalPotentialDelayDays` (Number), `parserVersion` (Text), `batchNotes` (Multi-line) |
+| 7 | Lookups | — |
+| 8 | Indexes | `projectId`, `importStatus` |
+| 9–11 | Standard | Major versions / Project team; financial confidential / Project site provisioning |
+| 12 | Governing Schema | P1-A6 budget_import_batch entity. **Storage decision:** SharePoint list for user-visible import history and snapshot tracking. Import *findings* remain in Azure Table Storage. |
+
+#### A.6.3 `BudgetUploadsLib`
 
 | # | Property | Value |
 |---|----------|-------|
@@ -711,7 +728,7 @@ These 7 dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, C
 | 7 | Lookups | `instanceId` → KickoffInstances |
 | 8 | Indexes | `instanceId`, `rowType`, `statusCode` |
 | 9–11 | Standard | Major versions / Project team / Project site provisioning |
-| 12 | Governing Schema | P1-A8 kickoff_row entity (3 row subtypes) |
+| 12 | Governing Schema | P1-A8 kickoff_row entity (3 row subtypes). **Storage note:** `kickoff_note` (timestamped comment history) and `kickoff_evidence_link` (multi-artifact links) are P1-A8 child entities deferred to Phase 2 as separate SharePoint lists. In Phase 1, `notesSummary` and `currentEvidenceRef` fields on this list serve as current-state equivalents. |
 
 ### A.9 — Permits & Inspections
 
@@ -1134,4 +1151,5 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 | 0.5 | 2026-03-17 | Architecture | Applied naming conventions: replaced all `_pending schema approval_` Physical Container Names with PascalCase names (24 build-ready containers). Changed deferred container names to `_deferred_` to distinguish from build-ready scope. |
 | 0.6 | 2026-03-17 | Architecture | Completed physical-schema treatment for 15 Wave 1 seeded containers (project, estimating, buyout). Added content type references, build-ready status, and field counts to Notes. Updated section status from pending to build-ready framing. Column appendices remain next step. |
 | 0.7 | 2026-03-17 | Architecture | Reorganized build-ready register into 13 execution-ordered sections. Added 15 new containers: shared dictionaries (9 hub-site + 4 template lists), external financial (2: budget lines + uploads lib), estimating kickoff (2: instances + rows), responsibility matrix (2: instances + assignments), lessons learned (2: reports + records). Total build-ready containers: ~46. |
-| 0.8 | 2026-03-17 | Architecture | Added per-container appendix blocks (A.1–A.13) with 12-point physical schema sequence for all build-ready containers. Covers shared dictionaries (13), project/intake (2), estimating (4), buyout (9), schedule (3), external financial (2), operational register (1), estimating kickoff (2), permits (2), lifecycle checklists (1), responsibility matrix (2), scorecard (2), lessons learned (2). Import findings/batch metadata confirmed as Azure Table Storage (not SharePoint). |
+| 0.8 | 2026-03-17 | Architecture | Added per-container appendix blocks (A.1–A.13) with 12-point physical schema sequence for all build-ready containers. Covers shared dictionaries (13), project/intake (2), estimating (4), buyout (9), schedule (3), external financial (2), operational register (1), estimating kickoff (2), permits (2), lifecycle checklists (1), responsibility matrix (2), scorecard (2), lessons learned (2). |
+| 0.9 | 2026-03-17 | Architecture | Resolved 3 ambiguous storage cases. (1) kickoff_note: deferred to Phase 2 as separate child list; Phase 1 uses notesSummary field on KickoffRows. (2) schedule ScheduleImportBatches: confirmed as SharePoint list (not Azure Table Storage). (3) budget BudgetImportBatches: added as new SharePoint list + appendix A.6.2 for user-visible import history. Fixed blanket import statement to distinguish findings (Table Storage) from batch metadata (SharePoint where user-visible). |
