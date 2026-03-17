@@ -220,6 +220,103 @@ Until these operational dependencies are met, proxy mode will authenticate and c
 
 ---
 
+## Test Strategy
+
+### Current State
+
+`@hbc/data-access` currently has **no test infrastructure**: no `test` script, no vitest config, and no test files. Only `check-types` (`tsc --noEmit`), `lint` (`eslint`), and `build` (`tsc`) scripts exist. Task 0 below must be completed before any test commands in this plan become runnable.
+
+### B1 Test Tiers
+
+**Tier 1 — Unit tests (owned by B1):**
+- `ProxyHttpClient`: mocked global `fetch`, error translation, Bearer header injection, timeout behavior, request tracing
+- `ProxyBaseRepository`: path building, project-scoped path building, query param marshaling, paginated response mapping
+- All 11 repository adapters: mocked `httpClient` via `vi.spyOn`, method delegation, domain-specific error handling
+- These tests use `vi.stubGlobal('fetch', mockFetch)` or `vi.spyOn(httpClient, method)` — no network calls
+
+**Tier 2 — Integration tests (owned by B1):**
+- Factory wiring: `setProxyContext` → `createLeadRepository('proxy')` → method call with mocked fetch
+- Verifies lazy `ProxyHttpClient` singleton, token provider per-request calls, cross-repository HTTP client reuse
+- Uses mocked `fetch` — no real backend required
+
+**NOT B1 scope (owned by P1-E1):**
+- Contract validation against Zod schemas
+- MSW v2 handler tests simulating real backend behavior
+- Response shape conformance checks between frontend expectations and backend output
+- B1 tests verify adapter behavior against manually mocked responses, not against real or simulated backend contracts
+
+### Verification Command Reference
+
+After Task 0 is complete, these commands become available:
+
+| Command | What It Validates |
+|---|---|
+| `pnpm --filter @hbc/data-access test` | Run all vitest tests in the package |
+| `pnpm --filter @hbc/data-access test -- http-client` | Run tests matching "http-client" |
+| `pnpm --filter @hbc/data-access check-types` | TypeScript type checking (available now) |
+| `pnpm --filter @hbc/data-access lint` | ESLint (available now) |
+| `pnpm --filter @hbc/data-access build` | TypeScript compilation (available now) |
+
+---
+
+## Chunk 0: Test Infrastructure Prerequisite
+
+### Task 0: Set up vitest for `@hbc/data-access`
+
+**Prerequisite for all subsequent tasks.** This task must be completed before any test commands in this plan are runnable.
+
+**Steps:**
+
+1. Add vitest as a dev dependency (already available in workspace — reference existing vitest config from another tested package like `@hbc/auth`):
+
+```bash
+pnpm --filter @hbc/data-access add -D vitest
+```
+
+2. Create `packages/data-access/vitest.config.ts`:
+
+```typescript
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'node',
+    include: ['src/**/*.test.ts'],
+  },
+});
+```
+
+3. Add `test` script to `packages/data-access/package.json`:
+
+```json
+"scripts": {
+  "build": "tsc --project tsconfig.json",
+  "check-types": "tsc --noEmit",
+  "lint": "eslint src/ --ext .ts,.tsx",
+  "test": "vitest run"
+}
+```
+
+4. Add `@hbc/data-access` to the root `package.json` test filter so workspace-level `pnpm test` includes it.
+
+**Verification:**
+
+```bash
+# These commands are available now (no Task 0 needed):
+pnpm --filter @hbc/data-access check-types
+pnpm --filter @hbc/data-access lint
+
+# After Task 0 — verify vitest runs (will show 0 tests initially):
+pnpm --filter @hbc/data-access test
+# Expected: vitest runs successfully with 0 test suites
+
+# Commit:
+# git commit -m "chore: add vitest test infrastructure to @hbc/data-access"
+```
+
+---
+
 ## Chunk 1: HTTP Client Foundation (≈450 lines)
 
 ### Task 1: Create `ProxyHttpClient` class
@@ -730,8 +827,9 @@ describe('ProxyHttpClient', () => {
 **Verification:**
 
 ```bash
-# Run tests for the HTTP client
-pnpm --filter @hbc/data-access test http-client.test.ts
+# Requires: Task 0 (vitest setup) completed first
+pnpm --filter @hbc/data-access test -- http-client
+pnpm --filter @hbc/data-access check-types
 
 # Expected: All 12+ tests pass, no type errors
 # Commit: git commit -m "feat: create ProxyHttpClient with full error translation and header injection"
@@ -1021,8 +1119,9 @@ describe('ProxyBaseRepository', () => {
 **Verification:**
 
 ```bash
-# Run tests for proxy base
-pnpm --filter @hbc/data-access test proxy-base.test.ts
+# Requires: Task 0 (vitest setup) completed first
+pnpm --filter @hbc/data-access test -- proxy-base
+pnpm --filter @hbc/data-access check-types
 
 # Expected: All 12+ tests pass
 # Commit: git commit -m "feat: create ProxyBaseRepository with path building and query marshaling"
@@ -1367,8 +1466,9 @@ describe('ProxyLeadRepository', () => {
 **Verification:**
 
 ```bash
-# Run lead repository tests
-pnpm --filter @hbc/data-access test lead-repository.test.ts
+# Requires: Task 0 (vitest setup) completed first
+pnpm --filter @hbc/data-access test -- lead-repository
+pnpm --filter @hbc/data-access check-types
 
 # Expected: All 13+ tests pass
 # Commit: git commit -m "feat: implement ProxyLeadRepository with full CRUD and search"
@@ -1484,7 +1584,9 @@ export class ProxyProjectRepository
 **Verification:**
 
 ```bash
-pnpm --filter @hbc/data-access test project-repository.test.ts
+# Requires: Task 0 (vitest setup) completed first
+pnpm --filter @hbc/data-access test -- project-repository
+pnpm --filter @hbc/data-access check-types
 
 # Expected: All tests pass
 # Commit: git commit -m "feat: implement ProxyProjectRepository with domain-specific methods"
@@ -1746,13 +1848,13 @@ Implementation follows the same project-scoped pattern as Schedule above, substi
 **Verification:**
 
 ```bash
-# Test all three in one pass
-pnpm --filter @hbc/data-access test \
-  estimating-repository.test.ts \
-  schedule-repository.test.ts \
-  buyout-repository.test.ts
+# Requires: Task 0 (vitest setup) completed first
+pnpm --filter @hbc/data-access test -- estimating-repository
+pnpm --filter @hbc/data-access test -- schedule-repository
+pnpm --filter @hbc/data-access test -- buyout-repository
+pnpm --filter @hbc/data-access check-types
 
-# Expected: 30+ tests pass
+# Expected: 30+ tests pass across all three
 # Commit (one per repo):
 git commit -m "feat: implement ProxyEstimatingRepository with tracker and kickoff methods"
 git commit -m "feat: implement ProxyScheduleRepository with project-scoped activities and metrics"
@@ -1788,12 +1890,13 @@ Project-scoped. Manages `IRiskCostItem` + `IRiskCostManagement`. Methods: `getIt
 **Verification:**
 
 ```bash
-pnpm --filter @hbc/data-access test \
-  compliance-repository.test.ts \
-  contract-repository.test.ts \
-  risk-repository.test.ts
+# Requires: Task 0 (vitest setup) completed first
+pnpm --filter @hbc/data-access test -- compliance-repository
+pnpm --filter @hbc/data-access test -- contract-repository
+pnpm --filter @hbc/data-access test -- risk-repository
+pnpm --filter @hbc/data-access check-types
 
-# Expected: 30+ tests pass
+# Expected: 30+ tests pass across all three
 # Commits (one per repo):
 git commit -m "feat: implement ProxyComplianceRepository with project-scoped entries and summary"
 git commit -m "feat: implement ProxyContractRepository with contracts and approval sub-resource"
@@ -1923,12 +2026,13 @@ export class ProxyAuthRepository
 **Verification:**
 
 ```bash
-pnpm --filter @hbc/data-access test \
-  scorecard-repository.test.ts \
-  pmp-repository.test.ts \
-  auth-repository.test.ts
+# Requires: Task 0 (vitest setup) completed first
+pnpm --filter @hbc/data-access test -- scorecard-repository
+pnpm --filter @hbc/data-access test -- pmp-repository
+pnpm --filter @hbc/data-access test -- auth-repository
+pnpm --filter @hbc/data-access check-types
 
-# Expected: 30+ tests pass
+# Expected: 30+ tests pass across all three
 # Commits:
 git commit -m "feat: implement ProxyScorecardRepository with project-scoped scorecards and versions"
 git commit -m "feat: implement ProxyPmpRepository with project-scoped plans and signatures"
@@ -2244,13 +2348,11 @@ export function createAuthRepository(mode?: AdapterMode): IAuthRepository {
 **Verification:**
 
 ```bash
-# Type check factory wiring
+# These commands are available now (no Task 0 needed):
 pnpm --filter @hbc/data-access check-types
-
-# Lint
 pnpm --filter @hbc/data-access lint
 
-# Expected: no errors
+# Expected: no type errors, no lint errors
 # Commit: git commit -m "feat: wire proxy repositories into factory, export ProxyHttpClient"
 ```
 
@@ -2445,8 +2547,9 @@ describe('Proxy Adapter Integration', () => {
 **Verification:**
 
 ```bash
-# Run integration tests
-pnpm --filter @hbc/data-access test proxy-integration.test.ts
+# Requires: Task 0 (vitest setup) completed first
+pnpm --filter @hbc/data-access test -- proxy-integration
+pnpm --filter @hbc/data-access check-types
 
 # Expected: All 8+ tests pass
 # Commit: git commit -m "feat: add integration tests for proxy adapter factory wiring"
@@ -2458,23 +2561,16 @@ pnpm --filter @hbc/data-access test proxy-integration.test.ts
 
 **Steps:**
 
-1. **Run package tests:**
+1. **Run package tests** (requires Task 0 completed):
 
 ```bash
 # Full data-access test suite
 pnpm --filter @hbc/data-access test
 
-# Expected output:
-# PASS packages/data-access/src/adapters/proxy/http-client.test.ts (14 tests)
-# PASS packages/data-access/src/adapters/proxy/proxy-base.test.ts (7 tests)
-# PASS packages/data-access/src/adapters/proxy/lead-repository.test.ts (13 tests)
-# PASS packages/data-access/src/adapters/proxy/project-repository.test.ts (13 tests)
-# ... (remaining 6 repositories)
-# PASS packages/data-access/src/adapters/proxy/proxy-integration.test.ts (8 tests)
-# ✓ All tests pass (100+ total)
+# Expected: 100+ tests pass across all proxy adapter test files
 ```
 
-2. **Type check:**
+2. **Type check** (available now):
 
 ```bash
 pnpm --filter @hbc/data-access check-types
@@ -2482,7 +2578,7 @@ pnpm --filter @hbc/data-access check-types
 # Expected: no errors
 ```
 
-3. **Lint:**
+3. **Lint** (available now):
 
 ```bash
 pnpm --filter @hbc/data-access lint
@@ -2511,19 +2607,19 @@ git commit -m "feat: complete proxy adapter implementation - all 11 repositories
 - 11 domain repositories: Lead, Project, Estimating, Schedule, Buyout,
   Compliance, Contract, Risk, Scorecard, PMP, Auth
 - Factory integration: setProxyContext() initialization, lazy HttpClient singleton
-- 100+ tests covering domain-specific methods, pagination, error handling
+- 100+ tests covering domain-specific methods, pagination, error handling (B1 adapter tests with mocked fetch — not E1 contract validation)
 - Integration tests verifying end-to-end factory wiring"
 ```
 
 **Final verification command:**
 
 ```bash
-# Run entire data-access package validation
+# Full package validation (requires Task 0 completed for test command)
 pnpm --filter @hbc/data-access test && \
 pnpm --filter @hbc/data-access check-types && \
 pnpm --filter @hbc/data-access lint
 
-# Expected: all checks pass, ~100 tests, 0 type errors, 0 lint errors
+# Expected: ~100 tests pass, 0 type errors, 0 lint errors
 ```
 
 ---
@@ -2720,8 +2816,9 @@ These discrepancies do NOT block B1 implementation because all B1 tests use mock
 
 ## Summary
 
-This plan delivers a production-ready proxy adapter across **10 sequential tasks**, organized into **4 focused chunks**:
+This plan delivers a production-ready proxy adapter across **11 sequential tasks** (Task 0–10), organized into **5 focused chunks**:
 
+- **Chunk 0:** Test infrastructure prerequisite (vitest setup for @hbc/data-access)
 - **Chunk 1:** HTTP client + base repository (~450 lines)
 - **Chunk 2:** Lead + Project repositories (~550 lines)
 - **Chunk 3:** Remaining 9 domain repositories (~700 lines + commit statements)
