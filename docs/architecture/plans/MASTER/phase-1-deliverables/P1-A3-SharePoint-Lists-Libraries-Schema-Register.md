@@ -1037,10 +1037,33 @@ Map P1-A1 data types to SharePoint column types:
 | `json` | Multiple Lines of Text (Plain) | Store as JSON; parse in adapter layer |
 | `choice` / controlled value | Choice | Populate choice values from P1-A1 controlled-value sets |
 
-### Content Type Rules
-- Use the default Item content type for most lists
-- Create custom content types only when a list stores multiple distinct record types
-- Document libraries should use custom content types to enforce required metadata columns
+### Content Type Strategy (Frozen)
+
+> **Status: Frozen.** This subsection defines when centralized, domain-specific, or list-local content types are appropriate.
+
+**Phase 1 content types.** Three hub-level content types, published through the Content Type Gallery, cover all Phase 1 build-ready containers:
+
+- `HBBaseListItem` (Item-based) — all transactional and operational lists
+- `HBDocumentItem` (Document-based) — all document libraries
+- `HBDictionaryItem` (Item-based) — all shared and domain-local dictionary lists
+
+No domain-specific content types are required for Phase 1. All Phase 1 lists use `HBBaseListItem`; all Phase 1 document libraries use `HBDocumentItem` with list-local metadata columns; all dictionary lists use `HBDictionaryItem`.
+
+**When centralized content types are required.** Use the Content Type Gallery to publish centralized content types when:
+- a content type is reused across multiple sites (the three hub-level types above),
+- a future document library requires enforced metadata columns beyond what `HBDocumentItem` provides, or
+- a repeating document class emerges across multiple project sites (e.g., a governed PMP document type).
+
+**When list-local schema is sufficient.** Do not create centralized or domain-specific content types when:
+- a list stores a single record type (most Phase 1 lists),
+- metadata requirements are met by list-local columns without content-type enforcement, or
+- the content type would serve only one list on one site.
+
+**Paired library pattern.** When a domain uses a paired container (list + library), the list uses `HBBaseListItem` and the library evaluates whether `HBDocumentItem` with list-local metadata is sufficient or whether a domain-specific document content type with enforced metadata should be published through the Content Type Gallery. Phase 1 build-ready paired libraries (`ScheduleUploadsLib`, `BudgetUploadsLib`) use `HBDocumentItem` with list-local metadata — no domain-specific document content types are needed.
+
+**Template-driven domains.** Hub-site template lists (`Shared_KickoffTemplates`, `Shared_ChecklistTemplates`, `Shared_ResponsibilityTemplates`, `Shared_ScorecardRubrics`) use `HBDictionaryItem`. Project-site instance/record lists use `HBBaseListItem`. Template governance is enforced at the schema level by domain schema artifacts (P1-A8 through P1-A13), not through domain-specific content types. This is sufficient because template structure is controlled by the governing schema, not by SharePoint content type enforcement.
+
+**What remains open.** When deferred paired libraries (PMP, future compliance/contract document libraries) become build-ready, their schema artifacts must declare whether `HBDocumentItem` is sufficient or a domain-specific document content type is warranted. This is evaluated per-domain, not pre-decided globally.
 
 ---
 
@@ -1069,8 +1092,10 @@ These columns appear on most or all Phase 1 lists and should be provisioned as s
 | Content Type | Base Type | Scope | Used By |
 |-------------|-----------|-------|---------|
 | `HBBaseListItem` | Item | Hub + Project Site | All Phase 1 lists; includes shared site columns above |
-| `HBDocumentItem` | Document | Project Site | Schedule uploads, compliance documents, contract documents |
+| `HBDocumentItem` | Document | Project Site | Schedule uploads (`ScheduleUploadsLib`), budget uploads (`BudgetUploadsLib`); future document libraries evaluate per §Content Type Strategy |
 | `HBDictionaryItem` | Item | Hub Site | All shared and domain-local dictionary lists |
+
+All three content types are published through the Content Type Gallery at the hub-site level and inherited by project sites during provisioning.
 
 ### Shared Dictionaries (Governed by P1-A5)
 
@@ -1255,8 +1280,9 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 - Milestone and checklist item lists (no revision pattern) do not require versioning
 
 ### Document Libraries
-- Enable major + minor versions for contract and compliance document libraries
-- PMP libraries should use major versions only (published versions)
+- Phase 1 build-ready libraries (`ScheduleUploadsLib`, `BudgetUploadsLib`): enable major versions only (upload provenance files, not collaboratively edited)
+- Future contract and compliance document libraries (when build-ready): enable major + minor versions
+- Future PMP libraries (when build-ready): major versions only (published versions)
 - Set version limit per organizational retention policy (recommended: 50 major versions for active documents)
 
 ---
@@ -1271,7 +1297,7 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 |----------|-------|-------|--------|---------------|
 | **Shared dictionary population automation** | How hub-site dictionary lists are initially populated (CSV upload, PnP provisioning, manual entry) and how dictionary content updates are applied to hub-site lists over time. Deployment architecture (hub-site authoritative, project-site adapter-resolved) is frozen in §Lookup and Reference Strategy | Platform Architecture + DevOps | Phase 1 (implementation) | Deployment architecture frozen (v1.8); automation tooling choice remains an implementation decision |
 | **Financial-sensitive data access model** | Group provisioning mechanics (how Financial Domain Team and Compliance Team SharePoint groups are created and populated per project site) and adapter authorization implementation (how adapters validate group membership at runtime). Security architecture (list-level isolation via restricted SharePoint groups, service-layer mirroring) is frozen in §Permissions and Inheritance Notes | Platform Architecture + Security | Phase 1 (implementation) | Security architecture frozen (v1.9); group provisioning mechanics and adapter authorization implementation remain |
-| **Content type strategy for deferred paired containers** | Custom content types for contracts, PMP, and compliance document libraries (currently deferred domains) — whether to use standard `HBDocumentItem` or domain-specific content types with enforced metadata | Platform Architecture | When deferred domains become build-ready | Build-ready domains resolved; deferred paired containers (contracts + library, PMP + library) still need content type decisions when their schemas are completed |
+| **Content type evaluation for future paired libraries** | When deferred paired-library domains (PMP, future compliance/contract document libraries) become build-ready, their schema artifacts must declare whether `HBDocumentItem` with list-local metadata is sufficient or a domain-specific document content type with enforced metadata should be published through the Content Type Gallery. Phase 1 content type strategy is frozen in §Content Type Strategy | Platform Architecture | When deferred domains become build-ready | Content type strategy frozen (v2.0); per-domain evaluation deferred to schema artifact completion |
 | **Provisioning automation scope** | Which of the ~45 build-ready containers are auto-provisioned via PnP scripts during hub/project site creation vs created manually or on-demand | Platform Architecture + DevOps | Phase 1 (implementation) | Container definitions are complete but the provisioning execution model (scripted vs manual vs hybrid) is not yet decided |
 
 ---
@@ -1312,3 +1338,4 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 | 1.7 | 2026-03-17 | Architecture | Summary-layer reconciliation: add A14 and A15 to Read With, authority boundary, relationship table, and document-scope references (previously stopped at A13). Move contracts from Pattern 3 (Paired) to Pattern 1 (Single List) in canonical container patterns to match A15 single-list decision. |
 | 1.8 | 2026-03-17 | Architecture | Froze shared dictionary deployment model: hub-site authoritative, project-site stores stable keys with optional display mirrors, adapter-resolved cross-site reads (no cross-site lookup columns). Annotated 2 cross-site appendix lookup rows (BuyoutCommitments, BudgetLines). Clarified domain-local dictionary provisioning. Fixed 7 stale "pending schema" labels in summary table. Narrowed open decision to population automation only. |
 | 1.9 | 2026-03-17 | Architecture | Froze financial-sensitive data security model: list-level permission isolation via Financial Domain Team and Compliance Team SharePoint groups, service-layer enforcement mirrors the same boundary, UI/view-only conventions explicitly rejected as sole mechanism, item-level permissions rejected as default model. Standardized security terminology across 9 container appendices and 9 register entries. Narrowed open decision to group provisioning and adapter authorization mechanics. |
+| 2.0 | 2026-03-17 | Architecture | Froze content type strategy: three hub-level types (HBBaseListItem, HBDocumentItem, HBDictionaryItem) published through Content Type Gallery cover all Phase 1 containers; no domain-specific content types needed for Phase 1; paired libraries evaluate per-domain when deferred domains become build-ready; template governance at schema level not content-type level. Fixed HBDocumentItem "Used By" to reflect Phase 1 reality. Separated document library versioning rules into Phase 1 build-ready vs future guidance. Narrowed open decision to per-domain evaluation for future paired libraries. |
