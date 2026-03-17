@@ -34,6 +34,8 @@ This register is the **engineering-level** companion to P1-A1's governance-level
 
 This boundary is frozen. P1-A3 does not own or redefine concerns that belong to the logical, governance, adapter, or dictionary layers.
 
+**Canonical-to-Physical Reconciliation Rule:** When a governing canonical schema defines more entities than A3 implements as separate SharePoint containers, A3 must include an explicit canonical-to-physical reconciliation note identifying which canonical entities are flattened into broader records, represented via shared hub-site assets, externalized to non-SharePoint operational state, or deferred. Fewer physical containers does not imply incomplete governance — it indicates intentional Phase 1 compression documented in A3.
+
 ---
 
 ## Relationship to Companion Artifacts
@@ -202,6 +204,33 @@ Containers are organized by execution dependency order. All containers below are
 | schedule | schedule_activity | Schedule Activities | `ScheduleActivities` | List | Project Site | Canonical normalized schedule activities from CSV/XML/XER imports | Activity item | ScheduleImportBatches (batch_id FK) | record_id, batch_id, activity_code, activity_name | schedule_wbs_node, schedule_calendar | — | None | Index: batch_id, activity_code; potentially thousands per import | Created during project site provisioning | Project team scoped | @hbc/data-access | Build-ready. CT: `HBBaseListItem`. Primary canonical entity from P1-A4. |
 | schedule | _raw uploads_ | Schedule Uploads Library | `ScheduleUploadsLib` | Document Library | Project Site | Raw uploaded schedule files (CSV, XML, XER) retained for provenance | Schedule file | ProjectMaster (project_id FK) | file name, detected_format, upload_date | — | Paired with ScheduleImportBatches | Major versions | Low volume; file-level storage | Created during project site provisioning | Project team scoped | @hbc/data-access | Build-ready. CT: `HBDocumentItem`. Immutable raw files per P1-A4 Layer 1. |
 
+**Canonical-to-Physical Reconciliation — Schedule (P1-A4 → A3)**
+
+P1-A4 defines 16 canonical entities across a 4-layer ingestion pipeline. A3 implements 3 physical SharePoint containers. This is an intentional Phase 1 compression: the canonical model supports full multi-format schedule normalization, while the physical model prioritizes user-facing activity data and raw file provenance. Parser-stage intermediate structures and operational audit records are handled outside SharePoint.
+
+| P1-A4 Canonical Entity | A3 Physical Disposition | Rationale |
+|------------------------|------------------------|-----------|
+| `schedule_import_batch` | **`ScheduleImportBatches`** (dedicated list) | User-visible import history; dedicated container justified |
+| `schedule_activity` | **`ScheduleActivities`** (dedicated list) | Primary user-facing entity; dedicated container justified |
+| `schedule_project` | Flattened into `ScheduleImportBatches` | One project per import batch; project metadata stored as batch fields |
+| `schedule_calendar` | Flattened into `ScheduleActivities` (`calendarId` FK field) | Calendar identity preserved as reference field on activity records; full calendar definitions are parser-stage data |
+| `schedule_wbs_node` | Flattened into `ScheduleActivities` (`wbsId`, `activityCode` fields) | WBS hierarchy preserved as reference fields; separate WBS list deferred — flat activity queries sufficient for Phase 1 |
+| `schedule_relationship` | Flattened into `ScheduleActivities` (predecessor/successor data in `sourceExtrasJson`) | Relationship data preserved in source extras JSON; separate relationship list deferred to Phase 2 when CPM visualization is implemented |
+| `schedule_resource` | Not implemented as Phase 1 SharePoint container | Resource definitions are parser-stage reference data; not user-facing in Phase 1 |
+| `schedule_resource_rate` | Not implemented as Phase 1 SharePoint container | Rate tables are parser-stage data |
+| `schedule_assignment` | Not implemented as Phase 1 SharePoint container | Resource assignments deferred; activity-level is sufficient for Phase 1 |
+| `schedule_baseline` | Flattened into `ScheduleActivities` (baseline date fields) | Primary baseline dates stored as activity fields; multi-baseline child records deferred |
+| `schedule_code_type` | Not implemented as Phase 1 SharePoint container | Code type definitions are parser-stage reference data |
+| `schedule_code_value` | Not implemented as Phase 1 SharePoint container | Code values are parser-stage reference data |
+| `schedule_activity_code_assignment` | Not implemented as Phase 1 SharePoint container | Code assignments deferred; activity-level classification sufficient for Phase 1 |
+| `schedule_udf_definition` | Not implemented as Phase 1 SharePoint container | UDF definitions are parser-stage metadata |
+| `schedule_udf_value` | Preserved in `ScheduleActivities` (`sourceExtrasJson`) | UDF values captured in source extras JSON for provenance |
+| `import_finding` | **Non-SharePoint** (Azure Table Storage) | Operational audit; documented in Non-SharePoint Entities registry |
+| Raw uploaded files | **`ScheduleUploadsLib`** (dedicated document library) | Immutable source file provenance; dedicated library justified |
+| Mapping/provenance/drift records | **Non-SharePoint** (Azure Table Storage) | Operational state; documented in Non-SharePoint Entities registry |
+
+**Compression justification:** Phase 1 schedule data consumption is activity-centric — users query activities by project, filter by status/dates, and view in list/timeline views. Full relational normalization (separate WBS tree, relationship table, resource table, code assignment table) adds significant container overhead without proportional Phase 1 user value. The canonical model in P1-A4 remains authoritative for parser/adapter design; the physical model here optimizes for SharePoint query patterns and list view threshold management.
+
 #### 6. External Financial (P1-A6)
 
 | Domain | Entity | Logical Container Name | Physical Container Name | Container Type | Scope | Purpose | Primary Record Type | Parent / Related Container | Key Columns / Required Fields | Lookup / Join Dependencies | Document Pairing Pattern | Versioning Requirement | Indexing / Scale Notes | Provisioning Requirement | Security / Visibility Notes | Related Adapter / Package Owner | Notes |
@@ -235,6 +264,28 @@ Containers are organized by execution dependency order. All containers below are
 | Domain | Entity | Logical Container Name | Physical Container Name | Container Type | Scope | Purpose | Primary Record Type | Parent / Related Container | Key Columns / Required Fields | Lookup / Join Dependencies | Document Pairing Pattern | Versioning Requirement | Indexing / Scale Notes | Provisioning Requirement | Security / Visibility Notes | Related Adapter / Package Owner | Notes |
 |--------|--------|------------------------|-------------------------|----------------|-------|---------|--------------------|-----------------------------|-------------------------------|---------------------------|--------------------------|------------------------|------------------------|--------------------------|----------------------------|--------------------------------|-------|
 | compliance | checklist_family_instance | Lifecycle Checklists | `LifecycleChecklists` | List | Project Site | Unified startup/safety/closeout checklist instances and items | Checklist item | ProjectMaster (project_id FK) | checklist_id, instance_id, item_id, checklist_family, canonical_outcome | Shared_ChecklistTemplates (hub), ChecklistFamilies (domain-local) | — | Major versions | Index: project_id, checklist_family, canonical_outcome; moderate volume | Created during project site provisioning | Project team scoped | @hbc/data-access | Build-ready. CT: `HBBaseListItem`. P1-A10 governs 8 entities. 3 families. |
+
+**Canonical-to-Physical Reconciliation — Project Lifecycle Checklists (P1-A10 → A3)**
+
+P1-A10 defines 8 canonical entities supporting 3 checklist families (startup, safety, closeout) with template governance. A3 implements 1 shared hub-site template list + 1 project-site checklist list. This is an intentional Phase 1 compression: the canonical model separates template, instance, section, item, and evidence concerns into distinct entities; the physical model flattens the project-side execution hierarchy into a single list with discriminator fields.
+
+| P1-A10 Canonical Entity | A3 Physical Disposition | Rationale |
+|------------------------|------------------------|-----------|
+| `lifecycle_checklist_template` | **`Shared_ChecklistTemplates`** (hub-site shared list) | Template identity stored as rows with `templateId` field; shared across all project sites |
+| `lifecycle_checklist_template_item` | **`Shared_ChecklistTemplates`** (hub-site shared list) | Template items are rows in the same shared list, distinguished by `templateItemId`, `sectionNumber`, `itemNumber` |
+| `project_lifecycle_checklist` | Flattened into **`LifecycleChecklists`** (project-site list) | Aggregate container identity represented by `checklistId` field; one per project — does not need a separate list |
+| `project_checklist_family_instance` | Flattened into **`LifecycleChecklists`** | Family instances distinguished by `instanceId` + `checklistFamily` fields; each row carries its family identity |
+| `checklist_section` | Flattened into **`LifecycleChecklists`** | Section identity represented by `sectionNumber` + `sectionLabel` fields on each item row; no separate section list needed |
+| `checklist_item` | **`LifecycleChecklists`** (project-site list) | The primary physical record — each row is one checklist item with outcome, notes, dates, and evidence reference |
+| `checklist_evidence_link` | Embedded as `currentEvidenceRef` field on `LifecycleChecklists` | Phase 1 uses a single evidence reference field per item; separate Evidence Link child list deferred to Phase 2 |
+| `checklist_import_batch` | **Non-SharePoint** (Azure Table Storage) | Operational state; batch ID referenced via `sourceBatchId` on checklist items |
+
+**Compression justification:** The physical `LifecycleChecklists` list stores one row per checklist item, with aggregate container, family instance, and section identity carried as discriminator fields (`checklistId`, `instanceId`, `checklistFamily`, `sectionNumber`, `sectionLabel`) on each row. This flat-list approach supports all three families (startup/safety/closeout) in a single list with SharePoint filtered views by family. The canonical hierarchy (container → family instance → section → item) is preserved logically via these fields and can be reconstructed for display, but does not require separate physical lists for Phase 1 query patterns. Template governance is separated onto the hub site (`Shared_ChecklistTemplates`) because templates are shared across all projects.
+
+**Family support in the unified list:**
+- Rows with `checklistFamily = 'startup'` → startup checklist items with `N/A / Yes / No` outcomes mapped to `complete / incomplete / not_applicable`
+- Rows with `checklistFamily = 'safety'` → safety checklist items with `Pass / Fail / N/A` outcomes mapped to `pass / fail / not_applicable`
+- Rows with `checklistFamily = 'closeout'` → closeout checklist items with `N/A / Yes / No` outcomes mapped to `complete / incomplete / not_applicable`
 
 #### 11. Responsibility Matrix (P1-A11)
 
@@ -683,7 +734,7 @@ These 7 dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, C
 | 7 | Lookups | `batchId` → ScheduleImportBatches |
 | 8 | Indexes | `batchId`, `activityCode` |
 | 9–11 | Standard | None / Project team / Project site provisioning |
-| 12 | Governing Schema | P1-A4 schedule_activity entity (16 canonical entities total) |
+| 12 | Governing Schema | P1-A4 schedule_activity entity. **Compressed model:** 16 canonical entities → 3 physical containers. See canonical-to-physical reconciliation note in Section 5. |
 
 #### A.5.2 `ScheduleImportBatches`
 
@@ -695,7 +746,7 @@ These 7 dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, C
 | 7 | Lookups | — |
 | 8 | Indexes | `projectId`, `importStatus` |
 | 9–11 | Standard | Major versions / Project team / Project site provisioning |
-| 12 | Governing Schema | P1-A4 schedule_import_batch entity |
+| 12 | Governing Schema | P1-A4 schedule_import_batch entity. Also absorbs `schedule_project` metadata (flattened). See reconciliation note in Section 5. |
 
 #### A.5.3 `ScheduleUploadsLib`
 
@@ -825,7 +876,7 @@ These 7 dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, C
 | 7 | Lookups | `checklistFamily` → domain-local ChecklistFamilies, `templateItemId` → Shared_ChecklistTemplates |
 | 8 | Indexes | `projectId`, `checklistFamily`, `canonicalOutcome` |
 | 9–11 | Standard | Major versions / Project team / Project site provisioning |
-| 12 | Governing Schema | P1-A10 (8 canonical entities, 3 families, ~149 items) |
+| 12 | Governing Schema | P1-A10. **Compressed model:** 8 canonical entities → 1 shared template list + 1 project-site list. See canonical-to-physical reconciliation note in Section 10. |
 
 ### A.11 — Responsibility Matrix
 
@@ -1217,3 +1268,4 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 | 1.1 | 2026-03-17 | Architecture | Reconciled open decisions: removed "Physical column schemas per domain" (resolved by appendix blocks v0.8). Narrowed "Shared dictionary deployment" to mechanics only, "Content type strategy" to deferred domains only. Added "Why Still Open" column. Documented resolved items from A3 closeout Steps 2–10 for traceability. 4 true implementation decisions remain. |
 | 1.2 | 2026-03-17 | Architecture | Final QA and closeout pass. Verified: all build-ready containers have appendix blocks, all appendices reference governing schemas, all project-site lists have indexed key/status fields, all shared dictionaries point to P1-A5, all non-SharePoint entities explicitly documented, deferred placeholders clearly separated. Updated approval status and comments to reflect completed closeout. A3 is implementation-ready for Phase 1 build-ready scope. |
 | 1.3 | 2026-03-17 | Architecture | Closed A3/A5 shared dictionary gap. Removed stale "next implementation step" language for appendices (appendices are present since v0.8). Updated 7 shared dictionary rows from "P1-A5 (pending)" to "P1-A5" referencing completed Simple Reference Dictionary pattern. Updated A.1.3 appendix and comments. |
+| 1.4 | 2026-03-17 | Architecture | Added canonical-to-physical reconciliation notes for schedule (16 entities → 3 containers) and lifecycle checklists (8 entities → 2 containers). Added reusable reconciliation rule in Authority Boundary section. Updated appendix governing-schema references to note compression. No corrective container changes required — existing compression is defensible. |
