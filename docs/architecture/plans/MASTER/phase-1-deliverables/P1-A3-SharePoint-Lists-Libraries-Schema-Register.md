@@ -1005,14 +1005,14 @@ These 7 dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, C
 
 | Convention | Rule | Example |
 |-----------|------|---------|
-| **Base content type** | Use default `Item` for most lists | Standard SharePoint Item |
-| **Custom content type** | PascalCase, domain-prefixed, descriptive | `BuyoutCommitment`, `PermitRecord`, `ScorecardEvaluation` |
-| **Document content type** | PascalCase with `Document` suffix | `ScheduleUploadDocument`, `ComplianceDocument` |
+| **Hub-level list content type** | `HB` prefix + PascalCase descriptor | `HBBaseListItem`, `HBDictionaryItem` |
+| **Hub-level document content type** | `HB` prefix + PascalCase descriptor | `HBDocumentItem` |
+| **Domain-specific content type (future)** | PascalCase, domain-prefixed, descriptive | Reserved for future paired libraries per §Content Type Strategy |
 
-Custom content types are created only when:
-- A list stores multiple distinct record types
-- A document library requires enforced metadata columns
-- A content type is reused across multiple lists (shared site column group)
+Phase 1 uses three hub-level content types exclusively (`HBBaseListItem`, `HBDocumentItem`, `HBDictionaryItem`) — see §Content Type Strategy for the frozen rules. Domain-specific content types are created only when:
+- a future paired library requires enforced metadata columns beyond what `HBDocumentItem` provides,
+- a repeating document class emerges across multiple project sites, or
+- a content type is reused across multiple sites and justifies Content Type Gallery governance.
 
 ### Lookup Target Notation
 
@@ -1217,8 +1217,8 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 - Do not use cross-site lookups; use stable key fields (e.g., `project_id`) and resolve at the adapter layer
 
 ### Shared Reference Dictionaries
-- Shared dictionaries (CSICodes / Cost Codes, StateCodes, CountryCodes, ProjectTypes, etc.) should be stored as lists on the hub site
-- Domain-local reference sets (EstimateSources, CommitmentStatuses, etc.) should be stored as lists on the relevant site scope
+- Shared dictionaries (CSICodes / Cost Codes, StateCodes, CountryCodes, ProjectTypes, etc.) are stored as lists on the hub site (see §Shared Dictionary Deployment Model)
+- Domain-local reference sets (EstimateSources, CommitmentStatuses, etc.) are stored as lists on the relevant site scope
 - Reference sets referenced by Choice columns should have their values populated from these dictionary lists
 - Canonical schema for reference dictionaries (keying, hierarchy, lifecycle, applicability) is governed by [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md)
 
@@ -1359,8 +1359,8 @@ The financial-sensitive and compliance-sensitive list isolation rules frozen abo
 | SharePoint Infrastructure Owner | — | — |
 | Security and Compliance Lead | — | — |
 
-**Approval Status:** Active — Closeout complete (v1.2). Physical schema register with per-container appendices for all Phase 1 build-ready domains.
-**Comments:** A3 closeout completed through 12 steps: authority boundary frozen (v0.2), build-ready/deferred scope split (v0.3), shared reusable schema assets and naming conventions (v0.4–0.5), Wave 1 containers completed (v0.6), all 13 domain groups added in execution order (v0.7), per-container appendix blocks with 12-point physical schema sequence for ~46 containers (v0.8), ambiguous storage cases resolved (v0.9), non-SharePoint entities registry (v1.0), open decisions reconciled to 4 true implementation choices (v1.1), final QA pass (v1.2). Post-closeout: leads moved to build-ready with `MarketLeads` and `PipelineSnapshots` containers (v1.5, governed by P1-A14), contracts moved to build-ready with `PrimeContracts` container (v1.6, governed by P1-A15). One deferred domain (pmp) remains a placeholder pending a dedicated schema artifact. All shared dictionaries have canonical schemas in P1-A5.
+**Approval Status:** Active — Closeout complete (v1.2); SharePoint implementation decisions frozen (v1.8–v2.2); reconciliation verified (v2.3). Physical schema register with per-container appendices for all Phase 1 build-ready domains.
+**Comments:** A3 closeout completed through 12 steps: authority boundary frozen (v0.2), build-ready/deferred scope split (v0.3), shared reusable schema assets and naming conventions (v0.4–0.5), Wave 1 containers completed (v0.6), all 13 domain groups added in execution order (v0.7), per-container appendix blocks with 12-point physical schema sequence for ~46 containers (v0.8), ambiguous storage cases resolved (v0.9), non-SharePoint entities registry (v1.0), open decisions reconciled to 4 true implementation choices (v1.1), final QA pass (v1.2). Post-closeout scope additions: leads moved to build-ready with `MarketLeads` and `PipelineSnapshots` containers (v1.5, governed by P1-A14), contracts moved to build-ready with `PrimeContracts` container (v1.6, governed by P1-A15). Post-closeout implementation-decision freezes: shared dictionary deployment model (v1.8), financial-sensitive data security model (v1.9), content type strategy (v2.0), indexing and query-pattern strategy (v2.1), permission-scope minimization rule (v2.2). Reconciliation pass (v2.3) verified internal consistency across all frozen decisions. One deferred domain (pmp) remains a placeholder pending a dedicated schema artifact. All shared dictionaries have canonical schemas in P1-A5. Four implementation decisions remain open: dictionary population automation, group provisioning mechanics, future paired-library content type evaluation, and provisioning automation scope.
 
 ---
 
@@ -1390,3 +1390,4 @@ The financial-sensitive and compliance-sensitive list isolation rules frozen abo
 | 2.0 | 2026-03-17 | Architecture | Froze content type strategy: three hub-level types (HBBaseListItem, HBDocumentItem, HBDictionaryItem) published through Content Type Gallery cover all Phase 1 containers; no domain-specific content types needed for Phase 1; paired libraries evaluate per-domain when deferred domains become build-ready; template governance at schema level not content-type level. Fixed HBDocumentItem "Used By" to reflect Phase 1 reality. Separated document library versioning rules into Phase 1 build-ready vs future guidance. Narrowed open decision to per-domain evaluation for future paired libraries. |
 | 2.1 | 2026-03-17 | Architecture | Froze indexing and query-pattern strategy: query-pattern-first provisioning (indexes at creation time, not deferred), volume risk classification for all build-ready containers, 5,000-item threshold strategy for hub-site dictionaries (CostCodes, CSICodes) and threshold-risk project-site lists, default view provisioning requirements (filtered, index-aligned), adapter-layer query routing expectations for cross-project aggregation and threshold-risk lists. |
 | 2.2 | 2026-03-17 | Architecture | Froze permission-scope minimization rule: site-level inheritance as default, explicit inheritance preference order (site → list → folder → item-by-exception-only), prohibition on item-level ACLs as default for any container, exception governance requirements (documented justification, scope count, review mechanism), practical unique-scope limits (~50,000 per list degradation boundary), interaction with financial/compliance isolation model. |
+| 2.3 | 2026-03-17 | Architecture | Final reconciliation sweep after five SharePoint implementation-decision freezes (v1.8–v2.2). Reconciled content type naming conventions with frozen strategy (removed stale domain-specific examples, aligned with three hub-level types). Tightened advisory "should be" language in Shared Reference Dictionaries to match frozen deployment model. Updated approval status and comments to reflect all five freezes and four remaining open decisions. Verified: all five decisions are explicit, internally consistent, and implementation-guiding; no stale open-decision language; no cross-section contradictions; no adjacent artifact changes needed. |
