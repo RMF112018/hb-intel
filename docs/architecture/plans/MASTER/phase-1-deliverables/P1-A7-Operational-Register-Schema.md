@@ -346,10 +346,131 @@ Maps register records to related entities in other domains.
 
 ---
 
+## Delay Subtype Extension
+
+### Overview
+
+Delay records are modeled as `register_record` entries with `record_type = 'delay'`. Delay-specific fields are optional columns on `register_record` — populated only when `record_type = 'delay'`, null for other record types.
+
+This is the first implemented subtype extension of the operational register, establishing the pattern for future risk, constraint, and action subtypes.
+
+### Source File
+
+**File:** `docs/reference/example/Project Delay Log_2025.csv`
+
+| Property | Value |
+|----------|-------|
+| Format | CSV template/tracker |
+| Rows | 31 (including metadata, headers, empty rows, totals) |
+| Data rows | 0 (template structure only; rows 6–29 are empty placeholders) |
+| Column header row | Row 5 |
+
+### Source Structure
+
+| Row | Content | Treatment |
+|-----|---------|-----------|
+| Row 1 | `Owner Name` (empty value) | Log-level metadata → `owner_name_snapshot` on import batch or register_record |
+| Row 2 | `Project Name` (empty value) | Log-level metadata → `project_name` on register_record |
+| Row 3 | `Delay Log` | Sheet title → source provenance only |
+| Row 4 | Empty | Skip |
+| Row 5 | Column headers | Schema definition row |
+| Rows 6–29 | Empty data rows | Placeholder; skip during import |
+| Row 30 | Totals: `Total Potential Cost Impact: $-`, `Total Potential Delay [days] 0` | Derived summary → optional import-batch snapshot fields; not canonical delay records |
+
+### Source Column Mapping
+
+| Source Column | Raw Field | Normalized Field | Type | Description |
+|--------------|-----------|-----------------|------|-------------|
+| `PCCO #` | `pcco_reference_raw` | `pcco_record_key` | string → string (FK) | Potential Change/Cost Order reference; raw text preserved; canonical linked key resolved when possible |
+| `Affected Task` | `affected_task_raw` | `affected_schedule_activity_key` | string → string (FK) | Schedule activity affected by delay; raw text preserved; canonical schedule activity key resolved when possible |
+| `Critical Path Impact [Yes/ No]` | `critical_path_impact_raw` | `critical_path_impact_flag` | string → boolean | Whether delay impacts critical path; "Yes" → true, "No" → false, blank → null |
+| `Potential Cost Impact` | `potential_cost_impact_raw` | `potential_cost_impact_amount` | string → number | Dollar amount of potential cost impact; "$-" or blank → 0 or null; strip currency formatting |
+| `Expected/ Actual Delay Duration [days]` | `delay_duration_raw` | `delay_duration_days` | string → number | Duration of delay in calendar days; blank → null |
+| `Original Activity Start` | `original_activity_start_raw` | `original_activity_start_date` | string → date | Original planned start date of the affected activity |
+| `Delay Start` | `delay_start_raw` | `delay_start_date` | string → date | Date the delay began |
+| `Date of Delay Notification to Owner` | `owner_notification_raw` | `owner_notification_date` | string → date | Date the owner was formally notified of the delay |
+| `Notes` | `delay_notes` | — | string | Free-text notes/remarks about the delay |
+
+### Delay-Specific Fields on `register_record`
+
+These fields are added to the existing `register_record` entity. They are populated only when `record_type = 'delay'` and are null for all other record types.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `owner_name_snapshot` | string | No | Owner/client name from source metadata row; display mirror of project owner |
+| `pcco_reference_raw` | string | No | Raw PCCO # text from source |
+| `pcco_record_key` | string | No | Canonical FK to related change/PCCO record (if resolved) |
+| `affected_task_raw` | string | No | Raw Affected Task text from source |
+| `affected_schedule_activity_key` | string | No | Canonical FK to schedule_activity (P1-A4) (if resolved) |
+| `critical_path_impact_raw` | string | No | Raw Yes/No text from source |
+| `critical_path_impact_flag` | boolean | No | Normalized: true = Yes, false = No, null = unknown |
+| `potential_cost_impact_raw` | string | No | Raw dollar text from source (e.g., "$15,000", "$-") |
+| `potential_cost_impact_amount` | number | No | Normalized numeric amount; 0 for "$-"; null if blank |
+| `delay_duration_raw` | string | No | Raw days text from source |
+| `delay_duration_days` | number | No | Normalized numeric days; null if blank |
+| `original_activity_start_raw` | string | No | Raw date text from source |
+| `original_activity_start_date` | date | No | Normalized date; null if blank or unparseable |
+| `delay_start_raw` | string | No | Raw date text from source |
+| `delay_start_date` | date | No | Normalized date; null if blank or unparseable |
+| `owner_notification_raw` | string | No | Raw date text from source |
+| `owner_notification_date` | date | No | Normalized date; null if blank or unparseable |
+| `delay_notes` | text | No | Notes/remarks from source Notes column |
+
+### Import Batch Snapshot Fields for Totals
+
+When the source file contains a totals row, these optional fields are stored on `register_import_batch` (not on individual delay records):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `imported_total_potential_cost_impact` | number | Source totals row value for Total Potential Cost Impact |
+| `imported_total_potential_delay_days` | number | Source totals row value for Total Potential Delay [days] |
+
+These are reconciliation snapshots only — canonical totals should be derived from the actual delay records.
+
+### PCCO / Change Linkage Rules
+
+| Aspect | Rule |
+|--------|------|
+| **Raw preservation** | `pcco_reference_raw` stores the exact source text |
+| **Canonical linkage** | `pcco_record_key` resolves to a change/PCCO record key when available; null until identity reconciliation |
+| **Resolution pattern** | Parser attempts to match PCCO # against known change order references; logs import_finding (info) if unresolvable |
+
+### Affected Task / Schedule Linkage Rules
+
+| Aspect | Rule |
+|--------|------|
+| **Raw preservation** | `affected_task_raw` stores the exact source text |
+| **Canonical linkage** | `affected_schedule_activity_key` resolves to a `schedule_activity` record key (P1-A4) when available |
+| **Resolution pattern** | Parser attempts to match against activity name or code in the project's schedule; logs import_finding (info) if unresolvable |
+
+### Normalization Rules
+
+| Source Pattern | Normalized Treatment |
+|----------------|---------------------|
+| "Yes" / "YES" / "yes" | `critical_path_impact_flag = true` |
+| "No" / "NO" / "no" | `critical_path_impact_flag = false` |
+| Blank | `critical_path_impact_flag = null` |
+| "$-" or "$0" or blank | `potential_cost_impact_amount = 0` or `null` |
+| "$15,000" | Strip `$`, `,`; parse as number → `15000` |
+| Date strings | Parse to ISO date; log warning if format is ambiguous |
+| Blank fields | `null` in normalized fields; empty string in raw fields |
+
+### Search / Filter / Reporting Role (Delay Subtype)
+
+| Dimension | Treatment |
+|-----------|-----------|
+| **Filterable by** | record_type = 'delay', project, critical_path_impact_flag, pcco_reference, affected_task |
+| **Reportable** | Delay count by project, total potential cost impact, total delay days, critical-path delay count, owner notification timing |
+| **Analytics** | Delay frequency, cost exposure trending, notification lag analysis |
+| **Dashboard** | Active delays by project, critical-path delays, unnotified delays, cost exposure summary |
+
+---
+
 ## Future Extensions
 
 | Extension | Description | Target |
 |-----------|-------------|--------|
+| **Delay subtype** | Delay-specific fields on register_record with PCCO/schedule linkage | **Implemented in v0.2** |
 | **Risk-specific fields** | probability, impact, exposure, mitigation_plan, risk_score | Phase 2–3 |
 | **Constraint-specific fields** | blocking_condition, dependency_type, resolution_criteria | Phase 2–3 |
 | **Action plan child records** | Linked mitigation/resolution steps with their own assignment and due dates | Phase 2–3 |
@@ -364,7 +485,7 @@ Maps register records to related entities in other domains.
 
 | Decision | Scope | Owner | Target |
 |----------|-------|-------|--------|
-| **Record-type subtyping** | When to activate risk/constraint/issue/action subtypes with type-specific optional fields | Platform Architecture + Operations | Phase 2 |
+| **Record-type subtyping** | First subtype (delay) implemented in v0.2; risk/constraint/issue/action subtypes remain Phase 2 targets | Platform Architecture + Operations | Phase 2 (delay: done) |
 | **Category dictionary governance** | Formalize 36 categories as governed reference set in P1-A5 | Platform Architecture | Phase 1 (late) |
 | **BIC dictionary governance** | Formalize 32 BIC teams as governed reference set in P1-A5 | Platform Architecture | Phase 1 (late) |
 | **Identity reconciliation for assigned** | Map assigned display names to stable person keys from identity source | Platform Architecture | Phase 1–2 |
@@ -390,3 +511,4 @@ Maps register records to related entities in other domains.
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 4 canonical entities, hybrid operational register classification, category/BIC normalization, lifecycle model, days-elapsed derivation, and storage alignment. Evidence-based from constraints.json. |
+| 0.2 | 2026-03-17 | Architecture | Added delay subtype extension with 18 delay-specific fields on register_record (raw+normalized pairs for PCCO, affected task, critical path impact, cost impact, duration, dates, notification). Import batch snapshot fields for totals row. First implemented subtype establishing the pattern. Evidence-based from Project Delay Log CSV template. |
