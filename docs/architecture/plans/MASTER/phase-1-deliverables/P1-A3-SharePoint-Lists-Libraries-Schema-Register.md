@@ -1174,13 +1174,16 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 
 ## Open Decisions / Future Expansion
 
-| Decision | Scope | Owner | Target |
-|----------|-------|-------|--------|
-| **Physical column schemas per domain** | Define exact SharePoint column names, types, and display names for each container | Platform Architecture + Business Domains | Wave-by-wave as P1-A1 field expansion completes |
-| **Shared dictionary list deployment** | Where and how shared reference dictionaries are provisioned across hub and project sites | Platform Architecture | Phase 1 |
-| **Column-level security for financial fields** | Implementation approach for restricting financial column visibility | Platform Architecture + Security | Phase 1 |
-| **Content type strategy for paired containers** | Custom content types for compliance, contracts, PMP document libraries | Platform Architecture | Phase 1 |
-| **Provisioning automation scope** | Which containers are auto-provisioned vs manually created | Platform Architecture + DevOps | Phase 1 |
+**Resolved during A3 closeout (Steps 2–10):** Physical column schemas per domain — resolved by per-container appendix blocks (v0.8). Build-ready vs deferred scope — resolved by scope split (v0.3). Non-SharePoint operational state — resolved by non-SharePoint entities registry (v1.0). Naming conventions — resolved (v0.4–0.5). Authority boundaries — frozen (v0.2).
+
+**Remaining implementation decisions:**
+
+| Decision | Scope | Owner | Target | Why Still Open |
+|----------|-------|-------|--------|---------------|
+| **Shared dictionary deployment mechanics** | How hub-site dictionary lists are initially populated (CSV upload scripts, PnP provisioning, manual entry) and how dictionary updates propagate to project sites | Platform Architecture + DevOps | Phase 1 (implementation) | Container definitions and schemas are complete; deployment automation approach is not yet selected |
+| **Column-level security for financial fields** | How fields marked `Confidential Business` / `Domain Team Only` in P1-A1 are restricted in SharePoint — column-level permissions, filtered views, adapter-layer enforcement, or a combination | Platform Architecture + Security | Phase 1 (implementation) | Security model choice affects SharePoint column configuration and view design for BuyoutCommitments, AllowanceItems, VE items, ComplianceWaiverRequests, BudgetLines, SubcontractorScorecards |
+| **Content type strategy for deferred paired containers** | Custom content types for contracts, PMP, and compliance document libraries (currently deferred domains) — whether to use standard `HBDocumentItem` or domain-specific content types with enforced metadata | Platform Architecture | When deferred domains become build-ready | Build-ready domains resolved; deferred paired containers (contracts + library, PMP + library) still need content type decisions when their schemas are completed |
+| **Provisioning automation scope** | Which of the ~45 build-ready containers are auto-provisioned via PnP scripts during hub/project site creation vs created manually or on-demand | Platform Architecture + DevOps | Phase 1 (implementation) | Container definitions are complete but the provisioning execution model (scripted vs manual vs hybrid) is not yet decided |
 
 ---
 
@@ -1211,3 +1214,4 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 | 0.8 | 2026-03-17 | Architecture | Added per-container appendix blocks (A.1–A.13) with 12-point physical schema sequence for all build-ready containers. Covers shared dictionaries (13), project/intake (2), estimating (4), buyout (9), schedule (3), external financial (2), operational register (1), estimating kickoff (2), permits (2), lifecycle checklists (1), responsibility matrix (2), scorecard (2), lessons learned (2). |
 | 0.9 | 2026-03-17 | Architecture | Resolved 3 ambiguous storage cases. (1) kickoff_note: deferred to Phase 2 as separate child list; Phase 1 uses notesSummary field on KickoffRows. (2) schedule ScheduleImportBatches: confirmed as SharePoint list (not Azure Table Storage). (3) budget BudgetImportBatches: added as new SharePoint list + appendix A.6.2 for user-visible import history. Fixed blanket import statement to distinguish findings (Table Storage) from batch metadata (SharePoint where user-visible). |
 | 1.0 | 2026-03-17 | Architecture | Added Non-SharePoint Canonical Entities registry: 8 import finding entities (Azure Table Storage), 7 import batch entities without SharePoint lists, 7 mapping/provenance entities (Azure Table Storage), 11 Phase 2 deferred child entities with Phase 1 inline alternatives documented. Replaces ad-hoc inline notes with comprehensive structured tables. |
+| 1.1 | 2026-03-17 | Architecture | Reconciled open decisions: removed "Physical column schemas per domain" (resolved by appendix blocks v0.8). Narrowed "Shared dictionary deployment" to mechanics only, "Content type strategy" to deferred domains only. Added "Why Still Open" column. Documented resolved items from A3 closeout Steps 2–10 for traceability. 4 true implementation decisions remain. |
