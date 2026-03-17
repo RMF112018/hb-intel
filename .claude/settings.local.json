@@ -124,7 +124,8 @@
       "Read(//private/tmp/**)",
       "Bash(for entity:*)",
       "Bash(awk:*)",
-      "Bash(sort -t',' -k1,1)"
+      "Bash(sort -t',' -k1,1)",
+      "Bash(pip3 install:*)"
     ]
   },
   "enabledPlugins": {

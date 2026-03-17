@@ -62,6 +62,7 @@ At the end of Phase 1:
 - Operational register schema (hybrid issue/action/risk/constraint tracking)
 - Estimating kickoff schema (template-based pursuit coordination and deliverable assembly)
 - Permits & inspections schema (permit lifecycle, inspections, issues, compliance tracking)
+- Project lifecycle checklist schema (unified startup/safety/closeout checklists)
 
 ### 6.2 Workstream B — Adapter Completion
 **Goal:** complete production-capable repository adapters.
@@ -148,6 +149,7 @@ Mandatory deliverables for Phase 1:
 - Operational Register Schema (hybrid issue/action/risk/constraint tracking)
 - Estimating Kickoff Schema (template-based pursuit coordination and deliverable assembly)
 - Permits & Inspections Schema (permit lifecycle, inspections, issues, compliance tracking)
+- Project Lifecycle Checklist Schema (unified startup/safety/closeout checklists)
 - Adapter Completion Backlog and Status Tracker
 - Service Contract Catalog
 - Error / Retry / Recovery Design Note
