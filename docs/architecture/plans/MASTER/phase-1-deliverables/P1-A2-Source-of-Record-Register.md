@@ -128,6 +128,30 @@ These entities are part of A4's normalized canonical model but are not stored in
 
 P1-A3 physically consolidates the 16 canonical schedule entities into 3 SharePoint containers (`ScheduleActivities`, `ScheduleImportBatches`, `ScheduleUploadsLib`) plus Azure Table Storage for findings. Several canonical entities are flattened into shared containers (e.g., `schedule_wbs_node` → FK fields on `ScheduleActivities`, `schedule_relationship` → `sourceExtrasJson`). This register preserves the logical entity-level SoR view for adapter design regardless of physical compression. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
 
+### External financial domain (P1-A6)
+
+P1-A6 defines 4 canonical entities for external financial data ingestion. In Phase 1, Procore budget data is **mirrored and read-only** — imported as point-in-time CSV snapshots, canonicalized, and stored. No write-back to Procore occurs until Phase 4+. The import model is snapshot-append: each upload creates a complete budget snapshot as a new batch; the latest batch for a project represents current state; all prior batches are retained for trend analysis.
+
+The 4 entities split across two storage tiers: SharePoint for user-facing business data and import metadata, Azure Table Storage for operational mappings and audit findings.
+
+#### Canonical business data and import metadata persisted in SharePoint
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `budget_line` | business (mirrored) | SharePoint List (`BudgetLines`) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `(batch_id, budget_code)` natural key; `line_id` surrogate | Class C | list-by-project, filter-by-batch, filter-by-cost-code | Yes (15 min) | Read-only snapshot per batch; newer batch supersedes | Procore is mirrored authority; newer snapshot supersedes; all prior batches retained for trend analysis | Import service | 1 |
+| `budget_import_batch` | operational | SharePoint List (`BudgetImportBatches`) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `batch_id` (unique per project per upload) | Class D | get-by-id, list-by-project | No | Status progresses forward only (pending → parsing → validating → complete/failed) | No conflict; each upload creates a new `batch_id` | Import service | 1 |
+
+#### Non-SharePoint operational and reference state
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `budget_line_external_mapping` | reference | Azure Table Storage | AF v4 → `@azure/data-tables` | `mapping_id` surrogate; `(line_id, target_entity_type, target_entity_id)` natural key | Class A | list-by-line, list-by-target | Yes (5 min) | Mutable; mappings adjustable, deactivatable via `is_active` flag | `is_active` flag deactivates obsolete mappings; no hard deletion; `mapping_basis` documents provenance | Import service + manual curation | 1 |
+| `budget_import_finding` | operational | Azure Table Storage (`partition: budget-findings-{batchId}`) | AF v4 → `@azure/data-tables` | `finding_id` surrogate; `(batch_id, line_id, severity, category)` implied | Class D | list-by-batch | No | Append-only; immutable once logged | No conflict; new imports create new findings per batch | Import service | 1 |
+
+#### A3 physical compression note
+
+P1-A3 stores the 4 canonical external financial entities across 2 SharePoint lists (`BudgetLines`, `BudgetImportBatches`), 1 document library (`BudgetUploadsLib` for raw Procore CSV provenance), and Azure Table Storage for findings and external mappings. This register preserves the logical entity-level SoR view for adapter design. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
+
 ### Remaining domains
 
 Entity-level rows for the following domains will be added as their schemas reach implementation-ready status:
@@ -135,7 +159,6 @@ Entity-level rows for the following domains will be added as their schemas reach
 | Domain | Schema Doc | Entity Count | Status |
 |--------|-----------|-------------|--------|
 | shared (reference data) | P1-A5 | ~11 | Schema defined; entity register pending |
-| financial | P1-A6 | 4 | Schema defined; entity register pending |
 | risk / compliance (operational register) | P1-A7 | 4 | Schema defined; entity register pending |
 | estimating (kickoff) | P1-A8 | 7 | Schema defined; entity register pending |
 | compliance (permits) | P1-A9 | 8 | Schema defined; entity register pending |
@@ -339,4 +362,5 @@ Stub adapters (Procore, Sage, Autodesk) exist but do not write in Phase 1.
 | 0.1 | 2026-03-16 | Architecture | Initial draft; operationalizes P1-A1 decisions for adapter design |
 | 0.2 | 2026-03-17 | Architecture | Add entity-level SoR and adapter behavior register structure; populate schedule domain (P1-A4); stub remaining domains |
 | 0.3 | 2026-03-17 | Architecture | Refine schedule entity-level register with A4-aligned data classes, A3 storage targets, conflict handling, and business-vs-operational distinction |
+| 0.4 | 2026-03-17 | Architecture | Add entity-level external financial register (P1-A6); distinguish mirrored Procore data from HB Intel-governed mappings and operational state |
 
