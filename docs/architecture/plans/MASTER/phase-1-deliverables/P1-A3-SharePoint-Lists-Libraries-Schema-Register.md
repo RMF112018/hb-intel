@@ -1303,6 +1303,21 @@ All build-ready containers are classified by their relationship to SharePoint On
 
 **`is_private` flag (PrimeContracts).** PrimeContracts retains the Procore-sourced `is_private` flag as supplemental application-layer visibility control. The flag is enforced at the adapter layer in addition to list-level SharePoint permissions, not as a substitute for them.
 
+**Permission-Scope Minimization (Frozen).** Site-level inheritance is the architectural default. When a container requires restricted access, permission-inheritance breaks follow this preference order:
+
+1. **Site** — preferred. All lists on a project site inherit project-site permissions; all lists on the hub site inherit hub-site permissions. This is the default for the majority of build-ready containers.
+2. **Library / List** — used for financial-sensitive and compliance-sensitive containers that require isolation from the broader site audience (already frozen above for Financial Domain Team and Compliance Team groups).
+3. **Folder** — acceptable when a document library requires coarse-grained partitioning within a single container (e.g., separating draft from published folders). No Phase 1 container currently requires folder-level permission breaks.
+4. **Item** — exception only. Requires explicit documented justification per container.
+
+Item-level unique permissions (per-row ACLs) are not the default access model for any build-ready container — financial or otherwise. The financial-access model's list-level isolation via restricted SharePoint groups is the most granular default pattern in Phase 1.
+
+Any container requiring item-level permission breaks must document in its appendix security row: (a) the business requirement that cannot be met by list-level or folder-level isolation, (b) the expected unique-scope count, and (c) the review/audit mechanism for ongoing scope governance.
+
+SharePoint Online performance degrades significantly when a single list accumulates tens of thousands of unique permission scopes (~50,000 unique ACLs per list is the practical degradation boundary). Phase 1 designs must stay well below this threshold. No container should normalize unbounded unique-scope growth as a standard operating pattern.
+
+The financial-sensitive and compliance-sensitive list isolation rules frozen above are instances of list-level permission breaks — the second tier in the preference order. This minimization rule does not weaken those boundaries; it ensures that nothing below list-level becomes a default pattern.
+
 **What remains open.** Financial Domain Team and Compliance Team group provisioning mechanics (creation, membership management, per-project-site setup) and adapter authorization implementation (how adapters validate group membership at runtime) remain implementation decisions for P1-B1.
 
 ---
@@ -1374,3 +1389,4 @@ All build-ready containers are classified by their relationship to SharePoint On
 | 1.9 | 2026-03-17 | Architecture | Froze financial-sensitive data security model: list-level permission isolation via Financial Domain Team and Compliance Team SharePoint groups, service-layer enforcement mirrors the same boundary, UI/view-only conventions explicitly rejected as sole mechanism, item-level permissions rejected as default model. Standardized security terminology across 9 container appendices and 9 register entries. Narrowed open decision to group provisioning and adapter authorization mechanics. |
 | 2.0 | 2026-03-17 | Architecture | Froze content type strategy: three hub-level types (HBBaseListItem, HBDocumentItem, HBDictionaryItem) published through Content Type Gallery cover all Phase 1 containers; no domain-specific content types needed for Phase 1; paired libraries evaluate per-domain when deferred domains become build-ready; template governance at schema level not content-type level. Fixed HBDocumentItem "Used By" to reflect Phase 1 reality. Separated document library versioning rules into Phase 1 build-ready vs future guidance. Narrowed open decision to per-domain evaluation for future paired libraries. |
 | 2.1 | 2026-03-17 | Architecture | Froze indexing and query-pattern strategy: query-pattern-first provisioning (indexes at creation time, not deferred), volume risk classification for all build-ready containers, 5,000-item threshold strategy for hub-site dictionaries (CostCodes, CSICodes) and threshold-risk project-site lists, default view provisioning requirements (filtered, index-aligned), adapter-layer query routing expectations for cross-project aggregation and threshold-risk lists. |
+| 2.2 | 2026-03-17 | Architecture | Froze permission-scope minimization rule: site-level inheritance as default, explicit inheritance preference order (site → list → folder → item-by-exception-only), prohibition on item-level ACLs as default for any container, exception governance requirements (documented justification, scope count, review mechanism), practical unique-scope limits (~50,000 per list degradation boundary), interaction with financial/compliance isolation model. |
