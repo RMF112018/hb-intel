@@ -335,9 +335,9 @@ HB Intel uses a multi-layered identity approach to maintain stability across sys
 - **Format:** RFC 4122 UUID v4 (stored as string in SharePoint list, Table Storage, and AF state)
 - **Example:** `550e8400-e29b-41d4-a716-446655440000`
 
-### Entity Record Identity
+### Entity Record Identity (Quick Reference)
 
-Entity-level governance introduces multiple identity patterns beyond SharePoint numeric item IDs. Adapter implementers should select the pattern that matches the entity's data class and mutability:
+> For the complete frozen identity strategy, see [Phase 1 Identity Strategy Freeze](#phase-1-identity-strategy-freeze) below. This table provides a quick-reference summary of the six structural patterns; the freeze section defines the 10 identity classes, field naming conventions, resolution rules, and implementation directives that govern their use.
 
 | Pattern | Description | When to Use | Examples |
 |---------|-------------|-------------|----------|
@@ -347,13 +347,6 @@ Entity-level governance introduces multiple identity patterns beyond SharePoint 
 | **Junction/intersection key** | Composite key on N:M or N-way intersection; all FK fields form the key | Normalized many-to-many or many-to-many-to-many relationships | `(item_instance_id, role_party_id, value_code)`, `(evaluation_id, criterion_def_id)` |
 | **Batch/provenance key** | Surrogate `batch_id` unique per import run; scopes all child findings | Import/provenance tracking entities in Azure Table Storage | `schedule_import_batch`, `lessons_import_batch`, `scorecard_import_batch` |
 | **Dictionary natural key** | Semantic code string from governed vocabulary; human-readable and stable | Shared reference dictionaries on hub site; enumeration-style data | `category_key`, `magnitude_key`, `value_code`, `family_code`, `role_party_code` |
-
-**Pattern selection rule:**
-- Use **surrogates** for mutable records that need stable external references.
-- Use **composite natural keys** for records whose identity is inherently multi-field (batch-scoped source records, version-scoped definitions).
-- Use **junction keys** for intersection entities — all participating FK fields plus any discriminating value form the key.
-- Use **dictionary natural keys** for governed vocabularies where the code string is the business identity.
-- Use **batch keys** for provenance records that are always scoped to a single import run.
 
 **Client presentation:** Domain-prefixed wrapping (`domain-{itemId}`) remains the standard for client-facing API responses on SharePoint-backed records. Surrogate and composite keys are returned directly without wrapping. Internal SharePoint numeric item IDs are never exposed to clients.
 
@@ -369,6 +362,92 @@ Entity-level governance introduces multiple identity patterns beyond SharePoint 
 - **Sage:** Cost codes, GL accounts, purchase requisition numbers
 - **Autodesk:** Revit element IDs, sheet numbers, model revision hashes
 - **Strategy:** Maintain a federated identity mapping table in Table Storage (partition key: `federated-identity`, row key: `{externalSystem}:{externalId}:{hbIntelDomainKey}`)
+
+---
+
+## Phase 1 Identity Strategy Freeze
+
+This section freezes the identity rules for all Phase 1 canonical entities and their child records. The identity classes, field naming conventions, resolution rules, and implementation directives defined here are authoritative for P1-B1 and all subsequent adapter, parser, and feature implementation. Downstream work must not invent local identity conventions when the record type falls under one of the frozen classes below.
+
+### Frozen Identity Classes
+
+| Class | Record Type | Identity Rule | Key Pattern | Entity Examples |
+|-------|------------|---------------|-------------|-----------------|
+| **A. Project/root anchor** | Project identity | Immutable UUID assigned by provisioning service; cross-domain anchor key; never reassigned or reused | `project_id` (RFC 4122 UUID v4) | Project provisioning record |
+| **B. SharePoint-backed business records** | Project-level instance/header records persisted in SharePoint lists | SharePoint numeric item ID is internal implementation detail only; expose stabilized HB Intel keys — either domain-prefixed wrapping (`domain-{itemId}`) or surrogate canonical `*_id`; raw SP numeric IDs must never appear in public API contracts, client state, or cross-system references | `domain-{itemId}` or surrogate `*_id` | `schedule_activity`, `kickoff_instance`, `project_lifecycle_checklist`, `checklist_item`, `scorecard_evaluation` |
+| **C. Shared template/reference records** | Hub-site templates, template versions, dictionary entries, rubric definitions, role/party catalogs | Stable canonical IDs — surrogate `*_id` for template/version records, dictionary natural `*_key` for governed vocabularies; SP numeric IDs internal only; display text is never identity | Surrogate `*_id` + `(template_id, version_number)` composite; or natural `*_key` | `kickoff_template`, `scorecard_rubric_version`, `lesson_category_dictionary`, `responsibility_role_party`, `assignment_value_type` |
+| **D. Child records** | Row-level children of a parent record | Stable surrogate `*_id` with required FK to parent; parent linkage alone is not sufficient identity — each child must have its own stable ID; row order and display name are not identity | Surrogate `*_id`; `(parent_id, child_id)` composite context | `kickoff_row`, `lesson_record`, `lesson_keyword`, `lesson_linked_reference`, `kickoff_evidence_link`, `checklist_evidence_link` |
+| **E. Import-batch/provenance records** | Import run tracking entities in Azure Table Storage | System-generated surrogate `batch_id` — opaque string (UUID or equivalent), not derived from source filename; unique per import run; source filename stored as metadata (`source_file_name`) but is not identity; source row numbers are provenance only | `batch_id` (surrogate, system-generated) | `schedule_import_batch`, `budget_import_batch`, `kickoff_import_batch`, `checklist_import_batch`, `responsibility_import_batch`, `scorecard_import_batch`, `lessons_import_batch` |
+| **F. Junction/intersection records** | N:M or N-way normalized relationship records | Composite natural key formed by all participating FK fields plus any discriminating value; uniqueness enforced at the tuple level; an optional surrogate `*_id` may be added if the adapter needs a stable single-field reference, but the composite natural key is the canonical identity | Composite `(fk1, fk2[, value_code])` | `responsibility_assignment` `(item_instance_id, role_party_id, value_code)`, `criterion_score_record` `(evaluation_id, criterion_def_id)` |
+| **G. Person-attribution fields** | Any field identifying a human actor (creator, uploader, evaluator, approver, responsible party when that party is a person) | UPN is the authoritative identity when the person is an Entra ID-resolved user; display text preserved in `*_display` field but non-authoritative; resolved canonical key stored in `*_key` when a resolution layer exists; `*_key` is nullable if the person cannot be resolved — never invent synthetic person IDs to fill the gap; `created_by`, `uploaded_by`, `approved_by` fields store UPN directly | `*_key` (UPN or resolved canonical key); `*_display` (raw/mirrored text) | `created_by` (UPN), `uploaded_by` (UPN), `evaluator_key`, `approver_key`, `responsible_entity_key`, `project_executive_key` |
+| **H. Vendor/subcontractor/party identity** | External party references — subcontractors, vendors, responsible parties that are not individual persons | Canonical `*_key` when resolved via a party registry, vendor catalog, or `responsibility_role_party` lookup; raw `*_display` text always preserved regardless of resolution status; external source ID preserved when available via `source_*` field; display text is never the durable join key; if unresolved, `*_key` is nullable — do not use display label as a substitute for a missing key | `*_key` (canonical); `*_display` (raw text); `source_*` (external) | `subcontractor_key`, `responsible_party_key`, `role_party_code` |
+| **I. External mapping/federated identity records** | Cross-system source-object references and mapping rows | External IDs preserved as `source_*` fields; internal HB Intel linkage uses a canonical mapping record with its own surrogate `mapping_id`; the external key is authoritative for the external system but is not HB Intel's primary internal identifier unless explicitly designated in the entity's A2 register row | `mapping_id` (surrogate); `source_*` (external key); natural key `(line_id, target_entity_type, target_entity_id)` | `budget_line_external_mapping`, federated identity table (Phase 4+) |
+| **J. Findings/audit/provenance rows** | Validation findings, audit log entries, parser diagnostics | Append-safe surrogate `finding_id` or deterministic `(batch_id, sequence)` composite; batch-scoped; these are not business-record IDs and must be clearly distinguished from the authoritative business objects they describe; never reuse a finding ID across batches | `finding_id` (surrogate) or `(batch_id, sequence)` | `import_finding`, `budget_import_finding`, `scorecard_import_finding`, `lessons_import_finding`, audit log entries |
+
+### Implementation Directive: Do Not Invent IDs Locally
+
+If a record type falls under identity classes A–J above, downstream adapters, parsers, and feature modules **must** use the frozen identity pattern. The following rules apply:
+
+1. **No local ID invention.** Adapters must not create local ID formats, naming conventions, or key-generation strategies that diverge from the class rules above.
+2. **New entity types require A2 amendment.** If a new canonical entity type is introduced in a later phase or wave, its identity class must be added to this table before implementation bakes in a local convention.
+3. **Surrogates are system-generated.** Surrogate `*_id` and `batch_id` values are generated by the owning service (import service, provisioning service, adapter layer) — not by client code, UI, or external callers.
+4. **Source-system IDs are preserved, not promoted.** When an imported record carries a source-system ID (e.g., Procore budget code, P6 activity ID), the source ID is preserved in a `source_*` field but does not replace the canonical HB Intel identity unless the A2 register row explicitly designates it as the primary key.
+5. **Display text is never a key.** Human-readable labels, display names, and formatted descriptions may be stored for presentation but must never be used as join keys, FK targets, or uniqueness constraints.
+
+### Field Naming Conventions (Frozen)
+
+Identity-related field names across all Phase 1 canonical schemas must follow these suffix conventions:
+
+| Suffix / Prefix | Meaning | Authoritative? | Examples |
+|-----------------|---------|----------------|----------|
+| `*_id` | Canonical record identifier (surrogate or natural key) | Yes | `report_id`, `lesson_id`, `evaluation_id`, `template_id` |
+| `project_id` | Immutable HB Intel project UUID | Yes (cross-domain anchor) | Always UUID v4 |
+| `*_key` | Stable resolved canonical identity for a person, vendor, party, or reference entity | Yes (when populated) | `evaluator_key`, `subcontractor_key`, `responsible_party_key`, `category_key` |
+| `*_display` | Raw or mirrored human-readable label; preserved for presentation and provenance | No — never a join key | `evaluator_display`, `subcontractor_display_name`, `responsible_party_display` |
+| `source_*` | Preserved source-system identifier or raw source text from an external system | Authoritative for the source system only | `source_activity_id`, `source_file_name`, `source_project_id` |
+| `batch_id` | Canonical import batch identity; always surrogate, system-generated | Yes (within import scope) | All `*_import_batch` entities |
+| `external_*` / `source_system_*` | External source identity fields used in federated mapping | Authoritative for the external system only | `external_id`, `source_system_code` |
+| `created_by` / `uploaded_by` / `approved_by` | Authoritative person attribution — UPN unless explicitly resolved through a canonical person-key layer | Yes (UPN) | Always store as UPN string |
+
+**Invariants:**
+- Display text (`*_display`) is never the durable join key for cross-record or cross-domain references.
+- Source row numbers from imported files are provenance metadata only — never entity identity.
+- Source filenames are metadata (`source_file_name`) — never record identity or batch identity.
+- SharePoint internal numeric item IDs are never part of the public API contract.
+
+### Person and Vendor/Party Resolution Rules (Frozen)
+
+#### Person/user identity
+
+1. **UPN is authoritative** when the person is an Entra ID-resolved user. All `created_by`, `uploaded_by`, and `approved_by` fields store UPN directly.
+2. **Display text is preserved but non-authoritative.** When a person field has both `*_key` and `*_display`, the `*_display` field preserves the raw or mirrored human-readable name. It may be used for presentation but must not be used as a join key.
+3. **Key is nullable if unresolved.** When a person cannot be resolved to an Entra ID user (e.g., imported from a source workbook with only a display name), the `*_key` field is left null and the `*_display` field carries the raw text. Do not invent synthetic person IDs to fill the gap.
+4. **No synthetic user IDs.** HB Intel does not generate synthetic person identifiers. Person identity flows from Entra ID (UPN) or remains unresolved (null key + preserved display).
+
+#### Vendor/subcontractor/party identity
+
+1. **Canonical `*_key` when resolved.** When a vendor, subcontractor, or external party can be resolved to a canonical party registry entry (e.g., `responsibility_role_party.role_party_code`, a future vendor registry), store the canonical key in the `*_key` field.
+2. **Raw `*_display` always preserved.** The source text for the party name is always stored in a `*_display` field regardless of resolution status.
+3. **External source ID preserved when available.** If the party has an identifier in an external system (e.g., Procore vendor ID), store it in a `source_*` field.
+4. **Display label is never the durable join key.** Cross-record and cross-project references to vendors/parties must use the canonical `*_key`, not the display text.
+5. **Key is nullable if unresolved.** When a party cannot be resolved (e.g., imported name with no registry match), the `*_key` is left null. Resolution may occur later via manual curation or automated matching.
+
+#### Cross-system references
+
+1. **Mapping records or federated identity logic required.** Cross-system joins must use explicit mapping records (e.g., `budget_line_external_mapping`) or the federated identity table — never free-form text joins.
+2. **External keys are preserved, not promoted.** The external system's key is stored as `source_*` metadata but does not become HB Intel's internal primary key unless the entity's A2 register row explicitly designates it.
+
+### Import Identity Rules (Frozen)
+
+1. **Every import batch gets a system-generated surrogate `batch_id`.** The import service generates a unique, opaque string (UUID or equivalent) for each import run. This is the canonical batch identity.
+2. **Source filename is metadata, not identity.** The uploaded file's name is stored in `source_file_name` for provenance but is never used as `batch_id` or any part of record identity.
+3. **Source row numbers are provenance only.** Row/line numbers from imported spreadsheets or files may be stored for diagnostic traceability but are never entity identity.
+4. **Natural keys within imported data must state their scope.** When an imported record carries a natural key from the source system (e.g., `source_activity_id`, `budget_code`), the A2 entity-level register row must state whether that key is:
+   - Globally unique (rare; only if the source system guarantees global uniqueness)
+   - Unique within project (common; scoped to `project_id`)
+   - Unique within batch (common for import-driven data; scoped to `batch_id`)
+5. **Findings and provenance rows are batch-scoped and append-only.** Each finding is scoped to its parent `batch_id` and must have an append-safe identity (surrogate `finding_id` or `(batch_id, sequence)` composite). Findings from different batches must never collide.
+6. **Imported business rows may use surrogate canonical IDs even when a natural key exists.** When both a source natural key and a HB Intel surrogate exist (e.g., `budget_line` with `budget_code` natural key and `line_id` surrogate), the surrogate is the canonical HB Intel identity and the natural key is preserved for source-system correlation.
 
 ---
 
@@ -562,6 +641,22 @@ Stub adapters (Procore, Sage, Autodesk) exist but do not write in Phase 1.
 
 ---
 
+## Identity Strategy Validation Checklist
+
+This checklist confirms that the Phase 1 identity strategy freeze is complete and internally consistent. Each item must pass before A2 can be treated as implementation-ready for P1-B1.
+
+- [x] **Every Phase 1 canonical entity family has an approved identity class (A–J).** All 7 expanded domains (A4, A6, A8, A10, A11, A12, A13) have entity-level rows with explicit Identity Key columns that align to the frozen classes.
+- [x] **No schema relies on raw SharePoint numeric IDs as the exposed contract.** All SharePoint-backed entities use domain-prefixed wrapping or surrogate canonical IDs for external exposure.
+- [x] **Person attribution uses UPN/resolved-key rules consistently.** `created_by` and `uploaded_by` fields across all schemas are UPN. Person `*_key` fields are nullable-if-unresolved with `*_display` always populated.
+- [x] **Vendor/party resolution uses key + display semantics consistently.** `subcontractor_key`, `responsible_party_key`, and similar fields use canonical key when resolved, with raw `*_display` always preserved. Display text is never the join key.
+- [x] **Import batches use system-generated surrogate `batch_id` consistently.** All 7 domain import batches use opaque surrogate `batch_id`. Source filenames are metadata only.
+- [x] **Child records have stable surrogate IDs with required FK to parent.** All child entities (`kickoff_row`, `lesson_record`, `lesson_keyword`, `checklist_item`, etc.) have their own `*_id` with FK to parent.
+- [x] **Junction records have explicit composite natural keys.** `responsibility_assignment` and `criterion_score_record` have documented composite keys with uniqueness at the tuple level.
+- [x] **Field naming follows frozen suffix conventions.** `*_id`, `*_key`, `*_display`, `source_*`, `batch_id`, `created_by`/`uploaded_by`/`approved_by` suffixes are used consistently.
+- [ ] **Remaining domains (A5, A7, A9) will require identity class assignment when entity-level rows are added.** These are not yet frozen but will follow the same class system.
+
+---
+
 ## Revision History
 
 | Version | Date | Author | Notes |
@@ -575,4 +670,5 @@ Stub adapters (Procore, Sage, Autodesk) exist but do not write in Phase 1.
 | 0.7 | 2026-03-17 | Architecture | Add entity-level lessons learned (P1-A13) register; distinguish shared dictionaries (hub, Class C) from project report/child records (project site, Class A) and operational state (Azure Table Storage, Class D); model keyword and linked-reference as first-class child entities |
 | 0.8 | 2026-03-17 | Architecture | Normalize cross-cutting identity, write-safety, and operational-state rules for entity-level governance; replace stale domain-level assumptions with entity-pattern summaries; add cross-cutting archetype table; add non-SharePoint operational state section; add template-version and draft-to-approved conflict scenarios |
 | 0.9 | 2026-03-17 | Architecture | Final QA reconciliation: fix A12 container naming to match A3 (SubcontractorScorecards + ScorecardCriterionScores); update document metadata date and status; tighten domain-level summary alignment; confirm entity-level coverage complete for 7 domains with no column gaps |
+| 1.0 | 2026-03-17 | Architecture | Phase 1 Identity Strategy Freeze: add 10 frozen identity classes (A–J) covering project anchors, SP-backed records, templates, children, import batches, junctions, person-attribution, vendor/party, external mappings, and findings; freeze field naming conventions and person/vendor resolution rules; add import identity rules; add identity QA validation checklist; align companion schemas (A4–A13) to frozen rules |
 

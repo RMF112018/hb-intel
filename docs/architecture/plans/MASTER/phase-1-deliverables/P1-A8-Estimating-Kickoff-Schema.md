@@ -147,7 +147,7 @@ Only populated in Final Deliverables sections. Not a YES/NO pair — it's a sepa
 | description | string | No | Template purpose description |
 | is_active | boolean | Yes | Whether this template version is the current default |
 | created_at | datetime | Yes | Template creation timestamp |
-| created_by | string | Yes | Creator identity |
+| created_by | string | Yes | Creator identity (UPN) |
 
 ### kickoff_template_item
 
@@ -191,14 +191,14 @@ Project-level kickoff instance with snapshot header fields.
 | proposal_type | string | No | — | Type of proposal (e.g., Lump Sum Proposal) |
 | rfi_format | string | No | — | RFI management format (Excel, Procore, email) |
 | project_executive_display | string | No | — | PE display name snapshot |
-| project_executive_key | string | No | — | Stable PE person key (if resolved) |
+| project_executive_key | string | No | — | Canonical person key (UPN when Entra-resolved; nullable if unresolved; `project_executive_display` is always populated per A2 identity class G) |
 | primary_contact_display | string | No | — | Owner primary contact snapshot |
 | estimator_assigned_display | string | No | — | Estimator(s) display name snapshot |
-| estimator_assigned_key | string | No | — | Stable estimator person key (if resolved) |
+| estimator_assigned_key | string | No | — | Canonical person key (UPN when Entra-resolved; nullable if unresolved; `estimator_assigned_display` is always populated per A2 identity class G) |
 | status | string | Yes | — | Instance status: draft, active, submitted, closed |
 | batch_id | string | No | FK | FK to kickoff_import_batch (null for app-created instances) |
 | created_at | datetime | Yes | — | Instance creation timestamp |
-| created_by | string | Yes | — | Creator identity |
+| created_by | string | Yes | — | Creator identity (UPN) |
 | updated_at | datetime | Yes | — | Last modification timestamp |
 | notes | text | No | — | Instance-level notes |
 
@@ -222,7 +222,7 @@ Child row on a project instance. Shared base with subtype-specific behavior.
 | raw_yes_marker | boolean | No | — | Source had "x" in YES column |
 | raw_no_marker | boolean | No | — | Source had "x" in NO column |
 | responsible_display | string | No | — | Raw responsible text from source |
-| responsible_entity_key | string | No | — | Stable person/team key (if resolved) |
+| responsible_entity_key | string | No | — | Canonical person key (UPN when Entra-resolved; nullable if unresolved; `responsible_display` is always populated per A2 identity class G) |
 | responsible_entity_type | string | No | — | `person`, `team`, `role`, `na`, `placeholder` |
 | target_date | date | No | — | Resolved deadline/due date for this project instance |
 | target_date_raw | string | No | — | Raw deadline text from source (preserved if text/narrative) |
@@ -257,7 +257,7 @@ Note/history entries per row.
 | note_id | string | Yes | Note record identifier |
 | row_id | string | Yes | FK to kickoff_row |
 | note_text | string | Yes | Note content |
-| created_by | string | Yes | Author identity |
+| created_by | string | Yes | Author identity (UPN) |
 | created_at | datetime | Yes | Note timestamp |
 
 ### kickoff_import_batch
@@ -266,13 +266,13 @@ Tracks workbook imports for provenance.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| batch_id | string | Yes | Import batch identifier |
+| batch_id | string | Yes | System-generated surrogate (opaque string); source filename is metadata only |
 | project_id | string | No | FK to project domain |
 | source_file_name | string | Yes | Original file name |
 | source_file_url | string | No | SharePoint document library URL |
 | import_status | string | Yes | pending, parsing, complete, failed |
 | total_rows_imported | number | No | Count of rows processed |
-| uploaded_by | string | Yes | Uploader identity |
+| uploaded_by | string | Yes | Uploader identity (UPN) |
 | uploaded_at | datetime | Yes | Upload timestamp |
 | parser_version | string | No | Parser version |
 | notes | text | No | Import notes |

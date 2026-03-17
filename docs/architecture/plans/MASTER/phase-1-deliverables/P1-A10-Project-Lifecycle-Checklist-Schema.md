@@ -132,7 +132,7 @@ All three are exported from Procore's "Inspection Template" system with consiste
 | source_system | string | No | Source system (e.g., "Procore Inspection Template") |
 | is_active | boolean | Yes | Whether this is the current active template for its family |
 | created_at | datetime | Yes | Creation timestamp |
-| created_by | string | Yes | Creator identity |
+| created_by | string | Yes | Creator identity (UPN) |
 
 ### lifecycle_checklist_template_item
 
@@ -232,7 +232,7 @@ One per family per project (e.g., one startup instance, one safety instance, one
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| batch_id | string | Yes | Import batch identifier |
+| batch_id | string | Yes | System-generated surrogate (opaque string); import batch identifier |
 | project_id | string | No | FK to project domain |
 | checklist_family | string | Yes | Which family was imported |
 | source_system | string | Yes | Source system (e.g., "Procore") |
@@ -240,7 +240,7 @@ One per family per project (e.g., one startup instance, one safety instance, one
 | import_status | string | Yes | pending, parsing, complete, failed |
 | total_sections | number | No | Sections processed |
 | total_items | number | No | Items processed |
-| uploaded_by | string | Yes | Uploader identity |
+| uploaded_by | string | Yes | Uploader identity (UPN) |
 | uploaded_at | datetime | Yes | Upload timestamp |
 | parser_version | string | No | Parser version |
 

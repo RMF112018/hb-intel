@@ -135,10 +135,10 @@ One per project — the report-level container.
 | scheduled_completion | date | No | — | Planned completion date |
 | actual_completion | date | No | — | Actual completion date |
 | days_variance | number | No | — | Schedule variance in days |
-| project_manager_display | string | No | — | PM name |
-| superintendent_display | string | No | — | Superintendent name |
-| project_executive_display | string | No | — | PX name |
-| report_prepared_by | string | No | — | Author name |
+| project_manager_display | string | No | — | Non-authoritative display text; not a join key; stable identity via resolved person key when available |
+| superintendent_display | string | No | — | Non-authoritative display text; not a join key; stable identity via resolved person key when available |
+| project_executive_display | string | No | — | Non-authoritative display text; not a join key; stable identity via resolved person key when available |
+| report_prepared_by | string | No | — | Author identity (UPN when Entra-resolved; raw display preserved per A2 identity class G) |
 | report_date | date | No | — | Report completion date |
 | delivery_method | string | No | — | Delivery method classification |
 | market_sector | string | No | — | Market sector classification |
@@ -235,12 +235,12 @@ Structured document/artifact links per lesson.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| batch_id | string | Yes | Import batch identifier |
+| batch_id | string | Yes | System-generated surrogate (opaque string); source filename is metadata only |
 | project_id | string | No | FK to project |
 | source_file_name | string | Yes | Original file name |
 | import_status | string | Yes | pending, parsing, complete, failed |
 | total_lessons | number | No | Lessons processed |
-| uploaded_by | string | Yes | Uploader identity |
+| uploaded_by | string | Yes | Uploader identity (UPN) |
 | uploaded_at | datetime | Yes | Upload timestamp |
 | parser_version | string | No | Parser version |
 

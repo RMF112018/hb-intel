@@ -166,7 +166,7 @@ The canonical data model uses **normalized assignment junction records** even th
 | source_sheet_name | string | No | Source worksheet name (e.g., "PM", "Field", "Template") |
 | is_active | boolean | Yes | Whether this is the current active template |
 | created_at | datetime | Yes | Creation timestamp |
-| created_by | string | Yes | Creator identity |
+| created_by | string | Yes | Creator identity (UPN) |
 
 ### responsibility_template_version
 
@@ -243,7 +243,7 @@ Governed catalog of roles/parties available as assignment targets.
 | snapshot_date | datetime | No | — | When template was snapshotted |
 | batch_id | string | No | FK | FK to import batch (null for app-created) |
 | created_at | datetime | Yes | — | Instance creation timestamp |
-| created_by | string | Yes | — | Creator identity |
+| created_by | string | Yes | — | Creator identity (UPN) |
 | notes | text | No | — | Instance-level notes |
 
 ### project_item_instance
@@ -262,8 +262,8 @@ Governed catalog of roles/parties available as assignment targets.
 | display_order | number | Yes | — | Sort position (may override template) |
 | article_number | string | No | — | Contract article (Owner Contract) |
 | page_reference | string | No | — | Page reference (Owner Contract) |
-| responsible_party_display | string | No | — | Single responsible party text (Owner Contract) |
-| responsible_party_key | string | No | — | Canonical party key (Owner Contract, if resolved) |
+| responsible_party_display | string | No | — | Non-authoritative display text; raw source preserved; not a join key (Owner Contract) |
+| responsible_party_key | string | No | — | Canonical party key when resolved; nullable if unresolved; `responsible_party_display` always populated; display text is not the join key (per A2 identity class H) |
 | source_row_number | number | No | — | Source workbook row |
 
 ### responsibility_assignment
@@ -283,7 +283,7 @@ Normalized intersection record — one per (item × role × assignment value). T
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| batch_id | string | Yes | Import batch identifier |
+| batch_id | string | Yes | System-generated surrogate (opaque string); import batch identifier |
 | project_id | string | No | FK to project domain |
 | source_system | string | Yes | Source system (e.g., "Excel Template") |
 | source_file_name | string | Yes | Original file name |
@@ -291,7 +291,7 @@ Normalized intersection record — one per (item × role × assignment value). T
 | import_status | string | Yes | pending, parsing, complete, failed |
 | total_items | number | No | Items processed |
 | total_assignments | number | No | Assignment intersections processed |
-| uploaded_by | string | Yes | Uploader identity |
+| uploaded_by | string | Yes | Uploader identity (UPN) |
 | uploaded_at | datetime | Yes | Upload timestamp |
 | parser_version | string | No | Parser version |
 

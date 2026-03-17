@@ -208,7 +208,7 @@ else:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| batch_id | string | Yes | HB Intel import batch identifier |
+| batch_id | string | Yes | System-generated surrogate (opaque string); source filename is metadata only |
 | project_id | string | Yes | FK to project domain |
 | source_file_name | string | Yes | Original uploaded file name |
 | source_file_url | string | Yes | SharePoint document library URL |

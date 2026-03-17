@@ -118,7 +118,7 @@ Portfolio-level database with per-evaluation rows: Subcontractor, Trade, Project
 | score_scale_max | number | Yes | Maximum score (5) |
 | is_active | boolean | Yes | Whether this is the current active template |
 | created_at | datetime | Yes | Creation timestamp |
-| created_by | string | Yes | Creator identity |
+| created_by | string | Yes | Creator identity (UPN) |
 
 ### scorecard_rubric_version
 
@@ -164,16 +164,16 @@ Per-project, per-subcontractor evaluation instance.
 |-------|------|----------|-----|-------------|
 | evaluation_id | string | Yes | PK | HB Intel evaluation identifier |
 | project_id | string | Yes | FK | FK to project domain |
-| subcontractor_key | string | No | FK | Canonical subcontractor/vendor reference (if resolved) |
-| subcontractor_display_name | string | Yes | — | Subcontractor name as entered |
+| subcontractor_key | string | No | FK | Canonical subcontractor/vendor key when resolved; nullable if unresolved; `subcontractor_display_name` always populated; display text is not the join key (per A2 identity class H) |
+| subcontractor_display_name | string | Yes | — | Non-authoritative display text; not a join key |
 | trade_package | string | No | — | Trade/scope description |
 | rubric_version_id | string | No | FK | FK to rubric version used |
 | evaluation_type | string | No | — | `interim`, `final`, `closeout` |
 | evaluation_status | string | Yes | — | `draft`, `in_progress`, `completed`, `approved` |
 | official_final_flag | boolean | Yes | — | True if this is the designated official final scorecard for aggregation |
 | evaluation_date | date | No | — | Date of evaluation |
-| evaluator_display | string | No | — | Evaluator name |
-| evaluator_key | string | No | — | Canonical evaluator person key (if resolved) |
+| evaluator_display | string | No | — | Non-authoritative display text; not a join key |
+| evaluator_key | string | No | — | Canonical person key (UPN when Entra-resolved; nullable if unresolved; `evaluator_display` always populated per A2 identity class G) |
 | evaluator_title | string | No | — | Evaluator title |
 | project_name_snapshot | string | No | — | Project name at evaluation time |
 | project_number_snapshot | string | No | — | Project number at evaluation time |
@@ -255,8 +255,8 @@ One per approver role per evaluation — structured approval records.
 | approval_id | string | Yes | Approval record identifier |
 | evaluation_id | string | Yes | FK to scorecard_evaluation |
 | approval_role | string | Yes | `project_manager`, `superintendent`, `project_executive` |
-| approver_display | string | No | Approver name/signature |
-| approver_key | string | No | Canonical person key (if resolved) |
+| approver_display | string | No | Non-authoritative display text; not a join key |
+| approver_key | string | No | Canonical person key (UPN when Entra-resolved; nullable if unresolved; `approver_display` always populated per A2 identity class G) |
 | approval_date | date | No | Date of approval |
 | approval_status | string | No | `pending`, `approved`, `declined` |
 
@@ -264,12 +264,12 @@ One per approver role per evaluation — structured approval records.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| batch_id | string | Yes | Import batch identifier |
+| batch_id | string | Yes | System-generated surrogate (opaque string); source filename is metadata only |
 | project_id | string | No | FK to project |
 | source_file_name | string | Yes | Original file name |
 | import_status | string | Yes | pending, parsing, complete, failed |
 | total_evaluations | number | No | Evaluations processed |
-| uploaded_by | string | Yes | Uploader identity |
+| uploaded_by | string | Yes | Uploader identity (UPN) |
 | uploaded_at | datetime | Yes | Upload timestamp |
 
 ### scorecard_import_finding

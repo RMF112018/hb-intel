@@ -166,7 +166,7 @@ Tier fields use a `code - description` format that must be parsed:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| batch_id | string | Yes | HB Intel import batch identifier |
+| batch_id | string | Yes | System-generated surrogate (opaque string); source filename is metadata only |
 | project_id | string | Yes | FK to project domain |
 | source_system | string | Yes | Source system name (e.g., "Procore") |
 | source_file_name | string | Yes | Original uploaded file name |
