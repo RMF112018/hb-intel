@@ -1,3 +1,13 @@
+| Field | Value |
+|---|---|
+| **Document ID** | P1-B1 |
+| **Phase** | Phase 1 — Production Data Plane and Integration Backbone |
+| **Workstream** | B — Adapter Completion |
+| **Document Type** | Engineering Plan |
+| **Status** | Draft |
+| **Last Updated** | 2026-03-17 |
+| **Owner** | Frontend Platform / Data Access |
+
 # Proxy Adapter Implementation Plan
 
 **Goal:** Implement a production-ready HTTP proxy adapter for the HB Intel frontend PWA, enabling all 11 domain repositories to communicate with Azure Functions backend via Bearer token authentication.
@@ -18,6 +28,98 @@
 - Authority: `factory.ts`, `base.ts`, error hierarchy in `errors/index.ts`
 - Test pattern: mirror the mock adapter structure
 - Factory wiring: follow existing switch pattern, remove `AdapterNotImplementedError` throws for proxy mode
+
+---
+
+## Scope
+
+### In Scope
+
+- `ProxyHttpClient` HTTP client with Bearer auth, error translation, timeout, and request tracing
+- `ProxyBaseRepository<T>` abstract base with path building, project-scoped paths, and query marshaling
+- 11 concrete proxy repository implementations matching their port interfaces in `@hbc/data-access`
+- Factory wiring: `setProxyContext()`, lazy `ProxyHttpClient` singleton, factory switch for proxy mode
+- Test infrastructure: vitest setup for `@hbc/data-access`, 100+ unit and integration tests with mocked `fetch`
+- PWA bootstrap guidance for proxy activation (code example for `main.tsx`, not code changes)
+
+### Out of Scope
+
+| Concern | Owner | Reference |
+|---|---|---|
+| Backend Azure Functions routes and handlers | P1-C1 | Backend Service Contract Catalog |
+| Auth middleware, token validation, OBO exchange | P1-C2 | Backend Auth and Validation Hardening |
+| Retry logic, idempotency keys, failure classification | P1-D1 | Write Safety, Retry, Recovery |
+| Contract testing with Zod schemas and MSW handlers | P1-E1 | Contract Test Suite Plan |
+| SharePoint adapter implementation | P1-B2 | Adapter Completion Backlog |
+| API adapter implementation | P1-B2 | Adapter Completion Backlog |
+| Mock adapter changes | — | Existing mock adapters are untouched |
+
+---
+
+## Milestones
+
+| Milestone | Chunk | Deliverable | Gate |
+|---|---|---|---|
+| **M0** | Chunk 0 | Vitest configured for `@hbc/data-access`; `pnpm --filter @hbc/data-access test` runs successfully | `vitest run` exits 0 |
+| **M1** | Chunk 1 | `ProxyHttpClient` + `ProxyBaseRepository` implemented and tested | 24+ unit tests pass; `check-types` clean |
+| **M2** | Chunk 2 | Lead + Project proxy repositories complete | First two real domain adapters pass all tests; factory returns proxy repos |
+| **M3** | Chunk 3 | All 11 proxy repositories implemented | 90+ tests across all adapter test files |
+| **M4** | Chunk 4 | Factory wired, integration tests passing, full suite green | 100+ tests pass; `check-types` and `lint` clean; no `AdapterNotImplementedError` for proxy mode |
+
+---
+
+## Acceptance Criteria
+
+B1 is **done** when all of the following are true:
+
+1. All 11 proxy repository classes exist in `packages/data-access/src/adapters/proxy/` and implement their corresponding port interfaces
+2. `pnpm --filter @hbc/data-access test` passes with 100+ tests (all using mocked `fetch`, no network calls)
+3. `pnpm --filter @hbc/data-access check-types` passes with zero errors
+4. `pnpm --filter @hbc/data-access lint` passes with zero errors
+5. Every `create*Repository('proxy')` factory call returns a concrete proxy repository (no `AdapterNotImplementedError`)
+6. `setProxyContext(baseUrl, getToken)` initializes the lazy `ProxyHttpClient` singleton correctly
+7. Calling `create*Repository('proxy')` without prior `setProxyContext()` throws a clear initialization error
+8. Proxy adapter barrel (`adapters/proxy/index.ts`) exports all implementations
+9. `@hbc/data-access` is added to the root `pnpm test` filter
+
+B1 is **not done** until these are independently verified. Backend availability, MSAL registration, and contract testing (E1) are NOT acceptance criteria for B1 — B1 delivers testable adapter code, not end-to-end integration.
+
+---
+
+## Package and App Ownership
+
+| Package / App | Role | What Changes |
+|---|---|---|
+| `@hbc/data-access` | **Primary** | All proxy adapter code, factory wiring, test files, vitest config |
+| `@hbc/models` | Referenced (read-only) | Domain types and shared pagination types consumed by adapters |
+| `@hbc/query-hooks` | Consumer (not modified) | Calls factory functions; will automatically use proxy repos when mode='proxy' |
+| `apps/pwa` | Guidance only | Bootstrap activation example for `main.tsx`; no code changes in B1 scope |
+
+---
+
+## Risk Register
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| C1 finalizes different API paths than B1 assumes | Medium | Medium — requires updating paths in 11 repos + tests | All paths annotated as provisional (see Appendix A); path constants can be centralized if churn is high |
+| C1 error envelope uses `.error` field but B1 reads `.message` | High | Medium — generic error messages in production | Flagged in Appendix B; must be reconciled before production activation |
+| Pagination default mismatch (B1: 20-25, C1: 50) | High | Low — functional but suboptimal page sizes | Documented in Appendix B; align when C1 is frozen |
+| MSAL app registration not complete when proxy activation is needed | Medium | High — all proxy calls fail with 401 | B1 tests are independent of MSAL; production activation blocked until C2 delivers |
+| Estimating sub-resource routing (`/trackers`, `/kickoffs`) not confirmed in C1 | Medium | Medium — may require restructuring estimating adapter | Flagged in Appendix A; confirm with C1 before implementing Task 5 |
+| No vitest infrastructure exists yet | Certain | High — no tests can run | Task 0 is the first deliverable; blocks all subsequent tasks |
+
+---
+
+## Architecture Decisions
+
+| Decision | Rationale |
+|---|---|
+| **Proxy pattern over direct API** | PWA must reach Azure Functions backend over HTTP; proxy adapter is the production data path for all domain repositories |
+| **Factory + lazy singleton** | Consistent with the existing mock adapter factory pattern; provides DI-like behavior without a framework; `setProxyContext` defers initialization until MSAL is ready |
+| **Token-provider function, not static token** | MSAL tokens expire (~1 hour); `getToken()` is called per-request to ensure fresh tokens via `acquireTokenSilent()` |
+| **TDD with mocked fetch** | Proxy adapters are fully testable in isolation before any backend exists; mocked `fetch` validates HTTP method, path, headers, and error translation without network calls |
+| **No retry in B1** | Retry is a transport-layer concern owned by P1-D1; B1 provides the `ProxyHttpClient` injection surface that D1 will wrap with `withRetry()` |
+| **Domain-specific method names** | Port interfaces define the contract; proxy adapters implement the actual interface, not a generic CRUD template (see Prompt 1 correction) |
 
 ---
 
