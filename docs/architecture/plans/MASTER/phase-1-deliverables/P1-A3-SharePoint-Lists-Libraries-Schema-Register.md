@@ -323,7 +323,7 @@ P1-A10 defines 8 canonical entities supporting 3 checklist families (startup, sa
 
 ### Deferred / Future-Wave Placeholders
 
-These domains do not yet have complete logical entity models in the Phase 1 schema set. They remain placeholders until P1-A1 field expansion and/or dedicated schema artifacts are completed.
+The following domain does not yet have a complete logical entity model in the Phase 1 schema set. It remains a placeholder until a dedicated schema artifact is completed.
 
 | Domain | Entity | Logical Container Name | Physical Container Name | Container Type | Scope | Purpose | Notes |
 |--------|--------|------------------------|-------------------------|----------------|-------|---------|-------|
@@ -1258,7 +1258,7 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 | Security and Compliance Lead | — | — |
 
 **Approval Status:** Active — Closeout complete (v1.2). Physical schema register with per-container appendices for all Phase 1 build-ready domains.
-**Comments:** A3 closeout completed through 12 steps: authority boundary frozen (v0.2), build-ready/deferred scope split (v0.3), shared reusable schema assets and naming conventions (v0.4–0.5), Wave 1 containers completed (v0.6), all 13 domain groups added in execution order (v0.7), per-container appendix blocks with 12-point physical schema sequence for ~46 containers (v0.8), ambiguous storage cases resolved (v0.9), non-SharePoint entities registry (v1.0), open decisions reconciled to 4 true implementation choices (v1.1), final QA pass (v1.2). Three deferred domains (leads, contracts, pmp) remain placeholders pending schema artifacts. All shared dictionaries now have canonical schemas in P1-A5.
+**Comments:** A3 closeout completed through 12 steps: authority boundary frozen (v0.2), build-ready/deferred scope split (v0.3), shared reusable schema assets and naming conventions (v0.4–0.5), Wave 1 containers completed (v0.6), all 13 domain groups added in execution order (v0.7), per-container appendix blocks with 12-point physical schema sequence for ~46 containers (v0.8), ambiguous storage cases resolved (v0.9), non-SharePoint entities registry (v1.0), open decisions reconciled to 4 true implementation choices (v1.1), final QA pass (v1.2). Post-closeout: leads moved to build-ready with `MarketLeads` and `PipelineSnapshots` containers (v1.5, governed by P1-A14), contracts moved to build-ready with `PrimeContracts` container (v1.6, governed by P1-A15). One deferred domain (pmp) remains a placeholder pending a dedicated schema artifact. All shared dictionaries have canonical schemas in P1-A5.
 
 ---
 
