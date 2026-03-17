@@ -152,6 +152,67 @@ The 4 entities split across two storage tiers: SharePoint for user-facing busine
 
 P1-A3 stores the 4 canonical external financial entities across 2 SharePoint lists (`BudgetLines`, `BudgetImportBatches`), 1 document library (`BudgetUploadsLib` for raw Procore CSV provenance), and Azure Table Storage for findings and external mappings. This register preserves the logical entity-level SoR view for adapter design. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
 
+### Estimating kickoff domain (P1-A8)
+
+P1-A8 defines 7 canonical entities for the estimating kickoff workflow. This is a **template-driven** domain: a shared template library on the hub site provides governed default item sets, and project-level instances on project sites inherit from those templates while allowing custom additions. Evidence links and notes are secondary append-only records attached to primary execution rows.
+
+#### Shared template assets (hub site)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `kickoff_template` | template (shared) | SharePoint List (`Shared_KickoffTemplates`, hub site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `template_id` (surrogate); one active version per template name | Class C | get-by-id, list-active | Yes (60 min) | Immutable once published; new versions create new records; only one `is_active = true` at a time | No conflict; versioned; existing project instances unaffected by template updates | Estimating leadership | 1 |
+| `kickoff_template_item` | template (shared) | SharePoint List (`Shared_KickoffTemplates`, hub site, same list) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `template_item_id` (surrogate, stable across versions) | Class C | list-by-template | Yes (60 min) | Immutable within version; `template_item_id` preserved across template evolution for lineage | No conflict; items within a version are frozen; new template version creates new item set | Estimating leadership | 1 |
+
+#### Project execution records (project site)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `kickoff_instance` | execution | SharePoint List (`KickoffInstances`) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `instance_id` (surrogate); `(project_id, pursuit_id)` business context | Class A | get-by-id, list-by-project | Yes (5 min) | Mutable (status, dates); project snapshots (job name, architect, PE) immutable after creation | Last-write-wins with `updated_at` timestamp; creation-time snapshots not overwritten | Project team | 1 |
+| `kickoff_row` | execution | SharePoint List (`KickoffRows`) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `row_id` (surrogate); `(instance_id, row_id)` composite | Class A | list-by-instance, filter-by-section | Yes (5 min) | Fully mutable (status, applicable, responsible, dates, tab_required) | Last-write-wins; `is_custom` flag distinguishes template-inherited vs project-added rows | Project team | 1 |
+| `kickoff_evidence_link` | execution (secondary) | SharePoint List (`KickoffRows`, inline `currentEvidenceRef` in Phase 1) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `link_id` (surrogate); `(row_id, link_id)` composite | Class A | list-by-row | No | Append-only in practice; new links added, old links retained for history | No conflict; additive only; row's `currentEvidenceRef` is denormalized summary pointer | Project team | 1 |
+| `kickoff_note` | execution (secondary) | SharePoint List (`KickoffRows`, inline `notesSummary` in Phase 1) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `note_id` (surrogate); `(row_id, note_id)` composite | Class A | list-by-row, ordered-by-created_at | No | Append-only; notes accumulate; no edit or delete | No conflict; additive only; ordered by `created_at` for history sequence | Project team | 1 |
+
+#### Operational state (non-SharePoint)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `kickoff_import_batch` | operational | Azure Table Storage | AF v4 → `@azure/data-tables` | `batch_id` (surrogate, unique per import) | Class D | get-by-id, list-by-project | No | Status progresses forward only (pending → parsing → complete/failed); immutable after completion | No conflict; each import creates a new `batch_id` | Import service | 1 |
+
+#### A3 physical compression note
+
+P1-A3 stores kickoff entities across 3 SharePoint containers: `Shared_KickoffTemplates` (hub site, combines template + template items), `KickoffInstances` (project site), and `KickoffRows` (project site). Evidence links and notes are stored inline on `KickoffRows` in Phase 1 (`currentEvidenceRef`, `notesSummary` fields); Phase 2 may promote these to separate child lists. Import batches remain in Azure Table Storage. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
+
+### Project lifecycle checklist domain (P1-A10)
+
+P1-A10 defines 8 canonical entities for the project lifecycle checklist system spanning three families: startup, safety, and closeout. Like kickoff, this is a **template-driven** domain with shared templates on the hub site and project execution records on project sites. The hierarchy is: checklist → family instance → section → item → evidence link. A3 physically compresses the 6 project-site entities into a single `LifecycleChecklists` list.
+
+#### Shared template assets (hub site)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `lifecycle_checklist_template` | template (shared) | SharePoint List (`Shared_ChecklistTemplates`, hub site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `template_id` (surrogate); `(template_id, checklist_family)` unique pair | Class C | get-by-id, list-by-family | Yes (60 min) | Immutable once published; versioned; existing project instances unaffected | No conflict; versioned; projects snapshot template at instance creation via `template_snapshot_date` | Operations leadership | 1 |
+| `lifecycle_checklist_template_item` | template (shared) | SharePoint List (`Shared_ChecklistTemplates`, hub site, same list) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `template_item_id` (surrogate, stable across versions) | Class C | list-by-template, filter-by-family | Yes (60 min) | Immutable within version; changes propagate to new instances only | No conflict; items within a version are frozen | Operations leadership | 1 |
+
+#### Project execution records (project site)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `project_lifecycle_checklist` | execution | SharePoint List (`LifecycleChecklists`, flattened) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `checklist_id` (surrogate); one per project | Class A | get-by-project | Yes (5 min) | Limited: `overall_status` mutable; project snapshots (name, number) immutable after creation | Last-write-wins for status; snapshots frozen at creation for audit | Project team | 1 |
+| `project_checklist_family_instance` | execution | SharePoint List (`LifecycleChecklists`, flattened) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `instance_id` (surrogate); `(checklist_id, checklist_family)` unique pair | Class A | list-by-checklist, filter-by-family | Yes (5 min) | Mutable (family status, completion_percentage, notes); `template_snapshot_date` immutable | Last-write-wins for status and completion fields | Project team | 1 |
+| `checklist_section` | execution | SharePoint List (`LifecycleChecklists`, flattened as `sectionNumber` + `sectionLabel`) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `section_id` (surrogate); `(instance_id, section_number)` unique pair | Class A | list-by-instance | Yes (15 min) | Immutable once created from template; section structure is fixed per family instance | No conflict; section structure is template-derived and frozen | Template (at creation) | 1 |
+| `checklist_item` | execution | SharePoint List (`LifecycleChecklists`, primary record) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `item_id` (surrogate); `(section_id, item_number)` unique within section | Class A | list-by-section, filter-by-outcome | Yes (5 min) | Mutable (`canonical_outcome`, `raw_outcome_value`, `status_notes`, `target_date`, `completed_date`, `current_evidence_ref`) | Last-write-wins; `is_custom` distinguishes template-inherited vs project-added | Project team | 1 |
+| `checklist_evidence_link` | execution (secondary) | SharePoint List (`LifecycleChecklists`, inline `currentEvidenceRef` in Phase 1) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `link_id` (surrogate); `(item_id, link_id)` composite | Class A | list-by-item | No | Append-only in practice; Phase 1 stores single reference inline; Phase 2 may promote to child list | No conflict; additive only; `currentEvidenceRef` on item is denormalized summary | Project team | 1 |
+
+#### Operational state (non-SharePoint)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `checklist_import_batch` | operational | Azure Table Storage | AF v4 → `@azure/data-tables` | `batch_id` (surrogate, unique per import) | Class D | get-by-id, list-by-project | No | Status progresses forward only (pending → parsing → complete/failed); immutable after completion | No conflict; each import creates a new `batch_id` | Import service | 1 |
+
+#### A3 physical compression note
+
+P1-A3 compresses the 8 canonical lifecycle checklist entities into 2 SharePoint containers: `Shared_ChecklistTemplates` (hub site, combines template + template items across all 3 families) and `LifecycleChecklists` (project site, flattens checklist aggregate, family instances, sections, items, and evidence links into a single list with `checklistFamily` discriminator). Import batches remain in Azure Table Storage. The unified `LifecycleChecklists` list uses `checklistFamily` (startup/safety/closeout) to partition records and supports family-specific outcome vocabularies mapped to canonical outcomes. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
+
 ### Remaining domains
 
 Entity-level rows for the following domains will be added as their schemas reach implementation-ready status:
@@ -160,9 +221,7 @@ Entity-level rows for the following domains will be added as their schemas reach
 |--------|-----------|-------------|--------|
 | shared (reference data) | P1-A5 | ~11 | Schema defined; entity register pending |
 | risk / compliance (operational register) | P1-A7 | 4 | Schema defined; entity register pending |
-| estimating (kickoff) | P1-A8 | 7 | Schema defined; entity register pending |
 | compliance (permits) | P1-A9 | 8 | Schema defined; entity register pending |
-| compliance (lifecycle checklists) | P1-A10 | 7 | Schema defined; entity register pending |
 | project management (responsibility matrix) | P1-A11 | 11 | Schema defined; entity register pending |
 | procurement (subcontractor scorecard) | P1-A12 | 12 | Schema defined; entity register pending |
 | project management (lessons learned) | P1-A13 | 8 | Schema defined; entity register pending |
@@ -363,4 +422,5 @@ Stub adapters (Procore, Sage, Autodesk) exist but do not write in Phase 1.
 | 0.2 | 2026-03-17 | Architecture | Add entity-level SoR and adapter behavior register structure; populate schedule domain (P1-A4); stub remaining domains |
 | 0.3 | 2026-03-17 | Architecture | Refine schedule entity-level register with A4-aligned data classes, A3 storage targets, conflict handling, and business-vs-operational distinction |
 | 0.4 | 2026-03-17 | Architecture | Add entity-level external financial register (P1-A6); distinguish mirrored Procore data from HB Intel-governed mappings and operational state |
+| 0.5 | 2026-03-17 | Architecture | Add entity-level kickoff (P1-A8) and lifecycle checklist (P1-A10) registers; distinguish shared template assets from project execution records and operational state |
 
