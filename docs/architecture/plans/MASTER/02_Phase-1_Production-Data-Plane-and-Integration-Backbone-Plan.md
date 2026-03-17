@@ -64,6 +64,7 @@ At the end of Phase 1:
 - Permits & inspections schema (permit lifecycle, inspections, issues, compliance tracking)
 - Project lifecycle checklist schema (unified startup/safety/closeout checklists)
 - Responsibility matrix schema (governed task-role assignment with project tailoring)
+- Subcontractor scorecard schema (rubric-based performance evaluation with portfolio aggregation)
 
 ### 6.2 Workstream B — Adapter Completion
 **Goal:** complete production-capable repository adapters.
@@ -152,6 +153,7 @@ Mandatory deliverables for Phase 1:
 - Permits & Inspections Schema (permit lifecycle, inspections, issues, compliance tracking)
 - Project Lifecycle Checklist Schema (unified startup/safety/closeout checklists)
 - Responsibility Matrix Schema (governed task-role assignment with project tailoring)
+- Subcontractor Scorecard Schema (rubric-based performance evaluation with portfolio aggregation)
 - Adapter Completion Backlog and Status Tracker
 - Service Contract Catalog
 - Error / Retry / Recovery Design Note
