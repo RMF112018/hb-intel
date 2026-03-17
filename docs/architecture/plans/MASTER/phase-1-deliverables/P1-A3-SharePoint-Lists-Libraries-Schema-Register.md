@@ -77,6 +77,79 @@ This boundary is frozen. P1-A3 does not own or redefine concerns that belong to 
 
 ---
 
+## Site-Scope Placement Authority (Frozen)
+
+This section is the authoritative placement reference for all Phase 1 artifacts. P1-B1 provisioning must follow these scope assignments. P1-A1 and P1-A2 defer to this section for physical site-scope placement.
+
+### Site Definitions
+
+| Site Scope | Description | Provisioning | Count |
+|------------|-------------|-------------|-------|
+| **Hub Site** | Tenant-level SharePoint site for shared reference data, project registry, templates, and governed dictionaries. One per HB Intel deployment. | Created once during platform setup | 15 containers |
+| **Project Site** | Per-project SharePoint site for execution data. One per active project. | Created during project provisioning | 31 containers |
+| **Sales/BD Site** | Department-level SharePoint site for market development, leads, and pipeline management. One per deployment. | Created once during platform setup | 2 containers |
+| **Shared Site** | Department-level SharePoint site for team rosters and department-shared operational data not appropriate for hub root. One per department as needed. | Created per department during platform setup | 1 container |
+| **Azure Table Storage** | Non-SharePoint operational state for audit, provisioning, import findings, parser provenance, and drift records. | Provisioned with Azure infrastructure | See Non-SharePoint registry |
+
+### Placement Rules (Frozen)
+
+| # | Rule | Scope | Frozen In |
+|---|------|-------|-----------|
+| 1 | **Shared reference dictionaries** → Hub Site. Project sites store stable keys + optional display mirrors. Adapter-resolved cross-site reads (no cross-site lookup columns). | Hub Site | A3 v1.8 |
+| 2 | **Template/definition artifacts** (kickoff, checklist, responsibility, scorecard rubrics) → Hub Site. Shared across all project sites. Read-only from project context. | Hub Site | A3 v0.7 |
+| 3 | **Project registry and intake** (ProjectMaster, NewProjectRequests) → Hub Site. Enterprise-wide, not project-scoped. | Hub Site | A3 v0.6 |
+| 4 | **Project execution data** → Project Site. All operational records created and consumed within project context. | Project Site | A3 v0.6 |
+| 5 | **Leads and pipeline** → Sales/BD Site. Department-scoped, not project-scoped or hub master data. | Sales/BD Site | A3 v1.5 |
+| 6 | **Department rosters** (EstimatingTeamMembers) → Shared Site. Team-scoped, not hub-root master data. | Shared Site | A3 v0.7 |
+| 7 | **Import findings** → Azure Table Storage (all domains, no exceptions). Class D, append-only. | Azure Table Storage | A2 Import-State Standard |
+| 8 | **Import batch metadata** → Azure Table Storage by default. Named exceptions: `schedule_import_batch` and `budget_import_batch` on Project Site (user-visible import history + direct parent of SharePoint-resident data). | Azure Table Storage / Project Site (exceptions) | A2 Import-State Standard |
+| 9 | **Provisioning state, audit log, identity mapping** → Azure Table Storage. Non-SharePoint operational state. | Azure Table Storage | A2 |
+
+### Placement Authority Matrix by Domain
+
+| Domain | Artifact Family | Site Scope | Containers | Governing Schema |
+|--------|----------------|------------|------------|-----------------|
+| project | Project registry + intake | Hub Site | `ProjectMaster`, `NewProjectRequests` | A1 |
+| dictionary | Shared reference dictionaries | Hub Site | `Shared_CostCodes`, `Shared_CSICodes`, `Shared_ProjectTypes`, `Shared_ProjectStages`, `Shared_ProjectRegions`, `Shared_StateCodes`, `Shared_CountryCodes`, `Shared_DeliveryMethods`, `Shared_Sectors` | A5 |
+| estimating-kickoff | Template definitions | Hub Site | `Shared_KickoffTemplates` | A8 |
+| estimating-kickoff | Project instances | Project Site | `KickoffInstances`, `KickoffRows` | A8 |
+| checklist | Template definitions | Hub Site | `Shared_ChecklistTemplates` | A10 |
+| checklist | Project instances | Project Site | `LifecycleChecklists` | A10 |
+| responsibility | Template/family definitions | Hub Site | `Shared_ResponsibilityTemplates` | A11 |
+| responsibility | Project instances | Project Site | `ResponsibilityMatrices`, `ResponsibilityAssignments` | A11 |
+| scorecard | Rubric definitions | Hub Site | `Shared_ScorecardRubrics` | A12 |
+| scorecard | Project evaluations | Project Site | `SubcontractorScorecards`, `ScorecardCriterionScores` | A12 |
+| lessons | Category/magnitude/phase dictionaries | Hub Site | (via A5 shared dictionaries) | A5/A13 |
+| lessons | Project reports + records | Project Site | `LessonsReports`, `LessonRecords` | A13 |
+| schedule | Project execution | Project Site | `ScheduleActivities`, `ScheduleImportBatches`, `ScheduleUploadsLib` | A4 |
+| financial | Project execution | Project Site | `BudgetLines`, `BudgetImportBatches`, `BudgetUploadsLib` | A6 |
+| register | Project execution | Project Site | `OperationalRegister` | A7 |
+| estimating | Project execution | Project Site | `EstimatingPursuits`, `PreconEngagements`, `EstimateTracking` | A1 |
+| buyout | Project execution | Project Site | `BuyoutCommitments`, `CommitmentMilestones`, `AllowanceItems`, `LongLeadItems`, `ValueEngineeringItems`, `SubcontractChecklists`, `SubcontractChecklistItems`, `ComplianceWaiverRequests`, `EVerifyTracking` | A1 |
+| permits | Project execution | Project Site | `Permits`, `PermitInspections` | A9 |
+| contracts | Project execution | Project Site | `PrimeContracts` | A15 |
+| leads | Sales/BD pipeline | Sales/BD Site | `MarketLeads`, `PipelineSnapshots` | A14 |
+| estimating | Department roster | Shared Site | `EstimatingTeamMembers` | A1 |
+| all import-driven | Import findings | Azure Table Storage | (non-SharePoint) | A2 |
+| all import-driven | Import batches (default) | Azure Table Storage | (non-SharePoint) | A2 |
+| schedule, financial | Import batches (named exception) | Project Site | `ScheduleImportBatches`, `BudgetImportBatches` | A2 |
+| platform | Provisioning / audit / identity | Azure Table Storage | (non-SharePoint) | A2 |
+
+### Template vs Instance Boundary (Frozen)
+
+All template-bearing domains follow the same split:
+
+| Domain | Hub Site (Templates) | Project Site (Instances) |
+|--------|---------------------|------------------------|
+| Estimating Kickoff | `Shared_KickoffTemplates` (template definitions + items) | `KickoffInstances`, `KickoffRows` (project-specific answers) |
+| Lifecycle Checklists | `Shared_ChecklistTemplates` (3 families: startup/safety/closeout) | `LifecycleChecklists` (project items with outcomes) |
+| Responsibility Matrix | `Shared_ResponsibilityTemplates` (families, roles, items, assignment values) | `ResponsibilityMatrices`, `ResponsibilityAssignments` (project assignments) |
+| Scorecard | `Shared_ScorecardRubrics` (sections, criteria, rating bands, recommendations) | `SubcontractorScorecards`, `ScorecardCriterionScores` (per-subcontractor evaluations) |
+
+Templates are hub-site reference data (A2 Class C, read-only from project context). Instances are project-site execution data (A2 Class A, mutable). Template identity keys are referenced by instances via FK; no cross-site lookup columns.
+
+---
+
 ## Canonical Container Patterns
 
 Phase 1 uses these standard SharePoint container patterns:
@@ -1396,3 +1469,4 @@ The financial-sensitive and compliance-sensitive list isolation rules frozen abo
 | 2.5 | 2026-03-17 | Architecture | Lessons phase dictionary reconciliation: added `LessonPhases` to LessonRecords lookup dependencies and register entry; added `phaseEncounteredKey` to LessonRecords indexes. |
 | 2.6 | 2026-03-17 | Architecture | Narrow kickoff_note storage clarification: annotated deferred entity table and A.8 appendix to reflect A8 v0.5 frozen storage decision (SharePoint List, not Azure Table Storage). No container or column changes. |
 | 2.7 | 2026-03-17 | Architecture | Schedule physical schema completeness: added `baselineStart`/`baselineFinish` (Date) to ScheduleActivities optional columns for primary baseline flattening (reconciles A3 reconciliation table line with actual column list). Updated A.5.1 governing schema note to document baseline field flattening and sourceExtrasJson role. Aligns with A4 v0.4 canonical-to-physical reconciliation closure. |
+| 2.8 | 2026-03-17 | Architecture | Froze site-scope placement authority. Added Site-Scope Placement Authority section with: 5 site-scope definitions (Hub, Project, Sales/BD, Shared, Azure Table Storage), 9 frozen placement rules, 25-row domain-by-artifact-family placement matrix covering all 49 build-ready containers, and template-vs-instance boundary table for 4 template-bearing domains. Consolidates scattered placement assignments into a single authoritative reference for P1-B1 provisioning. No container or scope changes — codifies existing consistent assignments. |

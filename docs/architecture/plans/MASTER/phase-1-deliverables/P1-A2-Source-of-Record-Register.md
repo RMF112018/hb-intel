@@ -37,6 +37,8 @@ Establish the authoritative source, read/write paths, and identity strategy for 
 
 > **Summary layer.** This table defines SoR, adapter path, identity key, and write safety at the *domain* level. For entity-level governance (individual canonical models within each domain), see the [Entity-Level Source-of-Record and Adapter Behavior Register](#entity-level-source-of-record-and-adapter-behavior-register) below.
 
+**Site-scope placement authority:** For the authoritative mapping of all Phase 1 artifacts to SharePoint site scopes (Hub Site, Project Site, Sales/BD Site, Shared Site) and Azure Table Storage, see the [Site-Scope Placement Authority](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md) section in P1-A3. A2 entity-level storage targets are consistent with the A3 placement matrix.
+
 | Domain | Source of Record | Adapter to Reach It | Identity Key | Write Safety Class | Phase |
 |--------|------------------|------------------|--------------|-------------------|-------|
 | **leads** | SharePoint Lists on Sales/BD site (`MarketLeads`, `PipelineSnapshots`) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs list item CRUD | `lead_id` (surrogate) for market leads; `snapshot_id` (surrogate) for pipeline snapshots; `(division, snapshot_date)` natural key | Class A | 1 |
@@ -884,4 +886,5 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 | 1.8 | 2026-03-17 | Architecture | Froze Person Identity Resolution Platform Standard: consolidated Class G (person-attribution) structural contract into one cross-schema section — `*_key` + `*_display` pair with nullable key for unresolved imports, direct UPN for system-attribution fields, adapter/service-layer resolution ownership, completeness requirement (every person-attributed field must have both key and display). |
 | 1.9 | 2026-03-17 | Architecture | Froze Vendor Identity Resolution Platform Standard: consolidated Class H (vendor/party) structural contract into a dedicated cross-schema section — `*_key` + `*_display` pair with nullable key for unresolved vendor names, adapter/service-layer resolution ownership, vendor registry as Phase 2 deliverable. Enumerated all Phase 1 governed fields (A11 responsible_party, A12 subcontractor, A15 owner_client). Noted buyout vendorName as pre-existing display field. |
 | 2.0 | 2026-03-17 | Architecture | Lessons phase dictionary reconciliation: added `lesson_phase_dictionary` entity to reference section (Class C, hub site, `LessonPhases`); updated `lesson_record` FK list to include `phase_encountered_key`. |
+| 2.1 | 2026-03-17 | Architecture | Added cross-reference to P1-A3 Site-Scope Placement Authority (v2.8) in Domain SoR Register. A3 is now the authoritative source for artifact-to-site-scope mapping. A2 entity-level storage targets are confirmed consistent with the A3 placement matrix. |
 

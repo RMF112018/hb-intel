@@ -36,7 +36,9 @@ HB Intel data falls into these categories, each with different storage and sync 
 
 ## Storage Platform Decision Table
 
-Each platform in the HB Intel stack owns specific data categories:
+Each platform in the HB Intel stack owns specific data categories.
+
+**Site-scope placement authority:** For the authoritative mapping of artifacts to SharePoint site scopes (Hub Site, Project Site, Sales/BD Site, Shared Site) and Azure Table Storage, see the [Site-Scope Placement Authority](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md) section in P1-A3.
 
 | Platform | Owns | Does NOT Own | Notes |
 |----------|------|--------------|-------|
@@ -991,3 +993,4 @@ These items were resolved through the field-level schema design interview and ar
 | 1.9 | 2026-03-17 | Architecture | Added P1-A11-Responsibility-Matrix-Schema.md to Read With. Governed matrix-based responsibility assignment model with 10 entities, 3 families (PM/Field/Owner Contract), normalized intersection records, and project tailoring. |
 | 2.0 | 2026-03-17 | Architecture | Added P1-A12-Subcontractor-Scorecard-Schema.md to Read With. Governed rubric-based performance evaluation with 12 entities, 6 weighted sections, 29 criteria, criterion-level scoring, and official-final designation for portfolio aggregation. |
 | 2.1 | 2026-03-17 | Architecture | Added P1-A13-Lessons-Learned-Schema.md to Read With. Project knowledge-capture with report+child lesson model, 15 governed categories, 4 impact magnitudes, structured content + composed narrative, and portfolio search/retrieval. |
+| 2.2 | 2026-03-17 | Architecture | Added cross-reference to P1-A3 Site-Scope Placement Authority (v2.8) in Storage Platform Decision Table. A3 is now the authoritative source for artifact-to-site-scope mapping (Hub, Project, Sales/BD, Shared, Azure Table Storage). |
