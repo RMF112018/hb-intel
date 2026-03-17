@@ -20,7 +20,7 @@ Reference data — cost codes, project types, project stages, CSI/MasterFormat c
 - **CSI Code Dictionary** — MasterFormat taxonomy model (evidence: `csi-code-dictionary.csv`)
 - **Simple Reference Dictionaries** — 7 shared hub-site lookup dictionaries
 - **Platform Controlled Sets** — import/validation infrastructure enumerations (Class P)
-- **Cross-Domain Governed Sets** — 14 business-rule-carrying value sets consumed by 2+ schemas (Class X)
+- **Cross-Domain Governed Sets** — 16 business-rule-carrying value sets consumed by 2+ schemas (Class X)
 - **Domain-Local Governance Contract** — structural rules for 27 domain-owned dictionaries (Class D)
 
 ---
@@ -119,6 +119,7 @@ This section lists all canonical entities and governed sets defined in this docu
 | 13 | Assignment Value | 5 | A11 | Admin-managed |
 | 14 | Permit Tag | 11 | A9 | Admin-managed |
 | 15 | Lesson Phase | 7 | A13 | Admin-managed |
+| 16 | Division Label | 9 | A5/A6 | Admin-managed |
 
 ### Domain-Local Dictionaries (Class D)
 
@@ -130,9 +131,9 @@ This section lists all canonical entities and governed sets defined in this docu
 |-------|-------|-------------------|
 | S — Shared Reference (entities) | 15 | 13 (2 deferred to Phase 4+) |
 | P — Platform Controlled (sets) | 3 | 3 |
-| X — Cross-Domain Governed (sets) | 15 | 15 |
+| X — Cross-Domain Governed (sets) | 16 | 16 |
 | D — Domain-Local (sets) | 27 | 27 (values in owning schemas) |
-| **Total governed artifacts** | **60** | **58** |
+| **Total governed artifacts** | **61** | **59** |
 
 ---
 
@@ -1127,6 +1128,27 @@ Cross-domain governed sets are value sets consumed by 2+ schemas or carrying bus
 **Governance:** Admin-managed (Class X). Values are tied to RACI-style governance model.
 **Build-ready:** Yes — Phase 1 (values frozen in A5; A11 binds by `value_code` key).
 
+### Division Label
+
+| Key | Display Label | Description |
+|-----|--------------|-------------|
+| `01` | General Conditions | Project-wide indirect costs (supervision, temp facilities, safety) |
+| `02` | Site Construction | Earthwork, site utilities, paving, landscaping |
+| `03` | Concrete | Formwork, reinforcement, cast-in-place, precast |
+| `10` | Specialties | Signage, compartments, flagpoles, specialty items |
+| `15` | Mechanical | HVAC, plumbing, fire protection |
+| `20` | Electrical | Power distribution, lighting, communications |
+| `25` | Equipment | Fixed and movable equipment |
+| `90` | Other | Company-specific extensions outside standard divisions |
+| `99` | Company Overhead | Corporate overhead allocation |
+
+**Primary consumer:** A5 cost code hierarchy (`division_code` leading segment of DD-SS-DDD), A6 (division-level budget rollups and UI grouping)
+**Future consumers:** Budget/cost control dashboards, portfolio analytics, UI division-filter controls
+**Governance:** Admin-managed (Class X). Values extracted from cost-code-dictionary.csv evidence — 9 distinct division codes observed as leading DD segment across 7,565 cost codes. New divisions require cost controls SME approval. Existing keys are immutable.
+**Key behavior:** `division_key` (2-digit zero-padded string, matching `division_code` on `cost_code` entity) + `division_label` (human-readable display text). Division labels are a normalized reference dictionary — the code IS the stable key, not a derived display layer.
+**Relationship to cost codes:** Division is the parent grouping of the DD-SS-DDD cost code hierarchy. Every cost code maps to exactly one division. UI and reporting bind to `division_key` for rollup and filtering.
+**Build-ready:** Yes — Phase 1 (9 values frozen from cost code evidence; A6 and cost code hierarchy bind by `division_key`).
+
 ---
 
 ## Domain-Local Dictionary Governance Contract (Class D)
@@ -1287,6 +1309,7 @@ The following dictionaries are referenced across P1-A1 field definitions. The 7 
 | **Permit Tag dictionary** | Closed — promoted to Class X. 11 values frozen from permits.json evidence. Admin-managed; new tags require compliance SME approval. |
 | **Kickoff/permits/checklist domain-local expansion** | Closed — added Permit Authority (A9) and Item Type (A10) to domain-local inventory. Domain-local count: 25 → 27. |
 | **Lesson Phase dictionary** | Closed — promoted to Class X. 7 construction lifecycle phases frozen (preconstruction through warranty). Admin-managed; new phases require operations SME approval. A13 binds by `phase_encountered_key`. General project-lifecycle phase normalization (A7 etc.) remains a separate Phase 2+ concern. |
+| **Division label dictionary** | Closed — promoted to Class X. 9 division labels frozen from cost-code-dictionary.csv evidence (01 General Conditions through 99 Company Overhead). Admin-managed; new divisions require cost controls SME approval. `division_key` is the 2-digit DD prefix of the DD-SS-DDD cost code. A6 and cost code hierarchy bind by `division_key`. |
 
 ### Remaining Open
 
@@ -1295,7 +1318,6 @@ The following dictionaries are referenced across P1-A1 field definitions. The 7 
 | **Sage cost code mapping** | Define mapping between HB Intel cost codes and Sage GL accounts | Platform Architecture + Finance | Phase 4+ |
 | **Procore cost code sync** | Define bidirectional sync of cost codes with Procore | Platform Architecture | Phase 4+ |
 | **Multi-stage applicability** | Determine if any codes need to appear in multiple stages | Business Domains | Phase 1 (late) |
-| **Division label dictionary** | Create human-readable labels for division codes (01 = General Conditions, etc.) | Platform Architecture | Phase 1 |
 | **Shared dictionary import automation** | Automate dictionary refresh from CSV/Excel uploads | Platform Architecture | Phase 2 |
 | **Remaining shared dictionaries** | ProjectBidTypes, ProjectOwnerTypes, TimeZones — not in A3 build-ready scope; define when needed | Platform Architecture | Phase 2+ |
 | **Keyword/Tag governance** | A13 keywords are free-text in Phase 1; governed dictionary planned for Phase 2 knowledge management | Platform Architecture + KM | Phase 2 |
@@ -1312,7 +1334,7 @@ The following dictionaries are referenced across P1-A1 field definitions. The 7 
 | Estimating Lead | — | — |
 
 **Approval Status:** Active — Phase 1 dictionary/governance backbone frozen
-**Comments:** A5 now governs 60 dictionary artifacts across 4 classes: 15 Class S shared reference entities (Cost Code, CSI Code, 7 Simple Reference Dictionaries), 3 Class P platform controlled sets (Import Status, Finding Severity, Finding Category), 15 Class X cross-domain governed sets (Lesson Phase promoted from open decision; 7 construction lifecycle phases frozen), and 27 Class D domain-local dictionaries (Permit Authority and Item Type added). Key + display label behavior, extensibility rules, binding mechanics, and derivation dependencies are frozen. Three shared dictionaries (ProjectBidTypes, ProjectOwnerTypes, TimeZones) remain pending — not in A3 build-ready scope.
+**Comments:** A5 now governs 61 dictionary artifacts across 4 classes: 15 Class S shared reference entities (Cost Code, CSI Code, 7 Simple Reference Dictionaries), 3 Class P platform controlled sets (Import Status, Finding Severity, Finding Category), 16 Class X cross-domain governed sets (Division Label promoted from open decision; 9 division labels frozen from cost code evidence), and 27 Class D domain-local dictionaries (Permit Authority and Item Type added). Key + display label behavior, extensibility rules, binding mechanics, and derivation dependencies are frozen. Three shared dictionaries (ProjectBidTypes, ProjectOwnerTypes, TimeZones) remain pending — not in A3 build-ready scope.
 
 ---
 
@@ -1327,3 +1349,4 @@ The following dictionaries are referenced across P1-A1 field definitions. The 7 
 | 0.5 | 2026-03-17 | Architecture | Dictionary/governance backbone expansion. Added 4-class dictionary classification framework (S/P/X/D). Froze 3 platform controlled sets (Import Status, Finding Severity, Finding Category). Froze 13 cross-domain governed sets with values, governance, and derivation dependencies. Established domain-local governance contract with 25 inventoried Class D dictionaries. Froze key + display label behavior and extensibility/binding rules. A5 now governs 56 dictionary artifacts — sufficient for later prompts to resolve domain decisions without inventing new governance structure. |
 | 0.6 | 2026-03-17 | Architecture | Governance closeout companion pass for kickoff/permits/checklist domains. Promoted Permit Tag to Class X (11 values frozen from permits.json evidence). Added 2 domain-local dictionaries to inventory: Permit Authority (A9, admin-managed, open), Item Type (A10, code-governed, open). Closed Permit Tag open decision. A5 now governs 59 dictionary artifacts: 15 Class S, 3 Class P, 14 Class X, 27 Class D. |
 | 0.7 | 2026-03-17 | Architecture | Lessons phase dictionary governance freeze. Promoted Lesson Phase to Class X — 7 construction lifecycle phases frozen (preconstruction, design, procurement, construction, commissioning, closeout, warranty). Admin-managed; new phases require operations SME approval. A13 binds by `phase_encountered_key`. Closed Project Phase open decision. General project-lifecycle normalization (A7 etc.) remains Phase 2+. A5 now governs 60 dictionary artifacts: 15 Class S, 3 Class P, 15 Class X, 27 Class D. |
+| 0.8 | 2026-03-17 | Architecture | Division label dictionary governance freeze. Promoted Division Label to Class X — 9 division labels frozen from cost-code-dictionary.csv evidence (01 General Conditions through 99 Company Overhead). Admin-managed; new divisions require cost controls SME approval. `division_key` is the 2-digit DD prefix of DD-SS-DDD cost codes. Closed Division label dictionary open decision. A5 now governs 61 dictionary artifacts: 15 Class S, 3 Class P, 16 Class X, 27 Class D. |

@@ -376,8 +376,23 @@ Import validation findings for kickoff workbook ingestion. Stored in Azure Table
 | Kickoff instances | SharePoint List (project site) | Authoritative project operational data | Aligns with P1-A1: estimating domain in SharePoint |
 | Kickoff rows | SharePoint List (project site) | Authoritative child records | Same |
 | Evidence links | SharePoint List (project site) | Authoritative links | Same |
-| Notes/history | SharePoint List (project site) or Azure Table Storage | Operational | Depends on volume; Table Storage for high-volume history |
+| Notes/history (Phase 1) | `notesSummary` field on `KickoffRows` | Authoritative current-state note | Inline field; no separate storage entity |
+| Notes/history (Phase 2) | SharePoint List (project site) — `kickoff_note` child list | Authoritative append-only history | Low-volume (0–10 per row); SharePoint List selected over Azure Table Storage |
 | Import batches | Azure Table Storage | Operational state | Default per Import-State Platform Standard in P1-A2 |
+
+---
+
+### Notes/History Storage Decision
+
+| Aspect | Decision |
+|--------|----------|
+| **Phase 1 (build-ready)** | `notesSummary` (multi-line text) on `KickoffRows` stores the latest/current note. Single editable text field. Write behavior: overwrite with latest text. No separate history entity |
+| **Phase 2 (governed upgrade)** | `kickoff_note` becomes a separate SharePoint List (child of `KickoffRows`). Append-only: each note is a timestamped record with `note_id` (surrogate), `row_id` (FK), `author_display`, `created_at`, `body`. No edit or delete after creation. UI renders as history timeline ordered by `created_at` descending |
+| **Storage decision (FROZEN)** | SharePoint List. Azure Table Storage is NOT selected. Kickoff notes are low-volume (typically 0–10 per row, dozens per project), project-site-scoped, and benefit from SharePoint security, backup, and API infrastructure. Volume does not warrant Table Storage for this domain |
+| **Record type** | User-authored narrative records (not operational or audit records). Each `kickoff_note` = one timestamped comment by one author on one kickoff row |
+| **Phase 2 migration** | `notesSummary` Phase 1 value is copied as the seed note when the `kickoff_note` child list is provisioned |
+| **Retention** | Notes follow parent kickoff row lifecycle per P1-A1 retention policy |
+| **UI rendering** | Phase 1: single editable text area. Phase 2: read-only timeline of historical notes + compose input for new note |
 
 ---
 
@@ -388,7 +403,7 @@ Import validation findings for kickoff workbook ingestion. Stored in Azure Table
 | **Template variant support** | Define templates for negotiated, design-build, and other pursuit types | Estimating Leadership | Phase 2 |
 | **Date rule automation** | Implement milestone date auto-calculation from proposal due date | Platform Architecture | Phase 2 |
 | **Package assembly engine** | Build deliverable package tab assembly from kickoff metadata | Platform Architecture + Estimating | Phase 2–3 |
-| **Comment history volume** | Determine if note history warrants Azure Table Storage vs SharePoint list | Platform Architecture | Phase 1 (late) |
+| **Comment history volume** | **Closed** — SharePoint List selected for Phase 2 `kickoff_note` child entity. Low-volume (0–10 per row); Azure Table Storage not warranted. Phase 1 uses `notesSummary` inline field on `KickoffRows`. Storage decision frozen in v0.5. | — | Done |
 | **Status dictionary governance** | **Closed** — kickoff status values governed as Class D (domain-local) per A5 structural contract (v0.5). Values owned by A8; must follow A5 key + display label pattern. | — | Done |
 | **Multi-estimator assignment** | Support multiple estimators per row | Platform Architecture | Phase 2 |
 
@@ -415,3 +430,4 @@ Import validation findings for kickoff workbook ingestion. Stored in Azure Table
 | 0.2 | 2026-03-17 | Architecture | Added `kickoff_import_finding` entity per P1-A2 Import-State Platform Standard completeness requirement. Aligned storage boundary references to cite platform standard. |
 | 0.3 | 2026-03-17 | Architecture | Added cross-reference to P1-A2 Person Identity Resolution Platform Standard for person name resolution behavior. |
 | 0.4 | 2026-03-17 | Architecture | Reconciliation: close Status dictionary governance open decision — governed as Class D per A5 structural contract. No schema changes. |
+| 0.5 | 2026-03-17 | Architecture | Close notes/history storage open decision — SharePoint List frozen for Phase 2 `kickoff_note` child entity (low-volume, 0–10 per row). Azure Table Storage not selected. Phase 1 uses `notesSummary` inline field. Added Notes/History Storage Decision subsection. Updated Storage Boundary Alignment table to remove volume-dependent bifurcation language. |

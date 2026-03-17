@@ -391,7 +391,7 @@ These entities are defined in their governing schemas but are deferred to Phase 
 
 | Entity | Governing Schema | Phase 1 Inline Alternative | Phase 2 Target |
 |--------|-----------------|---------------------------|----------------|
-| `kickoff_note` | P1-A8 | `notesSummary` on `KickoffRows` | Separate child list for timestamped comment history |
+| `kickoff_note` | P1-A8 | `notesSummary` on `KickoffRows` | Separate SharePoint List child for timestamped comment history (storage frozen in A8 v0.5 — SharePoint List, not Azure Table Storage) |
 | `kickoff_evidence_link` | P1-A8 | `currentEvidenceRef` on `KickoffRows` | Separate child list for multi-artifact evidence |
 | `permit_condition` | P1-A9 | `conditionsRaw` JSON on `Permits` | Separate child list for structured conditions |
 | `permit_tag` | P1-A9 | `tagsRaw` JSON on `Permits` | Separate child list for normalized tags |
@@ -848,7 +848,7 @@ These 7 dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, C
 | 7 | Lookups | `instanceId` → KickoffInstances |
 | 8 | Indexes | `instanceId`, `rowType`, `statusCode` |
 | 9–11 | Standard | Major versions / Project team / Project site provisioning |
-| 12 | Governing Schema | P1-A8 kickoff_row entity (3 row subtypes). **Storage note:** `kickoff_note` (timestamped comment history) and `kickoff_evidence_link` (multi-artifact links) are P1-A8 child entities deferred to Phase 2 as separate SharePoint lists. In Phase 1, `notesSummary` and `currentEvidenceRef` fields on this list serve as current-state equivalents. |
+| 12 | Governing Schema | P1-A8 kickoff_row entity (3 row subtypes). **Storage note:** `kickoff_note` (timestamped comment history) and `kickoff_evidence_link` (multi-artifact links) are P1-A8 child entities deferred to Phase 2 as separate SharePoint lists. In Phase 1, `notesSummary` and `currentEvidenceRef` fields on this list serve as current-state equivalents. Storage decision frozen in A8 v0.5: `kickoff_note` will be a SharePoint List (not Azure Table Storage). |
 
 ### A.9 — Permits & Inspections
 
@@ -1394,3 +1394,4 @@ The financial-sensitive and compliance-sensitive list isolation rules frozen abo
 | 2.3 | 2026-03-17 | Architecture | Final reconciliation sweep after five SharePoint implementation-decision freezes (v1.8–v2.2). Reconciled content type naming conventions with frozen strategy (removed stale domain-specific examples, aligned with three hub-level types). Tightened advisory "should be" language in Shared Reference Dictionaries to match frozen deployment model. Updated approval status and comments to reflect all five freezes and four remaining open decisions. Verified: all five decisions are explicit, internally consistent, and implementation-guiding; no stale open-decision language; no cross-section contradictions; no adjacent artifact changes needed. |
 | 2.4 | 2026-03-17 | Architecture | Aligned Non-SharePoint import entities with P1-A2 Import-State Platform Standard. Updated import findings table: removed "(implied)" for kickoff and checklist findings (now explicitly defined in A8/A10), added `responsibility_import_finding` (A11). Updated import batch metadata section with platform standard cross-reference and rationale for schedule/budget SharePoint exceptions. |
 | 2.5 | 2026-03-17 | Architecture | Lessons phase dictionary reconciliation: added `LessonPhases` to LessonRecords lookup dependencies and register entry; added `phaseEncounteredKey` to LessonRecords indexes. |
+| 2.6 | 2026-03-17 | Architecture | Narrow kickoff_note storage clarification: annotated deferred entity table and A.8 appendix to reflect A8 v0.5 frozen storage decision (SharePoint List, not Azure Table Storage). No container or column changes. |

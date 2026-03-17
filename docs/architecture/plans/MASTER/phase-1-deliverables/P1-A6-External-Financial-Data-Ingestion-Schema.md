@@ -307,6 +307,56 @@ Maps budget lines to HB Intel reference entities.
 
 ---
 
+### Sub-Job Modeling Decision
+
+Sub-job values (`sub_job_code`, `sub_job_description`) are **source-governed dimension fields** on `budget_line` — not a first-class canonical entity or separate reference dictionary in Phase 1.
+
+| Aspect | Decision |
+|--------|----------|
+| **Entity status** | Dimension fields on `budget_line`; no separate entity or lookup table |
+| **Source governance** | Procore owns sub-job master values; HB Intel accepts as-imported |
+| **Canonical key** | `sub_job_code` (string, as-imported from Procore `Sub Job` column; nullable when source omits it) |
+| **Display label** | `sub_job_description` (as-imported; parsed from `code - description` format) |
+| **Validation** | Parse integrity only (split on first ` - `). No cross-reference dictionary validation |
+| **When source omits sub-job** | Both fields null; budget line remains valid; `budget_code` composite key uses `{Tier3Code}.{CostType}` only |
+| **Inconsistent descriptions** | Different description text for same `sub_job_code` within one batch → `import_finding` (severity `warning`, category `validation_failure`). First occurrence description is canonical for display; all raw values preserved |
+| **Rollup/filtering** | Sub-job is a grouping/filtering dimension for budget analysis; no separate rollup entity needed |
+| **Phase 2+ consideration** | If cross-project sub-job analytics emerge, sub-job may be promoted to a Class D domain-local dictionary in A5. Explicitly deferred |
+
+---
+
+### Derivation Validation Rules
+
+Import-time validation governs the 7 derivable financial metrics identified in the Financial Metric Classification table. These rules ensure P1-B1 implementation has explicit governance — no ad hoc derivation behavior.
+
+| Rule | Decision |
+|------|----------|
+| **Precedence** | Source value always wins for storage. Derivation formula is used for validation comparison only — never for overwriting the imported value |
+| **Null source handling** | If source omits a derivable metric (null), it remains null. HB Intel does not compute missing derivable values in Phase 1 |
+| **Validation trigger** | For each non-null derivable metric, the system computes the expected value from its formula and compares against the imported value |
+| **Tolerance** | Absolute tolerance of $0.01 (one cent) per metric. Accounts for floating-point rounding in source systems. Platform-wide default |
+| **On mismatch** | Records are NEVER rejected for derivation mismatch alone. Each mismatch generates an `import_finding` with severity `warning`, category `derivation_mismatch` |
+| **Finding detail** | Finding captures: field name, imported value, expected value, absolute difference |
+| **Source preservation** | Imported (source) value is always preserved — never overwritten by computed value |
+| **Batch-level threshold** | If >50% of lines in a batch have derivation mismatches, an additional batch-level finding (severity `warning`) flags systematic source-system issues |
+| **Incomplete constituents** | If constituent source fields required for a derivation formula are null, the derivation check is SKIPPED for that line/metric. No finding generated for skipped validations |
+| **Architectural location** | Import-validation rule — lives in the import adapter/validation layer. P1-B1 implements as part of the budget import validation pipeline |
+
+**Derivation formulas and constituent chains:**
+
+| Derivable Metric | Formula | Constituents |
+|-----------------|---------|-------------|
+| Revised Budget | Original Budget + Budget Modifications + Approved COs | 3 source metrics |
+| Projected Budget | Revised Budget + Pending Budget Changes | 1 derivable + 1 source |
+| Job to Date Costs | Committed Costs + Direct Costs | 2 source metrics |
+| Projected Costs | Job to Date Costs + Pending Cost Changes | 1 derivable + 1 source |
+| Estimated Cost at Completion | Projected Costs + Forecast To Complete | 1 derivable + 1 source |
+| Projected over Under | Projected Budget − Estimated Cost at Completion | 2 derivable metrics |
+
+**Chained derivation note:** When a derivable metric depends on another derivable metric (e.g., Projected Budget depends on Revised Budget), the expected value for the outer metric uses the *imported* value of the inner metric — not its re-derived value. This ensures validation compares against what the source actually provided, not against a cascade of recalculations.
+
+---
+
 ### Search / Analytics / Reporting Role
 
 | Role | Treatment |
@@ -352,8 +402,8 @@ This artifact will be extended to cover additional external financial data sourc
 | **Procore API integration** | Replace CSV upload with real-time Procore API sync | Platform Architecture | Phase 4+ |
 | **Budget comparison engine** | Automated cross-snapshot variance detection and reporting | Platform Architecture + Cost Controls | Phase 2–3 |
 | **Cost type reference dictionary** | **Closed** — 5 cost types (LAB, LBN, MAT, OVH, SUB) frozen as Class X in P1-A5 (v0.5). A6 consumes via `cost_type_code` field. | — | Done |
-| **Sub-job entity model** | Determine if sub-jobs warrant their own entity or remain dimension fields | Platform Architecture + Project Controls | Phase 1 (late) |
-| **Derivation validation rules** | Finalize which derivable metrics are validated and tolerance thresholds | Cost Controls | Phase 1 |
+| **Sub-job entity model** | **Closed** — Sub-jobs remain source-governed dimension fields (`sub_job_code`, `sub_job_description`) on `budget_line`. No separate entity in Phase 1. Promotion to Class D dictionary deferred to Phase 2+ if cross-project consumption emerges. | — | Done |
+| **Derivation validation rules** | **Closed** — All 7 derivable metrics validated at import time. $0.01 absolute tolerance. Source value always preserved; mismatches generate `import_finding` (warning, `derivation_mismatch`). Batch-level threshold finding at >50% mismatch rate. Rules live in import-validation layer for P1-B1. | — | Done |
 
 ---
 
@@ -377,3 +427,5 @@ This artifact will be extended to cover additional external financial data sourc
 | 0.1 | 2026-03-17 | Architecture | Initial schema; Procore Budget with 4 canonical entities, composite key parsing, 14-metric classification (source vs derivable), snapshot-append temporal model, and downstream mapping strategy. Evidence-based from Procore_Budget.csv. |
 | 0.2 | 2026-03-17 | Architecture | Fixed storage boundary table: import batch metadata is SharePoint List (not Azure Table Storage) — budget is a named exception per P1-A2 Import-State Platform Standard. |
 | 0.3 | 2026-03-17 | Architecture | Reconciliation: close Cost Type dictionary open decision — 5 values frozen as Class X in A5 v0.5. No schema changes. |
+| 0.4 | 2026-03-17 | Architecture | Close sub-job modeling open decision — sub-jobs remain source-governed dimension fields on `budget_line` (no separate entity). Null sub-job allowed; inconsistent descriptions generate warning finding. Class D promotion deferred to Phase 2+. Added Sub-Job Modeling Decision subsection. |
+| 0.5 | 2026-03-17 | Architecture | Close derivation validation rules open decision — all 7 derivable metrics validated at import ($0.01 tolerance, source preserved, warning findings, >50% batch threshold, skipped when constituents null). Chained derivation uses imported inner values. Added Derivation Validation Rules subsection with formulas. |
