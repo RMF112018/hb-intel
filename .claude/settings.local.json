@@ -122,7 +122,9 @@
       "Read(//mnt/**)",
       "Read(//Users/bobbyfetting/**)",
       "Read(//private/tmp/**)",
-      "Bash(for entity:*)"
+      "Bash(for entity:*)",
+      "Bash(awk:*)",
+      "Bash(sort -t',' -k1,1)"
     ]
   },
   "enabledPlugins": {

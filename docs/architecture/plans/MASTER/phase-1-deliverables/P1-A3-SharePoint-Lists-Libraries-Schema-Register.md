@@ -5,7 +5,7 @@
 **Classification:** Internal — Engineering
 **Status:** Draft — Structure Established
 **Date:** 2026-03-17
-**Read With:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
+**Read With:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
 
 ---
 
@@ -202,9 +202,10 @@ Map P1-A1 data types to SharePoint column types:
 - Do not use cross-site lookups; use stable key fields (e.g., `project_id`) and resolve at the adapter layer
 
 ### Shared Reference Dictionaries
-- Shared dictionaries (CSICodes, StateCodes, CountryCodes, ProjectTypes, etc.) should be stored as lists on the hub site
+- Shared dictionaries (CSICodes / Cost Codes, StateCodes, CountryCodes, ProjectTypes, etc.) should be stored as lists on the hub site
 - Domain-local reference sets (EstimateSources, CommitmentStatuses, etc.) should be stored as lists on the relevant site scope
 - Reference sets referenced by Choice columns should have their values populated from these dictionary lists
+- Canonical schema for reference dictionaries (keying, hierarchy, lifecycle, applicability) is governed by [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md)
 
 ---
 

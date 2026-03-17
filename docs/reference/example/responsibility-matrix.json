@@ -1,0 +1,572 @@
+{
+  "projectInfo": {
+    "jobName": "ERAU New Residential Hall & Garage Building",
+    "jobNumber": "25-XXX-01",
+    "architect": "PQH Group",
+    "proposalDueDate": "Friday, July 25, 2025",
+    "proposalDeliveryMethod": "Email",
+    "handDeliveredCopies": "N/A",
+    "typeOfProposal": "Hard Bid",
+    "rfiFormat": "Excel",
+    "projectExecutive": "Joe Vavala",
+    "primaryContact": "",
+    "estimatorsAssigned": ["Sam", "Hank"]
+  },
+  "managingInformation": [
+    {
+      "id": "1",
+      "task": "Finalize Subcontractor Bid List in BC",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "2",
+      "task": "Send ITB to Subcontractors",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "3",
+      "task": "Phone Calls to improve Sub coverage",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "Update Ryan H. Weekly",
+      "status": "not-started",
+      "priority": "medium"
+    },
+    {
+      "id": "4",
+      "task": "Send Mass Messages in Building Connected to improve Sub coverage",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "Update Ryan H. Weekly",
+      "status": "not-started",
+      "priority": "medium"
+    },
+    {
+      "id": "5",
+      "task": "Complete Bid Packages",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "6",
+      "task": "RFI Management (Who is Point Person?)",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "7",
+      "task": "Invite Project Team to Procore",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "medium"
+    },
+    {
+      "id": "8",
+      "task": "Request Bid Bond from Eric Engstrom (CFO)",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "Follow up weekly with Eric",
+      "status": "not-started",
+      "priority": "medium"
+    },
+    {
+      "id": "9",
+      "task": "Request CCIP proposal from Eric Engstrom (CFO)",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "medium"
+    },
+    {
+      "id": "10",
+      "task": "Request financials from Eric Engstrom (CFO)",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "medium"
+    },
+    {
+      "id": "11",
+      "task": "AIA Contract Review by Patrick Painter",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "Follow up weekly with Patrick",
+      "status": "not-started",
+      "priority": "medium"
+    },
+    {
+      "id": "12",
+      "task": "Are there bid forms to be used?",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "13",
+      "task": "Submit/obtain Builders Risk Insurance Quote",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "14",
+      "task": "Review other Requirements noted on ITB (Self Performance, SBE, etc.)",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "15",
+      "task": "Add Warranty line item?",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "medium"
+    },
+    {
+      "id": "16",
+      "task": "Milestone Schedule",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "17",
+      "task": "Detailed Precon Schedule",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "18",
+      "task": "Detailed Project Schedule",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "19",
+      "task": "Site Logistics Plan",
+      "required": "YES",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "20",
+      "task": "BIM Modeling or Scanning",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "Proposal only",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "21",
+      "task": "VDC-What is a reasonable number of design iterations and model updates?",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "22",
+      "task": "VDC-How quickly shall Owner's Designers respond to VDC/BIM related inqueries?",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "23",
+      "task": "Requests Revit Files from Owner/Architect",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "24",
+      "task": "Assemble Closure Document Books",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "25",
+      "task": "Submit Permit and NOC",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "frequency": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    }
+  ],
+  "estimatingPreparation": [
+    {
+      "id": "26",
+      "task": "HB's Proposal Due",
+      "responsible": "",
+      "deadline": "Friday, July 25, 2025",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "27",
+      "task": "Subcontractor Proposals Due",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "28",
+      "task": "Schedule Pre-Submission Estimate Review",
+      "responsible": "",
+      "deadline": "Wednesday, July 23 - pm",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "29",
+      "task": "Schedule Win Strategy Meeting",
+      "responsible": "",
+      "deadline": "Friday, July 25 - am",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "30",
+      "task": "Schedule Subcontractor Site Walk-Thru",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "medium"
+    },
+    {
+      "id": "31",
+      "task": "Schedule Owner Estimate Review",
+      "responsible": "",
+      "deadline": "N/A",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    }
+  ],
+  "finalDeliverablesStandard": [
+    {
+      "id": "32",
+      "task": "Front Cover",
+      "required": "YES",
+      "responsible": "Wanda",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "33",
+      "task": "Executive Summary",
+      "required": "YES",
+      "responsible": "Wanda",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "34",
+      "task": "Cost Summary",
+      "required": "YES",
+      "responsible": "Estimator",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "35",
+      "task": "Detailed GC/GC Breakdown (optional)",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "36",
+      "task": "Detailed COW Breakdown (optional)",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "37",
+      "task": "List of Allowances",
+      "required": "YES",
+      "responsible": "Estimator",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "38",
+      "task": "Clarifications and Assumptions",
+      "required": "YES",
+      "responsible": "Estimator",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "39",
+      "task": "Value Analysis log",
+      "required": "YES",
+      "responsible": "Estimator",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "medium"
+    },
+    {
+      "id": "40",
+      "task": "Schedule",
+      "required": "YES",
+      "responsible": "Estimator",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "41",
+      "task": "Logistics Plan",
+      "required": "YES",
+      "responsible": "Estimator",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "high"
+    },
+    {
+      "id": "42",
+      "task": "List of Documents",
+      "required": "YES",
+      "responsible": "Estimator",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "medium"
+    },
+    {
+      "id": "43",
+      "task": "Team Organization Chart and Resumes",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "44",
+      "task": "Previous Experience",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "45",
+      "task": "BIM Proposal Required",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "46",
+      "task": "By Who List",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "47",
+      "task": "Back Cover",
+      "required": "YES",
+      "responsible": "Wanda",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "medium"
+    }
+  ],
+  "finalDeliverablesNonStandard": [
+    {
+      "id": "48",
+      "task": "Financials",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "49",
+      "task": "GC License",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "50",
+      "task": "BIM",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "51",
+      "task": "Contract",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "52",
+      "task": "Bid Bond",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    },
+    {
+      "id": "53",
+      "task": "Business Terms",
+      "required": "NO",
+      "responsible": "",
+      "deadline": "",
+      "notes": "",
+      "status": "not-started",
+      "priority": "low"
+    }
+  ]
+} 
