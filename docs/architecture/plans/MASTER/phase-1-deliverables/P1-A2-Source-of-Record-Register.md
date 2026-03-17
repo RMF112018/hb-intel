@@ -3,7 +3,7 @@
 **Document ID:** P1-A2
 **Phase:** 1 (Foundation)
 **Classification:** Internal — Architecture
-**Status:** Draft — Entity-level coverage complete for A4/A5/A6/A7/A8/A10/A11/A12/A13; pending A9
+**Status:** Draft — Entity-level coverage complete for all Phase 1 domains (A4–A13)
 **Date:** 2026-03-17
 **References:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md), [package-relationship-map.md](../../blueprint/package-relationship-map.md)
 
@@ -372,13 +372,34 @@ P1-A7 defines 4 canonical entities for the project-level operational register �
 
 P1-A3 stores operational register records in a project-site SharePoint list (`OperationalRegister`) with delay-subtype fields as optional columns. External mappings are stored alongside register data in the same project site. Import batches and findings reside in Azure Table Storage. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
 
-### Remaining domains
+### Permits & inspections domain (P1-A9)
 
-Entity-level rows for the following domains will be added as their schemas reach implementation-ready status:
+P1-A9 defines 7 canonical entities for the permits & inspections domain — a parent-child hierarchy tracking permit lifecycle (application → approval → renewal → expiration), scheduled inspections with compliance scoring, and structured issue resolution. Contact identity uses frozen Class G/H patterns: `inspector_contact_key` (Class G person-attribution, UPN when resolved) and `authority_contact_key` (Class H vendor/party, nullable when unresolved); snapshot fields are always preserved and never used as join keys.
 
-| Domain | Schema Doc | Entity Count | Status |
-|--------|-----------|-------------|--------|
-| compliance (permits) | P1-A9 | 8 | Schema defined; entity register pending |
+#### Project execution records (project site)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `permit_record` | execution | SharePoint List (`Permits`, project site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `record_id` (surrogate); `(project_id, permit_number)` natural key (project-scoped) | Class A | list-by-project, filter-by-type, filter-by-status, filter-by-priority, get-by-id | Yes (5 min) | Fully mutable; status transitions (pending → approved → renewed → expired / rejected); `conditions_raw` and `tags_raw` preserved for source fidelity; `authority_contact_key` updated on resolution; contact snapshot fields never overwritten by resolution | Last-write-wins with `updated_at` timestamp; raw preservation fields are source-of-truth for provenance | Project team | 1 |
+| `permit_condition` | execution (child) | SharePoint List (`Permits`, project site, child records) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `condition_id` (surrogate); `(permit_id, condition_id)` composite context | Class A | list-by-permit | No | Mutable; `condition_status` nullable until workflow tracking enabled (Phase 2) | No conflict; additive from `conditions_raw`; re-parse regenerates set | Import service (parser) | 1 |
+| `permit_tag` | execution (child) | SharePoint List (`Permits`, project site, child records) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `tag_id` (surrogate); `(permit_id, tag_id)` composite context | Class A | list-by-permit | No | Append-only in practice; `tag_value` normalized (lowercase, trimmed); `raw_tag_value` preserved; deduplicated within permit | No conflict; additive from `tags_raw` | Import service (parser) | 1 |
+| `permit_inspection` | execution (child) | SharePoint List (`PermitInspections`, project site) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `inspection_id` (surrogate); FK `permit_id` | Class A | list-by-permit, filter-by-result, filter-by-type | Yes (5 min) | Fully mutable; `result` tracks inspection outcome (passed/conditional/failed/pending); `inspector_display` always preserved; `inspector_contact_key` updated on resolution; `issues_raw` preserved for source fidelity | Last-write-wins with `updated_at` timestamp | Project team | 1 |
+| `permit_inspection_issue` | execution (child) | SharePoint List (`PermitInspections`, project site, child records) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `issue_id` (surrogate); FK `inspection_id` | Class A | list-by-inspection | No | Mutable; `is_resolved` + `resolution_notes` track resolution; `source_issue_id` preserved | Last-write-wins | Project team | 1 |
+
+#### Operational state (non-SharePoint)
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `permit_import_batch` | operational | Azure Table Storage | AF v4 → `@azure/data-tables` | `batch_id` (surrogate, unique per import) | Class D | get-by-id, list-by-project | No | Status progresses forward only (pending → parsing → complete/failed); immutable after completion | No conflict; each import creates a new `batch_id` | Import service | 1 |
+| `permit_import_finding` | operational (audit) | Azure Table Storage (`partition: permit-findings-{batchId}`) | AF v4 → `@azure/data-tables` | `finding_id` (surrogate); `(batch_id, finding_id)` composite context | Class D | list-by-batch | No | Append-only; immutable once logged; severity (error/warning/info); category (parse_error/validation_failure/mapping_warning); `entity_type` classifies finding scope (permit/inspection/issue/condition/tag) | No conflict; new imports create new findings per batch | Import service | 1 |
+
+#### A3 physical compression note
+
+P1-A3 stores permit data across 2 project-site SharePoint lists: `Permits` for permit records with condition and tag child records, and `PermitInspections` for inspection records with issue child records. Import batches and findings reside in Azure Table Storage. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
+
+### Phase 1 entity-level coverage complete
+
+All Phase 1 domain schemas (A4–A13) now have entity-level SoR coverage in this register. No domains remain pending.
 
 ---
 
@@ -681,8 +702,8 @@ Azure Table Storage is the designated storage platform for operational and prove
 - **Lifecycle:** Import service creates; system retains indefinitely for audit; no user delete
 
 **Entities in this tier across domains:**
-- Import batch records: `schedule_import_batch`, `budget_import_batch`, `kickoff_import_batch`, `checklist_import_batch`, `responsibility_import_batch`, `scorecard_import_batch`, `lessons_import_batch`, `cost_code_import_batch`, `csi_code_import_batch`, `register_import_batch`
-- Import finding records: `import_finding` (schedule), `budget_import_finding`, `scorecard_import_finding`, `lessons_import_finding`, `register_import_finding`
+- Import batch records: `schedule_import_batch`, `budget_import_batch`, `kickoff_import_batch`, `checklist_import_batch`, `responsibility_import_batch`, `scorecard_import_batch`, `lessons_import_batch`, `cost_code_import_batch`, `csi_code_import_batch`, `register_import_batch`, `permit_import_batch`
+- Import finding records: `import_finding` (schedule), `budget_import_finding`, `scorecard_import_finding`, `lessons_import_finding`, `register_import_finding`, `permit_import_finding`
 - External mapping records: `budget_line_external_mapping`
 - System state: provisioning state, audit log, project identity mapping
 
@@ -711,7 +732,7 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 - [x] **Child records have stable surrogate IDs with required FK to parent.** All child entities (`kickoff_row`, `lesson_record`, `lesson_keyword`, `checklist_item`, etc.) have their own `*_id` with FK to parent.
 - [x] **Junction records have explicit composite natural keys.** `responsibility_assignment` and `criterion_score_record` have documented composite keys with uniqueness at the tuple level.
 - [x] **Field naming follows frozen suffix conventions.** `*_id`, `*_key`, `*_display`, `source_*`, `batch_id`, `created_by`/`uploaded_by`/`approved_by` suffixes are used consistently.
-- [ ] **Remaining domains (A9) will require identity class assignment when entity-level rows are added.** These are not yet frozen but will follow the same class system.
+- [x] **All Phase 1 domains (A4–A13) have identity class assignments.** Entity-level rows cover A4, A5, A6, A7, A8, A10, A11, A12, A13 with frozen identity classes.
 
 ---
 
@@ -731,4 +752,5 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 | 1.0 | 2026-03-17 | Architecture | Phase 1 Identity Strategy Freeze: add 10 frozen identity classes (A–J) covering project anchors, SP-backed records, templates, children, import batches, junctions, person-attribution, vendor/party, external mappings, and findings; freeze field naming conventions and person/vendor resolution rules; add import identity rules; add identity QA validation checklist; align companion schemas (A4–A13) to frozen rules |
 | 1.1 | 2026-03-17 | Architecture | Add entity-level reference data domain register (P1-A5): 15 entities across 3 dictionary families (cost code, CSI code, simple reference); 11 shared canonical dictionaries (Class C), 2 import batches (Class D), 2 deferred external mappings (Phase 4+); update non-SharePoint operational state enumeration; update remaining domains to A7/A9 only |
 | 1.2 | 2026-03-17 | Architecture | Add entity-level operational register domain (P1-A7): 4 entities — `register_record` (Class A), `register_record_external_mapping` (Class A), `register_import_batch` (Class D), `register_import_finding` (Class D); assignee identity frozen as Class G (UPN when resolved, nullable when unresolved, display always preserved); update non-SharePoint operational state enumeration; update remaining domains to A9 only |
+| 1.3 | 2026-03-17 | Architecture | Add entity-level permits & inspections domain (P1-A9): 7 entities — `permit_record` (Class A), `permit_condition` (Class A), `permit_tag` (Class A), `permit_inspection` (Class A), `permit_inspection_issue` (Class A), `permit_import_batch` (Class D), `permit_import_finding` (Class D); contact identity frozen (`authority_contact_key` Class H, `inspector_contact_key` Class G); complete Phase 1 entity-level SoR coverage for all domains (A4–A13); identity validation checklist fully checked |
 

@@ -170,7 +170,7 @@ Both share phone/email; authority adds name/address, inspector adds badge. The i
 | authority_contact_phone | string | No | — | Authority contact phone (snapshot) |
 | authority_contact_email | string | No | — | Authority contact email (snapshot) |
 | authority_contact_address | string | No | — | Authority contact address (snapshot) |
-| authority_contact_key | string | No | — | Canonical linked contact reference (if resolved) |
+| authority_contact_key | string | No | — | Canonical authority contact key (Class H vendor/party pattern); nullable if unresolved; snapshot fields always preserved |
 | application_date | datetime | No | — | Application submission date |
 | approval_date | datetime | No | — | Approval date |
 | expiration_date | datetime | No | — | Permit expiration date |
@@ -221,7 +221,7 @@ Both share phone/email; authority adds name/address, inspector adds badge. The i
 | inspector_contact_phone | string | No | — | Inspector phone (snapshot) |
 | inspector_contact_email | string | No | — | Inspector email (snapshot) |
 | inspector_contact_badge | string | No | — | Inspector badge number (snapshot) |
-| inspector_contact_key | string | No | — | Canonical linked inspector reference (if resolved) |
+| inspector_contact_key | string | No | — | Canonical inspector identity (Class G person-attribution); UPN if Entra ID user, external registry key otherwise; nullable if unresolved; `inspector_display` always preserved |
 | comments | string | No | — | Inspection comments |
 | resolution_notes | string | No | — | Resolution notes |
 | follow_up_required | boolean | No | — | Whether follow-up inspection is needed |
@@ -283,6 +283,28 @@ Both share phone/email; authority adds name/address, inspector adds badge. The i
 | **Issue PK** | `issue_id` (surrogate) |
 | **Issue source** | `source_issue_id` preserved |
 | **Repeat import** | Same project + permit_number across batches = same logical permit; latest batch = current state |
+
+---
+
+### Identity Class Alignment (Frozen)
+
+Each A9 entity maps to a frozen identity class from the [P1-A2 Identity Strategy Freeze](./P1-A2-Source-of-Record-Register.md).
+
+| Entity | Identity Class | Identity Key | Notes |
+|--------|---------------|-------------|-------|
+| `permit_record` | B (SP-backed business record) | `record_id` (surrogate); `(project_id, permit_number)` natural key | `source_permit_id` preserved for import traceability; no raw SP numeric IDs exposed |
+| `permit_condition` | D (child record) | `condition_id` (surrogate); FK `permit_id` | Child of `permit_record` |
+| `permit_tag` | D (child record) | `tag_id` (surrogate); FK `permit_id` | `tag_value` normalized; `raw_tag_value` preserved |
+| `permit_inspection` | D (child record) | `inspection_id` (surrogate); FK `permit_id` | `source_inspection_id` preserved |
+| `permit_inspection_issue` | D (child record) | `issue_id` (surrogate); FK `inspection_id` | `source_issue_id` preserved |
+| `permit_import_batch` | E (import-batch) | `batch_id` (surrogate, system-generated) | `source_file_name` is metadata, not identity |
+| `permit_import_finding` | J (findings/audit) | `finding_id` (surrogate); batch-scoped | Append-only; immutable once logged |
+
+#### Contact key resolution
+
+- **`authority_contact_key`** follows the Class H (vendor/party) pattern: nullable canonical key for the issuing authority contact when resolvable via a future authority registry; raw snapshot fields (`authority_contact_name`, `authority_contact_phone`, `authority_contact_email`, `authority_contact_address`) are always preserved and never used as join keys.
+- **`inspector_contact_key`** follows the Class G (person-attribution) pattern: nullable canonical key — UPN if the inspector is an Entra ID-resolved user, or an external inspector registry key when available; `inspector_display` always preserved and never used as a join key.
+- Both keys are nullable if unresolved. No synthetic person or party IDs are invented. Resolution is owned by the adapter/import layer.
 
 ---
 
@@ -399,3 +421,4 @@ Both share phone/email; authority adds name/address, inspector adds badge. The i
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 7 canonical entities (permit_record, permit_condition, permit_tag, permit_inspection, permit_inspection_issue, permit_import_batch, permit_import_finding). Hybrid contact/conditions/tags/issues/lifecycle strategies per locked interview decisions. Evidence-based from permits.json. |
+| 0.2 | 2026-03-17 | Architecture | Add identity class alignment to A2 freeze: map all 7 entities to frozen classes (B, D, E, J). Freeze contact key resolution semantics — `authority_contact_key` as Class H (vendor/party), `inspector_contact_key` as Class G (person-attribution). Both nullable if unresolved; snapshot fields always preserved. |
