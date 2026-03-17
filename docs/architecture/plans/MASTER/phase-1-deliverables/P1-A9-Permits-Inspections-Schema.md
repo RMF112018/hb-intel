@@ -384,7 +384,7 @@ Each A9 entity maps to a frozen identity class from the [P1-A2 Identity Strategy
 | Tags | SharePoint List (project site) | Authoritative child records | Same |
 | Inspections | SharePoint List (project site) | Authoritative child records | Same |
 | Issues | SharePoint List (project site) | Authoritative child records | Same |
-| Import batches | Azure Table Storage | Operational state | Aligns with P1-A1/A2 |
+| Import batches | Azure Table Storage | Operational state | Default per Import-State Platform Standard in P1-A2 |
 | Import findings | Azure Table Storage | Operational audit | Same |
 
 ---
@@ -422,3 +422,4 @@ Each A9 entity maps to a frozen identity class from the [P1-A2 Identity Strategy
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 7 canonical entities (permit_record, permit_condition, permit_tag, permit_inspection, permit_inspection_issue, permit_import_batch, permit_import_finding). Hybrid contact/conditions/tags/issues/lifecycle strategies per locked interview decisions. Evidence-based from permits.json. |
 | 0.2 | 2026-03-17 | Architecture | Add identity class alignment to A2 freeze: map all 7 entities to frozen classes (B, D, E, J). Freeze contact key resolution semantics — `authority_contact_key` as Class H (vendor/party), `inspector_contact_key` as Class G (person-attribution). Both nullable if unresolved; snapshot fields always preserved. |
+| 0.3 | 2026-03-17 | Architecture | Aligned storage boundary references with P1-A2 Import-State Platform Standard. |

@@ -295,6 +295,22 @@ Normalized intersection record — one per (item × role × assignment value). T
 | uploaded_at | datetime | Yes | Upload timestamp |
 | parser_version | string | No | Parser version |
 
+**Storage:** Azure Table Storage (Class D, operational). Per the Import-State Platform Standard in P1-A2.
+
+### responsibility_import_finding
+
+Import validation findings for responsibility matrix workbook ingestion. Stored in Azure Table Storage per the Import-State Platform Standard in P1-A2 (universal rule: all findings in Azure Table Storage, Class D, append-only).
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| finding_id | string | Yes | Finding identifier (surrogate) |
+| batch_id | string | Yes | FK to responsibility_import_batch |
+| severity | string | Yes | error, warning, info |
+| category | string | Yes | parse_error, validation_failure, mapping_warning, assignment_conflict |
+| message | string | Yes | Human-readable description |
+
+**Storage:** Azure Table Storage (partition key: `responsibility-findings-{batchId}`). Class D, append-only, immutable once logged.
+
 ---
 
 ## Assignment Value Strategy
@@ -383,7 +399,7 @@ The normalized model can reconstruct the workbook matrix view using:
 | Project instances | SharePoint List (project site) | Authoritative project data | Aligns with P1-A1 |
 | Project item instances | SharePoint List (project site) | Authoritative child records | Same |
 | Assignment records | SharePoint List (project site) | Authoritative intersection data | Same |
-| Import batches | Azure Table Storage | Operational state | Aligns with P1-A1/A2 |
+| Import batches | Azure Table Storage | Operational state | Default per Import-State Platform Standard in P1-A2 |
 
 ---
 
@@ -417,3 +433,4 @@ The normalized model can reconstruct the workbook matrix view using:
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 10 canonical entities, 3 matrix families (PM/Field/Owner Contract), normalized assignment junction model, governed role/party catalog, assignment value dictionary, template/version/instance governance with project tailoring (custom + suppressed items). Evidence-based from 2 Excel templates. JSON confirmed misattached. All 4 locked interview decisions encoded. |
+| 0.2 | 2026-03-17 | Architecture | Added `responsibility_import_finding` entity per P1-A2 Import-State Platform Standard completeness requirement. Aligned storage boundary references to cite platform standard. |

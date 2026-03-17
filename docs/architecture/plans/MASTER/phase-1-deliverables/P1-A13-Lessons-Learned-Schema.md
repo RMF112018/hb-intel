@@ -328,7 +328,7 @@ This denormalization ensures each `lesson_record` is self-contained for search a
 | Lesson records | SharePoint List (project site) | Authoritative child records | Same |
 | Keywords | SharePoint List (project site) | Authoritative child records | Same |
 | Linked references | SharePoint List (project site) | Authoritative child records | Same |
-| Import batches | Azure Table Storage | Operational state | Aligns with P1-A1/A2 |
+| Import batches | Azure Table Storage | Operational state | Default per Import-State Platform Standard in P1-A2 |
 
 ---
 
@@ -362,3 +362,4 @@ This denormalization ensures each `lesson_record` is self-contained for search a
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 8 canonical entities (report instance, lesson record, keyword, linked reference, category dictionary, impact magnitude dictionary, import batch/finding). Report+child lesson model with inherited search metadata, structured lesson components + composed narrative, governed taxonomy + raw preservation, text + structured reference support. Evidence-based from SOP Lessons Learned workbook. All 4 locked interview decisions encoded. |
+| 0.2 | 2026-03-17 | Architecture | Aligned storage boundary references with P1-A2 Import-State Platform Standard. |

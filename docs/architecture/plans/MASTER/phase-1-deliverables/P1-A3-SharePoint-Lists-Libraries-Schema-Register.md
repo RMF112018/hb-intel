@@ -345,7 +345,7 @@ The following entities are part of the Phase 1 canonical domain model but are **
 
 #### Azure Table Storage — Import Findings (all domains)
 
-Import findings (parse errors, validation warnings, derivation mismatches) are operational audit records stored in Azure Table Storage per P1-A1/A2 storage boundary.
+Import findings (parse errors, validation warnings, derivation mismatches) are operational audit records stored in Azure Table Storage per the Import-State Platform Standard in P1-A2. All import-driven domains store findings universally in Azure Table Storage (Class D, append-only). No exceptions.
 
 | Entity | Governing Schema | Storage | Phase 1 Handling |
 |--------|-----------------|---------|-----------------|
@@ -353,14 +353,15 @@ Import findings (parse errors, validation warnings, derivation mismatches) are o
 | `budget_import_finding` | P1-A6 `budget_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
 | `register_import_finding` | P1-A7 `register_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
 | `permit_import_finding` | P1-A9 `permit_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
-| `checklist_import_finding` | P1-A10 (implied) | Azure Table Storage | Operational audit; not in SharePoint |
+| `checklist_import_finding` | P1-A10 `checklist_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
+| `kickoff_import_finding` | P1-A8 `kickoff_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
+| `responsibility_import_finding` | P1-A11 `responsibility_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
 | `scorecard_import_finding` | P1-A12 `scorecard_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
 | `lessons_import_finding` | P1-A13 `lessons_import_finding` | Azure Table Storage | Operational audit; not in SharePoint |
-| `kickoff_import_finding` | P1-A8 (implied) | Azure Table Storage | Operational audit; not in SharePoint |
 
 #### Azure Table Storage — Import Batch Metadata (domains without SharePoint batch lists)
 
-Schedule and budget domains have dedicated SharePoint batch lists (`ScheduleImportBatches`, `BudgetImportBatches`). The following domains track batch metadata only via the `sourceBatchId` field on their respective SharePoint lists, with full batch records in Azure Table Storage.
+Per the Import-State Platform Standard in P1-A2, the default storage for import-batch metadata is Azure Table Storage. Schedule and budget are the two Phase 1 exceptions with dedicated SharePoint batch lists (`ScheduleImportBatches`, `BudgetImportBatches`) because both domains have user-visible import-history requirements and the batch is a direct parent of SharePoint-resident imported data. The following domains store batch metadata in Azure Table Storage per the platform default, with downstream SharePoint entities referencing the batch via `sourceBatchId`.
 
 | Entity | Governing Schema | Storage | Phase 1 Handling |
 |--------|-----------------|---------|-----------------|
@@ -1391,3 +1392,4 @@ The financial-sensitive and compliance-sensitive list isolation rules frozen abo
 | 2.1 | 2026-03-17 | Architecture | Froze indexing and query-pattern strategy: query-pattern-first provisioning (indexes at creation time, not deferred), volume risk classification for all build-ready containers, 5,000-item threshold strategy for hub-site dictionaries (CostCodes, CSICodes) and threshold-risk project-site lists, default view provisioning requirements (filtered, index-aligned), adapter-layer query routing expectations for cross-project aggregation and threshold-risk lists. |
 | 2.2 | 2026-03-17 | Architecture | Froze permission-scope minimization rule: site-level inheritance as default, explicit inheritance preference order (site → list → folder → item-by-exception-only), prohibition on item-level ACLs as default for any container, exception governance requirements (documented justification, scope count, review mechanism), practical unique-scope limits (~50,000 per list degradation boundary), interaction with financial/compliance isolation model. |
 | 2.3 | 2026-03-17 | Architecture | Final reconciliation sweep after five SharePoint implementation-decision freezes (v1.8–v2.2). Reconciled content type naming conventions with frozen strategy (removed stale domain-specific examples, aligned with three hub-level types). Tightened advisory "should be" language in Shared Reference Dictionaries to match frozen deployment model. Updated approval status and comments to reflect all five freezes and four remaining open decisions. Verified: all five decisions are explicit, internally consistent, and implementation-guiding; no stale open-decision language; no cross-section contradictions; no adjacent artifact changes needed. |
+| 2.4 | 2026-03-17 | Architecture | Aligned Non-SharePoint import entities with P1-A2 Import-State Platform Standard. Updated import findings table: removed "(implied)" for kickoff and checklist findings (now explicitly defined in A8/A10), added `responsibility_import_finding` (A11). Updated import batch metadata section with platform standard cross-reference and rationale for schedule/budget SharePoint exceptions. |

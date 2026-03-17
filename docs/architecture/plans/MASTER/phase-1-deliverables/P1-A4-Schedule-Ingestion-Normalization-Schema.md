@@ -619,7 +619,7 @@ The `import_finding` entity captures all non-silent events during ingestion:
 | Layer | Storage | Authority | P1-A1/A2 Alignment |
 |-------|---------|-----------|---------------------|
 | Raw uploaded files | SharePoint Document Library (project site) | Authoritative raw source | Aligns with P1-A1 `schedule` domain: SharePoint is primary business data store |
-| Import batch metadata | SharePoint List (project site) | Authoritative operational metadata | Aligns with schedule domain governance |
+| Import batch metadata | SharePoint List (project site) | Authoritative operational metadata | Named exception per Import-State Platform Standard in P1-A2: user-visible import history + batch is direct parent of SharePoint-resident activities |
 | Canonical schedule entities | SharePoint Lists (project site) | Authoritative for schedule business data | Aligns with P1-A1: SharePoint List as primary store for schedule domain |
 | Mapping/provenance/drift records | Azure Table Storage | Operational state | Aligns with P1-A1/P1-A2: Azure Table Storage owns operational state and audit |
 | Import findings | Azure Table Storage | Operational audit | Aligns with P1-A1: audit/operational history in Table Storage |
@@ -644,3 +644,4 @@ The `import_finding` entity captures all non-silent events during ingestion:
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; canonical entity model with 16 entities, 3 format mappings (CSV/MSProject XML/P6 XER), drift handling, provenance tracking, and storage boundary alignment. Evidence-based analysis from 3 example schedule files. |
+| 0.2 | 2026-03-17 | Architecture | Aligned storage boundary table with P1-A2 Import-State Platform Standard: schedule is a named exception (batch in SharePoint, not Azure Table Storage default) with explicit rationale. |

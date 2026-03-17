@@ -324,7 +324,7 @@ Maps budget lines to HB Intel reference entities.
 | Data | Storage | Authority | P1-A1/A2 Alignment |
 |------|---------|-----------|---------------------|
 | Raw uploaded files | SharePoint Document Library (project site) | Source provenance; immutable | Aligns with P1-A1: SharePoint for business data |
-| Import batch metadata | Azure Table Storage | Operational state | Aligns with P1-A1/A2: Table Storage for operational state |
+| Import batch metadata | SharePoint List (project site) | Authoritative operational metadata | Named exception per Import-State Platform Standard in P1-A2: user-visible import history + batch is direct parent of SharePoint-resident budget lines |
 | Canonical budget lines | SharePoint List (project site) | Authoritative imported financial data (Mirrored from Procore) | Aligns with P1-A1: imported data is Mirrored authority type |
 | External mappings | SharePoint List (project site) | Authoritative mapping data | Alongside budget data |
 | Import findings | Azure Table Storage | Operational audit | Aligns with P1-A1/A2: audit in Table Storage |
@@ -375,3 +375,4 @@ This artifact will be extended to cover additional external financial data sourc
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; Procore Budget with 4 canonical entities, composite key parsing, 14-metric classification (source vs derivable), snapshot-append temporal model, and downstream mapping strategy. Evidence-based from Procore_Budget.csv. |
+| 0.2 | 2026-03-17 | Architecture | Fixed storage boundary table: import batch metadata is SharePoint List (not Azure Table Storage) — budget is a named exception per P1-A2 Import-State Platform Standard. |

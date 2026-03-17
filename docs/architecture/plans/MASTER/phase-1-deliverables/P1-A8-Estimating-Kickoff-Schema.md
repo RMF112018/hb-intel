@@ -277,6 +277,22 @@ Tracks workbook imports for provenance.
 | parser_version | string | No | Parser version |
 | notes | text | No | Import notes |
 
+**Storage:** Azure Table Storage (Class D, operational). Per the Import-State Platform Standard in P1-A2.
+
+### kickoff_import_finding
+
+Import validation findings for kickoff workbook ingestion. Stored in Azure Table Storage per the Import-State Platform Standard in P1-A2 (universal rule: all findings in Azure Table Storage, Class D, append-only).
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| finding_id | string | Yes | Finding identifier (surrogate) |
+| batch_id | string | Yes | FK to kickoff_import_batch |
+| severity | string | Yes | error, warning, info |
+| category | string | Yes | parse_error, validation_failure, mapping_warning |
+| message | string | Yes | Human-readable description |
+
+**Storage:** Azure Table Storage (partition key: `kickoff-findings-{batchId}`). Class D, append-only, immutable once logged.
+
 ---
 
 ### Keying and Uniqueness Rules
@@ -361,7 +377,7 @@ Tracks workbook imports for provenance.
 | Kickoff rows | SharePoint List (project site) | Authoritative child records | Same |
 | Evidence links | SharePoint List (project site) | Authoritative links | Same |
 | Notes/history | SharePoint List (project site) or Azure Table Storage | Operational | Depends on volume; Table Storage for high-volume history |
-| Import batches | Azure Table Storage | Operational state | Aligns with P1-A1/A2 |
+| Import batches | Azure Table Storage | Operational state | Default per Import-State Platform Standard in P1-A2 |
 
 ---
 
@@ -396,3 +412,4 @@ Tracks workbook imports for provenance.
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 7 canonical entities (template, template item, instance, row, evidence link, note, import batch), 3 row subtypes (task/milestone/deliverable), hybrid YES/NO and date handling, template/instance snapshot model, and package assembly metadata. Evidence-based from Estimating Kickoff.xlsx. All 16 locked interview decisions encoded. |
+| 0.2 | 2026-03-17 | Architecture | Added `kickoff_import_finding` entity per P1-A2 Import-State Platform Standard completeness requirement. Aligned storage boundary references to cite platform standard. |

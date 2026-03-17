@@ -244,6 +244,22 @@ One per family per project (e.g., one startup instance, one safety instance, one
 | uploaded_at | datetime | Yes | Upload timestamp |
 | parser_version | string | No | Parser version |
 
+**Storage:** Azure Table Storage (Class D, operational). Per the Import-State Platform Standard in P1-A2.
+
+### checklist_import_finding
+
+Import validation findings for checklist ingestion. Stored in Azure Table Storage per the Import-State Platform Standard in P1-A2 (universal rule: all findings in Azure Table Storage, Class D, append-only).
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| finding_id | string | Yes | Finding identifier (surrogate) |
+| batch_id | string | Yes | FK to checklist_import_batch |
+| severity | string | Yes | error, warning, info |
+| category | string | Yes | parse_error, validation_failure, mapping_warning, outcome_mismatch |
+| message | string | Yes | Human-readable description |
+
+**Storage:** Azure Table Storage (partition key: `checklist-findings-{batchId}`). Class D, append-only, immutable once logged.
+
 ---
 
 ## Outcome Mapping
@@ -343,7 +359,7 @@ One per family per project (e.g., one startup instance, one safety instance, one
 | Project aggregate + family instances | SharePoint List (project site) | Authoritative project operational data | Aligns with P1-A1 compliance domain |
 | Sections + items | SharePoint List (project site) | Authoritative child records | Same |
 | Evidence links | SharePoint List (project site) | Authoritative links | Same |
-| Import batches | Azure Table Storage | Operational state | Aligns with P1-A1/A2 |
+| Import batches | Azure Table Storage | Operational state | Default per Import-State Platform Standard in P1-A2 |
 
 ---
 
@@ -377,3 +393,4 @@ One per family per project (e.g., one startup instance, one safety instance, one
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 8 canonical entities, 3 checklist families (startup/safety/closeout), canonical outcome mapping (complete/incomplete/pass/fail/not_applicable), template/version model, evidence linkage, hybrid raw+canonical outcome preservation. Evidence-based from 3 source PDFs. All 6 locked interview decisions encoded. |
+| 0.2 | 2026-03-17 | Architecture | Added `checklist_import_finding` entity per P1-A2 Import-State Platform Standard completeness requirement. Aligned storage boundary references to cite platform standard. |

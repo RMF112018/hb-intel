@@ -362,7 +362,7 @@ The same Class G/H pattern applies to BIC identity:
 | Data | Storage | Authority | P1-A1/A2 Alignment |
 |------|---------|-----------|---------------------|
 | Canonical register records | SharePoint List (project site) | Authoritative for operational register data | Aligns with P1-A1: SharePoint for project business data |
-| Import batch metadata | Azure Table Storage | Operational state | Aligns with P1-A1/A2: Table Storage for operational state |
+| Import batch metadata | Azure Table Storage | Operational state | Default per Import-State Platform Standard in P1-A2 |
 | External mappings | SharePoint List (project site) | Authoritative mapping data | Alongside register data |
 | Import findings | Azure Table Storage | Operational audit | Aligns with P1-A1/A2: audit in Table Storage |
 | Category/BIC dictionaries | SharePoint List (hub site, shared) | Authoritative reference data | Governed by P1-A5 |
@@ -536,3 +536,4 @@ These are reconciliation snapshots only — canonical totals should be derived f
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 4 canonical entities, hybrid operational register classification, category/BIC normalization, lifecycle model, days-elapsed derivation, and storage alignment. Evidence-based from constraints.json. |
 | 0.2 | 2026-03-17 | Architecture | Added delay subtype extension with 18 delay-specific fields on register_record (raw+normalized pairs for PCCO, affected task, critical path impact, cost impact, duration, dates, notification). Import batch snapshot fields for totals row. First implemented subtype establishing the pattern. Evidence-based from Project Delay Log CSV template. |
 | 0.3 | 2026-03-17 | Architecture | Freeze assignee identity resolution: `assigned_person_key`/`assigned_display` aligned to Class G (person-attribution) from A2 identity freeze. UPN when resolved, nullable when unresolved, display always preserved, adapter owns resolution. Same pattern confirmed for `bic_key`/`bic_display`. Closes open decision "Identity reconciliation for assigned." |
+| 0.4 | 2026-03-17 | Architecture | Aligned storage boundary with P1-A2 Import-State Platform Standard: import batch and finding storage references updated to cite platform standard. |

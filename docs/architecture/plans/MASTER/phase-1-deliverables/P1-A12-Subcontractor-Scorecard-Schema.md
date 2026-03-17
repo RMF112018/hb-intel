@@ -378,7 +378,7 @@ Rating bands are derived from the overall weighted score. Thresholds are governe
 | Section/overall summaries | SharePoint List (project site) | Derived + stored | Same |
 | Recommendations + narratives | SharePoint List (project site) | Authoritative | Same |
 | Approvals | SharePoint List (project site) | Authoritative | Same |
-| Import batches | Azure Table Storage | Operational state | Aligns with P1-A1/A2 |
+| Import batches | Azure Table Storage | Operational state | Default per Import-State Platform Standard in P1-A2 |
 
 ---
 
@@ -412,3 +412,4 @@ Rating bands are derived from the overall weighted score. Thresholds are governe
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 12 canonical entities (rubric template/version/section/criterion, evaluation, criterion score, section summary, overall summary, recommendation, approval, import batch/finding). 6 weighted sections, 29 criteria, 1-5 scale with N/A, 3 approval roles, 4 narrative blocks, official-final designation for portfolio aggregation. Evidence-based from SOP SubScorecard workbook. All 4 locked interview decisions encoded. |
+| 0.2 | 2026-03-17 | Architecture | Aligned storage boundary references with P1-A2 Import-State Platform Standard. |

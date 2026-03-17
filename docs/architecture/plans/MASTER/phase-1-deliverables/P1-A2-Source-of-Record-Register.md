@@ -751,10 +751,37 @@ Azure Table Storage is the designated storage platform for operational and prove
 - **Lifecycle:** Import service creates; system retains indefinitely for audit; no user delete
 
 **Entities in this tier across domains:**
-- Import batch records: `schedule_import_batch`, `budget_import_batch`, `kickoff_import_batch`, `checklist_import_batch`, `responsibility_import_batch`, `scorecard_import_batch`, `lessons_import_batch`, `cost_code_import_batch`, `csi_code_import_batch`, `register_import_batch`, `permit_import_batch`, `lead_import_batch`, `contract_import_batch`
-- Import finding records: `import_finding` (schedule), `budget_import_finding`, `scorecard_import_finding`, `lessons_import_finding`, `register_import_finding`, `permit_import_finding`, `lead_import_finding`, `contract_import_finding`
+- Import batch records (Azure Table Storage default): `kickoff_import_batch`, `checklist_import_batch`, `responsibility_import_batch`, `scorecard_import_batch`, `lessons_import_batch`, `cost_code_import_batch`, `csi_code_import_batch`, `register_import_batch`, `permit_import_batch`, `lead_import_batch`, `contract_import_batch`. Note: `schedule_import_batch` and `budget_import_batch` are stored in dedicated SharePoint Lists per the Import-State Platform Standard (see below); all other domain batch records are in this tier.
+- Import finding records: `import_finding` (schedule), `budget_import_finding`, `kickoff_import_finding`, `checklist_import_finding`, `responsibility_import_finding`, `scorecard_import_finding`, `lessons_import_finding`, `register_import_finding`, `permit_import_finding`, `lead_import_finding`, `contract_import_finding`
 - External mapping records: `budget_line_external_mapping`
 - System state: provisioning state, audit log, project identity mapping
+
+### Import-State Platform Standard (Frozen)
+
+> **Status: Frozen.** This section defines the cross-schema platform standard for import-batch metadata and import findings. Domain-specific batch status workflows and finding category vocabularies remain domain-scoped; the storage model, SoR designation, and structural contract are standardized here.
+
+**`import_batch` — governed two-tier model.**
+
+The default storage for canonical import-batch metadata is Azure Table Storage (Class D, operational). This is the standard for all import-driven domains unless a named exception applies.
+
+A domain may store its `*_import_batch` entity in a dedicated SharePoint List instead of Azure Table Storage ONLY when both conditions are met:
+1. End users need to browse, filter, or query import history directly through SharePoint views or the adapter layer.
+2. The batch record is a direct parent of SharePoint-resident imported data (i.e., the batch's child records live in a SharePoint List on the same site).
+
+**Phase 1 exceptions:** `schedule_import_batch` (SharePoint List `ScheduleImportBatches`) and `budget_import_batch` (SharePoint List `BudgetImportBatches`). Both meet the two conditions: users need import-history visibility, and the batch is the direct parent of SharePoint-resident activities/budget lines. These are documented in their entity-level register rows and in P1-A3's container appendices.
+
+**All other domains** store their `*_import_batch` in Azure Table Storage. Downstream SharePoint entities reference the batch via the `sourceBatchId` field, which holds the canonical `batch_id` from Azure Table Storage.
+
+**`import_finding` — universal Azure Table Storage.**
+
+All `*_import_finding` entities are stored in Azure Table Storage (Class D, audit-only, append-only). No exceptions. Every import-driven domain MUST define a `{domain}_import_finding` entity with:
+- Partition key: `{domain-prefix}-findings-{batchId}`
+- Required fields: `finding_id` (surrogate), `batch_id` (FK to parent batch), `severity` (error/warning/info), `category` (domain-specific), `message`
+- Append-only semantics: findings are never updated once logged
+
+**`sourceBatchId` cross-reference convention.** All SharePoint-resident canonical entities that originate from an import carry a `sourceBatchId` field (Text) referencing the canonical `batch_id` of their governing import batch — regardless of whether that batch lives in SharePoint or Azure Table Storage. For schedule and budget domains, `batch_id` on child entities serves the same purpose (the batch is in the same SharePoint site). The field name convention (`sourceBatchId` vs `batchId`) may vary by domain but the semantic contract is identical: link to the canonical import batch record.
+
+**Completeness requirement.** Every import-driven domain must define both `*_import_batch` and `*_import_finding` entities in its governing schema artifact. Domains that define batch metadata without a corresponding finding entity must add one; import validation without structured finding records is not acceptable for production import pipelines.
 
 ### Proxy Adapter (Phase 1 MVP)
 The `@hbc/af-adapter-proxy` is the placeholder adapter that:
@@ -805,4 +832,5 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 | 1.4 | 2026-03-17 | Architecture | Add entity-level leads domain (P1-A14): 5 entities — `market_lead` (Class A), `market_lead_tag` (Class A), `pipeline_snapshot` (Class A), `lead_import_batch` (Class D), `lead_import_finding` (Class D); matched rep identity frozen as Class G; pipeline nested structures stored as flattened JSON; extend coverage to A4–A14 |
 | 1.5 | 2026-03-17 | Architecture | Add entity-level prime contracts domain (P1-A15): 3 entities — `prime_contract` (Class A), `contract_import_batch` (Class D), `contract_import_finding` (Class D); canonical identity frozen as surrogate `contract_id` with `contract_number` natural key and `source_project_id` for Procore federation; financial field classification (authoritative vs derived); owner/client contact as Class H, primary contact as Class G; extend coverage to A4–A15 |
 | 1.6 | 2026-03-17 | Architecture | Reconcile domain summary rows: update leads row to reflect A14 two-list model (`MarketLeads`, `PipelineSnapshots`) with surrogate identity; update contracts row to reflect A15 single-list `PrimeContracts` with surrogate `contract_id` (remove stale paired library + document URL identity) |
+| 1.7 | 2026-03-17 | Architecture | Froze Import-State Platform Standard: governed two-tier model for `import_batch` (Azure Table Storage default, SharePoint List exception for schedule/budget with explicit conditions), universal Azure Table Storage rule for `import_finding`, `sourceBatchId` cross-reference convention, completeness requirement (every import-driven domain must define both batch and finding entities). Fixed Non-SharePoint enumeration to exclude SharePoint-resident batch records. Added 3 missing finding entities to enumeration: `kickoff_import_finding`, `checklist_import_finding`, `responsibility_import_finding`. |
 
