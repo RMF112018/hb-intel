@@ -1,0 +1,4247 @@
+[
+  {
+    "id": "perm-001",
+    "projectId": 2525840,
+    "number": "MAST-2024-001",
+    "type": "Master Building Permit",
+    "status": "renewed",
+    "priority": "high",
+    "authority": "Palm Beach Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "407 Palm Beach Permit Center"
+    },
+    "applicationDate": "2024-06-24T08:00:00Z",
+    "approvalDate": "2024-07-06T14:30:00Z",
+    "expirationDate": "2025-02-09T23:59:59Z",
+    "renewalDate": "2024-12-28T00:00:00Z",
+    "cost": 9017.84,
+    "bondAmount": 36062.89,
+    "description": "Master Building Permit for project Palm Beach Luxury Estate",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "Stormwater management approval",
+      "ADA compliance verification needed"
+    ],
+    "tags": ["high-priority", "residential", "luxury"],
+    "inspections": [
+      {
+        "id": "insp-001-1",
+        "permitId": "perm-001",
+        "type": "Foundation",
+        "scheduledDate": "2024-07-15T09:00:00Z",
+        "completedDate": "2024-07-15T11:30:00Z",
+        "inspector": "John Smith",
+        "inspectorContact": {
+          "phone": "(555) 123-9876",
+          "email": "j.smith@cityinspections.gov",
+          "badge": "INS-001"
+        },
+        "result": "passed",
+        "complianceScore": 95,
+        "issues": [],
+        "comments": "Foundation meets all code requirements. Minor grading adjustment needed.",
+        "resolutionNotes": "Grading completed and approved.",
+        "followUpRequired": false,
+        "duration": 150,
+        "createdAt": "2024-07-15T09:00:00Z",
+        "updatedAt": "2024-07-15T11:30:00Z"
+      },
+      {
+        "id": "insp-001-2",
+        "permitId": "perm-001",
+        "type": "Framing",
+        "scheduledDate": "2024-08-02T08:00:00Z",
+        "completedDate": "2024-08-02T10:15:00Z",
+        "inspector": "Sarah Wilson",
+        "inspectorContact": {
+          "phone": "(555) 234-5678",
+          "email": "s.wilson@cityinspections.gov",
+          "badge": "INS-002"
+        },
+        "result": "conditional",
+        "complianceScore": 82,
+        "issues": [
+          {
+            "id": "issue-001",
+            "description": "Missing fire blocking in stairwell",
+            "severity": "medium",
+            "resolved": true,
+            "resolutionNotes": "Fire blocking installed per code requirements"
+          }
+        ],
+        "comments": "Overall framing is good. One fire blocking issue needs to be addressed.",
+        "resolutionNotes": "Fire blocking installed and re-inspected. Approved.",
+        "followUpRequired": false,
+        "duration": 135,
+        "createdAt": "2024-08-02T08:00:00Z",
+        "updatedAt": "2024-08-02T10:15:00Z"
+      }
+    ]
+  },
+  {
+    "id": "perm-002",
+    "projectId": 2525840,
+    "number": "DEMO-2024-002",
+    "type": "Demolition",
+    "status": "renewed",
+    "priority": "high",
+    "authority": "Palm Beach Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "407 Palm Beach Permit Center"
+    },
+    "applicationDate": "2024-03-24T08:00:00Z",
+    "approvalDate": "2024-04-18T14:30:00Z",
+    "expirationDate": "2025-05-06T23:59:59Z",
+    "renewalDate": "2025-04-09T00:00:00Z",
+    "cost": 5424.15,
+    "bondAmount": 14540.52,
+    "description": "Demolition for project Palm Beach Luxury Estate",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "Noise ordinance compliance"
+    ],
+    "tags": ["demolition", "safety"],
+    "inspections": []
+  },
+  {
+    "id": "perm-003",
+    "projectId": 2525840,
+    "number": "SITE-2024-003",
+    "type": "Site Development",
+    "status": "expired",
+    "priority": "medium",
+    "authority": "Palm Beach Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "407 Palm Beach Permit Center"
+    },
+    "applicationDate": "2024-06-17T08:00:00Z",
+    "approvalDate": "2024-07-09T14:30:00Z",
+    "expirationDate": "2025-09-18T23:59:59Z",
+    "renewalDate": "2025-07-31T00:00:00Z",
+    "cost": 17000.02,
+    "bondAmount": 48430.65,
+    "description": "Site Development for project Palm Beach Luxury Estate",
+    "comments": "Auto-generated mock permit record for site development.",
+    "conditions": [
+      "Environmental impact assessment completed",
+      "Stormwater management approval",
+      "Asbestos abatement documentation submitted"
+    ],
+    "tags": ["site-work", "environmental"],
+    "inspections": []
+  },
+  {
+    "id": "perm-004",
+    "projectId": 2525840,
+    "number": "ELEC-2024-004",
+    "type": "Electrical",
+    "status": "renewed",
+    "priority": "medium",
+    "authority": "Palm Beach Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "407 Palm Beach Permit Center"
+    },
+    "applicationDate": "2024-05-22T08:00:00Z",
+    "approvalDate": "2024-06-13T14:30:00Z",
+    "expirationDate": "2025-06-26T23:59:59Z",
+    "renewalDate": "2025-06-08T00:00:00Z",
+    "cost": 17915.41,
+    "bondAmount": 46938.94,
+    "description": "Electrical for project Palm Beach Luxury Estate",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "Environmental impact assessment completed"
+    ],
+    "tags": ["electrical", "safety-critical"],
+    "inspections": [
+      {
+        "id": "insp-004-1",
+        "permitId": "perm-004",
+        "type": "Rough-in Electrical",
+        "scheduledDate": "2024-07-20T10:00:00Z",
+        "completedDate": "2024-07-20T12:45:00Z",
+        "inspector": "Mike Johnson",
+        "inspectorContact": {
+          "phone": "(555) 345-6789",
+          "email": "m.johnson@electricalcode.gov",
+          "badge": "ELEC-003"
+        },
+        "result": "failed",
+        "complianceScore": 65,
+        "issues": [
+          {
+            "id": "issue-004-1",
+            "description": "GFCI outlets missing in bathroom areas",
+            "severity": "high",
+            "resolved": false,
+            "resolutionNotes": ""
+          },
+          {
+            "id": "issue-004-2",
+            "description": "Service panel labeling incomplete",
+            "severity": "medium",
+            "resolved": false,
+            "resolutionNotes": ""
+          }
+        ],
+        "comments": "Major electrical code violations found. Re-inspection required after corrections.",
+        "resolutionNotes": "",
+        "followUpRequired": true,
+        "duration": 165,
+        "createdAt": "2024-07-20T10:00:00Z",
+        "updatedAt": "2024-07-20T12:45:00Z"
+      },
+      {
+        "id": "insp-004-2",
+        "permitId": "perm-004",
+        "type": "Electrical Final",
+        "scheduledDate": "2024-12-15T09:00:00Z",
+        "inspector": "Mike Johnson",
+        "inspectorContact": {
+          "phone": "(555) 345-6789",
+          "email": "m.johnson@electricalcode.gov",
+          "badge": "ELEC-003"
+        },
+        "result": "pending",
+        "complianceScore": null,
+        "issues": [],
+        "comments": "Scheduled for final electrical inspection.",
+        "resolutionNotes": "",
+        "followUpRequired": false,
+        "duration": null,
+        "createdAt": "2024-12-01T08:00:00Z",
+        "updatedAt": "2024-12-01T08:00:00Z"
+      }
+    ]
+  },
+  {
+    "id": "perm-005",
+    "projectId": 2525840,
+    "number": "ROOF-2024-005",
+    "type": "Roofing",
+    "status": "renewed",
+    "priority": "low",
+    "authority": "Palm Beach Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "407 Palm Beach Permit Center"
+    },
+    "applicationDate": "2024-06-29T08:00:00Z",
+    "approvalDate": "2024-07-31T14:30:00Z",
+    "expirationDate": "2026-01-18T23:59:59Z",
+    "renewalDate": "2025-12-07T00:00:00Z",
+    "cost": 18915.82,
+    "bondAmount": 22919.46,
+    "description": "Roofing for project Palm Beach Luxury Estate",
+    "comments": "Auto-generated mock permit record for roofing.",
+    "conditions": [
+      "Environmental impact assessment completed"
+    ],
+    "tags": ["roofing", "weatherproofing"],
+    "inspections": []
+  },
+  {
+    "id": "perm-006",
+    "projectId": 2525841,
+    "number": "MAST-2025-006",
+    "type": "Master Building Permit",
+    "status": "renewed",
+    "priority": "high",
+    "authority": "Miami Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "641 Miami Permit Center"
+    },
+    "applicationDate": "2025-01-01T08:00:00Z",
+    "approvalDate": "2025-01-25T14:30:00Z",
+    "expirationDate": "2025-07-31T23:59:59Z",
+    "renewalDate": "2025-07-02T00:00:00Z",
+    "cost": 22965.17,
+    "bondAmount": 49246.52,
+    "description": "Master Building Permit for project Miami Commercial Tower",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "Stormwater management approval",
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-007",
+    "projectId": 2525841,
+    "number": "ELEC-2024-007",
+    "type": "Electrical",
+    "status": "pending",
+    "priority": "high",
+    "authority": "Miami Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "641 Miami Permit Center"
+    },
+    "applicationDate": "2024-11-09T08:00:00Z",
+    "approvalDate": "2024-12-10T14:30:00Z",
+    "expirationDate": "2025-12-06T23:59:59Z",
+    "renewalDate": "2025-10-20T00:00:00Z",
+    "cost": 4383.56,
+    "bondAmount": 20947.9,
+    "description": "Electrical for project Miami Commercial Tower",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-008",
+    "projectId": 2525841,
+    "number": "POOL-2024-008",
+    "type": "Pool Barricade",
+    "status": "renewed",
+    "priority": "low",
+    "authority": "Miami Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "641 Miami Permit Center"
+    },
+    "applicationDate": "2024-11-07T08:00:00Z",
+    "approvalDate": "2024-11-24T14:30:00Z",
+    "expirationDate": "2025-11-09T23:59:59Z",
+    "renewalDate": "2025-10-12T00:00:00Z",
+    "cost": 21962.73,
+    "bondAmount": 20522.66,
+    "description": "Pool Barricade for project Miami Commercial Tower",
+    "comments": "Auto-generated mock permit record for pool barricade.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Stormwater management approval",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-009",
+    "projectId": 2525841,
+    "number": "SITE-2024-009",
+    "type": "Site Development",
+    "status": "approved",
+    "priority": "high",
+    "authority": "Miami Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "641 Miami Permit Center"
+    },
+    "applicationDate": "2024-10-30T08:00:00Z",
+    "approvalDate": "2024-12-02T14:30:00Z",
+    "expirationDate": "2025-07-12T23:59:59Z",
+    "renewalDate": "2025-05-24T00:00:00Z",
+    "cost": 21408.53,
+    "bondAmount": 35671.14,
+    "description": "Site Development for project Miami Commercial Tower",
+    "comments": "Auto-generated mock permit record for site development.",
+    "conditions": [
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-010",
+    "projectId": 2525841,
+    "number": "FIRE-2024-010",
+    "type": "Fire Alarm",
+    "status": "pending",
+    "priority": "low",
+    "authority": "Miami Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "641 Miami Permit Center"
+    },
+    "applicationDate": "2024-11-30T08:00:00Z",
+    "approvalDate": "2024-12-20T14:30:00Z",
+    "expirationDate": "2026-01-26T23:59:59Z",
+    "renewalDate": "2025-12-15T00:00:00Z",
+    "cost": 16397.28,
+    "bondAmount": 36691.73,
+    "description": "Fire Alarm for project Miami Commercial Tower",
+    "comments": "Auto-generated mock permit record for fire alarm.",
+    "conditions": [
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-011",
+    "projectId": 2525841,
+    "number": "DEMO-2025-011",
+    "type": "Demolition",
+    "status": "rejected",
+    "priority": "low",
+    "authority": "Miami Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "641 Miami Permit Center"
+    },
+    "applicationDate": "2025-01-26T08:00:00Z",
+    "approvalDate": "2025-03-09T14:30:00Z",
+    "expirationDate": "2026-03-18T23:59:59Z",
+    "renewalDate": "2026-02-12T00:00:00Z",
+    "cost": 14329.28,
+    "bondAmount": 16118.68,
+    "description": "Demolition for project Miami Commercial Tower",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "ADA compliance verification needed",
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-012",
+    "projectId": 2525841,
+    "number": "ROOF-2025-012",
+    "type": "Roofing",
+    "status": "pending",
+    "priority": "high",
+    "authority": "Miami Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "641 Miami Permit Center"
+    },
+    "applicationDate": "2025-01-16T08:00:00Z",
+    "approvalDate": "2025-02-23T14:30:00Z",
+    "expirationDate": "2026-07-18T23:59:59Z",
+    "renewalDate": "2026-07-03T00:00:00Z",
+    "cost": 10212.85,
+    "bondAmount": 21873.63,
+    "description": "Roofing for project Miami Commercial Tower",
+    "comments": "Auto-generated mock permit record for roofing.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-013",
+    "projectId": 2525841,
+    "number": "ELEV-2024-013",
+    "type": "Elevator",
+    "status": "pending",
+    "priority": "high",
+    "authority": "Miami Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "641 Miami Permit Center"
+    },
+    "applicationDate": "2024-11-09T08:00:00Z",
+    "approvalDate": "2024-12-01T14:30:00Z",
+    "expirationDate": "2025-06-10T23:59:59Z",
+    "renewalDate": "2025-05-10T00:00:00Z",
+    "cost": 12185.08,
+    "bondAmount": 13754.61,
+    "description": "Elevator for project Miami Commercial Tower",
+    "comments": "Auto-generated mock permit record for elevator.",
+    "conditions": [
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-014",
+    "projectId": 2525841,
+    "number": "MASS-2024-014",
+    "type": "Mass Grading",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Miami Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "641 Miami Permit Center"
+    },
+    "applicationDate": "2024-10-07T08:00:00Z",
+    "approvalDate": "2024-10-25T14:30:00Z",
+    "expirationDate": "2026-01-01T23:59:59Z",
+    "renewalDate": "2025-12-16T00:00:00Z",
+    "cost": 11529.19,
+    "bondAmount": 43383.14,
+    "description": "Mass Grading for project Miami Commercial Tower",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "Noise ordinance compliance",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-015",
+    "projectId": 2525842,
+    "number": "MAST-2023-015",
+    "type": "Master Building Permit",
+    "status": "rejected",
+    "priority": "medium",
+    "authority": "Orlando Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "694 Orlando Permit Center"
+    },
+    "applicationDate": "2023-02-06T08:00:00Z",
+    "approvalDate": "2023-03-01T14:30:00Z",
+    "expirationDate": "2023-11-01T23:59:59Z",
+    "renewalDate": "2023-09-02T00:00:00Z",
+    "cost": 3993.54,
+    "bondAmount": 45983.59,
+    "description": "Master Building Permit for project Orlando Retail Complex",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-016",
+    "projectId": 2525842,
+    "number": "DEMO-2022-016",
+    "type": "Demolition",
+    "status": "pending",
+    "priority": "high",
+    "authority": "Orlando Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "694 Orlando Permit Center"
+    },
+    "applicationDate": "2022-12-26T08:00:00Z",
+    "approvalDate": "2023-01-14T14:30:00Z",
+    "expirationDate": "2023-12-27T23:59:59Z",
+    "renewalDate": "2023-11-30T00:00:00Z",
+    "cost": 17143.65,
+    "bondAmount": 42605.07,
+    "description": "Demolition for project Orlando Retail Complex",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-017",
+    "projectId": 2525842,
+    "number": "MASS-2023-017",
+    "type": "Mass Grading",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Orlando Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "694 Orlando Permit Center"
+    },
+    "applicationDate": "2023-01-20T08:00:00Z",
+    "approvalDate": "2023-02-27T14:30:00Z",
+    "expirationDate": "2024-01-09T23:59:59Z",
+    "renewalDate": "2023-12-09T00:00:00Z",
+    "cost": 16638.21,
+    "bondAmount": 16051.16,
+    "description": "Mass Grading for project Orlando Retail Complex",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-018",
+    "projectId": 2525842,
+    "number": "MECH-2023-018",
+    "type": "Mechanical",
+    "status": "approved",
+    "priority": "high",
+    "authority": "Orlando Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "694 Orlando Permit Center"
+    },
+    "applicationDate": "2023-02-07T08:00:00Z",
+    "approvalDate": "2023-03-08T14:30:00Z",
+    "expirationDate": "2024-07-08T23:59:59Z",
+    "renewalDate": "2024-05-29T00:00:00Z",
+    "cost": 20689.83,
+    "bondAmount": 16765.39,
+    "description": "Mechanical for project Orlando Retail Complex",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "Environmental impact assessment completed",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-019",
+    "projectId": 2525842,
+    "number": "ELEC-2023-019",
+    "type": "Electrical",
+    "status": "approved",
+    "priority": "high",
+    "authority": "Orlando Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "694 Orlando Permit Center"
+    },
+    "applicationDate": "2023-02-06T08:00:00Z",
+    "approvalDate": "2023-03-10T14:30:00Z",
+    "expirationDate": "2024-05-04T23:59:59Z",
+    "renewalDate": "2024-04-01T00:00:00Z",
+    "cost": 20940.43,
+    "bondAmount": 32772.18,
+    "description": "Electrical for project Orlando Retail Complex",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-020",
+    "projectId": 2525842,
+    "number": "ELEV-2023-020",
+    "type": "Elevator",
+    "status": "expired",
+    "priority": "low",
+    "authority": "Orlando Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "694 Orlando Permit Center"
+    },
+    "applicationDate": "2023-03-19T08:00:00Z",
+    "approvalDate": "2023-04-17T14:30:00Z",
+    "expirationDate": "2024-08-14T23:59:59Z",
+    "renewalDate": "2024-06-23T00:00:00Z",
+    "cost": 22840.51,
+    "bondAmount": 47238.93,
+    "description": "Elevator for project Orlando Retail Complex",
+    "comments": "Auto-generated mock permit record for elevator.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-021",
+    "projectId": 2525842,
+    "number": "PLUM-2022-021",
+    "type": "Plumbing",
+    "status": "renewed",
+    "priority": "medium",
+    "authority": "Orlando Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "694 Orlando Permit Center"
+    },
+    "applicationDate": "2022-12-21T08:00:00Z",
+    "approvalDate": "2023-01-15T14:30:00Z",
+    "expirationDate": "2024-01-16T23:59:59Z",
+    "renewalDate": "2023-12-19T00:00:00Z",
+    "cost": 4611.76,
+    "bondAmount": 21163.47,
+    "description": "Plumbing for project Orlando Retail Complex",
+    "comments": "Auto-generated mock permit record for plumbing.",
+    "conditions": [
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-022",
+    "projectId": 2525843,
+    "number": "MAST-2024-022",
+    "type": "Master Building Permit",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Naples Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "314 Naples Permit Center"
+    },
+    "applicationDate": "2024-07-19T08:00:00Z",
+    "approvalDate": "2024-08-16T14:30:00Z",
+    "expirationDate": "2025-08-28T23:59:59Z",
+    "renewalDate": "2025-08-12T00:00:00Z",
+    "cost": 24372.58,
+    "bondAmount": 31622.01,
+    "description": "Master Building Permit for project Naples Waterfront Condominium",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-023",
+    "projectId": 2525843,
+    "number": "POOL-2024-023",
+    "type": "Pool Barricade",
+    "status": "rejected",
+    "priority": "medium",
+    "authority": "Naples Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "314 Naples Permit Center"
+    },
+    "applicationDate": "2024-09-19T08:00:00Z",
+    "approvalDate": "2024-10-04T14:30:00Z",
+    "expirationDate": "2025-05-27T23:59:59Z",
+    "renewalDate": "2025-04-05T00:00:00Z",
+    "cost": 24574.95,
+    "bondAmount": 17246.86,
+    "description": "Pool Barricade for project Naples Waterfront Condominium",
+    "comments": "Auto-generated mock permit record for pool barricade.",
+    "conditions": [
+      "ADA compliance verification needed",
+      "Stormwater management approval",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-024",
+    "projectId": 2525843,
+    "number": "ELEV-2024-024",
+    "type": "Elevator",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Naples Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "314 Naples Permit Center"
+    },
+    "applicationDate": "2024-07-12T08:00:00Z",
+    "approvalDate": "2024-08-08T14:30:00Z",
+    "expirationDate": "2025-03-01T23:59:59Z",
+    "renewalDate": "2025-01-07T00:00:00Z",
+    "cost": 20697.05,
+    "bondAmount": 48536.82,
+    "description": "Elevator for project Naples Waterfront Condominium",
+    "comments": "Auto-generated mock permit record for elevator.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "Fire sprinkler system required",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-025",
+    "projectId": 2525843,
+    "number": "FIRE-2024-025",
+    "type": "Fire Alarm",
+    "status": "renewed",
+    "priority": "low",
+    "authority": "Naples Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "314 Naples Permit Center"
+    },
+    "applicationDate": "2024-06-19T08:00:00Z",
+    "approvalDate": "2024-07-21T14:30:00Z",
+    "expirationDate": "2025-02-13T23:59:59Z",
+    "renewalDate": "2024-12-19T00:00:00Z",
+    "cost": 5660.39,
+    "bondAmount": 36193.1,
+    "description": "Fire Alarm for project Naples Waterfront Condominium",
+    "comments": "Auto-generated mock permit record for fire alarm.",
+    "conditions": [
+      "Stormwater management approval",
+      "Asbestos abatement documentation submitted",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-026",
+    "projectId": 2525843,
+    "number": "SITE-2024-026",
+    "type": "Site Development",
+    "status": "expired",
+    "priority": "low",
+    "authority": "Naples Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "314 Naples Permit Center"
+    },
+    "applicationDate": "2024-09-10T08:00:00Z",
+    "approvalDate": "2024-10-23T14:30:00Z",
+    "expirationDate": "2025-12-19T23:59:59Z",
+    "renewalDate": "2025-11-14T00:00:00Z",
+    "cost": 11687.68,
+    "bondAmount": 35324.14,
+    "description": "Site Development for project Naples Waterfront Condominium",
+    "comments": "Auto-generated mock permit record for site development.",
+    "conditions": [
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-027",
+    "projectId": 2525843,
+    "number": "FIRE-2024-027",
+    "type": "Fire Sprinkler",
+    "status": "renewed",
+    "priority": "low",
+    "authority": "Naples Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "314 Naples Permit Center"
+    },
+    "applicationDate": "2024-06-07T08:00:00Z",
+    "approvalDate": "2024-07-09T14:30:00Z",
+    "expirationDate": "2025-11-18T23:59:59Z",
+    "renewalDate": "2025-10-29T00:00:00Z",
+    "cost": 8315.99,
+    "bondAmount": 39140.59,
+    "description": "Fire Sprinkler for project Naples Waterfront Condominium",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-028",
+    "projectId": 2525843,
+    "number": "MASS-2024-028",
+    "type": "Mass Grading",
+    "status": "renewed",
+    "priority": "low",
+    "authority": "Naples Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "314 Naples Permit Center"
+    },
+    "applicationDate": "2024-08-28T08:00:00Z",
+    "approvalDate": "2024-09-10T14:30:00Z",
+    "expirationDate": "2025-11-26T23:59:59Z",
+    "renewalDate": "2025-10-13T00:00:00Z",
+    "cost": 22216.1,
+    "bondAmount": 46775.14,
+    "description": "Mass Grading for project Naples Waterfront Condominium",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-029",
+    "projectId": 2525844,
+    "number": "MAST-2021-029",
+    "type": "Master Building Permit",
+    "status": "pending",
+    "priority": "medium",
+    "authority": "Duval County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "104 Jacksonville Permit Center"
+    },
+    "applicationDate": "2021-12-19T08:00:00Z",
+    "approvalDate": "2022-01-11T14:30:00Z",
+    "expirationDate": "2023-03-29T23:59:59Z",
+    "renewalDate": "2023-02-20T00:00:00Z",
+    "cost": 24162.07,
+    "bondAmount": 48553.34,
+    "description": "Master Building Permit for project Jacksonville Mixed-Use Development",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-030",
+    "projectId": 2525844,
+    "number": "DEMO-2022-030",
+    "type": "Demolition",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Duval County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "104 Jacksonville Permit Center"
+    },
+    "applicationDate": "2022-01-29T08:00:00Z",
+    "approvalDate": "2022-03-06T14:30:00Z",
+    "expirationDate": "2023-02-04T23:59:59Z",
+    "renewalDate": "2022-12-14T00:00:00Z",
+    "cost": 8260.66,
+    "bondAmount": 29836.77,
+    "description": "Demolition for project Jacksonville Mixed-Use Development",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-031",
+    "projectId": 2525844,
+    "number": "FIRE-2021-031",
+    "type": "Fire Sprinkler",
+    "status": "pending",
+    "priority": "medium",
+    "authority": "Duval County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "104 Jacksonville Permit Center"
+    },
+    "applicationDate": "2021-10-03T08:00:00Z",
+    "approvalDate": "2021-11-04T14:30:00Z",
+    "expirationDate": "2023-02-18T23:59:59Z",
+    "renewalDate": "2023-01-07T00:00:00Z",
+    "cost": 4910.53,
+    "bondAmount": 42738.51,
+    "description": "Fire Sprinkler for project Jacksonville Mixed-Use Development",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "Noise ordinance compliance",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-032",
+    "projectId": 2525844,
+    "number": "POOL-2021-032",
+    "type": "Pool Barricade",
+    "status": "approved",
+    "priority": "low",
+    "authority": "Duval County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "104 Jacksonville Permit Center"
+    },
+    "applicationDate": "2021-11-01T08:00:00Z",
+    "approvalDate": "2021-11-27T14:30:00Z",
+    "expirationDate": "2023-05-05T23:59:59Z",
+    "renewalDate": "2023-03-08T00:00:00Z",
+    "cost": 13591.28,
+    "bondAmount": 47278.45,
+    "description": "Pool Barricade for project Jacksonville Mixed-Use Development",
+    "comments": "Auto-generated mock permit record for pool barricade.",
+    "conditions": [
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-033",
+    "projectId": 2525844,
+    "number": "MASS-2021-033",
+    "type": "Mass Grading",
+    "status": "approved",
+    "priority": "low",
+    "authority": "Duval County Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "104 Jacksonville Permit Center"
+    },
+    "applicationDate": "2021-10-11T08:00:00Z",
+    "approvalDate": "2021-10-20T14:30:00Z",
+    "expirationDate": "2022-11-21T23:59:59Z",
+    "renewalDate": "2022-09-25T00:00:00Z",
+    "cost": 24826.98,
+    "bondAmount": 11585.13,
+    "description": "Mass Grading for project Jacksonville Mixed-Use Development",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-034",
+    "projectId": 2525844,
+    "number": "MECH-2021-034",
+    "type": "Mechanical",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Duval County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "104 Jacksonville Permit Center"
+    },
+    "applicationDate": "2021-10-16T08:00:00Z",
+    "approvalDate": "2021-11-22T14:30:00Z",
+    "expirationDate": "2022-11-09T23:59:59Z",
+    "renewalDate": "2022-10-20T00:00:00Z",
+    "cost": 19985.39,
+    "bondAmount": 10918.0,
+    "description": "Mechanical for project Jacksonville Mixed-Use Development",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "Environmental impact assessment completed",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-035",
+    "projectId": 2525844,
+    "number": "ELEC-2021-035",
+    "type": "Electrical",
+    "status": "pending",
+    "priority": "medium",
+    "authority": "Duval County Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "104 Jacksonville Permit Center"
+    },
+    "applicationDate": "2021-12-27T08:00:00Z",
+    "approvalDate": "2022-01-13T14:30:00Z",
+    "expirationDate": "2023-04-28T23:59:59Z",
+    "renewalDate": "2023-03-08T00:00:00Z",
+    "cost": 4002.33,
+    "bondAmount": 26886.9,
+    "description": "Electrical for project Jacksonville Mixed-Use Development",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "ADA compliance verification needed",
+      "Asbestos abatement documentation submitted",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-036",
+    "projectId": 2525845,
+    "number": "MAST-2024-036",
+    "type": "Master Building Permit",
+    "status": "pending",
+    "priority": "high",
+    "authority": "Broward County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "919 Fort Lauderdale Permit Center"
+    },
+    "applicationDate": "2024-08-20T08:00:00Z",
+    "approvalDate": "2024-09-26T14:30:00Z",
+    "expirationDate": "2026-03-01T23:59:59Z",
+    "renewalDate": "2026-01-11T00:00:00Z",
+    "cost": 10723.19,
+    "bondAmount": 38796.04,
+    "description": "Master Building Permit for project Fort Lauderdale Hotel Resort",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-037",
+    "projectId": 2525845,
+    "number": "FIRE-2024-037",
+    "type": "Fire Alarm",
+    "status": "pending",
+    "priority": "high",
+    "authority": "Broward County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "919 Fort Lauderdale Permit Center"
+    },
+    "applicationDate": "2024-11-18T08:00:00Z",
+    "approvalDate": "2024-12-13T14:30:00Z",
+    "expirationDate": "2025-12-22T23:59:59Z",
+    "renewalDate": "2025-11-29T00:00:00Z",
+    "cost": 13544.22,
+    "bondAmount": 23608.17,
+    "description": "Fire Alarm for project Fort Lauderdale Hotel Resort",
+    "comments": "Auto-generated mock permit record for fire alarm.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Stormwater management approval",
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-038",
+    "projectId": 2525845,
+    "number": "MECH-2024-038",
+    "type": "Mechanical",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Broward County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "919 Fort Lauderdale Permit Center"
+    },
+    "applicationDate": "2024-11-10T08:00:00Z",
+    "approvalDate": "2024-12-14T14:30:00Z",
+    "expirationDate": "2025-11-13T23:59:59Z",
+    "renewalDate": "2025-09-29T00:00:00Z",
+    "cost": 10644.95,
+    "bondAmount": 46430.28,
+    "description": "Mechanical for project Fort Lauderdale Hotel Resort",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-039",
+    "projectId": 2525845,
+    "number": "DEMO-2024-039",
+    "type": "Demolition",
+    "status": "renewed",
+    "priority": "medium",
+    "authority": "Broward County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "919 Fort Lauderdale Permit Center"
+    },
+    "applicationDate": "2024-08-12T08:00:00Z",
+    "approvalDate": "2024-09-07T14:30:00Z",
+    "expirationDate": "2025-05-11T23:59:59Z",
+    "renewalDate": "2025-03-31T00:00:00Z",
+    "cost": 21750.63,
+    "bondAmount": 11165.3,
+    "description": "Demolition for project Fort Lauderdale Hotel Resort",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "ADA compliance verification needed",
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-040",
+    "projectId": 2525845,
+    "number": "ELEC-2024-040",
+    "type": "Electrical",
+    "status": "approved",
+    "priority": "high",
+    "authority": "Broward County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "919 Fort Lauderdale Permit Center"
+    },
+    "applicationDate": "2024-08-19T08:00:00Z",
+    "approvalDate": "2024-09-12T14:30:00Z",
+    "expirationDate": "2025-10-19T23:59:59Z",
+    "renewalDate": "2025-09-08T00:00:00Z",
+    "cost": 7021.13,
+    "bondAmount": 44770.59,
+    "description": "Electrical for project Fort Lauderdale Hotel Resort",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-041",
+    "projectId": 2525845,
+    "number": "FIRE-2024-041",
+    "type": "Fire Sprinkler",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Broward County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "919 Fort Lauderdale Permit Center"
+    },
+    "applicationDate": "2024-08-15T08:00:00Z",
+    "approvalDate": "2024-09-28T14:30:00Z",
+    "expirationDate": "2025-11-18T23:59:59Z",
+    "renewalDate": "2025-09-27T00:00:00Z",
+    "cost": 8073.52,
+    "bondAmount": 21244.5,
+    "description": "Fire Sprinkler for project Fort Lauderdale Hotel Resort",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "ADA compliance verification needed",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-042",
+    "projectId": 2525845,
+    "number": "ELEV-2024-042",
+    "type": "Elevator",
+    "status": "rejected",
+    "priority": "medium",
+    "authority": "Broward County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "919 Fort Lauderdale Permit Center"
+    },
+    "applicationDate": "2024-08-04T08:00:00Z",
+    "approvalDate": "2024-09-01T14:30:00Z",
+    "expirationDate": "2025-11-12T23:59:59Z",
+    "renewalDate": "2025-09-30T00:00:00Z",
+    "cost": 6309.65,
+    "bondAmount": 13744.53,
+    "description": "Elevator for project Fort Lauderdale Hotel Resort",
+    "comments": "Auto-generated mock permit record for elevator.",
+    "conditions": [
+      "Stormwater management approval",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-043",
+    "projectId": 2525846,
+    "number": "MAST-2025-043",
+    "type": "Master Building Permit",
+    "status": "rejected",
+    "priority": "high",
+    "authority": "Hillsborough County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "978 Tampa Permit Center"
+    },
+    "applicationDate": "2025-03-09T08:00:00Z",
+    "approvalDate": "2025-04-06T14:30:00Z",
+    "expirationDate": "2026-03-21T23:59:59Z",
+    "renewalDate": "2026-02-26T00:00:00Z",
+    "cost": 15684.99,
+    "bondAmount": 39283.74,
+    "description": "Master Building Permit for project Tampa Medical Center",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-044",
+    "projectId": 2525846,
+    "number": "ELEC-2025-044",
+    "type": "Electrical",
+    "status": "pending",
+    "priority": "high",
+    "authority": "Hillsborough County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "978 Tampa Permit Center"
+    },
+    "applicationDate": "2025-02-09T08:00:00Z",
+    "approvalDate": "2025-03-13T14:30:00Z",
+    "expirationDate": "2025-10-25T23:59:59Z",
+    "renewalDate": "2025-09-29T00:00:00Z",
+    "cost": 20586.23,
+    "bondAmount": 19703.51,
+    "description": "Electrical for project Tampa Medical Center",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-045",
+    "projectId": 2525846,
+    "number": "ROOF-2024-045",
+    "type": "Roofing",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Hillsborough County Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "978 Tampa Permit Center"
+    },
+    "applicationDate": "2024-12-12T08:00:00Z",
+    "approvalDate": "2025-01-22T14:30:00Z",
+    "expirationDate": "2025-09-10T23:59:59Z",
+    "renewalDate": "2025-08-11T00:00:00Z",
+    "cost": 18370.91,
+    "bondAmount": 46760.96,
+    "description": "Roofing for project Tampa Medical Center",
+    "comments": "Auto-generated mock permit record for roofing.",
+    "conditions": [
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-046",
+    "projectId": 2525846,
+    "number": "PLUM-2025-046",
+    "type": "Plumbing",
+    "status": "expired",
+    "priority": "low",
+    "authority": "Hillsborough County Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "978 Tampa Permit Center"
+    },
+    "applicationDate": "2025-02-22T08:00:00Z",
+    "approvalDate": "2025-03-09T14:30:00Z",
+    "expirationDate": "2025-12-13T23:59:59Z",
+    "renewalDate": "2025-10-31T00:00:00Z",
+    "cost": 12900.92,
+    "bondAmount": 17925.85,
+    "description": "Plumbing for project Tampa Medical Center",
+    "comments": "Auto-generated mock permit record for plumbing.",
+    "conditions": [
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-047",
+    "projectId": 2525846,
+    "number": "MECH-2024-047",
+    "type": "Mechanical",
+    "status": "renewed",
+    "priority": "medium",
+    "authority": "Hillsborough County Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "978 Tampa Permit Center"
+    },
+    "applicationDate": "2024-12-06T08:00:00Z",
+    "approvalDate": "2024-12-20T14:30:00Z",
+    "expirationDate": "2025-06-19T23:59:59Z",
+    "renewalDate": "2025-04-23T00:00:00Z",
+    "cost": 16375.3,
+    "bondAmount": 16822.11,
+    "description": "Mechanical for project Tampa Medical Center",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "Environmental impact assessment completed",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-048",
+    "projectId": 2525846,
+    "number": "FIRE-2025-048",
+    "type": "Fire Sprinkler",
+    "status": "expired",
+    "priority": "medium",
+    "authority": "Hillsborough County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "978 Tampa Permit Center"
+    },
+    "applicationDate": "2025-02-08T08:00:00Z",
+    "approvalDate": "2025-03-06T14:30:00Z",
+    "expirationDate": "2026-08-02T23:59:59Z",
+    "renewalDate": "2026-07-18T00:00:00Z",
+    "cost": 21190.4,
+    "bondAmount": 26600.53,
+    "description": "Fire Sprinkler for project Tampa Medical Center",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-049",
+    "projectId": 2525847,
+    "number": "MAST-2023-049",
+    "type": "Master Building Permit",
+    "status": "renewed",
+    "priority": "low",
+    "authority": "Monroe County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "105 Key West Permit Center"
+    },
+    "applicationDate": "2023-03-28T08:00:00Z",
+    "approvalDate": "2023-04-13T14:30:00Z",
+    "expirationDate": "2024-01-26T23:59:59Z",
+    "renewalDate": "2023-12-13T00:00:00Z",
+    "cost": 21296.18,
+    "bondAmount": 43861.08,
+    "description": "Master Building Permit for project Key West Luxury Villas",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-050",
+    "projectId": 2525847,
+    "number": "PLUM-2023-050",
+    "type": "Plumbing",
+    "status": "renewed",
+    "priority": "high",
+    "authority": "Monroe County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "105 Key West Permit Center"
+    },
+    "applicationDate": "2023-04-26T08:00:00Z",
+    "approvalDate": "2023-05-15T14:30:00Z",
+    "expirationDate": "2024-06-15T23:59:59Z",
+    "renewalDate": "2024-05-28T00:00:00Z",
+    "cost": 19186.53,
+    "bondAmount": 48432.63,
+    "description": "Plumbing for project Key West Luxury Villas",
+    "comments": "Auto-generated mock permit record for plumbing.",
+    "conditions": [
+      "Stormwater management approval",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-051",
+    "projectId": 2525847,
+    "number": "FIRE-2023-051",
+    "type": "Fire Alarm",
+    "status": "renewed",
+    "priority": "medium",
+    "authority": "Monroe County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "105 Key West Permit Center"
+    },
+    "applicationDate": "2023-06-28T08:00:00Z",
+    "approvalDate": "2023-07-05T14:30:00Z",
+    "expirationDate": "2024-05-14T23:59:59Z",
+    "renewalDate": "2024-04-17T00:00:00Z",
+    "cost": 17824.01,
+    "bondAmount": 17683.2,
+    "description": "Fire Alarm for project Key West Luxury Villas",
+    "comments": "Auto-generated mock permit record for fire alarm.",
+    "conditions": [
+      "Noise ordinance compliance",
+      "Asbestos abatement documentation submitted",
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-052",
+    "projectId": 2525847,
+    "number": "ELEV-2023-052",
+    "type": "Elevator",
+    "status": "expired",
+    "priority": "medium",
+    "authority": "Monroe County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "105 Key West Permit Center"
+    },
+    "applicationDate": "2023-05-06T08:00:00Z",
+    "approvalDate": "2023-05-23T14:30:00Z",
+    "expirationDate": "2024-02-07T23:59:59Z",
+    "renewalDate": "2024-01-18T00:00:00Z",
+    "cost": 3708.26,
+    "bondAmount": 23222.52,
+    "description": "Elevator for project Key West Luxury Villas",
+    "comments": "Auto-generated mock permit record for elevator.",
+    "conditions": [
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-053",
+    "projectId": 2525847,
+    "number": "POOL-2023-053",
+    "type": "Pool Barricade",
+    "status": "expired",
+    "priority": "low",
+    "authority": "Monroe County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "105 Key West Permit Center"
+    },
+    "applicationDate": "2023-03-23T08:00:00Z",
+    "approvalDate": "2023-04-30T14:30:00Z",
+    "expirationDate": "2024-04-28T23:59:59Z",
+    "renewalDate": "2024-04-12T00:00:00Z",
+    "cost": 13037.0,
+    "bondAmount": 29214.29,
+    "description": "Pool Barricade for project Key West Luxury Villas",
+    "comments": "Auto-generated mock permit record for pool barricade.",
+    "conditions": [
+      "ADA compliance verification needed",
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-054",
+    "projectId": 2525847,
+    "number": "MASS-2023-054",
+    "type": "Mass Grading",
+    "status": "expired",
+    "priority": "low",
+    "authority": "Monroe County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "105 Key West Permit Center"
+    },
+    "applicationDate": "2023-03-21T08:00:00Z",
+    "approvalDate": "2023-04-11T14:30:00Z",
+    "expirationDate": "2024-04-13T23:59:59Z",
+    "renewalDate": "2024-02-27T00:00:00Z",
+    "cost": 24884.27,
+    "bondAmount": 45998.64,
+    "description": "Mass Grading for project Key West Luxury Villas",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-055",
+    "projectId": 2525847,
+    "number": "ROOF-2023-055",
+    "type": "Roofing",
+    "status": "pending",
+    "priority": "medium",
+    "authority": "Monroe County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "105 Key West Permit Center"
+    },
+    "applicationDate": "2023-03-14T08:00:00Z",
+    "approvalDate": "2023-04-14T14:30:00Z",
+    "expirationDate": "2024-01-25T23:59:59Z",
+    "renewalDate": "2023-11-29T00:00:00Z",
+    "cost": 24716.71,
+    "bondAmount": 20451.7,
+    "description": "Roofing for project Key West Luxury Villas",
+    "comments": "Auto-generated mock permit record for roofing.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-056",
+    "projectId": 2525847,
+    "number": "FIRE-2023-056",
+    "type": "Fire Sprinkler",
+    "status": "rejected",
+    "priority": "high",
+    "authority": "Monroe County Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "105 Key West Permit Center"
+    },
+    "applicationDate": "2023-05-14T08:00:00Z",
+    "approvalDate": "2023-06-13T14:30:00Z",
+    "expirationDate": "2024-11-17T23:59:59Z",
+    "renewalDate": "2024-09-21T00:00:00Z",
+    "cost": 7155.46,
+    "bondAmount": 46232.07,
+    "description": "Fire Sprinkler for project Key West Luxury Villas",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "Noise ordinance compliance",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-057",
+    "projectId": 2525848,
+    "number": "MAST-2024-057",
+    "type": "Master Building Permit",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Escambia County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "464 Pensacola Permit Center"
+    },
+    "applicationDate": "2024-02-07T08:00:00Z",
+    "approvalDate": "2024-02-21T14:30:00Z",
+    "expirationDate": "2024-09-11T23:59:59Z",
+    "renewalDate": "2024-08-24T00:00:00Z",
+    "cost": 16506.44,
+    "bondAmount": 32207.77,
+    "description": "Master Building Permit for project Pensacola Corporate Campus",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-058",
+    "projectId": 2525848,
+    "number": "ELEC-2024-058",
+    "type": "Electrical",
+    "status": "rejected",
+    "priority": "high",
+    "authority": "Escambia County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "464 Pensacola Permit Center"
+    },
+    "applicationDate": "2024-01-14T08:00:00Z",
+    "approvalDate": "2024-02-09T14:30:00Z",
+    "expirationDate": "2025-06-16T23:59:59Z",
+    "renewalDate": "2025-04-27T00:00:00Z",
+    "cost": 5996.67,
+    "bondAmount": 29651.13,
+    "description": "Electrical for project Pensacola Corporate Campus",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-059",
+    "projectId": 2525848,
+    "number": "MASS-2024-059",
+    "type": "Mass Grading",
+    "status": "renewed",
+    "priority": "high",
+    "authority": "Escambia County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "464 Pensacola Permit Center"
+    },
+    "applicationDate": "2024-01-02T08:00:00Z",
+    "approvalDate": "2024-02-01T14:30:00Z",
+    "expirationDate": "2025-03-06T23:59:59Z",
+    "renewalDate": "2025-01-25T00:00:00Z",
+    "cost": 15851.87,
+    "bondAmount": 32048.05,
+    "description": "Mass Grading for project Pensacola Corporate Campus",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Stormwater management approval",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-060",
+    "projectId": 2525848,
+    "number": "PLUM-2024-060",
+    "type": "Plumbing",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Escambia County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "464 Pensacola Permit Center"
+    },
+    "applicationDate": "2024-02-22T08:00:00Z",
+    "approvalDate": "2024-03-29T14:30:00Z",
+    "expirationDate": "2025-02-22T23:59:59Z",
+    "renewalDate": "2025-02-06T00:00:00Z",
+    "cost": 8526.86,
+    "bondAmount": 31605.74,
+    "description": "Plumbing for project Pensacola Corporate Campus",
+    "comments": "Auto-generated mock permit record for plumbing.",
+    "conditions": [
+      "Noise ordinance compliance",
+      "Asbestos abatement documentation submitted",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-061",
+    "projectId": 2525848,
+    "number": "DEMO-2024-061",
+    "type": "Demolition",
+    "status": "rejected",
+    "priority": "low",
+    "authority": "Escambia County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "464 Pensacola Permit Center"
+    },
+    "applicationDate": "2024-01-17T08:00:00Z",
+    "approvalDate": "2024-02-21T14:30:00Z",
+    "expirationDate": "2024-12-02T23:59:59Z",
+    "renewalDate": "2024-11-17T00:00:00Z",
+    "cost": 14575.22,
+    "bondAmount": 22567.55,
+    "description": "Demolition for project Pensacola Corporate Campus",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "ADA compliance verification needed",
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-062",
+    "projectId": 2525848,
+    "number": "MECH-2024-062",
+    "type": "Mechanical",
+    "status": "rejected",
+    "priority": "medium",
+    "authority": "Escambia County Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "464 Pensacola Permit Center"
+    },
+    "applicationDate": "2024-02-14T08:00:00Z",
+    "approvalDate": "2024-03-10T14:30:00Z",
+    "expirationDate": "2024-09-15T23:59:59Z",
+    "renewalDate": "2024-08-31T00:00:00Z",
+    "cost": 7436.79,
+    "bondAmount": 45333.16,
+    "description": "Mechanical for project Pensacola Corporate Campus",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-063",
+    "projectId": 2525848,
+    "number": "ELEV-2024-063",
+    "type": "Elevator",
+    "status": "pending",
+    "priority": "medium",
+    "authority": "Escambia County Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "464 Pensacola Permit Center"
+    },
+    "applicationDate": "2024-03-02T08:00:00Z",
+    "approvalDate": "2024-03-15T14:30:00Z",
+    "expirationDate": "2025-02-08T23:59:59Z",
+    "renewalDate": "2024-12-25T00:00:00Z",
+    "cost": 10659.08,
+    "bondAmount": 29061.99,
+    "description": "Elevator for project Pensacola Corporate Campus",
+    "comments": "Auto-generated mock permit record for elevator.",
+    "conditions": [
+      "Stormwater management approval",
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-064",
+    "projectId": 2525848,
+    "number": "SITE-2024-064",
+    "type": "Site Development",
+    "status": "approved",
+    "priority": "low",
+    "authority": "Escambia County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "464 Pensacola Permit Center"
+    },
+    "applicationDate": "2024-02-04T08:00:00Z",
+    "approvalDate": "2024-03-15T14:30:00Z",
+    "expirationDate": "2025-02-27T23:59:59Z",
+    "renewalDate": "2025-02-07T00:00:00Z",
+    "cost": 14751.52,
+    "bondAmount": 40601.23,
+    "description": "Site Development for project Pensacola Corporate Campus",
+    "comments": "Auto-generated mock permit record for site development.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Asbestos abatement documentation submitted",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-065",
+    "projectId": 2525848,
+    "number": "FIRE-2024-065",
+    "type": "Fire Sprinkler",
+    "status": "pending",
+    "priority": "low",
+    "authority": "Escambia County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "464 Pensacola Permit Center"
+    },
+    "applicationDate": "2024-01-28T08:00:00Z",
+    "approvalDate": "2024-03-10T14:30:00Z",
+    "expirationDate": "2025-02-11T23:59:59Z",
+    "renewalDate": "2024-12-22T00:00:00Z",
+    "cost": 4444.42,
+    "bondAmount": 37763.21,
+    "description": "Fire Sprinkler for project Pensacola Corporate Campus",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Asbestos abatement documentation submitted",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-066",
+    "projectId": 2525849,
+    "number": "MAST-2025-066",
+    "type": "Master Building Permit",
+    "status": "expired",
+    "priority": "medium",
+    "authority": "Sarasota County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "930 Sarasota Permit Center"
+    },
+    "applicationDate": "2025-01-02T08:00:00Z",
+    "approvalDate": "2025-02-03T14:30:00Z",
+    "expirationDate": "2026-05-21T23:59:59Z",
+    "renewalDate": "2026-03-29T00:00:00Z",
+    "cost": 17144.18,
+    "bondAmount": 10920.65,
+    "description": "Master Building Permit for project Sarasota Cultural Center",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Stormwater management approval",
+      "Asbestos abatement documentation submitted",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-067",
+    "projectId": 2525849,
+    "number": "ELEC-2024-067",
+    "type": "Electrical",
+    "status": "approved",
+    "priority": "low",
+    "authority": "Sarasota County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "930 Sarasota Permit Center"
+    },
+    "applicationDate": "2024-12-10T08:00:00Z",
+    "approvalDate": "2025-01-24T14:30:00Z",
+    "expirationDate": "2026-03-04T23:59:59Z",
+    "renewalDate": "2026-01-11T00:00:00Z",
+    "cost": 10266.66,
+    "bondAmount": 34213.98,
+    "description": "Electrical for project Sarasota Cultural Center",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "Noise ordinance compliance",
+      "Asbestos abatement documentation submitted",
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-068",
+    "projectId": 2525849,
+    "number": "MASS-2024-068",
+    "type": "Mass Grading",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Sarasota County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "930 Sarasota Permit Center"
+    },
+    "applicationDate": "2024-11-22T08:00:00Z",
+    "approvalDate": "2025-01-06T14:30:00Z",
+    "expirationDate": "2026-03-02T23:59:59Z",
+    "renewalDate": "2026-01-04T00:00:00Z",
+    "cost": 7503.77,
+    "bondAmount": 29784.48,
+    "description": "Mass Grading for project Sarasota Cultural Center",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-069",
+    "projectId": 2525849,
+    "number": "PLUM-2024-069",
+    "type": "Plumbing",
+    "status": "pending",
+    "priority": "low",
+    "authority": "Sarasota County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "930 Sarasota Permit Center"
+    },
+    "applicationDate": "2024-11-29T08:00:00Z",
+    "approvalDate": "2024-12-22T14:30:00Z",
+    "expirationDate": "2025-11-29T23:59:59Z",
+    "renewalDate": "2025-10-26T00:00:00Z",
+    "cost": 16354.9,
+    "bondAmount": 42091.2,
+    "description": "Plumbing for project Sarasota Cultural Center",
+    "comments": "Auto-generated mock permit record for plumbing.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-070",
+    "projectId": 2525849,
+    "number": "SITE-2024-070",
+    "type": "Site Development",
+    "status": "pending",
+    "priority": "low",
+    "authority": "Sarasota County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "930 Sarasota Permit Center"
+    },
+    "applicationDate": "2024-11-13T08:00:00Z",
+    "approvalDate": "2024-12-14T14:30:00Z",
+    "expirationDate": "2025-08-24T23:59:59Z",
+    "renewalDate": "2025-08-02T00:00:00Z",
+    "cost": 11266.25,
+    "bondAmount": 14595.26,
+    "description": "Site Development for project Sarasota Cultural Center",
+    "comments": "Auto-generated mock permit record for site development.",
+    "conditions": [
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-071",
+    "projectId": 2525849,
+    "number": "MECH-2024-071",
+    "type": "Mechanical",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Sarasota County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "930 Sarasota Permit Center"
+    },
+    "applicationDate": "2024-12-21T08:00:00Z",
+    "approvalDate": "2025-01-01T14:30:00Z",
+    "expirationDate": "2025-10-23T23:59:59Z",
+    "renewalDate": "2025-08-30T00:00:00Z",
+    "cost": 12119.49,
+    "bondAmount": 24992.84,
+    "description": "Mechanical for project Sarasota Cultural Center",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "Noise ordinance compliance",
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-072",
+    "projectId": 2525849,
+    "number": "FIRE-2025-072",
+    "type": "Fire Alarm",
+    "status": "rejected",
+    "priority": "low",
+    "authority": "Sarasota County Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "930 Sarasota Permit Center"
+    },
+    "applicationDate": "2025-01-24T08:00:00Z",
+    "approvalDate": "2025-02-23T14:30:00Z",
+    "expirationDate": "2026-05-13T23:59:59Z",
+    "renewalDate": "2026-04-01T00:00:00Z",
+    "cost": 11295.25,
+    "bondAmount": 30955.58,
+    "description": "Fire Alarm for project Sarasota Cultural Center",
+    "comments": "Auto-generated mock permit record for fire alarm.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Stormwater management approval",
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-073",
+    "projectId": 2525849,
+    "number": "DEMO-2024-073",
+    "type": "Demolition",
+    "status": "expired",
+    "priority": "low",
+    "authority": "Sarasota County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "930 Sarasota Permit Center"
+    },
+    "applicationDate": "2024-12-07T08:00:00Z",
+    "approvalDate": "2025-01-05T14:30:00Z",
+    "expirationDate": "2025-12-23T23:59:59Z",
+    "renewalDate": "2025-11-16T00:00:00Z",
+    "cost": 11345.3,
+    "bondAmount": 45029.22,
+    "description": "Demolition for project Sarasota Cultural Center",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-074",
+    "projectId": 2525849,
+    "number": "FIRE-2024-074",
+    "type": "Fire Sprinkler",
+    "status": "rejected",
+    "priority": "low",
+    "authority": "Sarasota County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "930 Sarasota Permit Center"
+    },
+    "applicationDate": "2024-11-21T08:00:00Z",
+    "approvalDate": "2024-11-29T14:30:00Z",
+    "expirationDate": "2025-09-08T23:59:59Z",
+    "renewalDate": "2025-07-17T00:00:00Z",
+    "cost": 20949.44,
+    "bondAmount": 13511.34,
+    "description": "Fire Sprinkler for project Sarasota Cultural Center",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "Stormwater management approval",
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-075",
+    "projectId": 2525849,
+    "number": "POOL-2024-075",
+    "type": "Pool Barricade",
+    "status": "approved",
+    "priority": "low",
+    "authority": "Sarasota County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "930 Sarasota Permit Center"
+    },
+    "applicationDate": "2024-11-04T08:00:00Z",
+    "approvalDate": "2024-12-03T14:30:00Z",
+    "expirationDate": "2025-06-26T23:59:59Z",
+    "renewalDate": "2025-05-03T00:00:00Z",
+    "cost": 18244.12,
+    "bondAmount": 15850.0,
+    "description": "Pool Barricade for project Sarasota Cultural Center",
+    "comments": "Auto-generated mock permit record for pool barricade.",
+    "conditions": [
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-076",
+    "projectId": 2525850,
+    "number": "MAST-2024-076",
+    "type": "Master Building Permit",
+    "status": "rejected",
+    "priority": "low",
+    "authority": "Boca Raton Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "704 Boca Raton Permit Center"
+    },
+    "applicationDate": "2024-06-21T08:00:00Z",
+    "approvalDate": "2024-07-03T14:30:00Z",
+    "expirationDate": "2025-03-25T23:59:59Z",
+    "renewalDate": "2025-02-16T00:00:00Z",
+    "cost": 11203.53,
+    "bondAmount": 38128.44,
+    "description": "Master Building Permit for project Boca Raton Corporate Headquarters",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-077",
+    "projectId": 2525850,
+    "number": "FIRE-2024-077",
+    "type": "Fire Sprinkler",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Boca Raton Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "704 Boca Raton Permit Center"
+    },
+    "applicationDate": "2024-08-26T08:00:00Z",
+    "approvalDate": "2024-09-02T14:30:00Z",
+    "expirationDate": "2026-01-29T23:59:59Z",
+    "renewalDate": "2026-01-07T00:00:00Z",
+    "cost": 18321.6,
+    "bondAmount": 48950.5,
+    "description": "Fire Sprinkler for project Boca Raton Corporate Headquarters",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Asbestos abatement documentation submitted",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-078",
+    "projectId": 2525850,
+    "number": "MECH-2024-078",
+    "type": "Mechanical",
+    "status": "rejected",
+    "priority": "low",
+    "authority": "Boca Raton Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "704 Boca Raton Permit Center"
+    },
+    "applicationDate": "2024-06-26T08:00:00Z",
+    "approvalDate": "2024-07-08T14:30:00Z",
+    "expirationDate": "2025-01-27T23:59:59Z",
+    "renewalDate": "2024-12-24T00:00:00Z",
+    "cost": 17200.33,
+    "bondAmount": 48243.08,
+    "description": "Mechanical for project Boca Raton Corporate Headquarters",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "Stormwater management approval",
+      "Site fencing and erosion control in place",
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-079",
+    "projectId": 2525850,
+    "number": "SITE-2024-079",
+    "type": "Site Development",
+    "status": "rejected",
+    "priority": "medium",
+    "authority": "Boca Raton Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "704 Boca Raton Permit Center"
+    },
+    "applicationDate": "2024-06-30T08:00:00Z",
+    "approvalDate": "2024-08-04T14:30:00Z",
+    "expirationDate": "2026-01-19T23:59:59Z",
+    "renewalDate": "2025-12-15T00:00:00Z",
+    "cost": 11320.62,
+    "bondAmount": 40226.85,
+    "description": "Site Development for project Boca Raton Corporate Headquarters",
+    "comments": "Auto-generated mock permit record for site development.",
+    "conditions": [
+      "Environmental impact assessment completed",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-080",
+    "projectId": 2525850,
+    "number": "FIRE-2024-080",
+    "type": "Fire Alarm",
+    "status": "approved",
+    "priority": "high",
+    "authority": "Boca Raton Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "704 Boca Raton Permit Center"
+    },
+    "applicationDate": "2024-08-04T08:00:00Z",
+    "approvalDate": "2024-08-30T14:30:00Z",
+    "expirationDate": "2025-04-27T23:59:59Z",
+    "renewalDate": "2025-04-08T00:00:00Z",
+    "cost": 3713.94,
+    "bondAmount": 13437.49,
+    "description": "Fire Alarm for project Boca Raton Corporate Headquarters",
+    "comments": "Auto-generated mock permit record for fire alarm.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Fire sprinkler system required",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-081",
+    "projectId": 2525850,
+    "number": "MASS-2024-081",
+    "type": "Mass Grading",
+    "status": "rejected",
+    "priority": "high",
+    "authority": "Boca Raton Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "704 Boca Raton Permit Center"
+    },
+    "applicationDate": "2024-06-13T08:00:00Z",
+    "approvalDate": "2024-07-23T14:30:00Z",
+    "expirationDate": "2025-05-12T23:59:59Z",
+    "renewalDate": "2025-03-19T00:00:00Z",
+    "cost": 4501.54,
+    "bondAmount": 46672.74,
+    "description": "Mass Grading for project Boca Raton Corporate Headquarters",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-082",
+    "projectId": 2525850,
+    "number": "ELEV-2024-082",
+    "type": "Elevator",
+    "status": "renewed",
+    "priority": "medium",
+    "authority": "Boca Raton Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "704 Boca Raton Permit Center"
+    },
+    "applicationDate": "2024-05-16T08:00:00Z",
+    "approvalDate": "2024-06-16T14:30:00Z",
+    "expirationDate": "2025-09-27T23:59:59Z",
+    "renewalDate": "2025-08-25T00:00:00Z",
+    "cost": 24559.76,
+    "bondAmount": 33277.44,
+    "description": "Elevator for project Boca Raton Corporate Headquarters",
+    "comments": "Auto-generated mock permit record for elevator.",
+    "conditions": [
+      "Stormwater management approval",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-083",
+    "projectId": 2525850,
+    "number": "ELEC-2024-083",
+    "type": "Electrical",
+    "status": "renewed",
+    "priority": "low",
+    "authority": "Boca Raton Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "704 Boca Raton Permit Center"
+    },
+    "applicationDate": "2024-07-31T08:00:00Z",
+    "approvalDate": "2024-08-19T14:30:00Z",
+    "expirationDate": "2025-12-30T23:59:59Z",
+    "renewalDate": "2025-11-18T00:00:00Z",
+    "cost": 4641.28,
+    "bondAmount": 36005.18,
+    "description": "Electrical for project Boca Raton Corporate Headquarters",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "ADA compliance verification needed",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-084",
+    "projectId": 2525851,
+    "number": "MAST-2024-084",
+    "type": "Master Building Permit",
+    "status": "approved",
+    "priority": "high",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "403 Coral Gables Permit Center"
+    },
+    "applicationDate": "2024-11-15T08:00:00Z",
+    "approvalDate": "2024-12-15T14:30:00Z",
+    "expirationDate": "2025-07-12T23:59:59Z",
+    "renewalDate": "2025-06-18T00:00:00Z",
+    "cost": 21423.63,
+    "bondAmount": 40354.94,
+    "description": "Master Building Permit for project Coral Gables Luxury Condominium",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-085",
+    "projectId": 2525851,
+    "number": "FIRE-2024-085",
+    "type": "Fire Alarm",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "403 Coral Gables Permit Center"
+    },
+    "applicationDate": "2024-10-25T08:00:00Z",
+    "approvalDate": "2024-11-09T14:30:00Z",
+    "expirationDate": "2025-05-24T23:59:59Z",
+    "renewalDate": "2025-04-23T00:00:00Z",
+    "cost": 15628.64,
+    "bondAmount": 47966.06,
+    "description": "Fire Alarm for project Coral Gables Luxury Condominium",
+    "comments": "Auto-generated mock permit record for fire alarm.",
+    "conditions": [
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-086",
+    "projectId": 2525851,
+    "number": "SITE-2024-086",
+    "type": "Site Development",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "403 Coral Gables Permit Center"
+    },
+    "applicationDate": "2024-12-13T08:00:00Z",
+    "approvalDate": "2025-01-12T14:30:00Z",
+    "expirationDate": "2025-09-28T23:59:59Z",
+    "renewalDate": "2025-08-10T00:00:00Z",
+    "cost": 21288.13,
+    "bondAmount": 46115.49,
+    "description": "Site Development for project Coral Gables Luxury Condominium",
+    "comments": "Auto-generated mock permit record for site development.",
+    "conditions": [
+      "Environmental impact assessment completed",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-087",
+    "projectId": 2525851,
+    "number": "ROOF-2024-087",
+    "type": "Roofing",
+    "status": "renewed",
+    "priority": "high",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "403 Coral Gables Permit Center"
+    },
+    "applicationDate": "2024-10-20T08:00:00Z",
+    "approvalDate": "2024-10-28T14:30:00Z",
+    "expirationDate": "2025-08-28T23:59:59Z",
+    "renewalDate": "2025-08-11T00:00:00Z",
+    "cost": 10186.48,
+    "bondAmount": 21533.9,
+    "description": "Roofing for project Coral Gables Luxury Condominium",
+    "comments": "Auto-generated mock permit record for roofing.",
+    "conditions": [
+      "Stormwater management approval",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-088",
+    "projectId": 2525851,
+    "number": "DEMO-2024-088",
+    "type": "Demolition",
+    "status": "rejected",
+    "priority": "medium",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "403 Coral Gables Permit Center"
+    },
+    "applicationDate": "2024-11-09T08:00:00Z",
+    "approvalDate": "2024-11-30T14:30:00Z",
+    "expirationDate": "2025-11-11T23:59:59Z",
+    "renewalDate": "2025-09-23T00:00:00Z",
+    "cost": 4473.84,
+    "bondAmount": 43917.51,
+    "description": "Demolition for project Coral Gables Luxury Condominium",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "Environmental impact assessment completed",
+      "Noise ordinance compliance",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-089",
+    "projectId": 2525851,
+    "number": "FIRE-2024-089",
+    "type": "Fire Sprinkler",
+    "status": "renewed",
+    "priority": "low",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "403 Coral Gables Permit Center"
+    },
+    "applicationDate": "2024-12-31T08:00:00Z",
+    "approvalDate": "2025-01-09T14:30:00Z",
+    "expirationDate": "2025-10-02T23:59:59Z",
+    "renewalDate": "2025-09-11T00:00:00Z",
+    "cost": 6736.04,
+    "bondAmount": 17878.96,
+    "description": "Fire Sprinkler for project Coral Gables Luxury Condominium",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Environmental impact assessment completed",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-090",
+    "projectId": 2525852,
+    "number": "MAST-2023-090",
+    "type": "Master Building Permit",
+    "status": "pending",
+    "priority": "low",
+    "authority": "Alachua County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "386 Gainesville Permit Center"
+    },
+    "applicationDate": "2023-07-23T08:00:00Z",
+    "approvalDate": "2023-07-31T14:30:00Z",
+    "expirationDate": "2024-05-26T23:59:59Z",
+    "renewalDate": "2024-04-15T00:00:00Z",
+    "cost": 23495.33,
+    "bondAmount": 46319.34,
+    "description": "Master Building Permit for project Gainesville University Expansion",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "Environmental impact assessment completed",
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-091",
+    "projectId": 2525852,
+    "number": "SITE-2023-091",
+    "type": "Site Development",
+    "status": "pending",
+    "priority": "medium",
+    "authority": "Alachua County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "386 Gainesville Permit Center"
+    },
+    "applicationDate": "2023-08-12T08:00:00Z",
+    "approvalDate": "2023-09-24T14:30:00Z",
+    "expirationDate": "2025-01-01T23:59:59Z",
+    "renewalDate": "2024-12-01T00:00:00Z",
+    "cost": 20813.02,
+    "bondAmount": 43508.39,
+    "description": "Site Development for project Gainesville University Expansion",
+    "comments": "Auto-generated mock permit record for site development.",
+    "conditions": [
+      "Stormwater management approval",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-092",
+    "projectId": 2525852,
+    "number": "MASS-2023-092",
+    "type": "Mass Grading",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Alachua County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "386 Gainesville Permit Center"
+    },
+    "applicationDate": "2023-09-25T08:00:00Z",
+    "approvalDate": "2023-11-08T14:30:00Z",
+    "expirationDate": "2024-06-25T23:59:59Z",
+    "renewalDate": "2024-06-10T00:00:00Z",
+    "cost": 21230.61,
+    "bondAmount": 38865.42,
+    "description": "Mass Grading for project Gainesville University Expansion",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-093",
+    "projectId": 2525852,
+    "number": "ELEC-2023-093",
+    "type": "Electrical",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Alachua County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "386 Gainesville Permit Center"
+    },
+    "applicationDate": "2023-06-05T08:00:00Z",
+    "approvalDate": "2023-07-10T14:30:00Z",
+    "expirationDate": "2024-12-16T23:59:59Z",
+    "renewalDate": "2024-11-30T00:00:00Z",
+    "cost": 24079.1,
+    "bondAmount": 44673.95,
+    "description": "Electrical for project Gainesville University Expansion",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "ADA compliance verification needed",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-094",
+    "projectId": 2525852,
+    "number": "ELEV-2023-094",
+    "type": "Elevator",
+    "status": "renewed",
+    "priority": "low",
+    "authority": "Alachua County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "386 Gainesville Permit Center"
+    },
+    "applicationDate": "2023-06-15T08:00:00Z",
+    "approvalDate": "2023-07-23T14:30:00Z",
+    "expirationDate": "2024-04-23T23:59:59Z",
+    "renewalDate": "2024-03-14T00:00:00Z",
+    "cost": 12906.92,
+    "bondAmount": 40016.83,
+    "description": "Elevator for project Gainesville University Expansion",
+    "comments": "Auto-generated mock permit record for elevator.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Stormwater management approval",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-095",
+    "projectId": 2525852,
+    "number": "DEMO-2023-095",
+    "type": "Demolition",
+    "status": "approved",
+    "priority": "low",
+    "authority": "Alachua County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "386 Gainesville Permit Center"
+    },
+    "applicationDate": "2023-07-23T08:00:00Z",
+    "approvalDate": "2023-08-19T14:30:00Z",
+    "expirationDate": "2024-05-24T23:59:59Z",
+    "renewalDate": "2024-04-21T00:00:00Z",
+    "cost": 15074.16,
+    "bondAmount": 42082.98,
+    "description": "Demolition for project Gainesville University Expansion",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "Stormwater management approval",
+      "Fire sprinkler system required",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-096",
+    "projectId": 2525852,
+    "number": "PLUM-2023-096",
+    "type": "Plumbing",
+    "status": "renewed",
+    "priority": "medium",
+    "authority": "Alachua County Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "386 Gainesville Permit Center"
+    },
+    "applicationDate": "2023-08-07T08:00:00Z",
+    "approvalDate": "2023-08-14T14:30:00Z",
+    "expirationDate": "2024-07-22T23:59:59Z",
+    "renewalDate": "2024-06-23T00:00:00Z",
+    "cost": 20040.19,
+    "bondAmount": 49141.9,
+    "description": "Plumbing for project Gainesville University Expansion",
+    "comments": "Auto-generated mock permit record for plumbing.",
+    "conditions": [
+      "Stormwater management approval",
+      "ADA compliance verification needed",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-097",
+    "projectId": 2525852,
+    "number": "MECH-2023-097",
+    "type": "Mechanical",
+    "status": "pending",
+    "priority": "low",
+    "authority": "Alachua County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "386 Gainesville Permit Center"
+    },
+    "applicationDate": "2023-09-24T08:00:00Z",
+    "approvalDate": "2023-10-30T14:30:00Z",
+    "expirationDate": "2024-12-24T23:59:59Z",
+    "renewalDate": "2024-11-01T00:00:00Z",
+    "cost": 7462.83,
+    "bondAmount": 47796.99,
+    "description": "Mechanical for project Gainesville University Expansion",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Asbestos abatement documentation submitted",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-098",
+    "projectId": 2525852,
+    "number": "FIRE-2023-098",
+    "type": "Fire Alarm",
+    "status": "approved",
+    "priority": "high",
+    "authority": "Alachua County Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "386 Gainesville Permit Center"
+    },
+    "applicationDate": "2023-09-13T08:00:00Z",
+    "approvalDate": "2023-10-21T14:30:00Z",
+    "expirationDate": "2025-01-24T23:59:59Z",
+    "renewalDate": "2024-12-13T00:00:00Z",
+    "cost": 13947.46,
+    "bondAmount": 36165.06,
+    "description": "Fire Alarm for project Gainesville University Expansion",
+    "comments": "Auto-generated mock permit record for fire alarm.",
+    "conditions": [
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-099",
+    "projectId": 2525853,
+    "number": "MAST-2024-099",
+    "type": "Master Building Permit",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Fort Myers Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "615 Fort Myers Permit Center"
+    },
+    "applicationDate": "2024-09-26T08:00:00Z",
+    "approvalDate": "2024-10-23T14:30:00Z",
+    "expirationDate": "2025-05-19T23:59:59Z",
+    "renewalDate": "2025-04-09T00:00:00Z",
+    "cost": 20359.87,
+    "bondAmount": 11989.92,
+    "description": "Master Building Permit for project Fort Myers Waterfront Estate",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-100",
+    "projectId": 2525853,
+    "number": "ELEC-2024-100",
+    "type": "Electrical",
+    "status": "rejected",
+    "priority": "medium",
+    "authority": "Fort Myers Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "615 Fort Myers Permit Center"
+    },
+    "applicationDate": "2024-10-12T08:00:00Z",
+    "approvalDate": "2024-10-20T14:30:00Z",
+    "expirationDate": "2025-06-01T23:59:59Z",
+    "renewalDate": "2025-05-16T00:00:00Z",
+    "cost": 23578.28,
+    "bondAmount": 28051.14,
+    "description": "Electrical for project Fort Myers Waterfront Estate",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-101",
+    "projectId": 2525853,
+    "number": "MECH-2024-101",
+    "type": "Mechanical",
+    "status": "expired",
+    "priority": "low",
+    "authority": "Fort Myers Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "615 Fort Myers Permit Center"
+    },
+    "applicationDate": "2024-09-12T08:00:00Z",
+    "approvalDate": "2024-10-11T14:30:00Z",
+    "expirationDate": "2026-03-03T23:59:59Z",
+    "renewalDate": "2026-01-26T00:00:00Z",
+    "cost": 4296.02,
+    "bondAmount": 26220.19,
+    "description": "Mechanical for project Fort Myers Waterfront Estate",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "ADA compliance verification needed",
+      "Site fencing and erosion control in place",
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-102",
+    "projectId": 2525853,
+    "number": "POOL-2024-102",
+    "type": "Pool Barricade",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Fort Myers Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "615 Fort Myers Permit Center"
+    },
+    "applicationDate": "2024-10-18T08:00:00Z",
+    "approvalDate": "2024-11-21T14:30:00Z",
+    "expirationDate": "2025-06-02T23:59:59Z",
+    "renewalDate": "2025-05-18T00:00:00Z",
+    "cost": 21061.48,
+    "bondAmount": 45873.08,
+    "description": "Pool Barricade for project Fort Myers Waterfront Estate",
+    "comments": "Auto-generated mock permit record for pool barricade.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-103",
+    "projectId": 2525853,
+    "number": "MASS-2024-103",
+    "type": "Mass Grading",
+    "status": "expired",
+    "priority": "low",
+    "authority": "Fort Myers Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "615 Fort Myers Permit Center"
+    },
+    "applicationDate": "2024-08-11T08:00:00Z",
+    "approvalDate": "2024-08-24T14:30:00Z",
+    "expirationDate": "2025-08-09T23:59:59Z",
+    "renewalDate": "2025-06-21T00:00:00Z",
+    "cost": 8873.48,
+    "bondAmount": 18653.24,
+    "description": "Mass Grading for project Fort Myers Waterfront Estate",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-104",
+    "projectId": 2525854,
+    "number": "MAST-2022-104",
+    "type": "Master Building Permit",
+    "status": "pending",
+    "priority": "high",
+    "authority": "Palm Beach County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "108 West Palm Beach Permit Center"
+    },
+    "applicationDate": "2022-02-10T08:00:00Z",
+    "approvalDate": "2022-02-17T14:30:00Z",
+    "expirationDate": "2022-11-26T23:59:59Z",
+    "renewalDate": "2022-11-05T00:00:00Z",
+    "cost": 7712.98,
+    "bondAmount": 29115.89,
+    "description": "Master Building Permit for project West Palm Beach Mixed-Use Tower",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "Environmental impact assessment completed",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-105",
+    "projectId": 2525854,
+    "number": "PLUM-2022-105",
+    "type": "Plumbing",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Palm Beach County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "108 West Palm Beach Permit Center"
+    },
+    "applicationDate": "2022-02-14T08:00:00Z",
+    "approvalDate": "2022-03-25T14:30:00Z",
+    "expirationDate": "2023-07-06T23:59:59Z",
+    "renewalDate": "2023-06-02T00:00:00Z",
+    "cost": 8556.64,
+    "bondAmount": 13649.04,
+    "description": "Plumbing for project West Palm Beach Mixed-Use Tower",
+    "comments": "Auto-generated mock permit record for plumbing.",
+    "conditions": [
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-106",
+    "projectId": 2525854,
+    "number": "SITE-2022-106",
+    "type": "Site Development",
+    "status": "pending",
+    "priority": "low",
+    "authority": "Palm Beach County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "108 West Palm Beach Permit Center"
+    },
+    "applicationDate": "2022-03-22T08:00:00Z",
+    "approvalDate": "2022-04-30T14:30:00Z",
+    "expirationDate": "2023-04-06T23:59:59Z",
+    "renewalDate": "2023-03-02T00:00:00Z",
+    "cost": 22715.29,
+    "bondAmount": 22580.31,
+    "description": "Site Development for project West Palm Beach Mixed-Use Tower",
+    "comments": "Auto-generated mock permit record for site development.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "Noise ordinance compliance",
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-107",
+    "projectId": 2525854,
+    "number": "POOL-2022-107",
+    "type": "Pool Barricade",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Palm Beach County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "108 West Palm Beach Permit Center"
+    },
+    "applicationDate": "2022-01-29T08:00:00Z",
+    "approvalDate": "2022-03-03T14:30:00Z",
+    "expirationDate": "2023-08-01T23:59:59Z",
+    "renewalDate": "2023-06-20T00:00:00Z",
+    "cost": 7468.04,
+    "bondAmount": 36038.0,
+    "description": "Pool Barricade for project West Palm Beach Mixed-Use Tower",
+    "comments": "Auto-generated mock permit record for pool barricade.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-108",
+    "projectId": 2525854,
+    "number": "FIRE-2022-108",
+    "type": "Fire Alarm",
+    "status": "approved",
+    "priority": "high",
+    "authority": "Palm Beach County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "108 West Palm Beach Permit Center"
+    },
+    "applicationDate": "2022-01-16T08:00:00Z",
+    "approvalDate": "2022-02-27T14:30:00Z",
+    "expirationDate": "2022-10-10T23:59:59Z",
+    "renewalDate": "2022-09-13T00:00:00Z",
+    "cost": 20570.68,
+    "bondAmount": 49803.94,
+    "description": "Fire Alarm for project West Palm Beach Mixed-Use Tower",
+    "comments": "Auto-generated mock permit record for fire alarm.",
+    "conditions": [
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-109",
+    "projectId": 2525854,
+    "number": "MASS-2022-109",
+    "type": "Mass Grading",
+    "status": "approved",
+    "priority": "high",
+    "authority": "Palm Beach County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "108 West Palm Beach Permit Center"
+    },
+    "applicationDate": "2022-02-22T08:00:00Z",
+    "approvalDate": "2022-03-18T14:30:00Z",
+    "expirationDate": "2023-08-13T23:59:59Z",
+    "renewalDate": "2023-06-28T00:00:00Z",
+    "cost": 10608.73,
+    "bondAmount": 40709.96,
+    "description": "Mass Grading for project West Palm Beach Mixed-Use Tower",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-110",
+    "projectId": 2525855,
+    "number": "MAST-2024-110",
+    "type": "Master Building Permit",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "952 Aventura Permit Center"
+    },
+    "applicationDate": "2024-09-23T08:00:00Z",
+    "approvalDate": "2024-10-12T14:30:00Z",
+    "expirationDate": "2025-05-25T23:59:59Z",
+    "renewalDate": "2025-04-21T00:00:00Z",
+    "cost": 21068.03,
+    "bondAmount": 11737.78,
+    "description": "Master Building Permit for project Aventura Retail Plaza",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-111",
+    "projectId": 2525855,
+    "number": "SITE-2024-111",
+    "type": "Site Development",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "952 Aventura Permit Center"
+    },
+    "applicationDate": "2024-10-28T08:00:00Z",
+    "approvalDate": "2024-12-06T14:30:00Z",
+    "expirationDate": "2026-03-13T23:59:59Z",
+    "renewalDate": "2026-02-20T00:00:00Z",
+    "cost": 16956.36,
+    "bondAmount": 11156.06,
+    "description": "Site Development for project Aventura Retail Plaza",
+    "comments": "Auto-generated mock permit record for site development.",
+    "conditions": [
+      "Stormwater management approval",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-112",
+    "projectId": 2525855,
+    "number": "MASS-2024-112",
+    "type": "Mass Grading",
+    "status": "renewed",
+    "priority": "high",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "952 Aventura Permit Center"
+    },
+    "applicationDate": "2024-10-17T08:00:00Z",
+    "approvalDate": "2024-10-24T14:30:00Z",
+    "expirationDate": "2025-08-20T23:59:59Z",
+    "renewalDate": "2025-07-26T00:00:00Z",
+    "cost": 5039.27,
+    "bondAmount": 23570.06,
+    "description": "Mass Grading for project Aventura Retail Plaza",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-113",
+    "projectId": 2525855,
+    "number": "FIRE-2024-113",
+    "type": "Fire Alarm",
+    "status": "renewed",
+    "priority": "medium",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "952 Aventura Permit Center"
+    },
+    "applicationDate": "2024-11-22T08:00:00Z",
+    "approvalDate": "2024-11-30T14:30:00Z",
+    "expirationDate": "2026-03-12T23:59:59Z",
+    "renewalDate": "2026-01-14T00:00:00Z",
+    "cost": 7100.28,
+    "bondAmount": 45698.64,
+    "description": "Fire Alarm for project Aventura Retail Plaza",
+    "comments": "Auto-generated mock permit record for fire alarm.",
+    "conditions": [
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-114",
+    "projectId": 2525855,
+    "number": "FIRE-2024-114",
+    "type": "Fire Sprinkler",
+    "status": "pending",
+    "priority": "medium",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "952 Aventura Permit Center"
+    },
+    "applicationDate": "2024-11-01T08:00:00Z",
+    "approvalDate": "2024-11-09T14:30:00Z",
+    "expirationDate": "2025-10-08T23:59:59Z",
+    "renewalDate": "2025-08-19T00:00:00Z",
+    "cost": 5467.78,
+    "bondAmount": 19360.04,
+    "description": "Fire Sprinkler for project Aventura Retail Plaza",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-115",
+    "projectId": 2525855,
+    "number": "PLUM-2024-115",
+    "type": "Plumbing",
+    "status": "approved",
+    "priority": "low",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "952 Aventura Permit Center"
+    },
+    "applicationDate": "2024-12-26T08:00:00Z",
+    "approvalDate": "2025-02-09T14:30:00Z",
+    "expirationDate": "2026-02-26T23:59:59Z",
+    "renewalDate": "2026-02-08T00:00:00Z",
+    "cost": 19701.68,
+    "bondAmount": 36646.46,
+    "description": "Plumbing for project Aventura Retail Plaza",
+    "comments": "Auto-generated mock permit record for plumbing.",
+    "conditions": [
+      "ADA compliance verification needed",
+      "Fire sprinkler system required",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-116",
+    "projectId": 2525855,
+    "number": "MECH-2024-116",
+    "type": "Mechanical",
+    "status": "rejected",
+    "priority": "high",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "952 Aventura Permit Center"
+    },
+    "applicationDate": "2024-09-24T08:00:00Z",
+    "approvalDate": "2024-11-04T14:30:00Z",
+    "expirationDate": "2026-01-12T23:59:59Z",
+    "renewalDate": "2025-12-15T00:00:00Z",
+    "cost": 13325.76,
+    "bondAmount": 28921.12,
+    "description": "Mechanical for project Aventura Retail Plaza",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "Environmental impact assessment completed",
+      "Asbestos abatement documentation submitted",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-117",
+    "projectId": 2525855,
+    "number": "POOL-2024-117",
+    "type": "Pool Barricade",
+    "status": "expired",
+    "priority": "low",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "952 Aventura Permit Center"
+    },
+    "applicationDate": "2024-11-11T08:00:00Z",
+    "approvalDate": "2024-12-13T14:30:00Z",
+    "expirationDate": "2026-02-09T23:59:59Z",
+    "renewalDate": "2025-12-17T00:00:00Z",
+    "cost": 21968.15,
+    "bondAmount": 15998.35,
+    "description": "Pool Barricade for project Aventura Retail Plaza",
+    "comments": "Auto-generated mock permit record for pool barricade.",
+    "conditions": [
+      "Environmental impact assessment completed",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-118",
+    "projectId": 2525855,
+    "number": "DEMO-2024-118",
+    "type": "Demolition",
+    "status": "approved",
+    "priority": "medium",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "952 Aventura Permit Center"
+    },
+    "applicationDate": "2024-12-08T08:00:00Z",
+    "approvalDate": "2024-12-23T14:30:00Z",
+    "expirationDate": "2025-08-31T23:59:59Z",
+    "renewalDate": "2025-07-15T00:00:00Z",
+    "cost": 6207.11,
+    "bondAmount": 28337.84,
+    "description": "Demolition for project Aventura Retail Plaza",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "Environmental impact assessment completed",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-119",
+    "projectId": 2525855,
+    "number": "ROOF-2024-119",
+    "type": "Roofing",
+    "status": "renewed",
+    "priority": "high",
+    "authority": "Miami-Dade County Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "952 Aventura Permit Center"
+    },
+    "applicationDate": "2024-11-06T08:00:00Z",
+    "approvalDate": "2024-11-20T14:30:00Z",
+    "expirationDate": "2025-11-07T23:59:59Z",
+    "renewalDate": "2025-09-21T00:00:00Z",
+    "cost": 13063.03,
+    "bondAmount": 18813.87,
+    "description": "Roofing for project Aventura Retail Plaza",
+    "comments": "Auto-generated mock permit record for roofing.",
+    "conditions": [
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-120",
+    "projectId": 2525856,
+    "number": "MAST-2025-120",
+    "type": "Master Building Permit",
+    "status": "approved",
+    "priority": "high",
+    "authority": "Tallahassee Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "582 Tallahassee Permit Center"
+    },
+    "applicationDate": "2025-01-28T08:00:00Z",
+    "approvalDate": "2025-02-18T14:30:00Z",
+    "expirationDate": "2026-01-27T23:59:59Z",
+    "renewalDate": "2025-11-30T00:00:00Z",
+    "cost": 11350.91,
+    "bondAmount": 36667.95,
+    "description": "Master Building Permit for project Tallahassee Government Complex",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-121",
+    "projectId": 2525856,
+    "number": "FIRE-2025-121",
+    "type": "Fire Sprinkler",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Tallahassee Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "582 Tallahassee Permit Center"
+    },
+    "applicationDate": "2025-04-04T08:00:00Z",
+    "approvalDate": "2025-04-25T14:30:00Z",
+    "expirationDate": "2026-09-23T23:59:59Z",
+    "renewalDate": "2026-07-31T00:00:00Z",
+    "cost": 17350.15,
+    "bondAmount": 45937.69,
+    "description": "Fire Sprinkler for project Tallahassee Government Complex",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "Stormwater management approval",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-122",
+    "projectId": 2525856,
+    "number": "MASS-2025-122",
+    "type": "Mass Grading",
+    "status": "pending",
+    "priority": "high",
+    "authority": "Tallahassee Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "582 Tallahassee Permit Center"
+    },
+    "applicationDate": "2025-01-09T08:00:00Z",
+    "approvalDate": "2025-01-21T14:30:00Z",
+    "expirationDate": "2026-03-05T23:59:59Z",
+    "renewalDate": "2026-02-01T00:00:00Z",
+    "cost": 16064.6,
+    "bondAmount": 16826.84,
+    "description": "Mass Grading for project Tallahassee Government Complex",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-123",
+    "projectId": 2525856,
+    "number": "ELEV-2025-123",
+    "type": "Elevator",
+    "status": "approved",
+    "priority": "high",
+    "authority": "Tallahassee Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "582 Tallahassee Permit Center"
+    },
+    "applicationDate": "2025-04-07T08:00:00Z",
+    "approvalDate": "2025-05-20T14:30:00Z",
+    "expirationDate": "2026-02-01T23:59:59Z",
+    "renewalDate": "2025-12-29T00:00:00Z",
+    "cost": 24910.39,
+    "bondAmount": 18165.5,
+    "description": "Elevator for project Tallahassee Government Complex",
+    "comments": "Auto-generated mock permit record for elevator.",
+    "conditions": [
+      "Environmental impact assessment completed",
+      "ADA compliance verification needed",
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-124",
+    "projectId": 2525856,
+    "number": "DEMO-2025-124",
+    "type": "Demolition",
+    "status": "pending",
+    "priority": "low",
+    "authority": "Tallahassee Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "582 Tallahassee Permit Center"
+    },
+    "applicationDate": "2025-03-20T08:00:00Z",
+    "approvalDate": "2025-04-20T14:30:00Z",
+    "expirationDate": "2026-07-17T23:59:59Z",
+    "renewalDate": "2026-06-29T00:00:00Z",
+    "cost": 12950.07,
+    "bondAmount": 21414.8,
+    "description": "Demolition for project Tallahassee Government Complex",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-125",
+    "projectId": 2525856,
+    "number": "ELEC-2025-125",
+    "type": "Electrical",
+    "status": "rejected",
+    "priority": "high",
+    "authority": "Tallahassee Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "582 Tallahassee Permit Center"
+    },
+    "applicationDate": "2025-01-11T08:00:00Z",
+    "approvalDate": "2025-01-22T14:30:00Z",
+    "expirationDate": "2025-10-16T23:59:59Z",
+    "renewalDate": "2025-09-08T00:00:00Z",
+    "cost": 13753.38,
+    "bondAmount": 15964.57,
+    "description": "Electrical for project Tallahassee Government Complex",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-126",
+    "projectId": 2525856,
+    "number": "ROOF-2025-126",
+    "type": "Roofing",
+    "status": "pending",
+    "priority": "low",
+    "authority": "Tallahassee Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "582 Tallahassee Permit Center"
+    },
+    "applicationDate": "2025-04-30T08:00:00Z",
+    "approvalDate": "2025-06-04T14:30:00Z",
+    "expirationDate": "2026-02-04T23:59:59Z",
+    "renewalDate": "2026-01-06T00:00:00Z",
+    "cost": 15482.32,
+    "bondAmount": 23863.58,
+    "description": "Roofing for project Tallahassee Government Complex",
+    "comments": "Auto-generated mock permit record for roofing.",
+    "conditions": [
+      "Noise ordinance compliance",
+      "Stormwater management approval",
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-127",
+    "projectId": 2525857,
+    "number": "MAST-2023-127",
+    "type": "Master Building Permit",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Miami Beach Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "714 Miami Beach Permit Center"
+    },
+    "applicationDate": "2023-07-06T08:00:00Z",
+    "approvalDate": "2023-08-19T14:30:00Z",
+    "expirationDate": "2024-06-14T23:59:59Z",
+    "renewalDate": "2024-04-23T00:00:00Z",
+    "cost": 13907.64,
+    "bondAmount": 31902.25,
+    "description": "Master Building Permit for project Miami Beach Luxury Hotel",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Noise ordinance compliance",
+      "Fire sprinkler system required",
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-128",
+    "projectId": 2525857,
+    "number": "ROOF-2023-128",
+    "type": "Roofing",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Miami Beach Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "714 Miami Beach Permit Center"
+    },
+    "applicationDate": "2023-06-28T08:00:00Z",
+    "approvalDate": "2023-07-26T14:30:00Z",
+    "expirationDate": "2024-02-28T23:59:59Z",
+    "renewalDate": "2024-02-03T00:00:00Z",
+    "cost": 10334.71,
+    "bondAmount": 34205.78,
+    "description": "Roofing for project Miami Beach Luxury Hotel",
+    "comments": "Auto-generated mock permit record for roofing.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "Site fencing and erosion control in place",
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-129",
+    "projectId": 2525857,
+    "number": "POOL-2023-129",
+    "type": "Pool Barricade",
+    "status": "pending",
+    "priority": "high",
+    "authority": "Miami Beach Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "714 Miami Beach Permit Center"
+    },
+    "applicationDate": "2023-06-08T08:00:00Z",
+    "approvalDate": "2023-07-18T14:30:00Z",
+    "expirationDate": "2024-12-27T23:59:59Z",
+    "renewalDate": "2024-12-07T00:00:00Z",
+    "cost": 12818.74,
+    "bondAmount": 25318.17,
+    "description": "Pool Barricade for project Miami Beach Luxury Hotel",
+    "comments": "Auto-generated mock permit record for pool barricade.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-130",
+    "projectId": 2525857,
+    "number": "FIRE-2023-130",
+    "type": "Fire Alarm",
+    "status": "approved",
+    "priority": "low",
+    "authority": "Miami Beach Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "714 Miami Beach Permit Center"
+    },
+    "applicationDate": "2023-04-22T08:00:00Z",
+    "approvalDate": "2023-05-22T14:30:00Z",
+    "expirationDate": "2024-01-11T23:59:59Z",
+    "renewalDate": "2023-12-22T00:00:00Z",
+    "cost": 17807.5,
+    "bondAmount": 49258.64,
+    "description": "Fire Alarm for project Miami Beach Luxury Hotel",
+    "comments": "Auto-generated mock permit record for fire alarm.",
+    "conditions": [
+      "Site fencing and erosion control in place",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-131",
+    "projectId": 2525857,
+    "number": "ELEC-2023-131",
+    "type": "Electrical",
+    "status": "pending",
+    "priority": "low",
+    "authority": "Miami Beach Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "714 Miami Beach Permit Center"
+    },
+    "applicationDate": "2023-05-22T08:00:00Z",
+    "approvalDate": "2023-06-19T14:30:00Z",
+    "expirationDate": "2024-05-08T23:59:59Z",
+    "renewalDate": "2024-04-09T00:00:00Z",
+    "cost": 20284.97,
+    "bondAmount": 31011.48,
+    "description": "Electrical for project Miami Beach Luxury Hotel",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-132",
+    "projectId": 2525857,
+    "number": "DEMO-2023-132",
+    "type": "Demolition",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Miami Beach Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "714 Miami Beach Permit Center"
+    },
+    "applicationDate": "2023-06-08T08:00:00Z",
+    "approvalDate": "2023-07-05T14:30:00Z",
+    "expirationDate": "2024-05-29T23:59:59Z",
+    "renewalDate": "2024-04-12T00:00:00Z",
+    "cost": 12428.73,
+    "bondAmount": 34530.3,
+    "description": "Demolition for project Miami Beach Luxury Hotel",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-133",
+    "projectId": 2525857,
+    "number": "MASS-2023-133",
+    "type": "Mass Grading",
+    "status": "renewed",
+    "priority": "medium",
+    "authority": "Miami Beach Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "714 Miami Beach Permit Center"
+    },
+    "applicationDate": "2023-05-21T08:00:00Z",
+    "approvalDate": "2023-06-01T14:30:00Z",
+    "expirationDate": "2024-10-17T23:59:59Z",
+    "renewalDate": "2024-10-01T00:00:00Z",
+    "cost": 21374.1,
+    "bondAmount": 30377.34,
+    "description": "Mass Grading for project Miami Beach Luxury Hotel",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "Environmental impact assessment completed",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-134",
+    "projectId": 2525857,
+    "number": "MECH-2023-134",
+    "type": "Mechanical",
+    "status": "approved",
+    "priority": "low",
+    "authority": "Miami Beach Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "714 Miami Beach Permit Center"
+    },
+    "applicationDate": "2023-04-21T08:00:00Z",
+    "approvalDate": "2023-05-15T14:30:00Z",
+    "expirationDate": "2024-06-27T23:59:59Z",
+    "renewalDate": "2024-05-29T00:00:00Z",
+    "cost": 8493.1,
+    "bondAmount": 19412.41,
+    "description": "Mechanical for project Miami Beach Luxury Hotel",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "Stormwater management approval",
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-135",
+    "projectId": 2525857,
+    "number": "PLUM-2023-135",
+    "type": "Plumbing",
+    "status": "rejected",
+    "priority": "low",
+    "authority": "Miami Beach Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "714 Miami Beach Permit Center"
+    },
+    "applicationDate": "2023-07-14T08:00:00Z",
+    "approvalDate": "2023-08-23T14:30:00Z",
+    "expirationDate": "2024-08-03T23:59:59Z",
+    "renewalDate": "2024-07-01T00:00:00Z",
+    "cost": 10029.35,
+    "bondAmount": 42935.37,
+    "description": "Plumbing for project Miami Beach Luxury Hotel",
+    "comments": "Auto-generated mock permit record for plumbing.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "ADA compliance verification needed",
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-136",
+    "projectId": 2525857,
+    "number": "FIRE-2023-136",
+    "type": "Fire Sprinkler",
+    "status": "pending",
+    "priority": "medium",
+    "authority": "Miami Beach Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "714 Miami Beach Permit Center"
+    },
+    "applicationDate": "2023-06-22T08:00:00Z",
+    "approvalDate": "2023-07-21T14:30:00Z",
+    "expirationDate": "2024-05-20T23:59:59Z",
+    "renewalDate": "2024-04-30T00:00:00Z",
+    "cost": 23286.18,
+    "bondAmount": 21651.9,
+    "description": "Fire Sprinkler for project Miami Beach Luxury Hotel",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "ADA compliance verification needed",
+      "Environmental impact assessment completed",
+      "Asbestos abatement documentation submitted"
+    ]
+  },
+  {
+    "id": "perm-137",
+    "projectId": 2525857,
+    "number": "ELEV-2023-137",
+    "type": "Elevator",
+    "status": "pending",
+    "priority": "low",
+    "authority": "Miami Beach Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "714 Miami Beach Permit Center"
+    },
+    "applicationDate": "2023-07-25T08:00:00Z",
+    "approvalDate": "2023-08-24T14:30:00Z",
+    "expirationDate": "2024-04-28T23:59:59Z",
+    "renewalDate": "2024-03-22T00:00:00Z",
+    "cost": 7447.57,
+    "bondAmount": 18511.06,
+    "description": "Elevator for project Miami Beach Luxury Hotel",
+    "comments": "Auto-generated mock permit record for elevator.",
+    "conditions": [
+      "Stormwater management approval",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-138",
+    "projectId": 2525858,
+    "number": "MAST-2024-138",
+    "type": "Master Building Permit",
+    "status": "pending",
+    "priority": "high",
+    "authority": "Cape Coral Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "782 Cape Coral Permit Center"
+    },
+    "applicationDate": "2024-09-01T08:00:00Z",
+    "approvalDate": "2024-09-26T14:30:00Z",
+    "expirationDate": "2025-08-30T23:59:59Z",
+    "renewalDate": "2025-07-16T00:00:00Z",
+    "cost": 4711.62,
+    "bondAmount": 39475.28,
+    "description": "Master Building Permit for project Cape Coral Residential Community",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Environmental impact assessment completed",
+      "Asbestos abatement documentation submitted",
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-139",
+    "projectId": 2525858,
+    "number": "ROOF-2024-139",
+    "type": "Roofing",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Cape Coral Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "782 Cape Coral Permit Center"
+    },
+    "applicationDate": "2024-06-28T08:00:00Z",
+    "approvalDate": "2024-08-11T14:30:00Z",
+    "expirationDate": "2025-06-09T23:59:59Z",
+    "renewalDate": "2025-04-23T00:00:00Z",
+    "cost": 23928.23,
+    "bondAmount": 35178.3,
+    "description": "Roofing for project Cape Coral Residential Community",
+    "comments": "Auto-generated mock permit record for roofing.",
+    "conditions": [
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-140",
+    "projectId": 2525858,
+    "number": "MECH-2024-140",
+    "type": "Mechanical",
+    "status": "pending",
+    "priority": "high",
+    "authority": "Cape Coral Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "782 Cape Coral Permit Center"
+    },
+    "applicationDate": "2024-07-25T08:00:00Z",
+    "approvalDate": "2024-08-01T14:30:00Z",
+    "expirationDate": "2025-09-02T23:59:59Z",
+    "renewalDate": "2025-07-09T00:00:00Z",
+    "cost": 21396.61,
+    "bondAmount": 35420.97,
+    "description": "Mechanical for project Cape Coral Residential Community",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-141",
+    "projectId": 2525858,
+    "number": "SITE-2024-141",
+    "type": "Site Development",
+    "status": "expired",
+    "priority": "medium",
+    "authority": "Cape Coral Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "782 Cape Coral Permit Center"
+    },
+    "applicationDate": "2024-07-20T08:00:00Z",
+    "approvalDate": "2024-09-02T14:30:00Z",
+    "expirationDate": "2025-06-13T23:59:59Z",
+    "renewalDate": "2025-04-23T00:00:00Z",
+    "cost": 4176.83,
+    "bondAmount": 20199.59,
+    "description": "Site Development for project Cape Coral Residential Community",
+    "comments": "Auto-generated mock permit record for site development.",
+    "conditions": [
+      "Stormwater management approval",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-142",
+    "projectId": 2525858,
+    "number": "POOL-2024-142",
+    "type": "Pool Barricade",
+    "status": "approved",
+    "priority": "low",
+    "authority": "Cape Coral Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "782 Cape Coral Permit Center"
+    },
+    "applicationDate": "2024-07-13T08:00:00Z",
+    "approvalDate": "2024-08-06T14:30:00Z",
+    "expirationDate": "2025-05-03T23:59:59Z",
+    "renewalDate": "2025-04-13T00:00:00Z",
+    "cost": 6688.63,
+    "bondAmount": 27111.93,
+    "description": "Pool Barricade for project Cape Coral Residential Community",
+    "comments": "Auto-generated mock permit record for pool barricade.",
+    "conditions": [
+      "Noise ordinance compliance",
+      "Stormwater management approval",
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-143",
+    "projectId": 2525859,
+    "number": "MAST-2021-143",
+    "type": "Master Building Permit",
+    "status": "rejected",
+    "priority": "high",
+    "authority": "Hialeah Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "258 Hialeah Permit Center"
+    },
+    "applicationDate": "2021-11-30T08:00:00Z",
+    "approvalDate": "2021-12-13T14:30:00Z",
+    "expirationDate": "2022-10-01T23:59:59Z",
+    "renewalDate": "2022-09-01T00:00:00Z",
+    "cost": 19025.91,
+    "bondAmount": 17277.41,
+    "description": "Master Building Permit for project Hialeah Industrial Park",
+    "comments": "Auto-generated mock permit record for master building permit.",
+    "conditions": [
+      "Noise ordinance compliance"
+    ]
+  },
+  {
+    "id": "perm-144",
+    "projectId": 2525859,
+    "number": "ELEC-2022-144",
+    "type": "Electrical",
+    "status": "rejected",
+    "priority": "high",
+    "authority": "Hialeah Governing Body",
+    "authorityContact": {
+      "name": "James White",
+      "phone": "(555) 777-8888",
+      "email": "j.white@municipalauthority.us",
+      "address": "258 Hialeah Permit Center"
+    },
+    "applicationDate": "2022-01-19T08:00:00Z",
+    "approvalDate": "2022-02-17T14:30:00Z",
+    "expirationDate": "2022-08-20T23:59:59Z",
+    "renewalDate": "2022-07-31T00:00:00Z",
+    "cost": 23502.57,
+    "bondAmount": 38915.06,
+    "description": "Electrical for project Hialeah Industrial Park",
+    "comments": "Auto-generated mock permit record for electrical.",
+    "conditions": [
+      "Environmental impact assessment completed",
+      "ADA compliance verification needed",
+      "Stormwater management approval"
+    ]
+  },
+  {
+    "id": "perm-145",
+    "projectId": 2525859,
+    "number": "MECH-2022-145",
+    "type": "Mechanical",
+    "status": "renewed",
+    "priority": "low",
+    "authority": "Hialeah Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "258 Hialeah Permit Center"
+    },
+    "applicationDate": "2022-01-01T08:00:00Z",
+    "approvalDate": "2022-01-10T14:30:00Z",
+    "expirationDate": "2022-09-26T23:59:59Z",
+    "renewalDate": "2022-08-20T00:00:00Z",
+    "cost": 4837.88,
+    "bondAmount": 31547.18,
+    "description": "Mechanical for project Hialeah Industrial Park",
+    "comments": "Auto-generated mock permit record for mechanical.",
+    "conditions": [
+      "Noise ordinance compliance",
+      "Fire sprinkler system required"
+    ]
+  },
+  {
+    "id": "perm-146",
+    "projectId": 2525859,
+    "number": "PLUM-2022-146",
+    "type": "Plumbing",
+    "status": "expired",
+    "priority": "low",
+    "authority": "Hialeah Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "258 Hialeah Permit Center"
+    },
+    "applicationDate": "2022-02-25T08:00:00Z",
+    "approvalDate": "2022-04-06T14:30:00Z",
+    "expirationDate": "2023-08-14T23:59:59Z",
+    "renewalDate": "2023-07-01T00:00:00Z",
+    "cost": 19011.55,
+    "bondAmount": 26988.33,
+    "description": "Plumbing for project Hialeah Industrial Park",
+    "comments": "Auto-generated mock permit record for plumbing.",
+    "conditions": [
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-147",
+    "projectId": 2525859,
+    "number": "FIRE-2022-147",
+    "type": "Fire Sprinkler",
+    "status": "expired",
+    "priority": "medium",
+    "authority": "Hialeah Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "258 Hialeah Permit Center"
+    },
+    "applicationDate": "2022-01-16T08:00:00Z",
+    "approvalDate": "2022-02-21T14:30:00Z",
+    "expirationDate": "2023-01-20T23:59:59Z",
+    "renewalDate": "2022-12-14T00:00:00Z",
+    "cost": 24588.51,
+    "bondAmount": 24507.73,
+    "description": "Fire Sprinkler for project Hialeah Industrial Park",
+    "comments": "Auto-generated mock permit record for fire sprinkler.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-148",
+    "projectId": 2525859,
+    "number": "MASS-2022-148",
+    "type": "Mass Grading",
+    "status": "rejected",
+    "priority": "high",
+    "authority": "Hialeah Governing Body",
+    "authorityContact": {
+      "name": "Deborah Lee",
+      "phone": "(555) 333-4444",
+      "email": "d.lee@cityinspections.net",
+      "address": "258 Hialeah Permit Center"
+    },
+    "applicationDate": "2022-02-20T08:00:00Z",
+    "approvalDate": "2022-03-12T14:30:00Z",
+    "expirationDate": "2023-05-12T23:59:59Z",
+    "renewalDate": "2023-04-14T00:00:00Z",
+    "cost": 15729.55,
+    "bondAmount": 38373.09,
+    "description": "Mass Grading for project Hialeah Industrial Park",
+    "comments": "Auto-generated mock permit record for mass grading.",
+    "conditions": [
+      "Noise ordinance compliance",
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-149",
+    "projectId": 2525859,
+    "number": "ELEV-2022-149",
+    "type": "Elevator",
+    "status": "renewed",
+    "priority": "medium",
+    "authority": "Hialeah Governing Body",
+    "authorityContact": {
+      "name": "Linda Shaw",
+      "phone": "(555) 987-6543",
+      "email": "l.shaw@countypermits.org",
+      "address": "258 Hialeah Permit Center"
+    },
+    "applicationDate": "2022-02-21T08:00:00Z",
+    "approvalDate": "2022-03-26T14:30:00Z",
+    "expirationDate": "2022-12-01T23:59:59Z",
+    "renewalDate": "2022-10-07T00:00:00Z",
+    "cost": 23683.8,
+    "bondAmount": 14516.64,
+    "description": "Elevator for project Hialeah Industrial Park",
+    "comments": "Auto-generated mock permit record for elevator.",
+    "conditions": [
+      "ADA compliance verification needed",
+      "Environmental impact assessment completed"
+    ]
+  },
+  {
+    "id": "perm-150",
+    "projectId": 2525859,
+    "number": "FIRE-2021-150",
+    "type": "Fire Alarm",
+    "status": "expired",
+    "priority": "high",
+    "authority": "Hialeah Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "258 Hialeah Permit Center"
+    },
+    "applicationDate": "2021-11-15T08:00:00Z",
+    "approvalDate": "2021-11-23T14:30:00Z",
+    "expirationDate": "2023-04-27T23:59:59Z",
+    "renewalDate": "2023-03-25T00:00:00Z",
+    "cost": 15376.44,
+    "bondAmount": 23393.01,
+    "description": "Fire Alarm for project Hialeah Industrial Park",
+    "comments": "Auto-generated mock permit record for fire alarm.",
+    "conditions": [
+      "Fire sprinkler system required",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-151",
+    "projectId": 2525859,
+    "number": "DEMO-2022-151",
+    "type": "Demolition",
+    "status": "expired",
+    "priority": "low",
+    "authority": "Hialeah Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "258 Hialeah Permit Center"
+    },
+    "applicationDate": "2022-02-03T08:00:00Z",
+    "approvalDate": "2022-03-10T14:30:00Z",
+    "expirationDate": "2022-12-14T23:59:59Z",
+    "renewalDate": "2022-11-03T00:00:00Z",
+    "cost": 6490.82,
+    "bondAmount": 13646.35,
+    "description": "Demolition for project Hialeah Industrial Park",
+    "comments": "Auto-generated mock permit record for demolition.",
+    "conditions": [
+      "Asbestos abatement documentation submitted",
+      "Site fencing and erosion control in place",
+      "ADA compliance verification needed"
+    ]
+  },
+  {
+    "id": "perm-152",
+    "projectId": 2525859,
+    "number": "POOL-2021-152",
+    "type": "Pool Barricade",
+    "status": "rejected",
+    "priority": "medium",
+    "authority": "Hialeah Governing Body",
+    "authorityContact": {
+      "name": "Robert Martinez",
+      "phone": "(555) 123-4567",
+      "email": "r.martinez@citybuilding.gov",
+      "address": "258 Hialeah Permit Center"
+    },
+    "applicationDate": "2021-12-18T08:00:00Z",
+    "approvalDate": "2022-01-05T14:30:00Z",
+    "expirationDate": "2023-06-10T23:59:59Z",
+    "renewalDate": "2023-05-02T00:00:00Z",
+    "cost": 24912.78,
+    "bondAmount": 45012.77,
+    "description": "Pool Barricade for project Hialeah Industrial Park",
+    "comments": "Auto-generated mock permit record for pool barricade.",
+    "conditions": [
+      "ADA compliance verification needed",
+      "Site fencing and erosion control in place"
+    ]
+  },
+  {
+    "id": "perm-153",
+    "projectId": 2525859,
+    "number": "SITE-2022-153",
+    "type": "Site Development",
+    "status": "rejected",
+    "priority": "medium",
+    "authority": "Hialeah Governing Body",
+    "authorityContact": {
+      "name": "Kevin O'Neil",
+      "phone": "(555) 111-2222",
+      "email": "k.oneil@buildingdept.gov",
+      "address": "258 Hialeah Permit Center"
+    },
+    "applicationDate": "2022-02-18T08:00:00Z",
+    "approvalDate": "2022-03-16T14:30:00Z",
+    "expirationDate": "2023-06-29T23:59:59Z",
+    "renewalDate": "2023-06-04T00:00:00Z",
+    "cost": 18751.49,
+    "bondAmount": 42266.76,
+    "description": "Site Development for project Hialeah Industrial Park",
+    "comments": "Auto-generated mock permit record for site development.",
+    "conditions": [
+      "Site fencing and erosion control in place"
+    ]
+  }
+]

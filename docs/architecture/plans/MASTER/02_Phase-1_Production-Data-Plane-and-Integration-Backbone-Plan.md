@@ -58,6 +58,7 @@ At the end of Phase 1:
 - SharePoint lists & libraries schema register (physical container definitions)
 - Schedule ingestion & normalization schema (canonical model for heterogeneous schedule file imports)
 - Reference data dictionary schema (cost codes and governed reference dictionaries)
+- External financial data ingestion schema (Procore Budget and external cost-control imports)
 
 ### 6.2 Workstream B — Adapter Completion
 **Goal:** complete production-capable repository adapters.
@@ -140,6 +141,7 @@ Mandatory deliverables for Phase 1:
 - SharePoint Lists & Libraries Schema Register (physical container definitions)
 - Schedule Ingestion & Normalization Schema (canonical model for CSV/XML/XER schedule imports)
 - Reference Data Dictionary Schema (cost codes and governed reference dictionaries)
+- External Financial Data Ingestion Schema (Procore Budget and external cost-control imports)
 - Adapter Completion Backlog and Status Tracker
 - Service Contract Catalog
 - Error / Retry / Recovery Design Note
