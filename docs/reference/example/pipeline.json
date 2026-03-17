@@ -1,0 +1,1364 @@
+[
+    {
+      "id": "project-pipeline-1",
+      "division": "Residential",
+      "title": "Residential Pipeline 1",
+      "size": "medium",
+      "config": {
+        "pipelineValue": 242948836,
+        "probabilityWeighted": 183649878,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 3,
+            "value": 50838285,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 2,
+            "value": 29999120,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 1,
+            "value": 7100167,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 8,
+            "value": 155011264,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Palm Offices",
+            "value": 10112443,
+            "division": "Commercial"
+          },
+          {
+            "name": "Bay Towers",
+            "value": 11155074,
+            "division": "Residential"
+          },
+          {
+            "name": "Urban Offices",
+            "value": 14151516,
+            "division": "Residential"
+          }
+        ],
+        "recentLosses": [
+          {
+            "name": "Shore Offices",
+            "value": 10634043,
+            "division": "Commercial"
+          },
+          {
+            "name": "Lake Towers",
+            "value": 13573868,
+            "division": "Residential"
+          }
+        ]
+      },
+      "location": {
+        "city": "St. Augustine",
+        "state": "FL",
+        "zip": "32084"
+      },
+      "type": "tunnel form",
+      "anticipated_start": "2027-05-17",
+      "duration": 972
+    },
+    {
+      "id": "project-pipeline-2",
+      "division": "Residential",
+      "title": "Residential Pipeline 2",
+      "size": "small",
+      "config": {
+        "pipelineValue": 69444998,
+        "probabilityWeighted": 53374208,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 3,
+            "value": 6967230,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 4,
+            "value": 19556656,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 4,
+            "value": 5844328,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 8,
+            "value": 37076784,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Palm Offices",
+            "value": 23845603,
+            "division": "Commercial"
+          },
+          {
+            "name": "Bay Residences",
+            "value": 13392847,
+            "division": "Residential"
+          }
+        ],
+        "recentLosses": []
+      },
+      "location": {
+        "city": "Miami",
+        "state": "FL",
+        "zip": "33131"
+      },
+      "type": "wood frame",
+      "anticipated_start": "2027-06-16",
+      "duration": 1033
+    },
+    {
+      "id": "project-pipeline-3",
+      "division": "Commercial",
+      "title": "Commercial Pipeline 3",
+      "size": "medium",
+      "config": {
+        "pipelineValue": 83972931,
+        "probabilityWeighted": 65023987,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 1,
+            "value": 9963841,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 1,
+            "value": 18741182,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 1,
+            "value": 8107968,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 6,
+            "value": 47159940,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Bay Center",
+            "value": 27784945,
+            "division": "Residential"
+          },
+          {
+            "name": "Urban Residences",
+            "value": 16868248,
+            "division": "Residential"
+          },
+          {
+            "name": "Sunset Offices",
+            "value": 13490957,
+            "division": "Residential"
+          }
+        ],
+        "recentLosses": [
+          {
+            "name": "Shore Towers",
+            "value": 10469592,
+            "division": "Commercial"
+          },
+          {
+            "name": "Shore Residences",
+            "value": 19381172,
+            "division": "Commercial"
+          },
+          {
+            "name": "Gulf Plaza",
+            "value": 23687716,
+            "division": "Commercial"
+          }
+        ]
+      },
+      "location": {
+        "city": "Naples",
+        "state": "FL",
+        "zip": "34102"
+      },
+      "type": "curtain wall",
+      "anticipated_start": "2026-06-21",
+      "duration": 1010
+    },
+    {
+      "id": "project-pipeline-4",
+      "division": "Residential",
+      "title": "Residential Pipeline 4",
+      "size": "large",
+      "config": {
+        "pipelineValue": 292435088,
+        "probabilityWeighted": 225169919,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 1,
+            "value": 26828464,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 2,
+            "value": 59458768,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 1,
+            "value": 87019476,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 5,
+            "value": 119128380,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Urban Center",
+            "value": 13557460,
+            "division": "Residential"
+          },
+          {
+            "name": "Bay Offices",
+            "value": 22564751,
+            "division": "Residential"
+          }
+        ],
+        "recentLosses": []
+      },
+      "location": {
+        "city": "Winter Haven",
+        "state": "FL",
+        "zip": "33880"
+      },
+      "type": "remodel",
+      "anticipated_start": "2026-09-19",
+      "duration": 1056
+    },
+    {
+      "id": "project-pipeline-5",
+      "division": "Residential",
+      "title": "Residential Pipeline 5",
+      "size": "large",
+      "config": {
+        "pipelineValue": 565924378,
+        "probabilityWeighted": 423525494,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 2,
+            "value": 108688598,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 1,
+            "value": 36224051,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 2,
+            "value": 168948194,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 5,
+            "value": 252063535,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Sunset Center",
+            "value": 19266106,
+            "division": "Residential"
+          },
+          {
+            "name": "Urban Plaza",
+            "value": 19282174,
+            "division": "Commercial"
+          },
+          {
+            "name": "Sunset Towers",
+            "value": 10449827,
+            "division": "Residential"
+          }
+        ],
+        "recentLosses": [
+          {
+            "name": "Lake Offices",
+            "value": 23538688,
+            "division": "Commercial"
+          }
+        ]
+      },
+      "location": {
+        "city": "Gainesville",
+        "state": "FL",
+        "zip": "32601"
+      },
+      "type": "wood frame",
+      "anticipated_start": "2027-01-17",
+      "duration": 970
+    },
+    {
+      "id": "project-pipeline-6",
+      "division": "Commercial",
+      "title": "Commercial Pipeline 6",
+      "size": "large",
+      "config": {
+        "pipelineValue": 890332408,
+        "probabilityWeighted": 701048592,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 2,
+            "value": 147784908,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 1,
+            "value": 80688796,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 3,
+            "value": 87177879,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 9,
+            "value": 574680825,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Bay Offices",
+            "value": 19154878,
+            "division": "Commercial"
+          }
+        ],
+        "recentLosses": []
+      },
+      "location": {
+        "city": "Fort Lauderdale",
+        "state": "FL",
+        "zip": "33301"
+      },
+      "type": "masonry",
+      "anticipated_start": "2027-02-16",
+      "duration": 1045
+    },
+    {
+      "id": "project-pipeline-7",
+      "division": "Residential",
+      "title": "Residential Pipeline 7",
+      "size": "large",
+      "config": {
+        "pipelineValue": 1198492375,
+        "probabilityWeighted": 963577488,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 3,
+            "value": 157118973,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 2,
+            "value": 153168370,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 1,
+            "value": 75987054,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 9,
+            "value": 812217978,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Palm Towers",
+            "value": 11243318,
+            "division": "Residential"
+          },
+          {
+            "name": "Sunset Plaza",
+            "value": 7829646,
+            "division": "Commercial"
+          }
+        ],
+        "recentLosses": [
+          {
+            "name": "River Offices",
+            "value": 13185024,
+            "division": "Residential"
+          },
+          {
+            "name": "Gulf Towers",
+            "value": 14320465,
+            "division": "Residential"
+          },
+          {
+            "name": "Gulf Plaza",
+            "value": 27357396,
+            "division": "Commercial"
+          }
+        ]
+      },
+      "location": {
+        "city": "West Palm Beach",
+        "state": "FL",
+        "zip": "33401"
+      },
+      "type": "modular",
+      "anticipated_start": "2026-10-19",
+      "duration": 974
+    },
+    {
+      "id": "project-pipeline-8",
+      "division": "Residential",
+      "title": "Residential Pipeline 8",
+      "size": "medium",
+      "config": {
+        "pipelineValue": 82259360,
+        "probabilityWeighted": 59272962,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 2,
+            "value": 14720770,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 2,
+            "value": 13004310,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 2,
+            "value": 26782550,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 5,
+            "value": 27751730,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Coastal Center",
+            "value": 10294071,
+            "division": "Commercial"
+          },
+          {
+            "name": "Sunset Residences",
+            "value": 15589889,
+            "division": "Residential"
+          },
+          {
+            "name": "Coastal Residences",
+            "value": 14365458,
+            "division": "Residential"
+          }
+        ],
+        "recentLosses": []
+      },
+      "location": {
+        "city": "Jacksonville",
+        "state": "FL",
+        "zip": "32202"
+      },
+      "type": "tunnel form",
+      "anticipated_start": "2026-02-21",
+      "duration": 838
+    },
+    {
+      "id": "project-pipeline-9",
+      "division": "Residential",
+      "title": "Residential Pipeline 9",
+      "size": "medium",
+      "config": {
+        "pipelineValue": 70817386,
+        "probabilityWeighted": 53655405,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 1,
+            "value": 10207223,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 1,
+            "value": 12771261,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 2,
+            "value": 13374096,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 2,
+            "value": 34464806,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Coastal Residences",
+            "value": 12725887,
+            "division": "Residential"
+          }
+        ],
+        "recentLosses": [
+          {
+            "name": "Gulf Plaza",
+            "value": 5215716,
+            "division": "Residential"
+          },
+          {
+            "name": "River Offices",
+            "value": 29460278,
+            "division": "Residential"
+          },
+          {
+            "name": "Lake Offices",
+            "value": 15171671,
+            "division": "Commercial"
+          }
+        ]
+      },
+      "location": {
+        "city": "Ocala",
+        "state": "FL",
+        "zip": "34471"
+      },
+      "type": "remodel",
+      "anticipated_start": "2027-05-17",
+      "duration": 953
+    },
+    {
+      "id": "project-pipeline-10",
+      "division": "Residential",
+      "title": "Residential Pipeline 10",
+      "size": "medium",
+      "config": {
+        "pipelineValue": 124630332,
+        "probabilityWeighted": 94514305,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 2,
+            "value": 22159338,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 2,
+            "value": 18644120,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 1,
+            "value": 12316876,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 6,
+            "value": 71509998,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Bay Towers",
+            "value": 11083831,
+            "division": "Residential"
+          },
+          {
+            "name": "Sunset Offices",
+            "value": 26136278,
+            "division": "Commercial"
+          },
+          {
+            "name": "Sunset Plaza",
+            "value": 6874611,
+            "division": "Commercial"
+          }
+        ],
+        "recentLosses": []
+      },
+      "location": {
+        "city": "West Palm Beach",
+        "state": "FL",
+        "zip": "33401"
+      },
+      "type": "remodel",
+      "anticipated_start": "2026-07-21",
+      "duration": 826
+    },
+    {
+      "id": "project-pipeline-11",
+      "division": "Residential",
+      "title": "Residential Pipeline 11",
+      "size": "large",
+      "config": {
+        "pipelineValue": 878981637,
+        "probabilityWeighted": 726541776,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 1,
+            "value": 26174433,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 3,
+            "value": 196488819,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 3,
+            "value": 142650594,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 7,
+            "value": 513667791,
+            "probability": 95
+          }
+        ],
+        "recentWins": [],
+        "recentLosses": []
+      },
+      "location": {
+        "city": "Fernandina Beach",
+        "state": "FL",
+        "zip": "32034"
+      },
+      "type": "modular",
+      "anticipated_start": "2027-05-17",
+      "duration": 933
+    },
+    {
+      "id": "project-pipeline-12",
+      "division": "Residential",
+      "title": "Residential Pipeline 12",
+      "size": "large",
+      "config": {
+        "pipelineValue": 875443114,
+        "probabilityWeighted": 719277277,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 1,
+            "value": 76537018,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 1,
+            "value": 93216932,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 2,
+            "value": 174612286,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 9,
+            "value": 531076878,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Coastal Center",
+            "value": 15288759,
+            "division": "Commercial"
+          }
+        ],
+        "recentLosses": []
+      },
+      "location": {
+        "city": "Pensacola",
+        "state": "FL",
+        "zip": "32501"
+      },
+      "type": "prefabricated",
+      "anticipated_start": "2026-09-19",
+      "duration": 921
+    },
+    {
+      "id": "project-pipeline-13",
+      "division": "Residential",
+      "title": "Residential Pipeline 13",
+      "size": "small",
+      "config": {
+        "pipelineValue": 45997319,
+        "probabilityWeighted": 33915949,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 3,
+            "value": 9773478,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 2,
+            "value": 4343076,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 3,
+            "value": 9466620,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 5,
+            "value": 22414145,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Sunset Residences",
+            "value": 24475917,
+            "division": "Residential"
+          },
+          {
+            "name": "Coastal Center",
+            "value": 28639178,
+            "division": "Residential"
+          }
+        ],
+        "recentLosses": [
+          {
+            "name": "Shore Center",
+            "value": 16337339,
+            "division": "Residential"
+          }
+        ]
+      },
+      "location": {
+        "city": "Boca Raton",
+        "state": "FL",
+        "zip": "33432"
+      },
+      "type": "stick-built",
+      "anticipated_start": "2026-03-23",
+      "duration": 648
+    },
+    {
+      "id": "project-pipeline-14",
+      "division": "Commercial",
+      "title": "Commercial Pipeline 14",
+      "size": "medium",
+      "config": {
+        "pipelineValue": 211574807,
+        "probabilityWeighted": 184726908,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 1,
+            "value": 8425937,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 2,
+            "value": 15922478,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 4,
+            "value": 31987572,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 11,
+            "value": 155238820,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Urban Offices",
+            "value": 24890251,
+            "division": "Commercial"
+          },
+          {
+            "name": "Sunset Residences",
+            "value": 25514547,
+            "division": "Residential"
+          },
+          {
+            "name": "Bay Plaza",
+            "value": 7399235,
+            "division": "Residential"
+          }
+        ],
+        "recentLosses": [
+          {
+            "name": "Gulf Towers",
+            "value": 28802836,
+            "division": "Residential"
+          },
+          {
+            "name": "Gulf Residences",
+            "value": 17943836,
+            "division": "Commercial"
+          },
+          {
+            "name": "Gulf Center",
+            "value": 20900696,
+            "division": "Residential"
+          }
+        ]
+      },
+      "location": {
+        "city": "Ocala",
+        "state": "FL",
+        "zip": "34471"
+      },
+      "type": "renovation",
+      "anticipated_start": "2025-12-23",
+      "duration": 808
+    },
+    {
+      "id": "project-pipeline-15",
+      "division": "Commercial",
+      "title": "Commercial Pipeline 15",
+      "size": "medium",
+      "config": {
+        "pipelineValue": 276886750,
+        "probabilityWeighted": 171623947,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 5,
+            "value": 92612305,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 3,
+            "value": 42291645,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 4,
+            "value": 78585176,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 8,
+            "value": 63397624,
+            "probability": 95
+          }
+        ],
+        "recentWins": [],
+        "recentLosses": [
+          {
+            "name": "City Residences",
+            "value": 9565049,
+            "division": "Residential"
+          },
+          {
+            "name": "Gulf Residences",
+            "value": 5469092,
+            "division": "Residential"
+          },
+          {
+            "name": "River Center",
+            "value": 18985035,
+            "division": "Residential"
+          }
+        ]
+      },
+      "location": {
+        "city": "Fernandina Beach",
+        "state": "FL",
+        "zip": "32034"
+      },
+      "type": "renovation",
+      "anticipated_start": "2026-02-21",
+      "duration": 901
+    },
+    {
+      "id": "project-pipeline-16",
+      "division": "Commercial",
+      "title": "Commercial Pipeline 16",
+      "size": "medium",
+      "config": {
+        "pipelineValue": 227735136,
+        "probabilityWeighted": 175061695,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 4,
+            "value": 27496852,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 3,
+            "value": 33900384,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 4,
+            "value": 67825024,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 7,
+            "value": 98512876,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Sunset Towers",
+            "value": 5810397,
+            "division": "Residential"
+          },
+          {
+            "name": "Bay Plaza",
+            "value": 21919442,
+            "division": "Residential"
+          },
+          {
+            "name": "Urban Center",
+            "value": 27690920,
+            "division": "Residential"
+          }
+        ],
+        "recentLosses": []
+      },
+      "location": {
+        "city": "Sarasota",
+        "state": "FL",
+        "zip": "34236"
+      },
+      "type": "masonry",
+      "anticipated_start": "2026-01-22",
+      "duration": 1052
+    },
+    {
+      "id": "project-pipeline-17",
+      "division": "Commercial",
+      "title": "Commercial Pipeline 17",
+      "size": "large",
+      "config": {
+        "pipelineValue": 406756242,
+        "probabilityWeighted": 310149605,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 1,
+            "value": 64699222,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 1,
+            "value": 66385581,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 1,
+            "value": 51629441,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 6,
+            "value": 224041998,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Palm Plaza",
+            "value": 15130571,
+            "division": "Commercial"
+          }
+        ],
+        "recentLosses": [
+          {
+            "name": "Gulf Towers",
+            "value": 14208155,
+            "division": "Residential"
+          },
+          {
+            "name": "Lake Plaza",
+            "value": 17894816,
+            "division": "Residential"
+          }
+        ]
+      },
+      "location": {
+        "city": "Ocala",
+        "state": "FL",
+        "zip": "34471"
+      },
+      "type": "renovation",
+      "anticipated_start": "2026-11-18",
+      "duration": 720
+    },
+    {
+      "id": "project-pipeline-18",
+      "division": "Commercial",
+      "title": "Commercial Pipeline 18",
+      "size": "small",
+      "config": {
+        "pipelineValue": 30292745,
+        "probabilityWeighted": 23643374,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 1,
+            "value": 1144394,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 3,
+            "value": 11466894,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 2,
+            "value": 2134970,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 11,
+            "value": 15546487,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Coastal Residences",
+            "value": 19908746,
+            "division": "Commercial"
+          }
+        ],
+        "recentLosses": [
+          {
+            "name": "City Residences",
+            "value": 19690728,
+            "division": "Residential"
+          },
+          {
+            "name": "River Offices",
+            "value": 27632981,
+            "division": "Commercial"
+          }
+        ]
+      },
+      "location": {
+        "city": "Tallahassee",
+        "state": "FL",
+        "zip": "32301"
+      },
+      "type": "renovation",
+      "anticipated_start": "2027-03-18",
+      "duration": 530
+    },
+    {
+      "id": "project-pipeline-19",
+      "division": "Commercial",
+      "title": "Commercial Pipeline 19",
+      "size": "small",
+      "config": {
+        "pipelineValue": 14514468,
+        "probabilityWeighted": 10853188,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 1,
+            "value": 1819376,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 2,
+            "value": 3984724,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 1,
+            "value": 1782264,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 2,
+            "value": 6928104,
+            "probability": 95
+          }
+        ],
+        "recentWins": [],
+        "recentLosses": [
+          {
+            "name": "Shore Offices",
+            "value": 14317841,
+            "division": "Commercial"
+          }
+        ]
+      },
+      "location": {
+        "city": "Winter Haven",
+        "state": "FL",
+        "zip": "33880"
+      },
+      "type": "precast concrete",
+      "anticipated_start": "2025-11-23",
+      "duration": 630
+    },
+    {
+      "id": "project-pipeline-20",
+      "division": "Commercial",
+      "title": "Commercial Pipeline 20",
+      "size": "small",
+      "config": {
+        "pipelineValue": 27204840,
+        "probabilityWeighted": 17359199,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 2,
+            "value": 5312756,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 3,
+            "value": 12145650,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 2,
+            "value": 3436618,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 6,
+            "value": 6309816,
+            "probability": 95
+          }
+        ],
+        "recentWins": [],
+        "recentLosses": []
+      },
+      "location": {
+        "city": "Miami",
+        "state": "FL",
+        "zip": "33131"
+      },
+      "type": "masonry",
+      "anticipated_start": "2026-04-22",
+      "duration": 394
+    },
+    {
+      "id": "project-pipeline-21",
+      "division": "Residential",
+      "title": "Residential Pipeline 21",
+      "size": "medium",
+      "config": {
+        "pipelineValue": 136843365,
+        "probabilityWeighted": 114042910,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 2,
+            "value": 10154704,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 1,
+            "value": 5826389,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 3,
+            "value": 45405054,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 6,
+            "value": 75457218,
+            "probability": 95
+          }
+        ],
+        "recentWins": [
+          {
+            "name": "Palm Offices",
+            "value": 7527502,
+            "division": "Residential"
+          },
+          {
+            "name": "Urban Towers",
+            "value": 21882715,
+            "division": "Residential"
+          },
+          {
+            "name": "Sunset Plaza",
+            "value": 24811926,
+            "division": "Commercial"
+          }
+        ],
+        "recentLosses": [
+          {
+            "name": "Shore Center",
+            "value": 12816269,
+            "division": "Commercial"
+          }
+        ]
+      },
+      "location": {
+        "city": "Sarasota",
+        "state": "FL",
+        "zip": "34236"
+      },
+      "type": "masonry",
+      "anticipated_start": "2026-05-22",
+      "duration": 891
+    },
+    {
+      "id": "project-pipeline-22",
+      "division": "Commercial",
+      "title": "Commercial Pipeline 22",
+      "size": "medium",
+      "config": {
+        "pipelineValue": 98716547,
+        "probabilityWeighted": 67915108,
+        "stages": [
+          {
+            "stage": "Lead",
+            "count": 2,
+            "value": 19346638,
+            "probability": 25
+          },
+          {
+            "stage": "Proposal",
+            "count": 2,
+            "value": 30783938,
+            "probability": 60
+          },
+          {
+            "stage": "Negotiation",
+            "count": 1,
+            "value": 10323911,
+            "probability": 80
+          },
+          {
+            "stage": "Award",
+            "count": 6,
+            "value": 38262060,
+            "probability": 95
+          }
+        ],
+        "recentWins": [],
+        "recentLosses": [
+          {
+            "name": "River Towers",
+            "value": 12522730,
+            "division": "Residential"
+          },
+          {
+            "name": "Gulf Plaza",
+            "value": 6213255,
+            "division": "Residential"
+          }
+        ]
+      },
+      "location": {
+        "city": "Lakeland",
+        "state": "FL",
+        "zip": "33801"
+      },
+      "type": "renovation",
+      "anticipated_start": "2025-10-24",
+      "duration": 720
+    }
+  ]
