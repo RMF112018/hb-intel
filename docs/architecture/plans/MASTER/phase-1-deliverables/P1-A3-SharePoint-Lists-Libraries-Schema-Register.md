@@ -3,7 +3,7 @@
 **Document ID:** P1-A3
 **Phase:** 1 (Foundation)
 **Classification:** Internal — Engineering
-**Status:** Draft — Structure Established
+**Status:** Active — Physical Schema Register
 **Date:** 2026-03-17
 **Read With:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md), [P1-A6-External-Financial-Data-Ingestion-Schema.md](./P1-A6-External-Financial-Data-Ingestion-Schema.md), [P1-A7-Operational-Register-Schema.md](./P1-A7-Operational-Register-Schema.md), [P1-A8-Estimating-Kickoff-Schema.md](./P1-A8-Estimating-Kickoff-Schema.md), [P1-A9-Permits-Inspections-Schema.md](./P1-A9-Permits-Inspections-Schema.md), [P1-A10-Project-Lifecycle-Checklist-Schema.md](./P1-A10-Project-Lifecycle-Checklist-Schema.md), [P1-A11-Responsibility-Matrix-Schema.md](./P1-A11-Responsibility-Matrix-Schema.md), [P1-A12-Subcontractor-Scorecard-Schema.md](./P1-A12-Subcontractor-Scorecard-Schema.md), [P1-A13-Lessons-Learned-Schema.md](./P1-A13-Lessons-Learned-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
 
@@ -18,19 +18,35 @@ This register is the **engineering-level** companion to P1-A1's governance-level
 **This document does not:**
 - redefine data ownership or source-of-record authority (see P1-A1)
 - redefine write safety classes, identity keys, or adapter paths (see P1-A2)
+- define logical/canonical entity models (see P1-A4 through P1-A13 for domain-specific schemas)
+- define reference dictionary schemas or governance (see P1-A5)
 - cover Azure Table Storage, Redis, or external system schemas (those are not SharePoint containers)
+
+### Authority Boundary (Frozen)
+
+| Layer | Owning Artifact(s) | Scope |
+|-------|-------------------|-------|
+| **Physical SharePoint implementation** | **P1-A3** (this document) | Container names, column schemas, content types, lookups, indexing, versioning, provisioning, permissions |
+| **Logical / canonical entity models** | P1-A4 through P1-A13 | Domain-specific entity definitions, field semantics, relationship rules, ingestion/normalization logic |
+| **Data ownership and governance** | P1-A1 | Which data belongs where, who owns it, field-level ownership schema, lifecycle/retention/visibility/search/analytics |
+| **Adapter / source-of-record behavior** | P1-A2 | How adapters reach data, identity keys, write safety classes, conflict resolution |
+| **Dictionary schema and governance** | P1-A5 | Reference data dictionary canonical schemas, keying rules, hierarchy, lifecycle, external mapping |
+
+This boundary is frozen. P1-A3 does not own or redefine concerns that belong to the logical, governance, adapter, or dictionary layers.
 
 ---
 
-## Relationship to P1-A1 and P1-A2
+## Relationship to Companion Artifacts
 
 | Artifact | Role | Scope |
 |----------|------|-------|
 | **P1-A1** Data Ownership Matrix | Governance-level authority for data ownership, storage platform decisions, field-level ownership schema, lifecycle/retention/visibility/search/analytics participation | Logical: which data belongs where and who owns it |
 | **P1-A2** Source-of-Record Register | Operational authority for adapter paths, identity keys, write safety classes, and conflict resolution | Operational: how adapters reach authoritative data |
 | **P1-A3** SharePoint Schema Register (this document) | Engineering authority for physical SharePoint container definitions, column schemas, and implementation conventions | Physical: how SharePoint lists and libraries are structured |
+| **P1-A4–A13** Domain Schema Artifacts | Logical/canonical entity models for schedule ingestion, reference dictionaries, external financial data, operational registers, estimating kickoff, permits, lifecycle checklists, responsibility matrices, subcontractor scorecards, and lessons learned | Logical: what canonical entities and fields exist in each domain |
+| **P1-A5** Reference Data Dictionaries | Dictionary schema governance for cost codes, CSI codes, and all shared/domain-local reference sets | Dictionary: keying, hierarchy, lifecycle, and external mapping for governed reference data |
 
-**Reading order:** P1-A1 → P1-A2 → P1-A3. The governance decisions in P1-A1 drive the container choices here. The adapter paths in P1-A2 inform how containers are accessed.
+**Reading order:** P1-A1 → P1-A2 → domain schema (A4–A13) → P1-A3. The governance decisions in P1-A1 drive the container choices. The domain schemas define what goes into the containers. P1-A3 defines how the containers are physically structured in SharePoint.
 
 ---
 
@@ -267,8 +283,8 @@ Map P1-A1 data types to SharePoint column types:
 | SharePoint Infrastructure Owner | — | — |
 | Security and Compliance Lead | — | — |
 
-**Approval Status:** Pending — Structure established; physical schemas pending domain-by-domain approval
-**Comments:** Container register seeded from P1-A1 domain classification. Physical column schemas will be defined wave-by-wave as field expansion is approved.
+**Approval Status:** Active — Physical schema register for Phase 1 build-ready domains
+**Comments:** Container register established for all Wave 1 domains with logical container names, types, scope, key columns, and provisioning requirements. Wave 1 domains (project, estimating, buyout, new_project_request) have complete logical entity models in P1-A1 and domain schemas (P1-A4–A13); physical column schemas for these domains are ready for implementation as SharePoint list provisioning proceeds. Wave 2+ domains remain pending P1-A1 field expansion.
 
 ---
 
@@ -277,3 +293,4 @@ Map P1-A1 data types to SharePoint column types:
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial structure; container register seeded from P1-A1 Wave 1 domains. Physical column schemas pending approval. |
+| 0.2 | 2026-03-17 | Architecture | Froze authority boundary: A3 owns physical SharePoint implementation only; A4–A13 own logical/canonical entity models; A2 owns adapter/source-of-record behavior; A5 owns dictionary schema governance. Updated status from Draft to Active for Phase 1 build-ready domains. Expanded relationship table to include A4–A13 and A5. |
