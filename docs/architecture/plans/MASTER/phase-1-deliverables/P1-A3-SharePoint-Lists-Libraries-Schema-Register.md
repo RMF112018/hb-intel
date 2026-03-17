@@ -5,7 +5,7 @@
 **Classification:** Internal — Engineering
 **Status:** Active — Physical Schema Register
 **Date:** 2026-03-17
-**Read With:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md), [P1-A6-External-Financial-Data-Ingestion-Schema.md](./P1-A6-External-Financial-Data-Ingestion-Schema.md), [P1-A7-Operational-Register-Schema.md](./P1-A7-Operational-Register-Schema.md), [P1-A8-Estimating-Kickoff-Schema.md](./P1-A8-Estimating-Kickoff-Schema.md), [P1-A9-Permits-Inspections-Schema.md](./P1-A9-Permits-Inspections-Schema.md), [P1-A10-Project-Lifecycle-Checklist-Schema.md](./P1-A10-Project-Lifecycle-Checklist-Schema.md), [P1-A11-Responsibility-Matrix-Schema.md](./P1-A11-Responsibility-Matrix-Schema.md), [P1-A12-Subcontractor-Scorecard-Schema.md](./P1-A12-Subcontractor-Scorecard-Schema.md), [P1-A13-Lessons-Learned-Schema.md](./P1-A13-Lessons-Learned-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
+**Read With:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md), [P1-A6-External-Financial-Data-Ingestion-Schema.md](./P1-A6-External-Financial-Data-Ingestion-Schema.md), [P1-A7-Operational-Register-Schema.md](./P1-A7-Operational-Register-Schema.md), [P1-A8-Estimating-Kickoff-Schema.md](./P1-A8-Estimating-Kickoff-Schema.md), [P1-A9-Permits-Inspections-Schema.md](./P1-A9-Permits-Inspections-Schema.md), [P1-A10-Project-Lifecycle-Checklist-Schema.md](./P1-A10-Project-Lifecycle-Checklist-Schema.md), [P1-A11-Responsibility-Matrix-Schema.md](./P1-A11-Responsibility-Matrix-Schema.md), [P1-A12-Subcontractor-Scorecard-Schema.md](./P1-A12-Subcontractor-Scorecard-Schema.md), [P1-A13-Lessons-Learned-Schema.md](./P1-A13-Lessons-Learned-Schema.md), [P1-A14-Leads-Schema.md](./P1-A14-Leads-Schema.md), [P1-A15-Prime-Contracts-Schema.md](./P1-A15-Prime-Contracts-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
 
 ---
 
@@ -18,7 +18,7 @@ This register is the **engineering-level** companion to P1-A1's governance-level
 **This document does not:**
 - redefine data ownership or source-of-record authority (see P1-A1)
 - redefine write safety classes, identity keys, or adapter paths (see P1-A2)
-- define logical/canonical entity models (see P1-A4 through P1-A13 for domain-specific schemas)
+- define logical/canonical entity models (see P1-A4 through P1-A15 for domain-specific schemas)
 - define reference dictionary schemas or governance (see P1-A5)
 - cover Azure Table Storage, Redis, or external system schemas (those are not SharePoint containers)
 
@@ -27,7 +27,7 @@ This register is the **engineering-level** companion to P1-A1's governance-level
 | Layer | Owning Artifact(s) | Scope |
 |-------|-------------------|-------|
 | **Physical SharePoint implementation** | **P1-A3** (this document) | Container names, column schemas, content types, lookups, indexing, versioning, provisioning, permissions |
-| **Logical / canonical entity models** | P1-A4 through P1-A13 | Domain-specific entity definitions, field semantics, relationship rules, ingestion/normalization logic |
+| **Logical / canonical entity models** | P1-A4 through P1-A15 | Domain-specific entity definitions, field semantics, relationship rules, ingestion/normalization logic |
 | **Data ownership and governance** | P1-A1 | Which data belongs where, who owns it, field-level ownership schema, lifecycle/retention/visibility/search/analytics |
 | **Adapter / source-of-record behavior** | P1-A2 | How adapters reach data, identity keys, write safety classes, conflict resolution |
 | **Dictionary schema and governance** | P1-A5 | Reference data dictionary canonical schemas, keying rules, hierarchy, lifecycle, external mapping |
@@ -45,10 +45,10 @@ This boundary is frozen. P1-A3 does not own or redefine concerns that belong to 
 | **P1-A1** Data Ownership Matrix | Governance-level authority for data ownership, storage platform decisions, field-level ownership schema, lifecycle/retention/visibility/search/analytics participation | Logical: which data belongs where and who owns it |
 | **P1-A2** Source-of-Record Register | Operational authority for adapter paths, identity keys, write safety classes, and conflict resolution | Operational: how adapters reach authoritative data |
 | **P1-A3** SharePoint Schema Register (this document) | Engineering authority for physical SharePoint container definitions, column schemas, and implementation conventions | Physical: how SharePoint lists and libraries are structured |
-| **P1-A4–A13** Domain Schema Artifacts | Logical/canonical entity models for schedule ingestion, reference dictionaries, external financial data, operational registers, estimating kickoff, permits, lifecycle checklists, responsibility matrices, subcontractor scorecards, and lessons learned | Logical: what canonical entities and fields exist in each domain |
+| **P1-A4–A15** Domain Schema Artifacts | Logical/canonical entity models for schedule ingestion, reference dictionaries, external financial data, operational registers, estimating kickoff, permits, lifecycle checklists, responsibility matrices, subcontractor scorecards, lessons learned, leads & pipeline, and prime contracts | Logical: what canonical entities and fields exist in each domain |
 | **P1-A5** Reference Data Dictionaries | Dictionary schema governance for cost codes, CSI codes, and all shared/domain-local reference sets | Dictionary: keying, hierarchy, lifecycle, and external mapping for governed reference data |
 
-**Reading order:** P1-A1 → P1-A2 → domain schema (A4–A13) → P1-A3. The governance decisions in P1-A1 drive the container choices. The domain schemas define what goes into the containers. P1-A3 defines how the containers are physically structured in SharePoint.
+**Reading order:** P1-A1 → P1-A2 → domain schema (A4–A15) → P1-A3. The governance decisions in P1-A1 drive the container choices. The domain schemas define what goes into the containers. P1-A3 defines how the containers are physically structured in SharePoint.
 
 ---
 
@@ -84,7 +84,7 @@ Phase 1 uses these standard SharePoint container patterns:
 ### Pattern 1: Single List
 A standard SharePoint list storing transactional or reference records as list items.
 
-**Used by:** leads, project (metadata), estimating, schedule, buyout, risk, scorecard
+**Used by:** leads, project (metadata), estimating, schedule, buyout, risk, scorecard, contracts
 **Provisioning:** per-project site (most domains) or hub site (project master list)
 **Characteristics:** each row is one record; columns map to entity fields; lookups link related lists
 
@@ -98,7 +98,7 @@ A SharePoint document library storing document content with metadata columns.
 ### Pattern 3: Paired List + Document Library
 A document library for content paired with a companion list for structured metadata, compliance tracking, or workflow state.
 
-**Used by:** compliance, contracts, pmp
+**Used by:** compliance, pmp
 **Provisioning:** per-project site
 **Characteristics:** library stores the document; list stores structured metadata, approval state, checklist records, or index entries; linked by a stable key
 
@@ -1282,3 +1282,4 @@ Used by: subcontractor scorecard (section summaries, overall summary), budget li
 | 1.4 | 2026-03-17 | Architecture | Added canonical-to-physical reconciliation notes for schedule (16 entities → 3 containers) and lifecycle checklists (8 entities → 2 containers). Added reusable reconciliation rule in Authority Boundary section. Updated appendix governing-schema references to note compression. No corrective container changes required — existing compression is defensible. |
 | 1.5 | 2026-03-17 | Architecture | Moved leads from deferred to build-ready scope (section 14). Added 2 containers: `MarketLeads` (Sales/BD site, market leads with tag child records) and `PipelineSnapshots` (Sales/BD site, division-level pipeline snapshots with JSON-embedded aggregates). Governed by P1-A14. Remaining deferred: contracts, pmp. |
 | 1.6 | 2026-03-17 | Architecture | Moved contracts from deferred to build-ready scope (section 15). Added 1 container: `PrimeContracts` (project site, single list — no paired library). Changed from original "Paired (List + Library)" to single List — evidence shows no attachments in Phase 1 source data; library deferred to Phase 2. Governed by P1-A15. Remaining deferred: pmp. |
+| 1.7 | 2026-03-17 | Architecture | Summary-layer reconciliation: add A14 and A15 to Read With, authority boundary, relationship table, and document-scope references (previously stopped at A13). Move contracts from Pattern 3 (Paired) to Pattern 1 (Single List) in canonical container patterns to match A15 single-list decision. |
