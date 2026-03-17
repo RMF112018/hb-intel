@@ -21,6 +21,127 @@
 
 ---
 
+## Runtime Activation and Factory Reconciliation
+
+This section explains how proxy mode is activated in production, how the existing `ProxyConfig` type relates to `ProxyHttpClientOptions`, and what external dependencies must be satisfied before proxy adapters can function.
+
+### Adapter Mode Resolution
+
+The factory function `resolveAdapterMode()` in `factory.ts` reads `process.env.HBC_ADAPTER_MODE` and returns one of `'mock' | 'sharepoint' | 'proxy' | 'api'`. If the env var is missing or unrecognized, it **silently defaults to `'mock'`**.
+
+The env var is injected at build time via Vite `define`:
+
+| Surface | Build Config | Dev Default | Prod Default |
+|---|---|---|---|
+| **PWA** | `process.env.VITE_ADAPTER_MODE` | `'mock'` | `'proxy'` |
+| **dev-harness** | hardcoded | `'mock'` | `'mock'` |
+
+**Proxy mode is the production default for PWA builds.** Developers do not need to set an env var for proxy mode to activate in production — the Vite config handles it:
+
+```typescript
+// apps/pwa/vite.config.ts (relevant excerpt)
+define: {
+  'process.env.HBC_ADAPTER_MODE': JSON.stringify(
+    process.env.VITE_ADAPTER_MODE ?? (mode === 'development' ? 'mock' : 'proxy'),
+  ),
+}
+```
+
+### ProxyConfig Reconciliation
+
+The existing `ProxyConfig` type in `adapters/proxy/types.ts` defines:
+
+```typescript
+interface ProxyConfig {
+  baseUrl: string;
+  accessToken?: string;   // static token string
+  timeout?: number;
+  retryCount?: number;
+}
+```
+
+This plan evolves the config contract for proxy HTTP usage:
+
+- **`accessToken?: string` → `getToken: () => Promise<string>`** — MSAL tokens expire (typically 1 hour) and must be acquired per-request via `acquireTokenSilent()`. A static token string is insufficient for production use. The `ProxyHttpClientOptions` type introduced in Task 1 replaces the static token with a token-provider function.
+- **`timeout`** — preserved. `ProxyHttpClientOptions.timeout` defaults to `DEFAULT_TIMEOUT_MS` (30,000 ms) from `adapters/proxy/constants.ts`.
+- **`retryCount`** — **deferred**. The existing `DEFAULT_RETRY_COUNT = 3` constant is preserved for future use, but this plan does NOT implement retry logic in `ProxyHttpClient`. Retry handling is a Phase 4 concern that requires decisions about which errors are retryable, backoff strategy, and interaction with token refresh. This is explicitly a pending decision.
+- **`ProxyConfig` itself is NOT deleted.** It remains as the stub-phase contract in `types.ts`. `ProxyHttpClientOptions` is the runtime contract used by `ProxyHttpClient`. A future cleanup pass may unify them or deprecate `ProxyConfig`.
+
+### Timeout and Retry Reconciliation
+
+| Concern | This Plan (P1-B1) | Existing Constant | Resolution |
+|---|---|---|---|
+| Timeout | `ProxyHttpClient` constructor default | `DEFAULT_TIMEOUT_MS = 30_000` | Use `DEFAULT_TIMEOUT_MS` — import from constants, not hardcode |
+| Retry | Not implemented | `DEFAULT_RETRY_COUNT = 3` | **Deferred.** Constant preserved; no retry logic in P1-B1 scope |
+
+### PWA Bootstrap Activation
+
+Proxy context must be initialized **after MSAL authentication completes** and **before the React tree renders**. The call site is `apps/pwa/src/main.tsx`:
+
+```typescript
+// apps/pwa/src/main.tsx — proxy activation (added by this plan)
+
+import { setProxyContext } from '@hbc/data-access';
+import { msalInstance } from './auth/msal-init.js';
+
+// After MSAL init, before React render:
+if (resolveAdapterMode() === 'proxy') {
+  const baseUrl = import.meta.env.VITE_PROXY_BASE_URL;
+  if (!baseUrl) {
+    throw new Error(
+      'VITE_PROXY_BASE_URL must be set for proxy mode. '
+      + 'Check .env.production or deployment config.',
+    );
+  }
+  setProxyContext(baseUrl, async () => {
+    const account = msalInstance.getActiveAccount();
+    if (!account) {
+      throw new Error('No active MSAL account — user must be signed in before proxy calls');
+    }
+    const response = await msalInstance.acquireTokenSilent({
+      scopes: [import.meta.env.VITE_API_SCOPE],
+      account,
+    });
+    return response.accessToken;
+  });
+}
+```
+
+**Key points:**
+- `VITE_PROXY_BASE_URL` is a build-time env var (e.g., `https://func-hb-intel.azurewebsites.net/api`)
+- `VITE_API_SCOPE` is the Azure Functions app registration scope (e.g., `api://func-hb-intel/.default`)
+- The token provider is called on **every HTTP request** — tokens are never cached by `ProxyHttpClient`
+- If proxy mode is active but context is not initialized, `getProxyContext()` throws immediately (see Task 8)
+
+### Silent Mock Fallback Prevention
+
+In production proxy builds, two guards prevent silent mock fallback:
+
+1. **Compile-time guard:** PWA Vite config injects `HBC_ADAPTER_MODE = 'proxy'` into the bundle at build time. The env var cannot be absent at runtime because it is baked into the JavaScript output.
+
+2. **Runtime guard:** Even if `resolveAdapterMode()` somehow returns `'proxy'`, the `getProxyContext()` function (Task 8) throws `Error('Proxy adapter context not initialized')` if `setProxyContext()` was never called. This prevents a proxy factory call from silently constructing a broken repository.
+
+Together these guards ensure that:
+- Dev mode uses mock adapters explicitly
+- Prod mode activates proxy adapters explicitly
+- Missing configuration fails loudly, never silently
+
+### Dependencies on External Workstreams
+
+The following are **outside P1-B1 scope** but must be satisfied before proxy adapters function end-to-end:
+
+| Dependency | Owner | Status |
+|---|---|---|
+| Azure Functions API deployed and accessible | Backend team | Pending |
+| MSAL app registration with API scopes for Functions app | Platform/Auth | Pending |
+| Backend OBO (on-behalf-of) flow implementation | Backend team | Pending |
+| CORS configuration on Azure Functions for PWA origin | Backend/DevOps | Pending |
+| `VITE_PROXY_BASE_URL` and `VITE_API_SCOPE` env vars in deployment config | DevOps | Pending |
+
+Until these dependencies are met, proxy mode will authenticate and send requests but receive backend errors. The proxy adapter error translation (Task 1) will surface these as `HbcDataAccessError` with appropriate codes.
+
+---
+
 ## Chunk 1: HTTP Client Foundation (≈450 lines)
 
 ### Task 1: Create `ProxyHttpClient` class
@@ -35,11 +156,18 @@
 // packages/data-access/src/adapters/proxy/http-client.ts
 
 import { NotFoundError, ValidationError, HbcDataAccessError } from '../../errors/index.js';
+import { DEFAULT_TIMEOUT_MS } from './constants.js';
 
+/**
+ * Configuration for ProxyHttpClient.
+ * Aligned with the existing ProxyConfig contract in types.ts but uses a
+ * token-provider function instead of a static accessToken string, because
+ * MSAL tokens expire and must be acquired per-request.
+ */
 export interface ProxyHttpClientOptions {
   baseUrl: string;
   getToken: () => Promise<string>;
-  timeoutMs?: number;
+  timeout?: number;  // defaults to DEFAULT_TIMEOUT_MS (30,000 ms)
 }
 
 /**
@@ -47,7 +175,9 @@ export interface ProxyHttpClientOptions {
  * Handles Bearer auth, request tracing (X-Request-Id), error translation,
  * and header injection for Azure Functions backend.
  *
- * Does NOT retry or handle MSAL OBO; the backend performs OBO internally.
+ * Does NOT retry on failure — retry logic is deferred to a future phase.
+ * The existing DEFAULT_RETRY_COUNT constant is preserved but unused here.
+ * Does NOT handle MSAL OBO; the backend performs OBO internally.
  */
 export class ProxyHttpClient {
   private readonly baseUrl: string;
@@ -57,7 +187,7 @@ export class ProxyHttpClient {
   constructor(options: ProxyHttpClientOptions) {
     this.baseUrl = options.baseUrl;
     this.getToken = options.getToken;
-    this.timeoutMs = options.timeoutMs ?? 10000;
+    this.timeoutMs = options.timeout ?? DEFAULT_TIMEOUT_MS;
   }
 
   /**
@@ -282,7 +412,7 @@ describe('ProxyHttpClient', () => {
     const opts: ProxyHttpClientOptions = {
       baseUrl: 'https://api.example.com',
       getToken: async () => 'test-token',
-      timeoutMs: 5000,
+      timeout: 5000,
       ...overrides,
     };
     return new ProxyHttpClient(opts);
@@ -1779,48 +1909,49 @@ import {
 } from './adapters/proxy/index.js';
 
 /**
- * Token provider function signature for proxy adapter.
- * Called on each request to retrieve the current Bearer token.
- */
-export type TokenProvider = () => Promise<string>;
-
-/**
  * Global proxy factory context. Set via setProxyContext() before using proxy adapters.
+ *
+ * Uses the same getToken function shape as ProxyHttpClientOptions.
+ * This replaces the static accessToken from the original ProxyConfig stub —
+ * MSAL tokens expire and must be acquired per-request.
  */
 let proxyContext: {
   baseUrl: string;
-  getToken: TokenProvider;
+  getToken: () => Promise<string>;
 } | null = null;
 
 /**
  * Initialize proxy adapter context.
- * Must be called before creating proxy repositories (e.g., at app startup).
+ * Must be called after MSAL auth init, before React render (see main.tsx).
  *
- * @param baseUrl - Azure Functions base URL (e.g., "https://functions.example.com")
- * @param getToken - Async function returning current Bearer token
+ * @param baseUrl - Azure Functions base URL (e.g., "https://func-hb-intel.azurewebsites.net/api")
+ * @param getToken - Async function returning current Bearer token (called per-request)
  *
  * @example
  * ```ts
- * import { setProxyContext } from '@hbc/data-access';
+ * import { setProxyContext, resolveAdapterMode } from '@hbc/data-access';
+ * import { msalInstance } from './auth/msal-init.js';
  *
- * // At app startup (PWA main.ts or SPFx webpart init):
- * setProxyContext(
- *   process.env.PROXY_BASE_URL || 'https://localhost:7071',
- *   async () => {
- *     // Get token from MSAL or auth service
- *     const account = msalInstance.getActiveAccount();
- *     const response = await msalInstance.acquireTokenSilent({
- *       scopes: ['api://your-function-app/.default'],
- *       account,
- *     });
- *     return response.accessToken;
- *   },
- * );
+ * // In main.tsx, after MSAL init:
+ * if (resolveAdapterMode() === 'proxy') {
+ *   setProxyContext(
+ *     import.meta.env.VITE_PROXY_BASE_URL,
+ *     async () => {
+ *       const account = msalInstance.getActiveAccount();
+ *       if (!account) throw new Error('No active MSAL account');
+ *       const response = await msalInstance.acquireTokenSilent({
+ *         scopes: [import.meta.env.VITE_API_SCOPE],
+ *         account,
+ *       });
+ *       return response.accessToken;
+ *     },
+ *   );
+ * }
  * ```
  */
 export function setProxyContext(
   baseUrl: string,
-  getToken: TokenProvider,
+  getToken: () => Promise<string>,
 ): void {
   proxyContext = { baseUrl, getToken };
 }
