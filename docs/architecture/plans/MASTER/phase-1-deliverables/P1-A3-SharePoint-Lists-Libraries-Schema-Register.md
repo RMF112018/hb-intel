@@ -196,14 +196,58 @@ Platform containers for auth, provisioning state, audit log, and project identit
 
 ## Physical Schema Conventions
 
+### Container Naming
+
+| Element | Convention | Example |
+|---------|-----------|---------|
+| **Physical list name** | PascalCase, no spaces, domain-prefixed where needed for clarity | `BuyoutCommitments`, `EstimatingPursuits`, `PermitInspections` |
+| **Display name** | Title case with spaces; matches logical container name from register | "Buyout Commitments", "Estimating Pursuits", "Permit Inspections" |
+| **Document library name** | PascalCase with `Lib` suffix where disambiguation is needed | `ScheduleUploadsLib`, `ComplianceDocumentsLib` |
+| **Hub-site shared lists** | Prefixed with `Shared_` or placed in a dedicated shared list group | `Shared_ProjectTypes`, `Shared_CSICodes` |
+
 ### Column Naming
-- Use camelCase for internal column names (e.g., `projectId`, `commitmentNumber`, `createdAt`)
-- Display names may use title case with spaces (e.g., "Project ID", "Commitment Number")
-- Prefix checklist fields with `checklist_` to avoid collision (e.g., `checklist_bidBond`)
-- Prefix vendor contact fields with `vendorContact_` (e.g., `vendorContact_name`)
-- Prefix bid tab link fields with `bidTabLink_` (e.g., `bidTabLink_bidTabId`)
+
+| Convention | Rule | Example |
+|-----------|------|---------|
+| **Internal name** | camelCase; no spaces or special characters | `projectId`, `commitmentNumber`, `createdAt` |
+| **Display name** | Title case with spaces | "Project ID", "Commitment Number", "Created At" |
+| **Nested/prefixed fields** | Underscore prefix for embedded object fields to avoid collision | `vendorContact_name`, `vendorContact_email`, `bidTabLink_bidTabId`, `checklist_bidBond` |
+
+### Key Field Suffix Conventions
+
+| Suffix | Meaning | Usage |
+|--------|---------|-------|
+| `_id` | Primary or foreign key identifier (system-generated or source-native) | `project_id`, `commitment_id`, `batch_id` |
+| `_key` | Canonical HB Intel reference key (stable cross-entity linkage) | `record_id` (via Record ID Field), `template_item_key`, `role_party_key` |
+| `_code` | Controlled-value code from a governed dictionary or reference set | `status_code`, `category_code`, `cost_type_code` |
+| `_display` | Raw display/snapshot text preserved from source for UI rendering | `assigned_display`, `vendor_display`, `inspector_display` |
+| `_snapshot` | Point-in-time snapshot of a value that may change on the source entity | `job_name_snapshot`, `project_name_snapshot`, `contract_value_snapshot` |
+| `_raw` | Original source text preserved alongside a normalized canonical field | `category_raw`, `critical_path_impact_raw`, `pcco_reference_raw` |
+| `_flag` | Normalized boolean derived from source text (Yes/No, Pass/Fail, etc.) | `critical_path_impact_flag`, `na_flag`, `official_final_flag` |
+| `_pct` | Percentage value (stored as number, display as %) | `section_weight_pct`, `variance_percentage` |
+
+### Content Type Naming
+
+| Convention | Rule | Example |
+|-----------|------|---------|
+| **Base content type** | Use default `Item` for most lists | Standard SharePoint Item |
+| **Custom content type** | PascalCase, domain-prefixed, descriptive | `BuyoutCommitment`, `PermitRecord`, `ScorecardEvaluation` |
+| **Document content type** | PascalCase with `Document` suffix | `ScheduleUploadDocument`, `ComplianceDocument` |
+
+Custom content types are created only when:
+- A list stores multiple distinct record types
+- A document library requires enforced metadata columns
+- A content type is reused across multiple lists (shared site column group)
+
+### Lookup Target Notation
+
+In the container register, lookup/join dependencies use this notation:
+- `ParentListName (foreign_key_field FK)` — e.g., `Buyout Commitments List (commitment_id FK)`
+- `SharedDictionaryName (domain-local)` — e.g., `CommitmentStatuses (domain-local)`
+- `SharedDictionaryName (shared)` — e.g., `CSICodes (shared)`
 
 ### Column Types
+
 Map P1-A1 data types to SharePoint column types:
 
 | P1-A1 Data Type | SharePoint Column Type | Notes |
@@ -218,10 +262,148 @@ Map P1-A1 data types to SharePoint column types:
 | `json` | Multiple Lines of Text (Plain) | Store as JSON; parse in adapter layer |
 | `choice` / controlled value | Choice | Populate choice values from P1-A1 controlled-value sets |
 
-### Content Types
+### Content Type Rules
 - Use the default Item content type for most lists
 - Create custom content types only when a list stores multiple distinct record types
 - Document libraries should use custom content types to enforce required metadata columns
+
+---
+
+## Shared Reusable Schema Assets
+
+This section defines the reusable physical-schema building blocks that Phase 1 build-ready containers reference rather than redefining per-container.
+
+### Shared Site Columns
+
+These columns appear on most or all Phase 1 lists and should be provisioned as shared site columns at the hub or project-site level.
+
+| Column Internal Name | Display Name | SharePoint Type | Scope | Purpose |
+|---------------------|-------------|-----------------|-------|---------|
+| `recordId` | Record ID | Single Line of Text | All lists | HB Intel domain-prefixed primary identifier |
+| `projectId` | Project ID | Single Line of Text | All project-site lists | FK to project domain |
+| `createdAt` | Created At | Date and Time | All lists | Record creation timestamp |
+| `updatedAt` | Updated At | Date and Time | All lists | Last modification timestamp |
+| `createdBy` | Created By | Single Line of Text | Most lists | Creator identity (UPN or display) |
+| `isActive` | Is Active | Yes/No | Most lists | Soft-delete / active flag |
+| `notes` | Notes | Multiple Lines of Text | Most lists | General-purpose notes field |
+| `sourceBatchId` | Source Batch ID | Single Line of Text | Imported lists | FK to import batch (Azure Table Storage) |
+| `sourceRowNumber` | Source Row Number | Number | Imported lists | Original row in source file |
+
+### Custom Content Types
+
+| Content Type | Base Type | Scope | Used By |
+|-------------|-----------|-------|---------|
+| `HBBaseListItem` | Item | Hub + Project Site | All Phase 1 lists; includes shared site columns above |
+| `HBDocumentItem` | Document | Project Site | Schedule uploads, compliance documents, contract documents |
+| `HBDictionaryItem` | Item | Hub Site | All shared and domain-local dictionary lists |
+
+### Shared Dictionaries (Governed by P1-A5)
+
+These dictionaries are stored as SharePoint lists on the **hub site** and governed by [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md). A3 defines their physical container; A5 defines their canonical schema.
+
+| Dictionary List | Internal Name | Key Column | Display Column | Source |
+|----------------|---------------|-----------|----------------|--------|
+| Cost Codes | `Shared_CostCodes` | `csiCode` | `description` | P1-A5 Cost Code Dictionary |
+| CSI Codes | `Shared_CSICodes` | `csiCode` | `primaryDescription` | P1-A5 CSI Code Dictionary |
+| Project Types | `Shared_ProjectTypes` | `typeId` | `typeName` | P1-A5 (pending schema) |
+| Project Stages | `Shared_ProjectStages` | `stageId` | `stageName` | P1-A5 (pending schema) |
+| Project Regions | `Shared_ProjectRegions` | `regionId` | `regionName` | P1-A5 (pending schema) |
+| State Codes | `Shared_StateCodes` | `stateCode` | `stateName` | P1-A5 (pending schema) |
+| Country Codes | `Shared_CountryCodes` | `countryCode` | `countryName` | P1-A5 (pending schema) |
+| Delivery Methods | `Shared_DeliveryMethods` | `methodCode` | `methodName` | P1-A5 (pending schema) |
+| Sectors | `Shared_Sectors` | `sectorCode` | `sectorName` | P1-A5 (pending schema) |
+
+### Domain-Local Dictionaries (Site-Scoped)
+
+These dictionaries are stored on the relevant project or shared site and are managed within their domain's schema artifact. They are NOT governed by P1-A5 unless later promoted.
+
+| Dictionary List | Domain | Internal Name | Scope | Governing Schema |
+|----------------|--------|---------------|-------|-----------------|
+| Estimate Sources | estimating | `EstimateSources` | Project Site | P1-A1 (buyout/estimating field definitions) |
+| Estimate Deliverables | estimating | `EstimateDeliverables` | Project Site | P1-A1 |
+| Estimate Statuses | estimating | `EstimateStatuses` | Project Site | P1-A1 |
+| Commitment Statuses | buyout | `CommitmentStatuses` | Project Site | P1-A1 |
+| Procurement Methods | buyout | `ProcurementMethods` | Project Site | P1-A1 |
+| Contract Types | buyout | `ContractTypes` | Project Site | P1-A1 |
+| Checklist Item States | buyout | `ChecklistItemStates` | Project Site | P1-A1 |
+| E-Verify Statuses | buyout | `EVerifyStatuses` | Project Site | P1-A1 |
+| Register Categories | risk | `RegisterCategories` | Project Site | P1-A7 |
+| Register BIC Teams | risk | `RegisterBICTeams` | Project Site | P1-A7 |
+| Permit Types | compliance | `PermitTypes` | Project Site | P1-A9 |
+| Checklist Families | compliance | `ChecklistFamilies` | Project Site | P1-A10 |
+
+### Reusable Child-Record Patterns
+
+These patterns repeat across multiple domains. Each domain's container appendix should reference the shared pattern rather than reinventing the structure.
+
+#### Evidence / Document Link Pattern
+
+Used by: buyout (compliance waiver), estimating kickoff, lifecycle checklists, lessons learned, subcontractor scorecards
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `linkId` | Single Line of Text | Link record identifier |
+| `parentRecordId` | Single Line of Text | FK to parent entity |
+| `linkType` | Choice | document, file_url, certificate, inspection_report, external_reference |
+| `linkTarget` | Single Line of Text | Document ID, URL, or reference |
+| `linkLabel` | Single Line of Text | Display label |
+| `createdAt` | Date and Time | When the link was added |
+
+#### External Mapping Pattern
+
+Used by: cost codes (P1-A5), CSI codes (P1-A5), budget lines (P1-A6), operational register records (P1-A7)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `mappingId` | Single Line of Text | Mapping record identifier |
+| `sourceEntityId` | Single Line of Text | FK to source entity |
+| `targetSystem` | Single Line of Text | Target system name |
+| `targetCode` | Single Line of Text | Target system code/ID |
+| `targetDescription` | Single Line of Text | Target system description |
+| `mappingConfidence` | Choice | Auto-matched, Manual, Verified |
+| `isActive` | Yes/No | Whether mapping is current |
+
+#### Import Finding Pattern
+
+Used by: all imported data (schedule, budget, operational register, permits, checklists, scorecards, lessons)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `findingId` | Single Line of Text | Finding identifier |
+| `batchId` | Single Line of Text | FK to import batch |
+| `severity` | Choice | error, warning, info |
+| `category` | Single Line of Text | Finding category |
+| `entityType` | Single Line of Text | Which entity the finding relates to |
+| `message` | Multiple Lines of Text | Human-readable description |
+
+**Note:** Import findings are stored in **Azure Table Storage** per P1-A1/A2 storage boundary rules, not in SharePoint lists. This pattern defines the schema; the storage location is Table Storage.
+
+#### Approval / Attestation Record Pattern
+
+Used by: compliance waiver requests (3-tier), subcontractor scorecards (3-role), lifecycle checklists (future)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `approvalId` | Single Line of Text | Approval record identifier |
+| `parentRecordId` | Single Line of Text | FK to parent entity |
+| `approvalRole` | Single Line of Text | Role (project_manager, superintendent, project_executive, compliance_manager, cfo) |
+| `approverDisplay` | Single Line of Text | Approver display name |
+| `approverKey` | Single Line of Text | Canonical person key (if resolved) |
+| `approvalDate` | Date Only | Date of approval |
+| `approvalStatus` | Choice | pending, approved, declined |
+
+#### Summary / Derived Record Pattern
+
+Used by: subcontractor scorecard (section summaries, overall summary), budget lines (derived metrics)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `summaryId` | Single Line of Text | Summary record identifier |
+| `parentRecordId` | Single Line of Text | FK to parent entity |
+| `summaryType` | Single Line of Text | section_score, overall_score, derived_total |
+| `summaryValue` | Number | Calculated/derived numeric value |
+| `summaryLabel` | Single Line of Text | Display label |
+| `sourceFormula` | Single Line of Text | Derivation description (for provenance) |
 
 ---
 
@@ -309,3 +491,4 @@ Map P1-A1 data types to SharePoint column types:
 | 0.1 | 2026-03-17 | Architecture | Initial structure; container register seeded from P1-A1 Wave 1 domains. Physical column schemas pending approval. |
 | 0.2 | 2026-03-17 | Architecture | Froze authority boundary: A3 owns physical SharePoint implementation only; A4–A13 own logical/canonical entity models; A2 owns adapter/source-of-record behavior; A5 owns dictionary schema governance. Updated status from Draft to Active for Phase 1 build-ready domains. Expanded relationship table to include A4–A13 and A5. |
 | 0.3 | 2026-03-17 | Architecture | Split container register into Phase 1 Build-Ready vs Deferred sections. Moved schedule (P1-A4), risk (P1-A7), compliance/permits (P1-A9), compliance/checklists (P1-A10), scorecard (P1-A12) into build-ready scope with proper container rows. Retained leads, contracts, pmp as deferred placeholders. |
+| 0.4 | 2026-03-17 | Architecture | Added Shared Reusable Schema Assets section (shared site columns, custom content types, shared/domain-local dictionaries, 5 reusable child-record patterns). Expanded Physical Schema Conventions with comprehensive naming conventions (container names, column suffixes, content type rules, lookup notation). |
