@@ -65,6 +65,7 @@ At the end of Phase 1:
 - Project lifecycle checklist schema (unified startup/safety/closeout checklists)
 - Responsibility matrix schema (governed task-role assignment with project tailoring)
 - Subcontractor scorecard schema (rubric-based performance evaluation with portfolio aggregation)
+- Lessons learned schema (project knowledge-capture with report+child lessons and portfolio search)
 
 ### 6.2 Workstream B — Adapter Completion
 **Goal:** complete production-capable repository adapters.
@@ -154,6 +155,7 @@ Mandatory deliverables for Phase 1:
 - Project Lifecycle Checklist Schema (unified startup/safety/closeout checklists)
 - Responsibility Matrix Schema (governed task-role assignment with project tailoring)
 - Subcontractor Scorecard Schema (rubric-based performance evaluation with portfolio aggregation)
+- Lessons Learned Schema (project knowledge-capture with report+child lessons and portfolio search)
 - Adapter Completion Backlog and Status Tracker
 - Service Contract Catalog
 - Error / Retry / Recovery Design Note
