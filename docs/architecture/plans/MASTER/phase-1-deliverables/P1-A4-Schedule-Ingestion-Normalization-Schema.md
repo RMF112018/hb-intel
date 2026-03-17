@@ -772,6 +772,39 @@ The `import_finding` entity captures all non-silent events during ingestion:
 
 ---
 
+## Canonical-to-Physical Reconciliation (A4 → A3)
+
+P1-A4 defines 16 canonical entities across a 4-layer ingestion pipeline. P1-A3 implements 3 physical SharePoint containers. This is an intentional Phase 1 compression: the canonical model supports full multi-format schedule normalization, while the physical model prioritizes user-facing activity data and raw file provenance. P1-A2 carries SoR entries for all persisted entities.
+
+**Physical authority:** P1-A3 appendix blocks A.5.1–A.5.3 define column-level physical schemas. P1-A2 defines SoR behavior, identity keys, and write safety classes.
+
+| # | Canonical Entity | Physical Disposition | Container / Location |
+|---|-----------------|---------------------|---------------------|
+| 1 | `schedule_import_batch` | **Dedicated list** | `ScheduleImportBatches` (A3 A.5.2) |
+| 2 | `schedule_activity` | **Dedicated list** | `ScheduleActivities` (A3 A.5.1) |
+| 3 | `schedule_project` | Flattened into batch | `ScheduleImportBatches` — one project per batch; project metadata stored as batch fields |
+| 4 | `schedule_calendar` | FK reference on activity | `ScheduleActivities` (`calendarId` field) — calendar identity preserved; full definitions are parser-stage |
+| 5 | `schedule_wbs_node` | FK fields on activity | `ScheduleActivities` (`wbsId`, `activityCode` fields) — separate WBS list deferred to Phase 2 |
+| 6 | `schedule_relationship` | Structured JSON on activity | `ScheduleActivities` (`sourceExtrasJson`) — separate relationship list deferred to Phase 2 (CPM visualization) |
+| 7 | `schedule_baseline` | Flattened date fields on activity | `ScheduleActivities` (`baselineStart`, `baselineFinish`) — primary baseline (baseline_number=0) as activity fields; multi-baseline child records deferred |
+| 8 | `schedule_udf_value` | Structured JSON on activity | `ScheduleActivities` (`sourceExtrasJson`) — UDF values preserved for provenance |
+| 9 | `schedule_resource` | Not persisted in Phase 1 | Parser-stage reference data; not user-facing |
+| 10 | `schedule_resource_rate` | Not persisted in Phase 1 | Parser-stage data |
+| 11 | `schedule_assignment` | Not persisted in Phase 1 | Resource assignments deferred; activity-level sufficient |
+| 12 | `schedule_code_type` | Not persisted in Phase 1 | Parser-stage reference data |
+| 13 | `schedule_code_value` | Not persisted in Phase 1 | Parser-stage reference data |
+| 14 | `schedule_activity_code_assignment` | Not persisted in Phase 1 | Code assignments deferred; activity-level classification sufficient |
+| 15 | `schedule_udf_definition` | Not persisted in Phase 1 | Parser-stage metadata; UDF values (not definitions) preserved in `sourceExtrasJson` |
+| 16 | `import_finding` | **Non-SharePoint** | Azure Table Storage (partition: `sch-findings-{batchId}`) |
+| — | Raw uploaded files | **Dedicated document library** | `ScheduleUploadsLib` (A3 A.5.3) — immutable raw source files |
+| — | Mapping/provenance/drift | **Non-SharePoint** | Azure Table Storage — operational state |
+
+**Compression justification:** Phase 1 schedule consumption is activity-centric — users query activities by project, filter by status/dates, and view in list/timeline views. Full relational normalization (separate WBS tree, relationship table, resource table, code assignment table) adds container overhead without proportional Phase 1 user value. The canonical model here remains authoritative for parser/adapter design; A3 optimizes for SharePoint query patterns and list-view threshold management.
+
+**Phase 2 promotion path:** When CPM visualization, resource management, or multi-baseline analysis are implemented, entities 5–8 and 11–14 can be promoted from flattened/deferred to dedicated containers without changing the canonical model.
+
+---
+
 ## Open Decisions / Future Expansion
 
 ### Closed by This Version
@@ -781,6 +814,7 @@ The `import_finding` entity captures all non-silent events during ingestion:
 | **P6 XML support** | Closed — Phase 1 required at full parity with P6 XER. Same P6 data model, XML serialization. Detection rules (already present), concept coverage column, and source-to-canonical mapping table added (v0.3). 4 supported formats: CSV, MS Project XML, P6 XER, P6 XML. |
 | **Baseline table support in XER** | Closed — TASKBSLN mapping to `schedule_baseline` defined (v0.3). Baselines mapped when present; absence is expected and generates no finding. Orphaned baseline references log warning; malformed rows log error and are skipped. Primary baseline = 0; additional baselines numbered sequentially. |
 | **CSV column auto-detection** | Closed — deterministic alias-based classification pipeline defined (v0.3). Column mapping by name (not position); 22-column alias table; case-insensitive/whitespace-normalized matching; minimum classification threshold (1 activity identifier + 1 date column); rejection below threshold; no fuzzy matching. Interacts with existing drift tracking for alias table evolution. |
+| **SharePoint list schema for canonical entities** | Closed — canonical-to-physical reconciliation table added (v0.4). All 16 canonical entities have explicit physical disposition: 2 dedicated containers (`ScheduleActivities`, `ScheduleImportBatches`), 1 document library (`ScheduleUploadsLib`), 5 entities flattened into activity/batch fields, 7 deferred (parser-stage only), 2 in Azure Table Storage. P1-A3 appendix blocks A.5.1–A.5.3 define column-level physical schemas. P1-A2 defines SoR behavior for all persisted entities. |
 
 ### Remaining Open
 
@@ -788,7 +822,6 @@ The `import_finding` entity captures all non-silent events during ingestion:
 |----------|-------|-------|--------|
 | **Schedule comparison / diff** | Compare two import batches to detect schedule changes | Product / Platform Architecture | Phase 3+ |
 | **Re-parse from raw file** | Trigger re-parse when parser/mapping upgrades occur | Platform Architecture | Phase 2 |
-| **SharePoint list schema for canonical entities** | Physical column definitions in P1-A3 for schedule domain containers | Platform Architecture | Phase 1 (after field expansion in P1-A1) |
 
 ---
 
@@ -799,3 +832,4 @@ The `import_finding` entity captures all non-silent events during ingestion:
 | 0.1 | 2026-03-17 | Architecture | Initial schema; canonical entity model with 16 entities, 3 format mappings (CSV/MSProject XML/P6 XER), drift handling, provenance tracking, and storage boundary alignment. Evidence-based analysis from 3 example schedule files. |
 | 0.2 | 2026-03-17 | Architecture | Aligned storage boundary table with P1-A2 Import-State Platform Standard: schedule is a named exception (batch in SharePoint, not Azure Table Storage default) with explicit rationale. |
 | 0.3 | 2026-03-17 | Architecture | Closed 3 remaining Phase 1 schedule open decisions. (1) P6 XML support: Phase 1 required at XER parity — added concept coverage column, 37-row source-to-canonical mapping table, and parity/version notes. 4 supported formats now: CSV, MS Project XML, P6 XER, P6 XML. (2) XER baseline tables: added TASKBSLN mapping (7 field rows) and baseline handling rules (presence/absence, primary identification, orphan references, incomplete/malformed data). (3) CSV auto-detection: added deterministic classification pipeline — delimiter detection, header detection, 22-column alias table, minimum classification threshold, edge case handling, drift tracking interaction. Open decisions reduced from 6 to 3; remaining items are Phase 2+/3+. |
+| 0.4 | 2026-03-17 | Architecture | Closed physical SharePoint schedule schema open decision. Added canonical-to-physical reconciliation section mapping all 16 entities to their physical disposition (2 dedicated containers, 1 document library, 5 flattened, 7 deferred, 2 Azure Table Storage). References P1-A3 A.5.1–A.5.3 for column-level schemas and P1-A2 for SoR behavior. Documented compression justification and Phase 2 promotion path. Open decisions reduced from 3 to 2; remaining items are Phase 2+/3+. |
