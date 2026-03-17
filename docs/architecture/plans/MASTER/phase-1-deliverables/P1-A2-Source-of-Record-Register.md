@@ -335,20 +335,27 @@ HB Intel uses a multi-layered identity approach to maintain stability across sys
 - **Format:** RFC 4122 UUID v4 (stored as string in SharePoint list, Table Storage, and AF state)
 - **Example:** `550e8400-e29b-41d4-a716-446655440000`
 
-### Domain Record Identity
-- **SharePoint List-Scoped:** Each domain (estimating, schedule, buyout, compliance, contracts, risk, scorecard, pmp) stores records as SharePoint list items.
-- **Numeric Item ID:** SharePoint assigns numeric IDs per list (e.g., 1, 2, 3, ...). These are scoped to the list and project site.
-- **Stability Wrapping:** To prevent external dependencies on SharePoint internal ID assignment, AF wraps these as domain-prefixed keys:
-  - `lead-{itemId}` → Lead from Sales list
-  - `est-{itemId}` → Estimating item (bid)
-  - `sch-{itemId}` → Schedule milestone
-  - `buyout-{itemId}` → Purchase order
-  - `comp-{itemId}` → Compliance record
-  - `contract-{itemId}` → Contract metadata
-  - `risk-{itemId}` → Risk register entry
-  - `scorecard-{itemId}` → Scorecard record
-  - `pmp-{itemId}` → PMP index entry
-- **Client Presentation:** UI and API responses use domain-prefixed keys; internal SharePoint item ID is never exposed to clients.
+### Entity Record Identity
+
+Entity-level governance introduces multiple identity patterns beyond SharePoint numeric item IDs. Adapter implementers should select the pattern that matches the entity's data class and mutability:
+
+| Pattern | Description | When to Use | Examples |
+|---------|-------------|-------------|----------|
+| **SharePoint item-backed ID** | SP numeric ID wrapped as `domain-{itemId}` for client stability | Domain-level records stored as SharePoint list items in the original domain register | `sch-act-{itemId}`, `lead-{itemId}`, `est-{itemId}` |
+| **Surrogate canonical ID** | Application-assigned string ID (`{entity}_id`); unique within entity scope | Mutable project execution records; report/instance roots; child records needing stable references | `report_id`, `lesson_id`, `evaluation_id`, `instance_id`, `row_id`, `item_instance_id` |
+| **Composite natural key** | Multi-field business key; no single surrogate; uniqueness enforced at tuple level | Records where identity is inherently multi-dimensional (batch + source, version scope) | `(batch_id, source_activity_id)`, `(template_id, version_number)`, `(rubric_version_id, section_number)` |
+| **Junction/intersection key** | Composite key on N:M or N-way intersection; all FK fields form the key | Normalized many-to-many or many-to-many-to-many relationships | `(item_instance_id, role_party_id, value_code)`, `(evaluation_id, criterion_def_id)` |
+| **Batch/provenance key** | Surrogate `batch_id` unique per import run; scopes all child findings | Import/provenance tracking entities in Azure Table Storage | `schedule_import_batch`, `lessons_import_batch`, `scorecard_import_batch` |
+| **Dictionary natural key** | Semantic code string from governed vocabulary; human-readable and stable | Shared reference dictionaries on hub site; enumeration-style data | `category_key`, `magnitude_key`, `value_code`, `family_code`, `role_party_code` |
+
+**Pattern selection rule:**
+- Use **surrogates** for mutable records that need stable external references.
+- Use **composite natural keys** for records whose identity is inherently multi-field (batch-scoped source records, version-scoped definitions).
+- Use **junction keys** for intersection entities — all participating FK fields plus any discriminating value form the key.
+- Use **dictionary natural keys** for governed vocabularies where the code string is the business identity.
+- Use **batch keys** for provenance records that are always scoped to a single import run.
+
+**Client presentation:** Domain-prefixed wrapping (`domain-{itemId}`) remains the standard for client-facing API responses on SharePoint-backed records. Surrogate and composite keys are returned directly without wrapping. Internal SharePoint numeric item IDs are never exposed to clients.
 
 ### User Identity
 - **Primary:** Azure Entra ID User Principal Name (UPN; e.g., `alice@contoso.com`)
@@ -371,13 +378,13 @@ HB Intel uses a multi-layered identity approach to maintain stability across sys
 **Definition:** Write operations are stateless; retries are safe because duplicate operations return the existing record.
 
 **Guarantees:**
-- Creating the same lead twice returns the same record (no duplicate).
-- Creating a project with the same UUID returns the existing project.
-- Updating an estimating item idempotently (PUT, not PATCH) replaces the entire item.
+- Creating a record with the same identity key twice returns the existing record (no duplicate).
+- Updating a record idempotently (PUT, not PATCH) replaces the entire item.
+- Retries are always safe; no ordering or quantity sensitivity.
 
 **Best for:** Creates, full replacements, stateless updates.
 
-**Domains in Class A:** leads, project, schedule, risk, scorecard, contracts (basic), pmp (basic)
+**Entity patterns in Class A:** Mutable project execution records — instances, rows, items, assignments, junction records, evaluations (while draft), recommendations (while draft), lesson records, keyword/reference child records, report instances, mapping records with `is_active` soft-delete.
 
 **AF Pattern:**
 ```typescript
@@ -399,7 +406,7 @@ const lead = await leadRepo.createOrGet({
 
 **Best for:** Quantity-sensitive operations, ordered inserts, bulk appends.
 
-**Domains in Class B:** estimating (quantity-sensitive bid items), buyout (PO quantity, line items)
+**Entity patterns in Class B:** Quantity-sensitive operational records — estimating bid items (quantity fields), buyout purchase order line items (PO quantity, unit pricing).
 
 **AF Pattern:**
 ```typescript
@@ -419,11 +426,12 @@ const item = await estimatingRepo.add({
 **Guarantees:**
 - User identity reads are cached (eventual consistency, <5 min TTL).
 - Role lookups may lag by seconds.
-- Reference data (enumerations, classifications) is static per project.
+- Shared dictionaries and templates are governed reference data; writes require governance approval.
+- Mirrored external data (e.g., Procore budget snapshots) is read-only within HB Intel; newer import batches supersede.
 
-**Best for:** Identity, reference data, configuration.
+**Best for:** Identity, shared reference data, governed templates, dictionaries, mirrored external snapshots.
 
-**Domains in Class C:** auth
+**Entity patterns in Class C:** Shared hub-site templates and versions (kickoff, lifecycle checklist, responsibility matrix, scorecard rubric), dictionary entries (lesson categories, impact magnitudes, assignment value types), role/party catalogs, template items/section/criterion definitions, mirrored budget line snapshots, auth identity.
 
 **AF Pattern:**
 ```typescript
@@ -442,7 +450,7 @@ const user = await authRepo.getUser('alice@contoso.com');
 
 **Best for:** Audit trails, immutable events, forensics.
 
-**Domains in Class D:** compliance (after closure), provisioning state, audit log
+**Entity patterns in Class D:** Import batches (all domains), import findings (all domains), approval/workflow records (post-approval), schedule baseline records (immutable once set), provisioning state, audit log, compliance records (after closure).
 
 **AF Pattern:**
 ```typescript
@@ -458,6 +466,21 @@ await auditRepo.append({
 });
 // This entry is immutable; it is never modified or deleted.
 ```
+
+### Cross-Cutting Write-Safety Patterns
+
+Entity-level governance reveals recurring archetypes that cut across domains. A single domain often contains entities from multiple write-safety classes. The table below defines the standard mutability contract for each archetype; entity-level rows in the register above specify which archetype applies.
+
+| Entity Archetype | Typical Class | Mutability Rule | Identity Pattern |
+|-----------------|---------------|-----------------|------------------|
+| **Template/version record** | C | Immutable once published; new versions append as separate records; existing project instances unaffected by template updates | Surrogate + `(template_id, version_number)` composite |
+| **Imported snapshot record** | C (mirrored) or A | Read-only per batch; newer batch supersedes for current state; all prior batches retained for trend/audit | `(batch_id, source_key)` composite |
+| **Approval/signature record** | A → D | Forward-only status (pending → approved/rejected); immutable once terminal status reached; writes rejected after approval | Surrogate; `(parent_id, approver_role)` unique pair |
+| **Append-only finding/provenance** | D | Immutable once logged; no update or delete; severity and category classified at write time | Surrogate or `(batch_id, sequence)` |
+| **Editable project child record** | A | Fully mutable while parent record allows edits; may freeze when parent transitions to approved/closed | Surrogate; `(parent_id, child_id)` composite |
+| **Mapping/reference record** | A | Mutable; soft-delete via `is_active` flag; no hard deletion; `mapping_basis` documents provenance | Surrogate or composite natural key |
+
+**Rule: one class per entity, not per domain.** A domain like scorecard contains Class A entities (evaluations while draft), Class C entities (rubric definitions), and Class D entities (import batches). The domain-level register row indicates the dominant class for the domain as a whole; the entity-level rows specify the precise class for each entity.
 
 ---
 
@@ -483,28 +506,57 @@ await auditRepo.append({
 **Resolution:** HB Intel SharePoint is authoritative. Procore is a federated source; disagreements are resolved by HB Intel business logic or manual reconciliation.
 **Policy:** External systems are inputs; HB Intel domain data is source of truth.
 
+### Conflict Scenario 5: Template Version vs Project Instance
+**Situation:** A hub-site template (kickoff, lifecycle checklist, responsibility matrix, scorecard rubric) is updated to a new version after a project instance was already created from the prior version.
+**Resolution:** The project instance retains the template version it was created from (`template_version_id` or `template_snapshot_date` is immutable on the instance). The updated template only applies to newly created instances.
+**Policy:** Template evolution is append-only versioning; existing project instances are never retroactively changed by template updates.
+
+### Conflict Scenario 6: Draft-to-Approved Lifecycle Guard
+**Situation:** A user attempts to edit a scorecard evaluation or approval record that has already transitioned to `approved` status.
+**Resolution:** The adapter rejects the write. Once a record reaches a terminal status (approved, rejected, signed, closed), it is immutable. The status transition is forward-only and enforced at the adapter layer.
+**Policy:** Immutability after approval is enforced by status guard, not resolved after the fact. The entity effectively transitions from Class A (mutable while draft) to Class D (immutable after approval).
+
 ---
 
 ## Implementation Notes for Phase 1 Adapters
 
 ### Adapter Responsibilities
-1. **Read Consistency:** Adapt between HB Intel domain models and SharePoint list schema. Return domain-prefixed IDs, not raw SharePoint item IDs.
-2. **Write Safety:** Implement retries appropriately:
+1. **Read Consistency:** Adapt between HB Intel canonical models and storage schemas. Return the appropriate identity key for the entity's pattern — domain-prefixed IDs for SharePoint item-backed records, surrogate IDs for canonical entities, composite keys for junction/intersection records. Never expose raw SharePoint numeric item IDs to clients.
+2. **Write Safety:** Implement retries appropriately per the entity's write-safety class:
    - **Class A (Idempotent):** Implement "get or create" logic; check for existing record before creating.
    - **Class B (Sequential):** Check prior operation success (e.g., via lookup) before retry.
    - **Class C (Read-Mostly):** Cache reads; refresh cache on write.
    - **Class D (Audit-Only):** Append operations are idempotent by definition; timestamp uniqueness is key.
-3. **Error Handling:** Distinguish between transient (retry) and permanent (fail-fast) errors.
-4. **Audit Trail:** Every write (create, update, delete) logs to audit table with UPN, domain, item ID, old/new values.
+3. **Lifecycle Guards:** Enforce mutability contracts — reject writes to records that have transitioned to immutable status (approved, closed, signed). Check the entity's mutability rule before accepting a write.
+4. **Error Handling:** Distinguish between transient (retry) and permanent (fail-fast) errors.
+5. **Audit Trail:** Every write (create, update, delete) logs to audit table with UPN, domain, entity, item ID, old/new values.
+
+### Non-SharePoint Operational State
+
+Azure Table Storage is the designated storage platform for operational and provenance entities across all domains. These entities are not user-facing business data; they exist to support import tracking, validation audit, and system state management.
+
+**Conventions:**
+- **Partition key:** `{domain}-{entityType}-{scopeId}` (e.g., `sch-findings-{batchId}`, `lessons-findings-{batchId}`, `scorecard-findings-{batchId}`)
+- **Write safety:** Always Class D (append-only; immutable after completion)
+- **Adapter path:** `AF v4 → @azure/data-tables` (no PnPjs; no SharePoint dependency)
+- **Caching:** Not cached; queried on demand for administrative and diagnostic views
+- **Conflict handling:** No conflict — each import creates a new `batch_id` partition; findings append within the batch partition
+- **Lifecycle:** Import service creates; system retains indefinitely for audit; no user delete
+
+**Entities in this tier across domains:**
+- Import batch records: `schedule_import_batch`, `budget_import_batch`, `kickoff_import_batch`, `checklist_import_batch`, `responsibility_import_batch`, `scorecard_import_batch`, `lessons_import_batch`
+- Import finding records: `import_finding` (schedule), `budget_import_finding`, `scorecard_import_finding`, `lessons_import_finding`
+- External mapping records: `budget_line_external_mapping`
+- System state: provisioning state, audit log, project identity mapping
 
 ### Proxy Adapter (Phase 1 MVP)
 The `@hbc/af-adapter-proxy` is the placeholder adapter that:
 - Takes domain repository calls from AF.
-- Routes to actual storage (SharePoint, Table Storage, or Graph).
-- Uses PnPjs for SharePoint CRUD.
-- Uses `@azure/data-tables` for Table Storage.
+- Routes to actual storage (SharePoint, Table Storage, or Graph) based on the entity's storage target.
+- Uses PnPjs for SharePoint CRUD (business data and shared reference/template records).
+- Uses `@azure/data-tables` for Table Storage (operational state, provenance, findings, mappings).
 - Uses `@microsoft/microsoft-graph-client` (via MSAL OBO) for auth.
-- Returns domain models to caller.
+- Returns canonical domain models to caller with appropriate identity keys.
 
 Stub adapters (Procore, Sage, Autodesk) exist but do not write in Phase 1.
 
@@ -521,4 +573,5 @@ Stub adapters (Procore, Sage, Autodesk) exist but do not write in Phase 1.
 | 0.5 | 2026-03-17 | Architecture | Add entity-level kickoff (P1-A8) and lifecycle checklist (P1-A10) registers; distinguish shared template assets from project execution records and operational state |
 | 0.6 | 2026-03-17 | Architecture | Add entity-level responsibility matrix (P1-A11) and subcontractor scorecard (P1-A12) registers; distinguish shared reference/rubric (hub, Class C) from project execution/evaluation (project site, Class A) and operational state (Azure Table Storage, Class D); define junction identity for assignment and criterion score intersection records |
 | 0.7 | 2026-03-17 | Architecture | Add entity-level lessons learned (P1-A13) register; distinguish shared dictionaries (hub, Class C) from project report/child records (project site, Class A) and operational state (Azure Table Storage, Class D); model keyword and linked-reference as first-class child entities |
+| 0.8 | 2026-03-17 | Architecture | Normalize cross-cutting identity, write-safety, and operational-state rules for entity-level governance; replace stale domain-level assumptions with entity-pattern summaries; add cross-cutting archetype table; add non-SharePoint operational state section; add template-version and draft-to-approved conflict scenarios |
 
