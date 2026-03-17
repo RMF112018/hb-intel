@@ -61,6 +61,7 @@ At the end of Phase 1:
 - External financial data ingestion schema (Procore Budget and external cost-control imports)
 - Operational register schema (hybrid issue/action/risk/constraint tracking)
 - Estimating kickoff schema (template-based pursuit coordination and deliverable assembly)
+- Permits & inspections schema (permit lifecycle, inspections, issues, compliance tracking)
 
 ### 6.2 Workstream B — Adapter Completion
 **Goal:** complete production-capable repository adapters.
@@ -146,6 +147,7 @@ Mandatory deliverables for Phase 1:
 - External Financial Data Ingestion Schema (Procore Budget and external cost-control imports)
 - Operational Register Schema (hybrid issue/action/risk/constraint tracking)
 - Estimating Kickoff Schema (template-based pursuit coordination and deliverable assembly)
+- Permits & Inspections Schema (permit lifecycle, inspections, issues, compliance tracking)
 - Adapter Completion Backlog and Status Tracker
 - Service Contract Catalog
 - Error / Retry / Recovery Design Note

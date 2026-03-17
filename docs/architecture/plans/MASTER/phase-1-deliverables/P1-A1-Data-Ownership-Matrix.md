@@ -5,7 +5,7 @@
 **Classification:** Internal — Architecture
 **Status:** Draft — Schema Implemented
 **Date:** 2026-03-16
-**Read With:** [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md), [P1-A6-External-Financial-Data-Ingestion-Schema.md](./P1-A6-External-Financial-Data-Ingestion-Schema.md), [P1-A7-Operational-Register-Schema.md](./P1-A7-Operational-Register-Schema.md), [P1-A8-Estimating-Kickoff-Schema.md](./P1-A8-Estimating-Kickoff-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
+**Read With:** [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md), [P1-A6-External-Financial-Data-Ingestion-Schema.md](./P1-A6-External-Financial-Data-Ingestion-Schema.md), [P1-A7-Operational-Register-Schema.md](./P1-A7-Operational-Register-Schema.md), [P1-A8-Estimating-Kickoff-Schema.md](./P1-A8-Estimating-Kickoff-Schema.md), [P1-A9-Permits-Inspections-Schema.md](./P1-A9-Permits-Inspections-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
 
 ---
 
@@ -985,3 +985,4 @@ These items were resolved through the field-level schema design interview and ar
 | 1.3 | 2026-03-17 | Architecture | Added P1-A7-Operational-Register-Schema.md to Read With references. Risk domain in P1-A1 maps to operational register records; classified as hybrid operational register (not pure risk or constraint). |
 | 1.4 | 2026-03-17 | Architecture | Added P1-A8-Estimating-Kickoff-Schema.md to Read With references for estimating kickoff template/instance model. |
 | 1.5 | 2026-03-17 | Architecture | Added everify_tracking_record entity (14 fields) to buyout domain. E-Verify affidavit compliance tracking with milestone dates, derived status, and normalized duplicate reminder columns. Source: E-Verify Tracking Log CSV template. Buyout total 134 → 148 fields, 8 → 9 entities. |
+| 1.6 | 2026-03-17 | Architecture | Added P1-A9-Permits-Inspections-Schema.md to Read With references. Permits/inspections/issues operational schema for compliance domain. |
