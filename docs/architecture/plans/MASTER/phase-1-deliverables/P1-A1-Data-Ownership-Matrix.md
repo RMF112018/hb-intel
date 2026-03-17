@@ -5,13 +5,15 @@
 **Classification:** Internal — Architecture
 **Status:** Draft — Schema Implemented
 **Date:** 2026-03-16
-**Read With:** [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [current-state-map.md](../../blueprint/current-state-map.md)
+**Read With:** [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md), [current-state-map.md](../../blueprint/current-state-map.md)
 
 ---
 
 ## Purpose
 
-Define which data categories belong in which storage platforms and establish the ownership model for each domain's data. This matrix governs Phase 1 adapter design and data provisioning strategy, ensuring HB Intel respects SharePoint as the primary business data store while using Azure Table Storage for operational state.
+Define which data categories belong in which storage platforms and establish the governance-level ownership model for each domain's data. This matrix governs Phase 1 adapter design and data provisioning strategy, ensuring HB Intel respects SharePoint as the primary business data store while using Azure Table Storage for operational state.
+
+This document is the **governance-level** authority for data ownership, storage platform decisions, field-level ownership schema, and lifecycle/retention/visibility/search/analytics participation. It does not define detailed SharePoint physical container schemas — those live in [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
 
 ---
 
@@ -945,3 +947,4 @@ These items were resolved through the field-level schema design interview and ar
 | 0.5 | 2026-03-16 | Architecture | Wave 1 field expansion: new_project_request fieldset (32 fields). Intake/request form entity with raw+normalized pairs, person-assignment keys, workflow status, provenance fields, and online-only offline behavior. |
 | 0.6 | 2026-03-16 | Architecture | Wave 1 field expansion: buyout domain fieldsets (131 fields across 8 entities). Commitments, milestones, allowances, long-lead items, VE items, subcontract checklist records/items, and compliance waiver requests. Derived financial fields, CSI classification, bid-tab linkage metadata, compliance-sensitive retention, and formal approval signoff chains. |
 | 0.7 | 2026-03-17 | Architecture | Added compass_enrolled, q_score, and pre_qualified compliance fields to subcontract_checklist_record (131 → 134 buyout fields). |
+| 0.8 | 2026-03-17 | Architecture | Governance/schema separation: clarified P1-A1 as governance-level artifact; detailed SharePoint physical schemas now live in P1-A3-SharePoint-Lists-Libraries-Schema-Register.md. Updated Read With references. |

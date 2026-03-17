@@ -5,7 +5,7 @@
 **Classification:** Internal — Architecture
 **Status:** Draft
 **Date:** 2026-03-16
-**References:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [package-relationship-map.md](../../blueprint/package-relationship-map.md)
+**References:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md), [package-relationship-map.md](../../blueprint/package-relationship-map.md)
 
 ---
 

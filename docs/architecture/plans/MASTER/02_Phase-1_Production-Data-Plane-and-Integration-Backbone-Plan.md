@@ -52,9 +52,10 @@ At the end of Phase 1:
 - Define project identity and record identity strategy across systems.
 
 **Deliverables**
-- Data ownership matrix
+- Data ownership matrix (governance-level field ownership and authority)
 - Identity and key strategy note
 - Domain-by-domain source-of-record register
+- SharePoint lists & libraries schema register (physical container definitions)
 
 ### 6.2 Workstream B — Adapter Completion
 **Goal:** complete production-capable repository adapters.
@@ -132,8 +133,9 @@ End-to-end staging tests confirm the backbone is usable.
 ## 8. Deliverables
 
 Mandatory deliverables for Phase 1:
-- Data Ownership Matrix
+- Data Ownership Matrix (governance-level data authority)
 - Source-of-Record Register
+- SharePoint Lists & Libraries Schema Register (physical container definitions)
 - Adapter Completion Backlog and Status Tracker
 - Service Contract Catalog
 - Error / Retry / Recovery Design Note

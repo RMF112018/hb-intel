@@ -16,6 +16,7 @@ Reference the Phase 1 master plan first: `../02_Phase-1_Production-Data-Plane-an
 |---|---|---|---|
 | P1-A1-Data-Ownership-Matrix.md | A | Decision Document | Draft |
 | P1-A2-Source-of-Record-Register.md | A | Decision Document | Draft |
+| P1-A3-SharePoint-Lists-Libraries-Schema-Register.md | A | Engineering Register | Draft |
 | P1-B1-Proxy-Adapter-Implementation-Plan.md | B | Engineering Plan | Draft |
 | P1-B2-Adapter-Completion-Backlog.md | B | Status Tracker | Draft |
 | P1-B3-Mock-Isolation-Policy.md | B | Governance Policy | Draft |
@@ -32,24 +33,25 @@ Reference the Phase 1 master plan first: `../02_Phase-1_Production-Data-Plane-an
 ### Phase 1 Data and Architecture Decisions (read first)
 1. **P1-A1-Data-Ownership-Matrix** — Data category taxonomy and storage platform assignments
 2. **P1-A2-Source-of-Record-Register** — Domain-by-domain source-of-record authority and write-safety classes
+3. **P1-A3-SharePoint-Lists-Libraries-Schema-Register** — Physical SharePoint container definitions, column schemas, and implementation conventions
 
 ### Governance and Policy (read before implementation)
-3. **P1-B3-Mock-Isolation-Policy** — When mock adapters are allowed; when they must be removed
+4. **P1-B3-Mock-Isolation-Policy** — When mock adapters are allowed; when they must be removed
 
 ### Backend Contract and Adapter Contracts (read before building)
-4. **P1-C1-Backend-Service-Contract-Catalog** — All Azure Function routes (existing + Phase 1 targets)
-5. **P1-B1-Proxy-Adapter-Implementation-Plan** — TDD engineering plan for ProxyHttpClient and 11 domain repositories
+5. **P1-C1-Backend-Service-Contract-Catalog** — All Azure Function routes (existing + Phase 1 targets)
+6. **P1-B1-Proxy-Adapter-Implementation-Plan** — TDD engineering plan for ProxyHttpClient and 11 domain repositories
 
 ### Engineering Plans (read in parallel by workstream)
-6. **P1-C2-Backend-Auth-and-Validation-Hardening** — Auth middleware and Zod validation implementation
-7. **P1-D1-Write-Safety-Retry-Recovery** — Retry policy, idempotency keys, and failure-safe error handling
-8. **P1-E1-Contract-Test-Suite-Plan** — Zod schemas, MSW contract tests, and critical-flow smoke tests
+7. **P1-C2-Backend-Auth-and-Validation-Hardening** — Auth middleware and Zod validation implementation
+8. **P1-D1-Write-Safety-Retry-Recovery** — Retry policy, idempotency keys, and failure-safe error handling
+9. **P1-E1-Contract-Test-Suite-Plan** — Zod schemas, MSW contract tests, and critical-flow smoke tests
 
 ### Progress Tracking
-9. **P1-B2-Adapter-Completion-Backlog** — Update as adapter work progresses across phases
+10. **P1-B2-Adapter-Completion-Backlog** — Update as adapter work progresses across phases
 
 ### Operations and Sign-Off (read at phase end)
-10. **P1-E2-Staging-Readiness-Checklist** — Operational sign-off checklist for staging promotion
+11. **P1-E2-Staging-Readiness-Checklist** — Operational sign-off checklist for staging promotion
 
 ---
 
@@ -71,7 +73,7 @@ These decisions must be made or formally approved before corresponding Phase 1 e
 
 | Decision | What It Unblocks | Owner | Status |
 |---|---|---|---|
-| **SharePoint list schema approval per domain** | P1-B1 production adapter implementation | Product Owner + Business Domains | Pending |
+| **SharePoint list schema approval per domain** | P1-A3 physical schema definitions and P1-B1 production adapter implementation | Product Owner + Business Domains | Pending |
 | **Wave 0 Buildout Plan formal approval** | Phase 1 scope finalization and team allocation | Product Owner + Architecture Lead | See BLOCKER-02 in P0-E1 |
 | **Phase assignment for deferred packages** (D-006, OD-013) | P1-B1 scope refinement for @hbc/post-bid-autopsy, @hbc/score-benchmark, @hbc/ai-assist | Architecture Lead | See P0-E2 OD-013 |
 
@@ -87,5 +89,5 @@ These decisions must be made or formally approved before corresponding Phase 1 e
 
 ---
 
-**Last Updated:** 2026-03-16
+**Last Updated:** 2026-03-17
 **Governing Authority:** `docs/architecture/plans/MASTER/02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md`
