@@ -118,7 +118,11 @@
       "Bash(for pkg:*)",
       "Bash(for comp:*)",
       "Read(//Users/bobbyfetting/hb-intel/packages/ui-kit/src/**)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "Read(//mnt/**)",
+      "Read(//Users/bobbyfetting/**)",
+      "Read(//private/tmp/**)",
+      "Bash(for entity:*)"
     ]
   },
   "enabledPlugins": {
