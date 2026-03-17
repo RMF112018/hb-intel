@@ -5,7 +5,7 @@
 **Classification:** Internal — Architecture
 **Status:** Draft — Schema Implemented
 **Date:** 2026-03-16
-**Read With:** [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md), [current-state-map.md](../../blueprint/current-state-map.md)
+**Read With:** [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
 
 ---
 
@@ -948,3 +948,4 @@ These items were resolved through the field-level schema design interview and ar
 | 0.6 | 2026-03-16 | Architecture | Wave 1 field expansion: buyout domain fieldsets (131 fields across 8 entities). Commitments, milestones, allowances, long-lead items, VE items, subcontract checklist records/items, and compliance waiver requests. Derived financial fields, CSI classification, bid-tab linkage metadata, compliance-sensitive retention, and formal approval signoff chains. |
 | 0.7 | 2026-03-17 | Architecture | Added compass_enrolled, q_score, and pre_qualified compliance fields to subcontract_checklist_record (131 → 134 buyout fields). |
 | 0.8 | 2026-03-17 | Architecture | Governance/schema separation: clarified P1-A1 as governance-level artifact; detailed SharePoint physical schemas now live in P1-A3-SharePoint-Lists-Libraries-Schema-Register.md. Updated Read With references. |
+| 0.9 | 2026-03-17 | Architecture | Added P1-A4-Schedule-Ingestion-Normalization-Schema.md to Read With references for schedule domain ingestion and canonical model. |

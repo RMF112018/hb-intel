@@ -17,6 +17,7 @@ Reference the Phase 1 master plan first: `../02_Phase-1_Production-Data-Plane-an
 | P1-A1-Data-Ownership-Matrix.md | A | Decision Document | Draft |
 | P1-A2-Source-of-Record-Register.md | A | Decision Document | Draft |
 | P1-A3-SharePoint-Lists-Libraries-Schema-Register.md | A | Engineering Register | Draft |
+| P1-A4-Schedule-Ingestion-Normalization-Schema.md | A | Engineering Schema | Draft |
 | P1-B1-Proxy-Adapter-Implementation-Plan.md | B | Engineering Plan | Draft |
 | P1-B2-Adapter-Completion-Backlog.md | B | Status Tracker | Draft |
 | P1-B3-Mock-Isolation-Policy.md | B | Governance Policy | Draft |
@@ -34,24 +35,25 @@ Reference the Phase 1 master plan first: `../02_Phase-1_Production-Data-Plane-an
 1. **P1-A1-Data-Ownership-Matrix** — Data category taxonomy and storage platform assignments
 2. **P1-A2-Source-of-Record-Register** — Domain-by-domain source-of-record authority and write-safety classes
 3. **P1-A3-SharePoint-Lists-Libraries-Schema-Register** — Physical SharePoint container definitions, column schemas, and implementation conventions
+4. **P1-A4-Schedule-Ingestion-Normalization-Schema** — Schedule file ingestion pipeline, canonical entity model, format detection, and source-to-canonical mapping
 
 ### Governance and Policy (read before implementation)
-4. **P1-B3-Mock-Isolation-Policy** — When mock adapters are allowed; when they must be removed
+5. **P1-B3-Mock-Isolation-Policy** — When mock adapters are allowed; when they must be removed
 
 ### Backend Contract and Adapter Contracts (read before building)
-5. **P1-C1-Backend-Service-Contract-Catalog** — All Azure Function routes (existing + Phase 1 targets)
-6. **P1-B1-Proxy-Adapter-Implementation-Plan** — TDD engineering plan for ProxyHttpClient and 11 domain repositories
+6. **P1-C1-Backend-Service-Contract-Catalog** — All Azure Function routes (existing + Phase 1 targets)
+7. **P1-B1-Proxy-Adapter-Implementation-Plan** — TDD engineering plan for ProxyHttpClient and 11 domain repositories
 
 ### Engineering Plans (read in parallel by workstream)
-7. **P1-C2-Backend-Auth-and-Validation-Hardening** — Auth middleware and Zod validation implementation
-8. **P1-D1-Write-Safety-Retry-Recovery** — Retry policy, idempotency keys, and failure-safe error handling
-9. **P1-E1-Contract-Test-Suite-Plan** — Zod schemas, MSW contract tests, and critical-flow smoke tests
+8. **P1-C2-Backend-Auth-and-Validation-Hardening** — Auth middleware and Zod validation implementation
+9. **P1-D1-Write-Safety-Retry-Recovery** — Retry policy, idempotency keys, and failure-safe error handling
+10. **P1-E1-Contract-Test-Suite-Plan** — Zod schemas, MSW contract tests, and critical-flow smoke tests
 
 ### Progress Tracking
-10. **P1-B2-Adapter-Completion-Backlog** — Update as adapter work progresses across phases
+11. **P1-B2-Adapter-Completion-Backlog** — Update as adapter work progresses across phases
 
 ### Operations and Sign-Off (read at phase end)
-11. **P1-E2-Staging-Readiness-Checklist** — Operational sign-off checklist for staging promotion
+12. **P1-E2-Staging-Readiness-Checklist** — Operational sign-off checklist for staging promotion
 
 ---
 

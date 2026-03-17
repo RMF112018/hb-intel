@@ -5,7 +5,7 @@
 **Classification:** Internal — Engineering
 **Status:** Draft — Structure Established
 **Date:** 2026-03-17
-**Read With:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [current-state-map.md](../../blueprint/current-state-map.md)
+**Read With:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
 
 ---
 
@@ -155,7 +155,7 @@ This section maps P1-A1 domains to their SharePoint container definitions. Initi
 | pmp | _pending_ | PMP Index List + PMP Library | _pending schema approval_ | Paired (List + Library) | Project Site | Project management plan documents with structured index | Fields pending Wave 2 expansion in P1-A1 |
 | compliance | _pending_ | Compliance Records List + Compliance Library | _pending schema approval_ | Paired (List + Library) | Project Site | Compliance records with document attachments | Fields pending Wave 1 expansion in P1-A1 |
 | contracts | _pending_ | Contract Metadata List + Contract Library | _pending schema approval_ | Paired (List + Library) | Project Site | Contract documents with structured metadata | Fields pending Wave 1 expansion in P1-A1 |
-| schedule | _pending_ | Schedule Milestones List | _pending schema approval_ | List | Project Site | Project schedule milestones and events | Fields pending future expansion in P1-A1 |
+| schedule | _pending_ | Schedule Milestones List + Schedule Upload Library | _pending schema approval_ | List + Library | Project Site | Project schedule activities, relationships, and uploaded schedule files | Canonical entity model defined in P1-A4; containers pending P1-A1 field expansion and schema approval |
 
 ### Platform and Infrastructure Containers (Wave 3+)
 

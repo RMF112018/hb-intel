@@ -56,6 +56,7 @@ At the end of Phase 1:
 - Identity and key strategy note
 - Domain-by-domain source-of-record register
 - SharePoint lists & libraries schema register (physical container definitions)
+- Schedule ingestion & normalization schema (canonical model for heterogeneous schedule file imports)
 
 ### 6.2 Workstream B — Adapter Completion
 **Goal:** complete production-capable repository adapters.
@@ -136,6 +137,7 @@ Mandatory deliverables for Phase 1:
 - Data Ownership Matrix (governance-level data authority)
 - Source-of-Record Register
 - SharePoint Lists & Libraries Schema Register (physical container definitions)
+- Schedule Ingestion & Normalization Schema (canonical model for CSV/XML/XER schedule imports)
 - Adapter Completion Backlog and Status Tracker
 - Service Contract Catalog
 - Error / Retry / Recovery Design Note
