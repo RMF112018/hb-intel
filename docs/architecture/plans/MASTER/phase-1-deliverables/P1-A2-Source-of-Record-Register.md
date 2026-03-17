@@ -35,6 +35,8 @@ Establish the authoritative source, read/write paths, and identity strategy for 
 
 ## Domain Source-of-Record Register
 
+> **Summary layer.** This table defines SoR, adapter path, identity key, and write safety at the *domain* level. For entity-level governance (individual canonical models within each domain), see the [Entity-Level Source-of-Record and Adapter Behavior Register](#entity-level-source-of-record-and-adapter-behavior-register) below.
+
 | Domain | Source of Record | Adapter to Reach It | Identity Key | Write Safety Class | Phase |
 |--------|------------------|------------------|--------------|-------------------|-------|
 | **leads** | SharePoint List on Sales/Business Development site | `@hbc/af-adapter-proxy` → AF v4 → PnPjs `list.items.add()` / `list.items.getById().update()` | SharePoint numeric item ID (wrapped as `lead-{itemId}` for stability) | Class A | 1 |
@@ -56,6 +58,91 @@ Establish the authoritative source, read/write paths, and identity strategy for 
 | **Provisioning state** | Azure Table Storage (partition key: `{projectId}`, row key: `provisioning-{timestamp}`) | AF v4 → `@azure/data-tables` → orchestration service reads/writes status | Project UUID (provisioning key) | Class D | 1 |
 | **Audit log** | Azure Table Storage (partition key: `audit-{domain}`, row key: timestamp + UPN, append-only) | AF v4 → `@azure/data-tables` → audit service appends on every write | Composite: domain + timestamp + UPN | Class D | 1 |
 | **Project identity mapping** | Azure Table Storage (partition key: `project-identities`, row key: `{projectId}`) | AF v4 → `@azure/data-tables` → identity mapping cache | Project UUID | Class A | 1 |
+
+---
+
+## Entity-Level Source-of-Record and Adapter Behavior Register
+
+The domain register above captures one row per business domain. As canonical schemas mature (P1-A4 through P1-A13), each domain decomposes into discrete entities that may differ in storage target, write safety class, adapter pathway, or caching strategy. This section provides entity-level governance so adapter implementers know exactly how each canonical model is stored, read, written, and identified.
+
+### How to read this register
+
+| Column | Meaning |
+|--------|---------|
+| **Domain** | Parent domain from the domain register above |
+| **Entity** | Canonical model name as defined in the schema document |
+| **Schema Doc** | The P1-A _n_ document that defines this entity |
+| **Storage Target** | Physical storage system (e.g., SharePoint List, Azure Table Storage, Document Library) |
+| **Adapter Path** | Code path from AF to the storage target, including middleware |
+| **Identity Key** | Stable identifier for records of this entity |
+| **Write Safety Class** | Class A–D as defined in the [Reading Guide](#reading-guide) |
+| **Read Pattern** | Dominant read access pattern (e.g., list-by-project, get-by-id, batch-import) |
+| **Cacheable** | Whether reads may be cached and approximate TTL guidance |
+| **Mutability** | Whether records are mutable, append-only, or immutable after closure |
+| **Conflict Handling** | How divergence between this entity's data across systems or imports is resolved |
+| **Lifecycle Owner** | The system or process that creates and retires records |
+| **Phase** | Earliest phase in which the entity is available |
+
+### Schedule domain (P1-A4)
+
+P1-A4 defines 16 canonical entities for the schedule ingestion and normalization pipeline. These entities fall into three tiers for SoR and adapter governance:
+
+1. **Canonical business data persisted in SharePoint** — core schedule entities that survive normalization and are stored in SharePoint lists (some as dedicated columns, some flattened into shared containers per A3 physical design).
+2. **Canonical entities not persisted as first-class SharePoint containers in Phase 1** — entities recognized by A4's normalized model but deferred to Phase 2+ for dedicated storage. Their data is either captured in `sourceExtrasJson` fields or not persisted beyond parser stage.
+3. **Operational and provenance state** — import batch tracking and validation findings that support audit and re-parse but are not user-facing business data.
+
+#### Canonical business data persisted in SharePoint
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `schedule_activity` | business | SharePoint List (`ScheduleActivities`) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `batch_id` + `source_activity_id` → `sch-act-{itemId}` | Class A | list-by-project, filter-by-wbs | Yes (5 min) | Mutable; superseded per batch | Newer batch wins; prior batch retained for audit | Import service | 1 |
+| `schedule_project` | business | SharePoint List (`ScheduleImportBatches`, flattened) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `batch_id` + `source_project_id` → `sch-proj-{itemId}` | Class A | get-by-project | Yes (5 min) | Mutable; one record per batch | Newer batch wins; project metadata merged at batch level | Import service | 1 |
+| `schedule_wbs_node` | business | SharePoint List (`ScheduleActivities`, FK fields `wbsId`, `activityCode`) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `batch_id` + `source_wbs_id` → `sch-wbs-{itemId}` | Class A | list-by-project (tree) | Yes (5 min) | Mutable; superseded per batch | Newer batch wins; WBS hierarchy rebuilt per import | Import service | 1 |
+| `schedule_calendar` | business | SharePoint List (`ScheduleActivities`, FK reference `calendarId`) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `batch_id` + `source_calendar_id` → `sch-cal-{itemId}` | Class A | list-by-project | Yes (15 min) | Mutable; superseded per batch | Newer batch wins; calendar identity preserved as FK | Import service | 1 |
+| `schedule_relationship` | business | SharePoint List (`ScheduleActivities`, `sourceExtrasJson`) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `batch_id` + `predecessor_activity_id` + `successor_activity_id` + `relationship_type` | Class A | list-by-activity | Yes (5 min) | Mutable; superseded per batch | Newer batch wins; relationships rebuilt per import | Import service | 1 |
+| `schedule_baseline` | business | SharePoint List (`ScheduleActivities`, baseline date fields) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `batch_id` + `activity_id` + `baseline_number` | Class D | list-by-project | Yes (60 min) | Baseline 0 immutable; 1–10 append-only | Primary baseline never overwritten; additional baselines append per import | Import service | 1 |
+| `schedule_udf_value` | udf | SharePoint List (`ScheduleActivities`, `sourceExtrasJson`) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `batch_id` + `udf_definition_id` + `entity_id` | Class A | list-by-entity | Yes (5 min) | Mutable; superseded per batch | Newer batch wins; UDF values preserved in extras JSON | Import service | 1 |
+
+#### Canonical entities not persisted as first-class SharePoint containers (Phase 1)
+
+These entities are part of A4's normalized canonical model but are not stored in dedicated SharePoint containers during Phase 1. Their source data is either captured in `sourceExtrasJson` for provenance or remains parser-stage transient data. When these entities gain dedicated storage in Phase 2+, they will be promoted to the persisted table above with full SoR governance.
+
+| Entity | Data Class | Phase 1 Disposition | Reason | Phase Available |
+|--------|-----------|---------------------|--------|----------------|
+| `schedule_resource` | resource | Not persisted (parser-stage) | Resource definitions not user-facing in Phase 1 | 2+ |
+| `schedule_resource_rate` | resource | Not persisted (parser-stage) | Rate tables deferred; not needed for activity-level schedule views | 2+ |
+| `schedule_assignment` | resource | Not persisted (parser-stage) | Resource-to-activity assignments deferred; activity-level data sufficient for Phase 1 | 2+ |
+| `schedule_code_type` | classification | Not persisted (parser-stage) | Code type definitions deferred; activity-level classification sufficient | 2+ |
+| `schedule_code_value` | classification | Not persisted (parser-stage) | Code value hierarchies deferred | 2+ |
+| `schedule_activity_code_assignment` | classification | Not persisted (parser-stage) | Code-to-activity links deferred | 2+ |
+| `schedule_udf_definition` | udf | Not persisted (parser-stage) | UDF schema definitions deferred; UDF values preserved in `sourceExtrasJson` | 2+ |
+
+#### Operational and provenance state
+
+| Entity | Data Class | Storage Target | Adapter Path | Identity Key | Write Safety Class | Read Pattern | Cacheable | Mutability | Conflict Handling | Lifecycle Owner | Phase |
+|--------|-----------|----------------|--------------|-------------|-------------------|-------------|-----------|-----------|------------------|----------------|-------|
+| `schedule_import_batch` | operational | SharePoint List (`ScheduleImportBatches`) | `@hbc/af-adapter-proxy` → AF v4 → PnPjs | `batch_id` (unique per project per upload) | Class D | get-by-id, list-by-project | No | Status progresses forward only (pending → parsing → mapping → complete/failed) | No conflict; each upload creates a new `batch_id` | Import service | 1 |
+| `import_finding` | operational | Azure Table Storage (`partition: sch-findings-{batchId}`) | AF v4 → `@azure/data-tables` | `batch_id` + sequence/timestamp | Class D | list-by-batch | No | Append-only; immutable once logged | No conflict; new parser versions create new batch with new findings | Import service | 1 |
+
+#### A3 physical compression note
+
+P1-A3 physically consolidates the 16 canonical schedule entities into 3 SharePoint containers (`ScheduleActivities`, `ScheduleImportBatches`, `ScheduleUploadsLib`) plus Azure Table Storage for findings. Several canonical entities are flattened into shared containers (e.g., `schedule_wbs_node` → FK fields on `ScheduleActivities`, `schedule_relationship` → `sourceExtrasJson`). This register preserves the logical entity-level SoR view for adapter design regardless of physical compression. For physical container specifications, see [P1-A3](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
+
+### Remaining domains
+
+Entity-level rows for the following domains will be added as their schemas reach implementation-ready status:
+
+| Domain | Schema Doc | Entity Count | Status |
+|--------|-----------|-------------|--------|
+| shared (reference data) | P1-A5 | ~11 | Schema defined; entity register pending |
+| financial | P1-A6 | 4 | Schema defined; entity register pending |
+| risk / compliance (operational register) | P1-A7 | 4 | Schema defined; entity register pending |
+| estimating (kickoff) | P1-A8 | 7 | Schema defined; entity register pending |
+| compliance (permits) | P1-A9 | 8 | Schema defined; entity register pending |
+| compliance (lifecycle checklists) | P1-A10 | 7 | Schema defined; entity register pending |
+| project management (responsibility matrix) | P1-A11 | 11 | Schema defined; entity register pending |
+| procurement (subcontractor scorecard) | P1-A12 | 12 | Schema defined; entity register pending |
+| project management (lessons learned) | P1-A13 | 8 | Schema defined; entity register pending |
 
 ---
 
@@ -250,4 +337,6 @@ Stub adapters (Procore, Sage, Autodesk) exist but do not write in Phase 1.
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 0.1 | 2026-03-16 | Architecture | Initial draft; operationalizes P1-A1 decisions for adapter design |
+| 0.2 | 2026-03-17 | Architecture | Add entity-level SoR and adapter behavior register structure; populate schedule domain (P1-A4); stub remaining domains |
+| 0.3 | 2026-03-17 | Architecture | Refine schedule entity-level register with A4-aligned data classes, A3 storage targets, conflict handling, and business-vs-operational distinction |
 
