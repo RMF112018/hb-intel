@@ -104,7 +104,7 @@ YES/NO is indicated by an `x` marker in either column C (YES) or column D (NO):
 
 | Pattern | Example | Normalization |
 |---------|---------|---------------|
-| Person name | "Sam", "Mike C", "Wanda", "Butch" | Resolve to person key when possible; preserve display text |
+| Person name | "Sam", "Mike C", "Wanda", "Butch" | Resolve to person key when possible; preserve display text. Per Person Identity Resolution Platform Standard in P1-A2 |
 | Team name | "Estimating Team" | Resolve to team key; preserve display text |
 | "N/A" | "N/A" | Null normalized key; preserve "N/A" as display text |
 | Blank | (empty) | Null both key and display |
@@ -413,3 +413,4 @@ Import validation findings for kickoff workbook ingestion. Stored in Azure Table
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 7 canonical entities (template, template item, instance, row, evidence link, note, import batch), 3 row subtypes (task/milestone/deliverable), hybrid YES/NO and date handling, template/instance snapshot model, and package assembly metadata. Evidence-based from Estimating Kickoff.xlsx. All 16 locked interview decisions encoded. |
 | 0.2 | 2026-03-17 | Architecture | Added `kickoff_import_finding` entity per P1-A2 Import-State Platform Standard completeness requirement. Aligned storage boundary references to cite platform standard. |
+| 0.3 | 2026-03-17 | Architecture | Added cross-reference to P1-A2 Person Identity Resolution Platform Standard for person name resolution behavior. |

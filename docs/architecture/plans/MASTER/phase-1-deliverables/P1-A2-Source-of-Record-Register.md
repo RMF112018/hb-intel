@@ -783,6 +783,26 @@ All `*_import_finding` entities are stored in Azure Table Storage (Class D, audi
 
 **Completeness requirement.** Every import-driven domain must define both `*_import_batch` and `*_import_finding` entities in its governing schema artifact. Domains that define batch metadata without a corresponding finding entity must add one; import validation without structured finding records is not acceptable for production import pipelines.
 
+### Person Identity Resolution Platform Standard (Frozen)
+
+> **Status: Frozen.** This section defines the cross-schema platform standard for person identity resolution. The resolution algorithm (how UPN matching works at runtime) remains a P1-B1 implementation detail; the structural contract is standardized here.
+
+**Structural contract.** Every field that identifies a human actor (assignee, evaluator, approver, responsible person, contact, preparer, etc.) follows one of two patterns:
+
+1. **Key + display pair** (`*_key` + `*_display`): The stable join key (`*_key`) stores the person's UPN when resolved via Entra ID. The display mirror (`*_display`) stores the raw source text and is always populated regardless of resolution status. The display field is never the canonical join key. The key field is nullable if the person cannot be resolved — never invent synthetic person IDs to fill the gap.
+
+2. **Direct UPN** (`created_by`, `uploaded_by`, `approved_by`): System-attribution fields where the actor is always the authenticated current user. These store UPN directly with no separate display field, because the identity is known at write time.
+
+**Unresolved-import behavior.** When imported data contains a person name that cannot be resolved to a UPN (e.g., historical records, external participants, name ambiguity), the `*_key` field is null and the `*_display` field preserves the raw source text. The adapter/service layer may backfill the key later when resolution becomes possible, but the display text is never overwritten.
+
+**Resolution ownership.** The adapter/service layer owns person name-to-UPN resolution. Resolution occurs at import time or adapter-read time. Client code, UI layers, and external callers never perform resolution or generate person keys.
+
+**Vendor/party distinction.** Fields identifying external parties (subcontractors, vendors, authority organizations) follow the same structural pattern — `*_key` + `*_display` with nullable key — but use a party registry or vendor catalog key instead of UPN. These are Class H (vendor/party identity), not Class G (person-attribution). The structural contract is the same; the key source differs.
+
+**Completeness requirement.** Every person-attributed field across all Phase 1 schemas must have both a `_key` and `_display` field (or be a direct UPN field). Display-only person fields without corresponding key fields are not compliant with this standard.
+
+**Cross-reference.** This standard consolidates the rules from Class G (person-attribution) and Class H (vendor/party identity) in the Identity Strategy section above. The identity classes define the semantic rules; this section defines the cross-schema structural contract.
+
 ### Proxy Adapter (Phase 1 MVP)
 The `@hbc/af-adapter-proxy` is the placeholder adapter that:
 - Takes domain repository calls from AF.
@@ -833,4 +853,5 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 | 1.5 | 2026-03-17 | Architecture | Add entity-level prime contracts domain (P1-A15): 3 entities — `prime_contract` (Class A), `contract_import_batch` (Class D), `contract_import_finding` (Class D); canonical identity frozen as surrogate `contract_id` with `contract_number` natural key and `source_project_id` for Procore federation; financial field classification (authoritative vs derived); owner/client contact as Class H, primary contact as Class G; extend coverage to A4–A15 |
 | 1.6 | 2026-03-17 | Architecture | Reconcile domain summary rows: update leads row to reflect A14 two-list model (`MarketLeads`, `PipelineSnapshots`) with surrogate identity; update contracts row to reflect A15 single-list `PrimeContracts` with surrogate `contract_id` (remove stale paired library + document URL identity) |
 | 1.7 | 2026-03-17 | Architecture | Froze Import-State Platform Standard: governed two-tier model for `import_batch` (Azure Table Storage default, SharePoint List exception for schedule/budget with explicit conditions), universal Azure Table Storage rule for `import_finding`, `sourceBatchId` cross-reference convention, completeness requirement (every import-driven domain must define both batch and finding entities). Fixed Non-SharePoint enumeration to exclude SharePoint-resident batch records. Added 3 missing finding entities to enumeration: `kickoff_import_finding`, `checklist_import_finding`, `responsibility_import_finding`. |
+| 1.8 | 2026-03-17 | Architecture | Froze Person Identity Resolution Platform Standard: consolidated Class G (person-attribution) and Class H (vendor/party) structural contract into one cross-schema section — `*_key` + `*_display` pair with nullable key for unresolved imports, direct UPN for system-attribution fields, adapter/service-layer resolution ownership, completeness requirement (every person-attributed field must have both key and display). |
 

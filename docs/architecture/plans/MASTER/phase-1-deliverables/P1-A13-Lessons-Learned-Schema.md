@@ -135,9 +135,12 @@ One per project — the report-level container.
 | scheduled_completion | date | No | — | Planned completion date |
 | actual_completion | date | No | — | Actual completion date |
 | days_variance | number | No | — | Schedule variance in days |
-| project_manager_display | string | No | — | Non-authoritative display text; not a join key; stable identity via resolved person key when available |
-| superintendent_display | string | No | — | Non-authoritative display text; not a join key; stable identity via resolved person key when available |
-| project_executive_display | string | No | — | Non-authoritative display text; not a join key; stable identity via resolved person key when available |
+| project_manager_display | string | No | — | Non-authoritative display text; always populated; not a join key. Per Person Identity Resolution Platform Standard in P1-A2 |
+| project_manager_key | string | No | — | Canonical person key (UPN when Entra-resolved); nullable if unresolved. Class G per P1-A2 |
+| superintendent_display | string | No | — | Non-authoritative display text; always populated; not a join key. Per Person Identity Resolution Platform Standard in P1-A2 |
+| superintendent_key | string | No | — | Canonical person key (UPN when Entra-resolved); nullable if unresolved. Class G per P1-A2 |
+| project_executive_display | string | No | — | Non-authoritative display text; always populated; not a join key. Per Person Identity Resolution Platform Standard in P1-A2 |
+| project_executive_key | string | No | — | Canonical person key (UPN when Entra-resolved); nullable if unresolved. Class G per P1-A2 |
 | report_prepared_by | string | No | — | Author identity (UPN when Entra-resolved; raw display preserved per A2 identity class G) |
 | report_date | date | No | — | Report completion date |
 | delivery_method | string | No | — | Delivery method classification |
@@ -363,3 +366,4 @@ This denormalization ensures each `lesson_record` is self-contained for search a
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 8 canonical entities (report instance, lesson record, keyword, linked reference, category dictionary, impact magnitude dictionary, import batch/finding). Report+child lesson model with inherited search metadata, structured lesson components + composed narrative, governed taxonomy + raw preservation, text + structured reference support. Evidence-based from SOP Lessons Learned workbook. All 4 locked interview decisions encoded. |
 | 0.2 | 2026-03-17 | Architecture | Aligned storage boundary references with P1-A2 Import-State Platform Standard. |
+| 0.3 | 2026-03-17 | Architecture | Added 3 missing person key fields (`project_manager_key`, `superintendent_key`, `project_executive_key`) to `lessons_report_instance` per P1-A2 Person Identity Resolution Platform Standard completeness requirement. Display-only person fields are not compliant; every person-attributed field must have both `_key` and `_display`. |

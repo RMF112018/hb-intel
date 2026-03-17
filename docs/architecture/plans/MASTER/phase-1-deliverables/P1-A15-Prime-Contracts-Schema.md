@@ -278,7 +278,7 @@ Follows the same contact snapshot pattern as P1-A9 (permits):
 | **Primary contact** | `primary_contact_display` stores raw display name (Class G person-attribution); `primary_contact_key` is nullable UPN/canonical key when resolvable |
 | **Address snapshot** | `vendor_street`, `vendor_city`, `vendor_state`, `vendor_zip_code`, `vendor_phone`, `vendor_fax`, `email_address` stored as snapshot fields on `prime_contract`; not separate entity |
 | **Company name** | `company_name` is the contractor's own company name (self-referential); stored as snapshot for provenance |
-| **Display text is never a join key** | Contact display names and snapshot fields are preserved for presentation; canonical keys are the join targets |
+| **Display text is never a join key** | Contact display names and snapshot fields are preserved for presentation; canonical keys are the join targets. Per Person Identity Resolution Platform Standard in P1-A2 |
 
 ---
 
@@ -349,3 +349,4 @@ Follows the same contact snapshot pattern as P1-A9 (permits):
 | Version | Date | Author | Notes |
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 3 canonical entities (prime_contract, contract_import_batch, contract_import_finding). Flat Procore-sourced model with 38 fields on prime_contract. Identity strategy frozen: surrogate `contract_id` as canonical PK, `contract_number` as natural key, `source_project_id` for Procore federation. Financial field classification (authoritative vs derived). Vendor/owner contact snapshots (Class G/H). No child entities or document library — aggregate totals and no attachments in source. |
+| 0.2 | 2026-03-17 | Architecture | Added cross-reference to P1-A2 Person Identity Resolution Platform Standard in contact/identity section. |

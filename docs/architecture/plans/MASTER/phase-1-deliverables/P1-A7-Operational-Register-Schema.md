@@ -245,7 +245,7 @@ Maps register records to related entities in other domains.
 
 ### Assignee Identity Resolution (Frozen)
 
-The `assigned_person_key` / `assigned_display` pair follows the frozen **Class G (Person-attribution)** identity pattern from P1-A2. This decision closes the previously open "Identity reconciliation for assigned" item.
+The `assigned_person_key` / `assigned_display` pair follows the frozen **Class G (Person-attribution)** identity pattern from P1-A2. This decision closes the previously open "Identity reconciliation for assigned" item. This is an instance of the Person Identity Resolution Platform Standard in P1-A2.
 
 | Rule | Decision |
 |------|----------|
@@ -537,3 +537,4 @@ These are reconciliation snapshots only — canonical totals should be derived f
 | 0.2 | 2026-03-17 | Architecture | Added delay subtype extension with 18 delay-specific fields on register_record (raw+normalized pairs for PCCO, affected task, critical path impact, cost impact, duration, dates, notification). Import batch snapshot fields for totals row. First implemented subtype establishing the pattern. Evidence-based from Project Delay Log CSV template. |
 | 0.3 | 2026-03-17 | Architecture | Freeze assignee identity resolution: `assigned_person_key`/`assigned_display` aligned to Class G (person-attribution) from A2 identity freeze. UPN when resolved, nullable when unresolved, display always preserved, adapter owns resolution. Same pattern confirmed for `bic_key`/`bic_display`. Closes open decision "Identity reconciliation for assigned." |
 | 0.4 | 2026-03-17 | Architecture | Aligned storage boundary with P1-A2 Import-State Platform Standard: import batch and finding storage references updated to cite platform standard. |
+| 0.5 | 2026-03-17 | Architecture | Added cross-reference to P1-A2 Person Identity Resolution Platform Standard in assignee identity section. |

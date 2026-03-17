@@ -304,7 +304,7 @@ Each A9 entity maps to a frozen identity class from the [P1-A2 Identity Strategy
 
 - **`authority_contact_key`** follows the Class H (vendor/party) pattern: nullable canonical key for the issuing authority contact when resolvable via a future authority registry; raw snapshot fields (`authority_contact_name`, `authority_contact_phone`, `authority_contact_email`, `authority_contact_address`) are always preserved and never used as join keys.
 - **`inspector_contact_key`** follows the Class G (person-attribution) pattern: nullable canonical key — UPN if the inspector is an Entra ID-resolved user, or an external inspector registry key when available; `inspector_display` always preserved and never used as a join key.
-- Both keys are nullable if unresolved. No synthetic person or party IDs are invented. Resolution is owned by the adapter/import layer.
+- Both keys are nullable if unresolved. No synthetic person or party IDs are invented. Resolution is owned by the adapter/import layer. Per Person Identity Resolution Platform Standard in P1-A2.
 
 ---
 
@@ -423,3 +423,4 @@ Each A9 entity maps to a frozen identity class from the [P1-A2 Identity Strategy
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 7 canonical entities (permit_record, permit_condition, permit_tag, permit_inspection, permit_inspection_issue, permit_import_batch, permit_import_finding). Hybrid contact/conditions/tags/issues/lifecycle strategies per locked interview decisions. Evidence-based from permits.json. |
 | 0.2 | 2026-03-17 | Architecture | Add identity class alignment to A2 freeze: map all 7 entities to frozen classes (B, D, E, J). Freeze contact key resolution semantics — `authority_contact_key` as Class H (vendor/party), `inspector_contact_key` as Class G (person-attribution). Both nullable if unresolved; snapshot fields always preserved. |
 | 0.3 | 2026-03-17 | Architecture | Aligned storage boundary references with P1-A2 Import-State Platform Standard. |
+| 0.4 | 2026-03-17 | Architecture | Added cross-reference to P1-A2 Person Identity Resolution Platform Standard in contact key resolution section. |
