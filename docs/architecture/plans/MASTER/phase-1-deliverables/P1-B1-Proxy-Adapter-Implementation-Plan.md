@@ -1630,6 +1630,8 @@ export class ProxyEstimatingRepository
 
 **ProxyScheduleRepository:**
 
+> **Path discrepancy:** B1 uses `/api/schedules` (plural); C1 uses `/api/schedule` (singular). Also, B1 uses nested project-scoped paths (`/api/projects/{projectId}/activities`); C1 uses flat routes with query params. See Appendix A for details.
+
 The Schedule domain is project-scoped and manages `IScheduleActivity` entries plus an `IScheduleMetrics` aggregate. Methods: `getActivities(projectId)`, `getActivityById(id)`, `createActivity(data)`, `updateActivity(id, data)`, `deleteActivity(id)`, `getMetrics(projectId)`. No search method.
 
 ```typescript
@@ -1733,6 +1735,8 @@ export class ProxyScheduleRepository
 
 **ProxyBuyoutRepository:**
 
+> **Path discrepancy:** B1 uses `/api/buyouts` (plural); C1 uses `/api/buyout` (singular). See Appendix A for details.
+
 The Buyout domain is project-scoped and manages `IBuyoutEntry` entries plus an `IBuyoutSummary` aggregate. Methods: `getEntries(projectId)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)`. No search method.
 
 Implementation follows the same project-scoped pattern as Schedule above, substituting `IBuyoutEntry`/`IBuyoutSummary` and using resource paths under `/api/buyouts`. All API paths are provisional and track the P1-C1 backend contract catalog.
@@ -1777,6 +1781,8 @@ Project-scoped with two entity types. Manages `IContractInfo` + `ICommitmentAppr
 
 **ProxyRiskRepository:**
 
+> **Path discrepancy:** B1 uses `/api/risks` (plural); C1 uses `/api/risk` (singular). See Appendix A for details.
+
 Project-scoped. Manages `IRiskCostItem` + `IRiskCostManagement`. Methods: `getItems(projectId, options?)`, `getItemById(id)`, `createItem(data)`, `updateItem(id, data)`, `deleteItem(id)`, `getManagement(projectId)`. No search. Follows the project-scoped pattern with an aggregate query. All API paths are provisional and track the P1-C1 backend contract catalog.
 
 **Verification:**
@@ -1807,6 +1813,8 @@ git commit -m "feat: implement ProxyRiskRepository with project-scoped items and
 - `packages/data-access/src/adapters/proxy/auth-repository.test.ts`
 
 **ProxyScorecardRepository:**
+
+> **Path discrepancy:** B1 uses `/api/scorecards` (plural); C1 uses `/api/scorecard` (singular). See Appendix A for details.
 
 Project-scoped with two entity types. Manages `IGoNoGoScorecard` + `IScorecardVersion`. Methods: `getScorecards(projectId, options?)`, `getScorecardById(id)`, `createScorecard(data)`, `updateScorecard(id, data)`, `deleteScorecard(id)`, `getVersions(scorecardId)`. No search. The versions method operates on a sub-resource scoped by scorecard ID. All API paths are provisional and track the P1-C1 backend contract catalog.
 
@@ -2517,6 +2525,196 @@ pnpm --filter @hbc/data-access lint
 
 # Expected: all checks pass, ~100 tests, 0 type errors, 0 lint errors
 ```
+
+---
+
+## Appendix A: Route Contract Planning Matrix
+
+This appendix maps every proxy-backed repository method to its expected backend route. Each entry is labeled with its C1 confirmation status. **All response envelopes follow the C1-confirmed shapes documented in Appendix B unless otherwise noted.**
+
+### Tier 1 — C1 Path Locked (Leads, Projects, Estimating)
+
+These routes are confirmed in P1-C1 as high-priority Phase 1 targets with locked base paths.
+
+#### Lead Repository (`/api/leads` — C1 confirmed)
+
+| Method | Verb | Path | Params / Body | Response | C1 Status |
+|---|---|---|---|---|---|
+| `getAll(options?)` | GET | `/api/leads` | `?page=&pageSize=&sortBy=&sortOrder=&search=` | Collection envelope | Confirmed |
+| `getById(id)` | GET | `/api/leads/{id}` | — | Single-item envelope | Confirmed |
+| `create(data)` | POST | `/api/leads` | `ILeadFormData` body | Single-item envelope | Confirmed |
+| `update(id, data)` | PUT | `/api/leads/{id}` | `Partial<ILeadFormData>` body | Single-item envelope | Confirmed |
+| `delete(id)` | DELETE | `/api/leads/{id}` | — | 204 No Content | Confirmed |
+| `search(query, options?)` | GET | `/api/leads/search` | `?q=&page=&pageSize=` | Collection envelope | Confirmed |
+
+#### Project Repository (`/api/projects` — C1 confirmed)
+
+| Method | Verb | Path | Params / Body | Response | C1 Status |
+|---|---|---|---|---|---|
+| `getProjects(options?)` | GET | `/api/projects` | `?page=&pageSize=&sortBy=&sortOrder=` | Collection envelope (`IActiveProject[]`) | Confirmed |
+| `getProjectById(id)` | GET | `/api/projects/{id}` | — | Single-item envelope (`IActiveProject`) | Confirmed |
+| `createProject(data)` | POST | `/api/projects` | `Omit<IActiveProject, 'id'>` body | Single-item envelope | Confirmed |
+| `updateProject(id, data)` | PUT | `/api/projects/{id}` | `Partial<IActiveProject>` body | Single-item envelope | Confirmed |
+| `deleteProject(id)` | DELETE | `/api/projects/{id}` | — | 204 No Content | Confirmed |
+| `getPortfolioSummary()` | GET | `/api/projects/portfolio-summary` | — | Single-item envelope (`IPortfolioSummary`) | **Assumed** — C1 defines generic CRUD; this aggregate endpoint is not in the catalog |
+
+#### Estimating Repository (`/api/estimating` — C1 confirmed base path)
+
+| Method | Verb | Path | Params / Body | Response | C1 Status |
+|---|---|---|---|---|---|
+| `getAllTrackers(options?)` | GET | `/api/estimating/trackers` | `?page=&pageSize=` | Collection envelope (`IEstimatingTracker[]`) | **Discrepancy** — C1 defines `/api/estimating` flat; B1 uses `/trackers` sub-resource |
+| `getTrackerById(id)` | GET | `/api/estimating/trackers/{id}` | — | Single-item envelope | **Discrepancy** — sub-resource path |
+| `createTracker(data)` | POST | `/api/estimating/trackers` | `Omit<..., 'id'\|'createdAt'\|'updatedAt'>` body | Single-item envelope | **Discrepancy** |
+| `updateTracker(id, data)` | PUT | `/api/estimating/trackers/{id}` | `Partial<IEstimatingTracker>` body | Single-item envelope | **Discrepancy** |
+| `deleteTracker(id)` | DELETE | `/api/estimating/trackers/{id}` | — | 204 No Content | **Discrepancy** |
+| `getKickoff(projectId)` | GET | `/api/estimating/kickoffs/{projectId}` | — | Single-item envelope (`IEstimatingKickoff`) or null | **Assumed** — not in C1 catalog |
+| `createKickoff(data)` | POST | `/api/estimating/kickoffs` | `Omit<..., 'id'\|'createdAt'>` body | Single-item envelope | **Assumed** |
+
+> **Resolution needed:** C1 defines flat `/api/estimating` with generic CRUD. B1 repo truth has two entity types (tracker + kickoff) requiring sub-resource paths. Must confirm with C1 whether backend will support sub-resource routing or a different pattern.
+
+### Tier 2 — C1 Path Planned but Not Locked
+
+These routes are in C1's Phase 1 target list but paths are not yet frozen. B1 paths are provisional.
+
+#### Schedule Repository (B1: `/api/schedules` — **C1 uses `/api/schedule`**)
+
+| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+|---|---|---|---|---|---|
+| `getActivities(projectId, options?)` | GET | `/api/projects/{projectId}/activities` | `?page=&pageSize=` | Collection envelope (`IScheduleActivity[]`) | **Assumed** — C1 uses flat `/api/schedule`; B1 uses nested project-scoped path |
+| `getActivityById(id)` | GET | `/api/schedules/activities/{id}` | — | Single-item envelope | **Assumed** |
+| `createActivity(data)` | POST | `/api/schedules/activities` | `Omit<IScheduleActivity, 'id'>` body | Single-item envelope | **Assumed** |
+| `updateActivity(id, data)` | PUT | `/api/schedules/activities/{id}` | `Partial<IScheduleActivity>` body | Single-item envelope | **Assumed** |
+| `deleteActivity(id)` | DELETE | `/api/schedules/activities/{id}` | — | 204 No Content | **Assumed** |
+| `getMetrics(projectId)` | GET | `/api/projects/{projectId}/metrics` | — | Single-item envelope (`IScheduleMetrics`) | **Assumed** — aggregate endpoint not in C1 |
+
+> **Path discrepancy:** C1 uses singular `/api/schedule`; B1 uses plural `/api/schedules`. Also, C1 uses flat routes with query params; B1 uses nested project-scoped paths. Must resolve routing pattern with C1.
+
+#### Buyout Repository (B1: `/api/buyouts` — **C1 uses `/api/buyout`**)
+
+| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+|---|---|---|---|---|---|
+| `getEntries(projectId, options?)` | GET | `/api/buyout?projectId={id}&page=&pageSize=` | Query params | Collection envelope (`IBuyoutEntry[]`) | **Assumed** — path singular/plural TBD |
+| `getEntryById(id)` | GET | `/api/buyout/{id}` | — | Single-item envelope | **Assumed** |
+| `createEntry(data)` | POST | `/api/buyout` | `Omit<IBuyoutEntry, 'id'>` body | Single-item envelope | **Assumed** |
+| `updateEntry(id, data)` | PUT | `/api/buyout/{id}` | `Partial<IBuyoutEntry>` body | Single-item envelope | **Assumed** |
+| `deleteEntry(id)` | DELETE | `/api/buyout/{id}` | — | 204 No Content | **Assumed** |
+| `getSummary(projectId)` | GET | `/api/buyout/summary?projectId={id}` | — | Single-item envelope (`IBuyoutSummary`) | **Assumed** — aggregate not in C1 |
+
+#### Compliance Repository (`/api/compliance` — C1 path matches)
+
+| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+|---|---|---|---|---|---|
+| `getEntries(projectId, options?)` | GET | `/api/compliance?projectId={id}&page=&pageSize=` | Query params | Collection envelope (`IComplianceEntry[]`) | **Assumed** |
+| `getEntryById(id)` | GET | `/api/compliance/{id}` | — | Single-item envelope | **Assumed** |
+| `createEntry(data)` | POST | `/api/compliance` | `Omit<IComplianceEntry, 'id'>` body | Single-item envelope | **Assumed** |
+| `updateEntry(id, data)` | PUT | `/api/compliance/{id}` | `Partial<IComplianceEntry>` body | Single-item envelope | **Assumed** |
+| `deleteEntry(id)` | DELETE | `/api/compliance/{id}` | — | 204 No Content | **Assumed** |
+| `getSummary(projectId)` | GET | `/api/compliance/summary?projectId={id}` | — | Single-item envelope (`IComplianceSummary`) | **Assumed** — aggregate not in C1 |
+
+#### Contract Repository (`/api/contracts` — C1 path matches)
+
+| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+|---|---|---|---|---|---|
+| `getContracts(projectId, options?)` | GET | `/api/contracts?projectId={id}&page=&pageSize=` | Query params | Collection envelope (`IContractInfo[]`) | **Assumed** |
+| `getContractById(id)` | GET | `/api/contracts/{id}` | — | Single-item envelope | **Assumed** |
+| `createContract(data)` | POST | `/api/contracts` | `Omit<IContractInfo, 'id'>` body | Single-item envelope | **Assumed** |
+| `updateContract(id, data)` | PUT | `/api/contracts/{id}` | `Partial<IContractInfo>` body | Single-item envelope | **Assumed** |
+| `deleteContract(id)` | DELETE | `/api/contracts/{id}` | — | 204 No Content | **Assumed** |
+| `getApprovals(contractId)` | GET | `/api/contracts/{contractId}/approvals` | — | Array envelope (`ICommitmentApproval[]`) | **Assumed** — sub-resource not in C1 |
+| `createApproval(data)` | POST | `/api/contracts/{contractId}/approvals` | `Omit<ICommitmentApproval, 'id'>` body | Single-item envelope | **Assumed** |
+
+#### Risk Repository (B1: `/api/risks` — **C1 uses `/api/risk`**)
+
+| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+|---|---|---|---|---|---|
+| `getItems(projectId, options?)` | GET | `/api/risk?projectId={id}&page=&pageSize=` | Query params | Collection envelope (`IRiskCostItem[]`) | **Assumed** — path singular/plural TBD |
+| `getItemById(id)` | GET | `/api/risk/{id}` | — | Single-item envelope | **Assumed** |
+| `createItem(data)` | POST | `/api/risk` | `Omit<IRiskCostItem, 'id'>` body | Single-item envelope | **Assumed** |
+| `updateItem(id, data)` | PUT | `/api/risk/{id}` | `Partial<IRiskCostItem>` body | Single-item envelope | **Assumed** |
+| `deleteItem(id)` | DELETE | `/api/risk/{id}` | — | 204 No Content | **Assumed** |
+| `getManagement(projectId)` | GET | `/api/risk/management?projectId={id}` | — | Single-item envelope (`IRiskCostManagement`) | **Assumed** — aggregate not in C1 |
+
+#### Scorecard Repository (B1: `/api/scorecards` — **C1 uses `/api/scorecard`**)
+
+| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+|---|---|---|---|---|---|
+| `getScorecards(projectId, options?)` | GET | `/api/scorecard?projectId={id}&page=&pageSize=` | Query params | Collection envelope (`IGoNoGoScorecard[]`) | **Assumed** — path singular/plural TBD |
+| `getScorecardById(id)` | GET | `/api/scorecard/{id}` | — | Single-item envelope | **Assumed** |
+| `createScorecard(data)` | POST | `/api/scorecard` | `Omit<..., 'id'\|'createdAt'\|'updatedAt'>` body | Single-item envelope | **Assumed** |
+| `updateScorecard(id, data)` | PUT | `/api/scorecard/{id}` | `Partial<IGoNoGoScorecard>` body | Single-item envelope | **Assumed** |
+| `deleteScorecard(id)` | DELETE | `/api/scorecard/{id}` | — | 204 No Content | **Assumed** |
+| `getVersions(scorecardId)` | GET | `/api/scorecard/{scorecardId}/versions` | — | Array envelope (`IScorecardVersion[]`) | **Assumed** — sub-resource not in C1 |
+
+#### PMP Repository (`/api/pmp` — C1 path matches)
+
+| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+|---|---|---|---|---|---|
+| `getPlans(projectId, options?)` | GET | `/api/pmp?projectId={id}&page=&pageSize=` | Query params | Collection envelope (`IProjectManagementPlan[]`) | **Assumed** |
+| `getPlanById(id)` | GET | `/api/pmp/{id}` | — | Single-item envelope | **Assumed** |
+| `createPlan(data)` | POST | `/api/pmp` | `Omit<..., 'id'\|'createdAt'\|'updatedAt'>` body | Single-item envelope | **Assumed** |
+| `updatePlan(id, data)` | PUT | `/api/pmp/{id}` | `Partial<IProjectManagementPlan>` body | Single-item envelope | **Assumed** |
+| `deletePlan(id)` | DELETE | `/api/pmp/{id}` | — | 204 No Content | **Assumed** |
+| `getSignatures(pmpId)` | GET | `/api/pmp/{pmpId}/signatures` | — | Array envelope (`IPMPSignature[]`) | **Assumed** — sub-resource not in C1 |
+| `createSignature(data)` | POST | `/api/pmp/{pmpId}/signatures` | `Omit<IPMPSignature, 'id'>` body | Single-item envelope | **Assumed** |
+
+### Tier 3 — No C1 Route Defined (Auth)
+
+Auth is not part of C1's domain CRUD routes. It is a separate subsystem managed by C2 (auth hardening).
+
+#### Auth Repository (`/api/auth` — **not in C1 catalog**)
+
+| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+|---|---|---|---|---|---|
+| `getCurrentUser()` | GET | `/api/auth/me` | — | Single-item envelope (`ICurrentUser`) | **Assumed** — no C1 route; managed by C2 |
+| `getRoles()` | GET | `/api/auth/roles` | — | Array (`IRole[]`) | **Assumed** |
+| `getRoleById(id)` | GET | `/api/auth/roles/{id}` | — | Single-item envelope (`IRole`) or null | **Assumed** |
+| `getPermissionTemplates()` | GET | `/api/auth/permission-templates` | — | Array (`IPermissionTemplate[]`) | **Assumed** |
+| `assignRole(userId, roleId)` | POST | `/api/auth/users/{userId}/roles` | `{ roleId }` body | 204 No Content | **Assumed** |
+| `removeRole(userId, roleId)` | DELETE | `/api/auth/users/{userId}/roles/{roleId}` | — | 204 No Content | **Assumed** |
+
+> Auth routes are entirely B1-assumed. C2 defines auth middleware behavior but does not catalog auth-management endpoints. These routes must be confirmed with the auth/platform team.
+
+---
+
+## Appendix B: Response Envelope Reconciliation
+
+### C1-Confirmed Envelope Shapes
+
+C1 defines these standard response shapes. All B1 proxy adapter code must conform to these.
+
+**Collection (paginated):**
+```json
+{ "data": [ /* T[] */ ], "total": 0, "page": 1, "pageSize": 50 }
+```
+
+**Single item:**
+```json
+{ "data": { /* T */ } }
+```
+
+**No content:** HTTP 204 with empty body (or `{ "status": "ok" }`)
+
+**Error:**
+```json
+{ "error": "Human-readable message", "code": "ERROR_CODE", "requestId": "uuid" }
+```
+
+### B1 vs C1 Discrepancies
+
+| Concern | B1 Current Code | C1 Contract | Action Required |
+|---|---|---|---|
+| **Error field name** | Reads `body.message` in `handleResponse()` | Sends `body.error` | **Must fix:** Update `handleResponse` to read `.error` field instead of `.message`, or read both with `.error` preferred |
+| **Error code field** | Does not read response `code` | Sends `code` in error body | **Should use:** Map C1's `code` field to `HbcDataAccessError.code` when available |
+| **Request ID in errors** | Not extracted from error response | Sends `requestId` in error body | **Optional:** Could log `requestId` from error response for debugging |
+| **Default pageSize** | `mapPagedResponse` defaults to 20; `@hbc/models` `DEFAULT_PAGE_SIZE` = 25 | Default 50, max 200 | **Must align:** Use C1's default (50) or explicitly pass pageSize on every request |
+| **pageSize max** | `@hbc/models` `MAX_PAGE_SIZE` = 100 | Max 200 | **Note:** B1 enforces stricter limit; this is acceptable but should be documented |
+
+### Impact on Implementation
+
+These discrepancies do NOT block B1 implementation because all B1 tests use mocked fetch. However, they **must be resolved before production activation**:
+
+1. The error field mismatch (`message` vs `error`) will cause B1 to display generic "Validation failed" messages instead of actual backend error text
+2. The pagination default mismatch will cause B1 to request 20-25 items when the backend defaults to 50 — functional but suboptimal
 
 ---
 
