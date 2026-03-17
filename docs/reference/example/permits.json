@@ -1,7 +1,7 @@
 [
   {
     "id": "perm-001",
-    "projectId": 2525840,
+    "project_id": 2525840,
     "number": "MAST-2024-001",
     "type": "Master Building Permit",
     "status": "renewed",
@@ -84,7 +84,7 @@
   },
   {
     "id": "perm-002",
-    "projectId": 2525840,
+    "project_id": 2525840,
     "number": "DEMO-2024-002",
     "type": "Demolition",
     "status": "renewed",
@@ -113,7 +113,7 @@
   },
   {
     "id": "perm-003",
-    "projectId": 2525840,
+    "project_id": 2525840,
     "number": "SITE-2024-003",
     "type": "Site Development",
     "status": "expired",
@@ -143,7 +143,7 @@
   },
   {
     "id": "perm-004",
-    "projectId": 2525840,
+    "project_id": 2525840,
     "number": "ELEC-2024-004",
     "type": "Electrical",
     "status": "renewed",
@@ -230,7 +230,7 @@
   },
   {
     "id": "perm-005",
-    "projectId": 2525840,
+    "project_id": 2525840,
     "number": "ROOF-2024-005",
     "type": "Roofing",
     "status": "renewed",
@@ -258,7 +258,7 @@
   },
   {
     "id": "perm-006",
-    "projectId": 2525841,
+    "project_id": 2525841,
     "number": "MAST-2025-006",
     "type": "Master Building Permit",
     "status": "renewed",
@@ -286,7 +286,7 @@
   },
   {
     "id": "perm-007",
-    "projectId": 2525841,
+    "project_id": 2525841,
     "number": "ELEC-2024-007",
     "type": "Electrical",
     "status": "pending",
@@ -312,7 +312,7 @@
   },
   {
     "id": "perm-008",
-    "projectId": 2525841,
+    "project_id": 2525841,
     "number": "POOL-2024-008",
     "type": "Pool Barricade",
     "status": "renewed",
@@ -340,7 +340,7 @@
   },
   {
     "id": "perm-009",
-    "projectId": 2525841,
+    "project_id": 2525841,
     "number": "SITE-2024-009",
     "type": "Site Development",
     "status": "approved",
@@ -366,7 +366,7 @@
   },
   {
     "id": "perm-010",
-    "projectId": 2525841,
+    "project_id": 2525841,
     "number": "FIRE-2024-010",
     "type": "Fire Alarm",
     "status": "pending",
@@ -392,7 +392,7 @@
   },
   {
     "id": "perm-011",
-    "projectId": 2525841,
+    "project_id": 2525841,
     "number": "DEMO-2025-011",
     "type": "Demolition",
     "status": "rejected",
@@ -420,7 +420,7 @@
   },
   {
     "id": "perm-012",
-    "projectId": 2525841,
+    "project_id": 2525841,
     "number": "ROOF-2025-012",
     "type": "Roofing",
     "status": "pending",
@@ -447,7 +447,7 @@
   },
   {
     "id": "perm-013",
-    "projectId": 2525841,
+    "project_id": 2525841,
     "number": "ELEV-2024-013",
     "type": "Elevator",
     "status": "pending",
@@ -473,7 +473,7 @@
   },
   {
     "id": "perm-014",
-    "projectId": 2525841,
+    "project_id": 2525841,
     "number": "MASS-2024-014",
     "type": "Mass Grading",
     "status": "expired",
@@ -501,7 +501,7 @@
   },
   {
     "id": "perm-015",
-    "projectId": 2525842,
+    "project_id": 2525842,
     "number": "MAST-2023-015",
     "type": "Master Building Permit",
     "status": "rejected",
@@ -527,7 +527,7 @@
   },
   {
     "id": "perm-016",
-    "projectId": 2525842,
+    "project_id": 2525842,
     "number": "DEMO-2022-016",
     "type": "Demolition",
     "status": "pending",
@@ -553,7 +553,7 @@
   },
   {
     "id": "perm-017",
-    "projectId": 2525842,
+    "project_id": 2525842,
     "number": "MASS-2023-017",
     "type": "Mass Grading",
     "status": "approved",
@@ -579,7 +579,7 @@
   },
   {
     "id": "perm-018",
-    "projectId": 2525842,
+    "project_id": 2525842,
     "number": "MECH-2023-018",
     "type": "Mechanical",
     "status": "approved",
@@ -606,7 +606,7 @@
   },
   {
     "id": "perm-019",
-    "projectId": 2525842,
+    "project_id": 2525842,
     "number": "ELEC-2023-019",
     "type": "Electrical",
     "status": "approved",
@@ -632,7 +632,7 @@
   },
   {
     "id": "perm-020",
-    "projectId": 2525842,
+    "project_id": 2525842,
     "number": "ELEV-2023-020",
     "type": "Elevator",
     "status": "expired",
@@ -659,7 +659,7 @@
   },
   {
     "id": "perm-021",
-    "projectId": 2525842,
+    "project_id": 2525842,
     "number": "PLUM-2022-021",
     "type": "Plumbing",
     "status": "renewed",
@@ -685,7 +685,7 @@
   },
   {
     "id": "perm-022",
-    "projectId": 2525843,
+    "project_id": 2525843,
     "number": "MAST-2024-022",
     "type": "Master Building Permit",
     "status": "expired",
@@ -711,7 +711,7 @@
   },
   {
     "id": "perm-023",
-    "projectId": 2525843,
+    "project_id": 2525843,
     "number": "POOL-2024-023",
     "type": "Pool Barricade",
     "status": "rejected",
@@ -739,7 +739,7 @@
   },
   {
     "id": "perm-024",
-    "projectId": 2525843,
+    "project_id": 2525843,
     "number": "ELEV-2024-024",
     "type": "Elevator",
     "status": "approved",
@@ -767,7 +767,7 @@
   },
   {
     "id": "perm-025",
-    "projectId": 2525843,
+    "project_id": 2525843,
     "number": "FIRE-2024-025",
     "type": "Fire Alarm",
     "status": "renewed",
@@ -795,7 +795,7 @@
   },
   {
     "id": "perm-026",
-    "projectId": 2525843,
+    "project_id": 2525843,
     "number": "SITE-2024-026",
     "type": "Site Development",
     "status": "expired",
@@ -821,7 +821,7 @@
   },
   {
     "id": "perm-027",
-    "projectId": 2525843,
+    "project_id": 2525843,
     "number": "FIRE-2024-027",
     "type": "Fire Sprinkler",
     "status": "renewed",
@@ -847,7 +847,7 @@
   },
   {
     "id": "perm-028",
-    "projectId": 2525843,
+    "project_id": 2525843,
     "number": "MASS-2024-028",
     "type": "Mass Grading",
     "status": "renewed",
@@ -874,7 +874,7 @@
   },
   {
     "id": "perm-029",
-    "projectId": 2525844,
+    "project_id": 2525844,
     "number": "MAST-2021-029",
     "type": "Master Building Permit",
     "status": "pending",
@@ -901,7 +901,7 @@
   },
   {
     "id": "perm-030",
-    "projectId": 2525844,
+    "project_id": 2525844,
     "number": "DEMO-2022-030",
     "type": "Demolition",
     "status": "approved",
@@ -927,7 +927,7 @@
   },
   {
     "id": "perm-031",
-    "projectId": 2525844,
+    "project_id": 2525844,
     "number": "FIRE-2021-031",
     "type": "Fire Sprinkler",
     "status": "pending",
@@ -954,7 +954,7 @@
   },
   {
     "id": "perm-032",
-    "projectId": 2525844,
+    "project_id": 2525844,
     "number": "POOL-2021-032",
     "type": "Pool Barricade",
     "status": "approved",
@@ -980,7 +980,7 @@
   },
   {
     "id": "perm-033",
-    "projectId": 2525844,
+    "project_id": 2525844,
     "number": "MASS-2021-033",
     "type": "Mass Grading",
     "status": "approved",
@@ -1006,7 +1006,7 @@
   },
   {
     "id": "perm-034",
-    "projectId": 2525844,
+    "project_id": 2525844,
     "number": "MECH-2021-034",
     "type": "Mechanical",
     "status": "approved",
@@ -1033,7 +1033,7 @@
   },
   {
     "id": "perm-035",
-    "projectId": 2525844,
+    "project_id": 2525844,
     "number": "ELEC-2021-035",
     "type": "Electrical",
     "status": "pending",
@@ -1061,7 +1061,7 @@
   },
   {
     "id": "perm-036",
-    "projectId": 2525845,
+    "project_id": 2525845,
     "number": "MAST-2024-036",
     "type": "Master Building Permit",
     "status": "pending",
@@ -1087,7 +1087,7 @@
   },
   {
     "id": "perm-037",
-    "projectId": 2525845,
+    "project_id": 2525845,
     "number": "FIRE-2024-037",
     "type": "Fire Alarm",
     "status": "pending",
@@ -1115,7 +1115,7 @@
   },
   {
     "id": "perm-038",
-    "projectId": 2525845,
+    "project_id": 2525845,
     "number": "MECH-2024-038",
     "type": "Mechanical",
     "status": "approved",
@@ -1141,7 +1141,7 @@
   },
   {
     "id": "perm-039",
-    "projectId": 2525845,
+    "project_id": 2525845,
     "number": "DEMO-2024-039",
     "type": "Demolition",
     "status": "renewed",
@@ -1168,7 +1168,7 @@
   },
   {
     "id": "perm-040",
-    "projectId": 2525845,
+    "project_id": 2525845,
     "number": "ELEC-2024-040",
     "type": "Electrical",
     "status": "approved",
@@ -1194,7 +1194,7 @@
   },
   {
     "id": "perm-041",
-    "projectId": 2525845,
+    "project_id": 2525845,
     "number": "FIRE-2024-041",
     "type": "Fire Sprinkler",
     "status": "expired",
@@ -1221,7 +1221,7 @@
   },
   {
     "id": "perm-042",
-    "projectId": 2525845,
+    "project_id": 2525845,
     "number": "ELEV-2024-042",
     "type": "Elevator",
     "status": "rejected",
@@ -1248,7 +1248,7 @@
   },
   {
     "id": "perm-043",
-    "projectId": 2525846,
+    "project_id": 2525846,
     "number": "MAST-2025-043",
     "type": "Master Building Permit",
     "status": "rejected",
@@ -1274,7 +1274,7 @@
   },
   {
     "id": "perm-044",
-    "projectId": 2525846,
+    "project_id": 2525846,
     "number": "ELEC-2025-044",
     "type": "Electrical",
     "status": "pending",
@@ -1300,7 +1300,7 @@
   },
   {
     "id": "perm-045",
-    "projectId": 2525846,
+    "project_id": 2525846,
     "number": "ROOF-2024-045",
     "type": "Roofing",
     "status": "approved",
@@ -1326,7 +1326,7 @@
   },
   {
     "id": "perm-046",
-    "projectId": 2525846,
+    "project_id": 2525846,
     "number": "PLUM-2025-046",
     "type": "Plumbing",
     "status": "expired",
@@ -1352,7 +1352,7 @@
   },
   {
     "id": "perm-047",
-    "projectId": 2525846,
+    "project_id": 2525846,
     "number": "MECH-2024-047",
     "type": "Mechanical",
     "status": "renewed",
@@ -1380,7 +1380,7 @@
   },
   {
     "id": "perm-048",
-    "projectId": 2525846,
+    "project_id": 2525846,
     "number": "FIRE-2025-048",
     "type": "Fire Sprinkler",
     "status": "expired",
@@ -1406,7 +1406,7 @@
   },
   {
     "id": "perm-049",
-    "projectId": 2525847,
+    "project_id": 2525847,
     "number": "MAST-2023-049",
     "type": "Master Building Permit",
     "status": "renewed",
@@ -1433,7 +1433,7 @@
   },
   {
     "id": "perm-050",
-    "projectId": 2525847,
+    "project_id": 2525847,
     "number": "PLUM-2023-050",
     "type": "Plumbing",
     "status": "renewed",
@@ -1460,7 +1460,7 @@
   },
   {
     "id": "perm-051",
-    "projectId": 2525847,
+    "project_id": 2525847,
     "number": "FIRE-2023-051",
     "type": "Fire Alarm",
     "status": "renewed",
@@ -1488,7 +1488,7 @@
   },
   {
     "id": "perm-052",
-    "projectId": 2525847,
+    "project_id": 2525847,
     "number": "ELEV-2023-052",
     "type": "Elevator",
     "status": "expired",
@@ -1514,7 +1514,7 @@
   },
   {
     "id": "perm-053",
-    "projectId": 2525847,
+    "project_id": 2525847,
     "number": "POOL-2023-053",
     "type": "Pool Barricade",
     "status": "expired",
@@ -1541,7 +1541,7 @@
   },
   {
     "id": "perm-054",
-    "projectId": 2525847,
+    "project_id": 2525847,
     "number": "MASS-2023-054",
     "type": "Mass Grading",
     "status": "expired",
@@ -1568,7 +1568,7 @@
   },
   {
     "id": "perm-055",
-    "projectId": 2525847,
+    "project_id": 2525847,
     "number": "ROOF-2023-055",
     "type": "Roofing",
     "status": "pending",
@@ -1595,7 +1595,7 @@
   },
   {
     "id": "perm-056",
-    "projectId": 2525847,
+    "project_id": 2525847,
     "number": "FIRE-2023-056",
     "type": "Fire Sprinkler",
     "status": "rejected",
@@ -1622,7 +1622,7 @@
   },
   {
     "id": "perm-057",
-    "projectId": 2525848,
+    "project_id": 2525848,
     "number": "MAST-2024-057",
     "type": "Master Building Permit",
     "status": "approved",
@@ -1648,7 +1648,7 @@
   },
   {
     "id": "perm-058",
-    "projectId": 2525848,
+    "project_id": 2525848,
     "number": "ELEC-2024-058",
     "type": "Electrical",
     "status": "rejected",
@@ -1674,7 +1674,7 @@
   },
   {
     "id": "perm-059",
-    "projectId": 2525848,
+    "project_id": 2525848,
     "number": "MASS-2024-059",
     "type": "Mass Grading",
     "status": "renewed",
@@ -1701,7 +1701,7 @@
   },
   {
     "id": "perm-060",
-    "projectId": 2525848,
+    "project_id": 2525848,
     "number": "PLUM-2024-060",
     "type": "Plumbing",
     "status": "expired",
@@ -1729,7 +1729,7 @@
   },
   {
     "id": "perm-061",
-    "projectId": 2525848,
+    "project_id": 2525848,
     "number": "DEMO-2024-061",
     "type": "Demolition",
     "status": "rejected",
@@ -1756,7 +1756,7 @@
   },
   {
     "id": "perm-062",
-    "projectId": 2525848,
+    "project_id": 2525848,
     "number": "MECH-2024-062",
     "type": "Mechanical",
     "status": "rejected",
@@ -1782,7 +1782,7 @@
   },
   {
     "id": "perm-063",
-    "projectId": 2525848,
+    "project_id": 2525848,
     "number": "ELEV-2024-063",
     "type": "Elevator",
     "status": "pending",
@@ -1809,7 +1809,7 @@
   },
   {
     "id": "perm-064",
-    "projectId": 2525848,
+    "project_id": 2525848,
     "number": "SITE-2024-064",
     "type": "Site Development",
     "status": "approved",
@@ -1837,7 +1837,7 @@
   },
   {
     "id": "perm-065",
-    "projectId": 2525848,
+    "project_id": 2525848,
     "number": "FIRE-2024-065",
     "type": "Fire Sprinkler",
     "status": "pending",
@@ -1865,7 +1865,7 @@
   },
   {
     "id": "perm-066",
-    "projectId": 2525849,
+    "project_id": 2525849,
     "number": "MAST-2025-066",
     "type": "Master Building Permit",
     "status": "expired",
@@ -1893,7 +1893,7 @@
   },
   {
     "id": "perm-067",
-    "projectId": 2525849,
+    "project_id": 2525849,
     "number": "ELEC-2024-067",
     "type": "Electrical",
     "status": "approved",
@@ -1921,7 +1921,7 @@
   },
   {
     "id": "perm-068",
-    "projectId": 2525849,
+    "project_id": 2525849,
     "number": "MASS-2024-068",
     "type": "Mass Grading",
     "status": "approved",
@@ -1947,7 +1947,7 @@
   },
   {
     "id": "perm-069",
-    "projectId": 2525849,
+    "project_id": 2525849,
     "number": "PLUM-2024-069",
     "type": "Plumbing",
     "status": "pending",
@@ -1974,7 +1974,7 @@
   },
   {
     "id": "perm-070",
-    "projectId": 2525849,
+    "project_id": 2525849,
     "number": "SITE-2024-070",
     "type": "Site Development",
     "status": "pending",
@@ -2000,7 +2000,7 @@
   },
   {
     "id": "perm-071",
-    "projectId": 2525849,
+    "project_id": 2525849,
     "number": "MECH-2024-071",
     "type": "Mechanical",
     "status": "expired",
@@ -2027,7 +2027,7 @@
   },
   {
     "id": "perm-072",
-    "projectId": 2525849,
+    "project_id": 2525849,
     "number": "FIRE-2025-072",
     "type": "Fire Alarm",
     "status": "rejected",
@@ -2055,7 +2055,7 @@
   },
   {
     "id": "perm-073",
-    "projectId": 2525849,
+    "project_id": 2525849,
     "number": "DEMO-2024-073",
     "type": "Demolition",
     "status": "expired",
@@ -2081,7 +2081,7 @@
   },
   {
     "id": "perm-074",
-    "projectId": 2525849,
+    "project_id": 2525849,
     "number": "FIRE-2024-074",
     "type": "Fire Sprinkler",
     "status": "rejected",
@@ -2108,7 +2108,7 @@
   },
   {
     "id": "perm-075",
-    "projectId": 2525849,
+    "project_id": 2525849,
     "number": "POOL-2024-075",
     "type": "Pool Barricade",
     "status": "approved",
@@ -2134,7 +2134,7 @@
   },
   {
     "id": "perm-076",
-    "projectId": 2525850,
+    "project_id": 2525850,
     "number": "MAST-2024-076",
     "type": "Master Building Permit",
     "status": "rejected",
@@ -2160,7 +2160,7 @@
   },
   {
     "id": "perm-077",
-    "projectId": 2525850,
+    "project_id": 2525850,
     "number": "FIRE-2024-077",
     "type": "Fire Sprinkler",
     "status": "approved",
@@ -2188,7 +2188,7 @@
   },
   {
     "id": "perm-078",
-    "projectId": 2525850,
+    "project_id": 2525850,
     "number": "MECH-2024-078",
     "type": "Mechanical",
     "status": "rejected",
@@ -2216,7 +2216,7 @@
   },
   {
     "id": "perm-079",
-    "projectId": 2525850,
+    "project_id": 2525850,
     "number": "SITE-2024-079",
     "type": "Site Development",
     "status": "rejected",
@@ -2243,7 +2243,7 @@
   },
   {
     "id": "perm-080",
-    "projectId": 2525850,
+    "project_id": 2525850,
     "number": "FIRE-2024-080",
     "type": "Fire Alarm",
     "status": "approved",
@@ -2271,7 +2271,7 @@
   },
   {
     "id": "perm-081",
-    "projectId": 2525850,
+    "project_id": 2525850,
     "number": "MASS-2024-081",
     "type": "Mass Grading",
     "status": "rejected",
@@ -2297,7 +2297,7 @@
   },
   {
     "id": "perm-082",
-    "projectId": 2525850,
+    "project_id": 2525850,
     "number": "ELEV-2024-082",
     "type": "Elevator",
     "status": "renewed",
@@ -2324,7 +2324,7 @@
   },
   {
     "id": "perm-083",
-    "projectId": 2525850,
+    "project_id": 2525850,
     "number": "ELEC-2024-083",
     "type": "Electrical",
     "status": "renewed",
@@ -2352,7 +2352,7 @@
   },
   {
     "id": "perm-084",
-    "projectId": 2525851,
+    "project_id": 2525851,
     "number": "MAST-2024-084",
     "type": "Master Building Permit",
     "status": "approved",
@@ -2379,7 +2379,7 @@
   },
   {
     "id": "perm-085",
-    "projectId": 2525851,
+    "project_id": 2525851,
     "number": "FIRE-2024-085",
     "type": "Fire Alarm",
     "status": "expired",
@@ -2405,7 +2405,7 @@
   },
   {
     "id": "perm-086",
-    "projectId": 2525851,
+    "project_id": 2525851,
     "number": "SITE-2024-086",
     "type": "Site Development",
     "status": "approved",
@@ -2432,7 +2432,7 @@
   },
   {
     "id": "perm-087",
-    "projectId": 2525851,
+    "project_id": 2525851,
     "number": "ROOF-2024-087",
     "type": "Roofing",
     "status": "renewed",
@@ -2459,7 +2459,7 @@
   },
   {
     "id": "perm-088",
-    "projectId": 2525851,
+    "project_id": 2525851,
     "number": "DEMO-2024-088",
     "type": "Demolition",
     "status": "rejected",
@@ -2487,7 +2487,7 @@
   },
   {
     "id": "perm-089",
-    "projectId": 2525851,
+    "project_id": 2525851,
     "number": "FIRE-2024-089",
     "type": "Fire Sprinkler",
     "status": "renewed",
@@ -2515,7 +2515,7 @@
   },
   {
     "id": "perm-090",
-    "projectId": 2525852,
+    "project_id": 2525852,
     "number": "MAST-2023-090",
     "type": "Master Building Permit",
     "status": "pending",
@@ -2543,7 +2543,7 @@
   },
   {
     "id": "perm-091",
-    "projectId": 2525852,
+    "project_id": 2525852,
     "number": "SITE-2023-091",
     "type": "Site Development",
     "status": "pending",
@@ -2570,7 +2570,7 @@
   },
   {
     "id": "perm-092",
-    "projectId": 2525852,
+    "project_id": 2525852,
     "number": "MASS-2023-092",
     "type": "Mass Grading",
     "status": "approved",
@@ -2597,7 +2597,7 @@
   },
   {
     "id": "perm-093",
-    "projectId": 2525852,
+    "project_id": 2525852,
     "number": "ELEC-2023-093",
     "type": "Electrical",
     "status": "approved",
@@ -2624,7 +2624,7 @@
   },
   {
     "id": "perm-094",
-    "projectId": 2525852,
+    "project_id": 2525852,
     "number": "ELEV-2023-094",
     "type": "Elevator",
     "status": "renewed",
@@ -2652,7 +2652,7 @@
   },
   {
     "id": "perm-095",
-    "projectId": 2525852,
+    "project_id": 2525852,
     "number": "DEMO-2023-095",
     "type": "Demolition",
     "status": "approved",
@@ -2680,7 +2680,7 @@
   },
   {
     "id": "perm-096",
-    "projectId": 2525852,
+    "project_id": 2525852,
     "number": "PLUM-2023-096",
     "type": "Plumbing",
     "status": "renewed",
@@ -2708,7 +2708,7 @@
   },
   {
     "id": "perm-097",
-    "projectId": 2525852,
+    "project_id": 2525852,
     "number": "MECH-2023-097",
     "type": "Mechanical",
     "status": "pending",
@@ -2736,7 +2736,7 @@
   },
   {
     "id": "perm-098",
-    "projectId": 2525852,
+    "project_id": 2525852,
     "number": "FIRE-2023-098",
     "type": "Fire Alarm",
     "status": "approved",
@@ -2762,7 +2762,7 @@
   },
   {
     "id": "perm-099",
-    "projectId": 2525853,
+    "project_id": 2525853,
     "number": "MAST-2024-099",
     "type": "Master Building Permit",
     "status": "approved",
@@ -2788,7 +2788,7 @@
   },
   {
     "id": "perm-100",
-    "projectId": 2525853,
+    "project_id": 2525853,
     "number": "ELEC-2024-100",
     "type": "Electrical",
     "status": "rejected",
@@ -2815,7 +2815,7 @@
   },
   {
     "id": "perm-101",
-    "projectId": 2525853,
+    "project_id": 2525853,
     "number": "MECH-2024-101",
     "type": "Mechanical",
     "status": "expired",
@@ -2843,7 +2843,7 @@
   },
   {
     "id": "perm-102",
-    "projectId": 2525853,
+    "project_id": 2525853,
     "number": "POOL-2024-102",
     "type": "Pool Barricade",
     "status": "approved",
@@ -2870,7 +2870,7 @@
   },
   {
     "id": "perm-103",
-    "projectId": 2525853,
+    "project_id": 2525853,
     "number": "MASS-2024-103",
     "type": "Mass Grading",
     "status": "expired",
@@ -2896,7 +2896,7 @@
   },
   {
     "id": "perm-104",
-    "projectId": 2525854,
+    "project_id": 2525854,
     "number": "MAST-2022-104",
     "type": "Master Building Permit",
     "status": "pending",
@@ -2924,7 +2924,7 @@
   },
   {
     "id": "perm-105",
-    "projectId": 2525854,
+    "project_id": 2525854,
     "number": "PLUM-2022-105",
     "type": "Plumbing",
     "status": "expired",
@@ -2950,7 +2950,7 @@
   },
   {
     "id": "perm-106",
-    "projectId": 2525854,
+    "project_id": 2525854,
     "number": "SITE-2022-106",
     "type": "Site Development",
     "status": "pending",
@@ -2978,7 +2978,7 @@
   },
   {
     "id": "perm-107",
-    "projectId": 2525854,
+    "project_id": 2525854,
     "number": "POOL-2022-107",
     "type": "Pool Barricade",
     "status": "approved",
@@ -3005,7 +3005,7 @@
   },
   {
     "id": "perm-108",
-    "projectId": 2525854,
+    "project_id": 2525854,
     "number": "FIRE-2022-108",
     "type": "Fire Alarm",
     "status": "approved",
@@ -3031,7 +3031,7 @@
   },
   {
     "id": "perm-109",
-    "projectId": 2525854,
+    "project_id": 2525854,
     "number": "MASS-2022-109",
     "type": "Mass Grading",
     "status": "approved",
@@ -3057,7 +3057,7 @@
   },
   {
     "id": "perm-110",
-    "projectId": 2525855,
+    "project_id": 2525855,
     "number": "MAST-2024-110",
     "type": "Master Building Permit",
     "status": "approved",
@@ -3084,7 +3084,7 @@
   },
   {
     "id": "perm-111",
-    "projectId": 2525855,
+    "project_id": 2525855,
     "number": "SITE-2024-111",
     "type": "Site Development",
     "status": "expired",
@@ -3111,7 +3111,7 @@
   },
   {
     "id": "perm-112",
-    "projectId": 2525855,
+    "project_id": 2525855,
     "number": "MASS-2024-112",
     "type": "Mass Grading",
     "status": "renewed",
@@ -3137,7 +3137,7 @@
   },
   {
     "id": "perm-113",
-    "projectId": 2525855,
+    "project_id": 2525855,
     "number": "FIRE-2024-113",
     "type": "Fire Alarm",
     "status": "renewed",
@@ -3163,7 +3163,7 @@
   },
   {
     "id": "perm-114",
-    "projectId": 2525855,
+    "project_id": 2525855,
     "number": "FIRE-2024-114",
     "type": "Fire Sprinkler",
     "status": "pending",
@@ -3189,7 +3189,7 @@
   },
   {
     "id": "perm-115",
-    "projectId": 2525855,
+    "project_id": 2525855,
     "number": "PLUM-2024-115",
     "type": "Plumbing",
     "status": "approved",
@@ -3217,7 +3217,7 @@
   },
   {
     "id": "perm-116",
-    "projectId": 2525855,
+    "project_id": 2525855,
     "number": "MECH-2024-116",
     "type": "Mechanical",
     "status": "rejected",
@@ -3245,7 +3245,7 @@
   },
   {
     "id": "perm-117",
-    "projectId": 2525855,
+    "project_id": 2525855,
     "number": "POOL-2024-117",
     "type": "Pool Barricade",
     "status": "expired",
@@ -3272,7 +3272,7 @@
   },
   {
     "id": "perm-118",
-    "projectId": 2525855,
+    "project_id": 2525855,
     "number": "DEMO-2024-118",
     "type": "Demolition",
     "status": "approved",
@@ -3299,7 +3299,7 @@
   },
   {
     "id": "perm-119",
-    "projectId": 2525855,
+    "project_id": 2525855,
     "number": "ROOF-2024-119",
     "type": "Roofing",
     "status": "renewed",
@@ -3325,7 +3325,7 @@
   },
   {
     "id": "perm-120",
-    "projectId": 2525856,
+    "project_id": 2525856,
     "number": "MAST-2025-120",
     "type": "Master Building Permit",
     "status": "approved",
@@ -3352,7 +3352,7 @@
   },
   {
     "id": "perm-121",
-    "projectId": 2525856,
+    "project_id": 2525856,
     "number": "FIRE-2025-121",
     "type": "Fire Sprinkler",
     "status": "expired",
@@ -3379,7 +3379,7 @@
   },
   {
     "id": "perm-122",
-    "projectId": 2525856,
+    "project_id": 2525856,
     "number": "MASS-2025-122",
     "type": "Mass Grading",
     "status": "pending",
@@ -3405,7 +3405,7 @@
   },
   {
     "id": "perm-123",
-    "projectId": 2525856,
+    "project_id": 2525856,
     "number": "ELEV-2025-123",
     "type": "Elevator",
     "status": "approved",
@@ -3433,7 +3433,7 @@
   },
   {
     "id": "perm-124",
-    "projectId": 2525856,
+    "project_id": 2525856,
     "number": "DEMO-2025-124",
     "type": "Demolition",
     "status": "pending",
@@ -3460,7 +3460,7 @@
   },
   {
     "id": "perm-125",
-    "projectId": 2525856,
+    "project_id": 2525856,
     "number": "ELEC-2025-125",
     "type": "Electrical",
     "status": "rejected",
@@ -3486,7 +3486,7 @@
   },
   {
     "id": "perm-126",
-    "projectId": 2525856,
+    "project_id": 2525856,
     "number": "ROOF-2025-126",
     "type": "Roofing",
     "status": "pending",
@@ -3514,7 +3514,7 @@
   },
   {
     "id": "perm-127",
-    "projectId": 2525857,
+    "project_id": 2525857,
     "number": "MAST-2023-127",
     "type": "Master Building Permit",
     "status": "expired",
@@ -3542,7 +3542,7 @@
   },
   {
     "id": "perm-128",
-    "projectId": 2525857,
+    "project_id": 2525857,
     "number": "ROOF-2023-128",
     "type": "Roofing",
     "status": "expired",
@@ -3570,7 +3570,7 @@
   },
   {
     "id": "perm-129",
-    "projectId": 2525857,
+    "project_id": 2525857,
     "number": "POOL-2023-129",
     "type": "Pool Barricade",
     "status": "pending",
@@ -3597,7 +3597,7 @@
   },
   {
     "id": "perm-130",
-    "projectId": 2525857,
+    "project_id": 2525857,
     "number": "FIRE-2023-130",
     "type": "Fire Alarm",
     "status": "approved",
@@ -3624,7 +3624,7 @@
   },
   {
     "id": "perm-131",
-    "projectId": 2525857,
+    "project_id": 2525857,
     "number": "ELEC-2023-131",
     "type": "Electrical",
     "status": "pending",
@@ -3650,7 +3650,7 @@
   },
   {
     "id": "perm-132",
-    "projectId": 2525857,
+    "project_id": 2525857,
     "number": "DEMO-2023-132",
     "type": "Demolition",
     "status": "expired",
@@ -3676,7 +3676,7 @@
   },
   {
     "id": "perm-133",
-    "projectId": 2525857,
+    "project_id": 2525857,
     "number": "MASS-2023-133",
     "type": "Mass Grading",
     "status": "renewed",
@@ -3704,7 +3704,7 @@
   },
   {
     "id": "perm-134",
-    "projectId": 2525857,
+    "project_id": 2525857,
     "number": "MECH-2023-134",
     "type": "Mechanical",
     "status": "approved",
@@ -3732,7 +3732,7 @@
   },
   {
     "id": "perm-135",
-    "projectId": 2525857,
+    "project_id": 2525857,
     "number": "PLUM-2023-135",
     "type": "Plumbing",
     "status": "rejected",
@@ -3760,7 +3760,7 @@
   },
   {
     "id": "perm-136",
-    "projectId": 2525857,
+    "project_id": 2525857,
     "number": "FIRE-2023-136",
     "type": "Fire Sprinkler",
     "status": "pending",
@@ -3788,7 +3788,7 @@
   },
   {
     "id": "perm-137",
-    "projectId": 2525857,
+    "project_id": 2525857,
     "number": "ELEV-2023-137",
     "type": "Elevator",
     "status": "pending",
@@ -3815,7 +3815,7 @@
   },
   {
     "id": "perm-138",
-    "projectId": 2525858,
+    "project_id": 2525858,
     "number": "MAST-2024-138",
     "type": "Master Building Permit",
     "status": "pending",
@@ -3843,7 +3843,7 @@
   },
   {
     "id": "perm-139",
-    "projectId": 2525858,
+    "project_id": 2525858,
     "number": "ROOF-2024-139",
     "type": "Roofing",
     "status": "expired",
@@ -3869,7 +3869,7 @@
   },
   {
     "id": "perm-140",
-    "projectId": 2525858,
+    "project_id": 2525858,
     "number": "MECH-2024-140",
     "type": "Mechanical",
     "status": "pending",
@@ -3895,7 +3895,7 @@
   },
   {
     "id": "perm-141",
-    "projectId": 2525858,
+    "project_id": 2525858,
     "number": "SITE-2024-141",
     "type": "Site Development",
     "status": "expired",
@@ -3922,7 +3922,7 @@
   },
   {
     "id": "perm-142",
-    "projectId": 2525858,
+    "project_id": 2525858,
     "number": "POOL-2024-142",
     "type": "Pool Barricade",
     "status": "approved",
@@ -3950,7 +3950,7 @@
   },
   {
     "id": "perm-143",
-    "projectId": 2525859,
+    "project_id": 2525859,
     "number": "MAST-2021-143",
     "type": "Master Building Permit",
     "status": "rejected",
@@ -3976,7 +3976,7 @@
   },
   {
     "id": "perm-144",
-    "projectId": 2525859,
+    "project_id": 2525859,
     "number": "ELEC-2022-144",
     "type": "Electrical",
     "status": "rejected",
@@ -4004,7 +4004,7 @@
   },
   {
     "id": "perm-145",
-    "projectId": 2525859,
+    "project_id": 2525859,
     "number": "MECH-2022-145",
     "type": "Mechanical",
     "status": "renewed",
@@ -4031,7 +4031,7 @@
   },
   {
     "id": "perm-146",
-    "projectId": 2525859,
+    "project_id": 2525859,
     "number": "PLUM-2022-146",
     "type": "Plumbing",
     "status": "expired",
@@ -4057,7 +4057,7 @@
   },
   {
     "id": "perm-147",
-    "projectId": 2525859,
+    "project_id": 2525859,
     "number": "FIRE-2022-147",
     "type": "Fire Sprinkler",
     "status": "expired",
@@ -4084,7 +4084,7 @@
   },
   {
     "id": "perm-148",
-    "projectId": 2525859,
+    "project_id": 2525859,
     "number": "MASS-2022-148",
     "type": "Mass Grading",
     "status": "rejected",
@@ -4111,7 +4111,7 @@
   },
   {
     "id": "perm-149",
-    "projectId": 2525859,
+    "project_id": 2525859,
     "number": "ELEV-2022-149",
     "type": "Elevator",
     "status": "renewed",
@@ -4138,7 +4138,7 @@
   },
   {
     "id": "perm-150",
-    "projectId": 2525859,
+    "project_id": 2525859,
     "number": "FIRE-2021-150",
     "type": "Fire Alarm",
     "status": "expired",
@@ -4165,7 +4165,7 @@
   },
   {
     "id": "perm-151",
-    "projectId": 2525859,
+    "project_id": 2525859,
     "number": "DEMO-2022-151",
     "type": "Demolition",
     "status": "expired",
@@ -4193,7 +4193,7 @@
   },
   {
     "id": "perm-152",
-    "projectId": 2525859,
+    "project_id": 2525859,
     "number": "POOL-2021-152",
     "type": "Pool Barricade",
     "status": "rejected",
@@ -4220,7 +4220,7 @@
   },
   {
     "id": "perm-153",
-    "projectId": 2525859,
+    "project_id": 2525859,
     "number": "SITE-2022-153",
     "type": "Site Development",
     "status": "rejected",

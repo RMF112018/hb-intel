@@ -5,7 +5,7 @@
 **Classification:** Internal — Engineering
 **Status:** Draft — Structure Established
 **Date:** 2026-03-17
-**Read With:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md), [P1-A6-External-Financial-Data-Ingestion-Schema.md](./P1-A6-External-Financial-Data-Ingestion-Schema.md), [P1-A7-Operational-Register-Schema.md](./P1-A7-Operational-Register-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
+**Read With:** [P1-A1-Data-Ownership-Matrix.md](./P1-A1-Data-Ownership-Matrix.md), [P1-A2-Source-of-Record-Register.md](./P1-A2-Source-of-Record-Register.md), [P1-A4-Schedule-Ingestion-Normalization-Schema.md](./P1-A4-Schedule-Ingestion-Normalization-Schema.md), [P1-A5-Reference-Data-Dictionary-Schema.md](./P1-A5-Reference-Data-Dictionary-Schema.md), [P1-A6-External-Financial-Data-Ingestion-Schema.md](./P1-A6-External-Financial-Data-Ingestion-Schema.md), [P1-A7-Operational-Register-Schema.md](./P1-A7-Operational-Register-Schema.md), [P1-A8-Estimating-Kickoff-Schema.md](./P1-A8-Estimating-Kickoff-Schema.md), [current-state-map.md](../../blueprint/current-state-map.md)
 
 ---
 

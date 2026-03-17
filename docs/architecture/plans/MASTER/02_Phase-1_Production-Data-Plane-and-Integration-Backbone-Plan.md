@@ -60,6 +60,7 @@ At the end of Phase 1:
 - Reference data dictionary schema (cost codes and governed reference dictionaries)
 - External financial data ingestion schema (Procore Budget and external cost-control imports)
 - Operational register schema (hybrid issue/action/risk/constraint tracking)
+- Estimating kickoff schema (template-based pursuit coordination and deliverable assembly)
 
 ### 6.2 Workstream B — Adapter Completion
 **Goal:** complete production-capable repository adapters.
@@ -144,6 +145,7 @@ Mandatory deliverables for Phase 1:
 - Reference Data Dictionary Schema (cost codes and governed reference dictionaries)
 - External Financial Data Ingestion Schema (Procore Budget and external cost-control imports)
 - Operational Register Schema (hybrid issue/action/risk/constraint tracking)
+- Estimating Kickoff Schema (template-based pursuit coordination and deliverable assembly)
 - Adapter Completion Backlog and Status Tracker
 - Service Contract Catalog
 - Error / Retry / Recovery Design Note
