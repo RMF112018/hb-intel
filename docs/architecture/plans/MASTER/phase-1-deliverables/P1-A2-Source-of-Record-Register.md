@@ -801,7 +801,34 @@ All `*_import_finding` entities are stored in Azure Table Storage (Class D, audi
 
 **Completeness requirement.** Every person-attributed field across all Phase 1 schemas must have both a `_key` and `_display` field (or be a direct UPN field). Display-only person fields without corresponding key fields are not compliant with this standard.
 
-**Cross-reference.** This standard consolidates the rules from Class G (person-attribution) and Class H (vendor/party identity) in the Identity Strategy section above. The identity classes define the semantic rules; this section defines the cross-schema structural contract.
+**Cross-reference.** This standard consolidates the rules from Class G (person-attribution) in the Identity Strategy section above. The identity class defines the semantic rules; this section defines the cross-schema structural contract. For vendor/party identity (Class H), see the Vendor Identity Resolution Platform Standard below.
+
+### Vendor Identity Resolution Platform Standard (Frozen)
+
+> **Status: Frozen.** This section defines the cross-schema platform standard for vendor, subcontractor, and organization-party identity. The structural contract is standardized here. The canonical vendor registry (the source of resolved vendor keys) is a Phase 2 deliverable; Phase 1 schemas implement the structural contract with nullable keys.
+
+**Structural contract.** Every field that identifies an external organization or company party (subcontractor, vendor, client/owner organization, authority body, responsible party when that party is an organization rather than a person) follows the `*_key` + `*_display` pattern:
+
+- **Stable join key** (`*_key`): The canonical vendor/party identifier when resolved via a vendor registry, party catalog, or equivalent lookup. Nullable if unresolved. Never synthetic — do not invent vendor IDs to fill the gap.
+- **Display mirror** (`*_display` or `*_display_name`): The raw source text (company name, subcontractor name, etc.). Always populated regardless of resolution status. Never the canonical join key.
+
+**Distinction from person identity.** Vendor/party identity (Class H) shares the same `*_key` + `*_display` structural pattern as person identity (Class G), but the key source differs. Person keys resolve to UPN via Entra ID. Vendor keys resolve to a canonical party identifier via a vendor registry or party catalog. The structural contract is identical; the resolution mechanism is distinct.
+
+**Unresolved-import behavior.** When imported data contains a company/vendor name that cannot be resolved to a canonical vendor key (the expected Phase 1 state, since no vendor registry exists yet), the `*_key` field is null and the `*_display` field preserves the raw source text. The adapter/service layer may backfill the key when a vendor registry becomes available in Phase 2+.
+
+**Resolution ownership.** The adapter/service layer owns vendor name-to-key resolution. Resolution occurs at import time or adapter-read time when a vendor registry is available. Client code, UI layers, and external callers never perform resolution or generate vendor keys.
+
+**Phase 1 fields governed by this standard:**
+
+| Schema | Entity | Key Field | Display Field | Description |
+|--------|--------|-----------|---------------|-------------|
+| P1-A12 | `scorecard_evaluation` | `subcontractor_key` | `subcontractor_display_name` | Subcontractor being evaluated |
+| P1-A15 | `prime_contract` | `owner_client_key` | `owner_client_display` | Owner/client organization on contract |
+| P1-A11 | `project_item_instance` | `responsible_party_key` | `responsible_party_display` | Responsible party (Owner Contract family) |
+
+**Pre-existing fields.** A3's `BuyoutCommitments` container includes `vendorName` as a pre-existing physical column from the buyout domain buildout. This field predates the platform standard and does not have a corresponding `vendor_key` column. During P1-B1 implementation, `vendorName` should be treated as a display field per Class H conventions. Adding a `vendor_key` column is deferred to the buyout adapter implementation.
+
+**What remains open.** The canonical vendor registry — the authoritative source of vendor/party keys — is a Phase 2 deliverable. The structural contract (key + display pairs, nullable keys, adapter-owned resolution) is frozen now. Schemas do not need to wait for the vendor registry to implement the structural pattern; they use nullable keys until the registry is available.
 
 ### Proxy Adapter (Phase 1 MVP)
 The `@hbc/af-adapter-proxy` is the placeholder adapter that:
@@ -853,5 +880,6 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 | 1.5 | 2026-03-17 | Architecture | Add entity-level prime contracts domain (P1-A15): 3 entities — `prime_contract` (Class A), `contract_import_batch` (Class D), `contract_import_finding` (Class D); canonical identity frozen as surrogate `contract_id` with `contract_number` natural key and `source_project_id` for Procore federation; financial field classification (authoritative vs derived); owner/client contact as Class H, primary contact as Class G; extend coverage to A4–A15 |
 | 1.6 | 2026-03-17 | Architecture | Reconcile domain summary rows: update leads row to reflect A14 two-list model (`MarketLeads`, `PipelineSnapshots`) with surrogate identity; update contracts row to reflect A15 single-list `PrimeContracts` with surrogate `contract_id` (remove stale paired library + document URL identity) |
 | 1.7 | 2026-03-17 | Architecture | Froze Import-State Platform Standard: governed two-tier model for `import_batch` (Azure Table Storage default, SharePoint List exception for schedule/budget with explicit conditions), universal Azure Table Storage rule for `import_finding`, `sourceBatchId` cross-reference convention, completeness requirement (every import-driven domain must define both batch and finding entities). Fixed Non-SharePoint enumeration to exclude SharePoint-resident batch records. Added 3 missing finding entities to enumeration: `kickoff_import_finding`, `checklist_import_finding`, `responsibility_import_finding`. |
-| 1.8 | 2026-03-17 | Architecture | Froze Person Identity Resolution Platform Standard: consolidated Class G (person-attribution) and Class H (vendor/party) structural contract into one cross-schema section — `*_key` + `*_display` pair with nullable key for unresolved imports, direct UPN for system-attribution fields, adapter/service-layer resolution ownership, completeness requirement (every person-attributed field must have both key and display). |
+| 1.8 | 2026-03-17 | Architecture | Froze Person Identity Resolution Platform Standard: consolidated Class G (person-attribution) structural contract into one cross-schema section — `*_key` + `*_display` pair with nullable key for unresolved imports, direct UPN for system-attribution fields, adapter/service-layer resolution ownership, completeness requirement (every person-attributed field must have both key and display). |
+| 1.9 | 2026-03-17 | Architecture | Froze Vendor Identity Resolution Platform Standard: consolidated Class H (vendor/party) structural contract into a dedicated cross-schema section — `*_key` + `*_display` pair with nullable key for unresolved vendor names, adapter/service-layer resolution ownership, vendor registry as Phase 2 deliverable. Enumerated all Phase 1 governed fields (A11 responsible_party, A12 subcontractor, A15 owner_client). Noted buyout vendorName as pre-existing display field. |
 

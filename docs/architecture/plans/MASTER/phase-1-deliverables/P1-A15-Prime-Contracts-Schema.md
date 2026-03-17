@@ -325,7 +325,7 @@ Follows the same contact snapshot pattern as P1-A9 (permits):
 | **Individual change order records** | Source has aggregate CO totals only; individual CO records need a separate data source (Procore CO export) | Platform Architecture | Phase 2 |
 | **Invoice/payment line items** | Source has aggregate totals only; individual invoice records need a separate data source | Platform Architecture + Finance | Phase 2 |
 | **Contract document library** | Paired document library for contract PDFs, amendments, certificates; no attachments in Phase 1 source | Platform Architecture | Phase 2 |
-| **Vendor/owner registry linkage** | Resolve `owner_client_key` against a canonical vendor/party registry | Platform Architecture | Phase 2+ |
+| **Vendor registry implementation** | Build canonical vendor registry and populate `owner_client_key` from it. Structural contract (`owner_client_key` + `owner_client_display`) is frozen per Vendor Identity Resolution Platform Standard in P1-A2; what remains is the registry itself | Platform Architecture | Phase 2+ |
 | **Contract-to-buyout cross-reference** | Link prime contracts to subcontracts in buyout domain for total exposure views | Platform Architecture | Phase 2 |
 | **Contract status dictionary** | Formalize 4 status values as governed reference set | Platform Architecture | Phase 1 (late) |
 
@@ -350,3 +350,4 @@ Follows the same contact snapshot pattern as P1-A9 (permits):
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 3 canonical entities (prime_contract, contract_import_batch, contract_import_finding). Flat Procore-sourced model with 38 fields on prime_contract. Identity strategy frozen: surrogate `contract_id` as canonical PK, `contract_number` as natural key, `source_project_id` for Procore federation. Financial field classification (authoritative vs derived). Vendor/owner contact snapshots (Class G/H). No child entities or document library — aggregate totals and no attachments in source. |
 | 0.2 | 2026-03-17 | Architecture | Added cross-reference to P1-A2 Person Identity Resolution Platform Standard in contact/identity section. |
+| 0.3 | 2026-03-17 | Architecture | Narrowed "Vendor/owner registry linkage" open decision to "Vendor registry implementation" per P1-A2 Vendor Identity Resolution Platform Standard. Structural contract (owner_client_key + owner_client_display) is frozen; registry is Phase 2+. |

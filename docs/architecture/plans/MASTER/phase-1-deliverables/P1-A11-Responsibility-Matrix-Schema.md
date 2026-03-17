@@ -263,7 +263,7 @@ Governed catalog of roles/parties available as assignment targets.
 | article_number | string | No | — | Contract article (Owner Contract) |
 | page_reference | string | No | — | Page reference (Owner Contract) |
 | responsible_party_display | string | No | — | Non-authoritative display text; raw source preserved; not a join key (Owner Contract) |
-| responsible_party_key | string | No | — | Canonical party key when resolved; nullable if unresolved; `responsible_party_display` always populated; display text is not the join key (per A2 identity class H; Person Identity Resolution Platform Standard) |
+| responsible_party_key | string | No | — | Canonical party key when resolved; nullable if unresolved; `responsible_party_display` always populated; display text is not the join key (per A2 identity class H; Vendor Identity Resolution Platform Standard in P1-A2) |
 | source_row_number | number | No | — | Source workbook row |
 
 ### responsibility_assignment
@@ -434,4 +434,4 @@ The normalized model can reconstruct the workbook matrix view using:
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 10 canonical entities, 3 matrix families (PM/Field/Owner Contract), normalized assignment junction model, governed role/party catalog, assignment value dictionary, template/version/instance governance with project tailoring (custom + suppressed items). Evidence-based from 2 Excel templates. JSON confirmed misattached. All 4 locked interview decisions encoded. |
 | 0.2 | 2026-03-17 | Architecture | Added `responsibility_import_finding` entity per P1-A2 Import-State Platform Standard completeness requirement. Aligned storage boundary references to cite platform standard. |
-| 0.3 | 2026-03-17 | Architecture | Added cross-reference to P1-A2 Person Identity Resolution Platform Standard for responsible_party_key resolution. |
+| 0.3 | 2026-03-17 | Architecture | Updated responsible_party_key cross-reference to cite P1-A2 Vendor Identity Resolution Platform Standard (Class H, not Class G — this is a party/organization field). |

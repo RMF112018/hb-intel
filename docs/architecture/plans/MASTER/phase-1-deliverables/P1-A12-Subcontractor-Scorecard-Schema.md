@@ -388,7 +388,7 @@ Rating bands are derived from the overall weighted score. Thresholds are governe
 |----------|-------|-------|--------|
 | **N/A weight redistribution** | Define exact formula for redistributing section weight when criteria are N/A | Platform Architecture + Operations | Phase 1 (late) |
 | **Rating band thresholds** | Confirm exact score ranges for each rating band | Operations | Phase 1 (late) |
-| **Subcontractor identity resolution** | Map subcontractor display names to canonical vendor keys from vendor registry | Platform Architecture | Phase 2 |
+| **Vendor registry implementation** | Build canonical vendor registry and populate `subcontractor_key` from it. Structural contract (`subcontractor_key` + `subcontractor_display_name`) is frozen per Vendor Identity Resolution Platform Standard in P1-A2; what remains is the registry itself | Platform Architecture | Phase 2 |
 | **Cross-project aggregation engine** | Build portfolio-level scorecard aggregation from official final records | Platform Architecture | Phase 2–3 |
 | **Rubric override governance** | Define controlled override/addition rules at evaluation-instance level | Operations | Phase 2 |
 
@@ -413,3 +413,4 @@ Rating bands are derived from the overall weighted score. Thresholds are governe
 |---------|------|--------|-------|
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 12 canonical entities (rubric template/version/section/criterion, evaluation, criterion score, section summary, overall summary, recommendation, approval, import batch/finding). 6 weighted sections, 29 criteria, 1-5 scale with N/A, 3 approval roles, 4 narrative blocks, official-final designation for portfolio aggregation. Evidence-based from SOP SubScorecard workbook. All 4 locked interview decisions encoded. |
 | 0.2 | 2026-03-17 | Architecture | Aligned storage boundary references with P1-A2 Import-State Platform Standard. |
+| 0.3 | 2026-03-17 | Architecture | Narrowed "Subcontractor identity resolution" open decision to "Vendor registry implementation" per P1-A2 Vendor Identity Resolution Platform Standard. Structural contract (subcontractor_key + subcontractor_display_name) is frozen; vendor registry is Phase 2. |
