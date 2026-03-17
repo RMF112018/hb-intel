@@ -302,9 +302,40 @@ One per approver role per evaluation — structured approval records.
 | **Canonical detail** | `criterion_score_record` is the source-of-truth for all scoring |
 | **Section summary** | `section_score_summary` stores derived section averages/weighted scores — recomputable from criteria but stored for reporting |
 | **Overall summary** | `overall_score_summary` stores derived overall weighted score + rating — recomputable but stored for portfolio aggregation |
-| **N/A handling** | N/A criteria are excluded from section average calculation; section weight may be redistributed or section scored only on valid criteria |
+| **N/A handling** | N/A criteria are excluded from section average calculation; section weight is preserved unless the entire section is N/A (see N/A Weight Redistribution Rule below) |
 | **Workbook formulas** | Formula results are stored as `source_overall_score` for reconciliation; canonical values are independently derived |
 | **Both stored + derivable** | Per locked interview decision: section/overall summaries stored for audit/reporting fidelity AND derivable from criterion records |
+
+---
+
+## N/A Weight Redistribution Rule
+
+This is a **fixed Phase 1 governance rule** — not admin-configurable. Admin configurability of redistribution strategy is deferred to Phase 2 rubric override governance.
+
+### Standard Case: Partial N/A Within a Section
+
+When some criteria within a section are marked N/A:
+
+1. The section average is computed using only scored (non-N/A) criteria: `section_average = sum(scored_criteria_scores) / count(scored_criteria)`
+2. The section's overall weight percentage is **unchanged**: `section_weighted_score = section_average × (section_weight_pct / 100)`
+3. Remaining scored criteria carry proportionally more influence within the section
+
+**Example:** Safety & Compliance (20% weight, 5 criteria). If 1 criterion is N/A and the 4 scored criteria average 4.0: `section_weighted_score = 4.0 × 0.20 = 0.80`.
+
+### Edge Case: All Criteria N/A in a Section
+
+When every criterion in a section is marked N/A:
+
+1. The all-N/A section contributes **0** to the weighted score
+2. Its weight is redistributed proportionally across the remaining sections that have at least one scored criterion
+3. Adjusted weight formula: `adjusted_weight = original_weight × (100 / sum_of_weights_of_sections_with_scores)`
+4. This preserves relative weight ratios among scored sections while ensuring weights sum to 100%
+
+**Example:** Workforce & Labor (10% weight) is all-N/A. Remaining 5 sections total 90% original weight. Each remaining section's adjusted weight: `adjusted = original × (100 / 90)`. Safety (20%) → 22.2%, Quality (20%) → 22.2%, Schedule (20%) → 22.2%, Cost (15%) → 16.7%, Communication (15%) → 16.7%.
+
+### Overall Score
+
+`overall_weighted_score = sum(section_weighted_scores)` using adjusted weights when any section is all-N/A. Maximum 5.00.
 
 ---
 
@@ -312,13 +343,17 @@ One per approver role per evaluation — structured approval records.
 
 | Overall Score | Rating Code | Label |
 |--------------|-------------|-------|
-| 4.5–5.0 | `exceptional` | Exceptional |
-| 3.5–4.49 | `above_average` | Above Average |
-| 2.5–3.49 | `satisfactory` | Satisfactory |
-| 1.5–2.49 | `below_average` | Below Average |
-| 1.0–1.49 | `unsatisfactory` | Unsatisfactory |
+| 4.50–5.00 | `exceptional` | Exceptional |
+| 3.50–4.49 | `above_average` | Above Average |
+| 2.50–3.49 | `satisfactory` | Satisfactory |
+| 1.50–2.49 | `below_average` | Below Average |
+| 1.00–1.49 | `unsatisfactory` | Unsatisfactory |
 
-Rating bands are derived from the overall weighted score. Thresholds are governed and may be adjusted via rubric version.
+**Boundary behavior:** Inclusive on the low end of each band. A score of exactly 3.50 is Above Average; 3.49 is Satisfactory. The top band (Exceptional) is inclusive on both ends (4.50–5.00).
+
+**Dictionary authority:** A5 is the dictionary authority for Rating Band values and score ranges (Class X — cross-domain governed set). A12 binds to A5 by `rating_code` key. Threshold changes require A5 update with business process review per A5 Class X governance.
+
+**Configurability:** Fixed Phase 1 governance — not admin-configurable in Phase 1.
 
 ---
 
@@ -384,10 +419,17 @@ Rating bands are derived from the overall weighted score. Thresholds are governe
 
 ## Open Decisions / Future Expansion
 
+### Closed by This Version
+
+| Decision | Resolution |
+|----------|-----------|
+| **N/A weight redistribution** | Closed — proportional redistribution within section (section weight preserved). All-N/A sections redistribute weight proportionally across scored sections. Fixed Phase 1 governance rule (not admin-configurable). |
+| **Rating band thresholds** | Closed — score ranges confirmed (4.50–5.00, 3.50–4.49, 2.50–3.49, 1.50–2.49, 1.00–1.49). Boundary behavior: inclusive on low end. A5 is dictionary authority (Class X). Fixed Phase 1 governance. |
+
+### Remaining Open
+
 | Decision | Scope | Owner | Target |
 |----------|-------|-------|--------|
-| **N/A weight redistribution** | Define exact formula for redistributing section weight when criteria are N/A | Platform Architecture + Operations | Phase 1 (late) |
-| **Rating band thresholds** | Confirm exact score ranges for each rating band | Operations | Phase 1 (late) |
 | **Vendor registry implementation** | Build canonical vendor registry and populate `subcontractor_key` from it. Structural contract (`subcontractor_key` + `subcontractor_display_name`) is frozen per Vendor Identity Resolution Platform Standard in P1-A2; what remains is the registry itself | Platform Architecture | Phase 2 |
 | **Cross-project aggregation engine** | Build portfolio-level scorecard aggregation from official final records | Platform Architecture | Phase 2–3 |
 | **Rubric override governance** | Define controlled override/addition rules at evaluation-instance level | Operations | Phase 2 |
@@ -402,8 +444,8 @@ Rating bands are derived from the overall weighted score. Thresholds are governe
 | Operations Lead | — | — |
 | Preconstruction / Purchasing Lead | — | — |
 
-**Approval Status:** Pending — Schema defined; pending operational validation
-**Comments:** Schema derived from SOP SubScorecard workbook (2 sheets, 6 sections, 29 criteria, 12 entities). All 4 locked interview decisions encoded.
+**Approval Status:** Active — Schema and scoring governance frozen for Phase 1
+**Comments:** Schema derived from SOP SubScorecard workbook (2 sheets, 6 sections, 29 criteria, 12 entities). All 4 locked interview decisions encoded. N/A weight redistribution rule and rating band thresholds frozen in v0.4.
 
 ---
 
@@ -414,3 +456,4 @@ Rating bands are derived from the overall weighted score. Thresholds are governe
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 12 canonical entities (rubric template/version/section/criterion, evaluation, criterion score, section summary, overall summary, recommendation, approval, import batch/finding). 6 weighted sections, 29 criteria, 1-5 scale with N/A, 3 approval roles, 4 narrative blocks, official-final designation for portfolio aggregation. Evidence-based from SOP SubScorecard workbook. All 4 locked interview decisions encoded. |
 | 0.2 | 2026-03-17 | Architecture | Aligned storage boundary references with P1-A2 Import-State Platform Standard. |
 | 0.3 | 2026-03-17 | Architecture | Narrowed "Subcontractor identity resolution" open decision to "Vendor registry implementation" per P1-A2 Vendor Identity Resolution Platform Standard. Structural contract (subcontractor_key + subcontractor_display_name) is frozen; vendor registry is Phase 2. |
+| 0.4 | 2026-03-17 | Architecture | Governance closeout: froze N/A weight redistribution rule (proportional within section; all-N/A sections redistribute across scored sections; fixed Phase 1 governance). Froze rating band thresholds with boundary behavior and A5 dictionary authority reference. Closed 2 Phase 1 (late) open decisions. |

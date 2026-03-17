@@ -11,11 +11,17 @@
 
 ## Purpose
 
-Define the canonical schema, keying rules, lifecycle model, and governance approach for reference data dictionaries used across HB Intel domains.
+Define the canonical schema, keying rules, lifecycle model, classification framework, and governance approach for all reference data dictionaries and controlled value sets used across HB Intel Phase 1 domains.
 
-Reference data — cost codes, project types, project stages, CSI/MasterFormat codes, status value sets, geographic codes, and similar controlled vocabularies — is consumed by multiple domains but owned and governed centrally. This document establishes the architectural patterns for these dictionaries so they are treated as governed reference data rather than ad hoc UI dropdown values.
+Reference data — cost codes, project types, project stages, CSI/MasterFormat codes, status value sets, geographic codes, rating bands, category taxonomies, and similar controlled vocabularies — is consumed by multiple domains but must be governed with clear ownership, stable keys, and explicit extensibility rules. This document establishes the dictionary classification framework (Class S/P/X/D), the structural governance contract, and the canonical schemas so that all Phase 1 dictionaries are treated as governed reference data rather than ad hoc UI dropdown values.
 
-The first dictionary fully specified here is the **Cost Code Dictionary**, based on evidence from `docs/reference/example/cost-code-dictionary.csv`.
+**Dictionary families defined here:**
+- **Cost Code Dictionary** — canonical cost code entity model (evidence: `cost-code-dictionary.csv`)
+- **CSI Code Dictionary** — MasterFormat taxonomy model (evidence: `csi-code-dictionary.csv`)
+- **Simple Reference Dictionaries** — 7 shared hub-site lookup dictionaries
+- **Platform Controlled Sets** — import/validation infrastructure enumerations (Class P)
+- **Cross-Domain Governed Sets** — 14 business-rule-carrying value sets consumed by 2+ schemas (Class X)
+- **Domain-Local Governance Contract** — structural rules for 27 domain-owned dictionaries (Class D)
 
 ---
 
@@ -34,8 +40,16 @@ The first dictionary fully specified here is the **Cost Code Dictionary**, based
 ## Scope and Non-Scope
 
 ### In Scope
-- Cost Code dictionary canonical schema (primary deliverable of this version)
+- Cost Code dictionary canonical schema
+- CSI Code dictionary canonical schema
+- Simple Reference Dictionaries (7 shared hub-site dictionaries)
 - Reference data governance patterns applicable to all HB Intel dictionaries
+- **Dictionary classification framework** — Class S (Shared Reference), Class P (Platform Controlled Set), Class X (Cross-Domain Governed Set), Class D (Domain-Governed Dictionary)
+- **Platform controlled sets** — Import Status, Finding Severity, Finding Category
+- **Cross-domain governed sets** — dictionaries consumed by 2+ domain schemas that carry business rules
+- **Domain-local dictionary governance contract** — structural rules domain-local dictionaries must follow
+- **Key + display label behavior** — frozen stable-key / display-label / raw-preservation pattern
+- **Extensibility and binding rules** — how consuming schemas bind to A5-governed dictionaries
 - Keying, hierarchy, lifecycle, and applicability rules
 - External mapping strategy for ERP/Sage integration
 - Search, analytics, and reporting role of reference data
@@ -45,13 +59,16 @@ The first dictionary fully specified here is the **Cost Code Dictionary**, based
 - SharePoint physical container definitions (P1-A3)
 - Data ownership governance decisions (P1-A1)
 - Adapter implementation details (P1-B1)
-- Full specification of every domain-local dictionary (future versions; domain-local dictionaries are governed by their domain schema artifacts)
+- Full enumeration of every domain-local dictionary value set (governed by their domain schema artifacts; A5 provides the structural contract)
+- Identity resolution dictionaries (Class G person identity, Class H vendor identity — governed by P1-A2 identity resolution platform standards)
 
 ---
 
 ## Consolidated Entity Summary and Identity Alignment
 
-This section lists all 15 canonical entities defined across the three dictionary families in this document, with identity class alignment to the [P1-A2 Identity Strategy Freeze](./P1-A2-Source-of-Record-Register.md).
+This section lists all canonical entities and governed sets defined in this document, with identity class alignment to the [P1-A2 Identity Strategy Freeze](./P1-A2-Source-of-Record-Register.md).
+
+### Canonical Entities (Class S — Shared Reference Dictionaries)
 
 | # | Canonical Entity | Dictionary Family | Identity Class | Identity Key | Natural Key | Storage Target | Write Safety | Phase |
 |---|-----------------|-------------------|---------------|-------------|-------------|----------------|-------------|-------|
@@ -74,6 +91,48 @@ This section lists all 15 canonical entities defined across the three dictionary
 **Build-ready vs deferred:** 13 entities are Phase 1 build-ready. Two external mapping entities (`cost_code_external_mapping`, `csi_code_external_mapping`) are deferred to Phase 4+ and carry schema placeholders only.
 
 **Not enumerated here:** Three shared dictionaries (`ProjectBidTypes`, `ProjectOwnerTypes`, `TimeZones`) are not in A3 build-ready scope and are not counted among the 15 entities above. They will be specified when they enter build scope.
+
+### Platform Controlled Sets (Class P)
+
+| # | Set Name | Values | Consuming Schemas | Governance |
+|---|---------|--------|-------------------|------------|
+| 1 | Import Status | 5 (pending, parsing, validating, complete, failed) | A6–A13 (all) | Code-governed |
+| 2 | Finding Severity | 3 (error, warning, info) | A6–A13 (all) | Code-governed |
+| 3 | Finding Category (base) | 4 (parse_error, validation_failure, mapping_warning, derivation_mismatch) | A6–A13 (all) | Code-governed + domain extensions |
+
+### Cross-Domain Governed Sets (Class X)
+
+| # | Set Name | Value Count | Primary Consumer | Governance |
+|---|---------|------------|-----------------|------------|
+| 1 | Cost Type | 5 | A6 | Admin-managed |
+| 2 | Register Category | 36 | A7 | Admin-managed |
+| 3 | BIC Team | 32 | A7 | Admin-managed |
+| 4 | Permit Type | 12 | A9 | Admin-managed |
+| 5 | Checklist Family | 3 | A10 | Admin-managed |
+| 6 | Rating Band | 5 | A12 | Admin-managed |
+| 7 | Rebid Recommendation | 3 | A12 | Admin-managed |
+| 8 | Scorecard Section | 6 | A12 | Admin-managed |
+| 9 | Lesson Category | 15 | A13 | Admin-managed |
+| 10 | Impact Magnitude | 4 | A13 | Admin-managed |
+| 11 | Project Size Band | 6 | A13 | Admin-managed |
+| 12 | Complexity Rating | 5 | A13 | Admin-managed |
+| 13 | Assignment Value | 5 | A11 | Admin-managed |
+| 14 | Permit Tag | 11 | A9 | Admin-managed |
+| 15 | Lesson Phase | 7 | A13 | Admin-managed |
+
+### Domain-Local Dictionaries (Class D)
+
+27 domain-local dictionaries are inventoried in the Domain-Local Dictionary Governance Contract section. They are governed by their owning schema artifacts (A7–A13) and must follow the A5 structural contract.
+
+### Summary Counts
+
+| Class | Count | Phase 1 Build-Ready |
+|-------|-------|-------------------|
+| S — Shared Reference (entities) | 15 | 13 (2 deferred to Phase 4+) |
+| P — Platform Controlled (sets) | 3 | 3 |
+| X — Cross-Domain Governed (sets) | 15 | 15 |
+| D — Domain-Local (sets) | 27 | 27 (values in owning schemas) |
+| **Total governed artifacts** | **60** | **58** |
 
 ---
 
@@ -727,6 +786,443 @@ Seven shared dictionaries used across the project domain follow a common simple 
 
 ---
 
+## Dictionary Classification Framework
+
+Every Phase 1 dictionary or controlled value set falls into one of four governance classes. This framework determines ownership, mutability, storage expectations, and how consuming schemas bind to the dictionary.
+
+| Class | Name | Definition | Governance Owner | Mutability | Storage |
+|-------|------|-----------|-----------------|-----------|---------|
+| **S** | Shared Reference Dictionary | Hub-site dictionary consumed by 2+ domain schemas as a lookup/classification dimension | Platform Architecture (admin) | Admin-managed; values added/deprecated via governed process | SharePoint List (hub site, shared) |
+| **P** | Platform Controlled Set | Platform-wide enumeration consumed by import/validation infrastructure across all domains | Platform Engineering (code) | Code-governed; immutable without platform release | Embedded in code; no separate storage entity |
+| **X** | Cross-Domain Governed Set | Value set used by 2+ domain schemas that carries business rules beyond simple lookup (e.g., score bands, assignment models, weighted sections) | Platform Architecture (admin) + Domain SME | Admin-managed with SME approval; values carry business logic that downstream computation depends on | SharePoint List (hub site, shared) or code-governed depending on volatility |
+| **D** | Domain-Governed Dictionary | Owned by a single domain schema; values frozen or constrained by that schema | Domain schema owner | Defined in domain schema; admin-managed or code-governed per domain decision | Domain-local; may be SharePoint List (project site) or code-governed |
+
+**Class selection rule:** If a value set is consumed by 2+ domain schemas → Class S, P, or X. If consumed by exactly 1 schema → Class D. Platform infrastructure sets (import, validation) → Class P regardless of consumer count.
+
+**Identity dictionaries are out of scope:** Person identity (Class G) and vendor/party identity (Class H) are governed by the P1-A2 identity resolution platform standards, not by A5. Schemas that reference identity fields follow the `_key` + `_display` pattern defined in P1-A2.
+
+---
+
+## Key + Display Label Behavior
+
+All A5-governed dictionaries (Classes S, P, X, D) must follow this stable key + display label pattern.
+
+| Aspect | Rule |
+|--------|------|
+| **Stable key** | Machine-readable identifier; immutable once assigned; used for storage, binding, validation, and cross-schema joins. Format: `snake_case` string or numeric code. |
+| **Display label** | Human-readable text; mutable for cosmetic corrections; never used in logic, validation, or binding. |
+| **Key immutability** | Once a key is assigned and any record references it, the key value must not change. Cosmetic label changes are safe; key changes require a deprecation + new-key cycle. |
+| **Raw preservation** | When an import source provides free-text that maps to a governed dictionary, the schema must preserve the original value in a `_raw` field alongside the canonical `_key` field. This supports audit, debugging, and future re-mapping. |
+| **Null key behavior** | A null key means the value could not be resolved to the dictionary. The `_display` or `_raw` field must still be populated so the human-readable value is never lost. |
+| **Field naming convention** | `{concept}_key` for the stable key; `{concept}_display` or `{concept}_label` for the display text; `{concept}_raw` for unresolved import text. |
+
+**Examples already in use:**
+- `bic_key` + `bic_display` (A7 — BIC team)
+- `subcontractor_key` + `subcontractor_display_name` (A12 — vendor identity)
+- `evaluator_key` + `evaluator_display` (A12 — person identity)
+- `category_key` + `category_label` (A7 — register category)
+
+---
+
+## Platform Controlled Sets (Class P)
+
+Platform controlled sets are enumerations embedded in the import/validation infrastructure. They are consumed by every schema that uses the two-tier batch import model and are immutable without a platform code release.
+
+### Import Status
+
+| Key | Display Label | Description |
+|-----|--------------|-------------|
+| `pending` | Pending | Batch created, not yet processed |
+| `parsing` | Parsing | File is being parsed into staging rows |
+| `validating` | Validating | Parsed rows are being validated against schema rules |
+| `complete` | Complete | All rows processed; findings (if any) attached |
+| `failed` | Failed | Batch-level failure; no rows committed |
+
+**Consuming schemas:** A6, A7, A8, A9, A10, A11, A12, A13 (all import-capable schemas)
+**Governance:** Code-governed (Class P). Values are defined in platform import infrastructure code. Adding a new status requires a platform release and schema-level migration assessment.
+**Transition rules:** `pending → parsing → validating → complete` (happy path); any state → `failed` on unrecoverable error.
+
+### Finding Severity
+
+| Key | Display Label | Description |
+|-----|--------------|-------------|
+| `error` | Error | Row or batch cannot proceed; requires correction |
+| `warning` | Warning | Row accepted but data quality concern flagged |
+| `info` | Info | Informational note; no action required |
+
+**Consuming schemas:** A6, A7, A8, A9, A10, A11, A12, A13
+**Governance:** Code-governed (Class P). Immutable without platform release.
+
+### Finding Category
+
+Finding categories have a **platform base set** plus **domain-local extensions**. The base set is Class P; extensions are Class D.
+
+#### Platform Base Set
+
+| Key | Display Label | Description |
+|-----|--------------|-------------|
+| `parse_error` | Parse Error | Row could not be parsed from source format |
+| `validation_failure` | Validation Failure | Row parsed but failed schema validation rules |
+| `mapping_warning` | Mapping Warning | Row accepted but a mapping/resolution was ambiguous |
+| `derivation_mismatch` | Derivation Mismatch | Derived field value conflicts with explicit source value |
+
+#### Domain-Local Extensions
+
+| Key | Defined In | Description |
+|-----|-----------|-------------|
+| `excluded_row` | A6 | Row excluded by row-type filter (blank/summary) |
+| `outcome_mismatch` | A10 | Raw outcome does not map cleanly to canonical outcome |
+| `assignment_conflict` | A11 | Multiple conflicting assignments for same item/role |
+| `calculation_mismatch` | A12 | Computed score does not match provided score |
+
+**Extensibility:** Domain schemas may define additional finding categories as Class D extensions. New categories must use `snake_case` keys and must not collide with the platform base set.
+
+---
+
+## Cross-Domain Governed Sets (Class X)
+
+Cross-domain governed sets are value sets consumed by 2+ schemas or carrying business rules that downstream logic depends on. They are admin-managed with SME approval and stored on the hub site as shared reference data.
+
+### Cost Type
+
+| Key | Display Label | Description |
+|-----|--------------|-------------|
+| `LAB` | Labor | Direct labor costs |
+| `LBN` | Labor Burden | Labor burden / fringe costs |
+| `MAT` | Materials | Material and supply costs |
+| `OVH` | Overhead | Overhead and indirect costs |
+| `SUB` | Subcontractor | Subcontracted scope costs |
+
+**Primary consumer:** A6 (financial data ingestion — budget line classification)
+**Future consumers:** Budget/cost control schemas, reporting roll-ups
+**Governance:** Admin-managed (Class X). Values are stable; additions require finance SME approval.
+**Build-ready:** Yes — Phase 1.
+
+### Register Category
+
+36 governed categories for operational register items. Each category has a numeric prefix and a label.
+
+| Key Pattern | Example | Value Count |
+|------------|---------|-------------|
+| `{number}_{slug}` | `28_risk_management` | 36 |
+
+**Canonical values:** Defined in A7 Section "Register Category." Full list: 1–36 covering DESIGN through WARRANTY.
+**Primary consumer:** A7 (operational register)
+**Future consumers:** Cross-register analytics, portfolio risk dashboards
+**Governance:** Admin-managed (Class X). New categories require operations SME approval. Categories must not be renumbered once assigned.
+**Key behavior:** `category_number` (integer, immutable) + `category_key` (slug) + `category_label` (display text).
+**Build-ready:** Yes — Phase 1 (values frozen in A7).
+
+### BIC Team (Business-in-Charge)
+
+32 governed team/party assignments for operational register ownership.
+
+**Primary consumer:** A7 (operational register — `bic_key` + `bic_display`)
+**Future consumers:** Cross-register assignment analytics, workload reporting
+**Governance:** Admin-managed (Class X). Resolves to Class H vendor/party identity when the party registry is available; until then, `bic_key` is derived from normalized display text.
+**Key behavior:** `bic_key` (stable slug or Class H key when resolved) + `bic_display` (human-readable).
+**Build-ready:** Yes — Phase 1 (values frozen in A7).
+
+### Permit Type
+
+| Key | Display Label |
+|-----|--------------|
+| `master_building` | Master Building |
+| `demolition` | Demolition |
+| `site_development` | Site Development |
+| `electrical` | Electrical |
+| `plumbing` | Plumbing |
+| `mechanical` | Mechanical |
+| `roofing` | Roofing |
+| `fire_alarm` | Fire Alarm |
+| `fire_sprinkler` | Fire Sprinkler |
+| `elevator` | Elevator |
+| `pool_barricade` | Pool Barricade |
+| `mass_grading` | Mass Grading |
+
+**Primary consumer:** A9 (permits & inspections)
+**Future consumers:** Compliance analytics, cross-project permit dashboards
+**Governance:** Admin-managed (Class X). New permit types require compliance SME approval.
+**Build-ready:** Yes — Phase 1 (values frozen in A9).
+
+### Checklist Family
+
+| Key | Display Label | Outcome Set |
+|-----|--------------|------------|
+| `startup` | Startup | yes_no_na |
+| `safety` | Safety | pass_fail_na |
+| `closeout` | Closeout | yes_no_na |
+
+**Primary consumer:** A10 (project lifecycle checklist)
+**Future consumers:** Lifecycle governance, cross-project compliance reporting
+**Governance:** Admin-managed (Class X). New families require operations SME approval. Each family defines its raw outcome set and canonical outcome mapping.
+**Build-ready:** Yes — Phase 1 (values frozen in A10).
+
+### Permit Tag
+
+| Key | Display Label |
+|-----|--------------|
+| `demolition` | Demolition |
+| `electrical` | Electrical |
+| `environmental` | Environmental |
+| `high_priority` | High Priority |
+| `luxury` | Luxury |
+| `residential` | Residential |
+| `roofing` | Roofing |
+| `safety` | Safety |
+| `safety_critical` | Safety Critical |
+| `site_work` | Site Work |
+| `weatherproofing` | Weatherproofing |
+
+**Primary consumer:** A9 (permits & inspections — `tag_value` on `permit_tag`)
+**Future consumers:** Compliance analytics, cross-project permit filtering
+**Governance:** Admin-managed (Class X). New tags require compliance SME approval. Hybrid rule: controlled base set with admin-extensibility (not freeform). Source keys normalized from hyphenated source values (`high-priority` → `high_priority`) per A5 key convention.
+**Key behavior:** `tag_key` (stable slug, underscore-delimited) stored as `tag_value` on `permit_tag` child records.
+**Build-ready:** Yes — Phase 1 (11 values frozen from permits.json evidence).
+
+### Rating Band (Scorecard)
+
+| Key | Display Label | Score Range |
+|-----|--------------|------------|
+| `exceptional` | Exceptional | 4.50 – 5.00 |
+| `above_average` | Above Average | 3.50 – 4.49 |
+| `satisfactory` | Satisfactory | 2.50 – 3.49 |
+| `below_average` | Below Average | 1.50 – 2.49 |
+| `unsatisfactory` | Unsatisfactory | 1.00 – 1.49 |
+
+**Primary consumer:** A12 (subcontractor scorecard — `rating_code`)
+**Future consumers:** Cross-project performance analytics, procurement qualification
+**Governance:** Admin-managed (Class X). Score range boundaries are frozen — changes require business process review.
+**Derivation dependency:** Rating band drives `rebid_recommendation` advisory logic in A12.
+**Build-ready:** Yes — Phase 1 (values and score ranges frozen in A5; A12 binds by `rating_code` key).
+
+### Rebid Recommendation
+
+| Key | Display Label | Description |
+|-----|--------------|-------------|
+| `yes` | Yes | Recommended for future work |
+| `yes_with_conditions` | Yes with Conditions | Recommended with noted improvement areas |
+| `no` | No | Not recommended for future work |
+
+**Primary consumer:** A12 (subcontractor scorecard)
+**Future consumers:** Procurement qualification, vendor analytics
+**Governance:** Admin-managed (Class X).
+**Build-ready:** Yes — Phase 1 (values frozen in A5; A12 binds by `rebid_recommendation_code` key).
+
+### Scorecard Section
+
+| Key | Display Label | Default Weight |
+|-----|--------------|---------------|
+| `safety_compliance` | Safety & Compliance | 20% |
+| `quality_of_work` | Quality of Work | 20% |
+| `schedule_performance` | Schedule Performance | 20% |
+| `cost_management` | Cost Management | 15% |
+| `communication_management` | Communication & Management | 15% |
+| `workforce_labor` | Workforce & Labor | 10% |
+
+**Primary consumer:** A12 (subcontractor scorecard — section-level scoring and weighting)
+**Future consumers:** Cross-project performance analytics
+**Governance:** Admin-managed (Class X). Section weights are configurable per evaluation but default weights are governed. Adding/removing sections requires business process review.
+**Build-ready:** Yes — Phase 1 (values and default weights frozen in A5; A12 binds by `section_id` key).
+
+### Lesson Category
+
+| Key | Display Label |
+|-----|--------------|
+| `pre_construction` | Pre-Construction |
+| `estimating_bid` | Estimating & Bid |
+| `procurement` | Procurement |
+| `schedule` | Schedule |
+| `cost_budget` | Cost / Budget |
+| `safety` | Safety |
+| `quality` | Quality |
+| `subcontractors` | Subcontractors |
+| `design_rfis` | Design / RFIs |
+| `owner_client` | Owner / Client |
+| `technology_bim` | Technology / BIM |
+| `workforce_labor` | Workforce / Labor |
+| `commissioning` | Commissioning |
+| `closeout_turnover` | Closeout / Turnover |
+| `other` | Other |
+
+**Primary consumer:** A13 (lessons learned)
+**Future consumers:** Knowledge management, cross-project trend analysis
+**Governance:** Admin-managed (Class X). New categories require knowledge management SME approval.
+**Build-ready:** Yes — Phase 1 (values frozen in A13).
+
+### Impact Magnitude
+
+| Key | Display Label | Cost Threshold | Schedule Threshold |
+|-----|--------------|---------------|-------------------|
+| `minor` | Minor | < $10K | < 2 days |
+| `moderate` | Moderate | $10K – $50K | 2 – 10 days |
+| `significant` | Significant | $50K – $200K | 10 – 30 days |
+| `critical` | Critical | > $200K | > 30 days |
+
+**Primary consumer:** A13 (lessons learned — `impact_magnitude`)
+**Future consumers:** Risk analytics, cross-project impact reporting
+**Governance:** Admin-managed (Class X). Threshold boundaries are frozen — changes require business process review.
+**Build-ready:** Yes — Phase 1 (values and thresholds frozen in A13).
+
+### Project Size Band
+
+| Key | Display Label |
+|-----|--------------|
+| `under_1m` | Under $1M |
+| `1m_5m` | $1M – $5M |
+| `5m_15m` | $5M – $15M |
+| `15m_50m` | $15M – $50M |
+| `50m_100m` | $50M – $100M |
+| `over_100m` | Over $100M |
+
+**Primary consumer:** A13 (lessons learned — `project_size_band`)
+**Future consumers:** Portfolio analytics, lessons-learned filtering
+**Governance:** Admin-managed (Class X). Band boundaries are stable.
+**Build-ready:** Yes — Phase 1 (values frozen in A13).
+
+### Complexity Rating
+
+| Key | Display Label | Description |
+|-----|--------------|-------------|
+| `1` | Straightforward | Minimal coordination, standard scope |
+| `2` | Moderate | Some coordination complexity |
+| `3` | Complex | Significant coordination, multiple trades/phases |
+| `4` | Highly Complex | High coordination, regulatory, or technical demands |
+| `5` | Exceptional | Maximum complexity across multiple dimensions |
+
+**Primary consumer:** A13 (lessons learned — `complexity_rating`)
+**Future consumers:** Portfolio analytics, lessons-learned filtering
+**Governance:** Admin-managed (Class X). 1–5 scale is frozen.
+**Build-ready:** Yes — Phase 1 (values frozen in A13).
+
+### Lesson Phase
+
+| Key | Display Label | Description |
+|-----|--------------|-------------|
+| `preconstruction` | Pre-Construction | Planning, constructability, BIM coordination, design review |
+| `design` | Design | Design development, design-build involvement, VE |
+| `procurement` | Procurement | Bidding, buyout, subcontractor selection, material ordering |
+| `construction` | Construction | Active building, field operations, inspections |
+| `commissioning` | Commissioning | Systems startup, testing, TAB, owner training |
+| `closeout` | Closeout / Turnover | Punch list, as-builts, O&Ms, warranties, COO |
+| `warranty` | Warranty / Post-Occupancy | Post-turnover warranty service, callbacks |
+
+**Primary consumer:** A13 (lessons learned — `phase_encountered`)
+**Future consumers:** Portfolio analytics, cross-project lesson filtering by lifecycle phase
+**Governance:** Admin-managed (Class X). New phases require operations SME approval. Existing keys may not be deleted or renamed.
+**Build-ready:** Yes — Phase 1 (values frozen in A5; A13 binds by `phase_encountered_key`).
+
+### Assignment Value (Responsibility Matrix)
+
+| Key | Display Label | Applies To |
+|-----|--------------|-----------|
+| `primary` | Primary (X) | PM, Field matrix families |
+| `support` | Support | PM, Field matrix families |
+| `review` | Review | PM, Field matrix families |
+| `sign_off` | Sign-Off | PM, Field matrix families |
+| `responsible_party` | Responsible Party | Owner Contract family |
+
+**Primary consumer:** A11 (responsibility matrix — assignment cells)
+**Future consumers:** Cross-project responsibility analytics
+**Governance:** Admin-managed (Class X). Values are tied to RACI-style governance model.
+**Build-ready:** Yes — Phase 1 (values frozen in A5; A11 binds by `value_code` key).
+
+---
+
+## Domain-Local Dictionary Governance Contract (Class D)
+
+Domain-local dictionaries are owned by a single domain schema. A5 does not enumerate their values — that responsibility stays with the owning schema artifact. However, all domain-local dictionaries must follow the structural contract below so they are governed consistently and can be promoted to shared (Class S/X) status if cross-domain consumption emerges.
+
+### Structural Requirements
+
+| Requirement | Rule |
+|------------|------|
+| **Key + label pattern** | Must use `{concept}_key` / `{concept}_code` + `{concept}_label` / `{concept}_display` pairs per the Key + Display Label Behavior section |
+| **Mutability declaration** | The owning schema must declare whether the set is admin-managed, user-managed within constraints, or code-governed |
+| **Extensibility declaration** | The owning schema must declare whether the value set is closed (frozen) or open (extensible with constraints) |
+| **Lifecycle fields** | `is_active` and optionally `is_deprecated` must be present when soft-delete behavior is needed |
+| **Transition rules** | Status/workflow dictionaries must declare allowed state transitions in the owning schema |
+
+### Known Domain-Local Dictionaries (Phase 1)
+
+| Dictionary | Owning Schema | Governance Model | Extensible? |
+|-----------|--------------|-----------------|------------|
+| Completion Status (risk/constraint/issue) | A7 | Code-governed | Closed (4 values + transitions) |
+| Record Subtype | A7 | Code-governed | Open (delay added in v0.2; future subtypes expected) |
+| Section Classification (kickoff) | A8 | Code-governed | Closed (4 sections) |
+| Row Type (kickoff) | A8 | Code-governed | Closed (task, milestone, deliverable) |
+| Status Code (kickoff) | A8 | Code-governed | Closed (5 values) |
+| Date Rule Type | A8 | Code-governed | Closed (4 strategies) |
+| Instance Status (kickoff) | A8 | Code-governed | Closed (4 values) |
+| Permit Status | A9 | Code-governed | Closed (5 values) |
+| Priority | A9 | Code-governed | Closed (high, medium, low) |
+| Inspection Type | A9 | User-managed | Open (user-defined per project) |
+| Inspection Result | A9 | Code-governed | Closed (4 values) |
+| Permit Authority | A9 | Admin-managed | Open (new authorities per jurisdiction) |
+| Canonical Outcome (checklist) | A10 | Code-governed | Closed (5 values) |
+| Raw Outcome Family | A10 | Code-governed | Closed (2 families) |
+| Family Status (checklist) | A10 | Code-governed | Closed (3 values) |
+| Link Type (checklist) | A10 | Code-governed | Open (new link types expected) |
+| Item Type (checklist) | A10 | Code-governed | Open (new types as templates evolve) |
+| Matrix Family | A11 | Code-governed | Closed (3 families) |
+| Assignment Model | A11 | Code-governed | Closed (2 models) |
+| Item Type (responsibility) | A11 | Code-governed | Closed (3 types per family) |
+| Role/Party Catalog | A11 | Admin-managed | Open per family (roles defined in A11) |
+| Evaluation Type (scorecard) | A12 | Code-governed | Closed (3 types) |
+| Evaluation Status (scorecard) | A12 | Code-governed | Closed (4 values) |
+| Approval Role (scorecard) | A12 | Code-governed | Closed (3 roles) |
+| Approval Status (scorecard) | A12 | Code-governed | Closed (3 values) |
+| Reference Type (lessons) | A13 | Code-governed | Open (new reference types expected) |
+| Keyword/Tag (lessons) | A13 | User-managed | Open (free-text Phase 1; governed Phase 2) |
+
+### Promotion Path
+
+When a domain-local dictionary begins to be consumed by a second domain schema, it should be promoted to Class X (cross-domain) or Class S (shared reference) and added to A5 with full governance. The owning schema retains its value definitions; A5 gains the governance and binding authority.
+
+---
+
+## Extensibility and Binding Rules
+
+### Binding
+
+Consuming schemas bind to A5-governed dictionaries **by key reference**, not by copying values into the consuming schema. The consuming schema declares:
+- which A5 dictionary it references,
+- which field holds the key,
+- whether the key is required or nullable.
+
+**Example:** A12 `rating_code` binds to the Rating Band governed set by storing the key (`exceptional`, `above_average`, etc.). A12 does not redefine the score ranges — it references A5 as the authority.
+
+### Adding Values
+
+| Class | Process |
+|-------|---------|
+| **S** (Shared Reference) | Admin request → platform team review → add to dictionary list → consuming schemas pick up automatically |
+| **P** (Platform Controlled) | Platform code change → release → all schemas pick up automatically |
+| **X** (Cross-Domain Governed) | Admin request → domain SME approval → add to A5 governed set → update consuming schemas if binding changes |
+| **D** (Domain-Local) | Schema owner updates domain schema → values available in that domain |
+
+### Validation Expectations
+
+| Boundary | Rule |
+|----------|------|
+| **Import/ingestion** | Unknown keys are rejected or flagged as `validation_failure` findings. Raw value is preserved in `_raw` field. |
+| **UI entry** | Dropdowns/selectors are populated from the governed dictionary. Free-text entry is not permitted for governed fields unless the dictionary is user-managed (Class D, open). |
+| **Cross-schema joins** | Joins use the stable key. Display labels are resolved at read time from the governing dictionary, not stored redundantly. |
+
+### Derivation Dependencies
+
+Some governed sets drive downstream computation. These dependencies must be documented in both A5 and the consuming schema.
+
+| Governed Set | Drives | In Schema |
+|-------------|--------|-----------|
+| Rating Band | `rebid_recommendation` advisory logic | A12 |
+| Checklist Family | Raw-to-canonical outcome mapping | A10 |
+| Impact Magnitude | Cost/schedule threshold classification | A13 |
+| Scorecard Section | Weighted score computation | A12 |
+| Register Category | Category-number parsing and grouping | A7 |
+
+---
+
 ## Remaining Reference Dictionaries
 
 The following dictionaries are referenced across P1-A1 field definitions. The 7 shared dictionaries above and the Cost Code / CSI Code dictionaries are now canonically defined. The remaining dictionaries are either domain-local (governed by their domain's schema artifact) or not yet in A3 build-ready scope.
@@ -777,6 +1273,23 @@ The following dictionaries are referenced across P1-A1 field definitions. The 7 
 
 ## Open Decisions / Future Expansion
 
+### Closed by This Version
+
+| Decision | Resolution |
+|----------|-----------|
+| **Dictionary classification framework** | Closed — 4-class framework (S, P, X, D) established in v0.5 |
+| **Platform controlled sets** | Closed — Import Status, Finding Severity, Finding Category frozen with values and extensibility rules |
+| **Cross-domain governed sets** | Closed — 15 sets frozen with values, governance, and build-ready status (Lesson Phase added in v0.7) |
+| **Domain-local governance contract** | Closed — structural requirements and 27 known domain-local dictionaries inventoried |
+| **Key + display label behavior** | Closed — stable key / display label / raw preservation pattern frozen |
+| **Extensibility and binding rules** | Closed — binding, value-addition, validation, and derivation dependency rules frozen |
+| **Domain-local dictionary full specification** | Closed (structurally) — A5 provides the governance contract; domain schemas own their values |
+| **Permit Tag dictionary** | Closed — promoted to Class X. 11 values frozen from permits.json evidence. Admin-managed; new tags require compliance SME approval. |
+| **Kickoff/permits/checklist domain-local expansion** | Closed — added Permit Authority (A9) and Item Type (A10) to domain-local inventory. Domain-local count: 25 → 27. |
+| **Lesson Phase dictionary** | Closed — promoted to Class X. 7 construction lifecycle phases frozen (preconstruction through warranty). Admin-managed; new phases require operations SME approval. A13 binds by `phase_encountered_key`. General project-lifecycle phase normalization (A7 etc.) remains a separate Phase 2+ concern. |
+
+### Remaining Open
+
 | Decision | Scope | Owner | Target |
 |----------|-------|-------|--------|
 | **Sage cost code mapping** | Define mapping between HB Intel cost codes and Sage GL accounts | Platform Architecture + Finance | Phase 4+ |
@@ -784,8 +1297,9 @@ The following dictionaries are referenced across P1-A1 field definitions. The 7 
 | **Multi-stage applicability** | Determine if any codes need to appear in multiple stages | Business Domains | Phase 1 (late) |
 | **Division label dictionary** | Create human-readable labels for division codes (01 = General Conditions, etc.) | Platform Architecture | Phase 1 |
 | **Shared dictionary import automation** | Automate dictionary refresh from CSV/Excel uploads | Platform Architecture | Phase 2 |
-| **Domain-local dictionary full specification** | Specify canonical schemas for domain-local dictionaries (estimating, buyout, compliance, etc.) — governed by domain schema artifacts | Platform Architecture + Business Domains | Phase 1–2 |
 | **Remaining shared dictionaries** | ProjectBidTypes, ProjectOwnerTypes, TimeZones — not in A3 build-ready scope; define when needed | Platform Architecture | Phase 2+ |
+| **Keyword/Tag governance** | A13 keywords are free-text in Phase 1; governed dictionary planned for Phase 2 knowledge management | Platform Architecture + KM | Phase 2 |
+| **Role/Party Catalog promotion** | A11 role catalogs per matrix family; evaluate for Class X promotion if cross-schema role consumption emerges | Platform Architecture | Phase 2 |
 
 ---
 
@@ -797,8 +1311,8 @@ The following dictionaries are referenced across P1-A1 field definitions. The 7 
 | Cost Controls / Operations Lead | — | — |
 | Estimating Lead | — | — |
 
-**Approval Status:** Active — All shared hub-site dictionaries canonically defined for Phase 1 build-ready scope
-**Comments:** Cost Code dictionary (7,565 codes), CSI Code dictionary (~6,633 codes), and 7 Simple Reference Dictionaries (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, CountryCodes, DeliveryMethods, Sectors) are canonically defined. Three shared dictionaries (ProjectBidTypes, ProjectOwnerTypes, TimeZones) remain pending — not in A3 build-ready scope. Domain-local dictionaries remain governed by their domain schema artifacts.
+**Approval Status:** Active — Phase 1 dictionary/governance backbone frozen
+**Comments:** A5 now governs 60 dictionary artifacts across 4 classes: 15 Class S shared reference entities (Cost Code, CSI Code, 7 Simple Reference Dictionaries), 3 Class P platform controlled sets (Import Status, Finding Severity, Finding Category), 15 Class X cross-domain governed sets (Lesson Phase promoted from open decision; 7 construction lifecycle phases frozen), and 27 Class D domain-local dictionaries (Permit Authority and Item Type added). Key + display label behavior, extensibility rules, binding mechanics, and derivation dependencies are frozen. Three shared dictionaries (ProjectBidTypes, ProjectOwnerTypes, TimeZones) remain pending — not in A3 build-ready scope.
 
 ---
 
@@ -810,3 +1324,6 @@ The following dictionaries are referenced across P1-A1 field definitions. The 7 
 | 0.2 | 2026-03-17 | Architecture | Added CSI Code dictionary with 4 canonical entities, one-to-many description variant model, MasterFormat hierarchy, import cleanup rules (continuation merging, CamelCase normalization), and cross-mapping to cost codes. Evidence-based from csi-code-dictionary.csv (8,991 rows, 819 duplicate codes, 170 continuation artifacts). |
 | 0.3 | 2026-03-17 | Architecture | Added Simple Reference Dictionary pattern and 7 shared dictionary definitions (ProjectTypes, ProjectStages, ProjectRegions, StateCodes, CountryCodes, DeliveryMethods, Sectors). Closes A3/A5 shared dictionary gap — all A3 build-ready shared dictionaries now have canonical schemas. Updated shared dictionary table from "Schema pending" to "Defined above." Three dictionaries (ProjectBidTypes, ProjectOwnerTypes, TimeZones) remain pending — not in A3 build-ready scope. |
 | 0.4 | 2026-03-17 | Architecture | Added consolidated entity summary with identity class alignment to A2 freeze (15 entities across 3 dictionary families). Added canonical entity names to all 7 simple reference dictionary instantiations. Distinguished build-ready (13 entities, Phase 1) from deferred (2 external mapping entities, Phase 4+). |
+| 0.5 | 2026-03-17 | Architecture | Dictionary/governance backbone expansion. Added 4-class dictionary classification framework (S/P/X/D). Froze 3 platform controlled sets (Import Status, Finding Severity, Finding Category). Froze 13 cross-domain governed sets with values, governance, and derivation dependencies. Established domain-local governance contract with 25 inventoried Class D dictionaries. Froze key + display label behavior and extensibility/binding rules. A5 now governs 56 dictionary artifacts — sufficient for later prompts to resolve domain decisions without inventing new governance structure. |
+| 0.6 | 2026-03-17 | Architecture | Governance closeout companion pass for kickoff/permits/checklist domains. Promoted Permit Tag to Class X (11 values frozen from permits.json evidence). Added 2 domain-local dictionaries to inventory: Permit Authority (A9, admin-managed, open), Item Type (A10, code-governed, open). Closed Permit Tag open decision. A5 now governs 59 dictionary artifacts: 15 Class S, 3 Class P, 14 Class X, 27 Class D. |
+| 0.7 | 2026-03-17 | Architecture | Lessons phase dictionary governance freeze. Promoted Lesson Phase to Class X — 7 construction lifecycle phases frozen (preconstruction, design, procurement, construction, commissioning, closeout, warranty). Admin-managed; new phases require operations SME approval. A13 binds by `phase_encountered_key`. Closed Project Phase open decision. General project-lifecycle normalization (A7 etc.) remains Phase 2+. A5 now governs 60 dictionary artifacts: 15 Class S, 3 Class P, 15 Class X, 27 Class D. |

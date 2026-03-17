@@ -114,8 +114,9 @@ Each lesson block has:
 | 4 | `lesson_linked_reference` | Structured document/artifact links per lesson |
 | 5 | `lesson_category_dictionary` | 15 governed lesson categories |
 | 6 | `lesson_impact_magnitude_dictionary` | 4 governed impact magnitudes |
-| 7 | `lessons_import_batch` | Import provenance |
-| 8 | `lessons_import_finding` | Validation findings |
+| 7 | `lesson_phase_dictionary` | 7 governed construction lifecycle phases |
+| 8 | `lessons_import_batch` | Import provenance |
+| 9 | `lessons_import_finding` | Validation findings |
 
 ### lessons_report_instance
 
@@ -163,7 +164,7 @@ Individual lesson — the canonical search/reporting unit.
 | lesson_sequence | number | Yes | — | Lesson number within the report |
 | category_key | string | No | FK | FK to lesson_category_dictionary (canonical) |
 | category_raw | string | No | — | Raw/source category text |
-| phase_encountered_key | string | No | — | Canonical phase value (if governed) |
+| phase_encountered_key | string | No | FK | FK to lesson_phase_dictionary (canonical); 7 construction lifecycle phases governed as Class X in P1-A5 |
 | phase_encountered_raw | string | No | — | Raw/source phase text |
 | impact_magnitude_key | string | No | FK | FK to lesson_impact_magnitude_dictionary (canonical) |
 | impact_magnitude_raw | string | No | — | Raw/source magnitude text |
@@ -234,6 +235,18 @@ Structured document/artifact links per lesson.
 | sort_order | number | Yes | Severity order (1=Minor, 4=Critical) |
 | is_active | boolean | Yes | Whether this magnitude is current |
 
+### lesson_phase_dictionary
+
+7 governed construction lifecycle phases. Classified as Class X (cross-domain governed) in P1-A5. Values frozen; new phases additive only with operations SME approval.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| phase_key | string | Yes | Phase identifier (e.g., `preconstruction`, `construction`) |
+| phase_label | string | Yes | Display label (e.g., "Pre-Construction") |
+| phase_description | string | No | Scope description |
+| sort_order | number | Yes | Lifecycle order (1=Pre-Construction, 7=Warranty) |
+| is_active | boolean | Yes | Whether this phase is current |
+
 ### lessons_import_batch
 
 | Field | Type | Required | Description |
@@ -266,7 +279,7 @@ Structured document/artifact links per lesson.
 | **Governed categories** | 15 values in `lesson_category_dictionary`; canonical for filtering/analytics |
 | **Raw preservation** | `category_raw` on lesson_record preserves source text |
 | **Impact magnitudes** | 4 values in `lesson_impact_magnitude_dictionary` with cost/schedule thresholds |
-| **Phases** | `phase_encountered_key` + `phase_encountered_raw` — phase dictionary to be governed in P1-A5 |
+| **Phases** | `phase_encountered_key` + `phase_encountered_raw` — 7 construction lifecycle phases governed as Class X in P1-A5 (preconstruction, design, procurement, construction, commissioning, closeout, warranty); A13 binds by `phase_encountered_key` FK |
 | **Applicability** | Numeric 1–5 score directly on lesson_record |
 | **Project classifications** | Delivery method, market sector, size band, complexity — stored on report, inherited to lessons for search |
 
@@ -326,7 +339,7 @@ This denormalization ensures each `lesson_record` is self-contained for search a
 
 | Data | Storage | Authority | P1-A1/A2 Alignment |
 |------|---------|-----------|---------------------|
-| Category + magnitude dictionaries | SharePoint List (hub site, shared) | Authoritative reference | Shared reference per P1-A1 |
+| Category, magnitude, + phase dictionaries | SharePoint List (hub site, shared) | Authoritative reference | Shared reference per P1-A1 |
 | Report instances | SharePoint List (project site) | Authoritative project data | Aligns with P1-A1 |
 | Lesson records | SharePoint List (project site) | Authoritative child records | Same |
 | Keywords | SharePoint List (project site) | Authoritative child records | Same |
@@ -337,9 +350,16 @@ This denormalization ensures each `lesson_record` is self-contained for search a
 
 ## Open Decisions / Future Expansion
 
+### Closed by This Version
+
+| Decision | Resolution |
+|----------|-----------|
+| **Phase dictionary governance** | Closed — 7 construction lifecycle phases (preconstruction, design, procurement, construction, commissioning, closeout, warranty) promoted to Class X in P1-A5. A13 binds by `phase_encountered_key` FK. `lesson_phase_dictionary` entity added (entity #7). |
+
+### Remaining Open
+
 | Decision | Scope | Owner | Target |
 |----------|-------|-------|--------|
-| **Phase dictionary governance** | Formalize project phases as governed reference set in P1-A5 | Platform Architecture | Phase 1 (late) |
 | **AI-powered lesson retrieval** | Build RAG retrieval using composed narratives and keyword vectors | Platform Architecture + AI | Phase 3+ |
 | **Cross-project lesson linking** | Link lessons across projects when the same root cause applies | Platform Architecture | Phase 3 |
 | **Lesson approval workflow** | Formal review/approval before lessons enter the portfolio knowledge base | Operations | Phase 2 |
@@ -356,7 +376,7 @@ This denormalization ensures each `lesson_record` is self-contained for search a
 | Knowledge Management Lead | — | — |
 
 **Approval Status:** Pending — Schema defined; pending operational validation
-**Comments:** Schema derived from SOP Lessons Learned workbook (3 sheets, 15 categories, 4 impact magnitudes, ~10 lesson slots per report, 15-column database model). All 4 locked interview decisions encoded.
+**Comments:** Schema derived from SOP Lessons Learned workbook (3 sheets, 15 categories, 4 impact magnitudes, 7 lifecycle phases, ~10 lesson slots per report, 15-column database model). All 4 locked interview decisions encoded. Phase dictionary governance frozen — 7 construction lifecycle phases governed as Class X in P1-A5. 9 canonical entities.
 
 ---
 
@@ -367,3 +387,4 @@ This denormalization ensures each `lesson_record` is self-contained for search a
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 8 canonical entities (report instance, lesson record, keyword, linked reference, category dictionary, impact magnitude dictionary, import batch/finding). Report+child lesson model with inherited search metadata, structured lesson components + composed narrative, governed taxonomy + raw preservation, text + structured reference support. Evidence-based from SOP Lessons Learned workbook. All 4 locked interview decisions encoded. |
 | 0.2 | 2026-03-17 | Architecture | Aligned storage boundary references with P1-A2 Import-State Platform Standard. |
 | 0.3 | 2026-03-17 | Architecture | Added 3 missing person key fields (`project_manager_key`, `superintendent_key`, `project_executive_key`) to `lessons_report_instance` per P1-A2 Person Identity Resolution Platform Standard completeness requirement. Display-only person fields are not compliant; every person-attributed field must have both `_key` and `_display`. |
+| 0.4 | 2026-03-17 | Architecture | Phase dictionary governance freeze. Added `lesson_phase_dictionary` entity (#7, 9 total entities). 7 construction lifecycle phases (preconstruction → warranty) promoted to Class X in P1-A5. Updated `phase_encountered_key` to FK binding. Closed Phase dictionary governance open decision. |

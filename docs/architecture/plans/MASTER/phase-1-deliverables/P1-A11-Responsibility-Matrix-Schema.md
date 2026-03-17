@@ -375,6 +375,74 @@ The normalized model can reconstruct the workbook matrix view using:
 
 ---
 
+## Role Catalog Governance
+
+The `responsibility_role_party` catalog is governed as a **Class D domain-local dictionary** (per A5 domain-local inventory), scoped per matrix family with admin-managed extensibility.
+
+### Governed Role Sets
+
+**PM family (7 roles):**
+
+| Canonical Label | Template Display | Column Position |
+|----------------|-----------------|-----------------|
+| Project Executive | PX | 1 |
+| Senior Project Manager | Sr. PM | 2 |
+| Project Manager 2 | PM2 | 3 |
+| Project Manager 1 | PM1 | 4 |
+| Project Administrator | PA | 5 |
+| Quality Assurance / Quality Control | QAQC | 6 |
+| Project Accountant | Proj Acct. | 7 |
+
+**Field family (5 roles):**
+
+| Canonical Label | Template Display | Column Position |
+|----------------|-----------------|-----------------|
+| Lead Superintendent | Lead Super | 1 |
+| MEP Superintendent | MEP Super | 2 |
+| Interior Superintendent | Interior Super | 3 |
+| Assistant Superintendent | Asst Super | 4 |
+| Quality Assurance / Quality Control | QaQc | 5 |
+
+**Owner Contract family:** No fixed role catalog. Contractual parties are free-text (`responsible_party_display`) with optional Class H vendor key resolution (`responsible_party_key`) per the Vendor Identity Resolution Platform Standard in P1-A2.
+
+### Role Catalog Rules
+
+| Aspect | Rule |
+|--------|------|
+| **Scope** | Roles are family-scoped. PM roles ≠ Field roles. Each family governs its own role set independently. |
+| **Key behavior** | `role_party_id` (surrogate PK) is the join key. `canonical_label` is the stable display name. `template_display_label` preserves template abbreviation. Neither label is a dictionary key in the A5 sense. |
+| **Governance owner** | Operations (PM/Field families), Contracts (Owner Contract family). Platform Architecture reviews additions. |
+| **Extensibility** | Admin-managed, open per family. New roles added via governed process: insert into `responsibility_role_party` with appropriate `family_id`, `canonical_label`, `column_position`. |
+| **Deactivation** | Roles cannot be deleted — only soft-deactivated via `is_active = false`. Existing assignment records referencing a deactivated role remain valid. |
+| **A5 alignment** | Class D per A5 domain-local inventory. No Class X promotion until cross-schema consumption emerges (Phase 2 evaluation per A5 open decision). |
+
+---
+
+## Reminder-Item Modeling
+
+PM sheet rows 76–86 contain recurring deadline reminders (monthly cadence items with no matrix assignments). These are modeled as **responsibility items with `item_type = 'deadline_reminder'`**, not as a separate entity.
+
+### Modeling Rules
+
+| Aspect | Rule |
+|--------|------|
+| **Entity** | `responsibility_item` with `item_type = 'deadline_reminder'` |
+| **Template lifecycle** | Participates in template versioning and project instance inheritance identically to `task` items |
+| **Assignment behavior** | Deadline reminders have **no** `responsibility_assignment` records. Absence of assignments is the canonical representation. |
+| **Canonical fields** | `item_id`, `template_id`, `section_key` (e.g., `"reminders"`), `section_label`, `item_label` (reminder description text), `item_type = 'deadline_reminder'`, `display_order` — all standard `responsibility_item` fields |
+| **Project tailoring** | Same as tasks: `project_item_instance` inherits from template, supports `is_custom`, `is_suppressed`, display overrides |
+| **Storage** | Same SharePoint list as other responsibility items — no new physical container |
+
+### Build-Ready vs Deferred
+
+| Scope | Status |
+|-------|--------|
+| `responsibility_item` with `item_type = 'deadline_reminder'`, template inheritance, project instance lifecycle | **Build-ready — Phase 1** |
+| Cadence metadata (frequency, due-day, recurrence rules) | **Intentionally deferred — Phase 2.** Source rows contain descriptive text only; "Monthly" cadence is implied by section header, not structured data. |
+| Notification projection (turning `deadline_reminder` items into scheduled notifications) | **Intentionally deferred — Phase 2.** Application-layer concern, not a schema concern. |
+
+---
+
 ## Search / Filter / Reporting Role
 
 | Dimension | Treatment |
@@ -405,11 +473,18 @@ The normalized model can reconstruct the workbook matrix view using:
 
 ## Open Decisions / Future Expansion
 
+### Closed by This Version
+
+| Decision | Resolution |
+|----------|-----------|
+| **Role catalog governance** | Closed — PM (7 roles), Field (5 roles), Owner Contract (free-text parties) frozen as Class D domain-local dictionary per A5. Admin-managed, open per family, soft-deactivation only. |
+| **Deadline reminder items** | Closed — modeled as `responsibility_item` with `item_type = 'deadline_reminder'`. No separate entity. Cadence metadata and notification projection deferred to Phase 2. |
+
+### Remaining Open
+
 | Decision | Scope | Owner | Target |
 |----------|-------|-------|--------|
-| **Role catalog governance** | Formalize PM/Field/Owner Contract role catalogs in P1-A5 | Platform Architecture | Phase 1 (late) |
 | **Assignment value expansion** | Determine if additional values (Inform, Consult) are needed | Operations | Phase 2 |
-| **Deadline reminder items** | Determine how PM rows 76-86 (recurring cadence reminders) are modeled — as responsibility items or a separate cadence entity | Platform Architecture | Phase 1 (late) |
 | **Person-to-role mapping** | Map project staff names to roles for populated instances | Platform Architecture | Phase 2 |
 | **Matrix comparison** | Cross-project matrix comparison/standardization reporting | Operations | Phase 3 |
 
@@ -423,8 +498,8 @@ The normalized model can reconstruct the workbook matrix view using:
 | Operations Lead | — | — |
 | Project Controls Lead | — | — |
 
-**Approval Status:** Pending — Schema defined; pending operational validation
-**Comments:** Schema derived from 2 Excel templates (PM/Field: ~74+78 items, 12 roles, 4 assignment values; Owner Contract: 45 articles). JSON file confirmed as misattached Estimating Kickoff data. All 4 locked interview decisions encoded.
+**Approval Status:** Active — Schema and governance frozen for Phase 1
+**Comments:** Schema derived from 2 Excel templates (PM/Field: ~74+78 items, 12 roles, 4 assignment values; Owner Contract: 45 articles). JSON file confirmed as misattached Estimating Kickoff data. All 4 locked interview decisions encoded. Role catalog governance and reminder-item modeling frozen in v0.4.
 
 ---
 
@@ -435,3 +510,4 @@ The normalized model can reconstruct the workbook matrix view using:
 | 0.1 | 2026-03-17 | Architecture | Initial schema; 10 canonical entities, 3 matrix families (PM/Field/Owner Contract), normalized assignment junction model, governed role/party catalog, assignment value dictionary, template/version/instance governance with project tailoring (custom + suppressed items). Evidence-based from 2 Excel templates. JSON confirmed misattached. All 4 locked interview decisions encoded. |
 | 0.2 | 2026-03-17 | Architecture | Added `responsibility_import_finding` entity per P1-A2 Import-State Platform Standard completeness requirement. Aligned storage boundary references to cite platform standard. |
 | 0.3 | 2026-03-17 | Architecture | Updated responsible_party_key cross-reference to cite P1-A2 Vendor Identity Resolution Platform Standard (Class H, not Class G — this is a party/organization field). |
+| 0.4 | 2026-03-17 | Architecture | Governance closeout: froze role catalog governance (PM 7 roles, Field 5 roles, Owner Contract free-text parties; Class D domain-local, admin-managed, open per family). Froze reminder-item modeling (item_type = 'deadline_reminder' on responsibility_item; cadence metadata and notification projection deferred to Phase 2). Closed 2 Phase 1 (late) open decisions. |
