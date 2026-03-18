@@ -1,6 +1,6 @@
 {
   "name": "@hbc/data-access",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -22,10 +22,14 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src/ --ext .ts,.tsx"
+    "lint": "eslint src/ --ext .ts,.tsx",
+    "test": "vitest run"
   },
   "dependencies": {
     "@hbc/models": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist"
