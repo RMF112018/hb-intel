@@ -39,7 +39,7 @@ All adapter domain tracking in this document uses the following status progressi
 
 ## Proxy Adapter: Domain Completion Matrix
 
-B1 implements all 11 domain repositories against mocked fetch in Phase 1 (10 data domains in the table below; Auth tracked separately in its [own section](#auth-domain-special-case-tracking)). C1 backend routes are locked for 3 data domains; the remaining 7 proceed with provisional route assumptions and will reconcile before production activation.
+B1 implements all 11 domain repositories against mocked fetch in Phase 1 (10 data domains in the table below; Auth tracked separately in its [own section](#auth-domain-special-case-tracking)). C1 backend routes are partially locked for 3 data domains (CRUD only; aggregates and sub-resources remain provisional); the remaining 7 proceed with provisional route assumptions and will reconcile before production activation.
 
 | Domain | Port Interface | Method Families | Total | Phase Target | Status | B1 Task | Route Status |
 |---|---|---|---|---|---|---|---|
@@ -246,7 +246,7 @@ This table is the live tracking surface for adapter implementation progress. Upd
 |---|---|---|---|---|---|---|
 | Lead | B / Data Access | `IMPL_READY` | None | — | Begin B1 Task 3 | 2026-03-18 |
 | Project | B / Data Access | `IMPL_READY` | Production activation: A8 aggregate provisional | — | Begin B1 Task 4 | 2026-03-18 |
-| Estimating | B / Data Access | `IMPL_READY` | None (D2 deferred) | — | Begin B1 Task 5 | 2026-03-18 |
+| Estimating | B / Data Access | `IMPL_READY` | Production activation: D2 sub-resource routing open | — | Begin B1 Task 5 | 2026-03-18 |
 | Schedule | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 5 (mocked fetch) | 2026-03-18 |
 | Buyout | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 5 (mocked fetch) | 2026-03-18 |
 | Compliance | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
@@ -254,7 +254,7 @@ This table is the live tracking surface for adapter implementation progress. Upd
 | Risk | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
 | Scorecard | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 7 (mocked fetch) | 2026-03-18 |
 | PMP | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 7 (mocked fetch) | 2026-03-18 |
-| Auth | B / Data Access + C2 / Auth | `IMPL_READY` | A9 (no route catalog) | — | Begin B1 Task 7 | 2026-03-18 |
+| Auth | B / Data Access + C2 / Auth | `IMPL_READY` | Production activation: A9 (no route catalog) | — | Begin B1 Task 7 | 2026-03-18 |
 
 ### SharePoint and API Adapter Progress
 
@@ -276,7 +276,7 @@ Not yet active. Rows will be added when those phases begin planning.
 | **Contract testing** | Zod schema + MSW harness against staging | No | E1 delivers test harness; staging backend available |
 | **Production activation** | Remove mock fallback, live traffic | No | All above lanes resolved per domain |
 
-B1 Tasks 0–10 can proceed immediately against mocked fetch. Production activation is blocked by the convergence of C1, C2, D1, and E1 deliverables — see workstream detail below.
+B1 Tasks 0–10 can proceed immediately against mocked fetch. Production activation is blocked by the convergence of C1, C2, P1-D1, and E1 deliverables — see workstream detail below.
 
 ### P1-B1 — Frontend Adapter Implementation
 
@@ -303,14 +303,14 @@ These decisions do not block mocked-fetch implementation but must be resolved be
 
 | ID | Assumption | Confidence | Upstream Owner |
 |---|---|---|---|
-| A1 | API paths follow C1 catalog patterns | High for Lead/Project/Estimating; provisional for remaining 8 | P1-C1 |
+| A1 | API paths follow C1 catalog patterns | High for Lead/Project/Estimating; provisional for remaining 7 data domains + Auth | P1-C1 |
 | A2 | Collection envelope: `{ data: T[], total, page, pageSize }` | High | P1-C1 |
 | A3 | Single-item envelope: `{ data: T }` | High | P1-C1 |
 | A4 | Error responses: `extractErrorMessage()` reads `.error` first (C1 contract), falls back to `.message`; dual-field strategy provisional pending D3 | Low — D3 open | P1-C1, P1-C2 |
 | A5 | Default pageSize fallback is 25 (`DEFAULT_PAGE_SIZE`); C1 specifies default 50, max 200; fallback only applies when backend omits the field | Low — D4 open | P1-C1 |
 | A6 | Bearer token in `Authorization` header accepted by backend | High | P1-C2 |
 | A7 | Project-scoped routes use nested paths provisionally; C1 uses flat routes with `?projectId=` query params | Low — D6 open | P1-C1 |
-| A8 | Aggregate endpoints exist (portfolio summary, metrics) | Medium | P1-C1 |
+| A8 | Aggregate endpoints exist (portfolio summary, metrics) | Low — not in C1 catalog | P1-C1 |
 | A9 | Auth management routes (`/api/auth/*`) exist | Low — not in C1 or C2 catalog | P1-C1, P1-C2 |
 
 ### P1-C1 — Backend Service Contract Catalog
@@ -340,7 +340,7 @@ C2 owns MSAL app registration, OBO token exchange middleware, auth validation at
 
 **Unresolved items:**
 - A9: Auth management routes (`/api/auth/*`) have no C1 or C2 catalog entry — see [Auth Domain: Special-Case Tracking](#auth-domain-special-case-tracking) for full capability-group and dependency detail
-- D3: Error envelope field name — joint ownership with C1; affects how auth errors are surfaced to `ProxyHttpClient`
+- D3: Error envelope field priority — joint ownership with C1; affects how auth errors are surfaced to `ProxyHttpClient`
 
 ### P1-D1 — Write Safety, Retry, and Recovery
 
