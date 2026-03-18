@@ -19,6 +19,7 @@ The plan set translates the [target-state architecture](../../blueprint/HB-Intel
 | Status | Meaning |
 |---|---|
 | **Active Reference** | Living governing document — updated as the program evolves |
+| **Complete** | Phase execution finished — all deliverables produced, all milestones satisfied, all gate conditions cleared |
 | **Planning Complete** | All planning decisions locked; implementation proceeds as dependencies are satisfied |
 | **Draft** | Forward-planning document — structure and intent established, detailed planning not yet started |
 
@@ -29,7 +30,7 @@ The plan set translates the [target-state architecture](../../blueprint/HB-Intel
 | # | Document | Status | Type | Purpose |
 |---|---|---|---|---|
 | 00 | [Master Development Summary Plan](00_HB-Intel_Master-Development-Summary-Plan.md) | Active Reference | Program Summary | Governing summary — phase stack, dependency logic, milestones, workstreams |
-| 01 | [Phase 0 — Program Control and Repo Truth](01_Phase-0_Program-Control-and-Repo-Truth-Plan.md) | Planning Complete | Phase Plan | Establish planning truth, readiness classification, governance guardrails |
+| 01 | [Phase 0 — Program Control and Repo Truth](01_Phase-0_Program-Control-and-Repo-Truth-Plan.md) | Complete | Phase Plan | Establish planning truth, readiness classification, governance guardrails |
 | 02 | [Phase 1 — Production Data Plane and Integration Backbone](02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md) | Planning Complete | Phase Plan | Real data ownership, adapter architecture, backend contracts, contract testing |
 | 03 | [Phase 2 — Personal Work Hub and PWA Shell](03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md) | Draft | Phase Plan | PWA shell completion, Personal Work Hub as default post-login experience |
 | 04 | [Phase 3 — Project Hub and Project Context](04_Phase-3_Project-Hub-and-Project-Context-Plan.md) | Draft | Phase Plan | Project Hub as authoritative project command center |
@@ -37,7 +38,7 @@ The plan set translates the [target-state architecture](../../blueprint/HB-Intel
 | 06 | [Phase 5 — Search, Connected Records, and Document Access](06_Phase-5_Search-Connected-Records-and-Document-Access-Plan.md) | Draft | Phase Plan | Unified search, connected records, document journey simplification |
 | 07 | [Phase 6 — Field-First HB Site Control](07_Phase-6_Field-First-HB-Site-Control-Plan.md) | Draft | Phase Plan | HB Site Control field experience, mobile/tablet patterns, offline-capable workflows |
 | 08 | [Phase 7 — HBI Intelligence, Production Hardening, and Rollout](08_Phase-7_HBI-Intelligence-Production-Hardening-and-Rollout-Plan.md) | Draft | Phase Plan | Intelligence features, security hardening, production readiness, enterprise rollout |
-| — | [phase-0-deliverables/](phase-0-deliverables/) | Planning Complete | Deliverables Folder | 7 mandatory Phase 0 artifacts (reconciliation, readiness, guardrails, entry criteria) |
+| — | [phase-0-deliverables/](phase-0-deliverables/) | Complete | Deliverables Folder | 7 mandatory Phase 0 artifacts (reconciliation, readiness, guardrails, entry criteria) |
 | — | [phase-1-deliverables/](phase-1-deliverables/) | Planning Complete | Deliverables Folder | 24 Phase 1 artifacts (schemas, adapters, contracts, test plans, staging readiness) |
 
 ---
@@ -69,7 +70,7 @@ MASTER/
 ### Completed planning records
 
 **Phase 0 — Program Control and Repo Truth**
-Planning complete. Seven mandatory deliverables produced: reconciliation memo, divergence log, production readiness matrix, development guardrail sheet, environment and promotion matrix, Phase 1 entry checklist, and open decisions register. These artifacts established the program truth baseline that Phase 1 planning built upon.
+Execution complete (2026-03-16). Seven mandatory deliverables produced: reconciliation memo, divergence log, production readiness matrix, development guardrail sheet, environment and promotion matrix, Phase 1 entry checklist, and open decisions register. All five milestones (M0.1–M0.5) satisfied, all six Phase 1 entry blockers resolved, and all 17 completion gate checkboxes cleared (see P0-E1). These artifacts established the program truth baseline that Phase 1 planning built upon.
 
 **Phase 1 — Production Data Plane and Integration Backbone**
 Planning complete. Twenty-four deliverables produced across five workstreams: data ownership model (15 schemas), adapter architecture (3 plans), backend service contracts (3 specs), write safety and recovery (1 plan), and contract testing infrastructure (2 plans). All design decisions are locked. Implementation is gated on upstream deliverables (proxy adapters, backend routes, auth middleware, observability instrumentation).

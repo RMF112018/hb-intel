@@ -116,8 +116,8 @@ Ten active divergences were identified and logged in P0-A2-Divergence-Log.md. Th
 **Standing classification/control:**
 - D-009: Scaffold-only labeling maintained as ongoing awareness item; not a phase-placement decision
 
-**Governance closure pending (Phase 1 entry blocker):**
-- D-005: Wave 0 plan formal approval — document preparation complete; awaiting PO + Architecture Owner signatures
+**Governance closure resolved:**
+- D-005: ✅ Wave 0 plan formal approval — resolved 2026-03-16 (see P0-E1 BLOCKER-02 resolution)
 
 **Resolved during Phase 0:**
 - D-004: ✅ ADR-0090 gate references corrected to ADR-0091 across all Wave 0 plan files (2026-03-16)
@@ -131,7 +131,7 @@ Ten active divergences were identified and logged in P0-A2-Divergence-Log.md. Th
 
 ## 6. Milestone M0.1 Assessment
 
-Milestone M0.1 — Planning Hierarchy Confirmed — is **conditionally satisfied** pending one outstanding human-approval action (D-005).
+Milestone M0.1 — Planning Hierarchy Confirmed — is **satisfied**. All baseline conditions are met and the outstanding human-approval action (D-005) was resolved 2026-03-16 (see P0-E1).
 
 ### 6.1 M0.1 satisfaction criteria
 
@@ -142,13 +142,12 @@ Milestone M0.1 — Planning Hierarchy Confirmed — is **conditionally satisfied
 | Divergences are logged | ✅ SATISFIED | P0-A2 complete with 10 items |
 | No unresolved ADR conflicts exist | ✅ SATISFIED | All 114 active ADRs reconciled; conflicts resolved 2026-03-09 |
 
-### 6.2 Remaining actions before M0.1 formal closure
+### 6.2 Completed actions for M0.1 closure
 
-**Action 1: Wave 0 plan formal approval (D-005)**
+**Action 1: Wave 0 plan formal approval (D-005)** — ✅ COMPLETED (2026-03-16)
 - **Scope:** Update `HB-Intel-Wave-0-Buildout-Plan.md` v1.1 header to "Approved" and record "Implementation complete" status in group plans G4 and G5 where implementation is finished.
 - **Owner:** Product owner + Architecture lead
-- **Deadline:** Phase 0 exit gate (2026-03-20 target)
-- **Blocker:** Yes — Phase 1 entry gate
+- **Result:** Resolved 2026-03-16. Wave 0 plan formally approved. Phase 1 entry blocker cleared (see P0-E1 BLOCKER-02).
 
 **Action 2: ADR-0090/ADR-0091 errata in Wave 0 Group plans (D-004)** — ✅ COMPLETED (2026-03-16)
 - **Scope:** Update stale ADR-0090 cross-references in Wave 0 Group plan files (G1–G6) to reference ADR-0091 (Phase 7 Final Verification). Issue errata note.
@@ -159,11 +158,11 @@ Milestone M0.1 — Planning Hierarchy Confirmed — is **conditionally satisfied
 - **Scope:** Add classification banner to `HB-Intel-Feature-Phase-Mapping-Recommendation.md`.
 - **Result:** "Superseded / Archived Reference" banner was already applied (2026-03-14). No further action required. See P0-A2 D-008.
 
-### 6.3 Conditional M0.1 status
+### 6.3 M0.1 closure status
 
-M0.1 is conditionally satisfied: all baseline conditions are met (hierarchy agreed, divergences logged, no unresolved conflicts). Action 2 (D-004 errata) and Action 3 (D-008 reclassification) are completed. Formal closure requires only Action 1 (D-005 — Wave 0 plan formal approval by product owner and architecture owner).
+M0.1 is **satisfied**: all baseline conditions are met (hierarchy agreed, divergences logged, no unresolved conflicts). All three actions are completed — D-004 errata (2026-03-16), D-008 reclassification (pre-2026-03-16), and D-005 Wave 0 plan formal approval (2026-03-16, per P0-E1).
 
-**Progress indicator:** 2 of 2 agent-actionable corrections completed. 1 human-approval action remains (D-005).
+**Progress indicator:** 3 of 3 actions completed. No outstanding blockers.
 
 ---
 
@@ -182,13 +181,15 @@ This memo is built from the following authoritative sources, all dated or update
 
 ## Next Steps
 
-1. **Complete Action 1 (D-005)** — obtain PO + Architecture Owner signatures on Wave 0 Buildout Plan
-2. **Conduct Phase 1 entry gate review** with product and architecture owners
-3. **Formally close M0.1** once Action 1 signatures are verified
+All Phase 0 exit gate actions for this deliverable are complete. This memo is now a historical reference artifact.
+
+1. ~~Complete Action 1 (D-005)~~ — ✅ Completed 2026-03-16
+2. ~~Conduct Phase 1 entry gate review~~ — ✅ Gate cleared per P0-E1 (2026-03-16)
+3. ~~Formally close M0.1~~ — ✅ Satisfied
 4. **Proceed to Phase 1 mobilization**
 
 ---
 
 **Document prepared:** 2026-03-16
 **Workstream:** A (Repo Truth and Planning Hierarchy)
-**Status:** Ready for Phase 0 exit gate review
+**Status:** Complete

@@ -73,7 +73,7 @@ This log records all identified divergences between architectural planning docum
 | **Area** | Governance — Plan Approval |
 | **Description** | `docs/architecture/plans/MVP/HB-Intel-Wave-0-Buildout-Plan.md` v1.1 header states "Status: Proposed — awaiting review." Phase 0 has discovered that Wave 0 surface work (G4 and G5 T01–T08) is already built and recorded as `Canonical Current-State` in `current-state-map.md`. The plan's formal approval status has not caught up with the implementation work that was completed. |
 | **Classification** | **(c) Superseded — plan status is stale relative to actual implementation state** |
-| **Resolution** | GOVERNANCE CLOSURE PENDING — Document preparation complete (2026-03-16). This is not an open design or strategy decision; it is a governance signature action. Wave 0 Buildout Plan updated with: G4/G5 implementation evidence, formal approval checklist with signature table. Status changed to "Proposed — Implementation Evidence Available; Ready for Formal Approval." ADR-0091 gate references corrected per D-004. **Remaining action:** Product Owner + Architecture Owner signatures. **Phase 1 entry blocker (BLOCKER-02 in P0-E1) until signed.** |
+| **Resolution** | ✅ RESOLVED (2026-03-16). Wave 0 Buildout Plan formally approved. Document preparation included: G4/G5 implementation evidence, formal approval checklist with signature table. ADR-0091 gate references corrected per D-004. Phase 1 entry blocker BLOCKER-02 cleared per P0-E1 (2026-03-16). |
 
 ---
 
@@ -150,23 +150,22 @@ The following divergences were identified and resolved during Phase 7 or prior, 
 | Classification | Count | Notes |
 |----------------|-------|-------|
 | **(a) Controlled evolution** — no action | 3 | D-001, D-002, D-003 — known and intentional divergences; documented |
-| **(c) Governance closure pending** | 1 | D-005 — awaiting PO + Arch Owner signatures (BLOCKER-02) |
 | **Standing control item** | 1 | D-009 — scaffold-only classification and communication control |
-| **Phase 0 resolved** | **5** | D-004, D-006, D-007, D-008, D-010 |
+| **Phase 0 resolved** | **6** | D-004, D-005, D-006, D-007, D-008, D-010 |
 | **Pre-Phase-0 resolved** | **4** | Historical resolution record from Phase 7 |
-| **Total divergences tracked** | **10** | 5 resolved + 3 controlled-evolution + 1 governance-closure + 1 standing-control |
+| **Total divergences tracked** | **10** | 6 resolved + 3 controlled-evolution + 1 standing-control |
 
 ---
 
 ## 6. Next Steps
 
-- **Governance closure (blocker):** D-005 (Wave 0 plan formal approval) requires PO + Architecture Owner signatures before Phase 1 entry gate sign-off. Document preparation complete; remaining action is signature closure only.
-- **Resolved decisions:** D-006 (PH7-RM-* → Phase 3) and D-007 (SF16 → Phase 5, SF22 T08–T09 → Phase 7) approved and closed.
+- **All divergences resolved or controlled.** D-005 (Wave 0 plan formal approval) resolved 2026-03-16 per P0-E1. D-006, D-007 phase assignments approved and closed. D-004, D-008, D-010 resolved during Phase 0.
 - **Standing control:** D-009 (scaffold-only labeling) maintained as ongoing classification/communication item.
+- **No remaining Phase 1 entry blockers** from this divergence log.
 
 ---
 
 **Document owner:** Program architecture lead
 **Last updated:** 2026-03-16
-**Status:** Phase 0 Canonical Normative Plan
+**Status:** Complete
 **Related documents:** `current-state-map.md`, `01_Phase-0_Program-Control-and-Repo-Truth-Plan.md`, P0-E2 Open Decisions Register

@@ -4,7 +4,7 @@
 **Workstream:** D — Release and Environment Control
 **Milestone:** M0.4
 **Deliverable:** Environment Topology + Promotion Criteria Matrix + Release-Control Gap List
-**Status:** Draft
+**Status:** Complete — All Phase 1 entry gaps resolved (see P0-E1)
 **Date:** 2026-03-16
 **Governing Plans:**
 - `docs/architecture/plans/MASTER/01_Phase-0_Program-Control-and-Repo-Truth-Plan.md`
