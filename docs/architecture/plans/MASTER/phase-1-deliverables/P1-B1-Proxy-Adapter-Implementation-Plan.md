@@ -4,7 +4,7 @@
 | **Phase** | Phase 1 — Production Data Plane and Integration Backbone |
 | **Workstream** | B — Adapter Completion |
 | **Document Type** | Engineering Plan |
-| **Status** | Draft |
+| **Status** | Draft v2 — corrected against repo truth |
 | **Last Updated** | 2026-03-17 |
 | **Owner** | Frontend Platform / Data Access |
 
@@ -56,60 +56,6 @@
 
 ---
 
-## Milestones
-
-| Milestone | Chunk | Deliverable | Gate |
-|---|---|---|---|
-| **M0** | Chunk 0 | Vitest configured for `@hbc/data-access`; `pnpm --filter @hbc/data-access test` runs successfully | `vitest run` exits 0 |
-| **M1** | Chunk 1 | `ProxyHttpClient` + `ProxyBaseRepository` implemented and tested | 24+ unit tests pass; `check-types` clean |
-| **M2** | Chunk 2 | Lead + Project proxy repositories complete | First two real domain adapters pass all tests; factory returns proxy repos |
-| **M3** | Chunk 3 | All 11 proxy repositories implemented | 90+ tests across all adapter test files |
-| **M4** | Chunk 4 | Factory wired, integration tests passing, full suite green | 100+ tests pass; `check-types` and `lint` clean; no `AdapterNotImplementedError` for proxy mode |
-
----
-
-## Acceptance Criteria
-
-B1 is **done** when all of the following are true:
-
-1. All 11 proxy repository classes exist in `packages/data-access/src/adapters/proxy/` and implement their corresponding port interfaces
-2. `pnpm --filter @hbc/data-access test` passes with 100+ tests (all using mocked `fetch`, no network calls)
-3. `pnpm --filter @hbc/data-access check-types` passes with zero errors
-4. `pnpm --filter @hbc/data-access lint` passes with zero errors
-5. Every `create*Repository('proxy')` factory call returns a concrete proxy repository (no `AdapterNotImplementedError`)
-6. `setProxyContext(baseUrl, getToken)` initializes the lazy `ProxyHttpClient` singleton correctly
-7. Calling `create*Repository('proxy')` without prior `setProxyContext()` throws a clear initialization error
-8. Proxy adapter barrel (`adapters/proxy/index.ts`) exports all implementations
-9. `@hbc/data-access` is added to the root `pnpm test` filter
-
-B1 is **not done** until these are independently verified. Backend availability, MSAL registration, and contract testing (E1) are NOT acceptance criteria for B1 — B1 delivers testable adapter code, not end-to-end integration.
-
----
-
-## Package and App Ownership
-
-| Package / App | Role | What Changes |
-|---|---|---|
-| `@hbc/data-access` | **Primary** | All proxy adapter code, factory wiring, test files, vitest config |
-| `@hbc/models` | Referenced (read-only) | Domain types and shared pagination types consumed by adapters |
-| `@hbc/query-hooks` | Consumer (not modified) | Calls factory functions; will automatically use proxy repos when mode='proxy' |
-| `apps/pwa` | Guidance only | Bootstrap activation example for `main.tsx`; no code changes in B1 scope |
-
----
-
-## Risk Register
-
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| C1 finalizes different API paths than B1 assumes | Medium | Medium — requires updating paths in 11 repos + tests | All paths annotated as provisional (see Appendix A); path constants can be centralized if churn is high |
-| C1 error envelope uses `.error` field but B1 reads `.message` | High | Medium — generic error messages in production | Flagged in Appendix B; must be reconciled before production activation |
-| Pagination default mismatch (B1: 20-25, C1: 50) | High | Low — functional but suboptimal page sizes | Documented in Appendix B; align when C1 is frozen |
-| MSAL app registration not complete when proxy activation is needed | Medium | High — all proxy calls fail with 401 | B1 tests are independent of MSAL; production activation blocked until C2 delivers |
-| Estimating sub-resource routing (`/trackers`, `/kickoffs`) not confirmed in C1 | Medium | Medium — may require restructuring estimating adapter | Flagged in Appendix A; confirm with C1 before implementing Task 5 |
-| No vitest infrastructure exists yet | Certain | High — no tests can run | Task 0 is the first deliverable; blocks all subsequent tasks |
-
----
-
 ## Architecture Decisions
 
 | Decision | Rationale |
@@ -119,7 +65,7 @@ B1 is **not done** until these are independently verified. Backend availability,
 | **Token-provider function, not static token** | MSAL tokens expire (~1 hour); `getToken()` is called per-request to ensure fresh tokens via `acquireTokenSilent()` |
 | **TDD with mocked fetch** | Proxy adapters are fully testable in isolation before any backend exists; mocked `fetch` validates HTTP method, path, headers, and error translation without network calls |
 | **No retry in B1** | Retry is a transport-layer concern owned by P1-D1; B1 provides the `ProxyHttpClient` injection surface that D1 will wrap with `withRetry()` |
-| **Domain-specific method names** | Port interfaces define the contract; proxy adapters implement the actual interface, not a generic CRUD template (see Prompt 1 correction) |
+| **Domain-specific method names** | Port interfaces define the contract; proxy adapters implement the actual interface, not a generic CRUD template |
 
 ---
 
@@ -294,11 +240,13 @@ Together these guards ensure that:
 - Prod mode activates proxy adapters explicitly
 - Missing configuration fails loudly, never silently
 
-### Cross-Workstream Boundaries
+---
+
+## Cross-Workstream Boundaries
 
 B1 is the **frontend-side HTTP client and domain adapter** workstream. It owns the proxy adapter implementation, factory wiring, and adapter-level tests. It does NOT own backend routes, auth middleware, retry/recovery, or contract validation. The following sections define where B1 ends and where each adjacent workstream begins.
 
-#### B1 Task Responsibility Matrix
+### B1 Task Responsibility Matrix
 
 | B1 Task | B1 Owns | Depends on C1 | Depends on C2 | Depends on D1 | Depends on E1 |
 |---|---|---|---|---|---|
@@ -311,12 +259,12 @@ B1 is the **frontend-side HTTP client and domain adapter** workstream. It owns t
 | Task 9: Integration tests | Factory-level test with mocked fetch | Expected response shapes | Token provider behavior | — | — |
 | Task 10: Full suite | Package-level verification | — | — | — | — |
 
-#### Dependency: P1-C1 — Backend Service Contract Catalog
+### Dependency: P1-C1 — Backend Service Contract Catalog
 
 **What B1 assumes from C1:**
 - Endpoint paths (e.g., `/api/leads`, `/api/projects/{id}`, `/api/estimating/trackers`) — all paths in B1 are **provisional** and track C1's catalog
 - Response envelope shape: `{ data: T[], total, page, pageSize }` for paginated lists, `{ data: T }` for single-entity responses
-- Error response shape: `{ message: string }` in JSON body for 4xx/5xx responses
+- Error response shape: B1 currently reads `{ message: string }` but C1 specifies `{ error: string, code: string, requestId: string }` — **known mismatch, must reconcile before production** (see Appendix B, decision D3)
 - HTTP status code semantics: 404 for not found, 422 for validation, 401/403 for auth
 
 **Blocking semantics:**
@@ -327,7 +275,7 @@ B1 is the **frontend-side HTTP client and domain adapter** workstream. It owns t
 **What B1 does NOT own:**
 - Backend route handlers, middleware, request validation, database queries, response assembly — all C1
 
-#### Dependency: P1-C2 — Backend Auth and Validation Hardening
+### Dependency: P1-C2 — Backend Auth and Validation Hardening
 
 **What B1 assumes from C2:**
 - Bearer token in `Authorization` header is the auth mechanism
@@ -343,7 +291,7 @@ B1 is the **frontend-side HTTP client and domain adapter** workstream. It owns t
 **What B1 does NOT own:**
 - Token validation, role checking, permission enforcement, Zod request validation, OBO exchange — all C2
 
-#### Dependency: P1-D1 — Write Safety, Retry, and Recovery
+### Dependency: P1-D1 — Write Safety, Retry, and Recovery
 
 **What B1 defers to D1:**
 - Retry policy types and `withRetry` higher-order function
@@ -360,7 +308,7 @@ B1 is the **frontend-side HTTP client and domain adapter** workstream. It owns t
 **What B1 does NOT own:**
 - Retry logic, idempotency guards, write-safe error states, audit trail infrastructure — all D1
 
-#### Dependency: P1-E1 — Contract Test Suite
+### Dependency: P1-E1 — Contract Test Suite
 
 **What B1 defers to E1:**
 - Shared Zod schemas in `@hbc/models/contracts/` for runtime contract validation
@@ -375,7 +323,7 @@ B1 is the **frontend-side HTTP client and domain adapter** workstream. It owns t
 **What B1 does NOT own:**
 - Contract schema definition, MSW handler authoring, backend shape validation — all E1
 
-#### Operational Dependencies (Outside All Workstreams)
+### Operational Dependencies (Outside All Workstreams)
 
 | Dependency | Owner | Required For | Status |
 |---|---|---|---|
@@ -2789,6 +2737,47 @@ pnpm --filter @hbc/data-access lint
 
 # Expected: ~100 tests pass, 0 type errors, 0 lint errors
 ```
+
+---
+
+## Milestones
+
+| Milestone | Chunk | Deliverable | Gate |
+|---|---|---|---|
+| **M0** | Chunk 0 | Vitest configured for `@hbc/data-access`; `pnpm --filter @hbc/data-access test` runs successfully | `vitest run` exits 0 |
+| **M1** | Chunk 1 | `ProxyHttpClient` + `ProxyBaseRepository` implemented and tested | 24+ unit tests pass; `check-types` clean |
+| **M2** | Chunk 2 | Lead + Project proxy repositories complete | First two real domain adapters pass all tests; factory returns proxy repos |
+| **M3** | Chunk 3 | All 11 proxy repositories implemented | 90+ tests across all adapter test files |
+| **M4** | Chunk 4 | Factory wired, integration tests passing, full suite green | 100+ tests pass; `check-types` and `lint` clean; no `AdapterNotImplementedError` for proxy mode |
+
+---
+
+## Acceptance Criteria
+
+B1 is **done** when all of the following are true:
+
+1. All 11 proxy repository classes exist in `packages/data-access/src/adapters/proxy/` and implement their corresponding port interfaces
+2. `pnpm --filter @hbc/data-access test` passes with 100+ tests (all using mocked `fetch`, no network calls)
+3. `pnpm --filter @hbc/data-access check-types` passes with zero errors
+4. `pnpm --filter @hbc/data-access lint` passes with zero errors
+5. Every `create*Repository('proxy')` factory call returns a concrete proxy repository (no `AdapterNotImplementedError`)
+6. `setProxyContext(baseUrl, getToken)` initializes the lazy `ProxyHttpClient` singleton correctly
+7. Calling `create*Repository('proxy')` without prior `setProxyContext()` throws a clear initialization error
+8. Proxy adapter barrel (`adapters/proxy/index.ts`) exports all implementations
+9. `@hbc/data-access` is added to the root `pnpm test` filter
+
+B1 is **not done** until these are independently verified. Backend availability, MSAL registration, and contract testing (E1) are NOT acceptance criteria for B1 — B1 delivers testable adapter code, not end-to-end integration.
+
+---
+
+## Package and App Ownership
+
+| Package / App | Role | What Changes |
+|---|---|---|
+| `@hbc/data-access` | **Primary** | All proxy adapter code, factory wiring, test files, vitest config |
+| `@hbc/models` | Referenced (read-only) | Domain types and shared pagination types consumed by adapters |
+| `@hbc/query-hooks` | Consumer (not modified) | Calls factory functions; will automatically use proxy repos when mode='proxy' |
+| `apps/pwa` | Guidance only | Bootstrap activation example for `main.tsx`; no code changes in B1 scope |
 
 ---
 
