@@ -1,231 +1,351 @@
 # P1-E2: Staging Readiness Checklist
 
-**Document ID:** P1-E2
-**Phase:** 1 – Acceptance Validation
-**Status:** Draft
-**Date:** 2026-03-16
-**Owner:** QA / Platform Engineering
-
-## Purpose
-
-Confirm all Phase 1 backbone and domain work is live and functioning correctly in staging before formal Phase 1 acceptance. This checklist validates adapter mode, authentication, domain read/write paths, retry behavior, error recovery, observability, and architecture compliance.
+| Field | Value |
+|---|---|
+| **Doc ID** | P1-E2 |
+| **Phase** | Phase 1 |
+| **Workstream** | E — Contract Testing and Staging Readiness |
+| **Document Type** | Acceptance Checklist |
+| **Owner** | QA / Platform Engineering |
+| **Status** | Draft — most sections BLOCKED on upstream deliverables |
+| **Date** | 2026-03-16 |
+| **Last Reviewed Against Repo Truth** | 2026-03-18 |
+| **References** | P1-E1 (Contract Test Suite), P1-B1 (Proxy Adapter), P1-C1 (Backend Catalog), P1-C2 (Auth Hardening), P1-C3 (Observability), P1-D1 (Write Safety) |
 
 ---
 
-## Pre-Conditions
+## Checklist Usage Rule
 
-Before running this checklist, confirm:
+This document is **not** a claim that all listed routes, features, or infrastructure exist today. It is a staging validation gate document whose sections become active **only** when their upstream dependencies are satisfied.
+
+**Rules:**
+- Do not execute a section marked **BLOCKED** — the prerequisites do not exist yet.
+- A section becomes **READY TO VERIFY** only when all items in its "Depends on" row of the Dependency Matrix are delivered and deployed to staging.
+- **PREP-ONLY** sections can be reviewed for correctness but cannot produce pass/fail results without staging infrastructure.
+- Sections marked with PROVISIONAL items should note which items may change when upstream decisions (D3–D6) resolve.
+
+---
+
+## Repo Truth Snapshot (2026-03-18)
+
+### Currently Evidenced in Repo
+
+| Area | Evidence | Source |
+|---|---|---|
+| Registered Azure Function routes | Provisioning saga, proxy (GET + mutate), timer (full spec), SignalR negotiate, project setup requests, acknowledgments, notifications | `backend/functions/src/index.ts` |
+| Auth middleware | `validateToken()` verifies Entra ID Bearer tokens via JWKS; returns `IValidatedClaims { upn, oid, roles, displayName }` | `backend/functions/src/middleware/validateToken.ts` |
+| Auth error shape | `{ error: 'Unauthorized', reason: string }` — does NOT include `code` field or `requestId` | `unauthorizedResponse()` in `validateToken.ts` |
+| Startup config validation | `validateRequiredConfig()` exported but **NOT wired into startup** — explicitly deferred to G2.6 | `backend/functions/src/utils/validate-config.ts` |
+| Health endpoint | **None registered** — no `/api/health` function found in `index.ts` imports | `backend/functions/src/index.ts` |
+| Backend test infrastructure | Vitest with `unit` and `smoke` named projects; coverage targets provisioning only | `backend/functions/vitest.config.ts` |
+| Domain route handlers (leads, projects, estimating) | **None exist** — `backend/functions/src/functions/` contains only provisioning, proxy, notification, acknowledgment, signalr, and timer functions | `backend/functions/src/functions/` |
+| `@hbc/data-access` proxy adapters | **Stubs only** — `ProxyHttpClient` does not exist; proxy mode throws `AdapterNotImplementedError` | P1-E1 Repo Truth Snapshot |
+
+### Planned but Blocked
+
+| Item | Blocked On | Expected From |
+|---|---|---|
+| Domain route handlers (leads, projects, estimating) | C1 | P1-C1 Backend Service Contract Catalog |
+| Error envelope standardization (`{ error, code, requestId?, details? }`) | C1 | P1-C1 error middleware |
+| Auth middleware hardening (standardized error shapes, OBO for downstream APIs) | C2 | P1-C2 Auth Hardening |
+| Proxy adapter implementations | B1 | P1-B1 Proxy Adapter Engineering Plan |
+| Retry logic, idempotency guards, write safety | D1 | P1-D1 Write Safety |
+| Telemetry instrumentation (Application Insights events) | C3 | P1-C3 Observability |
+| Health check endpoint | C1 or Platform | Not yet assigned |
+
+### Staging-Only (Not Verifiable from Repo)
+
+| Item | What Must Exist |
+|---|---|
+| Staging Azure Functions deployment | Deployed instance at `SMOKE_TEST_BASE_URL` |
+| Redis cache connectivity | Redis instance reachable from staging functions |
+| Azure Table Storage connectivity | Table Storage reachable from staging functions |
+| MSAL OBO app registration | Entra ID app registration with API scope grants |
+| Application Insights workspace | AI workspace receiving telemetry from staging functions |
+
+---
+
+## Dependency Matrix
+
+Each major section maps to the upstream workstreams that must deliver before the section can be executed.
+
+| Section | B1 | C1 | C2 | C3 | D1 | Platform / Staging | Status |
+|---|---|---|---|---|---|---|---|
+| 1: Adapter Mode & Startup | — | — | — | — | — | Staging deploy | **PREP-ONLY** |
+| 2: Auth — Bearer Validation | — | — | **Required** | — | — | Staging deploy | **BLOCKED on C2** |
+| 3: Domain Reads — Leads | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
+| 4: Domain Reads — Projects | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
+| 5: Domain Reads — Estimating | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
+| 6: Domain Writes — Leads | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
+| 7: Domain Writes — Projects | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
+| 8: Domain Writes — Estimating | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
+| 9: Retry & Idempotency | **Required** | **Required** | **Required** | — | **Required** | Staging deploy | **BLOCKED on B1 + C1 + C2 + D1** |
+| 10: Error Recovery | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
+| 11: Observability | — | **Required** | **Required** | **Required** | — | Staging deploy + AI workspace | **BLOCKED on C1 + C2 + C3** |
+| 12: Acceptance Gates | All | All | All | All | All | All | **BLOCKED on all upstream** |
+
+---
+
+## Section 1: Adapter Mode & Startup — PREP-ONLY
+
+Confirm proxy adapter is configured and startup logic runs cleanly. This section can be partially reviewed against configuration, but full verification requires a staging deployment.
+
+**Depends on:** Platform (staging deployment)
 
 - [ ] `HBC_ADAPTER_MODE=proxy` configured in staging environment
-- [ ] Azure Functions v4 deployed and healthy in staging
-- [ ] MSAL OBO app registration configured and credentials valid
-- [ ] Redis cache available and reachable from functions
-- [ ] Azure Table Storage available and reachable from functions
-- [ ] Backend health endpoint responds successfully: `GET /api/health`
-- [ ] Staging deployment is post-P1-C2 (auth middleware and validation applied)
-
----
-
-## Section 1: Adapter Mode Verification
-
-Confirm proxy adapter is active and startup logic runs cleanly.
-
 - [ ] Application startup log contains `HBC_ADAPTER_MODE=proxy`
-- [ ] `assertAdapterModeForEnvironment()` completes without throwing error
-- [ ] `GET /api/health` returns `{ status: 'ok' }` with 200 status
 - [ ] No warning or error logs for adapter mode mismatch
-- [ ] Startup duration is acceptable (< 10 seconds)
+- [ ] `validateRequiredConfig()` is wired into startup and completes without error (**NOTE:** currently exported but NOT called at startup — G2.6 must wire it)
+- [ ] Startup duration measured and recorded as baseline (**NOTE:** no hard-coded threshold — measure actual cold-start time and document as the Phase 1 baseline for future comparison)
+
+**Health check:**
+- [ ] Health endpoint registered and responds — `GET /api/health` returns 200 (**NOTE:** no health function is currently registered in `backend/functions/src/index.ts` — C1 or Platform must add it)
 
 ---
 
-## Section 2: Authentication Verification
+## Section 2: Auth — Bearer Validation — BLOCKED on C2
 
-Confirm auth middleware rejects unauthenticated requests and accepts valid tokens.
+Confirm auth middleware rejects unauthenticated requests and accepts valid tokens with standardized error shapes.
+
+**Depends on:** C2 (auth hardening), Platform (staging deployment)
+
+**Current repo state:** `validateToken()` verifies Entra ID Bearer tokens and returns `IValidatedClaims`. The current `unauthorizedResponse()` returns `{ error: 'Unauthorized', reason }` — it does NOT return the `{ error, code }` shape expected by P1-E1 contract schemas. C2 must standardize the error response shape.
+
+**Important distinction:** Bearer token validation (verifying the caller's JWT) is different from OBO (On-Behalf-Of) flow, which is needed only when the Azure Functions API calls a downstream API (e.g., Microsoft Graph) on the user's behalf. Not every endpoint requires OBO. This section validates bearer validation only; OBO readiness is a separate C2 deliverable.
 
 ### Missing Token
 - [ ] `GET /api/leads` (no Authorization header) → 401 response
-- [ ] Response body includes `{ error: 'Unauthorized', code: 'UNAUTHORIZED' }`
-- [ ] Response includes `X-Request-Id` header
+- [ ] Response body conforms to ErrorEnvelopeSchema: `{ error: '...', code: 'UNAUTHORIZED' }` (PROVISIONAL — current shape is `{ error: 'Unauthorized', reason }` until C2 standardizes)
+- [ ] Response includes distributed trace correlation (via W3C `traceparent` header or Application Insights request ID — see Section 11)
 
 ### Expired Token
 - [ ] Use a JWT token with `exp` claim in the past
 - [ ] `GET /api/leads` with expired token → 401 response
-- [ ] Response includes same error shape
+- [ ] Response body conforms to ErrorEnvelopeSchema
 
 ### Valid Token
-- [ ] Use a valid bearer token (generated via test service or OAuth flow)
-- [ ] `GET /api/leads` with valid token → 200 response
-- [ ] Response body is valid (not 401)
-- [ ] Response includes `X-Request-Id` header
+- [ ] Use a valid bearer token scoped to the API audience (`api://<CLIENT_ID>`)
+- [ ] `GET /api/leads` with valid token → 200 response (requires C1 leads route to exist)
+- [ ] Token acquired via `az account get-access-token --resource api://<CLIENT_ID>` — NOT an ARM-scoped token
 
 ---
 
-## Section 3: Domain Read Paths – Leads
+## Section 3: Domain Reads — Leads — BLOCKED on C1 + C2
 
 Confirm `GET` endpoints return paginated responses and 404 for missing records.
 
-- [ ] `GET /api/leads` with valid token → 200 with `{ items: [...], pagination: {...} }`
-- [ ] Response includes pagination: `{ total, page, pageSize, totalPages }`
+**Depends on:** C1 (leads route handlers), C2 (auth middleware), Platform (staging deployment)
+
+**NOTE:** No leads route handlers exist in the repo today. `backend/functions/src/functions/` contains only provisioning, proxy, notification, acknowledgment, signalr, and timer functions. C1 must deliver `leads.handler.ts` before this section is executable.
+
+**Domain model reference:** Leads use **numeric IDs** (not UUIDs). Writable fields: `title`, `stage` (LeadStage enum), `clientName`, `estimatedValue`. See `ILead` in `@hbc/models`.
+
+- [ ] `GET /api/leads` with valid token → 200 with `{ items: [...], total, page, pageSize }` (collection response per P1-E1 envelope convention)
 - [ ] `GET /api/leads?page=1&pageSize=5` respects pagination (returns max 5 items)
-- [ ] `GET /api/leads?search=acme` filters results by name/company
+- [ ] `GET /api/leads/search?q=acme` returns filtered results matching title or clientName
 - [ ] `GET /api/leads?page=999` returns empty items array (valid, not error)
-- [ ] `GET /api/leads/{valid-uuid}` returns single lead record with 200
-- [ ] `GET /api/leads/{invalid-uuid}` returns 404 with `{ error: 'Not Found' }`
-- [ ] `GET /api/leads/{valid-uuid}` response includes all key fields: name, status, estimatedValue, etc.
+- [ ] `GET /api/leads/{numeric-id}` returns single lead with 200 (bare-object response per P1-E1 envelope convention)
+- [ ] `GET /api/leads/{nonexistent-id}` returns 404 conforming to ErrorEnvelopeSchema
+- [ ] Response includes all `ILead` fields: `id` (number), `title`, `stage`, `clientName`, `estimatedValue`, `createdAt`, `updatedAt`
 
 ---
 
-## Section 4: Domain Read Paths – Projects
+## Section 4: Domain Reads — Projects — BLOCKED on C1 + C2
 
 Confirm read endpoints work for projects domain.
+
+**Depends on:** C1 (project route handlers), C2 (auth middleware), Platform (staging deployment)
+
+**Domain model reference:** Projects use **string UUID IDs**. Writable fields: `name`, `number`, `status`, `startDate`, `endDate`. See `IActiveProject` in `@hbc/models`.
 
 - [ ] `GET /api/projects` with valid token → 200 with paginated response
 - [ ] `GET /api/projects?page=2&pageSize=10` respects pagination
 - [ ] `GET /api/projects/{valid-uuid}` returns single project with 200
-- [ ] `GET /api/projects/{invalid-uuid}` returns 404
+- [ ] `GET /api/projects/{invalid-uuid}` returns 404 conforming to ErrorEnvelopeSchema
 
 ---
 
-## Section 5: Domain Read Paths – Estimating
+## Section 5: Domain Reads — Estimating — BLOCKED on C1 + C2
 
 Confirm read endpoints work for estimating domain.
 
-- [ ] `GET /api/estimates` with valid token → 200 with paginated response
-- [ ] `GET /api/estimates?projectId={uuid}` filters by project
-- [ ] `GET /api/estimates/{valid-uuid}` returns single estimate with 200
-- [ ] `GET /api/estimates/{invalid-uuid}` returns 404
+**Depends on:** C1 (estimating route handlers), C2 (auth middleware), Platform (staging deployment)
+
+**Domain model reference:** Estimating is NOT a generic "estimates" CRUD resource. It is split into:
+- **Tracker CRUD:** `getAllTrackers`, `getTrackerById`, `createTracker`, `updateTracker`, `deleteTracker` — trackers use **numeric IDs**, scoped by `projectId` (string)
+- **Kickoff:** `getKickoff(projectId)`, `createKickoff(data)` — Tier 2 PROVISIONAL (D2 sub-resource routing open)
+
+See `IEstimatingTracker`, `IEstimatingKickoff`, and `IEstimatingRepository` in `@hbc/models` and `@hbc/data-access/src/ports/`.
+
+- [ ] `GET /api/estimating/trackers` with valid token → 200 with paginated response (PROVISIONAL — base route path confirmed, but D2 sub-resource routing may change)
+- [ ] `GET /api/estimating/trackers/{numeric-id}` returns single tracker with 200
+- [ ] `GET /api/estimating/trackers/{nonexistent-id}` returns 404 conforming to ErrorEnvelopeSchema
+- [ ] Tracker response includes all `IEstimatingTracker` fields: `id` (number), `projectId`, `bidNumber`, `status`, `dueDate`, `createdAt`, `updatedAt`
 
 ---
 
-## Section 6: Domain Write Paths – Leads
+## Section 6: Domain Writes — Leads — BLOCKED on C1 + C2
 
 Confirm `POST`, `PUT`, `DELETE` enforce validation and update correctly.
 
+**Depends on:** C1 (leads route handlers + error middleware), C2 (auth middleware), Platform (staging deployment)
+
 ### Create
-- [ ] `POST /api/leads` with valid body → 201 status, response includes `id`
-- [ ] Valid body: `{ name: "Acme Corp", status: "prospect", estimatedValue: 50000 }`
-- [ ] `POST /api/leads` with missing required field (e.g., name) → 422 with field error details
-- [ ] Response includes `{ error: 'Validation failed', details: [{ path: ['name'], message: 'Required' }] }`
+- [ ] `POST /api/leads` with valid body → 201 status, response includes numeric `id`
+- [ ] Valid body: `{ title: "Highway Bridge Replacement", stage: "Identified", clientName: "ACME Construction", estimatedValue: 2500000 }`
+- [ ] `POST /api/leads` with missing required field (e.g., `title`) → 422 with ErrorEnvelopeSchema response including `details` array
+- [ ] `POST /api/leads` with invalid `stage` value → 422
 
 ### Update
-- [ ] `PUT /api/leads/{valid-uuid}` with valid partial body → 200 with updated record
-- [ ] Partial update: `{ status: "qualified" }` updates only that field, others unchanged
-- [ ] `PUT /api/leads/{invalid-uuid}` → 404
-- [ ] `PUT /api/leads/{valid-uuid}` with invalid enum value (e.g., `status: "unknown"`) → 422
+- [ ] `PUT /api/leads/{numeric-id}` with valid partial body → 200 with updated record (bare-object response)
+- [ ] Partial update: `{ stage: "Bidding" }` updates only that field, others unchanged
+- [ ] `PUT /api/leads/{nonexistent-id}` → 404 conforming to ErrorEnvelopeSchema
+- [ ] `PUT /api/leads/{numeric-id}` with invalid `stage` value → 422
 
 ### Delete
-- [ ] `DELETE /api/leads/{valid-uuid}` → 204 (No Content)
-- [ ] Verify lead is actually deleted: `GET /api/leads/{uuid}` → 404
-- [ ] `DELETE /api/leads/{invalid-uuid}` → 404
+- [ ] `DELETE /api/leads/{numeric-id}` → 204 (No Content, empty body)
+- [ ] Verify lead is actually deleted: `GET /api/leads/{id}` → 404
+- [ ] `DELETE /api/leads/{nonexistent-id}` → 404
+
+### Search
+- [ ] `GET /api/leads/search?q=bridge` → 200 with paginated results matching title or clientName
+- [ ] `GET /api/leads/search?q=` (empty query) → 400 conforming to ErrorEnvelopeSchema
 
 ---
 
-## Section 7: Domain Write Paths – Projects
+## Section 7: Domain Writes — Projects — BLOCKED on C1 + C2
 
 Confirm create, update, delete for projects.
 
-- [ ] `POST /api/projects` with `{ name: "Website Redesign" }` → 201 with id
-- [ ] `POST /api/projects` missing name → 422 with field error
-- [ ] `PUT /api/projects/{valid-uuid}` with `{ budget: 150000 }` → 200, unchanged fields preserved
+**Depends on:** C1 (project route handlers), C2 (auth middleware), Platform (staging deployment)
+
+- [ ] `POST /api/projects` with `{ name: "Highway Widening", number: "PRJ-HW2026", status: "Planning", startDate: "2026-04-01T00:00:00Z", endDate: "2026-12-31T00:00:00Z" }` → 201 with UUID `id`
+- [ ] `POST /api/projects` missing `name` → 422 with ErrorEnvelopeSchema response
+- [ ] `PUT /api/projects/{valid-uuid}` with `{ status: "Active" }` → 200, unchanged fields preserved
 - [ ] `DELETE /api/projects/{valid-uuid}` → 204, verify deleted
 
 ---
 
-## Section 8: Domain Write Paths – Estimating
+## Section 8: Domain Writes — Estimating — BLOCKED on C1 + C2
 
-Confirm create, update, delete for estimates.
+Confirm create, update, delete for estimating trackers.
 
-- [ ] `POST /api/estimates` with `{ projectId: "{uuid}", description: "Design", estimatedHours: 40 }` → 201
-- [ ] `POST /api/estimates` without projectId → 422
-- [ ] `PUT /api/estimates/{valid-uuid}` with `{ estimatedHours: 50 }` → 200
-- [ ] `DELETE /api/estimates/{valid-uuid}` → 204
+**Depends on:** C1 (estimating route handlers), C2 (auth middleware), Platform (staging deployment)
+
+- [ ] `POST /api/estimating/trackers` with `{ projectId: "{uuid}", bidNumber: "BID-2026-001", status: "Draft", dueDate: "2026-05-01T00:00:00Z" }` → 201 with numeric `id`
+- [ ] `POST /api/estimating/trackers` without `projectId` → 422 with ErrorEnvelopeSchema response
+- [ ] `PUT /api/estimating/trackers/{numeric-id}` with `{ status: "InProgress" }` → 200
+- [ ] `DELETE /api/estimating/trackers/{numeric-id}` → 204
 
 ---
 
-## Section 9: Retry and Idempotency
+## Section 9: Retry & Idempotency — BLOCKED on B1 + C1 + C2 + D1
 
 Confirm client retry logic and idempotency key handling.
 
-### Simulated Backend Failure
-- [ ] Configure function to return 503 on next request (via feature flag or local override)
-- [ ] Client sends request → receives 503
-- [ ] Client retries automatically after 2 seconds
-- [ ] Retry succeeds → 200 or expected response
-- [ ] Function received only one successful request (not duplicate work)
+**Depends on:** B1 (proxy adapters with retry wiring), C1 (domain route handlers), C2 (auth middleware), D1 (retry policy, idempotency guards, `withIdempotency` handler wrapper, `IdempotencyStorageService`), Platform (staging deployment)
 
-### Idempotency Key Header
-- [ ] `POST /api/leads` with header `Idempotency-Key: test-key-123`
-- [ ] Request succeeds → 201 with created lead ID (e.g., id: "abc-def-123")
-- [ ] Send identical request again with same `Idempotency-Key`
-- [ ] Response is 200 with same lead ID (cached, not re-created)
-- [ ] Verify Azure Table Storage contains idempotency record with key "test-key-123"
+**NOTE:** This section is the most speculative in the checklist. The specific retry timing (e.g., 2-second delay), idempotency key header name, 503 simulation mechanism, and Table Storage record structure are all defined by P1-D1. Do not execute this section until D1 deliverables are frozen and deployed.
+
+### Retry Behavior (D1 `withRetry` HOF)
+- [ ] Client sends request to a temporarily unavailable endpoint → receives 503
+- [ ] Client retries automatically per D1 retry policy (timing TBD by D1)
+- [ ] Retry succeeds → expected response
+- [ ] No duplicate side effects from retry
+
+### Idempotency (D1 `withIdempotency` handler wrapper)
+- [ ] `POST /api/leads` with idempotency key header (header name TBD by D1)
+- [ ] Request succeeds → 201 with created lead
+- [ ] Identical request with same idempotency key → returns cached result (not re-created)
+- [ ] Idempotency record exists in D1's `IdempotencyStorageService` (Table Storage table name TBD by D1)
 
 ---
 
-## Section 10: Error Recovery
+## Section 10: Error Recovery — BLOCKED on C1 + C2
 
-Confirm error handling and observability during failures.
+Confirm error handling produces standardized shapes across all failure modes.
+
+**Depends on:** C1 (error middleware with `formatErrorResponse()`), C2 (auth middleware), Platform (staging deployment)
 
 ### Backend Failure (502 / 503)
-- [ ] Simulate backend 502 error
-- [ ] Frontend receives typed error response (not unhandled exception)
-- [ ] Error includes `code`, `message`, `requestId`
-- [ ] Browser console shows `WriteFailureReason` with classification (e.g., 'SERVER_ERROR')
-- [ ] No blank error pages or raw stack traces visible to user
+- [ ] Simulate backend error (mechanism TBD — may require staging-specific configuration)
+- [ ] Response conforms to ErrorEnvelopeSchema: `{ error: '...', code: 'INTERNAL_ERROR' }`
+- [ ] Error is classified and logged, not an unhandled exception
 
 ### Validation Failure (422)
-- [ ] Send `POST /api/leads` with invalid data (e.g., `status: "invalid"`)
-- [ ] Response is 422 with `{ error: 'Validation failed', details: [...] }`
-- [ ] Frontend can parse field errors and display validation messages
+- [ ] Send `POST /api/leads` with invalid data (e.g., `stage: "invalid"`)
+- [ ] Response is 422 conforming to ErrorEnvelopeSchema with `code: 'VALIDATION_ERROR'` and `details` array
 - [ ] No 500 error or unhandled exception
 
 ### Not Found (404)
-- [ ] Request non-existent resource → 404 with `{ error: 'Not Found' }`
-- [ ] Error code is 'NOT_FOUND', not generic error
-- [ ] Request ID in response for tracing
+- [ ] Request non-existent resource → 404 conforming to ErrorEnvelopeSchema
+- [ ] `code` is `'NOT_FOUND'`
+
+**PROVISIONAL (D3):** The `error` field in ErrorEnvelopeSchema may be renamed to `message` when C1 decision D3 resolves. See P1-E1 Frozen vs Provisional Error Envelope Fields.
 
 ---
 
-## Section 11: Observability
+## Section 11: Observability — BLOCKED on C1 + C2 + C3
 
-Confirm request tracing and logging across the stack.
+Confirm request tracing and telemetry across the stack.
 
-### Request ID Propagation
-- [ ] All API responses include `X-Request-Id` header
-- [ ] Request ID is a valid UUID format
-- [ ] Same Request ID appears in Azure Functions Application Insights logs
-- [ ] All log entries for the request share the same Request ID
+**Depends on:** C1 (route handlers emitting telemetry events), C2 (auth middleware emitting auth events), C3 (Application Insights instrumentation), Platform (staging deployment + AI workspace)
+
+**Tracing model:** Azure Functions uses W3C Trace Context (`traceparent` / `tracestate` headers) for distributed trace correlation, integrated with Application Insights. The checklist should verify W3C trace correlation, not rely solely on a custom `X-Request-Id` header.
+
+### Distributed Trace Correlation
+- [ ] API responses include W3C `traceparent` header (or Application Insights operation ID is set)
+- [ ] Same operation ID appears in Application Insights request telemetry
+- [ ] Related log entries share the same operation ID
 
 ### Application Insights
 - [ ] Azure Functions Application Insights dashboard loads
-- [ ] Recent requests visible in "Requests" table (last 5 minutes)
-- [ ] Failed requests appear in "Failures" tab
-- [ ] Dependency calls (Redis, Table Storage, OBO service) appear in trace
-- [ ] No orphaned logs (all logs have matching request ID)
+- [ ] Recent requests visible in "Requests" table (last 15 minutes after smoke test run)
+- [ ] Failed requests appear in "Failures" tab with correct status codes
+- [ ] Dependency calls (Redis, Table Storage) appear in dependency telemetry
 
-### Error Logs
-- [ ] Simulate an error scenario (e.g., database unavailable)
-- [ ] Error appears in Application Insights with full context
-- [ ] Stack trace includes function name, line number
-- [ ] Request ID and auth context included in error log
+### C3 Event Verification (manual KQL — see P1-E1 Task 9)
+- [ ] `handler.invoke`, `handler.success`, `handler.error` events present after smoke test traffic
+- [ ] `auth.bearer.validate`, `auth.bearer.success`, `auth.bearer.error` events present
+- [ ] Proxy events (`proxy.request.start`, `proxy.request.success`) present for proxy-adapter domains
+
+### Error Telemetry
+- [ ] Simulated error appears in Application Insights with full context
+- [ ] Exception telemetry includes function name, error classification
+- [ ] Operation ID links error to the originating request
 
 ---
 
-## Section 12: Phase 1 Acceptance Gates
+## Section 12: Phase 1 Acceptance Gates — BLOCKED on All Upstream
 
-Final verification that all Phase 1 work meets acceptance criteria.
+Final verification that all Phase 1 work meets acceptance criteria. This section becomes executable only when ALL preceding sections are READY TO VERIFY and have passed.
 
-- [ ] All Section 1–11 checks pass (no unchecked items)
-- [ ] No mock adapter usage in staging logs (no `HBC_ADAPTER_MODE=mock`)
-- [ ] No test tokens or fake credentials in staging (all auth is production-credentialed)
-- [ ] P0 entry blockers from Phase 1 initiation resolved
-- [ ] P1-C2 (auth and validation) fully deployed and functional
-- [ ] Domain APIs (leads, projects, estimating, acknowledgments, notifications) return 200 with auth
-- [ ] All routes enforce auth and validation
-- [ ] Response shapes are standardized
-- [ ] Request IDs propagate end-to-end
-- [ ] Error recovery and retry logic functional
-- [ ] Observability complete (logs, tracing, Application Insights)
+**Depends on:** All workstreams (B1, C1, C2, C3, D1), Platform (staging deployment + AI workspace)
+
+- [ ] All Sections 1–11 checks pass (no unchecked items in any READY TO VERIFY section)
+- [ ] No mock adapter usage in staging logs (`HBC_ADAPTER_MODE` must be `proxy`)
+- [ ] No test tokens or expired credentials in staging configuration
+- [ ] Domain APIs (leads, projects, estimating) return 200 with valid auth
+- [ ] All domain routes enforce auth (401 without token)
+- [ ] Response shapes conform to P1-E1 contract schemas (ErrorEnvelopeSchema for errors, bare-object for single-item, `createPagedSchema` for collections)
+- [ ] Error recovery and retry logic functional (D1 deliverables verified)
+- [ ] Observability complete: W3C trace correlation + Application Insights events + C3 telemetry events
+- [ ] `validateRequiredConfig()` wired into startup and passing in staging
+
+---
+
+## C1 Reconciliation Note
+
+Several items in this checklist reference transport shapes (error envelope, pagination, single-item response wrapping) that are governed by C1 decisions not yet frozen:
+
+| Decision | Affects | Current Provisional Convention |
+|---|---|---|
+| D3 — Error field naming | ErrorEnvelopeSchema `error` vs `message` | `.error` field used throughout |
+| D4 — Pagination default | `pageSize` default value | 25 (matches `DEFAULT_PAGE_SIZE`) |
+| D5 — PATCH support | Whether PUT-only or PUT+PATCH | PUT-only assumed |
+| D6 — Path nesting | Project-scoped domain routes | Flat paths assumed for Tier 1 |
+
+When C1 freezes these decisions, update the affected checklist items to match. See P1-E1 Provisional Response-Envelope Convention and Open Decision and Blocker Ledger for the authoritative tracking.
 
 ---
 
@@ -249,7 +369,7 @@ Additional observations, deviations, or follow-ups:
 
 ## Post-Phase-1 Recommendations
 
-- [ ] Document any manual test procedures needed for future staging validation
-- [ ] Create automated smoke tests for staging deployment validation
-- [ ] Review Application Insights cost; consider retention policy
+- [ ] Convert manual checklist items into automated smoke tests (see P1-E1 Task 8)
+- [ ] Document cold-start baseline from Section 1 for future performance comparison
+- [ ] Review Application Insights cost and configure retention policy
 - [ ] Schedule Phase 2 planning kickoff
