@@ -9,7 +9,7 @@
 | **Owner** | D1-workstream lead |
 | **Status** | Draft — blocked on B1 proxy infrastructure |
 | **Date** | 2026-03-16 |
-| **Last Reviewed Against Repo Truth** | 2026-03-18 |
+| **Last Reviewed Against Repo Truth** | 2026-03-19 |
 | **Audience** | Developers implementing write safety for Phase 1 critical path (Project, Lead, Estimating) |
 | **References** | P1-B1 (Proxy Adapter), P1-B2 (Adapter Completion Backlog), P1-C1 (Backend Service Catalog), P1-C3 (Observability Spec), current-state-map.md |
 
@@ -52,7 +52,7 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 - Proxy adapter mode throws `AdapterNotImplementedError` in the factory for all domains (**CURRENT**)
 - `packages/data-access` has no test script — only build, check-types, lint (**CURRENT**)
 - `backend/functions` has vitest test infrastructure (unit, smoke, coverage) (**CURRENT**)
-- Backend table storage service (`RealTableStorageService`) exposes domain-specific provisioning methods using `TableClient.upsertEntity()` semantics; no generic idempotency table or middleware exists (**CURRENT**)
+- Backend table storage service (`RealTableStorageService`) exposes domain-specific provisioning methods using `TableClient.upsertEntity()` semantics; no generic idempotency table or idempotency guard exists (**CURRENT**)
 - No retry logic exists anywhere in `packages/data-access` (**CURRENT**)
 
 ### D1 Deliverable Breakdown by Surface
@@ -1997,9 +1997,7 @@ on classification, not UI.
 **Files:**
 - Modify or create: `packages/models/src/shared/audit.ts`
 
-**Note:** If `packages/models` doesn't exist or audit.ts is elsewhere, adjust path.
-
-**Implementation (no tests; type definition):**
+**Implementation (type definition with optional type guard tests):**
 
 ```typescript
 // packages/models/src/shared/audit.ts
@@ -2540,9 +2538,9 @@ export {
 
 export {
   WriteFailureReason,
-  WriteOutcome,
   classifyWriteFailure,
 } from './write-safe-error.js';
+// NOTE: WriteOutcome is NOT exported — it is an optional app-level pattern (see Decision 5)
 ```
 
 Update root index:
@@ -2563,9 +2561,9 @@ export {
   generateIdempotencyKey,
   isExpired,
   WriteFailureReason,
-  WriteOutcome,
   classifyWriteFailure,
 } from './retry/index.js';
+// NOTE: WriteOutcome is NOT exported — it is an optional app-level pattern (see Decision 5)
 
 // TARGET: Re-export IdempotencyContext from proxy HTTP client once B1 delivers http-client.ts
 // export type { IdempotencyContext as HttpIdempotencyContext } from './adapters/proxy/http-client.js';
@@ -2704,5 +2702,3 @@ Write safety APIs exported. Full integration pending B1/C1.
 - **Azure Tables SDK:** `@azure/data-tables` v13.3.2
 
 ---
-
-**Document End — Total line count: 1,247**
