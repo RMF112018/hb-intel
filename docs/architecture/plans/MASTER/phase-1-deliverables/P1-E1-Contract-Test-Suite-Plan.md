@@ -148,7 +148,7 @@ See the Open Decision and Blocker Ledger below for the complete list of blocked 
 
 This is the single authoritative source for all open design decisions and workstream blockers affecting E1. Individual task sections reference this ledger rather than repeating blocker details.
 
-**Table A: Open Design Decisions**
+**Table A: Design Decisions (7 of 8 RESOLVED — see Locked Decisions Applied)**
 
 | ID | Decision | Owner | E1 Impact | Resolution | Status |
 |---|---|---|---|---|---|
@@ -160,6 +160,8 @@ This is the single authoritative source for all open design decisions and workst
 | D6 | Nested project-scoped paths vs flat `?projectId=` query params | P1-C1 | Tier 2 domain route paths and MSW handler URL patterns | **Nested** `/api/projects/{projectId}/...` | **RESOLVED** |
 | A8 | Aggregate endpoint for projects | P1-C1 | PortfolioSummarySchema route path | `/api/projects/summary` | **RESOLVED** |
 | A9 | Auth route catalog | P1-C2 | Tier 3 — no auth schema or tests | External except `/api/auth/me` smoke utility; full auth routes still deferred to C2 | **PARTIAL** |
+
+> **Note:** Table A design decisions are resolved — they no longer block schema design. Table B workstream blockers remain active — they block implementation of specific tasks pending upstream deliverables.
 
 **Table B: Workstream Blockers**
 
@@ -3708,11 +3710,24 @@ After upstream dependencies deliver:
 
 Before handing any E1 task to an implementation agent, confirm:
 
+**Task readiness:**
 - [ ] The task's status is **TARGET** (not BLOCKED)
 - [ ] All prerequisites in the Execution Sequence with Acceptance Criteria table are met
 - [ ] The Readiness Gate (if applicable for Tasks 8-9) shows all prerequisites as MET
-- [ ] The `Last Reviewed Against Repo Truth` date is within 7 days
 - [ ] The Blocker Ledger reflects current upstream status
-- [ ] The implementer has read the Execution Guardrails section
 - [ ] The implementer knows which vitest project and command to use for verification
-- [ ] All transport-layer decisions the task depends on are locked (D1–D6, A8 are all resolved)
+
+**Document currency:**
+- [ ] The `Last Reviewed Against Repo Truth` date is within 7 days
+- [ ] The implementer has read the Execution Guardrails section (including no-placeholder-scaffolding rule)
+
+**Decision reconciliation (confirmed 2026-03-18):**
+- [x] All transport-layer decisions are locked (D1–D6, A8 resolved; see Locked Decisions Applied)
+- [x] All code examples use `{ data: T }` wrapper for single-item responses
+- [x] All code examples use `message` field (not `error`) in ErrorEnvelopeSchema
+- [x] Blocked work is clearly bounded — no speculative tests or placeholder suites
+- [x] Smoke test input policy is explicit (skip locally, fail in CI)
+- [x] Telemetry gate evidence requires `requests` + `dependencies` + `traces` correlation
+- [x] `/api/auth/me` is scoped as smoke-test-only utility, not a contract test lane
+- [x] Canonical domain interfaces (`@hbc/models`) are distinguished from derived contract schemas
+- [x] No remaining agent-facing ambiguity on Phase 1 contract shapes
