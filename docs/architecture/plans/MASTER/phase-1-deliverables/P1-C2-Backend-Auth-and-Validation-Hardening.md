@@ -10,11 +10,27 @@
 
 Add centralized authentication middleware and Zod request validation to all Azure Functions routes, standardizing authentication enforcement, request/response shapes, and error handling across the Phase 1 domain APIs (leads, projects, estimating, acknowledgments, notifications).
 
+## Current Backend State (Pre-Implementation Baseline)
+
+Verified against live repo 2026-03-18. This section documents what exists so C2 implementation builds on the right foundation.
+
+**What exists and can be reused:**
+- `backend/functions/src/middleware/validateToken.ts` — JWT validation against Azure Entra ID JWKS via `jose` library. Returns `IValidatedClaims { upn, oid, roles, displayName? }`. Tested (valid token, missing header, expired, wrong audience, missing claims). **C2 builds `withAuth()` on top of this.**
+- `backend/functions/src/utils/logger.ts` — `createLogger()` producing structured JSON with `trackEvent()` and `trackMetric()`. **Reuse for request ID logging.**
+- `unauthorizedResponse()` helper in `validateToken.ts` — returns `{ error: 'Unauthorized', reason }`. **C2 replaces with standardized error envelope using `message` field per D3.**
+
+**What does NOT exist (C2 must build):**
+- Centralized `withAuth()` wrapper — each route currently calls `validateToken()` manually in try-catch
+- Zod request validation — `zod` is not in `backend/functions/package.json`; all validation is manual `if (!field)` checks
+- Standardized response helpers (`successResponse()`, `errorResponse()`, `listResponse()`) — each route constructs `{ status, jsonBody }` ad-hoc
+- `X-Request-Id` propagation — no request ID middleware exists; no `requestId` in error responses
+- Structured validation error details — validation errors are flat strings, not `{ field, message }[]` arrays
+
 ## Architecture
 
 - **Auth Pattern:** Express-style middleware adapted for Azure Functions v4; all auth checks in `middleware/auth.ts`
 - **Validation:** Zod schemas for request body, query params, and path params; `middleware/validate.ts` parse helpers
-- **Error Responses:** Standardized shape with `error`, `code`, `requestId`; helpers in `utils/response-helpers.ts`
+- **Error Responses:** Standardized shape with `message`, `code`, `requestId` (per D3 lock: `message` not `error`); helpers in `utils/response-helpers.ts`
 - **Request Tracking:** X-Request-Id propagation via middleware
 
 ## Tech Stack

@@ -14,6 +14,14 @@
 
 **Note:** This document was previously identified as P1-C1, which collided with the backend service contract catalog. Re-identified as P1-C3.
 
+### Implementation Baseline (verified 2026-03-18)
+
+- ✅ `createLogger()` + `ILogger` foundation fully implemented (`backend/functions/src/utils/logger.ts`)
+- ✅ Provisioning saga telemetry fully implemented (9 named events, 3 custom metrics, saga correlation IDs)
+- ❌ All other telemetry event families (proxy adapter, handler lifecycle, auth, notification, startup signal) are P1-C3 implementation scope — not yet implemented
+- ❌ Health endpoint (`GET /api/health`) not yet implemented
+- ❌ Dashboards and alert rules not yet created
+
 ---
 
 ## 1. Purpose and Scope

@@ -370,7 +370,7 @@ These standards define the target contract shape for Phase 1 domain routes. Curr
 
 **Collection (paginated):**
 ```json
-{ "data": [ /* T[] */ ], "total": 0, "page": 1, "pageSize": 50 }
+{ "items": [ /* T[] */ ], "total": 0, "page": 1, "pageSize": 25 }
 ```
 
 **Single item:**
@@ -388,21 +388,25 @@ These standards define the target contract shape for Phase 1 domain routes. Curr
 ### Error Response Envelope
 
 ```json
-{ "error": "Human-readable message", "code": "ERROR_CODE", "requestId": "uuid" }
+{ "message": "Human-readable message", "code": "ERROR_CODE", "requestId": "uuid" }
 ```
 
-**D3 note:** The target envelope uses `error` as the primary message field. B1's `extractErrorMessage()` currently reads `.error` first with `.message` fallback (dual-field strategy). Until D3 is resolved, backends should include the `error` field per this target standard. Backends may optionally include a `message` field for transitional compatibility, but `error` is authoritative.
+Optional `details` array for validation errors: `"details": [{ "field": "name", "message": "Required" }]`
+
+**D3 RESOLVED:** `message` is the primary error field (not `error`). See P1-E1 Locked Decision 2. B1's `extractErrorMessage()` reads `.message` with `.error` fallback for backward compatibility with pre-Phase-1 routes. New routes MUST use `message` only.
 
 ### Mutation Methods
 
-**Target:** Domain routes support both PUT (full replace) and PATCH (partial merge).
+**D5 RESOLVED:** PUT-only for new Phase 1 domain CRUD routes. PATCH is deferred to Phase 2.
 
-**D5 note:** B1 currently implements PUT only. D5 must resolve whether PATCH routes are also required for Phase 1 domain endpoints. Until D5 is resolved, PUT is the minimum requirement for all domain mutation routes. If PATCH is adopted, semantics are: PATCH merges provided fields into the existing resource; PUT replaces the entire resource (except server-managed fields like `id`, `createdAt`).
+PUT replaces the entire resource except server-managed fields (`id`, `createdAt`, `updatedAt`). New domain routes (leads, projects, estimating, etc.) MUST implement PUT, not PATCH.
+
+**Existing operational routes exception:** Pre-Phase-1 routes that use PATCH for state transitions or partial updates (notification mark-read/dismiss, project-setup-request state changes) retain PATCH semantics. D5 applies to new domain CRUD routes, not to existing operational endpoints.
 
 ### Pagination
 
-- Query params: `?page=1&pageSize=50` (max pageSize=200)
-- **D4 note:** Target default pageSize is 50 (C1). B1 implements 25 as `DEFAULT_PAGE_SIZE` fallback when the backend omits the `pageSize` field. D4 must resolve the canonical default before `CONTRACT_ALIGNED`. Until resolved, backends should return `pageSize` in every collection response so the frontend does not need to assume a default.
+- Query params: `?page=1&pageSize=25` (max pageSize=100)
+- **D4 RESOLVED:** Default pageSize is **25** (see P1-E1 Locked Decision 4). Backends MUST return `pageSize` in every collection response.
 - Offset-based pagination in Phase 1; cursor-based deferred to Phase 2
 - **Domain-specific exception:** Notification center (`GET notifications/center`) uses cursor-based pagination (`{items, cursor, totalCount, pageSize}`) as an allowed deviation from the default offset model. This is an intentional design choice for the notification surface and does not require normalization to offset-based.
 
@@ -417,15 +421,76 @@ These standards define the target contract shape for Phase 1 domain routes. Curr
 
 ---
 
-## Open Decisions (Cross-Referenced from B1/B2)
+## Resolved Decisions (Cross-Referenced from B1/B2/E1)
 
-| ID | Decision | Owner | C1 Impact | When Needed |
-|---|---|---|---|---|
-| D1 | Singular vs plural route paths | C1 | Path definitions for Schedule, Buyout, Risk, Scorecard | Before `CONTRACT_ALIGNED` |
-| D2 | Estimating sub-resource routing | C1 | Tracker/kickoff route structure | Before `CONTRACT_ALIGNED` |
-| D3 | Error envelope field priority (`.error` vs `.message`) | C1 + B1 | Error response shape | Before `CONTRACT_ALIGNED` |
-| D4 | Pagination default (50 vs 25) | C1 + B1 | Default pageSize in collection responses | Before `CONTRACT_ALIGNED` |
-| D5 | PATCH support in domain routes | C1 | Whether PUT-only or PUT+PATCH | Before `CONTRACT_ALIGNED` |
-| D6 | Project-scoped path pattern | C1 | C1 direction: flat `?projectId=` query params; B1 uses nested paths provisionally; affects 8 domains | Before `CONTRACT_ALIGNED` |
-| A8 | Aggregate endpoints (portfolio summary, metrics) | C1 | Whether aggregate routes are built | Before Project `CONTRACT_ALIGNED` |
-| A9 | Auth management routes | C2 | Whether `/api/auth/*` routes are defined | Before Auth `CONTRACT_ALIGNED` |
+All transport-layer decisions were locked on 2026-03-18 per P1-E1. See P1-E1 "Locked Decisions Applied" for full resolution text.
+
+| ID | Decision | Resolution | Reference |
+|---|---|---|---|
+| D1 | Singular vs plural route paths | **PLURAL** for all domain routes | P1-E1 line 155 |
+| D2 | Estimating sub-resource routing | `/api/estimating/trackers/` and `/api/estimating/kickoffs/` | P1-E1 line 156 |
+| D3 | Error envelope field priority | **`message`** (not `error`) | P1-E1 line 157 |
+| D4 | Pagination default | **25** (max 100) | P1-E1 line 158 |
+| D5 | PATCH support in domain routes | **PUT-only** in Phase 1; PATCH deferred to Phase 2 | P1-E1 line 159 |
+| D6 | Project-scoped path pattern | **Nested** `/api/projects/{projectId}/{domain}` | P1-E1 line 160 |
+| A8 | Aggregate endpoints | `/api/projects/summary` confirmed | P1-E1 line 161 |
+| A9 | Auth management routes | External except `/api/auth/me` smoke utility | P1-E1 line 162 |
+
+---
+
+## Contract Divergence Register (Pre-Phase-1 Baseline)
+
+This register documents where the current backend implementation diverges from the target contract conventions defined above. It establishes one authoritative baseline so that contract testing (P1-E1) and adapter implementation (P1-B1) can be planned against reality.
+
+**Scope:** Existing implemented routes only. Target domain routes (leads, projects, estimating, etc.) do not exist yet and will be built to target conventions directly.
+
+### Error Envelope
+
+| Current Behavior | Target Convention | Follow-up |
+|---|---|---|
+| All routes use `{ error: string }` for errors | `{ message, code, requestId?, details? }` per D3 lock | C2 introduces standardized `ErrorEnvelopeSchema` with `message` field |
+| `unauthorizedResponse()` returns `{ error: 'Unauthorized', reason }` | `{ message: 'Unauthorized', code: 'UNAUTHORIZED' }` | C2 replaces `unauthorizedResponse()` with standardized helper |
+| No `code` field in any error response | Required machine-readable code (e.g., `NOT_FOUND`, `VALIDATION_ERROR`) | C2 adds `code` to all error responses |
+| No `requestId` in responses; no `X-Request-Id` propagation | Optional UUID in error responses + response header | C2 adds request ID middleware |
+| Validation errors are flat strings (e.g., `"projectName and groupMembers are required"`) | Structured `details` array: `[{ field?, message }]` | C2 adds Zod-backed validation with structured error details |
+
+### Success Envelope
+
+| Current Behavior | Target Convention | Follow-up |
+|---|---|---|
+| Single items returned as raw entity (no wrapper) | `{ data: T }` wrapper | C2 introduces `successResponse()` helper; new routes use it |
+| Collections returned as raw arrays or domain-specific shapes | `{ items: T[], total, page, pageSize }` | New domain routes implement standard collection envelope |
+| Notification center uses `{ items, totalCount, hasMore, nextCursor }` | Cursor-based pagination is an **intentional allowed exception** | No normalization needed — documented exception in this catalog |
+| Provisioning 202 includes `correlationId` ✅ | `{ message, correlationId }` | Closest to target; add `correlationId` to notification-send and provisioning-retry when C2 standardizes |
+
+### HTTP Verbs
+
+| Current Behavior | Target Convention | Follow-up |
+|---|---|---|
+| PATCH used for: notification mark-read/dismiss, preferences, project-setup-request state | PUT-only for domain CRUD (D5) | **No refactor of existing PATCH routes.** D5 applies to new domain CRUD routes only. Existing operational PATCH endpoints serve state-transition and partial-update semantics that are distinct from domain CRUD. |
+| POST /api/acknowledgments returns 200 (not 201) | POST creation returns 201 | Normalize to 201 when C2 standardizes response helpers |
+
+### Pagination
+
+| Current Behavior | Target Convention | Follow-up |
+|---|---|---|
+| No offset-based pagination in any route | `?page=1&pageSize=25`, max 100, returns `{ items, total, page, pageSize }` | New domain routes implement offset pagination per P1-E1 schema |
+| Notification center uses cursor-based | Intentional allowed exception | No change |
+
+### Auth and Validation
+
+| Current Behavior | Target Convention | Follow-up |
+|---|---|---|
+| Each route calls `validateToken()` manually | Centralized `withAuth()` wrapper | C2 builds `withAuth()` on existing `validateToken()` |
+| Manual `if (!field)` validation checks | Zod-based `parseBody<T>()` / `parseQuery<T>()` | C2 adds `zod` to `backend/functions/package.json` and validation middleware |
+
+### Observability
+
+| Current Behavior | Target Convention | Follow-up |
+|---|---|---|
+| `createLogger()` + `ILogger` fully implemented | Required foundation | ✅ No gap |
+| Provisioning saga telemetry (9 events, 3 metrics) | Required | ✅ No gap |
+| No proxy/handler/auth/notification telemetry events | Multiple event families per P1-C3 | C3 implementation scope |
+| No `/api/health` endpoint | Required by C3 | C3 builds health endpoint |
+
+**Note:** Existing routes are NOT broken — they work correctly with their current shapes. The divergences above represent the gap between pre-Phase-1 ad-hoc conventions and the locked target conventions. Normalization occurs during C2 (response helpers, auth middleware) and as new domain routes are built to target conventions directly.
