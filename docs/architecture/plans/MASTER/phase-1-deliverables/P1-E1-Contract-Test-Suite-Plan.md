@@ -9,7 +9,7 @@
 | **Owner** | E1-workstream lead (TBD) |
 | **Status** | Draft — blocked on B1/C1 upstream deliverables |
 | **Date** | 2026-03-16 |
-| **Last Reviewed Against Repo Truth** | 2026-03-19 |
+| **Last Reviewed Against Repo Truth** | 2026-03-18 |
 | **Audience** | Developers implementing contract tests for Phase 1 critical path |
 | **References** | P1-B1 (Proxy Adapter), P1-B2 (Adapter Completion), P1-C1 (Backend Catalog), P1-C2 (Auth Hardening), P1-C3 (Observability), P1-D1 (Write Safety) |
 
@@ -17,7 +17,7 @@
 
 | Marker | Meaning |
 |---|---|
-| **CURRENT** | Verified against live repo as of 2026-03-19 |
+| **CURRENT** | Verified against live repo as of 2026-03-18 |
 | **TARGET** | E1 deliverable — implementation planned |
 | **PROVISIONAL** | Design decision pending upstream confirmation |
 | **BLOCKED** | Cannot implement until dependency is delivered |
@@ -34,7 +34,7 @@ Phase 1 contract testing establishes agreement between frontend proxy adapters (
 
 **Architecture:** Shared Zod schemas in `@hbc/models/src/api-schemas/` define the contract. MSW handlers simulate backend responses in frontend tests. Backend validation middleware uses the same schemas, ensuring both sides validate against a single source of truth.
 
-**Tech Stack:** TypeScript, Vitest, MSW v2 (`@msw/node`), Zod v3.22+
+**Tech Stack:** TypeScript, Vitest, MSW v2 (`msw/node`), Zod v3.22+
 
 **Success Criteria:**
 - All 11 domain types have contract schemas (Lead, Project, Estimating, +8 others)
@@ -47,7 +47,7 @@ Phase 1 contract testing establishes agreement between frontend proxy adapters (
 
 ## Plan Status and Dependencies
 
-### Current Repo State (verified 2026-03-19)
+### Current Repo State (verified 2026-03-18)
 
 - `@hbc/models` has no Zod dependency, no test script — only build, check-types, lint (**CURRENT**)
 - `@hbc/models/src/contracts/` contains Contracts business domain models (`IContractInfo`, `ICommitmentApproval`, `ContractStatus`) — NOT Zod API schemas (**CURRENT**)
@@ -211,7 +211,7 @@ E1 Zod schemas validate the **transport layer** — the HTTP envelope wrapping d
 ### Key Assumptions
 
 1. **Zod is the contract language** — TypeScript types alone are insufficient; runtime validation ensures both sides agree on shape
-2. **MSW v2 is stable** — using `@msw/node` for both Node.js test environments
+2. **MSW v2 is stable** — using `msw/node` for both Node.js test environments
 3. **11 domain types exist** — Lead, Project, Estimating, + 8 others with port interfaces already defined in `@hbc/models` and `@hbc/data-access/src/ports/`
 4. **Azure Functions v4 TypeScript** — backend uses modern async/await patterns, not legacy function bindings
 5. **Vitest is the test runner** — both packages use Vitest; tests run via `pnpm test`
@@ -1594,8 +1594,8 @@ describe('ProxyLeadRepository Contract Tests', () => {
 
       expect(result.id).toBeDefined();
       expect(result.id).not.toBeUndefined();
-      expect(typeof result.id).toBe('string');
-      expect(result.id.length).toBeGreaterThan(0);
+      expect(typeof result.id).toBe('number');
+      expect(result.id).toBeGreaterThan(0);
     });
 
     it('created lead has timestamps', async () => {
@@ -1827,7 +1827,7 @@ describe('ProxyEstimatingRepository Contract Tests', () => {
 
   describe('getById()', () => {
     it('single record conforms to EstimatingTrackerSchema', async () => {
-      const result = await repository.getById('770e8400-e29b-41d4-a716-446655440001');
+      const result = await repository.getById(1);
 
       const parsed = EstimatingTrackerSchema.safeParse(result);
       expect(parsed.success).toBe(true);
@@ -2140,6 +2140,8 @@ describe('Leads Route Handlers — Contract Tests', () => {
       expect(response.status).toBe(200);
       const body = JSON.parse(await response.text());
 
+      // PROVISIONAL (C1): Assumes single-item response uses { data: T } wrapper.
+      // If C1 freezes bare-object responses, change body.data to body.
       const parsed = LeadSchema.safeParse(body.data);
       expect(parsed.success).toBe(true);
     });
@@ -2190,6 +2192,8 @@ describe('Leads Route Handlers — Contract Tests', () => {
       expect(response.status).toBe(201);
       const body = JSON.parse(await response.text());
 
+      // PROVISIONAL (C1): Assumes single-item response uses { data: T } wrapper.
+      // If C1 freezes bare-object responses, change body.data to body.
       const parsed = LeadSchema.safeParse(body.data);
       expect(parsed.success).toBe(true);
     });
@@ -2497,6 +2501,12 @@ const skipReason = !BASE_URL
 
 describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)', () => {
   /**
+   * PROVISIONAL (C1): Tests below that access body.data for single-item responses
+   * assume a { data: T } wrapper. If C1 freezes bare-object responses, change
+   * body.data to body throughout this file.
+   */
+
+  /**
    * Test 1: Health check (no auth required)
    */
   it('health check endpoint responds 200', async () => {
@@ -2557,7 +2567,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
   });
 
   /**
-   * Test 3: Unauthenticated request is rejected
+   * Test 4: Unauthenticated request is rejected
    */
   it('unauthenticated request to /api/leads responds 401', async () => {
     const response = await fetch(`${BASE_URL}/api/leads`, {
@@ -2573,7 +2583,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
   });
 
   /**
-   * Test 4: Create a lead
+   * Test 5: Create a lead
    */
   it('POST /api/leads creates and returns new lead', async () => {
     const createPayload = {
@@ -2595,7 +2605,8 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     expect(response.status).toBe(201);
     const body = await response.json();
 
-    // Validate response conforms to LeadSchema
+    // PROVISIONAL (C1): Assumes single-item response uses { data: T } wrapper.
+    // If C1 freezes bare-object responses, change body.data to body throughout.
     const parsed = LeadSchema.safeParse(body.data);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
@@ -2608,7 +2619,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
   });
 
   /**
-   * Test 5: Retrieve created lead
+   * Test 6: Retrieve created lead
    */
   it('GET /api/leads/{id} returns created lead', async () => {
     // Create a lead first
@@ -2650,7 +2661,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
   });
 
   /**
-   * Test 6: Update a lead
+   * Test 7: Update a lead
    */
   it('PUT /api/leads/{id} updates and returns lead', async () => {
     // Create a lead
@@ -2700,7 +2711,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
   });
 
   /**
-   * Test 7: Delete a lead
+   * Test 8: Delete a lead
    */
   it('DELETE /api/leads/{id} removes lead', async () => {
     // Create a lead
@@ -2745,7 +2756,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
   });
 
   /**
-   * Test 8: Project creation flow
+   * Test 9: Project creation flow
    */
   it('POST /api/projects creates and returns new project', async () => {
     const createPayload = {
