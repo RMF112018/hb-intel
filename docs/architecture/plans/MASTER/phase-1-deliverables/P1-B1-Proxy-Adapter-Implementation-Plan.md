@@ -90,8 +90,8 @@ B1 is proceeding under these assumptions. Each is labeled with where verificatio
 | A1 | API paths follow C1 catalog patterns (e.g., `/api/leads`, `/api/projects/{id}`) | P1-C1 | Medium — Leads/Projects/Estimating paths locked; 8 domains provisional | Appendix A |
 | A2 | Collection response envelope: `{ data: T[], total, page, pageSize }` | P1-C1 | High — C1 confirms this shape | Appendix B |
 | A3 | Single-item response envelope: `{ data: T }` | P1-C1 | High — C1 confirms this shape | Appendix B |
-| A4 | Error responses contain a human-readable message field | P1-C1 | **Low** — B1 reads `.message`; C1 specifies `.error` | Appendix B |
-| A5 | Default pageSize is 20–25 | P1-C1 | **Low** — C1 specifies default 50, max 200 | Appendix B |
+| A4 | Error responses contain a human-readable message field | P1-C1 | **Low** — `extractErrorMessage()` reads `.error` first (C1 contract), falls back to `.message`; dual-field strategy provisional pending D3 | Appendix B |
+| A5 | Default pageSize fallback is 25 (`DEFAULT_PAGE_SIZE` from `@hbc/models`) | P1-C1 | **Low** — C1 specifies default 50, max 200; fallback only applies when backend omits the field | Appendix B |
 | A6 | Bearer token in `Authorization` header is accepted by backend | P1-C2 | High — standard pattern | Cross-Workstream Boundaries |
 | A7 | Project-scoped routes use nested paths (`/api/projects/{id}/activities`) | P1-C1 | **Low** — C1 uses flat routes with `?projectId=` query params | Appendix A |
 | A8 | Aggregate endpoints exist (portfolio summary, metrics, summaries, management) | P1-C1 | **Low** — not in C1 catalog; B1-assumed | Appendix A |
@@ -106,7 +106,7 @@ These must be resolved before production activation. B1 implementation can proce
 | D1 | Singular vs plural route paths (schedule, buyout, risk, scorecard) | P1-C1 | Path constants in 4 repos + tests | Before production activation |
 | D2 | Estimating sub-resource routing (`/trackers`, `/kickoffs`) vs flat `/api/estimating` | P1-C1 | May restructure estimating adapter | Before Task 5 implementation ideally |
 | D3 | Error envelope field name (`.message` vs `.error`) | P1-C1 + B1 | `ProxyHttpClient.handleResponse()` update | Before production activation |
-| D4 | Pagination default alignment (B1: 20–25, C1: 50) | P1-C1 + B1 | `mapPagedResponse` default + model constants | Before production activation |
+| D4 | Pagination default alignment (B1: 25 via `DEFAULT_PAGE_SIZE`, C1: 50) | P1-C1 + B1 | `mapPagedResponse` fallback + model constants | Before production activation |
 | D5 | Whether proxy adapters need PATCH support | P1-C1 | C1 defines PATCH routes; B1 uses PUT only | Before production activation |
 | D6 | Nested project-scoped paths vs flat query-param pattern | P1-C1 | Affects 8 project-scoped repos | Before production activation |
 
@@ -3040,7 +3040,7 @@ C1 defines these standard response shapes. All B1 proxy adapter code must confor
 These discrepancies do NOT block B1 implementation because all B1 tests use mocked fetch. However, they **must be resolved before production activation**:
 
 1. The error field mismatch (`message` vs `error`) will cause B1 to display generic "Validation failed" messages instead of actual backend error text
-2. The pagination default mismatch will cause B1 to request 20-25 items when the backend defaults to 50 — functional but suboptimal
+2. The pagination fallback mismatch (`DEFAULT_PAGE_SIZE` = 25 vs C1 default 50) only affects responses where the backend omits `pageSize` — functional but should be aligned
 
 ---
 
