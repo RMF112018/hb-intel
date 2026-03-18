@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { MockGraphService, GraphService } from './graph-service.js';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { MockGraphService, GraphService, GraphPermissionNotConfirmedError } from './graph-service.js';
 
 describe('MockGraphService', () => {
   it('createSecurityGroup returns a unique ID', async () => {
@@ -43,19 +43,56 @@ describe('MockGraphService', () => {
   });
 });
 
-describe('GraphService (real scaffold)', () => {
-  it('createSecurityGroup throws G2 scaffold error', async () => {
-    const svc = new GraphService();
-    await expect(svc.createSecurityGroup('test', 'desc')).rejects.toThrow('G2 scaffold');
+describe('GraphService (permission-gated)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
-  it('addGroupMembers throws G2 scaffold error', async () => {
+  it('createSecurityGroup throws GraphPermissionNotConfirmedError when env var is unset', async () => {
+    delete process.env.GRAPH_GROUP_PERMISSION_CONFIRMED;
     const svc = new GraphService();
-    await expect(svc.addGroupMembers('id', ['a@hb.com'])).rejects.toThrow('G2 scaffold');
+    await expect(svc.createSecurityGroup('test', 'desc')).rejects.toThrow(GraphPermissionNotConfirmedError);
   });
 
-  it('getGroupByDisplayName throws G2 scaffold error', async () => {
+  it('addGroupMembers throws GraphPermissionNotConfirmedError when env var is unset', async () => {
+    delete process.env.GRAPH_GROUP_PERMISSION_CONFIRMED;
     const svc = new GraphService();
-    await expect(svc.getGroupByDisplayName('test')).rejects.toThrow('G2 scaffold');
+    await expect(svc.addGroupMembers('id', ['a@hb.com'])).rejects.toThrow(GraphPermissionNotConfirmedError);
+  });
+
+  it('getGroupByDisplayName throws GraphPermissionNotConfirmedError when env var is unset', async () => {
+    delete process.env.GRAPH_GROUP_PERMISSION_CONFIRMED;
+    const svc = new GraphService();
+    await expect(svc.getGroupByDisplayName('test')).rejects.toThrow(GraphPermissionNotConfirmedError);
+  });
+
+  it('throws when env var is "false" (not "true")', async () => {
+    vi.stubEnv('GRAPH_GROUP_PERMISSION_CONFIRMED', 'false');
+    const svc = new GraphService();
+    await expect(svc.createSecurityGroup('test', 'desc')).rejects.toThrow(GraphPermissionNotConfirmedError);
+  });
+
+  it('error message includes IT setup guide reference', async () => {
+    delete process.env.GRAPH_GROUP_PERMISSION_CONFIRMED;
+    const svc = new GraphService();
+    try {
+      await svc.createSecurityGroup('test', 'desc');
+      expect.fail('should throw');
+    } catch (err) {
+      expect((err as Error).message).toContain('IT-Department-Setup-Guide.md');
+      expect((err as Error).message).toContain('Group.ReadWrite.All');
+      expect((err as Error).message).toContain('GRAPH_GROUP_PERMISSION_CONFIRMED');
+    }
+  });
+
+  it('error has GraphPermissionNotConfirmedError name', async () => {
+    delete process.env.GRAPH_GROUP_PERMISSION_CONFIRMED;
+    const svc = new GraphService();
+    try {
+      await svc.createSecurityGroup('test', 'desc');
+      expect.fail('should throw');
+    } catch (err) {
+      expect((err as Error).name).toBe('GraphPermissionNotConfirmedError');
+    }
   });
 });

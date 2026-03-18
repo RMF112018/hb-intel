@@ -25,30 +25,127 @@ export interface IGraphService {
   getGroupByDisplayName(displayName: string): Promise<string | null>;
 }
 
+const GRAPH_BASE = 'https://graph.microsoft.com/v1.0';
+const GRAPH_SCOPE = 'https://graph.microsoft.com/.default';
+
 /**
- * W0-G1-T02: Real Graph service scaffold — requires Group.ReadWrite.All consent (G2 / T05).
- * All methods throw until real Graph API integration is implemented.
+ * Permission-gate error thrown when Group.ReadWrite.All has not been
+ * confirmed by IT. This is an operational prerequisite, not a code defect.
+ */
+export class GraphPermissionNotConfirmedError extends Error {
+  constructor(operation: string) {
+    super(
+      `[GraphService] ${operation}: Group.ReadWrite.All permission not confirmed. ` +
+      'Set GRAPH_GROUP_PERMISSION_CONFIRMED=true in environment settings after IT grants the permission. ' +
+      'See IT-Department-Setup-Guide.md §8.4 for the approval process.'
+    );
+    this.name = 'GraphPermissionNotConfirmedError';
+  }
+}
+
+/**
+ * W0-G1-T02: Real Graph service — Microsoft Graph API integration for
+ * Entra ID security group lifecycle (create, populate, lookup).
+ *
+ * All operations are gated behind GRAPH_GROUP_PERMISSION_CONFIRMED env var.
+ * When not set to 'true', operations throw GraphPermissionNotConfirmedError
+ * with a clear IT setup guide reference.
  */
 export class GraphService implements IGraphService {
-  private readonly _credential = new DefaultAzureCredential();
+  private readonly credential = new DefaultAzureCredential();
 
-  async createSecurityGroup(_displayName: string, _description: string): Promise<string> {
-    void this._credential;
-    throw new Error(
-      'GraphService.createSecurityGroup is a G2 scaffold — real Graph API calls pending T05 Group.ReadWrite.All confirmation'
-    );
+  private assertPermissionConfirmed(operation: string): void {
+    if (process.env.GRAPH_GROUP_PERMISSION_CONFIRMED !== 'true') {
+      throw new GraphPermissionNotConfirmedError(operation);
+    }
   }
 
-  async addGroupMembers(_groupId: string, _memberUpns: string[]): Promise<void> {
-    throw new Error(
-      'GraphService.addGroupMembers is a G2 scaffold — real Graph API calls pending T05 Group.ReadWrite.All confirmation'
-    );
+  private async getAccessToken(): Promise<string> {
+    const tokenResponse = await this.credential.getToken(GRAPH_SCOPE);
+    return tokenResponse.token;
   }
 
-  async getGroupByDisplayName(_displayName: string): Promise<string | null> {
-    throw new Error(
-      'GraphService.getGroupByDisplayName is a G2 scaffold — real Graph API calls pending T05 Group.ReadWrite.All confirmation'
-    );
+  private async graphFetch(path: string, init?: RequestInit): Promise<Response> {
+    const token = await this.getAccessToken();
+    const response = await fetch(`${GRAPH_BASE}${path}`, {
+      ...init,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        ...init?.headers,
+      },
+    });
+    return response;
+  }
+
+  async createSecurityGroup(displayName: string, description: string): Promise<string> {
+    this.assertPermissionConfirmed('createSecurityGroup');
+
+    const mailNickname = displayName.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
+    const response = await this.graphFetch('/groups', {
+      method: 'POST',
+      body: JSON.stringify({
+        displayName,
+        description,
+        mailEnabled: false,
+        mailNickname,
+        securityEnabled: true,
+        groupTypes: [],
+      }),
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`[GraphService] createSecurityGroup failed (${response.status}): ${body}`);
+    }
+
+    const result = await response.json() as { id: string };
+    return result.id;
+  }
+
+  async addGroupMembers(groupId: string, memberUpns: string[]): Promise<void> {
+    this.assertPermissionConfirmed('addGroupMembers');
+
+    for (const upn of memberUpns) {
+      // Resolve UPN to user directory object ID
+      const userResponse = await this.graphFetch(`/users/${encodeURIComponent(upn)}?$select=id`);
+      if (!userResponse.ok) {
+        if (userResponse.status === 404) {
+          console.warn(`[GraphService] User not found: ${upn} — skipping`);
+          continue;
+        }
+        throw new Error(`[GraphService] Failed to resolve user ${upn} (${userResponse.status})`);
+      }
+      const user = await userResponse.json() as { id: string };
+
+      // Add user as member (409 = already a member — idempotent)
+      const addResponse = await this.graphFetch(`/groups/${groupId}/members/$ref`, {
+        method: 'POST',
+        body: JSON.stringify({
+          '@odata.id': `${GRAPH_BASE}/directoryObjects/${user.id}`,
+        }),
+      });
+
+      if (!addResponse.ok && addResponse.status !== 409) {
+        throw new Error(
+          `[GraphService] Failed to add ${upn} to group ${groupId} (${addResponse.status})`
+        );
+      }
+    }
+  }
+
+  async getGroupByDisplayName(displayName: string): Promise<string | null> {
+    this.assertPermissionConfirmed('getGroupByDisplayName');
+
+    const filter = encodeURIComponent(`displayName eq '${displayName}'`);
+    const response = await this.graphFetch(`/groups?$filter=${filter}&$select=id`);
+
+    if (!response.ok) {
+      throw new Error(`[GraphService] getGroupByDisplayName failed (${response.status})`);
+    }
+
+    const result = await response.json() as { value: Array<{ id: string }> };
+    return result.value.length > 0 ? result.value[0].id : null;
   }
 }
 

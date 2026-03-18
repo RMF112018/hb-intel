@@ -201,4 +201,14 @@ export const WAVE0_OPTIONAL_CONFIG: readonly IConfigEntry[] = [
       'Permission model for SharePoint site access: sites-selected (default, Path A) or fullcontrol (Path B fallback, requires ADR)',
     requiredInProd: false,
   },
+
+  // --- Permission Confirmation Gates (Bucket A) ---
+  {
+    name: 'GRAPH_GROUP_PERMISSION_CONFIRMED',
+    bucket: 'infrastructure',
+    description:
+      'Set to "true" after IT grants Group.ReadWrite.All application permission to the Managed Identity. ' +
+      'GraphService operations are blocked until this is confirmed. See IT-Department-Setup-Guide.md §8.4.',
+    requiredInProd: false,
+  },
 ] as const;

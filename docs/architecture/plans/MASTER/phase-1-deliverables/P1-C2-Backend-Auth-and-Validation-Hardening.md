@@ -80,7 +80,7 @@ Requires `Group.ReadWrite.All` application permission on the Managed Identity.
 |---|---|---|---|---|---|
 | ~~1~~ | ~~OBO endpoint list not finalized~~ | ~~Cannot determine which routes require delegated permissions~~ | ~~Architecture~~ | ~~IT Setup Guide §8.6~~ | **CLOSED** — See Endpoint Auth Matrix above. Only `/api/proxy/*` needs OBO; all other routes use MI. |
 | 2 | **Per-site grant automation** — manual admin grant per project vs bootstrap service principal | Provisioning cannot complete site-scoped access without manual IT intervention or automation | Architecture + IT | IT Setup Guide §8.4, §9.6 | Open |
-| 3 | **GraphService scaffold** — `graph-service.ts` real implementation pending `Group.ReadWrite.All` confirmation | Provisioning Step 6 (Entra group creation) cannot work in production until Graph permissions are granted and service unblocked | Backend | `backend/functions/src/services/graph-service.ts` | Open |
+| 3 | **GraphService `Group.ReadWrite.All` permission** — real Graph API calls implemented and permission-gated | Step 6 gated behind `GRAPH_GROUP_PERMISSION_CONFIRMED` env var; throws `GraphPermissionNotConfirmedError` until IT confirms | Backend + IT | `backend/functions/src/services/graph-service.ts` | **Code-complete** — awaiting IT permission grant |
 | ~~4~~ | ~~Startup config validation not wired~~ | ~~Backend could start with missing auth config~~ | ~~Backend~~ | ~~G2.6 task~~ | **CLOSED** — `validateRequiredConfig()` wired into `createServiceFactory()` (commit 4f89f0f). |
 
 ### Identity Trust Boundary
