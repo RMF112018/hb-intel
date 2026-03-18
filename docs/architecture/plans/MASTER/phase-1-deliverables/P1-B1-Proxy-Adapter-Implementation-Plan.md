@@ -193,9 +193,9 @@ This plan evolves the config contract for proxy HTTP usage:
 Proxy context must be initialized **after MSAL authentication completes** and **before the React tree renders**. The call site is `apps/pwa/src/main.tsx`:
 
 ```typescript
-// apps/pwa/src/main.tsx — proxy activation (added by this plan)
+// apps/pwa/src/main.tsx — proxy activation (example implementation guidance, not a B1 code change)
 
-import { setProxyContext } from '@hbc/data-access';
+import { setProxyContext, resolveAdapterMode } from '@hbc/data-access';
 import { msalInstance } from './auth/msal-init.js';
 
 // After MSAL init, before React render:
@@ -222,10 +222,12 @@ if (resolveAdapterMode() === 'proxy') {
 ```
 
 **Key points:**
+- `resolveAdapterMode` and `setProxyContext` are both exported from `@hbc/data-access` (via `factory.ts`)
 - `VITE_PROXY_BASE_URL` is a build-time env var (e.g., `https://func-hb-intel.azurewebsites.net/api`)
 - `VITE_API_SCOPE` is the Azure Functions app registration scope (e.g., `api://func-hb-intel/.default`)
 - The token provider is called on **every HTTP request** — tokens are never cached by `ProxyHttpClient`
 - If proxy mode is active but context is not initialized, `getProxyContext()` throws immediately (see Task 8)
+- This snippet is **implementation guidance** — B1 does not modify `main.tsx` directly (see Package Ownership)
 
 ### Silent Mock Fallback Prevention
 
@@ -2311,8 +2313,10 @@ let proxyContext: {
  *
  * // In main.tsx, after MSAL init:
  * if (resolveAdapterMode() === 'proxy') {
+ *   const baseUrl = import.meta.env.VITE_PROXY_BASE_URL;
+ *   if (!baseUrl) throw new Error('VITE_PROXY_BASE_URL must be set for proxy mode');
  *   setProxyContext(
- *     import.meta.env.VITE_PROXY_BASE_URL,
+ *     baseUrl,
  *     async () => {
  *       const account = msalInstance.getActiveAccount();
  *       if (!account) throw new Error('No active MSAL account');
