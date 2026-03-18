@@ -132,11 +132,47 @@ Phase 1 requires a progression from mocked execution through real-backend valida
 
 - **Adapter mode:** `'mock'`
 - **Purpose:** Fast, isolated tests of business logic and adapter interface compliance
-- **Data source:** In-memory mock stores with seed data (`SEED_LEADS`, `SEED_PROJECTS`, etc.)
-- **Reset:** Call `resetAllMockStores()` in `beforeEach` — note this resets the mock ID counter only, not in-memory store contents; create a fresh repository instance per test for full isolation
+- **Data source:** In-memory mock stores with seed data (16 seed constants: `SEED_LEADS`, `SEED_PROJECTS`, `SEED_ESTIMATING_TRACKERS`, `SEED_ESTIMATING_KICKOFFS`, etc.)
 - **Network:** None — no fetch, no HTTP, no external calls
 - **Factory usage:** Individual factory functions (`createProjectRepository()`, `createLeadRepository()`, etc.) — there is no generic `getRepository()` function
 - **When required:** Every domain, every gate — unit tests must pass at all stages of the B2 progression
+
+**Mock reset semantics (repo truth):**
+- Each mock repository instance has its own private store, initialized from seed data on construction (e.g., `private store: ILead[] = [...SEED_LEADS]`)
+- Creating a fresh repository instance gives you a clean copy of seed data — this is the primary isolation mechanism
+- `resetAllMockStores()` resets the global ID counter to 1000 for deterministic ID assignment — it does NOT clear in-memory store contents on existing instances
+- **Recommended pattern:** Call `resetAllMockStores()` in `beforeEach` for deterministic IDs, then create a fresh repository instance for full store isolation
+
+**Example (repo-truth API):**
+
+```typescript
+import { createProjectRepository, resetAllMockStores } from '@hbc/data-access';
+import type { IProjectRepository } from '@hbc/data-access';
+
+describe('ProjectRepository (mock)', () => {
+  let repo: IProjectRepository;
+
+  beforeEach(() => {
+    resetAllMockStores();                    // Reset ID counter for deterministic IDs
+    repo = createProjectRepository('mock');  // Fresh instance with clean seed data
+  });
+
+  it('should list seed projects', async () => {
+    const result = await repo.getProjects();
+    expect(result.data.length).toBeGreaterThan(0);
+  });
+
+  it('should create a project with deterministic ID', async () => {
+    const project = await repo.createProject({
+      name: 'Test Project',
+      /* ... other required fields */
+    } as Omit<IActiveProject, 'id'>);
+    expect(project.id).toBeDefined();
+  });
+});
+```
+
+**Implementation note:** The current `resetAllMockStores()` only resets the ID counter. If a true "reset all stores to initial seed state" capability is needed (e.g., for test harnesses that reuse repository instances across tests), this is a follow-on implementation requirement for `@hbc/data-access`. For now, creating a fresh repository instance per test block is the recommended pattern for full isolation.
 
 ### Test Lane 2: Mocked-Proxy Tests
 
@@ -146,6 +182,33 @@ Phase 1 requires a progression from mocked execution through real-backend valida
 - **Network:** Mocked — no real HTTP calls
 - **B1 cross-ref:** This is the primary test strategy for B1 Tasks 3–10
 - **When required:** Required for `CODE_COMPLETE_MOCK` gate per B1; runs on every PR for proxy adapter packages
+
+**Example (repo-truth API):**
+
+```typescript
+import { createLeadRepository } from '@hbc/data-access';
+import type { ILeadRepository } from '@hbc/data-access';
+
+describe('ProxyLeadRepository (mocked fetch)', () => {
+  let repo: ILeadRepository;
+
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn());
+    repo = createLeadRepository('proxy');
+  });
+
+  it('should call /api/leads and return typed result', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(
+      new Response(JSON.stringify({
+        data: [{ id: 1, name: 'Test Lead' }],
+        total: 1, page: 1, pageSize: 25,
+      })),
+    );
+    const result = await repo.getAll();
+    expect(result.data).toHaveLength(1);
+  });
+});
+```
 
 ### Test Lane 3: Contract Tests (E1)
 
