@@ -1,325 +1,252 @@
 # P1-B3: Mock Isolation Policy
 
-**Doc ID:** P1-B3
-**Phase:** Phase 1
-**Status:** Draft
-**Date:** 2026-03-16
-
-## Purpose
-
-Define when mock adapters are allowed versus when real adapters (proxy, sharepoint, api) are required. This policy prevents accidental use of in-memory test data in production and ensures environment-appropriate adapter configuration.
-
-## Mock Adapter Usage Policy
-
-### ALLOWED Contexts
-
-**Local Development** (`NODE_ENV=development`)
-- Developer machines running HB Intel locally
-- Default adapter mode: `'mock'`
-- Allows fast iteration without external service dependencies
-- Developer may override to test proxy adapter locally
-
-**Unit Tests**
-- Tests in `**/__tests__/unit/` or `**/*.test.ts`
-- Required to use mock adapters for isolation and speed
-- Must call `resetAllMockStores()` in `beforeEach` hook
-- Ensures predictable, repeatable test data (SEED_LEADS, SEED_PROJECTS, etc.)
-
-**Integration Tests** (against mock)
-- Tests in `**/__tests__/integration/` that test repository interface contracts
-- May use mock adapters to verify adapter interface compliance
-- Must call `resetAllMockStores()` between test cases
-- Isolated from external services
-
-**Demo / Sandbox Environments**
-- Ephemeral environments spun up for product demos, POCs
-- OK to use mock adapters if no customer data is involved
-- Must be clearly labeled as "demo" in UI and logs
-
-### REQUIRED Contexts
-
-**CI Pipeline** (unit and integration tests)
-- GitHub Actions or Azure Pipelines running test suite
-- Must use `HBC_ADAPTER_MODE='mock'`
-- No override allowed (prevents accidental real-service calls)
-- All tests must pass using mock data
-
-### PROHIBITED Contexts
-
-**Staging Environment**
-- MUST use `HBC_ADAPTER_MODE='proxy'` or another non-mock adapter
-- Mock data in staging masks real bugs and user workflows
-- Azure DevOps / GitHub Actions deployment gate blocks mock mode
-
-**Production Environment**
-- MUST use `HBC_ADAPTER_MODE='proxy'` or another non-mock adapter
-- Mock adapters in production is a critical security and data integrity failure
-- Immediate incident response required if mock detected
-
-**Any Environment with Real SharePoint Data**
-- If adapter mode is `'sharepoint'`, mock is prohibited
-- Mock data will never match SharePoint; causes user confusion
-- Deployment gate enforces this
-
-## Environment → Adapter Mode Mapping
-
-| Environment | HBC_ADAPTER_MODE | Override Allowed | Enforcement | Notes |
-|---|---|---|---|---|
-| **local** | `'mock'` | ✅ Yes (to test proxy) | None (dev's choice) | Developer override for testing |
-| **CI** | `'mock'` | ❌ No | Code check in startup | Required for fast test runs |
-| **staging** | `'proxy'` | ❌ No | Deployment gate blocks mock | Real data paths required |
-| **production** | `'proxy'` | ❌ No | Deployment gate + startup guard | Non-negotiable |
-| **demo** | `'mock'` | ✅ Yes (if no customer data) | None (staging-like setup otherwise) | Clear labeling required |
-
-## Guard Rail Implementation
-
-### TypeScript Adapter Mode Guard
-
-**File:** `packages/data-access/src/config/adapter-mode-guard.ts`
-
-```typescript
-/**
- * Assert that HBC_ADAPTER_MODE is appropriate for the current environment.
- * Throws a fatal error if mock mode is used in staging or production.
- *
- * Called during application startup in backend and frontend initialization.
- */
-export function assertAdapterModeForEnvironment(): void {
-  const nodeEnv = process.env.NODE_ENV ?? 'development';
-  const adapterMode = process.env.HBC_ADAPTER_MODE ?? 'mock';
-
-  if ((nodeEnv === 'production' || nodeEnv === 'staging') && adapterMode === 'mock') {
-    throw new Error(
-      `[FATAL] HBC_ADAPTER_MODE='mock' is not permitted in ${nodeEnv}. ` +
-      `Set HBC_ADAPTER_MODE='proxy' or another production adapter before starting.`
-    );
-  }
-}
-
-/**
- * Log the current adapter configuration for debugging.
- * Safe to call after assertAdapterModeForEnvironment() passes.
- */
-export function logAdapterConfiguration(): void {
-  const nodeEnv = process.env.NODE_ENV ?? 'development';
-  const adapterMode = process.env.HBC_ADAPTER_MODE ?? 'mock';
-  console.log(`[Adapter Config] Environment: ${nodeEnv}, Adapter: ${adapterMode}`);
-}
-```
-
-### Call Sites
-
-**Backend Application Startup** (`packages/backend/functions/src/index.ts`)
-
-```typescript
-import { assertAdapterModeForEnvironment, logAdapterConfiguration } from '@hbc/data-access';
-
-// First thing in main initialization
-assertAdapterModeForEnvironment();
-logAdapterConfiguration();
-
-// ... rest of startup
-```
-
-**Frontend Application Startup** (`packages/app-shell/src/index.tsx`)
-
-```typescript
-import { assertAdapterModeForEnvironment, logAdapterConfiguration } from '@hbc/data-access';
-
-// During app initialization before first repository call
-assertAdapterModeForEnvironment();
-logAdapterConfiguration();
-
-// ... rest of app startup
-```
-
-### CI Verification Step
-
-**GitHub Actions / Azure Pipelines:**
-
-```yaml
-- name: Verify Adapter Mode for Tests
-  run: |
-    if [ "$NODE_ENV" != "test" ] && [ "$NODE_ENV" != "development" ]; then
-      echo "ERROR: NODE_ENV must be 'test' or 'development' for test runs"
-      exit 1
-    fi
-    if [ -z "$HBC_ADAPTER_MODE" ] || [ "$HBC_ADAPTER_MODE" = "mock" ]; then
-      echo "✓ Adapter mode is 'mock' (or unset, defaults to mock) - tests will run in isolation"
-    else
-      echo "WARNING: HBC_ADAPTER_MODE=$HBC_ADAPTER_MODE - tests may call external services"
-    fi
-```
-
-### Deployment Gate (Azure DevOps / GitHub Actions)
+| Field | Value |
+|---|---|
+| **Doc ID** | P1-B3 |
+| **Phase** | Phase 1 |
+| **Workstream** | B — Adapter Completion |
+| **Document Type** | Governance Policy |
+| **Owner** | Frontend Platform Team / Data Access Maintainer |
+| **Update Authority** | B-workstream lead; changes require review by DevOps and Architecture |
+| **Last Reviewed Against Repo Truth** | 2026-03-18 |
+| **References** | P1-B1 (Engineering Plan), P1-B2 (Adapter Completion Backlog), P1-C2 (Auth Hardening), P1-E1 (Contract Test Suite) |
 
-**Pre-deployment Check:**
+---
 
-```typescript
-// deployment-gate/src/validate-adapter-mode.ts
-export async function validateAdapterModeForDeployment(
-  environment: 'staging' | 'production',
-  configFile: string
-): Promise<void> {
-  const config = JSON.parse(fs.readFileSync(configFile, 'utf-8'));
-  const adapterMode = config.HBC_ADAPTER_MODE ?? 'mock';
+## Policy Statement
 
-  if (adapterMode === 'mock') {
-    throw new Error(
-      `Deployment gate: HBC_ADAPTER_MODE='mock' is not allowed in ${environment}. ` +
-      `Update deployment configuration to use 'proxy' or another real adapter.`
-    );
-  }
-
-  console.log(`✓ Deployment validation passed: ${environment} will use adapter mode '${adapterMode}'`);
-}
-```
-
-## Test Isolation Policy
+Mock adapters must not appear in any production-facing data flow. All production and staging environments must use real adapters (proxy, sharepoint, or api). There is no acceptable scenario in which mock data serves real users or real business decisions. A mock adapter detected in production constitutes an incident requiring immediate response.
 
-### Unit Tests (All Domains)
-
-**Requirement:** Mock adapters, with reset before each test.
-
-```typescript
-// example: projects.test.ts
-import { resetAllMockStores } from '@hbc/data-access';
-import { getRepository } from '@hbc/data-access';
-
-describe('ProjectRepository', () => {
-  beforeEach(() => {
-    resetAllMockStores(); // Clear mock state
-  });
-
-  it('should create a project', async () => {
-    const repo = getRepository('IProjectRepository');
-    const project = await repo.create({ name: 'Test Project' });
-    expect(project.id).toBeDefined();
-  });
-
-  it('should return different state after reset', async () => {
-    const repo = getRepository('IProjectRepository');
-    const beforeCount = (await repo.list()).length;
-
-    resetAllMockStores();
-
-    const afterCount = (await repo.list()).length;
-    expect(afterCount).toBe(0); // Reset clears all data
-  });
-});
-```
-
-### Integration Tests (per adapter type)
-
-**Against Mock Adapters (Phase 1 - pre-proxy completion):**
-- Use `HBC_ADAPTER_MODE='mock'`
-- Test repository interface contracts
-- Verify adapter methods match interface signatures
-
-**Against Real Adapters (Phase 1+):**
-- Use `HBC_ADAPTER_MODE='proxy'` with test Azure Functions instance
-- Verify end-to-end flow: app → adapter → backend → response
-- Use different test database or isolated SharePoint test site
-
-**Example:**
-
-```typescript
-// example: proxy-adapter.integration.test.ts
-describe('ProxyAdapter Integration (Phase 1+)', () => {
-  let repo: IProjectRepository;
-
-  beforeAll(() => {
-    process.env.HBC_ADAPTER_MODE = 'proxy';
-    process.env.AZURE_FUNCTION_URL = 'https://test-functions.azurewebsites.net';
-    repo = getRepository('IProjectRepository');
-  });
-
-  it('should call Azure Functions and return typed result', async () => {
-    const project = await repo.getById('test-id');
-    expect(project).toHaveProperty('id');
-    expect(project).toHaveProperty('name');
-  });
-});
-```
-
-### E2E Tests (Staging)
-
-- Use real adapter against staging backend
-- `NODE_ENV='staging'`, `HBC_ADAPTER_MODE='proxy'`
-- Test full user workflows with real data
-
-## Feature Flag Integration: Domain-Level Overrides
-
-### Gradual Proxy Rollout Strategy
-
-Allow production rollout of proxy adapter on a per-domain basis without requiring all adapters to be complete.
-
-**Environment Variables:**
-
-```
-HBC_ADAPTER_MODE='mock'                     # Global default (Phase 1 start)
-HBC_ADAPTER_MODE_PROJECTS='proxy'           # Override for Projects domain
-HBC_ADAPTER_MODE_LEADS='proxy'              # Override for Leads domain
-HBC_ADAPTER_MODE_ESTIMATING='mock'          # Override back to mock if rollback needed
-```
-
-**Factory Implementation:**
-
-```typescript
-// packages/data-access/src/factory.ts
-function getAdapterModeForDomain(domain: string): string {
-  const domainKey = `HBC_ADAPTER_MODE_${domain.toUpperCase()}`;
-  const domainOverride = process.env[domainKey];
-
-  if (domainOverride) {
-    console.log(`[Factory] Domain override found: ${domain} → ${domainOverride}`);
-    return domainOverride;
-  }
-
-  const globalMode = process.env.HBC_ADAPTER_MODE ?? 'mock';
-  console.log(`[Factory] Using global mode for ${domain}: ${globalMode}`);
-  return globalMode;
-}
-
-// Usage in factory
-function createProjectRepository(): IProjectRepository {
-  const mode = getAdapterModeForDomain('projects');
-  if (mode === 'proxy') return new ProxyProjectRepository(...);
-  if (mode === 'mock') return new MockProjectRepository();
-  throw new Error(`Unknown adapter mode: ${mode}`);
-}
-```
-
-**Production Rollout Example (Phase 1 → Phase 2):**
-
-1. Phase 1 complete: Projects and Leads proxies ready
-2. Deploy with:
-   ```
-   HBC_ADAPTER_MODE='mock'
-   HBC_ADAPTER_MODE_PROJECTS='proxy'
-   HBC_ADAPTER_MODE_LEADS='proxy'
-   ```
-3. All other domains still use mock (safe fallback)
-4. Monitor Projects and Leads error rates
-5. Phase 2: Add more domains as proxies complete
-
-## Review and Enforcement Owners
+---
+
+## Policy Scope
+
+### This policy governs
+
+- When mock adapters may be used (development, unit tests, CI test runs)
+- When mock adapters are prohibited (staging, production)
+- How adapter mode is resolved and enforced at runtime
+- How test lanes are governed across the Phase 1 gate progression
+- How production rollout is governed with respect to mock isolation
+
+### This policy does NOT govern
+
+- Adapter implementation details — see `P1-B1-Proxy-Adapter-Implementation-Plan.md`
+- Adapter completion tracking and gate checklists — see `P1-B2-Adapter-Completion-Backlog.md`
+- Backend auth and OBO configuration — see P1-C2
+- Contract test harness design — see P1-E1
+
+---
+
+## Definitions
+
+| Term | Meaning |
+|---|---|
+| **Adapter mode** | The `HBC_ADAPTER_MODE` value that controls which adapter implementation the factory returns: `'mock'`, `'proxy'`, `'sharepoint'`, or `'api'` |
+| **Mock isolation** | The principle that mock adapters must only be used in controlled contexts where no real user data or production behavior is at stake |
+| **Production-facing flow** | Any code path where user actions result in data reads or writes that affect real business state |
+| **Test lane** | A category of test execution with its own adapter mode and environment constraints |
+| **Deployment environment** | The infrastructure target (local, CI, staging, production) with its own adapter mode requirements |
+| **Production-active** | Per B2 — a domain whose mock fallback is removed and live traffic is verified |
+
+---
+
+## Policy Precedence
+
+- **B3** governs adapter mode selection and mock isolation enforcement
+- **B1** governs adapter implementation; **B2** governs adapter completion tracking and gate checklists
+- Where B3 and B2 conflict on what constitutes "production-active," B2's gate definitions take precedence
+- **C2** governs auth configuration; B3 does not override auth mode decisions
+- **E1** governs contract test design; B3 defines which test lanes require which adapter modes
+
+---
+
+## Lane 1: Adapter Mode Governance
+
+### How Adapter Mode Is Resolved
+
+**Factory behavior** (`packages/data-access/src/factory.ts`):
+- `resolveAdapterMode()` reads `process.env.HBC_ADAPTER_MODE`
+- Returns `'proxy'`, `'sharepoint'`, or `'api'` if the env var matches one of those values
+- Falls back to `'mock'` if the env var is unset or unrecognized
+- Each domain's `create{Domain}Repository(mode?)` factory function delegates to `resolveAdapterMode()` when no explicit mode is passed
+
+**Vite build-time injection** (`apps/pwa/vite.config.ts`):
+- Vite injects `process.env.HBC_ADAPTER_MODE` as a build-time string literal
+- Reads `VITE_ADAPTER_MODE` from the build environment
+- Defaults to `'mock'` when Vite mode is `'development'`; defaults to `'proxy'` for all other build modes (including production)
+- This means production PWA builds will use `'proxy'` by default even if the env var is unset at build time
+
+**Backend** (`backend/functions/src/index.ts`):
+- Azure Functions read `HBC_ADAPTER_MODE` from app settings (configured per deployment slot)
+- No build-time injection; the value is resolved at runtime from the Azure app settings environment
+
+### Environment → Adapter Mode Rules
+
+| Environment | Required Adapter Mode | Mock Allowed? | Enforcement |
+|---|---|---|---|
+| **Local development** | `'mock'` (default) | Yes — developer may override to test other modes | None (developer's choice) |
+| **CI — unit tests** | `'mock'` | Yes — required for isolation and speed | CI pipeline config |
+| **CI — mocked-proxy tests** | `'mock'` fetch layer | Yes — proxy adapter tested against mocked fetch | CI pipeline config |
+| **CI — contract tests** | `'proxy'` against test backend | No | CI pipeline config + test backend availability |
+| **Staging** | `'proxy'` (or other real adapter) | **No** | Startup guard + deployment gate |
+| **Production** | `'proxy'` (or other real adapter) | **No — zero tolerance** | Startup guard + deployment gate |
+| **Demo / sandbox** | `'mock'` if no customer data | Conditional — must be clearly labeled | Labeling requirement |
+
+---
+
+## Lane 2: Test Lane Governance
+
+Phase 1 requires a progression from mocked execution through real-backend validation. The test policy must support all four lanes without blocking later gates.
+
+### Test Lane 1: Unit Tests
+
+- **Adapter mode:** `'mock'`
+- **Purpose:** Fast, isolated tests of business logic and adapter interface compliance
+- **Data source:** In-memory mock stores with seed data (`SEED_LEADS`, `SEED_PROJECTS`, etc.)
+- **Reset:** Call `resetAllMockStores()` in `beforeEach` — note this resets the mock ID counter only, not in-memory store contents; create a fresh repository instance per test for full isolation
+- **Network:** None — no fetch, no HTTP, no external calls
+- **Factory usage:** Individual factory functions (`createProjectRepository()`, `createLeadRepository()`, etc.) — there is no generic `getRepository()` function
+
+### Test Lane 2: Mocked-Proxy Tests
+
+- **Adapter mode:** `'proxy'` with mocked `fetch` (per B1 engineering plan)
+- **Purpose:** Validate proxy adapter implementations against mocked HTTP responses
+- **Data source:** Mocked fetch returning typed response envelopes
+- **Network:** Mocked — no real HTTP calls
+- **B1 cross-ref:** This is the primary test strategy for B1 Tasks 3–10 (`CODE_COMPLETE_MOCK` gate)
+
+### Test Lane 3: Contract Tests (E1)
+
+- **Adapter mode:** `'proxy'` against a deployed test or staging backend
+- **Purpose:** Validate that adapter behavior matches real backend response contracts
+- **Data source:** Real backend responses validated against Zod schemas
+- **Network:** Real HTTP calls to a test Azure Functions instance
+- **E1 cross-ref:** E1 owns the contract test harness; B3 defines that this lane must use a real adapter
+- **B2 cross-ref:** Required for `STAGING_READY` gate
+
+### Test Lane 4: Staging E2E
+
+- **Adapter mode:** `'proxy'` with real auth (MSAL) against staging backend
+- **Purpose:** Full user workflow validation in a production-like environment
+- **Data source:** Staging backend with test data
+- **Network:** Real HTTP with real auth tokens
+- **C2 cross-ref:** Requires C2 auth middleware to be operational
+
+---
+
+## Lane 3: Deployment Environment Governance
+
+### Startup Guard
+
+A startup guard must assert that mock mode is not active in staging or production. This guard runs early in application initialization.
+
+**Call sites (repo truth):**
+- **Frontend:** `apps/pwa/src/main.tsx` — before first repository call
+- **Backend:** `backend/functions/src/index.ts` — before function registration
+
+**Implementation target:** `packages/data-access/src/config/adapter-mode-guard.ts` (to be created per B3 scope)
+
+**Behavior:**
+- In staging or production: if `HBC_ADAPTER_MODE` resolves to `'mock'`, throw a fatal error preventing startup
+- In all environments: log the resolved adapter mode for observability
+- Note: the Vite build already defaults to `'proxy'` for non-dev builds, providing a build-time safety net for the PWA; the startup guard provides a runtime safety net
+
+### Deployment Gate
+
+A pre-deployment check must validate that the target environment's configuration does not include `HBC_ADAPTER_MODE='mock'` before allowing deployment to staging or production.
+
+**Implementation:** CI/CD pipeline step that reads the deployment configuration and fails the pipeline if mock mode is detected.
+
+**Scope:** Azure Functions app settings for backend; Vite build env for frontend.
+
+---
+
+## Lane 4: Production Rollout Governance
+
+### Core Rule
+
+Production rollout must ensure that every activated domain uses a real adapter. Mock fallback is never acceptable in production, even as a "safe default" during gradual rollout.
+
+### What This Means for Gradual Rollout
+
+If domains are activated incrementally (e.g., Lead and Project go live before Schedule), the rollout strategy must ensure:
+- Activated domains use `'proxy'` (or another real adapter)
+- Non-activated domains either throw `AdapterNotImplementedError` (current factory behavior) or are gated at the application layer to prevent user access
+- Under no circumstances does a non-activated domain silently fall back to mock data in production
+
+### Domain-Level Adapter Overrides
+
+Per-domain adapter mode overrides (e.g., `HBC_ADAPTER_MODE_LEADS`) are an **open decision** — see B2 [Factory Wiring open decision](#). If implemented:
+- Overrides may only select between real adapter types (`'proxy'`, `'sharepoint'`, `'api'`)
+- An override value of `'mock'` in production must be rejected by the startup guard
+- The naming convention, governance model, and implementation approach must be approved before use
+
+### B2 Cross-Reference
+
+A domain reaches `PROD_ACTIVE` (per B2) only when:
+- Mock fallback is removed for that domain
+- Live traffic is verified in production
+- Monitoring and error reporting are confirmed
+
+This policy enforces the prerequisite: mock must be unreachable in the production code path for that domain.
+
+---
+
+## Exception Policy
+
+### Production: No Exceptions
+
+There is no approved exception for mock adapters in production. If mock data is detected serving production traffic, this is an incident (see Incident Response below).
+
+### Staging: Time-Boxed Exception Only
+
+A temporary mock exception in staging may be approved under these conditions:
+- **Approval required from:** B-workstream lead AND DevOps lead
+- **Maximum duration:** 5 business days
+- **Documentation:** Written justification, affected domains, expiry date, rollback plan
+- **Monitoring:** The exception must be visible in startup logs and deployment dashboards
+
+### Demo / Sandbox
+
+Mock adapters are permitted in demo or sandbox environments if:
+- No customer data is involved
+- The environment is clearly labeled as "demo" in both UI and logs
+- The environment is not reachable from production networks
+
+---
+
+## Ownership and Accountability
 
 | Role | Responsibility |
 |---|---|
-| **Data Access Maintainer** | Owns `adapter-mode-guard.ts`, factory domain override logic, adapter README docs |
-| **Backend Platform Owner** | Ensures Azure Functions endpoints respond correctly; sets up test instances |
-| **DevOps / Release Engineer** | Owns deployment gate configuration; blocks staging/prod deployments with mock mode |
-| **QA Lead** | Verifies CI test isolation; coordinates integration test strategy per adapter |
-| **Product Manager** | Approves production rollout schedule and per-domain feature flag decisions |
+| **Data Access Maintainer** | Owns startup guard implementation, factory adapter mode resolution, adapter README docs |
+| **Backend Platform Owner** | Ensures Azure Functions app settings are correctly configured per environment |
+| **DevOps / Release Engineer** | Owns deployment gate configuration; validates adapter mode before staging/production deployment |
+| **QA Lead** | Verifies CI test lane configuration; coordinates multi-lane test strategy |
+| **B-workstream Lead** | Approves staging mock exceptions; owns policy updates |
+| **Architecture** | Reviews policy changes; approves domain-level override design if proposed |
 
-## Appendix: Policy Enforcement Checklist
+### Incident Response: Mock Detected in Production
 
-- [ ] `assertAdapterModeForEnvironment()` is called in backend startup
-- [ ] `assertAdapterModeForEnvironment()` is called in frontend startup
-- [ ] CI pipeline sets `NODE_ENV` and `HBC_ADAPTER_MODE` explicitly (no defaults)
-- [ ] All unit tests call `resetAllMockStores()` in `beforeEach`
-- [ ] Deployment gate validates adapter mode before staging/prod deployment
-- [ ] Domain-level feature flag env vars are documented in deployment runbook
-- [ ] Staging and production environments have `HBC_ADAPTER_MODE='proxy'` (or later adapter)
+If mock adapter usage is detected in a production environment:
+1. **Immediate:** Alert DevOps and B-workstream lead
+2. **Triage:** Determine scope — which domains, which users, how long
+3. **Remediate:** Deploy correct adapter configuration; verify real adapters are active
+4. **Root cause:** Identify how mock mode reached production (configuration drift, missing guard, build error)
+5. **Follow-up:** Update deployment gates or startup guards to prevent recurrence; document in incident log
+
+---
+
+## Policy Enforcement Checklist
+
+- [ ] `assertAdapterModeForEnvironment()` implemented in `packages/data-access/src/config/adapter-mode-guard.ts`
+- [ ] Startup guard called in `apps/pwa/src/main.tsx` before first repository call
+- [ ] Startup guard called in `backend/functions/src/index.ts` before function registration
+- [ ] Vite config defaults to `'proxy'` for non-development builds (verified in `apps/pwa/vite.config.ts`)
+- [ ] CI pipeline configures adapter mode per test lane (mock for unit, proxy for contract tests)
+- [ ] Deployment gate rejects `HBC_ADAPTER_MODE='mock'` for staging and production targets
+- [ ] Staging and production Azure Functions app settings have `HBC_ADAPTER_MODE='proxy'`
+- [ ] No domain-level override uses `'mock'` in staging or production (if override mechanism is implemented)
 - [ ] Local development `.env` files are in `.gitignore` and not committed
+- [ ] Adapter mode is logged at startup in all environments for observability
