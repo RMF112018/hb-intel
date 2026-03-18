@@ -72,15 +72,21 @@ All example payloads, ID types, field names, and response assertions in this che
 | Telemetry instrumentation (Application Insights events) | C3 | P1-C3 Observability |
 | Health check endpoint | C1 or Platform | Not yet assigned |
 
-### Staging-Only (Not Verifiable from Repo)
+### Staging Environment Readiness Matrix
 
-| Item | What Must Exist |
-|---|---|
-| Staging Azure Functions deployment | Deployed instance at `SMOKE_TEST_BASE_URL` |
-| Redis cache connectivity | Redis instance reachable from staging functions |
-| Azure Table Storage connectivity | Table Storage reachable from staging functions |
-| MSAL OBO app registration | Entra ID app registration with API scope grants |
-| Application Insights workspace | AI workspace receiving telemetry from staging functions |
+These items cannot be verified from repo alone — they require a deployed staging environment. Each item indicates which checklist sections depend on it and who is responsible for provisioning it.
+
+| Prerequisite | Required For | Owner | How to Verify | Status |
+|---|---|---|---|---|
+| **Function app deployed** | All sections | Platform | `SMOKE_TEST_BASE_URL` resolves; `curl $URL/api/health` or any registered route returns HTTP response (not DNS/connection failure) | **NOT MET** — no staging URL confirmed |
+| **Required env vars present** | Section 1 (startup) | Platform | `validateRequiredConfig()` runs without error in staging logs (requires G2.6 wiring) | **NOT MET** — validation not wired into startup |
+| **`HBC_ADAPTER_MODE=proxy`** | Section 1 (adapter mode) | Platform | Startup logs contain `HBC_ADAPTER_MODE=proxy` | **NOT MET** — staging not deployed |
+| **Auth app registration** (`AZURE_TENANT_ID`, `AZURE_CLIENT_ID`) | Section 2 (auth) | Platform + C2 | `validateToken()` successfully verifies a JWT against `api://<CLIENT_ID>` audience | **NOT MET** — CLIENT_ID not defined for staging |
+| **Redis reachable** | Sections 3–8 (domain routes using proxy cache) | Platform | Proxy route returns cached response; no Redis connection errors in AI | **NOT MET** — required only if proxy routes use Redis for domain data |
+| **Azure Table Storage reachable** | Section 9 (idempotency records) | Platform | D1 `IdempotencyStorageService` can read/write to `IdempotencyRecords` table | **NOT MET** — D1 not delivered; table not created |
+| **OBO app registration** (API scope grants for downstream APIs) | Endpoints calling downstream APIs (e.g., Graph, SharePoint) | C2 + Platform | OBO token exchange succeeds for downstream API audience | **NOT MET** — C2 not delivered; NOT required for basic domain CRUD |
+| **Application Insights workspace** | Section 11 (observability) | Platform | AI connection string in function app settings; telemetry appears in AI portal | **NOT MET** — access not confirmed |
+| **Health endpoint registered** | Section 1 (health check) | C1 or Platform | `GET /api/health` returns 200 | **BLOCKED** — no health function in `backend/functions/src/index.ts` |
 
 ---
 
@@ -109,16 +115,34 @@ Each major section maps to the upstream workstreams that must deliver before the
 
 Confirm proxy adapter is configured and startup logic runs cleanly. This section can be partially reviewed against configuration, but full verification requires a staging deployment.
 
-**Depends on:** Platform (staging deployment)
+**Depends on:** Platform (staging deployment), G2.6 (startup validation wiring)
 
-- [ ] `HBC_ADAPTER_MODE=proxy` configured in staging environment
+### Current Repo State
+
+| Item | Status | Evidence |
+|---|---|---|
+| `validateRequiredConfig()` | **Exported but NOT called at startup** | `backend/functions/src/utils/validate-config.ts` — comment explicitly says "NOT called at startup. G2.6 will wire the call." |
+| Adapter mode assertion | **No `assertAdapterModeForEnvironment()` function exists** | No such function found in repo |
+| Health endpoint | **Not registered** | `backend/functions/src/index.ts` imports 7 function modules — none is a health endpoint |
+| Startup timing threshold | **No governing plan defines a numeric threshold** | No `< 10 seconds` or equivalent rule found in any Phase 1 plan |
+
+### Adapter Mode Checks (operator-verifiable after staging deploy)
+- [ ] `HBC_ADAPTER_MODE=proxy` configured in staging environment variables
 - [ ] Application startup log contains `HBC_ADAPTER_MODE=proxy`
 - [ ] No warning or error logs for adapter mode mismatch
-- [ ] `validateRequiredConfig()` is wired into startup and completes without error (**NOTE:** currently exported but NOT called at startup — G2.6 must wire it)
-- [ ] Startup duration measured and recorded as baseline (**NOTE:** no hard-coded threshold — measure actual cold-start time and document as the Phase 1 baseline for future comparison)
 
-**Health check:**
-- [ ] Health endpoint registered and responds — `GET /api/health` returns 200 (**NOTE:** no health function is currently registered in `backend/functions/src/index.ts` — C1 or Platform must add it)
+### Startup Validation (BLOCKED on G2.6 wiring)
+- [ ] `validateRequiredConfig()` wired into startup initialization path (**BLOCKED** — currently exported but not called; G2.6 must wire it before this check is meaningful)
+- [ ] After G2.6 wiring: startup with missing required env vars produces an aggregated error listing all missing variables (per `validate-config.ts` implementation)
+- [ ] After G2.6 wiring: startup with all required env vars present completes without validation errors
+
+### Startup Duration (measured baseline — no hard-coded threshold)
+- [ ] Measure actual cold-start time for the staging function app and record as the Phase 1 baseline
+- [ ] Document the measured value for future comparison (**NOTE:** no governing plan defines a numeric pass/fail threshold such as "< 10 seconds" — the baseline is evidence, not a gate)
+
+### Health Endpoint (BLOCKED — not registered)
+- [ ] Health endpoint registered in `backend/functions/src/index.ts` and responds — `GET /api/health` returns 200 (**BLOCKED** — no health function exists in the repo today; C1 or Platform must deliver it before this check is executable)
+- [ ] If a health endpoint is delivered: response includes at minimum `{ status: 'ok' }` or equivalent
 
 ---
 
