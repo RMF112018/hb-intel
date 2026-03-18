@@ -103,9 +103,29 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 
 ### Verification Command Guidance
 
-- **`packages/data-access`**: No test script exists (**CURRENT**). D1 implementation must either (a) add a vitest configuration to data-access or (b) run tests via workspace root. Until a test script is added, use: `npx vitest run packages/data-access/src/retry/retry-policy.test.ts` from workspace root.
-- **`backend/functions`**: Has vitest — use `npm test` from `backend/functions/` or the workspace-scoped command.
-- All D1 code must pass `check-types` and `lint` for its package before commit.
+**`packages/data-access` — no test script exists (CURRENT):**
+
+D1 must add vitest configuration to data-access before any tests can run. Required setup (prerequisite for Task 1.1):
+1. Add `vitest` as a devDependency (or confirm it's available via workspace hoisting)
+2. Create `packages/data-access/vitest.config.ts` (node environment, include `src/**/*.test.ts`)
+3. Add `"test": "vitest run"` script to `packages/data-access/package.json`
+4. Optionally add data-access to root `vitest.workspace.ts` for workspace-level runs
+
+Until this is done, D1 tests cannot execute. The `npx vitest run packages/data-access/...` pattern used in earlier drafts is **not repo-valid** — `packages/data-access` is not in the workspace vitest configuration.
+
+**`packages/models` — no test script exists (CURRENT):**
+If Task 3.2 adds tests (currently type-only), the same vitest setup applies.
+
+**`backend/functions` — vitest exists (CURRENT):**
+- Unit tests: `cd backend/functions && npm test`
+- Smoke tests: `cd backend/functions && npm run test:smoke`
+- Coverage: `cd backend/functions && npm run test:coverage`
+
+**Static analysis (all packages, must pass before commit):**
+- `pnpm --filter @hbc/data-access run check-types`
+- `pnpm --filter @hbc/data-access run lint`
+- `pnpm --filter @hbc/backend-functions run check-types` (for backend changes)
+- `pnpm --filter @hbc/backend-functions run lint` (for backend changes)
 
 ### Actual Port Interface Reference (for code examples)
 
@@ -589,8 +609,12 @@ export async function withRetry<T>(
 **Run and Verify:**
 
 ```bash
-# From workspace root (see Verification Command Guidance in Plan Status section)
-npx vitest run packages/data-access/src/retry/retry-policy.test.ts
+# Prerequisite: vitest must be configured in packages/data-access (see Verification Command Guidance)
+cd packages/data-access && npx vitest run src/retry/retry-policy.test.ts
+
+# Static analysis (must also pass):
+pnpm --filter @hbc/data-access run check-types
+pnpm --filter @hbc/data-access run lint
 ```
 
 **Expected output:**
@@ -1081,8 +1105,13 @@ export class ProxyHttpClient {
 **Run and Verify:**
 
 ```bash
-# From workspace root (see Verification Command Guidance in Plan Status section)
-npx vitest run packages/data-access/src/adapters/proxy/http-client.test.ts
+# Prerequisite: vitest must be configured in packages/data-access (see Verification Command Guidance)
+# NOTE: This test is BLOCKED on B1 — test code is written but ProxyHttpClient does not yet exist
+cd packages/data-access && npx vitest run src/adapters/proxy/http-client.test.ts
+
+# Static analysis (must also pass):
+pnpm --filter @hbc/data-access run check-types
+pnpm --filter @hbc/data-access run lint
 ```
 
 **Expected output:**
@@ -1118,8 +1147,7 @@ git commit -m "Feat(data-access): Wire retry into ProxyHttpClient (B1-aligned)
 - Add IdempotencyContext support: include key and operation in headers
 - Add comprehensive test suite (9 tests, all passing)
 
-Retry and idempotency are now integrated into HTTP layer. Repositories
-will call client methods without worrying about transport failures.
+Retry wiring ready for integration once B1 delivers ProxyHttpClient.
 "
 ```
 
@@ -1287,8 +1315,12 @@ export function isExpired(ctx: IdempotencyContext): boolean {
 **Run and Verify:**
 
 ```bash
-# From workspace root (see Verification Command Guidance in Plan Status section)
-npx vitest run packages/data-access/src/retry/idempotency.test.ts
+# Prerequisite: vitest must be configured in packages/data-access (see Verification Command Guidance)
+cd packages/data-access && npx vitest run src/retry/idempotency.test.ts
+
+# Static analysis (must also pass):
+pnpm --filter @hbc/data-access run check-types
+pnpm --filter @hbc/data-access run lint
 ```
 
 **Expected output:**
@@ -1913,8 +1945,12 @@ export function classifyWriteFailure(error: HbcDataAccessError): WriteFailureRea
 **Run and Verify:**
 
 ```bash
-# From workspace root (see Verification Command Guidance in Plan Status section)
-npx vitest run packages/data-access/src/retry/write-safe-error.test.ts
+# Prerequisite: vitest must be configured in packages/data-access (see Verification Command Guidance)
+cd packages/data-access && npx vitest run src/retry/write-safe-error.test.ts
+
+# Static analysis (must also pass):
+pnpm --filter @hbc/data-access run check-types
+pnpm --filter @hbc/data-access run lint
 ```
 
 **Expected output:**
@@ -2314,6 +2350,7 @@ describe('Write safety: retry + idempotency integration', () => {
       .mockResolvedValueOnce({
         ok: true,
         status: 201,
+        headers: new Headers({ 'content-type': 'application/json' }),
         json: async () => ({ id: 'lead-1', firstName: 'John' }),
       });
 
@@ -2344,6 +2381,7 @@ describe('Write safety: retry + idempotency integration', () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 201,
+      headers: new Headers({ 'content-type': 'application/json' }),
       json: async () => cachedResponse,
     });
 
@@ -2360,6 +2398,7 @@ describe('Write safety: retry + idempotency integration', () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200, // 200 instead of 201 for cached response
+      headers: new Headers({ 'content-type': 'application/json' }),
       json: async () => cachedResponse,
     });
 
@@ -2383,6 +2422,7 @@ describe('Write safety: retry + idempotency integration', () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
       json: async () => responseData,
     });
 
@@ -2409,6 +2449,7 @@ describe('Write safety: retry + idempotency integration', () => {
       ok: false,
       status: 422,
       statusText: 'Unprocessable Entity',
+      headers: new Headers({ 'content-type': 'application/json' }),
       json: async () => ({ error: 'Missing required field: firstName' }),
     });
 
@@ -2433,8 +2474,13 @@ describe('Write safety: retry + idempotency integration', () => {
 The test itself is the verification. Run it:
 
 ```bash
-# From workspace root (see Verification Command Guidance in Plan Status section)
-npx vitest run packages/data-access/src/retry/write-safety.integration.test.ts
+# Prerequisite: vitest must be configured in packages/data-access (see Verification Command Guidance)
+# NOTE: This test is BLOCKED on B1 — test code is written but ProxyHttpClient does not yet exist
+cd packages/data-access && npx vitest run src/retry/write-safety.integration.test.ts
+
+# Static analysis (must also pass):
+pnpm --filter @hbc/data-access run check-types
+pnpm --filter @hbc/data-access run lint
 ```
 
 **Expected output:**
@@ -2460,7 +2506,8 @@ git commit -m "Test(data-access): Add write safety integration tests
 - Verify non-retryable errors stop retries (no waste)
 - Verify integration across retry policy, idempotency context, and HTTP client
 
-All 4 integration tests passing. Write safety is end-to-end ready.
+Integration tests verify retry + idempotency in isolation.
+End-to-end verification requires B1 proxy infrastructure.
 "
 ```
 
@@ -2535,7 +2582,7 @@ git commit -m "Feat(data-access): Export write-safety APIs from public surface
 - Convenience export: IdempotencyContext from http-client
 - Apps can now import: generateIdempotencyKey, WriteFailureReason, etc.
 
-Write safety APIs are now part of the public data-access surface.
+Write safety APIs exported. Full integration pending B1/C1.
 "
 ```
 
@@ -2575,28 +2622,46 @@ Write safety APIs are now part of the public data-access surface.
    - Example wiring shown for `ProxyLeadRepository` (**BLOCKED** on B1)
 
 4. **Integration & Verification** (Chunk 4)
-   - 4 integration tests verifying retry + idempotency together
+   - 4 integration tests verifying retry + idempotency together — **BLOCKED** on B1; test code written, execution pending
    - Public API exports from `@hbc/data-access`
-   - Ready for Phase 1 critical path (Project, Lead, Estimating)
+
+### D1 Acceptance Matrix
+
+| Stage | Criteria | Verification | Dependencies | Status |
+|---|---|---|---|---|
+| **Code complete — data-access** | RetryPolicy, withRetry, idempotency types, WriteFailureReason, classifyWriteFailure implemented and unit-tested | `cd packages/data-access && npm test` + `check-types` + `lint` | Vitest setup (prerequisite) | **TARGET** |
+| **Code complete — backend** | IdempotencyStorageService, checkIdempotency, recordIdempotencyResult, withIdempotency wrapper, cleanup timer implemented and unit-tested | `cd backend/functions && npm test` + `check-types` + `lint` | None — standalone | **TARGET** |
+| **Code complete — models** | IAuditRecord interface with correlation fields exported | `pnpm --filter @hbc/models run check-types` | None — type-only | **TARGET** |
+| **Integration-ready** | ProxyHttpClient retry wiring, repository-level idempotency, frontend→backend idempotency flow | D1 integration tests pass with B1 proxy infrastructure | B1 (ProxyHttpClient, proxy repositories) | **BLOCKED** on B1 |
+| **Contract-test dependent** | Error classification matches C1 error envelope; idempotency headers honored by backend | E1 contract test suite passes against staging | B1, C1 (error envelope freeze), E1 | **BLOCKED** on B1/C1/E1 |
+| **Staging-ready evidence** | Audit records visible in Azure Table Storage during E1 test runs; retry telemetry in Application Insights | E1 test run + AI query + Table Storage query | B1, C1, C3 (telemetry), E1 | **BLOCKED** on B1/C1/C3/E1 |
+| **PROD_ACTIVE gate** | "Write safety — Retry and idempotency behavior verified"; "Monitoring, error reporting, and alerting confirmed" | Production verification run + monitoring dashboards | All D1 + B1 + B2 + C1 + C3 + E1 | **BLOCKED** on all |
+
+**Phase 1 gate alignment — "Failures are recoverable and visible" requires:**
+- Retryable failures ARE retried (withRetry + policy) — verified at code-complete stage
+- Non-retryable failures ARE classified (classifyWriteFailure) — verified at code-complete stage
+- Write failures ARE audited (IAuditRecord + backend audit) — verified at staging-ready stage
+- Retry and audit ARE observable (C3 telemetry) — verified at PROD_ACTIVE stage
 
 ### Code Coverage
 
-- **Frontend (TypeScript/Vitest):** ~1,500 lines (code + tests)
+- **Frontend (data-access):** ~1,500 lines (code + tests)
   - Retry policy types, HOF, and tests (11 tests)
-  - HTTP client retry integration (8 tests)
+  - HTTP client retry integration (9 tests) — **BLOCKED** on B1; test code written, execution pending
   - Idempotency key generation (7 tests)
-  - Write-safe error classification (11 tests)
-  - Integration tests (4 tests)
-  - Total: 41 tests, all passing
+  - Write-safe error classification (10 tests)
+  - Integration tests (4 tests) — **BLOCKED** on B1; test code written, execution pending
+  - **Standalone tests executable at code-complete: 28**
+  - **B1-dependent tests executable after B1 delivery: 13**
 
 - **Backend (Azure Functions):** ~600 lines (code + tests)
-  - `IdempotencyStorageService` + mock (Table SDK integration)
+  - `IdempotencyStorageService` + mock (~20 estimated tests)
   - `checkIdempotency` / `recordIdempotencyResult` (standalone functions)
   - `withIdempotency` handler wrapper
   - `cleanupIdempotencyRecords` timer trigger
-  - Non-blocking async error handling
+  - **All executable at code-complete**
 
-- **Models:** ~100 lines (audit interface)
+- **Models:** ~100 lines (type definitions, optional type guard tests)
 
 ### Assumptions & Risks
 
@@ -2606,6 +2671,7 @@ Write safety APIs are now part of the public data-access surface.
 - Azure Table Storage connection string available via `AZURE_STORAGE_CONNECTION_STRING` env var (same as `RealTableStorageService`)
 - Azure Tables has no native TTL; expiry is application-enforced via `expiresAt` field + nightly cleanup timer
 - Phase 1 critical path: Project, Lead, Estimating only
+- `packages/data-access` requires vitest configuration setup before any D1 tests can execute
 
 **Risks:**
 - Idempotency TTL (24h) may need tuning; too short risks legitimate retries treated as new; too long wastes storage
@@ -2614,14 +2680,14 @@ Write safety APIs are now part of the public data-access surface.
 - Offline queue (session-state) coordination not covered; separate P1-D2 or later
 - SharePoint adapter retry (Phase 5) will need its own strategy at PnPjs call site
 
-### Next Steps (Post P1-D1)
+### Next Steps (Post D1 Code-Complete)
 
-1. Apply same pattern to `ProxyProjectRepository`, `ProxyEstimatingRepository`
-2. Implement offline write queue coordination (session-state integration)
-3. Wire frontend UI (Lead Creation app) to use `generateIdempotencyKey()` before writes
-4. Implement backend endpoints (P1-BE) to check idempotency keys and store results
-5. Add audit logging on backend (asynchronously, after write success)
-6. Test against live backend during Phase 1 integration
+1. **Immediate (no dependencies):** Add vitest configuration to `packages/data-access`; run all 28 standalone D1 tests
+2. **After B1 delivery:** Execute B1-dependent tests (Task 1.2, Task 3.3, Task 4.1); wire retry into delivered ProxyHttpClient
+3. **After C1 freeze:** Validate error classification against frozen C1 error envelope
+4. **After C3 alignment:** Wire `proxy.request.error` and `proxy.request.retry` telemetry events
+5. **After E1 delivery:** Run contract tests against staging; verify audit records visible in Table Storage
+6. **PROD_ACTIVE gate:** Production verification run with monitoring dashboards confirming all three critical-path domains
 
 ---
 
