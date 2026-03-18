@@ -195,15 +195,23 @@ Production rollout must ensure that every activated domain uses a real adapter. 
 
 If domains are activated incrementally (e.g., Lead and Project go live before Schedule), the rollout strategy must ensure:
 - Activated domains use `'proxy'` (or another real adapter)
-- Non-activated domains either throw `AdapterNotImplementedError` (current factory behavior) or are gated at the application layer to prevent user access
+- Non-activated domains throw `AdapterNotImplementedError` — this is the current factory behavior and is the safe production default; it prevents both mock data leakage and access to unimplemented adapters
+- Application-layer gating (feature flags, route guards, or UI visibility controls) should prevent users from reaching non-activated domain surfaces
 - Under no circumstances does a non-activated domain silently fall back to mock data in production
+
+**Preferred rollout mechanism:** Use managed feature flags or application-layer gating to control which domains are visible to users, rather than ad-hoc per-domain environment variable overrides. Azure App Configuration feature flags, application-level route guards, or UI feature toggles are preferred over environment variable sprawl because they are auditable, centrally managed, and do not require redeployment to change.
 
 ### Domain-Level Adapter Overrides
 
-Per-domain adapter mode overrides (e.g., `HBC_ADAPTER_MODE_LEADS`) are an **open decision** — see B2 [Factory Wiring open decision](#). If implemented:
-- Overrides may only select between real adapter types (`'proxy'`, `'sharepoint'`, `'api'`)
-- An override value of `'mock'` in production must be rejected by the startup guard
-- The naming convention, governance model, and implementation approach must be approved before use
+Per-domain adapter mode overrides (e.g., `HBC_ADAPTER_MODE_LEADS`) are **explicitly deferred** out of P1-B3 scope. See `P1-B2-Adapter-Completion-Backlog.md` section "Open Decision: Domain-Level Adapter Overrides" for the full status.
+
+**Current state:** No domain-level override mechanism exists in the factory. All domains resolve to the same global `HBC_ADAPTER_MODE` value. This is sufficient for Phase 1 where all domains target the same adapter type (`'proxy'`).
+
+**If domain-level overrides are pursued in the future:**
+- A separate design decision document must be created before implementation
+- Overrides may only select between real adapter types (`'proxy'`, `'sharepoint'`, `'api'`) — never `'mock'`
+- An override value of `'mock'` in a protected environment must be rejected by the startup guard
+- The naming convention, governance model, and implementation approach must be approved by B-workstream lead and Architecture
 
 ### B2 Cross-Reference
 
