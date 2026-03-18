@@ -1745,6 +1745,8 @@ export class ProxyProjectRepository
     }, 'ProxyProjectRepository.deleteProject');
   }
 
+  // PROVISIONAL (A8): Aggregate endpoint not in C1 catalog.
+  // Path and existence must be confirmed with C1 before production.
   async getPortfolioSummary(): Promise<IPortfolioSummary> {
     return this.wrapAsync(async () => {
       const response = await this.httpClient.get<{ data: IPortfolioSummary }>(
@@ -1788,6 +1790,8 @@ pnpm --filter @hbc/data-access check-types
 **ProxyEstimatingRepository:**
 
 The Estimating domain manages two entity types: `IEstimatingTracker` (bid tracking) and `IEstimatingKickoff` (kickoff meetings). Methods use domain-specific names (`getAllTrackers`, `getTrackerById`, `createTracker`, etc.) rather than generic CRUD. The kickoff entity has separate `getKickoff(projectId)` and `createKickoff()` methods.
+
+> **Provisional routing (D2):** B1 uses sub-resource paths (`/trackers`, `/kickoffs`) under `/api/estimating`. C1 defines flat `/api/estimating` with generic CRUD. Sub-resource routing must be confirmed with C1 before this adapter is finalized. Implementation is safe with mocked `fetch` but paths may change.
 
 ```typescript
 // packages/data-access/src/adapters/proxy/estimating-repository.ts
@@ -1877,6 +1881,7 @@ export class ProxyEstimatingRepository
     }, 'ProxyEstimatingRepository.deleteTracker');
   }
 
+  // PROVISIONAL (D2 + A8): Kickoff sub-resource path not in C1 catalog.
   async getKickoff(projectId: string): Promise<IEstimatingKickoff | null> {
     return this.wrapAsync(async () => {
       try {
@@ -1937,6 +1942,8 @@ export class ProxyScheduleRepository
     super(httpClient, '/api/schedules');
   }
 
+  // PROVISIONAL (D6): Uses nested project-scoped path. C1 may use flat
+  // ?projectId= query param instead. See addProjectScope() alternative.
   async getActivities(
     projectId: string,
     options?: IListQueryOptions,
@@ -2001,6 +2008,7 @@ export class ProxyScheduleRepository
     }, 'ProxyScheduleRepository.deleteActivity');
   }
 
+  // PROVISIONAL (A8 + D6): Aggregate endpoint not in C1 catalog; uses nested path.
   async getMetrics(projectId: string): Promise<IScheduleMetrics> {
     return this.wrapAsync(async () => {
       const response = await this.httpClient.get<{ data: IScheduleMetrics }>(
@@ -2016,7 +2024,7 @@ export class ProxyScheduleRepository
 
 > **Path discrepancy:** B1 uses `/api/buyouts` (plural); C1 uses `/api/buyout` (singular). See Appendix A for details.
 
-The Buyout domain is project-scoped and manages `IBuyoutEntry` entries plus an `IBuyoutSummary` aggregate. Methods: `getEntries(projectId)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)`. No search method.
+The Buyout domain is project-scoped and manages `IBuyoutEntry` entries plus an `IBuyoutSummary` aggregate. Methods: `getEntries(projectId)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)` **(A8: aggregate endpoint provisional — not in C1 catalog)**. No search method.
 
 Implementation follows the same project-scoped pattern as Schedule above, substituting `IBuyoutEntry`/`IBuyoutSummary` and using resource paths under `/api/buyouts`. All API paths are provisional and track the P1-C1 backend contract catalog.
 
@@ -2052,17 +2060,17 @@ git commit -m "feat: implement ProxyBuyoutRepository with project-scoped entries
 
 **ProxyComplianceRepository:**
 
-Project-scoped. Manages `IComplianceEntry` + `IComplianceSummary`. Methods: `getEntries(projectId, options?)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)`. No search. Follows the same project-scoped pattern as Buyout (Task 5). All API paths are provisional and track the P1-C1 backend contract catalog.
+Project-scoped. Manages `IComplianceEntry` + `IComplianceSummary`. Methods: `getEntries(projectId, options?)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)` **(A8: aggregate provisional)**. No search. Follows the same project-scoped pattern as Buyout (Task 5). All API paths are provisional and track the P1-C1 backend contract catalog.
 
 **ProxyContractRepository:**
 
-Project-scoped with two entity types. Manages `IContractInfo` + `ICommitmentApproval`. Methods: `getContracts(projectId, options?)`, `getContractById(id)`, `createContract(data)`, `updateContract(id, data)`, `deleteContract(id)`, `getApprovals(contractId)`, `createApproval(data)`. No search. The approval methods operate on a sub-resource scoped by contract ID. All API paths are provisional and track the P1-C1 backend contract catalog.
+Project-scoped with two entity types. Manages `IContractInfo` + `ICommitmentApproval`. Methods: `getContracts(projectId, options?)`, `getContractById(id)`, `createContract(data)`, `updateContract(id, data)`, `deleteContract(id)`, `getApprovals(contractId)` **(A8: sub-resource provisional)**, `createApproval(data)` **(A8)**. No search. The approval methods operate on a sub-resource scoped by contract ID. All API paths are provisional and track the P1-C1 backend contract catalog.
 
 **ProxyRiskRepository:**
 
 > **Path discrepancy:** B1 uses `/api/risks` (plural); C1 uses `/api/risk` (singular). See Appendix A for details.
 
-Project-scoped. Manages `IRiskCostItem` + `IRiskCostManagement`. Methods: `getItems(projectId, options?)`, `getItemById(id)`, `createItem(data)`, `updateItem(id, data)`, `deleteItem(id)`, `getManagement(projectId)`. No search. Follows the project-scoped pattern with an aggregate query. All API paths are provisional and track the P1-C1 backend contract catalog.
+Project-scoped. Manages `IRiskCostItem` + `IRiskCostManagement`. Methods: `getItems(projectId, options?)`, `getItemById(id)`, `createItem(data)`, `updateItem(id, data)`, `deleteItem(id)`, `getManagement(projectId)` **(A8: aggregate provisional)**. No search. Follows the project-scoped pattern with an aggregate query. All API paths are provisional and track the P1-C1 backend contract catalog.
 
 **Verification:**
 
@@ -2096,15 +2104,17 @@ git commit -m "feat: implement ProxyRiskRepository with project-scoped items and
 
 > **Path discrepancy:** B1 uses `/api/scorecards` (plural); C1 uses `/api/scorecard` (singular). See Appendix A for details.
 
-Project-scoped with two entity types. Manages `IGoNoGoScorecard` + `IScorecardVersion`. Methods: `getScorecards(projectId, options?)`, `getScorecardById(id)`, `createScorecard(data)`, `updateScorecard(id, data)`, `deleteScorecard(id)`, `getVersions(scorecardId)`. No search. The versions method operates on a sub-resource scoped by scorecard ID. All API paths are provisional and track the P1-C1 backend contract catalog.
+Project-scoped with two entity types. Manages `IGoNoGoScorecard` + `IScorecardVersion`. Methods: `getScorecards(projectId, options?)`, `getScorecardById(id)`, `createScorecard(data)`, `updateScorecard(id, data)`, `deleteScorecard(id)`, `getVersions(scorecardId)` **(A8: sub-resource provisional)**. No search. The versions method operates on a sub-resource scoped by scorecard ID. All API paths are provisional and track the P1-C1 backend contract catalog.
 
 **ProxyPmpRepository:**
 
-Project-scoped with two entity types. Manages `IProjectManagementPlan` + `IPMPSignature`. Methods: `getPlans(projectId, options?)`, `getPlanById(id)`, `createPlan(data)`, `updatePlan(id, data)`, `deletePlan(id)`, `getSignatures(pmpId)`, `createSignature(data)`. No search. Signatures are a sub-resource scoped by PMP ID. All API paths are provisional and track the P1-C1 backend contract catalog.
+Project-scoped with two entity types. Manages `IProjectManagementPlan` + `IPMPSignature`. Methods: `getPlans(projectId, options?)`, `getPlanById(id)`, `createPlan(data)`, `updatePlan(id, data)`, `deletePlan(id)`, `getSignatures(pmpId)` **(A8: sub-resource provisional)**, `createSignature(data)` **(A8)**. No search. Signatures are a sub-resource scoped by PMP ID. All API paths are provisional and track the P1-C1 backend contract catalog.
 
 **ProxyAuthRepository:**
 
 **This repository has no CRUD pattern at all.** It does not extend `ProxyBaseRepository` in a meaningful way (or uses it only for `httpClient` access). The Auth port manages users, roles, and permissions with these methods:
+
+> **All routes provisional (A9):** Auth management routes are not defined in C1 (domain CRUD catalog) or C2 (auth middleware). All `/api/auth/*` paths below are entirely B1-assumed. These routes must be confirmed with the auth/platform team before production activation.
 
 - `getCurrentUser(): Promise<ICurrentUser>` — retrieve authenticated user profile
 - `getRoles(): Promise<IRole[]>` — list all available roles
