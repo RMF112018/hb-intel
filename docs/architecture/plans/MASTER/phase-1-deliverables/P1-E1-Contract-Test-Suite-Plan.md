@@ -7,7 +7,7 @@
 | **Workstream** | E — Contract Testing and Staging Readiness |
 | **Document Type** | Implementation Plan |
 | **Owner** | E1-workstream lead (TBD) |
-| **Status** | Draft — blocked on B1/C1 upstream deliverables |
+| **Status** | Implementation-Ready — Blocked (B1, C1); transport conventions locked, test harness gated on upstream adapter and route delivery |
 | **Date** | 2026-03-16 |
 | **Last Reviewed Against Repo Truth** | 2026-03-18 |
 | **Audience** | Developers implementing contract tests for Phase 1 critical path |

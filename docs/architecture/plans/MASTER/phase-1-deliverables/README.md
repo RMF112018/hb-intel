@@ -25,9 +25,9 @@ All design decisions are locked. Transport-shape conventions (response envelopes
 
 | Status | Meaning |
 |---|---|
-| **Final** | Planning artifact complete, decisions locked, ready for implementation |
-| **Execution-Ready** | Engineering plan with all decisions reconciled; implementation can begin when named dependencies are met |
-| **Blocked** | Plan complete but implementation blocked on a named upstream deliverable |
+| **Final** | Planning artifact complete, all decisions locked. No implementation dependency. |
+| **Implementation-Ready** | Engineering plan complete, decisions reconciled, no blocking upstream dependency — implementation can begin now |
+| **Implementation-Ready — Blocked** | Engineering plan complete, but implementation gated on named upstream deliverable(s) |
 | **Active Reference** | Living document updated as implementation progresses |
 | **Governance Policy** | Standing policy; remains active through implementation and beyond |
 
@@ -59,7 +59,7 @@ All design decisions are locked. Transport-shape conventions (response envelopes
 
 | Document | Type | Status |
 |---|---|---|
-| P1-B1-Proxy-Adapter-Implementation-Plan.md | Engineering Plan | Execution-Ready |
+| P1-B1-Proxy-Adapter-Implementation-Plan.md | Engineering Plan | Implementation-Ready |
 | P1-B2-Adapter-Completion-Backlog.md | Status Tracker | Active Reference |
 | P1-B3-Mock-Isolation-Policy.md | Governance Policy | Governance Policy |
 
@@ -68,21 +68,51 @@ All design decisions are locked. Transport-shape conventions (response envelopes
 | Document | Type | Status |
 |---|---|---|
 | P1-C1-Backend-Service-Contract-Catalog.md | Contract Catalog | Final |
-| P1-C2-Backend-Auth-and-Validation-Hardening.md | Engineering Plan | Execution-Ready |
-| P1-C3-Observability-and-Instrumentation-Spec.md | Instrumentation Spec | Execution-Ready |
+| P1-C2-Backend-Auth-and-Validation-Hardening.md | Engineering Plan | Implementation-Ready |
+| P1-C3-Observability-and-Instrumentation-Spec.md | Instrumentation Spec | Implementation-Ready |
 
 ### Workstream D — Write Safety and Recovery (1 deliverable)
 
 | Document | Type | Status |
 |---|---|---|
-| P1-D1-Write-Safety-Retry-Recovery.md | Engineering Plan | Blocked (B1) |
+| P1-D1-Write-Safety-Retry-Recovery.md | Engineering Plan | Implementation-Ready — Blocked (B1) |
 
 ### Workstream E — Test and Observability Baseline (2 deliverables)
 
 | Document | Type | Status |
 |---|---|---|
-| P1-E1-Contract-Test-Suite-Plan.md | Engineering Plan | Execution-Ready |
-| P1-E2-Staging-Readiness-Checklist.md | Operational Checklist | Blocked (C1, C2, staging infra) |
+| P1-E1-Contract-Test-Suite-Plan.md | Engineering Plan | Implementation-Ready — Blocked (B1, C1) |
+| P1-E2-Staging-Readiness-Checklist.md | Operational Checklist | Implementation-Ready — Blocked (B1, C1, C2, C3) |
+
+---
+
+## Repo-Truth Notes (as of 2026-03-18)
+
+These notes anchor the status labels above to the actual codebase. They document what exists in code versus what Phase 1 plans to build.
+
+**Foundation packages — complete in code:**
+- `packages/models/`: All 11 domain entity types implemented (81 source files)
+- `packages/data-access/src/ports/`: All 11 port interfaces defined (ILeadRepository, IScheduleRepository, etc.)
+- `packages/data-access/src/adapters/mock/`: All 11 mock adapters fully implemented with seed data
+- `packages/data-access/src/factory.ts`: Mode-resolved factory; non-mock modes throw `AdapterNotImplementedError`
+
+**Production adapters — stubs only:**
+- `packages/data-access/src/adapters/proxy/`: Type stubs and constants only; zero repository implementations
+- `packages/data-access/src/adapters/sharepoint/`: Does not exist
+- `packages/data-access/src/adapters/api/`: Type stubs and constants only
+- **This is the primary B1 implementation target.**
+
+**Backend domain data routes — not implemented:**
+- Provisioning saga (7 steps), project requests, and notifications are fully implemented in `backend/functions/`
+- **Zero domain data routes exist** (no GET/POST/PUT for leads, schedules, estimates, buyouts, etc.)
+- **This is the primary C1 implementation target.**
+
+**SharePoint physical schema — defined but not deployed:**
+- List definition config files exist in `backend/functions/src/config/*-list-definitions.ts` (15+ files)
+- Physical SharePoint lists are **not provisioned** — awaiting business domain approval per P1-A3
+
+**Feature package integration — not started:**
+- No feature packages (`packages/features/*`) currently import or consume `@hbc/data-access` adapters
 
 ---
 
@@ -145,14 +175,14 @@ These decisions were identified as blockers during planning and have been resolv
 
 These items remain open and must be resolved before or during Phase 1 implementation:
 
-| Item | What It Unblocks | Owner | Status |
-|---|---|---|---|
-| SharePoint list schema approval per domain | P1-A3 physical schema deployment and P1-B1 production adapter implementation | Product Owner + Business Domains | Pending approval |
-| B1 proxy adapter delivery | P1-D1 implementation, P1-E1 adapter contract tests (Tasks 4–5) | Engineering | Implementation pending |
-| C1 backend route handler delivery | P1-E1 route contract tests (Tasks 6–7), P1-E2 staging readiness | Engineering | Implementation pending |
-| C2 auth middleware delivery | P1-E1 smoke test auth validation (Task 8), P1-E2 auth gates | Engineering | Implementation pending |
-| C3 observability instrumentation | P1-E1 telemetry baseline verification (Task 9) | Engineering | Implementation pending |
-| Phase assignment for deferred packages (D-006, OD-013) | Scope for @hbc/post-bid-autopsy, @hbc/score-benchmark, @hbc/ai-assist | Architecture Lead | See P0-E2 OD-013 |
+| Item | What It Unblocks | Owner | Status | Repo Truth |
+|---|---|---|---|---|
+| SharePoint list schema approval per domain | P1-A3 physical schema deployment and P1-B1 production adapter implementation | Product Owner + Business Domains | Pending approval | List definitions exist in code (`backend/functions/src/config/`); physical SharePoint lists not provisioned |
+| B1 proxy adapter delivery | P1-D1 implementation, P1-E1 adapter contract tests (Tasks 4–5) | Engineering | Implementation pending | Port interfaces + mock adapters complete; proxy adapter stubs only (`packages/data-access/src/adapters/proxy/`) |
+| C1 backend route handler delivery | P1-E1 route contract tests (Tasks 6–7), P1-E2 staging readiness | Engineering | Implementation pending | Provisioning + notification routes exist; zero domain data routes (leads, schedules, etc.) |
+| C2 auth middleware delivery | P1-E1 smoke test auth validation (Task 8), P1-E2 auth gates | Engineering | Implementation pending | MSAL OBO service exists; centralized validation middleware not yet built |
+| C3 observability instrumentation | P1-E1 telemetry baseline verification (Task 9) | Engineering | Implementation pending | Azure Table audit logging implemented; telemetry correlation infrastructure TBD |
+| Phase assignment for deferred packages (D-006, OD-013) | Scope for @hbc/post-bid-autopsy, @hbc/score-benchmark, @hbc/ai-assist | Architecture Lead | See P0-E2 OD-013 | Packages exist as scaffolds; deferred from Phase 1 per P0-E2 |
 
 ---
 
