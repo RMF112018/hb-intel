@@ -81,17 +81,37 @@ Mock adapters must not appear in any production-facing data flow. All production
 - Azure Functions read `HBC_ADAPTER_MODE` from app settings (configured per deployment slot)
 - No build-time injection; the value is resolved at runtime from the Azure app settings environment
 
+### Runtime Environment Detection
+
+The startup guard needs to know whether mock mode is permissible. Each surface detects its environment differently:
+
+**Layer 1 — Adapter mode** (`HBC_ADAPTER_MODE`): The primary policy variable. Controls which adapter the factory returns. This is the value the startup guard checks.
+
+**Layer 2 — Deployment environment detection:**
+
+| Surface | How environment is detected | Notes |
+|---|---|---|
+| **PWA (Vite)** | Build-time via Vite mode. Production builds inject `'proxy'` as a string literal into the bundle. There is no runtime env var check in the browser. | The guard validates the build-time-injected value. |
+| **Backend (Azure Functions)** | Runtime via `AZURE_FUNCTIONS_ENVIRONMENT` — set automatically by Azure to `'Production'` in production slots, `'Development'` locally. | Already used in repo: `backend/functions/src/functions/provisioningSaga/index.ts` gates on this variable. |
+
+**Layer 3 — Adapter mode override** (future): Per-domain overrides are an open decision (see B2 Factory Wiring). Not yet implemented.
+
+**What NOT to use for environment detection:**
+- Do not rely solely on `NODE_ENV` in the browser — Vite does not expose it at runtime the same way Node.js does
+- Do not assume `NODE_ENV='staging'` exists — there is no such standard value; Azure Functions uses `AZURE_FUNCTIONS_ENVIRONMENT` for environment discrimination
+- The adapter mode itself is the primary policy variable; environment detection is only needed for the startup guard to determine whether mock mode is permissible
+
 ### Environment → Adapter Mode Rules
 
-| Environment | Required Adapter Mode | Mock Allowed? | Enforcement |
-|---|---|---|---|
-| **Local development** | `'mock'` (default) | Yes — developer may override to test other modes | None (developer's choice) |
-| **CI — unit tests** | `'mock'` | Yes — required for isolation and speed | CI pipeline config |
-| **CI — mocked-proxy tests** | `'mock'` fetch layer | Yes — proxy adapter tested against mocked fetch | CI pipeline config |
-| **CI — contract tests** | `'proxy'` against test backend | No | CI pipeline config + test backend availability |
-| **Staging** | `'proxy'` (or other real adapter) | **No** | Startup guard + deployment gate |
-| **Production** | `'proxy'` (or other real adapter) | **No — zero tolerance** | Startup guard + deployment gate |
-| **Demo / sandbox** | `'mock'` if no customer data | Conditional — must be clearly labeled | Labeling requirement |
+| Environment | Detection | Required Adapter Mode | Mock Allowed? | Enforcement |
+|---|---|---|---|---|
+| **Local development** | Vite dev mode / `AZURE_FUNCTIONS_ENVIRONMENT='Development'` | `'mock'` (default) | Yes — developer may override | None (developer's choice) |
+| **CI — unit tests** | CI pipeline config | `'mock'` | Yes — required for isolation | CI pipeline config |
+| **CI — mocked-proxy tests** | CI pipeline config | `'mock'` fetch layer | Yes — proxy tested against mocked fetch | CI pipeline config |
+| **CI — contract tests** | CI pipeline config | `'proxy'` against test backend | No | CI pipeline config + test backend |
+| **Staging** | Azure slot config / Vite production build | `'proxy'` (or other real adapter) | **No** | Startup guard + deployment gate |
+| **Production** | `AZURE_FUNCTIONS_ENVIRONMENT='Production'` / Vite production build | `'proxy'` (or other real adapter) | **No — zero tolerance** | Startup guard + deployment gate |
+| **Demo / sandbox** | Explicit labeling | `'mock'` if no customer data | Conditional | Labeling requirement |
 
 ---
 
@@ -139,18 +159,21 @@ Phase 1 requires a progression from mocked execution through real-backend valida
 
 ### Startup Guard
 
-A startup guard must assert that mock mode is not active in staging or production. This guard runs early in application initialization.
-
-**Call sites (repo truth):**
-- **Frontend:** `apps/pwa/src/main.tsx` — before first repository call
-- **Backend:** `backend/functions/src/index.ts` — before function registration
+A startup guard must assert that mock mode is not active in protected environments. This guard runs early in application initialization.
 
 **Implementation target:** `packages/data-access/src/config/adapter-mode-guard.ts` (to be created per B3 scope)
 
-**Behavior:**
-- In staging or production: if `HBC_ADAPTER_MODE` resolves to `'mock'`, throw a fatal error preventing startup
-- In all environments: log the resolved adapter mode for observability
-- Note: the Vite build already defaults to `'proxy'` for non-dev builds, providing a build-time safety net for the PWA; the startup guard provides a runtime safety net
+**Frontend startup guard** (`apps/pwa/src/main.tsx`):
+- Checks the build-time-injected `process.env.HBC_ADAPTER_MODE` value (set by Vite `define` block)
+- If the value is `'mock'` and the build was not a development build, throws a fatal error preventing render
+- In practice, Vite's config already defaults non-dev builds to `'proxy'`, so this guard is a defense-in-depth safety net against misconfigured build environments
+- Logs the resolved adapter mode for observability
+
+**Backend startup guard** (`backend/functions/src/index.ts`):
+- Checks `process.env.HBC_ADAPTER_MODE` against the deployment environment
+- Uses `AZURE_FUNCTIONS_ENVIRONMENT` to determine whether mock is permissible (repo truth: this variable is already used in `backend/functions/src/functions/provisioningSaga/index.ts` for production gating)
+- If `AZURE_FUNCTIONS_ENVIRONMENT` is `'Production'` (or a staging slot) and `HBC_ADAPTER_MODE` resolves to `'mock'`, throws a fatal error preventing function registration
+- Logs the resolved adapter mode and environment for observability
 
 ### Deployment Gate
 
