@@ -87,7 +87,7 @@ The following are explicitly out of scope for E1 implementation until their prec
 |---|---|---|---|---|---|
 | `@hbc/models` | **No** | **No** | **No** | N/A | devDependency: `@types/react` only; no `api-schemas/` directory exists |
 | `@hbc/data-access` | **No** | **No** | N/A | **Stubs only** — `proxy/index.ts` exports `ProxyConfig`, `DEFAULT_TIMEOUT_MS`, `DEFAULT_RETRY_COUNT`; no `ProxyHttpClient` or proxy repository classes | Non-mock adapters throw `AdapterNotImplementedError` |
-| `backend/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`) | **Yes** — split `unit`/`smoke` projects with explicit include lists | N/A | N/A | Does NOT depend on `@hbc/data-access`; coverage targets provisioning only; no domain route handlers |
+| `backend/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`) | **Yes** — split `unit`/`smoke` projects with explicit include lists | N/A | N/A | Does NOT depend on `@hbc/data-access` (TARGET: type-only `devDependency` for port interfaces after C1); coverage targets provisioning only; no domain route handlers |
 | Root workspace | `pnpm test` (filtered) | **Yes** — 6 entries: auth, shell, sharepoint-docs, bic-next-move, complexity, pwa | N/A | N/A | `@hbc/models` and `@hbc/data-access` are NOT in the workspace test list |
 
 **Why adapter contract tests remain blocked:** `@hbc/data-access` proxy adapters are stubs. The `resolveAdapterMode()` factory returns mock adapters by default; selecting `'proxy'` mode throws `AdapterNotImplementedError`. B1 must deliver `ProxyHttpClient` and domain-specific proxy repository classes (`ProxyLeadRepository`, `ProxyProjectRepository`, `ProxyEstimatingRepository`) before adapter contract tests can execute.
@@ -257,12 +257,30 @@ Contract tests enforce a strict shape agreement:
 
 ### Architectural Invariants Protected
 
-- Package dependency direction: `data-access` → `models`, `backend/functions` → `models`
+- Package dependency direction: `data-access` → `models`, `backend/functions` → `models` (+ type-only `devDependency` on `data-access` for test port interfaces — see [Dependency Boundary Decision](#dependency-boundary-decision))
 - Reusable Zod schemas in `@hbc/models/src/api-schemas/` (not duplicated)
 - Frontend and backend both validate against same schemas (not divergent validators)
-- No direct `data-access` ↔ `backend/functions` coupling (only via shared `@hbc/models`)
+- No runtime `data-access` ↔ `backend/functions` coupling (type-only `devDependencies` for port interfaces in test code is permitted — see [Dependency Boundary Decision](#dependency-boundary-decision))
 - MSW handlers in frontend tests only (backend uses direct function calls)
 - `@hbc/models/src/contracts/` remains the Contracts business domain — E1 does not touch it
+
+### Dependency Boundary Decision
+
+**Decision:** `backend/functions` may add `@hbc/data-access` as a **`devDependencies`-only, type-only** import for repository port interfaces. This is required for route contract tests (Task 6) to type-check their mock service factory against the canonical port interfaces.
+
+**What is allowed:**
+- `@hbc/data-access` in `backend/functions/package.json` `devDependencies` (not `dependencies`)
+- `import type { ILeadRepository } from '@hbc/data-access/ports'` in test files and test utilities
+- The `@hbc/data-access` `./ports` export path exposes only TypeScript interfaces with no runtime code
+
+**What is NOT allowed:**
+- `@hbc/data-access` in `backend/functions/package.json` `dependencies` (no runtime coupling)
+- Runtime imports (`import { ... }`) from `@hbc/data-access` in production backend code
+- Backend production code depending on adapter implementations, mock adapters, or any non-type export from `@hbc/data-access`
+
+**Why this is safe:** The port interfaces (`ILeadRepository`, `IProjectRepository`, `IEstimatingRepository`, etc.) use only `import type` from `@hbc/models` — they contain zero runtime code. A `devDependencies` type-only import is erased at compile time and does not appear in the backend's production bundle. The architectural invariant "no runtime coupling between backend and data-access" is preserved.
+
+**C1 prerequisite:** C1 must add `@hbc/data-access` to `backend/functions/package.json` `devDependencies` before Task 6 contract test imports resolve.
 
 ### Transport Shape vs Domain Interface Distinction
 
@@ -1970,7 +1988,7 @@ Expected: All contract tests pass.
 - Domain route handlers: `leads.handler.ts`, `projects.handler.ts`, `estimating.handler.ts` in `backend/functions/src/functions/`
 - Error middleware: `formatErrorResponse()` in `backend/functions/src/middleware/error-middleware.ts`
 - Service container expansion: add domain repository access to `IServiceContainer` (currently only provisioning services)
-- `@hbc/data-access` added as a dependency in `backend/functions/package.json`
+- `@hbc/data-access` added as a `devDependency` (type-only) in `backend/functions/package.json` — see [Dependency Boundary Decision](#dependency-boundary-decision)
 
 | Test Category | Can Run Now? | Blocked On |
 |---|---|---|
@@ -2002,7 +2020,7 @@ Route contract tests and error contract tests occupy a distinct lane from the ex
 
 **Why this is the contract boundary:** The HTTP handler is the public API surface. Business logic classes are internal implementation. By testing the handler directly with mocked dependencies, route contract tests verify that the handler produces schema-conformant output without requiring a deployed environment.
 
-**`@hbc/data-access` dependency prerequisite:** Repository port interfaces (`ILeadRepository`, `IProjectRepository`, `IEstimatingRepository`) are defined in `@hbc/data-access/src/ports/`, NOT in `@hbc/models`. The mock service factory must implement these interfaces. **C1 must add `@hbc/data-access` to `backend/functions/package.json` dependencies** before contract test imports resolve. Currently, `@hbc/functions` depends on `@hbc/models`, `@hbc/provisioning`, `@hbc/acknowledgment`, and `@hbc/notification-intelligence` — but not `@hbc/data-access`.
+**`@hbc/data-access` dependency prerequisite:** Repository port interfaces (`ILeadRepository`, `IProjectRepository`, `IEstimatingRepository`) are defined in `@hbc/data-access/src/ports/`, NOT in `@hbc/models`. The mock service factory must implement these interfaces. **C1 must add `@hbc/data-access` to `backend/functions/package.json` `devDependencies`** (type-only — see [Dependency Boundary Decision](#dependency-boundary-decision)) before contract test imports resolve. Currently, `@hbc/functions` depends on `@hbc/models`, `@hbc/provisioning`, `@hbc/acknowledgment`, and `@hbc/notification-intelligence` — but not `@hbc/data-access`.
 
 **Files to Create:**
 - `backend/functions/src/functions/leads/leads.contract.test.ts`
@@ -2016,14 +2034,15 @@ Route contract tests and error contract tests occupy a distinct lane from the ex
 ```typescript
 /**
  * NOTE: backend/functions does NOT currently depend on @hbc/data-access.
- * C1 must add this dependency before these imports work.
+ * C1 must add @hbc/data-access to devDependencies (type-only) before these imports work.
+ * Only `import type` is permitted — see Dependency Boundary Decision.
  * Repository port interfaces live in @hbc/data-access, NOT @hbc/models.
  * @hbc/models exports domain model types (ILead, IActiveProject, etc.).
  *
  * This mock factory extends the existing provisioning mock pattern in
  * backend/functions/src/test-utils/mock-services.ts to cover domain repositories.
  */
-import type { ILeadRepository, IProjectRepository, IEstimatingRepository } from '@hbc/data-access';
+import type { ILeadRepository, IProjectRepository, IEstimatingRepository } from '@hbc/data-access/ports';
 import { vi } from 'vitest';
 
 /**
@@ -3374,7 +3393,7 @@ Follow this dependency-ordered sequence. Each task lists its prerequisites, veri
 | 4 | 3 | Task 10 (partial) | `packages/data-access/src/test-utils/*.ts`, `packages/data-access/src/msw/*.ts` | `pnpm --filter @hbc/data-access test` | MSW server starts; handlers registered; unhandled request errors | — |
 | 5 | 4 | Tasks 1, 3 + **B1 merged** | `packages/data-access/src/adapters/proxy/lead-repository.contract.test.ts` | `pnpm --filter @hbc/data-access test` | Adapter responses parse against contract schemas | B1 not merged — `ProxyLeadRepository` does not exist |
 | 6 | 5 | Tasks 1, 3 + **B1 merged** | `…/project-repository.contract.test.ts`, `…/estimating-repository.contract.test.ts` | `pnpm --filter @hbc/data-access test` | Adapter responses parse against contract schemas | B1 not merged |
-| 7 | 6 | Task 1 + **C1 delivered** + `@hbc/data-access` in `backend/functions` deps | `backend/functions/src/functions/leads/leads.contract.test.ts`, `…/test-utils/mock-service-factory.ts`, `…/test-utils/mock-request.ts` | `pnpm --filter @hbc/functions test:contract` | All handler responses conform to contract schemas (success + error) | C1 not delivered — no route handlers |
+| 7 | 6 | Task 1 + **C1 delivered** + `@hbc/data-access` in `backend/functions` devDependencies (type-only) | `backend/functions/src/functions/leads/leads.contract.test.ts`, `…/test-utils/mock-service-factory.ts`, `…/test-utils/mock-request.ts` | `pnpm --filter @hbc/functions test:contract` | All handler responses conform to contract schemas (success + error) | C1 not delivered — no route handlers |
 | 8 | 7 | Task 1 + **C1 delivered** | `backend/functions/src/middleware/error-contract.test.ts` | `pnpm --filter @hbc/functions test:contract` | All HTTP error codes produce ErrorEnvelopeSchema-conformant output | C1 not delivered — no error middleware |
 | 9 | 10 (final) | Tasks 6, 7 | `backend/functions/vitest.config.ts`, `backend/functions/package.json` | `pnpm --filter @hbc/functions test:contract` | `contract` project runs; `test:contract` script works | — |
 | 10 | 8 | Tasks 1, 6, 7 + **C1 + C2 + staging** | `backend/functions/src/test/smoke/critical-paths.smoke.test.ts` | `SMOKE_TEST_BASE_URL=… AUTH_TOKEN=… pnpm --filter @hbc/functions test:smoke` | All smoke tests pass; transport shapes conform to contract schemas | See Task 8 Readiness Gate |
