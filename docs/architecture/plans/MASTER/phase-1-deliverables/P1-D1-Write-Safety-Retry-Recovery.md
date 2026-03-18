@@ -90,7 +90,7 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 ### Acceptance Gates D1 Unlocks
 
 - B2 `PROD_ACTIVE` gate: "Write safety — Retry and idempotency behavior verified for write methods (D1 deliverables)"
-- B2 `PROD_ACTIVE` gate: "Observability — Monitoring, error reporting, and alerting confirmed" requires D1 circuit-breaker telemetry (C3 section 2.2.3)
+- B2 `PROD_ACTIVE` gate: "Observability — Monitoring, error reporting, and alerting confirmed" — D1 contributes retry telemetry (`proxy.request.error`, `proxy.request.retry`) and audit records; circuit-breaker telemetry (`circuit.state.change`, `circuit.fallback.used`) is defined by C3 but is **not a D1 Phase 1 deliverable**
 
 ### Cross-Workstream Dependencies
 
@@ -99,7 +99,7 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 | B1 (Proxy Adapter) | `ProxyHttpClient` class and proxy repository implementations | B1 not yet merged; proxy is stub |
 | C1 (Backend Catalog) | Route shapes, error envelope, HTTP methods | C1 frozen for implemented routes |
 | B2 (Completion Backlog) | Gate criteria and production activation requirements | B2 active |
-| C3 (Observability Spec) | Circuit-breaker telemetry contract (`circuit.state.change`, `circuit.fallback.used`) | C3 aligned |
+| C3 (Observability Spec) | Retry and error telemetry contract (`proxy.request.error`, `proxy.request.retry`); circuit-breaker telemetry is C3-owned, not D1 Phase 1 | C3 aligned for retry/error; circuit-breaker deferred |
 
 ### Verification Command Guidance
 
@@ -2157,7 +2157,7 @@ D1's audit and failure classification artifacts are not standalone — they feed
 
 - `proxy.request.error` events MUST include `errorCode` (from `HbcDataAccessError.code`) and `failureReason` (from `classifyWriteFailure()`). This is D1's contribution to C3 observability.
 - `proxy.request.retry` events MUST include `retryCount` and `retryReason`. These are emitted by `withRetry()` via the `onRetry` callback.
-- Circuit-breaker telemetry (`circuit.state.change`, `circuit.fallback.used`) is defined by C3 section 2.2.3 but implemented as part of D1's retry infrastructure.
+- **Circuit-breaker is not a D1 Phase 1 deliverable.** The C3 telemetry contract defines `circuit.state.change` and `circuit.fallback.used` events (C3 section 2.2.3), but circuit-breaker behavior (failure-rate tracking, state transitions, fallback routing) is a distinct resilience pattern beyond retry. If Phase 1 requires circuit-breaker behavior, it should be scoped as a separate deliverable with its own implementation task, or deferred to a later phase. D1's `withRetry` provides the retry foundation that a future circuit-breaker could compose with.
 - The `audit.write.failure` alert (C3 section 2.5) fires when audit persistence loss rate exceeds the configured threshold.
 
 ---
