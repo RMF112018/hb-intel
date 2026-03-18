@@ -420,11 +420,26 @@ export const PaginationQuerySchema = z.object({
 export type PaginationQuery = z.infer<typeof PaginationQuerySchema>;
 
 /**
- * NOTE: Single-item response envelope shape (e.g., GET /api/leads/:id) is TBD
- * pending C1 route spec. It may be a bare object or wrapped in { data: T }.
- * Do not define a SuccessEnvelopeSchema until C1 freezes this decision.
+ * PROVISIONAL: Single-item responses (GET /:id, POST, PUT) use bare-object
+ * returns — no { data: T } wrapper. See "Provisional Response-Envelope Convention"
+ * section for full details. If C1 freezes a wrapper convention, add a
+ * SuccessEnvelopeSchema here and update all downstream examples.
  */
 ```
+
+#### Provisional Response-Envelope Convention
+
+All E1 code examples use the following transport shape conventions. These are the single source of truth for response shape assumptions across Tasks 3, 4, 5, 6, 7, and 8.
+
+| Response Type | Example Route | Convention | Status | Schema Validation |
+|---|---|---|---|---|
+| **Collection** | `GET /api/leads` | `{ items: T[], total, page, pageSize }` | CONFIRMED — matches `IPagedResult<T>` | `createPagedSchema(LeadSchema)` |
+| **Search** | `GET /api/leads/search?q=` | Same as collection: `{ items: T[], total, page, pageSize }` | CONFIRMED — same shape as getAll | `createPagedSchema(LeadSchema)` |
+| **Single-item** | `GET /api/leads/:id`, `POST /api/leads`, `PUT /api/leads/:id` | **Bare object `T`** — no `{ data: T }` wrapper | PROVISIONAL — C1 may add wrapper | `LeadSchema` directly on `body` |
+| **Delete** | `DELETE /api/leads/:id` | `204 No Content` — empty body | PROVISIONAL | No schema validation needed |
+| **Error** | Any 4xx/5xx | `{ error, code, requestId?, details? }` | PROVISIONAL (D3: `error` may become `message`) | `ErrorEnvelopeSchema` |
+
+**C1 reconciliation:** C1 may define a different single-item response shape (e.g., `{ data: T }` wrapper, `{ result: T }`, or bare object). When C1 freezes the single-item convention, update all E1 examples and contract schemas to match. Until then, E1 uses bare-object returns as the provisional convention because it is the simpler assumption and matches the current MSW handler implementations. This is a documentation-level choice, not a runtime constraint — the actual shape will be whatever C1 delivers.
 
 **File: `packages/models/src/api-schemas/lead-schema.ts`** (Tier 1 — CONFIRMED)
 
@@ -1332,6 +1347,26 @@ export const leadsHandlers = [
     const page = Number(url.searchParams.get('page') ?? 1);
     const pageSize = Number(url.searchParams.get('pageSize') ?? 25);
     const paged = makePagedResponse(LEAD_FIXTURES, page, pageSize);
+    return HttpResponse.json(paged, { status: 200 });
+  }),
+
+  /** GET /api/leads/search?q= — search leads by title/clientName */
+  http.get(`${API_BASE}/leads/search`, ({ request }) => {
+    const url = new URL(request.url);
+    const q = url.searchParams.get('q') ?? '';
+    if (!q) {
+      return HttpResponse.json(
+        { error: 'Search query is required', code: 'VALIDATION_ERROR' },
+        { status: 400 }
+      );
+    }
+    const page = Number(url.searchParams.get('page') ?? 1);
+    const pageSize = Number(url.searchParams.get('pageSize') ?? 25);
+    const filtered = LEAD_FIXTURES.filter(
+      (l) => l.title.toLowerCase().includes(q.toLowerCase()) ||
+             l.clientName.toLowerCase().includes(q.toLowerCase())
+    );
+    const paged = makePagedResponse(filtered, page, pageSize);
     return HttpResponse.json(paged, { status: 200 });
   }),
 
@@ -2304,9 +2339,8 @@ describe('Leads Route Handlers — Contract Tests', () => {
       expect(response.status).toBe(200);
       const body = JSON.parse(await response.text());
 
-      // PROVISIONAL (C1): Assumes single-item response uses { data: T } wrapper.
-      // If C1 freezes bare-object responses, change body.data to body.
-      const parsed = LeadSchema.safeParse(body.data);
+      // Bare-object convention — see Provisional Response-Envelope Convention
+      const parsed = LeadSchema.safeParse(body);
       expect(parsed.success).toBe(true);
     });
 
@@ -2356,9 +2390,8 @@ describe('Leads Route Handlers — Contract Tests', () => {
       expect(response.status).toBe(201);
       const body = JSON.parse(await response.text());
 
-      // PROVISIONAL (C1): Assumes single-item response uses { data: T } wrapper.
-      // If C1 freezes bare-object responses, change body.data to body.
-      const parsed = LeadSchema.safeParse(body.data);
+      // Bare-object convention — see Provisional Response-Envelope Convention
+      const parsed = LeadSchema.safeParse(body);
       expect(parsed.success).toBe(true);
     });
 
@@ -2398,8 +2431,64 @@ describe('Leads Route Handlers — Contract Tests', () => {
       expect(response.status).toBe(422);
     });
   });
+
+  describe('handleSearchLeads()', () => {
+    it('search returns paged leads conforming to paged LeadSchema', async () => {
+      const services = createMockServiceFactory();
+      vi.spyOn(services.leadRepository, 'search').mockResolvedValue({
+        items: [
+          {
+            id: 1,
+            title: 'Highway Bridge Replacement',
+            stage: 'Qualifying' as const,
+            clientName: 'ACME Construction',
+            estimatedValue: 2500000,
+            createdAt: '2026-03-16T10:00:00Z',
+            updatedAt: '2026-03-16T10:00:00Z',
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 25,
+      });
+
+      const request = createMockRequest('GET', '/api/leads/search', { q: 'bridge', page: '1', pageSize: '25' });
+      const context = createMockContext();
+
+      const response = await handleSearchLeads(request, context, services);
+
+      expect(response.status).toBe(200);
+      const body = JSON.parse(await response.text());
+
+      const parsed = createPagedSchema(LeadSchema).safeParse(body);
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data.items).toHaveLength(1);
+        expect(parsed.data.total).toBe(1);
+      }
+    });
+
+    it('empty search query returns 400 conforming to ErrorEnvelopeSchema', async () => {
+      const services = createMockServiceFactory();
+      const request = createMockRequest('GET', '/api/leads/search', { q: '' });
+      const context = createMockContext();
+
+      const response = await handleSearchLeads(request, context, services);
+
+      expect(response.status).toBe(400);
+      const body = JSON.parse(await response.text());
+
+      const parsed = ErrorEnvelopeSchema.safeParse(body);
+      expect(parsed.success).toBe(true);
+    });
+  });
 });
 ```
+
+> **Note:** The import line for this test file must also include `handleSearchLeads`:
+> ```typescript
+> import { handleGetLeads, handleCreateLead, handleGetLeadById, handleSearchLeads } from './leads.handler'; // C1 deliverable
+> ```
 
 **Verification** (see [Execution Sequence with Acceptance Criteria](#execution-sequence-with-acceptance-criteria) for prerequisites):
 
@@ -2408,7 +2497,7 @@ Run:
 pnpm --filter @hbc/functions test leads.contract
 ```
 
-Expected: All tests pass.
+Expected: All tests pass (when prerequisites are met).
 
 **Commit:** `test(backend): add contract tests for leads route handlers (P1-E1 Task 6)`
 
@@ -2680,12 +2769,16 @@ The test runner does NOT acquire tokens. The operator or CI pipeline must provid
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { LeadSchema, ActiveProjectSchema } from '@hbc/models/api-schemas';
+import { LeadSchema, ActiveProjectSchema, createPagedSchema } from '@hbc/models/api-schemas';
 
 /**
  * Critical path smoke tests for staging Azure Functions.
  *
  * BLOCKED: Requires C1 (routes) + C2 (auth) + staging infrastructure.
+ *
+ * Response-shape convention: Single-item responses use bare-object returns
+ * (no { data: T } wrapper). See "Provisional Response-Envelope Convention"
+ * in the P1-E1 plan for full details.
  *
  * These tests run against a real staging instance (not mocked).
  * They verify that essential user flows work end-to-end.
@@ -2719,12 +2812,6 @@ const skipReason = !BASE_URL
     : undefined;
 
 describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)', () => {
-  /**
-   * PROVISIONAL (C1): Tests below that access body.data for single-item responses
-   * assume a { data: T } wrapper. If C1 freezes bare-object responses, change
-   * body.data to body throughout this file.
-   */
-
   /**
    * Test 1: Health check (no auth required)
    * PROVISIONAL: P1-C1 catalog notes "Not found in repo" for GET /api/health.
@@ -2827,9 +2914,8 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     expect(response.status).toBe(201);
     const body = await response.json();
 
-    // PROVISIONAL (C1): Assumes single-item response uses { data: T } wrapper.
-    // If C1 freezes bare-object responses, change body.data to body throughout.
-    const parsed = LeadSchema.safeParse(body.data);
+    // Bare-object convention — see Provisional Response-Envelope Convention
+    const parsed = LeadSchema.safeParse(body);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       expect(parsed.data.title).toBe(createPayload.title);
@@ -2837,7 +2923,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     }
 
     // Return created lead id for subsequent tests
-    return body.data.id;
+    return body.id;
   });
 
   /**
@@ -2862,7 +2948,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     });
 
     const created = await createResponse.json();
-    const leadId = created.data.id;
+    const leadId = created.id;
 
     // Now fetch the created lead
     const getResponse = await fetch(`${BASE_URL}/api/leads/${leadId}`, {
@@ -2875,7 +2961,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     expect(getResponse.status).toBe(200);
     const body = await getResponse.json();
 
-    const parsed = LeadSchema.safeParse(body.data);
+    const parsed = LeadSchema.safeParse(body);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       expect(parsed.data.id).toBe(leadId);
@@ -2904,7 +2990,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     });
 
     const created = await createResponse.json();
-    const leadId = created.data.id;
+    const leadId = created.id;
 
     // Update the lead
     const updatePayload = {
@@ -2924,7 +3010,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     expect(updateResponse.status).toBe(200);
     const body = await updateResponse.json();
 
-    const parsed = LeadSchema.safeParse(body.data);
+    const parsed = LeadSchema.safeParse(body);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       expect(parsed.data.stage).toBe('Bidding');
@@ -2954,7 +3040,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     });
 
     const created = await createResponse.json();
-    const leadId = created.data.id;
+    const leadId = created.id;
 
     // Delete the lead
     const deleteResponse = await fetch(`${BASE_URL}/api/leads/${leadId}`, {
@@ -3001,8 +3087,31 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     expect(response.status).toBe(201);
     const body = await response.json();
 
-    const parsed = ActiveProjectSchema.safeParse(body.data);
+    // Bare-object convention — see Provisional Response-Envelope Convention
+    const parsed = ActiveProjectSchema.safeParse(body);
     expect(parsed.success).toBe(true);
+  });
+
+  /**
+   * Test 10: Search leads
+   */
+  it('GET /api/leads/search?q= returns matching leads', async () => {
+    const response = await fetch(`${BASE_URL}/api/leads/search?q=test&page=1&pageSize=10`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${AUTH_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+
+    // Search returns paged collection — same shape as GET /api/leads
+    expect(Array.isArray(body.items)).toBe(true);
+    expect(typeof body.total).toBe('number');
+    expect(typeof body.page).toBe('number');
+    expect(typeof body.pageSize).toBe('number');
   });
 });
 ```
