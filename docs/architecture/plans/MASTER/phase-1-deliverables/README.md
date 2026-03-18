@@ -221,6 +221,7 @@ These items remain open and must be resolved before or during Phase 1 implementa
 
 ## Related Documents
 
+- **Pre-Phase-1 Contradiction Closeout:** [`P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md`](P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) — 23 resolved contradictions, go/no-go checklist (7/7 PASS), 7 remaining blockers, implementation readiness summary
 - **Phase 0 Deliverables:** [`../phase-0-deliverables/README.md`](../phase-0-deliverables/README.md)
 - **Phase 0 Entry Checklist:** [`../phase-0-deliverables/P0-E1-Phase1-Entry-Checklist.md`](../phase-0-deliverables/P0-E1-Phase1-Entry-Checklist.md)
 - **Phase 0 Open Decisions Register:** [`../phase-0-deliverables/P0-E2-Open-Decisions-Register.md`](../phase-0-deliverables/P0-E2-Open-Decisions-Register.md)
