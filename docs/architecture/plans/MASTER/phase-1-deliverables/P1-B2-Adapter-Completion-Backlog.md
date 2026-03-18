@@ -39,7 +39,7 @@ All adapter domain tracking in this document uses the following status progressi
 
 ## Proxy Adapter: Domain Completion Matrix
 
-B1 implements all 11 domain repositories against mocked fetch in Phase 1 (10 data domains in the table below; Auth tracked separately in its [own section](#auth-domain-special-case-tracking)). C1 backend routes are partially locked for 3 data domains (CRUD only; aggregates and sub-resources remain provisional); the remaining 7 proceed with provisional route assumptions and will reconcile before production activation.
+B1 targets all 11 domain repositories for implementation against mocked fetch in Phase 1 (10 data domains in the table below; Auth tracked separately in its [own section](#auth-domain-special-case-tracking)). C1 backend routes are partially locked for 3 data domains (CRUD only; aggregates and sub-resources remain provisional); the remaining 7 proceed with provisional route assumptions and will reconcile before production activation.
 
 | Domain | Port Interface | Method Families | Total | Phase Target | Status | B1 Task | Route Status |
 |---|---|---|---|---|---|---|---|
@@ -378,6 +378,8 @@ E1 owns the Zod schema contract test suite and MSW-based test harness that valid
 | **proxy** | Calls Azure Functions via MSAL OBO | `STUB` | Phase 1 | `'proxy'` |
 | **sharepoint** | Direct PnPjs calls (SPFx-only surface) | `STUB` | Future phase | `'sharepoint'` |
 | **api** | REST / Azure SQL direct calls | Reserved | Future phase | `'api'` |
+
+This table reflects the current repo implementation state by adapter mode. For per-domain execution-gate status, see the [Execution Progress Tracker](#execution-progress-tracker) above.
 
 ---
 
