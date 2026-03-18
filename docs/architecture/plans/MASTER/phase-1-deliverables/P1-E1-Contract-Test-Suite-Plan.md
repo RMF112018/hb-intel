@@ -102,21 +102,43 @@ The following are explicitly out of scope for E1 implementation until their prec
 
 ### What E1 Cannot Implement Until Upstream Delivers
 
-- Frontend adapter contract tests → blocked on B1 proxy repositories
-- Backend route contract tests → blocked on C1 domain route handlers
-- Smoke tests → blocked on C1 + C2 + staging infrastructure
-- Telemetry baseline → blocked on C3 instrumentation
+See the Open Decision and Blocker Ledger below for the complete list of blocked items and their unblock conditions.
 
-### Cross-Workstream Dependencies
+### Open Decision and Blocker Ledger
 
-| E1 depends on | For | Status |
-|---|---|---|
-| B1 (Proxy Adapter) | `ProxyHttpClient` class and proxy repository implementations | B1 not yet merged; proxy is stub |
-| B2 (Adapter Completion) | Full adapter surface for all 11 domains | B2 active |
-| C1 (Backend Catalog) | Domain route handlers, error envelope freeze, HTTP methods | C1 routes not yet implemented for Lead/Project/Estimating |
-| C2 (Auth Hardening) | Auth middleware for staging smoke tests | C2 not yet delivered |
-| C3 (Observability) | Telemetry instrumentation for baseline verification | C3 aligned but not yet implemented |
-| D1 (Write Safety) | Shared vitest prerequisite for `@hbc/data-access` | D1 also needs vitest setup; coordinate |
+This is the single authoritative source for all open design decisions and workstream blockers affecting E1. Individual task sections reference this ledger rather than repeating blocker details.
+
+**Table A: Open Design Decisions**
+
+| ID | Decision | Owner | E1 Impact | What Can Proceed Now | Unblock Condition |
+|---|---|---|---|---|---|
+| D1 | Singular vs plural route paths (Schedule, Buyout, Risk, Scorecard) | P1-C1 | Tier 2 schema route-path assumptions | Tier 2 schema skeletons (field shapes only) | C1 publishes final route paths for these domains |
+| D2 | Estimating sub-resource routing (`/trackers`, `/kickoffs`) | P1-C1 | Estimating kickoff schema route assumption | Tier 1 tracker schemas; kickoff schema is Tier 2 skeleton | C1 publishes estimating sub-resource paths |
+| D3 | Error envelope field naming (`.error` vs `.message`) | P1-C1 + B1 | ErrorEnvelopeSchema field name, `extractErrorMessage()` | Schema written with `.error` + PROVISIONAL marker | C1 freezes error envelope spec |
+| D4 | Pagination default page size (25 vs 50) | P1-C1 + B1 | PaginationQuerySchema `.default(25)` | Schema uses current `DEFAULT_PAGE_SIZE` (25) + PROVISIONAL marker | C1 freezes pagination defaults |
+| D5 | PATCH support in proxy adapters | P1-C1 | Whether UpdateLeadRequestSchema needs PATCH semantics | PUT-only schemas written (current B1 pattern) | C1 decides PUT-only vs PUT+PATCH |
+| D6 | Nested project-scoped paths vs flat `?projectId=` query params | P1-C1 | Tier 2 domain route paths and MSW handler URL patterns | Tier 2 schema skeletons (field shapes only) | C1 publishes path structure for project-scoped domains |
+| A8 | Aggregate endpoint for projects | P1-C1 | PortfolioSummarySchema route path | Schema defined as Tier 2 (PROVISIONAL) | C1 publishes aggregate route |
+| A9 | Auth route catalog | P1-C2 | Tier 3 — no auth schema or tests | Capability-lane documentation only | C2 publishes auth route specs |
+
+**Table B: Workstream Blockers**
+
+| Blocker | Workstream | What It Blocks in E1 | Tasks Affected | What Can Proceed Now | Unblock Condition |
+|---|---|---|---|---|---|
+| B1 — Proxy Adapter | P1-B1 | Frontend adapter contract tests | Tasks 4, 5 | MSW handlers, fixtures, server setup (Task 3); Zod schemas (Tasks 1-2) | B1 delivers `ProxyHttpClient` + `ProxyLeadRepository` + `ProxyProjectRepository` + `ProxyEstimatingRepository` |
+| C1 — Backend Catalog | P1-C1 | Backend route and error contract tests | Tasks 6, 7, 8 | All frontend-side work; Zod schemas for Tier 1 domains | C1 delivers domain route handlers + error middleware for Lead/Project/Estimating |
+| C2 — Auth Hardening | P1-C2 | Staging smoke test auth validation | Task 8 (auth tests) | Non-auth smoke tests can be written (skip when no token) | C2 delivers auth middleware for staging |
+| C3 — Observability | P1-C3 | Telemetry baseline verification | Task 9 | Telemetry event classification documented | C3 instrumentation lands in staging; events visible in Application Insights |
+| D1 — Write Safety | P1-D1 | Shared vitest prerequisite for `@hbc/data-access` | Task 10 (partial) | Vitest setup can proceed independently; D1 and E1 coordinate | Vitest config created for `@hbc/data-access` (either workstream) |
+| Staging infra | Platform | Smoke tests + telemetry baseline | Tasks 8, 9 | All local contract tests | `SMOKE_TEST_BASE_URL` resolves to deployed staging instance |
+
+### Execution Guardrails
+
+- **Tier 1 (CONFIRMED):** Full implementation (schemas, tests, MSW handlers) is permitted only where all blocking dependencies are satisfied. For frontend adapter contract tests, B1 must be merged. For backend route contract tests, C1 must be delivered.
+- **Tier 2 (PROVISIONAL):** Schema skeletons with PROVISIONAL markers are permitted. Full test code, MSW handlers, and backend contract tests for Tier 2 domains must wait until C1 decisions D1/D2/D6 resolve and routes are confirmed.
+- **Tier 3 (NOT CATALOGED):** Auth remains entirely out of scope — no schema, no tests, no handlers — until C2 publishes auth route truth (A9).
+- **Transport-layer details:** Code that depends on D3 (error field naming), D4 (pagination defaults), D5 (PATCH support), or D6 (path nesting) must carry PROVISIONAL markers and be written against the current best-known shape, not an assumed resolution.
+- **No speculative unblocking:** Do not implement blocked tasks "optimistically" by guessing what B1/C1/C2 will deliver. Wait for the actual deliverable.
 
 ### Naming Conflict Resolution
 
@@ -1511,12 +1533,7 @@ Expected: Tests pass.
 
 ### Task 4: Contract Test — Frontend Adapter vs Backend Shape
 
-**Status:** **BLOCKED** on B1 — `ProxyLeadRepository` does not exist; proxy adapters throw `AdapterNotImplementedError`
-
-**B1 deliverables required before this task can execute:**
-- `ProxyHttpClient` class (`packages/data-access/src/adapters/proxy/http-client.ts`)
-- `ProxyLeadRepository` class (`packages/data-access/src/adapters/proxy/lead-repository.ts`)
-- Vitest configuration for `@hbc/data-access` (shared prerequisite with D1)
+**Status:** **BLOCKED** on B1 — see [Open Decision and Blocker Ledger](#open-decision-and-blocker-ledger) (B1 — Proxy Adapter)
 
 **Objective:** Prove that the ProxyLeadRepository adapter correctly parses backend responses according to LeadSchema.
 
@@ -1756,13 +1773,7 @@ Expected: All tests pass, proving adapter and schema agreement.
 
 ### Task 5: Add Contract Tests for Project and Estimating Repositories
 
-**Status:** **BLOCKED** on B1 — `ProxyProjectRepository` and `ProxyEstimatingRepository` do not exist
-
-**B1 deliverables required before this task can execute:**
-- `ProxyHttpClient` class (`packages/data-access/src/adapters/proxy/http-client.ts`)
-- `ProxyProjectRepository` class (`packages/data-access/src/adapters/proxy/project-repository.ts`)
-- `ProxyEstimatingRepository` class (`packages/data-access/src/adapters/proxy/estimating-repository.ts`)
-- Vitest configuration for `@hbc/data-access` (shared prerequisite with D1)
+**Status:** **BLOCKED** on B1 — see [Open Decision and Blocker Ledger](#open-decision-and-blocker-ledger) (B1 — Proxy Adapter)
 
 **Files to Create:**
 - `packages/data-access/src/adapters/proxy/project-repository.contract.test.ts`
@@ -1956,24 +1967,35 @@ Expected: All contract tests pass.
 
 ### Task 6: Backend Route Contract Tests (Leads Routes)
 
-**Status:** **BLOCKED** on C1 — domain route handlers (`handleGetLeads`, `handleCreateLead`, `handleGetLeadById`) do not exist
+**Status:** **BLOCKED** on C1 — see [Open Decision and Blocker Ledger](#open-decision-and-blocker-ledger) (C1 — Backend Catalog)
 
 **Objective:** Test that Azure Functions route handlers return responses conforming to Zod schemas.
+
+#### Backend Contract Test Strategy
+
+Contract tests occupy a distinct lane from the existing backend unit tests and from staging smoke tests:
+
+| Aspect | Existing Unit Tests | Contract Tests (Tasks 6-7) | Smoke Tests (Task 8) |
+|---|---|---|---|
+| **What is invoked** | Business logic classes (`SagaOrchestrator`, services) | HTTP handler functions (`handleGetLeads`, `handleCreateLead`) | Real HTTP endpoints over the network |
+| **Dependencies** | `createMockServices()` — all service methods are `vi.fn()` stubs | Mock service factory implementing repository port interfaces | Real staging deployment — no mocks |
+| **Auth** | Not tested | Not tested (handlers receive pre-validated context) | Real Entra ID Bearer tokens required |
+| **Network** | None | None | Real HTTP to staging Azure Functions |
+| **What is validated** | Business logic correctness, state transitions, side effects | Response body shape conformance against Zod schemas (success AND error paths) | End-to-end flow: auth → routing → response shape → status codes |
+| **Vitest project** | `unit` | `contract` (new — see Task 10) | `smoke` |
+
+**Invocation pattern:** Contract tests call the handler function directly — e.g., `handleGetLeads(request, context, services)` — passing a mock `HttpRequest` (plain object with `as any`, following the existing `validateToken.test.ts` pattern), a mock `InvocationContext`, and a mock service factory. The response body is parsed with `JSON.parse()` and validated against Zod schemas.
+
+**Why this is the contract boundary:** The HTTP handler is the public API surface. Business logic classes are internal implementation. By testing the handler directly with mocked dependencies, contract tests verify that the handler produces schema-conformant output without requiring a deployed environment.
+
+**`@hbc/data-access` dependency prerequisite:** Repository port interfaces (`ILeadRepository`, `IProjectRepository`, `IEstimatingRepository`) are defined in `@hbc/data-access/src/ports/`, NOT in `@hbc/models`. The mock service factory must implement these interfaces. **C1 must add `@hbc/data-access` to `backend/functions/package.json` dependencies** before contract test imports resolve. Currently, `@hbc/functions` depends on `@hbc/models`, `@hbc/provisioning`, `@hbc/acknowledgment`, and `@hbc/notification-intelligence` — but not `@hbc/data-access`.
 
 **Files to Create:**
 - `backend/functions/src/functions/leads/leads.contract.test.ts`
 - `backend/functions/src/test-utils/mock-service-factory.ts` (if not exists)
 - `backend/functions/src/test-utils/mock-request.ts` (if not exists)
 
-**Full Code (TARGET-STATE — C1 must deliver route handlers and add `@hbc/data-access` dependency first):**
-
-The following test utilities assume C1 has delivered:
-- `@hbc/data-access` added to `backend/functions/package.json` (currently NOT a dependency)
-- Domain route handlers in `backend/functions/src/functions/` (currently only provisioning/proxy/notification functions exist)
-- Domain repository interfaces wired into the backend service container (`IServiceContainer`)
-- The existing mock utility at `backend/functions/src/test-utils/mock-services.ts` covers provisioning services only; this file extends the pattern to domain repositories
-
-None of these exist today. This code is implementation guidance for after C1 delivery.
+**Full Code (TARGET-STATE — C1 must deliver route handlers first; see ledger for unblock conditions):**
 
 **File: `backend/functions/src/test-utils/mock-service-factory.ts`**
 
@@ -2359,20 +2381,27 @@ Expected: All tests pass.
 
 ### Task 7: Backend Error Shape Contract Test
 
-**Status:** **BLOCKED** on C1 — error middleware (`formatErrorResponse`) does not exist
+**Status:** **BLOCKED** on C1 — see [Open Decision and Blocker Ledger](#open-decision-and-blocker-ledger) (C1 — Backend Catalog)
 
 **Objective:** Ensure all error paths return ErrorEnvelopeSchema-conformant responses.
+
+#### Frozen vs Provisional Error Envelope Fields
+
+| Field | Status | Notes |
+|---|---|---|
+| `code` | **FROZEN** | Machine-readable error code (e.g., `NOT_FOUND`, `VALIDATION_ERROR`); required on all error responses |
+| `details` | **FROZEN** | Optional array of `{ field?, message }` for field-level validation errors |
+| `requestId` | **FROZEN** | Optional tracing correlation ID |
+| `error` | **PROVISIONAL (D3)** | Human-readable error message; may rename to `message` if D3 resolves that way |
+
+Tests asserting `code`, `details`, and `requestId` are stable regardless of D3 resolution. Tests asserting the `error` field name must carry a PROVISIONAL marker and adapt if D3 resolves to `.message`.
+
+**Relationship to Task 6:** Task 6 contract tests already validate error-path shapes for specific route handlers (400, 404, 422 cases). Task 7 tests the error middleware function (`formatErrorResponse`) in isolation, covering all HTTP error status codes and ensuring the middleware itself always produces schema-conformant output. Together, Tasks 6 and 7 provide complete error-shape coverage — Task 7 at the middleware layer, Task 6 at the handler layer.
 
 **Files to Create:**
 - `backend/functions/src/middleware/error-contract.test.ts`
 
-**Full Code (TARGET-STATE — C1 must deliver error middleware first):**
-
-Today, only `validateToken.ts` exists in `backend/functions/src/middleware/`. No `error-middleware.ts` or `formatErrorResponse()` function exists. Existing handlers return ad-hoc `{ status, jsonBody }` shapes without standardized error envelope conformance.
-
-C1 must deliver:
-- `backend/functions/src/middleware/error-middleware.ts` exporting `formatErrorResponse()`
-- Standardized error envelope conformance across all domain route handlers
+**Full Code (TARGET-STATE — C1 must deliver error middleware first; see ledger for unblock conditions):**
 
 **File: `backend/functions/src/middleware/error-contract.test.ts`**
 
@@ -2518,9 +2547,34 @@ Expected: All error envelope tests pass.
 
 ## Chunk 4: Smoke Tests and Telemetry Baseline
 
+### Readiness Gates for Tasks 8 and 9
+
+These gates document the concrete prerequisites that must be satisfied before staging smoke tests or telemetry baseline verification can produce meaningful results. All prerequisites are **NOT MET** as of 2026-03-18.
+
+#### Task 8 Readiness Gate (Staging Smoke Tests)
+
+| Prerequisite | Workstream | How to Verify | Current Status |
+|---|---|---|---|
+| Domain route handlers deployed to staging | C1 | `curl https://<staging>/api/leads` returns 401 (not 404) | **NOT MET** — no domain routes in repo |
+| Auth middleware active on staging | C2 | Unauthenticated request returns 401 with `ErrorEnvelopeSchema`-conformant body | **NOT MET** — C2 not delivered |
+| Staging Azure Functions instance deployed | Platform | `SMOKE_TEST_BASE_URL` resolves and returns HTTP responses | **NOT MET** — no staging URL confirmed |
+| Valid API-scoped auth token obtainable | C2 + Platform | `az account get-access-token --resource api://<CLIENT_ID>` succeeds | **NOT MET** — CLIENT_ID not defined by C2 |
+| `@hbc/models` Zod schemas published | E1 Tasks 1-2 | `@hbc/models/api-schemas` exports resolve | **NOT MET** — Zod not added yet |
+
+#### Task 9 Readiness Gate (Telemetry Baseline)
+
+All Task 8 prerequisites, plus:
+
+| Prerequisite | Workstream | How to Verify | Current Status |
+|---|---|---|---|
+| C3 instrumentation deployed to staging | C3 | KQL query `traces \| where timestamp > ago(5m)` returns `handler.*` events after smoke traffic | **NOT MET** — C3 not implemented |
+| Application Insights workspace accessible | Platform | Azure Portal → Application Insights → Logs → KQL query succeeds | **NOT MET** — access not confirmed |
+
+**Do not attempt Tasks 8 or 9 until the relevant readiness gates are met.** Running smoke tests against a staging instance without domain routes, auth middleware, or instrumentation will produce misleading results — tests will fail for infrastructure reasons, not contract violations.
+
 ### Task 8: Critical Path Smoke Tests
 
-**Status:** **BLOCKED** on C1 + C2 + staging infrastructure
+**Status:** **BLOCKED** on C1 + C2 + staging infrastructure — see [Open Decision and Blocker Ledger](#open-decision-and-blocker-ledger) (C1, C2, Staging infra)
 
 **Objective:** Run end-to-end tests against staging Azure Functions to verify critical flows work in production-like conditions.
 
@@ -2536,8 +2590,31 @@ The staging API is protected by Entra ID Bearer token validation (C2 deliverable
 | Variable | Required | Purpose |
 |---|---|---|
 | `SMOKE_TEST_BASE_URL` | Yes | Staging Azure Functions base URL (e.g., `https://hb-intel-stage.azurewebsites.net`) |
-| `AUTH_TOKEN` | Yes | Bearer token scoped to the HB Intel API audience |
+| `AUTH_TOKEN` | Yes | Bearer token — must be a JWT with `aud` matching the Azure Functions API app registration client ID (defined by C2). This is NOT an Azure Resource Manager token. |
 | `SMOKE_CLIENT_ID` | No (documentation only) | Entra ID app registration client ID — used in token acquisition, not consumed by tests directly |
+
+**Auth token expectations:**
+
+`AUTH_TOKEN` must be a valid JWT with the following properties:
+- `aud` (audience) matches the HB Intel Azure Functions API app registration (defined by C2)
+- Token is not expired (MSAL tokens expire after ~1 hour)
+- Token is from the correct tenant matching the staging environment
+- Token has sufficient scope grants for the API operations under test
+
+**Common failure:** `az account get-access-token` without `--resource api://<CLIENT_ID>` returns an ARM-scoped token (`aud: https://management.azure.com`) that the HB Intel API will reject with 401. This is the most common operator error.
+
+**Skip/fail behavior:**
+
+| Condition | Behavior | Classification |
+|---|---|---|
+| `SMOKE_TEST_BASE_URL` not set | All smoke tests skip silently | Expected for local dev |
+| `AUTH_TOKEN` not set | All smoke tests skip with warning | Expected when auth not configured |
+| 401 response from staging | Test fails with diagnostic message | Operator error — token audience mismatch or expired |
+| 5xx response from staging | Test fails | Staging unavailable — retry later, not a contract failure |
+| Response shape mismatch | Test fails | **Actual contract failure** — investigate |
+| Network timeout / DNS failure | Test fails | Staging not deployed or unreachable |
+
+**Skip pattern note:** The existing provisioning smoke test uses `SMOKE_TEST=true` + `describe.runIf(SMOKE_TEST)` as a boolean gate. E1 smoke tests use `describe.skipIf(!BASE_URL)` with env-var presence detection because they need the actual URL value, not just a boolean gate. Both patterns are acceptable.
 
 **Token acquisition — operator/CI responsibility:**
 
@@ -2617,6 +2694,9 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
 
   /**
    * Test 1: Health check (no auth required)
+   * PROVISIONAL: P1-C1 catalog notes "Not found in repo" for GET /api/health.
+   * This endpoint may not exist in staging. If it returns 404, this test should
+   * be removed or adapted to whatever health/readiness probe C1 implements.
    */
   it('health check endpoint responds 200', async () => {
     const response = await fetch(`${BASE_URL}/api/health`);
@@ -2922,7 +3002,7 @@ CI pipeline: set `SMOKE_TEST_BASE_URL` and `AUTH_TOKEN` as pipeline secrets/vari
 
 ### Task 9: Telemetry Baseline Verification
 
-**Status:** **BLOCKED** on C3 (instrumentation) + staging infrastructure
+**Status:** **BLOCKED** on C3 + staging infrastructure — see [Open Decision and Blocker Ledger](#open-decision-and-blocker-ledger) (C3, Staging infra)
 
 **Objective:** Define the telemetry evidence model and document how E1 smoke tests contribute to C3 verification.
 
