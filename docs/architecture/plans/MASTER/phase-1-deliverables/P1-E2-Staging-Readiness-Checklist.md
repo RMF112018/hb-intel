@@ -53,7 +53,7 @@ All example payloads, ID types, field names, and response assertions in this che
 |---|---|---|
 | Registered Azure Function routes | Provisioning saga, proxy (GET + mutate), timer (full spec), SignalR negotiate, project setup requests, acknowledgments, notifications | `backend/functions/src/index.ts` |
 | Auth middleware | `validateToken()` verifies Entra ID Bearer tokens via JWKS; returns `IValidatedClaims { upn, oid, roles, displayName }` | `backend/functions/src/middleware/validateToken.ts` |
-| Auth error shape | `{ error: 'Unauthorized', reason: string }` — does NOT include `code` field or `requestId` | `unauthorizedResponse()` in `validateToken.ts` |
+| Auth error shape | `{ error: 'Unauthorized', reason: string }` — pre-D3 legacy shape; does NOT include `code` field or `requestId`. Target after C2: `{ message: '...', code: 'UNAUTHORIZED' }` per D3 lock | `unauthorizedResponse()` in `validateToken.ts` |
 | Startup config validation | `validateRequiredConfig()` exported but **NOT wired into startup** — explicitly deferred to G2.6 | `backend/functions/src/utils/validate-config.ts` |
 | Health endpoint | **None registered** — no `/api/health` function found in `index.ts` imports | `backend/functions/src/index.ts` |
 | Backend test infrastructure | Vitest with `unit` and `smoke` named projects; coverage targets provisioning only | `backend/functions/vitest.config.ts` |
@@ -157,7 +157,7 @@ Confirm auth middleware rejects unauthenticated requests and accepts valid token
 | Aspect | Current (repo-evidenced) | Target (after C2) |
 |---|---|---|
 | **Token validation** | `validateToken()` verifies Entra ID Bearer tokens via JWKS against `api://<CLIENT_ID>` audience; returns `IValidatedClaims { upn, oid, roles, displayName }` | Same mechanism, potentially with additional claim requirements |
-| **401 response shape** | `{ error: 'Unauthorized', reason: string }` via `unauthorizedResponse()` | `{ error: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema (**TARGET — C2 must standardize**) |
+| **401 response shape** | `{ error: 'Unauthorized', reason: string }` via `unauthorizedResponse()` | `{ message: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema per D3 lock (**TARGET — C2 must standardize**) |
 | **Trace correlation on 401** | Not included in current `unauthorizedResponse()` | Should include W3C trace context or operation ID (see Section 11) |
 | **OBO flow** | Not implemented — no downstream API calls requiring delegated user context | C2 deliverable — needed only for endpoints that call downstream APIs (e.g., Microsoft Graph) on the user's behalf |
 
@@ -176,7 +176,7 @@ These are distinct concerns and must not be conflated:
 | **HTTP 401 on expired token** | Send request with expired JWT; confirm 401 status | Token expiry validation works | If 200 → JWKS verification not checking `exp` |
 | **HTTP 401 on wrong audience** | Send request with ARM-scoped token (`aud: https://management.azure.com`); confirm 401 | Audience validation works | If 200 → audience check misconfigured |
 | **HTTP 200 on valid token** | Send request with valid API-scoped JWT; confirm 200 | Full auth pipeline accepts legitimate requests | Requires C1 domain route to exist |
-| **401 response body shape** | Parse 401 response body; check for `code` field | C2 error standardization deployed | **TARGET-STATE** — current shape is `{ error, reason }`, not `{ error, code }` |
+| **401 response body shape** | Parse 401 response body; check for `message` and `code` fields | C2 error standardization deployed | **TARGET-STATE** — current shape is `{ error, reason }`, target is `{ message, code }` per D3 lock |
 | **Decoded token claims** | Decode the JWT used in the request; verify `aud`, `iss`, `upn`, `oid` match expected values | Token was correctly scoped to the API | Operator/config error if wrong audience or tenant |
 | **OBO downstream call** | Endpoint calls Microsoft Graph or other downstream API successfully | OBO app registration and token exchange work | Only applicable to OBO-dependent endpoints — NOT all routes |
 
@@ -185,7 +185,7 @@ These are distinct concerns and must not be conflated:
 #### Missing Token
 - [ ] `GET /api/leads` (no Authorization header) → 401 response
 - [ ] Response status is 401 (verifiable regardless of body shape)
-- [ ] Response body shape (**current:** `{ error: 'Unauthorized', reason }` — **target after C2:** `{ error: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema)
+- [ ] Response body shape (**current:** `{ error: 'Unauthorized', reason }` — **target after C2:** `{ message: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema per D3 lock)
 
 #### Expired Token
 - [ ] Use a JWT token with `exp` claim in the past
@@ -417,7 +417,7 @@ Confirm error handling produces standardized shapes across all failure modes. Ea
 
 ### Auth Failure (401)
 - [ ] `GET /api/leads` without Authorization header → 401
-- [ ] Response body shape: **current** `{ error: 'Unauthorized', reason }` — **target after C2:** `{ error: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema
+- [ ] Response body shape: **current** `{ error: 'Unauthorized', reason }` — **target after C2:** `{ message: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema per D3 lock
 - [ ] Expired token → 401 (same shape)
 - [ ] Wrong-audience token (ARM-scoped) → 401 (same shape)
 - [ ] **Distinguishing characteristic:** auth failures are operator/config errors, not contract failures — see Section 2 Auth Evidence Model

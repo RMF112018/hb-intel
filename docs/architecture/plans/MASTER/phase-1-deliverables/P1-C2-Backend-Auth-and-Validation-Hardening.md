@@ -26,6 +26,69 @@ Verified against live repo 2026-03-18. This section documents what exists so C2 
 - `X-Request-Id` propagation — no request ID middleware exists; no `requestId` in error responses
 - Structured validation error details — validation errors are flat strings, not `{ field, message }[]` arrays
 
+## Phase 1 Auth Boundary Model
+
+This section is the canonical developer-facing reference for the Phase 1 auth and permission model across all surfaces. For IT/admin operational steps (Entra ID setup, app registration, permission grants, SharePoint site-scoped access, verification checklist), see the [IT Department Setup Guide](../../../../how-to/administrator/setup/backend/IT-Department-Setup-Guide.md).
+
+### Surface Auth Boundaries
+
+| Surface | Token Type | Audience | Credential | Permissions |
+|---|---|---|---|---|
+| **PWA** | MSAL Bearer (delegated) | `api://<function-app-name>` | User's Azure AD token via `PublicClientApplication` | `User.Read` scope; backend API scope `api://<function-app-name>/.default` |
+| **SPFx** | SharePoint context (delegated) | SharePoint tenant | SPFx `WebPartContext.pageContext` | Site group membership → mapped to HBI permission keys via `SpfxRbacAdapter` |
+| **Backend Functions** | Validates inbound Bearer | `api://<CLIENT_ID>` (via `jose` JWKS) | N/A — validator, not acquirer | Extracts `upn`, `oid`, `roles` from validated JWT claims |
+| **Backend → SharePoint** | Managed Identity (application) | `https://{tenant}.sharepoint.com/.default` | `DefaultAzureCredential` (system-assigned MI) | `Sites.Selected` — per-site grant required for each site |
+| **Backend → Graph** | Managed Identity (application) | `https://graph.microsoft.com/.default` | `DefaultAzureCredential` (system-assigned MI) | `Group.ReadWrite.All` — tenant-wide for security group lifecycle |
+
+### App Registrations
+
+| Registration | Purpose | Key Config |
+|---|---|---|
+| **Backend API** | Defines token audience + API scope | Application ID URI: `api://<function-app-name>`, scope: `access_as_user`, admin consent required |
+| **PWA MSAL client** | Acquires user tokens for backend API | `VITE_MSAL_CLIENT_ID`, `VITE_MSAL_AUTHORITY`, `VITE_MSAL_SCOPES` |
+| **Function App Managed Identity** | System-assigned; downstream SharePoint/Graph calls | No client secret in production; `AZURE_CLIENT_ID`/`AZURE_CLIENT_SECRET` for local dev only |
+
+### Delegated vs Application vs OBO
+
+| Pattern | Where Used | Status |
+|---|---|---|
+| **Delegated** | PWA user login (`User.Read`); SPFx page context (SharePoint site groups) | Production-ready |
+| **Application (Managed Identity)** | Backend → SharePoint (provisioning, list ops); Backend → Graph (group lifecycle) | Production-ready for provisioning; `Sites.Selected` per-site grants required |
+| **OBO (On-Behalf-Of)** | Proxy handler acquires downstream tokens using user's Bearer token | **STUB** — proxy handler returns `{ _mock: true }` responses; OBO token acquired but not used for real API calls |
+
+### SharePoint Permission Model
+
+- **Default:** `Sites.Selected` (least-privilege; per-site grants required)
+- **Fallback:** `Sites.FullControl.All` (governed exception; requires ADR with expiry commitment)
+- **Config:** `SITES_PERMISSION_MODEL` env var; defaults to `sites-selected`
+- **Per-project grant process:** After site creation, Managed Identity must receive site-scoped permission via Graph API `POST /sites/{siteId}/permissions`
+- **Pre-provisioned sites requiring grants:** Hub site, Sales/BD site, shared/department site(s)
+
+### Entra ID Three-Group Model (per project)
+
+| Group | SharePoint Permission Level | Initial Members |
+|---|---|---|
+| `HB-{projectNumber}-Leaders` | Full Control | `groupLeaders` UPNs + `OPEX_MANAGER_UPN` |
+| `HB-{projectNumber}-Team` | Contribute | `groupMembers` UPNs + `submittedBy` |
+| `HB-{projectNumber}-Viewers` | Read | Department-specific background viewers from `DEPT_BACKGROUND_ACCESS_{DEPARTMENT}` |
+
+Requires `Group.ReadWrite.All` application permission on the Managed Identity.
+
+### Phase 1 Auth Blockers
+
+| # | Blocker | Impact | Owner | Reference |
+|---|---|---|---|---|
+| 1 | **OBO endpoint list not finalized** — which domain routes need OBO (user-context downstream calls) vs Managed Identity (app-context) | Cannot determine which new domain routes require delegated permissions | Architecture + Backend | IT Setup Guide §8.6 |
+| 2 | **Per-site grant automation** — manual admin grant per project vs bootstrap service principal | Provisioning cannot complete site-scoped access without manual IT intervention or automation | Architecture + IT | IT Setup Guide §8.4, §9.6 |
+| 3 | **GraphService scaffold** — `graph-service.ts` real implementation pending `Group.ReadWrite.All` confirmation | Provisioning Step 6 (Entra group creation) cannot work in production until Graph permissions are granted and service unblocked | Backend | `backend/functions/src/services/graph-service.ts` |
+| 4 | **Startup config validation not wired** — `validateRequiredConfig()` exists but isn't called at startup | Backend could start with missing auth config and fail at runtime instead of failing fast | Backend | G2.6 task |
+
+### Identity Trust Boundary
+
+All HTTP endpoints enforce: identity is extracted from validated JWT claims only, never from request body. Server-managed fields (`triggeredBy`, `submittedBy`) are overwritten with `claims.upn` (ADR-0078, D-PH6-03).
+
+---
+
 ## Architecture
 
 - **Auth Pattern:** Express-style middleware adapted for Azure Functions v4; all auth checks in `middleware/auth.ts`
