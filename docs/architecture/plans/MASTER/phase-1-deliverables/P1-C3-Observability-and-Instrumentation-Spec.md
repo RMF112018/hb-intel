@@ -24,7 +24,7 @@ Define telemetry, health checks, monitoring, and alerting requirements for Phase
 
 - **Proxy adapter observability** — instrumentation for all 11 domain proxy adapters calling Azure Functions backend (`HBC_ADAPTER_MODE='proxy'`)
 - **Backend route instrumentation** — all currently implemented route groups per C1 catalog (proxy, project setup requests, acknowledgments, notifications, provisioning saga, SignalR)
-- **Auth/OBO token telemetry** — MSAL token acquisition in the PWA, Bearer validation and OBO exchange in the backend
+- **Auth/OBO token telemetry** — Bearer validation and OBO exchange in the backend (primary); PWA-side MSAL token acquisition is a non-blocking enhancement pending browser telemetry client (see 2.1.9)
 - **Provisioning saga observability** — saga lifecycle, step completion, retry, and failure events
 - **Notification system observability** — notification delivery, queue processing, and preference management
 - **Adapter-mode startup assertion signals** — per B3 enforcement Layer 2, the startup guard must emit adapter mode and environment for observability
@@ -332,7 +332,7 @@ These events feed the "Circuit breaker open" alert (2.3.2) and the < 2 minute MT
 | Dashboard | Owner / Audience | Source Signals (AI tables) | Required Dimensions | B2 Gate Evidence |
 |---|---|---|---|---|
 | Adapter Health | DevOps | `proxy.request.*` events (2.1.1), `handler.*` events (2.1.2) from `traces` (filtered by `_telemetryType: 'customEvent'`) | `domain`, `routeGroup`, `operation`, `statusCode`, `environment` | Proxy adapter `PROD_ACTIVE` gate: error rate < 5%, p95 latency < 10s |
-| Auth & Token | Security / DevOps | `auth.token.*`, `auth.bearer.*`, `auth.obo.*` events (2.1.3) from `traces` (filtered by `_telemetryType: 'customEvent'`) | `provider`, `scope`, `errorCode`, `environment` | Auth flow verified for production activation |
+| Auth & Token | Security / DevOps | `auth.bearer.*`, `auth.obo.*` events (2.1.3) from `traces` (filtered by `_telemetryType: 'customEvent'`); `auth.token.*` added when PWA client available (2.1.9) | `provider`, `scope`, `errorCode`, `environment` | Auth flow verified for production activation |
 | Provisioning | Operations | `ProvisioningSaga*`, `ProvisioningTimer*` events + metrics (2.1.4) from `traces` (filtered by `_telemetryType: 'customEvent'` / `'customMetric'`) | `projectId`, `stepName`, `correlationId`, `outcome` | Provisioning saga success rate ≥ 95% over 7-day window |
 | Error Budget | Leadership / SRE | Aggregate error counts from `handler.error` events (2.1.2); SLO definitions from operational agreement | `routeGroup`, `environment`, time window | Overall error rate vs SLO; burn rate projection |
 
@@ -457,7 +457,7 @@ Maps current state (Part 1) against target requirements (Part 2) to identify the
 | Backend AI sampling | Adaptive sampling at 20 items/sec; no severity filtering | Exception exclusion + log-level config per 4.2; full severity-based sampling deferred (requires AI SDK) | `host.json` update needed |
 | Proxy adapter telemetry | `logger.info`/`logger.error` only, no `trackEvent` | `proxy.request.*` + `proxy.cache.*` per 2.1.1 | Full implementation needed |
 | Handler lifecycle telemetry | No uniform handler instrumentation | `handler.invoke`/`success`/`error` for all HTTP handlers per 2.1.2 | Full implementation needed |
-| Auth telemetry | Not implemented on either surface | PWA `auth.token.*` + backend `auth.bearer.*`/`auth.obo.*` per 2.1.3 | Full implementation needed |
+| Auth telemetry | Not implemented on either surface | Backend `auth.bearer.*`/`auth.obo.*` per 2.1.3 (primary); PWA `auth.token.*` non-blocking enhancement per 2.1.9 | Full implementation needed (backend) |
 | Provisioning telemetry | 9 events, 3 metrics, correlation IDs (2.1.4) | Complete — already meets spec | No gap |
 | Notification telemetry | No `trackEvent` calls in notification handlers | `notification.send.*` + `notification.digest.*` per 2.1.5 | Full implementation needed |
 | Adapter-mode startup signal | Not implemented | `startup.mode.resolved` per 2.1.6 (depends on B3 Layer 2) | Full implementation needed |
