@@ -8,11 +8,11 @@
 | **Document Type** | Instrumentation Specification |
 | **Owner** | Backend Services Team / DevOps |
 | **Update Authority** | C-workstream lead; changes require review by DevOps and B-workstream |
-| **Status** | Draft — pending repo-truth alignment |
+| **Status** | Aligned — repo-truth verified 2026-03-18; execution-ready |
 | **Last Reviewed Against Repo Truth** | 2026-03-18 |
-| **References** | P1-B2 (Adapter Completion Backlog), P1-B3 (Mock Isolation Policy), P1-C1 (Backend Service Contract Catalog), P1-D1 (Write Safety) |
+| **References** | P1-B2 (Adapter Completion Backlog), P1-B3 (Mock Isolation Policy), P1-C1 (Backend Service Contract Catalog), P1-D1 (Write Safety), P1-E1 (Contract Testing) |
 
-**Note:** This document was previously identified as P1-C1, which collided with the backend service contract catalog. Re-identified as P1-C3. Content sections below are carried forward from the original draft and require further alignment passes for health checks, circuit breakers, sampling, and telemetry events.
+**Note:** This document was previously identified as P1-C1, which collided with the backend service contract catalog. Re-identified as P1-C3.
 
 ---
 
@@ -66,7 +66,7 @@ None. No Application Insights SDK, no OpenTelemetry, no monitoring packages inst
 
 ### OpenTelemetry
 
-Not implemented on either surface. Azure Functions supports first-class OTel host enablement, but it has not been adopted.
+Not implemented on either surface. No OTel packages, configuration, or SDK usage in backend or PWA.
 
 ### Health Endpoint
 
@@ -436,7 +436,7 @@ Maps current state (Part 1) against target requirements (Part 2) to identify the
 | Platform health endpoint | Not implemented; removed from C1 catalog | `GET /api/health` returning 200 per 2.2.1 | Target contract — implementation and ownership TBD |
 | Dependency probes | Not implemented | Graph + Redis reachability probes per 2.2.2 | Full implementation needed |
 | Circuit-breaker telemetry | No circuit breaker exists (D1 not delivered) | `circuit.state.change` + `circuit.fallback.used` per 2.2.3 | Blocked on D1 delivery |
-| PWA telemetry | None | Adapter-mode startup signal, client error tracking | Full implementation needed |
+| PWA telemetry | None | `startup.mode.resolved` (2.1.6) + `auth.token.*` (2.1.3); client-side performance deferred (2.1.8) | Full implementation needed |
 | OpenTelemetry | None — zero packages or config | Not a Phase 1 requirement; future migration path defined in 4.5 | Deferred to post-Phase 1 workstream |
 | Dashboards | None verified | 4 AI Workbooks with source signals and dimensions per 2.3.1 | Full implementation needed |
 | Alerts | 2 rules documented (PH6.14); no Action Group | 5 alert rules with owner, source signal, and escalation per 2.3.2 | 3 additional rules + Action Group needed |
@@ -547,5 +547,5 @@ Azure Functions now supports first-class OTel host enablement (via `OTEL_EXPORTE
 | Structured logging | Console JSON output via `context.log()` | Application Insights | Application Insights |
 | Sampling | None (all telemetry captured) | Adaptive (20 items/sec) | Adaptive (20 items/sec) + exception exclusion (target) |
 | Correlation | Application-level `correlationId` | Application-level `correlationId` + AI `operation_Id` | Same as staging |
-| Alerting | Console output | Teams webhook (target) | Teams webhook (target) |
+| Alerting | Console output | Teams Workflow via Action Group (target) | Teams Workflow via Action Group (target) |
 | Health probes | Manual verification | Azure App Service health probe (target) | Azure App Service health probe (target) |
