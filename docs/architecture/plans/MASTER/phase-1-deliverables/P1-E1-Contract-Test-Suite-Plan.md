@@ -1033,6 +1033,18 @@ Expected: All tests pass (green checkmark).
 
 ## Chunk 2: MSW Handler Setup and Frontend Contract Tests
 
+### Frontend Contract Test Readiness
+
+| Test Category | Can Run Now? | Blocked On | Notes |
+|---|---|---|---|
+| MSW server setup + handler smoke tests | **Yes** — after vitest setup | Vitest config only | Independent of B1 |
+| Schema validation (Task 1 tests) | **Yes** — after Zod + vitest setup | Zod dependency | Independent of B1 |
+| Lead adapter contract tests | **No** | B1: `ProxyHttpClient` + `ProxyLeadRepository` | MSW intercepts HTTP; tests need real adapter code |
+| Project adapter contract tests | **No** | B1: `ProxyHttpClient` + `ProxyProjectRepository` | Same pattern as Lead |
+| Estimating adapter contract tests | **No** | B1: `ProxyHttpClient` + `ProxyEstimatingRepository` | Same pattern as Lead |
+| Tier 2 domain adapter contract tests | **No** | B1 + C1 (D1/D6 route decisions) | Routes provisional; adapters not yet planned |
+| Auth adapter contract tests | **No** | B1 + C2 (A9 route spec) | Auth routes not cataloged |
+
 ### Task 3: Create MSW Server Setup for `@hbc/data-access` Tests
 
 **Status:** **TARGET** — implementable after vitest setup
@@ -1302,6 +1314,18 @@ export const defaultHandlers = [
 ];
 ```
 
+**Future domain handlers (Tier 2 — pattern placeholders, not implementable yet):**
+
+When C1 decisions D1/D6 resolve and B1 delivers Tier 2 proxy repositories, add domain-specific handler arrays following the `leadsHandlers` pattern. Each requires:
+- Paged list handler (`GET /api/{domain}?page=&pageSize=` or project-scoped variant per D6)
+- Single-item handler (`GET /api/{domain}/:id`)
+- Create handler (`POST /api/{domain}`)
+- Update handler (`PUT /api/{domain}/:id`)
+- Delete handler (`DELETE /api/{domain}/:id` → `204 No Content`, no response body)
+- Aggregate/child handlers where applicable (e.g., Schedule metrics, Contract approvals)
+
+Do NOT pre-define handler arrays with undefined code names. Add them when the route contract is frozen and the adapter class exists.
+
 **File: `packages/data-access/src/test-utils/msw-server.ts`**
 
 ```typescript
@@ -1382,12 +1406,17 @@ Expected: Tests pass.
 
 **Status:** **BLOCKED** on B1 — `ProxyLeadRepository` does not exist; proxy adapters throw `AdapterNotImplementedError`
 
+**B1 deliverables required before this task can execute:**
+- `ProxyHttpClient` class (`packages/data-access/src/adapters/proxy/http-client.ts`)
+- `ProxyLeadRepository` class (`packages/data-access/src/adapters/proxy/lead-repository.ts`)
+- Vitest configuration for `@hbc/data-access` (shared prerequisite with D1)
+
 **Objective:** Prove that the ProxyLeadRepository adapter correctly parses backend responses according to LeadSchema.
 
 **Files to Create:**
 - `packages/data-access/src/adapters/proxy/lead-repository.contract.test.ts`
 
-This is the critical contract test. It verifies that the adapter's response type matches the Zod schema.
+This is the critical contract test. It verifies that the adapter's response type matches the Zod schema. MSW intercepts HTTP calls made by `ProxyHttpClient`, so the test exercises the full adapter → HTTP → MSW → response → Zod validation pipeline.
 
 **Full Code:**
 
@@ -1397,7 +1426,7 @@ This is the critical contract test. It verifies that the adapter's response type
 import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
 import { LeadSchema, CreateLeadRequestSchema, createPagedSchema } from '@hbc/models/api-schemas';
 import { ProxyLeadRepository } from './lead-repository';
-import { createHttpClient } from '../../http-client';
+import { ProxyHttpClient } from './http-client';
 import { server } from '../../test-utils';
 
 /**
@@ -1414,7 +1443,11 @@ import { server } from '../../test-utils';
  * If these tests fail, the proxy adapter and backend are not in contract.
  */
 describe('ProxyLeadRepository Contract Tests', () => {
-  const httpClient = createHttpClient({ baseUrl: 'http://localhost:7071' });
+  // ProxyHttpClient is a B1 deliverable — does not exist yet
+  const httpClient = new ProxyHttpClient({
+    baseUrl: 'http://localhost:7071',
+    getToken: async () => 'test-token', // MSW intercepts; token not validated
+  });
   let repository: ProxyLeadRepository;
 
   beforeAll(() => {
@@ -1428,7 +1461,7 @@ describe('ProxyLeadRepository Contract Tests', () => {
 
   describe('getAll()', () => {
     it('response conforms to paged LeadSchema', async () => {
-      const result = await repository.getAll({ page: 1, pageSize: 20 });
+      const result = await repository.getAll({ page: 1, pageSize: 25 });
 
       // Assert response matches paged schema
       const PagedLeads = createPagedSchema(LeadSchema);
@@ -1442,7 +1475,7 @@ describe('ProxyLeadRepository Contract Tests', () => {
       expect(parsed.success).toBe(true);
       if (parsed.success) {
         expect(parsed.data.page).toBe(1);
-        expect(parsed.data.pageSize).toBe(20);
+        expect(parsed.data.pageSize).toBe(25);
         expect(Array.isArray(parsed.data.items)).toBe(true);
       }
     });
@@ -1455,8 +1488,8 @@ describe('ProxyLeadRepository Contract Tests', () => {
         expect(parsed.success).toBe(true);
         if (parsed.success) {
           expect(parsed.data.id).toBeDefined();
-          expect(parsed.data.name).toBeDefined();
-          expect(parsed.data.status).toBeDefined();
+          expect(parsed.data.title).toBeDefined();
+          expect(parsed.data.stage).toBeDefined();
         }
       }
     });
@@ -1494,8 +1527,8 @@ describe('ProxyLeadRepository Contract Tests', () => {
       expect(result).not.toBeNull();
       if (result) {
         expect(result.id).toBeDefined();
-        expect(result.name).toBeDefined();
-        expect(result.status).toBeDefined();
+        expect(result.title).toBeDefined();
+        expect(result.stage).toBeDefined();
         expect(result.createdAt).toBeDefined();
         expect(result.updatedAt).toBeDefined();
       }
@@ -1621,11 +1654,17 @@ Expected: All tests pass, proving adapter and schema agreement.
 
 **Status:** **BLOCKED** on B1 — `ProxyProjectRepository` and `ProxyEstimatingRepository` do not exist
 
+**B1 deliverables required before this task can execute:**
+- `ProxyHttpClient` class (`packages/data-access/src/adapters/proxy/http-client.ts`)
+- `ProxyProjectRepository` class (`packages/data-access/src/adapters/proxy/project-repository.ts`)
+- `ProxyEstimatingRepository` class (`packages/data-access/src/adapters/proxy/estimating-repository.ts`)
+- Vitest configuration for `@hbc/data-access` (shared prerequisite with D1)
+
 **Files to Create:**
 - `packages/data-access/src/adapters/proxy/project-repository.contract.test.ts`
 - `packages/data-access/src/adapters/proxy/estimating-repository.contract.test.ts`
 
-**Implementation:** Use the same pattern as Task 4, adjusting for Project and EstimatingRecord types.
+**Implementation:** Use the same pattern as Task 4, adjusting for ActiveProject and EstimatingTracker types.
 
 **File: `packages/data-access/src/adapters/proxy/project-repository.contract.test.ts`** (skeleton; show representative test)
 
@@ -1633,11 +1672,14 @@ Expected: All tests pass, proving adapter and schema agreement.
 import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
 import { ActiveProjectSchema, createPagedSchema } from '@hbc/models/api-schemas';
 import { ProxyProjectRepository } from './project-repository';
-import { createHttpClient } from '../../http-client';
+import { ProxyHttpClient } from './http-client';
 import { server } from '../../test-utils';
 
 describe('ProxyProjectRepository Contract Tests', () => {
-  const httpClient = createHttpClient({ baseUrl: 'http://localhost:7071' });
+  const httpClient = new ProxyHttpClient({
+    baseUrl: 'http://localhost:7071',
+    getToken: async () => 'test-token',
+  });
   let repository: ProxyProjectRepository;
 
   beforeAll(() => {
@@ -1650,10 +1692,10 @@ describe('ProxyProjectRepository Contract Tests', () => {
 
   describe('getAll()', () => {
     it('response conforms to paged ActiveProjectSchema', async () => {
-      const result = await repository.getAll({ page: 1, pageSize: 20 });
+      const result = await repository.getAll({ page: 1, pageSize: 25 });
 
       const parsed = createPagedSchema(ActiveProjectSchema).safeParse({
-        data: result.data,
+        items: result.items,
         total: result.total,
         page: result.page,
         pageSize: result.pageSize,
@@ -1714,11 +1756,14 @@ describe('ProxyProjectRepository Contract Tests', () => {
 import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
 import { EstimatingTrackerSchema, createPagedSchema } from '@hbc/models/api-schemas';
 import { ProxyEstimatingRepository } from './estimating-repository';
-import { createHttpClient } from '../../http-client';
+import { ProxyHttpClient } from './http-client';
 import { server } from '../../test-utils';
 
 describe('ProxyEstimatingRepository Contract Tests', () => {
-  const httpClient = createHttpClient({ baseUrl: 'http://localhost:7071' });
+  const httpClient = new ProxyHttpClient({
+    baseUrl: 'http://localhost:7071',
+    getToken: async () => 'test-token',
+  });
   let repository: ProxyEstimatingRepository;
 
   beforeAll(() => {
@@ -1731,10 +1776,10 @@ describe('ProxyEstimatingRepository Contract Tests', () => {
 
   describe('getAll()', () => {
     it('response conforms to paged EstimatingTrackerSchema', async () => {
-      const result = await repository.getAll({ page: 1, pageSize: 20 });
+      const result = await repository.getAll({ page: 1, pageSize: 25 });
 
       const parsed = createPagedSchema(EstimatingTrackerSchema).safeParse({
-        data: result.data,
+        items: result.items,
         total: result.total,
         page: result.page,
         pageSize: result.pageSize,
@@ -1820,7 +1865,7 @@ export function createMockServiceFactory() {
       ],
       total: 1,
       page: 1,
-      pageSize: 20,
+      pageSize: 25,
     }),
     getById: vi.fn().mockResolvedValue(null),
     create: vi.fn().mockResolvedValue({
@@ -1841,7 +1886,7 @@ export function createMockServiceFactory() {
       data: [],
       total: 0,
       page: 1,
-      pageSize: 20,
+      pageSize: 25,
     }),
     getById: vi.fn().mockResolvedValue(null),
     create: vi.fn().mockResolvedValue(null),
@@ -1854,7 +1899,7 @@ export function createMockServiceFactory() {
       data: [],
       total: 0,
       page: 1,
-      pageSize: 20,
+      pageSize: 25,
     }),
     getById: vi.fn().mockResolvedValue(null),
     create: vi.fn().mockResolvedValue(null),
@@ -1949,7 +1994,7 @@ describe('Leads Route Handlers — Contract Tests', () => {
   describe('handleGetLeads()', () => {
     it('returns paged leads conforming to paged LeadSchema', async () => {
       const services = createMockServiceFactory();
-      const request = createMockRequest('GET', '/api/leads', { page: '1', pageSize: '20' });
+      const request = createMockRequest('GET', '/api/leads', { page: '1', pageSize: '25' });
       const context = createMockContext();
 
       const response = await handleGetLeads(request, context, services);
