@@ -46,6 +46,7 @@ Verified against live repo as of 2026-03-18. This inventory establishes the base
 Configured via `host.json`:
 - `samplingSettings.isEnabled: true`, `maxTelemetryItemsPerSecond: 20`
 - Connection string injected via `APPLICATIONINSIGHTS_CONNECTION_STRING` app setting
+- Integration model: Azure Functions host built-in forwarding via `context.log()` — no direct `applicationinsights` npm SDK or `TelemetryClient`
 
 ### Structured Logger
 
@@ -341,7 +342,7 @@ Maps current state (Part 1) against target requirements (Part 2) to identify the
 | Area | Current State | Target | Gap |
 |---|---|---|---|
 | Backend logging | Custom structured logger, 22 files | Structured logging across all domain route handlers | Extend to new Phase 1 domain handlers |
-| Backend AI sampling | host.json sampling (20 items/sec) | Severity-based sampling (100% warn/error) | Sampling config update needed |
+| Backend AI sampling | Adaptive sampling at 20 items/sec; no severity filtering | Exception exclusion + log-level config per 4.2; full severity-based sampling deferred (requires AI SDK) | `host.json` update needed |
 | Proxy adapter telemetry | `logger.info`/`logger.error` only, no `trackEvent` | `proxy.request.*` + `proxy.cache.*` per 2.1.1 | Full implementation needed |
 | Handler lifecycle telemetry | No uniform handler instrumentation | `handler.invoke`/`success`/`error` for all HTTP handlers per 2.1.2 | Full implementation needed |
 | Auth telemetry | Not implemented on either surface | PWA `auth.token.*` + backend `auth.bearer.*`/`auth.obo.*` per 2.1.3 | Full implementation needed |
@@ -353,7 +354,7 @@ Maps current state (Part 1) against target requirements (Part 2) to identify the
 | Dependency probes | Not implemented | Graph + Redis reachability probes per 2.2.2 | Full implementation needed |
 | Circuit-breaker telemetry | No circuit breaker exists (D1 not delivered) | `circuit.state.change` + `circuit.fallback.used` per 2.2.3 | Blocked on D1 delivery |
 | PWA telemetry | None | Adapter-mode startup signal, client error tracking | Full implementation needed |
-| OpenTelemetry | None | OTel-compatible span context | Deferred — Azure Functions supports it but not yet adopted |
+| OpenTelemetry | None — zero packages or config | Not a Phase 1 requirement; future migration path defined in 4.5 | Deferred to post-Phase 1 workstream |
 | Dashboards | None verified | 4 dashboards (Adapter, Auth, Provisioning, Error Budget) | Full implementation needed |
 | Alerts | 2 documented (PH6.14) | 5 alert rules | 3 additional rules needed |
 | Alert channel | "Teams webhook" documented | Specific mechanism confirmed | Workflows recommended — mechanism must be confirmed |
@@ -362,20 +363,105 @@ Maps current state (Part 1) against target requirements (Part 2) to identify the
 
 ## Part 4: Infrastructure Requirements
 
-### 4.1 Logging
+### 4.1 Phase 1 Telemetry Backend: Application Insights via Azure Functions Host
 
-- **Local:** Console logger with structured JSON output
-- **Staging:** Application Insights (Azure) with correlation IDs
-- **Production:** Application Insights with sampling — current repo: `host.json` sets `maxTelemetryItemsPerSecond: 20`; target sampling strategy (severity-based) requires further configuration
+**Primary telemetry path for Phase 1:** Azure Functions built-in Application Insights integration. All telemetry flows through the Functions host — the backend does NOT use the `applicationinsights` npm SDK directly or instantiate a `TelemetryClient`.
 
-### 4.2 Metrics
+**How it works:**
 
-- Custom metrics via Application Insights trackMetric API
-- OpenTelemetry-compatible span context for distributed tracing — **target behavior**; current repo does not have OTel host enablement. Azure Functions now supports first-class OpenTelemetry; migration path should be defined as a follow-on.
+- `createLogger(context)` emits structured JSON via `context.log()`, `context.warn()`, `context.error()`
+- The Azure Functions host forwards these to Application Insights based on `host.json` configuration
+- Custom events use `_telemetryType: 'customEvent'` markers; custom metrics use `_telemetryType: 'customMetric'`
+- Correlation IDs are application-level (`correlationId` property in event payloads), not W3C trace context
 
-### 4.3 Environment Parity
+This is intentional for Phase 1: the Functions host integration is zero-dependency, requires no additional npm packages, and surfaces telemetry in Application Insights `traces`, `customEvents`, and `customMetrics` tables.
 
-All environments (local, staging, production) must have:
-- Structured logging with domain/operation/correlationId fields
-- Health check endpoints or equivalent readiness signals
-- Error alerting configured (local: console, staging/production: Teams webhook or equivalent)
+### 4.2 Sampling Configuration
+
+**Current (`host.json`):**
+
+```json
+{
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "maxTelemetryItemsPerSecond": 20
+      }
+    }
+  }
+}
+```
+
+This is Azure's adaptive sampling — it rate-limits telemetry to 20 items/second across all severity levels. It does NOT provide severity-based filtering.
+
+**Target Phase 1 configuration:**
+
+```json
+{
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "maxTelemetryItemsPerSecond": 20,
+        "excludedTypes": "Exception"
+      }
+    },
+    "logLevel": {
+      "default": "Information",
+      "Host.Results": "Warning",
+      "Function": "Information"
+    }
+  }
+}
+```
+
+**Configuration delta required:**
+
+- Add `excludedTypes: "Exception"` to ensure exceptions are never sampled out
+- Add `logLevel` section to control verbosity by category
+- Full severity-based sampling (100% capture of warn/error, reduced capture of info/debug) requires the Application Insights SDK with a custom `ITelemetryProcessor` — this is a post-Phase 1 enhancement, not achievable through `host.json` alone
+
+### 4.3 Correlation and Tracing
+
+**Current behavior:**
+
+- Application-level correlation via manual `correlationId` properties in `trackEvent`/`trackMetric` payloads
+- No W3C trace context propagation (`traceparent`/`tracestate` headers)
+- No distributed tracing spans connecting PWA → backend → Graph API
+
+**Phase 1 posture:**
+
+- Continue using application-level correlation IDs — sufficient for saga tracing, request correlation, and triage
+- Azure Functions host automatically assigns `operation_Id` to Application Insights records within a single function invocation, providing basic request-level correlation
+- Cross-service distributed tracing (PWA → backend → Graph) is NOT a Phase 1 requirement
+
+### 4.4 Metrics
+
+- Custom metrics via `ILogger.trackMetric()` — surfaces in Application Insights `customMetrics` table
+- Queryable by dimension properties (e.g., `projectId`, `stepName`, `correlationId`)
+- No Prometheus/OpenMetrics endpoint — not needed for Phase 1
+
+### 4.5 OpenTelemetry — Future Direction
+
+OpenTelemetry is NOT part of Phase 1. Current state: zero OTel packages, configuration, or SDK usage on either surface.
+
+Azure Functions now supports first-class OTel host enablement (via `OTEL_EXPORTER_OTLP_ENDPOINT` and the Azure Monitor OpenTelemetry Exporter).
+
+**Migration path (post-Phase 1):**
+
+- Replace `context.log()` telemetry path with OTel SDK spans and metrics
+- Enable W3C trace context propagation for distributed tracing across PWA → backend → Graph
+- Adopt Azure Monitor OpenTelemetry Exporter as the Application Insights bridge
+- The `ILogger` interface can be preserved as a facade — the underlying implementation would switch from `context.log()` to OTel span/event emission
+- This migration should be planned as a dedicated workstream, not incrementally mixed into Phase 1 work
+
+### 4.6 Environment Parity
+
+| Concern | Local | Staging | Production |
+|---|---|---|---|
+| Structured logging | Console JSON output via `context.log()` | Application Insights | Application Insights |
+| Sampling | None (all telemetry captured) | Adaptive (20 items/sec) | Adaptive (20 items/sec) + exception exclusion (target) |
+| Correlation | Application-level `correlationId` | Application-level `correlationId` + AI `operation_Id` | Same as staging |
+| Alerting | Console output | Teams webhook (target) | Teams webhook (target) |
+| Health probes | Manual verification | Azure App Service health probe (target) | Azure App Service health probe (target) |
