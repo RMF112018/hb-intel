@@ -170,43 +170,89 @@ Auth is tracked separately from the 10 data domains because it has no CRUD patte
 
 ## Definition of Done: Status Gate Checklists
 
+Gates apply per domain per adapter type. Not all gates apply to all adapter types — SharePoint adapters have no OBO or Azure Functions dependencies; API adapters have no PnPjs dependencies. Each gate item requires an evidence artifact (CI run link, PR, config confirmation, etc.). "Passes tests" means a CI-reproducible green run, not a local-only claim.
+
 ### `CODE_COMPLETE_MOCK`
 
-- [ ] Proxy adapter class implements every method on its port interface
-- [ ] All vitest tests pass against mocked fetch (no network calls)
-- [ ] `check-types` clean for the touched package
-- [ ] Lint clean for the touched package
-- [ ] Factory wiring registers the adapter for the domain
+| Dimension | Requirement | Applies To |
+|---|---|---|
+| **Port completeness** | Adapter implements every method on its port interface — CRUD, search, aggregate, sub-resource, and non-CRUD methods as applicable | All adapter types |
+| **Test readiness** | All vitest tests pass against mocked data source (mocked fetch for proxy; mocked PnPjs for SP; mocked SQL client for API) | All adapter types |
+| **Code quality** | `check-types` and lint clean for the touched package | All adapter types |
+| **Factory wiring** | Factory returns the adapter for this domain/mode combination; `AdapterNotImplementedError` no longer thrown | All adapter types |
+| **Documentation** | Adapter README updated with domain-specific implementation notes | All adapter types |
+| **Evidence** | Link to passing CI run or reproducible local test output | Required |
 
 ### `CONTRACT_ALIGNED`
 
-- [ ] C1 routes frozen for this domain (no provisional paths remain)
-- [ ] Adapter path constants reconciled with C1 catalog
-- [ ] Error envelope aligned with D3 resolution (`.message` vs `.error`)
-- [ ] Pagination default aligned with D4 resolution (B1: 25 via `DEFAULT_PAGE_SIZE`, C1: 50)
-- [ ] PATCH vs PUT decision applied per D5 resolution
+| Dimension | Requirement | Applies To |
+|---|---|---|
+| **Upstream contract** | C1 routes frozen for all method families in this domain — CRUD, aggregate, sub-resource, and search routes | Proxy |
+| **Path reconciliation** | Adapter path constants match C1 catalog for every route group | Proxy |
+| **Response contract** | Error envelope aligned (D3), pagination default aligned (D4), HTTP methods aligned (D5) | Proxy |
+| **Schema alignment** | List/library column schemas match port interface field contracts | SharePoint (future) |
+| **Evidence** | Link to C1 catalog entry, route freeze confirmation, or schema approval | Required |
 
 ### `INTEGRATION_READY`
 
-- [ ] Backend Azure Functions deployed for this domain
-- [ ] MSAL app registration includes required scopes
-- [ ] CORS configured for frontend origins
-- [ ] Environment variables set (`HBC_ADAPTER_MODE`, domain endpoint URLs)
-- [ ] OBO token exchange verified end-to-end
+| Dimension | Requirement | Applies To |
+|---|---|---|
+| **Backend deployment** | Azure Functions deployed for this domain's route groups | Proxy |
+| **Auth configuration** | MSAL scopes registered; OBO token exchange verified end-to-end | Proxy |
+| **Network configuration** | CORS configured for frontend origins; environment variables set | Proxy |
+| **Site provisioning** | SP site provisioned; lists/libraries created with correct schemas | SharePoint (future) |
+| **SPFx context** | PnPjs `SPFx()` initialization verified in app shell | SharePoint (future) |
+| **Permissions** | SP site/list permissions mapped to app roles | SharePoint (future) |
+| **Database deployment** | Azure SQL schema deployed; connection strings configured | API (future) |
+| **Evidence** | Link to environment configuration, deployment confirmation, or provisioning log | Required |
 
 ### `STAGING_READY`
 
-- [ ] E1 contract tests pass against staging backend
-- [ ] Error responses match agreed envelope shape
-- [ ] Pagination behavior matches agreed defaults
-- [ ] Auth token flow works with staging identity provider
+| Dimension | Requirement | Applies To |
+|---|---|---|
+| **Contract testing** | E1 contract tests pass against staging environment | All adapter types |
+| **Response validation** | Error and pagination behavior matches agreed contracts | All adapter types |
+| **Auth flow** | Token acquisition and validation work end-to-end in staging | All adapter types |
+| **Non-CRUD verification** | Aggregate, search, sub-resource, and assignment methods tested — not just CRUD | All adapter types |
+| **Throttling** | SPO 429 handling and batch patterns verified under load | SharePoint (future) |
+| **Evidence** | Link to E1 test run against staging | Required |
 
 ### `PROD_ACTIVE`
 
-- [ ] Live traffic verified in production
-- [ ] Mock fallback removed for this domain
-- [ ] Domain-level override tested (if override mechanism is implemented — see [Factory Wiring open decision](#open-decision-domain-level-adapter-overrides))
-- [ ] Monitoring and error reporting confirmed
+| Dimension | Requirement | Applies To |
+|---|---|---|
+| **Live verification** | Real traffic verified in production for all method families | All adapter types |
+| **Mock removal** | Mock fallback removed for this domain in this adapter type | All adapter types |
+| **Override testing** | Domain-level override tested if mechanism exists (see [Factory Wiring open decision](#open-decision-domain-level-adapter-overrides)) | All adapter types |
+| **Observability** | Monitoring, error reporting, and alerting confirmed | All adapter types |
+| **Write safety** | Retry and idempotency behavior verified for write methods (D1 deliverables) | Proxy, API (future) |
+| **Evidence** | Link to production verification run or monitoring dashboard | Required |
+
+---
+
+## Execution Progress Tracker
+
+This table is the live tracking surface for adapter implementation progress. Update it when status changes, blockers are resolved, or ownership is assigned.
+
+### Proxy Adapter Progress
+
+| Domain | Owner | Current Gate | Blocker | Evidence | Next Action | Last Updated |
+|---|---|---|---|---|---|---|
+| Lead | — | `IMPL_READY` | None | — | Begin B1 Task 3 | 2026-03-18 |
+| Project | — | `IMPL_READY` | None | — | Begin B1 Task 4 | 2026-03-18 |
+| Estimating | — | `IMPL_READY` | None (D2 deferred) | — | Begin B1 Task 5 | 2026-03-18 |
+| Schedule | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
+| Buyout | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
+| Compliance | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
+| Contract | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
+| Risk | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
+| Scorecard | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
+| PMP | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
+| Auth | — | `IMPL_READY` | A9 (no route catalog) | — | Begin B1 Task 7 | 2026-03-18 |
+
+### SharePoint and API Adapter Progress
+
+Not yet active. Rows will be added when those phases begin planning.
 
 ---
 
