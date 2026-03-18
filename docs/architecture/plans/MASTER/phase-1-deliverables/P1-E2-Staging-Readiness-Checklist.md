@@ -347,45 +347,100 @@ Confirm create, update, delete for estimating trackers and kickoff creation.
 
 ## Section 9: Retry & Idempotency — BLOCKED on B1 + C1 + C2 + D1
 
-Confirm client retry logic and idempotency key handling.
+Confirm client retry logic and backend idempotency guard behavior.
 
-**Depends on:** B1 (proxy adapters with retry wiring), C1 (domain route handlers), C2 (auth middleware), D1 (retry policy, idempotency guards, `withIdempotency` handler wrapper, `IdempotencyStorageService`), Platform (staging deployment)
+**Depends on:** B1 (proxy adapters with retry wiring), C1 (domain route handlers), C2 (auth middleware), D1 (`RetryPolicy` types, `withRetry` HOF, `withIdempotency` handler wrapper, `IdempotencyStorageService`, `WriteFailureReason` classification), Platform (staging deployment)
 
-**NOTE:** This section is the most speculative in the checklist. The specific retry timing (e.g., 2-second delay), idempotency key header name, 503 simulation mechanism, and Table Storage record structure are all defined by P1-D1. Do not execute this section until D1 deliverables are frozen and deployed.
+### Write-Safety Dependency Note
 
-### Retry Behavior (D1 `withRetry` HOF)
-- [ ] Client sends request to a temporarily unavailable endpoint → receives 503
-- [ ] Client retries automatically per D1 retry policy (timing TBD by D1)
-- [ ] Retry succeeds → expected response
-- [ ] No duplicate side effects from retry
+All retry and idempotency behavior in this section is governed by **P1-D1 (Write Safety, Retry, and Recovery)**. The specific details below are NOT frozen — they represent the expected D1 deliverable shape based on the current D1 plan. Do not execute this section until D1 deliverables are implemented, frozen, and deployed to staging.
 
-### Idempotency (D1 `withIdempotency` handler wrapper)
-- [ ] `POST /api/leads` with idempotency key header (header name TBD by D1)
-- [ ] Request succeeds → 201 with created lead
-- [ ] Identical request with same idempotency key → returns cached result (not re-created)
-- [ ] Idempotency record exists in D1's `IdempotencyStorageService` (Table Storage table name TBD by D1)
+| Detail | Governed By | Current Status |
+|---|---|---|
+| Retry timing and backoff policy | D1 `RetryPolicy` types | **NOT FROZEN** — D1 defines `withRetry` HOF but timing constants are TBD |
+| Client-side automatic retry trigger | D1 `withRetry` wired into `ProxyHttpClient` | **BLOCKED on B1 + D1** — `ProxyHttpClient` does not exist yet |
+| Idempotency key header name | D1 `IdempotencyContext` | **NOT FROZEN** — D1 defines `generateIdempotencyKey` but header name TBD |
+| Backend idempotency guard | D1 `withIdempotency` handler wrapper | **NOT FROZEN** — D1 plan defines the wrapper but it is not implemented |
+| Idempotency storage table | D1 `IdempotencyStorageService` | **NOT FROZEN** — dedicated `IdempotencyRecords` table planned but not created |
+| 503 simulation mechanism | Not defined by any plan | **OUT OF SCOPE** — no feature flag or simulation path exists |
+| `WriteFailureReason` classification | D1 `classifyWriteFailure` | **NOT FROZEN** — enum and classifier planned but not implemented |
+
+### CONFIRMED NOW
+
+Nothing in this section is currently verifiable. No retry logic, idempotency guard, or write-safety infrastructure exists in the repo.
+
+### TARGET AFTER D1 + B1 DELIVERY
+
+#### Client Retry Behavior
+- [ ] Client proxy adapter sends request to temporarily unavailable endpoint → receives 503
+- [ ] `ProxyHttpClient` retries automatically per D1 `RetryPolicy` (timing, max retries, and backoff strategy defined by D1)
+- [ ] Retry succeeds → expected response returned to caller
+- [ ] No duplicate side effects from retried request (backend must be safe for retry on idempotent methods)
+- [ ] Non-retryable errors (4xx) are NOT retried — only transient failures (5xx, network errors) trigger retry
+
+#### Backend Idempotency Guard
+- [ ] `POST /api/leads` with idempotency key header (header name per D1 `IdempotencyContext`)
+- [ ] Request succeeds → 201 with created lead (numeric `id`, fields per `ILead`)
+- [ ] Identical request replayed with same idempotency key → returns cached 200 result (not re-created)
+- [ ] Different request body with same idempotency key → returns cached result from first request (key takes precedence)
+- [ ] Idempotency record persisted in D1's `IdempotencyStorageService` storage
+
+#### Write Failure Classification
+- [ ] Transient failure (503, network timeout) → classified as retryable by `classifyWriteFailure`
+- [ ] Validation failure (422) → classified as non-retryable
+- [ ] Auth failure (401) → classified as non-retryable
+- [ ] Not-found (404) → classified as non-retryable
+
+### OUT OF SCOPE / NOT YET DEFINED
+
+- **Feature-flagged 503 simulation:** No plan defines a mechanism to trigger artificial 503 responses for testing. Retry verification may require real transient failures or a staging-specific test endpoint (not yet planned).
+- **Idempotency record inspection:** Direct Azure Table Storage verification of idempotency records is an implementation-level concern. The staging checklist verifies behavior (replay returns cached result), not storage internals, unless D1 explicitly defines a verification query.
+- **Circuit breaker behavior:** P1-D1 lists circuit breaker telemetry (`circuit.state.change`, `circuit.fallback.used`) as deferred / not a Phase 1 deliverable.
 
 ---
 
 ## Section 10: Error Recovery — BLOCKED on C1 + C2
 
-Confirm error handling produces standardized shapes across all failure modes.
+Confirm error handling produces standardized shapes across all failure modes. Each failure class is tested independently so failures in one class do not mask issues in another.
 
-**Depends on:** C1 (error middleware with `formatErrorResponse()`), C2 (auth middleware), Platform (staging deployment)
+**Depends on:** C1 (error middleware with `formatErrorResponse()`), C2 (auth middleware with standardized 401 shape), Platform (staging deployment)
 
-### Backend Failure (502 / 503)
-- [ ] Simulate backend error (mechanism TBD — may require staging-specific configuration)
-- [ ] Response conforms to ErrorEnvelopeSchema: `{ error: '...', code: 'INTERNAL_ERROR' }`
-- [ ] Error is classified and logged, not an unhandled exception
+### Failure Mode Classification
+
+| Failure Class | HTTP Status | ErrorEnvelopeSchema `code` | Triggered By | Depends On |
+|---|---|---|---|---|
+| **Auth failure** | 401 | `UNAUTHORIZED` | Missing/expired/wrong-audience token | C2 (standardized shape) |
+| **Validation failure** | 422 | `VALIDATION_ERROR` | Invalid request body (wrong types, missing required fields, invalid enum values) | C1 (Zod validation in route handlers) |
+| **Not found** | 404 | `NOT_FOUND` | Request for non-existent resource ID | C1 (route handlers) |
+| **Transport failure** | 502 / 503 | `INTERNAL_ERROR` or `SERVICE_UNAVAILABLE` | Backend dependency unavailable (database, downstream API) | C1 (error middleware) |
+| **Backend dependency failure** | 500 / 502 | `INTERNAL_ERROR` | Unhandled exception in route handler or service layer | C1 (error middleware catch-all) |
+
+### Auth Failure (401)
+- [ ] `GET /api/leads` without Authorization header → 401
+- [ ] Response body shape: **current** `{ error: 'Unauthorized', reason }` — **target after C2:** `{ error: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema
+- [ ] Expired token → 401 (same shape)
+- [ ] Wrong-audience token (ARM-scoped) → 401 (same shape)
+- [ ] **Distinguishing characteristic:** auth failures are operator/config errors, not contract failures — see Section 2 Auth Evidence Model
 
 ### Validation Failure (422)
-- [ ] Send `POST /api/leads` with invalid data (e.g., `stage: "invalid"`)
-- [ ] Response is 422 conforming to ErrorEnvelopeSchema with `code: 'VALIDATION_ERROR'` and `details` array
-- [ ] No 500 error or unhandled exception
+- [ ] `POST /api/leads` with invalid `stage` value (e.g., `stage: "invalid"`) → 422
+- [ ] Response conforms to ErrorEnvelopeSchema with `code: 'VALIDATION_ERROR'` and `details` array listing field-level errors
+- [ ] `POST /api/leads` with missing required field (e.g., no `title`) → 422 with `details` indicating the missing field
+- [ ] No 500 error or unhandled exception for invalid input — validation errors must be caught and formatted by C1 error middleware
+- [ ] **Distinguishing characteristic:** validation failures indicate client-side payload problems, not server errors
 
 ### Not Found (404)
-- [ ] Request non-existent resource → 404 conforming to ErrorEnvelopeSchema
-- [ ] `code` is `'NOT_FOUND'`
+- [ ] `GET /api/leads/{nonexistent-numeric-id}` → 404
+- [ ] Response conforms to ErrorEnvelopeSchema with `code: 'NOT_FOUND'`
+- [ ] `PUT /api/leads/{nonexistent-numeric-id}` → 404 (same shape)
+- [ ] `DELETE /api/leads/{nonexistent-numeric-id}` → 404 (same shape)
+- [ ] **Distinguishing characteristic:** not-found is a normal application response, not an error — no error telemetry should fire for expected 404s
+
+### Transport / Backend Dependency Failure (5xx)
+- [ ] Simulate backend dependency failure (mechanism TBD — may require staging-specific configuration or temporary infrastructure outage)
+- [ ] Response conforms to ErrorEnvelopeSchema with `code: 'INTERNAL_ERROR'` or equivalent
+- [ ] Error is classified, logged to Application Insights, and returned as a structured response — not an unhandled exception or raw stack trace
+- [ ] **Distinguishing characteristic:** 5xx errors indicate server-side problems that may be retryable (see Section 9)
 
 **PROVISIONAL (D3):** The `error` field in ErrorEnvelopeSchema may be renamed to `message` when C1 decision D3 resolves. See P1-E1 Frozen vs Provisional Error Envelope Fields.
 
