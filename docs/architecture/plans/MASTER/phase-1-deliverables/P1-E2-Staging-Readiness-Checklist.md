@@ -539,20 +539,90 @@ When C1 freezes these decisions, update the affected checklist items to match. S
 
 ---
 
+## Execution Order
+
+Run checklist sections in this dependency-ordered sequence. Do not skip ahead — later sections depend on earlier ones passing.
+
+| Step | Section | Gate Condition |
+|---|---|---|
+| 1 | **Section 1: Adapter Mode & Startup** | Staging deployed; function app responding |
+| 2 | **Section 2: Auth — Bearer Validation** | Step 1 passed; C2 auth hardening deployed |
+| 3 | **Section 3: Domain Reads — Leads** | Steps 1–2 passed; C1 leads routes deployed |
+| 4 | **Section 4: Domain Reads — Projects** | Steps 1–2 passed; C1 project routes deployed |
+| 5 | **Section 5: Domain Reads — Estimating** | Steps 1–2 passed; C1 estimating routes deployed |
+| 6 | **Section 6: Domain Writes — Leads** | Step 3 passed (reads work before testing writes) |
+| 7 | **Section 7: Domain Writes — Projects** | Step 4 passed |
+| 8 | **Section 8: Domain Writes — Estimating** | Step 5 passed |
+| 9 | **Section 9: Retry & Idempotency** | Steps 6–8 passed; D1 + B1 deployed |
+| 10 | **Section 10: Error Recovery** | Steps 3–8 passed; C1 error middleware deployed |
+| 11 | **Section 11: Observability** | Steps 1–10 passed; C3 instrumentation deployed; AI workspace accessible |
+| 12 | **Section 12: Acceptance Gates** | All steps 1–11 passed |
+
+**Partial execution:** If only some upstream deliverables are available, execute only the sections whose gate conditions are met. Record blocked sections in the Evidence Log.
+
+---
+
+## Evidence to Capture
+
+For each check item, the operator must record evidence in the following format. Copy this template into a separate evidence log file or spreadsheet for the test run.
+
+| Section | Check Item | Command / Request | Expected Result | Actual Result | Staging Evidence (AI operation_Id, screenshot, or log link) | Outcome |
+|---|---|---|---|---|---|---|
+| _1_ | _Adapter mode in logs_ | _Check startup logs_ | _`HBC_ADAPTER_MODE=proxy`_ | _[fill]_ | _[link]_ | _Pass / Fail / Blocked / Waived_ |
+| _2_ | _Missing token → 401_ | _`curl -s $URL/api/leads`_ | _HTTP 401_ | _[fill]_ | _[link]_ | _Pass / Fail / Blocked / Waived_ |
+| _…_ | _…_ | _…_ | _…_ | _…_ | _…_ | _…_ |
+
+**Outcome definitions:**
+
+| Outcome | Meaning |
+|---|---|
+| **Pass** | Check produced the expected result with staging evidence captured |
+| **Fail** | Check produced an unexpected result — investigate and document |
+| **Blocked** | Prerequisites not met — section cannot be executed (record which dependency is missing) |
+| **Waived** | Check intentionally skipped with documented rationale and sign-off approval |
+
+---
+
+## Known Non-Executable Items (as of 2026-03-18)
+
+All items below remain blocked on upstream deliverables. This section must be updated as dependencies are delivered.
+
+| Section | Blocked Item | Blocked On | Unblock Condition |
+|---|---|---|---|
+| 1 | Startup validation wired into runtime | G2.6 | `validateRequiredConfig()` called at startup |
+| 1 | Health endpoint | C1 or Platform | `/api/health` function registered in `index.ts` |
+| 2 | Standardized 401 response shape (`{ error, code }`) | C2 | Auth middleware returns ErrorEnvelopeSchema-conformant 401 |
+| 3–5 | All domain read checks | C1 | Domain route handlers (leads, projects, estimating) deployed |
+| 6–8 | All domain write checks | C1 | Domain route handlers + error middleware deployed |
+| 9 | All retry and idempotency checks | B1 + D1 | `ProxyHttpClient` with retry wiring + `withIdempotency` handler wrapper |
+| 10 | Standardized error shapes (422, 404, 5xx) | C1 | `formatErrorResponse()` error middleware deployed |
+| 11 | C3 telemetry events | C3 | Application Insights instrumentation deployed |
+| 11 | Custom `X-Request-Id` header | C1 or C2 | **PROVISIONAL** — header contract not frozen |
+| 12 | All acceptance gates | All | All Sections 1–11 passed |
+
+---
+
 ## Sign-Off
 
-| Role | Name | Date | Signature |
-|------|------|------|-----------|
-| QA Lead | __________ | __________ | __________ |
-| Platform Lead | __________ | __________ | __________ |
-| Architecture Lead | __________ | __________ | __________ |
+Each signer must record one of: **PASSED**, **FAILED** (with issue references), **BLOCKED** (with missing dependencies), or **WAIVED** (with rationale).
+
+| Role | Name | Date | Outcome | Notes / Issue References |
+|------|------|------|---------|--------------------------|
+| QA Lead | __________ | __________ | Pass / Fail / Blocked / Waived | __________ |
+| Platform Lead | __________ | __________ | Pass / Fail / Blocked / Waived | __________ |
+| Architecture Lead | __________ | __________ | Pass / Fail / Blocked / Waived | __________ |
+
+### Sign-Off Conditions
+
+- **PASSED:** All Sections 1–12 checks pass with staging evidence captured. No items waived without rationale.
+- **FAILED:** One or more checks failed. Issue references must be provided. Re-run after fixes.
+- **BLOCKED:** One or more sections could not execute due to missing upstream deliverables. List blocked sections and their dependencies.
+- **WAIVED:** Specific checks intentionally skipped. Each waiver requires written rationale and Architecture Lead approval.
 
 ### Sign-Off Notes
 
-Additional observations, deviations, or follow-ups:
-
 ```
-[Notes here]
+[Observations, deviations, waivers, or follow-ups]
 ```
 
 ---
@@ -563,3 +633,18 @@ Additional observations, deviations, or follow-ups:
 - [ ] Document cold-start baseline from Section 1 for future performance comparison
 - [ ] Review Application Insights cost and configure retention policy
 - [ ] Schedule Phase 2 planning kickoff
+
+---
+
+## Definition of Ready to Execute This Checklist
+
+Before beginning a checklist execution run, confirm all of the following:
+
+- [ ] `SMOKE_TEST_BASE_URL` is set and resolves to a deployed staging Azure Functions instance
+- [ ] `AUTH_TOKEN` is available (acquired via `az account get-access-token --resource api://<CLIENT_ID>`)
+- [ ] The `Last Reviewed Against Repo Truth` date in the header is within 7 days of the execution date
+- [ ] The Staging Environment Readiness Matrix has been reviewed — items marked NOT MET are understood as blocking their dependent sections
+- [ ] The Known Non-Executable Items section has been reviewed — the operator knows which sections will be blocked
+- [ ] An evidence log file or spreadsheet has been prepared using the Evidence to Capture template
+- [ ] The operator has read the Checklist Usage Rule and understands the BLOCKED / PREP-ONLY / PROVISIONAL distinctions
+- [ ] The Execution Order has been reviewed — the operator will follow the dependency sequence, not skip ahead
