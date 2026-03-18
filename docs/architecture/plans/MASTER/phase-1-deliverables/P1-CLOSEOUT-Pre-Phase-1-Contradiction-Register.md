@@ -8,13 +8,16 @@
 
 ## Executive Summary
 
-Six reconciliation passes were completed on 2026-03-18, resolving 23 planning contradictions across the Phase 0/Phase 1 documentation and codebase. All transport-layer design decisions (D1–D6, A8, A9) are locked and propagated. The pre-Phase-1 go/no-go checklist passes on all 7 areas. Seven implementation blockers remain — all documented with owners — but none prevent B1/C2/C3 workstreams from beginning immediately.
+Six reconciliation passes were completed on 2026-03-18, resolving 23 planning contradictions across the Phase 0/Phase 1 documentation and codebase. All transport-layer design decisions (D1–D6, A8, A9) are locked and propagated. The pre-Phase-1 go/no-go checklist passes on all 7 areas.
+
+**Blocker ledger (refreshed 2026-03-18):** 3 closed, 2 code-complete/process-documented, 1 approval-ready, 1 in-progress.
 
 **Recommendation: Ready with conditions.**
 
-- **Begin now:** B1 (proxy adapters), C2 (auth middleware), C3 (observability instrumentation)
+- **Begin now:** B1 (proxy adapters — 7 of 11 done), C2 (auth middleware), C3 (observability)
 - **Blocked on B1 delivery:** D1 (write safety wiring), E1 (contract tests), E2 (staging checklist)
-- **Blocked on IT/Ops:** Production deployment, staging environment verification
+- **Blocked on external actions:** IT permission grants (#2 per-site, #3 Graph), PO schema approval (#5)
+- **No code blockers remain** — all remaining blockers are operational/approval dependencies
 
 ---
 
@@ -101,7 +104,7 @@ These blockers do not prevent Phase 1 implementation from starting but must be r
 | 2 | Per-site grant process | Manual script + automation hook provided | IT + Architecture | Ops | **Process-documented** — `tools/grant-site-access.sh` for manual grants; `IGraphService.grantSiteAccess()` as automation extension point. Full automation (Option A1) deferred to post-pilot scale threshold. |
 | 3 | GraphService `Group.ReadWrite.All` permission | Provisioning Step 6 Entra group creation gated until IT confirms permission | Backend + IT | Ops | **Code-complete** — Real Graph API calls implemented; gated behind `GRAPH_GROUP_PERMISSION_CONFIRMED` env var. Awaiting IT grant of `Group.ReadWrite.All` to Managed Identity. |
 | ~~4~~ | ~~Startup config validation not wired (G2.6 task)~~ | ~~Backend could start with missing auth config~~ | ~~Backend~~ | ~~G2~~ | **CLOSED** — `validateRequiredConfig()` wired into `createServiceFactory()`; skips in mock/test mode (2026-03-18) |
-| 5 | SharePoint list schema approval pending | Physical SharePoint lists cannot be deployed to tenant | Product Owner | A3 | Medium — does not block adapter development against mocked fetch |
+| 5 | SharePoint list schema approval | Physical SharePoint lists cannot be deployed to tenant | Product Owner | A3 | **Approval-ready** — [P1-A3-Schema-Approval-Package.md](P1-A3-Schema-Approval-Package.md) prepared for PO review (49 containers, 4 scopes). Adapter dev proceeds against mocks; production deployment awaits approval. |
 | ~~6~~ | ~~B1 Appendix B route paths predate D6 lock~~ | ~~7 project-scoped domain route paths must be updated to nested pattern~~ | ~~B1 lead~~ | ~~B1~~ | **CLOSED** — All 7 domain route tables updated to D6 nested pattern (2026-03-18) |
 | 7 | B1 proxy adapter implementation | D1 retry wiring, E1 contract tests, E2 staging checklist blocked until complete | Engineering | B1 | **In progress** — Transport foundation + 7 project-scoped repos implemented (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Remaining: Lead, Project, Estimating, Auth (4 repos). |
 

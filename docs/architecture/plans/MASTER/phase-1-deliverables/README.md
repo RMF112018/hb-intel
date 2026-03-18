@@ -221,7 +221,8 @@ These items remain open and must be resolved before or during Phase 1 implementa
 
 ## Related Documents
 
-- **Pre-Phase-1 Contradiction Closeout:** [`P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md`](P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) — 23 resolved contradictions, go/no-go checklist (7/7 PASS), 7 remaining blockers, implementation readiness summary
+- **Pre-Phase-1 Contradiction Closeout:** [`P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md`](P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) — 23 resolved contradictions, go/no-go checklist (7/7 PASS), blocker ledger (3 closed, 2 code-complete, 1 approval-ready, 1 in-progress)
+- **SharePoint Schema Approval Package:** [`P1-A3-Schema-Approval-Package.md`](P1-A3-Schema-Approval-Package.md) — Decision package for Product Owner: 49 containers, 4 deployment scopes, pending approval for physical deployment
 - **Phase 0 Deliverables:** [`../phase-0-deliverables/README.md`](../phase-0-deliverables/README.md)
 - **Phase 0 Entry Checklist:** [`../phase-0-deliverables/P0-E1-Phase1-Entry-Checklist.md`](../phase-0-deliverables/P0-E1-Phase1-Entry-Checklist.md)
 - **Phase 0 Open Decisions Register:** [`../phase-0-deliverables/P0-E2-Open-Decisions-Register.md`](../phase-0-deliverables/P0-E2-Open-Decisions-Register.md)
