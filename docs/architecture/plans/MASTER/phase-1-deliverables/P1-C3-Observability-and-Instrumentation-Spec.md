@@ -348,13 +348,73 @@ These events feed the "Circuit breaker open" alert (2.3.2) and the < 2 minute MT
 
 ### 2.4 MTTD Targets
 
-| Issue Class | MTTD Target | Detection Method |
+| Issue Class | MTTD Target | Source Signal | Alert Owner | Detection Evidence |
+|---|---|---|---|---|
+| Adapter unavailable (circuit open) | < 2 minutes | `circuit.state.change` event (2.2.3) | DevOps on-call | Circuit breaker open alert (2.3.2) — activates after D1 delivery |
+| Elevated error rate (> 5%) | < 5 minutes | `proxy.request.error` / total `proxy.request.*` ratio (2.1.1) | DevOps on-call | High adapter error rate alert (2.3.2); Adapter Health dashboard (2.3.1) |
+| Auth system failure | < 2 minutes | `auth.token.error` + `auth.bearer.error` + `auth.obo.error` events (2.1.3) | Security + DevOps on-call | Auth failure burst alert (2.3.2) |
+| Provisioning saga compensation | < 1 minute | `ProvisioningSagaFailed` event (2.1.4) | Operations on-call | Provisioning saga failure alert (2.3.2); Provisioning dashboard (2.3.1) |
+| Performance degradation (p95 > 10s) | < 10 minutes | `proxy.request.success` event `durationMs` (2.1.1) | DevOps on-call | Adapter latency spike alert (2.3.2); Adapter Health dashboard (2.3.1) |
+| Unexpected adapter mode in production | < 5 minutes | `startup.mode.resolved` event (2.1.6) where `adapterMode ≠ 'proxy'` | DevOps on-call + B3 escalation | Runtime telemetry alert (B3 Layer 5); SEV-1 incident response |
+
+**MTTD validation:** MTTD targets are validated during `PROD_ACTIVE` gate progression by injecting synthetic failure conditions in staging and measuring time-to-detection against the target thresholds. This is a staging-environment exercise, not a production test.
+
+---
+
+### 2.5 Observability Gate Evidence Requirements
+
+This section maps C3 observability deliverables to B2 gate progression. Each gate lists the observability evidence required for advancement. References: P1-B2 (Adapter Completion Backlog), P1-B3 (Mock Isolation Policy).
+
+**`CODE_COMPLETE_MOCK`**
+
+No observability evidence required — mock-lane testing only.
+
+**`CONTRACT_ALIGNED`**
+
+No observability evidence required — contract/schema alignment only.
+
+**`INTEGRATION_READY`**
+
+- `startup.mode.resolved` event (2.1.6) verified in deployment logs — confirms adapter mode and environment classification
+- `APPLICATIONINSIGHTS_CONNECTION_STRING` configured and telemetry flowing to AI workspace
+- Evidence: Application Insights log query showing `startup.mode.resolved` event with correct `adapterMode` and `environment`
+
+**`STAGING_READY`**
+
+- `handler.*` lifecycle events (2.1.2) emitting for all exercised route groups in staging
+- `proxy.request.*` events (2.1.1) emitting for proxy adapter calls in staging
+- `auth.bearer.*` / `auth.obo.*` events (2.1.3) emitting for authenticated requests in staging
+- E1 contract test runs observable in Application Insights (test requests visible via handler telemetry)
+- Evidence: AI log query showing handler/proxy/auth events during E1 test execution in staging
+
+**`PROD_ACTIVE`** (B2: "Observability: Monitoring, error reporting, and alerting confirmed")
+
+- All `STAGING_READY` evidence verified against production environment
+- Dashboards operational: all 4 dashboards (2.3.1) populated with production telemetry
+- Alert rules active: all 5 alert rules (2.3.2) configured in Azure Monitor with Action Group delivery
+- Alert channel verified: at least one test alert successfully delivered via Teams Workflow (2.3.3)
+- Health probe configured: `/api/health` (2.2.1) responding or alternative readiness signal confirmed
+- Smoke test evidence: `deploy.smoke.pass` events (2.1.7) recorded in AI for production deployment
+- Startup guard evidence: `startup.mode.resolved` event confirms `adapterMode: 'proxy'` and `environment: 'Production'` (B3 Layer 2/5)
+- Evidence: Links to production dashboard, Action Group configuration, smoke test AI query, startup log query
+
+#### Mock-Mode Evidence Policy
+
+Per B3 staged exception model: while a staging mock exception is active, `STAGING_READY` and `PROD_ACTIVE` observability evidence gathered under mock mode does **NOT** count toward gate progression. Observability evidence must be gathered against real adapter traffic to be valid for gate advancement. Production has no mock exception path — mock detected in production is a SEV-1 incident (B3).
+
+#### Cross-Workstream Ownership for Observability Validation
+
+| Concern | Owner | Gate Dependency |
 |---|---|---|
-| Adapter unavailable (circuit open) | < 2 minutes | Circuit breaker state change alert (activates after D1 circuit-breaker delivery) |
-| Elevated error rate (> 5%) | < 5 minutes | Sliding window error rate dashboard |
-| Auth system failure | < 2 minutes | Token acquisition failure burst alert |
-| Provisioning saga compensation | < 1 minute | Real-time saga event stream |
-| Performance degradation (p95 > 10s) | < 10 minutes | Latency percentile dashboard |
+| Telemetry event implementation (2.1) | C-workstream (backend), B-workstream (adapter integration) | `STAGING_READY` |
+| Health endpoint implementation (2.2.1) | TBD (likely B3 or standalone backend task) | `PROD_ACTIVE` |
+| Circuit-breaker telemetry (2.2.3) | D1-workstream (implementation), C-workstream (observability contract) | `PROD_ACTIVE` |
+| Dashboard creation (2.3.1) | DevOps / C-workstream | `PROD_ACTIVE` |
+| Alert rule configuration (2.3.2) | DevOps | `PROD_ACTIVE` |
+| Alert channel setup (2.3.3) | DevOps | `PROD_ACTIVE` |
+| Smoke test telemetry (2.1.7) | DevOps / CI pipeline owner | `PROD_ACTIVE` |
+| Startup guard + telemetry (2.1.6) | B3-workstream (guard), C-workstream (event contract) | `INTEGRATION_READY` |
+| E1 contract test observability | E1-workstream (tests), C-workstream (handler telemetry) | `STAGING_READY` |
 
 ---
 
@@ -381,6 +441,7 @@ Maps current state (Part 1) against target requirements (Part 2) to identify the
 | Dashboards | None verified | 4 AI Workbooks with source signals and dimensions per 2.3.1 | Full implementation needed |
 | Alerts | 2 rules documented (PH6.14); no Action Group | 5 alert rules with owner, source signal, and escalation per 2.3.2 | 3 additional rules + Action Group needed |
 | Alert channel | No configured delivery mechanism | Teams Workflows via Action Group per 2.3.3; on-call paging mechanism TBD | Workflow setup + channel creation needed |
+| Gate evidence | No observability evidence mapped to B2 gates | Evidence requirements per gate per 2.5; mock-mode policy stated | Full mapping needed |
 
 ---
 
