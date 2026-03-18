@@ -44,7 +44,7 @@ B1 implements all 11 domain repositories against mocked fetch in Phase 1 (10 dat
 | Domain | Port Interface | Method Families | Total | Phase Target | Status | B1 Task | Route Status |
 |---|---|---|---|---|---|---|---|
 | **Lead** | `ILeadRepository` | CRUD (5), Search (1) | 6 | Phase 1 | `IMPL_READY` | Task 3 | C1 locked |
-| **Project** | `IProjectRepository` | CRUD (5), Aggregate (1) | 6 | Phase 1 | `IMPL_READY` | Task 4 | C1 locked; A8 |
+| **Project** | `IProjectRepository` | CRUD (5), Aggregate (1) | 6 | Phase 1 | `IMPL_READY` | Task 4 | CRUD: C1 locked; Aggregate: A8 provisional |
 | **Estimating** | `IEstimatingRepository` | Tracker CRUD (5), Kickoff (2) | 7 | Phase 1 | `IMPL_READY` | Task 5 | C1 base locked; D2 |
 | **Schedule** | `IScheduleRepository` | Activity CRUD (5), Metrics (1) | 6 | Phase 1 | `IMPL_READY` | Task 5 | D1, D6 provisional* |
 | **Buyout** | `IBuyoutRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1 | `IMPL_READY` | Task 5 | D1, D6 provisional* |
@@ -69,12 +69,12 @@ Each domain's port methods are grouped into route groups below. Route patterns a
 | CRUD | `getAll`, `getById`, `create`, `update`, `delete` | `GET/POST /api/leads`, `GET/PUT/DELETE /api/leads/{id}` | C1 locked | — |
 | Search | `search` | `GET /api/leads?q={query}` | C1 locked | — |
 
-#### Project (`IProjectRepository`) — C1 locked; A8 aggregate
+#### Project (`IProjectRepository`) — CRUD C1 locked; aggregate A8 provisional
 
 | Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
 |---|---|---|---|---|
 | CRUD | `getProjects`, `getProjectById`, `createProject`, `updateProject`, `deleteProject` | `GET/POST /api/projects`, `GET/PUT/DELETE /api/projects/{id}` | C1 locked | — |
-| Aggregate | `getPortfolioSummary` | `GET /api/projects/portfolio-summary` | C1 locked; A8 assumed | A8 |
+| Aggregate | `getPortfolioSummary` | `GET /api/projects/portfolio-summary` | A8 provisional — not in C1 catalog | A8 |
 
 #### Estimating (`IEstimatingRepository`) — C1 base locked; D2 sub-resource open
 
@@ -243,7 +243,7 @@ This table is the live tracking surface for adapter implementation progress. Upd
 | Domain | Owner | Current Gate | Blocker | Evidence | Next Action | Last Updated |
 |---|---|---|---|---|---|---|
 | Lead | — | `IMPL_READY` | None | — | Begin B1 Task 3 | 2026-03-18 |
-| Project | — | `IMPL_READY` | None | — | Begin B1 Task 4 | 2026-03-18 |
+| Project | — | `IMPL_READY` | Production activation: A8 aggregate provisional | — | Begin B1 Task 4 | 2026-03-18 |
 | Estimating | — | `IMPL_READY` | None (D2 deferred) | — | Begin B1 Task 5 | 2026-03-18 |
 | Schedule | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 5 (mocked fetch) | 2026-03-18 |
 | Buyout | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 5 (mocked fetch) | 2026-03-18 |
@@ -267,7 +267,7 @@ Not yet active. Rows will be added when those phases begin planning.
 | Lane | Scope | Can Proceed Now? | Blocked Until |
 |---|---|---|---|
 | **Mocked-fetch implementation** | B1 Tasks 0–10: all 11 domain adapters | **Yes** — no external blockers | — |
-| **Route reconciliation** | Align adapter paths with C1 catalog | Lead, Project, Estimating base only | C1 finalizes remaining 7 data-domain routes plus Auth (open decisions D1, D2, D5, D6; assumption A9) |
+| **Route reconciliation** | Align adapter paths with C1 catalog | Lead, Project CRUD, Estimating base only | C1 finalizes remaining 7 data-domain routes, Project aggregate (A8), Estimating sub-resources (D2), and Auth (A9) |
 | **Response contract alignment** | Error envelope, pagination defaults | No | C1 + B1 resolve D3, D4 |
 | **Auth integration** | MSAL registration, OBO flow, CORS | No | C2 delivers auth middleware and registers scopes |
 | **Write safety** | Retry, idempotency, failure classification | No | P1-D1 delivers `withRetry()`, idempotency guard, `WriteFailureReason` |
@@ -318,7 +318,7 @@ These decisions do not block mocked-fetch implementation but must be resolved be
 C1 owns route path finalization, response envelope shape, and HTTP method definitions for all backend Azure Functions endpoints. Until C1 freezes routes for a domain, that domain's adapter cannot be verified against real paths.
 
 **Current state:**
-- **C1 locked (3 domains):** Lead, Project, Estimating base paths
+- **C1 locked (3 domains, partial):** Lead, Project CRUD, Estimating base paths (Project aggregate A8 and Estimating sub-resources D2 remain provisional)
 - **Provisional (7 data domains):** Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP — route shapes assumed per B1, pending D1/D2/D5/D6 resolution
 - **Auth (tracked separately):** A9 — no route catalog entry; see [Auth Domain: Special-Case Tracking](#auth-domain-special-case-tracking)
 
