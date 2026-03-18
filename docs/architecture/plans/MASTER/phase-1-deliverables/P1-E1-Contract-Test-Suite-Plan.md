@@ -1826,6 +1826,28 @@ Expected: All contract tests pass.
 
 ## Chunk 3: Backend Contract Tests
 
+### Backend Contract Test Readiness
+
+**Current backend test infrastructure (CURRENT):**
+- Vitest configured with unit and smoke projects (`backend/functions/vitest.config.ts`) (**CURRENT**)
+- Mock services for provisioning saga (`backend/functions/src/test-utils/mock-services.ts`) (**CURRENT**)
+- Token validation middleware tests (`backend/functions/src/middleware/validateToken.test.ts`) (**CURRENT**)
+- No domain route handlers exist — backend currently serves provisioning, proxy, notification, and acknowledgment functions only (**CURRENT**)
+- `backend/functions` does NOT depend on `@hbc/data-access` — repository port interfaces are not available in the backend package (**CURRENT**)
+
+**What C1 must deliver before E1 Tasks 6-7 can execute:**
+- Domain route handlers: `leads.handler.ts`, `projects.handler.ts`, `estimating.handler.ts` in `backend/functions/src/functions/`
+- Error middleware: `formatErrorResponse()` in `backend/functions/src/middleware/error-middleware.ts`
+- Service container expansion: add domain repository access to `IServiceContainer` (currently only provisioning services)
+- `@hbc/data-access` added as a dependency in `backend/functions/package.json`
+
+| Test Category | Can Run Now? | Blocked On |
+|---|---|---|
+| Backend route contract tests (Task 6) | **No** | C1: domain route handlers + `@hbc/data-access` dependency |
+| Backend error shape tests (Task 7) | **No** | C1: error middleware |
+| Smoke tests (Task 8) | **No** | C1 + C2 + staging infra |
+| Telemetry baseline (Task 9) | **No** | C3 + staging infra |
+
 ### Task 6: Backend Route Contract Tests (Leads Routes)
 
 **Status:** **BLOCKED** on C1 — domain route handlers (`handleGetLeads`, `handleCreateLead`, `handleGetLeadById`) do not exist
@@ -1837,22 +1859,39 @@ Expected: All contract tests pass.
 - `backend/functions/src/test-utils/mock-service-factory.ts` (if not exists)
 - `backend/functions/src/test-utils/mock-request.ts` (if not exists)
 
-**Full Code:**
+**Full Code (TARGET-STATE — C1 must deliver route handlers and add `@hbc/data-access` dependency first):**
+
+The following test utilities assume C1 has delivered:
+- `@hbc/data-access` added to `backend/functions/package.json` (currently NOT a dependency)
+- Domain route handlers in `backend/functions/src/functions/` (currently only provisioning/proxy/notification functions exist)
+- Domain repository interfaces wired into the backend service container (`IServiceContainer`)
+- The existing mock utility at `backend/functions/src/test-utils/mock-services.ts` covers provisioning services only; this file extends the pattern to domain repositories
+
+None of these exist today. This code is implementation guidance for after C1 delivery.
 
 **File: `backend/functions/src/test-utils/mock-service-factory.ts`**
 
 ```typescript
-import type { ILeadRepository, IProjectRepository, IEstimatingRepository } from '@hbc/models';
+/**
+ * NOTE: backend/functions does NOT currently depend on @hbc/data-access.
+ * C1 must add this dependency before these imports work.
+ * Repository port interfaces live in @hbc/data-access, NOT @hbc/models.
+ * @hbc/models exports domain model types (ILead, IActiveProject, etc.).
+ *
+ * This mock factory extends the existing provisioning mock pattern in
+ * backend/functions/src/test-utils/mock-services.ts to cover domain repositories.
+ */
+import type { ILeadRepository, IProjectRepository, IEstimatingRepository } from '@hbc/data-access';
 import { vi } from 'vitest';
 
 /**
- * Creates a mock service factory for testing route handlers.
+ * Creates a mock service factory for testing domain route handlers.
  * Replace actual database/service implementations with Vitest mocks.
  */
 export function createMockServiceFactory() {
   const mockLeadRepository: ILeadRepository = {
     getAll: vi.fn().mockResolvedValue({
-      data: [
+      items: [
         {
           id: 1,
           title: 'Test Lead',
@@ -1868,6 +1907,7 @@ export function createMockServiceFactory() {
       pageSize: 25,
     }),
     getById: vi.fn().mockResolvedValue(null),
+    search: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 25 }),
     create: vi.fn().mockResolvedValue({
       id: 100,
       title: 'New Lead',
@@ -1878,33 +1918,38 @@ export function createMockServiceFactory() {
       updatedAt: '2026-03-16T10:00:00Z',
     }),
     update: vi.fn().mockResolvedValue(null),
-    delete: vi.fn().mockResolvedValue(true),
+    delete: vi.fn().mockResolvedValue(undefined),
   };
 
   const mockProjectRepository: IProjectRepository = {
-    getAll: vi.fn().mockResolvedValue({
-      data: [],
+    getProjects: vi.fn().mockResolvedValue({
+      items: [],
       total: 0,
       page: 1,
       pageSize: 25,
     }),
-    getById: vi.fn().mockResolvedValue(null),
-    create: vi.fn().mockResolvedValue(null),
-    update: vi.fn().mockResolvedValue(null),
-    delete: vi.fn().mockResolvedValue(true),
+    getProjectById: vi.fn().mockResolvedValue(null),
+    createProject: vi.fn().mockResolvedValue(null),
+    updateProject: vi.fn().mockResolvedValue(null),
+    deleteProject: vi.fn().mockResolvedValue(undefined),
+    getPortfolioSummary: vi.fn().mockResolvedValue({
+      totalProjects: 0, activeProjects: 0, totalContractValue: 0, averagePercentComplete: 0,
+    }),
   };
 
   const mockEstimatingRepository: IEstimatingRepository = {
-    getAll: vi.fn().mockResolvedValue({
-      data: [],
+    getAllTrackers: vi.fn().mockResolvedValue({
+      items: [],
       total: 0,
       page: 1,
       pageSize: 25,
     }),
-    getById: vi.fn().mockResolvedValue(null),
-    create: vi.fn().mockResolvedValue(null),
-    update: vi.fn().mockResolvedValue(null),
-    delete: vi.fn().mockResolvedValue(true),
+    getTrackerById: vi.fn().mockResolvedValue(null),
+    createTracker: vi.fn().mockResolvedValue(null),
+    updateTracker: vi.fn().mockResolvedValue(null),
+    deleteTracker: vi.fn().mockResolvedValue(undefined),
+    getKickoff: vi.fn().mockResolvedValue(null),
+    createKickoff: vi.fn().mockResolvedValue(null),
   };
 
   return {
@@ -1946,6 +1991,13 @@ export function createMockRequest(
 
 /**
  * Mock Azure Functions context.
+ *
+ * NOTE: This is a simplified mock. Actual InvocationContext from @azure/functions
+ * has additional required properties (triggerMetadata, trace, etc.). When C1
+ * delivers real route handlers, this mock may need to be extended to satisfy
+ * the handler's InvocationContext type signature. The existing provisioning
+ * tests at backend/functions/src/test-utils/mock-services.ts may provide a
+ * more complete InvocationContext mock pattern to follow.
  */
 export function createMockContext() {
   return {
@@ -1963,6 +2015,8 @@ export function createMockContext() {
 
 **File: `backend/functions/src/functions/leads/leads.contract.test.ts`**
 
+**TARGET-STATE:** This test file targets `leads.handler.ts` which does not exist today. The `backend/functions/src/functions/` directory currently contains only provisioning, proxy, notification, acknowledgment, signalr, and timer functions. No `leads/` directory exists. C1 must deliver the leads route module before this test can be created.
+
 ```typescript
 import { describe, it, expect, vi } from 'vitest';
 import type { HttpResponseInit } from '@azure/functions';
@@ -1973,7 +2027,7 @@ import {
   CreateLeadRequestSchema,
 } from '@hbc/models/api-schemas';
 import { createPagedSchema } from '@hbc/models/api-schemas';
-import { handleGetLeads, handleCreateLead, handleGetLeadById } from './leads.handler';
+import { handleGetLeads, handleCreateLead, handleGetLeadById } from './leads.handler'; // C1 deliverable
 import { createMockServiceFactory } from '../../test-utils/mock-service-factory';
 import { createMockRequest, createMockContext } from '../../test-utils/mock-request';
 
@@ -2172,19 +2226,25 @@ Expected: All tests pass.
 **Files to Create:**
 - `backend/functions/src/middleware/error-contract.test.ts`
 
-**Full Code:**
+**Full Code (TARGET-STATE — C1 must deliver error middleware first):**
+
+Today, only `validateToken.ts` exists in `backend/functions/src/middleware/`. No `error-middleware.ts` or `formatErrorResponse()` function exists. Existing handlers return ad-hoc `{ status, jsonBody }` shapes without standardized error envelope conformance.
+
+C1 must deliver:
+- `backend/functions/src/middleware/error-middleware.ts` exporting `formatErrorResponse()`
+- Standardized error envelope conformance across all domain route handlers
 
 **File: `backend/functions/src/middleware/error-contract.test.ts`**
 
 ```typescript
 import { describe, it, expect } from 'vitest';
 import { ErrorEnvelopeSchema } from '@hbc/models/api-schemas';
-import { formatErrorResponse } from './error-middleware';
+import { formatErrorResponse } from './error-middleware'; // C1 deliverable
 
 /**
  * Contract tests for error response formatting.
  *
- * BLOCKED: Requires C1 to deliver error middleware.
+ * TARGET-STATE: Requires C1 to deliver error middleware.
  *
  * Ensures all error paths in the backend produce ErrorEnvelopeSchema-conformant responses.
  */
@@ -2271,7 +2331,7 @@ describe('Error Response Contract', () => {
 
 **Note:** The `formatErrorResponse()` function must be implemented in the backend error middleware. It should use Zod validation to ensure compliance:
 
-**File: `backend/functions/src/middleware/error-middleware.ts`** (sketch)
+**File: `backend/functions/src/middleware/error-middleware.ts`** (TARGET-STATE sketch — C1 deliverable)
 
 ```typescript
 import { ErrorEnvelopeSchema, type ErrorEnvelope } from '@hbc/models/api-schemas';
