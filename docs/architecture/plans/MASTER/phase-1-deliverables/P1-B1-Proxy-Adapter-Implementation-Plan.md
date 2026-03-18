@@ -3039,7 +3039,7 @@ C1 defines these standard response shapes. All B1 proxy adapter code must confor
 
 These discrepancies do NOT block B1 implementation because all B1 tests use mocked fetch. However, they **must be resolved before production activation**:
 
-1. The error field mismatch (`message` vs `error`) will cause B1 to display generic "Validation failed" messages instead of actual backend error text
+1. B1 currently supports both `.error` and `.message` for compatibility via `extractErrorMessage()`. When C1 freezes D3, B1 should simplify to the final agreed contract shape and, if desired, map backend `code`/`requestId` fields more directly
 2. The pagination fallback mismatch (`DEFAULT_PAGE_SIZE` = 25 vs C1 default 50) only affects responses where the backend omits `pageSize` — functional but should be aligned
 
 ---
