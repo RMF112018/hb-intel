@@ -3,13 +3,13 @@
 | Field | Value |
 |---|---|
 | **Doc ID** | P1-B2 |
-| **Phase** | Phase 1 |
-| **Workstream** | B — Proxy Adapter Implementation |
+| **Phase** | Phase 1 (primary); future phases tracked as placeholders |
+| **Workstream** | B — Adapter Completion |
 | **Document Type** | Status Tracker |
 | **Owner** | Frontend Platform Team |
 | **Update Authority** | B-workstream lead; status changes require evidence per gate definitions below |
 | **Last Reviewed Against Repo Truth** | 2026-03-18 |
-| **References** | P1-B1 (Engineering Plan), P1-C1 (Service Contract Catalog), P1-C2 (Auth Hardening), P1-E1 (Contract Test Suite) |
+| **References** | P1-B1 (Engineering Plan), P1-B3 (Environment Configuration), P1-C1 (Service Contract Catalog), P1-C2 (Auth Hardening), P1-D1 (Write Safety), P1-E1 (Contract Test Suite) |
 
 **Evidence expectations:** A status change requires the evidence defined in the gate checklist for the target status. "Passes tests" means a CI-reproducible green run, not a local-only claim.
 
@@ -25,19 +25,21 @@ All adapter domain tracking in this document uses the following status progressi
 | Planned | `PLANNED` | In scope for a phase; no implementation work started |
 | Implementation-Ready | `IMPL_READY` | Port interface frozen, dependencies identified, coding can begin |
 | In Progress | `IN_PROGRESS` | Active implementation underway |
-| Code Complete (Mocked) | `CODE_COMPLETE_MOCK` | Implementation passes all vitest tests against mocked fetch; not yet validated against real backend |
+| Code Complete (Mocked) | `CODE_COMPLETE_MOCK` | Implementation passes all vitest tests against mocked data source; not yet validated against real backend or environment |
 | Blocked | `BLOCKED` | Cannot proceed; upstream dependency unresolved |
-| Contract-Aligned | `CONTRACT_ALIGNED` | C1 routes frozen; adapter paths reconciled; error envelope (D3) and pagination (D4) aligned |
-| Integration-Ready | `INTEGRATION_READY` | Backend deployed; MSAL registered; CORS configured; env vars set; ready for real HTTP calls |
+| Contract-Aligned | `CONTRACT_ALIGNED` | Upstream contracts frozen; adapter paths or schemas reconciled; error envelope (D3) and pagination (D4) aligned |
+| Integration-Ready | `INTEGRATION_READY` | Target environment deployed and configured; ready for real data source calls |
 | Staging-Ready | `STAGING_READY` | Passes E1 contract tests against staging backend |
 | Production-Active | `PROD_ACTIVE` | Live in production; mock fallback removed for this domain |
 | Deferred | `DEFERRED` | Explicitly deferred to a later phase |
+
+**Terminology note:** Open decisions D1–D6 refer to B1 engineering plan decisions (see [B1 Open Decisions table](#b1-open-decisions-affecting-route-shape)). P1-D1 refers to the Write Safety, Retry, and Recovery workstream. The "D" prefix is coincidental — context and the "P1-" workstream prefix disambiguate.
 
 ---
 
 ## Proxy Adapter: Domain Completion Matrix
 
-B1 implements all 11 domain repositories against mocked fetch in Phase 1 per the engineering plan. C1 backend routes are locked for 3 domains; the remaining 7 data domains proceed with provisional route assumptions and will reconcile before production activation. Auth is tracked separately — see [Auth Domain: Special-Case Tracking](#auth-domain-special-case-tracking) below.
+B1 implements all 11 domain repositories against mocked fetch in Phase 1 (10 data domains in the table below; Auth tracked separately in its [own section](#auth-domain-special-case-tracking)). C1 backend routes are locked for 3 data domains; the remaining 7 proceed with provisional route assumptions and will reconcile before production activation.
 
 | Domain | Port Interface | Method Families | Total | Phase Target | Status | B1 Task | Route Status |
 |---|---|---|---|---|---|---|---|
@@ -263,10 +265,10 @@ Not yet active. Rows will be added when those phases begin planning.
 | Lane | Scope | Can Proceed Now? | Blocked Until |
 |---|---|---|---|
 | **Mocked-fetch implementation** | B1 Tasks 0–10: all 11 domain adapters | **Yes** — no external blockers | — |
-| **Route reconciliation** | Align adapter paths with C1 catalog | Lead, Project, Estimating base only | C1 finalizes remaining 8 domain routes (D1, D2, D5, D6) |
+| **Route reconciliation** | Align adapter paths with C1 catalog | Lead, Project, Estimating base only | C1 finalizes remaining 7 data-domain routes plus Auth (open decisions D1, D2, D5, D6; assumption A9) |
 | **Response contract alignment** | Error envelope, pagination defaults | No | C1 + B1 resolve D3, D4 |
 | **Auth integration** | MSAL registration, OBO flow, CORS | No | C2 delivers auth middleware and registers scopes |
-| **Write safety** | Retry, idempotency, failure classification | No | D1 delivers `withRetry()`, idempotency guard, `WriteFailureReason` |
+| **Write safety** | Retry, idempotency, failure classification | No | P1-D1 delivers `withRetry()`, idempotency guard, `WriteFailureReason` |
 | **Contract testing** | Zod schema + MSW harness against staging | No | E1 delivers test harness; staging backend available |
 | **Production activation** | Remove mock fallback, live traffic | No | All above lanes resolved per domain |
 
@@ -276,7 +278,7 @@ B1 Tasks 0–10 can proceed immediately against mocked fetch. Production activat
 
 **Owner:** B-workstream. **Scope:** All 11 proxy adapter domain repositories.
 
-No external blockers for mocked-fetch implementation. All B1 tasks (vitest setup → `ProxyHttpClient` → `ProxyBaseRepository` → 11 domain repos → factory wiring → integration tests) proceed against mocked fetch. See P1-B1 engineering plan for full task breakdown.
+No external blockers for mocked-fetch implementation. All B1 tasks (vitest setup → `ProxyHttpClient` → `ProxyBaseRepository` → 11 domain repos → factory wiring → integration tests) proceed against mocked fetch. See `P1-B1-Proxy-Adapter-Implementation-Plan.md` for full task breakdown.
 
 Currently, all non-mock adapter modes throw `AdapterNotImplementedError` from the factory (`packages/data-access/src/factory.ts`). Phase 1 replaces these stubs with real proxy implementations.
 
@@ -309,7 +311,7 @@ These decisions do not block mocked-fetch implementation but must be resolved be
 
 ### P1-C1 — Backend Service Contract Catalog
 
-**Owner:** C1-workstream. **Blocks:** `CODE_COMPLETE_MOCK` → `CONTRACT_ALIGNED` for all 11 domains.
+**Owner:** C1-workstream. **Blocks:** `CODE_COMPLETE_MOCK` → `CONTRACT_ALIGNED` for all domains.
 
 C1 owns route path finalization, response envelope shape, and HTTP method definitions for all backend Azure Functions endpoints. Until C1 freezes routes for a domain, that domain's adapter cannot be verified against real paths.
 
@@ -348,7 +350,7 @@ D1 owns retry policy implementation in `ProxyHttpClient`, frontend idempotency k
 - Idempotency key generation interface and `Idempotency-Key` header injection
 - Backend idempotency guard middleware (Azure Functions)
 
-**Cross-ref:** P1-D1 plan for full scope. Retry and idempotency are `ProxyHttpClient` concerns — individual domain adapters do not implement their own retry logic.
+**Cross-ref:** `P1-D1-Write-Safety-Retry-Recovery.md` for full scope. Retry and idempotency are `ProxyHttpClient` concerns — individual domain adapters do not implement their own retry logic.
 
 ### P1-E1 — Contract and Integration Test Hardening
 
