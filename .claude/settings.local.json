@@ -125,7 +125,8 @@
       "Bash(for entity:*)",
       "Bash(awk:*)",
       "Bash(sort -t',' -k1,1)",
-      "Bash(pip3 install:*)"
+      "Bash(pip3 install:*)",
+      "Bash(against repo truth\".:*)"
     ]
   },
   "enabledPlugins": {
