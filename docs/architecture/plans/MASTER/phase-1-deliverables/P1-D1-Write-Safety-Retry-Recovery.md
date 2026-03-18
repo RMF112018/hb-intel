@@ -1611,6 +1611,7 @@ export async function recordIdempotencyResult(
 import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { createLogger } from '../utils/logger.js';
 import { createServiceFactory } from '../services/service-factory.js';
+import { validateToken } from '../middleware/validateToken.js';
 import { checkIdempotency, recordIdempotencyResult } from './idempotency-guard.js';
 
 type AzureHandler = (req: HttpRequest, ctx: InvocationContext) => Promise<HttpResponseInit>;
@@ -1619,12 +1620,24 @@ type AzureHandler = (req: HttpRequest, ctx: InvocationContext) => Promise<HttpRe
  * Wraps a mutating Azure Functions handler with idempotency support.
  * Applied at the app.http() registration site — does not modify handler internals.
  *
- * Flow: check idempotency → (cache hit? return cached) → run handler → record result → return
+ * Flow: validate token → check idempotency → (cache hit? return cached) → run handler → record result → return
  */
 export function withIdempotency(handler: AzureHandler): AzureHandler {
   return async (request, context) => {
     const logger = createLogger(context);
     const services = createServiceFactory();
+
+    // Extract authenticated user identity for the recordedBy field.
+    // validateToken will also be called inside the handler — the minor
+    // duplication is acceptable; implementation may optimize via request-scoped cache.
+    let upn = 'unknown';
+    try {
+      const claims = await validateToken(request);
+      upn = claims.upn;
+    } catch {
+      // If token validation fails here, the handler will also fail and
+      // return 401 — no idempotency record will be written for failed auth.
+    }
 
     // Check for cached idempotent response
     const check = await checkIdempotency(request, services.idempotency, logger);
@@ -1641,7 +1654,7 @@ export function withIdempotency(handler: AzureHandler): AzureHandler {
     if (key && response.status && response.status >= 200 && response.status < 300) {
       const operation = request.headers.get('x-idempotency-operation') ?? 'unknown';
       recordIdempotencyResult(
-        key, operation, response.status, response.jsonBody, 'system',
+        key, operation, response.status, response.jsonBody, upn,
         services.idempotency, logger,
       ).catch((err) => logger.error('Idempotency record failed', { error: String(err) }));
     }
