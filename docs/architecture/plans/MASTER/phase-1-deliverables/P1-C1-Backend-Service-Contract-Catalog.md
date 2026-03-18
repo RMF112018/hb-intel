@@ -23,7 +23,7 @@ Define the complete HTTP service contract for HB Intel backend Azure Functions v
 
 | Status | Meaning |
 |---|---|
-| `IMPLEMENTED` | Route exists in repo and is deployed; behavior verified against code |
+| `IMPLEMENTED` | Route exists in repo; behavior verified against code inspection (not deployment verification) |
 | `IMPLEMENTED (DELTA)` | Route exists but current response shape or behavior differs from target contract standards |
 | `TARGET` | Phase 1 target contract; route not yet implemented in backend |
 | `TARGET (PROVISIONAL)` | Target contract with open decisions pending (B1 open decisions D1–D6; not to be confused with P1-D1 workstream) |
@@ -165,7 +165,7 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 | `POST` | `provisioning-retry/{projectId}` | `retryProvisioning` | Retry failed provisioning |
 | `POST` | `provisioning-escalate/{projectId}` | `escalateProvisioning` | Escalate provisioning request |
 
-**Current response shape:** POST provision returns 202 `{message: "Provisioning started", projectId, correlationId}`. GET status returns 200 raw `ProvisioningStatus` entity. GET failures returns 200 array. POST retry returns 202 `{message, projectId}`. POST escalate returns 202. Errors return `{error: string}`.
+**Current response shape:** POST provision returns 202 `{message: "Provisioning started", projectId, correlationId}`. GET status returns 200 raw `ProvisioningStatus` entity. GET failures returns 200 array. POST retry returns 202 `{message, projectId}`. POST escalate returns 200 `{message: "Provisioning escalated", projectId}`. Errors return `{error: string}`.
 
 ### Timer (1 trigger)
 
@@ -312,7 +312,7 @@ This section shows how each implemented route group's current response shapes di
 | `GET` status | 200 raw `ProvisioningStatus` | 200 `{data: ProvisioningStatus}` | Wrap in `{data:...}` envelope |
 | `GET` failures | 200 raw array | 200 `{data: [...], total, page, pageSize}` | Add collection envelope |
 | `POST` retry | 202 `{message, projectId}` | 202 `{message, correlationId}` | Add `correlationId`; already async-correct |
-| `POST` escalate | 202 response | 202 `{message, correlationId}` | Normalize to async accepted shape |
+| `POST` escalate | 200 `{message, projectId}` | 200 `{data: {message, projectId}}` or 202 `{message, correlationId}` | Decide sync vs async semantics; wrap if sync |
 
 **Owner:** C-workstream
 
@@ -333,7 +333,7 @@ These deltas affect Phase 1 target domain routes that are not yet implemented. T
 | D3 — Error field priority | B1 reads `.error` first, `.message` fallback | C1 target: `error` field | Error envelope shape for all domain routes | C1 + B1 |
 | D4 — Pagination default | B1: 25 (`DEFAULT_PAGE_SIZE`); C1: 50 | Canonical default TBD | Collection response `pageSize` field | C1 + B1 |
 | D5 — PATCH support | B1: PUT only | C1 target: PUT + PATCH | Whether domain routes implement PATCH | C1 |
-| D6 — Project-scoped paths | B1: nested `/api/projects/{id}/...` | C1: not yet specified | Path shape for 8 project-scoped domains | C1 |
+| D6 — Project-scoped paths | B1: nested `/api/projects/{id}/...` | C1 direction: flat `?projectId=` query params | Path shape for 8 project-scoped domains | C1 |
 | A9 — Auth routes | No routes exist | IAuthRepository requires 4 route groups | Auth domain cannot reach `CONTRACT_ALIGNED` | C2 |
 
 ---
@@ -404,6 +404,7 @@ These standards define the target contract shape for Phase 1 domain routes. Curr
 - Query params: `?page=1&pageSize=50` (max pageSize=200)
 - **D4 note:** Target default pageSize is 50 (C1). B1 implements 25 as `DEFAULT_PAGE_SIZE` fallback when the backend omits the `pageSize` field. D4 must resolve the canonical default before `CONTRACT_ALIGNED`. Until resolved, backends should return `pageSize` in every collection response so the frontend does not need to assume a default.
 - Offset-based pagination in Phase 1; cursor-based deferred to Phase 2
+- **Domain-specific exception:** Notification center (`GET notifications/center`) uses cursor-based pagination (`{items, cursor, totalCount, pageSize}`) as an allowed deviation from the default offset model. This is an intentional design choice for the notification surface and does not require normalization to offset-based.
 
 ### Idempotency
 
@@ -425,6 +426,6 @@ These standards define the target contract shape for Phase 1 domain routes. Curr
 | D3 | Error envelope field priority (`.error` vs `.message`) | C1 + B1 | Error response shape | Before `CONTRACT_ALIGNED` |
 | D4 | Pagination default (50 vs 25) | C1 + B1 | Default pageSize in collection responses | Before `CONTRACT_ALIGNED` |
 | D5 | PATCH support in domain routes | C1 | Whether PUT-only or PUT+PATCH | Before `CONTRACT_ALIGNED` |
-| D6 | Project-scoped path pattern | C1 | Nested vs flat query-param for 8 domains | Before `CONTRACT_ALIGNED` |
+| D6 | Project-scoped path pattern | C1 | C1 direction: flat `?projectId=` query params; B1 uses nested paths provisionally; affects 8 domains | Before `CONTRACT_ALIGNED` |
 | A8 | Aggregate endpoints (portfolio summary, metrics) | C1 | Whether aggregate routes are built | Before Project `CONTRACT_ALIGNED` |
 | A9 | Auth management routes | C2 | Whether `/api/auth/*` routes are defined | Before Auth `CONTRACT_ALIGNED` |
