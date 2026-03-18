@@ -21,6 +21,32 @@
 | **TARGET** | E1 deliverable — implementation planned |
 | **PROVISIONAL** | Design decision pending upstream confirmation |
 | **BLOCKED** | Cannot implement until dependency is delivered |
+| **RESOLVED** | Design decision locked — see Locked Decisions Applied |
+
+### Locked Decisions Applied
+
+The following design decisions were locked on 2026-03-18. This pass reconciles the entire document against these resolutions.
+
+| # | Decision | Resolution |
+|---|---|---|
+| 1 | Single-record success envelope | `{ data: T }` wrapper — reverses previous bare-object convention |
+| 2 | Error envelope field naming (D3) | `message` field — not `error` |
+| 3 | Backend tests dependency on `@hbc/data-access` | Type-only `devDependency` — already applied |
+| 4 | `@hbc/models` interfaces as canonical | Already applied |
+| 5 | Schema conformance mechanism | Compile-time checks — already applied |
+| 6 | Update method (D5) | PUT-only in Phase 1 — no PATCH |
+| 7 | Default page size (D4) | 25 — confirmed |
+| 8 | Project subresources (D6) | Nested `/api/projects/{projectId}/...` |
+| 9 | Estimating routes (D2) | `/api/estimating/trackers/...` and `/api/estimating/kickoffs/...` |
+| 10 | Tier 2 base routes (D1) | Plural |
+| 11 | Project aggregate (A8) | `/api/projects/summary` |
+| 12 | Auth routes (A9 partial) | External except `/api/auth/me` smoke utility |
+| 13 | Blocked work | Stays blocked — no speculative unblocking |
+| 14 | Smoke tests | Skip locally, fail in CI |
+| 15 | Vitest setup | First workstream owns it |
+| 16 | Delete response | `204 No Content` — confirmed |
+| 17 | Telemetry | Requests + dependencies + traces |
+| 18 | Request tracing | Response header AND error body |
 
 ### Terminology
 
@@ -57,13 +83,13 @@ Phase 1 contract testing establishes agreement between frontend proxy adapters (
 
 ### Document Scope
 
-P1-E1 is a **plan-level design document** governing the contract test suite for Phase 1. It defines schemas, test structure, and verification strategy. Implementation proceeds only for items with **TARGET** status whose prerequisites are met. Code examples are implementation guidance — not authorization to build speculative infrastructure or implement ahead of upstream deliverables. Where this document labels something PROVISIONAL, implementation must wait for the governing decision to resolve before committing that shape.
+P1-E1 is a **plan-level design document** governing the contract test suite for Phase 1. It defines schemas, test structure, and verification strategy. Implementation proceeds only for items with **TARGET** status whose prerequisites are met. Code examples are implementation guidance — not authorization to build speculative infrastructure or implement ahead of upstream deliverables. As of 2026-03-18, all transport-layer design decisions (D1–D6, A8) are **RESOLVED** — see [Locked Decisions Applied](#locked-decisions-applied). The only remaining PROVISIONAL area is Tier 3 (auth), which awaits C2.
 
 ### Non-Goals
 
 The following are explicitly out of scope for E1 implementation until their preconditions are met:
 
-- **Tier 2 domain schemas, handlers, or tests** — do not implement until C1 decisions D1/D2/D6 resolve and routes are confirmed for each domain.
+- **Tier 2 domain handlers or tests** — D1/D2/D6 route conventions are now resolved, but do not implement full test code until C1 delivers actual route handlers for each domain.
 - **Tier 3 (Auth) schemas or tests** — do not implement until C2 publishes auth routes (A9).
 - **Convenience wrapper methods on port interfaces** — use the exact method signatures from `@hbc/data-access/src/ports/`. Do not invent aliases.
 - **Root `vitest.workspace.ts` registration** — do not add `@hbc/models` or `@hbc/data-access` to the root workspace until they have stable, passing test suites. Package-local vitest configs are the primary requirement.
@@ -124,16 +150,16 @@ This is the single authoritative source for all open design decisions and workst
 
 **Table A: Open Design Decisions**
 
-| ID | Decision | Owner | E1 Impact | What Can Proceed Now | Unblock Condition |
+| ID | Decision | Owner | E1 Impact | Resolution | Status |
 |---|---|---|---|---|---|
-| D1 | Singular vs plural route paths (Schedule, Buyout, Risk, Scorecard) | P1-C1 | Tier 2 schema route-path assumptions | Tier 2 schema skeletons (field shapes only) | C1 publishes final route paths for these domains |
-| D2 | Estimating sub-resource routing (`/trackers`, `/kickoffs`) | P1-C1 | Estimating kickoff schema route assumption | Tier 1 tracker schemas; kickoff schema is Tier 2 skeleton | C1 publishes estimating sub-resource paths |
-| D3 | Error envelope field naming (`.error` vs `.message`) | P1-C1 + B1 | ErrorEnvelopeSchema field name, `extractErrorMessage()` | Schema written with `.error` + PROVISIONAL marker | C1 freezes error envelope spec |
-| D4 | Pagination default page size (25 vs 50) | P1-C1 + B1 | PaginationQuerySchema `.default(25)` | Schema uses current `DEFAULT_PAGE_SIZE` (25) + PROVISIONAL marker | C1 freezes pagination defaults |
-| D5 | PATCH support in proxy adapters | P1-C1 | Whether UpdateLeadRequestSchema needs PATCH semantics | PUT-only schemas written (current B1 pattern) | C1 decides PUT-only vs PUT+PATCH |
-| D6 | Nested project-scoped paths vs flat `?projectId=` query params | P1-C1 | Tier 2 domain route paths and MSW handler URL patterns | Tier 2 schema skeletons (field shapes only) | C1 publishes path structure for project-scoped domains |
-| A8 | Aggregate endpoint for projects | P1-C1 | PortfolioSummarySchema route path | Schema defined as Tier 2 (PROVISIONAL) | C1 publishes aggregate route |
-| A9 | Auth route catalog | P1-C2 | Tier 3 — no auth schema or tests | Capability-lane documentation only | C2 publishes auth route specs |
+| D1 | Singular vs plural route paths (Schedule, Buyout, Risk, Scorecard) | P1-C1 | Tier 2 schema route-path assumptions | **Plural** — all Tier 2 base routes use plural form | **RESOLVED** |
+| D2 | Estimating sub-resource routing (`/trackers`, `/kickoffs`) | P1-C1 | Estimating kickoff schema route assumption | `/api/estimating/trackers/...` and `/api/estimating/kickoffs/...` | **RESOLVED** |
+| D3 | Error envelope field naming (`.error` vs `.message`) | P1-C1 + B1 | ErrorEnvelopeSchema field name, `extractErrorMessage()` | **`message`** field — not `error` | **RESOLVED** |
+| D4 | Pagination default page size (25 vs 50) | P1-C1 + B1 | PaginationQuerySchema `.default(25)` | **25** — confirmed | **RESOLVED** |
+| D5 | PATCH support in proxy adapters | P1-C1 | Whether UpdateLeadRequestSchema needs PATCH semantics | **PUT-only** in Phase 1 | **RESOLVED** |
+| D6 | Nested project-scoped paths vs flat `?projectId=` query params | P1-C1 | Tier 2 domain route paths and MSW handler URL patterns | **Nested** `/api/projects/{projectId}/...` | **RESOLVED** |
+| A8 | Aggregate endpoint for projects | P1-C1 | PortfolioSummarySchema route path | `/api/projects/summary` | **RESOLVED** |
+| A9 | Auth route catalog | P1-C2 | Tier 3 — no auth schema or tests | External except `/api/auth/me` smoke utility; full auth routes still deferred to C2 | **PARTIAL** |
 
 **Table B: Workstream Blockers**
 
@@ -149,9 +175,9 @@ This is the single authoritative source for all open design decisions and workst
 ### Execution Guardrails
 
 - **Tier 1 (CONFIRMED):** Full implementation (contract schemas, tests, MSW handlers) is permitted only where all blocking dependencies are satisfied. For adapter contract tests, B1 must be merged. For route contract tests, C1 must be delivered.
-- **Tier 2 (PROVISIONAL):** Schema skeletons with PROVISIONAL markers are permitted. Full test code, MSW handlers, and route contract tests for Tier 2 domains must wait until C1 decisions D1/D2/D6 resolve and routes are confirmed.
-- **Tier 3 (NOT CATALOGED):** Auth remains entirely out of scope — no schema, no tests, no handlers — until C2 publishes auth route truth (A9).
-- **Transport-layer details:** Code that depends on D3 (error field naming), D4 (pagination defaults), D5 (PATCH support), or D6 (path nesting) must carry PROVISIONAL markers and be written against the current best-known shape, not an assumed resolution.
+- **Tier 2 (CONFIRMED routes):** D1 (plural), D2 (estimating sub-resources), D6 (nested project-scoped paths), and A8 (`/api/projects/summary`) are now resolved. Tier 2 schema route paths are CONFIRMED. Full test code, MSW handlers, and route contract tests for Tier 2 domains still require C1 to deliver the actual route handlers.
+- **Tier 3 (NOT CATALOGED):** Auth remains out of scope for full schemas — no auth schema or tests until C2 publishes auth route truth. `/api/auth/me` is available as a smoke utility only (decision 12).
+- **Transport-layer details (LOCKED):** D3 (`message` field), D4 (page size 25), D5 (PUT-only), D6 (nested paths), single-item `{ data: T }` wrapper, and Delete `204 No Content` are all locked. No PROVISIONAL markers remain on transport-layer conventions.
 - **No speculative unblocking:** Do not implement blocked tasks "optimistically" by guessing what B1/C1/C2 will deliver. Wait for the actual deliverable.
 
 ### Naming Conflict Resolution
@@ -300,10 +326,10 @@ E1 contract schemas validate the **transport shape** — the HTTP envelope wrapp
 **Key implications for E1:**
 - `IPagedResult<T>` uses `items: T[]` (**CURRENT**). If C1 defines a different transport shape field name (e.g., `data`), contract schemas adapt to the transport shape, not the domain interface.
 - E1 does NOT invent transport shapes — it codifies shapes defined by C1 and verified against domain interfaces in `@hbc/models`.
-- Open C1 decisions that affect the transport layer and therefore E1 schemas:
-  - **D3** — Error envelope field naming: `.error` vs `.message` (**PROVISIONAL**)
-  - **D4** — Pagination default page size: 25 (current `DEFAULT_PAGE_SIZE`) vs 50 (**PROVISIONAL**)
-  - **D5** — Update method: PUT-only (current B1) vs PUT+PATCH (**PROVISIONAL**)
+- Previously open C1 transport-layer decisions — all now **RESOLVED**:
+  - **D3** — Error envelope field naming: **`message`** (locked)
+  - **D4** — Pagination default page size: **25** (locked)
+  - **D5** — Update method: **PUT-only** in Phase 1 (locked)
 
 ### Type Source-of-Truth Rule
 
@@ -325,7 +351,7 @@ If this check produces a `never` type error, the schema has drifted from the can
 **What an implementer must NOT do:**
 - Do not treat `z.infer<typeof Schema>` as a replacement for the domain interface in production code
 - Do not import `Lead` (the Zod-inferred type) where `ILead` (the canonical interface) should be used
-- Do not add fields to a Zod schema that don't exist in the corresponding `@hbc/models` interface without a PROVISIONAL marker
+- Do not add fields to a Zod schema that don't exist in the corresponding `@hbc/models` interface
 - Do not assume `z.infer` validates conformance — it only derives a type from the schema definition
 
 ### Key Assumptions
@@ -340,12 +366,12 @@ If this check produces a `never` type error, the schema has drifted from the can
 
 ### Example Code Fidelity Rules
 
-All code examples in this plan must mirror the current repo interfaces unless explicitly labeled PROVISIONAL:
+All code examples in this plan must mirror the current repo interfaces and locked transport conventions:
 
 1. **Method names must match the port interface** — `ILeadRepository.getAll()`, `IProjectRepository.getProjects()`, `IEstimatingRepository.getAllTrackers()`, etc. Do not use generic CRUD aliases unless the port itself uses them.
 2. **Return types must match the port signature** — if the port returns `Promise<void>`, the test must not expect a boolean; if the port throws on not-found, the test must not expect null.
 3. **Field names and ID types must match `@hbc/models`** — Lead IDs are `number`, Project IDs are `string` (UUID), Estimating tracker IDs are `number`.
-4. **PROVISIONAL markers are required** where an example depends on an unresolved C1 decision (D3–D6, single-item envelope shape).
+4. **D3–D6 and single-item envelope shape are resolved.** No PROVISIONAL markers are needed for these transport decisions. PROVISIONAL markers remain only for Tier 3 (auth) and any future unresolved decisions.
 5. **BLOCKED examples must be labeled as representative** — code for tasks blocked on B1/C1/C2 is implementation guidance, not immediately executable.
 
 ---
@@ -358,11 +384,11 @@ E1 does not treat all 11 domains equally. Schemas are tiered by C1 contract conf
 
 | Tier | Domains | C1 Status | E1 Treatment |
 |---|---|---|---|
-| **Tier 1 — CONFIRMED** | Lead, Project (CRUD), Estimating (tracker CRUD) | Domain target groups confirmed in C1; transport details (D3–D6) remain provisional | Full Zod schemas + full test code + MSW fixtures |
-| **Tier 2 — PROVISIONAL** | Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP; Project (aggregate), Estimating (kickoff) | D1/D6/D2/A8 open | Domain-accurate schema skeletons with PROVISIONAL markers; no full test code |
-| **Tier 3 — NOT CATALOGED** | Auth | A9 — deferred to C2 | Capability-lane description only; no schema until C2 publishes routes |
+| **Tier 1 — CONFIRMED** | Lead, Project (CRUD), Estimating (tracker CRUD) | Domain target groups and transport details all confirmed | Full Zod schemas + full test code + MSW fixtures |
+| **Tier 2 — CONFIRMED routes** | Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP; Project (aggregate), Estimating (kickoff) | D1/D2/D6/A8 resolved; route paths locked | Domain-accurate schema skeletons with confirmed route paths; no full test code until C1 delivers handlers |
+| **Tier 3 — NOT CATALOGED** | Auth | A9 partial — `/api/auth/me` confirmed as smoke utility; full routes deferred to C2 | Capability-lane description only; no schema until C2 publishes full routes |
 
-**What "CONFIRMED" means:** The domain group, CRUD method families, and base route paths (`/api/leads`, `/api/projects`, `/api/estimating`) are stable. Transport-layer details — error envelope field naming (D3), pagination defaults (D4), PATCH support (D5), nested vs flat paths (D6), and single-item response wrapping — await final C1 decisions. Zod schemas for confirmed domains should be written against current `@hbc/models` interfaces and marked PROVISIONAL where they depend on unresolved transport decisions.
+**What "CONFIRMED" means:** The domain group, CRUD method families, base route paths (`/api/leads`, `/api/projects`, `/api/estimating/trackers`, `/api/estimating/kickoffs`), and all transport-layer details are stable. Error envelope uses `message` (D3), page size defaults to 25 (D4), Phase 1 is PUT-only (D5), project-scoped domains use nested paths (D6), single-item responses use `{ data: T }` wrapper, and delete returns 204. Zod schemas should be written against current `@hbc/models` interfaces with no PROVISIONAL markers on transport conventions.
 
 ### Task 1: Create Domain Zod Schemas in `@hbc/models`
 
@@ -400,14 +426,13 @@ import { z } from 'zod';
 /**
  * Standard error response envelope used across all error paths.
  *
- * PROVISIONAL (D3): B1 currently reads `.error` first with `.message` fallback.
- * The field name is not yet frozen in C1. If D3 resolves to `.message`, rename
- * the `error` field to `message` and update all downstream references.
+ * D3 RESOLVED: Field is `message` (not `error`).
+ * D18 RESOLVED: `requestId` is included in both the response header and the error body.
  */
 export const ErrorEnvelopeSchema = z.object({
-  error: z.string().describe('Human-readable error message (D3: may become .message)'),
+  message: z.string().describe('Human-readable error message'),
   code: z.string().describe('Machine-readable error code (e.g., NOT_FOUND, VALIDATION_ERROR)'),
-  requestId: z.string().optional().describe('Unique request ID for tracing'),
+  requestId: z.string().optional().describe('Unique request ID for tracing (also in response header)'),
   details: z.array(
     z.object({
       field: z.string().optional(),
@@ -422,8 +447,7 @@ export type ErrorEnvelope = z.infer<typeof ErrorEnvelopeSchema>;
  * Generic paged result wrapper.
  * Matches IPagedResult<T> from @hbc/models/shared which uses `items: T[]`.
  *
- * PROVISIONAL (D4): Default page size is 25 (DEFAULT_PAGE_SIZE from @hbc/models).
- * C1 decision D4 may change this to 50.
+ * D4 RESOLVED: Default page size is 25 (confirmed).
  */
 export const createPagedSchema = <T extends z.ZodType>(itemSchema: T) =>
   z.object({
@@ -436,8 +460,7 @@ export const createPagedSchema = <T extends z.ZodType>(itemSchema: T) =>
 /**
  * Standard pagination query parameters.
  *
- * PROVISIONAL (D4): pageSize default is 25 (matches DEFAULT_PAGE_SIZE).
- * C1 may change this to 50.
+ * D4 RESOLVED: pageSize default is 25 (confirmed).
  */
 export const PaginationQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
@@ -447,26 +470,26 @@ export const PaginationQuerySchema = z.object({
 export type PaginationQuery = z.infer<typeof PaginationQuerySchema>;
 
 /**
- * PROVISIONAL: Single-item responses (GET /:id, POST, PUT) use bare-object
- * returns — no { data: T } wrapper. See "Provisional Response-Envelope Convention"
- * section for full details. If C1 freezes a wrapper convention, add a
- * SuccessEnvelopeSchema here and update all downstream examples.
+ * LOCKED: Single-item responses (GET /:id, POST, PUT) use `{ data: T }` wrapper.
+ * See "Locked Response-Envelope Convention" section for full details.
  */
+export const createSuccessEnvelopeSchema = <T extends z.ZodType>(itemSchema: T) =>
+  z.object({
+    data: itemSchema.describe('Single-item response payload'),
+  });
 ```
 
-#### Provisional Response-Envelope Convention
+#### Locked Response-Envelope Convention
 
-All E1 code examples use the following transport shape conventions. These are the single source of truth for response shape assumptions across Tasks 3, 4, 5, 6, 7, and 8.
+All E1 code examples use the following transport shape conventions. These are the single source of truth for response shapes across Tasks 3, 4, 5, 6, 7, and 8. All conventions are now **LOCKED**.
 
 | Response Type | Example Route | Convention | Status | Schema Validation |
 |---|---|---|---|---|
-| **Collection** | `GET /api/leads` | `{ items: T[], total, page, pageSize }` | CONFIRMED — matches `IPagedResult<T>` | `createPagedSchema(LeadSchema)` |
-| **Search** | `GET /api/leads/search?q=` | Same as collection: `{ items: T[], total, page, pageSize }` | CONFIRMED — same shape as getAll | `createPagedSchema(LeadSchema)` |
-| **Single-item** | `GET /api/leads/:id`, `POST /api/leads`, `PUT /api/leads/:id` | **Bare object `T`** — no `{ data: T }` wrapper | PROVISIONAL — C1 may add wrapper | `LeadSchema` directly on `body` |
-| **Delete** | `DELETE /api/leads/:id` | `204 No Content` — empty body | PROVISIONAL | No schema validation needed |
-| **Error** | Any 4xx/5xx | `{ error, code, requestId?, details? }` | PROVISIONAL (D3: `error` may become `message`) | `ErrorEnvelopeSchema` |
-
-**C1 reconciliation:** C1 may define a different single-item response shape (e.g., `{ data: T }` wrapper, `{ result: T }`, or bare object). When C1 freezes the single-item convention, update all E1 examples and contract schemas to match. Until then, E1 uses bare-object returns as the provisional convention because it is the simpler assumption and matches the current MSW handler implementations. This is a documentation-level choice, not a runtime constraint — the actual shape will be whatever C1 delivers.
+| **Collection** | `GET /api/leads` | `{ items: T[], total, page, pageSize }` | **CONFIRMED** — matches `IPagedResult<T>` | `createPagedSchema(LeadSchema)` |
+| **Search** | `GET /api/leads/search?q=` | Same as collection: `{ items: T[], total, page, pageSize }` | **CONFIRMED** — same shape as getAll | `createPagedSchema(LeadSchema)` |
+| **Single-item** | `GET /api/leads/:id`, `POST /api/leads`, `PUT /api/leads/:id` | **`{ data: T }`** wrapper | **CONFIRMED** (decision 1) | `createSuccessEnvelopeSchema(LeadSchema)` on `body` |
+| **Delete** | `DELETE /api/leads/:id` | `204 No Content` — empty body | **CONFIRMED** (decision 16) | No schema validation needed |
+| **Error** | Any 4xx/5xx | `{ message, code, requestId?, details? }` | **CONFIRMED** (decision 2: `message` not `error`) | `ErrorEnvelopeSchema` |
 
 **File: `packages/models/src/api-schemas/lead-schema.ts`** (Tier 1 — CONFIRMED)
 
@@ -571,9 +594,9 @@ export const UpdateProjectRequestSchema = CreateProjectRequestSchema.partial();
 export type UpdateProjectRequest = z.infer<typeof UpdateProjectRequestSchema>;
 
 /**
- * Portfolio summary aggregate — Tier 2 (PROVISIONAL A8).
+ * Portfolio summary aggregate — Tier 2, route CONFIRMED (A8 resolved).
  * Matches IPortfolioSummary from @hbc/models/project.
- * Aggregate endpoint not yet in C1 catalog — route path TBD.
+ * Route: /api/projects/summary (A8: confirmed).
  */
 export const PortfolioSummarySchema = z.object({
   totalProjects: z.number().int().nonnegative(),
@@ -628,9 +651,9 @@ export const UpdateTrackerRequestSchema = CreateTrackerRequestSchema.partial();
 export type UpdateTrackerRequest = z.infer<typeof UpdateTrackerRequestSchema>;
 
 /**
- * Estimating Kickoff schema — Tier 2 (PROVISIONAL D2).
+ * Estimating Kickoff schema — Tier 2, route CONFIRMED (D2 resolved).
  * Matches IEstimatingKickoff from @hbc/models/estimating.
- * Sub-resource routing (how kickoff relates to tracker/project in the URL) is not finalized.
+ * Route: /api/estimating/kickoffs (D2: confirmed sub-resource routing).
  */
 export const EstimatingKickoffSchema = z.object({
   id: z.number().int().positive().describe('Unique kickoff identifier'),
@@ -644,13 +667,18 @@ export const EstimatingKickoffSchema = z.object({
 export type EstimatingKickoff = z.infer<typeof EstimatingKickoffSchema>;
 ```
 
-#### Tier 2 Domain Schemas — PROVISIONAL (D1, D6)
+#### Tier 2 Domain Schemas — CONFIRMED (D1, D6 resolved)
 
-The following 7 project-scoped domains have frozen `@hbc/models` interfaces but **provisional route paths**. C1 decisions D1 (singular vs plural path) and D6 (nested `/projects/{id}/{domain}` vs flat `/{domain}?projectId=`) are open. Schema fields match `@hbc/models` exactly; route paths and transport envelope may change when D1/D6 resolve.
+The following 7 project-scoped domains have frozen `@hbc/models` interfaces and **confirmed route conventions**:
+- **D1 (resolved):** All Tier 2 base routes use **plural** form.
+- **D6 (resolved):** Project-scoped domains use **nested** paths: `/api/projects/{projectId}/{domain}`.
+- **A8 (resolved):** Project aggregate endpoint is `/api/projects/summary`.
+
+Schema fields match `@hbc/models` exactly. Route paths follow the locked conventions above.
 
 No full test code is provided for Tier 2 schemas. Skeleton tests should validate basic parse/reject behavior only.
 
-**File: `packages/models/src/api-schemas/schedule-schema.ts`** — PROVISIONAL (D1, D6)
+**File: `packages/models/src/api-schemas/schedule-schema.ts`** — CONFIRMED (D1: plural, D6: nested `/api/projects/{projectId}/schedules`)
 
 ```typescript
 import { z } from 'zod';
@@ -658,6 +686,7 @@ import { z } from 'zod';
 /**
  * Schedule Activity — matches IScheduleActivity from @hbc/models/schedule.
  * Port: IScheduleRepository (getActivities, getActivityById, createActivity, updateActivity, deleteActivity, getMetrics)
+ * Route: /api/projects/{projectId}/schedules (D1: plural, D6: nested)
  * ID: numeric. Scoped by projectId.
  */
 export const ScheduleActivitySchema = z.object({
@@ -680,7 +709,7 @@ export const ScheduleMetricsSchema = z.object({
 });
 ```
 
-**File: `packages/models/src/api-schemas/buyout-schema.ts`** — PROVISIONAL (D1, D6)
+**File: `packages/models/src/api-schemas/buyout-schema.ts`** — CONFIRMED (D1: plural, D6: nested `/api/projects/{projectId}/buyouts`)
 
 ```typescript
 import { z } from 'zod';
@@ -688,6 +717,7 @@ import { z } from 'zod';
 /**
  * Buyout Entry — matches IBuyoutEntry from @hbc/models/buyout.
  * Port: IBuyoutRepository (getEntries, getEntryById, createEntry, updateEntry, deleteEntry, getSummary)
+ * Route: /api/projects/{projectId}/buyouts (D1: plural, D6: nested)
  * ID: numeric. Scoped by projectId.
  */
 export const BuyoutEntrySchema = z.object({
@@ -707,7 +737,7 @@ export const BuyoutSummarySchema = z.object({
 });
 ```
 
-**File: `packages/models/src/api-schemas/compliance-schema.ts`** — PROVISIONAL (D1, D6)
+**File: `packages/models/src/api-schemas/compliance-schema.ts`** — CONFIRMED (D1: plural, D6: nested `/api/projects/{projectId}/compliance`)
 
 ```typescript
 import { z } from 'zod';
@@ -715,6 +745,7 @@ import { z } from 'zod';
 /**
  * Compliance Entry — matches IComplianceEntry from @hbc/models/compliance.
  * Port: IComplianceRepository (getEntries, getEntryById, createEntry, updateEntry, deleteEntry, getSummary)
+ * Route: /api/projects/{projectId}/compliance (D1: plural, D6: nested)
  * ID: numeric. Scoped by projectId.
  */
 export const ComplianceEntrySchema = z.object({
@@ -735,7 +766,7 @@ export const ComplianceSummarySchema = z.object({
 });
 ```
 
-**File: `packages/models/src/api-schemas/contract-schema.ts`** — PROVISIONAL (D1, D6)
+**File: `packages/models/src/api-schemas/contract-schema.ts`** — CONFIRMED (D1: plural, D6: nested `/api/projects/{projectId}/contracts`)
 
 ```typescript
 import { z } from 'zod';
@@ -743,6 +774,7 @@ import { z } from 'zod';
 /**
  * Contract Info — matches IContractInfo from @hbc/models/contracts (Contracts business domain).
  * Port: IContractRepository (getContracts, getContractById, createContract, updateContract, deleteContract, getApprovals, createApproval)
+ * Route: /api/projects/{projectId}/contracts (D1: plural, D6: nested)
  * ID: numeric. Scoped by projectId. Has child entity: CommitmentApproval.
  */
 export const ContractInfoSchema = z.object({
@@ -766,7 +798,7 @@ export const CommitmentApprovalSchema = z.object({
 });
 ```
 
-**File: `packages/models/src/api-schemas/risk-schema.ts`** — PROVISIONAL (D1, D6)
+**File: `packages/models/src/api-schemas/risk-schema.ts`** — CONFIRMED (D1: plural, D6: nested `/api/projects/{projectId}/risks`)
 
 ```typescript
 import { z } from 'zod';
@@ -774,6 +806,7 @@ import { z } from 'zod';
 /**
  * Risk Cost Item — matches IRiskCostItem from @hbc/models/risk.
  * Port: IRiskRepository (getItems, getItemById, createItem, updateItem, deleteItem, getManagement)
+ * Route: /api/projects/{projectId}/risks (D1: plural, D6: nested)
  * ID: numeric. Scoped by projectId.
  */
 export const RiskCostItemSchema = z.object({
@@ -795,7 +828,7 @@ export const RiskCostManagementSchema = z.object({
 });
 ```
 
-**File: `packages/models/src/api-schemas/scorecard-schema.ts`** — PROVISIONAL (D1, D6)
+**File: `packages/models/src/api-schemas/scorecard-schema.ts`** — CONFIRMED (D1: plural, D6: nested `/api/projects/{projectId}/scorecards`)
 
 ```typescript
 import { z } from 'zod';
@@ -803,6 +836,7 @@ import { z } from 'zod';
 /**
  * Go/No-Go Scorecard — matches IGoNoGoScorecard from @hbc/models/scorecard.
  * Port: IScorecardRepository (getScorecards, getScorecardById, createScorecard, updateScorecard, deleteScorecard, getVersions)
+ * Route: /api/projects/{projectId}/scorecards (D1: plural, D6: nested)
  * ID: numeric. Scoped by projectId. Has child entity: ScorecardVersion.
  */
 export const GoNoGoScorecardSchema = z.object({
@@ -824,7 +858,7 @@ export const ScorecardVersionSchema = z.object({
 });
 ```
 
-**File: `packages/models/src/api-schemas/pmp-schema.ts`** — PROVISIONAL (D1, D6)
+**File: `packages/models/src/api-schemas/pmp-schema.ts`** — CONFIRMED (D1: plural, D6: nested `/api/projects/{projectId}/pmps`)
 
 ```typescript
 import { z } from 'zod';
@@ -832,6 +866,7 @@ import { z } from 'zod';
 /**
  * Project Management Plan — matches IProjectManagementPlan from @hbc/models/pmp.
  * Port: IPmpRepository (getPlans, getPlanById, createPlan, updatePlan, deletePlan, getSignatures, createSignature)
+ * Route: /api/projects/{projectId}/pmps (D1: plural, D6: nested)
  * ID: numeric. Scoped by projectId. Has child entity: PMPSignature.
  */
 export const ProjectManagementPlanSchema = z.object({
@@ -860,19 +895,19 @@ Auth is **not a data-domain with CRUD**. It is a read-heavy capability lane with
 
 **Auth capability groups (reference only):**
 
-| Group | Port Method | Model Interface | Assumed Route (A9 — NOT confirmed) |
-|---|---|---|---|
-| Current User | `getCurrentUser()` | `ICurrentUser` | `GET /api/auth/me` |
-| Roles | `getRoles()`, `getRoleById(id)` | `IRole` | `GET /api/auth/roles`, `GET /api/auth/roles/:id` |
-| Permission Templates | `getPermissionTemplates()` | `IPermissionTemplate` | `GET /api/auth/permissions/templates` |
-| Role Assignment | `assignRole(userId, roleId)`, `removeRole(userId, roleId)` | void return | `POST/DELETE /api/auth/users/:userId/roles/:roleId` |
+| Group | Port Method | Model Interface | Route | Status |
+|---|---|---|---|---|
+| Current User | `getCurrentUser()` | `ICurrentUser` | `GET /api/auth/me` | **CONFIRMED** (decision 12: smoke utility) |
+| Roles | `getRoles()`, `getRoleById(id)` | `IRole` | `GET /api/auth/roles`, `GET /api/auth/roles/:id` | Deferred to C2 |
+| Permission Templates | `getPermissionTemplates()` | `IPermissionTemplate` | `GET /api/auth/permissions/templates` | Deferred to C2 |
+| Role Assignment | `assignRole(userId, roleId)`, `removeRole(userId, roleId)` | void return | `POST/DELETE /api/auth/users/:userId/roles/:roleId` | Deferred to C2 |
 
 **Model interfaces** (from `@hbc/models/auth`):
 - `ICurrentUser` — `{ id: string, displayName: string, email: string, roles: IRole[] }`
 - `IRole` — `{ id: string, name: string, permissions: string[] }`
 - `IPermissionTemplate` — `{ id: string, name: string, description: string, permissions: string[] }`
 
-When C2 publishes auth routes, create `packages/models/src/api-schemas/auth-schema.ts` with schemas matching these interfaces. Until then, no auth schema file exists.
+**Decision 12 (partial A9):** `/api/auth/me` is confirmed as a smoke utility endpoint for validating token acceptance. Full auth route schemas remain deferred until C2 publishes the complete auth route catalog. When C2 delivers, create `packages/models/src/api-schemas/auth-schema.ts` with schemas matching these interfaces. Until then, no auth schema file exists — but smoke tests may use `/api/auth/me` to verify token validity.
 
 **File: `packages/models/src/api-schemas/index.ts`**
 
@@ -891,9 +926,9 @@ When C2 publishes auth routes, create `packages/models/src/api-schemas/auth-sche
  * The Contracts business domain models live in src/contracts/ — do not conflate the two.
  *
  * Tier 1 (CONFIRMED): shared, lead, project (CRUD), estimating (tracker)
- * Tier 2 (PROVISIONAL): schedule, buyout, compliance, contract, risk, scorecard, pmp,
- *   plus project (aggregate) and estimating (kickoff)
- * Tier 3 (NOT CATALOGED): auth — NO export until C2 publishes routes (A9)
+ * Tier 2 (CONFIRMED routes): schedule, buyout, compliance, contract, risk, scorecard, pmp,
+ *   plus project (aggregate) and estimating (kickoff) — D1/D2/D6/A8 resolved
+ * Tier 3 (NOT CATALOGED): auth — NO export until C2 publishes routes (A9 partial)
  */
 
 // Tier 1 — CONFIRMED
@@ -902,7 +937,7 @@ export * from './lead-schema';
 export * from './project-schema';
 export * from './estimating-schema';
 
-// Tier 2 — PROVISIONAL (D1, D6)
+// Tier 2 — CONFIRMED routes (D1: plural, D6: nested, D2: estimating sub-resources, A8: /api/projects/summary)
 export * from './schedule-schema';
 export * from './buyout-schema';
 export * from './compliance-schema';
@@ -938,7 +973,7 @@ import { ErrorEnvelopeSchema, createPagedSchema } from './shared-schema';
 describe('ErrorEnvelopeSchema', () => {
   it('valid error envelope passes validation', () => {
     const validError = {
-      error: 'Lead not found',
+      message: 'Lead not found',
       code: 'NOT_FOUND',
     };
     const result = ErrorEnvelopeSchema.safeParse(validError);
@@ -950,7 +985,7 @@ describe('ErrorEnvelopeSchema', () => {
 
   it('error envelope with requestId and details passes validation', () => {
     const withDetails = {
-      error: 'Validation failed',
+      message: 'Validation failed',
       code: 'VALIDATION_ERROR',
       requestId: 'req-12345',
       details: [
@@ -961,19 +996,19 @@ describe('ErrorEnvelopeSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('missing error message fails validation', () => {
+  it('missing message fails validation', () => {
     const invalid = { code: 'NOT_FOUND' };
     const result = ErrorEnvelopeSchema.safeParse(invalid);
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues).toContainEqual(
-        expect.objectContaining({ path: ['error'] })
+        expect.objectContaining({ path: ['message'] })
       );
     }
   });
 
   it('missing code fails validation', () => {
-    const invalid = { error: 'Something went wrong' };
+    const invalid = { message: 'Something went wrong' };
     const result = ErrorEnvelopeSchema.safeParse(invalid);
     expect(result.success).toBe(false);
   });
@@ -1248,7 +1283,7 @@ afterAll(() => server.close());
 | `msw-server.ts` | Server instance wired with `defaultHandlers` | Exports shared server |
 | `index.ts` | Barrel export for all test utilities | Public API for test consumers |
 
-**Boundary rule:** Do NOT pre-build handler arrays for Tier 2 (PROVISIONAL) or Tier 3 (NOT CATALOGED) domains. Add handlers only when the route contract is confirmed and the adapter class exists.
+**Boundary rule:** Tier 2 route conventions are now confirmed (D1/D2/D6/A8 resolved), but do NOT pre-build handler arrays for Tier 2 or Tier 3 domains until the actual route handlers exist in C1 and adapter classes exist in B1.
 
 ### Adapter Contract Test Readiness
 
@@ -1397,7 +1432,7 @@ export const leadsHandlers = [
     const q = url.searchParams.get('q') ?? '';
     if (!q) {
       return HttpResponse.json(
-        { error: 'Search query is required', code: 'VALIDATION_ERROR' },
+        { message: 'Search query is required', code: 'VALIDATION_ERROR' },
         { status: 400 }
       );
     }
@@ -1416,11 +1451,11 @@ export const leadsHandlers = [
     const lead = LEAD_FIXTURES.find((l) => l.id === Number(params.id));
     if (!lead) {
       return HttpResponse.json(
-        { error: 'Lead not found', code: 'NOT_FOUND', requestId: 'req-404-001' },
+        { message: 'Lead not found', code: 'NOT_FOUND', requestId: 'req-404-001' },
         { status: 404 }
       );
     }
-    return HttpResponse.json(lead, { status: 200 });
+    return HttpResponse.json({ data: lead }, { status: 200 });
   }),
 
   /** POST /api/leads — create lead */
@@ -1430,7 +1465,7 @@ export const leadsHandlers = [
     if (!validation.success) {
       return HttpResponse.json(
         {
-          error: 'Validation failed',
+          message: 'Validation failed',
           code: 'VALIDATION_ERROR',
           details: validation.error.issues.map((issue) => ({
             field: issue.path.join('.'),
@@ -1446,25 +1481,25 @@ export const leadsHandlers = [
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    return HttpResponse.json(newLead, { status: 201 });
+    return HttpResponse.json({ data: newLead }, { status: 201 });
   }),
 
-  /** PUT /api/leads/:id — update lead */
+  /** PUT /api/leads/:id — update lead (PUT-only, decision 6) */
   http.put(`${API_BASE}/leads/:id`, async ({ params, request }) => {
     const body = await request.json();
     const lead = LEAD_FIXTURES.find((l) => l.id === Number(params.id));
     if (!lead) {
-      return HttpResponse.json({ error: 'Lead not found', code: 'NOT_FOUND' }, { status: 404 });
+      return HttpResponse.json({ message: 'Lead not found', code: 'NOT_FOUND' }, { status: 404 });
     }
     const updated: Lead = { ...lead, ...body, id: lead.id, updatedAt: new Date().toISOString() };
-    return HttpResponse.json(updated, { status: 200 });
+    return HttpResponse.json({ data: updated }, { status: 200 });
   }),
 
-  /** DELETE /api/leads/:id */
+  /** DELETE /api/leads/:id — 204 No Content (decision 16) */
   http.delete(`${API_BASE}/leads/:id`, ({ params }) => {
     const lead = LEAD_FIXTURES.find((l) => l.id === Number(params.id));
     if (!lead) {
-      return HttpResponse.json({ error: 'Lead not found', code: 'NOT_FOUND' }, { status: 404 });
+      return HttpResponse.json({ message: 'Lead not found', code: 'NOT_FOUND' }, { status: 404 });
     }
     return new HttpResponse(null, { status: 204 });
   }),
@@ -1482,9 +1517,9 @@ export const projectsHandlers = [
   http.get(`${API_BASE}/projects/:id`, ({ params }) => {
     const project = PROJECT_FIXTURES.find((p) => p.id === params.id);
     if (!project) {
-      return HttpResponse.json({ error: 'Project not found', code: 'NOT_FOUND' }, { status: 404 });
+      return HttpResponse.json({ message: 'Project not found', code: 'NOT_FOUND' }, { status: 404 });
     }
-    return HttpResponse.json(project, { status: 200 });
+    return HttpResponse.json({ data: project }, { status: 200 });
   }),
 
   http.post(`${API_BASE}/projects`, async ({ request }) => {
@@ -1492,18 +1527,18 @@ export const projectsHandlers = [
     const validation = CreateProjectRequestSchema.safeParse(body);
     if (!validation.success) {
       return HttpResponse.json(
-        { error: 'Validation failed', code: 'VALIDATION_ERROR',
+        { message: 'Validation failed', code: 'VALIDATION_ERROR',
           details: validation.error.issues.map((i) => ({ field: i.path.join('.'), message: i.message })) },
         { status: 422 }
       );
     }
     const newProject = { ...validation.data, id: crypto.randomUUID() };
-    return HttpResponse.json(newProject, { status: 201 });
+    return HttpResponse.json({ data: newProject }, { status: 201 });
   }),
 ];
 
 export const estimatingHandlers = [
-  http.get(`${API_BASE}/estimating`, ({ request }) => {
+  http.get(`${API_BASE}/estimating/trackers`, ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') ?? 1);
     const pageSize = Number(url.searchParams.get('pageSize') ?? 25);
@@ -1511,20 +1546,20 @@ export const estimatingHandlers = [
     return HttpResponse.json(paged, { status: 200 });
   }),
 
-  http.get(`${API_BASE}/estimating/:id`, ({ params }) => {
+  http.get(`${API_BASE}/estimating/trackers/:id`, ({ params }) => {
     const record = ESTIMATING_FIXTURES.find((r) => r.id === Number(params.id));
     if (!record) {
-      return HttpResponse.json({ error: 'Tracker not found', code: 'NOT_FOUND' }, { status: 404 });
+      return HttpResponse.json({ message: 'Tracker not found', code: 'NOT_FOUND' }, { status: 404 });
     }
-    return HttpResponse.json(record, { status: 200 });
+    return HttpResponse.json({ data: record }, { status: 200 });
   }),
 
-  http.post(`${API_BASE}/estimating`, async ({ request }) => {
+  http.post(`${API_BASE}/estimating/trackers`, async ({ request }) => {
     const body = await request.json();
     const validation = CreateTrackerRequestSchema.safeParse(body);
     if (!validation.success) {
       return HttpResponse.json(
-        { error: 'Validation failed', code: 'VALIDATION_ERROR',
+        { message: 'Validation failed', code: 'VALIDATION_ERROR',
           details: validation.error.issues.map((i) => ({ field: i.path.join('.'), message: i.message })) },
         { status: 422 }
       );
@@ -1535,13 +1570,13 @@ export const estimatingHandlers = [
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    return HttpResponse.json(newTracker, { status: 201 });
+    return HttpResponse.json({ data: newTracker }, { status: 201 });
   }),
 ];
 
 /**
  * Default handlers for the three Tier 1 (CONFIRMED) domains.
- * Tier 2 (PROVISIONAL) domain handlers should be added as routes are confirmed.
+ * Tier 2 route conventions are confirmed (D1/D2/D6/A8); add handlers when C1 delivers route implementations.
  * Tier 3 (Auth) handlers require C2 to publish route specs first.
  */
 export const defaultHandlers = [
@@ -1551,17 +1586,18 @@ export const defaultHandlers = [
 ];
 ```
 
-**Future domain handlers (Tier 2 — pattern placeholders, not implementable yet):**
+**Future domain handlers (Tier 2 — route conventions confirmed, waiting on C1/B1 delivery):**
 
-When C1 decisions D1/D6 resolve and B1 delivers Tier 2 proxy repositories, add domain-specific handler arrays following the `leadsHandlers` pattern. Each requires:
-- Paged list handler (`GET /api/{domain}?page=&pageSize=` or project-scoped variant per D6)
-- Single-item handler (`GET /api/{domain}/:id`)
-- Create handler (`POST /api/{domain}`)
-- Update handler (`PUT /api/{domain}/:id`)
-- Delete handler (`DELETE /api/{domain}/:id` → `204 No Content`, no response body)
+D1/D6 are resolved (plural, nested). When C1 delivers Tier 2 route handlers and B1 delivers Tier 2 proxy repositories, add domain-specific handler arrays following the `leadsHandlers` pattern. Each requires:
+- Paged list handler (`GET /api/projects/{projectId}/{domain}?page=&pageSize=`)
+- Single-item handler (`GET /api/projects/{projectId}/{domain}/:id` — returns `{ data: T }` wrapper)
+- Create handler (`POST /api/projects/{projectId}/{domain}` — returns `{ data: T }` wrapper)
+- Update handler (`PUT /api/projects/{projectId}/{domain}/:id` — PUT-only, returns `{ data: T }` wrapper)
+- Delete handler (`DELETE /api/projects/{projectId}/{domain}/:id` → `204 No Content`, no response body)
+- Error responses use `{ message, code, requestId?, details? }` envelope
 - Aggregate/child handlers where applicable (e.g., Schedule metrics, Contract approvals)
 
-Do NOT pre-define handler arrays with undefined code names. Add them when the route contract is frozen and the adapter class exists.
+Do NOT pre-define handler arrays until C1 delivers the actual route handler implementations and B1 delivers the adapter classes.
 
 **File: `packages/data-access/src/test-utils/msw-server.ts`**
 
@@ -2359,7 +2395,7 @@ describe('Leads Route Handlers — Contract Tests', () => {
   });
 
   describe('handleGetLeadById()', () => {
-    it('returns single lead conforming to LeadSchema', async () => {
+    it('returns single lead conforming to LeadSchema in { data } wrapper', async () => {
       const services = createMockServiceFactory();
       const mockLead = {
         id: 1,
@@ -2380,8 +2416,8 @@ describe('Leads Route Handlers — Contract Tests', () => {
       expect(response.status).toBe(200);
       const body = JSON.parse(await response.text());
 
-      // Bare-object convention — see Provisional Response-Envelope Convention
-      const parsed = LeadSchema.safeParse(body);
+      // { data: T } wrapper — see Locked Response-Envelope Convention
+      const parsed = LeadSchema.safeParse(body.data);
       expect(parsed.success).toBe(true);
     });
 
@@ -2431,8 +2467,8 @@ describe('Leads Route Handlers — Contract Tests', () => {
       expect(response.status).toBe(201);
       const body = JSON.parse(await response.text());
 
-      // Bare-object convention — see Provisional Response-Envelope Convention
-      const parsed = LeadSchema.safeParse(body);
+      // { data: T } wrapper — see Locked Response-Envelope Convention
+      const parsed = LeadSchema.safeParse(body.data);
       expect(parsed.success).toBe(true);
     });
 
@@ -2548,16 +2584,16 @@ Expected: All tests pass (when prerequisites are met).
 
 **Objective:** Ensure all error paths return ErrorEnvelopeSchema-conformant responses.
 
-#### Frozen vs Provisional Error Envelope Fields
+#### Error Envelope Fields (All Locked)
 
 | Field | Status | Notes |
 |---|---|---|
-| `code` | **FROZEN** | Machine-readable error code (e.g., `NOT_FOUND`, `VALIDATION_ERROR`); required on all error responses |
-| `details` | **FROZEN** | Optional array of `{ field?, message }` for field-level validation errors |
-| `requestId` | **FROZEN** | Optional tracing correlation ID |
-| `error` | **PROVISIONAL (D3)** | Human-readable error message; may rename to `message` if D3 resolves that way |
+| `message` | **LOCKED** (D3 resolved) | Human-readable error message |
+| `code` | **LOCKED** | Machine-readable error code (e.g., `NOT_FOUND`, `VALIDATION_ERROR`); required on all error responses |
+| `details` | **LOCKED** | Optional array of `{ field?, message }` for field-level validation errors |
+| `requestId` | **LOCKED** | Optional tracing correlation ID (decision 18: also in response header) |
 
-Tests asserting `code`, `details`, and `requestId` are stable regardless of D3 resolution. Tests asserting the `error` field name must carry a PROVISIONAL marker and adapt if D3 resolves to `.message`.
+All error envelope fields are now locked. No PROVISIONAL markers remain.
 
 **Relationship to Task 6:** Task 6 contract tests already validate error-path shapes for specific route handlers (400, 404, 422 cases). Task 7 tests the error middleware function (`formatErrorResponse`) in isolation, covering all HTTP error status codes and ensuring the middleware itself always produces schema-conformant output. Together, Tasks 6 and 7 provide complete error-shape coverage — Task 7 at the middleware layer, Task 6 at the handler layer.
 
@@ -2640,8 +2676,8 @@ describe('Error Response Contract', () => {
       expect(parsed.success).toBe(true);
     });
 
-    it('error must have error and code fields', () => {
-      const incomplete = { error: 'Test error' };  // Missing 'code'
+    it('error must have message and code fields', () => {
+      const incomplete = { message: 'Test error' };  // Missing 'code'
 
       const parsed = ErrorEnvelopeSchema.safeParse(incomplete);
       expect(parsed.success).toBe(false);
@@ -2649,7 +2685,7 @@ describe('Error Response Contract', () => {
 
     it('requestId is optional', () => {
       const response = {
-        error: 'Not found',
+        message: 'Not found',
         code: 'NOT_FOUND',
         // no requestId
       };
@@ -2679,7 +2715,7 @@ export function formatErrorResponse(
   details?: Array<{ field?: string; message: string }>
 ): ErrorEnvelope {
   const response: ErrorEnvelope = {
-    error: message,
+    message,
     code,
     requestId,
     details,
@@ -2768,16 +2804,16 @@ The staging API is protected by Entra ID Bearer token validation (C2 deliverable
 
 **Skip/fail behavior:**
 
-| Condition | Behavior | Classification |
-|---|---|---|
-| `SMOKE_TEST_BASE_URL` not set | All smoke tests skip silently | Expected for local dev |
-| `AUTH_TOKEN` not set | All smoke tests skip with warning | Expected when auth not configured |
-| 401 response from staging | Test fails with diagnostic message | Operator error — token audience mismatch or expired |
-| 5xx response from staging | Test fails | Staging unavailable — retry later, not a contract failure |
-| Response shape mismatch | Test fails | **Actual contract failure** — investigate |
-| Network timeout / DNS failure | Test fails | Staging not deployed or unreachable |
+| Condition | Local Behavior | CI Behavior | Classification |
+|---|---|---|---|
+| `SMOKE_TEST_BASE_URL` not set | Skip silently | **Fail** (decision 14) | Local: expected; CI: env must be configured |
+| `AUTH_TOKEN` not set | Skip with warning | **Fail** (decision 14) | Local: expected; CI: token must be injected |
+| 401 response from staging | Fail with diagnostic | Fail with diagnostic | Operator error — token audience mismatch or expired |
+| 5xx response from staging | Fail | Fail | Staging unavailable — retry later, not a contract failure |
+| Response shape mismatch | Fail | Fail | **Actual contract failure** — investigate |
+| Network timeout / DNS failure | Fail | Fail | Staging not deployed or unreachable |
 
-**Skip pattern note:** The existing provisioning smoke test uses `SMOKE_TEST=true` + `describe.runIf(SMOKE_TEST)` as a boolean gate. E1 smoke tests use `describe.skipIf(!BASE_URL)` with env-var presence detection because they need the actual URL value, not just a boolean gate. Both patterns are acceptable.
+**Skip/fail pattern (decision 14):** Locally, smoke tests skip when env vars are absent. In CI, missing env vars must cause a hard failure — CI pipelines must set `SMOKE_TEST_BASE_URL` and `AUTH_TOKEN` or the test suite fails. The `CI` environment variable distinguishes the two modes. The existing provisioning smoke test uses `SMOKE_TEST=true` + `describe.runIf(SMOKE_TEST)` as a boolean gate. E1 smoke tests use env-var presence detection with CI-aware failure logic.
 
 **Token acquisition — operator/CI responsibility:**
 
@@ -2817,9 +2853,8 @@ import { LeadSchema, ActiveProjectSchema, createPagedSchema } from '@hbc/models/
  *
  * BLOCKED: Requires C1 (routes) + C2 (auth) + staging infrastructure.
  *
- * Response-shape convention: Single-item responses use bare-object returns
- * (no { data: T } wrapper). See "Provisional Response-Envelope Convention"
- * in the P1-E1 plan for full details.
+ * Response-shape convention: Single-item responses use `{ data: T }` wrapper.
+ * See "Locked Response-Envelope Convention" in the P1-E1 plan for full details.
  *
  * These tests run against a real staging instance (not mocked).
  * They verify that essential user flows work end-to-end.
@@ -2836,28 +2871,37 @@ import { LeadSchema, ActiveProjectSchema, createPagedSchema } from '@hbc/models/
 
 const BASE_URL = process.env.SMOKE_TEST_BASE_URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
+const IS_CI = !!process.env.CI;
 
 /**
- * Skip semantics — distinguish between different failure modes:
+ * Skip/fail semantics (decision 14):
  *
- * - Missing BASE_URL  → staging not provisioned or not targeted — skip silently
- * - Missing AUTH_TOKEN → auth not configured — skip with warning
- * - 401 response       → token audience mismatch or expired (operator error, not contract failure)
- * - 5xx response       → staging temporarily unavailable (retry, not contract failure)
- * - Wrong shapes       → actual contract failure (investigate)
+ * - LOCAL + missing env vars → skip silently (expected for local dev)
+ * - CI + missing env vars    → FAIL (CI must configure env)
+ * - 401 response             → fail (operator error — token audience mismatch or expired)
+ * - 5xx response             → fail (staging temporarily unavailable)
+ * - Wrong shapes             → fail (actual contract failure)
  */
+if (IS_CI && !BASE_URL) {
+  throw new Error('CI requires SMOKE_TEST_BASE_URL to be set for smoke tests');
+}
+if (IS_CI && !AUTH_TOKEN) {
+  throw new Error('CI requires AUTH_TOKEN to be set for smoke tests');
+}
+
 const skipReason = !BASE_URL
-  ? 'SMOKE_TEST_BASE_URL not set — staging not targeted'
+  ? 'SMOKE_TEST_BASE_URL not set — staging not targeted (local skip)'
   : !AUTH_TOKEN
-    ? 'AUTH_TOKEN not set — auth not configured for smoke tests'
+    ? 'AUTH_TOKEN not set — auth not configured (local skip)'
     : undefined;
 
 describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)', () => {
   /**
    * Test 1: Health check (no auth required)
-   * PROVISIONAL: P1-C1 catalog notes "Not found in repo" for GET /api/health.
+   * NOTE: P1-C1 catalog notes "Not found in repo" for GET /api/health.
    * This endpoint may not exist in staging. If it returns 404, this test should
    * be removed or adapted to whatever health/readiness probe C1 implements.
+   * Decision 12 also confirms /api/auth/me as a smoke utility — see Test 2.
    */
   it('health check endpoint responds 200', async () => {
     const response = await fetch(`${BASE_URL}/api/health`);
@@ -2930,6 +2974,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     expect(response.status).toBe(401);
     const body = await response.json();
     expect(body.code).toBe('UNAUTHORIZED');
+    expect(body.message).toBeDefined();
   });
 
   /**
@@ -2955,8 +3000,8 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     expect(response.status).toBe(201);
     const body = await response.json();
 
-    // Bare-object convention — see Provisional Response-Envelope Convention
-    const parsed = LeadSchema.safeParse(body);
+    // { data: T } wrapper — see Locked Response-Envelope Convention
+    const parsed = LeadSchema.safeParse(body.data);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       expect(parsed.data.title).toBe(createPayload.title);
@@ -2964,7 +3009,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     }
 
     // Return created lead id for subsequent tests
-    return body.id;
+    return body.data.id;
   });
 
   /**
@@ -2989,7 +3034,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     });
 
     const created = await createResponse.json();
-    const leadId = created.id;
+    const leadId = created.data.id;
 
     // Now fetch the created lead
     const getResponse = await fetch(`${BASE_URL}/api/leads/${leadId}`, {
@@ -3002,7 +3047,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     expect(getResponse.status).toBe(200);
     const body = await getResponse.json();
 
-    const parsed = LeadSchema.safeParse(body);
+    const parsed = LeadSchema.safeParse(body.data);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       expect(parsed.data.id).toBe(leadId);
@@ -3031,7 +3076,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     });
 
     const created = await createResponse.json();
-    const leadId = created.id;
+    const leadId = created.data.id;
 
     // Update the lead
     const updatePayload = {
@@ -3051,7 +3096,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     expect(updateResponse.status).toBe(200);
     const body = await updateResponse.json();
 
-    const parsed = LeadSchema.safeParse(body);
+    const parsed = LeadSchema.safeParse(body.data);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       expect(parsed.data.stage).toBe('Bidding');
@@ -3081,7 +3126,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     });
 
     const created = await createResponse.json();
-    const leadId = created.id;
+    const leadId = created.data.id;
 
     // Delete the lead
     const deleteResponse = await fetch(`${BASE_URL}/api/leads/${leadId}`, {
@@ -3128,8 +3173,8 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
     expect(response.status).toBe(201);
     const body = await response.json();
 
-    // Bare-object convention — see Provisional Response-Envelope Convention
-    const parsed = ActiveProjectSchema.safeParse(body);
+    // { data: T } wrapper — see Locked Response-Envelope Convention
+    const parsed = ActiveProjectSchema.safeParse(body.data);
     expect(parsed.success).toBe(true);
   });
 
@@ -3176,7 +3221,7 @@ pnpm --filter @hbc/functions test:smoke
 CI pipeline: set `SMOKE_TEST_BASE_URL` and `AUTH_TOKEN` as pipeline secrets/variables. Token must be acquired per-run with correct API audience scope — see "Smoke test authentication policy" above.
 
 **Interpreting results:**
-- All tests skip → env vars not set (expected for local dev without staging)
+- All tests skip → env vars not set (expected for local dev; **fails in CI** per decision 14)
 - Auth diagnostic test fails (401) → token audience mismatch or expired (operator error, not contract failure)
 - Domain tests fail with 5xx → staging temporarily unavailable (retry)
 - Domain tests fail with wrong shapes → actual contract failure (investigate)
@@ -3285,12 +3330,20 @@ import { describe, it, expect } from 'vitest';
 
 const BASE_URL = process.env.SMOKE_TEST_BASE_URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
+const IS_CI = !!process.env.CI;
 
-// Same skip semantics as critical-paths smoke tests — see that file for full documentation
+// Same skip/fail semantics as critical-paths smoke tests (decision 14)
+if (IS_CI && !BASE_URL) {
+  throw new Error('CI requires SMOKE_TEST_BASE_URL to be set for telemetry baseline tests');
+}
+if (IS_CI && !AUTH_TOKEN) {
+  throw new Error('CI requires AUTH_TOKEN to be set for telemetry baseline tests');
+}
+
 const skipReason = !BASE_URL
-  ? 'SMOKE_TEST_BASE_URL not set — staging not targeted'
+  ? 'SMOKE_TEST_BASE_URL not set — staging not targeted (local skip)'
   : !AUTH_TOKEN
-    ? 'AUTH_TOKEN not set — auth not configured for smoke tests'
+    ? 'AUTH_TOKEN not set — auth not configured (local skip)'
     : undefined;
 
 describe.skipIf(skipReason !== undefined)('Telemetry Baseline (Staging)', () => {
@@ -3518,7 +3571,7 @@ Expected: All tests in each lane pass when their prerequisites are met.
 | 1 | 2 | Add Zod to `@hbc/models/package.json` | — | Implementable now | **TARGET** |
 | 1 | 10 (partial) | Vitest config for `@hbc/models` and `@hbc/data-access` | — | Implementable now (coordinate with D1) | **TARGET** |
 | 1 | 1 | Contract schemas — Tier 1 (Lead, Project CRUD, Estimating tracker) | 1 | Implementable after Tasks 2 + 10 | **TARGET** |
-| 1 | 1 | Contract schemas — Tier 2 (7 provisional domains + aggregates) | 2 | Preparatory only — schema skeletons with PROVISIONAL markers | **PROVISIONAL** |
+| 1 | 1 | Contract schemas — Tier 2 (7 domains + aggregates, routes confirmed) | 2 | Schema skeletons with confirmed route paths; no full tests until C1 delivers handlers | **TARGET** (routes confirmed) |
 | 1 | 1 | Auth capability-lane description (Tier 3) | 3 | Blocked — no schema until C2 publishes routes | **BLOCKED** on C2 (A9) |
 | 2 | 3 | MSW server and handlers (Tier 1 domains only) | 1 | Implementable after Task 10 (partial) | **TARGET** |
 | 2 | 4 | Adapter contract tests (Leads) | 1 | Blocked — B1 must deliver proxy repositories | **BLOCKED** on B1 |
@@ -3575,8 +3628,8 @@ Failure to update this document after implementation creates drift that misleads
 | Auth token audience mismatch in smoke tests | Medium | High | Require `--resource api://<CLIENT_ID>` flag; see Task 8 auth token expectations |
 | Staging environment downtime | Low | Medium | Smoke tests skip gracefully when `SMOKE_TEST_BASE_URL` absent |
 | `contracts/` naming collision with business domain | — | — | **Resolved:** `api-schemas/` directory; see Naming Conflict Resolution |
-| Provisional transport shapes become stale | Medium | Medium | Tier 2 schemas carry PROVISIONAL markers; adaptation notes per domain |
-| Transport shape field naming (D3) changes | Medium | Medium | ErrorEnvelopeSchema `error` field marked PROVISIONAL (D3); single adaptation point |
+| ~~Provisional transport shapes become stale~~ | ~~Medium~~ | ~~Medium~~ | **RESOLVED** — D1/D2/D3/D4/D5/D6/A8 all locked; no provisional transport shapes remain |
+| ~~Transport shape field naming (D3) changes~~ | ~~Medium~~ | ~~Medium~~ | **RESOLVED** — D3 locked: `message` field confirmed |
 
 ---
 
@@ -3596,11 +3649,11 @@ After upstream dependencies deliver:
 
 Before handing any E1 task to an implementation agent, confirm:
 
-- [ ] The task's status is **TARGET** (not BLOCKED or PROVISIONAL)
+- [ ] The task's status is **TARGET** (not BLOCKED)
 - [ ] All prerequisites in the Execution Sequence with Acceptance Criteria table are met
 - [ ] The Readiness Gate (if applicable for Tasks 8-9) shows all prerequisites as MET
 - [ ] The `Last Reviewed Against Repo Truth` date is within 7 days
 - [ ] The Blocker Ledger reflects current upstream status
 - [ ] The implementer has read the Execution Guardrails section
 - [ ] The implementer knows which vitest project and command to use for verification
-- [ ] No PROVISIONAL markers exist on code the task depends on (or the implementer accepts adaptation risk)
+- [ ] All transport-layer decisions the task depends on are locked (D1–D6, A8 are all resolved)
