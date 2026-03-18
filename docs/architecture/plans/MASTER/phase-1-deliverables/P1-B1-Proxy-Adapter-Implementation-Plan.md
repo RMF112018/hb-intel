@@ -5,7 +5,7 @@
 | **Workstream** | B — Adapter Completion |
 | **Document Type** | Engineering Plan |
 | **Status** | Draft v2 — corrected against repo truth |
-| **Last Updated** | 2026-03-17 |
+| **Last Updated** | 2026-03-18 |
 | **Owner** | Frontend Platform / Data Access |
 
 # Proxy Adapter Implementation Plan
@@ -582,7 +582,9 @@ export class ProxyHttpClient {
 
       return await this.handleResponse<T>(response);
     } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
+      // AbortSignal.timeout() throws TimeoutError in Node 18+ and modern browsers,
+      // but some environments still throw AbortError. Check for both.
+      if (err instanceof DOMException && (err.name === 'TimeoutError' || err.name === 'AbortError')) {
         throw new HbcDataAccessError(
           `Request timeout after ${this.timeoutMs}ms`,
           'TIMEOUT',
@@ -598,6 +600,19 @@ export class ProxyHttpClient {
       }
       throw err;
     }
+  }
+
+  /**
+   * Extract a human-readable error message from a backend error response body.
+   * Reads `.error` first (C1 contract), falls back to `.message` for compatibility.
+   * See decision D3: field name must be reconciled with C1 before production.
+   */
+  private extractErrorMessage(body: unknown, fallback: string): string {
+    if (typeof body === 'object' && body !== null) {
+      if ('error' in body) return String((body as Record<string, unknown>).error);
+      if ('message' in body) return String((body as Record<string, unknown>).message);
+    }
+    return fallback;
   }
 
   private async handleResponse<T>(response: Response): Promise<T> {
@@ -628,14 +643,10 @@ export class ProxyHttpClient {
 
       case 422:
         // Unprocessable entity — validation error
-        const validationData = isJson ? body : undefined;
-        const message =
-          typeof validationData === 'object' &&
-          validationData !== null &&
-          'message' in validationData
-            ? String(validationData.message)
-            : 'Validation failed';
-        throw new ValidationError(message);
+        // Uses extractErrorMessage for dual-field compatibility (D3)
+        throw new ValidationError(
+          this.extractErrorMessage(isJson ? body : undefined, 'Validation failed'),
+        );
 
       case 401:
       case 403:
@@ -650,19 +661,13 @@ export class ProxyHttpClient {
       case 502:
       case 503:
         throw new HbcDataAccessError(
-          `Server error (${response.status}): backend service unavailable`,
+          `Server error (${response.status}): ${this.extractErrorMessage(body, 'backend service unavailable')}`,
           'SERVER_ERROR',
         );
 
       default:
-        const message =
-          typeof body === 'object' &&
-          body !== null &&
-          'message' in body
-            ? String(body.message)
-            : `HTTP ${response.status}`;
         throw new HbcDataAccessError(
-          `${response.status} ${response.statusText}: ${message}`,
+          `${response.status} ${response.statusText}: ${this.extractErrorMessage(body, `HTTP ${response.status}`)}`,
           `HTTP_${response.status}`,
         );
     }
@@ -779,19 +784,35 @@ describe('ProxyHttpClient', () => {
       expect(err.code).toBe('UNAUTHORIZED');
     });
 
-    it('should throw HbcDataAccessError on 500', async () => {
+    it('should throw HbcDataAccessError on 500 with C1 error field', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error',
         headers: new Headers({ 'content-type': 'application/json' }),
-        json: async () => ({ message: 'Database error' }),
+        json: async () => ({ error: 'Database error', code: 'DB_ERROR', requestId: 'req-123' }),
       });
 
       client = createClient();
       const err = await client.get('/api/leads').catch((e) => e);
       expect(err).toBeInstanceOf(HbcDataAccessError);
       expect(err.code).toBe('SERVER_ERROR');
+      expect(err.message).toContain('Database error');
+    });
+
+    it('should fall back to .message field when .error is absent', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => ({ message: 'Legacy error format' }),
+      });
+
+      client = createClient();
+      const err = await client.get('/api/leads').catch((e) => e);
+      expect(err).toBeInstanceOf(HbcDataAccessError);
+      expect(err.message).toContain('Legacy error format');
     });
 
     it('should throw HbcDataAccessError on network error', async () => {
@@ -824,13 +845,13 @@ describe('ProxyHttpClient', () => {
       expect(result).toEqual(responseData);
     });
 
-    it('should throw ValidationError on 422', async () => {
+    it('should throw ValidationError on 422 with C1 error field', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 422,
         statusText: 'Unprocessable Entity',
         headers: new Headers({ 'content-type': 'application/json' }),
-        json: async () => ({ message: 'Title is required' }),
+        json: async () => ({ error: 'Title is required', code: 'VALIDATION_ERROR' }),
       });
 
       client = createClient();
@@ -2956,7 +2977,7 @@ C1 defines these standard response shapes. All B1 proxy adapter code must confor
 
 | Concern | B1 Current Code | C1 Contract | Action Required |
 |---|---|---|---|
-| **Error field name** | Reads `body.message` in `handleResponse()` | Sends `body.error` | **Must fix:** Update `handleResponse` to read `.error` field instead of `.message`, or read both with `.error` preferred |
+| **Error field name** | `extractErrorMessage()` reads `.error` first (C1), falls back to `.message` | Sends `body.error` | **Resolved provisionally:** Dual-field extraction implemented; `.error` preferred per C1 contract, `.message` accepted for compatibility. Final reconciliation when C1 freezes (decision D3) |
 | **Error code field** | Does not read response `code` | Sends `code` in error body | **Should use:** Map C1's `code` field to `HbcDataAccessError.code` when available |
 | **Request ID in errors** | Not extracted from error response | Sends `requestId` in error body | **Optional:** Could log `requestId` from error response for debugging |
 | **Default pageSize** | `mapPagedResponse` defaults to 20; `@hbc/models` `DEFAULT_PAGE_SIZE` = 25 | Default 50, max 200 | **Must align:** Use C1's default (50) or explicitly pass pageSize on every request |
