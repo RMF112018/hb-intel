@@ -24,6 +24,25 @@ This document is **not** a claim that all listed routes, features, or infrastruc
 - **PREP-ONLY** sections can be reviewed for correctness but cannot produce pass/fail results without staging infrastructure.
 - Sections marked with PROVISIONAL items should note which items may change when upstream decisions (D3–D6) resolve.
 
+### Domain Example Fidelity Rules
+
+All example payloads, ID types, field names, and response assertions in this checklist must mirror the current `@hbc/models` interfaces and `@hbc/data-access` port signatures unless explicitly marked PROVISIONAL.
+
+| Domain | Canonical Interface | ID Type | Writable Fields (`FormData`) | Port Interface |
+|---|---|---|---|---|
+| **Lead** | `ILead` | `number` | `title`, `stage` (LeadStage enum), `clientName`, `estimatedValue` | `ILeadRepository` |
+| **Project** | `IActiveProject` | `string` (UUID) | `name`, `number`, `status`, `startDate`, `endDate` | `IProjectRepository` |
+| **Estimating Tracker** | `IEstimatingTracker` | `number` | `projectId`, `bidNumber`, `status`, `dueDate` | `IEstimatingRepository` |
+| **Estimating Kickoff** | `IEstimatingKickoff` | `number` | `projectId`, `kickoffDate`, `attendees`, `notes` | `IEstimatingRepository` |
+
+**LeadStage valid values:** `Identified`, `Qualifying`, `BidDecision`, `Bidding`, `Awarded`, `Lost`, `Declined`
+
+**Rules:**
+- Do not use UUID examples for lead or estimating tracker IDs — they are numeric.
+- Do not use field names that differ from the canonical interface (e.g., `name` for leads — the correct field is `title`).
+- Do not treat estimating as a flat `/api/estimates` CRUD resource — it is split into tracker CRUD and kickoff operations.
+- If a route path is not yet frozen by C1, mark it PROVISIONAL.
+
 ---
 
 ## Repo Truth Snapshot (2026-03-18)
@@ -138,7 +157,7 @@ Confirm `GET` endpoints return paginated responses and 404 for missing records.
 
 **NOTE:** No leads route handlers exist in the repo today. `backend/functions/src/functions/` contains only provisioning, proxy, notification, acknowledgment, signalr, and timer functions. C1 must deliver `leads.handler.ts` before this section is executable.
 
-**Domain model reference:** Leads use **numeric IDs** (not UUIDs). Writable fields: `title`, `stage` (LeadStage enum), `clientName`, `estimatedValue`. See `ILead` in `@hbc/models`.
+**Domain model reference:** Leads use **numeric IDs** (not UUIDs). Writable fields per `ILeadFormData`: `title`, `stage` (LeadStage enum), `clientName`, `estimatedValue`. Response fields per `ILead`: `id` (number), `title`, `stage`, `clientName`, `estimatedValue`, `createdAt`, `updatedAt`. Valid `LeadStage` values: `Identified`, `Qualifying`, `BidDecision`, `Bidding`, `Awarded`, `Lost`, `Declined`.
 
 - [ ] `GET /api/leads` with valid token → 200 with `{ items: [...], total, page, pageSize }` (collection response per P1-E1 envelope convention)
 - [ ] `GET /api/leads?page=1&pageSize=5` respects pagination (returns max 5 items)
@@ -156,12 +175,13 @@ Confirm read endpoints work for projects domain.
 
 **Depends on:** C1 (project route handlers), C2 (auth middleware), Platform (staging deployment)
 
-**Domain model reference:** Projects use **string UUID IDs**. Writable fields: `name`, `number`, `status`, `startDate`, `endDate`. See `IActiveProject` in `@hbc/models`.
+**Domain model reference:** Projects use **string UUID IDs**. Writable fields per `IProjectFormData`: `name`, `number`, `status`, `startDate`, `endDate`. Response fields per `IActiveProject`: `id` (string UUID), `name`, `number`, `status`, `startDate`, `endDate`.
 
-- [ ] `GET /api/projects` with valid token → 200 with paginated response
+- [ ] `GET /api/projects` with valid token → 200 with paginated response `{ items: [...], total, page, pageSize }`
 - [ ] `GET /api/projects?page=2&pageSize=10` respects pagination
-- [ ] `GET /api/projects/{valid-uuid}` returns single project with 200
+- [ ] `GET /api/projects/{valid-uuid}` returns single project with 200 (bare-object response)
 - [ ] `GET /api/projects/{invalid-uuid}` returns 404 conforming to ErrorEnvelopeSchema
+- [ ] Project response includes all `IActiveProject` fields: `id` (string UUID), `name`, `number`, `status`, `startDate`, `endDate`
 
 ---
 
@@ -177,10 +197,16 @@ Confirm read endpoints work for estimating domain.
 
 See `IEstimatingTracker`, `IEstimatingKickoff`, and `IEstimatingRepository` in `@hbc/models` and `@hbc/data-access/src/ports/`.
 
-- [ ] `GET /api/estimating/trackers` with valid token → 200 with paginated response (PROVISIONAL — base route path confirmed, but D2 sub-resource routing may change)
-- [ ] `GET /api/estimating/trackers/{numeric-id}` returns single tracker with 200
+### Tracker Reads (Tier 1 — CONFIRMED)
+- [ ] `GET /api/estimating/trackers` with valid token → 200 with paginated response `{ items: [...], total, page, pageSize }` (PROVISIONAL — base route path confirmed, but D2 sub-resource routing may change)
+- [ ] `GET /api/estimating/trackers/{numeric-id}` returns single tracker with 200 (bare-object response)
 - [ ] `GET /api/estimating/trackers/{nonexistent-id}` returns 404 conforming to ErrorEnvelopeSchema
-- [ ] Tracker response includes all `IEstimatingTracker` fields: `id` (number), `projectId`, `bidNumber`, `status`, `dueDate`, `createdAt`, `updatedAt`
+- [ ] Tracker response includes all `IEstimatingTracker` fields: `id` (number), `projectId` (string), `bidNumber`, `status`, `dueDate`, `createdAt`, `updatedAt`
+
+### Kickoff Reads (Tier 2 — PROVISIONAL, D2 routing open)
+- [ ] `GET /api/estimating/kickoffs/{projectId}` returns kickoff record for the project with 200 (PROVISIONAL — D2 sub-resource routing not frozen; path may change)
+- [ ] Kickoff response includes all `IEstimatingKickoff` fields: `id` (number), `projectId` (string), `kickoffDate`, `attendees` (string[]), `notes`, `createdAt`
+- [ ] `GET /api/estimating/kickoffs/{nonexistent-projectId}` returns 404 conforming to ErrorEnvelopeSchema
 
 ---
 
@@ -219,23 +245,48 @@ Confirm create, update, delete for projects.
 
 **Depends on:** C1 (project route handlers), C2 (auth middleware), Platform (staging deployment)
 
+**Domain model reference:** Create/update body per `IProjectFormData`: `name`, `number`, `status`, `startDate`, `endDate`. All fields are required for create; update is partial.
+
+### Create
 - [ ] `POST /api/projects` with `{ name: "Highway Widening", number: "PRJ-HW2026", status: "Planning", startDate: "2026-04-01T00:00:00Z", endDate: "2026-12-31T00:00:00Z" }` → 201 with UUID `id`
-- [ ] `POST /api/projects` missing `name` → 422 with ErrorEnvelopeSchema response
-- [ ] `PUT /api/projects/{valid-uuid}` with `{ status: "Active" }` → 200, unchanged fields preserved
-- [ ] `DELETE /api/projects/{valid-uuid}` → 204, verify deleted
+- [ ] `POST /api/projects` missing `name` → 422 with ErrorEnvelopeSchema response including `details` array
+- [ ] Response includes all `IActiveProject` fields with server-generated `id` (string UUID)
+
+### Update
+- [ ] `PUT /api/projects/{valid-uuid}` with `{ status: "Active" }` → 200, unchanged fields preserved (bare-object response)
+- [ ] `PUT /api/projects/{invalid-uuid}` → 404 conforming to ErrorEnvelopeSchema
+
+### Delete
+- [ ] `DELETE /api/projects/{valid-uuid}` → 204 (No Content, empty body)
+- [ ] Verify project is actually deleted: `GET /api/projects/{uuid}` → 404
 
 ---
 
 ## Section 8: Domain Writes — Estimating — BLOCKED on C1 + C2
 
-Confirm create, update, delete for estimating trackers.
+Confirm create, update, delete for estimating trackers and kickoff creation.
 
 **Depends on:** C1 (estimating route handlers), C2 (auth middleware), Platform (staging deployment)
 
-- [ ] `POST /api/estimating/trackers` with `{ projectId: "{uuid}", bidNumber: "BID-2026-001", status: "Draft", dueDate: "2026-05-01T00:00:00Z" }` → 201 with numeric `id`
-- [ ] `POST /api/estimating/trackers` without `projectId` → 422 with ErrorEnvelopeSchema response
-- [ ] `PUT /api/estimating/trackers/{numeric-id}` with `{ status: "InProgress" }` → 200
-- [ ] `DELETE /api/estimating/trackers/{numeric-id}` → 204
+### Tracker Writes (Tier 1 — CONFIRMED)
+
+**Domain model reference:** Create/update body per `IEstimatingTrackerFormData`: `projectId` (string), `bidNumber`, `status`, `dueDate`. All fields required for create; update is partial.
+
+- [ ] `POST /api/estimating/trackers` with `{ projectId: "770e8400-e29b-41d4-a716-446655440001", bidNumber: "BID-2026-001", status: "Draft", dueDate: "2026-05-01T00:00:00Z" }` → 201 with numeric `id`
+- [ ] `POST /api/estimating/trackers` without `projectId` → 422 with ErrorEnvelopeSchema response including `details` array
+- [ ] Response includes all `IEstimatingTracker` fields with server-generated `id` (number), `createdAt`, `updatedAt`
+- [ ] `PUT /api/estimating/trackers/{numeric-id}` with `{ status: "InProgress" }` → 200, unchanged fields preserved (bare-object response)
+- [ ] `PUT /api/estimating/trackers/{nonexistent-id}` → 404 conforming to ErrorEnvelopeSchema
+- [ ] `DELETE /api/estimating/trackers/{numeric-id}` → 204 (No Content, empty body)
+- [ ] Verify tracker is actually deleted: `GET /api/estimating/trackers/{id}` → 404
+
+### Kickoff Writes (Tier 2 — PROVISIONAL, D2 routing open)
+
+**Domain model reference:** Create body per `IEstimatingKickoffFormData`: `projectId` (string), `kickoffDate`, `attendees` (string[]), `notes`.
+
+- [ ] `POST /api/estimating/kickoffs` with `{ projectId: "770e8400-e29b-41d4-a716-446655440001", kickoffDate: "2026-04-01T09:00:00Z", attendees: ["Alice", "Bob"], notes: "Initial kickoff" }` → 201 with numeric `id` (PROVISIONAL — D2 route path not frozen)
+- [ ] `POST /api/estimating/kickoffs` without `projectId` → 422 with ErrorEnvelopeSchema response
+- [ ] Response includes all `IEstimatingKickoff` fields with server-generated `id` (number) and `createdAt`
 
 ---
 
