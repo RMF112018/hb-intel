@@ -15,7 +15,7 @@
 
 ## Policy Statement
 
-Mock adapters must not appear in any production-facing data flow. All production and staging environments must use real adapters (proxy, sharepoint, or api). There is no acceptable scenario in which mock data serves real users or real business decisions. A mock adapter detected in production constitutes an incident requiring immediate response.
+Mock adapters must not appear in any production-facing data flow. All production environments must use real adapters (proxy, sharepoint, or api) with no exceptions. Staging environments must use real adapters under normal operations; a time-boxed emergency exception requires dual approval from B-workstream lead and DevOps lead (see Exception Approval Authority). There is no acceptable scenario in which mock data serves real users or real business decisions. A mock adapter detected in production constitutes an incident requiring immediate response.
 
 ---
 
@@ -24,7 +24,7 @@ Mock adapters must not appear in any production-facing data flow. All production
 ### This policy governs
 
 - When mock adapters may be used (development, unit tests, CI test runs)
-- When mock adapters are prohibited (staging, production)
+- When mock adapters are prohibited (production — absolute; staging — default, with documented emergency exception)
 - How adapter mode is resolved and enforced at runtime
 - How test lanes are governed across the Phase 1 gate progression
 - How production rollout is governed with respect to mock isolation
@@ -146,7 +146,7 @@ The startup guard needs to know whether mock mode is permissible. Each surface d
 | **CI — unit tests** | CI pipeline config | `'mock'` | Yes — required for isolation | CI pipeline config |
 | **CI — mocked-proxy tests** | CI pipeline config | `'proxy'` (mocked fetch) | Yes (fetch layer only) | CI pipeline config |
 | **CI — contract tests** | CI pipeline config | `'proxy'` against test backend | No | CI pipeline config + test backend |
-| **Staging** | Azure slot config / Vite production build | `'proxy'` (or other real adapter) | **No** | Startup guard + deployment gate |
+| **Staging** | Azure slot config / Vite production build | `'proxy'` (or other real adapter) | **No** (emergency exception only — see Exception Approval Authority) | Startup guard + deployment gate |
 | **Production** | `AZURE_FUNCTIONS_ENVIRONMENT='Production'` / Vite production build | `'proxy'` (or other real adapter) | **No — zero tolerance** | Startup guard + deployment gate |
 | **Demo / sandbox** | Explicit labeling | `'mock'` if no customer data | Conditional | Labeling requirement |
 
