@@ -198,10 +198,29 @@ A new `IdempotencyStorageService` class (following the `TableClient.fromConnecti
 Audit failures should never cause business operation failures. Users care about getting their project created or lead updated, not about whether the audit log entry succeeded.
 
 **Consequence:**
-Audit write on the backend uses a `.catch(logger.warn)` pattern. Audit records are eventually consistent. If an audit write fails 3 times and is finally dropped, the business operation still succeeded.
+Audit write on the backend uses a `.catch()` pattern. Audit records are eventually consistent. The business operation always succeeds regardless of audit outcome.
 
 **Implication for implementation:**
 Frontend data-access layer does NOT write audit records. Only the backend does, after confirming the write succeeded. The frontend may log errors locally (to IndexedDB via session-state), but those are not audit logs.
+
+#### Audit control requirements
+
+1. **When audit records MUST be written:** After every successful mutating operation (POST/PUT/DELETE) on Lead, Project, and Estimating domains. Audit is not optional for Phase 1 critical-path domains.
+
+2. **Minimum audit fields:** `id`, `entityType`, `entityId`, `operation`, `performedBy` (UPN), `performedAt` (ISO 8601), `correlationId` (from `X-Request-Id` header), `idempotencyKey` (from `Idempotency-Key` header when present), `outcome` (`'success'` | `'error'`), `errorCode` (when outcome is `'error'`).
+
+3. **Correlation requirements:** Every audit record MUST include the `correlationId` from the request's `X-Request-Id` header and the `idempotencyKey` from the `Idempotency-Key` header (when present). These enable end-to-end tracing from frontend through proxy to backend audit.
+
+4. **Audit persistence failure policy:**
+   - Try once with `.catch()` — do NOT retry (audit must not delay the response).
+   - Log the audit-write failure to Application Insights as a warning with full audit payload so the data is recoverable from telemetry.
+   - The business operation still succeeds — audit loss is an operational alert, not a user-visible error.
+   - C3 alert rule `audit.write.failure` fires when audit loss rate exceeds threshold (defined by C3 spec section 2.2).
+
+5. **Evidence for B2 `PROD_ACTIVE` and E1 `STAGING_READY`:**
+   - Audit records visible in Azure Table Storage during E1 contract test runs constitute staging-readiness evidence.
+   - For `PROD_ACTIVE`, audit query dashboards must show write operations for all three critical-path domains (Lead, Project, Estimating).
+   - Audit records correlatable with idempotency records by key constitute B2 deduplication evidence.
 
 ---
 
@@ -211,10 +230,13 @@ Frontend data-access layer does NOT write audit records. Only the backend does, 
 Data-access cannot predict what the app wants to do with a write failure. Should a lead-creation failure show a toast and a retry button? Or inline validation? Or a modal with escalation options? The app knows; data-access doesn't.
 
 **Consequence:**
-Data-access exports a `WriteFailureReason` enum (e.g., `NETWORK_UNREACHABLE`, `VALIDATION_FAILED`, `CONFLICT_DETECTED`). The consuming app imports this enum and decides what UX to show.
+Data-access exports `WriteFailureReason` (enum) and `classifyWriteFailure()` (function) as **canonical package exports**. These define the error taxonomy used by both frontend apps and C3 telemetry (`proxy.request.error` events include `failureReason` from this classification). The consuming app imports the enum and decides what UX to show.
+
+**What is NOT a canonical data-access export:**
+`WriteOutcome` (a discriminated union for structured write results) is an **optional app-level helper pattern**. It may be useful in app shells but should NOT be exported from `@hbc/data-access` because outcome shape — including states like `retrying`, `idempotent-duplicate`, progress tracking — is an app concern. Apps may define their own outcome types that compose `WriteFailureReason`.
 
 **Implication for implementation:**
-Data-access has a `classifyWriteFailure(error: HbcDataAccessError): WriteFailureReason` function. The app calls it after a write fails, then decides the user-facing message and action.
+Data-access has a `classifyWriteFailure(error: HbcDataAccessError): WriteFailureReason` function. The app calls it after a write fails, then decides the user-facing message and action. C3 telemetry uses the same function to populate the `failureReason` field on `proxy.request.error` events.
 
 ---
 
@@ -1705,7 +1727,6 @@ import { describe, it, expect } from 'vitest';
 import {
   WriteFailureReason,
   classifyWriteFailure,
-  WriteOutcome,
 } from './write-safe-error.js';
 import { HbcDataAccessError } from '../../errors/index.js';
 
@@ -1746,6 +1767,24 @@ describe('WriteFailureReason classification', () => {
     expect(reason).toBe(WriteFailureReason.ConflictDetected);
   });
 
+  it('classifies RATE_LIMITED as RateLimited', () => {
+    const error = new HbcDataAccessError('Too Many Requests', 'RATE_LIMITED');
+    const reason = classifyWriteFailure(error);
+    expect(reason).toBe(WriteFailureReason.RateLimited);
+  });
+
+  it('classifies NOT_FOUND as NotFound', () => {
+    const error = new HbcDataAccessError('Not Found', 'NOT_FOUND');
+    const reason = classifyWriteFailure(error);
+    expect(reason).toBe(WriteFailureReason.NotFound);
+  });
+
+  it('classifies SERVER_ERROR as ServerError', () => {
+    const error = new HbcDataAccessError('Internal Server Error', 'SERVER_ERROR');
+    const reason = classifyWriteFailure(error);
+    expect(reason).toBe(WriteFailureReason.ServerError);
+  });
+
   it('classifies unknown errors as UnknownError', () => {
     const error = new HbcDataAccessError('Something weird happened', 'WEIRD_CODE');
     const reason = classifyWriteFailure(error);
@@ -1753,46 +1792,8 @@ describe('WriteFailureReason classification', () => {
   });
 });
 
-describe('WriteOutcome types', () => {
-  it('success outcome has data field', () => {
-    const outcome: WriteOutcome = {
-      status: 'success',
-      data: { id: '123', name: 'Lead' },
-    };
-    expect(outcome.status).toBe('success');
-    expect(outcome.data).toBeDefined();
-  });
-
-  it('retrying outcome has attempt and nextRetryMs', () => {
-    const outcome: WriteOutcome = {
-      status: 'retrying',
-      attempt: 1,
-      nextRetryMs: 1000,
-    };
-    expect(outcome.status).toBe('retrying');
-    expect(outcome.attempt).toBe(1);
-  });
-
-  it('failed outcome has error and finalAttempt', () => {
-    const error = new HbcDataAccessError('Failed', 'NETWORK_ERROR');
-    const outcome: WriteOutcome = {
-      status: 'failed',
-      error,
-      finalAttempt: 3,
-    };
-    expect(outcome.status).toBe('failed');
-    expect(outcome.error).toEqual(error);
-  });
-
-  it('idempotent-duplicate outcome has existingData', () => {
-    const outcome: WriteOutcome = {
-      status: 'idempotent-duplicate',
-      existingData: { id: '123', name: 'Existing Lead' },
-    };
-    expect(outcome.status).toBe('idempotent-duplicate');
-    expect(outcome.existingData).toBeDefined();
-  });
-});
+// WriteOutcome tests removed — WriteOutcome is an optional app-level pattern,
+// not a canonical @hbc/data-access export (see Decision 5).
 ```
 
 **Implementation:**
@@ -1807,34 +1808,47 @@ import { HbcDataAccessError } from '../../errors/index.js';
  * Consuming apps use this to decide error messaging and UX recovery actions.
  */
 export enum WriteFailureReason {
-  /** Network unreachable; may succeed on retry. */
+  /** Network unreachable or timeout; may succeed on retry. */
   NetworkUnreachable = 'NETWORK_UNREACHABLE',
 
-  /** Backend service unavailable; may succeed on retry. */
+  /** Backend service unavailable (503, 502, 504); may succeed on retry. */
   ServiceUnavailable = 'SERVICE_UNAVAILABLE',
 
-  /** Request validation failed; will not succeed on retry without data change. */
+  /** Rate limited (429); app may show "try again later" messaging. */
+  RateLimited = 'RATE_LIMITED',
+
+  /** Request validation failed (422); will not succeed on retry without data change. */
   ValidationFailed = 'VALIDATION_FAILED',
 
-  /** Permission denied; will not succeed on retry without auth change. */
+  /** Permission denied (401, 403); will not succeed on retry without auth change. */
   PermissionDenied = 'PERMISSION_DENIED',
 
-  /** Conflict detected (e.g., concurrent edit); requires conflict resolution. */
+  /** Conflict detected (409, e.g., concurrent edit); requires conflict resolution. */
   ConflictDetected = 'CONFLICT_DETECTED',
 
-  /** Unknown or unexpected error. */
+  /** Resource not found (404); the entity targeted by update/delete does not exist. */
+  NotFound = 'NOT_FOUND',
+
+  /** Generic server error (500); backend failed for an unclassified reason. */
+  ServerError = 'SERVER_ERROR',
+
+  /** Unknown or unexpected error; code not recognized. */
   UnknownError = 'UNKNOWN_ERROR',
 }
 
 /**
- * User-facing outcome of a write operation.
- * Discriminated union: use `status` to narrow the type.
+ * Optional app-level pattern (NOT a canonical @hbc/data-access export).
+ *
+ * Apps that want a structured write outcome type can define one in their own domain:
+ *
+ *   type WriteOutcome<T> =
+ *     | { status: 'success'; data: T }
+ *     | { status: 'failed'; reason: WriteFailureReason; error: HbcDataAccessError };
+ *
+ * This is NOT exported from @hbc/data-access because outcome shape (including states
+ * like 'retrying', 'idempotent-duplicate', progress tracking) is an app concern
+ * per Decision 5. WriteFailureReason and classifyWriteFailure() are the canonical exports.
  */
-export type WriteOutcome =
-  | { status: 'success'; data: unknown }
-  | { status: 'retrying'; attempt: number; nextRetryMs: number }
-  | { status: 'failed'; error: HbcDataAccessError; finalAttempt: number }
-  | { status: 'idempotent-duplicate'; existingData: unknown };
 
 /**
  * Classifies a data-access error as a specific user-facing failure reason.
@@ -1868,6 +1882,10 @@ export function classifyWriteFailure(error: HbcDataAccessError): WriteFailureRea
     return WriteFailureReason.ServiceUnavailable;
   }
 
+  if (code === 'RATE_LIMITED') {
+    return WriteFailureReason.RateLimited;
+  }
+
   if (code === 'VALIDATION_ERROR') {
     return WriteFailureReason.ValidationFailed;
   }
@@ -1878,6 +1896,14 @@ export function classifyWriteFailure(error: HbcDataAccessError): WriteFailureRea
 
   if (code === 'CONFLICT') {
     return WriteFailureReason.ConflictDetected;
+  }
+
+  if (code === 'NOT_FOUND') {
+    return WriteFailureReason.NotFound;
+  }
+
+  if (code === 'SERVER_ERROR') {
+    return WriteFailureReason.ServerError;
   }
 
   return WriteFailureReason.UnknownError;
@@ -1893,7 +1919,7 @@ npx vitest run packages/data-access/src/retry/write-safe-error.test.ts
 
 **Expected output:**
 ```
-✓ packages/data-access/src/retry/write-safe-error.test.ts (11 tests)
+✓ packages/data-access/src/retry/write-safe-error.test.ts (10 tests)
   ✓ WriteFailureReason classification
     ✓ classifies NETWORK_ERROR as NetworkUnreachable
     ✓ classifies SERVICE_UNAVAILABLE as ServiceUnavailable
@@ -1901,30 +1927,30 @@ npx vitest run packages/data-access/src/retry/write-safe-error.test.ts
     ✓ classifies UNAUTHORIZED as PermissionDenied
     ✓ classifies FORBIDDEN as PermissionDenied
     ✓ classifies CONFLICT as ConflictDetected
+    ✓ classifies RATE_LIMITED as RateLimited
+    ✓ classifies NOT_FOUND as NotFound
+    ✓ classifies SERVER_ERROR as ServerError
     ✓ classifies unknown errors as UnknownError
-  ✓ WriteOutcome types
-    ✓ success outcome has data field
-    ✓ retrying outcome has attempt and nextRetryMs
-    ✓ failed outcome has error and finalAttempt
-    ✓ idempotent-duplicate outcome has existingData
 
 Test Files  1 passed (1)
-Tests  11 passed (11)
+Tests  10 passed (10)
 ```
 
 **Commit:**
 ```bash
 git add packages/data-access/src/retry/write-safe-error.ts
 git add packages/data-access/src/retry/write-safe-error.test.ts
-git commit -m "Feat(data-access): Add write-safe error classification
+git commit -m "Feat(data-access): Add write-safe error classification (9 categories)
 
-- Implement WriteFailureReason enum for user-facing error categories
-- Implement WriteOutcome discriminated union for write operation results
-- Add classifyWriteFailure() to map error codes to user-facing reasons
-- Add comprehensive test suite (11 tests, all passing)
+- Implement WriteFailureReason enum with 9 categories aligned to B1/C1 error codes
+- Add RateLimited, NotFound, ServerError to cover Phase 1 realistic error cases
+- Add classifyWriteFailure() to map error codes to user-facing reasons and C3 telemetry
+- Reframe WriteOutcome as optional app-level pattern (not canonical export)
+- Add comprehensive test suite (10 tests, all passing)
 
-Apps now import WriteFailureReason to decide UX (toast, validation,
-conflict resolution). Data-access stays focused on classification, not UI.
+Apps import WriteFailureReason to decide UX; C3 uses same classification
+for proxy.request.error failureReason field. Data-access stays focused
+on classification, not UI.
 "
 ```
 
@@ -1966,14 +1992,23 @@ export interface IAuditRecord {
   /** ISO 8601 timestamp when the operation was performed. */
   performedAt: string;
 
+  /** X-Request-Id correlation ID for end-to-end tracing (required). */
+  correlationId: string;
+
+  /** Idempotency-Key header value when present (enables dedup evidence). */
+  idempotencyKey?: string;
+
+  /** Did the business operation succeed? */
+  outcome: 'success' | 'error';
+
+  /** WriteFailureReason code when outcome is 'error'. */
+  errorCode?: string;
+
   /** Previous state of the entity (before update/delete). May be null for creates. */
   previousState?: unknown;
 
   /** Next state of the entity (after create/update). */
   nextState?: unknown;
-
-  /** Optional request ID for tracing (e.g., Idempotency-Key). */
-  requestId?: string;
 }
 ```
 
@@ -1986,7 +2021,7 @@ import { describe, it, expect } from 'vitest';
 import type { IAuditRecord } from '../audit.js';
 
 describe('IAuditRecord type', () => {
-  it('allows a complete audit record', () => {
+  it('allows a complete audit record with correlation fields', () => {
     const record: IAuditRecord = {
       id: '123',
       entityType: 'lead',
@@ -1994,25 +2029,47 @@ describe('IAuditRecord type', () => {
       operation: 'create',
       performedBy: 'user@contoso.com',
       performedAt: new Date().toISOString(),
+      correlationId: 'req-uuid-5678',
+      idempotencyKey: 'idem-uuid-1234',
+      outcome: 'success',
       previousState: undefined,
       nextState: { firstName: 'John', lastName: 'Doe' },
-      requestId: 'uuid-1234',
     };
     expect(record.entityType).toBe('lead');
+    expect(record.correlationId).toBe('req-uuid-5678');
+    expect(record.outcome).toBe('success');
   });
 
-  it('allows optional previousState and requestId', () => {
+  it('allows error outcome with errorCode', () => {
     const record: IAuditRecord = {
-      id: '123',
+      id: '456',
       entityType: 'project',
       entityId: 'proj-789',
       operation: 'update',
       performedBy: 'admin@contoso.com',
       performedAt: new Date().toISOString(),
-      nextState: { status: 'active' },
+      correlationId: 'req-uuid-9999',
+      outcome: 'error',
+      errorCode: 'VALIDATION_FAILED',
     };
+    expect(record.outcome).toBe('error');
+    expect(record.errorCode).toBe('VALIDATION_FAILED');
+  });
+
+  it('allows optional fields (idempotencyKey, previousState, nextState)', () => {
+    const record: IAuditRecord = {
+      id: '789',
+      entityType: 'estimating',
+      entityId: 'tracker-100',
+      operation: 'delete',
+      performedBy: 'admin@contoso.com',
+      performedAt: new Date().toISOString(),
+      correlationId: 'req-uuid-0000',
+      outcome: 'success',
+    };
+    expect(record.idempotencyKey).toBeUndefined();
     expect(record.previousState).toBeUndefined();
-    expect(record.requestId).toBeUndefined();
+    expect(record.nextState).toBeUndefined();
   });
 });
 ```
@@ -2021,16 +2078,38 @@ describe('IAuditRecord type', () => {
 ```bash
 git add packages/models/src/shared/audit.ts
 git add packages/models/src/shared/__tests__/audit.test.ts
-git commit -m "Feat(models): Add IAuditRecord interface for write operation tracking
+git commit -m "Feat(models): Add IAuditRecord interface with correlation and outcome fields
 
 - Define IAuditRecord with operation, entity, performer, state snapshots
+- Add correlationId (X-Request-Id) and idempotencyKey for end-to-end tracing
+- Add outcome ('success' | 'error') and errorCode for audit completeness
 - Audit records stored on backend (Azure Table) only, not frontend
-- Include optional requestId for tracing idempotency keys
-- Add type-safety test
+- Add type-safety tests for success, error, and optional field scenarios
 
-Frontend reads audit logs for display; backend writes them after confirms write success.
+Supports B2 PROD_ACTIVE write-safety evidence and E1 STAGING_READY audit visibility.
 "
 ```
+
+---
+
+### Cross-workstream evidence requirements (Chunk 3 → B2/C3/E1)
+
+D1's audit and failure classification artifacts are not standalone — they feed evidence to other workstreams:
+
+| D1 Artifact | Required By | Evidence | Gate |
+|---|---|---|---|
+| `WriteFailureReason` classification | C3 `proxy.request.error` event | `failureReason` field populated from `classifyWriteFailure()` | `PROD_ACTIVE` |
+| `IAuditRecord` with `correlationId` | B2 write-safety evidence | Audit records queryable by domain and correlationId | `PROD_ACTIVE` |
+| Audit records for Lead/Project/Estimating writes | E1 contract test evidence | Audit rows visible in Azure Table Storage during E1 test runs | `STAGING_READY` |
+| `classifyWriteFailure()` output | C3 error dashboard | Error categories surfaced in Application Insights error breakdown | `PROD_ACTIVE` |
+| `idempotencyKey` in audit trail | B2 deduplication evidence | Audit + idempotency records correlatable by key | `PROD_ACTIVE` |
+
+**Telemetry alignment with C3 spec:**
+
+- `proxy.request.error` events MUST include `errorCode` (from `HbcDataAccessError.code`) and `failureReason` (from `classifyWriteFailure()`). This is D1's contribution to C3 observability.
+- `proxy.request.retry` events MUST include `retryCount` and `retryReason`. These are emitted by `withRetry()` via the `onRetry` callback.
+- Circuit-breaker telemetry (`circuit.state.change`, `circuit.fallback.used`) is defined by C3 section 2.2.3 but implemented as part of D1's retry infrastructure.
+- The `audit.write.failure` alert (C3 section 2.5) fires when audit persistence loss rate exceeds the configured threshold.
 
 ---
 
@@ -2238,11 +2317,11 @@ describe('Write safety: retry + idempotency integration', () => {
         json: async () => ({ id: 'lead-1', firstName: 'John' }),
       });
 
-    client = new ProxyHttpClient(
-      'https://api.example.com',
-      async () => 'token',
-      WRITE_RETRY_POLICY,
-    );
+    client = new ProxyHttpClient({
+      baseUrl: 'https://api.example.com',
+      getToken: async () => 'token',
+      writePolicy: WRITE_RETRY_POLICY,
+    });
 
     const result = await client.post('/leads', { firstName: 'John' }, idempotency);
 
@@ -2268,11 +2347,11 @@ describe('Write safety: retry + idempotency integration', () => {
       json: async () => cachedResponse,
     });
 
-    client = new ProxyHttpClient(
-      'https://api.example.com',
-      async () => 'token',
-      WRITE_RETRY_POLICY,
-    );
+    client = new ProxyHttpClient({
+      baseUrl: 'https://api.example.com',
+      getToken: async () => 'token',
+      writePolicy: WRITE_RETRY_POLICY,
+    });
 
     const result1 = await client.post('/leads', { firstName: 'John' }, idempotency);
     expect(result1).toEqual(cachedResponse);
@@ -2307,11 +2386,11 @@ describe('Write safety: retry + idempotency integration', () => {
       json: async () => responseData,
     });
 
-    client = new ProxyHttpClient(
-      'https://api.example.com',
-      async () => 'token',
-      WRITE_RETRY_POLICY,
-    );
+    client = new ProxyHttpClient({
+      baseUrl: 'https://api.example.com',
+      getToken: async () => 'token',
+      writePolicy: WRITE_RETRY_POLICY,
+    });
 
     const result = await client.put('/projects/1', { name: 'Project A' }, idempotency);
     expect(result).toEqual(responseData);
@@ -2333,11 +2412,11 @@ describe('Write safety: retry + idempotency integration', () => {
       json: async () => ({ error: 'Missing required field: firstName' }),
     });
 
-    client = new ProxyHttpClient(
-      'https://api.example.com',
-      async () => 'token',
-      WRITE_RETRY_POLICY,
-    );
+    client = new ProxyHttpClient({
+      baseUrl: 'https://api.example.com',
+      getToken: async () => 'token',
+      writePolicy: WRITE_RETRY_POLICY,
+    });
 
     await expect(
       client.post('/leads', { lastName: 'Doe' }, idempotency),
@@ -2486,11 +2565,13 @@ Write safety APIs are now part of the public data-access surface.
    - Backend: `cleanupIdempotencyRecords` timer trigger (nightly stale record deletion)
    - Application-enforced 24h TTL (Azure Tables has no native TTL): check `expiresAt` on read + nightly cleanup
 
-3. **Write-Safety Error States** (Chunk 3)
-   - `WriteFailureReason` enum (6 categories)
-   - `WriteOutcome` discriminated union
-   - `classifyWriteFailure()` maps error codes to user-facing reasons
-   - `IAuditRecord` interface for tracking operations
+3. **Write-Safety Error States and Audit** (Chunk 3)
+   - `WriteFailureReason` enum (9 categories, aligned to B1/C1 error codes)
+   - `classifyWriteFailure()` maps error codes to user-facing reasons and C3 telemetry
+   - `IAuditRecord` interface with correlation fields (`correlationId`, `idempotencyKey`, `outcome`)
+   - Audit control requirements: mandatory for critical-path writes, non-blocking, correlated
+   - Cross-workstream evidence ties to B2 `PROD_ACTIVE`, C3 observability, E1 `STAGING_READY`
+   - `WriteOutcome` reframed as optional app-level helper (not canonical export)
    - Example wiring shown for `ProxyLeadRepository` (**BLOCKED** on B1)
 
 4. **Integration & Verification** (Chunk 4)
