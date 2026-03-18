@@ -247,22 +247,51 @@ The following adapter surfaces will require their own telemetry events when thei
 
 ---
 
-### 2.2 Health Checks and Circuit Breakers
+### 2.2 Health Checks, Dependency Probes, and Resilience Observability
 
-#### 2.2.1 Health Check Endpoints
+#### 2.2.1 Platform / App Health Endpoint
 
-- `/api/health` — Azure Functions health probe (returns 200 if operational). **Note:** Not currently verified in repo — see C1 catalog. Must be implemented or an alternative health signal defined.
-- Proxy adapter health: test call to a known backend route
-- Graph adapter health: scoped dependency probe (specific Graph endpoint TBD — `/me` is a delegated-user scenario and may not be appropriate for service health)
+**`GET /api/health`** — **NOT IMPLEMENTED.** Not present in the C1 implemented route inventory (explicitly removed as unverified). This is a **target contract / missing implementation dependency**.
 
-#### 2.2.2 Circuit Breaker Strategy
+- **Target behavior:** Returns 200 with `{ status: "healthy", environment, timestamp }` if the Azure Functions host is operational
+- **Purpose:** Azure App Service health probe target and external uptime monitor endpoint
+- **Implementation note:** May require backend entrypoint restructuring. Ownership should be assigned — likely B3 (environment/bootstrap) or a standalone backend task. This spec defines the observability requirement; it does not own the implementation.
 
-**Note:** Retry and circuit-breaker policy are owned by P1-D1 (Write Safety, Retry, and Recovery). The parameters below are target behavior pending D1 delivery. Proxy adapters do not implement their own retry logic per B1.
+#### 2.2.2 Dependency Probes
 
-- **Threshold:** 5 consecutive failures or 50% failure rate in 60-second window
-- **Open duration:** 30 seconds before half-open probe
-- **Half-open:** Single test request; success closes circuit, failure re-opens
-- **Fallback:** Return cached data if available; otherwise graceful degradation with user-visible notice
+Dependency probes verify that downstream services the backend relies on are reachable. These are distinct from the platform health endpoint (2.2.1), which checks that the Azure Functions host itself is operational.
+
+| Probe | Target | Method | Assumptions | Status |
+|---|---|---|---|---|
+| Graph API reachability | Microsoft Graph | `GET /organization` with app-only token, or lightweight endpoint that does not require delegated user context | Requires app-registration with `Organization.Read.All` or equivalent minimal scope | NOT IMPLEMENTED — target |
+| Redis cache reachability | Azure Cache for Redis | `PING` command via existing Redis client | Backend proxy handler already uses Redis for cache; probe reuses existing connection | NOT IMPLEMENTED — target |
+| Azure SQL reachability | Azure SQL (future API phase) | Deferred — no direct SQL dependency in Phase 1 proxy lane | N/A | Future phase |
+
+**Design note on Graph probe:** The previous spec listed `/me` as a Graph health probe. `/me` requires a delegated user token (OBO flow) and cannot be called from a background health probe without an active user session — it is inappropriate for service health verification. Use an app-only-scoped endpoint like `/organization` with minimal permissions, or verify that the Graph base URL returns a non-5xx response.
+
+#### 2.2.3 Circuit Breaker — Governance and Observability
+
+**Current behavior:**
+
+No circuit breaker is implemented. Proxy adapters pass requests through to Graph API without retry or circuit logic. This is by design — B1 explicitly defers retry to D1 as a transport-layer concern (P1-B1 Decision: "No retry in B1").
+
+**Target behavior (owned by P1-D1):**
+
+D1 will deliver `withRetry()` wrapping `ProxyHttpClient` with configurable retry and circuit-breaker policies. This spec does not prescribe circuit-breaker parameters (threshold, open duration, half-open probe behavior, fallback strategy) — those are D1 implementation decisions.
+
+- **Reference:** P1-D1 (Write Safety, Retry, and Recovery), P1-B1 (Proxy Adapter Implementation Plan)
+- **Dependency:** D1 delivery is a blocking dependency for production activation (`PROD_ACTIVE` gate per B2)
+
+**Observability requirements for circuit-breaker state (C3 owned):**
+
+When D1 implements circuit-breaker logic, the following telemetry events MUST be emitted using `ILogger.trackEvent()`:
+
+| Event | Trigger | Required Payload | Severity |
+|---|---|---|---|
+| `circuit.state.change` | Circuit transitions between closed/open/half-open | `domain`, `routeGroup`, `previousState`, `newState`, `correlationId`, `environment`, `failureCount`, `windowDurationMs` | warn |
+| `circuit.fallback.used` | Fallback behavior activated (cached data or degraded response) | `domain`, `routeGroup`, `correlationId`, `fallbackType` (`cache` or `degraded`), `environment` | warn |
+
+These events feed the "Circuit breaker open" alert (2.3.2) and the < 2 minute MTTD target for adapter unavailability (2.4).
 
 ---
 
@@ -287,6 +316,8 @@ The following adapter surfaces will require their own telemetry events when thei
 | Provisioning saga failure | Any compensation event | P2 | Teams webhook |
 | Circuit breaker open | Any adapter circuit opens | P1 | Teams webhook + on-call |
 
+**Circuit breaker alert note:** The "Circuit breaker open" alert activates only after D1 delivers circuit-breaker implementation. Currently a placeholder — no circuit breaker exists to trigger it.
+
 **Alert channel note:** "Teams webhook" refers to the supported alert delivery mechanism (Incoming Webhooks or Power Automate Workflows). The specific mechanism must be confirmed — Office 365 connectors are deprecated; Microsoft recommends Workflows for new integrations.
 
 ---
@@ -295,7 +326,7 @@ The following adapter surfaces will require their own telemetry events when thei
 
 | Issue Class | MTTD Target | Detection Method |
 |---|---|---|
-| Adapter unavailable (circuit open) | < 2 minutes | Circuit breaker state change alert |
+| Adapter unavailable (circuit open) | < 2 minutes | Circuit breaker state change alert (activates after D1 circuit-breaker delivery) |
 | Elevated error rate (> 5%) | < 5 minutes | Sliding window error rate dashboard |
 | Auth system failure | < 2 minutes | Token acquisition failure burst alert |
 | Provisioning saga compensation | < 1 minute | Real-time saga event stream |
@@ -318,7 +349,9 @@ Maps current state (Part 1) against target requirements (Part 2) to identify the
 | Notification telemetry | No `trackEvent` calls in notification handlers | `notification.send.*` + `notification.digest.*` per 2.1.5 | Full implementation needed |
 | Adapter-mode startup signal | Not implemented | `startup.mode.resolved` per 2.1.6 (depends on B3 Layer 2) | Full implementation needed |
 | Deployment verification signals | Smoke tests in CI, no App Insights emission | `deploy.smoke.start`/`pass`/`fail` per 2.1.7 | Full implementation needed |
-| Health endpoint | Not implemented | `/api/health` returning 200 | Implementation needed (see B3) |
+| Platform health endpoint | Not implemented; removed from C1 catalog | `GET /api/health` returning 200 per 2.2.1 | Target contract — implementation and ownership TBD |
+| Dependency probes | Not implemented | Graph + Redis reachability probes per 2.2.2 | Full implementation needed |
+| Circuit-breaker telemetry | No circuit breaker exists (D1 not delivered) | `circuit.state.change` + `circuit.fallback.used` per 2.2.3 | Blocked on D1 delivery |
 | PWA telemetry | None | Adapter-mode startup signal, client error tracking | Full implementation needed |
 | OpenTelemetry | None | OTel-compatible span context | Deferred — Azure Functions supports it but not yet adopted |
 | Dashboards | None verified | 4 dashboards (Adapter, Auth, Provisioning, Error Budget) | Full implementation needed |
