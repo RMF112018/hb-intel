@@ -43,6 +43,10 @@ Phase 1 contract testing establishes agreement between frontend proxy adapters (
 - Smoke tests pass against staging Azure Functions
 - No blocking contract violations between frontend and backend
 
+### Document Scope
+
+P1-E1 is a **plan-level design document** governing the contract test suite for Phase 1. It defines schemas, test structure, and verification strategy. Implementation proceeds only for items with **TARGET** status whose prerequisites are met. Code examples are implementation guidance — not authorization to build speculative infrastructure or implement ahead of upstream deliverables. Where this document labels something PROVISIONAL, implementation must wait for the governing decision to resolve before committing that shape.
+
 ---
 
 ## Plan Status and Dependencies
@@ -54,6 +58,17 @@ Phase 1 contract testing establishes agreement between frontend proxy adapters (
 - `@hbc/data-access` has no test script — only build, check-types, lint; proxy adapters are stubs (**CURRENT**)
 - `backend/functions` has vitest test infrastructure (unit, smoke, coverage) but no domain route handlers for Lead/Project/Estimating (**CURRENT**)
 - Port interfaces for all 11 domains exist in `@hbc/data-access/src/ports/` (**CURRENT**)
+
+### Repo Truth Snapshot (2026-03-18)
+
+| Package | Test Script | Vitest Config | Zod | Proxy State | Notes |
+|---|---|---|---|---|---|
+| `@hbc/models` | **No** | **No** | **No** | N/A | devDependency: `@types/react` only; no `api-schemas/` directory exists |
+| `@hbc/data-access` | **No** | **No** | N/A | **Stubs only** — `proxy/index.ts` exports `ProxyConfig`, `DEFAULT_TIMEOUT_MS`, `DEFAULT_RETRY_COUNT`; no `ProxyHttpClient` or proxy repository classes | Non-mock adapters throw `AdapterNotImplementedError` |
+| `backend/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`) | **Yes** — split `unit`/`smoke` projects with explicit include lists | N/A | N/A | Does NOT depend on `@hbc/data-access`; coverage targets provisioning only; no domain route handlers |
+| Root workspace | `pnpm test` (filtered) | **Yes** — 6 entries: auth, shell, sharepoint-docs, bic-next-move, complexity, pwa | N/A | N/A | `@hbc/models` and `@hbc/data-access` are NOT in the workspace test list |
+
+**Why frontend contract tests remain blocked:** `@hbc/data-access` proxy adapters are stubs. The `resolveAdapterMode()` factory returns mock adapters by default; selecting `'proxy'` mode throws `AdapterNotImplementedError`. B1 must deliver `ProxyHttpClient` and domain-specific proxy repository classes (`ProxyLeadRepository`, `ProxyProjectRepository`, `ProxyEstimatingRepository`) before adapter contract tests can execute.
 
 ### E1 Deliverable Breakdown by Surface
 
@@ -70,7 +85,7 @@ Phase 1 contract testing establishes agreement between frontend proxy adapters (
 ### What E1 Can Implement Now
 
 - Zod dependency addition to `@hbc/models` (after naming resolution)
-- Shared Zod schemas (error envelope, pagination) for C1-frozen shapes in `@hbc/models/src/api-schemas/`
+- Shared Zod schemas (error envelope, pagination) for C1-confirmed shapes in `@hbc/models/src/api-schemas/`
 - Domain schemas for Lead, Project, Estimating (using existing port interfaces as source)
 - MSW server setup and handler scaffolding (independent of B1)
 - Vitest configuration for `@hbc/data-access` (shared with D1 prerequisite)
@@ -216,7 +231,7 @@ E1 Zod schemas validate the **transport layer** — the HTTP envelope wrapping d
 4. **Azure Functions v4 TypeScript** — backend uses modern async/await patterns, not legacy function bindings
 5. **Vitest is the test runner** — both packages use Vitest; tests run via `pnpm test`
 6. **No Pact or external contract framework** — pure Vitest with Zod schema assertions
-7. **Schemas are tiered by C1 contract confidence** — only frozen routes get full schemas; provisional routes get skeleton schemas; uncataloged routes get no schemas
+7. **Schemas are tiered by C1 contract confidence** — only confirmed routes get full schemas; provisional routes get skeleton schemas; uncataloged routes get no schemas
 
 ---
 
@@ -228,9 +243,11 @@ E1 does not treat all 11 domains equally. Schemas are tiered by C1 contract conf
 
 | Tier | Domains | C1 Status | E1 Treatment |
 |---|---|---|---|
-| **Tier 1 — FROZEN** | Lead, Project (CRUD), Estimating (tracker CRUD) | Routes locked in C1 | Full Zod schemas + full test code + MSW fixtures |
+| **Tier 1 — CONFIRMED** | Lead, Project (CRUD), Estimating (tracker CRUD) | Domain target groups confirmed in C1; transport details (D3–D6) remain provisional | Full Zod schemas + full test code + MSW fixtures |
 | **Tier 2 — PROVISIONAL** | Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP; Project (aggregate), Estimating (kickoff) | D1/D6/D2/A8 open | Domain-accurate schema skeletons with PROVISIONAL markers; no full test code |
 | **Tier 3 — NOT CATALOGED** | Auth | A9 — deferred to C2 | Capability-lane description only; no schema until C2 publishes routes |
+
+**What "CONFIRMED" means:** The domain group, CRUD method families, and base route paths (`/api/leads`, `/api/projects`, `/api/estimating`) are stable. Transport-layer details — error envelope field naming (D3), pagination defaults (D4), PATCH support (D5), nested vs flat paths (D6), and single-item response wrapping — await final C1 decisions. Zod schemas for confirmed domains should be written against current `@hbc/models` interfaces and marked PROVISIONAL where they depend on unresolved transport decisions.
 
 ### Task 1: Create Domain Zod Schemas in `@hbc/models`
 
@@ -321,14 +338,14 @@ export type PaginationQuery = z.infer<typeof PaginationQuerySchema>;
  */
 ```
 
-**File: `packages/models/src/api-schemas/lead-schema.ts`** (Tier 1 — FROZEN)
+**File: `packages/models/src/api-schemas/lead-schema.ts`** (Tier 1 — CONFIRMED)
 
 ```typescript
 import { z } from 'zod';
 import { PaginationQuerySchema } from './shared-schema';
 
 /**
- * Lead domain contract schema — Tier 1 (FROZEN).
+ * Lead domain contract schema — Tier 1 (CONFIRMED).
  * Matches ILead from @hbc/models/leads (packages/models/src/leads/ILead.ts).
  *
  * Lead is a numeric-ID CRUD + search domain.
@@ -388,7 +405,7 @@ export type LeadSearchQuery = z.infer<typeof LeadSearchQuerySchema>;
 import { z } from 'zod';
 
 /**
- * Project domain contract schema — Tier 1 (FROZEN) for CRUD operations.
+ * Project domain contract schema — Tier 1 (CONFIRMED) for CRUD operations.
  * Matches IActiveProject from @hbc/models/project (packages/models/src/project/IProject.ts).
  *
  * Project uses string (UUID) IDs. CRUD + getPortfolioSummary aggregate.
@@ -436,7 +453,7 @@ export type PortfolioSummary = z.infer<typeof PortfolioSummarySchema>;
 import { z } from 'zod';
 
 /**
- * Estimating Tracker contract schema — Tier 1 (FROZEN) for tracker CRUD.
+ * Estimating Tracker contract schema — Tier 1 (CONFIRMED) for tracker CRUD.
  * Matches IEstimatingTracker from @hbc/models/estimating (packages/models/src/estimating/IEstimating.ts).
  *
  * Estimating is a bid-tracking domain with numeric IDs.
@@ -729,13 +746,13 @@ When C2 publishes auth routes, create `packages/models/src/api-schemas/auth-sche
  * NOTE: This directory is for Zod API contract schemas.
  * The Contracts business domain models live in src/contracts/ — do not conflate the two.
  *
- * Tier 1 (FROZEN): shared, lead, project (CRUD), estimating (tracker)
+ * Tier 1 (CONFIRMED): shared, lead, project (CRUD), estimating (tracker)
  * Tier 2 (PROVISIONAL): schedule, buyout, compliance, contract, risk, scorecard, pmp,
  *   plus project (aggregate) and estimating (kickoff)
  * Tier 3 (NOT CATALOGED): auth — NO export until C2 publishes routes (A9)
  */
 
-// Tier 1 — FROZEN
+// Tier 1 — CONFIRMED
 export * from './shared-schema';
 export * from './lead-schema';
 export * from './project-schema';
@@ -1330,7 +1347,7 @@ export const estimatingHandlers = [
 ];
 
 /**
- * Default handlers for the three Tier 1 (FROZEN) domains.
+ * Default handlers for the three Tier 1 (CONFIRMED) domains.
  * Tier 2 (PROVISIONAL) domain handlers should be added as routes are confirmed.
  * Tier 3 (Auth) handlers require C2 to publish route specs first.
  */
@@ -1362,7 +1379,7 @@ import { defaultHandlers } from './msw-handlers';
 /**
  * MSW server for data-access tests.
  * Use in test setup:
- *   beforeAll(() => server.listen());
+ *   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
  *   afterEach(() => server.resetHandlers());
  *   afterAll(() => server.close());
  */
@@ -1375,7 +1392,7 @@ export const server = setupServer(...defaultHandlers);
 /**
  * Test utilities for @hbc/data-access.
  * Exports MSW server, handlers, and fixtures for use in contract tests.
- * Only Tier 1 (FROZEN) domain handlers and fixtures are exported.
+ * Only Tier 1 (CONFIRMED) domain handlers and fixtures are exported.
  */
 
 export { server } from './msw-server';
@@ -1402,7 +1419,7 @@ import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
 import { server } from './msw-server';
 
 describe('MSW Server Setup', () => {
-  beforeAll(() => server.listen());
+  beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
@@ -1478,7 +1495,7 @@ describe('ProxyLeadRepository Contract Tests', () => {
   let repository: ProxyLeadRepository;
 
   beforeAll(() => {
-    server.listen();
+    server.listen({ onUnhandledRequest: 'error' });
     repository = new ProxyLeadRepository(httpClient);
   });
 
@@ -1710,16 +1727,16 @@ describe('ProxyProjectRepository Contract Tests', () => {
   let repository: ProxyProjectRepository;
 
   beforeAll(() => {
-    server.listen();
+    server.listen({ onUnhandledRequest: 'error' });
     repository = new ProxyProjectRepository(httpClient);
   });
 
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
-  describe('getAll()', () => {
+  describe('getProjects()', () => {
     it('response conforms to paged ActiveProjectSchema', async () => {
-      const result = await repository.getAll({ page: 1, pageSize: 25 });
+      const result = await repository.getProjects({ page: 1, pageSize: 25 });
 
       const parsed = createPagedSchema(ActiveProjectSchema).safeParse({
         items: result.items,
@@ -1732,7 +1749,7 @@ describe('ProxyProjectRepository Contract Tests', () => {
     });
 
     it('each project conforms to ActiveProjectSchema', async () => {
-      const result = await repository.getAll({ page: 1, pageSize: 10 });
+      const result = await repository.getProjects({ page: 1, pageSize: 10 });
 
       for (const project of result.items) {
         const parsed = ActiveProjectSchema.safeParse(project);
@@ -1741,22 +1758,22 @@ describe('ProxyProjectRepository Contract Tests', () => {
     });
   });
 
-  describe('getById()', () => {
+  describe('getProjectById()', () => {
     it('single project conforms to ActiveProjectSchema', async () => {
-      const result = await repository.getById('660e8400-e29b-41d4-a716-446655440001');
+      const result = await repository.getProjectById('660e8400-e29b-41d4-a716-446655440001');
 
       const parsed = ActiveProjectSchema.safeParse(result);
       expect(parsed.success).toBe(true);
     });
 
     it('unknown project returns null', async () => {
-      const result = await repository.getById('660e8400-e29b-41d4-a716-999999999999');
+      const result = await repository.getProjectById('660e8400-e29b-41d4-a716-999999999999');
 
       expect(result).toBeNull();
     });
   });
 
-  describe('create()', () => {
+  describe('createProject()', () => {
     it('created project conforms to ActiveProjectSchema', async () => {
       const request = {
         name: 'New Project',
@@ -1766,14 +1783,14 @@ describe('ProxyProjectRepository Contract Tests', () => {
         endDate: '2026-12-31T00:00:00Z',
       };
 
-      const result = await repository.create(request);
+      const result = await repository.createProject(request);
 
       const parsed = ActiveProjectSchema.safeParse(result);
       expect(parsed.success).toBe(true);
     });
   });
 
-  // ... update(), delete() following same pattern
+  // ... updateProject(), deleteProject() following same pattern
 });
 ```
 
@@ -1794,16 +1811,16 @@ describe('ProxyEstimatingRepository Contract Tests', () => {
   let repository: ProxyEstimatingRepository;
 
   beforeAll(() => {
-    server.listen();
+    server.listen({ onUnhandledRequest: 'error' });
     repository = new ProxyEstimatingRepository(httpClient);
   });
 
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
-  describe('getAll()', () => {
+  describe('getAllTrackers()', () => {
     it('response conforms to paged EstimatingTrackerSchema', async () => {
-      const result = await repository.getAll({ page: 1, pageSize: 25 });
+      const result = await repository.getAllTrackers({ page: 1, pageSize: 25 });
 
       const parsed = createPagedSchema(EstimatingTrackerSchema).safeParse({
         items: result.items,
@@ -1816,7 +1833,7 @@ describe('ProxyEstimatingRepository Contract Tests', () => {
     });
 
     it('each record conforms to EstimatingTrackerSchema', async () => {
-      const result = await repository.getAll({ page: 1, pageSize: 10 });
+      const result = await repository.getAllTrackers({ page: 1, pageSize: 10 });
 
       for (const record of result.items) {
         const parsed = EstimatingTrackerSchema.safeParse(record);
@@ -1825,16 +1842,16 @@ describe('ProxyEstimatingRepository Contract Tests', () => {
     });
   });
 
-  describe('getById()', () => {
+  describe('getTrackerById()', () => {
     it('single record conforms to EstimatingTrackerSchema', async () => {
-      const result = await repository.getById(1);
+      const result = await repository.getTrackerById(1);
 
       const parsed = EstimatingTrackerSchema.safeParse(result);
       expect(parsed.success).toBe(true);
     });
   });
 
-  // ... create(), update(), delete()
+  // ... createTracker(), updateTracker(), deleteTracker()
 });
 ```
 
@@ -3074,19 +3091,10 @@ The current `backend/functions/vitest.config.ts` uses named projects with explic
 
 **Do NOT replace this config with a generic `src/**/*.test.ts` pattern** — this would break the current project-based test separation and coverage targeting.
 
-Instead, extend the existing `unit` project's include array to add contract test patterns:
+**Recommended:** Add a dedicated `contract` project alongside the existing `unit` and `smoke` projects. This follows the backend's established project-based separation pattern and keeps contract tests independently runnable:
 
 ```typescript
-// Add to the existing unit project include array in vitest.config.ts:
-'src/functions/leads/**/*.contract.test.ts',
-'src/functions/projects/**/*.contract.test.ts',
-'src/functions/estimating/**/*.contract.test.ts',
-'src/middleware/error-contract.test.ts',
-```
-
-Alternatively, add a third named project `contract` alongside `unit` and `smoke`:
-
-```typescript
+// Add to the projects array in backend/functions/vitest.config.ts:
 {
   test: {
     name: 'contract',
@@ -3098,21 +3106,31 @@ Alternatively, add a third named project `contract` alongside `unit` and `smoke`
 }
 ```
 
-**Backend test scripts already exist (CURRENT — no changes needed):**
+Add a corresponding script to `backend/functions/package.json`:
+```json
+"test:contract": "vitest run --config vitest.config.ts --project contract"
+```
+
+**Fallback:** If a dedicated project is undesirable, extend the existing `unit` project's include array instead:
+```typescript
+// Append to the unit project include array:
+'src/functions/leads/**/*.contract.test.ts',
+'src/functions/projects/**/*.contract.test.ts',
+'src/functions/estimating/**/*.contract.test.ts',
+'src/middleware/error-contract.test.ts',
+```
+
+**Backend test scripts (CURRENT — no changes needed except adding `test:contract`):**
 
 ```json
 {
   "scripts": {
     "test": "vitest run --config vitest.config.ts --project unit",
     "test:smoke": "SMOKE_TEST=true vitest run --config vitest.config.ts --project smoke",
-    "test:coverage": "vitest run --config vitest.config.ts --project unit --coverage"
+    "test:coverage": "vitest run --config vitest.config.ts --project unit --coverage",
+    "test:contract": "vitest run --config vitest.config.ts --project contract"
   }
 }
-```
-
-If a `contract` project is added, add a corresponding script:
-```json
-"test:contract": "vitest run --config vitest.config.ts --project contract"
 ```
 
 **Verification** (requires all prerequisite setup + upstream deliveries — see Verification Command Guidance):
