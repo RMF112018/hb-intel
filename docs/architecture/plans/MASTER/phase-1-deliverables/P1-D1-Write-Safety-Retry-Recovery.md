@@ -17,7 +17,7 @@
 
 | Marker | Meaning |
 |---|---|
-| **CURRENT** | Verified against live repo as of 2026-03-18 |
+| **CURRENT** | Verified against live repo as of 2026-03-19 |
 | **TARGET** | D1 deliverable — implementation planned |
 | **PROVISIONAL** | Design decision pending upstream confirmation |
 | **BLOCKED** | Cannot implement until dependency is delivered |
@@ -46,7 +46,7 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 
 ## Plan Status and Dependencies
 
-### Current Repo State (verified 2026-03-18)
+### Current Repo State (verified 2026-03-19)
 
 - `ProxyHttpClient` does not exist — `packages/data-access/src/adapters/proxy/` contains only stub types, constants, and index re-exports (**CURRENT**)
 - Proxy adapter mode throws `AdapterNotImplementedError` in the factory for all domains (**CURRENT**)
@@ -1192,7 +1192,7 @@ describe('Idempotency key generation', () => {
 
   it('generateIdempotencyKey accepts custom TTL', () => {
     const customTtlMs = 60 * 1000; // 1 minute
-    const ctx = generateIdempotencyKey('delete-estimating', customTtlMs);
+    const ctx = generateIdempotencyKey('update-estimating', customTtlMs);
     const ttl = ctx.expiresAt - ctx.createdAt;
     expect(ttl).toBe(customTtlMs);
   });
