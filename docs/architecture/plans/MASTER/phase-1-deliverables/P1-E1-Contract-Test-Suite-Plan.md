@@ -2414,12 +2414,42 @@ Expected: All error envelope tests pass.
 **Files to Create:**
 - `backend/functions/src/test/smoke/critical-paths.smoke.test.ts`
 
-**Smoke test authentication:**
-- Token must be acquired for the specific Azure Functions API audience, NOT the default Azure Resource Manager scope.
-- Required: `az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv`
-- The `<CLIENT_ID>` value must match the Entra ID app registration for the HB Intel Azure Functions API (defined in C2 auth configuration).
-- Alternatively, use MSAL CLI or a dedicated test service principal with explicit scope grants.
-- Default `az account get-access-token` (no `--resource`) returns an ARM token that will NOT authenticate against the API.
+**Smoke test authentication policy:**
+
+The staging API is protected by Entra ID Bearer token validation (C2 deliverable). Smoke tests must present a valid token scoped to the API audience — not a default Azure Resource Manager token.
+
+**Required environment variables:**
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `SMOKE_TEST_BASE_URL` | Yes | Staging Azure Functions base URL (e.g., `https://hb-intel-stage.azurewebsites.net`) |
+| `AUTH_TOKEN` | Yes | Bearer token scoped to the HB Intel API audience |
+| `SMOKE_CLIENT_ID` | No (documentation only) | Entra ID app registration client ID — used in token acquisition, not consumed by tests directly |
+
+**Token acquisition — operator/CI responsibility:**
+
+The test runner does NOT acquire tokens. The operator or CI pipeline must provide `AUTH_TOKEN` via one of:
+
+1. **Azure CLI (interactive/developer):**
+   ```bash
+   AUTH_TOKEN=$(az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv)
+   ```
+   Where `<CLIENT_ID>` is the Entra ID app registration for the HB Intel Azure Functions API (defined by C2).
+
+2. **Service principal (CI/CD):**
+   ```bash
+   AUTH_TOKEN=$(az account get-access-token --resource api://<CLIENT_ID> \
+     --tenant <TENANT_ID> --query accessToken -o tsv)
+   ```
+   Requires prior `az login --service-principal` with a test service principal that has API scope grants.
+
+3. **MSAL CLI or custom script:**
+   Any method that produces a valid JWT with `aud` matching the API's client ID.
+
+**What will NOT work:**
+- `az account get-access-token` with no `--resource` flag — returns an ARM-scoped token (`aud: https://management.azure.com`) that the API will reject with 401.
+- Expired tokens — MSAL tokens expire after ~1 hour; CI pipelines must acquire fresh tokens per run.
+- Tokens from the wrong tenant — multi-tenant app registrations must match the staging tenant.
 
 **Full Code:**
 
@@ -2449,11 +2479,25 @@ import { LeadSchema, ActiveProjectSchema } from '@hbc/models/api-schemas';
 
 const BASE_URL = process.env.SMOKE_TEST_BASE_URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
-const SKIP_SMOKE = !BASE_URL || !AUTH_TOKEN;
 
-describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
+/**
+ * Skip semantics — distinguish between different failure modes:
+ *
+ * - Missing BASE_URL  → staging not provisioned or not targeted — skip silently
+ * - Missing AUTH_TOKEN → auth not configured — skip with warning
+ * - 401 response       → token audience mismatch or expired (operator error, not contract failure)
+ * - 5xx response       → staging temporarily unavailable (retry, not contract failure)
+ * - Wrong shapes       → actual contract failure (investigate)
+ */
+const skipReason = !BASE_URL
+  ? 'SMOKE_TEST_BASE_URL not set — staging not targeted'
+  : !AUTH_TOKEN
+    ? 'AUTH_TOKEN not set — auth not configured for smoke tests'
+    : undefined;
+
+describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)', () => {
   /**
-   * Test 1: Health check
+   * Test 1: Health check (no auth required)
    */
   it('health check endpoint responds 200', async () => {
     const response = await fetch(`${BASE_URL}/api/health`);
@@ -2464,7 +2508,33 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
   });
 
   /**
-   * Test 2: List leads with authentication
+   * Test 2: Auth token validation (diagnostic — runs before domain tests)
+   * If this fails with 401, the token is likely ARM-scoped or expired.
+   * Do NOT investigate domain contract failures until this test passes.
+   */
+  it('auth token is accepted by the API (not ARM-scoped)', async () => {
+    const response = await fetch(`${BASE_URL}/api/leads?page=1&pageSize=1`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` },
+    });
+
+    if (response.status === 401) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(
+        `AUTH_TOKEN rejected (401). Likely causes:\n` +
+        `  - Token acquired without --resource api://<CLIENT_ID>\n` +
+        `  - Token expired (MSAL tokens last ~1 hour)\n` +
+        `  - Wrong tenant or missing scope grants\n` +
+        `Response: ${JSON.stringify(body)}`
+      );
+    }
+
+    // Any non-401 response means the token was accepted
+    expect(response.status).not.toBe(401);
+  });
+
+  /**
+   * Test 3: List leads with authentication
    */
   it('GET /api/leads with auth token responds 200', async () => {
     const response = await fetch(`${BASE_URL}/api/leads?page=1&pageSize=10`, {
@@ -2704,22 +2774,29 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
 });
 ```
 
-**Task 8 Verification:**
+**Task 8 Verification** (requires C1 + C2 + staging infra — see Verification Command Guidance):
 
-Run locally (this will skip if env vars not set):
-```bash
-pnpm --filter @hbc/functions test smoke
-# All tests skipped until staging is ready
-```
+**Running smoke tests:**
 
-Run against staging:
+Local (skips automatically — `skipReason` fires when env vars are absent):
 ```bash
-SMOKE_TEST_BASE_URL=https://hb-intel-stage.azurewebsites.net \
-AUTH_TOKEN=$(az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv) \
 pnpm --filter @hbc/functions test:smoke
 ```
 
-Expected: All critical paths pass (green).
+Against staging (developer — interactive token acquisition):
+```bash
+export SMOKE_TEST_BASE_URL=https://hb-intel-stage.azurewebsites.net
+export AUTH_TOKEN=$(az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv)
+pnpm --filter @hbc/functions test:smoke
+```
+
+CI pipeline: set `SMOKE_TEST_BASE_URL` and `AUTH_TOKEN` as pipeline secrets/variables. Token must be acquired per-run with correct API audience scope — see "Smoke test authentication policy" above.
+
+**Interpreting results:**
+- All tests skip → env vars not set (expected for local dev without staging)
+- Auth diagnostic test fails (401) → token audience mismatch or expired (operator error, not contract failure)
+- Domain tests fail with 5xx → staging temporarily unavailable (retry)
+- Domain tests fail with wrong shapes → actual contract failure (investigate)
 
 **Commit:** `test(backend): add critical path smoke tests for staging (P1-E1 Task 8)`
 
@@ -2777,9 +2854,15 @@ import { describe, it, expect } from 'vitest';
 
 const BASE_URL = process.env.SMOKE_TEST_BASE_URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
-const SKIP_SMOKE = !BASE_URL || !AUTH_TOKEN;
 
-describe.skipIf(SKIP_SMOKE)('Telemetry Baseline (Staging)', () => {
+// Same skip semantics as critical-paths smoke tests — see that file for full documentation
+const skipReason = !BASE_URL
+  ? 'SMOKE_TEST_BASE_URL not set — staging not targeted'
+  : !AUTH_TOKEN
+    ? 'AUTH_TOKEN not set — auth not configured for smoke tests'
+    : undefined;
+
+describe.skipIf(skipReason !== undefined)('Telemetry Baseline (Staging)', () => {
   /**
    * Produce traffic for a successful request trace.
    * Expected traces: request.received → auth.validated → repository.called → response.sent
