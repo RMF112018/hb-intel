@@ -296,30 +296,53 @@ These events feed the "Circuit breaker open" alert (2.3.2) and the < 2 minute MT
 
 ---
 
-### 2.3 Monitoring Dashboards
+### 2.3 Monitoring, Dashboards, and Alerting
 
 #### 2.3.1 Required Dashboards
 
-| Dashboard | Audience | Key Metrics |
-|---|---|---|
-| Adapter Health | DevOps | Request rate, error rate, p50/p95/p99 latency per domain |
-| Auth & Token | Security | Token acquisition rate, failure rate, mode distribution |
-| Provisioning | Operations | Saga success rate, step duration heatmap, compensation events |
-| Error Budget | Leadership | Error rate vs SLO, burn rate, time-to-breach projection |
+| Dashboard | Owner / Audience | Source Signals (AI tables) | Required Dimensions | B2 Gate Evidence |
+|---|---|---|---|---|
+| Adapter Health | DevOps | `proxy.request.*` events (2.1.1), `handler.*` events (2.1.2) from `customEvents` | `domain`, `routeGroup`, `operation`, `statusCode`, `environment` | Proxy adapter `PROD_ACTIVE` gate: error rate < 5%, p95 latency < 10s |
+| Auth & Token | Security / DevOps | `auth.token.*`, `auth.bearer.*`, `auth.obo.*` events (2.1.3) from `customEvents` | `provider`, `scope`, `errorCode`, `environment` | Auth flow verified for production activation |
+| Provisioning | Operations | `ProvisioningSaga*`, `ProvisioningTimer*` events + `ProvisioningStepDurationMs`, `ProvisioningSagaSuccessRate` metrics (2.1.4) from `customEvents` + `customMetrics` | `projectId`, `stepName`, `correlationId`, `outcome` | Provisioning saga success rate ≥ 95% over 7-day window |
+| Error Budget | Leadership / SRE | Aggregate error counts from `handler.error` events (2.1.2); SLO definitions from operational agreement | `routeGroup`, `environment`, time window | Overall error rate vs SLO; burn rate projection |
 
-#### 2.3.2 Alert Templates
+**Implementation note:** All dashboards are Application Insights Workbooks or Azure Monitor dashboards querying the `customEvents`, `customMetrics`, and `traces` tables. KQL queries should be developed alongside telemetry implementation and stored in version control.
 
-| Alert | Condition | Severity | Notification |
-|---|---|---|---|
-| High adapter error rate | > 5% errors in 5-minute window | P2 | Teams webhook (see note below) |
-| Adapter latency spike | p95 > 10s for any domain | P3 | Teams webhook |
-| Auth failure burst | > 3 auth failures in 1 minute | P1 | Teams webhook + on-call |
-| Provisioning saga failure | Any compensation event | P2 | Teams webhook |
-| Circuit breaker open | Any adapter circuit opens | P1 | Teams webhook + on-call |
+#### 2.3.2 Alert Rules
 
-**Circuit breaker alert note:** The "Circuit breaker open" alert activates only after D1 delivers circuit-breaker implementation. Currently a placeholder — no circuit breaker exists to trigger it.
+| Alert | Owner | Source Signal | Condition | Severity | Escalation Path | Response Reference |
+|---|---|---|---|---|---|---|
+| High adapter error rate | DevOps on-call | `proxy.request.error` count / total `proxy.request.*` events | > 5% error rate in 5-min sliding window | P2 | Alert channel → DevOps on-call | Check domain-specific error codes, verify Graph API status, check Redis connectivity |
+| Adapter latency spike | DevOps on-call | `proxy.request.success` event `durationMs` field | p95 > 10s for any domain in 5-min window | P3 | Alert channel → DevOps on-call | Check Graph API latency, Redis cache hit rate, function cold start frequency |
+| Auth failure burst | Security + DevOps on-call | `auth.token.error` + `auth.bearer.error` + `auth.obo.error` count | > 3 auth failures in 1 minute from any surface | P1 | Alert channel → on-call → security escalation | Check MSAL config, verify Azure AD service health, check OBO scope permissions |
+| Provisioning saga failure | Operations on-call | `ProvisioningSagaFailed` event (2.1.4) | Any `ProvisioningSagaFailed` event emitted | P2 | Alert channel → operations on-call | Check `failedAtStep`, review step-specific error, assess compensation outcome |
+| Circuit breaker open | DevOps on-call | `circuit.state.change` event where `newState = 'open'` (2.2.3) | Any circuit opens | P1 | Alert channel → on-call → incident escalation | Check downstream dependency health, review failure pattern, assess fallback behavior |
 
-**Alert channel note:** "Teams webhook" refers to the supported alert delivery mechanism (Incoming Webhooks or Power Automate Workflows). The specific mechanism must be confirmed — Office 365 connectors are deprecated; Microsoft recommends Workflows for new integrations.
+**Circuit breaker alert note:** Activates only after D1 delivers circuit-breaker implementation. Currently a placeholder — no circuit breaker exists to trigger it.
+
+**Runbook note:** Full incident runbooks are out of scope for this spec. The "Response Reference" column provides initial triage guidance. Runbooks should be developed as a companion deliverable during telemetry implementation.
+
+#### 2.3.3 Alert Notification Channel
+
+**Recommended mechanism:** Microsoft Teams Workflows (Power Automate) posting to a dedicated HB Intel alerts channel.
+
+**Rationale:** Office 365 Incoming Webhooks (connectors) are deprecated by Microsoft. Teams Workflows via Power Automate is the supported replacement for programmatic message delivery to Teams channels. Workflows support:
+
+- Adaptive Card payloads (structured alert formatting with severity, source, and action links)
+- Rate limiting appropriate for alert volumes (not a concern at Phase 1 scale)
+- Azure Monitor native integration via Action Groups → Logic App / Workflow trigger
+
+**Implementation path:**
+
+1. Create an Azure Monitor Action Group for HB Intel alerts
+2. Configure Action Group to trigger a Teams Workflow (Power Automate) for channel delivery
+3. For P1 alerts (Auth failure burst, Circuit breaker open): add a secondary action to page the on-call engineer (PagerDuty, Opsgenie, or equivalent — mechanism TBD)
+4. Use Adaptive Card template for alert messages including: alert name, severity, condition detail, dashboard link, timestamp
+
+**Environment consistency requirement:** The alert notification transport must be consistent across staging and production. Staging alerts should use a separate Teams channel (e.g., `#hb-intel-alerts-staging`) with the same Workflow mechanism to validate alert delivery before production activation.
+
+**Open decision:** On-call paging mechanism (PagerDuty, Opsgenie, or native Azure Monitor SMS/email) is not yet selected. This must be confirmed before P1 alerts requiring on-call escalation can be fully operational.
 
 ---
 
@@ -355,9 +378,9 @@ Maps current state (Part 1) against target requirements (Part 2) to identify the
 | Circuit-breaker telemetry | No circuit breaker exists (D1 not delivered) | `circuit.state.change` + `circuit.fallback.used` per 2.2.3 | Blocked on D1 delivery |
 | PWA telemetry | None | Adapter-mode startup signal, client error tracking | Full implementation needed |
 | OpenTelemetry | None — zero packages or config | Not a Phase 1 requirement; future migration path defined in 4.5 | Deferred to post-Phase 1 workstream |
-| Dashboards | None verified | 4 dashboards (Adapter, Auth, Provisioning, Error Budget) | Full implementation needed |
-| Alerts | 2 documented (PH6.14) | 5 alert rules | 3 additional rules needed |
-| Alert channel | "Teams webhook" documented | Specific mechanism confirmed | Workflows recommended — mechanism must be confirmed |
+| Dashboards | None verified | 4 AI Workbooks with source signals and dimensions per 2.3.1 | Full implementation needed |
+| Alerts | 2 rules documented (PH6.14); no Action Group | 5 alert rules with owner, source signal, and escalation per 2.3.2 | 3 additional rules + Action Group needed |
+| Alert channel | No configured delivery mechanism | Teams Workflows via Action Group per 2.3.3; on-call paging mechanism TBD | Workflow setup + channel creation needed |
 
 ---
 
