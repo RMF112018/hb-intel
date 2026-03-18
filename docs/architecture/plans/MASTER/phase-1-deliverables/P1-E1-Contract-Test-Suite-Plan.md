@@ -179,6 +179,7 @@ This is the single authoritative source for all open design decisions and workst
 - **Tier 3 (NOT CATALOGED):** Auth remains out of scope for full schemas — no auth schema or tests until C2 publishes auth route truth. `/api/auth/me` is available as a smoke utility only (decision 12).
 - **Transport-layer details (LOCKED):** D3 (`message` field), D4 (page size 25), D5 (PUT-only), D6 (nested paths), single-item `{ data: T }` wrapper, and Delete `204 No Content` are all locked. No PROVISIONAL markers remain on transport-layer conventions.
 - **No speculative unblocking:** Do not implement blocked tasks "optimistically" by guessing what B1/C1/C2 will deliver. Wait for the actual deliverable.
+- **No placeholder scaffolding:** Do not create skipped test suites, empty test files, or `describe.skip()` blocks for blocked tasks just to show progress. Implement only what is truly unblocked. Placeholder code creates maintenance burden and false signals about readiness.
 
 ### Naming Conflict Resolution
 
@@ -2822,7 +2823,27 @@ The staging API is protected by Entra ID Bearer token validation (C2 deliverable
 | Response shape mismatch | Fail | Fail | **Actual contract failure** — investigate |
 | Network timeout / DNS failure | Fail | Fail | Staging not deployed or unreachable |
 
-**Skip/fail pattern (decision 14):** Locally, smoke tests skip when env vars are absent. In CI, missing env vars must cause a hard failure — CI pipelines must set `SMOKE_TEST_BASE_URL` and `AUTH_TOKEN` or the test suite fails. The `CI` environment variable distinguishes the two modes. The existing provisioning smoke test uses `SMOKE_TEST=true` + `describe.runIf(SMOKE_TEST)` as a boolean gate. E1 smoke tests use env-var presence detection with CI-aware failure logic.
+#### Smoke Test Input Policy
+
+**Required inputs:**
+
+| Input | Variable | Required For | Source |
+|---|---|---|---|
+| Staging base URL | `SMOKE_TEST_BASE_URL` | All smoke tests | Platform team — staging deployment URL |
+| API auth token | `AUTH_TOKEN` | All authenticated tests | Operator — `az account get-access-token --resource api://<CLIENT_ID>` |
+| CI indicator | `CI` | Distinguishing local vs CI behavior | CI pipeline sets automatically |
+
+**Local-vs-CI behavior (decision 14):**
+
+| Condition | Local (`CI` unset) | CI (`CI=true`) |
+|---|---|---|
+| `SMOKE_TEST_BASE_URL` missing | Skip silently | **Hard fail** — CI must configure staging URL |
+| `AUTH_TOKEN` missing | Skip with warning | **Hard fail** — CI must inject auth token |
+| Both present | Run tests | Run tests |
+
+Locally, developers run `pnpm --filter @hbc/functions test:smoke` without env vars and all smoke tests skip — this is expected and correct. In CI, missing inputs represent a pipeline configuration error that must fail the build, not silently skip. The `CI` environment variable (set automatically by all major CI providers) distinguishes the two modes.
+
+The existing provisioning smoke test uses `SMOKE_TEST=true` + `describe.runIf(SMOKE_TEST)` as a boolean gate. E1 smoke tests use env-var presence detection with CI-aware failure logic — both patterns are acceptable.
 
 **Token acquisition — operator/CI responsibility:**
 
@@ -3245,17 +3266,17 @@ CI pipeline: set `SMOKE_TEST_BASE_URL` and `AUTH_TOKEN` as pipeline secrets/vari
 
 **Telemetry verification approach (aligned to C3 section 2.5 and B2 gate model):**
 
-- Phase 1 telemetry evidence is **trace-based**, gathered from Application Insights `traces` table via KQL.
-- Smoke tests produce the **traffic** that generates traces; they do NOT assert telemetry programmatically.
-- Telemetry verification is a **manual gate step** — engineers run KQL queries after smoke tests to confirm expected C3 events.
-- E1's contribution: generate traffic scenarios + document expected C3 event names per scenario.
-- E1's contribution does NOT include: automated AI query assertions in test code, dashboard creation, or alert configuration.
+- Phase 1 telemetry evidence requires **correlated signals** across three Application Insights tables: `requests`, `dependencies`, and `traces`.
+- Smoke tests produce the **traffic** that generates telemetry; they do NOT assert telemetry programmatically.
+- Telemetry verification is a **manual gate step** — engineers run KQL queries after smoke tests to confirm expected signals appear across all three tables.
+- E1's contribution: generate traffic scenarios + document expected telemetry signals per scenario.
+- E1's contribution does NOT include: automated Application Insights query assertions in test code, dashboard creation, or alert configuration.
 
 **Gate-evidence alignment:**
 
 | B2 Gate | What E1 Contributes | Telemetry Verified By |
 |---|---|---|
-| `STAGING_READY` | Smoke tests generate traffic showing `handler.*`, `auth.bearer.*`, and `proxy.request.*` events in AI | Manual KQL verification after test run |
+| `STAGING_READY` | Smoke tests generate traffic producing correlated signals in `requests`, `dependencies`, and `traces` tables | Manual KQL verification across all three tables after test run |
 | `PROD_ACTIVE` | Same smoke tests re-run against production | Full C3 2.5 checklist (dashboards, alerts, health probe, startup guard) — NOT E1's scope |
 
 **Mock-mode evidence invalidation (B2 policy):**
@@ -3278,6 +3299,20 @@ Telemetry evidence gathered while the adapter runs in mock mode does NOT count t
 | `circuit.state.change` | No — circuit breaker deferred | **No** — deferred | D1 |
 | `auth.obo.*` | No — separate verification | Non-blocking Phase 1 | C2 |
 | `deploy.smoke.pass` | No — PROD_ACTIVE gate only | **No** — PROD_ACTIVE only | Deployment pipeline |
+
+#### Telemetry Gate Evidence
+
+Smoke tests generate the traffic; operators verify the correlated evidence manually across three Application Insights tables:
+
+| AI Table | What It Proves | Example Signal |
+|---|---|---|
+| `requests` | HTTP requests are logged with status codes, durations, and route metadata | `GET /api/leads` → 200, 15ms |
+| `dependencies` | Downstream calls (database, external APIs) are tracked with success/failure and timing | SQL query to leads table → 200, 8ms |
+| `traces` | Application-level lifecycle events (handler invoke/success/error, auth flow) are emitted | `handler.invoke`, `auth.bearer.success` |
+
+**Checking only `traces` is NOT sufficient for STAGING_READY.** A healthy deployment must show correlated signals: a `requests` entry for the inbound HTTP call, `dependencies` entries for any downstream calls, and `traces` entries for the application lifecycle events — all sharing the same `operation_Id` for a given request.
+
+E1 does NOT build automated Application Insights query assertions in test code. Telemetry verification is a manual gate step using KQL queries after smoke test traffic is generated.
 
 **Files to Create:**
 - `backend/functions/src/test/smoke/telemetry-baseline.smoke.test.ts`
@@ -3461,7 +3496,22 @@ traces
 ```
 Expected: `auth.bearer.validate` and `auth.bearer.success` present (from authenticated tests); `auth.bearer.error` present (from 401 test).
 
-**STAGING_READY gate check:** If Queries 1 and 2 show expected events from a non-mock adapter run, the domain's telemetry evidence requirement for `STAGING_READY` is met. Mock-mode runs do not produce gate-creditable evidence.
+**Query 3: Confirm request and dependency correlation**
+```kql
+requests
+| where timestamp > ago(15m)
+| where url has "/api/leads" or url has "/api/projects"
+| project operation_Id, url, resultCode, duration
+| join kind=leftouter (
+    dependencies
+    | where timestamp > ago(15m)
+    | project operation_Id, dep_type=type, dep_target=target, dep_resultCode=resultCode
+) on operation_Id
+| order by operation_Id asc
+```
+Expected: Each smoke test request appears with its downstream dependencies. `operation_Id` links requests to their dependencies.
+
+**STAGING_READY gate check:** All three queries must show expected results from a non-mock adapter run: Queries 1 and 2 confirm lifecycle events in `traces`, Query 3 confirms correlated `requests` and `dependencies`. Checking only `traces` is insufficient. Mock-mode runs do not produce gate-creditable evidence.
 
 **Commit:** `test(backend): add telemetry baseline smoke tests (P1-E1 Task 9)`
 
