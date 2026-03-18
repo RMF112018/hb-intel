@@ -107,20 +107,47 @@ The current `@hbc/models/src/contracts/` directory is the **Contracts business d
 
 ### Verification Command Guidance
 
-**`@hbc/models` — no test script exists (CURRENT):**
+**Test infrastructure status (CURRENT):**
 
-E1 must add vitest configuration to models before any schema tests can run. Required setup:
-1. Add `zod` as a dependency and `vitest` as a devDependency
-2. Create `packages/models/vitest.config.ts` (node environment, include `src/**/*.test.ts`)
-3. Add `"test": "vitest run"` script to `packages/models/package.json`
+| Package | `test` Script | Vitest Config | In Root Workspace | Status |
+|---|---|---|---|---|
+| `@hbc/models` | **No** | **No** | **No** | E1 must create vitest config + test script (Task 2 prerequisite) |
+| `@hbc/data-access` | **No** | **No** | **No** | E1 must create vitest config + test script (shared prerequisite with D1) |
+| `@hbc/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`) | **Yes** (unit + smoke named projects) | **No** (standalone config) | E1 must add contract test files to vitest project include list |
 
-**`@hbc/data-access` — no test script exists (CURRENT):**
+**E1 test lane classification:**
 
-Same vitest setup applies. Coordinate with D1 which also needs this prerequisite.
+| Lane | Package | Command | What It Runs | Prerequisite |
+|---|---|---|---|---|
+| Schema unit tests | `@hbc/models` | `pnpm --filter @hbc/models test` | Zod schema parse/reject tests | Add vitest + test script |
+| MSW setup tests | `@hbc/data-access` | `pnpm --filter @hbc/data-access test` | MSW server/handler smoke tests | Add vitest + test script |
+| Frontend contract tests | `@hbc/data-access` | `pnpm --filter @hbc/data-access test` | Adapter → MSW → Zod pipeline | B1 proxy adapters + vitest setup |
+| Backend contract tests | `@hbc/functions` | `pnpm --filter @hbc/functions test` | Route handler → schema conformance | C1 route handlers + vitest config update |
+| Staging smoke tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:smoke` | End-to-end against staging | C1 + C2 + staging infra |
 
-**`backend/functions` — vitest exists (CURRENT):**
-- Unit tests: `cd backend/functions && npm test`
-- Smoke tests: `cd backend/functions && npm run test:smoke`
+**Setup tasks E1 must complete before verification commands work:**
+
+1. **`@hbc/models` vitest setup:**
+   - Add `zod` as a dependency and `vitest` as a devDependency
+   - Create `packages/models/vitest.config.ts` (node environment, include `src/**/*.test.ts`)
+   - Add `"test": "vitest run"` to `packages/models/package.json` scripts
+   - Optionally add to root `vitest.workspace.ts` (currently lists auth, shell, sharepoint-docs, bic-next-move, complexity, pwa only)
+
+2. **`@hbc/data-access` vitest setup** (coordinate with D1):
+   - Add `vitest` and `msw` as devDependencies
+   - Create `packages/data-access/vitest.config.ts` (node environment, include `src/**/*.test.ts` and `src/**/*.contract.test.ts`)
+   - Add `"test": "vitest run"` to `packages/data-access/package.json` scripts
+   - Optionally add to root `vitest.workspace.ts`
+
+3. **`@hbc/functions` vitest config update** (after C1 delivers route handlers):
+   - Current `backend/functions/vitest.config.ts` uses named projects (`unit`, `smoke`) with **explicit file-path include lists** — new contract test files won't be discovered automatically
+   - Add contract test patterns to the `unit` project include list, or create a new `contract` project
+   - Add: `src/functions/leads/**/*.contract.test.ts`, `src/functions/projects/**/*.contract.test.ts`, `src/functions/estimating/**/*.contract.test.ts`, `src/middleware/error-contract.test.ts`
+
+**`@hbc/functions` existing test commands (CURRENT — runnable now):**
+- Unit tests: `pnpm --filter @hbc/functions test`
+- Smoke tests: `pnpm --filter @hbc/functions test:smoke`
+- Coverage: `pnpm --filter @hbc/functions test:coverage`
 
 ---
 
@@ -1017,7 +1044,7 @@ Add Zod to the `dependencies` section (not devDependencies, because schemas are 
 }
 ```
 
-**Verification:**
+**Verification** (requires vitest setup first — see Verification Command Guidance):
 
 Run:
 ```bash
@@ -1391,7 +1418,7 @@ describe('MSW Server Setup', () => {
 });
 ```
 
-**Verification:**
+**Verification** (requires vitest setup first — see Verification Command Guidance):
 
 Run:
 ```bash
@@ -1639,7 +1666,7 @@ describe('ProxyLeadRepository Contract Tests', () => {
 });
 ```
 
-**Verification:**
+**Verification** (requires B1 delivery + vitest setup — see Verification Command Guidance):
 
 Run:
 ```bash
@@ -1811,7 +1838,7 @@ describe('ProxyEstimatingRepository Contract Tests', () => {
 });
 ```
 
-**Verification:**
+**Verification** (requires B1 delivery + vitest setup — see Verification Command Guidance):
 
 Run:
 ```bash
@@ -2206,11 +2233,11 @@ describe('Leads Route Handlers — Contract Tests', () => {
 });
 ```
 
-**Verification:**
+**Verification** (requires C1 delivery + vitest config update — see Verification Command Guidance):
 
 Run:
 ```bash
-pnpm --filter backend-functions test leads.contract
+pnpm --filter @hbc/functions test leads.contract
 ```
 
 Expected: All tests pass.
@@ -2363,11 +2390,11 @@ export function formatErrorResponse(
 }
 ```
 
-**Verification:**
+**Verification** (requires C1 delivery + vitest config update — see Verification Command Guidance):
 
 Run:
 ```bash
-pnpm --filter backend-functions test error-contract
+pnpm --filter @hbc/functions test error-contract
 ```
 
 Expected: All error envelope tests pass.
@@ -2413,7 +2440,7 @@ import { LeadSchema, ActiveProjectSchema } from '@hbc/models/api-schemas';
  * Usage:
  *   SMOKE_TEST_BASE_URL=https://hb-intel-stage.azurewebsites.net \
  *   AUTH_TOKEN=$(az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv) \
- *   pnpm --filter backend-functions test:smoke
+ *   pnpm --filter @hbc/functions test:smoke
  *
  * NOTE: AUTH_TOKEN must be acquired for the Azure Functions API audience.
  * Using `az account get-access-token` without --resource returns an ARM token
@@ -2681,7 +2708,7 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
 
 Run locally (this will skip if env vars not set):
 ```bash
-pnpm --filter backend-functions test smoke
+pnpm --filter @hbc/functions test smoke
 # All tests skipped until staging is ready
 ```
 
@@ -2689,7 +2716,7 @@ Run against staging:
 ```bash
 SMOKE_TEST_BASE_URL=https://hb-intel-stage.azurewebsites.net \
 AUTH_TOKEN=$(az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv) \
-pnpm --filter backend-functions test:smoke
+pnpm --filter @hbc/functions test:smoke
 ```
 
 Expected: All critical paths pass (green).
@@ -2745,7 +2772,7 @@ import { describe, it, expect } from 'vitest';
  * Usage:
  *   SMOKE_TEST_BASE_URL=https://hb-intel-stage.azurewebsites.net \
  *   AUTH_TOKEN=$(az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv) \
- *   pnpm --filter backend-functions test:smoke
+ *   pnpm --filter @hbc/functions test:smoke
  */
 
 const BASE_URL = process.env.SMOKE_TEST_BASE_URL;
@@ -2869,54 +2896,80 @@ export default defineConfig({
 });
 ```
 
-**File: `backend/functions/vitest.config.ts`**
+**File: `backend/functions/vitest.config.ts`** — MODIFY existing config, do NOT replace
+
+The current `backend/functions/vitest.config.ts` uses named projects with explicit include lists:
+- `unit` project: explicit paths for provisioning saga, middleware, services, config, utils, state-machine tests
+- `smoke` project: provisioning smoke tests only with 180s timeout
+
+**Do NOT replace this config with a generic `src/**/*.test.ts` pattern** — this would break the current project-based test separation and coverage targeting.
+
+Instead, extend the existing `unit` project's include array to add contract test patterns:
 
 ```typescript
-import { defineConfig } from 'vitest/config';
-
-export default defineConfig({
-  test: {
-    environment: 'node',
-    globals: true,
-    // Separate projects for unit tests and smoke tests
-    include: [
-      'src/**/*.test.ts',
-      'src/**/*.contract.test.ts',
-    ],
-    exclude: ['node_modules', 'dist', 'src/test/smoke/**'],
-  },
-});
+// Add to the existing unit project include array in vitest.config.ts:
+'src/functions/leads/**/*.contract.test.ts',
+'src/functions/projects/**/*.contract.test.ts',
+'src/functions/estimating/**/*.contract.test.ts',
+'src/middleware/error-contract.test.ts',
 ```
 
-**Add smoke test runner script to `backend/functions/package.json`:**
+Alternatively, add a third named project `contract` alongside `unit` and `smoke`:
+
+```typescript
+{
+  test: {
+    name: 'contract',
+    include: [
+      'src/functions/**/*.contract.test.ts',
+      'src/middleware/error-contract.test.ts',
+    ],
+  },
+}
+```
+
+**Backend test scripts already exist (CURRENT — no changes needed):**
 
 ```json
 {
   "scripts": {
-    "test": "vitest",
-    "test:smoke": "vitest src/test/smoke/*.smoke.test.ts"
+    "test": "vitest run --config vitest.config.ts --project unit",
+    "test:smoke": "SMOKE_TEST=true vitest run --config vitest.config.ts --project smoke",
+    "test:coverage": "vitest run --config vitest.config.ts --project unit --coverage"
   }
 }
 ```
 
-**Verification:**
-
-Run unit + contract tests:
-```bash
-pnpm --filter @hbc/data-access test
-pnpm --filter backend-functions test
+If a `contract` project is added, add a corresponding script:
+```json
+"test:contract": "vitest run --config vitest.config.ts --project contract"
 ```
 
-Expected: All tests pass (green checkmark).
+**Verification** (requires all prerequisite setup + upstream deliveries — see Verification Command Guidance):
 
-Run smoke tests (staging):
+Run schema tests (requires `@hbc/models` vitest setup):
+```bash
+pnpm --filter @hbc/models test
+```
+
+Run frontend tests (requires `@hbc/data-access` vitest setup + B1 for contract tests):
+```bash
+pnpm --filter @hbc/data-access test
+```
+
+Run backend tests (requires C1 route handlers + vitest config update):
+```bash
+pnpm --filter @hbc/functions test
+```
+
+Run smoke tests (requires C1 + C2 + staging infra):
 ```bash
 SMOKE_TEST_BASE_URL=https://hb-intel-stage.azurewebsites.net \
 AUTH_TOKEN=$(az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv) \
-pnpm --filter backend-functions test:smoke
+pnpm --filter @hbc/functions test:smoke
 ```
 
-Expected: All critical paths pass (or skip if staging not ready).
+Expected: All tests in each lane pass when their prerequisites are met.
 
 **Commit:** `test: configure Vitest for contract and smoke test suites (P1-E1 Task 10)`
 
