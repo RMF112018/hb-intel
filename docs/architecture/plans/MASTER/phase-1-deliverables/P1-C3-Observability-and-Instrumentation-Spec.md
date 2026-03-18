@@ -143,6 +143,8 @@ Events are organized by Phase 1 runtime surface. Each table specifies event name
 | `auth.token.success` | Token acquired | `provider`, `scope`, `correlationId`, `durationMs`, `adapterMode`, `environment` | info |
 | `auth.token.error` | Token acquisition failed | `provider`, `scope`, `correlationId`, `durationMs`, `errorCode`, `adapterMode`, `environment` | error |
 
+**Transport note:** PWA `auth.token.*` events are classified as a non-blocking enhancement for Phase 1 — no browser telemetry client exists to deliver them to Application Insights (see 2.1.9). Backend `auth.bearer.*`/`auth.obo.*` events provide the primary auth observability signal. PWA auth telemetry becomes active when a browser telemetry client is added post-Phase 1.
+
 **Backend auth events:**
 
 | Event | Trigger | Required Payload | Severity |
@@ -214,7 +216,7 @@ Events are organized by Phase 1 runtime surface. Each table specifies event name
 
 #### 2.1.6 Adapter-Mode Startup / Environment Classification
 
-**Scope:** Per B3 Layer 2, the startup guard must emit the resolved adapter mode and environment for observability. Single event emitted once per cold start on each surface (PWA and backend).
+**Scope:** Per B3 Layer 2, the startup guard must emit the resolved adapter mode and environment for observability. Emitted once per cold start. Backend: delivered to Application Insights via `ILogger.trackEvent()`. PWA: logged to browser console only in Phase 1 (no AI delivery); verifiable via CI build logs and smoke tests (see 2.1.9).
 
 **Status:** NOT IMPLEMENTED — depends on B3 Layer 2 startup guard.
 
@@ -245,6 +247,26 @@ The following adapter surfaces will require their own telemetry events when thei
 - **SharePoint adapter events** — PnPjs calls, SPFx context, SharePoint list/library operations. Deferred to future SharePoint engineering phase.
 - **Direct API adapter events** — Azure SQL operations, connection pool metrics. Deferred to future API phase.
 - **PWA client-side performance events** — route navigation timing, component render metrics, error boundary captures. Separate concern from backend instrumentation.
+
+#### 2.1.9 PWA Telemetry Transport
+
+**Phase 1 decision:** No browser telemetry client is required for Phase 1. The PWA has no Application Insights SDK, no OpenTelemetry, and no monitoring packages (Part 1). Adding a browser telemetry client would require an npm dependency, configuration, consent/privacy review, and bundle size assessment — this is deferred to a post-Phase 1 enhancement.
+
+**Consequence for PWA-side events:**
+
+| Event Group | Phase 1 Status | Transport | Rationale |
+|---|---|---|---|
+| `auth.token.*` (2.1.3) | Non-blocking enhancement | No AI delivery in Phase 1 | Backend `auth.bearer.*`/`auth.obo.*` capture auth outcome server-side for every request; PWA-side adds client-perspective timing but is not required for auth observability |
+| `startup.mode.resolved` with `surface: 'pwa'` (2.1.6) | Console-only | Browser console + CI build logs | B3 Layer 2 startup guard logs to console; verifiable via CI Stage 4 smoke tests; AI delivery not required for gate evidence |
+| PWA client-side performance (2.1.8) | Deferred | No transport | Explicitly future-phase |
+
+**Post-Phase 1 enhancement:** When a browser telemetry client is added (Application Insights JS SDK or equivalent), enable:
+
+- `auth.token.*` events routed to Application Insights
+- `startup.mode.resolved` with `surface: 'pwa'` routed to Application Insights
+- PWA client-side performance events (2.1.8)
+
+This decision should be revisited if a Phase 1 requirement emerges that cannot be satisfied by backend-side auth telemetry alone.
 
 ---
 
@@ -315,7 +337,7 @@ These events feed the "Circuit breaker open" alert (2.3.2) and the < 2 minute MT
 |---|---|---|---|---|---|---|
 | High adapter error rate | DevOps on-call | `proxy.request.error` count / total `proxy.request.*` events | > 5% error rate in 5-min sliding window | P2 | Alert channel → DevOps on-call | Check domain-specific error codes, verify Graph API status, check Redis connectivity |
 | Adapter latency spike | DevOps on-call | `proxy.request.success` event `durationMs` field | p95 > 10s for any domain in 5-min window | P3 | Alert channel → DevOps on-call | Check Graph API latency, Redis cache hit rate, function cold start frequency |
-| Auth failure burst | Security + DevOps on-call | `auth.token.error` + `auth.bearer.error` + `auth.obo.error` count | > 3 auth failures in 1 minute from any surface | P1 | Alert channel → on-call → security escalation | Check MSAL config, verify Azure AD service health, check OBO scope permissions |
+| Auth failure burst | Security + DevOps on-call | `auth.bearer.error` + `auth.obo.error` count (backend); `auth.token.error` added when PWA telemetry client available (2.1.9) | > 3 auth failures in 1 minute | P1 | Alert channel → on-call → security escalation | Check MSAL config, verify Azure AD service health, check OBO scope permissions |
 | Provisioning saga failure | Operations on-call | `ProvisioningSagaFailed` event (2.1.4) | Any `ProvisioningSagaFailed` event emitted | P2 | Alert channel → operations on-call | Check `failedAtStep`, review step-specific error, assess compensation outcome |
 | Circuit breaker open | DevOps on-call | `circuit.state.change` event where `newState = 'open'` (2.2.3) | Any circuit opens | P1 | Alert channel → on-call → incident escalation | Check downstream dependency health, review failure pattern, assess fallback behavior |
 
@@ -352,7 +374,7 @@ These events feed the "Circuit breaker open" alert (2.3.2) and the < 2 minute MT
 |---|---|---|---|---|
 | Adapter unavailable (circuit open) | < 2 minutes | `circuit.state.change` event (2.2.3) | DevOps on-call | Circuit breaker open alert (2.3.2) — activates after D1 delivery |
 | Elevated error rate (> 5%) | < 5 minutes | `proxy.request.error` / total `proxy.request.*` ratio (2.1.1) | DevOps on-call | High adapter error rate alert (2.3.2); Adapter Health dashboard (2.3.1) |
-| Auth system failure | < 2 minutes | `auth.token.error` + `auth.bearer.error` + `auth.obo.error` events (2.1.3) | Security + DevOps on-call | Auth failure burst alert (2.3.2) |
+| Auth system failure | < 2 minutes | `auth.bearer.error` + `auth.obo.error` events (2.1.3); `auth.token.error` added when PWA client available (2.1.9) | Security + DevOps on-call | Auth failure burst alert (2.3.2) |
 | Provisioning saga compensation | < 1 minute | `ProvisioningSagaFailed` event (2.1.4) | Operations on-call | Provisioning saga failure alert (2.3.2); Provisioning dashboard (2.3.1) |
 | Performance degradation (p95 > 10s) | < 10 minutes | `proxy.request.success` event `durationMs` (2.1.1) | DevOps on-call | Adapter latency spike alert (2.3.2); Adapter Health dashboard (2.3.1) |
 | Unexpected adapter mode in production | < 5 minutes | `startup.mode.resolved` event (2.1.6) where `adapterMode ≠ 'proxy'` | DevOps on-call + B3 escalation | Runtime telemetry alert (B3 Layer 5); SEV-1 incident response |
@@ -375,15 +397,15 @@ No observability evidence required — contract/schema alignment only.
 
 **`INTEGRATION_READY`**
 
-- `startup.mode.resolved` event (2.1.6) verified in deployment logs — confirms adapter mode and environment classification
+- `startup.mode.resolved` event (2.1.6) verified in deployment logs — confirms adapter mode and environment classification (backend: AI log query; PWA: CI build log or smoke test console output per 2.1.9)
 - `APPLICATIONINSIGHTS_CONNECTION_STRING` configured and telemetry flowing to AI workspace
-- Evidence: Application Insights log query showing `startup.mode.resolved` event with correct `adapterMode` and `environment`
+- Evidence: Backend — Application Insights log query showing `startup.mode.resolved` event with correct `adapterMode` and `environment`; PWA — CI log or smoke test output
 
 **`STAGING_READY`**
 
 - `handler.*` lifecycle events (2.1.2) emitting for all exercised route groups in staging
 - `proxy.request.*` events (2.1.1) emitting for proxy adapter calls in staging
-- `auth.bearer.*` / `auth.obo.*` events (2.1.3) emitting for authenticated requests in staging
+- `auth.bearer.*` / `auth.obo.*` events (2.1.3) emitting for authenticated backend requests in staging (PWA `auth.token.*` events are non-blocking per 2.1.9)
 - E1 contract test runs observable in Application Insights (test requests visible via handler telemetry)
 - Evidence: AI log query showing handler/proxy/auth events during E1 test execution in staging
 
@@ -436,7 +458,7 @@ Maps current state (Part 1) against target requirements (Part 2) to identify the
 | Platform health endpoint | Not implemented; removed from C1 catalog | `GET /api/health` returning 200 per 2.2.1 | Target contract — implementation and ownership TBD |
 | Dependency probes | Not implemented | Graph + Redis reachability probes per 2.2.2 | Full implementation needed |
 | Circuit-breaker telemetry | No circuit breaker exists (D1 not delivered) | `circuit.state.change` + `circuit.fallback.used` per 2.2.3 | Blocked on D1 delivery |
-| PWA telemetry | None | `startup.mode.resolved` (2.1.6) + `auth.token.*` (2.1.3); client-side performance deferred (2.1.8) | Full implementation needed |
+| PWA telemetry | None | Backend `startup.mode.resolved` via AI; PWA `startup.mode.resolved` via console/CI only; `auth.token.*` non-blocking enhancement; client-side performance deferred (see 2.1.9) | Partial — console-only for Phase 1 |
 | OpenTelemetry | None — zero packages or config | Not a Phase 1 requirement; future migration path defined in 4.5 | Deferred to post-Phase 1 workstream |
 | Dashboards | None verified | 4 AI Workbooks with source signals and dimensions per 2.3.1 | Full implementation needed |
 | Alerts | 2 rules documented (PH6.14); no Action Group | 5 alert rules with owner, source signal, and escalation per 2.3.2 | 3 additional rules + Action Group needed |
