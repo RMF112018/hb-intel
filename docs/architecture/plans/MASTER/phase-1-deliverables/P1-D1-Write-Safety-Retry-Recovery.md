@@ -179,7 +179,9 @@ Frontend generates a unique key before initiating a write. The key is sent as th
 **Implication for implementation:**
 `generateIdempotencyKey()` returns a UUID + operation context. Mutating HTTP methods accept `IdempotencyContext`. Reads never receive contexts.
 
-**Idempotency enforcement for critical-path writes:** All POST, PUT, and DELETE calls through `ProxyHttpClient` for Lead, Project, and Estimating domains MUST include an `IdempotencyContext`. Callers that omit it on a write path are non-conforming with D1 and will fail the B2 `PROD_ACTIVE` write-safety gate. The `post()` and `put()` method signatures retain `idempotency?: IdempotencyContext` for backward compatibility during development, but repository implementations MUST always supply it for production writes.
+**Idempotency enforcement for critical-path writes:** All POST and PUT calls through `ProxyHttpClient` for Lead, Project, and Estimating domains MUST include an `IdempotencyContext`. Callers that omit it on a create or update path are non-conforming with D1 and will fail the B2 `PROD_ACTIVE` write-safety gate. The `post()` and `put()` method signatures retain `idempotency?: IdempotencyContext` for backward compatibility during development, but repository implementations MUST always supply it for production creates and updates.
+
+**DELETE is excluded from required idempotency:** HTTP DELETE is naturally idempotent — deleting a resource that is already deleted returns 404 or 204, not a duplicate side-effect. Application-level idempotency keys add no write-safety benefit for DELETE and are omitted from the `delete()` API to keep the interface simple. DELETE still uses `WRITE_RETRY_POLICY` for transport-level retry.
 
 ---
 
