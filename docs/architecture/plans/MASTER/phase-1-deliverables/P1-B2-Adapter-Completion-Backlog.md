@@ -205,7 +205,7 @@ Auth is tracked separately from the 10 data domains because it has no CRUD patte
 
 - [ ] Live traffic verified in production
 - [ ] Mock fallback removed for this domain
-- [ ] Domain-level override (`HBC_ADAPTER_MODE_{DOMAIN}`) tested
+- [ ] Domain-level override tested (if override mechanism is implemented — see [Factory Wiring open decision](#open-decision-domain-level-adapter-overrides))
 - [ ] Monitoring and error reporting confirmed
 
 ---
@@ -388,12 +388,39 @@ All 11 domains are candidates for direct API adapter implementation in a future 
 
 **Current File:** `packages/data-access/src/factory.ts`
 
-| Change | Current State | Phase 1 Change | Rationale |
-|---|---|---|---|
-| Mock adapter registration | Implemented | Keep as-is | Default for dev/test |
-| Proxy adapter import | Stub only | Implement all domains per matrix above | Phase 1 critical path |
-| `HBC_ADAPTER_MODE` read | Implemented | Add env validation guard (see P1-B3) | Prevent silent mock fallback |
-| Domain-level overrides | Not present | Implement `HBC_ADAPTER_MODE_{DOMAIN}` per domain | Gradual rollout support |
+### Current Repo Truth
+
+- `resolveAdapterMode()` reads `HBC_ADAPTER_MODE` env var; defaults to `'mock'` if unset or unrecognized
+- Each domain has a `create{Domain}Repository(mode?)` factory function with a `switch` on the resolved mode
+- **Mock adapters:** fully implemented for all 11 domains — returned for `'mock'` mode
+- **Non-mock adapters:** all throw `AdapterNotImplementedError` for `'proxy'`, `'sharepoint'`, and `'api'` modes — hard fail, no silent fallback to mock
+- **No domain-level override mechanism exists** — all domains resolve to the same global mode
+- **No env validation guard exists** — if `HBC_ADAPTER_MODE` is unset, the factory silently defaults to `'mock'` with no warning
+
+### Phase 1 Changes
+
+| Change | Owner | Rationale |
+|---|---|---|
+| Replace proxy adapter stubs with real implementations for all 11 domains | P1-B1 | Phase 1 critical path — removes `AdapterNotImplementedError` for `'proxy'` mode |
+| Add env validation guard to warn or error when `HBC_ADAPTER_MODE` is unset in non-dev environments | P1-B3 | Prevent silent mock fallback in production |
+
+### Future-Phase Changes
+
+| Change | Target Phase | Rationale |
+|---|---|---|
+| SharePoint adapter implementations for list-backed domains | Future (SP) | SPFx collaborative-authoring surface |
+| API adapter implementations for direct-database domains | Future (API) | Azure SQL direct access surface |
+
+### Open Decision: Domain-Level Adapter Overrides
+
+The concept of per-domain overrides (e.g., `HBC_ADAPTER_MODE_LEADS`) has been discussed for gradual rollout support — enabling proxy mode for one domain while keeping others on mock. However, this pattern is **not yet approved**:
+
+- **Naming convention:** Not locked (`HBC_ADAPTER_MODE_{DOMAIN}` is a placeholder, not a standard)
+- **Governance model:** Not defined (who sets overrides, where they are documented, how they interact with the global mode)
+- **Implementation approach:** Not designed (env var per domain vs config object vs feature flag)
+- **Owner:** Not assigned — likely P1-B3 (environment configuration) or a platform configuration decision
+
+If gradual domain-by-domain rollout is needed during Phase 1 activation, the override pattern must be defined and approved before implementation. Until then, all domains resolve to the same global `HBC_ADAPTER_MODE` value.
 
 ---
 
