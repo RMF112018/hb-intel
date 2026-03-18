@@ -306,10 +306,10 @@ These decisions do not block mocked-fetch implementation but must be resolved be
 | A1 | API paths follow C1 catalog patterns | High for Lead/Project/Estimating; provisional for remaining 7 data domains + Auth | P1-C1 |
 | A2 | Collection envelope: `{ data: T[], total, page, pageSize }` | High | P1-C1 |
 | A3 | Single-item envelope: `{ data: T }` | High | P1-C1 |
-| A4 | Error responses: `extractErrorMessage()` reads `.error` first (C1 contract), falls back to `.message`; dual-field strategy provisional pending D3 | Low — D3 open | P1-C1, P1-C2 |
-| A5 | Default pageSize fallback is 25 (`DEFAULT_PAGE_SIZE`); C1 specifies default 50, max 200; fallback only applies when backend omits the field | Low — D4 open | P1-C1 |
+| A4 | Error responses use `message` as primary field | **LOCKED** — D3 resolved: `.message` first, `.error` fallback for pre-Phase-1 routes | P1-C1, P1-E1 |
+| A5 | Default pageSize is 25, max 100 | **LOCKED** — D4 resolved; B1 and C1 aligned | P1-C1, P1-E1 |
 | A6 | Bearer token in `Authorization` header accepted by backend | High | P1-C2 |
-| A7 | Project-scoped routes use nested paths provisionally; C1 uses flat routes with `?projectId=` query params | Low — D6 open | P1-C1 |
+| A7 | Project-scoped routes use nested paths (`/api/projects/{projectId}/{domain}`) | **LOCKED** — D6 resolved: nested paths confirmed | P1-C1, P1-E1 |
 | A8 | Aggregate endpoints exist (portfolio summary, metrics) | Low — not in C1 catalog | P1-C1 |
 | A9 | Auth management routes (`/api/auth/*`) exist | Low — not in C1 or C2 catalog | P1-C1, P1-C2 |
 

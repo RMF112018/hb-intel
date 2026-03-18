@@ -54,7 +54,7 @@ All example payloads, ID types, field names, and response assertions in this che
 | Registered Azure Function routes | Provisioning saga, proxy (GET + mutate), timer (full spec), SignalR negotiate, project setup requests, acknowledgments, notifications | `backend/functions/src/index.ts` |
 | Auth middleware | `validateToken()` verifies Entra ID Bearer tokens via JWKS; returns `IValidatedClaims { upn, oid, roles, displayName }` | `backend/functions/src/middleware/validateToken.ts` |
 | Auth error shape | `{ error: 'Unauthorized', reason: string }` — pre-D3 legacy shape; does NOT include `code` field or `requestId`. Target after C2: `{ message: '...', code: 'UNAUTHORIZED' }` per D3 lock | `unauthorizedResponse()` in `validateToken.ts` |
-| Startup config validation | `validateRequiredConfig()` exported but **NOT wired into startup** — explicitly deferred to G2.6 | `backend/functions/src/utils/validate-config.ts` |
+| Startup config validation | `validateRequiredConfig()` **wired into `createServiceFactory()`** — fails fast on missing required env vars in non-mock mode; skips in mock/test mode (G2.6 complete) | `backend/functions/src/utils/validate-config.ts`, `backend/functions/src/services/service-factory.ts` |
 | Health endpoint | **None registered** — no `/api/health` function found in `index.ts` imports | `backend/functions/src/index.ts` |
 | Backend test infrastructure | Vitest with `unit` and `smoke` named projects; coverage targets provisioning only | `backend/functions/vitest.config.ts` |
 | Domain route handlers (leads, projects, estimating) | **None exist** — `backend/functions/src/functions/` contains only provisioning, proxy, notification, acknowledgment, signalr, and timer functions | `backend/functions/src/functions/` |

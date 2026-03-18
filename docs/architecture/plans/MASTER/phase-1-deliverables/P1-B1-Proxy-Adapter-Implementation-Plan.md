@@ -1086,13 +1086,12 @@ export abstract class ProxyBaseRepository<T> extends BaseRepository<T> {
 
   /**
    * Handle a paginated API response, normalizing the backend structure
-   * to IPagedResult. Backend returns { data: T[], total, page, pageSize };
-   * we extract and return as { items: T[], total, page, pageSize }.
+   * to IPagedResult. Backend returns { items: T[], total, page, pageSize };
+   * D4 LOCKED: default pageSize 25, max 100.
    *
-   * Fallback pageSize uses DEFAULT_PAGE_SIZE from @hbc/models (currently 25).
-   * See decision D4: C1 specifies default 50. This fallback only applies when
-   * the backend omits pageSize from the response, which should not happen in
-   * normal operation. The mismatch must be reconciled before production.
+   * Fallback pageSize uses DEFAULT_PAGE_SIZE from @hbc/models (25).
+   * This fallback only applies when the backend omits pageSize from
+   * the response, which should not happen in normal operation.
    */
   protected mapPagedResponse<U>(response: unknown): IPagedResult<U> {
     const data = response as any;

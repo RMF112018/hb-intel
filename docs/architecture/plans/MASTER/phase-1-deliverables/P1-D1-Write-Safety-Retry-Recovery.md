@@ -7,7 +7,7 @@
 | **Workstream** | D — Write Safety, Retry, and Recovery |
 | **Document Type** | Implementation Plan |
 | **Owner** | D1-workstream lead |
-| **Status** | Draft — blocked on B1 proxy infrastructure |
+| **Status** | Implementation-Ready — partially unblocked; ProxyHttpClient and 7 proxy repos now exist; standalone types (retry, idempotency, failure classification) can proceed immediately; full wiring requires remaining 4 B1 repos |
 | **Date** | 2026-03-16 |
 | **Last Reviewed Against Repo Truth** | 2026-03-19 |
 | **Audience** | Developers implementing write safety for Phase 1 critical path (Project, Lead, Estimating) |
@@ -96,7 +96,7 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 
 | D1 depends on | For | Status |
 |---|---|---|
-| B1 (Proxy Adapter) | `ProxyHttpClient` class and proxy repository implementations | B1 not yet merged; proxy is stub |
+| B1 (Proxy Adapter) | `ProxyHttpClient` class and proxy repository implementations | B1 transport foundation delivered; `ProxyHttpClient` exists; 7 of 11 proxy repos implemented (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Remaining: Lead, Project, Estimating, Auth. |
 | C1 (Backend Catalog) | Route shapes, error envelope, HTTP methods | C1 frozen for implemented routes |
 | B2 (Completion Backlog) | Gate criteria and production activation requirements | B2 active |
 | C3 (Observability Spec) | Retry and error telemetry contract (`proxy.request.error`, `proxy.request.retry`); circuit-breaker telemetry is C3-owned, not D1 Phase 1 | C3 aligned for retry/error; circuit-breaker deferred |

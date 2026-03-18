@@ -75,7 +75,7 @@ All design decisions are locked. Transport-shape conventions (response envelopes
 
 | Document | Type | Status |
 |---|---|---|
-| P1-D1-Write-Safety-Retry-Recovery.md | Engineering Plan | Implementation-Ready — Blocked (B1) |
+| P1-D1-Write-Safety-Retry-Recovery.md | Engineering Plan | Implementation-Ready — Partially Unblocked (B1 foundation delivered; standalone types can proceed; full wiring awaits remaining 4 B1 repos) |
 
 ### Workstream E — Test and Observability Baseline (2 deliverables)
 
@@ -94,13 +94,13 @@ These notes anchor the status labels above to the actual codebase. They document
 - `packages/models/`: All 11 domain entity types implemented (81 source files)
 - `packages/data-access/src/ports/`: All 11 port interfaces defined (ILeadRepository, IScheduleRepository, etc.)
 - `packages/data-access/src/adapters/mock/`: All 11 mock adapters fully implemented with seed data
-- `packages/data-access/src/factory.ts`: Mode-resolved factory; non-mock modes throw `AdapterNotImplementedError`
+- `packages/data-access/src/factory.ts`: Mode-resolved factory; startup config validation wired via `validateRequiredConfig()`
 
-**Production adapters — stubs only:**
-- `packages/data-access/src/adapters/proxy/`: Type stubs and constants only; zero repository implementations
-- `packages/data-access/src/adapters/sharepoint/`: Does not exist
-- `packages/data-access/src/adapters/api/`: Type stubs and constants only
-- **This is the primary B1 implementation target.**
+**Proxy adapters — B1 transport foundation + 7 of 11 repos implemented:**
+- `packages/data-access/src/adapters/proxy/`: `ProxyHttpClient` (Bearer auth, timeout, X-Request-Id, error normalization), envelope parsers (`items`/`data`/`message` per locked conventions), route builders (D6 nested paths), and 7 project-scoped repos (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP) — all factory-wired and tested (51 tests)
+- Remaining proxy repos: Lead, Project, Estimating, Auth — factory still throws `AdapterNotImplementedError` for these 4 domains
+- `packages/data-access/src/adapters/sharepoint/`: Does not exist (Phase 5+)
+- `packages/data-access/src/adapters/api/`: Type stubs and constants only (Phase 7+)
 
 **Backend domain data routes — not implemented:**
 - Provisioning saga (7 steps), project requests, and notifications are fully implemented in `backend/functions/`
@@ -178,7 +178,7 @@ These items remain open and must be resolved before or during Phase 1 implementa
 | Item | What It Unblocks | Owner | Status | Repo Truth |
 |---|---|---|---|---|
 | SharePoint list schema approval per domain | P1-A3 physical schema deployment and P1-B1 production adapter implementation | Product Owner + Business Domains | Pending approval | List definitions exist in code (`backend/functions/src/config/`); physical SharePoint lists not provisioned |
-| B1 proxy adapter delivery | P1-D1 implementation, P1-E1 adapter contract tests (Tasks 4–5) | Engineering | Implementation pending | Port interfaces + mock adapters complete; proxy adapter stubs only (`packages/data-access/src/adapters/proxy/`) |
+| B1 proxy adapter delivery | P1-D1 implementation, P1-E1 adapter contract tests (Tasks 4–5) | Engineering | **In progress** (7 of 11) | Transport foundation + 7 project-scoped repos implemented and tested; remaining: Lead, Project, Estimating, Auth |
 | C1 backend route handler delivery | P1-E1 route contract tests (Tasks 6–7), P1-E2 staging readiness | Engineering | Implementation pending | Provisioning + notification routes exist; zero domain data routes (leads, schedules, etc.) |
 | C2 auth middleware delivery | P1-E1 smoke test auth validation (Task 8), P1-E2 auth gates | Engineering | Implementation pending | MSAL OBO service exists; centralized validation middleware not yet built |
 | C3 observability instrumentation | P1-E1 telemetry baseline verification (Task 9) | Engineering | Implementation pending | Azure Table audit logging implemented; telemetry correlation infrastructure TBD |

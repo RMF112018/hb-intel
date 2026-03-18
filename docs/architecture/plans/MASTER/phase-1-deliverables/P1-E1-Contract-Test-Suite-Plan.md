@@ -112,11 +112,11 @@ The following are explicitly out of scope for E1 implementation until their prec
 | Package | Test Script | Vitest Config | Zod | Proxy State | Notes |
 |---|---|---|---|---|---|
 | `@hbc/models` | **No** | **No** | **No** | N/A | devDependency: `@types/react` only; no `api-schemas/` directory exists |
-| `@hbc/data-access` | **No** | **No** | N/A | **Stubs only** — `proxy/index.ts` exports `ProxyConfig`, `DEFAULT_TIMEOUT_MS`, `DEFAULT_RETRY_COUNT`; no `ProxyHttpClient` or proxy repository classes | Non-mock adapters throw `AdapterNotImplementedError` |
+| `@hbc/data-access` | **Yes** (`test`) | **Yes** — `vitest.config.ts` | N/A | **Partial** — `ProxyHttpClient`, envelope parsers, error normalization, path builders + 7 project-scoped proxy repos (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP) implemented and factory-wired; 51 tests passing. Remaining: Lead, Project, Estimating, Auth throw `AdapterNotImplementedError` | v0.1.2 |
 | `backend/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`) | **Yes** — split `unit`/`smoke` projects with explicit include lists | N/A | N/A | Does NOT depend on `@hbc/data-access` today (**CURRENT**). Type-only `devDependency` for test port interfaces is **approved** — see [Dependency Boundary Decision](#dependency-boundary-decision). No runtime coupling permitted. Coverage targets provisioning only; no domain route handlers |
 | Root workspace | `pnpm test` (filtered) | **Yes** — 6 entries: auth, shell, sharepoint-docs, bic-next-move, complexity, pwa | N/A | N/A | `@hbc/models` and `@hbc/data-access` are NOT in the workspace test list |
 
-**Why adapter contract tests remain blocked:** `@hbc/data-access` proxy adapters are stubs. The `resolveAdapterMode()` factory returns mock adapters by default; selecting `'proxy'` mode throws `AdapterNotImplementedError`. B1 must deliver `ProxyHttpClient` and domain-specific proxy repository classes (`ProxyLeadRepository`, `ProxyProjectRepository`, `ProxyEstimatingRepository`) before adapter contract tests can execute.
+**Adapter contract test status (updated 2026-03-18):** B1 transport foundation and 7 project-scoped proxy repos are implemented with 51 tests. Adapter contract tests for these 7 domains can proceed once C1 route handlers exist. Remaining 4 domains (Lead, Project, Estimating, Auth) still throw `AdapterNotImplementedError` in proxy mode — contract tests for those require B1 completion for those repos plus C1 route handlers.
 
 ### E1 Deliverable Breakdown by Surface
 
