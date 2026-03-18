@@ -46,15 +46,15 @@ B1 implements all 11 domain repositories against mocked fetch in Phase 1 (10 dat
 | **Lead** | `ILeadRepository` | CRUD (5), Search (1) | 6 | Phase 1 | `IMPL_READY` | Task 3 | C1 locked |
 | **Project** | `IProjectRepository` | CRUD (5), Aggregate (1) | 6 | Phase 1 | `IMPL_READY` | Task 4 | C1 locked; A8 |
 | **Estimating** | `IEstimatingRepository` | Tracker CRUD (5), Kickoff (2) | 7 | Phase 1 | `IMPL_READY` | Task 5 | C1 base locked; D2 |
-| **Schedule** | `IScheduleRepository` | Activity CRUD (5), Metrics (1) | 6 | Phase 1* | `PLANNED` | Task 5 | D1, D6 provisional |
-| **Buyout** | `IBuyoutRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1* | `PLANNED` | Task 5 | D1, D6 provisional |
-| **Compliance** | `IComplianceRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1* | `PLANNED` | Task 6 | D1, D6 provisional |
-| **Contract** | `IContractRepository` | Contract CRUD (5), Approvals (2) | 7 | Phase 1* | `PLANNED` | Task 6 | D1, D6 provisional |
-| **Risk** | `IRiskRepository` | Item CRUD (5), Management (1) | 6 | Phase 1* | `PLANNED` | Task 6 | D1, D6 provisional |
-| **Scorecard** | `IScorecardRepository` | Scorecard CRUD (5), Versions (1) | 6 | Phase 1* | `PLANNED` | Task 7 | D1, D6 provisional |
-| **PMP** | `IPmpRepository` | Plan CRUD (5), Signatures (2) | 7 | Phase 1* | `PLANNED` | Task 7 | D1, D6 provisional |
+| **Schedule** | `IScheduleRepository` | Activity CRUD (5), Metrics (1) | 6 | Phase 1 | `IMPL_READY` | Task 5 | D1, D6 provisional* |
+| **Buyout** | `IBuyoutRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1 | `IMPL_READY` | Task 5 | D1, D6 provisional* |
+| **Compliance** | `IComplianceRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1 | `IMPL_READY` | Task 6 | D1, D6 provisional* |
+| **Contract** | `IContractRepository` | Contract CRUD (5), Approvals (2) | 7 | Phase 1 | `IMPL_READY` | Task 6 | D1, D6 provisional* |
+| **Risk** | `IRiskRepository` | Item CRUD (5), Management (1) | 6 | Phase 1 | `IMPL_READY` | Task 6 | D1, D6 provisional* |
+| **Scorecard** | `IScorecardRepository` | Scorecard CRUD (5), Versions (1) | 6 | Phase 1 | `IMPL_READY` | Task 7 | D1, D6 provisional* |
+| **PMP** | `IPmpRepository` | Plan CRUD (5), Signatures (2) | 7 | Phase 1 | `IMPL_READY` | Task 7 | D1, D6 provisional* |
 
-*Phase 1 scope for mocked-fetch implementation. Production activation for these domains is blocked until C1 route finalization resolves D1/D6.
+*Mocked-fetch implementation can proceed against provisional route assumptions. Production activation blocked until C1 route finalization resolves open decisions D1/D6.
 
 ### Method Family Detail by Domain
 
@@ -236,6 +236,8 @@ Gates apply per domain per adapter type. Not all gates apply to all adapter type
 
 This table is the live tracking surface for adapter implementation progress. Update it when status changes, blockers are resolved, or ownership is assigned.
 
+**Two-track readiness:** The "Blocker" column distinguishes between code-progress blockers (prevents starting implementation) and production-activation blockers (prevents going live). A domain with only production-activation blockers can proceed with mocked-fetch implementation.
+
 ### Proxy Adapter Progress
 
 | Domain | Owner | Current Gate | Blocker | Evidence | Next Action | Last Updated |
@@ -243,13 +245,13 @@ This table is the live tracking surface for adapter implementation progress. Upd
 | Lead | — | `IMPL_READY` | None | — | Begin B1 Task 3 | 2026-03-18 |
 | Project | — | `IMPL_READY` | None | — | Begin B1 Task 4 | 2026-03-18 |
 | Estimating | — | `IMPL_READY` | None (D2 deferred) | — | Begin B1 Task 5 | 2026-03-18 |
-| Schedule | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
-| Buyout | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
-| Compliance | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
-| Contract | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
-| Risk | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
-| Scorecard | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
-| PMP | — | `PLANNED` | D1, D6 provisional | — | Await C1 route lock | 2026-03-18 |
+| Schedule | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 5 (mocked fetch) | 2026-03-18 |
+| Buyout | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 5 (mocked fetch) | 2026-03-18 |
+| Compliance | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
+| Contract | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
+| Risk | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
+| Scorecard | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 7 (mocked fetch) | 2026-03-18 |
+| PMP | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 7 (mocked fetch) | 2026-03-18 |
 | Auth | — | `IMPL_READY` | A9 (no route catalog) | — | Begin B1 Task 7 | 2026-03-18 |
 
 ### SharePoint and API Adapter Progress
