@@ -22,15 +22,27 @@
 | **PROVISIONAL** | Design decision pending upstream confirmation |
 | **BLOCKED** | Cannot implement until dependency is delivered |
 
+### Terminology
+
+| Term | Definition |
+|---|---|
+| **Contract schema** | Zod schema in `@hbc/models/src/api-schemas/` defining the transport shape contract between frontend and backend |
+| **Transport shape** | HTTP response structure (envelope, pagination, error format) governed by C1 |
+| **Domain interface** | TypeScript interface in `@hbc/models` defining entity field names and types (e.g., `ILead`, `IActiveProject`) |
+| **Adapter contract test** | Test verifying proxy adapter responses parse against contract schemas (Tasks 4-5, `@hbc/data-access`) |
+| **Route contract test** | Test verifying route handler responses conform to contract schemas (Task 6, `backend/functions`) |
+| **Error contract test** | Test verifying error middleware output conforms to ErrorEnvelopeSchema (Task 7, `backend/functions`) |
+| **Smoke test** | End-to-end test against a deployed staging instance over real HTTP with real auth tokens (Task 8) |
+
 ---
 
 ## Purpose
 
 Phase 1 contract testing establishes agreement between frontend proxy adapters (`@hbc/data-access`) and backend Azure Functions on request/response shapes. Using Zod schemas as the contract source of truth, the test suite verifies:
 
-1. **Frontend-backend shape agreement** — proxy adapter responses parse against Zod schemas
-2. **Backend service layer stability** — backend routes consistently produce contracted shapes
-3. **Critical path coverage** — staging smoke tests validate end-to-end flows in production-like conditions
+1. **Frontend-backend shape agreement** — proxy adapter responses parse against contract schemas
+2. **Backend service layer stability** — backend routes consistently produce contracted transport shapes
+3. **Critical path coverage** — smoke tests validate end-to-end flows in production-like conditions
 
 **Architecture:** Shared Zod schemas in `@hbc/models/src/api-schemas/` define the contract. MSW handlers simulate backend responses in frontend tests. Backend validation middleware uses the same schemas, ensuring both sides validate against a single source of truth.
 
@@ -38,8 +50,8 @@ Phase 1 contract testing establishes agreement between frontend proxy adapters (
 
 **Success Criteria:**
 - All 11 domain types have contract schemas (Lead, Project, Estimating, +8 others)
-- Frontend proxy adapter tests prove adapter → port interface mapping is correct
-- Backend route tests prove handlers return contracted shapes
+- Adapter contract tests prove adapter → domain interface mapping is correct
+- Route contract tests prove handlers return contracted transport shapes
 - Smoke tests pass against staging Azure Functions
 - No blocking contract violations between frontend and backend
 
@@ -78,18 +90,20 @@ The following are explicitly out of scope for E1 implementation until their prec
 | `backend/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`) | **Yes** — split `unit`/`smoke` projects with explicit include lists | N/A | N/A | Does NOT depend on `@hbc/data-access`; coverage targets provisioning only; no domain route handlers |
 | Root workspace | `pnpm test` (filtered) | **Yes** — 6 entries: auth, shell, sharepoint-docs, bic-next-move, complexity, pwa | N/A | N/A | `@hbc/models` and `@hbc/data-access` are NOT in the workspace test list |
 
-**Why frontend contract tests remain blocked:** `@hbc/data-access` proxy adapters are stubs. The `resolveAdapterMode()` factory returns mock adapters by default; selecting `'proxy'` mode throws `AdapterNotImplementedError`. B1 must deliver `ProxyHttpClient` and domain-specific proxy repository classes (`ProxyLeadRepository`, `ProxyProjectRepository`, `ProxyEstimatingRepository`) before adapter contract tests can execute.
+**Why adapter contract tests remain blocked:** `@hbc/data-access` proxy adapters are stubs. The `resolveAdapterMode()` factory returns mock adapters by default; selecting `'proxy'` mode throws `AdapterNotImplementedError`. B1 must deliver `ProxyHttpClient` and domain-specific proxy repository classes (`ProxyLeadRepository`, `ProxyProjectRepository`, `ProxyEstimatingRepository`) before adapter contract tests can execute.
 
 ### E1 Deliverable Breakdown by Surface
 
+See [Implementation Summary](#implementation-summary) for the full task-by-task status breakdown. The summary below is a high-level surface map only.
+
 | Deliverable | Surface | Status | Dependency |
 |---|---|---|---|
-| Zod schema infrastructure (shared schemas, per-domain schemas) | `@hbc/models` | **TARGET** — requires Zod dependency + naming resolution | None after setup |
+| Contract schema infrastructure (shared schemas, per-domain schemas) | `@hbc/models` | **TARGET** — requires Zod dependency + naming resolution | None after setup |
 | MSW handler setup + test utilities | `@hbc/data-access` | **TARGET** — requires vitest setup | D1 vitest prerequisite |
-| Frontend adapter contract tests (Lead, Project, Estimating) | `@hbc/data-access` | **BLOCKED** | B1 (proxy repositories) |
-| Backend route contract tests | `backend/functions` | **BLOCKED** | C1 (domain route handlers) |
-| Backend error shape contract tests | `backend/functions` | **BLOCKED** | C1 (error envelope freeze) |
-| Staging smoke tests | `backend/functions` | **BLOCKED** | C1 + C2 (routes + auth) + staging infra |
+| Adapter contract tests (Lead, Project, Estimating) | `@hbc/data-access` | **BLOCKED** | B1 (proxy repositories) |
+| Route contract tests | `backend/functions` | **BLOCKED** | C1 (domain route handlers) |
+| Error contract tests | `backend/functions` | **BLOCKED** | C1 (error envelope freeze) |
+| Smoke tests | `backend/functions` | **BLOCKED** | C1 + C2 (routes + auth) + staging infra |
 | Telemetry baseline verification | `backend/functions` | **BLOCKED** | C3 (instrumentation) + staging infra |
 
 ### What E1 Can Implement Now
@@ -125,17 +139,17 @@ This is the single authoritative source for all open design decisions and workst
 
 | Blocker | Workstream | What It Blocks in E1 | Tasks Affected | What Can Proceed Now | Unblock Condition |
 |---|---|---|---|---|---|
-| B1 — Proxy Adapter | P1-B1 | Frontend adapter contract tests | Tasks 4, 5 | MSW handlers, fixtures, server setup (Task 3); Zod schemas (Tasks 1-2) | B1 delivers `ProxyHttpClient` + `ProxyLeadRepository` + `ProxyProjectRepository` + `ProxyEstimatingRepository` |
-| C1 — Backend Catalog | P1-C1 | Backend route and error contract tests | Tasks 6, 7, 8 | All frontend-side work; Zod schemas for Tier 1 domains | C1 delivers domain route handlers + error middleware for Lead/Project/Estimating |
-| C2 — Auth Hardening | P1-C2 | Staging smoke test auth validation | Task 8 (auth tests) | Non-auth smoke tests can be written (skip when no token) | C2 delivers auth middleware for staging |
+| B1 — Proxy Adapter | P1-B1 | Adapter contract tests | Tasks 4, 5 | MSW handlers, fixtures, server setup (Task 3); contract schemas (Tasks 1-2) | B1 delivers `ProxyHttpClient` + `ProxyLeadRepository` + `ProxyProjectRepository` + `ProxyEstimatingRepository` |
+| C1 — Backend Catalog | P1-C1 | Route contract tests and error contract tests | Tasks 6, 7, 8 | All frontend-side work; contract schemas for Tier 1 domains | C1 delivers domain route handlers + error middleware for Lead/Project/Estimating |
+| C2 — Auth Hardening | P1-C2 | Smoke test auth validation | Task 8 (auth tests) | Non-auth smoke tests can be written (skip when no token) | C2 delivers auth middleware for staging |
 | C3 — Observability | P1-C3 | Telemetry baseline verification | Task 9 | Telemetry event classification documented | C3 instrumentation lands in staging; events visible in Application Insights |
 | D1 — Write Safety | P1-D1 | Shared vitest prerequisite for `@hbc/data-access` | Task 10 (partial) | Vitest setup can proceed independently; D1 and E1 coordinate | Vitest config created for `@hbc/data-access` (either workstream) |
 | Staging infra | Platform | Smoke tests + telemetry baseline | Tasks 8, 9 | All local contract tests | `SMOKE_TEST_BASE_URL` resolves to deployed staging instance |
 
 ### Execution Guardrails
 
-- **Tier 1 (CONFIRMED):** Full implementation (schemas, tests, MSW handlers) is permitted only where all blocking dependencies are satisfied. For frontend adapter contract tests, B1 must be merged. For backend route contract tests, C1 must be delivered.
-- **Tier 2 (PROVISIONAL):** Schema skeletons with PROVISIONAL markers are permitted. Full test code, MSW handlers, and backend contract tests for Tier 2 domains must wait until C1 decisions D1/D2/D6 resolve and routes are confirmed.
+- **Tier 1 (CONFIRMED):** Full implementation (contract schemas, tests, MSW handlers) is permitted only where all blocking dependencies are satisfied. For adapter contract tests, B1 must be merged. For route contract tests, C1 must be delivered.
+- **Tier 2 (PROVISIONAL):** Schema skeletons with PROVISIONAL markers are permitted. Full test code, MSW handlers, and route contract tests for Tier 2 domains must wait until C1 decisions D1/D2/D6 resolve and routes are confirmed.
 - **Tier 3 (NOT CATALOGED):** Auth remains entirely out of scope — no schema, no tests, no handlers — until C2 publishes auth route truth (A9).
 - **Transport-layer details:** Code that depends on D3 (error field naming), D4 (pagination defaults), D5 (PATCH support), or D6 (path nesting) must carry PROVISIONAL markers and be written against the current best-known shape, not an assumed resolution.
 - **No speculative unblocking:** Do not implement blocked tasks "optimistically" by guessing what B1/C1/C2 will deliver. Wait for the actual deliverable.
@@ -168,9 +182,9 @@ The current `@hbc/models/src/contracts/` directory is the **Contracts business d
 |---|---|---|---|---|
 | Schema unit tests | `@hbc/models` | `pnpm --filter @hbc/models test` | Zod schema parse/reject tests | Add vitest + test script |
 | MSW setup tests | `@hbc/data-access` | `pnpm --filter @hbc/data-access test` | MSW server/handler smoke tests | Add vitest + test script |
-| Frontend contract tests | `@hbc/data-access` | `pnpm --filter @hbc/data-access test` | Adapter → MSW → Zod pipeline | B1 proxy adapters + vitest setup |
-| Backend contract tests | `@hbc/functions` | `pnpm --filter @hbc/functions test` | Route handler → schema conformance | C1 route handlers + vitest config update |
-| Staging smoke tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:smoke` | End-to-end against staging | C1 + C2 + staging infra |
+| Adapter contract tests | `@hbc/data-access` | `pnpm --filter @hbc/data-access test` | Adapter → MSW → Zod pipeline | B1 proxy adapters + vitest setup |
+| Route contract tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:contract` | Route handler → contract schema conformance | C1 route handlers + vitest config update |
+| Smoke tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:smoke` | End-to-end against staging | C1 + C2 + staging infra |
 
 **Setup tasks E1 must complete before verification commands work:**
 
@@ -204,10 +218,10 @@ Each test lane has a single package owner, a specific command, and clear pass/fa
 |---|---|---|---|---|---|
 | Schema unit tests | `@hbc/models` | `pnpm --filter @hbc/models test` | All Zod parse/reject assertions pass | Zod + vitest setup | Yes — after setup |
 | MSW setup tests | `@hbc/data-access` | `pnpm --filter @hbc/data-access test` | Server starts, handlers registered, unhandled requests fail | Vitest + MSW setup | Yes — after setup |
-| Frontend adapter contract tests | `@hbc/data-access` | `pnpm --filter @hbc/data-access test` | Adapter responses parse against Zod schemas | B1 proxy repositories | No — blocked |
-| Backend route contract tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:contract` | Route handlers return schema-conformant responses | C1 route handlers | No — blocked |
-| Backend error contract tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:contract` | All error paths conform to ErrorEnvelopeSchema | C1 error middleware | No — blocked |
-| Staging smoke tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:smoke` | End-to-end flows pass against staging | C1 + C2 + staging | No — blocked |
+| Adapter contract tests | `@hbc/data-access` | `pnpm --filter @hbc/data-access test` | Adapter responses parse against contract schemas | B1 proxy repositories | No — blocked |
+| Route contract tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:contract` | Route handlers return contract-schema-conformant responses | C1 route handlers | No — blocked |
+| Error contract tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:contract` | All error paths conform to ErrorEnvelopeSchema | C1 error middleware | No — blocked |
+| Smoke tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:smoke` | End-to-end flows pass against staging | C1 + C2 + staging | No — blocked |
 | Telemetry baseline | `@hbc/functions` | `pnpm --filter @hbc/functions test:smoke` | Traffic generates expected C3 events (manual KQL) | C3 + staging | No — blocked |
 
 ---
@@ -250,20 +264,20 @@ Contract tests enforce a strict shape agreement:
 - MSW handlers in frontend tests only (backend uses direct function calls)
 - `@hbc/models/src/contracts/` remains the Contracts business domain — E1 does not touch it
 
-### Transport DTO vs Domain Interface Distinction
+### Transport Shape vs Domain Interface Distinction
 
-E1 Zod schemas validate the **transport layer** — the HTTP envelope wrapping domain payloads. C1 governs transport shapes; `@hbc/models` interfaces define the domain payload shapes.
+E1 contract schemas validate the **transport shape** — the HTTP envelope wrapping domain payloads. C1 governs transport shapes; domain interfaces in `@hbc/models` define the payload field shapes.
 
 **Two distinct layers:**
 
 | Layer | Governed by | Defines | Example |
 |---|---|---|---|
-| **Transport** | C1 (Backend Catalog) | HTTP envelope, status codes, field naming, pagination defaults | `{ items: ILead[], total, page, pageSize }` |
-| **Domain** | `@hbc/models` interfaces | Entity field names, types, enums | `ILead { id: number, title, stage, clientName, estimatedValue, createdAt, updatedAt }` |
+| **Transport shape** | C1 (Backend Catalog) | HTTP envelope, status codes, field naming, pagination defaults | `{ items: ILead[], total, page, pageSize }` |
+| **Domain interface** | `@hbc/models` interfaces | Entity field names, types, enums | `ILead { id: number, title, stage, clientName, estimatedValue, createdAt, updatedAt }` |
 
 **Key implications for E1:**
-- `IPagedResult<T>` uses `items: T[]` (**CURRENT**). If C1 defines a different transport field name (e.g., `data`), Zod schemas adapt to the transport shape, not the domain interface.
-- E1 does NOT invent transport shapes — it codifies shapes defined by C1 and verified against `@hbc/models`.
+- `IPagedResult<T>` uses `items: T[]` (**CURRENT**). If C1 defines a different transport shape field name (e.g., `data`), contract schemas adapt to the transport shape, not the domain interface.
+- E1 does NOT invent transport shapes — it codifies shapes defined by C1 and verified against domain interfaces in `@hbc/models`.
 - Open C1 decisions that affect the transport layer and therefore E1 schemas:
   - **D3** — Error envelope field naming: `.error` vs `.message` (**PROVISIONAL**)
   - **D4** — Pagination default page size: 25 (current `DEFAULT_PAGE_SIZE`) vs 50 (**PROVISIONAL**)
@@ -1117,7 +1131,7 @@ Add Zod to the `dependencies` section (not devDependencies, because schemas are 
 }
 ```
 
-**Verification** (requires vitest setup first — see Verification Command Guidance):
+**Verification** (see [Execution Sequence with Acceptance Criteria](#execution-sequence-with-acceptance-criteria) for prerequisites):
 
 Run:
 ```bash
@@ -1131,7 +1145,7 @@ Expected: All tests pass (green checkmark).
 
 ---
 
-## Chunk 2: MSW Handler Setup and Frontend Contract Tests
+## Chunk 2: MSW Handler Setup and Adapter Contract Tests
 
 ### MSW Test Infrastructure Policy
 
@@ -1162,7 +1176,7 @@ afterAll(() => server.close());
 
 **Boundary rule:** Do NOT pre-build handler arrays for Tier 2 (PROVISIONAL) or Tier 3 (NOT CATALOGED) domains. Add handlers only when the route contract is confirmed and the adapter class exists.
 
-### Frontend Contract Test Readiness
+### Adapter Contract Test Readiness
 
 | Test Category | Can Run Now? | Blocked On | Notes |
 |---|---|---|---|
@@ -1520,7 +1534,7 @@ describe('MSW Server Setup', () => {
 });
 ```
 
-**Verification** (requires vitest setup first — see Verification Command Guidance):
+**Verification** (see [Execution Sequence with Acceptance Criteria](#execution-sequence-with-acceptance-criteria) for prerequisites):
 
 Run:
 ```bash
@@ -1529,7 +1543,7 @@ pnpm --filter @hbc/data-access test test-utils
 
 Expected: Tests pass.
 
-**Commit:** `feat: set up MSW server and handlers for frontend contract tests (P1-E1 Task 3)`
+**Commit:** `feat: set up MSW server and handlers for adapter contract tests (P1-E1 Task 3)`
 
 ### Task 4: Contract Test — Frontend Adapter vs Backend Shape
 
@@ -1760,7 +1774,7 @@ describe('ProxyLeadRepository Contract Tests', () => {
 });
 ```
 
-**Verification** (requires B1 delivery + vitest setup — see Verification Command Guidance):
+**Verification** (see [Execution Sequence with Acceptance Criteria](#execution-sequence-with-acceptance-criteria) for prerequisites):
 
 Run:
 ```bash
@@ -1928,7 +1942,7 @@ describe('ProxyEstimatingRepository Contract Tests', () => {
 });
 ```
 
-**Verification** (requires B1 delivery + vitest setup — see Verification Command Guidance):
+**Verification** (see [Execution Sequence with Acceptance Criteria](#execution-sequence-with-acceptance-criteria) for prerequisites):
 
 Run:
 ```bash
@@ -1941,7 +1955,7 @@ Expected: All contract tests pass.
 
 ---
 
-## Chunk 3: Backend Contract Tests
+## Chunk 3: Route Contract Tests and Error Contract Tests
 
 ### Backend Contract Test Readiness
 
@@ -1960,33 +1974,33 @@ Expected: All contract tests pass.
 
 | Test Category | Can Run Now? | Blocked On |
 |---|---|---|
-| Backend route contract tests (Task 6) | **No** | C1: domain route handlers + `@hbc/data-access` dependency |
-| Backend error shape tests (Task 7) | **No** | C1: error middleware |
+| Route contract tests (Task 6) | **No** | C1: domain route handlers + `@hbc/data-access` dependency |
+| Error contract tests (Task 7) | **No** | C1: error middleware |
 | Smoke tests (Task 8) | **No** | C1 + C2 + staging infra |
 | Telemetry baseline (Task 9) | **No** | C3 + staging infra |
 
-### Task 6: Backend Route Contract Tests (Leads Routes)
+### Task 6: Route Contract Tests (Leads Routes)
 
 **Status:** **BLOCKED** on C1 — see [Open Decision and Blocker Ledger](#open-decision-and-blocker-ledger) (C1 — Backend Catalog)
 
-**Objective:** Test that Azure Functions route handlers return responses conforming to Zod schemas.
+**Objective:** Test that Azure Functions route handlers return responses conforming to contract schemas.
 
 #### Backend Contract Test Strategy
 
-Contract tests occupy a distinct lane from the existing backend unit tests and from staging smoke tests:
+Route contract tests and error contract tests occupy a distinct lane from the existing backend unit tests and from smoke tests:
 
-| Aspect | Existing Unit Tests | Contract Tests (Tasks 6-7) | Smoke Tests (Task 8) |
+| Aspect | Existing Unit Tests | Route/Error Contract Tests (Tasks 6-7) | Smoke Tests (Task 8) |
 |---|---|---|---|
 | **What is invoked** | Business logic classes (`SagaOrchestrator`, services) | HTTP handler functions (`handleGetLeads`, `handleCreateLead`) | Real HTTP endpoints over the network |
-| **Dependencies** | `createMockServices()` — all service methods are `vi.fn()` stubs | Mock service factory implementing repository port interfaces | Real staging deployment — no mocks |
+| **Dependencies** | `createMockServices()` — all service methods are `vi.fn()` stubs | Mock service factory implementing domain interface ports | Real staging deployment — no mocks |
 | **Auth** | Not tested | Not tested (handlers receive pre-validated context) | Real Entra ID Bearer tokens required |
 | **Network** | None | None | Real HTTP to staging Azure Functions |
-| **What is validated** | Business logic correctness, state transitions, side effects | Response body shape conformance against Zod schemas (success AND error paths) | End-to-end flow: auth → routing → response shape → status codes |
+| **What is validated** | Business logic correctness, state transitions, side effects | Response body conformance against contract schemas (success AND error paths) | End-to-end flow: auth → routing → transport shape → status codes |
 | **Vitest project** | `unit` | `contract` (new — see Task 10) | `smoke` |
 
-**Invocation pattern:** Contract tests call the handler function directly — e.g., `handleGetLeads(request, context, services)` — passing a mock `HttpRequest` (plain object with `as any`, following the existing `validateToken.test.ts` pattern), a mock `InvocationContext`, and a mock service factory. The response body is parsed with `JSON.parse()` and validated against Zod schemas.
+**Invocation pattern:** Route contract tests call the handler function directly — e.g., `handleGetLeads(request, context, services)` — passing a mock `HttpRequest` (plain object with `as any`, following the existing `validateToken.test.ts` pattern), a mock `InvocationContext`, and a mock service factory. The response body is parsed with `JSON.parse()` and validated against contract schemas.
 
-**Why this is the contract boundary:** The HTTP handler is the public API surface. Business logic classes are internal implementation. By testing the handler directly with mocked dependencies, contract tests verify that the handler produces schema-conformant output without requiring a deployed environment.
+**Why this is the contract boundary:** The HTTP handler is the public API surface. Business logic classes are internal implementation. By testing the handler directly with mocked dependencies, route contract tests verify that the handler produces schema-conformant output without requiring a deployed environment.
 
 **`@hbc/data-access` dependency prerequisite:** Repository port interfaces (`ILeadRepository`, `IProjectRepository`, `IEstimatingRepository`) are defined in `@hbc/data-access/src/ports/`, NOT in `@hbc/models`. The mock service factory must implement these interfaces. **C1 must add `@hbc/data-access` to `backend/functions/package.json` dependencies** before contract test imports resolve. Currently, `@hbc/functions` depends on `@hbc/models`, `@hbc/provisioning`, `@hbc/acknowledgment`, and `@hbc/notification-intelligence` — but not `@hbc/data-access`.
 
@@ -2368,7 +2382,7 @@ describe('Leads Route Handlers — Contract Tests', () => {
 });
 ```
 
-**Verification** (requires C1 delivery + vitest config update — see Verification Command Guidance):
+**Verification** (see [Execution Sequence with Acceptance Criteria](#execution-sequence-with-acceptance-criteria) for prerequisites):
 
 Run:
 ```bash
@@ -2379,7 +2393,7 @@ Expected: All tests pass.
 
 **Commit:** `test(backend): add contract tests for leads route handlers (P1-E1 Task 6)`
 
-### Task 7: Backend Error Shape Contract Test
+### Task 7: Error Contract Tests
 
 **Status:** **BLOCKED** on C1 — see [Open Decision and Blocker Ledger](#open-decision-and-blocker-ledger) (C1 — Backend Catalog)
 
@@ -2532,7 +2546,7 @@ export function formatErrorResponse(
 }
 ```
 
-**Verification** (requires C1 delivery + vitest config update — see Verification Command Guidance):
+**Verification** (see [Execution Sequence with Acceptance Criteria](#execution-sequence-with-acceptance-criteria) for prerequisites):
 
 Run:
 ```bash
@@ -2974,7 +2988,7 @@ describe.skipIf(skipReason !== undefined)('Critical Path Smoke Tests (Staging)',
 });
 ```
 
-**Task 8 Verification** (requires C1 + C2 + staging infra — see Verification Command Guidance):
+**Task 8 Verification** (see [Task 8 Readiness Gate](#task-8-readiness-gate-staging-smoke-tests) for prerequisites):
 
 **Running smoke tests:**
 
@@ -3298,7 +3312,7 @@ Add a corresponding script to `backend/functions/package.json`:
 }
 ```
 
-**Verification** (requires all prerequisite setup + upstream deliveries — see Verification Command Guidance):
+**Verification** (see [Execution Sequence with Acceptance Criteria](#execution-sequence-with-acceptance-criteria) for prerequisites):
 
 Run schema tests (requires `@hbc/models` vitest setup):
 ```bash
@@ -3330,20 +3344,56 @@ Expected: All tests in each lane pass when their prerequisites are met.
 
 ## Implementation Summary
 
-| Chunk | Task | Deliverable | Tier | Status |
-|---|---|---|---|---|
-| 1 | 1 | Zod schemas — Tier 1 (Lead, Project CRUD, Estimating tracker) | 1 | **TARGET** — implementable after Zod setup |
-| 1 | 1 | Zod schemas — Tier 2 (7 provisional domains + Project aggregate + Estimating kickoff) | 2 | **PROVISIONAL** — schema skeletons, no full tests |
-| 1 | 1 | Auth capability-lane description (Tier 3) | 3 | **BLOCKED** on C2 (A9) — no schema |
-| 1 | 2 | Add Zod to `@hbc/models/package.json` | — | **TARGET** — prerequisite for Task 1 |
-| 2 | 3 | MSW server and handlers (Tier 1 domains only) | 1 | **TARGET** — implementable after vitest setup |
-| 2 | 4 | Frontend contract tests (Leads) | 1 | **BLOCKED** on B1 |
-| 2 | 5 | Frontend contract tests (Project, Estimating) | 1 | **BLOCKED** on B1 |
-| 3 | 6 | Backend route contract tests | 1 | **BLOCKED** on C1 |
-| 3 | 7 | Backend error shape contract tests | — | **BLOCKED** on C1 |
-| 4 | 8 | Staging smoke tests | — | **BLOCKED** on C1 + C2 + staging |
-| 4 | 9 | Telemetry baseline | — | **BLOCKED** on C3 + staging |
-| 4 | 10 | Test configuration + verification | — | **TARGET** — shared with D1 vitest prerequisite |
+| Chunk | Task | Deliverable | Tier | Readiness | Status |
+|---|---|---|---|---|---|
+| 1 | 2 | Add Zod to `@hbc/models/package.json` | — | Implementable now | **TARGET** |
+| 1 | 10 (partial) | Vitest config for `@hbc/models` and `@hbc/data-access` | — | Implementable now (coordinate with D1) | **TARGET** |
+| 1 | 1 | Contract schemas — Tier 1 (Lead, Project CRUD, Estimating tracker) | 1 | Implementable after Tasks 2 + 10 | **TARGET** |
+| 1 | 1 | Contract schemas — Tier 2 (7 provisional domains + aggregates) | 2 | Preparatory only — schema skeletons with PROVISIONAL markers | **PROVISIONAL** |
+| 1 | 1 | Auth capability-lane description (Tier 3) | 3 | Blocked — no schema until C2 publishes routes | **BLOCKED** on C2 (A9) |
+| 2 | 3 | MSW server and handlers (Tier 1 domains only) | 1 | Implementable after Task 10 (partial) | **TARGET** |
+| 2 | 4 | Adapter contract tests (Leads) | 1 | Blocked — B1 must deliver proxy repositories | **BLOCKED** on B1 |
+| 2 | 5 | Adapter contract tests (Project, Estimating) | 1 | Blocked — B1 must deliver proxy repositories | **BLOCKED** on B1 |
+| 3 | 6 | Route contract tests (Leads) | 1 | Blocked — C1 must deliver route handlers | **BLOCKED** on C1 |
+| 3 | 7 | Error contract tests | — | Blocked — C1 must deliver error middleware | **BLOCKED** on C1 |
+| 3 | 10 (final) | Backend vitest `contract` project + `test:contract` script | — | Blocked — Tasks 6-7 must exist first | **BLOCKED** on C1 |
+| 4 | 8 | Smoke tests | — | Blocked — see Task 8 Readiness Gate | **BLOCKED** on C1 + C2 + staging |
+| 4 | 9 | Telemetry baseline | — | Blocked — see Task 9 Readiness Gate | **BLOCKED** on C3 + staging |
+
+---
+
+## Execution Sequence with Acceptance Criteria
+
+Follow this dependency-ordered sequence. Each task lists its prerequisites, verification, and pass/fail conditions.
+
+| Step | Task | Prerequisites | Files to Change | Verification Command | Pass Condition | Still-Blocked If |
+|---|---|---|---|---|---|---|
+| 1 | 2 | None | `packages/models/package.json` | `pnpm --filter @hbc/models check-types` | Zod resolves; types pass | — |
+| 2 | 10 (partial) | Task 2 | `packages/models/vitest.config.ts`, `packages/models/package.json`, `packages/data-access/vitest.config.ts`, `packages/data-access/package.json` | `pnpm --filter @hbc/models test`, `pnpm --filter @hbc/data-access test` | Vitest runs with no errors; test scripts exist | D1 coordination incomplete |
+| 3 | 1 | Tasks 2, 10 (partial) | `packages/models/src/api-schemas/*.ts`, `packages/models/src/index.ts` | `pnpm --filter @hbc/models test` | All contract schema parse/reject tests pass | — |
+| 4 | 3 | Task 10 (partial) | `packages/data-access/src/test-utils/*.ts`, `packages/data-access/src/msw/*.ts` | `pnpm --filter @hbc/data-access test` | MSW server starts; handlers registered; unhandled request errors | — |
+| 5 | 4 | Tasks 1, 3 + **B1 merged** | `packages/data-access/src/adapters/proxy/lead-repository.contract.test.ts` | `pnpm --filter @hbc/data-access test` | Adapter responses parse against contract schemas | B1 not merged — `ProxyLeadRepository` does not exist |
+| 6 | 5 | Tasks 1, 3 + **B1 merged** | `…/project-repository.contract.test.ts`, `…/estimating-repository.contract.test.ts` | `pnpm --filter @hbc/data-access test` | Adapter responses parse against contract schemas | B1 not merged |
+| 7 | 6 | Task 1 + **C1 delivered** + `@hbc/data-access` in `backend/functions` deps | `backend/functions/src/functions/leads/leads.contract.test.ts`, `…/test-utils/mock-service-factory.ts`, `…/test-utils/mock-request.ts` | `pnpm --filter @hbc/functions test:contract` | All handler responses conform to contract schemas (success + error) | C1 not delivered — no route handlers |
+| 8 | 7 | Task 1 + **C1 delivered** | `backend/functions/src/middleware/error-contract.test.ts` | `pnpm --filter @hbc/functions test:contract` | All HTTP error codes produce ErrorEnvelopeSchema-conformant output | C1 not delivered — no error middleware |
+| 9 | 10 (final) | Tasks 6, 7 | `backend/functions/vitest.config.ts`, `backend/functions/package.json` | `pnpm --filter @hbc/functions test:contract` | `contract` project runs; `test:contract` script works | — |
+| 10 | 8 | Tasks 1, 6, 7 + **C1 + C2 + staging** | `backend/functions/src/test/smoke/critical-paths.smoke.test.ts` | `SMOKE_TEST_BASE_URL=… AUTH_TOKEN=… pnpm --filter @hbc/functions test:smoke` | All smoke tests pass; transport shapes conform to contract schemas | See Task 8 Readiness Gate |
+| 11 | 9 | Task 8 + **C3 deployed** | `backend/functions/src/test/smoke/telemetry-baseline.smoke.test.ts` | Same as Task 8 + manual KQL verification | Traffic produces expected C3 events; KQL confirms handler/auth lifecycle | See Task 9 Readiness Gate |
+
+---
+
+## Post-Implementation Update Protocol
+
+When any E1 task is implemented or an upstream blocker resolves, the implementer **must** update this document:
+
+1. **`Last Reviewed Against Repo Truth`** — update the date in the header metadata table
+2. **Status markers** — change affected task statuses: BLOCKED → TARGET → CURRENT as appropriate
+3. **Blocker Ledger (Table B)** — update resolved blockers; update Table A for resolved design decisions
+4. **Readiness Gates** — update "Current Status" column for any prerequisite that is now met
+5. **Implementation Summary** — update the Status and Readiness columns
+6. **Execution Sequence** — mark completed steps
+
+Failure to update this document after implementation creates drift that misleads future implementers.
 
 ---
 
@@ -3351,30 +3401,13 @@ Expected: All tests in each lane pass when their prerequisites are met.
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|-----------|
-| Zod schema drift (frontend vs backend) | Medium | High | Use same schemas in both; validate in tests |
-| MSW handlers out of sync with real backend | Medium | Medium | Keep handlers aligned with backend route contracts (P1-C1) |
-| Auth token audience mismatch in smoke tests | Medium | High | Require explicit `--resource api://<CLIENT_ID>` flag; document in test header |
-| Staging environment downtime | Low | Medium | Skip smoke tests gracefully if BASE_URL unavailable |
-| Test flakiness (timing, async) | Low | Medium | Use explicit waits; avoid sleep loops; mock external calls |
-| `contracts/` naming collision with business domain | High | High | Resolved: use `api-schemas/` directory; documented in naming conflict section |
-| Provisional schemas become stale when D1/D6 resolve | Medium | Medium | Tier 2 schemas are explicitly marked PROVISIONAL; adaptation notes included per domain |
-| Transport envelope field naming (D3) changes | Medium | Medium | ErrorEnvelopeSchema and createPagedSchema marked PROVISIONAL (D3/D4); single adaptation point |
-
----
-
-## Execution Sequence
-
-Dependency-ordered steps (follow this sequence):
-
-1. **Resolve naming** — confirm `api-schemas/` path is acceptable (no existing collision)
-2. **Task 2** — add Zod dependency to `@hbc/models`
-3. **Task 10 (partial)** — add vitest config to `@hbc/models` and `@hbc/data-access` (coordinate with D1)
-4. **Task 1** — implement shared and domain Zod schemas; run schema tests
-5. **Task 3** — implement MSW server, handlers, and fixtures; run MSW setup tests
-6. **Wait for B1** — Tasks 4–5 unblock when proxy repositories exist
-7. **Wait for C1** — Tasks 6–7 unblock when domain route handlers and error middleware exist
-8. **Wait for C1 + C2 + staging** — Task 8 unblocks when routes, auth, and staging infra exist
-9. **Wait for C3 + staging** — Task 9 unblocks when telemetry instrumentation exists
+| Contract schema drift (frontend vs backend) | Medium | High | Single schema source in `@hbc/models/src/api-schemas/`; both sides validate against it |
+| MSW handlers out of sync with backend | Medium | Medium | Handlers aligned with C1 route contracts; update when C1 changes |
+| Auth token audience mismatch in smoke tests | Medium | High | Require `--resource api://<CLIENT_ID>` flag; see Task 8 auth token expectations |
+| Staging environment downtime | Low | Medium | Smoke tests skip gracefully when `SMOKE_TEST_BASE_URL` absent |
+| `contracts/` naming collision with business domain | — | — | **Resolved:** `api-schemas/` directory; see Naming Conflict Resolution |
+| Provisional transport shapes become stale | Medium | Medium | Tier 2 schemas carry PROVISIONAL markers; adaptation notes per domain |
+| Transport shape field naming (D3) changes | Medium | Medium | ErrorEnvelopeSchema `error` field marked PROVISIONAL (D3); single adaptation point |
 
 ---
 
@@ -3382,8 +3415,23 @@ Dependency-ordered steps (follow this sequence):
 
 After upstream dependencies deliver:
 
-1. **B1 lands** → implement Tasks 4–5 (frontend adapter contract tests)
-2. **C1 lands** → implement Tasks 6–7 (backend route and error contract tests)
+1. **B1 lands** → implement Tasks 4–5 (adapter contract tests)
+2. **C1 lands** → implement Tasks 6–7 (route contract tests + error contract tests)
 3. **C1 + C2 + staging ready** → implement Task 8 (smoke tests)
 4. **C3 lands** → implement Task 9 (telemetry baseline traffic generation)
 5. **All tasks pass** → update `current-state-map.md` and package READMEs
+
+---
+
+## Definition of Ready for Execution
+
+Before handing any E1 task to an implementation agent, confirm:
+
+- [ ] The task's status is **TARGET** (not BLOCKED or PROVISIONAL)
+- [ ] All prerequisites in the Execution Sequence with Acceptance Criteria table are met
+- [ ] The Readiness Gate (if applicable for Tasks 8-9) shows all prerequisites as MET
+- [ ] The `Last Reviewed Against Repo Truth` date is within 7 days
+- [ ] The Blocker Ledger reflects current upstream status
+- [ ] The implementer has read the Execution Guardrails section
+- [ ] The implementer knows which vitest project and command to use for verification
+- [ ] No PROVISIONAL markers exist on code the task depends on (or the implementer accepts adaptation risk)
