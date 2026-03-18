@@ -65,6 +65,39 @@ Define the complete HTTP service contract for HB Intel backend Azure Functions v
 
 ---
 
+## Contract Governance Matrix
+
+This matrix ties each target domain to its contract owner, freeze status, blocking dependencies, downstream consumers, and B2 gate impact. It enables cross-workstream coordination between C1 (contract definition), B1 (adapter implementation), C2 (auth), and E1 (contract testing).
+
+### Per-Domain Governance
+
+| Domain | Contract Owner | Freeze Status | Blocked By | Downstream Consumers | B2 Gate Impact |
+|---|---|---|---|---|---|
+| **Lead** | C1 | Frozen | — | B1 Task 3, E1 | `CONTRACT_ALIGNED` — ready |
+| **Project** | C1 | CRUD frozen; aggregate A8 provisional | A8 | B1 Task 4, E1 | `CONTRACT_ALIGNED` for CRUD; aggregate blocked |
+| **Estimating** | C1 | Base frozen; sub-resource D2 open | D2 | B1 Task 5, E1 | `CONTRACT_ALIGNED` for base; kickoff blocked |
+| **Auth** | C2 | Not cataloged | A9 | B1 Task 7, E1 | Cannot reach `CONTRACT_ALIGNED` |
+| **Schedule** | C1 | Provisional | D1, D6 | B1 Task 5, E1 | Blocked until D1/D6 resolved |
+| **Buyout** | C1 | Provisional | D1, D6 | B1 Task 5, E1 | Blocked until D1/D6 resolved |
+| **Compliance** | C1 | Provisional | D1, D6 | B1 Task 6, E1 | Blocked until D1/D6 resolved |
+| **Contract** | C1 | Provisional | D1, D6 | B1 Task 6, E1 | Blocked until D1/D6 resolved |
+| **Risk** | C1 | Provisional | D1, D6 | B1 Task 6, E1 | Blocked until D1/D6 resolved |
+| **Scorecard** | C1 | Provisional | D1, D6 | B1 Task 7, E1 | Blocked until D1/D6 resolved |
+| **PMP** | C1 | Provisional | D1, D6 | B1 Task 7, E1 | Blocked until D1/D6 resolved |
+
+### Cross-Cutting Contract Dependencies
+
+These affect all domain routes, not just one. They must be resolved before any domain can fully reach `CONTRACT_ALIGNED`.
+
+| Dependency | Owner | Affects | Status |
+|---|---|---|---|
+| D3 — Error envelope field priority | C1 + B1 | All domain error responses | Open |
+| D4 — Pagination default | C1 + B1 | All collection responses | Open |
+| D5 — PATCH support | C1 | All domain mutation routes | Open |
+| P1-D1 — Idempotency support | D1-workstream | All domain write routes | Pending D1 delivery |
+
+---
+
 ## Part 1: Current Implemented Route Inventory
 
 Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths shown without `/api/` prefix (Azure Functions adds it automatically).
