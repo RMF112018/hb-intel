@@ -117,6 +117,7 @@ The following repo locations use non-canonical vocabulary that could cause misco
 **Backend** (`backend/functions/src/index.ts`):
 - Azure Functions read `HBC_ADAPTER_MODE` from app settings (configured per deployment slot)
 - No build-time injection; the value is resolved at runtime from the Azure app settings environment
+- **Implementation note:** The current entrypoint is pure side-effect imports (`import './functions/proxy/index.js'` etc.) which trigger function registration immediately on module load. ES module imports are hoisted and execute before any module-level code. A startup guard cannot be inserted "before" these imports without restructuring — see Layer 2 in Enforcement Layers for the engineering requirement.
 
 ### Runtime Environment Detection
 
@@ -321,7 +322,8 @@ Mock isolation is enforced through five layers. Each layer catches failures that
 
 **Backend** (`backend/functions/src/index.ts`):
 - Checks `process.env.HBC_ADAPTER_MODE` against `AZURE_FUNCTIONS_ENVIRONMENT` (already used in repo for production gating)
-- If `AZURE_FUNCTIONS_ENVIRONMENT` is `'Production'` and adapter mode is `'mock'`, throws fatal error preventing function registration
+- If `AZURE_FUNCTIONS_ENVIRONMENT` is `'Production'` and adapter mode is `'mock'`, throws fatal error preventing function execution
+- **Engineering requirement:** The current entrypoint uses side-effect imports that register Azure Functions immediately on module load. A synchronous guard before these imports is not possible without restructuring. Implementation options include: (a) restructuring to a bootstrap module that validates config before dynamic `import()` of function registrations, (b) using an Azure Functions pre-invocation hook or app-level middleware, or (c) validating at the first adapter call site rather than at module load. This is a follow-on implementation task, not a line-level edit.
 
 **Both surfaces:** Log resolved adapter mode and environment at startup for observability.
 **Owner:** Data Access Maintainer
@@ -450,7 +452,7 @@ This policy enforces the prerequisite: mock must be unreachable in the productio
 **Layer 2 — Startup:**
 - [ ] `assertAdapterModeForEnvironment()` implemented in `packages/data-access/src/config/adapter-mode-guard.ts`
 - [ ] Startup guard called in `apps/pwa/src/main.tsx` before first repository call — evidence: startup log
-- [ ] Startup guard called in `backend/functions/src/index.ts` before function registration — evidence: startup log
+- [ ] Backend startup guard enforced — requires entrypoint restructuring or alternative mechanism (see Layer 2 engineering requirement) — evidence: startup log
 - [ ] Adapter mode and environment logged at startup in all environments — evidence: log query
 
 **Layer 3 — CI:**
