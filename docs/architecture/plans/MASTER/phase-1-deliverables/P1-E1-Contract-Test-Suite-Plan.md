@@ -38,13 +38,13 @@
 
 ## Purpose
 
-Phase 1 contract testing establishes agreement between frontend proxy adapters (`@hbc/data-access`) and backend Azure Functions on request/response shapes. Using Zod schemas as the contract source of truth, the test suite verifies:
+Phase 1 contract testing establishes agreement between frontend proxy adapters (`@hbc/data-access`) and backend Azure Functions on request/response shapes. Using Zod schemas as the contract validation layer, the test suite verifies:
 
 1. **Frontend-backend shape agreement** — proxy adapter responses parse against contract schemas
 2. **Backend service layer stability** — backend routes consistently produce contracted transport shapes
 3. **Critical path coverage** — smoke tests validate end-to-end flows in production-like conditions
 
-**Architecture:** Shared Zod schemas in `@hbc/models/src/api-schemas/` define the contract. MSW handlers simulate backend responses in frontend tests. Backend validation middleware uses the same schemas, ensuring both sides validate against a single source of truth.
+**Architecture:** Shared Zod schemas in `@hbc/models/src/api-schemas/` provide runtime validation for the contract. Domain entity shapes are defined by `@hbc/models` interfaces; Zod schemas must conform to those interfaces (see [Type Source-of-Truth Rule](#type-source-of-truth-rule)). MSW handlers simulate backend responses in frontend tests. Backend validation middleware uses the same schemas, ensuring both sides validate against the same shape rules.
 
 **Tech Stack:** TypeScript, Vitest, MSW v2 (`msw/node`), Zod v3.22+
 
@@ -230,20 +230,24 @@ Each test lane has a single package owner, a specific command, and clear pass/fa
 
 ### Source-of-Truth Hierarchy
 
-Contract tests enforce a strict shape agreement:
+Contract tests enforce a strict two-layer shape agreement:
 
 ```
-┌──────────────────────────────────────────┐
-│ Zod Schema (@hbc/models/api-schemas/)    │  Source of truth
-│ - LeadSchema, ActiveProjectSchema, etc.   │
-│ - Defines runtime validation + types     │
-└────────┬────────────────────┬────────────┘
+┌──────────────────────────────────────────────────┐
+│ @hbc/models interfaces (ILead, IActiveProject…)  │  Canonical domain shapes
+└──────────┬───────────────────────────────────────┘
+           │ must conform to
+┌──────────▼───────────────────────────────────────┐
+│ Zod Contract Schemas (@hbc/models/api-schemas/)  │  Runtime validation layer
+│ - LeadSchema, ActiveProjectSchema, etc.          │
+│ - Validates transport payloads at runtime         │
+│ - z.infer types are DERIVED, not canonical        │
+└────────┬────────────────────┬────────────────────┘
          │                    │
     ┌────▼────────┐    ┌──────▼───────┐
     │ Backend     │    │ Frontend      │
     │ Validation  │    │ Adapter Tests │
     │ Middleware  │    │ (MSW + Zod)   │
-    │ (P1-C2)     │    │ (P1-B2)       │
     └─────────────┘    └───────────────┘
 ```
 
@@ -300,6 +304,29 @@ E1 contract schemas validate the **transport shape** — the HTTP envelope wrapp
   - **D3** — Error envelope field naming: `.error` vs `.message` (**PROVISIONAL**)
   - **D4** — Pagination default page size: 25 (current `DEFAULT_PAGE_SIZE`) vs 50 (**PROVISIONAL**)
   - **D5** — Update method: PUT-only (current B1) vs PUT+PATCH (**PROVISIONAL**)
+
+### Type Source-of-Truth Rule
+
+**Canonical:** `@hbc/models` TypeScript interfaces (`ILead`, `IActiveProject`, `IEstimatingTracker`, etc.) are the canonical source of truth for domain entity field names and types. These interfaces are owned by the models package and consumed across the workspace.
+
+**Derived:** `z.infer<typeof Schema>` types in `api-schemas/` are derived convenience types for use within contract test code. They are NOT canonical replacements for the domain interfaces.
+
+**How drift is detected:** Each contract schema file must include a compile-time assignability check that verifies the Zod-inferred type is structurally compatible with the canonical interface:
+
+```typescript
+import type { ILead } from '@hbc/models';
+
+// Compile-time conformance check — fails if LeadSchema drifts from ILead
+type _LeadConformance = ILead extends Lead ? Lead extends ILead ? true : never : never;
+```
+
+If this check produces a `never` type error, the schema has drifted from the canonical interface and must be corrected.
+
+**What an implementer must NOT do:**
+- Do not treat `z.infer<typeof Schema>` as a replacement for the domain interface in production code
+- Do not import `Lead` (the Zod-inferred type) where `ILead` (the canonical interface) should be used
+- Do not add fields to a Zod schema that don't exist in the corresponding `@hbc/models` interface without a PROVISIONAL marker
+- Do not assume `z.infer` validates conformance — it only derives a type from the schema definition
 
 ### Key Assumptions
 
@@ -361,7 +388,7 @@ E1 does not treat all 11 domains equally. Schemas are tiered by C1 contract conf
 **Files to Modify:**
 - `packages/models/package.json` — Add zod dependency
 
-**Implementation Detail:** Each schema must match the TypeScript interface already defined in `packages/models/src/{domain}/`. Use `z.infer<typeof Schema>` to generate the type from the schema, ensuring they stay in sync. Schemas validate transport-layer payloads that carry domain data — field names and types must match `@hbc/models` exactly.
+**Implementation Detail:** Each schema must conform to the canonical TypeScript interface in `packages/models/src/{domain}/`. Add a compile-time assignability check (see [Type Source-of-Truth Rule](#type-source-of-truth-rule)) to detect drift. The `z.infer<typeof Schema>` convenience type is derived, not canonical — production code must use the `@hbc/models` interface (e.g., `ILead`), not the inferred type (e.g., `Lead`). Schemas validate transport-layer payloads that carry domain data — field names and types must match `@hbc/models` exactly.
 
 **Full Code Examples:**
 
@@ -472,6 +499,10 @@ export const LeadSchema = z.object({
 
 export type Lead = z.infer<typeof LeadSchema>;
 
+// Compile-time conformance — fails if schema drifts from canonical interface
+import type { ILead } from '@hbc/models';
+type _LeadConformance = ILead extends Lead ? Lead extends ILead ? true : never : never;
+
 /**
  * Create Lead request — matches ILeadFormData from @hbc/models/leads.
  * Omits server-generated fields (id, createdAt, updatedAt).
@@ -525,6 +556,10 @@ export const ActiveProjectSchema = z.object({
 
 export type ActiveProject = z.infer<typeof ActiveProjectSchema>;
 
+// Compile-time conformance — fails if schema drifts from canonical interface
+import type { IActiveProject } from '@hbc/models';
+type _ProjectConformance = IActiveProject extends ActiveProject ? ActiveProject extends IActiveProject ? true : never : never;
+
 /** Create Project request — omits server-generated id. */
 export const CreateProjectRequestSchema = ActiveProjectSchema.omit({ id: true });
 
@@ -573,6 +608,10 @@ export const EstimatingTrackerSchema = z.object({
 });
 
 export type EstimatingTracker = z.infer<typeof EstimatingTrackerSchema>;
+
+// Compile-time conformance — fails if schema drifts from canonical interface
+import type { IEstimatingTracker } from '@hbc/models';
+type _TrackerConformance = IEstimatingTracker extends EstimatingTracker ? EstimatingTracker extends IEstimatingTracker ? true : never : never;
 
 /** Create Tracker request — matches IEstimatingTrackerFormData. Omits id, createdAt, updatedAt. */
 export const CreateTrackerRequestSchema = EstimatingTrackerSchema.omit({
@@ -844,7 +883,9 @@ When C2 publishes auth routes, create `packages/models/src/api-schemas/auth-sche
  * Used by validation middleware and adapter tests.
  *
  * Each schema is a Zod validator that ensures runtime shape agreement.
- * Use z.safeParse(data) to validate; use z.infer<typeof Schema> for TypeScript types.
+ * Use z.safeParse(data) to validate transport payloads. Inferred types (z.infer)
+ * are convenience aliases — canonical domain types are the interfaces in
+ * @hbc/models (ILead, IActiveProject, etc.).
  *
  * NOTE: This directory is for Zod API contract schemas.
  * The Contracts business domain models live in src/contracts/ — do not conflate the two.
