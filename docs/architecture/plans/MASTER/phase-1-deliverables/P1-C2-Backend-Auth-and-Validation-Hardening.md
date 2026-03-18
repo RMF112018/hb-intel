@@ -79,7 +79,7 @@ Requires `Group.ReadWrite.All` application permission on the Managed Identity.
 | # | Blocker | Impact | Owner | Reference | Status |
 |---|---|---|---|---|---|
 | ~~1~~ | ~~OBO endpoint list not finalized~~ | ~~Cannot determine which routes require delegated permissions~~ | ~~Architecture~~ | ~~IT Setup Guide §8.6~~ | **CLOSED** — See Endpoint Auth Matrix above. Only `/api/proxy/*` needs OBO; all other routes use MI. |
-| 2 | **Per-site grant automation** — manual admin grant per project vs bootstrap service principal | Provisioning cannot complete site-scoped access without manual IT intervention or automation | Architecture + IT | IT Setup Guide §8.4, §9.6 | Open |
+| 2 | **Per-site grant process** — manual script + automation extension point | Manual grants via `tools/grant-site-access.sh`; `IGraphService.grantSiteAccess()` available for future automation | IT + Architecture | IT Setup Guide §8.4, §9.6; `tools/grant-site-access.sh` | **Process-documented** — full automation deferred to post-pilot |
 | 3 | **GraphService `Group.ReadWrite.All` permission** — real Graph API calls implemented and permission-gated | Step 6 gated behind `GRAPH_GROUP_PERMISSION_CONFIRMED` env var; throws `GraphPermissionNotConfirmedError` until IT confirms | Backend + IT | `backend/functions/src/services/graph-service.ts` | **Code-complete** — awaiting IT permission grant |
 | ~~4~~ | ~~Startup config validation not wired~~ | ~~Backend could start with missing auth config~~ | ~~Backend~~ | ~~G2.6 task~~ | **CLOSED** — `validateRequiredConfig()` wired into `createServiceFactory()` (commit 4f89f0f). |
 

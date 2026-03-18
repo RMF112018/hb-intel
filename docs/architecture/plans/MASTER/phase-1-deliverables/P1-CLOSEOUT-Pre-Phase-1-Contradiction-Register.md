@@ -98,7 +98,7 @@ These blockers do not prevent Phase 1 implementation from starting but must be r
 | # | Blocker | Impact | Owner | Workstream | Severity |
 |---|---|---|---|---|---|
 | ~~1~~ | ~~OBO endpoint list not finalized~~ | ~~Cannot determine which routes need delegated vs app permissions~~ | ~~Architecture~~ | ~~C2~~ | **CLOSED** — Endpoint Auth Matrix added to P1-C2: only `/api/proxy/*` needs OBO; all other routes use Managed Identity (2026-03-18) |
-| 2 | Per-site grant automation (manual vs bootstrap) | Provisioning cannot complete site-scoped access without IT intervention or automation | Architecture + IT | Ops | Medium — does not block B1/C2/C3 |
+| 2 | Per-site grant process | Manual script + automation hook provided | IT + Architecture | Ops | **Process-documented** — `tools/grant-site-access.sh` for manual grants; `IGraphService.grantSiteAccess()` as automation extension point. Full automation (Option A1) deferred to post-pilot scale threshold. |
 | 3 | GraphService `Group.ReadWrite.All` permission | Provisioning Step 6 Entra group creation gated until IT confirms permission | Backend + IT | Ops | **Code-complete** — Real Graph API calls implemented; gated behind `GRAPH_GROUP_PERMISSION_CONFIRMED` env var. Awaiting IT grant of `Group.ReadWrite.All` to Managed Identity. |
 | ~~4~~ | ~~Startup config validation not wired (G2.6 task)~~ | ~~Backend could start with missing auth config~~ | ~~Backend~~ | ~~G2~~ | **CLOSED** — `validateRequiredConfig()` wired into `createServiceFactory()`; skips in mock/test mode (2026-03-18) |
 | 5 | SharePoint list schema approval pending | Physical SharePoint lists cannot be deployed to tenant | Product Owner | A3 | Medium — does not block adapter development against mocked fetch |

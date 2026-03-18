@@ -41,6 +41,16 @@ describe('MockGraphService', () => {
     await svc.addGroupMembers(id, ['a@hb.com']);
     await expect(svc.addGroupMembers(id, ['a@hb.com'])).resolves.toBeUndefined();
   });
+
+  it('grantSiteAccess resolves successfully', async () => {
+    const svc = new MockGraphService();
+    await expect(svc.grantSiteAccess('site-123', 'app-456', 'write')).resolves.toBeUndefined();
+  });
+
+  it('grantSiteAccess defaults role to write', async () => {
+    const svc = new MockGraphService();
+    await expect(svc.grantSiteAccess('site-123', 'app-456')).resolves.toBeUndefined();
+  });
 });
 
 describe('GraphService (permission-gated)', () => {
@@ -94,5 +104,11 @@ describe('GraphService (permission-gated)', () => {
     } catch (err) {
       expect((err as Error).name).toBe('GraphPermissionNotConfirmedError');
     }
+  });
+
+  it('grantSiteAccess throws GraphPermissionNotConfirmedError when env var is unset', async () => {
+    delete process.env.GRAPH_GROUP_PERMISSION_CONFIRMED;
+    const svc = new GraphService();
+    await expect(svc.grantSiteAccess('site-123', 'app-456')).rejects.toThrow(GraphPermissionNotConfirmedError);
   });
 });

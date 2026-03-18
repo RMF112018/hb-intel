@@ -23,6 +23,20 @@ export interface IGraphService {
    * Returns the group object ID, or null if not found.
    */
   getGroupByDisplayName(displayName: string): Promise<string | null>;
+
+  /**
+   * Grants the specified application (Managed Identity) per-site access
+   * to a SharePoint site using the Sites.Selected permission model.
+   *
+   * This is the automation extension point for future saga Step 0.
+   * Currently called manually via tools/grant-site-access.sh; can be
+   * wired into provisioning automation when Option A1 is approved.
+   *
+   * @param siteId - SharePoint site ID (GUID)
+   * @param appId - Managed Identity application (client) ID
+   * @param role - Permission role: 'read', 'write', or 'fullcontrol' (default: 'write')
+   */
+  grantSiteAccess(siteId: string, appId: string, role?: 'read' | 'write' | 'fullcontrol'): Promise<void>;
 }
 
 const GRAPH_BASE = 'https://graph.microsoft.com/v1.0';
@@ -147,6 +161,36 @@ export class GraphService implements IGraphService {
     const result = await response.json() as { value: Array<{ id: string }> };
     return result.value.length > 0 ? result.value[0].id : null;
   }
+
+  async grantSiteAccess(
+    siteId: string,
+    appId: string,
+    role: 'read' | 'write' | 'fullcontrol' = 'write',
+  ): Promise<void> {
+    this.assertPermissionConfirmed('grantSiteAccess');
+
+    const response = await this.graphFetch(`/sites/${siteId}/permissions`, {
+      method: 'POST',
+      body: JSON.stringify({
+        roles: [role],
+        grantedToIdentities: [
+          {
+            application: {
+              id: appId,
+              displayName: 'HB Intel Provisioning Function',
+            },
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(
+        `[GraphService] grantSiteAccess failed for site ${siteId} (${response.status}): ${body}`
+      );
+    }
+  }
 }
 
 /**
@@ -178,5 +222,12 @@ export class MockGraphService implements IGraphService {
   async getGroupByDisplayName(displayName: string): Promise<string | null> {
     const entry = this.groups.get(displayName);
     return entry?.id ?? null;
+  }
+
+  private readonly siteGrants = new Map<string, { appId: string; role: string }>();
+
+  async grantSiteAccess(siteId: string, appId: string, role: 'read' | 'write' | 'fullcontrol' = 'write'): Promise<void> {
+    this.siteGrants.set(siteId, { appId, role });
+    console.log(`[MockGraph] Granted ${role} access to app ${appId} on site ${siteId}`);
   }
 }
