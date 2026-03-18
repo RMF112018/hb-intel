@@ -186,9 +186,44 @@ Each domain's port methods are grouped into route groups below. Route patterns a
 
 ## Blocking Dependencies
 
-### B1 Assumptions (from P1-B1 Engineering Plan)
+### Execution Summary
 
-| ID | Assumption | Confidence | Dependency |
+| Lane | Scope | Can Proceed Now? | Blocked Until |
+|---|---|---|---|
+| **Mocked-fetch implementation** | B1 Tasks 0–10: all 11 domain adapters | **Yes** — no external blockers | — |
+| **Route reconciliation** | Align adapter paths with C1 catalog | Lead, Project, Estimating base only | C1 finalizes remaining 8 domain routes (D1, D2, D5, D6) |
+| **Response contract alignment** | Error envelope, pagination defaults | No | C1 + B1 resolve D3, D4 |
+| **Auth integration** | MSAL registration, OBO flow, CORS | No | C2 delivers auth middleware and registers scopes |
+| **Write safety** | Retry, idempotency, failure classification | No | D1 delivers `withRetry()`, idempotency guard, `WriteFailureReason` |
+| **Contract testing** | Zod schema + MSW harness against staging | No | E1 delivers test harness; staging backend available |
+| **Production activation** | Remove mock fallback, live traffic | No | All above lanes resolved per domain |
+
+B1 Tasks 0–10 can proceed immediately against mocked fetch. Production activation is blocked by the convergence of C1, C2, D1, and E1 deliverables — see workstream detail below.
+
+### P1-B1 — Frontend Adapter Implementation
+
+**Owner:** B-workstream. **Scope:** All 11 proxy adapter domain repositories.
+
+No external blockers for mocked-fetch implementation. All B1 tasks (vitest setup → `ProxyHttpClient` → `ProxyBaseRepository` → 11 domain repos → factory wiring → integration tests) proceed against mocked fetch. See P1-B1 engineering plan for full task breakdown.
+
+Currently, all non-mock adapter modes throw `AdapterNotImplementedError` from the factory (`packages/data-access/src/factory.ts`). Phase 1 replaces these stubs with real proxy implementations.
+
+#### B1 Open Decisions Affecting Route Shape
+
+These decisions do not block mocked-fetch implementation but must be resolved before any domain can reach `CONTRACT_ALIGNED`.
+
+| ID | Decision | Owner | Impact | When Needed |
+|---|---|---|---|---|
+| D1 | Singular vs plural route paths for Schedule, Buyout, Risk, Scorecard | P1-C1 | Path constants in 4 domain adapters | Before `CONTRACT_ALIGNED` |
+| D2 | Estimating sub-resource routing (`/trackers`, `/kickoffs`) vs flat | P1-C1 | May restructure estimating adapter paths | Before Task 5 ideally |
+| D3 | Error envelope field name (`.message` vs `.error`) | P1-C1 + B1 | `ProxyHttpClient.handleResponse()` branch | Before `CONTRACT_ALIGNED` |
+| D4 | Pagination default alignment (B1: 25 via `DEFAULT_PAGE_SIZE`, C1: 50) | P1-C1 + B1 | `mapPagedResponse` fallback + model constants | Before `CONTRACT_ALIGNED` |
+| D5 | Whether proxy adapters need PATCH support | P1-C1 | C1 defines PATCH routes; B1 currently uses PUT only | Before `CONTRACT_ALIGNED` |
+| D6 | Nested project-scoped paths vs flat query-param pattern | P1-C1 | Affects list/aggregate routes in 8 project-scoped repos | Before `CONTRACT_ALIGNED` |
+
+#### B1 Assumptions
+
+| ID | Assumption | Confidence | Upstream Owner |
 |---|---|---|---|
 | A1 | API paths follow C1 catalog patterns | High for Lead/Project/Estimating; provisional for remaining 8 | P1-C1 |
 | A2 | Collection envelope: `{ data: T[], total, page, pageSize }` | High | P1-C1 |
@@ -198,35 +233,61 @@ Each domain's port methods are grouped into route groups below. Route patterns a
 | A6 | Bearer token in `Authorization` header accepted by backend | High | P1-C2 |
 | A7 | Project-scoped routes use nested paths | Medium — D6 open | P1-C1 |
 | A8 | Aggregate endpoints exist (portfolio summary, metrics) | Medium | P1-C1 |
-| A9 | Auth management routes (`/api/auth/*`) exist | Low — not yet in C1 or C2 catalog | P1-C1, P1-C2 |
+| A9 | Auth management routes (`/api/auth/*`) exist | Low — not in C1 or C2 catalog | P1-C1, P1-C2 |
 
-### Open Decisions (from P1-B1)
+### P1-C1 — Backend Service Contract Catalog
 
-| ID | Decision | Owner | Impact on B2 | When Needed |
-|---|---|---|---|---|
-| D1 | Singular vs plural route paths for 4 domains | P1-C1 | Path constants in Schedule, Buyout, Risk, Scorecard | Before `CONTRACT_ALIGNED` |
-| D2 | Estimating sub-resource routing (`/trackers`, `/kickoffs`) vs flat | P1-C1 | May restructure estimating adapter paths | Before Task 5 ideally |
-| D3 | Error envelope field name (`.message` vs `.error`) | P1-C1 + B1 | `ProxyHttpClient.handleResponse()` update | Before `CONTRACT_ALIGNED` |
-| D4 | Pagination default alignment (B1: 25, C1: 50) | P1-C1 + B1 | `mapPagedResponse` fallback + model constants | Before `CONTRACT_ALIGNED` |
-| D5 | Whether proxy adapters need PATCH support | P1-C1 | C1 defines PATCH; B1 currently uses PUT only | Before `CONTRACT_ALIGNED` |
-| D6 | Nested project-scoped paths vs flat query-param pattern | P1-C1 | Affects 8 project-scoped repositories | Before `CONTRACT_ALIGNED` |
+**Owner:** C1-workstream. **Blocks:** `CODE_COMPLETE_MOCK` → `CONTRACT_ALIGNED` for all 11 domains.
 
-### Cross-Workstream Dependencies
+C1 owns route path finalization, response envelope shape, and HTTP method definitions for all backend Azure Functions endpoints. Until C1 freezes routes for a domain, that domain's adapter cannot be verified against real paths.
 
-| Workstream | Dependency | Impact on B2 |
-|---|---|---|
-| **P1-C1** (Service Contract Catalog) | Route definitions for all 11 domains | Blocks transition from `CODE_COMPLETE_MOCK` to `CONTRACT_ALIGNED` |
-| **P1-C2** (Auth Hardening) | MSAL registration, OBO flow, auth middleware | Blocks transition to `INTEGRATION_READY` |
-| **P1-E1** (Contract Test Suite) | Zod schema + MSW contract test harness | Blocks transition to `STAGING_READY` |
+**Current state:**
+- **C1 locked (3 domains):** Lead, Project, Estimating base paths
+- **Provisional (8 domains):** Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP, Auth — route shapes assumed per B1, pending D1/D2/D5/D6 resolution
 
-### B1 Task Execution Blocks
+**Unresolved items blocking `CONTRACT_ALIGNED`:**
+- D1: Singular vs plural paths — affects 4 domain path constants
+- D2: Estimating sub-resource structure — affects tracker/kickoff route groups
+- D3: Error envelope field name — affects `ProxyHttpClient.handleResponse()` (joint with B1)
+- D4: Pagination default — affects `mapPagedResponse` fallback (joint with B1)
+- D5: PATCH support — affects update methods across all domains
+- D6: Project-scoped path pattern — affects list/aggregate routes in 8 domains
 
-| Tasks | Description | External Blockers |
-|---|---|---|
-| Tasks 0–2 | Vitest setup, `ProxyHttpClient`, `ProxyBaseRepository` | None |
-| Tasks 3–4 | Lead and Project repositories | None (C1 routes locked) |
-| Tasks 5–7 | Remaining 9 domain repositories | Proceed with caution — API paths provisional; D2 affects Estimating |
-| Tasks 8–10 | Factory wiring, integration tests, full suite | None |
+### P1-C2 — Auth and Validation Hardening
+
+**Owner:** C2-workstream. **Blocks:** `CONTRACT_ALIGNED` → `INTEGRATION_READY` for all domains.
+
+C2 owns MSAL app registration, OBO token exchange middleware, auth validation at service boundaries, and CORS configuration. No domain can accept real HTTP traffic until C2 delivers a working auth pipeline.
+
+**Unresolved items:**
+- A9: Auth management routes (`/api/auth/*`) have no C1 or C2 catalog entry — the Auth domain's 4 route groups (current user, roles, permissions, role assignment) have no confirmed backend paths
+- D3: Error envelope field name — joint ownership with C1; affects how auth errors are surfaced to `ProxyHttpClient`
+
+### P1-D1 — Write Safety, Retry, and Recovery
+
+**Owner:** D1-workstream. **Blocks:** production activation (Phase 1 acceptance gate: "failures are recoverable and visible").
+
+D1 owns retry policy implementation in `ProxyHttpClient`, frontend idempotency key generation, backend idempotency guard middleware, and write failure classification. Without D1 deliverables, write operations through proxy adapters have no retry, no idempotency protection, and no structured failure reporting.
+
+**Key deliverables affecting B2:**
+- `withRetry()` higher-order function for `ProxyHttpClient`
+- `WriteFailureReason` enum (`NETWORK_UNREACHABLE`, `VALIDATION_FAILED`, `CONFLICT_DETECTED`)
+- Idempotency key generation interface and `Idempotency-Key` header injection
+- Backend idempotency guard middleware (Azure Functions)
+
+**Cross-ref:** P1-D1 plan for full scope. Retry and idempotency are `ProxyHttpClient` concerns — individual domain adapters do not implement their own retry logic.
+
+### P1-E1 — Contract and Integration Test Hardening
+
+**Owner:** E1-workstream. **Blocks:** `INTEGRATION_READY` → `STAGING_READY` for all domains.
+
+E1 owns the Zod schema contract test suite and MSW-based test harness that validates adapter behavior against a staging backend. No domain can reach `STAGING_READY` without passing E1 contract tests.
+
+**Key deliverables affecting B2:**
+- Zod schemas matching C1 response contracts per domain
+- MSW handlers for integration test isolation
+- Staging environment test runner configuration
+- Per-domain contract test pass/fail reporting
 
 ---
 
