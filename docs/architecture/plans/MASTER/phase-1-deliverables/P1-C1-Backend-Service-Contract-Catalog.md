@@ -241,20 +241,75 @@ These 7 domains are project-scoped and depend on open decisions D1 (singular/plu
 
 ---
 
-## Part 3: Known Deltas and Normalization Work
+## Part 3: Normalization Delta Matrix
 
-These items must be resolved for the current implemented routes to conform to the target contract standards.
+This section shows how each implemented route group's current response shapes differ from the target contract. Use this matrix for E1 contract test design and B2 `CONTRACT_ALIGNED` gate assessment.
 
-| Delta | Current Behavior | Target Standard | Impact |
+### Project Setup Requests — Normalization Deltas
+
+| Route | Current Response | Target Normalized | Migration Note |
 |---|---|---|---|
-| Response envelope | Implemented routes return varied shapes (raw entities, `{events:[...]}`, `{message, projectId, correlationId}`) | `{ data: T }` or `{ data: T[], total, page, pageSize }` | Consuming adapters cannot assume a uniform envelope today |
-| Async response code | Provisioning saga returns 202 Accepted with body `{message, projectId, correlationId}` | C1 draft said 204 No Content for async; Azure guidance recommends 202 Accepted | 202 is actually more correct; update target standard to allow 202 for async |
-| No-Content response | C1 draft defined `{"status":"ok"}` as a 204 body | HTTP 204 should have no response body per RFC 9110 | Use 204 with empty body, or use 200 with `{"status":"ok"}` |
-| Auth routes | No backend routes exist for `/api/auth/*` | IAuthRepository requires 4 route groups | A9 blocker — C2 must define |
-| Error envelope field | B1 reads `.error` first, falls back to `.message` | C1 target uses `error` field | D3 open — currently provisional dual-field strategy |
-| Pagination default | B1 uses 25 (`DEFAULT_PAGE_SIZE`); C1 specifies 50 | Need alignment | D4 open |
-| PATCH support | C1 defines PATCH routes; B1 uses PUT only | Need alignment | D5 open |
-| Project-scoped paths | B1 uses nested `/api/projects/{id}/...`; C1 unspecified | Need decision | D6 open |
+| `POST` create | 201 raw `IProjectSetupRequest` entity | 201 `{data: IProjectSetupRequest}` | Wrap in `{data:...}` envelope |
+| `GET` list | 200 raw `IProjectSetupRequest[]` | 200 `{data: [...], total, page, pageSize}` | Add collection envelope with pagination fields |
+| `PATCH` advance | 200 raw entity | 200 `{data: entity}` | Wrap in `{data:...}` envelope |
+| Errors | `{error: string}` | `{error, code, requestId}` | Add `code` and `requestId` fields |
+
+**Owner:** C-workstream
+
+### Acknowledgments — Normalization Deltas
+
+| Route | Current Response | Target Normalized | Migration Note |
+|---|---|---|---|
+| `POST` acknowledge | 200 `{event, updatedState, isComplete}` | 200 `{data: {event, updatedState, isComplete}}` | Wrap composite in `{data:...}` or restructure |
+| `GET` list | 200 `{events: IAcknowledgmentEvent[]}` | 200 `{data: [...], total, page, pageSize}` | Rename `events` → `data`; add pagination fields |
+| Errors | `{error}`, 403 `{error}`, 409 `{error, declinedBy}` | `{error, code, requestId}` | Normalize error shape; move `declinedBy` into error details |
+
+**Owner:** C-workstream
+
+### Notifications — Normalization Deltas
+
+| Route | Current Response | Target Normalized | Migration Note |
+|---|---|---|---|
+| `POST` send | 202 `{message: "Notification queued."}` | 202 `{message, correlationId}` | Add `correlationId` for request tracking |
+| `GET` center | 200 `{totalCount, items, cursor, pageSize}` | 200 `{data: [...], total, page, pageSize}` | Rename `items` → `data`, `totalCount` → `total`; cursor pagination is a future-phase concern |
+| `PATCH` read/dismiss | 200 `{message}` | 204 empty body or 200 `{data: entity}` | Align with status code standards — 204 if no body needed |
+| `POST` mark-all-read | 200 `{message}` | 204 empty body or 200 `{data: {count}}` | Same as above |
+| `GET` preferences | 200 raw `NotificationPreferences` | 200 `{data: NotificationPreferences}` | Wrap in `{data:...}` envelope |
+| `PATCH` preferences | 200 raw entity | 200 `{data: entity}` | Wrap in `{data:...}` envelope |
+
+**Owner:** C-workstream. Notification center's cursor-based pagination is an intentional design — normalization to offset-based is not required if cursor is retained as a domain-specific extension.
+
+### Provisioning Saga — Normalization Deltas
+
+| Route | Current Response | Target Normalized | Migration Note |
+|---|---|---|---|
+| `POST` provision | 202 `{message, projectId, correlationId}` | 202 `{message, correlationId}` | Already close to target; `projectId` in body is useful, may keep |
+| `GET` status | 200 raw `ProvisioningStatus` | 200 `{data: ProvisioningStatus}` | Wrap in `{data:...}` envelope |
+| `GET` failures | 200 raw array | 200 `{data: [...], total, page, pageSize}` | Add collection envelope |
+| `POST` retry | 202 `{message, projectId}` | 202 `{message, correlationId}` | Add `correlationId`; already async-correct |
+| `POST` escalate | 202 response | 202 `{message, correlationId}` | Normalize to async accepted shape |
+
+**Owner:** C-workstream
+
+### Routes Not Requiring Normalization
+
+| Route Group | Reason |
+|---|---|
+| **Proxy** | Passthrough — forwards Graph API responses unmodified; normalization not applicable |
+| **SignalR** | Azure-managed connection negotiation; response shape controlled by Azure SignalR Service |
+| **Timer** | Non-HTTP trigger; no response shape |
+
+### Open-Decision Deltas (Affecting Target Routes)
+
+These deltas affect Phase 1 target domain routes that are not yet implemented. They must be resolved before those domains can reach `CONTRACT_ALIGNED`.
+
+| Decision | Current State | Target | Impact | Owner |
+|---|---|---|---|---|
+| D3 — Error field priority | B1 reads `.error` first, `.message` fallback | C1 target: `error` field | Error envelope shape for all domain routes | C1 + B1 |
+| D4 — Pagination default | B1: 25 (`DEFAULT_PAGE_SIZE`); C1: 50 | Canonical default TBD | Collection response `pageSize` field | C1 + B1 |
+| D5 — PATCH support | B1: PUT only | C1 target: PUT + PATCH | Whether domain routes implement PATCH | C1 |
+| D6 — Project-scoped paths | B1: nested `/api/projects/{id}/...` | C1: not yet specified | Path shape for 8 project-scoped domains | C1 |
+| A9 — Auth routes | No routes exist | IAuthRepository requires 4 route groups | Auth domain cannot reach `CONTRACT_ALIGNED` | C2 |
 
 ---
 
