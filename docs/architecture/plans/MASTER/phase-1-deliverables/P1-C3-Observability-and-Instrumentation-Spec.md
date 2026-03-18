@@ -278,7 +278,14 @@ This decision should be revisited if a Phase 1 requirement emerges that cannot b
 
 - **Target behavior:** Returns 200 with `{ status: "healthy", environment, timestamp }` if the Azure Functions host is operational
 - **Purpose:** Azure App Service health probe target and external uptime monitor endpoint
-- **Implementation note:** May require backend entrypoint restructuring. Ownership should be assigned — likely B3 (environment/bootstrap) or a standalone backend task. This spec defines the observability requirement; it does not own the implementation.
+- **Implementation note:** May require backend entrypoint restructuring. **Owner: C-workstream** (Backend Service Contracts and Hardening) — the health endpoint is a backend Azure Function within C-workstream's service hardening scope.
+
+**Interim readiness evidence:** Before `/api/health` is implemented, `PROD_ACTIVE` gate evidence may substitute:
+
+- Azure App Service built-in health check (configured to ping an existing function endpoint) returning 200
+- `deploy.smoke.pass` events (2.1.7) confirming the function app processes real requests successfully
+
+Both must be documented in the gate evidence submission. Once `/api/health` is delivered, it replaces the interim evidence as the primary readiness signal.
 
 #### 2.2.2 Dependency Probes
 
@@ -415,7 +422,7 @@ No observability evidence required — contract/schema alignment only.
 - Dashboards operational: all 4 dashboards (2.3.1) populated with production telemetry
 - Alert rules active: all 5 alert rules (2.3.2) configured in Azure Monitor with Action Group delivery
 - Alert channel verified: at least one test alert successfully delivered via Teams Workflow (2.3.3)
-- Health probe configured: `/api/health` (2.2.1) responding or alternative readiness signal confirmed
+- Health probe configured: `/api/health` (2.2.1) responding — or, if not yet delivered, interim readiness evidence accepted per 2.2.1 (App Service health check + smoke test pass)
 - Smoke test evidence: `deploy.smoke.pass` events (2.1.7) recorded in AI for production deployment
 - Startup guard evidence: `startup.mode.resolved` event confirms `adapterMode: 'proxy'` and `environment: 'Production'` (B3 Layer 2/5)
 - Evidence: Links to production dashboard, Action Group configuration, smoke test AI query, startup log query
@@ -429,7 +436,7 @@ Per B3 staged exception model: while a staging mock exception is active, `STAGIN
 | Concern | Owner | Gate Dependency |
 |---|---|---|
 | Telemetry event implementation (2.1) | C-workstream (backend), B-workstream (adapter integration) | `STAGING_READY` |
-| Health endpoint implementation (2.2.1) | TBD (likely B3 or standalone backend task) | `PROD_ACTIVE` |
+| Health endpoint implementation (2.2.1) | C-workstream (Backend Service Contracts and Hardening) | `PROD_ACTIVE` |
 | Circuit-breaker telemetry (2.2.3) | D1-workstream (implementation), C-workstream (observability contract) | `PROD_ACTIVE` |
 | Dashboard creation (2.3.1) | DevOps / C-workstream | `PROD_ACTIVE` |
 | Alert rule configuration (2.3.2) | DevOps | `PROD_ACTIVE` |
@@ -455,7 +462,7 @@ Maps current state (Part 1) against target requirements (Part 2) to identify the
 | Notification telemetry | No `trackEvent` calls in notification handlers | `notification.send.*` + `notification.digest.*` per 2.1.5 | Full implementation needed |
 | Adapter-mode startup signal | Not implemented | `startup.mode.resolved` per 2.1.6 (depends on B3 Layer 2) | Full implementation needed |
 | Deployment verification signals | Smoke tests in CI, no App Insights emission | `deploy.smoke.start`/`pass`/`fail` per 2.1.7 | Full implementation needed |
-| Platform health endpoint | Not implemented; removed from C1 catalog | `GET /api/health` returning 200 per 2.2.1 | Target contract — implementation and ownership TBD |
+| Platform health endpoint | Not implemented; removed from C1 catalog | `GET /api/health` returning 200 per 2.2.1; interim evidence defined | Owned by C-workstream; delivery pending |
 | Dependency probes | Not implemented | Graph + Redis reachability probes per 2.2.2 | Full implementation needed |
 | Circuit-breaker telemetry | No circuit breaker exists (D1 not delivered) | `circuit.state.change` + `circuit.fallback.used` per 2.2.3 | Blocked on D1 delivery |
 | PWA telemetry | None | Backend `startup.mode.resolved` via AI; PWA `startup.mode.resolved` via console/CI only; `auth.token.*` non-blocking enhancement; client-side performance deferred (see 2.1.9) | Partial — console-only for Phase 1 |
