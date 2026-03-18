@@ -117,7 +117,16 @@ The startup guard needs to know whether mock mode is permissible. Each surface d
 
 ## Lane 2: Test Lane Governance
 
-Phase 1 requires a progression from mocked execution through real-backend validation. The test policy must support all four lanes without blocking later gates.
+Phase 1 requires a progression from mocked execution through real-backend validation. The test policy must support all four lanes without blocking later gates. Mock isolation is strict for Lanes 1–2; Lanes 3–4 require real adapters and are mandatory for later B2 gates.
+
+### Gate Alignment Summary
+
+| Test Lane | Adapter Mode | Mock Allowed? | B2 Gate Served | CI Stage | Required For |
+|---|---|---|---|---|---|
+| Unit tests | `'mock'` | Yes — required | `CODE_COMPLETE_MOCK` | Every PR / push | All domains |
+| Mocked-proxy tests | `'proxy'` + mocked fetch | Yes (fetch layer) | `CODE_COMPLETE_MOCK` | Every PR / push | Proxy adapter domains |
+| Contract tests (E1) | `'proxy'` + real backend | No | `STAGING_READY` | Staging deploy gate | Domains with frozen C1 routes |
+| Staging E2E | `'proxy'` + real auth + backend | No | `STAGING_READY` → `PROD_ACTIVE` | Staging validation | Domains targeting production |
 
 ### Test Lane 1: Unit Tests
 
@@ -127,6 +136,7 @@ Phase 1 requires a progression from mocked execution through real-backend valida
 - **Reset:** Call `resetAllMockStores()` in `beforeEach` — note this resets the mock ID counter only, not in-memory store contents; create a fresh repository instance per test for full isolation
 - **Network:** None — no fetch, no HTTP, no external calls
 - **Factory usage:** Individual factory functions (`createProjectRepository()`, `createLeadRepository()`, etc.) — there is no generic `getRepository()` function
+- **When required:** Every domain, every gate — unit tests must pass at all stages of the B2 progression
 
 ### Test Lane 2: Mocked-Proxy Tests
 
@@ -134,7 +144,8 @@ Phase 1 requires a progression from mocked execution through real-backend valida
 - **Purpose:** Validate proxy adapter implementations against mocked HTTP responses
 - **Data source:** Mocked fetch returning typed response envelopes
 - **Network:** Mocked — no real HTTP calls
-- **B1 cross-ref:** This is the primary test strategy for B1 Tasks 3–10 (`CODE_COMPLETE_MOCK` gate)
+- **B1 cross-ref:** This is the primary test strategy for B1 Tasks 3–10
+- **When required:** Required for `CODE_COMPLETE_MOCK` gate per B1; runs on every PR for proxy adapter packages
 
 ### Test Lane 3: Contract Tests (E1)
 
@@ -142,8 +153,9 @@ Phase 1 requires a progression from mocked execution through real-backend valida
 - **Purpose:** Validate that adapter behavior matches real backend response contracts
 - **Data source:** Real backend responses validated against Zod schemas
 - **Network:** Real HTTP calls to a test Azure Functions instance
-- **E1 cross-ref:** E1 owns the contract test harness; B3 defines that this lane must use a real adapter
+- **E1 cross-ref:** E1 owns the contract test harness; B3 requires this lane to use a real adapter
 - **B2 cross-ref:** Required for `STAGING_READY` gate
+- **When required:** Required for `STAGING_READY` gate; runs only for domains whose C1 routes are frozen and whose backend is deployed
 
 ### Test Lane 4: Staging E2E
 
@@ -152,6 +164,36 @@ Phase 1 requires a progression from mocked execution through real-backend valida
 - **Data source:** Staging backend with test data
 - **Network:** Real HTTP with real auth tokens
 - **C2 cross-ref:** Requires C2 auth middleware to be operational
+- **When required:** Required for `PROD_ACTIVE` gate validation; runs on staging deployment as final pre-production check
+
+### CI Pipeline Stage Guidance
+
+B3 does not prescribe a specific pipeline file, but CI must support multiple stages with different adapter mode policies. E1/E2 may implement the detailed pipeline configuration against these policy requirements.
+
+**Stage 1 — Build + Unit + Mocked-Proxy** (every PR / push):
+- Adapter mode: `'mock'` for unit tests; `'proxy'` with mocked fetch for proxy tests
+- No external dependencies required
+- B2 gates served: `CODE_COMPLETE_MOCK`
+- This stage must never make real HTTP calls
+
+**Stage 2 — Contract Tests** (on staging deploy or scheduled):
+- Adapter mode: `'proxy'` against a deployed test backend
+- Requires test Azure Functions instance to be available
+- B2 gates served: `STAGING_READY`
+- E1 owns the test harness; B3 requires this stage to use a real adapter
+- Runs only for domains whose C1 routes are frozen
+
+**Stage 3 — Staging E2E** (on staging deploy):
+- Adapter mode: `'proxy'` with real MSAL auth against staging backend
+- Requires C2 auth middleware to be operational
+- B2 gates served: `STAGING_READY` → `PROD_ACTIVE` validation
+- Full user workflow validation in production-like environment
+
+**Stage 4 — Production Smoke** (post-deploy):
+- Adapter mode: `'proxy'` in production
+- Lightweight verification that real adapters are responding correctly
+- B2 gates served: `PROD_ACTIVE` confirmation
+- Must verify mock is not active (startup guard log check)
 
 ---
 
