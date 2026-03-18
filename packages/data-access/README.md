@@ -31,11 +31,22 @@ Data access layer for HB Intel — ports/adapters architecture (ADR-0002) provid
 - 1.0: Port interfaces locked; adapter implementations stable; production-grade
 - Post-1.0: Semver strict — major for port breaks, minor for new adapters/domains, patch for fixes
 
+### Integration Path Readiness (as of 2026-03-18)
+
+| Adapter Mode | Classification | Phase Target | Current State |
+|---|---|---|---|
+| `mock` | **Production-ready** (dev/test) | Available now | 11 repositories fully implemented with CRUD, pagination, seed data, test isolation |
+| `proxy` | **Stub** (config only) | Phase 1 (P1-B1) | Types + constants in `adapters/proxy/`; zero repository implementations; factory throws `AdapterNotImplementedError` |
+| `sharepoint` | **Not implemented** | Phase 5+ | No adapter directory exists; factory throws `AdapterNotImplementedError` |
+| `api` | **Stub** (config only) | Phase 7+ | Types + constants in `adapters/api/`; zero repository implementations; factory throws `AdapterNotImplementedError` |
+
+**Backend proxy handler** (`backend/functions/src/functions/proxy/`): Stub — validates auth and builds cache keys but returns `{ _mock: true }` hardcoded responses. Real Graph API forwarding is a Phase 1 deliverable.
+
 ### Phase 1 Adapter Strategy
 
-Phase 1 replaces mock adapters with production SharePoint/Graph adapters per ADR-0002:
+Phase 1 delivers production proxy adapters (P1-B1) replacing mock adapters for domain data routes per ADR-0002:
 - Mock adapters remain available for development and testing
-- Production adapters use `@hbc/af-adapter-proxy` pattern (see P1-B1)
+- Production adapters use proxy-to-backend pattern with OBO token forwarding (see P1-B1)
 - Domain source-of-record mapping per P1-A2
 
 ### Dependencies

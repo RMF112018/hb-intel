@@ -1,3 +1,10 @@
+/**
+ * INTEGRATION PATH: MOCK-ONLY
+ *
+ * MockRedisCacheService is the only implementation — no real Redis adapter exists.
+ * In-memory Map storage does not persist across Azure Function invocations.
+ * Real Redis integration (Azure Cache for Redis) is a Phase 1 infrastructure dependency.
+ */
 export interface IRedisCacheService {
   get<T>(key: string): Promise<T | null>;
   set<T>(key: string, value: T, ttlSeconds?: number): Promise<void>;

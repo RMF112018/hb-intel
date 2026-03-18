@@ -1,3 +1,12 @@
+/**
+ * INTEGRATION PATH: STUB (Phase 1 deliverable)
+ *
+ * This handler validates auth and builds cache keys but returns hardcoded
+ * mock responses ({ _mock: true }). It does NOT make real Graph API calls.
+ * Real Graph API forwarding via OBO token is a Phase 1 / P1-B1 deliverable.
+ *
+ * Do NOT rely on this handler for production data retrieval.
+ */
 import type { HttpRequest, HttpResponseInit } from '@azure/functions';
 import type { IServiceContainer } from '../../services/service-factory.js';
 import type { ILogger } from '../../utils/logger.js';
@@ -42,7 +51,7 @@ export async function handleProxyRequest(
       }
     }
 
-    // In mock mode, return a mock response instead of making real HTTP calls
+    // STUB: Returns mock response. Real Graph API call not yet implemented (Phase 1 / P1-B1).
     const responseBody = {
       _mock: true,
       targetUrl,
