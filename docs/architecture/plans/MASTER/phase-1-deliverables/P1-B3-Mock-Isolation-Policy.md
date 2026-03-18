@@ -260,33 +260,69 @@ B3 does not prescribe a specific pipeline file, but CI must support multiple sta
 
 ---
 
-## Lane 3: Deployment Environment Governance
+## Lane 3: Enforcement Layers (Defense in Depth)
 
-### Startup Guard
+Mock isolation is enforced through five layers. Each layer catches failures that earlier layers might miss. No single layer is sufficient alone.
 
-A startup guard must assert that mock mode is not active in protected environments. This guard runs early in application initialization.
+### Layer 1 — Build-Time Guardrail
 
+**What:** Vite `define` block injects `process.env.HBC_ADAPTER_MODE` as a string literal at build time.
+**How:** `apps/pwa/vite.config.ts` reads `VITE_ADAPTER_MODE`; defaults to `'mock'` in dev mode, `'proxy'` for all other build modes.
+**Effect:** Production PWA bundles contain `'proxy'` as a baked-in literal — mock mode cannot appear in a correctly built production artifact.
+**Owner:** Data Access Maintainer
+**Evidence:** Build log showing the injected `HBC_ADAPTER_MODE` value.
+
+### Layer 2 — Startup Assertion
+
+**What:** Runtime guard that throws a fatal error if mock mode is active in a protected environment.
 **Implementation target:** `packages/data-access/src/config/adapter-mode-guard.ts` (to be created per B3 scope)
 
-**Frontend startup guard** (`apps/pwa/src/main.tsx`):
-- Checks the build-time-injected `process.env.HBC_ADAPTER_MODE` value (set by Vite `define` block)
-- If the value is `'mock'` and the build was not a development build, throws a fatal error preventing render
-- In practice, Vite's config already defaults non-dev builds to `'proxy'`, so this guard is a defense-in-depth safety net against misconfigured build environments
-- Logs the resolved adapter mode for observability
+**Frontend** (`apps/pwa/src/main.tsx`):
+- Checks the build-time-injected `process.env.HBC_ADAPTER_MODE`
+- If `'mock'` in a non-development build, throws fatal error preventing render
+- Defense-in-depth: Vite already defaults to `'proxy'`, so this catches misconfigured builds
 
-**Backend startup guard** (`backend/functions/src/index.ts`):
-- Checks `process.env.HBC_ADAPTER_MODE` against the deployment environment
-- Uses `AZURE_FUNCTIONS_ENVIRONMENT` to determine whether mock is permissible (repo truth: this variable is already used in `backend/functions/src/functions/provisioningSaga/index.ts` for production gating)
-- If `AZURE_FUNCTIONS_ENVIRONMENT` is `'Production'` (or a staging slot) and `HBC_ADAPTER_MODE` resolves to `'mock'`, throws a fatal error preventing function registration
-- Logs the resolved adapter mode and environment for observability
+**Backend** (`backend/functions/src/index.ts`):
+- Checks `process.env.HBC_ADAPTER_MODE` against `AZURE_FUNCTIONS_ENVIRONMENT` (already used in repo for production gating)
+- If `AZURE_FUNCTIONS_ENVIRONMENT` is `'Production'` and adapter mode is `'mock'`, throws fatal error preventing function registration
 
-### Deployment Gate
+**Both surfaces:** Log resolved adapter mode and environment at startup for observability.
+**Owner:** Data Access Maintainer
+**Evidence:** Startup log line showing adapter mode and environment classification.
 
-A pre-deployment check must validate that the target environment's configuration does not include `HBC_ADAPTER_MODE='mock'` before allowing deployment to staging or production.
+### Layer 3 — CI Validation
 
-**Implementation:** CI/CD pipeline step that reads the deployment configuration and fails the pipeline if mock mode is detected.
+**What:** Each CI pipeline stage enforces the correct adapter mode for its test lane.
+**How:** Pipeline configuration sets `HBC_ADAPTER_MODE` explicitly per stage; Stage 1 (unit/proxy) uses mock; Stages 2–4 use real adapters.
+**Owner:** DevOps / QA Lead
+**Evidence:** CI job logs showing adapter mode env var, test pass/fail, and no unexpected network calls in mock-only stages.
 
-**Scope:** Azure Functions app settings for backend; Vite build env for frontend.
+### Layer 4 — Deployment Gate
+
+**What:** Pre-deployment check rejects `HBC_ADAPTER_MODE='mock'` for staging and production targets.
+**How:** CI/CD pipeline step reads deployment configuration (Azure Functions app settings for backend; Vite build env for frontend) and fails if mock mode is detected.
+**Owner:** DevOps / Release Engineer
+**Evidence:** Deployment gate pass/fail log in pipeline run.
+
+### Layer 5 — Runtime Telemetry
+
+**What:** Post-deployment monitoring confirms real adapters are active and responding.
+**How:** Startup log emits adapter mode; monitoring alerts on unexpected values; production smoke test (CI Stage 4) verifies real adapter responses.
+**Owner:** DevOps / Backend Platform Owner
+**Evidence:** Application Insights or log query confirming adapter mode per deployment; smoke test results.
+
+### Evidence Requirements Summary
+
+| Checkpoint | Evidence Required | Owner | When Verified |
+|---|---|---|---|
+| Build-time injection | Build log showing `HBC_ADAPTER_MODE` value | Data Access Maintainer | Every build |
+| Startup assertion | Startup log with adapter mode + environment | Data Access Maintainer | Every app start |
+| CI unit/proxy tests | CI job green with mock adapter mode | QA Lead | Every PR |
+| CI contract tests | CI job green with proxy against test backend | QA Lead / E1 | Staging deploy |
+| Deployment gate | Pipeline gate pass log for target environment | DevOps | Every staging/prod deploy |
+| Runtime telemetry | Log query confirming adapter mode in production | DevOps | Post-deploy, ongoing |
+| Staging E2E | E2E test pass with real auth against staging | QA Lead | Staging deploy |
+| Production smoke | Smoke test confirming real adapter responses | DevOps | Post-production deploy |
 
 ---
 
@@ -329,60 +365,69 @@ This policy enforces the prerequisite: mock must be unreachable in the productio
 
 ---
 
-## Exception Policy
+## Ownership, Exceptions, and Incident Handling
 
-### Production: No Exceptions
+| Role | Enforcement Layers Owned | Responsibility |
+|---|---|---|
+| **Data Access Maintainer** | Layers 1–2 (build-time, startup) | Owns startup guard implementation, factory adapter mode resolution, Vite config adapter defaults, adapter README docs |
+| **Backend Platform Owner** | Layer 2 (startup), Layer 5 (telemetry) | Ensures Azure Functions app settings are correctly configured per environment; monitors runtime adapter mode |
+| **DevOps / Release Engineer** | Layers 3–5 (CI, deployment gate, telemetry) | Owns deployment gate configuration; validates adapter mode before staging/production; owns production smoke tests |
+| **QA Lead** | Layer 3 (CI) | Verifies CI test lane configuration; coordinates multi-lane test strategy across B2 gates |
+| **B-workstream Lead** | Policy authority | Approves staging mock exceptions; owns policy updates; escalation point for incidents |
+| **Architecture** | Policy review | Reviews policy changes; approves domain-level override design if proposed |
 
-There is no approved exception for mock adapters in production. If mock data is detected serving production traffic, this is an incident (see Incident Response below).
+### Exception Approval Authority
 
-### Staging: Time-Boxed Exception Only
+| Exception Type | Approver(s) | Maximum Duration | Required Artifacts |
+|---|---|---|---|
+| Mock in staging (temporary) | B-workstream lead AND DevOps lead | 5 business days | Written justification, affected domains, expiry date, rollback plan |
+| Mock in production | **Not available** — no exception path exists | — | — |
+| Mock in demo/sandbox | No approval needed if no customer data | Unlimited | Clear "demo" labeling in UI and logs |
 
-A temporary mock exception in staging may be approved under these conditions:
-- **Approval required from:** B-workstream lead AND DevOps lead
-- **Maximum duration:** 5 business days
-- **Documentation:** Written justification, affected domains, expiry date, rollback plan
-- **Monitoring:** The exception must be visible in startup logs and deployment dashboards
+### Incident Response: Mock Detected in Protected Environment
 
-### Demo / Sandbox
+**Severity classification:**
 
-Mock adapters are permitted in demo or sandbox environments if:
-- No customer data is involved
-- The environment is clearly labeled as "demo" in both UI and logs
-- The environment is not reachable from production networks
+| Severity | Condition | Response Time | Required Action |
+|---|---|---|---|
+| **SEV-1 (Critical)** | Mock adapter serving production traffic to real users | Immediate escalation | Rollback or redeploy with correct config; page DevOps and B-workstream lead |
+| **SEV-2 (High)** | Mock mode detected in staging during validation | Within 1 hour | Block deployment pipeline; fix configuration before proceeding |
+| **SEV-3 (Medium)** | Mock mode in non-customer environment that should use real adapters | Within 1 business day | Fix configuration; verify enforcement layers |
 
----
+**Incident procedure (SEV-1):**
+1. **Immediate:** Alert DevOps and B-workstream lead; begin rollback
+2. **Triage:** Determine scope — which domains, which users, how long, what data was served
+3. **Remediate:** Deploy correct adapter configuration; verify real adapters are active; confirm via startup logs
+4. **Root cause:** Identify which enforcement layer failed (build misconfiguration, missing guard, deployment gate bypass, config drift)
+5. **Follow-up:** Update the failed enforcement layer to prevent recurrence; document in incident log
 
-## Ownership and Accountability
-
-| Role | Responsibility |
-|---|---|
-| **Data Access Maintainer** | Owns startup guard implementation, factory adapter mode resolution, adapter README docs |
-| **Backend Platform Owner** | Ensures Azure Functions app settings are correctly configured per environment |
-| **DevOps / Release Engineer** | Owns deployment gate configuration; validates adapter mode before staging/production deployment |
-| **QA Lead** | Verifies CI test lane configuration; coordinates multi-lane test strategy |
-| **B-workstream Lead** | Approves staging mock exceptions; owns policy updates |
-| **Architecture** | Reviews policy changes; approves domain-level override design if proposed |
-
-### Incident Response: Mock Detected in Production
-
-If mock adapter usage is detected in a production environment:
-1. **Immediate:** Alert DevOps and B-workstream lead
-2. **Triage:** Determine scope — which domains, which users, how long
-3. **Remediate:** Deploy correct adapter configuration; verify real adapters are active
-4. **Root cause:** Identify how mock mode reached production (configuration drift, missing guard, build error)
-5. **Follow-up:** Update deployment gates or startup guards to prevent recurrence; document in incident log
+**Required incident artifacts:** Timeline, affected scope (domains and users), root cause analysis, remediation steps taken, prevention measures added.
 
 ---
 
 ## Policy Enforcement Checklist
 
+**Layer 1 — Build-time:**
+- [ ] Vite config defaults to `'proxy'` for non-development builds — evidence: build log (verified in `apps/pwa/vite.config.ts`)
+
+**Layer 2 — Startup:**
 - [ ] `assertAdapterModeForEnvironment()` implemented in `packages/data-access/src/config/adapter-mode-guard.ts`
-- [ ] Startup guard called in `apps/pwa/src/main.tsx` before first repository call
-- [ ] Startup guard called in `backend/functions/src/index.ts` before function registration
-- [ ] Vite config defaults to `'proxy'` for non-development builds (verified in `apps/pwa/vite.config.ts`)
-- [ ] CI pipeline configures adapter mode per test lane (mock for unit, proxy for contract tests)
-- [ ] Deployment gate rejects `HBC_ADAPTER_MODE='mock'` for staging and production targets
-- [ ] Staging and production Azure Functions app settings have `HBC_ADAPTER_MODE='proxy'`
+- [ ] Startup guard called in `apps/pwa/src/main.tsx` before first repository call — evidence: startup log
+- [ ] Startup guard called in `backend/functions/src/index.ts` before function registration — evidence: startup log
+- [ ] Adapter mode and environment logged at startup in all environments — evidence: log query
+
+**Layer 3 — CI:**
+- [ ] CI pipeline configures adapter mode per test lane (mock for unit/proxy, real for contract/E2E) — evidence: CI job logs
+- [ ] Unit tests create fresh repository instances per test block for isolation — evidence: test code review
+
+**Layer 4 — Deployment gate:**
+- [ ] Deployment gate rejects `HBC_ADAPTER_MODE='mock'` for staging and production targets — evidence: pipeline gate log
+- [ ] Staging and production Azure Functions app settings have `HBC_ADAPTER_MODE='proxy'` — evidence: app settings config
+
+**Layer 5 — Runtime:**
+- [ ] Production smoke test verifies real adapter responses post-deploy — evidence: smoke test results
+- [ ] Monitoring alert configured for unexpected adapter mode values — evidence: alert rule config
+
+**General:**
 - [ ] No domain-level override uses `'mock'` in staging or production (if override mechanism is implemented)
 - [ ] Local development `.env` files are in `.gitignore` and not committed
-- [ ] Adapter mode is logged at startup in all environments for observability
