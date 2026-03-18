@@ -36,7 +36,7 @@ Data access layer for HB Intel — ports/adapters architecture (ADR-0002) provid
 | Adapter Mode | Classification | Phase Target | Current State |
 |---|---|---|---|
 | `mock` | **Production-ready** (dev/test) | Available now | 11 repositories fully implemented with CRUD, pagination, seed data, test isolation |
-| `proxy` | **Stub** (config only) | Phase 1 (P1-B1) | Types + constants in `adapters/proxy/`; zero repository implementations; factory throws `AdapterNotImplementedError` |
+| `proxy` | **Partial** (7 of 11 repos) | Phase 1 (P1-B1) | Transport foundation (ProxyHttpClient, envelope parsers, error normalization, path builders) + 7 project-scoped repos (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP) implemented and factory-wired. Remaining: Lead, Project, Estimating, Auth. |
 | `sharepoint` | **Not implemented** | Phase 5+ | No adapter directory exists; factory throws `AdapterNotImplementedError` |
 | `api` | **Stub** (config only) | Phase 7+ | Types + constants in `adapters/api/`; zero repository implementations; factory throws `AdapterNotImplementedError` |
 

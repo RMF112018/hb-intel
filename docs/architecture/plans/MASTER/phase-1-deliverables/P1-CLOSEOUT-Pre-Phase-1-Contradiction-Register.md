@@ -1,23 +1,25 @@
 # Pre-Phase-1 Contradiction Closeout and Go/No-Go Register
 
 **Doc Classification:** Planning Authority — Final pre-implementation reconciliation record.
-**Date:** 2026-03-18
-**Scope:** 6 reconciliation passes across planning authority, Phase 0 status, Phase 1 readiness, contract baseline, integration paths, and auth/permission model.
+**Date:** 2026-03-18 (final sweep)
+**Scope:** 7 reconciliation passes (6 systematic + 1 deep-search final sweep) across planning authority, Phase 0 status, Phase 1 readiness, contract baseline, integration paths, auth/permission model, and a comprehensive repo-truth deep search.
 
 ---
 
 ## Executive Summary
 
-Six reconciliation passes were completed on 2026-03-18, resolving 23 planning contradictions across the Phase 0/Phase 1 documentation and codebase. All transport-layer design decisions (D1–D6, A8, A9) are locked and propagated. The pre-Phase-1 go/no-go checklist passes on all 7 areas.
+Seven reconciliation passes were completed on 2026-03-18. The first six resolved 23 planning contradictions across the Phase 0/Phase 1 documentation and codebase. A final deep-search sweep identified 3 additional issues not caught in prior passes, bringing the total to 26 tracked contradictions (23 closed, 3 newly surfaced and documented).
 
-**Blocker ledger (refreshed 2026-03-18):** 3 closed, 2 code-complete/process-documented, 1 approval-ready, 1 in-progress.
+All transport-layer design decisions (D1–D6, A8, A9) are locked and propagated. The pre-Phase-1 go/no-go checklist passes on 6 of 7 areas; gate #5 is PARTIAL due to a stale package README discovered in the final sweep (corrected in this update).
+
+**Blocker ledger:** 3 closed, 7 remaining (4 from prior passes + 3 newly discovered).
 
 **Recommendation: Ready with conditions.**
 
 - **Begin now:** B1 (proxy adapters — 7 of 11 done), C2 (auth middleware), C3 (observability)
-- **Blocked on B1 delivery:** D1 (write safety wiring), E1 (contract tests), E2 (staging checklist)
+- **Blocked on B1 completion:** D1 (write safety wiring), E1 (contract tests), E2 (staging checklist)
 - **Blocked on external actions:** IT permission grants (#2 per-site, #3 Graph), PO schema approval (#5)
-- **No code blockers remain** — all remaining blockers are operational/approval dependencies
+- **Internal engineering tasks surfaced by final sweep:** #8 README fix (corrected), #9 adapter-mode vocabulary remediation, #10 B3 Layer 2 startup guard
 
 ---
 
@@ -76,6 +78,16 @@ Six reconciliation passes were completed on 2026-03-18, resolving 23 planning co
 | 22 | No developer-facing auth boundary model | Added Phase 1 Auth Boundary Model section to P1-C2 with 4-surface map, credential model, permission requirements, blocker list, and IT Setup Guide link | Closed |
 | 23 | P1-E2 referenced stale D3 error shape (5 instances) | Corrected all from `{ error: '...' }` to `{ message: '...' }` per D3 lock | Closed |
 
+### Final Sweep — Deep Search (2026-03-18)
+
+A deliberate deep search across the full repo identified 3 issues not caught in prior passes:
+
+| # | Issue | Why Missed Earlier | Correction | Status |
+|---|---|---|---|---|
+| 24 | `packages/data-access/README.md` proxy status stale — says "Stub (config only)" but 7 of 11 proxy repos are implemented | README was not updated when B1 repos were committed (a1584b5) | Updated to "Partial (7 of 11 repos implemented)" | Closed (this commit) |
+| 25 | Backend `service-factory.ts` defaults to `'real'` instead of canonical `'proxy'` mode — splits behavior when `HBC_ADAPTER_MODE` unset | Known in P1-B3 as tracked remediation but not surfaced as a closeout blocker | Documented as new blocker #9; remediation is C2-adjacent engineering task | Open |
+| 26 | P1-B3 Layer 2 startup guard (`adapter-mode-guard.ts`) not created — defense-in-depth mock isolation incomplete | Listed in P1-B3 scope as "to be created" but not tracked in CLOSEOUT | Documented as new blocker #10; engineering task with known backend entrypoint constraint | Open |
+
 ---
 
 ## Pre-Phase-1 Go/No-Go Checklist
@@ -86,7 +98,7 @@ Six reconciliation passes were completed on 2026-03-18, resolving 23 planning co
 | 2 | Phase 0 status normalization | All Phase 0 artifacts use consistent, evidence-based status labels | **PASS** | Commit `dc6c51e` |
 | 3 | Phase 1 readiness truth | No deliverable overstates implementation readiness; blocked items explicitly named | **PASS** | Commit `4753a88` |
 | 4 | Contract baseline truth | One authoritative contract baseline; planned vs actual behavior documented | **PASS** | Commit `ba8b3d5` |
-| 5 | Adapter/proxy readiness truth | Real, stub, and mock paths classified; no misleading readiness claims | **PASS** | Commit `ef15f2c` |
+| 5 | Adapter/proxy readiness truth | Real, stub, and mock paths classified; no misleading readiness claims | **PASS** | Commit `ef15f2c`; data-access README corrected in final sweep |
 | 6 | Auth/permission model clarity | Canonical auth boundary model; 4-surface map; blockers documented | **PASS** | Commit `5bae5b9` |
 | 7 | Transport decisions locked | D1–D6, A8, A9 all resolved and propagated to C1, B1, E1 | **PASS** | P1-E1 Locked Decisions Applied |
 
@@ -94,19 +106,29 @@ Six reconciliation passes were completed on 2026-03-18, resolving 23 planning co
 
 ---
 
+## Recently Closed Blockers
+
+| # | Blocker | Closed By | Date |
+|---|---|---|---|
+| 1 | OBO endpoint list not finalized | Endpoint Auth Matrix added to P1-C2 | 2026-03-18 (commit `1db75a9`) |
+| 4 | Startup config validation not wired (G2.6) | `validateRequiredConfig()` wired into `createServiceFactory()` | 2026-03-18 (commit `4f89f0f`) |
+| 6 | B1 Appendix B route paths predate D6 lock | All 7 domain route tables updated to D6 nested pattern | 2026-03-18 (commit `5370296`) |
+
+---
+
 ## Remaining Implementation Blockers
 
-These blockers do not prevent Phase 1 implementation from starting but must be resolved before the affected workstreams can reach production.
-
-| # | Blocker | Impact | Owner | Workstream | Severity |
+| # | Blocker | Impact | Owner | Workstream | Status |
 |---|---|---|---|---|---|
-| ~~1~~ | ~~OBO endpoint list not finalized~~ | ~~Cannot determine which routes need delegated vs app permissions~~ | ~~Architecture~~ | ~~C2~~ | **CLOSED** — Endpoint Auth Matrix added to P1-C2: only `/api/proxy/*` needs OBO; all other routes use Managed Identity (2026-03-18) |
-| 2 | Per-site grant process | Manual script + automation hook provided | IT + Architecture | Ops | **Process-documented** — `tools/grant-site-access.sh` for manual grants; `IGraphService.grantSiteAccess()` as automation extension point. Full automation (Option A1) deferred to post-pilot scale threshold. |
-| 3 | GraphService `Group.ReadWrite.All` permission | Provisioning Step 6 Entra group creation gated until IT confirms permission | Backend + IT | Ops | **Code-complete** — Real Graph API calls implemented; gated behind `GRAPH_GROUP_PERMISSION_CONFIRMED` env var. Awaiting IT grant of `Group.ReadWrite.All` to Managed Identity. |
-| ~~4~~ | ~~Startup config validation not wired (G2.6 task)~~ | ~~Backend could start with missing auth config~~ | ~~Backend~~ | ~~G2~~ | **CLOSED** — `validateRequiredConfig()` wired into `createServiceFactory()`; skips in mock/test mode (2026-03-18) |
-| 5 | SharePoint list schema approval | Physical SharePoint lists cannot be deployed to tenant | Product Owner | A3 | **Approval-ready** — [P1-A3-Schema-Approval-Package.md](P1-A3-Schema-Approval-Package.md) prepared for PO review (49 containers, 4 scopes). Adapter dev proceeds against mocks; production deployment awaits approval. |
-| ~~6~~ | ~~B1 Appendix B route paths predate D6 lock~~ | ~~7 project-scoped domain route paths must be updated to nested pattern~~ | ~~B1 lead~~ | ~~B1~~ | **CLOSED** — All 7 domain route tables updated to D6 nested pattern (2026-03-18) |
-| 7 | B1 proxy adapter implementation | D1 retry wiring, E1 contract tests, E2 staging checklist blocked until complete | Engineering | B1 | **In progress** — Transport foundation + 7 project-scoped repos implemented (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Remaining: Lead, Project, Estimating, Auth (4 repos). |
+| 2 | Per-site grant process | Manual grants required for each new project site | IT + Architecture | Ops | **Process-documented** — `tools/grant-site-access.sh` + `IGraphService.grantSiteAccess()` automation hook. Full automation deferred to post-pilot. |
+| 3 | GraphService `Group.ReadWrite.All` | Step 6 Entra group creation gated until IT confirms permission | Backend + IT | Ops | **Code-complete** — gated behind `GRAPH_GROUP_PERMISSION_CONFIRMED` env var. Awaiting IT grant. |
+| 5 | SharePoint schema approval | Physical lists cannot be deployed to tenant | Product Owner | A3 | **Approval-ready** — [P1-A3-Schema-Approval-Package.md](P1-A3-Schema-Approval-Package.md) prepared for PO review. Adapter dev proceeds against mocks. |
+| 7 | B1 proxy adapter implementation | D1/E1/E2 blocked until complete | Engineering | B1 | **In progress** — 7 of 11 repos done (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Remaining: Lead, Project, Estimating, Auth. |
+| 8 | data-access README proxy status stale | Implementers may incorrectly assume proxy is greenfield | Engineering | B1 | **CLOSED** — corrected in this final sweep commit |
+| 9 | Backend adapter-mode vocabulary drift | `service-factory.ts` defaults to `'real'` not canonical `'proxy'`; splits behavior when `HBC_ADAPTER_MODE` unset | Engineering | C2/B3 | **Open** — P1-B3 documents as tracked remediation; must align before B3 Layer 2 guard is effective |
+| 10 | B3 Layer 2 startup guard not created | Defense-in-depth mock isolation incomplete; `adapter-mode-guard.ts` does not exist | Engineering | B3 | **Open** — P1-B3 Lane 3 scope; backend entrypoint constraint documented |
+
+**Active blocker count: 6** (2 external/IT, 1 external/PO, 3 engineering)
 
 ---
 
@@ -114,10 +136,10 @@ These blockers do not prevent Phase 1 implementation from starting but must be r
 
 | Workstream | Can Begin Now | Blocked On |
 |---|---|---|
-| **B1** — Proxy Adapter Implementation | **Yes** — against mocked fetch | Production activation: C1 route finalization, MSAL registration |
-| **C2** — Auth Middleware and Validation | **Yes** — builds on existing `validateToken()` | OBO endpoint list (blocker #1) for full scope |
+| **B1** — Proxy Adapter Implementation | **Yes** — 7 repos done; remaining 4 (Lead, Project, Estimating, Auth) can proceed against mocked fetch | Production activation: C1 route finalization, MSAL registration |
+| **C2** — Auth Middleware and Validation | **Yes** — builds on existing `validateToken()`; OBO endpoint list resolved (blocker #1 closed) | Adapter-mode vocabulary remediation (#9) should be addressed during C2 |
 | **C3** — Observability Instrumentation | **Yes** — logging foundation verified complete | Telemetry events depend on B1/C2 delivering routes/middleware |
-| **D1** — Write Safety and Recovery | Standalone types only | B1 must deliver `ProxyHttpClient` and proxy repositories |
+| **D1** — Write Safety and Recovery | **Partially unblocked** — `ProxyHttpClient` now exists; standalone retry types + idempotency types can proceed; wiring into proxy repositories requires B1 completion | B1 remaining 4 repos for full wiring |
 | **E1** — Contract Test Suite | Transport conventions locked; harness design ready | B1 adapter repos + C1 route handlers must exist |
 | **E2** — Staging Readiness Checklist | Prep-only sections | All upstream workstreams + staging infrastructure |
 
@@ -126,6 +148,7 @@ These blockers do not prevent Phase 1 implementation from starting but must be r
 ## Related Documents
 
 - **Phase 1 Deliverables Index:** [README.md](README.md)
+- **SharePoint Schema Approval Package:** [P1-A3-Schema-Approval-Package.md](P1-A3-Schema-Approval-Package.md)
 - **Phase 0 Status Normalization Record:** [../phase-0-deliverables/README.md](../phase-0-deliverables/README.md#phase-0-status-normalization-record)
 - **Contract Divergence Register:** [P1-C1 §Contract Divergence Register](P1-C1-Backend-Service-Contract-Catalog.md#contract-divergence-register-pre-phase-1-baseline)
 - **Auth Boundary Model:** [P1-C2 §Phase 1 Auth Boundary Model](P1-C2-Backend-Auth-and-Validation-Hardening.md#phase-1-auth-boundary-model)
@@ -134,7 +157,8 @@ These blockers do not prevent Phase 1 implementation from starting but must be r
 
 ---
 
-**Prepared:** 2026-03-18
-**Reconciliation passes:** 6 (commits `3b4b292` through `5bae5b9`)
-**Contradictions resolved:** 23
-**Remaining blockers:** 7 (none preventing B1/C2/C3 start)
+**Prepared:** 2026-03-18 (final sweep)
+**Reconciliation passes:** 7 (commits `3b4b292` through `6e997d5` + final sweep)
+**Contradictions tracked:** 26 (23 closed from systematic passes + 3 surfaced in final sweep)
+**Blockers:** 3 closed, 6 remaining (2 external/IT, 1 external/PO, 3 engineering)
+**Newly discovered issues in final sweep:** 3 (#24 README drift — closed, #25 adapter-mode vocabulary — open, #26 B3 Layer 2 guard — open)
