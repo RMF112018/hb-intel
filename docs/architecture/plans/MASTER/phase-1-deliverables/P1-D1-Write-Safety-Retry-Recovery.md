@@ -103,6 +103,14 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 - **`backend/functions`**: Has vitest — use `npm test` from `backend/functions/` or the workspace-scoped command.
 - All D1 code must pass `check-types` and `lint` for its package before commit.
 
+### Actual Port Interface Reference (for code examples)
+
+- **`ILeadRepository`**: IDs are `number`; `create(data: ILeadFormData)`, `update(id: number, data: Partial<ILeadFormData>)`, `delete(id: number)`, `getById(id: number)`, `getAll(options?)`, `search(query, options?)`
+- **`IProjectRepository`**: domain-prefixed methods — `getProjects()`, `getProjectById(id: string)`, `createProject(data)`, `updateProject(id: string, data)`, `deleteProject(id: string)`, `getPortfolioSummary()`
+- **`IEstimatingRepository`**: tracker methods — `getAllTrackers()`, `getTrackerById(id: number)`, `createTracker(data)`, `updateTracker(id: number, data)`, `deleteTracker(id: number)` + kickoff methods — `getKickoff(projectId)`, `createKickoff(data)`
+
+Code examples in this plan use `ILeadRepository` as the primary illustration. When applying the pattern to Project and Estimating, use the actual method names and ID types from their port interfaces.
+
 ---
 
 ## Design Note: Write Safety Architecture Decisions
@@ -480,8 +488,8 @@ export async function withRetry<T>(
 **Run and Verify:**
 
 ```bash
-cd /sessions/great-vibrant-ride/mnt/hb-intel
-npm test -- packages/data-access/src/retry/retry-policy.test.ts
+# From workspace root (see Verification Command Guidance in Plan Status section)
+npx vitest run packages/data-access/src/retry/retry-policy.test.ts
 ```
 
 **Expected output:**
@@ -511,7 +519,7 @@ git commit -m "Feat(data-access): Add retry policy types and withRetry HOF
 
 - Implement RetryPolicy interface with configurable exponential backoff
 - Define DEFAULT_RETRY_POLICY, READ_RETRY_POLICY, WRITE_RETRY_POLICY
-- Implement withRetry<T>() HOF with jitter, callback support, error classification
+- Implement withRetry<T>() HOF with exponential backoff, callback support, error classification
 - Add comprehensive TDD test suite (11 tests, all passing)
 - Test exponential backoff ceiling, non-retryable error handling, callbacks
 
@@ -861,8 +869,8 @@ export class ProxyHttpClient {
 **Run and Verify:**
 
 ```bash
-cd /sessions/great-vibrant-ride/mnt/hb-intel
-npm test -- packages/data-access/src/adapters/proxy/http-client.test.ts
+# From workspace root (see Verification Command Guidance in Plan Status section)
+npx vitest run packages/data-access/src/adapters/proxy/http-client.test.ts
 ```
 
 **Expected output:**
@@ -1062,8 +1070,8 @@ export function isExpired(ctx: IdempotencyContext): boolean {
 **Run and Verify:**
 
 ```bash
-cd /sessions/great-vibrant-ride/mnt/hb-intel
-npm test -- packages/data-access/src/retry/idempotency.test.ts
+# From workspace root (see Verification Command Guidance in Plan Status section)
+npx vitest run packages/data-access/src/retry/idempotency.test.ts
 ```
 
 **Expected output:**
@@ -1426,8 +1434,8 @@ export async function recordIdempotencyResult(
 **Run and Verify:**
 
 ```bash
-cd /sessions/great-vibrant-ride/mnt/hb-intel/backend
-npm test -- functions/src/middleware/idempotency-guard.test.ts
+# From backend/functions directory (has vitest test infrastructure)
+cd backend/functions && npm test
 ```
 
 **Expected output:**
@@ -1666,8 +1674,8 @@ export function classifyWriteFailure(error: HbcDataAccessError): WriteFailureRea
 **Run and Verify:**
 
 ```bash
-cd /sessions/great-vibrant-ride/mnt/hb-intel
-npm test -- packages/data-access/src/retry/write-safe-error.test.ts
+# From workspace root (see Verification Command Guidance in Plan Status section)
+npx vitest run packages/data-access/src/retry/write-safe-error.test.ts
 ```
 
 **Expected output:**
@@ -1828,8 +1836,8 @@ Frontend reads audit logs for display; backend writes them after confirms write 
 // packages/data-access/src/adapters/proxy/lead-repository.ts
 
 import { BaseRepository } from '../base.js';
-import type { ILead, ILeadRepository } from '../../ports/index.js';
-import type { ProxyHttpClient, IdempotencyContext } from './http-client.js';
+import type { ILead, ILeadFormData, ILeadRepository } from '../../ports/index.js';
+import type { ProxyHttpClient, IdempotencyContext } from './http-client.js'; // TARGET: http-client.ts delivered by B1
 
 export class ProxyLeadRepository extends BaseRepository<ILead> implements ILeadRepository {
   constructor(private client: ProxyHttpClient) {
@@ -1838,11 +1846,11 @@ export class ProxyLeadRepository extends BaseRepository<ILead> implements ILeadR
 
   /**
    * Creates a new lead.
-   * @param data Lead data (without id)
+   * @param data Lead form data (matches ILeadRepository.create signature)
    * @param idempotency Optional idempotency context for deduplication
    */
   async create(
-    data: Omit<ILead, 'id'>,
+    data: ILeadFormData,
     idempotency?: IdempotencyContext,
   ): Promise<ILead> {
     return this.wrapAsync(async () => {
@@ -1852,34 +1860,31 @@ export class ProxyLeadRepository extends BaseRepository<ILead> implements ILeadR
 
   /**
    * Retrieves a lead by ID.
-   * @param id Lead ID
+   * @param id Lead ID (number — matches ILeadRepository port)
    */
-  async getById(id: string): Promise<ILead> {
-    this.validateId(id, 'Lead');
+  async getById(id: number): Promise<ILead | null> {
     return this.wrapAsync(async () => {
-      return this.client.get<ILead>(`/api/leads/${id}`);
+      return this.client.get<ILead | null>(`/api/leads/${id}`);
     }, 'ProxyLeadRepository.getById');
   }
 
   /**
    * Updates an existing lead.
-   * @param id Lead ID
-   * @param data Partial lead data
+   * @param id Lead ID (number)
+   * @param data Partial lead form data
    * @param idempotency Optional idempotency context for deduplication
    */
   async update(
-    id: string,
-    data: Partial<ILead>,
+    id: number,
+    data: Partial<ILeadFormData>,
     idempotency?: IdempotencyContext,
   ): Promise<ILead> {
-    this.validateId(id, 'Lead');
     return this.wrapAsync(async () => {
       return this.client.put<ILead>(`/api/leads/${id}`, data, idempotency);
     }, 'ProxyLeadRepository.update');
   }
 
-  async delete(id: string): Promise<void> {
-    this.validateId(id, 'Lead');
+  async delete(id: number): Promise<void> {
     return this.wrapAsync(async () => {
       await this.client.delete(`/api/leads/${id}`);
     }, 'ProxyLeadRepository.delete');
@@ -1894,7 +1899,7 @@ export class ProxyLeadRepository extends BaseRepository<ILead> implements ILeadR
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ProxyLeadRepository } from './lead-repository.js';
-import type { ILead } from '../../ports/index.js';
+import type { ILead, ILeadFormData } from '../../ports/index.js';
 
 describe('ProxyLeadRepository with idempotency', () => {
   let mockClient: any;
@@ -1919,7 +1924,7 @@ describe('ProxyLeadRepository with idempotency', () => {
       expiresAt: Date.now() + 1000 * 60 * 60,
     };
 
-    mockClient.post.mockResolvedValueOnce({ id: '123', ...leadData });
+    mockClient.post.mockResolvedValueOnce({ id: 123, ...leadData });
 
     await repository.create(leadData, idempotency);
 
@@ -1941,7 +1946,7 @@ describe('ProxyLeadRepository with idempotency', () => {
 
     mockClient.put.mockResolvedValueOnce({ id: '123', firstName: 'Jane', lastName: 'Doe' });
 
-    await repository.update('123', leadData, idempotency);
+    await repository.update(123, leadData, idempotency);
 
     expect(mockClient.put).toHaveBeenCalledWith(
       '/api/leads/123',
@@ -1952,7 +1957,7 @@ describe('ProxyLeadRepository with idempotency', () => {
 
   it('create() without idempotency still works', async () => {
     const leadData = { firstName: 'Bob', lastName: 'Smith' };
-    mockClient.post.mockResolvedValueOnce({ id: '456', ...leadData });
+    mockClient.post.mockResolvedValueOnce({ id: 456, ...leadData });
 
     await repository.create(leadData);
 
@@ -2136,8 +2141,8 @@ describe('Write safety: retry + idempotency integration', () => {
 The test itself is the verification. Run it:
 
 ```bash
-cd /sessions/great-vibrant-ride/mnt/hb-intel
-npm test -- packages/data-access/src/retry/write-safety.integration.test.ts
+# From workspace root (see Verification Command Guidance in Plan Status section)
+npx vitest run packages/data-access/src/retry/write-safety.integration.test.ts
 ```
 
 **Expected output:**
@@ -2223,8 +2228,8 @@ export {
   classifyWriteFailure,
 } from './retry/index.js';
 
-// Re-export IdempotencyContext from HTTP client for convenience
-export type { IdempotencyContext as HttpIdempotencyContext } from './adapters/proxy/http-client.js';
+// TARGET: Re-export IdempotencyContext from proxy HTTP client once B1 delivers http-client.ts
+// export type { IdempotencyContext as HttpIdempotencyContext } from './adapters/proxy/http-client.js';
 ```
 
 **Commit:**
@@ -2252,9 +2257,9 @@ Write safety APIs are now part of the public data-access surface.
 
 1. **Retry Policy Foundation** (Chunk 1)
    - `RetryPolicy` interface with configurable exponential backoff
-   - `withRetry()` HOF with jitter and callback support
+   - `withRetry()` HOF with exponential backoff and callback support
    - Three policies: DEFAULT, READ (5 attempts), WRITE (2 attempts)
-   - Integrated into `ProxyHttpClient` (GET, POST, PUT, DELETE)
+   - Designed for integration into `ProxyHttpClient` once B1 delivers it (**TARGET**)
    - Classifies HTTP errors: retryable (429, 502, 503, 504) vs terminal (400, 401, 403, 404)
 
 2. **Idempotency Key Pattern** (Chunk 2)
@@ -2270,7 +2275,7 @@ Write safety APIs are now part of the public data-access surface.
    - `WriteOutcome` discriminated union
    - `classifyWriteFailure()` maps error codes to user-facing reasons
    - `IAuditRecord` interface for tracking operations
-   - Wired into `ProxyLeadRepository` as example
+   - Example wiring shown for `ProxyLeadRepository` (**BLOCKED** on B1)
 
 4. **Integration & Verification** (Chunk 4)
    - 4 integration tests verifying retry + idempotency together
@@ -2296,14 +2301,14 @@ Write safety APIs are now part of the public data-access surface.
 ### Assumptions & Risks
 
 **Assumptions:**
-- `ProxyHttpClient` implementation uses native `fetch` API (adjust if using axios, etc.)
+- `ProxyHttpClient` implementation (B1 deliverable, **TARGET**) will use native `fetch` API (adjust if using axios, etc.)
 - Azure Table Storage available for idempotency records
 - Backend has access to table storage SDK and logger
 - Phase 1 critical path: Project, Lead, Estimating only
 
 **Risks:**
 - Idempotency TTL (24h) may be too aggressive or too lenient; adjust based on operational needs
-- Exponential backoff jitter not yet implemented (can add if needed)
+- Exponential backoff jitter and Retry-After header honoring not yet designed — both are recommended by Azure guidance for bounded retry behavior and retry-storm avoidance
 - Offline queue (session-state) coordination not covered; separate P1-D2 or later
 - SharePoint adapter retry (Phase 5) will need its own strategy at PnPjs call site
 
