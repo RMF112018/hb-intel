@@ -51,7 +51,7 @@ Configured via `host.json`:
 ### Structured Logger
 
 Custom `createLogger()` in `backend/functions/src/utils/logger.ts`:
-- Emits structured JSON with `trackEvent()` and `trackMetric()` markers
+- Emits structured JSON via `context.log()` with `_telemetryType` markers for event/metric classification; all output lands in the `traces` table
 - Used across 22 handler files
 
 ### Provisioning Telemetry
@@ -84,7 +84,7 @@ The sections below define target instrumentation requirements for Phase 1. Items
 
 ### 2.1 Required Telemetry Events
 
-Events are organized by Phase 1 runtime surface. Each table specifies event name, trigger condition, required payload fields, and severity. All events use the existing `ILogger.trackEvent()` contract; metrics use `ILogger.trackMetric()`. Payloads are flat `Record<string, unknown>` merged into Application Insights `customEvents` / `customMetrics` tables.
+Events are organized by Phase 1 runtime surface. Each table specifies event name, trigger condition, required payload fields, and severity. All events use the existing `ILogger.trackEvent()` contract; metrics use `ILogger.trackMetric()`. Payloads are flat `Record<string, unknown>` emitted as structured JSON via `context.log()`. In the current host-forwarded model, all events land in the Application Insights `traces` table; the `_telemetryType` markers enable KQL filtering. Adopting the Application Insights SDK (post-Phase 1 enhancement) would route events to native `customEvents`/`customMetrics` tables.
 
 **Naming convention:** Existing provisioning events (2.1.4) retain their PascalCase names for backward compatibility. All new events use dot-separated lowercase convention (e.g., `proxy.request.start`).
 
@@ -302,12 +302,12 @@ These events feed the "Circuit breaker open" alert (2.3.2) and the < 2 minute MT
 
 | Dashboard | Owner / Audience | Source Signals (AI tables) | Required Dimensions | B2 Gate Evidence |
 |---|---|---|---|---|
-| Adapter Health | DevOps | `proxy.request.*` events (2.1.1), `handler.*` events (2.1.2) from `customEvents` | `domain`, `routeGroup`, `operation`, `statusCode`, `environment` | Proxy adapter `PROD_ACTIVE` gate: error rate < 5%, p95 latency < 10s |
-| Auth & Token | Security / DevOps | `auth.token.*`, `auth.bearer.*`, `auth.obo.*` events (2.1.3) from `customEvents` | `provider`, `scope`, `errorCode`, `environment` | Auth flow verified for production activation |
-| Provisioning | Operations | `ProvisioningSaga*`, `ProvisioningTimer*` events + `ProvisioningStepDurationMs`, `ProvisioningSagaSuccessRate` metrics (2.1.4) from `customEvents` + `customMetrics` | `projectId`, `stepName`, `correlationId`, `outcome` | Provisioning saga success rate ≥ 95% over 7-day window |
+| Adapter Health | DevOps | `proxy.request.*` events (2.1.1), `handler.*` events (2.1.2) from `traces` (filtered by `_telemetryType: 'customEvent'`) | `domain`, `routeGroup`, `operation`, `statusCode`, `environment` | Proxy adapter `PROD_ACTIVE` gate: error rate < 5%, p95 latency < 10s |
+| Auth & Token | Security / DevOps | `auth.token.*`, `auth.bearer.*`, `auth.obo.*` events (2.1.3) from `traces` (filtered by `_telemetryType: 'customEvent'`) | `provider`, `scope`, `errorCode`, `environment` | Auth flow verified for production activation |
+| Provisioning | Operations | `ProvisioningSaga*`, `ProvisioningTimer*` events + metrics (2.1.4) from `traces` (filtered by `_telemetryType: 'customEvent'` / `'customMetric'`) | `projectId`, `stepName`, `correlationId`, `outcome` | Provisioning saga success rate ≥ 95% over 7-day window |
 | Error Budget | Leadership / SRE | Aggregate error counts from `handler.error` events (2.1.2); SLO definitions from operational agreement | `routeGroup`, `environment`, time window | Overall error rate vs SLO; burn rate projection |
 
-**Implementation note:** All dashboards are Application Insights Workbooks or Azure Monitor dashboards querying the `customEvents`, `customMetrics`, and `traces` tables. KQL queries should be developed alongside telemetry implementation and stored in version control.
+**Implementation note:** All dashboards are Application Insights Workbooks or Azure Monitor dashboards querying the `traces` table with KQL JSON parsing for `_telemetryType` filtering. If the Application Insights SDK is adopted (see 4.1), queries would migrate to native `customEvents`/`customMetrics` tables for improved ergonomics. KQL queries should be developed alongside telemetry implementation and stored in version control.
 
 #### 2.3.2 Alert Rules
 
@@ -455,10 +455,12 @@ Maps current state (Part 1) against target requirements (Part 2) to identify the
 
 - `createLogger(context)` emits structured JSON via `context.log()`, `context.warn()`, `context.error()`
 - The Azure Functions host forwards these to Application Insights based on `host.json` configuration
-- Custom events use `_telemetryType: 'customEvent'` markers; custom metrics use `_telemetryType: 'customMetric'`
+- Custom events include a `_telemetryType: 'customEvent'` marker; custom metrics include `_telemetryType: 'customMetric'`. These are JSON properties in the log message string, not Application Insights routing directives — the host does not parse them for table routing
 - Correlation IDs are application-level (`correlationId` property in event payloads), not W3C trace context
 
-This is intentional for Phase 1: the Functions host integration is zero-dependency, requires no additional npm packages, and surfaces telemetry in Application Insights `traces`, `customEvents`, and `customMetrics` tables.
+This is intentional for Phase 1: the Functions host integration is zero-dependency, requires no additional npm packages, and surfaces all telemetry in the Application Insights **`traces`** table. The `_telemetryType` markers are queryable via KQL JSON parsing (e.g., `traces | where message has '"_telemetryType":"customEvent"' | extend eventName = tostring(parse_json(message).name)`) but do not route records to the native `customEvents` or `customMetrics` tables.
+
+**Target-state enhancement:** To surface telemetry in `customEvents`/`customMetrics` tables — enabling richer Application Insights analytics, metrics aggregation, and native alert integration — a follow-on step would add the `applicationinsights` npm SDK and replace `context.log()` calls with `TelemetryClient.trackEvent()`/`TelemetryClient.trackMetric()`. The `ILogger` interface would be preserved as a facade. This is not a Phase 1 prerequisite but would improve query ergonomics and enable built-in features like Application Map and Smart Detection.
 
 ### 4.2 Sampling Configuration
 
@@ -522,8 +524,8 @@ This is Azure's adaptive sampling — it rate-limits telemetry to 20 items/secon
 
 ### 4.4 Metrics
 
-- Custom metrics via `ILogger.trackMetric()` — surfaces in Application Insights `customMetrics` table
-- Queryable by dimension properties (e.g., `projectId`, `stepName`, `correlationId`)
+- Custom metrics via `ILogger.trackMetric()` — currently surfaces in the `traces` table with `_telemetryType: 'customMetric'` marker; queryable via KQL JSON parsing. Would route to the native `customMetrics` table if Application Insights SDK is adopted (see 4.1)
+- Queryable by dimension properties (e.g., `projectId`, `stepName`, `correlationId`) via JSON field extraction in KQL
 - No Prometheus/OpenMetrics endpoint — not needed for Phase 1
 
 ### 4.5 OpenTelemetry — Future Direction
