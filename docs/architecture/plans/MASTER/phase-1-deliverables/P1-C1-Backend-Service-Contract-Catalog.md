@@ -205,16 +205,25 @@ Port interface: `IEstimatingRepository` — 7 methods (tracker CRUD + kickoff)
 
 ### Auth Domain — `NOT CATALOGED` (A9 unresolved)
 
-Port interface: `IAuthRepository` — 6 methods across 4 capability groups. No backend route definitions exist yet. See B2 [Auth Domain: Special-Case Tracking] for full capability-group detail.
+Port interface: `IAuthRepository` — 6 methods across 4 capability groups. No backend route definitions exist yet. Auth does not follow a CRUD pattern. See B2 [Auth Domain: Special-Case Tracking] for full capability-group and dependency detail.
 
-| Capability Group | Port Methods | Assumed Route Shape (B1) | Status |
-|---|---|---|---|
-| Current User | `getCurrentUser` | `GET /api/auth/me` | A9 — no catalog entry |
-| Roles | `getRoles`, `getRoleById` | `GET /api/auth/roles`, `GET /api/auth/roles/{id}` | A9 — no catalog entry |
-| Permissions | `getPermissionTemplates` | `GET /api/auth/permissions/templates` | A9 — no catalog entry |
-| Role Assignment | `assignRole`, `removeRole` | `POST/DELETE /api/auth/users/{userId}/roles/{roleId}` | A9 — no catalog entry |
+| Capability Group | Port Methods | Responsibility Layer | Assumed Route Shape (B1) | Status |
+|---|---|---|---|---|
+| Current User | `getCurrentUser` | Runtime token → user profile | `GET /api/auth/me` | A9 — no catalog entry |
+| Roles | `getRoles`, `getRoleById` | Auth subsystem — role definitions | `GET /api/auth/roles`, `GET /api/auth/roles/{id}` | A9 — no catalog entry |
+| Permissions | `getPermissionTemplates` | Auth subsystem — RBAC config | `GET /api/auth/permissions/templates` | A9 — no catalog entry |
+| Role Assignment | `assignRole`, `removeRole` | Auth subsystem — write operations | `POST/DELETE /api/auth/users/{userId}/roles/{roleId}` | A9 — no catalog entry |
 
-**Owner:** P1-C2 (Auth Hardening). Auth routes must be defined in C1 or C2 before B2 Auth domain can reach `CONTRACT_ALIGNED`.
+**Responsibility-layer ownership:**
+- **C1 scope:** Route path definitions and response envelope shape for `/api/auth/*` endpoints. C1 must publish these paths before Auth can reach `CONTRACT_ALIGNED`.
+- **C2 scope:** Auth subsystem implementation — backend service that manages roles, permissions, and assignments; OBO token exchange for auth-specific calls; role storage and permission logic. C2 owns whether this is a dedicated microservice or part of the Azure Functions backend.
+- **Runtime / app-shell:** Token acquisition (MSAL in PWA, Bearer in backend) and user identity context. The `getCurrentUser` capability may resolve partly from token claims (available in the app shell) and partly from a backend profile endpoint. This boundary is a C2 design decision.
+
+**Freeze criteria for Auth `CONTRACT_ALIGNED`:**
+1. C1 or C2 publishes route definitions for all 4 capability groups (resolving A9)
+2. Response envelope shape is defined per route (consistent with C1 target standards)
+3. Auth-specific error codes are defined (e.g., role-not-found, assignment-denied)
+4. OBO flow for auth routes is confirmed as same-as-domain or distinct (C2 decision)
 
 ### Remaining Domains — `TARGET (PROVISIONAL)` (D1, D6 pending)
 
