@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WAVE0_REQUIRED_CONFIG } from '../config/wave0-env-registry.js';
-import { validateRequiredConfig } from './validate-config.js';
+import { validateRequiredConfig, shouldValidateConfig } from './validate-config.js';
 
 vi.mock('../config/wave0-env-registry.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../config/wave0-env-registry.js')>();
@@ -14,21 +14,51 @@ vi.mock('../config/wave0-env-registry.js', async (importOriginal) => {
   };
 });
 
-describe('validateRequiredConfig', () => {
-  const originalEnv = process.env;
+const requiredNames = WAVE0_REQUIRED_CONFIG.filter((e) => e.requiredInProd).map((e) => e.name);
 
+describe('shouldValidateConfig', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('returns true when adapter mode is real and not test', () => {
+    vi.stubEnv('HBC_ADAPTER_MODE', 'real');
+    vi.stubEnv('NODE_ENV', 'production');
+    expect(shouldValidateConfig()).toBe(true);
+  });
+
+  it('returns false when adapter mode is mock', () => {
+    vi.stubEnv('HBC_ADAPTER_MODE', 'mock');
+    vi.stubEnv('NODE_ENV', 'production');
+    expect(shouldValidateConfig()).toBe(false);
+  });
+
+  it('returns false when NODE_ENV is test', () => {
+    vi.stubEnv('HBC_ADAPTER_MODE', 'real');
+    vi.stubEnv('NODE_ENV', 'test');
+    expect(shouldValidateConfig()).toBe(false);
+  });
+
+  it('defaults to real mode when HBC_ADAPTER_MODE is unset', () => {
+    delete process.env.HBC_ADAPTER_MODE;
+    vi.stubEnv('NODE_ENV', 'production');
+    expect(shouldValidateConfig()).toBe(true);
+  });
+});
+
+describe('validateRequiredConfig', () => {
   beforeEach(() => {
-    // Set all required vars to valid values
-    process.env = { ...originalEnv };
-    for (const entry of WAVE0_REQUIRED_CONFIG) {
-      if (entry.requiredInProd) {
-        process.env[entry.name] = `test-value-${entry.name}`;
-      }
+    // Force real/production mode so validation runs
+    vi.stubEnv('HBC_ADAPTER_MODE', 'real');
+    vi.stubEnv('NODE_ENV', 'production');
+    // Set all required vars to valid placeholder values
+    for (const name of requiredNames) {
+      vi.stubEnv(name, `test-value-${name}`);
     }
   });
 
   afterEach(() => {
-    process.env = originalEnv;
+    vi.unstubAllEnvs();
   });
 
   it('does not throw when all required vars are set', () => {
@@ -66,6 +96,22 @@ describe('validateRequiredConfig', () => {
     // All required are set in beforeEach; optional vars are never set
     delete process.env.SITES_PERMISSION_MODEL;
     delete process.env.AzureWebJobsStorage;
+    expect(() => validateRequiredConfig()).not.toThrow();
+  });
+
+  it('skips validation entirely in mock mode', () => {
+    vi.unstubAllEnvs();
+    vi.stubEnv('HBC_ADAPTER_MODE', 'mock');
+    vi.stubEnv('NODE_ENV', 'production');
+    // All required vars are unset — would throw if validation ran
+    expect(() => validateRequiredConfig()).not.toThrow();
+  });
+
+  it('skips validation entirely in test mode', () => {
+    vi.unstubAllEnvs();
+    vi.stubEnv('HBC_ADAPTER_MODE', 'real');
+    vi.stubEnv('NODE_ENV', 'test');
+    // All required vars are unset — would throw if validation ran
     expect(() => validateRequiredConfig()).not.toThrow();
   });
 });

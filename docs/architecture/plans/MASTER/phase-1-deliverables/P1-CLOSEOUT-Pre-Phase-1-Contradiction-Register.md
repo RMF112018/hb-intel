@@ -100,7 +100,7 @@ These blockers do not prevent Phase 1 implementation from starting but must be r
 | 1 | OBO endpoint list not finalized | Cannot determine which domain routes need delegated vs app permissions | Architecture | C2 | Medium — does not block C2 auth middleware foundation |
 | 2 | Per-site grant automation (manual vs bootstrap) | Provisioning cannot complete site-scoped access without IT intervention or automation | Architecture + IT | Ops | Medium — does not block B1/C2/C3 |
 | 3 | GraphService scaffold pending `Group.ReadWrite.All` confirmation | Provisioning Step 6 (Entra group creation) cannot work in production | Backend | Ops | High — blocks production provisioning |
-| 4 | Startup config validation not wired (G2.6 task) | Backend could start with missing auth config and fail at runtime | Backend | G2 | Low — fail-fast, not silent |
+| ~~4~~ | ~~Startup config validation not wired (G2.6 task)~~ | ~~Backend could start with missing auth config~~ | ~~Backend~~ | ~~G2~~ | **CLOSED** — `validateRequiredConfig()` wired into `createServiceFactory()`; skips in mock/test mode (2026-03-18) |
 | 5 | SharePoint list schema approval pending | Physical SharePoint lists cannot be deployed to tenant | Product Owner | A3 | Medium — does not block adapter development against mocked fetch |
 | ~~6~~ | ~~B1 Appendix B route paths predate D6 lock~~ | ~~7 project-scoped domain route paths must be updated to nested pattern~~ | ~~B1 lead~~ | ~~B1~~ | **CLOSED** — All 7 domain route tables updated to D6 nested pattern (2026-03-18) |
 | 7 | B1 proxy adapter implementation (0% code) | D1 retry wiring, E1 contract tests, E2 staging checklist all blocked | Engineering | B1 | High — critical path for Phase 1 completion |

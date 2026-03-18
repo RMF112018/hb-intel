@@ -16,6 +16,7 @@ import { MockProjectRequestsService, RealProjectRequestsService } from './projec
 import { MockAcknowledgmentService, RealAcknowledgmentService } from './acknowledgment-service.js';
 import { MockGraphService, GraphService } from './graph-service.js';
 import { MockNotificationService, NotificationService } from './notification-service.js';
+import { validateRequiredConfig } from '../utils/validate-config.js';
 
 export interface IServiceContainer {
   sharePoint: ISharePointService;
@@ -33,6 +34,9 @@ let singletonContainer: IServiceContainer | null = null;
 
 export function createServiceFactory(): IServiceContainer {
   if (singletonContainer) return singletonContainer;
+
+  // G2.6: Fail fast if required config is missing (skips in mock/test mode)
+  validateRequiredConfig();
 
   const adapterMode = process.env.HBC_ADAPTER_MODE ?? 'real';
   const isMock = adapterMode === 'mock' || process.env.NODE_ENV === 'test';
