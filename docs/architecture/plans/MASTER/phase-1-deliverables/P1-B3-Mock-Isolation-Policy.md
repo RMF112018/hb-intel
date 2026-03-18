@@ -51,6 +51,43 @@ Mock adapters must not appear in any production-facing data flow. All production
 
 ---
 
+## Canonical Adapter-Mode Vocabulary
+
+### Canonical Values
+
+Source of truth: `AdapterMode` type in `packages/data-access/src/factory.ts`
+
+| Value | Meaning | Phase Target |
+|---|---|---|
+| `'mock'` | In-memory seed data; no external calls | All phases — dev/test only in protected environments |
+| `'proxy'` | Azure Functions backend via Bearer token (OBO) | Phase 1 |
+| `'sharepoint'` | Direct PnPjs calls on SPFx surface | Future |
+| `'api'` | Direct Azure SQL / REST | Future |
+
+These four values are the only recognized adapter modes. Any other value (including `'real'`) causes `resolveAdapterMode()` to fall back to `'mock'`.
+
+### Canonical Environment Variable Names
+
+| Variable | Surface | Purpose |
+|---|---|---|
+| `HBC_ADAPTER_MODE` | Backend (runtime), Frontend (build-time injected) | Primary adapter mode variable read by `resolveAdapterMode()` |
+| `VITE_ADAPTER_MODE` | Frontend build environment only | Vite reads this at build time; injects it as `process.env.HBC_ADAPTER_MODE` in the PWA bundle |
+
+All policy rules, enforcement layers, and configuration guidance in this document use these canonical names and values exclusively.
+
+### Known Vocabulary Drift
+
+The following repo locations use non-canonical vocabulary that could cause misconfiguration if not reconciled:
+
+| Location | Issue | Risk |
+|---|---|---|
+| `backend/functions/src/services/service-factory.ts` (line 37) | Defaults to `'real'` — not in `AdapterMode` type | Backend service factory uses a value the frontend factory does not recognize; if `HBC_ADAPTER_MODE` is unset in production, the backend defaults to `'real'` while the frontend `resolveAdapterMode()` would fall back to `'mock'` |
+| `backend/functions/README.md` (line 62) | Documents `'real'` as a valid adapter mode | Developers may set `HBC_ADAPTER_MODE='real'` in Azure app settings, which is not a canonical value |
+
+**Remediation (outside B3 scope):** The backend service factory should be updated to use `'proxy'` instead of `'real'`, or an explicit mapping from `'real'` to `'proxy'` should be added. The backend README should be updated to use canonical vocabulary. This should be tracked as a follow-on task to prevent configuration drift between frontend and backend.
+
+---
+
 ## Policy Precedence
 
 - **B3** governs adapter mode selection and mock isolation enforcement
