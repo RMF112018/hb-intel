@@ -1,24 +1,30 @@
 # Phase 1 — Contract Test Suite Engineering Plan
 
-**Plan ID:** P1-E1-Contract-Test-Suite-Plan
+| Field | Value |
+|---|---|
+| **Doc ID** | P1-E1 |
+| **Phase** | Phase 1 |
+| **Workstream** | E — Contract Testing and Staging Readiness |
+| **Document Type** | Implementation Plan |
+| **Owner** | E1-workstream lead (TBD) |
+| **Status** | Draft — blocked on B1/C1 upstream deliverables |
+| **Date** | 2026-03-16 |
+| **Last Reviewed Against Repo Truth** | 2026-03-19 |
+| **Audience** | Developers implementing contract tests for Phase 1 critical path |
+| **References** | P1-B1 (Proxy Adapter), P1-B2 (Adapter Completion), P1-C1 (Backend Catalog), P1-C2 (Auth Hardening), P1-C3 (Observability), P1-D1 (Write Safety) |
 
-**Document Classification:** Canonical Development Plan (Tier 5)
+### Status Legend
 
-**Status:** Active
-
-**Created:** 2026-03-16
-
-**Last Updated:** 2026-03-16
-
-**Owner:** TBD (P1 Test Engineering)
-
-**Target Audience:** Backend and frontend engineers implementing contract tests for Phase 1
-
-**Governance:** This plan is scoped to the Phase 1 test requirement. Implementation must preserve architecture invariants defined in `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md` and dependency rules in `docs/architecture/blueprint/package-relationship-map.md`.
+| Marker | Meaning |
+|---|---|
+| **CURRENT** | Verified against live repo as of 2026-03-19 |
+| **TARGET** | E1 deliverable — implementation planned |
+| **PROVISIONAL** | Design decision pending upstream confirmation |
+| **BLOCKED** | Cannot implement until dependency is delivered |
 
 ---
 
-## Executive Summary
+## Purpose
 
 Phase 1 contract testing establishes agreement between frontend proxy adapters (`@hbc/data-access`) and backend Azure Functions on request/response shapes. Using Zod schemas as the contract source of truth, the test suite verifies:
 
@@ -26,7 +32,7 @@ Phase 1 contract testing establishes agreement between frontend proxy adapters (
 2. **Backend service layer stability** — backend routes consistently produce contracted shapes
 3. **Critical path coverage** — staging smoke tests validate end-to-end flows in production-like conditions
 
-**Architecture:** Shared Zod schemas in `@hbc/models/contracts/` define the contract. MSW handlers simulate backend responses in frontend tests. Backend validation middleware uses the same schemas, ensuring both sides validate against a single source of truth.
+**Architecture:** Shared Zod schemas in `@hbc/models/src/api-schemas/` define the contract. MSW handlers simulate backend responses in frontend tests. Backend validation middleware uses the same schemas, ensuring both sides validate against a single source of truth.
 
 **Tech Stack:** TypeScript, Vitest, MSW v2 (`@msw/node`), Zod v3.22+
 
@@ -39,6 +45,85 @@ Phase 1 contract testing establishes agreement between frontend proxy adapters (
 
 ---
 
+## Plan Status and Dependencies
+
+### Current Repo State (verified 2026-03-19)
+
+- `@hbc/models` has no Zod dependency, no test script — only build, check-types, lint (**CURRENT**)
+- `@hbc/models/src/contracts/` contains Contracts business domain models (`IContractInfo`, `ICommitmentApproval`, `ContractStatus`) — NOT Zod API schemas (**CURRENT**)
+- `@hbc/data-access` has no test script — only build, check-types, lint; proxy adapters are stubs (**CURRENT**)
+- `backend/functions` has vitest test infrastructure (unit, smoke, coverage) but no domain route handlers for Lead/Project/Estimating (**CURRENT**)
+- Port interfaces for all 11 domains exist in `@hbc/data-access/src/ports/` (**CURRENT**)
+
+### E1 Deliverable Breakdown by Surface
+
+| Deliverable | Surface | Status | Dependency |
+|---|---|---|---|
+| Zod schema infrastructure (shared schemas, per-domain schemas) | `@hbc/models` | **TARGET** — requires Zod dependency + naming resolution | None after setup |
+| MSW handler setup + test utilities | `@hbc/data-access` | **TARGET** — requires vitest setup | D1 vitest prerequisite |
+| Frontend adapter contract tests (Lead, Project, Estimating) | `@hbc/data-access` | **BLOCKED** | B1 (proxy repositories) |
+| Backend route contract tests | `backend/functions` | **BLOCKED** | C1 (domain route handlers) |
+| Backend error shape contract tests | `backend/functions` | **BLOCKED** | C1 (error envelope freeze) |
+| Staging smoke tests | `backend/functions` | **BLOCKED** | C1 + C2 (routes + auth) + staging infra |
+| Telemetry baseline verification | `backend/functions` | **BLOCKED** | C3 (instrumentation) + staging infra |
+
+### What E1 Can Implement Now
+
+- Zod dependency addition to `@hbc/models` (after naming resolution)
+- Shared Zod schemas (error envelope, pagination) for C1-frozen shapes in `@hbc/models/src/api-schemas/`
+- Domain schemas for Lead, Project, Estimating (using existing port interfaces as source)
+- MSW server setup and handler scaffolding (independent of B1)
+- Vitest configuration for `@hbc/data-access` (shared with D1 prerequisite)
+
+### What E1 Cannot Implement Until Upstream Delivers
+
+- Frontend adapter contract tests → blocked on B1 proxy repositories
+- Backend route contract tests → blocked on C1 domain route handlers
+- Smoke tests → blocked on C1 + C2 + staging infrastructure
+- Telemetry baseline → blocked on C3 instrumentation
+
+### Cross-Workstream Dependencies
+
+| E1 depends on | For | Status |
+|---|---|---|
+| B1 (Proxy Adapter) | `ProxyHttpClient` class and proxy repository implementations | B1 not yet merged; proxy is stub |
+| B2 (Adapter Completion) | Full adapter surface for all 11 domains | B2 active |
+| C1 (Backend Catalog) | Domain route handlers, error envelope freeze, HTTP methods | C1 routes not yet implemented for Lead/Project/Estimating |
+| C2 (Auth Hardening) | Auth middleware for staging smoke tests | C2 not yet delivered |
+| C3 (Observability) | Telemetry instrumentation for baseline verification | C3 aligned but not yet implemented |
+| D1 (Write Safety) | Shared vitest prerequisite for `@hbc/data-access` | D1 also needs vitest setup; coordinate |
+
+### Naming Conflict Resolution
+
+The current `@hbc/models/src/contracts/` directory is the **Contracts business domain** (legal contracts, commitment approvals). E1 must NOT overwrite this with Zod API schemas.
+
+**Resolution:** All E1 Zod schemas target `@hbc/models/src/api-schemas/` instead:
+- `packages/models/src/api-schemas/shared-schema.ts`
+- `packages/models/src/api-schemas/lead-schema.ts`
+- `packages/models/src/api-schemas/project-schema.ts`
+- `packages/models/src/api-schemas/estimating-schema.ts`
+- (remaining domain schemas follow the same pattern)
+- `packages/models/src/api-schemas/index.ts` — barrel export
+
+### Verification Command Guidance
+
+**`@hbc/models` — no test script exists (CURRENT):**
+
+E1 must add vitest configuration to models before any schema tests can run. Required setup:
+1. Add `zod` as a dependency and `vitest` as a devDependency
+2. Create `packages/models/vitest.config.ts` (node environment, include `src/**/*.test.ts`)
+3. Add `"test": "vitest run"` script to `packages/models/package.json`
+
+**`@hbc/data-access` — no test script exists (CURRENT):**
+
+Same vitest setup applies. Coordinate with D1 which also needs this prerequisite.
+
+**`backend/functions` — vitest exists (CURRENT):**
+- Unit tests: `cd backend/functions && npm test`
+- Smoke tests: `cd backend/functions && npm run test:smoke`
+
+---
+
 ## Architecture and Constraints
 
 ### Source-of-Truth Hierarchy
@@ -46,11 +131,11 @@ Phase 1 contract testing establishes agreement between frontend proxy adapters (
 Contract tests enforce a strict shape agreement:
 
 ```
-┌─────────────────────────────────────────┐
-│ Zod Schema (@hbc/models/contracts/)     │  Source of truth
-│ - LeadSchema, ProjectSchema, etc.       │
-│ - Defines runtime validation + types    │
-└────────┬────────────────────┬───────────┘
+┌──────────────────────────────────────────┐
+│ Zod Schema (@hbc/models/api-schemas/)    │  Source of truth
+│ - LeadSchema, ActiveProjectSchema, etc.   │
+│ - Defines runtime validation + types     │
+└────────┬────────────────────┬────────────┘
          │                    │
     ┌────▼────────┐    ┌──────▼───────┐
     │ Backend     │    │ Frontend      │
@@ -64,65 +149,106 @@ Contract tests enforce a strict shape agreement:
 
 | Package | Role | P1 Task | Status |
 |---------|------|---------|--------|
-| `@hbc/models` | Zod schemas + types | P1-E1 Task 1 | New contracts submodule |
-| `@hbc/data-access` | Proxy adapter + frontend tests | P1-B1 + P1-E1 Task 4–5 | Adapter built in B1; tests here |
-| `backend/functions` | Azure Functions + routes | P1-C1 + P1-E1 Task 6–9 | Routes built in C1; tests here |
+| `@hbc/models` | Zod schemas + types in `src/api-schemas/` | P1-E1 Task 1 | **TARGET** — new submodule |
+| `@hbc/data-access` | Proxy adapter + frontend tests | P1-B1 + P1-E1 Task 4–5 | **BLOCKED** — adapter built in B1; tests here |
+| `backend/functions` | Azure Functions + routes | P1-C1 + P1-E1 Task 6–9 | **BLOCKED** — routes built in C1; tests here |
 
 ### Architectural Invariants Protected
 
 - Package dependency direction: `data-access` → `models`, `backend/functions` → `models`
-- Reusable Zod schemas in `@hbc/models/contracts/` (not duplicated)
+- Reusable Zod schemas in `@hbc/models/src/api-schemas/` (not duplicated)
 - Frontend and backend both validate against same schemas (not divergent validators)
 - No direct `data-access` ↔ `backend/functions` coupling (only via shared `@hbc/models`)
 - MSW handlers in frontend tests only (backend uses direct function calls)
+- `@hbc/models/src/contracts/` remains the Contracts business domain — E1 does not touch it
+
+### Transport DTO vs Domain Interface Distinction
+
+E1 Zod schemas validate the **transport layer** — the HTTP envelope wrapping domain payloads. C1 governs transport shapes; `@hbc/models` interfaces define the domain payload shapes.
+
+**Two distinct layers:**
+
+| Layer | Governed by | Defines | Example |
+|---|---|---|---|
+| **Transport** | C1 (Backend Catalog) | HTTP envelope, status codes, field naming, pagination defaults | `{ items: ILead[], total, page, pageSize }` |
+| **Domain** | `@hbc/models` interfaces | Entity field names, types, enums | `ILead { id: number, title, stage, clientName, estimatedValue, createdAt, updatedAt }` |
+
+**Key implications for E1:**
+- `IPagedResult<T>` uses `items: T[]` (**CURRENT**). If C1 defines a different transport field name (e.g., `data`), Zod schemas adapt to the transport shape, not the domain interface.
+- E1 does NOT invent transport shapes — it codifies shapes defined by C1 and verified against `@hbc/models`.
+- Open C1 decisions that affect the transport layer and therefore E1 schemas:
+  - **D3** — Error envelope field naming: `.error` vs `.message` (**PROVISIONAL**)
+  - **D4** — Pagination default page size: 25 (current `DEFAULT_PAGE_SIZE`) vs 50 (**PROVISIONAL**)
+  - **D5** — Update method: PUT-only (current B1) vs PUT+PATCH (**PROVISIONAL**)
 
 ### Key Assumptions
 
 1. **Zod is the contract language** — TypeScript types alone are insufficient; runtime validation ensures both sides agree on shape
 2. **MSW v2 is stable** — using `@msw/node` for both Node.js test environments
-3. **11 domain types exist** — Lead, Project, Estimating, + 8 others with port interfaces already defined
+3. **11 domain types exist** — Lead, Project, Estimating, + 8 others with port interfaces already defined in `@hbc/models` and `@hbc/data-access/src/ports/`
 4. **Azure Functions v4 TypeScript** — backend uses modern async/await patterns, not legacy function bindings
 5. **Vitest is the test runner** — both packages use Vitest; tests run via `pnpm test`
 6. **No Pact or external contract framework** — pure Vitest with Zod schema assertions
+7. **Schemas are tiered by C1 contract confidence** — only frozen routes get full schemas; provisional routes get skeleton schemas; uncataloged routes get no schemas
 
 ---
 
 ## Chunk 1: Contract Schema Foundation
 
+### Contract-Confidence Tiering
+
+E1 does not treat all 11 domains equally. Schemas are tiered by C1 contract confidence:
+
+| Tier | Domains | C1 Status | E1 Treatment |
+|---|---|---|---|
+| **Tier 1 — FROZEN** | Lead, Project (CRUD), Estimating (tracker CRUD) | Routes locked in C1 | Full Zod schemas + full test code + MSW fixtures |
+| **Tier 2 — PROVISIONAL** | Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP; Project (aggregate), Estimating (kickoff) | D1/D6/D2/A8 open | Domain-accurate schema skeletons with PROVISIONAL markers; no full test code |
+| **Tier 3 — NOT CATALOGED** | Auth | A9 — deferred to C2 | Capability-lane description only; no schema until C2 publishes routes |
+
 ### Task 1: Create Domain Zod Schemas in `@hbc/models`
 
-**Objective:** Define contract schemas for all 11 domain types. These schemas are the single source of truth for both frontend and backend.
+**Status:** **TARGET** — implementable after Zod setup (Task 2)
+
+**Objective:** Define contract schemas for the 3 Tier 1 domains (Lead, Project, Estimating) with full precision, plus skeleton schemas for Tier 2 domains, matching the actual `@hbc/models` interfaces. Auth (Tier 3) gets no schema.
 
 **Files to Create:**
-- `packages/models/src/contracts/shared-schema.ts` — Error, Paged result envelopes
-- `packages/models/src/contracts/lead-schema.ts` — Lead domain contract
-- `packages/models/src/contracts/project-schema.ts` — Project domain contract
-- `packages/models/src/contracts/estimating-schema.ts` — Estimating domain contract
-- (9 additional domain schemas — show pattern once, implement per convention)
-- `packages/models/src/contracts/index.ts` — Barrel export
-- `packages/models/src/index.ts` — Update to export contracts
+- `packages/models/src/api-schemas/shared-schema.ts` — Error envelope, Paged result wrapper, pagination query
+- `packages/models/src/api-schemas/lead-schema.ts` — Lead domain (Tier 1)
+- `packages/models/src/api-schemas/project-schema.ts` — Project domain (Tier 1 CRUD + Tier 2 aggregate)
+- `packages/models/src/api-schemas/estimating-schema.ts` — Estimating domain (Tier 1 tracker + Tier 2 kickoff)
+- `packages/models/src/api-schemas/schedule-schema.ts` — Schedule domain (Tier 2)
+- `packages/models/src/api-schemas/buyout-schema.ts` — Buyout domain (Tier 2)
+- `packages/models/src/api-schemas/compliance-schema.ts` — Compliance domain (Tier 2)
+- `packages/models/src/api-schemas/contract-schema.ts` — Contract domain (Tier 2)
+- `packages/models/src/api-schemas/risk-schema.ts` — Risk domain (Tier 2)
+- `packages/models/src/api-schemas/scorecard-schema.ts` — Scorecard domain (Tier 2)
+- `packages/models/src/api-schemas/pmp-schema.ts` — PMP domain (Tier 2)
+- `packages/models/src/api-schemas/index.ts` — Barrel export (no auth-schema)
+- `packages/models/src/index.ts` — Update to export api-schemas
 
 **Files to Modify:**
 - `packages/models/package.json` — Add zod dependency
 
-**Implementation Detail:** Each schema must match the TypeScript interface already defined in `packages/models/src/`. Use `z.infer<typeof Schema>` to generate the type from the schema, ensuring they stay in sync.
+**Implementation Detail:** Each schema must match the TypeScript interface already defined in `packages/models/src/{domain}/`. Use `z.infer<typeof Schema>` to generate the type from the schema, ensuring they stay in sync. Schemas validate transport-layer payloads that carry domain data — field names and types must match `@hbc/models` exactly.
 
 **Full Code Examples:**
 
-**File: `packages/models/src/contracts/shared-schema.ts`**
+**File: `packages/models/src/api-schemas/shared-schema.ts`**
 
 ```typescript
 import { z } from 'zod';
 
 /**
  * Standard error response envelope used across all error paths.
- * Backend validation middleware produces this shape.
- * Frontend adapters expect this shape from MSW handlers and backend.
+ *
+ * PROVISIONAL (D3): B1 currently reads `.error` first with `.message` fallback.
+ * The field name is not yet frozen in C1. If D3 resolves to `.message`, rename
+ * the `error` field to `message` and update all downstream references.
  */
 export const ErrorEnvelopeSchema = z.object({
-  error: z.string().describe('Human-readable error message'),
+  error: z.string().describe('Human-readable error message (D3: may become .message)'),
   code: z.string().describe('Machine-readable error code (e.g., NOT_FOUND, VALIDATION_ERROR)'),
-  requestId: z.string().optional().describe('Unique request ID for logging'),
+  requestId: z.string().optional().describe('Unique request ID for tracing'),
   details: z.array(
     z.object({
       field: z.string().optional(),
@@ -135,321 +261,460 @@ export type ErrorEnvelope = z.infer<typeof ErrorEnvelopeSchema>;
 
 /**
  * Generic paged result wrapper.
- * Used for list endpoints: GET /api/leads, GET /api/projects, etc.
+ * Matches IPagedResult<T> from @hbc/models/shared which uses `items: T[]`.
+ *
+ * PROVISIONAL (D4): Default page size is 25 (DEFAULT_PAGE_SIZE from @hbc/models).
+ * C1 decision D4 may change this to 50.
  */
 export const createPagedSchema = <T extends z.ZodType>(itemSchema: T) =>
   z.object({
-    data: z.array(itemSchema),
-    total: z.number().int().nonnegative().describe('Total count of items (not just current page)'),
+    items: z.array(itemSchema).describe('Items for the current page'),
+    total: z.number().int().nonnegative().describe('Total count across all pages'),
     page: z.number().int().positive().describe('1-indexed page number'),
     pageSize: z.number().int().positive().describe('Number of items per page'),
   });
 
 /**
- * Success response envelope (optional — may omit if routes return bare objects).
- * Used if backend wraps single-item responses in { data: ... }.
- */
-export const SuccessEnvelopeSchema = <T extends z.ZodType>(dataSchema: T) =>
-  z.object({
-    data: dataSchema,
-  });
-
-/**
  * Standard pagination query parameters.
+ *
+ * PROVISIONAL (D4): pageSize default is 25 (matches DEFAULT_PAGE_SIZE).
+ * C1 may change this to 50.
  */
 export const PaginationQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
-  pageSize: z.coerce.number().int().positive().default(20).max(100),
+  pageSize: z.coerce.number().int().positive().default(25).max(100),
 });
 
 export type PaginationQuery = z.infer<typeof PaginationQuerySchema>;
+
+/**
+ * NOTE: Single-item response envelope shape (e.g., GET /api/leads/:id) is TBD
+ * pending C1 route spec. It may be a bare object or wrapped in { data: T }.
+ * Do not define a SuccessEnvelopeSchema until C1 freezes this decision.
+ */
 ```
 
-**File: `packages/models/src/contracts/lead-schema.ts`**
+**File: `packages/models/src/api-schemas/lead-schema.ts`** (Tier 1 — FROZEN)
 
 ```typescript
 import { z } from 'zod';
+import { PaginationQuerySchema } from './shared-schema';
 
 /**
- * Lead domain contract schema.
- * Matches the ILead interface in packages/models/src/domain/lead.ts.
- * Used by:
- * - Backend validation middleware (P1-C2) to validate outgoing responses
- * - Frontend adapter tests (P1-E1 Task 4) with MSW to verify adapter maps correctly
- * - Smoke tests (P1-E1 Task 8) to verify staging endpoint responses
+ * Lead domain contract schema — Tier 1 (FROZEN).
+ * Matches ILead from @hbc/models/leads (packages/models/src/leads/ILead.ts).
+ *
+ * Lead is a numeric-ID CRUD + search domain.
+ * Port: ILeadRepository (getAll, getById, create, update, delete, search)
  */
+
+/** LeadStage enum values — matches LeadStage from @hbc/models/leads */
+export const LeadStageValues = [
+  'Identified', 'Qualifying', 'BidDecision', 'Bidding', 'Awarded', 'Lost', 'Declined',
+] as const;
+
 export const LeadSchema = z.object({
-  id: z.string().uuid().describe('Unique lead identifier'),
-  name: z.string().min(1).max(255).describe('Lead contact or company name'),
-  email: z.string().email().optional().describe('Primary contact email'),
-  phone: z.string().optional().describe('Primary contact phone'),
-  status: z.enum([
-    'prospect',
-    'qualified',
-    'proposal',
-    'negotiation',
-    'won',
-    'lost',
-  ]).describe('Sales pipeline stage'),
-  estimatedValue: z.number().nonnegative().optional().describe('Estimated contract value in USD'),
-  projectId: z.string().uuid().optional().describe('Linked project ID if exists'),
-  source: z.enum(['inbound', 'outbound', 'referral', 'trade_show', 'other']).optional(),
-  notes: z.string().optional(),
-  createdAt: z.string().datetime().describe('ISO 8601 timestamp'),
-  updatedAt: z.string().datetime().describe('ISO 8601 timestamp'),
+  id: z.number().int().positive().describe('Unique lead identifier'),
+  title: z.string().min(1).describe('Descriptive title for the lead / opportunity'),
+  stage: z.enum(LeadStageValues).describe('Current pipeline stage (LeadStage enum)'),
+  clientName: z.string().min(1).describe('Name of the prospective client'),
+  estimatedValue: z.number().nonnegative().describe('Estimated contract value in USD'),
+  createdAt: z.string().datetime().describe('ISO-8601 creation timestamp'),
+  updatedAt: z.string().datetime().describe('ISO-8601 last-updated timestamp'),
 });
 
 export type Lead = z.infer<typeof LeadSchema>;
 
 /**
- * Paged Lead response.
- * Used for GET /api/leads?page=X&pageSize=Y
+ * Create Lead request — matches ILeadFormData from @hbc/models/leads.
+ * Omits server-generated fields (id, createdAt, updatedAt).
  */
-export const PagedLeadsSchema = z.object({
-  data: z.array(LeadSchema),
-  total: z.number().int().nonnegative(),
-  page: z.number().int().positive(),
-  pageSize: z.number().int().positive(),
-});
-
-export type PagedLeads = z.infer<typeof PagedLeadsSchema>;
-
-/**
- * Create Lead request payload (omits id, createdAt, updatedAt).
- */
-export const CreateLeadRequestSchema = LeadSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).pick({
-  name: true,
-  email: true,
-  phone: true,
-  status: true,
-  estimatedValue: true,
-  projectId: true,
-  source: true,
-  notes: true,
+export const CreateLeadRequestSchema = z.object({
+  title: z.string().min(1),
+  stage: z.enum(LeadStageValues),
+  clientName: z.string().min(1),
+  estimatedValue: z.number().nonnegative(),
 });
 
 export type CreateLeadRequest = z.infer<typeof CreateLeadRequestSchema>;
 
-/**
- * Update Lead request payload (all fields optional).
- */
+/** Update Lead — all fields optional. */
 export const UpdateLeadRequestSchema = CreateLeadRequestSchema.partial();
 
 export type UpdateLeadRequest = z.infer<typeof UpdateLeadRequestSchema>;
 
 /**
- * Success response for single Lead (if routes wrap in { data: ... }).
+ * Lead search query — extends pagination with free-text query.
+ * Used by ILeadRepository.search(query, options).
+ * Search matches against title and clientName.
  */
-export const LeadResponseSchema = z.object({
-  data: LeadSchema,
+export const LeadSearchQuerySchema = PaginationQuerySchema.extend({
+  q: z.string().min(1).describe('Free-text search against title and clientName'),
 });
 
-export type LeadResponse = z.infer<typeof LeadResponseSchema>;
+export type LeadSearchQuery = z.infer<typeof LeadSearchQuerySchema>;
 ```
 
-**File: `packages/models/src/contracts/project-schema.ts`**
+**File: `packages/models/src/api-schemas/project-schema.ts`** (Tier 1 CRUD + Tier 2 aggregate)
 
 ```typescript
 import { z } from 'zod';
 
 /**
- * Project domain contract schema.
- * Matches the IProject interface.
- * Used by backend validation middleware and frontend adapter tests.
+ * Project domain contract schema — Tier 1 (FROZEN) for CRUD operations.
+ * Matches IActiveProject from @hbc/models/project (packages/models/src/project/IProject.ts).
+ *
+ * Project uses string (UUID) IDs. CRUD + getPortfolioSummary aggregate.
+ * Port: IProjectRepository (getProjects, getProjectById, createProject, updateProject, deleteProject, getPortfolioSummary)
  */
-export const ProjectSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(1).max(255),
-  description: z.string().optional(),
-  status: z.enum(['planning', 'active', 'on_hold', 'completed', 'archived']),
-  leadId: z.string().uuid(),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
-  estimatedBudget: z.number().nonnegative().optional(),
-  actualBudget: z.number().nonnegative().optional(),
-  owner: z.string().describe('Email or user ID of project owner'),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+export const ActiveProjectSchema = z.object({
+  id: z.string().uuid().describe('Unique project identifier (UUID)'),
+  name: z.string().min(1).describe('Project display name'),
+  number: z.string().min(1).describe('Project number / code (e.g. "PRJ-A1B2C3")'),
+  status: z.string().describe('Current project status (ProjectStatus enum)'),
+  startDate: z.string().datetime().describe('ISO-8601 project start date'),
+  endDate: z.string().datetime().describe('ISO-8601 project end date'),
 });
 
-export type Project = z.infer<typeof ProjectSchema>;
+export type ActiveProject = z.infer<typeof ActiveProjectSchema>;
 
-export const PagedProjectsSchema = z.object({
-  data: z.array(ProjectSchema),
-  total: z.number().int().nonnegative(),
-  page: z.number().int().positive(),
-  pageSize: z.number().int().positive(),
-});
-
-export type PagedProjects = z.infer<typeof PagedProjectsSchema>;
-
-export const CreateProjectRequestSchema = ProjectSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+/** Create Project request — omits server-generated id. */
+export const CreateProjectRequestSchema = ActiveProjectSchema.omit({ id: true });
 
 export type CreateProjectRequest = z.infer<typeof CreateProjectRequestSchema>;
 
+/** Update Project — all fields optional. */
 export const UpdateProjectRequestSchema = CreateProjectRequestSchema.partial();
 
 export type UpdateProjectRequest = z.infer<typeof UpdateProjectRequestSchema>;
 
-export const ProjectResponseSchema = z.object({
-  data: ProjectSchema,
+/**
+ * Portfolio summary aggregate — Tier 2 (PROVISIONAL A8).
+ * Matches IPortfolioSummary from @hbc/models/project.
+ * Aggregate endpoint not yet in C1 catalog — route path TBD.
+ */
+export const PortfolioSummarySchema = z.object({
+  totalProjects: z.number().int().nonnegative(),
+  activeProjects: z.number().int().nonnegative(),
+  totalContractValue: z.number().nonnegative(),
+  averagePercentComplete: z.number().min(0).max(100),
 });
 
-export type ProjectResponse = z.infer<typeof ProjectResponseSchema>;
+export type PortfolioSummary = z.infer<typeof PortfolioSummarySchema>;
 ```
 
-**File: `packages/models/src/contracts/estimating-schema.ts`**
+**File: `packages/models/src/api-schemas/estimating-schema.ts`** (Tier 1 tracker + Tier 2 kickoff)
 
 ```typescript
 import { z } from 'zod';
 
 /**
- * Estimating domain contract schema.
- * Represents service estimation (labor hours, cost estimates, etc.).
- * Matches the IEstimatingRecord interface.
+ * Estimating Tracker contract schema — Tier 1 (FROZEN) for tracker CRUD.
+ * Matches IEstimatingTracker from @hbc/models/estimating (packages/models/src/estimating/IEstimating.ts).
+ *
+ * Estimating is a bid-tracking domain with numeric IDs.
+ * Port: IEstimatingRepository (getAllTrackers, getTrackerById, createTracker, updateTracker, deleteTracker, getKickoff, createKickoff)
  */
-export const EstimatingRecordSchema = z.object({
-  id: z.string().uuid(),
-  projectId: z.string().uuid(),
-  description: z.string().min(1),
-  estimatedHours: z.number().positive(),
-  estimatedCost: z.number().nonnegative(),
-  actualHours: z.number().nonnegative().optional(),
-  actualCost: z.number().nonnegative().optional(),
-  status: z.enum(['draft', 'submitted', 'approved', 'in_progress', 'completed']),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+export const EstimatingTrackerSchema = z.object({
+  id: z.number().int().positive().describe('Unique tracker identifier'),
+  projectId: z.string().describe('Associated project identifier'),
+  bidNumber: z.string().min(1).describe('Bid / proposal number'),
+  status: z.string().describe('Current status of the estimate (EstimatingStatus enum)'),
+  dueDate: z.string().datetime().describe('ISO-8601 due date for the estimate'),
+  createdAt: z.string().datetime().describe('ISO-8601 creation timestamp'),
+  updatedAt: z.string().datetime().describe('ISO-8601 last-updated timestamp'),
 });
 
-export type EstimatingRecord = z.infer<typeof EstimatingRecordSchema>;
+export type EstimatingTracker = z.infer<typeof EstimatingTrackerSchema>;
 
-export const PagedEstimatingRecordsSchema = z.object({
-  data: z.array(EstimatingRecordSchema),
-  total: z.number().int().nonnegative(),
-  page: z.number().int().positive(),
-  pageSize: z.number().int().positive(),
-});
-
-export type PagedEstimatingRecords = z.infer<typeof PagedEstimatingRecordsSchema>;
-
-export const CreateEstimatingRequestSchema = EstimatingRecordSchema.omit({
+/** Create Tracker request — matches IEstimatingTrackerFormData. Omits id, createdAt, updatedAt. */
+export const CreateTrackerRequestSchema = EstimatingTrackerSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-  actualHours: true,
-  actualCost: true,
 });
 
-export type CreateEstimatingRequest = z.infer<typeof CreateEstimatingRequestSchema>;
+export type CreateTrackerRequest = z.infer<typeof CreateTrackerRequestSchema>;
 
-export const UpdateEstimatingRequestSchema = CreateEstimatingRequestSchema.partial();
+/** Update Tracker — all fields optional. */
+export const UpdateTrackerRequestSchema = CreateTrackerRequestSchema.partial();
 
-export type UpdateEstimatingRequest = z.infer<typeof UpdateEstimatingRequestSchema>;
+export type UpdateTrackerRequest = z.infer<typeof UpdateTrackerRequestSchema>;
 
-export const EstimatingResponseSchema = z.object({
-  data: EstimatingRecordSchema,
+/**
+ * Estimating Kickoff schema — Tier 2 (PROVISIONAL D2).
+ * Matches IEstimatingKickoff from @hbc/models/estimating.
+ * Sub-resource routing (how kickoff relates to tracker/project in the URL) is not finalized.
+ */
+export const EstimatingKickoffSchema = z.object({
+  id: z.number().int().positive().describe('Unique kickoff identifier'),
+  projectId: z.string().describe('Associated project identifier'),
+  kickoffDate: z.string().datetime().describe('ISO-8601 kickoff meeting date'),
+  attendees: z.array(z.string()).describe('List of attendee names'),
+  notes: z.string().describe('Meeting notes / action items'),
+  createdAt: z.string().datetime().describe('ISO-8601 creation timestamp'),
 });
 
-export type EstimatingResponse = z.infer<typeof EstimatingResponseSchema>;
+export type EstimatingKickoff = z.infer<typeof EstimatingKickoffSchema>;
 ```
 
-#### Remaining Domain Schemas (Task 1 continued)
+#### Tier 2 Domain Schemas — PROVISIONAL (D1, D6)
 
-The following 8 domains follow the exact same pattern as EstimatingRecordSchema. Each requires:
-- `{Domain}Schema` — full object schema
-- `{Domain}Contract` type alias
-- `Paged{Domain}Schema` — wrapped in PagedResultSchema
-- `Create{Domain}RequestSchema` — omit id/createdAt/updatedAt
-- `Update{Domain}RequestSchema` — partial Create schema
-- `{Domain}ResponseSchema` — wraps domain schema in `{ data }` envelope
+The following 7 project-scoped domains have frozen `@hbc/models` interfaces but **provisional route paths**. C1 decisions D1 (singular vs plural path) and D6 (nested `/projects/{id}/{domain}` vs flat `/{domain}?projectId=`) are open. Schema fields match `@hbc/models` exactly; route paths and transport envelope may change when D1/D6 resolve.
 
-Files to create:
-- `packages/models/src/contracts/schedule-schema.ts`
-- `packages/models/src/contracts/buyout-schema.ts`
-- `packages/models/src/contracts/compliance-schema.ts`
-- `packages/models/src/contracts/contract-schema.ts`
-- `packages/models/src/contracts/risk-schema.ts`
-- `packages/models/src/contracts/scorecard-schema.ts`
-- `packages/models/src/contracts/pmp-schema.ts`
-- `packages/models/src/contracts/auth-schema.ts`
+No full test code is provided for Tier 2 schemas. Skeleton tests should validate basic parse/reject behavior only.
 
-Key type differences per domain:
-| Domain | ID Type | Notable Fields | Write Safety Class |
-|--------|---------|---------------|--------------------|
-| schedule | string | projectId, milestones[], startDate, endDate | Class A |
-| buyout | string | projectId, vendorId, lineItems[], status | Class B |
-| compliance | string | projectId, checkType, result, closedAt? | Class D (audit-only after close) |
-| contracts | string | projectId, counterparty, value, status | Class A |
-| risk | string | projectId, severity, likelihood, mitigation | Class A |
-| scorecard | string | projectId, categoryScores[], overallScore | Class A |
-| pmp | string | projectId, sections[], approvedAt? | Class A |
-| auth | string (UPN) | userId, roles[], permissions[], tenantId | Class C (read-mostly) |
+**File: `packages/models/src/api-schemas/schedule-schema.ts`** — PROVISIONAL (D1, D6)
 
-Example: ScheduleSchema skeleton:
 ```typescript
-// packages/models/src/contracts/schedule-schema.ts
-export const ScheduleSchema = z.object({
-  id: z.string(),
+import { z } from 'zod';
+
+/**
+ * Schedule Activity — matches IScheduleActivity from @hbc/models/schedule.
+ * Port: IScheduleRepository (getActivities, getActivityById, createActivity, updateActivity, deleteActivity, getMetrics)
+ * ID: numeric. Scoped by projectId.
+ */
+export const ScheduleActivitySchema = z.object({
+  id: z.number().int().positive(),
   projectId: z.string(),
-  name: z.string(),
+  name: z.string().min(1),
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
-  status: z.enum(['draft', 'active', 'completed', 'archived']),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  percentComplete: z.number().min(0).max(100),
+  isCriticalPath: z.boolean(),
 });
 
-export type ScheduleContract = z.infer<typeof ScheduleSchema>;
-
-export const PagedScheduleSchema = PagedResultSchema(ScheduleSchema);
-
-export type PagedSchedule = z.infer<typeof PagedScheduleSchema>;
-
-export const CreateScheduleRequestSchema = ScheduleSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+/** Schedule Metrics aggregate — matches IScheduleMetrics from @hbc/models/schedule. */
+export const ScheduleMetricsSchema = z.object({
+  projectId: z.string(),
+  totalActivities: z.number().int().nonnegative(),
+  completedActivities: z.number().int().nonnegative(),
+  criticalPathVariance: z.number().describe('Days variance — negative means behind schedule'),
+  overallPercentComplete: z.number().min(0).max(100),
 });
-
-export type CreateScheduleRequest = z.infer<typeof CreateScheduleRequestSchema>;
-
-export const UpdateScheduleRequestSchema = CreateScheduleRequestSchema.partial();
-
-export type UpdateScheduleRequest = z.infer<typeof UpdateScheduleRequestSchema>;
-
-export const ScheduleResponseSchema = z.object({
-  data: ScheduleSchema,
-});
-
-export type ScheduleResponse = z.infer<typeof ScheduleResponseSchema>;
 ```
 
-Follow this exact pattern for all 8 remaining domains (buyout, compliance, contracts, risk, scorecard, pmp, auth).
+**File: `packages/models/src/api-schemas/buyout-schema.ts`** — PROVISIONAL (D1, D6)
 
-**File: `packages/models/src/contracts/index.ts`**
+```typescript
+import { z } from 'zod';
+
+/**
+ * Buyout Entry — matches IBuyoutEntry from @hbc/models/buyout.
+ * Port: IBuyoutRepository (getEntries, getEntryById, createEntry, updateEntry, deleteEntry, getSummary)
+ * ID: numeric. Scoped by projectId.
+ */
+export const BuyoutEntrySchema = z.object({
+  id: z.number().int().positive(),
+  projectId: z.string(),
+  description: z.string(),
+  amount: z.number(),
+  status: z.string(),
+});
+
+/** Buyout Summary aggregate — matches IBuyoutSummary from @hbc/models/buyout. */
+export const BuyoutSummarySchema = z.object({
+  totalBuyout: z.number(),
+  committedAmount: z.number(),
+  uncommittedAmount: z.number(),
+  projectId: z.string(),
+});
+```
+
+**File: `packages/models/src/api-schemas/compliance-schema.ts`** — PROVISIONAL (D1, D6)
+
+```typescript
+import { z } from 'zod';
+
+/**
+ * Compliance Entry — matches IComplianceEntry from @hbc/models/compliance.
+ * Port: IComplianceRepository (getEntries, getEntryById, createEntry, updateEntry, deleteEntry, getSummary)
+ * ID: numeric. Scoped by projectId.
+ */
+export const ComplianceEntrySchema = z.object({
+  id: z.number().int().positive(),
+  projectId: z.string(),
+  vendorId: z.string(),
+  requirement: z.string(),
+  status: z.string(),
+  expiryDate: z.string().datetime().optional(),
+});
+
+/** Compliance Summary aggregate — matches IComplianceSummary from @hbc/models/compliance. */
+export const ComplianceSummarySchema = z.object({
+  totalVendors: z.number().int().nonnegative(),
+  compliant: z.number().int().nonnegative(),
+  atRisk: z.number().int().nonnegative(),
+  projectId: z.string(),
+});
+```
+
+**File: `packages/models/src/api-schemas/contract-schema.ts`** — PROVISIONAL (D1, D6)
+
+```typescript
+import { z } from 'zod';
+
+/**
+ * Contract Info — matches IContractInfo from @hbc/models/contracts (Contracts business domain).
+ * Port: IContractRepository (getContracts, getContractById, createContract, updateContract, deleteContract, getApprovals, createApproval)
+ * ID: numeric. Scoped by projectId. Has child entity: CommitmentApproval.
+ */
+export const ContractInfoSchema = z.object({
+  id: z.number().int().positive(),
+  projectId: z.string(),
+  contractNumber: z.string(),
+  vendorName: z.string(),
+  amount: z.number(),
+  status: z.string().describe('ContractStatus enum value'),
+  executedDate: z.string().describe('ISO-8601 date'),
+});
+
+/** Commitment Approval child entity — matches ICommitmentApproval from @hbc/models/contracts. */
+export const CommitmentApprovalSchema = z.object({
+  id: z.number().int().positive(),
+  contractId: z.number().int().positive(),
+  approverName: z.string(),
+  approvedAt: z.string().describe('ISO-8601 timestamp'),
+  status: z.string().describe('ApprovalStatus enum value'),
+  notes: z.string(),
+});
+```
+
+**File: `packages/models/src/api-schemas/risk-schema.ts`** — PROVISIONAL (D1, D6)
+
+```typescript
+import { z } from 'zod';
+
+/**
+ * Risk Cost Item — matches IRiskCostItem from @hbc/models/risk.
+ * Port: IRiskRepository (getItems, getItemById, createItem, updateItem, deleteItem, getManagement)
+ * ID: numeric. Scoped by projectId.
+ */
+export const RiskCostItemSchema = z.object({
+  id: z.number().int().positive(),
+  projectId: z.string(),
+  description: z.string(),
+  category: z.string().describe('RiskCategory enum value'),
+  probability: z.number().min(0).max(1),
+  impact: z.number().min(0).max(1),
+  riskValue: z.number().nonnegative().describe('probability × impact'),
+  status: z.string().describe('RiskStatus enum value'),
+});
+
+/** Risk Cost Management aggregate — matches IRiskCostManagement from @hbc/models/risk. */
+export const RiskCostManagementSchema = z.object({
+  projectId: z.string(),
+  totalRiskValue: z.number(),
+  highRiskCount: z.number().int().nonnegative(),
+});
+```
+
+**File: `packages/models/src/api-schemas/scorecard-schema.ts`** — PROVISIONAL (D1, D6)
+
+```typescript
+import { z } from 'zod';
+
+/**
+ * Go/No-Go Scorecard — matches IGoNoGoScorecard from @hbc/models/scorecard.
+ * Port: IScorecardRepository (getScorecards, getScorecardById, createScorecard, updateScorecard, deleteScorecard, getVersions)
+ * ID: numeric. Scoped by projectId. Has child entity: ScorecardVersion.
+ */
+export const GoNoGoScorecardSchema = z.object({
+  id: z.number().int().positive(),
+  projectId: z.string(),
+  evaluationDate: z.string().datetime(),
+  recommendation: z.string().describe('ScorecardRecommendation enum value'),
+  score: z.number(),
+  rationale: z.string(),
+});
+
+/** Scorecard Version child entity — matches IScorecardVersion from @hbc/models/scorecard. */
+export const ScorecardVersionSchema = z.object({
+  id: z.number().int().positive(),
+  scorecardId: z.number().int().positive(),
+  versionNumber: z.number().int().positive(),
+  createdAt: z.string().datetime(),
+  createdBy: z.string(),
+});
+```
+
+**File: `packages/models/src/api-schemas/pmp-schema.ts`** — PROVISIONAL (D1, D6)
+
+```typescript
+import { z } from 'zod';
+
+/**
+ * Project Management Plan — matches IProjectManagementPlan from @hbc/models/pmp.
+ * Port: IPmpRepository (getPlans, getPlanById, createPlan, updatePlan, deletePlan, getSignatures, createSignature)
+ * ID: numeric. Scoped by projectId. Has child entity: PMPSignature.
+ */
+export const ProjectManagementPlanSchema = z.object({
+  id: z.number().int().positive(),
+  projectId: z.string(),
+  documentName: z.string(),
+  status: z.string().describe('PmpStatus enum value'),
+  createdAt: z.string().datetime(),
+});
+
+/** PMP Signature child entity — matches IPMPSignature from @hbc/models/pmp. */
+export const PMPSignatureSchema = z.object({
+  id: z.number().int().positive(),
+  pmpId: z.number().int().positive(),
+  signerName: z.string(),
+  signedAt: z.string().datetime().optional(),
+  status: z.string().describe('SignatureStatus enum value'),
+});
+```
+
+#### Tier 3 — Auth (NOT CATALOGED, A9)
+
+Auth is **not a data-domain with CRUD**. It is a read-heavy capability lane with role assignment as the only write operation. Auth routes are not cataloged in C1 — they are deferred to C2 (Auth Hardening).
+
+**No Zod schema or test code until C2 publishes auth routes.**
+
+**Auth capability groups (reference only):**
+
+| Group | Port Method | Model Interface | Assumed Route (A9 — NOT confirmed) |
+|---|---|---|---|
+| Current User | `getCurrentUser()` | `ICurrentUser` | `GET /api/auth/me` |
+| Roles | `getRoles()`, `getRoleById(id)` | `IRole` | `GET /api/auth/roles`, `GET /api/auth/roles/:id` |
+| Permission Templates | `getPermissionTemplates()` | `IPermissionTemplate` | `GET /api/auth/permissions/templates` |
+| Role Assignment | `assignRole(userId, roleId)`, `removeRole(userId, roleId)` | void return | `POST/DELETE /api/auth/users/:userId/roles/:roleId` |
+
+**Model interfaces** (from `@hbc/models/auth`):
+- `ICurrentUser` — `{ id: string, displayName: string, email: string, roles: IRole[] }`
+- `IRole` — `{ id: string, name: string, permissions: string[] }`
+- `IPermissionTemplate` — `{ id: string, name: string, description: string, permissions: string[] }`
+
+When C2 publishes auth routes, create `packages/models/src/api-schemas/auth-schema.ts` with schemas matching these interfaces. Until then, no auth schema file exists.
+
+**File: `packages/models/src/api-schemas/index.ts`**
 
 ```typescript
 /**
- * Contract schemas for all domain types.
+ * API contract schemas for domain types.
  * Shared between frontend (@hbc/data-access) and backend (backend/functions).
  * Used by validation middleware and adapter tests.
  *
  * Each schema is a Zod validator that ensures runtime shape agreement.
  * Use z.safeParse(data) to validate; use z.infer<typeof Schema> for TypeScript types.
+ *
+ * NOTE: This directory is for Zod API contract schemas.
+ * The Contracts business domain models live in src/contracts/ — do not conflate the two.
+ *
+ * Tier 1 (FROZEN): shared, lead, project (CRUD), estimating (tracker)
+ * Tier 2 (PROVISIONAL): schedule, buyout, compliance, contract, risk, scorecard, pmp,
+ *   plus project (aggregate) and estimating (kickoff)
+ * Tier 3 (NOT CATALOGED): auth — NO export until C2 publishes routes (A9)
  */
 
+// Tier 1 — FROZEN
 export * from './shared-schema';
 export * from './lead-schema';
 export * from './project-schema';
 export * from './estimating-schema';
+
+// Tier 2 — PROVISIONAL (D1, D6)
 export * from './schedule-schema';
 export * from './buyout-schema';
 export * from './compliance-schema';
@@ -457,7 +722,8 @@ export * from './contract-schema';
 export * from './risk-schema';
 export * from './scorecard-schema';
 export * from './pmp-schema';
-export * from './auth-schema';
+
+// Tier 3 — Auth: no export. See auth capability-lane description in plan.
 ```
 
 **File: `packages/models/src/index.ts`** (Update)
@@ -466,18 +732,19 @@ export * from './auth-schema';
 // Existing exports...
 
 /**
- * Contract schemas for shape validation.
+ * API contract schemas for shape validation.
  * Used by backend validation middleware and frontend adapter tests.
  */
-export * as contracts from './contracts';
+export * as apiSchemas from './api-schemas';
 ```
 
 **Task 1 Tests:**
 
-**File: `packages/models/src/contracts/shared-schema.test.ts`**
+**File: `packages/models/src/api-schemas/shared-schema.test.ts`**
 
 ```typescript
 import { describe, it, expect } from 'vitest';
+import { z } from 'zod';
 import { ErrorEnvelopeSchema, createPagedSchema } from './shared-schema';
 
 describe('ErrorEnvelopeSchema', () => {
@@ -493,23 +760,21 @@ describe('ErrorEnvelopeSchema', () => {
     }
   });
 
-  it('error envelope with requestId passes validation', () => {
-    const withRequestId = {
+  it('error envelope with requestId and details passes validation', () => {
+    const withDetails = {
       error: 'Validation failed',
       code: 'VALIDATION_ERROR',
       requestId: 'req-12345',
       details: [
-        { field: 'email', message: 'Invalid email format' },
+        { field: 'title', message: 'Title is required' },
       ],
     };
-    const result = ErrorEnvelopeSchema.safeParse(withRequestId);
+    const result = ErrorEnvelopeSchema.safeParse(withDetails);
     expect(result.success).toBe(true);
   });
 
   it('missing error message fails validation', () => {
-    const invalid = {
-      code: 'NOT_FOUND',
-    };
+    const invalid = { code: 'NOT_FOUND' };
     const result = ErrorEnvelopeSchema.safeParse(invalid);
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -520,49 +785,44 @@ describe('ErrorEnvelopeSchema', () => {
   });
 
   it('missing code fails validation', () => {
-    const invalid = {
-      error: 'Something went wrong',
-    };
+    const invalid = { error: 'Something went wrong' };
     const result = ErrorEnvelopeSchema.safeParse(invalid);
     expect(result.success).toBe(false);
   });
 });
 
 describe('createPagedSchema', () => {
-  it('valid paged result with array passes validation', () => {
-    const StringItemSchema = StringSchema;
-    const PagedStringSchema = createPagedSchema(StringItemSchema);
+  it('valid paged result passes validation', () => {
+    const PagedStringSchema = createPagedSchema(z.string());
 
     const validPaged = {
-      data: ['item1', 'item2'],
+      items: ['item1', 'item2'],
       total: 2,
       page: 1,
-      pageSize: 20,
+      pageSize: 25,
     };
     const result = PagedStringSchema.safeParse(validPaged);
     expect(result.success).toBe(true);
   });
 
   it('page must be positive integer', () => {
-    const SimpleSchema = z.string();
-    const PagedSchema = createPagedSchema(SimpleSchema);
+    const PagedSchema = createPagedSchema(z.string());
 
     const invalidPage = {
-      data: [],
+      items: [],
       total: 0,
       page: 0,
-      pageSize: 20,
+      pageSize: 25,
     };
     const result = PagedSchema.safeParse(invalidPage);
     expect(result.success).toBe(false);
   });
 
   it('pageSize must be positive integer', () => {
-    const SimpleSchema = z.string();
-    const PagedSchema = createPagedSchema(SimpleSchema);
+    const PagedSchema = createPagedSchema(z.string());
 
     const invalidPageSize = {
-      data: [],
+      items: [],
       total: 0,
       page: 1,
       pageSize: 0,
@@ -572,14 +832,13 @@ describe('createPagedSchema', () => {
   });
 
   it('total cannot be negative', () => {
-    const SimpleSchema = z.string();
-    const PagedSchema = createPagedSchema(SimpleSchema);
+    const PagedSchema = createPagedSchema(z.string());
 
     const negativeTotal = {
-      data: [],
+      items: [],
       total: -1,
       page: 1,
-      pageSize: 20,
+      pageSize: 25,
     };
     const result = PagedSchema.safeParse(negativeTotal);
     expect(result.success).toBe(false);
@@ -587,23 +846,20 @@ describe('createPagedSchema', () => {
 });
 ```
 
-**File: `packages/models/src/contracts/lead-schema.test.ts`**
+**File: `packages/models/src/api-schemas/lead-schema.test.ts`**
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { LeadSchema, PagedLeadsSchema, CreateLeadRequestSchema } from './lead-schema';
+import { LeadSchema, CreateLeadRequestSchema, LeadSearchQuerySchema } from './lead-schema';
+import { createPagedSchema } from './shared-schema';
 
 describe('LeadSchema', () => {
   const validLead = {
-    id: '550e8400-e29b-41d4-a716-446655440000',
-    name: 'Acme Corp',
-    email: 'contact@acme.com',
-    phone: '555-1234',
-    status: 'qualified' as const,
-    estimatedValue: 50000,
-    projectId: '660e8400-e29b-41d4-a716-446655440001',
-    source: 'inbound' as const,
-    notes: 'High-value prospect',
+    id: 1,
+    title: 'Highway Bridge Replacement',
+    stage: 'Qualifying' as const,
+    clientName: 'ACME Construction',
+    estimatedValue: 2500000,
     createdAt: '2026-03-16T10:00:00Z',
     updatedAt: '2026-03-16T10:00:00Z',
   };
@@ -612,154 +868,139 @@ describe('LeadSchema', () => {
     const result = LeadSchema.safeParse(validLead);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.name).toBe('Acme Corp');
-      expect(result.data.status).toBe('qualified');
+      expect(result.data.title).toBe('Highway Bridge Replacement');
+      expect(result.data.stage).toBe('Qualifying');
     }
   });
 
-  it('lead with minimal fields passes validation', () => {
-    const minimal = {
-      id: '550e8400-e29b-41d4-a716-446655440000',
-      name: 'Minimal Lead',
-      status: 'prospect' as const,
-      createdAt: '2026-03-16T10:00:00Z',
-      updatedAt: '2026-03-16T10:00:00Z',
-    };
-    const result = LeadSchema.safeParse(minimal);
-    expect(result.success).toBe(true);
+  it('id must be a positive integer (not uuid)', () => {
+    const invalid = { ...validLead, id: 'not-a-number' };
+    const result = LeadSchema.safeParse(invalid);
+    expect(result.success).toBe(false);
   });
 
-  it('missing name fails validation', () => {
-    const { name, ...invalid } = validLead;
+  it('zero id fails validation', () => {
+    const invalid = { ...validLead, id: 0 };
+    const result = LeadSchema.safeParse(invalid);
+    expect(result.success).toBe(false);
+  });
+
+  it('missing title fails validation', () => {
+    const { title, ...invalid } = validLead;
     const result = LeadSchema.safeParse(invalid);
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues).toContainEqual(
-        expect.objectContaining({ path: ['name'] })
+        expect.objectContaining({ path: ['title'] })
       );
     }
   });
 
-  it('invalid status fails validation', () => {
-    const invalid = {
-      ...validLead,
-      status: 'invalid_status',
-    };
+  it('invalid stage fails validation', () => {
+    const invalid = { ...validLead, stage: 'prospect' };
     const result = LeadSchema.safeParse(invalid);
     expect(result.success).toBe(false);
   });
 
-  it('invalid email fails validation', () => {
-    const invalid = {
-      ...validLead,
-      email: 'not-an-email',
-    };
-    const result = LeadSchema.safeParse(invalid);
-    expect(result.success).toBe(false);
-  });
-
-  it('invalid uuid id fails validation', () => {
-    const invalid = {
-      ...validLead,
-      id: 'not-a-uuid',
-    };
-    const result = LeadSchema.safeParse(invalid);
-    expect(result.success).toBe(false);
+  it('all LeadStage values are accepted', () => {
+    const stages = ['Identified', 'Qualifying', 'BidDecision', 'Bidding', 'Awarded', 'Lost', 'Declined'];
+    for (const stage of stages) {
+      const result = LeadSchema.safeParse({ ...validLead, stage });
+      expect(result.success).toBe(true);
+    }
   });
 
   it('negative estimatedValue fails validation', () => {
-    const invalid = {
-      ...validLead,
-      estimatedValue: -100,
-    };
+    const invalid = { ...validLead, estimatedValue: -100 };
     const result = LeadSchema.safeParse(invalid);
     expect(result.success).toBe(false);
   });
 
   it('invalid datetime fails validation', () => {
-    const invalid = {
-      ...validLead,
-      createdAt: 'not-a-datetime',
-    };
+    const invalid = { ...validLead, createdAt: 'not-a-datetime' };
     const result = LeadSchema.safeParse(invalid);
     expect(result.success).toBe(false);
   });
 });
 
-describe('PagedLeadsSchema', () => {
-  const validPaged = {
-    data: [
-      {
-        id: '550e8400-e29b-41d4-a716-446655440000',
-        name: 'Lead 1',
-        status: 'prospect' as const,
-        createdAt: '2026-03-16T10:00:00Z',
-        updatedAt: '2026-03-16T10:00:00Z',
-      },
-    ],
-    total: 1,
-    page: 1,
-    pageSize: 20,
-  };
+describe('Paged Leads (via createPagedSchema)', () => {
+  const PagedLeadsSchema = createPagedSchema(LeadSchema);
 
   it('valid paged leads response passes validation', () => {
+    const validPaged = {
+      items: [
+        {
+          id: 1,
+          title: 'Lead 1',
+          stage: 'Identified' as const,
+          clientName: 'Client A',
+          estimatedValue: 500000,
+          createdAt: '2026-03-16T10:00:00Z',
+          updatedAt: '2026-03-16T10:00:00Z',
+        },
+      ],
+      total: 1,
+      page: 1,
+      pageSize: 25,
+    };
     const result = PagedLeadsSchema.safeParse(validPaged);
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.total).toBe(1);
-      expect(result.data.data).toHaveLength(1);
+      expect(result.data.items).toHaveLength(1);
     }
   });
 
   it('empty paged leads response passes validation', () => {
-    const empty = {
-      data: [],
-      total: 0,
-      page: 1,
-      pageSize: 20,
-    };
+    const empty = { items: [], total: 0, page: 1, pageSize: 25 };
     const result = PagedLeadsSchema.safeParse(empty);
     expect(result.success).toBe(true);
   });
 });
 
 describe('CreateLeadRequestSchema', () => {
-  const validRequest = {
-    name: 'New Lead',
-    email: 'new@example.com',
-    status: 'prospect' as const,
-  };
-
   it('valid create request passes validation', () => {
+    const validRequest = {
+      title: 'New Highway Project',
+      stage: 'Identified' as const,
+      clientName: 'State DOT',
+      estimatedValue: 10000000,
+    };
     const result = CreateLeadRequestSchema.safeParse(validRequest);
     expect(result.success).toBe(true);
   });
 
-  it('request with id fails validation (id should not be in create)', () => {
-    const invalid = {
-      ...validRequest,
-      id: '550e8400-e29b-41d4-a716-446655440000',
+  it('missing required field fails validation', () => {
+    const incomplete = {
+      title: 'Incomplete Lead',
+      stage: 'Identified' as const,
+      // missing clientName and estimatedValue
     };
-    const result = CreateLeadRequestSchema.safeParse(invalid);
-    // Should succeed if id is just extra field, or fail if schema is strict
-    // This depends on Zod's strictness; safeParse typically ignores extra fields
+    const result = CreateLeadRequestSchema.safeParse(incomplete);
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('LeadSearchQuerySchema', () => {
+  it('valid search query passes validation', () => {
+    const query = { q: 'bridge', page: 1, pageSize: 25 };
+    const result = LeadSearchQuerySchema.safeParse(query);
     expect(result.success).toBe(true);
   });
 
-  it('minimal create request (only required fields) passes validation', () => {
-    const minimal = {
-      name: 'Minimal',
-      status: 'prospect' as const,
-    };
-    const result = CreateLeadRequestSchema.safeParse(minimal);
-    expect(result.success).toBe(true);
+  it('empty search string fails validation', () => {
+    const query = { q: '', page: 1, pageSize: 25 };
+    const result = LeadSearchQuerySchema.safeParse(query);
+    expect(result.success).toBe(false);
   });
 });
 ```
 
-(Implement project-schema.test.ts and estimating-schema.test.ts following the same pattern.)
+(Implement project-schema.test.ts and estimating-schema.test.ts following the same pattern, using `ActiveProjectSchema` with `id: 'uuid'`, `name`, `number`, `status`, `startDate`, `endDate` and `EstimatingTrackerSchema` with `id: 1`, `projectId`, `bidNumber`, `status`, `dueDate`, `createdAt`, `updatedAt` respectively.)
 
 ### Task 2: Add Zod Dependency to `@hbc/models`
+
+**Status:** **TARGET** — prerequisite for Task 1
 
 **Files to Modify:**
 - `packages/models/package.json`
@@ -794,6 +1035,8 @@ Expected: All tests pass (green checkmark).
 
 ### Task 3: Create MSW Server Setup for `@hbc/data-access` Tests
 
+**Status:** **TARGET** — implementable after vitest setup
+
 **Objective:** Set up Mock Service Worker (MSW) to intercept HTTP requests in frontend tests. MSW handlers simulate backend responses; contract tests verify the adapter correctly parses those responses.
 
 **Files to Create:**
@@ -807,82 +1050,63 @@ Expected: All tests pass (green checkmark).
 **File: `packages/data-access/src/test-utils/msw-fixtures.ts`**
 
 ```typescript
-import type { Lead, Project, EstimatingRecord } from '@hbc/models/contracts';
+import type { Lead } from '@hbc/models/api-schemas';
+import type { ActiveProject } from '@hbc/models/api-schemas';
+import type { EstimatingTracker } from '@hbc/models/api-schemas';
 
 /**
  * Fixture data for testing.
- * All fixtures must conform to their respective Zod schemas.
+ * All fixtures conform to their respective Zod schemas and match @hbc/models interfaces.
  */
 
 export const LEAD_FIXTURES: Lead[] = [
   {
-    id: '550e8400-e29b-41d4-a716-446655440000',
-    name: 'Acme Corporation',
-    email: 'contact@acme.com',
-    phone: '555-0100',
-    status: 'qualified',
-    estimatedValue: 150000,
-    projectId: '660e8400-e29b-41d4-a716-446655440001',
-    source: 'inbound',
-    notes: 'High-value prospect, decision maker identified',
+    id: 1,
+    title: 'Highway Bridge Replacement — I-95 Corridor',
+    stage: 'Qualifying',
+    clientName: 'ACME Construction',
+    estimatedValue: 2500000,
     createdAt: '2026-01-15T09:00:00Z',
     updatedAt: '2026-03-16T14:30:00Z',
   },
   {
-    id: '550e8400-e29b-41d4-a716-446655440001',
-    name: 'TechStart Inc',
-    email: 'sales@techstart.io',
-    phone: '555-0101',
-    status: 'proposal',
-    estimatedValue: 75000,
-    projectId: undefined,
-    source: 'referral',
-    notes: 'Proposal sent, awaiting feedback',
+    id: 2,
+    title: 'Municipal Water Treatment Expansion',
+    stage: 'Bidding',
+    clientName: 'Riverside Utilities',
+    estimatedValue: 8500000,
     createdAt: '2026-02-01T10:15:00Z',
     updatedAt: '2026-03-10T11:45:00Z',
   },
   {
-    id: '550e8400-e29b-41d4-a716-446655440002',
-    name: 'Early Prospect',
-    email: undefined,
-    phone: undefined,
-    status: 'prospect',
-    estimatedValue: undefined,
-    projectId: undefined,
-    source: 'trade_show',
-    notes: undefined,
+    id: 3,
+    title: 'Commercial Office Renovation',
+    stage: 'Identified',
+    clientName: 'Downtown Properties LLC',
+    estimatedValue: 750000,
     createdAt: '2026-03-15T16:20:00Z',
     updatedAt: '2026-03-15T16:20:00Z',
   },
 ];
 
-export const PROJECT_FIXTURES: Project[] = [
+export const PROJECT_FIXTURES: ActiveProject[] = [
   {
     id: '660e8400-e29b-41d4-a716-446655440001',
-    name: 'Acme Website Redesign',
-    description: 'Complete redesign of public-facing website',
-    status: 'active',
-    leadId: '550e8400-e29b-41d4-a716-446655440000',
+    name: 'Highway Bridge Replacement',
+    number: 'PRJ-HBR001',
+    status: 'Active',
     startDate: '2026-02-01T00:00:00Z',
-    endDate: '2026-06-30T00:00:00Z',
-    estimatedBudget: 150000,
-    actualBudget: 85000,
-    owner: 'alice@hbi.com',
-    createdAt: '2026-01-20T08:00:00Z',
-    updatedAt: '2026-03-16T10:00:00Z',
+    endDate: '2026-12-31T00:00:00Z',
   },
 ];
 
-export const ESTIMATING_FIXTURES: EstimatingRecord[] = [
+export const ESTIMATING_FIXTURES: EstimatingTracker[] = [
   {
-    id: '770e8400-e29b-41d4-a716-446655440001',
+    id: 1,
     projectId: '660e8400-e29b-41d4-a716-446655440001',
-    description: 'Frontend development - landing page',
-    estimatedHours: 120,
-    estimatedCost: 12000,
-    actualHours: 100,
-    actualCost: 10000,
-    status: 'in_progress',
+    bidNumber: 'BID-2026-001',
+    status: 'InProgress',
+    dueDate: '2026-04-15T17:00:00Z',
     createdAt: '2026-02-05T09:00:00Z',
     updatedAt: '2026-03-16T09:00:00Z',
   },
@@ -890,17 +1114,18 @@ export const ESTIMATING_FIXTURES: EstimatingRecord[] = [
 
 /**
  * Helper to wrap items in a paged response.
+ * Matches IPagedResult<T> shape: { items, total, page, pageSize }
  */
 export function makePagedResponse<T>(
-  items: T[],
+  allItems: T[],
   page: number,
   pageSize: number
-): { data: T[]; total: number; page: number; pageSize: number } {
+): { items: T[]; total: number; page: number; pageSize: number } {
   const startIdx = (page - 1) * pageSize;
   const endIdx = startIdx + pageSize;
   return {
-    data: items.slice(startIdx, endIdx),
-    total: items.length,
+    items: allItems.slice(startIdx, endIdx),
+    total: allItems.length,
     page,
     pageSize,
   };
@@ -911,65 +1136,48 @@ export function makePagedResponse<T>(
 
 ```typescript
 import { http, HttpResponse } from 'msw';
-import type { Lead, Project, EstimatingRecord } from '@hbc/models/contracts';
-import { LeadSchema, ProjectSchema, EstimatingRecordSchema } from '@hbc/models/contracts';
+import type { Lead } from '@hbc/models/api-schemas';
+import { CreateLeadRequestSchema, CreateProjectRequestSchema, CreateTrackerRequestSchema } from '@hbc/models/api-schemas';
 import { LEAD_FIXTURES, PROJECT_FIXTURES, ESTIMATING_FIXTURES, makePagedResponse } from './msw-fixtures';
 
 const API_BASE = 'http://localhost:7071/api';
 
 /**
  * MSW handlers for frontend tests.
- * These simulate backend Azure Functions responses.
- * All responses must conform to their Zod schemas (validated by frontend tests).
+ * Simulate backend Azure Functions responses.
+ * All responses conform to Zod schemas and match @hbc/models interfaces.
+ *
+ * NOTE: Leads use numeric IDs. Projects use UUID string IDs. Estimating trackers use numeric IDs.
  */
 
+let nextLeadId = 100;
+
 export const leadsHandlers = [
-  /**
-   * GET /api/leads?page=X&pageSize=Y
-   * Returns paged list of leads.
-   */
+  /** GET /api/leads — paged list */
   http.get(`${API_BASE}/leads`, ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') ?? 1);
-    const pageSize = Number(url.searchParams.get('pageSize') ?? 20);
-
+    const pageSize = Number(url.searchParams.get('pageSize') ?? 25);
     const paged = makePagedResponse(LEAD_FIXTURES, page, pageSize);
     return HttpResponse.json(paged, { status: 200 });
   }),
 
-  /**
-   * GET /api/leads/:id
-   * Returns single lead or 404.
-   */
+  /** GET /api/leads/:id — single lead (numeric ID) */
   http.get(`${API_BASE}/leads/:id`, ({ params }) => {
-    const lead = LEAD_FIXTURES.find((l) => l.id === params.id);
+    const lead = LEAD_FIXTURES.find((l) => l.id === Number(params.id));
     if (!lead) {
       return HttpResponse.json(
-        {
-          error: 'Lead not found',
-          code: 'NOT_FOUND',
-          requestId: 'req-404-001',
-        },
+        { error: 'Lead not found', code: 'NOT_FOUND', requestId: 'req-404-001' },
         { status: 404 }
       );
     }
-    return HttpResponse.json({ data: lead }, { status: 200 });
+    return HttpResponse.json(lead, { status: 200 });
   }),
 
-  /**
-   * POST /api/leads
-   * Create a new lead.
-   */
+  /** POST /api/leads — create lead */
   http.post(`${API_BASE}/leads`, async ({ request }) => {
     const body = await request.json();
-
-    // Validate request against schema
-    const validation = LeadSchema.omit({
-      id: true,
-      createdAt: true,
-      updatedAt: true,
-    }).safeParse(body);
-
+    const validation = CreateLeadRequestSchema.safeParse(body);
     if (!validation.success) {
       return HttpResponse.json(
         {
@@ -983,62 +1191,33 @@ export const leadsHandlers = [
         { status: 422 }
       );
     }
-
-    // Create new lead with id and timestamps
     const newLead: Lead = {
-      ...(validation.data as Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>),
-      id: crypto.randomUUID(),
+      ...validation.data,
+      id: nextLeadId++,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-
-    return HttpResponse.json({ data: newLead }, { status: 201 });
+    return HttpResponse.json(newLead, { status: 201 });
   }),
 
-  /**
-   * PUT /api/leads/:id
-   * Update an existing lead.
-   */
+  /** PUT /api/leads/:id — update lead */
   http.put(`${API_BASE}/leads/:id`, async ({ params, request }) => {
     const body = await request.json();
-    const lead = LEAD_FIXTURES.find((l) => l.id === params.id);
+    const lead = LEAD_FIXTURES.find((l) => l.id === Number(params.id));
     if (!lead) {
-      return HttpResponse.json(
-        {
-          error: 'Lead not found',
-          code: 'NOT_FOUND',
-        },
-        { status: 404 }
-      );
+      return HttpResponse.json({ error: 'Lead not found', code: 'NOT_FOUND' }, { status: 404 });
     }
-
-    const updated: Lead = {
-      ...lead,
-      ...body,
-      id: lead.id,
-      createdAt: lead.createdAt,
-      updatedAt: new Date().toISOString(),
-    };
-
-    return HttpResponse.json({ data: updated }, { status: 200 });
+    const updated: Lead = { ...lead, ...body, id: lead.id, updatedAt: new Date().toISOString() };
+    return HttpResponse.json(updated, { status: 200 });
   }),
 
-  /**
-   * DELETE /api/leads/:id
-   * Delete a lead.
-   */
+  /** DELETE /api/leads/:id */
   http.delete(`${API_BASE}/leads/:id`, ({ params }) => {
-    const lead = LEAD_FIXTURES.find((l) => l.id === params.id);
+    const lead = LEAD_FIXTURES.find((l) => l.id === Number(params.id));
     if (!lead) {
-      return HttpResponse.json(
-        {
-          error: 'Lead not found',
-          code: 'NOT_FOUND',
-        },
-        { status: 404 }
-      );
+      return HttpResponse.json({ error: 'Lead not found', code: 'NOT_FOUND' }, { status: 404 });
     }
-    return HttpResponse.json({ status: 204 });
+    return new HttpResponse(null, { status: 204 });
   }),
 ];
 
@@ -1046,8 +1225,7 @@ export const projectsHandlers = [
   http.get(`${API_BASE}/projects`, ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') ?? 1);
-    const pageSize = Number(url.searchParams.get('pageSize') ?? 20);
-
+    const pageSize = Number(url.searchParams.get('pageSize') ?? 25);
     const paged = makePagedResponse(PROJECT_FIXTURES, page, pageSize);
     return HttpResponse.json(paged, { status: 200 });
   }),
@@ -1055,48 +1233,23 @@ export const projectsHandlers = [
   http.get(`${API_BASE}/projects/:id`, ({ params }) => {
     const project = PROJECT_FIXTURES.find((p) => p.id === params.id);
     if (!project) {
-      return HttpResponse.json(
-        {
-          error: 'Project not found',
-          code: 'NOT_FOUND',
-        },
-        { status: 404 }
-      );
+      return HttpResponse.json({ error: 'Project not found', code: 'NOT_FOUND' }, { status: 404 });
     }
-    return HttpResponse.json({ data: project }, { status: 200 });
+    return HttpResponse.json(project, { status: 200 });
   }),
 
   http.post(`${API_BASE}/projects`, async ({ request }) => {
     const body = await request.json();
-
-    const validation = ProjectSchema.omit({
-      id: true,
-      createdAt: true,
-      updatedAt: true,
-    }).safeParse(body);
-
+    const validation = CreateProjectRequestSchema.safeParse(body);
     if (!validation.success) {
       return HttpResponse.json(
-        {
-          error: 'Validation failed',
-          code: 'VALIDATION_ERROR',
-          details: validation.error.issues.map((issue) => ({
-            field: issue.path.join('.'),
-            message: issue.message,
-          })),
-        },
+        { error: 'Validation failed', code: 'VALIDATION_ERROR',
+          details: validation.error.issues.map((i) => ({ field: i.path.join('.'), message: i.message })) },
         { status: 422 }
       );
     }
-
-    const newProject: Project = {
-      ...(validation.data as Omit<Project, 'id' | 'createdAt' | 'updatedAt'>),
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    return HttpResponse.json({ data: newProject }, { status: 201 });
+    const newProject = { ...validation.data, id: crypto.randomUUID() };
+    return HttpResponse.json(newProject, { status: 201 });
   }),
 ];
 
@@ -1104,83 +1257,48 @@ export const estimatingHandlers = [
   http.get(`${API_BASE}/estimating`, ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') ?? 1);
-    const pageSize = Number(url.searchParams.get('pageSize') ?? 20);
-
+    const pageSize = Number(url.searchParams.get('pageSize') ?? 25);
     const paged = makePagedResponse(ESTIMATING_FIXTURES, page, pageSize);
     return HttpResponse.json(paged, { status: 200 });
   }),
 
   http.get(`${API_BASE}/estimating/:id`, ({ params }) => {
-    const record = ESTIMATING_FIXTURES.find((r) => r.id === params.id);
+    const record = ESTIMATING_FIXTURES.find((r) => r.id === Number(params.id));
     if (!record) {
-      return HttpResponse.json(
-        {
-          error: 'Estimating record not found',
-          code: 'NOT_FOUND',
-        },
-        { status: 404 }
-      );
+      return HttpResponse.json({ error: 'Tracker not found', code: 'NOT_FOUND' }, { status: 404 });
     }
-    return HttpResponse.json({ data: record }, { status: 200 });
+    return HttpResponse.json(record, { status: 200 });
   }),
 
   http.post(`${API_BASE}/estimating`, async ({ request }) => {
     const body = await request.json();
-
-    const validation = EstimatingRecordSchema.omit({
-      id: true,
-      createdAt: true,
-      updatedAt: true,
-      actualHours: true,
-      actualCost: true,
-    }).safeParse(body);
-
+    const validation = CreateTrackerRequestSchema.safeParse(body);
     if (!validation.success) {
       return HttpResponse.json(
-        {
-          error: 'Validation failed',
-          code: 'VALIDATION_ERROR',
-          details: validation.error.issues.map((issue) => ({
-            field: issue.path.join('.'),
-            message: issue.message,
-          })),
-        },
+        { error: 'Validation failed', code: 'VALIDATION_ERROR',
+          details: validation.error.issues.map((i) => ({ field: i.path.join('.'), message: i.message })) },
         { status: 422 }
       );
     }
-
-    const newRecord: EstimatingRecord = {
-      ...(validation.data as Omit<EstimatingRecord, 'id' | 'createdAt' | 'updatedAt' | 'actualHours' | 'actualCost'>),
-      id: crypto.randomUUID(),
+    const newTracker = {
+      ...validation.data,
+      id: 100,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      actualHours: undefined,
-      actualCost: undefined,
     };
-
-    return HttpResponse.json({ data: newRecord }, { status: 201 });
+    return HttpResponse.json(newTracker, { status: 201 });
   }),
 ];
 
 /**
- * Default handlers for all 11 domains.
- * Initial set includes leads, projects, and estimating.
- * Remaining 8 domains (schedule, buyout, compliance, contracts, risk, scorecard, pmp, auth)
- * follow the exact same pattern as leadsHandlers.
- * Extended by specific tests via server.use().
+ * Default handlers for the three Tier 1 (FROZEN) domains.
+ * Tier 2 (PROVISIONAL) domain handlers should be added as routes are confirmed.
+ * Tier 3 (Auth) handlers require C2 to publish route specs first.
  */
 export const defaultHandlers = [
   ...leadsHandlers,
   ...projectsHandlers,
   ...estimatingHandlers,
-  ...scheduleHandlers,
-  ...buyoutHandlers,
-  ...complianceHandlers,
-  ...contractsHandlers,
-  ...riskHandlers,
-  ...scorecardHandlers,
-  ...pmpHandlers,
-  ...authHandlers,
 ];
 ```
 
@@ -1206,6 +1324,7 @@ export const server = setupServer(...defaultHandlers);
 /**
  * Test utilities for @hbc/data-access.
  * Exports MSW server, handlers, and fixtures for use in contract tests.
+ * Only Tier 1 (FROZEN) domain handlers and fixtures are exported.
  */
 
 export { server } from './msw-server';
@@ -1214,27 +1333,11 @@ export {
   leadsHandlers,
   projectsHandlers,
   estimatingHandlers,
-  scheduleHandlers,
-  buyoutHandlers,
-  complianceHandlers,
-  contractsHandlers,
-  riskHandlers,
-  scorecardHandlers,
-  pmpHandlers,
-  authHandlers,
 } from './msw-handlers';
 export {
   LEAD_FIXTURES,
   PROJECT_FIXTURES,
   ESTIMATING_FIXTURES,
-  SCHEDULE_FIXTURES,
-  BUYOUT_FIXTURES,
-  COMPLIANCE_FIXTURES,
-  CONTRACTS_FIXTURES,
-  RISK_FIXTURES,
-  SCORECARD_FIXTURES,
-  PMP_FIXTURES,
-  AUTH_FIXTURES,
   makePagedResponse,
 } from './msw-fixtures';
 ```
@@ -1277,6 +1380,8 @@ Expected: Tests pass.
 
 ### Task 4: Contract Test — Frontend Adapter vs Backend Shape
 
+**Status:** **BLOCKED** on B1 — `ProxyLeadRepository` does not exist; proxy adapters throw `AdapterNotImplementedError`
+
 **Objective:** Prove that the ProxyLeadRepository adapter correctly parses backend responses according to LeadSchema.
 
 **Files to Create:**
@@ -1290,13 +1395,16 @@ This is the critical contract test. It verifies that the adapter's response type
 
 ```typescript
 import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
-import { LeadSchema, PagedLeadsSchema, CreateLeadRequestSchema } from '@hbc/models/contracts';
+import { LeadSchema, CreateLeadRequestSchema, createPagedSchema } from '@hbc/models/api-schemas';
 import { ProxyLeadRepository } from './lead-repository';
 import { createHttpClient } from '../../http-client';
 import { server } from '../../test-utils';
 
 /**
  * Contract tests for ProxyLeadRepository.
+ *
+ * BLOCKED: This test requires B1 to deliver ProxyLeadRepository.
+ * Currently, proxy adapters throw AdapterNotImplementedError.
  *
  * These tests verify that:
  * 1. The backend (via MSW) returns shapes that conform to Zod schemas
@@ -1319,12 +1427,13 @@ describe('ProxyLeadRepository Contract Tests', () => {
   afterAll(() => server.close());
 
   describe('getAll()', () => {
-    it('response conforms to PagedLeadsSchema', async () => {
+    it('response conforms to paged LeadSchema', async () => {
       const result = await repository.getAll({ page: 1, pageSize: 20 });
 
       // Assert response matches paged schema
-      const parsed = PagedLeadsSchema.safeParse({
-        data: result.data,
+      const PagedLeads = createPagedSchema(LeadSchema);
+      const parsed = PagedLeads.safeParse({
+        items: result.items,
         total: result.total,
         page: result.page,
         pageSize: result.pageSize,
@@ -1334,14 +1443,14 @@ describe('ProxyLeadRepository Contract Tests', () => {
       if (parsed.success) {
         expect(parsed.data.page).toBe(1);
         expect(parsed.data.pageSize).toBe(20);
-        expect(Array.isArray(parsed.data.data)).toBe(true);
+        expect(Array.isArray(parsed.data.items)).toBe(true);
       }
     });
 
     it('each item in data array conforms to LeadSchema', async () => {
       const result = await repository.getAll({ page: 1, pageSize: 10 });
 
-      for (const lead of result.data) {
+      for (const lead of result.items) {
         const parsed = LeadSchema.safeParse(lead);
         expect(parsed.success).toBe(true);
         if (parsed.success) {
@@ -1357,30 +1466,30 @@ describe('ProxyLeadRepository Contract Tests', () => {
 
       expect(result.pageSize).toBe(5);
       expect(result.page).toBe(1);
-      expect(result.data.length).toBeLessThanOrEqual(5);
+      expect(result.items.length).toBeLessThanOrEqual(5);
     });
   });
 
   describe('getById()', () => {
     it('single lead conforms to LeadSchema', async () => {
-      const result = await repository.getById('550e8400-e29b-41d4-a716-446655440000');
+      const result = await repository.getById(1);
 
       const parsed = LeadSchema.safeParse(result);
       expect(parsed.success).toBe(true);
       if (parsed.success) {
-        expect(parsed.data.id).toBe('550e8400-e29b-41d4-a716-446655440000');
-        expect(parsed.data.name).toBe('Acme Corporation');
+        expect(parsed.data.id).toBe(1);
+        expect(parsed.data.title).toBe('Highway Bridge Replacement — I-95 Corridor');
       }
     });
 
     it('unknown id returns null', async () => {
-      const result = await repository.getById('550e8400-e29b-41d4-a716-999999999999');
+      const result = await repository.getById(99999);
 
       expect(result).toBeNull();
     });
 
     it('all required fields present', async () => {
-      const result = await repository.getById('550e8400-e29b-41d4-a716-446655440000');
+      const result = await repository.getById(1);
 
       expect(result).not.toBeNull();
       if (result) {
@@ -1396,9 +1505,10 @@ describe('ProxyLeadRepository Contract Tests', () => {
   describe('create()', () => {
     it('response conforms to LeadSchema', async () => {
       const request = {
-        name: 'New Lead Inc',
-        email: 'contact@newlead.com',
-        status: 'prospect' as const,
+        title: 'New Highway Project',
+        stage: 'Identified' as const,
+        clientName: 'State DOT',
+        estimatedValue: 5000000,
       };
 
       const result = await repository.create(request);
@@ -1414,8 +1524,10 @@ describe('ProxyLeadRepository Contract Tests', () => {
 
     it('created lead has assigned id', async () => {
       const request = {
-        name: 'Another New Lead',
-        status: 'prospect' as const,
+        title: 'Another New Lead',
+        stage: 'Identified' as const,
+        clientName: 'Another Client',
+        estimatedValue: 1000000,
       };
 
       const result = await repository.create(request);
@@ -1428,8 +1540,10 @@ describe('ProxyLeadRepository Contract Tests', () => {
 
     it('created lead has timestamps', async () => {
       const request = {
-        name: 'Timestamped Lead',
-        status: 'prospect' as const,
+        title: 'Timestamped Lead',
+        stage: 'Identified' as const,
+        clientName: 'Timestamp Client',
+        estimatedValue: 500000,
       };
 
       const result = await repository.create(request);
@@ -1443,8 +1557,10 @@ describe('ProxyLeadRepository Contract Tests', () => {
 
     it('invalid request fails with 422', async () => {
       const invalidRequest = {
-        name: '',  // Empty name violates schema
-        status: 'prospect' as const,
+        title: '',  // Empty title violates schema
+        stage: 'Identified' as const,
+        clientName: 'Test',
+        estimatedValue: 0,
       };
 
       // Repository should throw or return error; contract test expects rejection
@@ -1454,10 +1570,10 @@ describe('ProxyLeadRepository Contract Tests', () => {
 
   describe('update()', () => {
     it('updated lead conforms to LeadSchema', async () => {
-      const leadId = '550e8400-e29b-41d4-a716-446655440000';
+      const leadId = 1;
       const updates = {
-        status: 'qualified' as const,
-        estimatedValue: 200000,
+        stage: 'Bidding' as const,
+        estimatedValue: 3000000,
       };
 
       const result = await repository.update(leadId, updates);
@@ -1467,8 +1583,8 @@ describe('ProxyLeadRepository Contract Tests', () => {
     });
 
     it('unknown lead returns null', async () => {
-      const updates = { status: 'qualified' as const };
-      const result = await repository.update('550e8400-e29b-41d4-a716-999999999999', updates);
+      const updates = { stage: 'Bidding' as const };
+      const result = await repository.update(99999, updates);
 
       expect(result).toBeNull();
     });
@@ -1476,13 +1592,13 @@ describe('ProxyLeadRepository Contract Tests', () => {
 
   describe('delete()', () => {
     it('delete known lead succeeds', async () => {
-      const result = await repository.delete('550e8400-e29b-41d4-a716-446655440000');
+      const result = await repository.delete(1);
 
       expect(result).toBe(true);
     });
 
     it('delete unknown lead returns false', async () => {
-      const result = await repository.delete('550e8400-e29b-41d4-a716-999999999999');
+      const result = await repository.delete(99999);
 
       expect(result).toBe(false);
     });
@@ -1503,6 +1619,8 @@ Expected: All tests pass, proving adapter and schema agreement.
 
 ### Task 5: Add Contract Tests for Project and Estimating Repositories
 
+**Status:** **BLOCKED** on B1 — `ProxyProjectRepository` and `ProxyEstimatingRepository` do not exist
+
 **Files to Create:**
 - `packages/data-access/src/adapters/proxy/project-repository.contract.test.ts`
 - `packages/data-access/src/adapters/proxy/estimating-repository.contract.test.ts`
@@ -1513,7 +1631,7 @@ Expected: All tests pass, proving adapter and schema agreement.
 
 ```typescript
 import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
-import { ProjectSchema, PagedProjectsSchema } from '@hbc/models/contracts';
+import { ActiveProjectSchema, createPagedSchema } from '@hbc/models/api-schemas';
 import { ProxyProjectRepository } from './project-repository';
 import { createHttpClient } from '../../http-client';
 import { server } from '../../test-utils';
@@ -1531,10 +1649,10 @@ describe('ProxyProjectRepository Contract Tests', () => {
   afterAll(() => server.close());
 
   describe('getAll()', () => {
-    it('response conforms to PagedProjectsSchema', async () => {
+    it('response conforms to paged ActiveProjectSchema', async () => {
       const result = await repository.getAll({ page: 1, pageSize: 20 });
 
-      const parsed = PagedProjectsSchema.safeParse({
+      const parsed = createPagedSchema(ActiveProjectSchema).safeParse({
         data: result.data,
         total: result.total,
         page: result.page,
@@ -1544,21 +1662,21 @@ describe('ProxyProjectRepository Contract Tests', () => {
       expect(parsed.success).toBe(true);
     });
 
-    it('each project conforms to ProjectSchema', async () => {
+    it('each project conforms to ActiveProjectSchema', async () => {
       const result = await repository.getAll({ page: 1, pageSize: 10 });
 
-      for (const project of result.data) {
-        const parsed = ProjectSchema.safeParse(project);
+      for (const project of result.items) {
+        const parsed = ActiveProjectSchema.safeParse(project);
         expect(parsed.success).toBe(true);
       }
     });
   });
 
   describe('getById()', () => {
-    it('single project conforms to ProjectSchema', async () => {
+    it('single project conforms to ActiveProjectSchema', async () => {
       const result = await repository.getById('660e8400-e29b-41d4-a716-446655440001');
 
-      const parsed = ProjectSchema.safeParse(result);
+      const parsed = ActiveProjectSchema.safeParse(result);
       expect(parsed.success).toBe(true);
     });
 
@@ -1570,17 +1688,18 @@ describe('ProxyProjectRepository Contract Tests', () => {
   });
 
   describe('create()', () => {
-    it('created project conforms to ProjectSchema', async () => {
+    it('created project conforms to ActiveProjectSchema', async () => {
       const request = {
         name: 'New Project',
-        leadId: '550e8400-e29b-41d4-a716-446655440000',
-        status: 'planning' as const,
-        owner: 'alice@hbi.com',
+        number: 'PRJ-NEW01',
+        status: 'Planning',
+        startDate: '2026-04-01T00:00:00Z',
+        endDate: '2026-12-31T00:00:00Z',
       };
 
       const result = await repository.create(request);
 
-      const parsed = ProjectSchema.safeParse(result);
+      const parsed = ActiveProjectSchema.safeParse(result);
       expect(parsed.success).toBe(true);
     });
   });
@@ -1593,7 +1712,7 @@ describe('ProxyProjectRepository Contract Tests', () => {
 
 ```typescript
 import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
-import { EstimatingRecordSchema, PagedEstimatingRecordsSchema } from '@hbc/models/contracts';
+import { EstimatingTrackerSchema, createPagedSchema } from '@hbc/models/api-schemas';
 import { ProxyEstimatingRepository } from './estimating-repository';
 import { createHttpClient } from '../../http-client';
 import { server } from '../../test-utils';
@@ -1611,10 +1730,10 @@ describe('ProxyEstimatingRepository Contract Tests', () => {
   afterAll(() => server.close());
 
   describe('getAll()', () => {
-    it('response conforms to PagedEstimatingRecordsSchema', async () => {
+    it('response conforms to paged EstimatingTrackerSchema', async () => {
       const result = await repository.getAll({ page: 1, pageSize: 20 });
 
-      const parsed = PagedEstimatingRecordsSchema.safeParse({
+      const parsed = createPagedSchema(EstimatingTrackerSchema).safeParse({
         data: result.data,
         total: result.total,
         page: result.page,
@@ -1624,21 +1743,21 @@ describe('ProxyEstimatingRepository Contract Tests', () => {
       expect(parsed.success).toBe(true);
     });
 
-    it('each record conforms to EstimatingRecordSchema', async () => {
+    it('each record conforms to EstimatingTrackerSchema', async () => {
       const result = await repository.getAll({ page: 1, pageSize: 10 });
 
-      for (const record of result.data) {
-        const parsed = EstimatingRecordSchema.safeParse(record);
+      for (const record of result.items) {
+        const parsed = EstimatingTrackerSchema.safeParse(record);
         expect(parsed.success).toBe(true);
       }
     });
   });
 
   describe('getById()', () => {
-    it('single record conforms to EstimatingRecordSchema', async () => {
+    it('single record conforms to EstimatingTrackerSchema', async () => {
       const result = await repository.getById('770e8400-e29b-41d4-a716-446655440001');
 
-      const parsed = EstimatingRecordSchema.safeParse(result);
+      const parsed = EstimatingTrackerSchema.safeParse(result);
       expect(parsed.success).toBe(true);
     });
   });
@@ -1664,6 +1783,8 @@ Expected: All contract tests pass.
 
 ### Task 6: Backend Route Contract Tests (Leads Routes)
 
+**Status:** **BLOCKED** on C1 — domain route handlers (`handleGetLeads`, `handleCreateLead`, `handleGetLeadById`) do not exist
+
 **Objective:** Test that Azure Functions route handlers return responses conforming to Zod schemas.
 
 **Files to Create:**
@@ -1688,9 +1809,11 @@ export function createMockServiceFactory() {
     getAll: vi.fn().mockResolvedValue({
       data: [
         {
-          id: '550e8400-e29b-41d4-a716-446655440000',
-          name: 'Test Lead',
-          status: 'prospect',
+          id: 1,
+          title: 'Test Lead',
+          stage: 'Identified',
+          clientName: 'Test Client',
+          estimatedValue: 100000,
           createdAt: '2026-03-16T10:00:00Z',
           updatedAt: '2026-03-16T10:00:00Z',
         },
@@ -1701,9 +1824,11 @@ export function createMockServiceFactory() {
     }),
     getById: vi.fn().mockResolvedValue(null),
     create: vi.fn().mockResolvedValue({
-      id: 'new-id-123',
-      name: 'New Lead',
-      status: 'prospect',
+      id: 100,
+      title: 'New Lead',
+      stage: 'Identified',
+      clientName: 'New Client',
+      estimatedValue: 50000,
       createdAt: '2026-03-16T10:00:00Z',
       updatedAt: '2026-03-16T10:00:00Z',
     }),
@@ -1799,10 +1924,10 @@ import type { HttpResponseInit } from '@azure/functions';
 import { HttpResponse } from '@azure/functions';
 import {
   LeadSchema,
-  PagedLeadsSchema,
   ErrorEnvelopeSchema,
   CreateLeadRequestSchema,
-} from '@hbc/models/contracts';
+} from '@hbc/models/api-schemas';
+import { createPagedSchema } from '@hbc/models/api-schemas';
 import { handleGetLeads, handleCreateLead, handleGetLeadById } from './leads.handler';
 import { createMockServiceFactory } from '../../test-utils/mock-service-factory';
 import { createMockRequest, createMockContext } from '../../test-utils/mock-request';
@@ -1810,8 +1935,10 @@ import { createMockRequest, createMockContext } from '../../test-utils/mock-requ
 /**
  * Contract tests for Leads route handlers.
  *
+ * BLOCKED: Requires C1 to deliver leads route handlers.
+ *
  * These tests verify that:
- * 1. GET /api/leads returns a PagedLeadsSchema-conformant response
+ * 1. GET /api/leads returns a paged-lead-schema-conformant response
  * 2. GET /api/leads/:id returns a LeadSchema-conformant response
  * 3. POST /api/leads validates input and returns LeadSchema-conformant response
  * 4. All error responses conform to ErrorEnvelopeSchema
@@ -1820,7 +1947,7 @@ import { createMockRequest, createMockContext } from '../../test-utils/mock-requ
  */
 describe('Leads Route Handlers — Contract Tests', () => {
   describe('handleGetLeads()', () => {
-    it('returns paged leads conforming to PagedLeadsSchema', async () => {
+    it('returns paged leads conforming to paged LeadSchema', async () => {
       const services = createMockServiceFactory();
       const request = createMockRequest('GET', '/api/leads', { page: '1', pageSize: '20' });
       const context = createMockContext();
@@ -1830,10 +1957,10 @@ describe('Leads Route Handlers — Contract Tests', () => {
       expect(response.status).toBe(200);
       const body = JSON.parse(await response.text());
 
-      const parsed = PagedLeadsSchema.safeParse(body);
+      const parsed = createPagedSchema(LeadSchema).safeParse(body);
       expect(parsed.success).toBe(true);
       if (parsed.success) {
-        expect(parsed.data.data).toBeInstanceOf(Array);
+        expect(parsed.data.items).toBeInstanceOf(Array);
         expect(parsed.data.total).toBeGreaterThanOrEqual(0);
       }
     });
@@ -1869,15 +1996,17 @@ describe('Leads Route Handlers — Contract Tests', () => {
     it('returns single lead conforming to LeadSchema', async () => {
       const services = createMockServiceFactory();
       const mockLead = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
-        name: 'Test Lead',
-        status: 'prospect' as const,
+        id: 1,
+        title: 'Test Lead',
+        stage: 'Identified' as const,
+        clientName: 'Test Client',
+        estimatedValue: 100000,
         createdAt: '2026-03-16T10:00:00Z',
         updatedAt: '2026-03-16T10:00:00Z',
       };
       vi.spyOn(services.leadRepository, 'getById').mockResolvedValue(mockLead as any);
 
-      const request = createMockRequest('GET', '/api/leads/550e8400-e29b-41d4-a716-446655440000');
+      const request = createMockRequest('GET', '/api/leads/1');
       const context = createMockContext();
 
       const response = await handleGetLeadById(request, context, services);
@@ -1893,7 +2022,7 @@ describe('Leads Route Handlers — Contract Tests', () => {
       const services = createMockServiceFactory();
       vi.spyOn(services.leadRepository, 'getById').mockResolvedValue(null);
 
-      const request = createMockRequest('GET', '/api/leads/550e8400-e29b-41d4-a716-999999999999');
+      const request = createMockRequest('GET', '/api/leads/99999');
       const context = createMockContext();
 
       const response = await handleGetLeadById(request, context, services);
@@ -1911,19 +2040,21 @@ describe('Leads Route Handlers — Contract Tests', () => {
     it('valid create request returns lead conforming to LeadSchema', async () => {
       const services = createMockServiceFactory();
       const newLead = {
-        id: 'new-id-123',
-        name: 'New Lead',
-        email: 'new@example.com',
-        status: 'prospect' as const,
+        id: 100,
+        title: 'New Lead',
+        stage: 'Identified' as const,
+        clientName: 'New Client',
+        estimatedValue: 50000,
         createdAt: '2026-03-16T10:00:00Z',
         updatedAt: '2026-03-16T10:00:00Z',
       };
       vi.spyOn(services.leadRepository, 'create').mockResolvedValue(newLead as any);
 
       const createRequest = {
-        name: 'New Lead',
-        email: 'new@example.com',
-        status: 'prospect',
+        title: 'New Lead',
+        stage: 'Identified',
+        clientName: 'New Client',
+        estimatedValue: 50000,
       };
       const request = createMockRequest('POST', '/api/leads', undefined, createRequest);
       const context = createMockContext();
@@ -1940,8 +2071,10 @@ describe('Leads Route Handlers — Contract Tests', () => {
     it('invalid request returns 422 conforming to ErrorEnvelopeSchema', async () => {
       const services = createMockServiceFactory();
       const invalidRequest = {
-        name: '',  // Empty string violates schema
-        status: 'prospect',
+        title: '',  // Empty string violates schema
+        stage: 'Identified',
+        clientName: 'Test',
+        estimatedValue: 0,
       };
       const request = createMockRequest('POST', '/api/leads', undefined, invalidRequest);
       const context = createMockContext();
@@ -1960,8 +2093,8 @@ describe('Leads Route Handlers — Contract Tests', () => {
     it('missing required fields returns 422', async () => {
       const services = createMockServiceFactory();
       const incompleteRequest = {
-        name: 'New Lead',
-        // status missing
+        title: 'New Lead',
+        // stage, clientName, estimatedValue missing
       };
       const request = createMockRequest('POST', '/api/leads', undefined, incompleteRequest);
       const context = createMockContext();
@@ -1987,6 +2120,8 @@ Expected: All tests pass.
 
 ### Task 7: Backend Error Shape Contract Test
 
+**Status:** **BLOCKED** on C1 — error middleware (`formatErrorResponse`) does not exist
+
 **Objective:** Ensure all error paths return ErrorEnvelopeSchema-conformant responses.
 
 **Files to Create:**
@@ -1998,11 +2133,13 @@ Expected: All tests pass.
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { ErrorEnvelopeSchema } from '@hbc/models/contracts';
+import { ErrorEnvelopeSchema } from '@hbc/models/api-schemas';
 import { formatErrorResponse } from './error-middleware';
 
 /**
  * Contract tests for error response formatting.
+ *
+ * BLOCKED: Requires C1 to deliver error middleware.
  *
  * Ensures all error paths in the backend produce ErrorEnvelopeSchema-conformant responses.
  */
@@ -2092,7 +2229,7 @@ describe('Error Response Contract', () => {
 **File: `backend/functions/src/middleware/error-middleware.ts`** (sketch)
 
 ```typescript
-import { ErrorEnvelopeSchema, type ErrorEnvelope } from '@hbc/models/contracts';
+import { ErrorEnvelopeSchema, type ErrorEnvelope } from '@hbc/models/api-schemas';
 
 /**
  * Format an error response conforming to ErrorEnvelopeSchema.
@@ -2138,10 +2275,19 @@ Expected: All error envelope tests pass.
 
 ### Task 8: Critical Path Smoke Tests
 
+**Status:** **BLOCKED** on C1 + C2 + staging infrastructure
+
 **Objective:** Run end-to-end tests against staging Azure Functions to verify critical flows work in production-like conditions.
 
 **Files to Create:**
 - `backend/functions/src/test/smoke/critical-paths.smoke.test.ts`
+
+**Smoke test authentication:**
+- Token must be acquired for the specific Azure Functions API audience, NOT the default Azure Resource Manager scope.
+- Required: `az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv`
+- The `<CLIENT_ID>` value must match the Entra ID app registration for the HB Intel Azure Functions API (defined in C2 auth configuration).
+- Alternatively, use MSAL CLI or a dedicated test service principal with explicit scope grants.
+- Default `az account get-access-token` (no `--resource`) returns an ARM token that will NOT authenticate against the API.
 
 **Full Code:**
 
@@ -2149,18 +2295,24 @@ Expected: All error envelope tests pass.
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { LeadSchema, ProjectSchema } from '@hbc/models/contracts';
+import { LeadSchema, ActiveProjectSchema } from '@hbc/models/api-schemas';
 
 /**
  * Critical path smoke tests for staging Azure Functions.
+ *
+ * BLOCKED: Requires C1 (routes) + C2 (auth) + staging infrastructure.
  *
  * These tests run against a real staging instance (not mocked).
  * They verify that essential user flows work end-to-end.
  *
  * Usage:
  *   SMOKE_TEST_BASE_URL=https://hb-intel-stage.azurewebsites.net \
- *   AUTH_TOKEN=<valid-token> \
+ *   AUTH_TOKEN=$(az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv) \
  *   pnpm --filter backend-functions test:smoke
+ *
+ * NOTE: AUTH_TOKEN must be acquired for the Azure Functions API audience.
+ * Using `az account get-access-token` without --resource returns an ARM token
+ * that will NOT authenticate against the HB Intel API.
  */
 
 const BASE_URL = process.env.SMOKE_TEST_BASE_URL;
@@ -2195,9 +2347,9 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
     const body = await response.json();
 
     // Validate response conforms to schema
-    expect(Array.isArray(body.data)).toBe(true);
-    if (body.data.length > 0) {
-      const parsed = LeadSchema.safeParse(body.data[0]);
+    expect(Array.isArray(body.items)).toBe(true);
+    if (body.items.length > 0) {
+      const parsed = LeadSchema.safeParse(body.items[0]);
       expect(parsed.success).toBe(true);
     }
   });
@@ -2223,9 +2375,10 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
    */
   it('POST /api/leads creates and returns new lead', async () => {
     const createPayload = {
-      name: `Test Lead ${Date.now()}`,
-      email: `test-${Date.now()}@hbi-test.com`,
-      status: 'prospect',
+      title: `Test Lead ${Date.now()}`,
+      stage: 'Identified',
+      clientName: 'Smoke Test Client',
+      estimatedValue: 1000000,
     };
 
     const response = await fetch(`${BASE_URL}/api/leads`, {
@@ -2244,8 +2397,8 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
     const parsed = LeadSchema.safeParse(body.data);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
-      expect(parsed.data.name).toBe(createPayload.name);
-      expect(parsed.data.status).toBe('prospect');
+      expect(parsed.data.title).toBe(createPayload.title);
+      expect(parsed.data.stage).toBe('Identified');
     }
 
     // Return created lead id for subsequent tests
@@ -2258,9 +2411,10 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
   it('GET /api/leads/{id} returns created lead', async () => {
     // Create a lead first
     const createPayload = {
-      name: `Test Lead Retrieve ${Date.now()}`,
-      email: `retrieve-${Date.now()}@hbi-test.com`,
-      status: 'prospect',
+      title: `Test Lead Retrieve ${Date.now()}`,
+      stage: 'Identified',
+      clientName: 'Retrieve Test Client',
+      estimatedValue: 500000,
     };
 
     const createResponse = await fetch(`${BASE_URL}/api/leads`, {
@@ -2299,9 +2453,10 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
   it('PUT /api/leads/{id} updates and returns lead', async () => {
     // Create a lead
     const createPayload = {
-      name: `Test Lead Update ${Date.now()}`,
-      email: `update-${Date.now()}@hbi-test.com`,
-      status: 'prospect',
+      title: `Test Lead Update ${Date.now()}`,
+      stage: 'Identified',
+      clientName: 'Update Test Client',
+      estimatedValue: 750000,
     };
 
     const createResponse = await fetch(`${BASE_URL}/api/leads`, {
@@ -2318,8 +2473,8 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
 
     // Update the lead
     const updatePayload = {
-      status: 'qualified',
-      estimatedValue: 100000,
+      stage: 'Bidding',
+      estimatedValue: 3000000,
     };
 
     const updateResponse = await fetch(`${BASE_URL}/api/leads/${leadId}`, {
@@ -2337,8 +2492,8 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
     const parsed = LeadSchema.safeParse(body.data);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
-      expect(parsed.data.status).toBe('qualified');
-      expect(parsed.data.estimatedValue).toBe(100000);
+      expect(parsed.data.stage).toBe('Bidding');
+      expect(parsed.data.estimatedValue).toBe(3000000);
     }
   });
 
@@ -2348,9 +2503,10 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
   it('DELETE /api/leads/{id} removes lead', async () => {
     // Create a lead
     const createPayload = {
-      name: `Test Lead Delete ${Date.now()}`,
-      email: `delete-${Date.now()}@hbi-test.com`,
-      status: 'prospect',
+      title: `Test Lead Delete ${Date.now()}`,
+      stage: 'Identified',
+      clientName: 'Delete Test Client',
+      estimatedValue: 250000,
     };
 
     const createResponse = await fetch(`${BASE_URL}/api/leads`, {
@@ -2392,9 +2548,10 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
   it('POST /api/projects creates and returns new project', async () => {
     const createPayload = {
       name: `Test Project ${Date.now()}`,
-      status: 'planning',
-      leadId: '550e8400-e29b-41d4-a716-446655440000',  // Use existing lead id or get one
-      owner: 'test@hbi.com',
+      number: `PRJ-TST${Date.now()}`,
+      status: 'Planning',
+      startDate: '2026-04-01T00:00:00Z',
+      endDate: '2026-12-31T00:00:00Z',
     };
 
     const response = await fetch(`${BASE_URL}/api/projects`, {
@@ -2409,7 +2566,7 @@ describe.skipIf(SKIP_SMOKE)('Critical Path Smoke Tests (Staging)', () => {
     expect(response.status).toBe(201);
     const body = await response.json();
 
-    const parsed = ProjectSchema.safeParse(body.data);
+    const parsed = ActiveProjectSchema.safeParse(body.data);
     expect(parsed.success).toBe(true);
   });
 });
@@ -2426,7 +2583,7 @@ pnpm --filter backend-functions test smoke
 Run against staging:
 ```bash
 SMOKE_TEST_BASE_URL=https://hb-intel-stage.azurewebsites.net \
-AUTH_TOKEN=$(az account get-access-token --query accessToken -o tsv) \
+AUTH_TOKEN=$(az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv) \
 pnpm --filter backend-functions test:smoke
 ```
 
@@ -2434,9 +2591,18 @@ Expected: All critical paths pass (green).
 
 **Commit:** `test(backend): add critical path smoke tests for staging (P1-E1 Task 8)`
 
-### Task 9: Telemetry Baseline Assertions
+### Task 9: Telemetry Baseline Verification
 
-**Objective:** Define and verify telemetry events logged during request processing.
+**Status:** **BLOCKED** on C3 (instrumentation) + staging infrastructure
+
+**Objective:** Define the telemetry evidence model and document how E1 smoke tests contribute to C3 verification.
+
+**Telemetry verification approach (aligned to C3):**
+- Phase 1 telemetry evidence is trace-based, gathered from Application Insights.
+- Smoke tests do NOT assert telemetry programmatically — they produce the traffic that generates traces.
+- Telemetry verification is a **manual gate step** using KQL queries against Application Insights, as defined by C3 section 2.5.
+- E1's contribution: document the expected KQL queries and the traces each smoke test should produce.
+- E1's contribution does NOT include: automated Application Insights query assertions in test code.
 
 **Files to Create:**
 - `backend/functions/src/test/smoke/telemetry-baseline.smoke.test.ts`
@@ -2451,12 +2617,29 @@ import { describe, it, expect } from 'vitest';
 /**
  * Telemetry baseline smoke tests for staging.
  *
- * Verify that Azure Functions logging produces expected telemetry events.
- * These events are logged to Application Insights and used for monitoring.
+ * BLOCKED: Requires C3 (instrumentation) + staging infrastructure.
+ *
+ * These tests produce traffic against staging endpoints. They do NOT assert
+ * telemetry programmatically — telemetry verification is a manual gate step
+ * using KQL queries against Application Insights (see C3 section 2.5).
+ *
+ * After running these tests, verify telemetry in Azure Portal using:
+ *
+ *   traces
+ *   | where timestamp > ago(5m)
+ *   | where customDimensions.requestId == "<captured-request-id>"
+ *   | order by timestamp asc
+ *   | project timestamp, message, customDimensions
+ *
+ * Expected traces per scenario:
+ *   - Successful request: request.received → auth.validated → repository.called → response.sent
+ *   - 404 Not Found: request.received → auth.validated → resource.not_found → response.sent
+ *   - 401 Unauthorized: request.received → auth.failed → response.sent
+ *   - 422 Validation Error: request.received → auth.validated → validation.failed → response.sent
  *
  * Usage:
  *   SMOKE_TEST_BASE_URL=https://hb-intel-stage.azurewebsites.net \
- *   AUTH_TOKEN=<valid-token> \
+ *   AUTH_TOKEN=$(az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv) \
  *   pnpm --filter backend-functions test:smoke
  */
 
@@ -2464,23 +2647,12 @@ const BASE_URL = process.env.SMOKE_TEST_BASE_URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 const SKIP_SMOKE = !BASE_URL || !AUTH_TOKEN;
 
-/**
- * Expected telemetry events for a successful request.
- * These are logged via context.log() or Application Insights client.
- */
-const EXPECTED_REQUEST_EVENTS = [
-  'request.received',       // Log when request received
-  'auth.validated',         // Log when authentication passes
-  'repository.called',      // Log when repository method called
-  'response.sent',          // Log before response returned
-];
-
 describe.skipIf(SKIP_SMOKE)('Telemetry Baseline (Staging)', () => {
   /**
-   * Test that a successful request produces telemetry events.
-   * This is a placeholder; in practice, you would query Application Insights.
+   * Produce traffic for a successful request trace.
+   * Expected traces: request.received → auth.validated → repository.called → response.sent
    */
-  it('GET /api/leads triggers expected telemetry events', async () => {
+  it('GET /api/leads produces successful request trace', async () => {
     const response = await fetch(`${BASE_URL}/api/leads?page=1&pageSize=10`, {
       method: 'GET',
       headers: {
@@ -2490,25 +2662,16 @@ describe.skipIf(SKIP_SMOKE)('Telemetry Baseline (Staging)', () => {
     });
 
     expect(response.status).toBe(200);
-
-    // In a real scenario, you would query Application Insights:
-    //   SELECT * FROM traces
-    //   WHERE timestamp > ago(5m)
-    //   AND customDimensions.requestId == "<captured-request-id>"
-    //   ORDER BY timestamp ASC
-    //
-    // Then assert that expected events appear in the trace logs.
-    //
-    // For now, this is a placeholder assertion.
-    expect(true).toBe(true);
+    // Telemetry verification: check Application Insights for request.received + auth.validated + response.sent traces
   });
 
   /**
-   * Test that a 404 produces telemetry (auth passes, not found).
+   * Produce traffic for a not-found trace.
+   * Expected traces: request.received → auth.validated → resource.not_found → response.sent
    */
-  it('GET /api/leads/{unknown-id} logs not-found telemetry', async () => {
+  it('GET /api/leads/{unknown-id} produces not-found trace', async () => {
     const response = await fetch(
-      `${BASE_URL}/api/leads/550e8400-e29b-41d4-a716-999999999999`,
+      `${BASE_URL}/api/leads/99999`,
       {
         method: 'GET',
         headers: {
@@ -2518,14 +2681,14 @@ describe.skipIf(SKIP_SMOKE)('Telemetry Baseline (Staging)', () => {
     );
 
     expect(response.status).toBe(404);
-
-    // Expected: request.received, auth.validated, not-found event
+    // Telemetry verification: check Application Insights for resource.not_found trace
   });
 
   /**
-   * Test that unauthorized request produces telemetry.
+   * Produce traffic for an authorization failure trace.
+   * Expected traces: request.received → auth.failed → response.sent
    */
-  it('GET /api/leads without auth logs authorization failure', async () => {
+  it('GET /api/leads without auth produces authorization failure trace', async () => {
     const response = await fetch(`${BASE_URL}/api/leads`, {
       method: 'GET',
       headers: {
@@ -2534,17 +2697,19 @@ describe.skipIf(SKIP_SMOKE)('Telemetry Baseline (Staging)', () => {
     });
 
     expect(response.status).toBe(401);
-
-    // Expected: request.received, auth.failed
+    // Telemetry verification: check Application Insights for auth.failed trace
   });
 
   /**
-   * Test that validation failure produces telemetry.
+   * Produce traffic for a validation failure trace.
+   * Expected traces: request.received → auth.validated → validation.failed → response.sent
    */
-  it('POST /api/leads with invalid payload logs validation error', async () => {
+  it('POST /api/leads with invalid payload produces validation error trace', async () => {
     const invalidPayload = {
-      name: '',  // Empty name
-      status: 'invalid-status',
+      title: '',  // Empty title
+      stage: 'invalid-stage',
+      clientName: 'Test',
+      estimatedValue: 0,
     };
 
     const response = await fetch(`${BASE_URL}/api/leads`, {
@@ -2557,30 +2722,16 @@ describe.skipIf(SKIP_SMOKE)('Telemetry Baseline (Staging)', () => {
     });
 
     expect(response.status).toBe(422);
-
-    // Expected: request.received, auth.validated, validation.failed
+    // Telemetry verification: check Application Insights for validation.failed trace
   });
 });
 ```
 
-**Note on Application Insights Queries:**
-
-In a real production setup, smoke tests would query Application Insights to verify telemetry events were logged:
-
-```kusto
-// Example Application Insights query
-traces
-| where timestamp > ago(5m)
-| where customDimensions.requestId == "test-request-123"
-| order by timestamp asc
-| project timestamp, message, customDimensions
-```
-
-For Phase 1, manual verification via Azure Portal suffices.
-
 **Commit:** `test(backend): add telemetry baseline smoke tests (P1-E1 Task 9)`
 
 ### Task 10: Verify Test Suite Configuration and Run All Contract Tests
+
+**Status:** **TARGET** — shared with D1 vitest prerequisite
 
 **Files to Modify:**
 - `packages/data-access/vitest.config.ts`
@@ -2656,7 +2807,7 @@ Expected: All tests pass (green checkmark).
 Run smoke tests (staging):
 ```bash
 SMOKE_TEST_BASE_URL=https://hb-intel-stage.azurewebsites.net \
-AUTH_TOKEN=$(az account get-access-token --query accessToken -o tsv) \
+AUTH_TOKEN=$(az account get-access-token --resource api://<CLIENT_ID> --query accessToken -o tsv) \
 pnpm --filter backend-functions test:smoke
 ```
 
@@ -2668,20 +2819,20 @@ Expected: All critical paths pass (or skip if staging not ready).
 
 ## Implementation Summary
 
-| Chunk | Task | Deliverable | Lines | Status |
-|-------|------|------------|-------|--------|
-| 1 | 1 | Zod schemas (@hbc/models) | ~400 | Complete |
-| 1 | 2 | Add Zod to package.json | 5 | Complete |
-| 2 | 3 | MSW server and handlers | ~450 | Complete |
-| 2 | 4 | Frontend contract tests (Leads) | ~300 | Complete |
-| 2 | 5 | Frontend contract tests (Project, Estimating) | ~200 | Complete |
-| 3 | 6 | Backend route contract tests | ~400 | Complete |
-| 3 | 7 | Backend error contract tests | ~200 | Complete |
-| 4 | 8 | Smoke tests (critical paths) | ~350 | Complete |
-| 4 | 9 | Telemetry baseline assertions | ~150 | Complete |
-| 4 | 10 | Test configuration + verification | ~50 | Complete |
-
-**Total Lines of Code:** ~2,500 (including tests, schemas, handlers, fixtures)
+| Chunk | Task | Deliverable | Tier | Status |
+|---|---|---|---|---|
+| 1 | 1 | Zod schemas — Tier 1 (Lead, Project CRUD, Estimating tracker) | 1 | **TARGET** — implementable after Zod setup |
+| 1 | 1 | Zod schemas — Tier 2 (7 provisional domains + Project aggregate + Estimating kickoff) | 2 | **PROVISIONAL** — schema skeletons, no full tests |
+| 1 | 1 | Auth capability-lane description (Tier 3) | 3 | **BLOCKED** on C2 (A9) — no schema |
+| 1 | 2 | Add Zod to `@hbc/models/package.json` | — | **TARGET** — prerequisite for Task 1 |
+| 2 | 3 | MSW server and handlers (Tier 1 domains only) | 1 | **TARGET** — implementable after vitest setup |
+| 2 | 4 | Frontend contract tests (Leads) | 1 | **BLOCKED** on B1 |
+| 2 | 5 | Frontend contract tests (Project, Estimating) | 1 | **BLOCKED** on B1 |
+| 3 | 6 | Backend route contract tests | 1 | **BLOCKED** on C1 |
+| 3 | 7 | Backend error shape contract tests | — | **BLOCKED** on C1 |
+| 4 | 8 | Staging smoke tests | — | **BLOCKED** on C1 + C2 + staging |
+| 4 | 9 | Telemetry baseline | — | **BLOCKED** on C3 + staging |
+| 4 | 10 | Test configuration + verification | — | **TARGET** — shared with D1 vitest prerequisite |
 
 ---
 
@@ -2691,31 +2842,37 @@ Expected: All critical paths pass (or skip if staging not ready).
 |------|-----------|--------|-----------|
 | Zod schema drift (frontend vs backend) | Medium | High | Use same schemas in both; validate in tests |
 | MSW handlers out of sync with real backend | Medium | Medium | Keep handlers aligned with backend route contracts (P1-C1) |
-| Auth token management in smoke tests | Low | Medium | Use environment variables; document auth setup |
+| Auth token audience mismatch in smoke tests | Medium | High | Require explicit `--resource api://<CLIENT_ID>` flag; document in test header |
 | Staging environment downtime | Low | Medium | Skip smoke tests gracefully if BASE_URL unavailable |
 | Test flakiness (timing, async) | Low | Medium | Use explicit waits; avoid sleep loops; mock external calls |
+| `contracts/` naming collision with business domain | High | High | Resolved: use `api-schemas/` directory; documented in naming conflict section |
+| Provisional schemas become stale when D1/D6 resolve | Medium | Medium | Tier 2 schemas are explicitly marked PROVISIONAL; adaptation notes included per domain |
+| Transport envelope field naming (D3) changes | Medium | Medium | ErrorEnvelopeSchema and createPagedSchema marked PROVISIONAL (D3/D4); single adaptation point |
 
 ---
 
-## Execution Checklist
+## Execution Sequence
 
-- [ ] Chunk 1 complete: Zod schemas and tests pass
-- [ ] Chunk 2 complete: Frontend proxy adapter contract tests pass
-- [ ] Chunk 3 complete: Backend route handler contract tests pass
-- [ ] Chunk 4 complete: Smoke tests runnable against staging
-- [ ] All schema updates reflected in barrel exports
-- [ ] MSW handlers aligned with P1-C1 routes
-- [ ] Error paths tested and documented
-- [ ] Telemetry events defined and logged
-- [ ] CI/CD integration ready (GHA/Azure Pipelines)
+Dependency-ordered steps (follow this sequence):
+
+1. **Resolve naming** — confirm `api-schemas/` path is acceptable (no existing collision)
+2. **Task 2** — add Zod dependency to `@hbc/models`
+3. **Task 10 (partial)** — add vitest config to `@hbc/models` and `@hbc/data-access` (coordinate with D1)
+4. **Task 1** — implement shared and domain Zod schemas; run schema tests
+5. **Task 3** — implement MSW server, handlers, and fixtures; run MSW setup tests
+6. **Wait for B1** — Tasks 4–5 unblock when proxy repositories exist
+7. **Wait for C1** — Tasks 6–7 unblock when domain route handlers and error middleware exist
+8. **Wait for C1 + C2 + staging** — Task 8 unblocks when routes, auth, and staging infra exist
+9. **Wait for C3 + staging** — Task 9 unblocks when telemetry instrumentation exists
 
 ---
 
 ## Next Steps
 
-After this plan is implemented:
+After upstream dependencies deliver:
 
-1. **P1-C2** — Implement backend validation middleware using Zod schemas
-2. **P1-B2** — Finalize frontend data-access adapters using schemas
-3. **P1-E2** — Add integration tests combining frontend + backend contract assertions
-4. **Docs** — Create developer guide for maintaining contract tests (update `packages/models/README.md` and `packages/data-access/README.md`)
+1. **B1 lands** → implement Tasks 4–5 (frontend adapter contract tests)
+2. **C1 lands** → implement Tasks 6–7 (backend route and error contract tests)
+3. **C1 + C2 + staging ready** → implement Task 8 (smoke tests)
+4. **C3 lands** → implement Task 9 (telemetry baseline traffic generation)
+5. **All tasks pass** → update `current-state-map.md` and package READMEs
