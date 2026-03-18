@@ -1,11 +1,26 @@
 # P1-D1: Write Safety, Retry, and Recovery Implementation Plan
 
-**Doc ID:** P1-D1
-**Phase:** Phase 1
-**Status:** Draft
-**Date:** 2026-03-16
-**Audience:** Developers implementing write safety for Phase 1 critical path (Project, Lead, Estimating)
-**References:** P1-B1 (Proxy Adapter), P1-C1 (Backend Service Catalog), current-state-map.md
+| Field | Value |
+|---|---|
+| **Doc ID** | P1-D1 |
+| **Phase** | Phase 1 |
+| **Workstream** | D — Write Safety, Retry, and Recovery |
+| **Document Type** | Implementation Plan |
+| **Owner** | D1-workstream lead |
+| **Status** | Draft — blocked on B1 proxy infrastructure |
+| **Date** | 2026-03-16 |
+| **Last Reviewed Against Repo Truth** | 2026-03-18 |
+| **Audience** | Developers implementing write safety for Phase 1 critical path (Project, Lead, Estimating) |
+| **References** | P1-B1 (Proxy Adapter), P1-B2 (Adapter Completion Backlog), P1-C1 (Backend Service Catalog), P1-C3 (Observability Spec), current-state-map.md |
+
+### Status Legend
+
+| Marker | Meaning |
+|---|---|
+| **CURRENT** | Verified against live repo as of 2026-03-18 |
+| **TARGET** | D1 deliverable — implementation planned |
+| **PROVISIONAL** | Design decision pending upstream confirmation |
+| **BLOCKED** | Cannot implement until dependency is delivered |
 
 ---
 
@@ -26,6 +41,67 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 - Offline queue deferred-write coordination (belongs to session-state, covered separately)
 - SharePoint adapter retry (Phase 5+)
 - Frontend UI error recovery flows (belongs to app shells, not data-access)
+
+---
+
+## Plan Status and Dependencies
+
+### Current Repo State (verified 2026-03-18)
+
+- `ProxyHttpClient` does not exist — `packages/data-access/src/adapters/proxy/` contains only stub types, constants, and index re-exports (**CURRENT**)
+- Proxy adapter mode throws `AdapterNotImplementedError` in the factory for all domains (**CURRENT**)
+- `packages/data-access` has no test script — only build, check-types, lint (**CURRENT**)
+- `backend/functions` has vitest test infrastructure (unit, smoke, coverage) (**CURRENT**)
+- Backend table storage service (`RealTableStorageService`) exposes domain-specific provisioning methods using `TableClient.upsertEntity()` semantics; no generic idempotency table or middleware exists (**CURRENT**)
+- No retry logic exists anywhere in `packages/data-access` (**CURRENT**)
+
+### D1 Deliverable Breakdown by Surface
+
+| Deliverable | Surface | Status | Dependency |
+|---|---|---|---|
+| `RetryPolicy` types + `withRetry` HOF | `packages/data-access` | **TARGET** — implementable now | None — standalone module |
+| `ProxyHttpClient` retry wiring | `packages/data-access` | **BLOCKED** | B1 must deliver `ProxyHttpClient` first |
+| `WriteFailureReason` enum + `classifyWriteFailure` | `packages/data-access` | **TARGET** — implementable now | None — standalone module |
+| `IdempotencyContext` + `generateIdempotencyKey` | `packages/data-access` | **TARGET** — implementable now | None — standalone module |
+| `IAuditRecord` interface | `packages/models` or `packages/data-access` | **TARGET** — implementable now | None — interface only |
+| Backend idempotency guard | `backend/functions` | **TARGET** — requires integration design | Backend handler model uses side-effect imports, not middleware pipeline (**PROVISIONAL**) |
+| Backend idempotency table storage | `backend/functions` | **TARGET** — requires storage strategy | Current `RealTableStorageService` has no idempotency methods; needs extension (**PROVISIONAL**) |
+| Repository-level idempotency wiring | `packages/data-access` | **BLOCKED** | B1 must deliver proxy repositories first |
+| Integration tests | Both surfaces | **BLOCKED** | B1 proxy infrastructure + D1 implementation must both exist |
+
+### What D1 Can Implement Now (No B1 Dependency)
+
+- Chunk 1, Task 1.1: `RetryPolicy` types and `withRetry` HOF (standalone, testable in isolation)
+- Chunk 2, Task 2.1: `IdempotencyContext` types and `generateIdempotencyKey` (standalone)
+- Chunk 3, Task 3.1: `WriteFailureReason` enum and `classifyWriteFailure` (standalone)
+- Chunk 3, Task 3.2: `IAuditRecord` interface (standalone)
+
+### What D1 Cannot Implement Until B1 Delivers
+
+- Chunk 1, Task 1.2: Wiring retry into `ProxyHttpClient` (class doesn't exist)
+- Chunk 2, Task 2.2: Backend idempotency guard (needs integration design with current handler model)
+- Chunk 3, Task 3.3: Repository-level idempotency wiring (repositories don't exist)
+- Chunk 4: Integration tests (needs both B1 and D1 implementations)
+
+### Acceptance Gates D1 Unlocks
+
+- B2 `PROD_ACTIVE` gate: "Write safety — Retry and idempotency behavior verified for write methods (D1 deliverables)"
+- B2 `PROD_ACTIVE` gate: "Observability — Monitoring, error reporting, and alerting confirmed" requires D1 circuit-breaker telemetry (C3 section 2.2.3)
+
+### Cross-Workstream Dependencies
+
+| D1 depends on | For | Status |
+|---|---|---|
+| B1 (Proxy Adapter) | `ProxyHttpClient` class and proxy repository implementations | B1 not yet merged; proxy is stub |
+| C1 (Backend Catalog) | Route shapes, error envelope, HTTP methods | C1 frozen for implemented routes |
+| B2 (Completion Backlog) | Gate criteria and production activation requirements | B2 active |
+| C3 (Observability Spec) | Circuit-breaker telemetry contract (`circuit.state.change`, `circuit.fallback.used`) | C3 aligned |
+
+### Verification Command Guidance
+
+- **`packages/data-access`**: No test script exists (**CURRENT**). D1 implementation must either (a) add a vitest configuration to data-access or (b) run tests via workspace root. Until a test script is added, use: `npx vitest run packages/data-access/src/retry/retry-policy.test.ts` from workspace root.
+- **`backend/functions`**: Has vitest — use `npm test` from `backend/functions/` or the workspace-scoped command.
+- All D1 code must pass `check-types` and `lint` for its package before commit.
 
 ---
 
@@ -453,7 +529,7 @@ into ProxyHttpClient in Task 1.2.
 - Create: `packages/data-access/src/adapters/proxy/http-client.test.ts`
 
 **Current state:**
-`ProxyHttpClient` exists but has no retry logic. The constructor takes `baseUrl` and `getToken`. We extend it to accept an optional `RetryPolicy`.
+`ProxyHttpClient` does not yet exist (**CURRENT**) — `packages/data-access/src/adapters/proxy/` contains only stub types and constants. B1 will deliver `ProxyHttpClient` with constructor taking `baseUrl` and `getToken`. D1 extends it to accept an optional `RetryPolicy`. **This task is BLOCKED until B1 delivers the proxy HTTP client.**
 
 **Failing Tests (TDD start):**
 
@@ -1026,6 +1102,8 @@ in Idempotency-Key header and can survive page reloads within TTL.
 ---
 
 ### Task 2.2: Backend Idempotency Guard (Azure Functions)
+
+**Integration note (PROVISIONAL):** The current backend Azure Functions handler model uses direct side-effect imports for handler registration — there is no generalized middleware pipeline. The "middleware" pattern described below requires one of: (a) a handler wrapper function applied at each mutating endpoint, (b) an Azure Functions pre-invocation hook, or (c) a validation layer injected into the service factory. The specific integration approach must be confirmed during implementation against the actual handler structure. The current `RealTableStorageService` uses `TableClient.upsertEntity()` with domain-specific methods — extending it for idempotency requires adding a dedicated idempotency table/partition and explicit TTL/cleanup strategy (the ~24h TTL in Decision 3 is not enforced by Azure Table Storage natively).
 
 **Files:**
 - Create: `backend/functions/src/middleware/idempotency-guard.ts`
@@ -1742,7 +1820,7 @@ Frontend reads audit logs for display; backend writes them after confirms write 
 - Modify: `packages/data-access/src/adapters/proxy/lead-repository.test.ts`
 
 **Current state:**
-Assume `ProxyLeadRepository` exists with `create()` and `update()` methods that don't yet support idempotency.
+`ProxyLeadRepository` does not yet exist (**CURRENT**) — proxy adapters throw `AdapterNotImplementedError`. B1 will deliver `ProxyLeadRepository` with `create()` and `update()` methods (matching `ILeadRepository` port: `create(data: ILeadFormData)`, `update(id: number, data: Partial<ILeadFormData>)`). D1 adds idempotency support to these methods. **This task is BLOCKED until B1 delivers the proxy lead repository.**
 
 **Modification (showing create() example):**
 
