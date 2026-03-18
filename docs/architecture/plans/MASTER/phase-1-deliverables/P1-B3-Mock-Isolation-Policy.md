@@ -122,16 +122,16 @@ The following repo locations use non-canonical vocabulary that could cause misco
 
 The startup guard needs to know whether mock mode is permissible. Each surface detects its environment differently:
 
-**Layer 1 — Adapter mode** (`HBC_ADAPTER_MODE`): The primary policy variable. Controls which adapter the factory returns. This is the value the startup guard checks.
+**Primary variable — Adapter mode** (`HBC_ADAPTER_MODE`): Controls which adapter the factory returns. This is the value the startup guard checks.
 
-**Layer 2 — Deployment environment detection:**
+**Environment detection:**
 
 | Surface | How environment is detected | Notes |
 |---|---|---|
 | **PWA (Vite)** | Build-time via Vite mode. Production builds inject `'proxy'` as a string literal into the bundle. There is no runtime env var check in the browser. | The guard validates the build-time-injected value. |
 | **Backend (Azure Functions)** | Runtime via `AZURE_FUNCTIONS_ENVIRONMENT` — set automatically by Azure to `'Production'` in production slots, `'Development'` locally. | Already used in repo: `backend/functions/src/functions/provisioningSaga/index.ts` gates on this variable. |
 
-**Layer 3 — Adapter mode override** (future): Per-domain overrides are an open decision (see B2 Factory Wiring). Not yet implemented.
+**Per-domain override** (future): Per-domain overrides are an open decision (see B2 Factory Wiring). Not yet implemented.
 
 **What NOT to use for environment detection:**
 - Do not rely solely on `NODE_ENV` in the browser — Vite does not expose it at runtime the same way Node.js does
@@ -144,7 +144,7 @@ The startup guard needs to know whether mock mode is permissible. Each surface d
 |---|---|---|---|---|
 | **Local development** | Vite dev mode / `AZURE_FUNCTIONS_ENVIRONMENT='Development'` | `'mock'` (default) | Yes — developer may override | None (developer's choice) |
 | **CI — unit tests** | CI pipeline config | `'mock'` | Yes — required for isolation | CI pipeline config |
-| **CI — mocked-proxy tests** | CI pipeline config | `'mock'` fetch layer | Yes — proxy tested against mocked fetch | CI pipeline config |
+| **CI — mocked-proxy tests** | CI pipeline config | `'proxy'` (mocked fetch) | Yes (fetch layer only) | CI pipeline config |
 | **CI — contract tests** | CI pipeline config | `'proxy'` against test backend | No | CI pipeline config + test backend |
 | **Staging** | Azure slot config / Vite production build | `'proxy'` (or other real adapter) | **No** | Startup guard + deployment gate |
 | **Production** | `AZURE_FUNCTIONS_ENVIRONMENT='Production'` / Vite production build | `'proxy'` (or other real adapter) | **No — zero tolerance** | Startup guard + deployment gate |
