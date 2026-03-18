@@ -233,6 +233,16 @@ E1 Zod schemas validate the **transport layer** — the HTTP envelope wrapping d
 6. **No Pact or external contract framework** — pure Vitest with Zod schema assertions
 7. **Schemas are tiered by C1 contract confidence** — only confirmed routes get full schemas; provisional routes get skeleton schemas; uncataloged routes get no schemas
 
+### Example Code Fidelity Rules
+
+All code examples in this plan must mirror the current repo interfaces unless explicitly labeled PROVISIONAL:
+
+1. **Method names must match the port interface** — `ILeadRepository.getAll()`, `IProjectRepository.getProjects()`, `IEstimatingRepository.getAllTrackers()`, etc. Do not use generic CRUD aliases unless the port itself uses them.
+2. **Return types must match the port signature** — if the port returns `Promise<void>`, the test must not expect a boolean; if the port throws on not-found, the test must not expect null.
+3. **Field names and ID types must match `@hbc/models`** — Lead IDs are `number`, Project IDs are `string` (UUID), Estimating tracker IDs are `number`.
+4. **PROVISIONAL markers are required** where an example depends on an unresolved C1 decision (D3–D6, single-item envelope shape).
+5. **BLOCKED examples must be labeled as representative** — code for tasks blocked on B1/C1/C2 is implementation guidance, not immediately executable.
+
 ---
 
 ## Chunk 1: Contract Schema Foundation
@@ -1464,6 +1474,8 @@ This is the critical contract test. It verifies that the adapter's response type
 
 **Full Code:**
 
+> **Representative example — not executable until B1 delivers `ProxyHttpClient` and `ProxyLeadRepository`.**
+
 **File: `packages/data-access/src/adapters/proxy/lead-repository.contract.test.ts`**
 
 ```typescript
@@ -1659,25 +1671,20 @@ describe('ProxyLeadRepository Contract Tests', () => {
       expect(parsed.success).toBe(true);
     });
 
-    it('unknown lead returns null', async () => {
+    it('unknown lead throws NotFoundError', async () => {
       const updates = { stage: 'Bidding' as const };
-      const result = await repository.update(99999, updates);
 
-      expect(result).toBeNull();
+      await expect(repository.update(99999, updates)).rejects.toThrow();
     });
   });
 
   describe('delete()', () => {
-    it('delete known lead succeeds', async () => {
-      const result = await repository.delete(1);
-
-      expect(result).toBe(true);
+    it('delete known lead resolves without error', async () => {
+      await expect(repository.delete(1)).resolves.toBeUndefined();
     });
 
-    it('delete unknown lead returns false', async () => {
-      const result = await repository.delete(99999);
-
-      expect(result).toBe(false);
+    it('delete unknown lead throws NotFoundError', async () => {
+      await expect(repository.delete(99999)).rejects.toThrow();
     });
   });
 });
@@ -1709,6 +1716,8 @@ Expected: All tests pass, proving adapter and schema agreement.
 - `packages/data-access/src/adapters/proxy/estimating-repository.contract.test.ts`
 
 **Implementation:** Use the same pattern as Task 4, adjusting for ActiveProject and EstimatingTracker types.
+
+> **Representative examples — not executable until B1 delivers proxy repository classes.**
 
 **File: `packages/data-access/src/adapters/proxy/project-repository.contract.test.ts`** (skeleton; show representative test)
 
@@ -1961,7 +1970,15 @@ export function createMockServiceFactory() {
       createdAt: '2026-03-16T10:00:00Z',
       updatedAt: '2026-03-16T10:00:00Z',
     }),
-    update: vi.fn().mockResolvedValue(null),
+    update: vi.fn().mockResolvedValue({
+      id: 1,
+      title: 'Updated Lead',
+      stage: 'Bidding',
+      clientName: 'Test Client',
+      estimatedValue: 200000,
+      createdAt: '2026-03-16T10:00:00Z',
+      updatedAt: '2026-03-16T12:00:00Z',
+    }),
     delete: vi.fn().mockResolvedValue(undefined),
   };
 
@@ -1973,8 +1990,16 @@ export function createMockServiceFactory() {
       pageSize: 25,
     }),
     getProjectById: vi.fn().mockResolvedValue(null),
-    createProject: vi.fn().mockResolvedValue(null),
-    updateProject: vi.fn().mockResolvedValue(null),
+    createProject: vi.fn().mockResolvedValue({
+      id: '770e8400-e29b-41d4-a716-446655440001',
+      name: 'New Project', number: 'PRJ-NEW01', status: 'Active',
+      startDate: '2026-04-01T00:00:00Z', endDate: '2026-12-31T00:00:00Z',
+    }),
+    updateProject: vi.fn().mockResolvedValue({
+      id: '770e8400-e29b-41d4-a716-446655440001',
+      name: 'Updated Project', number: 'PRJ-NEW01', status: 'Active',
+      startDate: '2026-04-01T00:00:00Z', endDate: '2026-12-31T00:00:00Z',
+    }),
     deleteProject: vi.fn().mockResolvedValue(undefined),
     getPortfolioSummary: vi.fn().mockResolvedValue({
       totalProjects: 0, activeProjects: 0, totalContractValue: 0, averagePercentComplete: 0,
@@ -1989,11 +2014,25 @@ export function createMockServiceFactory() {
       pageSize: 25,
     }),
     getTrackerById: vi.fn().mockResolvedValue(null),
-    createTracker: vi.fn().mockResolvedValue(null),
-    updateTracker: vi.fn().mockResolvedValue(null),
+    createTracker: vi.fn().mockResolvedValue({
+      id: 100, projectId: '660e8400-e29b-41d4-a716-446655440001',
+      bidNumber: 'BID-2026-100', status: 'Draft',
+      dueDate: '2026-05-01T00:00:00Z',
+      createdAt: '2026-03-16T10:00:00Z', updatedAt: '2026-03-16T10:00:00Z',
+    }),
+    updateTracker: vi.fn().mockResolvedValue({
+      id: 1, projectId: '660e8400-e29b-41d4-a716-446655440001',
+      bidNumber: 'BID-2026-001', status: 'InProgress',
+      dueDate: '2026-05-01T00:00:00Z',
+      createdAt: '2026-03-16T10:00:00Z', updatedAt: '2026-03-16T12:00:00Z',
+    }),
     deleteTracker: vi.fn().mockResolvedValue(undefined),
     getKickoff: vi.fn().mockResolvedValue(null),
-    createKickoff: vi.fn().mockResolvedValue(null),
+    createKickoff: vi.fn().mockResolvedValue({
+      id: 1, projectId: '660e8400-e29b-41d4-a716-446655440001',
+      kickoffDate: '2026-04-01T09:00:00Z', attendees: ['Alice', 'Bob'],
+      notes: 'Initial kickoff', createdAt: '2026-03-16T10:00:00Z',
+    }),
   };
 
   return {
