@@ -37,14 +37,13 @@ All adapter domain tracking in this document uses the following status progressi
 
 ## Proxy Adapter: Domain Completion Matrix
 
-B1 implements all 11 domain repositories against mocked fetch in Phase 1 per the engineering plan. C1 backend routes are locked for 3 domains; the remaining 8 proceed with provisional route assumptions and will reconcile before production activation.
+B1 implements all 11 domain repositories against mocked fetch in Phase 1 per the engineering plan. C1 backend routes are locked for 3 domains; the remaining 7 data domains proceed with provisional route assumptions and will reconcile before production activation. Auth is tracked separately — see [Auth Domain: Special-Case Tracking](#auth-domain-special-case-tracking) below.
 
 | Domain | Port Interface | Method Families | Total | Phase Target | Status | B1 Task | Route Status |
 |---|---|---|---|---|---|---|---|
 | **Lead** | `ILeadRepository` | CRUD (5), Search (1) | 6 | Phase 1 | `IMPL_READY` | Task 3 | C1 locked |
 | **Project** | `IProjectRepository` | CRUD (5), Aggregate (1) | 6 | Phase 1 | `IMPL_READY` | Task 4 | C1 locked; A8 |
 | **Estimating** | `IEstimatingRepository` | Tracker CRUD (5), Kickoff (2) | 7 | Phase 1 | `IMPL_READY` | Task 5 | C1 base locked; D2 |
-| **Auth** | `IAuthRepository` | Current User (1), Roles (2), Permissions (1), Assignment (2) | 6 | Phase 1 | `IMPL_READY` | Task 7 | A9 provisional |
 | **Schedule** | `IScheduleRepository` | Activity CRUD (5), Metrics (1) | 6 | Phase 1* | `PLANNED` | Task 5 | D1, D6 provisional |
 | **Buyout** | `IBuyoutRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1* | `PLANNED` | Task 5 | D1, D6 provisional |
 | **Compliance** | `IComplianceRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1* | `PLANNED` | Task 6 | D1, D6 provisional |
@@ -81,15 +80,6 @@ Each domain's port methods are grouped into route groups below. Route patterns a
 |---|---|---|---|---|
 | Tracker CRUD | `getAllTrackers`, `getTrackerById`, `createTracker`, `updateTracker`, `deleteTracker` | `GET/POST /api/estimating/trackers`, `GET/PUT/DELETE /api/estimating/trackers/{id}` | C1 base locked | D2 |
 | Kickoff | `getKickoff`, `createKickoff` | `GET/POST /api/estimating/kickoffs?projectId={id}` | Provisional | D2 |
-
-#### Auth (`IAuthRepository`) — A9 provisional; no CRUD pattern
-
-| Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
-|---|---|---|---|---|
-| Current User | `getCurrentUser` | `GET /api/auth/me` | A9 — not in C1/C2 catalog | A9 |
-| Roles | `getRoles`, `getRoleById` | `GET /api/auth/roles`, `GET /api/auth/roles/{id}` | A9 — not in C1/C2 catalog | A9 |
-| Permissions | `getPermissionTemplates` | `GET /api/auth/permissions/templates` | A9 — not in C1/C2 catalog | A9 |
-| Role Assignment | `assignRole`, `removeRole` | `POST/DELETE /api/auth/users/{userId}/roles/{roleId}` | A9 — not in C1/C2 catalog | A9 |
 
 #### Schedule (`IScheduleRepository`) — D1, D6 provisional; project-scoped
 
@@ -139,6 +129,42 @@ Each domain's port methods are grouped into route groups below. Route patterns a
 |---|---|---|---|---|
 | Plan CRUD | `getPlans`, `getPlanById`, `createPlan`, `updatePlan`, `deletePlan` | `GET/POST /api/projects/{projectId}/pmp`, `GET/PUT/DELETE /api/pmp/{id}` | Provisional | D1, D6 |
 | Signatures | `getSignatures`, `createSignature` | `GET/POST /api/pmp/{pmpId}/signatures` | Provisional | D6 |
+
+---
+
+## Auth Domain: Special-Case Tracking
+
+Auth is tracked separately from the 10 data domains because it has no CRUD pattern, no C1 route catalog entry (A9), and its responsibilities split across three distinct layers: adapter implementation, backend auth subsystem, and platform runtime token context. Its SharePoint surface strategy is also an open decision.
+
+### Auth Capability Groups
+
+| Capability Group | Port Methods | Responsibility Layer | Proxy Route (B1 assumed) | Route Confidence | Upstream Owner |
+|---|---|---|---|---|---|
+| Current User | `getCurrentUser` | Runtime token → user profile | `GET /api/auth/me` | A9 — no catalog entry | P1-C2 |
+| Role Retrieval | `getRoles`, `getRoleById` | Auth subsystem — role definitions | `GET /api/auth/roles`, `GET /api/auth/roles/{id}` | A9 — no catalog entry | P1-C2 |
+| Permission Templates | `getPermissionTemplates` | Auth subsystem — RBAC config | `GET /api/auth/permissions/templates` | A9 — no catalog entry | P1-C2 |
+| Role Assignment | `assignRole`, `removeRole` | Auth subsystem — write ops | `POST/DELETE /api/auth/users/{userId}/roles/{roleId}` | A9 — no catalog entry | P1-C2 |
+
+**Responsibility layer key:**
+- **Runtime token** — depends on MSAL token context already available in the app shell; the adapter translates token identity into a user profile. This is platform runtime behavior, not traditional adapter work.
+- **Auth subsystem** — depends on a backend auth service that manages roles, permissions, and assignments. This may be a dedicated auth microservice or part of the Azure Functions backend. The adapter calls it, but the service design is C2-owned.
+
+### Auth Status
+
+| Item | Status | Notes |
+|---|---|---|
+| Port interface (`IAuthRepository`) | Frozen | 6 methods across 4 capability groups |
+| Proxy adapter (mocked fetch) | `IMPL_READY` | B1 Task 7; can proceed against mocked fetch |
+| Backend route catalog | **Missing** | A9: no `/api/auth/*` routes in C1 or C2 catalog |
+| OBO token exchange for auth routes | **Unresolved** | C2 owns; auth OBO may differ from standard domain OBO |
+| SharePoint surface strategy | **Open decision** | Proxy-only vs native SPFx Entra ID/Graph; deferred to future SP engineering plan |
+
+### Auth Blocking Dependencies
+
+- **B1 Task 7** can proceed with mocked fetch — no external blocker for `CODE_COMPLETE_MOCK`
+- **A9 resolution** required before `CONTRACT_ALIGNED` — C2 must publish auth management route definitions
+- **C2 auth middleware** required before `INTEGRATION_READY` — OBO flow for auth routes may differ from standard domain OBO if auth uses a separate backend service
+- **SharePoint Auth adapter** is an open decision — not blocked, not designed; tracked as a future-phase open item (see SharePoint section below)
 
 ---
 
@@ -243,7 +269,8 @@ C1 owns route path finalization, response envelope shape, and HTTP method defini
 
 **Current state:**
 - **C1 locked (3 domains):** Lead, Project, Estimating base paths
-- **Provisional (8 domains):** Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP, Auth — route shapes assumed per B1, pending D1/D2/D5/D6 resolution
+- **Provisional (7 data domains):** Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP — route shapes assumed per B1, pending D1/D2/D5/D6 resolution
+- **Auth (tracked separately):** A9 — no route catalog entry; see [Auth Domain: Special-Case Tracking](#auth-domain-special-case-tracking)
 
 **Unresolved items blocking `CONTRACT_ALIGNED`:**
 - D1: Singular vs plural paths — affects 4 domain path constants
@@ -260,7 +287,7 @@ C1 owns route path finalization, response envelope shape, and HTTP method defini
 C2 owns MSAL app registration, OBO token exchange middleware, auth validation at service boundaries, and CORS configuration. No domain can accept real HTTP traffic until C2 delivers a working auth pipeline.
 
 **Unresolved items:**
-- A9: Auth management routes (`/api/auth/*`) have no C1 or C2 catalog entry — the Auth domain's 4 route groups (current user, roles, permissions, role assignment) have no confirmed backend paths
+- A9: Auth management routes (`/api/auth/*`) have no C1 or C2 catalog entry — see [Auth Domain: Special-Case Tracking](#auth-domain-special-case-tracking) for full capability-group and dependency detail
 - D3: Error envelope field name — joint ownership with C1; affects how auth errors are surfaced to `ProxyHttpClient`
 
 ### P1-D1 — Write Safety, Retry, and Recovery
@@ -337,7 +364,7 @@ The SharePoint adapter targets the SPFx collaborative-authoring surface. Not all
 
 Auth (`IAuthRepository`) does not receive a SharePoint adapter. Its methods — `getCurrentUser`, `getRoles`, `getRoleById`, `getPermissionTemplates`, `assignRole`, `removeRole` — are identity and RBAC operations backed by Entra ID (Azure AD), not SharePoint lists. In SPFx, user identity comes from `this.context.pageContext.user` and `AadHttpClient`/`MSGraphClient`; role management is an Azure AD / Microsoft Graph concern.
 
-**Open decision:** Whether Auth in the SharePoint surface stays proxy-only (calling the same Azure Functions backend as the PWA) or uses native SPFx Entra ID / Graph integration. This decision belongs to the future SharePoint engineering plan, not B2.
+**Open decision:** Whether Auth in the SharePoint surface stays proxy-only (calling the same Azure Functions backend as the PWA) or uses native SPFx Entra ID / Graph integration. This decision belongs to the future SharePoint engineering plan, not B2. See [Auth Domain: Special-Case Tracking](#auth-domain-special-case-tracking) for the full Auth status and dependency picture.
 
 #### SharePoint-Specific Blocking Dependencies
 
