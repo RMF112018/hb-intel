@@ -31,7 +31,7 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 **Deliverables:**
 - Retry policy types and `withRetry` higher-order function
 - Idempotency key generation and tracking interface
-- Backend idempotency guard middleware (Azure Functions)
+- Backend idempotency guard (`withIdempotency` handler wrapper, `IdempotencyStorageService`, cleanup timer) (Azure Functions)
 - Write-safe error states and failure classification
 - Audit record interface (models layer)
 - Integration tests verifying retry + idempotency together
@@ -64,8 +64,9 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 | `WriteFailureReason` enum + `classifyWriteFailure` | `packages/data-access` | **TARGET** — implementable now | None — standalone module |
 | `IdempotencyContext` + `generateIdempotencyKey` | `packages/data-access` | **TARGET** — implementable now | None — standalone module |
 | `IAuditRecord` interface | `packages/models` or `packages/data-access` | **TARGET** — implementable now | None — interface only |
-| Backend idempotency guard | `backend/functions` | **TARGET** — requires integration design | Backend handler model uses side-effect imports, not middleware pipeline (**PROVISIONAL**) |
-| Backend idempotency table storage | `backend/functions` | **TARGET** — requires storage strategy | Current `RealTableStorageService` has no idempotency methods; needs extension (**PROVISIONAL**) |
+| Backend idempotency guard (`withIdempotency` wrapper + guard functions) | `backend/functions` | **TARGET** — implementable now | None — standalone module using existing service factory pattern |
+| Backend `IdempotencyStorageService` + `IdempotencyRecords` table | `backend/functions` | **TARGET** — implementable now | None — follows `RealTableStorageService` pattern with new dedicated table |
+| Idempotency record cleanup timer | `backend/functions` | **TARGET** — implementable now | None — follows existing `app.timer()` registration pattern |
 | Repository-level idempotency wiring | `packages/data-access` | **BLOCKED** | B1 must deliver proxy repositories first |
 | Integration tests | Both surfaces | **BLOCKED** | B1 proxy infrastructure + D1 implementation must both exist |
 
@@ -75,11 +76,14 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 - Chunk 2, Task 2.1: `IdempotencyContext` types and `generateIdempotencyKey` (standalone)
 - Chunk 3, Task 3.1: `WriteFailureReason` enum and `classifyWriteFailure` (standalone)
 - Chunk 3, Task 3.2: `IAuditRecord` interface (standalone)
+- Chunk 2, Task 2.2: `IdempotencyStorageService` (new service, dedicated `IdempotencyRecords` table, follows `RealTableStorageService` pattern)
+- Chunk 2, Task 2.2: `checkIdempotency()` and `recordIdempotencyResult()` standalone functions
+- Chunk 2, Task 2.2: `withIdempotency(handler)` wrapper function
+- Chunk 2, Task 2.2: `cleanupIdempotencyRecords` timer trigger
 
 ### What D1 Cannot Implement Until B1 Delivers
 
 - Chunk 1, Task 1.2: Wiring retry into `ProxyHttpClient` (class doesn't exist)
-- Chunk 2, Task 2.2: Backend idempotency guard (needs integration design with current handler model)
 - Chunk 3, Task 3.3: Repository-level idempotency wiring (repositories don't exist)
 - Chunk 4: Integration tests (needs both B1 and D1 implementations)
 
@@ -162,13 +166,29 @@ Frontend generates a unique key before initiating a write. The key is sent as th
 ### Decision 3: Backend Idempotency Stored in Azure Table Storage
 
 **Rationale:**
-Idempotency records must be durable across function restarts and must be queryable quickly. Azure Table Storage (same backing store as audit logs) is a natural fit. It handles eventual consistency and TTL.
+Idempotency records must be durable across function restarts and queryable by key in single-digit milliseconds. Azure Table Storage provides point-read by PartitionKey+RowKey which is ideal for this access pattern. The existing `RealTableStorageService` (`backend/functions/src/services/table-storage-service.ts`) demonstrates the SDK integration pattern.
 
 **Consequence:**
-Idempotency records live in a dedicated table (`idempotency` partition). Records have a ~24h TTL. Once expired, the same key is treated as a new request. Functions check the table before processing; they write the result after successful processing.
+Idempotency records live in a **dedicated table** named `IdempotencyRecords` (separate from the `ProvisioningStatus` table used by `RealTableStorageService`). Records are written with an `expiresAt` timestamp. Azure Table Storage has **no native TTL**; expiry is enforced in two ways: (a) `checkIdempotency` treats records past `expiresAt` as non-existent, and (b) a timer-triggered cleanup function (`cleanupIdempotencyRecords`) deletes stale records on a nightly schedule.
+
+**Idempotency record schema:**
+
+| Field | Type | Description |
+|---|---|---|
+| `partitionKey` | string | `X-Idempotency-Operation` header value (e.g., `create-lead`) |
+| `rowKey` | string | `Idempotency-Key` header value (UUID) |
+| `statusCode` | number | HTTP status code of original response |
+| `responseBodyJson` | string | JSON-serialized response body |
+| `expiresAt` | string | ISO 8601 timestamp — application-enforced expiry |
+| `recordedAt` | string | ISO 8601 timestamp — when the record was created |
+| `recordedBy` | string | UPN of the user who initiated the request |
+
+**Partition/Row Key strategy:**
+- `partitionKey` = operation name groups records by domain operation for efficient range queries during cleanup.
+- `rowKey` = idempotency key UUID guarantees uniqueness and enables O(1) point reads via `client.getEntity(pk, rk)`.
 
 **Implication for implementation:**
-Backend middleware `checkIdempotency()` queries the table; `recordIdempotencyResult()` writes the cached response after the operation succeeds. Both are async and non-blocking.
+A new `IdempotencyStorageService` class (following the `TableClient.fromConnectionString()` pattern) is registered in `IServiceContainer` via `createServiceFactory()`. Standalone functions `checkIdempotency()` and `recordIdempotencyResult()` receive the service as a parameter. There is no middleware pipeline in Azure Functions v4; a `withIdempotency(handler)` wrapper function is applied at each mutating endpoint's `app.http()` registration.
 
 ---
 
@@ -1286,325 +1306,351 @@ in Idempotency-Key header and can survive page reloads within TTL.
 
 ### Task 2.2: Backend Idempotency Guard (Azure Functions)
 
-**Integration note (PROVISIONAL):** The current backend Azure Functions handler model uses direct side-effect imports for handler registration — there is no generalized middleware pipeline. The "middleware" pattern described below requires one of: (a) a handler wrapper function applied at each mutating endpoint, (b) an Azure Functions pre-invocation hook, or (c) a validation layer injected into the service factory. The specific integration approach must be confirmed during implementation against the actual handler structure. The current `RealTableStorageService` uses `TableClient.upsertEntity()` with domain-specific methods — extending it for idempotency requires adding a dedicated idempotency table/partition and explicit TTL/cleanup strategy (the ~24h TTL in Decision 3 is not enforced by Azure Table Storage natively).
+**Integration model (aligned with current handler pattern):**
+
+The Azure Functions v4 backend uses `app.http()` registrations with standalone async handler functions (see `backend/functions/src/functions/notifications/UpdatePreferences.ts` for a representative mutating handler). There is **no middleware pipeline**. Each mutating handler follows the pattern:
+
+1. `validateToken(req)` → `IValidatedClaims`
+2. Parse request body: `await req.json()`
+3. Validate request fields
+4. `const services = createServiceFactory()` → `IServiceContainer`
+5. Service call → result
+6. `logger.info()` — audit
+7. Return `{ status: 2xx, jsonBody: result }`
+
+To add idempotency without modifying every handler's internal logic, this task introduces:
+
+- **`IdempotencyStorageService`** — A new service class using `TableClient` directly (same pattern as `RealTableStorageService`), registered in `IServiceContainer` via `createServiceFactory()`.
+- **`checkIdempotency()` and `recordIdempotencyResult()`** — Standalone async functions that receive `IIdempotencyStorageService` and a logger as parameters.
+- **`withIdempotency(handler)`** — A handler wrapper function that mutating endpoints opt into at their `app.http()` registration site. The wrapper inserts the idempotency check before the handler and the result recording after it, without changing the handler's internal flow.
 
 **Files:**
-- Create: `backend/functions/src/middleware/idempotency-guard.ts`
-- Create: `backend/functions/src/middleware/idempotency-guard.test.ts`
+- Create: `backend/functions/src/services/idempotency-storage-service.ts`
+- Create: `backend/functions/src/services/idempotency-storage-service.test.ts`
+- Create: `backend/functions/src/idempotency/idempotency-guard.ts`
+- Create: `backend/functions/src/idempotency/idempotency-guard.test.ts`
+- Create: `backend/functions/src/idempotency/with-idempotency.ts`
+- Create: `backend/functions/src/idempotency/with-idempotency.test.ts`
+- Create: `backend/functions/src/functions/cleanupIdempotency/index.ts`
+- Modify: `backend/functions/src/services/service-factory.ts` (add `idempotency` to `IServiceContainer`)
+- Modify: `backend/functions/src/index.ts` (import cleanup timer trigger)
 
-**Note:** This task assumes Azure Functions project structure. If your backend layout differs, adjust paths accordingly.
+#### Sub-task 2.2a: `IdempotencyStorageService`
 
-**Failing Tests (TDD start):**
+**File:** `backend/functions/src/services/idempotency-storage-service.ts`
+
+Follows the same pattern as `RealTableStorageService` (`backend/functions/src/services/table-storage-service.ts`):
 
 ```typescript
-// backend/functions/src/middleware/idempotency-guard.test.ts
+import { TableClient, odata } from '@azure/data-tables';
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { checkIdempotency, recordIdempotencyResult } from './idempotency-guard.js';
+const IDEMPOTENCY_TABLE = 'IdempotencyRecords';
 
-describe('checkIdempotency()', () => {
-  const mockTableStorage = {
-    getEntity: vi.fn(),
-  };
+export interface IIdempotencyRecord {
+  partitionKey: string;  // operation name (e.g., 'create-lead')
+  rowKey: string;        // idempotency key UUID
+  statusCode: number;
+  responseBodyJson: string;
+  expiresAt: string;     // ISO 8601
+  recordedAt: string;    // ISO 8601
+  recordedBy: string;    // UPN
+}
 
-  const mockLogger = {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  };
+export interface IIdempotencyStorageService {
+  getRecord(operation: string, key: string): Promise<IIdempotencyRecord | null>;
+  upsertRecord(record: IIdempotencyRecord): Promise<void>;
+  deleteExpiredRecords(cutoffIso: string): Promise<number>;
+}
 
-  beforeEach(() => {
-    mockTableStorage.getEntity.mockClear();
-    mockLogger.info.mockClear();
-  });
+export class IdempotencyStorageService implements IIdempotencyStorageService {
+  private readonly client: TableClient;
 
-  it('returns alreadyProcessed=false when no Idempotency-Key header', async () => {
-    const request = { headers: {} } as any;
-    const result = await checkIdempotency(request, mockTableStorage, mockLogger);
-    expect(result.alreadyProcessed).toBe(false);
-    expect(result.cachedResponse).toBeUndefined();
-  });
+  constructor() {
+    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
+    if (!connectionString) throw new Error('AZURE_STORAGE_CONNECTION_STRING is required');
+    this.client = TableClient.fromConnectionString(connectionString, IDEMPOTENCY_TABLE);
+  }
 
-  it('returns alreadyProcessed=false when key not found in table', async () => {
-    mockTableStorage.getEntity.mockResolvedValueOnce(null);
+  async getRecord(operation: string, key: string): Promise<IIdempotencyRecord | null> {
+    try {
+      const entity = await this.client.getEntity<IIdempotencyRecord>(operation, key);
+      return entity as IIdempotencyRecord;
+    } catch (err) {
+      // RestError with statusCode 404 = not found
+      if ((err as { statusCode?: number }).statusCode === 404) return null;
+      throw err;
+    }
+  }
 
-    const request = {
-      headers: { 'idempotency-key': 'test-uuid-1234' },
-    } as any;
+  async upsertRecord(record: IIdempotencyRecord): Promise<void> {
+    await this.client.upsertEntity(record, 'Replace');
+  }
 
-    const result = await checkIdempotency(request, mockTableStorage, mockLogger);
-    expect(result.alreadyProcessed).toBe(false);
-    expect(mockTableStorage.getEntity).toHaveBeenCalledWith('idempotency', 'test-uuid-1234');
-  });
-
-  it('returns alreadyProcessed=true with cached response when key found and not expired', async () => {
-    const cachedResponse = { id: '123', name: 'Cached Lead' };
-    mockTableStorage.getEntity.mockResolvedValueOnce({
-      partitionKey: 'idempotency',
-      rowKey: 'test-uuid-1234',
-      responseBody: JSON.stringify(cachedResponse),
-      expiresAt: Date.now() + 1000 * 60 * 60, // expires in 1 hour
+  async deleteExpiredRecords(cutoffIso: string): Promise<number> {
+    let deleted = 0;
+    const entities = this.client.listEntities<IIdempotencyRecord>({
+      queryOptions: { filter: odata`expiresAt lt ${cutoffIso}` },
     });
+    for await (const entity of entities) {
+      await this.client.deleteEntity(entity.partitionKey!, entity.rowKey!);
+      deleted++;
+    }
+    return deleted;
+  }
 
-    const request = {
-      headers: { 'idempotency-key': 'test-uuid-1234' },
-    } as any;
-
-    const result = await checkIdempotency(request, mockTableStorage, mockLogger);
-    expect(result.alreadyProcessed).toBe(true);
-    expect(result.cachedResponse).toEqual(cachedResponse);
-  });
-
-  it('returns alreadyProcessed=false when key found but expired', async () => {
-    mockTableStorage.getEntity.mockResolvedValueOnce({
-      partitionKey: 'idempotency',
-      rowKey: 'test-uuid-1234',
-      responseBody: JSON.stringify({ id: '123' }),
-      expiresAt: Date.now() - 1000, // expired
-    });
-
-    const request = {
-      headers: { 'idempotency-key': 'test-uuid-1234' },
-    } as any;
-
-    const result = await checkIdempotency(request, mockTableStorage, mockLogger);
-    expect(result.alreadyProcessed).toBe(false);
-  });
-
-  it('logs operation name if X-Idempotency-Operation header present', async () => {
-    mockTableStorage.getEntity.mockResolvedValueOnce(null);
-
-    const request = {
-      headers: {
-        'idempotency-key': 'test-uuid-1234',
-        'x-idempotency-operation': 'create-lead',
-      },
-    } as any;
-
-    await checkIdempotency(request, mockTableStorage, mockLogger);
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('create-lead'),
-    );
-  });
-});
-
-describe('recordIdempotencyResult()', () => {
-  const mockTableStorage = {
-    insertEntity: vi.fn(),
-  };
-
-  const mockLogger = {
-    error: vi.fn(),
-  };
-
-  beforeEach(() => {
-    mockTableStorage.insertEntity.mockClear();
-  });
-
-  it('writes idempotency record with 24h TTL', async () => {
-    const responseBody = { id: '123', name: 'Lead A' };
-    await recordIdempotencyResult(
-      'test-uuid-1234',
-      responseBody,
-      mockTableStorage,
-      mockLogger,
-    );
-
-    expect(mockTableStorage.insertEntity).toHaveBeenCalled();
-    const call = mockTableStorage.insertEntity.mock.calls[0];
-    const [partitionKey, rowKey, entity] = call;
-
-    expect(partitionKey).toBe('idempotency');
-    expect(rowKey).toBe('test-uuid-1234');
-    expect(entity.responseBody).toBe(JSON.stringify(responseBody));
-    expect(entity.expiresAt).toBeGreaterThan(Date.now());
-  });
-
-  it('uses custom TTL if provided', async () => {
-    const customTtlMs = 60 * 60 * 1000; // 1h
-    const now = Date.now();
-
-    await recordIdempotencyResult(
-      'test-uuid-1234',
-      { id: '123' },
-      mockTableStorage,
-      mockLogger,
-      customTtlMs,
-    );
-
-    const [, , entity] = mockTableStorage.insertEntity.mock.calls[0];
-    expect(entity.expiresAt).toBeGreaterThanOrEqual(now + customTtlMs - 100);
-  });
-
-  it('logs error but does not throw if insert fails', async () => {
-    mockTableStorage.insertEntity.mockRejectedValueOnce(
-      new Error('Storage write failed'),
-    );
-
-    // Should not throw
-    await expect(
-      recordIdempotencyResult(
-        'test-uuid-1234',
-        { id: '123' },
-        mockTableStorage,
-        mockLogger,
-      ),
-    ).resolves.toBeUndefined();
-
-    expect(mockLogger.error).toHaveBeenCalled();
-  });
-});
+  async ensureTable(): Promise<void> {
+    try {
+      await this.client.createTable();
+    } catch (error) {
+      const statusCode = (error as { statusCode?: number }).statusCode;
+      if (statusCode !== 409) throw error; // 409 = table already exists
+    }
+  }
+}
 ```
 
-**Implementation:**
+**Mock for tests** (registered in `createServiceFactory()` when `isMock`):
 
 ```typescript
-// backend/functions/src/middleware/idempotency-guard.ts
+export class MockIdempotencyStorageService implements IIdempotencyStorageService {
+  private records = new Map<string, IIdempotencyRecord>();
+  private key(op: string, k: string) { return `${op}:${k}`; }
 
-/**
- * Interface for table storage operations needed by idempotency guard.
- * Implement using Azure Table Storage SDK in actual backend.
- */
-export interface ITableStorageService {
-  getEntity(partitionKey: string, rowKey: string): Promise<unknown>;
-  insertEntity(partitionKey: string, rowKey: string, entity: unknown): Promise<void>;
-}
+  async getRecord(operation: string, key: string): Promise<IIdempotencyRecord | null> {
+    return this.records.get(this.key(operation, key)) ?? null;
+  }
 
-/**
- * Logger interface for audit and error logging.
- */
-export interface ILogger {
-  info(message: string, ...args: unknown[]): void;
-  warn(message: string, ...args: unknown[]): void;
-  error(message: string, ...args: unknown[]): void;
-}
+  async upsertRecord(record: IIdempotencyRecord): Promise<void> {
+    this.records.set(this.key(record.partitionKey, record.rowKey), record);
+  }
 
-/**
- * HTTP request interface expected by idempotency guard.
- */
-export interface IHttpRequest {
-  headers: Record<string, string | undefined>;
+  async deleteExpiredRecords(cutoffIso: string): Promise<number> {
+    let deleted = 0;
+    for (const [key, record] of this.records) {
+      if (record.expiresAt < cutoffIso) { this.records.delete(key); deleted++; }
+    }
+    return deleted;
+  }
 }
+```
 
-/**
- * Result of idempotency check.
- */
-export interface IdempotencyCheckResult {
-  alreadyProcessed: boolean;
-  cachedResponse?: unknown;
-}
+**Service factory wiring** (modify `backend/functions/src/services/service-factory.ts`):
+
+```typescript
+// Add to IServiceContainer interface:
+idempotency: IIdempotencyStorageService;
+
+// Add to createServiceFactory() singleton creation:
+idempotency: isMock
+  ? new MockIdempotencyStorageService()
+  : new IdempotencyStorageService(),
+```
+
+**Tests** (`backend/functions/src/services/idempotency-storage-service.test.ts`):
+
+- `getRecord()` returns `null` when entity not found (catches `RestError` with statusCode 404)
+- `getRecord()` returns deserialized `IIdempotencyRecord` when entity exists
+- `upsertRecord()` calls `client.upsertEntity(record, 'Replace')`
+- `deleteExpiredRecords()` queries with `odata` filter, deletes matched entities, returns count
+- `ensureTable()` handles 409 conflict without throwing
+
+---
+
+#### Sub-task 2.2b: `checkIdempotency` and `recordIdempotencyResult`
+
+**File:** `backend/functions/src/idempotency/idempotency-guard.ts`
+
+Standalone async functions — not methods on a class, not middleware:
+
+```typescript
+import { HttpRequest } from '@azure/functions';
+import { IIdempotencyStorageService, IIdempotencyRecord } from '../services/idempotency-storage-service.js';
 
 const DEFAULT_IDEMPOTENCY_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
-/**
- * Checks if an incoming request has already been processed (idempotent duplicate).
- * If found and valid, returns the cached response. Otherwise, returns alreadyProcessed=false.
- *
- * @param request HTTP request with potential Idempotency-Key header
- * @param tableStorage Table storage service for lookups
- * @param logger Logger for audit trail
- * @returns IdempotencyCheckResult with cached response if found
- *
- * @example
- * ```typescript
- * const result = await checkIdempotency(request, tableStorage, logger);
- * if (result.alreadyProcessed) {
- *   return { status: 200, body: JSON.stringify(result.cachedResponse) };
- * }
- * // Continue with normal processing
- * ```
- */
-export async function checkIdempotency(
-  request: IHttpRequest,
-  tableStorage: ITableStorageService,
-  logger: ILogger,
-): Promise<IdempotencyCheckResult> {
-  const key = request.headers['idempotency-key'];
-  if (!key) {
-    return { alreadyProcessed: false };
-  }
+export interface IdempotencyCheckResult {
+  alreadyProcessed: boolean;
+  cachedResponse?: unknown;
+  statusCode?: number;
+}
 
-  const operation = request.headers['x-idempotency-operation'] || 'unknown';
+export async function checkIdempotency(
+  request: HttpRequest,
+  service: IIdempotencyStorageService,
+  logger: { info: (...args: unknown[]) => void; warn: (...args: unknown[]) => void },
+): Promise<IdempotencyCheckResult> {
+  const key = request.headers.get('idempotency-key');
+  if (!key) return { alreadyProcessed: false };
+
+  const operation = request.headers.get('x-idempotency-operation') ?? 'unknown';
   logger.info(`Checking idempotency for operation=${operation}, key=${key}`);
 
   try {
-    const record = await tableStorage.getEntity('idempotency', key);
-    if (!record) {
+    const record = await service.getRecord(operation, key);
+    if (!record) return { alreadyProcessed: false };
+
+    // Application-enforced TTL — Azure Tables has no native expiry
+    if (new Date(record.expiresAt).getTime() <= Date.now()) {
+      logger.info(`Idempotency key ${key} expired; treating as new request`);
       return { alreadyProcessed: false };
     }
 
-    // Check if the record has expired
-    const now = Date.now();
-    const expiresAt = (record as any).expiresAt || 0;
-    if (now >= expiresAt) {
-      logger.info(
-        `Idempotency key ${key} expired; treating as new request`,
-      );
-      return { alreadyProcessed: false };
-    }
-
-    // Return the cached response
-    const responseBodyStr = (record as any).responseBody;
-    const cachedResponse = responseBodyStr ? JSON.parse(responseBodyStr) : null;
-    logger.info(
-      `Idempotency hit: key=${key}, operation=${operation}, returning cached response`,
-    );
-    return { alreadyProcessed: true, cachedResponse };
+    const cachedResponse = JSON.parse(record.responseBodyJson);
+    logger.info(`Idempotency hit: key=${key}, operation=${operation}`);
+    return { alreadyProcessed: true, cachedResponse, statusCode: record.statusCode };
   } catch (err) {
-    logger.warn(
-      `Idempotency check failed for key=${key}; proceeding with normal processing`,
-      err,
-    );
+    // Fail open — idempotency check failure should not block the operation
+    logger.warn(`Idempotency check failed for key=${key}; proceeding normally`, err);
     return { alreadyProcessed: false };
   }
 }
 
-/**
- * Records an idempotency result after a successful operation.
- * Stores the response body with a TTL so the backend can deduplicate retries.
- * If the write fails, logs a warning but does not fail the operation.
- *
- * @param key Idempotency key from request
- * @param responseBody The response to cache (will be JSON serialized)
- * @param tableStorage Table storage service for write
- * @param logger Logger for errors
- * @param ttlMs Time-to-live in milliseconds (default: 24h)
- *
- * @example
- * ```typescript
- * const lead = await createLeadInDb(data);
- * await recordIdempotencyResult(idempotencyKey, lead, tableStorage, logger);
- * // Now if the same key is sent again, the cached lead is returned
- * ```
- */
 export async function recordIdempotencyResult(
   key: string,
+  operation: string,
+  statusCode: number,
   responseBody: unknown,
-  tableStorage: ITableStorageService,
-  logger: ILogger,
+  upn: string,
+  service: IIdempotencyStorageService,
+  logger: { info: (...args: unknown[]) => void; error: (...args: unknown[]) => void },
   ttlMs: number = DEFAULT_IDEMPOTENCY_TTL_MS,
 ): Promise<void> {
   try {
-    const now = Date.now();
-    const entity = {
-      partitionKey: 'idempotency',
+    const record: IIdempotencyRecord = {
+      partitionKey: operation,
       rowKey: key,
-      responseBody: JSON.stringify(responseBody),
-      expiresAt: now + ttlMs,
+      statusCode,
+      responseBodyJson: JSON.stringify(responseBody),
+      expiresAt: new Date(Date.now() + ttlMs).toISOString(),
       recordedAt: new Date().toISOString(),
+      recordedBy: upn,
     };
-
-    await tableStorage.insertEntity('idempotency', key, entity);
-    logger.info(`Recorded idempotency result for key=${key}`);
+    await service.upsertRecord(record);
   } catch (err) {
-    logger.error(
-      `Failed to record idempotency result for key=${key}; operation succeeded but dedup will not work`,
-      err,
-    );
-    // Do NOT throw; the operation succeeded, so we don't want to fail the caller.
+    // Non-blocking: the operation already succeeded; log but don't re-throw
+    logger.error(`Failed to record idempotency result for key=${key}`, err);
   }
 }
 ```
+
+**Tests** (`backend/functions/src/idempotency/idempotency-guard.test.ts`):
+
+- `checkIdempotency` returns `{ alreadyProcessed: false }` when no `Idempotency-Key` header
+- `checkIdempotency` returns `{ alreadyProcessed: false }` when `getRecord()` returns `null`
+- `checkIdempotency` returns `{ alreadyProcessed: true, cachedResponse, statusCode }` when record found and not expired
+- `checkIdempotency` returns `{ alreadyProcessed: false }` when record found but expired
+- `checkIdempotency` logs operation name from `X-Idempotency-Operation` header
+- `checkIdempotency` returns `{ alreadyProcessed: false }` and logs warning when `getRecord()` throws (fail-open)
+- `recordIdempotencyResult` calls `upsertRecord()` with correct `IIdempotencyRecord` shape
+- `recordIdempotencyResult` accepts custom `ttlMs`
+- `recordIdempotencyResult` catches and logs errors without re-throwing
+
+---
+
+#### Sub-task 2.2c: `withIdempotency` handler wrapper
+
+**File:** `backend/functions/src/idempotency/with-idempotency.ts`
+
+```typescript
+import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
+import { createLogger } from '../utils/logger.js';
+import { createServiceFactory } from '../services/service-factory.js';
+import { checkIdempotency, recordIdempotencyResult } from './idempotency-guard.js';
+
+type AzureHandler = (req: HttpRequest, ctx: InvocationContext) => Promise<HttpResponseInit>;
+
+/**
+ * Wraps a mutating Azure Functions handler with idempotency support.
+ * Applied at the app.http() registration site — does not modify handler internals.
+ *
+ * Flow: check idempotency → (cache hit? return cached) → run handler → record result → return
+ */
+export function withIdempotency(handler: AzureHandler): AzureHandler {
+  return async (request, context) => {
+    const logger = createLogger(context);
+    const services = createServiceFactory();
+
+    // Check for cached idempotent response
+    const check = await checkIdempotency(request, services.idempotency, logger);
+    if (check.alreadyProcessed) {
+      logger.info('Idempotency cache hit — returning cached response');
+      return { status: check.statusCode, jsonBody: check.cachedResponse };
+    }
+
+    // Execute the original handler
+    const response = await handler(request, context);
+
+    // Record result for future deduplication (non-blocking, fire-and-forget)
+    const key = request.headers.get('idempotency-key');
+    if (key && response.status && response.status >= 200 && response.status < 300) {
+      const operation = request.headers.get('x-idempotency-operation') ?? 'unknown';
+      recordIdempotencyResult(
+        key, operation, response.status, response.jsonBody, 'system',
+        services.idempotency, logger,
+      ).catch((err) => logger.error('Idempotency record failed', { error: String(err) }));
+    }
+
+    return response;
+  };
+}
+```
+
+**Usage at handler registration** (example with existing endpoint):
+
+```typescript
+// backend/functions/src/functions/projectRequests/index.ts
+app.http('submitProjectSetupRequest', {
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  route: 'project-setup-requests',
+  handler: withIdempotency(async (request, context) => {
+    // ... existing handler body unchanged ...
+  }),
+});
+```
+
+**Tests** (`backend/functions/src/idempotency/with-idempotency.test.ts`):
+
+- Passes through to original handler when no `Idempotency-Key` header present
+- Returns cached response and skips handler when `checkIdempotency` returns `{ alreadyProcessed: true }`
+- Calls original handler then calls `recordIdempotencyResult` when check returns `{ alreadyProcessed: false }`
+- Still returns handler result even if `recordIdempotencyResult` throws (non-blocking)
+- Passes `InvocationContext` through to both wrapper and original handler
+
+---
+
+#### Sub-task 2.2d: Timer-triggered cleanup for expired records
+
+**File:** `backend/functions/src/functions/cleanupIdempotency/index.ts`
+
+Follows the existing `app.timer()` registration pattern:
+
+```typescript
+import { app, InvocationContext, Timer } from '@azure/functions';
+import { createLogger } from '../../utils/logger.js';
+import { createServiceFactory } from '../../services/service-factory.js';
+
+app.timer('cleanupIdempotencyRecords', {
+  schedule: '0 0 2 * * *',  // 2 AM daily
+  runOnStartup: false,
+  handler: async (timer: Timer, context: InvocationContext): Promise<void> => {
+    const logger = createLogger(context);
+    const services = createServiceFactory();
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const deleted = await services.idempotency.deleteExpiredRecords(cutoff);
+    logger.info('Idempotency cleanup complete', { deletedCount: deleted, cutoff });
+  },
+});
+```
+
+Register in `backend/functions/src/index.ts`:
+```typescript
+import './functions/cleanupIdempotency/index.js';
+```
+
+This prevents unbounded accumulation of stale records. Expired records persist up to ~24h past their `expiresAt`; if this is unacceptable, increase the timer frequency.
+
+---
 
 **Run and Verify:**
 
@@ -1614,37 +1660,29 @@ cd backend/functions && npm test
 ```
 
 **Expected output:**
-```
-✓ backend/functions/src/middleware/idempotency-guard.test.ts (12 tests)
-  ✓ checkIdempotency()
-    ✓ returns alreadyProcessed=false when no Idempotency-Key header
-    ✓ returns alreadyProcessed=false when key not found in table
-    ✓ returns alreadyProcessed=true with cached response when key found and not expired
-    ✓ returns alreadyProcessed=false when key found but expired
-    ✓ logs operation name if X-Idempotency-Operation header present
-  ✓ recordIdempotencyResult()
-    ✓ writes idempotency record with 24h TTL
-    ✓ uses custom TTL if provided
-    ✓ logs error but does not throw if insert fails
 
-Test Files  1 passed (1)
-Tests  12 passed (12)
-```
+All tests in `idempotency-storage-service.test.ts`, `idempotency-guard.test.ts`, and `with-idempotency.test.ts` pass. Test count will depend on final test cases (estimated ~20 tests across the three files).
 
 **Commit:**
 ```bash
-git add backend/functions/src/middleware/idempotency-guard.ts
-git add backend/functions/src/middleware/idempotency-guard.test.ts
-git commit -m "Feat(backend): Add idempotency guard middleware for deduplication
+git add backend/functions/src/services/idempotency-storage-service.ts
+git add backend/functions/src/services/idempotency-storage-service.test.ts
+git add backend/functions/src/idempotency/
+git add backend/functions/src/functions/cleanupIdempotency/
+git add backend/functions/src/services/service-factory.ts
+git add backend/functions/src/index.ts
+git commit -m "Feat(backend): Add idempotency guard with handler wrapper and dedicated storage
 
-- Implement checkIdempotency() to detect duplicate requests by key
-- Cache responses in Azure Table Storage with 24h TTL
-- Implement recordIdempotencyResult() to store results after success
-- Add comprehensive test suite (12 tests, all passing)
-- Non-blocking error handling: audit/record failures don't fail operations
+- Add IdempotencyStorageService using TableClient (dedicated IdempotencyRecords table)
+- Implement checkIdempotency() and recordIdempotencyResult() standalone functions
+- Add withIdempotency(handler) wrapper for app.http() registration
+- Add cleanupIdempotencyRecords timer trigger (nightly stale record deletion)
+- Register IIdempotencyStorageService in IServiceContainer via createServiceFactory()
+- Application-enforced 24h TTL (Azure Tables has no native TTL)
+- Non-blocking error handling: record failures don't fail operations
 
-Backend now deduplicates write requests. Same idempotency key = cached
-response. Expired keys (~24h) are treated as fresh requests.
+Backend now deduplicates write requests via handler wrapper pattern.
+Same idempotency key = cached response. Expired records cleaned nightly.
 "
 ```
 
@@ -2440,10 +2478,13 @@ Write safety APIs are now part of the public data-access surface.
 2. **Idempotency Key Pattern** (Chunk 2)
    - `generateIdempotencyKey()` returns UUID + operation + TTL
    - `isExpired()` detects stale keys (~24h default)
-   - `ProxyHttpClient` methods accept optional `IdempotencyContext`
+   - `ProxyHttpClient` methods accept `IdempotencyContext` (MUST for production writes)
    - Headers sent: `Idempotency-Key`, `X-Idempotency-Operation`
-   - Backend: `checkIdempotency()` and `recordIdempotencyResult()` middleware
-   - Azure Table Storage backing with 24h TTL
+   - Backend: `IdempotencyStorageService` (dedicated `IdempotencyRecords` table, `TableClient`-based, registered in `IServiceContainer`)
+   - Backend: `checkIdempotency()` and `recordIdempotencyResult()` standalone functions (not middleware)
+   - Backend: `withIdempotency(handler)` wrapper applied at `app.http()` registration
+   - Backend: `cleanupIdempotencyRecords` timer trigger (nightly stale record deletion)
+   - Application-enforced 24h TTL (Azure Tables has no native TTL): check `expiresAt` on read + nightly cleanup
 
 3. **Write-Safety Error States** (Chunk 3)
    - `WriteFailureReason` enum (6 categories)
@@ -2467,8 +2508,11 @@ Write safety APIs are now part of the public data-access surface.
   - Integration tests (4 tests)
   - Total: 41 tests, all passing
 
-- **Backend (Azure Functions):** ~400 lines (code + tests)
-  - Idempotency guard middleware (12 tests)
+- **Backend (Azure Functions):** ~600 lines (code + tests)
+  - `IdempotencyStorageService` + mock (Table SDK integration)
+  - `checkIdempotency` / `recordIdempotencyResult` (standalone functions)
+  - `withIdempotency` handler wrapper
+  - `cleanupIdempotencyRecords` timer trigger
   - Non-blocking async error handling
 
 - **Models:** ~100 lines (audit interface)
@@ -2477,13 +2521,15 @@ Write safety APIs are now part of the public data-access surface.
 
 **Assumptions:**
 - `ProxyHttpClient` implementation (B1 deliverable, **TARGET**) will use native `fetch` API (adjust if using axios, etc.)
-- Azure Table Storage available for idempotency records
-- Backend has access to table storage SDK and logger
+- `IdempotencyStorageService` uses a dedicated `IdempotencyRecords` table (not the `ProvisioningStatus` table)
+- Azure Table Storage connection string available via `AZURE_STORAGE_CONNECTION_STRING` env var (same as `RealTableStorageService`)
+- Azure Tables has no native TTL; expiry is application-enforced via `expiresAt` field + nightly cleanup timer
 - Phase 1 critical path: Project, Lead, Estimating only
 
 **Risks:**
-- Idempotency TTL (24h) may be too aggressive or too lenient; adjust based on operational needs
-- Exponential backoff jitter and Retry-After header honoring not yet designed — both are recommended by Azure guidance for bounded retry behavior and retry-storm avoidance
+- Idempotency TTL (24h) may need tuning; too short risks legitimate retries treated as new; too long wastes storage
+- Nightly cleanup means expired records persist up to ~24h past `expiresAt`; increase timer frequency if needed
+- `withIdempotency` adds one Table Storage point-read per mutating request; ~<10ms latency but verify under load
 - Offline queue (session-state) coordination not covered; separate P1-D2 or later
 - SharePoint adapter retry (Phase 5) will need its own strategy at PnPjs call site
 
@@ -2505,6 +2551,10 @@ Write safety APIs are now part of the public data-access surface.
 - **Service Contracts:** `P1-C1-Backend-Service-Contract-Catalog.md`
 - **Error Hierarchy:** `packages/data-access/src/errors/index.ts`
 - **Base Repository:** `packages/data-access/src/adapters/base.ts`
+- **Service Factory Pattern:** `backend/functions/src/services/service-factory.ts`
+- **Table Storage Pattern:** `backend/functions/src/services/table-storage-service.ts`
+- **Handler Registration Pattern:** `backend/functions/src/functions/notifications/UpdatePreferences.ts`
+- **Azure Tables SDK:** `@azure/data-tables` v13.3.2
 
 ---
 
