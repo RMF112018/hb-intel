@@ -252,7 +252,7 @@ B1 is the **frontend-side HTTP client and domain adapter** workstream. It owns t
 
 | B1 Task | B1 Owns | Depends on C1 | Depends on C2 | Depends on D1 | Depends on E1 |
 |---|---|---|---|---|---|
-| Task 1: ProxyHttpClient | HTTP client, error translation, timeout, header injection | Error response shape (`{ message }` envelope) | Bearer token format; 401/403 behavior | Retry policy injection point (deferred to D1) | — |
+| Task 1: ProxyHttpClient | HTTP client, error translation, timeout, header injection | Error response shape (`{ error }` per C1, `.message` fallback — D3) | Bearer token format; 401/403 behavior | Retry policy injection point (deferred to D1) | — |
 | Task 2: ProxyBaseRepository | Path building, query marshaling, paged response mapping | Paginated response shape (`{ data, total, page, pageSize }`) | — | — | — |
 | Task 3: ProxyLeadRepository | Lead adapter implementation + tests | `/api/leads` endpoint paths and response contract | Auth middleware on lead routes | — | Lead contract schema |
 | Task 4: ProxyProjectRepository | Project adapter implementation + tests | `/api/projects` endpoint paths and response contract | Auth middleware on project routes | — | Project contract schema |
@@ -266,7 +266,7 @@ B1 is the **frontend-side HTTP client and domain adapter** workstream. It owns t
 **What B1 assumes from C1:**
 - Endpoint paths (e.g., `/api/leads`, `/api/projects/{id}`, `/api/estimating/trackers`) — all paths in B1 are **provisional** and track C1's catalog
 - Response envelope shape: `{ data: T[], total, page, pageSize }` for paginated lists, `{ data: T }` for single-entity responses
-- Error response shape: B1 currently reads `{ message: string }` but C1 specifies `{ error: string, code: string, requestId: string }` — **known mismatch, must reconcile before production** (see Appendix B, decision D3)
+- Error response shape: `extractErrorMessage()` reads `.error` first (C1 contract), falls back to `.message` for compatibility — **provisional dual-field strategy pending D3 freeze** (see Appendix B)
 - HTTP status code semantics: 404 for not found, 422 for validation, 401/403 for auth
 
 **Blocking semantics:**
@@ -2723,7 +2723,7 @@ describe('Proxy Adapter Integration', () => {
         status: 500,
         statusText: 'Internal Server Error',
         headers: new Headers({ 'content-type': 'application/json' }),
-        json: async () => ({ message: 'Database error' }),
+        json: async () => ({ error: 'Database error', code: 'DB_ERROR', requestId: 'req-456' }),
       });
 
       const repo = createLeadRepository('proxy');
