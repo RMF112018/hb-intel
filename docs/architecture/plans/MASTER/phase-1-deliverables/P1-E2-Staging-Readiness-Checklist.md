@@ -124,28 +124,59 @@ Confirm proxy adapter is configured and startup logic runs cleanly. This section
 
 ## Section 2: Auth — Bearer Validation — BLOCKED on C2
 
-Confirm auth middleware rejects unauthenticated requests and accepts valid tokens with standardized error shapes.
+Confirm auth middleware rejects unauthenticated requests and accepts valid tokens.
 
 **Depends on:** C2 (auth hardening), Platform (staging deployment)
 
-**Current repo state:** `validateToken()` verifies Entra ID Bearer tokens and returns `IValidatedClaims`. The current `unauthorizedResponse()` returns `{ error: 'Unauthorized', reason }` — it does NOT return the `{ error, code }` shape expected by P1-E1 contract schemas. C2 must standardize the error response shape.
+### Current State vs Target State
 
-**Important distinction:** Bearer token validation (verifying the caller's JWT) is different from OBO (On-Behalf-Of) flow, which is needed only when the Azure Functions API calls a downstream API (e.g., Microsoft Graph) on the user's behalf. Not every endpoint requires OBO. This section validates bearer validation only; OBO readiness is a separate C2 deliverable.
+| Aspect | Current (repo-evidenced) | Target (after C2) |
+|---|---|---|
+| **Token validation** | `validateToken()` verifies Entra ID Bearer tokens via JWKS against `api://<CLIENT_ID>` audience; returns `IValidatedClaims { upn, oid, roles, displayName }` | Same mechanism, potentially with additional claim requirements |
+| **401 response shape** | `{ error: 'Unauthorized', reason: string }` via `unauthorizedResponse()` | `{ error: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema (**TARGET — C2 must standardize**) |
+| **Trace correlation on 401** | Not included in current `unauthorizedResponse()` | Should include W3C trace context or operation ID (see Section 11) |
+| **OBO flow** | Not implemented — no downstream API calls requiring delegated user context | C2 deliverable — needed only for endpoints that call downstream APIs (e.g., Microsoft Graph) on the user's behalf |
 
-### Missing Token
+### Bearer Token Validation vs OBO
+
+These are distinct concerns and must not be conflated:
+
+- **Bearer validation (this section):** The API verifies the caller's JWT at the API boundary. Every authenticated endpoint requires this. The current `validateToken()` already does this — it verifies the token's signature, issuer, audience, and required claims (`upn`/`preferred_username`, `oid`).
+- **OBO (On-Behalf-Of):** The API acquires a new token to call a downstream API on the user's behalf. Only endpoints that need delegated access to downstream services (e.g., Microsoft Graph, SharePoint) require OBO. OBO readiness is a separate C2 deliverable and is NOT a precondition for basic domain CRUD endpoints.
+
+### Auth Evidence Model
+
+| Evidence Type | How to Verify | What It Proves | Failure Classification |
+|---|---|---|---|
+| **HTTP 401 on missing token** | Send request without `Authorization` header; confirm 401 status | Bearer validation is enforced at the API boundary | If 200 → auth middleware not wired (C2 not deployed) |
+| **HTTP 401 on expired token** | Send request with expired JWT; confirm 401 status | Token expiry validation works | If 200 → JWKS verification not checking `exp` |
+| **HTTP 401 on wrong audience** | Send request with ARM-scoped token (`aud: https://management.azure.com`); confirm 401 | Audience validation works | If 200 → audience check misconfigured |
+| **HTTP 200 on valid token** | Send request with valid API-scoped JWT; confirm 200 | Full auth pipeline accepts legitimate requests | Requires C1 domain route to exist |
+| **401 response body shape** | Parse 401 response body; check for `code` field | C2 error standardization deployed | **TARGET-STATE** — current shape is `{ error, reason }`, not `{ error, code }` |
+| **Decoded token claims** | Decode the JWT used in the request; verify `aud`, `iss`, `upn`, `oid` match expected values | Token was correctly scoped to the API | Operator/config error if wrong audience or tenant |
+| **OBO downstream call** | Endpoint calls Microsoft Graph or other downstream API successfully | OBO app registration and token exchange work | Only applicable to OBO-dependent endpoints — NOT all routes |
+
+### Checks
+
+#### Missing Token
 - [ ] `GET /api/leads` (no Authorization header) → 401 response
-- [ ] Response body conforms to ErrorEnvelopeSchema: `{ error: '...', code: 'UNAUTHORIZED' }` (PROVISIONAL — current shape is `{ error: 'Unauthorized', reason }` until C2 standardizes)
-- [ ] Response includes distributed trace correlation (via W3C `traceparent` header or Application Insights request ID — see Section 11)
+- [ ] Response status is 401 (verifiable regardless of body shape)
+- [ ] Response body shape (**current:** `{ error: 'Unauthorized', reason }` — **target after C2:** `{ error: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema)
 
-### Expired Token
+#### Expired Token
 - [ ] Use a JWT token with `exp` claim in the past
 - [ ] `GET /api/leads` with expired token → 401 response
-- [ ] Response body conforms to ErrorEnvelopeSchema
+- [ ] Confirm the rejection is due to expiry, not malformation (check `reason` in current shape or `code` in target shape)
 
-### Valid Token
-- [ ] Use a valid bearer token scoped to the API audience (`api://<CLIENT_ID>`)
-- [ ] `GET /api/leads` with valid token → 200 response (requires C1 leads route to exist)
+#### Wrong Audience (Operator Error Detection)
+- [ ] Use an ARM-scoped token (`az account get-access-token` without `--resource`)
+- [ ] `GET /api/leads` with ARM token → 401 response
+- [ ] This catches the most common operator error: using a management token instead of an API-scoped token
+
+#### Valid Token
 - [ ] Token acquired via `az account get-access-token --resource api://<CLIENT_ID>` — NOT an ARM-scoped token
+- [ ] `GET /api/leads` with valid token → 200 response (**requires C1 leads route to exist**)
+- [ ] Decoded token has `aud` matching `api://<CLIENT_ID>` and `iss` matching the staging tenant
 
 ---
 
@@ -342,28 +373,57 @@ Confirm request tracing and telemetry across the stack.
 
 **Depends on:** C1 (route handlers emitting telemetry events), C2 (auth middleware emitting auth events), C3 (Application Insights instrumentation), Platform (staging deployment + AI workspace)
 
-**Tracing model:** Azure Functions uses W3C Trace Context (`traceparent` / `tracestate` headers) for distributed trace correlation, integrated with Application Insights. The checklist should verify W3C trace correlation, not rely solely on a custom `X-Request-Id` header.
+### Tracing Evidence
 
-### Distributed Trace Correlation
-- [ ] API responses include W3C `traceparent` header (or Application Insights operation ID is set)
-- [ ] Same operation ID appears in Application Insights request telemetry
-- [ ] Related log entries share the same operation ID
+Azure Functions integrates with Application Insights via the W3C Trace Context standard (`traceparent` / `tracestate` headers). This is the primary correlation mechanism — custom `X-Request-Id` headers are neither required nor sufficient as the sole observability proof.
 
-### Application Insights
+**Correlation strategy:**
+
+| Layer | Correlation Identifier | Source | How to Verify |
+|---|---|---|---|
+| **HTTP response** | W3C `traceparent` header (if present) or Application Insights `Request-Id` header | Azure Functions host automatically adds these when AI is configured | Inspect response headers |
+| **Application Insights request telemetry** | `operation_Id` field | AI SDK auto-captures for every HTTP trigger invocation | KQL: `requests \| where operation_Id == "<id>"` |
+| **Application Insights trace/log entries** | `operation_Id` field | Inherited from the request context when using `context.log()` or AI SDK | KQL: `traces \| where operation_Id == "<id>"` |
+| **Application Insights dependency telemetry** | `operation_Id` field | AI SDK auto-captures outbound calls (Redis, Table Storage, HTTP) | KQL: `dependencies \| where operation_Id == "<id>"` |
+
+**Custom request-ID header:** If C1 or C2 defines a custom `X-Request-Id` response header (e.g., for client-side correlation), that header contract is **PROVISIONAL** — no governing plan has frozen it. The W3C `traceparent` / AI `operation_Id` is the primary correlation mechanism regardless.
+
+**What to verify:**
+
+| Evidence | How | Proves |
+|---|---|---|
+| HTTP-level correlation exists | Response includes `traceparent` or `Request-Id` header | AI instrumentation is active on the function app |
+| Request appears in AI | KQL: `requests \| where timestamp > ago(15m) \| where url contains "/api/leads"` | Function invocations are captured |
+| Logs correlate to request | KQL: `traces \| where operation_Id == "<operation_Id from request>"` | Log statements share the request's operation ID |
+| Dependencies correlate | KQL: `dependencies \| where operation_Id == "<operation_Id>"` | Outbound calls (Redis, Table Storage) are linked to the originating request |
+| Errors correlate | KQL: `exceptions \| where operation_Id == "<operation_Id>"` | Exceptions are linked to the originating request |
+
+### Checks
+
+#### Platform Telemetry Baseline
 - [ ] Azure Functions Application Insights dashboard loads
+- [ ] AI connection string configured in staging function app settings
 - [ ] Recent requests visible in "Requests" table (last 15 minutes after smoke test run)
-- [ ] Failed requests appear in "Failures" tab with correct status codes
-- [ ] Dependency calls (Redis, Table Storage) appear in dependency telemetry
+- [ ] Failed requests appear in "Failures" tab with correct HTTP status codes
+- [ ] Dependency calls (Redis, Table Storage) appear in dependency telemetry with correct target names
 
-### C3 Event Verification (manual KQL — see P1-E1 Task 9)
+#### Distributed Trace Correlation
+- [ ] API response includes `traceparent` header or AI `Request-Id` header (confirms AI instrumentation is active)
+- [ ] Extract `operation_Id` from AI request telemetry for a known request
+- [ ] Same `operation_Id` appears across `requests`, `traces`, and `dependencies` tables in AI
+- [ ] Custom `X-Request-Id` header present in response (PROVISIONAL — only if C1/C2 defines this contract)
+
+#### C3 Event Verification (manual KQL — see P1-E1 Task 9)
 - [ ] `handler.invoke`, `handler.success`, `handler.error` events present after smoke test traffic
 - [ ] `auth.bearer.validate`, `auth.bearer.success`, `auth.bearer.error` events present
 - [ ] Proxy events (`proxy.request.start`, `proxy.request.success`) present for proxy-adapter domains
+- [ ] Events carry `operation_Id` linking them to the originating HTTP request
 
-### Error Telemetry
-- [ ] Simulated error appears in Application Insights with full context
-- [ ] Exception telemetry includes function name, error classification
-- [ ] Operation ID links error to the originating request
+#### Error Telemetry
+- [ ] Simulated error appears in Application Insights `exceptions` table with full context
+- [ ] Exception telemetry includes function name and error classification
+- [ ] `operation_Id` links the exception to the originating request in the `requests` table
+- [ ] No orphaned exceptions (every exception has a matching request entry)
 
 ---
 
