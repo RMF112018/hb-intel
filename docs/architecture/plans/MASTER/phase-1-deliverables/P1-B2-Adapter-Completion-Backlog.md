@@ -308,7 +308,48 @@ The following adapter types are tracked here for completeness. Their domain matr
 
 ### SharePoint Adapter (Future Phase)
 
-All 11 domains are candidates for SharePoint adapter implementation in a future phase targeting collaborative authoring on the SPFx surface. Blocking dependency: site provisioning and list schema definition.
+The SharePoint adapter targets the SPFx collaborative-authoring surface. Not all domains map to simple single-list patterns — the matrix below classifies each domain by its likely SharePoint backing model. Full engineering detail belongs in a future SharePoint engineering plan; this section tracks enough to inform Phase 1 backlog awareness.
+
+**Auth note:** SPFx uses MSAL-based `AadHttpClient` and `MSGraphClient` for token acquisition. PnPjs initializes via the `SPFx()` factory using the SPFx context's built-in token provider. ADAL is deprecated and is not the intended SharePoint auth strategy.
+
+#### Domain Pattern Matrix
+
+| Domain | Port Interface | SP Pattern | Entity → List Mapping | Notes |
+|---|---|---|---|---|
+| **Lead** | `ILeadRepository` | Single list | Leads list → `ILead` | CRUD + search via CAML/view |
+| **Project** | `IProjectRepository` | List + computed aggregate | Projects list → `IActiveProject`; portfolio summary computed client-side or via view | A8: aggregate may require computed rollup |
+| **Estimating** | `IEstimatingRepository` | Parent/child lists | Trackers list + Kickoffs list; linked by projectId | Sub-resource pattern (cf. proxy D2) |
+| **Schedule** | `IScheduleRepository` | List + computed aggregate | Activities list → `IScheduleActivity`; metrics computed from list data | Project-scoped |
+| **Buyout** | `IBuyoutRepository` | List + computed aggregate | Entries list → `IBuyoutEntry`; summary computed from entries | Project-scoped |
+| **Compliance** | `IComplianceRepository` | List + computed aggregate | Entries list → `IComplianceEntry`; summary computed from entries | Project-scoped |
+| **Contract** | `IContractRepository` | Parent/child lists | Contracts list + Approvals list; linked by contractId | Project-scoped; child sub-resource |
+| **Risk** | `IRiskRepository` | List + computed aggregate | Items list → `IRiskCostItem`; management computed from items | Project-scoped |
+| **Scorecard** | `IScorecardRepository` | Parent/child lists | Scorecards list + Versions list; linked by scorecardId | Project-scoped; child sub-resource |
+| **PMP** | `IPmpRepository` | Parent/child lists | Plans list + Signatures list; linked by pmpId | Project-scoped; child sub-resource |
+| **Auth** | `IAuthRepository` | **Not applicable** | See special handling below | Identity/RBAC — no SP list backing |
+
+**SP Pattern key:**
+- **Single list** — one SP list, straightforward CRUD via PnPjs `sp.web.lists`
+- **List + computed aggregate** — one SP list for entities; summary/metrics computed client-side from list data
+- **Parent/child lists** — two SP lists with a relational link; adapter manages both
+
+#### Auth: Special Handling
+
+Auth (`IAuthRepository`) does not receive a SharePoint adapter. Its methods — `getCurrentUser`, `getRoles`, `getRoleById`, `getPermissionTemplates`, `assignRole`, `removeRole` — are identity and RBAC operations backed by Entra ID (Azure AD), not SharePoint lists. In SPFx, user identity comes from `this.context.pageContext.user` and `AadHttpClient`/`MSGraphClient`; role management is an Azure AD / Microsoft Graph concern.
+
+**Open decision:** Whether Auth in the SharePoint surface stays proxy-only (calling the same Azure Functions backend as the PWA) or uses native SPFx Entra ID / Graph integration. This decision belongs to the future SharePoint engineering plan, not B2.
+
+#### SharePoint-Specific Blocking Dependencies
+
+| Dependency | Description | Owner | When Needed |
+|---|---|---|---|
+| Site provisioning | Site collection or sub-site with correct URL and template | SharePoint Admin / DevOps | Before any SP adapter development |
+| List provisioning | SP lists created for all list-backed domains with correct columns and content types | SharePoint Admin / DevOps | Before per-domain adapter implementation |
+| Library provisioning | Document libraries for any document-backed domains (if applicable) | SharePoint Admin / DevOps | Before per-domain adapter implementation |
+| Schema approval | List/library column schemas reviewed and approved against port interface contracts | Architecture / Data Ownership | Before per-domain adapter implementation |
+| SPFx context pattern | PnPjs `SPFx()` initialization pattern established and tested in app shell | B-workstream / SPFx lead | Before any SP adapter development |
+| Permission model | SP site/list permissions mapped to app roles; external sharing policy confirmed | SharePoint Admin / Security | Before integration testing |
+| Throttling strategy | SPO 429 handling, batch request patterns, and retry policy for PnPjs calls | B-workstream | Before production activation |
 
 ### API Adapter (Future Phase)
 
