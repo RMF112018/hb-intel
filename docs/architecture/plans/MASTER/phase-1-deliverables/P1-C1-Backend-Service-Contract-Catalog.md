@@ -76,6 +76,8 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 | `GET` | `proxy/{*path}` | `proxyGet` | Graph API forwarding with OBO; Redis cache TTL 300s |
 | `POST, PATCH, PUT, DELETE` | `proxy/{*path}` | `proxyMutate` | Mutating proxy with cache invalidation |
 
+**Current response shape:** Raw Graph API passthrough — response body is the unmodified Graph API response, not wrapped in `{data:...}` envelope. Status codes forwarded from Graph.
+
 ### Project Setup Requests (3 routes)
 
 | Method | Route | Handler | Notes |
@@ -84,12 +86,16 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 | `GET` | `project-setup-requests` | `listProjectSetupRequests` | List with optional state filter |
 | `PATCH` | `project-setup-requests/{requestId}/state` | `advanceRequestState` | State machine transition with validation |
 
+**Current response shape:** POST returns 201 with raw `IProjectSetupRequest` entity (not `{data:...}` wrapped). GET returns 200 with raw `IProjectSetupRequest[]` array (not `{data:[], total, page, pageSize}` collection envelope). PATCH returns 200 with raw updated entity. Errors return `{error: string}`.
+
 ### Acknowledgments (2 routes)
 
 | Method | Route | Handler | Notes |
 |---|---|---|---|
 | `POST` | `acknowledgments` | `postAcknowledgment` | Submit acknowledgment, decline, or bypass event |
 | `GET` | `acknowledgments` | `getAcknowledgments` | Retrieve events by contextType + contextId |
+
+**Current response shape:** POST returns 200 with `{event: IAcknowledgmentEvent, updatedState: AcknowledgmentState, isComplete: boolean}` (custom shape, not `{data:...}`). GET returns 200 with `{events: IAcknowledgmentEvent[]}` (not `{data:[...]}`). Errors include 400 `{error}`, 403 `{error}`, 409 `{error, declinedBy}`.
 
 **Delta from previous draft:** No DELETE route found in repo. Previous C1 listed 3 routes.
 
@@ -107,13 +113,17 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 
 **Background triggers:** `hbc-notifications-queue` (queue), `hbc-email-queue` (queue), hourly digest timer.
 
-**Delta from previous draft:** Previous C1 listed 3 routes. Actual count is 7 HTTP + 3 background.
+**Current response shape:** POST send returns 202 `{message: "Notification queued."}`. GET center returns 200 `{totalCount, items: INotification[], cursor?, pageSize?}` (not `{data:[], total, page, pageSize}` target envelope). PATCH mark-read returns 200 `{message}`. GET preferences returns 200 raw `NotificationPreferences` entity. Errors return `{error: string}`.
+
+**Delta from previous draft:** Previous C1 listed 3 routes. Actual count is 7 HTTP + 3 background. Response shapes differ significantly from target collection envelope.
 
 ### SignalR (1 route)
 
 | Method | Route | Handler | Notes |
 |---|---|---|---|
 | `POST` | `provisioning-negotiate` | `signalrNegotiate` | SignalR connection negotiation for provisioning events |
+
+**Current response shape:** Azure-managed SignalR connection info (response shape controlled by Azure SignalR Service, not application code).
 
 **Delta from previous draft:** Previous C1 listed 2 routes (negotiate + message). Only negotiate found in repo.
 
@@ -127,6 +137,8 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 | `POST` | `admin/trigger-timer` | `triggerTimerManually` | Dev/staging only; blocked in Production |
 | `POST` | `provisioning-retry/{projectId}` | `retryProvisioning` | Retry failed provisioning |
 | `POST` | `provisioning-escalate/{projectId}` | `escalateProvisioning` | Escalate provisioning request |
+
+**Current response shape:** POST provision returns 202 `{message: "Provisioning started", projectId, correlationId}`. GET status returns 200 raw `ProvisioningStatus` entity. GET failures returns 200 array. POST retry returns 202 `{message, projectId}`. POST escalate returns 202. Errors return `{error: string}`.
 
 **Delta from previous draft:** Previous C1 listed 3 routes. Actual count is 6 (includes admin and escalation routes).
 
