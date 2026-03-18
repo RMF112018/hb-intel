@@ -29,7 +29,15 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 
 - **[HB Intel Delivery Roadmap](./architecture/blueprint/HB-Intel-Dev-Roadmap.md)** — Consolidated execution delivery roadmap. Defines the wave structure (Foundation/Wave 0 → Wave 1 → Wave 2 → Wave 3 → Convergence), dual-stream SPFx/PWA sequencing doctrine, readiness gates (app pilot, MVP-complete, PWA MVP, SPFx retirement), and long-range convergence strategy. **Read after the Unified Blueprint** for delivery sequence and sprint-level planning context.
 
-- **[Blueprint Crosswalk & Program Navigation Guide](./architecture/blueprint/HB-Intel-Blueprint-Crosswalk.md)** — Document family map, phase delivery sequence, PH7 clarification, active delivery streams, preserved historical progress notes, and superseded-document record. Use this for navigating between specific document families or for the historical narrative.
+- **[Master Plan Set](./architecture/plans/MASTER/README.md)** — Program-level planning index covering all eight development phases and the plan-stack crosswalk. Start here for program structure, milestones, Phase 1 deliverables, and navigation between plan families.
+
+## Development Plan Library
+
+- **[Master Plan Set](./architecture/plans/MASTER/README.md)** — Program-level planning index covering all eight development phases. Phase 0 and Phase 1 planning are complete; Phases 2–7 are forward-planning drafts. Start here for program structure, milestones, and Phase 1 deliverables.
+
+- **[MVP / Wave 0 Execution Plans](./architecture/plans/MVP/)** — Active sprint-level execution plans for the pre-Phase-1 implementation baseline. Organized into six groups (G1–G6) covering contracts and configuration, backend hardening, shared platform wiring, SPFx surfaces, hosted PWA surfaces, and admin observability.
+
+- **Phase 7 Domain Plans** — Feature-level plans for BD, Estimating, Project Hub, Admin, and Breakout Webparts. Pending Wave 1 activation. Located in `plans/ph7-business-development/`, `plans/ph7-estimating/`, `plans/ph7-project-hub/`, and related directories.
 
 ## Locked Architecture Documents
 
@@ -204,7 +212,7 @@ All HB Intel architecture documents are classified to prevent confusion between 
 | Class | What it means | Where to find it |
 |-------|--------------|-----------------|
 | **Canonical Current-State** | What the repo currently contains — governs present truth | `current-state-map.md`, `docs/README.md` |
-| **Canonical Normative Plan** | What must be built next in an active phase | PH7 domain plans, PH7 remediation plans (`ph7-remediation/`), Blueprint V4 |
+| **Canonical Normative Plan** | What must be built next in an active phase | Blueprint V4, MVP/Wave 0 plans (`plans/MVP/`), PH7.13 stub enforcement, PH7 domain plans (pending Wave 1) |
 | **Historical Foundational** | Completed phase planning; locked for audit trail | PH4–PH6 plans, Foundation Plan, SF01–SF03 shared-feature plans |
 | **Deferred Scope** | Planned work assigned to a future phase but not yet activated | SF04–SF06 plans (~19 docs), PH7-RM-* plans (9 files, assigned to Phase 3), SF16 plans (Phase 5) |
 | **Superseded / Archived Reference** | Replaced by a newer document or approach | Old PH7 root-level plans (deleted from git index) |
@@ -214,8 +222,9 @@ All HB Intel architecture documents are classified to prevent confusion between 
 
 **Reading order for a given topic:**
 1. Start with `current-state-map.md` (Canonical Current-State) — what exists today.
-2. Consult the active phase plan in `ph7-remediation/` (Canonical Normative Plan) — what is being built.
-3. If historical context is needed, check completed phase plans PH4–PH6 or the Foundation Plan (Historical Foundational).
+2. Consult the active execution plans in `plans/MVP/` (Canonical Normative Plan) — the current implementation baseline.
+   - For Phase 1 planning deliverables (schemas, contracts, test plans), see `plans/MASTER/phase-1-deliverables/`.
+3. If historical context is needed, check completed phase plans PH4–PH6, the Foundation Plan, or `ph7-remediation/` PH7.1–PH7.12 (signed off 2026-03-09) (Historical Foundational).
 4. For locked decisions, check `docs/architecture/adr/` (Permanent Decision Rationale).
 5. Ignore Deferred Scope and Superseded documents for current implementation work.
 

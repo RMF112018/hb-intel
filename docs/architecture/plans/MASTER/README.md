@@ -1,6 +1,6 @@
 # HB Intel Master Plan Set
 
-**Doc Classification:** Canonical Normative Index — authoritative front door to the HB Intel development plan set.
+**Doc Classification:** Planning Authority Index — navigational front door to the HB Intel development plan set.
 
 ---
 
@@ -77,6 +77,34 @@ Planning complete. Twenty-four deliverables produced across five workstreams: da
 ### Forward-planning documents
 
 **Phases 2–7** are draft plans with structure and intent established. They define scope and sequencing for the remaining program lifecycle but have not undergone the detailed planning process that Phases 0 and 1 completed. Detailed planning for each phase will occur as its predecessor reaches material completion.
+
+---
+
+## Relationship to Other Plan Stacks
+
+The MASTER plan set provides program-level planning: phase sequencing, milestones, deliverables, and governance. It is not the only planning stack in the repository. Other plan families handle sprint-level execution and domain feature planning.
+
+### MVP / Wave 0 — Active execution baseline
+The `plans/MVP/` directory contains the active sprint-level execution plans for pre-Phase-1 implementation. Organized into six groups:
+- **G1** — Contracts and Configuration (sites-selected validation, environment config, group model, notification contract, site template)
+- **G2** — Backend Hardening and Workflow Data Foundations (list schemas, provisioning saga, validation, seeding)
+- **G3** — Shared Platform Wiring and Workflow Experience
+- **G4** — SPFx Surfaces and Workflow Experience
+- **G5** — Hosted PWA Requester Surfaces
+- **G6** — Admin Support and Observability
+
+MVP/Wave 0 plans implement the production data plane and integration backbone defined by MASTER Phase 1 and its deliverables. The MASTER Phase 1 deliverables (schemas, contracts, test plans) are the governing design authority; the MVP/Wave 0 plans translate those designs into implementation tasks.
+
+### PH7 Remediation — Completed
+The `plans/ph7-remediation/` directory contains the Phase 7 P1 stabilization plans (PH7.1–PH7.12). These were signed off on 2026-03-09 (see ADR-0091 and the PH7 final verification evidence package). They are now completed execution records.
+
+**Exception:** PH7.13 (Stub Detection Enforcement) continues independently of the PH7.12 sign-off gate.
+
+### PH7 Domain Plans — Pending Wave 1
+Feature-level plans for Business Development, Estimating, Project Hub, Admin, and Breakout Webparts are classified as Canonical Normative Plan but are pending Wave 1 activation. Located in `plans/ph7-business-development/`, `plans/ph7-estimating/`, `plans/ph7-project-hub/`, and related directories.
+
+### Shared Features and UI Kit
+The `plans/shared-features/` and `plans/UI-Kit/` directories contain shared-feature planning families (SF01–SF29). Some are completed (Historical Foundational), others are active or deferred. See the [current-state map](../../blueprint/current-state-map.md) §2 for per-family classification.
 
 ---
 
