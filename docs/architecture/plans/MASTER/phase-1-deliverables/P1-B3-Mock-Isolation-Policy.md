@@ -75,16 +75,31 @@ These four values are the only recognized adapter modes. Any other value (includ
 
 All policy rules, enforcement layers, and configuration guidance in this document use these canonical names and values exclusively.
 
-### Known Vocabulary Drift
+### Tracked Remediation: Backend Adapter-Mode Vocabulary
 
-The following repo locations use non-canonical vocabulary that could cause misconfiguration if not reconciled:
+**Classification:** Phase 1 prerequisite for complete mock-isolation enforcement.
+**Status:** Not yet remediated.
+**Owner:** Backend Platform Owner.
+
+The following repo locations use non-canonical vocabulary that creates enforcement and configuration risk:
 
 | Location | Issue | Risk |
 |---|---|---|
-| `backend/functions/src/services/service-factory.ts` (line 37) | Defaults to `'real'` — not in `AdapterMode` type | Backend service factory uses a value the frontend factory does not recognize; if `HBC_ADAPTER_MODE` is unset in production, the backend defaults to `'real'` while the frontend `resolveAdapterMode()` would fall back to `'mock'` |
-| `backend/functions/README.md` (line 62) | Documents `'real'` as a valid adapter mode | Developers may set `HBC_ADAPTER_MODE='real'` in Azure app settings, which is not a canonical value |
+| `backend/functions/src/services/service-factory.ts` (line 37) | Defaults to `'real'` — not in `AdapterMode` type | Backend service factory uses a value the frontend factory does not recognize; if `HBC_ADAPTER_MODE` is unset in production, the backend defaults to `'real'` while the frontend `resolveAdapterMode()` would fall back to `'mock'` — creating split-surface behavior |
+| `backend/functions/README.md` (line 62) | Documents `'real'` as a valid adapter mode | Developers may set `HBC_ADAPTER_MODE='real'` in Azure app settings, which is not a canonical value and would not be caught by a startup guard checking for `'mock'` |
 
-**Remediation (outside B3 scope):** The backend service factory should be updated to use `'proxy'` instead of `'real'`, or an explicit mapping from `'real'` to `'proxy'` should be added. The backend README should be updated to use canonical vocabulary. This should be tracked as a follow-on task to prevent configuration drift between frontend and backend.
+**Why this blocks enforcement closure:**
+- The startup guard validates `HBC_ADAPTER_MODE` against canonical values. If the backend uses `'real'` instead of `'proxy'`, the guard cannot distinguish "correct real adapter" from "unrecognized value that should be rejected."
+- Configuration templates and developer docs that reference `'real'` will cause ongoing drift even after the guard is implemented.
+- The split default behavior (frontend→`'mock'`, backend→`'real'`) means a missing `HBC_ADAPTER_MODE` config produces different behavior per surface — the exact class of misconfiguration this policy exists to prevent.
+
+**Required remediation:**
+1. Update `backend/functions/src/services/service-factory.ts` to use `'proxy'` instead of `'real'` (or add an explicit `'real'` → `'proxy'` mapping)
+2. Update `backend/functions/README.md` to use canonical vocabulary
+3. Update `backend/functions/local.settings.example.json` if it references `'real'`
+4. Verify no other backend files reference `'real'` as an adapter mode
+
+This remediation must be completed before the backend startup guard (Layer 2) can be considered fully effective.
 
 ---
 
@@ -466,6 +481,9 @@ This policy enforces the prerequisite: mock must be unreachable in the productio
 **Layer 5 — Runtime:**
 - [ ] Production smoke test verifies real adapter responses post-deploy — evidence: smoke test results
 - [ ] Monitoring alert configured for unexpected adapter mode values — evidence: alert rule config
+
+**Prerequisites:**
+- [ ] Backend adapter-mode vocabulary remediated — `'real'` replaced with `'proxy'` in service-factory and docs (see Tracked Remediation above)
 
 **General:**
 - [ ] No domain-level override uses `'mock'` in staging or production (if override mechanism is implemented)
