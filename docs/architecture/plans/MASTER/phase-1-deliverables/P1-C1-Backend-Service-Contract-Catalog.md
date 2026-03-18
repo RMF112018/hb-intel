@@ -260,14 +260,31 @@ These items must be resolved for the current implemented routes to conform to th
 
 ## Global Contract Standards (Target State)
 
-These standards define the target contract shape for Phase 1. Currently implemented routes may not yet conform; normalization is tracked in Part 3 above.
+These standards define the target contract shape for Phase 1 domain routes. Currently implemented routes (Part 1) may not yet conform; normalization gaps are tracked in Part 3.
 
 ### Authentication & Authorization
 
-- **Bearer Token Required:** All routes except health checks require a valid Bearer token in the `Authorization` header
+- **Bearer Token Required:** All domain routes require a valid Bearer token in the `Authorization` header
 - **Token Validation:** Invalid/missing token returns `401 Unauthorized`
 - **OBO Flow:** For downstream Graph or SharePoint calls, tokens are acquired via MSAL OBO using the user's token as assertion
 - **Identity Trust Boundary:** User identity is sourced only from validated JWT claims; client-provided identity fields are overwritten from token claims
+
+### HTTP Status Codes (Target)
+
+| Status | Meaning | Used For |
+|---|---|---|
+| `200 OK` | Success; resource retrieved or mutation applied | GET, PUT, PATCH responses |
+| `201 Created` | Success; new resource created | POST responses |
+| `202 Accepted` | Async operation accepted for processing | Provisioning, queued notifications, long-running operations |
+| `204 No Content` | Success; no response body (per RFC 9110) | DELETE success — empty body, no JSON |
+| `400 Bad Request` | Invalid request; validation failed | Missing required fields, invalid format |
+| `401 Unauthorized` | Bearer token invalid, expired, or missing | All protected routes |
+| `403 Forbidden` | Authenticated user lacks permission | Role/scope not present in token |
+| `404 Not Found` | Resource does not exist | GET/PUT/PATCH/DELETE with non-existent id |
+| `409 Conflict` | Request conflicts with current state | State transition violation, duplicate idempotency key |
+| `422 Unprocessable Entity` | Semantic validation failed | Business logic constraint violation |
+| `500 Internal Server Error` | Unhandled exception | Wrapped in error envelope |
+| `502 Bad Gateway` | Downstream service unavailable | Graph API, SharePoint, Azure Table Storage failure |
 
 ### Success Response Envelopes
 
@@ -286,7 +303,7 @@ These standards define the target contract shape for Phase 1. Currently implemen
 { "message": "Operation accepted", "correlationId": "uuid" }
 ```
 
-**No content (204):** Empty response body.
+**No content (204):** Empty response body — no JSON. Per RFC 9110, a 204 response must not contain a message body.
 
 ### Error Response Envelope
 
@@ -294,14 +311,24 @@ These standards define the target contract shape for Phase 1. Currently implemen
 { "error": "Human-readable message", "code": "ERROR_CODE", "requestId": "uuid" }
 ```
 
+**D3 note:** The target envelope uses `error` as the primary message field. B1's `extractErrorMessage()` currently reads `.error` first with `.message` fallback (dual-field strategy). Until D3 is resolved, backends should include the `error` field per this target standard. Backends may optionally include a `message` field for transitional compatibility, but `error` is authoritative.
+
+### Mutation Methods
+
+**Target:** Domain routes support both PUT (full replace) and PATCH (partial merge).
+
+**D5 note:** B1 currently implements PUT only. D5 must resolve whether PATCH routes are also required for Phase 1 domain endpoints. Until D5 is resolved, PUT is the minimum requirement for all domain mutation routes. If PATCH is adopted, semantics are: PATCH merges provided fields into the existing resource; PUT replaces the entire resource (except server-managed fields like `id`, `createdAt`).
+
 ### Pagination
 
-- Query params: `?page=1&pageSize=50` (default pageSize=50, max=200) — D4 open: B1 uses 25 as fallback
-- Offset-based in Phase 1; cursor-based deferred to Phase 2
+- Query params: `?page=1&pageSize=50` (max pageSize=200)
+- **D4 note:** Target default pageSize is 50 (C1). B1 implements 25 as `DEFAULT_PAGE_SIZE` fallback when the backend omits the `pageSize` field. D4 must resolve the canonical default before `CONTRACT_ALIGNED`. Until resolved, backends should return `pageSize` in every collection response so the frontend does not need to assume a default.
+- Offset-based pagination in Phase 1; cursor-based deferred to Phase 2
 
 ### Idempotency
 
-- `Idempotency-Key` header accepted on POST/PUT/PATCH mutations — target behavior pending P1-D1 delivery (write safety)
+- `Idempotency-Key` header accepted on POST/PUT/PATCH mutations
+- **Target behavior pending P1-D1 delivery:** Idempotency guard middleware, key generation, and replay semantics are owned by P1-D1 (Write Safety). Until D1 delivers, idempotency support is aspirational in this catalog — backends are not yet required to honor the header.
 
 ### Request Tracking
 
