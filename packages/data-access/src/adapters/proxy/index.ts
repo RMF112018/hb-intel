@@ -22,3 +22,11 @@ export {
   buildProjectScopedPath,
   buildResourcePath,
 } from './paths.js';
+export { BaseProxyProjectRepository } from './BaseProxyProjectRepository.js';
+export { ProxyScheduleRepository } from './ProxyScheduleRepository.js';
+export { ProxyBuyoutRepository } from './ProxyBuyoutRepository.js';
+export { ProxyComplianceRepository } from './ProxyComplianceRepository.js';
+export { ProxyContractRepository } from './ProxyContractRepository.js';
+export { ProxyRiskRepository } from './ProxyRiskRepository.js';
+export { ProxyScorecardRepository } from './ProxyScorecardRepository.js';
+export { ProxyPmpRepository } from './ProxyPmpRepository.js';

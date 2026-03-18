@@ -23,6 +23,38 @@ import {
   MockAuthRepository,
 } from './adapters/mock/index.js';
 import { AdapterNotImplementedError } from './errors/index.js';
+import { ProxyHttpClient } from './adapters/proxy/ProxyHttpClient.js';
+import { ProxyScheduleRepository } from './adapters/proxy/ProxyScheduleRepository.js';
+import { ProxyBuyoutRepository } from './adapters/proxy/ProxyBuyoutRepository.js';
+import { ProxyComplianceRepository } from './adapters/proxy/ProxyComplianceRepository.js';
+import { ProxyContractRepository } from './adapters/proxy/ProxyContractRepository.js';
+import { ProxyRiskRepository } from './adapters/proxy/ProxyRiskRepository.js';
+import { ProxyScorecardRepository } from './adapters/proxy/ProxyScorecardRepository.js';
+import { ProxyPmpRepository } from './adapters/proxy/ProxyPmpRepository.js';
+import type { ProxyConfig } from './adapters/proxy/types.js';
+
+/** Lazy singleton proxy client — initialized on first proxy-mode factory call. */
+let proxyClient: ProxyHttpClient | null = null;
+
+function getProxyClient(): ProxyHttpClient {
+  if (proxyClient) return proxyClient;
+  const config: ProxyConfig = {
+    baseUrl: getProxyBaseUrl(),
+    accessToken: undefined, // Token set per-request by caller; not at construction time
+  };
+  proxyClient = new ProxyHttpClient(config);
+  return proxyClient;
+}
+
+function getProxyBaseUrl(): string {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const env = (globalThis as any).process?.env as Record<string, string> | undefined;
+    return env?.HBC_PROXY_BASE_URL ?? env?.VITE_API_BASE_URL ?? 'http://localhost:7071/api';
+  } catch {
+    return 'http://localhost:7071/api';
+  }
+}
 
 /** Runtime adapter mode resolved from environment. */
 export type AdapterMode = 'mock' | 'sharepoint' | 'proxy' | 'api';
@@ -67,8 +99,9 @@ export function createScheduleRepository(mode?: AdapterMode): IScheduleRepositor
   switch (resolved) {
     case 'mock':
       return new MockScheduleRepository();
-    case 'sharepoint':
     case 'proxy':
+      return new ProxyScheduleRepository(getProxyClient());
+    case 'sharepoint':
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'ScheduleRepository');
   }
@@ -79,8 +112,9 @@ export function createBuyoutRepository(mode?: AdapterMode): IBuyoutRepository {
   switch (resolved) {
     case 'mock':
       return new MockBuyoutRepository();
-    case 'sharepoint':
     case 'proxy':
+      return new ProxyBuyoutRepository(getProxyClient());
+    case 'sharepoint':
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'BuyoutRepository');
   }
@@ -103,8 +137,9 @@ export function createComplianceRepository(mode?: AdapterMode): IComplianceRepos
   switch (resolved) {
     case 'mock':
       return new MockComplianceRepository();
-    case 'sharepoint':
     case 'proxy':
+      return new ProxyComplianceRepository(getProxyClient());
+    case 'sharepoint':
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'ComplianceRepository');
   }
@@ -115,8 +150,9 @@ export function createContractRepository(mode?: AdapterMode): IContractRepositor
   switch (resolved) {
     case 'mock':
       return new MockContractRepository();
-    case 'sharepoint':
     case 'proxy':
+      return new ProxyContractRepository(getProxyClient());
+    case 'sharepoint':
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'ContractRepository');
   }
@@ -127,8 +163,9 @@ export function createRiskRepository(mode?: AdapterMode): IRiskRepository {
   switch (resolved) {
     case 'mock':
       return new MockRiskRepository();
-    case 'sharepoint':
     case 'proxy':
+      return new ProxyRiskRepository(getProxyClient());
+    case 'sharepoint':
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'RiskRepository');
   }
@@ -139,8 +176,9 @@ export function createScorecardRepository(mode?: AdapterMode): IScorecardReposit
   switch (resolved) {
     case 'mock':
       return new MockScorecardRepository();
-    case 'sharepoint':
     case 'proxy':
+      return new ProxyScorecardRepository(getProxyClient());
+    case 'sharepoint':
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'ScorecardRepository');
   }
@@ -151,8 +189,9 @@ export function createPmpRepository(mode?: AdapterMode): IPmpRepository {
   switch (resolved) {
     case 'mock':
       return new MockPmpRepository();
-    case 'sharepoint':
     case 'proxy':
+      return new ProxyPmpRepository(getProxyClient());
+    case 'sharepoint':
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'PmpRepository');
   }

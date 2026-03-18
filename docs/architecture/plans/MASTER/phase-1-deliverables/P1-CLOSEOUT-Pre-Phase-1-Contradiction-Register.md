@@ -103,7 +103,7 @@ These blockers do not prevent Phase 1 implementation from starting but must be r
 | ~~4~~ | ~~Startup config validation not wired (G2.6 task)~~ | ~~Backend could start with missing auth config~~ | ~~Backend~~ | ~~G2~~ | **CLOSED** — `validateRequiredConfig()` wired into `createServiceFactory()`; skips in mock/test mode (2026-03-18) |
 | 5 | SharePoint list schema approval pending | Physical SharePoint lists cannot be deployed to tenant | Product Owner | A3 | Medium — does not block adapter development against mocked fetch |
 | ~~6~~ | ~~B1 Appendix B route paths predate D6 lock~~ | ~~7 project-scoped domain route paths must be updated to nested pattern~~ | ~~B1 lead~~ | ~~B1~~ | **CLOSED** — All 7 domain route tables updated to D6 nested pattern (2026-03-18) |
-| 7 | B1 proxy adapter implementation (0% code) | D1 retry wiring, E1 contract tests, E2 staging checklist all blocked | Engineering | B1 | High — critical path for Phase 1 completion |
+| 7 | B1 proxy adapter implementation | D1 retry wiring, E1 contract tests, E2 staging checklist blocked until complete | Engineering | B1 | **In progress** — Transport foundation + 7 project-scoped repos implemented (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Remaining: Lead, Project, Estimating, Auth (4 repos). |
 
 ---
 
