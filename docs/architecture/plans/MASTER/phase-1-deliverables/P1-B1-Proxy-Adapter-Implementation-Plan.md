@@ -986,6 +986,7 @@ pnpm --filter @hbc/data-access check-types
 // packages/data-access/src/adapters/proxy/proxy-base.ts
 
 import type { IPagedResult, IListQueryOptions } from '@hbc/models';
+import { DEFAULT_PAGE_SIZE } from '@hbc/models';
 import { BaseRepository } from '../base.js';
 import { ProxyHttpClient } from './http-client.js';
 
@@ -1016,12 +1017,16 @@ export abstract class ProxyBaseRepository<T> extends BaseRepository<T> {
   }
 
   /**
-   * Build a project-scoped resource path.
-   * Most domain repositories scope queries by project.
+   * Build a project-scoped resource path using nested URL segments.
+   * PROVISIONAL — see decision D6: C1 may use flat query-param routing
+   * (`/api/schedule?projectId={id}`) instead of nested paths. If D6 resolves
+   * to flat routing, use buildProjectScopedQueryParams() instead and remove
+   * this method.
+   *
    * @param projectId - Project UUID
    * @param subResource - Sub-resource name (e.g., "activities", "entries")
    * @param id - Optional entity ID within the sub-resource
-   * @returns Path like "/api/projects/{projectId}/activities" or "/api/projects/{projectId}/activities/42"
+   * @returns Path like "/api/projects/{projectId}/activities"
    */
   protected buildProjectScopedPath(
     projectId: string,
@@ -1033,6 +1038,23 @@ export abstract class ProxyBaseRepository<T> extends BaseRepository<T> {
       return `${base}/${id}`;
     }
     return base;
+  }
+
+  /**
+   * Add projectId as a query parameter for flat-route project scoping.
+   * Alternative to buildProjectScopedPath() — see decision D6.
+   * C1 currently uses flat routes with `?projectId=` query params.
+   * Use this pattern if D6 resolves to flat routing.
+   *
+   * @param params - Existing query params (from buildQueryParams)
+   * @param projectId - Project UUID to add as query param
+   * @returns Params with projectId added
+   */
+  protected addProjectScope(
+    params: Record<string, string>,
+    projectId: string,
+  ): Record<string, string> {
+    return { ...params, projectId };
   }
 
   /**
@@ -1067,6 +1089,11 @@ export abstract class ProxyBaseRepository<T> extends BaseRepository<T> {
    * Handle a paginated API response, normalizing the backend structure
    * to IPagedResult. Backend returns { data: T[], total, page, pageSize };
    * we extract and return as { items: T[], total, page, pageSize }.
+   *
+   * Fallback pageSize uses DEFAULT_PAGE_SIZE from @hbc/models (currently 25).
+   * See decision D4: C1 specifies default 50. This fallback only applies when
+   * the backend omits pageSize from the response, which should not happen in
+   * normal operation. The mismatch must be reconciled before production.
    */
   protected mapPagedResponse<U>(response: unknown): IPagedResult<U> {
     const data = response as any;
@@ -1081,7 +1108,7 @@ export abstract class ProxyBaseRepository<T> extends BaseRepository<T> {
       items: data.data,
       total: data.total ?? 0,
       page: data.page ?? 1,
-      pageSize: data.pageSize ?? 20,
+      pageSize: data.pageSize ?? DEFAULT_PAGE_SIZE,
     };
   }
 }
@@ -1137,15 +1164,24 @@ describe('ProxyBaseRepository', () => {
     });
   });
 
-  describe('buildProjectScopedPath()', () => {
-    it('should build project-scoped path without ID', () => {
+  // D6: Nested path pattern is provisional. C1 may use flat ?projectId= routing.
+  // Both helpers are provided; final pattern depends on D6 resolution.
+  describe('buildProjectScopedPath() [provisional — D6]', () => {
+    it('should build nested project-scoped path without ID', () => {
       const path = repo['buildProjectScopedPath']('proj-uuid', 'activities');
       expect(path).toBe('/api/projects/proj-uuid/activities');
     });
 
-    it('should build project-scoped path with numeric ID', () => {
+    it('should build nested project-scoped path with numeric ID', () => {
       const path = repo['buildProjectScopedPath']('proj-uuid', 'activities', 42);
       expect(path).toBe('/api/projects/proj-uuid/activities/42');
+    });
+  });
+
+  describe('addProjectScope() [alternative — D6]', () => {
+    it('should add projectId as a query parameter', () => {
+      const params = repo['addProjectScope']({ page: '1' }, 'proj-uuid');
+      expect(params).toEqual({ page: '1', projectId: 'proj-uuid' });
     });
   });
 
@@ -1223,7 +1259,7 @@ describe('ProxyBaseRepository', () => {
       });
     });
 
-    it('should provide defaults for missing pagination fields', () => {
+    it('should provide defaults for missing pagination fields (D4: default from @hbc/models)', () => {
       const backendResponse = {
         data: [{ id: 1, name: 'Item 1' }],
       };
@@ -1233,7 +1269,9 @@ describe('ProxyBaseRepository', () => {
       expect(result.items).toHaveLength(1);
       expect(result.total).toBe(0);
       expect(result.page).toBe(1);
-      expect(result.pageSize).toBe(20);
+      // Uses DEFAULT_PAGE_SIZE from @hbc/models (currently 25).
+      // D4: C1 defaults to 50; this fallback only applies when backend omits pageSize.
+      expect(result.pageSize).toBe(25);
     });
 
     it('should throw on invalid response structure', () => {
@@ -2980,7 +3018,7 @@ C1 defines these standard response shapes. All B1 proxy adapter code must confor
 | **Error field name** | `extractErrorMessage()` reads `.error` first (C1), falls back to `.message` | Sends `body.error` | **Resolved provisionally:** Dual-field extraction implemented; `.error` preferred per C1 contract, `.message` accepted for compatibility. Final reconciliation when C1 freezes (decision D3) |
 | **Error code field** | Does not read response `code` | Sends `code` in error body | **Should use:** Map C1's `code` field to `HbcDataAccessError.code` when available |
 | **Request ID in errors** | Not extracted from error response | Sends `requestId` in error body | **Optional:** Could log `requestId` from error response for debugging |
-| **Default pageSize** | `mapPagedResponse` defaults to 20; `@hbc/models` `DEFAULT_PAGE_SIZE` = 25 | Default 50, max 200 | **Must align:** Use C1's default (50) or explicitly pass pageSize on every request |
+| **Default pageSize** | `mapPagedResponse` uses `DEFAULT_PAGE_SIZE` from `@hbc/models` (25) as fallback when backend omits pageSize | Default 50, max 200 | **Provisional (D4):** Fallback only applies when backend omits the field; normal responses include pageSize. Align constant with C1 when frozen |
 | **pageSize max** | `@hbc/models` `MAX_PAGE_SIZE` = 100 | Max 200 | **Note:** B1 enforces stricter limit; this is acceptable but should be documented |
 
 ### Impact on Implementation
