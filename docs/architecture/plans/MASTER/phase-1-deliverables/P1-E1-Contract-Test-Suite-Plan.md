@@ -47,6 +47,16 @@ Phase 1 contract testing establishes agreement between frontend proxy adapters (
 
 P1-E1 is a **plan-level design document** governing the contract test suite for Phase 1. It defines schemas, test structure, and verification strategy. Implementation proceeds only for items with **TARGET** status whose prerequisites are met. Code examples are implementation guidance — not authorization to build speculative infrastructure or implement ahead of upstream deliverables. Where this document labels something PROVISIONAL, implementation must wait for the governing decision to resolve before committing that shape.
 
+### Non-Goals
+
+The following are explicitly out of scope for E1 implementation until their preconditions are met:
+
+- **Tier 2 domain schemas, handlers, or tests** — do not implement until C1 decisions D1/D2/D6 resolve and routes are confirmed for each domain.
+- **Tier 3 (Auth) schemas or tests** — do not implement until C2 publishes auth routes (A9).
+- **Convenience wrapper methods on port interfaces** — use the exact method signatures from `@hbc/data-access/src/ports/`. Do not invent aliases.
+- **Root `vitest.workspace.ts` registration** — do not add `@hbc/models` or `@hbc/data-access` to the root workspace until they have stable, passing test suites. Package-local vitest configs are the primary requirement.
+- **Programmatic telemetry assertions** — C3 verification is a manual KQL gate step. Do not build automated Application Insights query assertions in test code.
+
 ---
 
 ## Plan Status and Dependencies
@@ -142,27 +152,41 @@ The current `@hbc/models/src/contracts/` directory is the **Contracts business d
 
 **Setup tasks E1 must complete before verification commands work:**
 
-1. **`@hbc/models` vitest setup:**
-   - Add `zod` as a dependency and `vitest` as a devDependency
-   - Create `packages/models/vitest.config.ts` (node environment, include `src/**/*.test.ts`)
+1. **`@hbc/models` vitest setup** (required):
+   - Add `zod` to `dependencies` and `vitest` to `devDependencies` in `packages/models/package.json`
+   - Create `packages/models/vitest.config.ts`: `environment: 'node'`, `globals: true`, `include: ['src/**/*.test.ts']`
    - Add `"test": "vitest run"` to `packages/models/package.json` scripts
-   - Optionally add to root `vitest.workspace.ts` (currently lists auth, shell, sharepoint-docs, bic-next-move, complexity, pwa only)
+   - **Optional follow-on:** Register in root `vitest.workspace.ts` after the package has stable passing tests. The root workspace currently lists 6 packages (auth, shell, sharepoint-docs, bic-next-move, complexity, pwa). Package-local `pnpm --filter @hbc/models test` works without root registration.
 
-2. **`@hbc/data-access` vitest setup** (coordinate with D1):
-   - Add `vitest` and `msw` as devDependencies
-   - Create `packages/data-access/vitest.config.ts` (node environment, include `src/**/*.test.ts` and `src/**/*.contract.test.ts`)
+2. **`@hbc/data-access` vitest setup** (required; coordinate with D1):
+   - Add `vitest` and `msw` to `devDependencies` in `packages/data-access/package.json`
+   - Create `packages/data-access/vitest.config.ts`: `environment: 'node'`, `globals: true`, `include: ['src/**/*.test.ts', 'src/**/*.contract.test.ts']`
    - Add `"test": "vitest run"` to `packages/data-access/package.json` scripts
-   - Optionally add to root `vitest.workspace.ts`
+   - **Optional follow-on:** Register in root `vitest.workspace.ts` after stable tests exist. Same rationale as `@hbc/models`.
 
-3. **`@hbc/functions` vitest config update** (after C1 delivers route handlers):
-   - Current `backend/functions/vitest.config.ts` uses named projects (`unit`, `smoke`) with **explicit file-path include lists** — new contract test files won't be discovered automatically
-   - Add contract test patterns to the `unit` project include list, or create a new `contract` project
-   - Add: `src/functions/leads/**/*.contract.test.ts`, `src/functions/projects/**/*.contract.test.ts`, `src/functions/estimating/**/*.contract.test.ts`, `src/middleware/error-contract.test.ts`
+3. **`@hbc/functions` vitest config update** (required after C1 delivers route handlers):
+   - **Why explicit discovery matters:** The current `backend/functions/vitest.config.ts` uses named projects (`unit`, `smoke`) with **explicit file-path include lists**. Vitest does NOT auto-discover files outside these lists — new `.contract.test.ts` files would be silently invisible to `vitest run`.
+   - **Required:** Add a dedicated `contract` project to the `projects` array (see Task 10 for details). This matches the existing `unit`/`smoke` separation, enables independent `pnpm --filter @hbc/functions test:contract`, and prevents coupling between provisioning unit tests and contract test prerequisites.
+   - Add `"test:contract": "vitest run --config vitest.config.ts --project contract"` to `backend/functions/package.json` scripts
 
 **`@hbc/functions` existing test commands (CURRENT — runnable now):**
 - Unit tests: `pnpm --filter @hbc/functions test`
 - Smoke tests: `pnpm --filter @hbc/functions test:smoke`
 - Coverage: `pnpm --filter @hbc/functions test:coverage`
+
+### Test Lane Ownership
+
+Each test lane has a single package owner, a specific command, and clear pass/fail criteria. Do not mix lanes across packages.
+
+| Lane | Package Owner | Command | Pass Criteria | Blocked On | CI-Ready? |
+|---|---|---|---|---|---|
+| Schema unit tests | `@hbc/models` | `pnpm --filter @hbc/models test` | All Zod parse/reject assertions pass | Zod + vitest setup | Yes — after setup |
+| MSW setup tests | `@hbc/data-access` | `pnpm --filter @hbc/data-access test` | Server starts, handlers registered, unhandled requests fail | Vitest + MSW setup | Yes — after setup |
+| Frontend adapter contract tests | `@hbc/data-access` | `pnpm --filter @hbc/data-access test` | Adapter responses parse against Zod schemas | B1 proxy repositories | No — blocked |
+| Backend route contract tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:contract` | Route handlers return schema-conformant responses | C1 route handlers | No — blocked |
+| Backend error contract tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:contract` | All error paths conform to ErrorEnvelopeSchema | C1 error middleware | No — blocked |
+| Staging smoke tests | `@hbc/functions` | `pnpm --filter @hbc/functions test:smoke` | End-to-end flows pass against staging | C1 + C2 + staging | No — blocked |
+| Telemetry baseline | `@hbc/functions` | `pnpm --filter @hbc/functions test:smoke` | Traffic generates expected C3 events (manual KQL) | C3 + staging | No — blocked |
 
 ---
 
@@ -1086,6 +1110,35 @@ Expected: All tests pass (green checkmark).
 ---
 
 ## Chunk 2: MSW Handler Setup and Frontend Contract Tests
+
+### MSW Test Infrastructure Policy
+
+All `@hbc/data-access` tests that intercept HTTP use a single shared MSW server instance. This prevents handler conflicts, ensures consistent error behavior, and keeps test setup DRY.
+
+**Central server setup:**
+- A single `packages/data-access/src/test-utils/msw-server.ts` exports the shared `server` instance.
+- All test files import `{ server }` from `../../test-utils` — no inline `setupServer()` calls.
+
+**Required lifecycle hooks (every test file that uses MSW):**
+
+```typescript
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+```
+
+**Why `onUnhandledRequest: 'error'`:** The existing PWA test setup uses `'warn'`, which logs but continues. Contract tests must use `'error'` because an unhandled request means a missing handler — that's a contract gap, not a warning. If a test makes a request that no handler covers, the test must fail immediately.
+
+**Fixture and handler organization:**
+
+| File | Purpose | Scope |
+|---|---|---|
+| `msw-fixtures.ts` | Domain fixture data conforming to Zod schemas | Tier 1 (CONFIRMED) domains only |
+| `msw-handlers.ts` | HTTP handlers organized by domain (`leadsHandlers`, `projectsHandlers`, `estimatingHandlers`) | Tier 1 domains only |
+| `msw-server.ts` | Server instance wired with `defaultHandlers` | Exports shared server |
+| `index.ts` | Barrel export for all test utilities | Public API for test consumers |
+
+**Boundary rule:** Do NOT pre-build handler arrays for Tier 2 (PROVISIONAL) or Tier 3 (NOT CATALOGED) domains. Add handlers only when the route contract is confirmed and the adapter class exists.
 
 ### Frontend Contract Test Readiness
 
@@ -3130,7 +3183,9 @@ The current `backend/functions/vitest.config.ts` uses named projects with explic
 
 **Do NOT replace this config with a generic `src/**/*.test.ts` pattern** — this would break the current project-based test separation and coverage targeting.
 
-**Recommended:** Add a dedicated `contract` project alongside the existing `unit` and `smoke` projects. This follows the backend's established project-based separation pattern and keeps contract tests independently runnable:
+**Required:** Add a dedicated `contract` project alongside the existing `unit` and `smoke` projects.
+
+**Why a dedicated project, not expanding `unit`:** The backend's `vitest.config.ts` uses **explicit include lists per project** — there is no glob-based auto-discovery. Adding contract patterns to the `unit` project's include list would couple contract test prerequisites (C1 route handlers, `@hbc/data-access` dependency) to provisioning unit tests, risking breakage when contract test files exist but their dependencies haven't landed. A separate `contract` project keeps these concerns independent, matches the existing `unit`/`smoke` separation pattern, and enables `pnpm --filter @hbc/functions test:contract` as a standalone command.
 
 ```typescript
 // Add to the projects array in backend/functions/vitest.config.ts:
@@ -3148,15 +3203,6 @@ The current `backend/functions/vitest.config.ts` uses named projects with explic
 Add a corresponding script to `backend/functions/package.json`:
 ```json
 "test:contract": "vitest run --config vitest.config.ts --project contract"
-```
-
-**Fallback:** If a dedicated project is undesirable, extend the existing `unit` project's include array instead:
-```typescript
-// Append to the unit project include array:
-'src/functions/leads/**/*.contract.test.ts',
-'src/functions/projects/**/*.contract.test.ts',
-'src/functions/estimating/**/*.contract.test.ts',
-'src/middleware/error-contract.test.ts',
 ```
 
 **Backend test scripts (CURRENT — no changes needed except adding `test:contract`):**
