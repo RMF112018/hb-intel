@@ -90,7 +90,7 @@ P1-E1 is a **plan-level design document** governing the contract test suite for 
 The following are explicitly out of scope for E1 implementation until their preconditions are met:
 
 - **Tier 2 domain handlers or tests** — D1/D2/D6 route conventions are now resolved, but do not implement full test code until C1 delivers actual route handlers for each domain.
-- **Tier 3 (Auth) schemas or tests** — do not implement until C2 publishes auth routes (A9).
+- **Tier 3 (Auth) schemas or tests** — do not implement full auth schemas or contract tests until C2 publishes auth routes (A9). Exception: `/api/auth/me` is confirmed as a smoke-test utility for token validation (decision 12) — it does not require a Zod schema or contract test lane.
 - **Convenience wrapper methods on port interfaces** — use the exact method signatures from `@hbc/data-access/src/ports/`. Do not invent aliases.
 - **Root `vitest.workspace.ts` registration** — do not add `@hbc/models` or `@hbc/data-access` to the root workspace until they have stable, passing test suites. Package-local vitest configs are the primary requirement.
 - **Programmatic telemetry assertions** — C3 verification is a manual KQL gate step. Do not build automated Application Insights query assertions in test code.
@@ -113,7 +113,7 @@ The following are explicitly out of scope for E1 implementation until their prec
 |---|---|---|---|---|---|
 | `@hbc/models` | **No** | **No** | **No** | N/A | devDependency: `@types/react` only; no `api-schemas/` directory exists |
 | `@hbc/data-access` | **No** | **No** | N/A | **Stubs only** — `proxy/index.ts` exports `ProxyConfig`, `DEFAULT_TIMEOUT_MS`, `DEFAULT_RETRY_COUNT`; no `ProxyHttpClient` or proxy repository classes | Non-mock adapters throw `AdapterNotImplementedError` |
-| `backend/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`) | **Yes** — split `unit`/`smoke` projects with explicit include lists | N/A | N/A | Does NOT depend on `@hbc/data-access` (TARGET: type-only `devDependency` for port interfaces after C1); coverage targets provisioning only; no domain route handlers |
+| `backend/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`) | **Yes** — split `unit`/`smoke` projects with explicit include lists | N/A | N/A | Does NOT depend on `@hbc/data-access` today (**CURRENT**). Type-only `devDependency` for test port interfaces is **approved** — see [Dependency Boundary Decision](#dependency-boundary-decision). No runtime coupling permitted. Coverage targets provisioning only; no domain route handlers |
 | Root workspace | `pnpm test` (filtered) | **Yes** — 6 entries: auth, shell, sharepoint-docs, bic-next-move, complexity, pwa | N/A | N/A | `@hbc/models` and `@hbc/data-access` are NOT in the workspace test list |
 
 **Why adapter contract tests remain blocked:** `@hbc/data-access` proxy adapters are stubs. The `resolveAdapterMode()` factory returns mock adapters by default; selecting `'proxy'` mode throws `AdapterNotImplementedError`. B1 must deliver `ProxyHttpClient` and domain-specific proxy repository classes (`ProxyLeadRepository`, `ProxyProjectRepository`, `ProxyEstimatingRepository`) before adapter contract tests can execute.
@@ -353,6 +353,15 @@ If this check produces a `never` type error, the schema has drifted from the can
 - Do not import `Lead` (the Zod-inferred type) where `ILead` (the canonical interface) should be used
 - Do not add fields to a Zod schema that don't exist in the corresponding `@hbc/models` interface
 - Do not assume `z.infer` validates conformance — it only derives a type from the schema definition
+
+### Compile-Time Conformance Policy
+
+Schema-to-interface drift **must fail at compile time**, not just at test runtime.
+
+1. **Every Zod schema file** must include a bidirectional assignability check against the canonical `@hbc/models` interface (see examples in Task 1 schema files).
+2. **Compile-time checks are mandatory; runtime parse tests are additive.** A schema that passes `z.safeParse()` tests but fails the assignability check is non-conformant and must be corrected.
+3. **`pnpm --filter @hbc/models check-types`** is the minimum verification — it must pass before any schema is considered valid.
+4. Runtime parse/reject tests (Task 1 tests) provide defense-in-depth for edge cases the type system cannot catch (e.g., string format constraints, numeric ranges). They do not replace compile-time conformance.
 
 ### Key Assumptions
 
@@ -891,7 +900,7 @@ export const PMPSignatureSchema = z.object({
 
 Auth is **not a data-domain with CRUD**. It is a read-heavy capability lane with role assignment as the only write operation. Auth routes are not cataloged in C1 — they are deferred to C2 (Auth Hardening).
 
-**No Zod schema or test code until C2 publishes auth routes.**
+**No Zod schema or contract test code until C2 publishes auth routes.** Exception: `/api/auth/me` may be used in smoke tests as a token-validation utility (decision 12). This is an operational probe, not a business API contract lane — no `auth-schema.ts`, no contract tests, no MSW handlers for auth.
 
 **Auth capability groups (reference only):**
 
