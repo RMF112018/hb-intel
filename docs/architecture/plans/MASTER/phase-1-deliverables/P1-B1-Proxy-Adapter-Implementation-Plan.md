@@ -269,7 +269,7 @@ B1 is the **frontend-side HTTP client and domain adapter** workstream. It owns t
 - Error response shape: `{ message, code, requestId?, details? }` — `message` is primary field per D3 lock. `extractErrorMessage()` should read `.message` first, `.error` fallback for pre-Phase-1 routes only
 - HTTP status code semantics: 404 for not found, 422 for validation, 401/403 for auth
 
-**Note:** Appendix B route paths for project-scoped domains (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP) predate the D6 lock and still show flat `?projectId=` query params. These must be updated to nested `/api/projects/{projectId}/{domain}` paths when B1 implementation begins.
+**Note:** Appendix B route paths for all 7 project-scoped domains were updated 2026-03-18 to use the D6 nested pattern (`/api/projects/{projectId}/{domain}`). Pseudocode examples in the implementation chunks may still reference the pre-D6 flat pattern as contextual commentary — the Appendix B route tables are authoritative.
 
 **Blocking semantics:**
 - B1 **can proceed before C1 is complete** because all HTTP calls are behind mocked `fetch` in tests
@@ -1022,10 +1022,7 @@ export abstract class ProxyBaseRepository<T> extends BaseRepository<T> {
 
   /**
    * Build a project-scoped resource path using nested URL segments.
-   * PROVISIONAL — see decision D6: C1 may use flat query-param routing
-   * (`/api/schedule?projectId={id}`) instead of nested paths. If D6 resolves
-   * to flat routing, use buildProjectScopedQueryParams() instead and remove
-   * this method.
+   * D6 LOCKED — nested paths confirmed: `/api/projects/{projectId}/{domain}`.
    *
    * @param projectId - Project UUID
    * @param subResource - Sub-resource name (e.g., "activities", "entries")
@@ -1045,10 +1042,8 @@ export abstract class ProxyBaseRepository<T> extends BaseRepository<T> {
   }
 
   /**
-   * Add projectId as a query parameter for flat-route project scoping.
-   * Alternative to buildProjectScopedPath() — see decision D6.
-   * C1 currently uses flat routes with `?projectId=` query params.
-   * Use this pattern if D6 resolves to flat routing.
+   * DEPRECATED — D6 locked to nested paths. Use buildProjectScopedPath() instead.
+   * Retained for reference only; do not use in production adapter implementation.
    *
    * @param params - Existing query params (from buildQueryParams)
    * @param projectId - Project UUID to add as query param
@@ -1168,9 +1163,8 @@ describe('ProxyBaseRepository', () => {
     });
   });
 
-  // D6: Nested path pattern is provisional. C1 may use flat ?projectId= routing.
-  // Both helpers are provided; final pattern depends on D6 resolution.
-  describe('buildProjectScopedPath() [provisional — D6]', () => {
+  // D6 LOCKED: Nested path pattern confirmed. Use buildProjectScopedPath().
+  describe('buildProjectScopedPath() [D6 locked]', () => {
     it('should build nested project-scoped path without ID', () => {
       const path = repo['buildProjectScopedPath']('proj-uuid', 'activities');
       expect(path).toBe('/api/projects/proj-uuid/activities');
@@ -1944,8 +1938,7 @@ export class ProxyScheduleRepository
     super(httpClient, '/api/schedules');
   }
 
-  // PROVISIONAL (D6): Uses nested project-scoped path. C1 may use flat
-  // ?projectId= query param instead. See addProjectScope() alternative.
+  // D6 LOCKED: Uses nested project-scoped path `/api/projects/{projectId}/schedules`.
   async getActivities(
     projectId: string,
     options?: IListQueryOptions,
@@ -2900,90 +2893,88 @@ These routes are confirmed in P1-C1 as high-priority Phase 1 targets with locked
 
 > **Resolution needed:** C1 defines flat `/api/estimating` with generic CRUD. B1 repo truth has two entity types (tracker + kickoff) requiring sub-resource paths. Must confirm with C1 whether backend will support sub-resource routing or a different pattern.
 
-### Tier 2 — C1 Path Planned but Not Locked
+### Tier 2 — Project-Scoped Domain Routes (D1/D6 LOCKED)
 
-These routes are in C1's Phase 1 target list but paths are not yet frozen. B1 paths are provisional.
+These routes follow the locked D6 nested pattern: `/api/projects/{projectId}/{domain}`. D1 (plural naming) and D6 (nested paths) are resolved per P1-E1 Locked Decisions 1 and 8. Route paths updated 2026-03-18 to replace pre-D6 flat `?projectId=` patterns.
 
-#### Schedule Repository (B1: `/api/schedules` — **C1 uses `/api/schedule`**)
+#### Schedule Repository — `/api/projects/{projectId}/schedules` (D1 plural, D6 nested)
 
-| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+| Method | Verb | Path | Params / Body | Response | Status |
 |---|---|---|---|---|---|
-| `getActivities(projectId, options?)` | GET | `/api/projects/{projectId}/activities` | `?page=&pageSize=` | Collection envelope (`IScheduleActivity[]`) | **Assumed** — C1 uses flat `/api/schedule`; B1 uses nested project-scoped path |
-| `getActivityById(id)` | GET | `/api/schedules/activities/{id}` | — | Single-item envelope | **Assumed** |
-| `createActivity(data)` | POST | `/api/schedules/activities` | `Omit<IScheduleActivity, 'id'>` body | Single-item envelope | **Assumed** |
-| `updateActivity(id, data)` | PUT | `/api/schedules/activities/{id}` | `Partial<IScheduleActivity>` body | Single-item envelope | **Assumed** |
-| `deleteActivity(id)` | DELETE | `/api/schedules/activities/{id}` | — | 204 No Content | **Assumed** |
-| `getMetrics(projectId)` | GET | `/api/projects/{projectId}/metrics` | — | Single-item envelope (`IScheduleMetrics`) | **Assumed** — aggregate endpoint not in C1 |
+| `getActivities(projectId, options?)` | GET | `/api/projects/{projectId}/schedules` | `?page=&pageSize=` | Collection envelope (`IScheduleActivity[]`) | D6 locked |
+| `getActivityById(projectId, id)` | GET | `/api/projects/{projectId}/schedules/{id}` | — | Single-item envelope | D6 locked |
+| `createActivity(projectId, data)` | POST | `/api/projects/{projectId}/schedules` | `Omit<IScheduleActivity, 'id'>` body | Single-item envelope (201) | D6 locked |
+| `updateActivity(projectId, id, data)` | PUT | `/api/projects/{projectId}/schedules/{id}` | `Partial<IScheduleActivity>` body | Single-item envelope | D6 locked |
+| `deleteActivity(projectId, id)` | DELETE | `/api/projects/{projectId}/schedules/{id}` | — | 204 No Content | D6 locked |
+| `getMetrics(projectId)` | GET | `/api/projects/{projectId}/schedules/metrics` | — | Single-item envelope (`IScheduleMetrics`) | Aggregate — not in C1 catalog |
 
-> **Path discrepancy:** C1 uses singular `/api/schedule`; B1 uses plural `/api/schedules`. Also, C1 uses flat routes with query params; B1 uses nested project-scoped paths. Must resolve routing pattern with C1.
+#### Buyout Repository — `/api/projects/{projectId}/buyouts` (D1 plural, D6 nested)
 
-#### Buyout Repository (B1: `/api/buyouts` — **C1 uses `/api/buyout`**)
-
-| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+| Method | Verb | Path | Params / Body | Response | Status |
 |---|---|---|---|---|---|
-| `getEntries(projectId, options?)` | GET | `/api/buyout?projectId={id}&page=&pageSize=` | Query params | Collection envelope (`IBuyoutEntry[]`) | **Assumed** — path singular/plural TBD |
-| `getEntryById(id)` | GET | `/api/buyout/{id}` | — | Single-item envelope | **Assumed** |
-| `createEntry(data)` | POST | `/api/buyout` | `Omit<IBuyoutEntry, 'id'>` body | Single-item envelope | **Assumed** |
-| `updateEntry(id, data)` | PUT | `/api/buyout/{id}` | `Partial<IBuyoutEntry>` body | Single-item envelope | **Assumed** |
-| `deleteEntry(id)` | DELETE | `/api/buyout/{id}` | — | 204 No Content | **Assumed** |
-| `getSummary(projectId)` | GET | `/api/buyout/summary?projectId={id}` | — | Single-item envelope (`IBuyoutSummary`) | **Assumed** — aggregate not in C1 |
+| `getEntries(projectId, options?)` | GET | `/api/projects/{projectId}/buyouts` | `?page=&pageSize=` | Collection envelope (`IBuyoutEntry[]`) | D6 locked |
+| `getEntryById(projectId, id)` | GET | `/api/projects/{projectId}/buyouts/{id}` | — | Single-item envelope | D6 locked |
+| `createEntry(projectId, data)` | POST | `/api/projects/{projectId}/buyouts` | `Omit<IBuyoutEntry, 'id'>` body | Single-item envelope (201) | D6 locked |
+| `updateEntry(projectId, id, data)` | PUT | `/api/projects/{projectId}/buyouts/{id}` | `Partial<IBuyoutEntry>` body | Single-item envelope | D6 locked |
+| `deleteEntry(projectId, id)` | DELETE | `/api/projects/{projectId}/buyouts/{id}` | — | 204 No Content | D6 locked |
+| `getSummary(projectId)` | GET | `/api/projects/{projectId}/buyouts/summary` | — | Single-item envelope (`IBuyoutSummary`) | Aggregate — not in C1 catalog |
 
-#### Compliance Repository (`/api/compliance` — C1 path matches)
+#### Compliance Repository — `/api/projects/{projectId}/compliance` (D6 nested)
 
-| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+| Method | Verb | Path | Params / Body | Response | Status |
 |---|---|---|---|---|---|
-| `getEntries(projectId, options?)` | GET | `/api/compliance?projectId={id}&page=&pageSize=` | Query params | Collection envelope (`IComplianceEntry[]`) | **Assumed** |
-| `getEntryById(id)` | GET | `/api/compliance/{id}` | — | Single-item envelope | **Assumed** |
-| `createEntry(data)` | POST | `/api/compliance` | `Omit<IComplianceEntry, 'id'>` body | Single-item envelope | **Assumed** |
-| `updateEntry(id, data)` | PUT | `/api/compliance/{id}` | `Partial<IComplianceEntry>` body | Single-item envelope | **Assumed** |
-| `deleteEntry(id)` | DELETE | `/api/compliance/{id}` | — | 204 No Content | **Assumed** |
-| `getSummary(projectId)` | GET | `/api/compliance/summary?projectId={id}` | — | Single-item envelope (`IComplianceSummary`) | **Assumed** — aggregate not in C1 |
+| `getEntries(projectId, options?)` | GET | `/api/projects/{projectId}/compliance` | `?page=&pageSize=` | Collection envelope (`IComplianceEntry[]`) | D6 locked |
+| `getEntryById(projectId, id)` | GET | `/api/projects/{projectId}/compliance/{id}` | — | Single-item envelope | D6 locked |
+| `createEntry(projectId, data)` | POST | `/api/projects/{projectId}/compliance` | `Omit<IComplianceEntry, 'id'>` body | Single-item envelope (201) | D6 locked |
+| `updateEntry(projectId, id, data)` | PUT | `/api/projects/{projectId}/compliance/{id}` | `Partial<IComplianceEntry>` body | Single-item envelope | D6 locked |
+| `deleteEntry(projectId, id)` | DELETE | `/api/projects/{projectId}/compliance/{id}` | — | 204 No Content | D6 locked |
+| `getSummary(projectId)` | GET | `/api/projects/{projectId}/compliance/summary` | — | Single-item envelope (`IComplianceSummary`) | Aggregate — not in C1 catalog |
 
-#### Contract Repository (`/api/contracts` — C1 path matches)
+#### Contract Repository — `/api/projects/{projectId}/contracts` (D6 nested)
 
-| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+| Method | Verb | Path | Params / Body | Response | Status |
 |---|---|---|---|---|---|
-| `getContracts(projectId, options?)` | GET | `/api/contracts?projectId={id}&page=&pageSize=` | Query params | Collection envelope (`IContractInfo[]`) | **Assumed** |
-| `getContractById(id)` | GET | `/api/contracts/{id}` | — | Single-item envelope | **Assumed** |
-| `createContract(data)` | POST | `/api/contracts` | `Omit<IContractInfo, 'id'>` body | Single-item envelope | **Assumed** |
-| `updateContract(id, data)` | PUT | `/api/contracts/{id}` | `Partial<IContractInfo>` body | Single-item envelope | **Assumed** |
-| `deleteContract(id)` | DELETE | `/api/contracts/{id}` | — | 204 No Content | **Assumed** |
-| `getApprovals(contractId)` | GET | `/api/contracts/{contractId}/approvals` | — | Array envelope (`ICommitmentApproval[]`) | **Assumed** — sub-resource not in C1 |
-| `createApproval(data)` | POST | `/api/contracts/{contractId}/approvals` | `Omit<ICommitmentApproval, 'id'>` body | Single-item envelope | **Assumed** |
+| `getContracts(projectId, options?)` | GET | `/api/projects/{projectId}/contracts` | `?page=&pageSize=` | Collection envelope (`IContractInfo[]`) | D6 locked |
+| `getContractById(projectId, id)` | GET | `/api/projects/{projectId}/contracts/{id}` | — | Single-item envelope | D6 locked |
+| `createContract(projectId, data)` | POST | `/api/projects/{projectId}/contracts` | `Omit<IContractInfo, 'id'>` body | Single-item envelope (201) | D6 locked |
+| `updateContract(projectId, id, data)` | PUT | `/api/projects/{projectId}/contracts/{id}` | `Partial<IContractInfo>` body | Single-item envelope | D6 locked |
+| `deleteContract(projectId, id)` | DELETE | `/api/projects/{projectId}/contracts/{id}` | — | 204 No Content | D6 locked |
+| `getApprovals(projectId, contractId)` | GET | `/api/projects/{projectId}/contracts/{contractId}/approvals` | — | Array envelope (`ICommitmentApproval[]`) | Sub-resource — not in C1 catalog |
+| `createApproval(projectId, contractId, data)` | POST | `/api/projects/{projectId}/contracts/{contractId}/approvals` | `Omit<ICommitmentApproval, 'id'>` body | Single-item envelope (201) | Sub-resource — not in C1 catalog |
 
-#### Risk Repository (B1: `/api/risks` — **C1 uses `/api/risk`**)
+#### Risk Repository — `/api/projects/{projectId}/risks` (D1 plural, D6 nested)
 
-| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+| Method | Verb | Path | Params / Body | Response | Status |
 |---|---|---|---|---|---|
-| `getItems(projectId, options?)` | GET | `/api/risk?projectId={id}&page=&pageSize=` | Query params | Collection envelope (`IRiskCostItem[]`) | **Assumed** — path singular/plural TBD |
-| `getItemById(id)` | GET | `/api/risk/{id}` | — | Single-item envelope | **Assumed** |
-| `createItem(data)` | POST | `/api/risk` | `Omit<IRiskCostItem, 'id'>` body | Single-item envelope | **Assumed** |
-| `updateItem(id, data)` | PUT | `/api/risk/{id}` | `Partial<IRiskCostItem>` body | Single-item envelope | **Assumed** |
-| `deleteItem(id)` | DELETE | `/api/risk/{id}` | — | 204 No Content | **Assumed** |
-| `getManagement(projectId)` | GET | `/api/risk/management?projectId={id}` | — | Single-item envelope (`IRiskCostManagement`) | **Assumed** — aggregate not in C1 |
+| `getItems(projectId, options?)` | GET | `/api/projects/{projectId}/risks` | `?page=&pageSize=` | Collection envelope (`IRiskCostItem[]`) | D6 locked |
+| `getItemById(projectId, id)` | GET | `/api/projects/{projectId}/risks/{id}` | — | Single-item envelope | D6 locked |
+| `createItem(projectId, data)` | POST | `/api/projects/{projectId}/risks` | `Omit<IRiskCostItem, 'id'>` body | Single-item envelope (201) | D6 locked |
+| `updateItem(projectId, id, data)` | PUT | `/api/projects/{projectId}/risks/{id}` | `Partial<IRiskCostItem>` body | Single-item envelope | D6 locked |
+| `deleteItem(projectId, id)` | DELETE | `/api/projects/{projectId}/risks/{id}` | — | 204 No Content | D6 locked |
+| `getManagement(projectId)` | GET | `/api/projects/{projectId}/risks/management` | — | Single-item envelope (`IRiskCostManagement`) | Aggregate — not in C1 catalog |
 
-#### Scorecard Repository (B1: `/api/scorecards` — **C1 uses `/api/scorecard`**)
+#### Scorecard Repository — `/api/projects/{projectId}/scorecards` (D1 plural, D6 nested)
 
-| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+| Method | Verb | Path | Params / Body | Response | Status |
 |---|---|---|---|---|---|
-| `getScorecards(projectId, options?)` | GET | `/api/scorecard?projectId={id}&page=&pageSize=` | Query params | Collection envelope (`IGoNoGoScorecard[]`) | **Assumed** — path singular/plural TBD |
-| `getScorecardById(id)` | GET | `/api/scorecard/{id}` | — | Single-item envelope | **Assumed** |
-| `createScorecard(data)` | POST | `/api/scorecard` | `Omit<..., 'id'\|'createdAt'\|'updatedAt'>` body | Single-item envelope | **Assumed** |
-| `updateScorecard(id, data)` | PUT | `/api/scorecard/{id}` | `Partial<IGoNoGoScorecard>` body | Single-item envelope | **Assumed** |
-| `deleteScorecard(id)` | DELETE | `/api/scorecard/{id}` | — | 204 No Content | **Assumed** |
-| `getVersions(scorecardId)` | GET | `/api/scorecard/{scorecardId}/versions` | — | Array envelope (`IScorecardVersion[]`) | **Assumed** — sub-resource not in C1 |
+| `getScorecards(projectId, options?)` | GET | `/api/projects/{projectId}/scorecards` | `?page=&pageSize=` | Collection envelope (`IGoNoGoScorecard[]`) | D6 locked |
+| `getScorecardById(projectId, id)` | GET | `/api/projects/{projectId}/scorecards/{id}` | — | Single-item envelope | D6 locked |
+| `createScorecard(projectId, data)` | POST | `/api/projects/{projectId}/scorecards` | `Omit<..., 'id'\|'createdAt'\|'updatedAt'>` body | Single-item envelope (201) | D6 locked |
+| `updateScorecard(projectId, id, data)` | PUT | `/api/projects/{projectId}/scorecards/{id}` | `Partial<IGoNoGoScorecard>` body | Single-item envelope | D6 locked |
+| `deleteScorecard(projectId, id)` | DELETE | `/api/projects/{projectId}/scorecards/{id}` | — | 204 No Content | D6 locked |
+| `getVersions(projectId, scorecardId)` | GET | `/api/projects/{projectId}/scorecards/{scorecardId}/versions` | — | Array envelope (`IScorecardVersion[]`) | Sub-resource — not in C1 catalog |
 
-#### PMP Repository (`/api/pmp` — C1 path matches)
+#### PMP Repository — `/api/projects/{projectId}/pmp` (D6 nested)
 
-| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+| Method | Verb | Path | Params / Body | Response | Status |
 |---|---|---|---|---|---|
-| `getPlans(projectId, options?)` | GET | `/api/pmp?projectId={id}&page=&pageSize=` | Query params | Collection envelope (`IProjectManagementPlan[]`) | **Assumed** |
-| `getPlanById(id)` | GET | `/api/pmp/{id}` | — | Single-item envelope | **Assumed** |
-| `createPlan(data)` | POST | `/api/pmp` | `Omit<..., 'id'\|'createdAt'\|'updatedAt'>` body | Single-item envelope | **Assumed** |
-| `updatePlan(id, data)` | PUT | `/api/pmp/{id}` | `Partial<IProjectManagementPlan>` body | Single-item envelope | **Assumed** |
-| `deletePlan(id)` | DELETE | `/api/pmp/{id}` | — | 204 No Content | **Assumed** |
-| `getSignatures(pmpId)` | GET | `/api/pmp/{pmpId}/signatures` | — | Array envelope (`IPMPSignature[]`) | **Assumed** — sub-resource not in C1 |
-| `createSignature(data)` | POST | `/api/pmp/{pmpId}/signatures` | `Omit<IPMPSignature, 'id'>` body | Single-item envelope | **Assumed** |
+| `getPlans(projectId, options?)` | GET | `/api/projects/{projectId}/pmp` | `?page=&pageSize=` | Collection envelope (`IProjectManagementPlan[]`) | D6 locked |
+| `getPlanById(projectId, id)` | GET | `/api/projects/{projectId}/pmp/{id}` | — | Single-item envelope | D6 locked |
+| `createPlan(projectId, data)` | POST | `/api/projects/{projectId}/pmp` | `Omit<..., 'id'\|'createdAt'\|'updatedAt'>` body | Single-item envelope (201) | D6 locked |
+| `updatePlan(projectId, id, data)` | PUT | `/api/projects/{projectId}/pmp/{id}` | `Partial<IProjectManagementPlan>` body | Single-item envelope | D6 locked |
+| `deletePlan(projectId, id)` | DELETE | `/api/projects/{projectId}/pmp/{id}` | — | 204 No Content | D6 locked |
+| `getSignatures(projectId, pmpId)` | GET | `/api/projects/{projectId}/pmp/{pmpId}/signatures` | — | Array envelope (`IPMPSignature[]`) | Sub-resource — not in C1 catalog |
+| `createSignature(projectId, pmpId, data)` | POST | `/api/projects/{projectId}/pmp/{pmpId}/signatures` | `Omit<IPMPSignature, 'id'>` body | Single-item envelope (201) | Sub-resource — not in C1 catalog |
 
 ### Tier 3 — No C1 Route Defined (Auth)
 
@@ -3008,11 +2999,11 @@ Auth is not part of C1's domain CRUD routes. It is a separate subsystem managed 
 
 ### C1-Confirmed Envelope Shapes
 
-C1 defines these standard response shapes. All B1 proxy adapter code must conform to these.
+C1 defines these standard response shapes (updated per locked decisions D3, D4, D16). All B1 proxy adapter code must conform to these.
 
 **Collection (paginated):**
 ```json
-{ "data": [ /* T[] */ ], "total": 0, "page": 1, "pageSize": 50 }
+{ "items": [ /* T[] */ ], "total": 0, "page": 1, "pageSize": 25 }
 ```
 
 **Single item:**
@@ -3020,29 +3011,26 @@ C1 defines these standard response shapes. All B1 proxy adapter code must confor
 { "data": { /* T */ } }
 ```
 
-**No content:** HTTP 204 with empty body (or `{ "status": "ok" }`)
+**No content:** HTTP 204 with empty body (per RFC 9110 — no JSON wrapper).
 
-**Error:**
+**Error (D3 locked: `message` not `error`):**
 ```json
-{ "error": "Human-readable message", "code": "ERROR_CODE", "requestId": "uuid" }
+{ "message": "Human-readable message", "code": "ERROR_CODE", "requestId": "uuid" }
 ```
 
 ### B1 vs C1 Discrepancies
 
 | Concern | B1 Current Code | C1 Contract | Action Required |
 |---|---|---|---|
-| **Error field name** | `extractErrorMessage()` reads `.error` first (C1), falls back to `.message` | Sends `body.error` | **Resolved provisionally:** Dual-field extraction implemented; `.error` preferred per C1 contract, `.message` accepted for compatibility. Final reconciliation when C1 freezes (decision D3) |
+| **Error field name** | `extractErrorMessage()` reads `.message` first (D3 locked), falls back to `.error` for pre-Phase-1 routes | Target: `body.message` | **D3 RESOLVED:** `message` is primary field. B1 reads `.message` first, `.error` fallback for backward compatibility with existing routes only |
 | **Error code field** | Does not read response `code` | Sends `code` in error body | **Should use:** Map C1's `code` field to `HbcDataAccessError.code` when available |
 | **Request ID in errors** | Not extracted from error response | Sends `requestId` in error body | **Optional:** Could log `requestId` from error response for debugging |
-| **Default pageSize** | `mapPagedResponse` uses `DEFAULT_PAGE_SIZE` from `@hbc/models` (25) as fallback when backend omits pageSize | Default 50, max 200 | **Provisional (D4):** Fallback only applies when backend omits the field; normal responses include pageSize. Align constant with C1 when frozen |
-| **pageSize max** | `@hbc/models` `MAX_PAGE_SIZE` = 100 | Max 200 | **Note:** B1 enforces stricter limit; this is acceptable but should be documented |
+| **Default pageSize** | `mapPagedResponse` uses `DEFAULT_PAGE_SIZE` from `@hbc/models` (25) as fallback when backend omits pageSize | Default 25, max 100 | **D4 RESOLVED:** B1 and C1 now agree on default 25, max 100 |
+| **pageSize max** | `@hbc/models` `MAX_PAGE_SIZE` = 100 | Max 100 | **D4 RESOLVED:** C1 updated to max 100 (previously 200). B1 and C1 now aligned |
 
 ### Impact on Implementation
 
-These discrepancies do NOT block B1 implementation because all B1 tests use mocked fetch. However, they **must be resolved before production activation**:
-
-1. B1 currently supports both `.error` and `.message` for compatibility via `extractErrorMessage()`. When C1 freezes D3, B1 should simplify to the final agreed contract shape and, if desired, map backend `code`/`requestId` fields more directly
-2. The pagination fallback mismatch (`DEFAULT_PAGE_SIZE` = 25 vs C1 default 50) only affects responses where the backend omits `pageSize` — functional but should be aligned
+Most discrepancies are now resolved per locked decisions (D3, D4). Remaining items (error `code` mapping, `requestId` logging) are implementation enhancements, not blockers. All B1 tests use mocked fetch so implementation can proceed against the locked contract shapes.
 
 ---
 

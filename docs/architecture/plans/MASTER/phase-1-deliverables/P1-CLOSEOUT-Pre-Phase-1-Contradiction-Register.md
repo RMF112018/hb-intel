@@ -102,7 +102,7 @@ These blockers do not prevent Phase 1 implementation from starting but must be r
 | 3 | GraphService scaffold pending `Group.ReadWrite.All` confirmation | Provisioning Step 6 (Entra group creation) cannot work in production | Backend | Ops | High — blocks production provisioning |
 | 4 | Startup config validation not wired (G2.6 task) | Backend could start with missing auth config and fail at runtime | Backend | G2 | Low — fail-fast, not silent |
 | 5 | SharePoint list schema approval pending | Physical SharePoint lists cannot be deployed to tenant | Product Owner | A3 | Medium — does not block adapter development against mocked fetch |
-| 6 | B1 Appendix B route paths predate D6 lock | 7 project-scoped domain route paths must be updated to nested pattern before implementation | B1 lead | B1 | Low — known; reconciliation note in place |
+| ~~6~~ | ~~B1 Appendix B route paths predate D6 lock~~ | ~~7 project-scoped domain route paths must be updated to nested pattern~~ | ~~B1 lead~~ | ~~B1~~ | **CLOSED** — All 7 domain route tables updated to D6 nested pattern (2026-03-18) |
 | 7 | B1 proxy adapter implementation (0% code) | D1 retry wiring, E1 contract tests, E2 staging checklist all blocked | Engineering | B1 | High — critical path for Phase 1 completion |
 
 ---
