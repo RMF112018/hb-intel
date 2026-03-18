@@ -170,7 +170,7 @@ The startup guard needs to know whether mock mode is permissible. Each surface d
 
 ## Lane 2: Test Lane Governance
 
-Phase 1 requires a progression from mocked execution through real-backend validation. The test policy must support all four lanes without blocking later gates. Mock isolation is strict for Lanes 1–2; Lanes 3–4 require real adapters and are mandatory for later B2 gates.
+Phase 1 requires a progression from mocked execution through real-backend validation. The test policy must support all four lanes without blocking later gates. Mock isolation is strict for Test Lanes 1–2; Test Lanes 3–4 require real adapters and are mandatory for later B2 gates.
 
 ### Gate Alignment Summary
 
@@ -347,7 +347,7 @@ Mock isolation is enforced through five layers. Each layer catches failures that
 ### Layer 3 — CI Validation
 
 **What:** Each CI pipeline stage enforces the correct adapter mode for its test lane.
-**How:** Pipeline configuration sets `HBC_ADAPTER_MODE` explicitly per stage; Stage 1 (unit/proxy) uses mock; Stages 2–4 use real adapters.
+**How:** Pipeline configuration sets `HBC_ADAPTER_MODE` explicitly per stage; Stage 1 uses `'mock'` for unit tests and `'proxy'` with mocked fetch for proxy tests; Stages 2–4 use real adapters against deployed backends.
 **Owner:** DevOps / QA Lead
 **Evidence:** CI job logs showing adapter mode env var, test pass/fail, and no unexpected network calls in mock-only stages.
 
