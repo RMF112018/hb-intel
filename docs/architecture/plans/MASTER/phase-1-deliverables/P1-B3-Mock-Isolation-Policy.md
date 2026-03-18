@@ -438,6 +438,10 @@ This policy enforces the prerequisite: mock must be unreachable in the productio
 | Mock in production | **Not available** — no exception path exists | — | — |
 | Mock in demo/sandbox | No approval needed if no customer data | Unlimited | Clear "demo" labeling in UI and logs |
 
+**Deployment gate behavior during a staging exception:** The deployment gate remains absolute — it rejects `HBC_ADAPTER_MODE='mock'` for all staging deployments by default. When an approved staging mock exception is active, the gate must be manually bypassed by a DevOps engineer with the documented exception artifact (approval record, affected domains, expiry date) attached to the deployment pipeline run. Automated bypass is not permitted.
+
+**B2 evidence suspension during a staging exception:** While a staging mock exception is active, `STAGING_READY` and `PROD_ACTIVE` evidence collection is suspended for the affected domains. Contract test results and staging E2E results collected against mock adapters do not count toward B2 gate progression. Evidence collection resumes only after staging is restored to real adapters and the affected domains pass contract/E2E tests against the real backend.
+
 ### Incident Response: Mock Detected in Protected Environment
 
 **Severity classification:**
