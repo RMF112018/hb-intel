@@ -2806,12 +2806,41 @@ CI pipeline: set `SMOKE_TEST_BASE_URL` and `AUTH_TOKEN` as pipeline secrets/vari
 
 **Objective:** Define the telemetry evidence model and document how E1 smoke tests contribute to C3 verification.
 
-**Telemetry verification approach (aligned to C3):**
-- Phase 1 telemetry evidence is trace-based, gathered from Application Insights.
-- Smoke tests do NOT assert telemetry programmatically — they produce the traffic that generates traces.
-- Telemetry verification is a **manual gate step** using KQL queries against Application Insights, as defined by C3 section 2.5.
-- E1's contribution: document the expected KQL queries and the traces each smoke test should produce.
-- E1's contribution does NOT include: automated Application Insights query assertions in test code.
+**Telemetry verification approach (aligned to C3 section 2.5 and B2 gate model):**
+
+- Phase 1 telemetry evidence is **trace-based**, gathered from Application Insights `traces` table via KQL.
+- Smoke tests produce the **traffic** that generates traces; they do NOT assert telemetry programmatically.
+- Telemetry verification is a **manual gate step** — engineers run KQL queries after smoke tests to confirm expected C3 events.
+- E1's contribution: generate traffic scenarios + document expected C3 event names per scenario.
+- E1's contribution does NOT include: automated AI query assertions in test code, dashboard creation, or alert configuration.
+
+**Gate-evidence alignment:**
+
+| B2 Gate | What E1 Contributes | Telemetry Verified By |
+|---|---|---|
+| `STAGING_READY` | Smoke tests generate traffic showing `handler.*`, `auth.bearer.*`, and `proxy.request.*` events in AI | Manual KQL verification after test run |
+| `PROD_ACTIVE` | Same smoke tests re-run against production | Full C3 2.5 checklist (dashboards, alerts, health probe, startup guard) — NOT E1's scope |
+
+**Mock-mode evidence invalidation (B2 policy):**
+Telemetry evidence gathered while the adapter runs in mock mode does NOT count toward gate progression. E1 telemetry baseline tests must run against a **real staging deployment** with `adapterMode: 'proxy'`. Mock-mode test runs are useful for development but produce no gate-creditable evidence.
+
+**E1 telemetry event classification:**
+
+| C3 Event | Produced by E1 Smoke Test? | Mandatory for STAGING_READY? | Dependency |
+|---|---|---|---|
+| `handler.invoke` | Yes (all 4 scenarios) | **Yes** | C1 route handlers |
+| `handler.success` | Yes (200 scenario) | **Yes** | C1 route handlers |
+| `handler.error` | Yes (401, 404, 422 scenarios) | **Yes** | C1 route handlers |
+| `auth.bearer.validate` | Yes (all 4 scenarios) | **Yes** | C2 auth middleware |
+| `auth.bearer.success` | Yes (200, 404, 422 scenarios) | **Yes** | C2 auth middleware |
+| `auth.bearer.error` | Yes (401 scenario) | **Yes** | C2 auth middleware |
+| `proxy.request.start` | Indirectly (if staging uses proxy adapter) | Yes (for proxy domains) | B1 proxy adapter |
+| `proxy.request.success` | Indirectly (200 scenario) | Yes (for proxy domains) | B1 proxy adapter |
+| `proxy.request.error` | Indirectly (error scenarios) | Yes (for proxy domains) | B1 proxy adapter |
+| `proxy.request.retry` | No — D1 retry not implemented | **No** — deferred | D1 |
+| `circuit.state.change` | No — circuit breaker deferred | **No** — deferred | D1 |
+| `auth.obo.*` | No — separate verification | Non-blocking Phase 1 | C2 |
+| `deploy.smoke.pass` | No — PROD_ACTIVE gate only | **No** — PROD_ACTIVE only | Deployment pipeline |
 
 **Files to Create:**
 - `backend/functions/src/test/smoke/telemetry-baseline.smoke.test.ts`
@@ -2840,11 +2869,30 @@ import { describe, it, expect } from 'vitest';
  *   | order by timestamp asc
  *   | project timestamp, message, customDimensions
  *
- * Expected traces per scenario:
- *   - Successful request: request.received → auth.validated → repository.called → response.sent
- *   - 404 Not Found: request.received → auth.validated → resource.not_found → response.sent
- *   - 401 Unauthorized: request.received → auth.failed → response.sent
- *   - 422 Validation Error: request.received → auth.validated → validation.failed → response.sent
+ * Expected C3 telemetry events per scenario (from C3 section 2.1):
+ *
+ *   Successful GET:
+ *     handler.invoke → auth.bearer.validate → auth.bearer.success → handler.success
+ *     (proxy.request.start → proxy.request.success if proxy adapter is in the path)
+ *
+ *   404 Not Found:
+ *     handler.invoke → auth.bearer.validate → auth.bearer.success → handler.error (status: 404)
+ *
+ *   401 Unauthorized (no/invalid token):
+ *     handler.invoke → auth.bearer.validate → auth.bearer.error → handler.error (status: 401)
+ *
+ *   422 Validation Error:
+ *     handler.invoke → auth.bearer.validate → auth.bearer.success → handler.error (status: 422)
+ *
+ * Mandatory Phase 1 events (must appear for STAGING_READY):
+ *   handler.invoke, handler.success, handler.error
+ *   auth.bearer.validate, auth.bearer.success, auth.bearer.error
+ *
+ * Non-blocking / deferred (NOT required for STAGING_READY):
+ *   proxy.request.retry (D1 dependent)
+ *   circuit.state.change, circuit.fallback.used (D1 dependent)
+ *   auth.obo.* (C2 dependent, verified separately)
+ *   deploy.smoke.pass (PROD_ACTIVE gate only)
  *
  * Usage:
  *   SMOKE_TEST_BASE_URL=https://hb-intel-stage.azurewebsites.net \
@@ -2865,7 +2913,7 @@ const skipReason = !BASE_URL
 describe.skipIf(skipReason !== undefined)('Telemetry Baseline (Staging)', () => {
   /**
    * Produce traffic for a successful request trace.
-   * Expected traces: request.received → auth.validated → repository.called → response.sent
+   * Expected C3 events: handler.invoke → auth.bearer.success → handler.success
    */
   it('GET /api/leads produces successful request trace', async () => {
     const response = await fetch(`${BASE_URL}/api/leads?page=1&pageSize=10`, {
@@ -2877,12 +2925,12 @@ describe.skipIf(skipReason !== undefined)('Telemetry Baseline (Staging)', () => 
     });
 
     expect(response.status).toBe(200);
-    // Telemetry verification: check Application Insights for request.received + auth.validated + response.sent traces
+    // Expected AI traces: handler.invoke + auth.bearer.success + handler.success
   });
 
   /**
    * Produce traffic for a not-found trace.
-   * Expected traces: request.received → auth.validated → resource.not_found → response.sent
+   * Expected C3 events: handler.invoke → auth.bearer.success → handler.error (status: 404)
    */
   it('GET /api/leads/{unknown-id} produces not-found trace', async () => {
     const response = await fetch(
@@ -2896,12 +2944,12 @@ describe.skipIf(skipReason !== undefined)('Telemetry Baseline (Staging)', () => 
     );
 
     expect(response.status).toBe(404);
-    // Telemetry verification: check Application Insights for resource.not_found trace
+    // Expected AI traces: handler.invoke + auth.bearer.success + handler.error (404)
   });
 
   /**
    * Produce traffic for an authorization failure trace.
-   * Expected traces: request.received → auth.failed → response.sent
+   * Expected C3 events: handler.invoke → auth.bearer.error → handler.error (status: 401)
    */
   it('GET /api/leads without auth produces authorization failure trace', async () => {
     const response = await fetch(`${BASE_URL}/api/leads`, {
@@ -2912,12 +2960,12 @@ describe.skipIf(skipReason !== undefined)('Telemetry Baseline (Staging)', () => 
     });
 
     expect(response.status).toBe(401);
-    // Telemetry verification: check Application Insights for auth.failed trace
+    // Expected AI traces: handler.invoke + auth.bearer.error + handler.error (401)
   });
 
   /**
    * Produce traffic for a validation failure trace.
-   * Expected traces: request.received → auth.validated → validation.failed → response.sent
+   * Expected C3 events: handler.invoke → auth.bearer.success → handler.error (status: 422)
    */
   it('POST /api/leads with invalid payload produces validation error trace', async () => {
     const invalidPayload = {
@@ -2937,10 +2985,38 @@ describe.skipIf(skipReason !== undefined)('Telemetry Baseline (Staging)', () => 
     });
 
     expect(response.status).toBe(422);
-    // Telemetry verification: check Application Insights for validation.failed trace
+    // Expected AI traces: handler.invoke + auth.bearer.success + handler.error (422)
   });
 });
 ```
+
+**Post-run KQL verification (manual gate step):**
+
+After running telemetry baseline tests against staging, verify in Azure Portal → Application Insights → Logs:
+
+**Query 1: Confirm handler lifecycle events**
+```kql
+traces
+| where timestamp > ago(15m)
+| extend evt = tostring(parse_json(tostring(customDimensions))._telemetryType)
+| where evt in ('handler.invoke', 'handler.success', 'handler.error')
+| summarize count() by evt
+| order by evt asc
+```
+Expected: All three event types present with count > 0.
+
+**Query 2: Confirm auth flow events**
+```kql
+traces
+| where timestamp > ago(15m)
+| extend evt = tostring(parse_json(tostring(customDimensions))._telemetryType)
+| where evt in ('auth.bearer.validate', 'auth.bearer.success', 'auth.bearer.error')
+| summarize count() by evt
+| order by evt asc
+```
+Expected: `auth.bearer.validate` and `auth.bearer.success` present (from authenticated tests); `auth.bearer.error` present (from 401 test).
+
+**STAGING_READY gate check:** If Queries 1 and 2 show expected events from a non-mock adapter run, the domain's telemetry evidence requirement for `STAGING_READY` is met. Mock-mode runs do not produce gate-creditable evidence.
 
 **Commit:** `test(backend): add telemetry baseline smoke tests (P1-E1 Task 9)`
 
