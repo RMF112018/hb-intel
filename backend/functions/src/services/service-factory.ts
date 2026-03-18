@@ -17,6 +17,7 @@ import { MockAcknowledgmentService, RealAcknowledgmentService } from './acknowle
 import { MockGraphService, GraphService } from './graph-service.js';
 import { MockNotificationService, NotificationService } from './notification-service.js';
 import { validateRequiredConfig } from '../utils/validate-config.js';
+import { assertAdapterModeValid } from '../utils/adapter-mode-guard.js';
 
 export interface IServiceContainer {
   sharePoint: ISharePointService;
@@ -35,11 +36,12 @@ let singletonContainer: IServiceContainer | null = null;
 export function createServiceFactory(): IServiceContainer {
   if (singletonContainer) return singletonContainer;
 
+  // B3 Layer 2: Validate and normalize adapter mode; reject invalid/mock-in-production
+  const adapterMode = assertAdapterModeValid();
+  const isMock = adapterMode === 'mock' || process.env.NODE_ENV === 'test';
+
   // G2.6: Fail fast if required config is missing (skips in mock/test mode)
   validateRequiredConfig();
-
-  const adapterMode = process.env.HBC_ADAPTER_MODE ?? 'real';
-  const isMock = adapterMode === 'mock' || process.env.NODE_ENV === 'test';
   const msalObo = isMock ? new MockMsalOboService() : new ManagedIdentityOboService();
 
   singletonContainer = {
@@ -61,6 +63,6 @@ export function createServiceFactory(): IServiceContainer {
     notifications: isMock ? new MockNotificationService() : new NotificationService(),
   };
 
-  console.log(`[ServiceFactory] Initialized services in "${isMock ? 'mock' : 'real'}" mode`);
+  console.log(`[ServiceFactory] Initialized services in "${adapterMode}" mode`);
   return singletonContainer;
 }

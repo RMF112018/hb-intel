@@ -12,7 +12,7 @@ Seven reconciliation passes were completed on 2026-03-18. The first six resolved
 
 All transport-layer design decisions (D1–D6, A8, A9) are locked and propagated. The pre-Phase-1 go/no-go checklist passes on 6 of 7 areas; gate #5 is PARTIAL due to a stale package README discovered in the final sweep (corrected in this update).
 
-**Blocker ledger:** 3 closed, 7 remaining (4 from prior passes + 3 newly discovered).
+**Blocker ledger:** 6 closed, 4 remaining (2 external/IT, 1 external/PO, 1 engineering in-progress).
 
 **Recommendation: Ready with conditions.**
 
@@ -125,10 +125,10 @@ A deliberate deep search across the full repo identified 3 issues not caught in 
 | 5 | SharePoint schema approval | Physical lists cannot be deployed to tenant | Product Owner | A3 | **Approval-ready** — [P1-A3-Schema-Approval-Package.md](P1-A3-Schema-Approval-Package.md) prepared for PO review. Adapter dev proceeds against mocks. |
 | 7 | B1 proxy adapter implementation | D1/E1/E2 blocked until complete | Engineering | B1 | **In progress** — 7 of 11 repos done (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Remaining: Lead, Project, Estimating, Auth. |
 | 8 | data-access README proxy status stale | Implementers may incorrectly assume proxy is greenfield | Engineering | B1 | **CLOSED** — corrected in this final sweep commit |
-| 9 | Backend adapter-mode vocabulary drift | `service-factory.ts` defaults to `'real'` not canonical `'proxy'`; splits behavior when `HBC_ADAPTER_MODE` unset | Engineering | C2/B3 | **Open** — P1-B3 documents as tracked remediation; must align before B3 Layer 2 guard is effective |
-| 10 | B3 Layer 2 startup guard not created | Defense-in-depth mock isolation incomplete; `adapter-mode-guard.ts` does not exist | Engineering | B3 | **Open** — P1-B3 Lane 3 scope; backend entrypoint constraint documented |
+| ~~9~~ | ~~Backend adapter-mode vocabulary drift~~ | ~~defaults to 'real' not canonical 'proxy'~~ | ~~Engineering~~ | ~~C2/B3~~ | **CLOSED** — `normalizeAdapterMode()` maps 'real'→'proxy'; default changed to 'proxy'; wave0 registry and README updated |
+| ~~10~~ | ~~B3 Layer 2 startup guard not created~~ | ~~defense-in-depth mock isolation incomplete~~ | ~~Engineering~~ | ~~B3~~ | **CLOSED** — `assertAdapterModeValid()` in `adapter-mode-guard.ts` wired into `createServiceFactory()`; rejects unknown modes and blocks mock-in-production |
 
-**Active blocker count: 6** (2 external/IT, 1 external/PO, 3 engineering)
+**Active blocker count: 4** (2 external/IT, 1 external/PO, 1 engineering in-progress)
 
 ---
 
@@ -160,5 +160,5 @@ A deliberate deep search across the full repo identified 3 issues not caught in 
 **Prepared:** 2026-03-18 (final sweep)
 **Reconciliation passes:** 7 (commits `3b4b292` through `6e997d5` + final sweep)
 **Contradictions tracked:** 26 (23 closed from systematic passes + 3 surfaced in final sweep)
-**Blockers:** 3 closed, 6 remaining (2 external/IT, 1 external/PO, 3 engineering)
-**Newly discovered issues in final sweep:** 3 (#24 README drift — closed, #25 adapter-mode vocabulary — open, #26 B3 Layer 2 guard — open)
+**Blockers:** 6 closed, 4 remaining (2 external/IT, 1 external/PO, 1 engineering in-progress)
+**Newly discovered issues in final sweep:** 3 (#24 README drift — closed, #25 adapter-mode vocabulary — closed, #26 B3 Layer 2 guard — closed)

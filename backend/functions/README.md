@@ -33,7 +33,7 @@ This package hosts HB Intel Azure Functions for provisioning and integration end
 
 - Production uses system-assigned Managed Identity with `DefaultAzureCredential`.
 - Local development uses a developer service principal (`AZURE_CLIENT_SECRET`) because IMDS is not available locally.
-- Keep `HBC_ADAPTER_MODE=mock` for normal local development unless explicitly testing the real adapter path.
+- Keep `HBC_ADAPTER_MODE=mock` for normal local development. Use `HBC_ADAPTER_MODE=proxy` for production-like testing with real services.
 
 ### Phase 6.5 Environment Variables
 
@@ -59,7 +59,7 @@ SharePoint audit writes are intentionally non-blocking. They must always use `.c
 
 - `AZURE_STORAGE_CONNECTION_STRING`: Required by `RealTableStorageService` for Azure Table access.
 - `SHAREPOINT_TENANT_URL`: Root site collection URL used for audit-list setup script and SharePoint service operations.
-- `HBC_ADAPTER_MODE`: `mock` for local deterministic mode; `real` (or omitted in production configuration) for real persistence.
+- `HBC_ADAPTER_MODE`: `mock` for local deterministic mode; `proxy` for production services (Managed Identity, SharePoint, Graph). Legacy value `real` is accepted as alias for `proxy`.
 
 ### Phase 6.8 Request Lifecycle Endpoints (D-PH6-08)
 

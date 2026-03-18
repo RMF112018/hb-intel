@@ -21,8 +21,8 @@ describe('shouldValidateConfig', () => {
     vi.unstubAllEnvs();
   });
 
-  it('returns true when adapter mode is real and not test', () => {
-    vi.stubEnv('HBC_ADAPTER_MODE', 'real');
+  it('returns true when adapter mode is proxy and not test', () => {
+    vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
     vi.stubEnv('NODE_ENV', 'production');
     expect(shouldValidateConfig()).toBe(true);
   });
@@ -34,12 +34,12 @@ describe('shouldValidateConfig', () => {
   });
 
   it('returns false when NODE_ENV is test', () => {
-    vi.stubEnv('HBC_ADAPTER_MODE', 'real');
+    vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
     vi.stubEnv('NODE_ENV', 'test');
     expect(shouldValidateConfig()).toBe(false);
   });
 
-  it('defaults to real mode when HBC_ADAPTER_MODE is unset', () => {
+  it('defaults to proxy mode when HBC_ADAPTER_MODE is unset', () => {
     delete process.env.HBC_ADAPTER_MODE;
     vi.stubEnv('NODE_ENV', 'production');
     expect(shouldValidateConfig()).toBe(true);
@@ -48,8 +48,8 @@ describe('shouldValidateConfig', () => {
 
 describe('validateRequiredConfig', () => {
   beforeEach(() => {
-    // Force real/production mode so validation runs
-    vi.stubEnv('HBC_ADAPTER_MODE', 'real');
+    // Force proxy/production mode so validation runs
+    vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
     vi.stubEnv('NODE_ENV', 'production');
     // Set all required vars to valid placeholder values
     for (const name of requiredNames) {
@@ -109,7 +109,7 @@ describe('validateRequiredConfig', () => {
 
   it('skips validation entirely in test mode', () => {
     vi.unstubAllEnvs();
-    vi.stubEnv('HBC_ADAPTER_MODE', 'real');
+    vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
     vi.stubEnv('NODE_ENV', 'test');
     // All required vars are unset — would throw if validation ran
     expect(() => validateRequiredConfig()).not.toThrow();

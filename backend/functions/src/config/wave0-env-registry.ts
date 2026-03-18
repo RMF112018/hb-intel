@@ -99,7 +99,7 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'HBC_ADAPTER_MODE',
     bucket: 'infrastructure',
-    description: 'Adapter mode selector: live (production) or mock (local dev/test)',
+    description: 'Adapter mode: proxy (production) or mock (local dev/test). Legacy value "real" is accepted as alias for "proxy".',
     requiredInProd: true,
   },
   {

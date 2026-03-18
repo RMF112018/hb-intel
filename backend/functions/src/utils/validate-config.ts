@@ -16,7 +16,7 @@ import { WAVE0_REQUIRED_CONFIG } from '../config/wave0-env-registry.js';
  * Skips in mock mode or test mode since mock services don't need real config.
  */
 export function shouldValidateConfig(): boolean {
-  const adapterMode = process.env.HBC_ADAPTER_MODE ?? 'real';
+  const adapterMode = process.env.HBC_ADAPTER_MODE ?? 'proxy';
   const isTest = process.env.NODE_ENV === 'test';
   return adapterMode !== 'mock' && !isTest;
 }
