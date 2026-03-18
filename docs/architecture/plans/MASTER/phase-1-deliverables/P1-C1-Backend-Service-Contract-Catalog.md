@@ -9,7 +9,7 @@
 | **Owner** | Backend Services Team |
 | **Update Authority** | C-workstream lead; route additions require review by B-workstream (adapter consumers) |
 | **Last Reviewed Against Repo Truth** | 2026-03-18 |
-| **References** | P1-B1 (Proxy Adapter Engineering Plan), P1-B2 (Adapter Completion Backlog), P1-C2 (Auth Hardening) |
+| **References** | P1-B1 (Proxy Adapter Engineering Plan), P1-B2 (Adapter Completion Backlog), P1-C2 (Auth Hardening), P1-D1 (Write Safety), P1-E1 (Contract Test Suite) |
 
 ---
 
@@ -26,7 +26,7 @@ Define the complete HTTP service contract for HB Intel backend Azure Functions v
 | `IMPLEMENTED` | Route exists in repo and is deployed; behavior verified against code |
 | `IMPLEMENTED (DELTA)` | Route exists but current response shape or behavior differs from target contract standards |
 | `TARGET` | Phase 1 target contract; route not yet implemented in backend |
-| `TARGET (PROVISIONAL)` | Target contract with open decisions pending (B1 D1–D6) |
+| `TARGET (PROVISIONAL)` | Target contract with open decisions pending (B1 open decisions D1–D6; not to be confused with P1-D1 workstream) |
 | `NOT CATALOGED` | Known frontend port interface requirement with no backend route definition yet |
 
 ---
@@ -42,7 +42,7 @@ Define the complete HTTP service contract for HB Intel backend Azure Functions v
 | Acknowledgments | `IMPLEMENTED` | 2 | — | Sign-off events (GET, POST only) |
 | Notifications | `IMPLEMENTED (DELTA)` | 7 | 2 queue + 1 timer | Response shapes vary from target envelope |
 | SignalR | `IMPLEMENTED` | 1 | — | Negotiate endpoint only |
-| Provisioning Saga | `IMPLEMENTED (DELTA)` | 6 | — | Uses 202 Accepted for async (not 204); admin routes included |
+| Provisioning Saga | `IMPLEMENTED (DELTA)` | 6 | — | Response shapes not yet normalized to target envelope; admin routes included |
 | Timer (Full Spec) | `IMPLEMENTED` | — | 1 timer | Nightly deferred provisioning |
 
 **Not found in repo:** Health check endpoint (`GET /api/health`) — listed in previous draft but not verified in current `backend/functions/src/index.ts` import barrel. Removed from catalog pending re-verification.
@@ -73,7 +73,7 @@ This matrix ties each target domain to its contract owner, freeze status, blocki
 
 | Domain | Contract Owner | Freeze Status | Blocked By | Downstream Consumers | B2 Gate Impact |
 |---|---|---|---|---|---|
-| **Lead** | C1 | Frozen | — | B1 Task 3, E1 | `CONTRACT_ALIGNED` — ready |
+| **Lead** | C1 | Route paths frozen | — | B1 Task 3, E1 | `CONTRACT_ALIGNED` for routes; cross-cutting D3/D4/D5 still apply |
 | **Project** | C1 | CRUD frozen; aggregate A8 provisional | A8 | B1 Task 4, E1 | `CONTRACT_ALIGNED` for CRUD; aggregate blocked |
 | **Estimating** | C1 | Base frozen; sub-resource D2 open | D2 | B1 Task 5, E1 | `CONTRACT_ALIGNED` for base; kickoff blocked |
 | **Auth** | C2 | Not cataloged | A9 | B1 Task 7, E1 | Cannot reach `CONTRACT_ALIGNED` |
@@ -130,8 +130,6 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 
 **Current response shape:** POST returns 200 with `{event: IAcknowledgmentEvent, updatedState: AcknowledgmentState, isComplete: boolean}` (custom shape, not `{data:...}`). GET returns 200 with `{events: IAcknowledgmentEvent[]}` (not `{data:[...]}`). Errors include 400 `{error}`, 403 `{error}`, 409 `{error, declinedBy}`.
 
-**Delta from previous draft:** No DELETE route found in repo. Previous C1 listed 3 routes.
-
 ### Notifications (7 HTTP routes + background triggers)
 
 | Method | Route | Handler | Notes |
@@ -148,8 +146,6 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 
 **Current response shape:** POST send returns 202 `{message: "Notification queued."}`. GET center returns 200 `{totalCount, items: INotification[], cursor?, pageSize?}` (not `{data:[], total, page, pageSize}` target envelope). PATCH mark-read returns 200 `{message}`. GET preferences returns 200 raw `NotificationPreferences` entity. Errors return `{error: string}`.
 
-**Delta from previous draft:** Previous C1 listed 3 routes. Actual count is 7 HTTP + 3 background. Response shapes differ significantly from target collection envelope.
-
 ### SignalR (1 route)
 
 | Method | Route | Handler | Notes |
@@ -157,8 +153,6 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 | `POST` | `provisioning-negotiate` | `signalrNegotiate` | SignalR connection negotiation for provisioning events |
 
 **Current response shape:** Azure-managed SignalR connection info (response shape controlled by Azure SignalR Service, not application code).
-
-**Delta from previous draft:** Previous C1 listed 2 routes (negotiate + message). Only negotiate found in repo.
 
 ### Provisioning Saga (6 routes)
 
@@ -172,8 +166,6 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 | `POST` | `provisioning-escalate/{projectId}` | `escalateProvisioning` | Escalate provisioning request |
 
 **Current response shape:** POST provision returns 202 `{message: "Provisioning started", projectId, correlationId}`. GET status returns 200 raw `ProvisioningStatus` entity. GET failures returns 200 array. POST retry returns 202 `{message, projectId}`. POST escalate returns 202. Errors return `{error: string}`.
-
-**Delta from previous draft:** Previous C1 listed 3 routes. Actual count is 6 (includes admin and escalation routes).
 
 ### Timer (1 trigger)
 
