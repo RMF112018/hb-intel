@@ -238,21 +238,23 @@ This table is the live tracking surface for adapter implementation progress. Upd
 
 **Two-track readiness:** The "Blocker" column distinguishes between code-progress blockers (prevents starting implementation) and production-activation blockers (prevents going live). A domain with only production-activation blockers can proceed with mocked-fetch implementation.
 
+**Ownership key:** `B / Data Access` = B-workstream frontend adapter implementation (Frontend Platform / Data Access team). `C2 / Auth` = C2-workstream auth subsystem design. Joint ownership means both teams must coordinate for the domain to progress past `CODE_COMPLETE_MOCK`.
+
 ### Proxy Adapter Progress
 
 | Domain | Owner | Current Gate | Blocker | Evidence | Next Action | Last Updated |
 |---|---|---|---|---|---|---|
-| Lead | — | `IMPL_READY` | None | — | Begin B1 Task 3 | 2026-03-18 |
-| Project | — | `IMPL_READY` | Production activation: A8 aggregate provisional | — | Begin B1 Task 4 | 2026-03-18 |
-| Estimating | — | `IMPL_READY` | None (D2 deferred) | — | Begin B1 Task 5 | 2026-03-18 |
-| Schedule | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 5 (mocked fetch) | 2026-03-18 |
-| Buyout | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 5 (mocked fetch) | 2026-03-18 |
-| Compliance | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
-| Contract | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
-| Risk | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
-| Scorecard | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 7 (mocked fetch) | 2026-03-18 |
-| PMP | — | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 7 (mocked fetch) | 2026-03-18 |
-| Auth | — | `IMPL_READY` | A9 (no route catalog) | — | Begin B1 Task 7 | 2026-03-18 |
+| Lead | B / Data Access | `IMPL_READY` | None | — | Begin B1 Task 3 | 2026-03-18 |
+| Project | B / Data Access | `IMPL_READY` | Production activation: A8 aggregate provisional | — | Begin B1 Task 4 | 2026-03-18 |
+| Estimating | B / Data Access | `IMPL_READY` | None (D2 deferred) | — | Begin B1 Task 5 | 2026-03-18 |
+| Schedule | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 5 (mocked fetch) | 2026-03-18 |
+| Buyout | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 5 (mocked fetch) | 2026-03-18 |
+| Compliance | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
+| Contract | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
+| Risk | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
+| Scorecard | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 7 (mocked fetch) | 2026-03-18 |
+| PMP | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 7 (mocked fetch) | 2026-03-18 |
+| Auth | B / Data Access + C2 / Auth | `IMPL_READY` | A9 (no route catalog) | — | Begin B1 Task 7 | 2026-03-18 |
 
 ### SharePoint and API Adapter Progress
 
