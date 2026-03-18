@@ -76,16 +76,53 @@ Requires `Group.ReadWrite.All` application permission on the Managed Identity.
 
 ### Phase 1 Auth Blockers
 
-| # | Blocker | Impact | Owner | Reference |
-|---|---|---|---|---|
-| 1 | **OBO endpoint list not finalized** — which domain routes need OBO (user-context downstream calls) vs Managed Identity (app-context) | Cannot determine which new domain routes require delegated permissions | Architecture + Backend | IT Setup Guide §8.6 |
-| 2 | **Per-site grant automation** — manual admin grant per project vs bootstrap service principal | Provisioning cannot complete site-scoped access without manual IT intervention or automation | Architecture + IT | IT Setup Guide §8.4, §9.6 |
-| 3 | **GraphService scaffold** — `graph-service.ts` real implementation pending `Group.ReadWrite.All` confirmation | Provisioning Step 6 (Entra group creation) cannot work in production until Graph permissions are granted and service unblocked | Backend | `backend/functions/src/services/graph-service.ts` |
-| 4 | **Startup config validation not wired** — `validateRequiredConfig()` exists but isn't called at startup | Backend could start with missing auth config and fail at runtime instead of failing fast | Backend | G2.6 task |
+| # | Blocker | Impact | Owner | Reference | Status |
+|---|---|---|---|---|---|
+| ~~1~~ | ~~OBO endpoint list not finalized~~ | ~~Cannot determine which routes require delegated permissions~~ | ~~Architecture~~ | ~~IT Setup Guide §8.6~~ | **CLOSED** — See Endpoint Auth Matrix above. Only `/api/proxy/*` needs OBO; all other routes use MI. |
+| 2 | **Per-site grant automation** — manual admin grant per project vs bootstrap service principal | Provisioning cannot complete site-scoped access without manual IT intervention or automation | Architecture + IT | IT Setup Guide §8.4, §9.6 | Open |
+| 3 | **GraphService scaffold** — `graph-service.ts` real implementation pending `Group.ReadWrite.All` confirmation | Provisioning Step 6 (Entra group creation) cannot work in production until Graph permissions are granted and service unblocked | Backend | `backend/functions/src/services/graph-service.ts` | Open |
+| ~~4~~ | ~~Startup config validation not wired~~ | ~~Backend could start with missing auth config~~ | ~~Backend~~ | ~~G2.6 task~~ | **CLOSED** — `validateRequiredConfig()` wired into `createServiceFactory()` (commit 4f89f0f). |
 
 ### Identity Trust Boundary
 
 All HTTP endpoints enforce: identity is extracted from validated JWT claims only, never from request body. Server-managed fields (`triggeredBy`, `submittedBy`) are overwritten with `claims.upn` (ADR-0078, D-PH6-03).
+
+### Endpoint Auth Matrix (OBO vs Managed Identity)
+
+This matrix documents the locked auth treatment for every current and planned Phase 1 endpoint. **OBO** means the backend acquires a downstream token using the user's delegated identity. **Managed Identity (MI)** means the backend uses its system-assigned identity for downstream calls; user identity from the Bearer token is used for audit only.
+
+#### OBO Routes (Delegated User Context)
+
+| Route | Method | Auth Pattern | Rationale |
+|---|---|---|---|
+| `/api/proxy/{*path}` | GET | OBO | Acquires Graph token via `msalObo.acquireTokenOnBehalfOf(userToken)` for downstream Graph API calls on behalf of the user. Currently STUB (returns mock response). |
+| `/api/proxy/{*path}` | POST/PATCH/PUT/DELETE | OBO | Same OBO flow for mutating Graph operations. |
+
+#### Managed Identity Routes (App-Level Access)
+
+| Route Group | Routes | Auth Pattern | Rationale |
+|---|---|---|---|
+| **Provisioning Saga** (6 routes) | `provision-project-site`, `provisioning-status/{id}`, `provisioning-failures`, `admin/trigger-timer`, `provisioning-retry/{id}`, `provisioning-escalate/{id}` | MI | Async saga steps use `DefaultAzureCredential` for SharePoint/Graph calls. User identity from Bearer for audit (`triggeredBy`) only. |
+| **Project Setup Requests** (3 routes) | `project-setup-requests` (POST/GET), `project-setup-requests/{id}/state` (PATCH) | MI | Table Storage persistence only. User claims captured as `submittedBy` for audit. |
+| **Notifications** (6 HTTP + 4 background) | `notifications/center`, `notifications/{id}/read`, `notifications/{id}/dismiss`, `notifications/mark-all-read`, `notifications/preferences` (GET/PATCH), `notifications/send` | MI | Internal store operations only. Queue/timer-triggered jobs use MI for email dispatch. |
+| **Acknowledgments** (2 routes) | `acknowledgments` (POST/GET) | MI | Table Storage events. No downstream SharePoint/Graph calls. |
+| **SignalR** (1 route) | `provisioning-negotiate` | MI | SignalR binding only. Validates user token for group assignment; no downstream calls. |
+| **Planned Domain CRUD** (Phase 1 target) | `leads/*`, `projects/*`, `estimating/*`, `projects/{id}/schedules/*`, `projects/{id}/buyouts/*`, `projects/{id}/compliance/*`, `projects/{id}/contracts/*`, `projects/{id}/risks/*`, `projects/{id}/scorecards/*`, `projects/{id}/pmp/*` | MI | Backend accesses SharePoint lists via Managed Identity. User identity for audit/authorization only, not for downstream data access. |
+
+#### C2 Middleware Independence
+
+All C2 middleware work can proceed immediately regardless of OBO/MI classification:
+
+| C2 Deliverable | OBO Dependency | Status |
+|---|---|---|
+| `withAuth()` Bearer validation wrapper | None — all routes validate Bearer tokens | Proceed |
+| Zod request validation schemas | None — validation is independent of auth pattern | Proceed |
+| Standardized response helpers | None — response shape is independent | Proceed |
+| `X-Request-Id` propagation | None — request tracking is independent | Proceed |
+
+#### Remaining Architecture Note
+
+No planned Phase 1 domain route requires OBO. If a future route needs to call Graph on behalf of the user (e.g., checking user-specific SharePoint site permissions), only that specific route needs OBO treatment — the entire domain API surface does not need to change. This is a contained extension, not a design revision.
 
 ---
 

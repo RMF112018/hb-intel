@@ -97,7 +97,7 @@ These blockers do not prevent Phase 1 implementation from starting but must be r
 
 | # | Blocker | Impact | Owner | Workstream | Severity |
 |---|---|---|---|---|---|
-| 1 | OBO endpoint list not finalized | Cannot determine which domain routes need delegated vs app permissions | Architecture | C2 | Medium — does not block C2 auth middleware foundation |
+| ~~1~~ | ~~OBO endpoint list not finalized~~ | ~~Cannot determine which routes need delegated vs app permissions~~ | ~~Architecture~~ | ~~C2~~ | **CLOSED** — Endpoint Auth Matrix added to P1-C2: only `/api/proxy/*` needs OBO; all other routes use Managed Identity (2026-03-18) |
 | 2 | Per-site grant automation (manual vs bootstrap) | Provisioning cannot complete site-scoped access without IT intervention or automation | Architecture + IT | Ops | Medium — does not block B1/C2/C3 |
 | 3 | GraphService scaffold pending `Group.ReadWrite.All` confirmation | Provisioning Step 6 (Entra group creation) cannot work in production | Backend | Ops | High — blocks production provisioning |
 | ~~4~~ | ~~Startup config validation not wired (G2.6 task)~~ | ~~Backend could start with missing auth config~~ | ~~Backend~~ | ~~G2~~ | **CLOSED** — `validateRequiredConfig()` wired into `createServiceFactory()`; skips in mock/test mode (2026-03-18) |
