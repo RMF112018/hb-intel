@@ -4,6 +4,7 @@ import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { createLogger } from '../../utils/logger.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 import {
   errorResponse,
   successResponse,
@@ -18,7 +19,7 @@ app.http('getComplianceEntries', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/compliance/entries',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
@@ -34,7 +35,7 @@ app.http('getComplianceEntries', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'compliance', operation: 'getComplianceEntries' })),
 });
 
 /**
@@ -44,7 +45,7 @@ app.http('getComplianceEntryById', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/compliance/entries/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -58,7 +59,7 @@ app.http('getComplianceEntryById', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'compliance', operation: 'getComplianceEntryById' })),
 });
 
 /**
@@ -68,7 +69,7 @@ app.http('createComplianceEntry', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/compliance/entries',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -98,7 +99,7 @@ app.http('createComplianceEntry', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'compliance', operation: 'createComplianceEntry' })),
 });
 
 /**
@@ -108,7 +109,7 @@ app.http('updateComplianceEntry', {
   methods: ['PUT'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/compliance/entries/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -127,7 +128,7 @@ app.http('updateComplianceEntry', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'compliance', operation: 'updateComplianceEntry' })),
 });
 
 /**
@@ -137,7 +138,7 @@ app.http('deleteComplianceEntry', {
   methods: ['DELETE'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/compliance/entries/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -150,7 +151,7 @@ app.http('deleteComplianceEntry', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'compliance', operation: 'deleteComplianceEntry' })),
 });
 
 /**
@@ -160,7 +161,7 @@ app.http('getComplianceSummary', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/compliance/summary',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
@@ -173,5 +174,5 @@ app.http('getComplianceSummary', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'compliance', operation: 'getComplianceSummary' })),
 });

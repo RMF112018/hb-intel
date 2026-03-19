@@ -5,6 +5,7 @@ import { createServiceFactory } from '../../services/service-factory.js';
 import { SagaOrchestrator } from './saga-orchestrator.js';
 import { createLogger } from '../../utils/logger.js';
 import { withAuth } from '../../middleware/auth.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import {
   errorResponse,
@@ -18,7 +19,7 @@ app.http('provisionProjectSite', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'provision-project-site',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -67,7 +68,7 @@ app.http('provisionProjectSite', {
       });
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'provisioningSaga', operation: 'provisionProjectSite' })),
 });
 
 app.http('getProvisioningStatus', {
@@ -75,7 +76,7 @@ app.http('getProvisioningStatus', {
   authLevel: 'anonymous',
   // D-PH6-01: route key migrated to immutable {projectId}.
   route: 'provisioning-status/{projectId}',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -101,14 +102,14 @@ app.http('getProvisioningStatus', {
       });
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'provisioningSaga', operation: 'getProvisioningStatus' })),
 });
 
 app.http('listFailedRuns', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'provisioning-failures',
-  handler: withAuth(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     // D-PH6-12 admin-only visibility: failures inbox is restricted to Admin/HBIntelAdmin.
@@ -119,14 +120,14 @@ app.http('listFailedRuns', {
     const services = createServiceFactory();
     const failedRuns = await services.tableStorage.listFailedRuns();
     return successResponse(failedRuns);
-  }),
+  }, { domain: 'provisioningSaga', operation: 'listFailedRuns' })),
 });
 
 app.http('triggerTimerManually', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'admin/trigger-timer',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     // D-PH6-13 manual timer trigger is limited to explicit admin roles.
@@ -141,7 +142,7 @@ app.http('triggerTimerManually', {
 
     await runTimerFullSpec(context, { isPastDue: false });
     return successResponse({ message: 'Timer logic executed manually' });
-  }),
+  }, { domain: 'provisioningSaga', operation: 'triggerTimerManually' })),
 });
 
 app.http('retryProvisioning', {
@@ -149,7 +150,7 @@ app.http('retryProvisioning', {
   authLevel: 'anonymous',
   // D-PH6-01: retry endpoint now addresses the system key projectId.
   route: 'provisioning-retry/{projectId}',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -179,7 +180,7 @@ app.http('retryProvisioning', {
       });
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'provisioningSaga', operation: 'retryProvisioning' })),
 });
 
 app.http('escalateProvisioning', {
@@ -187,7 +188,7 @@ app.http('escalateProvisioning', {
   authLevel: 'anonymous',
   // D-PH6-01: escalation endpoint now addresses the system key projectId.
   route: 'provisioning-escalate/{projectId}',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -211,5 +212,5 @@ app.http('escalateProvisioning', {
       });
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'provisioningSaga', operation: 'escalateProvisioning' })),
 });

@@ -6,6 +6,7 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
 import type { NotificationTier } from '@hbc/notification-intelligence';
 import { withAuth } from '../../middleware/auth.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createLogger } from '../../utils/logger.js';
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
@@ -17,7 +18,7 @@ app.http('MarkAllRead', {
   methods: ['POST'],
   route: 'notifications/mark-all-read',
   authLevel: 'anonymous',
-  handler: withAuth(async (req: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (req: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(req);
 
@@ -39,5 +40,5 @@ app.http('MarkAllRead', {
     logger.info('MarkAllRead: completed', { userId: auth.claims.oid, tier: tier ?? 'all' });
 
     return successResponse({ message: 'All notifications marked as read.' });
-  }),
+  }, { domain: 'notifications', operation: 'MarkAllRead' })),
 });

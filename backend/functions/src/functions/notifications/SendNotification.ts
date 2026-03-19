@@ -9,6 +9,7 @@
 import { app, output, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
 import type { NotificationSendPayload } from '@hbc/notification-intelligence';
 import { withAuth } from '../../middleware/auth.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createLogger } from '../../utils/logger.js';
 import { errorResponse } from '../../utils/response-helpers.js';
@@ -23,7 +24,7 @@ app.http('SendNotification', {
   route: 'notifications/send',
   authLevel: 'anonymous',
   extraOutputs: [notificationQueueOutput],
-  handler: withAuth(async (req: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (req: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(req);
 
@@ -48,5 +49,5 @@ app.http('SendNotification', {
 
     // Raw 202 response — fire-and-forget acknowledgment; do NOT wrap in successResponse
     return { status: 202, jsonBody: { message: 'Notification queued.' } };
-  }),
+  }, { domain: 'notifications', operation: 'SendNotification' })),
 });

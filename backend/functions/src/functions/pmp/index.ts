@@ -10,6 +10,7 @@ import {
   listResponse,
   notFoundResponse,
 } from '../../utils/response-helpers.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 
 /**
  * GET /api/projects/{projectId}/pmp/plans
@@ -18,7 +19,7 @@ app.http('getPmpPlans', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/pmp/plans',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
@@ -34,7 +35,7 @@ app.http('getPmpPlans', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'pmp', operation: 'getPmpPlans' })),
 });
 
 /**
@@ -44,7 +45,7 @@ app.http('getPmpPlanById', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/pmp/plans/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -58,7 +59,7 @@ app.http('getPmpPlanById', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'pmp', operation: 'getPmpPlanById' })),
 });
 
 /**
@@ -68,7 +69,7 @@ app.http('createPmpPlan', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/pmp/plans',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -96,7 +97,7 @@ app.http('createPmpPlan', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'pmp', operation: 'createPmpPlan' })),
 });
 
 /**
@@ -106,7 +107,7 @@ app.http('updatePmpPlan', {
   methods: ['PUT'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/pmp/plans/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -125,7 +126,7 @@ app.http('updatePmpPlan', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'pmp', operation: 'updatePmpPlan' })),
 });
 
 /**
@@ -135,7 +136,7 @@ app.http('deletePmpPlan', {
   methods: ['DELETE'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/pmp/plans/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -148,7 +149,7 @@ app.http('deletePmpPlan', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'pmp', operation: 'deletePmpPlan' })),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -162,7 +163,7 @@ app.http('getPmpSignatures', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/pmp/plans/{pmpId}/signatures',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const pmpId = parseInt(request.params.pmpId, 10);
@@ -175,7 +176,7 @@ app.http('getPmpSignatures', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'pmp', operation: 'getPmpSignatures' })),
 });
 
 /**
@@ -185,7 +186,7 @@ app.http('createPmpSignature', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/pmp/plans/{pmpId}/signatures',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -215,5 +216,5 @@ app.http('createPmpSignature', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'pmp', operation: 'createPmpSignature' })),
 });

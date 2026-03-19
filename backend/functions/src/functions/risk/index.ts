@@ -10,6 +10,7 @@ import {
   listResponse,
   notFoundResponse,
 } from '../../utils/response-helpers.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 
 /**
  * GET /api/projects/{projectId}/risk/items
@@ -18,7 +19,7 @@ app.http('getRiskItems', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/risk/items',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
@@ -34,7 +35,7 @@ app.http('getRiskItems', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'risk', operation: 'getRiskItems' })),
 });
 
 /**
@@ -44,7 +45,7 @@ app.http('getRiskItemById', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/risk/items/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -58,7 +59,7 @@ app.http('getRiskItemById', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'risk', operation: 'getRiskItemById' })),
 });
 
 /**
@@ -68,7 +69,7 @@ app.http('createRiskItem', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/risk/items',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -99,7 +100,7 @@ app.http('createRiskItem', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'risk', operation: 'createRiskItem' })),
 });
 
 /**
@@ -109,7 +110,7 @@ app.http('updateRiskItem', {
   methods: ['PUT'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/risk/items/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -128,7 +129,7 @@ app.http('updateRiskItem', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'risk', operation: 'updateRiskItem' })),
 });
 
 /**
@@ -138,7 +139,7 @@ app.http('deleteRiskItem', {
   methods: ['DELETE'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/risk/items/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -151,7 +152,7 @@ app.http('deleteRiskItem', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'risk', operation: 'deleteRiskItem' })),
 });
 
 /**
@@ -161,7 +162,7 @@ app.http('getRiskManagement', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/risk/management',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
@@ -174,5 +175,5 @@ app.http('getRiskManagement', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'risk', operation: 'getRiskManagement' })),
 });

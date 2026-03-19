@@ -22,6 +22,7 @@ import {
   successResponse,
   forbiddenResponse,
 } from '../../utils/response-helpers.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 import {
   triggerBicCompletion,
   triggerCompletionNotification,
@@ -70,7 +71,7 @@ app.http('postAcknowledgment', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'acknowledgments',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -176,7 +177,7 @@ app.http('postAcknowledgment', {
     });
 
     return successResponse({ event: toAcknowledgmentEvent(newItem), updatedState, isComplete });
-  }),
+  }, { domain: 'acknowledgments', operation: 'postAcknowledgment' })),
 });
 
 /**
@@ -188,7 +189,7 @@ app.http('getAcknowledgments', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'acknowledgments',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const contextType = request.query.get('contextType');
@@ -207,5 +208,5 @@ app.http('getAcknowledgments', {
     const events = items.map(toAcknowledgmentEvent);
 
     return successResponse({ events });
-  }),
+  }, { domain: 'acknowledgments', operation: 'getAcknowledgments' })),
 });

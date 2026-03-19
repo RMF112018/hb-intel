@@ -11,6 +11,7 @@ import {
   successResponse,
   notFoundResponse,
 } from '../../utils/response-helpers.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 
 const PROJECT_NUMBER_PATTERN = /^\d{2}-\d{3}-\d{2}$/;
 
@@ -22,7 +23,7 @@ app.http('submitProjectSetupRequest', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'project-setup-requests',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const reqId = extractOrGenerateRequestId(request);
 
@@ -58,7 +59,7 @@ app.http('submitProjectSetupRequest', {
     });
 
     return successResponse(newRequest, 201);
-  }),
+  }, { domain: 'projectRequests', operation: 'submitProjectSetupRequest' })),
 });
 
 /**
@@ -69,12 +70,12 @@ app.http('listProjectSetupRequests', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'project-setup-requests',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const services = createServiceFactory();
     const stateFilter = request.query.get('state') as ProjectSetupRequestState | null;
     const requests = await services.projectRequests.listRequests(stateFilter ?? undefined);
     return successResponse(requests);
-  }),
+  }, { domain: 'projectRequests', operation: 'listProjectSetupRequests' })),
 });
 
 /**
@@ -85,7 +86,7 @@ app.http('advanceRequestState', {
   methods: ['PATCH'],
   authLevel: 'anonymous',
   route: 'project-setup-requests/{requestId}/state',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const reqId = extractOrGenerateRequestId(request);
 
@@ -140,5 +141,5 @@ app.http('advanceRequestState', {
     });
 
     return successResponse(existing);
-  }),
+  }, { domain: 'projectRequests', operation: 'advanceRequestState' })),
 });

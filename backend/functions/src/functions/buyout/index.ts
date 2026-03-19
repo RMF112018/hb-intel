@@ -4,6 +4,7 @@ import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { createLogger } from '../../utils/logger.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 import {
   errorResponse,
   successResponse,
@@ -18,7 +19,7 @@ app.http('getBuyoutEntries', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/buyout/entries',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
@@ -34,7 +35,7 @@ app.http('getBuyoutEntries', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'buyout', operation: 'getBuyoutEntries' })),
 });
 
 /**
@@ -44,7 +45,7 @@ app.http('getBuyoutEntryById', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/buyout/entries/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -58,7 +59,7 @@ app.http('getBuyoutEntryById', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'buyout', operation: 'getBuyoutEntryById' })),
 });
 
 /**
@@ -68,7 +69,7 @@ app.http('createBuyoutEntry', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/buyout/entries',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -99,7 +100,7 @@ app.http('createBuyoutEntry', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'buyout', operation: 'createBuyoutEntry' })),
 });
 
 /**
@@ -109,7 +110,7 @@ app.http('updateBuyoutEntry', {
   methods: ['PUT'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/buyout/entries/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -128,7 +129,7 @@ app.http('updateBuyoutEntry', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'buyout', operation: 'updateBuyoutEntry' })),
 });
 
 /**
@@ -138,7 +139,7 @@ app.http('deleteBuyoutEntry', {
   methods: ['DELETE'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/buyout/entries/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -151,7 +152,7 @@ app.http('deleteBuyoutEntry', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'buyout', operation: 'deleteBuyoutEntry' })),
 });
 
 /**
@@ -161,7 +162,7 @@ app.http('getBuyoutSummary', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/buyout/summary',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
@@ -174,5 +175,5 @@ app.http('getBuyoutSummary', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'buyout', operation: 'getBuyoutSummary' })),
 });

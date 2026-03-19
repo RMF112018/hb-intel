@@ -4,6 +4,7 @@ import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { createLogger } from '../../utils/logger.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 import {
   errorResponse,
   successResponse,
@@ -19,7 +20,7 @@ app.http('getLeads', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'leads',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const page = Math.max(1, parseInt(request.query.get('page') ?? '1', 10));
@@ -36,7 +37,7 @@ app.http('getLeads', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'leads', operation: 'getLeads' })),
 });
 
 /**
@@ -46,7 +47,7 @@ app.http('getLeadById', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'leads/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -64,7 +65,7 @@ app.http('getLeadById', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'leads', operation: 'getLeadById' })),
 });
 
 /**
@@ -74,7 +75,7 @@ app.http('createLead', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'leads',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -97,7 +98,7 @@ app.http('createLead', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'leads', operation: 'createLead' })),
 });
 
 /**
@@ -107,7 +108,7 @@ app.http('updateLead', {
   methods: ['PUT'],
   authLevel: 'anonymous',
   route: 'leads/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -132,7 +133,7 @@ app.http('updateLead', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'leads', operation: 'updateLead' })),
 });
 
 /**
@@ -142,7 +143,7 @@ app.http('deleteLead', {
   methods: ['DELETE'],
   authLevel: 'anonymous',
   route: 'leads/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -157,5 +158,5 @@ app.http('deleteLead', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'leads', operation: 'deleteLead' })),
 });

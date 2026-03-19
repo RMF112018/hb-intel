@@ -10,6 +10,7 @@ import {
   listResponse,
   notFoundResponse,
 } from '../../utils/response-helpers.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Contract CRUD: /api/projects/{projectId}/contracts
@@ -22,7 +23,7 @@ app.http('getContracts', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
@@ -38,7 +39,7 @@ app.http('getContracts', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'contracts', operation: 'getContracts' })),
 });
 
 /**
@@ -48,7 +49,7 @@ app.http('getContractById', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -62,7 +63,7 @@ app.http('getContractById', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'contracts', operation: 'getContractById' })),
 });
 
 /**
@@ -72,7 +73,7 @@ app.http('createContract', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -103,7 +104,7 @@ app.http('createContract', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'contracts', operation: 'createContract' })),
 });
 
 /**
@@ -113,7 +114,7 @@ app.http('updateContract', {
   methods: ['PUT'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -132,7 +133,7 @@ app.http('updateContract', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'contracts', operation: 'updateContract' })),
 });
 
 /**
@@ -142,7 +143,7 @@ app.http('deleteContract', {
   methods: ['DELETE'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -155,7 +156,7 @@ app.http('deleteContract', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'contracts', operation: 'deleteContract' })),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -169,7 +170,7 @@ app.http('getContractApprovals', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts/{contractId}/approvals',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const contractId = parseInt(request.params.contractId, 10);
@@ -182,7 +183,7 @@ app.http('getContractApprovals', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'contracts', operation: 'getContractApprovals' })),
 });
 
 /**
@@ -192,7 +193,7 @@ app.http('createContractApproval', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts/{contractId}/approvals',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -222,5 +223,5 @@ app.http('createContractApproval', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'contracts', operation: 'createContractApproval' })),
 });

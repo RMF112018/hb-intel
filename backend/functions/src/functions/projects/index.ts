@@ -4,6 +4,7 @@ import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { createLogger } from '../../utils/logger.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 import {
   errorResponse,
   successResponse,
@@ -19,7 +20,7 @@ app.http('getProjects', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const page = Math.max(1, parseInt(request.query.get('page') ?? '1', 10));
@@ -32,7 +33,7 @@ app.http('getProjects', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'projects', operation: 'getProjects' })),
 });
 
 /**
@@ -44,7 +45,7 @@ app.http('getPortfolioSummary', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/summary',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     try {
@@ -54,7 +55,7 @@ app.http('getPortfolioSummary', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'projects', operation: 'getPortfolioSummary' })),
 });
 
 /**
@@ -65,7 +66,7 @@ app.http('getProjectById', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = request.params.id;
@@ -83,7 +84,7 @@ app.http('getProjectById', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'projects', operation: 'getProjectById' })),
 });
 
 /**
@@ -93,7 +94,7 @@ app.http('createProject', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'projects',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -122,7 +123,7 @@ app.http('createProject', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'projects', operation: 'createProject' })),
 });
 
 /**
@@ -132,7 +133,7 @@ app.http('updateProject', {
   methods: ['PUT'],
   authLevel: 'anonymous',
   route: 'projects/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = request.params.id;
@@ -157,7 +158,7 @@ app.http('updateProject', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'projects', operation: 'updateProject' })),
 });
 
 /**
@@ -167,7 +168,7 @@ app.http('deleteProject', {
   methods: ['DELETE'],
   authLevel: 'anonymous',
   route: 'projects/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = request.params.id;
@@ -182,5 +183,5 @@ app.http('deleteProject', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'projects', operation: 'deleteProject' })),
 });

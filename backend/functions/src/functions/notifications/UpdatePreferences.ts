@@ -6,6 +6,7 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
 import type { INotificationPreferences } from '@hbc/notification-intelligence';
 import { withAuth } from '../../middleware/auth.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createLogger } from '../../utils/logger.js';
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
@@ -15,7 +16,7 @@ app.http('UpdatePreferences', {
   methods: ['PATCH'],
   route: 'notifications/preferences',
   authLevel: 'anonymous',
-  handler: withAuth(async (req: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (req: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(req);
 
@@ -31,5 +32,5 @@ app.http('UpdatePreferences', {
     logger.info('UpdatePreferences: updated', { userId: auth.claims.oid });
 
     return successResponse(updated);
-  }),
+  }, { domain: 'notifications', operation: 'UpdatePreferences' })),
 });

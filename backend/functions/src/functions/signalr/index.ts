@@ -6,6 +6,7 @@ import {
   type HttpResponseInit,
 } from '@azure/functions';
 import { withAuth } from '../../middleware/auth.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { errorResponse } from '../../utils/response-helpers.js';
 
@@ -29,7 +30,7 @@ app.http('signalrNegotiate', {
   route: 'provisioning-negotiate',
   extraInputs: [],
   extraOutputs: [connectionInfoOutput],
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.query.get('projectId');
@@ -63,5 +64,5 @@ app.http('signalrNegotiate', {
         groups,
       },
     };
-  }),
+  }, { domain: 'signalR', operation: 'signalrNegotiate' })),
 });

@@ -10,6 +10,7 @@ import {
   listResponse,
   notFoundResponse,
 } from '../../utils/response-helpers.js';
+import { withTelemetry } from '../../utils/withTelemetry.js';
 
 /**
  * GET /api/projects/{projectId}/scorecards
@@ -18,7 +19,7 @@ app.http('getScorecards', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/scorecards',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
@@ -34,7 +35,7 @@ app.http('getScorecards', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'scorecards', operation: 'getScorecards' })),
 });
 
 /**
@@ -44,7 +45,7 @@ app.http('getScorecardById', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/scorecards/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -58,7 +59,7 @@ app.http('getScorecardById', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'scorecards', operation: 'getScorecardById' })),
 });
 
 /**
@@ -68,7 +69,7 @@ app.http('createScorecard', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/scorecards',
-  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
@@ -97,7 +98,7 @@ app.http('createScorecard', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'scorecards', operation: 'createScorecard' })),
 });
 
 /**
@@ -107,7 +108,7 @@ app.http('updateScorecard', {
   methods: ['PUT'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/scorecards/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -126,7 +127,7 @@ app.http('updateScorecard', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'scorecards', operation: 'updateScorecard' })),
 });
 
 /**
@@ -136,7 +137,7 @@ app.http('deleteScorecard', {
   methods: ['DELETE'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/scorecards/{id}',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
@@ -149,7 +150,7 @@ app.http('deleteScorecard', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'scorecards', operation: 'deleteScorecard' })),
 });
 
 /**
@@ -159,7 +160,7 @@ app.http('getScorecardVersions', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/scorecards/{scorecardId}/versions',
-  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
     const scorecardId = parseInt(request.params.scorecardId, 10);
@@ -172,5 +173,5 @@ app.http('getScorecardVersions', {
     } catch {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  }),
+  }, { domain: 'scorecards', operation: 'getScorecardVersions' })),
 });
