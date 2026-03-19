@@ -39,9 +39,9 @@ Apply the P1-C2 middleware and response helpers to all remaining route handlers.
 | `leads` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 5 handlers migrated |
 | `projects` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 6 handlers migrated; `randomUUID` removed (not needed for entity IDs) |
 | `estimating` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 7 handlers migrated (5 trackers + 2 kickoffs) |
-| `schedule` | HTTP | ✗ | ✗ | ✗ | Project-scoped; same pattern |
-| `buyout` | HTTP | ✗ | ✗ | ✗ | Project-scoped; same pattern |
-| `compliance` | HTTP | ✗ | ✗ | ✗ | Project-scoped; same pattern |
+| `schedule` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 6 handlers migrated |
+| `buyout` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 6 handlers migrated |
+| `compliance` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 6 handlers migrated |
 | `contracts` | HTTP | ✗ | ✗ | ✗ | Project-scoped; approval sub-resource |
 | `risk` | HTTP | ✗ | ✗ | ✗ | Project-scoped; same pattern |
 | `scorecards` | HTTP | ✗ | ✗ | ✗ | Project-scoped; version sub-resource |
