@@ -2,7 +2,15 @@
 export interface ProxyConfig {
   /** Base URL for the Azure Functions API (e.g. `https://func-hb-intel.azurewebsites.net/api`). */
   baseUrl: string;
-  /** MSAL access token for the on-behalf-of flow. */
+  /**
+   * Per-request token provider. Called on every HTTP request to acquire a
+   * fresh MSAL access token. Preferred over static `accessToken`.
+   */
+  getToken?: () => Promise<string>;
+  /**
+   * Static MSAL access token.
+   * @deprecated Use `getToken` instead — static tokens expire and cannot be refreshed.
+   */
   accessToken?: string;
   /** Request timeout in milliseconds. */
   timeout?: number;

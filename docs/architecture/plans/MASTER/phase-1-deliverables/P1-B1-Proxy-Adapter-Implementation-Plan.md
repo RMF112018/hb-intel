@@ -184,7 +184,7 @@ interface ProxyConfig {
 
 This plan evolves the config contract for proxy HTTP usage:
 
-- **`accessToken?: string` → `getToken: () => Promise<string>`** — MSAL tokens expire (typically 1 hour) and must be acquired per-request via `acquireTokenSilent()`. A static token string is insufficient for production use. The `ProxyHttpClientOptions` type introduced in Task 1 replaces the static token with a token-provider function.
+- **`accessToken?: string` → `getToken: () => Promise<string>`** — MSAL tokens expire (typically 1 hour) and must be acquired per-request via `acquireTokenSilent()`. A static token string is insufficient for production use. **COMPLETE (2026-03-19):** `getToken` added to `ProxyConfig`, `ProxyHttpClient.requestRaw()` calls it per-request, `setProxyContext()` added to factory and exported from barrel. `accessToken` preserved as deprecated fallback.
 - **`timeout`** — preserved. `ProxyHttpClientOptions.timeout` defaults to `DEFAULT_TIMEOUT_MS` (30,000 ms) from `adapters/proxy/constants.ts`.
 - **`retryCount`** — **deferred**. The existing `DEFAULT_RETRY_COUNT = 3` constant is preserved for future use, but this plan does NOT implement retry logic in `ProxyHttpClient`. Retry handling is a P1-D1 (Write Safety, Retry, Recovery) concern that requires decisions about which errors are retryable, backoff strategy, and interaction with token refresh. D1 injects retry logic at the HTTP transport layer by wrapping `ProxyHttpClient`, not inside repositories. This is explicitly a pending decision owned by D1.
 - **`ProxyConfig` itself is NOT deleted.** It remains as the stub-phase contract in `types.ts`. `ProxyHttpClientOptions` is the runtime contract used by `ProxyHttpClient`. A future cleanup pass may unify them or deprecate `ProxyConfig`.

@@ -21,6 +21,7 @@ export type AfterResponseHook = (url: string, response: Response) => void;
 
 export class ProxyHttpClient {
   private readonly baseUrl: string;
+  private readonly getToken: (() => Promise<string>) | undefined;
   private readonly accessToken: string | undefined;
   private readonly timeout: number;
 
@@ -32,6 +33,7 @@ export class ProxyHttpClient {
 
   constructor(config: ProxyConfig) {
     this.baseUrl = config.baseUrl.replace(/\/+$/, '');
+    this.getToken = config.getToken;
     this.accessToken = config.accessToken;
     this.timeout = config.timeout ?? DEFAULT_TIMEOUT_MS;
   }
@@ -87,8 +89,11 @@ export class ProxyHttpClient {
       'X-Request-Id': crypto.randomUUID(),
     };
 
-    if (this.accessToken) {
-      headers['Authorization'] = `Bearer ${this.accessToken}`;
+    // Per-request token acquisition: getToken() is called on every request
+    // because MSAL tokens expire and must be refreshed via acquireTokenSilent().
+    const token = this.getToken ? await this.getToken() : this.accessToken;
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     const init: RequestInit = {

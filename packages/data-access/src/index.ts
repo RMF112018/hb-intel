@@ -22,7 +22,7 @@
  * |---------------|---------------|---------------------------|--------------|
  * | `mock`        | (default)     | Dev harness / tests       | Implemented  |
  * | `sharepoint`  | `sharepoint`  | SPFx webparts (PnPjs)     | Stub         |
- * | `proxy`       | `proxy`       | PWA (Azure Functions)     | Stub         |
+ * | `proxy`       | `proxy`       | PWA (Azure Functions)     | Implemented  |
  * | `api`         | `api`         | Direct REST API           | Stub         |
  *
  * Set `HBC_ADAPTER_MODE` environment variable to switch modes.
@@ -93,5 +93,6 @@ export {
   createProjectRepository,
   createAuthRepository,
   resolveAdapterMode,
+  setProxyContext,
 } from './factory.js';
 export type { AdapterMode } from './factory.js';

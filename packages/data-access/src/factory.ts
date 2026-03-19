@@ -35,18 +35,47 @@ import { ProxyScorecardRepository } from './adapters/proxy/ProxyScorecardReposit
 import { ProxyPmpRepository } from './adapters/proxy/ProxyPmpRepository.js';
 import { ProxyProjectRepository } from './adapters/proxy/ProxyProjectRepository.js';
 import { ProxyAuthRepository } from './adapters/proxy/ProxyAuthRepository.js';
-import type { ProxyConfig } from './adapters/proxy/types.js';
+
+
+/** Proxy context set by `setProxyContext()` at app startup (e.g. after MSAL init). */
+let proxyContext: { baseUrl: string; getToken: () => Promise<string> } | null = null;
+
+/**
+ * Initialize the proxy adapter context with a base URL and per-request token provider.
+ * Must be called before any proxy-mode factory function (e.g. in PWA main.tsx after MSAL init).
+ *
+ * @example
+ * ```ts
+ * setProxyContext('https://func-hb-intel.azurewebsites.net/api', async () => {
+ *   const response = await msalInstance.acquireTokenSilent({ scopes, account });
+ *   return response.accessToken;
+ * });
+ * ```
+ */
+export function setProxyContext(
+  baseUrl: string,
+  getToken: () => Promise<string>,
+): void {
+  proxyContext = { baseUrl, getToken };
+  proxyClient = null; // Reset singleton so next call uses new context
+}
 
 /** Lazy singleton proxy client — initialized on first proxy-mode factory call. */
 let proxyClient: ProxyHttpClient | null = null;
 
 function getProxyClient(): ProxyHttpClient {
   if (proxyClient) return proxyClient;
-  const config: ProxyConfig = {
-    baseUrl: getProxyBaseUrl(),
-    accessToken: undefined, // Token set per-request by caller; not at construction time
-  };
-  proxyClient = new ProxyHttpClient(config);
+  if (proxyContext) {
+    proxyClient = new ProxyHttpClient({
+      baseUrl: proxyContext.baseUrl,
+      getToken: proxyContext.getToken,
+    });
+  } else {
+    // Fallback for non-context initialization (e.g. tests, env-var config)
+    proxyClient = new ProxyHttpClient({
+      baseUrl: getProxyBaseUrl(),
+    });
+  }
   return proxyClient;
 }
 
