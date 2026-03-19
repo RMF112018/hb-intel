@@ -7,7 +7,7 @@
 | **Workstream** | E — Contract Testing and Staging Readiness |
 | **Document Type** | Acceptance Checklist |
 | **Owner** | QA / Platform Engineering |
-| **Status** | Implementation-Ready — Blocked (B1, C1, C2, C3) |
+| **Status** | Implementation-Ready — Blocked (C1 domain routes, staging infrastructure) |
 | **Date** | 2026-03-16 |
 | **Last Reviewed Against Repo Truth** | 2026-03-19 |
 | **References** | P1-E1 (Contract Test Suite), P1-B1 (Proxy Adapter), P1-C1 (Backend Catalog), P1-C2 (Auth Hardening), P1-C3 (Observability), P1-D1 (Write Safety) |
@@ -45,7 +45,7 @@ All example payloads, ID types, field names, and response assertions in this che
 
 ---
 
-## Repo Truth Snapshot (2026-03-18)
+## Repo Truth Snapshot (2026-03-19)
 
 ### Currently Evidenced in Repo
 
@@ -53,24 +53,25 @@ All example payloads, ID types, field names, and response assertions in this che
 |---|---|---|
 | Registered Azure Function routes | Provisioning saga, proxy (GET + mutate), timer (full spec), SignalR negotiate, project setup requests, acknowledgments, notifications | `backend/functions/src/index.ts` |
 | Auth middleware | `validateToken()` verifies Entra ID Bearer tokens via JWKS; returns `IValidatedClaims { upn, oid, roles, displayName }` | `backend/functions/src/middleware/validateToken.ts` |
-| Auth error shape | `{ error: 'Unauthorized', reason: string }` — pre-D3 legacy shape; does NOT include `code` field or `requestId`. Target after C2: `{ message: '...', code: 'UNAUTHORIZED' }` per D3 lock | `unauthorizedResponse()` in `validateToken.ts` |
+| Auth error shape | **C2 DELIVERED** — `withAuth()` wrapper, `errorResponse()` helper, and response helpers (`successResponse`, `listResponse`, `notFoundResponse`) all use `message` field per D3 lock. Auth errors return `{ message: '...', code: 'UNAUTHORIZED' }`. Pre-D3 `unauthorizedResponse()` superseded. | `backend/functions/src/middleware/auth.ts`, `backend/functions/src/utils/response-helpers.ts` |
 | Startup config validation | `validateRequiredConfig()` **wired into `createServiceFactory()`** — fails fast on missing required env vars in non-mock mode; skips in mock/test mode (G2.6 complete) | `backend/functions/src/utils/validate-config.ts`, `backend/functions/src/services/service-factory.ts` |
-| Health endpoint | **None registered** — no `/api/health` function found in `index.ts` imports | `backend/functions/src/index.ts` |
+| Health endpoint | **DELIVERED** — `/api/health` function registered in `backend/functions/src/index.ts`; returns 200 with system status | `backend/functions/src/functions/health/` |
 | Backend test infrastructure | Vitest with `unit` and `smoke` named projects; coverage targets provisioning only | `backend/functions/vitest.config.ts` |
 | Domain route handlers (leads, projects, estimating) | **None exist** — `backend/functions/src/functions/` contains only provisioning, proxy, notification, acknowledgment, signalr, and timer functions | `backend/functions/src/functions/` |
-| `@hbc/data-access` proxy adapters | `ProxyHttpClient` implemented (Bearer auth, 30s timeout, X-Request-Id, error normalization). 10 of 11 domain repos implemented and factory-wired (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP — 84 tests). Auth still throws `AdapterNotImplementedError` (blocked on A9) | Verified against repo 2026-03-19 |
+| `@hbc/data-access` proxy adapters | **B1 COMPLETE** — `ProxyHttpClient` implemented (Bearer auth, 30s timeout, X-Request-Id, error normalization, `withRetry()` wired, idempotency header injection). All 11 domain repos implemented and factory-wired (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP, Auth — 170+ tests). D1 retry policies (READ/WRITE) and idempotency context integrated. E1 Zod contract schemas delivered for all 11 domains. MSW handler infrastructure in place (Tier 1 domains). | Verified against repo 2026-03-19 |
 
-### Planned but Blocked
+### Planned but Blocked / Delivered
 
-| Item | Blocked On | Expected From |
+| Item | Status | Notes |
 |---|---|---|
-| Domain route handlers (leads, projects, estimating) | C1 | P1-C1 Backend Service Contract Catalog |
-| Error envelope standardization (`{ message, code, requestId?, details? }`) per D3 lock | C2 | P1-C2 Auth Hardening (Task 6: response helpers) |
-| Auth middleware hardening (`withAuth()` wrapper, Zod validation, standardized response shapes) | C2 | P1-C2 Auth Hardening |
-| Proxy adapter implementations (4 remaining: Lead, Project, Estimating, Auth) | B1 | P1-B1 Proxy Adapter Engineering Plan |
-| Retry logic, idempotency guards, write safety | D1 | P1-D1 Write Safety |
-| Telemetry instrumentation (Application Insights events) | C3 | P1-C3 Observability |
-| Health check endpoint | C1 or Platform | Not yet assigned |
+| Domain route handlers (leads, projects, estimating) | **BLOCKED on C1** | Zero domain CRUD routes exist; provisioning/notification routes are operational |
+| Error envelope standardization (`{ message, code, requestId?, details? }`) per D3 lock | **DELIVERED** | `successResponse()`, `errorResponse()`, `listResponse()`, `notFoundResponse()` all use `message` field per D3 lock |
+| Auth middleware hardening (`withAuth()` wrapper, Zod validation, standardized response shapes) | **DELIVERED** | `withAuth()`, `parseBody()`, `parseQuery()`, response helpers, `extractOrGenerateRequestId()` all implemented and tested; awaiting application to C1 routes |
+| Proxy adapter implementations | **DELIVERED (B1)** | All 11 repos implemented, factory-wired, 170+ tests passing |
+| Retry logic, idempotency guards, write safety | **DELIVERED (D1)** | `withRetry()` wired into ProxyHttpClient, `withIdempotency` handler wrapper, `IdempotencyStorageService`, cleanup timer, idempotency header injection |
+| Telemetry instrumentation (Application Insights events) | **PARTIALLY DELIVERED (C3)** | Health endpoint, proxy.request.*, auth.bearer.*, auth.obo.*, startup.mode.resolved, circuit breaker telemetry contracts delivered; handler lifecycle events await C1 routes |
+| Health check endpoint | **DELIVERED** | `/api/health` function registered |
+| E1 contract test infrastructure | **DELIVERED** | Zod schemas (11 domains), MSW handlers (Tier 1), smoke test scaffolds (env-gated) |
 
 ### Staging Environment Readiness Matrix
 
@@ -83,10 +84,10 @@ These items cannot be verified from repo alone — they require a deployed stagi
 | **`HBC_ADAPTER_MODE=proxy`** | Section 1 (adapter mode) | Platform | Startup logs contain `HBC_ADAPTER_MODE=proxy` | **NOT MET** — staging not deployed |
 | **Auth app registration** (`AZURE_TENANT_ID`, `AZURE_CLIENT_ID`) | Section 2 (auth) | Platform + C2 | `validateToken()` successfully verifies a JWT against `api://<CLIENT_ID>` audience | **NOT MET** — CLIENT_ID not defined for staging |
 | **Redis reachable** | Sections 3–8 (domain routes using proxy cache) | Platform | Proxy route returns cached response; no Redis connection errors in AI | **NOT MET** — required only if proxy routes use Redis for domain data |
-| **Azure Table Storage reachable** | Section 9 (idempotency records) | Platform | D1 `IdempotencyStorageService` can read/write to `IdempotencyRecords` table | **NOT MET** — D1 not delivered; table not created |
+| **Azure Table Storage reachable** | Section 9 (idempotency records) | Platform | D1 `IdempotencyStorageService` can read/write to `IdempotencyRecords` table | **NOT MET** — D1 code delivered (`IdempotencyStorageService` + cleanup timer implemented); physical table requires staging deploy |
 | **OBO app registration** (API scope grants for downstream APIs) | Endpoints calling downstream APIs (e.g., Graph, SharePoint) | C2 + Platform | OBO token exchange succeeds for downstream API audience | **NOT MET** — C2 not delivered; NOT required for basic domain CRUD |
 | **Application Insights workspace** | Section 11 (observability) | Platform | AI connection string in function app settings; telemetry appears in AI portal | **NOT MET** — access not confirmed |
-| **Health endpoint registered** | Section 1 (health check) | C1 or Platform | `GET /api/health` returns 200 | **BLOCKED** — no health function in `backend/functions/src/index.ts` |
+| **Health endpoint registered** | Section 1 (health check) | C1 or Platform | `GET /api/health` returns 200 | **DELIVERED** — `/api/health` function registered in `backend/functions/src/index.ts` |
 
 ---
 
@@ -104,9 +105,9 @@ Each major section maps to the upstream workstreams that must deliver before the
 | 6: Domain Writes — Leads | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
 | 7: Domain Writes — Projects | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
 | 8: Domain Writes — Estimating | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
-| 9: Retry & Idempotency | **Required** | **Required** | **Required** | — | **Required** | Staging deploy | **BLOCKED on B1 + C1 + C2 + D1** |
+| 9: Retry & Idempotency | ✅ Delivered | **Required** | **Required** | — | ✅ Delivered | Staging deploy | **BLOCKED on C1 + staging** (B1 ✅, D1 ✅) |
 | 10: Error Recovery | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
-| 11: Observability | — | **Required** | **Required** | **Required** | — | Staging deploy + AI workspace | **BLOCKED on C1 + C2 + C3** |
+| 11: Observability | — | **Required** | ✅ Foundation | ✅ Foundation | — | Staging deploy + AI workspace | **BLOCKED on C1 + staging** (C2 middleware ✅, C3 telemetry contracts ✅) |
 | 12: Acceptance Gates | All | All | All | All | All | All | **BLOCKED on all upstream** |
 
 ---
@@ -583,22 +584,22 @@ For each check item, the operator must record evidence in the following format. 
 
 ---
 
-## Known Non-Executable Items (as of 2026-03-18)
+## Known Non-Executable Items (as of 2026-03-19)
 
-All items below remain blocked on upstream deliverables. This section must be updated as dependencies are delivered.
+Items below are either delivered or remain blocked. This section is updated as dependencies are delivered.
 
-| Section | Blocked Item | Blocked On | Unblock Condition |
+| Section | Item | Status | Notes |
 |---|---|---|---|
-| 1 | Startup validation wired into runtime | G2.6 | `validateRequiredConfig()` called at startup |
-| 1 | Health endpoint | C1 or Platform | `/api/health` function registered in `index.ts` |
-| 2 | Standardized 401 response shape (`{ message, code }` per D3 lock) | C2 | Auth middleware returns ErrorEnvelopeSchema-conformant 401 |
-| 3–5 | All domain read checks | C1 | Domain route handlers (leads, projects, estimating) deployed |
-| 6–8 | All domain write checks | C1 | Domain route handlers + error middleware deployed |
-| 9 | All retry and idempotency checks | B1 + D1 | `ProxyHttpClient` with retry wiring + `withIdempotency` handler wrapper |
-| 10 | Standardized error shapes (422, 404, 5xx) | C1 | `formatErrorResponse()` error middleware deployed |
-| 11 | C3 telemetry events | C3 | Application Insights instrumentation deployed |
-| 11 | Custom `X-Request-Id` header | C1 or C2 | **PROVISIONAL** — header contract not frozen |
-| 12 | All acceptance gates | All | All Sections 1–11 passed |
+| 1 | Startup validation wired into runtime | **DELIVERED** ✅ | `validateRequiredConfig()` wired into `createServiceFactory()` (G2.6 complete) |
+| 1 | Health endpoint | **DELIVERED** ✅ | `/api/health` function registered |
+| 2 | Standardized 401 response shape (`{ message, code }` per D3 lock) | **DELIVERED** ✅ | `withAuth()` + `errorResponse()` return D3-conformant error envelopes |
+| 3–5 | All domain read checks | **BLOCKED on C1** | Zero domain route handlers exist |
+| 6–8 | All domain write checks | **BLOCKED on C1** | Zero domain route handlers exist |
+| 9 | Retry and idempotency checks | **CODE DELIVERED, BLOCKED on C1 + staging** | B1 ✅ (11/11 repos), D1 ✅ (`withRetry()` wired, `withIdempotency` handler wrapper, `IdempotencyStorageService`); execution requires C1 routes + staging deploy |
+| 10 | Standardized error shapes (422, 404, 5xx) | **BLOCKED on C1** | Response helpers delivered; domain routes needed to apply them |
+| 11 | C3 telemetry events | **PARTIALLY DELIVERED** | Health endpoint, proxy.request.*, auth.bearer.*, auth.obo.*, circuit breaker telemetry contracts delivered; handler lifecycle events await C1 routes |
+| 11 | Custom `X-Request-Id` header | **DELIVERED** ✅ | `extractOrGenerateRequestId()` middleware implemented and tested |
+| 12 | All acceptance gates | **BLOCKED on C1 + staging** | All Sections 1–11 must pass |
 
 ---
 
