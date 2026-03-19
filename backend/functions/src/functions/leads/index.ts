@@ -1,9 +1,15 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
-import { randomUUID } from 'node:crypto';
 import type { ILeadFormData } from '@hbc/models';
-import { validateToken, unauthorizedResponse } from '../../middleware/validateToken.js';
+import { withAuth } from '../../middleware/auth.js';
+import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { createLogger } from '../../utils/logger.js';
+import {
+  errorResponse,
+  successResponse,
+  listResponse,
+  notFoundResponse,
+} from '../../utils/response-helpers.js';
 
 /**
  * GET /api/leads
@@ -13,12 +19,8 @@ app.http('getLeads', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'leads',
-  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    try {
-      await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     const page = Math.max(1, parseInt(request.query.get('page') ?? '1', 10));
     const pageSize = Math.min(100, Math.max(1, parseInt(request.query.get('pageSize') ?? '25', 10)));
@@ -30,17 +32,11 @@ app.http('getLeads', {
         ? await services.leads.search(q, page, pageSize)
         : await services.leads.list(page, pageSize);
 
-      return {
-        status: 200,
-        jsonBody: { items: result.items, total: result.total, page, pageSize },
-      };
+      return listResponse(result.items, result.total, page, pageSize, requestId);
     } catch {
-      return {
-        status: 500,
-        jsonBody: { message: 'Internal server error', code: 'INTERNAL_ERROR', requestId: randomUUID() },
-      };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 /**
@@ -50,32 +46,25 @@ app.http('getLeadById', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'leads/{id}',
-  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    try {
-      await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
     if (isNaN(id)) {
-      return { status: 400, jsonBody: { message: 'id must be a number', code: 'VALIDATION_ERROR' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'id must be a number', requestId);
     }
 
     try {
       const services = createServiceFactory();
       const lead = await services.leads.getById(id);
       if (!lead) {
-        return { status: 404, jsonBody: { message: 'Lead not found', code: 'NOT_FOUND' } };
+        return notFoundResponse('Lead', String(id), requestId);
       }
-      return { status: 200, jsonBody: { data: lead } };
+      return successResponse(lead);
     } catch {
-      return {
-        status: 500,
-        jsonBody: { message: 'Internal server error', code: 'INTERNAL_ERROR', requestId: randomUUID() },
-      };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 /**
@@ -85,41 +74,30 @@ app.http('createLead', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'leads',
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-    let claims;
-    try {
-      claims = await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+    const requestId = extractOrGenerateRequestId(request);
 
     let body: Partial<ILeadFormData>;
     try {
       body = (await request.json()) as Partial<ILeadFormData>;
     } catch {
-      return { status: 400, jsonBody: { message: 'Invalid JSON body', code: 'VALIDATION_ERROR' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
     }
 
     if (!body.title || !body.stage || !body.clientName || body.estimatedValue === undefined) {
-      return {
-        status: 400,
-        jsonBody: { message: 'title, stage, clientName, and estimatedValue are required', code: 'VALIDATION_ERROR' },
-      };
+      return errorResponse(400, 'VALIDATION_ERROR', 'title, stage, clientName, and estimatedValue are required', requestId);
     }
 
     try {
       const services = createServiceFactory();
       const lead = await services.leads.create(body as ILeadFormData);
-      logger.info('Lead created', { id: lead.id, by: claims.upn });
-      return { status: 201, jsonBody: { data: lead } };
+      logger.info('Lead created', { id: lead.id, by: auth.claims.upn });
+      return successResponse(lead, 201);
     } catch {
-      return {
-        status: 500,
-        jsonBody: { message: 'Internal server error', code: 'INTERNAL_ERROR', requestId: randomUUID() },
-      };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 /**
@@ -129,39 +107,32 @@ app.http('updateLead', {
   methods: ['PUT'],
   authLevel: 'anonymous',
   route: 'leads/{id}',
-  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    try {
-      await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
     if (isNaN(id)) {
-      return { status: 400, jsonBody: { message: 'id must be a number', code: 'VALIDATION_ERROR' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'id must be a number', requestId);
     }
 
     let body: Partial<ILeadFormData>;
     try {
       body = (await request.json()) as Partial<ILeadFormData>;
     } catch {
-      return { status: 400, jsonBody: { message: 'Invalid JSON body', code: 'VALIDATION_ERROR' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
     }
 
     try {
       const services = createServiceFactory();
       const updated = await services.leads.update(id, body);
       if (!updated) {
-        return { status: 404, jsonBody: { message: 'Lead not found', code: 'NOT_FOUND' } };
+        return notFoundResponse('Lead', String(id), requestId);
       }
-      return { status: 200, jsonBody: { data: updated } };
+      return successResponse(updated);
     } catch {
-      return {
-        status: 500,
-        jsonBody: { message: 'Internal server error', code: 'INTERNAL_ERROR', requestId: randomUUID() },
-      };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 /**
@@ -171,16 +142,12 @@ app.http('deleteLead', {
   methods: ['DELETE'],
   authLevel: 'anonymous',
   route: 'leads/{id}',
-  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    try {
-      await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
     if (isNaN(id)) {
-      return { status: 400, jsonBody: { message: 'id must be a number', code: 'VALIDATION_ERROR' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'id must be a number', requestId);
     }
 
     try {
@@ -188,10 +155,7 @@ app.http('deleteLead', {
       await services.leads.delete(id);
       return { status: 204 };
     } catch {
-      return {
-        status: 500,
-        jsonBody: { message: 'Internal server error', code: 'INTERNAL_ERROR', requestId: randomUUID() },
-      };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
