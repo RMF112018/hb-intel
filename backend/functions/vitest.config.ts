@@ -65,7 +65,10 @@ export default defineConfig({
             'src/state-machine.test.ts',
             'src/idempotency/*.test.ts',
           ],
-          exclude: ['src/functions/provisioningSaga/**/__tests__/smoke.test.ts'],
+          exclude: [
+            'src/functions/provisioningSaga/**/__tests__/smoke.test.ts',
+            'src/test/smoke/**/*.smoke.test.ts',
+          ],
         },
       },
       {
@@ -74,6 +77,14 @@ export default defineConfig({
           include: ['src/functions/provisioningSaga/**/__tests__/smoke.test.ts'],
           testTimeout: 180000,
           hookTimeout: 180000,
+        },
+      },
+      {
+        test: {
+          name: 'contract-smoke',
+          include: ['src/test/smoke/**/*.smoke.test.ts'],
+          testTimeout: 30000,
+          hookTimeout: 30000,
         },
       },
     ],
