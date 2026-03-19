@@ -1,9 +1,15 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
-import { randomUUID } from 'node:crypto';
 import type { IContractInfo, ICommitmentApproval } from '@hbc/models';
-import { validateToken, unauthorizedResponse } from '../../middleware/validateToken.js';
+import { withAuth } from '../../middleware/auth.js';
+import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { createLogger } from '../../utils/logger.js';
+import {
+  errorResponse,
+  successResponse,
+  listResponse,
+  notFoundResponse,
+} from '../../utils/response-helpers.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Contract CRUD: /api/projects/{projectId}/contracts
@@ -16,11 +22,11 @@ app.http('getContracts', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts',
-  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    try { await validateToken(request); } catch { return unauthorizedResponse('Invalid token'); }
+  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
-    if (!projectId) return { status: 400, jsonBody: { message: 'projectId is required', code: 'VALIDATION_ERROR' } };
+    if (!projectId) return errorResponse(400, 'VALIDATION_ERROR', 'projectId is required', requestId);
 
     const page = Math.max(1, parseInt(request.query.get('page') ?? '1', 10));
     const pageSize = Math.min(100, Math.max(1, parseInt(request.query.get('pageSize') ?? '25', 10)));
@@ -28,11 +34,11 @@ app.http('getContracts', {
     try {
       const services = createServiceFactory();
       const result = await services.contracts.listContracts(projectId, page, pageSize);
-      return { status: 200, jsonBody: { items: result.items, total: result.total, page, pageSize } };
+      return listResponse(result.items, result.total, page, pageSize, requestId);
     } catch {
-      return { status: 500, jsonBody: { message: 'Internal server error', code: 'INTERNAL_ERROR', requestId: randomUUID() } };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 /**
@@ -42,21 +48,21 @@ app.http('getContractById', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts/{id}',
-  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    try { await validateToken(request); } catch { return unauthorizedResponse('Invalid token'); }
+  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
-    if (isNaN(id)) return { status: 400, jsonBody: { message: 'id must be a number', code: 'VALIDATION_ERROR' } };
+    if (isNaN(id)) return errorResponse(400, 'VALIDATION_ERROR', 'id must be a number', requestId);
 
     try {
       const services = createServiceFactory();
       const contract = await services.contracts.getContractById(id);
-      if (!contract) return { status: 404, jsonBody: { message: 'Contract not found', code: 'NOT_FOUND' } };
-      return { status: 200, jsonBody: { data: contract } };
+      if (!contract) return notFoundResponse('Contract', String(id), requestId);
+      return successResponse(contract);
     } catch {
-      return { status: 500, jsonBody: { message: 'Internal server error', code: 'INTERNAL_ERROR', requestId: randomUUID() } };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 /**
@@ -66,21 +72,20 @@ app.http('createContract', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts',
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-    let claims;
-    try { claims = await validateToken(request); } catch { return unauthorizedResponse('Invalid token'); }
+    const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
-    if (!projectId) return { status: 400, jsonBody: { message: 'projectId is required', code: 'VALIDATION_ERROR' } };
+    if (!projectId) return errorResponse(400, 'VALIDATION_ERROR', 'projectId is required', requestId);
 
     let body: Partial<IContractInfo>;
     try { body = (await request.json()) as Partial<IContractInfo>; } catch {
-      return { status: 400, jsonBody: { message: 'Invalid JSON body', code: 'VALIDATION_ERROR' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
     }
 
     if (!body.contractNumber || !body.vendorName || body.amount === undefined || !body.status || body.executedDate === undefined) {
-      return { status: 400, jsonBody: { message: 'contractNumber, vendorName, amount, status, and executedDate are required', code: 'VALIDATION_ERROR' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'contractNumber, vendorName, amount, status, and executedDate are required', requestId);
     }
 
     try {
@@ -93,12 +98,12 @@ app.http('createContract', {
         status: body.status,
         executedDate: body.executedDate,
       });
-      logger.info('Contract created', { id: contract.id, projectId, by: claims.upn });
-      return { status: 201, jsonBody: { data: contract } };
+      logger.info('Contract created', { id: contract.id, projectId, by: auth.claims.upn });
+      return successResponse(contract, 201);
     } catch {
-      return { status: 500, jsonBody: { message: 'Internal server error', code: 'INTERNAL_ERROR', requestId: randomUUID() } };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 /**
@@ -108,26 +113,26 @@ app.http('updateContract', {
   methods: ['PUT'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts/{id}',
-  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    try { await validateToken(request); } catch { return unauthorizedResponse('Invalid token'); }
+  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
-    if (isNaN(id)) return { status: 400, jsonBody: { message: 'id must be a number', code: 'VALIDATION_ERROR' } };
+    if (isNaN(id)) return errorResponse(400, 'VALIDATION_ERROR', 'id must be a number', requestId);
 
     let body: Partial<IContractInfo>;
     try { body = (await request.json()) as Partial<IContractInfo>; } catch {
-      return { status: 400, jsonBody: { message: 'Invalid JSON body', code: 'VALIDATION_ERROR' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
     }
 
     try {
       const services = createServiceFactory();
       const updated = await services.contracts.updateContract(id, body);
-      if (!updated) return { status: 404, jsonBody: { message: 'Contract not found', code: 'NOT_FOUND' } };
-      return { status: 200, jsonBody: { data: updated } };
+      if (!updated) return notFoundResponse('Contract', String(id), requestId);
+      return successResponse(updated);
     } catch {
-      return { status: 500, jsonBody: { message: 'Internal server error', code: 'INTERNAL_ERROR', requestId: randomUUID() } };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 /**
@@ -137,20 +142,20 @@ app.http('deleteContract', {
   methods: ['DELETE'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts/{id}',
-  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    try { await validateToken(request); } catch { return unauthorizedResponse('Invalid token'); }
+  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     const id = parseInt(request.params.id, 10);
-    if (isNaN(id)) return { status: 400, jsonBody: { message: 'id must be a number', code: 'VALIDATION_ERROR' } };
+    if (isNaN(id)) return errorResponse(400, 'VALIDATION_ERROR', 'id must be a number', requestId);
 
     try {
       const services = createServiceFactory();
       await services.contracts.deleteContract(id);
       return { status: 204 };
     } catch {
-      return { status: 500, jsonBody: { message: 'Internal server error', code: 'INTERNAL_ERROR', requestId: randomUUID() } };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -164,20 +169,20 @@ app.http('getContractApprovals', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts/{contractId}/approvals',
-  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    try { await validateToken(request); } catch { return unauthorizedResponse('Invalid token'); }
+  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     const contractId = parseInt(request.params.contractId, 10);
-    if (isNaN(contractId)) return { status: 400, jsonBody: { message: 'contractId must be a number', code: 'VALIDATION_ERROR' } };
+    if (isNaN(contractId)) return errorResponse(400, 'VALIDATION_ERROR', 'contractId must be a number', requestId);
 
     try {
       const services = createServiceFactory();
       const approvals = await services.contracts.getApprovals(contractId);
-      return { status: 200, jsonBody: { data: approvals } };
+      return successResponse(approvals);
     } catch {
-      return { status: 500, jsonBody: { message: 'Internal server error', code: 'INTERNAL_ERROR', requestId: randomUUID() } };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 /**
@@ -187,21 +192,20 @@ app.http('createContractApproval', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'projects/{projectId}/contracts/{contractId}/approvals',
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-    let claims;
-    try { claims = await validateToken(request); } catch { return unauthorizedResponse('Invalid token'); }
+    const requestId = extractOrGenerateRequestId(request);
 
     const contractId = parseInt(request.params.contractId, 10);
-    if (isNaN(contractId)) return { status: 400, jsonBody: { message: 'contractId must be a number', code: 'VALIDATION_ERROR' } };
+    if (isNaN(contractId)) return errorResponse(400, 'VALIDATION_ERROR', 'contractId must be a number', requestId);
 
     let body: Partial<ICommitmentApproval>;
     try { body = (await request.json()) as Partial<ICommitmentApproval>; } catch {
-      return { status: 400, jsonBody: { message: 'Invalid JSON body', code: 'VALIDATION_ERROR' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
     }
 
     if (!body.approverName || !body.approvedAt || !body.status || body.notes === undefined) {
-      return { status: 400, jsonBody: { message: 'approverName, approvedAt, status, and notes are required', code: 'VALIDATION_ERROR' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'approverName, approvedAt, status, and notes are required', requestId);
     }
 
     try {
@@ -213,10 +217,10 @@ app.http('createContractApproval', {
         status: body.status,
         notes: body.notes,
       });
-      logger.info('Contract approval created', { id: approval.id, contractId, by: claims.upn });
-      return { status: 201, jsonBody: { data: approval } };
+      logger.info('Contract approval created', { id: approval.id, contractId, by: auth.claims.upn });
+      return successResponse(approval, 201);
     } catch {
-      return { status: 500, jsonBody: { message: 'Internal server error', code: 'INTERNAL_ERROR', requestId: randomUUID() } };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
