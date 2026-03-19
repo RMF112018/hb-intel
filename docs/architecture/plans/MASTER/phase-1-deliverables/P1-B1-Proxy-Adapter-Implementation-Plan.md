@@ -4,9 +4,15 @@
 | **Phase** | Phase 1 — Production Data Plane and Integration Backbone |
 | **Workstream** | B — Adapter Completion |
 | **Document Type** | Engineering Plan |
-| **Status** | Draft v2 — corrected against repo truth |
-| **Last Updated** | 2026-03-18 |
+| **Status** | Draft v3 — re-baselined against repo truth 2026-03-19 |
+| **Last Updated** | 2026-03-19 |
 | **Owner** | Frontend Platform / Data Access |
+
+### Repo Truth Update (2026-03-19)
+
+Tasks 0, 1, 2 are **COMPLETE** and verified in code. 7 of 11 domain repos are **COMPLETE** (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Test infrastructure exists: vitest configured with 51 tests across `ProxyHttpClient.test.ts`, `envelope.test.ts`, and `repositories.test.ts`. `ProxyHttpClient`, `BaseProxyProjectRepository`, envelope parsers, and route path builders are implemented. Factory wires all 7 project-scoped repos to proxy mode.
+
+**Remaining work:** Tasks 3 (Lead), 4 (Project), 5 partial (Estimating), 7 partial (Auth), 8–10 (factory wiring completion + integration tests). Completed tasks are marked **[COMPLETE]** inline below.
 
 # Proxy Adapter Implementation Plan
 
@@ -77,7 +83,7 @@ This section provides a consolidated view of execution risk for delivery plannin
 
 | Blocker | Impact | Resolution Path | Blocks |
 |---|---|---|---|
-| No vitest infrastructure in `@hbc/data-access` | Cannot run any tests | Task 0 adds vitest config and test script | All test tasks (1–10) |
+| ~~No vitest infrastructure in `@hbc/data-access`~~ | ~~Cannot run any tests~~ | **RESOLVED** — Task 0 complete; vitest configured with 51 tests passing | ~~All test tasks (1–10)~~ |
 
 **Not a B1 blocker:** SharePoint list schema approval (pending with Product Owner + Business Domains) affects SharePoint/production adapters but does NOT block proxy adapter work. Proxy adapters target Azure Functions via HTTP, not SharePoint directly.
 
@@ -128,10 +134,11 @@ These are explicitly out of B1 scope and owned by other workstreams.
 
 | Phase | Tasks | Status | Dependencies |
 |---|---|---|---|
-| **Proceed now** | Tasks 0–4 (vitest setup, HTTP client, base repo, Lead, Project) | No external blockers | Foundational work independent of unresolved C1 decisions |
-| **Proceed with caution** | Tasks 5–7 (remaining 9 domain repos) | API paths are provisional | Implementation valid against mocked `fetch`; paths may change when C1 freezes. Estimating adapter (Task 5) has highest C1 dependency due to sub-resource routing question (D2) |
-| **Proceed** | Tasks 8–10 (factory wiring, integration tests, full suite) | No external blockers for test scope | Factory code and mocked integration tests are independent of C1/C2 |
-| **Requires upstream resolution** | Production activation | Blocked | C1 route finalization, C2 auth middleware, MSAL registration, error envelope alignment (D3), path reconciliation (D1, D6), deployment env vars |
+| **COMPLETE** | Tasks 0–2 (vitest setup, ProxyHttpClient, BaseProxyProjectRepository) | Done — 51 tests passing | — |
+| **Proceed now** | Tasks 3–4 (Lead, Project) | No external blockers | Foundational work independent of unresolved C1 decisions |
+| **COMPLETE (7 of 9)** | Tasks 5–7 (domain repos) | Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP implemented and factory-wired | Estimating (Task 5) and Auth (Task 7) remaining |
+| **Partial** | Tasks 8–10 (factory wiring, integration tests, full suite) | Factory wires 7 repos; 4 remaining | Dependent on Tasks 3–4, 5 (Estimating), 7 (Auth) completion |
+| **Requires upstream resolution** | Production activation | Blocked | C1 route delivery, C2 auth middleware, MSAL registration, deployment env vars |
 
 ---
 
@@ -344,7 +351,7 @@ Until these operational dependencies are met, proxy mode will authenticate and c
 
 ### Current State
 
-`@hbc/data-access` currently has **no test infrastructure**: no `test` script, no vitest config, and no test files. Only `check-types` (`tsc --noEmit`), `lint` (`eslint`), and `build` (`tsc`) scripts exist. Task 0 below must be completed before any test commands in this plan become runnable.
+`@hbc/data-access` has vitest test infrastructure with 51 tests across 3 test files (`ProxyHttpClient.test.ts`, `envelope.test.ts`, `repositories.test.ts`). Task 0 is **COMPLETE**. The `test`, `check-types`, `lint`, and `build` scripts are all available.
 
 ### B1 Test Tiers
 
@@ -379,9 +386,9 @@ After Task 0 is complete, these commands become available:
 
 ---
 
-## Chunk 0: Test Infrastructure Prerequisite
+## Chunk 0: Test Infrastructure Prerequisite **[COMPLETE]**
 
-### Task 0: Set up vitest for `@hbc/data-access`
+### Task 0: Set up vitest for `@hbc/data-access` **[COMPLETE]**
 
 **Prerequisite for all subsequent tasks.** This task must be completed before any test commands in this plan are runnable.
 
@@ -437,9 +444,9 @@ pnpm --filter @hbc/data-access test
 
 ---
 
-## Chunk 1: HTTP Client Foundation (≈450 lines)
+## Chunk 1: HTTP Client Foundation **[COMPLETE]**
 
-### Task 1: Create `ProxyHttpClient` class
+### Task 1: Create `ProxyHttpClient` class **[COMPLETE]**
 
 **Files:**
 - Create: `packages/data-access/src/adapters/proxy/http-client.ts`
@@ -978,7 +985,7 @@ pnpm --filter @hbc/data-access check-types
 
 ---
 
-### Task 2: Create `ProxyBaseRepository<T>` abstract class
+### Task 2: Create `ProxyBaseRepository<T>` abstract class **[COMPLETE]**
 
 **Files:**
 - Create: `packages/data-access/src/adapters/proxy/proxy-base.ts`
@@ -1772,7 +1779,7 @@ pnpm --filter @hbc/data-access check-types
 
 **Overview:** Tasks 5–7 each implement their port interface by delegating to `ProxyHttpClient` through `ProxyBaseRepository`. Unlike Lead (Task 3), each repository has its own domain-specific method names, entity types, and query patterns. Most are project-scoped (taking `projectId` as a parameter on list methods) and several manage multiple entity types (e.g., tracker + kickoff, contract + approval). None of the remaining repositories have a generic `search()` method.
 
-### Task 5: ProxyEstimatingRepository, ProxyScheduleRepository, ProxyBuyoutRepository
+### Task 5: ProxyEstimatingRepository, ProxyScheduleRepository **[COMPLETE]**, ProxyBuyoutRepository **[COMPLETE]** — Estimating remaining
 
 **Files to create:**
 - `packages/data-access/src/adapters/proxy/estimating-repository.ts`
@@ -2042,7 +2049,7 @@ git commit -m "feat: implement ProxyBuyoutRepository with project-scoped entries
 
 ---
 
-### Task 6: ProxyComplianceRepository, ProxyContractRepository, ProxyRiskRepository
+### Task 6: ProxyComplianceRepository, ProxyContractRepository, ProxyRiskRepository **[COMPLETE]**
 
 **Files to create:**
 - `packages/data-access/src/adapters/proxy/compliance-repository.ts`
@@ -2084,7 +2091,7 @@ git commit -m "feat: implement ProxyRiskRepository with project-scoped items and
 
 ---
 
-### Task 7: ProxyScorecardRepository, ProxyPmpRepository, ProxyAuthRepository
+### Task 7: ProxyScorecardRepository **[COMPLETE]**, ProxyPmpRepository **[COMPLETE]**, ProxyAuthRepository — Auth remaining
 
 **Files to create:**
 - `packages/data-access/src/adapters/proxy/scorecard-repository.ts`

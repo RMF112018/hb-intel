@@ -8,7 +8,7 @@
 | **Document Type** | Governance Policy |
 | **Owner** | Frontend Platform Team / Data Access Maintainer |
 | **Update Authority** | B-workstream lead; changes require review by DevOps and Architecture |
-| **Last Reviewed Against Repo Truth** | 2026-03-18 |
+| **Last Reviewed Against Repo Truth** | 2026-03-19 |
 | **References** | P1-B1 (Engineering Plan), P1-B2 (Adapter Completion Backlog), P1-C2 (Auth Hardening), P1-E1 (Contract Test Suite) |
 
 ---
@@ -78,7 +78,7 @@ All policy rules, enforcement layers, and configuration guidance in this documen
 ### Tracked Remediation: Backend Adapter-Mode Vocabulary
 
 **Classification:** Phase 1 prerequisite for complete mock-isolation enforcement.
-**Status:** Not yet remediated.
+**Status:** Partially remediated. `adapter-mode-guard.ts` normalizes `'real'` to `'proxy'` at runtime, mitigating the split-default risk. Source files (`service-factory.ts` line 37, `README.md` line 62) still use `'real'` vocabulary and should be updated to canonical `'proxy'` to complete remediation.
 **Owner:** Backend Platform Owner.
 
 The following repo locations use non-canonical vocabulary that creates enforcement and configuration risk:
@@ -328,7 +328,7 @@ Mock isolation is enforced through five layers. Each layer catches failures that
 ### Layer 2 — Startup Assertion
 
 **What:** Runtime guard that throws a fatal error if mock mode is active in a protected environment.
-**Implementation target:** `packages/data-access/src/config/adapter-mode-guard.ts` (to be created per B3 scope)
+**Implementation status:** Backend guard implemented at `backend/functions/src/utils/adapter-mode-guard.ts` — normalizes `'real'` to `'proxy'`, rejects unknown modes, blocks mock in production. Frontend guard (`packages/data-access/src/config/adapter-mode-guard.ts`) not yet created.
 
 **Frontend** (`apps/pwa/src/main.tsx`):
 - Checks the build-time-injected `process.env.HBC_ADAPTER_MODE`
@@ -469,9 +469,9 @@ This policy enforces the prerequisite: mock must be unreachable in the productio
 - [ ] Vite config defaults to `'proxy'` for non-development builds — evidence: build log (verified in `apps/pwa/vite.config.ts`)
 
 **Layer 2 — Startup:**
-- [ ] `assertAdapterModeForEnvironment()` implemented in `packages/data-access/src/config/adapter-mode-guard.ts`
+- [x] Backend startup guard implemented — `assertAdapterModeValid()` in `backend/functions/src/utils/adapter-mode-guard.ts` normalizes `'real'` to `'proxy'`, rejects unknown values, blocks mock in production
+- [ ] Frontend `assertAdapterModeForEnvironment()` implemented in `packages/data-access/src/config/adapter-mode-guard.ts` — not yet created
 - [ ] Startup guard called in `apps/pwa/src/main.tsx` before first repository call — evidence: startup log
-- [ ] Backend startup guard enforced — requires entrypoint restructuring or alternative mechanism (see Layer 2 engineering requirement) — evidence: startup log
 - [ ] Adapter mode and environment logged at startup in all environments — evidence: log query
 
 **Layer 3 — CI:**

@@ -8,8 +8,8 @@
 | **Document Type** | Instrumentation Specification |
 | **Owner** | Backend Services Team / DevOps |
 | **Update Authority** | C-workstream lead; changes require review by DevOps and B-workstream |
-| **Status** | Aligned — repo-truth verified 2026-03-18; execution-ready |
-| **Last Reviewed Against Repo Truth** | 2026-03-18 |
+| **Status** | Spec-complete — defines target instrumentation; only logger foundation and provisioning saga telemetry are implemented |
+| **Last Reviewed Against Repo Truth** | 2026-03-19 |
 | **References** | P1-B2 (Adapter Completion Backlog), P1-B3 (Mock Isolation Policy), P1-C1 (Backend Service Contract Catalog), P1-D1 (Write Safety), P1-E1 (Contract Testing) |
 
 **Note:** This document was previously identified as P1-C1, which collided with the backend service contract catalog. Re-identified as P1-C3.

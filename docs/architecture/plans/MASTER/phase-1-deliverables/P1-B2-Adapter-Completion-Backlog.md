@@ -8,7 +8,7 @@
 | **Document Type** | Status Tracker |
 | **Owner** | Frontend Platform Team |
 | **Update Authority** | B-workstream lead; status changes require evidence per gate definitions below |
-| **Last Reviewed Against Repo Truth** | 2026-03-18 |
+| **Last Reviewed Against Repo Truth** | 2026-03-19 |
 | **References** | P1-B1 (Engineering Plan), P1-B3 (Environment Configuration), P1-C1 (Service Contract Catalog), P1-C2 (Auth Hardening), P1-D1 (Write Safety), P1-E1 (Contract Test Suite) |
 
 **Evidence expectations:** A status change requires the evidence defined in the gate checklist for the target status. "Passes tests" means a CI-reproducible green run, not a local-only claim.
@@ -46,15 +46,15 @@ B1 targets all 11 domain repositories for implementation against mocked fetch in
 | **Lead** | `ILeadRepository` | CRUD (5), Search (1) | 6 | Phase 1 | `IMPL_READY` | Task 3 | C1 locked |
 | **Project** | `IProjectRepository` | CRUD (5), Aggregate (1) | 6 | Phase 1 | `IMPL_READY` | Task 4 | CRUD: C1 locked; Aggregate: A8 provisional |
 | **Estimating** | `IEstimatingRepository` | Tracker CRUD (5), Kickoff (2) | 7 | Phase 1 | `IMPL_READY` | Task 5 | C1 base locked; D2 |
-| **Schedule** | `IScheduleRepository` | Activity CRUD (5), Metrics (1) | 6 | Phase 1 | `IMPL_READY` | Task 5 | D1, D6 provisional* |
-| **Buyout** | `IBuyoutRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1 | `IMPL_READY` | Task 5 | D1, D6 provisional* |
-| **Compliance** | `IComplianceRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1 | `IMPL_READY` | Task 6 | D1, D6 provisional* |
-| **Contract** | `IContractRepository` | Contract CRUD (5), Approvals (2) | 7 | Phase 1 | `IMPL_READY` | Task 6 | D1, D6 provisional* |
-| **Risk** | `IRiskRepository` | Item CRUD (5), Management (1) | 6 | Phase 1 | `IMPL_READY` | Task 6 | D1, D6 provisional* |
-| **Scorecard** | `IScorecardRepository` | Scorecard CRUD (5), Versions (1) | 6 | Phase 1 | `IMPL_READY` | Task 7 | D1, D6 provisional* |
-| **PMP** | `IPmpRepository` | Plan CRUD (5), Signatures (2) | 7 | Phase 1 | `IMPL_READY` | Task 7 | D1, D6 provisional* |
+| **Schedule** | `IScheduleRepository` | Activity CRUD (5), Metrics (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 5 | D1, D6 LOCKED* |
+| **Buyout** | `IBuyoutRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 5 | D1, D6 LOCKED* |
+| **Compliance** | `IComplianceRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 6 | D1, D6 LOCKED* |
+| **Contract** | `IContractRepository` | Contract CRUD (5), Approvals (2) | 7 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 6 | D1, D6 LOCKED* |
+| **Risk** | `IRiskRepository` | Item CRUD (5), Management (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 6 | D1, D6 LOCKED* |
+| **Scorecard** | `IScorecardRepository` | Scorecard CRUD (5), Versions (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 7 | D1, D6 LOCKED* |
+| **PMP** | `IPmpRepository` | Plan CRUD (5), Signatures (2) | 7 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 7 | D1, D6 LOCKED* |
 
-*Mocked-fetch implementation can proceed against provisional route assumptions. Production activation blocked until C1 route finalization resolves open decisions D1/D6.
+*D1 and D6 are now **LOCKED** per P1-E1 (plural paths, nested project-scoped paths). Production activation blocked until C1 delivers backend route handlers for these domains.
 
 ### Method Family Detail by Domain
 
@@ -244,17 +244,17 @@ This table is the live tracking surface for adapter implementation progress. Upd
 
 | Domain | Owner | Current Gate | Blocker | Evidence | Next Action | Last Updated |
 |---|---|---|---|---|---|---|
-| Lead | B / Data Access | `IMPL_READY` | None | — | Begin B1 Task 3 | 2026-03-18 |
-| Project | B / Data Access | `IMPL_READY` | Production activation: A8 aggregate provisional | — | Begin B1 Task 4 | 2026-03-18 |
-| Estimating | B / Data Access | `IMPL_READY` | Production activation: D2 sub-resource routing open | — | Begin B1 Task 5 | 2026-03-18 |
-| Schedule | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 5 (mocked fetch) | 2026-03-18 |
-| Buyout | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 5 (mocked fetch) | 2026-03-18 |
-| Compliance | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
-| Contract | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
-| Risk | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 6 (mocked fetch) | 2026-03-18 |
-| Scorecard | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 7 (mocked fetch) | 2026-03-18 |
-| PMP | B / Data Access | `IMPL_READY` | Production activation: open decisions D1, D6 | — | Begin B1 Task 7 (mocked fetch) | 2026-03-18 |
-| Auth | B / Data Access + C2 / Auth | `IMPL_READY` | Production activation: A9 (no route catalog) | — | Begin B1 Task 7 | 2026-03-18 |
+| Lead | B / Data Access | `IMPL_READY` | None | — | Begin B1 Task 3 | 2026-03-19 |
+| Project | B / Data Access | `IMPL_READY` | Production activation: A8 aggregate provisional | — | Begin B1 Task 4 | 2026-03-19 |
+| Estimating | B / Data Access | `IMPL_READY` | Production activation: D2 sub-resource routing open | — | Begin B1 Task 5 (Estimating portion) | 2026-03-19 |
+| Schedule | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Buyout | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Compliance | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Contract | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Risk | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Scorecard | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| PMP | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Auth | B / Data Access + C2 / Auth | `IMPL_READY` | Production activation: A9 (no route catalog) | — | Begin B1 Task 7 (Auth portion) | 2026-03-19 |
 
 ### SharePoint and API Adapter Progress
 
@@ -270,7 +270,7 @@ Not yet active. Rows will be added when those phases begin planning.
 |---|---|---|---|
 | **Mocked-fetch implementation** | B1 Tasks 0–10: all 11 domain adapters | **Yes** — no external blockers | — |
 | **Route reconciliation** | Align adapter paths with C1 catalog | Lead, Project CRUD, Estimating base only | C1 finalizes remaining 7 data-domain routes, Project aggregate (A8), Estimating sub-resources (D2), and Auth (A9) |
-| **Response contract alignment** | Error envelope, pagination defaults | No | C1 + B1 resolve D3, D4 |
+| **Response contract alignment** | Error envelope, pagination defaults | **LOCKED** — D3 (`message`), D4 (25/100) resolved per P1-E1 | — |
 | **Auth integration** | MSAL registration, OBO flow, CORS | No | C2 delivers auth middleware and registers scopes |
 | **Write safety** | Retry, idempotency, failure classification | No | P1-D1 delivers `withRetry()`, idempotency guard, `WriteFailureReason` |
 | **Contract testing** | Zod schema + MSW harness against staging | No | E1 delivers test harness; staging backend available |
@@ -284,27 +284,27 @@ B1 Tasks 0–10 can proceed immediately against mocked fetch. Production activat
 
 No external blockers for mocked-fetch implementation. All B1 tasks (vitest setup → `ProxyHttpClient` → `ProxyBaseRepository` → 11 domain repos → factory wiring → integration tests) proceed against mocked fetch. See `P1-B1-Proxy-Adapter-Implementation-Plan.md` for full task breakdown.
 
-Currently, all non-mock adapter modes throw `AdapterNotImplementedError` from the factory (`packages/data-access/src/factory.ts`). Phase 1 replaces these stubs with real proxy implementations.
+Currently, 4 of 11 domains (Lead, Project, Estimating, Auth) throw `AdapterNotImplementedError` for proxy mode in the factory (`packages/data-access/src/factory.ts`). The remaining 7 project-scoped domains are factory-wired to real proxy implementations and have reached `CODE_COMPLETE_MOCK`. Phase 1 implementation completes the remaining 4 proxy repos.
 
 #### B1 Open Decisions Affecting Route Shape
 
 These decisions do not block mocked-fetch implementation but must be resolved before any domain can reach `CONTRACT_ALIGNED`.
 
-| ID | Decision | Owner | Impact | When Needed |
+| ID | Decision | Owner | Resolution | Status |
 |---|---|---|---|---|
-| D1 | Singular vs plural route paths for Schedule, Buyout, Risk, Scorecard | P1-C1 | Path constants in 4 domain adapters | Before `CONTRACT_ALIGNED` |
-| D2 | Estimating sub-resource routing (`/trackers`, `/kickoffs`) vs flat | P1-C1 | May restructure estimating adapter paths | Before Task 5 ideally |
-| D3 | Error envelope field priority (`.error` vs `.message`) | P1-C1 + B1 | `extractErrorMessage()` reads `.error` first with `.message` fallback; field priority may change per D3 resolution | Before `CONTRACT_ALIGNED` |
-| D4 | Pagination default alignment (B1: 25 via `DEFAULT_PAGE_SIZE`; C1: 50 default, 200 max) | P1-C1 + B1 | `mapPagedResponse` fallback applies only when backend omits field; final default may change | Before `CONTRACT_ALIGNED` |
-| D5 | Whether proxy adapters need PATCH support | P1-C1 | C1 defines PATCH routes; B1 currently uses PUT only | Before `CONTRACT_ALIGNED` |
-| D6 | Nested project-scoped paths vs flat `?projectId=` query-param pattern | P1-C1 | B1 uses nested paths provisionally; C1 uses flat routes; affects list/aggregate routes in 8 project-scoped repos | Before `CONTRACT_ALIGNED` |
+| D1 | Singular vs plural route paths | P1-C1 | **Plural** for all domain routes | **LOCKED** — P1-E1 |
+| D2 | Estimating sub-resource routing (`/trackers`, `/kickoffs`) vs flat | P1-C1 | `/api/estimating/trackers/` and `/api/estimating/kickoffs/` | **LOCKED** — P1-E1 |
+| D3 | Error envelope field priority | P1-C1 + B1 | **`message`** is primary field; `extractErrorMessage()` reads `.message` first, `.error` fallback for pre-Phase-1 routes | **LOCKED** — P1-E1 |
+| D4 | Pagination default | P1-C1 + B1 | **25** (max 100) — B1 and C1 aligned | **LOCKED** — P1-E1 |
+| D5 | PATCH support in domain routes | P1-C1 | **PUT-only** in Phase 1; PATCH deferred to Phase 2 | **LOCKED** — P1-E1 |
+| D6 | Project-scoped path pattern | P1-C1 | **Nested** `/api/projects/{projectId}/{domain}` — B1 assumption confirmed | **LOCKED** — P1-E1 |
 
 #### B1 Assumptions
 
 | ID | Assumption | Confidence | Upstream Owner |
 |---|---|---|---|
 | A1 | API paths follow C1 catalog patterns | High for Lead/Project/Estimating; provisional for remaining 7 data domains + Auth | P1-C1 |
-| A2 | Collection envelope: `{ data: T[], total, page, pageSize }` | High | P1-C1 |
+| A2 | Collection envelope: `{ items: T[], total, page, pageSize }` | **LOCKED** — E1 locked decision confirms `items` field (not `data`) | P1-C1, P1-E1 |
 | A3 | Single-item envelope: `{ data: T }` | High | P1-C1 |
 | A4 | Error responses use `message` as primary field | **LOCKED** — D3 resolved: `.message` first, `.error` fallback for pre-Phase-1 routes | P1-C1, P1-E1 |
 | A5 | Default pageSize is 25, max 100 | **LOCKED** — D4 resolved; B1 and C1 aligned | P1-C1, P1-E1 |
@@ -324,13 +324,18 @@ C1 owns route path finalization, response envelope shape, and HTTP method defini
 - **Provisional (7 data domains):** Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP — route shapes assumed per B1, pending D1/D2/D5/D6 resolution
 - **Auth (tracked separately):** A9 — no route catalog entry; see [Auth Domain: Special-Case Tracking](#auth-domain-special-case-tracking)
 
-**Unresolved items blocking `CONTRACT_ALIGNED`:**
-- D1: Singular vs plural paths — affects 4 domain path constants
-- D2: Estimating sub-resource structure — affects tracker/kickoff route groups
-- D3: Error envelope field priority — `extractErrorMessage()` reads `.error` first with `.message` fallback; may change (joint with B1)
-- D4: Pagination default — B1 fallback 25 vs C1 default 50; applies only when backend omits field (joint with B1)
-- D5: PATCH support — affects update methods across all domains
-- D6: Project-scoped path pattern — B1 uses nested paths; C1 uses flat `?projectId=` query params; affects 8 domains
+**Resolved transport decisions (all LOCKED per P1-E1):**
+- D1: Plural paths — confirmed
+- D3: `message` is primary error field — `extractErrorMessage()` reads `.message` first, `.error` fallback
+- D4: Default pageSize 25, max 100 — B1 and C1 aligned
+- D5: PUT-only in Phase 1 — PATCH deferred to Phase 2
+- D6: Nested project-scoped paths — B1 assumption confirmed
+
+**Remaining items blocking `CONTRACT_ALIGNED`:**
+- D2: Estimating sub-resource routing — locked as `/api/estimating/trackers/` and `/api/estimating/kickoffs/`; adapter must implement two-sub-resource pattern
+- A8: Project aggregate endpoint — provisional; not in C1 catalog
+- A9: Auth management routes — no C1/C2 catalog entry
+- **C1 route handler delivery** — no domain data routes exist in backend yet; this is the primary remaining blocker
 
 ### P1-C2 — Auth and Validation Hardening
 
@@ -375,7 +380,7 @@ E1 owns the Zod schema contract test suite and MSW-based test harness that valid
 | Adapter Type | Description | Current Status | Target Phase | `HBC_ADAPTER_MODE` Value |
 |---|---|---|---|---|
 | **mock** | In-memory seed data; fully functional | Complete | All phases | `'mock'` |
-| **proxy** | Calls Azure Functions via MSAL OBO | `STUB` | Phase 1 | `'proxy'` |
+| **proxy** | Calls Azure Functions via MSAL OBO | `IN_PROGRESS` — 7 of 11 repos `CODE_COMPLETE_MOCK`; 4 remaining (Lead, Project, Estimating, Auth) | Phase 1 | `'proxy'` |
 | **sharepoint** | Direct PnPjs calls (SPFx-only surface) | `STUB` | Future phase | `'sharepoint'` |
 | **api** | REST / Azure SQL direct calls | Reserved | Future phase | `'api'` |
 
@@ -447,7 +452,8 @@ All 11 domains are candidates for direct API adapter implementation in a future 
 - `resolveAdapterMode()` reads `HBC_ADAPTER_MODE` env var; defaults to `'mock'` if unset or unrecognized
 - Each domain has a `create{Domain}Repository(mode?)` factory function with a `switch` on the resolved mode
 - **Mock adapters:** fully implemented for all 11 domains — returned for `'mock'` mode
-- **Non-mock adapters:** all throw `AdapterNotImplementedError` for `'proxy'`, `'sharepoint'`, and `'api'` modes — hard fail, no silent fallback to mock
+- **Proxy adapters:** 7 project-scoped domains (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP) fully wired — factory returns real proxy implementations for `'proxy'` mode. 4 domains (Lead, Project, Estimating, Auth) still throw `AdapterNotImplementedError` for `'proxy'` mode
+- **Non-proxy real adapters:** `'sharepoint'` and `'api'` modes throw `AdapterNotImplementedError` for all 11 domains — hard fail, no silent fallback to mock
 - **No domain-level override mechanism exists** — all domains resolve to the same global mode
 - **No env validation guard exists** — if `HBC_ADAPTER_MODE` is unset, the factory silently defaults to `'mock'` with no warning
 

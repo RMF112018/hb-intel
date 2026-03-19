@@ -9,7 +9,7 @@
 | **Owner** | QA / Platform Engineering |
 | **Status** | Draft — most sections BLOCKED on upstream deliverables |
 | **Date** | 2026-03-16 |
-| **Last Reviewed Against Repo Truth** | 2026-03-18 |
+| **Last Reviewed Against Repo Truth** | 2026-03-19 |
 | **References** | P1-E1 (Contract Test Suite), P1-B1 (Proxy Adapter), P1-C1 (Backend Catalog), P1-C2 (Auth Hardening), P1-C3 (Observability), P1-D1 (Write Safety) |
 
 ---
@@ -58,7 +58,7 @@ All example payloads, ID types, field names, and response assertions in this che
 | Health endpoint | **None registered** — no `/api/health` function found in `index.ts` imports | `backend/functions/src/index.ts` |
 | Backend test infrastructure | Vitest with `unit` and `smoke` named projects; coverage targets provisioning only | `backend/functions/vitest.config.ts` |
 | Domain route handlers (leads, projects, estimating) | **None exist** — `backend/functions/src/functions/` contains only provisioning, proxy, notification, acknowledgment, signalr, and timer functions | `backend/functions/src/functions/` |
-| `@hbc/data-access` proxy adapters | **Stubs only** — `ProxyHttpClient` does not exist; proxy mode throws `AdapterNotImplementedError` | P1-E1 Repo Truth Snapshot |
+| `@hbc/data-access` proxy adapters | `ProxyHttpClient` implemented (Bearer auth, 30s timeout, X-Request-Id, error normalization). 7 of 11 domain repos implemented and factory-wired (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP — 51 tests). 4 domains (Lead, Project, Estimating, Auth) still throw `AdapterNotImplementedError` | Verified against repo 2026-03-19 |
 
 ### Planned but Blocked
 
@@ -67,7 +67,7 @@ All example payloads, ID types, field names, and response assertions in this che
 | Domain route handlers (leads, projects, estimating) | C1 | P1-C1 Backend Service Contract Catalog |
 | Error envelope standardization (`{ message, code, requestId?, details? }`) per D3 lock | C2 | P1-C2 Auth Hardening (Task 6: response helpers) |
 | Auth middleware hardening (`withAuth()` wrapper, Zod validation, standardized response shapes) | C2 | P1-C2 Auth Hardening |
-| Proxy adapter implementations | B1 | P1-B1 Proxy Adapter Engineering Plan |
+| Proxy adapter implementations (4 remaining: Lead, Project, Estimating, Auth) | B1 | P1-B1 Proxy Adapter Engineering Plan |
 | Retry logic, idempotency guards, write safety | D1 | P1-D1 Write Safety |
 | Telemetry instrumentation (Application Insights events) | C3 | P1-C3 Observability |
 | Health check endpoint | C1 or Platform | Not yet assigned |
