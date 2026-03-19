@@ -442,7 +442,7 @@ Confirm error handling produces standardized shapes across all failure modes. Ea
 - [ ] Error is classified, logged to Application Insights, and returned as a structured response — not an unhandled exception or raw stack trace
 - [ ] **Distinguishing characteristic:** 5xx errors indicate server-side problems that may be retryable (see Section 9)
 
-**PROVISIONAL (D3):** The `error` field in ErrorEnvelopeSchema may be renamed to `message` when C1 decision D3 resolves. See P1-E1 Frozen vs Provisional Error Envelope Fields.
+**D3 LOCKED:** The primary error field is `message` (not `error`) per D3 lock (P1-E1 Locked Decision 2). ErrorEnvelopeSchema uses `{ message, code, requestId?, details? }`. B1's `extractErrorMessage()` reads `.message` with `.error` fallback for backward compatibility with pre-Phase-1 routes.
 
 ---
 
@@ -528,14 +528,14 @@ Final verification that all Phase 1 work meets acceptance criteria. This section
 
 Several items in this checklist reference transport shapes (error envelope, pagination, single-item response wrapping) that are governed by C1 decisions not yet frozen:
 
-| Decision | Affects | Current Provisional Convention |
+| Decision | Affects | Locked Resolution |
 |---|---|---|
-| D3 — Error field naming | ErrorEnvelopeSchema `error` vs `message` | `.error` field used throughout |
-| D4 — Pagination default | `pageSize` default value | 25 (matches `DEFAULT_PAGE_SIZE`) |
-| D5 — PATCH support | Whether PUT-only or PUT+PATCH | PUT-only assumed |
-| D6 — Path nesting | Project-scoped domain routes | Flat paths assumed for Tier 1 |
+| D3 — Error field naming | ErrorEnvelopeSchema primary field | **LOCKED** — `message` (not `error`); P1-E1 Locked Decision 2 |
+| D4 — Pagination default | `pageSize` default value | **LOCKED** — 25 (max 100); P1-E1 Locked Decision 4 |
+| D5 — PATCH support | Whether PUT-only or PUT+PATCH | **LOCKED** — PUT-only in Phase 1; P1-E1 Locked Decision 5 |
+| D6 — Path nesting | Project-scoped domain routes | **LOCKED** — Nested `/api/projects/{projectId}/{domain}`; P1-E1 Locked Decision 6 |
 
-When C1 freezes these decisions, update the affected checklist items to match. See P1-E1 Provisional Response-Envelope Convention and Open Decision and Blocker Ledger for the authoritative tracking.
+All four decisions were locked on 2026-03-18 per P1-E1. See P1-C1 "Locked Transport Conventions" and P1-E1 "Locked Decisions Applied" for authoritative resolution text.
 
 ---
 

@@ -91,9 +91,9 @@ These affect all domain routes, not just one. They must be resolved before any d
 
 | Dependency | Owner | Affects | Status |
 |---|---|---|---|
-| D3 — Error envelope field priority | C1 + B1 | All domain error responses | Open |
-| D4 — Pagination default | C1 + B1 | All collection responses | Open |
-| D5 — PATCH support | C1 | All domain mutation routes | Open |
+| D3 — Error envelope field priority | C1 + B1 | All domain error responses | **LOCKED** — `message` (not `error`); see Resolved Decisions |
+| D4 — Pagination default | C1 + B1 | All collection responses | **LOCKED** — 25 (max 100); see Resolved Decisions |
+| D5 — PATCH support | C1 | All domain mutation routes | **LOCKED** — PUT-only in Phase 1; see Resolved Decisions |
 | P1-D1 — Idempotency support | D1-workstream | All domain write routes | Pending D1 delivery |
 
 ---
@@ -179,10 +179,10 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 
 These routes do not yet exist in the backend. They define the contract that B1 proxy adapters will consume. Route shapes are derived from B1 engineering plan assumptions; provisional shapes will be reconciled when open decisions are resolved.
 
-**Target response envelope standard** (see Global Contract Standards below):
-- Collection: `{ data: T[], total, page, pageSize }`
+**Target response envelope standard** (see Global Contract Standards and Locked Transport Conventions below):
+- Collection: `{ items: T[], total, page, pageSize }`
 - Single item: `{ data: T }`
-- Error: `{ error: "message", code: "ERROR_CODE", requestId: "uuid" }`
+- Error: `{ message: "Human-readable message", code: "ERROR_CODE", requestId: "uuid" }`
 
 ### Lead Domain — `TARGET` (C1 locked)
 
@@ -324,17 +324,17 @@ This section shows how each implemented route group's current response shapes di
 | **SignalR** | Azure-managed connection negotiation; response shape controlled by Azure SignalR Service |
 | **Timer** | Non-HTTP trigger; no response shape |
 
-### Open-Decision Deltas (Affecting Target Routes)
+### Resolved Decision Deltas (Affecting Target Routes)
 
-These deltas affect Phase 1 target domain routes that are not yet implemented. They must be resolved before those domains can reach `CONTRACT_ALIGNED`.
+These decisions were locked on 2026-03-18 per P1-E1. The delta between B1's original assumptions and the locked resolutions is documented here for normalization tracking.
 
-| Decision | Current State | Target | Impact | Owner |
+| Decision | B1 Original Assumption | Locked Resolution | Normalization Impact | Owner |
 |---|---|---|---|---|
-| D3 — Error field priority | B1 reads `.error` first, `.message` fallback | C1 target: `error` field | Error envelope shape for all domain routes | C1 + B1 |
-| D4 — Pagination default | B1: 25 (`DEFAULT_PAGE_SIZE`); C1: 50 | Canonical default TBD | Collection response `pageSize` field | C1 + B1 |
-| D5 — PATCH support | B1: PUT only | C1 target: PUT + PATCH | Whether domain routes implement PATCH | C1 |
-| D6 — Project-scoped paths | B1: nested `/api/projects/{id}/...` | C1 direction: flat `?projectId=` query params | Path shape for 8 project-scoped domains | C1 |
-| A9 — Auth routes | No routes exist | IAuthRepository requires 4 route groups | Auth domain cannot reach `CONTRACT_ALIGNED` | C2 |
+| D3 — Error field priority | B1 reads `.error` first, `.message` fallback | **`message`** is primary error field | B1 `extractErrorMessage()` already reads `.message` with `.error` fallback — compatible | C1 + B1 |
+| D4 — Pagination default | B1: 25 (`DEFAULT_PAGE_SIZE`) | **25** (max 100) | No delta — B1 assumption matched | C1 + B1 |
+| D5 — PATCH support | B1: PUT only | **PUT-only** in Phase 1; PATCH deferred to Phase 2 | No delta — B1 assumption matched | C1 |
+| D6 — Project-scoped paths | B1: nested `/api/projects/{id}/...` | **Nested** `/api/projects/{projectId}/{domain}` | No delta — B1 assumption matched | C1 |
+| A9 — Auth routes | No routes exist | External except `/api/auth/me` smoke utility | Auth domain route definitions are a C2 responsibility | C2 |
 
 ---
 
@@ -435,6 +435,26 @@ All transport-layer decisions were locked on 2026-03-18 per P1-E1. See P1-E1 "Lo
 | D6 | Project-scoped path pattern | **Nested** `/api/projects/{projectId}/{domain}` | P1-E1 line 160 |
 | A8 | Aggregate endpoints | `/api/projects/summary` confirmed | P1-E1 line 161 |
 | A9 | Auth management routes | External except `/api/auth/me` smoke utility | P1-E1 line 162 |
+
+---
+
+## Locked Transport Conventions (Quick Reference)
+
+All transport-layer decisions were locked on 2026-03-18 per P1-E1. This section consolidates the locked shapes in one place. For full resolution text, see P1-E1 "Locked Decisions Applied" and the Resolved Decisions table above.
+
+| Convention | Locked Value | Reference |
+|---|---|---|
+| **Collection envelope** | `{ items: T[], total, page, pageSize }` | Global Contract Standards §Success Response Envelopes |
+| **Single-item envelope** | `{ data: T }` | Global Contract Standards §Success Response Envelopes |
+| **Error envelope** | `{ message, code, requestId?, details? }` | D3 lock; Global Contract Standards §Error Response Envelope |
+| **Primary error field** | `message` (not `error`) | D3 — P1-E1 Locked Decision 2 |
+| **Pagination default** | `pageSize=25`, max 100 | D4 — P1-E1 Locked Decision 4 |
+| **Mutation method** | PUT-only for new domain CRUD; PATCH deferred to Phase 2 | D5 — P1-E1 Locked Decision 5 |
+| **Project-scoped paths** | Nested: `/api/projects/{projectId}/{domain}` | D6 — P1-E1 Locked Decision 6 |
+| **Route plurality** | Plural for all domain routes | D1 — P1-E1 Locked Decision 1 |
+| **Estimating sub-resources** | `/api/estimating/trackers/` and `/api/estimating/kickoffs/` | D2 — P1-E1 Locked Decision 2 |
+| **Async accepted (202)** | `{ message, correlationId }` | Global Contract Standards §Success Response Envelopes |
+| **Delete success (204)** | Empty body — no JSON (RFC 9110) | Global Contract Standards §HTTP Status Codes |
 
 ---
 
