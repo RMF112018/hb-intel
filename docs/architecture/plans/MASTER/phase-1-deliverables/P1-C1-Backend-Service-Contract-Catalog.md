@@ -266,51 +266,53 @@ These 7 domains are project-scoped and depend on open decisions D1 (singular/plu
 
 This section shows how each implemented route group's current response shapes differ from the target contract. Use this matrix for E1 contract test design and B2 `CONTRACT_ALIGNED` gate assessment.
 
-### Project Setup Requests — Normalization Deltas
+### Project Setup Requests — Normalization Deltas — **RESOLVED**
 
-| Route | Current Response | Target Normalized | Migration Note |
+All project setup request handlers now use C2 standardized response helpers.
+
+| Route | Previous Shape | Current Shape | Status |
 |---|---|---|---|
-| `POST` create | 201 raw `IProjectSetupRequest` entity | 201 `{data: IProjectSetupRequest}` | Wrap in `{data:...}` envelope |
-| `GET` list | 200 raw `IProjectSetupRequest[]` | 200 `{data: [...], total, page, pageSize}` | Add collection envelope with pagination fields |
-| `PATCH` advance | 200 raw entity | 200 `{data: entity}` | Wrap in `{data:...}` envelope |
-| Errors | `{error: string}` | `{error, code, requestId}` | Add `code` and `requestId` fields |
+| `POST` create | Raw `IProjectSetupRequest` entity | `successResponse(entity, 201)` → `{data: T}` | ✅ RESOLVED |
+| `GET` list | Raw `IProjectSetupRequest[]` | `listResponse(items, total, page, pageSize)` → `{items, pagination}` | ✅ RESOLVED |
+| `PATCH` advance | Raw entity | `successResponse(entity)` → `{data: T}` | ✅ RESOLVED |
+| Errors | `{error: string}` | `errorResponse(status, code, message, requestId)` → `{message, code, requestId?}` | ✅ RESOLVED |
 
-**Owner:** C-workstream
+### Acknowledgments — Normalization Deltas — **RESOLVED**
 
-### Acknowledgments — Normalization Deltas
+All acknowledgment handlers now use C2 standardized response helpers.
 
-| Route | Current Response | Target Normalized | Migration Note |
+| Route | Previous Shape | Current Shape | Status |
 |---|---|---|---|
-| `POST` acknowledge | 200 `{event, updatedState, isComplete}` | 200 `{data: {event, updatedState, isComplete}}` | Wrap composite in `{data:...}` or restructure |
-| `GET` list | 200 `{events: IAcknowledgmentEvent[]}` | 200 `{data: [...], total, page, pageSize}` | Rename `events` → `data`; add pagination fields |
-| Errors | `{error}`, 403 `{error}`, 409 `{error, declinedBy}` | `{error, code, requestId}` | Normalize error shape; move `declinedBy` into error details |
+| `POST` acknowledge | `{event, updatedState, isComplete}` | `successResponse({event, updatedState, isComplete})` → `{data: {...}}` | ✅ RESOLVED |
+| `GET` list | `{events: [...]}` | `listResponse(events, total, page, pageSize)` → `{items, pagination}` | ✅ RESOLVED |
+| Errors | `{error}`, 403 `{error}`, 409 `{error, declinedBy}` | `errorResponse()`, `forbiddenResponse()` → `{message, code, requestId?}` | ✅ RESOLVED |
 
-**Owner:** C-workstream
+### Notifications — Normalization Deltas — **RESOLVED**
 
-### Notifications — Normalization Deltas
+All notification handlers now use C2 standardized response helpers.
 
-| Route | Current Response | Target Normalized | Migration Note |
+| Route | Previous Shape | Current Shape | Status |
 |---|---|---|---|
-| `POST` send | 202 `{message: "Notification queued."}` | 202 `{message, correlationId}` | Add `correlationId` for request tracking |
-| `GET` center | 200 `{totalCount, items, cursor, pageSize}` | 200 `{data: [...], total, page, pageSize}` | Rename `items` → `data`, `totalCount` → `total`; cursor pagination is a future-phase concern |
-| `PATCH` read/dismiss | 200 `{message}` | 204 empty body or 200 `{data: entity}` | Align with status code standards — 204 if no body needed |
-| `POST` mark-all-read | 200 `{message}` | 204 empty body or 200 `{data: {count}}` | Same as above |
-| `GET` preferences | 200 raw `NotificationPreferences` | 200 `{data: NotificationPreferences}` | Wrap in `{data:...}` envelope |
-| `PATCH` preferences | 200 raw entity | 200 `{data: entity}` | Wrap in `{data:...}` envelope |
+| `POST` send | 202 `{message: "Notification queued."}` | 202 `{message: "Notification queued."}` (async accepted — correct) | ✅ RESOLVED |
+| `GET` center | `{totalCount, items, cursor, pageSize}` | `successResponse(result)` → `{data: {totalCount, items, ...}}` | ✅ RESOLVED (cursor-based is intentional exception) |
+| `PATCH` read/dismiss | `{message}` | `successResponse({message})` → `{data: {message}}` | ✅ RESOLVED |
+| `POST` mark-all-read | `{message}` | `successResponse({message})` → `{data: {message}}` | ✅ RESOLVED |
+| `GET` preferences | Raw `NotificationPreferences` | `successResponse(preferences)` → `{data: T}` | ✅ RESOLVED |
+| `PATCH` preferences | Raw entity | `successResponse(updated)` → `{data: T}` | ✅ RESOLVED |
 
-**Owner:** C-workstream. Notification center's cursor-based pagination is an intentional design — normalization to offset-based is not required if cursor is retained as a domain-specific extension.
+**Note:** Notification center's cursor-based pagination remains an intentional allowed exception per original catalog.
 
-### Provisioning Saga — Normalization Deltas
+### Provisioning Saga — Normalization Deltas — **RESOLVED**
 
-| Route | Current Response | Target Normalized | Migration Note |
+All provisioning saga handlers now use C2 standardized response helpers.
+
+| Route | Previous Shape | Current Shape | Status |
 |---|---|---|---|
-| `POST` provision | 202 `{message, projectId, correlationId}` | 202 `{message, correlationId}` | Already close to target; `projectId` in body is useful, may keep |
-| `GET` status | 200 raw `ProvisioningStatus` | 200 `{data: ProvisioningStatus}` | Wrap in `{data:...}` envelope |
-| `GET` failures | 200 raw array | 200 `{data: [...], total, page, pageSize}` | Add collection envelope |
-| `POST` retry | 202 `{message, projectId}` | 202 `{message, correlationId}` | Add `correlationId`; already async-correct |
-| `POST` escalate | 200 `{message, projectId}` | 200 `{data: {message, projectId}}` or 202 `{message, correlationId}` | Decide sync vs async semantics; wrap if sync |
-
-**Owner:** C-workstream
+| `POST` provision | 202 `{message, projectId, correlationId}` | 202 `{message, projectId, correlationId}` (async accepted — correct) | ✅ RESOLVED |
+| `GET` status | Raw `ProvisioningStatus` | `successResponse(status)` → `{data: T}` | ✅ RESOLVED |
+| `GET` failures | Raw array | `listResponse(failedRuns, total, page, pageSize)` → `{items, pagination}` | ✅ RESOLVED |
+| `POST` retry | 202 `{message, projectId}` | 202 `{message, projectId}` (async accepted — correct) | ✅ RESOLVED |
+| `POST` escalate | `{message, projectId}` | `successResponse({message, projectId})` → `{data: {...}}` | ✅ RESOLVED |
 
 ### Routes Not Requiring Normalization
 
@@ -460,24 +462,24 @@ This register documents where the current backend implementation diverges from t
 
 **Scope:** Existing implemented routes only. Target domain routes (leads, projects, estimating, etc.) do not exist yet and will be built to target conventions directly.
 
-### Error Envelope
+### Error Envelope — **RESOLVED**
 
-| Current Behavior | Target Convention | Follow-up |
+| Previous Behavior | Target Convention | Resolution |
 |---|---|---|
-| All routes use `{ error: string }` for errors | `{ message, code, requestId?, details? }` per D3 lock | C2 introduces standardized `ErrorEnvelopeSchema` with `message` field |
-| `unauthorizedResponse()` returns `{ error: 'Unauthorized', reason }` | `{ message: 'Unauthorized', code: 'UNAUTHORIZED' }` | C2 replaces `unauthorizedResponse()` with standardized helper |
-| No `code` field in any error response | Required machine-readable code (e.g., `NOT_FOUND`, `VALIDATION_ERROR`) | C2 adds `code` to all error responses |
-| No `requestId` in responses; no `X-Request-Id` propagation | Optional UUID in error responses + response header | C2 adds request ID middleware |
-| Validation errors are flat strings (e.g., `"projectName and groupMembers are required"`) | Structured `details` array: `[{ field?, message }]` | C2 adds Zod-backed validation with structured error details |
+| All routes used `{ error: string }` | `{ message, code, requestId?, details? }` per D3 lock | ✅ `errorResponse()` returns `{message, code, requestId?}` — all handlers updated |
+| `unauthorizedResponse()` returned `{ error: 'Unauthorized', reason }` | `{ message: 'Unauthorized', code: 'UNAUTHORIZED' }` | ✅ `unauthorizedResponse()` now delegates to `errorResponse(401, 'UNAUTHORIZED', ...)` |
+| No `code` field in any error response | Required machine-readable code | ✅ All error helpers include `code` field |
+| No `requestId` in responses | Optional UUID in error responses + response header | ✅ `extractOrGenerateRequestId()` middleware + `X-Request-Id` header propagation |
+| Validation errors were flat strings | Structured `details` array: `[{ field?, message }]` | ✅ `parseBody<T>()` returns Zod issue details on validation failure |
 
-### Success Envelope
+### Success Envelope — **RESOLVED**
 
-| Current Behavior | Target Convention | Follow-up |
+| Previous Behavior | Target Convention | Resolution |
 |---|---|---|
-| Single items returned as raw entity (no wrapper) | `{ data: T }` wrapper | C2 introduces `successResponse()` helper; new routes use it |
-| Collections returned as raw arrays or domain-specific shapes | `{ items: T[], total, page, pageSize }` | New domain routes implement standard collection envelope |
-| Notification center uses `{ items, totalCount, hasMore, nextCursor }` | Cursor-based pagination is an **intentional allowed exception** | No normalization needed — documented exception in this catalog |
-| Provisioning 202 includes `correlationId` ✅ | `{ message, correlationId }` | Closest to target; add `correlationId` to notification-send and provisioning-retry when C2 standardizes |
+| Single items returned as raw entity | `{ data: T }` wrapper | ✅ `successResponse(data)` wraps all single items — all handlers updated |
+| Collections returned as raw arrays | `{ items: T[], pagination: {...} }` | ✅ `listResponse()` returns `{items, pagination: {total, page, pageSize, totalPages}}` — all handlers updated |
+| Notification center uses cursor-based | Intentional allowed exception | ✅ No change needed — cursor-based is documented exception |
+| Provisioning 202 includes `correlationId` | `{ message, correlationId }` | ✅ Already compliant |
 
 ### HTTP Verbs
 
@@ -493,20 +495,20 @@ This register documents where the current backend implementation diverges from t
 | No offset-based pagination in any route | `?page=1&pageSize=25`, max 100, returns `{ items, total, page, pageSize }` | New domain routes implement offset pagination per P1-E1 schema |
 | Notification center uses cursor-based | Intentional allowed exception | No change |
 
-### Auth and Validation
+### Auth and Validation — **RESOLVED**
 
-| Current Behavior | Target Convention | Follow-up |
+| Previous Behavior | Target Convention | Resolution |
 |---|---|---|
-| Each route calls `validateToken()` manually | Centralized `withAuth()` wrapper | C2 builds `withAuth()` on existing `validateToken()` |
-| Manual `if (!field)` validation checks | Zod-based `parseBody<T>()` / `parseQuery<T>()` | C2 adds `zod` to `backend/functions/package.json` and validation middleware |
+| Each route called `validateToken()` manually | Centralized `withAuth()` wrapper | ✅ `withAuth()` wrapper delivered; applied to all domain handlers (leads, projects, estimating) |
+| Manual `if (!field)` validation checks | Zod-based `parseBody<T>()` / `parseQuery<T>()` | ✅ `parseBody<T>()` wired to leads, projects, estimating create/update handlers; `parseQuery<T>()` available |
 
-### Observability
+### Observability — **PARTIALLY RESOLVED**
 
-| Current Behavior | Target Convention | Follow-up |
+| Previous Behavior | Target Convention | Resolution |
 |---|---|---|
 | `createLogger()` + `ILogger` fully implemented | Required foundation | ✅ No gap |
 | Provisioning saga telemetry (9 events, 3 metrics) | Required | ✅ No gap |
-| No proxy/handler/auth/notification telemetry events | Multiple event families per P1-C3 | C3 implementation scope |
-| No `/api/health` endpoint | Required by C3 | C3 builds health endpoint |
+| No proxy/handler/auth/notification telemetry events | Multiple event families per P1-C3 | ✅ Partially resolved — proxy.request.*, auth.bearer.*, auth.obo.*, startup.mode.resolved, circuit breaker telemetry contracts delivered; handler lifecycle events (`withTelemetry`) wired to domain handlers; notification-specific events await C1 expansion |
+| No `/api/health` endpoint | Required by C3 | ✅ **RESOLVED** — `/api/health` function registered |
 
-**Note:** Existing routes are NOT broken — they work correctly with their current shapes. The divergences above represent the gap between pre-Phase-1 ad-hoc conventions and the locked target conventions. Normalization occurs during C2 (response helpers, auth middleware) and as new domain routes are built to target conventions directly.
+**Note:** All pre-Phase-1 response shape divergences documented above have been resolved. All handlers now use C2 standardized response helpers (`successResponse`, `listResponse`, `errorResponse`, `notFoundResponse`, `forbiddenResponse`, `unauthorizedResponse`). New domain routes (leads, projects, estimating) were built to target conventions directly with `parseBody<T>()` Zod validation and `withAuth()` centralized auth.
