@@ -34,6 +34,7 @@ import { ProxyRiskRepository } from './adapters/proxy/ProxyRiskRepository.js';
 import { ProxyScorecardRepository } from './adapters/proxy/ProxyScorecardRepository.js';
 import { ProxyPmpRepository } from './adapters/proxy/ProxyPmpRepository.js';
 import { ProxyProjectRepository } from './adapters/proxy/ProxyProjectRepository.js';
+import { ProxyAuthRepository } from './adapters/proxy/ProxyAuthRepository.js';
 import type { ProxyConfig } from './adapters/proxy/types.js';
 
 /** Lazy singleton proxy client — initialized on first proxy-mode factory call. */
@@ -81,9 +82,8 @@ export function resolveAdapterMode(): AdapterMode {
  * Mode-aware factory: returns the correct adapter implementation
  * based on the runtime environment (SPFx → sharepoint, PWA → proxy, dev → mock).
  *
- * Proxy mode (B1): 10 of 11 domain repos implemented (Lead, Schedule, Buyout,
- * Estimating, Compliance, Contract, Risk, Scorecard, PMP, Project).
- * Auth proxy remains blocked on A9 (route paths unresolved).
+ * Proxy mode (B1): 11 of 11 domain repos implemented — Lead, Schedule, Buyout,
+ * Estimating, Compliance, Contract, Risk, Scorecard, PMP, Project, Auth.
  * SharePoint and API modes will be added in later phases.
  */
 
@@ -222,8 +222,9 @@ export function createAuthRepository(mode?: AdapterMode): IAuthRepository {
   switch (resolved) {
     case 'mock':
       return new MockAuthRepository();
-    case 'sharepoint':
     case 'proxy':
+      return new ProxyAuthRepository(getProxyClient());
+    case 'sharepoint':
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'AuthRepository');
   }

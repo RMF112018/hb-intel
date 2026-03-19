@@ -4,9 +4,9 @@
  * Foundation transport layer (B1): ProxyHttpClient, envelope parsers, error
  * normalization, and route builders.
  *
- * Domain repositories (B1 complete — 10 of 11): Lead, Schedule, Buyout,
- * Estimating, Compliance, Contract, Risk, Scorecard, PMP, Project.
- * Remaining: Auth (blocked on A9 — route paths unresolved).
+ * Domain repositories (B1 complete — 11 of 11): Lead, Schedule, Buyout,
+ * Estimating, Compliance, Contract, Risk, Scorecard, PMP, Project, Auth.
+ * A9 resolved — auth route catalog defined in P1-C2-a Task 21.
  */
 
 export type { ProxyConfig } from './types.js';
@@ -36,3 +36,4 @@ export { ProxyRiskRepository } from './ProxyRiskRepository.js';
 export { ProxyScorecardRepository } from './ProxyScorecardRepository.js';
 export { ProxyPmpRepository } from './ProxyPmpRepository.js';
 export { ProxyProjectRepository } from './ProxyProjectRepository.js';
+export { ProxyAuthRepository } from './ProxyAuthRepository.js';
