@@ -55,7 +55,7 @@ At the end of Phase 0:
 - Review current-state map and verify it matches the live repo at a meaningful control-point level.
 - Review target blueprint and mark which items are future-state intent versus already implemented foundations.
 - Reconcile any contradictions across planning docs, package READMEs, dependency declarations, and CI/CD workflows.
-- Record all divergences as one of: intentional evolution, not-yet-implemented plan, or superseded approach.
+- Record all divergences as one of: intentional evolution, not-yet-implemented plan, superseded approach, or standing control item.
 
 **Deliverables**
 - Current-state reconciliation memo
@@ -67,7 +67,7 @@ At the end of Phase 0:
 
 **Activities**
 - Inventory all major apps, packages, backend services, and integrations.
-- Assign each item a maturity label such as: production-ready, usable but incomplete, scaffold-only, blocked, or excluded from production path.
+- Assign each item a maturity label such as: production-ready, pilot-ready, usable but incomplete, scaffold-only, blocked, or excluded from production path.
 - Flag any item that is depended on by production-facing work but is not mature enough.
 - Identify packages that can be used only behind a feature flag or only in dev/test.
 
