@@ -81,3 +81,6 @@ export * from './audit/index.js';
 
 // ─── UI (shared data-shape interfaces for cross-package use) ─────────────────
 export * from './ui/index.js';
+
+// ─── API Schemas (Zod contract schemas for E1 contract testing) ──────────────
+export * from './api-schemas/index.js';

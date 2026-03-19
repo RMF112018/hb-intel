@@ -148,7 +148,7 @@ Until these conditions are met, implementation should focus on Tier 1 work items
 
 | Document | Type | Status |
 |---|---|---|
-| P1-E1-Contract-Test-Suite-Plan.md | Engineering Plan | Implementation-Ready — Blocked (B1, C1) |
+| P1-E1-Contract-Test-Suite-Plan.md | Engineering Plan | In Progress — Tasks 1–2 complete (Zod schemas + vitest); Tasks 3–9 blocked (C1, C2, staging) |
 | P1-E2-Staging-Readiness-Checklist.md | Acceptance Checklist | Implementation-Ready — Blocked (B1, C1, C2, C3) |
 
 ### Closeout and Reconciliation (1 deliverable)
