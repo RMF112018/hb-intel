@@ -46,7 +46,7 @@ Apply the P1-C2 middleware and response helpers to all remaining route handlers.
 | `risk` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 6 handlers migrated (5 CRUD + management) |
 | `scorecards` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 6 handlers migrated (5 CRUD + versions) |
 | `pmp` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 7 handlers migrated (5 CRUD + 2 signatures) |
-| `provisioningSaga` | HTTP | ✗ | ✗ | ✗ | 6 handlers; inline `validateToken`; `{ error: string }` error shape; 202 Accepted response |
+| `provisioningSaga` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 6 handlers migrated; 202 responses kept raw; admin 403s use forbiddenResponse |
 | `signalR` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 1 handler migrated; raw negotiate response preserved per SignalR SDK |
 | `notifications` (HTTP only) | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 7 HTTP handlers migrated across individual files; barrel and async processors unchanged |
 

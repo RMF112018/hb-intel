@@ -4,27 +4,28 @@ import { randomUUID } from 'crypto';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { SagaOrchestrator } from './saga-orchestrator.js';
 import { createLogger } from '../../utils/logger.js';
-import { validateToken, unauthorizedResponse, type IValidatedClaims } from '../../middleware/validateToken.js';
+import { withAuth } from '../../middleware/auth.js';
+import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
+import {
+  errorResponse,
+  successResponse,
+  notFoundResponse,
+  forbiddenResponse,
+} from '../../utils/response-helpers.js';
 import { runTimerFullSpec } from '../timerFullSpec/handler.js';
 
 app.http('provisionProjectSite', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'provision-project-site',
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-    let claims: IValidatedClaims;
-    try {
-      // D-PH6-03: Token validation is the first action for every provisioning HTTP endpoint.
-      claims = await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid or missing Bearer token');
-    }
+    const requestId = extractOrGenerateRequestId(request);
 
     try {
       const body = (await request.json()) as IProvisionSiteRequest;
       // D-PH6-03 trust boundary: server overwrites identity from validated JWT claims.
-      body.triggeredBy = claims.upn;
+      body.triggeredBy = auth.claims.upn;
       const correlationId = body.correlationId ?? randomUUID();
       body.correlationId = correlationId;
 
@@ -36,17 +37,11 @@ app.http('provisionProjectSite', {
       });
 
       if (!body.projectId || !body.projectNumber || !body.projectName || !body.triggeredBy) {
-        return {
-          status: 400,
-          jsonBody: {
-            error:
-              'Missing required fields: projectId, projectNumber, projectName, triggeredBy',
-          },
-        };
+        return errorResponse(400, 'VALIDATION_ERROR', 'Missing required fields: projectId, projectNumber, projectName, triggeredBy', requestId);
       }
 
       if (!/^\d{2}-\d{3}-\d{2}$/.test(body.projectNumber)) {
-        return { status: 400, jsonBody: { error: 'projectNumber must match ##-###-## format' } };
+        return errorResponse(400, 'VALIDATION_ERROR', 'projectNumber must match ##-###-## format', requestId);
       }
 
       const services = createServiceFactory();
@@ -61,6 +56,7 @@ app.http('provisionProjectSite', {
         });
       });
 
+      // Raw 202 response — fire-and-forget acknowledgment; do NOT wrap in successResponse
       return {
         status: 202,
         jsonBody: { message: 'Provisioning started', projectId: body.projectId, correlationId },
@@ -69,12 +65,9 @@ app.http('provisionProjectSite', {
       logger.error('Failed to start provisioning', {
         error: err instanceof Error ? err.message : String(err),
       });
-      return {
-        status: 500,
-        jsonBody: { error: 'Internal server error' },
-      };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 app.http('getProvisioningStatus', {
@@ -82,19 +75,14 @@ app.http('getProvisioningStatus', {
   authLevel: 'anonymous',
   // D-PH6-01: route key migrated to immutable {projectId}.
   route: 'provisioning-status/{projectId}',
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-    try {
-      // D-PH6-03: endpoint access requires a valid Bearer token even for read operations.
-      await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid or missing Bearer token');
-    }
+    const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
 
     if (!projectId) {
-      return { status: 400, jsonBody: { error: 'Missing projectId parameter' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
     }
 
     try {
@@ -102,68 +90,58 @@ app.http('getProvisioningStatus', {
       const status = await services.tableStorage.getProvisioningStatus(projectId);
 
       if (!status) {
-        return { status: 404, jsonBody: { error: `No provisioning found for ${projectId}` } };
+        return notFoundResponse('ProvisioningStatus', projectId, requestId);
       }
 
-      return { status: 200, jsonBody: status };
+      return successResponse(status);
     } catch (err) {
       logger.error('Failed to get provisioning status', {
         projectId,
         error: err instanceof Error ? err.message : String(err),
       });
-      return { status: 500, jsonBody: { error: 'Internal server error' } };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 app.http('listFailedRuns', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'provisioning-failures',
-  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    let claims: IValidatedClaims;
-    try {
-      claims = await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid or missing Bearer token');
-    }
+  handler: withAuth(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     // D-PH6-12 admin-only visibility: failures inbox is restricted to Admin/HBIntelAdmin.
-    if (!claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
-      return { status: 403, jsonBody: { error: 'Admin role required' } };
+    if (!auth.claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
+      return forbiddenResponse('Admin role required', requestId);
     }
 
     const services = createServiceFactory();
     const failedRuns = await services.tableStorage.listFailedRuns();
-    return { status: 200, jsonBody: failedRuns };
-  },
+    return successResponse(failedRuns);
+  }),
 });
 
 app.http('triggerTimerManually', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'admin/trigger-timer',
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
-    let claims: IValidatedClaims;
-    try {
-      claims = await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid or missing Bearer token');
-    }
+  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     // D-PH6-13 manual timer trigger is limited to explicit admin roles.
-    if (!claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
-      return { status: 403, jsonBody: { error: 'Admin role required' } };
+    if (!auth.claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
+      return forbiddenResponse('Admin role required', requestId);
     }
 
     // D-PH6-13 safety guard: manual timer execution is forbidden in production.
     if (process.env.AZURE_FUNCTIONS_ENVIRONMENT === 'Production') {
-      return { status: 403, jsonBody: { error: 'Manual trigger not available in production' } };
+      return forbiddenResponse('Manual trigger not available in production', requestId);
     }
 
     await runTimerFullSpec(context, { isPastDue: false });
-    return { status: 200, jsonBody: { message: 'Timer logic executed manually' } };
-  },
+    return successResponse({ message: 'Timer logic executed manually' });
+  }),
 });
 
 app.http('retryProvisioning', {
@@ -171,18 +149,14 @@ app.http('retryProvisioning', {
   authLevel: 'anonymous',
   // D-PH6-01: retry endpoint now addresses the system key projectId.
   route: 'provisioning-retry/{projectId}',
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-    try {
-      await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid or missing Bearer token');
-    }
+    const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
 
     if (!projectId) {
-      return { status: 400, jsonBody: { error: 'Missing projectId parameter' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
     }
 
     try {
@@ -196,15 +170,16 @@ app.http('retryProvisioning', {
         });
       });
 
+      // Raw 202 response — fire-and-forget; do NOT wrap in successResponse
       return { status: 202, jsonBody: { message: 'Retry started', projectId } };
     } catch (err) {
       logger.error('Failed to start retry', {
         projectId,
         error: err instanceof Error ? err.message : String(err),
       });
-      return { status: 500, jsonBody: { error: 'Internal server error' } };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
 
 app.http('escalateProvisioning', {
@@ -212,35 +187,29 @@ app.http('escalateProvisioning', {
   authLevel: 'anonymous',
   // D-PH6-01: escalation endpoint now addresses the system key projectId.
   route: 'provisioning-escalate/{projectId}',
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-    let claims: IValidatedClaims;
-    try {
-      // D-PH6-03 trust boundary: escalation identity is sourced from validated JWT claims.
-      claims = await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid or missing Bearer token');
-    }
+    const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.params.projectId;
 
     if (!projectId) {
-      return { status: 400, jsonBody: { error: 'Missing projectId parameter' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
     }
 
     try {
       void (await request.json());
       const services = createServiceFactory();
-      await services.tableStorage.escalateProvisioning(projectId, claims.upn);
+      await services.tableStorage.escalateProvisioning(projectId, auth.claims.upn);
 
-      logger.info(`Provisioning escalated for ${projectId} by ${claims.upn}`);
-      return { status: 200, jsonBody: { message: 'Provisioning escalated', projectId } };
+      logger.info(`Provisioning escalated for ${projectId} by ${auth.claims.upn}`);
+      return successResponse({ message: 'Provisioning escalated', projectId });
     } catch (err) {
       logger.error('Failed to escalate', {
         projectId,
         error: err instanceof Error ? err.message : String(err),
       });
-      return { status: 500, jsonBody: { error: 'Internal server error' } };
+      return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
-  },
+  }),
 });
