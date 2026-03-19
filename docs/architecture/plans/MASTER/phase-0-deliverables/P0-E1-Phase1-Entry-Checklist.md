@@ -87,7 +87,7 @@ Either:
 Architecture Lead + Dependent Package Owners
 
 **Status Notes**
-*(D-010 Option B selected 2026-03-16: @hbc/strategic-intelligence and @hbc/versioned-record formally deferred from Phase 1 scope. Scope exclusion notices added to package READMEs. Phase N target assignment tracked in OD-013. Dependent packages @hbc/post-bid-autopsy, @hbc/score-benchmark, and @hbc/ai-assist remain on scaffold-dependency freeze until upgraded targets assigned.)*
+*(D-010 Option B selected 2026-03-16: @hbc/strategic-intelligence and @hbc/versioned-record formally deferred from Phase 1 scope. Scope exclusion notices added to package READMEs. Phase N target assignment tracked in OD-016. Dependent packages @hbc/post-bid-autopsy, @hbc/score-benchmark, and @hbc/ai-assist remain on scaffold-dependency freeze until upgraded targets assigned.)*
 
 **Verification Criterion**
 (A) P0-B1 Production Readiness Matrix shows both packages at usable-but-incomplete or higher, with updated maturity justification; OR (B) Phase 1 scope document explicitly excludes the three dependent packages with deferral rationale and Phase N target. ✅ VERIFIED 2026-03-16 — Option B applied
@@ -97,7 +97,7 @@ Architecture Lead + Dependent Package Owners
 ### BLOCKER-04: Category C Platform Primitives Lack CI Coverage
 
 **Description**
-Only 5 of 20 Category C platform primitives have CI unit test coverage. Phase 1 will build production adapters and data-plane logic directly on top of Category C packages. Building on packages without automated test regression protection creates unacceptable production risk.
+Only 3 of 20 Category C shared-feature primitives had CI unit test coverage (sharepoint-docs, bic-next-move, complexity). Phase 1 will build production adapters and data-plane logic directly on top of Category C packages. Building on packages without automated test regression protection creates unacceptable production risk.
 
 **Action Required**
 1. Add unit test coverage to all 20 Category C packages (minimum 80% line coverage).
@@ -211,11 +211,11 @@ Phase 1 Adapter Roadmap document specifies adapter status and target phase for a
 ### DATA-03: @hbc/data-access Production Contract
 
 **Condition**
-The `@hbc/data-access` package (Category B, usable-but-incomplete per P0-B1) must confirm its production contract before Phase 1 data-plane work begins. The package is the data-plane foundation per the ports/adapters model. Contract must specify: (1) Public API surface (exports), (2) Breaking change policy, (3) Versioning and deprecation strategy, (4) Performance and reliability SLOs, (5) Unit and integration test coverage requirements.
+The `@hbc/data-access` package (Category A — Core Platform, usable-but-incomplete per P0-B1) must confirm its production contract before Phase 1 data-plane work begins. The package is the data-plane foundation per the ports/adapters model. Contract must specify: (1) Public API surface (exports), (2) Breaking change policy, (3) Versioning and deprecation strategy, (4) Performance and reliability SLOs, (5) Unit and integration test coverage requirements.
 
 **Verification**
 1. `@hbc/data-access` README documents the production contract.
-2. Package version bumped to 0.2.0 (or higher pre-1.0 version) to reflect usable-but-incomplete readiness.
+2. Package version bumped beyond v0.0.1 to reflect production contract readiness (current: v0.1.3).
 3. Contract reviewed and approved by Architecture Lead; approval date recorded in README.
 4. Unit test coverage >= 85%; integration tests for Phase 1 adapter patterns exist.
 
@@ -286,7 +286,7 @@ ALL of the following are true:
 ## Related Documents
 
 - **P0-A1** — Phase 0 Planning Hierarchy (confirms planning structure and gate logic)
-- **P0-A2** — Planning Blockers and Resolutions (D-004, D-005 cross-references)
+- **P0-A2** — Divergence Log (10 divergence items including D-004, D-005)
 - **P0-B1** — Production Readiness Matrix (6 maturity labels, 57 workspace members classified)
 - **P0-C1** — Development Guardrails (8 guardrails, especially G-04 scaffold dependencies)
 - **P0-D1** — Environment, Promotion Model, and Release Control (topology, GAP-D-01/02/07 sources)
@@ -308,4 +308,4 @@ For the operational implementation-entry gate — what can be implemented now, w
 ---
 
 **Document created:** 2026-03-16
-**Next review:** Upon resolution of each blocker; final gate review before Phase 1 NTP
+**Gate status:** All blockers resolved; gate passed 2026-03-16
