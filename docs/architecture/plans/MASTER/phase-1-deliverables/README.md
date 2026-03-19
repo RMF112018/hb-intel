@@ -25,7 +25,7 @@ All design decisions are locked. Transport-shape conventions (response envelopes
 | **Implementation — B1 proxy adapters** | **Complete** — transport foundation + 11 of 11 repos implemented and tested (109+ tests); all factory-wired for proxy mode |
 | **Implementation — C1 backend routes** | Not started — zero domain data routes exist; provisioning/notification routes are operational |
 | **Implementation — C2 auth middleware** | In progress — `validateToken()` exists and tested; `withAuth()` wrapper, Zod validation middleware, and response helpers (`successResponse`, `errorResponse`, `listResponse`, `notFoundResponse`) delivered; request ID middleware complete |
-| **Implementation — C3 observability** | Foundation only — `createLogger()` verified; telemetry event families not instrumented |
+| **Implementation — C3 observability** | In progress — `createLogger()` verified; proxy.request.* events emitted (§2.1.9); auth.bearer.*/auth.obo.* events emitted (§2.1.3); circuit breaker telemetry contracts delivered (§2.2.3); handler lifecycle and remaining families awaiting C1 route delivery |
 | **Implementation — D1 write safety** | Unblocked — `ProxyHttpClient` exists with `withRetry()` wired; B1 proxy adapters complete; standalone types can proceed |
 | **Staging readiness** | Not achievable — no domain routes, no staging telemetry evidence, no physical SharePoint lists |
 | **External dependencies** | 3 pending — IT Graph permission grant, IT per-site access grants, PO schema approval |
