@@ -304,7 +304,7 @@ These decisions do not block mocked-fetch implementation but must be resolved be
 
 | ID | Assumption | Confidence | Upstream Owner |
 |---|---|---|---|
-| A1 | API paths follow C1 catalog patterns | High for Lead/Project/Estimating; provisional for remaining 7 data domains + Auth | P1-C1 |
+| A1 | API paths follow C1 catalog patterns | High for Lead/Project/Estimating (C1 locked); convention-locked (D1, D6 resolved per P1-E1) for 7 project-scoped domains pending C1 handler delivery; low for Auth (A9 unresolved) | P1-C1 |
 | A2 | Collection envelope: `{ items: T[], total, page, pageSize }` | **LOCKED** — E1 locked decision confirms `items` field (not `data`) | P1-C1, P1-E1 |
 | A3 | Single-item envelope: `{ data: T }` | High | P1-C1 |
 | A4 | Error responses use `message` as primary field | **LOCKED** — D3 resolved: `.message` first, `.error` fallback for pre-Phase-1 routes | P1-C1, P1-E1 |

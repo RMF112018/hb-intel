@@ -1747,8 +1747,8 @@ export class ProxyProjectRepository
     }, 'ProxyProjectRepository.deleteProject');
   }
 
-  // PROVISIONAL (A8): Aggregate endpoint not in C1 catalog.
-  // Path and existence must be confirmed with C1 before production.
+  // A8 LOCKED (P1-E1 decision 11): route is GET /api/projects/summary.
+  // C1 route handler not yet delivered; path is confirmed.
   async getPortfolioSummary(): Promise<IPortfolioSummary> {
     return this.wrapAsync(async () => {
       const response = await this.httpClient.get<{ data: IPortfolioSummary }>(
@@ -1793,7 +1793,7 @@ pnpm --filter @hbc/data-access check-types
 
 The Estimating domain manages two entity types: `IEstimatingTracker` (bid tracking) and `IEstimatingKickoff` (kickoff meetings). Methods use domain-specific names (`getAllTrackers`, `getTrackerById`, `createTracker`, etc.) rather than generic CRUD. The kickoff entity has separate `getKickoff(projectId)` and `createKickoff()` methods.
 
-> **Provisional routing (D2):** B1 uses sub-resource paths (`/trackers`, `/kickoffs`) under `/api/estimating`. C1 defines flat `/api/estimating` with generic CRUD. Sub-resource routing must be confirmed with C1 before this adapter is finalized. Implementation is safe with mocked `fetch` but paths may change.
+> **D2 LOCKED (P1-E1):** Sub-resource paths (`/api/estimating/trackers/` and `/api/estimating/kickoffs/`) are confirmed. No path changes needed. C1 route handler delivery is the remaining blocker for production activation.
 
 ```typescript
 // packages/data-access/src/adapters/proxy/estimating-repository.ts
@@ -1883,7 +1883,7 @@ export class ProxyEstimatingRepository
     }, 'ProxyEstimatingRepository.deleteTracker');
   }
 
-  // PROVISIONAL (D2 + A8): Kickoff sub-resource path not in C1 catalog.
+  // D2 LOCKED (P1-E1): kickoff sub-resource path is /api/estimating/kickoffs. C1 route handler not yet delivered.
   async getKickoff(projectId: string): Promise<IEstimatingKickoff | null> {
     return this.wrapAsync(async () => {
       try {
@@ -2009,7 +2009,7 @@ export class ProxyScheduleRepository
     }, 'ProxyScheduleRepository.deleteActivity');
   }
 
-  // PROVISIONAL (A8 + D6): Aggregate endpoint not in C1 catalog; uses nested path.
+  // D6 LOCKED (P1-E1): uses nested project-scoped path /api/projects/{projectId}/schedule/metrics. C1 route handler not yet delivered.
   async getMetrics(projectId: string): Promise<IScheduleMetrics> {
     return this.wrapAsync(async () => {
       const response = await this.httpClient.get<{ data: IScheduleMetrics }>(
@@ -2025,9 +2025,9 @@ export class ProxyScheduleRepository
 
 > **Path discrepancy:** B1 uses `/api/buyouts` (plural); C1 uses `/api/buyout` (singular). See Appendix A for details.
 
-The Buyout domain is project-scoped and manages `IBuyoutEntry` entries plus an `IBuyoutSummary` aggregate. Methods: `getEntries(projectId)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)` **(A8: aggregate endpoint provisional — not in C1 catalog)**. No search method.
+The Buyout domain is project-scoped and manages `IBuyoutEntry` entries plus an `IBuyoutSummary` aggregate. Methods: `getEntries(projectId)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)` **(D6 locked: uses nested path `/api/projects/{projectId}/buyout/summary`)**. No search method.
 
-Implementation follows the same project-scoped pattern as Schedule above, substituting `IBuyoutEntry`/`IBuyoutSummary` and using resource paths under `/api/buyouts`. All API paths are provisional and track the P1-C1 backend contract catalog.
+Implementation follows the same project-scoped pattern as Schedule above, substituting `IBuyoutEntry`/`IBuyoutSummary` and using D6-locked nested resource paths. Route path shapes are convention-locked; C1 route handler delivery is the remaining production-activation blocker.
 
 **Test each:** 10+ test cases per repository, covering all domain-specific methods and error handling.
 
@@ -2061,17 +2061,17 @@ git commit -m "feat: implement ProxyBuyoutRepository with project-scoped entries
 
 **ProxyComplianceRepository:**
 
-Project-scoped. Manages `IComplianceEntry` + `IComplianceSummary`. Methods: `getEntries(projectId, options?)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)` **(A8: aggregate provisional)**. No search. Follows the same project-scoped pattern as Buyout (Task 5). All API paths are provisional and track the P1-C1 backend contract catalog.
+Project-scoped. Manages `IComplianceEntry` + `IComplianceSummary`. Methods: `getEntries(projectId, options?)`, `getEntryById(id)`, `createEntry(data)`, `updateEntry(id, data)`, `deleteEntry(id)`, `getSummary(projectId)` **(D6 locked: nested path `/api/projects/{projectId}/compliance/summary`)**. No search. Follows the same project-scoped pattern as Buyout (Task 5). Route path shapes are convention-locked (D1, D6 resolved per P1-E1); C1 route handler delivery is the remaining production-activation blocker.
 
 **ProxyContractRepository:**
 
-Project-scoped with two entity types. Manages `IContractInfo` + `ICommitmentApproval`. Methods: `getContracts(projectId, options?)`, `getContractById(id)`, `createContract(data)`, `updateContract(id, data)`, `deleteContract(id)`, `getApprovals(contractId)` **(A8: sub-resource provisional)**, `createApproval(data)` **(A8)**. No search. The approval methods operate on a sub-resource scoped by contract ID. All API paths are provisional and track the P1-C1 backend contract catalog.
+Project-scoped with two entity types. Manages `IContractInfo` + `ICommitmentApproval`. Methods: `getContracts(projectId, options?)`, `getContractById(id)`, `createContract(data)`, `updateContract(id, data)`, `deleteContract(id)`, `getApprovals(contractId)` **(D6 locked: nested path `/api/projects/{projectId}/contracts`)**, `createApproval(data)`. No search. The approval methods operate on a sub-resource scoped by contract ID. Route path shapes are convention-locked (D1, D6 resolved per P1-E1); C1 route handler delivery is the remaining production-activation blocker.
 
 **ProxyRiskRepository:**
 
 > **Path discrepancy:** B1 uses `/api/risks` (plural); C1 uses `/api/risk` (singular). See Appendix A for details.
 
-Project-scoped. Manages `IRiskCostItem` + `IRiskCostManagement`. Methods: `getItems(projectId, options?)`, `getItemById(id)`, `createItem(data)`, `updateItem(id, data)`, `deleteItem(id)`, `getManagement(projectId)` **(A8: aggregate provisional)**. No search. Follows the project-scoped pattern with an aggregate query. All API paths are provisional and track the P1-C1 backend contract catalog.
+Project-scoped. Manages `IRiskCostItem` + `IRiskCostManagement`. Methods: `getItems(projectId, options?)`, `getItemById(id)`, `createItem(data)`, `updateItem(id, data)`, `deleteItem(id)`, `getManagement(projectId)` **(D6 locked: nested path `/api/projects/{projectId}/risk/management`)**. No search. Follows the project-scoped pattern with an aggregate query. Route path shapes are convention-locked (D1, D6 resolved per P1-E1); C1 route handler delivery is the remaining production-activation blocker.
 
 **Verification:**
 
@@ -2105,11 +2105,11 @@ git commit -m "feat: implement ProxyRiskRepository with project-scoped items and
 
 > **Path discrepancy:** B1 uses `/api/scorecards` (plural); C1 uses `/api/scorecard` (singular). See Appendix A for details.
 
-Project-scoped with two entity types. Manages `IGoNoGoScorecard` + `IScorecardVersion`. Methods: `getScorecards(projectId, options?)`, `getScorecardById(id)`, `createScorecard(data)`, `updateScorecard(id, data)`, `deleteScorecard(id)`, `getVersions(scorecardId)` **(A8: sub-resource provisional)**. No search. The versions method operates on a sub-resource scoped by scorecard ID. All API paths are provisional and track the P1-C1 backend contract catalog.
+Project-scoped with two entity types. Manages `IGoNoGoScorecard` + `IScorecardVersion`. Methods: `getScorecards(projectId, options?)`, `getScorecardById(id)`, `createScorecard(data)`, `updateScorecard(id, data)`, `deleteScorecard(id)`, `getVersions(scorecardId)` **(D6 locked: nested path `/api/projects/{projectId}/scorecards`)**. No search. The versions method operates on a sub-resource scoped by scorecard ID. Route path shapes are convention-locked (D1, D6 resolved per P1-E1); C1 route handler delivery is the remaining production-activation blocker.
 
 **ProxyPmpRepository:**
 
-Project-scoped with two entity types. Manages `IProjectManagementPlan` + `IPMPSignature`. Methods: `getPlans(projectId, options?)`, `getPlanById(id)`, `createPlan(data)`, `updatePlan(id, data)`, `deletePlan(id)`, `getSignatures(pmpId)` **(A8: sub-resource provisional)**, `createSignature(data)` **(A8)**. No search. Signatures are a sub-resource scoped by PMP ID. All API paths are provisional and track the P1-C1 backend contract catalog.
+Project-scoped with two entity types. Manages `IProjectManagementPlan` + `IPMPSignature`. Methods: `getPlans(projectId, options?)`, `getPlanById(id)`, `createPlan(data)`, `updatePlan(id, data)`, `deletePlan(id)`, `getSignatures(pmpId)` **(D6 locked: nested path `/api/projects/{projectId}/pmp`)**, `createSignature(data)`. No search. Signatures are a sub-resource scoped by PMP ID. Route path shapes are convention-locked (D1, D6 resolved per P1-E1); C1 route handler delivery is the remaining production-activation blocker.
 
 **ProxyAuthRepository:**
 

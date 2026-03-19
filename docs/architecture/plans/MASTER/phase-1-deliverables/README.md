@@ -1,6 +1,6 @@
 # Phase 1 Deliverables — Production Data Plane and Integration Backbone
 
-**Doc Classification:** Planning-Complete Deliverable Index — Phase 1 planning artifacts are final and decision-locked; implementation proceeds as upstream dependencies are satisfied.
+**Doc Classification:** Planning-Complete Deliverable Index — Phase 1 transport conventions and A-series schemas are final and decision-locked; B-series trackers and E-series checklists remain living documents updated as implementation progresses. Implementation proceeds as upstream dependencies are satisfied.
 
 ---
 
@@ -167,7 +167,7 @@ These notes anchor the status labels above to the actual codebase. They document
 - `packages/models/`: All 11 domain entity types implemented (81 source files)
 - `packages/data-access/src/ports/`: All 11 port interfaces defined (ILeadRepository, IScheduleRepository, etc.)
 - `packages/data-access/src/adapters/mock/`: All 11 mock adapters fully implemented with seed data
-- `packages/data-access/src/factory.ts`: Mode-resolved factory; startup config validation wired via `validateRequiredConfig()`
+- `packages/data-access/src/factory.ts`: Mode-resolved factory; reads `HBC_ADAPTER_MODE`, defaults to `'mock'` if unset; no startup validation guard in this file (`validateRequiredConfig()` is in `backend/functions/src/services/service-factory.ts`, not in data-access)
 
 **Proxy adapters — B1 transport foundation + 7 of 11 repos implemented:**
 - `packages/data-access/src/adapters/proxy/`: `ProxyHttpClient` (Bearer auth, timeout, X-Request-Id, error normalization), envelope parsers (`items`/`data`/`message` per locked conventions), route builders (D6 nested paths), and 7 project-scoped repos (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP) — all factory-wired and tested (51 tests)
