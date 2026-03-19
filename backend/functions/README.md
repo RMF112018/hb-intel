@@ -113,6 +113,73 @@ app.http('myRoute', {
 
 **Migration:** Existing handlers using inline `validateToken()` try-catch should be migrated to `withAuth()`. The `projectRequests` routes are the first to adopt this pattern (P1-C2 Task 3). Remaining handlers will be migrated as C2 implementation proceeds.
 
+### Request Validation Pattern (P1-C2)
+
+Request body and query parameter validation uses Zod schemas with centralized parse helpers.
+
+**Files:**
+- `src/middleware/validate.ts` — `parseBody<T>()` and `parseQuery<T>()` helpers
+- `src/validation/schemas/` — domain-specific Zod schemas (leads, projects, estimating, shared pagination)
+
+**Usage:**
+```typescript
+import { parseBody, parseQuery } from '../../middleware/validate.js';
+import { CreateLeadSchema, PaginationQuerySchema } from '../../validation/schemas/index.js';
+
+// Body validation (POST/PUT/PATCH)
+const result = await parseBody(request, CreateLeadSchema);
+if (!result.ok) return result.response; // 422 with field-level errors
+const lead = result.data; // typed as z.infer<typeof CreateLeadSchema>
+
+// Query validation (GET with pagination)
+const qResult = parseQuery(request, PaginationQuerySchema);
+if (!qResult.ok) return qResult.response;
+const { page, pageSize, search } = qResult.data;
+```
+
+**Schema Fidelity Rule:** All Zod schemas are derived from the canonical `@hbc/models` interfaces and their `FormData` types. Field names, types, and enum values must match the model source files exactly.
+
+**Available Schemas:**
+- `CreateLeadSchema` / `UpdateLeadSchema` — from `ILeadFormData` + `LeadStage`
+- `CreateProjectSchema` / `UpdateProjectSchema` / `ListProjectsQuerySchema` — from `IProjectFormData`
+- `CreateTrackerSchema` / `UpdateTrackerSchema` — from `IEstimatingTrackerFormData` + `EstimatingStatus`
+- `CreateKickoffSchema` — from `IEstimatingKickoffFormData`
+- `PaginationQuerySchema` — shared pagination with defaults (page=1, pageSize=25)
+
+### Response Helpers & Request ID (P1-C2)
+
+All HTTP responses should use the standardized response helpers for consistent shapes, error codes, and request ID propagation.
+
+**Files:**
+- `src/utils/response-helpers.ts` — `errorResponse()`, `successResponse()`, `listResponse()`, `notFoundResponse()`, `unauthorizedResponse()`, `forbiddenResponse()`
+- `src/middleware/request-id.ts` — `extractOrGenerateRequestId()` for X-Request-Id propagation
+
+**Usage:**
+```typescript
+import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
+import { successResponse, errorResponse, listResponse, notFoundResponse } from '../../utils/response-helpers.js';
+
+handler: withAuth(async (request, context, auth) => {
+  const requestId = extractOrGenerateRequestId(request);
+
+  // Single resource
+  return successResponse(resource);            // 200, { data: resource }
+  return successResponse(resource, 201);       // 201, { data: resource }
+
+  // Paginated list
+  return listResponse(items, total, page, pageSize, requestId);
+
+  // Errors
+  return errorResponse(400, 'VALIDATION_ERROR', 'Details here', requestId);
+  return notFoundResponse('Lead', id, requestId);  // 404
+})
+```
+
+**Response Shapes (D3 lock — `message` is primary error field):**
+- Error: `{ message, code, requestId }` with `X-Request-Id` header
+- Success: `{ data: T }`
+- List: `{ items: T[], pagination: { total, page, pageSize, totalPages } }`
+
 ### Phase 6.8 State Machine Rules
 
 Valid transitions:

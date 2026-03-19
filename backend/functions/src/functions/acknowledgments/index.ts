@@ -12,10 +12,16 @@ import {
   resolveCurrentSequentialParty,
   computeIsComplete,
 } from '@hbc/acknowledgment/server';
-import { validateToken, unauthorizedResponse } from '../../middleware/validateToken.js';
+import { withAuth } from '../../middleware/auth.js';
+import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createServiceFactory } from '../../services/service-factory.js';
 import type { IAcknowledgmentListItem } from '../../services/acknowledgment-service.js';
 import { createLogger } from '../../utils/logger.js';
+import {
+  errorResponse,
+  successResponse,
+  forbiddenResponse,
+} from '../../utils/response-helpers.js';
 import {
   triggerBicCompletion,
   triggerCompletionNotification,
@@ -64,32 +70,27 @@ app.http('postAcknowledgment', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'acknowledgments',
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-    let claims;
-    try {
-      claims = await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+    const requestId = extractOrGenerateRequestId(request);
 
     let body: IPostAcknowledgmentBody;
     try {
       body = (await request.json()) as IPostAcknowledgmentBody;
     } catch {
-      return { status: 400, jsonBody: { error: 'Invalid JSON body' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
     }
 
     if (!body.contextType || !body.contextId || !body.partyUserId || !body.status) {
-      return { status: 400, jsonBody: { error: 'contextType, contextId, partyUserId, and status are required' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'contextType, contextId, partyUserId, and status are required', requestId);
     }
 
     if (!VALID_CONTEXT_TYPES.has(body.contextType)) {
-      return { status: 400, jsonBody: { error: `Invalid contextType: ${body.contextType}` } };
+      return errorResponse(400, 'VALIDATION_ERROR', `Invalid contextType: ${body.contextType}`, requestId);
     }
 
     if (!body.parties?.length || !body.mode) {
-      return { status: 400, jsonBody: { error: 'parties[] and mode are required' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'parties[] and mode are required', requestId);
     }
 
     const services = createServiceFactory();
@@ -100,19 +101,13 @@ app.http('postAcknowledgment', {
     if (body.mode === 'sequential' && !body.bypassSequentialOrder) {
       const currentParty = resolveCurrentSequentialParty(body.parties, existingEvents);
       if (currentParty && currentParty.userId !== body.partyUserId) {
-        return {
-          status: 403,
-          jsonBody: { error: 'Sequential order violation: it is not this party\'s turn' },
-        };
+        return forbiddenResponse('Sequential order violation: it is not this party\'s turn', requestId);
       }
     }
 
     // D-01: Bypass requires AcknowledgmentAdmin role
-    if (body.bypassSequentialOrder && !claims.roles.includes('AcknowledgmentAdmin')) {
-      return {
-        status: 403,
-        jsonBody: { error: 'AcknowledgmentAdmin role required for sequential bypass' },
-      };
+    if (body.bypassSequentialOrder && !auth.claims.roles.includes('AcknowledgmentAdmin')) {
+      return forbiddenResponse('AcknowledgmentAdmin role required for sequential bypass', requestId);
     }
 
     // D-09: Check for existing decline from a required party (blocks further acknowledgments)
@@ -121,13 +116,7 @@ app.http('postAcknowledgment', {
       return party?.required && e.status === 'declined';
     });
     if (existingDecline) {
-      return {
-        status: 409,
-        jsonBody: {
-          error: 'Acknowledgment blocked: a required party has declined',
-          declinedBy: existingDecline.partyUserId,
-        },
-      };
+      return errorResponse(409, 'CONFLICT', 'Acknowledgment blocked: a required party has declined', requestId);
     }
 
     const isBypass = body.bypassSequentialOrder ?? false;
@@ -136,14 +125,14 @@ app.http('postAcknowledgment', {
       ContextType: body.contextType,
       ContextId: body.contextId,
       PartyUserId: body.partyUserId,
-      PartyDisplayName: claims.displayName ?? claims.upn,
+      PartyDisplayName: auth.claims.displayName ?? auth.claims.upn,
       Status: isBypass ? 'bypassed' : body.status,
       AcknowledgedAt: body.acknowledgedAt || new Date().toISOString(),
       DeclineReason: body.declineReason ?? '',
       DeclineCategory: body.declineCategory ?? '',
       PromptMessage: body.promptMessage ?? '',
       IsBypass: isBypass,
-      BypassedBy: isBypass ? claims.upn : '',
+      BypassedBy: isBypass ? auth.claims.upn : '',
     };
 
     await services.acknowledgments.createEvent(newItem);
@@ -186,15 +175,8 @@ app.http('postAcknowledgment', {
       isComplete,
     });
 
-    return {
-      status: 200,
-      jsonBody: {
-        event: toAcknowledgmentEvent(newItem),
-        updatedState,
-        isComplete,
-      },
-    };
-  },
+    return successResponse({ event: toAcknowledgmentEvent(newItem), updatedState, isComplete });
+  }),
 });
 
 /**
@@ -206,28 +188,24 @@ app.http('getAcknowledgments', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'acknowledgments',
-  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    try {
-      await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     const contextType = request.query.get('contextType');
     const contextId = request.query.get('contextId');
 
     if (!contextType || !contextId) {
-      return { status: 400, jsonBody: { error: 'contextType and contextId query params are required' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'contextType and contextId query params are required', requestId);
     }
 
     if (!VALID_CONTEXT_TYPES.has(contextType)) {
-      return { status: 400, jsonBody: { error: `Invalid contextType: ${contextType}` } };
+      return errorResponse(400, 'VALIDATION_ERROR', `Invalid contextType: ${contextType}`, requestId);
     }
 
     const services = createServiceFactory();
     const items = await services.acknowledgments.getEvents(contextType, contextId);
     const events = items.map(toAcknowledgmentEvent);
 
-    return { status: 200, jsonBody: { events } };
-  },
+    return successResponse({ events });
+  }),
 });

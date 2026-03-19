@@ -44,11 +44,11 @@ Verified against live repo 2026-03-18. This section documents what exists so C2 
 | Component | Target File | Dependency |
 |---|---|---|
 | ~~`withAuth()` middleware wrapper~~ | ~~`middleware/auth.ts`~~ | ~~None — builds on existing `validateToken()`~~ | **COMPLETE** — `extractBearer()` + `withAuth()` implemented, tested, applied to `projectRequests` routes (2026-03-19) |
-| Zod request validation | `middleware/validate.ts` | `zod` must be added to `package.json` |
-| `parseBody<T>()` / `parseQuery<T>()` helpers | `middleware/validate.ts` | Zod |
-| `errorResponse()` / `successResponse()` / `listResponse()` | `utils/response-helpers.ts` | None |
-| Error envelope using `message` field per D3 | response helpers | None |
-| `X-Request-Id` propagation | `middleware/request-id.ts` | None |
+| ~~Zod request validation~~ | ~~`middleware/validate.ts`~~ | ~~`zod` must be added to `package.json`~~ | **COMPLETE** — `parseBody<T>()`, `parseQuery<T>()` helpers + domain schemas (leads, projects, estimating, shared pagination) implemented and tested (2026-03-19) |
+| ~~`parseBody<T>()` / `parseQuery<T>()` helpers~~ | ~~`middleware/validate.ts`~~ | ~~Zod~~ | **COMPLETE** — see above |
+| ~~`errorResponse()` / `successResponse()` / `listResponse()`~~ | ~~`utils/response-helpers.ts`~~ | ~~None~~ | **COMPLETE** — 6 response helpers implemented, tested, applied to acknowledgments routes (2026-03-19) |
+| ~~Error envelope using `message` field per D3~~ | ~~response helpers~~ | ~~None~~ | **COMPLETE** — all response helpers use `message` as primary error field per D3 lock (2026-03-19) |
+| ~~`X-Request-Id` propagation~~ | ~~`middleware/request-id.ts`~~ | ~~None~~ | **COMPLETE** — `extractOrGenerateRequestId()` implemented, tested, applied to acknowledgments routes (2026-03-19) |
 | `/api/auth/me` smoke utility endpoint | TBD | C2 or C1 delivery |
 
 ### Implementation Entry Condition
