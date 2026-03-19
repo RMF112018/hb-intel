@@ -34,6 +34,58 @@ Broad Phase 1 implementation should not be described as "execution-ready" until 
 
 **Governing plan:** [`../02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md`](../02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md)
 
+### Phase 1 Implementation-Entry Gate
+
+This gate defines the concrete entry conditions for Phase 1 implementation work. P0-E1 confirmed the Phase 0→1 planning transition is complete (2026-03-16). This section addresses the separate question: what implementation work can begin, what is blocked, and what must be true before broad execution.
+
+#### Current Assessment (2026-03-19): Ready for Narrow Kickoff
+
+Phase 1 is ready for **targeted implementation** on workstreams with no upstream blockers. It is NOT ready for broad execution — C1 backend routes, staging infrastructure, and external approvals are prerequisite to most integration and acceptance work.
+
+#### Tier 1 — Proceed Now (No Upstream Blockers)
+
+| Workstream | Work | Foundation Already Delivered |
+|---|---|---|
+| **B1** — Remaining proxy adapters | Lead, Project, Estimating, Auth repos | ProxyHttpClient, BaseProxyProjectRepository, envelope parsers, path builders, 51 tests, 7 repos complete |
+| **C2** — Auth middleware | `withAuth()` wrapper, Zod validation, response helpers, X-Request-Id | `validateToken()` tested and production-ready; builds directly on top |
+| **D1** — Write safety standalone types | RetryPolicy, WriteFailureReason, idempotency key types | ProxyHttpClient hook points (`onBeforeRequest`, `onAfterResponse`) ready for D1 wiring |
+
+#### Tier 2 — Proceed After Named Prerequisite
+
+| Workstream | Work | Blocked On | Unblock Condition |
+|---|---|---|---|
+| **C1** — Backend domain route handlers | Leads, projects, estimating route implementations | SharePoint schema approval (external) | PO + Business Domains approve P1-A3 schema package |
+| **D1** — Full retry/idempotency wiring | `withRetry()` integration into ProxyHttpClient | B1 remaining 4 repos complete | Tier 1 B1 work finishes |
+| **E1** — Contract tests against staging | Zod schema validation, MSW handlers, smoke tests | C1 routes + C2 auth delivered + staging deploy | Tier 1 C2 + Tier 2 C1 complete |
+| **C3** — Telemetry instrumentation | Handler lifecycle events, proxy events, auth events | C1 routes exist to instrument | Tier 2 C1 routes delivered |
+| **E2** — Staging readiness verification | Full checklist execution | All Tiers 1–2 complete + staging deployed | All workstreams delivered |
+
+#### Tier 3 — Blocked on External Approval
+
+| Dependency | Owner | Blocks | Current Status |
+|---|---|---|---|
+| SharePoint list schema approval | PO + Business Domains | C1 production data routes, physical list provisioning | Approval package ready (P1-A3-Schema-Approval-Package.md); awaiting sign-off |
+| IT Graph permission grant (`Group.ReadWrite.All`) | IT Department | Provisioning saga live testing | Code-complete; gated behind `GRAPH_GROUP_PERMISSION_CONFIRMED` env var |
+| IT per-site access grants (`Sites.Selected`) | IT Department | SharePoint data access for provisioned sites | Process documented; manual grants via `tools/grant-site-access.sh` |
+
+#### Broad Execution Entry Condition
+
+Phase 1 is ready for **broad execution** when ALL of the following are true:
+
+1. **Tier 1 complete:** All 4 remaining proxy repos delivered; C2 auth middleware operational; D1 standalone types defined
+2. **SharePoint schema approved:** PO has signed off on P1-A3 schema package, unblocking C1 route implementation
+3. **C1 routes in progress:** At least one domain (leads) has a working backend route handler
+4. **Staging environment available:** Function app deployed, auth app registration configured, required env vars set
+
+Until these conditions are met, implementation should focus on Tier 1 work items.
+
+#### Recommended Execution Sequence
+
+1. **Now:** Tier 1 work — complete remaining proxy adapters (B1), build auth middleware (C2), define write safety types (D1)
+2. **After Tier 1 + schema approval:** C1 domain route handlers (leads first, then projects, estimating)
+3. **After C1 + C2 delivered:** E1 contract tests, C3 telemetry instrumentation
+4. **After all workstreams + staging:** E2 staging readiness checklist execution and sign-off
+
 ---
 
 ## Status Legend

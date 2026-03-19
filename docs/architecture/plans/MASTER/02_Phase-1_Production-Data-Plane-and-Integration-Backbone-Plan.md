@@ -261,6 +261,8 @@ When implementation begins, the recommended sequencing is:
 5. Deploy observability instrumentation (P1-C3) to unblock telemetry baseline verification.
 6. Complete P1-E2 staging readiness checklist as the final sign-off gate.
 
+**Implementation-entry gate:** The Phase 1 deliverables README defines a three-tier implementation-entry gate (Tier 1: proceed now, Tier 2: proceed after named prerequisite, Tier 3: blocked on external approval) with concrete conditions for narrow kickoff versus broad execution. See [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md) §Phase 1 Implementation-Entry Gate for the current assessment.
+
 ## 16. Delivered Capability Summary (Planning Level)
 
 | Capability | Coverage | Key Deliverables |

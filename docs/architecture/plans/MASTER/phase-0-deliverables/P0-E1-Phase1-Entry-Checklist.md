@@ -299,5 +299,13 @@ ALL of the following are true:
 
 ---
 
+## Implementation Readiness Note
+
+This checklist gates the Phase 0→1 **planning transition**: it confirms that planning truth is established, governance is in place, and Phase 1 work is authorized to begin. It does NOT assess which Phase 1 **implementation work** can proceed immediately versus which is blocked on upstream deliverables or external approvals.
+
+For the operational implementation-entry gate — what can be implemented now, what is blocked, and what the entry condition for broad execution is — see the Phase 1 Implementation-Entry Gate in [`../phase-1-deliverables/README.md`](../phase-1-deliverables/README.md).
+
+---
+
 **Document created:** 2026-03-16
 **Next review:** Upon resolution of each blocker; final gate review before Phase 1 NTP
