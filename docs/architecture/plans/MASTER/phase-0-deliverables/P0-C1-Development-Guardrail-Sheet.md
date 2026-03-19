@@ -84,9 +84,9 @@ The following packages are labeled `scaffold-only` in the Production Readiness M
 |---------|---|---|---|
 | `@hbc/post-bid-autopsy` | C | v0.0.1 scaffold-only | Incomplete: SF22 T08-T09 UI surfaces and lifecycle/storage orchestration. Assigned to Phase 7 per OD-007. Deferred from Phase 1 per D-010. |
 | `@hbc/strategic-intelligence` | C | v0.0.1 scaffold-only | Incomplete: Runtime adapters and BD heritage integration. SF22 T08–T09 (Phase 7) gated on this reaching `usable-but-incomplete`; upgrade timeline tracked via OD-016. Deferred from Phase 1 per D-010. |
-| `@hbc/ai-assist` | C | v0.0.1 scaffold-only | Incomplete: Pre-Implementation Research Directive; Azure tenant integration and Smart Insert UI. Deferred from Phase 1 per D-010; phase assignment pending OD-013. |
+| `@hbc/ai-assist` | C | v0.0.1 scaffold-only | Incomplete: Pre-Implementation Research Directive; Azure tenant integration and Smart Insert UI. Deferred from Phase 1 per D-010; phase assignment pending OD-016. |
 | `@hbc/features-accounting` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 1+ delivery scope |
-| `@hbc/features-leadership` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 2 delivery scope |
+| `@hbc/features-leadership` | D | v0.0.0 scaffold-only | Scope: No production implementation. Not a standalone target application (Target-Architecture-Blueprint §6.2); retained as implementation container for role-aware surfaces in Personal Work Hub and Project Hub. |
 | `@hbc/features-safety` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 3+ delivery scope |
 | `@hbc/features-quality-control-warranty` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 4 delivery scope |
 | `@hbc/features-risk-management` | D | v0.0.0 scaffold-only | Scope: No production implementation; Phase 5+ delivery scope |
@@ -109,7 +109,7 @@ Packages labeled `usable-but-incomplete` may be used in production **only** when
 2. An exception has been approved by the program architecture lead (see §9)
 
 Examples of `usable-but-incomplete` packages currently allowed in Wave 0 production:
-- `@hbc/data-access` (v0.0.1) — mock adapters in use; real SharePoint/Graph adapters being developed
+- `@hbc/data-access` (v0.1.3) — production contract documented (OD-015); real SharePoint/Graph adapters being developed
 - `@hbc/auth` (0.2.0) — See separate rule below
 - `@hbc/shell`, `@hbc/app-shell`, `@hbc/ui-kit` (pilot-ready or usable-but-incomplete) — as listed in P0-B1
 - Feature packages and apps in active Wave 0 closeout (Estimating, Project Hub, Business Development, Admin, PWA)
@@ -239,7 +239,7 @@ Add the exception to the Open Decisions Register (P0-E2) with:
 
 | Document | Purpose | Authority Level |
 |---|---|---|
-| `docs/architecture/blueprint/current-state-map.md` (v1.0, 2026-03-16) | Inventory of all workspace members and their maturity labels | Present-truth authority |
+| `docs/architecture/blueprint/current-state-map.md` (v1.0, 2026-03-15) | Inventory of all workspace members and their maturity labels | Present-truth authority |
 | `docs/architecture/blueprint/package-relationship-map.md` | Dependency direction, category assignment, ownership | Dependency authority |
 | `docs/architecture/plans/MASTER/phase-0-deliverables/P0-B1-Production-Readiness-Matrix.md` | Maturity labels, production path restrictions, blockers | Phase 0 execution baseline |
 | `.claude/rules/02-architecture-invariants.md` | Locked architectural guardrails | Operational doctrine |
