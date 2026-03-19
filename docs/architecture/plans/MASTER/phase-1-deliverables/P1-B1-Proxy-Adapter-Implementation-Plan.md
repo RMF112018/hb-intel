@@ -10,9 +10,9 @@
 
 ### Repo Truth Update (2026-03-19)
 
-Tasks 0–5 are **COMPLETE** and verified in code. 10 of 11 domain repos are **COMPLETE** (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Test infrastructure exists: vitest configured with 84 tests across `ProxyHttpClient.test.ts`, `envelope.test.ts`, `repositories.test.ts`, `ProxyLeadRepository.test.ts`, `ProxyProjectRepository.test.ts`, and `ProxyEstimatingRepository.test.ts`. `ProxyHttpClient`, `BaseProxyProjectRepository`, envelope parsers, and route path builders are implemented. Factory wires all 10 completed repos to proxy mode.
+Tasks 0–7 are **COMPLETE** and verified in code. 11 of 11 domain repos are **COMPLETE** (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP, Auth). Test infrastructure exists: vitest configured with 103 tests across `ProxyHttpClient.test.ts`, `envelope.test.ts`, `repositories.test.ts`, `ProxyLeadRepository.test.ts`, `ProxyProjectRepository.test.ts`, `ProxyEstimatingRepository.test.ts`, and `ProxyAuthRepository.test.ts`. `ProxyHttpClient`, `BaseProxyProjectRepository`, envelope parsers, and route path builders are implemented. Factory wires all 11 repos to proxy mode.
 
-**Remaining work:** Task 7 (Auth — blocked on A9 route resolution), Tasks 8–10 (integration tests, full suite against live backend). Completed tasks are marked **[COMPLETE]** inline below.
+**Remaining work:** Tasks 8–10 (integration tests, full suite against live backend). Completed tasks are marked **[COMPLETE]** inline below. A9 (auth route catalog) was **RESOLVED** via P1-C2-a Task 21.
 
 # Proxy Adapter Implementation Plan
 
@@ -100,8 +100,8 @@ B1 is proceeding under these assumptions. Each is labeled with where verificatio
 | A5 | Default pageSize is 25, max 100 | P1-C1, P1-E1 | **LOCKED** — D4 resolved: default 25, max 100 (see P1-E1 PaginationQuerySchema) | Appendix B |
 | A6 | Bearer token in `Authorization` header is accepted by backend | P1-C2 | High — standard pattern | Cross-Workstream Boundaries |
 | A7 | Project-scoped routes use nested paths (`/api/projects/{projectId}/{domain}`) | P1-C1, P1-E1 | **LOCKED** — D6 resolved: nested paths confirmed (not flat `?projectId=` query params) | Appendix A |
-| A8 | Aggregate endpoints exist (portfolio summary, metrics, summaries, management) | P1-C1 | **Partially resolved** — project portfolio summary locked (`/api/projects/summary`, per P1-E1 decision 11); project-scoped metrics/summary routes follow convention-locked D6 nested pattern; auth aggregates (A9) remain unresolved | Appendix A |
-| A9 | Auth management routes (`/api/auth/*`) exist in backend | P1-C2 | Low — no C1 route defined; C2 owns auth subsystem | Appendix A, Tier 3 |
+| A8 | Aggregate endpoints exist (portfolio summary, metrics, summaries, management) | P1-C1 | **Partially resolved** — project portfolio summary locked (`/api/projects/summary`, per P1-E1 decision 11); project-scoped metrics/summary routes follow convention-locked D6 nested pattern; auth aggregates resolved via P1-C2-a | Appendix A |
+| A9 | Auth management routes (`/api/auth/*`) exist in backend | P1-C2 | **RESOLVED** — Auth management routes defined in P1-C2-a Task 21 (20 system-level + 9 project-scoped routes). `ProxyAuthRepository` implemented with 19 tests and factory-wired for proxy mode. Backend handlers are Phase 2 delivery. | Appendix A |
 
 ### Transport Convention Decisions (All Resolved)
 
@@ -137,7 +137,7 @@ These are explicitly out of B1 scope and owned by other workstreams.
 | **COMPLETE** | Tasks 0–2 (vitest setup, ProxyHttpClient, BaseProxyProjectRepository) | Done — 84 tests passing | — |
 | **COMPLETE** | Tasks 3–4 (Lead, Project) | Done — factory wired; 84 tests passing | — |
 | **COMPLETE (10 of 10 data domains)** | Tasks 5–6 (domain repos) | Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP implemented and factory-wired | — |
-| **Blocked** | Task 7 (Auth repo) | A9 unresolved — route paths not in C1/C2 catalog | Await C2 auth route definition |
+| **COMPLETE** | Task 7 (Auth repo) | A9 resolved — `ProxyAuthRepository` implemented with 19 tests; factory-wired for proxy mode (P1-C2-a) | — |
 | **Pending** | Tasks 8–10 (integration tests, full suite against live backend) | 84 tests passing against mocked fetch | Dependent on Task 7 (Auth) and C1/C2 route delivery |
 | **Requires upstream resolution** | Production activation | Blocked | C1 route delivery, C2 auth middleware, MSAL registration, deployment env vars |
 

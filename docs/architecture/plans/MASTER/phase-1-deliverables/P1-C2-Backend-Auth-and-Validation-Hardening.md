@@ -113,6 +113,7 @@ Requires `Group.ReadWrite.All` application permission on the Managed Identity.
 | 2 | **Per-site grant process** — manual script + automation extension point | Manual grants via `tools/grant-site-access.sh`; `IGraphService.grantSiteAccess()` available for future automation | IT + Architecture | IT Setup Guide §8.4, §9.6; `tools/grant-site-access.sh` | **Process-documented** — full automation deferred to post-pilot |
 | 3 | **GraphService `Group.ReadWrite.All` permission** — real Graph API calls implemented and permission-gated | Step 6 gated behind `GRAPH_GROUP_PERMISSION_CONFIRMED` env var; throws `GraphPermissionNotConfirmedError` until IT confirms | Backend + IT | `backend/functions/src/services/graph-service.ts` | **Code-complete** — awaiting IT permission grant |
 | ~~4~~ | ~~Startup config validation not wired~~ | ~~Backend could start with missing auth config~~ | ~~Backend~~ | ~~G2.6 task~~ | **CLOSED** — `validateRequiredConfig()` wired into `createServiceFactory()` (commit 4f89f0f). |
+| 5 | **Entra optional claims `jobTitle` configuration** — IT must update the app registration to include `jobTitle` as an optional claim in ID/access tokens | `validateToken()` returns `jobTitle: undefined` until configured; Job Title → SystemRole mapping produces no-op (no role assigned from job title) | IT | P1-C2-a AD-6; IT Setup Guide §Entra Optional Claims | **Process-documented** — `validateToken()` extracts `jobTitle` with graceful `undefined` fallback (P1-C2-a Task 17 complete). Full Job Title-based mapping is Phase 2. |
 
 ### Identity Trust Boundary
 
@@ -154,6 +155,65 @@ All C2 middleware work can proceed immediately regardless of OBO/MI classificati
 #### Remaining Architecture Note
 
 No planned Phase 1 domain route requires OBO. If a future route needs to call Graph on behalf of the user (e.g., checking user-specific SharePoint site permissions), only that specific route needs OBO treatment — the entire domain API surface does not need to change. This is a contained extension, not a design revision.
+
+---
+
+## Auth Management Route Catalog (A9 Resolution)
+
+This section is the canonical backend developer reference for all auth management routes. Defined by P1-C2-a Task 21; resolves blocker A9 from P1-B1. Frontend proxy adapter (`ProxyAuthRepository`) is complete and factory-wired. Backend route handlers are Phase 2 delivery.
+
+### System-Level Auth Routes (20 routes)
+
+All routes use Managed Identity auth pattern. Bearer token validates user identity for authorization and audit.
+
+| Route | Method | Handler Responsibility |
+|---|---|---|
+| `/api/auth/me` | GET | Return `ICurrentUser` for the validated token's OID; resolve Job Title → SystemRole via `IJobTitleMapping` table; return `IInternalUser` or `IExternalUser` based on user type |
+| `/api/auth/roles` | GET | Return all `IRole` definitions |
+| `/api/auth/roles` | POST | Create role definition; validate `grants[]` format |
+| `/api/auth/roles/{id}` | GET | Return role by ID; 404 if not found |
+| `/api/auth/roles/{id}` | PATCH | Partial update; 404 if not found |
+| `/api/auth/roles/{id}` | DELETE | Delete role; 404 if not found |
+| `/api/auth/users/{userId}/roles` | POST | Assign role to user; body: `{ roleId }` |
+| `/api/auth/users/{userId}/roles/{roleId}` | DELETE | Remove role from user |
+| `/api/auth/templates` | GET | Return all `IPermissionTemplate` definitions |
+| `/api/auth/templates` | POST | Create template; validate `grants[]` |
+| `/api/auth/templates/{id}` | GET | Return template by ID; 404 if not found |
+| `/api/auth/templates/{id}` | PATCH | Partial update |
+| `/api/auth/templates/{id}` | DELETE | Delete template |
+| `/api/auth/job-title-mappings` | GET | Return all `IJobTitleMapping` rules |
+| `/api/auth/job-title-mappings` | POST | Create mapping rule |
+| `/api/auth/job-title-mappings/{id}` | GET | Return mapping by ID |
+| `/api/auth/job-title-mappings/{id}` | PATCH | Update mapping rule |
+| `/api/auth/job-title-mappings/{id}` | DELETE | Delete mapping rule |
+| `/api/auth/users` | GET | List users from Entra + local table; supports `?search=` query |
+| `/api/auth/users/{userId}` | GET | Get user profile with resolved roles |
+
+### Project-Scoped Auth Routes (9 routes)
+
+All routes use Managed Identity auth pattern, nested under `/api/projects/{projectId}/`.
+
+| Route | Method | Handler Responsibility |
+|---|---|---|
+| `/api/projects/{projectId}/members` | GET | List internal project members (`IProjectMember[]`) |
+| `/api/projects/{projectId}/members` | POST | Add internal member to project |
+| `/api/projects/{projectId}/members/{userId}` | DELETE | Remove internal member |
+| `/api/projects/{projectId}/members/{userId}/role` | PATCH | Update member's project-level role override |
+| `/api/projects/{projectId}/external-members` | GET | List external members (`IExternalMember[]`) |
+| `/api/projects/{projectId}/external-members` | POST | Invite external user; triggers B2B guest account creation |
+| `/api/projects/{projectId}/external-members/{id}` | GET | Get external member record |
+| `/api/projects/{projectId}/external-members/{id}` | PATCH | Update grants or extend expiry |
+| `/api/projects/{projectId}/external-members/{id}` | DELETE | Revoke external member access |
+
+### Implementation Status
+
+| Component | Status | Reference |
+|---|---|---|
+| Route catalog (this section) | **DEFINED** | P1-C2-a Task 21 |
+| Frontend proxy adapter (`ProxyAuthRepository`) | **COMPLETE** | P1-C2-a Task 18; 19 tests passing |
+| Frontend mock adapter (`MockAuthRepository`) | **COMPLETE** | P1-C2-a Task 8; 16-method CRUD |
+| Backend route handlers | **Phase 2** | Requires `withAuth()` middleware from C2 Chunk 1 |
+| `/api/auth/me` smoke utility | **DEFINED** | Route defined; handler is Phase 2 |
 
 ---
 
