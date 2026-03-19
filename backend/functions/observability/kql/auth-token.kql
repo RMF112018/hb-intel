@@ -1,0 +1,43 @@
+// P1-C3 §2.3.1: Auth & Token Dashboard — auth.bearer.* events
+// Source: Application Insights traces table with _telemetryType JSON parsing
+// Dashboard: Auth & Token workbook
+// Gate: Auth flow verified for production activation
+
+// --- Handler-level auth failures (401 responses from withAuth) ---
+traces
+| where timestamp > ago(1h)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name == "handler.error"
+| extend
+    domain = tostring(parsed.domain),
+    operation = tostring(parsed.operation),
+    errorCode = tostring(parsed.errorCode)
+| where errorCode in ("UNAUTHORIZED", "FORBIDDEN")
+| summarize failureCount = count() by domain, operation, errorCode, bin(timestamp, 5m)
+| order by timestamp desc
+
+// --- Auth failure burst detection (>3 in 1 minute — alert threshold) ---
+traces
+| where timestamp > ago(15m)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name == "handler.error"
+| extend errorCode = tostring(parsed.errorCode)
+| where errorCode in ("UNAUTHORIZED", "FORBIDDEN")
+| summarize failureCount = count() by bin(timestamp, 1m)
+| where failureCount > 3
+| order by timestamp desc
+
+// --- Startup mode resolution (adapter mode per cold start) ---
+traces
+| where timestamp > ago(24h)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name == "startup.mode.resolved"
+| extend
+    adapterMode = tostring(parsed.adapterMode),
+    environment = tostring(parsed.environment),
+    surface = tostring(parsed.surface)
+| project timestamp, adapterMode, environment, surface
+| order by timestamp desc

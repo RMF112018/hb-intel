@@ -1,0 +1,55 @@
+// P1-C3 §2.3.1: Adapter Health Dashboard — proxy.request.* events
+// Source: Application Insights traces table with _telemetryType JSON parsing
+// Dashboard: Adapter Health workbook
+// Gate: error rate < 5%, p95 latency < 10s
+
+// --- Success rate by domain (5-min sliding window) ---
+traces
+| where timestamp > ago(1h)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name in ("proxy.request.success", "proxy.request.error")
+| extend
+    domain = tostring(parsed.domain),
+    eventName = tostring(parsed.name)
+| summarize
+    total = count(),
+    errors = countif(eventName == "proxy.request.error"),
+    successes = countif(eventName == "proxy.request.success")
+    by domain, bin(timestamp, 5m)
+| extend errorRate = round(todouble(errors) / todouble(total) * 100, 2)
+| project timestamp, domain, total, successes, errors, errorRate
+| order by timestamp desc, domain asc
+
+// --- P95 latency by domain (5-min sliding window) ---
+traces
+| where timestamp > ago(1h)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name == "proxy.request.success"
+| extend
+    domain = tostring(parsed.domain),
+    durationMs = todouble(parsed.durationMs)
+| summarize
+    p50 = percentile(durationMs, 50),
+    p95 = percentile(durationMs, 95),
+    p99 = percentile(durationMs, 99),
+    avg_duration = avg(durationMs),
+    request_count = count()
+    by domain, bin(timestamp, 5m)
+| project timestamp, domain, request_count, p50, p95, p99, avg_duration
+| order by timestamp desc, domain asc
+
+// --- Error breakdown by domain and errorCode ---
+traces
+| where timestamp > ago(1h)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name == "proxy.request.error"
+| extend
+    domain = tostring(parsed.domain),
+    operation = tostring(parsed.operation),
+    errorCode = tostring(parsed.errorCode),
+    statusCode = toint(parsed.statusCode)
+| summarize errorCount = count() by domain, operation, errorCode, statusCode
+| order by errorCount desc

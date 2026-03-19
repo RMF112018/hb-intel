@@ -1,0 +1,52 @@
+// P1-C3 §2.1.5: Notification Pipeline Dashboard — notification.send.* / notification.digest.*
+// Source: Application Insights traces table with _telemetryType JSON parsing
+
+// --- Notification send pipeline (enqueue → process → complete/error) ---
+traces
+| where timestamp > ago(24h)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name startswith "notification.send."
+| extend
+    eventName = tostring(parsed.name),
+    notificationType = tostring(parsed.notificationType),
+    correlationId = tostring(parsed.correlationId),
+    durationMs = todouble(parsed.durationMs),
+    errorCode = tostring(parsed.errorCode)
+| summarize count() by eventName, notificationType, bin(timestamp, 1h)
+| order by timestamp desc, eventName asc
+
+// --- Notification error breakdown ---
+traces
+| where timestamp > ago(24h)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name == "notification.send.error"
+| extend
+    notificationType = tostring(parsed.notificationType),
+    errorCode = tostring(parsed.errorCode),
+    errorMessage = tostring(parsed.errorMessage),
+    correlationId = tostring(parsed.correlationId)
+| project timestamp, notificationType, errorCode, errorMessage, correlationId
+| order by timestamp desc
+
+// --- Digest pipeline metrics ---
+traces
+| where timestamp > ago(7d)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name startswith "notification.digest."
+| extend
+    eventName = tostring(parsed.name),
+    processedCount = toint(parsed.processedCount),
+    pendingCount = toint(parsed.pendingCount),
+    durationMs = todouble(parsed.durationMs),
+    correlationId = tostring(parsed.correlationId)
+| summarize
+    triggers = countif(eventName == "notification.digest.trigger"),
+    completions = countif(eventName == "notification.digest.complete"),
+    errors = countif(eventName == "notification.digest.error"),
+    totalProcessed = sumif(processedCount, eventName == "notification.digest.complete"),
+    avgDurationMs = avgif(durationMs, eventName == "notification.digest.complete")
+    by bin(timestamp, 1d)
+| order by timestamp desc

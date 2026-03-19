@@ -1,0 +1,58 @@
+// P1-C3 §2.3.1: Provisioning Dashboard — ProvisioningSaga events + metrics
+// Source: Application Insights traces table with _telemetryType JSON parsing
+// Dashboard: Provisioning workbook
+// Gate: Provisioning saga success rate >= 95% over 7-day window
+
+// --- Saga outcome summary (7-day window) ---
+traces
+| where timestamp > ago(7d)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name in ("handler.success", "handler.error")
+| extend domain = tostring(parsed.domain)
+| where domain == "provisioningSaga"
+| extend
+    operation = tostring(parsed.operation),
+    eventName = tostring(parsed.name)
+| summarize
+    total = count(),
+    successes = countif(eventName == "handler.success"),
+    failures = countif(eventName == "handler.error")
+    by operation
+| extend successRate = round(todouble(successes) / todouble(total) * 100, 2)
+| order by total desc
+
+// --- Provisioning duration by operation ---
+traces
+| where timestamp > ago(7d)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name == "handler.success"
+| extend domain = tostring(parsed.domain)
+| where domain == "provisioningSaga"
+| extend
+    operation = tostring(parsed.operation),
+    durationMs = todouble(parsed.durationMs)
+| summarize
+    p50 = percentile(durationMs, 50),
+    p95 = percentile(durationMs, 95),
+    avg_duration = avg(durationMs),
+    count = count()
+    by operation
+| order by avg_duration desc
+
+// --- Failed provisioning runs (alert source) ---
+traces
+| where timestamp > ago(24h)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name == "handler.error"
+| extend domain = tostring(parsed.domain)
+| where domain == "provisioningSaga"
+| extend
+    operation = tostring(parsed.operation),
+    errorCode = tostring(parsed.errorCode),
+    errorMessage = tostring(parsed.errorMessage),
+    correlationId = tostring(parsed.correlationId)
+| project timestamp, operation, errorCode, errorMessage, correlationId
+| order by timestamp desc

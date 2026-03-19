@@ -1,0 +1,51 @@
+// P1-C3 §2.3.1: Error Budget Dashboard — handler.error aggregate counts
+// Source: Application Insights traces table with _telemetryType JSON parsing
+// Dashboard: Error Budget workbook
+// Gate: Overall error rate vs SLO; burn rate projection
+
+// --- Error rate by domain (hourly buckets, 24h window) ---
+traces
+| where timestamp > ago(24h)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name in ("handler.success", "handler.error")
+| extend
+    domain = tostring(parsed.domain),
+    eventName = tostring(parsed.name)
+| summarize
+    total = count(),
+    errors = countif(eventName == "handler.error")
+    by domain, bin(timestamp, 1h)
+| extend errorRate = round(todouble(errors) / todouble(total) * 100, 2)
+| order by timestamp desc, domain asc
+
+// --- Overall error budget burn rate (7-day rolling) ---
+traces
+| where timestamp > ago(7d)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name in ("handler.success", "handler.error")
+| extend eventName = tostring(parsed.name)
+| summarize
+    total = count(),
+    errors = countif(eventName == "handler.error")
+    by bin(timestamp, 1d)
+| extend
+    errorRate = round(todouble(errors) / todouble(total) * 100, 2),
+    sloTarget = 99.5,
+    budgetRemaining = round(99.5 - (todouble(errors) / todouble(total) * 100), 2)
+| order by timestamp desc
+
+// --- Top error producers (which operations fail most) ---
+traces
+| where timestamp > ago(24h)
+| where message has '"_telemetryType":"customEvent"'
+| extend parsed = parse_json(message)
+| where parsed.name == "handler.error"
+| extend
+    domain = tostring(parsed.domain),
+    operation = tostring(parsed.operation),
+    errorCode = tostring(parsed.errorCode)
+| summarize errorCount = count() by domain, operation, errorCode
+| order by errorCount desc
+| take 20

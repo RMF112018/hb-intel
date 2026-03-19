@@ -1,0 +1,83 @@
+{
+  "$schema": "P1-C3 §2.3.2 Alert Rule Definitions",
+  "description": "Machine-readable alert rule definitions for Azure Monitor. DevOps creates these as Azure Monitor alert rules with the specified Action Group.",
+  "alertRules": [
+    {
+      "name": "hbi-high-adapter-error-rate",
+      "displayName": "High Adapter Error Rate",
+      "severity": "P2",
+      "owner": "DevOps on-call",
+      "sourceSignal": "proxy.request.error count / total proxy.request.* events",
+      "condition": "> 5% error rate in 5-min sliding window",
+      "windowMinutes": 5,
+      "thresholdPercent": 5,
+      "kqlFile": "kql/adapter-health.kql",
+      "escalation": "Alert channel → DevOps on-call",
+      "responseGuidance": "Check domain-specific error codes, verify Graph API status, check Redis connectivity"
+    },
+    {
+      "name": "hbi-adapter-latency-spike",
+      "displayName": "Adapter Latency Spike",
+      "severity": "P3",
+      "owner": "DevOps on-call",
+      "sourceSignal": "proxy.request.success event durationMs field",
+      "condition": "p95 > 10s for any domain in 5-min window",
+      "windowMinutes": 5,
+      "thresholdMs": 10000,
+      "percentile": 95,
+      "kqlFile": "kql/adapter-health.kql",
+      "escalation": "Alert channel → DevOps on-call",
+      "responseGuidance": "Check Graph API latency, Redis cache hit rate, function cold start frequency"
+    },
+    {
+      "name": "hbi-auth-failure-burst",
+      "displayName": "Auth Failure Burst",
+      "severity": "P1",
+      "owner": "Security + DevOps on-call",
+      "sourceSignal": "auth.bearer.error + handler.error where errorCode in (UNAUTHORIZED, FORBIDDEN)",
+      "condition": "> 3 auth failures in 1 minute",
+      "windowMinutes": 1,
+      "thresholdCount": 3,
+      "kqlFile": "kql/auth-token.kql",
+      "escalation": "Alert channel → on-call → security escalation",
+      "responseGuidance": "Check MSAL config, verify Azure AD service health, check OBO scope permissions"
+    },
+    {
+      "name": "hbi-provisioning-saga-failure",
+      "displayName": "Provisioning Saga Failure",
+      "severity": "P2",
+      "owner": "Operations on-call",
+      "sourceSignal": "handler.error where domain = provisioningSaga",
+      "condition": "Any provisioning saga failure event emitted",
+      "windowMinutes": 0,
+      "thresholdCount": 1,
+      "kqlFile": "kql/provisioning.kql",
+      "escalation": "Alert channel → operations on-call",
+      "responseGuidance": "Check failedAtStep, review step-specific error, assess compensation outcome"
+    },
+    {
+      "name": "hbi-circuit-breaker-open",
+      "displayName": "Circuit Breaker Open",
+      "severity": "P1",
+      "owner": "DevOps on-call",
+      "sourceSignal": "circuit.state.change event where newState = 'open'",
+      "condition": "Any circuit opens",
+      "windowMinutes": 0,
+      "thresholdCount": 1,
+      "kqlFile": null,
+      "escalation": "Alert channel → on-call → incident escalation",
+      "responseGuidance": "Check downstream dependency health, review failure pattern, assess fallback behavior",
+      "status": "DEFERRED — activates after D1 delivers circuit-breaker implementation"
+    }
+  ],
+  "actionGroup": {
+    "name": "hbi-alert-action-group",
+    "description": "Azure Monitor Action Group for HB Intel alerts",
+    "deliveryMechanism": "Teams Workflow (Power Automate)",
+    "channels": {
+      "production": "#hb-intel-alerts",
+      "staging": "#hb-intel-alerts-staging"
+    },
+    "note": "Office 365 Incoming Webhooks (connectors) are deprecated. Use Teams Workflows via Power Automate per C3 §2.3.3."
+  }
+}
