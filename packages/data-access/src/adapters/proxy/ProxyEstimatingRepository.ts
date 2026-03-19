@@ -1,6 +1,6 @@
 import type { IEstimatingRepository } from '../../ports/IEstimatingRepository.js';
 import type { IEstimatingTracker, IEstimatingKickoff, IListQueryOptions, IPagedResult } from '@hbc/models';
-import type { ProxyHttpClient } from './ProxyHttpClient.js';
+import type { ProxyHttpClient, RequestMetadata } from './ProxyHttpClient.js';
 import { NotFoundError } from '../../errors/index.js';
 import { parseItemEnvelope, parsePagedEnvelope } from './envelope.js';
 import { buildResourcePath, buildQueryParams } from './paths.js';
@@ -25,6 +25,7 @@ export class ProxyEstimatingRepository implements IEstimatingRepository {
     const raw = await this.client.get<unknown>(
       '/api/estimating/trackers',
       buildQueryParams(options),
+      { domain: 'estimating', operation: 'getAllTrackers' },
     );
     return parsePagedEnvelope<IEstimatingTracker>(raw);
   }
@@ -33,6 +34,8 @@ export class ProxyEstimatingRepository implements IEstimatingRepository {
     try {
       const raw = await this.client.get<unknown>(
         `/api/estimating/trackers/${id}`,
+        undefined,
+        { domain: 'estimating', operation: 'getTrackerById' },
       );
       return parseItemEnvelope<IEstimatingTracker>(raw);
     } catch (err) {
@@ -45,6 +48,7 @@ export class ProxyEstimatingRepository implements IEstimatingRepository {
     const raw = await this.client.post<unknown>(
       '/api/estimating/trackers',
       data,
+      { domain: 'estimating', operation: 'createTracker' },
     );
     return parseItemEnvelope<IEstimatingTracker>(raw);
   }
@@ -53,12 +57,13 @@ export class ProxyEstimatingRepository implements IEstimatingRepository {
     const raw = await this.client.put<unknown>(
       `/api/estimating/trackers/${id}`,
       data,
+      { domain: 'estimating', operation: 'updateTracker' },
     );
     return parseItemEnvelope<IEstimatingTracker>(raw);
   }
 
   async deleteTracker(id: number): Promise<void> {
-    await this.client.delete(`/api/estimating/trackers/${id}`);
+    await this.client.delete(`/api/estimating/trackers/${id}`, { domain: 'estimating', operation: 'deleteTracker' });
   }
 
   // =========================================================================
@@ -69,6 +74,8 @@ export class ProxyEstimatingRepository implements IEstimatingRepository {
     try {
       const raw = await this.client.get<unknown>(
         `/api/estimating/kickoffs/${projectId}`,
+        undefined,
+        { domain: 'estimating', operation: 'getKickoff' },
       );
       return parseItemEnvelope<IEstimatingKickoff>(raw);
     } catch (err) {
@@ -81,6 +88,7 @@ export class ProxyEstimatingRepository implements IEstimatingRepository {
     const raw = await this.client.post<unknown>(
       `/api/estimating/kickoffs`,
       data,
+      { domain: 'estimating', operation: 'createKickoff' },
     );
     return parseItemEnvelope<IEstimatingKickoff>(raw);
   }

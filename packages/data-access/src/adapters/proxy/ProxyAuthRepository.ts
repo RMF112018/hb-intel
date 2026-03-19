@@ -30,7 +30,7 @@ import type {
   IJobTitleMapping,
 } from '@hbc/models';
 import type { IAuthRepository } from '../../ports/IAuthRepository.js';
-import type { ProxyHttpClient } from './ProxyHttpClient.js';
+import type { ProxyHttpClient, RequestMetadata } from './ProxyHttpClient.js';
 import { BaseRepository } from '../base.js';
 import { NotFoundError } from '../../errors/index.js';
 import { parseItemEnvelope } from './envelope.js';
@@ -43,21 +43,21 @@ export class ProxyAuthRepository extends BaseRepository<ICurrentUser> implements
   // ── Session ─────────────────────────────────────────────────────────────
 
   async getCurrentUser(): Promise<ICurrentUser> {
-    const raw = await this.client.get<unknown>('/auth/me');
+    const raw = await this.client.get<unknown>('/auth/me', undefined, { domain: 'auth', operation: 'getCurrentUser' });
     return parseItemEnvelope<ICurrentUser>(raw);
   }
 
   // ── Role definitions ─────────────────────────────────────────────────────
 
   async getRoles(): Promise<IRole[]> {
-    const raw = await this.client.get<unknown>('/auth/roles');
+    const raw = await this.client.get<unknown>('/auth/roles', undefined, { domain: 'auth', operation: 'getRoles' });
     return parseItemEnvelope<IRole[]>(raw);
   }
 
   async getRoleById(id: string): Promise<IRole | null> {
     this.validateId(id, 'Role');
     try {
-      const raw = await this.client.get<unknown>(`/auth/roles/${id}`);
+      const raw = await this.client.get<unknown>(`/auth/roles/${id}`, undefined, { domain: 'auth', operation: 'getRoleById' });
       return parseItemEnvelope<IRole>(raw);
     } catch (err) {
       if (err instanceof NotFoundError) return null;
@@ -66,18 +66,18 @@ export class ProxyAuthRepository extends BaseRepository<ICurrentUser> implements
   }
 
   async createRole(role: Omit<IRole, 'id'>): Promise<IRole> {
-    const raw = await this.client.post<unknown>('/auth/roles', role);
+    const raw = await this.client.post<unknown>('/auth/roles', role, { domain: 'auth', operation: 'createRole' });
     return parseItemEnvelope<IRole>(raw);
   }
 
   async updateRole(id: string, updates: Partial<Omit<IRole, 'id'>>): Promise<IRole> {
     this.validateId(id, 'Role');
-    const raw = await this.client.patch<unknown>(`/auth/roles/${id}`, updates);
+    const raw = await this.client.patch<unknown>(`/auth/roles/${id}`, updates, { domain: 'auth', operation: 'updateRole' });
     return parseItemEnvelope<IRole>(raw);
   }
 
   async deleteRole(id: string): Promise<void> {
-    await this.client.delete(`/auth/roles/${id}`);
+    await this.client.delete(`/auth/roles/${id}`, { domain: 'auth', operation: 'deleteRole' });
   }
 
   // ── Role assignment ───────────────────────────────────────────────────────
@@ -85,26 +85,26 @@ export class ProxyAuthRepository extends BaseRepository<ICurrentUser> implements
   async assignRole(userId: string, roleId: string): Promise<void> {
     this.validateId(userId, 'User');
     this.validateId(roleId, 'Role');
-    await this.client.post<unknown>(`/auth/users/${userId}/roles`, { roleId });
+    await this.client.post<unknown>(`/auth/users/${userId}/roles`, { roleId }, { domain: 'auth', operation: 'assignRole' });
   }
 
   async removeRole(userId: string, roleId: string): Promise<void> {
     this.validateId(userId, 'User');
     this.validateId(roleId, 'Role');
-    await this.client.delete(`/auth/users/${userId}/roles/${roleId}`);
+    await this.client.delete(`/auth/users/${userId}/roles/${roleId}`, { domain: 'auth', operation: 'removeRole' });
   }
 
   // ── Permission templates ──────────────────────────────────────────────────
 
   async getPermissionTemplates(): Promise<IPermissionTemplate[]> {
-    const raw = await this.client.get<unknown>('/auth/templates');
+    const raw = await this.client.get<unknown>('/auth/templates', undefined, { domain: 'auth', operation: 'getPermissionTemplates' });
     return parseItemEnvelope<IPermissionTemplate[]>(raw);
   }
 
   async createPermissionTemplate(
     template: Omit<IPermissionTemplate, 'id'>,
   ): Promise<IPermissionTemplate> {
-    const raw = await this.client.post<unknown>('/auth/templates', template);
+    const raw = await this.client.post<unknown>('/auth/templates', template, { domain: 'auth', operation: 'createPermissionTemplate' });
     return parseItemEnvelope<IPermissionTemplate>(raw);
   }
 
@@ -113,25 +113,25 @@ export class ProxyAuthRepository extends BaseRepository<ICurrentUser> implements
     updates: Partial<Omit<IPermissionTemplate, 'id'>>,
   ): Promise<IPermissionTemplate> {
     this.validateId(id, 'PermissionTemplate');
-    const raw = await this.client.patch<unknown>(`/auth/templates/${id}`, updates);
+    const raw = await this.client.patch<unknown>(`/auth/templates/${id}`, updates, { domain: 'auth', operation: 'updatePermissionTemplate' });
     return parseItemEnvelope<IPermissionTemplate>(raw);
   }
 
   async deletePermissionTemplate(id: string): Promise<void> {
-    await this.client.delete(`/auth/templates/${id}`);
+    await this.client.delete(`/auth/templates/${id}`, { domain: 'auth', operation: 'deletePermissionTemplate' });
   }
 
   // ── Job Title mappings ────────────────────────────────────────────────────
 
   async getJobTitleMappings(): Promise<IJobTitleMapping[]> {
-    const raw = await this.client.get<unknown>('/auth/job-title-mappings');
+    const raw = await this.client.get<unknown>('/auth/job-title-mappings', undefined, { domain: 'auth', operation: 'getJobTitleMappings' });
     return parseItemEnvelope<IJobTitleMapping[]>(raw);
   }
 
   async createJobTitleMapping(
     mapping: Omit<IJobTitleMapping, 'id'>,
   ): Promise<IJobTitleMapping> {
-    const raw = await this.client.post<unknown>('/auth/job-title-mappings', mapping);
+    const raw = await this.client.post<unknown>('/auth/job-title-mappings', mapping, { domain: 'auth', operation: 'createJobTitleMapping' });
     return parseItemEnvelope<IJobTitleMapping>(raw);
   }
 
@@ -140,11 +140,11 @@ export class ProxyAuthRepository extends BaseRepository<ICurrentUser> implements
     updates: Partial<Omit<IJobTitleMapping, 'id'>>,
   ): Promise<IJobTitleMapping> {
     this.validateId(id, 'JobTitleMapping');
-    const raw = await this.client.patch<unknown>(`/auth/job-title-mappings/${id}`, updates);
+    const raw = await this.client.patch<unknown>(`/auth/job-title-mappings/${id}`, updates, { domain: 'auth', operation: 'updateJobTitleMapping' });
     return parseItemEnvelope<IJobTitleMapping>(raw);
   }
 
   async deleteJobTitleMapping(id: string): Promise<void> {
-    await this.client.delete(`/auth/job-title-mappings/${id}`);
+    await this.client.delete(`/auth/job-title-mappings/${id}`, { domain: 'auth', operation: 'deleteJobTitleMapping' });
   }
 }

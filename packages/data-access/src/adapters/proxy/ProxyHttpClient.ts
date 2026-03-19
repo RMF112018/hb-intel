@@ -4,8 +4,9 @@
  * Provides Bearer auth, timeout, X-Request-Id, and error normalization.
  * All responses are parsed through the locked envelope conventions (P1-E1).
  *
- * Hook points (onBeforeRequest, onAfterResponse) are exposed for future
- * D1 retry/recovery wiring but are not activated in this foundation.
+ * P1-C3: Emits proxy.request.start/success/error telemetry events.
+ * Hook points (onBeforeRequest, onAfterResponse) are exposed for D1
+ * retry/recovery wiring and accept optional RequestMetadata.
  */
 
 import type { ProxyConfig } from './types.js';
@@ -13,11 +14,32 @@ import { DEFAULT_TIMEOUT_MS } from './constants.js';
 import { normalizeHttpError } from './errors.js';
 import { HbcDataAccessError } from '../../errors/index.js';
 
+/** Per-request metadata threaded from repositories for telemetry. */
+export interface RequestMetadata {
+  /** Domain area (e.g., 'leads', 'schedule', 'auth'). */
+  domain: string;
+  /** Operation name (e.g., 'getAll', 'create', 'fetchCollection'). */
+  operation: string;
+}
+
 /** Hook called before each request. Can be used for retry/telemetry wiring. */
-export type BeforeRequestHook = (url: string, init: RequestInit) => void;
+export type BeforeRequestHook = (url: string, init: RequestInit, metadata?: RequestMetadata) => void;
 
 /** Hook called after each response. Can be used for retry/telemetry wiring. */
-export type AfterResponseHook = (url: string, response: Response) => void;
+export type AfterResponseHook = (url: string, response: Response, metadata?: RequestMetadata) => void;
+
+/**
+ * Emit a structured telemetry event via console.log.
+ * Phase 1 PWA = console-only telemetry (C3 §2.1.9).
+ */
+function emitTelemetry(name: string, properties: Record<string, unknown>): void {
+  // eslint-disable-next-line no-console
+  console.log(JSON.stringify({
+    _telemetryType: 'customEvent',
+    name,
+    ...properties,
+  }));
+}
 
 export class ProxyHttpClient {
   private readonly baseUrl: string;
@@ -25,10 +47,10 @@ export class ProxyHttpClient {
   private readonly accessToken: string | undefined;
   private readonly timeout: number;
 
-  /** D1 hook point: called before each fetch. Not wired in foundation. */
+  /** D1 hook point: called before each fetch. */
   onBeforeRequest?: BeforeRequestHook;
 
-  /** D1 hook point: called after each fetch. Not wired in foundation. */
+  /** D1 hook point: called after each fetch. */
   onAfterResponse?: AfterResponseHook;
 
   constructor(config: ProxyConfig) {
@@ -38,24 +60,24 @@ export class ProxyHttpClient {
     this.timeout = config.timeout ?? DEFAULT_TIMEOUT_MS;
   }
 
-  async get<T>(path: string, params?: Record<string, string>): Promise<T> {
-    return this.request<T>('GET', path, undefined, params);
+  async get<T>(path: string, params?: Record<string, string>, metadata?: RequestMetadata): Promise<T> {
+    return this.request<T>('GET', path, undefined, params, metadata);
   }
 
-  async post<T>(path: string, body: unknown): Promise<T> {
-    return this.request<T>('POST', path, body);
+  async post<T>(path: string, body: unknown, metadata?: RequestMetadata): Promise<T> {
+    return this.request<T>('POST', path, body, undefined, metadata);
   }
 
-  async put<T>(path: string, body: unknown): Promise<T> {
-    return this.request<T>('PUT', path, body);
+  async put<T>(path: string, body: unknown, metadata?: RequestMetadata): Promise<T> {
+    return this.request<T>('PUT', path, body, undefined, metadata);
   }
 
-  async patch<T>(path: string, body: unknown): Promise<T> {
-    return this.request<T>('PATCH', path, body);
+  async patch<T>(path: string, body: unknown, metadata?: RequestMetadata): Promise<T> {
+    return this.request<T>('PATCH', path, body, undefined, metadata);
   }
 
-  async delete(path: string): Promise<void> {
-    await this.requestRaw('DELETE', path);
+  async delete(path: string, metadata?: RequestMetadata): Promise<void> {
+    await this.requestRaw('DELETE', path, undefined, undefined, metadata);
   }
 
   // ---------------------------------------------------------------------------
@@ -67,8 +89,9 @@ export class ProxyHttpClient {
     path: string,
     body?: unknown,
     params?: Record<string, string>,
+    metadata?: RequestMetadata,
   ): Promise<T> {
-    const response = await this.requestRaw(method, path, body, params);
+    const response = await this.requestRaw(method, path, body, params, metadata);
 
     if (response.status === 204) {
       return undefined as T;
@@ -82,11 +105,13 @@ export class ProxyHttpClient {
     path: string,
     body?: unknown,
     params?: Record<string, string>,
+    metadata?: RequestMetadata,
   ): Promise<Response> {
     const url = this.buildUrl(path, params);
+    const correlationId = crypto.randomUUID();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'X-Request-Id': crypto.randomUUID(),
+      'X-Request-Id': correlationId,
     };
 
     // Per-request token acquisition: getToken() is called on every request
@@ -102,8 +127,18 @@ export class ProxyHttpClient {
       body: body !== undefined ? JSON.stringify(body) : undefined,
     };
 
-    this.onBeforeRequest?.(url, init);
+    // P1-C3: proxy.request.start telemetry
+    const telemetryBase = metadata
+      ? { domain: metadata.domain, operation: metadata.operation, correlationId, method }
+      : { correlationId, method };
 
+    if (metadata) {
+      emitTelemetry('proxy.request.start', telemetryBase);
+    }
+
+    this.onBeforeRequest?.(url, init, metadata);
+
+    const startMs = Date.now();
     let response: Response;
     try {
       const controller = new AbortController();
@@ -111,7 +146,14 @@ export class ProxyHttpClient {
       response = await fetch(url, { ...init, signal: controller.signal });
       clearTimeout(timeoutId);
     } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
+      const durationMs = Date.now() - startMs;
+      const errorCode = err instanceof DOMException && err.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK_ERROR';
+
+      if (metadata) {
+        emitTelemetry('proxy.request.error', { ...telemetryBase, durationMs, errorCode });
+      }
+
+      if (errorCode === 'TIMEOUT') {
         throw new HbcDataAccessError(
           `Request timed out after ${this.timeout}ms: ${method} ${url}`,
           'TIMEOUT',
@@ -124,16 +166,36 @@ export class ProxyHttpClient {
       );
     }
 
-    this.onAfterResponse?.(url, response);
+    this.onAfterResponse?.(url, response, metadata);
 
     if (!response.ok) {
+      const durationMs = Date.now() - startMs;
       let errorBody: unknown = null;
       try {
         errorBody = await response.json();
       } catch {
         // Body may not be JSON — normalizeHttpError handles null body
       }
+
+      if (metadata) {
+        emitTelemetry('proxy.request.error', {
+          ...telemetryBase,
+          durationMs,
+          statusCode: response.status,
+          errorCode: `HTTP_${response.status}`,
+        });
+      }
+
       throw normalizeHttpError(response.status, errorBody, url);
+    }
+
+    // P1-C3: proxy.request.success telemetry
+    if (metadata) {
+      emitTelemetry('proxy.request.success', {
+        ...telemetryBase,
+        durationMs: Date.now() - startMs,
+        statusCode: response.status,
+      });
     }
 
     return response;

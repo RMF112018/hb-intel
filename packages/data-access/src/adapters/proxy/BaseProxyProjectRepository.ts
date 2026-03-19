@@ -31,6 +31,7 @@ export abstract class BaseProxyProjectRepository<T> extends BaseRepository<T> {
     const raw = await this.client.get<unknown>(
       buildProjectScopedPath(projectId, this.domain),
       buildQueryParams(options),
+      { domain: this.domain, operation: 'fetchCollection' },
     );
     return parsePagedEnvelope<T>(raw);
   }
@@ -39,6 +40,8 @@ export abstract class BaseProxyProjectRepository<T> extends BaseRepository<T> {
     try {
       const raw = await this.client.get<unknown>(
         buildResourcePath(this.domain, id),
+        undefined,
+        { domain: this.domain, operation: 'fetchById' },
       );
       return parseItemEnvelope<T>(raw);
     } catch (err) {
@@ -51,6 +54,7 @@ export abstract class BaseProxyProjectRepository<T> extends BaseRepository<T> {
     const raw = await this.client.post<unknown>(
       buildProjectScopedPath(projectId, this.domain),
       data,
+      { domain: this.domain, operation: 'create' },
     );
     return parseItemEnvelope<T>(raw);
   }
@@ -59,17 +63,23 @@ export abstract class BaseProxyProjectRepository<T> extends BaseRepository<T> {
     const raw = await this.client.put<unknown>(
       buildResourcePath(this.domain, id),
       data,
+      { domain: this.domain, operation: 'update' },
     );
     return parseItemEnvelope<T>(raw);
   }
 
   protected async fetchDelete(id: number | string): Promise<void> {
-    await this.client.delete(buildResourcePath(this.domain, id));
+    await this.client.delete(
+      buildResourcePath(this.domain, id),
+      { domain: this.domain, operation: 'delete' },
+    );
   }
 
   protected async fetchAggregate<A>(projectId: string, subPath: string): Promise<A> {
     const raw = await this.client.get<unknown>(
       buildProjectScopedPath(projectId, this.domain) + `/${subPath}`,
+      undefined,
+      { domain: this.domain, operation: `fetchAggregate:${subPath}` },
     );
     return parseItemEnvelope<A>(raw);
   }
@@ -77,6 +87,8 @@ export abstract class BaseProxyProjectRepository<T> extends BaseRepository<T> {
   protected async fetchSubResource<S>(parentId: number | string, subPath: string): Promise<S[]> {
     const raw = await this.client.get<unknown>(
       buildResourcePath(this.domain, parentId) + `/${subPath}`,
+      undefined,
+      { domain: this.domain, operation: `fetchSubResource:${subPath}` },
     );
     return parseItemEnvelope<S[]>(raw);
   }
@@ -85,6 +97,7 @@ export abstract class BaseProxyProjectRepository<T> extends BaseRepository<T> {
     const raw = await this.client.post<unknown>(
       buildResourcePath(this.domain, parentId) + `/${subPath}`,
       data,
+      { domain: this.domain, operation: `createSubResource:${subPath}` },
     );
     return parseItemEnvelope<S>(raw);
   }

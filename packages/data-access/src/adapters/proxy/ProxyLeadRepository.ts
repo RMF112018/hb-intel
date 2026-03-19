@@ -30,6 +30,7 @@ export class ProxyLeadRepository extends BaseRepository<ILead> implements ILeadR
     const raw = await this.client.get<unknown>(
       buildResourcePath('leads'),
       buildQueryParams(options),
+      { domain: 'leads', operation: 'getAll' },
     );
     return parsePagedEnvelope<ILead>(raw);
   }
@@ -39,6 +40,8 @@ export class ProxyLeadRepository extends BaseRepository<ILead> implements ILeadR
     try {
       const raw = await this.client.get<unknown>(
         buildResourcePath('leads', id),
+        undefined,
+        { domain: 'leads', operation: 'getById' },
       );
       return parseItemEnvelope<ILead>(raw);
     } catch (err) {
@@ -51,6 +54,7 @@ export class ProxyLeadRepository extends BaseRepository<ILead> implements ILeadR
     const raw = await this.client.post<unknown>(
       buildResourcePath('leads'),
       data,
+      { domain: 'leads', operation: 'create' },
     );
     return parseItemEnvelope<ILead>(raw);
   }
@@ -60,13 +64,17 @@ export class ProxyLeadRepository extends BaseRepository<ILead> implements ILeadR
     const raw = await this.client.put<unknown>(
       buildResourcePath('leads', id),
       data,
+      { domain: 'leads', operation: 'update' },
     );
     return parseItemEnvelope<ILead>(raw);
   }
 
   async delete(id: number): Promise<void> {
     this.validateId(id, 'Lead');
-    await this.client.delete(buildResourcePath('leads', id));
+    await this.client.delete(
+      buildResourcePath('leads', id),
+      { domain: 'leads', operation: 'delete' },
+    );
   }
 
   async search(query: string, options?: IListQueryOptions): Promise<IPagedResult<ILead>> {
@@ -75,6 +83,7 @@ export class ProxyLeadRepository extends BaseRepository<ILead> implements ILeadR
     const raw = await this.client.get<unknown>(
       buildResourcePath('leads', 'search'),
       params,
+      { domain: 'leads', operation: 'search' },
     );
     return parsePagedEnvelope<ILead>(raw);
   }

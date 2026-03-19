@@ -182,23 +182,88 @@ describe('ProxyHttpClient', () => {
   });
 
   describe('Hooks', () => {
-    it('calls onBeforeRequest before fetch', async () => {
+    it('calls onBeforeRequest with metadata', async () => {
       mockFetch({ jsonBody: {} });
       const client = createClient();
       const hook = vi.fn();
       client.onBeforeRequest = hook;
-      await client.get('/test');
+      await client.get('/test', undefined, { domain: 'leads', operation: 'getAll' });
       expect(hook).toHaveBeenCalledOnce();
       expect(hook.mock.calls[0][0]).toContain('/test');
+      expect(hook.mock.calls[0][2]).toEqual({ domain: 'leads', operation: 'getAll' });
     });
 
-    it('calls onAfterResponse after fetch', async () => {
+    it('calls onAfterResponse with metadata', async () => {
       mockFetch({ jsonBody: {} });
       const client = createClient();
       const hook = vi.fn();
       client.onAfterResponse = hook;
-      await client.get('/test');
+      await client.get('/test', undefined, { domain: 'leads', operation: 'getAll' });
       expect(hook).toHaveBeenCalledOnce();
+      expect(hook.mock.calls[0][2]).toEqual({ domain: 'leads', operation: 'getAll' });
+    });
+  });
+
+  describe('P1-C3 Telemetry', () => {
+    it('emits proxy.request.start and proxy.request.success on success', async () => {
+      mockFetch({ status: 200, jsonBody: { data: 'ok' } });
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const client = createClient();
+      await client.get('/test', undefined, { domain: 'leads', operation: 'getAll' });
+
+      const events = consoleSpy.mock.calls
+        .map((call) => { try { return JSON.parse(call[0] as string); } catch { return null; } })
+        .filter(Boolean);
+
+      const start = events.find((e: Record<string, unknown>) => e.name === 'proxy.request.start');
+      expect(start).toBeDefined();
+      expect(start.domain).toBe('leads');
+      expect(start.operation).toBe('getAll');
+      expect(start.method).toBe('GET');
+
+      const success = events.find((e: Record<string, unknown>) => e.name === 'proxy.request.success');
+      expect(success).toBeDefined();
+      expect(success.statusCode).toBe(200);
+      expect(typeof success.durationMs).toBe('number');
+
+      consoleSpy.mockRestore();
+    });
+
+    it('emits proxy.request.error on HTTP error', async () => {
+      mockFetch({ status: 500, jsonBody: { message: 'fail' } });
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const client = createClient();
+
+      try {
+        await client.get('/test', undefined, { domain: 'leads', operation: 'getAll' });
+      } catch {
+        // expected
+      }
+
+      const events = consoleSpy.mock.calls
+        .map((call) => { try { return JSON.parse(call[0] as string); } catch { return null; } })
+        .filter(Boolean);
+
+      const error = events.find((e: Record<string, unknown>) => e.name === 'proxy.request.error');
+      expect(error).toBeDefined();
+      expect(error.statusCode).toBe(500);
+      expect(error.domain).toBe('leads');
+
+      consoleSpy.mockRestore();
+    });
+
+    it('does not emit telemetry when metadata is omitted', async () => {
+      mockFetch({ status: 200, jsonBody: { data: 'ok' } });
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const client = createClient();
+      await client.get('/test');
+
+      const events = consoleSpy.mock.calls
+        .map((call) => { try { return JSON.parse(call[0] as string); } catch { return null; } })
+        .filter((e) => e && e._telemetryType === 'customEvent');
+
+      expect(events.length).toBe(0);
+      consoleSpy.mockRestore();
     });
   });
 });

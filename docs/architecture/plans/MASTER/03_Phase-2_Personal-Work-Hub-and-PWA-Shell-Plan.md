@@ -1,206 +1,400 @@
-# Phase 2 — Personal Work Hub and PWA Shell Plan
+# HB Intel — Enhanced Phase 2 Plan
+## Personal Work Hub and PWA Shell
 
-**Document ID:** 03  
-**Classification:** Phase Master Plan  
-**Status:** Draft — enhanced planning baseline  
-**Primary Role:** Make the PWA the true daily operating surface for HB Intel by establishing Personal Work Hub as the user-centered operating layer and completing the governing shell, routing, and work-aggregation model.
+**Document purpose:** Enhanced implementation-guiding Phase 2 plan for the Personal Work Hub and PWA shell work, refined through repo-truth review, governing-architecture reconciliation, subject-matter review, and decision interview.
 
----
+**Phase intent:** Turn HB Intel’s user entry experience into a real operating layer by making the PWA the primary personal work surface, while preserving a governed SPFx companion lane and explicit shared cross-lane contracts.
 
-## 1. Purpose
-
-Phase 2 defines how HB Intel turns the PWA from a broad application shell into the actual daily operating layer for users across the company. The phase is centered on **Personal Work Hub**: the place a user opens first, returns to repeatedly, and uses to understand what matters now, what changed, what they own, what is blocked, and what should happen next.
-
-The goal is not to create a generic dashboard. The goal is to create a **task-first, calm, role-aware, context-preserving operating layer** that reduces module switching, lowers cognitive overhead, and makes the platform feel materially easier to use than incumbent construction-tech tools.
-
-Phase 2 also completes the governing shell and routing model that makes this possible:
-- the **PWA** becomes the primary day-to-day operating surface,
-- **Personal Work Hub** becomes the user-centered operating layer,
-- **Project Hub** remains the project-centered operating layer,
-- and shared primitives/packages remain the default implementation path for work aggregation, notifications, personalization, and state behavior.
+**Document type:** Execution-hardened phase plan  
+**Status:** Enhanced planning baseline  
+**Primary lane focus:** PWA-first, with governed SPFx coexistence  
+**Primary audience:** Architecture, experience/shell, platform/core services, business-domain leads, and delivery planning owners
 
 ---
 
-## 2. Phase Objectives
+## 1. Objective
 
-Phase 2 planning addresses the following objectives:
+Phase 2 exists to make HB Intel feel like a real daily operating surface rather than a collection of modules and entry points.
 
-- Make **Personal Work Hub** the default post-login operating surface in the PWA.
-- Establish a **task-first operating model** organized around responsibility lanes, time-horizon cues, ownership clarity, and next-move visibility.
-- Complete the governing **PWA shell, root-routing, context-retention, and return-memory** rules that make the hub feel like the user’s real home.
-- Define how **real work sources** from Wave 1 business-core modules attach to the hub in a dependency-aware way.
-- Provide a governed model for **role-aware analytics expansion**, delegated/team visibility, and personalization without fragmenting the platform into separate mini-products.
-- Define the **notification-to-work**, **hub-to-domain**, and **hub-to-Project Hub** contracts so movement across the platform feels connected rather than app-switched.
-- Establish first-release **success measures** that evaluate adoption, action completion, reduced friction, trust, and role usefulness.
+This phase defines the Personal Work Hub and the shell behavior required to make that hub credible, calm, useful, and governable. It also clarifies how that operating layer coexists with HB Intel’s two application lanes:
+
+- **PWA lane** — the full Personal Work Hub and primary day-to-day operating home
+- **SPFx lane** — a richer companion surface that supports summary, visibility, and light actions, but does not become a second full operating home
+
+Phase 2 is therefore not a generic dashboard phase. It is the phase that establishes:
+
+- the user’s default home surface,
+- the task-first operating model,
+- the shell and routing behavior that preserves continuity,
+- the work-publication and handoff rules that attach domain work into that home,
+- the role-aware governance model,
+- and the first-release rollout and validation rules.
 
 ---
 
-## 3. Delivered End State (Planning Level)
+## 2. Planning Basis and Repo-Truth Starting Point
 
-At planning completion of Phase 2:
+This enhanced plan does **not** assume the Personal Work Hub or shell work begins from zero. Phase 2 must build from the current repo posture rather than re-planning foundations that already exist.
 
-- the operating doctrine for **Personal Work Hub** is fully defined and decision-locked,
-- the PWA shell and root-routing model are specified at implementation-governing depth,
-- the hub’s lane model, ranking model, analytics model, personalization controls, and role-context behavior are documented,
-- the first-release **source scope** is defined and tied to real Wave 1 business-core work sources,
-- the boundary rules between **Personal Work Hub**, **domain pages**, and **Project Hub** are specified,
-- the phase includes measurable acceptance gates, dependency rules, carry-forward decisions, and readiness criteria,
-- and downstream implementation teams can attach to the Phase 2 plan without inventing their own work-hub patterns.
+### 2.1 Required governing references
 
-At implementation completion of Phase 2:
+This plan is written to align with the following governing architecture references:
 
-- the PWA opens into a meaningful **Personal Work Hub**,
-- users can see what they own, what needs attention, what changed, what is blocked, and what they should do next without first reconstructing their day from multiple modules,
-- the hub is fed by the first meaningful set of real work sources,
-- shell movement across desktop and tablet is calm, trustworthy, and context-preserving,
-- and the PWA behaves like the main operating surface rather than a secondary launcher.
+- `docs/architecture/blueprint/current-state-map.md`
+- `docs/architecture/blueprint/HB-Intel-Dev-Roadmap.md`
+
+### 2.2 Repo-truth foundations already present
+
+Phase 2 planning must explicitly acknowledge the following current-state foundations:
+
+- A real **PWA application shell** already exists, including router, auth integration, workspace routing, and shell composition.
+- Root-route behavior already includes **redirect memory capture/restore** and **role-based post-auth landing precedence**.
+- The current PWA still lands at **`/project-hub`** by default, so Phase 2 is a controlled transition from a project-hub-first posture to a personal-work-first posture.
+- A real shared **`@hbc/my-work-feed`** package already exists and must remain the governing aggregation primitive for Personal Work Hub work publication.
+- Supporting shared packages already exist for core hub behavior, including:
+  - `@hbc/auth`
+  - `@hbc/shell`
+  - `@hbc/ui-kit`
+  - `@hbc/session-state`
+  - `@hbc/notification-intelligence`
+  - `@hbc/project-canvas`
+- Work Hub reference material already exists in the repo and should be treated as starting-point truth rather than ignored background.
+- The PWA already has a real PWA/installability baseline; Phase 2 is not inventing a PWA from scratch.
+
+### 2.3 Planning consequence
+
+Because these foundations already exist, Phase 2 must focus on:
+
+- **binding** existing primitives into one coherent operating-layer model,
+- **tightening** lane ownership and interaction rules,
+- **reconciling** current repo truth with the desired target behavior,
+- and **sequencing** first-release implementation and rollout in a credible way.
+
+Phase 2 must **not** waste effort re-describing already-established shell and feed foundations as if they were still hypothetical.
+
+---
+
+## 3. Strategic Outcome of Phase 2
+
+At the end of Phase 2, HB Intel should have a defined and implementation-ready operating-layer contract in which:
+
+- the **PWA** is the user’s primary personal home,
+- the home surface is **task-first and personal-first**,
+- elevated users also see governed **team / delegated / portfolio attention**,
+- the **SPFx lane** provides a useful but bounded companion experience,
+- users can move from summary to action without losing context,
+- work is published into the hub through shared cross-domain primitives rather than one-off domain logic,
+- and first-release usefulness can be validated with evidence rather than opinion.
+
+The target user impression of the completed phase is:
+
+> “When I open HB Intel, I immediately see what I need to do, what is waiting, what changed, and what matters next — without having to reconstruct my day from multiple tools.”
 
 ---
 
 ## 4. Phase 2 Scope Delivered
 
-Phase 2 planning covers:
+Phase 2 planning covers the following:
 
 - Personal Work Hub operating doctrine and information architecture
-- PWA shell completion and root-routing/landing behavior
+- PWA shell completion and root-routing/landing transition to Personal Work Hub
+- explicit **PWA/SPFx lane ownership** and coexistence rules
 - work-item ranking, lane structure, time-horizon cues, and explainability rules
-- work-source aggregation model using shared primitives
-- role-aware analytics expansion tied to `@hbc/auth` role definitions
-- governed personalization using `@hbc/project-canvas`
-- delegated/team lane visibility rules for elevated roles
+- first-release work publication and handoff rules using existing shared primitives
+- role-aware visibility and analytics expansion tied to `@hbc/auth` role definitions
+- governed personalization and adaptive composition rules
+- delegated/team visibility rules for elevated roles
 - notification-to-hub signal mapping using `@hbc/notification-intelligence`
-- hub state persistence, return/context memory, freshness/staleness trust, and degraded/offline behavior expectations
+- state persistence, context/return memory, freshness/staleness trust, and degraded/offline behavior expectations
 - handoff rules from Personal Work Hub to domain pages and Project Hub
-- first-release success model and validation criteria
+- first-release pilot rollout, phased adoption posture, and validation criteria
 
 ---
 
-## 5. Phase 2 Boundary Conditions
+## 5. Boundary Conditions and Non-Goals
 
-The following are explicitly outside Phase 2 scope:
+The following are **outside** Phase 2 scope and must not be backfilled into this plan as hidden requirements:
 
-- Full completion of all business domain modules
-- Full completion of **Project Hub** as the project-centered operating layer (Phase 3)
-- Broad search, connected-record, and document journey unification (Phase 5)
-- Field-first workflow specialization and mobile/tablet field execution patterns beyond shared shell/tablet expectations (Phase 6)
-- Broad intelligence, advanced recommendation logic, AI assistance expansion, and enterprise production hardening (Phase 7)
-- Exact per-role card inventory for every individual auth role as a permanent final-state artifact (captured as follow-on governance work)
-- Exact production KPI thresholds for first-release success (captured as follow-on implementation and validation work)
+- Full completion of all business-domain modules
+- Full completion of **Project Hub** as the project-centered operating layer
+- Broad connected-record, search, and document-journey unification beyond the work-surface rules needed here
+- Broad field-specialized/mobile-first workflow design beyond shared shell, continuity, and degraded-state expectations
+- Enterprise-wide rollout as a day-one assumption
+- Final KPI bands and production support thresholds for all roles and domains
+- Final per-role permanent card inventory for every auth role
+- Full dual-host parity between PWA and SPFx home experiences
+- Open-ended dashboard freedom that would weaken the task-first operating model
 
-Phase 2 is therefore an **operating-layer phase**, not a full platform-completion phase.
+Phase 2 is therefore an **operating-layer and shell-governance phase**, not a general platform-completion phase and not a “duplicate the same home in both hosts” phase.
 
 ---
 
-## 6. Phase Workstreams
+## 6. Phase 2 Lane Ownership and Coexistence Rules
 
-### 6.1 Workstream A — Personal Work Hub Operating Model
+This section is mandatory doctrine for all downstream design and implementation work.
 
-**Outcome:** Define Personal Work Hub as a real operating layer rather than a dashboard.
+### 6.1 Lane model
 
-**What Phase 2 defines here:**
-- Personal Work Hub remains **personal-first**, even when work volume is low.
-- Low-work states stay on the hub and show a **smart empty-state plus governed analytics cards**, not a redirect away.
-- The hub uses a **hybrid organization model**: responsibility lanes are primary, with time-horizon cues layered inside them.
-- Work is ranked using a **weighted mix** of ownership, urgency, aging, project importance, blocking status, and role context.
-- Users must be able to understand both:
-  - what they are responsible for next,
-  - and when it matters.
-- The hub must provide explainability for why items surface where they do.
+| Concern | PWA lane | SPFx lane | Shared cross-lane platform work |
+|---|---|---|---|
+| Primary home experience | **Owns full Personal Work Hub** | Does not own the full home | Route semantics, auth state, entitlement vocabulary |
+| Default landing | **Owns default steady-state landing** (`/my-work`) for approved rollout cohorts | No default-host takeover in this phase | Redirect memory, post-auth precedence rules |
+| Personal work feed | **Owns full feed, filtering, role-aware composition, context retention** | May show governed companion summary/list | Canonical work-item model, dedupe, ranking inputs |
+| Rich companion summary | May include within shell/home | **Owns richer companion view** for summary, limited item list, and light actions | Shared publication model and telemetry |
+| Item completion | **Owns deeper workflow continuation and full completion** | Limited to light actions only | Deep-link rules, action metadata, state vocabulary |
+| Personalization | **Owns moderated layout controls** | Curated composition only in first release | Saved-view rules, entitlement rules |
+| Team/delegated visibility | **Owns elevated-role hybrid landing** | May expose summarized team visibility | Role and delegated-visibility contracts |
+| Offline/degraded behavior | **Owns primary trust model** | Must expose consistent status cues where applicable | Freshness/staleness vocabulary, session-state semantics |
+| Project/Domain handoff | **Owns full handoff and return continuity** | Can launch into destination or PWA | Context handoff, project-anchor semantics |
 
-**Locked operating decisions included in this workstream:**
-- Low-work default stays on Personal Work Hub
-- Responsibility-first lanes with time-horizon layering
-- Weighted ranking model
-- Balanced first-release success scorecard
+### 6.2 First-release lane doctrine
+
+Phase 2 first release is governed by the following locked posture:
+
+- **PWA** is the full operating home.
+- **SPFx** is a richer companion lane, not a competing home.
+- SPFx may expose:
+  - counts,
+  - summary cards,
+  - a limited item list,
+  - and selected light actions.
+- SPFx must **not** become the place where users complete deeper work, manage rich personalization, or experience the full operating-layer logic.
+- Anything that requires deeper workflow context, multi-step interaction, or extended continuity must route to the **PWA**.
+
+### 6.3 Cross-lane consistency rules
+
+The following must remain consistent across both lanes:
+
+- auth and role resolution semantics
+- work-item identity and canonical shape
+- notification-to-work signal semantics
+- action/deep-link vocabulary
+- freshness, stale, syncing, degraded, and offline status meanings
+- delegated/team visibility entitlement rules
+- telemetry event names for launch, open, action, handoff, and abandonment
+- project/context handoff semantics where applicable
+
+### 6.4 Explicit anti-drift rules
+
+The following are prohibited during Phase 2:
+
+- implementing separate work-item models for PWA and SPFx
+- creating lane-specific ranking systems
+- allowing SPFx to silently become a second full home experience
+- allowing unrestricted dashboard composition in either lane
+- bypassing `@hbc/my-work-feed` and `@hbc/notification-intelligence` for first-release publication patterns where those shared primitives already cover the need
+
+---
+
+## 7. First-Release Experience Model
+
+### 7.1 Default release posture
+
+Phase 2 is planned for a **targeted pilot / phased rollout first**, not a company-wide mandatory switch on day one.
+
+The pilot cohort should prioritize:
+
+- users whose workflows are tied to the first-release source tranche,
+- users who will benefit most from a credible daily work surface,
+- and elevated roles who need the hybrid personal + team/portfolio experience.
+
+The exact roster is an implementation-governance decision, not a blocker to this phase plan.
+
+### 7.2 Home model by role
+
+| User type | First-release landing behavior |
+|---|---|
+| Standard roles | Personal work first |
+| Elevated roles | Hybrid landing: personal work first, then team / delegated / portfolio attention |
+| Multi-role users | Personal work within the active role context, with controlled switching |
+| Admin-only exception contexts | May still use admin-specific landing behavior where explicitly required |
+
+### 7.3 Low-work behavior
+
+Low-work states do **not** redirect the user away from Personal Work Hub.
+
+Instead, the PWA home remains stable and shows:
+
+- smart empty-state guidance,
+- governed secondary cards,
+- recent signals where useful,
+- and quick paths back into meaningful tools or context.
+
+This keeps the operating layer intact even when the active task queue is light.
+
+### 7.4 Operating doctrine
+
+The Personal Work Hub is **not** a generic summary dashboard.
+
+The top of the page must always answer, in a calm and trustworthy way:
+
+- What needs my attention now?
+- What is waiting on others?
+- What changed that matters?
+- What project or context is most relevant right now?
+
+---
+
+## 8. Layout, Personalization, and Surface Governance
+
+### 8.1 Page zones
+
+The Personal Work Hub uses governed zones:
+
+- **Primary zone** — prioritized personal work, next moves, waiting/blocked, and critical signals
+- **Secondary zone** — analytics, exceptions, oversight, and role-aware visibility expansions
+- **Tertiary zone** — quick actions, recent context, pinned tools, and lightweight utility components
+
+### 8.2 Personalization doctrine
+
+Personalization is **moderately governed**.
+
+Users may:
+
+- reorder approved secondary/tertiary cards,
+- resize approved cards within governed limits,
+- choose from approved role-allowed cards,
+- save limited view preferences where permitted.
+
+Users may **not**:
+
+- remove or displace the core personal-work runway,
+- break the responsibility-first operating model,
+- surface cards outside their entitlement rules,
+- or turn the home into a freeform analytics board.
+
+### 8.3 `@hbc/project-canvas` usage rule
+
+`@hbc/project-canvas` is approved as the governing adaptive-layout foundation for the **PWA Personal Work Hub**, but with explicit constraints:
+
+- first-release use is focused on **secondary and tertiary zones**, plus governed supporting composition around the primary runway,
+- the core task-first operating region remains protected and not fully user-removable,
+- SPFx companion surfaces use **curated composition**, not full freeform canvas behavior, until host suitability and supportability are proven.
+
+This preserves reuse without allowing the Personal Work Hub to drift into an unconstrained dashboard experience.
+
+---
+
+## 9. Work Publication, Signals, and Handoff Doctrine
+
+### 9.1 Governing publication model
+
+Phase 2 must use existing shared work-publication primitives rather than creating a parallel operating model.
+
+The governing posture is:
+
+- `@hbc/my-work-feed` remains the primary aggregation primitive,
+- `@hbc/notification-intelligence` remains the governing signal layer for notification-fed surfacing,
+- domain teams publish work into the hub through shared contracts,
+- and Personal Work Hub remains the main place for meaningful review and action prioritization.
+
+### 9.2 First-release source posture
+
+The first-release source scope remains:
+
+- Estimating
+- Business Development
+- Project Hub handoff signals
+- approvals
+- provisioning/admin exceptions
+
+But Phase 2 must explicitly classify each first-release source as:
+
+- **required for pilot launch**,
+- **optional but beneficial**,
+- **blocked on named prerequisite**,
+- or **deferred beyond first release**.
+
+### 9.3 Navigation doctrine by item type
+
+Work items do not all open the same way.
+
+Allowed destination patterns include:
+
+- direct deep-link into the authoritative domain surface,
+- preview/summary first, then domain open,
+- escalation into Project Hub for materially project-coordination-oriented work,
+- or light in-place action when explicitly approved for the SPFx companion or PWA hub surface.
+
+### 9.4 Project Hub handoff doctrine
+
+Project Hub remains the project-centered operating layer and must not be absorbed by Personal Work Hub.
+
+Phase 2 handoff logic uses a **project significance rule**:
+
+- work that is materially project-coordination-oriented should route toward Project Hub,
+- work that is materially personal-action-oriented should remain governed by Personal Work Hub,
+- and the return path must preserve user context and continuity.
+
+---
+
+## 10. Workstreams
+
+### 10.1 Workstream A — Personal Work Hub Operating Model
+
+**Outcome:** Define the Personal Work Hub as a personal-first operating layer with a stable responsibility-first structure.
+
+**What this workstream must now clarify beyond the prior version:**
+
+- distinguish invariant operating rules from configurable page behavior,
+- define the responsibility-lane model clearly enough for real surface design,
+- document why the hub remains stable in both high-work and low-work states,
+- and convert ranking/lane concepts into implementation-governing policy rather than descriptive prose.
 
 **Mandatory deliverables:**
 - P2-A1 — Personal Work Hub Operating Model Register
 - P2-A2 — Ranking, Lane, and Time-Horizon Policy
 - P2-A3 — Work-Item Explainability and Visibility Rules
 
-### 6.2 Workstream B — PWA Shell, Root Routing, and Return Memory
+### 10.2 Workstream B — PWA Shell, Landing Transition, and Lane Ownership
 
-**Outcome:** Complete the governing shell and root-routing model that makes the hub feel like the primary operating surface.
+**Outcome:** Make the PWA the credible default home for the approved first-release cohort while preserving deep-link continuity and cross-lane coexistence.
 
-**What Phase 2 defines here:**
-- The **PWA** is the main operating surface.
-- **Personal Work Hub** is the default post-login destination.
-- Root routing must preserve deep-link intent, but the steady-state home is the work hub.
-- Movement across domains should preserve user context and reduce heavy navigation hops.
-- Return navigation should use **strong context memory**, restoring filters, scroll, expanded sections, and recent focus state where appropriate.
-- Freshness should use a **hybrid trust model**: important items refresh quickly, while the page remains calm and visibly trustworthy rather than noisy.
-- Shell behavior must remain strong across desktop and tablet.
+**What this workstream must now clarify beyond the prior version:**
 
-**Locked operating decisions included in this workstream:**
-- Strong return/context memory
-- Hybrid freshness model
-- Cross-device shell continuity
+- current repo-truth landing behavior vs target landing behavior,
+- the transition from `/project-hub` default to `/my-work` default,
+- redirect memory and return behavior that already exists vs what Phase 2 adds,
+- lane-specific shell responsibilities,
+- and the explicit rules preventing SPFx from becoming a second full home.
 
 **Mandatory deliverables:**
+- P2-B0 — Phase 2 Lane Ownership and Coexistence Rules
 - P2-B1 — Root Routing and Landing Precedence Spec
 - P2-B2 — Hub State Persistence and Return-Memory Contract
 - P2-B3 — Freshness, Refresh, and Staleness Trust Policy
 - P2-B4 — Cross-Device Shell Behavior Note
 
-### 6.3 Workstream C — Shared Work Source Integration and Handoff Rules
+### 10.3 Workstream C — Shared Work Sources, Signals, and Handoff Rules
 
-**Outcome:** Define how real work sources attach to the hub and how the hub routes users into the correct destination surface.
+**Outcome:** Define how first-release domains publish meaningful work into the hub and how those items move users into the right next surface.
 
-**What Phase 2 defines here:**
-- Personal Work Hub must use the existing shared work-aggregation path rather than inventing a new one.
-- Notifications are **signals**, but the hub is the main place to review and act on meaningful work.
-- `@hbc/notification-intelligence` is the governing signal layer for notification-fed work surfacing.
-- First-release scope includes **Wave 1 business-core work sources**:
-  - Estimating
-  - Business Development
-  - Project Hub handoff signals
-  - approvals
-  - provisioning/admin exceptions
-- The first release must distinguish:
-  - required sources,
-  - optional sources,
-  - blocked sources,
-  - deferred sources.
-- Work items should open by **item-type rule**:
-  - some deep-link directly,
-  - some preview first,
-  - some escalate into Project Hub when they are materially project-coordination-oriented.
+**What this workstream must now clarify beyond the prior version:**
 
-**Locked operating decisions included in this workstream:**
-- Notifications feed the hub via `@hbc/notification-intelligence`
-- First-release source scope = Wave 1 business-core scope
-- Personal Work Hub → Project Hub handoff uses a **project significance rule**
-- Work-item navigation varies by item type
+- the actual first-release source tranche as a governed register,
+- required vs optional vs blocked vs deferred source status,
+- signal-to-work mapping rules,
+- PWA vs SPFx action boundaries,
+- and item-type-based navigation/handoff rules.
 
 **Mandatory deliverables:**
 - P2-C1 — First-Release Source Tranche Register
 - P2-C2 — Notification-to-Work Mapping Policy
 - P2-C3 — Work-Item Navigation Matrix
 - P2-C4 — Personal Work Hub / Domain / Project Hub Handoff Criteria Matrix
+- P2-C5 — First-Release Pilot Publication and Rollout Readiness Register
 
-### 6.4 Workstream D — Role Governance, Analytics Expansion, and Personalization
+### 10.4 Workstream D — Role Governance, Analytics Expansion, and Personalization
 
-**Outcome:** Provide a governed role-aware model without turning the platform into separate products or open-ended dashboards.
+**Outcome:** Give the Personal Work Hub governed role-aware depth without turning it into separate products or unconstrained dashboards.
 
-**What Phase 2 defines here:**
-- The hub uses an **adaptive layout** backed by `@hbc/project-canvas`.
-- The page is organized into governed zones:
-  - **Primary zone:** prioritized work lanes and next moves
-  - **Secondary zone:** analytics and exception/oversight cards
-  - **Tertiary zone:** quick actions, pinned tools, recent context
-- Analytics visibility expands with **role elevation**, but governance derives from the actual `@hbc/auth` role definitions rather than a parallel custom hierarchy.
-- Personalization is **moderately governed**:
-  - users may reorder, resize, and choose from approved cards within role-based limits,
-  - but they may not break the task-first operating model.
-- Elevated roles may receive **limited delegated/team lanes**, but the hub remains personal-first.
-- For multi-role users, the hub uses a **primary active role context** model with controlled switching.
+**What this workstream must now clarify beyond the prior version:**
 
-**Locked operating decisions included in this workstream:**
-- Adaptive layout using `@hbc/project-canvas`
-- Role-governed analytics expansion via `@hbc/auth`
-- Moderately governed personalization
-- Limited delegated/team lanes for elevated roles
-- Multi-role context model with default active role + controlled switch
+- which zones are invariant vs configurable,
+- how elevated-role hybrid landing works,
+- how delegated/team visibility is constrained,
+- what SPFx companion visibility may include,
+- and what personalization rules are allowed per lane.
 
 **Mandatory deliverables:**
 - P2-D1 — Role-to-Hub Entitlement Matrix
@@ -209,67 +403,54 @@ Phase 2 is therefore an **operating-layer phase**, not a full platform-completio
 - P2-D4 — Delegated and Team Lane Governance Note
 - P2-D5 — Personalization Policy and Saved-View Rules
 
-### 6.5 Workstream E — Multi-Role Context, Adoption, and First-Release Validation
+### 10.5 Workstream E — Multi-Role Context, Rollout, and Validation
 
-**Outcome:** Define how the hub behaves for real multi-role users and how first-release success is judged.
+**Outcome:** Define how the hub behaves for real multi-role users and how first-release success is evaluated during phased rollout.
 
-**What Phase 2 defines here:**
-- When a user has multiple auth roles, the hub uses a **primary active role context**.
-- The system chooses a sensible default, but the user may manually switch role context when needed.
-- Default context uses a **hybrid precedence rule**:
-  - preserve last manual choice when still relevant,
-  - otherwise use a system-inferred best-fit context.
-- Context relevance is **work-and-context aware**, not purely time-based.
-- Changing role context should affect:
-  - analytics,
-  - layout preset,
-  - lane emphasis,
-  - delegated visibility,
-  - while keeping the same overall product frame.
-- The hub’s recent/current project anchor also uses a **hybrid rule**:
-  - use a user-pinned project when present and relevant,
-  - otherwise infer the best-fit project from work, activity, assignment, and project signals.
-- First-release success uses a **balanced scorecard** rather than a single adoption or throughput metric.
+**What this workstream must now clarify beyond the prior version:**
 
-**Locked operating decisions included in this workstream:**
-- Multi-role active role context model
-- Hybrid role-context switch/default rules
-- Hybrid project anchor rule
-- Balanced success scorecard
+- active role context behavior,
+- hybrid role and project anchor rules,
+- pilot-cohort rollout posture,
+- evidence-based first-release acceptance,
+- and what remains open vs intentionally deferred.
 
 **Mandatory deliverables:**
 - P2-E1 — Multi-Role Context Policy
 - P2-E2 — Project Anchor and Context-Scope Policy
 - P2-E3 — First-Release Success Scorecard and Validation Plan
 - P2-E4 — Phase 2 Open Decisions and Deferred Items Register
+- P2-E5 — Pilot Cohort Rollout and Adoption Sequencing Note
 
 ---
 
-## 7. Planning Milestones Achieved
+## 11. Planning Milestones
 
-### M2.1 — Personal Work Hub operating doctrine locked
-The hub is defined as a task-first, personal-first operating layer with a clear lane model, ranking model, and low-work behavior.
+### M2.1 — Operating doctrine locked
+The Personal Work Hub is defined as a task-first, personal-first operating layer with stable low-work behavior and responsibility-first organization.
 
-### M2.2 — PWA landing and shell doctrine locked
-The PWA shell, root-routing direction, return-memory behavior, and freshness/staleness trust model are specified.
+### M2.2 — Lane model locked
+The PWA/SPFx coexistence model is explicit, bounded, and implementation-guiding.
 
-### M2.3 — Role governance and adaptive layout model locked
-Role-driven analytics expansion, delegated visibility, personalization, and adaptive `@hbc/project-canvas` layout rules are defined.
+### M2.3 — Landing and continuity doctrine locked
+Root routing, landing precedence, redirect memory, return memory, freshness/staleness trust, and shell continuity rules are specified.
 
-### M2.4 — First-release work-source and handoff scope locked
-The first-release source register and the routing/handoff boundaries between Personal Work Hub, domain pages, and Project Hub are defined.
+### M2.4 — Role governance and layout doctrine locked
+Adaptive layout, personalization, hybrid elevated-role visibility, and entitlement rules are specified.
 
-### M2.5 — Multi-role behavior and first-release success criteria locked
-The plan defines active role context behavior, project anchoring, and a balanced first-release success scorecard.
+### M2.5 — Source tranche and handoff doctrine locked
+The first-release publication set, signal mapping, navigation, and Project Hub handoff boundaries are specified.
+
+### M2.6 — Pilot rollout and validation doctrine locked
+The first-release rollout posture, cohort logic, and balanced success scorecard are defined.
 
 ---
 
-## 8. Mandatory Deliverables
-
-Phase 2 must produce, at minimum, the following planning artifacts:
+## 12. Mandatory Deliverables
 
 | Workstream | Deliverable |
 |---|---|
+| B | P2-B0 — Phase 2 Lane Ownership and Coexistence Rules |
 | A | P2-A1 — Personal Work Hub Operating Model Register |
 | A | P2-A2 — Ranking, Lane, and Time-Horizon Policy |
 | A | P2-A3 — Work-Item Explainability and Visibility Rules |
@@ -281,6 +462,7 @@ Phase 2 must produce, at minimum, the following planning artifacts:
 | C | P2-C2 — Notification-to-Work Mapping Policy |
 | C | P2-C3 — Work-Item Navigation Matrix |
 | C | P2-C4 — Personal Work Hub / Domain / Project Hub Handoff Criteria Matrix |
+| C | P2-C5 — First-Release Pilot Publication and Rollout Readiness Register |
 | D | P2-D1 — Role-to-Hub Entitlement Matrix |
 | D | P2-D2 — Adaptive Layout and Zone Governance Spec |
 | D | P2-D3 — Analytics Card Governance Matrix |
@@ -290,210 +472,237 @@ Phase 2 must produce, at minimum, the following planning artifacts:
 | E | P2-E2 — Project Anchor and Context-Scope Policy |
 | E | P2-E3 — First-Release Success Scorecard and Validation Plan |
 | E | P2-E4 — Phase 2 Open Decisions and Deferred Items Register |
+| E | P2-E5 — Pilot Cohort Rollout and Adoption Sequencing Note |
 
 ---
 
-## 9. Dependencies
+## 13. Dependency Posture
 
-### Incoming dependencies
+### 13.1 Incoming dependencies
 
-Phase 2 depends on the following existing foundations:
+Phase 2 depends on the following current-state foundations:
 
-- Phase 0 control baseline complete
-- Stable auth/session/shell foundations already present in the repo
-- Shared platform primitives already present for work aggregation, notifications, and governed layout/personalization
-- Phase 1 design layer complete enough to define data/contract expectations for downstream consumers
+- Phase 0 control baseline and repo-truth discipline
+- stable auth/session/shell foundations already present in the repo
+- shared aggregation, signal, state, and layout primitives already present for work publication and shell continuity
+- sufficient Phase 1 data/contract posture to define downstream work-publication expectations
 
-### Dependency posture relative to Phase 1
+### 13.2 Planning-ready now
 
-Phase 2 must explicitly distinguish between **planning-ready**, **implementation-ready**, and **blocked** work:
+The following are planning-ready now:
 
-#### Planning-ready now
 - Personal Work Hub operating doctrine
-- PWA shell and landing behavior refinement
-- ranking, lane, and explainability policy
-- role-governance and adaptive layout policy
+- lane ownership and coexistence rules
+- landing and shell transition model
+- ranking, explainability, and visibility policy
+- adaptive layout and personalization governance
+- role-aware hybrid landing rules
 - multi-role context rules
 - project anchor and handoff criteria
-- validation scorecard design
+- pilot rollout posture and validation design
 
-#### Implementation-ready now (subject to current repo truth)
-- Shell-level and routing-level refinements that rely on existing PWA/auth/shell foundations
-- State persistence and return-memory implementation planning
-- Adaptive layout composition planning using `@hbc/project-canvas`
-- Notification-to-work contract design using `@hbc/notification-intelligence`
+### 13.3 Implementation-ready now (subject to repo truth)
 
-#### Implementation-ready after named prerequisite
-- Real-source hub aggregation for Wave 1 business-core work items after the relevant Phase 1-backed routes/contracts are available
-- First-release real work-item publication from domains that still depend on Phase 1 C1/C2/C3 readiness
+The following are implementation-ready now, subject to live repo foundations remaining stable:
 
-#### Blocked on upstream or external dependency
-- Broad real-domain integration beyond first-release tranche scope where backend/service contracts are not yet live
-- Any feature that assumes broad staging-ready Phase 1 execution rather than narrow kickoff reality
+- root routing and landing refinement in the PWA shell
+- redirect-memory and return-memory extension where needed
+- freshness/trust-state implementation planning using existing shell/session-state posture
+- adaptive composition planning using `@hbc/project-canvas` under Phase 2 constraints
+- notification-to-work mapping design using `@hbc/notification-intelligence`
+- PWA companion/launch entry rules from SPFx surfaces
 
-### Outgoing dependencies
+### 13.4 Implementation-ready after named prerequisite
+
+The following become implementation-ready only after named prerequisites are confirmed:
+
+- real-source publication for first-release domains whose contracts or domain routes still depend on Phase 1-backed readiness
+- richer delegated/team and portfolio signals where upstream domain projection logic is incomplete
+- any SPFx light actions that require specific API/contract readiness not yet proven in the repo
+
+### 13.5 Blocked / deferred by design
+
+The following are intentionally not first-release blockers for Phase 2:
+
+- full enterprise-wide real-domain integration across all business modules
+- host-parity freeform personalization across both PWA and SPFx
+- full final-state analytics catalog for every role
+- broad AI/recommendation expansion beyond the operating-layer baseline
+
+### 13.6 Outgoing dependencies enabled by Phase 2
 
 Phase 2 enables:
-- Phase 3 **Project Hub** by establishing the user-centered to project-centered handoff rules
-- Phase 4 business domains by giving them a governed work-surface contract to publish into
-- Phase 5 search/document entry points by stabilizing the user operating layer and context transitions
-- Phase 6 field-first work by establishing shared work, freshness, and degraded/offline expectations
-- Phase 7 adoption, intelligence, and rollout planning by defining the first meaningful operating-layer success model
+
+- Phase 3 Project Hub by locking the personal-to-project handoff contract
+- later domain buildout by giving domains a governed publication target
+- later search/document unification by stabilizing user entry and context continuity
+- later field-specific work by stabilizing freshness, degraded-state, and handoff expectations
+- later adoption/intelligence planning by providing a measurable first-release operating-layer baseline
 
 ---
 
-## 10. Acceptance Gates
+## 14. Acceptance Gates
 
-Phase 2 is complete only when all of the following are true:
+Phase 2 is not complete when the prose sounds good. It is complete only when the following gates have clear pass evidence.
 
-- **The PWA opens into Personal Work Hub by default** as the steady-state user operating surface.
-- **The hub is task-first and responsibility-first**, not a generic dashboard.
-- **Low-work states remain useful** through smart empty-state behavior and governed analytics fallback.
-- **The lane model, ranking model, and time-horizon model are implemented consistently** and can be explained to users.
-- **First-release real work sources are live** per the Phase 2 source tranche register.
-- **Notifications act as signals into the hub**, not as a competing work system.
-- **Role governance is working** using `@hbc/auth` role definitions.
-- **Personalization is useful but governed**, and the core work operating model remains intact.
-- **Delegated/team lanes are limited and role-appropriate**, not a second team dashboard.
-- **Return/context memory is strong and trustworthy** when users move between hub and destination surfaces.
-- **Freshness and staleness state are visible and trustworthy** without making the page jittery or unstable.
-- **Project Hub handoff rules are working** for materially project-coordination-oriented work.
-- **Desktop and tablet shell behavior is stable and coherent.**
-- **First-release success can be measured** with a balanced scorecard covering adoption, action completion, friction reduction, trust, and role usefulness.
+| Gate | Pass condition | Evidence required | Primary owner |
+|---|---|---|---|
+| Default home gate | Approved first-release cohorts land in **PWA Personal Work Hub** by steady-state default | Route/landing spec, implemented route behavior, test coverage | Experience / Shell |
+| Lane-boundary gate | PWA and SPFx responsibilities are explicit and no second full home emerges in SPFx | P2-B0, design review signoff, scope map | Architecture + Experience |
+| Work-surface gate | Hub remains task-first and responsibility-first, not a generic dashboard | Operating model register, zone governance spec, UX review | Product/Design + Experience |
+| Low-work gate | Low-work states remain useful without redirecting users away from the hub | Empty-state rules, UX proof, acceptance review | Product/Design |
+| Publication gate | First-release required sources are classified and launch-critical sources publish correctly | Source tranche register, publication readiness register, integration validation | Platform + Domain owners |
+| Signal gate | Notifications act as signals into the hub rather than a competing work system | Mapping policy, interaction review, launch checks | Platform/Core Services |
+| Role-governance gate | Role behavior is enforced from `@hbc/auth` rules and not parallel custom logic | Entitlement matrix, role validation, review signoff | Auth / Architecture |
+| Personalization gate | Personalization is useful but bounded; primary work runway remains protected | Personalization policy, layout governance proof, UX review | Experience / Shell |
+| Delegated-visibility gate | Elevated-role hybrid landing works without turning into a second team dashboard | Delegated/team governance note, role walkthroughs | Product + Experience |
+| Continuity gate | Redirect memory, return memory, and context restoration are trustworthy | Persistence contract, navigation test scenarios | Experience / Shell |
+| Trust-state gate | Freshness, stale, syncing, degraded, and offline states are visible and coherent | Freshness policy, state UX review, scenario tests | Platform + Experience |
+| Handoff gate | Project-significant work routes correctly to Project Hub and returns cleanly | Handoff matrix, navigation review, scenario tests | Product + Project surfaces |
+| Cross-device gate | Desktop and tablet shell behavior remains stable and credible | Cross-device behavior note, test evidence | Experience / QA |
+| Pilot-readiness gate | The pilot cohort has a defined rollout path and measurable success scorecard | Pilot rollout note, scorecard plan, launch checklist | Adoption / Product |
 
 ---
 
-## 11. Team Ownership
+## 15. Team Ownership
 
 ### Primary custodian
-Experience / Shell Team — owns the Personal Work Hub operating model, PWA shell, routing, adaptive layout behavior, and the user-centered operating-layer contract.
+Experience / Shell Team — owns the Personal Work Hub operating model, PWA shell, landing transition, layout composition rules, and continuity behavior.
 
 ### Supporting custodians
-- **Platform / Core Services** — shared work-source contracts, notification-to-work mapping, freshness/state behavior, and implementation dependencies on Phase 1 surfaces
-- **Business Domains** — publication of meaningful work items from Wave 1 business-core sources
-- **Project / Documents** — Project Hub handoff criteria and project anchor behavior
-- **Support / Adoption** — first-release usefulness validation and behavioral success measurement
+- **Platform / Core Services** — shared publication contracts, notification-to-work mapping, state/freshness semantics, and integration dependencies
+- **Business Domains** — publication of meaningful first-release work items from the approved source tranche
+- **Project / Project Hub owners** — project-significance handoff rules and project-anchor implications
+- **Support / Adoption** — pilot rollout, user usefulness validation, and scorecard measurement
+- **Architecture** — lane-boundary enforcement, shared primitive usage, and anti-drift review
 
-### Required reviewers for implementation
+### Required reviewers
 - Product/design lead
 - Architecture lead
+- Experience/shell lead
+- Platform/core services lead
 - Support/adoption representative
-- Role/governance reviewer for `@hbc/auth`-based entitlement implications
+- Role/governance reviewer for `@hbc/auth` implications
 
 ---
 
-## 12. Resolved Decisions
+## 16. Resolved Decisions
 
-The following decisions were resolved during Phase 2 operating-model interviewing and are treated as locked planning doctrine for the enhanced phase plan:
+The following decisions are locked for the enhanced Phase 2 plan:
 
-| Decision | Locked Resolution |
+| Decision | Locked resolution |
 |---|---|
-| Low-work default | Stay on Personal Work Hub with smart empty-state + select analytics cards |
-| Layout model | Adaptive layout using `@hbc/project-canvas` |
+| Full Personal Work Hub ownership | **PWA first** |
+| SPFx posture | **Richer companion lane**, not the full home |
+| SPFx action model | **Light actions only**; deeper work and full completion stay in PWA |
+| Elevated-role landing | **Hybrid** — personal work first, then team / delegated / portfolio attention |
+| Personalization | **Moderately governed** |
+| Low-work default | Stay on Personal Work Hub with smart empty-state + governed fallback content |
+| Layout model | Adaptive layout using `@hbc/project-canvas`, constrained by zone governance |
 | Analytics scope | Expand by role elevation, governed by `@hbc/auth` role definitions |
-| Personalization | Moderately governed |
 | Work ranking | Weighted mix of ownership, urgency, aging, project importance, blocking status, and role context |
 | Top-level organization | Responsibility lanes first, with time-horizon cues layered inside |
 | Work-item navigation | Varies by item type |
 | Delegated/team lanes | Limited and only for eligible elevated roles |
 | Return behavior | Strong context memory |
-| Inline action model | Moderate; role-based expansion for first release |
 | Notification relationship | Notifications feed the hub via `@hbc/notification-intelligence`; hub remains the main work surface |
-| Context scope | Cross-project by default with a prominent recent/current project anchor |
 | Freshness model | Hybrid freshness/staleness trust model |
-| First-release success | Balanced scorecard |
+| First-release success model | Balanced scorecard |
 | Multi-role governance source | `@hbc/auth` role definitions |
 | Multi-role default | Primary active role context |
-| Role-context switching | Hybrid — sensible default plus manual switch |
-| Default role-context selection | Preserve last relevant manual choice; otherwise infer best-fit context |
-| Role-context change effects | Analytics + layout + lane emphasis adapt, without turning into a separate app |
-| Role-context validity | Work-and-context aware preservation of last manual role |
+| Role-context switching | Hybrid — preserve sensible/relevant last context, otherwise infer best fit |
+| Project anchor rule | Hybrid — preserve relevant pinned project; otherwise infer best-fit anchor |
 | First-release source scope | Wave 1 business-core scope: Estimating, Business Development, Project Hub handoff signals, approvals, provisioning/admin exceptions |
 | Project Hub handoff rule | Use a project significance rule |
-| Project anchor rule | Hybrid — preserve a relevant pinned project; otherwise infer best-fit anchor |
+| Rollout posture | **Targeted pilot / phased rollout first** |
 
 ---
 
-## 13. Carry-Forward Architecture Questions
+## 17. Carry-Forward and Deferred Items
 
-These items remain useful follow-on refinements, but do not block the enhanced Phase 2 plan itself:
+The following remain useful follow-on items, but do not block the enhanced Phase 2 plan:
 
-- Exact ranking-factor coefficients and tie-break implementation detail
-- Exact per-role card inventory by every `@hbc/auth` role definition
-- Exact first-release KPI thresholds and red/green target bands
-- Exact action-by-domain inline entitlement table for all workflows
-- Exact project-anchor inference scoring logic
-- Final visual component inventory and Storybook composition set for hub surfaces
+- exact ranking-factor coefficients and tie-break implementation details
+- final per-role card inventory by every auth role
+- exact launch KPIs and red/green thresholds
+- exact inline action entitlement tables by domain and host
+- final project-anchor inference scoring logic
+- host-proven expansion of curated SPFx companion actions
+- final visual component inventory and Storybook composition catalog for all hub surfaces
 
-These should be captured as controlled follow-on artifacts or implementation subtasks, not as open blockers to the phase plan.
+These should be captured as controlled follow-on artifacts or implementation subtasks, not kept as hidden blockers inside the plan.
 
 ---
 
-## 14. Risks Being Mitigated
+## 18. Risks Being Mitigated
 
 Phase 2 explicitly mitigates the following risks:
 
-- **PWA remains only a shell:** Users still reconstruct their day from multiple tools because the home layer never becomes operational.
-- **Dashboard drift:** The work hub becomes an analytics-heavy summary page instead of a task-first operating layer.
-- **Cross-package drift:** Teams attach domains into the hub inconsistently, bypassing shared primitives and creating fragmented work publication patterns.
-- **Project scope bleed:** Personal Work Hub absorbs too much Project Hub scope and loses the personal-first operating model.
-- **Incumbent-pattern regression:** The hub inherits the density, navigation burden, and cognitive noise of incumbent construction-tech shells.
-- **Multi-role confusion:** Users with multiple auth roles receive noisy or incoherent home experiences.
-- **Trust failure:** Freshness, offline/degraded behavior, or notification mapping make the hub feel unstable or misleading.
-- **False Phase 1 assumptions:** The phase assumes broad real data availability before Phase 1 implementation is actually ready to support it.
+- **PWA remains only a shell** — users still reconstruct their workday from multiple tools because the home layer never becomes operational.
+- **Second-home drift in SPFx** — the companion lane silently becomes a competing full home.
+- **Dashboard drift** — the Personal Work Hub becomes an analytics-heavy summary page rather than a work-first operating layer.
+- **Cross-package drift** — domains publish work inconsistently by bypassing shared primitives.
+- **Project-scope bleed** — Personal Work Hub absorbs too much Project Hub behavior and loses the personal-first model.
+- **Multi-role confusion** — users with multiple auth roles receive noisy or inconsistent home experiences.
+- **Trust failure** — stale, syncing, degraded, or notification behaviors make the hub feel misleading or unstable.
+- **Premature broad rollout** — the org is forced into a new default home before the first-release source set is useful enough.
 
 ---
 
-## 15. Phase 2 Execution Priorities
+## 19. Phase 2 Execution Priorities
 
-When implementation begins, the recommended sequencing is:
+Recommended implementation-sequencing posture:
 
-1. Lock the **Personal Work Hub operating doctrine** and produce the operating model, lane policy, and ranking policy.
-2. Define the **PWA root-routing and return-memory model** so the shell/home experience is authoritative.
-3. Define the **adaptive zone layout and role-governance matrices** using `@hbc/project-canvas` and `@hbc/auth` as the governing implementation foundations.
-4. Define the **first-release source tranche register** and the **notification-to-work mapping contract**.
-5. Define the **hub-to-domain** and **hub-to-Project Hub** routing/handoff rules.
-6. Finalize the **multi-role context**, **project anchor**, and **freshness** contracts.
-7. Produce the **first-release success scorecard** and implementation validation plan.
+1. Lock the **lane ownership** and **Personal Work Hub operating doctrine**.
+2. Finalize the **PWA landing transition** and **return/continuity model**.
+3. Lock the **zone governance**, **personalization rules**, and **hybrid elevated-role behavior**.
+4. Finalize the **first-release source tranche**, **signal mapping**, and **navigation/handoff rules**.
+5. Define the **multi-role**, **project-anchor**, and **freshness/trust-state** contracts.
+6. Produce the **pilot rollout**, **publication-readiness**, and **validation scorecard** artifacts.
+7. Use those artifacts to drive bounded implementation and launch readiness.
 
 ---
 
-## 16. Delivered Capability Summary (Planning Level)
+## 20. Delivered Capability Summary (Planning Level)
 
-| Capability | Coverage | Key Deliverables |
+| Capability | Coverage | Key deliverables |
 |---|---|---|
-| Personal operating-layer doctrine | Task-first, responsibility-first, calm user operating model | P2-A1, P2-A2, P2-A3 |
-| PWA shell and landing completion | Root routing, landing precedence, return memory, freshness | P2-B1, P2-B2, P2-B3, P2-B4 |
-| Shared work aggregation and signal mapping | First-release sources, notification-to-work, routing/handoff rules | P2-C1, P2-C2, P2-C3, P2-C4 |
-| Role governance and adaptive layout | Auth-driven entitlement, adaptive canvas rules, personalization controls | P2-D1, P2-D2, P2-D3, P2-D4, P2-D5 |
-| Multi-role and context behavior | Role switching, project anchoring, success model | P2-E1, P2-E2, P2-E3, P2-E4 |
+| Personal operating-layer doctrine | Task-first, personal-first operating model with low-work stability | P2-A1, P2-A2, P2-A3 |
+| Lane ownership and coexistence | Explicit PWA vs SPFx rules and anti-drift posture | P2-B0 |
+| PWA shell and landing completion | Root routing, landing precedence, return memory, freshness/trust | P2-B1, P2-B2, P2-B3, P2-B4 |
+| Shared work publication and signals | First-release sources, notification mapping, routing/handoff rules | P2-C1, P2-C2, P2-C3, P2-C4, P2-C5 |
+| Role governance and adaptive layout | Auth-driven entitlement, adaptive zone rules, personalization controls | P2-D1, P2-D2, P2-D3, P2-D4, P2-D5 |
+| Multi-role behavior and rollout validation | Role switching, project anchoring, pilot sequencing, scorecard | P2-E1, P2-E2, P2-E3, P2-E4, P2-E5 |
 
 ---
 
-## 17. How to Use This Plan Now
+## 21. How to Use This Plan Now
 
-| Goal | Start Here |
+| Goal | Start here |
 |---|---|
-| Understand the purpose and objective of Phase 2 | Sections 1–3 |
-| See what is and is not in scope | Sections 4–5 |
-| Understand the workstreams and required artifacts | Section 6 + Section 8 |
-| Understand the planning milestones and gates | Sections 7 and 10 |
-| Check incoming/outgoing dependencies | Section 9 |
-| See the locked operating decisions | Section 12 |
-| Understand remaining refinement items | Section 13 |
-| Plan implementation sequencing | Section 15 |
+| Understand the purpose and strategic target of Phase 2 | Sections 1–3 |
+| See what is in and out of scope | Sections 4–5 |
+| Understand lane ownership and coexistence | Section 6 |
+| Understand the first-release home experience | Sections 7–9 |
+| Review required workstreams and deliverables | Sections 10–12 |
+| Review dependency posture and acceptance gates | Sections 13–14 |
+| See locked decisions and remaining carry-forward items | Sections 16–17 |
+| Plan implementation sequencing | Section 19 |
 
 ---
 
-## 18. Related Documents
+## 22. Related Documents
 
 - `00_HB-Intel_Master-Development-Summary-Plan.md`
 - `01_Phase-0_Program-Control-and-Repo-Truth-Plan.md`
 - `02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md`
+- `docs/architecture/blueprint/current-state-map.md`
+- `docs/architecture/blueprint/HB-Intel-Dev-Roadmap.md`
 - `phase-0-deliverables/README.md`
 - `phase-1-deliverables/README.md`
 - `@hbc/my-work-feed` package documentation
 - `@hbc/notification-intelligence` package documentation
 - `@hbc/project-canvas` package documentation
 - `@hbc/auth` package documentation
+- work-hub reference documents already present in the repo
 
