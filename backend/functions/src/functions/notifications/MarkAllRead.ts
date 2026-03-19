@@ -5,8 +5,10 @@
 
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
 import type { NotificationTier } from '@hbc/notification-intelligence';
-import { validateToken, unauthorizedResponse } from '../../middleware/validateToken.js';
+import { withAuth } from '../../middleware/auth.js';
+import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createLogger } from '../../utils/logger.js';
+import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { notificationStore } from './lib/notificationStore.js';
 
 const VALID_TIERS = new Set<string>(['immediate', 'watch', 'digest']);
@@ -15,22 +17,16 @@ app.http('MarkAllRead', {
   methods: ['POST'],
   route: 'notifications/mark-all-read',
   authLevel: 'anonymous',
-  handler: async (req: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (req: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-
-    let claims;
-    try {
-      claims = await validateToken(req);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+    const requestId = extractOrGenerateRequestId(req);
 
     let tier: NotificationTier | undefined;
     try {
       const body = (await req.json()) as { tier?: string };
       if (body.tier) {
         if (!VALID_TIERS.has(body.tier)) {
-          return { status: 400, jsonBody: { error: `Invalid tier: ${body.tier}` } };
+          return errorResponse(400, 'VALIDATION_ERROR', `Invalid tier: ${body.tier}`, requestId);
         }
         tier = body.tier as NotificationTier;
       }
@@ -38,10 +34,10 @@ app.http('MarkAllRead', {
       // No body or invalid JSON — mark all tiers
     }
 
-    await notificationStore.markAllRead(claims.oid, tier);
+    await notificationStore.markAllRead(auth.claims.oid, tier);
 
-    logger.info('MarkAllRead: completed', { userId: claims.oid, tier: tier ?? 'all' });
+    logger.info('MarkAllRead: completed', { userId: auth.claims.oid, tier: tier ?? 'all' });
 
-    return { status: 200, jsonBody: { message: 'All notifications marked as read.' } };
-  },
+    return successResponse({ message: 'All notifications marked as read.' });
+  }),
 });

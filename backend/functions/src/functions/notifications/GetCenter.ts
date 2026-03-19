@@ -5,8 +5,10 @@
 
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
 import type { INotificationCenterFilter, NotificationTier } from '@hbc/notification-intelligence';
-import { validateToken, unauthorizedResponse } from '../../middleware/validateToken.js';
+import { withAuth } from '../../middleware/auth.js';
+import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createLogger } from '../../utils/logger.js';
+import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { notificationStore } from './lib/notificationStore.js';
 
 const VALID_TIERS = new Set<string>(['immediate', 'watch', 'digest', 'all']);
@@ -15,19 +17,13 @@ app.http('GetCenter', {
   methods: ['GET'],
   route: 'notifications/center',
   authLevel: 'anonymous',
-  handler: async (req: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (req: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-
-    let claims;
-    try {
-      claims = await validateToken(req);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+    const requestId = extractOrGenerateRequestId(req);
 
     const tierParam = req.query.get('tier') ?? 'all';
     if (!VALID_TIERS.has(tierParam)) {
-      return { status: 400, jsonBody: { error: `Invalid tier: ${tierParam}` } };
+      return errorResponse(400, 'VALIDATION_ERROR', `Invalid tier: ${tierParam}`, requestId);
     }
 
     const filter: INotificationCenterFilter = {
@@ -37,14 +33,14 @@ app.http('GetCenter', {
       pageSize: req.query.get('pageSize') ? parseInt(req.query.get('pageSize')!, 10) : undefined,
     };
 
-    const result = await notificationStore.getCenter(claims.oid, filter);
+    const result = await notificationStore.getCenter(auth.claims.oid, filter);
 
     logger.info('GetCenter: returned', {
-      userId: claims.oid,
+      userId: auth.claims.oid,
       totalCount: result.totalCount,
       pageItems: result.items.length,
     });
 
-    return { status: 200, jsonBody: result };
-  },
+    return successResponse(result);
+  }),
 });

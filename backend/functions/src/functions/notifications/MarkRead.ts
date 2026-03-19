@@ -4,32 +4,29 @@
  */
 
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
-import { validateToken, unauthorizedResponse } from '../../middleware/validateToken.js';
+import { withAuth } from '../../middleware/auth.js';
+import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createLogger } from '../../utils/logger.js';
+import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { notificationStore } from './lib/notificationStore.js';
 
 app.http('MarkRead', {
   methods: ['PATCH'],
   route: 'notifications/{id}/read',
   authLevel: 'anonymous',
-  handler: async (req: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (req: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-
-    try {
-      await validateToken(req);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+    const requestId = extractOrGenerateRequestId(req);
 
     const id = req.params.id;
     if (!id) {
-      return { status: 400, jsonBody: { error: 'Missing notification id' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Missing notification id', requestId);
     }
 
     await notificationStore.markRead(id);
 
     logger.info('MarkRead: completed', { notificationId: id });
 
-    return { status: 200, jsonBody: { message: 'Notification marked as read.' } };
-  },
+    return successResponse({ message: 'Notification marked as read.' });
+  }),
 });

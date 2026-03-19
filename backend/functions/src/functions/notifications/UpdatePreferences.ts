@@ -5,35 +5,31 @@
 
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
 import type { INotificationPreferences } from '@hbc/notification-intelligence';
-import { validateToken, unauthorizedResponse } from '../../middleware/validateToken.js';
+import { withAuth } from '../../middleware/auth.js';
+import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createLogger } from '../../utils/logger.js';
+import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { preferencesStore } from './lib/preferencesStore.js';
 
 app.http('UpdatePreferences', {
   methods: ['PATCH'],
   route: 'notifications/preferences',
   authLevel: 'anonymous',
-  handler: async (req: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (req: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-
-    let claims;
-    try {
-      claims = await validateToken(req);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+    const requestId = extractOrGenerateRequestId(req);
 
     let updates: Partial<Omit<INotificationPreferences, 'userId'>>;
     try {
       updates = (await req.json()) as Partial<Omit<INotificationPreferences, 'userId'>>;
     } catch {
-      return { status: 400, jsonBody: { error: 'Invalid JSON body' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
     }
 
-    const updated = await preferencesStore.update(claims.oid, updates);
+    const updated = await preferencesStore.update(auth.claims.oid, updates);
 
-    logger.info('UpdatePreferences: updated', { userId: claims.oid });
+    logger.info('UpdatePreferences: updated', { userId: auth.claims.oid });
 
-    return { status: 200, jsonBody: updated };
-  },
+    return successResponse(updated);
+  }),
 });

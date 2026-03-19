@@ -8,8 +8,10 @@
 
 import { app, output, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
 import type { NotificationSendPayload } from '@hbc/notification-intelligence';
-import { validateToken, unauthorizedResponse } from '../../middleware/validateToken.js';
+import { withAuth } from '../../middleware/auth.js';
+import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createLogger } from '../../utils/logger.js';
+import { errorResponse } from '../../utils/response-helpers.js';
 
 const notificationQueueOutput = output.storageQueue({
   queueName: 'hbc-notifications-queue',
@@ -21,25 +23,19 @@ app.http('SendNotification', {
   route: 'notifications/send',
   authLevel: 'anonymous',
   extraOutputs: [notificationQueueOutput],
-  handler: async (req: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (req: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-
-    let claims;
-    try {
-      claims = await validateToken(req);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+    const requestId = extractOrGenerateRequestId(req);
 
     let payload: NotificationSendPayload;
     try {
       payload = (await req.json()) as NotificationSendPayload;
     } catch {
-      return { status: 400, jsonBody: { error: 'Invalid JSON body' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
     }
 
     if (!payload.eventType || !payload.recipientUserId) {
-      return { status: 400, jsonBody: { error: 'Missing required fields: eventType, recipientUserId' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'Missing required fields: eventType, recipientUserId', requestId);
     }
 
     context.extraOutputs.set(notificationQueueOutput, JSON.stringify(payload));
@@ -47,9 +43,10 @@ app.http('SendNotification', {
     logger.info('SendNotification: enqueued', {
       eventType: payload.eventType,
       recipientUserId: payload.recipientUserId,
-      sender: claims.upn,
+      sender: auth.claims.upn,
     });
 
+    // Raw 202 response — fire-and-forget acknowledgment; do NOT wrap in successResponse
     return { status: 202, jsonBody: { message: 'Notification queued.' } };
-  },
+  }),
 });

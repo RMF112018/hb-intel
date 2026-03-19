@@ -4,28 +4,22 @@
  */
 
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
-import { validateToken, unauthorizedResponse } from '../../middleware/validateToken.js';
+import { withAuth } from '../../middleware/auth.js';
 import { createLogger } from '../../utils/logger.js';
+import { successResponse } from '../../utils/response-helpers.js';
 import { preferencesStore } from './lib/preferencesStore.js';
 
 app.http('GetPreferences', {
   methods: ['GET'],
   route: 'notifications/preferences',
   authLevel: 'anonymous',
-  handler: async (req: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (req: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
 
-    let claims;
-    try {
-      claims = await validateToken(req);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
+    const preferences = await preferencesStore.getOrDefault(auth.claims.oid);
 
-    const preferences = await preferencesStore.getOrDefault(claims.oid);
+    logger.info('GetPreferences: returned', { userId: auth.claims.oid });
 
-    logger.info('GetPreferences: returned', { userId: claims.oid });
-
-    return { status: 200, jsonBody: preferences };
-  },
+    return successResponse(preferences);
+  }),
 });

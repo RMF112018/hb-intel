@@ -48,7 +48,7 @@ Apply the P1-C2 middleware and response helpers to all remaining route handlers.
 | `pmp` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 7 handlers migrated (5 CRUD + 2 signatures) |
 | `provisioningSaga` | HTTP | ✗ | ✗ | ✗ | 6 handlers; inline `validateToken`; `{ error: string }` error shape; 202 Accepted response |
 | `signalR` | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 1 handler migrated; raw negotiate response preserved per SignalR SDK |
-| `notifications` (HTTP only) | HTTP | ✗ | ✗ | ✗ | 7 HTTP handlers in individual files; barrel `index.ts` does not need changes |
+| `notifications` (HTTP only) | HTTP | ✓ | ✓ | ✓ | **UPGRADED** (2026-03-19) — 7 HTTP handlers migrated across individual files; barrel and async processors unchanged |
 
 ---
 
