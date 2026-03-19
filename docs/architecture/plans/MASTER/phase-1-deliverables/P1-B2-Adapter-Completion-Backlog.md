@@ -40,13 +40,13 @@ All adapter domain tracking in this document uses the following status progressi
 
 ## Proxy Adapter: Domain Completion Matrix
 
-B1 targets all 11 domain repositories for implementation against mocked fetch in Phase 1 (10 data domains in the table below; Auth tracked separately in its [own section](#auth-domain-special-case-tracking)). C1 backend routes are partially locked for 3 data domains (CRUD only; aggregates and sub-resources remain provisional); the remaining 7 proceed with provisional route assumptions and will reconcile before production activation.
+B1 targets all 11 domain repositories for implementation against mocked fetch in Phase 1 (10 data domains in the table below; Auth tracked separately in its [own section](#auth-domain-special-case-tracking)). C1 backend routes are locked for 3 data domains (Lead, Project, Estimating — including A8 aggregate and D2 sub-resources, resolved per P1-E1); the remaining 7 proceed with provisional route assumptions and will reconcile before production activation.
 
 | Domain | Port Interface | Method Families | Total | Phase Target | Status | B1 Task | Route Status |
 |---|---|---|---|---|---|---|---|
 | **Lead** | `ILeadRepository` | CRUD (5), Search (1) | 6 | Phase 1 | `IMPL_READY` | Task 3 | C1 locked |
-| **Project** | `IProjectRepository` | CRUD (5), Aggregate (1) | 6 | Phase 1 | `IMPL_READY` | Task 4 | CRUD: C1 locked; Aggregate: A8 provisional |
-| **Estimating** | `IEstimatingRepository` | Tracker CRUD (5), Kickoff (2) | 7 | Phase 1 | `IMPL_READY` | Task 5 | C1 base locked; D2 |
+| **Project** | `IProjectRepository` | CRUD (5), Aggregate (1) | 6 | Phase 1 | `IMPL_READY` | Task 4 | C1 locked (A8 aggregate locked: `/api/projects/summary`) |
+| **Estimating** | `IEstimatingRepository` | Tracker CRUD (5), Kickoff (2) | 7 | Phase 1 | `IMPL_READY` | Task 5 | C1 locked (D2 sub-resources locked: `/api/estimating/trackers/`, `/api/estimating/kickoffs/`) |
 | **Schedule** | `IScheduleRepository` | Activity CRUD (5), Metrics (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 5 | D1, D6 LOCKED* |
 | **Buyout** | `IBuyoutRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 5 | D1, D6 LOCKED* |
 | **Compliance** | `IComplianceRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 6 | D1, D6 LOCKED* |
@@ -59,9 +59,9 @@ B1 targets all 11 domain repositories for implementation against mocked fetch in
 
 ### Method Family Detail by Domain
 
-Each domain's port methods are grouped into route groups below. Route patterns are B1-assumed shapes — not final contracts. Provisional routes will be reconciled when the owning open decision is resolved.
+Each domain's port methods are grouped into route groups below. Route patterns are B1-assumed shapes — not final contracts. Transport conventions (D1–D6) are locked per P1-E1. Route patterns below reflect locked conventions. Production activation remains blocked until C1 delivers backend route handlers.
 
-**Route confidence key:** `C1 locked` = route confirmed in C1 catalog. `Provisional` = B1-assumed shape, pending open decision. `A9` = no C1/C2 catalog entry exists.
+**Route confidence key:** `C1 locked` = route confirmed in C1 catalog. `Convention-locked` = route shape follows locked D1/D6 conventions; production activation blocked until C1 delivers backend handler. `A9` = no C1/C2 catalog entry exists.
 
 #### Lead (`ILeadRepository`) — C1 locked
 
@@ -70,68 +70,68 @@ Each domain's port methods are grouped into route groups below. Route patterns a
 | CRUD | `getAll`, `getById`, `create`, `update`, `delete` | `GET/POST /api/leads`, `GET/PUT/DELETE /api/leads/{id}` | C1 locked | — |
 | Search | `search` | `GET /api/leads?q={query}` | C1 locked | — |
 
-#### Project (`IProjectRepository`) — CRUD C1 locked; aggregate A8 provisional
+#### Project (`IProjectRepository`) — C1 locked (A8 aggregate locked)
 
 | Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
 |---|---|---|---|---|
 | CRUD | `getProjects`, `getProjectById`, `createProject`, `updateProject`, `deleteProject` | `GET/POST /api/projects`, `GET/PUT/DELETE /api/projects/{id}` | C1 locked | — |
-| Aggregate | `getPortfolioSummary` | `GET /api/projects/portfolio-summary` | A8 provisional — not in C1 catalog | A8 |
+| Aggregate | `getPortfolioSummary` | `GET /api/projects/summary` | A8 locked per P1-E1 decision 11 | — |
 
-#### Estimating (`IEstimatingRepository`) — C1 base locked; D2 sub-resource open
+#### Estimating (`IEstimatingRepository`) — C1 locked (D2 sub-resources locked)
 
 | Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
 |---|---|---|---|---|
 | Tracker CRUD | `getAllTrackers`, `getTrackerById`, `createTracker`, `updateTracker`, `deleteTracker` | `GET/POST /api/estimating/trackers`, `GET/PUT/DELETE /api/estimating/trackers/{id}` | C1 base locked | D2 |
 | Kickoff | `getKickoff`, `createKickoff` | `GET/POST /api/estimating/kickoffs?projectId={id}` | Provisional | D2 |
 
-#### Schedule (`IScheduleRepository`) — D1, D6 provisional; project-scoped
+#### Schedule (`IScheduleRepository`) — Convention-locked (D1, D6 resolved); project-scoped
 
 | Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
 |---|---|---|---|---|
-| Activity CRUD | `getActivities`, `getActivityById`, `createActivity`, `updateActivity`, `deleteActivity` | `GET/POST /api/projects/{projectId}/schedule`, `GET/PUT/DELETE /api/schedule/{id}` | Provisional | D1, D6 |
-| Metrics | `getMetrics` | `GET /api/projects/{projectId}/schedule/metrics` | Provisional | D6 |
+| Activity CRUD | `getActivities`, `getActivityById`, `createActivity`, `updateActivity`, `deleteActivity` | `GET/POST /api/projects/{projectId}/schedule`, `GET/PUT/DELETE /api/schedule/{id}` | Convention-locked (D1, D6 resolved) | — |
+| Metrics | `getMetrics` | `GET /api/projects/{projectId}/schedule/metrics` | Convention-locked (D6 resolved) | — |
 
-#### Buyout (`IBuyoutRepository`) — D1, D6 provisional; project-scoped
-
-| Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
-|---|---|---|---|---|
-| Entry CRUD | `getEntries`, `getEntryById`, `createEntry`, `updateEntry`, `deleteEntry` | `GET/POST /api/projects/{projectId}/buyout`, `GET/PUT/DELETE /api/buyout/{id}` | Provisional | D1, D6 |
-| Summary | `getSummary` | `GET /api/projects/{projectId}/buyout/summary` | Provisional | D6 |
-
-#### Compliance (`IComplianceRepository`) — D1, D6 provisional; project-scoped
+#### Buyout (`IBuyoutRepository`) — Convention-locked (D1, D6 resolved); project-scoped
 
 | Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
 |---|---|---|---|---|
-| Entry CRUD | `getEntries`, `getEntryById`, `createEntry`, `updateEntry`, `deleteEntry` | `GET/POST /api/projects/{projectId}/compliance`, `GET/PUT/DELETE /api/compliance/{id}` | Provisional | D1, D6 |
-| Summary | `getSummary` | `GET /api/projects/{projectId}/compliance/summary` | Provisional | D6 |
+| Entry CRUD | `getEntries`, `getEntryById`, `createEntry`, `updateEntry`, `deleteEntry` | `GET/POST /api/projects/{projectId}/buyout`, `GET/PUT/DELETE /api/buyout/{id}` | Convention-locked (D1, D6 resolved) | — |
+| Summary | `getSummary` | `GET /api/projects/{projectId}/buyout/summary` | Convention-locked (D6 resolved) | — |
 
-#### Contract (`IContractRepository`) — D1, D6 provisional; project-scoped
-
-| Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
-|---|---|---|---|---|
-| Contract CRUD | `getContracts`, `getContractById`, `createContract`, `updateContract`, `deleteContract` | `GET/POST /api/projects/{projectId}/contracts`, `GET/PUT/DELETE /api/contracts/{id}` | Provisional | D1, D6 |
-| Approvals | `getApprovals`, `createApproval` | `GET/POST /api/contracts/{contractId}/approvals` | Provisional | D6 |
-
-#### Risk (`IRiskRepository`) — D1, D6 provisional; project-scoped
+#### Compliance (`IComplianceRepository`) — Convention-locked (D1, D6 resolved); project-scoped
 
 | Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
 |---|---|---|---|---|
-| Item CRUD | `getItems`, `getItemById`, `createItem`, `updateItem`, `deleteItem` | `GET/POST /api/projects/{projectId}/risk`, `GET/PUT/DELETE /api/risk/{id}` | Provisional | D1, D6 |
-| Management | `getManagement` | `GET /api/projects/{projectId}/risk/management` | Provisional | D6 |
+| Entry CRUD | `getEntries`, `getEntryById`, `createEntry`, `updateEntry`, `deleteEntry` | `GET/POST /api/projects/{projectId}/compliance`, `GET/PUT/DELETE /api/compliance/{id}` | Convention-locked (D1, D6 resolved) | — |
+| Summary | `getSummary` | `GET /api/projects/{projectId}/compliance/summary` | Convention-locked (D6 resolved) | — |
 
-#### Scorecard (`IScorecardRepository`) — D1, D6 provisional; project-scoped
-
-| Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
-|---|---|---|---|---|
-| Scorecard CRUD | `getScorecards`, `getScorecardById`, `createScorecard`, `updateScorecard`, `deleteScorecard` | `GET/POST /api/projects/{projectId}/scorecards`, `GET/PUT/DELETE /api/scorecards/{id}` | Provisional | D1, D6 |
-| Versions | `getVersions` | `GET /api/scorecards/{scorecardId}/versions` | Provisional | D6 |
-
-#### PMP (`IPmpRepository`) — D1, D6 provisional; project-scoped
+#### Contract (`IContractRepository`) — Convention-locked (D1, D6 resolved); project-scoped
 
 | Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
 |---|---|---|---|---|
-| Plan CRUD | `getPlans`, `getPlanById`, `createPlan`, `updatePlan`, `deletePlan` | `GET/POST /api/projects/{projectId}/pmp`, `GET/PUT/DELETE /api/pmp/{id}` | Provisional | D1, D6 |
-| Signatures | `getSignatures`, `createSignature` | `GET/POST /api/pmp/{pmpId}/signatures` | Provisional | D6 |
+| Contract CRUD | `getContracts`, `getContractById`, `createContract`, `updateContract`, `deleteContract` | `GET/POST /api/projects/{projectId}/contracts`, `GET/PUT/DELETE /api/contracts/{id}` | Convention-locked (D1, D6 resolved) | — |
+| Approvals | `getApprovals`, `createApproval` | `GET/POST /api/contracts/{contractId}/approvals` | Convention-locked (D6 resolved) | — |
+
+#### Risk (`IRiskRepository`) — Convention-locked (D1, D6 resolved); project-scoped
+
+| Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
+|---|---|---|---|---|
+| Item CRUD | `getItems`, `getItemById`, `createItem`, `updateItem`, `deleteItem` | `GET/POST /api/projects/{projectId}/risk`, `GET/PUT/DELETE /api/risk/{id}` | Convention-locked (D1, D6 resolved) | — |
+| Management | `getManagement` | `GET /api/projects/{projectId}/risk/management` | Convention-locked (D6 resolved) | — |
+
+#### Scorecard (`IScorecardRepository`) — Convention-locked (D1, D6 resolved); project-scoped
+
+| Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
+|---|---|---|---|---|
+| Scorecard CRUD | `getScorecards`, `getScorecardById`, `createScorecard`, `updateScorecard`, `deleteScorecard` | `GET/POST /api/projects/{projectId}/scorecards`, `GET/PUT/DELETE /api/scorecards/{id}` | Convention-locked (D1, D6 resolved) | — |
+| Versions | `getVersions` | `GET /api/scorecards/{scorecardId}/versions` | Convention-locked (D6 resolved) | — |
+
+#### PMP (`IPmpRepository`) — Convention-locked (D1, D6 resolved); project-scoped
+
+| Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
+|---|---|---|---|---|
+| Plan CRUD | `getPlans`, `getPlanById`, `createPlan`, `updatePlan`, `deletePlan` | `GET/POST /api/projects/{projectId}/pmp`, `GET/PUT/DELETE /api/pmp/{id}` | Convention-locked (D1, D6 resolved) | — |
+| Signatures | `getSignatures`, `createSignature` | `GET/POST /api/pmp/{pmpId}/signatures` | Convention-locked (D6 resolved) | — |
 
 ---
 

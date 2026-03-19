@@ -374,7 +374,7 @@ Schema-to-interface drift **must fail at compile time**, not just at test runtim
 4. **Azure Functions v4 TypeScript** — backend uses modern async/await patterns, not legacy function bindings
 5. **Vitest is the test runner** — both packages use Vitest; tests run via `pnpm test`
 6. **No Pact or external contract framework** — pure Vitest with Zod schema assertions
-7. **Schemas are tiered by C1 contract confidence** — only confirmed routes get full schemas; provisional routes get skeleton schemas; uncataloged routes get no schemas
+7. **Schemas are tiered by C1 contract confidence** — only confirmed routes get full schemas; routes awaiting C1 handler delivery get skeleton schemas; uncataloged routes get no schemas
 
 ### Example Code Fidelity Rules
 

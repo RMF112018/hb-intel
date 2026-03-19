@@ -22,7 +22,7 @@ This document is **not** a claim that all listed routes, features, or infrastruc
 - Do not execute a section marked **BLOCKED** — the prerequisites do not exist yet.
 - A section becomes **READY TO VERIFY** only when all items in its "Depends on" row of the Dependency Matrix are delivered and deployed to staging.
 - **PREP-ONLY** sections can be reviewed for correctness but cannot produce pass/fail results without staging infrastructure.
-- Sections marked with PROVISIONAL items should note which items may change when upstream decisions (D3–D6) resolve.
+- Transport decisions D3–D6 are resolved (locked per P1-E1 on 2026-03-18). Remaining PROVISIONAL markers apply only to items with genuinely unresolved upstream dependencies.
 
 ### Domain Example Fidelity Rules
 
@@ -248,18 +248,18 @@ Confirm read endpoints work for estimating domain.
 
 **Domain model reference:** Estimating is NOT a generic "estimates" CRUD resource. It is split into:
 - **Tracker CRUD:** `getAllTrackers`, `getTrackerById`, `createTracker`, `updateTracker`, `deleteTracker` — trackers use **numeric IDs**, scoped by `projectId` (string)
-- **Kickoff:** `getKickoff(projectId)`, `createKickoff(data)` — Tier 2 PROVISIONAL (D2 sub-resource routing open)
+- **Kickoff:** `getKickoff(projectId)`, `createKickoff(data)` — Tier 2 (D2 sub-resource routing locked: `/api/estimating/kickoffs/`)
 
 See `IEstimatingTracker`, `IEstimatingKickoff`, and `IEstimatingRepository` in `@hbc/models` and `@hbc/data-access/src/ports/`.
 
 ### Tracker Reads (Tier 1 — CONFIRMED)
-- [ ] `GET /api/estimating/trackers` with valid token → 200 with paginated response `{ items: [...], total, page, pageSize }` (PROVISIONAL — base route path confirmed, but D2 sub-resource routing may change)
+- [ ] `GET /api/estimating/trackers` with valid token → 200 with paginated response `{ items: [...], total, page, pageSize }`
 - [ ] `GET /api/estimating/trackers/{numeric-id}` returns single tracker with 200 (bare-object response)
 - [ ] `GET /api/estimating/trackers/{nonexistent-id}` returns 404 conforming to ErrorEnvelopeSchema
 - [ ] Tracker response includes all `IEstimatingTracker` fields: `id` (number), `projectId` (string), `bidNumber`, `status`, `dueDate`, `createdAt`, `updatedAt`
 
-### Kickoff Reads (Tier 2 — PROVISIONAL, D2 routing open)
-- [ ] `GET /api/estimating/kickoffs/{projectId}` returns kickoff record for the project with 200 (PROVISIONAL — D2 sub-resource routing not frozen; path may change)
+### Kickoff Reads (Tier 2 — D2 routing locked)
+- [ ] `GET /api/estimating/kickoffs/{projectId}` returns kickoff record for the project with 200
 - [ ] Kickoff response includes all `IEstimatingKickoff` fields: `id` (number), `projectId` (string), `kickoffDate`, `attendees` (string[]), `notes`, `createdAt`
 - [ ] `GET /api/estimating/kickoffs/{nonexistent-projectId}` returns 404 conforming to ErrorEnvelopeSchema
 
@@ -335,11 +335,11 @@ Confirm create, update, delete for estimating trackers and kickoff creation.
 - [ ] `DELETE /api/estimating/trackers/{numeric-id}` → 204 (No Content, empty body)
 - [ ] Verify tracker is actually deleted: `GET /api/estimating/trackers/{id}` → 404
 
-### Kickoff Writes (Tier 2 — PROVISIONAL, D2 routing open)
+### Kickoff Writes (Tier 2 — D2 routing locked)
 
 **Domain model reference:** Create body per `IEstimatingKickoffFormData`: `projectId` (string), `kickoffDate`, `attendees` (string[]), `notes`.
 
-- [ ] `POST /api/estimating/kickoffs` with `{ projectId: "770e8400-e29b-41d4-a716-446655440001", kickoffDate: "2026-04-01T09:00:00Z", attendees: ["Alice", "Bob"], notes: "Initial kickoff" }` → 201 with numeric `id` (PROVISIONAL — D2 route path not frozen)
+- [ ] `POST /api/estimating/kickoffs` with `{ projectId: "770e8400-e29b-41d4-a716-446655440001", kickoffDate: "2026-04-01T09:00:00Z", attendees: ["Alice", "Bob"], notes: "Initial kickoff" }` → 201 with numeric `id`
 - [ ] `POST /api/estimating/kickoffs` without `projectId` → 422 with ErrorEnvelopeSchema response
 - [ ] Response includes all `IEstimatingKickoff` fields with server-generated `id` (number) and `createdAt`
 
@@ -358,7 +358,7 @@ All retry and idempotency behavior in this section is governed by **P1-D1 (Write
 | Detail | Governed By | Current Status |
 |---|---|---|
 | Retry timing and backoff policy | D1 `RetryPolicy` types | **NOT FROZEN** — D1 defines `withRetry` HOF but timing constants are TBD |
-| Client-side automatic retry trigger | D1 `withRetry` wired into `ProxyHttpClient` | **BLOCKED on B1 + D1** — `ProxyHttpClient` does not exist yet |
+| Client-side automatic retry trigger | D1 `withRetry` wired into `ProxyHttpClient` | **BLOCKED on D1** — `ProxyHttpClient` exists (B1 delivered); retry wiring awaits D1 implementation |
 | Idempotency key header name | D1 `IdempotencyContext` | **NOT FROZEN** — D1 defines `generateIdempotencyKey` but header name TBD |
 | Backend idempotency guard | D1 `withIdempotency` handler wrapper | **NOT FROZEN** — D1 plan defines the wrapper but it is not implemented |
 | Idempotency storage table | D1 `IdempotencyStorageService` | **NOT FROZEN** — dedicated `IdempotencyRecords` table planned but not created |

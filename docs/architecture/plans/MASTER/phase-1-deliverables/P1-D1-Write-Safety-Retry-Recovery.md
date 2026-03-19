@@ -668,13 +668,13 @@ into ProxyHttpClient in Task 1.2.
 - Create: `packages/data-access/src/adapters/proxy/http-client.test.ts`
 
 **Current state:**
-`ProxyHttpClient` does not yet exist (**CURRENT**) — `packages/data-access/src/adapters/proxy/` contains only stub types and constants. B1 will deliver `ProxyHttpClient` with constructor accepting `ProxyHttpClientOptions` (`{ baseUrl, getToken, timeout? }`). D1 extends this options interface to add `readPolicy?` and `writePolicy?` retry policy fields. D1 does NOT replace the B1 constructor signature. **This task is BLOCKED until B1 delivers the proxy HTTP client.**
+`ProxyHttpClient` exists (**CURRENT**) — B1 delivered it with constructor accepting `ProxyConfig` (`{ baseUrl, getToken, timeout? }`) plus `onBeforeRequest`/`onAfterResponse` D1 hook points. D1 extends this to add `readPolicy?` and `writePolicy?` retry policy fields. D1 does NOT replace the B1 constructor signature. **This task is unblocked — ProxyHttpClient exists with D1 hook points ready for wiring.**
 
 **Contract dependencies (provisional — do not freeze in D1):**
 
 | Dependency | Owner | D1 Assumption | Status |
 |---|---|---|---|
-| Constructor signature `ProxyHttpClientOptions` | B1 | D1 extends with `readPolicy?`, `writePolicy?` | **PROVISIONAL** until B1 merges |
+| Constructor signature `ProxyConfig` | B1 | D1 extends with `readPolicy?`, `writePolicy?` | **DELIVERED** — B1 merged; `ProxyConfig` interface exists in `packages/data-access/src/adapters/proxy/types.ts` |
 | Error field priority (`.message` primary) | C1 (D3) | D1 uses `.message`-first / `.error`-fallback for pre-Phase-1 routes | **LOCKED** — D3 resolved per P1-E1 |
 | 204 No Content on DELETE | C1 | D1 returns `undefined` for 204 | **FROZEN** per C1 HTTP status semantics |
 | `Retry-After` header on 429/503 | C1 | D1 honors header as delay floor | **PROVISIONAL** — C1 does not mandate backends emit this header |
@@ -900,9 +900,9 @@ export interface IdempotencyContext {
  * Extended options for ProxyHttpClient with D1 retry policy support.
  * Extends B1's ProxyHttpClientOptions — D1 adds retry fields only.
  *
- * **PROVISIONAL (pending B1 delivery):** The base interface shape
- * (baseUrl, getToken, timeout) is owned by B1. If B1 changes the
- * constructor contract, D1 must follow.
+ * **DELIVERED (B1 merged):** The base interface `ProxyConfig`
+ * (baseUrl, getToken, timeout) is owned by B1 and is now stable.
+ * D1 extends it with retry policy fields.
  */
 export interface ProxyHttpClientOptions {
   baseUrl: string;
@@ -1143,7 +1143,7 @@ git commit -m "Feat(data-access): Wire retry into ProxyHttpClient (B1-aligned)
 
 - Extend B1 ProxyHttpClientOptions with readPolicy/writePolicy retry fields
 - Use READ_RETRY_POLICY for GET, WRITE_RETRY_POLICY for POST/PUT/DELETE
-- Align error extraction with B1: .error-first / .message-fallback (D3 provisional)
+- Align error extraction with B1: .message-first / .error-fallback (D3 locked)
 - Handle 204 No Content and content-type checking (aligned with B1 handleResponse)
 - Classify HTTP errors as retryable (429, 502, 503, 504) vs terminal (400, 401, 403, 404, 409)
 - Extract Retry-After header from 429/503 responses for backoff floor
