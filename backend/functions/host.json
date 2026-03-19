@@ -4,8 +4,14 @@
     "applicationInsights": {
       "samplingSettings": {
         "isEnabled": true,
-        "maxTelemetryItemsPerSecond": 20
+        "maxTelemetryItemsPerSecond": 20,
+        "excludedTypes": "Exception"
       }
+    },
+    "logLevel": {
+      "default": "Information",
+      "Host.Results": "Warning",
+      "Function": "Information"
     }
   },
   "functionTimeout": "00:10:00",

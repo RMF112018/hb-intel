@@ -69,6 +69,20 @@ export function createServiceFactory(): IServiceContainer {
 
   // B3 Layer 2: Validate and normalize adapter mode; reject invalid/mock-in-production
   const adapterMode = assertAdapterModeValid();
+
+  // P1-C3 §2.1.6: startup.mode.resolved telemetry event (INTEGRATION_READY gate).
+  // Uses console.log with structured JSON because InvocationContext is not available
+  // at service factory initialization time. Azure Functions host forwards to App Insights.
+  console.log(JSON.stringify({
+    level: 'info',
+    _telemetryType: 'customEvent',
+    name: 'startup.mode.resolved',
+    adapterMode,
+    environment: process.env.AZURE_FUNCTIONS_ENVIRONMENT ?? 'Development',
+    surface: 'backend',
+    timestamp: new Date().toISOString(),
+  }));
+
   const isMock = adapterMode === 'mock' || process.env.NODE_ENV === 'test';
 
   // G2.6: Fail fast if required config is missing (skips in mock/test mode)
