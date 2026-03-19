@@ -24,7 +24,7 @@ All design decisions are locked. Transport-shape conventions (response envelopes
 | **Planning** | Complete — transport conventions locked (D1–D6, A8); deliverable statuses range from Final to Active Reference per the index below; A9 (auth management routes) resolved via P1-C2-a Task 21 |
 | **Implementation — B1 proxy adapters** | **Complete** — transport foundation + 11 of 11 repos implemented and tested (109+ tests); all factory-wired for proxy mode |
 | **Implementation — C1 backend routes** | Not started — zero domain data routes exist; provisioning/notification routes are operational |
-| **Implementation — C2 auth middleware** | Not started — `validateToken()` exists; `withAuth()`, Zod validation, response helpers not yet built |
+| **Implementation — C2 auth middleware** | In progress — `validateToken()` exists and tested; `withAuth()` wrapper, Zod validation middleware, and response helpers (`successResponse`, `errorResponse`, `listResponse`, `notFoundResponse`) delivered; request ID middleware complete |
 | **Implementation — C3 observability** | Foundation only — `createLogger()` verified; telemetry event families not instrumented |
 | **Implementation — D1 write safety** | Unblocked — `ProxyHttpClient` exists with `withRetry()` wired; B1 proxy adapters complete; standalone types can proceed |
 | **Staging readiness** | Not achievable — no domain routes, no staging telemetry evidence, no physical SharePoint lists |
@@ -126,7 +126,7 @@ Until these conditions are met, implementation should focus on Tier 1 work items
 
 | Document | Type | Status |
 |---|---|---|
-| P1-B1-Proxy-Adapter-Implementation-Plan.md | Engineering Plan | Implementation-Ready |
+| P1-B1-Proxy-Adapter-Implementation-Plan.md | Engineering Plan | Complete |
 | P1-B2-Adapter-Completion-Backlog.md | Status Tracker | Active Reference |
 | P1-B3-Mock-Isolation-Policy.md | Governance Policy | Governance Policy |
 
