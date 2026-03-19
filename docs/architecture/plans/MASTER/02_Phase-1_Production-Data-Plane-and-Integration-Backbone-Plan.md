@@ -12,7 +12,7 @@
 
 Phase 1 planning established the complete production data plane and integration backbone design for HB Intel. Twenty-four planning artifacts across five workstreams define data ownership, canonical schemas, production adapter architecture, backend service contracts, write-safety patterns, and contract testing infrastructure. All design decisions are locked and transport-shape conventions are fully reconciled.
 
-Implementation proceeds as upstream deliverables (proxy adapters, backend route handlers, auth middleware, observability instrumentation) are satisfied. The detailed deliverable index is maintained in [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md).
+Implementation proceeds as upstream deliverables are satisfied. As of 2026-03-18: B1 proxy transport foundation and 7 of 11 domain repos are implemented; C1 backend domain routes, C2 auth middleware, and C3 telemetry instrumentation are not yet started; staging readiness is not achievable until these and external dependencies (IT permissions, PO schema approval) are resolved. The detailed deliverable index and readiness positioning are maintained in [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md); the blocker ledger is in [`phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md`](phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md).
 
 ---
 

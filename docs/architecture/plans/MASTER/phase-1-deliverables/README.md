@@ -15,7 +15,22 @@ Phase 1 planning established the complete production data plane and integration 
 - **Write-safety and recovery design** with retry, idempotency, and failure-handling patterns (D-series)
 - **Contract testing infrastructure** with locked transport conventions, smoke-test policy, and staging readiness criteria (E-series)
 
-All design decisions are locked. Transport-shape conventions (response envelopes, error formats, pagination, route paths) are fully reconciled. Implementation is gated on upstream deliverables (B1 proxy adapters, C1 backend routes, C2 auth middleware, C3 instrumentation).
+All design decisions are locked. Transport-shape conventions (response envelopes, error formats, pagination, route paths) are fully reconciled.
+
+### Readiness Positioning
+
+| Category | Status |
+|---|---|
+| **Planning** | Complete — all 24 deliverables final, all transport decisions locked (D1–D6, A8, A9) |
+| **Implementation — B1 proxy adapters** | In progress — transport foundation + 7 of 11 repos implemented and tested; Lead, Project, Estimating, Auth remaining |
+| **Implementation — C1 backend routes** | Not started — zero domain data routes exist; provisioning/notification routes are operational |
+| **Implementation — C2 auth middleware** | Not started — `validateToken()` exists; `withAuth()`, Zod validation, response helpers not yet built |
+| **Implementation — C3 observability** | Foundation only — `createLogger()` verified; telemetry event families not instrumented |
+| **Implementation — D1 write safety** | Partially unblocked — `ProxyHttpClient` exists; standalone types can proceed; full wiring awaits B1 |
+| **Staging readiness** | Not achievable — no domain routes, no staging telemetry evidence, no physical SharePoint lists |
+| **External dependencies** | 3 pending — IT Graph permission grant, IT per-site access grants, PO schema approval |
+
+Broad Phase 1 implementation should not be described as "execution-ready" until the remaining readiness blockers are resolved. See the [P1-CLOSEOUT register](P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) for the detailed blocker ledger.
 
 **Governing plan:** [`../02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md`](../02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md)
 

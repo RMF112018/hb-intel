@@ -1,8 +1,8 @@
 # HB Intel — Master Development Summary Plan
 
-**Document ID:** 00  
-**Classification:** Program Execution Master Plan  
-**Status:** Draft for working use  
+**Document ID:** 00
+**Classification:** Program Execution Master Plan
+**Status:** Active Reference — governing summary; updated as the program evolves
 **Primary Role:** Governing summary plan for the HB Intel development program
 
 ## 1. Purpose
