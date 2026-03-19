@@ -42,7 +42,58 @@ describe('D-PH6-15 validateToken middleware', () => {
       upn: 'valid.user@hb.com',
       oid: 'oid-1',
       roles: ['Admin'],
+      displayName: 'valid.user@hb.com',
+      jobTitle: undefined,
     });
+  });
+
+  it('populates jobTitle when JWT contains the claim', async () => {
+    jwtVerifyMock.mockResolvedValueOnce({
+      payload: {
+        upn: 'pm@hb.com',
+        oid: 'oid-2',
+        roles: ['ProjectManager'],
+        name: 'PM User',
+        jobTitle: 'Project Manager',
+      },
+    });
+
+    const { validateToken } = await import('./validateToken.js');
+    const claims = await validateToken(makeRequest('Bearer token-with-jobtitle'));
+
+    expect(claims.jobTitle).toBe('Project Manager');
+    expect(claims.displayName).toBe('PM User');
+  });
+
+  it('returns undefined jobTitle when JWT omits the claim', async () => {
+    jwtVerifyMock.mockResolvedValueOnce({
+      payload: {
+        upn: 'user@hb.com',
+        oid: 'oid-3',
+        roles: [],
+      },
+    });
+
+    const { validateToken } = await import('./validateToken.js');
+    const claims = await validateToken(makeRequest('Bearer token-no-jobtitle'));
+
+    expect(claims.jobTitle).toBeUndefined();
+  });
+
+  it('returns undefined jobTitle when claim is non-string', async () => {
+    jwtVerifyMock.mockResolvedValueOnce({
+      payload: {
+        upn: 'user@hb.com',
+        oid: 'oid-4',
+        roles: [],
+        jobTitle: 42,
+      },
+    });
+
+    const { validateToken } = await import('./validateToken.js');
+    const claims = await validateToken(makeRequest('Bearer token-bad-jobtitle'));
+
+    expect(claims.jobTitle).toBeUndefined();
   });
 
   it('throws when Authorization header is missing', async () => {

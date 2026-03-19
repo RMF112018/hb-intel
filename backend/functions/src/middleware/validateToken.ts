@@ -14,6 +14,15 @@ export interface IValidatedClaims {
   roles: string[];
   /** Display name from JWT `name` claim. Falls back to UPN if absent. */
   displayName?: string;
+  /**
+   * Entra ID Job Title from JWT optional claim (`jobTitle`).
+   *
+   * Populated only if the app registration is configured to include
+   * `jobTitle` as an optional claim in the ID/access token. If the claim
+   * is absent (SPFx path, or optional claim not yet configured), this
+   * field is undefined — callers must handle gracefully.
+   */
+  jobTitle?: string;
 }
 
 /**
@@ -40,6 +49,7 @@ export async function validateToken(request: HttpRequest): Promise<IValidatedCla
     oid?: string;
     roles?: string[];
     name?: string;
+    jobTitle?: string;
   };
 
   const upn = (claims.upn ?? claims.preferred_username) ?? '';
@@ -52,6 +62,7 @@ export async function validateToken(request: HttpRequest): Promise<IValidatedCla
     oid: claims.oid,
     roles: claims.roles ?? [],
     displayName: claims.name ?? upn,
+    jobTitle: typeof claims.jobTitle === 'string' ? claims.jobTitle : undefined,
   };
 }
 
