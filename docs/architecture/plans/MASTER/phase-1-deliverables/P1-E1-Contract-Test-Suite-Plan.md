@@ -7,7 +7,7 @@
 | **Workstream** | E — Contract Testing and Staging Readiness |
 | **Document Type** | Implementation Plan |
 | **Owner** | E1-workstream lead (TBD) |
-| **Status** | Implementation-Ready — Blocked (B1, C1); transport conventions locked, test harness gated on upstream adapter and route delivery |
+| **Status** | Implementation-Ready — B1 and C1 DELIVERED; blocked only on schema infrastructure (Task 1–2) and staging infra (Task 8) |
 | **Date** | 2026-03-16 |
 | **Last Reviewed Against Repo Truth** | 2026-03-18 |
 | **Audience** | Developers implementing contract tests for Phase 1 critical path |
@@ -103,20 +103,20 @@ The following are explicitly out of scope for E1 implementation until their prec
 
 - `@hbc/models` has no Zod dependency, no test script — only build, check-types, lint (**CURRENT**)
 - `@hbc/models/src/contracts/` contains Contracts business domain models (`IContractInfo`, `ICommitmentApproval`, `ContractStatus`) — NOT Zod API schemas (**CURRENT**)
-- `@hbc/data-access` has vitest configured (`test` script), 84 tests passing; 10 of 11 proxy adapters implemented (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP); Auth still throws `AdapterNotImplementedError` (blocked on A9) (**CURRENT**)
-- `backend/functions` has vitest test infrastructure (unit, smoke, coverage) but no domain route handlers for Lead/Project/Estimating (**CURRENT**)
+- `@hbc/data-access` has vitest configured (`test` script), 150+ tests passing; all 11 proxy adapters implemented and factory-wired — including `ProxyAuthRepository` (16 methods, 19 tests); A9 resolved per P1-C2-a Task 21 (**CURRENT 2026-03-19**)
+- `backend/functions` has vitest test infrastructure (unit, smoke, coverage); all 10 data-domain route handlers delivered (leads, projects, estimating, schedule, buyout, compliance, contracts, risk, scorecards, pmp) using C2 standardized middleware (**CURRENT 2026-03-19**)
 - Port interfaces for all 11 domains exist in `@hbc/data-access/src/ports/` (**CURRENT**)
 
-### Repo Truth Snapshot (2026-03-18)
+### Repo Truth Snapshot (updated 2026-03-19)
 
 | Package | Test Script | Vitest Config | Zod | Proxy State | Notes |
 |---|---|---|---|---|---|
-| `@hbc/models` | **No** | **No** | **No** | N/A | devDependency: `@types/react` only; no `api-schemas/` directory exists |
-| `@hbc/data-access` | **Yes** (`test`) | **Yes** — `vitest.config.ts` | N/A | **Partial** — `ProxyHttpClient`, envelope parsers, error normalization, path builders + 10 proxy repos (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP) implemented and factory-wired; 84 tests passing. Remaining: Auth throws `AdapterNotImplementedError` (blocked on A9) | v0.1.2 |
-| `backend/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`) | **Yes** — split `unit`/`smoke` projects with explicit include lists | N/A | N/A | Does NOT depend on `@hbc/data-access` today (**CURRENT**). Type-only `devDependency` for test port interfaces is **approved** — see [Dependency Boundary Decision](#dependency-boundary-decision). No runtime coupling permitted. Coverage targets provisioning only; no domain route handlers |
+| `@hbc/models` | **No** | **No** | **No** | N/A | devDependency: `@types/react` only; no `api-schemas/` directory exists — E1 Task 1–2 creates this |
+| `@hbc/data-access` | **Yes** (`test`) | **Yes** — `vitest.config.ts` | N/A | **Complete** — all 11 proxy repos factory-wired; `ProxyAuthRepository` done (16 methods, 19 tests); 150+ tests passing | v0.1.x |
+| `backend/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`, `test:contract-smoke`) | **Yes** — split `unit`/`smoke`/`contract-smoke` projects | N/A | N/A | Does NOT depend on `@hbc/data-access` today (**CURRENT**). Type-only `devDependency` approved. All 10 data-domain route handlers delivered (2026-03-19) with C2 standardized middleware |
 | Root workspace | `pnpm test` (filtered) | **Yes** — 6 entries: auth, shell, sharepoint-docs, bic-next-move, complexity, pwa | N/A | N/A | `@hbc/models` and `@hbc/data-access` are NOT in the workspace test list |
 
-**Adapter contract test status (updated 2026-03-19):** B1 transport foundation and 10 proxy repos are implemented with 84 tests. Adapter contract tests for these 10 domains can proceed once C1 route handlers exist. Auth still throws `AdapterNotImplementedError` in proxy mode (blocked on A9) — contract tests for Auth require B1 Task 7 completion plus C1/C2 route delivery.
+**Adapter contract test status (updated 2026-03-19):** All 11 proxy repos are implemented. C1 route handlers for all 10 data domains are delivered. E1 can now proceed with schema infrastructure (Task 1–2) and adapter/route contract tests (Tasks 4–7). Only Auth backend handlers remain Phase 2; `ProxyAuthRepository` contract tests await C2 staging delivery.
 
 ### E1 Deliverable Breakdown by Surface
 
@@ -124,21 +124,25 @@ See [Implementation Summary](#implementation-summary) for the full task-by-task 
 
 | Deliverable | Surface | Status | Dependency |
 |---|---|---|---|
-| Contract schema infrastructure (shared schemas, per-domain schemas) | `@hbc/models` | **TARGET** — requires Zod dependency + naming resolution | None after setup |
-| MSW handler setup + test utilities | `@hbc/data-access` | **TARGET** — requires vitest setup | D1 vitest prerequisite |
-| Adapter contract tests (Lead, Project, Estimating) | `@hbc/data-access` | **BLOCKED** | B1 (proxy repositories) |
-| Route contract tests | `backend/functions` | **BLOCKED** | C1 (domain route handlers) |
-| Error contract tests | `backend/functions` | **BLOCKED** | C1 (error envelope freeze) |
-| Smoke tests | `backend/functions` | **BLOCKED** | C1 + C2 (routes + auth) + staging infra |
+| Contract schema infrastructure (shared schemas, per-domain schemas) | `@hbc/models` | **TARGET** — requires Zod dependency + `api-schemas/` setup | None — can start immediately (E1 Task 1–2) |
+| MSW handler setup + test utilities | `@hbc/data-access` | **TARGET** — vitest already configured; MSW install + server setup remaining | Vitest already done (B1 Task 0) |
+| Adapter contract tests (Lead, Project, Estimating, +7 more) | `@hbc/data-access` | **UNBLOCKED** — B1 all 11 repos delivered; blocked only on schema infrastructure | E1 Tasks 1–2 (schema infra) must land first |
+| Route contract tests | `backend/functions` | **UNBLOCKED** — C1 all 10 domain route handlers delivered (2026-03-19) | E1 Tasks 1–2 (schema infra) must land first |
+| Error contract tests | `backend/functions` | **UNBLOCKED** — error envelope locked and implemented | E1 Tasks 1–2 (schema infra) must land first |
+| Smoke tests | `backend/functions` | **BLOCKED** | C2 (auth middleware) + staging infra |
 | Telemetry baseline verification | `backend/functions` | **BLOCKED** | C3 (instrumentation) + staging infra |
 
 ### What E1 Can Implement Now
 
-- Zod dependency addition to `@hbc/models` (after naming resolution)
-- Shared Zod schemas (error envelope, pagination) for C1-confirmed shapes in `@hbc/models/src/api-schemas/`
-- Domain schemas for Lead, Project, Estimating (using existing port interfaces as source)
-- MSW server setup and handler scaffolding (independent of B1)
-- Vitest configuration for `@hbc/data-access` (shared with D1 prerequisite)
+All upstream blockers (B1 proxy adapters, C1 domain route handlers) are **DELIVERED**. E1 can now proceed with:
+
+- Zod dependency + vitest setup for `@hbc/models` (naming resolution is done — target `api-schemas/`)
+- Shared Zod schemas (error envelope, pagination) in `@hbc/models/src/api-schemas/`
+- Domain schemas for all 10 data domains (Lead, Project, Estimating, +7 project-scoped)
+- MSW install + server setup for `@hbc/data-access` (vitest already configured)
+- Adapter contract tests for all 10 data domains
+- Route contract tests for all 10 data-domain handler groups
+- Error contract tests (`ErrorEnvelopeSchema` conformance)
 
 ### What E1 Cannot Implement Until Upstream Delivers
 
@@ -167,17 +171,17 @@ This is the single authoritative source for all open design decisions and workst
 
 | Blocker | Workstream | What It Blocks in E1 | Tasks Affected | What Can Proceed Now | Unblock Condition |
 |---|---|---|---|---|---|
-| B1 — Proxy Adapter | P1-B1 | Adapter contract tests | Tasks 4, 5 | MSW handlers, fixtures, server setup (Task 3); contract schemas (Tasks 1-2) | B1 delivers `ProxyHttpClient` + `ProxyLeadRepository` + `ProxyProjectRepository` + `ProxyEstimatingRepository` |
-| C1 — Backend Catalog | P1-C1 | Route contract tests and error contract tests | Tasks 6, 7, 8 | All frontend-side work; contract schemas for Tier 1 domains | C1 delivers domain route handlers + error middleware for Lead/Project/Estimating |
+| B1 — Proxy Adapter | P1-B1 | Adapter contract tests | Tasks 4, 5 | **DELIVERED** — all 11 proxy repos implemented; unblocks Tasks 4–5 | **CLOSED** — B1 complete as of 2026-03-19 |
+| C1 — Backend Catalog | P1-C1 | Route contract tests and error contract tests | Tasks 6, 7, 8 | **DELIVERED** — all 10 data-domain route handlers implemented with C2 middleware; unblocks Tasks 6–7 | **CLOSED** — C1 complete as of 2026-03-19 |
 | C2 — Auth Hardening | P1-C2 | Smoke test auth validation | Task 8 (auth tests) | Non-auth smoke tests can be written (skip when no token) | C2 delivers auth middleware for staging |
 | C3 — Observability | P1-C3 | Telemetry baseline verification | Task 9 | Telemetry event classification documented | C3 instrumentation lands in staging; events visible in Application Insights |
-| D1 — Write Safety | P1-D1 | Shared vitest prerequisite for `@hbc/data-access` | Task 10 (partial) | Vitest setup can proceed independently; D1 and E1 coordinate | Vitest config created for `@hbc/data-access` (either workstream) |
+| D1 — Write Safety | P1-D1 | Shared vitest prerequisite for `@hbc/data-access` | Task 10 (partial) | **DELIVERED** — `withRetry()`, idempotency guard, cleanup timer all implemented; vitest already configured | **CLOSED** — D1 complete as of 2026-03-19 |
 | Staging infra | Platform | Smoke tests + telemetry baseline | Tasks 8, 9 | All local contract tests | `SMOKE_TEST_BASE_URL` resolves to deployed staging instance |
 
 ### Execution Guardrails
 
-- **Tier 1 (CONFIRMED):** Full implementation (contract schemas, tests, MSW handlers) is permitted only where all blocking dependencies are satisfied. For adapter contract tests, B1 must be merged. For route contract tests, C1 must be delivered.
-- **Tier 2 (CONFIRMED routes):** D1 (plural), D2 (estimating sub-resources), D6 (nested project-scoped paths), and A8 (`/api/projects/summary`) are now resolved. Tier 2 schema route paths are CONFIRMED. Full test code, MSW handlers, and route contract tests for Tier 2 domains still require C1 to deliver the actual route handlers.
+- **Tier 1 (CONFIRMED and DELIVERED):** B1 proxy adapters are complete. C1 route handlers for Lead, Project, Estimating are delivered. Full adapter and route contract test implementation is unblocked — gated only on schema infrastructure (E1 Tasks 1–2).
+- **Tier 2 (CONFIRMED and DELIVERED):** D1 (plural), D2 (estimating sub-resources), D6 (nested project-scoped paths), and A8 (`/api/projects/summary`) are resolved. C1 route handlers for all 7 project-scoped domains delivered 2026-03-19. Full test code, MSW handlers, and route contract tests for Tier 2 domains are unblocked — gated only on schema infrastructure (E1 Tasks 1–2).
 - **Tier 3 (NOT CATALOGED):** Auth remains out of scope for full schemas — no auth schema or tests until C2 publishes auth route truth. `/api/auth/me` is available as a smoke utility only (decision 12).
 - **Transport-layer details (LOCKED):** D3 (`message` field), D4 (page size 25), D5 (PUT-only), D6 (nested paths), single-item `{ data: T }` wrapper, and Delete `204 No Content` are all locked. No PROVISIONAL markers remain on transport-layer conventions.
 - **No speculative unblocking:** Do not implement blocked tasks "optimistically" by guessing what B1/C1/C2 will deliver. Wait for the actual deliverable.
@@ -201,9 +205,9 @@ The current `@hbc/models/src/contracts/` directory is the **Contracts business d
 
 | Package | `test` Script | Vitest Config | In Root Workspace | Status |
 |---|---|---|---|---|
-| `@hbc/models` | **No** | **No** | **No** | E1 must create vitest config + test script (Task 2 prerequisite) |
-| `@hbc/data-access` | **No** | **No** | **No** | E1 must create vitest config + test script (shared prerequisite with D1) |
-| `@hbc/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`) | **Yes** (unit + smoke named projects) | **No** (standalone config) | E1 must add contract test files to vitest project include list |
+| `@hbc/models` | **No** | **No** | **No** | E1 must add Zod + vitest config + test script (E1 Task 1–2 prerequisite) |
+| `@hbc/data-access` | **Yes** (`test`) | **Yes** (`vitest.config.ts`) | **No** | **CURRENT — vitest already configured (B1 Task 0 + D1)**; E1 must add `msw` and contract test files only |
+| `@hbc/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`, `test:contract-smoke`) | **Yes** (unit + smoke + contract-smoke named projects) | **No** (standalone config) | E1 must add full `contract` project and route contract test files |
 
 **E1 test lane classification:**
 
@@ -223,10 +227,9 @@ The current `@hbc/models/src/contracts/` directory is the **Contracts business d
    - Add `"test": "vitest run"` to `packages/models/package.json` scripts
    - **Optional follow-on:** Register in root `vitest.workspace.ts` after the package has stable passing tests. The root workspace currently lists 6 packages (auth, shell, sharepoint-docs, bic-next-move, complexity, pwa). Package-local `pnpm --filter @hbc/models test` works without root registration.
 
-2. **`@hbc/data-access` vitest setup** (required; coordinate with D1):
-   - Add `vitest` and `msw` to `devDependencies` in `packages/data-access/package.json`
-   - Create `packages/data-access/vitest.config.ts`: `environment: 'node'`, `globals: true`, `include: ['src/**/*.test.ts', 'src/**/*.contract.test.ts']`
-   - Add `"test": "vitest run"` to `packages/data-access/package.json` scripts
+2. **`@hbc/data-access` vitest setup** — **ALREADY COMPLETE** (B1 Task 0 + D1):
+   - `vitest.config.ts` exists; `test` script in `package.json`; 150+ tests passing (**DONE**)
+   - E1 remaining work: add `msw` to `devDependencies` and write MSW server setup + handler files
    - **Optional follow-on:** Register in root `vitest.workspace.ts` after stable tests exist. Same rationale as `@hbc/models`.
 
 3. **`@hbc/functions` vitest config update** (required after C1 delivers route handlers):

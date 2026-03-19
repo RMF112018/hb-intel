@@ -40,12 +40,12 @@ Define the complete HTTP service contract for HB Intel backend Azure Functions v
 | Proxy | `IMPLEMENTED` | 2 handlers (GET + mutate) | — | Graph API forwarding with OBO, Redis cache |
 | Project Setup Requests | `IMPLEMENTED` | 3 | — | State machine lifecycle |
 | Acknowledgments | `IMPLEMENTED` | 2 | — | Sign-off events (GET, POST only) |
-| Notifications | `IMPLEMENTED (DELTA)` | 7 | 2 queue + 1 timer | Response shapes vary from target envelope |
+| Notifications | `IMPLEMENTED` | 7 | 2 queue + 1 timer | All response shapes normalized to target envelope (2026-03-19) |
 | SignalR | `IMPLEMENTED` | 1 | — | Negotiate endpoint only |
-| Provisioning Saga | `IMPLEMENTED (DELTA)` | 6 | — | Response shapes not yet normalized to target envelope; admin routes included |
+| Provisioning Saga | `IMPLEMENTED` | 6 | — | All response shapes normalized to target envelope (2026-03-19); admin routes included |
 | Timer (Full Spec) | `IMPLEMENTED` | — | 1 timer | Nightly deferred provisioning |
-
-**Not found in repo:** Health check endpoint (`GET /api/health`) — listed in previous draft but not verified in current `backend/functions/src/index.ts` import barrel. Removed from catalog pending re-verification.
+| Health | `IMPLEMENTED` | 1 | — | `GET /api/health` — verified in `backend/functions/src/index.ts` barrel |
+| Cleanup (Idempotency) | `IMPLEMENTED` | — | 1 timer | `cleanupIdempotency` — nightly expired-record purge; 3 AM daily |
 
 ### Phase 1 Target Domain Routes
 
@@ -119,7 +119,7 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 | `GET` | `project-setup-requests` | `listProjectSetupRequests` | List with optional state filter |
 | `PATCH` | `project-setup-requests/{requestId}/state` | `advanceRequestState` | State machine transition with validation |
 
-**Current response shape:** POST returns 201 with raw `IProjectSetupRequest` entity (not `{data:...}` wrapped). GET returns 200 with raw `IProjectSetupRequest[]` array (not `{data:[], total, page, pageSize}` collection envelope). PATCH returns 200 with raw updated entity. Errors return `{error: string}`.
+**Current response shape (normalized 2026-03-19):** POST returns 201 `{data: IProjectSetupRequest}`. GET returns 200 `{items, pagination: {total, page, pageSize, totalPages}}` with `?page` and `?pageSize` support (default 25, max 100). PATCH returns 200 `{data: IProjectSetupRequest}`. Errors return `{message, code, requestId}`.
 
 ### Acknowledgments (2 routes)
 
@@ -128,7 +128,7 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 | `POST` | `acknowledgments` | `postAcknowledgment` | Submit acknowledgment, decline, or bypass event |
 | `GET` | `acknowledgments` | `getAcknowledgments` | Retrieve events by contextType + contextId |
 
-**Current response shape:** POST returns 200 with `{event: IAcknowledgmentEvent, updatedState: AcknowledgmentState, isComplete: boolean}` (custom shape, not `{data:...}`). GET returns 200 with `{events: IAcknowledgmentEvent[]}` (not `{data:[...]}`). Errors include 400 `{error}`, 403 `{error}`, 409 `{error, declinedBy}`.
+**Current response shape (normalized 2026-03-19):** POST returns 200 `{data: {event, updatedState, isComplete}}`. GET returns 200 `{items: IAcknowledgmentEvent[], pagination: {total, page, pageSize, totalPages}}` (full event set, single page). Errors return `{message, code, requestId}`.
 
 ### Notifications (7 HTTP routes + background triggers)
 
@@ -165,7 +165,7 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 | `POST` | `provisioning-retry/{projectId}` | `retryProvisioning` | Retry failed provisioning |
 | `POST` | `provisioning-escalate/{projectId}` | `escalateProvisioning` | Escalate provisioning request |
 
-**Current response shape:** POST provision returns 202 `{message: "Provisioning started", projectId, correlationId}`. GET status returns 200 raw `ProvisioningStatus` entity. GET failures returns 200 array. POST retry returns 202 `{message, projectId}`. POST escalate returns 200 `{message: "Provisioning escalated", projectId}`. Errors return `{error: string}`.
+**Current response shape (normalized 2026-03-19):** POST provision returns 202 `{message, projectId, correlationId}` (async accepted). GET status returns 200 `{data: ProvisioningStatus}`. GET failures returns 200 `{items, pagination: {total, page, pageSize, totalPages}}`. POST retry returns 202 `{message, projectId}`. POST escalate returns 200 `{data: {message, projectId}}`. Errors return `{message, code, requestId}`.
 
 ### Timer (1 trigger)
 
@@ -175,9 +175,9 @@ Routes verified against `backend/functions/src/` as of 2026-03-18. Route paths s
 
 ---
 
-## Part 2: Target Phase 1 Domain Route Contracts
+## Part 2: Phase 1 Domain Route Contracts
 
-These routes do not yet exist in the backend. They define the contract that B1 proxy adapters will consume. Route shapes are derived from B1 engineering plan assumptions; provisional shapes will be reconciled when open decisions are resolved.
+All 10 data-domain route groups listed below are **IMPLEMENTED** as of 2026-03-19. Routes are built to the target envelope conventions from the outset — no normalization delta applies to these handlers. Auth backend handlers remain Phase 2. Route shapes reflect the locked transport conventions (D1–D6, A8, A9).
 
 **Target response envelope standard** (see Global Contract Standards and Locked Transport Conventions below):
 - Collection: `{ items: T[], total, page, pageSize }`
@@ -246,19 +246,19 @@ Port interface: `IAuthRepository` — 16 methods across 5 capability groups. Rou
 
 **Backend handler status:** Route catalog defined and locked; backend handler implementation is a Phase 2 delivery. `ProxyAuthRepository` is production-ready pending backend route delivery.
 
-### Remaining Domains — `TARGET (PROVISIONAL)` (D1, D6 pending)
+### Project-Scoped Domains — `IMPLEMENTED` (D1, D6 resolved; handlers delivered 2026-03-19)
 
-These 7 domains are project-scoped and depend on open decisions D1 (singular/plural paths) and D6 (nested paths vs flat `?projectId=` query params). Route shapes below are B1-assumed; they will be reconciled when D1/D6 are resolved. See B2 method family detail for full port method inventory.
+All 7 project-scoped domains are implemented with C2 standardized middleware (`withAuth`, `withTelemetry`, `successResponse`, `listResponse`, `errorResponse`). D1 (plural) and D6 (nested paths) are locked per P1-E1 and reflected in all route handlers. See B2 method family detail for full port method inventory.
 
-| Domain | Port Interface | Method Families | Assumed Base Path | Open Decisions |
+| Domain | Port Interface | Method Families | Base Path | Status |
 |---|---|---|---|---|
-| Schedule | `IScheduleRepository` | Activity CRUD (5) + Metrics (1) | `/api/projects/{projectId}/schedule` | D1, D6 |
-| Buyout | `IBuyoutRepository` | Entry CRUD (5) + Summary (1) | `/api/projects/{projectId}/buyout` | D1, D6 |
-| Compliance | `IComplianceRepository` | Entry CRUD (5) + Summary (1) | `/api/projects/{projectId}/compliance` | D1, D6 |
-| Contract | `IContractRepository` | Contract CRUD (5) + Approvals (2) | `/api/projects/{projectId}/contracts` | D1, D6 |
-| Risk | `IRiskRepository` | Item CRUD (5) + Management (1) | `/api/projects/{projectId}/risk` | D1, D6 |
-| Scorecard | `IScorecardRepository` | Scorecard CRUD (5) + Versions (1) | `/api/projects/{projectId}/scorecards` | D1, D6 |
-| PMP | `IPmpRepository` | Plan CRUD (5) + Signatures (2) | `/api/projects/{projectId}/pmp` | D1, D6 |
+| Schedule | `IScheduleRepository` | Activity CRUD (5) + Metrics (1) | `/api/projects/{projectId}/schedule` | `IMPLEMENTED` |
+| Buyout | `IBuyoutRepository` | Entry CRUD (5) + Summary (1) | `/api/projects/{projectId}/buyout` | `IMPLEMENTED` |
+| Compliance | `IComplianceRepository` | Entry CRUD (5) + Summary (1) | `/api/projects/{projectId}/compliance` | `IMPLEMENTED` |
+| Contract | `IContractRepository` | Contract CRUD (5) + Approvals (2) | `/api/projects/{projectId}/contracts` | `IMPLEMENTED` |
+| Risk | `IRiskRepository` | Item CRUD (5) + Management (1) | `/api/projects/{projectId}/risk` | `IMPLEMENTED` |
+| Scorecard | `IScorecardRepository` | Scorecard CRUD (5) + Versions (1) | `/api/projects/{projectId}/scorecards` | `IMPLEMENTED` |
+| PMP | `IPmpRepository` | Plan CRUD (5) + Signatures (2) | `/api/projects/{projectId}/pmp` | `IMPLEMENTED` |
 
 ---
 

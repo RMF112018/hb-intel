@@ -136,12 +136,12 @@ A deliberate deep search across the full repo identified 3 issues not caught in 
 | 2 | Per-site grant process | Manual grants required for each new project site | IT + Architecture | Ops | **Process-documented** — `tools/grant-site-access.sh` + `IGraphService.grantSiteAccess()` automation hook. Full automation deferred to post-pilot. |
 | 3 | GraphService `Group.ReadWrite.All` | Step 6 Entra group creation gated until IT confirms permission | Backend + IT | Ops | **Code-complete** — gated behind `GRAPH_GROUP_PERMISSION_CONFIRMED` env var. Awaiting IT grant. |
 | 5 | SharePoint schema approval | Physical lists cannot be deployed to tenant | Product Owner | A3 | **Approval-ready** — [P1-A3-Schema-Approval-Package.md](P1-A3-Schema-Approval-Package.md) prepared for PO review. Adapter dev proceeds against mocks. |
-| 7 | B1 proxy adapter implementation | D1/E1/E2 blocked until complete | Engineering | B1 | **In progress** — 10 of 11 repos done (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Remaining: Auth only (blocked on A9 — route paths not in C1/C2 catalog). |
+| ~~7~~ | ~~B1 proxy adapter implementation~~ | ~~D1/E1/E2 blocked until complete~~ | ~~Engineering~~ | ~~B1~~ | **CLOSED** — All 11 repos CODE_COMPLETE_MOCK (2026-03-19). Auth (ProxyAuthRepository): 16 methods, 19 tests, factory-wired. A9 resolved. |
 | 8 | data-access README proxy status stale | Implementers may incorrectly assume proxy is greenfield | Engineering | B1 | **CLOSED** — corrected in this final sweep commit |
 | ~~9~~ | ~~Backend adapter-mode vocabulary drift~~ | ~~defaults to 'real' not canonical 'proxy'~~ | ~~Engineering~~ | ~~C2/B3~~ | **CLOSED** — `normalizeAdapterMode()` maps 'real'→'proxy'; default changed to 'proxy'; wave0 registry and README updated |
 | ~~10~~ | ~~B3 Layer 2 startup guard not created~~ | ~~defense-in-depth mock isolation incomplete~~ | ~~Engineering~~ | ~~B3~~ | **CLOSED** — `assertAdapterModeValid()` in `adapter-mode-guard.ts` wired into `createServiceFactory()`; rejects unknown modes and blocks mock-in-production |
 
-**Active blocker count: 4** (2 external/IT, 1 external/PO, 1 engineering in-progress)
+**Active blocker count: 3** (2 external/IT, 1 external/PO; engineering blocker #7 CLOSED 2026-03-19)
 
 ---
 
@@ -149,11 +149,11 @@ A deliberate deep search across the full repo identified 3 issues not caught in 
 
 | Workstream | Can Begin Now | Blocked On |
 |---|---|---|
-| **B1** — Proxy Adapter Implementation | **Yes** — 7 repos done; remaining 4 (Lead, Project, Estimating, Auth) can proceed against mocked fetch | Production activation: C1 route finalization, MSAL registration |
+| **B1** — Proxy Adapter Implementation | **Complete** — All 11 repos CODE_COMPLETE_MOCK (2026-03-19) | Production activation: C2 auth middleware, E1 contract tests, staging infra |
 | **C2** — Auth Middleware and Validation | **Yes** — builds on existing `validateToken()`; OBO endpoint list resolved (blocker #1 closed); adapter-mode vocabulary remediated (blocker #9 closed) | — |
 | **C3** — Observability Instrumentation | **Yes** — logging foundation verified complete | Telemetry events depend on B1/C2 delivering routes/middleware |
-| **D1** — Write Safety and Recovery | **Partially unblocked** — `ProxyHttpClient` now exists; standalone retry types + idempotency types can proceed; wiring into proxy repositories requires B1 completion | B1 remaining 4 repos for full wiring |
-| **E1** — Contract Test Suite | Transport conventions locked; harness design ready | B1 adapter repos + C1 route handlers must exist |
+| **D1** — Write Safety and Recovery | **Unblocked** — `ProxyHttpClient` exists; B1 CODE_COMPLETE_MOCK for all 11 repos; retry/idempotency types deliverable in D1 | E1 contract test coverage + staging infra for full validation |
+| **E1** — Contract Test Suite | **Unblocked** — B1 and C1 both DELIVERED (2026-03-19) | Zod schema infrastructure (Task 1–2) + staging infra |
 | **E2** — Staging Readiness Checklist | Prep-only sections | All upstream workstreams + staging infrastructure |
 
 ---

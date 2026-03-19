@@ -20,6 +20,7 @@ import { createLogger } from '../../utils/logger.js';
 import {
   errorResponse,
   successResponse,
+  listResponse,
   forbiddenResponse,
 } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
@@ -207,6 +208,6 @@ app.http('getAcknowledgments', {
     const items = await services.acknowledgments.getEvents(contextType, contextId);
     const events = items.map(toAcknowledgmentEvent);
 
-    return successResponse({ events });
+    return listResponse(events, events.length, 1, events.length, requestId);
   }, { domain: 'acknowledgments', operation: 'getAcknowledgments' })),
 });

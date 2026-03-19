@@ -9,6 +9,7 @@ import { createLogger } from '../../utils/logger.js';
 import {
   errorResponse,
   successResponse,
+  listResponse,
   notFoundResponse,
 } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
@@ -71,10 +72,14 @@ app.http('listProjectSetupRequests', {
   authLevel: 'anonymous',
   route: 'project-setup-requests',
   handler: withAuth(withTelemetry(async (request: HttpRequest): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
+    const page = Math.max(1, parseInt(request.query.get('page') ?? '1', 10));
+    const pageSize = Math.min(100, Math.max(1, parseInt(request.query.get('pageSize') ?? '25', 10)));
     const services = createServiceFactory();
     const stateFilter = request.query.get('state') as ProjectSetupRequestState | null;
     const requests = await services.projectRequests.listRequests(stateFilter ?? undefined);
-    return successResponse(requests);
+    const start = (page - 1) * pageSize;
+    return listResponse(requests.slice(start, start + pageSize), requests.length, page, pageSize, requestId);
   }, { domain: 'projectRequests', operation: 'listProjectSetupRequests' })),
 });
 

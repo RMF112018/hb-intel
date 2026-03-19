@@ -40,7 +40,7 @@ All adapter domain tracking in this document uses the following status progressi
 
 ## Proxy Adapter: Domain Completion Matrix
 
-B1 targets all 11 domain repositories for implementation against mocked fetch in Phase 1 (10 data domains in the table below; Auth tracked separately in its [own section](#auth-domain-special-case-tracking)). C1 backend routes are locked for 3 data domains (Lead, Project, Estimating — including A8 aggregate and D2 sub-resources, resolved per P1-E1). Transport conventions D1 and D6 are **LOCKED** for all 7 project-scoped domains; those domains' C1 route *handlers* are not yet delivered and remain the primary production-activation blocker.
+B1 targets all 11 domain repositories for implementation against mocked fetch in Phase 1 (10 data domains in the table below; Auth tracked separately in its [own section](#auth-domain-special-case-tracking)). C1 backend routes are locked and **DELIVERED** for all 10 data domains — Lead, Project, Estimating (including A8 aggregate and D2 sub-resources, per P1-E1) plus all 7 project-scoped domains (per D1, D6 lock, delivered 2026-03-19). Auth backend handlers remain Phase 2. All 10 data-domain adapters are at `CODE_COMPLETE_MOCK` and can advance to `CONTRACT_ALIGNED`.
 
 | Domain | Port Interface | Method Families | Total | Phase Target | Status | B1 Task | Route Status |
 |---|---|---|---|---|---|---|---|
@@ -55,13 +55,13 @@ B1 targets all 11 domain repositories for implementation against mocked fetch in
 | **Scorecard** | `IScorecardRepository` | Scorecard CRUD (5), Versions (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 7 | D1, D6 LOCKED* |
 | **PMP** | `IPmpRepository` | Plan CRUD (5), Signatures (2) | 7 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 7 | D1, D6 LOCKED* |
 
-*D1 and D6 are now **LOCKED** per P1-E1 (plural paths, nested project-scoped paths). Production activation blocked until C1 delivers backend route handlers for these domains.
+*D1 and D6 are **LOCKED** per P1-E1 (plural paths, nested project-scoped paths). C1 backend route handlers for all 7 project-scoped domains are **DELIVERED** (2026-03-19). Production activation now blocked only by C2 auth, E1 contract tests, and staging infra.
 
 ### Method Family Detail by Domain
 
 Each domain's port methods are grouped into route groups below. Route patterns are B1-assumed shapes — not final contracts. Transport conventions (D1–D6) are locked per P1-E1. Route patterns below reflect locked conventions. Production activation remains blocked until C1 delivers backend route handlers.
 
-**Route confidence key:** `C1 locked` = route confirmed in C1 catalog. `Convention-locked` = route shape follows locked D1/D6 conventions; production activation blocked until C1 delivers backend handler. `A9` = no C1/C2 catalog entry exists.
+**Route confidence key:** `C1 locked` = route confirmed in C1 catalog. `Convention-locked` = route shape follows locked D1/D6 conventions; C1 backend handler **DELIVERED** (2026-03-19). `A9` = no C1/C2 catalog entry exists.
 
 #### Lead (`ILeadRepository`) — C1 locked
 
@@ -156,17 +156,17 @@ Auth is tracked separately from the 10 data domains because it has no CRUD patte
 
 | Item | Status | Notes |
 |---|---|---|
-| Port interface (`IAuthRepository`) | Frozen | 6 methods across 4 capability groups |
-| Proxy adapter (mocked fetch) | `IMPL_READY` | B1 Task 7; can proceed against mocked fetch |
-| Backend route catalog | **Missing** | A9: no `/api/auth/*` routes in C1 or C2 catalog |
-| OBO token exchange for auth routes | **Unresolved** | C2 owns; auth OBO may differ from standard domain OBO |
+| Port interface (`IAuthRepository`) | Frozen | 16 methods across 5 capability groups |
+| Proxy adapter (mocked fetch) | `CODE_COMPLETE_MOCK` | B1 Task 7 **DELIVERED** — `ProxyAuthRepository` implemented (16 methods, 19 tests, factory-wired); route catalog locked in P1-C2-a Task 21 |
+| Backend route catalog | **RESOLVED** | A9 resolved — 20 system-level + 9 project-scoped auth routes defined in P1-C2-a Task 21; backend handler implementation is Phase 2 |
+| OBO token exchange for auth routes | **Unresolved** | C2 owns; auth OBO may differ from standard domain OBO; Phase 2 |
 | SharePoint surface strategy | **Open decision** | Proxy-only vs native SPFx Entra ID/Graph; deferred to future SP engineering plan |
 
 ### Auth Blocking Dependencies
 
-- **B1 Task 7** can proceed with mocked fetch — no external blocker for `CODE_COMPLETE_MOCK`
-- **A9 resolution** required before `CONTRACT_ALIGNED` — C2 must publish auth management route definitions
-- **C2 auth middleware** required before `INTEGRATION_READY` — OBO flow for auth routes may differ from standard domain OBO if auth uses a separate backend service
+- **B1 Task 7** — **DELIVERED** — `ProxyAuthRepository` implemented (16 methods, 19 tests, factory-wired)
+- **A9 resolution** — **RESOLVED** — route catalog defined in P1-C2-a Task 21 (20 system-level + 9 project-scoped routes); `CONTRACT_ALIGNED` is now unblocked
+- **C2 auth middleware** required before `INTEGRATION_READY` — OBO flow for auth routes may differ from standard domain OBO; backend handler implementation is Phase 2
 - **SharePoint Auth adapter** is an open decision — not blocked, not designed; tracked as a future-phase open item (see SharePoint section below)
 
 ---
@@ -245,17 +245,17 @@ This table is the live tracking surface for adapter implementation progress. Upd
 
 | Domain | Owner | Current Gate | Blocker | Evidence | Next Action | Last Updated |
 |---|---|---|---|---|---|---|
-| Lead | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Project | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Estimating | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Schedule | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Buyout | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Compliance | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Contract | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Risk | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Scorecard | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| PMP | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Auth | B / Data Access + C2 / Auth | `IMPL_READY` | Code: A9 (route paths unresolved); Production: A9 + C1/C2 delivery | — | Await C2 auth route definition before B1 Task 7 | 2026-03-19 |
+| Lead | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: C2 auth, E1 contract tests, staging infra | 84 tests passing; factory wired; C1 routes delivered | Advance to `CONTRACT_ALIGNED`; await E1 contract tests for `STAGING_READY` | 2026-03-19 |
+| Project | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: C2 auth, E1 contract tests, staging infra | 84 tests passing; factory wired; C1 routes delivered | Advance to `CONTRACT_ALIGNED`; await E1 contract tests for `STAGING_READY` | 2026-03-19 |
+| Estimating | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: C2 auth, E1 contract tests, staging infra | 84 tests passing; factory wired; C1 routes delivered | Advance to `CONTRACT_ALIGNED`; await E1 contract tests for `STAGING_READY` | 2026-03-19 |
+| Schedule | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: C2 auth, E1 contract tests, staging infra | 84 tests passing; factory wired; C1 routes delivered (2026-03-19) | Advance to `CONTRACT_ALIGNED`; await E1 contract tests for `STAGING_READY` | 2026-03-19 |
+| Buyout | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: C2 auth, E1 contract tests, staging infra | 84 tests passing; factory wired; C1 routes delivered (2026-03-19) | Advance to `CONTRACT_ALIGNED`; await E1 contract tests for `STAGING_READY` | 2026-03-19 |
+| Compliance | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: C2 auth, E1 contract tests, staging infra | 84 tests passing; factory wired; C1 routes delivered (2026-03-19) | Advance to `CONTRACT_ALIGNED`; await E1 contract tests for `STAGING_READY` | 2026-03-19 |
+| Contract | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: C2 auth, E1 contract tests, staging infra | 84 tests passing; factory wired; C1 routes delivered (2026-03-19) | Advance to `CONTRACT_ALIGNED`; await E1 contract tests for `STAGING_READY` | 2026-03-19 |
+| Risk | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: C2 auth, E1 contract tests, staging infra | 84 tests passing; factory wired; C1 routes delivered (2026-03-19) | Advance to `CONTRACT_ALIGNED`; await E1 contract tests for `STAGING_READY` | 2026-03-19 |
+| Scorecard | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: C2 auth, E1 contract tests, staging infra | 84 tests passing; factory wired; C1 routes delivered (2026-03-19) | Advance to `CONTRACT_ALIGNED`; await E1 contract tests for `STAGING_READY` | 2026-03-19 |
+| PMP | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: C2 auth, E1 contract tests, staging infra | 84 tests passing; factory wired; C1 routes delivered (2026-03-19) | Advance to `CONTRACT_ALIGNED`; await E1 contract tests for `STAGING_READY` | 2026-03-19 |
+| Auth | B / Data Access + C2 / Auth | `CODE_COMPLETE_MOCK` | Production activation: backend handlers Phase 2; C2 auth middleware; staging infra | 16 methods, 19 tests; factory-wired (ProxyAuthRepository); route catalog defined in P1-C2-a Task 21 | Await backend handler delivery (Phase 2) for `INTEGRATION_READY` | 2026-03-19 |
 
 ### SharePoint and API Adapter Progress
 
@@ -269,13 +269,13 @@ Not yet active. Rows will be added when those phases begin planning.
 
 | Lane | Scope | Can Proceed Now? | Blocked Until |
 |---|---|---|---|
-| **Mocked-fetch implementation** | B1 Tasks 0–10: all 11 domain adapters | **Yes** — no external blockers | — |
-| **Route reconciliation** | Align adapter paths with C1 catalog | Lead, Project (incl. A8 aggregate), Estimating (incl. D2 sub-resources) locked per P1-E1; 7 convention-locked domains pending C1 handler delivery | C1 delivers remaining 7 data-domain route handlers; Auth (A9) catalog entry still needed |
-| **Response contract alignment** | Error envelope, pagination defaults | **LOCKED** — D3 (`message`), D4 (25/100) resolved per P1-E1 | — |
+| **Mocked-fetch implementation** | B1 Tasks 0–10: all 11 domain adapters | **COMPLETE** — all 11 repos factory-wired and at `CODE_COMPLETE_MOCK` | — |
+| **Route reconciliation** | Align adapter paths with C1 catalog | **COMPLETE** for all 10 data domains — Lead/Project/Estimating locked per P1-E1; 7 project-scoped domains delivered 2026-03-19; Auth (A9) catalog defined in P1-C2-a Task 21 | Backend handlers for Auth are Phase 2 |
+| **Response contract alignment** | Error envelope, pagination defaults | **LOCKED** — D3 (`message`), D4 (25/100) resolved per P1-E1; all pre-Phase-1 routes normalized 2026-03-19 | — |
 | **Auth integration** | MSAL registration, OBO flow, CORS | No | C2 delivers auth middleware and registers scopes |
-| **Write safety** | Retry, idempotency, failure classification | No | P1-D1 delivers `withRetry()`, idempotency guard, `WriteFailureReason` |
+| **Write safety** | Retry, idempotency, failure classification | **DELIVERED** — `withRetry()`, idempotency guard, `WriteFailureReason`, `cleanupIdempotency` timer | — |
 | **Contract testing** | Zod schema + MSW harness against staging | No | E1 delivers test harness; staging backend available |
-| **Production activation** | Remove mock fallback, live traffic | No | All above lanes resolved per domain |
+| **Production activation** | Remove mock fallback, live traffic | No | C2 auth, E1 contract tests, staging infra |
 
 B1 Tasks 0–10 can proceed immediately against mocked fetch. Production activation is blocked by the convergence of C1, C2, P1-D1, and E1 deliverables — see workstream detail below.
 
@@ -285,7 +285,7 @@ B1 Tasks 0–10 can proceed immediately against mocked fetch. Production activat
 
 No external blockers for mocked-fetch implementation. All B1 tasks (vitest setup → `ProxyHttpClient` → `ProxyBaseRepository` → 11 domain repos → factory wiring → integration tests) proceed against mocked fetch. See `P1-B1-Proxy-Adapter-Implementation-Plan.md` for full task breakdown.
 
-Currently, 4 of 11 domains (Lead, Project, Estimating, Auth) throw `AdapterNotImplementedError` for proxy mode in the factory (`packages/data-access/src/factory.ts`). The remaining 7 project-scoped domains are factory-wired to real proxy implementations and have reached `CODE_COMPLETE_MOCK`. Phase 1 implementation completes the remaining 4 proxy repos.
+All 11 domains are factory-wired to real proxy implementations and have reached `CODE_COMPLETE_MOCK`. No domain throws `AdapterNotImplementedError` for proxy mode. Auth backend handlers remain Phase 2, but `ProxyAuthRepository` itself is complete (16 methods, 19 tests).
 
 #### B1 Open Decisions Affecting Route Shape
 
@@ -320,23 +320,25 @@ These decisions do not block mocked-fetch implementation but must be resolved be
 
 C1 owns route path finalization, response envelope shape, and HTTP method definitions for all backend Azure Functions endpoints. Until C1 freezes routes for a domain, that domain's adapter cannot be verified against real paths.
 
-**Current state:**
-- **C1 locked (3 domains):** Lead, Project (including A8 aggregate: `/api/projects/summary`), Estimating (including D2 sub-resources: `/api/estimating/trackers/` and `/api/estimating/kickoffs/`) — all per P1-E1
-- **Convention-locked, handler pending (7 data domains):** Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP — transport conventions D1, D5, D6 **LOCKED** per P1-E1; route paths follow confirmed nested patterns; production activation blocked until C1 delivers backend route handlers
-- **Auth (tracked separately):** A9 — no route catalog entry; see [Auth Domain: Special-Case Tracking](#auth-domain-special-case-tracking)
+**Current state (verified 2026-03-19):**
+- **C1 locked and DELIVERED (all 10 data domains):** Lead, Project (including A8 aggregate), Estimating (including D2 sub-resources), Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP — all route handlers implemented with C2 standardized middleware
+- **Auth (tracked separately):** A9 resolved — route catalog defined in P1-C2-a Task 21; backend handler implementation is Phase 2
 
 **Resolved transport decisions (all LOCKED per P1-E1):**
-- D1: Plural paths — confirmed
-- D3: `message` is primary error field — `extractErrorMessage()` reads `.message` first, `.error` fallback
-- D4: Default pageSize 25, max 100 — B1 and C1 aligned
+- D1: Plural paths — confirmed and delivered
+- D2: Estimating sub-resources — confirmed and delivered
+- D3: `message` is primary error field — all handlers use `errorResponse()`
+- D4: Default pageSize 25, max 100 — B1 and C1 aligned; delivered in all list routes
 - D5: PUT-only in Phase 1 — PATCH deferred to Phase 2
-- D6: Nested project-scoped paths — B1 assumption confirmed
+- D6: Nested project-scoped paths — confirmed and delivered
 
-**Remaining items blocking `CONTRACT_ALIGNED`:**
-- A9: Auth management routes — no C1/C2 catalog entry; see Auth Domain section
-- **C1 route handler delivery** — no domain data routes exist in backend yet; this is the primary remaining blocker for all non-Lead/Project/Estimating domains
+**Remaining items blocking `CONTRACT_ALIGNED` → `STAGING_READY`:**
+- C2 auth middleware (MSAL/OBO) — required before `INTEGRATION_READY`
+- E1 contract tests — required before `STAGING_READY`
+- Staging infrastructure deployment — required before `STAGING_READY`
+- Auth backend handlers — Phase 2; `ProxyAuthRepository` can reach `CONTRACT_ALIGNED` once C2 confirms route definitions are final
 
-*Note: D2 (Estimating sub-resources) and A8 (project aggregate) are now locked per P1-E1; they no longer block `CONTRACT_ALIGNED` for those domains.*
+*D2 (Estimating sub-resources) and A8 (project aggregate) are locked per P1-E1. All C1 route handler delivery is complete as of 2026-03-19.*
 
 ### P1-C2 — Auth and Validation Hardening
 
@@ -381,7 +383,7 @@ E1 owns the Zod schema contract test suite and MSW-based test harness that valid
 | Adapter Type | Description | Current Status | Target Phase | `HBC_ADAPTER_MODE` Value |
 |---|---|---|---|---|
 | **mock** | In-memory seed data; fully functional | Complete | All phases | `'mock'` |
-| **proxy** | Calls Azure Functions via MSAL OBO | `IN_PROGRESS` — 10 of 11 repos `CODE_COMPLETE_MOCK`; 1 remaining (Auth — blocked on A9) | Phase 1 | `'proxy'` |
+| **proxy** | Calls Azure Functions via MSAL OBO | `CODE_COMPLETE_MOCK` — 11 of 11 repos complete; Auth (`ProxyAuthRepository`) implemented (16 methods, 19 tests); backend handlers for Auth are Phase 2 | Phase 1 | `'proxy'` |
 | **sharepoint** | Direct PnPjs calls (SPFx-only surface) | `STUB` | Future phase | `'sharepoint'` |
 | **api** | REST / Azure SQL direct calls | Reserved | Future phase | `'api'` |
 
@@ -453,7 +455,7 @@ All 11 domains are candidates for direct API adapter implementation in a future 
 - `resolveAdapterMode()` reads `HBC_ADAPTER_MODE` env var; defaults to `'mock'` if unset or unrecognized
 - Each domain has a `create{Domain}Repository(mode?)` factory function with a `switch` on the resolved mode
 - **Mock adapters:** fully implemented for all 11 domains — returned for `'mock'` mode
-- **Proxy adapters:** 7 project-scoped domains (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP) fully wired — factory returns real proxy implementations for `'proxy'` mode. 4 domains (Lead, Project, Estimating, Auth) still throw `AdapterNotImplementedError` for `'proxy'` mode
+- **Proxy adapters:** all 11 domains fully wired — factory returns real proxy implementations for `'proxy'` mode. All `AdapterNotImplementedError` stubs replaced. Auth domain (`ProxyAuthRepository`) factory-wired with 16 methods and 19 tests
 - **Non-proxy real adapters:** `'sharepoint'` and `'api'` modes throw `AdapterNotImplementedError` for all 11 domains — hard fail, no silent fallback to mock
 - **No domain-level override mechanism exists** — all domains resolve to the same global mode
 - **No env validation guard exists** — if `HBC_ADAPTER_MODE` is unset, the factory silently defaults to `'mock'` with no warning

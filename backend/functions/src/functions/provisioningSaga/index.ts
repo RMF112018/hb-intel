@@ -10,6 +10,7 @@ import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import {
   errorResponse,
   successResponse,
+  listResponse,
   notFoundResponse,
   forbiddenResponse,
 } from '../../utils/response-helpers.js';
@@ -119,7 +120,7 @@ app.http('listFailedRuns', {
 
     const services = createServiceFactory();
     const failedRuns = await services.tableStorage.listFailedRuns();
-    return successResponse(failedRuns);
+    return listResponse(failedRuns, failedRuns.length, 1, failedRuns.length, requestId);
   }, { domain: 'provisioningSaga', operation: 'listFailedRuns' })),
 });
 
