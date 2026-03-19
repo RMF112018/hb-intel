@@ -26,6 +26,37 @@ Verified against live repo 2026-03-18. This section documents what exists so C2 
 - `X-Request-Id` propagation — no request ID middleware exists; no `requestId` in error responses
 - Structured validation error details — validation errors are flat strings, not `{ field, message }[]` arrays
 
+## Auth Readiness Clarifications
+
+### What Exists Now (Implementation Foundation)
+
+| Component | File | Status |
+|---|---|---|
+| `validateToken()` | `backend/functions/src/middleware/validateToken.ts` | Production-tested JWT validation against Entra ID JWKS via `jose` |
+| `IValidatedClaims` | same file | Canonical claim shape: `{ upn, oid, roles, displayName? }` |
+| `unauthorizedResponse()` | same file | Returns `{ error: 'Unauthorized', reason }` — pre-D3 shape, C2 replaces |
+| `ManagedIdentityOboService` | `backend/functions/src/services/msal-obo-service.ts` | App-level MI token acquisition for downstream SharePoint/Graph calls; NOT user-delegated OBO |
+| Identity trust boundary | All HTTP handlers | Server-managed fields (`triggeredBy`, `submittedBy`) overwritten from JWT claims (ADR-0078) |
+| Per-handler auth pattern | All HTTP handlers | Every handler calls `validateToken()` directly in inline try-catch — no wrapper, no middleware |
+
+### What C2 Must Build (Does Not Exist Yet)
+
+| Component | Target File | Dependency |
+|---|---|---|
+| `withAuth()` middleware wrapper | `middleware/auth.ts` | None — builds on existing `validateToken()` |
+| Zod request validation | `middleware/validate.ts` | `zod` must be added to `package.json` |
+| `parseBody<T>()` / `parseQuery<T>()` helpers | `middleware/validate.ts` | Zod |
+| `errorResponse()` / `successResponse()` / `listResponse()` | `utils/response-helpers.ts` | None |
+| Error envelope using `message` field per D3 | response helpers | None |
+| `X-Request-Id` propagation | `middleware/request-id.ts` | None |
+| `/api/auth/me` smoke utility endpoint | TBD | C2 or C1 delivery |
+
+### Implementation Entry Condition
+
+C2 implementation can begin immediately. No upstream blocker prevents starting Chunk 1 (auth middleware). The foundation (`validateToken()`) is tested and production-ready. C2 does NOT depend on C1 domain routes — middleware can be built and tested independently, then applied to routes as C1 delivers them.
+
+---
+
 ## Phase 1 Auth Boundary Model
 
 This section is the canonical developer-facing reference for the Phase 1 auth and permission model across all surfaces. For IT/admin operational steps (Entra ID setup, app registration, permission grants, SharePoint site-scoped access, verification checklist), see the [IT Department Setup Guide](../../../../how-to/administrator/setup/backend/IT-Department-Setup-Guide.md).
@@ -126,12 +157,14 @@ No planned Phase 1 domain route requires OBO. If a future route needs to call Gr
 
 ---
 
-## Architecture
+## Target Architecture (To Be Created by C2)
 
-- **Auth Pattern:** Express-style middleware adapted for Azure Functions v4; all auth checks in `middleware/auth.ts`
-- **Validation:** Zod schemas for request body, query params, and path params; `middleware/validate.ts` parse helpers
-- **Error Responses:** Standardized shape with `message`, `code`, `requestId` (per D3 lock: `message` not `error`); helpers in `utils/response-helpers.ts`
-- **Request Tracking:** X-Request-Id propagation via middleware
+These files and patterns do not exist yet. C2 implementation creates them.
+
+- **Auth Pattern:** Express-style middleware adapted for Azure Functions v4; create `middleware/auth.ts` with `withAuth()` wrapper on top of existing `validateToken()`
+- **Validation:** Zod schemas for request body, query params, and path params; create `middleware/validate.ts` with `parseBody<T>()` and `parseQuery<T>()` helpers
+- **Error Responses:** Standardized shape with `message`, `code`, `requestId` (per D3 lock: `message` not `error`); create `utils/response-helpers.ts`
+- **Request Tracking:** X-Request-Id propagation via middleware; create `middleware/request-id.ts`
 
 ## Tech Stack
 
@@ -276,6 +309,8 @@ export function parseQuery<T>(
 
 ### Task 5: Create Zod schemas for Phase 1 domain routes
 
+**Domain Model Fidelity Rule:** All Zod schemas MUST be derived from the canonical `@hbc/models` interfaces (`ILead`, `IActiveProject`, `IEstimatingTracker`, `IEstimatingKickoff`) and their corresponding `FormData` types. Do not invent field names or enum values. See P1-E2 Domain Example Fidelity Rules for the authoritative field reference.
+
 **Files:**
 - Create: `backend/functions/src/validation/schemas/leads.ts`
 - Create: `backend/functions/src/validation/schemas/projects.ts`
@@ -285,40 +320,36 @@ export function parseQuery<T>(
 
 **Shared Schemas** (`shared.ts`):
 ```typescript
-export const UUIDSchema = z.string().uuid();
 export const PaginationQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
-  pageSize: z.coerce.number().int().positive().max(100).default(20),
+  pageSize: z.coerce.number().int().positive().max(100).default(25), // D4 lock: default 25
   search: z.string().optional(),
-});
-export const ProjectIdQuerySchema = z.object({
-  projectId: z.string().uuid().optional(),
 });
 ```
 
-**Leads Schemas** (`leads.ts`):
+**Leads Schemas** (`leads.ts`) — derived from `ILead` / `ILeadFormData`:
 ```typescript
+// ILead: id (number), title, stage (LeadStage), clientName, estimatedValue, createdAt, updatedAt
+// LeadStage: Identified, Qualifying, BidDecision, Bidding, Awarded, Lost, Declined
 export const CreateLeadSchema = z.object({
-  name: z.string().min(1).max(255),
-  status: z.enum(['prospect', 'qualified', 'proposal', 'negotiation', 'won', 'lost']),
+  title: z.string().min(1).max(255),
+  stage: z.enum(['Identified', 'Qualifying', 'BidDecision', 'Bidding', 'Awarded', 'Lost', 'Declined']),
+  clientName: z.string().max(255),
   estimatedValue: z.number().nonnegative().optional(),
-  companyName: z.string().max(255).optional(),
-  contactEmail: z.string().email().optional(),
 });
 
 export const UpdateLeadSchema = CreateLeadSchema.partial();
-
-export const ListLeadsQuerySchema = PaginationQuerySchema.merge(ProjectIdQuerySchema);
 ```
 
-**Projects Schemas** (`projects.ts`):
+**Projects Schemas** (`projects.ts`) — derived from `IActiveProject` / `IProjectFormData`:
 ```typescript
+// IActiveProject: id (string UUID), name, number, status, startDate, endDate
 export const CreateProjectSchema = z.object({
   name: z.string().min(1).max(255),
-  description: z.string().optional(),
-  budget: z.number().nonnegative().optional(),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
+  number: z.string().min(1),
+  status: z.string().min(1),
+  startDate: z.string().datetime(),
+  endDate: z.string().datetime(),
 });
 
 export const UpdateProjectSchema = CreateProjectSchema.partial();
@@ -326,21 +357,26 @@ export const UpdateProjectSchema = CreateProjectSchema.partial();
 export const ListProjectsQuerySchema = PaginationQuerySchema;
 ```
 
-**Estimating Schemas** (`estimating.ts`):
+**Estimating Schemas** (`estimating.ts`) — derived from `IEstimatingTracker` / `IEstimatingKickoff`:
 ```typescript
-export const CreateEstimateSchema = z.object({
+// Estimating is NOT flat CRUD — it has two sub-resources: trackers and kickoffs
+// IEstimatingTracker: id (number), projectId (string), bidNumber, status, dueDate, createdAt, updatedAt
+export const CreateTrackerSchema = z.object({
   projectId: z.string().uuid(),
-  description: z.string().min(1),
-  estimatedHours: z.number().positive(),
-  hourlyRate: z.number().nonnegative().optional(),
-  confidence: z.enum(['low', 'medium', 'high']).optional(),
+  bidNumber: z.string().min(1),
+  status: z.string().min(1),
+  dueDate: z.string().datetime(),
 });
 
-export const UpdateEstimateSchema = CreateEstimateSchema.partial();
+export const UpdateTrackerSchema = CreateTrackerSchema.partial();
 
-export const ListEstimatesQuerySchema = PaginationQuerySchema.merge(
-  z.object({ projectId: z.string().uuid().optional() })
-);
+// IEstimatingKickoff: id (number), projectId (string), kickoffDate, attendees (string[]), notes, createdAt
+export const CreateKickoffSchema = z.object({
+  projectId: z.string().uuid(),
+  kickoffDate: z.string().datetime(),
+  attendees: z.array(z.string()).min(1),
+  notes: z.string().optional(),
+});
 ```
 
 **Tests:** For each schema, write:
@@ -392,13 +428,12 @@ export function forbiddenResponse(): HttpResponseInit
 
 **Response Shape:**
 ```typescript
-// Error response
+// Error response (per D3 lock: `message` is primary field, not `error`)
 {
   status: 400,
   jsonBody: {
-    error: string,
-    code: string,
     message: string,
+    code: string,
     requestId: string
   }
 }
@@ -528,9 +563,9 @@ Verify:
 
 ## Risk Notes
 
-- **OBO Token Integration:** If `msal-obo-service` needs auth context (user ID), Task 1 may need to extract claims from bearer token. Mark for follow-up if the existing OBO service requires userId.
-- **Backwards Compatibility:** Public routes (if any) cannot use `withAuth` wrapper. Coordinate with API contract owner for which routes are public vs protected.
-- **Zod Dependency:** Confirm Zod is in `backend/functions/package.json`; if not, add it.
+- **OBO Token Integration:** `ManagedIdentityOboService` uses system-assigned Managed Identity (`DefaultAzureCredential`), not user-delegated OBO. The `acquireTokenOnBehalfOf(userToken)` signature accepts a `userToken` parameter but the production implementation ignores it (D-PH6-04 compatibility bridge). No C2 change required for OBO — it is independent of the `withAuth()` wrapper. See Auth Blocker #1 (CLOSED).
+- **All Phase 1 routes require auth:** No public (unauthenticated) routes exist or are planned. Every HTTP endpoint must use the `withAuth()` wrapper.
+- **Zod Dependency:** `zod` is NOT in `backend/functions/package.json` today. C2 must add it before implementing Task 4.
 
 ## Sign-off Gates
 

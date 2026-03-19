@@ -65,8 +65,8 @@ All example payloads, ID types, field names, and response assertions in this che
 | Item | Blocked On | Expected From |
 |---|---|---|
 | Domain route handlers (leads, projects, estimating) | C1 | P1-C1 Backend Service Contract Catalog |
-| Error envelope standardization (`{ error, code, requestId?, details? }`) | C1 | P1-C1 error middleware |
-| Auth middleware hardening (standardized error shapes, OBO for downstream APIs) | C2 | P1-C2 Auth Hardening |
+| Error envelope standardization (`{ message, code, requestId?, details? }`) per D3 lock | C2 | P1-C2 Auth Hardening (Task 6: response helpers) |
+| Auth middleware hardening (`withAuth()` wrapper, Zod validation, standardized response shapes) | C2 | P1-C2 Auth Hardening |
 | Proxy adapter implementations | B1 | P1-B1 Proxy Adapter Engineering Plan |
 | Retry logic, idempotency guards, write safety | D1 | P1-D1 Write Safety |
 | Telemetry instrumentation (Application Insights events) | C3 | P1-C3 Observability |
@@ -526,7 +526,7 @@ Final verification that all Phase 1 work meets acceptance criteria. This section
 
 ## C1 Reconciliation Note
 
-Several items in this checklist reference transport shapes (error envelope, pagination, single-item response wrapping) that are governed by C1 decisions not yet frozen:
+Several items in this checklist reference transport shapes (error envelope, pagination, single-item response wrapping) governed by C1 decisions. All four decisions are now **LOCKED** (resolved 2026-03-18):
 
 | Decision | Affects | Locked Resolution |
 |---|---|---|
@@ -591,7 +591,7 @@ All items below remain blocked on upstream deliverables. This section must be up
 |---|---|---|---|
 | 1 | Startup validation wired into runtime | G2.6 | `validateRequiredConfig()` called at startup |
 | 1 | Health endpoint | C1 or Platform | `/api/health` function registered in `index.ts` |
-| 2 | Standardized 401 response shape (`{ error, code }`) | C2 | Auth middleware returns ErrorEnvelopeSchema-conformant 401 |
+| 2 | Standardized 401 response shape (`{ message, code }` per D3 lock) | C2 | Auth middleware returns ErrorEnvelopeSchema-conformant 401 |
 | 3–5 | All domain read checks | C1 | Domain route handlers (leads, projects, estimating) deployed |
 | 6–8 | All domain write checks | C1 | Domain route handlers + error middleware deployed |
 | 9 | All retry and idempotency checks | B1 + D1 | `ProxyHttpClient` with retry wiring + `withIdempotency` handler wrapper |
