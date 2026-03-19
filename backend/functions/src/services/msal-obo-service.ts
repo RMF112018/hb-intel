@@ -6,6 +6,21 @@ export interface IMsalOboService {
 }
 
 /**
+ * Emit a structured telemetry event via console.log.
+ * No InvocationContext available in service layer — uses same pattern as
+ * service-factory.ts startup event. Azure Functions host forwards to App Insights.
+ */
+function emitTelemetry(name: string, properties: Record<string, unknown>): void {
+  // eslint-disable-next-line no-console
+  console.log(JSON.stringify({
+    level: 'info',
+    _telemetryType: 'customEvent',
+    name,
+    ...properties,
+  }));
+}
+
+/**
  * D-PH6-04: Production implementation that acquires SharePoint tokens via
  * system-assigned Managed Identity through DefaultAzureCredential.
  * Traceability: docs/architecture/plans/PH6.2-Security-ManagedIdentity.md §6.2.5
@@ -30,8 +45,32 @@ export class ManagedIdentityOboService implements IMsalOboService {
     if (!scope) {
       throw new Error('At least one scope is required for token acquisition');
     }
+
+    // P1-C3 §2.1.3: auth.obo.start telemetry
+    emitTelemetry('auth.obo.start', { scope });
+
+    const startMs = Date.now();
     const siteUrl = scope.endsWith('/.default') ? scope.replace('/.default', '') : scope;
-    return this.getSharePointToken(siteUrl);
+
+    try {
+      const token = await this.getSharePointToken(siteUrl);
+
+      // P1-C3 §2.1.3: auth.obo.success telemetry
+      emitTelemetry('auth.obo.success', {
+        scope,
+        durationMs: Date.now() - startMs,
+      });
+
+      return token;
+    } catch (err) {
+      // P1-C3 §2.1.3: auth.obo.error telemetry
+      emitTelemetry('auth.obo.error', {
+        scope,
+        durationMs: Date.now() - startMs,
+        errorMessage: err instanceof Error ? err.message : String(err),
+      });
+      throw err;
+    }
   }
 }
 
