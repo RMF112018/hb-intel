@@ -79,7 +79,7 @@ These items cannot be verified from repo alone — they require a deployed stagi
 | Prerequisite | Required For | Owner | How to Verify | Status |
 |---|---|---|---|---|
 | **Function app deployed** | All sections | Platform | `SMOKE_TEST_BASE_URL` resolves; `curl $URL/api/health` or any registered route returns HTTP response (not DNS/connection failure) | **NOT MET** — no staging URL confirmed |
-| **Required env vars present** | Section 1 (startup) | Platform | `validateRequiredConfig()` runs without error in staging logs (requires G2.6 wiring) | **NOT MET** — validation not wired into startup |
+| **Required env vars present** | Section 1 (startup) | Platform | `validateRequiredConfig()` runs without error in staging logs (G2.6 wiring complete) | **NOT MET** — staging not deployed; validation wired but untested in staging |
 | **`HBC_ADAPTER_MODE=proxy`** | Section 1 (adapter mode) | Platform | Startup logs contain `HBC_ADAPTER_MODE=proxy` | **NOT MET** — staging not deployed |
 | **Auth app registration** (`AZURE_TENANT_ID`, `AZURE_CLIENT_ID`) | Section 2 (auth) | Platform + C2 | `validateToken()` successfully verifies a JWT against `api://<CLIENT_ID>` audience | **NOT MET** — CLIENT_ID not defined for staging |
 | **Redis reachable** | Sections 3–8 (domain routes using proxy cache) | Platform | Proxy route returns cached response; no Redis connection errors in AI | **NOT MET** — required only if proxy routes use Redis for domain data |
@@ -121,8 +121,8 @@ Confirm proxy adapter is configured and startup logic runs cleanly. This section
 
 | Item | Status | Evidence |
 |---|---|---|
-| `validateRequiredConfig()` | **Exported but NOT called at startup** | `backend/functions/src/utils/validate-config.ts` — comment explicitly says "NOT called at startup. G2.6 will wire the call." |
-| Adapter mode assertion | **No `assertAdapterModeForEnvironment()` function exists** | No such function found in repo |
+| `validateRequiredConfig()` | **Called at startup** — wired into `createServiceFactory()` (G2.6 complete) | `backend/functions/src/services/service-factory.ts` line 44 |
+| Adapter mode assertion | **`assertAdapterModeValid()` called at startup** | `backend/functions/src/services/service-factory.ts` line 40 |
 | Health endpoint | **Not registered** | `backend/functions/src/index.ts` imports 7 function modules — none is a health endpoint |
 | Startup timing threshold | **No governing plan defines a numeric threshold** | No `< 10 seconds` or equivalent rule found in any Phase 1 plan |
 
@@ -131,10 +131,10 @@ Confirm proxy adapter is configured and startup logic runs cleanly. This section
 - [ ] Application startup log contains `HBC_ADAPTER_MODE=proxy`
 - [ ] No warning or error logs for adapter mode mismatch
 
-### Startup Validation (BLOCKED on G2.6 wiring)
-- [ ] `validateRequiredConfig()` wired into startup initialization path (**BLOCKED** — currently exported but not called; G2.6 must wire it before this check is meaningful)
-- [ ] After G2.6 wiring: startup with missing required env vars produces an aggregated error listing all missing variables (per `validate-config.ts` implementation)
-- [ ] After G2.6 wiring: startup with all required env vars present completes without validation errors
+### Startup Validation (G2.6 complete — wired)
+- [x] `validateRequiredConfig()` wired into `createServiceFactory()` startup path (G2.6 complete — `service-factory.ts` line 44)
+- [ ] In staging: startup with missing required env vars produces an aggregated error listing all missing variables
+- [ ] In staging: startup with all required env vars present completes without validation errors
 
 ### Startup Duration (measured baseline — no hard-coded threshold)
 - [ ] Measure actual cold-start time for the staging function app and record as the Phase 1 baseline

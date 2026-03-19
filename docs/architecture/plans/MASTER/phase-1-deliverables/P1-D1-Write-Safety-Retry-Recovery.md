@@ -48,11 +48,12 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 
 ### Current Repo State (verified 2026-03-19)
 
-- `ProxyHttpClient` does not exist — `packages/data-access/src/adapters/proxy/` contains only stub types, constants, and index re-exports (**CURRENT**)
-- Proxy adapter mode throws `AdapterNotImplementedError` in the factory for all domains (**CURRENT**)
-- `packages/data-access` has no test script — only build, check-types, lint (**CURRENT**)
+- `ProxyHttpClient` exists with Bearer auth, 30s timeout, X-Request-Id generation, error normalization via `normalizeHttpError()`, and D1 hook points (`onBeforeRequest`, `onAfterResponse`) — hooks are exposed but not yet activated (**CURRENT**)
+- `BaseProxyProjectRepository` exists with `fetchCollection`, `fetchById`, `fetchCreate`, `fetchUpdate`, `fetchDelete`, `fetchAggregate`, `fetchSubResource` methods (**CURRENT**)
+- 7 of 11 proxy repos implemented and factory-wired (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP); 4 domains (Lead, Project, Estimating, Auth) still throw `AdapterNotImplementedError` (**CURRENT**)
+- `packages/data-access` has vitest configured with `test` script; 51 tests passing across `ProxyHttpClient.test.ts`, `envelope.test.ts`, `repositories.test.ts` (**CURRENT**)
 - `backend/functions` has vitest test infrastructure (unit, smoke, coverage) (**CURRENT**)
-- Backend table storage service (`RealTableStorageService`) exposes domain-specific provisioning methods using `TableClient.upsertEntity()` semantics; no generic idempotency table or idempotency guard exists (**CURRENT**)
+- Backend table storage service exposes domain-specific provisioning methods; no generic idempotency table or idempotency guard exists (**CURRENT**)
 - No retry logic exists anywhere in `packages/data-access` (**CURRENT**)
 
 ### D1 Deliverable Breakdown by Surface
@@ -60,7 +61,7 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 | Deliverable | Surface | Status | Dependency |
 |---|---|---|---|
 | `RetryPolicy` types + `withRetry` HOF | `packages/data-access` | **TARGET** — implementable now | None — standalone module |
-| `ProxyHttpClient` retry wiring | `packages/data-access` | **BLOCKED** | B1 must deliver `ProxyHttpClient` first |
+| `ProxyHttpClient` retry wiring | `packages/data-access` | **TARGET** — unblocked | `ProxyHttpClient` exists with D1 hook points (`onBeforeRequest`, `onAfterResponse`) ready for wiring |
 | `WriteFailureReason` enum + `classifyWriteFailure` | `packages/data-access` | **TARGET** — implementable now | None — standalone module |
 | `IdempotencyContext` + `generateIdempotencyKey` | `packages/data-access` | **TARGET** — implementable now | None — standalone module |
 | `IAuditRecord` interface | `packages/models` or `packages/data-access` | **TARGET** — implementable now | None — interface only |
@@ -81,11 +82,14 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 - Chunk 2, Task 2.2: `withIdempotency(handler)` wrapper function
 - Chunk 2, Task 2.2: `cleanupIdempotencyRecords` timer trigger
 
-### What D1 Cannot Implement Until B1 Delivers
+### What D1 Cannot Implement Until B1 Delivers Remaining Repos
 
-- Chunk 1, Task 1.2: Wiring retry into `ProxyHttpClient` (class doesn't exist)
-- Chunk 3, Task 3.3: Repository-level idempotency wiring (repositories don't exist)
-- Chunk 4: Integration tests (needs both B1 and D1 implementations)
+- Chunk 3, Task 3.3: Repository-level idempotency wiring for Lead, Project, Estimating, Auth (these 4 repos do not yet exist; 7 project-scoped repos are available for wiring now)
+- Chunk 4: Full integration tests across all 11 domains (needs remaining 4 B1 repos + D1 implementation)
+
+**Now unblocked (ProxyHttpClient and 7 repos exist):**
+- Chunk 1, Task 1.2: Wiring retry into `ProxyHttpClient` — class exists with D1 hook points
+- Chunk 3, Task 3.3 (partial): Repository-level idempotency wiring for the 7 implemented project-scoped repos
 
 ### Acceptance Gates D1 Unlocks
 
@@ -103,12 +107,12 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 
 ### Verification Command Guidance
 
-**`packages/data-access` — no test script exists (CURRENT):**
+**`packages/data-access` — vitest configured and 51 tests passing (CURRENT):**
 
-D1 must add vitest configuration to data-access before any tests can run. Required setup (prerequisite for Task 1.1):
-1. Add `vitest` as a devDependency (or confirm it's available via workspace hoisting)
-2. Create `packages/data-access/vitest.config.ts` (node environment, include `src/**/*.test.ts`)
-3. Add `"test": "vitest run"` script to `packages/data-access/package.json`
+Test infrastructure is already in place. D1 adds new test files following the existing pattern:
+- Run tests: `pnpm --filter @hbc/data-access test`
+- Existing config: `packages/data-access/vitest.config.ts`
+- Existing test files: `ProxyHttpClient.test.ts`, `envelope.test.ts`, `repositories.test.ts`
 4. Optionally add data-access to root `vitest.workspace.ts` for workspace-level runs
 
 Until this is done, D1 tests cannot execute. The `npx vitest run packages/data-access/...` pattern used in earlier drafts is **not repo-valid** — `packages/data-access` is not in the workspace vitest configuration.

@@ -103,7 +103,7 @@ The following are explicitly out of scope for E1 implementation until their prec
 
 - `@hbc/models` has no Zod dependency, no test script — only build, check-types, lint (**CURRENT**)
 - `@hbc/models/src/contracts/` contains Contracts business domain models (`IContractInfo`, `ICommitmentApproval`, `ContractStatus`) — NOT Zod API schemas (**CURRENT**)
-- `@hbc/data-access` has no test script — only build, check-types, lint; proxy adapters are stubs (**CURRENT**)
+- `@hbc/data-access` has vitest configured (`test` script), 51 tests passing; 7 of 11 proxy adapters implemented (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP); remaining 4 (Lead, Project, Estimating, Auth) still throw `AdapterNotImplementedError` (**CURRENT**)
 - `backend/functions` has vitest test infrastructure (unit, smoke, coverage) but no domain route handlers for Lead/Project/Estimating (**CURRENT**)
 - Port interfaces for all 11 domains exist in `@hbc/data-access/src/ports/` (**CURRENT**)
 

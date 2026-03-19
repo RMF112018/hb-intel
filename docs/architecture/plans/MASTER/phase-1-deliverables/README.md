@@ -181,7 +181,7 @@ These notes anchor the status labels above to the actual codebase. They document
 - **This is the primary C1 implementation target.**
 
 **SharePoint physical schema — defined but not deployed:**
-- List definition config files exist in `backend/functions/src/config/*-list-definitions.ts` (15+ files)
+- List definition config files exist in `backend/functions/src/config/*-list-definitions.ts` (7 files: 6 domain-scoped + 1 aggregate)
 - Physical SharePoint lists are **not provisioned** — awaiting business domain approval per P1-A3
 
 **Feature package integration — not started:**
