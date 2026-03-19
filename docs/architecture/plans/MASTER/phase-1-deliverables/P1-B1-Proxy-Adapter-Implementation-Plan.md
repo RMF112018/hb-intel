@@ -138,7 +138,7 @@ These are explicitly out of B1 scope and owned by other workstreams.
 | **COMPLETE** | Tasks 3–4 (Lead, Project) | Done — factory wired; 84 tests passing | — |
 | **COMPLETE (10 of 10 data domains)** | Tasks 5–6 (domain repos) | Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP implemented and factory-wired | — |
 | **COMPLETE** | Task 7 (Auth repo) | A9 resolved — `ProxyAuthRepository` implemented with 19 tests; factory-wired for proxy mode (P1-C2-a) | — |
-| **Pending** | Tasks 8–10 (integration tests, full suite against live backend) | 84 tests passing against mocked fetch | Dependent on Task 7 (Auth) and C1/C2 route delivery |
+| **Partially complete** | Tasks 8–10 (integration tests, full suite against live backend) | 109 tests passing; Task 9 factory integration test complete (2026-03-19) — `setProxyContext` → `createAuthRepository('proxy')` chain verified with mocked fetch | Task 10 dependent on C1/C2 route delivery for live backend |
 | **Requires upstream resolution** | Production activation | Blocked | C1 route delivery, C2 auth middleware, MSAL registration, deployment env vars |
 
 ---
