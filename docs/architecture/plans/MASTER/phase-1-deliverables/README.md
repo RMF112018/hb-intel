@@ -6,7 +6,7 @@
 
 ## Planning Completion Summary
 
-Phase 1 planning established the complete production data plane and integration backbone design for HB Intel. The 24 deliverables in this folder define:
+Phase 1 planning established the complete production data plane and integration backbone design for HB Intel. The 25 deliverables in this folder define:
 
 - **Data ownership and source-of-record model** across all 15+ business domains (A-series)
 - **Canonical schemas** for SharePoint storage, ingestion pipelines, and governed data structures (A-series)
@@ -21,7 +21,7 @@ All design decisions are locked. Transport-shape conventions (response envelopes
 
 | Category | Status |
 |---|---|
-| **Planning** | Complete — all 24 deliverables final, all transport decisions locked (D1–D6, A8, A9) |
+| **Planning** | Complete — all 25 deliverables final, all transport decisions locked (D1–D6, A8, A9) |
 | **Implementation — B1 proxy adapters** | In progress — transport foundation + 7 of 11 repos implemented and tested; Lead, Project, Estimating, Auth remaining |
 | **Implementation — C1 backend routes** | Not started — zero domain data routes exist; provisioning/notification routes are operational |
 | **Implementation — C2 auth middleware** | Not started — `validateToken()` exists; `withAuth()`, Zod validation, response helpers not yet built |
@@ -149,7 +149,13 @@ Until these conditions are met, implementation should focus on Tier 1 work items
 | Document | Type | Status |
 |---|---|---|
 | P1-E1-Contract-Test-Suite-Plan.md | Engineering Plan | Implementation-Ready — Blocked (B1, C1) |
-| P1-E2-Staging-Readiness-Checklist.md | Operational Checklist | Implementation-Ready — Blocked (B1, C1, C2, C3) |
+| P1-E2-Staging-Readiness-Checklist.md | Acceptance Checklist | Implementation-Ready — Blocked (B1, C1, C2, C3) |
+
+### Closeout and Reconciliation (1 deliverable)
+
+| Document | Type | Status |
+|---|---|---|
+| P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md | Closeout Register | Final |
 
 ---
 

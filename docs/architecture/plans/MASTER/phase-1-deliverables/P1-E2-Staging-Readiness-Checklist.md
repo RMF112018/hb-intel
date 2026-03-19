@@ -7,7 +7,7 @@
 | **Workstream** | E — Contract Testing and Staging Readiness |
 | **Document Type** | Acceptance Checklist |
 | **Owner** | QA / Platform Engineering |
-| **Status** | Draft — most sections BLOCKED on upstream deliverables |
+| **Status** | Implementation-Ready — Blocked (B1, C1, C2, C3) |
 | **Date** | 2026-03-16 |
 | **Last Reviewed Against Repo Truth** | 2026-03-19 |
 | **References** | P1-E1 (Contract Test Suite), P1-B1 (Proxy Adapter), P1-C1 (Backend Catalog), P1-C2 (Auth Hardening), P1-C3 (Observability), P1-D1 (Write Safety) |

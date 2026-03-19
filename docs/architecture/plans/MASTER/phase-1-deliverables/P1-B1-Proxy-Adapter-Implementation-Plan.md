@@ -4,7 +4,7 @@
 | **Phase** | Phase 1 — Production Data Plane and Integration Backbone |
 | **Workstream** | B — Adapter Completion |
 | **Document Type** | Engineering Plan |
-| **Status** | Draft v3 — re-baselined against repo truth 2026-03-19 |
+| **Status** | Implementation-Ready |
 | **Last Updated** | 2026-03-19 |
 | **Owner** | Frontend Platform / Data Access |
 

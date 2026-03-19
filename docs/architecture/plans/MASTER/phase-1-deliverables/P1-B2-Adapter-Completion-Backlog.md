@@ -6,6 +6,7 @@
 | **Phase** | Phase 1 (primary); future phases tracked as placeholders |
 | **Workstream** | B — Adapter Completion |
 | **Document Type** | Status Tracker |
+| **Status** | Active Reference |
 | **Owner** | Frontend Platform Team |
 | **Update Authority** | B-workstream lead; status changes require evidence per gate definitions below |
 | **Last Reviewed Against Repo Truth** | 2026-03-19 |
