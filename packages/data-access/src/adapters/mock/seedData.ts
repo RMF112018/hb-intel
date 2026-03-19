@@ -18,7 +18,7 @@ import type {
   IProjectManagementPlan,
   IPMPSignature,
   IActiveProject,
-  ICurrentUser,
+  IInternalUser,
   IRole,
 } from '@hbc/models';
 import { LeadStage } from '@hbc/models';
@@ -300,25 +300,28 @@ export const SEED_PROJECTS: IActiveProject[] = [
 export const SEED_ROLES: IRole[] = [
   {
     id: 'role-admin',
-    name: 'Admin',
-    permissions: ['project:*', 'user:*', 'audit:*', 'settings:*'],
+    name: 'Administrator',
+    grants: ['project:*', 'user:*', 'audit:*', 'settings:*'],
   },
   {
     id: 'role-pm',
     name: 'Project Manager',
-    permissions: ['project:read', 'project:write', 'document:*', 'reports:read'],
+    grants: ['project:read', 'project:write', 'document:*', 'reports:read'],
   },
 ];
 
-export const SEED_CURRENT_USER: ICurrentUser = {
+export const SEED_CURRENT_USER: IInternalUser = {
+  type: 'internal',
   id: 'user-uuid-001',
   displayName: 'Dev User',
   email: 'dev@hbconstruction.com',
+  jobTitle: 'Project Manager',
   roles: [
     {
       id: 'role-admin',
-      name: 'Admin',
-      permissions: ['project:*', 'user:*', 'audit:*', 'settings:*'],
+      name: 'Administrator',
+      grants: ['project:*', 'user:*', 'audit:*', 'settings:*'],
+      source: 'manual',
     },
   ],
 };
