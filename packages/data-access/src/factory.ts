@@ -71,23 +71,13 @@ function getProxyClient(): ProxyHttpClient {
       getToken: proxyContext.getToken,
     });
   } else {
-    // Fallback for non-context initialization (e.g. tests, env-var config)
-    proxyClient = new ProxyHttpClient({
-      baseUrl: getProxyBaseUrl(),
-    });
+    throw new Error(
+      'Proxy adapter context not initialized. Call setProxyContext() at app startup before using proxy-mode repositories.',
+    );
   }
   return proxyClient;
 }
 
-function getProxyBaseUrl(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const env = (globalThis as any).process?.env as Record<string, string> | undefined;
-    return env?.HBC_PROXY_BASE_URL ?? env?.VITE_API_BASE_URL ?? 'http://localhost:7071/api';
-  } catch {
-    return 'http://localhost:7071/api';
-  }
-}
 
 /** Runtime adapter mode resolved from environment. */
 export type AdapterMode = 'mock' | 'sharepoint' | 'proxy' | 'api';

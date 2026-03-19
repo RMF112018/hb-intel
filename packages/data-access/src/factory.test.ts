@@ -31,10 +31,6 @@ function nthFetchInit(n: number): RequestInit {
   return (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[n][1] as RequestInit;
 }
 
-function nthFetchUrl(n: number): string {
-  return (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[n][0] as string;
-}
-
 afterEach(() => {
   vi.restoreAllMocks();
 });
@@ -116,6 +112,12 @@ describe('P1-B1 Task 9: Factory integration — setProxyContext + proxy reposito
     expect(sentBody.name).toBe('TestRole');
     expect(sentBody.grants).toEqual(['read:leads']);
     expect(result).toEqual(created);
+  });
+
+  it('throws when proxy context is not initialized', async () => {
+    vi.resetModules();
+    const { createAuthRepository: freshCreate } = await import('./factory.js');
+    expect(() => freshCreate('proxy')).toThrow('Proxy adapter context not initialized');
   });
 
   it('X-Request-Id header is present on every request', async () => {
