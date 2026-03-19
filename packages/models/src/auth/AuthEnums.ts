@@ -1,19 +1,27 @@
 /**
  * System-level roles that determine global access privileges.
  *
- * ADMIN has the highest privilege level, followed by C_SUITE.
+ * SYSTEM_ADMIN has the highest privilege level.
  */
 export enum SystemRole {
   /** Full administrative access. */
-  Admin = 'ADMIN',
-  /** C-suite executives — global project access. */
-  CSuite = 'C_SUITE',
+  SystemAdmin = 'SYSTEM_ADMIN',
+  /** Executive leadership — global project access. */
+  Executive = 'EXECUTIVE',
   /** Project executive oversight. */
   ProjectExecutive = 'PROJECT_EXECUTIVE',
   /** Project management responsibilities. */
   ProjectManager = 'PROJECT_MANAGER',
-  /** Day-to-day operational staff. */
-  OperationsStaff = 'OPERATIONS_STAFF',
+  /** On-site construction superintendent. */
+  Superintendent = 'SUPERINTENDENT',
+  /** Preconstruction / estimating role. */
+  Preconstruction = 'PRECONSTRUCTION',
+  /** Project support / coordination. */
+  ProjectSupport = 'PROJECT_SUPPORT',
+  /** Office-based administrative staff. */
+  OfficeStaff = 'OFFICE_STAFF',
+  /** Field-based operational staff. */
+  FieldStaff = 'FIELD_STAFF',
 }
 
 /**
