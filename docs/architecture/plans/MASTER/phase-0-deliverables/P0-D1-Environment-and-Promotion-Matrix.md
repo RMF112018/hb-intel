@@ -35,7 +35,7 @@ This matrix is the authoritative reference for release planning, CI/CD workflow 
 |---|---|---|---|---|---|---|
 | **Local/Developer** | Development sandbox, local testing, design iteration | Manual (`pnpm dev` / turbo run) | Mock (VITE_AUTH_MODE=mock by default) | Developer machine only | Unrestricted | None |
 | **CI (GitHub Actions)** | Validation gate, linting, unit test, build verification | PR to main + push to main | None (ephemeral, Azurite emulator for storage) | None (ephemeral) | GitHub Actions runner (ubuntu-latest) | Triggers ci.yml, cd.yml, spfx-build.yml path-filtered |
-| **Staging** | Pre-production verification, E2E testing, smoke testing against real tenant | Auto-deploy after CI success on main | Configurable (initially mock via Vercel env; switches to msal when Azure AD configured) | Real Azure tenant + Vercel managed state | Dev team + QA + product | cd.yml (PWA, Functions) + spfx-deploy.yml (SPFx auto) + e2e.yml (manual) + smoke-tests.yml (daily) |
+| **Staging** | Pre-production verification, E2E testing, smoke testing against real tenant | Auto-deploy after CI success on main | Configurable (initially mock via Vercel env; switches to msal when Azure AD configured) | Real Azure tenant + Vercel managed state | Dev team + QA + product | cd.yml (PWA, HB Site Control, Functions) + spfx-deploy.yml (SPFx auto via spfx-build.yml trigger) + e2e.yml (manual) + smoke-tests.yml (daily + PRs) |
 | **Production** | Released software serving business operations | v* semantic version tags + manual SPFx dispatch | msal (Azure AD integrated) | Real Azure tenant + Vercel managed state | End users + authorized operators | release.yml (gates E2E pass) + deploy-functions.yml (production slot) + spfx-deploy.yml (manual dispatch) |
 
 ### 2.2 Individual Environment Descriptions
@@ -130,10 +130,11 @@ git push -u origin feature/foo  # Triggers CI on PR
 
 **Deployment paths:**
 - **PWA:** cd.yml auto-deploys to Vercel staging after CI success
+- **HB Site Control:** cd.yml auto-deploys to Vercel staging after CI success
 - **Azure Functions:** cd.yml auto-deploys to staging slot after CI success
-- **SPFx apps:** spfx-deploy.yml auto-deploys to staging App Catalog after spfx-build.yml success
+- **SPFx apps:** spfx-deploy.yml auto-deploys to staging App Catalog, triggered by spfx-build.yml workflow_run on main (cd.yml deploy-spfx job is disabled)
 - E2E tests (e2e.yml) target staging URLs via secrets: STAGING_ESTIMATING_URL, STAGING_ACCOUNTING_URL
-- Smoke tests (smoke-tests.yml) run daily at 6 AM UTC against real SharePoint tenant
+- Smoke tests (smoke-tests.yml) run daily at 6 AM UTC and on PRs against real SharePoint tenant
 
 **When to use:**
 - Manual E2E test runs (Playwright against staging URLs)
@@ -178,6 +179,7 @@ This matrix defines which artifact types can deploy to which environments and un
 | **SPFx Estimating (@hbc/spfx-estimating)** | Manual | spfx-build.yml validation | Auto (spfx-deploy.yml) | Manual dispatch | CI tested; path filter: apps/estimating/** |
 | **SPFx Accounting (@hbc/spfx-accounting)** | Manual | spfx-build.yml validation | Auto (spfx-deploy.yml) | Manual dispatch | CI tested; path filter: apps/accounting/** |
 | **SPFx Other 8 apps** | Manual | spfx-build.yml validation + CI unit tests | Auto (spfx-deploy.yml) | Manual dispatch | CI unit tests added (GAP-D-02 resolved); path filter covers all 11 apps in apps/** |
+| **HB Site Control (apps/hb-site-control)** | Manual (pnpm dev, port 4012) | None (CI validates only) | Auto (cd.yml after CI pass) | Not yet configured | React Native Web mobile site control; scaffold-only Phase 6 scope |
 | **dev-harness (apps/dev-harness)** | Manual (pnpm dev, port 3000) | None (not in CI pipeline) | None | None | Local development sandbox only; not deployed to external envs |
 | **Platform packages (@hbc/auth, @hbc/shell, etc.)** | Built locally via pnpm turbo run build | CI validates via unit-tests-p1 (all Category C + auth + shell) | Consumed by deployed apps | Consumed by released apps | All 20 Category C packages plus health-indicator now have CI coverage (GAP-D-01 resolved) |
 
@@ -211,7 +213,7 @@ This matrix defines the gates required to move artifacts from one environment to
 | CI all green | cd.yml triggers | Auto | Concurrency: never cancels in-progress deploys |
 | cd.yml success | PWA deployed to Vercel staging | Auto | |
 | cd.yml success | Azure Functions deployed to staging slot | Auto | |
-| spfx-build.yml success on main | spfx-deploy.yml staging step triggers | Auto | |
+| spfx-build.yml success on main | spfx-deploy.yml staging step triggers (via workflow_run) | Auto | cd.yml deploy-spfx job is disabled; SPFx staging goes through spfx-build → spfx-deploy path |
 | spfx-deploy.yml success | SPFx apps deployed to staging App Catalog | Auto | |
 
 **Summary:** Once all CI jobs pass and commit is on main, staging deployment is automatic. No manual gate.
@@ -254,7 +256,7 @@ This section details all CI jobs that enforce release control.
 
 ## 6. Release-Control Gap List
 
-The following gaps in CI coverage, test automation, and environment qualification must be closed before Phase 1 entry.
+The following gaps in CI coverage, test automation, and environment qualification were identified during Phase 0. Phase 1 blockers (GAP-D-01, GAP-D-02, GAP-D-07) have been resolved; remaining items are deferred to Phase 1.
 
 | ID | Description | Severity | Phase 1 Blocker | Recommended Action | Target Phase |
 |---|---|---|---|---|---|
@@ -264,7 +266,7 @@ The following gaps in CI coverage, test automation, and environment qualificatio
 | **GAP-D-04** | promote-ideas.yml is disabled (if: false); scripts/promote-ideas.mjs does not exist. Cannot auto-promote ideas from ideation to active plans in Phase 0. | Low | No | Either implement promote-ideas.mjs and enable workflow, or document manual promotion process in dev runbook. Defer to Phase 1 planning. | Phase 1 planning |
 | **GAP-D-05** | No explicit coverage threshold enforcement for app-level tests. @hbc/spfx-admin, @hbc/spfx-estimating, @hbc/spfx-accounting, @hbc/pwa have zero-failure requirement but no percentage threshold (unlike platform packages which enforce 90–95%). | Medium | No | Define coverage thresholds for all 4 apps (recommend 80% for apps); add coverage reporting to unit-tests-apps job; enforce via CI gate if below threshold. Update ci.yml. | Phase 1 start |
 | **GAP-D-06** | SPFx production deploy is manual-dispatch only (spfx-deploy.yml with environment = production requires human trigger). No automatic promotion path from staging to production for SPFx artifacts. Breaks release parity with PWA and Functions. | Medium | No | Document SPFx manual production dispatch as Phase 1 release SOP. Consider auto-promotion on v* tag in Phase 1 if manual process proves bottleneck. For now, enforce checklist discipline in release.yml gate. | Phase 1 release SOP |
-| **GAP-D-07** | No automated Phase 1 readiness gate. Phase 1 entry criteria (GAP-D-01, GAP-D-02 closure, E2E + smoke test pass, staging soak) checked manually via P0-E1 (Phase 0 Completion Checklist) only. No CI workflow to prevent Phase 1 start before gates close. | High | **YES** | Create P0-E1-gate.yml workflow that runs on demand, validates closure of D-01, D-02, and checks pass/fail of e2e.yml and smoke-tests.yml in last 7 days. Add manual approval gate in release.yml blocking v1.0.0 tag creation until P0-E1 gate passes. | M0.4 end |
+| **GAP-D-07** | No automated Phase 1 readiness gate. Phase 1 entry criteria (GAP-D-01, GAP-D-02 closure, E2E + smoke test pass, staging soak) checked manually via P0-E1 (Phase 0 Completion Checklist) only. No CI workflow to prevent Phase 1 start before gates close. | High | **RESOLVED** | P0-E1-gate.yml implemented with 5 sequential blockers (BLOCKER-01 through BLOCKER-05). Integrated into release.yml as a conditional gate for v1.0.x tags. Runs on demand via workflow_dispatch and as a reusable workflow called by release.yml. | Resolved 2026-03-16 |
 | **GAP-D-08** | No formal staging environment qualification step before production release. E2E gate exists but no broader staging readiness checklist is enforced (e.g., no performance baseline, no penetration test, no smoke-test-series pass). | Medium | No | Create P0-staging-readiness.md checklist in docs/reference/developer/; add pre-release verification section to release.yml or release-verification-checklist.md. Recommend 48-hour staging soak before v* tag. | Phase 1 release SOP |
 
 ---
@@ -285,7 +287,8 @@ The following gaps in CI coverage, test automation, and environment qualificatio
   - `.github/workflows/spfx-deploy.yml` — staging auto + production manual dispatch
   - `.github/workflows/release.yml` — semantic version gate + E2E gate + production gate
   - `.github/workflows/e2e.yml` — Playwright tests against staging URLs
-  - `.github/workflows/smoke-tests.yml` — daily + on-demand smoke test against real tenant
+  - `.github/workflows/smoke-tests.yml` — daily + on-demand + PR smoke test against real tenant
+  - `.github/workflows/P0-E1-gate.yml` — Phase 1 entry gate validation (reusable, called by release.yml for v1.0.x)
 
 - **Reference & Guidance:**
   - `docs/reference/developer/wave-1-ci-gates.md` — CI gate definitions
@@ -302,7 +305,7 @@ The following gaps in CI coverage, test automation, and environment qualificatio
 | 2. Staging auto-deploy | cd.yml, spfx-deploy staging steps succeed | GitHub Actions | Automatic (non-blocking if passed) |
 | 3. Staging soak & smoke tests | smoke-tests.yml runs daily + passes (48 hours recommended) | QA + Dev | Manual review + e2e.yml pass |
 | 4. E2E validation | e2e.yml passes against STAGING_ESTIMATING_URL, STAGING_ACCOUNTING_URL | QA | Manual trigger + pass (blocking v* tag) |
-| 5. Phase 1 readiness gate (GAP-D-07) | P0-E1 gate (D-01, D-02 closed) + manual approval | Release engineering | Blocks v1.0.0 tag creation |
+| 5. Phase 1 readiness gate (GAP-D-07 RESOLVED) | P0-E1-gate.yml (5 blockers) integrated into release.yml for v1.0.x tags | Release engineering | Blocks v1.0.0 tag creation |
 | 6. Production release | v* semantic version tag created | Release engineering | Automatic: E2E gate (PWA + Functions) + manual SPFx dispatch |
 
 ---
