@@ -43,7 +43,7 @@ Verified against live repo 2026-03-18. This section documents what exists so C2 
 
 | Component | Target File | Dependency |
 |---|---|---|
-| `withAuth()` middleware wrapper | `middleware/auth.ts` | None — builds on existing `validateToken()` |
+| ~~`withAuth()` middleware wrapper~~ | ~~`middleware/auth.ts`~~ | ~~None — builds on existing `validateToken()`~~ | **COMPLETE** — `extractBearer()` + `withAuth()` implemented, tested, applied to `projectRequests` routes (2026-03-19) |
 | Zod request validation | `middleware/validate.ts` | `zod` must be added to `package.json` |
 | `parseBody<T>()` / `parseQuery<T>()` helpers | `middleware/validate.ts` | Zod |
 | `errorResponse()` / `successResponse()` / `listResponse()` | `utils/response-helpers.ts` | None |

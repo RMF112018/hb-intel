@@ -76,6 +76,43 @@ SharePoint audit writes are intentionally non-blocking. They must always use `.c
   - Enforces transition rules via `isValidTransition`.
   - Enforces `projectNumber` format `##-###-##` when advancing to `ReadyToProvision`.
 
+### Auth Middleware Pattern (P1-C2)
+
+All HTTP route handlers must use the `withAuth()` middleware wrapper for authentication enforcement. This replaces the previous per-handler inline `validateToken()` try-catch pattern.
+
+**Files:**
+- `src/middleware/auth.ts` — `withAuth()` wrapper, `extractBearer()`, `AuthContext` interface
+- `src/middleware/validateToken.ts` — JWT validation core (unchanged, used internally by `withAuth`)
+
+**Usage:**
+```typescript
+import { withAuth } from '../../middleware/auth.js';
+
+app.http('myRoute', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'my-resource',
+  handler: withAuth(async (request, context, auth) => {
+    // auth.claims.upn — authenticated user's UPN
+    // auth.claims.oid — user's Object ID
+    // auth.claims.roles — JWT role claims
+    // auth.claims.displayName — display name (falls back to UPN)
+    // auth.claims.jobTitle — optional Entra ID job title claim
+    // auth.userToken — raw Bearer token string
+    return { status: 200, jsonBody: { user: auth.claims.upn } };
+  }),
+});
+```
+
+**Behavior:**
+- Extracts and validates the `Authorization: Bearer <token>` header
+- Validates the JWT against Azure Entra ID JWKS via `validateToken()`
+- Returns standardized 401 if token is missing, malformed, or invalid
+- Passes `AuthContext` (validated claims + raw token) to the handler
+- Handler errors are NOT caught — they bubble to the Azure Functions runtime
+
+**Migration:** Existing handlers using inline `validateToken()` try-catch should be migrated to `withAuth()`. The `projectRequests` routes are the first to adopt this pattern (P1-C2 Task 3). Remaining handlers will be migrated as C2 implementation proceeds.
+
 ### Phase 6.8 State Machine Rules
 
 Valid transitions:

@@ -1,7 +1,7 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
 import type { IProjectSetupRequest, ProjectSetupRequestState } from '@hbc/models';
 import { randomUUID } from 'crypto';
-import { validateToken, unauthorizedResponse } from '../../middleware/validateToken.js';
+import { withAuth } from '../../middleware/auth.js';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { isValidTransition } from '../../state-machine.js';
 import { createLogger } from '../../utils/logger.js';
@@ -16,15 +16,8 @@ app.http('submitProjectSetupRequest', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'project-setup-requests',
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-    let claims;
-    try {
-      // D-PH6-08 Bearer trust boundary: identity is only sourced from validated token claims.
-      claims = await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
 
     const body = (await request.json()) as Partial<IProjectSetupRequest>;
     if (!body.projectName || !body.groupMembers?.length) {
@@ -43,7 +36,7 @@ app.http('submitProjectSetupRequest', {
       projectLocation: body.projectLocation ?? '',
       projectType: body.projectType ?? '',
       projectStage: body.projectStage ?? 'Pursuit',
-      submittedBy: claims.upn,
+      submittedBy: auth.claims.upn,
       submittedAt: new Date().toISOString(),
       state: 'Submitted',
       groupMembers: body.groupMembers,
@@ -54,11 +47,11 @@ app.http('submitProjectSetupRequest', {
     logger.info('Project setup request submitted', {
       requestId,
       projectId,
-      submittedBy: claims.upn,
+      submittedBy: auth.claims.upn,
     });
 
     return { status: 201, jsonBody: newRequest };
-  },
+  }),
 });
 
 /**
@@ -69,18 +62,12 @@ app.http('listProjectSetupRequests', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'project-setup-requests',
-  handler: async (request: HttpRequest): Promise<HttpResponseInit> => {
-    try {
-      await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
-
+  handler: withAuth(async (request: HttpRequest): Promise<HttpResponseInit> => {
     const services = createServiceFactory();
     const stateFilter = request.query.get('state') as ProjectSetupRequestState | null;
     const requests = await services.projectRequests.listRequests(stateFilter ?? undefined);
     return { status: 200, jsonBody: requests };
-  },
+  }),
 });
 
 /**
@@ -91,14 +78,8 @@ app.http('advanceRequestState', {
   methods: ['PATCH'],
   authLevel: 'anonymous',
   route: 'project-setup-requests/{requestId}/state',
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
-    let claims;
-    try {
-      claims = await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid token');
-    }
 
     const requestId = request.params.requestId;
     const body = (await request.json()) as {
@@ -145,7 +126,7 @@ app.http('advanceRequestState', {
     }
 
     if (body.newState === 'Provisioning' || body.newState === 'Completed') {
-      existing.completedBy = claims.upn;
+      existing.completedBy = auth.claims.upn;
       existing.completedAt = new Date().toISOString();
     }
 
@@ -155,9 +136,9 @@ app.http('advanceRequestState', {
       requestId,
       from: fromState,
       to: body.newState,
-      by: claims.upn,
+      by: auth.claims.upn,
     });
 
     return { status: 200, jsonBody: existing };
-  },
+  }),
 });
