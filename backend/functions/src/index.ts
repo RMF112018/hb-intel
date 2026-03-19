@@ -9,6 +9,9 @@ import './functions/projectRequests/index.js';
 import './functions/acknowledgments/index.js';
 import './functions/notifications/index.js';
 
+// Health probe (P1-C3 §2.2.1)
+import './functions/health/index.js';
+
 // Phase 1 domain route handlers (P1-C1-a)
 import './functions/leads/index.js';
 import './functions/projects/index.js';
