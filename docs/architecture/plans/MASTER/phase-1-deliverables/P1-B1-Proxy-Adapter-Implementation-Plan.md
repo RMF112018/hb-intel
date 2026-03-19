@@ -112,7 +112,7 @@ These must be resolved before production activation. B1 implementation can proce
 | D1 | Singular vs plural route paths (schedule, buyout, risk, scorecard) | P1-C1 | Path constants in 4 repos + tests | Before production activation |
 | D2 | Estimating sub-resource routing (`/trackers`, `/kickoffs`) vs flat `/api/estimating` | P1-C1 | May restructure estimating adapter | Before Task 5 implementation ideally |
 | D3 | Error envelope field name (`.message` vs `.error`) | P1-C1 + B1 | `ProxyHttpClient.handleResponse()` update | Before production activation |
-| D4 | Pagination default alignment (B1: 25 via `DEFAULT_PAGE_SIZE`, C1: 50) | P1-C1 + B1 | `mapPagedResponse` fallback + model constants | Before production activation |
+| D4 | Pagination default | P1-C1 + B1 | **LOCKED** — default 25, max 100; B1 and C1 aligned | Resolved |
 | D5 | Whether proxy adapters need PATCH support | P1-C1 | C1 defines PATCH routes; B1 uses PUT only | Before production activation |
 | D6 | Nested project-scoped paths vs flat query-param pattern | P1-C1 | Affects 8 project-scoped repos | Before production activation |
 
@@ -1274,7 +1274,7 @@ describe('ProxyBaseRepository', () => {
       expect(result.total).toBe(0);
       expect(result.page).toBe(1);
       // Uses DEFAULT_PAGE_SIZE from @hbc/models (currently 25).
-      // D4: C1 defaults to 50; this fallback only applies when backend omits pageSize.
+      // D4 (LOCKED): default pageSize is 25 (max 100). This fallback ensures consistency when backend omits pageSize.
       expect(result.pageSize).toBe(25);
     });
 

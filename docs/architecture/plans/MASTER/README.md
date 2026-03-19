@@ -77,7 +77,17 @@ Execution complete (2026-03-16). Seven mandatory deliverables produced: reconcil
 **Phase 1 — Production Data Plane and Integration Backbone**
 Planning complete. Twenty-four deliverables produced across five workstreams. All design decisions are locked. Pre-Phase-1 contradiction closeout completed 2026-03-18 (26 contradictions resolved, go/no-go checklist 7/7 PASS). B1 transport foundation and 7 of 11 proxy repos are implemented and tested. See [P1-CLOSEOUT](phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) for the full register.
 
-**Readiness positioning:** Phase 1 planning is complete but broad implementation requires remaining blockers to be resolved. Domain data routes do not yet exist in the backend. Proxy adapters cover 7 of 11 domains; 4 remain (Lead, Project, Estimating, Auth). Staging telemetry evidence is not yet in place. Production deployment is gated on external IT/PO actions (Graph permissions, per-site grants, schema approval). Workstreams B1, C2, and C3 may proceed now; D1/E1/E2 are blocked on B1 completion.
+**Phase 1 Implementation Baseline (2026-03-19):**
+
+| Dimension | Status |
+|---|---|
+| Phase 0 control baseline | **Complete** — all milestones satisfied, all gates cleared (2026-03-16) |
+| Phase 1 planning | **Complete** — 24 deliverables final, all transport decisions locked, contradiction closeout 7/7 PASS |
+| Implementation verdict | **Ready for narrow kickoff** — Tier 1 workstreams (B1, C2, D1) have no upstream blockers |
+| Remaining blockers for broad execution | SharePoint schema approval (PO), IT Graph permission grant, IT per-site access grants, C1 backend route delivery |
+| Recommended immediate next step | Complete remaining 4 proxy repos (B1 Lead/Project/Estimating/Auth), build C2 auth middleware (`withAuth()`, Zod, response helpers), define D1 write-safety standalone types |
+
+For the full three-tier implementation-entry gate, see [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md) §Phase 1 Implementation-Entry Gate.
 
 ### Forward-planning documents
 
@@ -171,4 +181,4 @@ The `plans/shared-features/` and `plans/UI-Kit/` directories contain shared-feat
 
 ---
 
-**Last Updated:** 2026-03-18
+**Last Updated:** 2026-03-19

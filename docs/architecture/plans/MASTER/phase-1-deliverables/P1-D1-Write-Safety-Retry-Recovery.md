@@ -671,7 +671,7 @@ into ProxyHttpClient in Task 1.2.
 | Dependency | Owner | D1 Assumption | Status |
 |---|---|---|---|
 | Constructor signature `ProxyHttpClientOptions` | B1 | D1 extends with `readPolicy?`, `writePolicy?` | **PROVISIONAL** until B1 merges |
-| Error field priority (`.error` vs `.message`) | C1 (D3) | D1 uses `.error`-first / `.message`-fallback | **PROVISIONAL** pending D3 freeze |
+| Error field priority (`.message` primary) | C1 (D3) | D1 uses `.message`-first / `.error`-fallback for pre-Phase-1 routes | **LOCKED** — D3 resolved per P1-E1 |
 | 204 No Content on DELETE | C1 | D1 returns `undefined` for 204 | **FROZEN** per C1 HTTP status semantics |
 | `Retry-After` header on 429/503 | C1 | D1 honors header as delay floor | **PROVISIONAL** — C1 does not mandate backends emit this header |
 | Error code taxonomy (RATE_LIMITED, BAD_GATEWAY, etc.) | D1 | D1 owns classification | **TARGET** — must align with B1 `handleResponse` error types |
@@ -1065,8 +1065,7 @@ export class ProxyHttpClient {
       retryAfterMs = isNaN(seconds) ? undefined : seconds * 1000;
     }
 
-    // Error message extraction: .error first (C1 contract), .message fallback.
-    // PROVISIONAL (pending D3 freeze): field priority must be reconciled with C1.
+    // Error message extraction: .message first (D3 LOCKED), .error fallback for pre-Phase-1 routes.
     const message = this._extractErrorMessage(body, response.statusText);
     const error = new HbcDataAccessError(message, code);
     (error as any).statusCode = response.status;
@@ -1076,11 +1075,9 @@ export class ProxyHttpClient {
 
   /**
    * Extract a human-readable error message from backend error response body.
-   * Reads `.error` first (C1 target contract), falls back to `.message` for
-   * transitional compatibility.
-   *
-   * **PROVISIONAL (pending D3):** The field priority (.error vs .message) must
-   * be reconciled with C1 before CONTRACT_ALIGNED. See B1 extractErrorMessage().
+   * Reads `.message` first (D3 LOCKED — `message` is primary error field per P1-E1),
+   * falls back to `.error` for pre-Phase-1 route backward compatibility.
+   * See B1 `extractErrorMessage()` for the matching implementation.
    */
   private _extractErrorMessage(body: unknown, fallback: string): string {
     if (typeof body === 'object' && body !== null) {
