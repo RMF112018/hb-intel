@@ -8,7 +8,7 @@
 | **Document Type** | Contract Catalog |
 | **Owner** | Backend Services Team |
 | **Update Authority** | C-workstream lead; route additions require review by B-workstream (adapter consumers) |
-| **Last Reviewed Against Repo Truth** | 2026-03-18 |
+| **Last Reviewed Against Repo Truth** | 2026-03-19 |
 | **References** | P1-B1 (Proxy Adapter Engineering Plan), P1-B2 (Adapter Completion Backlog), P1-C2 (Auth Hardening), P1-D1 (Write Safety), P1-E1 (Contract Test Suite) |
 
 ---
@@ -51,17 +51,17 @@ Define the complete HTTP service contract for HB Intel backend Azure Functions v
 
 | Domain | Status | Port Interface | Method Families | Route Confidence | Open Decisions |
 |---|---|---|---|---|---|
-| **Lead** | `TARGET` | `ILeadRepository` | CRUD (5) + Search (1) | C1 locked | — |
-| **Project** | `TARGET` | `IProjectRepository` | CRUD (5) + Portfolio Summary (1) | CRUD: C1 locked; Aggregate: A8 provisional | A8 |
-| **Estimating** | `TARGET` | `IEstimatingRepository` | Tracker CRUD (5) + Kickoff (2) | Base locked; sub-resource D2 open | D2 |
-| **Auth** | `TARGET` | `IAuthRepository` | Current User (1), Roles (6), Templates (4), Job Title Mappings (4), Assignment (2) | Routes defined in P1-C2-a Task 21 (A9 resolved) | — |
-| **Schedule** | `TARGET (PROVISIONAL)` | `IScheduleRepository` | Activity CRUD (5) + Metrics (1) | Provisional | D1, D6 |
-| **Buyout** | `TARGET (PROVISIONAL)` | `IBuyoutRepository` | Entry CRUD (5) + Summary (1) | Provisional | D1, D6 |
-| **Compliance** | `TARGET (PROVISIONAL)` | `IComplianceRepository` | Entry CRUD (5) + Summary (1) | Provisional | D1, D6 |
-| **Contract** | `TARGET (PROVISIONAL)` | `IContractRepository` | Contract CRUD (5) + Approvals (2) | Provisional | D1, D6 |
-| **Risk** | `TARGET (PROVISIONAL)` | `IRiskRepository` | Item CRUD (5) + Management (1) | Provisional | D1, D6 |
-| **Scorecard** | `TARGET (PROVISIONAL)` | `IScorecardRepository` | Scorecard CRUD (5) + Versions (1) | Provisional | D1, D6 |
-| **PMP** | `TARGET (PROVISIONAL)` | `IPmpRepository` | Plan CRUD (5) + Signatures (2) | Provisional | D1, D6 |
+| **Lead** | `IMPLEMENTED` | `ILeadRepository` | CRUD (5) + Search (1) | C1 locked | — |
+| **Project** | `IMPLEMENTED` | `IProjectRepository` | CRUD (5) + Portfolio Summary (1) | C1 locked; A8 resolved | — |
+| **Estimating** | `IMPLEMENTED` | `IEstimatingRepository` | Tracker CRUD (5) + Kickoff (2) | C1 locked; D2 resolved | — |
+| **Auth** | `TARGET` | `IAuthRepository` | Current User (1), Roles (6), Templates (4), Job Title Mappings (4), Assignment (2) | Routes defined in P1-C2-a Task 21 (A9 resolved); backend handlers Phase 2 | — |
+| **Schedule** | `IMPLEMENTED` | `IScheduleRepository` | Activity CRUD (5) + Metrics (1) | D1/D6 resolved | — |
+| **Buyout** | `IMPLEMENTED` | `IBuyoutRepository` | Entry CRUD (5) + Summary (1) | D1/D6 resolved | — |
+| **Compliance** | `IMPLEMENTED` | `IComplianceRepository` | Entry CRUD (5) + Summary (1) | D1/D6 resolved | — |
+| **Contract** | `IMPLEMENTED` | `IContractRepository` | Contract CRUD (5) + Approvals (2) | D1/D6 resolved | — |
+| **Risk** | `IMPLEMENTED` | `IRiskRepository` | Item CRUD (5) + Management (1) | D1/D6 resolved | — |
+| **Scorecard** | `IMPLEMENTED` | `IScorecardRepository` | Scorecard CRUD (5) + Versions (1) | D1/D6 resolved | — |
+| **PMP** | `IMPLEMENTED` | `IPmpRepository` | Plan CRUD (5) + Signatures (2) | D1/D6 resolved | — |
 
 ---
 
@@ -73,17 +73,17 @@ This matrix ties each target domain to its contract owner, freeze status, blocki
 
 | Domain | Contract Owner | Freeze Status | Blocked By | Downstream Consumers | B2 Gate Impact |
 |---|---|---|---|---|---|
-| **Lead** | C1 | Route paths frozen | — | B1 Task 3, E1 | `CONTRACT_ALIGNED` for routes; cross-cutting D3/D4/D5 still apply |
-| **Project** | C1 | CRUD frozen; aggregate A8 provisional | A8 | B1 Task 4, E1 | `CONTRACT_ALIGNED` for CRUD; aggregate blocked |
-| **Estimating** | C1 | Base frozen; sub-resource D2 open | D2 | B1 Task 5, E1 | `CONTRACT_ALIGNED` for base; kickoff blocked |
-| **Auth** | C2 | Routes defined (P1-C2-a Task 21; A9 resolved) | — | B1 Task 7 (complete), E1 | Route catalog available; backend handlers Phase 2 |
-| **Schedule** | C1 | Provisional | D1, D6 | B1 Task 5, E1 | Blocked until D1/D6 resolved |
-| **Buyout** | C1 | Provisional | D1, D6 | B1 Task 5, E1 | Blocked until D1/D6 resolved |
-| **Compliance** | C1 | Provisional | D1, D6 | B1 Task 6, E1 | Blocked until D1/D6 resolved |
-| **Contract** | C1 | Provisional | D1, D6 | B1 Task 6, E1 | Blocked until D1/D6 resolved |
-| **Risk** | C1 | Provisional | D1, D6 | B1 Task 6, E1 | Blocked until D1/D6 resolved |
-| **Scorecard** | C1 | Provisional | D1, D6 | B1 Task 7, E1 | Blocked until D1/D6 resolved |
-| **PMP** | C1 | Provisional | D1, D6 | B1 Task 7, E1 | Blocked until D1/D6 resolved |
+| **Lead** | C1 | Routes frozen and implemented | — | B1 ✅, E1 Tasks 4–7 ✅ | `CONTRACT_ALIGNED` |
+| **Project** | C1 | Routes frozen and implemented; A8 resolved | — | B1 ✅, E1 Tasks 4–7 ✅ | `CONTRACT_ALIGNED` |
+| **Estimating** | C1 | Routes frozen and implemented; D2 resolved | — | B1 ✅, E1 Tasks 4–7 ✅ | `CONTRACT_ALIGNED` |
+| **Auth** | C2 | Routes defined (P1-C2-a Task 21; A9 resolved) | — | B1 ✅ | Route catalog available; backend handlers Phase 2 |
+| **Schedule** | C1 | Routes frozen and implemented; D1/D6 resolved | — | B1 ✅ | `CONTRACT_ALIGNED` |
+| **Buyout** | C1 | Routes frozen and implemented; D1/D6 resolved | — | B1 ✅ | `CONTRACT_ALIGNED` |
+| **Compliance** | C1 | Routes frozen and implemented; D1/D6 resolved | — | B1 ✅ | `CONTRACT_ALIGNED` |
+| **Contract** | C1 | Routes frozen and implemented; D1/D6 resolved | — | B1 ✅ | `CONTRACT_ALIGNED` |
+| **Risk** | C1 | Routes frozen and implemented; D1/D6 resolved | — | B1 ✅ | `CONTRACT_ALIGNED` |
+| **Scorecard** | C1 | Routes frozen and implemented; D1/D6 resolved | — | B1 ✅ | `CONTRACT_ALIGNED` |
+| **PMP** | C1 | Routes frozen and implemented; D1/D6 resolved | — | B1 ✅ | `CONTRACT_ALIGNED` |
 
 ### Cross-Cutting Contract Dependencies
 
@@ -94,7 +94,7 @@ These affect all domain routes, not just one. They must be resolved before any d
 | D3 — Error envelope field priority | C1 + B1 | All domain error responses | **LOCKED** — `message` (not `error`); see Resolved Decisions |
 | D4 — Pagination default | C1 + B1 | All collection responses | **LOCKED** — 25 (max 100); see Resolved Decisions |
 | D5 — PATCH support | C1 | All domain mutation routes | **LOCKED** — PUT-only in Phase 1; see Resolved Decisions |
-| P1-D1 — Idempotency support | D1-workstream | All domain write routes | Pending D1 delivery |
+| P1-D1 — Idempotency support | D1-workstream | All domain write routes | **DELIVERED** — `withRetry()` wired into ProxyHttpClient; `withIdempotency` handler wrapper + `IdempotencyStorageService` implemented; idempotency header injection active |
 
 ---
 
