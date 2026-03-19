@@ -2,9 +2,15 @@ import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } 
 import type { IProjectSetupRequest, ProjectSetupRequestState } from '@hbc/models';
 import { randomUUID } from 'crypto';
 import { withAuth } from '../../middleware/auth.js';
+import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { isValidTransition } from '../../state-machine.js';
 import { createLogger } from '../../utils/logger.js';
+import {
+  errorResponse,
+  successResponse,
+  notFoundResponse,
+} from '../../utils/response-helpers.js';
 
 const PROJECT_NUMBER_PATTERN = /^\d{2}-\d{3}-\d{2}$/;
 
@@ -18,10 +24,11 @@ app.http('submitProjectSetupRequest', {
   route: 'project-setup-requests',
   handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
+    const reqId = extractOrGenerateRequestId(request);
 
     const body = (await request.json()) as Partial<IProjectSetupRequest>;
     if (!body.projectName || !body.groupMembers?.length) {
-      return { status: 400, jsonBody: { error: 'projectName and groupMembers are required' } };
+      return errorResponse(400, 'VALIDATION_ERROR', 'projectName and groupMembers are required', reqId);
     }
 
     const services = createServiceFactory();
@@ -50,7 +57,7 @@ app.http('submitProjectSetupRequest', {
       submittedBy: auth.claims.upn,
     });
 
-    return { status: 201, jsonBody: newRequest };
+    return successResponse(newRequest, 201);
   }),
 });
 
@@ -66,7 +73,7 @@ app.http('listProjectSetupRequests', {
     const services = createServiceFactory();
     const stateFilter = request.query.get('state') as ProjectSetupRequestState | null;
     const requests = await services.projectRequests.listRequests(stateFilter ?? undefined);
-    return { status: 200, jsonBody: requests };
+    return successResponse(requests);
   }),
 });
 
@@ -80,6 +87,7 @@ app.http('advanceRequestState', {
   route: 'project-setup-requests/{requestId}/state',
   handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
+    const reqId = extractOrGenerateRequestId(request);
 
     const requestId = request.params.requestId;
     const body = (await request.json()) as {
@@ -88,32 +96,24 @@ app.http('advanceRequestState', {
       clarificationNote?: string;
     };
 
-    if (!requestId) return { status: 400, jsonBody: { error: 'requestId is required' } };
-    if (!body.newState) return { status: 400, jsonBody: { error: 'newState is required' } };
+    if (!requestId) return errorResponse(400, 'VALIDATION_ERROR', 'requestId is required', reqId);
+    if (!body.newState) return errorResponse(400, 'VALIDATION_ERROR', 'newState is required', reqId);
 
     const services = createServiceFactory();
     const existing = await services.projectRequests.getRequest(requestId);
     if (!existing) {
-      return { status: 404, jsonBody: { error: 'Request not found' } };
+      return notFoundResponse('ProjectSetupRequest', requestId, reqId);
     }
 
     // D-PH6-08 transition guard prevents invalid lifecycle jumps.
     if (!isValidTransition(existing.state, body.newState)) {
-      return {
-        status: 400,
-        jsonBody: { error: `Invalid state transition: ${existing.state} → ${body.newState}` },
-      };
+      return errorResponse(400, 'VALIDATION_ERROR', `Invalid state transition: ${existing.state} → ${body.newState}`, reqId);
     }
 
     // D-PH6-08 validation rule: ReadyToProvision requires a valid human-assigned project number.
     if (body.newState === 'ReadyToProvision') {
       if (!body.projectNumber || !PROJECT_NUMBER_PATTERN.test(body.projectNumber)) {
-        return {
-          status: 400,
-          jsonBody: {
-            error: 'Valid projectNumber (##-###-##) is required to set ReadyToProvision',
-          },
-        };
+        return errorResponse(400, 'VALIDATION_ERROR', 'Valid projectNumber (##-###-##) is required to set ReadyToProvision', reqId);
       }
       existing.projectNumber = body.projectNumber;
     }
@@ -139,6 +139,6 @@ app.http('advanceRequestState', {
       by: auth.claims.upn,
     });
 
-    return { status: 200, jsonBody: existing };
+    return successResponse(existing);
   }),
 });
