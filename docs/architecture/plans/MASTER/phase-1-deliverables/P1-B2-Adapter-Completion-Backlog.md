@@ -40,7 +40,7 @@ All adapter domain tracking in this document uses the following status progressi
 
 ## Proxy Adapter: Domain Completion Matrix
 
-B1 targets all 11 domain repositories for implementation against mocked fetch in Phase 1 (10 data domains in the table below; Auth tracked separately in its [own section](#auth-domain-special-case-tracking)). C1 backend routes are locked for 3 data domains (Lead, Project, Estimating — including A8 aggregate and D2 sub-resources, resolved per P1-E1); the remaining 7 proceed with provisional route assumptions and will reconcile before production activation.
+B1 targets all 11 domain repositories for implementation against mocked fetch in Phase 1 (10 data domains in the table below; Auth tracked separately in its [own section](#auth-domain-special-case-tracking)). C1 backend routes are locked for 3 data domains (Lead, Project, Estimating — including A8 aggregate and D2 sub-resources, resolved per P1-E1). Transport conventions D1 and D6 are **LOCKED** for all 7 project-scoped domains; those domains' C1 route *handlers* are not yet delivered and remain the primary production-activation blocker.
 
 | Domain | Port Interface | Method Families | Total | Phase Target | Status | B1 Task | Route Status |
 |---|---|---|---|---|---|---|---|
@@ -81,8 +81,8 @@ Each domain's port methods are grouped into route groups below. Route patterns a
 
 | Route Group | Methods | Route Pattern (B1 assumed) | Route Confidence | Open Decisions |
 |---|---|---|---|---|
-| Tracker CRUD | `getAllTrackers`, `getTrackerById`, `createTracker`, `updateTracker`, `deleteTracker` | `GET/POST /api/estimating/trackers`, `GET/PUT/DELETE /api/estimating/trackers/{id}` | C1 base locked | D2 |
-| Kickoff | `getKickoff`, `createKickoff` | `GET/POST /api/estimating/kickoffs?projectId={id}` | Provisional | D2 |
+| Tracker CRUD | `getAllTrackers`, `getTrackerById`, `createTracker`, `updateTracker`, `deleteTracker` | `GET/POST /api/estimating/trackers`, `GET/PUT/DELETE /api/estimating/trackers/{id}` | C1 locked (D2 resolved per P1-E1) | — |
+| Kickoff | `getKickoff`, `createKickoff` | `GET/POST /api/estimating/kickoffs?projectId={id}` | C1 locked (D2 resolved per P1-E1) | — |
 
 #### Schedule (`IScheduleRepository`) — Convention-locked (D1, D6 resolved); project-scoped
 
@@ -246,8 +246,8 @@ This table is the live tracking surface for adapter implementation progress. Upd
 | Domain | Owner | Current Gate | Blocker | Evidence | Next Action | Last Updated |
 |---|---|---|---|---|---|---|
 | Lead | B / Data Access | `IMPL_READY` | None | — | Begin B1 Task 3 | 2026-03-19 |
-| Project | B / Data Access | `IMPL_READY` | Production activation: A8 aggregate provisional | — | Begin B1 Task 4 | 2026-03-19 |
-| Estimating | B / Data Access | `IMPL_READY` | Production activation: D2 sub-resource routing open | — | Begin B1 Task 5 (Estimating portion) | 2026-03-19 |
+| Project | B / Data Access | `IMPL_READY` | Production activation: awaits C1 route delivery | — | Begin B1 Task 4 | 2026-03-19 |
+| Estimating | B / Data Access | `IMPL_READY` | Production activation: awaits C1 route delivery | — | Begin B1 Task 5 (Estimating portion) | 2026-03-19 |
 | Schedule | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
 | Buyout | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
 | Compliance | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
@@ -270,7 +270,7 @@ Not yet active. Rows will be added when those phases begin planning.
 | Lane | Scope | Can Proceed Now? | Blocked Until |
 |---|---|---|---|
 | **Mocked-fetch implementation** | B1 Tasks 0–10: all 11 domain adapters | **Yes** — no external blockers | — |
-| **Route reconciliation** | Align adapter paths with C1 catalog | Lead, Project CRUD, Estimating base only | C1 finalizes remaining 7 data-domain routes, Project aggregate (A8), Estimating sub-resources (D2), and Auth (A9) |
+| **Route reconciliation** | Align adapter paths with C1 catalog | Lead, Project (incl. A8 aggregate), Estimating (incl. D2 sub-resources) locked per P1-E1; 7 convention-locked domains pending C1 handler delivery | C1 delivers remaining 7 data-domain route handlers; Auth (A9) catalog entry still needed |
 | **Response contract alignment** | Error envelope, pagination defaults | **LOCKED** — D3 (`message`), D4 (25/100) resolved per P1-E1 | — |
 | **Auth integration** | MSAL registration, OBO flow, CORS | No | C2 delivers auth middleware and registers scopes |
 | **Write safety** | Retry, idempotency, failure classification | No | P1-D1 delivers `withRetry()`, idempotency guard, `WriteFailureReason` |
@@ -321,8 +321,8 @@ These decisions do not block mocked-fetch implementation but must be resolved be
 C1 owns route path finalization, response envelope shape, and HTTP method definitions for all backend Azure Functions endpoints. Until C1 freezes routes for a domain, that domain's adapter cannot be verified against real paths.
 
 **Current state:**
-- **C1 locked (3 domains, partial):** Lead, Project CRUD, Estimating base paths (Project aggregate A8 and Estimating sub-resources D2 remain provisional)
-- **Provisional (7 data domains):** Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP — route shapes assumed per B1, pending D1/D2/D5/D6 resolution
+- **C1 locked (3 domains):** Lead, Project (including A8 aggregate: `/api/projects/summary`), Estimating (including D2 sub-resources: `/api/estimating/trackers/` and `/api/estimating/kickoffs/`) — all per P1-E1
+- **Convention-locked, handler pending (7 data domains):** Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP — transport conventions D1, D5, D6 **LOCKED** per P1-E1; route paths follow confirmed nested patterns; production activation blocked until C1 delivers backend route handlers
 - **Auth (tracked separately):** A9 — no route catalog entry; see [Auth Domain: Special-Case Tracking](#auth-domain-special-case-tracking)
 
 **Resolved transport decisions (all LOCKED per P1-E1):**
@@ -333,10 +333,10 @@ C1 owns route path finalization, response envelope shape, and HTTP method defini
 - D6: Nested project-scoped paths — B1 assumption confirmed
 
 **Remaining items blocking `CONTRACT_ALIGNED`:**
-- D2: Estimating sub-resource routing — locked as `/api/estimating/trackers/` and `/api/estimating/kickoffs/`; adapter must implement two-sub-resource pattern
-- A8: Project aggregate endpoint — provisional; not in C1 catalog
-- A9: Auth management routes — no C1/C2 catalog entry
-- **C1 route handler delivery** — no domain data routes exist in backend yet; this is the primary remaining blocker
+- A9: Auth management routes — no C1/C2 catalog entry; see Auth Domain section
+- **C1 route handler delivery** — no domain data routes exist in backend yet; this is the primary remaining blocker for all non-Lead/Project/Estimating domains
+
+*Note: D2 (Estimating sub-resources) and A8 (project aggregate) are now locked per P1-E1; they no longer block `CONTRACT_ALIGNED` for those domains.*
 
 ### P1-C2 — Auth and Validation Hardening
 

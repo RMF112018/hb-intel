@@ -21,7 +21,7 @@ All design decisions are locked. Transport-shape conventions (response envelopes
 
 | Category | Status |
 |---|---|
-| **Planning** | Complete — all 25 deliverables final, all transport decisions locked (D1–D6, A8, A9) |
+| **Planning** | Complete — transport conventions locked (D1–D6, A8); deliverable statuses range from Final to Active Reference per the index below; A9 (auth management routes) remains an open assumption |
 | **Implementation — B1 proxy adapters** | In progress — transport foundation + 7 of 11 repos implemented and tested; Lead, Project, Estimating, Auth remaining |
 | **Implementation — C1 backend routes** | Not started — zero domain data routes exist; provisioning/notification routes are operational |
 | **Implementation — C2 auth middleware** | Not started — `validateToken()` exists; `withAuth()`, Zod validation, response helpers not yet built |
@@ -227,7 +227,7 @@ Phase 1 implementation is complete when all of the following are satisfied:
 - **Hardened service boundaries.** Authentication, validation, and authorization are enforced at all backend service boundaries per P1-C2.
 - **Recoverable failures.** Retry behavior, partial-failure scenarios, and user-facing error states are implemented and tested per P1-D1.
 - **Stable downstream contracts.** Phase 2+ teams can build against the contract layer defined in P1-C1 and validated by P1-E1 without inventing their own data access patterns.
-- **Observable operations.** Telemetry signals (requests, dependencies, traces) are correlated and verifiable in staging per P1-C3 and P1-E1.
+- **Observable operations.** Telemetry signals (requests, dependencies, traces) can be correlated and verified in staging per P1-C3 and P1-E1. (Staging verification remains pending until C1 routes, C2 auth, C3 instrumentation, and staging deployment are complete.)
 - **Staging sign-off.** P1-E2 checklist is complete with all gates passed.
 
 ---
@@ -238,7 +238,7 @@ These decisions were identified as blockers during planning and have been resolv
 
 | Decision | Resolution | Reference |
 |---|---|---|
-| Transport shape conventions (D1–D6, A8) | All locked — plural routes, nested paths, `{ data: T }` wrapper, `message` error field, page size 25, PUT-only, 204 deletes | P1-E1 Locked Decisions Applied |
+| Transport shape conventions (D1–D6, A8) | All locked — plural routes, nested paths; collection/paged responses use `{ items: T[], total, page, pageSize }` (page size 25, max 100); single-item responses use `{ data: T }`; error responses use `{ message, ... }`; PUT-only, 204 deletes | P1-E1 Locked Decisions Applied |
 | Error envelope field naming | `message` field (not `error`) | P1-E1 decision D3 |
 | Auth scope in Phase 1 | External except `/api/auth/me` smoke utility | P1-E1 decision 12 |
 | Telemetry evidence model | Three-table correlation: `requests` + `dependencies` + `traces` | P1-E1 Telemetry Gate Evidence |

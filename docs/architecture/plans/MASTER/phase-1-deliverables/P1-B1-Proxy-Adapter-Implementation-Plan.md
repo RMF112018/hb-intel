@@ -93,28 +93,28 @@ B1 is proceeding under these assumptions. Each is labeled with where verificatio
 
 | # | Assumption | Verify With | Current Confidence | Reference |
 |---|---|---|---|---|
-| A1 | API paths follow C1 catalog patterns (e.g., `/api/leads`, `/api/projects/{id}`) | P1-C1 | Medium — Leads/Projects/Estimating paths locked; 8 domains provisional | Appendix A |
+| A1 | API paths follow C1 catalog patterns (e.g., `/api/leads`, `/api/projects/{id}`) | P1-C1 | Medium — Leads/Projects/Estimating base paths C1-locked; 7 project-scoped domains convention-locked (D1, D6 resolved) pending C1 route handler delivery; Auth (A9) unresolved | Appendix A |
 | A2 | Collection response envelope: `{ items: T[], total, page, pageSize }` | P1-C1, P1-E1 | **LOCKED** — E1 locked decision confirms `items` field (not `data`) | Appendix B |
 | A3 | Single-item response envelope: `{ data: T }` | P1-C1 | High — C1 confirms this shape | Appendix B |
 | A4 | Error responses use `message` as primary field | P1-C1, P1-E1 | **LOCKED** — D3 resolved: `message` is primary (not `error`). `extractErrorMessage()` should read `.message` first, `.error` fallback for pre-Phase-1 routes | Appendix B |
 | A5 | Default pageSize is 25, max 100 | P1-C1, P1-E1 | **LOCKED** — D4 resolved: default 25, max 100 (see P1-E1 PaginationQuerySchema) | Appendix B |
 | A6 | Bearer token in `Authorization` header is accepted by backend | P1-C2 | High — standard pattern | Cross-Workstream Boundaries |
 | A7 | Project-scoped routes use nested paths (`/api/projects/{projectId}/{domain}`) | P1-C1, P1-E1 | **LOCKED** — D6 resolved: nested paths confirmed (not flat `?projectId=` query params) | Appendix A |
-| A8 | Aggregate endpoints exist (portfolio summary, metrics, summaries, management) | P1-C1 | **Low** — not in C1 catalog; B1-assumed | Appendix A |
+| A8 | Aggregate endpoints exist (portfolio summary, metrics, summaries, management) | P1-C1 | **Partially resolved** — project portfolio summary locked (`/api/projects/summary`, per P1-E1 decision 11); project-scoped metrics/summary routes follow convention-locked D6 nested pattern; auth aggregates (A9) remain unresolved | Appendix A |
 | A9 | Auth management routes (`/api/auth/*`) exist in backend | P1-C2 | Low — no C1 route defined; C2 owns auth subsystem | Appendix A, Tier 3 |
 
-### Open Decisions
+### Transport Convention Decisions (All Resolved)
 
-These must be resolved before production activation. B1 implementation can proceed with mocked `fetch` but the adapter code will need updates once decisions are made.
+All transport convention decisions are **LOCKED** per P1-E1. No open decisions remain in this set. B1 adapter code that implements mocked-fetch tests should already follow the resolved conventions below; any pre-lock pseudocode examples in this document are superseded by Appendix B.
 
-| # | Decision | Owner | Impact | When Needed |
+| # | Decision | Owner | Resolution | Status |
 |---|---|---|---|---|
-| D1 | Singular vs plural route paths (schedule, buyout, risk, scorecard) | P1-C1 | Path constants in 4 repos + tests | Before production activation |
-| D2 | Estimating sub-resource routing (`/trackers`, `/kickoffs`) vs flat `/api/estimating` | P1-C1 | May restructure estimating adapter | Before Task 5 implementation ideally |
-| D3 | Error envelope field name (`.message` vs `.error`) | P1-C1 + B1 | `ProxyHttpClient.handleResponse()` update | Before production activation |
-| D4 | Pagination default | P1-C1 + B1 | **LOCKED** — default 25, max 100; B1 and C1 aligned | Resolved |
-| D5 | Whether proxy adapters need PATCH support | P1-C1 | C1 defines PATCH routes; B1 uses PUT only | Before production activation |
-| D6 | Nested project-scoped paths vs flat query-param pattern | P1-C1 | Affects 8 project-scoped repos | Before production activation |
+| D1 | Singular vs plural route paths | P1-C1 | **Plural** for all domain routes | **LOCKED** — P1-E1 |
+| D2 | Estimating sub-resource routing (`/trackers`, `/kickoffs`) vs flat `/api/estimating` | P1-C1 | `/api/estimating/trackers/` and `/api/estimating/kickoffs/` | **LOCKED** — P1-E1 |
+| D3 | Error envelope field name (`.message` vs `.error`) | P1-C1 + B1 | **`message`** is primary; `extractErrorMessage()` reads `.message` first, `.error` fallback for pre-Phase-1 routes | **LOCKED** — P1-E1 |
+| D4 | Pagination default | P1-C1 + B1 | **25** (max 100) — B1 and C1 aligned | **LOCKED** — P1-E1 |
+| D5 | Whether proxy adapters need PATCH support | P1-C1 | **PUT-only** in Phase 1; PATCH deferred to Phase 2 | **LOCKED** — P1-E1 |
+| D6 | Nested project-scoped paths vs flat query-param pattern | P1-C1 | **Nested** `/api/projects/{projectId}/{domain}` — B1 assumption confirmed | **LOCKED** — P1-E1 |
 
 ### Deferred Items
 
@@ -259,8 +259,8 @@ B1 is the **frontend-side HTTP client and domain adapter** workstream. It owns t
 
 | B1 Task | B1 Owns | Depends on C1 | Depends on C2 | Depends on D1 | Depends on E1 |
 |---|---|---|---|---|---|
-| Task 1: ProxyHttpClient | HTTP client, error translation, timeout, header injection | Error response shape (`{ error }` per C1, `.message` fallback — D3) | Bearer token format; 401/403 behavior | Retry policy injection point (deferred to D1) | — |
-| Task 2: ProxyBaseRepository | Path building, query marshaling, paged response mapping | Paginated response shape (`{ data, total, page, pageSize }`) | — | — | — |
+| Task 1: ProxyHttpClient | HTTP client, error translation, timeout, header injection | Error response shape (`{ message, ... }` — D3 locked; `.error` fallback for pre-Phase-1 routes only) | Bearer token format; 401/403 behavior | Retry policy injection point (deferred to D1) | — |
+| Task 2: ProxyBaseRepository | Path building, query marshaling, paged response mapping | Paginated response shape (`{ items: T[], total, page, pageSize }` — locked per P1-E1) | — | — | — |
 | Task 3: ProxyLeadRepository | Lead adapter implementation + tests | `/api/leads` endpoint paths and response contract | Auth middleware on lead routes | — | Lead contract schema |
 | Task 4: ProxyProjectRepository | Project adapter implementation + tests | `/api/projects` endpoint paths and response contract | Auth middleware on project routes | — | Project contract schema |
 | Tasks 5–7: Remaining 9 repos | Domain adapter implementations + tests | All domain endpoint paths and response contracts | Auth middleware on all domain routes | — | All domain contract schemas |
