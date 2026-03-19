@@ -6,7 +6,7 @@
 
 ## Planning Status Summary
 
-Phase 2 planning is underway. P2-B0 (Lane Ownership and Coexistence Rules) is the first locked governance deliverable, establishing the lane-ownership foundation that all downstream deliverables must conform to. Remaining deliverables are in planning queue, sequenced per Phase 2 §19 execution priorities.
+Phase 2 planning is underway. P2-B0 (Lane Ownership and Coexistence Rules) and P2-A1 (Personal Work Hub Operating Model Register) are locked governance deliverables, establishing lane-ownership and operating-model foundations that all downstream deliverables must conform to. Remaining deliverables are in planning queue, sequenced per Phase 2 §19 execution priorities.
 
 ---
 
@@ -28,7 +28,7 @@ Phase 2 planning is underway. P2-B0 (Lane Ownership and Coexistence Rules) is th
 
 | Doc ID | Title | Status |
 |---|---|---|
-| P2-A1 | Personal Work Hub Operating Model Register | Not Started |
+| P2-A1 | [Personal Work Hub Operating Model Register](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) | Governance Policy |
 | P2-A2 | Ranking, Lane, and Time-Horizon Policy | Not Started |
 | P2-A3 | Work-Item Explainability and Visibility Rules | Not Started |
 
