@@ -23,7 +23,7 @@ export class ProxyComplianceRepository
   }
 
   async createEntry(data: Omit<IComplianceEntry, 'id'>): Promise<IComplianceEntry> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data);
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createEntry' });
     return parseItemEnvelope<IComplianceEntry>(raw);
   }
 

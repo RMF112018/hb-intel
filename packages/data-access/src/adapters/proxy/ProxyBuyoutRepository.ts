@@ -23,7 +23,7 @@ export class ProxyBuyoutRepository
   }
 
   async createEntry(data: Omit<IBuyoutEntry, 'id'>): Promise<IBuyoutEntry> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data);
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createEntry' });
     return parseItemEnvelope<IBuyoutEntry>(raw);
   }
 

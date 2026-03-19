@@ -23,7 +23,7 @@ export class ProxyRiskRepository
   }
 
   async createItem(data: Omit<IRiskCostItem, 'id'>): Promise<IRiskCostItem> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data);
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createItem' });
     return parseItemEnvelope<IRiskCostItem>(raw);
   }
 

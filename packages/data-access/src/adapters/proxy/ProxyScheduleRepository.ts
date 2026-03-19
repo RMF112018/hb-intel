@@ -23,7 +23,7 @@ export class ProxyScheduleRepository
   }
 
   async createActivity(data: Omit<IScheduleActivity, 'id'>): Promise<IScheduleActivity> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data);
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createActivity' });
     return parseItemEnvelope<IScheduleActivity>(raw);
   }
 

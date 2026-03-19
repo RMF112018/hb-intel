@@ -23,7 +23,7 @@ export class ProxyPmpRepository
   }
 
   async createPlan(data: Omit<IProjectManagementPlan, 'id' | 'createdAt' | 'updatedAt'>): Promise<IProjectManagementPlan> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data);
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createPlan' });
     return parseItemEnvelope<IProjectManagementPlan>(raw);
   }
 
@@ -43,7 +43,7 @@ export class ProxyPmpRepository
   }
 
   async createSignature(data: Omit<IPMPSignature, 'id'>): Promise<IPMPSignature> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain) + '/signatures', data);
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain) + '/signatures', data, { domain: this.domain, operation: 'createSignature' });
     return parseItemEnvelope<IPMPSignature>(raw);
   }
 }

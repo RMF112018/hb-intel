@@ -23,7 +23,7 @@ export class ProxyScorecardRepository
   }
 
   async createScorecard(data: Omit<IGoNoGoScorecard, 'id' | 'createdAt' | 'updatedAt'>): Promise<IGoNoGoScorecard> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data);
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createScorecard' });
     return parseItemEnvelope<IGoNoGoScorecard>(raw);
   }
 

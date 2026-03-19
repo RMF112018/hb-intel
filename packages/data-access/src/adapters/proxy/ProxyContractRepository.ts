@@ -23,7 +23,7 @@ export class ProxyContractRepository
   }
 
   async createContract(data: Omit<IContractInfo, 'id'>): Promise<IContractInfo> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data);
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createContract' });
     return parseItemEnvelope<IContractInfo>(raw);
   }
 
@@ -43,7 +43,7 @@ export class ProxyContractRepository
   }
 
   async createApproval(data: Omit<ICommitmentApproval, 'id'>): Promise<ICommitmentApproval> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain) + '/approvals', data);
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain) + '/approvals', data, { domain: this.domain, operation: 'createApproval' });
     return parseItemEnvelope<ICommitmentApproval>(raw);
   }
 }
