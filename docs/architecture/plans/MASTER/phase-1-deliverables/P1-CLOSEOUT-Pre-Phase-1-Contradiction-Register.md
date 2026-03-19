@@ -7,11 +7,23 @@
 
 ---
 
+## How to Read This Register
+
+**Closure types:**
+- **Doc-Closed** — A documentation inconsistency was corrected in planning files. No code change required. (Items 1–16, 19–24)
+- **Code-Closed** — Code was added or modified in the repo to resolve the issue. (Items 17, 18, 25, 26; Blockers #4, #6, #8, #9, #10)
+- **External-Pending** — Blocked on an action outside engineering's control (IT permission grant, PO approval). (Blockers #2, #3, #5)
+- **Engineering-Active** — Implementation work is in progress. (Blocker #7)
+
+A "Closed" item means the specific contradiction or blocker is resolved. It does NOT mean all downstream implementation is complete — implementation readiness is tracked in the Phase 1 README, not here.
+
+---
+
 ## Executive Summary
 
-Seven reconciliation passes were completed on 2026-03-18. The first six resolved 23 planning contradictions across the Phase 0/Phase 1 documentation and codebase. A final deep-search sweep identified 3 additional issues not caught in prior passes, bringing the total to 26 tracked contradictions (23 closed, 3 newly surfaced and documented).
+Seven reconciliation passes were completed on 2026-03-18. The first six resolved 23 planning contradictions across the Phase 0/Phase 1 documentation and codebase. A final deep-search sweep identified 3 additional issues (#24–#26); all 3 have since been closed (2 via code delivery, 1 via doc correction). Total: 26 tracked contradictions, all closed.
 
-All transport-layer design decisions (D1–D6, A8, A9) are locked and propagated. The pre-Phase-1 go/no-go checklist passes on 6 of 7 areas; gate #5 is PARTIAL due to a stale package README discovered in the final sweep (corrected in this update).
+All transport-layer design decisions (D1–D6, A8, A9) are locked and propagated. The pre-Phase-1 go/no-go checklist passes 7/7 (gate #5 corrected in final sweep commit).
 
 **Blocker ledger:** 6 closed, 4 remaining (2 external/IT, 1 external/PO, 1 engineering in-progress).
 
@@ -20,7 +32,7 @@ All transport-layer design decisions (D1–D6, A8, A9) are locked and propagated
 - **Begin now:** B1 (proxy adapters — 7 of 11 done), C2 (auth middleware), C3 (observability)
 - **Blocked on B1 completion:** D1 (write safety wiring), E1 (contract tests), E2 (staging checklist)
 - **Blocked on external actions:** IT permission grants (#2 per-site, #3 Graph), PO schema approval (#5)
-- **Internal engineering tasks surfaced by final sweep:** #8 README fix (corrected), #9 adapter-mode vocabulary remediation, #10 B3 Layer 2 startup guard
+- **Internal engineering tasks surfaced by final sweep:** #8 README fix (closed), #9 adapter-mode vocabulary remediation (closed — code delivered), #10 B3 Layer 2 startup guard (closed — code delivered)
 
 ---
 
@@ -86,8 +98,8 @@ A deliberate deep search across the full repo identified 3 issues not caught in 
 | # | Issue | Why Missed Earlier | Correction | Status |
 |---|---|---|---|---|
 | 24 | `packages/data-access/README.md` proxy status stale — says "Stub (config only)" but 7 of 11 proxy repos are implemented | README was not updated when B1 repos were committed (a1584b5) | Updated to "Partial (7 of 11 repos implemented)" | Closed (this commit) |
-| 25 | Backend `service-factory.ts` defaults to `'real'` instead of canonical `'proxy'` mode — splits behavior when `HBC_ADAPTER_MODE` unset | Known in P1-B3 as tracked remediation but not surfaced as a closeout blocker | Documented as new blocker #9; remediation is C2-adjacent engineering task | Open |
-| 26 | P1-B3 Layer 2 startup guard (`adapter-mode-guard.ts`) not created — defense-in-depth mock isolation incomplete | Listed in P1-B3 scope as "to be created" but not tracked in CLOSEOUT | Documented as new blocker #10; engineering task with known backend entrypoint constraint | Open |
+| 25 | Backend `service-factory.ts` defaults to `'real'` instead of canonical `'proxy'` mode — splits behavior when `HBC_ADAPTER_MODE` unset | Known in P1-B3 as tracked remediation but not surfaced as a closeout blocker | `normalizeAdapterMode()` maps 'real'→'proxy'; `assertAdapterModeValid()` defaults to 'proxy'; wired into `createServiceFactory()` | Closed (code) |
+| 26 | P1-B3 Layer 2 startup guard (`adapter-mode-guard.ts`) not created — defense-in-depth mock isolation incomplete | Listed in P1-B3 scope as "to be created" but not tracked in CLOSEOUT | `assertAdapterModeValid()` created in `adapter-mode-guard.ts`; rejects unknown modes, blocks mock-in-production; wired into `createServiceFactory()` | Closed (code) |
 
 ---
 
@@ -138,7 +150,7 @@ A deliberate deep search across the full repo identified 3 issues not caught in 
 | Workstream | Can Begin Now | Blocked On |
 |---|---|---|
 | **B1** — Proxy Adapter Implementation | **Yes** — 7 repos done; remaining 4 (Lead, Project, Estimating, Auth) can proceed against mocked fetch | Production activation: C1 route finalization, MSAL registration |
-| **C2** — Auth Middleware and Validation | **Yes** — builds on existing `validateToken()`; OBO endpoint list resolved (blocker #1 closed) | Adapter-mode vocabulary remediation (#9) should be addressed during C2 |
+| **C2** — Auth Middleware and Validation | **Yes** — builds on existing `validateToken()`; OBO endpoint list resolved (blocker #1 closed); adapter-mode vocabulary remediated (blocker #9 closed) | — |
 | **C3** — Observability Instrumentation | **Yes** — logging foundation verified complete | Telemetry events depend on B1/C2 delivering routes/middleware |
 | **D1** — Write Safety and Recovery | **Partially unblocked** — `ProxyHttpClient` now exists; standalone retry types + idempotency types can proceed; wiring into proxy repositories requires B1 completion | B1 remaining 4 repos for full wiring |
 | **E1** — Contract Test Suite | Transport conventions locked; harness design ready | B1 adapter repos + C1 route handlers must exist |
@@ -160,6 +172,6 @@ A deliberate deep search across the full repo identified 3 issues not caught in 
 
 **Prepared:** 2026-03-18 (final sweep)
 **Reconciliation passes:** 7 (commits `3b4b292` through `6e997d5` + final sweep)
-**Contradictions tracked:** 26 (23 closed from systematic passes + 3 surfaced in final sweep)
+**Contradictions tracked:** 26 (all closed — 23 from systematic passes, 3 from final sweep)
 **Blockers:** 6 closed, 4 remaining (2 external/IT, 1 external/PO, 1 engineering in-progress)
 **Newly discovered issues in final sweep:** 3 (#24 README drift — closed, #25 adapter-mode vocabulary — closed, #26 B3 Layer 2 guard — closed)
