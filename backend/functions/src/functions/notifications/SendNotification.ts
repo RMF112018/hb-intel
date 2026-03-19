@@ -41,6 +41,13 @@ app.http('SendNotification', {
 
     context.extraOutputs.set(notificationQueueOutput, JSON.stringify(payload));
 
+    // P1-C3 §2.1.5: notification.send.enqueue telemetry
+    logger.trackEvent('notification.send.enqueue', {
+      notificationType: payload.eventType,
+      correlationId: requestId,
+      recipientUserId: payload.recipientUserId,
+    });
+
     logger.info('SendNotification: enqueued', {
       eventType: payload.eventType,
       recipientUserId: payload.recipientUserId,
