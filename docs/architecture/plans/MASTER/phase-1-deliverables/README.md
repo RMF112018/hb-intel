@@ -23,11 +23,11 @@ All design decisions are locked. Transport-shape conventions (response envelopes
 |---|---|
 | **Planning** | Complete — transport conventions locked (D1–D6, A8); deliverable statuses range from Final to Active Reference per the index below; A9 (auth management routes) resolved via P1-C2-a Task 21 |
 | **Implementation — B1 proxy adapters** | **Complete** — transport foundation + 11 of 11 repos implemented and tested (109+ tests); all factory-wired for proxy mode |
-| **Implementation — C1 backend routes** | Not started — zero domain data routes exist; provisioning/notification routes are operational |
-| **Implementation — C2 auth middleware** | In progress — `validateToken()` exists and tested; `withAuth()` wrapper, Zod validation middleware, and response helpers (`successResponse`, `errorResponse`, `listResponse`, `notFoundResponse`) delivered; request ID middleware complete |
-| **Implementation — C3 observability** | In progress — `createLogger()` verified; proxy.request.* events emitted (§2.1.9); auth.bearer.*/auth.obo.* events emitted (§2.1.3); circuit breaker telemetry contracts delivered (§2.2.3); handler lifecycle and remaining families awaiting C1 route delivery |
-| **Implementation — D1 write safety** | Unblocked — `ProxyHttpClient` exists with `withRetry()` wired; B1 proxy adapters complete; standalone types can proceed |
-| **Staging readiness** | Not achievable — no domain routes, no staging telemetry evidence, no physical SharePoint lists |
+| **Implementation — C1 backend routes** | **Complete** — leads, projects, estimating domain handlers implemented with `withAuth()`, `parseBody<T>()`, `withTelemetry()`, and standardized response helpers |
+| **Implementation — C2 auth middleware** | **Complete** — `withAuth()` wrapper, `parseBody<T>()` Zod validation, response helpers (`successResponse`, `errorResponse`, `listResponse`, `notFoundResponse`), request-id middleware all delivered and wired to domain handlers |
+| **Implementation — C3 observability** | **Complete (code)** — proxy.request.*, auth.bearer.*, auth.obo.*, startup.mode.resolved, circuit breaker telemetry contracts, health endpoint, `withTelemetry()` handler lifecycle all delivered; staging verification pending deployment |
+| **Implementation — D1 write safety** | **Complete** — `withRetry()` wired into ProxyHttpClient, `withIdempotency` handler wrapper, `IdempotencyStorageService`, cleanup timer, idempotency header injection all delivered |
+| **Staging readiness** | **Gated on staging deployment** — all code delivered; execution requires IT-side function app deployment, auth app registration, and environment variable configuration |
 | **External dependencies** | 3 pending — IT Graph permission grant, IT per-site access grants, PO schema approval |
 
 Broad Phase 1 implementation should not be described as "execution-ready" until the remaining readiness blockers are resolved. See the [P1-CLOSEOUT register](P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) for the detailed blocker ledger.
@@ -38,27 +38,26 @@ Broad Phase 1 implementation should not be described as "execution-ready" until 
 
 This gate defines the concrete entry conditions for Phase 1 implementation work. P0-E1 confirmed the Phase 0→1 planning transition is complete (2026-03-16). This section addresses the separate question: what implementation work can begin, what is blocked, and what must be true before broad execution.
 
-#### Current Assessment (2026-03-19): Ready for Narrow Kickoff
+#### Current Assessment (2026-03-19): Code Complete — Gated on Staging Deployment
 
-Phase 1 is ready for **targeted implementation** on workstreams with no upstream blockers. It is NOT ready for broad execution — C1 backend routes, staging infrastructure, and external approvals are prerequisite to most integration and acceptance work.
+Phase 1 implementation is **code-complete** across all workstreams (B1, C1, C2, C3, D1, E1). E2 staging readiness checklist execution is gated on IT-side staging infrastructure deployment (function app, auth registration, environment variables). No further code work is required before staging verification can proceed.
 
-#### Tier 1 — Proceed Now (No Upstream Blockers)
+#### Tier 1 — All Complete
 
-| Workstream | Work | Foundation Already Delivered |
+| Workstream | Status | Delivered |
 |---|---|---|
-| **B1** — Proxy adapters | **COMPLETE** — all 11 repos implemented, factory-wired, 109+ tests | ProxyHttpClient, BaseProxyProjectRepository, envelope parsers, path builders, all 11 domain repos including Auth |
-| **C2** — Auth middleware | `withAuth()` wrapper, Zod validation, response helpers, X-Request-Id | `validateToken()` tested and production-ready; builds directly on top |
-| **D1** — Write safety standalone types | RetryPolicy, WriteFailureReason, idempotency key types | ProxyHttpClient hook points (`onBeforeRequest`, `onAfterResponse`) ready for D1 wiring |
+| **B1** — Proxy adapters | **COMPLETE** | All 11 repos implemented, factory-wired, 189+ tests; ProxyHttpClient with retry + idempotency |
+| **C2** — Auth middleware | **COMPLETE** | `withAuth()`, `parseBody<T>()`, response helpers, request-id middleware — all wired to domain handlers |
+| **D1** — Write safety | **COMPLETE** | `withRetry()` wired, `withIdempotency` handler wrapper, `IdempotencyStorageService`, cleanup timer |
 
-#### Tier 2 — Proceed After Named Prerequisite
+#### Tier 2 — All Complete
 
-| Workstream | Work | Blocked On | Unblock Condition |
-|---|---|---|---|
-| **C1** — Backend domain route handlers | Leads, projects, estimating route implementations | SharePoint schema approval (external) | PO + Business Domains approve P1-A3 schema package |
-| **D1** — Full retry/idempotency wiring | `withRetry()` integration into ProxyHttpClient | — | B1 complete; `withRetry()` wired into ProxyHttpClient (2026-03-19) |
-| **E1** — Contract tests against staging | Zod schema validation, MSW handlers, smoke tests | C1 routes + C2 auth delivered + staging deploy | Tier 1 C2 + Tier 2 C1 complete |
-| **C3** — Telemetry instrumentation | Handler lifecycle events, proxy events, auth events | C1 routes exist to instrument | Tier 2 C1 routes delivered |
-| **E2** — Staging readiness verification | Full checklist execution | All Tiers 1–2 complete + staging deployed | All workstreams delivered |
+| Workstream | Status | Delivered |
+|---|---|---|
+| **C1** — Backend domain route handlers | **COMPLETE** | Leads, projects, estimating handlers with withAuth + parseBody + withTelemetry |
+| **C3** — Telemetry instrumentation | **COMPLETE (code)** | proxy.request.*, auth.bearer.*, auth.obo.*, circuit breaker contracts, health endpoint, withTelemetry handler lifecycle |
+| **E1** — Contract test infrastructure | **COMPLETE (Tasks 1–7)** | Zod schemas (11 domains), MSW handlers, adapter contract tests, response envelope contract tests, smoke test scaffold (env-gated) |
+| **E2** — Staging readiness verification | **GATED ON STAGING** | Checklist written; execution requires deployed staging environment |
 
 #### Tier 3 — Blocked on External Approval
 
@@ -68,23 +67,23 @@ Phase 1 is ready for **targeted implementation** on workstreams with no upstream
 | IT Graph permission grant (`Group.ReadWrite.All`) | IT Department | Provisioning saga live testing | Code-complete; gated behind `GRAPH_GROUP_PERMISSION_CONFIRMED` env var |
 | IT per-site access grants (`Sites.Selected`) | IT Department | SharePoint data access for provisioned sites | Process documented; manual grants via `tools/grant-site-access.sh` |
 
-#### Broad Execution Entry Condition
+#### Staging Deployment Entry Condition
 
-Phase 1 is ready for **broad execution** when ALL of the following are true:
+All code workstreams (B1, C1, C2, C3, D1, E1 Tasks 1–7) are **complete**. Phase 1 is ready for **staging deployment and E2 checklist execution** when ALL of the following are true:
 
-1. **Tier 1 complete:** B1 proxy adapters delivered (11/11 complete); C2 auth middleware operational; D1 standalone types defined
-2. **SharePoint schema approved:** PO has signed off on P1-A3 schema package, unblocking C1 route implementation
-3. **C1 routes in progress:** At least one domain (leads) has a working backend route handler
-4. **Staging environment available:** Function app deployed, auth app registration configured, required env vars set
+1. **Staging function app deployed:** Azure Functions instance responding at a stable URL
+2. **Auth app registration configured:** `AZURE_TENANT_ID`, `AZURE_CLIENT_ID` set; JWT validation functional
+3. **Required environment variables set:** `HBC_ADAPTER_MODE=proxy`, storage connection strings, Redis (if applicable)
+4. **SharePoint schema approved:** PO has signed off on P1-A3 schema package (external dependency)
+5. **IT permissions granted:** Graph `Group.ReadWrite.All` and per-site `Sites.Selected` access
 
-Until these conditions are met, implementation should focus on Tier 1 work items.
+#### Recommended Next Steps
 
-#### Recommended Execution Sequence
-
-1. **Now:** Tier 1 work — B1 proxy adapters complete; build auth middleware (C2), define write safety types (D1)
-2. **After Tier 1 + schema approval:** C1 domain route handlers (leads first, then projects, estimating)
-3. **After C1 + C2 delivered:** E1 contract tests, C3 telemetry instrumentation
-4. **After all workstreams + staging:** E2 staging readiness checklist execution and sign-off
+1. **Now:** Deploy function app to staging environment; configure auth registration and env vars
+2. **After staging available:** Execute E2 staging readiness checklist (Sections 1–12)
+3. **After E2 pass:** Run E1 smoke tests (`test:contract-smoke` with `SMOKE_TEST_BASE_URL` + `AUTH_TOKEN`)
+4. **After smoke pass:** Telemetry baseline verification via KQL queries in Application Insights
+5. **After all gates pass:** E2 sign-off by QA Lead, Platform Lead, Architecture Lead
 
 ---
 
