@@ -6,7 +6,7 @@
 
 ## Planning Status Summary
 
-Phase 2 planning is underway. P2-B0 (Lane Ownership and Coexistence Rules), P2-A1 (Personal Work Hub Operating Model Register), and P2-A2 (Ranking, Lane, and Time-Horizon Policy) are locked governance deliverables, establishing lane-ownership, operating-model, and ranking foundations that all downstream deliverables must conform to. Remaining deliverables are in planning queue, sequenced per Phase 2 §19 execution priorities.
+Phase 2 planning is underway. Workstream A is complete — P2-A1 (Operating Model Register), P2-A2 (Ranking Policy), and P2-A3 (Explainability and Visibility Rules) are locked alongside P2-B0 (Lane Ownership). These establish the operating-model, ranking, explainability, and lane-ownership foundations that all downstream deliverables must conform to. Remaining deliverables are in planning queue, sequenced per Phase 2 §19 execution priorities.
 
 ---
 
@@ -30,7 +30,7 @@ Phase 2 planning is underway. P2-B0 (Lane Ownership and Coexistence Rules), P2-A
 |---|---|---|
 | P2-A1 | [Personal Work Hub Operating Model Register](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) | Governance Policy |
 | P2-A2 | [Ranking, Lane, and Time-Horizon Policy](P2-A2-Ranking-Lane-and-Time-Horizon-Policy.md) | Governance Policy |
-| P2-A3 | Work-Item Explainability and Visibility Rules | Not Started |
+| P2-A3 | [Work-Item Explainability and Visibility Rules](P2-A3-Work-Item-Explainability-and-Visibility-Rules.md) | Governance Policy |
 
 ### Workstream B — PWA Shell, Landing Transition, and Lane Ownership
 
