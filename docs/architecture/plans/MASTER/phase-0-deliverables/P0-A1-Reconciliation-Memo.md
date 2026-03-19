@@ -36,22 +36,22 @@ When sources disagree about what the repository currently contains, treat `curre
 
 - **Version:** 1.0
 - **Status:** Canonical Current-State
-- **Last Updated:** 2026-03-16
-- **Coverage:** Complete structural inventory of 50 workspace members across all categories and document classifications
+- **Last Updated:** 2026-03-15
+- **Coverage:** Complete structural inventory of 57 workspace members across all categories and document classifications
 
 ### 3.2 Workspace inventory summary
 
 | Category | Type | Count | Examples |
 |----------|------|-------|----------|
-| A | Core platform packages | 8 | `@hbc/ui-kit`, `@hbc/adaptive-auth`, `@hbc/types-contracts` |
-| B | Shared infrastructure | 2 | `@hbc/runtime-env-adapter`, `@hbc/msalClient` |
+| A | Core platform packages | 8 | `@hbc/ui-kit`, `@hbc/auth`, `@hbc/app-shell` |
+| B | Shared infrastructure | 2 | `@hbc/spfx`, `@hb-intel/eslint-plugin-hbc` |
 | C | Shared-feature primitives | 20 | SF01–SF29 (Acknowledgment, Step-Wizard, Versioned-Record, Field-Annotations, Workflow-Handoff, etc.) |
 | D | Feature packages | 11 | Admin, Estimating, Business-Development, Project-Hub, Accounting, Leadership, etc. |
 | E | Applications | 14 | 11 SPFx webparts + 3 standalone PWA applications |
 | F | Backend | 1 | Azure Functions runtime |
 | G | Build tooling | 1 | Monorepo governance and build tools |
 
-**Total:** 50 workspace members across 7 categories.
+**Total:** 57 workspace members across 7 categories.
 
 ### 3.3 Documentation and decision inventory
 
@@ -168,7 +168,7 @@ M0.1 is **satisfied**: all baseline conditions are met (hierarchy agreed, diverg
 
 ## 7. Governing Documents Referenced
 
-This memo is built from the following authoritative sources, all dated or updated 2026-03-16 or later:
+This memo is built from the following authoritative sources, all dated or updated 2026-03-15 or later:
 
 - `docs/architecture/blueprint/current-state-map.md` (v1.0, 2026-03-16)
 - `docs/architecture/plans/MASTER/00_HB-Intel_Master-Development-Summary-Plan.md`

@@ -24,13 +24,16 @@ import {
 } from './adapters/mock/index.js';
 import { AdapterNotImplementedError } from './errors/index.js';
 import { ProxyHttpClient } from './adapters/proxy/ProxyHttpClient.js';
+import { ProxyLeadRepository } from './adapters/proxy/ProxyLeadRepository.js';
 import { ProxyScheduleRepository } from './adapters/proxy/ProxyScheduleRepository.js';
 import { ProxyBuyoutRepository } from './adapters/proxy/ProxyBuyoutRepository.js';
+import { ProxyEstimatingRepository } from './adapters/proxy/ProxyEstimatingRepository.js';
 import { ProxyComplianceRepository } from './adapters/proxy/ProxyComplianceRepository.js';
 import { ProxyContractRepository } from './adapters/proxy/ProxyContractRepository.js';
 import { ProxyRiskRepository } from './adapters/proxy/ProxyRiskRepository.js';
 import { ProxyScorecardRepository } from './adapters/proxy/ProxyScorecardRepository.js';
 import { ProxyPmpRepository } from './adapters/proxy/ProxyPmpRepository.js';
+import { ProxyProjectRepository } from './adapters/proxy/ProxyProjectRepository.js';
 import type { ProxyConfig } from './adapters/proxy/types.js';
 
 /** Lazy singleton proxy client — initialized on first proxy-mode factory call. */
@@ -78,8 +81,10 @@ export function resolveAdapterMode(): AdapterMode {
  * Mode-aware factory: returns the correct adapter implementation
  * based on the runtime environment (SPFx → sharepoint, PWA → proxy, dev → mock).
  *
- * Non-mock adapters will throw until their concrete implementations are added
- * in later phases (Phase 4 for proxy, Phase 5 for sharepoint, Phase 7 for api).
+ * Proxy mode (B1): 10 of 11 domain repos implemented (Lead, Schedule, Buyout,
+ * Estimating, Compliance, Contract, Risk, Scorecard, PMP, Project).
+ * Auth proxy remains blocked on A9 (route paths unresolved).
+ * SharePoint and API modes will be added in later phases.
  */
 
 export function createLeadRepository(mode?: AdapterMode): ILeadRepository {
@@ -87,8 +92,9 @@ export function createLeadRepository(mode?: AdapterMode): ILeadRepository {
   switch (resolved) {
     case 'mock':
       return new MockLeadRepository();
-    case 'sharepoint':
     case 'proxy':
+      return new ProxyLeadRepository(getProxyClient());
+    case 'sharepoint':
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'LeadRepository');
   }
@@ -125,8 +131,9 @@ export function createEstimatingRepository(mode?: AdapterMode): IEstimatingRepos
   switch (resolved) {
     case 'mock':
       return new MockEstimatingRepository();
-    case 'sharepoint':
     case 'proxy':
+      return new ProxyEstimatingRepository(getProxyClient());
+    case 'sharepoint':
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'EstimatingRepository');
   }
@@ -202,8 +209,9 @@ export function createProjectRepository(mode?: AdapterMode): IProjectRepository 
   switch (resolved) {
     case 'mock':
       return new MockProjectRepository();
-    case 'sharepoint':
     case 'proxy':
+      return new ProxyProjectRepository(getProxyClient());
+    case 'sharepoint':
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'ProjectRepository');
   }

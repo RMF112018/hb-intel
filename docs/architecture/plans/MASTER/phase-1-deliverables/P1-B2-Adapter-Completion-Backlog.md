@@ -44,9 +44,9 @@ B1 targets all 11 domain repositories for implementation against mocked fetch in
 
 | Domain | Port Interface | Method Families | Total | Phase Target | Status | B1 Task | Route Status |
 |---|---|---|---|---|---|---|---|
-| **Lead** | `ILeadRepository` | CRUD (5), Search (1) | 6 | Phase 1 | `IMPL_READY` | Task 3 | C1 locked |
-| **Project** | `IProjectRepository` | CRUD (5), Aggregate (1) | 6 | Phase 1 | `IMPL_READY` | Task 4 | C1 locked (A8 aggregate locked: `/api/projects/summary`) |
-| **Estimating** | `IEstimatingRepository` | Tracker CRUD (5), Kickoff (2) | 7 | Phase 1 | `IMPL_READY` | Task 5 | C1 locked (D2 sub-resources locked: `/api/estimating/trackers/`, `/api/estimating/kickoffs/`) |
+| **Lead** | `ILeadRepository` | CRUD (5), Search (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 3 | C1 locked |
+| **Project** | `IProjectRepository` | CRUD (5), Aggregate (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 4 | C1 locked (A8 aggregate locked: `/api/projects/summary`) |
+| **Estimating** | `IEstimatingRepository` | Tracker CRUD (5), Kickoff (2) | 7 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 5 | C1 locked (D2 sub-resources locked: `/api/estimating/trackers/`, `/api/estimating/kickoffs/`) |
 | **Schedule** | `IScheduleRepository` | Activity CRUD (5), Metrics (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 5 | D1, D6 LOCKED* |
 | **Buyout** | `IBuyoutRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 5 | D1, D6 LOCKED* |
 | **Compliance** | `IComplianceRepository` | Entry CRUD (5), Summary (1) | 6 | Phase 1 | `CODE_COMPLETE_MOCK` | Task 6 | D1, D6 LOCKED* |
@@ -245,17 +245,17 @@ This table is the live tracking surface for adapter implementation progress. Upd
 
 | Domain | Owner | Current Gate | Blocker | Evidence | Next Action | Last Updated |
 |---|---|---|---|---|---|---|
-| Lead | B / Data Access | `IMPL_READY` | None | — | Begin B1 Task 3 | 2026-03-19 |
-| Project | B / Data Access | `IMPL_READY` | Production activation: awaits C1 route delivery | — | Begin B1 Task 4 | 2026-03-19 |
-| Estimating | B / Data Access | `IMPL_READY` | Production activation: awaits C1 route delivery | — | Begin B1 Task 5 (Estimating portion) | 2026-03-19 |
-| Schedule | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Buyout | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Compliance | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Contract | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Risk | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Scorecard | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| PMP | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 51 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
-| Auth | B / Data Access + C2 / Auth | `IMPL_READY` | Production activation: A9 (no route catalog) | — | Begin B1 Task 7 (Auth portion) | 2026-03-19 |
+| Lead | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Project | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Estimating | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Schedule | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Buyout | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Compliance | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Contract | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Risk | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Scorecard | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| PMP | B / Data Access | `CODE_COMPLETE_MOCK` | Production activation: awaits C1 route delivery | 84 tests passing; factory wired | Await C1 route delivery for `CONTRACT_ALIGNED` | 2026-03-19 |
+| Auth | B / Data Access + C2 / Auth | `IMPL_READY` | Code: A9 (route paths unresolved); Production: A9 + C1/C2 delivery | — | Await C2 auth route definition before B1 Task 7 | 2026-03-19 |
 
 ### SharePoint and API Adapter Progress
 
@@ -381,7 +381,7 @@ E1 owns the Zod schema contract test suite and MSW-based test harness that valid
 | Adapter Type | Description | Current Status | Target Phase | `HBC_ADAPTER_MODE` Value |
 |---|---|---|---|---|
 | **mock** | In-memory seed data; fully functional | Complete | All phases | `'mock'` |
-| **proxy** | Calls Azure Functions via MSAL OBO | `IN_PROGRESS` — 7 of 11 repos `CODE_COMPLETE_MOCK`; 4 remaining (Lead, Project, Estimating, Auth) | Phase 1 | `'proxy'` |
+| **proxy** | Calls Azure Functions via MSAL OBO | `IN_PROGRESS` — 10 of 11 repos `CODE_COMPLETE_MOCK`; 1 remaining (Auth — blocked on A9) | Phase 1 | `'proxy'` |
 | **sharepoint** | Direct PnPjs calls (SPFx-only surface) | `STUB` | Future phase | `'sharepoint'` |
 | **api** | REST / Azure SQL direct calls | Reserved | Future phase | `'api'` |
 

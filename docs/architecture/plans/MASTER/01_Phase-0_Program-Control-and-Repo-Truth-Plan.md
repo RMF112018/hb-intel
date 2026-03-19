@@ -162,7 +162,7 @@ Phase 0 directly enables:
 
 Phase 0 is complete only when:
 - the team can clearly answer what is real today versus future-state only
-- every major package/app has a readiness status and owner
+- every major package/app has a readiness status
 - production restrictions are explicit, not implied
 - exceptions have an approval path
 - Phase 1 entry blockers are known and prioritized
@@ -184,14 +184,15 @@ Platform / Core Services Team
 - Delivery/program lead
 - Release/governance lead
 
-## 12. Decisions / Idea Curation Required
+## 12. Decisions Surfaced During Phase 0
 
-This phase should explicitly surface and curate the following:
-- What exact maturity labels will be used across the program?
-- What qualifies an app/package as “production-ready” versus “pilot-ready”?
-- Which demo-oriented artifacts remain in the repo and how are they clearly isolated?
-- How strict should exception handling be for teams that want to move faster than the platform baseline?
-- How much documentation synchronization is required to declare repo truth reconciled?
+This phase surfaced and resolved the following decision items. The authoritative record with full resolution details is [P0-E2 — Open Decisions and Idea-Curation Register](./phase-0-deliverables/P0-E2-Open-Decisions-Register.md).
+
+- **OD-001 — Maturity label adoption:** RESOLVED — six-label vocabulary adopted (P0-B1)
+- **OD-002 — Production-ready vs pilot-ready qualification:** RESOLVED — rubric defined and approved (2026-03-16)
+- **OD-003 — Demo artifact isolation strategy:** RESOLVED — dev-harness and data-seeding excluded from production path (2026-03-16)
+- **OD-004 — Exception-handling strictness threshold:** DEFERRED to Phase 1 — procedural framework (G-07) in place; threshold refinement deferred to Phase 1 governance calibration
+- **OD-005 — Documentation sync completion criteria:** RESOLVED — source hierarchy agreed, all divergences triaged (2026-03-16)
 
 ## 13. Risks if Phase 0 is Skipped or Soft-Executed
 
@@ -201,9 +202,9 @@ This phase should explicitly surface and curate the following:
 - downstream rework and sequencing errors
 - inability to hold teams accountable to one truth set
 
-## 14. Recommended First Actions
+## 14. Mobilization Actions Completed
 
-1. Run a controlled architecture/program review workshop.
-2. Build the readiness matrix first; it is the most valuable control artifact.
-3. Convert unresolved issues into a decision register, not hallway assumptions.
-4. Close Phase 0 quickly but rigorously; do not let it become endless discovery.
+1. Controlled architecture/program review workshop conducted.
+2. Readiness matrix built as the primary control artifact (P0-B1).
+3. Unresolved issues converted into a formal decision register (P0-E2).
+4. Phase 0 closed rigorously per acceptance gates (§10).

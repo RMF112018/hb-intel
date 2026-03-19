@@ -36,7 +36,7 @@
 | `docs/README.md` | **Canonical Current-State** | Infrastructure/exempt — no Tier 1 banner |
 | `docs/architecture/blueprint/HB-Intel-Blueprint-V4.md` | **Canonical Normative Plan** | Tier 1 banner applied |
 | `docs/architecture/plans/hb-intel-foundation-plan.md` | **Historical Foundational** | Tier 1 banner applied |
-| `docs/architecture/adr/` (all files) | **Permanent Decision Rationale** | Exempt from inline banner; 111 active records indexed; 6 archived in `adr/archived/`; conflicts resolved PH7.11 |
+| `docs/architecture/adr/` (all files) | **Permanent Decision Rationale** | Exempt from inline banner; 114 active records indexed; 6 archived in `adr/archived/`; conflicts resolved PH7.11 |
 | SF01–SF03 plans (completed shared-feature work: bic-next-move, complexity, sharepoint-docs) | **Historical Foundational** | Tier 2 — matrix classification only |
 | SF04 shared-feature plans (10 files: `SF04-Acknowledgment.md` through `SF04-T09-Deployment.md`) | **Historical Foundational** | Tier 2 — matrix classification only; completed 2026-03-09 |
 | `docs/architecture/adr/ADR-0092-acknowledgment-platform-primitive.md` | **Permanent Decision Rationale** | SF04 acknowledgment platform primitive; 10 locked decisions |
@@ -538,8 +538,8 @@ ADR-0116 is the active UI doctrine. `@hbc/ui-kit` remains the owner of reusable 
 | Standalone applications | 3 |
 | Backend services | 1 |
 | Build tooling packages | 1 |
-| **Total workspace members** | **56** |
-| Architecture Decision Records | 113 active + 6 archived | <!-- Updated 2026-03-15: ADR-0114 authored to resolve score-benchmark ↔ post-bid-autopsy circular dependency; ADR-0106 authored for SF17 admin-intelligence; ADR-0107 authored for SF18 estimating adapter-over-primitive; ADR-0108 authored for SF19 BD score benchmark adapter boundary; ADR-0109 authored for SF20 BD heritage adapter-over-primitive boundary; ADR-0110 authored for SF21 project health pulse multi-dimension indicator; ADR-0111 authored for health-indicator companion primitive governance; ADR-0112 authored for score-benchmark companion primitive governance; ADR-0113 authored for strategic-intelligence companion primitive governance; ADR-0091–0097 added since PH7.11; ADR-0098 reserved SF09; ADR-0099 reserved SF10; ADR-0100 reserved SF11; ADR-0101 authored SF12; ADR-0102 authored SF13; ADR-0103 authored SF14; ADR-0104 authored SF15; ADR-0105 reserved SF16 -->
+| **Total workspace members** | **57** |
+| Architecture Decision Records | 114 active + 6 archived | <!-- Updated 2026-03-15: ADR-0114 authored to resolve score-benchmark ↔ post-bid-autopsy circular dependency; ADR-0106 authored for SF17 admin-intelligence; ADR-0107 authored for SF18 estimating adapter-over-primitive; ADR-0108 authored for SF19 BD score benchmark adapter boundary; ADR-0109 authored for SF20 BD heritage adapter-over-primitive boundary; ADR-0110 authored for SF21 project health pulse multi-dimension indicator; ADR-0111 authored for health-indicator companion primitive governance; ADR-0112 authored for score-benchmark companion primitive governance; ADR-0113 authored for strategic-intelligence companion primitive governance; ADR-0091–0097 added since PH7.11; ADR-0098 reserved SF09; ADR-0099 reserved SF10; ADR-0100 reserved SF11; ADR-0101 authored SF12; ADR-0102 authored SF13; ADR-0103 authored SF14; ADR-0104 authored SF15; ADR-0105 reserved SF16 -->
 | TSConfig path aliases | 64 |
 | Vite dev server ports | 14 (3000, 4000–4012) |
 

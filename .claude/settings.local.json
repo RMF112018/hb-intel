@@ -129,7 +129,8 @@
       "Bash(against repo truth\".:*)",
       "Bash(implementation guidance\" to match B1 scope \\(guidance only, no main.tsx:*)",
       "Bash(failed\" messages — no longer accurate since extractErrorMessage\\(\\) reads:*)",
-      "Bash(find /Users/bobbyfetting/hb-intel/backend/functions/src -type f \\\\\\(-name *.ts -o -name *.json \\\\\\))"
+      "Bash(find /Users/bobbyfetting/hb-intel/backend/functions/src -type f \\\\\\(-name *.ts -o -name *.json \\\\\\))",
+      "Bash(-print)"
     ]
   },
   "enabledPlugins": {

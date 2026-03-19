@@ -17,10 +17,11 @@ This log records all identified divergences between architectural planning docum
 | **(a) Controlled evolution** | Intentional, documented evolution beyond Blueprint V4 | Record and confirm; no correction needed |
 | **(b) Not-yet-implemented** | Planned in docs but not built yet | Track in Phase 1 entry checklist or decision register |
 | **(c) Superseded** | Replaced by a newer decision or approach | Mark stale documents; consider errata or archive |
+| **(d) Standing control** | Ongoing awareness/communication item — not a phase-placement decision | Maintain labeling; review periodically |
 
 ---
 
-## 3. Active Divergences
+## 3. Phase 0 Divergence Inventory
 
 ### D-001: Shared-Feature Primitive layer emergence
 
@@ -110,14 +111,14 @@ This log records all identified divergences between architectural planning docum
 
 ---
 
-### D-009: Several feature packages and SPFx apps at v0.0.0 (scaffold-only)
+### D-009: Seven scaffold-only feature packages and corresponding SPFx apps
 
 | Field | Value |
 |-------|-------|
 | **Area** | Implementation — Package Maturity |
-| **Description** | Six feature packages (`features-accounting`, `features-leadership`, `features-safety`, `features-quality-control-warranty`, `features-risk-management`, `features-operational-excellence`, `features-human-resources`) and their corresponding SPFx apps are at v0.0.0. Their presence in the inventory might be interpreted as "functional" by future contributors without checking version/maturity. |
-| **Classification** | **Standing classification/control item** |
-| **Resolution** | Classification complete; standing awareness item. Explicitly classified as `scaffold-only` in P0-B1 Production Readiness Matrix. Scaffold-only README notices added to all 7 feature packages (2026-03-16). This is not a phase-placement or strategy decision — it is a standing readiness and communication control item. Maintain explicit `scaffold-only` labeling in readiness and contributor-facing materials. No phase assignment applies to D-009. |
+| **Description** | Seven feature packages at v0.0.0 (`features-accounting`, `features-leadership`, `features-safety`, `features-quality-control-warranty`, `features-risk-management`, `features-operational-excellence`, `features-human-resources`) and their corresponding SPFx apps (at v0.0.1) are scaffold-only. Their presence in the inventory might be interpreted as "functional" by future contributors without checking version/maturity. **Leadership distinction:** `features-leadership` and `spfx-leadership` are retained as implementation containers for role-aware visibility surfaces within the Personal Work Hub and Project Hub — Leadership is not a standalone target application (Target-Architecture-Blueprint §6.2; Dev-Roadmap reframing note 2026-03-15). |
+| **Classification** | **(d) Standing control** |
+| **Resolution** | Classification complete; standing awareness item. All 7 feature packages explicitly classified as `scaffold-only` in P0-B1 Production Readiness Matrix. Scaffold-only README notices added to all 7 feature packages (2026-03-16). Leadership packages carry additional architectural context: they serve as implementation containers for role-aware surfaces, not as a standalone application signal. This is not a phase-placement or strategy decision — it is a standing readiness and communication control item. Maintain explicit `scaffold-only` labeling in readiness and contributor-facing materials. No phase assignment applies to D-009. |
 
 ---
 
@@ -147,20 +148,23 @@ The following divergences were identified and resolved during Phase 7 or prior, 
 
 ## 5. Summary Counts
 
-| Classification | Count | Notes |
+| Classification | Count | Items |
 |----------------|-------|-------|
-| **(a) Controlled evolution** — no action | 3 | D-001, D-002, D-003 — known and intentional divergences; documented |
-| **Standing control item** | 1 | D-009 — scaffold-only classification and communication control |
-| **Phase 0 resolved** | **6** | D-004, D-005, D-006, D-007, D-008, D-010 |
-| **Pre-Phase-0 resolved** | **4** | Historical resolution record from Phase 7 |
-| **Total divergences tracked** | **10** | 6 resolved + 3 controlled-evolution + 1 standing-control |
+| **(a) Controlled evolution** | 3 | D-001, D-002, D-003 |
+| **(b) Not-yet-implemented** — resolved | 2 | D-006, D-007 |
+| **(c) Superseded** — resolved | 3 | D-004, D-005, D-008 |
+| **(c) Superseded / resolution applied** | 1 | D-010 |
+| **(d) Standing control** | 1 | D-009 |
+| **Phase 0 log items** | **10** | D-001 through D-010 |
+| **Pre-Phase-0 historical items** | **4** | ADR catalog reconciliation (§4) |
+| **Total tracked** | **14** | All items in this log |
 
 ---
 
 ## 6. Next Steps
 
 - **All divergences resolved or controlled.** D-005 (Wave 0 plan formal approval) resolved 2026-03-16 per P0-E1. D-006, D-007 phase assignments approved and closed. D-004, D-008, D-010 resolved during Phase 0.
-- **Standing control:** D-009 (scaffold-only labeling) maintained as ongoing classification/communication item.
+- **Standing control (d):** D-009 (scaffold-only labeling) maintained as ongoing classification/communication item.
 - **No remaining Phase 1 entry blockers** from this divergence log.
 
 ---

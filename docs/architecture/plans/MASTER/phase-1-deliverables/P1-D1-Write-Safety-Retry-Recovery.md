@@ -50,8 +50,8 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 
 - `ProxyHttpClient` exists with Bearer auth, 30s timeout, X-Request-Id generation, error normalization via `normalizeHttpError()`, and D1 hook points (`onBeforeRequest`, `onAfterResponse`) — hooks are exposed but not yet activated (**CURRENT**)
 - `BaseProxyProjectRepository` exists with `fetchCollection`, `fetchById`, `fetchCreate`, `fetchUpdate`, `fetchDelete`, `fetchAggregate`, `fetchSubResource` methods (**CURRENT**)
-- 7 of 11 proxy repos implemented and factory-wired (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP); 4 domains (Lead, Project, Estimating, Auth) still throw `AdapterNotImplementedError` (**CURRENT**)
-- `packages/data-access` has vitest configured with `test` script; 51 tests passing across `ProxyHttpClient.test.ts`, `envelope.test.ts`, `repositories.test.ts` (**CURRENT**)
+- 10 of 11 proxy repos implemented and factory-wired (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP); Auth still throws `AdapterNotImplementedError` (blocked on A9 — route paths unresolved) (**CURRENT**)
+- `packages/data-access` has vitest configured with `test` script; 84 tests passing across `ProxyHttpClient.test.ts`, `envelope.test.ts`, `repositories.test.ts`, `ProxyLeadRepository.test.ts`, `ProxyProjectRepository.test.ts`, `ProxyEstimatingRepository.test.ts` (**CURRENT**)
 - `backend/functions` has vitest test infrastructure (unit, smoke, coverage) (**CURRENT**)
 - Backend table storage service exposes domain-specific provisioning methods; no generic idempotency table or idempotency guard exists (**CURRENT**)
 - No retry logic exists anywhere in `packages/data-access` (**CURRENT**)
@@ -100,14 +100,14 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 
 | D1 depends on | For | Status |
 |---|---|---|
-| B1 (Proxy Adapter) | `ProxyHttpClient` class and proxy repository implementations | B1 transport foundation delivered; `ProxyHttpClient` exists; 7 of 11 proxy repos implemented (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Remaining: Lead, Project, Estimating, Auth. |
+| B1 (Proxy Adapter) | `ProxyHttpClient` class and proxy repository implementations | B1 transport foundation delivered; `ProxyHttpClient` exists; 10 of 11 proxy repos implemented (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Remaining: Auth (blocked on A9). |
 | C1 (Backend Catalog) | Route shapes, error envelope, HTTP methods | C1 frozen for implemented routes |
 | B2 (Completion Backlog) | Gate criteria and production activation requirements | B2 active |
 | C3 (Observability Spec) | Retry and error telemetry contract (`proxy.request.error`, `proxy.request.retry`); circuit-breaker telemetry is C3-owned, not D1 Phase 1 | C3 aligned for retry/error; circuit-breaker deferred |
 
 ### Verification Command Guidance
 
-**`packages/data-access` — vitest configured and 51 tests passing (CURRENT):**
+**`packages/data-access` — vitest configured and 84 tests passing (CURRENT):**
 
 Test infrastructure is already in place. D1 adds new test files following the existing pattern:
 - Run tests: `pnpm --filter @hbc/data-access test`

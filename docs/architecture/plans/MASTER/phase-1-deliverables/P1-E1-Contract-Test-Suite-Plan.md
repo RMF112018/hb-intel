@@ -103,7 +103,7 @@ The following are explicitly out of scope for E1 implementation until their prec
 
 - `@hbc/models` has no Zod dependency, no test script — only build, check-types, lint (**CURRENT**)
 - `@hbc/models/src/contracts/` contains Contracts business domain models (`IContractInfo`, `ICommitmentApproval`, `ContractStatus`) — NOT Zod API schemas (**CURRENT**)
-- `@hbc/data-access` has vitest configured (`test` script), 51 tests passing; 7 of 11 proxy adapters implemented (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP); remaining 4 (Lead, Project, Estimating, Auth) still throw `AdapterNotImplementedError` (**CURRENT**)
+- `@hbc/data-access` has vitest configured (`test` script), 84 tests passing; 10 of 11 proxy adapters implemented (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP); Auth still throws `AdapterNotImplementedError` (blocked on A9) (**CURRENT**)
 - `backend/functions` has vitest test infrastructure (unit, smoke, coverage) but no domain route handlers for Lead/Project/Estimating (**CURRENT**)
 - Port interfaces for all 11 domains exist in `@hbc/data-access/src/ports/` (**CURRENT**)
 
@@ -112,11 +112,11 @@ The following are explicitly out of scope for E1 implementation until their prec
 | Package | Test Script | Vitest Config | Zod | Proxy State | Notes |
 |---|---|---|---|---|---|
 | `@hbc/models` | **No** | **No** | **No** | N/A | devDependency: `@types/react` only; no `api-schemas/` directory exists |
-| `@hbc/data-access` | **Yes** (`test`) | **Yes** — `vitest.config.ts` | N/A | **Partial** — `ProxyHttpClient`, envelope parsers, error normalization, path builders + 7 project-scoped proxy repos (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP) implemented and factory-wired; 51 tests passing. Remaining: Lead, Project, Estimating, Auth throw `AdapterNotImplementedError` | v0.1.2 |
+| `@hbc/data-access` | **Yes** (`test`) | **Yes** — `vitest.config.ts` | N/A | **Partial** — `ProxyHttpClient`, envelope parsers, error normalization, path builders + 10 proxy repos (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP) implemented and factory-wired; 84 tests passing. Remaining: Auth throws `AdapterNotImplementedError` (blocked on A9) | v0.1.2 |
 | `backend/functions` | **Yes** (`test`, `test:smoke`, `test:coverage`) | **Yes** — split `unit`/`smoke` projects with explicit include lists | N/A | N/A | Does NOT depend on `@hbc/data-access` today (**CURRENT**). Type-only `devDependency` for test port interfaces is **approved** — see [Dependency Boundary Decision](#dependency-boundary-decision). No runtime coupling permitted. Coverage targets provisioning only; no domain route handlers |
 | Root workspace | `pnpm test` (filtered) | **Yes** — 6 entries: auth, shell, sharepoint-docs, bic-next-move, complexity, pwa | N/A | N/A | `@hbc/models` and `@hbc/data-access` are NOT in the workspace test list |
 
-**Adapter contract test status (updated 2026-03-18):** B1 transport foundation and 7 project-scoped proxy repos are implemented with 51 tests. Adapter contract tests for these 7 domains can proceed once C1 route handlers exist. Remaining 4 domains (Lead, Project, Estimating, Auth) still throw `AdapterNotImplementedError` in proxy mode — contract tests for those require B1 completion for those repos plus C1 route handlers.
+**Adapter contract test status (updated 2026-03-19):** B1 transport foundation and 10 proxy repos are implemented with 84 tests. Adapter contract tests for these 10 domains can proceed once C1 route handlers exist. Auth still throws `AdapterNotImplementedError` in proxy mode (blocked on A9) — contract tests for Auth require B1 Task 7 completion plus C1/C2 route delivery.
 
 ### E1 Deliverable Breakdown by Surface
 

@@ -10,9 +10,9 @@
 
 ### Repo Truth Update (2026-03-19)
 
-Tasks 0, 1, 2 are **COMPLETE** and verified in code. 7 of 11 domain repos are **COMPLETE** (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Test infrastructure exists: vitest configured with 51 tests across `ProxyHttpClient.test.ts`, `envelope.test.ts`, and `repositories.test.ts`. `ProxyHttpClient`, `BaseProxyProjectRepository`, envelope parsers, and route path builders are implemented. Factory wires all 7 project-scoped repos to proxy mode.
+Tasks 0–5 are **COMPLETE** and verified in code. 10 of 11 domain repos are **COMPLETE** (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Test infrastructure exists: vitest configured with 84 tests across `ProxyHttpClient.test.ts`, `envelope.test.ts`, `repositories.test.ts`, `ProxyLeadRepository.test.ts`, `ProxyProjectRepository.test.ts`, and `ProxyEstimatingRepository.test.ts`. `ProxyHttpClient`, `BaseProxyProjectRepository`, envelope parsers, and route path builders are implemented. Factory wires all 10 completed repos to proxy mode.
 
-**Remaining work:** Tasks 3 (Lead), 4 (Project), 5 partial (Estimating), 7 partial (Auth), 8–10 (factory wiring completion + integration tests). Completed tasks are marked **[COMPLETE]** inline below.
+**Remaining work:** Task 7 (Auth — blocked on A9 route resolution), Tasks 8–10 (integration tests, full suite against live backend). Completed tasks are marked **[COMPLETE]** inline below.
 
 # Proxy Adapter Implementation Plan
 
@@ -134,10 +134,11 @@ These are explicitly out of B1 scope and owned by other workstreams.
 
 | Phase | Tasks | Status | Dependencies |
 |---|---|---|---|
-| **COMPLETE** | Tasks 0–2 (vitest setup, ProxyHttpClient, BaseProxyProjectRepository) | Done — 51 tests passing | — |
-| **Proceed now** | Tasks 3–4 (Lead, Project) | No external blockers | Foundational work independent of unresolved C1 decisions |
-| **COMPLETE (7 of 9)** | Tasks 5–7 (domain repos) | Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP implemented and factory-wired | Estimating (Task 5) and Auth (Task 7) remaining |
-| **Partial** | Tasks 8–10 (factory wiring, integration tests, full suite) | Factory wires 7 repos; 4 remaining | Dependent on Tasks 3–4, 5 (Estimating), 7 (Auth) completion |
+| **COMPLETE** | Tasks 0–2 (vitest setup, ProxyHttpClient, BaseProxyProjectRepository) | Done — 84 tests passing | — |
+| **COMPLETE** | Tasks 3–4 (Lead, Project) | Done — factory wired; 84 tests passing | — |
+| **COMPLETE (10 of 10 data domains)** | Tasks 5–6 (domain repos) | Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP implemented and factory-wired | — |
+| **Blocked** | Task 7 (Auth repo) | A9 unresolved — route paths not in C1/C2 catalog | Await C2 auth route definition |
+| **Pending** | Tasks 8–10 (integration tests, full suite against live backend) | 84 tests passing against mocked fetch | Dependent on Task 7 (Auth) and C1/C2 route delivery |
 | **Requires upstream resolution** | Production activation | Blocked | C1 route delivery, C2 auth middleware, MSAL registration, deployment env vars |
 
 ---

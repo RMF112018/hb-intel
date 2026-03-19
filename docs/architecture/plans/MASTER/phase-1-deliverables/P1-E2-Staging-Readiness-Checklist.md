@@ -58,7 +58,7 @@ All example payloads, ID types, field names, and response assertions in this che
 | Health endpoint | **None registered** — no `/api/health` function found in `index.ts` imports | `backend/functions/src/index.ts` |
 | Backend test infrastructure | Vitest with `unit` and `smoke` named projects; coverage targets provisioning only | `backend/functions/vitest.config.ts` |
 | Domain route handlers (leads, projects, estimating) | **None exist** — `backend/functions/src/functions/` contains only provisioning, proxy, notification, acknowledgment, signalr, and timer functions | `backend/functions/src/functions/` |
-| `@hbc/data-access` proxy adapters | `ProxyHttpClient` implemented (Bearer auth, 30s timeout, X-Request-Id, error normalization). 7 of 11 domain repos implemented and factory-wired (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP — 51 tests). 4 domains (Lead, Project, Estimating, Auth) still throw `AdapterNotImplementedError` | Verified against repo 2026-03-19 |
+| `@hbc/data-access` proxy adapters | `ProxyHttpClient` implemented (Bearer auth, 30s timeout, X-Request-Id, error normalization). 10 of 11 domain repos implemented and factory-wired (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP — 84 tests). Auth still throws `AdapterNotImplementedError` (blocked on A9) | Verified against repo 2026-03-19 |
 
 ### Planned but Blocked
 

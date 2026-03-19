@@ -2,8 +2,11 @@
  * Proxy adapters — Azure Functions proxy implementations for PWA (MSAL on-behalf-of).
  *
  * Foundation transport layer (B1): ProxyHttpClient, envelope parsers, error
- * normalization, and route builders. Individual domain repositories will be
- * added as B1 implementation progresses.
+ * normalization, and route builders.
+ *
+ * Domain repositories (B1 complete — 10 of 11): Lead, Schedule, Buyout,
+ * Estimating, Compliance, Contract, Risk, Scorecard, PMP, Project.
+ * Remaining: Auth (blocked on A9 — route paths unresolved).
  */
 
 export type { ProxyConfig } from './types.js';
@@ -23,10 +26,13 @@ export {
   buildResourcePath,
 } from './paths.js';
 export { BaseProxyProjectRepository } from './BaseProxyProjectRepository.js';
+export { ProxyLeadRepository } from './ProxyLeadRepository.js';
 export { ProxyScheduleRepository } from './ProxyScheduleRepository.js';
 export { ProxyBuyoutRepository } from './ProxyBuyoutRepository.js';
+export { ProxyEstimatingRepository } from './ProxyEstimatingRepository.js';
 export { ProxyComplianceRepository } from './ProxyComplianceRepository.js';
 export { ProxyContractRepository } from './ProxyContractRepository.js';
 export { ProxyRiskRepository } from './ProxyRiskRepository.js';
 export { ProxyScorecardRepository } from './ProxyScorecardRepository.js';
 export { ProxyPmpRepository } from './ProxyPmpRepository.js';
+export { ProxyProjectRepository } from './ProxyProjectRepository.js';

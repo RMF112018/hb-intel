@@ -51,7 +51,7 @@ The plan set translates the [target-state architecture](../../blueprint/HB-Intel
 MASTER/
 ├── README.md                        ← You are here — plan set index
 ├── 00_Master-Development-Summary    ← Governing summary (Active Reference)
-├── 01_Phase-0                       ← Phase plan (Planning Complete)
+├── 01_Phase-0                       ← Phase plan (Complete)
 ├── 02_Phase-1                       ← Phase plan (Planning Complete)
 ├── 03–08_Phases-2-through-7         ← Phase plans (Draft — forward planning)
 ├── phase-0-deliverables/            ← 7 artifacts + index README
@@ -75,7 +75,7 @@ MASTER/
 Execution complete (2026-03-16). Seven mandatory deliverables produced: reconciliation memo, divergence log, production readiness matrix, development guardrail sheet, environment and promotion matrix, Phase 1 entry checklist, and open decisions register. All five milestones (M0.1–M0.5) satisfied, all six Phase 1 entry blockers resolved, and all 17 completion gate checkboxes cleared (see P0-E1). These artifacts established the program truth baseline that Phase 1 planning built upon.
 
 **Phase 1 — Production Data Plane and Integration Backbone**
-Planning complete. Twenty-four deliverables produced across five workstreams. All design decisions are locked. Pre-Phase-1 contradiction closeout completed 2026-03-18 (26 contradictions resolved, go/no-go checklist 7/7 PASS). B1 transport foundation and 7 of 11 proxy repos are implemented and tested. See [P1-CLOSEOUT](phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) for the full register.
+Planning complete. Twenty-four deliverables produced across five workstreams. All design decisions are locked. Pre-Phase-1 contradiction closeout completed 2026-03-18 (26 contradictions resolved, go/no-go checklist 7/7 PASS). B1 transport foundation and 10 of 11 proxy repos are implemented and tested (Auth remaining — blocked on A9). See [P1-CLOSEOUT](phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) for the full register.
 
 **Phase 1 Implementation Baseline (2026-03-19):**
 

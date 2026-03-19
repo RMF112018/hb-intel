@@ -29,7 +29,7 @@ All transport-layer design decisions (D1–D6, A8, A9) are locked and propagated
 
 **Recommendation: Ready with conditions.**
 
-- **Begin now:** B1 (proxy adapters — 7 of 11 done), C2 (auth middleware), C3 (observability)
+- **Begin now:** B1 Auth repo (blocked on A9 — 10 of 11 done), C2 (auth middleware), C3 (observability)
 - **Blocked on B1 completion:** D1 (write safety wiring), E1 (contract tests), E2 (staging checklist)
 - **Blocked on external actions:** IT permission grants (#2 per-site, #3 Graph), PO schema approval (#5)
 - **Internal engineering tasks surfaced by final sweep:** #8 README fix (closed), #9 adapter-mode vocabulary remediation (closed — code delivered), #10 B3 Layer 2 startup guard (closed — code delivered)
@@ -136,7 +136,7 @@ A deliberate deep search across the full repo identified 3 issues not caught in 
 | 2 | Per-site grant process | Manual grants required for each new project site | IT + Architecture | Ops | **Process-documented** — `tools/grant-site-access.sh` + `IGraphService.grantSiteAccess()` automation hook. Full automation deferred to post-pilot. |
 | 3 | GraphService `Group.ReadWrite.All` | Step 6 Entra group creation gated until IT confirms permission | Backend + IT | Ops | **Code-complete** — gated behind `GRAPH_GROUP_PERMISSION_CONFIRMED` env var. Awaiting IT grant. |
 | 5 | SharePoint schema approval | Physical lists cannot be deployed to tenant | Product Owner | A3 | **Approval-ready** — [P1-A3-Schema-Approval-Package.md](P1-A3-Schema-Approval-Package.md) prepared for PO review. Adapter dev proceeds against mocks. |
-| 7 | B1 proxy adapter implementation | D1/E1/E2 blocked until complete | Engineering | B1 | **In progress** — 7 of 11 repos done (Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Remaining: Lead, Project, Estimating, Auth. |
+| 7 | B1 proxy adapter implementation | D1/E1/E2 blocked until complete | Engineering | B1 | **In progress** — 10 of 11 repos done (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP). Remaining: Auth only (blocked on A9 — route paths not in C1/C2 catalog). |
 | 8 | data-access README proxy status stale | Implementers may incorrectly assume proxy is greenfield | Engineering | B1 | **CLOSED** — corrected in this final sweep commit |
 | ~~9~~ | ~~Backend adapter-mode vocabulary drift~~ | ~~defaults to 'real' not canonical 'proxy'~~ | ~~Engineering~~ | ~~C2/B3~~ | **CLOSED** — `normalizeAdapterMode()` maps 'real'→'proxy'; default changed to 'proxy'; wave0 registry and README updated |
 | ~~10~~ | ~~B3 Layer 2 startup guard not created~~ | ~~defense-in-depth mock isolation incomplete~~ | ~~Engineering~~ | ~~B3~~ | **CLOSED** — `assertAdapterModeValid()` in `adapter-mode-guard.ts` wired into `createServiceFactory()`; rejects unknown modes and blocks mock-in-production |
