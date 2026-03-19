@@ -54,7 +54,7 @@ Define the complete HTTP service contract for HB Intel backend Azure Functions v
 | **Lead** | `TARGET` | `ILeadRepository` | CRUD (5) + Search (1) | C1 locked | — |
 | **Project** | `TARGET` | `IProjectRepository` | CRUD (5) + Portfolio Summary (1) | CRUD: C1 locked; Aggregate: A8 provisional | A8 |
 | **Estimating** | `TARGET` | `IEstimatingRepository` | Tracker CRUD (5) + Kickoff (2) | Base locked; sub-resource D2 open | D2 |
-| **Auth** | `NOT CATALOGED` | `IAuthRepository` | Current User (1), Roles (2), Permissions (1), Assignment (2) | A9 — no route definition | A9 |
+| **Auth** | `TARGET` | `IAuthRepository` | Current User (1), Roles (6), Templates (4), Job Title Mappings (4), Assignment (2) | Routes defined in P1-C2-a Task 21 (A9 resolved) | — |
 | **Schedule** | `TARGET (PROVISIONAL)` | `IScheduleRepository` | Activity CRUD (5) + Metrics (1) | Provisional | D1, D6 |
 | **Buyout** | `TARGET (PROVISIONAL)` | `IBuyoutRepository` | Entry CRUD (5) + Summary (1) | Provisional | D1, D6 |
 | **Compliance** | `TARGET (PROVISIONAL)` | `IComplianceRepository` | Entry CRUD (5) + Summary (1) | Provisional | D1, D6 |
@@ -76,7 +76,7 @@ This matrix ties each target domain to its contract owner, freeze status, blocki
 | **Lead** | C1 | Route paths frozen | — | B1 Task 3, E1 | `CONTRACT_ALIGNED` for routes; cross-cutting D3/D4/D5 still apply |
 | **Project** | C1 | CRUD frozen; aggregate A8 provisional | A8 | B1 Task 4, E1 | `CONTRACT_ALIGNED` for CRUD; aggregate blocked |
 | **Estimating** | C1 | Base frozen; sub-resource D2 open | D2 | B1 Task 5, E1 | `CONTRACT_ALIGNED` for base; kickoff blocked |
-| **Auth** | C2 | Not cataloged | A9 | B1 Task 7, E1 | Cannot reach `CONTRACT_ALIGNED` |
+| **Auth** | C2 | Routes defined (P1-C2-a Task 21; A9 resolved) | — | B1 Task 7 (complete), E1 | Route catalog available; backend handlers Phase 2 |
 | **Schedule** | C1 | Provisional | D1, D6 | B1 Task 5, E1 | Blocked until D1/D6 resolved |
 | **Buyout** | C1 | Provisional | D1, D6 | B1 Task 5, E1 | Blocked until D1/D6 resolved |
 | **Compliance** | C1 | Provisional | D1, D6 | B1 Task 6, E1 | Blocked until D1/D6 resolved |
@@ -228,27 +228,23 @@ Port interface: `IEstimatingRepository` — 7 methods (tracker CRUD + kickoff)
 
 **Note:** This domain does NOT use a flat `IEstimatingItem` entity. Previous C1 described generic CRUD+search for `IEstimatingItem`; repo truth has two sub-resources (trackers and kickoffs). D2 governs sub-resource routing.
 
-### Auth Domain — `NOT CATALOGED` (A9 unresolved)
+### Auth Domain — `TARGET` (A9 resolved — routes defined in P1-C2-a Task 21)
 
-Port interface: `IAuthRepository` — 6 methods across 4 capability groups. No backend route definitions exist yet. Auth does not follow a CRUD pattern. See B2 [Auth Domain: Special-Case Tracking] for full capability-group and dependency detail.
+Port interface: `IAuthRepository` — 16 methods across 5 capability groups. Route catalog defined in P1-C2-a Task 21 (20 system-level + 9 project-scoped routes). Auth does not follow a CRUD pattern. `ProxyAuthRepository` is fully implemented (19 tests, factory-wired).
 
-| Capability Group | Port Methods | Responsibility Layer | Assumed Route Shape (B1) | Status |
-|---|---|---|---|---|
-| Current User | `getCurrentUser` | Runtime token → user profile | `GET /api/auth/me` | A9 — no catalog entry |
-| Roles | `getRoles`, `getRoleById` | Auth subsystem — role definitions | `GET /api/auth/roles`, `GET /api/auth/roles/{id}` | A9 — no catalog entry |
-| Permissions | `getPermissionTemplates` | Auth subsystem — RBAC config | `GET /api/auth/permissions/templates` | A9 — no catalog entry |
-| Role Assignment | `assignRole`, `removeRole` | Auth subsystem — write operations | `POST/DELETE /api/auth/users/{userId}/roles/{roleId}` | A9 — no catalog entry |
+| Capability Group | Port Methods | Route Paths (P1-C2-a) | Status |
+|---|---|---|---|
+| Current User | `getCurrentUser` | `GET /api/auth/me` | Route defined; proxy adapter complete |
+| Role Definitions | `getRoles`, `getRoleById`, `createRole`, `updateRole`, `deleteRole` | `GET/POST /api/auth/roles`, `GET/PATCH/DELETE /api/auth/roles/{id}` | Routes defined; proxy adapter complete |
+| Role Assignment | `assignRole`, `removeRole` | `POST /api/auth/users/{userId}/roles`, `DELETE /api/auth/users/{userId}/roles/{roleId}` | Routes defined; proxy adapter complete |
+| Permission Templates | `getPermissionTemplates`, `createPermissionTemplate`, `updatePermissionTemplate`, `deletePermissionTemplate` | `GET/POST /api/auth/templates`, `PATCH/DELETE /api/auth/templates/{id}` | Routes defined; proxy adapter complete |
+| Job Title Mappings | `getJobTitleMappings`, `createJobTitleMapping`, `updateJobTitleMapping`, `deleteJobTitleMapping` | `GET/POST /api/auth/job-title-mappings`, `PATCH/DELETE /api/auth/job-title-mappings/{id}` | Routes defined; proxy adapter complete |
 
 **Responsibility-layer ownership:**
-- **C1 scope:** Route path definitions and response envelope shape for `/api/auth/*` endpoints. C1 must publish these paths before Auth can reach `CONTRACT_ALIGNED`.
-- **C2 scope:** Auth subsystem implementation — backend service that manages roles, permissions, and assignments; OBO token exchange for auth-specific calls; role storage and permission logic. C2 owns whether this is a dedicated microservice or part of the Azure Functions backend.
-- **Runtime / app-shell:** Token acquisition (MSAL in PWA, Bearer in backend) and user identity context. The `getCurrentUser` capability may resolve partly from token claims (available in the app shell) and partly from a backend profile endpoint. This boundary is a C2 design decision.
+- **C2 scope:** Auth subsystem implementation — backend service that manages roles, permissions, templates, job title mappings, and assignments; OBO token exchange for auth-specific calls; role storage and permission logic. C2 owns whether this is a dedicated microservice or part of the Azure Functions backend. Route catalog is locked in P1-C2-a Task 21.
+- **Runtime / app-shell:** Token acquisition (MSAL in PWA, Bearer in backend) and user identity context. `getCurrentUser` resolves from a backend profile endpoint that maps token claims + job title → `ICurrentUser` (discriminated union per P1-C2-a AD-2).
 
-**Freeze criteria for Auth `CONTRACT_ALIGNED`:**
-1. C1 or C2 publishes route definitions for all 4 capability groups (resolving A9)
-2. Response envelope shape is defined per route (consistent with C1 target standards)
-3. Auth-specific error codes are defined (e.g., role-not-found, assignment-denied)
-4. OBO flow for auth routes is confirmed as same-as-domain or distinct (C2 decision)
+**Backend handler status:** Route catalog defined and locked; backend handler implementation is a Phase 2 delivery. `ProxyAuthRepository` is production-ready pending backend route delivery.
 
 ### Remaining Domains — `TARGET (PROVISIONAL)` (D1, D6 pending)
 
@@ -334,7 +330,7 @@ These decisions were locked on 2026-03-18 per P1-E1. The delta between B1's orig
 | D4 — Pagination default | B1: 25 (`DEFAULT_PAGE_SIZE`) | **25** (max 100) | No delta — B1 assumption matched | C1 + B1 |
 | D5 — PATCH support | B1: PUT only | **PUT-only** in Phase 1; PATCH deferred to Phase 2 | No delta — B1 assumption matched | C1 |
 | D6 — Project-scoped paths | B1: nested `/api/projects/{id}/...` | **Nested** `/api/projects/{projectId}/{domain}` | No delta — B1 assumption matched | C1 |
-| A9 — Auth routes | No routes exist | External except `/api/auth/me` smoke utility | Auth domain route definitions are a C2 responsibility | C2 |
+| A9 — Auth routes | No routes existed | **RESOLVED** — 20 system-level + 9 project-scoped auth routes defined in P1-C2-a Task 21; `ProxyAuthRepository` implemented (16 methods, 19 tests) | C2 |
 
 ---
 

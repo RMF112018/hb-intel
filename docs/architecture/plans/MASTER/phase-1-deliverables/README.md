@@ -21,12 +21,12 @@ All design decisions are locked. Transport-shape conventions (response envelopes
 
 | Category | Status |
 |---|---|
-| **Planning** | Complete — transport conventions locked (D1–D6, A8); deliverable statuses range from Final to Active Reference per the index below; A9 (auth management routes) remains an open assumption |
-| **Implementation — B1 proxy adapters** | In progress — transport foundation + 10 of 11 repos implemented and tested; Auth remaining (blocked on A9 — route paths unresolved) |
+| **Planning** | Complete — transport conventions locked (D1–D6, A8); deliverable statuses range from Final to Active Reference per the index below; A9 (auth management routes) resolved via P1-C2-a Task 21 |
+| **Implementation — B1 proxy adapters** | **Complete** — transport foundation + 11 of 11 repos implemented and tested (109+ tests); all factory-wired for proxy mode |
 | **Implementation — C1 backend routes** | Not started — zero domain data routes exist; provisioning/notification routes are operational |
 | **Implementation — C2 auth middleware** | Not started — `validateToken()` exists; `withAuth()`, Zod validation, response helpers not yet built |
 | **Implementation — C3 observability** | Foundation only — `createLogger()` verified; telemetry event families not instrumented |
-| **Implementation — D1 write safety** | Partially unblocked — `ProxyHttpClient` exists; standalone types can proceed; full wiring awaits B1 |
+| **Implementation — D1 write safety** | Unblocked — `ProxyHttpClient` exists with `withRetry()` wired; B1 proxy adapters complete; standalone types can proceed |
 | **Staging readiness** | Not achievable — no domain routes, no staging telemetry evidence, no physical SharePoint lists |
 | **External dependencies** | 3 pending — IT Graph permission grant, IT per-site access grants, PO schema approval |
 
@@ -46,7 +46,7 @@ Phase 1 is ready for **targeted implementation** on workstreams with no upstream
 
 | Workstream | Work | Foundation Already Delivered |
 |---|---|---|
-| **B1** — Remaining proxy adapters | Auth repo only (blocked on A9) | ProxyHttpClient, BaseProxyProjectRepository, envelope parsers, path builders, 84 tests, 10 repos complete |
+| **B1** — Proxy adapters | **COMPLETE** — all 11 repos implemented, factory-wired, 109+ tests | ProxyHttpClient, BaseProxyProjectRepository, envelope parsers, path builders, all 11 domain repos including Auth |
 | **C2** — Auth middleware | `withAuth()` wrapper, Zod validation, response helpers, X-Request-Id | `validateToken()` tested and production-ready; builds directly on top |
 | **D1** — Write safety standalone types | RetryPolicy, WriteFailureReason, idempotency key types | ProxyHttpClient hook points (`onBeforeRequest`, `onAfterResponse`) ready for D1 wiring |
 
@@ -55,7 +55,7 @@ Phase 1 is ready for **targeted implementation** on workstreams with no upstream
 | Workstream | Work | Blocked On | Unblock Condition |
 |---|---|---|---|
 | **C1** — Backend domain route handlers | Leads, projects, estimating route implementations | SharePoint schema approval (external) | PO + Business Domains approve P1-A3 schema package |
-| **D1** — Full retry/idempotency wiring | `withRetry()` integration into ProxyHttpClient | B1 remaining 4 repos complete | Tier 1 B1 work finishes |
+| **D1** — Full retry/idempotency wiring | `withRetry()` integration into ProxyHttpClient | — | B1 complete; `withRetry()` wired into ProxyHttpClient (2026-03-19) |
 | **E1** — Contract tests against staging | Zod schema validation, MSW handlers, smoke tests | C1 routes + C2 auth delivered + staging deploy | Tier 1 C2 + Tier 2 C1 complete |
 | **C3** — Telemetry instrumentation | Handler lifecycle events, proxy events, auth events | C1 routes exist to instrument | Tier 2 C1 routes delivered |
 | **E2** — Staging readiness verification | Full checklist execution | All Tiers 1–2 complete + staging deployed | All workstreams delivered |
@@ -72,7 +72,7 @@ Phase 1 is ready for **targeted implementation** on workstreams with no upstream
 
 Phase 1 is ready for **broad execution** when ALL of the following are true:
 
-1. **Tier 1 complete:** All 4 remaining proxy repos delivered; C2 auth middleware operational; D1 standalone types defined
+1. **Tier 1 complete:** B1 proxy adapters delivered (11/11 complete); C2 auth middleware operational; D1 standalone types defined
 2. **SharePoint schema approved:** PO has signed off on P1-A3 schema package, unblocking C1 route implementation
 3. **C1 routes in progress:** At least one domain (leads) has a working backend route handler
 4. **Staging environment available:** Function app deployed, auth app registration configured, required env vars set
@@ -81,7 +81,7 @@ Until these conditions are met, implementation should focus on Tier 1 work items
 
 #### Recommended Execution Sequence
 
-1. **Now:** Tier 1 work — complete remaining proxy adapters (B1), build auth middleware (C2), define write safety types (D1)
+1. **Now:** Tier 1 work — B1 proxy adapters complete; build auth middleware (C2), define write safety types (D1)
 2. **After Tier 1 + schema approval:** C1 domain route handlers (leads first, then projects, estimating)
 3. **After C1 + C2 delivered:** E1 contract tests, C3 telemetry instrumentation
 4. **After all workstreams + staging:** E2 staging readiness checklist execution and sign-off
@@ -159,7 +159,7 @@ Until these conditions are met, implementation should focus on Tier 1 work items
 
 ---
 
-## Repo-Truth Notes (as of 2026-03-18)
+## Repo-Truth Notes (as of 2026-03-19)
 
 These notes anchor the status labels above to the actual codebase. They document what exists in code versus what Phase 1 plans to build.
 
@@ -169,9 +169,9 @@ These notes anchor the status labels above to the actual codebase. They document
 - `packages/data-access/src/adapters/mock/`: All 11 mock adapters fully implemented with seed data
 - `packages/data-access/src/factory.ts`: Mode-resolved factory; reads `HBC_ADAPTER_MODE`, defaults to `'mock'` if unset; no startup validation guard in this file (`validateRequiredConfig()` is in `backend/functions/src/services/service-factory.ts`, not in data-access)
 
-**Proxy adapters — B1 transport foundation + 10 of 11 repos implemented:**
-- `packages/data-access/src/adapters/proxy/`: `ProxyHttpClient` (Bearer auth, timeout, X-Request-Id, error normalization), envelope parsers (`items`/`data`/`message` per locked conventions), route builders (D6 nested paths), and 10 repos (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP) — all factory-wired and tested (84 tests)
-- Remaining proxy repo: Auth — factory still throws `AdapterNotImplementedError` for proxy mode; blocked on A9 (route paths not yet in C1/C2 catalog)
+**Proxy adapters — B1 complete (11 of 11 repos implemented):**
+- `packages/data-access/src/adapters/proxy/`: `ProxyHttpClient` (Bearer auth, timeout, X-Request-Id, error normalization, `withRetry()` wired), envelope parsers (`items`/`data`/`message` per locked conventions), route builders (D6 nested paths), and 11 repos (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP, Auth) — all factory-wired and tested (109+ tests)
+- Auth proxy adapter: `ProxyAuthRepository` implements 16 methods per `IAuthRepository`; 19 unit tests; A9 route catalog resolved via P1-C2-a Task 21 (20 system-level + 9 project-scoped routes)
 - `packages/data-access/src/adapters/sharepoint/`: Does not exist (Phase 5+)
 - `packages/data-access/src/adapters/api/`: Type stubs and constants only (Phase 7+)
 
@@ -251,7 +251,7 @@ These items remain open and must be resolved before or during Phase 1 implementa
 | Item | What It Unblocks | Owner | Status | Repo Truth |
 |---|---|---|---|---|
 | SharePoint list schema approval per domain | P1-A3 physical schema deployment and P1-B1 production adapter implementation | Product Owner + Business Domains | Pending approval | List definitions exist in code (`backend/functions/src/config/`); physical SharePoint lists not provisioned |
-| B1 proxy adapter delivery | P1-D1 implementation, P1-E1 adapter contract tests (Tasks 4–5) | Engineering | **In progress** (10 of 11) | Transport foundation + 10 repos implemented and tested; remaining: Auth only (blocked on A9 — route paths unresolved) |
+| B1 proxy adapter delivery | P1-D1 implementation, P1-E1 adapter contract tests (Tasks 4–5) | Engineering | **Complete** (11 of 11) | Transport foundation + 11 repos implemented, factory-wired, and tested (109+ tests); A9 resolved via P1-C2-a Task 21 |
 | C1 backend route handler delivery | P1-E1 route contract tests (Tasks 6–7), P1-E2 staging readiness | Engineering | Implementation pending | Provisioning + notification routes exist; zero domain data routes (leads, schedules, etc.) |
 | C2 auth middleware delivery | P1-E1 smoke test auth validation (Task 8), P1-E2 auth gates | Engineering | Implementation pending | `validateToken()` exists and is tested; `ManagedIdentityOboService` exists (app-level MI, not user-delegated OBO); centralized `withAuth()` wrapper, Zod validation, and response helpers not yet built |
 | C3 observability instrumentation | P1-E1 telemetry baseline verification (Task 9) | Engineering | Implementation pending | Azure Table audit logging implemented; telemetry correlation infrastructure TBD |

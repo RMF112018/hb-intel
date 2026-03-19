@@ -93,7 +93,7 @@ B1 is proceeding under these assumptions. Each is labeled with where verificatio
 
 | # | Assumption | Verify With | Current Confidence | Reference |
 |---|---|---|---|---|
-| A1 | API paths follow C1 catalog patterns (e.g., `/api/leads`, `/api/projects/{id}`) | P1-C1 | Medium — Leads/Projects/Estimating base paths C1-locked; 7 project-scoped domains convention-locked (D1, D6 resolved) pending C1 route handler delivery; Auth (A9) unresolved | Appendix A |
+| A1 | API paths follow C1 catalog patterns (e.g., `/api/leads`, `/api/projects/{id}`) | P1-C1 | Medium — Leads/Projects/Estimating base paths C1-locked; 7 project-scoped domains convention-locked (D1, D6 resolved) pending C1 route handler delivery; Auth routes defined in P1-C2-a Task 21 (A9 resolved) | Appendix A |
 | A2 | Collection response envelope: `{ items: T[], total, page, pageSize }` | P1-C1, P1-E1 | **LOCKED** — E1 locked decision confirms `items` field (not `data`) | Appendix B |
 | A3 | Single-item response envelope: `{ data: T }` | P1-C1 | High — C1 confirms this shape | Appendix B |
 | A4 | Error responses use `message` as primary field | P1-C1, P1-E1 | **LOCKED** — D3 resolved: `message` is primary (not `error`). `extractErrorMessage()` should read `.message` first, `.error` fallback for pre-Phase-1 routes | Appendix B |
@@ -2114,18 +2114,37 @@ Project-scoped with two entity types. Manages `IProjectManagementPlan` + `IPMPSi
 
 **ProxyAuthRepository:**
 
-**This repository has no CRUD pattern at all.** It does not extend `ProxyBaseRepository` in a meaningful way (or uses it only for `httpClient` access). The Auth port manages users, roles, and permissions with these methods:
+**This repository has no CRUD pattern at all.** It does not extend `ProxyBaseRepository` in a meaningful way (or uses it only for `httpClient` access). The Auth port manages users, roles, permissions, templates, and job title mappings with 16 methods across 5 capability groups:
 
-> **All routes provisional (A9):** Auth management routes are not defined in C1 (domain CRUD catalog) or C2 (auth middleware). All `/api/auth/*` paths below are entirely B1-assumed. These routes must be confirmed with the auth/platform team before production activation.
+> **A9 RESOLVED:** Auth management routes are defined in P1-C2-a Task 21 (20 system-level + 9 project-scoped routes). `ProxyAuthRepository` is fully implemented with 19 tests and factory-wired for proxy mode.
 
-- `getCurrentUser(): Promise<ICurrentUser>` — retrieve authenticated user profile
-- `getRoles(): Promise<IRole[]>` — list all available roles
-- `getRoleById(id: string): Promise<IRole | null>` — retrieve a single role by ID
-- `getPermissionTemplates(): Promise<IPermissionTemplate[]>` — list permission templates
-- `assignRole(userId: string, roleId: string): Promise<void>` — assign a role to a user
-- `removeRole(userId: string, roleId: string): Promise<void>` — remove a role from a user
+**Session (1 method):**
+- `getCurrentUser(): Promise<ICurrentUser>` — GET `/auth/me`
 
-All methods delegate to `/api/auth/*` endpoints. No pagination, no entity creation/deletion in the traditional sense. IDs are strings.
+**Role Definitions (5 methods):**
+- `getRoles(): Promise<IRole[]>` — GET `/auth/roles`
+- `getRoleById(id: string): Promise<IRole | null>` — GET `/auth/roles/{id}`
+- `createRole(role, idempotencyContext?): Promise<IRole>` — POST `/auth/roles`
+- `updateRole(id, updates, idempotencyContext?): Promise<IRole>` — PATCH `/auth/roles/{id}`
+- `deleteRole(id): Promise<void>` — DELETE `/auth/roles/{id}`
+
+**Role Assignment (2 methods):**
+- `assignRole(userId, roleId, idempotencyContext?): Promise<void>` — POST `/auth/users/{userId}/roles`
+- `removeRole(userId, roleId): Promise<void>` — DELETE `/auth/users/{userId}/roles/{roleId}`
+
+**Permission Templates (4 methods):**
+- `getPermissionTemplates(): Promise<IPermissionTemplate[]>` — GET `/auth/templates`
+- `createPermissionTemplate(template, idempotencyContext?): Promise<IPermissionTemplate>` — POST `/auth/templates`
+- `updatePermissionTemplate(id, updates, idempotencyContext?): Promise<IPermissionTemplate>` — PATCH `/auth/templates/{id}`
+- `deletePermissionTemplate(id): Promise<void>` — DELETE `/auth/templates/{id}`
+
+**Job Title Mappings (4 methods):**
+- `getJobTitleMappings(): Promise<IJobTitleMapping[]>` — GET `/auth/job-title-mappings`
+- `createJobTitleMapping(mapping, idempotencyContext?): Promise<IJobTitleMapping>` — POST `/auth/job-title-mappings`
+- `updateJobTitleMapping(id, updates, idempotencyContext?): Promise<IJobTitleMapping>` — PATCH `/auth/job-title-mappings/{id}`
+- `deleteJobTitleMapping(id): Promise<void>` — DELETE `/auth/job-title-mappings/{id}`
+
+All methods delegate to `/api/auth/*` endpoints with `{ domain: 'auth', operation: '...' }` request metadata. Write methods accept optional `IdempotencyContext` per P1-D1 wiring. IDs are strings.
 
 ```typescript
 // packages/data-access/src/adapters/proxy/auth-repository.ts
@@ -2983,22 +3002,32 @@ These routes follow the locked D6 nested pattern: `/api/projects/{projectId}/{do
 | `getSignatures(projectId, pmpId)` | GET | `/api/projects/{projectId}/pmp/{pmpId}/signatures` | — | Array envelope (`IPMPSignature[]`) | Sub-resource — not in C1 catalog |
 | `createSignature(projectId, pmpId, data)` | POST | `/api/projects/{projectId}/pmp/{pmpId}/signatures` | `Omit<IPMPSignature, 'id'>` body | Single-item envelope (201) | Sub-resource — not in C1 catalog |
 
-### Tier 3 — No C1 Route Defined (Auth)
+### Tier 3 — Auth Routes (A9 Resolved — Routes Defined in P1-C2-a)
 
-Auth is not part of C1's domain CRUD routes. It is a separate subsystem managed by C2 (auth hardening).
+Auth is not part of C1's domain CRUD routes. It is a separate subsystem managed by C2 (auth hardening). Route catalog locked in P1-C2-a Task 21. `ProxyAuthRepository` is fully implemented (16 methods, 19 tests, factory-wired).
 
-#### Auth Repository (`/api/auth` — **not in C1 catalog**)
+#### Auth Repository (`/api/auth` — routes defined in P1-C2-a Task 21)
 
-| Method | Verb | Path (B1 provisional) | Params / Body | Response | C1 Status |
+| Method | Verb | Path | Params / Body | Response | Status |
 |---|---|---|---|---|---|
-| `getCurrentUser()` | GET | `/api/auth/me` | — | Single-item envelope (`ICurrentUser`) | **Assumed** — no C1 route; managed by C2 |
-| `getRoles()` | GET | `/api/auth/roles` | — | Array (`IRole[]`) | **Assumed** |
-| `getRoleById(id)` | GET | `/api/auth/roles/{id}` | — | Single-item envelope (`IRole`) or null | **Assumed** |
-| `getPermissionTemplates()` | GET | `/api/auth/permission-templates` | — | Array (`IPermissionTemplate[]`) | **Assumed** |
-| `assignRole(userId, roleId)` | POST | `/api/auth/users/{userId}/roles` | `{ roleId }` body | 204 No Content | **Assumed** |
-| `removeRole(userId, roleId)` | DELETE | `/api/auth/users/{userId}/roles/{roleId}` | — | 204 No Content | **Assumed** |
+| `getCurrentUser()` | GET | `/api/auth/me` | — | Single-item envelope (`ICurrentUser`) | **P1-C2-a locked** |
+| `getRoles()` | GET | `/api/auth/roles` | — | Array (`IRole[]`) | **P1-C2-a locked** |
+| `getRoleById(id)` | GET | `/api/auth/roles/{id}` | — | Single-item envelope (`IRole`) or null | **P1-C2-a locked** |
+| `createRole(role)` | POST | `/api/auth/roles` | `IRole` body | Single-item envelope (`IRole`, 201) | **P1-C2-a locked** |
+| `updateRole(id, updates)` | PATCH | `/api/auth/roles/{id}` | Partial body | Single-item envelope (`IRole`) | **P1-C2-a locked** |
+| `deleteRole(id)` | DELETE | `/api/auth/roles/{id}` | — | 204 No Content | **P1-C2-a locked** |
+| `assignRole(userId, roleId)` | POST | `/api/auth/users/{userId}/roles` | `{ roleId }` body | 204 No Content | **P1-C2-a locked** |
+| `removeRole(userId, roleId)` | DELETE | `/api/auth/users/{userId}/roles/{roleId}` | — | 204 No Content | **P1-C2-a locked** |
+| `getPermissionTemplates()` | GET | `/api/auth/templates` | — | Array (`IPermissionTemplate[]`) | **P1-C2-a locked** |
+| `createPermissionTemplate(template)` | POST | `/api/auth/templates` | `IPermissionTemplate` body | Single-item envelope (201) | **P1-C2-a locked** |
+| `updatePermissionTemplate(id, updates)` | PATCH | `/api/auth/templates/{id}` | Partial body | Single-item envelope | **P1-C2-a locked** |
+| `deletePermissionTemplate(id)` | DELETE | `/api/auth/templates/{id}` | — | 204 No Content | **P1-C2-a locked** |
+| `getJobTitleMappings()` | GET | `/api/auth/job-title-mappings` | — | Array (`IJobTitleMapping[]`) | **P1-C2-a locked** |
+| `createJobTitleMapping(mapping)` | POST | `/api/auth/job-title-mappings` | `IJobTitleMapping` body | Single-item envelope (201) | **P1-C2-a locked** |
+| `updateJobTitleMapping(id, updates)` | PATCH | `/api/auth/job-title-mappings/{id}` | Partial body | Single-item envelope | **P1-C2-a locked** |
+| `deleteJobTitleMapping(id)` | DELETE | `/api/auth/job-title-mappings/{id}` | — | 204 No Content | **P1-C2-a locked** |
 
-> Auth routes are entirely B1-assumed. C2 defines auth middleware behavior but does not catalog auth-management endpoints. These routes must be confirmed with the auth/platform team.
+> Auth routes are defined in P1-C2-a Task 21. Backend handler implementation is Phase 2 delivery. `ProxyAuthRepository` is production-ready pending backend route delivery.
 
 ---
 
