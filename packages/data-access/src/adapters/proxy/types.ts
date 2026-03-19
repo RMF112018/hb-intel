@@ -1,3 +1,5 @@
+import type { RetryPolicy } from '../../retry/retry-policy.js';
+
 /** Configuration for Azure Functions proxy adapters. */
 export interface ProxyConfig {
   /** Base URL for the Azure Functions API (e.g. `https://func-hb-intel.azurewebsites.net/api`). */
@@ -14,6 +16,8 @@ export interface ProxyConfig {
   accessToken?: string;
   /** Request timeout in milliseconds. */
   timeout?: number;
-  /** Number of automatic retries on transient failures. */
-  retryCount?: number;
+  /** Retry policy for read operations (GET). Defaults to READ_RETRY_POLICY. */
+  readRetryPolicy?: RetryPolicy;
+  /** Retry policy for write operations (POST/PUT/PATCH/DELETE). Defaults to WRITE_RETRY_POLICY. */
+  writeRetryPolicy?: RetryPolicy;
 }

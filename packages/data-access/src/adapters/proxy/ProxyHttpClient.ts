@@ -1,18 +1,25 @@
 /**
  * ProxyHttpClient — shared HTTP transport for B1 proxy adapters.
  *
- * Provides Bearer auth, timeout, X-Request-Id, and error normalization.
+ * Provides Bearer auth, timeout, X-Request-Id, retry (D1), idempotency
+ * header injection, and error normalization.
  * All responses are parsed through the locked envelope conventions (P1-E1).
  *
  * P1-C3: Emits proxy.request.start/success/error telemetry events.
- * Hook points (onBeforeRequest, onAfterResponse) are exposed for D1
- * retry/recovery wiring and accept optional RequestMetadata.
+ * P1-D1: Wraps requests with withRetry using READ/WRITE retry policies.
  */
 
 import type { ProxyConfig } from './types.js';
 import { DEFAULT_TIMEOUT_MS } from './constants.js';
 import { normalizeHttpError } from './errors.js';
 import { HbcDataAccessError } from '../../errors/index.js';
+import {
+  withRetry,
+  READ_RETRY_POLICY,
+  WRITE_RETRY_POLICY,
+  type RetryPolicy,
+} from '../../retry/retry-policy.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 
 /** Per-request metadata threaded from repositories for telemetry. */
 export interface RequestMetadata {
@@ -46,6 +53,8 @@ export class ProxyHttpClient {
   private readonly getToken: (() => Promise<string>) | undefined;
   private readonly accessToken: string | undefined;
   private readonly timeout: number;
+  private readonly readPolicy: RetryPolicy;
+  private readonly writePolicy: RetryPolicy;
 
   /** D1 hook point: called before each fetch. */
   onBeforeRequest?: BeforeRequestHook;
@@ -58,26 +67,43 @@ export class ProxyHttpClient {
     this.getToken = config.getToken;
     this.accessToken = config.accessToken;
     this.timeout = config.timeout ?? DEFAULT_TIMEOUT_MS;
+    this.readPolicy = config.readRetryPolicy ?? READ_RETRY_POLICY;
+    this.writePolicy = config.writeRetryPolicy ?? WRITE_RETRY_POLICY;
   }
 
   async get<T>(path: string, params?: Record<string, string>, metadata?: RequestMetadata): Promise<T> {
-    return this.request<T>('GET', path, undefined, params, metadata);
+    return withRetry(
+      () => this.request<T>('GET', path, undefined, params, metadata),
+      this.readPolicy,
+    );
   }
 
-  async post<T>(path: string, body: unknown, metadata?: RequestMetadata): Promise<T> {
-    return this.request<T>('POST', path, body, undefined, metadata);
+  async post<T>(path: string, body: unknown, metadata?: RequestMetadata, idempotency?: IdempotencyContext): Promise<T> {
+    return withRetry(
+      () => this.request<T>('POST', path, body, undefined, metadata, idempotency),
+      this.writePolicy,
+    );
   }
 
-  async put<T>(path: string, body: unknown, metadata?: RequestMetadata): Promise<T> {
-    return this.request<T>('PUT', path, body, undefined, metadata);
+  async put<T>(path: string, body: unknown, metadata?: RequestMetadata, idempotency?: IdempotencyContext): Promise<T> {
+    return withRetry(
+      () => this.request<T>('PUT', path, body, undefined, metadata, idempotency),
+      this.writePolicy,
+    );
   }
 
   async patch<T>(path: string, body: unknown, metadata?: RequestMetadata): Promise<T> {
-    return this.request<T>('PATCH', path, body, undefined, metadata);
+    return withRetry(
+      () => this.request<T>('PATCH', path, body, undefined, metadata),
+      this.writePolicy,
+    );
   }
 
   async delete(path: string, metadata?: RequestMetadata): Promise<void> {
-    await this.requestRaw('DELETE', path, undefined, undefined, metadata);
+    await withRetry(
+      () => this.requestRaw('DELETE', path, undefined, undefined, metadata),
+      this.writePolicy,
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -90,8 +116,9 @@ export class ProxyHttpClient {
     body?: unknown,
     params?: Record<string, string>,
     metadata?: RequestMetadata,
+    idempotency?: IdempotencyContext,
   ): Promise<T> {
-    const response = await this.requestRaw(method, path, body, params, metadata);
+    const response = await this.requestRaw(method, path, body, params, metadata, idempotency);
 
     if (response.status === 204) {
       return undefined as T;
@@ -106,6 +133,7 @@ export class ProxyHttpClient {
     body?: unknown,
     params?: Record<string, string>,
     metadata?: RequestMetadata,
+    idempotency?: IdempotencyContext,
   ): Promise<Response> {
     const url = this.buildUrl(path, params);
     const correlationId = crypto.randomUUID();
@@ -119,6 +147,12 @@ export class ProxyHttpClient {
     const token = this.getToken ? await this.getToken() : this.accessToken;
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // D1: Idempotency header injection for POST/PUT when context is provided
+    if (idempotency) {
+      headers['Idempotency-Key'] = idempotency.key;
+      headers['X-Idempotency-Operation'] = idempotency.operation;
     }
 
     const init: RequestInit = {

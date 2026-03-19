@@ -17,6 +17,7 @@ import type { IContractService } from './contract-service.js';
 import type { IRiskService } from './risk-service.js';
 import type { IScorecardService } from './scorecard-service.js';
 import type { IPmpService } from './pmp-service.js';
+import type { IIdempotencyStorageService } from './idempotency-storage-service.js';
 import { MockSharePointService, SharePointService } from './sharepoint-service.js';
 import { MockTableStorageService, RealTableStorageService } from './table-storage-service.js';
 import { MockRedisCacheService } from './redis-cache-service.js';
@@ -36,6 +37,7 @@ import { MockContractService, RealContractService } from './contract-service.js'
 import { MockRiskService, RealRiskService } from './risk-service.js';
 import { MockScorecardService, RealScorecardService } from './scorecard-service.js';
 import { MockPmpService, RealPmpService } from './pmp-service.js';
+import { MockIdempotencyStorageService, RealIdempotencyStorageService } from './idempotency-storage-service.js';
 import { validateRequiredConfig } from '../utils/validate-config.js';
 import { assertAdapterModeValid } from '../utils/adapter-mode-guard.js';
 
@@ -60,6 +62,8 @@ export interface IServiceContainer {
   risk: IRiskService;
   scorecards: IScorecardService;
   pmp: IPmpService;
+  // P1-D1: Write safety — idempotency record persistence.
+  idempotency: IIdempotencyStorageService;
 }
 
 let singletonContainer: IServiceContainer | null = null;
@@ -117,6 +121,8 @@ export function createServiceFactory(): IServiceContainer {
     risk: isMock ? new MockRiskService() : new RealRiskService(),
     scorecards: isMock ? new MockScorecardService() : new RealScorecardService(),
     pmp: isMock ? new MockPmpService() : new RealPmpService(),
+    // P1-D1: idempotency record storage (real Azure Table; in-memory mock for test/mock mode).
+    idempotency: isMock ? new MockIdempotencyStorageService() : new RealIdempotencyStorageService(),
   };
 
   console.log(`[ServiceFactory] Initialized services in "${adapterMode}" mode`);

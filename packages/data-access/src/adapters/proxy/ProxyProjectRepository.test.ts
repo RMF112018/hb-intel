@@ -12,11 +12,15 @@ function mockFetch(response: { status?: number; jsonBody?: unknown }): void {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(resp));
 }
 
+const NO_RETRY = { maxAttempts: 1, initialDelayMs: 0, backoffFactor: 1, maxDelayMs: 0, jitterFactor: 0, maxTotalDurationMs: 0, retryableErrors: new Set<string>() };
+
 function createClient(): ProxyHttpClient {
   return new ProxyHttpClient({
     baseUrl: 'https://api.test.com/api',
     accessToken: 'test-token',
     timeout: 5000,
+    readRetryPolicy: NO_RETRY,
+    writeRetryPolicy: NO_RETRY,
   });
 }
 

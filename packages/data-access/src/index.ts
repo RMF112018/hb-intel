@@ -78,6 +78,33 @@ export {
 } from './adapters/mock/index.js';
 
 // ---------------------------------------------------------------------------
+// P1-D1: Retry policy
+// ---------------------------------------------------------------------------
+export type { RetryPolicy } from './retry/retry-policy.js';
+export {
+  DEFAULT_RETRY_POLICY,
+  READ_RETRY_POLICY,
+  WRITE_RETRY_POLICY,
+  withRetry,
+} from './retry/retry-policy.js';
+
+// ---------------------------------------------------------------------------
+// P1-D1: Idempotency context (frontend key generation)
+// ---------------------------------------------------------------------------
+export type { IdempotencyContext } from './retry/idempotency.js';
+export { generateIdempotencyKey, isExpired } from './retry/idempotency.js';
+
+// ---------------------------------------------------------------------------
+// P1-D1: Write failure classification
+// ---------------------------------------------------------------------------
+export { WriteFailureReason, classifyWriteFailure } from './retry/write-safe-error.js';
+
+// ---------------------------------------------------------------------------
+// P1-D1: Audit record interface
+// ---------------------------------------------------------------------------
+export type { IAuditRecord } from './retry/audit.js';
+
+// ---------------------------------------------------------------------------
 // Factory (11 create functions + adapter mode utilities)
 // ---------------------------------------------------------------------------
 export {

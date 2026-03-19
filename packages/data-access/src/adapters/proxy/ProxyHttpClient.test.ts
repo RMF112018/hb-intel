@@ -4,11 +4,24 @@ import { HbcDataAccessError, NotFoundError, ValidationError } from '../../errors
 
 const BASE_URL = 'https://api.example.com/api';
 
+/** No-retry policy for tests that expect single-attempt behavior. */
+const NO_RETRY = {
+  maxAttempts: 1,
+  initialDelayMs: 0,
+  backoffFactor: 1,
+  maxDelayMs: 0,
+  jitterFactor: 0,
+  maxTotalDurationMs: 0,
+  retryableErrors: new Set<string>(),
+};
+
 function createClient(overrides?: { accessToken?: string; timeout?: number }): ProxyHttpClient {
   return new ProxyHttpClient({
     baseUrl: BASE_URL,
     accessToken: overrides?.accessToken ?? 'test-bearer-token',
     timeout: overrides?.timeout ?? 5000,
+    readRetryPolicy: NO_RETRY,
+    writeRetryPolicy: NO_RETRY,
   });
 }
 
@@ -26,6 +39,11 @@ function mockFetch(response: Partial<Response> & { jsonBody?: unknown }): void {
 
 function mockFetchReject(error: Error): void {
   vi.stubGlobal('fetch', vi.fn().mockRejectedValue(error));
+}
+
+/** Return the RequestInit passed to the most recent fetch() call. */
+function lastFetchInit(): RequestInit {
+  return (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.at(-1)?.[1] as RequestInit;
 }
 
 describe('ProxyHttpClient', () => {
@@ -103,7 +121,7 @@ describe('ProxyHttpClient', () => {
 
     it('omits Authorization when no token provided', async () => {
       mockFetch({ jsonBody: {} });
-      const client = new ProxyHttpClient({ baseUrl: BASE_URL, timeout: 5000 });
+      const client = new ProxyHttpClient({ baseUrl: BASE_URL, timeout: 5000, readRetryPolicy: NO_RETRY, writeRetryPolicy: NO_RETRY });
       await client.get('/test');
       const init = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0][1] as RequestInit;
       const headers = init.headers as Record<string, string>;
@@ -264,6 +282,119 @@ describe('ProxyHttpClient', () => {
 
       expect(events.length).toBe(0);
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe('P1-D1 Retry Wiring', () => {
+    it('GET retries on NETWORK_ERROR and succeeds on 2nd attempt', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      let callCount = 0;
+      vi.stubGlobal('fetch', vi.fn(async () => {
+        callCount++;
+        if (callCount === 1) {
+          throw new TypeError('fetch failed');
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({ data: 'recovered' }),
+        } as unknown as Response;
+      }));
+
+      const client = new ProxyHttpClient({
+        baseUrl: BASE_URL,
+        accessToken: 'test-token',
+        timeout: 5000,
+        readRetryPolicy: {
+          maxAttempts: 3,
+          initialDelayMs: 1,
+          backoffFactor: 1,
+          maxDelayMs: 10,
+          jitterFactor: 0,
+          maxTotalDurationMs: 30000,
+          retryableErrors: new Set(['NETWORK_ERROR', 'TIMEOUT', 'SERVER_ERROR']),
+        },
+      });
+
+      const result = await client.get<{ data: string }>('/test');
+      expect(result.data).toBe('recovered');
+      expect(callCount).toBe(2);
+      consoleSpy.mockRestore();
+    });
+
+    it('POST uses write retry policy (fewer attempts)', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      let callCount = 0;
+      vi.stubGlobal('fetch', vi.fn(async () => {
+        callCount++;
+        throw new TypeError('fetch failed');
+      }));
+
+      const client = new ProxyHttpClient({
+        baseUrl: BASE_URL,
+        accessToken: 'test-token',
+        timeout: 5000,
+        writeRetryPolicy: {
+          maxAttempts: 2,
+          initialDelayMs: 1,
+          backoffFactor: 1,
+          maxDelayMs: 10,
+          jitterFactor: 0,
+          maxTotalDurationMs: 30000,
+          retryableErrors: new Set(['NETWORK_ERROR', 'TIMEOUT', 'SERVER_ERROR']),
+        },
+      });
+
+      await expect(client.post('/test', {})).rejects.toThrow('Network error');
+      expect(callCount).toBe(2);
+      consoleSpy.mockRestore();
+    });
+
+    it('non-retryable error (404) throws immediately without retry', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      let callCount = 0;
+      vi.stubGlobal('fetch', vi.fn(async () => {
+        callCount++;
+        return {
+          ok: false,
+          status: 404,
+          json: vi.fn().mockResolvedValue({ message: 'Not found' }),
+        } as unknown as Response;
+      }));
+
+      const client = createClient();
+      await expect(client.get('/test')).rejects.toThrow();
+      expect(callCount).toBe(1);
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('P1-D1 Idempotency Headers', () => {
+    it('injects Idempotency-Key and X-Idempotency-Operation headers on POST', async () => {
+      mockFetch({ status: 200, jsonBody: { data: 'created' } });
+      const client = createClient();
+      await client.post('/test', { name: 'test' }, undefined, {
+        key: 'idem-uuid-123',
+        operation: 'create-lead',
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 86400000,
+      });
+
+      const init = lastFetchInit();
+      const headers = init.headers as Record<string, string>;
+      expect(headers['Idempotency-Key']).toBe('idem-uuid-123');
+      expect(headers['X-Idempotency-Operation']).toBe('create-lead');
+    });
+
+    it('does not inject idempotency headers when context is omitted', async () => {
+      mockFetch({ status: 200, jsonBody: { data: 'created' } });
+      const client = createClient();
+      await client.post('/test', { name: 'test' });
+
+      const init = lastFetchInit();
+      const headers = init.headers as Record<string, string>;
+      expect(headers['Idempotency-Key']).toBeUndefined();
+      expect(headers['X-Idempotency-Operation']).toBeUndefined();
     });
   });
 });
