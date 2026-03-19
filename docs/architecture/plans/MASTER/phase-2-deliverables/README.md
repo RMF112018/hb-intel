@@ -6,7 +6,7 @@
 
 ## Planning Status Summary
 
-Phase 2 planning is underway. Workstream A is complete — P2-A1 (Operating Model Register), P2-A2 (Ranking Policy), and P2-A3 (Explainability and Visibility Rules) are locked alongside P2-B0 (Lane Ownership) and P2-B1 (Root Routing and Landing Precedence). These establish the operating-model, ranking, explainability, lane-ownership, and routing foundations that all downstream deliverables must conform to. Remaining deliverables are in planning queue, sequenced per Phase 2 §19 execution priorities.
+Phase 2 planning is underway. Workstream A is complete. Workstream B is progressing — P2-B0 (Lane Ownership), P2-B1 (Root Routing), and P2-B2 (State Persistence) are locked alongside all A-series deliverables. These establish operating-model, ranking, explainability, lane-ownership, routing, and state-persistence foundations. Remaining deliverables are in planning queue, sequenced per Phase 2 §19 execution priorities.
 
 ---
 
@@ -38,7 +38,7 @@ Phase 2 planning is underway. Workstream A is complete — P2-A1 (Operating Mode
 |---|---|---|
 | P2-B0 | [Lane Ownership and Coexistence Rules](P2-B0-Lane-Ownership-and-Coexistence-Rules.md) | Governance Policy |
 | P2-B1 | [Root Routing and Landing Precedence Spec](P2-B1-Root-Routing-and-Landing-Precedence-Spec.md) | Specification |
-| P2-B2 | Hub State Persistence and Return-Memory Contract | Not Started |
+| P2-B2 | [Hub State Persistence and Return-Memory Contract](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md) | Specification |
 | P2-B3 | Freshness, Refresh, and Staleness Trust Policy | Not Started |
 | P2-B4 | Cross-Device Shell Behavior Note | Not Started |
 
