@@ -613,6 +613,27 @@ Each signer must record one of: **PASSED**, **FAILED** (with issue references), 
 | Platform Lead | __________ | __________ | Pass / Fail / Blocked / Waived | __________ |
 | Architecture Lead | __________ | __________ | Pass / Fail / Blocked / Waived | __________ |
 
+### Execution Attempt Record (2026-03-19)
+
+**Result:** BLOCKED — all code prerequisites satisfied; staging infrastructure not available.
+
+**Code prerequisites met:**
+- B1 proxy adapters: 11/11 repos, 189+ tests, factory-wired ✅
+- C1 domain route handlers: leads, projects, estimating implemented with withAuth + parseBody + withTelemetry ✅
+- C2 auth middleware: withAuth(), parseBody<T>(), response helpers, request-id middleware ✅
+- C3 observability: proxy/auth/circuit telemetry, health endpoint, handler lifecycle ✅
+- D1 write safety: withRetry(), withIdempotency, IdempotencyStorageService, cleanup timer ✅
+- E1 contract tests: Zod schemas (11 domains), MSW handlers, adapter contract tests (Tasks 1–7), smoke scaffold (Tasks 8–9) ✅
+
+**Staging prerequisites NOT met:**
+- Function app not deployed (no `SMOKE_TEST_BASE_URL`)
+- Auth app registration not configured (no `AZURE_CLIENT_ID` for staging)
+- Required environment variables not set (`HBC_ADAPTER_MODE`, storage connections)
+- Azure Table Storage not provisioned (IdempotencyRecords table)
+- Application Insights workspace not confirmed
+
+**Next action:** IT/Platform team deploys staging function app and configures auth registration + env vars. Once `SMOKE_TEST_BASE_URL` resolves, re-execute this checklist starting from Section 1.
+
 ### Sign-Off Conditions
 
 - **PASSED:** All Sections 1–12 checks pass with staging evidence captured. No items waived without rationale.
@@ -623,7 +644,11 @@ Each signer must record one of: **PASSED**, **FAILED** (with issue references), 
 ### Sign-Off Notes
 
 ```
-[Observations, deviations, waivers, or follow-ups]
+2026-03-19: Execution attempted. All 12 sections are BLOCKED on staging
+infrastructure. All code workstreams (B1, C1, C2, C3, D1, E1) are
+code-complete. The checklist is ready to execute immediately once IT
+deploys the staging function app and configures auth + env vars.
+No code-side work remains before E2 can proceed.
 ```
 
 ---
