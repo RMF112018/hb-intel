@@ -1,6 +1,7 @@
 import type { IContractRepository } from '../../ports/IContractRepository.js';
 import type { IContractInfo, ICommitmentApproval, IListQueryOptions, IPagedResult } from '@hbc/models';
 import type { ProxyHttpClient } from './ProxyHttpClient.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseProxyProjectRepository } from './BaseProxyProjectRepository.js';
 import { parseItemEnvelope } from './envelope.js';
 import { buildResourcePath } from './paths.js';
@@ -22,14 +23,14 @@ export class ProxyContractRepository
     return this.fetchById(id);
   }
 
-  async createContract(data: Omit<IContractInfo, 'id'>): Promise<IContractInfo> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createContract' });
+  async createContract(data: Omit<IContractInfo, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IContractInfo> {
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createContract' }, idempotencyContext);
     return parseItemEnvelope<IContractInfo>(raw);
   }
 
-  async updateContract(id: number, data: Partial<IContractInfo>): Promise<IContractInfo> {
+  async updateContract(id: number, data: Partial<IContractInfo>, idempotencyContext?: IdempotencyContext): Promise<IContractInfo> {
     this.validateId(id, 'Contract');
-    return this.fetchUpdate(id, data) as Promise<IContractInfo>;
+    return this.fetchUpdate(id, data, idempotencyContext) as Promise<IContractInfo>;
   }
 
   async deleteContract(id: number): Promise<void> {
@@ -42,8 +43,8 @@ export class ProxyContractRepository
     return this.fetchSubResource<ICommitmentApproval>(contractId, 'approvals');
   }
 
-  async createApproval(data: Omit<ICommitmentApproval, 'id'>): Promise<ICommitmentApproval> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain) + '/approvals', data, { domain: this.domain, operation: 'createApproval' });
+  async createApproval(data: Omit<ICommitmentApproval, 'id'>, idempotencyContext?: IdempotencyContext): Promise<ICommitmentApproval> {
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain) + '/approvals', data, { domain: this.domain, operation: 'createApproval' }, idempotencyContext);
     return parseItemEnvelope<ICommitmentApproval>(raw);
   }
 }

@@ -1,6 +1,7 @@
 import type { IScorecardRepository } from '../../ports/IScorecardRepository.js';
 import type { IGoNoGoScorecard, IScorecardVersion, IListQueryOptions, IPagedResult } from '@hbc/models';
 import type { ProxyHttpClient } from './ProxyHttpClient.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseProxyProjectRepository } from './BaseProxyProjectRepository.js';
 import { parseItemEnvelope } from './envelope.js';
 import { buildResourcePath } from './paths.js';
@@ -22,14 +23,14 @@ export class ProxyScorecardRepository
     return this.fetchById(id);
   }
 
-  async createScorecard(data: Omit<IGoNoGoScorecard, 'id' | 'createdAt' | 'updatedAt'>): Promise<IGoNoGoScorecard> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createScorecard' });
+  async createScorecard(data: Omit<IGoNoGoScorecard, 'id' | 'createdAt' | 'updatedAt'>, idempotencyContext?: IdempotencyContext): Promise<IGoNoGoScorecard> {
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createScorecard' }, idempotencyContext);
     return parseItemEnvelope<IGoNoGoScorecard>(raw);
   }
 
-  async updateScorecard(id: number, data: Partial<IGoNoGoScorecard>): Promise<IGoNoGoScorecard> {
+  async updateScorecard(id: number, data: Partial<IGoNoGoScorecard>, idempotencyContext?: IdempotencyContext): Promise<IGoNoGoScorecard> {
     this.validateId(id, 'Scorecard');
-    return this.fetchUpdate(id, data) as Promise<IGoNoGoScorecard>;
+    return this.fetchUpdate(id, data, idempotencyContext) as Promise<IGoNoGoScorecard>;
   }
 
   async deleteScorecard(id: number): Promise<void> {

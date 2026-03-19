@@ -1,5 +1,6 @@
 import type { IRiskCostItem, IRiskCostManagement, IPagedResult, IListQueryOptions } from '@hbc/models';
 import type { IRiskRepository } from '../../ports/IRiskRepository.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseRepository } from '../base.js';
 import { paginate, genId } from './helpers.js';
 import { SEED_RISK_ITEMS } from './seedData.js';
@@ -17,13 +18,13 @@ export class MockRiskRepository extends BaseRepository<IRiskCostItem> implements
     return this.store.find((r) => r.id === id) ?? null;
   }
 
-  async createItem(data: Omit<IRiskCostItem, 'id'>): Promise<IRiskCostItem> {
+  async createItem(data: Omit<IRiskCostItem, 'id'>, _idempotencyContext?: IdempotencyContext): Promise<IRiskCostItem> {
     const item: IRiskCostItem = { ...data, id: genId() };
     this.store.push(item);
     return item;
   }
 
-  async updateItem(id: number, data: Partial<IRiskCostItem>): Promise<IRiskCostItem> {
+  async updateItem(id: number, data: Partial<IRiskCostItem>, _idempotencyContext?: IdempotencyContext): Promise<IRiskCostItem> {
     this.validateId(id, 'RiskItem');
     const idx = this.store.findIndex((r) => r.id === id);
     if (idx === -1) this.throwNotFound('RiskItem', id);

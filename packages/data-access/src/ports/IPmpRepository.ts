@@ -1,4 +1,5 @@
 import type { IProjectManagementPlan, IPMPSignature, IPagedResult, IListQueryOptions } from '@hbc/models';
+import type { IdempotencyContext } from '../retry/idempotency.js';
 
 /**
  * Port interface for the PMP (Project Management Plan) domain.
@@ -31,7 +32,7 @@ export interface IPmpRepository {
    * @param data - Plan data without generated fields (id, timestamps).
    * @returns The newly created plan.
    */
-  createPlan(data: Omit<IProjectManagementPlan, 'id' | 'createdAt' | 'updatedAt'>): Promise<IProjectManagementPlan>;
+  createPlan(data: Omit<IProjectManagementPlan, 'id' | 'createdAt' | 'updatedAt'>, idempotencyContext?: IdempotencyContext): Promise<IProjectManagementPlan>;
 
   /**
    * Update an existing plan.
@@ -40,7 +41,7 @@ export interface IPmpRepository {
    * @returns The updated plan.
    * @throws {NotFoundError} If the plan does not exist.
    */
-  updatePlan(id: number, data: Partial<IProjectManagementPlan>): Promise<IProjectManagementPlan>;
+  updatePlan(id: number, data: Partial<IProjectManagementPlan>, idempotencyContext?: IdempotencyContext): Promise<IProjectManagementPlan>;
 
   /**
    * Delete a plan by ID.
@@ -60,5 +61,5 @@ export interface IPmpRepository {
    * @param data - Signature data without the generated `id`.
    * @returns The newly created signature.
    */
-  createSignature(data: Omit<IPMPSignature, 'id'>): Promise<IPMPSignature>;
+  createSignature(data: Omit<IPMPSignature, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IPMPSignature>;
 }

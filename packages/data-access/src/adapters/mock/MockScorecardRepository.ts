@@ -1,5 +1,6 @@
 import type { IGoNoGoScorecard, IScorecardVersion, IPagedResult, IListQueryOptions } from '@hbc/models';
 import type { IScorecardRepository } from '../../ports/IScorecardRepository.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseRepository } from '../base.js';
 import { paginate, genId } from './helpers.js';
 import { SEED_SCORECARDS, SEED_SCORECARD_VERSIONS } from './seedData.js';
@@ -18,7 +19,7 @@ export class MockScorecardRepository extends BaseRepository<IGoNoGoScorecard> im
     return this.scorecards.find((s) => s.id === id) ?? null;
   }
 
-  async createScorecard(data: Omit<IGoNoGoScorecard, 'id' | 'createdAt' | 'updatedAt'>): Promise<IGoNoGoScorecard> {
+  async createScorecard(data: Omit<IGoNoGoScorecard, 'id' | 'createdAt' | 'updatedAt'>, _idempotencyContext?: IdempotencyContext): Promise<IGoNoGoScorecard> {
     const scorecard: IGoNoGoScorecard = {
       ...data,
       id: genId(),
@@ -29,7 +30,7 @@ export class MockScorecardRepository extends BaseRepository<IGoNoGoScorecard> im
     return scorecard;
   }
 
-  async updateScorecard(id: number, data: Partial<IGoNoGoScorecard>): Promise<IGoNoGoScorecard> {
+  async updateScorecard(id: number, data: Partial<IGoNoGoScorecard>, _idempotencyContext?: IdempotencyContext): Promise<IGoNoGoScorecard> {
     this.validateId(id, 'Scorecard');
     const idx = this.scorecards.findIndex((s) => s.id === id);
     if (idx === -1) this.throwNotFound('Scorecard', id);

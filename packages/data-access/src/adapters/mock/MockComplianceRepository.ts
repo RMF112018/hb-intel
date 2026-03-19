@@ -1,5 +1,6 @@
 import type { IComplianceEntry, IComplianceSummary, IPagedResult, IListQueryOptions } from '@hbc/models';
 import type { IComplianceRepository } from '../../ports/IComplianceRepository.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseRepository } from '../base.js';
 import { paginate, genId } from './helpers.js';
 import { SEED_COMPLIANCE_ENTRIES } from './seedData.js';
@@ -17,13 +18,13 @@ export class MockComplianceRepository extends BaseRepository<IComplianceEntry> i
     return this.store.find((e) => e.id === id) ?? null;
   }
 
-  async createEntry(data: Omit<IComplianceEntry, 'id'>): Promise<IComplianceEntry> {
+  async createEntry(data: Omit<IComplianceEntry, 'id'>, _idempotencyContext?: IdempotencyContext): Promise<IComplianceEntry> {
     const entry: IComplianceEntry = { ...data, id: genId() };
     this.store.push(entry);
     return entry;
   }
 
-  async updateEntry(id: number, data: Partial<IComplianceEntry>): Promise<IComplianceEntry> {
+  async updateEntry(id: number, data: Partial<IComplianceEntry>, _idempotencyContext?: IdempotencyContext): Promise<IComplianceEntry> {
     this.validateId(id, 'ComplianceEntry');
     const idx = this.store.findIndex((e) => e.id === id);
     if (idx === -1) this.throwNotFound('ComplianceEntry', id);

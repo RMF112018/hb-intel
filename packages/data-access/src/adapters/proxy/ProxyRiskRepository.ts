@@ -1,6 +1,7 @@
 import type { IRiskRepository } from '../../ports/IRiskRepository.js';
 import type { IRiskCostItem, IRiskCostManagement, IListQueryOptions, IPagedResult } from '@hbc/models';
 import type { ProxyHttpClient } from './ProxyHttpClient.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseProxyProjectRepository } from './BaseProxyProjectRepository.js';
 import { parseItemEnvelope } from './envelope.js';
 import { buildResourcePath } from './paths.js';
@@ -22,14 +23,14 @@ export class ProxyRiskRepository
     return this.fetchById(id);
   }
 
-  async createItem(data: Omit<IRiskCostItem, 'id'>): Promise<IRiskCostItem> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createItem' });
+  async createItem(data: Omit<IRiskCostItem, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IRiskCostItem> {
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createItem' }, idempotencyContext);
     return parseItemEnvelope<IRiskCostItem>(raw);
   }
 
-  async updateItem(id: number, data: Partial<IRiskCostItem>): Promise<IRiskCostItem> {
+  async updateItem(id: number, data: Partial<IRiskCostItem>, idempotencyContext?: IdempotencyContext): Promise<IRiskCostItem> {
     this.validateId(id, 'RiskItem');
-    return this.fetchUpdate(id, data) as Promise<IRiskCostItem>;
+    return this.fetchUpdate(id, data, idempotencyContext) as Promise<IRiskCostItem>;
   }
 
   async deleteItem(id: number): Promise<void> {

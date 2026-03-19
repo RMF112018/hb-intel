@@ -1,4 +1,5 @@
 import type { IActiveProject, IPortfolioSummary, IPagedResult, IListQueryOptions } from '@hbc/models';
+import type { IdempotencyContext } from '../retry/idempotency.js';
 
 /**
  * Port interface for the Project (active project context and portfolio) domain.
@@ -32,7 +33,7 @@ export interface IProjectRepository {
    * @param data - Project data without the generated `id`.
    * @returns The newly created project with a generated UUID.
    */
-  createProject(data: Omit<IActiveProject, 'id'>): Promise<IActiveProject>;
+  createProject(data: Omit<IActiveProject, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IActiveProject>;
 
   /**
    * Update an existing project.
@@ -41,7 +42,7 @@ export interface IProjectRepository {
    * @returns The updated project.
    * @throws {NotFoundError} If the project does not exist.
    */
-  updateProject(id: string, data: Partial<IActiveProject>): Promise<IActiveProject>;
+  updateProject(id: string, data: Partial<IActiveProject>, idempotencyContext?: IdempotencyContext): Promise<IActiveProject>;
 
   /**
    * Delete a project by ID.

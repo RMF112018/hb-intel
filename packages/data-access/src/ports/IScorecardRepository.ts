@@ -1,4 +1,5 @@
 import type { IGoNoGoScorecard, IScorecardVersion, IPagedResult, IListQueryOptions } from '@hbc/models';
+import type { IdempotencyContext } from '../retry/idempotency.js';
 
 /**
  * Port interface for the Scorecard (Go/No-Go evaluation) domain.
@@ -31,7 +32,7 @@ export interface IScorecardRepository {
    * @param data - Scorecard data without generated fields (id, timestamps).
    * @returns The newly created scorecard.
    */
-  createScorecard(data: Omit<IGoNoGoScorecard, 'id' | 'createdAt' | 'updatedAt'>): Promise<IGoNoGoScorecard>;
+  createScorecard(data: Omit<IGoNoGoScorecard, 'id' | 'createdAt' | 'updatedAt'>, idempotencyContext?: IdempotencyContext): Promise<IGoNoGoScorecard>;
 
   /**
    * Update an existing scorecard.
@@ -40,7 +41,7 @@ export interface IScorecardRepository {
    * @returns The updated scorecard.
    * @throws {NotFoundError} If the scorecard does not exist.
    */
-  updateScorecard(id: number, data: Partial<IGoNoGoScorecard>): Promise<IGoNoGoScorecard>;
+  updateScorecard(id: number, data: Partial<IGoNoGoScorecard>, idempotencyContext?: IdempotencyContext): Promise<IGoNoGoScorecard>;
 
   /**
    * Delete a scorecard by ID.

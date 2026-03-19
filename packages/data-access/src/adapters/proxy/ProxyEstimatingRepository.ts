@@ -1,6 +1,7 @@
 import type { IEstimatingRepository } from '../../ports/IEstimatingRepository.js';
 import type { IEstimatingTracker, IEstimatingKickoff, IListQueryOptions, IPagedResult } from '@hbc/models';
 import type { ProxyHttpClient, RequestMetadata } from './ProxyHttpClient.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { NotFoundError } from '../../errors/index.js';
 import { parseItemEnvelope, parsePagedEnvelope } from './envelope.js';
 import { buildResourcePath, buildQueryParams } from './paths.js';
@@ -44,20 +45,22 @@ export class ProxyEstimatingRepository implements IEstimatingRepository {
     }
   }
 
-  async createTracker(data: Omit<IEstimatingTracker, 'id' | 'createdAt' | 'updatedAt'>): Promise<IEstimatingTracker> {
+  async createTracker(data: Omit<IEstimatingTracker, 'id' | 'createdAt' | 'updatedAt'>, idempotencyContext?: IdempotencyContext): Promise<IEstimatingTracker> {
     const raw = await this.client.post<unknown>(
       '/api/estimating/trackers',
       data,
       { domain: 'estimating', operation: 'createTracker' },
+      idempotencyContext,
     );
     return parseItemEnvelope<IEstimatingTracker>(raw);
   }
 
-  async updateTracker(id: number, data: Partial<IEstimatingTracker>): Promise<IEstimatingTracker> {
+  async updateTracker(id: number, data: Partial<IEstimatingTracker>, idempotencyContext?: IdempotencyContext): Promise<IEstimatingTracker> {
     const raw = await this.client.put<unknown>(
       `/api/estimating/trackers/${id}`,
       data,
       { domain: 'estimating', operation: 'updateTracker' },
+      idempotencyContext,
     );
     return parseItemEnvelope<IEstimatingTracker>(raw);
   }
@@ -84,11 +87,12 @@ export class ProxyEstimatingRepository implements IEstimatingRepository {
     }
   }
 
-  async createKickoff(data: Omit<IEstimatingKickoff, 'id' | 'createdAt'>): Promise<IEstimatingKickoff> {
+  async createKickoff(data: Omit<IEstimatingKickoff, 'id' | 'createdAt'>, idempotencyContext?: IdempotencyContext): Promise<IEstimatingKickoff> {
     const raw = await this.client.post<unknown>(
       `/api/estimating/kickoffs`,
       data,
       { domain: 'estimating', operation: 'createKickoff' },
+      idempotencyContext,
     );
     return parseItemEnvelope<IEstimatingKickoff>(raw);
   }

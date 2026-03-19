@@ -1,5 +1,6 @@
 import type { ILead, ILeadFormData, IPagedResult, IListQueryOptions } from '@hbc/models';
 import type { ILeadRepository } from '../../ports/ILeadRepository.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseRepository } from '../base.js';
 import { paginate, genId } from './helpers.js';
 import { SEED_LEADS } from './seedData.js';
@@ -16,7 +17,7 @@ export class MockLeadRepository extends BaseRepository<ILead> implements ILeadRe
     return this.store.find((l) => l.id === id) ?? null;
   }
 
-  async create(data: ILeadFormData): Promise<ILead> {
+  async create(data: ILeadFormData, _idempotencyContext?: IdempotencyContext): Promise<ILead> {
     const lead: ILead = {
       ...data,
       id: genId(),
@@ -27,7 +28,7 @@ export class MockLeadRepository extends BaseRepository<ILead> implements ILeadRe
     return lead;
   }
 
-  async update(id: number, data: Partial<ILeadFormData>): Promise<ILead> {
+  async update(id: number, data: Partial<ILeadFormData>, _idempotencyContext?: IdempotencyContext): Promise<ILead> {
     this.validateId(id, 'Lead');
     const idx = this.store.findIndex((l) => l.id === id);
     if (idx === -1) this.throwNotFound('Lead', id);

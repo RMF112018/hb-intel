@@ -1,6 +1,7 @@
 import type { IProjectRepository } from '../../ports/IProjectRepository.js';
 import type { IActiveProject, IPortfolioSummary, IListQueryOptions, IPagedResult } from '@hbc/models';
 import type { ProxyHttpClient, RequestMetadata } from './ProxyHttpClient.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseRepository } from '../base.js';
 import { NotFoundError } from '../../errors/index.js';
 import { parseItemEnvelope, parsePagedEnvelope } from './envelope.js';
@@ -37,14 +38,14 @@ export class ProxyProjectRepository extends BaseRepository<IActiveProject> imple
     }
   }
 
-  async createProject(data: Omit<IActiveProject, 'id'>): Promise<IActiveProject> {
-    const raw = await this.client.post<unknown>(buildResourcePath('projects'), data, { domain: 'projects', operation: 'createProject' });
+  async createProject(data: Omit<IActiveProject, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IActiveProject> {
+    const raw = await this.client.post<unknown>(buildResourcePath('projects'), data, { domain: 'projects', operation: 'createProject' }, idempotencyContext);
     return parseItemEnvelope<IActiveProject>(raw);
   }
 
-  async updateProject(id: string, data: Partial<IActiveProject>): Promise<IActiveProject> {
+  async updateProject(id: string, data: Partial<IActiveProject>, idempotencyContext?: IdempotencyContext): Promise<IActiveProject> {
     this.validateId(id, 'Project');
-    const raw = await this.client.put<unknown>(buildResourcePath('projects', id), data, { domain: 'projects', operation: 'updateProject' });
+    const raw = await this.client.put<unknown>(buildResourcePath('projects', id), data, { domain: 'projects', operation: 'updateProject' }, idempotencyContext);
     return parseItemEnvelope<IActiveProject>(raw);
   }
 

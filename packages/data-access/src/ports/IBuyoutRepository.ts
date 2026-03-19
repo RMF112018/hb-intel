@@ -1,4 +1,5 @@
 import type { IBuyoutEntry, IBuyoutSummary, IPagedResult, IListQueryOptions } from '@hbc/models';
+import type { IdempotencyContext } from '../retry/idempotency.js';
 
 /**
  * Port interface for the Buyout (procurement) domain.
@@ -31,7 +32,7 @@ export interface IBuyoutRepository {
    * @param data - Entry data without the generated `id`.
    * @returns The newly created entry.
    */
-  createEntry(data: Omit<IBuyoutEntry, 'id'>): Promise<IBuyoutEntry>;
+  createEntry(data: Omit<IBuyoutEntry, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IBuyoutEntry>;
 
   /**
    * Update an existing buyout entry.
@@ -40,7 +41,7 @@ export interface IBuyoutRepository {
    * @returns The updated entry.
    * @throws {NotFoundError} If the entry does not exist.
    */
-  updateEntry(id: number, data: Partial<IBuyoutEntry>): Promise<IBuyoutEntry>;
+  updateEntry(id: number, data: Partial<IBuyoutEntry>, idempotencyContext?: IdempotencyContext): Promise<IBuyoutEntry>;
 
   /**
    * Delete a buyout entry by ID.

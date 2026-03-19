@@ -1,4 +1,5 @@
 import type { ILead, ILeadFormData, IPagedResult, IListQueryOptions } from '@hbc/models';
+import type { IdempotencyContext } from '../retry/idempotency.js';
 
 /**
  * Port interface for the Lead (business development pipeline) domain.
@@ -29,7 +30,7 @@ export interface ILeadRepository {
    * @param data - Lead form data (title, stage, clientName, estimatedValue).
    * @returns The newly created lead with generated `id` and timestamps.
    */
-  create(data: ILeadFormData): Promise<ILead>;
+  create(data: ILeadFormData, idempotencyContext?: IdempotencyContext): Promise<ILead>;
 
   /**
    * Update an existing lead.
@@ -38,7 +39,7 @@ export interface ILeadRepository {
    * @returns The updated lead.
    * @throws {NotFoundError} If the lead does not exist.
    */
-  update(id: number, data: Partial<ILeadFormData>): Promise<ILead>;
+  update(id: number, data: Partial<ILeadFormData>, idempotencyContext?: IdempotencyContext): Promise<ILead>;
 
   /**
    * Delete a lead by ID.

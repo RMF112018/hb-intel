@@ -92,9 +92,9 @@ export class ProxyHttpClient {
     );
   }
 
-  async patch<T>(path: string, body: unknown, metadata?: RequestMetadata): Promise<T> {
+  async patch<T>(path: string, body: unknown, metadata?: RequestMetadata, idempotency?: IdempotencyContext): Promise<T> {
     return withRetry(
-      () => this.request<T>('PATCH', path, body, undefined, metadata),
+      () => this.request<T>('PATCH', path, body, undefined, metadata, idempotency),
       this.writePolicy,
     );
   }

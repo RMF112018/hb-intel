@@ -1,4 +1,5 @@
 import type { IContractInfo, ICommitmentApproval, IPagedResult, IListQueryOptions } from '@hbc/models';
+import type { IdempotencyContext } from '../retry/idempotency.js';
 
 /**
  * Port interface for the Contract (contract management and approvals) domain.
@@ -31,7 +32,7 @@ export interface IContractRepository {
    * @param data - Contract data without the generated `id`.
    * @returns The newly created contract.
    */
-  createContract(data: Omit<IContractInfo, 'id'>): Promise<IContractInfo>;
+  createContract(data: Omit<IContractInfo, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IContractInfo>;
 
   /**
    * Update an existing contract.
@@ -40,7 +41,7 @@ export interface IContractRepository {
    * @returns The updated contract.
    * @throws {NotFoundError} If the contract does not exist.
    */
-  updateContract(id: number, data: Partial<IContractInfo>): Promise<IContractInfo>;
+  updateContract(id: number, data: Partial<IContractInfo>, idempotencyContext?: IdempotencyContext): Promise<IContractInfo>;
 
   /**
    * Delete a contract by ID.
@@ -60,5 +61,5 @@ export interface IContractRepository {
    * @param data - Approval data without the generated `id`.
    * @returns The newly created approval.
    */
-  createApproval(data: Omit<ICommitmentApproval, 'id'>): Promise<ICommitmentApproval>;
+  createApproval(data: Omit<ICommitmentApproval, 'id'>, idempotencyContext?: IdempotencyContext): Promise<ICommitmentApproval>;
 }

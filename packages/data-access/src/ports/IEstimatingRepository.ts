@@ -1,4 +1,5 @@
 import type { IEstimatingTracker, IEstimatingKickoff, IPagedResult, IListQueryOptions } from '@hbc/models';
+import type { IdempotencyContext } from '../retry/idempotency.js';
 
 /**
  * Port interface for the Estimating (bid tracking and kickoff) domain.
@@ -30,7 +31,7 @@ export interface IEstimatingRepository {
    * @param data - Tracker data without generated fields (id, timestamps).
    * @returns The newly created tracker.
    */
-  createTracker(data: Omit<IEstimatingTracker, 'id' | 'createdAt' | 'updatedAt'>): Promise<IEstimatingTracker>;
+  createTracker(data: Omit<IEstimatingTracker, 'id' | 'createdAt' | 'updatedAt'>, idempotencyContext?: IdempotencyContext): Promise<IEstimatingTracker>;
 
   /**
    * Update an existing tracker.
@@ -39,7 +40,7 @@ export interface IEstimatingRepository {
    * @returns The updated tracker.
    * @throws {NotFoundError} If the tracker does not exist.
    */
-  updateTracker(id: number, data: Partial<IEstimatingTracker>): Promise<IEstimatingTracker>;
+  updateTracker(id: number, data: Partial<IEstimatingTracker>, idempotencyContext?: IdempotencyContext): Promise<IEstimatingTracker>;
 
   /**
    * Delete a tracker by ID.
@@ -59,5 +60,5 @@ export interface IEstimatingRepository {
    * @param data - Kickoff data without generated fields (id, createdAt).
    * @returns The newly created kickoff.
    */
-  createKickoff(data: Omit<IEstimatingKickoff, 'id' | 'createdAt'>): Promise<IEstimatingKickoff>;
+  createKickoff(data: Omit<IEstimatingKickoff, 'id' | 'createdAt'>, idempotencyContext?: IdempotencyContext): Promise<IEstimatingKickoff>;
 }

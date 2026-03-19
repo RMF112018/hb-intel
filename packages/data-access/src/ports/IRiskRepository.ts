@@ -1,4 +1,5 @@
 import type { IRiskCostItem, IRiskCostManagement, IPagedResult, IListQueryOptions } from '@hbc/models';
+import type { IdempotencyContext } from '../retry/idempotency.js';
 
 /**
  * Port interface for the Risk (risk cost management) domain.
@@ -31,7 +32,7 @@ export interface IRiskRepository {
    * @param data - Risk item data without the generated `id`.
    * @returns The newly created risk item.
    */
-  createItem(data: Omit<IRiskCostItem, 'id'>): Promise<IRiskCostItem>;
+  createItem(data: Omit<IRiskCostItem, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IRiskCostItem>;
 
   /**
    * Update an existing risk item.
@@ -40,7 +41,7 @@ export interface IRiskRepository {
    * @returns The updated risk item.
    * @throws {NotFoundError} If the risk item does not exist.
    */
-  updateItem(id: number, data: Partial<IRiskCostItem>): Promise<IRiskCostItem>;
+  updateItem(id: number, data: Partial<IRiskCostItem>, idempotencyContext?: IdempotencyContext): Promise<IRiskCostItem>;
 
   /**
    * Delete a risk item by ID.

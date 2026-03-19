@@ -1,5 +1,6 @@
 import type { IScheduleActivity, IScheduleMetrics, IPagedResult, IListQueryOptions } from '@hbc/models';
 import type { IScheduleRepository } from '../../ports/IScheduleRepository.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseRepository } from '../base.js';
 import { paginate, genId } from './helpers.js';
 import { SEED_SCHEDULE_ACTIVITIES } from './seedData.js';
@@ -17,13 +18,13 @@ export class MockScheduleRepository extends BaseRepository<IScheduleActivity> im
     return this.store.find((a) => a.id === id) ?? null;
   }
 
-  async createActivity(data: Omit<IScheduleActivity, 'id'>): Promise<IScheduleActivity> {
+  async createActivity(data: Omit<IScheduleActivity, 'id'>, _idempotencyContext?: IdempotencyContext): Promise<IScheduleActivity> {
     const activity: IScheduleActivity = { ...data, id: genId() };
     this.store.push(activity);
     return activity;
   }
 
-  async updateActivity(id: number, data: Partial<IScheduleActivity>): Promise<IScheduleActivity> {
+  async updateActivity(id: number, data: Partial<IScheduleActivity>, _idempotencyContext?: IdempotencyContext): Promise<IScheduleActivity> {
     this.validateId(id, 'Activity');
     const idx = this.store.findIndex((a) => a.id === id);
     if (idx === -1) this.throwNotFound('Activity', id);

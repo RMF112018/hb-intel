@@ -1,5 +1,6 @@
 import type { IBuyoutEntry, IBuyoutSummary, IPagedResult, IListQueryOptions } from '@hbc/models';
 import type { IBuyoutRepository } from '../../ports/IBuyoutRepository.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseRepository } from '../base.js';
 import { paginate, genId } from './helpers.js';
 import { SEED_BUYOUT_ENTRIES } from './seedData.js';
@@ -17,13 +18,13 @@ export class MockBuyoutRepository extends BaseRepository<IBuyoutEntry> implement
     return this.store.find((e) => e.id === id) ?? null;
   }
 
-  async createEntry(data: Omit<IBuyoutEntry, 'id'>): Promise<IBuyoutEntry> {
+  async createEntry(data: Omit<IBuyoutEntry, 'id'>, _idempotencyContext?: IdempotencyContext): Promise<IBuyoutEntry> {
     const entry: IBuyoutEntry = { ...data, id: genId() };
     this.store.push(entry);
     return entry;
   }
 
-  async updateEntry(id: number, data: Partial<IBuyoutEntry>): Promise<IBuyoutEntry> {
+  async updateEntry(id: number, data: Partial<IBuyoutEntry>, _idempotencyContext?: IdempotencyContext): Promise<IBuyoutEntry> {
     this.validateId(id, 'BuyoutEntry');
     const idx = this.store.findIndex((e) => e.id === id);
     if (idx === -1) this.throwNotFound('BuyoutEntry', id);

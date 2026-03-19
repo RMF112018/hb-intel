@@ -16,6 +16,7 @@
 import type { ILeadRepository } from '../../ports/ILeadRepository.js';
 import type { ILead, ILeadFormData, IListQueryOptions, IPagedResult } from '@hbc/models';
 import type { ProxyHttpClient } from './ProxyHttpClient.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseRepository } from '../base.js';
 import { NotFoundError } from '../../errors/index.js';
 import { parseItemEnvelope, parsePagedEnvelope } from './envelope.js';
@@ -50,21 +51,23 @@ export class ProxyLeadRepository extends BaseRepository<ILead> implements ILeadR
     }
   }
 
-  async create(data: ILeadFormData): Promise<ILead> {
+  async create(data: ILeadFormData, idempotencyContext?: IdempotencyContext): Promise<ILead> {
     const raw = await this.client.post<unknown>(
       buildResourcePath('leads'),
       data,
       { domain: 'leads', operation: 'create' },
+      idempotencyContext,
     );
     return parseItemEnvelope<ILead>(raw);
   }
 
-  async update(id: number, data: Partial<ILeadFormData>): Promise<ILead> {
+  async update(id: number, data: Partial<ILeadFormData>, idempotencyContext?: IdempotencyContext): Promise<ILead> {
     this.validateId(id, 'Lead');
     const raw = await this.client.put<unknown>(
       buildResourcePath('leads', id),
       data,
       { domain: 'leads', operation: 'update' },
+      idempotencyContext,
     );
     return parseItemEnvelope<ILead>(raw);
   }

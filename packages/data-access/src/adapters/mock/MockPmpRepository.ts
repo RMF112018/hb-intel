@@ -1,5 +1,6 @@
 import type { IProjectManagementPlan, IPMPSignature, IPagedResult, IListQueryOptions } from '@hbc/models';
 import type { IPmpRepository } from '../../ports/IPmpRepository.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseRepository } from '../base.js';
 import { paginate, genId } from './helpers.js';
 import { SEED_PMPS, SEED_PMP_SIGNATURES } from './seedData.js';
@@ -18,7 +19,7 @@ export class MockPmpRepository extends BaseRepository<IProjectManagementPlan> im
     return this.plans.find((p) => p.id === id) ?? null;
   }
 
-  async createPlan(data: Omit<IProjectManagementPlan, 'id' | 'createdAt' | 'updatedAt'>): Promise<IProjectManagementPlan> {
+  async createPlan(data: Omit<IProjectManagementPlan, 'id' | 'createdAt' | 'updatedAt'>, _idempotencyContext?: IdempotencyContext): Promise<IProjectManagementPlan> {
     const plan: IProjectManagementPlan = {
       ...data,
       id: genId(),
@@ -29,7 +30,7 @@ export class MockPmpRepository extends BaseRepository<IProjectManagementPlan> im
     return plan;
   }
 
-  async updatePlan(id: number, data: Partial<IProjectManagementPlan>): Promise<IProjectManagementPlan> {
+  async updatePlan(id: number, data: Partial<IProjectManagementPlan>, _idempotencyContext?: IdempotencyContext): Promise<IProjectManagementPlan> {
     this.validateId(id, 'PMP');
     const idx = this.plans.findIndex((p) => p.id === id);
     if (idx === -1) this.throwNotFound('PMP', id);
@@ -47,7 +48,7 @@ export class MockPmpRepository extends BaseRepository<IProjectManagementPlan> im
     return this.signatures.filter((s) => s.pmpId === pmpId);
   }
 
-  async createSignature(data: Omit<IPMPSignature, 'id'>): Promise<IPMPSignature> {
+  async createSignature(data: Omit<IPMPSignature, 'id'>, _idempotencyContext?: IdempotencyContext): Promise<IPMPSignature> {
     const signature: IPMPSignature = { ...data, id: genId() };
     this.signatures.push(signature);
     return signature;

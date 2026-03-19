@@ -6,6 +6,7 @@ import type {
   IJobTitleMapping,
 } from '@hbc/models';
 import type { IAuthRepository } from '../../ports/IAuthRepository.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseRepository } from '../base.js';
 import { SEED_CURRENT_USER, SEED_ROLES } from './seedData.js';
 
@@ -47,13 +48,13 @@ export class MockAuthRepository extends BaseRepository<ICurrentUser> implements 
     return this.roles.find((r) => r.id === id) ?? null;
   }
 
-  async createRole(role: Omit<IRole, 'id'>): Promise<IRole> {
+  async createRole(role: Omit<IRole, 'id'>, _idempotencyContext?: IdempotencyContext): Promise<IRole> {
     const created: IRole = { id: crypto.randomUUID(), ...role };
     this.roles.push(created);
     return { ...created };
   }
 
-  async updateRole(id: string, updates: Partial<Omit<IRole, 'id'>>): Promise<IRole> {
+  async updateRole(id: string, updates: Partial<Omit<IRole, 'id'>>, _idempotencyContext?: IdempotencyContext): Promise<IRole> {
     this.validateId(id, 'Role');
     const index = this.roles.findIndex((r) => r.id === id);
     if (index === -1) this.throwNotFound('Role', id);
@@ -67,7 +68,7 @@ export class MockAuthRepository extends BaseRepository<ICurrentUser> implements 
 
   // ── Role assignment ───────────────────────────────────────────────────────
 
-  async assignRole(userId: string, roleId: string): Promise<void> {
+  async assignRole(userId: string, roleId: string, _idempotencyContext?: IdempotencyContext): Promise<void> {
     this.validateId(userId, 'User');
     this.validateId(roleId, 'Role');
     const role = this.roles.find((r) => r.id === roleId);
@@ -101,6 +102,7 @@ export class MockAuthRepository extends BaseRepository<ICurrentUser> implements 
 
   async createPermissionTemplate(
     template: Omit<IPermissionTemplate, 'id'>,
+    _idempotencyContext?: IdempotencyContext,
   ): Promise<IPermissionTemplate> {
     const created: IPermissionTemplate = { id: crypto.randomUUID(), ...template };
     this.permissionTemplates.push(created);
@@ -110,6 +112,7 @@ export class MockAuthRepository extends BaseRepository<ICurrentUser> implements 
   async updatePermissionTemplate(
     id: string,
     updates: Partial<Omit<IPermissionTemplate, 'id'>>,
+    _idempotencyContext?: IdempotencyContext,
   ): Promise<IPermissionTemplate> {
     this.validateId(id, 'PermissionTemplate');
     const index = this.permissionTemplates.findIndex((t) => t.id === id);
@@ -130,6 +133,7 @@ export class MockAuthRepository extends BaseRepository<ICurrentUser> implements 
 
   async createJobTitleMapping(
     mapping: Omit<IJobTitleMapping, 'id'>,
+    _idempotencyContext?: IdempotencyContext,
   ): Promise<IJobTitleMapping> {
     const created: IJobTitleMapping = { id: crypto.randomUUID(), ...mapping };
     this.jobTitleMappings.push(created);
@@ -139,6 +143,7 @@ export class MockAuthRepository extends BaseRepository<ICurrentUser> implements 
   async updateJobTitleMapping(
     id: string,
     updates: Partial<Omit<IJobTitleMapping, 'id'>>,
+    _idempotencyContext?: IdempotencyContext,
   ): Promise<IJobTitleMapping> {
     this.validateId(id, 'JobTitleMapping');
     const index = this.jobTitleMappings.findIndex((m) => m.id === id);

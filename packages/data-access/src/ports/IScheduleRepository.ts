@@ -1,4 +1,5 @@
 import type { IScheduleActivity, IScheduleMetrics, IPagedResult, IListQueryOptions } from '@hbc/models';
+import type { IdempotencyContext } from '../retry/idempotency.js';
 
 /**
  * Port interface for the Schedule (activity tracking) domain.
@@ -31,7 +32,7 @@ export interface IScheduleRepository {
    * @param data - Activity data without the generated `id`.
    * @returns The newly created activity.
    */
-  createActivity(data: Omit<IScheduleActivity, 'id'>): Promise<IScheduleActivity>;
+  createActivity(data: Omit<IScheduleActivity, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IScheduleActivity>;
 
   /**
    * Update an existing activity.
@@ -40,7 +41,7 @@ export interface IScheduleRepository {
    * @returns The updated activity.
    * @throws {NotFoundError} If the activity does not exist.
    */
-  updateActivity(id: number, data: Partial<IScheduleActivity>): Promise<IScheduleActivity>;
+  updateActivity(id: number, data: Partial<IScheduleActivity>, idempotencyContext?: IdempotencyContext): Promise<IScheduleActivity>;
 
   /**
    * Delete an activity by ID.

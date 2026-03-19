@@ -1,6 +1,7 @@
 import type { IComplianceRepository } from '../../ports/IComplianceRepository.js';
 import type { IComplianceEntry, IComplianceSummary, IListQueryOptions, IPagedResult } from '@hbc/models';
 import type { ProxyHttpClient } from './ProxyHttpClient.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseProxyProjectRepository } from './BaseProxyProjectRepository.js';
 import { parseItemEnvelope } from './envelope.js';
 import { buildResourcePath } from './paths.js';
@@ -22,14 +23,14 @@ export class ProxyComplianceRepository
     return this.fetchById(id);
   }
 
-  async createEntry(data: Omit<IComplianceEntry, 'id'>): Promise<IComplianceEntry> {
-    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createEntry' });
+  async createEntry(data: Omit<IComplianceEntry, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IComplianceEntry> {
+    const raw = await this.client.post<unknown>(buildResourcePath(this.domain), data, { domain: this.domain, operation: 'createEntry' }, idempotencyContext);
     return parseItemEnvelope<IComplianceEntry>(raw);
   }
 
-  async updateEntry(id: number, data: Partial<IComplianceEntry>): Promise<IComplianceEntry> {
+  async updateEntry(id: number, data: Partial<IComplianceEntry>, idempotencyContext?: IdempotencyContext): Promise<IComplianceEntry> {
     this.validateId(id, 'ComplianceEntry');
-    return this.fetchUpdate(id, data) as Promise<IComplianceEntry>;
+    return this.fetchUpdate(id, data, idempotencyContext) as Promise<IComplianceEntry>;
   }
 
   async deleteEntry(id: number): Promise<void> {

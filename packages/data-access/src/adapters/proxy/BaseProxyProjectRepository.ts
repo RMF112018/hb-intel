@@ -14,6 +14,7 @@ import type { IListQueryOptions, IPagedResult } from '@hbc/models';
 import { BaseRepository } from '../base.js';
 import { NotFoundError } from '../../errors/index.js';
 import type { ProxyHttpClient } from './ProxyHttpClient.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { parseItemEnvelope, parsePagedEnvelope } from './envelope.js';
 import { buildProjectScopedPath, buildResourcePath, buildQueryParams } from './paths.js';
 
@@ -50,20 +51,22 @@ export abstract class BaseProxyProjectRepository<T> extends BaseRepository<T> {
     }
   }
 
-  protected async fetchCreate<D>(projectId: string, data: D): Promise<T> {
+  protected async fetchCreate<D>(projectId: string, data: D, idempotency?: IdempotencyContext): Promise<T> {
     const raw = await this.client.post<unknown>(
       buildProjectScopedPath(projectId, this.domain),
       data,
       { domain: this.domain, operation: 'create' },
+      idempotency,
     );
     return parseItemEnvelope<T>(raw);
   }
 
-  protected async fetchUpdate<D>(id: number | string, data: D): Promise<T> {
+  protected async fetchUpdate<D>(id: number | string, data: D, idempotency?: IdempotencyContext): Promise<T> {
     const raw = await this.client.put<unknown>(
       buildResourcePath(this.domain, id),
       data,
       { domain: this.domain, operation: 'update' },
+      idempotency,
     );
     return parseItemEnvelope<T>(raw);
   }

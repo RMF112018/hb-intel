@@ -12,6 +12,9 @@ import './functions/notifications/index.js';
 // Health probe (P1-C3 §2.2.1)
 import './functions/health/index.js';
 
+// Idempotency cleanup timer (P1-D1)
+import './functions/cleanupIdempotency/index.js';
+
 // Phase 1 domain route handlers (P1-C1-a)
 import './functions/leads/index.js';
 import './functions/projects/index.js';

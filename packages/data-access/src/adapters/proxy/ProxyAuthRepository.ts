@@ -31,6 +31,7 @@ import type {
 } from '@hbc/models';
 import type { IAuthRepository } from '../../ports/IAuthRepository.js';
 import type { ProxyHttpClient, RequestMetadata } from './ProxyHttpClient.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseRepository } from '../base.js';
 import { NotFoundError } from '../../errors/index.js';
 import { parseItemEnvelope } from './envelope.js';
@@ -65,14 +66,14 @@ export class ProxyAuthRepository extends BaseRepository<ICurrentUser> implements
     }
   }
 
-  async createRole(role: Omit<IRole, 'id'>): Promise<IRole> {
-    const raw = await this.client.post<unknown>('/auth/roles', role, { domain: 'auth', operation: 'createRole' });
+  async createRole(role: Omit<IRole, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IRole> {
+    const raw = await this.client.post<unknown>('/auth/roles', role, { domain: 'auth', operation: 'createRole' }, idempotencyContext);
     return parseItemEnvelope<IRole>(raw);
   }
 
-  async updateRole(id: string, updates: Partial<Omit<IRole, 'id'>>): Promise<IRole> {
+  async updateRole(id: string, updates: Partial<Omit<IRole, 'id'>>, idempotencyContext?: IdempotencyContext): Promise<IRole> {
     this.validateId(id, 'Role');
-    const raw = await this.client.patch<unknown>(`/auth/roles/${id}`, updates, { domain: 'auth', operation: 'updateRole' });
+    const raw = await this.client.patch<unknown>(`/auth/roles/${id}`, updates, { domain: 'auth', operation: 'updateRole' }, idempotencyContext);
     return parseItemEnvelope<IRole>(raw);
   }
 
@@ -82,10 +83,10 @@ export class ProxyAuthRepository extends BaseRepository<ICurrentUser> implements
 
   // ── Role assignment ───────────────────────────────────────────────────────
 
-  async assignRole(userId: string, roleId: string): Promise<void> {
+  async assignRole(userId: string, roleId: string, idempotencyContext?: IdempotencyContext): Promise<void> {
     this.validateId(userId, 'User');
     this.validateId(roleId, 'Role');
-    await this.client.post<unknown>(`/auth/users/${userId}/roles`, { roleId }, { domain: 'auth', operation: 'assignRole' });
+    await this.client.post<unknown>(`/auth/users/${userId}/roles`, { roleId }, { domain: 'auth', operation: 'assignRole' }, idempotencyContext);
   }
 
   async removeRole(userId: string, roleId: string): Promise<void> {
@@ -103,17 +104,19 @@ export class ProxyAuthRepository extends BaseRepository<ICurrentUser> implements
 
   async createPermissionTemplate(
     template: Omit<IPermissionTemplate, 'id'>,
+    idempotencyContext?: IdempotencyContext,
   ): Promise<IPermissionTemplate> {
-    const raw = await this.client.post<unknown>('/auth/templates', template, { domain: 'auth', operation: 'createPermissionTemplate' });
+    const raw = await this.client.post<unknown>('/auth/templates', template, { domain: 'auth', operation: 'createPermissionTemplate' }, idempotencyContext);
     return parseItemEnvelope<IPermissionTemplate>(raw);
   }
 
   async updatePermissionTemplate(
     id: string,
     updates: Partial<Omit<IPermissionTemplate, 'id'>>,
+    idempotencyContext?: IdempotencyContext,
   ): Promise<IPermissionTemplate> {
     this.validateId(id, 'PermissionTemplate');
-    const raw = await this.client.patch<unknown>(`/auth/templates/${id}`, updates, { domain: 'auth', operation: 'updatePermissionTemplate' });
+    const raw = await this.client.patch<unknown>(`/auth/templates/${id}`, updates, { domain: 'auth', operation: 'updatePermissionTemplate' }, idempotencyContext);
     return parseItemEnvelope<IPermissionTemplate>(raw);
   }
 
@@ -130,17 +133,19 @@ export class ProxyAuthRepository extends BaseRepository<ICurrentUser> implements
 
   async createJobTitleMapping(
     mapping: Omit<IJobTitleMapping, 'id'>,
+    idempotencyContext?: IdempotencyContext,
   ): Promise<IJobTitleMapping> {
-    const raw = await this.client.post<unknown>('/auth/job-title-mappings', mapping, { domain: 'auth', operation: 'createJobTitleMapping' });
+    const raw = await this.client.post<unknown>('/auth/job-title-mappings', mapping, { domain: 'auth', operation: 'createJobTitleMapping' }, idempotencyContext);
     return parseItemEnvelope<IJobTitleMapping>(raw);
   }
 
   async updateJobTitleMapping(
     id: string,
     updates: Partial<Omit<IJobTitleMapping, 'id'>>,
+    idempotencyContext?: IdempotencyContext,
   ): Promise<IJobTitleMapping> {
     this.validateId(id, 'JobTitleMapping');
-    const raw = await this.client.patch<unknown>(`/auth/job-title-mappings/${id}`, updates, { domain: 'auth', operation: 'updateJobTitleMapping' });
+    const raw = await this.client.patch<unknown>(`/auth/job-title-mappings/${id}`, updates, { domain: 'auth', operation: 'updateJobTitleMapping' }, idempotencyContext);
     return parseItemEnvelope<IJobTitleMapping>(raw);
   }
 

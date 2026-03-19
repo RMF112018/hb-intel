@@ -1,5 +1,6 @@
 import type { IEstimatingTracker, IEstimatingKickoff, IPagedResult, IListQueryOptions } from '@hbc/models';
 import type { IEstimatingRepository } from '../../ports/IEstimatingRepository.js';
+import type { IdempotencyContext } from '../../retry/idempotency.js';
 import { BaseRepository } from '../base.js';
 import { paginate, genId } from './helpers.js';
 import { SEED_ESTIMATING_TRACKERS, SEED_ESTIMATING_KICKOFFS } from './seedData.js';
@@ -17,7 +18,7 @@ export class MockEstimatingRepository extends BaseRepository<IEstimatingTracker>
     return this.trackers.find((t) => t.id === id) ?? null;
   }
 
-  async createTracker(data: Omit<IEstimatingTracker, 'id' | 'createdAt' | 'updatedAt'>): Promise<IEstimatingTracker> {
+  async createTracker(data: Omit<IEstimatingTracker, 'id' | 'createdAt' | 'updatedAt'>, _idempotencyContext?: IdempotencyContext): Promise<IEstimatingTracker> {
     const tracker: IEstimatingTracker = {
       ...data,
       id: genId(),
@@ -28,7 +29,7 @@ export class MockEstimatingRepository extends BaseRepository<IEstimatingTracker>
     return tracker;
   }
 
-  async updateTracker(id: number, data: Partial<IEstimatingTracker>): Promise<IEstimatingTracker> {
+  async updateTracker(id: number, data: Partial<IEstimatingTracker>, _idempotencyContext?: IdempotencyContext): Promise<IEstimatingTracker> {
     this.validateId(id, 'EstimatingTracker');
     const idx = this.trackers.findIndex((t) => t.id === id);
     if (idx === -1) this.throwNotFound('EstimatingTracker', id);
@@ -45,7 +46,7 @@ export class MockEstimatingRepository extends BaseRepository<IEstimatingTracker>
     return this.kickoffs.find((k) => k.projectId === projectId) ?? null;
   }
 
-  async createKickoff(data: Omit<IEstimatingKickoff, 'id' | 'createdAt'>): Promise<IEstimatingKickoff> {
+  async createKickoff(data: Omit<IEstimatingKickoff, 'id' | 'createdAt'>, _idempotencyContext?: IdempotencyContext): Promise<IEstimatingKickoff> {
     const kickoff: IEstimatingKickoff = {
       ...data,
       id: genId(),

@@ -1,4 +1,5 @@
 import type { IComplianceEntry, IComplianceSummary, IPagedResult, IListQueryOptions } from '@hbc/models';
+import type { IdempotencyContext } from '../retry/idempotency.js';
 
 /**
  * Port interface for the Compliance (vendor requirement tracking) domain.
@@ -31,7 +32,7 @@ export interface IComplianceRepository {
    * @param data - Entry data without the generated `id`.
    * @returns The newly created entry.
    */
-  createEntry(data: Omit<IComplianceEntry, 'id'>): Promise<IComplianceEntry>;
+  createEntry(data: Omit<IComplianceEntry, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IComplianceEntry>;
 
   /**
    * Update an existing compliance entry.
@@ -40,7 +41,7 @@ export interface IComplianceRepository {
    * @returns The updated entry.
    * @throws {NotFoundError} If the entry does not exist.
    */
-  updateEntry(id: number, data: Partial<IComplianceEntry>): Promise<IComplianceEntry>;
+  updateEntry(id: number, data: Partial<IComplianceEntry>, idempotencyContext?: IdempotencyContext): Promise<IComplianceEntry>;
 
   /**
    * Delete a compliance entry by ID.
