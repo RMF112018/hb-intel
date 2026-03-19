@@ -1,7 +1,7 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
-import type { IEstimatingTracker, IEstimatingKickoff } from '@hbc/models';
 import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
+import { parseBody } from '../../middleware/validate.js';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { createLogger } from '../../utils/logger.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
@@ -11,6 +11,11 @@ import {
   listResponse,
   notFoundResponse,
 } from '../../utils/response-helpers.js';
+import {
+  CreateTrackerSchema,
+  UpdateTrackerSchema,
+  CreateKickoffSchema,
+} from '../../validation/schemas/index.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Tracker Sub-Resource: /api/estimating/trackers
@@ -79,25 +84,13 @@ app.http('createTracker', {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
-    let body: Partial<IEstimatingTracker>;
-    try {
-      body = (await request.json()) as Partial<IEstimatingTracker>;
-    } catch {
-      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
-    }
-
-    if (!body.projectId || !body.bidNumber || !body.status || !body.dueDate) {
-      return errorResponse(400, 'VALIDATION_ERROR', 'projectId, bidNumber, status, and dueDate are required', requestId);
-    }
+    const parsed = await parseBody(request, CreateTrackerSchema);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
 
     try {
       const services = createServiceFactory();
-      const tracker = await services.estimating.createTracker({
-        projectId: body.projectId,
-        bidNumber: body.bidNumber,
-        status: body.status,
-        dueDate: body.dueDate,
-      });
+      const tracker = await services.estimating.createTracker(body);
       logger.info('Tracker created', { id: tracker.id, by: auth.claims.upn });
       return successResponse(tracker, 201);
     } catch {
@@ -121,12 +114,9 @@ app.http('updateTracker', {
       return errorResponse(400, 'VALIDATION_ERROR', 'id must be a number', requestId);
     }
 
-    let body: Partial<IEstimatingTracker>;
-    try {
-      body = (await request.json()) as Partial<IEstimatingTracker>;
-    } catch {
-      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
-    }
+    const parsed = await parseBody(request, UpdateTrackerSchema);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
 
     try {
       const services = createServiceFactory();
@@ -210,25 +200,13 @@ app.http('createKickoff', {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
-    let body: Partial<IEstimatingKickoff>;
-    try {
-      body = (await request.json()) as Partial<IEstimatingKickoff>;
-    } catch {
-      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
-    }
-
-    if (!body.projectId || !body.kickoffDate || !Array.isArray(body.attendees) || !body.notes) {
-      return errorResponse(400, 'VALIDATION_ERROR', 'projectId, kickoffDate, attendees (array), and notes are required', requestId);
-    }
+    const parsed = await parseBody(request, CreateKickoffSchema);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
 
     try {
       const services = createServiceFactory();
-      const kickoff = await services.estimating.createKickoff({
-        projectId: body.projectId,
-        kickoffDate: body.kickoffDate,
-        attendees: body.attendees,
-        notes: body.notes,
-      });
+      const kickoff = await services.estimating.createKickoff(body);
       logger.info('Kickoff created', { projectId: kickoff.projectId, by: auth.claims.upn });
       return successResponse(kickoff, 201);
     } catch {

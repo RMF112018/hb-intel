@@ -1,7 +1,7 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
-import type { ILeadFormData } from '@hbc/models';
 import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
+import { parseBody } from '../../middleware/validate.js';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { createLogger } from '../../utils/logger.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
@@ -11,6 +11,8 @@ import {
   listResponse,
   notFoundResponse,
 } from '../../utils/response-helpers.js';
+import type { ILeadFormData } from '@hbc/models';
+import { CreateLeadSchema, UpdateLeadSchema } from '../../validation/schemas/index.js';
 
 /**
  * GET /api/leads
@@ -79,16 +81,9 @@ app.http('createLead', {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
-    let body: Partial<ILeadFormData>;
-    try {
-      body = (await request.json()) as Partial<ILeadFormData>;
-    } catch {
-      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
-    }
-
-    if (!body.title || !body.stage || !body.clientName || body.estimatedValue === undefined) {
-      return errorResponse(400, 'VALIDATION_ERROR', 'title, stage, clientName, and estimatedValue are required', requestId);
-    }
+    const parsed = await parseBody(request, CreateLeadSchema);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
 
     try {
       const services = createServiceFactory();
@@ -116,16 +111,13 @@ app.http('updateLead', {
       return errorResponse(400, 'VALIDATION_ERROR', 'id must be a number', requestId);
     }
 
-    let body: Partial<ILeadFormData>;
-    try {
-      body = (await request.json()) as Partial<ILeadFormData>;
-    } catch {
-      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
-    }
+    const parsed = await parseBody(request, UpdateLeadSchema);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
 
     try {
       const services = createServiceFactory();
-      const updated = await services.leads.update(id, body);
+      const updated = await services.leads.update(id, body as Partial<ILeadFormData>);
       if (!updated) {
         return notFoundResponse('Lead', String(id), requestId);
       }

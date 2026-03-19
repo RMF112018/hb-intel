@@ -1,7 +1,7 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
-import type { IActiveProject } from '@hbc/models';
 import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
+import { parseBody } from '../../middleware/validate.js';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { createLogger } from '../../utils/logger.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
@@ -11,6 +11,7 @@ import {
   listResponse,
   notFoundResponse,
 } from '../../utils/response-helpers.js';
+import { CreateProjectSchema, UpdateProjectSchema } from '../../validation/schemas/index.js';
 
 /**
  * GET /api/projects
@@ -98,26 +99,13 @@ app.http('createProject', {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
-    let body: Partial<IActiveProject>;
-    try {
-      body = (await request.json()) as Partial<IActiveProject>;
-    } catch {
-      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
-    }
-
-    if (!body.name || !body.number || !body.status || !body.startDate || !body.endDate) {
-      return errorResponse(400, 'VALIDATION_ERROR', 'name, number, status, startDate, and endDate are required', requestId);
-    }
+    const parsed = await parseBody(request, CreateProjectSchema);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
 
     try {
       const services = createServiceFactory();
-      const project = await services.projects.create({
-        name: body.name,
-        number: body.number,
-        status: body.status,
-        startDate: body.startDate,
-        endDate: body.endDate,
-      });
+      const project = await services.projects.create(body);
       logger.info('Project created', { id: project.id, by: auth.claims.upn });
       return successResponse(project, 201);
     } catch {
@@ -141,12 +129,9 @@ app.http('updateProject', {
       return errorResponse(400, 'VALIDATION_ERROR', 'id is required', requestId);
     }
 
-    let body: Partial<IActiveProject>;
-    try {
-      body = (await request.json()) as Partial<IActiveProject>;
-    } catch {
-      return errorResponse(400, 'VALIDATION_ERROR', 'Invalid JSON body', requestId);
-    }
+    const parsed = await parseBody(request, UpdateProjectSchema);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
 
     try {
       const services = createServiceFactory();
