@@ -52,6 +52,40 @@ describe('parsePagedEnvelope', () => {
   it('throws when items is not an array', () => {
     expect(() => parsePagedEnvelope({ items: 'not array' })).toThrow('non-array "items"');
   });
+
+  it('parses C2 nested pagination shape', () => {
+    const body = {
+      items: [{ id: 1 }, { id: 2 }],
+      pagination: { total: 42, page: 3, pageSize: 10, totalPages: 5 },
+    };
+    const result = parsePagedEnvelope<{ id: number }>(body);
+    expect(result.items).toEqual([{ id: 1 }, { id: 2 }]);
+    expect(result.total).toBe(42);
+    expect(result.page).toBe(3);
+    expect(result.pageSize).toBe(10);
+  });
+
+  it('prefers nested pagination over flat fields', () => {
+    const body = {
+      items: [{ id: 1 }],
+      total: 999,
+      page: 99,
+      pageSize: 50,
+      pagination: { total: 42, page: 2, pageSize: 25, totalPages: 2 },
+    };
+    const result = parsePagedEnvelope<{ id: number }>(body);
+    expect(result.total).toBe(42);
+    expect(result.page).toBe(2);
+    expect(result.pageSize).toBe(25);
+  });
+
+  it('falls back to flat fields when pagination is absent', () => {
+    const body = { items: [{ id: 1 }, { id: 2 }], total: 50, page: 2, pageSize: 25 };
+    const result = parsePagedEnvelope<{ id: number }>(body);
+    expect(result.total).toBe(50);
+    expect(result.page).toBe(2);
+    expect(result.pageSize).toBe(25);
+  });
 });
 
 describe('parseErrorBody', () => {
