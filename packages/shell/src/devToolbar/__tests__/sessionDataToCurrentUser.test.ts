@@ -52,7 +52,7 @@ describe('sessionDataToCurrentUser', () => {
 
   it('first role includes only truthy permissions as flat strings', () => {
     const user = sessionDataToCurrentUser(makeSession());
-    const permissions = user.roles[0].permissions;
+    const permissions = user.roles[0].grants;
     expect(permissions).toContain('feature:accounting-invoice');
     expect(permissions).toContain('feature:accounting-reports');
     expect(permissions).toContain('action:read');
@@ -64,7 +64,7 @@ describe('sessionDataToCurrentUser', () => {
 
   it('second role has empty permissions array', () => {
     const user = sessionDataToCurrentUser(makeSession({ roles: ['AccountingUser', 'Manager'] }));
-    expect(user.roles[1].permissions).toHaveLength(0);
+    expect(user.roles[1].grants).toHaveLength(0);
   });
 
   it('generates role id with dev-role- prefix and kebab-case slug', () => {
@@ -77,7 +77,7 @@ describe('sessionDataToCurrentUser', () => {
       Object.keys(makeSession().permissions).map((k) => [k, false]),
     );
     const user = sessionDataToCurrentUser(makeSession({ permissions: noPermissions }));
-    expect(user.roles[0].permissions).toHaveLength(0);
+    expect(user.roles[0].grants).toHaveLength(0);
   });
 });
 

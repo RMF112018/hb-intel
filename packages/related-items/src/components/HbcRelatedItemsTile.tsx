@@ -108,7 +108,7 @@ export const HbcRelatedItemsTile: FC<HbcRelatedItemsTileProps> = ({
   const styles = useStyles();
   const user = useCurrentUser();
   const { tier } = useComplexity();
-  const resolvedRole = currentUserRole ?? user?.roles[0]?.name ?? 'Unknown';
+  const resolvedRole = currentUserRole ?? (user?.type === 'internal' ? user.roles[0]?.name : undefined) ?? 'Unknown';
 
   const { items, isLoading, error } = useRelatedItems({
     sourceRecordType,

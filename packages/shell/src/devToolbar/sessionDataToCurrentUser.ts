@@ -1,7 +1,7 @@
 // packages/shell/src/devToolbar/sessionDataToCurrentUser.ts
 // D-PH6F-01: Conversion utilities for ISessionData -> ICurrentUser + permission extraction
 
-import type { ICurrentUser, IRole } from '@hbc/models';
+import type { IInternalUser } from '@hbc/models';
 import type { ISessionData } from '@hbc/auth/dev';
 
 /**
@@ -14,18 +14,20 @@ import type { ISessionData } from '@hbc/auth/dev';
  * @param session - The dev auth session data containing userId, displayName, email, roles, and permissions.
  * @returns An `ICurrentUser` suitable for `useAuthStore.getState().setUser()`.
  */
-export function sessionDataToCurrentUser(session: ISessionData): ICurrentUser {
+export function sessionDataToCurrentUser(session: ISessionData): IInternalUser {
   const grantedPermissions = extractGrantedPermissions(session.permissions);
 
-  // D-PH6F-01: Collapse role strings into IRole objects, attaching granted permissions
+  // D-PH6F-01: Collapse role strings into IUserRole objects, attaching granted permissions
   // to the first role so the auth store has a complete picture.
-  const roles: IRole[] = session.roles.map((roleName, index) => ({
+  const roles = session.roles.map((roleName, index) => ({
     id: `dev-role-${roleName.toLowerCase().replace(/\s+/g, '-')}`,
     name: roleName,
-    permissions: index === 0 ? grantedPermissions : [],
+    grants: index === 0 ? grantedPermissions : [],
+    source: 'manual' as const,
   }));
 
   return {
+    type: 'internal' as const,
     id: session.userId,
     displayName: session.displayName,
     email: session.email,

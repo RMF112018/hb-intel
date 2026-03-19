@@ -99,7 +99,7 @@ export const HbcRelatedItemsPanel: FC<HbcRelatedItemsPanelProps> = ({
   const styles = useStyles();
   const user = useCurrentUser();
   const { tier } = useComplexity();
-  const currentUserRole = user?.roles[0]?.name ?? 'Unknown';
+  const currentUserRole = (user?.type === 'internal' ? user.roles[0]?.name : undefined) ?? 'Unknown';
 
   if (tier === 'essential') {
     return null;
