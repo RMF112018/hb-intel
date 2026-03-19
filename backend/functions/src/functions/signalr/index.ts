@@ -5,7 +5,9 @@ import {
   type InvocationContext,
   type HttpResponseInit,
 } from '@azure/functions';
-import { validateToken, unauthorizedResponse } from '../../middleware/validateToken.js';
+import { withAuth } from '../../middleware/auth.js';
+import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
+import { errorResponse } from '../../utils/response-helpers.js';
 
 const ADMIN_ROLES = ['Admin', 'HBIntelAdmin'];
 const ADMIN_GROUP = 'provisioning-admin';
@@ -27,27 +29,17 @@ app.http('signalrNegotiate', {
   route: 'provisioning-negotiate',
   extraInputs: [],
   extraOutputs: [connectionInfoOutput],
-  handler: async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
-    let claims;
-    try {
-      // Bearer validation is handled explicitly to keep negotiate auth policy aligned
-      // with PH6.2 and preserve user identity for SignalR userId assignment.
-      claims = await validateToken(request);
-    } catch {
-      return unauthorizedResponse('Invalid token for SignalR negotiate');
-    }
+  handler: withAuth(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
 
     const projectId = request.query.get('projectId');
     if (!projectId) {
-      return {
-        status: 400,
-        jsonBody: { error: 'projectId query parameter is required' },
-      };
+      return errorResponse(400, 'VALIDATION_ERROR', 'projectId query parameter is required', requestId);
     }
 
     // Per-project group is always required; admin group is additive for global monitoring.
     const groups: string[] = [`provisioning-${projectId}`];
-    const isAdmin = claims.roles.some((role) => ADMIN_ROLES.includes(role));
+    const isAdmin = auth.claims.roles.some((role) => ADMIN_ROLES.includes(role));
     if (isAdmin) {
       groups.push(ADMIN_GROUP);
     }
@@ -59,16 +51,17 @@ app.http('signalrNegotiate', {
 
     context.extraOutputs.set(connectionInfoOutput, {
       ...connectionInfo,
-      userId: claims.upn,
+      userId: auth.claims.upn,
     });
 
+    // Raw negotiate response — SignalR client SDK requires this exact shape; do NOT wrap in successResponse.
     return {
       status: 200,
       jsonBody: {
         ...connectionInfo,
-        userId: claims.upn,
+        userId: auth.claims.upn,
         groups,
       },
     };
-  },
+  }),
 });
