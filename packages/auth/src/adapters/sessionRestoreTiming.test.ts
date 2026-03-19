@@ -1,13 +1,14 @@
-import type { ICurrentUser } from '@hbc/models';
+import type { IInternalUser } from '@hbc/models';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MockAdapter } from './MockAdapter.js';
 import type { NormalizedAuthSession } from '../types.js';
 
-const user: ICurrentUser = {
+const user: IInternalUser = {
+  type: 'internal',
   id: 'timing-user-1',
   displayName: 'Timing User',
   email: 'timing.user@hbintel.local',
-  roles: [{ id: 'role-member', name: 'Member', permissions: ['project:read'] }],
+  roles: [{ id: 'role-member', name: 'Member', grants: ['project:read'], source: 'manual' }],
 };
 
 function buildSession(expiresAt?: string): NormalizedAuthSession {

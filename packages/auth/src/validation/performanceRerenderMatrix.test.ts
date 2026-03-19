@@ -29,6 +29,7 @@ function seedAuthenticatedState(): void {
     },
     session: {
       user: {
+        type: 'internal' as const,
         id: 'perf-user-1',
         displayName: 'Perf User',
         email: 'perf.user@hbintel.local',
@@ -36,7 +37,8 @@ function seedAuthenticatedState(): void {
           {
             id: 'role-member',
             name: 'Member',
-            permissions: ['project:read'],
+            grants: ['project:read'],
+            source: 'manual' as const,
           },
         ],
       },
@@ -54,6 +56,7 @@ function seedAuthenticatedState(): void {
       },
     },
     currentUser: {
+      type: 'internal' as const,
       id: 'perf-user-1',
       displayName: 'Perf User',
       email: 'perf.user@hbintel.local',
@@ -61,7 +64,8 @@ function seedAuthenticatedState(): void {
         {
           id: 'role-member',
           name: 'Member',
-          permissions: ['project:read'],
+          grants: ['project:read'],
+          source: 'manual' as const,
         },
       ],
     },
@@ -108,6 +112,7 @@ describe('Phase 5.16 performance/rerender validation matrix', () => {
     useAuthStore.getState().completeBootstrap({
       session: {
         user: {
+          type: 'internal' as const,
           id: 'perf-user-2',
           displayName: 'Perf User 2',
           email: 'perf.user2@hbintel.local',
@@ -115,7 +120,8 @@ describe('Phase 5.16 performance/rerender validation matrix', () => {
             {
               id: 'role-admin',
               name: 'Administrator',
-              permissions: ['*:*'],
+              grants: ['*:*'],
+              source: 'manual' as const,
             },
           ],
         },

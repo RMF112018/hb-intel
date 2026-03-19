@@ -14,6 +14,7 @@ describe('authStore audit integration', () => {
   it('records sign-in and sign-out events', () => {
     useAuthStore.getState().signInSuccess({
       user: {
+        type: 'internal',
         id: 'user-1',
         displayName: 'User One',
         email: 'user1@hbintel.local',
@@ -21,7 +22,8 @@ describe('authStore audit integration', () => {
           {
             id: 'role-member',
             name: 'Member',
-            permissions: ['project-hub:view'],
+            grants: ['project-hub:view'],
+            source: 'manual',
           },
         ],
       },
@@ -52,6 +54,7 @@ describe('authStore audit integration', () => {
       shellStatusTransition: 'restore-succeeded',
       session: {
         user: {
+          type: 'internal',
           id: 'user-2',
           displayName: 'User Two',
           email: 'user2@hbintel.local',
@@ -59,7 +62,8 @@ describe('authStore audit integration', () => {
             {
               id: 'role-admin',
               name: 'Administrator',
-              permissions: ['*:*'],
+              grants: ['*:*'],
+              source: 'manual',
             },
           ],
         },
@@ -162,10 +166,11 @@ describe('authStore bootstrap timing integration', () => {
   it('completeBootstrap calls endStartupPhase with success metadata', () => {
     const mockSession = {
       user: {
+        type: 'internal' as const,
         id: 'user-1',
         displayName: 'User One',
         email: 'user1@hbintel.local',
-        roles: [{ id: 'role-member', name: 'Member', permissions: ['project-hub:view'] }],
+        roles: [{ id: 'role-member', name: 'Member', grants: ['project-hub:view'], source: 'manual' as const }],
       },
       providerIdentityRef: 'user1@hbintel.local',
       resolvedRoles: ['Member'],

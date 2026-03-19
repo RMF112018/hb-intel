@@ -5,13 +5,15 @@ import { getProvisioningVisibility } from './visibility.js';
 function createSession(upn: string, resolvedRoles: string[]): NormalizedAuthSession {
   return {
     user: {
+      type: 'internal' as const,
       id: 'u-1',
       displayName: upn,
       email: upn,
       roles: resolvedRoles.map((role, index) => ({
         id: `r-${index}`,
         name: role,
-        permissions: [],
+        grants: [],
+        source: 'manual' as const,
       })),
     },
     providerIdentityRef: upn,

@@ -21,10 +21,11 @@ const mockTier = { value: 'standard' as string };
 
 vi.mock('@hbc/auth', () => ({
   useCurrentUser: () => ({
+    type: 'internal',
     id: 'u-1',
     displayName: 'Story User',
     email: 'story@example.com',
-    roles: [{ id: 'r-1', name: 'Project Manager', permissions: [] }],
+    roles: [{ id: 'r-1', name: 'Project Manager', grants: [], source: 'manual' }],
   }),
 }));
 

@@ -1,4 +1,4 @@
-import type { ICurrentUser } from '@hbc/models';
+import type { IInternalUser } from '@hbc/models';
 import { describe, expect, it } from 'vitest';
 import {
   applyOverrideApprovalAction,
@@ -22,7 +22,8 @@ import { buildAccessDeniedActionModel } from '../guards/AccessDenied.js';
 /**
  * Phase 5.16 validation matrix fixture user used across runtime-mode tests.
  */
-const MATRIX_USER: ICurrentUser = {
+const MATRIX_USER: IInternalUser = {
+  type: 'internal',
   id: 'matrix-user-1',
   displayName: 'Matrix User',
   email: 'matrix.user@hbintel.local',
@@ -30,7 +31,8 @@ const MATRIX_USER: ICurrentUser = {
     {
       id: 'role-admin',
       name: 'Administrator',
-      permissions: ['*:*'],
+      grants: ['*:*'],
+      source: 'manual',
     },
   ],
 };

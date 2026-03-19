@@ -67,10 +67,11 @@ describe('HbcRelatedItemsPanel (SF14-T05)', () => {
     vi.clearAllMocks();
 
     vi.mocked(useCurrentUser).mockReturnValue({
+      type: 'internal',
       id: 'u-1',
       displayName: 'Test User',
       email: 'test@example.com',
-      roles: [{ id: 'r-1', name: 'Project Manager', permissions: [] }],
+      roles: [{ id: 'r-1', name: 'Project Manager', grants: [], source: 'manual' }],
     });
 
     vi.mocked(useComplexity).mockReturnValue({
