@@ -3,7 +3,7 @@
  * Shared utilities that apps/pwa/src/auth/msal-init.ts delegates to.
  * Keeps @hbc/auth as the single auth abstraction layer.
  */
-import type { ICurrentUser } from '@hbc/models';
+import type { IInternalUser } from '@hbc/models';
 import type { IMsalConfig } from '../adapters/index.js';
 
 /**
@@ -14,8 +14,9 @@ export function mapMsalAccountToUser(account: {
   localAccountId: string;
   name?: string;
   username: string;
-}): ICurrentUser {
+}): IInternalUser {
   return {
+    type: 'internal',
     id: account.localAccountId,
     displayName: account.name ?? account.username,
     email: account.username,
@@ -23,7 +24,8 @@ export function mapMsalAccountToUser(account: {
       {
         id: 'role-default',
         name: 'User',
-        permissions: ['project:read', 'document:read'],
+        grants: ['project:read', 'document:read'],
+        source: 'manual',
       },
     ],
   };

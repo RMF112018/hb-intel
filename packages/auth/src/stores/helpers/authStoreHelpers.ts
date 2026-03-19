@@ -142,9 +142,13 @@ export function buildCompatSession(
   return {
     user,
     providerIdentityRef: user.email,
-    resolvedRoles: user.roles.map((role) => role.name),
+    resolvedRoles: user.type === 'internal'
+      ? user.roles.map((role) => role.name)
+      : [],
     permissionSummary: {
-      grants: user.roles.flatMap((role) => role.permissions),
+      grants: user.type === 'internal'
+        ? user.roles.flatMap((role) => role.grants)
+        : user.projectAccess.flatMap((p) => p.grants),
       overrides: [],
     },
     runtimeMode,

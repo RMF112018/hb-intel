@@ -63,10 +63,16 @@ export function mapIdentityToAppRoles(
  * Convert adapter identity into the canonical role-mapping input contract.
  */
 export function toRoleMappingInput(identity: AdapterIdentityPayload): RoleMappingInput {
+  // External users have no system roles — return empty existingRoleNames (AD-8)
+  const existingRoleNames =
+    identity.user.type === 'internal'
+      ? identity.user.roles.map((role) => role.name)
+      : [];
+
   return {
     providerIdentityRef: identity.providerIdentityRef,
     runtimeMode: identity.runtimeMode,
-    existingRoleNames: identity.user.roles.map((role) => role.name),
+    existingRoleNames,
     rawContext: identity.rawContext,
     hint: {
       loginName: identity.user.email,

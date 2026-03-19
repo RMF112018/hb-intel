@@ -2,7 +2,7 @@
 // D-PH6F-03: Bootstrap utilities for PERSONA_REGISTRY-aware dev bootstrapping.
 // Shared by apps/pwa/src/bootstrap.ts and apps/dev-harness/src/bootstrap.ts.
 
-import type { ICurrentUser } from '@hbc/models';
+import type { IInternalUser } from '@hbc/models';
 import { PERSONA_REGISTRY, type IPersona } from './personaRegistry.js';
 
 /** Must match STATE_KEY in packages/shell/src/devToolbar/useDevAuthBypass.ts */
@@ -52,17 +52,19 @@ export function resolveBootstrapPersona(): IPersona {
  *
  * D-PH6F-03: Bridge between PERSONA_REGISTRY personas and the Zustand auth store.
  */
-export function personaToCurrentUser(persona: IPersona): ICurrentUser {
+export function personaToCurrentUser(persona: IPersona): IInternalUser {
   const grantedPermissions = resolveBootstrapPermissions(persona);
 
   return {
+    type: 'internal',
     id: persona.id,
     displayName: persona.name,
     email: persona.email,
     roles: persona.roles.map((roleName, index) => ({
       id: `dev-role-${roleName.toLowerCase().replace(/\s+/g, '-')}`,
       name: roleName,
-      permissions: index === 0 ? grantedPermissions : [],
+      grants: index === 0 ? grantedPermissions : [],
+      source: 'manual' as const,
     })),
   };
 }

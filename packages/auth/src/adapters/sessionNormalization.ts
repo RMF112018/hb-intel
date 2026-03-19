@@ -52,7 +52,10 @@ export function normalizeIdentityToSession(
   }
 
   const nowIso = new Date().toISOString();
-  const grants = identity.user.roles.flatMap((role) => role.permissions);
+  const grants =
+    identity.user.type === 'internal'
+      ? identity.user.roles.flatMap((role) => role.grants)
+      : identity.user.projectAccess.flatMap((p) => p.grants);
   const resolvedRoles = mapIdentityToAppRoles(identity);
 
   return {

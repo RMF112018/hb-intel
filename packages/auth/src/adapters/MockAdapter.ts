@@ -1,4 +1,4 @@
-import type { ICurrentUser } from '@hbc/models';
+import type { ICurrentUser, IInternalUser } from '@hbc/models';
 import type { IAuthAdapter } from '../IAuthAdapter.js';
 import type {
   AdapterIdentityPayload,
@@ -106,7 +106,8 @@ export class MockAdapter implements IAuthAdapter {
   }
 }
 
-const DEFAULT_MOCK_USER: ICurrentUser = {
+const DEFAULT_MOCK_USER: IInternalUser = {
+  type: 'internal',
   id: 'mock-user-001',
   displayName: 'Mock User',
   email: 'mock.user@hbintel.local',
@@ -114,7 +115,8 @@ const DEFAULT_MOCK_USER: ICurrentUser = {
     {
       id: 'role-mock-admin',
       name: 'Administrator',
-      permissions: ['*:*'],
+      grants: ['*:*'],
+      source: 'manual',
     },
   ],
 };

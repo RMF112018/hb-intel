@@ -5,6 +5,7 @@ import { mapIdentityToAppRoles } from './roleMapping.js';
 function createIdentity(overrides?: Partial<AdapterIdentityPayload>): AdapterIdentityPayload {
   return {
     user: {
+      type: 'internal',
       id: 'user-1',
       displayName: 'Test User',
       email: 'test@hbintel.local',
@@ -12,7 +13,8 @@ function createIdentity(overrides?: Partial<AdapterIdentityPayload>): AdapterIde
         {
           id: 'role-member',
           name: 'Member',
-          permissions: ['project:view'],
+          grants: ['project:view'],
+          source: 'manual',
         },
       ],
     },
@@ -52,6 +54,7 @@ describe('mapIdentityToAppRoles', () => {
     const roles = mapIdentityToAppRoles(
       createIdentity({
         user: {
+          type: 'internal',
           id: 'user-2',
           displayName: 'No Role User',
           email: 'norole@hbintel.local',

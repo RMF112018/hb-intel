@@ -73,7 +73,10 @@ export function bootstrapSpfxAuth(input: ISpfxPageContext | SpfxHostBridgeInput)
       ? toSpfxIdentityBridgeInput(input)
       : toLegacyBridgeInput(input);
     const user = extractSpfxUser(bridgeInput.pageContext);
-    const permissions = user.roles.flatMap((r) => r.permissions);
+    const permissions =
+      user.type === 'internal'
+        ? user.roles.flatMap((r) => r.grants)
+        : user.projectAccess.flatMap((p) => p.grants);
 
     useAuthStore.getState().setUser(user);
     usePermissionStore.getState().setPermissions(permissions);

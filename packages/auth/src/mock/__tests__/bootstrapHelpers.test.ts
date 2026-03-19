@@ -59,7 +59,7 @@ describe('personaToCurrentUser', () => {
   it('does not include _-prefixed keys in role permissions', () => {
     const degraded = PERSONA_REGISTRY.getById('persona-degraded-mode')!;
     const user = personaToCurrentUser(degraded);
-    const allPermissions = user.roles.flatMap((r) => r.permissions);
+    const allPermissions = user.roles.flatMap((r) => r.grants);
     expect(allPermissions.some((p) => p.startsWith('_'))).toBe(false);
   });
 });

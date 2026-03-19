@@ -6,7 +6,7 @@
  * Reference: PH7-BW-2-SPFx-Auth-Bridge.md
  */
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
-import type { ICurrentUser } from '@hbc/models';
+import type { IInternalUser } from '@hbc/models';
 import { useAuthStore } from '../stores/index.js';
 import { usePermissionStore } from '../stores/index.js';
 import { endStartupPhase, startStartupPhase } from '../startup/startupTimingBridge.js';
@@ -52,7 +52,8 @@ export async function bootstrapSpfxAuth(
 
     // 2. Build ICurrentUser from SharePoint page context
     const { user } = context.pageContext;
-    const currentUser: ICurrentUser = {
+    const currentUser: IInternalUser = {
+      type: 'internal',
       id: `spfx-${user.loginName}`,
       displayName: user.displayName,
       email: user.email,

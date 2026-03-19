@@ -1,4 +1,4 @@
-import type { ICurrentUser } from '@hbc/models';
+import type { IInternalUser } from '@hbc/models';
 import type { IAuthAdapter } from '../IAuthAdapter.js';
 import type {
   AdapterIdentityPayload,
@@ -113,27 +113,28 @@ export class SpfxAdapter implements IAuthAdapter {
 /**
  * Shared mapper retained for compatibility with existing SPFx bootstrap code.
  */
-export function mapSpfxContextToUser(pageContext: ISpfxPageContext): ICurrentUser {
+export function mapSpfxContextToUser(pageContext: ISpfxPageContext): IInternalUser {
   const { user, web } = pageContext;
 
-  const permissions: string[] = [];
+  const grants: string[] = [];
   if (user.isSiteAdmin) {
-    permissions.push('*:*');
+    grants.push('*:*');
   } else {
     // SharePoint permission-mask bridge to current HB Intel action set.
     const high = web.permissions.value.High;
     const low = web.permissions.value.Low;
 
-    if (high & 0x800) permissions.push('settings:*');
-    if (low & 0x20) permissions.push('project:write', 'document:write');
-    if (low & 0x10) permissions.push('project:read', 'document:read', 'reports:read');
+    if (high & 0x800) grants.push('settings:*');
+    if (low & 0x20) grants.push('project:write', 'document:write');
+    if (low & 0x10) grants.push('project:read', 'document:read', 'reports:read');
 
-    if (permissions.length === 0) {
-      permissions.push('project:read');
+    if (grants.length === 0) {
+      grants.push('project:read');
     }
   }
 
   return {
+    type: 'internal',
     id: `spfx-${user.loginName}`,
     displayName: user.displayName,
     email: user.email,
@@ -141,7 +142,8 @@ export function mapSpfxContextToUser(pageContext: ISpfxPageContext): ICurrentUse
       {
         id: user.isSiteAdmin ? 'role-admin' : 'role-member',
         name: user.isSiteAdmin ? 'Administrator' : 'Member',
-        permissions,
+        grants,
+        source: 'manual',
       },
     ],
   };
