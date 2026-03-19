@@ -11,6 +11,24 @@ vi.mock('./validateToken.js', () => ({
   }),
 }));
 
+const trackedEvents: Array<{ name: string; properties: Record<string, unknown> }> = [];
+
+vi.mock('../utils/logger.js', () => ({
+  createLogger: () => ({
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    trackEvent: (name: string, properties: Record<string, unknown>) => {
+      trackedEvents.push({ name, properties });
+    },
+    trackMetric: vi.fn(),
+  }),
+}));
+
+vi.mock('./request-id.js', () => ({
+  extractOrGenerateRequestId: () => 'test-correlation-id',
+}));
+
 import { extractBearer, withAuth, type AuthContext } from './auth.js';
 
 const makeRequest = (authorizationHeader?: string): HttpRequest =>
@@ -56,6 +74,7 @@ describe('P1-C2 extractBearer', () => {
 describe('P1-C2 withAuth', () => {
   beforeEach(() => {
     validateTokenMock.mockReset();
+    trackedEvents.length = 0;
   });
 
   it('returns 401 before handler executes when request is unauthenticated', async () => {
@@ -120,5 +139,47 @@ describe('P1-C2 withAuth', () => {
     await expect(wrapped(makeRequest('Bearer valid-token'), makeContext())).rejects.toThrow(
       'Handler blew up',
     );
+  });
+});
+
+describe('P1-C3 auth.bearer.* telemetry', () => {
+  beforeEach(() => {
+    validateTokenMock.mockReset();
+    trackedEvents.length = 0;
+  });
+
+  it('emits auth.bearer.error when bearer header is missing', async () => {
+    const wrapped = withAuth(vi.fn());
+    await wrapped(makeRequest(), makeContext());
+
+    const event = trackedEvents.find((e) => e.name === 'auth.bearer.error');
+    expect(event).toBeDefined();
+    expect(event!.properties.reason).toBe('missing_or_malformed');
+    expect(event!.properties.correlationId).toBe('test-correlation-id');
+  });
+
+  it('emits auth.bearer.error when token validation fails', async () => {
+    validateTokenMock.mockRejectedValueOnce(new Error('JWTExpired'));
+    const wrapped = withAuth(vi.fn());
+    await wrapped(makeRequest('Bearer bad-token'), makeContext());
+
+    const event = trackedEvents.find((e) => e.name === 'auth.bearer.error');
+    expect(event).toBeDefined();
+    expect(event!.properties.reason).toBe('invalid_token');
+    expect(typeof event!.properties.durationMs).toBe('number');
+  });
+
+  it('emits auth.bearer.success when token validates', async () => {
+    validateTokenMock.mockResolvedValueOnce({
+      upn: 'user@hb.com', oid: 'oid-1', roles: [], displayName: 'User', jobTitle: undefined,
+    });
+    const handler = vi.fn().mockResolvedValueOnce({ status: 200 });
+    const wrapped = withAuth(handler);
+    await wrapped(makeRequest('Bearer valid-token'), makeContext());
+
+    const event = trackedEvents.find((e) => e.name === 'auth.bearer.success');
+    expect(event).toBeDefined();
+    expect(typeof event!.properties.durationMs).toBe('number');
+    expect(event!.properties.correlationId).toBe('test-correlation-id');
   });
 });
