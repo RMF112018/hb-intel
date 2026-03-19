@@ -148,7 +148,7 @@ Until these conditions are met, implementation should focus on Tier 1 work items
 
 | Document | Type | Status |
 |---|---|---|
-| P1-E1-Contract-Test-Suite-Plan.md | Engineering Plan | In Progress — Tasks 1–3 complete (Zod schemas, vitest, MSW handlers); Tasks 8–9 scaffold delivered (env-gated, blocked on C1 + C2 + staging); Tasks 4–7 blocked (C1) |
+| P1-E1-Contract-Test-Suite-Plan.md | Engineering Plan | In Progress — Tasks 1–7 complete (Zod schemas, vitest, MSW handlers, adapter contract tests, response envelope contract tests); Tasks 8–9 scaffold delivered (env-gated, blocked on staging) |
 | P1-E2-Staging-Readiness-Checklist.md | Acceptance Checklist | Implementation-Ready — Blocked (C1 domain routes, staging infrastructure); B1 ✅, C2 middleware ✅, C3 foundation ✅, D1 ✅, E1 infrastructure ✅ |
 
 ### Closeout and Reconciliation (1 deliverable)
