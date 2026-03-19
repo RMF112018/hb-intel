@@ -1534,6 +1534,9 @@ importers:
         specifier: workspace:*
         version: link:../models
     devDependencies:
+      msw:
+        specifier: ^2.7.5
+        version: 2.12.10(@types/node@20.19.35)(typescript@5.9.3)
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@20.19.35)(happy-dom@18.0.1)(jsdom@26.1.0)(msw@2.12.10(@types/node@20.19.35)(typescript@5.9.3))(terser@5.46.0)(tsx@4.21.0)

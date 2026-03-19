@@ -1,6 +1,6 @@
 {
   "name": "@hbc/data-access",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -29,6 +29,7 @@
     "@hbc/models": "workspace:*"
   },
   "devDependencies": {
+    "msw": "^2.7.5",
     "vitest": "^3.2.4"
   },
   "files": [
