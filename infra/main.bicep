@@ -80,7 +80,7 @@ resource hostTableRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 // Cosmos DB Built-in Data Contributor role (read/write data plane access)
 var cosmosDbBuiltInDataContributor = '00000000-0000-0000-0000-000000000002'
 
-resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
+resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
   name: 'hbintel-table-${environmentName}'
   location: location
   kind: 'GlobalDocumentDB'
@@ -100,14 +100,12 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
     consistencyPolicy: {
       defaultConsistencyLevel: 'Session'
     }
-    publicNetworkAccess: 'Enabled'
-    minimalTlsVersion: 'Tls12'
   }
 }
 
 // Cosmos DB RBAC: Built-in Data Contributor for Managed Identity
 
-resource cosmosDbDataRole 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' = {
+resource cosmosDbDataRole 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2023-04-15' = {
   name: guid(cosmosDbAccount.id, functionAppPrincipalId, cosmosDbBuiltInDataContributor)
   parent: cosmosDbAccount
   properties: {

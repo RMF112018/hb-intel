@@ -32,7 +32,7 @@ These settings establish connectivity to Azure services. All are required in pro
 | `AZURE_TENANT_ID` | A | Yes | Entra ID tenant identifier | No (non-secret) |
 | `AZURE_CLIENT_ID` | A | Yes | App registration client ID for backend identity | No (non-secret) |
 | `AZURE_CLIENT_SECRET` | A | Yes | App registration client secret | **Yes** |
-| `AZURE_TABLE_ENDPOINT` | A | Yes | App-data Table Storage endpoint URL (production) or connection string (local dev) | No (endpoint URL; not a secret) |
+| `AZURE_TABLE_ENDPOINT` | A | Yes | Cosmos DB Table API endpoint URL (production) or connection string (local dev). Not a secret — this is a configuration URL, not a credential. | No |
 | `AzureSignalRConnectionString` | A | Yes | SignalR Service connection string for real-time push | **Yes** |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | A | Yes | Application Insights telemetry ingestion | **Yes** |
 | `SHAREPOINT_TENANT_URL` | A | Yes | Root SharePoint tenant URL (e.g., `https://hbconstruction.sharepoint.com`) | No (non-secret) |
@@ -87,7 +87,7 @@ These settings are owned by business stakeholders and may be updated without cod
 | `AZURE_TENANT_ID` | Dev tenant ID | Staging tenant ID | Prod tenant ID |
 | `AZURE_CLIENT_ID` | Dev app registration | Staging app registration | Prod app registration |
 | `AZURE_CLIENT_SECRET` | `.local.settings.json` | Key Vault reference | Key Vault reference |
-| `AZURE_TABLE_ENDPOINT` | `UseDevelopmentStorage=true` | `https://hbinteldata{env}.table.core.windows.net` | `https://hbinteldata{env}.table.core.windows.net` |
+| `AZURE_TABLE_ENDPOINT` | `UseDevelopmentStorage=true` | `https://hbintel-table-{env}.table.cosmos.azure.com:443/` | `https://hbintel-table-{env}.table.cosmos.azure.com:443/` |
 | `AzureSignalRConnectionString` | Dev SignalR instance | Key Vault reference | Key Vault reference |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | Dev App Insights | Key Vault reference | Key Vault reference |
 | `EMAIL_DELIVERY_API_KEY` | Test/sandbox key | Key Vault reference | Key Vault reference |
