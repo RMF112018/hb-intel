@@ -8,6 +8,7 @@
  *
  * P2-A1 §4: hub MUST NOT redirect when the work queue is empty.
  * P2-B2: hub state persistence, return memory, feed refresh on return.
+ * P2-B3: trust-state freshness, connectivity display.
  * P2-D1: role determines which zones and card types are visible.
  */
 import { useEffect, useMemo } from 'react';
@@ -26,6 +27,7 @@ import { HubTertiaryZone } from './HubTertiaryZone.js';
 import { useHubStatePersistence } from './useHubStatePersistence.js';
 import { useHubReturnMemory } from './useHubReturnMemory.js';
 import { useHubFeedRefresh } from './useHubFeedRefresh.js';
+import { HubConnectivityBanner } from './HubConnectivityBanner.js';
 
 export function MyWorkPage(): ReactNode {
   const currentUser = useCurrentUser();
@@ -76,6 +78,7 @@ export function MyWorkPage(): ReactNode {
           isLoadError={false}
           hasPermission={currentUser !== null}
         >
+          <HubConnectivityBanner />
           <div ref={scrollContainerRef as React.RefObject<HTMLDivElement>}>
             <HubZoneLayout
               primaryContent={<HubPrimaryZone />}
