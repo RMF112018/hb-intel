@@ -6,7 +6,7 @@
 
 ## Planning Status Summary
 
-Phase 2 planning is underway. Workstream A is complete. Workstream B is progressing — P2-B0 (Lane Ownership), P2-B1 (Root Routing), P2-B2 (State Persistence), and P2-B3 (Freshness Trust) are locked alongside all A-series deliverables. Only P2-B4 (Cross-Device) remains in Workstream B. Remaining deliverables are in planning queue, sequenced per Phase 2 §19 execution priorities.
+Phase 2 planning is underway. Workstreams A and B are complete — all 8 deliverables (P2-A1–A3, P2-B0–B4) are locked. These establish the operating-model, ranking, explainability, lane-ownership, routing, state-persistence, freshness, and cross-device foundations. Remaining deliverables (Workstreams C, D, E) are in planning queue, sequenced per Phase 2 §19 execution priorities.
 
 ---
 
@@ -15,6 +15,8 @@ Phase 2 planning is underway. Workstream A is complete. Workstream B is progress
 | Status | Meaning |
 |---|---|
 | **Governance Policy** | Locked governance artifact; changes require Architecture-lead approval |
+| **Specification** | Locked technical specification; changes require Experience-lead approval |
+| **Note** | Locked behavioral guidance; lighter weight than Policy or Spec |
 | **Final** | Content locked; no further changes expected |
 | **Active Reference** | Living document updated as implementation progresses |
 | **In Progress** | Actively being authored |
@@ -40,7 +42,7 @@ Phase 2 planning is underway. Workstream A is complete. Workstream B is progress
 | P2-B1 | [Root Routing and Landing Precedence Spec](P2-B1-Root-Routing-and-Landing-Precedence-Spec.md) | Specification |
 | P2-B2 | [Hub State Persistence and Return-Memory Contract](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md) | Specification |
 | P2-B3 | [Freshness, Refresh, and Staleness Trust Policy](P2-B3-Freshness-Refresh-and-Staleness-Trust-Policy.md) | Governance Policy |
-| P2-B4 | Cross-Device Shell Behavior Note | Not Started |
+| P2-B4 | [Cross-Device Shell Behavior Note](P2-B4-Cross-Device-Shell-Behavior-Note.md) | Note |
 
 ### Workstream C — Shared Work Sources, Signals, and Handoff Rules
 
