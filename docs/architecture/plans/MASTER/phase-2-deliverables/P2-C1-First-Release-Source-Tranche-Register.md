@@ -19,6 +19,8 @@ This register governs which first-release work sources are allowed to publish in
 
 This document deliberately separates source intent from implementation maturity. A source may be structurally part of the Wave 1 tranche while still being blocked on wiring, publication, or validation. No source may publish into the hub outside this register without Platform-lead approval.
 
+**Repo-truth audit — 2026-03-20:** All 17 repo anchor files confirmed present. All 6 primitive packages (`@hbc/bic-next-move`, `@hbc/workflow-handoff`, `@hbc/acknowledgment`, `@hbc/step-wizard`, `@hbc/field-annotations`, `@hbc/notification-intelligence`) confirmed in the workspace. Blocked source rows (Estimating, BD Score Benchmark, BD Strategic Intelligence, Health Pulse, Approvals) correctly assessed — their `bicNextMoveAdapter.ts` files are projection helpers with no registration or bootstrap wiring. `acknowledgment/contextTypes.ts` confirms `ADMIN_PROVISIONING: 'admin-provisioning'`, grounding the §5 Wave 1 Approvals proving example. `ProjectSetupPage.tsx` uses `HbcStepWizard`, confirming primitive readiness without My Work publication. One material inaccuracy found: **§3.1 Provisioning "Publishing: Ready" overstates live state.** `MyWorkRegistry.register()` is never called in any production source file across the workspace — the full adapter stack (`bicAdapter`, `notificationAdapter`, `handoffAdapter`, `acknowledgmentAdapter`) exists and is exported from `packages/my-work-feed/src/adapters/` but is never assembled into `MyWorkRegistry` in production code. `useMyWork` hooks are defined but not consumed in any PWA route (no `/my-work` route exists). By this register's own band definition, "emits real hub items into `@hbc/my-work-feed` on at least one real route" is not yet satisfied. The "already publishing" language in §3.1 should be revised. See §3.1 reconciliation note below.
+
 ---
 
 ## Register Scope
@@ -62,7 +64,7 @@ This document deliberately separates source intent from implementation maturity.
 
 | Source | Source Key | Classification | Contract / Design | Wired | Publishing | Tested / Launch-Validated | Pilot-Launch Blocker? | Primary Channel(s) |
 |---|---|---|---|---|---|---|---|---|
-| **Provisioning** | `provisioning` | Required | **Ready** | **Ready** | **Ready** | **Partial** | No | BIC + Notification + Handoff |
+| **Provisioning** | `provisioning` | Required | **Ready** | **Ready** | **Partial** | **Partial** | No | BIC + Notification + Handoff |
 | **Estimating Bid Readiness** | `estimating-bid-readiness` | Required | **Ready** | **Blocked** | **Blocked** | **Blocked** | Yes | BIC |
 | **BD Score Benchmark** | `bd-score-benchmark` | Required | **Ready** | **Blocked** | **Blocked** | **Blocked** | Yes | BIC |
 | **BD Strategic Intelligence** | `bd-strategic-intelligence` | Required | **Ready** | **Blocked** | **Blocked** | **Blocked** | Yes | BIC |
@@ -111,8 +113,8 @@ This tightened register incorporates the following locked decisions:
 | Band | Status | Evidence / Notes |
 |---|---|---|
 | Contract / Design | Ready | Canonical source identity, channel mix, and publication posture are established |
-| Wired | Ready | Provisioning BIC registration, notification registrations/templates, and handoff configuration exist |
-| Publishing | Ready | Provisioning is the real Wave 1 reference source already publishing through the shared primitive stack |
+| Wired | Ready | Provisioning BIC registration factory (`createProjectSetupBicRegistration`), notification registrations/templates, and handoff configuration all exist as ready-to-assemble artifacts |
+| Publishing | Partial | Adapter infrastructure is complete and exported; however `MyWorkRegistry.register()` is not yet called in any production source file, and no `/my-work` PWA route consumes `useMyWork`. Per this register's own band definition, "emits real hub items into `@hbc/my-work-feed` on at least one real route" is not yet satisfied. |
 | Tested / Launch-Validated | Partial | Provisioning is the reference implementation, but final cross-source pilot validation still belongs to P2-C5 |
 
 **Reference artifacts**
@@ -121,8 +123,11 @@ This tightened register incorporates the following locked decisions:
 - `packages/provisioning/src/notification-templates.ts`
 - `packages/provisioning/src/handoff-config.ts`
 
+**Repo-truth reconciliation note (2026-03-20)**
+The full adapter stack (`bicAdapter`, `notificationAdapter`, `handoffAdapter`, `acknowledgmentAdapter`) is built and exported from `packages/my-work-feed/src/adapters/`. `MyWorkRegistry.register()` exists as an API in `packages/my-work-feed/src/registry/MyWorkRegistry.ts` and appears only in JSDoc examples — it is never called in production code. The assembly step that wires adapters into the registry and the consuming route (`/my-work`) are the remaining blockers. "Wired: Ready" is retained because the registration factory and all configuration artifacts are present; the missing piece is the assembly call, which is the next integration step, not an unbuilt artifact.
+
 **Register consequence**
-- Provisioning remains the reference pattern for later BIC registration, notification registration, and Project Hub handoff publishing.
+- Provisioning remains the reference pattern for later BIC registration, notification registration, and Project Hub handoff publishing. The assembly step (`MyWorkRegistry.register`) must be the first integration task when the `/my-work` route is implemented.
 
 ### 3.2 Estimating Bid Readiness — Blocked on Registration and Bootstrap Wiring
 
@@ -326,7 +331,7 @@ P2-C1 is the source-tranche evidence artifact for the Phase 2 publication gate.
 - **Classification model:** Ready
 - **Readiness-band discipline:** Ready after this tightening pass
 - **Required-source publication posture:** Blocked
-- **Why blocked:** Required rows beyond Provisioning remain partially wired or unpublished, and the new explicit Approvals row still lacks a real end-to-end published route
+- **Why blocked:** No source row has a complete end-to-end My Work publication path in live code. `MyWorkRegistry.register()` is not called in any production source file; no `/my-work` PWA route exists. Required rows beyond Provisioning remain partially wired or unpublished; the Approvals row lacks a real end-to-end published route. Provisioning's publishing status has been corrected from Ready to Partial (2026-03-20 audit).
 
 ---
 
