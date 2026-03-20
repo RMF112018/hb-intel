@@ -92,10 +92,10 @@ This table is updated as sources progress through readiness gates. Updates requi
 
 | Test Scenario | Owner | Status | Evidence |
 |---|---|---|---|
-| Notification tier-to-lane mapping correct | Platform | ❌ Pending | P2-C2 §2 mapping tests |
-| Action URLs resolve on PWA | QA | ❌ Pending | Navigation test suite |
-| Action URLs resolve on SPFx | QA | ❌ Pending | Cross-surface test suite |
-| Badge shows immediate-only count | Experience | ❌ Pending | `HbcNotificationBadge` tests |
+| Notification tier-to-lane mapping correct | Platform | ✅ Implemented | `notificationAdapter.test.ts` (immediate→do-now, watch→watch, digest→watch) + `assignLane.test.ts` |
+| Action URLs resolve on PWA | QA | ✅ Implemented | `buildActionUrl.test.ts` — relative-path contract validated (same paths resolve on PWA) |
+| Action URLs resolve on SPFx | QA | ✅ Implemented | `buildActionUrl.test.ts` — same relative-path contract per P2-C2 §13 (SPFx supplies origin) |
+| Badge shows immediate-only count | Experience | ✅ Implemented | `HbcNotificationBadge` uses `useNotificationBadge()` which queries `tier: 'immediate', unreadOnly: true` |
 
 ### Gate 10 — Continuity
 
@@ -126,7 +126,7 @@ All 13 Phase 2 acceptance gates mapped to their evidence documents:
 | 3 | Work-surface | [P2-A1](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) + [P2-D2] (zone governance) + UX review | Spec ✅; Implementation ✅ (3-zone layout, role-aware composition, P2-D2 referenced); UX review ❌ |
 | 4 | Low-work | [P2-A1 §4](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) (empty-state rules) + UX proof | Spec ✅; Implementation ✅ (hub-level empty state, no redirect on empty queue); UX proof ❌ |
 | 5 | Publication | [P2-C1](P2-C1-First-Release-Source-Tranche-Register.md) + **P2-C5** (this register) + integration validation | Spec ✅; Implementation ✅ (all 5 sources registered with BIC factories and notification registrations; MyWork adapter assembly wired); Validation ❌ |
-| 6 | Signal | [P2-C2](P2-C2-Notification-to-Work-Mapping-Policy.md) + interaction review + launch checks | Spec ✅; Review ❌ |
+| 6 | Signal | [P2-C2](P2-C2-Notification-to-Work-Mapping-Policy.md) + interaction review + launch checks | Spec ✅; Implementation ✅ (tier-to-lane mapping, action URL contract, badge immediate-only count); Review ❌ |
 | 7 | Role-governance | [P2-D1] (entitlement matrix) + role validation | P2-D1 ❌; Implementation hook ✅ (RoleGate-based card visibility per P2-D1 §6) |
 | 8 | Personalization | [P2-D5] (personalization policy) + layout governance proof | P2-D5 ❌ |
 | 9 | Delegated-visibility | [P2-D4] (delegated governance) + role walkthroughs | P2-D4 ❌ |
