@@ -8,14 +8,25 @@
 | **Document Type** | Specification |
 | **Owner** | Experience / Shell + Platform / Core Services |
 | **Update Authority** | Experience lead; changes require review by Platform lead |
-| **Last Reviewed Against Repo Truth** | 2026-03-19 |
-| **References** | [Phase 2 Plan §10.2, §14, §16](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [P2-B1](P2-B1-Root-Routing-and-Landing-Precedence-Spec.md); [P2-A1](P2-A1-Personal-Work-Hub-Operating-Model-Register.md); [interaction-contract](../../../reference/work-hub/interaction-contract.md); `@hbc/session-state`; `@hbc/my-work-feed` |
+| **Last Reviewed Against Repo Truth** | 2026-03-20 |
+| **References** | [Phase 2 Plan §10.2, §14, §16](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [P2-B1](P2-B1-Root-Routing-and-Landing-Precedence-Spec.md); [P2-A1](P2-A1-Personal-Work-Hub-Operating-Model-Register.md); [P2-A3](P2-A3-Work-Item-Explainability-and-Visibility-Rules.md); [P2-B3](P2-B3-Freshness-and-Staleness-Trust-Policy.md); [interaction-contract](../../../reference/work-hub/interaction-contract.md); `@hbc/session-state`; `@hbc/my-work-feed`; TanStack Router search/state contract |
 
 ---
 
 ## Specification Statement
 
-The Personal Work Hub must provide trustworthy return behavior — when users navigate to a domain surface and return, they must find the hub in a recognizable state rather than starting from scratch. This specification defines the state persistence contract, draft key registry, return navigation flow, offline/degraded behavior, and cleanup rules. It is built on `@hbc/session-state` IndexedDB-backed draft storage and complements P2-B1's redirect memory contract (which handles post-auth routing, not application state).
+The Personal Work Hub must provide trustworthy continuity when users leave `/my-work` for an authoritative domain surface and later return. This specification locks the state-authority model, the persistence categories, the return-memory flow, the offline/degraded fallback behavior, and the cleanup rules required to restore the hub in a recognizable and trustworthy state.
+
+**Repo-truth audit — 2026-03-20:** All `@hbc/session-state` primitives referenced in this specification were verified against live package code. `useDraft`, `useAutoSaveDraft`, and `useConnectivity` exist with the expected signatures; `ConnectivityStatus` union values (`'online' | 'offline' | 'degraded'`) match §8.1; IndexedDB backing (`SESSION_DB_NAME = 'hbc-session-state'`) and the queued operations API (`IQueuedOperation`, `enqueue`, `listPending`) are confirmed. TanStack Query is confirmed in `@hbc/my-work-feed`. The §9.1 / §10.2 claim that registry-driven bulk cleanup does not yet exist as a shared primitive is accurate — no `clearByPrefix`, `bulkClear`, `clearAll`, or equivalent was found anywhere in `packages/session-state/src/`. The specification's current-state / target-state separation is correct. One precision note: `AUTO_SAVE_DEBOUNCE_MS` defaults to 1,500 ms; the §4.2 example passes `500` explicitly, which is valid and intentional, but implementors must supply the third argument to get 500 ms rather than the default.
+
+This specification intentionally separates:
+
+- **route identity / query-driving state**, which is canonical in the URL when present
+- **draft-seeded convenience state**, which may seed a bare `/my-work` entry and is then reflected back into the URL
+- **return-memory UI state**, which restores the user’s immediate working context
+- **durable offline fallback state**, which supports continuity when live fetch is unavailable
+
+P2-B2 complements P2-B1. P2-B1 governs **where the user lands**. P2-B2 governs **what state the hub restores once the user is back**.
 
 ---
 
@@ -23,22 +34,24 @@ The Personal Work Hub must provide trustworthy return behavior — when users na
 
 ### This specification governs
 
-- Which hub state is persisted on navigation away
-- Draft key names, TTLs, and storage layer for each state category
-- Team mode persistence and role-gated restoration
-- Scroll position and expansion state capture/restore
-- Filter and search context persistence
-- Offline feed cache strategy
-- Return navigation flow (step-by-step)
-- State cleanup triggers (logout, role change, TTL expiry)
+- Canonical authority for query-driving hub state
+- Which hub state is persisted, where, and for how long
+- Query-seed draft behavior for bare `/my-work` entries
+- Team mode persistence and role-gated normalization
+- Scroll position and expansion state capture / restore
+- Offline feed fallback strategy
+- Return navigation flow
+- State cleanup triggers and shared cleanup capability requirements
 
 ### This specification does NOT govern
 
-- Post-auth routing and redirect memory — see [P2-B1 §5](P2-B1-Root-Routing-and-Landing-Precedence-Spec.md)
-- Freshness indicators and staleness UX — see P2-B3
-- Cross-device state synchronization — see P2-B4
-- Adaptive layout and card arrangement persistence — see P2-D2
-- Personalization and saved-view persistence — see P2-D5
+- Post-auth routing and redirect memory — see [P2-B1](P2-B1-Root-Routing-and-Landing-Precedence-Spec.md)
+- Freshness indicator rendering and staleness UX details — see P2-B3
+- Cross-device synchronization — see P2-B4
+- Adaptive layout / card arrangement persistence — see P2-D2
+- Personalization / saved-view product policy beyond immediate continuity — see P2-D5
+- Ranking policy and lane semantics — see P2-A2
+- Explainability / visibility constraints for elevated-role views — see P2-A3
 
 ---
 
@@ -46,383 +59,457 @@ The Personal Work Hub must provide trustworthy return behavior — when users na
 
 | Term | Meaning |
 |---|---|
-| **Return memory** | Application-level state captured when the user navigates away from `/my-work`, restored when they return. Distinct from redirect memory (which handles auth-redirect routing) |
-| **Draft persistence** | IndexedDB-backed key-value storage provided by `@hbc/session-state` via `useDraft()` and `useAutoSaveDraft()` hooks, with configurable TTL |
-| **Return state** | The bundle of UI state (scroll position, expanded groups) captured at the moment of navigation away |
-| **Feed cache** | A stored copy of the last-successful `IMyWorkFeedResult`, used as a fallback when the user returns offline or with degraded connectivity |
-| **State cleanup** | The process of clearing persisted drafts on logout, auth state change, or TTL expiry |
-| **Role-gated restoration** | Validation that restored state (e.g., team mode) is still valid for the user's current role before applying it |
+| **Return memory** | Application-level state captured when the user leaves `/my-work` and restored when the user returns. Distinct from redirect memory, which governs post-auth routing. |
+| **Query-driving state** | State that materially changes the feed identity or query: `teamMode`, project/module/lane/filter/search context, or other route-significant inputs. |
+| **Canonical URL state** | Search-param state on `/my-work` that takes precedence over any persisted draft state when present. |
+| **Query-seed draft** | Persisted last-known hub query state used only when the user enters a bare `/my-work` route with no canonical search params. |
+| **Return UI state** | Immediate working context such as scroll position and expanded groups. |
+| **Feed fallback cache** | Durable locally persisted copy of a recent successful feed result, used only for offline / degraded continuity. |
+| **Role-gated normalization** | Validation and normalization of restored state against the user’s current entitlements before it is applied. |
+| **Registry-driven cleanup** | Shared `@hbc/session-state` capability that clears a governed set of draft keys, or a namespaced prefix, on logout and similar lifecycle events. |
 
 ---
 
-## 1. State Persistence Contract
+## 1. Current-State vs Target-State Reconciliation
 
-### 1.1 Persisted State Categories
+| Concern | Current State (Repo Truth) | Phase 2 Target |
+|---|---|---|
+| **Session-state primitive** | `@hbc/session-state` provides IndexedDB-backed draft save/load/clear, TTL purge, connectivity state, and queued operations | P2-B2 uses these primitives and adds one new shared cleanup capability requirement |
+| **Cleanup model** | Current inspected surface is still largely per-key plus TTL purge | Registry-driven bulk cleanup / clear-by-prefix is required shared capability |
+| **My-work live cache** | `@hbc/my-work-feed` uses TanStack Query for live feed orchestration and reads cached query metadata from `QueryClient` | TanStack Query remains the primary live/cache authority; durable fallback cache is additive for continuity only |
+| **Landing posture** | Legacy repo truth still routes Executive users to `/leadership` and others to `/project-hub` | Phase 2 `/my-work` restore posture must align to P2-B1’s locked **personal-first** home for cohort-enabled elevated roles |
+| **State authority** | No locked `/my-work` route-search contract yet | Query-driving state is canonical in URL when present; draft may seed bare `/my-work` entries |
 
-| Category | What Is Saved | Draft Key | TTL | Storage Layer |
-|---|---|---|---|---|
-| **Team mode** | Last-selected `teamMode` value | `hbc-my-work-team-mode` | 16 hours | `@hbc/session-state` IndexedDB draft |
-| **Return state** | Scroll position, expanded group keys | `hbc-my-work-return-state` | 1 hour | `@hbc/session-state` IndexedDB draft |
-| **Filter context** | Active `IMyWorkQuery` filter parameters | `hbc-my-work-filter-state` | 8 hours | `@hbc/session-state` IndexedDB draft |
-| **Feed cache** | Last-successful `IMyWorkFeedResult` | `hbc-my-work-feed-cache` | 4 hours | `@hbc/session-state` IndexedDB draft |
+### Reconciliation Note
 
-### 1.2 What Is NOT Persisted
+This is a **target-state execution specification**. Where it references capabilities not yet present in repo truth, those are implementation requirements and, where material, **shared dependency blockers**.
 
-- **Feed data** beyond the cache — live feed is always re-fetched on return when online
-- **Reasoning drawer state** — whether the reasoning drawer was open for a specific item
-- **Notification badge state** — derived from live feed computation, not stored
-- **Domain surface state** — state of workspace pages visited from the hub is not the hub's concern
-- **Redirect memory** — handled separately by `@hbc/shell` (P2-B1 §5)
+Verified against live code 2026-03-20:
 
-### 1.3 Draft Key Invariants
-
-- All draft keys use the `hbc-my-work-` prefix to namespace hub state and enable bulk cleanup.
-- TTLs are chosen to balance usefulness (return within a work session) against staleness risk.
-- Drafts are scoped to the current browser session via IndexedDB; they do not sync across devices.
-- All drafts are cleared on logout (§8).
+- **Session-state primitive row** — confirmed. `useDraft` (`packages/session-state/src/hooks/useDraft.ts`), `useAutoSaveDraft` (`useAutoSaveDraft.ts`), and `useConnectivity` (`useConnectivity.ts`) all exported from `packages/session-state/src/index.ts` with matching signatures. `ConnectivityStatus = 'online' | 'offline' | 'degraded'` defined in `types/ISessionState.ts`.
+- **Cleanup model row** — confirmed. No `clearByPrefix`, `bulkClear`, or equivalent registry cleanup function exists anywhere in `packages/session-state/src/`. Only per-key `clearDraft` and TTL purge via `purgeExpiredDrafts` are present. The shared cleanup capability remains an unbuilt requirement.
+- **My-work live cache row** — confirmed. `@hbc/my-work-feed` uses `QueryClient` / `QueryClientProvider` from `@tanstack/react-query` (visible in `src/__tests__/hookTestUtils.tsx`).
+- **Landing posture row** — confirmed. `apps/pwa/src/router/workspace-routes.ts` line 46 hard-codes `redirect({ to: '/project-hub' })`; `/my-work` has no entry in `WORKSPACE_IDS` (`packages/shell/src/types.ts`) and no PWA route implementation. Controlled evolution — target state is P2-B1 direction.
+- **State authority row** — confirmed. No `/my-work` route-search contract is locked anywhere in current repo truth. Controlled evolution — required alongside implementation.
 
 ---
 
-## 2. Team Mode Persistence
+## 2. State Authority Model
 
-### 2.1 What Is Saved
+### 2.1 Authority Rule
 
-```
-IMyWorkTeamModeDraft {
-  teamMode: 'personal' | 'my-team' | 'delegated-by-me'
-  savedAt: string  // ISO timestamp
-}
-```
+Query-driving hub state follows a **hybrid authority model**:
 
-### 2.2 Save Trigger
+1. **URL/search params are canonical when present**
+2. **Bare `/my-work` may be seeded from a persisted query-seed draft**
+3. **Once seeded, the resolved query state is reflected into the URL**
+4. **Return UI state is never route-canonical**
+5. **Feed fallback cache is never route-canonical**
 
-Team mode is saved whenever the user changes the team-mode toggle in the feed header. Use `useAutoSaveDraft('hbc-my-work-team-mode', 16)` with debounce to avoid write storms during rapid toggling.
+### 2.2 What Is Canonical in URL
 
-### 2.3 Restore Behavior
+The following categories are URL/search canonical when present:
 
-On return to `/my-work`:
+- `teamMode`
+- project / module / lane / class / priority / state filters
+- include / exclude toggles that materially change feed membership
+- shareable search/query context that changes the feed identity
+- other future query-driving parameters approved for the `/my-work` route contract
 
-| Condition | Behavior |
-|---|---|
-| Draft exists and user's current role supports the saved mode | Restore saved team mode |
-| Draft exists but user's role no longer supports `my-team` (e.g., Executive role removed) | Discard draft; fall back to `personal` |
-| Draft exists but user's role no longer supports `delegated-by-me` (no delegations) | Discard draft; fall back to `personal` |
-| No draft exists | Use role-based default: Executive → `my-team`, all others → `personal` |
-| Draft expired (TTL exceeded) | Use role-based default |
+### 2.3 What Is NOT Canonical in URL
 
-### 2.4 Role-Gated Restoration
+The following remain non-canonical UI continuity state:
 
-Before applying a restored team mode, validate against the current user's resolved roles from `@hbc/auth`:
-- `my-team` requires elevated role entitlement (per P2-A3 §5)
-- `delegated-by-me` requires the user to have active delegations
-- `personal` is always valid
+- scroll position
+- expanded group keys
+- transient drawer / panel open state
+- ephemeral per-session convenience state that does not define the feed identity
 
----
+### 2.4 Invariants
 
-## 3. Return State (Scroll and Expansion)
-
-### 3.1 What Is Saved
-
-```
-IMyWorkReturnState {
-  scrollPosition: number       // window.scrollY or virtualized list offset
-  expandedGroupKeys: string[]  // serialized Set of expanded lane/group identifiers
-  capturedAt: string           // ISO timestamp
-}
-```
-
-### 3.2 Save Trigger
-
-Return state is captured when the user navigates away from `/my-work`. Detection methods:
-
-| Method | When It Fires |
-|---|---|
-| **Route change listener** | TanStack Router `beforeLoad` or `onLeave` hook on the `/my-work` route |
-| **Visibility change** | `document.visibilitychange` event when tab is hidden (covers tab switching) |
-
-Use `useDraft('hbc-my-work-return-state', 1)` — 1-hour TTL reflects the expectation that return state is only useful for near-term returns.
-
-### 3.3 Restore Behavior
-
-On return to `/my-work`:
-
-| Condition | Behavior |
-|---|---|
-| Draft exists and feed data is available | Restore scroll position after feed renders; restore expanded groups |
-| Draft exists but feed structure changed (different items, different lanes) | Restore expanded groups where keys still match; skip scroll restoration |
-| Draft expired | Start at top of feed with default expansion state |
-| No draft | Start at top of feed with default expansion state |
-
-### 3.4 Scroll Restoration Timing
-
-Scroll restoration MUST wait until the feed has rendered with data. Sequence:
-1. Feed component mounts
-2. Feed data loads (from cache or network)
-3. Feed renders items
-4. Apply saved scroll position via `window.scrollTo()` or virtualization API
-5. Clear the return state draft (consumed)
+- Search params override drafts.
+- Drafts do not silently override an explicit URL.
+- A bare `/my-work` entry may restore the most recent valid working context, but once restored, that context becomes visible in URL/search state.
+- Route identity and browser history must not depend on hidden IndexedDB-only query state.
+- P2-B1 routing authority remains separate from P2-B2 state authority.
 
 ---
 
-## 4. Filter and Search Context
+## 3. Persisted State Categories
+
+### 3.1 Registry
+
+| Category | What Is Saved | Draft Key | TTL | Storage Layer | Authority Role |
+|---|---|---|---|---|---|
+| **Query-seed state** | Last valid hub query-driving state used to seed bare `/my-work` entries | `hbc-my-work-query-seed` | 8 hours | `@hbc/session-state` draft | Convenience seed only |
+| **Return UI state** | Scroll position, expanded group keys, and equivalent immediate working context | `hbc-my-work-return-state` | 1 hour | `@hbc/session-state` draft | Continuity only |
+| **Feed fallback cache** | Last successful durable fallback payload for offline / degraded return | `hbc-my-work-feed-cache` | 4 hours | `@hbc/session-state` draft | Fallback only |
+
+### 3.2 What Is Not Persisted Here
+
+- Redirect memory
+- Authoritative domain-surface state
+- Long-term saved views / personalization catalogs
+- Notification badge counts as a separate persisted truth
+- Reasoning drawer open/closed state
+- A second primary live cache that competes with TanStack Query
+
+### 3.3 Draft Key Invariants
+
+- All hub continuity keys use the `hbc-my-work-` namespace.
+- All keys must be registered in a governed cleanup registry.
+- TTLs are scoped to continuity usefulness, not indefinite personalization.
+- IndexedDB persistence is **local browser persistence with TTL**, not true in-memory session state and not cross-device sync.
+
+---
+
+## 4. Query-Seed Draft Contract
 
 ### 4.1 What Is Saved
 
-```
-IMyWorkFilterState {
+```ts
+IMyWorkQuerySeedDraft {
+  teamMode?: 'personal' | 'my-team' | 'delegated-by-me'
   projectId?: string
   moduleKeys?: string[]
-  priorities?: string[]      // MyWorkPriority values
-  classes?: string[]         // MyWorkItemClass values
-  states?: string[]          // MyWorkState values
+  priorities?: string[]
+  classes?: string[]
+  states?: string[]
   includeDeferred?: boolean
-  lane?: string              // MyWorkLane value
-  savedAt: string            // ISO timestamp
+  includeSuperseded?: boolean
+  lane?: string
+  locationLabel?: string
+  searchText?: string
+  savedAt: string
 }
 ```
 
-Note: `teamMode` is persisted separately (§2) because it has different TTL and restoration logic.
+The exact field list may evolve with the route-search contract, but the rule is stable: the query-seed draft stores the **last valid route-significant hub query state**.
 
 ### 4.2 Save Trigger
 
-Filter state is saved whenever the user changes any filter parameter. Use `useAutoSaveDraft('hbc-my-work-filter-state', 8, 500)` — 8-hour TTL, 500ms debounce.
+The query-seed draft is updated whenever the effective canonical hub query changes.
+
+Recommended integration pattern:
+
+- resolve effective query from URL + normalization
+- write debounced query-seed draft
+- do **not** treat the draft as a second hidden authority while URL is present
+
+`useAutoSaveDraft('hbc-my-work-query-seed', 8, 500)` is the preferred primitive.
 
 ### 4.3 Restore Behavior
 
-On return to `/my-work`:
+When the user enters `/my-work`:
 
 | Condition | Behavior |
 |---|---|
-| Draft exists | Restore all saved filters; apply to `IMyWorkQuery` |
-| Draft expired | Use default query (no filters) |
-| User explicitly clears filters | Clear the filter draft immediately |
+| URL/search params are present | Use URL as canonical; ignore query-seed draft for state authority |
+| URL/search params are absent and a valid query-seed draft exists | Seed effective query from draft, normalize it, then reflect it into URL |
+| No draft exists | Use role-appropriate default query posture |
+| Draft expired | Use role-appropriate default query posture |
 
-### 4.4 Filter Validity
+### 4.4 Role-Gated Normalization
 
-Restored filters are applied as-is. If a filter references a `projectId` that no longer exists or a `moduleKey` that's been removed, the feed query naturally returns no items for that filter — the user sees the result and can clear filters. No pre-validation of filter values is required.
+Before applying query-seed state:
+
+- `personal` is always valid
+- `my-team` must still be permitted by the current user’s entitlements and first-release visibility limits
+- `delegated-by-me` must still be valid for the current user context
+- invalid or unsupported values are normalized to the safe default: **`personal`**
+
+### 4.5 Elevated-Role Default
+
+Per locked P2-B1 direction:
+
+- cohort-enabled elevated-role users default to **`personal`**, not `my-team`
+- `my-team` remains a valid secondary restored mode only if still supported
+- no restore path may reintroduce a team-first default through persistence
 
 ---
 
-## 5. Offline Feed Cache
+## 5. Return UI State Contract
 
 ### 5.1 What Is Saved
 
-```
-IMyWorkFeedCache {
-  result: IMyWorkFeedResult   // Full feed result including items, counts, health
-  cachedAt: string            // ISO timestamp
-  sourceStates: Record<string, 'live' | 'cached' | 'partial'>
+```ts
+IMyWorkReturnState {
+  scrollPosition: number
+  expandedGroupKeys: string[]
+  capturedAt: string
 }
 ```
 
 ### 5.2 Save Trigger
 
-The feed cache is saved whenever a successful feed computation completes with at least one `live` source. Use `useDraft('hbc-my-work-feed-cache', 4)` — 4-hour TTL.
+Return UI state is captured when the user leaves `/my-work`.
 
-### 5.3 Cache Usage
+Allowed capture mechanisms:
 
-The feed cache is used ONLY as a fallback when the user returns to `/my-work` and the live feed fetch fails or is in progress:
+| Method | Role |
+|---|---|
+| **Route `onLeave`** | Primary route-level outbound capture hook |
+| **`document.visibilitychange`** | Secondary resilience mechanism for tab hiding / abrupt tab transitions |
+
+`beforeLoad` is not an outbound return-state capture hook and must not be used as the primary mechanism for this purpose.
+
+Use `useDraft('hbc-my-work-return-state', 1)`.
+
+### 5.3 Restore Behavior
+
+| Condition | Behavior |
+|---|---|
+| Draft exists and rendered group structure still matches | Restore expanded groups and scroll |
+| Draft exists but structure materially changed | Restore only valid group keys; skip or soften scroll restoration |
+| Draft expired | Start at top with default expansion state |
+| No draft | Start at top with default expansion state |
+
+### 5.4 Restoration Timing
+
+Return UI state restoration occurs only after the hub has enough rendered structure to apply it safely:
+
+1. route resolves effective query state
+2. feed fetch begins
+3. fallback or live data renders
+4. expanded groups are restored
+5. scroll is restored
+6. return-state draft is consumed and cleared
+
+Return UI state is not applied before content exists.
+
+---
+
+## 6. Feed Fallback Cache Contract
+
+### 6.1 Authority Relationship
+
+- **TanStack Query** remains the primary live/cache authority for active hub rendering.
+- The persisted feed fallback cache is a **durable continuity layer**, not a competing primary cache.
+- The fallback cache exists to support offline / degraded returns and post-reload continuity only.
+
+### 6.2 What Is Saved
+
+```ts
+IMyWorkFeedFallbackCache {
+  result: IMyWorkFeedResult
+  cachedAt: string
+  freshness: 'live-derived' | 'partial-derived'
+}
+```
+
+### 6.3 Save Trigger
+
+The fallback cache is written after a successful feed computation that is trustworthy enough to seed continuity.
+
+Recommended rule:
+
+- save when a successful feed result is produced
+- do not require a second independent ranking computation for the fallback cache
+- allow the saved payload to carry its own health / freshness markers
+
+Use `useDraft('hbc-my-work-feed-cache', 4)` or an equivalent explicit write path.
+
+### 6.4 Usage Rules
 
 | Connectivity State | Behavior |
 |---|---|
-| `online` | Fetch live feed; show loading state; ignore cache |
-| `degraded` | Fetch live feed; if slow (>3s), show cached feed with "Refreshing..." indicator; replace with live data when available |
-| `offline` | Show cached feed immediately with staleness indicator; queue any mutations for replay |
+| **online** | Use live fetch and normal TanStack Query behavior; fallback cache is not primary |
+| **degraded** | Begin live fetch; if latency crosses the governed threshold, render fallback cache with refresh / staleness messaging |
+| **offline** | Render fallback cache immediately if available; otherwise remain on `/my-work` with offline empty-state guidance |
 
-### 5.4 Cache Invariants
+### 6.5 Invariants
 
-- The feed cache is a **fallback**, not a primary data source. Live data always takes precedence when available.
-- The cached feed MUST display with a staleness indicator showing `cachedAt` timestamp (per P2-A1 §8.1 trust invariant).
-- Cached items retain their `rankingReason` from the time of caching — ranking may differ from a live computation.
-- The cache is invalidated (cleared) when the user logs out or when TTL expires.
-
----
-
-## 6. Return Navigation Flow
-
-The following step-by-step flow specifies how state is captured and restored during a hub → domain → hub navigation cycle.
-
-### 6.1 Outbound: Hub → Domain Surface
-
-| Step | Action | Responsibility |
-|---|---|---|
-| 1 | User clicks a work item's "Open" action or navigates via deep link | Feed component |
-| 2 | Capture return state (scroll position, expanded groups) | Route `onLeave` handler → `useDraft('hbc-my-work-return-state')` |
-| 3 | Team mode and filter state are already auto-saved (§2, §4) | `useAutoSaveDraft` hooks |
-| 4 | Router navigates to domain surface via `context.href` | TanStack Router |
-| 5 | Shell preserves routing history for browser back | `@hbc/shell` |
-
-### 6.2 At Domain Surface
-
-| Step | Action | Responsibility |
-|---|---|---|
-| 6 | User performs domain actions (approve, reject, update) | Domain surface |
-| 7 | If offline, mutations are queued in `@hbc/session-state` | Session-state queue |
-
-### 6.3 Inbound: Domain Surface → Hub
-
-| Step | Action | Responsibility |
-|---|---|---|
-| 8 | User navigates back (shell nav, browser back, "Back to My Work" link) | Router |
-| 9 | `/my-work` route loads; `HbcMyWorkFeed` component mounts | Route component |
-| 10 | Restore team mode from draft; validate against current role (§2.3) | Feed component |
-| 11 | Restore filter context from draft (§4.3) | Feed component |
-| 12 | Initiate live feed fetch with restored team mode and filters | TanStack Query |
-| 13 | While fetching: show cached feed if available and connectivity is degraded/offline (§5.3) | Feed component |
-| 14 | Live feed arrives → render with current data | Feed component |
-| 15 | Restore scroll position and expanded groups from return state draft (§3.4) | Feed component (post-render) |
-| 16 | Clear return state draft (consumed) | Feed component |
-
-### 6.4 Flow Invariants
-
-- Steps 10–11 (state restoration) happen synchronously before the feed fetch, so the query uses the correct team mode and filters.
-- Step 15 (scroll restoration) happens after render, not before — the DOM must have the content to scroll to.
-- If live data arrives quickly (before cached feed is shown), skip the cache and render live directly.
-- Domain mutations made in step 6 are reflected in the live feed (step 14) because the feed re-fetches from source adapters.
+- The fallback cache is never treated as authoritative live truth.
+- Cached payloads must display staleness / cached-at context per P2-B3 trust rules.
+- Returning offline with no fallback cache must not redirect the user away from `/my-work`.
+- The fallback cache is cleared on logout and governed cleanup events.
 
 ---
 
-## 7. Offline and Degraded Return Behavior
+## 7. Return Navigation Flow
 
-### 7.1 Connectivity States
+### 7.1 Outbound: Hub → Domain Surface
 
-Per `@hbc/session-state` connectivity detection:
-
-| State | Detection | Hub Behavior |
+| Step | Action | Responsibility |
 |---|---|---|
-| `online` | `navigator.onLine === true` + probe success | Normal operation: live fetch, no cache fallback |
-| `degraded` | `navigator.onLine === true` + probe failure or high latency | Show cached feed if fetch exceeds 3s; refresh in background |
-| `offline` | `navigator.onLine === false` | Show cached feed immediately; queue mutations; sync on reconnect |
+| 1 | User activates a work-item navigation action | Hub surface |
+| 2 | Save return UI state | Route `onLeave` + `useDraft('hbc-my-work-return-state')` |
+| 3 | Query-seed draft is already current through debounced persistence | Hub query-state layer |
+| 4 | Router navigates to authoritative domain surface | Router |
+| 5 | Browser history remains intact | Shell / router |
 
-### 7.2 Offline Return Behavior
+### 7.2 Inbound: Domain Surface → Hub
 
-When the user returns to `/my-work` while offline:
+| Step | Action | Responsibility |
+|---|---|---|
+| 6 | User returns to `/my-work` | Router |
+| 7 | Resolve landing path per P2-B1 if needed | Shared landing resolver |
+| 8 | Resolve effective hub query state: URL first, else query-seed draft, else default | Hub route / page layer |
+| 9 | Normalize query state against current entitlements | Hub route / page layer |
+| 10 | Reflect seeded state into URL if entry was bare `/my-work` | Router |
+| 11 | Start live feed fetch with effective query | Hub data layer |
+| 12 | If needed, render fallback cache while live fetch is pending or unavailable | Hub surface |
+| 13 | Restore return UI state after render | Hub surface |
+| 14 | Clear consumed return-state draft | Hub surface |
 
-1. Show cached feed from `hbc-my-work-feed-cache` draft if available
-2. Display staleness indicator: "Last updated [cachedAt timestamp] — you are offline"
-3. Restore team mode, scroll position, and filters from drafts
-4. Allow optimistic mutations: `mark-read`, `defer`, `undefer`, `pin-today`, `pin-week`, `waiting-on`
-5. Queue mutations in `@hbc/session-state` operation queue for replay on reconnect
-6. When connectivity restores: trigger live feed fetch, replay queued mutations, reconcile state
+### 7.3 Flow Invariants
 
-### 7.3 No-Cache Offline Return
-
-If the user returns offline and no feed cache exists:
-
-1. Show empty state with connectivity message: "You are offline. Your work feed will load when connectivity is restored."
-2. The `@hbc/smart-empty-state` `loading-failed` classification applies
-3. No redirect — the user stays on `/my-work` (per P2-A1 §1.2 no-redirect invariant)
-4. Auto-retry when connectivity is detected
-
-### 7.4 Mutation Reconciliation
-
-When connectivity restores after offline mutations:
-
-| Event | Behavior |
-|---|---|
-| Queue replay succeeds | Mutations applied; feed refreshes with server state |
-| Queue replay partially fails | Successful mutations applied; failed mutations shown with error; feed refreshes |
-| Conflict detected (item state changed since cache) | Server state wins; user sees updated item; no data loss (feed mutations are non-destructive) |
-
-See [interaction-contract §5](../../../reference/work-hub/interaction-contract.md) for the full mutation vs navigation action taxonomy and offline-capable mutation list.
+- Effective query resolution happens before live fetch.
+- Return UI state restoration happens after render.
+- Seeded draft state becomes visible route state.
+- Domain mutations are reflected through live re-fetch and normal hub refresh behavior.
+- Persistence must not create a hidden alternate navigation model.
 
 ---
 
-## 8. State Cleanup Rules
+## 8. Offline and Degraded Return Behavior
 
-### 8.1 Cleanup Triggers
+### 8.1 Connectivity Model
+
+Use the connectivity model provided by `@hbc/session-state`:
+
+- `online`
+- `degraded`
+- `offline`
+
+### 8.2 Offline Return with Fallback Cache
+
+When returning offline and a fallback cache exists:
+
+1. remain on `/my-work`
+2. resolve effective query state
+3. render fallback cache immediately
+4. show staleness / offline messaging
+5. restore return UI state where safe
+6. allow only approved offline-capable mutations
+7. replay queued operations and refresh when connectivity returns
+
+### 8.3 Offline Return with No Fallback Cache
+
+When returning offline and no fallback cache exists:
+
+1. remain on `/my-work`
+2. show governed offline empty-state guidance
+3. do not redirect
+4. retry automatically when connectivity improves
+
+### 8.4 Mutation Reconciliation
+
+On reconnect:
+
+- queued offline-capable mutations replay through the existing queue model
+- live feed refresh reconciles current authoritative state
+- server truth wins where conflicts exist
+- continuity is preserved without inventing destructive local ownership
+
+---
+
+## 9. Cleanup Rules
+
+### 9.1 Shared Cleanup Requirement
+
+P2-B2 requires a new shared `@hbc/session-state` capability for **registry-driven bulk cleanup / clear-by-prefix**.
+
+This is a **required shared dependency** and must not be written as already available repo truth.
+
+### 9.2 Cleanup Triggers
 
 | Trigger | What Is Cleared | Mechanism |
 |---|---|---|
-| **User logout** | All `hbc-my-work-*` drafts | Auth state change listener clears IndexedDB drafts by key prefix |
-| **Auth state change** (role change, session refresh) | Team mode draft only (re-validate role eligibility) | Auth event listener checks team mode validity |
-| **TTL expiry** | Individual drafts per their TTL | `@hbc/session-state` automatic TTL enforcement |
-| **Explicit user action** | Filter state cleared on "Clear filters"; return state cleared on consumption | Component-level draft deletion |
-| **New session** (browser restart) | IndexedDB persists across restarts; TTL-expired drafts are cleaned | TTL enforcement on read |
+| **User logout** | All registered `hbc-my-work-*` continuity drafts | Shared registry-driven bulk cleanup / clear-by-prefix |
+| **Auth state change / role change** | Query-seed state may be retained, but restored values must be re-normalized; invalid return-state drafts may be dropped | Re-normalization + selective cleanup as needed |
+| **TTL expiry** | Individual drafts per TTL | Existing draft TTL enforcement |
+| **Explicit user action** | Relevant state category only | Component / route-level clear |
+| **Provider mount / lifecycle sweep** | Expired drafts | Existing TTL purge behavior |
 
-### 8.2 Cleanup Invariants
+### 9.3 Cleanup Invariants
 
-- Logout MUST clear all hub state drafts. Sensitive work-item data (cached feed) must not persist after authentication ends.
-- Role changes MUST trigger team mode re-validation before the next restore.
-- TTL expiry is enforced on read — expired drafts return null and are cleaned up lazily.
-- The feed cache is NOT cleared on route change — it persists for offline fallback until TTL expires or logout.
+- Logout must clear all hub continuity drafts, including the feed fallback cache.
+- Sensitive continuity state must not persist after auth ends.
+- Expired drafts are treated as absent.
+- Cleanup policy must not depend on hard-coded per-feature local deletion once the shared cleanup registry exists.
+- Until the shared cleanup capability exists, implementation of P2-B2 is not complete.
 
 ---
 
-## 9. Integration Points
+## 10. Integration Requirements
 
-### 9.1 Hooks and APIs
+### 10.1 Shared Packages / APIs
 
-| Hook | Package | Used For |
+| Integration Point | Role |
+|---|---|
+| `@hbc/session-state/useDraft` | Return UI state + durable fallback cache |
+| `@hbc/session-state/useAutoSaveDraft` | Query-seed draft persistence |
+| `@hbc/session-state/useConnectivity` | Connectivity-aware return behavior |
+| `@hbc/session-state` queued operations | Offline-capable mutation replay |
+| TanStack Router search params | Canonical query-driving route state |
+| TanStack Query / `QueryClient` | Primary live/cache authority |
+| `@hbc/my-work-feed` query contracts | Effective query shape and feed behavior |
+| P2-B1 shared landing resolver | Landing path only, not hub state authority |
+
+### 10.2 Required Shared Dependency Blockers
+
+| Dependency | Status in Repo Truth | P2-B2 Requirement |
 |---|---|---|
-| `useDraft<T>(key, ttlHours)` | `@hbc/session-state` | Return state (1h), feed cache (4h) |
-| `useAutoSaveDraft<T>(key, ttlHours, debounceMs)` | `@hbc/session-state` | Team mode (16h, 300ms), filter context (8h, 500ms) |
-| `useConnectivity()` | `@hbc/session-state` | Connectivity state for cache fallback decisions |
-| `useQueryClient()` | TanStack Query | Feed query invalidation on return |
-| `resolveRoleLandingPath()` | `@hbc/shell` | Default team mode by role (P2-B1 §3) |
+| Registry-driven bulk cleanup / clear-by-prefix | Not yet confirmed as existing shared primitive | Required blocker |
+| `/my-work` route search contract | Not yet locked in current repo truth | Must be defined alongside implementation |
+| Seed-to-URL normalization flow | Not yet established as a locked hub pattern | Required implementation contract |
 
-### 9.2 Draft Key Registry
+### 10.3 No-Go Rules
 
-All hub state draft keys are registered here for lifecycle management:
-
-| Key | Type | TTL | Auto-Save |
-|---|---|---|---|
-| `hbc-my-work-team-mode` | `IMyWorkTeamModeDraft` | 16h | Yes (300ms debounce) |
-| `hbc-my-work-return-state` | `IMyWorkReturnState` | 1h | No (captured on nav away) |
-| `hbc-my-work-filter-state` | `IMyWorkFilterState` | 8h | Yes (500ms debounce) |
-| `hbc-my-work-feed-cache` | `IMyWorkFeedCache` | 4h | No (saved on successful fetch) |
-
-### 9.3 TanStack Query Integration
-
-- Feed query keys follow the existing `myWorkKeys` factory pattern.
-- On return to `/my-work`, invalidate stale queries to trigger re-fetch.
-- Feed cache (§5) is independent of TanStack Query's cache — it uses `@hbc/session-state` for IndexedDB persistence, while TanStack manages in-memory query state.
+- Do not hide query-driving state exclusively in IndexedDB.
+- Do not reintroduce Executive `my-team` as a default via persistence.
+- Do not let durable fallback cache become a second primary cache authority.
+- Do not describe future shared cleanup primitives as already-live repo truth.
 
 ---
 
-## 10. Acceptance Gate Reference
+## 11. Acceptance Gate References
 
-P2-B2 contributes evidence for the Continuity gate:
+P2-B2 contributes evidence for the **Continuity gate**.
 
 | Field | Value |
 |---|---|
 | **Gate** | Continuity gate |
-| **Pass condition** | Redirect memory, return memory, and context restoration are trustworthy |
-| **P2-B2 evidence** | State persistence contract (§1), return flow specification (§6), offline behavior (§7), cleanup rules (§8) |
-| **Primary owner** | Experience / Shell |
+| **Pass condition** | Return memory and context restoration are trustworthy without obscuring route identity |
+| **Primary evidence** | State-authority model, persistence registry, return flow, offline/degraded fallback, cleanup contract |
+| **Primary owner** | Experience / Shell + Platform |
 
-Evidence requirements:
-- Persistence contract defines what is saved and with what TTL ✓
-- Return flow specifies step-by-step state capture and restoration ✓
-- Offline behavior shows cached feed with staleness indicators ✓
-- Cleanup rules ensure state is purged on logout ✓
-- Navigation test scenarios can be derived from the return flow (§6) ✓
+### Required Evidence
+
+- canonical URL-vs-draft authority is explicitly defined
+- bare-route seed behavior is defined and testable
+- return UI restoration sequence is defined
+- offline/degraded fallback is defined
+- cleanup contract is defined, including the shared dependency blocker
 
 ---
 
-## 11. Locked Decisions
+## 12. Locked Decisions Applied
 
-| Decision | Locked Resolution | P2-B2 Consequence |
+| Decision | Locked Resolution | Consequence in P2-B2 |
 |---|---|---|
-| Return behavior | **Strong context memory** | Hub must persist and restore team mode, scroll position, filters, and provide offline feed cache |
-| Freshness model | **Hybrid freshness/staleness trust model** | Feed cache must display with staleness indicators; trust invariant applies to cached data |
-| Low-work default | **Stay on Personal Work Hub** | No-cache offline return stays on `/my-work` with connectivity message, never redirects |
+| **Executive / elevated-role landing** | Personal-first | Restored default posture is `personal`, not `my-team` |
+| **State authority model** | URL canonical when present; bare route may seed from draft and then reflect to URL | Query-driving state is no longer IndexedDB-only |
+| **Cleanup architecture** | Shared registry-driven bulk cleanup / clear-by-prefix | Prefix/registry language remains valid, but is now explicitly a shared dependency requirement |
+| **Low-work default** | Stay on Personal Work Hub | Offline / no-cache return never redirects away from `/my-work` |
+| **Continuity posture** | Strong context memory | Query seed, return UI state, and fallback cache are all governed continuity layers |
 
 ---
 
-## 12. Policy Precedence
+## 13. Policy Precedence
 
 | Deliverable | Relationship to P2-B2 |
 |---|---|
-| **P2-B1** — Root Routing and Landing Precedence | P2-B1 handles redirect memory (post-auth routing). P2-B2 handles return memory (application state). Together they provide the complete return experience |
-| **P2-B3** — Freshness and Staleness Trust Policy | P2-B3 defines how staleness indicators appear. P2-B2 defines when cached data is shown (offline/degraded returns) |
-| **P2-B4** — Cross-Device Shell Behavior | P2-B4 addresses whether state syncs across devices. P2-B2 scopes state to the current browser session |
-| **P2-D2** — Adaptive Layout and Zone Governance | P2-D2 may define additional layout persistence (card arrangement). P2-D2 should use the same `@hbc/session-state` draft pattern with its own key prefix |
-| **P2-D5** — Personalization Policy | P2-D5 governs what personalization is allowed. P2-B2 provides the persistence mechanism for approved personalization choices |
+| **P2-B1** — Root Routing and Landing Precedence | Determines where the user lands; P2-B2 determines what hub state is restored |
+| **P2-B3** — Freshness and Staleness Trust | Governs trust messaging for cached / stale hub data |
+| **P2-B4** — Cross-Device Shell Behavior | Governs whether continuity crosses devices; P2-B2 is local-browser scoped |
+| **P2-D2** — Adaptive Layout and Zone Governance | Separate layout persistence policy; not route-canonical hub query state |
+| **P2-D5** — Personalization Policy | Long-term personalization must not overwrite this continuity contract |
 
-If a downstream deliverable needs additional hub state persistence, it should follow the draft key pattern established here (§9.2) and register its keys in the draft key registry.
+If a downstream deliverable conflicts with this specification on state authority, return flow, or cleanup model, this specification takes precedence for `/my-work` continuity behavior.
 
 ---
 
-**Last Updated:** 2026-03-19
-**Governing Authority:** [Phase 2 Plan §10.2, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md)
+**Last Updated:** 2026-03-20  
+**Governing Authority:** [Phase 2 Plan §10.2, §14, §16](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md)
