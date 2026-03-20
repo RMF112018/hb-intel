@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Status:** Canonical Current-State
-**Last Updated:** 2026-03-15
+**Last Updated:** 2026-03-20
 **Purpose:** Single authoritative reference for the present implementation state of the HB Intel monorepo. When this document differs from historical plans or locked blueprints regarding _what exists today_, this document governs present truth.
 
 ---
@@ -256,6 +256,18 @@
 | `docs/reference/ui-kit/UI-Kit-Residual-Debt-Register.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; WS1-T13 residual debt register with 10 non-blocking items, named owners, and resolution timelines; no Wave 1 blocking debt |
 | Diátaxis output docs (`docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/`, `docs/user-guide/`, `docs/administrator-guide/`, `docs/maintenance/`, `docs/troubleshooting/`, `docs/security/`, `docs/release-notes/`, `docs/faq.md`) | **Living Reference (Diátaxis)** | 200+ files; quadrant breakdown: tutorials, how-to, reference, explanation, user-guide, administrator-guide, maintenance, troubleshooting, security, release-notes, faq; updated continuously as features ship; exempt from inline banner |
 | `docs/architecture/adr/ADR-0116-ui-doctrine-and-visual-governance.md` | **Permanent Decision Rationale** | Governs UI ownership, governed UI-bearing exceptions, promotion/migration rule, Personal Work Hub / PWA as the benchmark surface, and release-gated visual excellence doctrine across all UI-bearing surfaces; authored 2026-03-16 |
+| `docs/architecture/plans/MASTER/README.md` | **Canonical Current-State** | MASTER plan library navigation index; links all phase plans, deliverable subdirectories, and the master summary |
+| `docs/architecture/plans/MASTER/00_HB-Intel_Master-Development-Summary-Plan.md` | **Canonical Normative Plan** | Tier 1 banner applied; program master summary and phase sequencing index; governs execution order across all MASTER phase plans |
+| `docs/architecture/plans/MASTER/01_Phase-0_Program-Control-and-Repo-Truth-Plan.md` and `02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md` | **Historical Foundational** | Tier 1 banner applied to each; Phases 0 and 1 complete; deliverable artifacts in `phase-0-deliverables/` and `phase-1-deliverables/` |
+| `docs/architecture/plans/MASTER/03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md` | **Canonical Normative Plan** | Tier 1 banner applied; Phase 2 Personal Work Hub and PWA shell execution plan; implementation complete 2026-03-20; governs all P2-* deliverable specs |
+| `docs/architecture/plans/MASTER/04` through `08` (Phase 3–7 plans) | **Canonical Normative Plan** | Tier 1 banner applied to each; Phase 3 Project Hub through Phase 7 Intelligence plans; Draft for working use; pending activation |
+| `docs/architecture/plans/MASTER/phase-2-deliverables/` (25 P2-\* specification files, README, phase-2-decision-register.md) | **Canonical Normative Plan** | Tier 2 — matrix classification only; Phase 2 governing deliverable specifications P2-A1 through P2-E5; P2-C1 and P2-C5 serve as living readiness registers; updated through 2026-03-20 |
+| `docs/architecture/plans/MASTER/phase-0-deliverables/` and `phase-1-deliverables/` | **Historical Foundational** | Tier 2 — matrix classification only; completed phase deliverable artifacts |
+| `packages/shell/src/landingResolver.ts` | **Canonical Current-State** | Phase 2 (P2-B1): `resolveLandingDecision()` — sole policy authority for landing path decisions; exports `LandingDecision`, `LandingDecisionInput`, `LandingMode`, `TeamMode`; implemented 2026-03-20 |
+| `packages/shell/src/cohortGate.ts` | **Canonical Current-State** | Phase 2 (P2-B1): `isMyWorkCohortEnabled()` — single source of truth for `/my-work` pilot cohort gate; reads `my-work-hub` feature flag from `@hbc/auth`; implemented 2026-03-20 |
+| `apps/pwa/src/sources/sourceAssembly.ts` | **Canonical Current-State** | Phase 2 (P2-C1): hub source registration bootstrap; called once from `main.tsx`; registers all 5 BIC modules, all notification events, and all 4 MyWork adapters; implemented 2026-03-20 |
+| `apps/pwa/src/sources/domainQueryFns.ts` | **Canonical Current-State** | Phase 2 (P2-C1): domain queryFn seam; mock data implementations for Estimating, BD Score Benchmark, BD Strategic Intelligence, Health Pulse; replacement point for real domain API clients in Phase 4; implemented 2026-03-20 |
+| `apps/pwa/src/pages/my-work/` (MyWorkPage, HubZoneLayout, HubPrimaryZone, HubSecondaryZone, HubTertiaryZone, HubPageLevelEmptyState, HubTeamModeSelector, HubFreshnessIndicator, HubConnectivityBanner, hubStateTypes, trustStateConstants, formatRelativeTime, useHubStatePersistence, useHubReturnMemory, useHubFeedRefresh, useHubTrustState, useHubPersonalization, cards/) | **Canonical Current-State** | Phase 2 (P2-D1 through P2-D5): three-zone Personal Work Hub implementation; adaptive layout, role-based card composition, freshness trust state, return memory, team mode and card arrangement persistence; implemented 2026-03-20 |
 
 ### 2.1 Classification Maintenance Rule
 
@@ -448,6 +460,25 @@ The original workspace included `packages/*` and `apps/*`. It now also includes:
 - `packages/features/*` — Feature package sub-workspace
 
 This is **controlled evolution (a)** — necessary to support the full platform as implementation progressed through Phases 4–6.
+
+### 4.4 Phase 2 Shell Contracts and Personal Work Hub
+
+Phase 2 (completed 2026-03-20) extended two existing packages and introduced a new application layer within the PWA without creating new packages.
+
+**`@hbc/shell` public contract expansion:** The shell package was originally described as "Global navigation & layout." Phase 2 added two new public seams that are architectural in nature:
+
+- `resolveLandingDecision()` — a pure function that is the sole policy authority for post-auth landing path decisions. It encodes the priority chain (redirect memory → role → cohort) and is the mandatory replacement for any parallel role/cohort branching in route files. Companion types: `LandingDecision`, `LandingDecisionInput`, `LandingMode`, `TeamMode`.
+- `isMyWorkCohortEnabled()` — the single source of truth for pilot cohort membership. Reads `my-work-hub` feature flag from `@hbc/auth`; replaceable with a real cohort service without changing consumers.
+
+These are **controlled evolution (a)** — a natural extension of `@hbc/shell`'s orchestration authority into landing policy and cohort governance.
+
+**Personal Work Hub (PWA):** The `/my-work` route and `apps/pwa/src/pages/my-work/` directory implement the Phase 2 operating layer. Key structural additions:
+
+- `apps/pwa/src/sources/sourceAssembly.ts` — bootstrap file called once from `main.tsx`; registers all hub sources (BIC modules, notification events, MyWork adapters) in a single governed location.
+- `apps/pwa/src/sources/domainQueryFns.ts` — mock queryFn seam for the four non-Provisioning BIC sources; designed as an explicit Phase 4 replacement point for real domain API clients.
+- `apps/pwa/src/pages/my-work/` — three-zone adaptive hub with role-based card composition (P2-D1), adaptive layout (P2-D2), freshness/trust state (P2-B3), return memory (P2-B2), and team mode + card arrangement persistence (P2-D5).
+
+This is **controlled evolution (a)** — the PWA's transition from a project-hub-first landing to a personal-work-first operating layer, as specified in Phase 2 and permitted by Blueprint V4's multi-surface doctrine.
 
 ---
 

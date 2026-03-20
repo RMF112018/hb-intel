@@ -131,7 +131,8 @@
       "Bash(failed\" messages — no longer accurate since extractErrorMessage\\(\\) reads:*)",
       "Bash(find /Users/bobbyfetting/hb-intel/backend/functions/src -type f \\\\\\(-name *.ts -o -name *.json \\\\\\))",
       "Bash(-print)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\) -path */hub/* -o -path */personal-work/*)"
     ]
   },
   "enabledPlugins": {

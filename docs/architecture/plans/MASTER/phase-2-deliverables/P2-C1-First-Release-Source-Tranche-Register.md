@@ -271,11 +271,11 @@ This register now treats source rows and platform primitives as related but dist
 | Source | Primary Channel(s) | Governing Primitive(s) | Current Wave 1 Proof / Note |
 |---|---|---|---|
 | Provisioning | BIC + Notification + Handoff | `@hbc/bic-next-move`, `@hbc/notification-intelligence`, `@hbc/workflow-handoff` | Reference implementation |
-| Estimating Bid Readiness | BIC | `@hbc/bic-next-move` | Projection helper exists; registration/bootstrap still open |
-| BD Score Benchmark | BIC | `@hbc/bic-next-move` | Projection helper exists; registration/bootstrap still open |
-| BD Strategic Intelligence | BIC | `@hbc/bic-next-move` | Projection helper exists; registration/bootstrap still open |
-| Project Hub Handoff Signals | Handoff + Notification | `@hbc/workflow-handoff`, `@hbc/notification-intelligence` | Proven only through narrower provisioning completion-handoff posture so far |
-| Project Hub Health Pulse | BIC | `@hbc/bic-next-move` | Projection helper exists; row not yet wired |
+| Estimating Bid Readiness | BIC | `@hbc/bic-next-move` | Registration wired in `sourceAssembly.ts`; mock queryFn in place; real API client pending |
+| BD Score Benchmark | BIC | `@hbc/bic-next-move` | Registration wired in `sourceAssembly.ts`; mock queryFn in place; real API client pending |
+| BD Strategic Intelligence | BIC | `@hbc/bic-next-move` | Registration wired in `sourceAssembly.ts`; mock queryFn in place; real API client pending |
+| Project Hub Handoff Signals | Handoff + Notification | `@hbc/workflow-handoff`, `@hbc/notification-intelligence` | Handoff adapter registered (weight 0.8); proven through provisioning completion-handoff path |
+| Project Hub Health Pulse | BIC | `@hbc/bic-next-move` | Registration wired in `sourceAssembly.ts`; mock queryFn in place; real API client pending |
 | Approvals | BIC + Notification (+ Handoff where route-specific) | `@hbc/acknowledgment`, `@hbc/step-wizard`, `@hbc/workflow-handoff`, `@hbc/notification-intelligence`, `@hbc/field-annotations`, `@hbc/bic-next-move` | Wave 1 proof path locked to admin provisioning sign-off |
 | Admin Escalations | BIC (via Provisioning) + Notification | Provisioning + `@hbc/notification-intelligence` | Derived companion row, not a separate publication system |
 
@@ -338,9 +338,9 @@ P2-C1 is the source-tranche evidence artifact for the Phase 2 publication gate.
 ### Current Gate Reading
 
 - **Classification model:** Ready
-- **Readiness-band discipline:** Ready after this tightening pass
-- **Required-source publication posture:** Blocked
-- **Why blocked:** No source row has a complete end-to-end My Work publication path in live code. `MyWorkRegistry.register()` is not called in any production source file; no `/my-work` PWA route exists. Required rows beyond Provisioning remain partially wired or unpublished; the Approvals row lacks a real end-to-end published route. Provisioning's publishing status has been corrected from Ready to Partial (2026-03-20 audit).
+- **Readiness-band discipline:** Ready
+- **Required-source publication posture:** Partial
+- **Why partial:** The shared primitive stack is wired and the `/my-work` route is live. `MyWorkRegistry.register()` is called in `apps/pwa/src/sources/sourceAssembly.ts` with all 4 adapters; all 5 BIC modules are registered; all 28 notification events are registered. Provisioning publishes through all three channels (BIC, Notification, Handoff). The 4 domain sources (Estimating, BD Score, BD Strategic Intelligence, Health Pulse) are structurally wired with representative mock queryFns — real domain API client integration is pending for each. The Approvals row remains Blocked with no real end-to-end approval route yet publishing into My Work. Gate closure requires domain API client integration for the 4 partial sources and an Approvals publishing path. *(Updated 2026-03-20: assembly step complete, domain queryFn stubs replaced with mock data seams.)*
 
 ---
 
