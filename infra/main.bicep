@@ -120,8 +120,11 @@ resource cosmosDbDataRole 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignme
 // Outputs
 // ---------------------------------------------------------------------------
 
-@description('Connection string for AzureWebJobsStorage (host account)')
-output hostStorageConnectionString string = 'DefaultEndpointsProtocol=https;AccountName=${hostStorage.name};AccountKey=${hostStorage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+@description('Host storage account name — set as app setting AzureWebJobsStorage__accountName')
+output hostStorageAccountName string = hostStorage.name
+
+@description('Host storage blob endpoint — set as app setting AzureWebJobsStorage__serviceUri')
+output hostStorageBlobEndpoint string = hostStorage.properties.primaryEndpoints.blob
 
 @description('Cosmos DB Table API endpoint URL for AZURE_TABLE_ENDPOINT')
 output dataTableEndpoint string = 'https://${cosmosDbAccount.name}.table.cosmos.azure.com'
