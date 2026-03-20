@@ -154,12 +154,14 @@ Two-account topology confirmed and implemented. `AzureWebJobsStorage` maps to `h
 
 ---
 
-### R3 — Cosmos DB serverless single-region planning
+### R3 — Cosmos DB serverless single-region planning — DECIDED
 
-If Cosmos DB serverless is selected for early-stage cost control, multi-region is not available with that configuration. A decision is needed: accept single-region for MVP and plan a throughput model change for production, or start with provisioned throughput.
+**Decision:** Cosmos DB serverless (single-region) for MVP. Multi-region is not required at current scale. Serverless provides cost control during early adoption without committing to provisioned RU capacity.
+
+**Migration trigger:** When multi-region replication becomes a business requirement, the Cosmos DB account throughput model will be changed from serverless to provisioned. This is a Cosmos DB account-level configuration change — no application code changes are required since the `@azure/data-tables` SDK and `AZURE_TABLE_ENDPOINT` connection pattern are throughput-model-agnostic.
 
 **Owner:** Architecture + Product
-**Action required:** Explicit decision before provisioning Cosmos DB account
+**Decided:** 2026-03-20 — serverless single-region accepted for MVP
 
 ---
 
