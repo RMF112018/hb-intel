@@ -4,11 +4,14 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { HbcCard, HbcKpiCard } from '@hbc/ui-kit';
+import { HbcCard, HbcKpiCard, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
 import { useMyWorkCounts } from '@hbc/my-work-feed';
 
 const useStyles = makeStyles({
-  root: { gridColumn: 'span 6' },
+  root: {
+    gridColumn: 'span 6',
+    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: { gridColumn: 'span 1' },
+  },
   kpiRow: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
 });
 

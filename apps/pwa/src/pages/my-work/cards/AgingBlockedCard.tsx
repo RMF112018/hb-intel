@@ -4,11 +4,14 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { HbcCard } from '@hbc/ui-kit';
+import { HbcCard, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
 import { RoleGate } from '@hbc/auth';
 
 const useStyles = makeStyles({
-  root: { gridColumn: 'span 6' },
+  root: {
+    gridColumn: 'span 6',
+    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: { gridColumn: 'span 1' },
+  },
 });
 
 export function AgingBlockedCard(): ReactNode {

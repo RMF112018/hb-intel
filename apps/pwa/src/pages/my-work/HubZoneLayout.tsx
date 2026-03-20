@@ -1,15 +1,18 @@
 /**
- * HubZoneLayout — P2-D2 adaptive three-zone layout.
+ * HubZoneLayout — P2-D2 adaptive three-zone layout, P2-B4 cross-device.
  *
  * Primary zone: task runway (dominant, full-width, NOT canvas-governed).
  * Secondary zone: analytics/oversight cards (12-column sub-grid).
  * Tertiary zone: utility/quick-access cards (12-column sub-grid).
  *
- * Grid uses 12 columns matching CANVAS_GRID_COLUMNS for future
- * @hbc/project-canvas migration in secondary/tertiary zones.
+ * Responsive breakpoints per P2-B4:
+ *   Desktop (≥1024px): 12-column grid
+ *   Tablet (768–1023px): 6-column grid for secondary/tertiary
+ *   Mobile (≤767px): single-column stack
  */
 import type { ReactNode } from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
+import { HBC_BREAKPOINT_TABLET, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
 
 export interface HubZoneLayoutProps {
   primaryContent: ReactNode;
@@ -23,22 +26,46 @@ const useStyles = makeStyles({
     gridTemplateColumns: 'repeat(12, 1fr)',
     ...shorthands.gap('16px'),
     width: '100%',
+    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
+      gridTemplateColumns: '1fr',
+      ...shorthands.gap('12px'),
+    },
   },
   primaryZone: {
     gridColumn: '1 / -1',
     minHeight: '400px',
+    [`@media (max-width: ${HBC_BREAKPOINT_TABLET}px)`]: {
+      minHeight: '300px',
+    },
+    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
+      minHeight: 'auto',
+    },
   },
   secondaryZone: {
     gridColumn: '1 / -1',
     display: 'grid',
     gridTemplateColumns: 'repeat(12, 1fr)',
     ...shorthands.gap('16px'),
+    [`@media (max-width: ${HBC_BREAKPOINT_TABLET}px)`]: {
+      gridTemplateColumns: 'repeat(6, 1fr)',
+    },
+    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
+      gridTemplateColumns: '1fr',
+      ...shorthands.gap('12px'),
+    },
   },
   tertiaryZone: {
     gridColumn: '1 / -1',
     display: 'grid',
     gridTemplateColumns: 'repeat(12, 1fr)',
     ...shorthands.gap('16px'),
+    [`@media (max-width: ${HBC_BREAKPOINT_TABLET}px)`]: {
+      gridTemplateColumns: 'repeat(6, 1fr)',
+    },
+    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
+      gridTemplateColumns: '1fr',
+      ...shorthands.gap('12px'),
+    },
   },
 });
 

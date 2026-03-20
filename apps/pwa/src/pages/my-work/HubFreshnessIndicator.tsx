@@ -12,6 +12,7 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
+import { HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
 import type { IHubTrustState } from './useHubTrustState.js';
 import { formatRelativeTime } from './formatRelativeTime.js';
@@ -35,6 +36,11 @@ const useStyles = makeStyles({
     fontSize: '12px',
     color: 'var(--colorNeutralForeground3)',
     paddingBottom: '8px',
+    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      gap: '4px',
+    },
   },
   badge: {
     display: 'inline-flex',
