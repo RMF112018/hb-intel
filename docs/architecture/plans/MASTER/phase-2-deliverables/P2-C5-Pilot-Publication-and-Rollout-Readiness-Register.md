@@ -121,7 +121,7 @@ All 13 Phase 2 acceptance gates mapped to their evidence documents:
 
 | # | Gate | Primary Evidence | Status |
 |---|---|---|---|
-| 1 | Default home | [P2-B1](P2-B1-Root-Routing-and-Landing-Precedence-Spec.md) (route/landing spec) + implementation + test | Spec ✅; Implementation ❌ |
+| 1 | Default home | [P2-B1](P2-B1-Root-Routing-and-Landing-Precedence-Spec.md) (route/landing spec) + implementation + test | Spec ✅; Implementation ✅ (route, resolver, cohort gate complete; source publication pending) |
 | 2 | Lane-boundary | [P2-B0](P2-B0-Lane-Ownership-and-Coexistence-Rules.md) + design review signoff | Spec ✅; Signoff ❌ |
 | 3 | Work-surface | [P2-A1](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) + [P2-D2] (zone governance) + UX review | Spec ✅; P2-D2 ❌; UX review ❌ |
 | 4 | Low-work | [P2-A1 §4](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) (empty-state rules) + UX proof | Spec ✅; UX proof ❌ |
@@ -208,8 +208,8 @@ This checklist must be fully satisfied before pilot launch approval:
 
 ### Pre-Launch: Implementation Gates
 
-- [ ] `/my-work` route created and wired to `HbcMyWorkFeed`
-- [ ] `resolveRoleLandingPath()` updated to return `/my-work`
+- [x] `/my-work` route created and wired to `HbcMyWorkFeed`
+- [x] `resolveRoleLandingPath()` updated to return `/my-work` (via shared `resolveLandingDecision()` resolver with cohort gate)
 - [ ] All 5 required sources pass P2-C1 readiness gates (6/6)
 - [ ] Cross-source deduplication tested
 - [ ] Notification tier-to-lane mapping tested
@@ -280,8 +280,8 @@ Named blockers that must be resolved before pilot launch:
 | 5 | Estimating notification registrations not defined | 6 — Signal | Platform + Estimating | Wave 1 | ❌ Open |
 | 6 | BD notification registrations not defined | 6 — Signal | Platform + BD | Wave 1 | ❌ Open |
 | 7 | Project Hub notification registrations not defined | 6 — Signal | Platform + Project Hub | Wave 1 | ❌ Open |
-| 8 | `/my-work` route not implemented | 1 — Default home | Experience/Shell | Wave 1 | ❌ Open |
-| 9 | `resolveRoleLandingPath()` not updated | 1 — Default home | Experience/Shell | Wave 1 | ❌ Open |
+| 8 | `/my-work` route not implemented | 1 — Default home | Experience/Shell | Wave 1 | ✅ Resolved — route created, `HbcMyWorkFeed` wired, `MyWorkProvider` mounted |
+| 9 | `resolveRoleLandingPath()` not updated | 1 — Default home | Experience/Shell | Wave 1 | ✅ Resolved — refactored to delegate to `resolveLandingDecision()` with cohort gate via `isMyWorkCohortEnabled()` |
 | 10 | Workstream D deliverables not complete | 7, 8, 9 — Role/Personalization | Experience + Product | Wave 1 | ❌ Open |
 | 11 | Workstream E deliverables not complete | 14 — Pilot-readiness | Adoption + Product | Wave 1 | ❌ Open |
 | 12 | Pilot cohort roster not defined | 14 — Pilot-readiness | Product/Adoption | Pre-launch | ❌ Open |

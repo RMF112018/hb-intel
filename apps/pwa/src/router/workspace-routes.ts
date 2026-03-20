@@ -5,8 +5,8 @@
  */
 import { createRoute, redirect, lazyRouteComponent } from '@tanstack/react-router';
 import type { WorkspaceId } from '@hbc/shell';
-import { useNavStore, resolveLandingDecision } from '@hbc/shell';
-import { useAuthStore, usePermissionStore } from '@hbc/auth';
+import { useNavStore, resolveLandingDecision, isMyWorkCohortEnabled } from '@hbc/shell';
+import { useAuthStore } from '@hbc/auth';
 import { rootRoute } from './root-route.js';
 import { requireAuth, requireAdminAccessControl } from './route-guards.js';
 import { WORKSPACE_TOOL_PICKERS, WORKSPACE_SIDEBARS } from './workspace-config.js';
@@ -45,11 +45,10 @@ export const indexRoute = createRoute({
   path: '/',
   beforeLoad: () => {
     const resolvedRoles = useAuthStore.getState().session?.resolvedRoles ?? [];
-    const cohortEnabled = usePermissionStore.getState().hasFeatureFlag('my-work-hub');
     const decision = resolveLandingDecision({
       resolvedRoles,
       runtimeMode: 'pwa',
-      cohortEnabled,
+      cohortEnabled: isMyWorkCohortEnabled(),
     });
     throw redirect({ to: decision.pathname });
   },
@@ -226,20 +225,11 @@ export const requestDetailRoute = createRoute({
   ),
 });
 
-// P2-B1 §11.2: /my-work route — personal work hub (non-workspace, auth-gated).
-export const myWorkRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: 'my-work',
-  beforeLoad: () => {
-    requireAuth();
-    // Clear active workspace — my-work is not a workspace surface.
-    const nav = useNavStore.getState();
-    nav.setActiveWorkspace(null);
-  },
-  component: lazyRouteComponent(
-    () => import('../pages/MyWorkPage.js').then((m) => ({ default: m.MyWorkPage })),
-  ),
-});
+// P2-B1 §11.2: /my-work route — personal work hub workspace.
+export const myWorkRoute = createWorkspaceRoute(
+  'my-work',
+  () => import('../pages/MyWorkPage.js').then((m) => ({ default: m.MyWorkPage })),
+);
 
 // 404 catch-all
 export const notFoundRoute = createRoute({

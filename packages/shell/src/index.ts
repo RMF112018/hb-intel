@@ -77,6 +77,7 @@ export type {
   LandingDecisionInput,
   LandingDecision,
 } from './landingResolver.js';
+export { isMyWorkCohortEnabled } from './cohortGate.js';
 export { canCompleteFirstProtectedShellRender } from './useStartupTimingCompletion.js';
 export {
   RECENT_AUTH_WINDOW_MS,

@@ -1,6 +1,6 @@
 {
   "name": "@hbc/pwa",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -23,6 +23,7 @@
     "@hbc/step-wizard": "workspace:*",
     "@hbc/session-state": "workspace:*",
     "@hbc/smart-empty-state": "workspace:*",
+    "@hbc/my-work-feed": "workspace:*",
     "@hbc/features-estimating": "workspace:*",
     "@azure/msal-browser": "^4.0.0",
     "@azure/msal-react": "^3.0.0",

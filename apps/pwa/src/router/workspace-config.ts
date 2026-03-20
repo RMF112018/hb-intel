@@ -26,6 +26,7 @@ export const WORKSPACE_DESCRIPTORS: Record<WorkspaceId, WorkspaceDescriptor> = {
   'risk-management': { id: 'risk-management', label: 'Risk Management', description: 'Risk register and mitigation planning' },
   'operational-excellence': { id: 'operational-excellence', label: 'Operational Excellence', description: 'Process improvement and metrics' },
   'human-resources': { id: 'human-resources', label: 'Human Resources', description: 'Staffing and certifications management' },
+  'my-work': { id: 'my-work', label: 'My Work', description: 'Personal work hub and task queue' },
 };
 
 type ToolPickerFactory = (navigate: (id: string) => void) => ToolPickerItem[];

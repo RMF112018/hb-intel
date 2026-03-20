@@ -26,6 +26,8 @@ export interface NavItemConfig {
 }
 
 export const NAV_ITEMS: NavItemConfig[] = [
+  // My Work (Phase 2 — Personal Work Hub)
+  { key: 'feed', label: 'My Work', path: '/my-work', workspace: 'my-work', order: 0 },
   // Project Hub
   { key: 'portfolio', label: 'Portfolio', path: '/project-hub/portfolio', workspace: 'project-hub', order: 0 },
   { key: 'recent', label: 'Recent', path: '/project-hub/recent', workspace: 'project-hub', order: 1 },

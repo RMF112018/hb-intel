@@ -46,6 +46,7 @@ const DEFAULT_FEATURE_FLAGS: Record<string, boolean> = {
   'risk-matrix': true,
   'ai-insights': false,
   'procore-sync': false,
+  'my-work-hub': true,
 };
 
 export function bootstrapMockEnvironment(): void {

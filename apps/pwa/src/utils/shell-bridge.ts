@@ -6,8 +6,7 @@
 import { createElement } from 'react';
 import type { ICurrentUser } from '@hbc/models';
 import type { WorkspaceId, SidebarItem } from '@hbc/shell';
-import { getNavItemsForWorkspace } from '@hbc/shell';
-import { usePermissionStore } from '@hbc/auth';
+import { getNavItemsForWorkspace, isMyWorkCohortEnabled } from '@hbc/shell';
 import type { SidebarNavGroup, ShellUser } from '@hbc/ui-kit';
 import { DrawingSheet } from '@hbc/ui-kit';
 import { WORKSPACE_DESCRIPTORS } from '../router/workspace-config.js';
@@ -47,7 +46,7 @@ export function buildSidebarGroupsFromRegistry(
   const groups: SidebarNavGroup[] = [];
 
   // P2-B1 §11.5: "My Work" nav item when cohort flag is enabled.
-  if (usePermissionStore.getState().hasFeatureFlag('my-work-hub')) {
+  if (isMyWorkCohortEnabled()) {
     groups.push({
       id: 'my-work',
       label: 'My Work',
