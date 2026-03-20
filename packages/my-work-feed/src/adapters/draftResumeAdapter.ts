@@ -54,7 +54,7 @@ function mapQueuedOperation(op: IQueuedOperation): IMyWorkItem {
       moduleKey: 'session-state',
     },
     sourceMeta: [buildSourceMeta('session-state', op.operationId, op.createdAt)],
-    permissionState: { canOpen: false, canAct: false },
+    permissionState: { canOpen: false, canAct: false, cannotActReason: 'Queued operations are managed automatically by the sync queue' },
     lifecycle: {
       previousStepLabel: null,
       currentStepLabel: hasError ? 'Retrying' : 'Pending',

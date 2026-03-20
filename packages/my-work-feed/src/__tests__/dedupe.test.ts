@@ -329,4 +329,90 @@ describe('dedupeItems', () => {
     expect(result.canonical[0].permissionState.canAct).toBe(false);
     expect(result.canonical[0].permissionState.cannotActReason).toBeNull();
   });
+
+  // canDelegate / canBulkAct conservative merge (any-false-wins — per P2-A3 §5.3)
+
+  it('canDelegate: false from merged item overrides survivor true (any-false-wins)', () => {
+    const items = [
+      createMockMyWorkItem({
+        workItemId: 'w-survivor',
+        dedupeKey: 'shared',
+        sourceMeta: [{ source: 'bic-next-move', sourceItemId: 'src-1', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+        permissionState: { canOpen: true, canAct: true, canDelegate: true, canBulkAct: false, cannotActReason: null },
+      }),
+      createMockMyWorkItem({
+        workItemId: 'w-merged',
+        dedupeKey: 'shared',
+        sourceMeta: [{ source: 'workflow-handoff', sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-15T11:00:00.000Z' }],
+        permissionState: { canOpen: true, canAct: true, canDelegate: false, canBulkAct: false, cannotActReason: null },
+      }),
+    ];
+
+    const result = dedupeItems(items);
+    expect(result.canonical[0].workItemId).toBe('w-survivor');
+    expect(result.canonical[0].permissionState.canDelegate).toBe(false);
+  });
+
+  it('canDelegate: survivor value preserved when no merged item has canDelegate false', () => {
+    const items = [
+      createMockMyWorkItem({
+        workItemId: 'w-survivor',
+        dedupeKey: 'shared',
+        sourceMeta: [{ source: 'bic-next-move', sourceItemId: 'src-1', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+        permissionState: { canOpen: true, canAct: true, canDelegate: true, canBulkAct: false, cannotActReason: null },
+      }),
+      createMockMyWorkItem({
+        workItemId: 'w-merged',
+        dedupeKey: 'shared',
+        sourceMeta: [{ source: 'workflow-handoff', sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-15T11:00:00.000Z' }],
+        permissionState: { canOpen: true, canAct: true, canDelegate: true, canBulkAct: false, cannotActReason: null },
+      }),
+    ];
+
+    const result = dedupeItems(items);
+    expect(result.canonical[0].workItemId).toBe('w-survivor');
+    expect(result.canonical[0].permissionState.canDelegate).toBe(true);
+  });
+
+  it('canBulkAct: false from merged item overrides survivor true (any-false-wins)', () => {
+    const items = [
+      createMockMyWorkItem({
+        workItemId: 'w-survivor',
+        dedupeKey: 'shared',
+        sourceMeta: [{ source: 'bic-next-move', sourceItemId: 'src-1', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+        permissionState: { canOpen: true, canAct: true, canDelegate: true, canBulkAct: true, cannotActReason: null },
+      }),
+      createMockMyWorkItem({
+        workItemId: 'w-merged',
+        dedupeKey: 'shared',
+        sourceMeta: [{ source: 'workflow-handoff', sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-15T11:00:00.000Z' }],
+        permissionState: { canOpen: true, canAct: true, canDelegate: true, canBulkAct: false, cannotActReason: null },
+      }),
+    ];
+
+    const result = dedupeItems(items);
+    expect(result.canonical[0].workItemId).toBe('w-survivor');
+    expect(result.canonical[0].permissionState.canBulkAct).toBe(false);
+  });
+
+  it('canBulkAct: survivor value preserved when no merged item has canBulkAct false', () => {
+    const items = [
+      createMockMyWorkItem({
+        workItemId: 'w-survivor',
+        dedupeKey: 'shared',
+        sourceMeta: [{ source: 'bic-next-move', sourceItemId: 'src-1', sourceUpdatedAtIso: '2026-01-15T10:00:00.000Z' }],
+        permissionState: { canOpen: true, canAct: true, canDelegate: true, canBulkAct: true, cannotActReason: null },
+      }),
+      createMockMyWorkItem({
+        workItemId: 'w-merged',
+        dedupeKey: 'shared',
+        sourceMeta: [{ source: 'workflow-handoff', sourceItemId: 'src-2', sourceUpdatedAtIso: '2026-01-15T11:00:00.000Z' }],
+        permissionState: { canOpen: true, canAct: true, canDelegate: true, canBulkAct: true, cannotActReason: null },
+      }),
+    ];
+
+    const result = dedupeItems(items);
+    expect(result.canonical[0].workItemId).toBe('w-survivor');
+    expect(result.canonical[0].permissionState.canBulkAct).toBe(true);
+  });
 });

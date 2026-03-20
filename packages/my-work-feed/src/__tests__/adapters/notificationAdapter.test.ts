@@ -142,6 +142,17 @@ describe('notificationAdapter', () => {
     expect(items).toEqual([]);
   });
 
+  it('sets canAct false with cannotActReason populated (per P2-A3 §1.5)', async () => {
+    mockGetCenter
+      .mockResolvedValueOnce(createCenterResult([createNotificationEvent()]))
+      .mockResolvedValueOnce(createCenterResult([]));
+
+    const items = await notificationAdapter.load(createMockMyWorkQuery(), createMockRuntimeContext());
+    expect(items[0].permissionState.canOpen).toBe(true);
+    expect(items[0].permissionState.canAct).toBe(false);
+    expect(items[0].permissionState.cannotActReason).toBe('Notification items are view-only');
+  });
+
   it('fetches both immediate and watch tiers', async () => {
     mockGetCenter
       .mockResolvedValueOnce(createCenterResult([createNotificationEvent()]))

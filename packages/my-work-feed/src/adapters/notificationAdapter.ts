@@ -57,7 +57,7 @@ function mapNotificationItem(event: INotificationEvent): IMyWorkItem {
       href: event.actionUrl,
     },
     sourceMeta: [buildSourceMeta('notification-intelligence', event.id, event.createdAt)],
-    permissionState: { canOpen: true, canAct: false },
+    permissionState: { canOpen: true, canAct: false, cannotActReason: 'Notification items are view-only' },
     lifecycle: {
       previousStepLabel: null,
       currentStepLabel: null,

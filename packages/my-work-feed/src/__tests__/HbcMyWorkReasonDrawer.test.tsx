@@ -47,9 +47,11 @@ function createReasoning(overrides?: Partial<IMyWorkReasoningPayload>): IMyWorkR
       score: 0.95,
     },
     lifecycle: {
+      previousStepLabel: null,
       currentStepLabel: 'Pending Review',
       nextStepLabel: 'Approved',
       blockedDependencyLabel: null,
+      impactedRecordLabel: null,
     },
     permissionState: {
       canOpen: true,
@@ -131,10 +133,10 @@ describe('HbcMyWorkReasonDrawer', () => {
     expect(screen.queryByText(/Score:/)).not.toBeInTheDocument();
   });
 
-  it('shows score at expert tier', () => {
+  it('does not show score at expert tier (score is internal-only per P2-A3 §2.3)', () => {
     vi.mocked(useComplexity).mockReturnValue({ tier: 'expert' });
     render(<HbcMyWorkReasonDrawer itemId="work-001" open={true} onClose={onClose} />);
-    expect(screen.getByText('Score: 0.95')).toBeInTheDocument();
+    expect(screen.queryByText(/Score:/)).not.toBeInTheDocument();
   });
 
   it('renders Lifecycle step with current and next labels', () => {

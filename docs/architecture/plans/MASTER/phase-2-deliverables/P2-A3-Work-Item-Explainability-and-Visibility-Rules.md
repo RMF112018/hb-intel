@@ -24,6 +24,8 @@ This refined version also distinguishes between:
 - **locked target-state policy** that downstream implementation must follow, and
 - **current repo-truth drift** that must be corrected before this policy can be treated as execution-complete.
 
+Verified repo-truth drift as of 2026-03-20 (see §10 for full citations). Resolved: raw numeric score display in `HbcMyWorkReasonDrawer` corrected (§10.2); `cannotActReason` added to `notificationAdapter.ts` and `draftResumeAdapter.ts` (§10.3); `IMyWorkLifecyclePreview` tightened to required-nullable (§10.5); `canDelegate`/`canBulkAct` conservative merge added to `dedupeItems.ts` (§10.6); `delegated-team` annotated `@provisional` in type, both `assignLane()` sites, and reference doc — removal deferred to P2-A1 team-visibility wave (§10.1). No open drift items remain for this policy audit cycle.
+
 ---
 
 ## Policy Scope
@@ -101,6 +103,8 @@ Every `IMyWorkItem` carries explainability data. This section defines the semant
 **Population:** Set by source adapters during item mapping.
 
 **Policy rule:** `nextStepLabel` must describe the immediate next meaningful movement, not a distant or generic future state.
+
+**Reconciliation note — lifecycle field optionality (resolved 2026-03-20):** `IMyWorkLifecyclePreview` previously declared all five fields as optional (`field?: string | null`). The type has been tightened to `field: string | null` (required-nullable). All five adapters and all test construction sites were audited; one incomplete test fixture (`HbcMyWorkReasonDrawer.test.tsx`) was corrected to include the missing fields. `tsc --noEmit` passes clean; 299/299 tests pass. See §10.5.
 
 ### 1.3 `dedupe: IMyWorkDedupeMetadata`
 
@@ -191,6 +195,8 @@ Explainability data is displayed at three disclosure levels.
 - Superseded items MUST NOT appear in active feed rendering.
 - Internal identifiers such as `dedupeKey`, raw work item IDs, and raw supersession target IDs MUST NOT be surfaced in end-user UI.
 - Explainability must remain human-readable. The system may retain machine-oriented metadata internally, but it must not leak internal contract details into user-facing copy.
+
+**Reconciliation note — score display (resolved 2026-03-20):** `HbcMyWorkReasonDrawer` previously rendered the raw numeric score for expert-tier users. That render block and the associated component header comment have been corrected. Score is now internal-only at all tiers. See §10.2.
 
 ---
 
@@ -290,6 +296,8 @@ Future completion of the org-chart / entitlement plumbing is required before tru
 | **cannotActReason: required when merged result is not actionable** | If merged result ends with `canAct: false`, a reason must survive normalization | Prevents disabled-without-explanation outcomes |
 | **blocked state: any-true-wins** | If any merged source says blocked, the merged item remains blocked | Preserves meaningful stop signals |
 | **delegate / bulk flags** | Preserve only where the resulting action remains valid for the merged item | Prevents overstating action rights after merge |
+
+**Reconciliation note — canDelegate/canBulkAct deduplication gap (resolved 2026-03-20):** `dedupeItems.ts` previously inherited `canDelegate` and `canBulkAct` from the survivor via object spread only, silently discarding restrictions from lower-priority merged items. Explicit conservative merge logic has been added: `canDelegate: false` or `canBulkAct: false` from any merged item overrides the survivor's grant (any-false-wins). `tsc --noEmit` passes clean; 4 new tests in `dedupe.test.ts` verify false-wins-from-merged and survivor-value-preserved-when-no-restriction for each flag; 303/303 tests pass. See §10.6.
 
 ### 5.4 Permission Invariants
 
@@ -409,29 +417,51 @@ Per P2-B0, PWA owns the full personal-work home and SPFx remains a governed comp
 
 This section is intentionally normative. These items are known current-state drifts that must be reconciled for execution readiness.
 
-### 10.1 Stale lane encoding
+### 10.1 Stale lane encoding — annotated
 
 Current shared type definitions still include a `delegated-team` lane. That conflicts with the tightened personal-first operating model direction from P2-A1, where delegated/team visibility is governed as a projection or secondary surface concern rather than a standing primary responsibility lane.
 
-**Required consequence:** downstream implementation must not treat `delegated-team` as the policy truth for first release. Package cleanup or compatibility handling must be planned.
+**Resolution (2026-03-20):** Outright removal is deferred — the member is actively returned by both `lifecycle.ts::assignLane()` and `projectFeed.ts::assignLane()` and removing it now would break type-correctness without a coordinated P2-A1 team-surface replacement. Instead: the member has been annotated `@provisional` in `IMyWorkItem.ts` with an inline explanation of the policy constraint; both `assignLane()` return sites carry `// @provisional` comments referencing P2-A2 §3.3 and this section; `docs/reference/my-work-feed/api.md` marks it as provisional. First-release UI surfaces must suppress `delegated-team` items — they must not render it as a standing primary lane. Full cleanup is scoped to the P2-A1 team-visibility wave. `tsc --noEmit` clean; 303/303 tests pass.
 
-### 10.2 Complexity drawer behavior is partly right, partly drifting
+### 10.2 Complexity drawer behavior — structural tier gating aligned; score display violation resolved
 
-Current reasoning drawer behavior already uses `@hbc/complexity` and already gates the drawer out for `essential`. That is aligned with this policy. However, current expert-tier behavior still exposes raw numeric ranking score.
+Current reasoning drawer behavior uses `@hbc/complexity` and gates the drawer out for `essential`. `standard` shows "Why Surfaced" and "Lifecycle & Permissions" steps. `expert` adds a "Source Provenance" step with dedupe detail. These structural behaviors are aligned with this policy.
 
-**Required consequence:** keep the complexity-tier model, but remove end-user score exposure.
+**Previously confirmed violation (now resolved):** `HbcMyWorkReasonDrawer/index.tsx` previously rendered `Score: {reasoning.rankingReason.score}` for expert-tier users. This violated §2.3, §3.2, and the §12 locked decision. The score render block and the misleading component header comment have been corrected (2026-03-20). Raw numeric ranking score is no longer shown at any complexity tier. The regression test asserting score display at expert tier has been updated to assert the inverse.
 
-### 10.3 Non-actionable notification items are under-specified
+### 10.3 Non-actionable items missing cannotActReason — resolved
 
-Current notification mapping produces non-actionable items, but known repo state does not consistently guarantee a populated `cannotActReason`.
+A full adapter audit found two adapters setting `canAct: false` without a populated `cannotActReason`:
 
-**Required consequence:** adapters must be tightened so any non-actionable item supplies a reason, and shared UI/action layers must enforce it.
+- `notificationAdapter.ts` — `permissionState: { canOpen: true, canAct: false }` with no reason.
+- `draftResumeAdapter.ts` — `permissionState: { canOpen: false, canAct: false }` with no reason.
+
+The other two adapters (`bicAdapter.ts`, `handoffAdapter.ts`) set `canAct: true` and are not affected.
+
+**Resolved (2026-03-20):**
+- `notificationAdapter.ts` now sets `cannotActReason: 'Notification items are view-only'`.
+- `draftResumeAdapter.ts` now sets `cannotActReason: 'Queued operations are managed automatically by the sync queue'`.
+- Both adapters have new test assertions confirming `cannotActReason` is populated when `canAct: false`. Both pass (20/20).
+
+Future adapters must populate `cannotActReason` whenever setting `canAct: false`. The shared UI/action layers should enforce this requirement at runtime so the policy cannot be silently violated by new adapters.
 
 ### 10.4 Team feed contracts exist before full team plumbing is complete
 
-Current shared query and team-feed contracts include `teamMode` and a team-feed result projection. That does not, by itself, prove that direct-report item visibility is release-complete.
+Current shared query and team-feed contracts include `teamMode` and a team-feed result projection (`IMyWorkTeamFeedResult` with `agingCount`, `escalationCandidateCount`). That does not, by itself, prove that direct-report item visibility is release-complete.
 
 **Required consequence:** implementation and planning docs must carry an explicit note that true direct-report item visibility remains dependent on future org-chart / entitlement plumbing.
+
+### 10.5 IMyWorkLifecyclePreview field optionality — resolved
+
+`IMyWorkLifecyclePreview` previously declared all five fields as optional (`field?: string | null`), allowing adapters to omit them and making `undefined` indistinguishable from an intentional `null`. This conflicted with the policy contract (`string | null`, always present) and weakened the explainability guarantee.
+
+**Resolved (2026-03-20):** All five fields in `IMyWorkLifecyclePreview` are now `field: string | null` (required-nullable). A full construction-site audit was performed across all five adapters and all test fixtures. One test fixture (`HbcMyWorkReasonDrawer.test.tsx`) was missing `previousStepLabel` and `impactedRecordLabel` and has been corrected. `tsc --noEmit` is clean; 299/299 tests pass. Future adapters must explicitly set all five lifecycle fields — using `null` when no value is available.
+
+### 10.6 canDelegate and canBulkAct conservative merge — resolved
+
+`dedupeItems.ts` previously inherited `canDelegate` and `canBulkAct` from the survivor via object spread, silently discarding restrictions from lower-priority merged items. The fix adds explicit any-false-wins logic for both flags: if any item in the merged group has `canDelegate === false` or `canBulkAct === false`, that restriction is preserved in the canonical output regardless of the survivor's value. When no item restricts the flag, the survivor's value is preserved unchanged. The merge logic is documented inline alongside the existing `canAct` and `isBlocked` rules.
+
+**Verified (2026-03-20):** `tsc --noEmit` clean. Four new tests added to `dedupe.test.ts` — two for `canDelegate` (false-wins-from-merged; survivor-value-preserved-when-no-restriction) and two for `canBulkAct` (same pattern). 303/303 tests pass.
 
 ---
 

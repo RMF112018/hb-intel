@@ -22,6 +22,8 @@ export function assignLane(item: IMyWorkItem): MyWorkLane {
   if (item.priority === 'deferred' || item.state === 'deferred') {
     return 'deferred';
   }
+  // @provisional — delegated-team is not a target-state primary lane (P2-A2 §3.3 / P2-A3 §10.1).
+  // Must not be exposed as a standing lane on first-release surfaces. Pending P2-A1 team-visibility work.
   if (item.delegatedTo || item.delegatedBy) {
     return 'delegated-team';
   }

@@ -28,7 +28,7 @@
 
 - `MyWorkItemClass` — `'owned-action' | 'inbound-handoff' | 'pending-approval' | 'attention-item' | 'queued-follow-up' | 'contextual-signal'`
 - `MyWorkPriority` — `'now' | 'soon' | 'watch' | 'deferred'`
-- `MyWorkLane` — `'do-now' | 'waiting-blocked' | 'watch' | 'delegated-team' | 'deferred'`
+- `MyWorkLane` — `'do-now' | 'waiting-blocked' | 'watch' | 'delegated-team' | 'deferred'` (`delegated-team` is provisional — retained for compatibility, not a target-state primary lane; see P2-A2 §3.3 / P2-A3 §10.1)
 - `MyWorkState` — `'new' | 'active' | 'blocked' | 'waiting' | 'deferred' | 'superseded' | 'completed'`
 - `MyWorkOwnerType` — `'user' | 'role' | 'company' | 'system'`
 - `MyWorkSource` — `'bic-next-move' | 'workflow-handoff' | 'acknowledgment' | 'notification-intelligence' | 'session-state' | 'module'`

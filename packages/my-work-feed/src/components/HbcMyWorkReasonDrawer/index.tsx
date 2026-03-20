@@ -3,7 +3,9 @@
  *
  * Explainability tearsheet with 2–3 steps depending on tier.
  * Essential: returns null. Standard: 2 steps (Why Surfaced, Lifecycle).
- * Expert: all 3 steps (+ Source Provenance) with score and dedupe detail.
+ * Expert: 3 steps (+ Source Provenance with dedupe detail).
+ *
+ * Raw numeric ranking score is never shown at any tier per P2-A3 §2.3 / §12.
  */
 
 import React from 'react';
@@ -60,11 +62,6 @@ export function HbcMyWorkReasonDrawer({
                 </li>
               ))}
             </ul>
-          )}
-          {tier === 'expert' && reasoning.rankingReason.score != null && (
-            <HbcTypography intent="bodySmall">
-              Score: {reasoning.rankingReason.score}
-            </HbcTypography>
           )}
         </div>
       ),

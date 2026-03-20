@@ -23,6 +23,14 @@ export type MyWorkLane =
   | 'do-now'
   | 'waiting-blocked'
   | 'watch'
+  /**
+   * @provisional
+   * Retained for compatibility with current `assignLane()` implementations that detect
+   * delegated items via `delegatedTo`/`delegatedBy`. This member is NOT part of the
+   * target-state four-lane model (P2-A2 §3.3 / P2-A3 §10.1). First-release surfaces
+   * must not render `delegated-team` as a standing primary lane. Removal or replacement
+   * is required before team-visibility surfaces ship (P2-A1 scope).
+   */
   | 'delegated-team'
   | 'deferred';
 
@@ -85,11 +93,11 @@ export interface IMyWorkPermissionState {
 }
 
 export interface IMyWorkLifecyclePreview {
-  previousStepLabel?: string | null;
-  currentStepLabel?: string | null;
-  nextStepLabel?: string | null;
-  blockedDependencyLabel?: string | null;
-  impactedRecordLabel?: string | null;
+  previousStepLabel: string | null;
+  currentStepLabel: string | null;
+  nextStepLabel: string | null;
+  blockedDependencyLabel: string | null;
+  impactedRecordLabel: string | null;
 }
 
 export interface IMyWorkRankingReason {

@@ -70,13 +70,23 @@ export function dedupeItems(items: IMyWorkItem[]): IDedupeResult {
       }
     }
 
-    // Permission preservation: any canAct:true wins, any isBlocked:true wins
+    // Permission preservation:
+    //   canAct:      any-true-wins (a grant from any source is preserved)
+    //   isBlocked:   any-true-wins (a stop signal from any source is preserved)
+    //   canDelegate: any-false-wins (a restriction from any source overrides a survivor grant)
+    //   canBulkAct:  any-false-wins (a restriction from any source overrides a survivor grant)
     const allItems = [survivor, ...merged];
     const anyCanAct = allItems.some((i) => i.permissionState.canAct);
     const anyBlocked = allItems.some((i) => i.isBlocked);
     const cannotActReason = anyCanAct
       ? null
       : allItems.find((i) => i.permissionState.cannotActReason)?.permissionState.cannotActReason ?? null;
+    const canDelegate = allItems.some((i) => i.permissionState.canDelegate === false)
+      ? false
+      : survivor.permissionState.canDelegate;
+    const canBulkAct = allItems.some((i) => i.permissionState.canBulkAct === false)
+      ? false
+      : survivor.permissionState.canBulkAct;
 
     const mergedSurvivor: IMyWorkItem = {
       ...survivor,
@@ -86,6 +96,8 @@ export function dedupeItems(items: IMyWorkItem[]): IDedupeResult {
         ...survivor.permissionState,
         canAct: anyCanAct,
         cannotActReason,
+        canDelegate,
+        canBulkAct,
       },
       dedupe: {
         dedupeKey,

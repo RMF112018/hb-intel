@@ -93,6 +93,15 @@ describe('draftResumeAdapter', () => {
     expect(items[0].lifecycle.currentStepLabel).toBe('Pending');
   });
 
+  it('sets canAct false with cannotActReason populated (per P2-A3 §1.5)', async () => {
+    mockListPending.mockResolvedValue([createQueuedOperation()]);
+
+    const items = await draftResumeAdapter.load(createMockMyWorkQuery(), createMockRuntimeContext());
+    expect(items[0].permissionState.canOpen).toBe(false);
+    expect(items[0].permissionState.canAct).toBe(false);
+    expect(items[0].permissionState.cannotActReason).toBe('Queued operations are managed automatically by the sync queue');
+  });
+
   it('returns empty array when no pending operations', async () => {
     mockListPending.mockResolvedValue([]);
 
