@@ -11,7 +11,7 @@
  */
 import { registerBicModule } from '@hbc/bic-next-move';
 import { NotificationRegistry } from '@hbc/notification-intelligence';
-import { MyWorkRegistry, bicAdapter, notificationAdapter, handoffAdapter } from '@hbc/my-work-feed';
+import { MyWorkRegistry, bicAdapter, notificationAdapter, handoffAdapter, acknowledgmentAdapter } from '@hbc/my-work-feed';
 import {
   createProjectSetupBicRegistration,
   PROVISIONING_NOTIFICATION_REGISTRATIONS,
@@ -50,11 +50,13 @@ export function assembleHubSources(): void {
   NotificationRegistry.register(PROJECT_HEALTH_PULSE_NOTIFICATION_REGISTRATIONS);
 
   // ── MyWork feed adapter assembly ──────────────────────────────────────
-  // Wires adapters that consume the BIC fan-out, notification center,
-  // and handoff inbox into the aggregation feed.
+  // Wires all 4 required adapters (P2-C1 §3.1) that consume the BIC
+  // fan-out, notification center, handoff inbox, and acknowledgment
+  // queue into the aggregation feed.
   MyWorkRegistry.register([
     { source: 'bic-next-move', adapter: bicAdapter, rankingWeight: 0.9 },
-    { source: 'notification-intelligence', adapter: notificationAdapter, rankingWeight: 0.5 },
     { source: 'workflow-handoff', adapter: handoffAdapter, rankingWeight: 0.8 },
+    { source: 'acknowledgment', adapter: acknowledgmentAdapter, rankingWeight: 0.7 },
+    { source: 'notification-intelligence', adapter: notificationAdapter, rankingWeight: 0.5 },
   ]);
 }
