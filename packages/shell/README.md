@@ -37,6 +37,67 @@ These concerns are owned by `@hbc/auth`.
 - SPFx boundary contracts: `SpfxHostBridge`, host signal handlers.
 - Protected feature contracts: registration/validation/registry interfaces.
 - Startup diagnostics: startup phase, budget, and snapshot contracts.
+- Landing resolver: `resolveLandingDecision`, `LandingDecision`, `LandingDecisionInput`, `LandingMode`, `TeamMode`.
+- Cohort gate: `isMyWorkCohortEnabled`.
+
+## Landing Resolver (Phase 2)
+
+`resolveLandingDecision()` is the **sole policy authority** for landing path decisions (P2-B1 §11.1).
+All landing-path consumers must call this shared resolver — no parallel role/cohort branching is permitted.
+
+### Exports
+
+| Export | Kind | Purpose |
+|--------|------|---------|
+| `resolveLandingDecision` | Function | Pure function: role + cohort → landing path. No store access. |
+| `LandingDecisionInput` | Type | Input: `resolvedRoles`, `runtimeMode`, `redirectTarget?`, `cohortEnabled` |
+| `LandingDecision` | Type | Output: `pathname`, `landingMode` (`'legacy'` or `'phase-2'`), `teamMode?` |
+| `LandingMode` | Type | `'legacy' \| 'phase-2'` |
+| `TeamMode` | Type | `'personal' \| 'delegated-by-me' \| 'my-team'` |
+
+### Landing Precedence
+
+1. **Redirect memory** (Priority 1) — caller passes validated `redirectTarget`
+2. **Administrator** → `/admin` (always, regardless of cohort)
+3. **Executive + cohort** → `/my-work` with `teamMode: 'personal'`
+4. **Executive + no cohort** → `/leadership`
+5. **Standard role + cohort** → `/my-work` with `teamMode: 'personal'`
+6. **Standard role + no cohort** → `/project-hub`
+
+### Consumers
+
+- `apps/pwa/src/router/workspace-routes.ts` — index route `beforeLoad`
+- `apps/pwa/src/router/root-route.tsx` — post-auth Priority 2 landing
+- `packages/shell/src/ShellCore.tsx` — via deprecated `resolveRoleLandingPath()` (delegates with `cohortEnabled: false`)
+
+### Anti-Pattern
+
+Do NOT create a second landing resolver or duplicate role/cohort branching in route files.
+`resolveRoleLandingPath()` is deprecated — it delegates to the shared resolver with `cohortEnabled: false`.
+
+## Cohort Gate (Phase 2)
+
+`isMyWorkCohortEnabled()` is the **single source of truth** for `/my-work` pilot cohort enablement (P2-B1 §6).
+
+| Export | Kind | Purpose |
+|--------|------|---------|
+| `isMyWorkCohortEnabled` | Function | Returns `true` when the current user is in the `/my-work` pilot cohort |
+
+- Reads `usePermissionStore.getState().hasFeatureFlag('my-work-hub')` from `@hbc/auth`
+- Feature flag key: **`my-work-hub`**
+- Called imperatively via `.getState()` — safe for `beforeLoad` route guards
+- Replaceable with a real cohort service without changing consumers
+
+### Consumers
+
+- `apps/pwa/src/router/workspace-routes.ts` — index route cohort check
+- `apps/pwa/src/router/root-route.tsx` — post-auth landing cohort check
+- `apps/pwa/src/utils/shell-bridge.ts` — "My Work" nav item visibility
+
+### Anti-Pattern
+
+Do NOT read `hasFeatureFlag('my-work-hub')` directly from `usePermissionStore` in app code.
+Always use `isMyWorkCohortEnabled()` so the gate can be replaced in one place.
 
 ## Component Export Tiers
 
