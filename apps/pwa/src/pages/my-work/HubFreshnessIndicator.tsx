@@ -2,6 +2,7 @@
  * HubFreshnessIndicator — P2-B3 §5–§6.
  *
  * Displays freshness timestamp and status badge above the primary zone.
+ * Uses HbcStatusBadge from @hbc/ui-kit for the badge rendering.
  * Complexity-tier-aware:
  *   Essential: "Last synced [relative time]" when not live
  *   Standard: + freshness label badge + degraded-source summary
@@ -11,8 +12,9 @@
  * Shows stale-while-revalidate treatment when refreshing stale data.
  */
 import type { ReactNode } from 'react';
-import { makeStyles, mergeClasses } from '@griffel/react';
-import { HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import { HBC_BREAKPOINT_MOBILE, HbcStatusBadge } from '@hbc/ui-kit';
+import type { StatusVariant } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
 import type { IHubTrustState } from './useHubTrustState.js';
 import { formatRelativeTime } from './formatRelativeTime.js';
@@ -28,6 +30,12 @@ const FRESHNESS_LABELS: Record<'live' | 'cached' | 'partial', string> = {
   partial: 'Partial',
 };
 
+const FRESHNESS_TO_VARIANT: Record<'live' | 'cached' | 'partial', StatusVariant> = {
+  live: 'success',
+  cached: 'info',
+  partial: 'warning',
+};
+
 const useStyles = makeStyles({
   root: {
     display: 'flex',
@@ -41,29 +49,6 @@ const useStyles = makeStyles({
       alignItems: 'flex-start',
       gap: '4px',
     },
-  },
-  badge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    paddingLeft: '6px',
-    paddingRight: '6px',
-    paddingTop: '2px',
-    paddingBottom: '2px',
-    borderRadius: '4px',
-    fontSize: '11px',
-    fontWeight: 600,
-  },
-  badgeLive: {
-    backgroundColor: 'var(--colorPaletteGreenBackground1)',
-    color: 'var(--colorPaletteGreenForeground1)',
-  },
-  badgeCached: {
-    backgroundColor: 'var(--colorPaletteBlueBorderActive)',
-    color: 'var(--colorNeutralForegroundOnBrand)',
-  },
-  badgePartial: {
-    backgroundColor: 'var(--colorPaletteYellowBackground1)',
-    color: 'var(--colorPaletteYellowForeground1)',
   },
   refreshing: {
     fontStyle: 'italic',
@@ -97,23 +82,18 @@ export function HubFreshnessIndicator({
     );
   }
 
-  const badgeClass =
-    freshness === 'live'
-      ? styles.badgeLive
-      : freshness === 'cached'
-        ? styles.badgeCached
-        : styles.badgePartial;
-
   return (
     <div className={styles.root} data-hub-trust={freshness}>
       {/* Essential tier: just the timestamp */}
       {relativeTime && <span>Last synced {relativeTime}</span>}
 
-      {/* Standard+ tier: freshness badge */}
+      {/* Standard+ tier: freshness badge via HbcStatusBadge */}
       {tier !== 'essential' && (
-        <span className={mergeClasses(styles.badge, badgeClass)}>
-          {FRESHNESS_LABELS[freshness]}
-        </span>
+        <HbcStatusBadge
+          variant={FRESHNESS_TO_VARIANT[freshness]}
+          label={FRESHNESS_LABELS[freshness]}
+          size="small"
+        />
       )}
 
       {/* Standard+ tier: degraded source summary */}
