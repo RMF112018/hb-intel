@@ -48,7 +48,7 @@ Phase 2 planning is underway. Workstreams A and B are complete — all 8 deliver
 
 | Doc ID | Title | Status |
 |---|---|---|
-| P2-C1 | First-Release Source Tranche Register | Not Started |
+| P2-C1 | [First-Release Source Tranche Register](P2-C1-First-Release-Source-Tranche-Register.md) | Active Reference |
 | P2-C2 | Notification-to-Work Mapping Policy | Not Started |
 | P2-C3 | Work-Item Navigation Matrix | Not Started |
 | P2-C4 | Personal Work Hub / Domain / Project Hub Handoff Criteria Matrix | Not Started |
