@@ -190,12 +190,12 @@ The Docker/Linux Cosmos DB emulator does not support the Table API endpoint. If 
 
 ---
 
-### R7 — `listRequests()` query cap pagination
+### R7 — `listRequests()` query cap pagination ✅ RESOLVED
 
-`listRequests()` in `project-requests-service.ts` uses `.top(5000)` without pagination. This is a code-level design choice that should be fixed before production to prevent silent truncation at high volume. The fix is a standard pagination loop.
+`listRequests()` in `project-requests-repository.ts` now uses PnPjs `getAll(5000)` which handles `$skiptoken`-based pagination internally. Silent truncation at 5,000 items is eliminated.
 
 **Owner:** Engineering
-**Priority:** Before general availability
+**Resolved:** 2026-03-20 — replaced `.top(5000)()` with `.getAll(5000)` in `SharePointProjectRequestsAdapter`
 
 ---
 

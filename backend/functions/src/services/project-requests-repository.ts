@@ -80,7 +80,7 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
       query = query.filter(`RequestState eq '${key}'`);
     }
 
-    const items = await query.top(5000)();
+    const items = await query.getAll(5000);
     return (items as Array<Record<string, unknown>>).map((item) => this.fromListItem(item));
   }
 
