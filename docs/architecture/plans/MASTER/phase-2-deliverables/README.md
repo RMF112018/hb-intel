@@ -71,7 +71,7 @@ Phase 2 planning is underway. Workstreams A, B, and C are complete. Workstream D
 | P2-E1 | [Multi-Role Context Policy](P2-E1-Multi-Role-Context-Policy.md) | Governance Policy |
 | P2-E2 | [Project Anchor and Context-Scope Policy](P2-E2-Project-Anchor-and-Context-Scope-Policy.md) | Governance Policy |
 | P2-E3 | [First-Release Success Scorecard and Validation Plan](P2-E3-First-Release-Success-Scorecard-and-Validation-Plan.md) | Active Reference |
-| P2-E4 | Phase 2 Open Decisions and Deferred Items Register | Not Started |
+| P2-E4 | [Open Decisions and Deferred Items Register](P2-E4-Open-Decisions-and-Deferred-Items-Register.md) | Active Reference |
 | P2-E5 | Pilot Cohort Rollout and Adoption Sequencing Note | Not Started |
 
 ---
