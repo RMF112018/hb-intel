@@ -228,6 +228,65 @@ This checklist must be fully satisfied before pilot launch approval:
 - [ ] Product/Adoption approval for pilot cohort and rollout plan — Evidence: P2-E5 rollout sequencing spec exists; P2-C5 §4 cohort definition template ready; awaiting Product/Adoption decision
 - [ ] Success scorecard (P2-E3) finalized with measurable criteria — Evidence: P2-E3 spec exists; KPI bands and measurement plan require Product finalization
 
+### Pre-Launch: Governance Review Schedule
+
+The following governance reviews require human signoff. Implementation evidence exists for each; the sessions need to be scheduled.
+
+#### Gate 2 — Design Review: Lane-Boundary (P2-B0)
+
+| Field | Value |
+|---|---|
+| **Reviewer** | Design lead |
+| **Gate** | Lane-boundary |
+| **Pass condition** | Hub layout respects P2-B0 lane model; primary zone dominates; secondary/tertiary zones use governed card grid |
+| **Evidence to review** | `apps/pwa/src/pages/my-work/HubZoneLayout.tsx` (12-column grid, primary/secondary/tertiary zones); `HubPrimaryZone.tsx` (feed rendered outside canvas, no EditMode); `HubSecondaryZone.tsx` + `HubTertiaryZone.tsx` (role-gated cards on 12-col sub-grid matching `CANVAS_GRID_COLUMNS`) |
+| **Governing spec** | [P2-B0](P2-B0-Lane-Ownership-and-Coexistence-Rules.md), [P2-D2](P2-D2-Adaptive-Layout-and-Zone-Governance-Spec.md) |
+| **Status** | Awaiting session scheduling |
+
+#### Gates 3/4 — UX Review: Work-Surface and Low-Work (P2-A1, P2-D2)
+
+| Field | Value |
+|---|---|
+| **Reviewer** | UX lead |
+| **Gate** | Work-surface (Gate 3) + Low-work (Gate 4) |
+| **Pass condition** | Hub provides a credible task-first work surface; empty/low-work states keep the hub useful and never redirect |
+| **Evidence to review** | `HubZoneLayout.tsx` (three-zone adaptive layout); `HubPageLevelEmptyState.tsx` (loading-failed/permission-empty guard, never redirects on empty queue per P2-A1 §4); `HbcMyWorkFeed` (built-in truly-empty/filter-empty/first-use states); `HubFreshnessIndicator.tsx` + `HubConnectivityBanner.tsx` (trust-state and offline display); responsive breakpoints (12→6→1 column reflow) |
+| **Governing spec** | [P2-A1 §4, §6](P2-A1-Personal-Work-Hub-Operating-Model-Register.md), [P2-D2](P2-D2-Adaptive-Layout-and-Zone-Governance-Spec.md) |
+| **Status** | Awaiting session scheduling |
+
+#### Gate 7 — Role Validation Walkthrough (P2-D1, P2-D4)
+
+| Field | Value |
+|---|---|
+| **Reviewer** | Product lead + Experience lead |
+| **Gate** | Role-governance |
+| **Pass condition** | Role-gated surfaces correctly show/hide per entitlement matrix; team mode toggle restricted to eligible roles |
+| **Evidence to review** | `RoleGate` usage in `TeamPortfolioCard.tsx` (Executive), `AgingBlockedCard.tsx` (Executive), `AdminOversightCard.tsx` (Administrator); `HubTeamModeSelector.tsx` (my-team tab Executive-only via `useAuthStore`); `useHubPersonalization.ts` (team mode draft persistence); `useMyWorkTeamFeed` (delegated-by-me + escalation-candidate scopes) |
+| **Governing spec** | [P2-D1](P2-D1-Role-to-Hub-Entitlement-Matrix.md) §5–§6, [P2-D4](P2-D4-Delegated-and-Team-Lane-Governance-Note.md) §1 |
+| **Walkthrough scenarios** | (1) Member user sees personal cards only, no team mode options beyond delegated-by-me; (2) Executive user sees team portfolio + aging/blocked cards + my-team tab; (3) Administrator sees admin oversight card; (4) Multi-role Administrator+Executive sees all |
+| **Status** | Awaiting session scheduling |
+
+#### Blocker 12 — Pilot Cohort Roster (Product/Adoption)
+
+| Field | Value |
+|---|---|
+| **Decision owner** | Product lead + Adoption lead |
+| **Blocker** | Pilot cohort roster not defined |
+| **Decision required** | Cohort size, role mix, geographic scope, pilot duration, opt-out mechanism (per §4.2) |
+| **Infrastructure ready** | `isMyWorkCohortEnabled()` in `@hbc/shell` reads `my-work-hub` feature flag; `resolveLandingDecision()` routes cohort users to `/my-work`; `DEFAULT_FEATURE_FLAGS` in `bootstrap.ts` enables flag in dev mode |
+| **Governing spec** | [P2-E5](P2-E5-Pilot-Cohort-Rollout-and-Adoption-Sequencing-Note.md), P2-C5 §4 |
+| **Status** | Awaiting Product/Adoption decision |
+
+#### Blocker 13 — Success Scorecard (Product)
+
+| Field | Value |
+|---|---|
+| **Decision owner** | Product lead |
+| **Blocker** | Success scorecard not finalized |
+| **Decision required** | Measurable KPI bands, measurement thresholds, monitoring cadence, success/failure criteria for Wave 1→Wave 2 expansion gate |
+| **Spec ready** | [P2-E3](P2-E3-First-Release-Success-Scorecard-and-Validation-Plan.md) exists with framework; Product must finalize specific numeric thresholds |
+| **Status** | Awaiting Product finalization |
+
 ---
 
 ## 6. Rollout Posture
