@@ -6,7 +6,7 @@
 
 ## Planning Status Summary
 
-Phase 2 planning is underway. Workstreams A and B are complete — all 8 deliverables (P2-A1–A3, P2-B0–B4) are locked. These establish the operating-model, ranking, explainability, lane-ownership, routing, state-persistence, freshness, and cross-device foundations. Remaining deliverables (Workstreams C, D, E) are in planning queue, sequenced per Phase 2 §19 execution priorities.
+Phase 2 planning is underway. Workstreams A, B, and C are complete — all 13 deliverables (P2-A1–A3, P2-B0–B4, P2-C1–C5) are locked. These establish operating-model, ranking, explainability, lane-ownership, routing, state-persistence, freshness, cross-device, publication, notification, navigation, handoff, and rollout-readiness foundations. Remaining deliverables (Workstreams D and E) are in planning queue.
 
 ---
 
@@ -52,7 +52,7 @@ Phase 2 planning is underway. Workstreams A and B are complete — all 8 deliver
 | P2-C2 | [Notification-to-Work Mapping Policy](P2-C2-Notification-to-Work-Mapping-Policy.md) | Governance Policy |
 | P2-C3 | [Work-Item Navigation Matrix](P2-C3-Work-Item-Navigation-Matrix.md) | Specification |
 | P2-C4 | [Handoff Criteria Matrix](P2-C4-Handoff-Criteria-Matrix.md) | Specification |
-| P2-C5 | First-Release Pilot Publication and Rollout Readiness Register | Not Started |
+| P2-C5 | [Pilot Publication and Rollout Readiness Register](P2-C5-Pilot-Publication-and-Rollout-Readiness-Register.md) | Active Reference |
 
 ### Workstream D — Role Governance, Analytics Expansion, and Personalization
 

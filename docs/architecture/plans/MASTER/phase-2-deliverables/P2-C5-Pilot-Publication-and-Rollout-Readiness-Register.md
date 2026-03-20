@@ -1,0 +1,348 @@
+# P2-C5: First-Release Pilot Publication and Rollout Readiness Register
+
+| Field | Value |
+|---|---|
+| **Doc ID** | P2-C5 |
+| **Phase** | Phase 2 |
+| **Workstream** | C — Shared Work Sources, Signals, and Handoff Rules |
+| **Document Type** | Active Reference |
+| **Owner** | Platform / Core Services + Adoption / Product |
+| **Update Authority** | Platform lead updates publication readiness; Product lead updates rollout posture; changes require mutual review |
+| **Last Reviewed Against Repo Truth** | 2026-03-20 |
+| **References** | [Phase 2 Plan §7.1, §10.3, §14, §16, §19](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [P2-C1](P2-C1-First-Release-Source-Tranche-Register.md); [P2-C2](P2-C2-Notification-to-Work-Mapping-Policy.md); [P2-C3](P2-C3-Work-Item-Navigation-Matrix.md); [P2-C4](P2-C4-Handoff-Criteria-Matrix.md); [P0-B1](../phase-0-deliverables/P0-B1-Production-Readiness-Matrix.md) |
+
+---
+
+## Register Statement
+
+This register is the canonical launch-readiness artifact for the Phase 2 first-release pilot. It tracks per-source publication readiness, maps all 13 acceptance gates to evidence, defines the pilot cohort, and provides the launch checklist that gates pilot approval. No pilot launch may proceed without Platform-lead and Product-lead sign-off on this register's readiness status.
+
+---
+
+## Register Scope
+
+### This register governs
+
+- Per-source publication readiness status and integration test tracking
+- Acceptance gate evidence inventory (all 13 gates)
+- Pilot cohort definition and selection criteria
+- Pilot launch checklist
+- Rollout posture (Wave 1 start gate, expansion criteria, rollback conditions)
+- Named pilot-launch blockers with resolution owners
+
+### This register does NOT govern
+
+- Source classification and readiness gate definitions — see [P2-C1](P2-C1-First-Release-Source-Tranche-Register.md)
+- Notification mapping rules — see [P2-C2](P2-C2-Notification-to-Work-Mapping-Policy.md)
+- Navigation patterns — see [P2-C3](P2-C3-Work-Item-Navigation-Matrix.md)
+- Handoff criteria — see [P2-C4](P2-C4-Handoff-Criteria-Matrix.md)
+- Success scorecard and KPI bands — see P2-E3
+- Pilot cohort sequencing details — see P2-E5
+
+---
+
+## Definitions
+
+| Term | Meaning |
+|---|---|
+| **Publication-ready** | Source has passed all 6 readiness gates (P2-C1 §4) and integration tests confirm correct publication into the hub |
+| **Publication-blocked** | Source is required for pilot but has unmet readiness gates — listed as a pilot-launch blocker |
+| **Publication-optional** | Source is beneficial but its absence does not block pilot launch |
+| **Pilot cohort** | The targeted group of users who receive the `/my-work` Personal Work Hub as their default landing in the first-release rollout |
+| **Acceptance gate** | One of 13 Phase 2 pass/fail criteria that must have clear evidence before pilot launch approval |
+
+---
+
+## 1. Publication Readiness Status
+
+Inherited from [P2-C1 §1](P2-C1-First-Release-Source-Tranche-Register.md) with integration test status:
+
+| Source | Module Key | Classification | Gate Status (P2-C1 §4) | Integration Tested | Publication Status |
+|---|---|---|---|---|---|
+| **Provisioning** | `provisioning` | Required | 6/6 ✅ | ❌ Pending | **Publication-ready** (gates met; integration test pending) |
+| **Estimating Bid Readiness** | `estimating-bid-readiness` | Required | 3/6 ❌ | ❌ Blocked | **Publication-blocked** |
+| **BD Score Benchmark** | `bd-score-benchmark` | Required | 3/6 ❌ | ❌ Blocked | **Publication-blocked** |
+| **BD Strategic Intelligence** | `bd-strategic-intelligence` | Required | 3/6 ❌ | ❌ Blocked | **Publication-blocked** |
+| **Project Hub Health Pulse** | `project-hub-health-pulse` | Required | 3/6 ❌ | ❌ Blocked | **Publication-blocked** |
+| **Admin Escalations** | `admin` | Optional | Via Provisioning ✅ | ❌ Pending | **Publication-optional** |
+
+### 1.1 Readiness Status Updates
+
+This table is updated as sources progress through readiness gates. Updates require:
+- Domain-owner confirmation that gates are met
+- Platform-lead review of integration test evidence
+- QA sign-off on cross-source deduplication and lane assignment
+
+---
+
+## 2. Integration Test Readiness by Gate
+
+### Gate 5 — Publication
+
+| Test Scenario | Source | Owner | Status | Evidence |
+|---|---|---|---|---|
+| BIC registration factory created | All 5 required | Domain leads | Provisioning ✅; others ❌ | `*/bic-registration.ts` |
+| App bootstrap wires `registerBicModule()` | All 5 required | Domain leads | Provisioning ✅; others ❌ | App bootstrap files |
+| Notification registrations defined | All notification-publishing sources | Platform | Provisioning ✅ (15 events); others ❌ | `*/notification-registrations.ts` |
+| Deduplication key format validates | All sources | Platform | ✅ Defined in P2-C1 §5 | Canonical key registry |
+| Cross-source dedup tested (BIC + Notification) | Provisioning | QA | ❌ Pending | `@hbc/my-work-feed` test suite |
+| Lane assignment correct per priority mapping | All sources | Platform | ❌ Pending | `projectFeed.ts` test coverage |
+
+### Gate 6 — Signal
+
+| Test Scenario | Owner | Status | Evidence |
+|---|---|---|---|
+| Notification tier-to-lane mapping correct | Platform | ❌ Pending | P2-C2 §2 mapping tests |
+| Action URLs resolve on PWA | QA | ❌ Pending | Navigation test suite |
+| Action URLs resolve on SPFx | QA | ❌ Pending | Cross-surface test suite |
+| Badge shows immediate-only count | Experience | ❌ Pending | `HbcNotificationBadge` tests |
+
+### Gate 10 — Continuity
+
+| Test Scenario | Owner | Status | Evidence |
+|---|---|---|---|
+| Return memory restores hub state after domain navigation | Experience/Shell | ❌ Pending | P2-B2 test scenarios |
+| Redirect memory works after auth redirect | Experience/Shell | ✅ Implemented | `redirectMemory.ts` test suite |
+| Team mode persists across navigation | Experience/Shell | ❌ Pending | `useDraft` integration test |
+
+### Gate 12 — Handoff
+
+| Test Scenario | Owner | Status | Evidence |
+|---|---|---|---|
+| Provisioning completion handoff creates Project Hub seed | Platform + Project Hub | ❌ Pending | `handoff-config.ts` acceptance test |
+| Health pulse items navigate to Project Hub | Experience | ❌ Pending | P2-C4 scenario test #3 |
+| Return from Project Hub restores hub state | Experience/Shell | ❌ Pending | P2-C4 scenario test #6 |
+
+---
+
+## 3. Acceptance Gate Evidence Inventory
+
+All 13 Phase 2 acceptance gates mapped to their evidence documents:
+
+| # | Gate | Primary Evidence | Status |
+|---|---|---|---|
+| 1 | Default home | [P2-B1](P2-B1-Root-Routing-and-Landing-Precedence-Spec.md) (route/landing spec) + implementation + test | Spec ✅; Implementation ❌ |
+| 2 | Lane-boundary | [P2-B0](P2-B0-Lane-Ownership-and-Coexistence-Rules.md) + design review signoff | Spec ✅; Signoff ❌ |
+| 3 | Work-surface | [P2-A1](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) + [P2-D2] (zone governance) + UX review | Spec ✅; P2-D2 ❌; UX review ❌ |
+| 4 | Low-work | [P2-A1 §4](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) (empty-state rules) + UX proof | Spec ✅; UX proof ❌ |
+| 5 | Publication | [P2-C1](P2-C1-First-Release-Source-Tranche-Register.md) + **P2-C5** (this register) + integration validation | Spec ✅; Validation ❌ |
+| 6 | Signal | [P2-C2](P2-C2-Notification-to-Work-Mapping-Policy.md) + interaction review + launch checks | Spec ✅; Review ❌ |
+| 7 | Role-governance | [P2-D1] (entitlement matrix) + role validation | P2-D1 ❌ |
+| 8 | Personalization | [P2-D5] (personalization policy) + layout governance proof | P2-D5 ❌ |
+| 9 | Delegated-visibility | [P2-D4] (delegated governance) + role walkthroughs | P2-D4 ❌ |
+| 10 | Continuity | [P2-B2](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md) (persistence contract) + navigation test scenarios | Spec ✅; Tests ❌ |
+| 11 | Trust-state | [P2-B3](P2-B3-Freshness-Refresh-and-Staleness-Trust-Policy.md) (freshness policy) + state UX review + scenario tests | Spec ✅; Review ❌ |
+| 12 | Handoff | [P2-C3](P2-C3-Work-Item-Navigation-Matrix.md) + [P2-C4](P2-C4-Handoff-Criteria-Matrix.md) + navigation review + scenario tests | Spec ✅; Tests ❌ |
+| 13 | Cross-device | [P2-B4](P2-B4-Cross-Device-Shell-Behavior-Note.md) + test evidence | Spec ✅; Tests ❌ |
+| 14 | Pilot-readiness | **P2-C5** (this register) + [P2-E3] (scorecard) + launch checklist | P2-C5 ✅; P2-E3 ❌ |
+
+### Gate Status Summary
+
+- **Spec complete:** 10 of 14 gates have locked specification documents
+- **Spec pending:** Gates 7, 8, 9 (Workstream D) and Gate 14 (P2-E3) require documents not yet created
+- **Implementation/validation complete:** 0 of 14 gates — all pending implementation work
+
+---
+
+## 4. Pilot Cohort Definition
+
+Per Phase 2 Plan §7.1 (Default release posture):
+
+### 4.1 Selection Criteria
+
+The pilot cohort SHOULD prioritize:
+
+| Criterion | Rationale |
+|---|---|
+| Users whose workflows are tied to the first-release source tranche | They will have real work items in the hub from day one |
+| Users who will benefit most from a credible daily work surface | Users currently reconstructing their workday across multiple tools |
+| Elevated roles who need the hybrid personal + team/portfolio experience | Validates team-mode landing and delegated visibility |
+
+### 4.2 Cohort Parameters
+
+| Parameter | Value | Status |
+|---|---|---|
+| **Cohort size** | To be determined by Product/Adoption | ❌ Not yet defined |
+| **Role mix** | Must include standard, elevated, and multi-role users | ❌ Roster pending |
+| **Geographic scope** | To be determined | ❌ Not yet defined |
+| **Pilot duration** | To be determined | ❌ Not yet defined |
+| **Opt-out mechanism** | To be determined (revert to `/project-hub` landing) | ❌ Not yet defined |
+
+### 4.3 Cohort Invariants
+
+- The exact roster is an implementation-governance decision, not a planning blocker (Phase 2 Plan §7.1).
+- Cohort selection MUST NOT delay locked specification work.
+- Cohort finalization is gated on P2-E5 (Pilot Cohort Rollout and Adoption Sequencing Note).
+
+---
+
+## 5. Pilot Launch Checklist
+
+This checklist must be fully satisfied before pilot launch approval:
+
+### Pre-Launch: Specification Gates
+
+- [x] P2-A1 — Operating Model Register locked
+- [x] P2-A2 — Ranking Policy locked
+- [x] P2-A3 — Explainability Rules locked
+- [x] P2-B0 — Lane Ownership locked
+- [x] P2-B1 — Root Routing Spec locked
+- [x] P2-B2 — State Persistence Contract locked
+- [x] P2-B3 — Freshness Trust Policy locked
+- [x] P2-B4 — Cross-Device Note locked
+- [x] P2-C1 — Source Tranche Register locked
+- [x] P2-C2 — Notification Mapping Policy locked
+- [x] P2-C3 — Navigation Matrix locked
+- [x] P2-C4 — Handoff Criteria Matrix locked
+- [x] P2-C5 — Readiness Register created (this document)
+- [ ] P2-D1 — Role-to-Hub Entitlement Matrix
+- [ ] P2-D2 — Adaptive Layout and Zone Governance Spec
+- [ ] P2-D3 — Analytics Card Governance Matrix
+- [ ] P2-D4 — Delegated and Team Lane Governance Note
+- [ ] P2-D5 — Personalization Policy and Saved-View Rules
+- [ ] P2-E1 — Multi-Role Context Policy
+- [ ] P2-E2 — Project Anchor and Context-Scope Policy
+- [ ] P2-E3 — First-Release Success Scorecard
+- [ ] P2-E4 — Open Decisions and Deferred Items Register
+- [ ] P2-E5 — Pilot Cohort Rollout and Adoption Sequencing Note
+
+### Pre-Launch: Implementation Gates
+
+- [ ] `/my-work` route created and wired to `HbcMyWorkFeed`
+- [ ] `resolveRoleLandingPath()` updated to return `/my-work`
+- [ ] All 5 required sources pass P2-C1 readiness gates (6/6)
+- [ ] Cross-source deduplication tested
+- [ ] Notification tier-to-lane mapping tested
+- [ ] Return memory and state persistence tested
+- [ ] Freshness indicators visible at all complexity tiers
+- [ ] Handoff scenarios tested (Provisioning → Project Hub, Health Pulse → Project Hub)
+- [ ] Cross-device stability verified (desktop + tablet)
+- [ ] Pilot cohort roster finalized and approved
+
+### Pre-Launch: Governance Gates
+
+- [ ] Design review signoff for lane-boundary gate
+- [ ] UX review signoff for work-surface and low-work gates
+- [ ] Role validation signoff for role-governance gate
+- [ ] Product/Adoption approval for pilot cohort and rollout plan
+- [ ] Success scorecard (P2-E3) finalized with measurable criteria
+
+---
+
+## 6. Rollout Posture
+
+Per Phase 2 Plan §16 locked decision: **Targeted pilot / phased rollout first.**
+
+### 6.1 Wave 1: Pilot Launch
+
+| Aspect | Specification |
+|---|---|
+| **Start gate** | All pilot launch checklist items (§5) are complete |
+| **Scope** | Approved pilot cohort receives `/my-work` as default landing |
+| **Duration** | Minimum 2 weeks for meaningful data collection |
+| **Monitoring** | Success scorecard metrics tracked from day 1 (P2-E3) |
+
+### 6.2 Wave 2: Broader Rollout
+
+| Aspect | Specification |
+|---|---|
+| **Expansion gate** | Wave 1 success scorecard passes minimum thresholds |
+| **Scope** | Expanded to additional user groups per P2-E5 sequencing |
+| **Prerequisites** | All Wave 1 issues resolved; support/adoption team trained |
+
+### 6.3 Rollback Criteria
+
+| Condition | Action |
+|---|---|
+| Critical publication failure (source data not appearing) | Pause pilot; revert affected cohort to `/project-hub` landing |
+| Trust-state failure (stale data served without indicator) | Pause pilot; fix staleness indicators; resume |
+| Handoff failure (items routing to wrong surface) | Pause pilot; fix navigation routing; resume |
+| Negative user feedback exceeding threshold (P2-E3) | Pause pilot; Product/Adoption review; decide continue/revert |
+
+### 6.4 Rollout Invariants
+
+- Rollback MUST NOT destroy user state — reverting to `/project-hub` landing preserves all feed data and session state.
+- Pilot users who opt out MUST be able to return to `/project-hub` default without data loss.
+- Rollout expansion requires explicit Product-lead approval — no automatic promotion.
+
+---
+
+## 7. Pilot-Launch Blockers
+
+Named blockers that must be resolved before pilot launch:
+
+| # | Blocker | Blocked Gate | Resolution Owner | Target | Status |
+|---|---|---|---|---|---|
+| 1 | Estimating BIC registration not created | 5 — Publication | Estimating domain lead | Wave 1 | ❌ Open |
+| 2 | BD Score BIC registration not created | 5 — Publication | BD domain lead | Wave 1 | ❌ Open |
+| 3 | BD Strategic BIC registration not created | 5 — Publication | BD domain lead | Wave 1 | ❌ Open |
+| 4 | Project Hub Health BIC registration not created | 5 — Publication | Project Hub lead | Wave 1 | ❌ Open |
+| 5 | Estimating notification registrations not defined | 6 — Signal | Platform + Estimating | Wave 1 | ❌ Open |
+| 6 | BD notification registrations not defined | 6 — Signal | Platform + BD | Wave 1 | ❌ Open |
+| 7 | Project Hub notification registrations not defined | 6 — Signal | Platform + Project Hub | Wave 1 | ❌ Open |
+| 8 | `/my-work` route not implemented | 1 — Default home | Experience/Shell | Wave 1 | ❌ Open |
+| 9 | `resolveRoleLandingPath()` not updated | 1 — Default home | Experience/Shell | Wave 1 | ❌ Open |
+| 10 | Workstream D deliverables not complete | 7, 8, 9 — Role/Personalization | Experience + Product | Wave 1 | ❌ Open |
+| 11 | Workstream E deliverables not complete | 14 — Pilot-readiness | Adoption + Product | Wave 1 | ❌ Open |
+| 12 | Pilot cohort roster not defined | 14 — Pilot-readiness | Product/Adoption | Pre-launch | ❌ Open |
+| 13 | Success scorecard not finalized | 14 — Pilot-readiness | Product/Adoption | Pre-launch | ❌ Open |
+
+### Blocker Resolution Process
+
+- Domain owners update blocker status when gates are met
+- Platform lead verifies integration test evidence
+- Product lead approves governance and rollout gate resolution
+- This register is updated to reflect current status
+
+---
+
+## 8. Acceptance Gate Reference
+
+P2-C5 is primary evidence for two gates:
+
+### Publication Gate
+
+| Field | Value |
+|---|---|
+| **Gate** | Publication gate |
+| **Pass condition** | First-release required sources are classified and launch-critical sources publish correctly |
+| **P2-C5 evidence** | Publication readiness status (§1), integration test results (§2) |
+| **Primary owner** | Platform + Domain owners |
+
+### Pilot-Readiness Gate
+
+| Field | Value |
+|---|---|
+| **Gate** | Pilot-readiness gate |
+| **Pass condition** | Pilot cohort has defined rollout path and measurable success scorecard |
+| **P2-C5 evidence** | Pilot cohort definition (§4), launch checklist (§5), rollout posture (§6), blocker status (§7) |
+| **Primary owner** | Adoption / Product |
+
+---
+
+## 9. Locked Decisions
+
+| Decision | Locked Resolution | P2-C5 Consequence |
+|---|---|---|
+| Rollout posture | **Targeted pilot / phased rollout first** | No company-wide switch on day one; pilot validates before expansion |
+| First-release source scope | **Wave 1 business-core scope** | All 5 named sources must pass publication gates before pilot launch |
+
+---
+
+## 10. Register Precedence
+
+| Deliverable | Relationship to P2-C5 |
+|---|---|
+| **P2-C1** — Source Tranche Register | P2-C5 inherits source classification and gate status from P2-C1 |
+| **P2-C2** — Notification Mapping | P2-C5 tracks notification integration test readiness per P2-C2 |
+| **P2-C3** — Navigation Matrix | P2-C5 validates navigation scenarios from P2-C3 |
+| **P2-C4** — Handoff Criteria | P2-C5 validates handoff scenarios from P2-C4 |
+| **P2-E3** — Success Scorecard | P2-E3 defines the success metrics P2-C5 requires for pilot-readiness gate |
+| **P2-E5** — Pilot Cohort Sequencing | P2-E5 defines the detailed rollout sequencing that P2-C5's rollout posture summarizes |
+
+This register is updated as blockers are resolved and sources achieve publication-ready status. All updates require Platform-lead approval.
+
+---
+
+**Last Updated:** 2026-03-20
+**Governing Authority:** [Phase 2 Plan §7.1, §10.3, §14, §19](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md)
