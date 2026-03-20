@@ -6,7 +6,7 @@
 
 ## Planning Status Summary
 
-Phase 2 planning is underway. Workstreams A, B, and C are complete — all 13 deliverables (P2-A1–A3, P2-B0–B4, P2-C1–C5) are locked. These establish operating-model, ranking, explainability, lane-ownership, routing, state-persistence, freshness, cross-device, publication, notification, navigation, handoff, and rollout-readiness foundations. Remaining deliverables (Workstreams D and E) are in planning queue.
+Phase 2 planning is underway. Workstreams A, B, and C are complete. Workstream D is progressing — P2-D1 (Entitlement Matrix), P2-D3 (Analytics Cards), P2-D4 (Team Lane Governance), and P2-D5 (Personalization) are locked. P2-D2 (Adaptive Layout) remains. Workstream E is in planning queue.
 
 ---
 
@@ -62,7 +62,7 @@ Phase 2 planning is underway. Workstreams A, B, and C are complete — all 13 de
 | P2-D2 | Adaptive Layout and Zone Governance Spec | Not Started |
 | P2-D3 | [Analytics Card Governance Matrix](P2-D3-Analytics-Card-Governance-Matrix.md) | Governance Policy |
 | P2-D4 | [Delegated and Team Lane Governance Note](P2-D4-Delegated-and-Team-Lane-Governance-Note.md) | Note |
-| P2-D5 | Personalization Policy and Saved-View Rules | Not Started |
+| P2-D5 | [Personalization Policy and Saved-View Rules](P2-D5-Personalization-Policy-and-Saved-View-Rules.md) | Governance Policy |
 
 ### Workstream E — Multi-Role Context, Rollout, and Validation
 
