@@ -68,7 +68,7 @@ Phase 2 planning is underway. Workstreams A, B, and C are complete. Workstream D
 
 | Doc ID | Title | Status |
 |---|---|---|
-| P2-E1 | Multi-Role Context Policy | Not Started |
+| P2-E1 | [Multi-Role Context Policy](P2-E1-Multi-Role-Context-Policy.md) | Governance Policy |
 | P2-E2 | Project Anchor and Context-Scope Policy | Not Started |
 | P2-E3 | First-Release Success Scorecard and Validation Plan | Not Started |
 | P2-E4 | Phase 2 Open Decisions and Deferred Items Register | Not Started |
