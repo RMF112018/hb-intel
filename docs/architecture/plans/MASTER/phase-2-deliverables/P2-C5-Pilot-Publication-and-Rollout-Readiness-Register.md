@@ -123,11 +123,11 @@ All 13 Phase 2 acceptance gates mapped to their evidence documents:
 |---|---|---|---|
 | 1 | Default home | [P2-B1](P2-B1-Root-Routing-and-Landing-Precedence-Spec.md) (route/landing spec) + implementation + test | Spec ✅; Implementation ✅ (route, resolver, cohort gate complete; source publication pending) |
 | 2 | Lane-boundary | [P2-B0](P2-B0-Lane-Ownership-and-Coexistence-Rules.md) + design review signoff | Spec ✅; Signoff ❌ |
-| 3 | Work-surface | [P2-A1](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) + [P2-D2] (zone governance) + UX review | Spec ✅; P2-D2 ❌; UX review ❌ |
-| 4 | Low-work | [P2-A1 §4](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) (empty-state rules) + UX proof | Spec ✅; UX proof ❌ |
+| 3 | Work-surface | [P2-A1](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) + [P2-D2] (zone governance) + UX review | Spec ✅; Implementation ✅ (3-zone layout, role-aware composition, P2-D2 referenced); UX review ❌ |
+| 4 | Low-work | [P2-A1 §4](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) (empty-state rules) + UX proof | Spec ✅; Implementation ✅ (hub-level empty state, no redirect on empty queue); UX proof ❌ |
 | 5 | Publication | [P2-C1](P2-C1-First-Release-Source-Tranche-Register.md) + **P2-C5** (this register) + integration validation | Spec ✅; Validation ❌ |
 | 6 | Signal | [P2-C2](P2-C2-Notification-to-Work-Mapping-Policy.md) + interaction review + launch checks | Spec ✅; Review ❌ |
-| 7 | Role-governance | [P2-D1] (entitlement matrix) + role validation | P2-D1 ❌ |
+| 7 | Role-governance | [P2-D1] (entitlement matrix) + role validation | P2-D1 ❌; Implementation hook ✅ (RoleGate-based card visibility per P2-D1 §6) |
 | 8 | Personalization | [P2-D5] (personalization policy) + layout governance proof | P2-D5 ❌ |
 | 9 | Delegated-visibility | [P2-D4] (delegated governance) + role walkthroughs | P2-D4 ❌ |
 | 10 | Continuity | [P2-B2](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md) (persistence contract) + navigation test scenarios | Spec ✅; Tests ❌ |
