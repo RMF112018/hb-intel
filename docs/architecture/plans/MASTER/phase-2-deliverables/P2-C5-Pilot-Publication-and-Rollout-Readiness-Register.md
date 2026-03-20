@@ -128,8 +128,8 @@ All 13 Phase 2 acceptance gates mapped to their evidence documents:
 | 5 | Publication | [P2-C1](P2-C1-First-Release-Source-Tranche-Register.md) + **P2-C5** (this register) + integration validation | Spec ✅; Implementation ✅ (all 5 sources registered with BIC factories and notification registrations; MyWork adapter assembly wired); Validation ❌ |
 | 6 | Signal | [P2-C2](P2-C2-Notification-to-Work-Mapping-Policy.md) + interaction review + launch checks | Spec ✅; Implementation ✅ (tier-to-lane mapping, action URL contract, badge immediate-only count); Review ❌ |
 | 7 | Role-governance | [P2-D1] (entitlement matrix) + role validation | P2-D1 ❌; Implementation hook ✅ (RoleGate-based card visibility per P2-D1 §6) |
-| 8 | Personalization | [P2-D5] (personalization policy) + layout governance proof | P2-D5 ❌ |
-| 9 | Delegated-visibility | [P2-D4] (delegated governance) + role walkthroughs | P2-D4 ❌ |
+| 8 | Personalization | [P2-D5] (personalization policy) + layout governance proof | P2-D5 ✅; Implementation ✅ (team mode toggle, card arrangement persistence, saved-view rules per P2-D5 §4/§7) |
+| 9 | Delegated-visibility | [P2-D4] (delegated governance) + role walkthroughs | P2-D4 ✅; Implementation ✅ (delegated-by-me + escalation-candidate scopes via useMyWorkTeamFeed; my-team deferred per locked decision) |
 | 10 | Continuity | [P2-B2](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md) (persistence contract) + navigation test scenarios | Spec ✅; Implementation ✅ (draft persistence, return memory, feed refresh on return); Tests ❌ |
 | 11 | Trust-state | [P2-B3](P2-B3-Freshness-Refresh-and-Staleness-Trust-Policy.md) (freshness policy) + state UX review + scenario tests | Spec ✅; Implementation ✅ (freshness indicator, stale-while-revalidate, connectivity display); Review ❌ |
 | 12 | Handoff | [P2-C3](P2-C3-Work-Item-Navigation-Matrix.md) + [P2-C4](P2-C4-Handoff-Criteria-Matrix.md) + navigation review + scenario tests | Spec ✅; Implementation ✅ (seed creation, health pulse navigation, return restoration); Tests ✅ (scenario tests 2, 3, 5, 6, 7) |

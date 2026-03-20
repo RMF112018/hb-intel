@@ -1,27 +1,51 @@
 /**
  * TeamPortfolioCard — P2-D1 §6: Executive-only.
- * Team portfolio summary (placeholder for first release).
+ * P2-D4 §3: Shows team feed counts (total, aging, blocked, escalation candidates).
+ * Visible only in delegated-by-me or my-team mode.
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { HbcCard, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
+import { HbcCard, HbcKpiCard, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
 import { RoleGate } from '@hbc/auth';
+import { useMyWorkTeamFeed } from '@hbc/my-work-feed';
+import type { TeamMode } from '../HubTeamModeSelector.js';
 
 const useStyles = makeStyles({
   root: {
     gridColumn: 'span 6',
     [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: { gridColumn: 'span 1' },
   },
+  kpiRow: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
 });
 
-export function TeamPortfolioCard(): ReactNode {
+export interface TeamPortfolioCardProps {
+  teamMode: TeamMode;
+}
+
+export function TeamPortfolioCard({ teamMode }: TeamPortfolioCardProps): ReactNode {
   const styles = useStyles();
+  const ownerScope = teamMode === 'my-team' ? 'my-team' : 'delegated-by-me';
+  const { teamFeed, isLoading } = useMyWorkTeamFeed({
+    ownerScope,
+    enabled: teamMode !== 'personal',
+  });
+
+  if (teamMode === 'personal') return null;
 
   return (
     <RoleGate requiredRole="Executive">
       <div className={styles.root}>
         <HbcCard weight="standard" header={<span>Team Portfolio</span>}>
-          <p>Team workload and delegation summary will appear here.</p>
+          {isLoading ? (
+            <span>Loading...</span>
+          ) : (
+            <div className={styles.kpiRow}>
+              <HbcKpiCard label="Total Items" value={teamFeed?.totalCount ?? 0} />
+              <HbcKpiCard label="Aging" value={teamFeed?.agingCount ?? 0} color="var(--colorPaletteYellowForeground1)" />
+              <HbcKpiCard label="Blocked" value={teamFeed?.blockedCount ?? 0} color="var(--colorPaletteRedForeground1)" />
+              <HbcKpiCard label="Escalation" value={teamFeed?.escalationCandidateCount ?? 0} />
+            </div>
+          )}
         </HbcCard>
       </div>
     </RoleGate>

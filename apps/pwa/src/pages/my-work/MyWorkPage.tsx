@@ -10,6 +10,8 @@
  * P2-B2: hub state persistence, return memory, feed refresh on return.
  * P2-B3: trust-state freshness, connectivity display.
  * P2-D1: role determines which zones and card types are visible.
+ * P2-D4: delegated-by-me and escalation-candidate scopes.
+ * P2-D5: team mode toggle, card arrangement persistence.
  */
 import { useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
@@ -28,6 +30,8 @@ import { useHubStatePersistence } from './useHubStatePersistence.js';
 import { useHubReturnMemory } from './useHubReturnMemory.js';
 import { useHubFeedRefresh } from './useHubFeedRefresh.js';
 import { HubConnectivityBanner } from './HubConnectivityBanner.js';
+import { HubTeamModeSelector } from './HubTeamModeSelector.js';
+import { useHubPersonalization } from './useHubPersonalization.js';
 
 export function MyWorkPage(): ReactNode {
   const currentUser = useCurrentUser();
@@ -42,6 +46,9 @@ export function MyWorkPage(): ReactNode {
     complexityTier: tier,
   };
 
+  // P2-D5: Personalization — team mode + card arrangement
+  const { teamMode, setTeamMode } = useHubPersonalization();
+
   // P2-B2: Hub state persistence (query-seed + return UI state)
   const { querySeed, returnState } = useHubStatePersistence();
   const { refreshFeed } = useHubFeedRefresh();
@@ -51,14 +58,14 @@ export function MyWorkPage(): ReactNode {
     onReturn: refreshFeed,
   });
 
-  // P2-B2 §4: Seed default query from restored draft
+  // Build default query: team mode from personalization, seeded from restored draft
   const defaultQuery: IMyWorkQuery = useMemo(() => {
-    if (!restoredQuerySeed) return {};
-    const seed: IMyWorkQuery = {};
-    if (restoredQuerySeed.teamMode) seed.teamMode = restoredQuerySeed.teamMode;
-    if (restoredQuerySeed.lane) seed.lane = restoredQuerySeed.lane as IMyWorkQuery['lane'];
+    const seed: IMyWorkQuery = { teamMode };
+    if (restoredQuerySeed?.lane) {
+      seed.lane = restoredQuerySeed.lane as IMyWorkQuery['lane'];
+    }
     return seed;
-  }, [restoredQuerySeed]);
+  }, [teamMode, restoredQuerySeed]);
 
   // P2-B2 §4: Auto-save query seed when mode/lane preferences change
   useEffect(() => {
@@ -79,10 +86,11 @@ export function MyWorkPage(): ReactNode {
           hasPermission={currentUser !== null}
         >
           <HubConnectivityBanner />
+          <HubTeamModeSelector activeMode={teamMode} onModeChange={setTeamMode} />
           <div ref={scrollContainerRef as React.RefObject<HTMLDivElement>}>
             <HubZoneLayout
               primaryContent={<HubPrimaryZone />}
-              secondaryContent={<HubSecondaryZone />}
+              secondaryContent={<HubSecondaryZone teamMode={teamMode} />}
               tertiaryContent={<HubTertiaryZone />}
             />
           </div>

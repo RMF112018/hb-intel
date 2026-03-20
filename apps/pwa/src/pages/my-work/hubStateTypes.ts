@@ -1,6 +1,6 @@
 /**
- * Hub state persistence types — P2-B2 §3–§6.
- * Draft contracts for query-seed and return UI state.
+ * Hub state persistence types — P2-B2 §3–§6, P2-D5 §4.
+ * Draft contracts for query-seed, return UI state, and personalization.
  */
 
 /** P2-B2 §4: Query-seed state — persisted query preferences. */
@@ -18,14 +18,39 @@ export interface IMyWorkReturnState {
   capturedAt: string;
 }
 
-/** Draft key constants per P2-B2 §3. */
+/** P2-D5 §4.3: Card arrangement saved view. */
+export interface IMyWorkCardArrangement {
+  secondaryZone: ICardSlot[];
+  tertiaryZone: ICardSlot[];
+  savedAt: string;
+}
+
+/** P2-D5 §4.3: Individual card visibility slot. */
+export interface ICardSlot {
+  cardId: string;
+  visible: boolean;
+}
+
+/** P2-D5 §7: Team mode saved preference. */
+export interface IMyWorkTeamModeDraft {
+  teamMode: 'personal' | 'my-team' | 'delegated-by-me';
+  savedAt: string;
+}
+
+/** Draft key constants per P2-B2 §3, P2-D5 §4. */
 export const HUB_DRAFT_KEYS = {
   querySeed: 'hbc-my-work-query-seed',
   returnState: 'hbc-my-work-return-state',
+  teamMode: 'hbc-my-work-team-mode',
+  filterState: 'hbc-my-work-filter-state',
+  cardArrangement: 'hbc-my-work-card-arrangement',
 } as const;
 
-/** TTL constants per P2-B2 §3. */
+/** TTL constants per P2-B2 §3, P2-D5 §4. */
 export const HUB_DRAFT_TTL = {
-  querySeed: 8, // hours
-  returnState: 1, // hours
+  querySeed: 8,          // hours
+  returnState: 1,        // hours
+  teamMode: 16,          // hours (P2-D5 §7)
+  filterState: 8,        // hours (P2-D5 §8)
+  cardArrangement: 720,  // 30 days in hours (P2-D5 §4)
 } as const;
