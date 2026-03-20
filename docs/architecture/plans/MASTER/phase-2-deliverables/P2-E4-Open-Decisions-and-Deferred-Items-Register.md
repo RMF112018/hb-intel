@@ -139,7 +139,7 @@ These decisions must be made before or during pilot but do not yet have locked r
 |---|---|---|---|---|---|
 | OD-1 | **Pilot cohort roster** | P2-C5 §4 — selection criteria defined; roster not finalized | Yes — blocks pilot launch | Product/Adoption | Pre-pilot |
 | OD-2 | **KPI threshold bands** | P2-E3 §8.3 — scorecard structure defined; exact pass/fail numbers pending | No — can be set during pilot Week 1 | Product/Adoption | Pilot Week 1 |
-| OD-3 | **P2-D2 Adaptive Layout and Zone Governance Spec** | Not yet created — defines `@hbc/project-canvas` composition mechanics for zones | Yes — referenced by multiple deliverables | Experience/Shell | Pre-pilot |
+| OD-3 | ~~**P2-D2 Adaptive Layout and Zone Governance Spec**~~ | **Resolved 2026-03-20** — spec created; defines `@hbc/project-canvas` composition mechanics, zone-bounded EditMode gating, tile registry binding, role-default layouts, and 5 implementation gates | **Closed** | Experience/Shell | **Done** |
 | OD-4 | **Pilot duration** | P2-C5 §4 — minimum 2 weeks; exact duration not set | No — can be decided at launch | Product/Adoption | Pre-pilot |
 | OD-5 | **Opt-out mechanism** | P2-C5 §4 — whether pilot users can revert to `/project-hub` | No — recommended but not required for pilot start | Experience/Shell | Pre-pilot |
 
@@ -151,9 +151,9 @@ These decisions must be made before or during pilot but do not yet have locked r
 
 | Status | Count | Items |
 |---|---|---|
-| **Resolved** | 1 | CF-1 (ranking coefficients — resolved by P2-A2) |
+| **Resolved** | 2 | CF-1 (ranking coefficients — resolved by P2-A2); OD-3 (P2-D2 — locked 2026-03-20) |
 | **Pilot-launch blocker** | 6 | D-C1-1 through D-C1-5 (source wiring), OD-1 (cohort roster) |
-| **Open decision (pre-pilot)** | 3 | OD-3 (P2-D2), OD-4 (duration), OD-5 (opt-out) |
+| **Open decision (pre-pilot)** | 2 | OD-4 (duration), OD-5 (opt-out) |
 | **Open decision (during pilot)** | 2 | OD-2 (threshold bands), D-E3-1 (KPI calibration) |
 | **Deferred to post-pilot** | 9 | CF-2, CF-3 partial, CF-4, D-A2-1, D-B3-1, D-D3-1, D-D5-3, D-D5-4, D-E2-1 |
 | **Deferred to future phase** | 6 | CF-5 partial, CF-6, CF-7, D-B4-1, D-D5-1, D-D5-2, D-E2-2, D-E2-3 |
@@ -171,7 +171,7 @@ These decisions must be made before or during pilot but do not yet have locked r
 | CF-7 | Carry-forward | No | Experience/UI | Post-pilot |
 | D-C1-1..5 | Blocker | **Yes** | Domain leads + Platform | Pre-pilot |
 | OD-1 | Open decision | **Yes** | Product/Adoption | Pre-pilot |
-| OD-3 | Open decision | **Yes** | Experience/Shell | Pre-pilot |
+| OD-3 | ~~Open decision~~ **Resolved** | **No — Closed** | Experience/Shell | Done (2026-03-20) |
 | All others | Deferred | No | Various | Post-pilot or future |
 
 ---
@@ -235,11 +235,139 @@ P2-E4 contributes to the Pilot-readiness gate:
 
 - All 7 carry-forward items from §17 tracked with status ✓
 - All deliverable-specific deferrals collected ✓
-- 5 open decisions identified with owners ✓
-- 6 pilot-launch blockers identified with owners ✓
+- 5 open decisions identified with owners (OD-3 resolved 2026-03-20; 4 remain) ✓
+- 6 pilot-launch blockers identified with owners (OD-3 closed; 5 active blockers remain: D-C1-1..5, OD-1) ✓
 - No hidden blockers — all items classified ✓
 
 ---
 
-**Last Updated:** 2026-03-20
+## 8. Package-Maturity Regression Governance
+
+### Purpose
+
+Phase 2 planning depends on six shared packages being at a specified maturity level (P2-A1 §0.3). This section defines the standing governance procedure that applies when any of those packages regresses — loses capabilities, breaks API contracts, or has a locked ADR reversed — after Phase 2 planning committed to their readiness. This procedure is not a one-time item; it is a living rule that governs the full Phase 2 implementation and pilot lifecycle.
+
+---
+
+### 8.1 Protected Package Set
+
+The following packages are protected by this procedure. Their maturity status is declared in P2-A1 §0.3 and must remain stable for Phase 2 implementation to proceed on the committed basis.
+
+| Package | ADR / Lock Date | Primary P2 Commitments |
+|---|---|---|
+| `@hbc/my-work-feed` | ADR-0115 locked 2026-03-15 | Primary zone aggregation; canonical item model; adapter registry; P2-A1, P2-A2, P2-D4 |
+| `@hbc/notification-intelligence` | ADR-0099 locked 2026-03-10 | Notification-to-work signal layer; P2-C2 |
+| `@hbc/session-state` | ADR-0101 locked 2026-03-11 | Draft persistence; offline/sync trust model; P2-B2, P2-B3, P2-D5 |
+| `@hbc/smart-empty-state` | ADR-0100 locked 2026-03-11 | Low-work empty-state classification; P2-A1 §4 |
+| `@hbc/project-canvas` | ADR-0102 locked 2026-03-11 | Adaptive layout; zone EditMode; tile registry; P2-D2 Gates 1–5 |
+| `@hbc/auth` | Auth baseline / PH5 complete | Role resolution; entitlement vocabulary; P2-D1 and all role-gated behavior |
+
+---
+
+### 8.2 Regression Triggers
+
+This procedure is invoked when any of the following occurs for a protected package:
+
+| Trigger | Examples |
+|---|---|
+| **API surface break** | A previously exported hook, type, or component is removed or signature-changed in a way that breaks a P2-plan–dependent consumer |
+| **ADR reversal or material amendment** | The governing ADR for a locked package is reversed, suspended, or amended in a way that changes the capability P2 planning relied on |
+| **Maturity demotion** | The package's status in `current-state-map.md` drops from its locked level (e.g., "Mature" → "In Progress" or "Partial") |
+| **Critical test coverage loss** | The package's test suite is materially degraded such that production confidence in its P2-relevant behavior is no longer warranted |
+| **Behavioral contract violation** | The package is found to behave differently than the P2 plan assumed — e.g., `useCanvasEditor.removeTile()` no longer respects `isMandatory`, or `@hbc/auth` `resolvedRoles` changes its resolution model |
+| **Unplanned breaking dependency change** | A transitive dependency change causes the protected package to lose or alter a capability P2 relies on |
+
+A team member, code reviewer, or automated signal (failing CI for a P2-dependent package) may invoke this procedure. Architecture lead confirms whether a trigger condition is met.
+
+---
+
+### 8.3 Package-to-Plan Impact Map
+
+When a regression is confirmed, consult this map to identify which P2 plan commitments and implementation gates are affected.
+
+| Package | Affected P2 Documents | Affected Gates |
+|---|---|---|
+| `@hbc/my-work-feed` | P2-A1 (primary zone), P2-A2 (ranking contract), P2-D4 (team feed projection) | P2-C5 publication gate; work-surface gate |
+| `@hbc/notification-intelligence` | P2-C2 (notification-to-work mapping) | Signal gate |
+| `@hbc/session-state` | P2-B2 (persistence contract), P2-B3 (freshness trust), P2-D5 (saved-view storage) | Continuity gate; trust-state gate; personalization gate |
+| `@hbc/smart-empty-state` | P2-A1 §4 (low-work behavior) | Work-surface gate; low-work gate |
+| `@hbc/project-canvas` | P2-D2 (all zones and gates) | P2-D2 Gates 1–5 (primary zone isolation, mandatory enforcement, zone boundary, role eligibility, config restore); personalization gate; work-surface gate |
+| `@hbc/auth` | P2-D1 (entitlement matrix), P2-B1 (landing precedence), all role-gated behavior | Role-governance gate; all gates with role-conditional behavior |
+
+---
+
+### 8.4 Response Procedure
+
+When a regression trigger is confirmed, execute the following steps in order:
+
+**Step 1 — Declare and classify (Architecture lead, within 1 business day)**
+
+- Confirm the trigger condition against §8.2.
+- Classify severity:
+
+| Severity | Criteria |
+|---|---|
+| **Critical** | Regression breaks a P2-D2 implementation gate, removes a primary-zone contract, or causes a pilot-launch–blocking capability gap |
+| **High** | Regression affects a non-gate P2 contract that will require rework before pilot but does not itself block launch |
+| **Low** | Regression affects a deferred or post-pilot capability; no immediate impact on first-release implementation |
+
+- Add a new entry to §1, §2, or a new regression log in this register (see §8.5).
+- Notify: Experience/Shell lead, Architecture lead, and the owner of the affected P2 documents.
+
+**Step 2 — Impact assessment (Architecture + affected team lead, within 2 business days of declaration)**
+
+- Using the impact map in §8.3, identify every P2 document and implementation gate affected.
+- For each affected gate: determine whether the gate can still be passed with a workaround, requires a plan amendment, or is now blocked until the package is restored.
+- For each affected P2 document: determine whether the document remains accurate or requires an update.
+
+**Step 3 — Resolution path selection (Architecture lead)**
+
+Choose one of the following resolution paths:
+
+| Path | Criteria | Action |
+|---|---|---|
+| **Restore** | The package regression is unintended and will be fixed by the package owner | Block implementation work that depends on the regressed capability; track fix as a new pilot-launch blocker in §2 |
+| **Adapt** | The regression is intentional (e.g., the package's design evolved) and the P2 plan can be updated to remain valid | Update the affected P2 documents and gate evidence; re-verify affected gates |
+| **Defer** | The regression affects a post-pilot capability only; first-release work is unaffected | Log in §2 as a deferred item with rationale; no immediate action required |
+| **Escalate to ADR** | The regression represents a durable architectural change that requires a new or amended ADR | Architecture lead initiates ADR process; P2 documents are updated to reference the new ADR once locked |
+
+**Step 4 — Register update (Architecture lead)**
+
+- Add or update the regression entry in §8.5.
+- Update P2-A1 §0.3 if the package's maturity classification has changed.
+- Update affected P2 documents per the chosen resolution path.
+- Update the Classification Matrix in §4 if the regression introduced a new blocker.
+
+**Step 5 — Re-verification (Experience/Shell + Architecture)**
+
+After the regression is resolved or the plan is adapted:
+- Re-run the verification steps for all affected P2-D2 gates.
+- Update gate evidence in the affected specifications.
+- Confirm no other protected packages were affected by the same underlying change.
+
+---
+
+### 8.5 Regression Log
+
+Active and resolved package-maturity regressions are recorded here. The log starts empty; entries are added as regressions occur.
+
+| Entry | Package | Detected | Trigger | Severity | Resolution Path | Status |
+|---|---|---|---|---|---|---|
+| — | — | — | — | — | — | No regressions recorded as of 2026-03-20 |
+
+---
+
+### 8.6 Governance Rules
+
+| Rule | Specification |
+|---|---|
+| **No silent regressions** | Any discovered regression in a protected package must be logged here within 1 business day of discovery |
+| **No proceeding through a blocked gate** | If a regression blocks a P2-D2 implementation gate, implementation work that depends on that gate must pause until the gate is unblocked |
+| **No self-certification** | The team implementing a feature that depends on a regressed package may not self-certify that the regression is acceptable; Architecture lead must confirm the resolution path |
+| **No plan divergence without documentation** | If a P2 plan document is updated to adapt to a regression, the update must reference this register entry and the resolution path chosen |
+| **Post-pilot review** | At pilot completion, this log is reviewed to determine whether any low-severity regressions should be promoted to post-pilot resolution items |
+
+---
+
+**Last Updated:** 2026-03-20 — OD-3 closed; P2-D2 locked; §8 package-maturity regression governance procedure added
 **Governing Authority:** [Phase 2 Plan §17](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md)

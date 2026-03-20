@@ -1,12 +1,12 @@
 # Phase 2 Deliverables — Personal Work Hub and PWA Shell
 
-**Doc Classification:** Planning-Complete Deliverable Index — all 23 mandatory Phase 2 artifacts are locked across 5 workstreams. P2-D2 (Adaptive Layout) remains as the only undelivered specification (tracked in P2-E4 as OD-3). Implementation proceeds per the P2-C5 launch checklist.
+**Doc Classification:** Planning-Complete Deliverable Index — all 23 mandatory Phase 2 artifacts are now locked across 5 workstreams. P2-D2 (Adaptive Layout and Zone Governance Spec) locked 2026-03-20; OD-3 closed in P2-E4. Implementation proceeds per the P2-C5 launch checklist.
 
 ---
 
 ## Planning Status Summary
 
-**Phase 2 planning is complete.** All 22 of 23 deliverables are locked across Workstreams A (3), B (5), C (5), D (4 of 5), and E (5). P2-D2 (Adaptive Layout and Zone Governance Spec) is the only remaining specification — tracked as open decision OD-3 in P2-E4. Implementation proceeds per the P2-C5 pilot launch checklist, gated by source wiring (P2-C1 blockers) and the 13 acceptance gates (P2-C5 §3).
+**Phase 2 planning is complete.** All 23 of 23 deliverables are locked across Workstreams A (3), B (5), C (5), D (5), and E (5). P2-D2 (Adaptive Layout and Zone Governance Spec) locked 2026-03-20 — OD-3 closed. Implementation proceeds per the P2-C5 pilot launch checklist, gated by source wiring (P2-C1 blockers) and the 13 acceptance gates (P2-C5 §3).
 
 ---
 
@@ -59,7 +59,7 @@
 | Doc ID | Title | Status |
 |---|---|---|
 | P2-D1 | [Role-to-Hub Entitlement Matrix](P2-D1-Role-to-Hub-Entitlement-Matrix.md) | Governance Policy |
-| P2-D2 | Adaptive Layout and Zone Governance Spec | Not Started |
+| P2-D2 | [Adaptive Layout and Zone Governance Spec](P2-D2-Adaptive-Layout-and-Zone-Governance-Spec.md) | Specification |
 | P2-D3 | [Analytics Card Governance Matrix](P2-D3-Analytics-Card-Governance-Matrix.md) | Governance Policy |
 | P2-D4 | [Delegated and Team Lane Governance Note](P2-D4-Delegated-and-Team-Lane-Governance-Note.md) | Note |
 | P2-D5 | [Personalization Policy and Saved-View Rules](P2-D5-Personalization-Policy-and-Saved-View-Rules.md) | Governance Policy |
@@ -87,6 +87,6 @@
 
 ---
 
-**Last Updated:** 2026-03-20 — P2-A1 repo-truth audit completed; all referenced shared packages verified as mature/partial (my-work-feed, notification-intelligence, session-state, smart-empty-state, project-canvas, auth per current-state-map §2). No blockers identified. Package binding sections added to P2-A1 for clarity.
+**Last Updated:** 2026-03-20 — P2-D2 locked; all 23 Phase 2 deliverables complete. P2-A1 repo-truth audit also completed this session; all shared packages verified mature. OD-3 closed in P2-E4.
 
 **Governing Plan:** [Phase 2 Plan §10–§12](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md)
