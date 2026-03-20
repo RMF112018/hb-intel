@@ -7,7 +7,7 @@
 | **Workstream** | D — Write Safety, Retry, and Recovery |
 | **Document Type** | Implementation Plan |
 | **Owner** | D1-workstream lead |
-| **Status** | Implementation-Ready — partially unblocked; ProxyHttpClient and 7 proxy repos now exist; standalone types (retry, idempotency, failure classification) can proceed immediately; full wiring requires remaining 4 B1 repos |
+| **Status** | **Complete (2026-03-19)** — `withRetry()` wired into ProxyHttpClient, `withIdempotency` handler wrapper, `IdempotencyStorageService`, cleanup timer, idempotency header injection all delivered |
 | **Date** | 2026-03-16 |
 | **Last Reviewed Against Repo Truth** | 2026-03-19 |
 | **Audience** | Developers implementing write safety for Phase 1 critical path (Project, Lead, Estimating) |
@@ -46,15 +46,15 @@ This plan guides developers with no HB Intel codebase knowledge to implement wri
 
 ## Plan Status and Dependencies
 
-### Current Repo State (verified 2026-03-19)
+### Current Repo State (updated 2026-03-19 — D1 complete)
 
-- `ProxyHttpClient` exists with Bearer auth, 30s timeout, X-Request-Id generation, error normalization via `normalizeHttpError()`, and D1 hook points (`onBeforeRequest`, `onAfterResponse`) — hooks are exposed but not yet activated (**CURRENT**)
+- `ProxyHttpClient` exists with `withRetry()` wired, Bearer auth, 30s timeout, X-Request-Id generation, error normalization via `normalizeHttpError()`, idempotency key header injection (**COMPLETE**)
 - `BaseProxyProjectRepository` exists with `fetchCollection`, `fetchById`, `fetchCreate`, `fetchUpdate`, `fetchDelete`, `fetchAggregate`, `fetchSubResource` methods (**CURRENT**)
-- 10 of 11 proxy repos implemented and factory-wired (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP); Auth still throws `AdapterNotImplementedError` (blocked on A9 — route paths unresolved) (**CURRENT**)
-- `packages/data-access` has vitest configured with `test` script; 84 tests passing across `ProxyHttpClient.test.ts`, `envelope.test.ts`, `repositories.test.ts`, `ProxyLeadRepository.test.ts`, `ProxyProjectRepository.test.ts`, `ProxyEstimatingRepository.test.ts` (**CURRENT**)
+- All 11 proxy repos implemented and factory-wired (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP, Auth); A9 resolved via P1-C2-a Task 21 (**COMPLETE**)
+- `packages/data-access` has vitest configured with `test` script; 189+ tests passing across all proxy repos (**CURRENT**)
 - `backend/functions` has vitest test infrastructure (unit, smoke, coverage) (**CURRENT**)
-- Backend table storage service exposes domain-specific provisioning methods; no generic idempotency table or idempotency guard exists (**CURRENT**)
-- No retry logic exists anywhere in `packages/data-access` (**CURRENT**)
+- `IdempotencyStorageService` implemented (`IdempotencyRecords` table); `withIdempotency` handler wrapper delivered; nightly cleanup timer implemented (**COMPLETE**)
+- Retry logic (`withRetry` HOF with configurable policy) implemented and wired into `ProxyHttpClient` (**COMPLETE**)
 
 ### D1 Deliverable Breakdown by Surface
 

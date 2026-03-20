@@ -141,14 +141,14 @@ All code workstreams (B1, C1, C2, C3, D1, E1 Tasks 1–7) are **complete**. Phas
 
 | Document | Type | Status |
 |---|---|---|
-| P1-D1-Write-Safety-Retry-Recovery.md | Engineering Plan | Implementation-Ready — Partially Unblocked (B1 foundation delivered; standalone types can proceed; full wiring awaits remaining 4 B1 repos) |
+| P1-D1-Write-Safety-Retry-Recovery.md | Engineering Plan | **Complete** — `withRetry()` wired into ProxyHttpClient, `withIdempotency` handler wrapper, `IdempotencyStorageService`, cleanup timer all delivered (2026-03-19) |
 
 ### Workstream E — Test and Observability Baseline (2 deliverables)
 
 | Document | Type | Status |
 |---|---|---|
 | P1-E1-Contract-Test-Suite-Plan.md | Engineering Plan | In Progress — Tasks 1–7 complete (Zod schemas, vitest, MSW handlers, adapter contract tests, response envelope contract tests); Tasks 8–9 scaffold delivered (env-gated, blocked on staging) |
-| P1-E2-Staging-Readiness-Checklist.md | Acceptance Checklist | Implementation-Ready — Blocked (C1 domain routes, staging infrastructure); B1 ✅, C2 middleware ✅, C3 foundation ✅, D1 ✅, E1 infrastructure ✅ |
+| P1-E2-Staging-Readiness-Checklist.md | Acceptance Checklist | **Gated on staging deployment** — all code dependencies delivered (B1 ✅, C1 ✅, C2 ✅, C3 ✅, D1 ✅, E1 ✅); execution blocked on IT-side function app deployment, auth registration, and environment variable configuration |
 
 ### Closeout and Reconciliation (1 deliverable)
 
@@ -174,10 +174,10 @@ These notes anchor the status labels above to the actual codebase. They document
 - `packages/data-access/src/adapters/sharepoint/`: Does not exist (Phase 5+)
 - `packages/data-access/src/adapters/api/`: Type stubs and constants only (Phase 7+)
 
-**Backend domain data routes — not implemented:**
+**Backend domain data routes — C1 complete (2026-03-19):**
 - Provisioning saga (7 steps), project requests, and notifications are fully implemented in `backend/functions/`
-- **Zero domain data routes exist** (no GET/POST/PUT for leads, schedules, estimates, buyouts, etc.)
-- **This is the primary C1 implementation target.**
+- Domain data routes for leads, projects, and estimating (trackers + kickoffs) implemented with `withAuth()`, `parseBody<T>()`, `withTelemetry()`, and standardized response helpers
+- Health endpoint (`GET /api/health`) implemented
 
 **SharePoint physical schema — defined but not deployed:**
 - List definition config files exist in `backend/functions/src/config/*-list-definitions.ts` (7 files: 6 domain-scoped + 1 aggregate)
@@ -226,7 +226,7 @@ Phase 1 implementation is complete when all of the following are satisfied:
 - **Hardened service boundaries.** Authentication, validation, and authorization are enforced at all backend service boundaries per P1-C2.
 - **Recoverable failures.** Retry behavior, partial-failure scenarios, and user-facing error states are implemented and tested per P1-D1.
 - **Stable downstream contracts.** Phase 2+ teams can build against the contract layer defined in P1-C1 and validated by P1-E1 without inventing their own data access patterns.
-- **Observable operations.** Telemetry signals (requests, dependencies, traces) can be correlated and verified in staging per P1-C3 and P1-E1. (Staging verification remains pending until C1 routes, C2 auth, C3 instrumentation, and staging deployment are complete.)
+- **Observable operations.** Telemetry signals (requests, dependencies, traces) can be correlated and verified in staging per P1-C3 and P1-E1. (Staging verification remains pending until IT-side staging deployment is complete; all code—C1, C2, C3—is delivered.)
 - **Staging sign-off.** P1-E2 checklist is complete with all gates passed.
 
 ---
@@ -251,9 +251,9 @@ These items remain open and must be resolved before or during Phase 1 implementa
 |---|---|---|---|---|
 | SharePoint list schema approval per domain | P1-A3 physical schema deployment and P1-B1 production adapter implementation | Product Owner + Business Domains | Pending approval | List definitions exist in code (`backend/functions/src/config/`); physical SharePoint lists not provisioned |
 | B1 proxy adapter delivery | P1-D1 implementation, P1-E1 adapter contract tests (Tasks 4–5) | Engineering | **Complete** (11 of 11) | Transport foundation + 11 repos implemented, factory-wired, and tested (109+ tests); A9 resolved via P1-C2-a Task 21 |
-| C1 backend route handler delivery | P1-E1 route contract tests (Tasks 6–7), P1-E2 staging readiness | Engineering | Implementation pending | Provisioning + notification routes exist; zero domain data routes (leads, schedules, etc.) |
-| C2 auth middleware delivery | P1-E1 smoke test auth validation (Task 8), P1-E2 auth gates | Engineering | Implementation pending | `validateToken()` exists and is tested; `ManagedIdentityOboService` exists (app-level MI, not user-delegated OBO); centralized `withAuth()` wrapper, Zod validation, and response helpers not yet built |
-| C3 observability instrumentation | P1-E1 telemetry baseline verification (Task 9) | Engineering | Implementation pending | Azure Table audit logging implemented; telemetry correlation infrastructure TBD |
+| C1 backend route handler delivery | P1-E1 route contract tests (Tasks 6–7), P1-E2 staging readiness | Engineering | **Complete (2026-03-19)** | Domain data routes for leads, projects, and estimating implemented; health endpoint delivered |
+| C2 auth middleware delivery | P1-E1 smoke test auth validation (Task 8), P1-E2 auth gates | Engineering | **Complete (2026-03-19)** | `withAuth()` wrapper, `parseBody<T>()` Zod validation, response helpers (`successResponse`, `errorResponse`, `listResponse`, `notFoundResponse`), request-id middleware all delivered and wired to domain handlers |
+| C3 observability instrumentation | P1-E1 telemetry baseline verification (Task 9) | Engineering | **Complete — code (2026-03-19)** | proxy.request.*, auth.bearer.*, auth.obo.*, circuit breaker telemetry contracts, health endpoint, `withTelemetry()` handler lifecycle delivered; staging verification pending deployment |
 | Phase assignment for deferred packages (D-006, OD-013) | Scope for @hbc/post-bid-autopsy, @hbc/score-benchmark, @hbc/ai-assist | Architecture Lead | See P0-E2 OD-013 | Packages exist as scaffolds; deferred from Phase 1 per P0-E2 |
 
 ---

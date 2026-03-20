@@ -8,14 +8,34 @@
 | **Document Type** | Governance Policy |
 | **Owner** | Platform / Core Services + Experience / Shell |
 | **Update Authority** | Platform lead; changes require review by Experience lead and Architecture |
-| **Last Reviewed Against Repo Truth** | 2026-03-19 |
-| **References** | [Phase 2 Plan §10.2, §14, §16](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [P2-A1 §8](P2-A1-Personal-Work-Hub-Operating-Model-Register.md); [P2-B0](P2-B0-Lane-Ownership-and-Coexistence-Rules.md); [P2-B2](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md); [interaction-contract §3](../../../reference/work-hub/interaction-contract.md); `aggregateFeed.ts`; `connectivity.ts`; `HbcConnectivityBar`; `HbcMyWorkSourceHealth` |
+| **Last Reviewed Against Repo Truth** | 2026-03-20 |
+| **References** | [Phase 2 Plan §10.2, §14, §16](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [P2-A1 §8](P2-A1-Personal-Work-Hub-Operating-Model-Register.md); [P2-B0](P2-B0-Lane-Ownership-and-Coexistence-Rules.md); [P2-B2](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md); [interaction-contract §3](../../../reference/work-hub/interaction-contract.md); implementation touchpoints: `aggregateFeed.ts`, `projectFeed.ts`, `IMyWorkItem.ts`, `root-route.tsx`, `@hbc/session-state` |
 
 ---
 
 ## Policy Statement
 
-Users must never be misled into thinking they are seeing live data when they are not. This policy converts that trust invariant into concrete freshness thresholds, refresh intervals, staleness display rules, degraded/offline UX specifications, and cross-lane vocabulary consistency requirements. When the feed is stale, partially loaded, cached, or offline-queued, the hub MUST communicate that state clearly and calmly — without alarming users or undermining trust in the operating layer.
+Users must never be misled into thinking they are seeing live data when they are not. This policy converts that trust invariant into concrete timestamp rules, freshness thresholds, refresh intervals, stale-state display rules, degraded/offline UX expectations, local-change queue behavior, and cross-lane vocabulary requirements.
+
+This document is **normative for target-state behavior**. It must not be read as claiming that every rule in this policy is already implemented in the current repo. Where current implementation is partial or provisional, this document states the required execution posture and the reconciliation needed before the trust-state gate can pass.
+
+---
+
+## Repo-Truth Reconciliation Notes
+
+### Current repo-truth anchors
+
+- The feed type system currently exposes `MyWorkSyncStatus = 'live' | 'cached' | 'partial' | 'queued'`.
+- The current aggregation path emits `live`, `cached`, or `partial` freshness outcomes and stamps a single sync timestamp during aggregation.
+- The PWA root shell already mounts connectivity UI at the application shell level via `HbcConnectivityBar` and consumes `@hbc/session-state` connectivity.
+- The current lane model still contains provisional team/delegated remnants (`delegated-team`) in the shared feed types and normalization path.
+
+### Required reconciliation to satisfy this policy
+
+- `queued` must no longer be treated as canonical freshness. It must be modeled separately as a local-change queue state.
+- User-facing trust timestamps must split `lastRefreshAttemptIso` from `lastTrustedDataIso` / `lastSuccessfulDataIso`.
+- Connectivity truth must be delegated to the resolved `@hbc/session-state` signal, not a raw browser online/offline flag.
+- Team/direct-report trust behavior remains **provisional** until future completion of org-chart and entitlement plumbing. Any team-visibility freshness UX must carry that dependency explicitly.
 
 ---
 
@@ -23,9 +43,12 @@ Users must never be misled into thinking they are seeing live data when they are
 
 ### This policy governs
 
-- Freshness thresholds (when data becomes stale)
-- Refresh intervals (how often the feed recomputes)
-- Sync status vocabulary and user-facing labels
+- Feed-level freshness thresholds
+- Refresh cadence and retry expectations
+- User-facing freshness vocabulary
+- User-facing local-change queue vocabulary
+- Trusted-data timestamp behavior
+- Refresh-attempt timestamp behavior
 - Staleness display rules by complexity tier
 - Degraded-state and offline-state UX behavior
 - Partial-load behavior and source health visibility
@@ -36,11 +59,12 @@ Users must never be misled into thinking they are seeing live data when they are
 
 ### This policy does NOT govern
 
-- Feed cache TTL or draft key management — see [P2-B2](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md)
+- Feed cache TTL, draft keys, or storage topology — see [P2-B2](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md)
 - State persistence and return-memory mechanics — see [P2-B2](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md)
 - Root routing and landing precedence — see [P2-B1](P2-B1-Root-Routing-and-Landing-Precedence-Spec.md)
 - Ranking coefficients or scoring model — see [P2-A2](P2-A2-Ranking-Lane-and-Time-Horizon-Policy.md)
 - Cross-device synchronization — see P2-B4
+- Org-chart and entitlement completion for first-class team visibility — future dependency noted here but governed elsewhere
 
 ---
 
@@ -48,385 +72,452 @@ Users must never be misled into thinking they are seeing live data when they are
 
 | Term | Meaning |
 |---|---|
-| **Freshness window** | The maximum age of feed data before it is considered stale. Measured from `lastRefreshedIso` |
-| **Staleness threshold** | The point at which the feed transitions from fresh to stale, triggering `isStale: true` and requiring a visible indicator |
-| **Sync status** | The current state of data freshness: `live`, `cached`, `partial`, or `queued`. Type: `MyWorkSyncStatus` |
-| **Degraded state** | Connectivity is present but unreliable — probes succeed slowly or intermittently. Type: `ConnectivityStatus = 'degraded'` |
-| **Feed refresh** | A recomputation of the feed via the aggregation pipeline, fetching from all enabled source adapters |
-| **Partial load** | A feed computation where some sources succeeded and others failed, resulting in `freshness: 'partial'` |
-| **Optimistic update** | A mutation applied to the local feed state immediately, before server confirmation, with reconciliation on sync |
+| **Freshness window** | The maximum age of the **trusted feed snapshot** before it is considered stale. Measured from `lastTrustedDataIso`, not from the most recent refresh attempt. |
+| **Staleness threshold** | The point at which the trusted feed transitions from fresh to stale, requiring a visible trust indicator. |
+| **Freshness status** | Canonical data-state vocabulary: `live`, `cached`, or `partial`. |
+| **Local change state** | Canonical mutation-queue vocabulary: `none` or `queued`. This is separate from freshness. |
+| **Trusted data timestamp** | `lastTrustedDataIso` / `lastSuccessfulDataIso`: the last time the surface received a fully trusted feed snapshot that may be represented to the user as the last synced state. |
+| **Refresh attempt timestamp** | `lastRefreshAttemptIso`: the most recent time a refresh was attempted, regardless of outcome. Operational and diagnostic; not the primary user-facing trust timestamp. |
+| **Degraded state** | Connectivity is present but unstable according to the resolved `@hbc/session-state` signal. |
+| **Feed refresh** | A recomputation of the feed via the aggregation pipeline, fetching from enabled source adapters. |
+| **Partial load** | A refresh attempt where some sources succeeded and others failed, producing freshness `partial`. |
+| **Optimistic update** | A mutation reflected locally before server confirmation, with later replay / reconciliation. |
 
 ---
 
 ## 1. Trust Invariant
 
-Per Unified Blueprint §7.2 (locked Interview Decision 8) and P2-A1 §8.1:
+Per Unified Blueprint §7.2 and P2-A1 §8.1:
 
-> **"Users must never be misled into thinking they are seeing live data when they are not."**
+> **Users must never be misled into thinking they are seeing live data when they are not.**
 
 ### Enforcement Rules
 
 | Condition | Required Action |
 |---|---|
-| Any source not in `live` state | Sync-state indicator MUST be visible |
-| Feed `isStale === true` | Staleness label MUST be visible with timestamp |
-| Connectivity is `degraded` | Degraded indicator MUST be visible |
-| Connectivity is `offline` | Offline banner MUST be visible with last-cached timestamp |
-| Cached feed shown as fallback | "Last updated [timestamp]" MUST be displayed |
-| Mutations queued for replay | Pending mutation count MUST be accessible |
+| Freshness status is not `live` | Freshness indicator MUST be visible |
+| Feed age exceeds the freshness window | Trusted timestamp MUST be visible |
+| Connectivity resolves to `degraded` | Degraded indicator MUST be visible |
+| Connectivity resolves to `offline` | Offline banner MUST be visible with trusted timestamp or explicit no-cache message |
+| Cached feed shown as fallback | User-facing label MUST use the trusted/cached snapshot time, not the failed attempt time |
+| Local change state is `queued` | Pending mutation indicator MUST be visible or directly accessible |
+| Team/delegated feed is shown on provisional surfaces | Surface MUST NOT imply fully trusted first-release team semantics before org-chart / entitlement plumbing is complete |
 
 ### Trust Invariant Exceptions
 
-- None. There are no exceptions to the trust invariant. Silent serving of stale data is always a policy violation.
+- None. Silent serving of stale, partial, cached, or queued-change state as if it were live is always a policy violation.
 
 ---
 
-## 2. Freshness Thresholds
+## 2. Timestamp Model and Freshness Thresholds
 
-### 2.1 Feed-Level Staleness
+### 2.1 Canonical Timestamp Model
+
+| Field | Purpose | User-facing? |
+|---|---|---|
+| `lastTrustedDataIso` | Last fully trusted snapshot time | **Yes** — primary timestamp for “Last synced / Last updated” |
+| `lastRefreshAttemptIso` | Most recent refresh attempt time | No by default; available for expert diagnostics and telemetry |
+| `cachedAtIso` | Time the currently displayed fallback snapshot was written to cache | Yes when cached fallback is in use |
+
+### 2.2 Timestamp Advancement Rules
+
+| Refresh Outcome | Advance `lastRefreshAttemptIso` | Advance `lastTrustedDataIso` |
+|---|---|---|
+| `live` | Yes | Yes |
+| `partial` | Yes | **No** |
+| `cached` fallback after failed live refresh | Yes | **No** |
+| Offline with no refresh attempt | No | No |
+| Queue replay only, without successful feed refresh | Operational timestamp may advance separately; trusted feed timestamp does not | No |
+
+### 2.3 Feed-Level Staleness
 
 | Constant | Value | Meaning |
 |---|---|---|
-| `FEED_FRESHNESS_WINDOW_MS` | 300,000 (5 minutes) | Feed data older than 5 minutes since `lastRefreshedIso` triggers `isStale: true` |
+| `FEED_FRESHNESS_WINDOW_MS` | 300,000 (5 minutes) | Trusted feed data older than 5 minutes since `lastTrustedDataIso` is stale |
 
-When the feed has not been refreshed within the freshness window:
-- `isStale` transitions to `true`
-- The staleness indicator appears (§5)
-- Auto-refresh is triggered if the hub is visible (§3)
+When the trusted feed age exceeds the freshness window:
 
-### 2.2 Per-Source Staleness
+- the surface is stale even if a more recent refresh attempt failed
+- the UI must show the trusted timestamp
+- auto-refresh should run when the hub is eligible to refresh
+
+### 2.4 Per-Source Staleness
 
 | Constant | Value | Meaning |
 |---|---|---|
-| `SOURCE_FRESHNESS_WINDOW_MS` | 600,000 (10 minutes) | Individual source data older than 10 minutes is considered source-stale |
+| `SOURCE_FRESHNESS_WINDOW_MS` | 600,000 (10 minutes) | A source older than 10 minutes is source-stale |
 
-Per-source staleness is tracked in `IMyWorkHealthState.freshness` and `degradedSourceCount`. A source may be individually stale while the aggregate feed is still within its freshness window (e.g., one adapter failed on the last refresh attempt).
+Per-source staleness is tracked in health metadata and surfaced according to complexity tier. A source may be stale while the aggregate feed remains usable.
 
-### 2.3 Threshold Rationale
+### 2.5 Threshold Rationale
 
-- **5-minute feed threshold** balances data currency against refresh cost. Most work-item state changes (approvals, handoffs, ownership transfers) are not sub-minute events — a 5-minute window captures meaningful changes without excessive polling.
-- **10-minute source threshold** allows individual sources to be briefly unavailable without immediately degrading the feed's trust signal. If a source hasn't updated in 10 minutes, it's likely experiencing a real issue.
+- **5-minute feed threshold** balances trust and cost for operational work-item surfaces.
+- **10-minute source threshold** allows brief adapter instability without immediately overstating a full-surface failure.
+- **Split timestamps** preserve operator observability without overstating freshness to end users.
 
 ---
 
-## 3. Refresh Intervals
+## 3. Refresh Policy
 
-### 3.1 Auto-Refresh
+### 3.1 Auto-Refresh Behavior
 
 | Constant | Value | Meaning |
 |---|---|---|
-| `FEED_AUTO_REFRESH_INTERVAL_MS` | 180,000 (3 minutes) | Feed auto-refreshes every 3 minutes while the hub tab is visible |
-
-Auto-refresh behavior:
+| `FEED_AUTO_REFRESH_INTERVAL_MS` | 180,000 (3 minutes) | Target auto-refresh interval while the Personal Work Hub is visible and refresh-eligible |
 
 | Condition | Behavior |
 |---|---|
-| Hub visible and `online` | Auto-refresh every 3 minutes |
-| Hub visible and `degraded` | Auto-refresh every 3 minutes (may produce partial results) |
-| Hub visible and `offline` | No auto-refresh; show cached feed |
-| Hub not visible (tab hidden) | No auto-refresh; refresh on tab focus return |
-| User triggers manual refresh | Immediate refresh; reset auto-refresh timer |
+| Hub visible and connectivity `online` | Auto-refresh every 3 minutes |
+| Hub visible and connectivity `degraded` | Auto-refresh every 3 minutes; may resolve to `partial` or `cached` |
+| Hub visible and connectivity `offline` | No live refresh; show cached snapshot or offline empty state |
+| Hub hidden | Pause interval refresh; refresh on focus return / reconnect according to query policy |
+| Manual refresh | Immediate refresh attempt; reset interval clock |
 
-### 3.2 TanStack Query Configuration
+### 3.2 Query / Hook Execution Target
+
+This section is an **execution requirement**, not a claim that the current repo already uses these exact values.
 
 | Config | Value | Rationale |
 |---|---|---|
-| `staleTime` | 180,000 (3 minutes) | Matches auto-refresh interval; prevents redundant fetches |
-| `gcTime` (formerly `cacheTime`) | 600,000 (10 minutes) | Keep query cache for 10 minutes for tab-switch scenarios |
-| `refetchOnWindowFocus` | `true` | Refresh when user returns to the tab |
-| `refetchOnReconnect` | `true` | Refresh when connectivity restores |
-| `retry` | 2 | Retry failed fetches twice with exponential backoff |
+| `staleTime` | 180,000 (3 minutes) | Align query freshness with refresh interval |
+| `gcTime` | 600,000 (10 minutes) | Preserve tab-switch and short-return cache usability |
+| `refetchOnWindowFocus` | `true` | Revalidate on focus return |
+| `refetchOnReconnect` | `true` | Revalidate when connectivity resolves from degraded/offline |
+| `retry` | 2 | Limited retry with backoff |
 
 ### 3.3 Refresh Throttling
 
-- Consecutive manual refreshes MUST be throttled to at most one per 10 seconds to prevent refresh storms.
-- Auto-refresh and manual refresh share the same query key — a manual refresh resets the auto-refresh timer.
+- Manual refresh must be throttled to at most one attempt per 10 seconds.
+- Manual refresh and auto-refresh must share the same canonical feed query key.
+- Refresh throttling must not suppress visibility of existing stale/cached/partial indicators.
 
 ---
 
-## 4. Sync Status Vocabulary
+## 4. Canonical Vocabulary
 
-The feed uses four sync status states. These are the canonical labels and visual treatments.
-
-**Type:** `MyWorkSyncStatus` from `packages/my-work-feed/src/types/IMyWorkItem.ts`
+### 4.1 Freshness Status Vocabulary
 
 | Status | User-Facing Label | Visual Variant | Meaning |
 |---|---|---|---|
-| `live` | "Up to date" | `success` (green) | All sources fetched successfully within the freshness window |
-| `cached` | "Using saved data" | `info` (blue) | Data served from cache; live sources unreachable |
-| `partial` | "Some data unavailable" | `warning` (amber) | Some sources loaded successfully, others failed |
-| `queued` | "Changes saved locally" | `warning` (amber) | Offline; mutations queued for replay |
+| `live` | Up to date | success | All required sources succeeded and the trusted snapshot is current |
+| `cached` | Using saved data | info | Cached snapshot is being shown because a live refresh could not fully supply the surface |
+| `partial` | Some data unavailable | warning | Some sources succeeded and some failed during the latest refresh attempt |
 
-### 4.1 Connectivity Status Labels
+### 4.2 Local Change Queue Vocabulary
 
-| Status | User-Facing Label | Component |
+| State | User-Facing Label | Visual Variant | Meaning |
+|---|---|---|---|
+| `none` | — | — | No locally queued mutations |
+| `queued` | Changes saved locally | warning | One or more offline/deferred mutations are waiting for replay |
+
+### 4.3 Composition Rule
+
+Freshness and queued-local-changes are separate signals and may coexist.
+
+Valid examples:
+
+- `cached` + `queued`
+- `partial` + `none`
+- `live` + `queued` (for a short period before replay completes)
+
+Invalid example:
+
+- Treating `queued` as the sole freshness state
+
+### 4.4 Connectivity Vocabulary
+
+| Connectivity | User-Facing Label | Component Guidance |
 |---|---|---|
-| `online` | (no indicator — normal state) | — |
-| `degraded` | "Connection unstable — changes will be saved locally" | `HbcConnectivityBar` (warning) |
-| `offline` | "You are offline — N change(s) queued" | `HbcConnectivityBar` (error) |
+| `online` | none by default | No explicit banner required |
+| `degraded` | Connection unstable — changes will be saved locally | `HbcConnectivityBar` warning treatment |
+| `offline` | You are offline — changes will sync when connection returns | `HbcConnectivityBar` error/offline treatment |
 
-### 4.2 Vocabulary Invariants
+### 4.5 Vocabulary Invariants
 
-- These labels and meanings are the canonical vocabulary. All surfaces (PWA, SPFx) MUST use the same terminology per P2-B0 cross-lane consistency rule 5.
-- Labels MUST be calm and informational, not alarming. "Some data unavailable" is preferred over "DATA SYNC ERROR."
-- Labels MUST NOT include technical details (no "IndexedDB", no "TanStack Query", no "adapter timeout").
+- PWA and SPFx must use the same **freshness** meanings.
+- `queued` is a local-change indicator, not a synonym for stale/cached/partial.
+- Labels must remain calm, brief, and non-technical.
+- Raw implementation details must not appear in user-facing copy.
 
 ---
 
-## 5. Staleness Display Rules
+## 5. User-Facing Trust Composition
 
-Staleness is displayed differently based on the user's complexity tier (per `@hbc/complexity` density context).
+The UI must communicate the feed’s state by composing freshness, trusted timestamp, connectivity, and local queue state.
 
-### 5.1 Display by Complexity Tier
+### 5.1 Header / Banner Composition Examples
+
+| State | Required User-Facing Treatment |
+|---|---|
+| `live` + `none` | No stale banner required |
+| `cached` + `none` | “Using saved data” + “Last updated [trusted/cached timestamp]” |
+| `cached` + `queued` | “Using saved data” + “Last updated [trusted/cached timestamp]” + “Changes saved locally” |
+| `partial` + `none` | “Some data unavailable” + trusted timestamp |
+| `partial` + `queued` | “Some data unavailable” + trusted timestamp + “Changes saved locally” |
+| `offline` with no cache | Offline empty state; do not imply a last synced value that does not exist |
+
+### 5.2 Timestamp Rule
+
+The default header timestamp must represent **trusted data age**, not simply the time of the most recent refresh attempt.
+
+### 5.3 Expert Diagnostics
+
+Expert surfaces may expose additional details such as:
+
+- `lastRefreshAttemptIso`
+- degraded source count
+- per-source health badges
+- queued mutation count / replay outcome
+
+These expert diagnostics must not replace the user-facing trusted timestamp.
+
+---
+
+## 6. Staleness Display Rules by Complexity Tier
+
+### 6.1 Display by Complexity Tier
 
 | Tier | Staleness Display | Location |
 |---|---|---|
-| **Essential** | "Last synced [relative time]" timestamp in feed header | Feed header, always visible when `isStale` or not `live` |
-| **Standard** | Essential display + "[N] source(s) updating" count when `partial` | Feed header with expandable detail |
-| **Expert** | Standard display + per-source health badge via `HbcMyWorkSourceHealth` | Feed header + per-source detail panel |
+| **Essential** | “Last synced [relative time]” or “Last updated [relative time]” when not live | Feed header |
+| **Standard** | Essential display + freshness label + degraded-source summary when `partial` | Feed header with compact detail |
+| **Expert** | Standard display + per-source health detail + optional last refresh attempt detail | Feed header + detail panel |
 
-### 5.2 Relative Time Labels
+### 6.2 Relative Time Labels
 
 | Age | Display |
 |---|---|
-| < 1 minute | "Just now" |
-| 1–4 minutes | "[N] min ago" |
-| 5–59 minutes | "[N] min ago" (with staleness styling) |
-| 1–4 hours | "[N] hr ago" (with staleness warning) |
-| > 4 hours | "More than 4 hours ago" (with strong staleness warning) |
+| < 1 minute | Just now |
+| 1–4 minutes | [N] min ago |
+| 5–59 minutes | [N] min ago |
+| 1–4 hours | [N] hr ago |
+| > 4 hours | More than 4 hours ago |
 
-### 5.3 Staleness Display Invariants
+### 6.3 Display Invariants
 
-- The staleness indicator MUST be visible at all complexity tiers when `isStale === true` or `freshness !== 'live'`.
-- The indicator MUST NOT be hidden behind a click/tap — it must be visible in the feed header without user action.
-- When the feed is `live` and fresh, no staleness indicator is shown — the absence of the indicator communicates freshness.
-- The `HbcMyWorkSourceHealth` component (expert tier) already displays per-source health badges with variant/label mapping. P2-B3 endorses its current behavior for expert tier and requires Essential/Standard tiers to show the simpler indicators defined above.
+- Staleness or freshness indicators must be visible whenever freshness is not `live` or the trusted snapshot is stale.
+- The indicator must not be hidden behind a click to reveal.
+- A partial refresh must not replace the trusted timestamp with the attempt time.
+- If the current visible surface has never achieved a trusted full sync, the UI must say so explicitly rather than fabricate a “Last synced” value.
 
 ---
 
-## 6. Degraded-State UX
+## 7. Degraded-State UX
 
-When connectivity is `degraded` (detected by `@hbc/session-state` probe):
+Connectivity status must come from the resolved `@hbc/session-state` signal. Raw `navigator.onLine` may contribute to that signal but is not the sole policy source of truth.
 
-### 6.1 Degraded-State Sequence
+### 7.1 Degraded-State Sequence
 
 | Step | Timing | Behavior |
 |---|---|---|
-| 1 | 0s | Initiate live feed fetch; show loading indicator |
-| 2 | 0–3s | Continue loading; `HbcConnectivityBar` shows "Connection unstable" (warning) |
-| 3 | 3s (fetch not complete) | Show cached feed from `hbc-my-work-feed-cache` draft with "Refreshing..." overlay |
-| 4 | Fetch completes | Replace cached feed with live data; remove "Refreshing..." overlay |
-| 5 | Fetch fails entirely | Keep cached feed; show "Some data unavailable" with last-cached timestamp |
+| 1 | 0s | Start refresh attempt; show loading / progress affordance |
+| 2 | 0–3s | `HbcConnectivityBar` may show degraded connection warning |
+| 3 | ~3s (if live refresh has not resolved and cache exists) | Cached snapshot may be shown with “Refreshing…” overlay |
+| 4 | Refresh resolves `live` | Replace snapshot with live result; advance trusted timestamp |
+| 5 | Refresh resolves `partial` | Show partial result and freshness warning; do **not** advance trusted timestamp |
+| 6 | Refresh resolves `cached` / full failure | Keep cached snapshot; show “Using saved data” with trusted/cached timestamp |
 
-### 6.2 Degraded-State Rules
+### 7.2 Degraded-State Rules
 
-- Cached feed shown at step 3 MUST display "Last updated [cachedAt]" timestamp.
-- Cached feed MUST NOT be silently shown as if it were live data.
-- The 3-second threshold matches P2-B2 §5.3 degraded-state behavior.
-- If no cached feed exists, continue showing loading indicator until fetch completes or fails.
+- Cached fallback must always show a trusted/cached timestamp.
+- The degraded sequence must not silently replace trusted data with an unqualified partial result.
+- If no cache exists, continue showing loading / degraded-state messaging until the attempt resolves or fails.
 
 ---
 
-## 7. Offline-State UX
+## 8. Offline-State UX
 
-When connectivity is `offline` (detected by `navigator.onLine === false`):
-
-### 7.1 Offline Display
+### 8.1 Offline Display
 
 | Element | Behavior |
 |---|---|
-| **Connectivity bar** | `HbcConnectivityBar` shows "You are offline — N change(s) queued" (error variant) |
-| **Feed display** | Show cached feed from `hbc-my-work-feed-cache` draft if available |
-| **Staleness indicator** | "Last updated [cachedAt timestamp] — you are offline" |
-| **Feed mutations** | Allowed for offline-capable actions: `mark-read`, `defer`, `undefer`, `pin-today`, `pin-week`, `waiting-on` |
-| **Mutation indicator** | Pending mutation count visible in connectivity bar |
-| **No-cache state** | If no cached feed: show empty state with "You are offline. Your work feed will load when connectivity is restored." |
-| **No redirect** | User stays on `/my-work` regardless (per P2-A1 §1.2 no-redirect invariant) |
+| **Connectivity bar** | Show offline state from `@hbc/session-state` |
+| **Feed display** | Show cached snapshot if available |
+| **Staleness indicator** | “Last updated [cachedAt / trusted timestamp] — you are offline” |
+| **Feed mutations** | Allow only approved offline-capable actions |
+| **Mutation indicator** | Queued mutation count visible or directly accessible |
+| **No-cache state** | Empty state: “You are offline. Your work feed will load when connectivity is restored.” |
+| **No redirect** | User remains on `/my-work` |
 
-### 7.2 Reconnection Behavior
-
-When connectivity transitions from `offline` to `online` or `degraded`:
+### 8.2 Reconnection Behavior
 
 | Step | Action |
 |---|---|
-| 1 | `HbcConnectivityBar` transitions to "Syncing..." |
-| 2 | Replay queued mutations via `@hbc/session-state` operation queue |
-| 3 | Trigger full feed refresh |
-| 4 | On success: replace cached feed with live data; clear staleness indicator |
-| 5 | On partial success: show live data for successful sources; mark failed sources as stale |
-| 6 | Update connectivity bar to reflect new state |
+| 1 | Connectivity transitions from `offline` to `online` or `degraded` |
+| 2 | Queue replay begins |
+| 3 | Feed refresh begins |
+| 4 | If refresh resolves `live`, advance trusted timestamp and clear stale indicators |
+| 5 | If refresh resolves `partial`, keep warning state and preserve prior trusted timestamp |
+| 6 | If refresh fails, keep cached state and preserve prior trusted timestamp |
 
 ---
 
-## 8. Partial-Load Behavior
+## 9. Partial-Load Behavior
 
-When a feed refresh produces `freshness: 'partial'` (some sources succeeded, others failed):
-
-### 8.1 Partial-Load Display
+### 9.1 Partial-Load Display
 
 | Tier | Display |
 |---|---|
-| Essential | "Last synced [time] — some data unavailable" |
-| Standard | "Last synced [time] — [N] of [M] sources loaded" |
-| Expert | Standard display + per-source health badges showing which sources failed |
+| Essential | “Some data unavailable” + trusted timestamp |
+| Standard | Essential display + “[N] of [M] sources loaded” |
+| Expert | Standard display + per-source health detail |
 
-### 8.2 Partial-Load Rules
+### 9.2 Partial-Load Rules
 
-- Available data from successful sources is shown normally — partial load does NOT hide successfully loaded items.
-- Failed sources contribute 0 items to the feed computation. Their previous items (from cache or last successful load) are NOT mixed in.
-- `degradedSourceCount` in `IMyWorkHealthState` tracks how many sources failed.
-- `warningMessage` may contain a human-readable summary (e.g., "2 source(s) failed to load").
-- Auto-refresh continues normally — the next refresh may succeed for previously failed sources.
+- Available data from successful sources may be shown.
+- Failed sources may contribute zero items to the current attempt result.
+- A partial load must not advance `lastTrustedDataIso`.
+- `lastRefreshAttemptIso` may advance for telemetry / diagnostics.
+- If there is no prior trusted snapshot and the first visible result is partial, the UI must say that the first trusted sync is still pending.
 
 ---
 
-## 9. Ranking and Cached Data
+## 10. Ranking and Cached Data
 
-### 9.1 Cached Feed Ranking
-
-When cached feed is displayed (offline or degraded fallback):
+### 10.1 Cached Feed Ranking
 
 | Aspect | Behavior |
 |---|---|
-| **Ranking order** | Items retain their `rankingReason` and position from the time of caching |
-| **Score accuracy** | Cached scores may not reflect current state (e.g., an item may have become overdue since caching) |
-| **User notification** | No explicit notification that ranking may be stale — the staleness indicator communicates data age |
-| **On live refresh** | Items may reorder. No transition animation or notification of reorder is required |
+| Ranking order | Items retain their cached ranking order and reasoning metadata |
+| Score accuracy | Cached scores may no longer reflect present-time urgency |
+| User notification | No separate rank-staleness message is required beyond freshness / timestamp indicators |
+| Live refresh behavior | Reordering on successful live refresh is acceptable |
 
-### 9.2 Ranking Consistency
+### 10.2 Ranking Consistency
 
-- Cached feed and live feed use the same ranking algorithm (P2-A2 §9 ranking invariant).
-- The difference is input freshness, not algorithm difference.
-- Users may notice items "jumping" when live data arrives — this is expected and acceptable behavior.
+- Cached and live results must use the same ranking model.
+- Staleness changes trust in the input data, not the scoring model identity.
 
 ---
 
-## 10. Mutation Reconciliation on Reconnect
+## 11. Mutation Reconciliation on Reconnect
 
-Per P2-B2 §7.4, when connectivity restores:
-
-### 10.1 Reconciliation Rules
+### 11.1 Reconciliation Rules
 
 | Scenario | Behavior |
 |---|---|
-| **Queue replay succeeds** | Mutations applied server-side; feed refreshes to reflect server state |
-| **Queue replay partially fails** | Successful mutations applied; failed mutations shown with inline error; feed refreshes |
-| **Conflict detected** | Server state wins. Feed mutations are non-destructive (mark-read, defer, pin) — conflicts cannot cause data loss |
-| **Item no longer exists** | Mutation silently discarded; item removed from feed on refresh |
+| Queue replay succeeds | Apply server-confirmed changes and refresh feed |
+| Queue replay partially fails | Apply successful mutations, surface failures, refresh feed |
+| Conflict detected | Server state wins for canonical feed state |
+| Item no longer exists | Discard mutation and remove item on refresh |
 
-### 10.2 Reconciliation Invariants
+### 11.2 Reconciliation Invariants
 
-- Optimistic updates applied during offline mode are reconciled against server state, not assumed correct.
-- If an item was deferred offline but completed by another user, the deferral is discarded and the item is removed from the feed.
-- No user confirmation is required for reconciliation — it happens automatically on reconnect.
+- Optimistic updates are provisional until replay / confirmation succeeds.
+- Queued mutation state is independent from freshness state.
+- Queue replay alone does not authorize advancing the trusted feed timestamp.
 
 ---
 
-## 11. Cross-Lane Staleness Consistency
+## 12. Cross-Lane Consistency
 
-Per P2-B0 cross-lane consistency rule 5, freshness vocabulary must be identical across PWA and SPFx.
+Per P2-B0, freshness vocabulary must remain consistent across PWA and SPFx.
 
-### 11.1 Cross-Lane Requirements
+### 12.1 Cross-Lane Requirements
 
 | Aspect | PWA | SPFx | Consistency Rule |
 |---|---|---|---|
-| **Status vocabulary** | `live`, `cached`, `partial`, `queued` | Same 4 states | Identical terminology |
-| **Status meaning** | Per §4 definitions | Same definitions | Identical semantics |
-| **Staleness indicator** | Full display per complexity tier (§5) | Simplified: "Last synced [time]" label on companion summary | Same meaning, simpler UI |
-| **Offline indicator** | `HbcConnectivityBar` + cached feed | Status badge on companion card | Same meaning, surface-appropriate UI |
-| **Refresh action** | Manual refresh available in feed header | Not applicable (SPFx companion is read-only summary) | PWA owns refresh |
+| Freshness vocabulary | `live`, `cached`, `partial` | Same meanings | Identical semantics |
+| Trusted timestamp meaning | Header / banner trust timestamp | Simplified summary timestamp | Same meaning |
+| Local queue indicator | Required on mutation-capable surfaces | Optional on read-only summary surfaces | Same concept; only required where mutations can exist |
+| Refresh authority | PWA owns active refresh | SPFx may mirror status from shared feed state | PWA is authoritative |
+| Connectivity messaging | Full shell connectivity surface | Surface-appropriate simplified indication | Same trust posture |
 
-### 11.2 Consistency Invariants
+### 12.2 Provisional Team / Delegated Note
 
-- The same feed data displayed in PWA and SPFx MUST show the same sync status.
-- SPFx MUST NOT silently show stale data as if it were live.
-- SPFx companion uses simpler UI (no connectivity bar, no reasoning drawer) but the same status vocabulary.
+The current shared feed model still contains provisional delegated/team remnants. P2-B3 therefore locks the following constraint:
 
----
-
-## 12. Telemetry Contract
-
-The following telemetry events support freshness monitoring and trust-state verification.
-
-### 12.1 Feed Freshness Events
-
-| Event | Trigger | Payload |
-|---|---|---|
-| `feed.freshness.stale` | Feed transitions from fresh to stale (`isStale` becomes `true`) | `{ feedAge: number, lastRefreshedIso: string }` |
-| `feed.freshness.refresh.complete` | Feed refresh completes | `{ duration: number, freshness: MyWorkSyncStatus, sourceCount: number, degradedCount: number }` |
-| `feed.freshness.refresh.failed` | Feed refresh fails entirely | `{ error: string, lastCachedIso?: string }` |
-
-### 12.2 Connectivity Events
-
-| Event | Trigger | Payload |
-|---|---|---|
-| `feed.connectivity.offline-cache-shown` | Cached feed displayed due to offline state | `{ cachedAt: string, itemCount: number }` |
-| `feed.connectivity.degraded-cache-shown` | Cached feed displayed due to degraded fetch (>3s) | `{ cachedAt: string, fetchDuration: number }` |
-| `feed.connectivity.sync-complete` | Queued mutations replayed on reconnect | `{ mutationCount: number, successCount: number, failedCount: number }` |
-
-### 12.3 Source Health Events
-
-| Event | Trigger | Payload |
-|---|---|---|
-| `feed.source.partial-load` | Feed computation completed with degraded sources | `{ totalSources: number, degradedSources: number, warningMessage?: string }` |
-| `feed.source.recovered` | Previously degraded source returns to `live` | `{ source: string, degradedDuration: number }` |
+- first-release Personal Work trust behavior may be executed for personal surfaces now
+- any direct-report or team freshness surface remains provisional until future completion of org-chart and entitlement plumbing
+- no team/delegated surface may imply final first-release trust completeness before that dependency is resolved
 
 ---
 
-## 13. Acceptance Gate Reference
+## 13. Telemetry Contract
 
-P2-B3 is the primary evidence artifact for the Trust-state gate:
+### 13.1 Refresh and Trust Events
+
+| Event | Trigger | Payload |
+|---|---|---|
+| `feed.refresh.attempted` | A refresh attempt starts | `{ attemptIso, trigger }` |
+| `feed.refresh.completed` | A refresh attempt resolves | `{ attemptIso, freshnessStatus, sourceCount, degradedCount, durationMs }` |
+| `feed.trust.timestamp-advanced` | Trusted snapshot advances | `{ previousTrustedIso, newTrustedIso, freshnessStatus: 'live' }` |
+| `feed.refresh.failed` | Attempt fails to produce live data | `{ attemptIso, freshnessStatus, cachedAtIso? }` |
+
+### 13.2 Connectivity and Queue Events
+
+| Event | Trigger | Payload |
+|---|---|---|
+| `feed.connectivity.offline-cache-shown` | Cached snapshot shown during offline state | `{ cachedAtIso, itemCount }` |
+| `feed.connectivity.degraded-cache-shown` | Cached snapshot shown during degraded fetch fallback | `{ cachedAtIso, attemptIso }` |
+| `feed.queue.state-changed` | Queue count or queued state changes | `{ queuedCount, state }` |
+| `feed.queue.replay-complete` | Replay finishes | `{ mutationCount, successCount, failedCount }` |
+
+### 13.3 Source Health Events
+
+| Event | Trigger | Payload |
+|---|---|---|
+| `feed.source.partial-load` | Partial refresh result produced | `{ totalSources, degradedSources, warningMessage? }` |
+| `feed.source.recovered` | Previously degraded source returns live | `{ source, degradedDurationMs }` |
+
+---
+
+## 14. Acceptance Gate Reference
+
+P2-B3 is the primary evidence artifact for the trust-state gate.
 
 | Field | Value |
 |---|---|
 | **Gate** | Trust-state gate |
-| **Pass condition** | Freshness, stale, syncing, degraded, and offline states are visible and coherent |
-| **Evidence required** | Freshness policy (this document), state UX review, scenario tests |
+| **Pass condition** | Freshness, stale, syncing, degraded, offline, and queued-change states are visible and coherent |
+| **Evidence required** | Freshness policy, UX review, scenario tests, implementation reconciliation |
 | **Primary owner** | Platform + Experience |
 
 ### Scenario Test Requirements
 
-The following scenarios must produce correct, visible trust-state behavior:
-
 | # | Scenario | Expected Behavior |
 |---|---|---|
-| 1 | Feed is fresh and all sources live | No staleness indicator shown |
-| 2 | Feed age exceeds 5 minutes without refresh | Staleness indicator appears with relative time |
-| 3 | One of three sources fails during refresh | `partial` status shown; available data displayed normally |
-| 4 | All sources fail during refresh | `cached` status shown with last-cached timestamp |
-| 5 | User goes offline with cached feed | Offline banner + cached feed + pending mutation count |
-| 6 | User goes offline without cached feed | Empty state with offline message |
-| 7 | User returns online after offline mutations | Sync indicator → mutation replay → feed refresh → live state |
-| 8 | Degraded connectivity; fetch exceeds 3s | Cached feed shown with "Refreshing..." overlay |
-| 9 | Tab hidden then focused | Auto-refresh triggers on tab focus |
-| 10 | Multiple rapid manual refreshes | Throttled to one per 10 seconds |
+| 1 | Feed is fresh and all sources live | No stale indicator required |
+| 2 | Trusted snapshot age exceeds 5 minutes | Trusted timestamp appears |
+| 3 | One source fails during refresh | `partial` shown; trusted timestamp does not advance |
+| 4 | All sources fail during refresh and cache exists | `cached` shown with trusted/cached timestamp |
+| 5 | User goes offline with cached feed | Offline state + cached feed + queued indicator when applicable |
+| 6 | User goes offline without cached feed | Offline empty state |
+| 7 | User returns online after offline mutations | Queue replay + refresh + coherent freshness / queue messaging |
+| 8 | Degraded connectivity causes fallback before refresh completes | Cached snapshot shown with refresh-in-progress treatment |
+| 9 | Refresh attempt occurs but resolves `partial` | `lastRefreshAttemptIso` may advance; user-facing trusted timestamp does not |
+| 10 | Multiple rapid manual refreshes | Attempts are throttled |
+| 11 | `cached` and `queued` coexist | Both signals are visible without semantic collision |
+| 12 | Team/delegated prototype surface is shown | Surface does not imply final org-chart/entitlement-complete trust behavior |
 
 ---
 
-## 14. Locked Decisions
+## 15. Locked Decisions
 
 | Decision | Locked Resolution | P2-B3 Consequence |
 |---|---|---|
-| Freshness model | **Hybrid freshness/staleness trust model** | Feed tracks both live source freshness and cached fallback freshness; users see one coherent status |
-| Offline/degraded behavior | **PWA owns primary trust model** | P2-B3 defines the PWA trust model; SPFx exposes consistent status cues but PWA is authoritative |
-| Low-work default | **Stay on Personal Work Hub** | Offline/degraded state does not redirect users away from `/my-work` |
-| Return behavior | **Strong context memory** | Feed cache (P2-B2) enables offline return with staleness indicators defined by P2-B3 |
+| Freshness vocabulary | `live`, `cached`, `partial` | Canonical freshness excludes `queued` |
+| Local mutation signal | Separate queue state | `queued` is modeled independently from freshness |
+| Trust timestamp | Split trusted-data vs refresh-attempt timestamps | User-facing trust uses `lastTrustedDataIso`; diagnostics may use `lastRefreshAttemptIso` |
+| Offline/degraded ownership | PWA owns primary trust model | SPFx mirrors trust semantics with lighter UI |
+| Team/direct-report dependency | Org-chart and entitlement plumbing not complete | Team freshness remains provisional until that dependency is closed |
+| Low-work default | Stay on Personal Work Hub | Trust state does not redirect users away from `/my-work` |
 
 ---
 
-## 15. Policy Precedence
+## 16. Policy Precedence
 
 | Deliverable | Relationship to P2-B3 |
 |---|---|
-| **P2-A1** — Operating Model Register | P2-B3 implements the trust invariant defined in P2-A1 §8.1 with concrete thresholds and display rules |
-| **P2-B0** — Lane Ownership | P2-B3 enforces cross-lane consistency rule 5 for freshness/staleness/degraded/offline vocabulary |
-| **P2-B2** — Hub State Persistence | P2-B2 defines the cache mechanism (draft keys, TTLs); P2-B3 defines how cached data is displayed and when staleness indicators appear |
-| **P2-A2** — Ranking Policy | P2-B3 clarifies that cached feed retains P2-A2 ranking from cache time; no separate stale-item scoring |
-| **P2-B4** — Cross-Device Shell Behavior | P2-B4 addresses whether freshness state syncs across devices; P2-B3 defines the per-device trust model |
+| **P2-A1** — Operating Model Register | P2-B3 operationalizes the trust invariant with concrete timestamp and visibility rules |
+| **P2-B0** — Lane Ownership | P2-B3 enforces cross-lane terminology consistency for freshness and trust messaging |
+| **P2-B2** — Hub State Persistence | P2-B2 defines storage / cache mechanics; P2-B3 defines trust semantics for displaying cached state |
+| **P2-A2** — Ranking Policy | P2-B3 clarifies that ranking identity is stable while data freshness changes |
+| **P2-B4** — Cross-Device Shell Behavior | P2-B4 may govern multi-device propagation; P2-B3 governs per-surface trust semantics |
 
-If a downstream deliverable introduces freshness-related behavior, it must conform to the thresholds, vocabulary, and display rules defined here.
+If a downstream deliverable introduces freshness-related behavior, it must conform to the timestamp model, vocabulary, and visibility rules defined here.
 
 ---
 
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-03-20  
 **Governing Authority:** [Phase 2 Plan §10.2, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md)

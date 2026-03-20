@@ -1,0 +1,57 @@
+{
+  "id": "/subscriptions/da99386a-88ef-4987-afc5-12e22690da20/resourceGroups/BFetting/providers/Microsoft.Resources/deployments/Microsoft.Azure.CosmosDB-20260320115857",
+  "name": "Microsoft.Azure.CosmosDB-20260320115857",
+  "type": "Microsoft.Resources/deployments",
+  "properties": {
+    "templateHash": "11196773446697067189",
+    "parameters": {
+      "name": {
+        "type": "String",
+        "value": "hbintel-table-prod-01"
+      },
+      "location": {
+        "type": "String",
+        "value": "eastus"
+      },
+      "locationName": {
+        "type": "String",
+        "value": "East US"
+      },
+      "defaultExperience": {
+        "type": "String",
+        "value": "Azure Table"
+      },
+      "isZoneRedundant": {
+        "type": "String",
+        "value": "false"
+      }
+    },
+    "mode": "Incremental",
+    "debugSetting": {
+      "detailLevel": "None"
+    },
+    "provisioningState": "Running",
+    "timestamp": "2026-03-20T15:58:58.9285278Z",
+    "duration": "PT4.2301757S",
+    "correlationId": "4f3aeeaf-657e-43dc-820e-d404aa08559c",
+    "providers": [
+      {
+        "namespace": "Microsoft.DocumentDb",
+        "resourceTypes": [
+          {
+            "resourceType": "databaseAccounts",
+            "locations": [
+              "eastus"
+            ]
+          }
+        ]
+      }
+    ],
+    "dependencies": [],
+    "validationLevel": "Template"
+  },
+  "tags": {
+    "primaryResourceId": "/subscriptions/da99386a-88ef-4987-afc5-12e22690da20/resourcegroups/BFetting/providers/Microsoft.DocumentDB/databaseAccounts/hbintel-table-prod-01",
+    "marketplaceItemId": "Microsoft.DocumentDB"
+  }
+}

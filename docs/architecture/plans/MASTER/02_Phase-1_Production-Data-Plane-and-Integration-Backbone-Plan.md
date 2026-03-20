@@ -2,7 +2,7 @@
 
 **Document ID:** 02
 **Classification:** Phase Master Plan
-**Status:** Planning Complete — implementation pending upstream deliverables
+**Status:** Implementation Complete — code-complete across all workstreams (B1, C1, C2, C3, D1, E1); E2 staging verification gated on IT-side deployment
 **Primary Role:** Define the production data plane, integration backbone, and service contract layer for HB Intel
 **Read With:** [`00_HB-Intel_Master-Development-Summary-Plan.md`](00_HB-Intel_Master-Development-Summary-Plan.md)
 
@@ -12,7 +12,7 @@
 
 Phase 1 planning established the complete production data plane and integration backbone design for HB Intel. Twenty-four planning artifacts across five workstreams define data ownership, canonical schemas, production adapter architecture, backend service contracts, write-safety patterns, and contract testing infrastructure. All design decisions are locked and transport-shape conventions are fully reconciled.
 
-Implementation proceeds as upstream deliverables are satisfied. As of 2026-03-19: B1 proxy transport foundation and 10 of 11 domain repos are implemented (Auth remaining — blocked on A9); C1 backend domain routes, C2 auth middleware, and C3 telemetry instrumentation are not yet started; staging readiness is not achievable until these and external dependencies (IT permissions, PO schema approval) are resolved. The detailed deliverable index and readiness positioning are maintained in [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md); the blocker ledger is in [`phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md`](phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md).
+As of 2026-03-19, all Phase 1 implementation workstreams are code-complete: B1 proxy transport foundation (all 11 repos, 189+ tests), C1 backend domain route handlers, C2 auth middleware, C3 telemetry instrumentation and health endpoint, D1 write-safety and idempotency infrastructure, and E1 contract test suite. E2 staging readiness checklist execution is the sole remaining gate and is blocked on IT-side deployment (function app provisioning, auth app registration, and environment variable configuration) and two external approvals (IT Graph permission grant, PO schema approval). No further code work is required before staging verification. The detailed deliverable index and readiness positioning are maintained in [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md); the blocker ledger is in [`phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md`](phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md).
 
 ---
 
@@ -252,14 +252,16 @@ Phase 1 planning explicitly mitigates the following risks. These remain relevant
 
 ## 15. Phase 1 Execution Priorities
 
-When implementation begins, the recommended sequencing is:
+**Implementation status (2026-03-19): All sequencing steps below are complete.** The original sequencing is preserved as a planning record of the intended build order.
 
-1. Finalize SharePoint list schema approvals (external dependency) to unblock P1-A3 physical deployment and P1-B1 adapter implementation.
-2. Implement the proxy adapter (P1-B1) to unblock write-safety (P1-D1) and adapter contract tests (P1-E1 Tasks 4–5).
-3. Implement backend route handlers (P1-C1) to unblock route contract tests (P1-E1 Tasks 6–7) and staging readiness.
-4. Implement auth middleware (P1-C2) to unblock smoke test auth validation.
-5. Deploy observability instrumentation (P1-C3) to unblock telemetry baseline verification.
-6. Complete P1-E2 staging readiness checklist as the final sign-off gate.
+~~When implementation begins, the recommended sequencing is:~~
+
+1. ~~Finalize SharePoint list schema approvals (external dependency) to unblock P1-A3 physical deployment and P1-B1 adapter implementation.~~ — **External approval outstanding (PO schema); B1 proceeded without full A3 physical deployment**
+2. ~~Implement the proxy adapter (P1-B1) to unblock write-safety (P1-D1) and adapter contract tests (P1-E1 Tasks 4–5).~~ — **COMPLETE (2026-03-19)**
+3. ~~Implement backend route handlers (P1-C1) to unblock route contract tests (P1-E1 Tasks 6–7) and staging readiness.~~ — **COMPLETE (2026-03-19)**
+4. ~~Implement auth middleware (P1-C2) to unblock smoke test auth validation.~~ — **COMPLETE (2026-03-19)**
+5. ~~Deploy observability instrumentation (P1-C3) to unblock telemetry baseline verification.~~ — **COMPLETE (code) (2026-03-19)**
+6. Complete P1-E2 staging readiness checklist as the final sign-off gate. — **PENDING — gated on IT-side staging deployment**
 
 **Implementation-entry gate:** The Phase 1 deliverables README defines a three-tier implementation-entry gate (Tier 1: proceed now, Tier 2: proceed after named prerequisite, Tier 3: blocked on external approval) with concrete conditions for narrow kickoff versus broad execution. See [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md) §Phase 1 Implementation-Entry Gate for the current assessment.
 

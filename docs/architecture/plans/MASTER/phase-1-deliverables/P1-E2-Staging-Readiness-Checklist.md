@@ -7,7 +7,7 @@
 | **Workstream** | E — Contract Testing and Staging Readiness |
 | **Document Type** | Acceptance Checklist |
 | **Owner** | QA / Platform Engineering |
-| **Status** | Implementation-Ready — Blocked (C1 domain routes, staging infrastructure) |
+| **Status** | **Gated on staging deployment** — all code dependencies delivered (B1 ✅, C1 ✅, C2 ✅, C3 ✅, D1 ✅, E1 ✅); execution requires IT-side function app deployment, auth registration, and environment variable configuration |
 | **Date** | 2026-03-16 |
 | **Last Reviewed Against Repo Truth** | 2026-03-19 |
 | **References** | P1-E1 (Contract Test Suite), P1-B1 (Proxy Adapter), P1-C1 (Backend Catalog), P1-C2 (Auth Hardening), P1-C3 (Observability), P1-D1 (Write Safety) |
@@ -57,14 +57,14 @@ All example payloads, ID types, field names, and response assertions in this che
 | Startup config validation | `validateRequiredConfig()` **wired into `createServiceFactory()`** — fails fast on missing required env vars in non-mock mode; skips in mock/test mode (G2.6 complete) | `backend/functions/src/utils/validate-config.ts`, `backend/functions/src/services/service-factory.ts` |
 | Health endpoint | **DELIVERED** — `/api/health` function registered in `backend/functions/src/index.ts`; returns 200 with system status | `backend/functions/src/functions/health/` |
 | Backend test infrastructure | Vitest with `unit` and `smoke` named projects; coverage targets provisioning only | `backend/functions/vitest.config.ts` |
-| Domain route handlers (leads, projects, estimating) | **None exist** — `backend/functions/src/functions/` contains only provisioning, proxy, notification, acknowledgment, signalr, and timer functions | `backend/functions/src/functions/` |
+| Domain route handlers (leads, projects, estimating) | **C1 DELIVERED** — leads, projects, estimating (trackers + kickoffs) implemented with `withAuth()`, `parseBody<T>()`, `withTelemetry()`, and standardized response helpers | `backend/functions/src/functions/` (verified 2026-03-19) |
 | `@hbc/data-access` proxy adapters | **B1 COMPLETE** — `ProxyHttpClient` implemented (Bearer auth, 30s timeout, X-Request-Id, error normalization, `withRetry()` wired, idempotency header injection). All 11 domain repos implemented and factory-wired (Lead, Project, Estimating, Schedule, Buyout, Compliance, Contract, Risk, Scorecard, PMP, Auth — 170+ tests). D1 retry policies (READ/WRITE) and idempotency context integrated. E1 Zod contract schemas delivered for all 11 domains. MSW handler infrastructure in place (Tier 1 domains). | Verified against repo 2026-03-19 |
 
 ### Planned but Blocked / Delivered
 
 | Item | Status | Notes |
 |---|---|---|
-| Domain route handlers (leads, projects, estimating) | **BLOCKED on C1** | Zero domain CRUD routes exist; provisioning/notification routes are operational |
+| Domain route handlers (leads, projects, estimating) | **DELIVERED (C1)** | Leads, projects, estimating domain handlers implemented with withAuth + parseBody + withTelemetry; staging deployment remains outstanding |
 | Error envelope standardization (`{ message, code, requestId?, details? }`) per D3 lock | **DELIVERED** | `successResponse()`, `errorResponse()`, `listResponse()`, `notFoundResponse()` all use `message` field per D3 lock |
 | Auth middleware hardening (`withAuth()` wrapper, Zod validation, standardized response shapes) | **DELIVERED** | `withAuth()`, `parseBody()`, `parseQuery()`, response helpers, `extractOrGenerateRequestId()` all implemented and tested; awaiting application to C1 routes |
 | Proxy adapter implementations | **DELIVERED (B1)** | All 11 repos implemented, factory-wired, 170+ tests passing |
@@ -85,7 +85,7 @@ These items cannot be verified from repo alone — they require a deployed stagi
 | **Auth app registration** (`AZURE_TENANT_ID`, `AZURE_CLIENT_ID`) | Section 2 (auth) | Platform + C2 | `validateToken()` successfully verifies a JWT against `api://<CLIENT_ID>` audience | **NOT MET** — CLIENT_ID not defined for staging |
 | **Redis reachable** | Sections 3–8 (domain routes using proxy cache) | Platform | Proxy route returns cached response; no Redis connection errors in AI | **NOT MET** — required only if proxy routes use Redis for domain data |
 | **Azure Table Storage reachable** | Section 9 (idempotency records) | Platform | D1 `IdempotencyStorageService` can read/write to `IdempotencyRecords` table | **NOT MET** — D1 code delivered (`IdempotencyStorageService` + cleanup timer implemented); physical table requires staging deploy |
-| **OBO app registration** (API scope grants for downstream APIs) | Endpoints calling downstream APIs (e.g., Graph, SharePoint) | C2 + Platform | OBO token exchange succeeds for downstream API audience | **NOT MET** — C2 not delivered; NOT required for basic domain CRUD |
+| **OBO app registration** (API scope grants for downstream APIs) | Endpoints calling downstream APIs (e.g., Graph, SharePoint) | C2 + Platform | OBO token exchange succeeds for downstream API audience | **NOT MET** — C2 code delivered; physical app registration and scope grants require IT action; NOT required for basic domain CRUD |
 | **Application Insights workspace** | Section 11 (observability) | Platform | AI connection string in function app settings; telemetry appears in AI portal | **NOT MET** — access not confirmed |
 | **Health endpoint registered** | Section 1 (health check) | C1 or Platform | `GET /api/health` returns 200 | **DELIVERED** — `/api/health` function registered in `backend/functions/src/index.ts` |
 
@@ -98,17 +98,17 @@ Each major section maps to the upstream workstreams that must deliver before the
 | Section | B1 | C1 | C2 | C3 | D1 | Platform / Staging | Status |
 |---|---|---|---|---|---|---|---|
 | 1: Adapter Mode & Startup | — | — | — | — | — | Staging deploy | **PREP-ONLY** |
-| 2: Auth — Bearer Validation | — | — | **Required** | — | — | Staging deploy | **BLOCKED on C2** |
-| 3: Domain Reads — Leads | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
-| 4: Domain Reads — Projects | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
-| 5: Domain Reads — Estimating | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
-| 6: Domain Writes — Leads | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
-| 7: Domain Writes — Projects | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
-| 8: Domain Writes — Estimating | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
-| 9: Retry & Idempotency | ✅ Delivered | **Required** | **Required** | — | ✅ Delivered | Staging deploy | **BLOCKED on C1 + staging** (B1 ✅, D1 ✅) |
-| 10: Error Recovery | — | **Required** | **Required** | — | — | Staging deploy | **BLOCKED on C1 + C2** |
-| 11: Observability | — | **Required** | ✅ Foundation | ✅ Foundation | — | Staging deploy + AI workspace | **BLOCKED on C1 + staging** (C2 middleware ✅, C3 telemetry contracts ✅) |
-| 12: Acceptance Gates | All | All | All | All | All | All | **BLOCKED on all upstream** |
+| 2: Auth — Bearer Validation | — | — | ✅ Delivered | — | — | Staging deploy | **GATED on staging deployment** |
+| 3: Domain Reads — Leads | — | ✅ Delivered | ✅ Delivered | — | — | Staging deploy | **GATED on staging deployment** |
+| 4: Domain Reads — Projects | — | ✅ Delivered | ✅ Delivered | — | — | Staging deploy | **GATED on staging deployment** |
+| 5: Domain Reads — Estimating | — | ✅ Delivered | ✅ Delivered | — | — | Staging deploy | **GATED on staging deployment** |
+| 6: Domain Writes — Leads | — | ✅ Delivered | ✅ Delivered | — | — | Staging deploy | **GATED on staging deployment** |
+| 7: Domain Writes — Projects | — | ✅ Delivered | ✅ Delivered | — | — | Staging deploy | **GATED on staging deployment** |
+| 8: Domain Writes — Estimating | — | ✅ Delivered | ✅ Delivered | — | — | Staging deploy | **GATED on staging deployment** |
+| 9: Retry & Idempotency | ✅ Delivered | ✅ Delivered | ✅ Delivered | — | ✅ Delivered | Staging deploy | **GATED on staging deployment** |
+| 10: Error Recovery | — | ✅ Delivered | ✅ Delivered | — | — | Staging deploy | **GATED on staging deployment** |
+| 11: Observability | — | ✅ Delivered | ✅ Delivered | ✅ Delivered | — | Staging deploy + AI workspace | **GATED on staging deployment + AI workspace** |
+| 12: Acceptance Gates | All ✅ | All ✅ | All ✅ | All ✅ | All ✅ | Staging deploy | **GATED on staging deployment** |
 
 ---
 
@@ -124,7 +124,7 @@ Confirm proxy adapter is configured and startup logic runs cleanly. This section
 |---|---|---|
 | `validateRequiredConfig()` | **Called at startup** — wired into `createServiceFactory()` (G2.6 complete) | `backend/functions/src/services/service-factory.ts` line 44 |
 | Adapter mode assertion | **`assertAdapterModeValid()` called at startup** | `backend/functions/src/services/service-factory.ts` line 40 |
-| Health endpoint | **Not registered** | `backend/functions/src/index.ts` imports 7 function modules — none is a health endpoint |
+| Health endpoint | **DELIVERED** — `/api/health` function registered in `backend/functions/src/index.ts`; returns 200 with system status | `backend/functions/src/functions/health/` |
 | Startup timing threshold | **No governing plan defines a numeric threshold** | No `< 10 seconds` or equivalent rule found in any Phase 1 plan |
 
 ### Adapter Mode Checks (operator-verifiable after staging deploy)
@@ -141,13 +141,13 @@ Confirm proxy adapter is configured and startup logic runs cleanly. This section
 - [ ] Measure actual cold-start time for the staging function app and record as the Phase 1 baseline
 - [ ] Document the measured value for future comparison (**NOTE:** no governing plan defines a numeric pass/fail threshold such as "< 10 seconds" — the baseline is evidence, not a gate)
 
-### Health Endpoint (BLOCKED — not registered)
-- [ ] Health endpoint registered in `backend/functions/src/index.ts` and responds — `GET /api/health` returns 200 (**BLOCKED** — no health function exists in the repo today; C1 or Platform must deliver it before this check is executable)
-- [ ] If a health endpoint is delivered: response includes at minimum `{ status: 'ok' }` or equivalent
+### Health Endpoint (DELIVERED — gated on staging deploy)
+- [ ] `GET /api/health` returns 200 — **code delivered** (`/api/health` registered in `backend/functions/src/index.ts`); requires staging deployment to verify
+- [ ] Response includes at minimum `{ status: 'ok' }` or equivalent
 
 ---
 
-## Section 2: Auth — Bearer Validation — BLOCKED on C2
+## Section 2: Auth — Bearer Validation — GATED on staging deployment (C2 delivered)
 
 Confirm auth middleware rejects unauthenticated requests and accepts valid tokens.
 
@@ -158,7 +158,7 @@ Confirm auth middleware rejects unauthenticated requests and accepts valid token
 | Aspect | Current (repo-evidenced) | Target (after C2) |
 |---|---|---|
 | **Token validation** | `validateToken()` verifies Entra ID Bearer tokens via JWKS against `api://<CLIENT_ID>` audience; returns `IValidatedClaims { upn, oid, roles, displayName }` | Same mechanism, potentially with additional claim requirements |
-| **401 response shape** | `{ error: 'Unauthorized', reason: string }` via `unauthorizedResponse()` | `{ message: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema per D3 lock (**TARGET — C2 must standardize**) |
+| **401 response shape** | **C2 DELIVERED** — `{ message: '...', code: 'UNAUTHORIZED' }` via `withAuth()` / `errorResponse()` per D3 lock | Same — C2 standardization complete; verify in staging |
 | **Trace correlation on 401** | Not included in current `unauthorizedResponse()` | Should include W3C trace context or operation ID (see Section 11) |
 | **OBO flow** | Not implemented — no downstream API calls requiring delegated user context | C2 deliverable — needed only for endpoints that call downstream APIs (e.g., Microsoft Graph) on the user's behalf |
 
@@ -177,7 +177,7 @@ These are distinct concerns and must not be conflated:
 | **HTTP 401 on expired token** | Send request with expired JWT; confirm 401 status | Token expiry validation works | If 200 → JWKS verification not checking `exp` |
 | **HTTP 401 on wrong audience** | Send request with ARM-scoped token (`aud: https://management.azure.com`); confirm 401 | Audience validation works | If 200 → audience check misconfigured |
 | **HTTP 200 on valid token** | Send request with valid API-scoped JWT; confirm 200 | Full auth pipeline accepts legitimate requests | Requires C1 domain route to exist |
-| **401 response body shape** | Parse 401 response body; check for `message` and `code` fields | C2 error standardization deployed | **TARGET-STATE** — current shape is `{ error, reason }`, target is `{ message, code }` per D3 lock |
+| **401 response body shape** | Parse 401 response body; check for `message` and `code` fields | C2 error standardization deployed | C2 delivered — shape is `{ message, code: 'UNAUTHORIZED' }` per D3 lock; verify in staging |
 | **Decoded token claims** | Decode the JWT used in the request; verify `aud`, `iss`, `upn`, `oid` match expected values | Token was correctly scoped to the API | Operator/config error if wrong audience or tenant |
 | **OBO downstream call** | Endpoint calls Microsoft Graph or other downstream API successfully | OBO app registration and token exchange work | Only applicable to OBO-dependent endpoints — NOT all routes |
 
@@ -186,7 +186,7 @@ These are distinct concerns and must not be conflated:
 #### Missing Token
 - [ ] `GET /api/leads` (no Authorization header) → 401 response
 - [ ] Response status is 401 (verifiable regardless of body shape)
-- [ ] Response body shape (**current:** `{ error: 'Unauthorized', reason }` — **target after C2:** `{ message: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema per D3 lock)
+- [ ] Response body shape: `{ message: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema per D3 lock (**C2 delivered** — verify in staging)
 
 #### Expired Token
 - [ ] Use a JWT token with `exp` claim in the past
@@ -205,7 +205,7 @@ These are distinct concerns and must not be conflated:
 
 ---
 
-## Section 3: Domain Reads — Leads — BLOCKED on C1 + C2
+## Section 3: Domain Reads — Leads — GATED on staging deployment (C1 ✅, C2 ✅)
 
 Confirm `GET` endpoints return paginated responses and 404 for missing records.
 
@@ -225,7 +225,7 @@ Confirm `GET` endpoints return paginated responses and 404 for missing records.
 
 ---
 
-## Section 4: Domain Reads — Projects — BLOCKED on C1 + C2
+## Section 4: Domain Reads — Projects — GATED on staging deployment (C1 ✅, C2 ✅)
 
 Confirm read endpoints work for projects domain.
 
@@ -241,7 +241,7 @@ Confirm read endpoints work for projects domain.
 
 ---
 
-## Section 5: Domain Reads — Estimating — BLOCKED on C1 + C2
+## Section 5: Domain Reads — Estimating — GATED on staging deployment (C1 ✅, C2 ✅)
 
 Confirm read endpoints work for estimating domain.
 
@@ -266,7 +266,7 @@ See `IEstimatingTracker`, `IEstimatingKickoff`, and `IEstimatingRepository` in `
 
 ---
 
-## Section 6: Domain Writes — Leads — BLOCKED on C1 + C2
+## Section 6: Domain Writes — Leads — GATED on staging deployment (C1 ✅, C2 ✅)
 
 Confirm `POST`, `PUT`, `DELETE` enforce validation and update correctly.
 
@@ -295,7 +295,7 @@ Confirm `POST`, `PUT`, `DELETE` enforce validation and update correctly.
 
 ---
 
-## Section 7: Domain Writes — Projects — BLOCKED on C1 + C2
+## Section 7: Domain Writes — Projects — GATED on staging deployment (C1 ✅, C2 ✅)
 
 Confirm create, update, delete for projects.
 
@@ -318,7 +318,7 @@ Confirm create, update, delete for projects.
 
 ---
 
-## Section 8: Domain Writes — Estimating — BLOCKED on C1 + C2
+## Section 8: Domain Writes — Estimating — GATED on staging deployment (C1 ✅, C2 ✅)
 
 Confirm create, update, delete for estimating trackers and kickoff creation.
 
@@ -358,17 +358,17 @@ All retry and idempotency behavior in this section is governed by **P1-D1 (Write
 
 | Detail | Governed By | Current Status |
 |---|---|---|
-| Retry timing and backoff policy | D1 `RetryPolicy` types | **NOT FROZEN** — D1 defines `withRetry` HOF but timing constants are TBD |
-| Client-side automatic retry trigger | D1 `withRetry` wired into `ProxyHttpClient` | **BLOCKED on D1** — `ProxyHttpClient` exists (B1 delivered); retry wiring awaits D1 implementation |
-| Idempotency key header name | D1 `IdempotencyContext` | **NOT FROZEN** — D1 defines `generateIdempotencyKey` but header name TBD |
-| Backend idempotency guard | D1 `withIdempotency` handler wrapper | **NOT FROZEN** — D1 plan defines the wrapper but it is not implemented |
-| Idempotency storage table | D1 `IdempotencyStorageService` | **NOT FROZEN** — dedicated `IdempotencyRecords` table planned but not created |
+| Retry timing and backoff policy | D1 `RetryPolicy` types | **DELIVERED** — `withRetry` HOF with configurable policy implemented and wired into `ProxyHttpClient` |
+| Client-side automatic retry trigger | D1 `withRetry` wired into `ProxyHttpClient` | **DELIVERED** — retry wired; staging deployment required for end-to-end verification |
+| Idempotency key header name | D1 `IdempotencyContext` | **DELIVERED** — `generateIdempotencyKey` and header injection implemented; verify header name against D1 code |
+| Backend idempotency guard | D1 `withIdempotency` handler wrapper | **DELIVERED** — `withIdempotency` handler wrapper implemented |
+| Idempotency storage table | D1 `IdempotencyStorageService` | **DELIVERED** — `IdempotencyRecords` table and `IdempotencyStorageService` implemented; physical table requires staging deploy |
 | 503 simulation mechanism | Not defined by any plan | **OUT OF SCOPE** — no feature flag or simulation path exists |
-| `WriteFailureReason` classification | D1 `classifyWriteFailure` | **NOT FROZEN** — enum and classifier planned but not implemented |
+| `WriteFailureReason` classification | D1 `classifyWriteFailure` | **DELIVERED** — `classifyWriteFailure` enum and classifier implemented |
 
 ### CONFIRMED NOW
 
-Nothing in this section is currently verifiable. No retry logic, idempotency guard, or write-safety infrastructure exists in the repo.
+All D1 write-safety infrastructure is code-complete (2026-03-19). This section is fully verifiable once staging deployment is complete. No items remain blocked on engineering delivery.
 
 ### TARGET AFTER D1 + B1 DELIVERY
 
@@ -400,7 +400,7 @@ Nothing in this section is currently verifiable. No retry logic, idempotency gua
 
 ---
 
-## Section 10: Error Recovery — BLOCKED on C1 + C2
+## Section 10: Error Recovery — GATED on staging deployment (C1 ✅, C2 ✅)
 
 Confirm error handling produces standardized shapes across all failure modes. Each failure class is tested independently so failures in one class do not mask issues in another.
 
@@ -418,7 +418,7 @@ Confirm error handling produces standardized shapes across all failure modes. Ea
 
 ### Auth Failure (401)
 - [ ] `GET /api/leads` without Authorization header → 401
-- [ ] Response body shape: **current** `{ error: 'Unauthorized', reason }` — **target after C2:** `{ message: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema per D3 lock
+- [ ] Response body shape: `{ message: '...', code: 'UNAUTHORIZED' }` conforming to ErrorEnvelopeSchema per D3 lock (**C2 delivered** — verify in staging)
 - [ ] Expired token → 401 (same shape)
 - [ ] Wrong-audience token (ARM-scoped) → 401 (same shape)
 - [ ] **Distinguishing characteristic:** auth failures are operator/config errors, not contract failures — see Section 2 Auth Evidence Model

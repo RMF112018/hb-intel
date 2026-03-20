@@ -8,19 +8,21 @@
 | **Document Type** | Instrumentation Specification |
 | **Owner** | Backend Services Team / DevOps |
 | **Update Authority** | C-workstream lead; changes require review by DevOps and B-workstream |
-| **Status** | Spec-complete — defines target instrumentation; only logger foundation and provisioning saga telemetry are implemented |
+| **Status** | **Complete — code (2026-03-19)** — proxy.request.*, auth.bearer.*, auth.obo.*, startup.mode.resolved, circuit breaker telemetry contracts, health endpoint, `withTelemetry()` handler lifecycle all delivered; dashboards, alert rules, and staging verification pending deployment |
 | **Last Reviewed Against Repo Truth** | 2026-03-19 |
 | **References** | P1-B2 (Adapter Completion Backlog), P1-B3 (Mock Isolation Policy), P1-C1 (Backend Service Contract Catalog), P1-D1 (Write Safety), P1-E1 (Contract Testing) |
 
 **Note:** This document was previously identified as P1-C1, which collided with the backend service contract catalog. Re-identified as P1-C3.
 
-### Implementation Baseline (verified 2026-03-18)
+### Implementation Baseline (updated 2026-03-19 — C3 code-complete)
 
 - ✅ `createLogger()` + `ILogger` foundation fully implemented (`backend/functions/src/utils/logger.ts`)
 - ✅ Provisioning saga telemetry fully implemented (9 named events, 3 custom metrics, saga correlation IDs)
-- ❌ All other telemetry event families (proxy adapter, handler lifecycle, auth, notification, startup signal) are P1-C3 implementation scope — not yet implemented
-- ❌ Health endpoint (`GET /api/health`) not yet implemented
-- ❌ Dashboards and alert rules not yet created
+- ✅ proxy.request.*, auth.bearer.*, auth.obo.*, startup.mode.resolved telemetry events implemented
+- ✅ `withTelemetry()` handler lifecycle wrapper implemented
+- ✅ Circuit breaker telemetry contracts delivered
+- ✅ Health endpoint (`GET /api/health`) implemented in `backend/functions/src/functions/health/`
+- ❌ Dashboards and alert rules not yet created (post-Phase 1 / staging-dependent)
 
 ---
 

@@ -75,17 +75,17 @@ MASTER/
 Execution complete (2026-03-16). Seven mandatory deliverables produced: reconciliation memo, divergence log, production readiness matrix, development guardrail sheet, environment and promotion matrix, Phase 1 entry checklist, and open decisions register. All five milestones (M0.1–M0.5) satisfied, all six Phase 1 entry blockers resolved, and all 17 completion gate checkboxes cleared (see P0-E1). These artifacts established the program truth baseline that Phase 1 planning built upon.
 
 **Phase 1 — Production Data Plane and Integration Backbone**
-Planning and implementation complete. Twenty-four deliverables produced across five workstreams. All design decisions are locked. Pre-Phase-1 contradiction closeout completed 2026-03-18 (26 contradictions resolved, go/no-go checklist 7/7 PASS). All implementation workstreams code-complete as of 2026-03-19. See [P1-CLOSEOUT](phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) for the full blocker register.
+Planning complete. Twenty-four deliverables produced across five workstreams. All design decisions are locked. Pre-Phase-1 contradiction closeout completed 2026-03-18 (26 contradictions resolved, go/no-go checklist 7/7 PASS). B1 transport foundation and 10 of 11 proxy repos are implemented and tested (Auth remaining — blocked on A9). See [P1-CLOSEOUT](phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) for the full register.
 
-**Phase 1 Implementation Baseline (updated 2026-03-19):**
+**Phase 1 Implementation Baseline (2026-03-19):**
 
 | Dimension | Status |
 |---|---|
 | Phase 0 control baseline | **Complete** — all milestones satisfied, all gates cleared (2026-03-16) |
 | Phase 1 planning | **Complete** — 24 deliverables final, all transport decisions locked, contradiction closeout 7/7 PASS |
-| Implementation verdict | **Code-complete** — B1 (11/11 repos), C1, C2, C3, D1, E1 all delivered and tested |
-| Remaining blockers for staging execution | IT-side function app deployment, auth app registration, environment variable configuration; IT Graph permission grant; PO schema approval |
-| Recommended immediate next step | Resolve IT-side staging deployment blockers to execute P1-E2 staging readiness checklist |
+| Implementation verdict | **Ready for narrow kickoff** — Tier 1 workstreams (B1, C2, D1) have no upstream blockers |
+| Remaining blockers for broad execution | SharePoint schema approval (PO), IT Graph permission grant, IT per-site access grants, C1 backend route delivery |
+| Recommended immediate next step | Complete remaining 4 proxy repos (B1 Lead/Project/Estimating/Auth), build C2 auth middleware (`withAuth()`, Zod, response helpers), define D1 write-safety standalone types |
 
 For the full three-tier implementation-entry gate, see [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md) §Phase 1 Implementation-Entry Gate.
 
@@ -181,4 +181,4 @@ The `plans/shared-features/` and `plans/UI-Kit/` directories contain shared-feat
 
 ---
 
-**Last Updated:** 2026-03-20 — P2-A1 comprehensive repo-truth drift audit completed. All shared-package references verified as current and mature (my-work-feed SF29, notification-intelligence SF10, session-state SF12, smart-empty-state SF11, project-canvas SF13, auth stable). No overclaiming of implementation in P2-A1 plan detected. All package bindings added for clarity. Phase 2 plan repo-truth foundations updated with maturity classification.
+**Last Updated:** 2026-03-19
