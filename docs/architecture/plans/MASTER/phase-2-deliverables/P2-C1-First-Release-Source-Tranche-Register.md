@@ -8,7 +8,7 @@
 | **Document Type** | Active Reference |
 | **Owner** | Platform / Core Services + Domain Owners |
 | **Update Authority** | Platform lead maintains tranche structure and readiness bands; domain owners update source-specific readiness evidence |
-| **Last Reviewed Against Repo Truth** | 2026-03-20 |
+| **Last Reviewed Against Repo Truth** | 2026-03-20 (readiness matrix updated: 4 sources → Wired: Ready; Provisioning → Publishing: Ready) |
 | **References** | [Phase 2 Plan §9.2, §10.3, §14, §16](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [P2-A1 §7](P2-A1-Personal-Work-Hub-Operating-Model-Register.md); [P2-A2](P2-A2-Ranking-Lane-and-Time-Horizon-Policy.md); [P2-B0](P2-B0-Lane-Ownership-and-Coexistence-Rules.md); [P2-C2](P2-C2-Notification-to-Work-Mapping-Policy.md); [P2-C4](P2-C4-Handoff-Criteria-Matrix.md); [P2-C5](P2-C5-Pilot-Publication-and-Rollout-Readiness-Register.md); [@hbc/bic-next-move README](../../../../packages/bic-next-move/README.md); [@hbc/workflow-handoff README](../../../../packages/workflow-handoff/README.md); [@hbc/acknowledgment README](../../../../packages/acknowledgment/README.md); [@hbc/step-wizard README](../../../../packages/step-wizard/README.md); [@hbc/field-annotations README](../../../../packages/field-annotations/README.md); [@hbc/notification-intelligence README](../../../../packages/notification-intelligence/README.md) |
 
 ---
@@ -64,12 +64,12 @@ This document deliberately separates source intent from implementation maturity.
 
 | Source | Source Key | Classification | Contract / Design | Wired | Publishing | Tested / Launch-Validated | Pilot-Launch Blocker? | Primary Channel(s) |
 |---|---|---|---|---|---|---|---|---|
-| **Provisioning** | `provisioning` | Required | **Ready** | **Ready** | **Partial** | **Partial** | No | BIC + Notification + Handoff |
-| **Estimating Bid Readiness** | `estimating-bid-readiness` | Required | **Ready** | **Blocked** | **Blocked** | **Blocked** | Yes | BIC |
-| **BD Score Benchmark** | `bd-score-benchmark` | Required | **Ready** | **Blocked** | **Blocked** | **Blocked** | Yes | BIC |
-| **BD Strategic Intelligence** | `bd-strategic-intelligence` | Required | **Ready** | **Blocked** | **Blocked** | **Blocked** | Yes | BIC |
-| **Project Hub Handoff Signals** | `project-hub-handoff-signals` | Required | **Ready** | **Partial** | **Partial** | **Blocked** | Yes | Handoff + Notification |
-| **Project Hub Health Pulse** | `project-health-pulse` | Required | **Ready** | **Blocked** | **Blocked** | **Blocked** | Yes | BIC |
+| **Provisioning** | `provisioning` | Required | **Ready** | **Ready** | **Ready** | **Partial** | No | BIC + Notification + Handoff |
+| **Estimating Bid Readiness** | `estimating-bid-readiness` | Required | **Ready** | **Ready** | **Partial** | **Blocked** | Yes | BIC |
+| **BD Score Benchmark** | `bd-score-benchmark` | Required | **Ready** | **Ready** | **Partial** | **Blocked** | Yes | BIC |
+| **BD Strategic Intelligence** | `bd-strategic-intelligence` | Required | **Ready** | **Ready** | **Partial** | **Blocked** | Yes | BIC |
+| **Project Hub Handoff Signals** | `project-hub-handoff-signals` | Required | **Ready** | **Ready** | **Partial** | **Blocked** | Yes | Handoff + Notification |
+| **Project Hub Health Pulse** | `project-health-pulse` | Required | **Ready** | **Ready** | **Partial** | **Blocked** | Yes | BIC |
 | **Approvals** | `approvals` | Required | **Ready** | **Blocked** | **Blocked** | **Blocked** | Yes | BIC + Notification |
 | **Admin Escalations** | `admin` | Optional | **Ready** | **Ready** | **Ready** | **Partial** | No | BIC (via Provisioning) + Notification |
 
@@ -114,7 +114,7 @@ This tightened register incorporates the following locked decisions:
 |---|---|---|
 | Contract / Design | Ready | Canonical source identity, channel mix, and publication posture are established |
 | Wired | Ready | Provisioning BIC registration factory (`createProjectSetupBicRegistration`), notification registrations/templates, and handoff configuration all exist as ready-to-assemble artifacts |
-| Publishing | Partial | Adapter infrastructure is complete and exported; however `MyWorkRegistry.register()` is not yet called in any production source file, and no `/my-work` PWA route consumes `useMyWork`. Per this register's own band definition, "emits real hub items into `@hbc/my-work-feed` on at least one real route" is not yet satisfied. |
+| Publishing | Ready | `MyWorkRegistry.register()` is called in `apps/pwa/src/sources/sourceAssembly.ts` with all 4 adapters (BIC 0.9, handoff 0.8, acknowledgment 0.7, notification 0.5). The `/my-work` PWA route consumes `useMyWork` via `HbcMyWorkFeed`. Domain queryFns emit representative items via `domainQueryFns.ts`. |
 | Tested / Launch-Validated | Partial | Provisioning is the reference implementation, but final cross-source pilot validation still belongs to P2-C5 |
 
 **Reference artifacts**
@@ -123,67 +123,71 @@ This tightened register incorporates the following locked decisions:
 - `packages/provisioning/src/notification-templates.ts`
 - `packages/provisioning/src/handoff-config.ts`
 
-**Repo-truth reconciliation note (2026-03-20)**
-The full adapter stack (`bicAdapter`, `notificationAdapter`, `handoffAdapter`, `acknowledgmentAdapter`) is built and exported from `packages/my-work-feed/src/adapters/`. `MyWorkRegistry.register()` exists as an API in `packages/my-work-feed/src/registry/MyWorkRegistry.ts` and appears only in JSDoc examples — it is never called in production code. The assembly step that wires adapters into the registry and the consuming route (`/my-work`) are the remaining blockers. "Wired: Ready" is retained because the registration factory and all configuration artifacts are present; the missing piece is the assembly call, which is the next integration step, not an unbuilt artifact.
+**Repo-truth reconciliation note (updated 2026-03-20)**
+The assembly step is now complete. `apps/pwa/src/sources/sourceAssembly.ts` calls `MyWorkRegistry.register()` with all 4 adapters at bootstrap. The `/my-work` route exists and renders `HbcMyWorkFeed` which consumes `useMyWork()`. All 5 BIC modules are registered via `registerBicModule()`, all 28 notification events are registered via `NotificationRegistry.register()`, and domain queryFns in `domainQueryFns.ts` emit representative items. Publishing is Ready.
 
 **Register consequence**
-- Provisioning remains the reference pattern for later BIC registration, notification registration, and Project Hub handoff publishing. The assembly step (`MyWorkRegistry.register`) must be the first integration task when the `/my-work` route is implemented.
+- Provisioning is the reference pattern. All 4 remaining required sources follow the same factory + registration + notification pattern established here.
 
-### 3.2 Estimating Bid Readiness — Blocked on Registration and Bootstrap Wiring
+### 3.2 Estimating Bid Readiness — Wired; Publishing Partial
 
 | Band | Status | Evidence / Notes |
 |---|---|---|
 | Contract / Design | Ready | Bid-readiness projection shape is real; source identity and BIC-first publication posture are defined |
-| Wired | Blocked | Projection helper exists, but a provisioning-style BIC registration factory and app bootstrap wiring are not closed |
-| Publishing | Blocked | No end-to-end My Work publication is proven yet |
+| Wired | Ready | BIC registration factory (`createEstimatingBidReadinessBicRegistration`) created and wired in `sourceAssembly.ts`; 3 notification events registered (`ESTIMATING_NOTIFICATION_REGISTRATIONS`) |
+| Publishing | Partial | Domain queryFn emits representative mock items via `domainQueryFns.ts`; real domain API client integration pending |
 | Tested / Launch-Validated | Blocked | Source-specific publication validation is not closed |
 
 **Repo anchors**
+- `packages/features/estimating/src/bid-readiness/bic-registration.ts`
+- `packages/features/estimating/src/bid-readiness/notification-registrations.ts`
 - `packages/features/estimating/src/bid-readiness/integrations/bicNextMoveAdapter.ts`
-- `packages/features/estimating/src/bid-readiness/integrations/notificationDispatchAdapter.ts`
+- `apps/pwa/src/sources/sourceAssembly.ts`
 
-**Blocking work**
-- Create a source registration factory compatible with `@hbc/bic-next-move`
-- Wire `registerBicModule()` at the appropriate Estimating bootstrap seam
-- Close any Wave 1 notification-intelligence registration required by the source row's final channel posture
+**Remaining work**
+- Connect real domain API client to queryFn (replace mock data in `domainQueryFns.ts`)
 
-### 3.3 BD Score Benchmark — Blocked on Registration and Bootstrap Wiring
+### 3.3 BD Score Benchmark — Wired; Publishing Partial
 
 | Band | Status | Evidence / Notes |
 |---|---|---|
 | Contract / Design | Ready | Score-benchmark projection shape exists and fits the tranche model |
-| Wired | Blocked | No closed BIC registration / bootstrap wiring yet |
-| Publishing | Blocked | No real Wave 1 My Work publication proven |
+| Wired | Ready | BIC registration factory (`createBdScoreBenchmarkBicRegistration`) created and wired in `sourceAssembly.ts`; 3 notification events registered (`BD_SCORE_BENCHMARK_NOTIFICATION_REGISTRATIONS`) |
+| Publishing | Partial | Domain queryFn emits representative mock items via `domainQueryFns.ts`; real domain API client integration pending |
 | Tested / Launch-Validated | Blocked | No launch-grade validation closure |
 
-**Repo anchor**
-- `packages/features/business-development/src/score-benchmark/integrations/bicNextMoveAdapter.ts`
+**Repo anchors**
+- `packages/features/business-development/src/score-benchmark/bic-registration.ts`
+- `packages/features/business-development/src/score-benchmark/notification-registrations.ts`
+- `apps/pwa/src/sources/sourceAssembly.ts`
 
-**Blocking work**
-- Create the row's real BIC registration contract and bootstrap it in Business Development
+**Remaining work**
+- Connect real domain API client to queryFn
 
-### 3.4 BD Strategic Intelligence — Blocked on Registration and Bootstrap Wiring
+### 3.4 BD Strategic Intelligence — Wired; Publishing Partial
 
 | Band | Status | Evidence / Notes |
 |---|---|---|
 | Contract / Design | Ready | Strategic-intelligence projection shape exists and belongs in the tranche |
-| Wired | Blocked | No closed BIC registration / bootstrap wiring yet |
-| Publishing | Blocked | No real Wave 1 My Work publication proven |
+| Wired | Ready | BIC registration factory (`createBdStrategicIntelligenceBicRegistration`) created and wired in `sourceAssembly.ts`; 3 notification events registered (`BD_STRATEGIC_INTELLIGENCE_NOTIFICATION_REGISTRATIONS`) |
+| Publishing | Partial | Domain queryFn emits representative mock items via `domainQueryFns.ts`; real domain API client integration pending |
 | Tested / Launch-Validated | Blocked | No launch-grade validation closure |
 
-**Repo anchor**
-- `packages/features/business-development/src/strategic-intelligence/integrations/bicNextMoveAdapter.ts`
+**Repo anchors**
+- `packages/features/business-development/src/strategic-intelligence/bic-registration.ts`
+- `packages/features/business-development/src/strategic-intelligence/notification-registrations.ts`
+- `apps/pwa/src/sources/sourceAssembly.ts`
 
-**Blocking work**
-- Create the row's real BIC registration contract and bootstrap it in Business Development
+**Remaining work**
+- Connect real domain API client to queryFn
 
-### 3.5 Project Hub Handoff Signals — Split Out as Its Own Required Row
+### 3.5 Project Hub Handoff Signals — Wired; Publishing Partial
 
 | Band | Status | Evidence / Notes |
 |---|---|---|
 | Contract / Design | Ready | Project-significant handoff signals are explicitly part of the Wave 1 source model and are backed by the workflow-handoff primitive |
-| Wired | Partial | The repo already has real workflow-handoff infrastructure and a provisioning handoff configuration, but the source row is only partially normalized as a standalone Phase 2 publication source |
-| Publishing | Partial | A real provisioning completion-to-Project-Hub handoff path exists conceptually and structurally, but row-level publication proof is still narrower than the final tranche intent |
+| Wired | Ready | Handoff adapter registered in `sourceAssembly.ts` (weight 0.8); provisioning handoff config has implemented `onAcknowledged` callback generating seed record IDs; `resolveHealthPulseActionUrl` provides Project Hub navigation |
+| Publishing | Partial | Handoff adapter produces items from `HandoffApi.inbox()`; provisioning completion → Project Hub seed creation works; row-level publication proof narrower than final tranche intent |
 | Tested / Launch-Validated | Blocked | Source-specific validation for the tranche row is not yet closed |
 
 **Repo anchors**
@@ -194,21 +198,26 @@ The full adapter stack (`bicAdapter`, `notificationAdapter`, `handoffAdapter`, `
 **Wave 1 note**
 - This source row is no longer collapsed into Health Pulse. It represents Project Hub-directed handoff traffic and must remain distinct from Project Hub monitoring / health surfacing.
 
-### 3.6 Project Hub Health Pulse — Separate from Handoff Signals
+### 3.6 Project Hub Health Pulse — Wired; Publishing Partial
 
 | Band | Status | Evidence / Notes |
 |---|---|---|
 | Contract / Design | Ready | Health Pulse belongs to the first-release tranche by locked decision and is modeled as its own row |
-| Wired | Blocked | Projection helper exists, but no closed BIC registration / bootstrap wiring yet |
-| Publishing | Blocked | No real Wave 1 My Work publication proven |
+| Wired | Ready | BIC registration factory (`createProjectHealthPulseBicRegistration`) created and wired in `sourceAssembly.ts`; 4 notification events registered (`PROJECT_HEALTH_PULSE_NOTIFICATION_REGISTRATIONS`); navigation URL helper (`resolveHealthPulseActionUrl`) created |
+| Publishing | Partial | Domain queryFn emits representative mock items via `domainQueryFns.ts`; real domain API client integration pending |
 | Tested / Launch-Validated | Blocked | No launch-grade validation closure |
 
 **Repo anchors**
-- `packages/features/project-hub/src/health-pulse/integrations/bicNextMoveAdapter.ts`
-- `packages/features/project-hub/src/health-pulse/integrations/helpers.ts`
+- `packages/features/project-hub/src/health-pulse/bic-registration.ts`
+- `packages/features/project-hub/src/health-pulse/notification-registrations.ts`
+- `packages/features/project-hub/src/health-pulse/resolveHealthPulseActionUrl.ts`
+- `apps/pwa/src/sources/sourceAssembly.ts`
 
 **Critical correction**
 - The canonical source key for this row is **`project-health-pulse`**, not `project-hub-health-pulse`.
+
+**Remaining work**
+- Connect real domain API client to queryFn
 
 ### 3.7 Approvals — Explicit Required Row, but Wave 1 Proof is Narrower than Full Scope
 
