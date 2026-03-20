@@ -1,42 +1,21 @@
 /**
  * HubConnectivityBanner — P2-B3 §4.4.
  *
- * Hub-specific connectivity display complementing the shell-level
- * HbcConnectivityBar. Shows degraded/offline messaging with last
- * refresh timestamp when available.
+ * Hub-specific connectivity display using HbcBanner from @hbc/ui-kit.
+ * Complements the shell-level HbcConnectivityBar with hub-specific messaging
+ * and last-refresh timestamp context.
  *
  * online → hidden
- * degraded → "Connection unstable — showing cached data while refreshing"
- * offline → "You are offline — showing last available data"
+ * degraded → HbcBanner variant="warning"
+ * offline → HbcBanner variant="info"
  */
 import type { ReactNode } from 'react';
-import { makeStyles } from '@griffel/react';
+import { HbcBanner } from '@hbc/ui-kit';
 import { useConnectivity } from '@hbc/session-state';
 import { useMyWork } from '@hbc/my-work-feed';
 import { formatRelativeTime } from './formatRelativeTime.js';
 
-const useStyles = makeStyles({
-  banner: {
-    paddingTop: '8px',
-    paddingBottom: '8px',
-    paddingLeft: '12px',
-    paddingRight: '12px',
-    borderRadius: '4px',
-    fontSize: '13px',
-    marginBottom: '8px',
-  },
-  degraded: {
-    backgroundColor: 'var(--colorPaletteYellowBackground1)',
-    color: 'var(--colorPaletteYellowForeground1)',
-  },
-  offline: {
-    backgroundColor: 'var(--colorNeutralBackground3)',
-    color: 'var(--colorNeutralForeground2)',
-  },
-});
-
 export function HubConnectivityBanner(): ReactNode {
-  const styles = useStyles();
   const connectivity = useConnectivity();
   const { feed } = useMyWork();
 
@@ -48,17 +27,17 @@ export function HubConnectivityBanner(): ReactNode {
 
   if (connectivity === 'degraded') {
     return (
-      <div className={`${styles.banner} ${styles.degraded}`} role="status" data-hub-connectivity="degraded">
+      <HbcBanner variant="warning">
         Connection unstable — showing cached data while refreshing.
         {lastRefreshed && ` Last synced ${lastRefreshed}.`}
-      </div>
+      </HbcBanner>
     );
   }
 
   // offline
   return (
-    <div className={`${styles.banner} ${styles.offline}`} role="status" data-hub-connectivity="offline">
+    <HbcBanner variant="info">
       You are offline — {lastRefreshed ? `showing data from ${lastRefreshed}.` : 'no cached data available.'}
-    </div>
+    </HbcBanner>
   );
 }
