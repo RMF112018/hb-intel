@@ -35,7 +35,7 @@ export interface IAcknowledgmentService {
 
 /**
  * SF04-T06: Real adapter using SharePoint HbcAcknowledgmentEvents list.
- * Follows RealProjectRequestsService pattern (D-PH6-08).
+ * Follows SharePointProjectRequestsAdapter pattern (D-PH6-08).
  */
 export class RealAcknowledgmentService implements IAcknowledgmentService {
   private readonly tenantUrl: string;

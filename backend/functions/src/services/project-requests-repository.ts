@@ -8,7 +8,7 @@ import '@pnp/sp/webs/index.js';
 
 const PROJECTS_LIST_NAME = 'Projects';
 
-export interface IProjectRequestsService {
+export interface IProjectRequestsRepository {
   upsertRequest(request: IProjectSetupRequest): Promise<void>;
   getRequest(requestId: string): Promise<IProjectSetupRequest | null>;
   listRequests(state?: ProjectSetupRequestState): Promise<IProjectSetupRequest[]>;
@@ -18,7 +18,7 @@ export interface IProjectRequestsService {
  * D-PH6-08 real adapter for Project Setup Request lifecycle persistence.
  * Uses SharePoint Projects list as the central request record store.
  */
-export class RealProjectRequestsService implements IProjectRequestsService {
+export class SharePointProjectRequestsAdapter implements IProjectRequestsRepository {
   private readonly tenantUrl: string;
   private readonly credential = new DefaultAzureCredential();
 
@@ -161,7 +161,7 @@ export class RealProjectRequestsService implements IProjectRequestsService {
 /**
  * D-PH6-08 mock adapter for deterministic local/unit usage.
  */
-export class MockProjectRequestsService implements IProjectRequestsService {
+export class MockProjectRequestsRepository implements IProjectRequestsRepository {
   private readonly requests = new Map<string, IProjectSetupRequest>();
 
   async upsertRequest(request: IProjectSetupRequest): Promise<void> {

@@ -262,7 +262,7 @@ export const NOTIFICATION_TEMPLATES = {
 
 ## PH6.8 Progress Notes
 
-2026-03-07: PH6.8 completed. Delivered D-PH6-08 lifecycle state engine (`packages/provisioning/src/state-machine.ts`), notification templates (`packages/provisioning/src/notification-templates.ts`), request lifecycle APIs (`backend/functions/src/functions/projectRequests/index.ts`), Projects-list persistence service wiring (`backend/functions/src/services/project-requests-service.ts` + factory integration), one-time Projects list setup script (`scripts/create-projects-list.ts`), backend README updates, and Diataxis docs (`docs/how-to/administrator/create-projects-list.md`, `docs/reference/provisioning/request-lifecycle.md`).
+2026-03-07: PH6.8 completed. Delivered D-PH6-08 lifecycle state engine (`packages/provisioning/src/state-machine.ts`), notification templates (`packages/provisioning/src/notification-templates.ts`), request lifecycle APIs (`backend/functions/src/functions/projectRequests/index.ts`), Projects-list persistence service wiring (`backend/functions/src/services/project-requests-repository.ts` + factory integration), one-time Projects list setup script (`scripts/create-projects-list.ts`), backend README updates, and Diataxis docs (`docs/how-to/administrator/create-projects-list.md`, `docs/reference/provisioning/request-lifecycle.md`).
 
 ### Verification Evidence
 

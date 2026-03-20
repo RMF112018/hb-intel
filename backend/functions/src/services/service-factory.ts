@@ -3,7 +3,7 @@ import type { ITableStorageService } from './table-storage-service.js';
 import type { IRedisCacheService } from './redis-cache-service.js';
 import type { ISignalRPushService } from './signalr-push-service.js';
 import type { IMsalOboService } from './msal-obo-service.js';
-import type { IProjectRequestsService } from './project-requests-service.js';
+import type { IProjectRequestsRepository } from './project-requests-repository.js';
 import type { IAcknowledgmentService } from './acknowledgment-service.js';
 import type { IGraphService } from './graph-service.js';
 import type { INotificationService } from './notification-service.js';
@@ -23,7 +23,7 @@ import { MockTableStorageService, RealTableStorageService } from './table-storag
 import { MockRedisCacheService } from './redis-cache-service.js';
 import { MockSignalRPushService } from './signalr-push-service.js';
 import { ManagedIdentityOboService, MockMsalOboService } from './msal-obo-service.js';
-import { MockProjectRequestsService, RealProjectRequestsService } from './project-requests-service.js';
+import { MockProjectRequestsRepository, SharePointProjectRequestsAdapter } from './project-requests-repository.js';
 import { MockAcknowledgmentService, RealAcknowledgmentService } from './acknowledgment-service.js';
 import { MockGraphService, GraphService } from './graph-service.js';
 import { MockNotificationService, NotificationService } from './notification-service.js';
@@ -47,7 +47,7 @@ export interface IServiceContainer {
   redisCache: IRedisCacheService;
   signalR: ISignalRPushService;
   msalObo: IMsalOboService;
-  projectRequests: IProjectRequestsService;
+  projectRequests: IProjectRequestsRepository;
   acknowledgments: IAcknowledgmentService;
   graph: IGraphService;
   notifications: INotificationService;
@@ -103,7 +103,7 @@ export function createServiceFactory(): IServiceContainer {
     // D-PH6-04: Managed Identity in real mode, mock OBO in test/mock mode.
     msalObo,
     // D-PH6-08: Project Setup Request lifecycle persistence adapter.
-    projectRequests: isMock ? new MockProjectRequestsService() : new RealProjectRequestsService(),
+    projectRequests: isMock ? new MockProjectRequestsRepository() : new SharePointProjectRequestsAdapter(),
     // SF04-T06: Acknowledgment event persistence adapter.
     acknowledgments: isMock ? new MockAcknowledgmentService() : new RealAcknowledgmentService(),
     // W0-G1-T02: Entra ID group management via Microsoft Graph.
