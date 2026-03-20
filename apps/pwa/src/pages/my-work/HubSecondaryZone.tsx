@@ -12,7 +12,7 @@ import { PersonalAnalyticsCard } from './cards/PersonalAnalyticsCard.js';
 import { TeamPortfolioCard } from './cards/TeamPortfolioCard.js';
 import { AgingBlockedCard } from './cards/AgingBlockedCard.js';
 import { AdminOversightCard } from './cards/AdminOversightCard.js';
-import type { TeamMode } from './HubTeamModeSelector.js';
+import type { TeamMode } from '@hbc/shell';
 
 const useStyles = makeStyles({
   heading: { gridColumn: '1 / -1', marginTop: '8px', marginBottom: '0' },

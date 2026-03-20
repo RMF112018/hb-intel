@@ -13,9 +13,8 @@ import { HUB_DRAFT_KEYS, HUB_DRAFT_TTL } from './hubStateTypes.js';
 import type {
   IMyWorkTeamModeDraft,
   IMyWorkCardArrangement,
-  ICardSlot,
 } from './hubStateTypes.js';
-import type { TeamMode } from './HubTeamModeSelector.js';
+import type { TeamMode } from '@hbc/shell';
 
 export interface IHubPersonalization {
   teamMode: TeamMode;

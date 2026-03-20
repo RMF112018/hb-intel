@@ -11,10 +11,9 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
+import type { TeamMode } from '@hbc/shell';
 import { useComplexity } from '@hbc/complexity';
-import { useAuthStore, RoleGate } from '@hbc/auth';
-
-export type TeamMode = 'personal' | 'delegated-by-me' | 'my-team';
+import { useAuthStore } from '@hbc/auth';
 
 export interface HubTeamModeSelectorProps {
   activeMode: TeamMode;

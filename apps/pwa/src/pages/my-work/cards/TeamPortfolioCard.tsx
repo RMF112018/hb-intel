@@ -8,7 +8,7 @@ import { makeStyles } from '@griffel/react';
 import { HbcCard, HbcKpiCard, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
 import { RoleGate } from '@hbc/auth';
 import { useMyWorkTeamFeed } from '@hbc/my-work-feed';
-import type { TeamMode } from '../HubTeamModeSelector.js';
+import type { TeamMode } from '@hbc/shell';
 
 const useStyles = makeStyles({
   root: {
