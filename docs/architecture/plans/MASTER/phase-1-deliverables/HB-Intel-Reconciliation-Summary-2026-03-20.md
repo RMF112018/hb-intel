@@ -217,12 +217,13 @@ Key Vault references are documented as planned for production secrets but no imp
 
 ---
 
-### R10 — OBO app registration outstanding (IT action)
+### R10 — OBO app registration outstanding (IT action) — ACKNOWLEDGED, IT-GATED
 
-The OBO (On-Behalf-Of) token exchange for downstream API calls requires IT to provision an app registration with the appropriate scope grants. C2 code is delivered; the physical registration is outstanding.
+The OBO (On-Behalf-Of) token exchange for downstream API calls requires IT to provision an Entra ID app registration with the appropriate scope grants. C2 code (`ManagedIdentityOboService`, `withAuth()`, endpoint auth matrix) is fully delivered (2026-03-19). The physical registration is an IT-owned external dependency running in parallel with engineering work.
 
 **Owner:** IT + Architecture
-**Status:** IT action required; not a code issue
+**Status:** IT action required; not an engineering blocker. C2 code delivered. Only `/api/proxy/{*path}` OBO routes are affected; all Phase 1 domain data routes use Managed Identity and are unblocked.
+**Formally acknowledged:** 2026-03-20 — engineering scope complete; IT registration runs as a parallel track
 
 ---
 
