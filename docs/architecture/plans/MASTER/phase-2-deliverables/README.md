@@ -50,7 +50,7 @@ Phase 2 planning is underway. Workstreams A and B are complete — all 8 deliver
 |---|---|---|
 | P2-C1 | [First-Release Source Tranche Register](P2-C1-First-Release-Source-Tranche-Register.md) | Active Reference |
 | P2-C2 | [Notification-to-Work Mapping Policy](P2-C2-Notification-to-Work-Mapping-Policy.md) | Governance Policy |
-| P2-C3 | Work-Item Navigation Matrix | Not Started |
+| P2-C3 | [Work-Item Navigation Matrix](P2-C3-Work-Item-Navigation-Matrix.md) | Specification |
 | P2-C4 | Personal Work Hub / Domain / Project Hub Handoff Criteria Matrix | Not Started |
 | P2-C5 | First-Release Pilot Publication and Rollout Readiness Register | Not Started |
 
