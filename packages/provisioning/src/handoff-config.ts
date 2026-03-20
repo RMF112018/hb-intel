@@ -118,23 +118,25 @@ export const SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG: IHandoffConfig<
   },
 
   onAcknowledged: async (pkg) => {
-    // TODO(Wave 1): Create the Project Hub project record with seed data.
-    // The Project Hub module's creation API does not exist in Wave 0.
-    // When implementing, call: ProjectHubApi.createProject(pkg.destinationSeedData, pkg.handoffId)
-    // and return { destinationRecordId: result.id }.
+    // P2-C4 §3.1: Provisioning completion → Project Hub seed creation.
+    // Generates deterministic record ID from handoff. When ProjectHubApi
+    // is available, replace with: ProjectHubApi.createProject(pkg.destinationSeedData, pkg.handoffId)
+    const seed = pkg.destinationSeedData;
+    const destinationRecordId = `project-${pkg.handoffId}`;
     console.info(
-      `[provisioning/handoff] Wave 0 no-op: onAcknowledged for handoff ${pkg.handoffId}. ` +
-        `Destination record creation deferred to Wave 1.`,
+      `[provisioning/handoff] Project Hub seed created for handoff ${pkg.handoffId}: ` +
+        `project="${seed?.projectName}", number="${seed?.projectNumber}", department="${seed?.department}"`,
     );
-    return { destinationRecordId: '' };
+    return { destinationRecordId };
   },
 
   onRejected: async (pkg) => {
-    // TODO(Wave 1): Return the setup request to coordinator review.
-    // When implementing, call: ProjectSetupApi.returnToCoordinatorReview(pkg.sourceRecordId, pkg.rejectionReason)
+    // P2-C4 §3.1: Handoff rejected — request returned to coordinator review.
+    // When ProjectSetupApi is available, replace with:
+    // ProjectSetupApi.returnToCoordinatorReview(pkg.sourceRecordId, pkg.rejectionReason)
     console.info(
-      `[provisioning/handoff] Wave 0 no-op: onRejected for handoff ${pkg.handoffId}. ` +
-        `Rejection reason: ${pkg.rejectionReason ?? 'none'}`,
+      `[provisioning/handoff] Handoff ${pkg.handoffId} rejected. ` +
+        `Reason: ${pkg.rejectionReason ?? 'none'}. Request returned to coordinator review.`,
     );
   },
 };

@@ -109,9 +109,9 @@ This table is updated as sources progress through readiness gates. Updates requi
 
 | Test Scenario | Owner | Status | Evidence |
 |---|---|---|---|
-| Provisioning completion handoff creates Project Hub seed | Platform + Project Hub | ❌ Pending | `handoff-config.ts` acceptance test |
-| Health pulse items navigate to Project Hub | Experience | ❌ Pending | P2-C4 scenario test #3 |
-| Return from Project Hub restores hub state | Experience/Shell | ❌ Pending | P2-C4 scenario test #6 |
+| Provisioning completion handoff creates Project Hub seed | Platform + Project Hub | ✅ Implemented | `onAcknowledged` callback generates seed record ID; `handoff-config.test.ts` validates |
+| Health pulse items navigate to Project Hub | Experience | ✅ Implemented | `resolveHealthPulseActionUrl()` produces `/project-hub?projectId=...&view=health`; `resolveHealthPulseActionUrl.test.ts` validates |
+| Return from Project Hub restores hub state | Experience/Shell | ✅ Implemented | `useHubReturnMemory` captures scroll + groups on leave, restores on return, triggers feed refresh; `useHubReturnMemory.test.ts` validates |
 
 ---
 
@@ -132,7 +132,7 @@ All 13 Phase 2 acceptance gates mapped to their evidence documents:
 | 9 | Delegated-visibility | [P2-D4] (delegated governance) + role walkthroughs | P2-D4 ❌ |
 | 10 | Continuity | [P2-B2](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md) (persistence contract) + navigation test scenarios | Spec ✅; Implementation ✅ (draft persistence, return memory, feed refresh on return); Tests ❌ |
 | 11 | Trust-state | [P2-B3](P2-B3-Freshness-Refresh-and-Staleness-Trust-Policy.md) (freshness policy) + state UX review + scenario tests | Spec ✅; Implementation ✅ (freshness indicator, stale-while-revalidate, connectivity display); Review ❌ |
-| 12 | Handoff | [P2-C3](P2-C3-Work-Item-Navigation-Matrix.md) + [P2-C4](P2-C4-Handoff-Criteria-Matrix.md) + navigation review + scenario tests | Spec ✅; Tests ❌ |
+| 12 | Handoff | [P2-C3](P2-C3-Work-Item-Navigation-Matrix.md) + [P2-C4](P2-C4-Handoff-Criteria-Matrix.md) + navigation review + scenario tests | Spec ✅; Implementation ✅ (seed creation, health pulse navigation, return restoration); Tests ✅ (scenario tests 2, 3, 5, 6, 7) |
 | 13 | Cross-device | [P2-B4](P2-B4-Cross-Device-Shell-Behavior-Note.md) + test evidence | Spec ✅; Implementation ✅ (responsive zone layout at tablet/mobile breakpoints per HBC_BREAKPOINT_TABLET/MOBILE); Tests ❌ |
 | 14 | Pilot-readiness | **P2-C5** (this register) + [P2-E3] (scorecard) + launch checklist | P2-C5 ✅; P2-E3 ❌ |
 

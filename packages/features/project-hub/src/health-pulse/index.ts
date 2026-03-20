@@ -20,3 +20,6 @@ export {
 
 // Notification Registrations (P2-C5 Blocker #7)
 export { PROJECT_HEALTH_PULSE_NOTIFICATION_REGISTRATIONS } from './notification-registrations.js';
+
+// Health Pulse Navigation (P2-C4 §3 Pattern 3)
+export { resolveHealthPulseActionUrl } from './resolveHealthPulseActionUrl.js';
