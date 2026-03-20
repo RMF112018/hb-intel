@@ -6,6 +6,7 @@
 //
 // Deploy (staging): az deployment group create -g <rg> -f infra/main.bicep -p infra/main.staging.bicepparam
 // Deploy (prod):    az deployment group create -g <rg> -f infra/main.bicep -p infra/main.prod.bicepparam
+// Monitoring:       az deployment group create -g <rg> -f infra/monitoring.bicep -p environmentName=prod appInsightsResourceId=<resource-id> actionGroupEmail=<email>
 
 @description('Environment suffix for resource naming (dev, staging, prod)')
 param environmentName string

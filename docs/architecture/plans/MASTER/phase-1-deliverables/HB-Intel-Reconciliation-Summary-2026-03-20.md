@@ -203,12 +203,12 @@ The Cosmos DB Table API migration is complete. The `@azure/data-tables` SDK work
 
 ---
 
-### R8 — Dashboards, alert rules, and operational runbooks absent
+### R8 — Dashboards, alert rules, and operational runbooks ✅ RESOLVED
 
-No Azure Monitor alert rules, Application Insights workbooks, or operational runbooks exist in the repository. The provisioning pipeline has no alerting for failure rate, Step 5 retry exhaustion, or timer function failures.
+Alert rules defined in `infra/monitoring.bicep` (4 rules: auth failure burst Sev 1, handler error rate Sev 2, provisioning saga failure Sev 2, timer function failure Sev 2) with action group for email notification. Operational runbook at `docs/how-to/developer/operational-runbook.md` covers alert response procedures, health verification, timer monitoring, and escalation path. KQL dashboard queries at `docs/reference/developer/monitoring-queries.md` provide ready-to-paste Application Insights queries for all implemented telemetry domains.
 
 **Owner:** DevOps + Platform
-**Blocks:** Production-grade operational readiness
+**Resolved:** 2026-03-20 — `infra/monitoring.bicep`, `operational-runbook.md`, `monitoring-queries.md`
 
 ---
 
