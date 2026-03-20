@@ -114,7 +114,7 @@ jobs:
       - name: Run unit tests (gate)
         run: pnpm turbo run test --filter=backend-functions --filter=@hbc/provisioning
         env:
-          AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
+          AZURE_TABLE_ENDPOINT: UseDevelopmentStorage=true
 
       - name: Package Functions artifact
         run: |
@@ -236,7 +236,7 @@ jobs:
       - name: Run unit tests with coverage
         run: pnpm turbo run test --filter=backend-functions --filter=@hbc/provisioning
         env:
-          AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
+          AZURE_TABLE_ENDPOINT: UseDevelopmentStorage=true
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -320,7 +320,7 @@ Create this file at `backend/functions/local.settings.example.json` and add `loc
     "AZURE_TENANT_ID": "<your-tenant-id>",
     "AZURE_CLIENT_ID": "<app-registration-client-id>",
     "AZURE_CLIENT_SECRET": "<app-registration-client-secret-for-local-dev>",
-    "AZURE_STORAGE_CONNECTION_STRING": "UseDevelopmentStorage=true",
+    "AZURE_TABLE_ENDPOINT": "UseDevelopmentStorage=true",
     "AzureSignalRConnectionString": "<signalr-connection-string>",
     "APPLICATIONINSIGHTS_CONNECTION_STRING": "<app-insights-connection-string>",
     "SHAREPOINT_TENANT_URL": "https://hbconstruction.sharepoint.com",

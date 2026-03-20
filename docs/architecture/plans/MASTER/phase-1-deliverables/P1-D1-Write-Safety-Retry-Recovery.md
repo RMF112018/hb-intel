@@ -1423,8 +1423,8 @@ export class IdempotencyStorageService implements IIdempotencyStorageService {
   private readonly client: TableClient;
 
   constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
-    if (!connectionString) throw new Error('AZURE_STORAGE_CONNECTION_STRING is required');
+    const connectionString = process.env.AZURE_TABLE_ENDPOINT!;
+    if (!connectionString) throw new Error('AZURE_TABLE_ENDPOINT is required');
     this.client = TableClient.fromConnectionString(connectionString, IDEMPOTENCY_TABLE);
   }
 
@@ -2682,7 +2682,7 @@ Write safety APIs exported. Full integration pending B1/C1.
 **Assumptions:**
 - `ProxyHttpClient` implementation (B1 deliverable, **TARGET**) will use native `fetch` API (adjust if using axios, etc.)
 - `IdempotencyStorageService` uses a dedicated `IdempotencyRecords` table (not the `ProvisioningStatus` table)
-- Azure Table Storage connection string available via `AZURE_STORAGE_CONNECTION_STRING` env var (same as `RealTableStorageService`)
+- Azure Table Storage connection string available via `AZURE_TABLE_ENDPOINT` env var (same as `RealTableStorageService`)
 - Azure Tables has no native TTL; expiry is application-enforced via `expiresAt` field + nightly cleanup timer
 - Phase 1 critical path: Project, Lead, Estimating only
 - `packages/data-access` requires vitest configuration setup before any D1 tests can execute

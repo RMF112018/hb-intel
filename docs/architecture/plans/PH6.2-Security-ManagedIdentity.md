@@ -273,7 +273,7 @@ The `local.settings.json` file is gitignored. Each developer creates it locally.
     "AZURE_CLIENT_ID": "<app-registration-client-id>",
     "AZURE_CLIENT_SECRET": "<dev-service-principal-secret>",
     "AzureSignalRConnectionString": "<signalr-connection-string>",
-    "AZURE_STORAGE_CONNECTION_STRING": "UseDevelopmentStorage=true",
+    "AZURE_TABLE_ENDPOINT": "UseDevelopmentStorage=true",
     "SHAREPOINT_TENANT_URL": "https://hbconstruction.sharepoint.com",
     "SHAREPOINT_HUB_SITE_ID": "<hub-site-id>",
     "PROVISIONING_STEP5_TIMEOUT_MS": "90000",

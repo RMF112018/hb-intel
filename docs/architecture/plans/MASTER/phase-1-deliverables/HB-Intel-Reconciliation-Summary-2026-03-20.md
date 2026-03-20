@@ -147,7 +147,7 @@ Bicep IaC added in `infra/main.bicep` defining two storage accounts (`hbintelhos
 
 ### R2 — Production storage topology ✅ RESOLVED
 
-Two-account topology confirmed and implemented. `AzureWebJobsStorage` maps to `hbintelhost{env}` (Functions host runtime). `AZURE_TABLE_ENDPOINT` (renamed from `AZURE_STORAGE_CONNECTION_STRING`) maps to `hbinteldata{env}` (app data tables). All 13 domain services now use `createAppTableClient()` which supports both endpoint URL (production, Managed Identity) and connection string (local dev, Azurite) modes.
+Two-account topology confirmed and implemented. `AzureWebJobsStorage` maps to `hbintelhost{env}` (Functions host runtime). `AZURE_TABLE_ENDPOINT` (renamed from `AZURE_STORAGE_CONNECTION_STRING`) maps to `hbinteldata{env}` (app data tables). All 12 domain services now use `createAppTableClient()` which supports both endpoint URL (production, Managed Identity) and connection string (local dev, Azurite) modes.
 
 **Owner:** Platform engineering
 **Resolved:** 2026-03-20 — env var renamed, `table-client-factory.ts` created, config registry updated

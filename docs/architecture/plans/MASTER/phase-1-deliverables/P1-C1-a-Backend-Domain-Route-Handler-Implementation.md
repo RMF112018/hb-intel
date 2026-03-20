@@ -181,7 +181,7 @@ export interface ILeadService {
 
 **`RealLeadService` implementation notes:**
 
-- `TableClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING!, 'HBLeads')`
+- `TableClient.fromConnectionString(process.env.AZURE_TABLE_ENDPOINT!, 'HBLeads')`
 - `PartitionKey = 'lead'` (flat domain — all leads share one partition for Phase 1)
 - `RowKey = String(entity.id)`
 - `list()`: use `listEntities()` with no filter; collect all, sort by `createdAt` descending; apply page/pageSize slice; return `{ items, total: allItems.length }`

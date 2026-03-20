@@ -72,8 +72,8 @@ export class RealTableStorageService implements ITableStorageService {
   private readonly client: TableClient;
 
   constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
-    if (!connectionString) throw new Error('AZURE_STORAGE_CONNECTION_STRING is required');
+    const connectionString = process.env.AZURE_TABLE_ENDPOINT!;
+    if (!connectionString) throw new Error('AZURE_TABLE_ENDPOINT is required');
     this.client = TableClient.fromConnectionString(connectionString, TABLE_NAME);
   }
 

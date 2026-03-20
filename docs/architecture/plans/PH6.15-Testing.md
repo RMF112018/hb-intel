@@ -277,7 +277,7 @@ test.describe('Phase 6 — Provisioning E2E', () => {
 - name: Run unit tests
   run: pnpm turbo run test --filter=backend-functions --filter=@hbc/provisioning
   env:
-    AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
+    AZURE_TABLE_ENDPOINT: UseDevelopmentStorage=true
 ```
 
 **Layer 2 — Nightly + pre-merge gate (`smoke-tests.yml`):**

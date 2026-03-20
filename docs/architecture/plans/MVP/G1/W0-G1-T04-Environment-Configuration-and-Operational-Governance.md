@@ -29,7 +29,7 @@ The Wave 0 provisioning pipeline depends on a substantial set of environment con
 | `AZURE_TENANT_ID` | Local dev only — Managed Identity replaces in production |
 | `AZURE_CLIENT_ID` | Local dev only — Managed Identity replaces in production |
 | `AZURE_CLIENT_SECRET` | Local dev only — never in production |
-| `AZURE_STORAGE_CONNECTION_STRING` | Table Storage for provisioning status and audit records |
+| `AZURE_TABLE_ENDPOINT` | Table Storage for provisioning status and audit records |
 | `AzureSignalRConnectionString` | SignalR Service connection |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | AppInsights telemetry |
 | `SHAREPOINT_TENANT_URL` | PnPjs base URL for all SharePoint operations |
@@ -114,7 +114,7 @@ The following table constitutes the Wave 0 configuration registry. G2.6 uses thi
 | Setting Name | Description | Env Scope | Required in Prod | Notes |
 |-------------|-------------|-----------|-----------------|-------|
 | `AzureWebJobsStorage` | Azure Storage connection for Functions host (job state, locks) | all | Yes | Use Azurite for local dev |
-| `AZURE_STORAGE_CONNECTION_STRING` | Table Storage for provisioning status, audit records | all | Yes | Separate from `AzureWebJobsStorage`; Key Vault reference in prod |
+| `AZURE_TABLE_ENDPOINT` | Table Storage for provisioning status, audit records | all | Yes | Separate from `AzureWebJobsStorage`; Key Vault reference in prod |
 | `AzureSignalRConnectionString` | Azure SignalR Service connection string | all | Yes | Serverless mode; Key Vault reference in prod |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | AppInsights telemetry ingestion | all | Yes | Required for telemetry; warn if absent in dev, fail if absent in prod |
 | `SHAREPOINT_TENANT_URL` | Base URL for all SharePoint operations (e.g., `https://company.sharepoint.com`) | all | Yes | Must match the target tenant exactly |
@@ -183,7 +183,7 @@ G2.6 must implement startup validation that checks for all required Bucket A set
 // backend/functions/src/utils/validate-config.ts  (G2.6 creates)
 export function validateRequiredConfig(): void {
   const required = [
-    'AZURE_STORAGE_CONNECTION_STRING',
+    'AZURE_TABLE_ENDPOINT',
     'AzureSignalRConnectionString',
     'SHAREPOINT_TENANT_URL',
     'SHAREPOINT_HUB_SITE_ID',
@@ -214,14 +214,14 @@ For all Bucket A settings containing connection strings or API keys, the product
 
 **Pattern:**
 ```
-Setting name: AZURE_STORAGE_CONNECTION_STRING
+Setting name: AZURE_TABLE_ENDPOINT
 Setting value: @Microsoft.KeyVault(SecretUri=https://hb-intel-kv.vault.azure.net/secrets/AzureStorageConnectionString/)
 ```
 
 The Function App's Managed Identity must have `Get` and `List` access on the Key Vault secrets. This access grant is an IT/infrastructure task that must be confirmed before the staging environment is validated.
 
 **Scope for Wave 0:** The following settings must use Key Vault references in production:
-- `AZURE_STORAGE_CONNECTION_STRING`
+- `AZURE_TABLE_ENDPOINT`
 - `AzureSignalRConnectionString`
 - `APPLICATIONINSIGHTS_CONNECTION_STRING`
 - `EMAIL_DELIVERY_API_KEY`
