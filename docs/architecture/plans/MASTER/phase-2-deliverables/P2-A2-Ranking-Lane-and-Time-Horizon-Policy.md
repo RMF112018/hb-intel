@@ -17,7 +17,7 @@
 
 Work-item ranking in the Personal Work Hub is deterministic, explainable, responsibility-first, and uniform across all governed surfaces. This policy locks the first-release scoring model, tie-breaking chain, source-trust hierarchy, lane assignment logic, time-horizon cue rules, user-driven ranking overrides, and role-context ranking behavior.
 
-This document is also a **reconciliation policy**. Current repo truth still contains implementation details that do not fully match the refined Phase 2 target state — most notably delegated-team handling, source naming/weighting alignment, and some lane consequences for user actions. This policy defines the required first-release behavior and identifies where current implementation posture must be brought into compliance.
+This document is also a **reconciliation policy**. Current repo truth still contains implementation details that do not fully match the refined Phase 2 target state — most notably: scoring factors 5 (pin-today), 6 (pin-week), and 8 (recent material activity) are absent from `rankItems.ts`; tie-break level 3 (direct-work source trust) is absent from `tieBreakCompare`; the `deferred`/`do-now` evaluation order in `assignLane()` is inverted relative to this policy; and `delegated-team` remains an active lane in `projectFeed.ts`. This policy defines the required first-release behavior and identifies where current implementation posture must be brought into compliance.
 
 Changes to scoring coefficients, tie-break order, trust hierarchy, or lane assignment criteria require Experience-lead approval with Platform and Architecture review.
 
@@ -73,10 +73,13 @@ Changes to scoring coefficients, tie-break order, trust hierarchy, or lane assig
 
 ### 0.1 Current Repo Truth Relevant to P2-A2
 
-As of the last repo-truth review:
+As of the last repo-truth review (2026-03-20, verified against `rankItems.ts` and `projectFeed.ts`):
 
-- `rankItems.ts` implements deterministic additive scoring with overdue, due-date proximity, blocked BIC treatment, unread freshness, dependency impact, project context, source weight, and offline-capable contributions.
-- `projectFeed.ts` currently assigns `delegated-team` as a lane when delegation metadata is present.
+- `rankItems.ts` implements deterministic additive scoring with overdue, due-date proximity, blocked BIC treatment, unacknowledged direct work, unread freshness, dependency impact, project context, source weight, and offline-capable contributions.
+- **Scoring factors 5 (`pin-today` +250), 6 (`pin-week` +150), and 8 (recent material activity) are absent from the current `rankItems.ts` implementation.** These are target-state requirements, not current repo truth.
+- `tieBreakCompare` in `rankItems.ts` evaluates: overdue severity → blocked status → source weight → freshness → canonical key. **Tie-break level 3 ("direct-work source trust") from §2.1 is absent** — the implementation skips from blocked status directly to source weight. This is a reconciliation gap.
+- `projectFeed.ts::assignLane()` currently evaluates: waiting-blocked → **do-now (priority 2)** → **deferred (priority 3)** → delegated-team → watch. **The policy order for `deferred` (priority 2) and `do-now` (priority 3) is swapped relative to the current implementation.** This produces a behavioral discrepancy for items that are `priority === 'now'` but `state === 'deferred'`: policy assigns `deferred`; current code assigns `do-now`.
+- `projectFeed.ts` currently assigns `delegated-team` as a lane when `delegatedTo` or `delegatedBy` is present. `computeCounts` tracks a corresponding `teamCount`. Both are active in the repo and represent a reconciliation gap relative to the target-state four-lane model.
 - The canonical source enum currently uses:
   - `bic-next-move`
   - `workflow-handoff`
@@ -84,7 +87,7 @@ As of the last repo-truth review:
   - `notification-intelligence`
   - `session-state`
   - `module`
-- The current ranking implementation uses the first `sourceMeta` entry for weighting rather than a richer merged-provenance trust computation.
+- The current ranking implementation uses the first `sourceMeta` entry (`sourceMeta[0]?.source`) for weighting rather than a richer merged-provenance trust computation.
 
 ### 0.2 Target-State Reconciliation Rules
 
@@ -131,6 +134,8 @@ The policy remains anchored to the current additive model, but is tightened to r
 | 10 | **Project context** | `context.projectId` is present | `+100` | `Project context` |
 | 11 | **Source weight** | Always applied | `+50 × sourceWeight` | contributing factor only |
 | 12 | **Offline capable** | `offlineCapable === true` | `+25` | `Offline capable` |
+
+**Reconciliation note — scoring factors 5, 6, 8 (repo-truth gap):** Factors 5 (`pin-today` +250), 6 (`pin-week` +150), and 8 (recent material activity, decaying +100) are target-state requirements locked by this policy. They are **not present in the current `rankItems.ts` implementation**. Implementation work must add these factors before the scoring model is considered compliant. Until then, pinning user actions produce no ranking effect and recent material activity is not scored.
 
 ### 1.2 Scoring Behavior
 
@@ -192,6 +197,8 @@ When two items have equal scores, the following deterministic tie-break chain re
 | 5 | Freshness | Most recently updated first | More active relevant work surfaces first |
 | 6 | Canonical key | Lexicographic ascending | Stable deterministic fallback |
 
+**Reconciliation note — tie-break level 3 (repo-truth gap):** Level 3 ("direct-work source trust") is a target-state requirement locked by this policy. It is **absent from the current `tieBreakCompare` implementation** in `rankItems.ts`, which goes directly from blocked status (level 2) to source weight (level 4). As a result, two items with equal score where one is a responsibility-bearing source and the other is a notification-only signal are not correctly ordered under current code. Implementation work must insert the direct-work source trust comparison before source weight.
+
 ### 2.2 Tie-Breaking Invariants
 
 - Tie-breaking MUST be deterministic.
@@ -229,6 +236,10 @@ The following decision table is evaluated in order — the first matching rule d
 | 4 | Inbound handoff awaiting acknowledgment | `do-now` |
 | 5 | Default otherwise | `watch` |
 
+**Reconciliation note — lane priority order (repo-truth gap, active behavioral discrepancy):** The current `projectFeed.ts::assignLane()` implementation evaluates `do-now` at priority 2 and `deferred` at priority 3. **This is the inverse of the policy order above (deferred at priority 2, do-now at priority 3).** The behavioral consequence is that an item with `priority === 'now'` and `state === 'deferred'` will land in `do-now` under current code but must land in `deferred` under this policy. The implementation must be corrected to evaluate deferred status before active/now priority. This is a first-release compliance requirement.
+
+In addition, `assignLane()` currently matches `delegatedTo || delegatedBy` and returns `delegated-team` at priority 4, which is not a target-state lane. See §3.3 below.
+
 ### 3.3 Lane Assignment Rules
 
 - Blocked/waiting state takes precedence over urgency.
@@ -237,7 +248,7 @@ The following decision table is evaluated in order — the first matching rule d
 - `pin-week` MUST NOT by itself move an item into `do-now`.
 - Handoff age may affect ranking and explainability, but it MUST NOT create a separate lane rule.
 - Delegation metadata (`delegatedTo`, `delegatedBy`) does not create a standing lane in target-state policy.
-- Current implementation that still computes `delegated-team` internally must be treated as a reconciliation gap until the visible policy is aligned.
+- **Repo-truth gap:** `projectFeed.ts::assignLane()` currently returns `'delegated-team'` when `item.delegatedTo || item.delegatedBy` is truthy. `computeCounts` tracks a corresponding `teamCount`. Both are active implementation realities. This must be treated as a reconciliation gap: `delegated-team` must be removed from `assignLane()` and from visible lane policy before the four-lane model is compliant. Items with delegation metadata should fall through to `watch` or be handled by a governed blend-mode projection rather than a standing primary lane.
 
 ### 3.4 Source-to-Lane Mapping
 

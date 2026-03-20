@@ -8,14 +8,21 @@
 | **Document Type** | Governance Policy |
 | **Owner** | Experience / Shell Team |
 | **Update Authority** | Experience lead; changes require review by Platform lead and Architecture |
-| **Last Reviewed Against Repo Truth** | 2026-03-19 |
-| **References** | [P2-A1](P2-A1-Personal-Work-Hub-Operating-Model-Register.md); [P2-A2](P2-A2-Ranking-Lane-and-Time-Horizon-Policy.md); [P2-B0](P2-B0-Lane-Ownership-and-Coexistence-Rules.md); [interaction-contract §6](../../../reference/work-hub/interaction-contract.md); `IMyWorkItem.ts`; `IMyWorkRegistry.ts`; `dedupeItems.ts` |
+| **Last Reviewed Against Repo Truth** | 2026-03-20 |
+| **References** | [P2-A1](P2-A1-Personal-Work-Hub-Operating-Model-Register.md); [P2-A2](P2-A2-Ranking-Lane-and-Time-Horizon-Policy.md); [P2-B0](P2-B0-Lane-Ownership-and-Coexistence-Rules.md); [P2-D1](P2-D1-Role-to-Hub-Entitlement-Matrix.md); [interaction-contract §6](../../../reference/work-hub/interaction-contract.md); `IMyWorkItem.ts`; `IMyWorkQuery.ts`; `IMyWorkRegistry.ts`; `HbcMyWorkReasonDrawer`; `notificationAdapter.ts`; `@hbc/complexity`; `@hbc/auth` |
 
 ---
 
 ## Policy Statement
 
-Every work item in the Personal Work Hub must carry sufficient explainability data for users to understand why it appears, where it is ranked, and what they can do with it. Visibility and permission rules must be role-governed, consistent across surfaces, and transparent — users must never encounter opaque ranking, unexplained restrictions, or invisible entitlement logic. This policy locks the explainability field semantics, display rules, visibility model, permission inheritance rules, and reasoning payload contract.
+Every work item in the Personal Work Hub must carry sufficient explainability data for users to understand why it appears, what stage it is in, what they can do with it, and what restrictions apply. Visibility and permission rules must remain personal-first, role-governed, and cross-surface consistent. Users must never encounter opaque ranking, unexplained disabled actions, or hidden access-boundary behavior.
+
+This policy locks the explainability field semantics, disclosure rules, complexity-tier behavior, visibility posture, permission enforcement rules, reasoning payload contract, and cross-surface consistency expectations for Phase 2.
+
+This refined version also distinguishes between:
+
+- **locked target-state policy** that downstream implementation must follow, and
+- **current repo-truth drift** that must be corrected before this policy can be treated as execution-complete.
 
 ---
 
@@ -23,23 +30,24 @@ Every work item in the Personal Work Hub must carry sufficient explainability da
 
 ### This policy governs
 
-- Semantics and population rules for all five explainability fields
-- Display and disclosure rules (what users see in list view, reasoning drawer, and detail view)
-- User visibility model by team mode (personal, delegated-by-me, my-team)
-- Permission field semantics and adapter defaults
+- Semantics and population rules for all explainability fields on `IMyWorkItem`
+- Display and disclosure rules for list view, reasoning drawer, and internal-only data
+- Explainability access and depth by `@hbc/complexity` tier
+- Personal, delegated, and elevated-role team visibility posture for first release
+- Permission field semantics and strict enforcement expectations
 - Permission inheritance during deduplication
-- Role-based entitlement for explainability data
-- Reasoning payload contract and drawer behavior
-- Update timing and consistency guarantees
+- Reasoning payload assembly and drawer behavior
+- Cross-lane visibility consistency between PWA and SPFx surfaces
+- Required reconciliation notes where current shared package behavior still drifts from the locked policy
 
 ### This policy does NOT govern
 
-- Scoring coefficients, tie-breaking rules, or lane assignment — see [P2-A2](P2-A2-Ranking-Lane-and-Time-Horizon-Policy.md)
+- Scoring coefficients, tie-breaking rules, or lane assignment math — see [P2-A2](P2-A2-Ranking-Lane-and-Time-Horizon-Policy.md)
 - Responsibility-lane structure and operating-model invariants — see [P2-A1](P2-A1-Personal-Work-Hub-Operating-Model-Register.md)
-- PWA/SPFx lane ownership — see [P2-B0](P2-B0-Lane-Ownership-and-Coexistence-Rules.md)
-- Freshness thresholds and staleness trust — see P2-B3
-- Complete role-to-hub entitlement matrix — see P2-D1
-- Source tranche classification — see P2-C1
+- PWA/SPFx lane ownership and shell coexistence doctrine — see [P2-B0](P2-B0-Lane-Ownership-and-Coexistence-Rules.md)
+- Freshness thresholds and stale/offline trust rules beyond explainability implications — see P2-B3
+- The detailed role-to-entitlement matrix — see [P2-D1](P2-D1-Role-to-Hub-Entitlement-Matrix.md)
+- Source tranche classification and adapter rollout sequencing — see P2-C1 through P2-C5
 
 ---
 
@@ -47,19 +55,22 @@ Every work item in the Personal Work Hub must carry sufficient explainability da
 
 | Term | Meaning |
 |---|---|
-| **Explainability field** | A structured data field on a work item that explains an aspect of its ranking, lifecycle, origin, history, or permission state |
-| **Reasoning payload** | The complete bundle of explainability data for a single work item, assembled for display in the reasoning drawer (`IMyWorkReasoningPayload`) |
-| **Reasoning drawer** | A slide-out or expandable UI surface that shows the full reasoning payload for a selected work item |
-| **Visibility entitlement** | The set of items and explainability data a user is authorized to see, determined by ownership, team mode, and role |
-| **Permission inheritance** | The rules that determine how permissions are preserved or merged when multiple source items are deduplicated into one |
-| **Supersession** | The process by which a work item replaces another (e.g., when ownership transfers), marking the old item as `superseded` |
-| **Disclosure level** | The tier of detail shown to a user: list-view summary, reasoning drawer detail, or internal-only (never shown to users) |
+| **Explainability field** | A structured data field on a work item that explains ranking, lifecycle, origin, merge history, or permission state |
+| **Reasoning payload** | The bundle of explainability data for a single work item, assembled for display in the reasoning drawer |
+| **Reasoning drawer** | A user-invoked disclosure surface that explains why an item surfaced, what state it is in, and what the user can or cannot do |
+| **Disclosure level** | The detail layer at which a field is shown: list-view cue, reasoning-drawer detail, or internal-only |
+| **Complexity tier** | The user-experience depth selected through `@hbc/complexity` (`essential`, `standard`, `expert`) |
+| **Visibility entitlement** | The set of items and explainability data a user is authorized to see based on ownership, delegation state, role, and governing entitlements |
+| **Team summary / escalation surface** | A manager-facing summary surface showing governed team indicators, counts, or escalation candidates without treating team work as a standing personal-work lane |
+| **Direct-report item feed** | A full item-level `my-team` feed showing direct-report work items; this is not considered first-release complete until org-chart and entitlement plumbing is implemented |
+| **Permission inheritance** | The merge rules applied to permission state when multiple source items for the same canonical record are deduplicated into one |
+| **Supersession** | The process by which one work item replaces another and marks the older item as `superseded` |
 
 ---
 
 ## 1. Explainability Fields Reference
 
-Every `IMyWorkItem` carries five explainability fields. This section defines the semantics, population rules, and intended use of each.
+Every `IMyWorkItem` carries explainability data. This section defines the semantics, population rules, and intended use of each field.
 
 ### 1.1 `rankingReason: IMyWorkRankingReason`
 
@@ -67,13 +78,13 @@ Every `IMyWorkItem` carries five explainability fields. This section defines the
 
 | Field | Type | Meaning |
 |---|---|---|
-| `primaryReason` | `string` | The single highest-impact scoring factor (e.g., "Overdue item", "Blocked BIC item", "Unacknowledged") |
-| `contributingReasons` | `string[]` | All scoring factors that contributed to the score (e.g., `["Overdue", "Project context", "Unread"]`) |
-| `score` | `number` (optional) | The numeric score produced by the additive scoring model (P2-A2 §1) |
+| `primaryReason` | `string` | The single highest-impact reason the item surfaced where it did (for example: "Overdue item", "Blocked BIC item", "Unread notification") |
+| `contributingReasons` | `string[]` | Additional factors that contributed to surfacing or ordering |
+| `score` | `number` (optional) | Internal numeric ranking output produced by the additive ranking model |
 
-**Population:** Computed by `rankItems.ts::scoreItem()` during feed aggregation. Recalculated on every feed computation.
+**Population:** Computed by ranking/normalization during feed aggregation.
 
-**Invariant:** The `primaryReason` and `score` MUST match the actual ranking position — if an item ranks first, its `rankingReason` must explain why.
+**Policy rule:** `primaryReason` and `contributingReasons` MUST truthfully explain the actual ordering outcome. Numeric `score` may exist in the model for system logic, audit, or telemetry, but remains internal-only.
 
 ### 1.2 `lifecycle: IMyWorkLifecyclePreview`
 
@@ -81,15 +92,15 @@ Every `IMyWorkItem` carries five explainability fields. This section defines the
 
 | Field | Type | Meaning |
 |---|---|---|
-| `previousStepLabel` | `string \| null` | The workflow step the item just came from (e.g., "Sent", "Requested") |
-| `currentStepLabel` | `string \| null` | Where the item is now (e.g., "Received", "Active", "Awaiting approval") |
-| `nextStepLabel` | `string \| null` | The intended next step if the user acts (e.g., "Acknowledged", "Approved") |
-| `blockedDependencyLabel` | `string \| null` | Why the item is blocked, if applicable (e.g., "Awaiting approval", "Waiting on requester") |
-| `impactedRecordLabel` | `string \| null` | Which record or entity is affected by this item |
+| `previousStepLabel` | `string \| null` | The workflow state the item just came from |
+| `currentStepLabel` | `string \| null` | The state the item is currently in |
+| `nextStepLabel` | `string \| null` | The immediate next expected state if the user or owning actor acts |
+| `blockedDependencyLabel` | `string \| null` | The dependency currently blocking progress, if any |
+| `impactedRecordLabel` | `string \| null` | The record, entity, or artifact materially affected by the item |
 
-**Population:** Set by source adapters during item mapping. Domain adapters are responsible for providing meaningful labels. The aggregation pipeline does not modify lifecycle labels.
+**Population:** Set by source adapters during item mapping.
 
-**Semantic rule:** `nextStepLabel` MUST describe the immediate next step the user is expected to take, not a distant future state.
+**Policy rule:** `nextStepLabel` must describe the immediate next meaningful movement, not a distant or generic future state.
 
 ### 1.3 `dedupe: IMyWorkDedupeMetadata`
 
@@ -97,13 +108,13 @@ Every `IMyWorkItem` carries five explainability fields. This section defines the
 
 | Field | Type | Meaning |
 |---|---|---|
-| `dedupeKey` | `string` | The canonical key that identified the merged items (`{moduleKey}::{recordType}::{recordId}`) |
-| `mergedSourceMeta` | `IMyWorkSourceMeta[]` | The complete list of sources that were merged into this item |
-| `mergeReason` | `string` | Human-readable merge explanation (e.g., "Merged 2 items with key 'provisioning::request::req-123'") |
+| `dedupeKey` | `string` | Canonical merge key used by normalization |
+| `mergedSourceMeta` | `IMyWorkSourceMeta[]` | Source list combined into the surviving item |
+| `mergeReason` | `string` | Human-readable explanation of why items were merged |
 
-**Population:** Set by `dedupeItems.ts::dedupeItems()` only when deduplication occurs. Items that were not deduplicated do not carry this field.
+**Population:** Set only when deduplication occurs.
 
-**Rule:** The higher-weight source survives deduplication (P2-A2 §4). The lower-weight item's `sourceMeta` is merged into the survivor.
+**Policy rule:** The user-facing disclosure must explain that sources were merged, but must not expose raw canonical keys or internal key format.
 
 ### 1.4 `supersession: IMyWorkSupersessionMetadata`
 
@@ -111,13 +122,13 @@ Every `IMyWorkItem` carries five explainability fields. This section defines the
 
 | Field | Type | Meaning |
 |---|---|---|
-| `supersededByWorkItemId` | `string` | The ID of the work item that replaced this one |
-| `supersessionReason` | `string` | Why the item was superseded (e.g., "Ownership transferred from Controller to Requester") |
-| `originalRankingReason` | `IMyWorkRankingReason` | The ranking reason the item had before supersession |
+| `supersededByWorkItemId` | `string` | Internal ID of the item that replaced this one |
+| `supersessionReason` | `string` | Human-readable explanation of why the prior item was replaced |
+| `originalRankingReason` | `IMyWorkRankingReason` | Ranking explanation the superseded item had before replacement |
 
-**Population:** Set by `supersession.ts::applySupersession()` when a higher-weight source replaces a lower-weight source for the same record, or when BIC ownership transfers.
+**Population:** Set during supersession handling when one item formally replaces another.
 
-**Rule:** Superseded items have `state: 'superseded'` and are excluded from active feed rendering. They are retained for audit and history purposes.
+**Policy rule:** Superseded items are excluded from the active feed and only exposed through governed history/audit contexts.
 
 ### 1.5 `permissionState: IMyWorkPermissionState`
 
@@ -125,160 +136,197 @@ Every `IMyWorkItem` carries five explainability fields. This section defines the
 
 | Field | Type | Meaning |
 |---|---|---|
-| `canOpen` | `boolean` | User can navigate to the item's source surface via `context.href` |
-| `canAct` | `boolean` | User can perform feed mutations (mark-read, defer, pin) or trigger domain actions |
-| `canDelegate` | `boolean` (optional) | User can hand this item off to another person |
-| `canBulkAct` | `boolean` (optional) | User can select this item for bulk operations |
-| `cannotActReason` | `string \| null` (optional) | If `canAct: false`, explains why (e.g., "Insufficient permissions", "Item is in read-only state") |
+| `canOpen` | `boolean` | User can navigate to the source surface or detail context |
+| `canAct` | `boolean` | User can execute feed actions or source-domain actions from the work item |
+| `canDelegate` | `boolean` (optional) | User can delegate the item |
+| `canBulkAct` | `boolean` (optional) | User can include the item in bulk operations |
+| `cannotActReason` | `string \| null` (optional) | Required explanation whenever `canAct: false` |
 
-**Population:** Set by source adapters during item mapping. Default adapter permissions:
+**Population:** Set by source adapters and preserved through normalization/deduplication rules.
 
-| Adapter | `canOpen` | `canAct` | Rationale |
-|---|---|---|---|
-| BIC adapter | `true` | `true` | User is the BIC owner — full action rights |
-| Handoff adapter | `true` | `true` | User is the handoff recipient — can acknowledge/act |
-| Notification adapter | `true` | `false` | Informational signal — user can view but not act on the notification itself |
+**Policy rule:** `cannotActReason` MUST be populated whenever `canAct: false`. A disabled action without a reason is a policy violation.
 
 ---
 
 ## 2. Display and Disclosure Rules
 
-Explainability data is displayed at three disclosure levels. Each field has an assigned level that determines where and how it appears.
+Explainability data is displayed at three disclosure levels.
 
 ### 2.1 Disclosure Levels
 
 | Level | Surface | When Shown | Purpose |
 |---|---|---|---|
-| **List view** | Feed item row in the primary/watch/blocked lanes | Always visible in the feed | Quick context without interaction |
-| **Reasoning drawer** | Slide-out panel triggered by explicit user action | On user request (click/tap "Why?") | Full explainability for a single item |
-| **Internal only** | Not shown to users | Never | System telemetry and audit data |
+| **List view** | Work item row / card in feed surfaces | Always when the item is visible | Quick context without extra interaction |
+| **Reasoning drawer** | User-invoked explainability surface | On explicit user request and only when allowed by complexity tier | Full human-readable explanation |
+| **Internal only** | Not shown to end users | Never displayed in user-facing surfaces | System logic, telemetry, audit, diagnostics |
 
 ### 2.2 Field-to-Disclosure Mapping
 
 | Field | List View | Reasoning Drawer | Internal Only |
 |---|---|---|---|
-| `rankingReason.primaryReason` | Shown as a subtle label (e.g., "Overdue", "Blocked") | Shown with full context | — |
-| `rankingReason.contributingReasons` | Not shown | Shown as bulleted list | — |
-| `rankingReason.score` | Not shown | Not shown (numeric score is internal) | Logged for telemetry |
-| `lifecycle.currentStepLabel` | Shown as item status | Shown with full lifecycle | — |
-| `lifecycle.nextStepLabel` | Shown as action hint when available | Shown with full lifecycle | — |
-| `lifecycle.previousStepLabel` | Not shown | Shown with full lifecycle | — |
-| `lifecycle.blockedDependencyLabel` | Shown when item is blocked | Shown with dependency context | — |
-| `lifecycle.impactedRecordLabel` | Shown as subtitle/context | Shown | — |
+| `rankingReason.primaryReason` | Shown as concise cue / label | Shown with fuller context | — |
+| `rankingReason.contributingReasons` | Not shown | Shown | — |
+| `rankingReason.score` | Not shown | Not shown | Yes |
+| `lifecycle.currentStepLabel` | Shown when meaningful | Shown | — |
+| `lifecycle.nextStepLabel` | Shown as action hint when meaningful | Shown | — |
+| `lifecycle.previousStepLabel` | Not shown | Shown | — |
+| `lifecycle.blockedDependencyLabel` | Shown when blocked | Shown | — |
+| `lifecycle.impactedRecordLabel` | Shown as contextual subtitle where useful | Shown | — |
 | `dedupe.mergeReason` | Not shown | Shown | — |
-| `dedupe.mergedSourceMeta` | Not shown | Shown as source list | — |
-| `dedupe.dedupeKey` | Not shown | Not shown | Logged for audit |
-| `supersession.supersessionReason` | Not shown (item is hidden from active list) | Available via history | — |
-| `supersession.supersededByWorkItemId` | Not shown | Available via history | — |
-| `supersession.originalRankingReason` | Not shown | Available via history | — |
-| `permissionState.canOpen` | Reflected in "Open" button enabled/disabled state | Shown | — |
-| `permissionState.canAct` | Reflected in action button enabled/disabled state | Shown | — |
-| `permissionState.cannotActReason` | Shown as tooltip on disabled actions | Shown with full explanation | — |
-| `permissionState.canDelegate` | Reflected in "Delegate" action visibility | Shown | — |
-| `permissionState.canBulkAct` | Reflected in checkbox visibility for bulk selection | Shown | — |
+| `dedupe.mergedSourceMeta` | Not shown | Shown as named sources / provenance | — |
+| `dedupe.dedupeKey` | Not shown | Not shown | Yes |
+| `supersession.supersessionReason` | Not shown in active feed | Shown only in history/audit contexts | — |
+| `supersession.supersededByWorkItemId` | Not shown | Not shown as raw ID | Yes |
+| `supersession.originalRankingReason` | Not shown in active feed | History/audit only | — |
+| `permissionState.canOpen` | Reflected in open affordance state | Shown | — |
+| `permissionState.canAct` | Reflected in action enabled/disabled state | Shown | — |
+| `permissionState.cannotActReason` | Accessible wherever an action is disabled | Shown | — |
+| `permissionState.canDelegate` | Reflected in delegate affordance visibility/state | Shown | — |
+| `permissionState.canBulkAct` | Reflected in bulk-select affordance visibility/state | Shown | — |
 
 ### 2.3 Display Invariants
 
-- The numeric `score` MUST NOT be displayed to users. Ranking is explained through `primaryReason` and `contributingReasons`, not raw numbers.
-- `cannotActReason` MUST always be accessible (via tooltip or drawer) when `canAct: false` — users must never encounter unexplained disabled actions.
-- Superseded items MUST NOT appear in the active feed list. They are accessible only through history/audit views.
-- The `dedupeKey` format (`{moduleKey}::{recordType}::{recordId}`) is an internal identifier and MUST NOT be displayed to users.
+- Raw numeric ranking score MUST NOT be displayed to end users at any complexity tier.
+- Disabled or unavailable actions MUST always have an accessible human-readable explanation.
+- Superseded items MUST NOT appear in active feed rendering.
+- Internal identifiers such as `dedupeKey`, raw work item IDs, and raw supersession target IDs MUST NOT be surfaced in end-user UI.
+- Explainability must remain human-readable. The system may retain machine-oriented metadata internally, but it must not leak internal contract details into user-facing copy.
 
 ---
 
-## 3. User Visibility Model
+## 3. Explainability Access by Complexity Tier
 
-### 3.1 Item Visibility by Team Mode
+Explainability depth is governed through the existing `@hbc/complexity` shared feature package.
 
-| Team Mode | Items Visible | Populated By |
+### 3.1 Locked Tier Behavior
+
+| Complexity Tier | Drawer Access | Required Explainability Depth |
 |---|---|---|
-| `personal` | Items the user personally owns or needs to act on | BIC items where user is owner; handoff items where user is recipient; notification items for user |
-| `delegated-by-me` | Items the user delegated to others | Items where `delegatedBy` matches current user |
-| `my-team` | Items owned by the user's direct reports | Items where owner is a direct report of current user (requires elevated role) |
+| **essential** | No reasoning drawer | List-level cues only (`primaryReason`, current status, action state, blocked cue if applicable) |
+| **standard** | Yes | "Why surfaced" plus lifecycle and permission explanation |
+| **expert** | Yes | Everything in `standard` plus source provenance, dedupe summary, and supersession summary where applicable |
 
-### 3.2 Explainability Data Visibility by Team Mode
+### 3.2 Tier Rules
 
-| Field | Personal Mode | Delegated-By-Me Mode | My-Team Mode |
-|---|---|---|---|
-| `rankingReason` | Full access | Full access (user delegated the work) | `primaryReason` and `contributingReasons` visible; `score` remains internal |
-| `lifecycle` | Full access | Full access | Full access (managers need to see workflow state) |
-| `dedupe` | Full access | Full access | `mergeReason` visible; `mergedSourceMeta` visible |
-| `supersession` | Full access (for own superseded items) | Not applicable | Not applicable (superseded items are not shown in team view) |
-| `permissionState` | Full access | Read-only visibility (delegator cannot act on delegated items) | Read-only visibility (manager sees permissions but cannot act unless they are also the owner) |
+- `essential` MUST NOT open a reasoning drawer.
+- `standard` MUST include enough information for a user to understand why the item surfaced and what they can or cannot do.
+- `expert` MAY show deeper provenance and merge/supersession context, but MUST NOT show raw numeric ranking score.
+- Team-related summary or item visibility follows the same complexity-tier disclosure boundaries; elevated role does not override complexity policy.
+- Complexity tier affects disclosure depth, not entitlement. A user must still be entitled to view the underlying item or summary.
 
-### 3.3 Visibility Invariants
+### 3.3 Drawer Content Rules
 
-- Users MUST only see items they are entitled to view based on ownership, delegation, or team membership.
-- A manager viewing team-mode feed MUST NOT see items owned by people outside their direct reports.
-- Delegated-by-me mode shows items the user delegated — the delegator sees the item but cannot act on it (the delegatee owns the action).
-- No user can see another user's personal feed in `personal` team mode.
+| Drawer Step | Standard | Expert |
+|---|---|---|
+| Why Surfaced | Yes | Yes |
+| Lifecycle & Permissions | Yes | Yes |
+| Source Provenance | No | Yes |
+| Dedupe Summary | Optional if relevant | Yes if relevant |
+| Supersession Summary | History/audit contexts only | History/audit contexts only |
+| Raw Numeric Score | No | No |
 
 ---
 
-## 4. Permission Rules and Inheritance
+## 4. User Visibility Model
 
-### 4.1 Permission Evaluation
+### 4.1 First-Release Visibility Posture
 
-Permissions are evaluated at two stages:
+Phase 2 remains **personal-first**. Team visibility is additive and governed, not a standing fifth personal-work lane.
 
-| Stage | When | Who Sets Permissions |
+| Mode / Surface | First-Release Status | What Is Visible |
 |---|---|---|
-| **Adapter mapping** | When source data is mapped to `IMyWorkItem` | Each adapter (BIC, handoff, notification) sets initial permissions based on source context |
-| **Deduplication** | When multiple items for the same record are merged | Permission preservation rules apply (§4.2) |
+| `personal` | Locked for first release | Items the user owns, receives, or personally needs to review/act on |
+| `delegated-by-me` | Locked for first release | Items the user delegated to others, subject to governed read-only visibility where the delegator no longer owns the action |
+| Team summary / escalation surfaces | Locked for first release for eligible elevated roles | Counts, escalation candidates, or governed summary indicators derived from eligible team items |
+| Full direct-report item-level `my-team` feed | Deferred | Not considered complete until org-chart and entitlement plumbing is implemented |
 
-Permissions are NOT re-evaluated on every render. They are computed during feed aggregation and cached in the `IMyWorkItem`. If the user's role changes, permissions update on the next feed refresh.
+### 4.2 Team Visibility Rule
 
-### 4.2 Permission Inheritance During Deduplication
+For first release, elevated users may receive governed team summary or escalation visibility, but the plan must not assume that full direct-report item-level visibility is already fully implemented. Full direct-report item feeds require future completion of:
 
-When multiple items are deduplicated, permissions are merged using these rules:
+- org-chart / manager-of-record resolution,
+- role-governed entitlement plumbing,
+- boundary validation that prevents exposure outside the true report chain.
 
-**Reference implementation:** `packages/my-work-feed/src/normalization/dedupeItems.ts`
+### 4.3 Locked Future Note
+
+**Required implementation note:**  
+Future completion of the org-chart / entitlement plumbing is required before true direct-report item visibility is considered complete. Until that work is finished, this policy treats team visibility as summary/escalation-first rather than a fully realized standing item feed.
+
+### 4.4 Visibility Invariants
+
+- No user may see another user’s personal feed through `personal` mode.
+- Delegated-by-me visibility does not automatically imply action authority.
+- Team visibility must be entitlement-governed and limited to valid reporting boundaries.
+- Explainability disclosure for team contexts must remain consistent with complexity tier and role entitlement.
+- Team visibility is not allowed to silently bypass personal-first operating model rules from P2-A1.
+
+---
+
+## 5. Permission Rules and Enforcement
+
+### 5.1 Permission Evaluation Stages
+
+| Stage | When | Responsibility |
+|---|---|---|
+| Adapter mapping | Source item is mapped into `IMyWorkItem` | Source adapter sets initial permission state |
+| Normalization / deduplication | Multiple items for same canonical record are merged | Shared normalization preserves or merges permission state |
+| UI rendering | Item is rendered on any surface | Shared UI honors permission state and disables or hides actions accordingly |
+| Action execution | User attempts an action | Action layer rejects execution that is not allowed by permission state |
+
+### 5.2 Strict Enforcement Rules
+
+- `cannotActReason` is required whenever `canAct: false`.
+- UI components MUST NOT render an action as effectively executable when `permissionState` says it is unavailable.
+- Action hooks / dispatch layers MUST reject attempts to execute actions that permission state does not allow.
+- "You cannot act on this item" is acceptable only as a fallback. Adapters should provide a specific reason whenever the source can supply one.
+- Read-only visibility for delegated or team-related contexts must remain visually clear.
+
+### 5.3 Permission Inheritance During Deduplication
 
 | Rule | Logic | Rationale |
 |---|---|---|
-| **canAct: any-true-wins** | If any source item has `canAct: true`, the merged item has `canAct: true` | If any source grants action rights (e.g., BIC ownership), the user can act regardless of informational sources (notifications) that don't grant action |
-| **isBlocked: any-true-wins** | If any source item has `isBlocked: true`, the merged item has `isBlocked: true` | Blocked status from any source is a signal that should not be hidden by merging |
-| **cannotActReason: first-available** | If `canAct: false` after merge, use the first non-null `cannotActReason` from the source items | Provides the most specific explanation available |
+| **canAct: any-true-wins** | If any merged source grants action rights, the surviving merged item may remain actionable | Prevents informational sources from stripping legitimate action rights |
+| **cannotActReason: required when merged result is not actionable** | If merged result ends with `canAct: false`, a reason must survive normalization | Prevents disabled-without-explanation outcomes |
+| **blocked state: any-true-wins** | If any merged source says blocked, the merged item remains blocked | Preserves meaningful stop signals |
+| **delegate / bulk flags** | Preserve only where the resulting action remains valid for the merged item | Prevents overstating action rights after merge |
 
-### 4.3 Permission Rules
+### 5.4 Permission Invariants
 
-- **canOpen** is `true` unless the deep link (`context.href`) is broken or the user lacks view entitlement to the source surface.
-- **canAct** is `true` when the user has the authority to perform feed mutations or trigger domain actions on this item.
-- **canDelegate** is `true` only when the item supports delegation and the user has delegation authority.
-- **canBulkAct** is `true` only when the item is eligible for bulk operations (same action type, same permission level).
-- **cannotActReason** MUST be populated whenever `canAct: false` — an empty reason with a disabled action is a policy violation.
+- `canOpen` and `canAct` are distinct and must not be conflated.
+- Informational signals may be viewable while remaining non-actionable.
+- A manager seeing governed team summary or read-only team information is not automatically granted action authority.
+- Cross-surface rendering must not disagree about whether an item is actionable.
 
 ---
 
-## 5. Role-Based Entitlement Rules
+## 6. Role-Based Entitlement Rules
 
-### 5.1 Entitlement by Role
+### 6.1 Entitlement by Role Class
 
 | Entitlement | Standard Roles | Elevated Roles | Admin |
 |---|---|---|---|
-| View own items (`personal` mode) | Yes | Yes | Yes |
-| View delegated items (`delegated-by-me` mode) | Yes (if delegations exist) | Yes | Yes |
-| View team items (`my-team` mode) | No | Yes | Yes |
-| See ranking reasons for own items | Yes | Yes | Yes |
-| See ranking reasons for team items | N/A | Yes — `primaryReason` and `contributingReasons` | Yes |
-| See lifecycle labels for team items | N/A | Yes | Yes |
-| Act on team items | N/A | No (read-only visibility) | Only if also the item owner |
-| Access reasoning drawer | Yes (own items) | Yes (own + team items) | Yes |
+| View own items (`personal`) | Yes | Yes | Yes |
+| View delegated items (`delegated-by-me`) | Yes, if relevant | Yes | Yes |
+| View team summary / escalation surfaces | No | Yes, when granted by `@hbc/auth` | Yes |
+| View full direct-report item feed | Deferred | Deferred until plumbing is complete | Deferred until plumbing is complete unless explicitly governed later |
+| Access reasoning drawer | Per complexity tier | Per complexity tier | Per complexity tier |
+| Act on another user’s item solely because it is visible in team context | No | No | No, unless separately entitled and also the effective actor/owner |
 
-### 5.2 Entitlement Invariants
+### 6.2 Entitlement Rules
 
-- Role-based entitlement is resolved from `@hbc/auth` role definitions — no parallel custom role logic (per P2-B0).
-- "Elevated role" means a role that has the `my-team` team-mode entitlement. The exact role set is defined by `@hbc/auth` and documented in P2-D1.
-- Entitlement rules are the same in PWA and SPFx (per P2-B0 cross-lane consistency rule 6).
-- A manager seeing team items has **read-only** visibility by default — they can see ranking reasons and lifecycle state but cannot act on items they don't own.
+- Role-based entitlement is resolved through `@hbc/auth`. No parallel bespoke role system is allowed.
+- "Elevated role" means a role granted the relevant summary/team visibility entitlements in P2-D1.
+- Complexity tier does not create entitlement; it only governs explainability depth.
+- Entitlement rules must remain consistent between PWA and SPFx surfaces.
 
 ---
 
-## 6. Reasoning Payload Contract
+## 7. Reasoning Payload Contract
 
-### 6.1 Payload Type
+### 7.1 Payload Shape
 
-**Reference:** `packages/my-work-feed/src/types/IMyWorkRegistry.ts`
+Reasoning payload assembly continues to rely on the shared registry / reasoning hooks, but downstream implementation must treat this policy as the governing disclosure contract.
 
 ```
 IMyWorkReasoningPayload {
@@ -294,118 +342,142 @@ IMyWorkReasoningPayload {
 }
 ```
 
-### 6.2 Payload Assembly
+### 7.2 Payload Assembly Rules
 
-The reasoning payload is built by `useMyWorkReasoning.ts::buildReasoningPayload()` from the `IMyWorkItem` fields. It assembles all explainability data for a single item into a display-ready bundle.
+- The reasoning payload is assembled from the canonical work-item fields, not from a separate competing explainability model.
+- The reasoning drawer must remain a display of existing governed fields, not a place to invent new ranking logic or entitlement logic.
+- Missing source provenance or permission explanation should be treated as adapter-quality issues, not as justification to bypass this policy.
 
-### 6.3 Reasoning Drawer Rules
+### 7.3 Drawer Rules
 
 | Rule | Specification |
 |---|---|
-| **Trigger** | Explicit user action — click/tap on a "Why?" or reasoning affordance. Not shown automatically |
-| **Content** | All reasoning-drawer-level fields from §2.2 |
-| **Score display** | Numeric `score` is NOT shown; ranking is explained through `primaryReason` and `contributingReasons` |
-| **Source metadata** | Show source names and last-updated timestamps. Do NOT show internal source identifiers or dedupeKey format |
-| **Deduplication info** | If present, show `mergeReason` and list of merged sources by name. Do NOT show `dedupeKey` |
-| **Supersession info** | If the user has superseded items in history, show `supersessionReason`. Do NOT show `supersededByWorkItemId` as a raw ID |
-| **Permission explanation** | Show `cannotActReason` when applicable. Show which actions are available and which are restricted |
-| **Accessibility** | Reasoning drawer MUST be keyboard-navigable and screen-reader accessible |
+| **Trigger** | Explicit user action only |
+| **Complexity gating** | Drawer availability and depth follow Section 3 |
+| **Score display** | Raw numeric score is never shown |
+| **Lifecycle / permission explanation** | Standard and expert tiers must explain current state and actionability |
+| **Source provenance** | Expert tier may show source names, timestamps, and human-readable provenance |
+| **Dedupe disclosure** | Show human-readable merge explanation, not raw canonical keys |
+| **Supersession disclosure** | Show human-readable supersession explanation only in governed history/audit contexts |
+| **Accessibility** | Drawer must be keyboard navigable and screen-reader accessible |
 
 ---
 
-## 7. Update Timing and Consistency
+## 8. Update Timing and Consistency
 
-### 7.1 When Explainability Fields Are Computed
+### 8.1 Computation Timing
 
-| Field | Computation Timing | Update Behavior |
+| Field | Timing | Update Behavior |
 |---|---|---|
-| `rankingReason` | Recomputed on every feed aggregation | Always reflects the current scoring model |
-| `lifecycle` | Set at adapter mapping time | Updates when source data changes (on next feed refresh) |
-| `dedupe` | Set during deduplication pass | Updates if source set changes (new source appears, source retracts) |
-| `supersession` | Set during supersession pass | One-time — superseded items do not change state |
-| `permissionState` | Set at adapter mapping time | Updates on next feed refresh after role/permission change |
+| `rankingReason` | Feed aggregation time | Recomputed whenever ranking is recomputed |
+| `lifecycle` | Adapter mapping time | Updates on next refresh when source state changes |
+| `dedupe` | Deduplication pass | Updates when source set or merge outcome changes |
+| `supersession` | Supersession pass | Set when replacement occurs; not part of active list rendering |
+| `permissionState` | Adapter mapping plus normalization | Refreshes on next feed computation after source/role changes |
 
-### 7.2 Consistency Guarantees
+### 8.2 Consistency Guarantees
 
-| Guarantee | Rule |
-|---|---|
-| **Ranking-reason accuracy** | `rankingReason` MUST match the actual ranking position. If the ranking algorithm places item A above item B, item A's `rankingReason.score` must be ≥ item B's score |
-| **Lifecycle freshness** | Lifecycle labels reflect the state at last feed computation. They may be stale if the source surface has changed since the last refresh |
-| **Permission freshness** | Permission state is evaluated at feed computation time. Role changes take effect on the next feed refresh, not in real-time |
-| **Cross-surface consistency** | The same item viewed in PWA full feed, PWA panel, and SPFx companion MUST show the same explainability data (P2-B0 cross-lane consistency) |
-
-### 7.3 Staleness Handling
-
-When the feed is stale (any source not in `live` state per P2-A1 §8):
-- Explainability data from stale sources MUST be treated as potentially outdated.
-- The feed MUST display a sync-state indicator per P2-A1 §8.1.
-- Stale items MUST NOT be hidden — they are shown with a staleness cue.
-- `rankingReason` for stale items still reflects the last-computed ranking; the staleness cue communicates that the underlying data may have changed.
+- Ranking explanation must remain consistent with actual ordering.
+- Explainability data may become stale if sources are stale, but stale items must not silently disappear solely because of explainability uncertainty.
+- The same visible item must carry the same permission state and same core explainability fields across PWA and SPFx displays.
+- Surfaces may show less information because of surface constraints or complexity tier, but they must not show contradictory information.
 
 ---
 
-## 8. Cross-Lane Visibility Consistency
+## 9. Cross-Lane Visibility Consistency
 
-Per P2-B0 cross-lane consistency rule 6, the following visibility rules MUST remain consistent across PWA and SPFx:
+Per P2-B0, PWA owns the full personal-work home and SPFx remains a governed companion surface. Explainability and entitlement semantics must remain consistent across both.
 
 | Rule | PWA | SPFx | Enforcement |
 |---|---|---|---|
-| Delegated/team visibility entitlement | Full team mode support | Governed companion summary of team items | Same entitlement checks; SPFx shows subset of same data |
-| Permission state | Full display | Same permission state for displayed items | Same `IMyWorkPermissionState` data |
-| Ranking reason | Full reasoning drawer available | `primaryReason` label visible on items | Same `IMyWorkRankingReason` data |
-| Lifecycle labels | Full display | `currentStepLabel` visible on items | Same `IMyWorkLifecyclePreview` data |
-| Action vocabulary | Full action set | Light actions only (per P2-B0) | SPFx restricts actions but uses same permission model |
+| Personal visibility | Full owned experience | Governed companion subset | Same entitlement source |
+| Delegated visibility | Supported where allowed | Supported only where companion doctrine allows | Same entitlement source |
+| Team summary / escalation visibility | Full governed summary surface | Companion summary only | Same entitlement source |
+| Full direct-report item feed | Deferred | Deferred | Must not be claimed complete before plumbing is delivered |
+| Permission state | Full display and enforcement | Same underlying state for displayed items | Same `IMyWorkPermissionState` semantics |
+| Explainability | Full by complexity tier | Condensed by surface and complexity tier | Same canonical data, different presentation depth |
 
-### 8.1 Cross-Lane Invariants
+### 9.1 Cross-Lane Invariants
 
-- The same item MUST carry the same `permissionState` regardless of which surface displays it.
-- SPFx companion may show fewer explainability fields (due to surface constraints), but MUST NOT show conflicting data.
-- Team-mode entitlement checks are resolved identically in both surfaces — `@hbc/auth` is the single source of role resolution.
+- The same item must not be actionable in one surface and non-actionable in another without a real entitlement difference.
+- SPFx may show a smaller subset of explainability data, but it must not contradict the PWA representation.
+- Team and delegated visibility must use the same entitlement vocabulary and checks across both hosts.
 
 ---
 
-## 9. Acceptance Gate Reference
+## 10. Required Repo-Truth Reconciliation Notes
 
-P2-A3 contributes evidence for the Work-surface gate:
+This section is intentionally normative. These items are known current-state drifts that must be reconciled for execution readiness.
+
+### 10.1 Stale lane encoding
+
+Current shared type definitions still include a `delegated-team` lane. That conflicts with the tightened personal-first operating model direction from P2-A1, where delegated/team visibility is governed as a projection or secondary surface concern rather than a standing primary responsibility lane.
+
+**Required consequence:** downstream implementation must not treat `delegated-team` as the policy truth for first release. Package cleanup or compatibility handling must be planned.
+
+### 10.2 Complexity drawer behavior is partly right, partly drifting
+
+Current reasoning drawer behavior already uses `@hbc/complexity` and already gates the drawer out for `essential`. That is aligned with this policy. However, current expert-tier behavior still exposes raw numeric ranking score.
+
+**Required consequence:** keep the complexity-tier model, but remove end-user score exposure.
+
+### 10.3 Non-actionable notification items are under-specified
+
+Current notification mapping produces non-actionable items, but known repo state does not consistently guarantee a populated `cannotActReason`.
+
+**Required consequence:** adapters must be tightened so any non-actionable item supplies a reason, and shared UI/action layers must enforce it.
+
+### 10.4 Team feed contracts exist before full team plumbing is complete
+
+Current shared query and team-feed contracts include `teamMode` and a team-feed result projection. That does not, by itself, prove that direct-report item visibility is release-complete.
+
+**Required consequence:** implementation and planning docs must carry an explicit note that true direct-report item visibility remains dependent on future org-chart / entitlement plumbing.
+
+---
+
+## 11. Acceptance Gate Reference
+
+P2-A3 contributes evidence for the Work-surface gate.
 
 | Field | Value |
 |---|---|
 | **Gate** | Work-surface gate |
-| **Pass condition** | Hub remains task-first and responsibility-first, not a generic dashboard |
-| **P2-A3 evidence** | Explainability rules ensure ranking is user-understandable (not opaque algorithm); visibility rules ensure users see only what they're entitled to; permission rules ensure clear action boundaries |
-| **Primary owner** | Product/Design + Experience |
+| **Pass condition** | Hub remains task-first and responsibility-first, not a generic dashboard or opaque surveillance surface |
+| **P2-A3 evidence** | Explainability remains human-readable, visibility stays entitlement-governed, and permission boundaries are explicit and enforceable |
+| **Primary owner** | Product / Design + Experience |
 
-Explainability prevents the hub from becoming opaque by ensuring every ranking decision has a human-readable reason. Visibility rules prevent the hub from becoming a surveillance tool by limiting team-mode access to entitled roles with read-only defaults.
+Explainability prevents the hub from becoming an opaque algorithmic feed. Visibility rules prevent it from becoming a role-leak or surveillance surface. Strict permission-state enforcement prevents false action affordances that would erode user trust.
 
 ---
 
-## 10. Locked Decisions
+## 12. Locked Decisions
 
-The following decisions from Phase 2 §16 are locked and directly govern explainability and visibility:
+The following decisions are now locked for this policy version.
 
 | Decision | Locked Resolution | P2-A3 Consequence |
 |---|---|---|
-| Work ranking | Weighted mix of ownership, urgency, aging, project importance, blocking status, and role context | All factors must be explainable via `rankingReason` |
-| Top-level organization | Responsibility lanes first, with time-horizon cues layered inside | Explainability is per-item within lanes, not per-lane |
-| Delegated/team lanes | Limited and only for eligible elevated roles | Team-mode visibility is role-gated, not universally available |
-| Multi-role default | Primary active role context | Permission evaluation uses the active role, not all roles |
-| Multi-role governance source | `@hbc/auth` role definitions | Entitlement is resolved from `@hbc/auth`, not custom logic |
+| Explainability disclosure depth | Governed by `@hbc/complexity` | Essential has no drawer; standard/expert have graduated disclosure |
+| Raw ranking score exposure | Hidden from all end users | Expert tier may get more provenance, but never raw score |
+| Team visibility in first release | Hybrid | Personal-first home, with governed team summary/escalation surfaces only |
+| Direct-report item feed completeness | Deferred | Requires future org-chart / entitlement plumbing before treated as complete |
+| Permission enforcement | Strict now | Adapters, UI, and action hooks must all honor permission state |
+| Role governance source | `@hbc/auth` | No parallel custom role logic |
 
 ---
 
-## 11. Policy Precedence
+## 13. Policy Precedence
 
 | Deliverable | Relationship to P2-A3 |
 |---|---|
-| **P2-A1** — Operating Model Register | P2-A3 explains the data produced by the operating model. P2-A3 MUST NOT contradict lane structure, lifecycle rules, or ownership identity rules from P2-A1 |
-| **P2-A2** — Ranking Policy | P2-A3 defines how to display the `rankingReason` data that P2-A2's scoring model produces. Display rules MUST NOT expose raw score to users |
-| **P2-B0** — Lane Ownership and Coexistence | P2-A3 enforces cross-lane visibility consistency per P2-B0 cross-lane consistency rules |
-| **P2-D1** — Role-to-Hub Entitlement Matrix | P2-D1 must use the entitlement framework defined in P2-A3 §5. The detailed role-to-entitlement mapping lives in P2-D1; P2-A3 defines the governing rules |
-| **P2-C1–C5** — Work Sources and Handoff | Source adapters must populate explainability fields correctly per the field reference in §1 |
+| **P2-A1** — Operating Model Register | P2-A3 must not contradict the personal-first operating model, lane posture, or visibility doctrine locked in P2-A1 |
+| **P2-A2** — Ranking Policy | P2-A3 governs how ranking output is explained, not how ranking is calculated |
+| **P2-B0** — Lane Ownership and Coexistence | P2-A3 must remain consistent with PWA-owned full home and SPFx companion doctrine |
+| **P2-D1** — Role-to-Hub Entitlement Matrix | P2-D1 defines exact role mappings using the rules established here |
+| **P2-C1–C5** — Work Sources and Handoff | Source adapters must populate explainability and permission fields consistently with this policy |
 
-If a downstream deliverable conflicts with this policy, this policy takes precedence for explainability semantics, display rules, and visibility entitlement.
+If any downstream deliverable conflicts with this document on explainability semantics, disclosure, visibility posture, or permission enforcement, this policy takes precedence unless Architecture formally supersedes it.
 
 ---
 
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-03-20  
 **Governing Authority:** [Phase 2 Plan §10.1](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md)
