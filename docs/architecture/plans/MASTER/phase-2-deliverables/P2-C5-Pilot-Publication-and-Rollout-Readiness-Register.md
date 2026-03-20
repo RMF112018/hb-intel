@@ -81,12 +81,12 @@ This table is updated as sources progress through readiness gates. Updates requi
 
 | Test Scenario | Source | Owner | Status | Evidence |
 |---|---|---|---|---|
-| BIC registration factory created | All 5 required | Domain leads | Provisioning ✅; others ❌ | `*/bic-registration.ts` |
-| App bootstrap wires `registerBicModule()` | All 5 required | Domain leads | Provisioning ✅; others ❌ | App bootstrap files |
-| Notification registrations defined | All notification-publishing sources | Platform | Provisioning ✅ (15 events); others ❌ | `*/notification-registrations.ts` |
+| BIC registration factory created | All 5 required | Domain leads | ✅ All 5 created | `*/bic-registration.ts` in provisioning, estimating, bd, project-hub |
+| App bootstrap wires `registerBicModule()` | All 5 required | Domain leads | ✅ All 5 wired | `apps/pwa/src/sources/sourceAssembly.ts` |
+| Notification registrations defined | All notification-publishing sources | Platform | ✅ All 5 defined (28 events total) | `*/notification-registrations.ts` in all feature packages |
 | Deduplication key format validates | All sources | Platform | ✅ Defined in P2-C1 §5 | Canonical key registry |
-| Cross-source dedup tested (BIC + Notification) | Provisioning | QA | ❌ Pending | `@hbc/my-work-feed` test suite |
-| Lane assignment correct per priority mapping | All sources | Platform | ❌ Pending | `projectFeed.ts` test coverage |
+| Cross-source dedup tested (BIC + Notification) | Provisioning | QA | ✅ Implemented | `crossSourceDedup.test.ts` — 5 tests: BIC+Notif merge, source priority, non-merge, blocked propagation, 3-way merge |
+| Lane assignment correct per priority mapping | All sources | Platform | ✅ Implemented | `assignLane.test.ts` — 8 tests covering all lane types + `computeCounts` |
 
 ### Gate 6 — Signal
 
