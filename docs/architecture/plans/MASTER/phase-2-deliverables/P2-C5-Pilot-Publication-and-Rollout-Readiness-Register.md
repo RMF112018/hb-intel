@@ -101,9 +101,9 @@ This table is updated as sources progress through readiness gates. Updates requi
 
 | Test Scenario | Owner | Status | Evidence |
 |---|---|---|---|
-| Return memory restores hub state after domain navigation | Experience/Shell | ❌ Pending | P2-B2 test scenarios |
+| Return memory restores hub state after domain navigation | Experience/Shell | ✅ Implemented | `useHubReturnMemory` — scroll restore, feed refresh on return, visibilitychange resilience |
 | Redirect memory works after auth redirect | Experience/Shell | ✅ Implemented | `redirectMemory.ts` test suite |
-| Team mode persists across navigation | Experience/Shell | ❌ Pending | `useDraft` integration test |
+| Team mode persists across navigation | Experience/Shell | ✅ Implemented | `useHubStatePersistence` — query-seed auto-save via `useAutoSaveDraft('hbc-my-work-query-seed', 8, 500)` |
 
 ### Gate 12 — Handoff
 
@@ -130,7 +130,7 @@ All 13 Phase 2 acceptance gates mapped to their evidence documents:
 | 7 | Role-governance | [P2-D1] (entitlement matrix) + role validation | P2-D1 ❌; Implementation hook ✅ (RoleGate-based card visibility per P2-D1 §6) |
 | 8 | Personalization | [P2-D5] (personalization policy) + layout governance proof | P2-D5 ❌ |
 | 9 | Delegated-visibility | [P2-D4] (delegated governance) + role walkthroughs | P2-D4 ❌ |
-| 10 | Continuity | [P2-B2](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md) (persistence contract) + navigation test scenarios | Spec ✅; Tests ❌ |
+| 10 | Continuity | [P2-B2](P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md) (persistence contract) + navigation test scenarios | Spec ✅; Implementation ✅ (draft persistence, return memory, feed refresh on return); Tests ❌ |
 | 11 | Trust-state | [P2-B3](P2-B3-Freshness-Refresh-and-Staleness-Trust-Policy.md) (freshness policy) + state UX review + scenario tests | Spec ✅; Review ❌ |
 | 12 | Handoff | [P2-C3](P2-C3-Work-Item-Navigation-Matrix.md) + [P2-C4](P2-C4-Handoff-Criteria-Matrix.md) + navigation review + scenario tests | Spec ✅; Tests ❌ |
 | 13 | Cross-device | [P2-B4](P2-B4-Cross-Device-Shell-Behavior-Note.md) + test evidence | Spec ✅; Tests ❌ |
