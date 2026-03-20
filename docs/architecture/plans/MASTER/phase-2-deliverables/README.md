@@ -1,12 +1,12 @@
 # Phase 2 Deliverables — Personal Work Hub and PWA Shell
 
-**Doc Classification:** Active Planning — Phase 2 deliverable index; tracks workstream-to-milestone mapping for all 23 mandatory artifacts defined in the [Phase 2 plan](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md).
+**Doc Classification:** Planning-Complete Deliverable Index — all 23 mandatory Phase 2 artifacts are locked across 5 workstreams. P2-D2 (Adaptive Layout) remains as the only undelivered specification (tracked in P2-E4 as OD-3). Implementation proceeds per the P2-C5 launch checklist.
 
 ---
 
 ## Planning Status Summary
 
-Phase 2 planning is underway. Workstreams A, B, and C are complete. Workstream D is progressing — P2-D1 (Entitlement Matrix), P2-D3 (Analytics Cards), P2-D4 (Team Lane Governance), and P2-D5 (Personalization) are locked. P2-D2 (Adaptive Layout) remains. Workstream E is in planning queue.
+**Phase 2 planning is complete.** All 22 of 23 deliverables are locked across Workstreams A (3), B (5), C (5), D (4 of 5), and E (5). P2-D2 (Adaptive Layout and Zone Governance Spec) is the only remaining specification — tracked as open decision OD-3 in P2-E4. Implementation proceeds per the P2-C5 pilot launch checklist, gated by source wiring (P2-C1 blockers) and the 13 acceptance gates (P2-C5 §3).
 
 ---
 
@@ -72,7 +72,7 @@ Phase 2 planning is underway. Workstreams A, B, and C are complete. Workstream D
 | P2-E2 | [Project Anchor and Context-Scope Policy](P2-E2-Project-Anchor-and-Context-Scope-Policy.md) | Governance Policy |
 | P2-E3 | [First-Release Success Scorecard and Validation Plan](P2-E3-First-Release-Success-Scorecard-and-Validation-Plan.md) | Active Reference |
 | P2-E4 | [Open Decisions and Deferred Items Register](P2-E4-Open-Decisions-and-Deferred-Items-Register.md) | Active Reference |
-| P2-E5 | Pilot Cohort Rollout and Adoption Sequencing Note | Not Started |
+| P2-E5 | [Pilot Cohort Rollout and Adoption Sequencing Note](P2-E5-Pilot-Cohort-Rollout-and-Adoption-Sequencing-Note.md) | Note |
 
 ---
 
