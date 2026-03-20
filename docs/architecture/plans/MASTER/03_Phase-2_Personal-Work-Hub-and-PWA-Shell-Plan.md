@@ -45,20 +45,21 @@ This plan is written to align with the following governing architecture referenc
 
 ### 2.2 Repo-truth foundations already present
 
-Phase 2 planning must explicitly acknowledge the following current-state foundations:
+Phase 2 planning must explicitly acknowledge the following current-state foundations (verified 2026-03-20 against current-state-map §2 and live packages):
 
 - A real **PWA application shell** already exists, including router, auth integration, workspace routing, and shell composition.
 - Root-route behavior already includes **redirect memory capture/restore** and **role-based post-auth landing precedence**.
 - The current PWA still lands at **`/project-hub`** by default, so Phase 2 is a controlled transition from a project-hub-first posture to a personal-work-first posture.
-- A real shared **`@hbc/my-work-feed`** package already exists and must remain the governing aggregation primitive for Personal Work Hub work publication.
-- Supporting shared packages already exist for core hub behavior, including:
-  - `@hbc/auth`
-  - `@hbc/shell`
-  - `@hbc/ui-kit`
-  - `@hbc/session-state`
-  - `@hbc/notification-intelligence`
-  - `@hbc/project-canvas`
-- Work Hub reference material already exists in the repo and should be treated as starting-point truth rather than ignored background.
+- A real shared **`@hbc/my-work-feed`** package already exists and is **mature** (SF29, ADR-0115 locked 2026-03-15); it must remain the governing aggregation primitive for Personal Work Hub work publication.
+- Supporting shared packages already exist and are **mature/partial** for core hub behavior:
+  - `@hbc/auth` (auth foundation, role definitions stable)
+  - `@hbc/shell` (app shell layer)
+  - `@hbc/ui-kit` (design system)
+  - `@hbc/session-state` (SF12, ADR-0101 locked; offline model ready)
+  - `@hbc/notification-intelligence` (SF10, ADR-0099 locked; signal layer ready)
+  - `@hbc/project-canvas` (SF13, ADR-0102 locked; adaptive layout ready with Phase 2 zone constraints)
+  - `@hbc/smart-empty-state` (SF11, ADR-0100 locked; empty-state classification ready)
+- Work Hub reference material already exists in the repo (SF29 and related ADRs) and should be treated as starting-point truth rather than ignored background.
 - The PWA already has a real PWA/installability baseline; Phase 2 is not inventing a PWA from scratch.
 
 ### 2.3 Planning consequence
