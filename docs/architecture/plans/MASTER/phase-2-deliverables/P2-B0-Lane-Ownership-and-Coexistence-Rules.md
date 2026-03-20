@@ -19,6 +19,8 @@ HB Intel operates two application lanes — **PWA** and **SPFx** — that serve 
 
 The **PWA** is the full operating home for the Personal Work Hub. **SPFx** is a bounded SharePoint-native companion lane that may expose summary, governed limited item lists, and light actions, but MUST NOT become a second full operating home.
 
+**Repo-truth audit — 2026-03-20.** All seven shared primitives named in this policy exist in the repo. No anti-drift violations are present in current code (the Personal Work Hub has not yet been built, so no parallel models, rankings, or SPFx escalation exist). Three confirmed controlled-evolution gaps: `@hbc/my-work-feed` and `@hbc/notification-intelligence` are not yet wired to either lane app; the `/my-work` PWA landing is not yet implemented. One precision gap corrected: the `@hbc/app-shell` posture reconciliation note (note 2) has been sharpened to reflect zero current consumers and the SPFx live import pattern. See §Repo-Truth Reconciliation Notes for full citations.
+
 This document is normative for Phase 2. Where current repo truth does not yet fully match this policy, the divergence MUST be explicitly documented as one of the following:
 
 - **Controlled evolution** — target-state rule is intentionally ahead of implementation
@@ -195,18 +197,27 @@ The following reconciliations are locked for Phase 2 and MUST be honored in down
 1. **`@hbc/project-canvas` scope reconciliation**  
    Current repo truth already supports SPFx-safe use of `@hbc/project-canvas` in governed contexts outside the Personal Work Hub. This policy does **not** invalidate those uses. For Phase 2 lane doctrine, it only locks adaptive-layout authority for the **PWA Personal Work Hub**.
 
-2. **`@hbc/app-shell` posture reconciliation**  
-   Current repo truth treats `@hbc/app-shell` as a convenience/facade layer rather than a mandatory permanent architectural boundary. This policy preserves that posture. `@hbc/shell` remains canonical.
+2. **`@hbc/app-shell` posture reconciliation** *(sharpened 2026-03-20)*
+   `@hbc/app-shell` currently has **zero consumers** anywhere in the workspace — no app or package imports from it. The live SPFx extension (`HbIntelHeaderApplicationCustomizer.ts`) imports `HbcAppShell` directly from `'@hbc/ui-kit/app-shell'`, not from `@hbc/app-shell`. The package's own self-description is internally inconsistent: the `src/index.ts` file header calls it a "PWA facade" while the `README.md` warns against PWA use and describes it as targeting SPFx / Project Hub shell contexts. This policy's characterisation of `@hbc/app-shell` as an optional SPFx / Project Hub convenience aggregator (Locked Decisions table, Shared Primitive Binding table) is the intent, but current repo truth is that neither SPFx nor any app has adopted it. `@hbc/shell` remains canonical. The package's self-description should be aligned with the policy intent before consumers are added.
 
 3. **Team/direct-report visibility reconciliation**  
    Current shared feed seams expose delegation-oriented team scopes, but true direct-report item visibility is not yet considered complete. Phase 2 first release may use summary plus governed limited item lists for approved scopes, while full direct-report item visibility remains deferred pending org-chart / entitlement plumbing.
 
-4. **Current-state-map reconciliation requirement**  
+4. **Current-state-map reconciliation requirement**
    Any implementation or design artifact claiming lane-boundary compliance MUST explicitly annotate where current implementation is:
    - compliant,
    - controlled evolution,
    - known constrained current state,
    - or superseded.
+
+5. **`@hbc/my-work-feed` lane binding not yet established — controlled evolution**
+   The Shared Primitive Binding table requires both lanes to consume `@hbc/my-work-feed`. As of the 2026-03-20 audit, neither `apps/pwa` nor `packages/spfx` declares `@hbc/my-work-feed` as a dependency or imports from it. The Personal Work Hub aggregation wiring is Phase 2 target-state work not yet built. This is classified as **controlled evolution** — the policy is intentionally ahead of implementation. No violation of Anti-Drift Rule 5 applies yet because no parallel publication model has been introduced.
+
+6. **`@hbc/notification-intelligence` lane binding not yet established — controlled evolution**
+   Same pattern as note 5. The Shared Primitive Binding table requires both lanes to consume `@hbc/notification-intelligence`. Neither `apps/pwa` nor `packages/spfx` currently does. Current consumers are domain packages only (`@hbc/bic-next-move`, `@hbc/step-wizard`, feature packages, `@hbc/provisioning`). Classified as **controlled evolution**.
+
+7. **`/my-work` PWA landing not yet implemented — controlled evolution**
+   The Lane Model table assigns the PWA default steady-state landing to `/my-work` for approved rollout cohorts. In current repo truth: `apps/pwa` index route redirects to `/project-hub`; `WORKSPACE_IDS` in `@hbc/shell/src/types.ts` contains no `my-work` entry; `resolveRoleLandingPath()` in `ShellCore.tsx` returns `/project-hub` for Member roles and `/leadership` for Executive roles. No `/my-work` route exists anywhere in the monorepo. Classified as **controlled evolution** — the Personal Work Hub landing is Phase 2 scope not yet delivered. Downstream routing and shell work (P2-B1) must establish this path before the lane-boundary gate passes.
 
 ---
 
