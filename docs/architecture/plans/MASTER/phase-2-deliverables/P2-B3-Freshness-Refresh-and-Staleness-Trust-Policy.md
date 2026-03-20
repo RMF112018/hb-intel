@@ -19,22 +19,24 @@ Users must never be misled into thinking they are seeing live data when they are
 
 This document is **normative for target-state behavior**. It must not be read as claiming that every rule in this policy is already implemented in the current repo. Where current implementation is partial or provisional, this document states the required execution posture and the reconciliation needed before the trust-state gate can pass.
 
+**Repo-truth audit — 2026-03-20:** All current-state anchors in the Reconciliation Notes below were verified against live package code. Three corrections applied: (1) the `'queued'`-in-type anchor is accurate, but a precision note has been added that the aggregation pipeline already never produces `'queued'` — the remaining task is type cleanup, not a behavioral correction; (2) the connectivity delegation bullet has been corrected — this is already complete in `apps/pwa/src/router/root-route.tsx`; (3) all other anchors confirmed accurate. Execution-requirement constants (`FEED_FRESHNESS_WINDOW_MS`, `SOURCE_FRESHNESS_WINDOW_MS`, `FEED_AUTO_REFRESH_INTERVAL_MS`) and the §13 telemetry event names do not yet exist in live code — controlled evolution, correctly framed as target requirements throughout. The live `FeedTelemetry` covers pipeline-internal events only (`dedupe`, `supersession`, `source-error`, `aggregation-complete`); the §13 trust/refresh event contract is additive.
+
 ---
 
 ## Repo-Truth Reconciliation Notes
 
 ### Current repo-truth anchors
 
-- The feed type system currently exposes `MyWorkSyncStatus = 'live' | 'cached' | 'partial' | 'queued'`.
-- The current aggregation path emits `live`, `cached`, or `partial` freshness outcomes and stamps a single sync timestamp during aggregation.
-- The PWA root shell already mounts connectivity UI at the application shell level via `HbcConnectivityBar` and consumes `@hbc/session-state` connectivity.
-- The current lane model still contains provisional team/delegated remnants (`delegated-team`) in the shared feed types and normalization path.
+- The feed type system currently exposes `MyWorkSyncStatus = 'live' | 'cached' | 'partial' | 'queued'` (`packages/my-work-feed/src/types/IMyWorkItem.ts`).
+- The current aggregation path (`src/api/aggregateFeed.ts`) emits `live`, `cached`, or `partial` freshness outcomes only — `buildQueueHealth()` derives freshness solely from source outcomes and never produces `'queued'`. A single `lastRefreshedIso` timestamp is stamped per aggregation run (`IMyWorkFeedResult` in `src/types/IMyWorkQuery.ts`).
+- The PWA root shell already mounts connectivity UI at the application shell level via `HbcConnectivityBar` and consumes `@hbc/session-state` connectivity (`apps/pwa/src/router/root-route.tsx`, line 22 import, line 36 usage — comment: "D-PH6F-1: Online/offline connectivity signal — delegated to @hbc/session-state").
+- The current lane model still contains provisional team/delegated remnants (`delegated-team`) in the shared feed types and normalization path (annotated `@provisional` as of P2-A3 audit; removal deferred to P2-A1).
 
 ### Required reconciliation to satisfy this policy
 
-- `queued` must no longer be treated as canonical freshness. It must be modeled separately as a local-change queue state.
-- User-facing trust timestamps must split `lastRefreshAttemptIso` from `lastTrustedDataIso` / `lastSuccessfulDataIso`.
-- Connectivity truth must be delegated to the resolved `@hbc/session-state` signal, not a raw browser online/offline flag.
+- `queued` must be removed from `MyWorkSyncStatus` and `IMyWorkHealthState.freshness`. It must be modeled only as a separate local-change queue state (as `IMyWorkOfflineState.queuedActionCount` / `queuedActions` already are). Note: the aggregation pipeline already never produces `'queued'`; the outstanding task is type cleanup only.
+- User-facing trust timestamps must split `lastRefreshAttemptIso` from `lastTrustedDataIso` / `lastSuccessfulDataIso`. Not yet implemented — `IMyWorkFeedResult` has only `lastRefreshedIso`.
+- ~~Connectivity truth must be delegated to the resolved `@hbc/session-state` signal~~ — **Already complete** (`root-route.tsx` `useConnectivity()` from `@hbc/session-state`). No remaining action required here.
 - Team/direct-report trust behavior remains **provisional** until future completion of org-chart and entitlement plumbing. Any team-visibility freshness UX must carry that dependency explicitly.
 
 ---
