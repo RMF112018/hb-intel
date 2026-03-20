@@ -61,7 +61,7 @@ Phase 2 planning is underway. Workstreams A, B, and C are complete — all 13 de
 | P2-D1 | [Role-to-Hub Entitlement Matrix](P2-D1-Role-to-Hub-Entitlement-Matrix.md) | Governance Policy |
 | P2-D2 | Adaptive Layout and Zone Governance Spec | Not Started |
 | P2-D3 | [Analytics Card Governance Matrix](P2-D3-Analytics-Card-Governance-Matrix.md) | Governance Policy |
-| P2-D4 | Delegated and Team Lane Governance Note | Not Started |
+| P2-D4 | [Delegated and Team Lane Governance Note](P2-D4-Delegated-and-Team-Lane-Governance-Note.md) | Note |
 | P2-D5 | Personalization Policy and Saved-View Rules | Not Started |
 
 ### Workstream E — Multi-Role Context, Rollout, and Validation
