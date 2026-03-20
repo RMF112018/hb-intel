@@ -897,21 +897,33 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hbc/bic-next-move':
+        specifier: workspace:*
+        version: link:../../packages/bic-next-move
       '@hbc/complexity':
         specifier: workspace:*
         version: link:../../packages/complexity
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
+      '@hbc/features-business-development':
+        specifier: workspace:*
+        version: link:../../packages/features/business-development
       '@hbc/features-estimating':
         specifier: workspace:*
         version: link:../../packages/features/estimating
+      '@hbc/features-project-hub':
+        specifier: workspace:*
+        version: link:../../packages/features/project-hub
       '@hbc/models':
         specifier: workspace:*
         version: link:../../packages/models
       '@hbc/my-work-feed':
         specifier: workspace:*
         version: link:../../packages/my-work-feed
+      '@hbc/notification-intelligence':
+        specifier: workspace:*
+        version: link:../../packages/notification-intelligence
       '@hbc/provisioning':
         specifier: workspace:*
         version: link:../../packages/provisioning
@@ -1780,12 +1792,18 @@ importers:
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../auth
+      '@hbc/bic-next-move':
+        specifier: workspace:*
+        version: link:../../bic-next-move
       '@hbc/health-indicator':
         specifier: workspace:*
         version: link:../../health-indicator
       '@hbc/models':
         specifier: workspace:*
         version: link:../../models
+      '@hbc/notification-intelligence':
+        specifier: workspace:*
+        version: link:../../notification-intelligence
       '@hbc/post-bid-autopsy':
         specifier: workspace:*
         version: link:../../post-bid-autopsy

@@ -10,6 +10,7 @@ import { toFeaturePermissionRegistrations, startPhase, endPhase } from '@hbc/she
 import { FEATURE_REGISTRY } from './features/featureRegistry.js';
 import { bootstrapMockEnvironment } from './bootstrap.js';
 import { initializeMsalAuth } from './auth/msal-init.js';
+import { assembleHubSources } from './sources/sourceAssembly.js';
 import { App } from './App.js';
 import './pwa.css';
 
@@ -40,6 +41,9 @@ async function start(): Promise<void> {
     toFeaturePermissionRegistrations(Object.values(FEATURE_REGISTRY)),
   );
   endPhase('permission-resolution', { source: 'pwa-bootstrap', outcome: 'success', runtimeMode: authMode });
+
+  // P2-C1: Assemble hub sources — BIC modules, notification registrations, MyWork adapters.
+  assembleHubSources();
 
   const root = document.getElementById('root');
   if (!root) throw new Error('Root element not found');

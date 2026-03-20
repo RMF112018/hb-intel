@@ -75,6 +75,14 @@ export type {
   SeverityLevel,
 } from './constants/index.js';
 
+// BIC Registration + Notification Registrations (P2-C5 Blockers 1, 5)
+export {
+  ESTIMATING_BID_READINESS_BIC_KEY,
+  ESTIMATING_BID_READINESS_BIC_LABEL,
+  createEstimatingBidReadinessBicRegistration,
+  ESTIMATING_NOTIFICATION_REGISTRATIONS,
+} from './bid-readiness/index.js';
+
 // Bid Readiness (SF18 adapter surface)
 export {
   estimatingBidReadinessProfile,

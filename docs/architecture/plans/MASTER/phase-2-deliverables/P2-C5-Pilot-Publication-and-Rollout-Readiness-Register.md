@@ -125,7 +125,7 @@ All 13 Phase 2 acceptance gates mapped to their evidence documents:
 | 2 | Lane-boundary | [P2-B0](P2-B0-Lane-Ownership-and-Coexistence-Rules.md) + design review signoff | Spec ✅; Signoff ❌ |
 | 3 | Work-surface | [P2-A1](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) + [P2-D2] (zone governance) + UX review | Spec ✅; Implementation ✅ (3-zone layout, role-aware composition, P2-D2 referenced); UX review ❌ |
 | 4 | Low-work | [P2-A1 §4](P2-A1-Personal-Work-Hub-Operating-Model-Register.md) (empty-state rules) + UX proof | Spec ✅; Implementation ✅ (hub-level empty state, no redirect on empty queue); UX proof ❌ |
-| 5 | Publication | [P2-C1](P2-C1-First-Release-Source-Tranche-Register.md) + **P2-C5** (this register) + integration validation | Spec ✅; Validation ❌ |
+| 5 | Publication | [P2-C1](P2-C1-First-Release-Source-Tranche-Register.md) + **P2-C5** (this register) + integration validation | Spec ✅; Implementation ✅ (all 5 sources registered with BIC factories and notification registrations; MyWork adapter assembly wired); Validation ❌ |
 | 6 | Signal | [P2-C2](P2-C2-Notification-to-Work-Mapping-Policy.md) + interaction review + launch checks | Spec ✅; Review ❌ |
 | 7 | Role-governance | [P2-D1] (entitlement matrix) + role validation | P2-D1 ❌; Implementation hook ✅ (RoleGate-based card visibility per P2-D1 §6) |
 | 8 | Personalization | [P2-D5] (personalization policy) + layout governance proof | P2-D5 ❌ |
@@ -273,13 +273,13 @@ Named blockers that must be resolved before pilot launch:
 
 | # | Blocker | Blocked Gate | Resolution Owner | Target | Status |
 |---|---|---|---|---|---|
-| 1 | Estimating BIC registration not created | 5 — Publication | Estimating domain lead | Wave 1 | ❌ Open |
-| 2 | BD Score BIC registration not created | 5 — Publication | BD domain lead | Wave 1 | ❌ Open |
-| 3 | BD Strategic BIC registration not created | 5 — Publication | BD domain lead | Wave 1 | ❌ Open |
-| 4 | Project Hub Health BIC registration not created | 5 — Publication | Project Hub lead | Wave 1 | ❌ Open |
-| 5 | Estimating notification registrations not defined | 6 — Signal | Platform + Estimating | Wave 1 | ❌ Open |
-| 6 | BD notification registrations not defined | 6 — Signal | Platform + BD | Wave 1 | ❌ Open |
-| 7 | Project Hub notification registrations not defined | 6 — Signal | Platform + Project Hub | Wave 1 | ❌ Open |
+| 1 | Estimating BIC registration not created | 5 — Publication | Estimating domain lead | Wave 1 | ✅ Resolved — `createEstimatingBidReadinessBicRegistration()` factory created and wired in `sourceAssembly.ts` |
+| 2 | BD Score BIC registration not created | 5 — Publication | BD domain lead | Wave 1 | ✅ Resolved — `createBdScoreBenchmarkBicRegistration()` factory created and wired in `sourceAssembly.ts` |
+| 3 | BD Strategic BIC registration not created | 5 — Publication | BD domain lead | Wave 1 | ✅ Resolved — `createBdStrategicIntelligenceBicRegistration()` factory created and wired in `sourceAssembly.ts` |
+| 4 | Project Hub Health BIC registration not created | 5 — Publication | Project Hub lead | Wave 1 | ✅ Resolved — `createProjectHealthPulseBicRegistration()` factory created and wired in `sourceAssembly.ts` |
+| 5 | Estimating notification registrations not defined | 6 — Signal | Platform + Estimating | Wave 1 | ✅ Resolved — `ESTIMATING_NOTIFICATION_REGISTRATIONS` (3 events) defined and registered |
+| 6 | BD notification registrations not defined | 6 — Signal | Platform + BD | Wave 1 | ✅ Resolved — `BD_SCORE_BENCHMARK_NOTIFICATION_REGISTRATIONS` (3 events) + `BD_STRATEGIC_INTELLIGENCE_NOTIFICATION_REGISTRATIONS` (3 events) defined and registered |
+| 7 | Project Hub notification registrations not defined | 6 — Signal | Platform + Project Hub | Wave 1 | ✅ Resolved — `PROJECT_HEALTH_PULSE_NOTIFICATION_REGISTRATIONS` (4 events) defined and registered |
 | 8 | `/my-work` route not implemented | 1 — Default home | Experience/Shell | Wave 1 | ✅ Resolved — route created, `HbcMyWorkFeed` wired, `MyWorkProvider` mounted |
 | 9 | `resolveRoleLandingPath()` not updated | 1 — Default home | Experience/Shell | Wave 1 | ✅ Resolved — refactored to delegate to `resolveLandingDecision()` with cohort gate via `isMyWorkCohortEnabled()` |
 | 10 | Workstream D deliverables not complete | 7, 8, 9 — Role/Personalization | Experience + Product | Wave 1 | ❌ Open |

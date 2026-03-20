@@ -56,6 +56,16 @@ export {
   validateAdminChecklistDefinitions,
 } from './checklist/index.js';
 
+// BIC Registration (P2-C5 Blocker #1)
+export {
+  ESTIMATING_BID_READINESS_BIC_KEY,
+  ESTIMATING_BID_READINESS_BIC_LABEL,
+  createEstimatingBidReadinessBicRegistration,
+} from './bic-registration.js';
+
+// Notification Registrations (P2-C5 Blocker #5)
+export { ESTIMATING_NOTIFICATION_REGISTRATIONS } from './notification-registrations.js';
+
 // Integrations
 export {
   projectBidReadinessToBicNextMove,

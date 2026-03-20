@@ -1,5 +1,15 @@
 export { businessDevelopmentStrategicIntelligenceProfile } from './profiles/index.js';
 
+// BIC Registration (P2-C5 Blocker #3)
+export {
+  BD_STRATEGIC_INTELLIGENCE_BIC_KEY,
+  BD_STRATEGIC_INTELLIGENCE_BIC_LABEL,
+  createBdStrategicIntelligenceBicRegistration,
+} from './bic-registration.js';
+
+// Notification Registrations (P2-C5 Blocker #6)
+export { BD_STRATEGIC_INTELLIGENCE_NOTIFICATION_REGISTRATIONS } from './notification-registrations.js';
+
 export {
   mapStrategicIntelligenceStateToBdView,
   projectCommitmentRegister,

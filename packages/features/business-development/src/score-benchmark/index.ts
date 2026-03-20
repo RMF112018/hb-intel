@@ -1,5 +1,15 @@
 export { businessDevelopmentScoreBenchmarkProfile } from './profiles/index.js';
 
+// BIC Registration (P2-C5 Blocker #2)
+export {
+  BD_SCORE_BENCHMARK_BIC_KEY,
+  BD_SCORE_BENCHMARK_BIC_LABEL,
+  createBdScoreBenchmarkBicRegistration,
+} from './bic-registration.js';
+
+// Notification Registrations (P2-C5 Blocker #6)
+export { BD_SCORE_BENCHMARK_NOTIFICATION_REGISTRATIONS } from './notification-registrations.js';
+
 export {
   mapScoreBenchmarkSnapshotToBdView,
   createReviewerConsensusSummary,

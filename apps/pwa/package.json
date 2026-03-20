@@ -1,6 +1,6 @@
 {
   "name": "@hbc/pwa",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -24,7 +24,11 @@
     "@hbc/session-state": "workspace:*",
     "@hbc/smart-empty-state": "workspace:*",
     "@hbc/my-work-feed": "workspace:*",
+    "@hbc/bic-next-move": "workspace:*",
+    "@hbc/notification-intelligence": "workspace:*",
     "@hbc/features-estimating": "workspace:*",
+    "@hbc/features-business-development": "workspace:*",
+    "@hbc/features-project-hub": "workspace:*",
     "@azure/msal-browser": "^4.0.0",
     "@azure/msal-react": "^3.0.0",
     "@fluentui/react-components": "^9.56.0",

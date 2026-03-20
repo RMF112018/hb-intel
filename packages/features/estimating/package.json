@@ -66,6 +66,8 @@
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
     "@hbc/smart-empty-state": "workspace:*",
+    "@hbc/bic-next-move": "workspace:*",
+    "@hbc/notification-intelligence": "workspace:*",
     "@hbc/health-indicator": "workspace:*",
     "@hbc/post-bid-autopsy": "workspace:*",
     "@hbc/session-state": "workspace:*",
