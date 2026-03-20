@@ -30,7 +30,7 @@ describe('D-PH6-15 RealTableStorageService (mocked TableClient)', () => {
     mockUpsertEntity.mockClear();
     mockListEntities.mockReset();
     fromConnectionString.mockClear();
-    process.env.AZURE_STORAGE_CONNECTION_STRING = 'UseDevelopmentStorage=true';
+    process.env.AZURE_TABLE_ENDPOINT = 'UseDevelopmentStorage=true';
   });
 
   const makeStatus = (overrides: Partial<IProvisioningStatus> = {}): IProvisioningStatus => ({

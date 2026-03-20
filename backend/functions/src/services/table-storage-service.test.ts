@@ -10,16 +10,16 @@ const AZURITE_ENABLED = process.env.AZURITE_TEST === 'true';
  * Integration tests target Azurite when enabled to prove the real adapter contract.
  */
 describe('D-PH6-15 RealTableStorageService constructor', () => {
-  it('throws when AZURE_STORAGE_CONNECTION_STRING is missing', async () => {
-    const previous = process.env.AZURE_STORAGE_CONNECTION_STRING;
-    delete process.env.AZURE_STORAGE_CONNECTION_STRING;
+  it('throws when AZURE_TABLE_ENDPOINT is missing', async () => {
+    const previous = process.env.AZURE_TABLE_ENDPOINT;
+    delete process.env.AZURE_TABLE_ENDPOINT;
 
     expect(() => new RealTableStorageService()).toThrow(
-      'AZURE_STORAGE_CONNECTION_STRING is required'
+      'AZURE_TABLE_ENDPOINT is required'
     );
 
     if (previous) {
-      process.env.AZURE_STORAGE_CONNECTION_STRING = previous;
+      process.env.AZURE_TABLE_ENDPOINT = previous;
     }
   });
 });

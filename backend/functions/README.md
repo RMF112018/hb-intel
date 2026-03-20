@@ -16,7 +16,7 @@ This package hosts HB Intel Azure Functions for provisioning and integration end
     "AZURE_CLIENT_ID": "<app-registration-client-id>",
     "AZURE_CLIENT_SECRET": "<dev-service-principal-secret>",
     "AzureSignalRConnectionString": "<signalr-connection-string>",
-    "AZURE_STORAGE_CONNECTION_STRING": "UseDevelopmentStorage=true",
+    "AZURE_TABLE_ENDPOINT": "UseDevelopmentStorage=true",
     "SHAREPOINT_TENANT_URL": "https://hbconstruction.sharepoint.com",
     "SHAREPOINT_APP_CATALOG_URL": "https://hbconstruction.sharepoint.com/sites/appcatalog",
     "HB_INTEL_SPFX_APP_ID": "<hb-intel-spfx-product-id-guid>",
@@ -57,7 +57,7 @@ SharePoint audit writes are intentionally non-blocking. They must always use `.c
 
 ### Phase 6.6 Environment Variables
 
-- `AZURE_STORAGE_CONNECTION_STRING`: Required by `RealTableStorageService` for Azure Table access.
+- `AZURE_TABLE_ENDPOINT`: App-data Table Storage endpoint URL (production) or connection string (local dev). Used by all domain table services via `createAppTableClient()`.
 - `SHAREPOINT_TENANT_URL`: Root site collection URL used for audit-list setup script and SharePoint service operations.
 - `HBC_ADAPTER_MODE`: `mock` for local deterministic mode; `proxy` for production services (Managed Identity, SharePoint, Graph). Legacy value `real` is accepted as alias for `proxy`.
 

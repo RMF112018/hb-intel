@@ -266,7 +266,7 @@ Fill in this table as you complete setup. These values are the handoff to the de
 | `FUNCTIONS_WORKER_RUNTIME` | `node` | Do not change |
 | `WEBSITE_NODE_DEFAULT_VERSION` | `~20` | Infrastructure sets this |
 | `AzureWebJobsStorage` | Storage connection string or Key Vault reference | Required for Functions host operation |
-| `AZURE_STORAGE_CONNECTION_STRING` | Storage connection string or Key Vault reference | For Table Storage (provisioning, audit, idempotency) |
+| `AZURE_TABLE_ENDPOINT` | Table Storage endpoint URL (e.g., `https://hbinteldata{env}.table.core.windows.net`) | For app-data Table Storage; uses Managed Identity in production |
 | `AzureSignalRConnectionString` | SignalR connection string or Key Vault reference | For real-time updates |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | App Insights connection string or Key Vault reference | For monitoring and telemetry |
 | `SHAREPOINT_TENANT_URL` | Your SharePoint tenant URL | e.g., `https://contoso.sharepoint.com` |

@@ -1,5 +1,6 @@
-import { TableClient, odata } from '@azure/data-tables';
+import { odata } from '@azure/data-tables';
 import type { IContractInfo, ICommitmentApproval } from '@hbc/models';
+import { createAppTableClient } from '../utils/table-client-factory.js';
 
 const CONTRACT_TABLE = 'HBContracts';
 const APPROVAL_TABLE = 'HBContractApprovals';
@@ -19,14 +20,8 @@ export interface IContractService {
 // ---------------------------------------------------------------------------
 
 export class RealContractService implements IContractService {
-  private readonly contractClient: TableClient;
-  private readonly approvalClient: TableClient;
-
-  constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
-    this.contractClient = TableClient.fromConnectionString(connectionString, CONTRACT_TABLE);
-    this.approvalClient = TableClient.fromConnectionString(connectionString, APPROVAL_TABLE);
-  }
+  private readonly contractClient = createAppTableClient(CONTRACT_TABLE);
+  private readonly approvalClient = createAppTableClient(APPROVAL_TABLE);
 
   async listContracts(projectId: string, page: number, pageSize: number): Promise<{ items: IContractInfo[]; total: number }> {
     const all = await this.listByProject(projectId);

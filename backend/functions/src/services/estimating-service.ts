@@ -1,5 +1,6 @@
-import { TableClient, odata } from '@azure/data-tables';
+import { odata } from '@azure/data-tables';
 import type { IEstimatingTracker, IEstimatingKickoff } from '@hbc/models';
+import { createAppTableClient } from '../utils/table-client-factory.js';
 
 const TRACKER_TABLE = 'HBEstimatingTrackers';
 const KICKOFF_TABLE = 'HBEstimatingKickoffs';
@@ -20,14 +21,8 @@ export interface IEstimatingService {
 // ---------------------------------------------------------------------------
 
 export class RealEstimatingService implements IEstimatingService {
-  private readonly trackerClient: TableClient;
-  private readonly kickoffClient: TableClient;
-
-  constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
-    this.trackerClient = TableClient.fromConnectionString(connectionString, TRACKER_TABLE);
-    this.kickoffClient = TableClient.fromConnectionString(connectionString, KICKOFF_TABLE);
-  }
+  private readonly trackerClient = createAppTableClient(TRACKER_TABLE);
+  private readonly kickoffClient = createAppTableClient(KICKOFF_TABLE);
 
   // ── Trackers ──────────────────────────────────────────────────────────────
 

@@ -1,5 +1,6 @@
-import { TableClient, odata } from '@azure/data-tables';
+import { odata } from '@azure/data-tables';
 import type { IProjectManagementPlan, IPMPSignature } from '@hbc/models';
+import { createAppTableClient } from '../utils/table-client-factory.js';
 
 const PLAN_TABLE = 'HBPmpPlans';
 const SIGNATURE_TABLE = 'HBPmpSignatures';
@@ -19,14 +20,8 @@ export interface IPmpService {
 // ---------------------------------------------------------------------------
 
 export class RealPmpService implements IPmpService {
-  private readonly planClient: TableClient;
-  private readonly signatureClient: TableClient;
-
-  constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
-    this.planClient = TableClient.fromConnectionString(connectionString, PLAN_TABLE);
-    this.signatureClient = TableClient.fromConnectionString(connectionString, SIGNATURE_TABLE);
-  }
+  private readonly planClient = createAppTableClient(PLAN_TABLE);
+  private readonly signatureClient = createAppTableClient(SIGNATURE_TABLE);
 
   async listPlans(projectId: string, page: number, pageSize: number): Promise<{ items: IProjectManagementPlan[]; total: number }> {
     const all = await this.listByProject(projectId);

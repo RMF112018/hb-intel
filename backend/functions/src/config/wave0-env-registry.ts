@@ -53,9 +53,9 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
     requiredInProd: true,
   },
   {
-    name: 'AZURE_STORAGE_CONNECTION_STRING',
+    name: 'AZURE_TABLE_ENDPOINT',
     bucket: 'infrastructure',
-    description: 'Azure Storage connection string for table/blob/queue',
+    description: 'App-data Table Storage endpoint URL (production) or connection string (local dev)',
     requiredInProd: true,
   },
   {

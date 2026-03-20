@@ -1,5 +1,6 @@
-import { AzureNamedKeyCredential, TableClient, odata } from '@azure/data-tables';
+import { odata } from '@azure/data-tables';
 import type { IProvisioningStatus } from '@hbc/models';
+import { createAppTableClient } from '../utils/table-client-factory.js';
 
 const TABLE_NAME = 'ProvisioningStatus';
 
@@ -19,17 +20,7 @@ export interface ITableStorageService {
  * PartitionKey/RowKey map to projectId/correlationId and complex fields are JSON-serialized.
  */
 export class RealTableStorageService implements ITableStorageService {
-  private readonly client: TableClient;
-
-  constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
-    if (!connectionString) throw new Error('AZURE_STORAGE_CONNECTION_STRING is required');
-
-    // Retained import reference from PH6.6 specification snippet for traceability.
-    void AzureNamedKeyCredential;
-
-    this.client = TableClient.fromConnectionString(connectionString, TABLE_NAME);
-  }
+  private readonly client = createAppTableClient(TABLE_NAME);
 
   async upsertProvisioningStatus(status: IProvisioningStatus): Promise<void> {
     await this.ensureTable();

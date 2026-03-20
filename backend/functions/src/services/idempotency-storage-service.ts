@@ -12,7 +12,7 @@
  * `cleanupIdempotency` timer trigger.
  */
 
-import { TableClient } from '@azure/data-tables';
+import { createAppTableClient } from '../utils/table-client-factory.js';
 
 const TABLE_NAME = 'IdempotencyRecords';
 
@@ -67,16 +67,8 @@ export interface IIdempotencyStorageService {
 // ---------------------------------------------------------------------------
 
 export class RealIdempotencyStorageService implements IIdempotencyStorageService {
-  private readonly client: TableClient;
+  private readonly client = createAppTableClient(TABLE_NAME);
   private tableEnsured = false;
-
-  constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
-    if (!connectionString) {
-      throw new Error('AZURE_STORAGE_CONNECTION_STRING is required for IdempotencyStorageService');
-    }
-    this.client = TableClient.fromConnectionString(connectionString, TABLE_NAME);
-  }
 
   async getRecord(operation: string, key: string): Promise<IIdempotencyRecord | null> {
     await this.ensureTable();

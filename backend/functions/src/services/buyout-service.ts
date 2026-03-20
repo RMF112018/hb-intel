@@ -1,5 +1,6 @@
-import { TableClient, odata } from '@azure/data-tables';
+import { odata } from '@azure/data-tables';
 import type { IBuyoutEntry, IBuyoutSummary } from '@hbc/models';
+import { createAppTableClient } from '../utils/table-client-factory.js';
 
 const TABLE_NAME = 'HBBuyoutEntries';
 
@@ -17,12 +18,7 @@ export interface IBuyoutService {
 // ---------------------------------------------------------------------------
 
 export class RealBuyoutService implements IBuyoutService {
-  private readonly client: TableClient;
-
-  constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
-    this.client = TableClient.fromConnectionString(connectionString, TABLE_NAME);
-  }
+  private readonly client = createAppTableClient(TABLE_NAME);
 
   async listEntries(projectId: string, page: number, pageSize: number): Promise<{ items: IBuyoutEntry[]; total: number }> {
     const all = await this.listByProject(projectId);

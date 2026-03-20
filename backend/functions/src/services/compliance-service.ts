@@ -1,5 +1,6 @@
-import { TableClient, odata } from '@azure/data-tables';
+import { odata } from '@azure/data-tables';
 import type { IComplianceEntry, IComplianceSummary } from '@hbc/models';
+import { createAppTableClient } from '../utils/table-client-factory.js';
 
 const TABLE_NAME = 'HBComplianceEntries';
 
@@ -17,12 +18,7 @@ export interface IComplianceService {
 // ---------------------------------------------------------------------------
 
 export class RealComplianceService implements IComplianceService {
-  private readonly client: TableClient;
-
-  constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
-    this.client = TableClient.fromConnectionString(connectionString, TABLE_NAME);
-  }
+  private readonly client = createAppTableClient(TABLE_NAME);
 
   async listEntries(projectId: string, page: number, pageSize: number): Promise<{ items: IComplianceEntry[]; total: number }> {
     const all = await this.listByProject(projectId);

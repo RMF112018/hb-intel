@@ -1,5 +1,6 @@
-import { TableClient, odata } from '@azure/data-tables';
+import { odata } from '@azure/data-tables';
 import type { IScheduleActivity, IScheduleMetrics } from '@hbc/models';
+import { createAppTableClient } from '../utils/table-client-factory.js';
 
 const TABLE_NAME = 'HBScheduleActivities';
 
@@ -17,12 +18,7 @@ export interface IScheduleService {
 // ---------------------------------------------------------------------------
 
 export class RealScheduleService implements IScheduleService {
-  private readonly client: TableClient;
-
-  constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
-    this.client = TableClient.fromConnectionString(connectionString, TABLE_NAME);
-  }
+  private readonly client = createAppTableClient(TABLE_NAME);
 
   async listActivities(projectId: string, page: number, pageSize: number): Promise<{ items: IScheduleActivity[]; total: number }> {
     const all = await this.listByProject(projectId);

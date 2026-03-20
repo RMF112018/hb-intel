@@ -136,21 +136,21 @@ The architecture audit report contained 11 claims requiring precision correction
 
 These items were identified during the reconciliation but are not resolved by documentation changes alone. They require engineering, infrastructure, or organizational decisions.
 
-### R1 — IaC gap (HIGHEST PRIORITY)
+### R1 — IaC gap ✅ RESOLVED
 
-No Bicep, ARM, Terraform, or Pulumi exists in the repository. The actual storage account topology, network rules, RBAC assignments, and resource configuration cannot be verified from the repository. This is the most significant operational readiness gap and blocks all of the following items.
+Bicep IaC added in `infra/main.bicep` defining two storage accounts (`hbintelhost{env}` for Functions host, `hbinteldata{env}` for app data tables) with per-resource RBAC role assignments for Managed Identity. Storage topology, network posture, and RBAC are now verifiable from the repository.
 
 **Owner:** Platform engineering + DevOps
-**Blocks:** Lifecycle policies, RBAC verification, storage account separation confirmation, identity-based storage connections
+**Resolved:** 2026-03-20 — `infra/main.bicep` with host + data account definitions and RBAC assignments
 
 ---
 
-### R2 — Production storage topology unconfirmed
+### R2 — Production storage topology ✅ RESOLVED
 
-Whether `AzureWebJobsStorage` and `AZURE_STORAGE_CONNECTION_STRING` map to the same or separate storage accounts in production cannot be determined from the repository. The `wave0-config-registry` designates `AzureWebJobsStorage` as "platform-managed" — this is ambiguous.
+Two-account topology confirmed and implemented. `AzureWebJobsStorage` maps to `hbintelhost{env}` (Functions host runtime). `AZURE_TABLE_ENDPOINT` (renamed from `AZURE_STORAGE_CONNECTION_STRING`) maps to `hbinteldata{env}` (app data tables). All 13 domain services now use `createAppTableClient()` which supports both endpoint URL (production, Managed Identity) and connection string (local dev, Azurite) modes.
 
 **Owner:** Platform engineering
-**Action required:** Confirm production topology; document in config registry; provision separate host account if sharing
+**Resolved:** 2026-03-20 — env var renamed, `table-client-factory.ts` created, config registry updated
 
 ---
 

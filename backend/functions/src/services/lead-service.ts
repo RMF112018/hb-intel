@@ -1,5 +1,6 @@
-import { TableClient, odata } from '@azure/data-tables';
+import { odata } from '@azure/data-tables';
 import type { ILead, ILeadFormData } from '@hbc/models';
+import { createAppTableClient } from '../utils/table-client-factory.js';
 
 const TABLE_NAME = 'HBLeads';
 const PARTITION_KEY = 'lead';
@@ -18,12 +19,7 @@ export interface ILeadService {
 // ---------------------------------------------------------------------------
 
 export class RealLeadService implements ILeadService {
-  private readonly client: TableClient;
-
-  constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
-    this.client = TableClient.fromConnectionString(connectionString, TABLE_NAME);
-  }
+  private readonly client = createAppTableClient(TABLE_NAME);
 
   async list(page: number, pageSize: number): Promise<{ items: ILead[]; total: number }> {
     const all = await this.listAll();

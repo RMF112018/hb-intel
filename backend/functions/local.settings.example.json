@@ -7,7 +7,7 @@
     "AZURE_TENANT_ID": "<your-tenant-id>",
     "AZURE_CLIENT_ID": "<app-registration-client-id>",
     "AZURE_CLIENT_SECRET": "<app-registration-client-secret-for-local-dev>",
-    "AZURE_STORAGE_CONNECTION_STRING": "UseDevelopmentStorage=true",
+    "AZURE_TABLE_ENDPOINT": "UseDevelopmentStorage=true",
     "AzureSignalRConnectionString": "<signalr-connection-string>",
     "APPLICATIONINSIGHTS_CONNECTION_STRING": "<app-insights-connection-string>",
     "SHAREPOINT_TENANT_URL": "https://hbconstruction.sharepoint.com",

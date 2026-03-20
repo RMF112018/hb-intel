@@ -1,5 +1,6 @@
-import { TableClient, odata } from '@azure/data-tables';
+import { odata } from '@azure/data-tables';
 import type { IRiskCostItem, IRiskCostManagement } from '@hbc/models';
+import { createAppTableClient } from '../utils/table-client-factory.js';
 
 const TABLE_NAME = 'HBRiskItems';
 
@@ -17,12 +18,7 @@ export interface IRiskService {
 // ---------------------------------------------------------------------------
 
 export class RealRiskService implements IRiskService {
-  private readonly client: TableClient;
-
-  constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
-    this.client = TableClient.fromConnectionString(connectionString, TABLE_NAME);
-  }
+  private readonly client = createAppTableClient(TABLE_NAME);
 
   async listItems(projectId: string, page: number, pageSize: number): Promise<{ items: IRiskCostItem[]; total: number }> {
     const all = await this.listByProject(projectId);

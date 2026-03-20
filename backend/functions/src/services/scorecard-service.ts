@@ -1,5 +1,6 @@
-import { TableClient, odata } from '@azure/data-tables';
+import { odata } from '@azure/data-tables';
 import type { IGoNoGoScorecard, IScorecardVersion } from '@hbc/models';
+import { createAppTableClient } from '../utils/table-client-factory.js';
 
 const SCORECARD_TABLE = 'HBScorecards';
 const VERSION_TABLE = 'HBScorecardVersions';
@@ -18,14 +19,8 @@ export interface IScorecardService {
 // ---------------------------------------------------------------------------
 
 export class RealScorecardService implements IScorecardService {
-  private readonly scorecardClient: TableClient;
-  private readonly versionClient: TableClient;
-
-  constructor() {
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!;
-    this.scorecardClient = TableClient.fromConnectionString(connectionString, SCORECARD_TABLE);
-    this.versionClient = TableClient.fromConnectionString(connectionString, VERSION_TABLE);
-  }
+  private readonly scorecardClient = createAppTableClient(SCORECARD_TABLE);
+  private readonly versionClient = createAppTableClient(VERSION_TABLE);
 
   async listScorecards(projectId: string, page: number, pageSize: number): Promise<{ items: IGoNoGoScorecard[]; total: number }> {
     const all = await this.listByProject(projectId);

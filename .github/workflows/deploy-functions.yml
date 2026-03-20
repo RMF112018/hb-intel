@@ -45,7 +45,7 @@ jobs:
       - name: Run unit tests (gate)
         run: pnpm turbo run test --filter=@hbc/functions --filter=@hbc/provisioning
         env:
-          AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
+          AZURE_TABLE_ENDPOINT: UseDevelopmentStorage=true
 
       - name: Package Functions artifact
         run: |
