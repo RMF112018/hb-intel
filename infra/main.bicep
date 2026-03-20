@@ -4,7 +4,8 @@
 //   hbintelhost{env}        — Azure Storage for Functions host runtime (AzureWebJobsStorage)
 //   hbintel-table-{env}     — Cosmos DB (Table API, serverless) for app data (AZURE_TABLE_ENDPOINT)
 //
-// Deploy: az deployment group create -g <rg> -f infra/main.bicep -p environmentName=dev functionAppPrincipalId=<principal-id>
+// Deploy (staging): az deployment group create -g <rg> -f infra/main.bicep -p infra/main.staging.bicepparam
+// Deploy (prod):    az deployment group create -g <rg> -f infra/main.bicep -p infra/main.prod.bicepparam
 
 @description('Environment suffix for resource naming (dev, staging, prod)')
 param environmentName string
