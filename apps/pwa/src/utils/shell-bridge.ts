@@ -7,6 +7,7 @@ import { createElement } from 'react';
 import type { ICurrentUser } from '@hbc/models';
 import type { WorkspaceId, SidebarItem } from '@hbc/shell';
 import { getNavItemsForWorkspace } from '@hbc/shell';
+import { usePermissionStore } from '@hbc/auth';
 import type { SidebarNavGroup, ShellUser } from '@hbc/ui-kit';
 import { DrawingSheet } from '@hbc/ui-kit';
 import { WORKSPACE_DESCRIPTORS } from '../router/workspace-config.js';
@@ -43,12 +44,29 @@ export function mapNavStoreToSidebarGroups(
 export function buildSidebarGroupsFromRegistry(
   workspaceId: WorkspaceId | null,
 ): SidebarNavGroup[] {
+  const groups: SidebarNavGroup[] = [];
+
+  // P2-B1 §11.5: "My Work" nav item when cohort flag is enabled.
+  if (usePermissionStore.getState().hasFeatureFlag('my-work-hub')) {
+    groups.push({
+      id: 'my-work',
+      label: 'My Work',
+      items: [
+        {
+          id: 'my-work-hub',
+          label: 'My Work',
+          icon: createElement(DrawingSheet, { size: 'sm' }),
+          href: '/my-work',
+        },
+      ],
+    });
+  }
+
   const wsId = workspaceId ?? 'project-hub';
   const navItems = getNavItemsForWorkspace(wsId);
-  if (navItems.length === 0) return [];
-  const descriptor = WORKSPACE_DESCRIPTORS[wsId];
-  return [
-    {
+  if (navItems.length > 0) {
+    const descriptor = WORKSPACE_DESCRIPTORS[wsId];
+    groups.push({
       id: wsId,
       label: descriptor?.label ?? 'Navigation',
       items: navItems.map((navItem) => ({
@@ -58,8 +76,10 @@ export function buildSidebarGroupsFromRegistry(
         href: navItem.path,
         requiredPermission: navItem.requiredPermission,
       })),
-    },
-  ];
+    });
+  }
+
+  return groups;
 }
 
 /**

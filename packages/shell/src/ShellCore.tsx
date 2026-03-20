@@ -7,6 +7,7 @@ import { AppLauncher } from './AppLauncher/index.js';
 import { BackToProjectHub } from './BackToProjectHub/index.js';
 import { ProjectPicker } from './ProjectPicker/index.js';
 import { ShellLayout } from './ShellLayout/index.js';
+import { resolveLandingDecision } from './landingResolver.js';
 import { resolveShellModeRules } from './shellModeRules.js';
 import type {
   ShellConnectivitySignal,
@@ -98,15 +99,14 @@ export interface ShellCoreProps {
 
 /**
  * Resolve role-appropriate landing path fallbacks.
+ * @deprecated Prefer resolveLandingDecision() for cohort-aware landing (P2-B1 §11.4).
  */
 export function resolveRoleLandingPath(resolvedRoles: readonly string[]): string {
-  if (resolvedRoles.includes('Administrator')) {
-    return '/admin';
-  }
-  if (resolvedRoles.includes('Executive')) {
-    return '/leadership';
-  }
-  return '/project-hub';
+  return resolveLandingDecision({
+    resolvedRoles,
+    runtimeMode: 'pwa',
+    cohortEnabled: false,
+  }).pathname;
 }
 
 /**

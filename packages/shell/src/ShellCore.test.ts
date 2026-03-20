@@ -52,6 +52,10 @@ describe('resolveRoleLandingPath', () => {
     expect(resolveRoleLandingPath(['Administrator'])).toBe('/admin');
   });
 
+  it('returns leadership for Executive role (cohort-disabled fallback)', () => {
+    expect(resolveRoleLandingPath(['Executive'])).toBe('/leadership');
+  });
+
   it('falls back to project hub for non-admin roles', () => {
     expect(resolveRoleLandingPath(['Member'])).toBe('/project-hub');
   });

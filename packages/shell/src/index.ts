@@ -70,6 +70,13 @@ export {
   resolveShellExperienceState,
 } from './ShellCore.js';
 export type { ShellCoreProps } from './ShellCore.js';
+export { resolveLandingDecision } from './landingResolver.js';
+export type {
+  LandingMode,
+  TeamMode,
+  LandingDecisionInput,
+  LandingDecision,
+} from './landingResolver.js';
 export { canCompleteFirstProtectedShellRender } from './useStartupTimingCompletion.js';
 export {
   RECENT_AUTH_WINDOW_MS,

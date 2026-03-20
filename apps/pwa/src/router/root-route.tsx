@@ -13,12 +13,12 @@ import {
   restoreRedirectTarget,
   clearRedirectMemory,
   isSafeRedirectPath,
-  resolveRoleLandingPath,
+  resolveLandingDecision,
   getSnapshot,
   validateBudgets,
 } from '@hbc/shell';
 import { HbcAppShell, HbcConnectivityBar } from '@hbc/ui-kit';
-import { useCurrentUser, useAuthStore } from '@hbc/auth';
+import { useCurrentUser, useAuthStore, usePermissionStore } from '@hbc/auth';
 import { useConnectivity, HbcSyncStatusBadge } from '@hbc/session-state';
 import { buildSidebarGroupsFromRegistry, mapCurrentUserToShellUser } from '../utils/shell-bridge.js';
 import { performPwaSignOut } from '../auth/signOut.js';
@@ -66,12 +66,17 @@ function RootComponent(): React.ReactNode {
       return;
     }
 
-    // Priority 2: Role-based landing when user is at root (PH6F-5)
+    // Priority 2: Role + cohort-aware landing when user is at root (PH6F-5, P2-B1 §11.3)
     if (router.state.location.pathname === '/' || router.state.location.pathname === '') {
       const resolvedRoles = useAuthStore.getState().session?.resolvedRoles ?? [];
-      const roleLandingPath = resolveRoleLandingPath(resolvedRoles);
-      if (roleLandingPath && roleLandingPath !== '/') {
-        void router.navigate({ to: roleLandingPath, replace: true });
+      const cohortEnabled = usePermissionStore.getState().hasFeatureFlag('my-work-hub');
+      const decision = resolveLandingDecision({
+        resolvedRoles,
+        runtimeMode: 'pwa',
+        cohortEnabled,
+      });
+      if (decision.pathname !== '/') {
+        void router.navigate({ to: decision.pathname, replace: true });
       }
     }
   }, [lifecyclePhase, router]);
