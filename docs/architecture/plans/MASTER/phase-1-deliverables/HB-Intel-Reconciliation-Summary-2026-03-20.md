@@ -172,12 +172,12 @@ The Docker/Linux Cosmos DB emulator does not support the Table API endpoint. If 
 
 ---
 
-### R5 — `responseBodyJson` entity size risk in IdempotencyRecords
+### R5 — `responseBodyJson` entity size risk in IdempotencyRecords ✅ RESOLVED
 
-`IdempotencyStorageService` stores the full HTTP response body in `responseBodyJson`. For domain operations returning large result sets (e.g., `getAllLeads` with hundreds of records), this can approach or exceed the 1 MiB Azure Table entity limit. Cap/truncation logic has not yet been implemented.
+`recordIdempotencyResult()` in `idempotency-guard.ts` now caps `responseBodyJson` at 32KB. Oversized bodies are replaced with a JSON truncation marker (`_idempotencyTruncated: true`) that preserves idempotency deduplication while preventing Azure Table entity size violations.
 
 **Owner:** Engineering
-**Action required:** Implement 32KB cap with truncation marker before production load
+**Resolved:** 2026-03-20 — `capResponseBody()` in `backend/functions/src/idempotency/idempotency-guard.ts`
 
 ---
 

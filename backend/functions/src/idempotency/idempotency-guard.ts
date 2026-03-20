@@ -20,6 +20,20 @@ const IDEMPOTENCY_OP_HEADER = 'X-Idempotency-Operation';
 /** Default idempotency record TTL: 24 hours in milliseconds. */
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 
+/** R5: Maximum byte size for cached response bodies (32 KB). */
+const MAX_RESPONSE_BODY_BYTES = 32_768;
+
+/** Replace oversized response bodies with a truncation marker. */
+function capResponseBody(body: string): string {
+  const sizeBytes = Buffer.byteLength(body, 'utf8');
+  if (sizeBytes <= MAX_RESPONSE_BODY_BYTES) return body;
+  return JSON.stringify({
+    _idempotencyTruncated: true,
+    message: 'Original response body exceeded 32KB idempotency storage cap',
+    originalSizeBytes: sizeBytes,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // checkIdempotency
 // ---------------------------------------------------------------------------
@@ -100,7 +114,7 @@ export function recordIdempotencyResult(
       partitionKey: operation,
       rowKey: key,
       statusCode,
-      responseBodyJson: responseBody,
+      responseBodyJson: capResponseBody(responseBody),
       expiresAt: expiresAt.toISOString(),
       recordedAt: now.toISOString(),
       recordedBy: upn,
