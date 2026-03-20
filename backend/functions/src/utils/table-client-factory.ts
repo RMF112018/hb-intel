@@ -1,12 +1,11 @@
 /**
- * R1/R2: Centralized TableClient factory for the app-data storage account.
+ * R1/R2/R4: Centralized TableClient factory for the app-data account.
  *
  * Reads AZURE_TABLE_ENDPOINT and creates the appropriate client:
  * - Endpoint URL (production): DefaultAzureCredential (Managed Identity)
+ *   Works transparently with both Azure Table Storage and Cosmos DB Table API
+ *   endpoints — the @azure/data-tables SDK is the migration seam.
  * - Connection string (local dev / Azurite): TableClient.fromConnectionString()
- *
- * Replaces the duplicated `TableClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING!, TABLE)`
- * pattern that was repeated across all 13 domain services.
  */
 
 import { TableClient } from '@azure/data-tables';

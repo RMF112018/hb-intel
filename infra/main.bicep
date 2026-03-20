@@ -1,8 +1,8 @@
-// R1+R2: HB Intel Storage Account Topology
+// R1+R2+R4: HB Intel Storage and Cosmos DB Topology
 //
-// Defines two storage accounts per the approved production topology:
-//   hbintelhost{env} — Functions host runtime (AzureWebJobsStorage)
-//   hbinteldata{env} — App data tables today, Cosmos DB endpoint tomorrow
+// Defines the production infrastructure:
+//   hbintelhost{env}        — Azure Storage for Functions host runtime (AzureWebJobsStorage)
+//   hbintel-table-{env}     — Cosmos DB (Table API, serverless) for app data (AZURE_TABLE_ENDPOINT)
 //
 // Deploy: az deployment group create -g <rg> -f infra/main.bicep -p environmentName=dev functionAppPrincipalId=<principal-id>
 
@@ -74,32 +74,46 @@ resource hostTableRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 }
 
 // ---------------------------------------------------------------------------
-// Data storage account — App data tables (Cosmos DB migration target)
+// Cosmos DB account — App data via Table API (R3: serverless, single-region)
 // ---------------------------------------------------------------------------
 
-resource dataStorage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
-  name: 'hbinteldata${environmentName}'
+// Cosmos DB Built-in Data Contributor role (read/write data plane access)
+var cosmosDbBuiltInDataContributor = '00000000-0000-0000-0000-000000000002'
+
+resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
+  name: 'hbintel-table-${environmentName}'
   location: location
-  kind: 'StorageV2'
-  sku: {
-    name: 'Standard_LRS'
-  }
+  kind: 'GlobalDocumentDB'
   properties: {
-    supportsHttpsTrafficOnly: true
-    minimumTlsVersion: 'TLS1_2'
-    allowBlobPublicAccess: false
+    databaseAccountOfferType: 'Standard'
+    capabilities: [
+      { name: 'EnableTable' }
+      { name: 'EnableServerless' }
+    ]
+    locations: [
+      {
+        locationName: location
+        failoverPriority: 0
+        isZoneRedundant: false
+      }
+    ]
+    consistencyPolicy: {
+      defaultConsistencyLevel: 'Session'
+    }
+    publicNetworkAccess: 'Enabled'
+    minimalTlsVersion: 'Tls12'
   }
 }
 
-// Data RBAC: Table Data Contributor only (app data is tables-only today)
+// Cosmos DB RBAC: Built-in Data Contributor for Managed Identity
 
-resource dataTableRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(dataStorage.id, functionAppPrincipalId, storageTableDataContributor)
-  scope: dataStorage
+resource cosmosDbDataRole 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' = {
+  name: guid(cosmosDbAccount.id, functionAppPrincipalId, cosmosDbBuiltInDataContributor)
+  parent: cosmosDbAccount
   properties: {
     principalId: functionAppPrincipalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageTableDataContributor)
-    principalType: 'ServicePrincipal'
+    roleDefinitionId: '${cosmosDbAccount.id}/sqlRoleDefinitions/${cosmosDbBuiltInDataContributor}'
+    scope: cosmosDbAccount.id
   }
 }
 
@@ -110,5 +124,5 @@ resource dataTableRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 @description('Connection string for AzureWebJobsStorage (host account)')
 output hostStorageConnectionString string = 'DefaultEndpointsProtocol=https;AccountName=${hostStorage.name};AccountKey=${hostStorage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
 
-@description('Table endpoint URL for AZURE_TABLE_ENDPOINT (data account)')
-output dataTableEndpoint string = hostStorage.properties.primaryEndpoints.table == '' ? 'https://${dataStorage.name}.table.${environment().suffixes.storage}' : dataStorage.properties.primaryEndpoints.table
+@description('Cosmos DB Table API endpoint URL for AZURE_TABLE_ENDPOINT')
+output dataTableEndpoint string = 'https://${cosmosDbAccount.name}.table.cosmos.azure.com'

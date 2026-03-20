@@ -165,12 +165,14 @@ Two-account topology confirmed and implemented. `AzureWebJobsStorage` maps to `h
 
 ---
 
-### R4 — Linux CI emulator gap for Cosmos DB Table API
+### R4 — Linux CI emulator gap for Cosmos DB Table API — DECIDED
 
-The Docker/Linux Cosmos DB emulator does not support the Table API endpoint. If CI agents run on Linux (common with GitHub Actions ubuntu-latest), integration tests against the Cosmos DB Table API cannot use the emulator. Options: (a) Windows CI agent, (b) real Azure test account for CI, (c) mock/interface-level test only with no emulator.
+**Decision:** Interface-only testing with mock adapters for CI. Every domain service has a `Mock*Service` implementation wired through `IServiceContainer`. Unit tests run against mocks on Linux CI (`ubuntu-latest`). Integration tests against the live Cosmos DB Table API run in staging (real Azure account), not in CI. This avoids Windows CI agent cost and real-Azure-account-in-CI credential complexity.
+
+The Cosmos DB Table API migration is complete. The `@azure/data-tables` SDK works transparently with both Azure Table Storage and Cosmos DB Table API endpoints — `createAppTableClient()` handles the connection seamlessly. `infra/main.bicep` now defines the Cosmos DB account (`hbintel-table-{env}`, serverless, single-region per R3).
 
 **Owner:** Engineering + DevOps
-**Action required:** Decide CI strategy before Cosmos DB Table migration
+**Decided:** 2026-03-20 — mock adapters for CI; integration tests in staging; Cosmos DB IaC deployed
 
 ---
 
