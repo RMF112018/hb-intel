@@ -30,16 +30,24 @@ import {
   createProjectHealthPulseBicRegistration,
   PROJECT_HEALTH_PULSE_NOTIFICATION_REGISTRATIONS,
 } from '@hbc/features-project-hub';
+import {
+  createEstimatingQueryFn,
+  createBdScoreBenchmarkQueryFn,
+  createBdStrategicIntelligenceQueryFn,
+  createHealthPulseQueryFn,
+} from './domainQueryFns.js';
 
 export function assembleHubSources(): void {
   // ── BIC module registrations (Gate 5 — Publication) ───────────────────
-  // queryFn stubs return empty arrays until domain API clients are wired.
-  // The registration structure is what satisfies P2-C5 Blockers 1–4.
+  // Provisioning uses a stub queryFn (real API client wired separately).
+  // The 4 domain sources use mock queryFns from domainQueryFns.ts that
+  // produce representative items so the hub feed is exercisable in dev.
+  // Replace with real domain API calls when clients are ready.
   registerBicModule(createProjectSetupBicRegistration(async () => []));
-  registerBicModule(createEstimatingBidReadinessBicRegistration(async () => []));
-  registerBicModule(createBdScoreBenchmarkBicRegistration(async () => []));
-  registerBicModule(createBdStrategicIntelligenceBicRegistration(async () => []));
-  registerBicModule(createProjectHealthPulseBicRegistration(async () => []));
+  registerBicModule(createEstimatingBidReadinessBicRegistration(createEstimatingQueryFn()));
+  registerBicModule(createBdScoreBenchmarkBicRegistration(createBdScoreBenchmarkQueryFn()));
+  registerBicModule(createBdStrategicIntelligenceBicRegistration(createBdStrategicIntelligenceQueryFn()));
+  registerBicModule(createProjectHealthPulseBicRegistration(createHealthPulseQueryFn()));
 
   // ── Notification registrations (Gate 6 — Signal) ─────────────────────
   // Satisfies P2-C5 Blockers 5–7.
