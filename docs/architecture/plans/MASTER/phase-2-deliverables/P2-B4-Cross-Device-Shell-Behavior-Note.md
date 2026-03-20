@@ -17,6 +17,8 @@
 
 The Personal Work Hub and PWA shell must remain stable and credible on desktop and tablet devices.
 
+**Repo-truth audit — 2026-03-20:** All verifiable live-code claims confirmed. Breakpoint ownership is correct — `@hbc/ui-kit/src/theme/breakpoints.ts` is the canonical source with `HBC_BREAKPOINT_MOBILE = 767`, `HBC_BREAKPOINT_TABLET = 1023`, and `HBC_BREAKPOINT_SIDEBAR = 1024`, mapping precisely to this note's planning ranges. Tablet adaptive behavior is already operational: `HbcAppShell` uses `useIsTablet()` (pinned to `HBC_BREAKPOINT_TABLET`) to switch from sidebar to `HbcBottomNav` at ≤1023px. The `useIsTablet()` hook uses a `resize` listener to update presentation state only — no route or state reset — consistent with §3.6. Service worker is present: `vite.config.ts` uses `VitePWA({ registerType: 'autoUpdate' })` with Workbox, built artifacts confirmed. Connectivity delegation to `@hbc/session-state` confirmed in P2-B2/B3 audits and live in `root-route.tsx`. No inaccuracies found. §10 Reconciliation Notes are self-referential editorial corrections from a prior version and were not re-audited here.
+
 This note governs **cross-device continuity guarantees** for Phase 2. It locks what must remain behaviorally consistent across supported device classes and what adaptive shell behavior is allowed as viewport width changes. It does **not** lock exact tablet component choices, exact panel treatments, or exact navigation primitives; those remain implementation-governed by shared responsive infrastructure and adaptive layout work.
 
 Phase 2 explicitly prioritizes **desktop and tablet credibility**. Broad mobile-first workflow design remains out of scope.
