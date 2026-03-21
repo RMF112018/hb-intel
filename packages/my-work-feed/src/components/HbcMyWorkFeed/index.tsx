@@ -217,19 +217,10 @@ function formatDueDate(isoDate: string): string {
   return `Due ${MONTH_ABBR[d.getMonth()]} ${d.getDate()}`;
 }
 
-// ─── Column height sizing ────────────────────────────────────────────────────
-/** Estimated row height for HbcDataTable virtualizer (px). */
+// UIF-019-followup: resolveTableHeight removed — HbcDataTable default is now
+// height='auto' (full content height, no scroll). estimatedRowHeight is still
+// passed for the virtualizer's size estimation.
 const ESTIMATED_ROW_HEIGHT = 48;
-/** Header row height (px) — matches HbcDataTable thead. */
-const TABLE_HEADER_HEIGHT = 44;
-
-/**
- * Returns a px height string for HbcDataTable sized to content.
- * Avoids the default 600px allocation for groups with few items.
- */
-function resolveTableHeight(itemCount: number): string {
-  return `${itemCount * ESTIMATED_ROW_HEIGHT + TABLE_HEADER_HEIGHT}px`;
-}
 
 // ─── Work item column definitions ───────────────────────────────────────────
 
@@ -700,7 +691,6 @@ export function HbcMyWorkFeed({
               data={processedItems}
               columns={workItemColumns}
               isLoading={false}
-              autoHeight
               estimatedRowHeight={ESTIMATED_ROW_HEIGHT}
               mobileCardFields={['title', 'dueDateIso']}
               onRowClick={(item) => {
@@ -733,7 +723,8 @@ export function HbcMyWorkFeed({
                   style={{
                     borderRadius: HBC_RADIUS_LG,
                     border: '1px solid var(--colorNeutralStroke2)',
-                    overflow: 'hidden',
+                    // UIF-019-followup: overflow visible so fully-expanded table rows are not clipped.
+                    overflow: 'visible',
                   }}
                 >
                   {/* Group header — div, not button, so UA background does not override tokens */}

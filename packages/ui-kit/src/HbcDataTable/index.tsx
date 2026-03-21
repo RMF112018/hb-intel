@@ -403,8 +403,7 @@ export function HbcDataTable<TData>({
   pageSize = 50,
   isLoading = false,
   estimatedRowHeight,
-  height = '600px',
-  autoHeight = false,
+  height = 'auto',
   onRowClick,
   className,
   // PH4.7 Step 1: Adaptive Density
@@ -805,7 +804,7 @@ export function HbcDataTable<TData>({
       <div
         ref={parentRef}
         className={mergeClasses(styles.wrapper, staleClass)}
-        style={autoHeight
+        style={height === 'auto'
           ? { height: 'auto', overflow: 'visible' }
           : { height, overflow: 'auto' }
         }

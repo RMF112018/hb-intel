@@ -1034,6 +1034,8 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 - `packages/my-work-feed/package.json` — version 0.0.18 → 0.0.19
 - `apps/pwa/package.json` — version 0.12.33 → 0.12.34
 
+**UIF-019-FOLLOWUP (root cause fix):** The `autoHeight` prop approach was insufficient because `HbcDataTable` still defaulted to `height='600px'` and the inline `style` prop overrode all CSS. Root cause fix: (1) changed `HbcDataTable` height default from `'600px'` to `'auto'`, making the scroll wrapper conditional check `height === 'auto'` → `{ height: 'auto', overflow: 'visible' }`; (2) removed `resolveTableHeight()`, `TABLE_HEADER_HEIGHT` constants, and `autoHeight` prop — no longer needed since default is auto; (3) changed section wrapper `overflow: 'hidden'` → `overflow: 'visible'` so fully-expanded table rows are not clipped. Files: `HbcDataTable/index.tsx` (default + conditional), `HbcDataTable/types.ts` (removed autoHeight), `HbcMyWorkFeed/index.tsx` (removed resolveTableHeight + section overflow). Versions: ui-kit 2.2.30→2.2.31, my-work-feed 0.0.22→0.0.23.
+
 ---
 
 ### 10A.11 UIF-020-addl: Priority-Based Grouping with Smart Collapse Defaults (High)

@@ -76,11 +76,9 @@ export interface HbcDataTableProps<TData> extends IComplexityAwareProps {
   isLoading?: boolean;
   /** Estimated row height for virtualizer (default derives from density tier) */
   estimatedRowHeight?: number;
-  /** Table height for virtualization (default '600px') */
+  /** Table height — default 'auto' (full content height, no scroll).
+   * Pass a pixel value (e.g. '600px') to enable virtualized scrolling. */
   height?: string;
-  /** UIF-019-addl: When true, table grows to full content height with no internal scroll.
-   * Use for short lists embedded in a naturally scrolling page layout. */
-  autoHeight?: boolean;
   /** Callback when a row is clicked */
   onRowClick?: (row: TData) => void;
   /** Additional CSS class */
