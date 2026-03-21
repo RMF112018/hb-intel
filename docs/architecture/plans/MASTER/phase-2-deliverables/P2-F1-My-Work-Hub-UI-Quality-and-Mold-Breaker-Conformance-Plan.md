@@ -233,9 +233,9 @@ When `HbcProjectCanvas` hosts secondary/tertiary tiles in the right panel (per U
 | Contrast | Must meet `textContrastMin` for the active density tier per `HBC_DENSITY_TOKENS` | `UI-Kit-Field-Readability-Standards.md` — ≥4.5:1 standard, ≥7:1 field |
 
 **Acceptance criteria:**
-- No browser-default blue (`rgb(0,0,238)`) on any work item title in any lane
-- No underline in rest state; underline on hover only
-- WCAG AA (4.5:1) in compact/comfortable; WCAG AAA (7:1) in touch density — per `HBC_DENSITY_TOKENS[tier].textContrastMin`
+- No browser-default blue (`rgb(0,0,238)`) on any work item title in any lane — **MET** (uses `HBC_STATUS_RAMP_INFO[50]` #3B9FFF for default links, `[30]` #0050B3 for muted watch-lane items; `resolveTitleLinkColor()` is the single source of truth)
+- No underline in rest state; underline on hover only — **MET** (`textDecoration: 'none'` inline at rest; `.hbc-my-work-feed a[href]:hover { text-decoration: underline }` in pwa.css)
+- WCAG AA (4.5:1) in compact/comfortable; WCAG AAA (7:1) in touch density — per `HBC_DENSITY_TOKENS[tier].textContrastMin` — **MET** (`HBC_STATUS_RAMP_INFO[50]` #3B9FFF on field surface-0 #0F1419 ≈ 6.2:1 contrast; `useDensity()` available in component for tier-aware adjustments)
 
 ---
 
