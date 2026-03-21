@@ -234,6 +234,7 @@ const ESTIMATED_ROW_HEIGHT = 48;
  */
 function buildWorkItemColumns(
   onItemSelect: ((item: IMyWorkItem) => void) | undefined,
+  ctaButtonSize: 'md' | 'lg' = 'md',
 ): ColumnDef<IMyWorkItem, unknown>[] {
   return [
     {
@@ -447,10 +448,10 @@ function buildWorkItemColumns(
         // UIF-007: CTA label + variant differentiated by lane/status.
         const cta = resolveCtaAction(item);
         return (
-          // UIF-009-addl: size="md" (36px) meets Compact minimum; touch auto-scales to 44px.
+          // UIF-016-addl: density-aware size via ctaButtonSize (md at compact, lg at comfortable/touch).
           <HbcButton
             variant={cta.variant}
-            size="md"
+            size={ctaButtonSize}
             onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
               if (onItemSelect) {
@@ -479,6 +480,9 @@ export function HbcMyWorkFeed({
   const { tier: rawDensityTier, setOverride: setDensityOverride } = useDensity();
   // UIF-015-addl: Map density.ts 'comfortable' → HbcCommandBar 'standard' for type compat.
   const densityTier = rawDensityTier === 'comfortable' ? 'standard' as const : rawDensityTier;
+  // UIF-016-addl: Density-aware CTA button size.
+  // compact → 'md' (36px ≥ 32px min), comfortable/touch → 'lg' (44px ≥ 40px/44px min).
+  const ctaButtonSize = rawDensityTier === 'compact' ? 'md' as const : 'lg' as const;
   const { feed, isLoading, isError } = useMyWork({ query });
   const { executeAction: _executeAction } = useMyWorkActions();
 
@@ -519,10 +523,10 @@ export function HbcMyWorkFeed({
     }
   }, [groupingKey]);
 
-  // UIF-002: Stable column definitions — rebuilt only when onItemSelect identity changes.
+  // UIF-002: Stable column definitions — rebuilt when onItemSelect or density changes.
   const workItemColumns = useMemo(
-    () => buildWorkItemColumns(onItemSelect),
-    [onItemSelect],
+    () => buildWorkItemColumns(onItemSelect, ctaButtonSize),
+    [onItemSelect, ctaButtonSize],
   );
 
   const processedItems = useMemo(() => {

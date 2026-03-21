@@ -133,6 +133,9 @@ export function HbcMyWorkListItem({
   // HbcButton handles touch auto-scaling via useTouchSize (sm→lg on coarse pointer).
   // Raw <button> elements use touchMin directly.
   const touchMin = Math.max(densityTokens.touchTargetMin, 44);
+  // UIF-016-addl: Density-aware CTA button size.
+  // compact → 'md' (36px ≥ 32px min), comfortable/touch → 'lg' (44px ≥ 40px/44px min).
+  const ctaButtonSize = densityTier === 'compact' ? 'md' as const : 'lg' as const;
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
@@ -403,10 +406,10 @@ export function HbcMyWorkListItem({
       >
         {primaryAction && (
           // UIF-007: variant + label from resolveCtaAction — differentiated by lane/status.
-          // UIF-009-addl: size="md" (36px) meets Compact minimum; touch auto-scales to 44px.
+          // UIF-016-addl: density-aware size via ctaButtonSize (md at compact, lg at comfortable/touch).
           <HbcButton
             variant={primaryCta.variant}
-            size="md"
+            size={ctaButtonSize}
             onClick={() => onAction?.({ actionKey: primaryAction.key, item })}
           >
             {primaryCta.label}
@@ -417,7 +420,7 @@ export function HbcMyWorkListItem({
             {item.availableActions.find((a) => a.key === 'mark-read') && (
               <HbcButton
                 variant="ghost"
-                size="md"
+                size={ctaButtonSize}
                 onClick={() => onAction?.({ actionKey: 'mark-read', item })}
               >
                 Mark read
@@ -426,7 +429,7 @@ export function HbcMyWorkListItem({
             {item.availableActions.find((a) => a.key === 'defer') && (
               <HbcButton
                 variant="ghost"
-                size="md"
+                size={ctaButtonSize}
                 onClick={() => onAction?.({ actionKey: 'defer', item })}
               >
                 Defer

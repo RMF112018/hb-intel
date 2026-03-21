@@ -1436,6 +1436,35 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.36 UIF-016-addl: Density-Aware CTA Button Sizing (Critical)
+
+**Severity:** Critical
+**Category:** Field Use / Interaction
+**Governing authority:** MB-07 (Field-Usable Contrast & Touch) — `UI-Kit-Mold-Breaker-Principles.md`. MB-05 (More Adaptive Density) — density toggle must produce visible sizing changes. `HBC_DENSITY_TOKENS[tier].touchTargetMin` from `UI-Kit-Field-Readability-Standards.md`.
+
+**Observed state:** Row CTA buttons ("Resolve Block", "Take Action", secondary actions) used a fixed `size="md"` (36px height) regardless of density tier. At comfortable tier (40px min), buttons were undersized. The density toggle (UIF-015-addl) changed the toolbar state but CTA buttons did not respond.
+
+**Root cause:** CTA button `size` prop was hardcoded to `"md"` in both `HbcMyWorkFeed` column definitions and `HbcMyWorkListItem` action buttons. No density-tier mapping existed.
+
+**Fix:** Added density-aware button size mapping in both components:
+- `compact` → `'md'` (36px ≥ 32px minimum)
+- `comfortable` / `touch` → `'lg'` (44px ≥ 40px/44px minimum)
+
+Derived from `useDensity().tier` already available in both components. `useTouchSize` hook in `HbcButton` provides an additional safety net on coarse-pointer devices.
+
+**Acceptance criteria:**
+- All row CTA buttons meet `HBC_DENSITY_TOKENS[tier].touchTargetMin` at each tier — **MET** (compact: 36px ≥ 24px; comfortable: 44px ≥ 36px; touch: 44px ≥ 44px)
+- Buttons respond to density tier changes from the toolbar toggle — **MET** (both components derive `ctaButtonSize` from `useDensity().tier`)
+- Font size meets compact minimum of 13px — **MET** (md=14px, lg=16px; both exceed 13px)
+- Primary destructive "Resolve Block" has elevated weight — **MET** (uses `danger` variant with elevated color; at lg size the button is more prominent)
+
+**Files modified:**
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — `ctaButtonSize` derivation from density tier; actions column uses `size={ctaButtonSize}`
+- `packages/my-work-feed/src/components/HbcMyWorkListItem/index.tsx` — `ctaButtonSize` derivation; primary + secondary action buttons use `size={ctaButtonSize}`
+- `packages/my-work-feed/package.json` — version 0.0.24 → 0.0.25
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
