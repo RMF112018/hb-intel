@@ -32,6 +32,7 @@ import {
   HBC_STATUS_RAMP_RED,
   HBC_STATUS_RAMP_INFO,
   HBC_ACCENT_ORANGE,
+  hbcBrandRamp,
 } from '@hbc/ui-kit';
 import type { IMyWorkItem } from '../../types/index.js';
 import type { IMyWorkActionRequest } from '../../hooks/useMyWorkActions.js';
@@ -58,6 +59,21 @@ function formatModuleLabel(moduleKey: string): string {
     MODULE_DISPLAY_NAMES[moduleKey] ??
     moduleKey.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
   );
+}
+
+// ─── UIF-016: Project color coding ──────────────────────────────────────────
+// Deterministic color from hbcBrandRamp categorical stops, assigned by project ID hash.
+// Consistent across all surfaces referencing the same project entity.
+const PROJECT_COLOR_STOPS = [40, 60, 80, 100, 120, 140] as const;
+
+function resolveProjectColor(projectId: string | undefined): string {
+  if (!projectId) return hbcBrandRamp[80];
+  let hash = 0;
+  for (let i = 0; i < projectId.length; i++) {
+    hash = ((hash << 5) - hash + projectId.charCodeAt(i)) | 0;
+  }
+  const idx = Math.abs(hash) % PROJECT_COLOR_STOPS.length;
+  return hbcBrandRamp[PROJECT_COLOR_STOPS[idx]];
 }
 
 function formatDaysInState(updatedAtIso: string): string {
@@ -255,6 +271,23 @@ export function HbcMyWorkListItem({
               flexWrap: 'wrap',
             }}
           >
+            {/* UIF-016: Project color dot + name */}
+            {item.context.projectName && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: resolveProjectColor(item.context.projectId),
+                    flexShrink: 0,
+                  }}
+                />
+                <span style={{ fontSize: bodySmall.fontSize, fontWeight: bodySmall.fontWeight, lineHeight: bodySmall.lineHeight, color: HBC_STATUS_RAMP_GRAY[50] }}>
+                  {item.context.projectName}
+                </span>
+              </span>
+            )}
             {item.context.moduleKey && (
               <span style={{ fontSize: bodySmall.fontSize, fontWeight: bodySmall.fontWeight, lineHeight: bodySmall.lineHeight, color: HBC_STATUS_RAMP_GRAY[50] }}>
                 {formatModuleLabel(item.context.moduleKey)}
