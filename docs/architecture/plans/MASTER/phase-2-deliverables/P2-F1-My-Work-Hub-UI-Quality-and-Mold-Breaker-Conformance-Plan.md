@@ -496,11 +496,11 @@ Row 2:  [module human label]  ·  [days in state]  ·  [due date if present]
 | Aging / Aging Blocked | `?filter=aging` |
 
 **Acceptance criteria:**
-- `DashboardLayout` + `HbcKpiCard` is the component model — no raw card div implementations
-- KPI values at `heading1` (24px/700) — `summaryMetric` content level
-- All cards at `surface-1` background; no light-background card in this context
-- Click-to-filter on all cards; URL param set
-- UNREAD uses `HBC_STATUS_RAMP_AMBER` top border
+- `DashboardLayout` + `HbcKpiCard` is the component model — no raw card div implementations — **MET** (PersonalAnalyticsCard + AgingBlockedCard use DashboardLayout-pattern responsive grid with `HbcKpiCard` directly; no raw card divs)
+- KPI values at `heading1` (24px/700) — `summaryMetric` content level — **MET** (HbcKpiCard value style: `fontSize: '1.5rem'`, `fontWeight: '700'` = 24px/700)
+- All cards at `surface-1` background; no light-background card in this context — **MET** (HbcKpiCard: `backgroundColor: 'var(--colorNeutralBackground1)'` = surface-1 in dark/field themes)
+- Click-to-filter on all cards; URL param set — **MET** (all 4 KPI cards have `onClick` + `isActive` props; URL synced via `handleKpiFilter` → `?filter=` param in MyWorkPage)
+- UNREAD uses `HBC_STATUS_RAMP_AMBER` top border — **MET** (`color={HBC_STATUS_RAMP_AMBER[50]}` on Unread HbcKpiCard top border)
 
 ---
 
