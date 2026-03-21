@@ -36,6 +36,7 @@ import {
 } from '@hbc/ui-kit';
 import type { IMyWorkItem } from '../../types/index.js';
 import type { IMyWorkActionRequest } from '../../hooks/useMyWorkActions.js';
+import { resolveCtaLabel } from '../../utils/resolveCtaLabel.js';
 
 export interface IHbcMyWorkListItemProps {
   item: IMyWorkItem;
@@ -408,7 +409,8 @@ export function HbcMyWorkListItem({
             size="sm"
             onClick={() => onAction?.({ actionKey: primaryAction.key, item })}
           >
-            {primaryAction.label}
+            {/* UIF-014: Context-sensitive CTA label */}
+            {resolveCtaLabel(item)}
           </HbcButton>
         )}
         {tier !== 'essential' && (

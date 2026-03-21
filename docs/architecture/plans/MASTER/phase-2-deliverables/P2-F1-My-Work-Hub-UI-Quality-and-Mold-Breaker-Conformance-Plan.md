@@ -726,7 +726,7 @@ All UIFs re-opened as of the 2026-03-21 Audit 2 finding. Previous "Complete" cla
 | UIF-011 | Typography — empty state heading scale | High | G1 | **Complete** — 2026-03-21: HbcEmptyState title downgraded from heading3 to body (0.875rem/400), h2→p semantic element |
 | UIF-012 | Command bar — two rows, no count badges | High | G2 | **Complete** — 2026-03-21: group-by/sort moved to overflow menu, active filters use surface-active token, urgency-colored count badges, search placeholder |
 | UIF-013 | Sidebar nav — only one item visible | High | G3 | **Complete** — 2026-03-21: top-level Workspaces group with 4 destinations (My Work, BD, Estimating, Project Hub), icon resolver from NAV_ITEMS.icon, icons assigned per workspace |
-| UIF-014 | CTA labels — generic "Open" | High | G3 | **Open** |
+| UIF-014 | CTA labels — generic "Open" | High | G3 | **Complete** — 2026-03-21: resolveCtaLabel utility (blocked→"Resolve Block", approval→"Approve", bd-scorecard→"Review Score", health-pulse→"View Health", do-now→"Take Action", fallback→"Open") |
 | UIF-015 | SPFx / responsive breakpoints | Medium | G5 | **Complete** — 2026-03-21: HBC_BREAKPOINT_DESKTOP added to canonical set, HubZoneLayout refactored to use canonical tokens with 4-tier responsive grid (desktop/tablet/below-tablet/mobile) |
 | UIF-016 | Project color coding on work items | Medium | G5 | **Complete** — 2026-03-21: 8px color dot in metadata row using hbcBrandRamp categorical stops (40/60/80/100/120/140), deterministic hash from projectId |
 | UIF-017 | Focus ring visibility — WCAG 2.4.7 | Medium | G5 | **Complete** — 2026-03-21: :focus-visible CSS rule in pwa.css using colorBrandStroke1/HBC_PRIMARY_BLUE, outline: none removed from group header button |

@@ -18,3 +18,5 @@ export * from './store/index.js';
 export * from './components/index.js';
 // Telemetry
 export * from './telemetry/index.js';
+// Utils
+export { resolveCtaLabel } from './utils/resolveCtaLabel.js';
