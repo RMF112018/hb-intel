@@ -341,10 +341,10 @@ export function HbcMyWorkFeed({
                     aria-expanded={isExpanded}
                     style={{
                       // Reset UA button styles first (UIF-001 — MB-08)
+                      // UIF-017: outline NOT reset here — :focus-visible ring provided by pwa.css
                       appearance: 'none' as const,
                       WebkitAppearance: 'none' as const,
                       border: 'none',
-                      outline: 'none',
                       // Layout
                       width: '100%',
                       boxSizing: 'border-box' as const,

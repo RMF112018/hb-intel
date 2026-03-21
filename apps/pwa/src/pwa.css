@@ -56,3 +56,15 @@ html[data-theme="dark"] body {
 html[data-theme="field"] body {
   background-color: #0F1419;
 }
+
+/* UIF-017: Focus ring visibility — WCAG 2.4.7 Level AA.
+   Matches HbcButton :focus-visible pattern (2px solid, 2px offset).
+   Uses Fluent colorBrandStroke1 token for consistency per MB-08.
+   Falls back to HBC_PRIMARY_BLUE (#004B87) outside FluentProvider scope. */
+[data-hub-zone] a:focus-visible,
+[data-hub-zone] button:focus-visible,
+.hbc-my-work-feed button:focus-visible,
+.hbc-my-work-feed a:focus-visible {
+  outline: 2px solid var(--colorBrandStroke1, #004B87);
+  outline-offset: 2px;
+}
