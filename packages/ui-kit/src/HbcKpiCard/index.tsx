@@ -31,7 +31,8 @@ const useStyles = makeStyles({
     borderLeftStyle: 'none',
     borderRightStyle: 'none',
     borderBottomStyle: 'none',
-    borderTopWidth: '3px',
+    // INS-003: 4px pixel-aligned accent — sharp, intentional, visually impactful.
+    borderTopWidth: '4px',
     borderTopStyle: 'solid',
     borderTopColor: tokens.colorNeutralStroke2,
     cursor: 'default',
@@ -53,11 +54,11 @@ const useStyles = makeStyles({
     },
   },
   cardActive: {
-    // INS-001: Active state uses top + bottom accent only — no side borders.
-    borderTopWidth: '2px',
+    // INS-001/003: Active state uses top + bottom 4px accent — no side borders.
+    borderTopWidth: '4px',
     borderTopStyle: 'solid',
     borderTopColor: HBC_PRIMARY_BLUE as string,
-    borderBottomWidth: '2px',
+    borderBottomWidth: '4px',
     borderBottomStyle: 'solid',
     borderBottomColor: HBC_PRIMARY_BLUE as string,
     backgroundColor: tokens.colorSubtleBackgroundSelected,

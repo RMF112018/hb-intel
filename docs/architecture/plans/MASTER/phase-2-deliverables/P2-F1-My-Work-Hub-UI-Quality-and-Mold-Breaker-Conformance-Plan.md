@@ -1199,6 +1199,26 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.17 INS-003: Increase Top Accent Border to 4px (Medium)
+
+**Severity:** Medium
+**Category:** Design System / Visual Hierarchy
+
+**Observed state:** Top accent border at 3px and active state at 2px produced sub-pixel rendering noise and insufficient visual weight relative to card height.
+
+**Required change:** Increased all accent borders to clean 4px pixel-aligned value — default top border 3px→4px, active state top+bottom 2px→4px.
+
+**Acceptance criteria:**
+- Default top accent is 4px — **MET**
+- Active top+bottom accents are 4px — **MET**
+- No sub-pixel values — **MET** (all values pixel-aligned)
+
+**Files modified:**
+- `packages/ui-kit/src/HbcKpiCard/index.tsx` — border widths 3px/2px → 4px
+- `packages/ui-kit/package.json` — version 2.2.32 → 2.2.33
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
