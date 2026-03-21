@@ -122,29 +122,6 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground1,
     cursor: 'pointer',
   },
-  densityControl: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    fontSize: '0.75rem',
-    color: tokens.colorNeutralForeground3,
-  },
-  densityLabel: {
-    fontSize: '0.6875rem',
-    color: tokens.colorNeutralForeground3,
-    backgroundColor: tokens.colorNeutralBackground3,
-    padding: '2px 6px',
-    borderRadius: '3px',
-  },
-  densitySelect: {
-    fontSize: '0.75rem',
-    padding: '1px 4px',
-    border: `1px solid ${tokens.colorNeutralStroke1}`,
-    borderRadius: '3px',
-    backgroundColor: 'transparent',
-    color: tokens.colorNeutralForeground3,
-    cursor: 'pointer',
-  },
   scopeBadge: {
     fontSize: '0.625rem',
     textTransform: 'uppercase',
@@ -348,22 +325,23 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
 
       <div className={styles.spacer} />
 
-      {/* Density indicator + override */}
-      <div className={styles.densityControl}>
-        <span className={styles.densityLabel}>{DENSITY_LABELS[effectiveDensity]}</span>
-        {onDensityChange && (
-          <select
-            className={styles.densitySelect}
-            value={effectiveDensity}
-            onChange={(e) => onDensityChange(e.target.value as DensityTier)}
-            aria-label="Density"
-          >
-            <option value="compact">Compact</option>
-            <option value="standard">Standard</option>
-            <option value="touch">Touch</option>
-          </select>
-        )}
-      </div>
+      {/* UIF-015-addl: Accessible density toggle — replaces bare <div> with
+         focusable, aria-pressed toggle button. Toggles compact↔touch. */}
+      <HbcButton
+        variant="ghost"
+        size="sm"
+        pressed={effectiveDensity === 'compact'}
+        disabled={!onDensityChange}
+        onClick={() => {
+          if (onDensityChange) {
+            const next = effectiveDensity === 'compact' ? 'touch' : 'compact';
+            onDensityChange(next);
+          }
+        }}
+        aria-label={`Density: ${DENSITY_LABELS[effectiveDensity]}`}
+      >
+        {DENSITY_LABELS[effectiveDensity]}
+      </HbcButton>
 
       {/* Column config trigger slot */}
       {columnConfigTrigger}

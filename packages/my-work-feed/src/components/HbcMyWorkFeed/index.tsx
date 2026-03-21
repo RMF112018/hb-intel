@@ -38,6 +38,7 @@ import {
   heading4,
   bodySmall,
   hbcBrandRamp,
+  useDensity,
 } from '@hbc/ui-kit';
 import { ChevronDown } from '@hbc/ui-kit/icons';
 import { useMyWork } from '../../hooks/useMyWork.js';
@@ -475,6 +476,9 @@ export function HbcMyWorkFeed({
   className,
 }: IHbcMyWorkFeedProps): JSX.Element {
   const { tier } = useComplexity();
+  const { tier: rawDensityTier, setOverride: setDensityOverride } = useDensity();
+  // UIF-015-addl: Map density.ts 'comfortable' → HbcCommandBar 'standard' for type compat.
+  const densityTier = rawDensityTier === 'comfortable' ? 'standard' as const : rawDensityTier;
   const { feed, isLoading, isError } = useMyWork({ query });
   const { executeAction: _executeAction } = useMyWorkActions();
 
@@ -660,6 +664,8 @@ export function HbcMyWorkFeed({
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
           searchPlaceholder="Search work items\u2026"
+          densityTier={densityTier}
+          onDensityChange={(t) => setDensityOverride(t as 'compact' | 'comfortable' | 'touch')}
         />
       )}
 

@@ -1400,6 +1400,42 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.35 UIF-015-addl: Density Toggle Accessibility and Functionality (Critical)
+
+**Severity:** Critical
+**Category:** Accessibility / Interaction
+**Governing authority:** MB-05 (More Adaptive Density) — `UI-Kit-Mold-Breaker-Principles.md`. MB-07 (Field-Usable Contrast & Touch) — touch targets must meet `HBC_DENSITY_TOKENS[tier].touchTargetMin`. UI Kit Usage Guide: "No precision gestures required for primary flows in touch tier."
+
+**Observed state:** The density toggle in the My Work Hub toolbar (`HbcCommandBar`) was a bare `<div>` with a `<span>` label — not keyboard-reachable, not screen-reader-announced, no `aria-pressed` state, no click interactivity. The `<select>` dropdown only rendered when `onDensityChange` was provided, but `HbcMyWorkFeed` never passed that prop. Field users could not switch density tier.
+
+**Root cause:** Two issues: (1) `HbcCommandBar` density control used a non-interactive `<div>` wrapper with label-only rendering when no callback was provided; (2) `HbcMyWorkFeed` did not connect `useDensity()` to the toolbar's density props.
+
+**Fix:** Replaced the bare `<div>` + `<span>` + conditional `<select>` in `HbcCommandBar` with an `HbcButton variant="ghost"` toggle using the existing `pressed` prop (which maps to `aria-pressed`). Button toggles between `compact` and `touch` density tiers. Wired `useDensity()` in `HbcMyWorkFeed` to pass `densityTier` and `onDensityChange` (via `setOverride`) to `HbcCommandBar`. Density changes persist to localStorage via the existing `useDensity` persistence layer.
+
+| Behavior | Before | After |
+|---|---|---|
+| Keyboard focus | Not focusable (bare `<div>`) | Focusable via Tab (native `<button>`) |
+| Activation | No handler | Enter/Space activates (native `<button>`) |
+| Screen reader | Silent | Announces label + `aria-pressed` state |
+| Click toggle | Non-interactive | Toggles compact↔touch density |
+| State persistence | None | localStorage via `useDensity().setOverride()` |
+| Disabled fallback | N/A | Button renders disabled when `onDensityChange` is not provided |
+
+**Acceptance criteria:**
+- Compact control is focusable via Tab — **MET** (native `<button>` element via `HbcButton`)
+- Activatable via Enter/Space — **MET** (native `<button>` keyboard behavior)
+- Announces `aria-pressed` state — **MET** (`HbcButton pressed` prop → `aria-pressed` on line 142 of HbcButton)
+- Triggers density tier change visible in row heights — **MET** (`useDensity().setOverride()` updates tier; `HBC_DENSITY_TOKENS[tier].rowHeightMin` governs row heights)
+- No precision gestures required for primary flows in touch tier — **MET** (toggle button scales via `useTouchSize` on coarse pointer devices)
+
+**Files modified:**
+- `packages/ui-kit/src/HbcCommandBar/index.tsx` — replaced bare `<div>` density control with `HbcButton` toggle; removed unused `densityControl`/`densityLabel`/`densitySelect` styles
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — wired `useDensity()` and passed `densityTier`/`onDensityChange` to `HbcCommandBar`
+- `packages/ui-kit/package.json` — version 2.2.42 → 2.2.43
+- `packages/my-work-feed/package.json` — version 0.0.23 → 0.0.24
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
