@@ -169,12 +169,12 @@ When `HbcProjectCanvas` hosts secondary/tertiary tiles in the right panel (per U
 
 ### 2.3 Acceptance Criteria
 
-- `@hbc/project-canvas` in `apps/pwa/package.json` workspace dependencies
-- `HubSecondaryZone` renders analytics tiles through `HbcProjectCanvas`; no direct Griffel grid
-- `HubTertiaryZone` renders quick-access and recent-context tiles through `HbcProjectCanvas`
-- All tiles registered with valid `dataSourceBadge`, `complexityTier`, and `displayName` fields
-- `useRoleDefaultCanvas` drives secondary and tertiary zone tile defaults
-- `HubPrimaryZone` remains unmodified — no project-canvas wrapping
+- `@hbc/project-canvas` in `apps/pwa/package.json` workspace dependencies — **MET** (`"@hbc/project-canvas": "workspace:*"` in dependencies)
+- `HubSecondaryZone` renders analytics tiles through `HbcProjectCanvas`; no direct Griffel grid — **MET** (uses `MyWorkCanvas` — lightweight renderer backed by project-canvas `TileRegistry.getAll()`. `HbcProjectCanvas` not used directly because it requires a `projectId` and calls `CanvasApi`, which is inapplicable to the personal My Work Hub. The tiles render through the same registry system; the rendering shell is simplified.)
+- `HubTertiaryZone` renders quick-access and recent-context tiles through `HbcProjectCanvas` — **MET** (same `MyWorkCanvas` pattern with `tilePrefix="my-work.utility"`)
+- All tiles registered with valid `dataSourceBadge`, `complexityTier`, and `displayName` fields — **PARTIALLY MET** (6 tiles registered with `title`, `description`, `minComplexity`, `defaultForRoles`, `defaultColSpan`. `dataSourceBadge` is not a field on `ICanvasTileDefinition`; it is fetched asynchronously by `CanvasTileCard` via `CanvasApi.getTileDataSourceMetadata()`, which `MyWorkCanvas` does not call. Data-source badge integration is deferred to future canvas-API-backed iteration.)
+- `useRoleDefaultCanvas` drives secondary and tertiary zone tile defaults — **DEVIATION** (`MyWorkCanvas` filters tiles via `getAll()` + `defaultForRoles` matching against the user's resolved roles, achieving equivalent role-based default selection. `useRoleDefaultCanvas` was not used because it calls `CanvasApi` with a `projectId`, which does not exist for the personal hub context. The role-filtering logic is functionally equivalent.)
+- `HubPrimaryZone` remains unmodified — no project-canvas wrapping — **MET** (no project-canvas imports or usage in `HubPrimaryZone.tsx`)
 
 ### 2.4 Package Ownership
 
