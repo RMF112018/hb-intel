@@ -30,6 +30,7 @@ import {
   HBC_SPACE_MD,
   HBC_STATUS_RAMP_GRAY,
   HBC_STATUS_RAMP_RED,
+  HBC_STATUS_RAMP_INFO,
   HBC_ACCENT_ORANGE,
 } from '@hbc/ui-kit';
 import type { IMyWorkItem } from '../../types/index.js';
@@ -102,10 +103,18 @@ const LEFT_PADDING_WITH_ACCENT = `${HBC_SPACE_MD - 3}px`; // 3px stripe + (16-3)
 const LEFT_PADDING_NO_ACCENT = `${HBC_SPACE_MD}px`;        // same total width, no stripe
 
 /**
- * `watch`-lane items carry lower urgency — mute their title slightly so
- * `do-now` and blocked items stand out through contrast, not colour alone.
+ * UIF-003: Title link color uses brand blue ramp from HBC_STATUS_RAMP_INFO.
+ * `watch`-lane items use a darker shade (30) for lower visual urgency.
+ * Non-link titles (no href) use neutral foreground.
  */
-function resolveTitleColor(item: IMyWorkItem): string {
+function resolveTitleLinkColor(item: IMyWorkItem): string {
+  if (item.lane === 'watch' && !item.isUnread && !item.isBlocked) {
+    return HBC_STATUS_RAMP_INFO[30]; // Muted brand blue for watch lane
+  }
+  return HBC_STATUS_RAMP_INFO[50]; // Brand blue, readable on dark surfaces
+}
+
+function resolveTitleSpanColor(item: IMyWorkItem): string {
   if (item.lane === 'watch' && !item.isUnread && !item.isBlocked) {
     return 'var(--colorNeutralForeground3)';
   }
@@ -187,16 +196,16 @@ export function HbcMyWorkListItem({
           gap: '4px',
         }}
       >
-        {/* Title */}
+        {/* Title — UIF-003: brand blue for links, neutral for non-links */}
         {item.context.href ? (
           <a
             href={item.context.href}
             style={{
               display: 'block',
-              color: resolveTitleColor(item),
+              color: resolveTitleLinkColor(item),
               textDecoration: 'none',
               fontSize: '0.875rem',
-              fontWeight: 600,
+              fontWeight: 500,
               lineHeight: '1.4',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -209,9 +218,9 @@ export function HbcMyWorkListItem({
           <span
             style={{
               display: 'block',
-              color: resolveTitleColor(item),
+              color: resolveTitleSpanColor(item),
               fontSize: '0.875rem',
-              fontWeight: 600,
+              fontWeight: 500,
               lineHeight: '1.4',
               overflow: 'hidden',
               textOverflow: 'ellipsis',

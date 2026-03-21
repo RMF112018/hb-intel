@@ -68,3 +68,9 @@ html[data-theme="field"] body {
   outline: 2px solid var(--colorBrandStroke1, #004B87);
   outline-offset: 2px;
 }
+
+/* UIF-003: Title link hover — underline on hover only, no underline at rest.
+   Inline styles set text-decoration: none at rest; this CSS rule adds hover. */
+.hbc-my-work-feed a[href]:hover {
+  text-decoration: underline;
+}

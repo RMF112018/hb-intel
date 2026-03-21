@@ -715,7 +715,7 @@ All UIFs re-opened as of the 2026-03-21 Audit 2 finding. Previous "Complete" cla
 | — | @hbc/project-canvas integration | Architectural | G0 | **Complete** — 2026-03-21: dependency added, 6 tiles registered, HubSecondaryZone + HubTertiaryZone refactored to MyWorkCanvas |
 | UIF-001 | Lane header native button appearance | Critical | G1 | **Complete** — 2026-03-21: lane-color left border accents (status ramp tokens), heading4 typography, TRANSITION_FAST animation, HBC_RADIUS_LG containers, human-readable labels, sticky headers |
 | UIF-002 | Two-column layout / canvas waste | Critical | G2 | **Open** |
-| UIF-003 | Title links — browser default blue | Critical | G1 | **Open** |
+| UIF-003 | Title links — browser default blue | Critical | G1 | **Complete** — 2026-03-21: brand blue HBC_STATUS_RAMP_INFO[50] for links, muted [30] for watch lane, fontWeight 500, hover underline via CSS |
 | UIF-004 | Theme split — light body / dark shell | Critical | G1 | **Complete** — 2026-03-21: body background corrected to surface-0 tokens (#FFFFFF light, #0F172A dark, #0F1419 field) via data-theme attribute bridge |
 | UIF-005 | Collapsed lane — no visual distinction | High | G2 | **Open** |
 | UIF-006 | Work item row — zero structure, no metadata | High | G2 | **Complete** — 2026-03-21: density-aware rows via useDensity() + HBC_DENSITY_TOKENS[tier].rowHeightMin, bodySmall typography, HBC_STATUS_RAMP_GRAY[50] metadata color, token-driven padding |
