@@ -1332,6 +1332,14 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.29 INS-013: Quick Actions Card Visual Treatment (Medium)
+
+**Fix:** Replaced `<ul>/<li>` DOM with plain `<div>` flex container (eliminates duplicate button-in-list-item nesting). Applied `heading4` (14px/600) to the card header instead of default body-weight span. Increased action button gap from 2px to 4px. HbcCard `weight="supporting"` already provides background + elevation; icons were already present from prior UIF-013 work.
+
+**Files:** `apps/pwa/src/pages/my-work/cards/QuickActionsCard.tsx`. Version: pwa 0.12.45→0.12.46.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

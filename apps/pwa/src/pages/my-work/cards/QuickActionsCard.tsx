@@ -6,21 +6,26 @@
  * stay within the SPA and do not trigger full page reloads.
  * Action triggers use HbcButton variant="ghost" per UI governance.
  *
- * UIF-013: Added leading semantic icons per action, full-width buttons with
- * left-aligned content so hover state spans the full card width.
+ * INS-013: heading4 treatment, simplified DOM (no ul/li), 4px gap,
+ * leading semantic icons per action, full-width buttons.
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import { useRouter } from '@tanstack/react-router';
-import { HbcCard, HbcButton, Create, ViewList, ViewGrid } from '@hbc/ui-kit';
+import { HbcCard, HbcButton, heading4, Create, ViewList, ViewGrid } from '@hbc/ui-kit';
 
 const useStyles = makeStyles({
-  list: {
-    listStyleType: 'none',
-    ...({ padding: 0, margin: 0 } as Record<string, string | number>),
+  // INS-013: heading4 (14px/600) for the card header.
+  heading: {
+    ...heading4,
+    color: 'var(--colorNeutralForeground1)',
+    margin: '0',
+  },
+  // INS-013: Simple flex column with 4px gap — no ul/li wrappers.
+  actions: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '2px',
+    gap: '4px',
   },
   // Full-width ghost buttons need left-aligned content for a proper row layout.
   btnStart: {
@@ -33,45 +38,39 @@ export function QuickActionsCard(): ReactNode {
   const router = useRouter();
 
   return (
-    <HbcCard weight="supporting" header={<span>Quick Actions</span>}>
-      <ul className={styles.list}>
-        <li>
-          <HbcButton
-            variant="ghost"
-            size="sm"
-            fullWidth
-            className={styles.btnStart}
-            icon={<Create size="sm" />}
-            onClick={() => router.navigate({ to: '/project-setup', search: { mode: 'new-request' } })}
-          >
-            Create project request
-          </HbcButton>
-        </li>
-        <li>
-          <HbcButton
-            variant="ghost"
-            size="sm"
-            fullWidth
-            className={styles.btnStart}
-            icon={<ViewList size="sm" />}
-            onClick={() => router.navigate({ to: '/projects' })}
-          >
-            View my requests
-          </HbcButton>
-        </li>
-        <li>
-          <HbcButton
-            variant="ghost"
-            size="sm"
-            fullWidth
-            className={styles.btnStart}
-            icon={<ViewGrid size="sm" />}
-            onClick={() => router.navigate({ to: '/project-hub' })}
-          >
-            Go to Project Hub
-          </HbcButton>
-        </li>
-      </ul>
+    <HbcCard weight="supporting" header={<span className={styles.heading}>Quick Actions</span>}>
+      <div className={styles.actions}>
+        <HbcButton
+          variant="ghost"
+          size="sm"
+          fullWidth
+          className={styles.btnStart}
+          icon={<Create size="sm" />}
+          onClick={() => router.navigate({ to: '/project-setup', search: { mode: 'new-request' } })}
+        >
+          Create project request
+        </HbcButton>
+        <HbcButton
+          variant="ghost"
+          size="sm"
+          fullWidth
+          className={styles.btnStart}
+          icon={<ViewList size="sm" />}
+          onClick={() => router.navigate({ to: '/projects' })}
+        >
+          View my requests
+        </HbcButton>
+        <HbcButton
+          variant="ghost"
+          size="sm"
+          fullWidth
+          className={styles.btnStart}
+          icon={<ViewGrid size="sm" />}
+          onClick={() => router.navigate({ to: '/project-hub' })}
+        >
+          Go to Project Hub
+        </HbcButton>
+      </div>
     </HbcCard>
   );
 }
