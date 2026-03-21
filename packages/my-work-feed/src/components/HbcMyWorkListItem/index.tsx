@@ -29,6 +29,8 @@ import {
   HBC_SPACE_SM,
   HBC_SPACE_MD,
   HBC_STATUS_RAMP_GRAY,
+  HBC_STATUS_RAMP_RED,
+  HBC_ACCENT_ORANGE,
 } from '@hbc/ui-kit';
 import type { IMyWorkItem } from '../../types/index.js';
 import type { IMyWorkActionRequest } from '../../hooks/useMyWorkActions.js';
@@ -72,11 +74,11 @@ function formatDueDate(isoDate: string): string {
   return `Due ${MONTH_ABBR[d.getMonth()]} ${d.getDate()}`;
 }
 
-// ─── Status accent colours ──────────────────────────────────────────────────
-// Kept as literals: my-work-feed has no direct dep on @hbc/ui-kit/theme,
-// and these are stable brand/semantic values that don't vary by theme.
-const ACCENT_ORANGE = '#F37021';
-const ACCENT_BLOCKED = 'var(--colorPaletteRedBorderActive)';
+// ─── Status accent colours (UIF-007) ────────────────────────────────────────
+// Canonical tokens from @hbc/ui-kit ensure semantic color separation:
+//   blocked → HBC_STATUS_RAMP_RED[50] (error red, distinct from amber warning)
+//   unread  → HBC_ACCENT_ORANGE (CTA orange, distinct from both)
+const ACCENT_BLOCKED = HBC_STATUS_RAMP_RED[50];
 
 // ─── Lane-based urgency helpers ─────────────────────────────────────────────
 
@@ -88,7 +90,7 @@ const ACCENT_BLOCKED = 'var(--colorPaletteRedBorderActive)';
  */
 function resolveAccentBorder(item: IMyWorkItem): string | undefined {
   if (item.isBlocked) return `3px solid ${ACCENT_BLOCKED}`;
-  if (item.isUnread) return `3px solid ${ACCENT_ORANGE}`;
+  if (item.isUnread) return `3px solid ${HBC_ACCENT_ORANGE}`;
   return undefined;
 }
 
@@ -226,7 +228,7 @@ export function HbcMyWorkListItem({
           }}
         >
           {item.isOverdue && <HbcStatusBadge variant="error" label="Overdue" />}
-          {item.isBlocked && <HbcStatusBadge variant="warning" label="Blocked" />}
+          {item.isBlocked && <HbcStatusBadge variant="error" label="Blocked" />}
         </div>
 
         {/* Metadata row — module label, days in state, due date (UIF-006)

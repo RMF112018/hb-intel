@@ -88,7 +88,8 @@ const useStatusStyles = makeStyles({
     },
   },
   atRisk: {
-    backgroundColor: tokens.colorPaletteRedBackground3,
+    // UIF-007: Use HBC error red for semantic consistency with blocked/critical states.
+    backgroundColor: '#FF4D4D', // HBC_STATUS_RAMP_RED[50]
     color: tokens.colorNeutralForegroundOnBrand,
     fontWeight: '600',
     '@media (forced-colors: active)': {
