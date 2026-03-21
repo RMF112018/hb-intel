@@ -597,9 +597,9 @@ CTA button uses `HBC_ACCENT_ORANGE` (`#F37021`) at `primaryAction` content level
 | PWA standalone | Verify both absent in `(display-mode: standalone)` — standalone PWA is the product surface; dev overlays are unconditionally prohibited | MB-07 — field-usable quality requires clean PWA surface |
 
 **Acceptance criteria:**
-- `import.meta.env.DEV !== true` → neither element in DOM
-- PWA standalone: no dev overlays regardless of build environment
-- In dev mode, any remaining indicator uses governed z-index (≤ `toast` layer: 1300)
+- `import.meta.env.DEV !== true` → neither element in DOM — **MET** (DevToolbar + ReactQueryDevtools wrapped in `if (import.meta.env.DEV)` static module-level guards + JSX `{import.meta.env.DEV && ...}` guards in App.tsx; tree-shaken in production builds)
+- PWA standalone: no dev overlays regardless of build environment — **MET** (`import.meta.env.DEV` is build-time; production builds tree-shake both components entirely; PWA standalone runs production build)
+- In dev mode, any remaining indicator uses governed z-index (≤ `toast` layer: 1300) — **MET** (DevToolbar `zIndex` changed from 99999 to `1300` = governed toast layer)
 
 ---
 
