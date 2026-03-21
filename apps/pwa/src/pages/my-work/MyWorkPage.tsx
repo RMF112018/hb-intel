@@ -120,7 +120,11 @@ export function MyWorkPage(): ReactNode {
   ) : undefined;
 
   return (
-    <WorkspacePageShell layout="dashboard" title="My Work">
+    <WorkspacePageShell
+      layout="dashboard"
+      title="My Work"
+      breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'My Work' }]}
+    >
       <MyWorkProvider context={runtimeContext} defaultQuery={defaultQuery}>
         <HubPageLevelEmptyState
           isLoadError={false}

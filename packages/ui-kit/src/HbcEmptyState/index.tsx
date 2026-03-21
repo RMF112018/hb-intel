@@ -8,7 +8,7 @@ import * as React from 'react';
 import { mergeClasses, tokens } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { keyframes, TRANSITION_NORMAL } from '../theme/animations.js';
-import { heading3 } from '../theme/typography.js';
+import { body } from '../theme/typography.js';
 import type { HbcEmptyStateProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -45,9 +45,9 @@ const useStyles = makeStyles({
     },
   },
   title: {
-    // UIF-011: heading3 (1rem/600) instead of heading2 (1.25rem/600) so empty
-    // state headings are visually subordinate to page and card titles.
-    ...heading3,
+    // UIF-011: body (0.875rem/400) — empty state headings must not compete
+    // with section headings (heading3) or page title (heading2).
+    ...body,
     color: tokens.colorNeutralForeground1,
     margin: '0',
   },
@@ -87,7 +87,7 @@ export const HbcEmptyState: React.FC<HbcEmptyStateProps> = ({
       {resolvedIcon && (
         <div className={styles.illustration}>{resolvedIcon}</div>
       )}
-      <h2 className={styles.title}>{title}</h2>
+      <p className={styles.title}>{title}</p>
       {description && <p className={styles.description}>{description}</p>}
       {(resolvedPrimary || secondaryAction) && (
         <div className={styles.actions}>

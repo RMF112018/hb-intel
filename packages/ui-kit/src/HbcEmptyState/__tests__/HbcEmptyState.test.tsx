@@ -8,10 +8,10 @@ describe('HbcEmptyState', () => {
     expect(container.querySelector('[data-hbc-ui="empty-state"]')).toBeInTheDocument();
   });
 
-  it('renders the title as an h2 element', () => {
+  it('renders the title as a paragraph element (UIF-011: body weight, not heading)', () => {
     render(<HbcEmptyState title="Nothing here" />);
-    const heading = screen.getByRole('heading', { level: 2, name: 'Nothing here' });
-    expect(heading).toBeInTheDocument();
+    expect(screen.getByText('Nothing here')).toBeInTheDocument();
+    expect(screen.getByText('Nothing here').tagName).toBe('P');
   });
 
   it('renders description when provided', () => {
@@ -21,7 +21,9 @@ describe('HbcEmptyState', () => {
 
   it('does not render description when omitted', () => {
     const { container } = render(<HbcEmptyState title="Empty" />);
-    expect(container.querySelector('p')).not.toBeInTheDocument();
+    // Title is now a <p> (UIF-011), so check that only 1 <p> exists (no description <p>)
+    const paragraphs = container.querySelectorAll('p');
+    expect(paragraphs).toHaveLength(1); // Only the title <p>
   });
 
   it('renders icon content when icon prop is provided', () => {
@@ -68,7 +70,7 @@ describe('HbcEmptyState', () => {
     const { container } = render(<HbcEmptyState title="Empty" />);
     // The actions div only renders when resolvedPrimary or secondaryAction exists
     const emptyState = container.querySelector('[data-hbc-ui="empty-state"]')!;
-    // h2 is the only child when no icon, no description, no actions
+    // title <p> is the only child when no icon, no description, no actions
     expect(emptyState.children).toHaveLength(1);
   });
 

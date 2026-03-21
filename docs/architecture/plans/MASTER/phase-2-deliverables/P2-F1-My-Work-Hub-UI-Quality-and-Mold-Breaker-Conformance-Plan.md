@@ -714,7 +714,7 @@ All UIFs re-opened as of the 2026-03-21 Audit 2 finding. Previous "Complete" cla
 |---|---|---|---|---|
 | — | @hbc/project-canvas integration | Architectural | G0 | **Complete** — 2026-03-21: dependency added, 6 tiles registered, HubSecondaryZone + HubTertiaryZone refactored to MyWorkCanvas |
 | UIF-001 | Lane header native button appearance | Critical | G1 | **Complete** — 2026-03-21: lane-color left border accents (status ramp tokens), heading4 typography, TRANSITION_FAST animation, HBC_RADIUS_LG containers, human-readable labels, sticky headers |
-| UIF-002 | Two-column layout / canvas waste | Critical | G2 | **Open** |
+| UIF-002 | Two-column layout / canvas waste | Critical | G2 | **Complete** — 2026-03-21: two-column layout via HubZoneLayout (G0+UIF-015), breadcrumb added, typography hierarchy verified (heading2 title, heading3 sections) |
 | UIF-003 | Title links — browser default blue | Critical | G1 | **Complete** — 2026-03-21: brand blue HBC_STATUS_RAMP_INFO[50] for links, muted [30] for watch lane, fontWeight 500, hover underline via CSS |
 | UIF-004 | Theme split — light body / dark shell | Critical | G1 | **Complete** — 2026-03-21: body background corrected to surface-0 tokens (#FFFFFF light, #0F172A dark, #0F1419 field) via data-theme attribute bridge |
 | UIF-005 | Collapsed lane — no visual distinction | High | G2 | **Complete** — 2026-03-21: collapsed hides lane-color accent (transparent border), chevron 0°→−90° rotation, surface-2 bg + opacity 0.7 (from UIF-001), aria-expanded present |
@@ -723,7 +723,7 @@ All UIFs re-opened as of the 2026-03-21 Audit 2 finding. Previous "Complete" cla
 | UIF-008 | KPI cards — static and inconsistent | High | G3 | **Complete** — 2026-03-21: DashboardLayout-pattern responsive grid (4→2→1), HbcCard wrapper removed, semantic status ramp colors (UNREAD amber, Action Now/Blocked red), heading1 value typography (existing), surface-1 bg (existing) |
 | UIF-009 | Touch target — "Open" button below 44px | High | G3 | **Complete** — 2026-03-21: density-aware tap spacing via tapSpacingMin, reasoning button sized to touchTargetMin (44px min), HbcButton auto-scales via useTouchSize |
 | UIF-010 | Dev tools visible in non-dev builds | High | G4 | **Open** |
-| UIF-011 | Typography — empty state heading scale | High | G1 | **Open** |
+| UIF-011 | Typography — empty state heading scale | High | G1 | **Complete** — 2026-03-21: HbcEmptyState title downgraded from heading3 to body (0.875rem/400), h2→p semantic element |
 | UIF-012 | Command bar — two rows, no count badges | High | G2 | **Complete** — 2026-03-21: group-by/sort moved to overflow menu, active filters use surface-active token, urgency-colored count badges, search placeholder |
 | UIF-013 | Sidebar nav — only one item visible | High | G3 | **Complete** — 2026-03-21: top-level Workspaces group with 4 destinations (My Work, BD, Estimating, Project Hub), icon resolver from NAV_ITEMS.icon, icons assigned per workspace |
 | UIF-014 | CTA labels — generic "Open" | High | G3 | **Open** |
