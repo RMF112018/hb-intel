@@ -23,6 +23,8 @@ export interface HbcKpiCardProps {
   onClick?: () => void;
   /** INS-006: Optional subtitle below the value (e.g. "active work items") */
   subtitle?: string;
+  /** INS-007: Optional icon in top-right corner for scanability */
+  icon?: React.ReactNode;
   /** Additional CSS class */
   className?: string;
 }

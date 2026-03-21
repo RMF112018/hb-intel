@@ -22,6 +22,7 @@ import {
   HBC_PRIMARY_BLUE,
 } from '@hbc/ui-kit';
 import { useMyWorkCounts } from '@hbc/my-work-feed';
+import { ViewList, SparkleIcon, Cancel, Notifications } from '@hbc/ui-kit/icons';
 
 // UIF-001: auto-fit + minmax(90px, 1fr) replaces fixed repeat(4,1fr) with explicit
 // breakpoints. The old breakpoints were calibrated for full-page width contexts and
@@ -74,16 +75,17 @@ export function PersonalAnalyticsCard({
           value={counts?.totalCount ?? 0}
           subtitle="active work items"
           color={HBC_PRIMARY_BLUE}
+          icon={<ViewList size="sm" />}
           isActive={activeFilter === null || activeFilter === undefined}
           onClick={() => onFilterChange?.('total')}
           className={styles.summaryCard}
         />
       </div>
-      {/* INS-002: Green = go-forward, ready-to-act in construction-ops culture */}
       <HbcKpiCard
         label="Action Now"
         value={counts?.nowCount ?? 0}
         color={HBC_STATUS_ACTION_GREEN}
+        icon={<SparkleIcon size="sm" />}
         isActive={activeFilter === 'action-now'}
         onClick={() => onFilterChange?.('action-now')}
       />
@@ -91,6 +93,7 @@ export function PersonalAnalyticsCard({
         label="Blocked"
         value={counts?.blockedCount ?? 0}
         color={HBC_STATUS_RAMP_RED[50]}
+        icon={<Cancel size="sm" />}
         isActive={activeFilter === 'blocked'}
         onClick={() => onFilterChange?.('blocked')}
       />
@@ -99,6 +102,7 @@ export function PersonalAnalyticsCard({
         label="Unread"
         value={counts?.unreadCount ?? 0}
         color={HBC_STATUS_RAMP_INFO[50]}
+        icon={<Notifications size="sm" />}
         isActive={activeFilter === 'unread'}
         onClick={() => onFilterChange?.('unread')}
       />

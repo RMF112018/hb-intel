@@ -1284,6 +1284,14 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.23 INS-007: Add Icons to KPI Cards for Scanability (Medium)
+
+**Fix:** Added `icon?: React.ReactNode` prop to HbcKpiCard with absolute-positioned top-right rendering at 40% opacity (80% on hover). Applied semantic icons to all 7 cards: Total Items → ViewList, Action Now → SparkleIcon, Blocked → Cancel, Unread → Notifications, Escalation Candidates → Upload, Aging → StatusOverdueIcon.
+
+**Files:** `packages/ui-kit/src/HbcKpiCard/types.ts` + `index.tsx` (icon prop + rendering), `apps/pwa/src/pages/my-work/cards/PersonalAnalyticsCard.tsx` + `AgingBlockedCard.tsx` (icon assignments). Versions: ui-kit 2.2.36→2.2.37, pwa 0.12.41→0.12.42.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

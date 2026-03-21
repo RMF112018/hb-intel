@@ -20,6 +20,7 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
+    position: 'relative',
     paddingTop: `${HBC_SPACE_MD}px`,
     paddingBottom: `${HBC_SPACE_MD}px`,
     paddingLeft: '20px',
@@ -99,6 +100,22 @@ const useStyles = makeStyles({
   trendFlat: {
     color: tokens.colorNeutralForeground3,
   },
+  // INS-007: Icon in top-right corner — subtle at rest, visible on hover.
+  iconSlot: {
+    position: 'absolute',
+    top: `${HBC_SPACE_MD}px`,
+    right: '12px',
+    width: '20px',
+    height: '20px',
+    opacity: '0.4',
+    transitionProperty: 'opacity',
+    transitionDuration: TRANSITION_FAST,
+    pointerEvents: 'none',
+  },
+  // INS-007: Icon opacity on card hover.
+  cardHoverIcon: {
+    opacity: '0.8',
+  },
   // INS-006: Subtitle below the value — small muted descriptor text.
   subtitle: {
     fontSize: '0.625rem',
@@ -121,10 +138,12 @@ export const HbcKpiCard: React.FC<HbcKpiCardProps> = ({
   color,
   isActive = false,
   subtitle,
+  icon,
   onClick,
   className,
 }) => {
   const styles = useStyles();
+  const [isHovered, setIsHovered] = React.useState(false);
 
   const trendClass = trend
     ? trend.direction === 'up'
@@ -147,6 +166,8 @@ export const HbcKpiCard: React.FC<HbcKpiCardProps> = ({
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onKeyDown={
         onClick
           ? (e) => {
@@ -158,6 +179,14 @@ export const HbcKpiCard: React.FC<HbcKpiCardProps> = ({
           : undefined
       }
     >
+      {icon && (
+        <span
+          className={mergeClasses(styles.iconSlot, isHovered && styles.cardHoverIcon)}
+          style={color ? { color } : undefined}
+        >
+          {icon}
+        </span>
+      )}
       <span className={styles.label}>{label}</span>
       <span className={styles.value}>{value}</span>
       {subtitle && <span className={styles.subtitle}>{subtitle}</span>}

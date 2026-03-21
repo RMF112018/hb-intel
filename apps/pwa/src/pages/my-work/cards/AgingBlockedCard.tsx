@@ -20,6 +20,7 @@ import {
 } from '@hbc/ui-kit';
 import { RoleGate } from '@hbc/auth';
 import { useMyWorkTeamFeed } from '@hbc/my-work-feed';
+import { Upload, Cancel, StatusOverdueIcon } from '@hbc/ui-kit/icons';
 
 // UIF-001: auto-fit + minmax(90px, 1fr) — same rationale as PersonalAnalyticsCard.
 // 3 cards fit in a single row at ≥302px; wrap to 2+1 below that.
@@ -55,11 +56,11 @@ export function AgingBlockedCard({
         <HbcSpinner size="sm" label="Loading insights" />
       ) : (
         <div className={styles.kpiGrid}>
-          {/* INS-002: Amber = at-risk, attention needed */}
           <HbcKpiCard
             label="Escalation Candidates"
             value={teamFeed?.escalationCandidateCount ?? 0}
             color={HBC_STATUS_RAMP_AMBER[50]}
+            icon={<Upload size="sm" />}
             isActive={activeFilter === 'escalation'}
             onClick={() => onFilterChange?.('escalation')}
           />
@@ -67,14 +68,15 @@ export function AgingBlockedCard({
             label="Blocked"
             value={teamFeed?.blockedCount ?? 0}
             color={HBC_STATUS_RAMP_RED[50]}
+            icon={<Cancel size="sm" />}
             isActive={activeFilter === 'blocked'}
             onClick={() => onFilterChange?.('blocked')}
           />
-          {/* INS-002: Gray = low-urgency background metric */}
           <HbcKpiCard
             label="Aging"
             value={teamFeed?.agingCount ?? 0}
             color={HBC_STATUS_RAMP_GRAY[50]}
+            icon={<StatusOverdueIcon size="sm" />}
             isActive={activeFilter === 'aging'}
             onClick={() => onFilterChange?.('aging')}
           />
