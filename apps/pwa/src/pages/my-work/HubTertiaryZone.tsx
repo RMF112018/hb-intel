@@ -30,15 +30,23 @@ const useStyles = makeStyles({
     color: 'var(--colorNeutralForeground1)',
     margin: '0',
   },
-  // INS-004: Clean 2-column grid replaces the 12-column micro-grid.
+  // INS-015: Asymmetric 2-column grid — Recent Context gets more space (2fr).
   // Responsive: single-column on mobile (≤767px).
   tileGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
+    gridTemplateColumns: 'minmax(140px, 1fr) minmax(200px, 2fr)',
     gap: '12px',
     [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
       gridTemplateColumns: '1fr',
     },
+  },
+  // INS-015: Top separator from Insights panel above.
+  cardWrapper: {
+    marginTop: '16px',
+    paddingTop: '16px',
+    borderTopWidth: '1px',
+    borderTopStyle: 'solid',
+    borderTopColor: 'rgba(255,255,255,0.06)',
   },
   // UIF-016: <details> disclosure wrapper used at narrow viewports.
   disclosure: {
@@ -124,6 +132,7 @@ export function HubTertiaryZone(): ReactNode {
     <HbcCard
       weight="supporting"
       header={<h3 className={styles.heading}>Quick Access</h3>}
+      className={styles.cardWrapper}
     >
       {tileGrid}
     </HbcCard>

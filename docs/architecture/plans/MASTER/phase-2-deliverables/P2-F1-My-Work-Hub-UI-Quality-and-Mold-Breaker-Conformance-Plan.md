@@ -1348,6 +1348,14 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.31 INS-015: Quick Access Layout Refinement (Low)
+
+**Fix:** Changed tileGrid from `repeat(2, 1fr)` to `minmax(140px, 1fr) minmax(200px, 2fr)` — asymmetric layout giving Recent Context more space. Added 16px top margin + padding and `1px solid rgba(255,255,255,0.06)` top border via `cardWrapper` class on the HbcCard for clear visual separation from Insights panel above.
+
+**Files:** `apps/pwa/src/pages/my-work/HubTertiaryZone.tsx`. Version: pwa 0.12.47→0.12.48.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
