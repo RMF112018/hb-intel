@@ -208,10 +208,10 @@ When `HbcProjectCanvas` hosts secondary/tertiary tiles in the right panel (per U
 | Lane-color tokens | `waiting-blocked` → `HBC_STATUS_RAMP_RED` (50); `do-now` → `HBC_STATUS_RAMP_AMBER` (50); `watch` → `HBC_STATUS_RAMP_GRAY` (50) | `UI-Kit-Visual-Language-Guide.md` status color ramps |
 
 **Acceptance criteria:**
-- No native `outset` border, no `rgb(239,239,239)` background, no `appearance: auto` on any lane header
-- Lane-color left border accent visible and color-coded per lane using status color tokens
-- Human-readable lane labels applied
-- Chevron rotation animated via `TRANSITION_FAST`; collapsed vs expanded visually distinguishable at a glance
+- No native `outset` border, no `rgb(239,239,239)` background, no `appearance: auto` on any lane header — **MET** (`appearance: 'none'`, `WebkitAppearance: 'none'`, `border: 'none'`; background uses Fluent `colorNeutralBackground2`/`3` tokens)
+- Lane-color left border accent visible and color-coded per lane using status color tokens — **MET** (`borderLeft: 4px solid` using `HBC_STATUS_RAMP_RED[50]` for waiting-blocked, `HBC_STATUS_RAMP_AMBER[50]` for do-now, `HBC_STATUS_RAMP_GRAY[50]` for watch, `HBC_STATUS_RAMP_INFO[50]` for delegated-team)
+- Human-readable lane labels applied — **MET** (`'do-now': 'Action Required'`, `'waiting-blocked': 'Waiting / Blocked'`, `'watch': 'Watching'`, `'delegated-team': 'Delegated to Team'`, `'deferred': 'Deferred'`)
+- Chevron rotation animated via `TRANSITION_FAST`; collapsed vs expanded visually distinguishable at a glance — **MET** (`rotate(0deg)` expanded → `rotate(-90deg)` collapsed with `transition: transform ${TRANSITION_FAST} ease`; collapsed state also has opacity 0.7 + transparent border accent per UIF-005)
 
 ---
 
