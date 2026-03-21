@@ -71,6 +71,12 @@ export interface WorkspacePageShellProps {
   banner?: BannerConfig;
   /** Supported device modes */
   supportedModes?: ('office' | 'field')[];
+  /**
+   * When true, hides the active project name badge shown next to the page title.
+   * Use on pages that are not scoped to a single project (e.g. My Work).
+   * Defaults to false.
+   */
+  suppressProjectContext?: boolean;
   /** Page content */
   children: ReactNode;
 }

@@ -50,6 +50,24 @@ describe('HbcCommandBar', () => {
     expect(screen.getByText('Archived')).toBeInTheDocument();
   });
 
+  it('renders grouping buttons with correct labels and aria-pressed state', () => {
+    renderWithFluent(
+      <HbcCommandBar
+        groupings={[
+          { key: 'group-lane', label: 'Group by lane', active: true, onSelect: vi.fn() },
+          { key: 'group-priority', label: 'Group by priority', active: false, onSelect: vi.fn() },
+          { key: 'group-project', label: 'Group by project', active: false, onSelect: vi.fn() },
+        ]}
+      />,
+    );
+    const activeBtn = screen.getByRole('button', { name: 'Group by lane' });
+    const inactiveBtn = screen.getByRole('button', { name: 'Group by priority' });
+    expect(activeBtn).toBeInTheDocument();
+    expect(activeBtn).toHaveAttribute('aria-pressed', 'true');
+    expect(inactiveBtn).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('radiogroup', { name: 'Group by' })).toBeInTheDocument();
+  });
+
   it('merges custom className', () => {
     const { container } = renderWithFluent(
       <HbcCommandBar className="custom-bar-class" />,

@@ -9,10 +9,9 @@
  */
 import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
+import { tokens } from '@fluentui/react-components';
 import {
-  HBC_PRIMARY_BLUE,
   HBC_HEADER_ICON_MUTED,
-  HBC_SURFACE_LIGHT,
   HBC_SURFACE_FIELD,
   hbcBrandRamp,
 } from '../theme/tokens.js';
@@ -31,8 +30,8 @@ const useStyles = makeStyles({
     position: 'sticky',
     top: '0',
     zIndex: 1,
-    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
-    borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    backgroundColor: tokens.colorNeutralBackground2,
+    borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
     paddingLeft: `${HBC_SPACE_MD}px`,
     paddingRight: `${HBC_SPACE_MD}px`,
   },
@@ -61,7 +60,7 @@ const useStyles = makeStyles({
     padding: '0',
     fontSize: 'inherit',
     fontFamily: 'inherit',
-    color: HBC_PRIMARY_BLUE,
+    color: tokens.colorBrandForeground1,
     cursor: 'pointer',
     textDecoration: 'none',
     ':hover': {
@@ -73,7 +72,7 @@ const useStyles = makeStyles({
   },
   current: {
     fontWeight: '600',
-    color: HBC_SURFACE_LIGHT['text-primary'],
+    color: tokens.colorNeutralForeground1,
   },
   currentField: {
     color: HBC_SURFACE_FIELD['text-primary'],

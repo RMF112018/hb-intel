@@ -154,6 +154,7 @@ export const HbcUserMenu: React.FC<HbcUserMenuProps> = ({
   onToggleFieldMode,
   onSignOut,
   onProfileClick,
+  userMenuExtra,
 }) => {
   // D-12: Always respect provider-resolved theme, even when consumers pass legacy props.
   const { isFieldMode: providerIsFieldMode } = useHbcTheme();
@@ -259,6 +260,8 @@ export const HbcUserMenu: React.FC<HbcUserMenuProps> = ({
               resolvedFieldMode ? styles.dividerField : styles.dividerOffice,
             )}
           />
+
+          {userMenuExtra}
 
           <button
             className={mergeClasses(

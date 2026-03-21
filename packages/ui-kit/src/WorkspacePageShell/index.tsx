@@ -265,6 +265,7 @@ export function WorkspacePageShell({
   emptyActionLabel,
   onEmptyAction,
   banner,
+  suppressProjectContext = false,
   children,
 }: WorkspacePageShellProps): React.ReactNode {
   const activeProject = useProjectStore((s) => s.activeProject);
@@ -348,7 +349,7 @@ export function WorkspacePageShell({
         <div className={styles.header}>
           <div className={styles.titleRow}>
             <h1 className={styles.title}>{title}</h1>
-            {activeProject && (
+            {activeProject && !suppressProjectContext && (
               <span className={styles.projectContext}>
                 {activeProject.name} ({activeProject.number})
               </span>

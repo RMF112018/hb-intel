@@ -5,7 +5,7 @@
 import { useMemo } from 'react';
 import { useConnectivity } from '@hbc/session-state';
 import type { ConnectivityStatus } from '@hbc/session-state';
-import type { IMyWorkFeedResult } from '@hbc/my-work-feed';
+import type { IMyWorkFeedResult, MyWorkSource } from '@hbc/my-work-feed';
 import { FEED_FRESHNESS_WINDOW_MS } from './trustStateConstants.js';
 
 export interface IHubTrustState {
@@ -15,6 +15,8 @@ export interface IHubTrustState {
   isStaleWhileRevalidating: boolean;
   connectivity: ConnectivityStatus;
   degradedSourceCount: number;
+  /** UIF-011: Source keys that failed to load. Empty array when all sources healthy. */
+  degradedSources: MyWorkSource[];
 }
 
 export function useHubTrustState(
@@ -40,6 +42,7 @@ export function useHubTrustState(
       (feed?.isStale === true || !isWithinFreshnessWindow) && isLoading;
 
     const degradedSourceCount = feed?.healthState?.degradedSourceCount ?? 0;
+    const degradedSources = (feed?.healthState?.degradedSources ?? []) as MyWorkSource[];
 
     return {
       freshness: normalizedFreshness,
@@ -48,6 +51,7 @@ export function useHubTrustState(
       isStaleWhileRevalidating,
       connectivity,
       degradedSourceCount,
+      degradedSources,
     };
   }, [feed, isLoading, connectivity]);
 }

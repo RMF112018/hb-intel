@@ -58,6 +58,18 @@ export interface SavedView {
   isActive?: boolean;
 }
 
+/** UIF-010: Mutually exclusive grouping control. Radio semantics via aria-pressed + radiogroup wrapper. */
+export interface CommandBarGrouping {
+  /** Unique key */
+  key: string;
+  /** Display label */
+  label: string;
+  /** This grouping is currently active */
+  active: boolean;
+  /** Selection handler */
+  onSelect: () => void;
+}
+
 export interface HbcCommandBarProps {
   /** Search box value */
   searchValue?: string;
@@ -83,6 +95,8 @@ export interface HbcCommandBarProps {
   onDensityChange?: (tier: DensityTier) => void;
   /** Column configurator trigger slot */
   columnConfigTrigger?: React.ReactNode;
+  /** Mutually exclusive grouping controls. Rendered as a radiogroup of toggle buttons. (UIF-010) */
+  groupings?: CommandBarGrouping[];
   /** Additional CSS class */
   className?: string;
 }

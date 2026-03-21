@@ -2,8 +2,10 @@
  * PersonalAnalyticsCard — P2-D1 §6: available to all roles.
  * Displays personal work KPIs from useMyWorkCounts().
  *
- * UIF-008: Responsive 4→2→1 KPI grid matching DashboardLayout pattern.
- * Click-to-filter on each card scopes the work item feed.
+ * UIF-008: Responsive KPI grid with click-to-filter on each card.
+ * UIF-001 fix: grid uses auto-fit + minmax so columns reflow to container width
+ * instead of overflowing. Works correctly whether the tile spans 6 or 12 columns
+ * in the secondary zone's 12-column grid.
  * Semantic status ramp colors on top borders per UIF-007.
  * Value typography: heading1 (1.5rem/700) via HbcKpiCard default.
  * Background: surface-1 (colorNeutralBackground1) via HbcKpiCard default.
@@ -12,26 +14,23 @@ import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import {
   HbcKpiCard,
-  HBC_BREAKPOINT_CONTENT_MEDIUM,
-  HBC_BREAKPOINT_MOBILE,
+  HbcSpinner,
   HBC_SPACE_MD,
   HBC_STATUS_RAMP_RED,
   HBC_STATUS_RAMP_AMBER,
 } from '@hbc/ui-kit';
 import { useMyWorkCounts } from '@hbc/my-work-feed';
 
-// UIF-008: Responsive KPI grid matching DashboardLayout.kpiGrid pattern.
+// UIF-001: auto-fit + minmax(90px, 1fr) replaces fixed repeat(4,1fr) with explicit
+// breakpoints. The old breakpoints were calibrated for full-page width contexts and
+// did not account for the constrained ~200-250px tile wrapper inside defaultColSpan:6.
+// With auto-fit, the grid self-adapts: 4 cards per row at ≥408px, 2 per row at
+// ≥196px, 1 per row below. No viewport-level media query needed.
 const useStyles = makeStyles({
   kpiGrid: {
     display: 'grid',
     gap: `${HBC_SPACE_MD}px`,
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    [`@media (max-width: ${HBC_BREAKPOINT_CONTENT_MEDIUM}px)`]: {
-      gridTemplateColumns: 'repeat(2, 1fr)',
-    },
-    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
-      gridTemplateColumns: '1fr',
-    },
+    gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))',
   },
 });
 
@@ -49,7 +48,9 @@ export function PersonalAnalyticsCard({
   const styles = useStyles();
   const { counts, isLoading } = useMyWorkCounts();
 
-  if (isLoading) return <span>Loading...</span>;
+  // Per-tile loading — WorkspacePageShell isLoading is page-level, not applicable here.
+  // eslint-disable-next-line @hb-intel/hbc/no-direct-spinner
+  if (isLoading) return <HbcSpinner size="sm" label="Loading insights" />;
 
   return (
     <div className={styles.kpiGrid}>

@@ -77,6 +77,13 @@ function MyWorkCanvasTile({
 }): ReactNode {
   const TileComponent = definition.component[complexityTier];
 
+  // UIF-001: Guard against a missing variant for the current tier. The minComplexity
+  // filter in MyWorkCanvas handles the standard case, but if a tile definition has
+  // no component for the resolved tier (e.g. essential variant returns undefined),
+  // skip the wrapper entirely to avoid a height:0 ghost cell in the zone grid that
+  // consumes a gridColumn span without rendering any visible content.
+  if (!TileComponent) return null;
+
   const gridStyle: React.CSSProperties = {
     gridColumn: `span ${definition.defaultColSpan}`,
   };

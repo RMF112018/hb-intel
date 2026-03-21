@@ -19,4 +19,6 @@ export * from './components/index.js';
 // Telemetry
 export * from './telemetry/index.js';
 // Utils
-export { resolveCtaLabel } from './utils/resolveCtaLabel.js';
+export { resolveCtaLabel, resolveCtaAction } from './utils/resolveCtaLabel.js';
+export type { CtaAction, CtaVariant } from './utils/resolveCtaLabel.js';
+export { formatModuleLabel, MODULE_DISPLAY_NAMES } from './utils/formatModuleLabel.js';

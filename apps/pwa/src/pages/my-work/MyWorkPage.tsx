@@ -119,11 +119,17 @@ export function MyWorkPage(): ReactNode {
     </Suspense>
   ) : undefined;
 
+  // UIF-008: Right panel is meaningful only when secondary/tertiary zones have
+  // real tile content (standard/expert tier) or a detail panel is open.
+  // At essential tier both zones are hidden or empty — collapse to full-width.
+  const hasRightPanelContent = tier !== 'essential' || !!selectedItem;
+
   return (
     <WorkspacePageShell
       layout="dashboard"
       title="My Work"
       breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'My Work' }]}
+      suppressProjectContext
     >
       <MyWorkProvider context={runtimeContext} defaultQuery={defaultQuery}>
         <HubPageLevelEmptyState
@@ -146,6 +152,7 @@ export function MyWorkPage(): ReactNode {
               }
               tertiaryContent={<HubTertiaryZone />}
               detailContent={detailContent}
+              hasRightPanelContent={hasRightPanelContent}
             />
           </div>
         </HubPageLevelEmptyState>

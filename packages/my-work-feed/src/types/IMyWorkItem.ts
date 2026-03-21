@@ -117,6 +117,8 @@ export interface IMyWorkHealthState {
   freshness: MyWorkSyncStatus;
   hiddenSupersededCount?: number;
   degradedSourceCount?: number;
+  /** UIF-011: Source keys that failed to load. Enables expandable source detail in HubFreshnessIndicator. */
+  degradedSources?: MyWorkSource[];
   warningMessage?: string | null;
 }
 

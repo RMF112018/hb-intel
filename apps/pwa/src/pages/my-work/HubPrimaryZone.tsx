@@ -20,12 +20,13 @@ export interface HubPrimaryZoneProps {
 }
 
 export function HubPrimaryZone({ onItemSelect, kpiFilter }: HubPrimaryZoneProps): ReactNode {
-  const { feed, isLoading } = useMyWork();
+  const { feed, isLoading, refetch } = useMyWork();
   const trustState = useHubTrustState(feed, isLoading);
 
   return (
     <>
-      <HubFreshnessIndicator trustState={trustState} isLoading={isLoading} />
+      {/* UIF-011: onRetry wires the feed refetch into the degraded-source Retry button. */}
+      <HubFreshnessIndicator trustState={trustState} isLoading={isLoading} onRetry={refetch} />
       <HbcMyWorkFeed onItemSelect={onItemSelect} kpiFilter={kpiFilter} />
     </>
   );

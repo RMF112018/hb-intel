@@ -79,6 +79,8 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   mode = 'pwa',
   onSignOut,
   onNavigate,
+  userMenuExtra,
+  showProjectSelector = true,
 }) => {
   const { isExpanded, isMobile } = useSidebarState();
   const isTablet = useIsTablet();
@@ -132,7 +134,7 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   return (
     <div data-hbc-shell="app-shell" data-mode={mode}>
       <HbcConnectivityBar />
-      <HbcHeader user={user} onSignOut={onSignOut} />
+      <HbcHeader user={user} onSignOut={onSignOut} userMenuExtra={userMenuExtra} showProjectSelector={showProjectSelector} />
       {showSidebar && (
         <HbcSidebar groups={sidebarGroups} activeItemId={resolvedActiveItemId} onNavigate={onNavigate} />
       )}

@@ -3,7 +3,9 @@
  *
  * HbcThemeProvider > MsalProvider (conditional) > QueryClientProvider
  *   > HbcErrorBoundary > RouterProvider > ReactQueryDevtools (DEV only)
- *   > DevToolbar (DEV only — D-PH5C-06/D-PH5C-02)
+ *
+ * UIF-012: DevToolbar bottom bar removed. Dev tooling now lives in the user avatar menu
+ * via DevToolbarMenuEntry, mounted in root-route.tsx.
  */
 import { lazy, Suspense } from 'react';
 import type { ComponentType } from 'react';
@@ -20,15 +22,6 @@ import { createProvisioningApiClient } from '@hbc/provisioning';
 import { resolveSessionToken } from './utils/resolveSessionToken.js';
 import { createAppRouter } from './router/index.js';
 import { MsalGuard } from './auth/MsalGuard.js';
-
-// D-PH5C-06/D-PH5C-02: Lazily load persona switcher only in DEV mode — zero cost in production.
-// ALIGNMENT: ShellCore.tsx PH5C.4 pattern.
-let DevToolbar: ComponentType | null = null;
-if (import.meta.env.DEV) {
-  DevToolbar = lazy(() =>
-    import('@hbc/shell/dev-toolbar').then((m) => ({ default: m.DevToolbar })),
-  );
-}
 
 // UIF-010: Gate React Query devtools behind DEV — same pattern as DevToolbar.
 let ReactQueryDevtoolsLazy: ComponentType<{ initialIsOpen: boolean }> | null = null;
@@ -94,11 +87,6 @@ export function App({ authMode }: AppProps): React.ReactNode {
           </SessionStateProvider>
         </ComplexityProvider>
       </HbcErrorBoundary>
-      {import.meta.env.DEV && DevToolbar ? (
-        <Suspense fallback={null}>
-          <DevToolbar />
-        </Suspense>
-      ) : null}
     </HbcThemeProvider>
   );
 }

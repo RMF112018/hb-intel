@@ -36,30 +36,13 @@ import {
 } from '@hbc/ui-kit';
 import type { IMyWorkItem } from '../../types/index.js';
 import type { IMyWorkActionRequest } from '../../hooks/useMyWorkActions.js';
-import { resolveCtaLabel } from '../../utils/resolveCtaLabel.js';
+import { resolveCtaAction } from '../../utils/resolveCtaLabel.js';
+import { formatModuleLabel } from '../../utils/formatModuleLabel.js';
 
 export interface IHbcMyWorkListItemProps {
   item: IMyWorkItem;
   onAction?: (request: IMyWorkActionRequest) => void;
   className?: string;
-}
-
-// ─── Module display name mapping (UIF-006) ──────────────────────────────────
-// Maps raw moduleKey slugs to human-readable labels. Falls back to title-casing.
-const MODULE_DISPLAY_NAMES: Record<string, string> = {
-  'bd-scorecard': 'BD Scorecard',
-  'project-hub-pmp': 'Project Hub',
-  'project-hub-health-pulse': 'Health Pulse',
-  'estimating': 'Estimating',
-  'accounting': 'Accounting',
-  'admin': 'Admin',
-};
-
-function formatModuleLabel(moduleKey: string): string {
-  return (
-    MODULE_DISPLAY_NAMES[moduleKey] ??
-    moduleKey.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-  );
 }
 
 // ─── UIF-016: Project color coding ──────────────────────────────────────────
@@ -156,6 +139,8 @@ export function HbcMyWorkListItem({
   const handleMouseLeave = useCallback(() => setIsHovered(false), []);
 
   const primaryAction = item.availableActions[0];
+  // UIF-007: Resolve CTA label + variant once; used in the primary action button.
+  const primaryCta = resolveCtaAction(item);
   const accentBorder = resolveAccentBorder(item);
   const hasAccent = Boolean(accentBorder);
 
@@ -289,8 +274,21 @@ export function HbcMyWorkListItem({
                 </span>
               </span>
             )}
+            {/* UIF-006: Module label as neutral chip — no raw kebab keys exposed */}
             {item.context.moduleKey && (
-              <span style={{ fontSize: bodySmall.fontSize, fontWeight: bodySmall.fontWeight, lineHeight: bodySmall.lineHeight, color: HBC_STATUS_RAMP_GRAY[50] }}>
+              <span
+                style={{
+                  display: 'inline-block',
+                  fontSize: '0.6875rem',
+                  fontWeight: 500,
+                  lineHeight: '1.5',
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--colorNeutralBackground4)',
+                  color: 'var(--colorNeutralForeground3)',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {formatModuleLabel(item.context.moduleKey)}
               </span>
             )}
@@ -404,13 +402,13 @@ export function HbcMyWorkListItem({
         }}
       >
         {primaryAction && (
+          // UIF-007: variant + label from resolveCtaAction — differentiated by lane/status.
           <HbcButton
-            variant="ghost"
+            variant={primaryCta.variant}
             size="sm"
             onClick={() => onAction?.({ actionKey: primaryAction.key, item })}
           >
-            {/* UIF-014: Context-sensitive CTA label */}
-            {resolveCtaLabel(item)}
+            {primaryCta.label}
           </HbcButton>
         )}
         {tier !== 'essential' && (

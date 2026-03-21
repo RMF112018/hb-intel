@@ -75,6 +75,8 @@ export interface IMyWorkQueueHealth {
   lastSyncAtIso: string;
   hiddenSupersededCount: number;
   degradedSourceCount: number;
+  /** UIF-011: Source keys that failed to load. Companion to degradedSourceCount. */
+  degradedSources?: MyWorkSource[];
   warningMessage?: string;
 }
 

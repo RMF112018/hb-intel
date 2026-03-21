@@ -2,20 +2,29 @@
  * HbcMyWorkFeed — SF29-T06
  *
  * Full workspace feed with grouping, filtering, search, and sorting.
- * State is component-local (D1). Reuses HbcMyWorkListItem (D2).
- * Essential: flat list, no controls. Standard: CommandBar + grouping.
+ * State is component-local (D1).
+ * Essential: flat HbcDataTable, no controls.
+ * Standard: CommandBar + per-group HbcDataTable.
  * Expert: + sort + source health footer.
+ *
+ * UIF-002: Replaced HbcMyWorkListItem card list + grouped <button> headers with
+ * HbcDataTable per group. Group headers are now <section> + <div> containing
+ * a standalone <h3> and a separate collapse <button>, eliminating the illegal
+ * button > h3 nesting and UA button background interference.
  *
  * Groups start expanded by default. collapsedGroups tracks what has been
  * manually collapsed rather than what is open, so initial render shows all items.
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import type { ColumnDef } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
 import {
   HbcCommandBar,
   HbcSpinner,
   HbcBanner,
+  HbcDataTable,
+  HbcButton,
   HBC_STATUS_RAMP_RED,
   HBC_STATUS_RAMP_AMBER,
   HBC_STATUS_RAMP_GRAY,
@@ -25,14 +34,17 @@ import {
   HBC_SPACE_MD,
   TRANSITION_FAST,
   heading4,
+  bodySmall,
+  hbcBrandRamp,
 } from '@hbc/ui-kit';
 import { ChevronDown } from '@hbc/ui-kit/icons';
 import { useMyWork } from '../../hooks/useMyWork.js';
 import { useMyWorkActions } from '../../hooks/useMyWorkActions.js';
 import { HbcMyWorkOfflineBanner } from '../HbcMyWorkOfflineBanner/index.js';
-import { HbcMyWorkListItem } from '../HbcMyWorkListItem/index.js';
 import { HbcMyWorkEmptyState } from '../HbcMyWorkEmptyState/index.js';
 import { HbcMyWorkSourceHealth } from '../HbcMyWorkSourceHealth/index.js';
+import { resolveCtaAction } from '../../utils/resolveCtaLabel.js';
+import { formatModuleLabel } from '../../utils/formatModuleLabel.js';
 import type { IMyWorkItem, IMyWorkQuery } from '../../types/index.js';
 
 export interface IHbcMyWorkFeedProps {
@@ -60,10 +72,6 @@ const GROUPINGS: Record<GroupingKey, (item: IMyWorkItem) => string> = {
   module: (item) => item.context.moduleKey,
 };
 
-/**
- * Human-readable labels for MyWorkLane slug values.
- * Falls back to title-casing the slug for any unlisted values.
- */
 /**
  * UIF-001: Human-readable labels for MyWorkLane slug values.
  * MB-01 — no developer-internal labels visible to users.
@@ -126,6 +134,292 @@ function groupItems(
   }));
 }
 
+// ─── Column cell helpers ─────────────────────────────────────────────────────
+
+// UIF-016: Deterministic project color from hbcBrandRamp categorical stops.
+const PROJECT_COLOR_STOPS = [40, 60, 80, 100, 120, 140] as const;
+
+function resolveProjectColor(projectId: string | undefined): string {
+  if (!projectId) return hbcBrandRamp[80];
+  let hash = 0;
+  for (let i = 0; i < projectId.length; i++) {
+    hash = ((hash << 5) - hash + projectId.charCodeAt(i)) | 0;
+  }
+  const idx = Math.abs(hash) % PROJECT_COLOR_STOPS.length;
+  return hbcBrandRamp[PROJECT_COLOR_STOPS[idx]];
+}
+
+const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function formatDueDate(isoDate: string): string {
+  const d = new Date(isoDate);
+  return `Due ${MONTH_ABBR[d.getMonth()]} ${d.getDate()}`;
+}
+
+// ─── Column height sizing ────────────────────────────────────────────────────
+/** Estimated row height for HbcDataTable virtualizer (px). */
+const ESTIMATED_ROW_HEIGHT = 48;
+/** Header row height (px) — matches HbcDataTable thead. */
+const TABLE_HEADER_HEIGHT = 44;
+
+/**
+ * Returns a px height string for HbcDataTable sized to content.
+ * Avoids the default 600px allocation for groups with few items.
+ */
+function resolveTableHeight(itemCount: number): string {
+  return `${itemCount * ESTIMATED_ROW_HEIGHT + TABLE_HEADER_HEIGHT}px`;
+}
+
+// ─── Work item column definitions ───────────────────────────────────────────
+
+/**
+ * Builds the ColumnDef array for IMyWorkItem tables.
+ * Stable reference is guaranteed by the useMemo call in HbcMyWorkFeed.
+ * onItemSelect is threaded through closure so columns do not need to be
+ * rebuilt on every render — it is captured once and remains stable as long
+ * as the parent memoizes correctly.
+ */
+function buildWorkItemColumns(
+  onItemSelect: ((item: IMyWorkItem) => void) | undefined,
+): ColumnDef<IMyWorkItem, unknown>[] {
+  return [
+    {
+      id: 'title',
+      accessorKey: 'title',
+      header: 'Work Item',
+      size: 280,
+      cell: ({ row }) => {
+        const item = row.original;
+        const isWatchMuted = item.lane === 'watch' && !item.isUnread && !item.isBlocked;
+        const titleColor = isWatchMuted
+          ? HBC_STATUS_RAMP_INFO[30]
+          : HBC_STATUS_RAMP_INFO[50];
+        const accentBorder = item.isBlocked
+          ? `3px solid ${HBC_STATUS_RAMP_RED[50]}`
+          : item.isUnread
+          ? '3px solid var(--colorBrandForeground1)'
+          : undefined;
+
+        const inner = (
+          <span
+            style={{
+              fontWeight: item.isUnread ? 600 : 400,
+              fontSize: bodySmall.fontSize,
+              lineHeight: bodySmall.lineHeight,
+              color: item.context.href ? titleColor : 'var(--colorNeutralForeground1)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              display: 'block',
+            }}
+          >
+            {item.title}
+          </span>
+        );
+
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderLeft: accentBorder,
+              paddingLeft: accentBorder ? '6px' : undefined,
+              overflow: 'hidden',
+            }}
+          >
+            {item.context.href ? (
+              <a
+                href={item.context.href}
+                onClick={(e) => {
+                  if (onItemSelect) {
+                    e.preventDefault();
+                    onItemSelect(item);
+                  }
+                }}
+                style={{
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  overflow: 'hidden',
+                  display: 'block',
+                  width: '100%',
+                }}
+              >
+                {inner}
+              </a>
+            ) : (
+              inner
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      size: 120,
+      cell: ({ row }) => {
+        const item = row.original;
+        const tags: React.ReactNode[] = [];
+        if (item.isOverdue) {
+          tags.push(
+            <span
+              key="overdue"
+              style={{
+                fontSize: '0.6875rem',
+                fontWeight: 600,
+                padding: '1px 6px',
+                borderRadius: '4px',
+                backgroundColor: HBC_STATUS_RAMP_RED[90],
+                color: HBC_STATUS_RAMP_RED[30],
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Overdue
+            </span>,
+          );
+        }
+        if (item.isBlocked) {
+          tags.push(
+            <span
+              key="blocked"
+              style={{
+                fontSize: '0.6875rem',
+                fontWeight: 600,
+                padding: '1px 6px',
+                borderRadius: '4px',
+                backgroundColor: HBC_STATUS_RAMP_AMBER[90],
+                color: HBC_STATUS_RAMP_AMBER[30],
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Blocked
+            </span>,
+          );
+        }
+        return (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+            {tags.length > 0 ? tags : (
+              <span style={{ color: 'var(--colorNeutralForeground4)', fontSize: '0.6875rem' }}>—</span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      id: 'source',
+      header: 'Source',
+      size: 160,
+      cell: ({ row }) => {
+        const item = row.original;
+        const projectColor = resolveProjectColor(item.context.projectId);
+        const projectName = item.context.projectName ?? item.context.projectId ?? '—';
+        const moduleLabel = formatModuleLabel(item.context.moduleKey);
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+            <span
+              aria-hidden="true"
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: projectColor,
+                flexShrink: 0,
+              }}
+            />
+            <div style={{ overflow: 'hidden', minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: bodySmall.fontSize,
+                  color: 'var(--colorNeutralForeground1)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {projectName}
+              </div>
+              {/* UIF-006: Module label as neutral chip — no raw kebab keys exposed */}
+              <span
+                style={{
+                  display: 'inline-block',
+                  fontSize: '0.6875rem',
+                  fontWeight: 500,
+                  lineHeight: '1.5',
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--colorNeutralBackground4)',
+                  color: 'var(--colorNeutralForeground3)',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {moduleLabel}
+              </span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'dueDate',
+      accessorKey: 'dueDateIso',
+      header: 'Due',
+      size: 100,
+      cell: ({ row }) => {
+        const item = row.original;
+        if (!item.dueDateIso) {
+          return (
+            <span style={{ color: 'var(--colorNeutralForeground4)', fontSize: bodySmall.fontSize }}>
+              —
+            </span>
+          );
+        }
+        return (
+          <span
+            style={{
+              fontSize: bodySmall.fontSize,
+              color: item.isOverdue ? HBC_STATUS_RAMP_RED[50] : 'var(--colorNeutralForeground2)',
+              fontWeight: item.isOverdue ? 600 : 400,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {formatDueDate(item.dueDateIso)}
+          </span>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      header: '',
+      size: 120,
+      cell: ({ row }) => {
+        const item = row.original;
+        // UIF-007: CTA label + variant differentiated by lane/status.
+        const cta = resolveCtaAction(item);
+        return (
+          <HbcButton
+            variant={cta.variant}
+            size="sm"
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              if (onItemSelect) {
+                onItemSelect(item);
+              } else if (item.context.href) {
+                window.location.href = item.context.href;
+              }
+            }}
+          >
+            {cta.label}
+          </HbcButton>
+        );
+      },
+    },
+  ];
+}
+
 export function HbcMyWorkFeed({
   query,
   onItemSelect,
@@ -135,7 +429,7 @@ export function HbcMyWorkFeed({
 }: IHbcMyWorkFeedProps): JSX.Element {
   const { tier } = useComplexity();
   const { feed, isLoading, isError } = useMyWork({ query });
-  const { executeAction } = useMyWorkActions();
+  const { executeAction: _executeAction } = useMyWorkActions();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [groupingKey, setGroupingKey] = useState<GroupingKey>('lane');
@@ -159,6 +453,12 @@ export function HbcMyWorkFeed({
       return next;
     });
   }, []);
+
+  // UIF-002: Stable column definitions — rebuilt only when onItemSelect identity changes.
+  const workItemColumns = useMemo(
+    () => buildWorkItemColumns(onItemSelect),
+    [onItemSelect],
+  );
 
   const processedItems = useMemo(() => {
     if (!feed?.items) return [];
@@ -244,21 +544,24 @@ export function HbcMyWorkFeed({
     },
   ];
 
-  // UIF-012: Group-by and sort controls in overflow menu (MB-01 progressive disclosure)
-  const overflowActions = [
-    ...(['lane', 'priority', 'project', 'module'] as const).map((key) => ({
-      key: `group-${key}`,
-      label: `Group by ${key}`,
-      onClick: () => setGroupingKey(key),
-    })),
-    ...(tier === 'expert'
+  // UIF-010: Grouping controls rendered as a visible radiogroup row in HbcCommandBar.
+  // Each entry reflects the active groupingKey so the selected option shows filled active state.
+  const groupings = (['lane', 'priority', 'project', 'module'] as const).map((key) => ({
+    key: `group-${key}`,
+    label: `Group by ${key}`,
+    active: groupingKey === key,
+    onSelect: () => setGroupingKey(key),
+  }));
+
+  // Sort controls remain in overflow menu (expert-only progressive disclosure).
+  const overflowActions =
+    tier === 'expert'
       ? (['rank', 'updated', 'created'] as const).map((key) => ({
           key: `sort-${key}`,
           label: `Sort by ${key}`,
           onClick: () => setSortKey(key),
         }))
-      : []),
-  ];
+      : [];
 
   return (
     <div
@@ -270,7 +573,8 @@ export function HbcMyWorkFeed({
       {tier !== 'essential' && (
         <HbcCommandBar
           filters={filters}
-          overflowActions={overflowActions}
+          groupings={groupings}
+          overflowActions={overflowActions.length > 0 ? overflowActions : undefined}
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
           searchPlaceholder="Search work items\u2026"
@@ -299,83 +603,78 @@ export function HbcMyWorkFeed({
       {!isLoading && !isError && hasItems && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
           {tier === 'essential' ? (
-            <div
-              style={{
-                borderRadius: '6px',
-                border: '1px solid var(--colorNeutralStroke2)',
-                overflow: 'hidden',
+            // UIF-002: HbcDataTable replaces card list for all tiers.
+            // Essential tier renders a single ungrouped table.
+            <HbcDataTable
+              data={processedItems}
+              columns={workItemColumns}
+              isLoading={false}
+              height={resolveTableHeight(processedItems.length)}
+              estimatedRowHeight={ESTIMATED_ROW_HEIGHT}
+              mobileCardFields={['title', 'dueDateIso']}
+              onRowClick={(item) => {
+                if (onItemSelect) {
+                  onItemSelect(item);
+                } else if (item.context.href) {
+                  window.location.href = item.context.href;
+                }
               }}
-            >
-              {processedItems.map((item) => (
-                <HbcMyWorkListItem
-                  key={item.workItemId}
-                  item={item}
-                  onAction={(request) => {
-                    executeAction(request);
-                    onItemSelect?.(request.item);
-                  }}
-                />
-              ))}
-            </div>
+            />
           ) : (
             groups.map((group) => {
               const isExpanded = !collapsedGroups.has(group.groupKey);
+              const label = formatGroupLabel(group.groupKey);
+              const laneColor = LANE_COLORS[group.groupKey] ?? 'transparent';
+              // Stable IDs for ARIA labelling.
+              const headerId = `my-work-group-hdr-${group.groupKey}`;
+              const bodyId = `my-work-group-body-${group.groupKey}`;
+
               return (
-                <div
+                // UIF-002: <section> wraps each lane group. The group header is a
+                // plain <div> containing a semantic <h3> and a standalone collapse
+                // <button>. This eliminates the illegal button > h3 HTML and allows
+                // Fluent UI CSS tokens on the header div to resolve correctly (no UA
+                // button background interference).
+                <section
                   key={group.groupKey}
                   data-lane={group.groupKey}
+                  aria-label={label}
                   style={{
                     borderRadius: HBC_RADIUS_LG,
                     border: '1px solid var(--colorNeutralStroke2)',
                     overflow: 'hidden',
                   }}
                 >
-                  {/* Group header
-                      border: 'none' MUST precede borderBottom — border is a
-                      shorthand that resets all sides; placing it first lets
-                      borderBottom win as the last-declared property. */}
-                  <button
-                    type="button"
-                    onClick={() => toggleGroup(group.groupKey)}
-                    aria-expanded={isExpanded}
+                  {/* Group header — div, not button, so UA background does not override tokens */}
+                  <div
                     style={{
-                      // Reset UA button styles first (UIF-001 — MB-08)
-                      // UIF-017: outline NOT reset here — :focus-visible ring provided by pwa.css
-                      appearance: 'none' as const,
-                      WebkitAppearance: 'none' as const,
-                      border: 'none',
-                      // Layout
-                      width: '100%',
-                      boxSizing: 'border-box' as const,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      // UIF-001: Spacing from design tokens
                       padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px`,
                       backgroundColor: isExpanded
                         ? 'var(--colorNeutralBackground2)'
                         : 'var(--colorNeutralBackground3)',
                       // UIF-001 + UIF-005: Lane-color left border accent (expanded only)
                       borderLeft: isExpanded
-                        ? `4px solid ${LANE_COLORS[group.groupKey] ?? 'transparent'}`
+                        ? `4px solid ${laneColor}`
                         : '4px solid transparent',
-                      // Separator — declared after border: none so it wins
+                      // Separator between header and table body
                       borderBottom: isExpanded
                         ? '1px solid var(--colorNeutralStroke2)'
-                        : '0',
+                        : undefined,
                       // UIF-001: Sticky lane headers (MB-03)
-                      position: 'sticky' as const,
+                      position: 'sticky',
                       top: 0,
                       zIndex: 1,
-                      // Typography & interaction
-                      cursor: 'pointer',
-                      color: 'var(--colorNeutralForeground1)',
-                      userSelect: 'none' as const,
                     }}
                   >
+                    {/* Left: heading + count badge */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span
+                      <h3
+                        id={headerId}
                         style={{
+                          margin: 0,
                           fontWeight: heading4.fontWeight,
                           fontSize: heading4.fontSize,
                           lineHeight: heading4.lineHeight,
@@ -385,8 +684,8 @@ export function HbcMyWorkFeed({
                           transition: `opacity ${TRANSITION_FAST} ease`,
                         }}
                       >
-                        {formatGroupLabel(group.groupKey)}
-                      </span>
+                        {label}
+                      </h3>
                       <span
                         style={{
                           fontSize: '0.6875rem',
@@ -396,7 +695,7 @@ export function HbcMyWorkFeed({
                           backgroundColor: 'var(--colorNeutralBackground4)',
                           color: 'var(--colorNeutralForeground2)',
                           minWidth: '22px',
-                          textAlign: 'center' as const,
+                          textAlign: 'center',
                           lineHeight: '1.4',
                           opacity: isExpanded ? 1 : 0.7,
                           transition: `opacity ${TRANSITION_FAST} ease`,
@@ -405,37 +704,71 @@ export function HbcMyWorkFeed({
                         {group.items.length}
                       </span>
                     </div>
-                    <span
+
+                    {/* Right: standalone collapse toggle */}
+                    <button
+                      type="button"
+                      aria-expanded={isExpanded}
+                      aria-controls={bodyId}
+                      aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${label}`}
+                      onClick={() => toggleGroup(group.groupKey)}
                       style={{
-                        color: 'var(--colorNeutralForeground3)',
+                        // Full UA reset — appearance does not apply to color/bg
+                        appearance: 'none',
+                        WebkitAppearance: 'none',
+                        border: 'none',
+                        background: 'transparent',
+                        padding: '4px',
+                        margin: 0,
+                        cursor: 'pointer',
+                        // Flex icon centering
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--colorNeutralForeground3)',
+                        borderRadius: '4px',
                         flexShrink: 0,
-                        // UIF-005: 0° expanded (down), −90° collapsed (right)
-                        transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
-                        transition: `transform ${TRANSITION_FAST} ease`,
                       }}
                     >
-                      <ChevronDown size="sm" />
-                    </span>
-                  </button>
+                      <span
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          // UIF-005: 0° expanded (down), −90° collapsed (right)
+                          transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+                          transition: `transform ${TRANSITION_FAST} ease`,
+                        }}
+                      >
+                        <ChevronDown size="sm" />
+                      </span>
+                    </button>
+                  </div>
 
-                  {/* Group body */}
+                  {/* Group body — HbcDataTable per lane */}
                   {isExpanded && (
-                    <div style={{ backgroundColor: 'var(--colorNeutralBackground1)' }}>
-                      {group.items.map((item) => (
-                        <HbcMyWorkListItem
-                          key={item.workItemId}
-                          item={item}
-                          onAction={(request) => {
-                            executeAction(request);
-                            onItemSelect?.(request.item);
-                          }}
-                        />
-                      ))}
+                    <div
+                      id={bodyId}
+                      role="region"
+                      aria-labelledby={headerId}
+                    >
+                      <HbcDataTable
+                        data={group.items}
+                        columns={workItemColumns}
+                        isLoading={false}
+                        height={resolveTableHeight(group.items.length)}
+                        estimatedRowHeight={ESTIMATED_ROW_HEIGHT}
+                        mobileCardFields={['title', 'dueDateIso']}
+                        onRowClick={(item) => {
+                          if (onItemSelect) {
+                            onItemSelect(item);
+                          } else if (item.context.href) {
+                            window.location.href = item.context.href;
+                          }
+                        }}
+                      />
                     </div>
                   )}
-                </div>
+                </section>
               );
             })
           )}

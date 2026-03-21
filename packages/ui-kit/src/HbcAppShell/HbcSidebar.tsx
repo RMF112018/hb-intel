@@ -32,9 +32,17 @@ const useStyles = makeStyles({
     transitionProperty: 'width',
     transitionDuration: TRANSITION_NORMAL,
     transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-    overflowX: 'hidden',
-    overflowY: 'auto',
+    // UIF-009: overflow hidden on root so the toggle button cannot be scrolled
+    // out of view. Scrolling is delegated to the navScroll inner container.
+    overflow: 'hidden',
     zIndex: Z_INDEX.sidebar,
+  },
+  // UIF-009: Scrollable wrapper for nav groups. flex:1 fills available height
+  // between the top edge and the sticky toggle button at the bottom.
+  navScroll: {
+    flex: '1 1 0',
+    overflowY: 'auto',
+    overflowX: 'hidden',
   },
   collapsed: {
     width: '56px',
@@ -119,9 +127,6 @@ const useStyles = makeStyles({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
-  spacer: {
-    flexGrow: 1,
-  },
   toggleButton: {
     display: 'flex',
     alignItems: 'center',
@@ -133,6 +138,7 @@ const useStyles = makeStyles({
     paddingBottom: '12px',
     backgroundColor: 'transparent',
     ...shorthands.borderStyle('none'),
+    ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke1),
     cursor: 'pointer',
     color: tokens.colorNeutralForeground3,
     ':hover': {
@@ -199,73 +205,74 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
       data-expanded={effectiveExpanded}
       style={{ top: topOffset, height: sidebarHeight }}
     >
-      {groups.map((group) => (
-        <PermissionFilteredGroup key={group.id} group={group}>
-          {(visible) =>
-            visible ? (
-              <div>
-                <div
-                  className={mergeClasses(
-                    styles.groupLabel,
-                    !effectiveExpanded && styles.groupLabelCollapsed,
-                  )}
-                >
-                  {effectiveExpanded ? group.label : ''}
+      <div className={styles.navScroll}>
+        {groups.map((group) => (
+          <PermissionFilteredGroup key={group.id} group={group}>
+            {(visible) =>
+              visible ? (
+                <div>
+                  <div
+                    className={mergeClasses(
+                      styles.groupLabel,
+                      !effectiveExpanded && styles.groupLabelCollapsed,
+                    )}
+                  >
+                    {effectiveExpanded ? group.label : ''}
+                  </div>
+                  {group.items.map((item) => {
+                    const isActive = item.id === activeItemId;
+                    const iconEl = (
+                      <span
+                        className={mergeClasses(
+                          styles.navItemIcon,
+                          isActive && !effectiveExpanded && styles.navItemActiveIcon,
+                        )}
+                      >
+                        {item.icon}
+                      </span>
+                    );
+
+                    const button = (
+                      <button
+                        key={item.id}
+                        className={mergeClasses(
+                          styles.navItem,
+                          !effectiveExpanded && styles.navItemCollapsed,
+                          isActive && styles.navItemActive,
+                          isActive && !effectiveExpanded && styles.navItemActiveCollapsed,
+                        )}
+                        onClick={() => onNavigate?.(item.href)}
+                        aria-current={isActive ? 'page' : undefined}
+                        aria-label={item.label}
+                        type="button"
+                      >
+                        {iconEl}
+                        {effectiveExpanded && <span className={styles.navItemLabel}>{item.label}</span>}
+                      </button>
+                    );
+
+                    return (
+                      <PermissionFilteredItem key={item.id} permission={item.requiredPermission}>
+                        {effectiveExpanded ? (
+                          button
+                        ) : (
+                          <Tooltip
+                            content={item.label}
+                            relationship="label"
+                            positioning="after"
+                          >
+                            {button}
+                          </Tooltip>
+                        )}
+                      </PermissionFilteredItem>
+                    );
+                  })}
                 </div>
-                {group.items.map((item) => {
-                  const isActive = item.id === activeItemId;
-                  const iconEl = (
-                    <span
-                      className={mergeClasses(
-                        styles.navItemIcon,
-                        isActive && !effectiveExpanded && styles.navItemActiveIcon,
-                      )}
-                    >
-                      {item.icon}
-                    </span>
-                  );
-
-                  const button = (
-                    <button
-                      key={item.id}
-                      className={mergeClasses(
-                        styles.navItem,
-                        !effectiveExpanded && styles.navItemCollapsed,
-                        isActive && styles.navItemActive,
-                        isActive && !effectiveExpanded && styles.navItemActiveCollapsed,
-                      )}
-                      onClick={() => onNavigate?.(item.href)}
-                      aria-current={isActive ? 'page' : undefined}
-                      type="button"
-                    >
-                      {iconEl}
-                      {effectiveExpanded && <span className={styles.navItemLabel}>{item.label}</span>}
-                    </button>
-                  );
-
-                  return (
-                    <PermissionFilteredItem key={item.id} permission={item.requiredPermission}>
-                      {effectiveExpanded ? (
-                        button
-                      ) : (
-                        <Tooltip
-                          content={item.label}
-                          relationship="label"
-                          positioning="after"
-                        >
-                          {button}
-                        </Tooltip>
-                      )}
-                    </PermissionFilteredItem>
-                  );
-                })}
-              </div>
-            ) : null
-          }
-        </PermissionFilteredGroup>
-      ))}
-
-      <div className={styles.spacer} />
+              ) : null
+            }
+          </PermissionFilteredGroup>
+        ))}
+      </div>
 
       <button
         className={styles.toggleButton}

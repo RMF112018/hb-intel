@@ -13,6 +13,12 @@
  *
  * UIF-002: Master-detail — selected item shows detail panel in right column,
  *   replacing secondary/tertiary zones.
+ *
+ * UIF-016: At narrow viewports (<HBC_BREAKPOINT_SIDEBAR), rightPanel uses
+ *   display:contents so its children become direct grid items. CSS order
+ *   floats secondaryZone (Insights/KPI) above primaryZone and sinks
+ *   tertiaryZone (Quick Access) below — KPI summary is visible before the
+ *   feed without scrolling. Sticky right panel is only active at desktop tier.
  */
 import type { ReactNode } from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
@@ -29,6 +35,19 @@ export interface HubZoneLayoutProps {
   tertiaryContent?: ReactNode;
   /** When provided, replaces secondary/tertiary in the right panel (item detail). */
   detailContent?: ReactNode;
+  /**
+   * UIF-008: Signal that the right panel has real content to display.
+   *
+   * When false, the right panel div is omitted and the grid collapses to a
+   * single column via an inline style override (which wins over Griffel's
+   * media-query class rules). Primary zone then gets full viewport width.
+   *
+   * Callers should pass `false` when both secondary/tertiary zones render
+   * only empty states or are hidden by complexity tier.
+   *
+   * Defaults to `true` to preserve existing layout behaviour when not set.
+   */
+  hasRightPanelContent?: boolean;
 }
 
 const useStyles = makeStyles({
@@ -52,6 +71,9 @@ const useStyles = makeStyles({
   primaryZone: {
     gridColumn: '1 / -1',
     minHeight: '400px',
+    // UIF-016: explicit order keeps primary between insights (−1) and
+    // quick-access (+1) in the narrow single-column stack.
+    order: 0,
     // Tablet + Desktop: primary takes left column
     [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
       gridColumn: '1 / 2',
@@ -60,14 +82,20 @@ const useStyles = makeStyles({
       minHeight: 'auto',
     },
   },
+  // UIF-016: At narrow viewports rightPanel is display:contents — the element
+  // box is removed from layout and its children become direct grid items of
+  // hubGrid. This allows secondaryZone and tertiaryZone to be independently
+  // ordered relative to primaryZone via CSS order.
+  // At ≥SIDEBAR the panel is restored as a flex column in the right grid cell,
+  // and at ≥DESKTOP it becomes sticky.
   rightPanel: {
-    gridColumn: '1 / -1',
-    display: 'flex',
-    flexDirection: 'column',
-    ...shorthands.gap('0px'),
-    // Tablet: right panel present but not sticky
+    display: 'contents',
+    // Tablet+: restore as a flex column in the right grid column
     [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
+      display: 'flex',
+      flexDirection: 'column',
       gridColumn: '2 / 3',
+      ...shorthands.gap('0px'),
     },
     // Desktop: sticky right panel
     [`@media (min-width: ${HBC_BREAKPOINT_DESKTOP}px)`]: {
@@ -78,22 +106,24 @@ const useStyles = makeStyles({
       overflowY: 'auto',
     },
   },
+  // UIF-003: Zones render a single HbcCard each; no grid needed here.
+  // UIF-016: At narrow widths, secondaryZone (Insights/KPI) floats above
+  // primaryZone via order:-1. Reset to 0 at ≥SIDEBAR where the right panel
+  // resumes its flex-column layout and ordering is irrelevant.
   secondaryZone: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(12, 1fr)',
-    ...shorthands.gap('20px'),
-    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
-      gridTemplateColumns: '1fr',
-      ...shorthands.gap('12px'),
+    display: 'block',
+    order: -1,
+    [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
+      order: 0,
     },
   },
+  // UIF-016: At narrow widths, tertiaryZone (Quick Access) sinks below
+  // primaryZone via order:1 so the feed stays between KPI and actions.
   tertiaryZone: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(12, 1fr)',
-    ...shorthands.gap('20px'),
-    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
-      gridTemplateColumns: '1fr',
-      ...shorthands.gap('12px'),
+    display: 'block',
+    order: 1,
+    [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
+      order: 0,
     },
   },
 });
@@ -103,32 +133,43 @@ export function HubZoneLayout({
   secondaryContent,
   tertiaryContent,
   detailContent,
+  hasRightPanelContent = true,
 }: HubZoneLayoutProps): ReactNode {
   const styles = useStyles();
 
+  // UIF-008: When the right panel has no real content, collapse the grid to a
+  // single column so the primary feed gets the full viewport width. The inline
+  // style overrides Griffel's media-query class rules (inline > stylesheet).
+  const rightPanelVisible = hasRightPanelContent || !!detailContent;
+  const gridOverride = rightPanelVisible
+    ? undefined
+    : { gridTemplateColumns: '1fr' };
+
   return (
-    <div className={styles.hubGrid} data-spfx-safe="true">
+    <div className={styles.hubGrid} style={gridOverride} data-spfx-safe="true">
       <section className={styles.primaryZone} data-hub-zone="primary">
         {primaryContent}
       </section>
 
-      <div className={styles.rightPanel}>
-        {detailContent ?? (
-          <>
-            {secondaryContent ? (
-              <section className={styles.secondaryZone} data-hub-zone="secondary">
-                {secondaryContent}
-              </section>
-            ) : null}
+      {rightPanelVisible && (
+        <div className={styles.rightPanel}>
+          {detailContent ?? (
+            <>
+              {secondaryContent ? (
+                <section className={styles.secondaryZone} data-hub-zone="secondary">
+                  {secondaryContent}
+                </section>
+              ) : null}
 
-            {tertiaryContent ? (
-              <section className={styles.tertiaryZone} data-hub-zone="tertiary">
-                {tertiaryContent}
-              </section>
-            ) : null}
-          </>
-        )}
-      </div>
+              {tertiaryContent ? (
+                <section className={styles.tertiaryZone} data-hub-zone="tertiary">
+                  {tertiaryContent}
+                </section>
+              ) : null}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

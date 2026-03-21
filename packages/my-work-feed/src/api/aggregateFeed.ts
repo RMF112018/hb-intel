@@ -59,7 +59,10 @@ export function buildQueueHealth(
   outcomes: ISourceLoadOutcome[],
   supersededCount: number,
 ): IMyWorkQueueHealth {
-  const degradedSourceCount = outcomes.filter((o) => o.error).length;
+  const failedOutcomes = outcomes.filter((o) => o.error);
+  const degradedSourceCount = failedOutcomes.length;
+  // UIF-011: Collect the specific source keys that failed so callers can render named detail.
+  const degradedSources = failedOutcomes.map((o) => o.source);
   const allFailed = outcomes.length > 0 && degradedSourceCount === outcomes.length;
   const anyFailed = degradedSourceCount > 0;
 
@@ -77,9 +80,7 @@ export function buildQueueHealth(
     lastSyncAtIso: new Date().toISOString(),
     hiddenSupersededCount: supersededCount,
     degradedSourceCount,
-    ...(degradedSourceCount > 0
-      ? { warningMessage: `${degradedSourceCount} source(s) failed to load` }
-      : {}),
+    ...(anyFailed ? { degradedSources, warningMessage: `${degradedSourceCount} source(s) failed to load` } : {}),
   };
 }
 
@@ -123,6 +124,8 @@ export async function aggregateFeed(options: IAggregateOptions): Promise<IMyWork
     freshness: queueHealth.freshness,
     hiddenSupersededCount: queueHealth.hiddenSupersededCount,
     degradedSourceCount: queueHealth.degradedSourceCount,
+    // UIF-011: Surface degraded source keys for expandable indicator rendering.
+    ...(queueHealth.degradedSources ? { degradedSources: queueHealth.degradedSources } : {}),
     warningMessage: queueHealth.warningMessage,
   };
   const result = projectFeedResult(ranked, query, healthState, nowIso);

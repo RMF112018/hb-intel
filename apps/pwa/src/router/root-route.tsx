@@ -5,7 +5,9 @@
  * D-PH6F-1: HbcConnectivityBar mounted above HbcAppShell for shell connectivity surface.
  */
 import * as React from 'react';
-import { createRootRoute, Outlet, useRouter } from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
+import type { ComponentType } from 'react';
+import { createRootRoute, Outlet, useRouter, useRouterState } from '@tanstack/react-router';
 import {
   useNavStore,
   resolveShellStatusSnapshot,
@@ -23,6 +25,15 @@ import { useCurrentUser, useAuthStore } from '@hbc/auth';
 import { useConnectivity, HbcSyncStatusBadge } from '@hbc/session-state';
 import { buildSidebarGroupsFromRegistry, mapCurrentUserToShellUser } from '../utils/shell-bridge.js';
 import { performPwaSignOut } from '../auth/signOut.js';
+
+// UIF-012: DevToolbarMenuEntry replaces the fixed bottom bar — lives in user avatar menu.
+// Same lazy-guard pattern as DevToolbar in App.tsx (D-PH5C-06/D-PH5C-02).
+let DevToolbarMenuEntry: ComponentType | null = null;
+if (import.meta.env.DEV) {
+  DevToolbarMenuEntry = lazy(() =>
+    import('@hbc/shell/dev-toolbar').then((m) => ({ default: m.DevToolbarMenuEntry })),
+  );
+}
 
 function RootComponent(): React.ReactNode {
   const router = useRouter();
@@ -95,6 +106,10 @@ function RootComponent(): React.ReactNode {
     }
   }, []);
 
+  // Hide project selector on pages that are not project-scoped (My Work).
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const showProjectSelector = !pathname.startsWith('/my-work');
+
   const shellUser = mapCurrentUserToShellUser(currentUser);
   const sidebarGroups = React.useMemo(
     () => buildSidebarGroupsFromRegistry(activeWorkspace),
@@ -128,6 +143,14 @@ function RootComponent(): React.ReactNode {
             void router.navigate({ to: '/' });
           });
         }}
+        showProjectSelector={showProjectSelector}
+        userMenuExtra={
+          import.meta.env.DEV && DevToolbarMenuEntry ? (
+            <Suspense fallback={null}>
+              <DevToolbarMenuEntry />
+            </Suspense>
+          ) : undefined
+        }
       >
         {/* W0-G5-T04: Site-wide pending sync badge — visible on all G5 routes */}
         <HbcSyncStatusBadge />

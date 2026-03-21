@@ -5,24 +5,38 @@
  * registry through MyWorkCanvas. Hub-specific state (UIF-008 KPI filter,
  * team mode) is threaded to tile adapters via MyWorkHubTileContext.
  *
+ * UIF-003: Entire section wrapped in HbcCard weight="primary" to give the
+ * Insights zone a distinct visual surface with header divider. The 12-column
+ * tile grid moves into the card body so MyWorkCanvas tile spans still work.
+ *
  * Complexity gating: hidden at essential tier (primary zone only).
  * Role gating: individual tiles enforce P2-D1 §6 via defaultForRoles + RoleGate.
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { heading3 } from '@hbc/ui-kit';
+import { HbcCard, heading3, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
 import type { TeamMode } from '@hbc/shell';
 import { MyWorkCanvas, MyWorkHubTileProvider } from './tiles/index.js';
 
 const useStyles = makeStyles({
+  // UIF-003: heading is now the card header — gridColumn and spacing no longer needed.
   heading: {
-    gridColumn: '1 / -1',
     ...heading3,
     color: 'var(--colorNeutralForeground1)',
     margin: '0',
-    marginTop: '20px',
-    marginBottom: '8px',
+  },
+  // UIF-003: 12-column tile grid moved inside the card body.
+  // MyWorkCanvas tile spans (gridColumn: span N) work as direct grid children.
+  // Responsive: single-column on mobile (≤767px).
+  tileGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(12, 1fr)',
+    gap: '20px',
+    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
+      gridTemplateColumns: '1fr',
+      gap: '12px',
+    },
   },
 });
 
@@ -45,9 +59,15 @@ export function HubSecondaryZone({
   if (tier === 'essential') return null;
 
   return (
-    <MyWorkHubTileProvider value={{ activeFilter, onFilterChange, teamMode }}>
-      <h3 className={styles.heading}>Insights</h3>
-      <MyWorkCanvas tilePrefix="my-work.analytics" complexityTier={tier} />
-    </MyWorkHubTileProvider>
+    <HbcCard
+      weight="primary"
+      header={<h3 className={styles.heading}>Insights</h3>}
+    >
+      <MyWorkHubTileProvider value={{ activeFilter, onFilterChange, teamMode }}>
+        <div className={styles.tileGrid}>
+          <MyWorkCanvas tilePrefix="my-work.analytics" complexityTier={tier} />
+        </div>
+      </MyWorkHubTileProvider>
+    </HbcCard>
   );
 }

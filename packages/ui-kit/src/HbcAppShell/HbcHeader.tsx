@@ -104,6 +104,8 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
   onNotificationsOpen,
   onProjectSelect,
   onToolboxOpen,
+  userMenuExtra,
+  showProjectSelector = true,
 }) => {
   const styles = useStyles();
   const { isFieldMode, toggleFieldMode } = useHbcTheme();
@@ -132,7 +134,7 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
         <a href="/" className={styles.logoLink} aria-label="Project Home">
           {logo ?? <span className={styles.logoFallback}>HB</span>}
         </a>
-        <HbcProjectSelector onProjectSelect={onProjectSelect} />
+        {showProjectSelector && <HbcProjectSelector onProjectSelect={onProjectSelect} />}
       </div>
 
       {/* Center: Toolbox + Favorites + Search */}
@@ -155,6 +157,7 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
             isFieldMode={isFieldMode}
             onToggleFieldMode={toggleFieldMode}
             onSignOut={onSignOut}
+            userMenuExtra={userMenuExtra}
           />
         )}
       </div>

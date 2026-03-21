@@ -11,17 +11,17 @@
 import React from 'react';
 import type { ICanvasTileDefinition } from '@hbc/project-canvas';
 
-/** All recognized hub roles for defaultForRoles. */
-const ALL_HUB_ROLES = [
-  'Superintendent',
-  'Project Manager',
-  'Project Engineer',
-  'Chief Estimator',
-  'VP of Operations',
-  'Director of Preconstruction',
-];
-
-const EXECUTIVE_ROLES = ['VP of Operations', 'Director of Preconstruction'];
+/**
+ * Canonical auth role strings for tile role-gating.
+ *
+ * These must match strings produced by mapIdentityToAppRoles() in
+ * @hbc/auth/roleMapping. Verified against landingResolver.ts and
+ * HubTeamModeSelector.tsx, which both use 'Executive' and 'Administrator'.
+ *
+ * Tiles intended for all authenticated users use defaultForRoles: [].
+ * MyWorkCanvas treats an empty array as "show to everyone" (no role filter).
+ */
+const EXECUTIVE_ROLES = ['Executive'];
 
 export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
   // ── Secondary zone: analytics tiles ──────────────────────────────────
@@ -29,7 +29,7 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
     tileKey: 'my-work.analytics.personal',
     title: 'Personal Analytics',
     description: 'Personal work KPIs with click-to-filter (UIF-008).',
-    defaultForRoles: ALL_HUB_ROLES,
+    defaultForRoles: [],
     minComplexity: 'standard',
     mandatory: false,
     component: {
@@ -85,7 +85,7 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
     tileKey: 'my-work.analytics.team-portfolio',
     title: 'Team Portfolio',
     description: 'Team feed counts for delegated and team modes (Executive-only).',
-    defaultForRoles: ['VP of Operations'],
+    defaultForRoles: EXECUTIVE_ROLES,
     minComplexity: 'standard',
     mandatory: false,
     component: {
@@ -113,7 +113,7 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
     tileKey: 'my-work.analytics.admin-oversight',
     title: 'Admin Oversight',
     description: 'System-wide oversight metrics (Administrator-only).',
-    defaultForRoles: ALL_HUB_ROLES,
+    defaultForRoles: ['Administrator'],
     minComplexity: 'standard',
     mandatory: false,
     component: {
@@ -143,7 +143,7 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
     tileKey: 'my-work.utility.quick-access',
     title: 'Quick Access',
     description: 'Common action shortcuts to other features.',
-    defaultForRoles: ALL_HUB_ROLES,
+    defaultForRoles: [],
     minComplexity: 'essential',
     mandatory: false,
     component: {
@@ -171,7 +171,7 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
     tileKey: 'my-work.utility.recent-context',
     title: 'Recent Context',
     description: 'Recently visited projects and work items.',
-    defaultForRoles: ALL_HUB_ROLES,
+    defaultForRoles: [],
     minComplexity: 'standard',
     mandatory: false,
     component: {

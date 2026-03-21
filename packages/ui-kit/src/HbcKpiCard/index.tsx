@@ -6,10 +6,10 @@
  * Supports trend arrows, click-to-filter active state, and Field Mode.
  */
 import * as React from 'react';
-import { mergeClasses } from '@fluentui/react-components';
+import { mergeClasses, tokens } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { TRANSITION_FAST } from '../theme/animations.js';
-import { HBC_PRIMARY_BLUE, HBC_STATUS_COLORS, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
+import { HBC_PRIMARY_BLUE, HBC_STATUS_COLORS } from '../theme/tokens.js';
 import { hbcTypeScale } from '../theme/typography.js';
 import { HBC_RADIUS_XL } from '../theme/radii.js';
 import { HBC_SPACE_MD } from '../theme/grid.js';
@@ -25,15 +25,20 @@ const useStyles = makeStyles({
     paddingLeft: '20px',
     paddingRight: '20px',
     borderRadius: HBC_RADIUS_XL,
-    backgroundColor: 'var(--colorNeutralBackground1)',
-    border: '1px solid var(--colorNeutralStroke2)',
+    backgroundColor: tokens.colorNeutralBackground1,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
     borderTopWidth: '3px',
     borderTopStyle: 'solid',
-    borderTopColor: 'var(--colorNeutralStroke2)',
+    borderTopColor: tokens.colorNeutralStroke2,
     cursor: 'default',
     transitionProperty: 'border-color, background-color, box-shadow',
     transitionDuration: TRANSITION_FAST,
-    minWidth: '160px',
+    // UIF-001: minWidth removed — hard floor blocked grid track shrinking and caused
+    // horizontal overflow in secondary zone tiles. Grid/flex parents now control
+    // card width via track sizing. overflow:hidden prevents label text from forcing
+    // the card wider than its allocated track.
+    minWidth: '0',
+    overflow: 'hidden',
     flex: '1 1 0',
     maxWidth: '240px',
   },
@@ -56,14 +61,14 @@ const useStyles = makeStyles({
     borderRightWidth: '2px',
     borderRightStyle: 'solid',
     borderRightColor: HBC_PRIMARY_BLUE as string,
-    backgroundColor: HBC_SURFACE_LIGHT['surface-active'],
+    backgroundColor: tokens.colorSubtleBackgroundSelected,
   },
   label: {
     fontFamily: hbcTypeScale.label.fontFamily,
     fontSize: hbcTypeScale.label.fontSize,
     fontWeight: hbcTypeScale.label.fontWeight as string,
     lineHeight: hbcTypeScale.label.lineHeight,
-    color: HBC_SURFACE_LIGHT['text-muted'] as string,
+    color: tokens.colorNeutralForeground3,
     textTransform: 'uppercase' as const,
     letterSpacing: '0.04em',
   },
@@ -72,7 +77,7 @@ const useStyles = makeStyles({
     fontSize: '1.5rem',
     fontWeight: '700',
     lineHeight: '1.2',
-    color: HBC_SURFACE_LIGHT['text-primary'] as string,
+    color: tokens.colorNeutralForeground1,
   },
   trend: {
     display: 'flex',
@@ -90,7 +95,7 @@ const useStyles = makeStyles({
     color: HBC_STATUS_COLORS.error as string,
   },
   trendFlat: {
-    color: HBC_SURFACE_LIGHT['text-muted'] as string,
+    color: tokens.colorNeutralForeground3,
   },
 });
 

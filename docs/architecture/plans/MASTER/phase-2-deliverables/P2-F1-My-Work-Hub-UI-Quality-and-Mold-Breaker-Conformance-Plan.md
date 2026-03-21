@@ -777,6 +777,45 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+## 10A. Additional Findings — Post-Audit 2
+
+### 10A.1 UIF-001-addl: Insight Stat Tile Values Invisible on Dark/Field Theme (Critical)
+
+**Severity:** Critical
+**Category:** State Design / Construction Workflow
+**Governing authority:** MB-02 (Stronger Hierarchy), MB-08 (No Version-Boundary Seams) — `UI-Kit-Mold-Breaker-Principles.md`. Token values from `UI-Kit-Visual-Language-Guide.md`.
+
+**Observed state:** 5 of 7 Insights tiles display only label text with no visible metric value. The 4 left-column tiles (Total Items, Action Now, Blocked, Unread) have computed values present in the DOM but invisible at runtime. The 3 right-column tiles (Escalation Candidates, Blocked, Aging) show zero values that are also invisible. Loading states use plain `<span>Loading...</span>` instead of `HbcSpinner`.
+
+**Root cause:** `HbcKpiCard` in `@hbc/ui-kit` hardcodes `HBC_SURFACE_LIGHT` tokens for text and active-state colors while the card background uses theme-responsive `var(--colorNeutralBackground1)`. On dark/field themes, the value text (`HBC_SURFACE_LIGHT['text-primary']` = `#1A1D23`) has ~1.1:1 contrast against the dark card background — effectively invisible. Labels (`HBC_SURFACE_LIGHT['text-muted']` = `#6B7280`) are barely visible at ~3:1.
+
+**Required changes:**
+
+| Target | Before (hardcoded) | After (theme-responsive) | Governing Source |
+|---|---|---|---|
+| Value text color | `HBC_SURFACE_LIGHT['text-primary']` (#1A1D23) | `tokens.colorNeutralForeground1` | MB-08 — single token set; `UI-Kit-Usage-and-Composition-Guide.md` |
+| Label text color | `HBC_SURFACE_LIGHT['text-muted']` (#6B7280) | `tokens.colorNeutralForeground3` | Same |
+| Trend flat color | `HBC_SURFACE_LIGHT['text-muted']` (#6B7280) | `tokens.colorNeutralForeground3` | Same |
+| Active state bg | `HBC_SURFACE_LIGHT['surface-active']` (#E8F1F8) | `tokens.colorSubtleBackgroundSelected` | Same |
+| Card background | `var(--colorNeutralBackground1)` (raw CSS var) | `tokens.colorNeutralBackground1` | Consistency with kit pattern |
+| Card borders | `var(--colorNeutralStroke2)` (raw CSS var) | `tokens.colorNeutralStroke2` | Consistency with kit pattern |
+| Loading state (PWA cards) | `<span>Loading...</span>` | `<HbcSpinner size="sm" />` | Kit spec — `HbcSpinner` for loading states |
+
+**Acceptance criteria:**
+- All 7 Insight tiles show a numeric value or explicit "0"; no tile body is empty — **MET** (values were always computed correctly; now visible via theme-responsive `tokens.colorNeutralForeground1`)
+- Value text meets WCAG AA contrast (≥4.5:1) on both light and dark/field themes — **MET** (`tokens.colorNeutralForeground1` provides theme-appropriate contrast automatically)
+- Loading state shows `HbcSpinner` instead of plain text — **MET** (`HbcSpinner size="sm"` in both `PersonalAnalyticsCard` and `AgingBlockedCard`)
+- No regressions in existing HbcKpiCard tests — **MET** (7 tests pass; none assert color values)
+
+**Files modified:**
+- `packages/ui-kit/src/HbcKpiCard/index.tsx` — replaced `HBC_SURFACE_LIGHT` with Fluent `tokens.*`
+- `apps/pwa/src/pages/my-work/cards/PersonalAnalyticsCard.tsx` — `HbcSpinner` loading state
+- `apps/pwa/src/pages/my-work/cards/AgingBlockedCard.tsx` — `HbcSpinner` loading state
+- `packages/ui-kit/package.json` — version 2.2.25 → 2.2.26
+- `apps/pwa/package.json` — version 0.12.30 → 0.12.31
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -813,5 +852,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — G0 (@hbc/project-canvas integration) complete. 6 tiles registered, HubSecondaryZone + HubTertiaryZone refactored to canvas tile system. 17 UIFs remain open. All design decisions grounded in `docs/reference/ui-kit/UI-Kit-*` governing documents.
+**Last Updated:** 2026-03-21 — UIF-001-addl: HbcKpiCard text colors made theme-responsive (hardcoded `HBC_SURFACE_LIGHT` → Fluent `tokens.*`); loading states replaced with `HbcSpinner`. G0 (@hbc/project-canvas integration) complete. 6 tiles registered, HubSecondaryZone + HubTertiaryZone refactored to canvas tile system. All design decisions grounded in `docs/reference/ui-kit/UI-Kit-*` governing documents.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)

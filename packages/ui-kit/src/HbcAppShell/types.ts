@@ -64,6 +64,14 @@ export interface HbcHeaderProps {
   onNotificationsOpen?: () => void;
   onProjectSelect?: (projectId: string) => void;
   onToolboxOpen?: () => void;
+  /** Extra content rendered inside the user menu dropdown, above Sign Out. Dev tooling slot. */
+  userMenuExtra?: ReactNode;
+  /**
+   * When false the project selector is hidden from the header.
+   * Use on pages that are not scoped to a single project (e.g. My Work).
+   * Defaults to true.
+   */
+  showProjectSelector?: boolean;
 }
 
 /** Props for the user menu dropdown */
@@ -73,6 +81,8 @@ export interface HbcUserMenuProps {
   onToggleFieldMode: () => void;
   onSignOut?: () => void;
   onProfileClick?: () => void;
+  /** Extra content rendered inside the dropdown above Sign Out. Intended for dev tooling. */
+  userMenuExtra?: ReactNode;
 }
 
 /** Props for the full application shell orchestrator */
@@ -85,6 +95,14 @@ export interface HbcAppShellProps {
   activeItemId?: string;
   onSignOut?: () => void;
   onNavigate?: (href: string) => void;
+  /** Extra content rendered inside the user menu dropdown, above Sign Out. Dev tooling slot. */
+  userMenuExtra?: ReactNode;
+  /**
+   * When false the project selector is hidden from the header.
+   * Use on pages that are not scoped to a single project (e.g. My Work).
+   * Defaults to true.
+   */
+  showProjectSelector?: boolean;
 }
 
 /** Props for the project selector */
