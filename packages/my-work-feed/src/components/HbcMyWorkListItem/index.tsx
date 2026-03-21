@@ -19,7 +19,17 @@
 
 import React, { useState, useCallback } from 'react';
 import { useComplexity } from '@hbc/complexity';
-import { HbcButton, HbcStatusBadge, HbcPopover } from '@hbc/ui-kit';
+import {
+  HbcButton,
+  HbcStatusBadge,
+  HbcPopover,
+  useDensity,
+  HBC_DENSITY_TOKENS,
+  bodySmall,
+  HBC_SPACE_SM,
+  HBC_SPACE_MD,
+  HBC_STATUS_RAMP_GRAY,
+} from '@hbc/ui-kit';
 import type { IMyWorkItem } from '../../types/index.js';
 import type { IMyWorkActionRequest } from '../../hooks/useMyWorkActions.js';
 
@@ -84,10 +94,10 @@ function resolveAccentBorder(item: IMyWorkItem): string | undefined {
 
 /**
  * Left padding accounts for the 3px accent stripe so content never shifts
- * regardless of whether an accent is present.
+ * regardless of whether an accent is present. UIF-006: uses HBC_SPACE_MD.
  */
-const LEFT_PADDING_WITH_ACCENT = '13px'; // 3px stripe + 10px content gap
-const LEFT_PADDING_NO_ACCENT = '16px';   // same total width, no stripe
+const LEFT_PADDING_WITH_ACCENT = `${HBC_SPACE_MD - 3}px`; // 3px stripe + (16-3)px content gap
+const LEFT_PADDING_NO_ACCENT = `${HBC_SPACE_MD}px`;        // same total width, no stripe
 
 /**
  * `watch`-lane items carry lower urgency — mute their title slightly so
@@ -106,6 +116,8 @@ export function HbcMyWorkListItem({
   className,
 }: IHbcMyWorkListItemProps): JSX.Element {
   const { tier } = useComplexity();
+  const { tier: densityTier } = useDensity();
+  const densityTokens = HBC_DENSITY_TOKENS[densityTier];
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
@@ -149,7 +161,9 @@ export function HbcMyWorkListItem({
         alignItems: 'flex-start',
         justifyContent: 'space-between',
         gap: '12px',
-        padding: `12px 14px 12px ${hasAccent ? LEFT_PADDING_WITH_ACCENT : LEFT_PADDING_NO_ACCENT}`,
+        // UIF-006: Density-aware row sizing via HBC_DENSITY_TOKENS
+        minHeight: `${densityTokens.rowHeightMin}px`,
+        padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px ${HBC_SPACE_SM}px ${hasAccent ? LEFT_PADDING_WITH_ACCENT : LEFT_PADDING_NO_ACCENT}`,
         borderBottom: '1px solid var(--colorNeutralStroke2)',
         borderLeft: accentBorder ?? 'none',
         backgroundColor: rowBackground,
@@ -215,25 +229,28 @@ export function HbcMyWorkListItem({
           {item.isBlocked && <HbcStatusBadge variant="warning" label="Blocked" />}
         </div>
 
-        {/* Metadata row — module label, days in state, due date (UIF-006) */}
+        {/* Metadata row — module label, days in state, due date (UIF-006)
+            Typography: bodySmall token. Color: HBC_STATUS_RAMP_GRAY[50] (#8B95A5). */}
         {tier !== 'essential' && (
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: `${HBC_SPACE_SM}px`,
               flexWrap: 'wrap',
             }}
           >
             {item.context.moduleKey && (
-              <span style={{ fontSize: '0.75rem', color: 'var(--colorNeutralForeground3)' }}>
+              <span style={{ fontSize: bodySmall.fontSize, fontWeight: bodySmall.fontWeight, lineHeight: bodySmall.lineHeight, color: HBC_STATUS_RAMP_GRAY[50] }}>
                 {formatModuleLabel(item.context.moduleKey)}
               </span>
             )}
             <span
               style={{
-                fontSize: '0.75rem',
-                color: 'var(--colorNeutralForeground3)',
+                fontSize: bodySmall.fontSize,
+                fontWeight: bodySmall.fontWeight,
+                lineHeight: bodySmall.lineHeight,
+                color: HBC_STATUS_RAMP_GRAY[50],
               }}
             >
               {formatDaysInState(item.timestamps.updatedAtIso)}
@@ -241,11 +258,12 @@ export function HbcMyWorkListItem({
             {item.dueDateIso && (
               <span
                 style={{
-                  fontSize: '0.75rem',
+                  fontSize: bodySmall.fontSize,
+                  lineHeight: bodySmall.lineHeight,
                   color: item.isOverdue
                     ? 'var(--colorPaletteRedForeground1)'
-                    : 'var(--colorNeutralForeground3)',
-                  fontWeight: item.isOverdue ? 600 : 400,
+                    : HBC_STATUS_RAMP_GRAY[50],
+                  fontWeight: item.isOverdue ? 600 : bodySmall.fontWeight,
                 }}
               >
                 {formatDueDate(item.dueDateIso)}
@@ -258,9 +276,10 @@ export function HbcMyWorkListItem({
         {tier !== 'essential' && item.whyThisMatters && (
           <span
             style={{
-              fontSize: '0.75rem',
-              color: 'var(--colorNeutralForeground3)',
-              lineHeight: '1.4',
+              fontSize: bodySmall.fontSize,
+              fontWeight: bodySmall.fontWeight,
+              lineHeight: bodySmall.lineHeight,
+              color: HBC_STATUS_RAMP_GRAY[50],
             }}
           >
             {item.whyThisMatters}
@@ -273,9 +292,10 @@ export function HbcMyWorkListItem({
             {item.expectedAction && (
               <span
                 style={{
-                  fontSize: '0.75rem',
+                  fontSize: bodySmall.fontSize,
+                  fontWeight: bodySmall.fontWeight,
+                  lineHeight: bodySmall.lineHeight,
                   color: 'var(--colorNeutralForeground2)',
-                  lineHeight: '1.4',
                 }}
               >
                 {item.expectedAction}
@@ -306,12 +326,12 @@ export function HbcMyWorkListItem({
                 </button>
               }
             >
-              <div style={{ padding: '8px', maxWidth: '280px' }}>
+              <div style={{ padding: `${HBC_SPACE_SM}px`, maxWidth: '280px' }}>
                 <span
                   style={{
-                    fontSize: '0.75rem',
+                    fontSize: bodySmall.fontSize,
+                    lineHeight: bodySmall.lineHeight,
                     color: 'var(--colorNeutralForeground1)',
-                    lineHeight: '1.4',
                   }}
                 >
                   {item.rankingReason.primaryReason}
