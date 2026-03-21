@@ -1,12 +1,12 @@
 # Phase 3 Deliverables — Project Hub and Project Context
 
-**Doc Classification:** Active Deliverable Index — Phase 3 deliverable production has begun. Workstreams A, B, C, D, E, F complete. P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-F1, P3-G1, P3-G2 locked.
+**Doc Classification:** Active Deliverable Index — Phase 3 deliverable production has begun. Workstreams A, B, C, D, E, F, G complete. P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-F1, P3-G1, P3-G2, P3-G3 locked.
 
 ---
 
 ## Planning Status Summary
 
-**Phase 3 planning is in progress.** 17 of 18 deliverables are locked (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-F1, P3-G1, P3-G2). Workstreams A, B, C, D, E, and F are complete. Workstream G has 2 of 3 deliverables locked. The remaining 1 deliverable (P3-H1) in Workstream H is planned but not yet authored. Deliverable production follows the execution priority sequencing defined in [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
+**Phase 3 planning is in progress.** 18 of 19 deliverables are locked (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-F1, P3-G1, P3-G2, P3-G3). Workstreams A, B, C, D, E, F, and G are complete. The remaining deliverable P3-H1 (Workstream H — Validation, staging, and acceptance) is planned but not yet authored. Deliverable production follows the execution priority sequencing defined in [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
 
 ---
 
@@ -78,7 +78,7 @@
 |---|---|---|
 | P3-G1 | [Lane Capability Matrix (PWA / SPFx)](P3-G1-Lane-Capability-Matrix.md) | Specification |
 | P3-G2 | [Cross-Lane Navigation and Handoff Map](P3-G2-Cross-Lane-Navigation-and-Handoff-Map.md) | Specification |
-| P3-G3 | Lane-Specific Acceptance Matrix | Not Started |
+| P3-G3 | [Lane-Specific Acceptance Matrix](P3-G3-Lane-Specific-Acceptance-Matrix.md) | Specification |
 
 ### Workstream H — Validation, staging, and acceptance
 
@@ -101,6 +101,6 @@
 
 ---
 
-**Last Updated:** 2026-03-21 — P3-G2 locked; 17 of 18 Phase 3 deliverables complete.
+**Last Updated:** 2026-03-21 — P3-G3 locked; Workstream G complete; 18 of 19 Phase 3 deliverables complete.
 
 **Governing Plan:** [Phase 3 Plan §14–§15](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
