@@ -1,12 +1,12 @@
 # Phase 3 Deliverables — Project Hub and Project Context
 
-**Doc Classification:** Active Deliverable Index — Phase 3 deliverable production has begun. Workstream A complete (3 contracts). Workstream B complete (1 consolidated contract).
+**Doc Classification:** Active Deliverable Index — Phase 3 deliverable production has begun. Workstreams A, B complete. P3-G1 locked.
 
 ---
 
 ## Planning Status Summary
 
-**Phase 3 planning is in progress.** 4 of 18 deliverables are locked (P3-A1, P3-A2, P3-A3, P3-B1). Workstream A (Shared-canonical Project Hub contracts) and Workstream B (Project context continuity and switching) are complete. P3-B1 is a consolidated contract covering the originally planned B1/B2/B3 scope. The remaining 14 deliverables across Workstreams C–H are planned but not yet authored. Deliverable production follows the execution priority sequencing defined in [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
+**Phase 3 planning is in progress.** 5 of 18 deliverables are locked (P3-A1, P3-A2, P3-A3, P3-B1, P3-G1). Workstreams A and B are complete. P3-G1 (Lane Capability Matrix) is the first Workstream G deliverable. The remaining 13 deliverables across Workstreams C–H are planned but not yet authored. Deliverable production follows the execution priority sequencing defined in [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
 
 ---
 
@@ -76,7 +76,7 @@
 
 | Doc ID | Title | Status |
 |---|---|---|
-| P3-G1 | PWA / SPFx Capability Matrix | Not Started |
+| P3-G1 | [Lane Capability Matrix (PWA / SPFx)](P3-G1-Lane-Capability-Matrix.md) | Specification |
 | P3-G2 | Cross-Lane Navigation and Handoff Map | Not Started |
 | P3-G3 | Lane-Specific Acceptance Matrix | Not Started |
 
@@ -101,6 +101,6 @@
 
 ---
 
-**Last Updated:** 2026-03-20 — Workstreams A and B complete (P3-A1, P3-A2, P3-A3, P3-B1 locked); 4 of 18 Phase 3 deliverables complete (B2/B3 consolidated into B1).
+**Last Updated:** 2026-03-21 — P3-G1 locked; 5 of 18 Phase 3 deliverables complete.
 
 **Governing Plan:** [Phase 3 Plan §14–§15](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
