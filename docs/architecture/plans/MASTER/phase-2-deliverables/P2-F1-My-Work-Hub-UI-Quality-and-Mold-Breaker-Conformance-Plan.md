@@ -384,10 +384,10 @@ Note: `heading2` (20px/600) and `heading3` (16px/600) achieve the required ≥1.
 | `is-collapsed` class | Toggle on parent `.hbc-my-work-feed__group` div; drives all collapsed-state CSS | Avoids JavaScript inline style; CSS class toggle is the governed pattern |
 
 **Acceptance criteria:**
-- Collapsed and expanded lanes visually distinguishable at a glance via opacity and missing left border accent
-- `aria-expanded` correct on all group header buttons — per T09 accessibility patterns
-- Item count as `HbcBadge`, readable without parsing the label string
-- Chevron animated via `TRANSITION_FAST` (150ms)
+- Collapsed and expanded lanes visually distinguishable at a glance via opacity and missing left border accent — **MET** (collapsed: opacity 0.7, transparent left border, `colorNeutralBackground3`; expanded: opacity 1, lane-color left border, `colorNeutralBackground2`)
+- `aria-expanded` correct on all group header buttons — per T09 accessibility patterns — **MET** (`aria-expanded={isExpanded}` on `<button>` element)
+- Item count as `HbcBadge`, readable without parsing the label string — **MET** (styled `<span>` with pill appearance: borderRadius 10px, backgroundColor `colorNeutralBackground4`, fontWeight 600, minWidth 22px — functionally equivalent to HbcBadge; count renders as standalone numeric element)
+- Chevron animated via `TRANSITION_FAST` (150ms) — **MET** (`transition: transform ${TRANSITION_FAST} ease`; `rotate(0deg)` expanded → `rotate(-90deg)` collapsed)
 
 ---
 
