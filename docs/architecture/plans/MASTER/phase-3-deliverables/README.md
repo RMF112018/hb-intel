@@ -1,12 +1,12 @@
 # Phase 3 Deliverables — Project Hub and Project Context
 
-**Doc Classification:** Active Deliverable Index — Phase 3 deliverable production has begun. Workstreams A, B complete. P3-C1, P3-G1 locked.
+**Doc Classification:** Active Deliverable Index — Phase 3 deliverable production has begun. Workstreams A, B complete. P3-C1, P3-C2, P3-G1 locked.
 
 ---
 
 ## Planning Status Summary
 
-**Phase 3 planning is in progress.** 6 of 18 deliverables are locked (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-G1). Workstreams A and B are complete. P3-C1 (Project Canvas Governance Note) is the first Workstream C deliverable. The remaining 12 deliverables across Workstreams C–H are planned but not yet authored. Deliverable production follows the execution priority sequencing defined in [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
+**Phase 3 planning is in progress.** 7 of 18 deliverables are locked (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-G1). Workstreams A and B are complete. Workstream C has 2 of 3 deliverables locked. The remaining 11 deliverables across Workstreams C–H are planned but not yet authored. Deliverable production follows the execution priority sequencing defined in [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
 
 ---
 
@@ -46,7 +46,7 @@
 | Doc ID | Title | Status |
 |---|---|---|
 | P3-C1 | [Project Canvas Governance Note](P3-C1-Project-Canvas-Governance-Note.md) | Note |
-| P3-C2 | Mandatory Core Tile Family Definition | Not Started |
+| P3-C2 | [Mandatory Core Tile Family Definition](P3-C2-Mandatory-Core-Tile-Family-Definition.md) | Specification |
 | P3-C3 | Lane-Aware Home/Canvas Capability Matrix | Not Started |
 
 ### Workstream D — Shared project spines
@@ -101,6 +101,6 @@
 
 ---
 
-**Last Updated:** 2026-03-21 — P3-C1 locked; 6 of 18 Phase 3 deliverables complete.
+**Last Updated:** 2026-03-21 — P3-C2 locked; 7 of 18 Phase 3 deliverables complete.
 
 **Governing Plan:** [Phase 3 Plan §14–§15](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
