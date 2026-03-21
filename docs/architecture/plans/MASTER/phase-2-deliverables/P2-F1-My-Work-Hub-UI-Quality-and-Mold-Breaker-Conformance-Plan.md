@@ -699,10 +699,10 @@ Apply to: work item title links, CTA buttons, group header buttons, filter chips
 | Named source list | Integrate with project-canvas tile data-source badge registry (G0) — same source registry that drives tile badges drives the "Details" list | G0 data-source badge model |
 
 **Acceptance criteria:**
-- "Retry" button visible; triggers re-sync on click; uses `HBC_PRIMARY_BLUE` button styling
-- "Details" popover shows human-readable source names at `elevationLevel3`
-- Banner auto-dismisses via `slideInUp` / `TRANSITION_NORMAL` on sync success
-- Warning color is `HBC_STATUS_RAMP_AMBER` — distinct from error (`HBC_STATUS_RAMP_RED`) per UIF-007
+- "Retry" button visible; triggers re-sync on click; uses `HBC_PRIMARY_BLUE` button styling — **PARTIALLY MET** (Retry button present with `variant="secondary"` triggering `refreshFeed()` via `useHubFeedRefresh`; uses neutral secondary styling, not `HBC_PRIMARY_BLUE` — secondary variant chosen for visual hierarchy where the banner message is primary and retry is a supporting action)
+- "Details" popover shows human-readable source names at `elevationLevel3` — **DEFERRED** (Details popover not yet implemented; deferred to future iteration when project-canvas data-source badge registry integration is available per G0 §2.2.4)
+- Banner auto-dismisses via `slideInUp` / `TRANSITION_NORMAL` on sync success — **MET** (success flash: `HbcBanner variant="success"` with built-in `slideInUp` animation at 250ms; auto-dismiss after 2000ms via `setTimeout` + `setShowSuccessFlash(false)`)
+- Warning color is `HBC_STATUS_RAMP_AMBER` — distinct from error (`HBC_STATUS_RAMP_RED`) per UIF-007 — **MET** (`HbcBanner variant="warning"` uses `HBC_STATUS_RAMP_AMBER['90']` bg + `HBC_STATUS_COLORS.warning` accent; left-border wrapper uses `HBC_STATUS_RAMP_AMBER[10]`)
 
 ---
 
