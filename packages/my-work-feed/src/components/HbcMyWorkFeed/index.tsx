@@ -356,8 +356,10 @@ export function HbcMyWorkFeed({
                       backgroundColor: isExpanded
                         ? 'var(--colorNeutralBackground2)'
                         : 'var(--colorNeutralBackground3)',
-                      // UIF-001: Lane-color left border accent
-                      borderLeft: `4px solid ${LANE_COLORS[group.groupKey] ?? 'transparent'}`,
+                      // UIF-001 + UIF-005: Lane-color left border accent (expanded only)
+                      borderLeft: isExpanded
+                        ? `4px solid ${LANE_COLORS[group.groupKey] ?? 'transparent'}`
+                        : '4px solid transparent',
                       // Separator — declared after border: none so it wins
                       borderBottom: isExpanded
                         ? '1px solid var(--colorNeutralStroke2)'
@@ -410,7 +412,8 @@ export function HbcMyWorkFeed({
                         display: 'flex',
                         alignItems: 'center',
                         flexShrink: 0,
-                        transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                        // UIF-005: 0° expanded (down), −90° collapsed (right)
+                        transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
                         transition: `transform ${TRANSITION_FAST} ease`,
                       }}
                     >
