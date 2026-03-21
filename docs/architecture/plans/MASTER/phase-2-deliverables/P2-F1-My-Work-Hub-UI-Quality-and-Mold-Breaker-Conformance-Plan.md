@@ -721,7 +721,7 @@ All UIFs re-opened as of the 2026-03-21 Audit 2 finding. Previous "Complete" cla
 | UIF-006 | Work item row — zero structure, no metadata | High | G2 | **Complete** — 2026-03-21: density-aware rows via useDensity() + HBC_DENSITY_TOKENS[tier].rowHeightMin, bodySmall typography, HBC_STATUS_RAMP_GRAY[50] metadata color, token-driven padding |
 | UIF-007 | Semantic color collision | High | G1 | **Complete** — 2026-03-21: Blocked badge → error variant (red), accent borders use HBC_STATUS_RAMP_RED/HBC_ACCENT_ORANGE tokens, atRisk style uses #FF4D4D |
 | UIF-008 | KPI cards — static and inconsistent | High | G3 | **Open** |
-| UIF-009 | Touch target — "Open" button below 44px | High | G3 | **Open** |
+| UIF-009 | Touch target — "Open" button below 44px | High | G3 | **Complete** — 2026-03-21: density-aware tap spacing via tapSpacingMin, reasoning button sized to touchTargetMin (44px min), HbcButton auto-scales via useTouchSize |
 | UIF-010 | Dev tools visible in non-dev builds | High | G4 | **Open** |
 | UIF-011 | Typography — empty state heading scale | High | G1 | **Open** |
 | UIF-012 | Command bar — two rows, no count badges | High | G2 | **Open** |

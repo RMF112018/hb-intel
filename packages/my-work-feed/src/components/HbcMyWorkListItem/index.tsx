@@ -120,6 +120,10 @@ export function HbcMyWorkListItem({
   const { tier } = useComplexity();
   const { tier: densityTier } = useDensity();
   const densityTokens = HBC_DENSITY_TOKENS[densityTier];
+  // UIF-009: WCAG 2.5.5 hard minimum 44px; density tier may require more.
+  // HbcButton handles touch auto-scaling via useTouchSize (sm→lg on coarse pointer).
+  // Raw <button> elements use touchMin directly.
+  const touchMin = Math.max(densityTokens.touchTargetMin, 44);
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
@@ -312,13 +316,14 @@ export function HbcMyWorkListItem({
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '16px',
-                    height: '16px',
+                    // UIF-009: Touch target minimum per density tier (WCAG 2.5.5)
+                    width: `${touchMin}px`,
+                    height: `${touchMin}px`,
                     borderRadius: '50%',
                     border: '1px solid var(--colorNeutralStroke1)',
                     backgroundColor: 'transparent',
                     color: 'var(--colorNeutralForeground3)',
-                    fontSize: '0.6875rem',
+                    fontSize: `${densityTokens.labelTextMinPx}px`,
                     fontWeight: 700,
                     cursor: 'pointer',
                     lineHeight: 1,
@@ -349,7 +354,8 @@ export function HbcMyWorkListItem({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '4px',
+          // UIF-009: Density-aware tap spacing between interactive elements
+          gap: `${densityTokens.tapSpacingMin}px`,
           flexShrink: 0,
           alignSelf: 'flex-start',
         }}
