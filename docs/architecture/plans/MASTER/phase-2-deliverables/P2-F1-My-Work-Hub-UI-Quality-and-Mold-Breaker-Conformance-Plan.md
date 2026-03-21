@@ -1219,6 +1219,29 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.18 INS-004: Replace 12-Column Grid with 2-Column Layout (Medium)
+
+**Severity:** Medium
+**Category:** Layout / Visual Hierarchy
+
+**Observed state:** Insights and Quick Access panels used a 12-column Griffel grid with span-6 tile wrappers — overcomplicated for 2-3 tiles side by side, producing 23.1px micro-columns and structural artifacts.
+
+**Required change:** Replaced `repeat(12, 1fr)` with `repeat(2, 1fr)` in both HubSecondaryZone and HubTertiaryZone grids. Updated all tile defaultColSpan values from 6→1 (half-width) and 12→2 (full-width) to match the 2-column grid.
+
+**Acceptance criteria:**
+- Grid uses `1fr 1fr` — **MET** (`repeat(2, 1fr)`)
+- Tiles flow naturally in 2-column layout — **MET** (colSpans updated)
+- No empty structural artifacts — **MET** (span-1 cells, no fractional widths)
+- Mobile falls back to single column — **MET** (media query `1fr`)
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/HubSecondaryZone.tsx` — grid `repeat(12,1fr)` → `repeat(2,1fr)`
+- `apps/pwa/src/pages/my-work/HubTertiaryZone.tsx` — same grid change
+- `apps/pwa/src/pages/my-work/tiles/myWorkTileDefinitions.ts` — colSpans: 6→1, 12→2, 4→1
+- `apps/pwa/package.json` — version 0.12.37 → 0.12.38
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

@@ -49,7 +49,8 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
         })),
       ),
     },
-    defaultColSpan: 6,
+    // INS-004: 1 column in 2-column grid (was 6 in 12-column grid)
+    defaultColSpan: 1,
     defaultRowSpan: 1,
     lockable: false,
   },
@@ -77,7 +78,8 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
         })),
       ),
     },
-    defaultColSpan: 6,
+    // INS-004: 1 column in 2-column grid
+    defaultColSpan: 1,
     defaultRowSpan: 1,
     lockable: false,
   },
@@ -105,7 +107,8 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
         })),
       ),
     },
-    defaultColSpan: 6,
+    // INS-004: 1 column in 2-column grid
+    defaultColSpan: 1,
     defaultRowSpan: 1,
     lockable: false,
   },
@@ -133,7 +136,8 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
         })),
       ),
     },
-    defaultColSpan: 12,
+    // INS-004: Full-width in 2-column grid (span 2)
+    defaultColSpan: 2,
     defaultRowSpan: 1,
     lockable: false,
   },
@@ -163,7 +167,8 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
         })),
       ),
     },
-    defaultColSpan: 4,
+    // INS-004: 1 column in 2-column grid (was 4 in 12-column grid)
+    defaultColSpan: 1,
     defaultRowSpan: 1,
     lockable: false,
   },
@@ -191,7 +196,8 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
         })),
       ),
     },
-    defaultColSpan: 6,
+    // INS-004: 1 column in 2-column grid
+    defaultColSpan: 1,
     defaultRowSpan: 1,
     lockable: false,
   },

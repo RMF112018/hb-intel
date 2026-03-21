@@ -26,16 +26,15 @@ const useStyles = makeStyles({
     color: 'var(--colorNeutralForeground1)',
     margin: '0',
   },
-  // UIF-003: 12-column tile grid moved inside the card body.
-  // MyWorkCanvas tile spans (gridColumn: span N) work as direct grid children.
+  // INS-004: Clean 2-column grid replaces the overcomplicated 12-column micro-grid.
+  // Each tile occupies one cell directly — no column-group wrappers needed.
   // Responsive: single-column on mobile (≤767px).
   tileGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(12, 1fr)',
-    gap: '20px',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '12px',
     [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
       gridTemplateColumns: '1fr',
-      gap: '12px',
     },
   },
 });
