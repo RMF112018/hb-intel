@@ -31,7 +31,8 @@ const useDevToolbarStyles = makeStyles({
     color: 'var(--hbc-dev-text-primary)',
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     fontSize: '12px',
-    zIndex: 99999,
+    // UIF-010: Use governed toast layer (1300) instead of arbitrary 99999.
+    zIndex: 1300,
     boxShadow: 'var(--hbc-dev-shadow)',
   },
   header: {

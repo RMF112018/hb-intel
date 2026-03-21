@@ -722,7 +722,7 @@ All UIFs re-opened as of the 2026-03-21 Audit 2 finding. Previous "Complete" cla
 | UIF-007 | Semantic color collision | High | G1 | **Complete** — 2026-03-21: Blocked badge → error variant (red), accent borders use HBC_STATUS_RAMP_RED/HBC_ACCENT_ORANGE tokens, atRisk style uses #FF4D4D |
 | UIF-008 | KPI cards — static and inconsistent | High | G3 | **Complete** — 2026-03-21: DashboardLayout-pattern responsive grid (4→2→1), HbcCard wrapper removed, semantic status ramp colors (UNREAD amber, Action Now/Blocked red), heading1 value typography (existing), surface-1 bg (existing) |
 | UIF-009 | Touch target — "Open" button below 44px | High | G3 | **Complete** — 2026-03-21: density-aware tap spacing via tapSpacingMin, reasoning button sized to touchTargetMin (44px min), HbcButton auto-scales via useTouchSize |
-| UIF-010 | Dev tools visible in non-dev builds | High | G4 | **Open** |
+| UIF-010 | Dev tools visible in non-dev builds | High | G4 | **Complete** — 2026-03-21: DEV-gated (import.meta.env.DEV), initialIsOpen=false, zIndex reduced from 99999 to governed toast layer (1300) |
 | UIF-011 | Typography — empty state heading scale | High | G1 | **Complete** — 2026-03-21: HbcEmptyState title downgraded from heading3 to body (0.875rem/400), h2→p semantic element |
 | UIF-012 | Command bar — two rows, no count badges | High | G2 | **Complete** — 2026-03-21: group-by/sort moved to overflow menu, active filters use surface-active token, urgency-colored count badges, search placeholder |
 | UIF-013 | Sidebar nav — only one item visible | High | G3 | **Complete** — 2026-03-21: top-level Workspaces group with 4 destinations (My Work, BD, Estimating, Project Hub), icon resolver from NAV_ITEMS.icon, icons assigned per workspace |
