@@ -12,6 +12,7 @@ import { TRANSITION_FAST } from '../theme/animations.js';
 import { HBC_PRIMARY_BLUE, HBC_STATUS_COLORS } from '../theme/tokens.js';
 import { hbcTypeScale } from '../theme/typography.js';
 import { HBC_RADIUS_XL } from '../theme/radii.js';
+import { elevationLevel2 } from '../theme/elevation.js';
 import { HBC_SPACE_MD } from '../theme/grid.js';
 import type { HbcKpiCardProps } from './types.js';
 
@@ -37,8 +38,10 @@ const useStyles = makeStyles({
     borderTopStyle: 'solid',
     borderTopColor: tokens.colorNeutralStroke2,
     cursor: 'default',
-    transitionProperty: 'border-color, background-color, box-shadow',
+    // INS-008: Transition includes box-shadow + transform for hover/active states.
+    transitionProperty: 'border-color, background-color, box-shadow, transform',
     transitionDuration: TRANSITION_FAST,
+    transitionTimingFunction: 'ease',
     // UIF-001: minWidth removed — hard floor blocked grid track shrinking and caused
     // horizontal overflow in secondary zone tiles. Grid/flex parents now control
     // card width via track sizing. overflow:hidden prevents label text from forcing
@@ -52,8 +55,12 @@ const useStyles = makeStyles({
   },
   cardClickable: {
     cursor: 'pointer',
+    // INS-008: Hover elevation with accent glow + pressed scale-down.
     ':hover': {
-      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+      boxShadow: `${elevationLevel2}, 0 0 8px 0 rgba(255,255,255,0.06)`,
+    },
+    ':active': {
+      transform: 'scale(0.98)',
     },
   },
   cardActive: {

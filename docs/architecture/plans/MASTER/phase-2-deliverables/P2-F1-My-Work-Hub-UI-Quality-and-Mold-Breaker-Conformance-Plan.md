@@ -1292,6 +1292,14 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.24 INS-008: Hover Elevation + Active Press State (Medium)
+
+**Fix:** Enhanced `cardClickable` hover from minimal `0 2px 8px rgba(0,0,0,0.08)` to `elevationLevel2` shadow + ambient glow (`0 0 8px 0 rgba(255,255,255,0.06)`). Added `:active` pseudo with `transform: scale(0.98)` for tactile press feedback. Extended card transition to include `box-shadow` and `transform` with `TRANSITION_FAST` timing.
+
+**Files:** `packages/ui-kit/src/HbcKpiCard/index.tsx` (elevation import, hover/active styles, transition). Version: ui-kit 2.2.37→2.2.38.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
