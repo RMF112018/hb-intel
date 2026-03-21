@@ -713,7 +713,7 @@ All UIFs re-opened as of the 2026-03-21 Audit 2 finding. Previous "Complete" cla
 | UIF | Title | Severity | Group | Status |
 |---|---|---|---|---|
 | — | @hbc/project-canvas integration | Architectural | G0 | **Complete** — 2026-03-21: dependency added, 6 tiles registered, HubSecondaryZone + HubTertiaryZone refactored to MyWorkCanvas |
-| UIF-001 | Lane header native button appearance | Critical | G1 | **Open** |
+| UIF-001 | Lane header native button appearance | Critical | G1 | **Complete** — 2026-03-21: lane-color left border accents (status ramp tokens), heading4 typography, TRANSITION_FAST animation, HBC_RADIUS_LG containers, human-readable labels, sticky headers |
 | UIF-002 | Two-column layout / canvas waste | Critical | G2 | **Open** |
 | UIF-003 | Title links — browser default blue | Critical | G1 | **Open** |
 | UIF-004 | Theme split — light body / dark shell | Critical | G1 | **Complete** — 2026-03-21: body background corrected to surface-0 tokens (#FFFFFF light, #0F172A dark, #0F1419 field) via data-theme attribute bridge |

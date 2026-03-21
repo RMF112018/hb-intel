@@ -12,7 +12,20 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { useComplexity } from '@hbc/complexity';
-import { HbcCommandBar, HbcSpinner, HbcBanner } from '@hbc/ui-kit';
+import {
+  HbcCommandBar,
+  HbcSpinner,
+  HbcBanner,
+  HBC_STATUS_RAMP_RED,
+  HBC_STATUS_RAMP_AMBER,
+  HBC_STATUS_RAMP_GRAY,
+  HBC_STATUS_RAMP_INFO,
+  HBC_RADIUS_LG,
+  HBC_SPACE_SM,
+  HBC_SPACE_MD,
+  TRANSITION_FAST,
+  heading4,
+} from '@hbc/ui-kit';
 import { ChevronDown } from '@hbc/ui-kit/icons';
 import { useMyWork } from '../../hooks/useMyWork.js';
 import { useMyWorkActions } from '../../hooks/useMyWorkActions.js';
@@ -51,12 +64,28 @@ const GROUPINGS: Record<GroupingKey, (item: IMyWorkItem) => string> = {
  * Human-readable labels for MyWorkLane slug values.
  * Falls back to title-casing the slug for any unlisted values.
  */
+/**
+ * UIF-001: Human-readable labels for MyWorkLane slug values.
+ * MB-01 — no developer-internal labels visible to users.
+ */
 const LANE_LABELS: Record<string, string> = {
-  'do-now': 'Do Now',
+  'do-now': 'Action Required',
   'waiting-blocked': 'Waiting / Blocked',
-  watch: 'Watch',
+  watch: 'Watching',
   'delegated-team': 'Delegated to Team',
   deferred: 'Deferred',
+};
+
+/**
+ * UIF-001: Lane-color left border accent using status ramp tokens.
+ * Governed by UI-Kit-Visual-Language-Guide.md status color ramps.
+ */
+const LANE_COLORS: Record<string, string> = {
+  'waiting-blocked': HBC_STATUS_RAMP_RED[50],
+  'do-now': HBC_STATUS_RAMP_AMBER[50],
+  watch: HBC_STATUS_RAMP_GRAY[50],
+  'delegated-team': HBC_STATUS_RAMP_INFO[50],
+  deferred: HBC_STATUS_RAMP_GRAY[50],
 };
 
 function formatGroupLabel(key: string): string {
@@ -295,8 +324,9 @@ export function HbcMyWorkFeed({
               return (
                 <div
                   key={group.groupKey}
+                  data-lane={group.groupKey}
                   style={{
-                    borderRadius: '6px',
+                    borderRadius: HBC_RADIUS_LG,
                     border: '1px solid var(--colorNeutralStroke2)',
                     overflow: 'hidden',
                   }}
@@ -310,7 +340,7 @@ export function HbcMyWorkFeed({
                     onClick={() => toggleGroup(group.groupKey)}
                     aria-expanded={isExpanded}
                     style={{
-                      // Reset UA button styles first (UIF-001)
+                      // Reset UA button styles first (UIF-001 — MB-08)
                       appearance: 'none' as const,
                       WebkitAppearance: 'none' as const,
                       border: 'none',
@@ -321,15 +351,21 @@ export function HbcMyWorkFeed({
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      // Spacing & surface
-                      padding: '10px 14px',
+                      // UIF-001: Spacing from design tokens
+                      padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px`,
                       backgroundColor: isExpanded
                         ? 'var(--colorNeutralBackground2)'
                         : 'var(--colorNeutralBackground3)',
+                      // UIF-001: Lane-color left border accent
+                      borderLeft: `4px solid ${LANE_COLORS[group.groupKey] ?? 'transparent'}`,
                       // Separator — declared after border: none so it wins
                       borderBottom: isExpanded
                         ? '1px solid var(--colorNeutralStroke2)'
                         : '0',
+                      // UIF-001: Sticky lane headers (MB-03)
+                      position: 'sticky' as const,
+                      top: 0,
+                      zIndex: 1,
                       // Typography & interaction
                       cursor: 'pointer',
                       color: 'var(--colorNeutralForeground1)',
@@ -339,13 +375,13 @@ export function HbcMyWorkFeed({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span
                         style={{
-                          fontWeight: 600,
-                          fontSize: '0.8125rem',
-                          lineHeight: '1.25',
+                          fontWeight: heading4.fontWeight,
+                          fontSize: heading4.fontSize,
+                          lineHeight: heading4.lineHeight,
                           color: 'var(--colorNeutralForeground1)',
                           letterSpacing: '0.01em',
                           opacity: isExpanded ? 1 : 0.7,
-                          transition: 'opacity 200ms ease',
+                          transition: `opacity ${TRANSITION_FAST} ease`,
                         }}
                       >
                         {formatGroupLabel(group.groupKey)}
@@ -362,7 +398,7 @@ export function HbcMyWorkFeed({
                           textAlign: 'center' as const,
                           lineHeight: '1.4',
                           opacity: isExpanded ? 1 : 0.7,
-                          transition: 'opacity 200ms ease',
+                          transition: `opacity ${TRANSITION_FAST} ease`,
                         }}
                       >
                         {group.items.length}
@@ -375,7 +411,7 @@ export function HbcMyWorkFeed({
                         alignItems: 'center',
                         flexShrink: 0,
                         transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transition: 'transform 200ms ease',
+                        transition: `transform ${TRANSITION_FAST} ease`,
                       }}
                     >
                       <ChevronDown size="sm" />
