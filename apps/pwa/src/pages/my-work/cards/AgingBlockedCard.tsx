@@ -56,11 +56,13 @@ export function AgingBlockedCard({
         <HbcSpinner size="sm" label="Loading insights" />
       ) : (
         <div className={styles.kpiGrid}>
+          {/* INS-009: Flat trend placeholders — replaced with real deltas when data model supports it */}
           <HbcKpiCard
             label="Escalation Candidates"
             value={teamFeed?.escalationCandidateCount ?? 0}
             color={HBC_STATUS_RAMP_AMBER[50]}
             icon={<Upload size="sm" />}
+            trend={{ direction: 'flat', label: 'No change' }}
             isActive={activeFilter === 'escalation'}
             onClick={() => onFilterChange?.('escalation')}
           />
@@ -69,6 +71,7 @@ export function AgingBlockedCard({
             value={teamFeed?.blockedCount ?? 0}
             color={HBC_STATUS_RAMP_RED[50]}
             icon={<Cancel size="sm" />}
+            trend={{ direction: 'flat', label: 'No change' }}
             isActive={activeFilter === 'blocked'}
             onClick={() => onFilterChange?.('blocked')}
           />
@@ -77,6 +80,7 @@ export function AgingBlockedCard({
             value={teamFeed?.agingCount ?? 0}
             color={HBC_STATUS_RAMP_GRAY[50]}
             icon={<StatusOverdueIcon size="sm" />}
+            trend={{ direction: 'flat', label: 'No change' }}
             isActive={activeFilter === 'aging'}
             onClick={() => onFilterChange?.('aging')}
           />

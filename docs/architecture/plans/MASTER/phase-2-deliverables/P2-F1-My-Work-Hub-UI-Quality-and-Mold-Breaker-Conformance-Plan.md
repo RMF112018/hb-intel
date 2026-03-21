@@ -1300,6 +1300,14 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.25 INS-009: Trend Placeholders on KPI Cards (Medium)
+
+**Fix:** Added `trend={{ direction: 'flat', label: 'No change' }}` to all 6 detail KPI cards (Action Now, Blocked ×2, Unread, Escalation Candidates, Aging) in PersonalAnalyticsCard and AgingBlockedCard. Total Items (summary anchor) intentionally omitted. These are flat placeholders preserving layout rhythm and signaling future intent — replaced with real delta computations when the data model supports historical counts.
+
+**Files:** `apps/pwa/src/pages/my-work/cards/PersonalAnalyticsCard.tsx` + `AgingBlockedCard.tsx`. Version: pwa 0.12.42→0.12.43.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

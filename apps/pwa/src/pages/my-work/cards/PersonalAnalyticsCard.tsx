@@ -81,11 +81,13 @@ export function PersonalAnalyticsCard({
           className={styles.summaryCard}
         />
       </div>
+      {/* INS-009: Flat trend placeholders — replaced with real deltas when data model supports it */}
       <HbcKpiCard
         label="Action Now"
         value={counts?.nowCount ?? 0}
         color={HBC_STATUS_ACTION_GREEN}
         icon={<SparkleIcon size="sm" />}
+        trend={{ direction: 'flat', label: 'No change' }}
         isActive={activeFilter === 'action-now'}
         onClick={() => onFilterChange?.('action-now')}
       />
@@ -94,15 +96,16 @@ export function PersonalAnalyticsCard({
         value={counts?.blockedCount ?? 0}
         color={HBC_STATUS_RAMP_RED[50]}
         icon={<Cancel size="sm" />}
+        trend={{ direction: 'flat', label: 'No change' }}
         isActive={activeFilter === 'blocked'}
         onClick={() => onFilterChange?.('blocked')}
       />
-      {/* INS-002: Info blue — passive informational metric */}
       <HbcKpiCard
         label="Unread"
         value={counts?.unreadCount ?? 0}
         color={HBC_STATUS_RAMP_INFO[50]}
         icon={<Notifications size="sm" />}
+        trend={{ direction: 'flat', label: 'No change' }}
         isActive={activeFilter === 'unread'}
         onClick={() => onFilterChange?.('unread')}
       />
