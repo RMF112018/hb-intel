@@ -2,14 +2,43 @@
  * Shell bridge — Phase 4.19, PH4B.5 §4b.5.3
  * Converts navStore / NAV_ITEMS registry → SidebarNavGroup[] expected by HbcAppShell,
  * and ICurrentUser → ShellUser.
+ *
+ * UIF-013: Icon resolver maps NavItemConfig.icon → JSX. Top-level workspace
+ * entries always visible (≥4 destinations per conformance plan §5.3).
  */
 import { createElement } from 'react';
+import type React from 'react';
 import type { ICurrentUser } from '@hbc/models';
 import type { WorkspaceId, SidebarItem } from '@hbc/shell';
 import { getNavItemsForWorkspace, isMyWorkCohortEnabled } from '@hbc/shell';
 import type { SidebarNavGroup, ShellUser } from '@hbc/ui-kit';
-import { DrawingSheet } from '@hbc/ui-kit';
+import { DrawingSheet, Home, Toolbox, BudgetLine, GoNoGo, HardHat } from '@hbc/ui-kit';
 import { WORKSPACE_DESCRIPTORS } from '../router/workspace-config.js';
+
+// UIF-013: Icon resolver — maps NavItemConfig.icon string to JSX component.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ICON_MAP: Record<string, React.FC<any>> = {
+  'home': Home,
+  'toolbox': Toolbox,
+  'budget-line': BudgetLine,
+  'go-no-go': GoNoGo,
+  'hard-hat': HardHat,
+  'drawing-sheet': DrawingSheet,
+};
+
+function resolveIcon(iconName?: string): React.ReactNode {
+  const Icon = iconName ? ICON_MAP[iconName] ?? DrawingSheet : DrawingSheet;
+  return createElement(Icon, { size: 'sm' });
+}
+
+// UIF-013: Top-level workspace entries that should always be visible in the sidebar.
+// Ensures ≥4 navigation destinations are reachable from any page.
+const TOP_LEVEL_WORKSPACES: Array<{ workspace: WorkspaceId; label: string; icon: string; path: string }> = [
+  { workspace: 'my-work', label: 'My Work', icon: 'home', path: '/my-work' },
+  { workspace: 'business-development', label: 'BD', icon: 'toolbox', path: '/bd' },
+  { workspace: 'estimating', label: 'Estimating', icon: 'go-no-go', path: '/estimating' },
+  { workspace: 'project-hub', label: 'Project Hub', icon: 'hard-hat', path: '/project-hub' },
+];
 
 /**
  * Maps flat navStore sidebar items into the grouped structure HbcAppShell expects.
@@ -29,7 +58,7 @@ export function mapNavStoreToSidebarGroups(
       items: items.map((item) => ({
         id: item.id,
         label: item.label,
-        icon: createElement(DrawingSheet, { size: 'sm' }),
+        icon: resolveIcon(),
         href: `/${wsId}/${item.id}`,
       })),
     },
@@ -38,29 +67,28 @@ export function mapNavStoreToSidebarGroups(
 
 /**
  * Builds sidebar groups directly from the NAV_ITEMS registry — PH4B.5 §4b.5.3.
- * No dependency on navStore's sidebarItems for content.
+ * UIF-013: Always includes top-level workspace entries (≥4 destinations).
  */
 export function buildSidebarGroupsFromRegistry(
   workspaceId: WorkspaceId | null,
 ): SidebarNavGroup[] {
   const groups: SidebarNavGroup[] = [];
 
-  // P2-B1 §11.5: "My Work" nav item when cohort flag is enabled.
+  // UIF-013: Top-level workspace quick-nav group — always visible.
   if (isMyWorkCohortEnabled()) {
     groups.push({
-      id: 'my-work',
-      label: 'My Work',
-      items: [
-        {
-          id: 'my-work-hub',
-          label: 'My Work',
-          icon: createElement(DrawingSheet, { size: 'sm' }),
-          href: '/my-work',
-        },
-      ],
+      id: 'workspaces',
+      label: 'Workspaces',
+      items: TOP_LEVEL_WORKSPACES.map((ws) => ({
+        id: `ws-${ws.workspace}`,
+        label: ws.label,
+        icon: resolveIcon(ws.icon),
+        href: ws.path,
+      })),
     });
   }
 
+  // Active workspace sub-navigation (if workspace has sub-items)
   const wsId = workspaceId ?? 'project-hub';
   const navItems = getNavItemsForWorkspace(wsId);
   if (navItems.length > 0) {
@@ -71,16 +99,14 @@ export function buildSidebarGroupsFromRegistry(
       items: navItems.map((navItem) => ({
         id: navItem.key,
         label: navItem.label,
-        icon: createElement(DrawingSheet, { size: 'sm' }),
+        icon: resolveIcon(navItem.icon),
         href: navItem.path,
         requiredPermission: navItem.requiredPermission,
       })),
     });
   }
 
-  // Deduplicate groups by id — prevents React key warnings when the active
-  // workspace matches a group already registered above (e.g. 'my-work' cohort
-  // group and the 'my-work' workspace nav group are otherwise both pushed).
+  // Deduplicate groups by id
   const seen = new Set<string>();
   return groups.filter((g) => {
     if (seen.has(g.id)) return false;

@@ -27,18 +27,20 @@ export interface NavItemConfig {
 
 export const NAV_ITEMS: NavItemConfig[] = [
   // My Work (Phase 2 — Personal Work Hub)
-  { key: 'feed', label: 'My Work', path: '/my-work', workspace: 'my-work', order: 0 },
+  { key: 'feed', label: 'My Work', icon: 'home', path: '/my-work', workspace: 'my-work', order: 0 },
+  // Business Development (UIF-013: top-level workspace entry)
+  { key: 'bd-dashboard', label: 'Business Development', icon: 'toolbox', path: '/bd', workspace: 'business-development', order: 0 },
   // Project Hub
-  { key: 'portfolio', label: 'Portfolio', path: '/project-hub/portfolio', workspace: 'project-hub', order: 0 },
-  { key: 'recent', label: 'Recent', path: '/project-hub/recent', workspace: 'project-hub', order: 1 },
-  { key: 'favorites', label: 'Favorites', path: '/project-hub/favorites', workspace: 'project-hub', order: 2 },
+  { key: 'portfolio', label: 'Portfolio', icon: 'home', path: '/project-hub/portfolio', workspace: 'project-hub', order: 0 },
+  { key: 'recent', label: 'Recent', icon: 'drawing-sheet', path: '/project-hub/recent', workspace: 'project-hub', order: 1 },
+  { key: 'favorites', label: 'Favorites', icon: 'drawing-sheet', path: '/project-hub/favorites', workspace: 'project-hub', order: 2 },
   // Accounting
-  { key: 'overview', label: 'Overview', path: '/accounting/overview', workspace: 'accounting', order: 0 },
-  { key: 'budgets', label: 'Budgets', path: '/accounting/budgets', workspace: 'accounting', order: 1 },
-  { key: 'invoices', label: 'Invoices', path: '/accounting/invoices', workspace: 'accounting', order: 2 },
+  { key: 'overview', label: 'Overview', icon: 'budget-line', path: '/accounting/overview', workspace: 'accounting', order: 0 },
+  { key: 'budgets', label: 'Budgets', icon: 'budget-line', path: '/accounting/budgets', workspace: 'accounting', order: 1 },
+  { key: 'invoices', label: 'Invoices', icon: 'drawing-sheet', path: '/accounting/invoices', workspace: 'accounting', order: 2 },
   // Estimating
-  { key: 'bids', label: 'Bids', path: '/estimating/bids', workspace: 'estimating', order: 0 },
-  { key: 'templates', label: 'Templates', path: '/estimating/templates', workspace: 'estimating', order: 1 },
+  { key: 'bids', label: 'Bids', icon: 'go-no-go', path: '/estimating/bids', workspace: 'estimating', order: 0 },
+  { key: 'templates', label: 'Templates', icon: 'drawing-sheet', path: '/estimating/templates', workspace: 'estimating', order: 1 },
 ];
 
 /** Get nav items for a specific workspace, sorted by order */
