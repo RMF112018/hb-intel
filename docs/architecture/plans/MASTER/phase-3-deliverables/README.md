@@ -1,12 +1,12 @@
 # Phase 3 Deliverables — Project Hub and Project Context
 
-**Doc Classification:** Active Deliverable Index — Phase 3 deliverable production has begun. P3-A1 (Project Registry and Activation Contract) is the first locked artifact.
+**Doc Classification:** Active Deliverable Index — Phase 3 deliverable production has begun. P3-A1 and P3-A2 (Workstream A contracts) are locked.
 
 ---
 
 ## Planning Status Summary
 
-**Phase 3 planning is in progress.** 1 of 20 deliverables is locked (P3-A1). The remaining 19 deliverables across Workstreams A–H are planned but not yet authored. Deliverable production follows the execution priority sequencing defined in [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
+**Phase 3 planning is in progress.** 2 of 20 deliverables are locked (P3-A1, P3-A2). The remaining 18 deliverables across Workstreams A–H are planned but not yet authored. Deliverable production follows the execution priority sequencing defined in [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
 
 ---
 
@@ -30,7 +30,7 @@
 | Doc ID | Title | Status |
 |---|---|---|
 | P3-A1 | [Project Registry and Activation Contract](P3-A1-Project-Registry-and-Activation-Contract.md) | Contract |
-| P3-A2 | Membership / Role Authority Contract | Not Started |
+| P3-A2 | [Membership / Role Authority Contract](P3-A2-Membership-Role-Authority-Contract.md) | Contract |
 | P3-A3 | Shared Spine Publication Contract Set | Not Started |
 
 ### Workstream B — Project context continuity and switching
@@ -101,6 +101,6 @@
 
 ---
 
-**Last Updated:** 2026-03-20 — P3-A1 locked; 1 of 20 Phase 3 deliverables complete.
+**Last Updated:** 2026-03-20 — P3-A1, P3-A2 locked; 2 of 20 Phase 3 deliverables complete.
 
 **Governing Plan:** [Phase 3 Plan §14–§15](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
