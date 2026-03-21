@@ -720,7 +720,7 @@ All UIFs re-opened as of the 2026-03-21 Audit 2 finding. Previous "Complete" cla
 | UIF-005 | Collapsed lane — no visual distinction | High | G2 | **Complete** — 2026-03-21: collapsed hides lane-color accent (transparent border), chevron 0°→−90° rotation, surface-2 bg + opacity 0.7 (from UIF-001), aria-expanded present |
 | UIF-006 | Work item row — zero structure, no metadata | High | G2 | **Complete** — 2026-03-21: density-aware rows via useDensity() + HBC_DENSITY_TOKENS[tier].rowHeightMin, bodySmall typography, HBC_STATUS_RAMP_GRAY[50] metadata color, token-driven padding |
 | UIF-007 | Semantic color collision | High | G1 | **Complete** — 2026-03-21: Blocked badge → error variant (red), accent borders use HBC_STATUS_RAMP_RED/HBC_ACCENT_ORANGE tokens, atRisk style uses #FF4D4D |
-| UIF-008 | KPI cards — static and inconsistent | High | G3 | **Open** |
+| UIF-008 | KPI cards — static and inconsistent | High | G3 | **Complete** — 2026-03-21: DashboardLayout-pattern responsive grid (4→2→1), HbcCard wrapper removed, semantic status ramp colors (UNREAD amber, Action Now/Blocked red), heading1 value typography (existing), surface-1 bg (existing) |
 | UIF-009 | Touch target — "Open" button below 44px | High | G3 | **Complete** — 2026-03-21: density-aware tap spacing via tapSpacingMin, reasoning button sized to touchTargetMin (44px min), HbcButton auto-scales via useTouchSize |
 | UIF-010 | Dev tools visible in non-dev builds | High | G4 | **Open** |
 | UIF-011 | Typography — empty state heading scale | High | G1 | **Open** |
