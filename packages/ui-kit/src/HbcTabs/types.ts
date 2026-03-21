@@ -22,7 +22,11 @@ export interface HbcTabsProps {
   onTabChange: (tabId: string) => void;
   /** Optional content panels — lazy rendered (only active panel mounted) */
   panels?: TabPanel[];
-  /** When true, uses HBC_SURFACE_FIELD dark tokens */
+  /**
+   * @deprecated No-op since PH4C theme-responsive migration.
+   * HbcTabs now auto-adapts to all themes via Fluent tokens.
+   * Prop retained for backward compatibility; has no effect.
+   */
   isFieldMode?: boolean;
   /** Additional CSS class */
   className?: string;

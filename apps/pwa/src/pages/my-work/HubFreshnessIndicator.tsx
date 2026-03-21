@@ -41,17 +41,15 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    fontSize: '12px',
-    color: 'var(--colorNeutralForeground3)',
-    paddingBottom: '8px',
+    fontSize: '0.75rem',
+    fontWeight: '500',
+    color: 'var(--colorNeutralForeground2)',
+    paddingBottom: '12px',
     [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
       flexDirection: 'column',
       alignItems: 'flex-start',
       gap: '4px',
     },
-  },
-  refreshing: {
-    fontStyle: 'italic',
   },
 });
 
@@ -76,7 +74,7 @@ export function HubFreshnessIndicator({
   if (isStaleWhileRevalidating) {
     return (
       <div className={styles.root} data-hub-trust="stale-revalidating">
-        <span className={styles.refreshing}>Refreshing...</span>
+        <HbcStatusBadge variant="info" label="Refreshing" size="small" />
         {relativeTime && <span>Last synced {relativeTime}</span>}
       </div>
     );

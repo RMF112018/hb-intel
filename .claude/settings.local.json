@@ -132,7 +132,11 @@
       "Bash(find /Users/bobbyfetting/hb-intel/backend/functions/src -type f \\\\\\(-name *.ts -o -name *.json \\\\\\))",
       "Bash(-print)",
       "Bash(npm run:*)",
-      "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\) -path */hub/* -o -path */personal-work/*)"
+      "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\) -path */hub/* -o -path */personal-work/*)",
+      "Bash(find /Users/bobbyfetting/hb-intel/apps/project-hub -type f \\\\\\(-name *.tsx -o -name *.ts \\\\\\))",
+      "Bash(find /Users/bobbyfetting/hb-intel/packages/related-items/testing -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(find /Users/bobbyfetting/hb-intel/packages/my-work-feed -type f \\\\\\(-name *.css -o -name *.scss -o -name *styles* \\\\\\))",
+      "Bash(npx vite:*)"
     ]
   },
   "enabledPlugins": {

@@ -1,10 +1,15 @@
 /**
  * QuickActionsCard — P2-D1 §6: available to all roles.
  * Common action shortcuts for the hub.
+ *
+ * Navigation uses useRouter().navigate() (TanStack Router) so actions
+ * stay within the SPA and do not trigger full page reloads.
+ * Action triggers use HbcButton variant="ghost" per UI governance.
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { HbcCard, HBC_BREAKPOINT_TABLET, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
+import { useRouter } from '@tanstack/react-router';
+import { HbcCard, HbcButton, ChevronForward, HBC_BREAKPOINT_TABLET, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
 
 const useStyles = makeStyles({
   root: {
@@ -17,20 +22,51 @@ const useStyles = makeStyles({
     ...({ padding: 0, margin: 0 } as Record<string, string | number>),
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
+    gap: '4px',
   },
 });
 
 export function QuickActionsCard(): ReactNode {
   const styles = useStyles();
+  const router = useRouter();
 
   return (
     <div className={styles.root}>
       <HbcCard weight="supporting" header={<span>Quick Actions</span>}>
         <ul className={styles.list}>
-          <li><a href="/project-setup?mode=new-request">Create project request</a></li>
-          <li><a href="/projects">View my requests</a></li>
-          <li><a href="/project-hub">Go to Project Hub</a></li>
+          <li>
+            <HbcButton
+              variant="ghost"
+              size="sm"
+              icon={<ChevronForward size="sm" />}
+              iconPosition="after"
+              onClick={() => router.navigate({ to: '/project-setup', search: { mode: 'new-request' } })}
+            >
+              Create project request
+            </HbcButton>
+          </li>
+          <li>
+            <HbcButton
+              variant="ghost"
+              size="sm"
+              icon={<ChevronForward size="sm" />}
+              iconPosition="after"
+              onClick={() => router.navigate({ to: '/projects' })}
+            >
+              View my requests
+            </HbcButton>
+          </li>
+          <li>
+            <HbcButton
+              variant="ghost"
+              size="sm"
+              icon={<ChevronForward size="sm" />}
+              iconPosition="after"
+              onClick={() => router.navigate({ to: '/project-hub' })}
+            >
+              Go to Project Hub
+            </HbcButton>
+          </li>
         </ul>
       </HbcCard>
     </div>

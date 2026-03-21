@@ -41,3 +41,15 @@ body {
   overflow-y: auto;
   padding: 24px;
 }
+
+/* UIF-004: Theme-responsive body background.
+   FluentProvider sets CSS custom properties on its wrapper inside #root,
+   but <body> sits outside that scope so --colorNeutralBackground1 resolves
+   to the #fafafa fallback. Use the data-theme attribute that useFieldMode
+   already sets on <html> to keep body in sync with the active theme. */
+html[data-theme="dark"] body {
+  background-color: #111827;
+}
+html[data-theme="field"] body {
+  background-color: #1A2332;
+}

@@ -12,11 +12,18 @@
  */
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
+import { makeStyles } from '@griffel/react';
 import type { TeamMode } from '@hbc/shell';
 import { HbcTabs } from '@hbc/ui-kit';
 import type { LayoutTab } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
 import { useAuthStore } from '@hbc/auth';
+
+const useStyles = makeStyles({
+  tabBar: {
+    marginBottom: '16px',
+  },
+});
 
 export interface HubTeamModeSelectorProps {
   activeMode: TeamMode;
@@ -34,6 +41,7 @@ export function HubTeamModeSelector({
   activeMode,
   onModeChange,
 }: HubTeamModeSelectorProps): ReactNode {
+  const styles = useStyles();
   const { tier } = useComplexity();
   const session = useAuthStore((s) => s.session);
   const isExecutive = session?.resolvedRoles.includes('Executive') ?? false;
@@ -46,10 +54,12 @@ export function HubTeamModeSelector({
   if (tier === 'essential') return null;
 
   return (
-    <HbcTabs
-      tabs={tabs}
-      activeTabId={activeMode}
-      onTabChange={(tabId) => onModeChange(tabId as TeamMode)}
-    />
+    <div className={styles.tabBar}>
+      <HbcTabs
+        tabs={tabs}
+        activeTabId={activeMode}
+        onTabChange={(tabId) => onModeChange(tabId as TeamMode)}
+      />
+    </div>
   );
 }

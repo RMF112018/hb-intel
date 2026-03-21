@@ -6,12 +6,20 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
+import { heading3 } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
 import { QuickActionsCard } from './cards/QuickActionsCard.js';
 import { RecentContextCard } from './cards/RecentContextCard.js';
 
 const useStyles = makeStyles({
-  heading: { gridColumn: '1 / -1', marginTop: '8px', marginBottom: '0' },
+  heading: {
+    gridColumn: '1 / -1',
+    ...heading3,
+    color: 'var(--colorNeutralForeground1)',
+    margin: '0',
+    marginTop: '20px',
+    marginBottom: '8px',
+  },
 });
 
 export function HubTertiaryZone(): ReactNode {

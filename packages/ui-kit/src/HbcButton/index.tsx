@@ -4,17 +4,16 @@
  * V2.1 Dec 31: detect (pointer: coarse) → auto-bump size by one tier
  */
 import * as React from 'react';
-import { Button, Spinner, mergeClasses } from '@fluentui/react-components';
+import { Button, Spinner, mergeClasses, tokens } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import {
-  HBC_ACCENT_ORANGE,
-  HBC_ACCENT_ORANGE_HOVER,
-  HBC_ACCENT_ORANGE_PRESSED,
+  HBC_BRAND_ACTION,
+  HBC_BRAND_ACTION_HOVER,
+  HBC_BRAND_ACTION_PRESSED,
   HBC_DANGER_HOVER,
   HBC_DANGER_PRESSED,
   HBC_HEADER_TEXT,
   HBC_STATUS_COLORS,
-  HBC_SURFACE_LIGHT,
 } from '../theme/tokens.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
 import { HBC_RADIUS_MD } from '../theme/radii.js';
@@ -43,7 +42,7 @@ const useStyles = makeStyles({
     ':focus-visible': {
       outlineWidth: '2px',
       outlineStyle: 'solid',
-      outlineColor: HBC_SURFACE_LIGHT['border-focus'],
+      outlineColor: tokens.colorBrandStroke1,
       outlineOffset: '2px',
     },
     ':disabled': {
@@ -52,27 +51,27 @@ const useStyles = makeStyles({
     },
   },
   primary: {
-    backgroundColor: HBC_ACCENT_ORANGE,
+    backgroundColor: HBC_BRAND_ACTION,
     color: HBC_HEADER_TEXT,
     ':hover:not(:disabled)': {
-      backgroundColor: HBC_ACCENT_ORANGE_HOVER,
+      backgroundColor: HBC_BRAND_ACTION_HOVER,
     },
     ':active:not(:disabled)': {
-      backgroundColor: HBC_ACCENT_ORANGE_PRESSED,
+      backgroundColor: HBC_BRAND_ACTION_PRESSED,
     },
   },
   secondary: {
-    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
-    color: HBC_SURFACE_LIGHT['text-primary'],
+    backgroundColor: tokens.colorNeutralBackground3,
+    color: tokens.colorNeutralForeground1,
     ':hover:not(:disabled)': {
-      backgroundColor: HBC_SURFACE_LIGHT['surface-3'],
+      backgroundColor: tokens.colorNeutralBackground3Hover,
     },
   },
   ghost: {
     backgroundColor: 'transparent',
-    color: HBC_SURFACE_LIGHT['text-primary'],
+    color: tokens.colorNeutralForeground1,
     ':hover:not(:disabled)': {
-      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+      backgroundColor: tokens.colorNeutralBackground3Hover,
     },
   },
   danger: {
@@ -107,9 +106,9 @@ function useTouchSize(requestedSize: ButtonSize): ButtonSize {
   }, []);
 
   if (!isCoarse) return requestedSize;
-  if (requestedSize === 'sm') return 'md';
-  if (requestedSize === 'md') return 'lg';
-  return 'lg'; // lg stays lg but gets min 56px touch target
+  // UIF-009: WCAG 2.5.5 — minimum 44px touch target for all interactive elements.
+  // All sizes map to 'lg' (44px) on coarse pointer; lg also gets 56px minHeight.
+  return 'lg';
 }
 
 export const HbcButton: React.FC<HbcButtonProps> = ({

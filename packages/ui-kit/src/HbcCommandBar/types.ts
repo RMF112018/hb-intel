@@ -37,6 +37,10 @@ export interface CommandBarFilter {
   active: boolean;
   /** Toggle handler */
   onToggle: () => void;
+  /** Item count badge. Omit or undefined to hide. (UIF-012) */
+  count?: number;
+  /** Urgency level for badge accent color. Default: 'neutral'. (UIF-012) */
+  urgency?: 'error' | 'warning' | 'neutral';
 }
 
 // PH4.6 §Step 10 — Saved views

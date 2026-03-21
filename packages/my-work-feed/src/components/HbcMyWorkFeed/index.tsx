@@ -5,12 +5,15 @@
  * State is component-local (D1). Reuses HbcMyWorkListItem (D2).
  * Essential: flat list, no controls. Standard: CommandBar + grouping.
  * Expert: + sort + source health footer.
+ *
+ * Groups start expanded by default. collapsedGroups tracks what has been
+ * manually collapsed rather than what is open, so initial render shows all items.
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { useComplexity } from '@hbc/complexity';
-import { HbcCommandBar, HbcTypography, HbcSpinner, HbcBanner } from '@hbc/ui-kit';
-import { ChevronDown, ChevronUp } from '@hbc/ui-kit/icons';
+import { HbcCommandBar, HbcSpinner, HbcBanner } from '@hbc/ui-kit';
+import { ChevronDown } from '@hbc/ui-kit/icons';
 import { useMyWork } from '../../hooks/useMyWork.js';
 import { useMyWorkActions } from '../../hooks/useMyWorkActions.js';
 import { HbcMyWorkOfflineBanner } from '../HbcMyWorkOfflineBanner/index.js';
@@ -23,6 +26,8 @@ export interface IHbcMyWorkFeedProps {
   query?: IMyWorkQuery;
   onItemSelect?: (item: IMyWorkItem) => void;
   onOpenReasonDrawer?: (itemId: string) => void;
+  /** UIF-008: External KPI filter key (e.g. 'action-now', 'blocked', 'unread'). */
+  kpiFilter?: string | null;
   className?: string;
 }
 
@@ -41,6 +46,25 @@ const GROUPINGS: Record<GroupingKey, (item: IMyWorkItem) => string> = {
   project: (item) => item.context.projectName ?? item.context.projectId ?? 'No Project',
   module: (item) => item.context.moduleKey,
 };
+
+/**
+ * Human-readable labels for MyWorkLane slug values.
+ * Falls back to title-casing the slug for any unlisted values.
+ */
+const LANE_LABELS: Record<string, string> = {
+  'do-now': 'Do Now',
+  'waiting-blocked': 'Waiting / Blocked',
+  watch: 'Watch',
+  'delegated-team': 'Delegated to Team',
+  deferred: 'Deferred',
+};
+
+function formatGroupLabel(key: string): string {
+  return (
+    LANE_LABELS[key] ??
+    key.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  );
+}
 
 function sortItems(items: IMyWorkItem[], sortKey: SortKey): IMyWorkItem[] {
   if (sortKey === 'rank') return items;
@@ -76,7 +100,8 @@ function groupItems(
 export function HbcMyWorkFeed({
   query,
   onItemSelect,
-  onOpenReasonDrawer,
+  onOpenReasonDrawer: _onOpenReasonDrawer,
+  kpiFilter,
   className,
 }: IHbcMyWorkFeedProps): JSX.Element {
   const { tier } = useComplexity();
@@ -86,7 +111,8 @@ export function HbcMyWorkFeed({
   const [searchTerm, setSearchTerm] = useState('');
   const [groupingKey, setGroupingKey] = useState<GroupingKey>('lane');
   const [sortKey, setSortKey] = useState<SortKey>('rank');
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  // Track collapsed groups — groups start expanded (absent from this set = expanded).
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [activeFilters, setActiveFilters] = useState<IActiveFilters>({
     overdue: false,
     blocked: false,
@@ -94,7 +120,7 @@ export function HbcMyWorkFeed({
   });
 
   const toggleGroup = useCallback((key: string) => {
-    setExpandedGroups((prev) => {
+    setCollapsedGroups((prev) => {
       const next = new Set(prev);
       if (next.has(key)) {
         next.delete(key);
@@ -131,11 +157,21 @@ export function HbcMyWorkFeed({
       items = items.filter((item) => item.isUnread);
     }
 
+    // UIF-008: External KPI filter from page-level click-to-filter
+    if (kpiFilter === 'action-now') {
+      items = items.filter((item) => item.priority === 'now');
+    } else if (kpiFilter === 'blocked') {
+      items = items.filter((item) => item.isBlocked);
+    } else if (kpiFilter === 'unread') {
+      items = items.filter((item) => item.isUnread);
+    }
+    // 'total' or null = no additional KPI filtering
+
     // Sort
     items = sortItems(items, sortKey);
 
     return items;
-  }, [feed?.items, searchTerm, activeFilters, sortKey]);
+  }, [feed?.items, searchTerm, activeFilters, kpiFilter, sortKey]);
 
   const groups = useMemo(() => {
     if (tier === 'essential') return [];
@@ -144,6 +180,13 @@ export function HbcMyWorkFeed({
 
   const hasItems = processedItems.length > 0;
 
+  // UIF-012: Compute filter counts from the base feed (unfiltered) so counts
+  // reflect the total matching items regardless of which filters are active.
+  const feedItems = feed?.items ?? [];
+  const overdueCount = feedItems.filter((i) => i.isOverdue).length;
+  const blockedCount = feedItems.filter((i) => i.isBlocked).length;
+  const unreadCount = feedItems.filter((i) => i.isUnread).length;
+
   // Build CommandBar filters
   const filters = [
     {
@@ -151,18 +194,24 @@ export function HbcMyWorkFeed({
       label: 'Overdue',
       active: activeFilters.overdue,
       onToggle: () => setActiveFilters((f) => ({ ...f, overdue: !f.overdue })),
+      count: overdueCount,
+      urgency: 'error' as const,
     },
     {
       key: 'blocked',
       label: 'Blocked',
       active: activeFilters.blocked,
       onToggle: () => setActiveFilters((f) => ({ ...f, blocked: !f.blocked })),
+      count: blockedCount,
+      urgency: 'warning' as const,
     },
     {
       key: 'unread',
       label: 'Unread',
       active: activeFilters.unread,
       onToggle: () => setActiveFilters((f) => ({ ...f, unread: !f.unread })),
+      count: unreadCount,
+      urgency: 'neutral' as const,
     },
   ];
 
@@ -185,7 +234,10 @@ export function HbcMyWorkFeed({
   ];
 
   return (
-    <div className={`hbc-my-work-feed${className ? ` ${className}` : ''}`}>
+    <div
+      className={className}
+      style={{ display: 'flex', flexDirection: 'column', gap: '0' }}
+    >
       <HbcMyWorkOfflineBanner />
 
       {tier !== 'essential' && (
@@ -198,7 +250,14 @@ export function HbcMyWorkFeed({
       )}
 
       {isLoading && (
-        <div className="hbc-my-work-feed__loading">
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '32px 0',
+          }}
+        >
           <HbcSpinner size="md" />
         </div>
       )}
@@ -210,36 +269,122 @@ export function HbcMyWorkFeed({
       {!isLoading && !isError && !hasItems && <HbcMyWorkEmptyState variant="feed" />}
 
       {!isLoading && !isError && hasItems && (
-        <div className="hbc-my-work-feed__items">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
           {tier === 'essential' ? (
-            processedItems.map((item) => (
-              <HbcMyWorkListItem
-                key={item.workItemId}
-                item={item}
-                onAction={(request) => {
-                  executeAction(request);
-                  onItemSelect?.(request.item);
-                }}
-              />
-            ))
+            <div
+              style={{
+                borderRadius: '6px',
+                border: '1px solid var(--colorNeutralStroke2)',
+                overflow: 'hidden',
+              }}
+            >
+              {processedItems.map((item) => (
+                <HbcMyWorkListItem
+                  key={item.workItemId}
+                  item={item}
+                  onAction={(request) => {
+                    executeAction(request);
+                    onItemSelect?.(request.item);
+                  }}
+                />
+              ))}
+            </div>
           ) : (
             groups.map((group) => {
-              const isExpanded = expandedGroups.has(group.groupKey);
+              const isExpanded = !collapsedGroups.has(group.groupKey);
               return (
-                <div key={group.groupKey} className="hbc-my-work-feed__group">
+                <div
+                  key={group.groupKey}
+                  style={{
+                    borderRadius: '6px',
+                    border: '1px solid var(--colorNeutralStroke2)',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {/* Group header
+                      border: 'none' MUST precede borderBottom — border is a
+                      shorthand that resets all sides; placing it first lets
+                      borderBottom win as the last-declared property. */}
                   <button
                     type="button"
-                    className="hbc-my-work-feed__group-header"
                     onClick={() => toggleGroup(group.groupKey)}
                     aria-expanded={isExpanded}
+                    style={{
+                      // Reset UA button styles first (UIF-001)
+                      appearance: 'none' as const,
+                      WebkitAppearance: 'none' as const,
+                      border: 'none',
+                      outline: 'none',
+                      // Layout
+                      width: '100%',
+                      boxSizing: 'border-box' as const,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      // Spacing & surface
+                      padding: '10px 14px',
+                      backgroundColor: isExpanded
+                        ? 'var(--colorNeutralBackground2)'
+                        : 'var(--colorNeutralBackground3)',
+                      // Separator — declared after border: none so it wins
+                      borderBottom: isExpanded
+                        ? '1px solid var(--colorNeutralStroke2)'
+                        : '0',
+                      // Typography & interaction
+                      cursor: 'pointer',
+                      color: 'var(--colorNeutralForeground1)',
+                      userSelect: 'none' as const,
+                    }}
                   >
-                    <HbcTypography intent="heading4">
-                      {group.groupKey} ({group.items.length})
-                    </HbcTypography>
-                    {isExpanded ? <ChevronUp size="sm" /> : <ChevronDown size="sm" />}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span
+                        style={{
+                          fontWeight: 600,
+                          fontSize: '0.8125rem',
+                          lineHeight: '1.25',
+                          color: 'var(--colorNeutralForeground1)',
+                          letterSpacing: '0.01em',
+                          opacity: isExpanded ? 1 : 0.7,
+                          transition: 'opacity 200ms ease',
+                        }}
+                      >
+                        {formatGroupLabel(group.groupKey)}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '0.6875rem',
+                          fontWeight: 600,
+                          padding: '2px 8px',
+                          borderRadius: '10px',
+                          backgroundColor: 'var(--colorNeutralBackground4)',
+                          color: 'var(--colorNeutralForeground2)',
+                          minWidth: '22px',
+                          textAlign: 'center' as const,
+                          lineHeight: '1.4',
+                          opacity: isExpanded ? 1 : 0.7,
+                          transition: 'opacity 200ms ease',
+                        }}
+                      >
+                        {group.items.length}
+                      </span>
+                    </div>
+                    <span
+                      style={{
+                        color: 'var(--colorNeutralForeground3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        flexShrink: 0,
+                        transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 200ms ease',
+                      }}
+                    >
+                      <ChevronDown size="sm" />
+                    </span>
                   </button>
+
+                  {/* Group body */}
                   {isExpanded && (
-                    <div className="hbc-my-work-feed__group-body">
+                    <div style={{ backgroundColor: 'var(--colorNeutralBackground1)' }}>
                       {group.items.map((item) => (
                         <HbcMyWorkListItem
                           key={item.workItemId}

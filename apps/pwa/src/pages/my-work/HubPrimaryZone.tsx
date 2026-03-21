@@ -6,6 +6,7 @@
  * its own truly-empty, filter-empty, and first-use empty states internally.
  *
  * P2-B3: Freshness indicator above feed shows trust-state cues.
+ * UIF-008: Passes kpiFilter to HbcMyWorkFeed for KPI click-to-filter.
  */
 import type { ReactNode } from 'react';
 import { HbcMyWorkFeed, useMyWork } from '@hbc/my-work-feed';
@@ -15,16 +16,17 @@ import { HubFreshnessIndicator } from './HubFreshnessIndicator.js';
 
 export interface HubPrimaryZoneProps {
   onItemSelect?: (item: IMyWorkItem) => void;
+  kpiFilter?: string | null;
 }
 
-export function HubPrimaryZone({ onItemSelect }: HubPrimaryZoneProps): ReactNode {
+export function HubPrimaryZone({ onItemSelect, kpiFilter }: HubPrimaryZoneProps): ReactNode {
   const { feed, isLoading } = useMyWork();
   const trustState = useHubTrustState(feed, isLoading);
 
   return (
     <>
       <HubFreshnessIndicator trustState={trustState} isLoading={isLoading} />
-      <HbcMyWorkFeed onItemSelect={onItemSelect} />
+      <HbcMyWorkFeed onItemSelect={onItemSelect} kpiFilter={kpiFilter} />
     </>
   );
 }

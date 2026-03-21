@@ -6,9 +6,8 @@
  * Weight prop controls visual hierarchy: primary, standard (default), supporting.
  */
 import * as React from 'react';
-import { mergeClasses } from '@fluentui/react-components';
+import { mergeClasses, tokens } from '@fluentui/react-components';
 import { makeStyles, shorthands } from '@griffel/react';
-import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { elevationLevel0, elevationLevel1, elevationLevel2 } from '../theme/elevation.js';
 import { HBC_RADIUS_XL } from '../theme/radii.js';
 import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
@@ -16,8 +15,9 @@ import type { HbcCardProps } from './types.js';
 
 const useStyles = makeStyles({
   root: {
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    backgroundColor: tokens.colorNeutralBackground1,
+    color: tokens.colorNeutralForeground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     borderRadius: HBC_RADIUS_XL,
     boxShadow: elevationLevel1,
     overflow: 'hidden',
@@ -25,11 +25,11 @@ const useStyles = makeStyles({
   // Weight variants
   weightPrimary: {
     boxShadow: elevationLevel2,
-    ...shorthands.border('2px', 'solid', HBC_SURFACE_LIGHT['border-focus']),
+    ...shorthands.border('2px', 'solid', tokens.colorBrandStroke1),
   },
   weightSupporting: {
     boxShadow: elevationLevel0,
-    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
+    backgroundColor: tokens.colorNeutralBackground2,
   },
   // Header/footer with default (standard) padding
   header: {
@@ -37,7 +37,7 @@ const useStyles = makeStyles({
     paddingRight: `${HBC_SPACE_LG}px`,
     paddingBottom: `${HBC_SPACE_MD}px`,
     paddingLeft: `${HBC_SPACE_LG}px`,
-    ...shorthands.borderBottom('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke1),
   },
   body: {
     paddingTop: `${HBC_SPACE_LG}px`,
@@ -50,7 +50,7 @@ const useStyles = makeStyles({
     paddingRight: `${HBC_SPACE_LG}px`,
     paddingBottom: `${HBC_SPACE_MD}px`,
     paddingLeft: `${HBC_SPACE_LG}px`,
-    ...shorthands.borderTop('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    ...shorthands.borderTop('1px', 'solid', tokens.colorNeutralStroke1),
   },
   // Primary weight uses increased header padding
   headerPrimary: {

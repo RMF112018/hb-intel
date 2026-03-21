@@ -2,13 +2,12 @@
  * App root — Provider hierarchy per Blueprint §2a, §2b, §2e.
  *
  * HbcThemeProvider > MsalProvider (conditional) > QueryClientProvider
- *   > HbcErrorBoundary > RouterProvider > ReactQueryDevtools
+ *   > HbcErrorBoundary > RouterProvider > ReactQueryDevtools (DEV only)
  *   > DevToolbar (DEV only — D-PH5C-06/D-PH5C-02)
  */
 import { lazy, Suspense } from 'react';
 import type { ComponentType } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider } from '@tanstack/react-router';
 import { HbcThemeProvider, HbcErrorBoundary } from '@hbc/ui-kit';
 import { ComplexityProvider } from '@hbc/complexity';
@@ -28,6 +27,14 @@ let DevToolbar: ComponentType | null = null;
 if (import.meta.env.DEV) {
   DevToolbar = lazy(() =>
     import('@hbc/shell/dev-toolbar').then((m) => ({ default: m.DevToolbar })),
+  );
+}
+
+// UIF-010: Gate React Query devtools behind DEV — same pattern as DevToolbar.
+let ReactQueryDevtoolsLazy: ComponentType<{ initialIsOpen: boolean }> | null = null;
+if (import.meta.env.DEV) {
+  ReactQueryDevtoolsLazy = lazy(() =>
+    import('@tanstack/react-query-devtools').then((m) => ({ default: m.ReactQueryDevtools })),
   );
 }
 
@@ -70,7 +77,11 @@ export function App({ authMode }: AppProps): React.ReactNode {
   const routerContent = (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
-      <ReactQueryDevtools initialIsOpen={false} />
+      {import.meta.env.DEV && ReactQueryDevtoolsLazy && (
+        <Suspense fallback={null}>
+          <ReactQueryDevtoolsLazy initialIsOpen={false} />
+        </Suspense>
+      )}
     </QueryClientProvider>
   );
 

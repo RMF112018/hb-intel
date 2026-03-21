@@ -2,14 +2,13 @@
  * HbcEmptyState — Zero-data states with icon/illustration + dual CTAs
  * Blueprint §1d — centered layout, fadeIn + slideInUp entrance
  * PH4.6 §Step 4 — Replace Fluent CSS vars with HBC tokens
- * PH4.9 §Step 5 — icon alias, heading-2 typography, dual action row
+ * PH4.9 §Step 5 — icon alias, heading-3 typography (UIF-011), dual action row
  */
 import * as React from 'react';
-import { mergeClasses } from '@fluentui/react-components';
+import { mergeClasses, tokens } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { keyframes, TRANSITION_NORMAL } from '../theme/animations.js';
-import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
-import { heading2 } from '../theme/typography.js';
+import { heading3 } from '../theme/typography.js';
 import type { HbcEmptyStateProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -46,13 +45,15 @@ const useStyles = makeStyles({
     },
   },
   title: {
-    ...heading2,
-    color: HBC_SURFACE_LIGHT['text-primary'],
+    // UIF-011: heading3 (1rem/600) instead of heading2 (1.25rem/600) so empty
+    // state headings are visually subordinate to page and card titles.
+    ...heading3,
+    color: tokens.colorNeutralForeground1,
     margin: '0',
   },
   description: {
     fontSize: '0.875rem',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: tokens.colorNeutralForeground3,
     margin: '0',
     maxWidth: '400px',
   },

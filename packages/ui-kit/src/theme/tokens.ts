@@ -148,6 +148,17 @@ export const HBC_SURFACE_FIELD = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// Brand-action CTA tokens (UIF-007)
+// Primary CTA buttons use brand-ramp blue, distinct from all status tokens.
+// ---------------------------------------------------------------------------
+/** Brand-action CTA — rest state (brandRamp[80]) */
+export const HBC_BRAND_ACTION = '#337AAB' as const;
+/** Brand-action CTA — hover state (brandRamp[70]) */
+export const HBC_BRAND_ACTION_HOVER = '#1A6399' as const;
+/** Brand-action CTA — pressed state (brandRamp[60] = primary blue) */
+export const HBC_BRAND_ACTION_PRESSED = '#004B87' as const;
+
+// ---------------------------------------------------------------------------
 // Interactive state constants (V2.1.1 — WS1-T03)
 // ---------------------------------------------------------------------------
 /** Accent orange hover state — darkened variant of HBC_ACCENT_ORANGE */

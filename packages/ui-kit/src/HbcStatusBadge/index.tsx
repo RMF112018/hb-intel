@@ -122,8 +122,9 @@ const useStatusStyles = makeStyles({
     },
   },
   warning: {
-    // Fluent token set exposes DarkOrangeBackground3 (no OrangeBackground3 token in this build).
-    backgroundColor: tokens.colorPaletteDarkOrangeBackground3,
+    // UIF-007: Use HBC amber (#FFB020) for warnings, not Fluent dark-orange.
+    // Amber is visually distinct from error red and brand-action blue.
+    backgroundColor: '#FFB020',
     color: tokens.colorNeutralForeground1,
     fontWeight: '600',
     '@media (forced-colors: active)': {

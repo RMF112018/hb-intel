@@ -16,14 +16,22 @@ import {
   MenuList,
   MenuItem,
   mergeClasses,
+  tokens,
 } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { elevationRaised } from '../theme/elevation.js';
-import { HBC_SURFACE_LIGHT, HBC_ACCENT_ORANGE, HBC_STATUS_COLORS, HBC_HEADER_TEXT, HBC_DANGER_HOVER } from '../theme/tokens.js';
+import { HBC_ACCENT_ORANGE, HBC_STATUS_COLORS, HBC_HEADER_TEXT, HBC_DANGER_HOVER } from '../theme/tokens.js';
 import { HbcTooltip } from '../HbcTooltip/index.js';
 import { HBC_SPACE_SM } from '../theme/grid.js';
 import { MoreActions } from '../icons/index.js';
-import type { HbcCommandBarProps, CommandBarAction, DensityTier } from './types.js';
+import type { HbcCommandBarProps, CommandBarAction, CommandBarFilter, DensityTier } from './types.js';
+
+// UIF-012: Urgency-differentiated badge background colors for filter count badges.
+const URGENCY_BADGE_BG: Record<NonNullable<CommandBarFilter['urgency']>, string> = {
+  error: HBC_STATUS_COLORS.error,   // red — Overdue
+  warning: '#FFB020',               // amber — Blocked
+  neutral: 'var(--colorNeutralBackground4)', // neutral — Unread
+};
 
 const DENSITY_HEIGHT: Record<DensityTier, string> = {
   compact: '32px',
@@ -86,10 +94,10 @@ const useStyles = makeStyles({
   viewSelect: {
     fontSize: '0.8125rem',
     padding: '2px 8px',
-    border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    border: `1px solid ${tokens.colorNeutralStroke1}`,
     borderRadius: '3px',
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    color: HBC_SURFACE_LIGHT['text-primary'],
+    backgroundColor: tokens.colorNeutralBackground1,
+    color: tokens.colorNeutralForeground1,
     cursor: 'pointer',
   },
   densityControl: {
@@ -97,29 +105,29 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: '4px',
     fontSize: '0.75rem',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: tokens.colorNeutralForeground3,
   },
   densityLabel: {
     fontSize: '0.6875rem',
-    color: HBC_SURFACE_LIGHT['text-muted'],
-    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    color: tokens.colorNeutralForeground3,
+    backgroundColor: tokens.colorNeutralBackground3,
     padding: '2px 6px',
     borderRadius: '3px',
   },
   densitySelect: {
     fontSize: '0.75rem',
     padding: '1px 4px',
-    border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    border: `1px solid ${tokens.colorNeutralStroke1}`,
     borderRadius: '3px',
     backgroundColor: 'transparent',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: tokens.colorNeutralForeground3,
     cursor: 'pointer',
   },
   scopeBadge: {
     fontSize: '0.625rem',
     textTransform: 'uppercase',
     letterSpacing: '0.04em',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: tokens.colorNeutralForeground3,
     marginLeft: '4px',
   },
 });
@@ -247,11 +255,33 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
                 key={f.key}
                 name={f.key}
                 value={f.key}
+                aria-pressed={f.active}
                 onClick={f.onToggle}
                 size="small"
                 appearance={f.active ? 'primary' : 'subtle'}
               >
                 {f.label}
+                {f.count !== undefined && (
+                  <span
+                    style={{
+                      marginLeft: '6px',
+                      fontSize: '0.6875rem',
+                      fontWeight: 600,
+                      padding: '1px 6px',
+                      borderRadius: '8px',
+                      backgroundColor: URGENCY_BADGE_BG[f.urgency ?? 'neutral'],
+                      color:
+                        f.urgency === 'error' || f.urgency === 'warning'
+                          ? '#FFFFFF'
+                          : undefined,
+                      minWidth: '18px',
+                      textAlign: 'center' as const,
+                      lineHeight: '1.4',
+                    }}
+                  >
+                    {f.count}
+                  </span>
+                )}
               </ToolbarToggleButton>
             ))}
           </Toolbar>

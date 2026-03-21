@@ -9,7 +9,8 @@
  */
 import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import { HBC_ACCENT_ORANGE, HBC_SURFACE_LIGHT, HBC_SURFACE_FIELD } from '../theme/tokens.js';
+import { tokens } from '@fluentui/react-components';
+import { HBC_ACCENT_ORANGE } from '../theme/tokens.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
 import { HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
 import type { HbcTabsProps } from './types.js';
@@ -20,12 +21,9 @@ const useStyles = makeStyles({
     alignItems: 'stretch',
     height: '40px',
     gap: `${HBC_SPACE_LG}px`,
-    borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
     paddingLeft: `${HBC_SPACE_MD}px`,
     paddingRight: `${HBC_SPACE_MD}px`,
-  },
-  tablistField: {
-    borderBottom: `1px solid ${HBC_SURFACE_FIELD['border-default']}`,
   },
   tab: {
     display: 'flex',
@@ -37,27 +35,17 @@ const useStyles = makeStyles({
     padding: '0',
     fontSize: '0.875rem',
     fontFamily: 'inherit',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: tokens.colorNeutralForeground3,
     cursor: 'pointer',
     transitionProperty: 'color, border-color',
     transitionDuration: TRANSITION_FAST,
     whiteSpace: 'nowrap',
     ':hover': {
-      color: HBC_SURFACE_LIGHT['text-primary'],
-    },
-  },
-  tabField: {
-    color: HBC_SURFACE_FIELD['text-muted'],
-    ':hover': {
-      color: HBC_SURFACE_FIELD['text-primary'],
+      color: tokens.colorNeutralForeground1,
     },
   },
   tabActive: {
     fontWeight: '600',
-    color: HBC_ACCENT_ORANGE,
-    borderBottomColor: HBC_ACCENT_ORANGE,
-  },
-  tabActiveField: {
     color: HBC_ACCENT_ORANGE,
     borderBottomColor: HBC_ACCENT_ORANGE,
   },
@@ -75,7 +63,7 @@ export const HbcTabs: React.FC<HbcTabsProps> = ({
   activeTabId,
   onTabChange,
   panels,
-  isFieldMode = false,
+  isFieldMode: _isFieldMode = false,
   className,
 }) => {
   const styles = useStyles();
@@ -116,10 +104,7 @@ export const HbcTabs: React.FC<HbcTabsProps> = ({
     <div data-hbc-ui="tabs" className={className}>
       <div
         role="tablist"
-        className={mergeClasses(
-          styles.tablist,
-          isFieldMode && styles.tablistField,
-        )}
+        className={styles.tablist}
         onKeyDown={handleKeyDown}
       >
         {tabs.map((tab, idx) => {
@@ -137,9 +122,7 @@ export const HbcTabs: React.FC<HbcTabsProps> = ({
               tabIndex={isActive ? 0 : -1}
               className={mergeClasses(
                 styles.tab,
-                isFieldMode && styles.tabField,
                 isActive && styles.tabActive,
-                isActive && isFieldMode && styles.tabActiveField,
                 tab.disabled && styles.tabDisabled,
               )}
               onClick={() => !tab.disabled && onTabChange(tab.id)}

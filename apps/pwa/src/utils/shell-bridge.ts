@@ -78,7 +78,15 @@ export function buildSidebarGroupsFromRegistry(
     });
   }
 
-  return groups;
+  // Deduplicate groups by id — prevents React key warnings when the active
+  // workspace matches a group already registered above (e.g. 'my-work' cohort
+  // group and the 'my-work' workspace nav group are otherwise both pushed).
+  const seen = new Set<string>();
+  return groups.filter((g) => {
+    if (seen.has(g.id)) return false;
+    seen.add(g.id);
+    return true;
+  });
 }
 
 /**

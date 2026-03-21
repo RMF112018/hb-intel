@@ -1,0 +1,17 @@
+{
+  "name": "HB Intel",
+  "short_name": "HB Intel",
+  "description": "Construction intelligence platform",
+  "theme_color": "#004B87",
+  "background_color": "#FFFFFF",
+  "display": "standalone",
+  "start_url": "/",
+  "id": "/",
+  "lang": "en",
+  "scope": "/",
+  "icons": [
+    { "src": "/pwa-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/pwa-512x512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/pwa-512x512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
