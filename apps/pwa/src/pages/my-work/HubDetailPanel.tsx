@@ -7,8 +7,8 @@
  * Lazy-loaded: mounted on first item selection via React.lazy() in MyWorkPage.
  */
 import type { ReactNode } from 'react';
-import { makeStyles, shorthands } from '@griffel/react';
-import { heading3, HbcButton, HbcStatusBadge, HbcCard } from '@hbc/ui-kit';
+import { makeStyles, shorthands, mergeClasses } from '@griffel/react';
+import { heading3, HbcButton, HbcStatusBadge, HbcCard, useAnimationStyles, elevationLevel3 } from '@hbc/ui-kit';
 import type { IMyWorkItem } from '@hbc/my-work-feed';
 
 export interface HubDetailPanelProps {
@@ -57,6 +57,11 @@ const LANE_LABELS: Record<string, string> = {
 };
 
 const useStyles = makeStyles({
+  // UIF-002: elevationLevel3 for detail panel (focused work zone)
+  panelWrapper: {
+    boxShadow: elevationLevel3,
+    ...shorthands.borderRadius('8px'),
+  },
   root: {
     display: 'flex',
     flexDirection: 'column',
@@ -111,10 +116,13 @@ const useStyles = makeStyles({
 
 export function HubDetailPanel({ item, onClose }: HubDetailPanelProps): ReactNode {
   const styles = useStyles();
+  const animStyles = useAnimationStyles();
 
   const laneLabel = LANE_LABELS[item.lane] ?? item.lane;
 
+  // UIF-002: slideInRight (250ms) entrance + elevationLevel3 box-shadow
   return (
+    <div className={mergeClasses(styles.panelWrapper, animStyles.slideInRight)}>
     <HbcCard weight="primary" header={<span>Item Detail</span>}>
       <div className={styles.root}>
         {/* Header: title + close */}
@@ -197,5 +205,6 @@ export function HubDetailPanel({ item, onClose }: HubDetailPanelProps): ReactNod
         )}
       </div>
     </HbcCard>
+    </div>
   );
 }

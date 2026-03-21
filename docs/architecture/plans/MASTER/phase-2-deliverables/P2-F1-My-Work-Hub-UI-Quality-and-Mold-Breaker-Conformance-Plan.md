@@ -357,11 +357,11 @@ Note: `heading2` (20px/600) and `heading3` (16px/600) achieve the required ≥1.
 | Responsive collapse | < `BREAKPOINT_MOBILE` (768px): full single-column stack; right panel hidden behind tab/button | MB-04 — no horizontal scrolling at any supported viewport |
 
 **Acceptance criteria:**
-- At 1024px+ (`BREAKPOINT_TABLET`), right panel visible without scrolling per the T08 split view pattern
-- Insights/analytics tiles visible in right panel without scrolling in default state
-- Item click → `HubDetailPanel` via `slideInRight` (250ms) without full-page navigation
-- Single-column at < 1024px per `BREAKPOINT_TABLET`
-- Right panel at `elevationLevel3` when in item-detail state; `elevationLevel0` in analytics state
+- At 1024px+ (`BREAKPOINT_TABLET`), right panel visible without scrolling per the T08 split view pattern — **MET** (HubZoneLayout min-width: HBC_BREAKPOINT_SIDEBAR two-column grid)
+- Insights/analytics tiles visible in right panel without scrolling in default state — **MET** (sticky right panel with maxHeight, MyWorkCanvas renders tiles)
+- Item click → `HubDetailPanel` via `slideInRight` (250ms) without full-page navigation — **MET** (useAnimationStyles().slideInRight applied, lazy-loaded panel replaces secondary/tertiary zones)
+- Single-column at < 1024px per `BREAKPOINT_TABLET` — **MET** (grid falls back to 1fr below HBC_BREAKPOINT_SIDEBAR)
+- Right panel at `elevationLevel3` when in item-detail state; `elevationLevel0` in analytics state — **MET** (panelWrapper boxShadow: elevationLevel3; analytics zones have no shadow = elevationLevel0)
 
 ---
 
