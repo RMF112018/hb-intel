@@ -1,12 +1,12 @@
 # Phase 3 Deliverables — Project Hub and Project Context
 
-**Doc Classification:** Active Deliverable Index — Phase 3 deliverable production has begun. Workstreams A, B complete. P3-C1, P3-C2, P3-D1, P3-D2, P3-D3, P3-G1 locked.
+**Doc Classification:** Active Deliverable Index — Phase 3 deliverable production has begun. Workstreams A, B, D complete. P3-C1, P3-C2, P3-D1, P3-D2, P3-D3, P3-D4, P3-G1 locked.
 
 ---
 
 ## Planning Status Summary
 
-**Phase 3 planning is in progress.** 10 of 18 deliverables are locked (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-D1, P3-D2, P3-D3, P3-G1). Workstreams A and B are complete. Workstream C has 2 of 3, Workstream D has 3 of 4 deliverables locked. The remaining 8 deliverables across Workstreams C–H are planned but not yet authored. Deliverable production follows the execution priority sequencing defined in [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
+**Phase 3 planning is in progress.** 11 of 18 deliverables are locked (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-D1, P3-D2, P3-D3, P3-D4, P3-G1). Workstreams A, B, and D are complete. Workstream C has 2 of 3 deliverables locked. The remaining 7 deliverables across Workstreams C, E–H are planned but not yet authored. Deliverable production follows the execution priority sequencing defined in [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
 
 ---
 
@@ -56,7 +56,7 @@
 | P3-D1 | [Project Activity Contract](P3-D1-Project-Activity-Contract.md) | Contract |
 | P3-D2 | [Project Health Contract](P3-D2-Project-Health-Contract.md) | Contract |
 | P3-D3 | [Project Work Queue Contract](P3-D3-Project-Work-Queue-Contract.md) | Contract |
-| P3-D4 | Related-Items Registry / Presentation Contract | Not Started |
+| P3-D4 | [Related-Items Registry / Presentation Contract](P3-D4-Related-Items-Registry-Presentation-Contract.md) | Contract |
 
 ### Workstream E — Always-on core module delivery and PH7 reconciliation
 
@@ -101,6 +101,6 @@
 
 ---
 
-**Last Updated:** 2026-03-21 — P3-D3 locked; 10 of 18 Phase 3 deliverables complete.
+**Last Updated:** 2026-03-21 — P3-D4 locked; Workstream D complete; 11 of 18 Phase 3 deliverables complete.
 
 **Governing Plan:** [Phase 3 Plan §14–§15](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
