@@ -933,6 +933,34 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.7 UIF-007-addl: Replace Fluent ToggleButton Filter Chips with HbcButton (High)
+
+**Severity:** High
+**Category:** Design System / Component Compliance
+**Governing authority:** MB-08 (No Version-Boundary Seams), T12 (no feature-local duplicates of kit primitives) — `UI-Kit-Mold-Breaker-Principles.md`, `UI-Kit-Usage-and-Composition-Guide.md`.
+
+**Observed state:** Filter quick-filters (Overdue, Blocked, Unread) in `HbcCommandBar` used Fluent UI `ToolbarToggleButton` directly — not a governed HBC component. This created inconsistent focus rings, hover tokens, and touch auto-scale behavior. Count badges were concatenated inline with labels, creating screen-reader issues.
+
+**Required changes:**
+1. Add `pressed?: boolean` prop to `HbcButton` for toggle state support (`aria-pressed`)
+2. Replace `ToolbarToggleButton` in HbcCommandBar filter section with `HbcButton variant="ghost" size="sm" pressed={f.active}`
+3. Replace `<Toolbar>` wrapper with `<div role="group" aria-label="Filters">`
+4. Add `aria-label` to count badge spans for screen-reader separation
+
+**Acceptance criteria:**
+- Filter bar uses no `fui-ToggleButton` classes — uses `HbcButton` with `data-hbc-ui="button"` — **MET**
+- `aria-pressed` present on each filter button — **MET** (HbcButton `pressed` prop → `aria-pressed`)
+- Count badge has `aria-label` for screen-reader separation — **MET** (`aria-label="{count} items"`)
+- Consistent HBC focus ring, hover, and touch auto-scale — **MET** (HbcButton provides these)
+
+**Files modified:**
+- `packages/ui-kit/src/HbcButton/types.ts` — added `pressed?: boolean` prop
+- `packages/ui-kit/src/HbcButton/index.tsx` — wired `aria-pressed` to button element
+- `packages/ui-kit/src/HbcCommandBar/index.tsx` — replaced ToolbarToggleButton with HbcButton
+- `packages/ui-kit/package.json` — version 2.2.27 → 2.2.28
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -969,5 +997,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-006-addl: Title tooltip + column width. UIF-005-addl: Partial-sync → HbcBanner. UIF-004-addl: Scrollbar polish. UIF-003-addl: Status → HbcStatusBadge. UIF-002-addl: Page title → display. UIF-001-addl: KPI theme-responsive. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
+**Last Updated:** 2026-03-21 — UIF-007-addl: Filter buttons → HbcButton with pressed/aria-pressed. UIF-006-addl: Title tooltip. UIF-005-addl: Partial-sync → HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: Status → HbcStatusBadge. UIF-002-addl: Page title → display. UIF-001-addl: KPI theme-responsive. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)

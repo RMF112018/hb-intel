@@ -5,10 +5,8 @@
  */
 import * as React from 'react';
 import {
-  Toolbar,
   ToolbarButton,
   ToolbarDivider,
-  ToolbarToggleButton,
   ToggleButton,
   SearchBox,
   Menu,
@@ -23,6 +21,7 @@ import { makeStyles } from '@griffel/react';
 import { elevationRaised } from '../theme/elevation.js';
 import { HBC_ACCENT_ORANGE, HBC_STATUS_COLORS, HBC_HEADER_TEXT, HBC_DANGER_HOVER } from '../theme/tokens.js';
 import { HbcTooltip } from '../HbcTooltip/index.js';
+import { HbcButton } from '../HbcButton/index.js';
 import { HBC_SPACE_SM } from '../theme/grid.js';
 import { MoreActions } from '../icons/index.js';
 import type { HbcCommandBarProps, CommandBarAction, CommandBarFilter, CommandBarGrouping, DensityTier } from './types.js';
@@ -269,29 +268,26 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
         />
       )}
 
-      {/* Filters */}
+      {/* UIF-007-addl: Filters use HbcButton (governed) instead of Fluent ToolbarToggleButton */}
       {filters && filters.length > 0 && (
         <>
           <ToolbarDivider />
-          <Toolbar className={styles.filters} size="small">
+          <div role="group" aria-label="Filters" className={styles.filters}>
             {filters.map((f) => (
-              <ToolbarToggleButton
+              <HbcButton
                 key={f.key}
-                name={f.key}
-                value={f.key}
-                aria-pressed={f.active}
+                variant="ghost"
+                size="sm"
+                pressed={f.active}
                 onClick={f.onToggle}
-                size="small"
-                appearance="subtle"
-                // UIF-005: Active fill uses adaptive urgency token, not light-theme-only HBC_SURFACE_LIGHT.
                 style={f.active ? { backgroundColor: URGENCY_ACTIVE_BG[f.urgency ?? 'neutral'] } : undefined}
               >
-                {/* UIF-005: Urgency label color — Overdue=red, Blocked=amber, Unread=default */}
                 <span style={{ color: URGENCY_LABEL_COLOR[f.urgency ?? 'neutral'] }}>
                   {f.label}
                 </span>
                 {f.count !== undefined && (
                   <span
+                    aria-label={`${f.count} items`}
                     style={{
                       marginLeft: '6px',
                       fontSize: '0.6875rem',
@@ -311,9 +307,9 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
                     {f.count}
                   </span>
                 )}
-              </ToolbarToggleButton>
+              </HbcButton>
             ))}
-          </Toolbar>
+          </div>
         </>
       )}
 

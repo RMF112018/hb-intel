@@ -119,9 +119,11 @@ export const HbcButton: React.FC<HbcButtonProps> = ({
   loading = false,
   disabled = false,
   fullWidth = false,
+  pressed,
   onClick,
   children,
   className,
+  style: styleProp,
   type = 'button',
 }) => {
   const styles = useStyles();
@@ -137,6 +139,7 @@ export const HbcButton: React.FC<HbcButtonProps> = ({
       data-hbc-variant={variant}
       type={type}
       disabled={disabled || loading}
+      aria-pressed={pressed}
       onClick={onClick}
       className={mergeClasses(
         styles.base,
@@ -150,6 +153,7 @@ export const HbcButton: React.FC<HbcButtonProps> = ({
         fontSize: sizeStyle.fontSize,
         padding: sizeStyle.padding,
         minHeight,
+        ...styleProp,
       }}
     >
       {loading ? (

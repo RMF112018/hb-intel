@@ -21,12 +21,16 @@ export interface HbcButtonProps {
   disabled?: boolean;
   /** Full-width button */
   fullWidth?: boolean;
+  /** Toggle/pressed state for filter or toggle buttons (sets aria-pressed) */
+  pressed?: boolean;
   /** Click handler */
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   /** Button content */
   children: React.ReactNode;
   /** Additional CSS class */
   className?: string;
+  /** Inline style overrides (use sparingly — prefer className) */
+  style?: React.CSSProperties;
   /** HTML button type */
   type?: 'button' | 'submit' | 'reset';
 }
