@@ -1340,6 +1340,14 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.30 INS-014: Recent Context Empty State Refinement (Medium)
+
+**Fix:** Increased Browse Projects button from `size="sm"` (28px) to `size="md"` (36px) meeting the governed minimum. Applied `heading4` (14px/600) to the card header matching QuickActionsCard treatment. Added darker card background (`#0D1520`) via Griffel className for visual depth against adjacent cards.
+
+**Files:** `apps/pwa/src/pages/my-work/cards/RecentContextCard.tsx`. Version: pwa 0.12.46→0.12.47.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

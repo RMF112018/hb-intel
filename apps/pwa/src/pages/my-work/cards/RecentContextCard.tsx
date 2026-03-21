@@ -6,18 +6,33 @@
  * Empty/pending state uses HbcEmptyState per UI governance (UIF-008).
  * Real recent-context data is a Phase 3+ concern; this card renders
  * the governed inline empty state until that data source is available.
- * HbcEmptyState (not HbcSmartEmptyState) is appropriate here — this is
- * a simple inline placeholder, not a page-level orchestrated empty state.
  *
- * UIF-008: Added icon + primary action to empty state per acceptance criteria.
+ * INS-014: heading4 header, size="md" CTA (36px minimum), darker
+ * card background for visual depth against adjacent Quick Actions.
  */
 import type { ReactNode } from 'react';
-import { HbcCard, HbcEmptyState, HbcButton } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import { HbcCard, HbcEmptyState, HbcButton, heading4 } from '@hbc/ui-kit';
 import { BlueprintRoll } from '@hbc/ui-kit/icons';
 
+const useStyles = makeStyles({
+  // INS-014: heading4 (14px/600) matches QuickActionsCard header treatment.
+  heading: {
+    ...heading4,
+    color: 'var(--colorNeutralForeground1)',
+    margin: '0',
+  },
+  // INS-014: Slightly darker background for depth against adjacent card.
+  card: {
+    backgroundColor: '#0D1520',
+  },
+});
+
 export function RecentContextCard(): ReactNode {
+  const styles = useStyles();
+
   return (
-    <HbcCard weight="supporting" header={<span>Recent Context</span>}>
+    <HbcCard weight="supporting" header={<span className={styles.heading}>Recent Context</span>} className={styles.card}>
       <HbcEmptyState
         icon={<BlueprintRoll size="lg" color="var(--colorNeutralForeground4)" />}
         title="No recent context"
@@ -25,7 +40,7 @@ export function RecentContextCard(): ReactNode {
         primaryAction={
           <HbcButton
             variant="primary"
-            size="sm"
+            size="md"
             onClick={() => { window.location.href = '/projects'; }}
           >
             Browse Projects
