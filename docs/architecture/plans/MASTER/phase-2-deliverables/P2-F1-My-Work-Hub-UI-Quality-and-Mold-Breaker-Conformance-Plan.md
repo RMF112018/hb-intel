@@ -814,6 +814,27 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 - `packages/ui-kit/package.json` — version 2.2.25 → 2.2.26
 - `apps/pwa/package.json` — version 0.12.30 → 0.12.31
 
+### 10A.2 UIF-002-addl: Page Title Typography — Three-Second Read Standard (Critical)
+
+**Severity:** Critical
+**Category:** Design System / Visual Hierarchy
+**Governing authority:** MB-02 (Stronger Hierarchy), T04 Three-Second Read Standard — `UI-Kit-Visual-Hierarchy-and-Depth-Standards.md`. `HBC_CONTENT_LEVELS.pageTitle` from `hierarchy.ts`.
+
+**Observed state:** Page title "My Work" renders at `heading2` (20px/600) via `WorkspacePageShell`. The Three-Second Read Standard (T04) requires: "Page title identifiable in ≤1 second; must use pageTitle content level; must be the largest text on the page." At 20px the title competes with section headings (14–16px/600) rather than dominating them.
+
+**Root cause:** `WorkspacePageShell` title style uses `...heading2` (1.25rem/600) instead of `...display` (2rem/700) as specified by `HBC_CONTENT_LEVELS.pageTitle`.
+
+**Required change:** Update `WorkspacePageShell` title style from `...heading2` to `...display`.
+
+**Acceptance criteria:**
+- H1 computed fontSize ≥ 28px (actual: 32px / 2rem), fontWeight 700 — **MET** (`...display` = 2rem/700)
+- Visibly larger than all section headings (heading3 = 16px/600) — **MET** (32px vs 16px = 2× ratio)
+- Three-Second Read Standard (T04) passes — **MET** (page title is now largest text on the page)
+
+**Files modified:**
+- `packages/ui-kit/src/WorkspacePageShell/index.tsx` — title style `...heading2` → `...display`
+- `packages/ui-kit/package.json` — version 2.2.26 → 2.2.27
+
 ---
 
 ## 11. Acceptance Gate Contribution
@@ -852,5 +873,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-001-addl: HbcKpiCard text colors made theme-responsive (hardcoded `HBC_SURFACE_LIGHT` → Fluent `tokens.*`); loading states replaced with `HbcSpinner`. G0 (@hbc/project-canvas integration) complete. 6 tiles registered, HubSecondaryZone + HubTertiaryZone refactored to canvas tile system. All design decisions grounded in `docs/reference/ui-kit/UI-Kit-*` governing documents.
+**Last Updated:** 2026-03-21 — UIF-002-addl: WorkspacePageShell page title upgraded from `heading2` to `display` (2rem/700) for T04 Three-Second Read Standard compliance. UIF-001-addl: HbcKpiCard text colors made theme-responsive (hardcoded `HBC_SURFACE_LIGHT` → Fluent `tokens.*`); loading states replaced with `HbcSpinner`. G0 (@hbc/project-canvas integration) complete. 6 tiles registered, HubSecondaryZone + HubTertiaryZone refactored to canvas tile system. All design decisions grounded in `docs/reference/ui-kit/UI-Kit-*` governing documents.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)

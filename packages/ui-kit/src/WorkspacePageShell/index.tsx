@@ -32,7 +32,7 @@ import {
 import { hbcSpacing } from '../theme/grid.js';
 import { HBC_RADIUS_MD, HBC_RADIUS_FULL } from '../theme/radii.js';
 import { elevationRaised } from '../theme/elevation.js';
-import { heading2, heading3, body } from '../theme/typography.js';
+import { display, heading3, body } from '../theme/typography.js';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { setFieldModeActions } from '../HbcCommandBar/fieldModeActionsStore.js';
 import type { WorkspacePageShellProps, ListConfig } from './types.js';
@@ -75,8 +75,9 @@ const useStyles = makeStyles({
     gap: '12px',
   },
   title: {
-    ...heading2,
+    ...display,
     // D-PH4C-26: Content title must resolve from Fluent runtime tokens for theme responsiveness.
+    // UIF-002-addl: pageTitle content level = display (2rem/700) per T04 Three-Second Read Standard.
     color: tokens.colorNeutralForeground1,
     margin: '0',
   },
