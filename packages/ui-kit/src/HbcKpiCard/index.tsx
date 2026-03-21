@@ -42,6 +42,8 @@ const useStyles = makeStyles({
     // horizontal overflow in secondary zone tiles. Grid/flex parents now control
     // card width via track sizing. overflow:hidden prevents label text from forcing
     // the card wider than its allocated track.
+    // INS-005: Uniform minimum height — all cards same size for even grid rhythm.
+    minHeight: '100px',
     minWidth: '0',
     overflow: 'hidden',
     flex: '1 1 0',

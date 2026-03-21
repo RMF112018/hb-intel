@@ -1242,6 +1242,14 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.19 INS-005: Normalize Card Heights to Uniform Minimum (Medium)
+
+**Observed state:** Top-row cards 102px, bottom-row 85px — uneven grid.
+**Fix:** Added `minHeight: '100px'` to HbcKpiCard. All cards now have uniform minimum height.
+**Files:** `packages/ui-kit/src/HbcKpiCard/index.tsx` — added minHeight. Version 2.2.33→2.2.34.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
