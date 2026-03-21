@@ -91,7 +91,12 @@ export function buildSidebarGroupsFromRegistry(
   // Active workspace sub-navigation (if workspace has sub-items)
   const wsId = workspaceId ?? 'project-hub';
   const navItems = getNavItemsForWorkspace(wsId);
-  if (navItems.length > 0) {
+  // UIF-012-addl: Skip workspace sub-nav when it's a single item already in the
+  // top-level Workspaces group — prevents duplicate "My Work" entries in sidebar.
+  const isDuplicateSingleItem = isMyWorkCohortEnabled() &&
+    navItems.length === 1 &&
+    TOP_LEVEL_WORKSPACES.some((ws) => ws.workspace === wsId && ws.path === navItems[0].path);
+  if (navItems.length > 0 && !isDuplicateSingleItem) {
     const descriptor = WORKSPACE_DESCRIPTORS[wsId];
     groups.push({
       id: wsId,

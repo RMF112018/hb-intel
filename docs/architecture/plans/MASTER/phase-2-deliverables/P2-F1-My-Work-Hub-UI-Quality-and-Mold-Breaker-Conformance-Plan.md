@@ -1120,6 +1120,29 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.14 UIF-012-addl: Sidebar Nav Duplicate "My Work" Entry (Medium)
+
+**Severity:** Medium
+**Category:** Navigation / IA
+**Governing authority:** MB-01 (Lower Cognitive Load) — `UI-Kit-Mold-Breaker-Principles.md`.
+
+**Observed state:** Two "My Work" entries appeared in the sidebar: one in the "Workspaces" quick-nav group and another in the "my-work" workspace sub-nav group. Both pointed to `/my-work`. The group-level deduplication didn't catch this because the groups had different IDs.
+
+**Root cause:** `buildSidebarGroupsFromRegistry()` in `shell-bridge.ts` always added the workspace sub-nav group even when it contained a single item already represented in the Workspaces quick-nav group.
+
+**Required change:** Skip the workspace sub-nav group when it's a single item matching a TOP_LEVEL_WORKSPACES entry — prevents duplicates while preserving multi-item workspace sub-navs.
+
+**Acceptance criteria:**
+- Only one "My Work" nav item present — **MET** (single-item workspace sub-nav skipped when covered by Workspaces group)
+- Multi-item workspaces (project-hub, estimating) unaffected — **MET** (condition checks `navItems.length === 1`)
+- All icons have tooltip labels on hover — **MET** (already present via Fluent `Tooltip`)
+
+**Files modified:**
+- `apps/pwa/src/utils/shell-bridge.ts` — added `isDuplicateSingleItem` guard
+- `apps/pwa/package.json` — version 0.12.35 → 0.12.36
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -1156,5 +1179,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-010-addl: Source chip border + tooltips. UIF-018-addl: Sticky header. UIF-020-addl: Priority grouping. UIF-019-addl: Single page scroll. UIF-009-addl: CTA md. UIF-008-addl: STATUS. UIF-007-addl: HbcButton filters. UIF-006-addl: Tooltip. UIF-005-addl: HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: HbcStatusBadge. UIF-002-addl: display title. UIF-001-addl: KPI theme. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
+**Last Updated:** 2026-03-21 — UIF-012-addl: Sidebar nav dedup. UIF-010-addl: Source chip tooltips. UIF-018-addl: Sticky header. UIF-020-addl: Priority grouping. UIF-019-addl: Single page scroll. UIF-009/008/007/006/005/004/003/002/001-addl: Various. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)
