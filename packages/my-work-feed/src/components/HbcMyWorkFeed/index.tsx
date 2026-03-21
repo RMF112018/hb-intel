@@ -16,7 +16,7 @@
  * manually collapsed rather than what is open, so initial render shows all items.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import type { ColumnDef } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
 import {
@@ -100,6 +100,36 @@ const LANE_COLORS: Record<string, string> = {
 };
 
 /**
+ * UIF-020-addl: Priority-group human-readable labels.
+ */
+const PRIORITY_LABELS: Record<string, string> = {
+  now: 'Now',
+  soon: 'Soon',
+  watch: 'Watching',
+  deferred: 'Deferred',
+};
+
+/**
+ * UIF-020-addl: Priority-group display order — Now first (highest urgency).
+ */
+const PRIORITY_ORDER: string[] = ['now', 'soon', 'watch', 'deferred'];
+
+/**
+ * UIF-020-addl: Priority-group left-border accent colors.
+ */
+const PRIORITY_COLORS: Record<string, string> = {
+  now: HBC_STATUS_RAMP_RED[50],
+  soon: HBC_STATUS_RAMP_AMBER[50],
+  watch: HBC_STATUS_RAMP_GRAY[50],
+  deferred: HBC_STATUS_RAMP_GRAY[50],
+};
+
+/**
+ * UIF-020-addl: Lane-group display order for consistent rendering.
+ */
+const LANE_ORDER: string[] = ['waiting-blocked', 'do-now', 'watch', 'delegated-team', 'deferred'];
+
+/**
  * UIF-008-addl: Human-readable display labels for MyWorkState values.
  * Ensures the STATUS column shows a meaningful badge for every row.
  */
@@ -128,6 +158,7 @@ const STATE_BADGE_VARIANT: Record<MyWorkState, StatusVariant> = {
 
 function formatGroupLabel(key: string): string {
   return (
+    PRIORITY_LABELS[key] ??
     LANE_LABELS[key] ??
     key.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
   );
@@ -449,10 +480,14 @@ export function HbcMyWorkFeed({
   const { executeAction: _executeAction } = useMyWorkActions();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [groupingKey, setGroupingKey] = useState<GroupingKey>('lane');
+  // UIF-020-addl: Default to priority grouping with "Now" expanded, others collapsed.
+  const [groupingKey, setGroupingKey] = useState<GroupingKey>('priority');
   const [sortKey, setSortKey] = useState<SortKey>('rank');
-  // Track collapsed groups — groups start expanded (absent from this set = expanded).
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  // Track collapsed groups — groups absent from this set are expanded.
+  // Priority default: all groups except 'now' start collapsed.
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
+    () => new Set(PRIORITY_ORDER.filter((k) => k !== 'now')),
+  );
   const [activeFilters, setActiveFilters] = useState<IActiveFilters>({
     overdue: false,
     blocked: false,
@@ -470,6 +505,16 @@ export function HbcMyWorkFeed({
       return next;
     });
   }, []);
+
+  // UIF-020-addl: Reset collapse state when grouping mode changes.
+  // Priority mode: "Now" expanded, others collapsed. Other modes: all expanded.
+  useEffect(() => {
+    if (groupingKey === 'priority') {
+      setCollapsedGroups(new Set(PRIORITY_ORDER.filter((k) => k !== 'now')));
+    } else {
+      setCollapsedGroups(new Set());
+    }
+  }, [groupingKey]);
 
   // UIF-002: Stable column definitions — rebuilt only when onItemSelect identity changes.
   const workItemColumns = useMemo(
@@ -521,7 +566,22 @@ export function HbcMyWorkFeed({
 
   const groups = useMemo(() => {
     if (tier === 'essential') return [];
-    return groupItems(processedItems, GROUPINGS[groupingKey]);
+    const raw = groupItems(processedItems, GROUPINGS[groupingKey]);
+    // UIF-020-addl: Sort groups by defined order for priority and lane modes.
+    if (groupingKey === 'priority') {
+      raw.sort((a, b) => {
+        const ai = PRIORITY_ORDER.indexOf(a.groupKey);
+        const bi = PRIORITY_ORDER.indexOf(b.groupKey);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+    } else if (groupingKey === 'lane') {
+      raw.sort((a, b) => {
+        const ai = LANE_ORDER.indexOf(a.groupKey);
+        const bi = LANE_ORDER.indexOf(b.groupKey);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+    }
+    return raw;
   }, [processedItems, groupingKey, tier]);
 
   const hasItems = processedItems.length > 0;
@@ -641,7 +701,7 @@ export function HbcMyWorkFeed({
             groups.map((group) => {
               const isExpanded = !collapsedGroups.has(group.groupKey);
               const label = formatGroupLabel(group.groupKey);
-              const laneColor = LANE_COLORS[group.groupKey] ?? 'transparent';
+              const laneColor = PRIORITY_COLORS[group.groupKey] ?? LANE_COLORS[group.groupKey] ?? 'transparent';
               // Stable IDs for ARIA labelling.
               const headerId = `my-work-group-hdr-${group.groupKey}`;
               const bodyId = `my-work-group-body-${group.groupKey}`;

@@ -1036,6 +1036,37 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.11 UIF-020-addl: Priority-Based Grouping with Smart Collapse Defaults (High)
+
+**Severity:** High
+**Category:** Construction Workflow / State Design / Layout
+**Governing authority:** MB-01 (Lower Cognitive Load), MB-02 (Stronger Hierarchy) — `UI-Kit-Mold-Breaker-Principles.md`.
+
+**Observed state:** All section groups expanded equally on load with lane-based grouping. Users had to scan all sections to find urgent items. No priority-ordered grouping model — the three lane-based groups gave equal visual weight to high-urgency and low-urgency items.
+
+**Required changes:**
+1. Changed default grouping from `'lane'` to `'priority'` — groups by `MyWorkPriority` (now/soon/watch/deferred)
+2. On load, "Now" group expanded and all others collapsed — smart defaults for immediate triage
+3. Added `PRIORITY_LABELS`, `PRIORITY_ORDER`, `PRIORITY_COLORS`, `LANE_ORDER` constants for ordered, labeled, color-coded groups
+4. Groups sorted by defined order (Now → Soon → Watching → Deferred for priority; defined order for lane)
+5. Switching grouping mode resets collapse state (priority → only Now expanded; other modes → all expanded)
+6. Updated `formatGroupLabel` to include priority labels
+7. Updated group header accent color to check `PRIORITY_COLORS` before `LANE_COLORS`
+
+**Acceptance criteria:**
+- Default grouping is "priority" — **MET** (`useState<GroupingKey>('priority')`)
+- On load, "Now" expanded, others collapsed — **MET** (initial state: `PRIORITY_ORDER.filter(k => k !== 'now')`)
+- Groups ordered Now → Soon → Watching → Deferred — **MET** (sorted by `PRIORITY_ORDER`)
+- Collapsed headers show item counts — **MET** (count badge already present on headers)
+- Switching grouping mode resets collapse — **MET** (`useEffect` on `groupingKey`)
+- "Now" group uses red accent — **MET** (`PRIORITY_COLORS.now = HBC_STATUS_RAMP_RED[50]`)
+
+**Files modified:**
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — priority grouping, smart collapse, ordered groups
+- `packages/my-work-feed/package.json` — version 0.0.19 → 0.0.20
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -1072,5 +1103,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-019-addl: Single page scroll (autoHeight tables, no right panel overflow). UIF-009-addl: CTA sm→md. UIF-008-addl: STATUS from state. UIF-007-addl: Filters → HbcButton. UIF-006-addl: Title tooltip. UIF-005-addl: HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: HbcStatusBadge. UIF-002-addl: display title. UIF-001-addl: KPI theme. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
+**Last Updated:** 2026-03-21 — UIF-020-addl: Priority grouping + smart collapse. UIF-019-addl: Single page scroll. UIF-009-addl: CTA md. UIF-008-addl: STATUS. UIF-007-addl: HbcButton filters. UIF-006-addl: Tooltip. UIF-005-addl: HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: HbcStatusBadge. UIF-002-addl: display title. UIF-001-addl: KPI theme. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)
