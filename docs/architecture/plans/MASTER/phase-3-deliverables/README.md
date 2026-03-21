@@ -1,12 +1,12 @@
 # Phase 3 Deliverables — Project Hub and Project Context
 
-**Doc Classification:** Active Deliverable Index — Phase 3 deliverable production has begun. Workstreams A, B, C, D complete. P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-G1 locked.
+**Doc Classification:** Active Deliverable Index — Phase 3 deliverable production has begun. Workstreams A, B, C, D, E complete. P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-G1 locked.
 
 ---
 
 ## Planning Status Summary
 
-**Phase 3 planning is in progress.** 14 of 18 deliverables are locked (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-G1). Workstreams A, B, C, and D are complete. Workstream E has 2 of 3 deliverables locked. The remaining 4 deliverables across Workstreams E–H are planned but not yet authored. Deliverable production follows the execution priority sequencing defined in [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
+**Phase 3 planning is in progress.** 15 of 18 deliverables are locked (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-G1). Workstreams A, B, C, D, and E are complete. The remaining 3 deliverables across Workstreams F–H are planned but not yet authored. Deliverable production follows the execution priority sequencing defined in [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
 
 ---
 
@@ -64,7 +64,7 @@
 |---|---|---|
 | P3-E1 | [Phase 3 Module Classification Matrix](P3-E1-Phase-3-Module-Classification-Matrix.md) | Specification |
 | P3-E2 | [Module Source-of-Truth / Action-Boundary Matrix](P3-E2-Module-Source-of-Truth-Action-Boundary-Matrix.md) | Specification |
-| P3-E3 | Spreadsheet/Document Replacement Reference Note Set | Not Started |
+| P3-E3 | [Spreadsheet/Document Replacement Reference Note Set](P3-E3-Spreadsheet-Document-Replacement-Reference-Note-Set.md) | Note |
 
 ### Workstream F — Governed reporting system
 
@@ -101,6 +101,6 @@
 
 ---
 
-**Last Updated:** 2026-03-21 — P3-E2 locked; 14 of 18 Phase 3 deliverables complete.
+**Last Updated:** 2026-03-21 — P3-E3 locked; Workstream E complete; 15 of 18 Phase 3 deliverables complete.
 
 **Governing Plan:** [Phase 3 Plan §14–§15](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
