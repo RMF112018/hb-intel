@@ -910,6 +910,29 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.6 UIF-006-addl: Work Item Title Tooltip and Column Width (High)
+
+**Severity:** High
+**Category:** Table / Data Surface
+**Governing authority:** MB-01 (Lower Cognitive Load), MB-05 (Adaptive Density) — `UI-Kit-Mold-Breaker-Principles.md`.
+
+**Observed state:** Work item titles truncated at 280px column width. While `textOverflow: ellipsis` is present on the inner span, there is no tooltip to reveal the full title on hover. Construction work items have long names ("Harbor View Medical Center — Bid Readiness Review Q1") and PMs must distinguish similarly-named items.
+
+**Required changes:**
+1. Wrap title text in `HbcTooltip content={item.title}` for full-title hover reveal
+2. Widen WORK ITEM column from 280 → 340px, narrow STATUS from 120 → 80px (net zero)
+
+**Acceptance criteria:**
+- Hovering work item title shows full title via HbcTooltip — **MET** (`HbcTooltip content={item.title}` wraps inner span)
+- WORK ITEM column widened to 340px — **MET** (`size: 340`)
+- Ellipsis visible on truncated titles — **MET** (existing `textOverflow: 'ellipsis'`)
+
+**Files modified:**
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — added HbcTooltip, adjusted column sizes
+- `packages/my-work-feed/package.json` — version 0.0.15 → 0.0.16
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -946,5 +969,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-005-addl: Partial-sync → HbcBanner warning. UIF-004-addl: Scrollbar polish. UIF-003-addl: Status spans → HbcStatusBadge. UIF-002-addl: Page title → display. UIF-001-addl: KPI theme-responsive text. All design decisions grounded in `docs/reference/ui-kit/UI-Kit-*` governing documents.
+**Last Updated:** 2026-03-21 — UIF-006-addl: Title tooltip + column width. UIF-005-addl: Partial-sync → HbcBanner. UIF-004-addl: Scrollbar polish. UIF-003-addl: Status → HbcStatusBadge. UIF-002-addl: Page title → display. UIF-001-addl: KPI theme-responsive. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)

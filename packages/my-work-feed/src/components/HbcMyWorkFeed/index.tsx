@@ -26,6 +26,7 @@ import {
   HbcDataTable,
   HbcButton,
   HbcStatusBadge,
+  HbcTooltip,
   HBC_STATUS_RAMP_RED,
   HBC_STATUS_RAMP_AMBER,
   HBC_STATUS_RAMP_GRAY,
@@ -188,7 +189,7 @@ function buildWorkItemColumns(
       id: 'title',
       accessorKey: 'title',
       header: 'Work Item',
-      size: 280,
+      size: 340,
       cell: ({ row }) => {
         const item = row.original;
         const isWatchMuted = item.lane === 'watch' && !item.isUnread && !item.isBlocked;
@@ -201,21 +202,24 @@ function buildWorkItemColumns(
           ? '3px solid var(--colorBrandForeground1)'
           : undefined;
 
+        // UIF-006-addl: HbcTooltip shows full title on hover for truncated items.
         const inner = (
-          <span
-            style={{
-              fontWeight: item.isUnread ? 600 : 400,
-              fontSize: bodySmall.fontSize,
-              lineHeight: bodySmall.lineHeight,
-              color: item.context.href ? titleColor : 'var(--colorNeutralForeground1)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              display: 'block',
-            }}
-          >
-            {item.title}
-          </span>
+          <HbcTooltip content={item.title}>
+            <span
+              style={{
+                fontWeight: item.isUnread ? 600 : 400,
+                fontSize: bodySmall.fontSize,
+                lineHeight: bodySmall.lineHeight,
+                color: item.context.href ? titleColor : 'var(--colorNeutralForeground1)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                display: 'block',
+              }}
+            >
+              {item.title}
+            </span>
+          </HbcTooltip>
         );
 
         return (
@@ -258,7 +262,7 @@ function buildWorkItemColumns(
     {
       id: 'status',
       header: 'Status',
-      size: 120,
+      size: 80,
       cell: ({ row }) => {
         const item = row.original;
         const tags: React.ReactNode[] = [];
