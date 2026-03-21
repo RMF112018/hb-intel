@@ -99,6 +99,13 @@ const useStyles = makeStyles({
   trendFlat: {
     color: tokens.colorNeutralForeground3,
   },
+  // INS-006: Subtitle below the value — small muted descriptor text.
+  subtitle: {
+    fontSize: '0.625rem',
+    fontWeight: '400',
+    lineHeight: '1.4',
+    color: tokens.colorNeutralForeground3,
+  },
 });
 
 const TREND_ARROWS: Record<string, string> = {
@@ -113,6 +120,7 @@ export const HbcKpiCard: React.FC<HbcKpiCardProps> = ({
   trend,
   color,
   isActive = false,
+  subtitle,
   onClick,
   className,
 }) => {
@@ -152,6 +160,7 @@ export const HbcKpiCard: React.FC<HbcKpiCardProps> = ({
     >
       <span className={styles.label}>{label}</span>
       <span className={styles.value}>{value}</span>
+      {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
       {trend && (
         <span className={mergeClasses(styles.trend, trendClass)}>
           {TREND_ARROWS[trend.direction]} {trend.label}

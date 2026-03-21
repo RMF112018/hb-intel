@@ -32,6 +32,11 @@ const useStyles = makeStyles({
     gap: `${HBC_SPACE_MD}px`,
     gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))',
   },
+  // INS-006: Summary card gets distinct background + full width + no maxWidth cap.
+  summaryCard: {
+    backgroundColor: '#1E3A5F',
+    maxWidth: 'none',
+  },
 });
 
 export interface PersonalAnalyticsCardProps {
@@ -54,12 +59,24 @@ export function PersonalAnalyticsCard({
 
   return (
     <div className={styles.kpiGrid}>
-      <HbcKpiCard
-        label="Total Items"
-        value={counts?.totalCount ?? 0}
-        isActive={activeFilter === null || activeFilter === undefined}
-        onClick={() => onFilterChange?.('total')}
-      />
+      {/* INS-006: Total Items as full-width summary card with distinct visual weight.
+        * Wrapper div provides gridColumn span + background override via CSS variable. */}
+      <div
+        style={{
+          gridColumn: '1 / -1',
+          '--summary-bg': '#1E3A5F',
+        } as React.CSSProperties}
+      >
+        <HbcKpiCard
+          label="Total Items"
+          value={counts?.totalCount ?? 0}
+          subtitle="active work items"
+          color="#8B95A5"
+          isActive={activeFilter === null || activeFilter === undefined}
+          onClick={() => onFilterChange?.('total')}
+          className={styles.summaryCard}
+        />
+      </div>
       <HbcKpiCard
         label="Action Now"
         value={counts?.nowCount ?? 0}

@@ -21,6 +21,8 @@ export interface HbcKpiCardProps {
   isActive?: boolean;
   /** Click handler for click-to-filter */
   onClick?: () => void;
+  /** INS-006: Optional subtitle below the value (e.g. "active work items") */
+  subtitle?: string;
   /** Additional CSS class */
   className?: string;
 }

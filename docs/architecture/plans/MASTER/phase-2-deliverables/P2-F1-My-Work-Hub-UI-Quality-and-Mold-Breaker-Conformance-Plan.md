@@ -1250,6 +1250,14 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.20 INS-006: Total Items Summary Card with Distinct Visual Weight (Medium)
+
+**Fix:** Added `subtitle?: string` prop to HbcKpiCard with muted 10px text rendered below value. Total Items card in PersonalAnalyticsCard spans full width (`gridColumn: 1 / -1`), uses `surface-active` background (`#1E3A5F`), neutral top accent (`#8B95A5`), `maxWidth: none`, and subtitle "active work items" — establishing visual primacy as the summary anchor above the detail cards.
+
+**Files:** `packages/ui-kit/src/HbcKpiCard/types.ts` + `index.tsx` (subtitle prop), `apps/pwa/src/pages/my-work/cards/PersonalAnalyticsCard.tsx` (summary layout). Versions: ui-kit 2.2.34→2.2.35, pwa 0.12.38→0.12.39.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
