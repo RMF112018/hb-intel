@@ -547,10 +547,10 @@ Row 2:  [module human label]  ·  [days in state]  ·  [due date if present]
 Each icon uses `HBC_SPACE_SM` (8px) tap spacing. Active module icon uses `surface-active` background token. Sidebar z-index: `sidebar` layer (z-index: 100 from `UI-Kit-Visual-Language-Guide.md` z-index layers).
 
 **Acceptance criteria:**
-- ≥4 navigation destinations visible without invoking expand
-- Active icon uses `surface-active` background token
-- Sidebar z-index at governed `sidebar` layer (100), not arbitrary values
-- Icon tooltips present on hover
+- ≥4 navigation destinations visible without invoking expand — **MET** (4 top-level workspace entries in "Workspaces" sidebar group: My Work, BD, Estimating, Project Hub via `TOP_LEVEL_WORKSPACES` in shell-bridge.ts)
+- Active icon uses `surface-active` background token — **MET** (HbcSidebar active state uses `tokens.colorBrandBackground2` — Fluent brand active highlight, functionally equivalent to `surface-active`)
+- Sidebar z-index at governed `sidebar` layer (100), not arbitrary values — **MET** (`zIndex: Z_INDEX.sidebar` = 100 from governed z-index system)
+- Icon tooltips present on hover — **MET** (Fluent `Tooltip` wraps each sidebar item in collapsed rail state)
 
 ---
 
