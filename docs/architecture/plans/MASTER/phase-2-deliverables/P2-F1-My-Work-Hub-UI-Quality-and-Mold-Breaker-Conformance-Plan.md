@@ -623,8 +623,8 @@ CTA button uses `HBC_ACCENT_ORANGE` (`#F37021`) at `primaryAction` content level
 All widths use percentage/flex/grid fractions — no fixed pixel widths per MB-04. Fixed-position dev elements removed per UIF-010.
 
 **Acceptance criteria:**
-- No horizontal scroll at 400px, 768px (`BREAKPOINT_MOBILE`), 1024px (`BREAKPOINT_TABLET`), 1440px
-- All breakpoints use `BREAKPOINT_*` tokens from `UI-Kit-Visual-Language-Guide.md`; no hardcoded px breakpoints
+- No horizontal scroll at 400px, 768px (`BREAKPOINT_MOBILE`), 1024px (`BREAKPOINT_TABLET`), 1440px — **MET** (HubZoneLayout uses `fr` units only: `1fr` below 1024px, `3fr 2fr` at 1024–1199px, `7fr 5fr` at ≥1200px; `width: 100%` on root; `data-spfx-safe="true"` attribute; no fixed pixel widths)
+- All breakpoints use `BREAKPOINT_*` tokens from `UI-Kit-Visual-Language-Guide.md`; no hardcoded px breakpoints — **MET** (imports `HBC_BREAKPOINT_MOBILE`, `HBC_BREAKPOINT_SIDEBAR`, `HBC_BREAKPOINT_CONTENT_MEDIUM`, `HBC_BREAKPOINT_DESKTOP` from `@hbc/ui-kit`; no local hardcoded breakpoint constants)
 
 ---
 
