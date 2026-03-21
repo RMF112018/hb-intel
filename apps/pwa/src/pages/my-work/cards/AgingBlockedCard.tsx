@@ -63,6 +63,7 @@ export function AgingBlockedCard({
             color={HBC_STATUS_RAMP_AMBER[50]}
             icon={<Upload size="sm" />}
             trend={{ direction: 'flat', label: 'No change' }}
+            ariaLabel={`Filter by Escalation Candidates: ${teamFeed?.escalationCandidateCount ?? 0} items`}
             isActive={activeFilter === 'escalation'}
             onClick={() => onFilterChange?.('escalation')}
           />
@@ -72,6 +73,7 @@ export function AgingBlockedCard({
             color={HBC_STATUS_RAMP_RED[50]}
             icon={<Cancel size="sm" />}
             trend={{ direction: 'flat', label: 'No change' }}
+            ariaLabel={`Filter by Blocked: ${teamFeed?.blockedCount ?? 0} items`}
             isActive={activeFilter === 'blocked'}
             onClick={() => onFilterChange?.('blocked')}
           />
@@ -81,6 +83,7 @@ export function AgingBlockedCard({
             color={HBC_STATUS_RAMP_GRAY[50]}
             icon={<StatusOverdueIcon size="sm" />}
             trend={{ direction: 'flat', label: 'No change' }}
+            ariaLabel={`Filter by Aging: ${teamFeed?.agingCount ?? 0} items`}
             isActive={activeFilter === 'aging'}
             onClick={() => onFilterChange?.('aging')}
           />

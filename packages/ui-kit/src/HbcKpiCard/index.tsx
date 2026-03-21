@@ -146,6 +146,7 @@ export const HbcKpiCard: React.FC<HbcKpiCardProps> = ({
   isActive = false,
   subtitle,
   icon,
+  ariaLabel,
   onClick,
   className,
 }) => {
@@ -172,6 +173,7 @@ export const HbcKpiCard: React.FC<HbcKpiCardProps> = ({
       style={color ? { borderTopColor: color } : undefined}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
+      aria-label={ariaLabel}
       tabIndex={onClick ? 0 : undefined}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

@@ -25,6 +25,8 @@ export interface HbcKpiCardProps {
   subtitle?: string;
   /** INS-007: Optional icon in top-right corner for scanability */
   icon?: React.ReactNode;
+  /** INS-010: Accessible label for screen readers (e.g. "Filter by Action Now: 4 items") */
+  ariaLabel?: string;
   /** Additional CSS class */
   className?: string;
 }

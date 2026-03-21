@@ -1308,6 +1308,14 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.26 INS-010: aria-label on Interactive KPI Cards (Medium)
+
+**Fix:** Added `ariaLabel?: string` prop to HbcKpiCard, wired to `aria-label` on the button div. All 7 cards now pass descriptive labels (e.g. "Filter by Action Now: 4 items") from PersonalAnalyticsCard and AgingBlockedCard. All cards already interactive (UIF-013-addl), toggle-off supported (MyWorkPage handleKpiFilter).
+
+**Files:** `packages/ui-kit/src/HbcKpiCard/types.ts` + `index.tsx` (ariaLabel prop), `apps/pwa/src/pages/my-work/cards/PersonalAnalyticsCard.tsx` + `AgingBlockedCard.tsx` (labels). Versions: ui-kit 2.2.38→2.2.39, pwa 0.12.43→0.12.44.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

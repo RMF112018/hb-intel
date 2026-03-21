@@ -76,6 +76,7 @@ export function PersonalAnalyticsCard({
           subtitle="active work items"
           color={HBC_PRIMARY_BLUE}
           icon={<ViewList size="sm" />}
+          ariaLabel={`Filter by Total Items: ${counts?.totalCount ?? 0} items`}
           isActive={activeFilter === null || activeFilter === undefined}
           onClick={() => onFilterChange?.('total')}
           className={styles.summaryCard}
@@ -88,6 +89,7 @@ export function PersonalAnalyticsCard({
         color={HBC_STATUS_ACTION_GREEN}
         icon={<SparkleIcon size="sm" />}
         trend={{ direction: 'flat', label: 'No change' }}
+        ariaLabel={`Filter by Action Now: ${counts?.nowCount ?? 0} items`}
         isActive={activeFilter === 'action-now'}
         onClick={() => onFilterChange?.('action-now')}
       />
@@ -97,6 +99,7 @@ export function PersonalAnalyticsCard({
         color={HBC_STATUS_RAMP_RED[50]}
         icon={<Cancel size="sm" />}
         trend={{ direction: 'flat', label: 'No change' }}
+        ariaLabel={`Filter by Blocked: ${counts?.blockedCount ?? 0} items`}
         isActive={activeFilter === 'blocked'}
         onClick={() => onFilterChange?.('blocked')}
       />
@@ -106,6 +109,7 @@ export function PersonalAnalyticsCard({
         color={HBC_STATUS_RAMP_INFO[50]}
         icon={<Notifications size="sm" />}
         trend={{ direction: 'flat', label: 'No change' }}
+        ariaLabel={`Filter by Unread: ${counts?.unreadCount ?? 0} items`}
         isActive={activeFilter === 'unread'}
         onClick={() => onFilterChange?.('unread')}
       />
