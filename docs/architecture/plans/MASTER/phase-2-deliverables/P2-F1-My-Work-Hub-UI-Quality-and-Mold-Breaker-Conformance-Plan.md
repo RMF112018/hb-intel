@@ -452,11 +452,11 @@ Row 2:  [module human label]  ·  [days in state]  ·  [due date if present]
 | `aria-pressed` | `true` on active filter chips; `false` on inactive | `UI-Kit-Accessibility-Findings.md` — ARIA button patterns |
 
 **Acceptance criteria:**
-- `HbcCommandBar` is the governing component for the entire command surface — no custom toolbar grid
-- One command row ≤ 48px height
-- Filter chips show active `surface-active` fill and live count badges
-- Group by and View controls in `HbcCommandBar` overflow/dropdown pattern
-- `aria-pressed` correct on filter chips
+- `HbcCommandBar` is the governing component for the entire command surface — no custom toolbar grid — **MET** (HbcMyWorkFeed renders `<HbcCommandBar>` directly; no custom toolbar grid)
+- One command row ≤ 48px height — **MET** (HbcCommandBar `minHeight` driven by density tier: 32px compact, 40px standard, 48px touch via `DENSITY_HEIGHT`)
+- Filter chips show active `surface-active` fill and live count badges — **MET** (active filters use `HBC_SURFACE_LIGHT['surface-active']` background; count badges with urgency-colored backgrounds: red/amber/neutral)
+- Group by and View controls in `HbcCommandBar` overflow/dropdown pattern — **MET** (group-by + sort actions moved to `overflowActions` — rendered behind "More" overflow menu)
+- `aria-pressed` correct on filter chips — **MET** (`aria-pressed={f.active}` on each `ToolbarToggleButton`)
 
 ---
 
