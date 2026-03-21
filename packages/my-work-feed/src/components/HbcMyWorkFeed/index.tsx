@@ -563,6 +563,12 @@ export function HbcMyWorkFeed({
       items = items.filter((item) => item.isBlocked);
     } else if (kpiFilter === 'unread') {
       items = items.filter((item) => item.isUnread);
+    } else if (kpiFilter === 'escalation') {
+      // UIF-013-addl: Escalation candidates = overdue OR blocked
+      items = items.filter((item) => item.isOverdue || item.isBlocked || item.state === 'blocked');
+    } else if (kpiFilter === 'aging') {
+      // UIF-013-addl: Aging = overdue items
+      items = items.filter((item) => item.isOverdue);
     }
     // 'total' or null = no additional KPI filtering
 

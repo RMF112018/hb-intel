@@ -5,6 +5,8 @@
  * UIF-008: Responsive KPI grid with semantic status ramp colors.
  * UIF-001 fix: grid uses auto-fit + minmax so columns reflow to container width
  * instead of overflowing. Mirrors the fix applied to PersonalAnalyticsCard.
+ * UIF-013-addl: All tiles interactive with click-to-filter (same pattern as
+ * PersonalAnalyticsCard).
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
@@ -28,7 +30,17 @@ const useStyles = makeStyles({
   },
 });
 
-export function AgingBlockedCard(): ReactNode {
+export interface AgingBlockedCardProps {
+  /** UIF-013-addl: Currently active KPI filter key. */
+  activeFilter?: string | null;
+  /** UIF-013-addl: Callback when a KPI card is clicked. */
+  onFilterChange?: (filter: string) => void;
+}
+
+export function AgingBlockedCard({
+  activeFilter,
+  onFilterChange,
+}: AgingBlockedCardProps): ReactNode {
   const styles = useStyles();
   const { teamFeed, isLoading } = useMyWorkTeamFeed({
     ownerScope: 'escalation-candidate',
@@ -46,16 +58,22 @@ export function AgingBlockedCard(): ReactNode {
             label="Escalation Candidates"
             value={teamFeed?.escalationCandidateCount ?? 0}
             color={HBC_STATUS_RAMP_RED[50]}
+            isActive={activeFilter === 'escalation'}
+            onClick={() => onFilterChange?.('escalation')}
           />
           <HbcKpiCard
             label="Blocked"
             value={teamFeed?.blockedCount ?? 0}
             color={HBC_STATUS_RAMP_RED[50]}
+            isActive={activeFilter === 'blocked'}
+            onClick={() => onFilterChange?.('blocked')}
           />
           <HbcKpiCard
             label="Aging"
             value={teamFeed?.agingCount ?? 0}
             color={HBC_STATUS_RAMP_AMBER[50]}
+            isActive={activeFilter === 'aging'}
+            onClick={() => onFilterChange?.('aging')}
           />
         </div>
       )}

@@ -1143,6 +1143,35 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.15 UIF-013-addl: Make Right-Column Insight Tiles Interactive (Medium)
+
+**Severity:** Medium
+**Category:** Card / Design System
+**Governing authority:** MB-01 (Lower Cognitive Load), MB-02 (Stronger Hierarchy) — `UI-Kit-Mold-Breaker-Principles.md`.
+
+**Observed state:** AgingBlockedCard tiles (Escalation Candidates, Blocked, Aging) were non-interactive — no `onClick`, no `isActive` state — while left-column PersonalAnalyticsCard tiles were fully interactive with click-to-filter. This inconsistency made right-column tiles appear decorative.
+
+**Required changes:**
+1. Added `activeFilter` and `onFilterChange` props to `AgingBlockedCard` (same pattern as PersonalAnalyticsCard)
+2. Wired `onClick` and `isActive` to all three HbcKpiCard tiles (escalation/blocked/aging filter keys)
+3. Updated `AgingBlockedTile` to pass filter context from `useMyWorkHubTileContext`
+4. Added `'escalation'` and `'aging'` filter paths to `HbcMyWorkFeed` kpiFilter logic
+
+**Acceptance criteria:**
+- All 7 tiles interactive with click-to-filter — **MET** (onClick + isActive on all tiles)
+- Escalation filter: overdue OR blocked — **MET**
+- Aging filter: overdue items — **MET**
+- Blocked filter shared between both cards — **MET** (same `'blocked'` key)
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/cards/AgingBlockedCard.tsx` — added activeFilter/onFilterChange props + onClick/isActive
+- `apps/pwa/src/pages/my-work/tiles/AgingBlockedTile.tsx` — wired filter context
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — added escalation/aging filter paths
+- `packages/my-work-feed/package.json` — version 0.0.21 → 0.0.22
+- `apps/pwa/package.json` — version 0.12.36 → 0.12.37
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -1179,5 +1208,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-012-addl: Sidebar nav dedup. UIF-010-addl: Source chip tooltips. UIF-018-addl: Sticky header. UIF-020-addl: Priority grouping. UIF-019-addl: Single page scroll. UIF-009/008/007/006/005/004/003/002/001-addl: Various. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
+**Last Updated:** 2026-03-21 — UIF-013-addl: Interactive insight tiles. UIF-012-addl: Nav dedup. UIF-010-addl: Source tooltips. UIF-018/020/019-addl: Sticky header, priority groups, single scroll. UIF-001–009-addl: Various. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)
