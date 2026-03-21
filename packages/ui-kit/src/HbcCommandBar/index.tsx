@@ -20,7 +20,7 @@ import {
 } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { elevationRaised } from '../theme/elevation.js';
-import { HBC_ACCENT_ORANGE, HBC_STATUS_COLORS, HBC_HEADER_TEXT, HBC_DANGER_HOVER } from '../theme/tokens.js';
+import { HBC_ACCENT_ORANGE, HBC_STATUS_COLORS, HBC_HEADER_TEXT, HBC_DANGER_HOVER, HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { HbcTooltip } from '../HbcTooltip/index.js';
 import { HBC_SPACE_SM } from '../theme/grid.js';
 import { MoreActions } from '../icons/index.js';
@@ -258,7 +258,9 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
                 aria-pressed={f.active}
                 onClick={f.onToggle}
                 size="small"
-                appearance={f.active ? 'primary' : 'subtle'}
+                appearance="subtle"
+                // UIF-012: Active filter uses surface-active token background
+                style={f.active ? { backgroundColor: HBC_SURFACE_LIGHT['surface-active'] } : undefined}
               >
                 {f.label}
                 {f.count !== undefined && (

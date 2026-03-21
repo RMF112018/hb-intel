@@ -244,19 +244,17 @@ export function HbcMyWorkFeed({
     },
   ];
 
-  // Build CommandBar actions (grouping selector + sort for expert)
-  const actions = [
+  // UIF-012: Group-by and sort controls in overflow menu (MB-01 progressive disclosure)
+  const overflowActions = [
     ...(['lane', 'priority', 'project', 'module'] as const).map((key) => ({
       key: `group-${key}`,
       label: `Group by ${key}`,
-      active: groupingKey === key,
       onClick: () => setGroupingKey(key),
     })),
     ...(tier === 'expert'
       ? (['rank', 'updated', 'created'] as const).map((key) => ({
           key: `sort-${key}`,
           label: `Sort by ${key}`,
-          active: sortKey === key,
           onClick: () => setSortKey(key),
         }))
       : []),
@@ -272,9 +270,10 @@ export function HbcMyWorkFeed({
       {tier !== 'essential' && (
         <HbcCommandBar
           filters={filters}
-          actions={actions}
+          overflowActions={overflowActions}
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
+          searchPlaceholder="Search work items\u2026"
         />
       )}
 
