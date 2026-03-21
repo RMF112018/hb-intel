@@ -15,6 +15,9 @@
  *
  * UIF-011: Degraded source names and Retry action surfaced in banner.
  *
+ * UIF-014-addl: Defensive fallback when degradedSources array is empty but
+ * degradedSourceCount is non-zero — prevents blank interpolation in banner text.
+ *
  * Hidden when freshness is 'live' and data is within the freshness window.
  * Shows stale-while-revalidate treatment when refreshing stale data.
  */
@@ -118,20 +121,30 @@ export function HubFreshnessIndicator({
 
   // UIF-005-addl: Promote partial-sync to HbcBanner when sources are degraded.
   // Banner is not dismissible — the warning persists until the issue is resolved.
+  // UIF-014-addl: Defensive fallback when degradedSources is empty but count > 0.
   if (hasDegradedSources) {
     const sourceNames = degradedSources
       .map((s) => SOURCE_DISPLAY_NAMES[s] ?? s)
+      .filter(Boolean)
       .join(', ');
+
+    const syncSuffix = relativeTime ? ` Last synced ${relativeTime}.` : '';
+
+    // UIF-014-addl: When source names can't be resolved, use generic fallback
+    // so the banner never renders with blank interpolation variables.
+    const message = !sourceNames ? (
+      <>One or more data sources are unavailable.{syncSuffix}</>
+    ) : degradedSourceCount === 1 ? (
+      <>Data source &lsquo;<strong>{sourceNames}</strong>&rsquo; is unavailable.{syncSuffix}</>
+    ) : (
+      <>Data is incomplete — <strong>{sourceNames}</strong> are unavailable.{syncSuffix}</>
+    );
 
     return (
       <div className={styles.bannerWrap} data-hub-trust={freshness}>
         <HbcBanner variant="warning">
           <div className={styles.bannerContent}>
-            <span>
-              Data is incomplete — <strong>{sourceNames}</strong>{' '}
-              {degradedSourceCount === 1 ? 'is' : 'are'} unavailable.
-              {relativeTime ? ` Last synced ${relativeTime}.` : ''}
-            </span>
+            <span>{message}</span>
             {onRetry && (
               <HbcButton variant="secondary" size="sm" onClick={onRetry}>
                 Retry

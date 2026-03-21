@@ -1364,6 +1364,42 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.33 INS-018: Migrate to Governed HbcKpiCard — Already Complete
+
+**Status:** No code changes needed. All 7 Insight cards already use `<HbcKpiCard>` from `@hbc/ui-kit` (PersonalAnalyticsCard: 4 cards, AgingBlockedCard: 3 cards). No custom card implementations exist in `HbcMyWorkFeed`. All INS-series enhancements (INS-001 through INS-016) were applied directly to the governed component. The kit component supports all required props: `icon`, `subtitle`, `trend`, `ariaLabel`, `color` (with gradient), `isActive`, `onClick`. T12 compliance confirmed — no feature-local duplicates.
+
+---
+
+### 10A.34 UIF-014-addl: Alert Banner Interpolation Failure (Critical)
+
+**Severity:** Critical
+**Category:** State Design
+**Governing authority:** MB-01 (Lower Cognitive Load) — `UI-Kit-Mold-Breaker-Principles.md`. Alert banner is `role="alert"` with `aria-live="assertive"` per T09.
+
+**Observed state:** When `degradedSourceCount > 0` but `degradedSources` array is empty (separate optional fields in `IMyWorkHealthState`), the `HubFreshnessIndicator` banner renders "Data is incomplete — are unavailable. Last synced 2 min ago." — an empty `<strong>` tag with a dangling verb fragment. The banner is the first content after the page title; broken copy destroys trust for executive users making bid/go-no-go decisions.
+
+**Root cause:** `degradedSourceCount` and `degradedSources` are independently optional in `IMyWorkHealthState`. The rendering logic guarded on count > 0 but relied on the array for name interpolation without a fallback.
+
+**Fix:** Added `.filter(Boolean)` to the name-mapping pipeline and a three-way branch in `HubFreshnessIndicator.tsx`:
+
+| Condition | Rendered text |
+|---|---|
+| `sourceNames` empty (fallback) | "One or more data sources are unavailable. Last synced {time}." |
+| Single source (`degradedSourceCount === 1`) | "Data source '{name}' is unavailable. Last synced {time}." |
+| Multiple sources | "Data is incomplete — **{names}** are unavailable. Last synced {time}." |
+
+**Acceptance criteria:**
+- Alert banner text never renders with missing substitution variables — **MET** (empty `sourceNames` triggers generic fallback; `.filter(Boolean)` strips any falsy mapped names)
+- If source name is undefined, fallback text "One or more data sources are unavailable." displays — **MET** (explicit `!sourceNames` branch)
+- Single-source case uses distinct format "Data source '{name}' is unavailable." — **MET** (`degradedSourceCount === 1` branch)
+- No regressions in existing banner rendering for known source names — **MET** (multi-source path unchanged except for `.filter(Boolean)` addition)
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/HubFreshnessIndicator.tsx` — defensive fallback logic with three-way message branch
+- `apps/pwa/package.json` — version 0.12.48 → 0.12.49
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
