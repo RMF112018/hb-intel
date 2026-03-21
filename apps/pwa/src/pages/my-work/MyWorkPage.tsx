@@ -130,6 +130,8 @@ export function MyWorkPage(): ReactNode {
       title="My Work"
       breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'My Work' }]}
       suppressProjectContext
+      stickyHeader
+      headerSlot={<HubTeamModeSelector activeMode={teamMode} onModeChange={setTeamMode} />}
     >
       <MyWorkProvider context={runtimeContext} defaultQuery={defaultQuery}>
         <HubPageLevelEmptyState
@@ -137,7 +139,6 @@ export function MyWorkPage(): ReactNode {
           hasPermission={currentUser !== null}
         >
           <HubConnectivityBanner />
-          <HubTeamModeSelector activeMode={teamMode} onModeChange={setTeamMode} />
           <div ref={scrollContainerRef as React.RefObject<HTMLDivElement>}>
             <HubZoneLayout
               primaryContent={

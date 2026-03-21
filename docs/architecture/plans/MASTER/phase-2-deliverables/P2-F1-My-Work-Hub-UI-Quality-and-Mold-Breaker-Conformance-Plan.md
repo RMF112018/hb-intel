@@ -1067,6 +1067,34 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.12 UIF-018-addl: Sticky Header Band — Breadcrumbs + Title + Tabs (High)
+
+**Severity:** High
+**Category:** Layout / Navigation / PWA / Field Use
+**Governing authority:** MB-03 (Less Shell Fatigue — persistent orientation context), `UI-Kit-Wave1-Page-Patterns.md` (sticky breadcrumb and tab bar).
+
+**Observed state:** Breadcrumbs, page title, and team mode tabs scrolled away with content. When scrolled to the Watching section, all orientation signals vanished — no page identity, no tab switcher.
+
+**Required changes:**
+1. Added `stickyHeader?: boolean` and `headerSlot?: ReactNode` props to `WorkspacePageShell`
+2. When `stickyHeader` is true, breadcrumbs + title + headerSlot are wrapped in a sticky container at `top: 56px` (below app header) with opaque background and `elevationRaised` shadow
+3. MyWorkPage uses `stickyHeader` and moves `HubTeamModeSelector` to `headerSlot`
+
+**Acceptance criteria:**
+- Breadcrumb + title + tabs stick below 56px app header on scroll — **MET** (`position: sticky; top: 56px`)
+- Sticky background is opaque — **MET** (`tokens.colorNeutralBackground1`)
+- z-index above content, below overlays — **MET** (`zIndex: 2` + `elevationRaised` shadow)
+- Right panel content not obscured — **MET** (sticky band is full width above grid, not overlapping columns)
+
+**Files modified:**
+- `packages/ui-kit/src/WorkspacePageShell/types.ts` — added `stickyHeader`, `headerSlot` props
+- `packages/ui-kit/src/WorkspacePageShell/index.tsx` — sticky wrapper + conditional rendering
+- `apps/pwa/src/pages/my-work/MyWorkPage.tsx` — uses `stickyHeader` + `headerSlot`
+- `packages/ui-kit/package.json` — version 2.2.29 → 2.2.30
+- `apps/pwa/package.json` — version 0.12.34 → 0.12.35
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -1103,5 +1131,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-020-addl: Priority grouping + smart collapse. UIF-019-addl: Single page scroll. UIF-009-addl: CTA md. UIF-008-addl: STATUS. UIF-007-addl: HbcButton filters. UIF-006-addl: Tooltip. UIF-005-addl: HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: HbcStatusBadge. UIF-002-addl: display title. UIF-001-addl: KPI theme. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
+**Last Updated:** 2026-03-21 — UIF-018-addl: Sticky header band. UIF-020-addl: Priority grouping. UIF-019-addl: Single page scroll. UIF-009-addl: CTA md. UIF-008-addl: STATUS. UIF-007-addl: HbcButton filters. UIF-006-addl: Tooltip. UIF-005-addl: HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: HbcStatusBadge. UIF-002-addl: display title. UIF-001-addl: KPI theme. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)

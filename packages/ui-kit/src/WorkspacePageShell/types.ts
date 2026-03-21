@@ -77,6 +77,16 @@ export interface WorkspacePageShellProps {
    * Defaults to false.
    */
   suppressProjectContext?: boolean;
+  /**
+   * UIF-018-addl: When true, breadcrumbs + title + headerSlot stick below the
+   * 56px app header on scroll. Background is opaque with elevationLevel2 shadow.
+   */
+  stickyHeader?: boolean;
+  /**
+   * UIF-018-addl: Extra content rendered inside the sticky header band (e.g., tabs).
+   * Only rendered when stickyHeader is true.
+   */
+  headerSlot?: ReactNode;
   /** Page content */
   children: ReactNode;
 }

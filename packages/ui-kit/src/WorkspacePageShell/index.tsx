@@ -85,6 +85,14 @@ const useStyles = makeStyles({
     fontSize: '0.75rem',
     color: tokens.colorNeutralForeground3,
   },
+  // UIF-018-addl: Sticky header band below the 56px app header.
+  stickyHeaderBand: {
+    position: 'sticky' as const,
+    top: '56px',
+    zIndex: 2,
+    backgroundColor: tokens.colorNeutralBackground1,
+    boxShadow: elevationRaised,
+  },
   commandBarZone: {
     paddingLeft: `${hbcSpacing.md}px`,
     paddingRight: `${hbcSpacing.md}px`,
@@ -267,6 +275,8 @@ export function WorkspacePageShell({
   onEmptyAction,
   banner,
   suppressProjectContext = false,
+  stickyHeader = false,
+  headerSlot,
   children,
 }: WorkspacePageShellProps): React.ReactNode {
   const activeProject = useProjectStore((s) => s.activeProject);
@@ -331,9 +341,42 @@ export function WorkspacePageShell({
         data-active-workspace={activeWorkspace ?? undefined}
         className={styles.root}
       >
-        {/* Breadcrumbs */}
-        {breadcrumbs && breadcrumbs.length > 0 && (
-          <HbcBreadcrumbs items={breadcrumbs} />
+        {/* UIF-018-addl: Sticky header band wraps breadcrumbs + title + headerSlot */}
+        {stickyHeader ? (
+          <div className={styles.stickyHeaderBand}>
+            {breadcrumbs && breadcrumbs.length > 0 && (
+              <HbcBreadcrumbs items={breadcrumbs} />
+            )}
+            <div className={styles.header}>
+              <div className={styles.titleRow}>
+                <h1 className={styles.title}>{title}</h1>
+                {activeProject && !suppressProjectContext && (
+                  <span className={styles.projectContext}>
+                    {activeProject.name} ({activeProject.number})
+                  </span>
+                )}
+              </div>
+            </div>
+            {headerSlot}
+          </div>
+        ) : (
+          <>
+            {/* Breadcrumbs */}
+            {breadcrumbs && breadcrumbs.length > 0 && (
+              <HbcBreadcrumbs items={breadcrumbs} />
+            )}
+            {/* Header with title */}
+            <div className={styles.header}>
+              <div className={styles.titleRow}>
+                <h1 className={styles.title}>{title}</h1>
+                {activeProject && !suppressProjectContext && (
+                  <span className={styles.projectContext}>
+                    {activeProject.name} ({activeProject.number})
+                  </span>
+                )}
+              </div>
+            </div>
+          </>
         )}
 
         {/* Banner */}
@@ -345,18 +388,6 @@ export function WorkspacePageShell({
             {banner.message}
           </HbcBanner>
         )}
-
-        {/* Header with title + command bar */}
-        <div className={styles.header}>
-          <div className={styles.titleRow}>
-            <h1 className={styles.title}>{title}</h1>
-            {activeProject && !suppressProjectContext && (
-              <span className={styles.projectContext}>
-                {activeProject.name} ({activeProject.number})
-              </span>
-            )}
-          </div>
-        </div>
 
         {/* Command bar — D-03: all page actions via actions/overflowActions props */}
         {hasActions && !isFieldMode && (
