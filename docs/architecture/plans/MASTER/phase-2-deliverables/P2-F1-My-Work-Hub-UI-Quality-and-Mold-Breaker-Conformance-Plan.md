@@ -837,6 +837,30 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.3 UIF-003-addl: Raw Status Spans in Table View — HbcStatusBadge Compliance (High)
+
+**Severity:** High
+**Category:** Design System / Component Compliance
+**Governing authority:** MB-08 (No Version-Boundary Seams), WCAG `role="status"` — `UI-Kit-Mold-Breaker-Principles.md`, `UI-Kit-Accessibility-Findings.md`.
+
+**Observed state:** The `HbcMyWorkFeed` table view renders Overdue and Blocked badges as raw inline-styled `<span>` elements with hardcoded `backgroundColor`/`color` values. These spans lack `role="status"`, `aria-label`, semantic icon pairing, and field-mode color adaptation. The row view (`HbcMyWorkListItem`) already uses `HbcStatusBadge` correctly — only the table view is non-compliant.
+
+**Root cause:** `HbcMyWorkFeed` status column cell renderer (lines 264-298) builds badges as raw `<span>` with inline styles instead of using the governed `HbcStatusBadge` component.
+
+**Required change:** Replace raw spans with `HbcStatusBadge variant="error" label="Overdue"` and `HbcStatusBadge variant="warning" label="Blocked"`.
+
+**Acceptance criteria:**
+- STATUS column uses HbcStatusBadge with `role="status"` in DOM — **MET** (HbcStatusBadge renders with `role="status"` and `aria-label`)
+- No raw inline-styled spans for status badges — **MET** (raw spans replaced)
+- Overdue renders as `variant="error"`, Blocked as `variant="warning"` — **MET**
+- Empty status shows em-dash — **MET** (unchanged fallback)
+
+**Files modified:**
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — added `HbcStatusBadge` import, replaced raw spans
+- `packages/my-work-feed/package.json` — version 0.0.14 → 0.0.15
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -873,5 +897,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-002-addl: WorkspacePageShell page title upgraded from `heading2` to `display` (2rem/700) for T04 Three-Second Read Standard compliance. UIF-001-addl: HbcKpiCard text colors made theme-responsive (hardcoded `HBC_SURFACE_LIGHT` → Fluent `tokens.*`); loading states replaced with `HbcSpinner`. G0 (@hbc/project-canvas integration) complete. 6 tiles registered, HubSecondaryZone + HubTertiaryZone refactored to canvas tile system. All design decisions grounded in `docs/reference/ui-kit/UI-Kit-*` governing documents.
+**Last Updated:** 2026-03-21 — UIF-003-addl: Raw status spans in HbcMyWorkFeed table view replaced with HbcStatusBadge (role="status", semantic variants, field-mode contrast). UIF-002-addl: WorkspacePageShell page title upgraded from `heading2` to `display` (2rem/700) for T04 compliance. UIF-001-addl: HbcKpiCard text colors made theme-responsive. All design decisions grounded in `docs/reference/ui-kit/UI-Kit-*` governing documents.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)

@@ -25,6 +25,7 @@ import {
   HbcBanner,
   HbcDataTable,
   HbcButton,
+  HbcStatusBadge,
   HBC_STATUS_RAMP_RED,
   HBC_STATUS_RAMP_AMBER,
   HBC_STATUS_RAMP_GRAY,
@@ -263,38 +264,12 @@ function buildWorkItemColumns(
         const tags: React.ReactNode[] = [];
         if (item.isOverdue) {
           tags.push(
-            <span
-              key="overdue"
-              style={{
-                fontSize: '0.6875rem',
-                fontWeight: 600,
-                padding: '1px 6px',
-                borderRadius: '4px',
-                backgroundColor: HBC_STATUS_RAMP_RED[90],
-                color: HBC_STATUS_RAMP_RED[30],
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Overdue
-            </span>,
+            <HbcStatusBadge key="overdue" variant="error" label="Overdue" size="small" />,
           );
         }
         if (item.isBlocked) {
           tags.push(
-            <span
-              key="blocked"
-              style={{
-                fontSize: '0.6875rem',
-                fontWeight: 600,
-                padding: '1px 6px',
-                borderRadius: '4px',
-                backgroundColor: HBC_STATUS_RAMP_AMBER[90],
-                color: HBC_STATUS_RAMP_AMBER[30],
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Blocked
-            </span>,
+            <HbcStatusBadge key="blocked" variant="warning" label="Blocked" size="small" />,
           );
         }
         return (
