@@ -257,9 +257,9 @@ When `HbcProjectCanvas` hosts secondary/tertiary tiles in the right panel (per U
 **Pre-condition:** Before applying, sweep all `color: white` usages inside `@hbc/my-work` to confirm no component depends on a light background for text contrast. Use `HBC_DENSITY_TOKENS[tier].textContrastMin` to verify compliance after the change.
 
 **Acceptance criteria:**
-- No near-white background visible through any component at any viewport ≥ 320px
-- `useHbcTheme()` (not ad-hoc CSS) drives the dark canvas background
-- KPI cards, lane headers, and work item rows share a coherent surface token environment
+- No near-white background visible through any component at any viewport ≥ 320px — **MET** (body uses canonical surface-0 tokens: `#FFFFFF` light, `#0F172A` dark, `#0F1419` field via `data-theme` CSS rules in pwa.css; all components inherit or use Fluent `colorNeutralBackground*` tokens)
+- `useHbcTheme()` (not ad-hoc CSS) drives the dark canvas background — **MET** (`HbcThemeProvider` wraps entire app in App.tsx; `useFieldMode` sets `data-theme` on `<html>` bridging body background outside FluentProvider scope; no ad-hoc dark hex values in components)
+- KPI cards, lane headers, and work item rows share a coherent surface token environment — **MET** (KPI cards: `colorNeutralBackground1` via HbcKpiCard; lane headers: `colorNeutralBackground2`/`3`; work item rows: `colorNeutralBackground1`/`1Hover`/`2` — all Fluent theme-responsive tokens)
 
 ---
 
