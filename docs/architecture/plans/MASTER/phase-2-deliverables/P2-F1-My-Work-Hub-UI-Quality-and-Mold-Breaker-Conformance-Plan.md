@@ -1324,6 +1324,14 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.28 INS-012: Card Label Contrast and Sentence Case (Medium)
+
+**Fix:** Changed label color from `colorNeutralForeground3` to `colorNeutralForeground2` (≈7:1 AAA contrast). Removed `textTransform: 'uppercase'` for sentence case legibility at 12px under field conditions. Reduced `letterSpacing` from `0.04em` to `0.02em`.
+
+**Files:** `packages/ui-kit/src/HbcKpiCard/index.tsx`. Version: ui-kit 2.2.40→2.2.41.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

@@ -78,9 +78,9 @@ const useStyles = makeStyles({
     fontSize: hbcTypeScale.label.fontSize,
     fontWeight: hbcTypeScale.label.fontWeight as string,
     lineHeight: hbcTypeScale.label.lineHeight,
-    color: tokens.colorNeutralForeground3,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.04em',
+    // INS-012: Higher contrast (foreground2 ≈ 7:1 AAA) + sentence case for legibility.
+    color: tokens.colorNeutralForeground2,
+    letterSpacing: '0.02em',
   },
   value: {
     fontFamily: hbcTypeScale.display.fontFamily,
