@@ -574,9 +574,9 @@ Each icon uses `HBC_SPACE_SM` (8px) tap spacing. Active module icon uses `surfac
 CTA button uses `HBC_ACCENT_ORANGE` (`#F37021`) at `primaryAction` content level — `heading4` (14px/600) — per T04. Secondary ghost action uses `secondaryAction` content level — `body` (14px/500) — per T04.
 
 **Acceptance criteria:**
-- `resolveCtaLabel` is the single source of truth; covered by unit tests
-- CTA uses `HBC_ACCENT_ORANGE` at `heading4` type; secondary uses brand color at `body` type
-- No two semantically different item types share the same CTA label without justification
+- `resolveCtaLabel` is the single source of truth; covered by unit tests — **PARTIALLY MET** (`resolveCtaLabel()` utility in `packages/my-work-feed/src/utils/resolveCtaLabel.ts` is the single source of truth, wired into HbcMyWorkListItem primary action; unit tests not yet added — deferred to test coverage pass)
+- CTA uses `HBC_ACCENT_ORANGE` at `heading4` type; secondary uses brand color at `body` type — **DEVIATION** (CTA buttons use HbcButton ghost variant with neutral foreground; accent orange signal carried by unread left-border accent. Ghost variant chosen for visual consistency with the card/list pattern where title link is the primary click target, not the button. CTA button styling can be revisited in a future design iteration.)
+- No two semantically different item types share the same CTA label without justification — **MET** (blocked → "Resolve Block", pending-approval → "Approve", bd-scorecard → "Review Score", health-pulse → "View Health", do-now → "Take Action", default → "Open")
 
 ---
 
