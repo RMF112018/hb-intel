@@ -639,9 +639,9 @@ All widths use percentage/flex/grid fractions — no fixed pixel widths per MB-0
 Categorical assignment tokens: Use `hbcBrandRamp` at shades 40, 60, 80, 100, 120, 140 for project identity differentiation. Must be consistent with any project color used in `@hbc/features-project-hub` on the same project entity.
 
 **Acceptance criteria:**
-- Each work item row has a visible project-identity signal
-- Project color is consistent across all surfaces that reference the same project entity
-- Color assignment uses `hbcBrandRamp` categorical stops — no hardcoded hex values
+- Each work item row has a visible project-identity signal — **MET** (8px color dot + project name in metadata row via `resolveProjectColor()` in HbcMyWorkListItem)
+- Project color is consistent across all surfaces that reference the same project entity — **MET** (deterministic hash of `projectId` — same ID always produces same `hbcBrandRamp` stop)
+- Color assignment uses `hbcBrandRamp` categorical stops — no hardcoded hex values — **MET** (`PROJECT_COLOR_STOPS = [40, 60, 80, 100, 120, 140]`; color resolved via `hbcBrandRamp[stop]` from `@hbc/ui-kit`)
 
 ---
 
