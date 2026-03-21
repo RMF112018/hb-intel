@@ -1356,6 +1356,14 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.32 INS-016: Gradient Wash on KPI Card Backgrounds (Low)
+
+**Fix:** When `color` prop is provided, HbcKpiCard now applies `background: linear-gradient(180deg, ${color}14 0%, transparent 40%)` as inline style — a soft 8%-opacity "warm glow" from the top that reinforces the accent color identity without being heavy. Each card gets a visually distinct interior tint.
+
+**Files:** `packages/ui-kit/src/HbcKpiCard/index.tsx`. Version: ui-kit 2.2.41→2.2.42.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

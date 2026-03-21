@@ -170,7 +170,12 @@ export const HbcKpiCard: React.FC<HbcKpiCardProps> = ({
         isActive ? styles.cardActive : undefined,
         className,
       )}
-      style={color ? { borderTopColor: color } : undefined}
+      // INS-016: Gradient wash — soft color-matched "warm glow" from the top.
+      // Hex suffix 14 = 8% opacity. Gradient fades to transparent at 40%.
+      style={color ? {
+        borderTopColor: color,
+        background: `linear-gradient(180deg, ${color}14 0%, transparent 40%)`,
+      } : undefined}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       aria-label={ariaLabel}
