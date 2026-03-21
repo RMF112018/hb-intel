@@ -861,6 +861,55 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.4 UIF-004-addl: Right Panel Native Scrollbar — Dark Theme Polish (High)
+
+**Severity:** High
+**Category:** Visual Hierarchy / Field Use
+**Governing authority:** MB-08 (No Version-Boundary Seams) — `UI-Kit-Mold-Breaker-Principles.md`.
+
+**Observed state:** The right panel scroll container (`HubZoneLayout.tsx` rightPanel at desktop breakpoint) renders a bright native OS scrollbar against the dark background. The `overflowY: 'auto'` declaration has no scrollbar styling, so the browser defaults to a high-contrast bright scrollbar.
+
+**Root cause:** Missing `scrollbar-width` and `scrollbar-color` properties on the right panel's desktop media query.
+
+**Required change:** Add `scrollbarWidth: 'thin'` and `scrollbarColor: 'rgba(255,255,255,0.15) transparent'` to the desktop breakpoint — invisible track, faint thumb visible only during scroll.
+
+**Acceptance criteria:**
+- Right panel scrollbar invisible at rest (transparent track) — **MET** (`scrollbarColor: 'rgba(255,255,255,0.15) transparent'`)
+- Scroll thumb is subtle — visible only when scrolling — **MET** (15% white opacity thumb)
+- No bright white track visible in default state — **MET**
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/HubZoneLayout.tsx` — added scrollbar styling to rightPanel desktop breakpoint
+- `apps/pwa/package.json` — version 0.12.31 → 0.12.32
+
+---
+
+### 10A.5 UIF-005-addl: Partial-Sync State Promoted to HbcBanner Warning (High)
+
+**Severity:** High
+**Category:** State Design / PWA
+**Governing authority:** MB-01 (Lower Cognitive Load — context-aware state management) — `UI-Kit-Mold-Breaker-Principles.md`.
+
+**Observed state:** When data sources are unavailable (freshness === 'partial'), the `HubFreshnessIndicator` rendered a small inline row with a tiny badge, a dotted-underline expandable button, and a minimal retry button. The warning was easy to miss despite being operationally significant — incomplete data means blocked items may be absent from view.
+
+**Root cause:** The partial-sync state was surfaced at the same visual weight as informational states (cached, stale), not proportional to its severity.
+
+**Required change:** Promote partial-sync with degraded sources to `HbcBanner variant="warning"` — full-width banner that names unavailable sources and provides inline `HbcButton` Retry action. Banner is not dismissible. Non-degraded states (live/cached/stale) retain existing small indicator behavior.
+
+**Acceptance criteria:**
+- HbcBanner with `variant="warning"` visible when sources are unavailable — **MET** (renders when `freshness === 'partial'` && `degradedSourceCount > 0`)
+- Banner names unavailable sources (human-readable) — **MET** (`SOURCE_DISPLAY_NAMES` lookup in bold text)
+- Retry CTA is primary-styled within the banner — **MET** (`HbcButton variant="secondary" size="sm"`)
+- Banner has `role="alert"` and `aria-live="assertive"` — **MET** (HbcBanner warning variant default)
+- Banner is not dismissible — **MET** (no `onDismiss` prop)
+- Non-degraded states keep small indicator — **MET** (conditional branching preserves existing behavior)
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/HubFreshnessIndicator.tsx` — promoted partial-sync to HbcBanner; removed expandable disclosure pattern
+- `apps/pwa/package.json` — version 0.12.32 → 0.12.33
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -897,5 +946,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-003-addl: Raw status spans in HbcMyWorkFeed table view replaced with HbcStatusBadge (role="status", semantic variants, field-mode contrast). UIF-002-addl: WorkspacePageShell page title upgraded from `heading2` to `display` (2rem/700) for T04 compliance. UIF-001-addl: HbcKpiCard text colors made theme-responsive. All design decisions grounded in `docs/reference/ui-kit/UI-Kit-*` governing documents.
+**Last Updated:** 2026-03-21 — UIF-005-addl: Partial-sync → HbcBanner warning. UIF-004-addl: Scrollbar polish. UIF-003-addl: Status spans → HbcStatusBadge. UIF-002-addl: Page title → display. UIF-001-addl: KPI theme-responsive text. All design decisions grounded in `docs/reference/ui-kit/UI-Kit-*` governing documents.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)

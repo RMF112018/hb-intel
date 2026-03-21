@@ -5,19 +5,22 @@
  * Uses HbcStatusBadge from @hbc/ui-kit for the badge rendering.
  * Complexity-tier-aware:
  *   Essential: "Last synced [relative time]" when not live
- *   Standard: + freshness label badge + degraded-source summary (expandable)
- *   Expert: + degraded source count detail with names always visible
+ *   Standard: + freshness label badge
+ *   Expert: + degraded source count detail
  *
- * UIF-011: When sources are degraded, renders an expandable disclosure of
- * source names and an inline Retry action (onRetry prop).
+ * UIF-005-addl: When sources are degraded (partial freshness), renders a
+ * full-width HbcBanner variant="warning" naming unavailable sources with
+ * an inline Retry action. This replaces the previous small expandable
+ * disclosure pattern to ensure the warning is proportional to its severity.
+ *
+ * UIF-011: Degraded source names and Retry action surfaced in banner.
  *
  * Hidden when freshness is 'live' and data is within the freshness window.
  * Shows stale-while-revalidate treatment when refreshing stale data.
  */
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { HBC_BREAKPOINT_MOBILE, HbcStatusBadge } from '@hbc/ui-kit';
+import { HBC_BREAKPOINT_MOBILE, HbcStatusBadge, HbcBanner, HbcButton } from '@hbc/ui-kit';
 import type { StatusVariant } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
 import type { MyWorkSource } from '@hbc/my-work-feed';
@@ -70,73 +73,16 @@ const useStyles = makeStyles({
       gap: '4px',
     },
   },
-  // UIF-011: Inline row holding the expand trigger + retry button.
-  degradedRow: {
+  // UIF-005-addl: Banner wrapper gets bottom padding to separate from feed.
+  bannerWrap: {
+    paddingBottom: '12px',
+  },
+  // UIF-005-addl: Inline flex for banner content + retry button.
+  bannerContent: {
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
-  },
-  // UIF-011: Expand trigger — styled as inline text to blend with surrounding copy.
-  expandTrigger: {
-    background: 'none',
-    border: 'none',
-    padding: '0',
-    cursor: 'pointer',
-    fontSize: '0.75rem',
-    fontWeight: '500',
-    color: 'var(--colorNeutralForeground2)',
-    textDecorationLine: 'underline',
-    textDecorationStyle: 'dotted',
-    ':hover': {
-      color: 'var(--colorNeutralForeground1)',
-    },
-    ':focus-visible': {
-      outlineStyle: 'solid',
-      outlineWidth: '2px',
-      outlineColor: 'var(--colorBrandStroke1)',
-      outlineOffset: '2px',
-      borderRadius: '2px',
-    },
-  },
-  // UIF-011: Retry action — minimal ghost button inline with the text.
-  retryButton: {
-    background: 'none',
-    border: '1px solid var(--colorNeutralStroke1)',
-    borderRadius: '3px',
-    padding: '1px 8px',
-    cursor: 'pointer',
-    fontSize: '0.6875rem',
-    fontWeight: '500',
-    color: 'var(--colorBrandForeground1)',
-    ':hover': {
-      backgroundColor: 'var(--colorNeutralBackground3Hover)',
-    },
-    ':focus-visible': {
-      outlineStyle: 'solid',
-      outlineWidth: '2px',
-      outlineColor: 'var(--colorBrandStroke1)',
-      outlineOffset: '2px',
-      borderRadius: '2px',
-    },
-  },
-  // UIF-011: Expandable source name list.
-  sourceList: {
-    listStyleType: 'none',
-    margin: '0',
-    padding: '0',
-    display: 'flex',
+    gap: '12px',
     flexWrap: 'wrap',
-    gap: '4px',
-    width: '100%',
-    paddingBottom: '4px',
-  },
-  sourceItem: {
-    fontSize: '0.6875rem',
-    fontWeight: '500',
-    padding: '1px 6px',
-    borderRadius: '3px',
-    backgroundColor: 'var(--colorStatusWarningBackground1)',
-    color: 'var(--colorStatusWarningForeground1)',
   },
 });
 
@@ -147,7 +93,6 @@ export function HubFreshnessIndicator({
 }: HubFreshnessIndicatorProps): ReactNode {
   const styles = useStyles();
   const { tier } = useComplexity();
-  const [sourcesExpanded, setSourcesExpanded] = useState(false);
 
   const { freshness, lastRefreshedIso, isWithinFreshnessWindow, isStaleWhileRevalidating, degradedSourceCount, degradedSources } =
     trustState;
@@ -171,6 +116,34 @@ export function HubFreshnessIndicator({
 
   const hasDegradedSources = tier !== 'essential' && freshness === 'partial' && degradedSourceCount > 0;
 
+  // UIF-005-addl: Promote partial-sync to HbcBanner when sources are degraded.
+  // Banner is not dismissible — the warning persists until the issue is resolved.
+  if (hasDegradedSources) {
+    const sourceNames = degradedSources
+      .map((s) => SOURCE_DISPLAY_NAMES[s] ?? s)
+      .join(', ');
+
+    return (
+      <div className={styles.bannerWrap} data-hub-trust={freshness}>
+        <HbcBanner variant="warning">
+          <div className={styles.bannerContent}>
+            <span>
+              Data is incomplete — <strong>{sourceNames}</strong>{' '}
+              {degradedSourceCount === 1 ? 'is' : 'are'} unavailable.
+              {relativeTime ? ` Last synced ${relativeTime}.` : ''}
+            </span>
+            {onRetry && (
+              <HbcButton variant="secondary" size="sm" onClick={onRetry}>
+                Retry
+              </HbcButton>
+            )}
+          </div>
+        </HbcBanner>
+      </div>
+    );
+  }
+
+  // Non-degraded states: small indicator row
   return (
     <div className={styles.root} data-hub-trust={freshness}>
       {/* Essential tier: just the timestamp */}
@@ -185,58 +158,9 @@ export function HubFreshnessIndicator({
         />
       )}
 
-      {/* Standard+ tier: degraded source summary — UIF-011 expandable + retry */}
-      {hasDegradedSources && (
-        <span className={styles.degradedRow}>
-          {tier === 'expert' ? (
-            // Expert: show count as plain text (names always visible below)
-            <span>{degradedSourceCount} source(s) unavailable</span>
-          ) : (
-            // Standard: expand trigger with dotted underline
-            <button
-              type="button"
-              className={styles.expandTrigger}
-              onClick={() => setSourcesExpanded((v) => !v)}
-              aria-expanded={sourcesExpanded}
-              aria-controls="hub-degraded-sources"
-            >
-              {degradedSourceCount} source(s) unavailable{' '}
-              {sourcesExpanded ? '▲' : '▼'}
-            </button>
-          )}
-
-          {onRetry && (
-            <button
-              type="button"
-              className={styles.retryButton}
-              onClick={onRetry}
-              aria-label="Retry loading unavailable sources"
-            >
-              Retry
-            </button>
-          )}
-        </span>
-      )}
-
       {/* Expert tier: extra degraded source count when freshness is not partial */}
       {tier === 'expert' && degradedSourceCount > 0 && freshness !== 'partial' && (
         <span>{degradedSourceCount} degraded source(s)</span>
-      )}
-
-      {/* UIF-011: Source name list — always visible at expert, toggle at standard */}
-      {hasDegradedSources && degradedSources.length > 0 && (tier === 'expert' || sourcesExpanded) && (
-        <ul
-          id="hub-degraded-sources"
-          className={styles.sourceList}
-          role="list"
-          aria-label="Unavailable sources"
-        >
-          {degradedSources.map((source) => (
-            <li key={source} className={styles.sourceItem}>
-              {SOURCE_DISPLAY_NAMES[source] ?? source}
-            </li>
-          ))}
-        </ul>
       )}
     </div>
   );

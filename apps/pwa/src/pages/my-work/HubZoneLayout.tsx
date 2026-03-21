@@ -104,6 +104,9 @@ const useStyles = makeStyles({
       alignSelf: 'start',
       maxHeight: 'calc(100vh - 120px)',
       overflowY: 'auto',
+      // UIF-004-addl: subtle scrollbar on dark theme — invisible track, faint thumb
+      scrollbarWidth: 'thin' as const,
+      scrollbarColor: 'rgba(255,255,255,0.15) transparent',
     },
   },
   // UIF-003: Zones render a single HbcCard each; no grid needed here.
