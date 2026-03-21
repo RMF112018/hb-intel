@@ -422,11 +422,11 @@ Row 2:  [module human label]  ·  [days in state]  ·  [due date if present]
 | Due date | "Due MMM D" in `label` type (12px/500), if present. Omit if not applicable. | Same as above |
 
 **Acceptance criteria:**
-- Each row visually bounded by `surface-3` hover, border-bottom separator, and lane-color left border
-- Row height meets `HBC_DENSITY_TOKENS[tier].rowHeightMin` in all three density tiers
-- At least one temporal signal per item
-- No raw slug strings visible — module human-label lookup covers all registered source modules
-- `useDensity()` drives row height; no hardcoded pixel heights in component CSS
+- Each row visually bounded by `surface-3` hover, border-bottom separator, and lane-color left border — **MET** (hover: `colorNeutralBackground1Hover`, border-bottom: `1px solid colorNeutralStroke2`, blocked/unread accent left border via `HBC_STATUS_RAMP_RED[50]` / `HBC_ACCENT_ORANGE`)
+- Row height meets `HBC_DENSITY_TOKENS[tier].rowHeightMin` in all three density tiers — **MET** (`minHeight: ${densityTokens.rowHeightMin}px` — 32px compact, 40px comfortable, 48px touch)
+- At least one temporal signal per item — **MET** (`formatDaysInState()` renders for every item; `formatDueDate()` renders when `dueDateIso` present)
+- No raw slug strings visible — module human-label lookup covers all registered source modules — **MET** (`MODULE_DISPLAY_NAMES` map + `formatModuleLabel()` with title-case fallback)
+- `useDensity()` drives row height; no hardcoded pixel heights in component CSS — **MET** (`useDensity()` → `HBC_DENSITY_TOKENS[densityTier]` for `minHeight` and `padding` via `HBC_SPACE_SM`/`HBC_SPACE_MD`)
 
 ---
 
