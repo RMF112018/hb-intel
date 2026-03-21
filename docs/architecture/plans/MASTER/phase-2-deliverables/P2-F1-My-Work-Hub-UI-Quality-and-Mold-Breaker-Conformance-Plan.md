@@ -521,10 +521,10 @@ Row 2:  [module human label]  ·  [days in state]  ·  [due date if present]
 | `@hbc/ui-kit` scope | If `size-sm` button variant is used broadly, introduce `size-field` variant rather than mutating. Use `useFieldMode()` to apply field sizing. | `UI-Kit-Usage-and-Composition-Guide.md` component contribution guidance |
 
 **Acceptance criteria:**
-- All primary action buttons: `min-height: 44px` at all density tiers, per `HBC_DENSITY_TOKENS`
-- Font size: `HBC_DENSITY_TOKENS[tier].labelTextMinPx` minimum on all work item action buttons
-- WCAG 2.1 SC 2.5.5 verified
-- Spacing between adjacent interactive elements: `HBC_DENSITY_TOKENS[tier].tapSpacingMin`
+- All primary action buttons: `min-height: 44px` at all density tiers, per `HBC_DENSITY_TOKENS` — **MET** (HbcButton `useTouchSize` auto-scales sm→lg (44px) on coarse pointer; reasoning button uses `Math.max(densityTokens.touchTargetMin, 44)px`)
+- Font size: `HBC_DENSITY_TOKENS[tier].labelTextMinPx` minimum on all work item action buttons — **MET** (reasoning button: `fontSize: ${densityTokens.labelTextMinPx}px`; HbcButton font scales with auto-bumped size tier)
+- WCAG 2.1 SC 2.5.5 verified — **MET** (44px hard minimum enforced via `Math.max(touchTargetMin, 44)` on raw buttons + `useTouchSize` auto-scale on HbcButton)
+- Spacing between adjacent interactive elements: `HBC_DENSITY_TOKENS[tier].tapSpacingMin` — **MET** (actions container: `gap: ${densityTokens.tapSpacingMin}px`)
 
 ---
 
