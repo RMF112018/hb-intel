@@ -1,6 +1,6 @@
 {
   "name": "@hbc/pwa",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -24,6 +24,7 @@
     "@hbc/session-state": "workspace:*",
     "@hbc/smart-empty-state": "workspace:*",
     "@hbc/my-work-feed": "workspace:*",
+    "@hbc/project-canvas": "workspace:*",
     "@hbc/bic-next-move": "workspace:*",
     "@hbc/notification-intelligence": "workspace:*",
     "@hbc/features-estimating": "workspace:*",

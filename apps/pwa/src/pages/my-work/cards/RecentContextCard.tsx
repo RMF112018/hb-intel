@@ -10,28 +10,15 @@
  * a simple inline placeholder, not a page-level orchestrated empty state.
  */
 import type { ReactNode } from 'react';
-import { makeStyles } from '@griffel/react';
-import { HbcCard, HbcEmptyState, HBC_BREAKPOINT_TABLET, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
-
-const useStyles = makeStyles({
-  root: {
-    gridColumn: 'span 8',
-    [`@media (max-width: ${HBC_BREAKPOINT_TABLET}px)`]: { gridColumn: 'span 3' },
-    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: { gridColumn: 'span 1' },
-  },
-});
+import { HbcCard, HbcEmptyState } from '@hbc/ui-kit';
 
 export function RecentContextCard(): ReactNode {
-  const styles = useStyles();
-
   return (
-    <div className={styles.root}>
-      <HbcCard weight="supporting" header={<span>Recent Context</span>}>
-        <HbcEmptyState
-          title="No recent context"
-          description="Recently visited projects and work items will appear here."
-        />
-      </HbcCard>
-    </div>
+    <HbcCard weight="supporting" header={<span>Recent Context</span>}>
+      <HbcEmptyState
+        title="No recent context"
+        description="Recently visited projects and work items will appear here."
+      />
+    </HbcCard>
   );
 }

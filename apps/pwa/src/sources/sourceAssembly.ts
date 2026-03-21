@@ -36,6 +36,7 @@ import {
   createBdStrategicIntelligenceQueryFn,
   createHealthPulseQueryFn,
 } from './domainQueryFns.js';
+import { registerMyWorkTiles } from '../pages/my-work/tiles/registerMyWorkTiles.js';
 
 export function assembleHubSources(): void {
   // ── BIC module registrations (Gate 5 — Publication) ───────────────────
@@ -67,4 +68,7 @@ export function assembleHubSources(): void {
     { source: 'acknowledgment', adapter: acknowledgmentAdapter, rankingWeight: 0.7 },
     { source: 'notification-intelligence', adapter: notificationAdapter, rankingWeight: 0.5 },
   ]);
+
+  // ── My Work Hub canvas tile registrations (G0 — P2-F1 §2.2) ───────
+  registerMyWorkTiles();
 }

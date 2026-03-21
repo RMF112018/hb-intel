@@ -7,14 +7,10 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { HbcCard, HbcKpiCard, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
+import { HbcCard, HbcKpiCard } from '@hbc/ui-kit';
 import { useMyWorkCounts } from '@hbc/my-work-feed';
 
 const useStyles = makeStyles({
-  root: {
-    gridColumn: 'span 6',
-    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: { gridColumn: 'span 1' },
-  },
   kpiRow: { display: 'flex', gap: '16px', flexWrap: 'wrap' },
 });
 
@@ -33,41 +29,39 @@ export function PersonalAnalyticsCard({
   const { counts, isLoading } = useMyWorkCounts();
 
   return (
-    <div className={styles.root}>
-      <HbcCard weight="primary" header={<span>Personal Analytics</span>}>
-        {isLoading ? (
-          <span>Loading...</span>
-        ) : (
-          <div className={styles.kpiRow}>
-            <HbcKpiCard
-              label="Total Items"
-              value={counts?.totalCount ?? 0}
-              isActive={activeFilter === null || activeFilter === undefined}
-              onClick={() => onFilterChange?.('total')}
-            />
-            <HbcKpiCard
-              label="Action Now"
-              value={counts?.nowCount ?? 0}
-              color="var(--colorPaletteRedForeground1)"
-              isActive={activeFilter === 'action-now'}
-              onClick={() => onFilterChange?.('action-now')}
-            />
-            <HbcKpiCard
-              label="Blocked"
-              value={counts?.blockedCount ?? 0}
-              color="var(--colorPaletteYellowForeground1)"
-              isActive={activeFilter === 'blocked'}
-              onClick={() => onFilterChange?.('blocked')}
-            />
-            <HbcKpiCard
-              label="Unread"
-              value={counts?.unreadCount ?? 0}
-              isActive={activeFilter === 'unread'}
-              onClick={() => onFilterChange?.('unread')}
-            />
-          </div>
-        )}
-      </HbcCard>
-    </div>
+    <HbcCard weight="primary" header={<span>Personal Analytics</span>}>
+      {isLoading ? (
+        <span>Loading...</span>
+      ) : (
+        <div className={styles.kpiRow}>
+          <HbcKpiCard
+            label="Total Items"
+            value={counts?.totalCount ?? 0}
+            isActive={activeFilter === null || activeFilter === undefined}
+            onClick={() => onFilterChange?.('total')}
+          />
+          <HbcKpiCard
+            label="Action Now"
+            value={counts?.nowCount ?? 0}
+            color="var(--colorPaletteRedForeground1)"
+            isActive={activeFilter === 'action-now'}
+            onClick={() => onFilterChange?.('action-now')}
+          />
+          <HbcKpiCard
+            label="Blocked"
+            value={counts?.blockedCount ?? 0}
+            color="var(--colorPaletteYellowForeground1)"
+            isActive={activeFilter === 'blocked'}
+            onClick={() => onFilterChange?.('blocked')}
+          />
+          <HbcKpiCard
+            label="Unread"
+            value={counts?.unreadCount ?? 0}
+            isActive={activeFilter === 'unread'}
+            onClick={() => onFilterChange?.('unread')}
+          />
+        </div>
+      )}
+    </HbcCard>
   );
 }

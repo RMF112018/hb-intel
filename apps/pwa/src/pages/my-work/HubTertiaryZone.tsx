@@ -1,15 +1,16 @@
 /**
  * HubTertiaryZone — P2-D2 §2: utility/quick-access zone.
  *
- * Quick action shortcuts, recent context, and pinned tools.
+ * G0 — P2-F1 §2.2: Renders utility tiles via @hbc/project-canvas tile
+ * registry through MyWorkCanvas. Quick action shortcuts and recent context.
+ *
  * Hidden at essential tier. All roles have access per P2-D1 §5.
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import { heading3 } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
-import { QuickActionsCard } from './cards/QuickActionsCard.js';
-import { RecentContextCard } from './cards/RecentContextCard.js';
+import { MyWorkCanvas } from './tiles/index.js';
 
 const useStyles = makeStyles({
   heading: {
@@ -31,8 +32,7 @@ export function HubTertiaryZone(): ReactNode {
   return (
     <>
       <h3 className={styles.heading}>Quick Access</h3>
-      <QuickActionsCard />
-      <RecentContextCard />
+      <MyWorkCanvas tilePrefix="my-work.utility" complexityTier={tier} />
     </>
   );
 }

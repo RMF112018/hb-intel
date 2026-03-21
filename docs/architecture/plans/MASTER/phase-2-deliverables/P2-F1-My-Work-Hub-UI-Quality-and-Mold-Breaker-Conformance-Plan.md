@@ -712,7 +712,7 @@ All UIFs re-opened as of the 2026-03-21 Audit 2 finding. Previous "Complete" cla
 
 | UIF | Title | Severity | Group | Status |
 |---|---|---|---|---|
-| — | @hbc/project-canvas integration | Architectural | G0 | **Open** |
+| — | @hbc/project-canvas integration | Architectural | G0 | **Complete** — 2026-03-21: dependency added, 6 tiles registered, HubSecondaryZone + HubTertiaryZone refactored to MyWorkCanvas |
 | UIF-001 | Lane header native button appearance | Critical | G1 | **Open** |
 | UIF-002 | Two-column layout / canvas waste | Critical | G2 | **Open** |
 | UIF-003 | Title links — browser default blue | Critical | G1 | **Open** |
@@ -813,5 +813,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — Full plan revision following Audit 2. All 18 UIFs open. project-canvas integration mandate added. All design decisions grounded in `docs/reference/ui-kit/UI-Kit-*` governing documents.
+**Last Updated:** 2026-03-21 — G0 (@hbc/project-canvas integration) complete. 6 tiles registered, HubSecondaryZone + HubTertiaryZone refactored to canvas tile system. 17 UIFs remain open. All design decisions grounded in `docs/reference/ui-kit/UI-Kit-*` governing documents.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)

@@ -924,6 +924,9 @@ importers:
       '@hbc/notification-intelligence':
         specifier: workspace:*
         version: link:../../packages/notification-intelligence
+      '@hbc/project-canvas':
+        specifier: workspace:*
+        version: link:../../packages/project-canvas
       '@hbc/provisioning':
         specifier: workspace:*
         version: link:../../packages/provisioning

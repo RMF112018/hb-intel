@@ -5,16 +5,12 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { HbcCard, HbcKpiCard, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
+import { HbcCard, HbcKpiCard } from '@hbc/ui-kit';
 import { RoleGate } from '@hbc/auth';
 import { useMyWorkTeamFeed } from '@hbc/my-work-feed';
 import type { TeamMode } from '@hbc/shell';
 
 const useStyles = makeStyles({
-  root: {
-    gridColumn: 'span 6',
-    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: { gridColumn: 'span 1' },
-  },
   kpiRow: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
 });
 
@@ -34,20 +30,18 @@ export function TeamPortfolioCard({ teamMode }: TeamPortfolioCardProps): ReactNo
 
   return (
     <RoleGate requiredRole="Executive">
-      <div className={styles.root}>
-        <HbcCard weight="standard" header={<span>Team Portfolio</span>}>
-          {isLoading ? (
-            <span>Loading...</span>
-          ) : (
-            <div className={styles.kpiRow}>
-              <HbcKpiCard label="Total Items" value={teamFeed?.totalCount ?? 0} />
-              <HbcKpiCard label="Aging" value={teamFeed?.agingCount ?? 0} color="var(--colorPaletteYellowForeground1)" />
-              <HbcKpiCard label="Blocked" value={teamFeed?.blockedCount ?? 0} color="var(--colorPaletteRedForeground1)" />
-              <HbcKpiCard label="Escalation" value={teamFeed?.escalationCandidateCount ?? 0} />
-            </div>
-          )}
-        </HbcCard>
-      </div>
+      <HbcCard weight="standard" header={<span>Team Portfolio</span>}>
+        {isLoading ? (
+          <span>Loading...</span>
+        ) : (
+          <div className={styles.kpiRow}>
+            <HbcKpiCard label="Total Items" value={teamFeed?.totalCount ?? 0} />
+            <HbcKpiCard label="Aging" value={teamFeed?.agingCount ?? 0} color="var(--colorPaletteYellowForeground1)" />
+            <HbcKpiCard label="Blocked" value={teamFeed?.blockedCount ?? 0} color="var(--colorPaletteRedForeground1)" />
+            <HbcKpiCard label="Escalation" value={teamFeed?.escalationCandidateCount ?? 0} />
+          </div>
+        )}
+      </HbcCard>
     </RoleGate>
   );
 }
