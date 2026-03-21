@@ -1316,6 +1316,14 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.27 INS-011: Insights Panel Header Refinement (Medium)
+
+**Fix:** Set `backgroundColor: '#141E2E'` on HbcCard `weightPrimary` for depth distinction from page background. Added live freshness subtitle ("Updated just now") to HubSecondaryZone header via `useMyWork()` + `formatRelativeTime()` (TanStack Query deduplicates — no extra fetch). Header row uses flex baseline alignment with heading + muted 11px timestamp.
+
+**Files:** `packages/ui-kit/src/HbcCard/index.tsx` (primary bg), `apps/pwa/src/pages/my-work/HubSecondaryZone.tsx` (header + freshness). Versions: ui-kit 2.2.39→2.2.40, pwa 0.12.44→0.12.45.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

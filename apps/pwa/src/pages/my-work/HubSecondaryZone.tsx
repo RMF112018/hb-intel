@@ -16,15 +16,28 @@ import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import { HbcCard, heading3, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
+import { useMyWork } from '@hbc/my-work-feed';
 import type { TeamMode } from '@hbc/shell';
 import { MyWorkCanvas, MyWorkHubTileProvider } from './tiles/index.js';
+import { formatRelativeTime } from './formatRelativeTime.js';
 
 const useStyles = makeStyles({
-  // UIF-003: heading is now the card header — gridColumn and spacing no longer needed.
   heading: {
     ...heading3,
     color: 'var(--colorNeutralForeground1)',
     margin: '0',
+  },
+  // INS-011: Header row with heading + freshness subtitle
+  headerRow: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '12px',
+  },
+  // INS-011: Muted freshness timestamp below heading
+  freshness: {
+    fontSize: '0.6875rem',
+    fontWeight: '400',
+    color: 'var(--colorNeutralForeground3)',
   },
   // INS-004: Clean 2-column grid replaces the overcomplicated 12-column micro-grid.
   // Each tile occupies one cell directly — no column-group wrappers needed.
@@ -54,13 +67,23 @@ export function HubSecondaryZone({
 }: HubSecondaryZoneProps): ReactNode {
   const styles = useStyles();
   const { tier } = useComplexity();
+  // INS-011: Access feed timestamp via shared TanStack Query cache (no extra fetch).
+  const { feed } = useMyWork();
+  const relativeTime = feed?.lastRefreshedIso ? formatRelativeTime(feed.lastRefreshedIso) : null;
 
   if (tier === 'essential') return null;
 
   return (
     <HbcCard
       weight="primary"
-      header={<h3 className={styles.heading}>Insights</h3>}
+      header={
+        <div className={styles.headerRow}>
+          <h3 className={styles.heading}>Insights</h3>
+          {relativeTime && (
+            <span className={styles.freshness}>Updated {relativeTime}</span>
+          )}
+        </div>
+      }
     >
       <MyWorkHubTileProvider value={{ activeFilter, onFilterChange, teamMode }}>
         <div className={styles.tileGrid}>

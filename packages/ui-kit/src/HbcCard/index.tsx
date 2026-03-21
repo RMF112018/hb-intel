@@ -26,8 +26,9 @@ const useStyles = makeStyles({
   weightPrimary: {
     boxShadow: elevationLevel2,
     // INS-001: Subtle 1px separator instead of heavy 2px brand stroke.
-    // Eliminates visual clutter from overlapping border contexts.
     ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.06)'),
+    // INS-011: One step darker than page background for depth distinction.
+    backgroundColor: '#141E2E',
   },
   weightSupporting: {
     boxShadow: elevationLevel0,
