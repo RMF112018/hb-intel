@@ -404,6 +404,7 @@ export function HbcDataTable<TData>({
   isLoading = false,
   estimatedRowHeight,
   height = '600px',
+  autoHeight = false,
   onRowClick,
   className,
   // PH4.7 Step 1: Adaptive Density
@@ -804,7 +805,10 @@ export function HbcDataTable<TData>({
       <div
         ref={parentRef}
         className={mergeClasses(styles.wrapper, staleClass)}
-        style={{ height, overflow: 'auto' }}
+        style={autoHeight
+          ? { height: 'auto', overflow: 'visible' }
+          : { height, overflow: 'auto' }
+        }
         role="region"
         aria-label="Data table"
         tabIndex={0}

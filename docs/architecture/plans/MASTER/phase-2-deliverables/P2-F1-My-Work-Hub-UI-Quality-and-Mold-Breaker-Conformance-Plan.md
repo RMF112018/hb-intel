@@ -1005,6 +1005,37 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.10 UIF-019-addl: Eliminate Nested Scroll Containers — Single Page Scroll (High)
+
+**Severity:** High
+**Category:** Layout / Visual Hierarchy / PWA / Field Use
+**Governing authority:** MB-03 (Less Shell Fatigue), MB-04 (Less Horizontal Scrolling — vertical equivalent), `UI-Kit-Wave1-Page-Patterns.md` (ListLayout uses single page-level scroll).
+
+**Observed state:** The My Work page had nested scroll containers: each HbcDataTable created its own scroll context via hardcoded `overflow: auto`, and the right panel (Insights + Quick Access) had `overflowY: auto` + `maxHeight: calc(100vh - 120px)` at desktop, producing an independent scroll region with a native OS scrollbar. Users had to manage multiple simultaneous scroll contexts — items could be hidden within section scrollers.
+
+**Required changes:**
+1. Added `autoHeight?: boolean` prop to `HbcDataTable` — when true, sets `height: 'auto'` and `overflow: 'visible'` instead of scroll container behavior
+2. Applied `autoHeight` to all HbcDataTable instances in HbcMyWorkFeed — tables grow to full content height
+3. Removed `maxHeight`, `overflowY`, `scrollbarWidth`, `scrollbarColor` from HubZoneLayout rightPanel desktop media query — right panel grows to full content height, page-level scroll is the only scroll axis
+
+**Acceptance criteria:**
+- HbcDataTable section containers have no internal scroll when `autoHeight` is set — **MET** (`overflow: 'visible'`, `height: 'auto'`)
+- All rows visible without secondary scroll — **MET** (tables grow to fit all rows)
+- Right panel has no `overflowY` or `maxHeight` at desktop — **MET** (properties removed)
+- No native OS scrollbar on right panel — **MET** (no overflow → no scrollbar)
+- Page-level scroll is the only scroll axis — **MET**
+
+**Files modified:**
+- `packages/ui-kit/src/HbcDataTable/types.ts` — added `autoHeight?: boolean`
+- `packages/ui-kit/src/HbcDataTable/index.tsx` — implemented autoHeight behavior
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — used `autoHeight` on tables
+- `apps/pwa/src/pages/my-work/HubZoneLayout.tsx` — removed rightPanel scroll constraint
+- `packages/ui-kit/package.json` — version 2.2.28 → 2.2.29
+- `packages/my-work-feed/package.json` — version 0.0.18 → 0.0.19
+- `apps/pwa/package.json` — version 0.12.33 → 0.12.34
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -1041,5 +1072,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-009-addl: CTA buttons sm→md (36px). UIF-008-addl: STATUS from state. UIF-007-addl: Filters → HbcButton. UIF-006-addl: Title tooltip. UIF-005-addl: HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: HbcStatusBadge. UIF-002-addl: display title. UIF-001-addl: KPI theme. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
+**Last Updated:** 2026-03-21 — UIF-019-addl: Single page scroll (autoHeight tables, no right panel overflow). UIF-009-addl: CTA sm→md. UIF-008-addl: STATUS from state. UIF-007-addl: Filters → HbcButton. UIF-006-addl: Title tooltip. UIF-005-addl: HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: HbcStatusBadge. UIF-002-addl: display title. UIF-001-addl: KPI theme. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)

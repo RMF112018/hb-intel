@@ -98,15 +98,13 @@ const useStyles = makeStyles({
       ...shorthands.gap('0px'),
     },
     // Desktop: sticky right panel
+    // UIF-019-addl: removed maxHeight + overflowY — right panel grows to full content
+    // height. Page-level scroll is the only scroll axis. Sticky keeps panel visible
+    // while scrolling the primary zone.
     [`@media (min-width: ${HBC_BREAKPOINT_DESKTOP}px)`]: {
       position: 'sticky' as const,
       top: '24px',
       alignSelf: 'start',
-      maxHeight: 'calc(100vh - 120px)',
-      overflowY: 'auto',
-      // UIF-004-addl: subtle scrollbar on dark theme — invisible track, faint thumb
-      scrollbarWidth: 'thin' as const,
-      scrollbarColor: 'rgba(255,255,255,0.15) transparent',
     },
   },
   // UIF-003: Zones render a single HbcCard each; no grid needed here.
