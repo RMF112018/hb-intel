@@ -26,7 +26,11 @@ const useStyles = makeStyles({
     paddingRight: '20px',
     borderRadius: HBC_RADIUS_XL,
     backgroundColor: tokens.colorNeutralBackground1,
-    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    // INS-001: Only top accent border — side/bottom borders removed to eliminate
+    // visual clutter from overlapping border contexts (panel → card → hairlines).
+    borderLeftStyle: 'none',
+    borderRightStyle: 'none',
+    borderBottomStyle: 'none',
     borderTopWidth: '3px',
     borderTopStyle: 'solid',
     borderTopColor: tokens.colorNeutralStroke2,
@@ -49,18 +53,13 @@ const useStyles = makeStyles({
     },
   },
   cardActive: {
+    // INS-001: Active state uses top + bottom accent only — no side borders.
     borderTopWidth: '2px',
     borderTopStyle: 'solid',
     borderTopColor: HBC_PRIMARY_BLUE as string,
     borderBottomWidth: '2px',
     borderBottomStyle: 'solid',
     borderBottomColor: HBC_PRIMARY_BLUE as string,
-    borderLeftWidth: '2px',
-    borderLeftStyle: 'solid',
-    borderLeftColor: HBC_PRIMARY_BLUE as string,
-    borderRightWidth: '2px',
-    borderRightStyle: 'solid',
-    borderRightColor: HBC_PRIMARY_BLUE as string,
     backgroundColor: tokens.colorSubtleBackgroundSelected,
   },
   label: {

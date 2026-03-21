@@ -25,7 +25,9 @@ const useStyles = makeStyles({
   // Weight variants
   weightPrimary: {
     boxShadow: elevationLevel2,
-    ...shorthands.border('2px', 'solid', tokens.colorBrandStroke1),
+    // INS-001: Subtle 1px separator instead of heavy 2px brand stroke.
+    // Eliminates visual clutter from overlapping border contexts.
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.06)'),
   },
   weightSupporting: {
     boxShadow: elevationLevel0,

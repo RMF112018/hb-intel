@@ -1174,6 +1174,31 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.16 INS-001: Eliminate Overlapping Border Problem on Insight Cards (Medium)
+
+**Severity:** Medium
+**Category:** Design System / Visual Hierarchy
+**Governing authority:** MB-02 (Stronger Hierarchy) — `UI-Kit-Mold-Breaker-Principles.md`.
+
+**Observed state:** Three simultaneous border contexts created visual clutter: outer HbcCard panel (2px brand stroke) → KpiCard top accent (3px) → KpiCard side/bottom hairlines (1px). The side and bottom borders on KpiCard served no design purpose.
+
+**Required changes:**
+1. Removed side/bottom borders from HbcKpiCard — cards retain only the semantic top accent border (`borderStyle: 'none'` base + explicit top border)
+2. Active state simplified to top + bottom accent only (no side borders)
+3. HbcCard `weightPrimary` changed from `2px solid colorBrandStroke1` to `1px solid rgba(255,255,255,0.06)` — subtle separator
+
+**Acceptance criteria:**
+- KpiCard has only top accent border — **MET** (`borderStyle: 'none'` + explicit `borderTop*`)
+- Active state has top + bottom only — **MET** (removed `borderLeft`/`borderRight` declarations)
+- Panel border is subtle, not competing — **MET** (`rgba(255,255,255,0.06)` barely visible)
+
+**Files modified:**
+- `packages/ui-kit/src/HbcKpiCard/index.tsx` — removed side/bottom borders
+- `packages/ui-kit/src/HbcCard/index.tsx` — subtle primary weight border
+- `packages/ui-kit/package.json` — version 2.2.31 → 2.2.32
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

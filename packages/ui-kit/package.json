@@ -1,6 +1,6 @@
 {
   "name": "@hbc/ui-kit",
-  "version": "2.2.31",
+  "version": "2.2.32",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
