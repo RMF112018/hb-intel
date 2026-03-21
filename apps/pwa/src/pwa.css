@@ -19,7 +19,7 @@ body {
   font-family: var(--fontFamilyBase, 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--colorNeutralBackground1, #fafafa);
+  background-color: var(--colorNeutralBackground1, #FFFFFF); /* surface-0 light: HBC_SURFACE_LIGHT['surface-0'] */
   color: var(--colorNeutralForeground1, #242424);
 }
 
@@ -42,14 +42,17 @@ body {
   padding: 24px;
 }
 
-/* UIF-004: Theme-responsive body background.
-   FluentProvider sets CSS custom properties on its wrapper inside #root,
-   but <body> sits outside that scope so --colorNeutralBackground1 resolves
-   to the #fafafa fallback. Use the data-theme attribute that useFieldMode
-   already sets on <html> to keep body in sync with the active theme. */
+/* UIF-004: Theme-responsive body background using surface-0 tokens.
+   <body> sits outside the FluentProvider scope (inside #root), so CSS custom
+   properties like --colorNeutralBackground1 resolve to their fallback values.
+   The data-theme attribute (set by useFieldMode on <html>) bridges this gap.
+   Values are canonical surface-0 from @hbc/ui-kit theme tokens:
+     light: HBC_SURFACE_LIGHT['surface-0'] = #FFFFFF (set as body fallback above)
+     dark:  hbcSemanticDark['surface-0']    = #0F172A
+     field: HBC_SURFACE_FIELD['surface-0']  = #0F1419 */
 html[data-theme="dark"] body {
-  background-color: #111827;
+  background-color: #0F172A;
 }
 html[data-theme="field"] body {
-  background-color: #1A2332;
+  background-color: #0F1419;
 }
