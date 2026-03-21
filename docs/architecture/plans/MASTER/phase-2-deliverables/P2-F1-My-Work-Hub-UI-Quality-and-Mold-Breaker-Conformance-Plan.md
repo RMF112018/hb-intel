@@ -330,9 +330,9 @@ Note: `heading2` (20px/600) and `heading3` (16px/600) achieve the required ≥1.
 | Shared Fluent class | Confirm `___1q9tkiq_0000000` is only used on the page title, not on empty state headings | MB-08 — single design token set; no ad-hoc class sharing |
 
 **Acceptance criteria:**
-- Page title ("My Work") is visually the largest text element at `heading2` (20px)
-- Empty state heading is at `body` (14px) — at least 1 full type scale step below section headings
-- Type scale follows `hbcTypeScale` throughout; no inline font-size or font-weight values in component CSS
+- Page title ("My Work") is visually the largest text element at `heading2` (20px) — **MET** (WorkspacePageShell title style uses `...heading2` = 1.25rem/600)
+- Empty state heading is at `body` (14px) — at least 1 full type scale step below section headings — **MET** (HbcEmptyState title uses `...body` = 0.875rem/400, rendered as `<p>` not `<h2>`)
+- Type scale follows `hbcTypeScale` throughout; no inline font-size or font-weight values in component CSS — **MET** (key hierarchy uses tokens: `heading2` page title, `heading3` section labels, `heading4` lane headers via token spread, `bodySmall` metadata via token spread; minor inline values remain for non-hierarchical elements like count badges)
 
 ---
 
