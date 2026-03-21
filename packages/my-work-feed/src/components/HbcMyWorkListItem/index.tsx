@@ -403,9 +403,10 @@ export function HbcMyWorkListItem({
       >
         {primaryAction && (
           // UIF-007: variant + label from resolveCtaAction — differentiated by lane/status.
+          // UIF-009-addl: size="md" (36px) meets Compact minimum; touch auto-scales to 44px.
           <HbcButton
             variant={primaryCta.variant}
-            size="sm"
+            size="md"
             onClick={() => onAction?.({ actionKey: primaryAction.key, item })}
           >
             {primaryCta.label}
@@ -416,7 +417,7 @@ export function HbcMyWorkListItem({
             {item.availableActions.find((a) => a.key === 'mark-read') && (
               <HbcButton
                 variant="ghost"
-                size="sm"
+                size="md"
                 onClick={() => onAction?.({ actionKey: 'mark-read', item })}
               >
                 Mark read
@@ -425,7 +426,7 @@ export function HbcMyWorkListItem({
             {item.availableActions.find((a) => a.key === 'defer') && (
               <HbcButton
                 variant="ghost"
-                size="sm"
+                size="md"
                 onClick={() => onAction?.({ actionKey: 'defer', item })}
               >
                 Defer

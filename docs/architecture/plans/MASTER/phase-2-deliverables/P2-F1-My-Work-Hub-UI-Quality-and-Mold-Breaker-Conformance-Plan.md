@@ -983,6 +983,28 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.9 UIF-009-addl: CTA Button Size Below Touch-Target Minimum (High)
+
+**Severity:** High
+**Category:** Interaction / Construction Workflow
+**Governing authority:** MB-07 (Field-Usable Contrast & Touch), WCAG 2.5.5 Target Size — `UI-Kit-Mold-Breaker-Principles.md`, `UI-Kit-Field-Readability-Standards.md`.
+
+**Observed state:** CTA action buttons ("Resolve Block", "Take Action", "Open") rendered at 28px height (`HbcButton size="sm"`) — below the governed Compact tier minimum (32px) and well below Comfortable (36px). The most critical action ("Resolve Block", variant="danger") violated touch-target requirements.
+
+**Required change:** Changed all CTA buttons from `size="sm"` (28px) to `size="md"` (36px) in both table and card views. HbcButton's touch auto-scale (`useTouchSize`) further bumps to 44px on coarse-pointer devices.
+
+**Acceptance criteria:**
+- All CTA buttons minimum 36px height — **MET** (`size="md"` = 36px)
+- Touch auto-scale to 44px on coarse pointer — **MET** (`useTouchSize` in HbcButton)
+- "Resolve Block" uses `variant="danger"` — **MET** (already correct via `resolveCtaAction`)
+
+**Files modified:**
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — CTA button `size="sm"` → `size="md"`
+- `packages/my-work-feed/src/components/HbcMyWorkListItem/index.tsx` — primary + secondary CTA buttons `size="sm"` → `size="md"`
+- `packages/my-work-feed/package.json` — version 0.0.17 → 0.0.18
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -1019,5 +1041,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-008-addl: STATUS column populated from item state. UIF-007-addl: Filter → HbcButton. UIF-006-addl: Title tooltip. UIF-005-addl: Partial-sync → HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: Status → HbcStatusBadge. UIF-002-addl: Page title → display. UIF-001-addl: KPI theme-responsive. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
+**Last Updated:** 2026-03-21 — UIF-009-addl: CTA buttons sm→md (36px). UIF-008-addl: STATUS from state. UIF-007-addl: Filters → HbcButton. UIF-006-addl: Title tooltip. UIF-005-addl: HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: HbcStatusBadge. UIF-002-addl: display title. UIF-001-addl: KPI theme. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)

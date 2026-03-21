@@ -416,9 +416,10 @@ function buildWorkItemColumns(
         // UIF-007: CTA label + variant differentiated by lane/status.
         const cta = resolveCtaAction(item);
         return (
+          // UIF-009-addl: size="md" (36px) meets Compact minimum; touch auto-scales to 44px.
           <HbcButton
             variant={cta.variant}
-            size="sm"
+            size="md"
             onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
               if (onItemSelect) {
