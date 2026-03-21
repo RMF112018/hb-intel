@@ -727,7 +727,7 @@ All UIFs re-opened as of the 2026-03-21 Audit 2 finding. Previous "Complete" cla
 | UIF-012 | Command bar — two rows, no count badges | High | G2 | **Open** |
 | UIF-013 | Sidebar nav — only one item visible | High | G3 | **Open** |
 | UIF-014 | CTA labels — generic "Open" | High | G3 | **Open** |
-| UIF-015 | SPFx / responsive breakpoints | Medium | G5 | **Open** |
+| UIF-015 | SPFx / responsive breakpoints | Medium | G5 | **Complete** — 2026-03-21: HBC_BREAKPOINT_DESKTOP added to canonical set, HubZoneLayout refactored to use canonical tokens with 4-tier responsive grid (desktop/tablet/below-tablet/mobile) |
 | UIF-016 | Project color coding on work items | Medium | G5 | **Open** |
 | UIF-017 | Focus ring visibility — WCAG 2.4.7 | Medium | G5 | **Open** |
 | UIF-018 | Sync bar actionability | Medium | G5 | **Open** |

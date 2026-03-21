@@ -1,22 +1,27 @@
 /**
- * HubZoneLayout — P2-D2 adaptive layout, P2-B4 cross-device.
+ * HubZoneLayout — P2-D2 adaptive layout, P2-B4 cross-device, UIF-015 breakpoints.
  *
- * UIF-002: Master-detail two-column layout at desktop (≥1200px).
- *   Left column (7fr): task runway feed (primary zone).
- *   Right column (5fr): contextual panel — item detail when selected,
- *     otherwise analytics/utility cards (secondary + tertiary zones).
+ * All breakpoints use canonical HBC_BREAKPOINT_* tokens from @hbc/ui-kit.
+ * No hardcoded pixel breakpoints (MB-08). No fixed pixel widths (MB-04).
+ * SPFx-safe: uses percentage/flex/grid-fraction widths only.
  *
- * Responsive breakpoints per P2-B4:
- *   Desktop (≥1200px): two-column master-detail grid
- *   Tablet (768–1199px): single-column stack
- *   Mobile (≤767px): single-column stack with tighter gap
+ * Responsive tiers per UIF-015:
+ *   Desktop (≥1200px / HBC_BREAKPOINT_DESKTOP): full two-column 7fr 5fr
+ *   Tablet  (1024–1199px / HBC_BREAKPOINT_SIDEBAR–CONTENT_MEDIUM): two-column 3fr 2fr
+ *   Below tablet (768–1023px): single-column stack
+ *   Mobile  (≤767px / HBC_BREAKPOINT_MOBILE): single-column, tighter gap
+ *
+ * UIF-002: Master-detail — selected item shows detail panel in right column,
+ *   replacing secondary/tertiary zones.
  */
 import type { ReactNode } from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
-import { HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
-
-/** Desktop breakpoint for master-detail two-column layout (UIF-002). */
-const BREAKPOINT_DESKTOP = 1200;
+import {
+  HBC_BREAKPOINT_MOBILE,
+  HBC_BREAKPOINT_SIDEBAR,
+  HBC_BREAKPOINT_CONTENT_MEDIUM,
+  HBC_BREAKPOINT_DESKTOP,
+} from '@hbc/ui-kit';
 
 export interface HubZoneLayoutProps {
   primaryContent: ReactNode;
@@ -32,7 +37,12 @@ const useStyles = makeStyles({
     gridTemplateColumns: '1fr',
     ...shorthands.gap('24px'),
     width: '100%',
-    [`@media (min-width: ${BREAKPOINT_DESKTOP}px)`]: {
+    // Tablet tier: two-column with narrower right panel
+    [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px) and (max-width: ${HBC_BREAKPOINT_CONTENT_MEDIUM}px)`]: {
+      gridTemplateColumns: '3fr 2fr',
+    },
+    // Desktop tier: full two-column master-detail
+    [`@media (min-width: ${HBC_BREAKPOINT_DESKTOP}px)`]: {
       gridTemplateColumns: '7fr 5fr',
     },
     [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
@@ -42,7 +52,8 @@ const useStyles = makeStyles({
   primaryZone: {
     gridColumn: '1 / -1',
     minHeight: '400px',
-    [`@media (min-width: ${BREAKPOINT_DESKTOP}px)`]: {
+    // Tablet + Desktop: primary takes left column
+    [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
       gridColumn: '1 / 2',
     },
     [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
@@ -54,8 +65,12 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('0px'),
-    [`@media (min-width: ${BREAKPOINT_DESKTOP}px)`]: {
+    // Tablet: right panel present but not sticky
+    [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
       gridColumn: '2 / 3',
+    },
+    // Desktop: sticky right panel
+    [`@media (min-width: ${HBC_BREAKPOINT_DESKTOP}px)`]: {
       position: 'sticky' as const,
       top: '24px',
       alignSelf: 'start',
@@ -92,7 +107,7 @@ export function HubZoneLayout({
   const styles = useStyles();
 
   return (
-    <div className={styles.hubGrid}>
+    <div className={styles.hubGrid} data-spfx-safe="true">
       <section className={styles.primaryZone} data-hub-zone="primary">
         {primaryContent}
       </section>

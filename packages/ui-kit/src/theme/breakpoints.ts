@@ -15,5 +15,8 @@ export const HBC_BREAKPOINT_SIDEBAR = 1024;
 /** <=1199px: medium content reflow threshold for dashboard/tool landing grids. */
 export const HBC_BREAKPOINT_CONTENT_MEDIUM = 1199;
 
+/** >=1200px: full desktop two-column layout boundary (min-width complement of CONTENT_MEDIUM). */
+export const HBC_BREAKPOINT_DESKTOP = 1200;
+
 /** >=1440px: compact density threshold for fine pointers. */
 export const HBC_BREAKPOINT_COMPACT_DENSITY = 1440;
