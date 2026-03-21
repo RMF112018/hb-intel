@@ -17,7 +17,9 @@ import {
   HbcSpinner,
   HBC_SPACE_MD,
   HBC_STATUS_RAMP_RED,
-  HBC_STATUS_RAMP_AMBER,
+  HBC_STATUS_RAMP_INFO,
+  HBC_STATUS_ACTION_GREEN,
+  HBC_PRIMARY_BLUE,
 } from '@hbc/ui-kit';
 import { useMyWorkCounts } from '@hbc/my-work-feed';
 
@@ -71,16 +73,17 @@ export function PersonalAnalyticsCard({
           label="Total Items"
           value={counts?.totalCount ?? 0}
           subtitle="active work items"
-          color="#8B95A5"
+          color={HBC_PRIMARY_BLUE}
           isActive={activeFilter === null || activeFilter === undefined}
           onClick={() => onFilterChange?.('total')}
           className={styles.summaryCard}
         />
       </div>
+      {/* INS-002: Green = go-forward, ready-to-act in construction-ops culture */}
       <HbcKpiCard
         label="Action Now"
         value={counts?.nowCount ?? 0}
-        color={HBC_STATUS_RAMP_RED[50]}
+        color={HBC_STATUS_ACTION_GREEN}
         isActive={activeFilter === 'action-now'}
         onClick={() => onFilterChange?.('action-now')}
       />
@@ -91,10 +94,11 @@ export function PersonalAnalyticsCard({
         isActive={activeFilter === 'blocked'}
         onClick={() => onFilterChange?.('blocked')}
       />
+      {/* INS-002: Info blue — passive informational metric */}
       <HbcKpiCard
         label="Unread"
         value={counts?.unreadCount ?? 0}
-        color={HBC_STATUS_RAMP_AMBER[50]}
+        color={HBC_STATUS_RAMP_INFO[50]}
         isActive={activeFilter === 'unread'}
         onClick={() => onFilterChange?.('unread')}
       />

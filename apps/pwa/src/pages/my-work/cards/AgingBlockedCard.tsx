@@ -16,6 +16,7 @@ import {
   HBC_SPACE_MD,
   HBC_STATUS_RAMP_RED,
   HBC_STATUS_RAMP_AMBER,
+  HBC_STATUS_RAMP_GRAY,
 } from '@hbc/ui-kit';
 import { RoleGate } from '@hbc/auth';
 import { useMyWorkTeamFeed } from '@hbc/my-work-feed';
@@ -54,10 +55,11 @@ export function AgingBlockedCard({
         <HbcSpinner size="sm" label="Loading insights" />
       ) : (
         <div className={styles.kpiGrid}>
+          {/* INS-002: Amber = at-risk, attention needed */}
           <HbcKpiCard
             label="Escalation Candidates"
             value={teamFeed?.escalationCandidateCount ?? 0}
-            color={HBC_STATUS_RAMP_RED[50]}
+            color={HBC_STATUS_RAMP_AMBER[50]}
             isActive={activeFilter === 'escalation'}
             onClick={() => onFilterChange?.('escalation')}
           />
@@ -68,10 +70,11 @@ export function AgingBlockedCard({
             isActive={activeFilter === 'blocked'}
             onClick={() => onFilterChange?.('blocked')}
           />
+          {/* INS-002: Gray = low-urgency background metric */}
           <HbcKpiCard
             label="Aging"
             value={teamFeed?.agingCount ?? 0}
-            color={HBC_STATUS_RAMP_AMBER[50]}
+            color={HBC_STATUS_RAMP_GRAY[50]}
             isActive={activeFilter === 'aging'}
             onClick={() => onFilterChange?.('aging')}
           />

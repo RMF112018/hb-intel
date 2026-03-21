@@ -61,8 +61,12 @@ const useStyles = makeStyles({
       gridTemplateColumns: '3fr 2fr',
     },
     // Desktop tier: full two-column master-detail
+    // UIF-021: alignItems start lets grid tracks size independently — right column
+    // shrinks to content height, giving the sticky panel travel room within the
+    // taller primary zone row.
     [`@media (min-width: ${HBC_BREAKPOINT_DESKTOP}px)`]: {
       gridTemplateColumns: '7fr 5fr',
+      alignItems: 'start',
     },
     [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
       ...shorthands.gap('16px'),
@@ -98,13 +102,20 @@ const useStyles = makeStyles({
       ...shorthands.gap('0px'),
     },
     // Desktop: sticky right panel
-    // UIF-019-addl: removed maxHeight + overflowY — right panel grows to full content
-    // height. Page-level scroll is the only scroll axis. Sticky keeps panel visible
-    // while scrolling the primary zone.
+    // UIF-021: Fixed sticky positioning — panel collapses to fit-content height,
+    // enabling sticky travel as the primary zone scrolls past. top clears the
+    // 56px app header + ~74px sticky header band (UIF-018). maxHeight caps the
+    // panel to the remaining viewport; overflowY scrolls only if content exceeds.
     [`@media (min-width: ${HBC_BREAKPOINT_DESKTOP}px)`]: {
       position: 'sticky' as const,
-      top: '24px',
-      alignSelf: 'start',
+      top: '130px',
+      alignSelf: 'flex-start',
+      height: 'fit-content',
+      maxHeight: 'calc(100vh - 130px)',
+      overflowY: 'auto',
+      // UIF-004-addl: subtle scrollbar if panel overflows
+      scrollbarWidth: 'thin' as const,
+      scrollbarColor: 'rgba(255,255,255,0.15) transparent',
     },
   },
   // UIF-003: Zones render a single HbcCard each; no grid needed here.

@@ -148,6 +148,14 @@ export const HBC_SURFACE_FIELD = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// Semantic action-green token (INS-002)
+// Reuses HBC_STATUS_RAMP_GREEN[50] — named distinctly for intent clarity.
+// Green = "clear to proceed" in construction-ops culture.
+// ---------------------------------------------------------------------------
+/** Action Now card accent — go-forward, ready-to-act momentum */
+export const HBC_STATUS_ACTION_GREEN = '#00C896' as const;
+
+// ---------------------------------------------------------------------------
 // Brand-action CTA tokens (UIF-007)
 // Primary CTA buttons use brand-ramp blue, distinct from all status tokens.
 // ---------------------------------------------------------------------------

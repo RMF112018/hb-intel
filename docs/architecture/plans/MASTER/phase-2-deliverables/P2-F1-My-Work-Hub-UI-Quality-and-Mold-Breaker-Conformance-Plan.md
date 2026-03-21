@@ -1258,6 +1258,32 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.21 UIF-021: Fix Right Panel Sticky Scroll Behavior (High)
+
+**Observed state:** Right panel declared `position: sticky; top: 24px` but sticky had zero travel — `alignSelf: 'start'` collapsed the panel height to match the grid row height, and `top: 24px` was below the ~130px sticky header band.
+
+**Root cause fixes:**
+1. `hubGrid` desktop: added `alignItems: 'start'` so grid tracks size independently — right column shrinks to content, giving sticky travel room within the taller primary zone
+2. `rightPanel` desktop: `top: '24px'` → `'130px'` (clears 56px header + 74px sticky band), `alignSelf: 'start'` → `'flex-start'`, added `height: 'fit-content'` + `maxHeight: 'calc(100vh - 130px)'` + `overflowY: 'auto'` with subtle scrollbar styling
+
+**Acceptance criteria:**
+- Insights + Quick Access remain visible during feed scroll at ≥1200px — **MET**
+- Panel doesn't slide under sticky header band — **MET** (`top: 130px`)
+- Panel scrolls internally only if content exceeds viewport cap — **MET** (`maxHeight` + `overflowY: auto`)
+- Tablet/mobile: no regression — **MET** (desktop-only media query)
+
+**Files:** `apps/pwa/src/pages/my-work/HubZoneLayout.tsx`. Version: pwa 0.12.39→0.12.40.
+
+---
+
+### 10A.22 INS-002 (Revised): Semantic Color Token Hierarchy for KPI Cards (High)
+
+**Fix:** Added `HBC_STATUS_ACTION_GREEN` token (`#00C896`, alias of `HBC_STATUS_RAMP_GREEN[50]`) to `packages/ui-kit/src/theme/tokens.ts` and exported from theme/index.ts + src/index.ts. Reassigned all 7 KPI card border colors to eliminate collisions: Total Items → `HBC_PRIMARY_BLUE` (#004B87), Action Now → `HBC_STATUS_ACTION_GREEN` (#00C896), Blocked → `HBC_STATUS_RAMP_RED[50]` (#FF4D4D, sole red card), Unread → `HBC_STATUS_RAMP_INFO[50]` (#3B9FFF), Escalation Candidates → `HBC_STATUS_RAMP_AMBER[50]` (#FFB020), Aging → `HBC_STATUS_RAMP_GRAY[50]` (#8B95A5). Result: 5 distinct colors, 0 collisions, only Blocked is red.
+
+**Files:** `packages/ui-kit/src/theme/tokens.ts` + `theme/index.ts` + `src/index.ts` (new token), `apps/pwa/src/pages/my-work/cards/PersonalAnalyticsCard.tsx` + `AgingBlockedCard.tsx` (color assignments). Versions: ui-kit 2.2.35→2.2.36, pwa 0.12.40→0.12.41.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
