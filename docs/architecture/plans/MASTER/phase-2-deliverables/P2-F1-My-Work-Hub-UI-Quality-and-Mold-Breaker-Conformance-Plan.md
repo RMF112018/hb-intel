@@ -672,10 +672,10 @@ Identify and remove the `outline: transparent` override at its source — do not
 Apply to: work item title links, CTA buttons, group header buttons, filter chips (post UIF-012), KPI cards (post UIF-008), and sidebar nav icons.
 
 **Acceptance criteria:**
-- Tab navigation shows visible focus ring on all interactive work feed elements
-- Focus ring uses `HBC_PRIMARY_BLUE` or `HBC_ACCENT_ORANGE` — matches `HbcButton` `:focus-visible` pattern
-- Passes WCAG 2.4.7 Level AA
-- No `outline: transparent` overrides remaining on governed interactive elements
+- Tab navigation shows visible focus ring on all interactive work feed elements — **MET** (pwa.css `:focus-visible` rule targets `[data-hub-zone] a/button` and `.hbc-my-work-feed a/button` with 2px solid outline + 2px offset)
+- Focus ring uses `HBC_PRIMARY_BLUE` or `HBC_ACCENT_ORANGE` — matches `HbcButton` `:focus-visible` pattern — **MET** (`var(--colorBrandStroke1, #004B87)` — Fluent brand stroke token with `HBC_PRIMARY_BLUE` fallback, same token as HbcButton)
+- Passes WCAG 2.4.7 Level AA — **MET** (`:focus-visible` ensures keyboard focus visible; 2px solid outline at brand color provides sufficient contrast)
+- No `outline: transparent` overrides remaining on governed interactive elements — **MET** (`outline: 'none'` removed from group header button; no `outline: transparent` in HB Intel source — only in external SPFx node_modules)
 
 ---
 
