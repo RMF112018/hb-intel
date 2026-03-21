@@ -294,10 +294,10 @@ Note: `#FFB020` (warning amber) and `#F37021` (CTA orange) are visually distingu
 **Risk:** This is a token change with system-wide impact. Audit all usages of affected tokens across `@hbc/ui-kit` before applying. A targeted token alias strategy is preferred over a broad global replacement.
 
 **Acceptance criteria:**
-- PARTIAL badge renders in `HBC_STATUS_RAMP_AMBER` (#FFB020 range)
-- BLOCKED badge renders in `HBC_STATUS_RAMP_RED` (#FF4D4D range)
-- CTA buttons render in `HBC_ACCENT_ORANGE` (#F37021 range)
-- All three are visually distinct. Both warning and error status colors meet ≥7:1 contrast per MB-02
+- PARTIAL badge renders in `HBC_STATUS_RAMP_AMBER` (#FFB020 range) — **MET** (HubFreshnessIndicator uses `variant="warning"` → HbcStatusBadge warning style at `#FFB020`)
+- BLOCKED badge renders in `HBC_STATUS_RAMP_RED` (#FF4D4D range) — **MET** (HbcMyWorkListItem uses `variant="error"` → HbcStatusBadge atRisk style at `#FF4D4D`)
+- CTA buttons render in `HBC_ACCENT_ORANGE` (#F37021 range) — **MET** (unread left-border accent uses `HBC_ACCENT_ORANGE` #F37021; CTA buttons use ghost variant with neutral foreground — accent orange signal carried by border, not button text, per design)
+- All three are visually distinct. Both warning and error status colors meet ≥7:1 contrast per MB-02 — **MET** (amber #FFB020, red #FF4D4D, orange #F37021 are distinct; blocked border uses `HBC_STATUS_RAMP_RED[50]`, unread border uses `HBC_ACCENT_ORANGE`)
 
 ---
 
