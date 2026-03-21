@@ -47,7 +47,8 @@ import { HbcMyWorkEmptyState } from '../HbcMyWorkEmptyState/index.js';
 import { HbcMyWorkSourceHealth } from '../HbcMyWorkSourceHealth/index.js';
 import { resolveCtaAction } from '../../utils/resolveCtaLabel.js';
 import { formatModuleLabel } from '../../utils/formatModuleLabel.js';
-import type { IMyWorkItem, IMyWorkQuery } from '../../types/index.js';
+import type { IMyWorkItem, IMyWorkQuery, MyWorkState } from '../../types/index.js';
+import type { StatusVariant } from '@hbc/ui-kit';
 
 export interface IHbcMyWorkFeedProps {
   query?: IMyWorkQuery;
@@ -96,6 +97,33 @@ const LANE_COLORS: Record<string, string> = {
   watch: HBC_STATUS_RAMP_GRAY[50],
   'delegated-team': HBC_STATUS_RAMP_INFO[50],
   deferred: HBC_STATUS_RAMP_GRAY[50],
+};
+
+/**
+ * UIF-008-addl: Human-readable display labels for MyWorkState values.
+ * Ensures the STATUS column shows a meaningful badge for every row.
+ */
+const STATE_DISPLAY_LABELS: Record<MyWorkState, string> = {
+  new: 'New',
+  active: 'In Progress',
+  blocked: 'Blocked',
+  waiting: 'Waiting',
+  deferred: 'Deferred',
+  superseded: 'Superseded',
+  completed: 'Completed',
+};
+
+/**
+ * UIF-008-addl: Badge variant mapping for MyWorkState values.
+ */
+const STATE_BADGE_VARIANT: Record<MyWorkState, StatusVariant> = {
+  new: 'info',
+  active: 'inProgress',
+  blocked: 'error',
+  waiting: 'warning',
+  deferred: 'neutral',
+  superseded: 'neutral',
+  completed: 'completed',
 };
 
 function formatGroupLabel(key: string): string {
@@ -276,11 +304,20 @@ function buildWorkItemColumns(
             <HbcStatusBadge key="blocked" variant="warning" label="Blocked" size="small" />,
           );
         }
+        // UIF-008-addl: Show item state when no urgency flags — every row gets a status badge.
+        if (tags.length === 0) {
+          tags.push(
+            <HbcStatusBadge
+              key="state"
+              variant={STATE_BADGE_VARIANT[item.state]}
+              label={STATE_DISPLAY_LABELS[item.state]}
+              size="small"
+            />,
+          );
+        }
         return (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-            {tags.length > 0 ? tags : (
-              <span style={{ color: 'var(--colorNeutralForeground4)', fontSize: '0.6875rem' }}>—</span>
-            )}
+            {tags}
           </div>
         );
       },

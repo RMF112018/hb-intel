@@ -961,6 +961,28 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.8 UIF-008-addl: Populate STATUS Column from Item State (High)
+
+**Severity:** High
+**Category:** Construction Workflow / Data Surface
+**Governing authority:** MB-01 (Lower Cognitive Load), MB-05 (Adaptive Density) — `UI-Kit-Mold-Breaker-Principles.md`.
+
+**Observed state:** 6 of 8 work items showed "—" in the STATUS column because it only rendered badges for `isOverdue` and `isBlocked` flags. The `state` field (`new`, `active`, `blocked`, `waiting`, `deferred`, `superseded`, `completed`) was available on every `IMyWorkItem` but never displayed.
+
+**Required change:** Added `STATE_DISPLAY_LABELS` (human-readable) and `STATE_BADGE_VARIANT` (semantic badge variant) maps for all 7 `MyWorkState` values. Updated the STATUS column cell renderer to show the item's state badge as a fallback when no urgency flags are set.
+
+**Acceptance criteria:**
+- STATUS column has non-null values for 100% of rows — **MET** (state badge or urgency badge on every row)
+- No em-dash "—" in STATUS column — **MET** (fallback removed)
+- State labels are human-readable — **MET** ("In Progress" not "active", "Waiting" not "waiting")
+- Badge variants match semantic meaning — **MET** (active=inProgress, blocked=error, etc.)
+
+**Files modified:**
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — added state label/variant maps, updated STATUS cell renderer
+- `packages/my-work-feed/package.json` — version 0.0.16 → 0.0.17
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -997,5 +1019,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-007-addl: Filter buttons → HbcButton with pressed/aria-pressed. UIF-006-addl: Title tooltip. UIF-005-addl: Partial-sync → HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: Status → HbcStatusBadge. UIF-002-addl: Page title → display. UIF-001-addl: KPI theme-responsive. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
+**Last Updated:** 2026-03-21 — UIF-008-addl: STATUS column populated from item state. UIF-007-addl: Filter → HbcButton. UIF-006-addl: Title tooltip. UIF-005-addl: Partial-sync → HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: Status → HbcStatusBadge. UIF-002-addl: Page title → display. UIF-001-addl: KPI theme-responsive. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)
