@@ -730,7 +730,7 @@ All UIFs re-opened as of the 2026-03-21 Audit 2 finding. Previous "Complete" cla
 | UIF-015 | SPFx / responsive breakpoints | Medium | G5 | **Complete** — 2026-03-21: HBC_BREAKPOINT_DESKTOP added to canonical set, HubZoneLayout refactored to use canonical tokens with 4-tier responsive grid (desktop/tablet/below-tablet/mobile) |
 | UIF-016 | Project color coding on work items | Medium | G5 | **Complete** — 2026-03-21: 8px color dot in metadata row using hbcBrandRamp categorical stops (40/60/80/100/120/140), deterministic hash from projectId |
 | UIF-017 | Focus ring visibility — WCAG 2.4.7 | Medium | G5 | **Complete** — 2026-03-21: :focus-visible CSS rule in pwa.css using colorBrandStroke1/HBC_PRIMARY_BLUE, outline: none removed from group header button |
-| UIF-018 | Sync bar actionability | Medium | G5 | **Open** |
+| UIF-018 | Sync bar actionability | Medium | G5 | **Complete** — 2026-03-21: Retry button on degraded/offline, success flash with slideInUp + 2s auto-dismiss on reconnect, HBC_STATUS_RAMP_AMBER[10] left-border accent |
 
 ---
 
