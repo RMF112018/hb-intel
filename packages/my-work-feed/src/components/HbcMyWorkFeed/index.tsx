@@ -364,8 +364,10 @@ function buildWorkItemColumns(
         const moduleLabel = formatModuleLabel(item.context.moduleKey);
         return (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+            {/* UIF-010-addl: Project-color dot with title for context */}
             <span
               aria-hidden="true"
+              title={projectName}
               style={{
                 width: '8px',
                 height: '8px',
@@ -375,36 +377,42 @@ function buildWorkItemColumns(
               }}
             />
             <div style={{ overflow: 'hidden', minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: bodySmall.fontSize,
-                  color: 'var(--colorNeutralForeground1)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {projectName}
-              </div>
-              {/* UIF-006: Module label as neutral chip — no raw kebab keys exposed */}
-              <span
-                style={{
-                  display: 'inline-block',
-                  fontSize: '0.6875rem',
-                  fontWeight: 500,
-                  lineHeight: '1.5',
-                  padding: '1px 6px',
-                  borderRadius: '4px',
-                  backgroundColor: 'var(--colorNeutralBackground4)',
-                  color: 'var(--colorNeutralForeground3)',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '100%',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {moduleLabel}
-              </span>
+              {/* UIF-010-addl: Tooltip on project name for truncated text */}
+              <HbcTooltip content={projectName}>
+                <div
+                  style={{
+                    fontSize: bodySmall.fontSize,
+                    color: 'var(--colorNeutralForeground1)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {projectName}
+                </div>
+              </HbcTooltip>
+              {/* UIF-006/010-addl: Module chip with border + tooltip */}
+              <HbcTooltip content={moduleLabel}>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    fontSize: '0.6875rem',
+                    fontWeight: 500,
+                    lineHeight: '1.5',
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--colorNeutralBackground4)',
+                    border: '1px solid var(--colorNeutralStroke2)',
+                    color: 'var(--colorNeutralForeground3)',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '100%',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {moduleLabel}
+                </span>
+              </HbcTooltip>
             </div>
           </div>
         );

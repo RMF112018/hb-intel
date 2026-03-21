@@ -1095,6 +1095,31 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
+### 10A.13 UIF-010-addl: Source Column Chip Styling and Tooltip (Medium)
+
+**Severity:** Medium
+**Category:** Design System / Visual Hierarchy
+**Governing authority:** MB-02 (Stronger Hierarchy), MB-01 (Lower Cognitive Load) — `UI-Kit-Mold-Breaker-Principles.md`.
+
+**Observed state:** Source column module label chips had background color but no border, making them barely distinguishable from plain text. Project names and module labels truncated without tooltip — "Bd Department Se..." gave no way to see the full label. The project-color ● dot had no tooltip explaining which project it represents.
+
+**Required changes:**
+1. Added `border: '1px solid var(--colorNeutralStroke2)'` to module label chip for visual distinction
+2. Wrapped project name in `HbcTooltip` for truncated text hover reveal
+3. Wrapped module label in `HbcTooltip` for truncated text hover reveal
+4. Added `title={projectName}` to the project-color dot
+
+**Acceptance criteria:**
+- Module chips have visible background + border — **MET** (border added)
+- No raw truncation without tooltip — **MET** (HbcTooltip on both project name and module label)
+- ● dot has context — **MET** (title attribute with project name)
+
+**Files modified:**
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — source column styling + tooltips
+- `packages/my-work-feed/package.json` — version 0.0.20 → 0.0.21
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
@@ -1131,5 +1156,5 @@ Any `@hbc/ui-kit` token or component variant change requires a cross-surface imp
 
 ---
 
-**Last Updated:** 2026-03-21 — UIF-018-addl: Sticky header band. UIF-020-addl: Priority grouping. UIF-019-addl: Single page scroll. UIF-009-addl: CTA md. UIF-008-addl: STATUS. UIF-007-addl: HbcButton filters. UIF-006-addl: Tooltip. UIF-005-addl: HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: HbcStatusBadge. UIF-002-addl: display title. UIF-001-addl: KPI theme. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
+**Last Updated:** 2026-03-21 — UIF-010-addl: Source chip border + tooltips. UIF-018-addl: Sticky header. UIF-020-addl: Priority grouping. UIF-019-addl: Single page scroll. UIF-009-addl: CTA md. UIF-008-addl: STATUS. UIF-007-addl: HbcButton filters. UIF-006-addl: Tooltip. UIF-005-addl: HbcBanner. UIF-004-addl: Scrollbar. UIF-003-addl: HbcStatusBadge. UIF-002-addl: display title. UIF-001-addl: KPI theme. All grounded in `docs/reference/ui-kit/UI-Kit-*`.
 **Governing Authority:** [Phase 2 Plan §8, §10, §14](../03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md); [UI-Kit Reference Documents](../../../reference/ui-kit/)
