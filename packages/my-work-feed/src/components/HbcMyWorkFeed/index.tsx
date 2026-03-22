@@ -269,7 +269,9 @@ function buildWorkItemColumns(
       id: 'title',
       accessorKey: 'title',
       header: 'Work Item',
-      size: 340,
+      // Table-layout-fix: reduced from 340→200 to prevent 820px total exceeding ~670px container.
+      // With table-layout:fixed + width:100%, these sizes distribute proportionally.
+      size: 200,
       cell: ({ row }) => {
         const item = row.original;
         const isWatchMuted = item.lane === 'watch' && !item.isUnread && !item.isBlocked;
@@ -342,7 +344,7 @@ function buildWorkItemColumns(
     {
       id: 'status',
       header: 'Status',
-      size: 100,
+      size: 80,
       cell: ({ row }) => {
         const item = row.original;
         const tags: React.ReactNode[] = [];
@@ -378,7 +380,7 @@ function buildWorkItemColumns(
     {
       id: 'source',
       header: 'Source',
-      size: 160,
+      size: 120,
       cell: ({ row }) => {
         const item = row.original;
         const projectColor = resolveProjectColor(item.context.projectId);
@@ -444,7 +446,7 @@ function buildWorkItemColumns(
       id: 'dueDate',
       accessorKey: 'dueDateIso',
       header: 'Due',
-      size: 100,
+      size: 70,
       cell: ({ row }) => {
         const item = row.original;
         if (!item.dueDateIso) {
@@ -471,7 +473,7 @@ function buildWorkItemColumns(
     {
       id: 'actions',
       header: '',
-      size: 120,
+      size: 80,
       cell: ({ row }) => {
         const item = row.original;
         // UIF-007: CTA label + variant differentiated by lane/status.
@@ -775,8 +777,10 @@ export function HbcMyWorkFeed({
                   style={{
                     borderRadius: HBC_RADIUS_LG,
                     border: '1px solid var(--colorNeutralStroke2)',
-                    // UIF-019-followup: overflow visible so fully-expanded table rows are not clipped.
-                    overflow: 'visible',
+                    // Table-layout-fix: overflowX hidden prevents horizontal bleed while
+                    // overflowY visible preserves row expansion.
+                    overflowX: 'hidden',
+                    overflowY: 'visible',
                   }}
                 >
                   {/* Group header — div, not button, so UA background does not override tokens */}
