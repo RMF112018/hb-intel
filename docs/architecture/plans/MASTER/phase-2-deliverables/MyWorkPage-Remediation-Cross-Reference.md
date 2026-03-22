@@ -347,13 +347,13 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 7-C: State persistence and return-memory tests
+### 7-C: State persistence and return-memory tests ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| TST-F1 | **C** | Zero behavioral test coverage | ✅ Partial close — state persistence domain covered |
-| STT-01 | **H** | Feed cache key behavioral verification: draft key round-trip, stale-return seed | ✅ Gate evidence |
-| STT-02 | **H** | Route `onLeave` capture behavioral verification | ✅ Gate evidence |
+| TST-F1 | **C** | Zero behavioral test coverage | ✅ Partial (2026-03-22) — 17 persistence tests (total: 53 across 7-A/B/C) |
+| STT-01 | **H** | Feed cache key verification | ✅ Evidence (2026-03-22) — key, TTL, shape verified |
+| STT-02 | **H** | Route onLeave capture verification | ✅ Evidence (2026-03-22) — `triggerOnLeaveCapture` callable + no-throw when unregistered |
 
 ---
 
