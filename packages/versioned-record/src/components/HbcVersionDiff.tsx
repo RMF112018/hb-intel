@@ -343,8 +343,8 @@ export function HbcVersionDiff<T>({
   if (isComputing) {
     return (
       <div className={mergeClasses(classes.root, classes.rootLoading)} role="status">
-        <div className={classes.spinner} aria-label="Computing diff\u2026" />
-        <span className={classes.loadingText}>Comparing versions\u2026</span>
+        <div className={classes.spinner} aria-label="Computing diff…" />
+        <span className={classes.loadingText}>Comparing versions…</span>
       </div>
     );
   }

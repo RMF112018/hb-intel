@@ -700,7 +700,7 @@ function RollbackConfirmModal({
             aria-busy={isRollingBack}
             data-testid="rollback-confirm-btn"
           >
-            {isRollingBack ? 'Restoring\u2026' : `Restore to v${target.version}`}
+            {isRollingBack ? 'Restoring…' : `Restore to v${target.version}`}
           </button>
         </div>
       </div>

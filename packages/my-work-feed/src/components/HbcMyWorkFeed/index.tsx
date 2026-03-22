@@ -667,7 +667,7 @@ export function HbcMyWorkFeed({
           overflowActions={overflowActions.length > 0 ? overflowActions : undefined}
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
-          searchPlaceholder="Search work items\u2026"
+          searchPlaceholder="Search work items…"
           densityTier={densityTier}
           onDensityChange={(t) => setDensityOverride(t as 'compact' | 'comfortable' | 'touch')}
         />

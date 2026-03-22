@@ -57,7 +57,7 @@ export function HbcConnectivityBar({ showWhenOnline = false }: HbcConnectivityBa
   let styleKey: string;
 
   if (isSyncing) {
-    message = 'Syncing changes\u2026';
+    message = 'Syncing changes…';
     styleKey = 'syncing';
   } else if (connectivity === 'degraded') {
     message = 'Connection unstable \u2014 changes will be saved locally';

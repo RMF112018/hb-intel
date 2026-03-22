@@ -1498,6 +1498,38 @@ Source/module chips ("BD Scorecard", "Est. Pursuit") are correctly non-interacti
 
 ---
 
+### 10A.38 UIF-018-addl: Search Placeholder Unicode Escape Fix (High)
+
+**Severity:** High
+**Category:** Design System / State Design
+**Governing authority:** MB-08 (No Version-Boundary Seams) — `UI-Kit-Mold-Breaker-Principles.md`. Cosmetic defects in primary input elements undermine platform polish.
+
+**Observed state:** The search input placeholder rendered `\u2026` as a literal string instead of the `…` (ellipsis) character. The same `\u2026` Unicode escape pattern appeared in 4 files across 3 packages.
+
+**Root cause:** JSX string attributes using `\u2026` Unicode escape sequences. While valid in JS template literals, these can render literally depending on build/template processing. Using the direct Unicode character eliminates ambiguity.
+
+**Fix:** Replaced all `\u2026` escape sequences with the direct `…` character across the codebase:
+
+| File | String |
+|---|---|
+| `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` | `"Search work items…"` |
+| `packages/session-state/src/components/HbcConnectivityBar.tsx` | `'Syncing changes…'` |
+| `packages/versioned-record/src/components/HbcVersionDiff.tsx` | `"Computing diff…"`, `"Comparing versions…"` |
+| `packages/versioned-record/src/components/HbcVersionHistory.tsx` | `'Restoring…'` |
+
+**Acceptance criteria:**
+- Placeholder renders as "Search work items…" (visual ellipsis) — **MET** (direct Unicode character)
+- No `\u2026` escape sequences remain in source files — **MET** (all 5 instances replaced across 4 files)
+
+**Files modified:**
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx`
+- `packages/session-state/src/components/HbcConnectivityBar.tsx`
+- `packages/versioned-record/src/components/HbcVersionDiff.tsx`
+- `packages/versioned-record/src/components/HbcVersionHistory.tsx`
+- `packages/my-work-feed/package.json` — version 0.0.26 → 0.0.27
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
