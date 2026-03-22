@@ -2189,6 +2189,30 @@ Added `minHeight: 0` to prevent grid blowout from `minmax()` in nested flex/grid
 
 ---
 
+### 10A.66 UIF-045-addl: Adaptive KPI Card Density Modes
+
+**Severity:** Medium
+**Category:** Responsive / Readability
+
+**Fix:** Made KPI card internals adapt to narrow/wide states via `clamp()`:
+
+| Property | Narrow (≤400px vp) | Wide (≥600px vp) |
+|---|---|---|
+| Horizontal padding | 10px | 20px |
+| Vertical padding | 10px | 14px |
+| Gap | 3px | 6px |
+| Min-height | 80px | 100px |
+| Value font | 20px | 28px (existing) |
+| Trend max-width | 40px (arrow only) | 120px (full label) |
+
+Content priority at narrow widths: value → label → trend arrow → subtitle (truncated) → trend label (hidden). All achieved via CSS `clamp()` + `text-overflow: ellipsis` — no JS measurement or container queries needed.
+
+**Files modified:**
+- `packages/ui-kit/src/HbcKpiCard/index.tsx` — adaptive padding, gap, min-height, trend max-width
+- `packages/ui-kit/package.json` — version 2.2.58 → 2.2.59
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

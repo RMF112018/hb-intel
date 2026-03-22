@@ -17,16 +17,17 @@ import { HBC_SPACE_MD } from '../theme/grid.js';
 import type { HbcKpiCardProps } from './types.js';
 
 const useStyles = makeStyles({
-  // UIF-041-addl: Increased gap (6px) and vertical padding (14px) for breathing room.
+  // UIF-045-addl: Adaptive density — padding, gap, and min-height scale with viewport.
+  // Narrow cards get tighter spacing; wide cards get breathing room.
   card: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '6px',
+    gap: 'clamp(3px, 1vw, 6px)',
     position: 'relative',
-    paddingTop: '14px',
-    paddingBottom: '14px',
-    paddingLeft: '20px',
-    paddingRight: '20px',
+    paddingTop: 'clamp(10px, 2vw, 14px)',
+    paddingBottom: 'clamp(10px, 2vw, 14px)',
+    paddingLeft: 'clamp(10px, 3vw, 20px)',
+    paddingRight: 'clamp(10px, 3vw, 20px)',
     borderRadius: HBC_RADIUS_XL,
     backgroundColor: tokens.colorNeutralBackground1,
     // INS-001: Only top accent border — side/bottom borders removed to eliminate
@@ -48,7 +49,7 @@ const useStyles = makeStyles({
     // card width via track sizing. overflow:hidden prevents label text from forcing
     // the card wider than its allocated track.
     // INS-005: Uniform minimum height — all cards same size for even grid rhythm.
-    minHeight: '100px',
+    minHeight: 'clamp(80px, 12vw, 100px)',
     minWidth: '0',
     overflow: 'hidden',
     flex: '1 1 0',
@@ -96,7 +97,8 @@ const useStyles = makeStyles({
     lineHeight: '1.2',
     color: tokens.colorNeutralForeground1,
   },
-  // UIF-041-addl: Trend as colored pill badge — background tint + icon + label.
+  // UIF-045-addl: Trend pill with adaptive max-width — truncates label text at
+  // narrow widths while keeping the direction arrow visible.
   trend: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -111,6 +113,10 @@ const useStyles = makeStyles({
     paddingRight: '6px',
     borderRadius: '10px',
     alignSelf: 'flex-start',
+    maxWidth: 'clamp(40px, 10vw, 120px)',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
   trendUp: {
     color: HBC_STATUS_COLORS.success as string,
