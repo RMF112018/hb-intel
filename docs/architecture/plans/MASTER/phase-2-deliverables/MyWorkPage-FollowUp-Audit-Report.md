@@ -197,17 +197,11 @@ The implementation demonstrates production-grade quality across architecture, ro
 
 ---
 
-### TRZ-01 — HubTertiaryZone `editable={false}` Contradicts P2-D2 §5.3
-**Severity:** Low
-**File:** `HubTertiaryZone.tsx`
+### TRZ-01 — HubTertiaryZone `editable={false}` Documented via ADR-0118 ✅ RESOLVED
 
-P2-D2 §5.3 specifies that the tertiary zone should support "limited EditMode" — users should be able to configure which tiles appear in the tertiary zone. The current implementation passes `editable={false}` to `HbcProjectCanvas`, which disables the edit mode entry point entirely for that zone.
-
-There is no ADR, comment, or spec amendment explaining this deviation. The `tileGovernance.test.ts` does not test tertiary-zone edit mode availability.
+**Resolution:** ADR-0118 documents that the tertiary zone is explicitly reserved for the `hub:recent-context` tile only. `editable={false}` is intentional — enabling edit mode in a single-tile zone would allow users to remove the sole tile (leaving an empty zone) or add secondary-zone tiles (breaking P2-D2 Gate 3 zone isolation). P2-D2 §5.3's EditMode requirement is superseded for this zone per ADR-0118. If the tertiary zone is expanded to host multiple configurable tiles in a future phase, the ADR should be revisited.
 
 **Note on the `:tertiary` role suffix:** The `role={`${primaryRole}:tertiary`}` pattern in `HubTertiaryZone.tsx` is the intended zone-isolation mechanism. The `ROLE_DEFAULT_TILES` in `canvasDefaults.ts` uses `:tertiary`-suffixed keys for the same purpose, and this is documented in the `README.md`. This is **not** a finding — it is deliberate design.
-
-**Required action:** Either (a) change `editable={false}` to `editable={true}` (or remove the prop to use the canvas default) to restore limited EditMode per spec, or (b) document an explicit deviation in the component header or an ADR citing the rationale.
 
 ---
 
@@ -234,19 +228,18 @@ There is no ADR, comment, or spec amendment explaining this deviation. The `tile
 | UI findings (UIF) | 10 | 10 | 0 | 0 |
 | Testing (TST) | 6 | 6 | 0 | 0 |
 | Documentation (DOC) | 3 | 3 | 0 | 0 |
-| **New finding (TRZ-01)** | 1 | 0 | 0 | 1 |
-| **Total** | **64** | **63** | **0** | **1** |
+| **New finding (TRZ-01)** | 1 | 1 | 0 | 0 |
+| **Total** | **64** | **64** | **0** | **0** |
 
 ---
 
 ## Final Verdict
 
-### CONDITIONAL GO
+### GO ✅
 
-The Phase 2 implementation satisfies the overwhelming majority of the original audit findings and demonstrates a production-grade implementation of the Personal Work Hub. Core architecture, role governance, token compliance, state persistence, freshness/trust, action vocabulary, testing coverage, and documentation are all in order.
+All 64 findings have been resolved. The Phase 2 implementation is a production-grade implementation of the Personal Work Hub. Core architecture, role governance, token compliance, state persistence, freshness/trust, action vocabulary, testing coverage, and documentation are all in order.
 
-**One item requires resolution before Phase 2 can be formally closed:**
+- **PRS-01/PRS-02:** Resolved via option (b) — vestigial `cardArrangement` props removed; `HbcProjectCanvas` manages tile arrangement internally.
+- **TRZ-01:** Resolved via ADR-0118 — tertiary zone is reserved for `hub:recent-context` only; `editable={false}` is intentional and documented.
 
-1. **TRZ-01 (Low):** `HubTertiaryZone.tsx` passes `editable={false}` to `HbcProjectCanvas`, contradicting P2-D2 §5.3's requirement for limited EditMode in the tertiary zone. Either restore `editable={true}` or document the deviation with rationale.
-
-PRS-01/PRS-02 have been resolved via option (b) — vestigial props removed and canvas config authority documented. The remaining item does not affect the primary feed zone, role entitlement, freshness/trust, state persistence, action vocabulary, or the pilot-required analytics tiles.
+Phase 2 can be formally closed.

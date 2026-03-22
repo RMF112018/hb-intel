@@ -15,6 +15,7 @@ The `/my-work` route implements the HB Intel Personal Work Hub: a three-zone ada
 | P2-A1 | Operating model — action vocabulary, no-redirect-on-empty |
 | P2-F1 | UI quality and mold-breaker conformance |
 | ADR-0117 | Executive defaults to `my-team` mode (resolves P2-D5 §3 vs P2-B2 §4) |
+| ADR-0118 | Tertiary zone reserved for Recent Activity only; `editable={false}` intentional (supersedes P2-D2 §5.3) |
 
 ## Directory Structure
 
@@ -24,7 +25,7 @@ my-work/
   HubZoneLayout.tsx       — Responsive three-zone grid (7fr/5fr desktop, 3fr/2fr tablet)
   HubPrimaryZone.tsx      — Primary feed zone (HbcMyWorkFeed)
   HubSecondaryZone.tsx    — Analytics zone (HbcProjectCanvas, "My Analytics")
-  HubTertiaryZone.tsx     — Utility zone (HbcProjectCanvas, recent activity)
+  HubTertiaryZone.tsx     — Utility zone (HbcProjectCanvas, recent activity, ADR-0118)
   HubDetailPanel.tsx      — Master-detail item drawer (UIF-002)
   HubTeamModeSelector.tsx — Team mode tabs (Personal/Delegated/My Team)
   HubConnectivityBanner.tsx — Degraded/offline connectivity display

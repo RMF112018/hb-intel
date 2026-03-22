@@ -5,6 +5,9 @@
  * RecentActivityCard render). Uses separate projectId from secondary zone
  * per P2-D2 Gate 3 zone boundary enforcement (two isolated canvas instances).
  *
+ * ADR-0118: Tertiary zone is reserved for hub:recent-context only.
+ * editable={false} is intentional — P2-D2 §5.3 EditMode superseded for this zone.
+ *
  * Hidden at essential tier. All roles have access per P2-D1 §5.
  */
 import type { ReactNode } from 'react';
@@ -20,7 +23,7 @@ export function HubTertiaryZone(): ReactNode {
   if (tier === 'essential') return null;
 
   // P2-D2 Gate 3: Separate projectId + tertiary role key for zone isolation.
-  // Tertiary zone: Recent Activity only, no editing, no heading.
+  // ADR-0118: Tertiary zone reserved for Recent Activity only; editable={false} intentional.
   return (
     <HbcProjectCanvas
       projectId="my-work-hub-tertiary"

@@ -379,6 +379,16 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
+## Phase 8 — Follow-Up Audit Resolutions
+
+### 8-A: ADR-0118 — Tertiary zone reserved for Recent Activity (TRZ-01) ✅ Completed (2026-03-22)
+
+| Finding ID | Severity | Finding Summary | Closure |
+|---|---|---|---|
+| TRZ-01 | **L** | `HubTertiaryZone.tsx` passes `editable={false}`, contradicting P2-D2 §5.3 EditMode requirement | ✅ Closed (2026-03-22) — ADR-0118 documents tertiary zone as single-purpose (`hub:recent-context` only); `editable={false}` intentional; P2-D2 §5.3 superseded for this zone |
+
+---
+
 ## Findings Coverage Summary
 
 | Finding ID | Severity | Closed By |
@@ -466,7 +476,8 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 | UX-F4 | C | 5-B, 5-C, 5-D |
 | UX-F5 | L | 1-A |
 | UX-F6 | H | 2-A (pa-lane-summary, pa-source-breakdown), 6-B (ao-provisioning-health) |
+| TRZ-01 | L | 8-A |
 
 ---
 
-*Cross-reference produced: 2026-03-22*
+*Cross-reference produced: 2026-03-22. Updated: 2026-03-22 (PRS-01 option b, TRZ-01 ADR-0118).*
