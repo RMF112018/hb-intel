@@ -132,6 +132,7 @@ Status: **Implemented 2026-03-22 in `@hbc/models` v0.4.0.** `IProjectRegistryRec
 **1.2 — Dual-key inbound routing normalization**
 Implement the transitional inbound routing layer that accepts both `projectId` (UUID) and `projectNumber` (legacy string). All inbound `projectNumber` references must resolve to `projectId` via a registry lookup before any internal processing. All internal state, links, and cross-lane handoffs use `projectId` exclusively. Redirect `projectNumber`-based routes to canonical `projectId`-based routes.
 Governing: P3-A1 §3.4–§3.6, P3-B1 §2.2
+Status: **Implemented 2026-03-22 in `@hbc/data-access` v0.5.0.** `getProjectByNumber` added to `IProjectRepository`. `normalizeProjectIdentifier` utility detects identifier kind (UUID vs `##-###-##`), resolves `projectNumber` to canonical `projectId` via registry lookup, and signals redirect requirement. Mock and proxy adapters updated.
 
 **1.3 — Project activation transaction — setup seam**
 Implement the setup seam activation path: new project setup flow produces a valid project registry entry with `projectId`, `siteUrl`, and `status: 'active'`. Incomplete activations must be rejected atomically — no orphaned records.

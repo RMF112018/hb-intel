@@ -29,6 +29,14 @@ export interface IProjectRepository {
   getProjectById(id: string): Promise<IActiveProject | null>;
 
   /**
+   * Retrieve a single project by its project number (legacy reference key).
+   * Used for dual-key inbound routing normalization (P3-A1 §3.4).
+   * @param projectNumber - The project number (format: ##-###-##).
+   * @returns The project, or `null` if not found.
+   */
+  getProjectByNumber(projectNumber: string): Promise<IActiveProject | null>;
+
+  /**
    * Create a new project.
    * @param data - Project data without the generated `id`.
    * @returns The newly created project with a generated UUID.

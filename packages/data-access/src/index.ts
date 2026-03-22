@@ -123,3 +123,15 @@ export {
   setProxyContext,
 } from './factory.js';
 export type { AdapterMode } from './factory.js';
+
+// ---------------------------------------------------------------------------
+// Routing normalization (Phase 3 Stage 1.2 — dual-key project identity)
+// ---------------------------------------------------------------------------
+export {
+  detectProjectIdentifierKind,
+  normalizeProjectIdentifier,
+} from './routing/normalizeProjectIdentifier.js';
+export type {
+  ProjectIdentifierKind,
+  NormalizeProjectIdentifierResult,
+} from './routing/normalizeProjectIdentifier.js';

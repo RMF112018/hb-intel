@@ -38,6 +38,20 @@ export class ProxyProjectRepository extends BaseRepository<IActiveProject> imple
     }
   }
 
+  async getProjectByNumber(projectNumber: string): Promise<IActiveProject | null> {
+    try {
+      const raw = await this.client.get<unknown>(
+        `/projects/by-number/${encodeURIComponent(projectNumber)}`,
+        undefined,
+        { domain: 'projects', operation: 'getProjectByNumber' },
+      );
+      return parseItemEnvelope<IActiveProject>(raw);
+    } catch (err) {
+      if (err instanceof NotFoundError) return null;
+      throw err;
+    }
+  }
+
   async createProject(data: Omit<IActiveProject, 'id'>, idempotencyContext?: IdempotencyContext): Promise<IActiveProject> {
     const raw = await this.client.post<unknown>(buildResourcePath('projects'), data, { domain: 'projects', operation: 'createProject' }, idempotencyContext);
     return parseItemEnvelope<IActiveProject>(raw);

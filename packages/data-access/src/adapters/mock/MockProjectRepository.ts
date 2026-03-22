@@ -17,6 +17,10 @@ export class MockProjectRepository extends BaseRepository<IActiveProject> implem
     return this.store.find((p) => p.id === id) ?? null;
   }
 
+  async getProjectByNumber(projectNumber: string): Promise<IActiveProject | null> {
+    return this.store.find((p) => p.number === projectNumber) ?? null;
+  }
+
   async createProject(data: Omit<IActiveProject, 'id'>, _idempotencyContext?: IdempotencyContext): Promise<IActiveProject> {
     const project: IActiveProject = {
       ...data,
