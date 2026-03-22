@@ -1,6 +1,6 @@
 {
   "name": "@hbc/pwa",
-  "version": "0.12.69",
+  "version": "0.12.71",
   "private": true,
   "type": "module",
   "scripts": {

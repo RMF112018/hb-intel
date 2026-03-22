@@ -145,8 +145,8 @@ Refactor `HubSecondaryZone` to render analytics/KPI tiles via `HbcProjectCanvas`
 
 | Tile ID | Content | Data Source Badge | Complexity Tier |
 |---|---|---|---|
-| `my-work.analytics.personal` | Personal Analytics card group | `Live` | Standard |
-| `my-work.analytics.aging-blocked` | Aging & Blocked card group | `Live` | Standard |
+| `hub:personal-analytics` | Personal Analytics card group | `Live` | Standard |
+| `hub:aging-blocked` | Aging & Blocked card group | `Live` | Standard |
 
 Each tile must be registered in the canvas tile registry using `register()` from `@hbc/project-canvas` at module initialization. Use `useRoleDefaultCanvas` for role-appropriate tile defaults. Use `useCanvasConfig` for user-modified arrangements per P2-D5.
 
@@ -161,7 +161,7 @@ Refactor `HubTertiaryZone` to render tiles via `HbcProjectCanvas`. Per `UI-Kit-W
 
 #### 2.2.4 Data-Source Badge and Freshness
 
-The `my-work.analytics.*` tiles use the `Live` data source badge model. The badge system provides per-tile freshness state through the canvas, which directly supports UIF-007 and UIF-018 — the data-source badge gives users a per-tile freshness signal without requiring a separate full-width banner as the sole recovery affordance.
+The `hub:*` analytics tiles use the `Live` data source badge model. The badge system provides per-tile freshness state through the canvas, which directly supports UIF-007 and UIF-018 — the data-source badge gives users a per-tile freshness signal without requiring a separate full-width banner as the sole recovery affordance.
 
 #### 2.2.5 Canvas Layout in the Right Panel
 
@@ -351,7 +351,7 @@ Note: `heading2` (20px/600) and `heading3` (16px/600) achieve the required ≥1.
 | Target | Change | Governing Source |
 |---|---|---|
 | Main content container | CSS grid: `grid-template-columns: minmax(0, 1fr) minmax(0, 380px)` on `HubZoneLayout`. Left = primary content zone (Standard weight); right = secondary detail zone (Light weight). | `UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` zone distinctions: Primary content (Standard) + Secondary detail (Light) |
-| Right panel — no item selected | `HbcProjectCanvas`-backed analytics tiles (`my-work.analytics.*`) + quick-access tiles. Elevation: `elevationLevel0` — secondary panel recedes behind primary feed | `UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` — supporting zone at elevation Level 0 |
+| Right panel — no item selected | `HbcProjectCanvas`-backed analytics tiles (`hub:*`) + quick-access tiles. Elevation: `elevationLevel0` — secondary panel recedes behind primary feed | `UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` — supporting zone at elevation Level 0 |
 | Right panel — item selected | `HubDetailPanel` (lazy-loaded) — `HbcPanel` slide-in pattern. Elevation: `elevationLevel3` (strong dual-shadow), surface role: Focused work zone. `slideInRight` animation (`TRANSITION_NORMAL` 250ms). | `UI-Kit-Wave1-Page-Patterns.md` — "Drill-In / Side Panel: HbcPanel at elevationLevel3 with backdrop"; `UI-Kit-Visual-Language-Guide.md` animation keyframes |
 | Breakpoints | `BREAKPOINT_TABLET` (1024px): two-column; below: single-column, right panel becomes `HbcPanel` drawer | `UI-Kit-Visual-Language-Guide.md` responsive breakpoints — `BREAKPOINT_TABLET: 1024px` |
 | Responsive collapse | < `BREAKPOINT_MOBILE` (768px): full single-column stack; right panel hidden behind tab/button | MB-04 — no horizontal scrolling at any supported viewport |

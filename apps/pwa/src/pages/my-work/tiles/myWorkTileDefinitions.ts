@@ -1,9 +1,12 @@
 /**
  * My Work Hub tile definitions — G0, P2-F1 §2.2.
  *
- * Defines 6 canvas tiles for the secondary (analytics) and tertiary (utility) zones.
- * Tile keys use the `my-work.analytics.*` and `my-work.utility.*` namespaces
- * so MyWorkCanvas can filter by zone prefix.
+ * Defines canvas tiles for the secondary (analytics) zone.
+ * Tile keys use the `hub:*` namespace per P2-D2 §6.1 so MyWorkCanvas
+ * can filter by zone prefix and tiles are discoverable by HbcProjectCanvas.
+ *
+ * Namespace mandate: P2-D2 §6.1 requires all My Work Hub tiles to use the
+ * `hub:` prefix. See P2-D2-Adaptive-Layout-and-Zone-Governance-Spec.md §6.1.
  *
  * Each tile provides 3 complexity variants (essential / standard / expert)
  * per the ICanvasTileDefinition contract from @hbc/project-canvas.
@@ -11,22 +14,15 @@
 import React from 'react';
 import type { ICanvasTileDefinition } from '@hbc/project-canvas';
 
-/**
- * Canonical auth role strings for tile role-gating.
- *
- * These must match strings produced by mapIdentityToAppRoles() in
- * @hbc/auth/roleMapping. Verified against landingResolver.ts and
- * HubTeamModeSelector.tsx, which both use 'Executive' and 'Administrator'.
- *
- * Tiles intended for all authenticated users use defaultForRoles: [].
- * MyWorkCanvas treats an empty array as "show to everyone" (no role filter).
- */
-const EXECUTIVE_ROLES = ['Executive'];
+// Role strings must match @hbc/auth canonical names (P2-D1 §11.1).
+// Do not extract to local constants — use inline literals or @hbc/auth exports.
+// Tiles intended for all authenticated users use defaultForRoles: [].
+// MyWorkCanvas treats an empty array as "show to everyone" (no role filter).
 
 export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
   // ── Secondary zone: analytics tiles ──────────────────────────────────
   {
-    tileKey: 'my-work.analytics.personal',
+    tileKey: 'hub:personal-analytics',
     title: 'Personal Analytics',
     description: 'Personal work KPIs with click-to-filter (UIF-008).',
     defaultForRoles: [],
@@ -55,10 +51,10 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
     lockable: false,
   },
   {
-    tileKey: 'my-work.analytics.aging-blocked',
+    tileKey: 'hub:aging-blocked',
     title: 'Aging & Blocked',
     description: 'Escalation candidate and blocked item counts (Executive-only).',
-    defaultForRoles: EXECUTIVE_ROLES,
+    defaultForRoles: ['Executive'],
     minComplexity: 'standard',
     mandatory: false,
     component: {
@@ -84,10 +80,10 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
     lockable: false,
   },
   {
-    tileKey: 'my-work.analytics.team-portfolio',
+    tileKey: 'hub:team-portfolio',
     title: 'Team Portfolio',
     description: 'Team feed counts for delegated and team modes (Executive-only).',
-    defaultForRoles: EXECUTIVE_ROLES,
+    defaultForRoles: ['Executive'],
     minComplexity: 'standard',
     mandatory: false,
     component: {
@@ -113,7 +109,7 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
     lockable: false,
   },
   {
-    tileKey: 'my-work.analytics.admin-oversight',
+    tileKey: 'hub:admin-oversight',
     title: 'Admin Oversight',
     description: 'System-wide oversight metrics (Administrator-only).',
     defaultForRoles: ['Administrator'],

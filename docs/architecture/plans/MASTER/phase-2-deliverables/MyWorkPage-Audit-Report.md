@@ -1,0 +1,696 @@
+# MyWorkPage Architecture and Implementation Audit
+
+**Date:** 2026-03-22
+**Audit Target:** `apps/pwa/src/pages/my-work/MyWorkPage.tsx` and all associated files
+**Reviewer Role:** Senior Architecture / Planning-Governance
+**Governing Authority:** Phase 2 Deliverables (`docs/architecture/plans/MASTER/phase-2-deliverables/`)
+**Status:** **NO-GO — Full re-implementation required before Phase 3 execution**
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#1-executive-summary)
+2. [Audit Scope](#2-audit-scope)
+3. [Current Repo-Truth Operating Model](#3-current-repo-truth-operating-model)
+4. [Plan Reconciliation Matrix](#4-plan-reconciliation-matrix)
+5. [UI-Kit Governance Violations](#5-ui-kit-governance-violations)
+6. [Architecture and Composition Findings](#6-architecture-and-composition-findings)
+7. [UX and Interaction Findings](#7-ux-and-interaction-findings)
+8. [Testing and Readiness Gaps](#8-testing-and-readiness-gaps)
+9. [Prioritized Remediation Plan](#9-prioritized-remediation-plan)
+10. [Documentation Corrections Needed](#10-documentation-corrections-needed)
+11. [Optional Immediate-Fix Patch List](#11-optional-immediate-fix-patch-list)
+
+---
+
+## 1. Executive Summary
+
+The `MyWorkPage` implementation fails on three structural levels simultaneously: governance compliance, implementation completeness, and production quality. The page is **not acceptable as the execution baseline for Phase 3 work.**
+
+The most critical failure is the complete absence of `@hbc/project-canvas` governance in the secondary and tertiary zones. The plan documents — most explicitly P2-D2 and P2-F1 — mandate that `HbcProjectCanvas`, `HbcCanvasEditor`, `useCanvasEditor`, `useCanvasMandatoryTiles`, and `useRoleDefaultCanvas` govern analytics and utility zone composition. None of these exist in the current implementation. Instead, a bespoke `MyWorkCanvas` component manually renders tiles with a hand-rolled grid. This is not a deferred feature — it is the governance structure the rest of the system was built to require.
+
+The second structural failure is that P2-F1 (the authoritative UI quality and conformance plan) explicitly re-opened all 18 UI findings on 2026-03-21, after reviewing Phases 1–5. The document's current status reads: "Full re-implementation required." The page received a 4/10 product-quality score and was reclassified from "Competitive (lower end)" to "Below Competitive" after Wave 5. This audit corroborates that assessment across every dimension examined.
+
+The third structural failure is a set of interconnected state management violations: the feed freshness model uses a single merged timestamp instead of the split `lastTrustedDataIso`/`lastRefreshAttemptIso` required by P2-B3; the `hbc-my-work-feed-cache` key mandated by P2-B2 §6 is absent from `hubStateTypes.ts`; return-state capture fires only on `visibilitychange`, not on the route `onLeave` required by P2-B2; and `isLoadError` is hardcoded to `false` at the page level, permanently suppressing error states.
+
+Across 36 implementation files reviewed and seven governing plan documents consulted, the audit found 7 Critical, 12 High, 9 Medium, and 6 Low findings, detailed in sections 4–8. No finding is safe to carry forward into Phase 3 without disposition.
+
+**Overall verdict: NO-GO.** Proceeding to Phase 3 on the current baseline would compound technical debt, create integration friction when canvas governance is later enforced, and deliver a product that the governing plans have already declared unacceptable.
+
+---
+
+## 2. Audit Scope
+
+### Files Reviewed
+
+**Page directory** (`apps/pwa/src/pages/my-work/`):
+`MyWorkPage.tsx`, `HubZoneLayout.tsx`, `HubPrimaryZone.tsx`, `HubSecondaryZone.tsx`, `HubTertiaryZone.tsx`, `HubDetailPanel.tsx`, `HubConnectivityBanner.tsx`, `HubFreshnessIndicator.tsx`, `HubPageLevelEmptyState.tsx`, `HubTeamModeSelector.tsx`, `useHubStatePersistence.ts`, `useHubReturnMemory.ts`, `useHubFeedRefresh.ts`, `useHubPersonalization.ts`, `useHubTrustState.ts`, `hubStateTypes.ts`, `trustStateConstants.ts`, `formatRelativeTime.ts`, `__tests__/useHubReturnMemory.test.ts`
+
+**Cards** (`cards/`):
+`QuickActionsStrip.tsx`, `QuickActionsSheet.tsx`, `QuickActionsMenu.tsx`, `RecentActivityCard.tsx`, `PersonalAnalyticsCard.tsx`, `AdminOversightCard.tsx`, `AgingBlockedCard.tsx`, `TeamPortfolioCard.tsx`
+
+**Tiles** (`tiles/`):
+`MyWorkCanvas.tsx`, `MyWorkHubTileContext.tsx`, `myWorkTileDefinitions.ts`, `registerMyWorkTiles.ts`, `PersonalAnalyticsTile.tsx`, `AgingBlockedTile.tsx`, `AdminOversightTile.tsx`, `TeamPortfolioTile.tsx`, `index.ts`
+
+**App shell**:
+`apps/pwa/src/router/workspace-routes.ts`, `apps/pwa/src/router/root-route.tsx`, `apps/pwa/src/sources/sourceAssembly.ts`
+
+### Governing Documents Consulted
+
+`P2-A1`, `P2-B2`, `P2-B3`, `P2-D1`, `P2-D2`, `P2-D3`, `P2-D4`, `P2-D5`, `P2-C4`, `P2-F1`, `P2-F1-UI-Audit-Report`, `UI-Kit-Mold-Breaker-Principles.md`, `UI-Kit-Usage-and-Composition-Guide.md`, `UI-Kit-Wave1-Page-Patterns.md`, `HB-Intel-Dev-Roadmap.md`, `.claude/rules/02-architecture-invariants.md`
+
+### Out of Scope
+
+Source adapter implementations in `@hbc/my-work-feed`, `@hbc/project-canvas` internals, SPFx companion surface, notification routing (P2-C2), ranking algorithm (P2-A2).
+
+---
+
+## 3. Current Repo-Truth Operating Model
+
+As actually implemented, `MyWorkPage` operates as follows.
+
+**Composition.** `MyWorkPage` mounts `MyWorkProvider` (from `@hbc/my-work-feed`) at the top, wraps the three-zone structure in `HubZoneLayout`, and passes `useHubTrustState`, `useHubPersonalization`, and local state (`teamMode`, `kpiFilter`, `selectedItem`) through React context and props. An inline `<style>` block in the JSX overrides breakpoint-specific layout behaviours. A FAB button for mobile quick-actions and a `HubTabBadgeBridge` null-renderer sit inside the composition.
+
+**Primary zone.** `HubPrimaryZone` renders `HubFreshnessIndicator` followed by `HbcMyWorkFeed`. This is the only zone with a clear architectural mandate; the feed is correctly excluded from project-canvas governance.
+
+**Secondary zone.** `HubSecondaryZone` renders an `HbcCard weight="primary"` containing `MyWorkCanvas` filtered by the `my-work.analytics.*` tile prefix. `MyWorkCanvas` is a custom renderer: it calls `getAll()` from `@hbc/project-canvas`, filters by prefix, complexity, and resolved roles, then renders tiles in a Griffel CSS grid. There is no `HbcProjectCanvas`, `HbcCanvasEditor`, `useRoleDefaultCanvas`, `useCanvasMandatoryTiles`, or `HbcTileCatalog`.
+
+**Tertiary zone.** `HubTertiaryZone` renders `RecentActivityCard` directly — it is not tile-governed at all. Both secondary and tertiary zones hide at `essential` complexity tier.
+
+**State management.** Draft persistence uses `useAutoSaveDraft` for `querySeed` (8h, 500ms debounce) and `useDraft` for `returnState` (1h). Team mode is persisted via a second `useAutoSaveDraft` call in `useHubPersonalization` (16h, 300ms debounce). `cardArrangement` and `updateCardVisibility` are computed in `useHubPersonalization` but neither value is consumed anywhere in `MyWorkPage`. The `hbc-my-work-feed-cache` draft key is not declared in `hubStateTypes.ts`.
+
+**Trust state.** `useHubTrustState` derives a single `lastRefreshedIso` timestamp from `feed.sources`, and the `queued` state is silently normalized to `live`. The split-timestamp model (`lastTrustedDataIso`, `lastRefreshAttemptIso`) required by P2-B3 §5 is not implemented.
+
+**Routing.** `myWorkRoute` is a `createWorkspaceRoute` with `lazyRouteComponent` — no `onLeave` hook, no search-parameter validation. Return-state capture fires from a `visibilitychange` event handler in `useHubReturnMemory`, not from the route lifecycle.
+
+**Navigation.** `HubDetailPanel` routes every action key — `open`, `mark-read`, `defer`, `pin-today`, `pin-week`, `delegate`, `reassign` — with `window.location.href = item.context.href`, a hard page reload regardless of action type. `RecentActivityCard` uses `window.location.href = '/projects'` for its CTA.
+
+**Tile registration.** `registerMyWorkTiles()` is correctly called from `sourceAssembly.ts` at bootstrap. The four registered definitions use namespace `hub:personal-analytics`, `hub:aging-blocked`, `hub:admin-oversight`, `hub:team-portfolio` — ✅ corrected per P2-D2 §6.1 (remediation 0-A, 2026-03-22).
+
+---
+
+## 4. Plan Reconciliation Matrix
+
+### Severity key: Critical / High / Medium / Low
+
+---
+
+### P2-D2 — Adaptive Layout and Zone Governance Spec
+
+| Finding ID | Requirement | Current State | Severity |
+|---|---|---|---|
+| ARC-01 | `HbcProjectCanvas` must govern secondary and tertiary zone tile layout | `MyWorkCanvas` custom renderer used; `HbcProjectCanvas` not present | **Critical** |
+| ARC-02 | `HbcCanvasEditor` + `useCanvasEditor` required for edit-mode in secondary zone | Not present anywhere in the page | **Critical** |
+| ARC-03 | `useCanvasMandatoryTiles` must lock `hub:lane-summary`, `hub:quick-actions`, `hub:team-workload` | Not present; no mandatory tile enforcement exists | **Critical** |
+| ARC-04 | `useRoleDefaultCanvas` must seed role-specific default arrangements | Not present; tile order is hard-coded by `getAll()` position | **Critical** |
+| ARC-05 | Tile namespace must be `hub:*` (P2-D2 §6.1) | ✅ Corrected — tiles registered as `hub:*` (remediation 0-A, 2026-03-22) | **Critical** — Resolved |
+| ARC-06 | Two isolated `useCanvasEditor` instances (secondary + tertiary) required | Not present | **High** |
+| ARC-07 | `HbcTileCatalog` required for edit-mode tile picker | Not present | **High** |
+| ARC-08 | 12-column grid with governed responsive tiers | Custom Griffel 1fr/2fr/7fr grid — no column alignment with design system grid | **Medium** |
+| ARC-09 | Gate 2 (canvas in secondary), Gate 3 (canvas in tertiary), Gate 4 (edit-mode), Gate 5 (mandatory tiles) all failing | All five gates failing (Gate 1 — primary zone isolation — passes) | **Critical** |
+
+P2-D2 is the single most consequential governance failure. Every gate beyond Gate 1 is unmet.
+
+---
+
+### P2-B2 — Hub State Persistence and Return Memory Contract
+
+| Finding ID | Requirement | Current State | Severity |
+|---|---|---|---|
+| STT-01 | `hbc-my-work-feed-cache` draft key (4h TTL) required for feed fallback on stale return | Key absent from `hubStateTypes.ts`; `useHubStatePersistence.ts` does not persist feed data | **High** |
+| STT-02 | Route `onLeave` is primary return-state capture trigger | `captureReturnState` fires only from `visibilitychange` handler; route has no `onLeave` hook | **High** |
+| STT-03 | URL is canonical state authority; bare `/my-work` seeds from draft | `window.history.replaceState` used for URL sync — not TanStack Router search params; state management coupling is incomplete | **Medium** |
+| STT-04 | Registry-driven bulk cleanup on session end required | Not implemented; no cleanup registry hook present | **Low** |
+
+---
+
+### P2-B3 — Freshness, Refresh, and Staleness Trust Policy
+
+| Finding ID | Requirement | Current State | Severity |
+|---|---|---|---|
+| FRS-01 | Split timestamp model: `lastTrustedDataIso` (when data was trusted) vs `lastRefreshAttemptIso` (when refresh was last tried) | Single `lastRefreshedIso` used throughout; `HubFreshnessIndicator` and `useHubTrustState` cannot distinguish a failed refresh from a successful one | **High** |
+| FRS-02 | `queued` trust state is a distinct state (not `live`, not `partial`) | `useHubTrustState` normalizes `queued → live`; the queued indicator is erased from the UX | **High** |
+| FRS-03 | 3-minute auto-refresh trigger | `useHubFeedRefresh` correctly invalidates TanStack Query; trigger scheduling not verified in current implementation | **Medium** |
+| FRS-04 | `FEED_FRESHNESS_WINDOW_MS = 300_000` (5 min) | `trustStateConstants.ts` correctly sets this value | **Pass** |
+| FRS-05 | Relative time display bands | `formatRelativeTime.ts` bands match P2-B3 §6.2 exactly | **Pass** |
+
+---
+
+### P2-D1 — Role-to-Hub Entitlement Matrix
+
+| Finding ID | Requirement | Current State | Severity |
+|---|---|---|---|
+| ROL-01 | `@hbc/auth` is the sole role resolution authority; no local role constants (§11.1) | ✅ Corrected — local role constants removed; inline literals used (remediation 0-B, 2026-03-22) | **Critical** — Resolved |
+| ROL-02 | `my-team` mode eligibility must use `resolvedRoles` from `@hbc/auth` exclusively | `MyWorkPage` uses `useCurrentUser()` for role resolution; `HubTeamModeSelector` independently imports and reads `useAuthStore` — dual role resolution sources in the same page | **High** |
+| ROL-03 | Executive default landing is `my-team` mode (P2-D1 §4) | `MyWorkPage` initializes `teamMode` from persisted draft, defaulting to `'personal'` for all roles | **Medium** |
+| ROL-04 | Administrator routes to `/admin`, not `/my-work` | `workspace-routes.ts` correctly gates `/admin` with `requireAdminAccessControl()`; `resolveLandingDecision` in the index route handles this | **Pass** |
+
+---
+
+### P2-D3 — Analytics Card Governance Matrix
+
+| Finding ID | Requirement | Current State | Severity |
+|---|---|---|---|
+| CRD-01 | `pa-lane-summary` (pilot-REQUIRED, locked) must display 4 lane counts; Standard variant: visual chart | `PersonalAnalyticsTile` renders `PersonalAnalyticsCard` which shows KPI counts by source module — not lane counts. No `pa-lane-summary` card exists | **High** |
+| CRD-02 | `pa-source-breakdown` (pilot-REQUIRED) must show work distribution by source module | Not present as a distinct card; source-module data is partially surfaced inside `PersonalAnalyticsCard` but not governed to spec | **High** |
+| CRD-03 | `pa-recent-activity` (tertiary zone) — 5 items in Standard tier | `RecentActivityCard` is a placeholder stub with empty-state only; no items rendered | **High** |
+| CRD-04 | `ao-provisioning-health` (Administrator, secondary zone) — provisioning failure list | `AdminOversightCard` is a stub containing placeholder text only; no data rendered | **High** |
+| CRD-05 | Card variants must cover all three complexity tiers (E/S/X) | All four tiles use `PersonalAnalyticsTileStandard as PersonalAnalyticsTileExpert` — Expert variant is an alias of Standard; no expert-specific implementation exists | **Low** |
+| CRD-06 | Cards must not cross zones; secondary cards stay in secondary | `RecentActivityCard` is rendered by `HubTertiaryZone` — correct zone. `PersonalAnalyticsCard` is in secondary — correct zone | **Pass** |
+| CRD-07 | Locked cards cannot be personalized away | No lock enforcement mechanism exists since `HbcProjectCanvas`/`useCanvasMandatoryTiles` are absent | **Critical** (derives from ARC-03) |
+
+---
+
+### P2-D4 — Delegated and Team Lane Governance Note
+
+| Finding ID | Requirement | Current State | Severity |
+|---|---|---|---|
+| TM-01 | `my-team` must be role-gated to Executive only | `HubTeamModeSelector` conditionally renders the "My Team" tab behind `isExecutive` check — functionally correct | **Pass (conditional)** |
+| TM-02 | Team mode is a feed projection, not a separate route | No separate route for team mode; `teamMode` is local state within `/my-work` — correct | **Pass** |
+| TM-03 | Role check uses `resolvedRoles` from `@hbc/auth` | Two separate role checks (ROL-02 above) — structural concern but functional result is currently the same | **Medium** |
+| TM-04 | Team items are read-only (no feed mutations for non-owners) | `HubDetailPanel` routes all actions via `window.location.href` regardless of team mode — this inadvertently provides some protection but not via the specified `canAct` mechanism | **Medium** |
+
+---
+
+### P2-A1 — Personal Work Hub Operating Model Register
+
+| Finding ID | Requirement | Current State | Severity |
+|---|---|---|---|
+| OPM-01 | Full PWA action vocabulary: `open`, `mark-read`, `acknowledge`, `dismiss`, `defer`, `undefer`, `waiting-on`, `pin-today`, `pin-week`, `delegate`, `reassign` (§7.2) | Only `open` is implemented — via `window.location.href` full page reload; all other actions route to the same href regardless of action key | **High** |
+| OPM-02 | No redirect on low-work; primary zone protected | Correct — no redirect implemented; primary zone is invariant | **Pass** |
+| OPM-03 | Task-first identity; feed is primary operating layer | Primary zone correctly prioritized in layout | **Pass** |
+
+---
+
+### P2-D5 — Personalization Policy and Saved-View Rules
+
+| Finding ID | Requirement | Current State | Severity |
+|---|---|---|---|
+| PRS-01 | `cardArrangement` must govern analytics card display order | `useHubPersonalization` correctly persists `cardArrangement` (30-day TTL, 500ms debounce) but `MyWorkPage` never passes it to `HubSecondaryZone` or `MyWorkCanvas` — it is destructured and dropped | **High** |
+| PRS-02 | `updateCardVisibility` must be wired to card show/hide UI | `useHubPersonalization` exports `updateCardVisibility` — not consumed anywhere | **Medium** |
+| PRS-03 | Executive default is `my-team` (P2-D5 §3) | P2-D5 §3 says Executive defaults to `my-team`; P2-B2 §4 says bare `/my-work` seeds from personal-first draft. These plan files conflict. The implementation defaults all roles to `personal`. | **Plan conflict — High** |
+
+---
+
+### P2-C4 — Handoff Criteria Matrix
+
+| Finding ID | Requirement | Current State | Severity |
+|---|---|---|---|
+| NAV-01 | Domain mutations happen at the domain surface via proper handoff | `HubDetailPanel` emits `window.location.href = item.context.href` for every action — no `@hbc/workflow-handoff` package integration; no `IHandoffPackage` construction; full page reload on every navigation | **High** |
+| NAV-02 | Return path contract: domain surface provides "Back to My Work" | No return-path state is passed through the handoff — return state would need to be stored in draft first | **Medium** |
+
+---
+
+## 5. UI-Kit Governance Violations
+
+### D-10: No Direct Fluent UI Imports (Usage and Composition Guide Rule)
+
+Rule: Fluent UI primitives must be imported through `@hbc/ui-kit` only; never directly from `@fluentui/react-components`.
+
+| File | Violation | Severity |
+|---|---|---|
+| `cards/QuickActionsSheet.tsx` | `import { tokens } from '@fluentui/react-components'` | **Medium** |
+| `cards/RecentActivityCard.tsx` | `import { tokens } from '@fluentui/react-components'` | **Medium** |
+
+Both files access Fluent tokens directly, bypassing the `@hbc/ui-kit` token governance layer and breaking MB-08 (single token set, no per-surface overrides).
+
+---
+
+### MB-08: Single Token Set — No Hardcoded Colors
+
+Rule: All colors and spacing must use `HBC_*` named token constants from `@hbc/ui-kit/theme`. No inline hex, rgb, or CSS literal values.
+
+| File | Violation | Severity |
+|---|---|---|
+| `cards/PersonalAnalyticsCard.tsx` | `backgroundColor: '#1E3A5F'` — hardcoded hex on KPI card header | **Medium** |
+| `MyWorkPage.tsx` | FAB button `style={{ backgroundColor: '#F37021' }}` — hardcoded brand orange | **Medium** |
+| `cards/TeamPortfolioCard.tsx` | Raw CSS variable strings (`'var(--colorBrandBackground)'`) instead of named token constants | **Medium** |
+| `HubConnectivityBanner.tsx` | `<div style={{ borderLeftColor: HBC_STATUS_RAMP_AMBER[10] }}>` — ramp index access instead of a semantic token | **Medium** |
+
+---
+
+### Usage and Composition Guide Rule 6: No Inline Styles for Layout
+
+| File | Violation | Severity |
+|---|---|---|
+| `MyWorkPage.tsx` | Inline `<style>` block for responsive breakpoint overrides instead of Griffel `makeStyles` | **Medium** |
+| `HubZoneLayout.tsx` | `hasRightPanelContent` prop triggers inline `style={{ gridTemplateColumns: '1fr' }}` override | **Medium** |
+
+---
+
+### Missing Token Usage
+
+| File | Violation | Severity |
+|---|---|---|
+| `cards/TeamPortfolioCard.tsx` | `<span>Loading...</span>` plain text instead of `HbcSpinner` | **Medium** |
+| `HubTeamModeSelector.tsx` | Local `TabBadge` subcomponent uses inline styles for badge display | **Low** |
+
+---
+
+## 6. Architecture and Composition Findings
+
+### ARC-F1: `MyWorkCanvas` is a Governance Bypass (Critical)
+
+**File:** `tiles/MyWorkCanvas.tsx`
+
+`MyWorkCanvas` calls `getAll()` from `@hbc/project-canvas` — the package's internal registry read — and then manually renders tiles using local role filtering and a hand-rolled Griffel grid. This completely bypasses:
+
+- `HbcProjectCanvas` (the governed canvas renderer with edit-mode support, mandatory tile enforcement, and role defaults)
+- `useRoleDefaultCanvas` (seeding the default arrangement based on resolved role)
+- `useCanvasMandatoryTiles` (ensuring `hub:lane-summary`, `hub:quick-actions`, `hub:team-workload` cannot be removed)
+- `HbcCanvasEditor` and `HbcTileCatalog` (the edit-mode tile management surface)
+
+P2-F1 §Revision Note (2026-03-21) explicitly identifies this as one of the two root causes of the page's production failure. The custom `MyWorkCanvas` must be replaced with `HbcProjectCanvas` in both the secondary and tertiary zones.
+
+---
+
+### ARC-F2: Wrong Tile Namespace (Critical)
+
+**File:** `tiles/myWorkTileDefinitions.ts`
+
+Four tile definitions are now registered with the correct `hub:*` namespace per P2-D2 §6.1:
+- `hub:personal-analytics`
+- `hub:aging-blocked`
+- `hub:team-portfolio`
+- `hub:admin-oversight`
+
+✅ Namespace corrected (remediation 0-A, 2026-03-22). Tiles are now discoverable under the governed `hub:` prefix for future `HbcProjectCanvas` integration.
+
+---
+
+### ARC-F3: Local Role Constants Violate P2-D1 §11.1 (Critical)
+
+**File:** `tiles/myWorkTileDefinitions.ts`
+
+✅ Local role constants removed (remediation 0-B, 2026-03-22). Role strings are now inlined per the canonical `@hbc/auth` pattern (e.g., `defaultForRoles: ['Executive']`). P2-D1 §11.1 compliance restored.
+
+---
+
+### ARC-F4: Dual Role Resolution Sources in a Single Page (High)
+
+`MyWorkPage.tsx` calls `useCurrentUser()` to obtain role information for the `RoleGate` wrappers and the Executive default team mode. `HubTeamModeSelector.tsx` independently calls `useAuthStore()` directly. These two hooks read from the same underlying store but create two separate observation points. If a memoisation or timing edge case ever causes them to diverge, the team mode tab and the page-level role gate would see different role states simultaneously. P2-D1 mandates a single role resolution path via `@hbc/auth` hooks — consolidate to one call site per render tree.
+
+---
+
+### ARC-F5: `registerMyWorkTiles` Called from App Bootstrap (Observation)
+
+**File:** `apps/pwa/src/sources/sourceAssembly.ts`
+
+Tile registration is correctly placed in `sourceAssembly.ts`, which is called at PWA bootstrap. This ensures tiles are available before any route renders. The registration itself is idempotent (verified in `registerMyWorkTiles.ts`). The concern is purely the namespace (ARC-F2), not the timing.
+
+---
+
+### ARC-F6: `cardArrangement` Silently Discarded (High)
+
+**Files:** `useHubPersonalization.ts`, `MyWorkPage.tsx`
+
+`useHubPersonalization` computes `cardArrangement` (a 30-day-persisted draft of the user's card layout) and exports it alongside `updateCardVisibility`. In `MyWorkPage`, `cardArrangement` is destructured from the hook result but is never passed to `HubSecondaryZone`, `MyWorkCanvas`, or any downstream component. The user's saved layout is read from IndexedDB on every mount and immediately discarded. This means the P2-D5 card personalization feature appears to work (the draft is persisted and restored) but has zero effect on the rendered layout.
+
+---
+
+### ARC-F7: `QuickActionsMenu.tsx` is Orphaned Dead Code (High)
+
+**File:** `cards/QuickActionsMenu.tsx`
+
+This component imports `HbcCard`, wraps a menu, and exports a complete `QuickActionsMenu`. It is not imported or rendered anywhere in `MyWorkPage.tsx`, `HubTertiaryZone.tsx`, or any other component. It is not referenced in the tile definitions. It accumulates bundle weight and creates maintenance confusion.
+
+---
+
+### ARC-F8: `AdminOversightCard` is a Stub (High)
+
+**File:** `cards/AdminOversightCard.tsx`
+
+The card contains only placeholder text — no real data fetch, no `@hbc/my-work-feed` hook usage, no actual provisioning health rendering. P2-D3 §8 designates `ao-provisioning-health` as a pilot-optional card but the governing matrix (§2) specifies it should surface provisioning BIC items in failed/blocked state. The tile definition exists, the registration exists, and the card renders — but it renders no meaningful content. Administrator users will see a blank card.
+
+---
+
+### ARC-F9: `HubTabBadgeBridge` is an Architectural Smell (Medium)
+
+**File:** `MyWorkPage.tsx`
+
+`HubTabBadgeBridge` is a null-rendering component (returns `null`) whose sole purpose is to call `useMyWorkCounts()` inside the `MyWorkProvider` context boundary and presumably update some external tab badge state. This pattern creates invisible cross-boundary data coupling. If `useMyWorkCounts` is not the mechanism for badge updates, this is dead code; if it is, the coupling should be explicit. Either way, the intent should be documented or the pattern replaced with a context value passed to `HubTeamModeSelector`.
+
+---
+
+### ARC-F10: Route Has No `onLeave` Hook (High)
+
+**File:** `apps/pwa/src/router/workspace-routes.ts`
+
+`myWorkRoute` is constructed with `createWorkspaceRoute('my-work', ...)`, which produces a standard `createRoute` with no `onLeave`. P2-B2 §4.2 designates route `onLeave` as the primary trigger for `captureReturnState`. The current implementation fires this only from a `visibilitychange` event handler in `useHubReturnMemory`. Tab-switching and some programmatic navigations will fire `visibilitychange`; but SPA navigation away from `/my-work` to another route (e.g., clicking "Project Hub" in the sidebar) will not reliably fire it. State will not be captured on those navigation events.
+
+---
+
+## 7. UX and Interaction Findings
+
+### UX-F1: All Navigation Uses `window.location.href` (High)
+
+**Files:** `HubDetailPanel.tsx`, `cards/RecentActivityCard.tsx`
+
+`HubDetailPanel` maps every action key to `window.location.href = item.context.href`. This means:
+
+- Every "Open" action causes a full page reload — the SPA never navigates; the browser loads a new document
+- All other action keys (`mark-read`, `defer`, `pin-today`, `pin-week`, `delegate`, `reassign`) silently fall through to the same `window.location.href` handler, discarding the action intent entirely
+- The TanStack Router session is torn down on every navigation — no back-button SPA behavior, no scroll position restoration, no prefetch
+
+`RecentActivityCard` uses `window.location.href = '/projects'` directly. Both must use `router.navigate()` (TanStack Router) for same-origin SPA navigation, with `@hbc/workflow-handoff` for cross-domain handoff packages where P2-C4 applies.
+
+---
+
+### UX-F2: `isLoadError` Hardcoded to `false` (High)
+
+**File:** `MyWorkPage.tsx`
+
+```tsx
+<HubPageLevelEmptyState
+  // ...
+  isLoadError={false}  // hardcoded
+/>
+```
+
+`HubPageLevelEmptyState` contains logic for rendering `HbcSmartEmptyState` with an error variant when `isLoadError` is true. The hardcoded `false` means users will never see an error state, even if `MyWorkProvider` fails to load data. Any network failure, auth expiry, or source adapter error will render a silent empty state rather than actionable error feedback.
+
+---
+
+### UX-F3: `queued` Trust State Erased (High)
+
+**File:** `useHubTrustState.ts`
+
+```typescript
+const trustState = rawState === 'queued' ? 'live' : rawState;
+```
+
+P2-B3 §3 defines `queued` as a distinct, user-visible trust state meaning "data is enqueued for send but not yet confirmed." It has different visual treatment from `live` (which means data is confirmed fresh) and from `cached` (which means data is serving from local cache). By silently converting `queued → live`, the freshness indicator misleads users into thinking their data is confirmed fresh when it may be pending. This is a data-integrity misrepresentation.
+
+---
+
+### UX-F4: P2-F1 UI Findings UIF-001 through UIF-018 All Unresolved (Critical)
+
+**Authority:** `P2-F1-My-Work-Hub-UI-Audit-Report.md` (updated 2026-03-21 after Wave 5 inspection)
+
+The consolidate UI audit report contains 18 findings, 4 Critical and 10 High severity, all currently marked re-opened. The most operationally significant:
+
+**UIF-001 (Critical):** Lane headers in `@hbc/my-work-feed` render as OS-native gray rectangle buttons — no design token treatment, `appearance: auto`, `border-radius: 0px`. This is described as "the most trust-breaking visual on the page" and a "credibility disqualifier" for mold-breaker status.
+
+**UIF-002 (Critical):** Single-column layout buries the Insights panel 900px below fold. The governing layout spec (P2-D2) requires a two-column responsive grid (primary zone left, analytics right). The right portion of the viewport is empty throughout the work feed scroll.
+
+**UIF-003 (Critical):** Work item title links render in browser-default blue (`rgb(0,0,238)`) on the dark shell background — a design system override failure.
+
+**UIF-004 (Critical):** The page is in a split-theme state — shell chrome is dark, work item feed content area is near-white. Neither dark mode nor light mode; a collision of both.
+
+**UIF-006 (High):** Work item rows have zero padding, zero border separators, and transparent background. Items bleed together with no visual row boundary. No temporal metadata (due date, age, days blocked) visible on list rows — triage requires clicking every item.
+
+**UIF-010 (High):** Dev overlays (`HB-AUTH-DEV` bar and TanStack devtools button) visible in production-accessible builds. Root-route `root-route.tsx` shows these have been addressed via `import.meta.env.DEV` guards — this finding may be partially resolved, but the audit report re-opened it.
+
+**UIF-013 (High):** Left navigation rail shows only one item ("My Work") — no other module destinations visible without expansion.
+
+**UIF-014 through UIF-018** cover CTA label specificity, project color coding, focus ring visibility, and field-use touch targets — all open.
+
+The full detailed remediation requirements for all 18 findings are in `P2-F1-My-Work-Hub-UI-Quality-and-Mold-Breaker-Conformance-Plan.md`. This audit does not duplicate them here but requires they be treated as a co-equal input to any remediation plan.
+
+---
+
+### UX-F5: `HubFreshnessIndicator._isLoading` is Dead Code (Low)
+
+**File:** `HubFreshnessIndicator.tsx`
+
+The `_isLoading` parameter (leading underscore signals intentional suppression of lint warnings) is accepted by the component but never used in any conditional or rendering logic. The Fluent `HbcSpinner` that was presumably intended to appear during loading is absent. The component renders the same static content whether data is loading or not.
+
+---
+
+### UX-F6: Pilot-Required Cards Incomplete or Absent (High)
+
+Per P2-D3 §8, four cards are pilot-REQUIRED:
+
+| Card ID | Status |
+|---|---|
+| `pa-lane-summary` | **Missing** — `PersonalAnalyticsTile` shows source breakdown counts, not the 4 required lane counts (`nowCount`, `blockedCount`, `waitingCount`, `deferredCount`) |
+| `pa-source-breakdown` | **Missing** — not a distinct card; source data partially present inside `PersonalAnalyticsCard` |
+| `tp-team-workload` | **Partially present** — `TeamPortfolioCard` renders team counts but uses `<span>Loading...</span>` and raw CSS variable strings |
+| `ut-quick-actions` | **Present** — `QuickActionsStrip` and `QuickActionsSheet` are implemented and wired |
+
+Two of the four pilot-required cards are missing; one is present but below quality bar. The pilot-required card set is the minimum viable card inventory; pilot launch without `pa-lane-summary` and `pa-source-breakdown` would fail P2-D3's pilot launch gate.
+
+---
+
+## 8. Testing and Readiness Gaps
+
+### TST-F1: Effectively Zero Behavioral Test Coverage (Critical)
+
+**File:** `__tests__/useHubReturnMemory.test.ts` (the only test file)
+
+The single test file in the entire `my-work` directory tests type shapes and constant values. It imports `HUB_DRAFT_KEYS`, `HUB_DRAFT_TTL`, and `HUB_RETURN_STATE_SCHEMA` and asserts that constants equal their expected values. There are no behavioral tests for any of the following:
+
+- `useHubTrustState` state derivation under `live`, `cached`, `partial`, `queued` inputs
+- `useHubReturnMemory` scroll capture and restore behavior
+- `useHubStatePersistence` draft key write/read round-trip
+- `useHubPersonalization` team mode persistence and cardArrangement round-trip
+- `useHubFeedRefresh` cache invalidation on return
+- `MyWorkCanvas` tile filtering by prefix, role, and complexity
+- `HubTeamModeSelector` tab rendering and mode switching
+- `HubDetailPanel` action routing
+- `HubFreshnessIndicator` display under each trust state
+- `HubPageLevelEmptyState` rendering under error and permission states
+
+P2-D2 Implementation Gate 5 (mandatory tile enforcement) explicitly requires tests demonstrating that locked tiles cannot be removed. No such tests exist.
+
+The absence of behavioral tests means every refactoring required by this audit must be done without a safety net.
+
+---
+
+### TST-F2: P2-E3 Validation Plan Evidence Not Satisfied
+
+The First Release Success Scorecard (`P2-E3`) requires automated validation of the role-entitlement matrix (P2-D1 §11.1), trust state transitions, and freshness window behavior before pilot launch. None of these have corresponding tests.
+
+---
+
+### TST-F3: No Integration or Snapshot Tests for Zone Composition
+
+There are no tests verifying that:
+- `HubSecondaryZone` renders analytics tiles for each role
+- `HubTertiaryZone` renders utility cards correctly
+- `HubPrimaryZone` correctly excludes canvas governance
+- The `MyWorkProvider` context is correctly threaded through all zone components
+
+---
+
+## 9. Prioritized Remediation Plan
+
+All items are pre-conditions for Phase 3 unless explicitly marked as "can proceed in parallel."
+
+---
+
+### Tier 0: Governance-Blocking (Must complete before any Phase 3 work)
+
+These findings invalidate the implementation's fitness as a Phase 3 baseline. They cannot be deferred without creating compounding integration debt.
+
+**T0-01: Replace `MyWorkCanvas` with `HbcProjectCanvas` in secondary and tertiary zones**
+Files: `tiles/MyWorkCanvas.tsx`, `HubSecondaryZone.tsx`, `HubTertiaryZone.tsx`
+Authority: P2-D2, P2-F1 §G0
+Action: Remove `MyWorkCanvas`. Wire `HbcProjectCanvas` with `useRoleDefaultCanvas` for seeding, `useCanvasMandatoryTiles` locking `hub:lane-summary`, `hub:quick-actions`, `hub:team-workload`, and two isolated `useCanvasEditor` instances (secondary, tertiary). Add `HbcCanvasEditor` and `HbcTileCatalog` for edit mode.
+Risk: High — this is a full secondary/tertiary zone replacement. Requires careful coordination with `@hbc/project-canvas` API.
+
+**T0-02: Re-register tiles under `hub:` namespace** ✅ Completed (2026-03-22)
+File: `tiles/myWorkTileDefinitions.ts`, `tiles/registerMyWorkTiles.ts`
+Authority: P2-D2 §6.1
+Action: Renamed all tile IDs to `hub:personal-analytics`, `hub:aging-blocked`, `hub:admin-oversight`, `hub:team-portfolio`. Updated filter prefix in `HubSecondaryZone` from `my-work.analytics` to `hub:`. Added P2-D2 §6.1 namespace mandate doc comment to `myWorkTileDefinitions.ts`.
+
+**T0-03: Remove local role constants; use `@hbc/auth` exclusively** ✅ Completed (2026-03-22)
+File: `tiles/myWorkTileDefinitions.ts`
+Authority: P2-D1 §11.1
+Action: Deleted `EXECUTIVE_ROLES` constant and its JSDoc block. Replaced with inline string literals (`['Executive']`, `['Administrator']`) per the canonical `@hbc/auth` pattern used in `landingResolver.ts`. Added P2-D1 §11.1 governance comment. Role resolution consolidation (single call site per render tree) deferred to T1-02.
+
+---
+
+### Tier 1: Contract-Blocking (Must complete before pilot launch)
+
+**T1-01: Implement split timestamp model in `useHubTrustState`**
+Files: `useHubTrustState.ts`, `HubFreshnessIndicator.tsx`, `hubStateTypes.ts`
+Authority: P2-B3 §5
+Action: Split `lastRefreshedIso` into `lastTrustedDataIso` (last time data was confirmed good) and `lastRefreshAttemptIso` (last time a refresh was attempted). Update `HubFreshnessIndicator` to distinguish these. Remove `queued → live` normalization; add `queued` visual treatment.
+
+**T1-02: Add `hbc-my-work-feed-cache` draft key and feed cache persistence**
+Files: `hubStateTypes.ts`, `useHubStatePersistence.ts`
+Authority: P2-B2 §6
+Action: Add `HUB_DRAFT_KEYS.feedCache = 'hbc-my-work-feed-cache'` with 4h TTL. Wire `useAutoSaveDraft` in `useHubStatePersistence` to persist the feed data on write and seed it on stale return.
+
+**T1-03: Wire return-state capture to route `onLeave`**
+Files: `apps/pwa/src/router/workspace-routes.ts`, `useHubReturnMemory.ts`
+Authority: P2-B2 §4.2
+Action: Add `onLeave` callback to `myWorkRoute` (TanStack Router supports this via `routerOptions` or route lifecycle hooks). Call `captureReturnState()` there as the primary trigger; retain `visibilitychange` as a secondary fallback.
+
+**T1-04: Implement full PWA action vocabulary in `HubDetailPanel`**
+File: `HubDetailPanel.tsx`
+Authority: P2-A1 §7.2, P2-C4
+Action: Replace `window.location.href` universal handler with action-specific dispatch. `open` → `router.navigate()` for same-app routes, `@hbc/workflow-handoff` for cross-domain. `mark-read`, `defer`, `pin-today`, `pin-week`, `undefer`, `waiting-on` → hub-local mutations via `@hbc/my-work-feed` mutation hooks. `delegate`, `reassign` → `@hbc/workflow-handoff` with appropriate `IHandoffPackage`. All actions must preserve SPA session.
+
+**T1-05: Fix `isLoadError` — derive from actual error state**
+File: `MyWorkPage.tsx`
+Authority: P2-A1 §3.4 (error gating)
+Action: Obtain error state from `useMyWork()` result and pass it to `<HubPageLevelEmptyState isLoadError={isError} />`. Remove hardcoded `false`.
+
+**T1-06: Wire `cardArrangement` to tile rendering**
+Files: `MyWorkPage.tsx`, `HubSecondaryZone.tsx`
+Authority: P2-D5, P2-D3 §7
+Action: After T0-01 (canvas integration), pass `cardArrangement` from `useHubPersonalization` into the `HbcProjectCanvas` arrangement prop. Wire `updateCardVisibility` to the edit-mode surface. Until T0-01 is complete, at minimum stop discarding the value silently.
+
+**T1-07: Implement missing pilot-required cards (`pa-lane-summary`, `pa-source-breakdown`)**
+Files: New card and tile files; `myWorkTileDefinitions.ts`
+Authority: P2-D3 §8
+Action: Create `LaneSummaryCard` consuming `useMyWorkCounts()` lane fields. Create `SourceBreakdownCard` consuming `IMyWorkFeedResult.counts` by `sourceModule`. Register as `hub:lane-summary` and `hub:personal-analytics-source` respectively. Lock `hub:lane-summary` via `useCanvasMandatoryTiles` (part of T0-01).
+
+---
+
+### Tier 2: Quality-Blocking (Must complete before mold-breaker assessment)
+
+**T2-01: Resolve P2-F1 UIFs — Group G1 (Design Token Foundation)**
+Files: `cards/PersonalAnalyticsCard.tsx`, `MyWorkPage.tsx`, `HubConnectivityBanner.tsx`, `cards/TeamPortfolioCard.tsx`, `cards/QuickActionsSheet.tsx`, `cards/RecentActivityCard.tsx`
+Authority: P2-F1 §G1, MB-08, UI-Kit Usage and Composition Guide D-10
+Action: Replace all hardcoded hex/rgb values with `HBC_*` token constants. Replace `@fluentui/react-components` direct imports with `@hbc/ui-kit` re-exports. Replace inline `<style>` block with Griffel `makeStyles`. Replace `<span>Loading...</span>` with `HbcSpinner`.
+
+**T2-02: Resolve P2-F1 UIFs — Group G2 (Feed Visual Structure)**
+Authority: P2-F1 §G2, UIF-001, UIF-003, UIF-004, UIF-005, UIF-006
+Action: This involves `@hbc/my-work-feed` component updates (lane header styling, item row padding/separation, collapse state differentiation, metadata density). These changes are in the feed package, not in `MyWorkPage.tsx`, but the defects are visible here.
+
+**T2-03: Resolve P2-F1 UIFs — Group G3 (Layout)**
+Authority: P2-F1 §G3, UIF-002
+Action: Implement two-column persistent layout (work feed left ~65%, analytics panel right ~35%) per P2-D2. Collapse to single column below `HBC_BREAKPOINT_MOBILE`. The current `HubZoneLayout.tsx` partially implements this but the right panel is not sticky at all viewport sizes.
+
+**T2-04: Consolidate role resolution to one call site**
+Files: `MyWorkPage.tsx`, `HubTeamModeSelector.tsx`
+Authority: P2-D1, P2-D4
+Action: Remove `useAuthStore` from `HubTeamModeSelector`; pass `isExecutive` and `hasDelegations` as props from `MyWorkPage`, which owns the single `useCurrentUser()` call.
+
+**T2-05: Remove `QuickActionsMenu.tsx` dead code**
+File: `cards/QuickActionsMenu.tsx`
+Action: Delete the file; remove export from `cards/index.ts` if present.
+
+---
+
+### Tier 3: Technical Debt (Strongly recommended before Phase 3 close)
+
+**T3-01: Implement behavioral test suite**
+Authority: P2-D2 Gate 5, P2-E3
+Action: Add vitest suites covering: trust state derivation, freshness indicator rendering per trust state, tile filtering by role/complexity/prefix, return-state capture/restore, team mode toggle behavior, draft persistence round-trips.
+
+**T3-02: Implement expert-tier tile variants**
+Files: All `*Tile.tsx` files
+Authority: P2-D3 §5
+Action: Replace `PersonalAnalyticsTileStandard as PersonalAnalyticsTileExpert` aliasing with actual expert-tier components that render the `X` complexity variants per P2-D3 governance matrix.
+
+**T3-03: Address `AdminOversightCard` stub**
+File: `cards/AdminOversightCard.tsx`
+Authority: P2-D3 §1.3
+Action: Either implement `ao-provisioning-health` content from the provisioning feed source, or mark the tile as `experimentalOnly: true` and gate it from pilot builds.
+
+**T3-04: Replace `window.history.replaceState` with router search params**
+File: `MyWorkPage.tsx`
+Authority: P2-B2 §3 (URL is canonical)
+Action: Use TanStack Router `useSearch` / `router.navigate({ search })` to sync `teamMode`, `kpiFilter`, and `selectedItem` into URL parameters. This makes URL truly canonical and enables deep-linking.
+
+**T3-05: Resolve P2-D5 vs P2-B2 Executive default conflict**
+Authority: Architecture decision required
+Action: P2-D5 §3 says Executive defaults to `my-team`; P2-B2 §4 says bare `/my-work` seeds from personal-first draft. These are contradictory. File an ADR or update one document to resolve. The implementation currently defaults all roles to `personal`.
+
+---
+
+## 10. Documentation Corrections Needed
+
+**DOC-01: `P2-F1-My-Work-Hub-UI-Quality-and-Mold-Breaker-Conformance-Plan.md`**
+The plan's revision note dated 2026-03-21 correctly documents the current state. No correction needed; it accurately describes the failure modes. Implementers must treat it as a co-equal requirement alongside this audit.
+
+**DOC-02: `hubStateTypes.ts` comment**
+The file contains no JSDoc or reference comments pointing to P2-B2. Add a reference to `P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md` for each draft key constant so future developers understand the governing policy.
+
+**DOC-03: `myWorkTileDefinitions.ts` comment** ⚡ Partially addressed (2026-03-22)
+P2-D2 §6.1 namespace mandate doc comment added to `myWorkTileDefinitions.ts` header block during remediation 0-A. Full close deferred to Phase 6-E per remediation cross-reference.
+
+**DOC-04: P2-D5 vs P2-B2 conflict (Executive default team mode)**
+Once the ADR from T3-05 is written, update whichever document is being superseded to reference the ADR. The current contradiction in the plan corpus is a documentation defect.
+
+**DOC-05: `apps/pwa/src/pages/my-work/README.md`**
+No README exists for the `my-work` page directory. Per `.claude/rules/04-documentation-standards.md`, a mature package or feature area that changes materially requires a `README.md` covering purpose, public exports, key hooks, governing plan references, and implementation notes. This is especially important given the complexity of the state management model.
+
+---
+
+## 11. Optional Immediate-Fix Patch List
+
+These changes are small, safe, and self-contained. They can be applied immediately without architectural dependency and will reduce noise in subsequent reviews.
+
+**PATCH-01: Remove `QuickActionsMenu.tsx`**
+File: `cards/QuickActionsMenu.tsx`
+Action: Delete file. Verify no import exists (none found). Eliminates dead code with zero risk.
+
+**PATCH-02: Fix `isLoadError` hardcode**
+File: `MyWorkPage.tsx`
+Change:
+```tsx
+// Before
+isLoadError={false}
+// After
+isLoadError={!!error}  // where error comes from useMyWork() destructure
+```
+One-line fix with no side effects beyond enabling the existing error state UI.
+
+**PATCH-03: Fix D-10 Fluent UI direct imports**
+Files: `cards/QuickActionsSheet.tsx`, `cards/RecentActivityCard.tsx`
+Change:
+```tsx
+// Before
+import { tokens } from '@fluentui/react-components';
+// After
+import { tokens } from '@hbc/ui-kit';  // assuming @hbc/ui-kit re-exports tokens
+```
+Verify `tokens` is re-exported from `@hbc/ui-kit` before applying; if not, add it to the ui-kit barrel.
+
+**PATCH-04: Remove local role constants**
+File: `tiles/myWorkTileDefinitions.ts`
+Change: Delete `const EXECUTIVE_ROLES = ['Executive']` and `const ADMIN_ROLES = ['Administrator']`. Replace inline role checks with prop-injected role arrays from the tile context — this will require a small refactor of `ICanvasTileDefinition.roleGuard` usage.
+
+**PATCH-05: Fix FAB hardcoded color**
+File: `MyWorkPage.tsx`
+Change:
+```tsx
+// Before
+style={{ backgroundColor: '#F37021' }}
+// After
+className={styles.fabButton}  // where fabButton uses makeStyles with HBC_ACCENT_ORANGE token
+```
+
+**PATCH-06: Add `queued` trust state handling**
+File: `useHubTrustState.ts`
+Change: Remove the `queued → live` normalization. Add a `queued` case to the trust state return. Update `HubFreshnessIndicator` to render a "Pending sync" indicator for `queued` state using `HbcBanner` with neutral styling.
+
+**PATCH-07: Replace `<span>Loading...</span>` in `TeamPortfolioCard`**
+File: `cards/TeamPortfolioCard.tsx`
+Change:
+```tsx
+// Before
+<span>Loading...</span>
+// After
+<HbcSpinner size="small" label="Loading team data" />
+```
+
+---
+
+## Go / No-Go Judgment
+
+### Verdict: **NO-GO**
+
+The current `MyWorkPage` implementation is **not acceptable as the execution baseline for Phase 3 work.**
+
+This judgment rests on three independent grounds, any one of which would alone be sufficient:
+
+**Ground 1 — Governance failure.** The implementation bypasses `@hbc/project-canvas` governance entirely in the secondary and tertiary zones. Five of the six P2-D2 implementation gates are unmet. The tile namespace is wrong. Local role constants violate the P2-D1 mandate for `@hbc/auth` as sole authority. These are not stylistic deviations — they are structural violations of the architecture documents that govern this exact feature area.
+
+**Ground 2 — Existing authoritative audit.** P2-F1, the plan document with "Update Authority: Experience lead; changes require Architecture review" and "Last Reviewed Against Repo Truth: 2026-03-21," already rendered a formal verdict: "Full re-implementation required." The document's current status is "Active — All UIFs Re-opened after Audit 2." That judgment pre-dates this audit and was issued by the designated governing authority for UI quality. This audit corroborates it on every dimension.
+
+**Ground 3 — Pilot-blocking card gaps and state management defects.** Two of the four pilot-required P2-D3 cards are absent or non-functional. The trust state model misrepresents freshness. Return-state capture is not wired to the route lifecycle. Error states are permanently suppressed. The page cannot pass a pilot launch review in its current form.
+
+Proceeding to Phase 3 on this baseline would mean building new features on top of a governance structure that will need to be torn out and replaced. Every new tile, every new card, and every personalization feature would have to be re-integrated into `HbcProjectCanvas` retroactively. The cost of building on this baseline is higher than the cost of fixing it now.
+
+The recommended Phase 3 entry condition is completion of all Tier 0 (T0-01 through T0-03) and Tier 1 (T1-01 through T1-07) remediation items, plus a verified pass on P2-D2 Gates 1–5, with at minimum a basic behavioral test suite covering trust state and tile governance. Tier 2 items should be substantially complete before any pilot deployment. Tier 3 items should be tracked as carry-forward with clear owners.
+
+---
+
+*Audit produced: 2026-03-22. All findings traceable to files read during this session. Governing document citations reference the `docs/architecture/plans/MASTER/phase-2-deliverables/` plan corpus and `docs/reference/ui-kit/` design authority documents.*

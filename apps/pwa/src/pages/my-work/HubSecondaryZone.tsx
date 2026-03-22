@@ -131,7 +131,7 @@ export function HubSecondaryZone({
     >
       <MyWorkHubTileProvider value={{ activeFilter, onFilterChange, teamMode }}>
         <div className={styles.tileGrid}>
-          <MyWorkCanvas tilePrefix="my-work.analytics" complexityTier={tier} />
+          <MyWorkCanvas tilePrefix="hub:" complexityTier={tier} />
         </div>
       </MyWorkHubTileProvider>
     </HbcCard>
