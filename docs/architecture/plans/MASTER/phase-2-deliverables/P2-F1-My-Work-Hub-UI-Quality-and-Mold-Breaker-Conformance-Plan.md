@@ -1782,6 +1782,26 @@ Badges update reactively via TanStack Query cache — same data source as the fe
 
 ---
 
+### 10A.48 UIF-029-addl: Search Input Height Fix (High)
+
+**Severity:** High
+**Category:** Design System
+**Governing authority:** MB-07 (Field-Usable Contrast & Touch) — touch targets ≥ 36px. `UI-Kit-Field-Readability-Standards.md`.
+
+**Observed state:** The `\u2026` placeholder escape was already fixed in UIF-018-addl. The remaining issue: SearchBox rendered at ~22px height (`size="small"` Fluent prop) — below the 36px minimum touch target for field use.
+
+**Fix:** Changed SearchBox `size` from `"small"` to `"medium"` (32px Fluent base) and added `minHeight: '36px'` to the `search` Griffel style to guarantee the touch-target minimum.
+
+**Acceptance criteria:**
+- Placeholder renders as "Search work items…" — **MET** (already fixed in UIF-018-addl)
+- Input height ≥ 36px — **MET** (`size="medium"` + `minHeight: '36px'`)
+
+**Files modified:**
+- `packages/ui-kit/src/HbcCommandBar/index.tsx` — SearchBox `size="medium"`, search style `minHeight: '36px'`
+- `packages/ui-kit/package.json` — version 2.2.48 → 2.2.49
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

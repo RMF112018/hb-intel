@@ -75,8 +75,10 @@ const useStyles = makeStyles({
     gap: `${HBC_SPACE_SM}px`,
     flexWrap: 'wrap',
   },
+  // UIF-029-addl: 36px minimum height meets touch-target requirement.
   search: {
     minWidth: '200px',
+    minHeight: '36px',
     flexShrink: 0,
   },
   filters: {
@@ -241,7 +243,7 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
           value={searchValue ?? ''}
           onChange={(_e, data) => onSearchChange(data.value)}
           placeholder={searchPlaceholder}
-          size="small"
+          size="medium"
         />
       )}
 
