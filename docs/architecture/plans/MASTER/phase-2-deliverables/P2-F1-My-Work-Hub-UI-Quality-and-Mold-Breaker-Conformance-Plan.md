@@ -2443,6 +2443,41 @@ All shell components now derive their dimensions from these tokens instead of ma
 
 ---
 
+### 10A.76+ Shell Chrome Series: Header + Sidebar Final Readiness
+
+**Summary of shell chrome improvements (header tokenization through sidebar badges):**
+
+**Header:**
+- Shell dimension tokens introduced (HBC_HEADER_HEIGHT, connectivity heights, sidebar widths, bottom-nav height)
+- Header zones rebalanced (brand lockup, centered search, toolbox relocated to right cluster)
+- Action cluster: notification badge wired, touch targets normalized to 36px/44px, Create CTA improved, M365 suppressed in SPFx
+- Connectivity bar: renders once, offline states show visible text, header offset token-derived
+- Active route: `aria-current="page"` already correct
+
+**Sidebar:**
+- CSS custom properties for theme-overridable styling
+- Complete active/hover/pressed state system with muted inactive text
+- Toggle ARIA (`aria-expanded` + `aria-controls`)
+- Group semantics (`role="group"` + `aria-label`)
+- Skip-to-content link at shell level
+- Nav item min-height 36px/44px
+- Escape-to-collapse
+- BD icon collision resolved (toolbox → go-no-go)
+- Badge support with collapsed/expanded rendering
+
+**Documentation created:**
+- `docs/reference/ui-kit/HbcSidebar.md` — full governing spec
+
+**Final readiness judgment:** The shell chrome (header + sidebar) is implementation-ready and governance-aligned. All shell dimensions derive from tokens. Both surfaces have governed boundaries (`HbcHeader`, `HbcSidebar`) with CSS custom properties for theme override. Accessibility baseline is met: skip link, ARIA states, tooltips, touch targets, semantic groups. Badge infrastructure is in place for live operational context.
+
+**Known limitations:**
+- Notification badge data source not yet wired (prop exists, consumer must provide count)
+- Sidebar badge data not yet wired to My Work feed counts
+- User-role chip in header deferred to follow-on
+- Full bottom-nav Actions slot integration deferred
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
