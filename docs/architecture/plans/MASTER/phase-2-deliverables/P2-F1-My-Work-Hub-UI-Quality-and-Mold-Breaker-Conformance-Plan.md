@@ -1670,6 +1670,37 @@ Wired `onClearKpiFilter` callback through `MyWorkPage` → `HubPrimaryZone` → 
 
 ---
 
+### 10A.44 UIF-026-addl: Unified Sync State Indicator for Insights Panel (Medium)
+
+**Severity:** Medium
+**Category:** PWA / Performance Perception
+**Governing authority:** MB-01 (Lower Cognitive Load) — `UI-Kit-Mold-Breaker-Principles.md`. Consistent state communication across UI regions. `UI-Kit-Field-Readability-Standards.md` — 12px minimum for status text.
+
+**Observed state:** Insights panel header showed "Updated X min ago" as plain 11px text using `feed.lastRefreshedIso` directly, disconnected from the trust state used by the alert banner (`HubFreshnessIndicator`). No visual sync-state indicator (loading/syncing/stale). The two sync reporters could show contradictory information.
+
+**Fix:** Replaced the plain text indicator with a unified sync state indicator derived from `useHubTrustState` — the same source as the alert banner. Four visual states:
+
+| Trust State | Icon | Label |
+|---|---|---|
+| Stale-while-revalidating (loading) | Pulsing green dot (CSS animation) | "Refreshing…" |
+| Live + within freshness window | `StatusCompleteIcon` (green) | "Updated {time}" |
+| Partial / degraded sources | `StatusAttentionIcon` (amber #FFB020) | "Updated {time}" |
+| Cached (neutral) | No icon | "Updated {time}" |
+
+Also upgraded font size from 0.6875rem (11px) to 0.75rem (12px) to meet field-readability minimum.
+
+**Acceptance criteria:**
+- Insights panel and alert banner use same underlying sync state — **MET** (both use `useHubTrustState` from `useHubTrustState.ts`)
+- During stale state, both show consistent visual treatment — **MET** (amber warning icon matches banner warning variant)
+- Pulse animation used during active sync — **MET** (CSS keyframe animation on green dot with 1.5s infinite cycle)
+- Font size meets 12px minimum — **MET** (0.75rem)
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/HubSecondaryZone.tsx` — unified sync state indicator with `useHubTrustState`, status icons, pulse dot, font size upgrade
+- `apps/pwa/package.json` — version 0.12.50 → 0.12.51
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

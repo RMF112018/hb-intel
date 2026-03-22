@@ -9,17 +9,23 @@
  * Insights zone a distinct visual surface with header divider. The 12-column
  * tile grid moves into the card body so MyWorkCanvas tile spans still work.
  *
+ * UIF-026-addl: Insights freshness indicator unified with trust state from
+ * useHubTrustState — same source as HubFreshnessIndicator alert banner.
+ * Shows pulse dot during sync, checkmark on fresh, warning icon when degraded.
+ *
  * Complexity gating: hidden at essential tier (primary zone only).
  * Role gating: individual tiles enforce P2-D1 §6 via defaultForRoles + RoleGate.
  */
 import type { ReactNode } from 'react';
-import { makeStyles } from '@griffel/react';
-import { HbcCard, heading3, HBC_BREAKPOINT_MOBILE } from '@hbc/ui-kit';
+import { makeStyles, mergeClasses } from '@griffel/react';
+import { HbcCard, heading3, HBC_BREAKPOINT_MOBILE, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { StatusCompleteIcon, StatusAttentionIcon } from '@hbc/ui-kit/icons';
 import { useComplexity } from '@hbc/complexity';
 import { useMyWork } from '@hbc/my-work-feed';
 import type { TeamMode } from '@hbc/shell';
 import { MyWorkCanvas, MyWorkHubTileProvider } from './tiles/index.js';
 import { formatRelativeTime } from './formatRelativeTime.js';
+import { useHubTrustState } from './useHubTrustState.js';
 
 const useStyles = makeStyles({
   heading: {
@@ -33,11 +39,29 @@ const useStyles = makeStyles({
     alignItems: 'baseline',
     gap: '12px',
   },
-  // INS-011: Muted freshness timestamp below heading
+  // UIF-026-addl: Unified sync state indicator — 12px per field-readability minimum.
   freshness: {
-    fontSize: '0.6875rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontSize: '0.75rem',
     fontWeight: '400',
     color: 'var(--colorNeutralForeground3)',
+  },
+  // UIF-026-addl: Pulsing dot during active sync/revalidation.
+  syncPulse: {
+    display: 'inline-block',
+    width: '6px',
+    height: '6px',
+    borderRadius: '50%',
+    backgroundColor: 'var(--colorPaletteGreenForeground1)',
+    animationName: {
+      '0%': { opacity: 1 },
+      '50%': { opacity: 0.4 },
+      '100%': { opacity: 1 },
+    },
+    animationDuration: '1.5s',
+    animationIterationCount: 'infinite',
   },
   // INS-004: Clean 2-column grid replaces the overcomplicated 12-column micro-grid.
   // Each tile occupies one cell directly — no column-group wrappers needed.
@@ -67,11 +91,30 @@ export function HubSecondaryZone({
 }: HubSecondaryZoneProps): ReactNode {
   const styles = useStyles();
   const { tier } = useComplexity();
-  // INS-011: Access feed timestamp via shared TanStack Query cache (no extra fetch).
-  const { feed } = useMyWork();
-  const relativeTime = feed?.lastRefreshedIso ? formatRelativeTime(feed.lastRefreshedIso) : null;
+  // UIF-026-addl: Derive trust state from the same source as HubFreshnessIndicator.
+  const { feed, isLoading } = useMyWork();
+  const trustState = useHubTrustState(feed, isLoading);
+  const relativeTime = trustState.lastRefreshedIso
+    ? formatRelativeTime(trustState.lastRefreshedIso)
+    : null;
 
   if (tier === 'essential') return null;
+
+  // UIF-026-addl: Sync state icon derived from unified trust state.
+  let syncIcon: ReactNode = null;
+  let syncLabel = relativeTime ? `Updated ${relativeTime}` : '';
+
+  if (trustState.isStaleWhileRevalidating) {
+    // Active sync — pulsing dot
+    syncIcon = <span className={styles.syncPulse} aria-hidden="true" />;
+    syncLabel = 'Refreshing…';
+  } else if (trustState.freshness === 'partial' || trustState.degradedSourceCount > 0) {
+    // Degraded — amber warning
+    syncIcon = <StatusAttentionIcon size="sm" color={HBC_STATUS_COLORS.warning} />;
+  } else if (trustState.freshness === 'live' && trustState.isWithinFreshnessWindow) {
+    // Fresh — green checkmark
+    syncIcon = <StatusCompleteIcon size="sm" color="var(--colorPaletteGreenForeground1)" />;
+  }
 
   return (
     <HbcCard
@@ -79,8 +122,11 @@ export function HubSecondaryZone({
       header={
         <div className={styles.headerRow}>
           <h3 className={styles.heading}>Insights</h3>
-          {relativeTime && (
-            <span className={styles.freshness}>Updated {relativeTime}</span>
+          {syncLabel && (
+            <span className={styles.freshness}>
+              {syncIcon}
+              {syncLabel}
+            </span>
           )}
         </div>
       }
