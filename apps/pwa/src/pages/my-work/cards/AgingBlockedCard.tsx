@@ -3,10 +3,9 @@
  * P2-D4 §3: Shows escalation-candidate scope counts.
  *
  * UIF-008: Responsive KPI grid with semantic status ramp colors.
- * UIF-001 fix: grid uses auto-fit + minmax so columns reflow to container width
- * instead of overflowing. Mirrors the fix applied to PersonalAnalyticsCard.
- * UIF-013-addl: All tiles interactive with click-to-filter (same pattern as
- * PersonalAnalyticsCard).
+ * UIF-039-addl: Explicit 2-column grid (Escalation Candidates + Aging).
+ * Duplicate "Blocked" card removed — PersonalAnalyticsCard handles that filter.
+ * UIF-013-addl: All tiles interactive with click-to-filter.
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
@@ -14,21 +13,24 @@ import {
   HbcKpiCard,
   HbcSpinner,
   HBC_SPACE_MD,
-  HBC_STATUS_RAMP_RED,
+  HBC_BREAKPOINT_MOBILE,
   HBC_STATUS_RAMP_AMBER,
   HBC_STATUS_RAMP_GRAY,
 } from '@hbc/ui-kit';
 import { RoleGate } from '@hbc/auth';
 import { useMyWorkTeamFeed } from '@hbc/my-work-feed';
-import { Upload, Cancel, StatusOverdueIcon } from '@hbc/ui-kit/icons';
+import { Upload, StatusOverdueIcon } from '@hbc/ui-kit/icons';
 
-// UIF-001: auto-fit + minmax(90px, 1fr) — same rationale as PersonalAnalyticsCard.
-// 3 cards fit in a single row at ≥302px; wrap to 2+1 below that.
+// UIF-039-addl: Explicit 2-column grid for 2 cards (Escalation Candidates, Aging).
+// Eliminates ghost columns from auto-fit when container is wider than needed.
 const useStyles = makeStyles({
   kpiGrid: {
     display: 'grid',
     gap: `${HBC_SPACE_MD}px`,
-    gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
+      gridTemplateColumns: '1fr',
+    },
   },
 });
 
@@ -67,16 +69,8 @@ export function AgingBlockedCard({
             isActive={activeFilter === 'escalation'}
             onClick={() => onFilterChange?.('escalation')}
           />
-          <HbcKpiCard
-            label="Blocked"
-            value={teamFeed?.blockedCount ?? 0}
-            color={HBC_STATUS_RAMP_RED[50]}
-            icon={<Cancel size="sm" />}
-            trend={{ direction: 'flat', label: 'No change' }}
-            ariaLabel={`Filter by Blocked: ${teamFeed?.blockedCount ?? 0} items`}
-            isActive={activeFilter === 'blocked'}
-            onClick={() => onFilterChange?.('blocked')}
-          />
+          {/* UIF-039-addl: Duplicate "Blocked" card removed — PersonalAnalyticsCard
+              already renders the personal Blocked KPI with the same filter key. */}
           <HbcKpiCard
             label="Aging"
             value={teamFeed?.agingCount ?? 0}

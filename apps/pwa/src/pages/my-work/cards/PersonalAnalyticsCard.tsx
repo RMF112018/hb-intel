@@ -16,6 +16,7 @@ import {
   HbcKpiCard,
   HbcSpinner,
   HBC_SPACE_MD,
+  HBC_BREAKPOINT_MOBILE,
   HBC_STATUS_RAMP_RED,
   HBC_STATUS_RAMP_INFO,
   HBC_STATUS_ACTION_GREEN,
@@ -29,11 +30,17 @@ import { ViewList, SparkleIcon, Cancel, Notifications } from '@hbc/ui-kit/icons'
 // did not account for the constrained ~200-250px tile wrapper inside defaultColSpan:6.
 // With auto-fit, the grid self-adapts: 4 cards per row at ≥408px, 2 per row at
 // ≥196px, 1 per row below. No viewport-level media query needed.
+// UIF-039-addl: Explicit 3-column grid for the 3 secondary cards (Action Now,
+// Blocked, Unread). Hero card spans full width via gridColumn: '1 / -1'.
+// Eliminates ghost columns from auto-fit when container width doesn't divide evenly.
 const useStyles = makeStyles({
   kpiGrid: {
     display: 'grid',
     gap: `${HBC_SPACE_MD}px`,
-    gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
+      gridTemplateColumns: '1fr',
+    },
   },
   // INS-006: Summary card gets distinct background + full width + no maxWidth cap.
   summaryCard: {

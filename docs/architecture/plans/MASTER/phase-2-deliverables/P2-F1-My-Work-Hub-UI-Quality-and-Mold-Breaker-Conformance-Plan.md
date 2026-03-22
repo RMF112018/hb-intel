@@ -2049,6 +2049,27 @@ Adding orientation-specific CSS rules would create maintenance complexity and po
 
 ---
 
+### 10A.60 UIF-039-addl: KPI Card Container Structure Fix
+
+**Severity:** High
+**Category:** Layout / Information Architecture
+
+**Observed state:** Two issues: (1) Duplicate "Blocked" KPI card — both `PersonalAnalyticsCard` and `AgingBlockedCard` rendered a "Blocked" card with the same `'blocked'` filter key, causing both to highlight simultaneously and confusing the filter source. (2) Inner KPI grids used `repeat(auto-fit, minmax(90px, 1fr))` which created ghost columns (empty grid tracks) when the container width didn't evenly divide by the card count, wasting horizontal space and producing irrational card sizing.
+
+**Fix:**
+1. **Removed duplicate "Blocked" card** from `AgingBlockedCard.tsx` — the personal Blocked KPI in `PersonalAnalyticsCard` is the canonical instance
+2. **Replaced `auto-fit` grids** with explicit column counts:
+   - `PersonalAnalyticsCard`: `repeat(3, 1fr)` for 3 secondary cards (hero spans full width via `gridColumn: '1 / -1'`)
+   - `AgingBlockedCard`: `repeat(2, 1fr)` for 2 remaining cards (Escalation Candidates, Aging)
+3. **Added mobile breakpoint**: both grids collapse to `1fr` at ≤767px
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/cards/AgingBlockedCard.tsx` — removed duplicate Blocked card, explicit 2-col grid
+- `apps/pwa/src/pages/my-work/cards/PersonalAnalyticsCard.tsx` — explicit 3-col grid
+- `apps/pwa/package.json` — version 0.12.57 → 0.12.58
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
