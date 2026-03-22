@@ -157,10 +157,12 @@ const useStyles = makeStyles({
     transitionProperty: 'background-color, box-shadow',
     transitionDuration: TRANSITION_FAST,
   },
+  // Table-token-fix: strengthened hover from Background1Hover (#F5F5F5, nearly invisible
+  // on #FFFFFF) to Background3 (#F0F2F5) for perceptible row hover contrast.
   trClickable: {
     cursor: 'pointer',
     ':hover': {
-      backgroundColor: 'var(--colorNeutralBackground1Hover)',
+      backgroundColor: 'var(--colorNeutralBackground3)',
     },
   },
   trHover: {
