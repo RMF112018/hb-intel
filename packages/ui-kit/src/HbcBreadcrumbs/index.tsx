@@ -11,7 +11,6 @@ import * as React from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { tokens } from '@fluentui/react-components';
 import {
-  HBC_HEADER_ICON_MUTED,
   HBC_SURFACE_FIELD,
   hbcBrandRamp,
 } from '../theme/tokens.js';
@@ -50,21 +49,25 @@ const useStyles = makeStyles({
     backgroundColor: 'transparent',
     borderBottom: 'none',
   },
+  // UIF-024-addl: Muted color for separators — Level 7 metadata hierarchy.
   separator: {
-    color: HBC_HEADER_ICON_MUTED,
+    color: tokens.colorNeutralForeground3,
     userSelect: 'none',
   },
+  // UIF-024-addl: Ancestor links use muted color, not brand blue.
+  // Current page segment uses textPrimary/600 for visual distinction.
   link: {
     background: 'none',
     border: 'none',
     padding: '0',
     fontSize: 'inherit',
     fontFamily: 'inherit',
-    color: tokens.colorBrandForeground1,
+    color: tokens.colorNeutralForeground3,
     cursor: 'pointer',
     textDecoration: 'none',
     ':hover': {
       textDecoration: 'underline',
+      color: tokens.colorNeutralForeground1,
     },
   },
   linkField: {
@@ -78,7 +81,7 @@ const useStyles = makeStyles({
     color: HBC_SURFACE_FIELD['text-primary'],
   },
   ellipsis: {
-    color: HBC_HEADER_ICON_MUTED,
+    color: tokens.colorNeutralForeground3,
   },
 });
 

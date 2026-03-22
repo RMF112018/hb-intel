@@ -1649,6 +1649,27 @@ Wired `onClearKpiFilter` callback through `MyWorkPage` → `HubPrimaryZone` → 
 
 ---
 
+### 10A.43 UIF-024-addl: Breadcrumb Hierarchy Color Fix (Medium)
+
+**Severity:** Medium
+**Category:** Navigation / Breadcrumb
+**Governing authority:** `UI-Kit-Visual-Hierarchy-and-Depth-Standards.md` — Level 7 (Metadata) requires muted color for breadcrumbs. MB-02 (Stronger Hierarchy) — navigable and current-page crumbs must be visually distinct.
+
+**Observed state:** Breadcrumb ancestor links ("Home") rendered in `tokens.colorBrandForeground1` (Fluent blue) — same visual weight as primary text. The current-page segment ("My Work") at `colorNeutralForeground1`/600 was not sufficiently differentiated from the ancestor link. Separators used `HBC_HEADER_ICON_MUTED` which is a static token rather than a theme-adaptive Fluent token.
+
+**Fix:** Changed ancestor link color from `tokens.colorBrandForeground1` to `tokens.colorNeutralForeground3` (muted). Updated separator and ellipsis color to `tokens.colorNeutralForeground3` for consistency and theme-adaptivity. Added `color: tokens.colorNeutralForeground1` on hover for ancestor links to provide interactive feedback. Removed unused `HBC_HEADER_ICON_MUTED` import.
+
+**Acceptance criteria:**
+- Breadcrumb ancestor links visually distinct from current page label — **MET** (muted foreground3 vs primary foreground1 + weight 600)
+- All text uses muted or label scale tokens — **MET** (`colorNeutralForeground3` for ancestors/separators, `colorNeutralForeground1` for current page)
+- Hover state provides interactive feedback — **MET** (underline + color shift to foreground1)
+
+**Files modified:**
+- `packages/ui-kit/src/HbcBreadcrumbs/index.tsx` — link/separator/ellipsis color → `tokens.colorNeutralForeground3`; removed `HBC_HEADER_ICON_MUTED` import
+- `packages/ui-kit/package.json` — version 2.2.45 → 2.2.46
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
