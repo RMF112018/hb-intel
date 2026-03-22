@@ -15,7 +15,7 @@
  *   2. Pending approval     → "Approve"         (primary)
  *   3. Module-specific label (inherits lane variant)
  *   4. Lane-based label + variant
- *   5. Fallback             → "Open"            (ghost)
+ *   5. Fallback             → "Open"            (secondary)
  */
 import type { IMyWorkItem } from '../types/index.js';
 
@@ -44,16 +44,20 @@ const MODULE_CTA_LABELS: Record<string, string> = {
  *   danger    — immediate remediation required (blocked, escalation)
  *   primary   — primary workflow action (do-now, approvals)
  *   secondary — monitoring / follow-up action (delegated)
- *   ghost     — low-urgency navigation (watch, deferred, default)
+ *   secondary — monitoring / follow-up / low-urgency (watch, deferred, delegated, default)
+ *
+ * UIF-017-addl: watch/deferred/default upgraded from ghost → secondary so all
+ * row-level actions have visible button affordance (background fill). Ghost
+ * variant was visually indistinguishable from plain text, breaking T04 hierarchy.
  */
 function resolveLaneCta(lane: string): CtaAction {
   switch (lane) {
     case 'do-now':         return { label: 'Take Action', variant: 'primary'   };
     case 'waiting-blocked': return { label: 'Escalate',  variant: 'danger'    };
-    case 'watch':          return { label: 'View',       variant: 'ghost'     };
+    case 'watch':          return { label: 'View',       variant: 'secondary' };
     case 'delegated-team': return { label: 'Follow Up',  variant: 'secondary' };
-    case 'deferred':       return { label: 'Resume',     variant: 'ghost'     };
-    default:               return { label: 'Open',       variant: 'ghost'     };
+    case 'deferred':       return { label: 'Resume',     variant: 'secondary' };
+    default:               return { label: 'Open',       variant: 'secondary' };
   }
 }
 

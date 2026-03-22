@@ -1465,6 +1465,39 @@ Derived from `useDensity().tier` already available in both components. `useTouch
 
 ---
 
+### 10A.37 UIF-017-addl: Watch Lane CTA Visual Affordance (High)
+
+**Severity:** High
+**Category:** Interaction / Visual Hierarchy
+**Governing authority:** T04 (primary action must have visual weight above bodyContent) — `UI-Kit-Visual-Hierarchy-and-Depth-Standards.md`. MB-07 (Field-Usable Contrast & Touch) — `UI-Kit-Mold-Breaker-Principles.md`.
+
+**Observed state:** Watch-lane and deferred-lane row actions ("View", "Resume", "Review Score") rendered as `HbcButton variant="ghost"` — semantically correct `<button>` elements but visually indistinguishable from plain text (transparent background, no border, no underline). Users could not distinguish interactive text from static content. Inconsistent with the filled CTAs in urgent lanes (danger/primary variants).
+
+**Root cause:** The `resolveLaneCta()` function in `resolveCtaLabel.ts` assigned `variant: 'ghost'` to watch, deferred, and default lanes. HbcButton's ghost variant uses `backgroundColor: 'transparent'` with no border, providing hover-only affordance.
+
+**Fix:** Changed `resolveLaneCta()` to assign `variant: 'secondary'` for watch, deferred, and default lanes. HbcButton secondary variant provides `backgroundColor: tokens.colorNeutralBackground3` — a visible neutral fill that distinguishes the button from surrounding text while maintaining lower visual weight than primary/danger variants.
+
+Updated CTA hierarchy:
+| Lane | Variant | Visual weight |
+|---|---|---|
+| `waiting-blocked` | `danger` | Red filled — highest |
+| `do-now` / approval | `primary` | Orange filled — high |
+| `watch` / `deferred` / `delegated-team` / default | `secondary` | Neutral filled — medium |
+
+Source/module chips ("BD Scorecard", "Est. Pursuit") are correctly non-interactive `<span>` elements with no cursor:pointer and no onClick handlers — no semantic change needed.
+
+**Acceptance criteria:**
+- All row-level actions render as buttons with visible affordance — **MET** (all lanes now use HbcButton with filled variants; no ghost variant used for row CTAs)
+- No interactive element uses plain text alone — **MET** (all CTAs have visible background via secondary/primary/danger variants)
+- Source chips have correct semantic role — **MET** (non-interactive `<span>` elements with no cursor:pointer; `HbcTooltip` for truncation context only)
+- CTA hierarchy is consistent: filled for urgent, filled-neutral for monitoring — **MET** (danger > primary > secondary visual hierarchy)
+
+**Files modified:**
+- `packages/my-work-feed/src/utils/resolveCtaLabel.ts` — watch/deferred/default variant changed from `ghost` to `secondary`
+- `packages/my-work-feed/package.json` — version 0.0.25 → 0.0.26
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
