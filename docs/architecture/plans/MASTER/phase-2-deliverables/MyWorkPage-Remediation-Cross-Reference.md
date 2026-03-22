@@ -132,12 +132,12 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 2-D: Wire `useRoleDefaultCanvas` for both zones
+### 2-D: Wire `useRoleDefaultCanvas` for both zones ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| ARC-04 | **C** | `useRoleDefaultCanvas` absent; tile order hard-coded by `getAll()` position | ✅ Full close |
-| ROL-03 | **M** | Implementation defaults all roles to `personal`; Executive default layout not driven by role-default logic | ⚡ Partial — role-default layout now seeded correctly; Executive `my-team` default resolved in 4-B |
+| ARC-04 | **C** | `useRoleDefaultCanvas` absent; tile order hard-coded by `getAll()` position | ✅ Closed (2026-03-22) — hub role defaults added to `ROLE_DEFAULT_TILES` |
+| ROL-03 | **M** | Implementation defaults all roles to `personal`; Executive default layout not driven by role-default logic | ⚡ Partial (2026-03-22) — role-default layout seeded correctly; Executive `my-team` default resolved in 4-B |
 
 ---
 

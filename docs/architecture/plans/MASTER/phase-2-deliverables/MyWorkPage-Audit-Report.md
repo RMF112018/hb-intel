@@ -103,7 +103,7 @@ As actually implemented, `MyWorkPage` operates as follows.
 | ARC-01 | `HbcProjectCanvas` must govern secondary and tertiary zone tile layout | ✅ Both zones corrected — secondary (2-B, 2026-03-22) and tertiary (2-C, 2026-03-22) now use `HbcProjectCanvas` | **Critical** — Resolved |
 | ARC-02 | `HbcCanvasEditor` + `useCanvasEditor` required for edit-mode in secondary zone | Not present anywhere in the page | **Critical** |
 | ARC-03 | `useCanvasMandatoryTiles` must lock `hub:lane-summary`, `hub:quick-actions`, `hub:team-workload` | Not present; no mandatory tile enforcement exists | **Critical** |
-| ARC-04 | `useRoleDefaultCanvas` must seed role-specific default arrangements | Not present; tile order is hard-coded by `getAll()` position | **Critical** |
+| ARC-04 | `useRoleDefaultCanvas` must seed role-specific default arrangements | ✅ Corrected — hub role defaults (Member, Executive, Administrator) added to `ROLE_DEFAULT_TILES`; `useRoleDefaultCanvas` called internally by `HbcProjectCanvas` via `useProjectCanvas` (remediation 2-D, 2026-03-22) | **Critical** — Resolved |
 | ARC-05 | Tile namespace must be `hub:*` (P2-D2 §6.1) | ✅ Corrected — tiles registered as `hub:*` (remediation 0-A, 2026-03-22) | **Critical** — Resolved |
 | ARC-06 | Two isolated `useCanvasEditor` instances (secondary + tertiary) required | Not present | **High** |
 | ARC-07 | `HbcTileCatalog` required for edit-mode tile picker | Not present | **High** |
@@ -143,7 +143,7 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 |---|---|---|---|
 | ROL-01 | `@hbc/auth` is the sole role resolution authority; no local role constants (§11.1) | ✅ Corrected — local role constants removed; inline literals used (remediation 0-B, 2026-03-22) | **Critical** — Resolved |
 | ROL-02 | `my-team` mode eligibility must use `resolvedRoles` from `@hbc/auth` exclusively | ✅ Corrected — MyWorkPage uses `useCurrentSession()` as single resolution site; `isExecutive` passed as prop to HubTeamModeSelector (remediation 1-D, 2026-03-22) | **High** — Resolved |
-| ROL-03 | Executive default landing is `my-team` mode (P2-D1 §4) | `MyWorkPage` initializes `teamMode` from persisted draft, defaulting to `'personal'` for all roles | **Medium** |
+| ROL-03 | Executive default landing is `my-team` mode (P2-D1 §4) | ⚡ Role-default tile layout now seeded correctly via `ROLE_DEFAULT_TILES` (remediation 2-D, 2026-03-22); Executive `my-team` default team mode resolved in 4-B | **Medium** — Partially Resolved |
 | ROL-04 | Administrator routes to `/admin`, not `/my-work` | `workspace-routes.ts` correctly gates `/admin` with `requireAdminAccessControl()`; `resolveLandingDecision` in the index route handles this | **Pass** |
 
 ---

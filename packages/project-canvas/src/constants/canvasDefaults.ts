@@ -24,6 +24,23 @@ export const ROLE_DEFAULT_TILES: Record<string, string[]> = {
   'Chief Estimator': ['bic-my-items', 'estimating-pursuit', 'bd-heritage', 'workflow-handoff-inbox'],
   'VP of Operations': ['project-health-pulse', 'bic-my-items', 'pending-approvals', 'notification-summary'],
   'Director of Preconstruction': ['bic-my-items', 'workflow-handoff-inbox', 'pending-approvals', 'bd-heritage'],
+
+  // --- Hub role defaults — P2-D2 §7 (My Work Hub) ---
+  // Only currently registered hub:* tiles included. Future tiles (hub:team-workload,
+  // hub:escalation-candidates, hub:quick-actions, hub:provisioning-health) to be
+  // added as they are implemented.
+  'Member': [
+    'hub:lane-summary', 'hub:personal-analytics', 'hub:source-breakdown',
+    'hub:recent-context',
+  ],
+  'Executive': [
+    'hub:lane-summary', 'hub:personal-analytics', 'hub:aging-blocked',
+    'hub:team-portfolio', 'hub:source-breakdown', 'hub:recent-context',
+  ],
+  'Administrator': [
+    'hub:lane-summary', 'hub:personal-analytics', 'hub:source-breakdown',
+    'hub:admin-oversight', 'hub:recent-context',
+  ],
 };
 
 // --- Editor constraints — D-04 ---
