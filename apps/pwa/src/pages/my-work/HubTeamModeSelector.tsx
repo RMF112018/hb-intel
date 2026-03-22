@@ -40,30 +40,31 @@ const useStyles = makeStyles({
       alignItems: 'center',
     },
   },
+  // UIF-027-addl: Urgent count badge — red pill with white text (was inline style).
+  badge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '18px',
+    height: '18px',
+    paddingLeft: '5px',
+    paddingRight: '5px',
+    borderRadius: '9px',
+    fontSize: '0.6875rem',
+    fontWeight: 600,
+    lineHeight: '1',
+    backgroundColor: HBC_STATUS_COLORS.error,
+    color: '#FFFFFF',
+    marginLeft: '6px',
+  },
 });
 
-// UIF-027-addl: Urgent count badge — red pill with white text.
+// UIF-027-addl: Urgent count badge — red pill with white text (Griffel class).
 function TabBadge({ count }: { count: number }): ReactNode {
+  const styles = useStyles();
   if (count <= 0) return null;
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: '18px',
-        height: '18px',
-        padding: '0 5px',
-        borderRadius: '9px',
-        fontSize: '0.6875rem',
-        fontWeight: 600,
-        lineHeight: 1,
-        backgroundColor: HBC_STATUS_COLORS.error,
-        color: '#FFFFFF',
-        marginLeft: '6px',
-      }}
-      aria-label={`${count} blocked`}
-    >
+    <span className={styles.badge} aria-label={`${count} blocked`}>
       {count > 99 ? '99+' : count}
     </span>
   );

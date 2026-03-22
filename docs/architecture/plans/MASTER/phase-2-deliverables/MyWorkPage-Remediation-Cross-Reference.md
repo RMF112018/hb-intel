@@ -227,14 +227,14 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ## Phase 5 — P2-F1 UI Quality
 
-### 5-A: P2-F1 G1 — Remaining design token foundation
+### 5-A: P2-F1 G1 — Remaining design token foundation ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| MB-08 (any remaining) | **M** | Any hardcoded colors/spacing not caught by Phase 0-C | ✅ Full close |
-| D-10 (any remaining) | **M** | Any remaining direct Fluent imports not caught by Phase 0-C | ✅ Full close |
-| Rule-6 (HubZoneLayout) | **M** | `hasRightPanelContent` inline style override — residual after 2-C | ✅ Full close |
-| TabBadge inline styles (HubTeamModeSelector) | **L** | Local `TabBadge` subcomponent uses inline styles instead of governed tokens | ✅ Full close |
+| MB-08 (any remaining) | **M** | Any hardcoded colors/spacing not caught by Phase 0-C | ✅ Closed (2026-03-22) — no remaining hardcoded hex (FAB uses HBC_ACCENT_ORANGE) |
+| D-10 (any remaining) | **M** | Any remaining direct Fluent imports not caught by Phase 0-C | ✅ Closed (2026-03-22) — AgingBlockedCard `tokens` import moved to @hbc/ui-kit |
+| Rule-6 (HubZoneLayout) | **M** | `hasRightPanelContent` inline style override — residual after 2-C | ✅ Closed (2026-03-22) — converted to Griffel `singleColumn` class |
+| TabBadge inline styles (HubTeamModeSelector) | **L** | Local `TabBadge` subcomponent uses inline styles instead of governed tokens | ✅ Closed (2026-03-22) — converted to Griffel `badge` class |
 
 ---
 

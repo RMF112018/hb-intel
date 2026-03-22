@@ -21,7 +21,7 @@
  *   feed without scrolling. Sticky right panel is only active at desktop tier.
  */
 import type { ReactNode } from 'react';
-import { makeStyles, shorthands } from '@griffel/react';
+import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import {
   HBC_BREAKPOINT_MOBILE,
   HBC_BREAKPOINT_SIDEBAR,
@@ -78,6 +78,10 @@ const useStyles = makeStyles({
     [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
       ...shorthands.gap('16px'),
     },
+  },
+  // Rule-6: Griffel class replaces inline style={{ gridTemplateColumns: '1fr' }} override.
+  singleColumn: {
+    gridTemplateColumns: '1fr !important' as '1fr',
   },
   primaryZone: {
     gridColumn: '1 / -1',
@@ -163,15 +167,12 @@ export function HubZoneLayout({
   const styles = useStyles();
 
   // UIF-008: When the right panel has no real content, collapse the grid to a
-  // single column so the primary feed gets the full viewport width. The inline
-  // style overrides Griffel's media-query class rules (inline > stylesheet).
+  // single column so the primary feed gets the full viewport width.
+  // Rule-6: Uses Griffel singleColumn class instead of inline style override.
   const rightPanelVisible = hasRightPanelContent || !!detailContent;
-  const gridOverride = rightPanelVisible
-    ? undefined
-    : { gridTemplateColumns: '1fr' };
 
   return (
-    <div className={styles.hubGrid} style={gridOverride} data-spfx-safe="true">
+    <div className={mergeClasses(styles.hubGrid, !rightPanelVisible && styles.singleColumn)} data-spfx-safe="true">
       <section className={styles.primaryZone} data-hub-zone="primary">
         {primaryContent}
       </section>

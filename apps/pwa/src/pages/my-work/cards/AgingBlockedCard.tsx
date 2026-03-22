@@ -11,8 +11,8 @@
 import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
-import { tokens } from '@fluentui/react-components';
 import {
+  tokens,
   HbcKpiCard,
   HbcSpinner,
   HBC_SPACE_MD,
