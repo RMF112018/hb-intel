@@ -22,7 +22,7 @@ import type { TeamMode } from '@hbc/shell';
 import { HbcTabs, HBC_STATUS_COLORS, HBC_BREAKPOINT_SIDEBAR } from '@hbc/ui-kit';
 import type { LayoutTab } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
-import { useAuthStore } from '@hbc/auth';
+// Role resolution consolidated to MyWorkPage (P2-D1 / ARC-F4).
 
 const useStyles = makeStyles({
   // UIF-048-addl: Flex row with tabs left, rightSlot right.
@@ -72,6 +72,8 @@ function TabBadge({ count }: { count: number }): ReactNode {
 export interface HubTeamModeSelectorProps {
   activeMode: TeamMode;
   onModeChange: (mode: TeamMode) => void;
+  /** P2-D1 / ARC-F4: Passed from parent — single role resolution site. */
+  isExecutive: boolean;
   /** UIF-027-addl: Blocked count for "Delegated by Me" tab badge. */
   delegatedBlockedCount?: number;
   /** UIF-027-addl: Blocked count for "My Team" tab badge. */
@@ -83,14 +85,13 @@ export interface HubTeamModeSelectorProps {
 export function HubTeamModeSelector({
   activeMode,
   onModeChange,
+  isExecutive,
   delegatedBlockedCount = 0,
   teamBlockedCount = 0,
   rightSlot,
 }: HubTeamModeSelectorProps): ReactNode {
   const styles = useStyles();
   const { tier } = useComplexity();
-  const session = useAuthStore((s) => s.session);
-  const isExecutive = session?.resolvedRoles.includes('Executive') ?? false;
 
   const tabs = useMemo<LayoutTab[]>(() => {
     const baseTabs: LayoutTab[] = [

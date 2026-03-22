@@ -82,13 +82,13 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 1-D: Consolidate dual role resolution
+### 1-D: Consolidate dual role resolution ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| ROL-02 | **H** | `MyWorkPage` uses `useCurrentUser()`; `HubTeamModeSelector` independently uses `useAuthStore` — two observation points | ✅ Full close |
-| ARC-F4 | **H** | Dual role resolution sources in a single render tree; timing edge case risk | ✅ Full close |
-| TM-03 | **M** | Team mode eligibility check uses two separate auth sources | ✅ Full close |
+| ROL-02 | **H** | `MyWorkPage` uses `useCurrentUser()`; `HubTeamModeSelector` independently uses `useAuthStore` — two observation points | ✅ Closed (2026-03-22) |
+| ARC-F4 | **H** | Dual role resolution sources in a single render tree; timing edge case risk | ✅ Closed (2026-03-22) |
+| TM-03 | **M** | Team mode eligibility check uses two separate auth sources | ✅ Closed (2026-03-22) |
 
 ---
 

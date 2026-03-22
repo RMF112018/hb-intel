@@ -22,7 +22,7 @@ import { lazy, Suspense, useEffect, useMemo, useState, useCallback, useRef } fro
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import { WorkspacePageShell, HBC_ACCENT_ORANGE } from '@hbc/ui-kit';
-import { useCurrentUser, useAuthStore } from '@hbc/auth';
+import { useCurrentUser, useCurrentSession } from '@hbc/auth';
 import { useComplexity } from '@hbc/complexity';
 import { useConnectivity } from '@hbc/session-state';
 import { MyWorkProvider, useMyWorkCounts } from '@hbc/my-work-feed';
@@ -110,7 +110,8 @@ function HubTabBadgeBridge({
 export function MyWorkPage(): ReactNode {
   const styles = useStyles();
   const currentUser = useCurrentUser();
-  const session = useAuthStore((s) => s.session);
+  // P2-D1 / ARC-F4: Single role resolution via canonical @hbc/auth hook.
+  const session = useCurrentSession();
   const { tier } = useComplexity();
   const connectivity = useConnectivity();
 
@@ -207,7 +208,7 @@ export function MyWorkPage(): ReactNode {
       breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'My Work' }]}
       suppressProjectContext
       stickyHeader
-      headerSlot={<HubTeamModeSelector activeMode={teamMode} onModeChange={setTeamMode} delegatedBlockedCount={delegatedBlocked} teamBlockedCount={teamBlocked} rightSlot={<QuickActionsStrip />} />}
+      headerSlot={<HubTeamModeSelector activeMode={teamMode} onModeChange={setTeamMode} isExecutive={isExecutive} delegatedBlockedCount={delegatedBlocked} teamBlockedCount={teamBlocked} rightSlot={<QuickActionsStrip />} />}
     >
       <MyWorkProvider context={runtimeContext} defaultQuery={defaultQuery}>
         <HubTabBadgeBridge activeMode={teamMode} isExecutive={isExecutive} onCounts={handleBadgeCounts} />

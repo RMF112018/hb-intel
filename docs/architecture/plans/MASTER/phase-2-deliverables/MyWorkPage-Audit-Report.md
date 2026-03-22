@@ -142,7 +142,7 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 | Finding ID | Requirement | Current State | Severity |
 |---|---|---|---|
 | ROL-01 | `@hbc/auth` is the sole role resolution authority; no local role constants (§11.1) | ✅ Corrected — local role constants removed; inline literals used (remediation 0-B, 2026-03-22) | **Critical** — Resolved |
-| ROL-02 | `my-team` mode eligibility must use `resolvedRoles` from `@hbc/auth` exclusively | `MyWorkPage` uses `useCurrentUser()` for role resolution; `HubTeamModeSelector` independently imports and reads `useAuthStore` — dual role resolution sources in the same page | **High** |
+| ROL-02 | `my-team` mode eligibility must use `resolvedRoles` from `@hbc/auth` exclusively | ✅ Corrected — MyWorkPage uses `useCurrentSession()` as single resolution site; `isExecutive` passed as prop to HubTeamModeSelector (remediation 1-D, 2026-03-22) | **High** — Resolved |
 | ROL-03 | Executive default landing is `my-team` mode (P2-D1 §4) | `MyWorkPage` initializes `teamMode` from persisted draft, defaulting to `'personal'` for all roles | **Medium** |
 | ROL-04 | Administrator routes to `/admin`, not `/my-work` | `workspace-routes.ts` correctly gates `/admin` with `requireAdminAccessControl()`; `resolveLandingDecision` in the index route handles this | **Pass** |
 
@@ -168,7 +168,7 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 |---|---|---|---|
 | TM-01 | `my-team` must be role-gated to Executive only | `HubTeamModeSelector` conditionally renders the "My Team" tab behind `isExecutive` check — functionally correct | **Pass (conditional)** |
 | TM-02 | Team mode is a feed projection, not a separate route | No separate route for team mode; `teamMode` is local state within `/my-work` — correct | **Pass** |
-| TM-03 | Role check uses `resolvedRoles` from `@hbc/auth` | Two separate role checks (ROL-02 above) — structural concern but functional result is currently the same | **Medium** |
+| TM-03 | Role check uses `resolvedRoles` from `@hbc/auth` | ✅ Corrected — single role resolution site in MyWorkPage via `useCurrentSession()` (remediation 1-D, 2026-03-22) | **Medium** — Resolved |
 | TM-04 | Team items are read-only (no feed mutations for non-owners) | `HubDetailPanel` routes all actions via `window.location.href` regardless of team mode — this inadvertently provides some protection but not via the specified `canAct` mechanism | **Medium** |
 
 ---
@@ -290,7 +290,7 @@ Four tile definitions are now registered with the correct `hub:*` namespace per 
 
 ### ARC-F4: Dual Role Resolution Sources in a Single Page (High)
 
-`MyWorkPage.tsx` calls `useCurrentUser()` to obtain role information for the `RoleGate` wrappers and the Executive default team mode. `HubTeamModeSelector.tsx` independently calls `useAuthStore()` directly. These two hooks read from the same underlying store but create two separate observation points. If a memoisation or timing edge case ever causes them to diverge, the team mode tab and the page-level role gate would see different role states simultaneously. P2-D1 mandates a single role resolution path via `@hbc/auth` hooks — consolidate to one call site per render tree.
+✅ Corrected (remediation 1-D, 2026-03-22). MyWorkPage now uses `useCurrentSession()` (canonical `@hbc/auth` hook) as the single role resolution site. `isExecutive` is passed as a prop to `HubTeamModeSelector`, which no longer independently calls `useAuthStore()`. Single observation point per render tree per P2-D1.
 
 ---
 
