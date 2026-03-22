@@ -15,14 +15,13 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { tokens } from '@fluentui/react-components';
-import { HbcCard, HbcEmptyState, HbcButton, heading4 } from '@hbc/ui-kit';
+import { tokens, HbcCard, HbcEmptyState, HbcButton, heading4 } from '@hbc/ui-kit';
 import { BlueprintRoll } from '@hbc/ui-kit/icons';
 
 const useStyles = makeStyles({
   heading: {
     ...heading4,
-    color: 'var(--colorNeutralForeground1)',
+    color: tokens.colorNeutralForeground1,
     margin: '0',
   },
   card: {
@@ -40,7 +39,7 @@ export function RecentActivityCard(): ReactNode {
       className={styles.card}
     >
       <HbcEmptyState
-        icon={<BlueprintRoll size="lg" color="var(--colorNeutralForeground4)" />}
+        icon={<BlueprintRoll size="lg" color={tokens.colorNeutralForeground4} />}
         title="No recent activity"
         description="Recently visited projects and work items will appear here."
         primaryAction={

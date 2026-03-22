@@ -20,7 +20,8 @@
  */
 import { lazy, Suspense, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
-import { WorkspacePageShell } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import { WorkspacePageShell, HBC_ACCENT_ORANGE } from '@hbc/ui-kit';
 import { useCurrentUser, useAuthStore } from '@hbc/auth';
 import { useComplexity } from '@hbc/complexity';
 import { useConnectivity } from '@hbc/session-state';
@@ -44,6 +45,33 @@ import { useHubPersonalization } from './useHubPersonalization.js';
 const HubDetailPanel = lazy(() =>
   import('./HubDetailPanel.js').then((m) => ({ default: m.HubDetailPanel })),
 );
+
+// MB-08 + Rule-6: FAB button uses named token and Griffel responsive style
+// instead of inline style + <style> tag.
+const useStyles = makeStyles({
+  fab: {
+    position: 'fixed',
+    bottom: 'calc(56px + env(safe-area-inset-bottom, 0px) + 12px)',
+    right: '16px',
+    width: '48px',
+    height: '48px',
+    borderRadius: '50%',
+    border: 'none',
+    backgroundColor: HBC_ACCENT_ORANGE,
+    color: '#FFFFFF',
+    fontSize: '1.5rem',
+    fontWeight: 700,
+    cursor: 'pointer',
+    zIndex: 299,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+    display: 'none',
+    '@media (max-width: 1023px)': {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  },
+});
 
 /**
  * UIF-027-addl: Badge bridge — renders inside MyWorkProvider to access
@@ -80,6 +108,7 @@ function HubTabBadgeBridge({
 }
 
 export function MyWorkPage(): ReactNode {
+  const styles = useStyles();
   const currentUser = useCurrentUser();
   const session = useAuthStore((s) => s.session);
   const { tier } = useComplexity();
@@ -183,7 +212,6 @@ export function MyWorkPage(): ReactNode {
       <MyWorkProvider context={runtimeContext} defaultQuery={defaultQuery}>
         <HubTabBadgeBridge activeMode={teamMode} isExecutive={isExecutive} onCounts={handleBadgeCounts} />
         <HubPageLevelEmptyState
-          isLoadError={false}
           hasPermission={currentUser !== null}
         >
           <HubConnectivityBanner />
@@ -215,34 +243,10 @@ export function MyWorkPage(): ReactNode {
       data-hbc-ui="quick-actions-fab"
       aria-label="Quick Actions"
       onClick={() => setIsActionsSheetOpen(true)}
-      style={{
-        position: 'fixed',
-        bottom: 'calc(56px + env(safe-area-inset-bottom, 0px) + 12px)',
-        right: '16px',
-        width: '48px',
-        height: '48px',
-        borderRadius: '50%',
-        border: 'none',
-        backgroundColor: '#F37021',
-        color: '#FFFFFF',
-        fontSize: '1.5rem',
-        fontWeight: 700,
-        cursor: 'pointer',
-        zIndex: 299,
-        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-        display: 'none',
-      }}
-      // Desktop hide via CSS — inline media query not possible, so use a className
-      // approach. For now, this FAB is always hidden via display:none and revealed
-      // by a <style> tag below.
+      className={styles.fab}
     >
       +
     </button>
-    <style>{`
-      @media (max-width: 1023px) {
-        [data-hbc-ui="quick-actions-fab"] { display: flex !important; align-items: center; justify-content: center; }
-      }
-    `}</style>
     <QuickActionsSheet isOpen={isActionsSheetOpen} onDismiss={() => setIsActionsSheetOpen(false)} />
   </>
   );

@@ -38,16 +38,18 @@ export interface HubFreshnessIndicatorProps {
   onRetry?: () => void;
 }
 
-const FRESHNESS_LABELS: Record<'live' | 'cached' | 'partial', string> = {
+const FRESHNESS_LABELS: Record<'live' | 'cached' | 'partial' | 'queued', string> = {
   live: 'Live',
   cached: 'Cached',
   partial: 'Partial',
+  queued: 'Pending Sync',
 };
 
-const FRESHNESS_TO_VARIANT: Record<'live' | 'cached' | 'partial', StatusVariant> = {
+const FRESHNESS_TO_VARIANT: Record<'live' | 'cached' | 'partial' | 'queued', StatusVariant> = {
   live: 'success',
   cached: 'info',
   partial: 'warning',
+  queued: 'info',
 };
 
 // UIF-011: Human-readable display names for MyWorkSource keys.
@@ -92,13 +94,15 @@ const useStyles = makeStyles({
 
 export function HubFreshnessIndicator({
   trustState,
-  isLoading: _isLoading,
+  isLoading,
   onRetry,
 }: HubFreshnessIndicatorProps): ReactNode {
   const styles = useStyles();
   const { tier } = useComplexity();
 
-  const { freshness, lastRefreshedIso, isWithinFreshnessWindow, isStaleWhileRevalidating, degradedSourceCount, degradedSources } =
+  // FRS-01: Split timestamp model — lastTrustedDataIso for "last synced" display,
+  // lastRefreshAttemptIso for stale-while-revalidate context.
+  const { freshness, lastTrustedDataIso, lastRefreshAttemptIso, isWithinFreshnessWindow, isStaleWhileRevalidating, degradedSourceCount, degradedSources } =
     trustState;
 
   // UIF-028-addl: Dismissible banner — resets when degraded state changes.
@@ -110,14 +114,19 @@ export function HubFreshnessIndicator({
     return null;
   }
 
-  const relativeTime = lastRefreshedIso ? formatRelativeTime(lastRefreshedIso) : null;
+  // FRS-01: Display trusted data age, not attempt age, for "Last synced".
+  const relativeTime = lastTrustedDataIso ? formatRelativeTime(lastTrustedDataIso) : null;
+  // FRS-01: Attempt time used for stale-while-revalidate context.
+  const attemptTime = lastRefreshAttemptIso ? formatRelativeTime(lastRefreshAttemptIso) : null;
 
   // P2-B3 §6: Stale-while-revalidate treatment
+  // UX-F5: isLoading now actively used (was dead _isLoading parameter).
   if (isStaleWhileRevalidating) {
     return (
       <div className={styles.root} data-hub-trust="stale-revalidating">
-        <HbcStatusBadge variant="info" label="Refreshing" size="small" />
+        <HbcStatusBadge variant="info" label={isLoading ? 'Refreshing…' : 'Stale'} size="small" />
         {relativeTime && <span>Last synced {relativeTime}</span>}
+        {attemptTime && attemptTime !== relativeTime && <span>(retry {attemptTime})</span>}
       </div>
     );
   }

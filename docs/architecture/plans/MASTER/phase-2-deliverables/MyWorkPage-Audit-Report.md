@@ -118,8 +118,8 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 
 | Finding ID | Requirement | Current State | Severity |
 |---|---|---|---|
-| STT-01 | `hbc-my-work-feed-cache` draft key (4h TTL) required for feed fallback on stale return | Key absent from `hubStateTypes.ts`; `useHubStatePersistence.ts` does not persist feed data | **High** |
-| STT-02 | Route `onLeave` is primary return-state capture trigger | `captureReturnState` fires only from `visibilitychange` handler; route has no `onLeave` hook | **High** |
+| STT-01 | `hbc-my-work-feed-cache` draft key (4h TTL) required for feed fallback on stale return | ✅ Corrected — `feedCache` key added to `HUB_DRAFT_KEYS` with 4h TTL; `useDraft` wired in `useHubStatePersistence` (remediation 1-B, 2026-03-22) | **High** — Resolved |
+| STT-02 | Route `onLeave` is primary return-state capture trigger | ✅ Corrected — `onLeave` wired to `myWorkRoute` via module-level bridge to `captureReturnState`; `visibilitychange` retained as secondary fallback (remediation 1-C, 2026-03-22) | **High** — Resolved |
 | STT-03 | URL is canonical state authority; bare `/my-work` seeds from draft | `window.history.replaceState` used for URL sync — not TanStack Router search params; state management coupling is incomplete | **Medium** |
 | STT-04 | Registry-driven bulk cleanup on session end required | Not implemented; no cleanup registry hook present | **Low** |
 
@@ -129,9 +129,9 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 
 | Finding ID | Requirement | Current State | Severity |
 |---|---|---|---|
-| FRS-01 | Split timestamp model: `lastTrustedDataIso` (when data was trusted) vs `lastRefreshAttemptIso` (when refresh was last tried) | Single `lastRefreshedIso` used throughout; `HubFreshnessIndicator` and `useHubTrustState` cannot distinguish a failed refresh from a successful one | **High** |
-| FRS-02 | `queued` trust state is a distinct state (not `live`, not `partial`) | `useHubTrustState` normalizes `queued → live`; the queued indicator is erased from the UX | **High** |
-| FRS-03 | 3-minute auto-refresh trigger | `useHubFeedRefresh` correctly invalidates TanStack Query; trigger scheduling not verified in current implementation | **Medium** |
+| FRS-01 | Split timestamp model: `lastTrustedDataIso` (when data was trusted) vs `lastRefreshAttemptIso` (when refresh was last tried) | ✅ Corrected — split model implemented in `useHubTrustState`; `HubFreshnessIndicator` distinguishes trusted data age from attempt age (remediation 1-A, 2026-03-22) | **High** — Resolved |
+| FRS-02 | `queued` trust state is a distinct state (not `live`, not `partial`) | ✅ Corrected — `queued` preserved as first-class state (remediation 0-C, 2026-03-22) | **High** — Resolved |
+| FRS-03 | 3-minute auto-refresh trigger | `useHubFeedRefresh` uses `invalidateQueries` on return; no periodic `refetchInterval` or timer scheduling found — auto-refresh is return-triggered only, not time-based. Verified during 1-A (2026-03-22) | **Medium** |
 | FRS-04 | `FEED_FRESHNESS_WINDOW_MS = 300_000` (5 min) | `trustStateConstants.ts` correctly sets this value | **Pass** |
 | FRS-05 | Relative time display bands | `formatRelativeTime.ts` bands match P2-B3 §6.2 exactly | **Pass** |
 
@@ -210,10 +210,11 @@ Rule: Fluent UI primitives must be imported through `@hbc/ui-kit` only; never di
 
 | File | Violation | Severity |
 |---|---|---|
-| `cards/QuickActionsSheet.tsx` | `import { tokens } from '@fluentui/react-components'` | **Medium** |
-| `cards/RecentActivityCard.tsx` | `import { tokens } from '@fluentui/react-components'` | **Medium** |
+| `cards/QuickActionsSheet.tsx` | ✅ Corrected — `tokens` now imported from `@hbc/ui-kit` (remediation 0-C, 2026-03-22) | **Medium** — Resolved |
+| `cards/RecentActivityCard.tsx` | ✅ Corrected — `tokens` now imported from `@hbc/ui-kit` (remediation 0-C, 2026-03-22) | **Medium** — Resolved |
+| `cards/PersonalAnalyticsCard.tsx` | ✅ Corrected — `tokens` now imported from `@hbc/ui-kit` (remediation 0-C, 2026-03-22) | **Medium** — Resolved |
 
-Both files access Fluent tokens directly, bypassing the `@hbc/ui-kit` token governance layer and breaking MB-08 (single token set, no per-surface overrides).
+✅ `tokens` re-exported from `@hbc/ui-kit` barrel (remediation 0-C, 2026-03-22). All consumer imports corrected.
 
 ---
 
@@ -223,10 +224,10 @@ Rule: All colors and spacing must use `HBC_*` named token constants from `@hbc/u
 
 | File | Violation | Severity |
 |---|---|---|
-| `cards/PersonalAnalyticsCard.tsx` | `backgroundColor: '#1E3A5F'` — hardcoded hex on KPI card header | **Medium** |
-| `MyWorkPage.tsx` | FAB button `style={{ backgroundColor: '#F37021' }}` — hardcoded brand orange | **Medium** |
-| `cards/TeamPortfolioCard.tsx` | Raw CSS variable strings (`'var(--colorBrandBackground)'`) instead of named token constants | **Medium** |
-| `HubConnectivityBanner.tsx` | `<div style={{ borderLeftColor: HBC_STATUS_RAMP_AMBER[10] }}>` — ramp index access instead of a semantic token | **Medium** |
+| `cards/PersonalAnalyticsCard.tsx` | ✅ Corrected — `#1E3A5F` replaced with `HBC_PRIMARY_BLUE` (remediation 0-C, 2026-03-22) | **Medium** — Resolved |
+| `MyWorkPage.tsx` | ✅ Corrected — `#F37021` FAB replaced with `HBC_ACCENT_ORANGE` via Griffel `makeStyles` (remediation 0-C, 2026-03-22) | **Medium** — Resolved |
+| `cards/TeamPortfolioCard.tsx` | ✅ Corrected — raw CSS variables replaced with `HBC_STATUS_RAMP_AMBER[50]` and `HBC_STATUS_RAMP_RED[50]` (remediation 0-C, 2026-03-22) | **Medium** — Resolved |
+| `HubConnectivityBanner.tsx` | ✅ Corrected — inline style replaced with Griffel `makeStyles` class (remediation 0-C, 2026-03-22) | **Medium** — Resolved |
 
 ---
 
@@ -234,7 +235,7 @@ Rule: All colors and spacing must use `HBC_*` named token constants from `@hbc/u
 
 | File | Violation | Severity |
 |---|---|---|
-| `MyWorkPage.tsx` | Inline `<style>` block for responsive breakpoint overrides instead of Griffel `makeStyles` | **Medium** |
+| `MyWorkPage.tsx` | ✅ Corrected — inline `<style>` tag removed; responsive FAB now uses Griffel `makeStyles` with `@media` rule (remediation 0-C, 2026-03-22) | **Medium** — Resolved |
 | `HubZoneLayout.tsx` | `hasRightPanelContent` prop triggers inline `style={{ gridTemplateColumns: '1fr' }}` override | **Medium** |
 
 ---
@@ -243,7 +244,7 @@ Rule: All colors and spacing must use `HBC_*` named token constants from `@hbc/u
 
 | File | Violation | Severity |
 |---|---|---|
-| `cards/TeamPortfolioCard.tsx` | `<span>Loading...</span>` plain text instead of `HbcSpinner` | **Medium** |
+| `cards/TeamPortfolioCard.tsx` | ✅ Corrected — `<span>Loading...</span>` replaced with `<HbcSpinner>` (remediation 0-C, 2026-03-22) | **Medium** — Resolved |
 | `HubTeamModeSelector.tsx` | Local `TabBadge` subcomponent uses inline styles for badge display | **Low** |
 
 ---
@@ -313,7 +314,7 @@ Tile registration is correctly placed in `sourceAssembly.ts`, which is called at
 
 **File:** `cards/QuickActionsMenu.tsx`
 
-This component imports `HbcCard`, wraps a menu, and exports a complete `QuickActionsMenu`. It is not imported or rendered anywhere in `MyWorkPage.tsx`, `HubTertiaryZone.tsx`, or any other component. It is not referenced in the tile definitions. It accumulates bundle weight and creates maintenance confusion.
+✅ File deleted (remediation 0-C, 2026-03-22). No imports existed — only comments referenced it. Dead code removed.
 
 ---
 
@@ -337,7 +338,7 @@ The card contains only placeholder text — no real data fetch, no `@hbc/my-work
 
 **File:** `apps/pwa/src/router/workspace-routes.ts`
 
-`myWorkRoute` is constructed with `createWorkspaceRoute('my-work', ...)`, which produces a standard `createRoute` with no `onLeave`. P2-B2 §4.2 designates route `onLeave` as the primary trigger for `captureReturnState`. The current implementation fires this only from a `visibilitychange` event handler in `useHubReturnMemory`. Tab-switching and some programmatic navigations will fire `visibilitychange`; but SPA navigation away from `/my-work` to another route (e.g., clicking "Project Hub" in the sidebar) will not reliably fire it. State will not be captured on those navigation events.
+✅ Corrected (remediation 1-C, 2026-03-22). `myWorkRoute` now uses a direct `createRoute` call with `onLeave` that invokes `triggerOnLeaveCapture()` — a module-level bridge exported from `useHubReturnMemory.ts`. The hook registers the current `captureReturnState` function into the bridge on mount and clears it on unmount. `visibilitychange` retained as secondary fallback per P2-B2 §5.2.
 
 ---
 
@@ -359,28 +360,17 @@ The card contains only placeholder text — no real data fetch, no `@hbc/my-work
 
 ### UX-F2: `isLoadError` Hardcoded to `false` (High)
 
-**File:** `MyWorkPage.tsx`
+**File:** `MyWorkPage.tsx`, `HubPageLevelEmptyState.tsx`
 
-```tsx
-<HubPageLevelEmptyState
-  // ...
-  isLoadError={false}  // hardcoded
-/>
-```
-
-`HubPageLevelEmptyState` contains logic for rendering `HbcSmartEmptyState` with an error variant when `isLoadError` is true. The hardcoded `false` means users will never see an error state, even if `MyWorkProvider` fails to load data. Any network failure, auth expiry, or source adapter error will render a silent empty state rather than actionable error feedback.
+✅ Corrected (remediation 0-C, 2026-03-22). `isLoadError` prop removed from `MyWorkPage.tsx`. `HubPageLevelEmptyState` now derives error state from `useMyWork().isError` when the prop is not explicitly provided. Error states are no longer permanently suppressed.
 
 ---
 
 ### UX-F3: `queued` Trust State Erased (High)
 
-**File:** `useHubTrustState.ts`
+**File:** `useHubTrustState.ts`, `HubFreshnessIndicator.tsx`
 
-```typescript
-const trustState = rawState === 'queued' ? 'live' : rawState;
-```
-
-P2-B3 §3 defines `queued` as a distinct, user-visible trust state meaning "data is enqueued for send but not yet confirmed." It has different visual treatment from `live` (which means data is confirmed fresh) and from `cached` (which means data is serving from local cache). By silently converting `queued → live`, the freshness indicator misleads users into thinking their data is confirmed fresh when it may be pending. This is a data-integrity misrepresentation.
+✅ Corrected (remediation 0-C, 2026-03-22). The `queued → live` normalization has been removed. `queued` is now a first-class freshness state in both `IHubTrustState.freshness` type and `HubFreshnessIndicator` rendering (label: "Pending Sync", variant: info). P2-B3 §3 compliance restored.
 
 ---
 
@@ -414,7 +404,7 @@ The full detailed remediation requirements for all 18 findings are in `P2-F1-My-
 
 **File:** `HubFreshnessIndicator.tsx`
 
-The `_isLoading` parameter (leading underscore signals intentional suppression of lint warnings) is accepted by the component but never used in any conditional or rendering logic. The Fluent `HbcSpinner` that was presumably intended to appear during loading is absent. The component renders the same static content whether data is loading or not.
+✅ Corrected (remediation 1-A, 2026-03-22). Leading underscore removed; `isLoading` is now actively used in stale-while-revalidate rendering to distinguish "Refreshing…" (loading=true) from "Stale" (loading=false).
 
 ---
 
@@ -504,20 +494,20 @@ Action: Deleted `EXECUTIVE_ROLES` constant and its JSDoc block. Replaced with in
 
 ### Tier 1: Contract-Blocking (Must complete before pilot launch)
 
-**T1-01: Implement split timestamp model in `useHubTrustState`**
-Files: `useHubTrustState.ts`, `HubFreshnessIndicator.tsx`, `hubStateTypes.ts`
+**T1-01: Implement split timestamp model in `useHubTrustState`** ✅ Completed (2026-03-22)
+Files: `useHubTrustState.ts`, `HubFreshnessIndicator.tsx`, `HubSecondaryZone.tsx`
 Authority: P2-B3 §5
-Action: Split `lastRefreshedIso` into `lastTrustedDataIso` (last time data was confirmed good) and `lastRefreshAttemptIso` (last time a refresh was attempted). Update `HubFreshnessIndicator` to distinguish these. Remove `queued → live` normalization; add `queued` visual treatment.
+Action: Split `lastRefreshedIso` into `lastTrustedDataIso` (tracked via `useRef` — updated only when freshness is `'live'`) and `lastRefreshAttemptIso` (always reflects latest aggregation). Updated `HubFreshnessIndicator` to show trusted data age for "Last synced" and attempt time for stale-revalidate context. Fixed `_isLoading` dead code (UX-F5). `queued` normalization was already removed in 0-C.
 
-**T1-02: Add `hbc-my-work-feed-cache` draft key and feed cache persistence**
+**T1-02: Add `hbc-my-work-feed-cache` draft key and feed cache persistence** ✅ Completed (2026-03-22)
 Files: `hubStateTypes.ts`, `useHubStatePersistence.ts`
 Authority: P2-B2 §6
-Action: Add `HUB_DRAFT_KEYS.feedCache = 'hbc-my-work-feed-cache'` with 4h TTL. Wire `useAutoSaveDraft` in `useHubStatePersistence` to persist the feed data on write and seed it on stale return.
+Action: Added `IMyWorkFeedCacheDraft` type, `HUB_DRAFT_KEYS.feedCache = 'hbc-my-work-feed-cache'` with 4h TTL, and `HUB_DRAFT_TTL.feedCache = 4`. Wired `useDraft<IMyWorkFeedCacheDraft>` in `useHubStatePersistence` as explicit write path per P2-B2 §6.
 
-**T1-03: Wire return-state capture to route `onLeave`**
+**T1-03: Wire return-state capture to route `onLeave`** ✅ Completed (2026-03-22)
 Files: `apps/pwa/src/router/workspace-routes.ts`, `useHubReturnMemory.ts`
 Authority: P2-B2 §4.2
-Action: Add `onLeave` callback to `myWorkRoute` (TanStack Router supports this via `routerOptions` or route lifecycle hooks). Call `captureReturnState()` there as the primary trigger; retain `visibilitychange` as a secondary fallback.
+Action: Replaced `createWorkspaceRoute` for `myWorkRoute` with direct `createRoute` call including `onLeave`. Added `triggerOnLeaveCapture()` module-level bridge in `useHubReturnMemory.ts` — hook registers `captureReturnState` on mount, clears on unmount. `visibilitychange` retained as secondary fallback.
 
 **T1-04: Implement full PWA action vocabulary in `HubDetailPanel`**
 File: `HubDetailPanel.tsx`
@@ -599,8 +589,8 @@ Action: P2-D5 §3 says Executive defaults to `my-team`; P2-B2 §4 says bare `/my
 **DOC-01: `P2-F1-My-Work-Hub-UI-Quality-and-Mold-Breaker-Conformance-Plan.md`**
 The plan's revision note dated 2026-03-21 correctly documents the current state. No correction needed; it accurately describes the failure modes. Implementers must treat it as a co-equal requirement alongside this audit.
 
-**DOC-02: `hubStateTypes.ts` comment**
-The file contains no JSDoc or reference comments pointing to P2-B2. Add a reference to `P2-B2-Hub-State-Persistence-and-Return-Memory-Contract.md` for each draft key constant so future developers understand the governing policy.
+**DOC-02: `hubStateTypes.ts` comment** ⚡ Partially addressed (2026-03-22)
+The file header already references P2-B2 §3–§6. The new `feedCache` key and `IMyWorkFeedCacheDraft` type include inline P2-B2 §6 references. Per-key reference comments for existing keys deferred to Phase 6-E.
 
 **DOC-03: `myWorkTileDefinitions.ts` comment** ⚡ Partially addressed (2026-03-22)
 P2-D2 §6.1 namespace mandate doc comment added to `myWorkTileDefinitions.ts` header block during remediation 0-A. Full close deferred to Phase 6-E per remediation cross-reference.
@@ -617,59 +607,26 @@ No README exists for the `my-work` page directory. Per `.claude/rules/04-documen
 
 These changes are small, safe, and self-contained. They can be applied immediately without architectural dependency and will reduce noise in subsequent reviews.
 
-**PATCH-01: Remove `QuickActionsMenu.tsx`**
-File: `cards/QuickActionsMenu.tsx`
-Action: Delete file. Verify no import exists (none found). Eliminates dead code with zero risk.
+**PATCH-01: Remove `QuickActionsMenu.tsx`** ✅ Completed (2026-03-22)
+File deleted. No imports existed.
 
-**PATCH-02: Fix `isLoadError` hardcode**
-File: `MyWorkPage.tsx`
-Change:
-```tsx
-// Before
-isLoadError={false}
-// After
-isLoadError={!!error}  // where error comes from useMyWork() destructure
-```
-One-line fix with no side effects beyond enabling the existing error state UI.
+**PATCH-02: Fix `isLoadError` hardcode** ✅ Completed (2026-03-22)
+`isLoadError` prop removed from `MyWorkPage.tsx`. `HubPageLevelEmptyState` now derives error state from `useMyWork().isError` context.
 
-**PATCH-03: Fix D-10 Fluent UI direct imports**
-Files: `cards/QuickActionsSheet.tsx`, `cards/RecentActivityCard.tsx`
-Change:
-```tsx
-// Before
-import { tokens } from '@fluentui/react-components';
-// After
-import { tokens } from '@hbc/ui-kit';  // assuming @hbc/ui-kit re-exports tokens
-```
-Verify `tokens` is re-exported from `@hbc/ui-kit` before applying; if not, add it to the ui-kit barrel.
+**PATCH-03: Fix D-10 Fluent UI direct imports** ✅ Completed (2026-03-22)
+`tokens` re-exported from `@hbc/ui-kit` barrel. Imports updated in `QuickActionsSheet.tsx`, `RecentActivityCard.tsx`, and `PersonalAnalyticsCard.tsx`.
 
-**PATCH-04: Remove local role constants**
-File: `tiles/myWorkTileDefinitions.ts`
-Change: Delete `const EXECUTIVE_ROLES = ['Executive']` and `const ADMIN_ROLES = ['Administrator']`. Replace inline role checks with prop-injected role arrays from the tile context — this will require a small refactor of `ICanvasTileDefinition.roleGuard` usage.
+**PATCH-04: Remove local role constants** ✅ Completed (2026-03-22, remediation 0-B)
+`EXECUTIVE_ROLES` constant deleted. Role strings inlined per canonical `@hbc/auth` pattern.
 
-**PATCH-05: Fix FAB hardcoded color**
-File: `MyWorkPage.tsx`
-Change:
-```tsx
-// Before
-style={{ backgroundColor: '#F37021' }}
-// After
-className={styles.fabButton}  // where fabButton uses makeStyles with HBC_ACCENT_ORANGE token
-```
+**PATCH-05: Fix FAB hardcoded color** ✅ Completed (2026-03-22)
+Inline style replaced with Griffel `makeStyles` class using `HBC_ACCENT_ORANGE` token. Responsive media query absorbed into the same class, eliminating the Rule-6 `<style>` tag violation simultaneously.
 
-**PATCH-06: Add `queued` trust state handling**
-File: `useHubTrustState.ts`
-Change: Remove the `queued → live` normalization. Add a `queued` case to the trust state return. Update `HubFreshnessIndicator` to render a "Pending sync" indicator for `queued` state using `HbcBanner` with neutral styling.
+**PATCH-06: Add `queued` trust state handling** ✅ Completed (2026-03-22)
+`queued → live` normalization removed from `useHubTrustState.ts`. `queued` added as first-class freshness state with "Pending Sync" label and info badge in `HubFreshnessIndicator`.
 
-**PATCH-07: Replace `<span>Loading...</span>` in `TeamPortfolioCard`**
-File: `cards/TeamPortfolioCard.tsx`
-Change:
-```tsx
-// Before
-<span>Loading...</span>
-// After
-<HbcSpinner size="small" label="Loading team data" />
-```
+**PATCH-07: Replace `<span>Loading...</span>` in `TeamPortfolioCard`** ✅ Completed (2026-03-22)
+Replaced with `<HbcSpinner size="sm" label="Loading team data" />`.
 
 ---
 

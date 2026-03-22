@@ -13,8 +13,8 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { tokens } from '@fluentui/react-components';
 import {
+  tokens,
   HbcKpiCard,
   HbcSpinner,
   HBC_SPACE_MD,
@@ -38,7 +38,7 @@ const useStyles = makeStyles({
   },
   // INS-006: Summary card gets distinct background + full width + no maxWidth cap.
   summaryCard: {
-    backgroundColor: '#1E3A5F',
+    backgroundColor: HBC_PRIMARY_BLUE,
     maxWidth: 'none',
   },
   // UIF-040-addl: Proportional breakdown bar below the hero KPI value.
@@ -113,7 +113,7 @@ export function PersonalAnalyticsCard({
       <div
         style={{
           gridColumn: '1 / -1',
-          '--summary-bg': '#1E3A5F',
+          '--summary-bg': HBC_PRIMARY_BLUE,
         } as React.CSSProperties}
       >
         <HbcKpiCard

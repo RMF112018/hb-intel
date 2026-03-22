@@ -92,8 +92,8 @@ export function HubSecondaryZone({
   // UIF-026-addl: Derive trust state from the same source as HubFreshnessIndicator.
   const { feed, isLoading } = useMyWork();
   const trustState = useHubTrustState(feed, isLoading);
-  const relativeTime = trustState.lastRefreshedIso
-    ? formatRelativeTime(trustState.lastRefreshedIso)
+  const relativeTime = trustState.lastTrustedDataIso
+    ? formatRelativeTime(trustState.lastTrustedDataIso)
     : null;
 
   if (tier === 'essential') return null;

@@ -31,6 +31,18 @@ export interface ICardSlot {
   visible: boolean;
 }
 
+/**
+ * P2-B2 §6: Feed fallback cache — durable continuity layer for offline/degraded return.
+ * Persisted via @hbc/session-state draft store; not a competing primary cache.
+ * TanStack Query remains the live/cache authority.
+ */
+export interface IMyWorkFeedCacheDraft {
+  items: unknown[];
+  totalCount: number;
+  lastRefreshedIso: string;
+  cachedAt: string;
+}
+
 /** P2-D5 §7: Team mode saved preference. */
 export interface IMyWorkTeamModeDraft {
   teamMode: 'personal' | 'my-team' | 'delegated-by-me';
@@ -44,6 +56,8 @@ export const HUB_DRAFT_KEYS = {
   teamMode: 'hbc-my-work-team-mode',
   filterState: 'hbc-my-work-filter-state',
   cardArrangement: 'hbc-my-work-card-arrangement',
+  /** P2-B2 §6: Durable feed fallback cache for stale return. */
+  feedCache: 'hbc-my-work-feed-cache',
 } as const;
 
 /** TTL constants per P2-B2 §3, P2-D5 §4. */
@@ -53,4 +67,5 @@ export const HUB_DRAFT_TTL = {
   teamMode: 16,          // hours (P2-D5 §7)
   filterState: 8,        // hours (P2-D5 §8)
   cardArrangement: 720,  // 30 days in hours (P2-D5 §4)
+  feedCache: 4,          // hours (P2-B2 §6)
 } as const;

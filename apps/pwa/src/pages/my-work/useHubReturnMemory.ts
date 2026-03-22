@@ -7,6 +7,18 @@ import { useRouter } from '@tanstack/react-router';
 import type { IAutoSaveDraftResult, IUseDraftResult } from '@hbc/session-state';
 import type { IMyWorkReturnState, IMyWorkQuerySeedDraft } from './hubStateTypes.js';
 
+/**
+ * P2-B2 §4.2: Module-level bridge for route onLeave → captureReturnState.
+ * Updated by useHubReturnMemory when mounted; cleared on unmount.
+ * This bridges the non-React route lifecycle with the React hook state.
+ */
+let _onLeaveCapture: (() => void) | null = null;
+
+/** Called by myWorkRoute's onLeave handler to trigger return-state capture. */
+export function triggerOnLeaveCapture(): void {
+  _onLeaveCapture?.();
+}
+
 interface UseHubReturnMemoryOptions {
   returnState: IUseDraftResult<IMyWorkReturnState>;
   querySeed: IAutoSaveDraftResult<IMyWorkQuerySeedDraft>;
@@ -65,6 +77,12 @@ export function useHubReturnMemory({
     },
     [returnState],
   );
+
+  // P2-B2 §4.2: Register capture callback for route onLeave (primary trigger).
+  useEffect(() => {
+    _onLeaveCapture = () => captureReturnState([]);
+    return () => { _onLeaveCapture = null; };
+  }, [captureReturnState]);
 
   // P2-B2 §5.2: Secondary resilience — capture on visibilitychange
   useEffect(() => {

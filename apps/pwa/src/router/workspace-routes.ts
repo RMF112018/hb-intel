@@ -10,6 +10,7 @@ import { useAuthStore } from '@hbc/auth';
 import { rootRoute } from './root-route.js';
 import { requireAuth, requireAdminAccessControl } from './route-guards.js';
 import { WORKSPACE_TOOL_PICKERS, WORKSPACE_SIDEBARS } from './workspace-config.js';
+import { triggerOnLeaveCapture } from '../pages/my-work/useHubReturnMemory.js';
 
 function createWorkspaceRoute(
   workspaceId: WorkspaceId,
@@ -226,10 +227,31 @@ export const requestDetailRoute = createRoute({
 });
 
 // P2-B1 §11.2: /my-work route — personal work hub workspace.
-export const myWorkRoute = createWorkspaceRoute(
-  'my-work',
-  () => import('../pages/MyWorkPage.js').then((m) => ({ default: m.MyWorkPage })),
-);
+// Uses direct createRoute (not createWorkspaceRoute) to support onLeave per P2-B2 §4.2.
+export const myWorkRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'my-work',
+  beforeLoad: () => {
+    requireAuth();
+    const nav = useNavStore.getState();
+    nav.setActiveWorkspace('my-work');
+    const toolPickerFactory = WORKSPACE_TOOL_PICKERS['my-work'];
+    if (toolPickerFactory) {
+      nav.setToolPickerItems(toolPickerFactory(() => {}));
+    }
+    const sidebarFactory = WORKSPACE_SIDEBARS['my-work'];
+    if (sidebarFactory) {
+      nav.setSidebarItems(sidebarFactory(() => {}));
+    }
+  },
+  component: lazyRouteComponent(
+    () => import('../pages/MyWorkPage.js').then((m) => ({ default: m.MyWorkPage })),
+  ),
+  // P2-B2 §4.2: Primary return-state capture trigger on SPA navigation away.
+  onLeave: () => {
+    triggerOnLeaveCapture();
+  },
+});
 
 // 404 catch-all
 export const notFoundRoute = createRoute({

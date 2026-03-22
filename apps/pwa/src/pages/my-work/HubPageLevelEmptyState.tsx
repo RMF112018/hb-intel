@@ -10,9 +10,11 @@
 import type { ReactNode } from 'react';
 import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
 import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
+import { useMyWork } from '@hbc/my-work-feed';
 
 export interface HubPageLevelEmptyStateProps {
-  isLoadError: boolean;
+  /** Override feed error detection. When omitted, derived from useMyWork() context. */
+  isLoadError?: boolean;
   hasPermission: boolean;
   children: ReactNode;
 }
@@ -65,8 +67,12 @@ export function HubPageLevelEmptyState({
   hasPermission,
   children,
 }: HubPageLevelEmptyStateProps): ReactNode {
+  // UX-F2: Derive error state from feed context when prop is not explicitly provided.
+  const { isError } = useMyWork({ enabled: false });
+  const effectiveLoadError = isLoadError ?? isError;
+
   // Only show page-level empty state for error/permission scenarios
-  if (isLoadError || !hasPermission) {
+  if (effectiveLoadError || !hasPermission) {
     const context: IEmptyStateContext = {
       module: 'pwa',
       view: 'my-work',
@@ -74,7 +80,7 @@ export function HubPageLevelEmptyState({
       hasPermission,
       isFirstVisit: false,
       currentUserRole: 'user',
-      isLoadError,
+      isLoadError: effectiveLoadError,
     };
 
     return (

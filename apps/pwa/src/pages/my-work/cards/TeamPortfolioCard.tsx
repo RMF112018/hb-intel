@@ -5,7 +5,7 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { HbcCard, HbcKpiCard } from '@hbc/ui-kit';
+import { HbcCard, HbcKpiCard, HbcSpinner, HBC_STATUS_RAMP_AMBER, HBC_STATUS_RAMP_RED } from '@hbc/ui-kit';
 import { RoleGate } from '@hbc/auth';
 import { useMyWorkTeamFeed } from '@hbc/my-work-feed';
 import type { TeamMode } from '@hbc/shell';
@@ -31,13 +31,15 @@ export function TeamPortfolioCard({ teamMode }: TeamPortfolioCardProps): ReactNo
   return (
     <RoleGate requiredRole="Executive">
       <HbcCard weight="standard" header={<span>Team Portfolio</span>}>
+        {/* Per-tile loading — WorkspacePageShell isLoading is page-level, not applicable here. */}
         {isLoading ? (
-          <span>Loading...</span>
+          // eslint-disable-next-line @hb-intel/hbc/no-direct-spinner
+          <HbcSpinner size="sm" label="Loading team data" />
         ) : (
           <div className={styles.kpiRow}>
             <HbcKpiCard label="Total Items" value={teamFeed?.totalCount ?? 0} />
-            <HbcKpiCard label="Aging" value={teamFeed?.agingCount ?? 0} color="var(--colorPaletteYellowForeground1)" />
-            <HbcKpiCard label="Blocked" value={teamFeed?.blockedCount ?? 0} color="var(--colorPaletteRedForeground1)" />
+            <HbcKpiCard label="Aging" value={teamFeed?.agingCount ?? 0} color={HBC_STATUS_RAMP_AMBER[50]} />
+            <HbcKpiCard label="Blocked" value={teamFeed?.blockedCount ?? 0} color={HBC_STATUS_RAMP_RED[50]} />
             <HbcKpiCard label="Escalation" value={teamFeed?.escalationCandidateCount ?? 0} />
           </div>
         )}

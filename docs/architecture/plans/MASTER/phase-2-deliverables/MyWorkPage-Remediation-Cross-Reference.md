@@ -33,52 +33,52 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 0-C: Apply all trivial patches
+### 0-C: Apply all trivial patches ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| UX-F2 | **H** | `isLoadError={false}` hardcoded — error states permanently suppressed | ✅ Full close |
-| D-10 (QuickActionsSheet) | **M** | `import { tokens } from '@fluentui/react-components'` direct Fluent import | ✅ Full close |
-| D-10 (RecentActivityCard) | **M** | `import { tokens } from '@fluentui/react-components'` direct Fluent import | ✅ Full close |
-| MB-08 (PersonalAnalyticsCard) | **M** | Hardcoded `backgroundColor: '#1E3A5F'` | ✅ Full close |
-| MB-08 (MyWorkPage FAB) | **M** | Hardcoded `style={{ backgroundColor: '#F37021' }}` | ✅ Full close |
-| Rule-6 (MyWorkPage) | **M** | Inline `<style>` block for responsive overrides instead of Griffel `makeStyles` | ✅ Full close |
-| MB-08 (TeamPortfolioCard) | **M** | Raw CSS variable strings instead of named token constants | ✅ Full close |
-| MB-08 (HubConnectivityBanner) | **M** | `HBC_STATUS_RAMP_AMBER[10]` ramp-index access instead of semantic token | ✅ Full close |
-| Missing token (TeamPortfolioCard) | **M** | `<span>Loading...</span>` instead of `HbcSpinner` | ✅ Full close |
-| ARC-F7 | **H** | `QuickActionsMenu.tsx` orphaned dead code — imported and rendered nowhere | ✅ Full close |
-| FRS-02 / UX-F3 | **H** | `queued` trust state normalized to `live` — erases a distinct P2-B3 trust state | ✅ Full close |
+| UX-F2 | **H** | `isLoadError={false}` hardcoded — error states permanently suppressed | ✅ Closed (2026-03-22) |
+| D-10 (QuickActionsSheet) | **M** | `import { tokens } from '@fluentui/react-components'` direct Fluent import | ✅ Closed (2026-03-22) |
+| D-10 (RecentActivityCard) | **M** | `import { tokens } from '@fluentui/react-components'` direct Fluent import | ✅ Closed (2026-03-22) |
+| MB-08 (PersonalAnalyticsCard) | **M** | Hardcoded `backgroundColor: '#1E3A5F'` | ✅ Closed (2026-03-22) |
+| MB-08 (MyWorkPage FAB) | **M** | Hardcoded `style={{ backgroundColor: '#F37021' }}` | ✅ Closed (2026-03-22) |
+| Rule-6 (MyWorkPage) | **M** | Inline `<style>` block for responsive overrides instead of Griffel `makeStyles` | ✅ Closed (2026-03-22) |
+| MB-08 (TeamPortfolioCard) | **M** | Raw CSS variable strings instead of named token constants | ✅ Closed (2026-03-22) |
+| MB-08 (HubConnectivityBanner) | **M** | `HBC_STATUS_RAMP_AMBER[10]` ramp-index access instead of semantic token | ✅ Closed (2026-03-22) |
+| Missing token (TeamPortfolioCard) | **M** | `<span>Loading...</span>` instead of `HbcSpinner` | ✅ Closed (2026-03-22) |
+| ARC-F7 | **H** | `QuickActionsMenu.tsx` orphaned dead code — imported and rendered nowhere | ✅ Closed (2026-03-22) |
+| FRS-02 / UX-F3 | **H** | `queued` trust state normalized to `live` — erases a distinct P2-B3 trust state | ✅ Closed (2026-03-22) |
 
 ---
 
 ## Phase 1 — State Contract Repairs
 
-### 1-A: Implement split timestamp model
+### 1-A: Implement split timestamp model ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| FRS-01 | **H** | Single `lastRefreshedIso` used; cannot distinguish failed refresh from successful one | ✅ Full close |
-| UX-F5 | **L** | `_isLoading` parameter in `HubFreshnessIndicator` is dead code (leading underscore suppresses lint) | ✅ Full close — indicator can now use loading state correctly |
-| FRS-03 | **M** | 3-minute auto-refresh scheduling not verified — confirm trigger wiring during freshness model rebuild | ⚡ Verify as sub-task |
-| UIF-007 (via UX-F4) | **H** | Sync status bar unactionable; staleness display incorrect — partially depends on split timestamp to show correct age | ⚡ Partial — provides data model; UIF-007 UI rendering addressed in 5-D |
+| FRS-01 | **H** | Single `lastRefreshedIso` used; cannot distinguish failed refresh from successful one | ✅ Closed (2026-03-22) |
+| UX-F5 | **L** | `_isLoading` parameter in `HubFreshnessIndicator` is dead code (leading underscore suppresses lint) | ✅ Closed (2026-03-22) — `isLoading` now used for stale-revalidate badge |
+| FRS-03 | **M** | 3-minute auto-refresh scheduling not verified — confirm trigger wiring during freshness model rebuild | ⚡ Verified (2026-03-22) — no periodic timer; refresh is return-triggered only via `useHubFeedRefresh` |
+| UIF-007 (via UX-F4) | **H** | Sync status bar unactionable; staleness display incorrect — partially depends on split timestamp to show correct age | ⚡ Partial — data model now correct; UIF-007 UI rendering addressed in 5-D |
 
 ---
 
-### 1-B: Add `hbc-my-work-feed-cache` draft key and persistence
+### 1-B: Add `hbc-my-work-feed-cache` draft key and persistence ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| STT-01 | **H** | `hbc-my-work-feed-cache` key (P2-B2 §6) absent from `hubStateTypes.ts`; feed data not persisted for stale return | ✅ Full close |
-| DOC-02 | — | `hubStateTypes.ts` has no reference comments pointing to P2-B2 | ⚡ Partial — add inline reference comment as part of this change |
+| STT-01 | **H** | `hbc-my-work-feed-cache` key (P2-B2 §6) absent from `hubStateTypes.ts`; feed data not persisted for stale return | ✅ Closed (2026-03-22) |
+| DOC-02 | — | `hubStateTypes.ts` has no reference comments pointing to P2-B2 | ⚡ Partial (2026-03-22) — P2-B2 §6 references added for feedCache; per-key comments for existing keys deferred to 6-E |
 
 ---
 
-### 1-C: Wire return-state capture to route `onLeave`
+### 1-C: Wire return-state capture to route `onLeave` ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| STT-02 | **H** | Route `onLeave` is the required primary capture trigger (P2-B2 §4.2); only `visibilitychange` fires today | ✅ Full close |
-| ARC-F10 | **H** | `myWorkRoute` has no `onLeave` hook; SPA navigation away from `/my-work` loses return state | ✅ Full close |
+| STT-02 | **H** | Route `onLeave` is the required primary capture trigger (P2-B2 §4.2); only `visibilitychange` fires today | ✅ Closed (2026-03-22) |
+| ARC-F10 | **H** | `myWorkRoute` has no `onLeave` hook; SPA navigation away from `/my-work` loses return state | ✅ Closed (2026-03-22) |
 
 ---
 

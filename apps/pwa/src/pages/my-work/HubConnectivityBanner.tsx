@@ -16,16 +16,25 @@
  */
 import { useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { makeStyles } from '@griffel/react';
 import { HbcBanner, HbcButton, HBC_STATUS_RAMP_AMBER } from '@hbc/ui-kit';
 import { useConnectivity } from '@hbc/session-state';
 import { useMyWork } from '@hbc/my-work-feed';
 import { useHubFeedRefresh } from './useHubFeedRefresh.js';
 import { formatRelativeTime } from './formatRelativeTime.js';
 
+// MB-08: Griffel class for warning border — no inline style with ramp-index access.
+const useStyles = makeStyles({
+  warningBorder: {
+    borderLeftColor: HBC_STATUS_RAMP_AMBER[10],
+  },
+});
+
 /** UIF-018: Auto-dismiss delay for success flash (ms). */
 const SUCCESS_FLASH_MS = 2000;
 
 export function HubConnectivityBanner(): ReactNode {
+  const styles = useStyles();
   const connectivity = useConnectivity();
   const { feed } = useMyWork();
   const { refreshFeed } = useHubFeedRefresh();
@@ -72,7 +81,7 @@ export function HubConnectivityBanner(): ReactNode {
 
   if (connectivity === 'degraded') {
     return (
-      <div style={{ borderLeftColor: HBC_STATUS_RAMP_AMBER[10] }}>
+      <div className={styles.warningBorder}>
         <HbcBanner variant="warning">
           <span style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <span>
