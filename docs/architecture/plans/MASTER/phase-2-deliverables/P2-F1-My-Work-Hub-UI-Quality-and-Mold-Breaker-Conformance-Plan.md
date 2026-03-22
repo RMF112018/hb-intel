@@ -1802,6 +1802,28 @@ Badges update reactively via TanStack Query cache — same data source as the fe
 
 ---
 
+### 10A.49 UIF-030-addl: Enforce Pill Border-Radius on HbcStatusBadge (High)
+
+**Severity:** High
+**Category:** Design System / Visual Hierarchy
+**Governing authority:** MB-02 (Stronger Hierarchy) — status badges must use governed `HbcStatusBadge` pill form. `UI-Kit-Visual-Language-Guide.md` — shape language requires rounded pill for inline badges.
+
+**Observed state:** The status column already used `HbcStatusBadge` with correct variant mapping (UIF-023-addl), but the rendered badge had `borderRadius: 0px` and transparent-appearing background. The Fluent `Badge` component's default `borderRadius` was being overridden by other Griffel CSS specificity, producing a flat box instead of the governed pill shape.
+
+**Fix:** Added explicit `borderRadius: '9999px'` and `padding: '2px 8px'` to the `badge` Griffel style in `HbcStatusBadge`, guaranteeing pill rendering regardless of Fluent Badge CSS specificity. This ensures the governed component always renders with the correct shape language.
+
+**Acceptance criteria:**
+- All STATUS column values use HbcStatusBadge with correct variant mapping — **MET** (already using `HbcStatusBadge` since UIF-023-addl)
+- No custom badge styling in table rows — **MET** (all badges use `HbcStatusBadge`)
+- `data-hbc-ui="status-badge"` attribute visible on badge elements — **MET** (set at line 222 of HbcStatusBadge)
+- Pill border-radius renders correctly — **MET** (explicit `9999px` in Griffel style)
+
+**Files modified:**
+- `packages/ui-kit/src/HbcStatusBadge/index.tsx` — explicit `borderRadius: '9999px'` + `padding` on badge style
+- `packages/ui-kit/package.json` — version 2.2.49 → 2.2.50
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

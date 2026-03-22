@@ -161,6 +161,8 @@ const useStatusStyles = makeStyles({
 });
 
 const useStyles = makeStyles({
+  // UIF-030-addl: Explicit pill shape + padding to override Fluent Badge defaults
+  // that may resolve to borderRadius: 0px due to CSS specificity.
   badge: {
     fontWeight: '600',
     textTransform: 'uppercase',
@@ -168,6 +170,11 @@ const useStyles = makeStyles({
     display: 'inline-flex',
     alignItems: 'center',
     gap: '4px',
+    borderRadius: '9999px',
+    paddingLeft: '8px',
+    paddingRight: '8px',
+    paddingTop: '2px',
+    paddingBottom: '2px',
   },
   animating: {
     animationName: {
