@@ -2233,6 +2233,36 @@ Pattern consistent with `HubTertiaryZone`'s `<details>` disclosure widget. Seman
 
 ---
 
+### 10A.68 KPI Layout Documentation Hardening + Final Readiness
+
+**Category:** Documentation / Compliance
+
+**Docs updated:**
+- `docs/reference/ui-kit/HbcKpiCard.md` — Complete rewrite reflecting current implementation: added `subtitle`, `icon`, `ariaLabel` props; updated trend description from plain text arrows to colored pill badges; added Adaptive Sizing section with `clamp()` table; added Gradient Wash section; added Grid Integration section; removed outdated "max-width 240px" and "min-width 160px"; updated accessibility section with `aria-label` on trend.
+
+**Final readiness judgment — Insights KPI Layout (UIF-039 through UIF-046):**
+
+The Insights panel KPI layout is implementation-ready and governance-aligned:
+
+1. **Duplicate Blocked card removed** (UIF-039) — single canonical Blocked KPI in PersonalAnalyticsCard
+2. **Hero card** enhanced with proportional breakdown bar (UIF-040) — no longer empty horizontal space
+3. **Secondary cards** improved with larger value font, pill badge trends, adaptive padding (UIF-041)
+4. **Typography scales** via `clamp()` (UIF-042) — value 20–28px, labels truncate
+5. **Container-aware grids** (UIF-043) — `auto-fill` with `minmax(130px, 1fr)` replaces fixed columns
+6. **Readable minimum** 130px per card (UIF-044) — 3-up at 414px+, 2-up at 272px+, 1-up below
+7. **Adaptive density** (UIF-045) — padding, gap, min-height, trend truncation all scale with viewport
+8. **Constrained-height overflow** (UIF-046) — aging cards collapse behind disclosure on short viewports
+
+**Known limitations:**
+- `clamp()` uses `vw` units (viewport width), not container width — sufficient but not pixel-perfect to card width
+- Full container query support deferred until Griffel upgrades to support `@container`
+- Data table scrollbar issue (separate from KPI layout) remains an open item
+
+**Files modified:**
+- `docs/reference/ui-kit/HbcKpiCard.md` — complete rewrite
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
