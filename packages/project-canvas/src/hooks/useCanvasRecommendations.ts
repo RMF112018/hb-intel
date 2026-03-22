@@ -34,8 +34,8 @@ export function useCanvasRecommendations(userId: string, projectId: string): {
         (a, b) => signalOrder.indexOf(a.signal) - signalOrder.indexOf(b.signal),
       );
       setRecommendations(sorted);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
+    } catch {
+      // API unavailable (dev mode, network error) — no recommendations.
       setRecommendations([]);
     } finally {
       setIsLoading(false);

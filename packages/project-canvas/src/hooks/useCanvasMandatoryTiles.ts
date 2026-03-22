@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ICanvasTileDefinition } from '../types/index.js';
 import { CanvasApi } from '../api/index.js';
+import { getAll } from '../registry/index.js';
 
 export function useCanvasMandatoryTiles(role: string): {
   mandatoryTiles: ICanvasTileDefinition[];
@@ -31,9 +32,13 @@ export function useCanvasMandatoryTiles(role: string): {
           setIsLoading(false);
         }
       })
-      .catch((err) => {
+      .catch(() => {
         if (!cancelled) {
-          setError(err instanceof Error ? err : new Error(String(err)));
+          // API unavailable (dev mode, network error) — derive mandatory tiles
+          // from local registry. Covers dev mode and degraded-network scenarios.
+          const allTiles = getAll();
+          const localMandatory = allTiles.filter((t) => t.mandatory);
+          setMandatoryTiles(localMandatory);
           setIsLoading(false);
         }
       });

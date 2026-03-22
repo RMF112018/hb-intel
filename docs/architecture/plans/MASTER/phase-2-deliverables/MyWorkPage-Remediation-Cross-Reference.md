@@ -183,11 +183,11 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 3-B: Config restore with role validation (`useCanvasConfig`)
+### 3-B: Config restore with role validation (`useCanvasConfig`) ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| ARC-09 | **C** | Gate 5 (config restore and validation on return) | ✅ Gate 5 satisfied |
+| ARC-09 | **C** | Gate 5 (config restore and validation on return) | ✅ Gate 5 satisfied (2026-03-22) — `useProjectCanvas` filters saved config tiles against role eligibility |
 | TST-F2 | — | P2-E3 validation plan requires automated evidence of restore behavior | ⚡ Partial — unit tests for this path added in 7-B |
 
 ---

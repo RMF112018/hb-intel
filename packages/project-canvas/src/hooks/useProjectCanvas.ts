@@ -6,6 +6,7 @@
 import { useMemo, useCallback } from 'react';
 import type { ICanvasTilePlacement } from '../types/index.js';
 import { CanvasApi } from '../api/index.js';
+import { get } from '../registry/index.js';
 import { useCanvasConfig } from './useCanvasConfig.js';
 import { useRoleDefaultCanvas } from './useRoleDefaultCanvas.js';
 import { useCanvasMandatoryTiles } from './useCanvasMandatoryTiles.js';
@@ -30,7 +31,20 @@ export function useProjectCanvas(projectId: string, userId: string, role: string
   } = useCanvasMandatoryTiles(role);
 
   const tiles = useMemo(() => {
-    const baseTiles = config ? config.tiles : defaultTiles;
+    // Gate 5 (P2-D2 §14): Validate saved config against current role-eligible tile set.
+    // Remove tiles the user is no longer eligible for after a role change.
+    // Append newly eligible mandatory tiles that are missing from the saved config.
+    let baseTiles: ICanvasTilePlacement[];
+    if (config) {
+      baseTiles = config.tiles.filter((placement) => {
+        const def = get(placement.tileKey);
+        if (!def) return false; // tile no longer registered
+        if (def.defaultForRoles.length === 0) return true; // available to all roles
+        return def.defaultForRoles.includes(role);
+      });
+    } else {
+      baseTiles = defaultTiles;
+    }
     const existingKeys = new Set(baseTiles.map((t) => t.tileKey));
     const missingMandatory = mandatoryTiles
       .filter((mt) => !existingKeys.has(mt.tileKey))
@@ -43,7 +57,7 @@ export function useProjectCanvas(projectId: string, userId: string, role: string
         isLocked: mt.lockable,
       }));
     return [...baseTiles, ...missingMandatory];
-  }, [config, defaultTiles, mandatoryTiles]);
+  }, [config, defaultTiles, mandatoryTiles, role]);
 
   const isLoading = configLoading || defaultsLoading || mandatoryLoading;
   const error = configError ?? mandatoryError ?? null;

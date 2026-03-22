@@ -1,6 +1,6 @@
 {
   "name": "@hbc/project-canvas",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "private": true,
   "description": "Role-based configurable project dashboard canvas for HB Intel modules",
   "type": "module",

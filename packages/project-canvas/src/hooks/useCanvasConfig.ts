@@ -25,8 +25,10 @@ export function useCanvasConfig(userId: string, projectId: string): {
     try {
       const result = await CanvasApi.getConfig(userId, projectId);
       setConfig(result);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
+    } catch {
+      // API unavailable (dev mode, network error) — treat as no saved config.
+      // useProjectCanvas will fall back to role defaults via useRoleDefaultCanvas.
+      setConfig(null);
     } finally {
       setIsLoading(false);
     }

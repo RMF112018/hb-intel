@@ -29,10 +29,17 @@ export function MyWorkHubTileProvider({ value, children }: MyWorkHubTileProvider
   return <MyWorkHubTileCtx.Provider value={value}>{children}</MyWorkHubTileCtx.Provider>;
 }
 
+/** Default fallback when rendered outside a MyWorkHubTileProvider (e.g. tertiary zone). */
+const DEFAULT_TILE_CONTEXT: MyWorkHubTileContextValue = {
+  activeFilter: null,
+  onFilterChange: undefined,
+  teamMode: 'personal',
+};
+
 export function useMyWorkHubTileContext(): MyWorkHubTileContextValue {
   const ctx = useContext(MyWorkHubTileCtx);
-  if (!ctx) {
-    throw new Error('useMyWorkHubTileContext must be used within a MyWorkHubTileProvider');
-  }
-  return ctx;
+  // Return safe defaults when no provider is present — tiles rendered by
+  // HbcProjectCanvas in zones without MyWorkHubTileProvider (e.g. tertiary)
+  // should degrade gracefully rather than crash.
+  return ctx ?? DEFAULT_TILE_CONTEXT;
 }

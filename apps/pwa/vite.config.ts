@@ -38,6 +38,7 @@ export default defineConfig(({ mode }) => ({
       '@hbc/shell/dev-toolbar': path.resolve(__dirname, '../../packages/shell/src/devToolbar/index.ts'),
       '@hbc/shell': path.resolve(__dirname, '../../packages/shell/src'),
       '@hbc/ui-kit': path.resolve(__dirname, '../../packages/ui-kit/src'),
+      '@hbc/project-canvas': path.resolve(__dirname, '../../packages/project-canvas/src'),
       '@hbc/features-accounting': path.resolve(__dirname, '../../packages/features/accounting/src/index.ts'),
       '@hbc/features-estimating': path.resolve(__dirname, '../../packages/features/estimating/src/index.ts'),
       '@hbc/features-project-hub': path.resolve(__dirname, '../../packages/features/project-hub/src/index.ts'),

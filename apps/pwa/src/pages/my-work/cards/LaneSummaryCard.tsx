@@ -71,27 +71,26 @@ export function LaneSummaryCard({
   const styles = useStyles();
   const { counts, isLoading } = useMyWorkCounts();
 
-  // eslint-disable-next-line @hb-intel/hbc/no-direct-spinner
-  if (isLoading) return <HbcSpinner size="sm" label="Loading lane summary" />;
-
-  const now = counts?.nowCount ?? 0;
-  const blocked = counts?.blockedCount ?? 0;
-  const waiting = counts?.waitingCount ?? 0;
-  const deferred = counts?.deferredCount ?? 0;
-  const total = now + blocked + waiting + deferred;
-
-  const pct = (n: number) => (total > 0 ? (n / total) * 100 : 0);
-
-  const segments: LaneSegment[] = useMemo(
-    () => [
+  // All hooks must be called before any early return (Rules of Hooks).
+  const segments: LaneSegment[] = useMemo(() => {
+    const now = counts?.nowCount ?? 0;
+    const blocked = counts?.blockedCount ?? 0;
+    const waiting = counts?.waitingCount ?? 0;
+    const deferred = counts?.deferredCount ?? 0;
+    const total = now + blocked + waiting + deferred;
+    const pct = (n: number) => (total > 0 ? (n / total) * 100 : 0);
+    return [
       { key: 'action-now', label: 'Action Now', count: now, color: HBC_STATUS_ACTION_GREEN, icon: <SparkleIcon size="sm" />, pct: pct(now) },
       { key: 'blocked', label: 'Blocked', count: blocked, color: HBC_STATUS_RAMP_RED[50], icon: <Cancel size="sm" />, pct: pct(blocked) },
       { key: 'waiting', label: 'Waiting', count: waiting, color: HBC_STATUS_RAMP_AMBER[50], icon: <StatusAttentionIcon size="sm" />, pct: pct(waiting) },
       { key: 'deferred', label: 'Deferred', count: deferred, color: HBC_STATUS_RAMP_GRAY[50], icon: <Notifications size="sm" />, pct: pct(deferred) },
-    ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [now, blocked, waiting, deferred, total],
-  );
+    ];
+  }, [counts]);
+
+  // eslint-disable-next-line @hb-intel/hbc/no-direct-spinner
+  if (isLoading) return <HbcSpinner size="sm" label="Loading lane summary" />;
+
+  const total = segments.reduce((sum, s) => sum + s.count, 0);
 
   return (
     <div>
@@ -116,7 +115,7 @@ export function LaneSummaryCard({
           <div
             className={styles.bar}
             role="img"
-            aria-label={`Lane distribution: ${now} action now, ${blocked} blocked, ${waiting} waiting, ${deferred} deferred`}
+            aria-label={`Lane distribution: ${segments.map((s) => `${s.count} ${s.label.toLowerCase()}`).join(', ')}`}
           >
             {segments
               .filter((s) => s.count > 0)
