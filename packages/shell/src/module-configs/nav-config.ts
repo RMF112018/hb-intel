@@ -29,7 +29,8 @@ export const NAV_ITEMS: NavItemConfig[] = [
   // My Work (Phase 2 — Personal Work Hub)
   { key: 'feed', label: 'My Work', icon: 'home', path: '/my-work', workspace: 'my-work', order: 0 },
   // Business Development (UIF-013: top-level workspace entry)
-  { key: 'bd-dashboard', label: 'Business Development', icon: 'toolbox', path: '/bd', workspace: 'business-development', order: 0 },
+  // Sidebar-icons: changed from 'toolbox' to 'go-no-go' to avoid semantic collision with header toolbox.
+  { key: 'bd-dashboard', label: 'Business Development', icon: 'go-no-go', path: '/bd', workspace: 'business-development', order: 0 },
   // Project Hub
   { key: 'portfolio', label: 'Portfolio', icon: 'home', path: '/project-hub/portfolio', workspace: 'project-hub', order: 0 },
   { key: 'recent', label: 'Recent', icon: 'drawing-sheet', path: '/project-hub/recent', workspace: 'project-hub', order: 1 },

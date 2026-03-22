@@ -10,7 +10,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { Tooltip, tokens } from '@fluentui/react-components';
 import { usePermission } from '@hbc/auth';
-import { HBC_ACCENT_ORANGE, HBC_HEADER_HEIGHT, HBC_CONNECTIVITY_HEIGHT_ONLINE, HBC_CONNECTIVITY_HEIGHT_OFFLINE, HBC_SIDEBAR_WIDTH_COLLAPSED, HBC_SIDEBAR_WIDTH_EXPANDED } from '../theme/tokens.js';
+import { HBC_ACCENT_ORANGE, HBC_HEADER_TEXT, HBC_STATUS_COLORS, HBC_HEADER_HEIGHT, HBC_CONNECTIVITY_HEIGHT_ONLINE, HBC_CONNECTIVITY_HEIGHT_OFFLINE, HBC_SIDEBAR_WIDTH_COLLAPSED, HBC_SIDEBAR_WIDTH_EXPANDED } from '../theme/tokens.js';
 import { TRANSITION_NORMAL } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { Expand, Collapse } from '../icons/index.js';
@@ -89,6 +89,7 @@ const useStyles = makeStyles({
       paddingTop: '12px',
       paddingBottom: '12px',
     },
+    position: 'relative',
     backgroundColor: 'transparent',
     ...shorthands.borderStyle('none'),
     ...shorthands.borderLeft('3px', 'solid', 'transparent'),
@@ -146,6 +147,32 @@ const useStyles = makeStyles({
   navItemLabel: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    flexGrow: 1,
+  },
+  // Sidebar-badges: small red count pill — collapsed (absolute near icon), expanded (inline after label).
+  badge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '16px',
+    height: '16px',
+    paddingLeft: '4px',
+    paddingRight: '4px',
+    borderRadius: '8px',
+    backgroundColor: HBC_STATUS_COLORS.error as string,
+    color: HBC_HEADER_TEXT,
+    fontSize: '0.625rem',
+    fontWeight: '700',
+    lineHeight: '1',
+    flexShrink: 0,
+  },
+  badgeCollapsed: {
+    position: 'absolute',
+    top: '4px',
+    right: '8px',
+    minWidth: '14px',
+    height: '14px',
+    fontSize: '0.5625rem',
   },
   toggleButton: {
     display: 'flex',
@@ -274,6 +301,16 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
                       </span>
                     );
 
+                    const badgeCount = item.badge ?? 0;
+                    const badgeEl = badgeCount > 0 ? (
+                      <span
+                        className={mergeClasses(styles.badge, !effectiveExpanded && styles.badgeCollapsed)}
+                        aria-hidden="true"
+                      >
+                        {badgeCount > 99 ? '99+' : badgeCount}
+                      </span>
+                    ) : null;
+
                     const button = (
                       <button
                         key={item.id}
@@ -286,11 +323,12 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
                         onClick={() => onNavigate?.(item.href)}
                         aria-current={isActive ? 'page' : undefined}
                         data-active={isActive ? 'true' : undefined}
-                        aria-label={item.label}
+                        aria-label={badgeCount > 0 ? `${item.label}, ${badgeCount} items need attention` : item.label}
                         type="button"
                       >
                         {iconEl}
                         {effectiveExpanded && <span className={styles.navItemLabel}>{item.label}</span>}
+                        {badgeEl}
                       </button>
                     );
 

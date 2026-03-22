@@ -27,6 +27,8 @@ export interface SidebarNavItem {
   isFavorite?: boolean;
   /** Permission required to see this item. Hidden (not disabled) if not met. PH4B.5 §4b.5.4 */
   requiredPermission?: string;
+  /** Sidebar-badges: Live count badge (e.g., blocked/action-required). Hidden at 0. */
+  badge?: number;
 }
 
 /** A group of navigation items in the sidebar */
