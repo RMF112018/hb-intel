@@ -8,6 +8,10 @@
  */
 
 import type { IProjectRegistryRecord, ProjectDepartment } from '@hbc/models';
+import type {
+  DepartmentReclassificationInput,
+  DepartmentReclassificationResult,
+} from './departmentReclassification.js';
 
 /**
  * Registry-focused lookup service operating on canonical IProjectRegistryRecord.
@@ -35,4 +39,12 @@ export interface IProjectRegistryService {
 
   /** List all registry records for a given department (P3-A2 §3 — PER authority scoping) */
   listByDepartment(department: ProjectDepartment): Promise<IProjectRegistryRecord[]>;
+
+  /**
+   * Execute a governed department reclassification (P3-A1 §3.6).
+   * Requires Manager of Operational Excellence approval.
+   */
+  reclassifyDepartment(
+    input: DepartmentReclassificationInput,
+  ): Promise<DepartmentReclassificationResult>;
 }

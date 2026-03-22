@@ -130,6 +130,15 @@ export type { AdapterMode } from './factory.js';
 // ---------------------------------------------------------------------------
 export type { IProjectRegistryService } from './services/IProjectRegistryService.js';
 export { MockProjectRegistryService } from './services/MockProjectRegistryService.js';
+export {
+  validateReclassificationAuthority,
+  executeDepartmentReclassification,
+  RECLASSIFICATION_APPROVER_ROLE,
+} from './services/departmentReclassification.js';
+export type {
+  DepartmentReclassificationInput,
+  DepartmentReclassificationResult,
+} from './services/departmentReclassification.js';
 
 // ---------------------------------------------------------------------------
 // Routing normalization (Phase 3 Stage 1.2 — dual-key project identity)

@@ -151,7 +151,8 @@ Status: **Implemented 2026-03-22 in `@hbc/data-access` v0.6.0.** `IProjectRegist
 
 **1.6 — Governed department reclassification flow**
 Implement the department change workflow: Manager of OpEx approval, audit record creation, downstream visibility recalculation (all role-scoped authority re-evaluated for the new department value), and suspension of any active PER override records for the project until re-grant.
-Governing: P3-A1 §4.3, P3-A2 §4.3
+Governing: P3-A1 §3.6, P3-A2 §7
+Status: **Implemented 2026-03-22 in `@hbc/data-access` v0.7.0.** `validateReclassificationAuthority` and `executeDepartmentReclassification` added. Enforces Manager of OpEx approval, rejects no-ops, updates department atomically, suspends PER overrides via `suspendPerOverridesForDepartmentChange`, records audit timestamp. `IProjectRegistryService.reclassifyDepartment` added. Stage 1 fully complete.
 
 ---
 

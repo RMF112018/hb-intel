@@ -1,5 +1,10 @@
 import type { IProjectRegistryRecord, ProjectDepartment } from '@hbc/models';
 import type { IProjectRegistryService } from './IProjectRegistryService.js';
+import type {
+  DepartmentReclassificationInput,
+  DepartmentReclassificationResult,
+} from './departmentReclassification.js';
+import { executeDepartmentReclassification } from './departmentReclassification.js';
 
 /**
  * In-memory mock implementation of IProjectRegistryService for dev/test.
@@ -54,5 +59,23 @@ export class MockProjectRegistryService implements IProjectRegistryService {
 
   async listByDepartment(department: ProjectDepartment): Promise<IProjectRegistryRecord[]> {
     return this.store.filter((r) => r.department === department);
+  }
+
+  async reclassifyDepartment(
+    input: DepartmentReclassificationInput,
+  ): Promise<DepartmentReclassificationResult> {
+    const record = this.store.find((r) => r.projectId === input.projectId);
+    if (!record) {
+      throw new Error(`Project "${input.projectId}" not found in registry.`);
+    }
+
+    // Execute the pure reclassification function
+    const result = executeDepartmentReclassification(input, record);
+
+    // Update the store
+    const idx = this.store.findIndex((r) => r.projectId === input.projectId);
+    this.store[idx] = result.updatedRecord;
+
+    return result;
   }
 }
