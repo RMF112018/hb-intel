@@ -1971,6 +1971,31 @@ All changes are CSS-only `@media (pointer: coarse)` rules — no effect on mouse
 
 ---
 
+### 10A.57 UIF-036-addl: KPI Grid Intermediate Column Tier
+
+**Severity:** Medium
+**Category:** Responsive Layout / Design System
+
+**Observed state:** `DashboardLayout.kpiGrid` jumped from 2 columns (≤1199px) directly to 4 columns (≥1200px), creating a jarring visual shift at the tablet/desktop boundary. No intermediate 3-column tier existed.
+
+**Fix:** Added a 3-column intermediate tier at 1024–1199px (`HBC_BREAKPOINT_SIDEBAR` to `HBC_BREAKPOINT_CONTENT_MEDIUM`) in `DashboardLayout.tsx`. The 2-column tier now applies only to 768–1023px. This smooths the column progression: 1→2→3→4 across viewport widths.
+
+Final KPI grid breakpoints:
+| Width | Columns |
+|---|---|
+| ≤767px | 1 |
+| 768–1023px | 2 |
+| 1024–1199px | 3 (new) |
+| ≥1200px | 4 |
+
+Note: The My Work page's own KPI cards in `HubSecondaryZone` use `repeat(auto-fit, minmax(90px, 1fr))` which self-adapts and is unaffected by this change. This fix targets the shared `DashboardLayout` used by other pages via `WorkspacePageShell layout="dashboard"`.
+
+**Files modified:**
+- `packages/ui-kit/src/layouts/DashboardLayout.tsx` — 3-column intermediate tier + `HBC_BREAKPOINT_SIDEBAR` import
+- `packages/ui-kit/package.json` — version 2.2.53 → 2.2.54
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
