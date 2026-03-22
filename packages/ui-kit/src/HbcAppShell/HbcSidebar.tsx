@@ -93,16 +93,26 @@ const useStyles = makeStyles({
     ...shorthands.borderStyle('none'),
     ...shorthands.borderLeft('3px', 'solid', 'transparent'),
     cursor: 'pointer',
-    color: tokens.colorNeutralForeground1,
+    // Sidebar nav-state: inactive uses muted foreground for typographic hierarchy.
+    color: tokens.colorNeutralForeground2,
+    fontWeight: '400',
     fontSize: '0.875rem',
     textAlign: 'left',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     textDecorationLine: 'none',
+    // Smooth hover/active/pressed transitions.
+    transitionProperty: 'background-color, color, border-color',
+    transitionDuration: '150ms',
+    transitionTimingFunction: 'ease',
     ':hover': {
       backgroundColor: tokens.colorNeutralBackground3Hover,
       color: tokens.colorBrandForeground1,
+    },
+    ':active': {
+      backgroundColor: tokens.colorNeutralBackground3Pressed,
+      transform: 'scale(0.98)',
     },
   },
   navItemCollapsed: {
@@ -262,6 +272,7 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
                         )}
                         onClick={() => onNavigate?.(item.href)}
                         aria-current={isActive ? 'page' : undefined}
+                        data-active={isActive ? 'true' : undefined}
                         aria-label={item.label}
                         type="button"
                       >
