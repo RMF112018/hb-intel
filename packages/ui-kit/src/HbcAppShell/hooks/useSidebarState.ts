@@ -42,7 +42,12 @@ export function useSidebarState(): UseSidebarStateReturn {
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    // UIF-037-addl: Re-evaluate sidebar on device rotation (tablet portrait↔landscape).
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
   }, []);
 
   const toggle = useCallback(() => {

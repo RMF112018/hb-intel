@@ -1996,6 +1996,36 @@ Note: The My Work page's own KPI cards in `HubSecondaryZone` use `repeat(auto-fi
 
 ---
 
+### 10A.58 UIF-037-addl: Orientation-Aware Responsive Polish
+
+**Severity:** Medium
+**Category:** Responsive Layout / Tablet
+
+**Architectural decision — width-only breakpoints preserved:** The codebase uses width-based breakpoints exclusively. No `@media (orientation: ...)` CSS rules were added because all four target iPad dimensions map cleanly to existing width tiers:
+
+| Device state | Width | Tier |
+|---|---|---|
+| iPad Pro 12.9" landscape | 1366px | Desktop (≥1200px) |
+| iPad Pro 12.9" portrait | 1024px | Tablet (1024–1199px) |
+| iPad Air landscape | 1194px | Tablet (1024–1199px) |
+| iPad Air portrait | 834px | sm-tablet (768–1023px) |
+
+Adding orientation-specific CSS rules would create maintenance complexity and potential conflicts with the width-based tier system without meaningful layout improvement. This decision aligns with the UI-Kit Competitive Benchmark Matrix which defines viewport tiers by width (desktop 1440+, tablet landscape 1024–1366, tablet portrait 768–1024).
+
+**Fix:** Added `orientationchange` event listener to `useSidebarState` so the sidebar re-evaluates its mobile/desktop state after device rotation. Previously only `resize` was listened to — on some tablets, `orientationchange` fires before `resize` completes, causing a transient stale state.
+
+**Behaviors left width-driven only (intentional):**
+- Nav sidebar visibility (width ≥ 1024px)
+- Two-column layout activation (width ≥ 1024px)
+- Sticky right panel (width ≥ 1024px)
+- KPI grid column count (width-based 1→2→3→4)
+
+**Files modified:**
+- `packages/ui-kit/src/HbcAppShell/hooks/useSidebarState.ts` — added `orientationchange` listener
+- `packages/ui-kit/package.json` — version 2.2.54 → 2.2.55
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
