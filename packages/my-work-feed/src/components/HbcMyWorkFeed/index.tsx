@@ -128,6 +128,25 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 /**
+ * Lane-container: Module-group accent colors. Uses info ramp so module groups
+ * are visually distinct from lane/priority groups.
+ */
+const MODULE_COLORS: Record<string, string> = {
+  'bic-next-move': HBC_STATUS_RAMP_INFO[50],
+  'workflow-handoff': HBC_STATUS_RAMP_INFO[30],
+  'acknowledgment': HBC_STATUS_RAMP_GRAY[50],
+  'notification-intelligence': HBC_STATUS_RAMP_AMBER[30],
+  'session-state': HBC_STATUS_RAMP_GRAY[30],
+  'module': HBC_STATUS_RAMP_INFO[50],
+};
+
+/** Fallback accent for project and unknown groupings. */
+const DEFAULT_GROUP_ACCENT = HBC_STATUS_RAMP_GRAY[30];
+
+/** Construction/business domain acronyms that must stay uppercase in titles. */
+const DOMAIN_ACRONYMS = new Set(['bd', 'rfi', 'pm', 'pmp', 'qc', 'hse', 'mep', 'hvac', 'bim', 'spfx']);
+
+/**
  * UIF-020-addl: Lane-group display order for consistent rendering.
  */
 const LANE_ORDER: string[] = ['waiting-blocked', 'do-now', 'watch', 'delegated-team', 'deferred'];
@@ -159,11 +178,18 @@ const STATE_BADGE_VARIANT: Record<MyWorkState, StatusVariant> = {
   completed: 'completed',
 };
 
+/** Lane-container: Acronym-aware group label formatting.
+ * Known domain acronyms (BD, RFI, PM, etc.) stay uppercase instead of
+ * being naively title-cased to "Bd", "Rfi", etc. */
 function formatGroupLabel(key: string): string {
   return (
     PRIORITY_LABELS[key] ??
     LANE_LABELS[key] ??
-    key.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+    key
+      .replace(/-/g, ' ')
+      .split(' ')
+      .map((word) => DOMAIN_ACRONYMS.has(word.toLowerCase()) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
   );
 }
 
@@ -726,7 +752,12 @@ export function HbcMyWorkFeed({
             groups.map((group) => {
               const isExpanded = !collapsedGroups.has(group.groupKey);
               const label = formatGroupLabel(group.groupKey);
-              const laneColor = PRIORITY_COLORS[group.groupKey] ?? LANE_COLORS[group.groupKey] ?? 'transparent';
+              // Lane-container: accent color cascade — priority → lane → module → default.
+              // No grouping mode falls to transparent.
+              const laneColor = PRIORITY_COLORS[group.groupKey]
+                ?? LANE_COLORS[group.groupKey]
+                ?? MODULE_COLORS[group.groupKey]
+                ?? DEFAULT_GROUP_ACCENT;
               // Stable IDs for ARIA labelling.
               const headerId = `my-work-group-hdr-${group.groupKey}`;
               const bodyId = `my-work-group-body-${group.groupKey}`;
@@ -790,6 +821,7 @@ export function HbcMyWorkFeed({
                         {label}
                       </h3>
                       <span
+                        aria-label={`${group.items.length} items`}
                         style={{
                           fontSize: '0.6875rem',
                           fontWeight: 600,
