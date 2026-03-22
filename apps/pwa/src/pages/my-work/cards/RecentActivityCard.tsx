@@ -15,6 +15,7 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
+import { useRouter } from '@tanstack/react-router';
 import { tokens, HbcCard, HbcEmptyState, HbcButton, heading4 } from '@hbc/ui-kit';
 import { BlueprintRoll } from '@hbc/ui-kit/icons';
 
@@ -31,6 +32,7 @@ const useStyles = makeStyles({
 
 export function RecentActivityCard(): ReactNode {
   const styles = useStyles();
+  const router = useRouter();
 
   return (
     <HbcCard
@@ -46,7 +48,7 @@ export function RecentActivityCard(): ReactNode {
           <HbcButton
             variant="primary"
             size="md"
-            onClick={() => { window.location.href = '/projects'; }}
+            onClick={() => { void router.navigate({ to: '/projects' }); }}
           >
             Browse Projects
           </HbcButton>

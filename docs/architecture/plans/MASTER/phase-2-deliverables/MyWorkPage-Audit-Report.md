@@ -177,7 +177,7 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 
 | Finding ID | Requirement | Current State | Severity |
 |---|---|---|---|
-| OPM-01 | Full PWA action vocabulary: `open`, `mark-read`, `acknowledge`, `dismiss`, `defer`, `undefer`, `waiting-on`, `pin-today`, `pin-week`, `delegate`, `reassign` (§7.2) | Only `open` is implemented — via `window.location.href` full page reload; all other actions route to the same href regardless of action key | **High** |
+| OPM-01 | Full PWA action vocabulary: `open`, `mark-read`, `acknowledge`, `dismiss`, `defer`, `undefer`, `waiting-on`, `pin-today`, `pin-week`, `delegate`, `reassign` (§7.2) | ✅ Corrected — `HubDetailPanel` wired to `useMyWorkActions` which dispatches all action keys; replayable actions mutate locally, non-replayable navigate via SPA router (remediation 4-A, 2026-03-22) | **High** — Resolved |
 | OPM-02 | No redirect on low-work; primary zone protected | Correct — no redirect implemented; primary zone is invariant | **Pass** |
 | OPM-03 | Task-first identity; feed is primary operating layer | Primary zone correctly prioritized in layout | **Pass** |
 
@@ -197,7 +197,7 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 
 | Finding ID | Requirement | Current State | Severity |
 |---|---|---|---|
-| NAV-01 | Domain mutations happen at the domain surface via proper handoff | `HubDetailPanel` emits `window.location.href = item.context.href` for every action — no `@hbc/workflow-handoff` package integration; no `IHandoffPackage` construction; full page reload on every navigation | **High** |
+| NAV-01 | Domain mutations happen at the domain surface via proper handoff | ✅ Corrected — `HubDetailPanel` dispatches actions via `useMyWorkActions`; SPA navigation via `router.navigate()` for `deepLinkHref`; no more `window.location.href` page reloads (remediation 4-A, 2026-03-22) | **High** — Resolved |
 | NAV-02 | Return path contract: domain surface provides "Back to My Work" | No return-path state is passed through the handoff — return state would need to be stored in draft first | **Medium** |
 
 ---
@@ -341,13 +341,7 @@ The card contains only placeholder text — no real data fetch, no `@hbc/my-work
 
 **Files:** `HubDetailPanel.tsx`, `cards/RecentActivityCard.tsx`
 
-`HubDetailPanel` maps every action key to `window.location.href = item.context.href`. This means:
-
-- Every "Open" action causes a full page reload — the SPA never navigates; the browser loads a new document
-- All other action keys (`mark-read`, `defer`, `pin-today`, `pin-week`, `delegate`, `reassign`) silently fall through to the same `window.location.href` handler, discarding the action intent entirely
-- The TanStack Router session is torn down on every navigation — no back-button SPA behavior, no scroll position restoration, no prefetch
-
-`RecentActivityCard` uses `window.location.href = '/projects'` directly. Both must use `router.navigate()` (TanStack Router) for same-origin SPA navigation, with `@hbc/workflow-handoff` for cross-domain handoff packages where P2-C4 applies.
+✅ Corrected (remediation 4-A, 2026-03-22). `HubDetailPanel` now dispatches all actions via `useMyWorkActions` hook — replayable actions (mark-read, defer, undefer, pin-today, pin-week, waiting-on) execute locally; non-replayable actions (open, delegate, reassign) navigate via `router.navigate(deepLinkHref)`. `RecentActivityCard` now navigates via `router.navigate({ to: '/projects' })`. All `window.location.href` usage removed from the my-work page tree.
 
 ---
 

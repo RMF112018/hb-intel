@@ -6,11 +6,13 @@
  *
  * Lazy-loaded: mounted on first item selection via React.lazy() in MyWorkPage.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { makeStyles, shorthands, mergeClasses } from '@griffel/react';
+import { useRouter } from '@tanstack/react-router';
 import { heading3, HbcButton, HbcStatusBadge, HbcCard, useAnimationStyles, elevationLevel3 } from '@hbc/ui-kit';
-import type { IMyWorkItem } from '@hbc/my-work-feed';
+import type { IMyWorkItem, IMyWorkActionDefinition } from '@hbc/my-work-feed';
+import { useMyWorkActions } from '@hbc/my-work-feed';
 
 export interface HubDetailPanelProps {
   item: IMyWorkItem;
@@ -120,8 +122,24 @@ export function HubDetailPanel({ item, onClose }: HubDetailPanelProps): ReactNod
   const animStyles = useAnimationStyles();
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<Element | null>(null);
+  const router = useRouter();
+  const { executeAction, isPending, lastResult } = useMyWorkActions();
 
   const laneLabel = LANE_LABELS[item.lane] ?? item.lane;
+
+  // Navigate to deep-link when a non-replayable action completes.
+  useEffect(() => {
+    if (lastResult?.deepLinkHref) {
+      void router.navigate({ to: lastResult.deepLinkHref });
+    }
+  }, [lastResult, router]);
+
+  // OPM-01 / UX-F1: Full action vocabulary via useMyWorkActions.
+  // Replayable actions (mark-read, defer, etc.) execute locally.
+  // Non-replayable actions (open, delegate) navigate via SPA router.
+  const handleAction = useCallback((action: IMyWorkActionDefinition) => {
+    executeAction({ actionKey: action.key, item });
+  }, [executeAction, item]);
 
   // Detail-panel a11y: focus panel on open, restore focus on close.
   useEffect(() => {
@@ -221,11 +239,8 @@ export function HubDetailPanel({ item, onClose }: HubDetailPanelProps): ReactNod
                 key={action.key}
                 variant={action.variant === 'primary' ? 'primary' : 'secondary'}
                 size="md"
-                onClick={() => {
-                  if (item.context.href) {
-                    window.location.href = item.context.href;
-                  }
-                }}
+                disabled={isPending}
+                onClick={() => handleAction(action)}
               >
                 {action.label}
               </HbcButton>

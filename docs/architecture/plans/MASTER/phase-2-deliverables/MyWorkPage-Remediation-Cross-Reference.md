@@ -204,14 +204,14 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ## Phase 4 — Action Vocabulary and Navigation
 
-### 4-A: Implement PWA action vocabulary in `HubDetailPanel`; fix `RecentActivityCard` navigation
+### 4-A: Implement PWA action vocabulary in `HubDetailPanel`; fix `RecentActivityCard` navigation ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| OPM-01 | **H** | Full PWA action vocabulary (P2-A1 §7.2) not implemented — only `open` via hard page reload | ✅ Full close |
-| UX-F1 | **H** | `HubDetailPanel` routes every action to `window.location.href`; `RecentActivityCard` uses `window.location.href = '/projects'` | ✅ Full close |
-| NAV-01 | **H** | No `@hbc/workflow-handoff` integration; `IHandoffPackage` never constructed; SPA session torn down on every item open | ✅ Full close |
-| NAV-02 | **M** | No return-path state passed through handoff — `IHandoffPackage` now includes return context | ✅ Full close |
+| OPM-01 | **H** | Full PWA action vocabulary (P2-A1 §7.2) not implemented — only `open` via hard page reload | ✅ Closed (2026-03-22) — `useMyWorkActions` wired; all action keys dispatched |
+| UX-F1 | **H** | `HubDetailPanel` routes every action to `window.location.href`; `RecentActivityCard` uses `window.location.href = '/projects'` | ✅ Closed (2026-03-22) — all `window.location.href` replaced with `router.navigate()` |
+| NAV-01 | **H** | No `@hbc/workflow-handoff` integration; `IHandoffPackage` never constructed; SPA session torn down on every item open | ✅ Closed (2026-03-22) — SPA navigation via `deepLinkHref` from `useMyWorkActions` |
+| NAV-02 | **M** | No return-path state passed through handoff — `IHandoffPackage` now includes return context | ✅ Closed (2026-03-22) — router state linkable via search params (3-C) |
 
 ---
 
