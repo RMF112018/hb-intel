@@ -2343,6 +2343,39 @@ Desktop-only visibility enforced at the CSS level in `HubTeamModeSelector.rightS
 
 ---
 
+### 10A.72 UIF-050-addl: Right Panel Redesign — RecentActivityCard + Gap
+
+**Severity:** Medium
+**Category:** Layout / Right Panel
+
+**Changes:**
+
+1. **HubTertiaryZone** simplified from canvas tile rendering (MyWorkCanvas + asymmetric 2-column grid + narrow disclosure) to a direct `<RecentActivityCard />` render. The old canvas indirection is no longer needed because QuickActionsMenu moved to the tab row strip (desktop) and FAB/sheet (mobile).
+
+2. **Right panel gap** changed from `0px` to `16px` in `HubZoneLayout.tsx` rightPanel `≥SIDEBAR` media query — proper spacing between Insights and Recent Activity cards.
+
+3. **RecentActivityCard** already uses full panel width (single-column layout, no fixed-width constraints).
+
+Final right panel composition (≥1024px):
+```
+┌─────────────────────────┐
+│ Insights (HbcCard primary)│
+│ [hero + secondary KPIs]  │
+├─── 16px gap ─────────────┤
+│ Recent Activity (supporting)│
+│ [empty state / items]    │
+└─────────────────────────┘
+```
+
+Sticky overflow: `maxHeight: calc(100vh - 210px)` with `overflowY: auto` on the right panel — both cards scroll together when panel height is constrained.
+
+**Files changed:**
+- `apps/pwa/src/pages/my-work/HubTertiaryZone.tsx` — simplified to direct RecentActivityCard render
+- `apps/pwa/src/pages/my-work/HubZoneLayout.tsx` — right panel gap 0→16px
+- `apps/pwa/package.json` — version 0.12.65 → 0.12.66
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

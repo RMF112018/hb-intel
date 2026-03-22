@@ -109,7 +109,8 @@ const useStyles = makeStyles({
       display: 'flex',
       flexDirection: 'column',
       gridColumn: '2 / 3',
-      ...shorthands.gap('0px'),
+      // UIF-050-addl: 16px gap between Insights and Recent Activity cards.
+      ...shorthands.gap('16px'),
       position: 'sticky' as const,
       top: '208px',
       alignSelf: 'flex-start',
