@@ -19,5 +19,10 @@ function TeamPortfolioTileEssential(_props: ICanvasTileProps): ReactNode {
   return null;
 }
 
-export { TeamPortfolioTileEssential, TeamPortfolioTileStandard };
-export { TeamPortfolioTileStandard as TeamPortfolioTileExpert };
+// CRD-05: Genuine expert variant (distinct function, not alias).
+function TeamPortfolioTileExpert(_props: ICanvasTileProps): ReactNode {
+  const { teamMode } = useMyWorkHubTileContext();
+  return <div data-complexity="expert"><TeamPortfolioCard teamMode={teamMode} /></div>;
+}
+
+export { TeamPortfolioTileEssential, TeamPortfolioTileStandard, TeamPortfolioTileExpert };

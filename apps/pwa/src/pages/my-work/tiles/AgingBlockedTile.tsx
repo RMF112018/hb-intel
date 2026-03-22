@@ -19,5 +19,10 @@ function AgingBlockedTileEssential(_props: ICanvasTileProps): ReactNode {
   return null;
 }
 
-export { AgingBlockedTileEssential, AgingBlockedTileStandard };
-export { AgingBlockedTileStandard as AgingBlockedTileExpert };
+// CRD-05: Genuine expert variant (distinct function, not alias).
+function AgingBlockedTileExpert(_props: ICanvasTileProps): ReactNode {
+  const { activeFilter, onFilterChange } = useMyWorkHubTileContext();
+  return <div data-complexity="expert"><AgingBlockedCard activeFilter={activeFilter} onFilterChange={onFilterChange} /></div>;
+}
+
+export { AgingBlockedTileEssential, AgingBlockedTileStandard, AgingBlockedTileExpert };

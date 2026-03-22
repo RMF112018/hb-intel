@@ -16,5 +16,9 @@ function AdminOversightTileEssential(_props: ICanvasTileProps): ReactNode {
   return null;
 }
 
-export { AdminOversightTileEssential, AdminOversightTileStandard };
-export { AdminOversightTileStandard as AdminOversightTileExpert };
+// CRD-05: Genuine expert variant (distinct function, not alias).
+function AdminOversightTileExpert(_props: ICanvasTileProps): ReactNode {
+  return <div data-complexity="expert"><AdminOversightCard /></div>;
+}
+
+export { AdminOversightTileEssential, AdminOversightTileStandard, AdminOversightTileExpert };

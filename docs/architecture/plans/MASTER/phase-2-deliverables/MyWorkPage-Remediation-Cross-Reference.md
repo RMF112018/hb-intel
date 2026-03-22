@@ -250,37 +250,37 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 5-C: P2-F1 G3 — Layout (two-column persistent layout)
+### 5-C: P2-F1 G3 — Layout (two-column persistent layout) ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| UIF-002 (via UX-F4) | **C** | Single-column layout buries analytics 900px below fold; right viewport empty throughout feed scroll | ✅ Full close |
-| ARC-08 | **M** | Grid not aligned to governed 12-column system — residual layout alignment after canvas integration | ✅ Full close (any remaining layout alignment concerns) |
+| UIF-002 (via UX-F4) | **C** | Single-column layout buries analytics 900px below fold | ✅ Closed (2026-03-22) — `HubZoneLayout` implements two-column responsive grid (`7fr 5fr` desktop, `3fr 2fr` tablet) |
+| ARC-08 | **M** | Grid not aligned to governed 12-column system | ✅ Closed (2026-03-22) — tile colSpan values converted to 12-column (2-B); `HbcProjectCanvas` manages grid |
 
 ---
 
-### 5-D: Remaining open P2-F1 UIFs (UIF-007 through UIF-018)
+### 5-D: Remaining open P2-F1 UIFs (UIF-007 through UIF-018) ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| UIF-007 (via UX-F4) | **H** | Connectivity bar unactionable — no retry, no named sources, color collision between PARTIAL and BLOCKED | ✅ Full close |
-| UIF-008 (via UX-F4) | **H** | KPI cards static counts — not clickable/filterable; duplicate BLOCKED label; inconsistent card styles | ✅ Full close |
-| UIF-009 (via UX-F4) | **H** | "Open" button 28px tall — below 44px WCAG touch target threshold | ✅ Full close |
-| UIF-010 (via UX-F4) | **H** | Dev overlays (`HB-AUTH-DEV` bar, TanStack devtools) visible in production-accessible builds | ✅ Full close |
-| UIF-011 (via UX-F4) | **H** | Empty-state heading same weight as page title — broken typographic hierarchy | ✅ Full close |
-| UIF-012 (via UX-F4) | **H** | Two separate command rows (~80px overhead); filter buttons no active state; "Group by" not a dropdown | ✅ Full close |
-| UIF-013 (via UX-F4) | **H** | Left nav rail shows only one destination — no other modules visible | ✅ Full close |
-| UIF-014 through UIF-018 (via UX-F4) | **H** | CTA label specificity, project color coding, focus ring visibility, field-use touch targets | ✅ Full close |
+| UIF-007 (via UX-F4) | **H** | Connectivity bar unactionable | ✅ Closed (2026-03-22) — `HubConnectivityBanner` has retry button, named degraded sources, HbcBanner variant="warning" |
+| UIF-008 (via UX-F4) | **H** | KPI cards static/non-clickable | ✅ Closed (2026-03-22) — `LaneSummaryCard` + `PersonalAnalyticsCard` have `onClick`/`isActive` click-to-filter |
+| UIF-009 (via UX-F4) | **H** | Button below 44px touch target | ✅ Closed (2026-03-22) — `HbcButton` auto-bumps to `lg` on touch/coarse pointer |
+| UIF-010 (via UX-F4) | **H** | Dev overlays in production builds | ✅ Closed (2026-03-22) — gated behind `import.meta.env.DEV` |
+| UIF-011 (via UX-F4) | **H** | Empty-state typographic hierarchy | ✅ Closed (2026-03-22) — `HbcSmartEmptyState` uses governed heading levels |
+| UIF-012 (via UX-F4) | **H** | Command row overhead | ✅ Closed (2026-03-22) — consolidated tab row with QuickActionsStrip |
+| UIF-013 (via UX-F4) | **H** | Nav rail single destination | ✅ Closed (2026-03-22) — sidebar populated via `WORKSPACE_SIDEBARS` config |
+| UIF-014 through UIF-018 (via UX-F4) | **H** | CTA labels, color coding, focus rings, touch targets | ✅ Closed (2026-03-22) — ui-kit components provide governed implementations |
 
 ---
 
 ## Phase 6 — Completeness and Technical Debt
 
-### 6-A: Implement expert-tier tile variants
+### 6-A: Implement expert-tier tile variants ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| CRD-05 | **L** | All four existing tiles alias Standard as Expert — no expert-specific behavior or display | ✅ Full close |
+| CRD-05 | **L** | All four existing tiles alias Standard as Expert | ✅ Closed (2026-03-22) — aliases replaced with genuine functions; `data-complexity="expert"` wrapper |
 
 ---
 

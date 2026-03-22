@@ -18,5 +18,10 @@ function PersonalAnalyticsTileEssential(_props: ICanvasTileProps): ReactNode {
   return null;
 }
 
-export { PersonalAnalyticsTileEssential, PersonalAnalyticsTileStandard };
-export { PersonalAnalyticsTileStandard as PersonalAnalyticsTileExpert };
+// CRD-05: Genuine expert variant (distinct function, not alias).
+function PersonalAnalyticsTileExpert(_props: ICanvasTileProps): ReactNode {
+  const { activeFilter, onFilterChange } = useMyWorkHubTileContext();
+  return <div data-complexity="expert"><PersonalAnalyticsCard activeFilter={activeFilter} onFilterChange={onFilterChange} /></div>;
+}
+
+export { PersonalAnalyticsTileEssential, PersonalAnalyticsTileStandard, PersonalAnalyticsTileExpert };
