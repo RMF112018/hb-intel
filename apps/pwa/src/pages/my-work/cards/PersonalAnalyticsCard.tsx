@@ -3,15 +3,17 @@
  * Displays personal work KPIs from useMyWorkCounts().
  *
  * UIF-008: Responsive KPI grid with click-to-filter on each card.
- * UIF-001 fix: grid uses auto-fit + minmax so columns reflow to container width
- * instead of overflowing. Works correctly whether the tile spans 6 or 12 columns
- * in the secondary zone's 12-column grid.
+ * UIF-039-addl: Explicit 3-column grid for secondary cards. Hero spans full width.
+ * UIF-040-addl: Hero card includes a proportional breakdown bar showing the
+ * composition of totalCount (Action Now + Blocked + Unread + Other).
+ *
  * Semantic status ramp colors on top borders per UIF-007.
  * Value typography: heading1 (1.5rem/700) via HbcKpiCard default.
  * Background: surface-1 (colorNeutralBackground1) via HbcKpiCard default.
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
+import { tokens } from '@fluentui/react-components';
 import {
   HbcKpiCard,
   HbcSpinner,
@@ -25,14 +27,6 @@ import {
 import { useMyWorkCounts } from '@hbc/my-work-feed';
 import { ViewList, SparkleIcon, Cancel, Notifications } from '@hbc/ui-kit/icons';
 
-// UIF-001: auto-fit + minmax(90px, 1fr) replaces fixed repeat(4,1fr) with explicit
-// breakpoints. The old breakpoints were calibrated for full-page width contexts and
-// did not account for the constrained ~200-250px tile wrapper inside defaultColSpan:6.
-// With auto-fit, the grid self-adapts: 4 cards per row at ≥408px, 2 per row at
-// ≥196px, 1 per row below. No viewport-level media query needed.
-// UIF-039-addl: Explicit 3-column grid for the 3 secondary cards (Action Now,
-// Blocked, Unread). Hero card spans full width via gridColumn: '1 / -1'.
-// Eliminates ghost columns from auto-fit when container width doesn't divide evenly.
 const useStyles = makeStyles({
   kpiGrid: {
     display: 'grid',
@@ -46,6 +40,36 @@ const useStyles = makeStyles({
   summaryCard: {
     backgroundColor: '#1E3A5F',
     maxWidth: 'none',
+  },
+  // UIF-040-addl: Proportional breakdown bar below the hero KPI value.
+  breakdownWrap: {
+    paddingLeft: '12px',
+    paddingRight: '12px',
+    paddingBottom: '8px',
+  },
+  breakdownBar: {
+    display: 'flex',
+    height: '6px',
+    borderRadius: '3px',
+    overflow: 'hidden',
+    backgroundColor: tokens.colorNeutralBackground4,
+  },
+  breakdownLegend: {
+    display: 'flex',
+    gap: '12px',
+    marginTop: '6px',
+    fontSize: '0.625rem',
+    fontWeight: '500',
+    color: tokens.colorNeutralForeground3,
+    flexWrap: 'wrap',
+  },
+  legendDot: {
+    display: 'inline-block',
+    width: '6px',
+    height: '6px',
+    borderRadius: '50%',
+    marginRight: '3px',
+    verticalAlign: 'middle',
   },
 });
 
@@ -67,10 +91,25 @@ export function PersonalAnalyticsCard({
   // eslint-disable-next-line @hb-intel/hbc/no-direct-spinner
   if (isLoading) return <HbcSpinner size="sm" label="Loading insights" />;
 
+  const total = counts?.totalCount ?? 0;
+  const now = counts?.nowCount ?? 0;
+  const blocked = counts?.blockedCount ?? 0;
+  const unread = counts?.unreadCount ?? 0;
+  const other = Math.max(0, total - now - blocked - unread);
+
+  // UIF-040-addl: Segment widths as percentages of total.
+  const pct = (n: number) => (total > 0 ? (n / total) * 100 : 0);
+
+  const segments = [
+    { label: 'Now', count: now, color: HBC_STATUS_ACTION_GREEN, pct: pct(now) },
+    { label: 'Blocked', count: blocked, color: HBC_STATUS_RAMP_RED[50], pct: pct(blocked) },
+    { label: 'Unread', count: unread, color: HBC_STATUS_RAMP_INFO[50], pct: pct(unread) },
+    { label: 'Other', count: other, color: 'transparent', pct: pct(other) },
+  ].filter((s) => s.count > 0);
+
   return (
     <div className={styles.kpiGrid}>
-      {/* INS-006: Total Items as full-width summary card with distinct visual weight.
-        * Wrapper div provides gridColumn span + background override via CSS variable. */}
+      {/* Hero card: full-width summary with proportional breakdown bar */}
       <div
         style={{
           gridColumn: '1 / -1',
@@ -79,44 +118,73 @@ export function PersonalAnalyticsCard({
       >
         <HbcKpiCard
           label="Total Items"
-          value={counts?.totalCount ?? 0}
+          value={total}
           subtitle="active work items"
           color={HBC_PRIMARY_BLUE}
           icon={<ViewList size="sm" />}
-          ariaLabel={`Filter by Total Items: ${counts?.totalCount ?? 0} items`}
+          ariaLabel={`Filter by Total Items: ${total} items`}
           isActive={activeFilter === null || activeFilter === undefined}
           onClick={() => onFilterChange?.('total')}
           className={styles.summaryCard}
         />
+        {/* UIF-040-addl: Proportional breakdown bar */}
+        {total > 0 && (
+          <div className={styles.breakdownWrap}>
+            <div
+              className={styles.breakdownBar}
+              role="img"
+              aria-label={`Breakdown: ${now} action now, ${blocked} blocked, ${unread} unread, ${other} other`}
+            >
+              {segments.map((seg) => (
+                <div
+                  key={seg.label}
+                  style={{
+                    width: `${seg.pct}%`,
+                    backgroundColor: seg.color === 'transparent' ? undefined : seg.color,
+                    minWidth: seg.count > 0 ? '2px' : 0,
+                  }}
+                />
+              ))}
+            </div>
+            <div className={styles.breakdownLegend}>
+              {segments.filter((s) => s.color !== 'transparent').map((seg) => (
+                <span key={seg.label}>
+                  <span className={styles.legendDot} style={{ backgroundColor: seg.color }} />
+                  {seg.label} {seg.count}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-      {/* INS-009: Flat trend placeholders — replaced with real deltas when data model supports it */}
+      {/* Secondary KPI cards */}
       <HbcKpiCard
         label="Action Now"
-        value={counts?.nowCount ?? 0}
+        value={now}
         color={HBC_STATUS_ACTION_GREEN}
         icon={<SparkleIcon size="sm" />}
         trend={{ direction: 'flat', label: 'No change' }}
-        ariaLabel={`Filter by Action Now: ${counts?.nowCount ?? 0} items`}
+        ariaLabel={`Filter by Action Now: ${now} items`}
         isActive={activeFilter === 'action-now'}
         onClick={() => onFilterChange?.('action-now')}
       />
       <HbcKpiCard
         label="Blocked"
-        value={counts?.blockedCount ?? 0}
+        value={blocked}
         color={HBC_STATUS_RAMP_RED[50]}
         icon={<Cancel size="sm" />}
         trend={{ direction: 'flat', label: 'No change' }}
-        ariaLabel={`Filter by Blocked: ${counts?.blockedCount ?? 0} items`}
+        ariaLabel={`Filter by Blocked: ${blocked} items`}
         isActive={activeFilter === 'blocked'}
         onClick={() => onFilterChange?.('blocked')}
       />
       <HbcKpiCard
         label="Unread"
-        value={counts?.unreadCount ?? 0}
+        value={unread}
         color={HBC_STATUS_RAMP_INFO[50]}
         icon={<Notifications size="sm" />}
         trend={{ direction: 'flat', label: 'No change' }}
-        ariaLabel={`Filter by Unread: ${counts?.unreadCount ?? 0} items`}
+        ariaLabel={`Filter by Unread: ${unread} items`}
         isActive={activeFilter === 'unread'}
         onClick={() => onFilterChange?.('unread')}
       />

@@ -2070,6 +2070,29 @@ Adding orientation-specific CSS rules would create maintenance complexity and po
 
 ---
 
+### 10A.61 UIF-040-addl: Hero KPI Card Proportional Breakdown Bar
+
+**Severity:** Medium
+**Category:** Visual Hierarchy / Information Density
+
+**Observed state:** The hero KPI card ("Total Items") spanned full width but was mostly empty horizontal space — the same internal layout as secondary cards, just wider. No visual summary of the total's composition was provided.
+
+**Fix:** Added a proportional breakdown bar below the hero KPI value in `PersonalAnalyticsCard.tsx`. The bar shows the composition of `totalCount` as color-coded segments:
+- Green (`HBC_STATUS_ACTION_GREEN`): Action Now count
+- Red (`HBC_STATUS_RAMP_RED[50]`): Blocked count
+- Blue (`HBC_STATUS_RAMP_INFO[50]`): Unread count
+- Gray background: remaining/other items
+
+Implementation: CSS-only flex bar (6px height, 3px border-radius) with segments sized as percentages of totalCount. Below the bar, a compact legend shows segment labels + counts with color dots. The bar has `role="img"` with a descriptive `aria-label` for accessibility. Hidden when `totalCount === 0`.
+
+**Visual summary chosen:** Proportional segmented bar — lightest-weight option that fits the existing HbcScoreBar pattern without importing a charting library. Provides at-a-glance category composition.
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/cards/PersonalAnalyticsCard.tsx` — breakdown bar + legend styles + rendering logic
+- `apps/pwa/package.json` — version 0.12.58 → 0.12.59
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
