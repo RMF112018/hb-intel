@@ -321,14 +321,14 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ## Phase 7 — Test Coverage
 
-### 7-A: Trust state and freshness tests
+### 7-A: Trust state and freshness tests ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| TST-F1 | **C** | Zero behavioral test coverage across all hooks and components | ✅ Partial close — trust state and freshness domain covered |
-| FRS-01 | **H** | Split timestamp model — behavioral verification that derivation is correct | ✅ Gate evidence |
-| FRS-02 / UX-F3 | **H** | `queued` state distinction — behavioral verification | ✅ Gate evidence |
-| TST-F2 | — | P2-E3 validation plan requires automated evidence of freshness window behavior | ✅ Satisfied |
+| TST-F1 | **C** | Zero behavioral test coverage | ✅ Partial (2026-03-22) — 15 tests covering trust state + freshness domain |
+| FRS-01 | **H** | Split timestamp model verification | ✅ Gate evidence (2026-03-22) — 3 tests verify lastTrustedDataIso vs lastRefreshAttemptIso |
+| FRS-02 / UX-F3 | **H** | Queued state distinction verification | ✅ Gate evidence (2026-03-22) — 2 tests verify queued not normalized |
+| TST-F2 | — | Freshness window automated evidence | ✅ Satisfied (2026-03-22) — 4 tests verify window behavior + 5-min constant |
 
 ---
 
