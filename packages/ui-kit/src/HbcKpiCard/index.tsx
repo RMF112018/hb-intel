@@ -17,13 +17,14 @@ import { HBC_SPACE_MD } from '../theme/grid.js';
 import type { HbcKpiCardProps } from './types.js';
 
 const useStyles = makeStyles({
+  // UIF-041-addl: Increased gap (6px) and vertical padding (14px) for breathing room.
   card: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '6px',
     position: 'relative',
-    paddingTop: `${HBC_SPACE_MD}px`,
-    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingTop: '14px',
+    paddingBottom: '14px',
     paddingLeft: '20px',
     paddingRight: '20px',
     borderRadius: HBC_RADIUS_XL,
@@ -51,7 +52,7 @@ const useStyles = makeStyles({
     minWidth: '0',
     overflow: 'hidden',
     flex: '1 1 0',
-    maxWidth: '240px',
+    // UIF-041-addl: maxWidth removed — grid/flex parents control card width.
   },
   cardClickable: {
     cursor: 'pointer',
@@ -82,30 +83,41 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     letterSpacing: '0.02em',
   },
+  // UIF-041-addl: Bumped from 1.5rem to 1.75rem for stronger numeric emphasis.
   value: {
     fontFamily: hbcTypeScale.display.fontFamily,
-    fontSize: '1.5rem',
+    fontSize: '1.75rem',
     fontWeight: '700',
     lineHeight: '1.2',
     color: tokens.colorNeutralForeground1,
   },
+  // UIF-041-addl: Trend as colored pill badge — background tint + icon + label.
   trend: {
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
-    gap: '4px',
+    gap: '3px',
     fontFamily: hbcTypeScale.bodySmall.fontFamily,
-    fontSize: hbcTypeScale.bodySmall.fontSize,
-    fontWeight: hbcTypeScale.bodySmall.fontWeight as string,
-    lineHeight: hbcTypeScale.bodySmall.lineHeight,
+    fontSize: '0.6875rem',
+    fontWeight: '600',
+    lineHeight: '1',
+    paddingTop: '3px',
+    paddingBottom: '3px',
+    paddingLeft: '6px',
+    paddingRight: '6px',
+    borderRadius: '10px',
+    alignSelf: 'flex-start',
   },
   trendUp: {
     color: HBC_STATUS_COLORS.success as string,
+    backgroundColor: `${HBC_STATUS_COLORS.success}18`,
   },
   trendDown: {
     color: HBC_STATUS_COLORS.error as string,
+    backgroundColor: `${HBC_STATUS_COLORS.error}18`,
   },
   trendFlat: {
     color: tokens.colorNeutralForeground3,
+    backgroundColor: tokens.colorNeutralBackground3,
   },
   // INS-007: Icon in top-right corner — subtle at rest, visible on hover.
   iconSlot: {
@@ -131,10 +143,11 @@ const useStyles = makeStyles({
   },
 });
 
+// UIF-041-addl: Simpler arrow characters for pill badge — less heavy than filled triangles.
 const TREND_ARROWS: Record<string, string> = {
-  up: '\u25B2',
-  down: '\u25BC',
-  flat: '\u25B6',
+  up: '↑',
+  down: '↓',
+  flat: '→',
 };
 
 export const HbcKpiCard: React.FC<HbcKpiCardProps> = ({

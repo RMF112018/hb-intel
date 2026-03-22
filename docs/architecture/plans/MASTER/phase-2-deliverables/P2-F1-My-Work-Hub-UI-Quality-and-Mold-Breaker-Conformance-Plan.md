@@ -2093,6 +2093,31 @@ Implementation: CSS-only flex bar (6px height, 3px border-radius) with segments 
 
 ---
 
+### 10A.62 UIF-041-addl: Secondary KPI Card Improvements
+
+**Severity:** Medium
+**Category:** Visual Hierarchy / Design System
+
+**Changes to HbcKpiCard (`packages/ui-kit/src/HbcKpiCard/index.tsx`):**
+
+| Property | Before | After | Why |
+|---|---|---|---|
+| `maxWidth` | `240px` | removed | Grid/flex parents control width; hard cap prevented cards from using available space |
+| Value font size | `1.5rem` (24px) | `1.75rem` (28px) | Stronger numeric emphasis with wider cards |
+| Card gap | `4px` | `6px` | Better breathing room between label/value/trend |
+| Vertical padding | `12px` | `14px` | More comfortable internal spacing |
+| Trend indicator | Unicode arrows (▲▼▶) as colored text | Colored pill badge with tinted background | More legible, semantic, and consistent with HbcStatusBadge pattern |
+| Trend arrows | Filled triangles (\u25B2/\u25BC/\u25B6) | Light arrows (↑/↓/→) | Cleaner at small size inside pill badge |
+| Trend badge bg | none | 10% tint of trend color (`${color}18`) | Visual weight proportional to significance |
+
+Trend pill styling: `inline-flex`, `borderRadius: 10px`, `padding: 3px 6px`, `fontSize: 0.6875rem`, `fontWeight: 600`. Up = green tint, Down = red tint, Flat = neutral gray tint.
+
+**Files modified:**
+- `packages/ui-kit/src/HbcKpiCard/index.tsx` — all five improvements
+- `packages/ui-kit/package.json` — version 2.2.56 → 2.2.57
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
