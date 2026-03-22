@@ -127,6 +127,7 @@ All subsequent stages depend on a functioning project registry and canonical ide
 **1.1 — Project registry record shape**
 Implement the project registry record with all required fields: `projectId` (UUID, canonical), `projectNumber` (legacy reference key), `siteUrl`, `status`, `department`, `activatedAt`, and `activationSource`. The `department` field is the authoritative scope key for leadership authority calculations.
 Governing: P3-A1 §2–§3
+Status: **Implemented 2026-03-22 in `@hbc/models` v0.4.0.** `IProjectRegistryRecord` (24 fields), `ISiteAssociation`, `ProjectLifecycleStatus`, and `toActiveProject` backward-compatible mapper added. Existing `IActiveProject` and `ProjectStatus` preserved for backward compatibility.
 
 **1.2 — Dual-key inbound routing normalization**
 Implement the transitional inbound routing layer that accepts both `projectId` (UUID) and `projectNumber` (legacy string). All inbound `projectNumber` references must resolve to `projectId` via a registry lookup before any internal processing. All internal state, links, and cross-lane handoffs use `projectId` exclusively. Redirect `projectNumber`-based routes to canonical `projectId`-based routes.
