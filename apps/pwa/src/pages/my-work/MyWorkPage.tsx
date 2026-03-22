@@ -4,7 +4,7 @@
  * P2-D2 adaptive three-zone layout:
  *   Primary: task runway (HbcMyWorkFeed, protected, not canvas-governed)
  *   Secondary: analytics/oversight cards (role-aware, complexity-gated)
- *   Tertiary: utility/quick-access (role-aware, complexity-gated)
+ *   Tertiary: Recent Activity card (role-aware, complexity-gated)
  *
  * UIF-002: Master-detail layout at ≥1200px. Selected item shows detail
  * panel in the right column, replacing secondary/tertiary zones.

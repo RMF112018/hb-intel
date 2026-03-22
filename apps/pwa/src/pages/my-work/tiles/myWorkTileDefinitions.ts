@@ -142,63 +142,7 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
     lockable: false,
   },
 
-  // ── Tertiary zone: utility tiles ─────────────────────────────────────
-  {
-    tileKey: 'my-work.utility.quick-access',
-    title: 'Quick Access',
-    description: 'Common action shortcuts to other features.',
-    defaultForRoles: [],
-    minComplexity: 'essential',
-    mandatory: false,
-    component: {
-      essential: React.lazy(() =>
-        import('./QuickActionsTile.js').then((m) => ({
-          default: m.QuickActionsTileEssential,
-        })),
-      ),
-      standard: React.lazy(() =>
-        import('./QuickActionsTile.js').then((m) => ({
-          default: m.QuickActionsTileStandard,
-        })),
-      ),
-      expert: React.lazy(() =>
-        import('./QuickActionsTile.js').then((m) => ({
-          default: m.QuickActionsTileExpert,
-        })),
-      ),
-    },
-    // INS-004: 1 column in 2-column grid (was 4 in 12-column grid)
-    defaultColSpan: 1,
-    defaultRowSpan: 1,
-    lockable: false,
-  },
-  {
-    tileKey: 'my-work.utility.recent-context',
-    title: 'Recent Context',
-    description: 'Recently visited projects and work items.',
-    defaultForRoles: [],
-    minComplexity: 'standard',
-    mandatory: false,
-    component: {
-      essential: React.lazy(() =>
-        import('./RecentContextTile.js').then((m) => ({
-          default: m.RecentContextTileEssential,
-        })),
-      ),
-      standard: React.lazy(() =>
-        import('./RecentContextTile.js').then((m) => ({
-          default: m.RecentContextTileStandard,
-        })),
-      ),
-      expert: React.lazy(() =>
-        import('./RecentContextTile.js').then((m) => ({
-          default: m.RecentContextTileExpert,
-        })),
-      ),
-    },
-    // INS-004: 1 column in 2-column grid
-    defaultColSpan: 1,
-    defaultRowSpan: 1,
-    lockable: false,
-  },
+  // UIF-051-addl: Utility tiles (quick-access, recent-context) removed.
+  // QuickActionsMenu moved to desktop tab-row strip (UIF-048-addl) and mobile sheet (UIF-049-addl).
+  // RecentActivityCard rendered directly by HubTertiaryZone (UIF-050-addl).
 ];

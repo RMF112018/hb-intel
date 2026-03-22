@@ -2376,6 +2376,45 @@ Sticky overflow: `maxHeight: calc(100vh - 210px)` with `overflowY: auto` on the 
 
 ---
 
+### 10A.73 UIF-050-fix: Insights flex-shrink protection
+See §10A.72 follow-up. `flexShrink: 0` on secondaryZone at ≥SIDEBAR.
+
+---
+
+### 10A.74 UIF-051-addl: Quick Access Cleanup — A11y, Dead Code
+
+**Category:** Accessibility / Cleanup
+
+**Accessibility fixes to `QuickActionsSheet`:**
+- Added `aria-labelledby="qa-sheet-heading"` referencing the `<h3 id="qa-sheet-heading">` (replaces plain `aria-label`)
+- Added focus-return: captures `document.activeElement` on open, restores focus to trigger on dismiss
+- Added `role="presentation"` on drag handle for screen readers
+- Deferred focus via `requestAnimationFrame` to avoid fighting the entry animation
+
+**Dead code removed:**
+- Deleted `QuickActionsTile.tsx` — no longer consumed (HubTertiaryZone uses direct render)
+- Deleted `RecentContextTile.tsx` — same
+- Removed `my-work.utility.quick-access` and `my-work.utility.recent-context` tile definitions from `myWorkTileDefinitions.ts`
+- Updated MyWorkPage doc comment from "utility/quick-access" to "Recent Activity card"
+
+**Final Quick Access redesign readiness:**
+The Quick Access zone is now fully decomposed into three platform-adaptive surfaces:
+1. Desktop tab-row strip (UIF-048) — `QuickActionsStrip` in `rightSlot`
+2. Mobile bottom sheet (UIF-049) — `QuickActionsSheet` with FAB trigger
+3. Right panel (UIF-050) — `RecentActivityCard` direct render in HubTertiaryZone
+
+No Storybook stories existed for the old `QuickAccessCard` — none to remove. New component stories are a follow-on item when the Storybook story infrastructure is extended to cover page-local components.
+
+**Files changed:**
+- `apps/pwa/src/pages/my-work/cards/QuickActionsSheet.tsx` — a11y: aria-labelledby, focus-return, drag handle role
+- `apps/pwa/src/pages/my-work/tiles/myWorkTileDefinitions.ts` — removed utility tile definitions
+- `apps/pwa/src/pages/my-work/tiles/QuickActionsTile.tsx` — deleted
+- `apps/pwa/src/pages/my-work/tiles/RecentContextTile.tsx` — deleted
+- `apps/pwa/src/pages/my-work/MyWorkPage.tsx` — updated doc comment
+- `apps/pwa/package.json` — version 0.12.67 → 0.12.68
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

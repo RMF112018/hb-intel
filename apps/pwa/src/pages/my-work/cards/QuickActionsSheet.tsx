@@ -89,13 +89,19 @@ export function QuickActionsSheet({ isOpen, onDismiss }: QuickActionsSheetProps)
   const styles = useStyles();
   const router = useRouter();
   const sheetRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<Element | null>(null);
   const dragStartY = useRef(0);
   const isDragging = useRef(false);
 
-  // Focus trap: focus the sheet when opened
+  // UIF-051-addl: Focus management — capture trigger on open, restore on dismiss.
   useEffect(() => {
-    if (isOpen && sheetRef.current) {
-      sheetRef.current.focus();
+    if (isOpen) {
+      triggerRef.current = document.activeElement;
+      // Defer focus to allow animation to start
+      requestAnimationFrame(() => sheetRef.current?.focus());
+    } else if (triggerRef.current instanceof HTMLElement) {
+      triggerRef.current.focus();
+      triggerRef.current = null;
     }
   }, [isOpen]);
 
@@ -152,16 +158,16 @@ export function QuickActionsSheet({ isOpen, onDismiss }: QuickActionsSheetProps)
         className={styles.sheet}
         role="dialog"
         aria-modal="true"
-        aria-label="Quick Actions"
+        aria-labelledby="qa-sheet-heading"
         tabIndex={-1}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div className={styles.dragHandle}>
+        <div className={styles.dragHandle} role="presentation">
           <div className={styles.dragBar} />
         </div>
-        <h3 className={styles.heading}>Quick Actions</h3>
+        <h3 id="qa-sheet-heading" className={styles.heading}>Quick Actions</h3>
         <div className={styles.actions}>
           <HbcButton
             variant="ghost"
