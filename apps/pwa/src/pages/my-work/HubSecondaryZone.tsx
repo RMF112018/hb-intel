@@ -134,7 +134,7 @@ export function HubSecondaryZone({
           userId={session?.user?.id ?? ''}
           role={primaryRole}
           complexityTier={tier}
-          editable={false}
+          editable
         />
       </MyWorkHubTileProvider>
     </HbcCard>

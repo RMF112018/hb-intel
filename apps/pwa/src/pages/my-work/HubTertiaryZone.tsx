@@ -26,7 +26,7 @@ export function HubTertiaryZone(): ReactNode {
       userId={session?.user?.id ?? ''}
       role={primaryRole}
       complexityTier={tier}
-      editable={false}
+      editable
     />
   );
 }

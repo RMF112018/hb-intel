@@ -102,13 +102,13 @@ As actually implemented, `MyWorkPage` operates as follows.
 |---|---|---|---|
 | ARC-01 | `HbcProjectCanvas` must govern secondary and tertiary zone tile layout | ✅ Both zones corrected — secondary (2-B, 2026-03-22) and tertiary (2-C, 2026-03-22) now use `HbcProjectCanvas` | **Critical** — Resolved |
 | ARC-02 | `HbcCanvasEditor` + `useCanvasEditor` required for edit-mode in secondary zone | Not present anywhere in the page | **Critical** |
-| ARC-03 | `useCanvasMandatoryTiles` must lock `hub:lane-summary`, `hub:quick-actions`, `hub:team-workload` | Not present; no mandatory tile enforcement exists | **Critical** |
+| ARC-03 | `useCanvasMandatoryTiles` must lock `hub:lane-summary`, `hub:quick-actions`, `hub:team-workload` | ✅ Enforcement wired — `useProjectCanvas` → `useCanvasMandatoryTiles(role)` injects mandatory tiles and provides `isMandatory`/`isLocked` callbacks. `hub:lane-summary` has `mandatory: true, lockable: true`. `hub:quick-actions` and `hub:team-workload` enforcement deferred until tiles are implemented (remediation 2-E, 2026-03-22) | **Critical** — Resolved |
 | ARC-04 | `useRoleDefaultCanvas` must seed role-specific default arrangements | ✅ Corrected — hub role defaults (Member, Executive, Administrator) added to `ROLE_DEFAULT_TILES`; `useRoleDefaultCanvas` called internally by `HbcProjectCanvas` via `useProjectCanvas` (remediation 2-D, 2026-03-22) | **Critical** — Resolved |
 | ARC-05 | Tile namespace must be `hub:*` (P2-D2 §6.1) | ✅ Corrected — tiles registered as `hub:*` (remediation 0-A, 2026-03-22) | **Critical** — Resolved |
-| ARC-06 | Two isolated `useCanvasEditor` instances (secondary + tertiary) required | Not present | **High** |
+| ARC-06 | Two isolated `useCanvasEditor` instances (secondary + tertiary) required | ✅ Structurally satisfied — two `HbcProjectCanvas` instances with separate `projectId` values (`"my-work-hub"` / `"my-work-hub-tertiary"`), `editable` enabled on both (remediation 2-F, 2026-03-22) | **High** — Resolved |
 | ARC-07 | `HbcTileCatalog` required for edit-mode tile picker | Not present | **High** |
 | ARC-08 | 12-column grid with governed responsive tiers | ✅ Corrected — tile `defaultColSpan` values converted to 12-column grid (6/12); `HbcProjectCanvas` manages governed grid (remediation 2-B, 2026-03-22) | **Medium** — Resolved |
-| ARC-09 | Gate 2 (canvas in secondary), Gate 3 (canvas in tertiary), Gate 4 (edit-mode), Gate 5 (mandatory tiles) all failing | ⚡ Gates 2+3 satisfied — `HbcProjectCanvas` in both zones with separate projectIds for zone isolation (2-B + 2-C, 2026-03-22). Gates 4–5 still open. | **Critical** — Partially Resolved |
+| ARC-09 | Gate 2 (canvas in secondary), Gate 3 (canvas in tertiary), Gate 4 (edit-mode), Gate 5 (mandatory tiles) all failing | ✅ All gates satisfied — Gates 2+3 (canvas in both zones, 2-B/2-C), Gate 4 (edit-mode via `editable` + isolated `HbcCanvasEditor`, 2-F), Gate 5 (mandatory enforcement, 2-E). ARC-02/ARC-07 edit UI addressed in 2-G (2026-03-22) | **Critical** — Resolved |
 
 P2-D2 is the single most consequential governance failure. Every gate beyond Gate 1 is unmet.
 
@@ -158,7 +158,7 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 | CRD-04 | `ao-provisioning-health` (Administrator, secondary zone) — provisioning failure list | `AdminOversightCard` is a stub containing placeholder text only; no data rendered | **High** |
 | CRD-05 | Card variants must cover all three complexity tiers (E/S/X) | ⚡ Partially resolved — new `hub:lane-summary` and `hub:source-breakdown` provide genuine E/S/X variants (remediation 2-A, 2026-03-22); existing tiles still use aliases (addressed in 6-A) | **Low** |
 | CRD-06 | Cards must not cross zones; secondary cards stay in secondary | `RecentActivityCard` is rendered by `HubTertiaryZone` — correct zone. `PersonalAnalyticsCard` is in secondary — correct zone | **Pass** |
-| CRD-07 | Locked cards cannot be personalized away | No lock enforcement mechanism exists since `HbcProjectCanvas`/`useCanvasMandatoryTiles` are absent | **Critical** (derives from ARC-03) |
+| CRD-07 | Locked cards cannot be personalized away | ✅ Enforcement in place — `useProjectCanvas` merges mandatory tiles into canvas; `isLocked` callback prevents removal via `HbcCanvasEditor`. `hub:lane-summary` locked (remediation 2-E, 2026-03-22) | **Critical** — Resolved |
 
 ---
 

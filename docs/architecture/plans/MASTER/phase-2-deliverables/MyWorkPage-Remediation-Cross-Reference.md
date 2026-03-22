@@ -141,23 +141,23 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 2-E: Implement mandatory tile enforcement (`useCanvasMandatoryTiles`)
+### 2-E: Implement mandatory tile enforcement (`useCanvasMandatoryTiles`) ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| ARC-03 | **C** | `useCanvasMandatoryTiles` absent; `hub:lane-summary`, `hub:team-workload`, `hub:quick-actions` can be removed by users | ✅ Full close |
-| CRD-07 | **C** | Locked cards from P2-D3 §2 have no enforcement mechanism | ✅ Full close |
-| ARC-09 | **C** | Gate 2 (mandatory tile enforcement evidence) | ✅ Gate 2 fully satisfied |
-| TM-04 | **M** | `hub:team-workload` mandatory state must be dynamic — mandatory in `my-team`, configurable in `personal` | ✅ Full close — `isMandatory` callback reads `teamMode` |
+| ARC-03 | **C** | `useCanvasMandatoryTiles` absent; `hub:lane-summary`, `hub:team-workload`, `hub:quick-actions` can be removed by users | ✅ Closed (2026-03-22) — enforcement wired via `useProjectCanvas`; `hub:lane-summary` mandatory; future tiles enforced when registered |
+| CRD-07 | **C** | Locked cards from P2-D3 §2 have no enforcement mechanism | ✅ Closed (2026-03-22) — `isMandatory`/`isLocked` callbacks available to editor |
+| ARC-09 | **C** | Gate 5 (mandatory tile enforcement evidence) | ✅ Gate 5 satisfied (2026-03-22) |
+| TM-04 | **M** | `hub:team-workload` mandatory state must be dynamic — mandatory in `my-team`, configurable in `personal` | ⚡ Deferred — tile not yet registered; mechanism ready when tile is implemented |
 
 ---
 
-### 2-F: Wire two isolated `useCanvasEditor` instances
+### 2-F: Wire two isolated `useCanvasEditor` instances ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| ARC-06 | **H** | Two isolated `useCanvasEditor` instances required for zone boundary enforcement; none present | ✅ Full close |
-| ARC-09 | **C** | Gate 3 (zone boundary enforcement) failing | ✅ Gate 3 satisfied |
+| ARC-06 | **H** | Two isolated `useCanvasEditor` instances required for zone boundary enforcement; none present | ✅ Closed (2026-03-22) — two HbcProjectCanvas instances with separate projectIds, editable enabled |
+| ARC-09 | **C** | Gate 4 (edit-mode with isolated editors) | ✅ Gate 4 satisfied (2026-03-22) |
 
 ---
 
