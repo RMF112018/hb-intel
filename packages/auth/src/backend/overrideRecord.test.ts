@@ -88,6 +88,54 @@ describe('overrideRecord', () => {
     expect(revoked.status).toBe('revoked');
   });
 
+  it('passes through PER override fields (overrideType, projectIds, department)', () => {
+    const record = createOverrideRequest({
+      id: 'per-override-1',
+      targetUserId: 'exec-1',
+      baseRoleId: 'portfolio-executive-reviewer',
+      requestedChange: {
+        mode: 'grant',
+        grants: ['per:read', 'per:annotate'],
+      },
+      reason: 'Out-of-scope review for Harbor View Medical Center.',
+      requesterId: 'opex-manager',
+      emergency: false,
+      expiresAt: '2026-06-01T00:00:00.000Z',
+      overrideType: 'out-of-scope-per',
+      projectIds: ['proj-001', 'proj-002'],
+      department: 'Healthcare',
+    });
+
+    expect(record.overrideType).toBe('out-of-scope-per');
+    expect(record.projectIds).toEqual(['proj-001', 'proj-002']);
+    expect(record.department).toBe('Healthcare');
+  });
+
+  it('preserves approverScope when approving PER overrides', () => {
+    const requested = createOverrideRequest({
+      id: 'per-override-2',
+      targetUserId: 'exec-2',
+      baseRoleId: 'portfolio-executive-reviewer',
+      requestedChange: {
+        mode: 'grant',
+        grants: ['per:read'],
+      },
+      reason: 'Cross-department review assignment.',
+      requesterId: 'opex-manager',
+      emergency: false,
+      expiresAt: '2026-06-01T00:00:00.000Z',
+      overrideType: 'out-of-scope-per',
+    });
+
+    const approved = approveOverrideRequest(requested, {
+      approverId: 'opex-manager',
+      approverScope: 'company-wide',
+    });
+
+    expect(approved.approval.approverScope).toBe('company-wide');
+    expect(approved.approval.state).toBe('approved');
+  });
+
   it('marks dependent overrides for review when base role versions change', () => {
     const memberOverride = createOverrideRequest({
       id: 'override-5',

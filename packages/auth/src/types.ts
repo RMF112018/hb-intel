@@ -528,6 +528,30 @@ export interface AccessOverrideGrantChange {
   grants: string[];
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Override classification and approver scope (Phase 3 Stage 0.2)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Override purpose discriminator.
+ *
+ * general          — Generic access override (default for existing records)
+ * out-of-scope-per — Out-of-scope Portfolio Executive Reviewer grant (Phase 3)
+ */
+export type AccessControlOverrideType =
+  | 'general'
+  | 'out-of-scope-per';
+
+/**
+ * Approver authority class for override approval decisions.
+ *
+ * company-wide       — Manager of Operational Excellence; may approve any scope
+ * department-scoped  — Department leadership; may only approve within their scope
+ */
+export type AccessControlApproverScope =
+  | 'company-wide'
+  | 'department-scoped';
+
 /**
  * Approval metadata for governed override workflows.
  */
@@ -536,6 +560,8 @@ export interface AccessOverrideApprovalMetadata {
   requestedAt: string;
   approverId: string | null;
   approvedAt: string | null;
+  /** Authority class of the approver (Phase 3 PER overrides) */
+  approverScope?: AccessControlApproverScope;
 }
 
 /**
@@ -559,6 +585,12 @@ export interface AccessControlOverrideReviewMetadata {
 /**
  * HB Intel system-of-record override model for user-specific authorization
  * exceptions.
+ *
+ * For out-of-scope PER grants (Phase 3):
+ *  - overrideType: 'out-of-scope-per'
+ *  - projectIds: project(s) the override applies to
+ *  - department: the department boundary being overridden
+ *  - approval.approverScope: authority class of the approver
  */
 export interface AccessControlOverrideRecord {
   id: string;
@@ -572,6 +604,12 @@ export interface AccessControlOverrideRecord {
   emergency: boolean;
   review: AccessControlOverrideReviewMetadata;
   status: AccessControlRecordStatus;
+  /** Override purpose discriminator; defaults to 'general' when absent */
+  overrideType?: AccessControlOverrideType;
+  /** Project(s) this override applies to (used for out-of-scope PER grants) */
+  projectIds?: string[];
+  /** Department boundary being overridden (used for out-of-scope PER grants) */
+  department?: string;
 }
 
 /**
@@ -588,6 +626,12 @@ export interface AccessOverrideRequest {
   expiresAt?: string;
   emergency: boolean;
   reviewRequired?: boolean;
+  /** Override purpose discriminator (Phase 3 PER overrides) */
+  overrideType?: AccessControlOverrideType;
+  /** Project(s) this override applies to (Phase 3 PER overrides) */
+  projectIds?: string[];
+  /** Department boundary being overridden (Phase 3 PER overrides) */
+  department?: string;
 }
 
 /**

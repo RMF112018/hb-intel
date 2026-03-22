@@ -15,7 +15,7 @@
 
 ## Contract Statement
 
-This contract establishes the canonical membership authority model, project role vocabulary, access eligibility rules, module visibility governance, and cross-lane membership consistency requirements for Phase 3 Project Hub.
+This contract establishes the canonical membership authority model, project role vocabulary, access eligibility rules, leadership scope model, executive review authority posture, module visibility governance, override governance, reclassification consequences, and cross-lane membership consistency requirements for Phase 3 Project Hub.
 
 Phase 3 uses a **hybrid membership authority** (Phase 3 plan §8.2):
 
@@ -24,7 +24,21 @@ Phase 3 uses a **hybrid membership authority** (Phase 3 plan §8.2):
 
 This contract governs how a user's identity, system role, project membership, and Entra group membership combine to produce an effective project role context that determines what that user can see and do within a specific project.
 
-**Repo-truth audit — 2026-03-20.** The repo contains a mature auth infrastructure (`@hbc/auth` v0.3.0) with system-level role mapping, permission resolution, feature gating, and access control override governance. Project membership types (`IProjectMember`, `IExternalMember`) exist in `@hbc/models` but are not yet wired into a project-scoped role resolution pipeline. The Entra three-group model (Leaders, Team, Viewers) is implemented in provisioning and maps to SharePoint permission levels. PH7 route-level membership checks use a `teamMemberUpns.includes()` pattern that must be formalized. See §5 for full reconciliation.
+### Authority split — three-tier leadership model
+
+Phase 3 replaces the coarse `Executive` platform role with a precise three-tier model for project oversight and membership:
+
+| Tier | Role | Scope | Nature |
+|---|---|---|---|
+| 1 | **Leadership** | Company-level or department-level visibility | Platform-level posture; not project membership |
+| 2 | **Portfolio Executive Reviewer** | Projects within governed business scope | Non-member oversight posture derived from Leadership eligibility; governed read + annotation + push authority |
+| 3 | **Project Executive** | A specific project; named in the registry or Teams group | True project-member authority within project scope |
+
+- **Leadership** is a company-level classification based on position and department.
+- **Portfolio Executive Reviewer** is the non-member leadership-derived project oversight posture. It is NOT project membership and does NOT confer operational source-record write authority by default.
+- **Project Executive** is the true project-member, project-scoped authority role.
+
+**Repo-truth audit — 2026-03-20.** The repo contains a mature auth infrastructure (`@hbc/auth` v0.3.0) with system-level role mapping, permission resolution, feature gating, and access control override governance. Project membership types (`IProjectMember`, `IExternalMember`) exist in `@hbc/models` but are not yet wired into a project-scoped role resolution pipeline. The Entra three-group model (Leaders, Team, Viewers) is implemented in provisioning and maps to SharePoint permission levels. PH7 route-level membership checks use a `teamMemberUpns.includes()` pattern that must be formalized. The three-tier leadership model defined in this contract is target-state. See §5 for full reconciliation.
 
 ---
 
@@ -67,6 +81,13 @@ This contract governs how a user's identity, system role, project membership, an
 | **Canvas defaults** | The initial tile arrangement on a user's project home canvas, determined by their effective project role |
 | **External member** | A user outside the organization granted time-bounded, grant-scoped access to a specific project |
 | **Subordinate membership data** | Project membership information stored in site-local or module-local surfaces that is derived from canonical membership but does not override it |
+| **Leadership** | Company-level or business-line/department leadership tier; C-suite or equivalent; eligibility basis for Portfolio Executive Reviewer posture |
+| **Portfolio Executive Reviewer (PER)** | The non-member leadership-derived project oversight posture; governed read-heavy + limited annotation + push + report-review-run authority within business scope |
+| **Project Executive (PE)** | The true project-member project-scoped authority role; named in the project registry as `projectExecutiveUpn` or in the Leaders Entra group |
+| **Governed business scope** | The set of projects accessible to a given Portfolio Executive Reviewer; derived from their department assignment or C-suite breadth |
+| **Out-of-scope override** | A central time-bounded override record granting a Portfolio Executive Reviewer posture to a project outside their normal governed business scope |
+| **Designated leadership approver** | A fixed named role permitted to approve out-of-scope overrides within their governed business scope; only Manager of Operational Excellence may approve company-wide |
+| **Authority loss** | The condition where a Portfolio Executive Reviewer loses scope eligibility (e.g., due to department reclassification), requiring suspension of active review authority |
 
 ---
 
@@ -101,6 +122,8 @@ This contract governs how a user's identity, system role, project membership, an
 
 **Note:** System roles are defined in `packages/models/src/auth/AuthEnums.ts` with job-title-to-role mapping in `IJobTitleMapping`. The Phase 2 hub role resolution pipeline (`mapIdentityToAppRoles()`) currently produces three canonical app roles (`Administrator`, `Executive`, `Member`) from provider hints. The system role hierarchy above exists for broader platform use but does not yet feed directly into the Phase 2 hub role pipeline.
 
+The existing `EXECUTIVE` system role (level 80) maps to the **Leadership** tier for Phase 3 purposes. Phase 3 further resolves leadership users into either **Portfolio Executive Reviewer** (non-member oversight posture) or **Project Executive** (project-member authority) depending on whether they hold an explicit project membership anchor.
+
 ### 1.3 Phase 2 hub roles (live)
 
 | Hub Role | Resolution Source | Phase 2 Use |
@@ -109,7 +132,7 @@ This contract governs how a user's identity, system role, project membership, an
 | `Executive` | `HB-Intel-Executives` group | Executive landing, team view |
 | `Member` | Default fallback | Standard member access |
 
-These roles govern Personal Work Hub behavior (P2-D1). Phase 3 must extend — not replace — this vocabulary for project-scoped use.
+These roles govern Personal Work Hub behavior (P2-D1). Phase 3 must extend — not replace — this vocabulary for project-scoped use. The Phase 2 `Executive` hub role maps to the Phase 3 **Leadership** tier. Portfolio Executive Reviewer and Project Executive postures are resolved within that tier based on project membership and business scope.
 
 ### 1.4 Project membership types (live, not yet wired)
 
@@ -146,9 +169,9 @@ Phase 3 membership authority follows a strict hierarchy:
 | Priority | Authority | Owns | Source |
 |---|---|---|---|
 | 1 | **Platform auth (`@hbc/auth`)** | System-level role resolution, session normalization, permission evaluation | `NormalizedAuthSession.resolvedRoles`, `permissionSummary` |
-| 2 | **Project registry (P3-A1)** | Team anchor fields, `entraGroupSet`, activation-time membership seed | Registry record per P3-A1 §2.1 |
-| 3 | **Central membership contract (this document)** | Project access eligibility, effective project role context, module visibility | Resolved at project-context entry time |
-| 4 | **Project-level overrides** | Per-user `projectRoleId` adjustments within a project | `IProjectMember.projectRoleId` |
+| 2 | **Project registry (P3-A1)** | Team anchor fields, `entraGroupSet`, activation-time membership seed, `department` | Registry record per P3-A1 §2.1 |
+| 3 | **Central membership contract (this document)** | Project access eligibility, effective project role context, Portfolio Executive Reviewer scope, module visibility | Resolved at project-context entry time |
+| 4 | **Project-level overrides** | Per-user `projectRoleId` adjustments within a project; out-of-scope PER overrides | `IProjectMember.projectRoleId`; central access-control override record |
 | 5 | **Site-local / module-local data** | Subordinate projection of canonical membership for performance or host-specific rendering | SharePoint group membership, site permissions |
 
 ### 2.2 Subordination rule
@@ -162,6 +185,34 @@ Site-local or module-local membership data (e.g., SharePoint group membership, m
 
 If a discrepancy is detected between subordinate and canonical membership, the canonical source wins. Subordinate data SHOULD be re-synchronized rather than treated as authoritative.
 
+### 2.3 Leadership scope model
+
+For users who resolve to the **Leadership** tier (system role `EXECUTIVE` level 80 or equivalent), business-scope visibility is determined as follows:
+
+| Leadership classification | Default visibility scope |
+|---|---|
+| **C-suite** (CEO, COO, CFO, and equivalents) | Company-wide — all projects regardless of department |
+| **Business-line / department leadership** | Governed business scope only — projects whose `department` matches the leader's assigned department |
+
+`department` (from P3-A1 §2.1) is the **authoritative Phase 3 business-scope key**. `projectType` remains descriptive/reporting-only and does NOT drive access scoping in Phase 3.
+
+**Out-of-scope access:** A Leadership user may be granted access to projects outside their default business scope through a central time-bounded override record using the existing `AccessControlOverrideRecord` pattern from `@hbc/auth`. An out-of-scope override:
+- grants full Portfolio Executive Reviewer posture for the specified project(s),
+- does NOT grant project membership or operational source-record write authority,
+- has a governed approval requirement (see §2.4),
+- expires at the configured `expiresAt` unless renewed.
+
+### 2.4 Designated leadership approver rules
+
+Out-of-scope Portfolio Executive Reviewer access requires approval from a **designated leadership approver**. Designated leadership approvers are:
+
+| Approver | Approval scope |
+|---|---|
+| **Manager of Operational Excellence** | Company-wide; may approve any out-of-scope PER override |
+| **Designated department leadership approver** | Within their governed business scope only; may not approve access outside that scope |
+
+Designated leadership approvers are **fixed named roles** — approval authority is not delegatable to arbitrary individuals. The Manager of Operational Excellence is always the fallback approver for any scope.
+
 ---
 
 ## 3. Project Role Vocabulary
@@ -170,50 +221,94 @@ If a discrepancy is detected between subordinate and canonical membership, the c
 
 Phase 3 introduces a **project role** layer that is distinct from system roles. Project roles determine what a user can see and do within a specific project. They are resolved from multiple inputs, not assigned independently.
 
-| Project Role | Derived From | Project Hub Capabilities |
-|---|---|---|
-| **Project Administrator** | System role `Administrator` OR `SYSTEM_ADMIN` | Full project access, all modules, canvas governance, membership management, reporting release |
-| **Project Executive** | System role `Executive` OR `PROJECT_EXECUTIVE` level AND project membership | Health visibility, reporting, activity oversight, canvas with executive defaults |
-| **Project Manager** | `PROJECT_MANAGER` level AND Leaders group membership OR explicit PM team anchor | Full module access, canvas governance, report authoring, membership management |
-| **Superintendent** | `SUPERINTENDENT` level AND Leaders/Team group membership | Full module access (field-oriented), safety authority, canvas with field defaults |
-| **Project Team Member** | Team group membership OR explicit `IProjectMember` record | Standard module access, work queue participation, canvas with team defaults |
-| **Project Viewer** | Viewers group membership only | Read-only access to approved modules, no work queue participation |
-| **External Contributor** | `IExternalMember` record with active status | Grant-scoped access to specific modules/actions per `grants[]`, time-bounded |
+| Project Role | Tier | Derived From | Project Hub Capabilities |
+|---|---|---|---|
+| **Project Administrator** | Platform | System role `Administrator` OR `SYSTEM_ADMIN` | Full project access, all modules, canvas governance, membership management, reporting release |
+| **Portfolio Executive Reviewer** | Leadership (non-member) | Leadership tier user within governed business scope OR active out-of-scope override | Read-heavy project visibility, limited annotation authority, Push to Project Team, report review-run generation, PX Review approval authority — per policy; NOT project membership; NOT operational source-record write |
+| **Project Executive** | Leadership (member) | System role `Executive` OR `PROJECT_EXECUTIVE` level AND explicit project membership (registry anchor or Leaders group) | Full project-member authority within project scope; report approval/release per family policy; canvas governance; report internal review chain participant |
+| **Project Manager** | Member | `PROJECT_MANAGER` level AND Leaders group membership OR explicit PM team anchor | Full module access, canvas governance, report authoring (PM narrative), membership management |
+| **Superintendent** | Member | `SUPERINTENDENT` level AND Leaders/Team group membership | Full module access (field-oriented), safety authority, canvas with field defaults |
+| **Project Team Member** | Member | Team group membership OR explicit `IProjectMember` record | Standard module access, work queue participation, canvas with team defaults |
+| **Project Viewer** | Member | Viewers group membership only | Read-only access to approved modules, no work queue participation |
+| **External Contributor** | External | `IExternalMember` record with active status | Grant-scoped access to specific modules/actions per `grants[]`, time-bounded |
 
-### 3.2 Role resolution pipeline
+**Critical distinction — Portfolio Executive Reviewer vs Project Executive:**
+
+- **Portfolio Executive Reviewer** is a non-member oversight posture. It is resolved from business-scope eligibility, not project membership. A PER user does NOT appear in the project's membership roster and does NOT have operational source-record write authority.
+- **Project Executive** is a true project member. They are named as `projectExecutiveUpn` in the registry record or are in the project's Leaders Entra group with `PROJECT_EXECUTIVE` system role level.
+
+A Leadership-tier user resolves to **Portfolio Executive Reviewer** when they are NOT explicitly project-member-anchored. They resolve to **Project Executive** when they ARE project-member-anchored (registry anchor or Leaders group). These are mutually exclusive postures for a given user-project combination.
+
+### 3.2 Portfolio Executive Reviewer — governed authority
+
+Portfolio Executive Reviewers hold the following authorities, which are **non-member and review-layer only**:
+
+| Authority | Permitted? | Notes |
+|---|---|---|
+| View project reports | **Yes** | Including draft state within review circle |
+| Annotate reports and review-capable module surfaces | **Yes** | Executive review layer only; never a mutation path for source data |
+| Generate review runs (report review versions) | **Yes** | Only against latest already-confirmed PM-owned snapshot; if no confirmed snapshot exists, must request one from the project team |
+| Approve PX Review | **Yes — by project policy** | Default: not permitted; must be explicitly enabled by project-level policy set by Project Executive |
+| Release reports by default | **No** | Release authority is project-policy by report family, not universal for PER |
+| Confirm PM draft state | **No** | PM draft ownership belongs exclusively to the PM/Project Executive chain |
+| Refresh or confirm canonical release snapshots | **No** | PM-owned operation |
+| Assume PM narrative ownership | **No** | |
+| Push to Project Team | **Yes** | Creates a structured tracked review/follow-up item; see §3.4 |
+| Operational source-record write | **No** | PER posture never grants direct write access to module source-of-truth records |
+| Project membership | **No** | PER is not project membership |
+
+### 3.3 Role resolution pipeline
 
 For a given user entering a project context, the effective project role is resolved as follows:
 
 1. **Start with system role.** Read `resolvedRoles` from `NormalizedAuthSession`.
-2. **Check project membership.** Look up the user in project membership records (`IProjectMember` or `IExternalMember`).
-3. **Check Entra group membership.** Determine if the user is in the project's Leaders, Team, or Viewers group via `entraGroupSet`.
-4. **Check team anchor fields.** Determine if the user is a named team anchor (PM, Superintendent, PX) in the registry record.
-5. **Apply project-level override.** If `IProjectMember.projectRoleId` is set, apply the override.
-6. **Resolve effective project role.** Combine all inputs using the precedence in §3.3.
-7. **Evaluate module visibility.** Apply the module visibility matrix (§4) to the resolved role.
+2. **If Leadership tier (EXECUTIVE level 80+):**
+   a. Check if user is a named team anchor (`projectExecutiveUpn`) or in the project's Leaders Entra group with executive-level system role → resolves to **Project Executive**.
+   b. Check if project `department` is within the user's governed business scope OR if an active out-of-scope override exists → resolves to **Portfolio Executive Reviewer**.
+   c. If neither applies, user does not have a PER posture for this project.
+3. **Check project membership.** Look up the user in project membership records (`IProjectMember` or `IExternalMember`).
+4. **Check Entra group membership.** Determine if the user is in the project's Leaders, Team, or Viewers group via `entraGroupSet`.
+5. **Check team anchor fields.** Determine if the user is a named team anchor (PM, Superintendent) in the registry record.
+6. **Apply project-level override.** If `IProjectMember.projectRoleId` is set, apply the override.
+7. **Resolve effective project role.** Combine all inputs using the precedence in §3.4.
+8. **Evaluate module visibility.** Apply the module visibility matrix (§4) to the resolved role.
 
-### 3.3 Role precedence rules
+### 3.4 Push to Project Team — structured tracked item
+
+When a Portfolio Executive Reviewer uses Push to Project Team, the system MUST create a **structured tracked review/follow-up item**, not merely a notification. This item:
+
+- preserves provenance back to the originating executive review artifact,
+- aligns with the work queue / handoff behavior (P3-D3) — the PER does NOT convert field-annotations into the work-queue owner,
+- carries a default payload of curated summary content; the pusher may choose full-context inclusion at push time,
+- remains a separate artifact — the original executive review thread is not converted or absorbed,
+- triggers closure loop: when the project team marks the pushed item as resolved, the originating executive review artifact returns to the executive review circle for closure confirmation rather than auto-closing.
+
+### 3.5 Role precedence rules
 
 When a user qualifies for multiple project roles, the **highest-capability role** wins:
 
 1. Project Administrator (highest)
-2. Project Executive
-3. Project Manager
-4. Superintendent
-5. Project Team Member
-6. Project Viewer
-7. External Contributor (lowest, grant-scoped)
+2. Portfolio Executive Reviewer (if Leadership tier; non-member but higher platform posture than PE for project-scope questions)
+3. Project Executive (project-member anchor)
+4. Project Manager
+5. Superintendent
+6. Project Team Member
+7. Project Viewer
+8. External Contributor (lowest, grant-scoped)
+
+**Note on PER vs PE precedence:** Portfolio Executive Reviewer and Project Executive are mutually exclusive postures for a given user-project combination. A Leadership-tier user who holds an explicit project-member anchor resolves to Project Executive — the member role takes precedence and they do not simultaneously hold PER posture. The precedence ordering above governs inter-role conflicts only.
 
 A user MUST NOT be assigned conflicting roles within the same project. The resolution pipeline always produces a single effective project role.
 
-### 3.4 Relationship to Phase 2 hub roles
+### 3.6 Relationship to Phase 2 hub roles
 
 Phase 2 hub roles (`Administrator`, `Executive`, `Member`) govern **Personal Work Hub** behavior and are resolved at the platform level. Phase 3 project roles govern **Project Hub** behavior and are resolved at the project level.
 
-| Phase 2 Hub Role | Default Phase 3 Project Role (when project-member) | Notes |
+| Phase 2 Hub Role | Default Phase 3 Project Role | Notes |
 |---|---|---|
 | `Administrator` | Project Administrator | Bypasses project membership checks |
-| `Executive` | Project Executive | Requires project membership for non-admin access |
+| `Executive` — C-suite | Portfolio Executive Reviewer (company-wide scope) OR Project Executive (if member-anchored) | C-suite always has company-wide PER eligibility |
+| `Executive` — department | Portfolio Executive Reviewer (department scope) OR Project Executive (if member-anchored) | Department leadership limited to their governed scope |
 | `Member` | Determined by group membership and team anchors | Most users resolve here |
 
 Phase 3 project roles **extend** Phase 2 hub roles — they do not replace them. A user's Phase 2 hub role continues to govern Personal Work Hub behavior regardless of their project role.
@@ -224,26 +319,30 @@ Phase 3 project roles **extend** Phase 2 hub roles — they do not replace them.
 
 ### 4.1 Module visibility matrix
 
-Module visibility is determined by the user's effective project role. Modules are classified as **visible** (can see and interact), **read-only** (can see but not modify), or **hidden** (not rendered).
+Module visibility is determined by the user's effective project role. Modules are classified as **visible** (can see and interact), **read-only** (can see but not modify), **review-layer** (visible at review-annotation depth only, no operational writes), or **hidden** (not rendered).
 
-| Module | Project Admin | Project Executive | Project Manager | Superintendent | Team Member | Viewer | External |
-|---|---|---|---|---|---|---|---|
-| Home / Canvas | Visible | Visible | Visible | Visible | Visible | Visible | Visible |
-| Project Health | Visible | Visible | Visible | Visible | Visible | Read-only | Grant-scoped |
-| Activity | Visible | Visible | Visible | Visible | Visible | Read-only | Grant-scoped |
-| Related Items | Visible | Visible | Visible | Visible | Visible | Read-only | Hidden |
-| Work Queue | Visible | Visible | Visible | Visible | Visible | Hidden | Hidden |
-| Financial | Visible | Visible | Visible | Read-only | Grant-scoped | Hidden | Hidden |
-| Schedule | Visible | Visible | Visible | Visible | Visible | Read-only | Grant-scoped |
-| Constraints | Visible | Visible | Visible | Visible | Visible | Read-only | Hidden |
-| Permits | Visible | Visible | Visible | Visible | Visible | Read-only | Hidden |
-| Reports | Visible | Visible | Visible | Read-only | Read-only | Hidden | Hidden |
-| Safety | Visible | Visible | Visible | Visible | Visible | Read-only | Hidden |
+| Module | Project Admin | Portfolio Executive Reviewer | Project Executive | Project Manager | Superintendent | Team Member | Viewer | External |
+|---|---|---|---|---|---|---|---|---|
+| Home / Canvas | Visible | Visible (exec view) | Visible | Visible | Visible | Visible | Visible | Visible |
+| Project Health | Visible | Review-layer | Visible | Visible | Visible | Visible | Read-only | Grant-scoped |
+| Activity | Visible | Read-only | Visible | Visible | Visible | Visible | Read-only | Grant-scoped |
+| Related Items | Visible | Read-only | Visible | Visible | Visible | Visible | Read-only | Hidden |
+| Work Queue | Visible | Review push only | Visible | Visible | Visible | Visible | Hidden | Hidden |
+| Financial | Visible | Review-layer | Visible | Visible | Read-only | Grant-scoped | Hidden | Hidden |
+| Schedule | Visible | Review-layer | Visible | Visible | Visible | Visible | Read-only | Grant-scoped |
+| Constraints | Visible | Review-layer | Visible | Visible | Visible | Visible | Read-only | Hidden |
+| Permits | Visible | Review-layer | Visible | Visible | Visible | Visible | Read-only | Hidden |
+| Reports | Visible | Review-run + PX approval (by policy) | Visible | Visible | Read-only | Read-only | Hidden | Hidden |
+| Safety | Visible | Read-only | Visible | Visible | Visible | Visible | Read-only | Hidden |
 
 **Notes:**
+- **Review-layer** means the module is visible to Portfolio Executive Reviewers for executive review annotation purposes only. It does not grant operational write access to module source-of-truth records. Review annotations are in a separate executive review artifact layer.
+- **Review push only** for Work Queue means PER may initiate Push-to-Project-Team items but does not own or manage work queue items directly.
 - **Grant-scoped** means the module is visible only if the user's `grants[]` include the relevant module permission.
 - Financial is restricted for Superintendent and below because financial data has a higher sensitivity classification.
+- Safety is NOT included in the executive review layer for Phase 3 (see P3-E1). PER access to Safety is read-only.
 - This matrix is a first-release baseline. Module visibility MAY be refined through `FeaturePermissionRegistration` as implementation matures.
+- Review-layer visibility before executive push defaults to a restricted review circle only: originating executive reviewer, other authorized executive reviewers, PM / PX / designated surface owner. Wider team visibility occurs only through governed Push-to-Project-Team behavior (§3.4).
 
 ### 4.2 Feature permission integration
 
@@ -276,6 +375,7 @@ Every project role receives a default canvas tile arrangement on the project hom
 | Project Role | Mandatory Locked Tiles | Role-Default Tiles | Optional Tiles |
 |---|---|---|---|
 | Project Administrator | Identity header, Health, Work Queue, Activity | All module tiles | Full optional catalog |
+| Portfolio Executive Reviewer | Identity header, Health, Activity | Reports, Financial summary (review-layer) | Executive review catalog |
 | Project Executive | Identity header, Health, Activity | Reports, Financial summary | Subset of optional catalog |
 | Project Manager | Identity header, Health, Work Queue, Activity | All module tiles | Full optional catalog |
 | Superintendent | Identity header, Health, Work Queue, Activity, Safety | Schedule, Permits, Constraints | Field-oriented optional catalog |
@@ -304,6 +404,8 @@ A user is eligible to access a project in Project Hub if ANY of the following ar
 | User is in a project Entra group | `entraGroupSet` (Leaders, Team, or Viewers) | Project role per group type |
 | User has an `IProjectMember` record | Central membership data | Project role per `projectRoleId` or group membership |
 | User has an active `IExternalMember` record | Central membership data | External Contributor with grant-scoped access |
+| User is Leadership tier AND project `department` is within their governed business scope | P3-A1 registry `department`; auth session `Executive` role | Portfolio Executive Reviewer — non-member oversight posture |
+| User is Leadership tier AND an active out-of-scope override record exists for this project | `AccessControlOverrideRecord` | Portfolio Executive Reviewer for specified project(s) — non-member, time-bounded |
 
 ### 6.2 Who may NOT access a project
 
@@ -311,15 +413,50 @@ A user who satisfies NONE of the eligibility paths in §6.1 MUST NOT be granted 
 
 This rule applies in both lanes:
 - **PWA:** Route-level membership check before rendering project-scoped pages.
-- **SPFx:** Site context resolution must confirm the user is a member of the project's Entra groups or has explicit membership.
+- **SPFx:** Site context resolution must confirm the user is a member of the project's Entra groups, has explicit membership, or holds a valid Portfolio Executive Reviewer posture.
 
 ### 6.3 Administrator bypass
 
 Users with system role `Administrator` bypass per-project membership checks and receive Project Administrator capabilities in all projects. This is consistent with the Phase 2 admin override pattern and the PH7 route-level check (`user.role !== 'Admin'` bypass in PH7-ProjectHub-2 §7.2.4).
 
+### 6.4 Portfolio Executive Reviewer access vs project membership
+
+Access granted through a PER posture (§6.1 paths 5–6) MUST be clearly distinguished from project membership (paths 1–4):
+
+- PER posture grants review-layer and report-interaction authority only (see §3.2).
+- PER posture does NOT appear in project membership rosters.
+- PER posture does NOT grant access to module operational write actions.
+- Revocation of PER eligibility (scope change, override expiration) immediately terminates PER access to the affected projects.
+
 ---
 
-## 7. External Member Authority
+## 7. Department Reclassification Effects on Access
+
+When a project's `department` is changed through governed reclassification (P3-A1 §3.6), the following access effects MUST be applied immediately:
+
+### 7.1 Visibility recalculation
+
+All existing Portfolio Executive Reviewer scope eligibility for the project must be recomputed against the new `department` value. This recalculation:
+
+- removes PER access for users whose governed business scope no longer covers the new department,
+- grants PER access to users whose governed business scope now covers the new department (if they had no prior access),
+- takes effect immediately upon reclassification completion, not at the user's next login.
+
+### 7.2 Permissive exception suspension
+
+Any active out-of-scope override records tied to the old department are immediately moved to **suspended / review-required** status. They MUST be revalidated under the new department scope before they become active again. Revalidation requires the same approval authority as the original override.
+
+### 7.3 Authority loss effects
+
+When reclassification removes a Portfolio Executive Reviewer from valid scope:
+
+| Outcome | Rule |
+|---|---|
+| **Active review authority terminated** | The user loses authority to approve, annotate, or generate review runs immediately |
+| **Read-only legacy visibility preserved** | The user retains read-only access to review artifacts they personally originated |
+| **Active workflow responsibility reassigned** | Any active workflows (pending approvals, pushed items awaiting executive closure) are reassigned per §10 |
+
+## 8. External Member Authority
 
 ### 7.1 External member model
 
@@ -349,7 +486,35 @@ External members (`IExternalMember`) have project-scoped access that is:
 
 ---
 
-## 8. Cross-Lane Membership Consistency Rules
+## 9. Reassignment and Escalation After Authority Loss
+
+When active review ownership or authority must be reassigned following authority loss (scope removal, reclassification, override expiration, revocation), the following reassignment order applies:
+
+### 9.1 Default reassignment destination
+
+**Project Executive** is the first default reassignment destination for all active review workflows that lose their assigned reviewer.
+
+| Scenario | First reassignment target | Escalation path |
+|---|---|---|
+| PER loses scope (reclassification) | Project Executive | → Project Manager (if no PE) → Architecture-lead-approved exception |
+| PER override expires | Project Executive | → Project Manager (if no PE) → Architecture-lead-approved exception |
+| PER is revoked | Project Executive | → Project Manager (if no PE) → Architecture-lead-approved exception |
+
+### 9.2 Broader authority hierarchy for escalation
+
+The broader authority hierarchy for escalation when the default destination is unavailable is:
+
+1. Portfolio Executive Reviewer (another eligible PER from the reviewer pool)
+2. Project Executive
+3. Project Member (Project Manager or above)
+
+In all cases, the original out-of-scope reviewer retains only read-only originator visibility to artifacts they created. They do not retain active workflow authority after authority loss.
+
+### 9.3 Reassignment notification
+
+The Project Executive (or fallback assignee) MUST receive a notification when active workflows are reassigned to them due to authority loss. The reassignment event MUST be recorded in the relevant audit trail.
+
+## 10. Cross-Lane Membership Consistency Rules
 
 The following MUST remain consistent across both the PWA and SPFx lanes:
 
@@ -362,64 +527,73 @@ The following MUST remain consistent across both the PWA and SPFx lanes:
 
 ---
 
-## 9. Repo-Truth Reconciliation Notes
+## 11. Repo-Truth Reconciliation Notes
 
 The following reconciliations are locked for Phase 3 and MUST be honored in downstream design and implementation reviews:
 
 1. **`IProjectMember` not yet wired to project role resolution — controlled evolution**
-   `IProjectMember` exists in `packages/models/src/auth/IProjectMembership.ts` with a `projectRoleId` field, but no project-scoped role resolution pipeline consumes it. The role resolution pipeline defined in §3.2 is target-state. Classified as **controlled evolution**.
+   `IProjectMember` exists in `packages/models/src/auth/IProjectMembership.ts` with a `projectRoleId` field, but no project-scoped role resolution pipeline consumes it. The role resolution pipeline defined in §3.3 is target-state. Classified as **controlled evolution**.
 
 2. **PH7 `teamMemberUpns.includes()` check — compliant, requires formalization**
-   PH7-ProjectHub-2 §7.2.4 defines a route-level membership check using `teamMemberUpns.includes(user.upn)`. This is functionally correct but does not account for Entra group resolution, external members, or role-based module visibility. Phase 3 must formalize this into the eligibility rules in §6 while preserving the intent.
+   PH7-ProjectHub-2 §7.2.4 defines a route-level membership check using `teamMemberUpns.includes(user.upn)`. This is functionally correct but does not account for Entra group resolution, external members, Portfolio Executive Reviewer posture, or role-based module visibility. Phase 3 must formalize this into the eligibility rules in §6 while preserving the intent.
 
 3. **System role hierarchy not yet integrated with project roles — controlled evolution**
    The nine-level system role hierarchy in `AuthEnums.ts` (`SYSTEM_ADMIN` through `FIELD_STAFF`) exists but does not currently feed into project role resolution. Phase 2 hub roles (`Administrator`, `Executive`, `Member`) are resolved from provider hints, not from the system role hierarchy. Phase 3 project roles (§3) bridge this gap by mapping system role levels to project role capabilities. This is **controlled evolution**.
 
 4. **`FeaturePermissionRegistration` not yet used for project modules — controlled evolution**
-   The feature permission registration pattern exists in `@hbc/auth` but no Project Hub modules are registered. Module visibility in §4 should be implemented using this pattern. Classified as **controlled evolution**.
+   The feature permission registration pattern exists in `@hbc/auth` but no Project Hub modules are registered. Module visibility in §4 should be implemented using this pattern. The new `review-layer` visibility classification must map to a `FeaturePermissionRegistration` grant that allows view/annotate but blocks all operational writes. Classified as **controlled evolution**.
 
 5. **Entra group-to-project-role mapping not yet implemented — controlled evolution**
    Entra project groups (Leaders, Team, Viewers) are created during provisioning and stored in `IEntraGroupSet`, but no runtime pipeline resolves group membership into project roles. The mapping defined in §3.1 and §6.1 is target-state. Classified as **controlled evolution**.
 
 6. **SPFx permission resolution — compliant, scope-limited**
-   `resolveSpfxPermissions()` in the SPFx project hub webpart bridges SharePoint page context into `@hbc/auth`. This is **compliant** with the cross-lane consistency requirement (§8) but currently resolves only system-level permissions, not project-scoped membership. Extension to project-scoped resolution is required.
+   `resolveSpfxPermissions()` in the SPFx project hub webpart bridges SharePoint page context into `@hbc/auth`. This is **compliant** with the cross-lane consistency requirement (§10) but currently resolves only system-level permissions, not project-scoped membership. Extension to project-scoped resolution and Portfolio Executive Reviewer posture resolution is required.
 
 7. **External member access not yet implemented — controlled evolution**
-   `IExternalMember` and `IExternalProjectAccess` types exist but no access validation pipeline consumes them. The external member authority defined in §7 is target-state. Classified as **controlled evolution**.
+   `IExternalMember` and `IExternalProjectAccess` types exist but no access validation pipeline consumes them. The external member authority defined in §8 is target-state. Classified as **controlled evolution**.
+
+8. **Portfolio Executive Reviewer posture pipeline not yet implemented — controlled evolution**
+   No `department`-based scope resolution pipeline or out-of-scope `AccessControlOverrideRecord` lookup for PER exists in the current codebase. The `AccessControlOverrideRecord` type exists in `@hbc/auth` and has been extended for PER scope management. The three-tier leadership model and scope resolution defined in §2.3, §3.1, and §6.1 are target-state. PER pipeline implementation remains **controlled evolution**.
+
+   **Blocker note — resolved 2026-03-22:** `AccessControlOverrideRecord` extended in `@hbc/auth` v0.4.0 with `overrideType` (`'general' | 'out-of-scope-per'`), `projectIds`, `department`, and `approverScope` fields. PER-specific helpers added: `createPerOverrideRequest`, `isPerOverride`, `getPerOverridesForUser`, `getPerOverridesForProject`, `suspendPerOverridesForDepartmentChange`. Backward-compatible — existing override records unaffected. Structural sufficiency confirmed.
+
+9. **Department reclassification visibility-recalculation trigger not yet implemented — controlled evolution**
+   No automatic visibility-recalculation trigger on `department` change exists. Phase 3 must implement the recomputation and override-suspension behavior defined in P3-A1 §3.6 and §7 of this contract. Classified as **controlled evolution**.
 
 ---
 
-## 10. Acceptance Gate Reference
+## 12. Acceptance Gate Reference
 
 **Gate:** Role-governance gate (Phase 3 plan §18.1, §18.5 — cross-lane and core module components)
 
 | Field | Value |
 |---|---|
-| **Pass condition** | Project membership is resolved from canonical sources; effective project role determines module visibility consistently across both lanes; no parallel role logic exists outside `@hbc/auth` |
-| **Evidence required** | P3-A2 (this document), project role resolution implementation, module visibility enforcement, cross-lane membership consistency tests, external member access validation |
+| **Pass condition** | Project membership is resolved from canonical sources; effective project role determines module visibility consistently across both lanes; Portfolio Executive Reviewer posture is correctly resolved from business scope; department reclassification triggers visibility recalculation; no parallel role logic exists outside `@hbc/auth` |
+| **Evidence required** | P3-A2 (this document), project role resolution implementation, PER scope resolution implementation, module visibility enforcement, cross-lane membership consistency tests, department reclassification effects tests, override/exception suspension tests |
 | **Primary owner** | Auth / Architecture + Project Hub platform owner |
 
 ---
 
-## 11. Policy Precedence
+## 13. Policy Precedence
 
 This contract establishes the **membership and role authority foundation** that downstream Phase 3 deliverables must conform to:
 
 | Deliverable | Relationship to P3-A2 |
 |---|---|
-| **P3-A1** — Project Registry and Activation Contract | Provides team anchor fields and `entraGroupSet` consumed by the role resolution pipeline (§3.2) |
+| **P3-A1** — Project Registry and Activation Contract | Provides team anchor fields, `entraGroupSet`, and `department` consumed by the role resolution and PER scope pipelines |
 | **P3-A3** — Shared Spine Publication Contract Set | Must use project membership context to determine publication visibility per project |
-| **P3-C1** — Project Canvas Governance Note | Must implement canvas defaults by project role per §5 |
-| **P3-C2** — Mandatory Core Tile Family Definition | Must respect module visibility matrix (§4.1) for tile rendering |
-| **P3-E1** — Module Classification Matrix | Must align module visibility with this contract's matrix |
-| **P3-E2** — Module Source-of-Truth / Action-Boundary Matrix | Must use `StandardActionPermission` vocabulary per §4.3 |
-| **P3-G1** — PWA / SPFx Capability Matrix | Must respect cross-lane membership consistency (§8); lane depth differences must not create membership divergence |
-| **P3-H1** — Acceptance Checklist | Must include membership and role governance gate evidence |
+| **P3-C1** — Project Canvas Governance Note | Must implement canvas defaults by project role per §5; PER canvas defaults are distinct from PE canvas defaults |
+| **P3-C2** — Mandatory Core Tile Family Definition | Must respect module visibility matrix (§4.1) for tile rendering; review-layer tiles require separate governance |
+| **P3-E1** — Module Classification Matrix | Must align module visibility with this contract's matrix; executive review-capable surfaces per §3.2 |
+| **P3-E2** — Module Source-of-Truth / Action-Boundary Matrix | Must use `StandardActionPermission` vocabulary per §4.3; review-layer annotations must not create source mutation paths |
+| **P3-F1** — Reports Workspace Contract | Must implement PER report permissions and report-family policy hierarchy per §3.2 |
+| **P3-G1** — PWA / SPFx Capability Matrix | Must respect cross-lane membership consistency (§10); lane depth differences must not create membership divergence |
+| **P3-H1** — Acceptance Checklist | Must include membership, PER scope, and department reclassification governance gate evidence |
 | **Any implementation artifact** | Must use `@hbc/auth` infrastructure for role and permission resolution; no parallel auth pipelines |
 
 If a downstream deliverable conflicts with this contract, this contract takes precedence unless the Architecture lead approves a documented exception.
 
 ---
 
-**Last Updated:** 2026-03-20
+**Last Updated:** 2026-03-22
 **Governing Authority:** [Phase 3 Plan §8.2](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

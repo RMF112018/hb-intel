@@ -4,6 +4,7 @@ import {
   resolveRenewalState,
 } from './accessControlModel.js';
 import type {
+  AccessControlApproverScope,
   AccessControlOverrideRecord,
   AccessControlRecordStatus,
   AccessOverrideGrantChange,
@@ -45,6 +46,9 @@ export function createOverrideRequest(request: AccessOverrideRequest): AccessCon
     emergency: request.emergency,
     review: createReviewMetadata({ reviewRequired: request.reviewRequired ?? false }),
     status: normalizeAccessControlStatus('active'),
+    overrideType: request.overrideType,
+    projectIds: request.projectIds,
+    department: request.department,
   };
 }
 
@@ -56,6 +60,7 @@ export function approveOverrideRequest(
   approval: {
     approverId: string;
     approvedAt?: string;
+    approverScope?: AccessControlApproverScope;
   },
 ): AccessControlOverrideRecord {
   if (record.approval.state !== 'pending') {
@@ -70,6 +75,7 @@ export function approveOverrideRequest(
       state: 'approved',
       approverId: approval.approverId,
       approvedAt,
+      approverScope: approval.approverScope,
     },
     status: normalizeAccessControlStatus('active'),
   };

@@ -19,6 +19,14 @@ export {
 } from './overrideRecord.js';
 
 export {
+  createPerOverrideRequest,
+  isPerOverride,
+  getPerOverridesForUser,
+  getPerOverridesForProject,
+  suspendPerOverridesForDepartmentChange,
+} from './perOverride.js';
+
+export {
   DEFAULT_SHELL_AUTH_CONFIGURATION,
   resolveShellAuthConfiguration,
   validateShellAuthConfiguration,

@@ -105,7 +105,8 @@ Status: **Assessed 2026-03-22 — gap confirmed, remediation delivered in v0.2.0
 
 **0.2 — `@hbc/auth` AccessControlOverrideRecord readiness**
 Confirm that `@hbc/auth` can issue, store, and revoke time-bounded AccessControlOverrideRecords for out-of-scope PER grants. If this record type does not yet exist, it must be added to `@hbc/auth` before the PER authority model can be implemented.
-Governing: P3-A2 §5.3
+Governing: P3-A2 §2.3, §2.4, §6.1, §11.8
+Status: **Assessed 2026-03-22 — gap confirmed, remediation delivered in v0.4.0.** `AccessControlOverrideRecord` extended with `overrideType`, `projectIds`, `department` fields and `approverScope` on approval metadata. PER-specific helpers added (`createPerOverrideRequest`, `isPerOverride`, `getPerOverridesForUser`, `getPerOverridesForProject`, `suspendPerOverridesForDepartmentChange`). Existing override records unaffected. Stage 1 unblocked.
 
 **0.3 — `@hbc/my-work-feed` work item type readiness**
 Confirm that `@hbc/my-work-feed` (ADR-0115) supports structured typed work items with provenance fields (originRole, originReviewRunId, originAnnotationId, pushTimestamp) and a closure-loop response model. The Push-to-Project-Team feature requires this. If the work item model is narrower, agree on a work item type extension before executive review work begins.

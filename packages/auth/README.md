@@ -382,13 +382,43 @@ Helper utilities: `resolveAuthMode`, `resolveCanonicalAuthMode`, `mapLegacyToCan
 | `createBaseRoleDefinition`, `getChangedBaseRoleReferences` | Role definitions |
 | `createOverrideRequest`, `approveOverrideRequest`, `revokeOverrideRecord`, `archiveOverrideRecord`, `renewOverrideRecord` | Override lifecycle |
 | `resolveOverrideLifecycleStatus`, `flagOverrideForReview`, `markDependentOverridesForRoleReview` | Override resolution |
+| `createPerOverrideRequest`, `isPerOverride`, `getPerOverridesForUser`, `getPerOverridesForProject`, `suspendPerOverridesForDepartmentChange` | PER override helpers (Phase 3) |
 | `DEFAULT_SHELL_AUTH_CONFIGURATION`, `resolveShellAuthConfiguration`, `validateShellAuthConfiguration`, `loadShellAuthConfiguration` | Shell auth config |
 
 ### Types
 
 Key type exports include: `AuthStoreSlice`, `PermissionState`, `NormalizedAuthSession`, `CanonicalAuthMode`, `AuthLifecyclePhase`, `AuthFailure`, `FeaturePermissionRegistration`, `FeatureAccessEvaluation`, `EffectivePermissionSet`, `PermissionResolutionSnapshot`, `GuardResolutionInput`, `GuardResolutionResult`, `ProtectedContentGuardProps`, `PermissionGateProps`, `FeatureGateProps`, `RoleGateProps`, `AccessDeniedProps`, `StandardActionPermission`, `IAuthAdapter`.
 
+New Phase 3 types: `AccessControlOverrideType` (`'general' | 'out-of-scope-per'`), `AccessControlApproverScope` (`'company-wide' | 'department-scoped'`).
+
 See `src/types.ts` and the barrel exports in `src/index.ts` for the full set.
+
+---
+
+## Portfolio Executive Reviewer (PER) Overrides
+
+Phase 3 extends `AccessControlOverrideRecord` to support out-of-scope PER grants — time-bounded project access for Leadership-tier users outside their governed department scope.
+
+```typescript
+import { createPerOverrideRequest, approveOverrideRequest } from '@hbc/auth';
+
+const pending = createPerOverrideRequest({
+  id: 'per-001',
+  targetUserId: 'exec-user-id',
+  projectIds: ['proj-001'],
+  department: 'Healthcare',
+  reason: 'Cross-department portfolio review for Harbor View Medical Center.',
+  requesterId: 'opex-manager-id',
+  expiresAt: '2026-06-01T00:00:00.000Z',
+});
+
+const approved = approveOverrideRequest(pending, {
+  approverId: 'opex-manager-id',
+  approverScope: 'company-wide',
+});
+```
+
+Governing: P3-A2 §2.3, §2.4, §6.1 path 7.
 
 ---
 
