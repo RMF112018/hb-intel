@@ -1,22 +1,32 @@
 /**
  * HubTertiaryZone — P2-D2 §2: utility zone below Insights in the right panel.
  *
- * UIF-050-addl: Simplified to render RecentActivityCard directly. The old
- * canvas tile indirection (MyWorkCanvas with two utility tiles) was removed
- * because QuickActionsMenu moved to the desktop tab-row strip (UIF-048-addl)
- * and mobile bottom sheet (UIF-049-addl). The tertiary zone now contains
- * only the Recent Activity card.
+ * ARC-01 / 2-C: Renders tiles via HbcProjectCanvas (replaced direct
+ * RecentActivityCard render). Uses separate projectId from secondary zone
+ * per P2-D2 Gate 3 zone boundary enforcement (two isolated canvas instances).
  *
  * Hidden at essential tier. All roles have access per P2-D1 §5.
  */
 import type { ReactNode } from 'react';
 import { useComplexity } from '@hbc/complexity';
-import { RecentActivityCard } from './cards/RecentActivityCard.js';
+import { HbcProjectCanvas } from '@hbc/project-canvas';
+import { useCurrentSession } from '@hbc/auth';
 
 export function HubTertiaryZone(): ReactNode {
   const { tier } = useComplexity();
+  const session = useCurrentSession();
+  const primaryRole = session?.resolvedRoles[0] ?? 'Member';
 
   if (tier === 'essential') return null;
 
-  return <RecentActivityCard />;
+  // P2-D2 Gate 3: Separate projectId from secondary zone ensures zone isolation.
+  return (
+    <HbcProjectCanvas
+      projectId="my-work-hub-tertiary"
+      userId={session?.user?.id ?? ''}
+      role={primaryRole}
+      complexityTier={tier}
+      editable={false}
+    />
+  );
 }

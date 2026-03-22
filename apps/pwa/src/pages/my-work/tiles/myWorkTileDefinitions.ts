@@ -198,7 +198,34 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
     lockable: false,
   },
 
-  // UIF-051-addl: Utility tiles (quick-access, recent-context) removed.
-  // QuickActionsMenu moved to desktop tab-row strip (UIF-048-addl) and mobile sheet (UIF-049-addl).
-  // RecentActivityCard rendered directly by HubTertiaryZone (UIF-050-addl).
+  // ── Tertiary zone tile (P2-D2 §6.1, remediation 2-C) ───────────────────
+  {
+    tileKey: 'hub:recent-context',
+    title: 'Recent Activity',
+    description: 'Recently visited projects and work items (P2-D2 §6.1).',
+    defaultForRoles: [],
+    minComplexity: 'standard',
+    mandatory: false,
+    component: {
+      essential: React.lazy(() =>
+        import('./RecentActivityTile.js').then((m) => ({
+          default: m.RecentActivityTileEssential,
+        })),
+      ),
+      standard: React.lazy(() =>
+        import('./RecentActivityTile.js').then((m) => ({
+          default: m.RecentActivityTileStandard,
+        })),
+      ),
+      expert: React.lazy(() =>
+        import('./RecentActivityTile.js').then((m) => ({
+          default: m.RecentActivityTileExpert,
+        })),
+      ),
+    },
+    // ARC-08: 12-column grid — full width in tertiary zone
+    defaultColSpan: 12,
+    defaultRowSpan: 1,
+    lockable: false,
+  },
 ];

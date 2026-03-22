@@ -100,7 +100,7 @@ As actually implemented, `MyWorkPage` operates as follows.
 
 | Finding ID | Requirement | Current State | Severity |
 |---|---|---|---|
-| ARC-01 | `HbcProjectCanvas` must govern secondary and tertiary zone tile layout | ✅ Secondary zone corrected — `HbcProjectCanvas` replaces `MyWorkCanvas` (remediation 2-B, 2026-03-22); tertiary zone addressed in 2-C | **Critical** — Partially Resolved |
+| ARC-01 | `HbcProjectCanvas` must govern secondary and tertiary zone tile layout | ✅ Both zones corrected — secondary (2-B, 2026-03-22) and tertiary (2-C, 2026-03-22) now use `HbcProjectCanvas` | **Critical** — Resolved |
 | ARC-02 | `HbcCanvasEditor` + `useCanvasEditor` required for edit-mode in secondary zone | Not present anywhere in the page | **Critical** |
 | ARC-03 | `useCanvasMandatoryTiles` must lock `hub:lane-summary`, `hub:quick-actions`, `hub:team-workload` | Not present; no mandatory tile enforcement exists | **Critical** |
 | ARC-04 | `useRoleDefaultCanvas` must seed role-specific default arrangements | Not present; tile order is hard-coded by `getAll()` position | **Critical** |
@@ -108,7 +108,7 @@ As actually implemented, `MyWorkPage` operates as follows.
 | ARC-06 | Two isolated `useCanvasEditor` instances (secondary + tertiary) required | Not present | **High** |
 | ARC-07 | `HbcTileCatalog` required for edit-mode tile picker | Not present | **High** |
 | ARC-08 | 12-column grid with governed responsive tiers | ✅ Corrected — tile `defaultColSpan` values converted to 12-column grid (6/12); `HbcProjectCanvas` manages governed grid (remediation 2-B, 2026-03-22) | **Medium** — Resolved |
-| ARC-09 | Gate 2 (canvas in secondary), Gate 3 (canvas in tertiary), Gate 4 (edit-mode), Gate 5 (mandatory tiles) all failing | ⚡ Gate 2 satisfied — `HbcProjectCanvas` in secondary zone (remediation 2-B, 2026-03-22). Gates 3–5 still open. | **Critical** — Partially Resolved |
+| ARC-09 | Gate 2 (canvas in secondary), Gate 3 (canvas in tertiary), Gate 4 (edit-mode), Gate 5 (mandatory tiles) all failing | ⚡ Gates 2+3 satisfied — `HbcProjectCanvas` in both zones with separate projectIds for zone isolation (2-B + 2-C, 2026-03-22). Gates 4–5 still open. | **Critical** — Partially Resolved |
 
 P2-D2 is the single most consequential governance failure. Every gate beyond Gate 1 is unmet.
 
@@ -154,7 +154,7 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 |---|---|---|---|
 | CRD-01 | `pa-lane-summary` (pilot-REQUIRED, locked) must display 4 lane counts; Standard variant: visual chart | ✅ Implemented — `LaneSummaryCard` with E/S/X variants; registered as `hub:lane-summary` (mandatory, lockable, wide) (remediation 2-A, 2026-03-22) | **High** — Resolved |
 | CRD-02 | `pa-source-breakdown` (pilot-REQUIRED) must show work distribution by source module | ✅ Implemented — `SourceBreakdownCard` with E/S/X variants; registered as `hub:source-breakdown` (remediation 2-A, 2026-03-22) | **High** — Resolved |
-| CRD-03 | `pa-recent-activity` (tertiary zone) — 5 items in Standard tier | `RecentActivityCard` is a placeholder stub with empty-state only; no items rendered | **High** |
+| CRD-03 | `pa-recent-activity` (tertiary zone) — 5 items in Standard tier | ⚡ Governance structure in place — registered as `hub:recent-context` tile, rendered via `HbcProjectCanvas` (remediation 2-C, 2026-03-22); card still renders stub content (real data Phase 3+) | **High** — Partially Resolved |
 | CRD-04 | `ao-provisioning-health` (Administrator, secondary zone) — provisioning failure list | `AdminOversightCard` is a stub containing placeholder text only; no data rendered | **High** |
 | CRD-05 | Card variants must cover all three complexity tiers (E/S/X) | ⚡ Partially resolved — new `hub:lane-summary` and `hub:source-breakdown` provide genuine E/S/X variants (remediation 2-A, 2026-03-22); existing tiles still use aliases (addressed in 6-A) | **Low** |
 | CRD-06 | Cards must not cross zones; secondary cards stay in secondary | `RecentActivityCard` is rendered by `HubTertiaryZone` — correct zone. `PersonalAnalyticsCard` is in secondary — correct zone | **Pass** |
@@ -255,7 +255,7 @@ Rule: All colors and spacing must use `HBC_*` named token constants from `@hbc/u
 
 **File:** `tiles/MyWorkCanvas.tsx` — ✅ **Deleted** (remediation 2-B, 2026-03-22)
 
-`MyWorkCanvas` has been removed. `HubSecondaryZone` now renders tiles via `HbcProjectCanvas` from `@hbc/project-canvas`, which provides the governed 12-column grid, role-default seeding, mandatory tile enforcement, and edit-mode support. The `MyWorkHubTileProvider` context wrapper is preserved for hub-specific tile state (KPI filter, team mode). Tertiary zone replacement addressed in 2-C.
+`MyWorkCanvas` has been removed. Both zones now use `HbcProjectCanvas` from `@hbc/project-canvas`: secondary zone (2-B, 2026-03-22) and tertiary zone (2-C, 2026-03-22). Two separate `projectId` values (`"my-work-hub"` and `"my-work-hub-tertiary"`) ensure zone boundary isolation per P2-D2 Gate 3. `RecentActivityCard` registered as `hub:recent-context` tile. The `MyWorkHubTileProvider` context preserved for hub-specific tile state.
 
 ---
 
@@ -467,10 +467,10 @@ All items are pre-conditions for Phase 3 unless explicitly marked as "can procee
 
 These findings invalidate the implementation's fitness as a Phase 3 baseline. They cannot be deferred without creating compounding integration debt.
 
-**T0-01: Replace `MyWorkCanvas` with `HbcProjectCanvas` in secondary and tertiary zones** ⚡ Secondary zone completed (2026-03-22)
+**T0-01: Replace `MyWorkCanvas` with `HbcProjectCanvas` in secondary and tertiary zones** ✅ Completed (2026-03-22)
 Files: `tiles/MyWorkCanvas.tsx` (**deleted**), `HubSecondaryZone.tsx`, `HubTertiaryZone.tsx` (pending 2-C)
 Authority: P2-D2, P2-F1 §G0
-Action: `MyWorkCanvas.tsx` deleted. `HubSecondaryZone` now renders via `HbcProjectCanvas` with `projectId="my-work-hub"`, `role` from `useCurrentSession()`, `complexityTier`, `editable=false`. Tile `defaultColSpan` values converted to 12-column grid (6/12). `MyWorkHubTileProvider` context preserved for hub-specific tile state. Tertiary zone replacement deferred to 2-C. Edit-mode and mandatory enforcement hooks deferred to subsequent phases.
+Action: `MyWorkCanvas.tsx` deleted. `HubSecondaryZone` now renders via `HbcProjectCanvas` with `projectId="my-work-hub"`, `role` from `useCurrentSession()`, `complexityTier`, `editable=false`. Tile `defaultColSpan` values converted to 12-column grid (6/12). `MyWorkHubTileProvider` context preserved for hub-specific tile state. Tertiary zone completed (2-C, 2026-03-22) with `hub:recent-context` tile registered and `HbcProjectCanvas projectId="my-work-hub-tertiary"`. Two isolated canvas instances satisfy P2-D2 Gate 3 zone boundary enforcement. Edit-mode and mandatory enforcement hooks deferred to subsequent phases.
 
 **T0-02: Re-register tiles under `hub:` namespace** ✅ Completed (2026-03-22)
 File: `tiles/myWorkTileDefinitions.ts`, `tiles/registerMyWorkTiles.ts`

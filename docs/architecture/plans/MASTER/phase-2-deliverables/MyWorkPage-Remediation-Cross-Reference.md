@@ -119,15 +119,15 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 2-C: Replace `RecentActivityCard` direct render with `HbcProjectCanvas` — tertiary zone
+### 2-C: Replace `RecentActivityCard` direct render with `HbcProjectCanvas` — tertiary zone ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| ARC-01 | **C** | `HbcProjectCanvas` absent in tertiary zone; `RecentActivityCard` rendered directly without governance | ✅ Full close (tertiary) |
-| ARC-F1 | **C** | Tertiary zone has no canvas governance at all | ✅ Full close (tertiary) |
-| ARC-09 | **C** | Gate 2 (canvas in tertiary zone) fully satisfied (both zones) | ✅ Gate 2 complete |
-| CRD-03 | **H** | `pa-recent-activity` stub rendered directly — tertiary zone now canvas-governed | ⚡ Partial — governance structure in place; `hub:recent-context` tile content separately tracked |
-| CRD-07 | **C** | Locked card enforcement impossible without canvas governance — `hub:quick-actions` must be mandatory in tertiary | ⚡ Partial — canvas exists; mandatory enforcement wired in 2-E |
+| ARC-01 | **C** | `HbcProjectCanvas` absent in tertiary zone; `RecentActivityCard` rendered directly without governance | ✅ Closed — tertiary zone (2026-03-22); both zones now governed |
+| ARC-F1 | **C** | Tertiary zone has no canvas governance at all | ✅ Closed (2026-03-22) — `HbcProjectCanvas` with `projectId="my-work-hub-tertiary"` |
+| ARC-09 | **C** | Gate 2 (canvas in tertiary zone) fully satisfied (both zones) | ✅ Gates 2+3 complete (2026-03-22) — two isolated canvas instances |
+| CRD-03 | **H** | `pa-recent-activity` stub rendered directly — tertiary zone now canvas-governed | ⚡ Partial (2026-03-22) — `hub:recent-context` tile registered; stub content (real data Phase 3+) |
+| CRD-07 | **C** | Locked card enforcement impossible without canvas governance — `hub:quick-actions` must be mandatory in tertiary | ⚡ Partial — canvas exists (2026-03-22); mandatory enforcement wired in 2-E |
 | Rule-6 (HubZoneLayout) | **M** | `hasRightPanelContent` triggers inline `style={{ gridTemplateColumns: '1fr' }}` override | ⚡ Partial — tertiary zone now canvas-governed; layout consolidation completed in 5-C |
 
 ---
