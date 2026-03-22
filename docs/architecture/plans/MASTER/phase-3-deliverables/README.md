@@ -163,6 +163,7 @@ Must follow Stage 1 (requires `projectId` and `department` from registry).
 **2.1 — Three-tier authority model implementation**
 Implement role resolution for all three tiers: Leadership (department-scoped, all projects in department), Portfolio Executive Reviewer (department-scoped, non-membership, review-layer only), and Project Executive (project-scoped, full operational authority). Resolve authority against `department` from the project registry record, not against projectType or any other field.
 Governing: P3-A2 §3
+Status: **Implemented 2026-03-22 in `@hbc/models` v0.4.1 + `@hbc/auth` v0.5.0.** `ProjectRole` type (8 roles) with tier classification, precedence, labels, and membership flags added to models. `resolveProjectRole` pipeline (9 eligibility paths per P3-A2 §6.1) and `resolvePerEligibility` (department scope, C-suite, override) added to auth. Pure functions — caller provides all inputs.
 
 **2.2 — Membership enforcement**
 Implement project membership validation. Membership is role-based and project-scoped. Implement the membership resolver used by both lanes (PWA route guards and SPFx web part initialization). The resolver must distinguish between membership-based access and PER oversight access — these are separate access paths.
