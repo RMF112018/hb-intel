@@ -101,6 +101,9 @@ export function MyWorkPage(): ReactNode {
     setKpiFilter((prev) => (prev === filter || filter === 'total' ? null : filter));
   }, []);
 
+  // UIF-020-addl: Clear KPI filter — used by empty state "View all items" action.
+  const handleClearKpiFilter = useCallback(() => setKpiFilter(null), []);
+
   // Sync kpiFilter to URL
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -142,7 +145,7 @@ export function MyWorkPage(): ReactNode {
           <div ref={scrollContainerRef as React.RefObject<HTMLDivElement>}>
             <HubZoneLayout
               primaryContent={
-                <HubPrimaryZone onItemSelect={setSelectedItem} kpiFilter={kpiFilter} />
+                <HubPrimaryZone onItemSelect={setSelectedItem} kpiFilter={kpiFilter} onClearKpiFilter={handleClearKpiFilter} />
               }
               secondaryContent={
                 <HubSecondaryZone

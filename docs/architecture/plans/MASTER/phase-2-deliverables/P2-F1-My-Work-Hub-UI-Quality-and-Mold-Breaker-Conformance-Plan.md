@@ -1569,6 +1569,41 @@ Source/module chips ("BD Scorecard", "Est. Pursuit") are correctly non-interacti
 
 ---
 
+### 10A.40 UIF-020-addl: Context-Aware Filtered Empty State (High)
+
+**Severity:** High
+**Category:** State Design / Construction Workflow
+**Governing authority:** MB-01 (Lower Cognitive Load) — `UI-Kit-Mold-Breaker-Principles.md`. Context-aware states reduce ambiguity and accelerate triage.
+
+**Observed state:** When a KPI filter (e.g., `?filter=aging`) produced zero results, the empty state showed generic "You're all caught up" with no indication of which filter was active, what zero results meant contextually, or how to clear the filter. Combined with degraded-data banners, users couldn't distinguish "no items exist" from "data failed to load."
+
+**Root cause:** `HbcMyWorkEmptyState` had no awareness of the active filter or data health state. It rendered identical messaging regardless of context.
+
+**Fix:** Extended `HbcMyWorkEmptyState` with `kpiFilter`, `isDegraded`, and `onClearFilter` props. When a KPI filter is active:
+- **Title:** Names the active filter (e.g., "No Aging items")
+- **Description:** Contextual explanation (e.g., "No items aging past threshold — all work items are within their due date ranges.")
+- **Degraded caveat:** Appends "Some data sources are unavailable — this count may be incomplete." when `isDegraded` is true
+- **Secondary CTA:** "View all items" button clears the filter
+
+Filter content map covers: action-now, blocked, unread, escalation, aging.
+
+Wired `onClearKpiFilter` callback through `MyWorkPage` → `HubPrimaryZone` → `HbcMyWorkFeed` → `HbcMyWorkEmptyState`.
+
+**Acceptance criteria:**
+- Empty state text references the active filter — **MET** (title includes filter label)
+- Empty state includes "View all items" action — **MET** (secondary CTA with `onClearFilter` callback)
+- Empty state distinguishes stale-data empty from genuine-zero empty — **MET** (`isDegraded` caveat from `feed.healthState.degradedSourceCount`)
+- Unfiltered empty state unchanged — **MET** (default "You're all caught up" path preserved)
+
+**Files modified:**
+- `packages/my-work-feed/src/components/HbcMyWorkEmptyState/index.tsx` — filter-aware messaging with KPI_FILTER_CONTENT map
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — passes `kpiFilter`, `isDegraded`, `onClearFilter` to empty state; added `onClearKpiFilter` prop
+- `apps/pwa/src/pages/my-work/HubPrimaryZone.tsx` — passes `onClearKpiFilter` through to feed
+- `apps/pwa/src/pages/my-work/MyWorkPage.tsx` — `handleClearKpiFilter` callback wired to HubPrimaryZone
+- `packages/my-work-feed/package.json` — version 0.0.27 → 0.0.28
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

@@ -57,6 +57,8 @@ export interface IHbcMyWorkFeedProps {
   onOpenReasonDrawer?: (itemId: string) => void;
   /** UIF-008: External KPI filter key (e.g. 'action-now', 'blocked', 'unread'). */
   kpiFilter?: string | null;
+  /** UIF-020-addl: Callback to clear the active KPI filter. */
+  onClearKpiFilter?: () => void;
   className?: string;
 }
 
@@ -474,6 +476,7 @@ export function HbcMyWorkFeed({
   onItemSelect,
   onOpenReasonDrawer: _onOpenReasonDrawer,
   kpiFilter,
+  onClearKpiFilter,
   className,
 }: IHbcMyWorkFeedProps): JSX.Element {
   const { tier } = useComplexity();
@@ -690,7 +693,14 @@ export function HbcMyWorkFeed({
         <HbcBanner variant="error">Unable to load work items. Please try again.</HbcBanner>
       )}
 
-      {!isLoading && !isError && !hasItems && <HbcMyWorkEmptyState variant="feed" />}
+      {!isLoading && !isError && !hasItems && (
+        <HbcMyWorkEmptyState
+          variant="feed"
+          kpiFilter={kpiFilter}
+          isDegraded={(feed?.healthState?.degradedSourceCount ?? 0) > 0}
+          onClearFilter={onClearKpiFilter}
+        />
+      )}
 
       {!isLoading && !isError && hasItems && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
