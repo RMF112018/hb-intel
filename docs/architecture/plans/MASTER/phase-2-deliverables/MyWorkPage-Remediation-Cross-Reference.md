@@ -173,13 +173,13 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ## Phase 3 — Personalization Completion
 
-### 3-A: Wire `cardArrangement` into `HbcProjectCanvas`; wire `updateCardVisibility` ✅ Completed (2026-03-22)
+### 3-A: Resolve `cardArrangement` / `updateCardVisibility` ownership ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| PRS-01 | **H** | `cardArrangement` (30-day persisted draft) computed by `useHubPersonalization`, passed to no one | ✅ Closed (2026-03-22) — passed from MyWorkPage to HubSecondaryZone |
-| ARC-F6 | **H** | `cardArrangement` destructured in `MyWorkPage` and immediately discarded | ✅ Closed (2026-03-22) — no longer discarded |
-| PRS-02 | **M** | `updateCardVisibility` exported by `useHubPersonalization`, consumed nowhere | ✅ Closed (2026-03-22) — passed to HubSecondaryZone |
+| PRS-01 | **H** | `cardArrangement` (30-day persisted draft) computed by `useHubPersonalization`, passed to no one | ✅ Closed (2026-03-22) — option (b): vestigial props removed; HbcProjectCanvas manages arrangement via internal config store |
+| ARC-F6 | **H** | `cardArrangement` destructured in `MyWorkPage` and immediately discarded | ✅ Closed (2026-03-22) — option (b): dead code removed; canvas owns tile config |
+| PRS-02 | **M** | `updateCardVisibility` exported by `useHubPersonalization`, consumed nowhere | ✅ Closed (2026-03-22) — option (b): callback removed; canvas edit mode provides tile visibility management |
 
 ---
 

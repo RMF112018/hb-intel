@@ -1,6 +1,9 @@
 /**
- * Hub state persistence types — P2-B2 §3–§6, P2-D5 §4.
+ * Hub state persistence types — P2-B2 §3–§6.
  * Draft contracts for query-seed, return UI state, and personalization.
+ *
+ * Card arrangement (P2-D5 §4) is managed by HbcProjectCanvas internally
+ * via useCanvasConfig + CanvasApi — types removed per PRS-01 option (b).
  */
 
 /** P2-B2 §4: Query-seed state — persisted query preferences. */
@@ -16,19 +19,6 @@ export interface IMyWorkReturnState {
   scrollPosition: number;
   expandedGroupKeys: string[];
   capturedAt: string;
-}
-
-/** P2-D5 §4.3: Card arrangement saved view. */
-export interface IMyWorkCardArrangement {
-  secondaryZone: ICardSlot[];
-  tertiaryZone: ICardSlot[];
-  savedAt: string;
-}
-
-/** P2-D5 §4.3: Individual card visibility slot. */
-export interface ICardSlot {
-  cardId: string;
-  visible: boolean;
 }
 
 /**
@@ -55,7 +45,6 @@ export const HUB_DRAFT_KEYS = {
   returnState: 'hbc-my-work-return-state',
   teamMode: 'hbc-my-work-team-mode',
   filterState: 'hbc-my-work-filter-state',
-  cardArrangement: 'hbc-my-work-card-arrangement',
   /** P2-B2 §6: Durable feed fallback cache for stale return. */
   feedCache: 'hbc-my-work-feed-cache',
 } as const;
@@ -66,6 +55,5 @@ export const HUB_DRAFT_TTL = {
   returnState: 1,        // hours
   teamMode: 16,          // hours (P2-D5 §7)
   filterState: 8,        // hours (P2-D5 §8)
-  cardArrangement: 720,  // 30 days in hours (P2-D5 §4)
   feedCache: 4,          // hours (P2-B2 §6)
 } as const;

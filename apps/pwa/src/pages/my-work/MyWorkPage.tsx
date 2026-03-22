@@ -131,9 +131,8 @@ export function MyWorkPage(): ReactNode {
     complexityTier: tier,
   };
 
-  // P2-D5: Personalization — team mode + card arrangement
-  // PRS-01 / ARC-F6: cardArrangement and updateCardVisibility now consumed (was silently discarded).
-  const { teamMode, setTeamMode, cardArrangement, updateCardVisibility } = useHubPersonalization();
+  // P2-D5: Personalization — team mode (card arrangement managed by HbcProjectCanvas internally)
+  const { teamMode, setTeamMode } = useHubPersonalization();
 
   // P2-B2: Hub state persistence (query-seed + return UI state)
   const { querySeed, returnState } = useHubStatePersistence();
@@ -227,8 +226,6 @@ export function MyWorkPage(): ReactNode {
                   teamMode={teamMode}
                   activeFilter={kpiFilter}
                   onFilterChange={handleKpiFilter}
-                  cardArrangement={cardArrangement}
-                  updateCardVisibility={updateCardVisibility}
                 />
               }
               tertiaryContent={<HubTertiaryZone />}

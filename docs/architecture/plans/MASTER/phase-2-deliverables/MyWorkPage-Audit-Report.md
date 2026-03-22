@@ -187,8 +187,8 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 
 | Finding ID | Requirement | Current State | Severity |
 |---|---|---|---|
-| PRS-01 | `cardArrangement` must govern analytics card display order | ✅ Corrected — `cardArrangement` destructured and passed from `MyWorkPage` to `HubSecondaryZone` (remediation 3-A, 2026-03-22) | **High** — Resolved |
-| PRS-02 | `updateCardVisibility` must be wired to card show/hide UI | ✅ Corrected — `updateCardVisibility` destructured and passed to `HubSecondaryZone` (remediation 3-A, 2026-03-22) | **Medium** — Resolved |
+| PRS-01 | `cardArrangement` must govern analytics card display order | ✅ Resolved (option b) — vestigial props removed; HbcProjectCanvas manages tile arrangement internally via useCanvasConfig + CanvasApi (PRS-01 polish, 2026-03-22) | **High** — Resolved |
+| PRS-02 | `updateCardVisibility` must be wired to card show/hide UI | ✅ Resolved (option b) — updateCardVisibility removed; canvas edit mode provides tile show/hide (PRS-01 polish, 2026-03-22) | **Medium** — Resolved |
 | PRS-03 | Executive default is `my-team` (P2-D5 §3) | ✅ Resolved via ADR-0117 — Executive defaults to `my-team`; other roles default to `personal`. P2-D5 §3 governs; P2-B2 §4 superseded for Executive only (remediation 4-B, 2026-03-22) | **Plan conflict — High** — Resolved |
 
 ---

@@ -35,7 +35,7 @@ my-work/
   formatRelativeTime.ts   — Relative timestamp formatter
   useHubTrustState.ts     — Split timestamp model (lastTrustedDataIso / lastRefreshAttemptIso)
   useHubStatePersistence.ts — @hbc/session-state draft persistence wiring
-  useHubPersonalization.ts — Team mode + card arrangement persistence
+  useHubPersonalization.ts — Team mode persistence
   useHubReturnMemory.ts   — Return-state capture (route onLeave + visibilitychange)
   useHubFeedRefresh.ts    — TanStack Query invalidation on return
   cards/                  — Card components (LaneSummary, SourceBreakdown, etc.)
@@ -49,7 +49,7 @@ my-work/
 |------|---------|
 | `useHubTrustState` | Derives freshness, connectivity, and staleness from feed result (P2-B3) |
 | `useHubStatePersistence` | Wires @hbc/session-state drafts for query-seed, return state, feed cache |
-| `useHubPersonalization` | Team mode + card arrangement persistence; Executive default `my-team` (ADR-0117) |
+| `useHubPersonalization` | Team mode persistence; Executive default `my-team` (ADR-0117). Card arrangement managed by HbcProjectCanvas internally. |
 | `useHubReturnMemory` | Captures scroll/group state on leave; restores on return; triggers feed refresh |
 | `useHubFeedRefresh` | Invalidates TanStack Query cache on return from domain surface |
 
@@ -57,7 +57,6 @@ my-work/
 
 - **Feed data**: TanStack Query via `@hbc/my-work-feed` hooks (`useMyWork`, `useMyWorkCounts`)
 - **Team mode**: Persisted draft (16h TTL, 300ms debounce) via `useAutoSaveDraft`
-- **Card arrangement**: Persisted draft (30-day TTL, 500ms debounce) via `useAutoSaveDraft`
 - **Query seed**: Persisted draft (8h TTL, 500ms debounce) — lane/mode preferences
 - **Return state**: Persisted draft (1h TTL) — scroll position, expanded groups
 - **Feed cache**: Explicit write draft (4h TTL) — durable fallback for offline return
