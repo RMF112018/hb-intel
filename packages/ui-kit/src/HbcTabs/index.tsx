@@ -129,6 +129,7 @@ export const HbcTabs: React.FC<HbcTabsProps> = ({
             >
               {tab.icon}
               {tab.label}
+              {tab.badge}
             </button>
           );
         })}

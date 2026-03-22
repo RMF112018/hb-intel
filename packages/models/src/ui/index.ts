@@ -33,6 +33,8 @@ export interface LayoutTab {
   id: string;
   label: string;
   icon?: ReactNode;
+  /** UIF-027-addl: Optional count badge rendered after the label (e.g., urgent item count). */
+  badge?: ReactNode;
   disabled?: boolean;
 }
 

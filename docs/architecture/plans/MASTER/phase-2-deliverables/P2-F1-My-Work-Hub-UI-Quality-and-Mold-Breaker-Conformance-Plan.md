@@ -1701,6 +1701,38 @@ Also upgraded font size from 0.6875rem (11px) to 0.75rem (12px) to meet field-re
 
 ---
 
+### 10A.45 UIF-027-addl: Tab Count Badges for Delegated/Team Views (Medium)
+
+**Severity:** Medium
+**Category:** Mold Breaker / Construction Workflow
+**Governing authority:** MB-01 (Lower Cognitive Load) — `UI-Kit-Mold-Breaker-Principles.md`. Cross-role intelligence is a category-differentiating capability; blind tabs waste it.
+
+**Observed state:** "Delegated by Me" and "My Team" tabs showed no count badges. A PM had to click each tab to discover if team members had blocked items — requiring navigation where a persistent signal would suffice.
+
+**Fix:** Three-layer implementation:
+
+1. **`LayoutTab` type** (`@hbc/models`): Added `badge?: ReactNode` field to the tab definition interface
+2. **`HbcTabs` component** (`@hbc/ui-kit`): Renders `{tab.badge}` after the label in each tab button
+3. **`HubTeamModeSelector`** (`apps/pwa`): Uses `useMyWorkCounts()` per team mode to fetch blocked counts. For non-active tabs with `blockedCount > 0`, renders a red pill badge (`HBC_STATUS_COLORS.error` background, white text). Badge hidden at zero count. Count capped at "99+" for display.
+
+Badges update reactively via TanStack Query cache — same data source as the feed. Only non-active tabs show badges (active tab's content is already visible).
+
+**Acceptance criteria:**
+- "Delegated by Me" and "My Team" tabs show count badges when views contain blocked items — **MET** (`blockedCount` from `useMyWorkCounts` rendered as red pill badge)
+- Badge updates reactively with data sync — **MET** (TanStack Query reactive cache)
+- Zero-count hides badge — **MET** (`TabBadge` returns null when `count <= 0`)
+- Non-zero count shows badge with correct styling — **MET** (red pill, white text, 99+ cap)
+
+**Files modified:**
+- `packages/models/src/ui/index.ts` — `badge?: ReactNode` added to `LayoutTab`
+- `packages/ui-kit/src/HbcTabs/index.tsx` — renders `{tab.badge}` in tab button
+- `apps/pwa/src/pages/my-work/HubTeamModeSelector.tsx` — `useMyWorkCounts` per mode, `TabBadge` component
+- `packages/models/package.json` — version 0.3.0 → 0.3.1
+- `packages/ui-kit/package.json` — version 2.2.46 → 2.2.47
+- `apps/pwa/package.json` — version 0.12.51 → 0.12.52
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
