@@ -26,14 +26,15 @@ import {
 import { useMyWorkCounts } from '@hbc/my-work-feed';
 import { ViewList, SparkleIcon, Cancel, Notifications } from '@hbc/ui-kit/icons';
 
-// UIF-043-addl: Container-aware auto-fill grid — adapts to actual panel width.
-// At ~360px panel: 2 columns (120px min × 2 + 12px gap = 252px).
-// At ~500px panel: 3 columns. Hero card spans full width via gridColumn: '1 / -1'.
+// UIF-044-addl: Container-aware auto-fill grid with 130px readable minimum.
+// Reflow thresholds: 3-up at ≥414px, 2-up at ≥272px, 1-up below.
+// Hero card spans full width via gridColumn: '1 / -1'.
 const useStyles = makeStyles({
   kpiGrid: {
     display: 'grid',
     gap: `${HBC_SPACE_MD}px`,
-    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+    minHeight: 0,
   },
   // INS-006: Summary card gets distinct background + full width + no maxWidth cap.
   summaryCard: {

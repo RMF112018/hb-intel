@@ -2166,6 +2166,29 @@ Trend pill styling: `inline-flex`, `borderRadius: 10px`, `padding: 3px 6px`, `fo
 
 ---
 
+### 10A.65 UIF-044-addl: KPI Card Readable Minimum Width Refinement
+
+**Severity:** Medium
+**Category:** Layout / Readability
+
+**Fix:** Increased KPI card grid `minmax()` from `120px` to `130px` for better readability. 130px gives each card room for the label (12px), adaptive value (20–28px via clamp), and trend pill badge without compression.
+
+Reflow thresholds now:
+| Panel width | Columns | Card width |
+|---|---|---|
+| ≥414px | 3 | ~130px each |
+| 272–413px | 2 | ~130–200px each |
+| <272px | 1 | full width |
+
+Added `minHeight: 0` to prevent grid blowout from `minmax()` in nested flex/grid contexts.
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/cards/PersonalAnalyticsCard.tsx` — minmax 120→130, minHeight: 0
+- `apps/pwa/src/pages/my-work/cards/AgingBlockedCard.tsx` — minmax 120→130, minHeight: 0
+- `apps/pwa/package.json` — version 0.12.60 → 0.12.61
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

@@ -20,13 +20,14 @@ import { RoleGate } from '@hbc/auth';
 import { useMyWorkTeamFeed } from '@hbc/my-work-feed';
 import { Upload, StatusOverdueIcon } from '@hbc/ui-kit/icons';
 
-// UIF-043-addl: Container-aware auto-fill grid — adapts to actual panel width.
+// UIF-044-addl: Container-aware auto-fill grid with 130px readable minimum.
 // 2 cards (Escalation Candidates, Aging) flow into available columns.
 const useStyles = makeStyles({
   kpiGrid: {
     display: 'grid',
     gap: `${HBC_SPACE_MD}px`,
-    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+    minHeight: 0,
   },
 });
 
