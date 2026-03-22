@@ -42,6 +42,16 @@ describe('HbcBanner', () => {
     expect(screen.getByRole('alert')).toHaveAttribute('aria-live', 'assertive');
   });
 
+  it('polite prop overrides aria-live to "polite" for warning variant (UIF-003)', () => {
+    render(<HbcBanner variant="warning" polite>Degraded state</HbcBanner>);
+    expect(screen.getByRole('status')).toHaveAttribute('aria-live', 'polite');
+  });
+
+  it('polite prop overrides aria-live to "polite" for error variant', () => {
+    render(<HbcBanner variant="error" polite>Persistent error</HbcBanner>);
+    expect(screen.getByRole('status')).toHaveAttribute('aria-live', 'polite');
+  });
+
   it('sets aria-live="polite" for info/success variants', () => {
     const { rerender } = render(<HbcBanner variant="info">Info</HbcBanner>);
     expect(screen.getByRole('status')).toHaveAttribute('aria-live', 'polite');

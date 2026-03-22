@@ -82,7 +82,8 @@ export function HubConnectivityBanner(): ReactNode {
   if (connectivity === 'degraded') {
     return (
       <div className={styles.warningBorder}>
-        <HbcBanner variant="warning">
+        {/* UIF-003: polite for persistent degraded-data state */}
+        <HbcBanner variant="warning" polite>
           <span style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <span>
               Connection unstable — showing cached data while refreshing.

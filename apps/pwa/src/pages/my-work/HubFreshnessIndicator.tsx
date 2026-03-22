@@ -161,7 +161,8 @@ export function HubFreshnessIndicator({
 
     return (
       <div className={styles.bannerWrap} data-hub-trust={freshness}>
-        <HbcBanner variant="warning" onDismiss={() => setDismissed(true)}>
+        {/* UIF-003: polite for persistent degraded-source state */}
+        <HbcBanner variant="warning" polite onDismiss={() => setDismissed(true)}>
           <div className={styles.bannerContent}>
             <span>{message}</span>
             {onRetry && (

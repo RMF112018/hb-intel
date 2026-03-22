@@ -55,6 +55,7 @@ export function HbcMyWorkOfflineBanner({
   return (
     <HbcBanner
       variant="warning"
+      polite
       className={`hbc-my-work-offline-banner${className ? ` ${className}` : ''}`}
       icon={<CloudOffline size="sm" />}
     >

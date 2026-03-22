@@ -105,6 +105,7 @@ export const HbcBanner: React.FC<HbcBannerProps> = ({
   children,
   icon,
   onDismiss,
+  polite,
   className,
 }) => {
   const classes = useStyles();
@@ -113,8 +114,9 @@ export const HbcBanner: React.FC<HbcBannerProps> = ({
   const ramp = isFieldMode ? FIELD_VARIANT_RAMP[variant] : VARIANT_RAMP[variant];
   const DefaultIcon = VARIANT_ICON[variant];
 
-  const role = variant === 'warning' || variant === 'error' ? 'alert' : 'status';
-  const ariaLive = variant === 'warning' || variant === 'error' ? 'assertive' as const : 'polite' as const;
+  // UIF-003: polite prop overrides to aria-live="polite" + role="status" for persistent non-urgent banners.
+  const role = polite ? 'status' : (variant === 'warning' || variant === 'error' ? 'alert' : 'status');
+  const ariaLive = polite ? 'polite' as const : (variant === 'warning' || variant === 'error' ? 'assertive' as const : 'polite' as const);
 
   return (
     <div

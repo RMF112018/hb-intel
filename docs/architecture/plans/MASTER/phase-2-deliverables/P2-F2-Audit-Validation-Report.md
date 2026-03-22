@@ -19,7 +19,7 @@ The P2-F2 audit covered the full HB Intel PWA product — My Work, BD, Estimatin
 |---|---|---|---|
 | UIF-001 | No detail drawer; rows navigate to 404 | Drawer IS implemented; feed calls `onItemSelect` on row click; deep-link hrefs corrected to match actual routes | **RESOLVED** |
 | UIF-002 | "Blocked" badge is unstyled `<span>`, no role | `HbcStatusBadge` IS used in `HbcMyWorkListItem` | **DISPUTED** |
-| UIF-003 | Degraded banner uses `aria-live="assertive"` | `HbcBanner variant="warning"` IS `aria-live="assertive"` per `HbcBanner` tests | **CONFIRMED** |
+| UIF-003 | Degraded banner uses `aria-live="assertive"` | `HbcBanner` now supports `polite` prop; applied to persistent degraded-data banners | **RESOLVED** |
 | UIF-004 | Cmd+K command palette non-functional | No command palette implementation in PWA | **CONFIRMED** |
 | UIF-005 | BD nav link → `/bd` → 404 | Sidebar nav links to `/business-development`, not `/bd` | **DISPUTED** |
 | UIF-006 | Active filter cards have no visual feedback | KPI cards have `isActive`, `onClick`, `ariaLabel` props wired | **DISPUTED** |
@@ -81,7 +81,7 @@ The P2-F2 audit covered the full HB Intel PWA product — My Work, BD, Estimatin
 
 **Note:** The shell-level `HbcConnectivityBar` IS present in `root-route.tsx` and uses `aria-live="polite"` for shell status. The hub-level warning banners are a secondary layer on top.
 
-**Verdict:** Confirmed. The `HbcBanner variant="warning"` implementation used for persistent degraded-data states fires `aria-live="assertive"`, which is overly aggressive for this purpose. The fix requires either (a) introducing a `"warning-polite"` variant in `HbcBanner`, or (b) using `variant="info"` (which is `aria-live="polite"`) for persistent degraded data vs. `variant="warning"` only for actionable interrupts.
+**Verdict:** Resolved. `HbcBanner` now supports an optional `polite` prop that overrides `aria-live` to `"polite"` and `role` to `"status"`. Applied to `HubConnectivityBanner`, `HubFreshnessIndicator`, and `HbcMyWorkOfflineBanner`. Default behavior unchanged — consumers opt in when their banner is persistent/non-urgent.
 
 ---
 
@@ -267,7 +267,7 @@ The count badge uses `aria-label` to override its text content contribution to t
 |---|---|---|
 | UIF-001 | ✅ Resolved | Deep-link hrefs corrected to match actual workspace routes. Drawer polish applied (row highlighting, header label, surface bg). |
 | UIF-002 | Disputed | `HbcStatusBadge` in use — no action. |
-| UIF-003 | **Confirmed** | `HbcBanner variant="warning"` fires `assertive` for persistent degraded-data banners. Consider `variant="info"` for non-actionable degraded states, or add `polite` variant to HbcBanner. |
+| UIF-003 | ✅ Resolved | `HbcBanner` `polite` prop added; applied to `HubConnectivityBanner`, `HubFreshnessIndicator`, `HbcMyWorkOfflineBanner`. |
 | UIF-006 | Disputed | Active filter wired — no action. |
 | UIF-008 | Stale | Element doesn't exist — no action. |
 | UIF-009 | Disputed | `ellipsis` in use — no action. |
@@ -299,11 +299,8 @@ These findings are valid product concerns but fall outside the Phase 2 My Work H
 
 Two findings require attention before Phase 2 can be considered fully clean against this audit:
 
-**1. UIF-003 — `aria-live="assertive"` on persistent degraded-data banners (Medium)**
-`HubConnectivityBanner` and `HubFreshnessIndicator` both render `HbcBanner variant="warning"`, which fires `aria-live="assertive"`. For persistent degraded-data conditions (not emergency interrupts), `aria-live="polite"` is the correct level. Options:
-- Change to `<HbcBanner variant="info">` for degraded-but-retrying states (no data loss, user can continue working).
-- Add a `severity="polite"` prop to `HbcBanner` that overrides the default assertive behavior for warnings.
-- Change `HbcBanner` to use `aria-live="polite"` for `warning` and reserve `assertive` only for `error` variant.
+**1. UIF-003 — `aria-live="assertive"` on persistent degraded-data banners (Medium)** ✅ RESOLVED
+`HbcBanner` now supports an optional `polite` prop that overrides `aria-live` to `"polite"` and `role` to `"status"`. Applied to `HubConnectivityBanner`, `HubFreshnessIndicator`, and `HbcMyWorkOfflineBanner`. Default behavior for `variant="warning"` unchanged — zero blast radius to the 44 existing consumers.
 
 **2. UIF-012 — "Bd Department Sections" acronym casing (Low)**
 The `formatModuleLabel` fallback title-cases only the first character of each word. `bd-department-sections` → "Bd Department Sections". Fix: add the key to `MODULE_DISPLAY_NAMES` in `packages/my-work-feed/src/utils/formatModuleLabel.ts`. Audit all live `moduleKey` values in `domainQueryFns.ts` for similar unrecognized `bd-*` or acronym-containing keys and add them to the map.

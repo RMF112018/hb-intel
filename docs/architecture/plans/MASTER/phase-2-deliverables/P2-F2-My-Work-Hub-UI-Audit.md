@@ -110,6 +110,12 @@ Recommended change: Replace amber alert banner with HbcConnectivityBar shellStat
 Expected user benefit: Shell state is communicated without interrupting flow or fatiguing assistive technology users.
 Acceptance criteria: No aria-live="assertive" on a persistent degraded-data banner. Shell status appears as a non-intrusive top rail using HbcConnectivityBar.
 
+---
+
+**Resolution Status (2026-03-22):** ✅ RESOLVED — `HbcBanner` now supports an optional `polite` prop that overrides `aria-live` to `"polite"` and `role` to `"status"` for persistent non-urgent banners. Applied to `HubConnectivityBanner`, `HubFreshnessIndicator`, and `HbcMyWorkOfflineBanner`. Default behavior for `variant="warning"` unchanged — consumers opt in to polite semantics when their banner is persistent/non-urgent. The `HbcConnectivityBar` recommendation was not adopted because the hub-level banners provide richer context (degraded source names, retry buttons) than the shell-level connectivity indicator.
+
+**Acceptance criteria met:** Persistent degraded-data banners use `aria-live="polite"`. No assertive interrupts for non-urgent status.
+
 
 UIF-004
 

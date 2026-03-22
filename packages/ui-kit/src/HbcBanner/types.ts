@@ -15,6 +15,8 @@ export interface HbcBannerProps {
   icon?: React.ReactNode;
   /** Callback when dismiss button is clicked. Omit for non-dismissible banners. */
   onDismiss?: () => void;
+  /** Override aria-live to "polite" for persistent/non-urgent banners (UIF-003). Default: inferred from variant. */
+  polite?: boolean;
   /** Additional CSS class */
   className?: string;
 }
