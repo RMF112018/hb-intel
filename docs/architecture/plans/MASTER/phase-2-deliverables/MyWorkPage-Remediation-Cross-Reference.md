@@ -238,15 +238,15 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 5-B: P2-F1 G2 — Feed visual structure (changes in `@hbc/my-work-feed`)
+### 5-B: P2-F1 G2 — Feed visual structure (changes in `@hbc/my-work-feed`) ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| UIF-001 (via UX-F4) | **C** | Lane headers render as OS-native gray rectangle buttons — `appearance: auto`, no design token treatment | ✅ Full close |
-| UIF-003 (via UX-F4) | **C** | Work item title links in browser-default blue `rgb(0,0,238)` on dark shell | ✅ Full close |
-| UIF-004 (via UX-F4) | **C** | Split-theme state — shell dark, work feed near-white; visual incoherence | ✅ Full close |
-| UIF-005 (via UX-F4) | **H** | Collapsed lane state visually indistinguishable from expanded; no `aria-expanded`; no distinct treatment | ✅ Full close |
-| UIF-006 (via UX-F4) | **H** | Work item rows: zero padding, zero separators, transparent background; no temporal metadata | ✅ Full close |
+| UIF-001 (via UX-F4) | **C** | Lane headers render as OS-native gray rectangle buttons | ✅ Closed (2026-03-22) — `<div>` with token backgrounds, lane-color accent, sticky, `heading4` typography |
+| UIF-003 (via UX-F4) | **C** | Work item title links in browser-default blue | ✅ Closed (2026-03-22) — `resolveTitleLinkColor()` → `HBC_STATUS_RAMP_INFO[50]` |
+| UIF-004 (via UX-F4) | **C** | Split-theme state | ✅ Closed (2026-03-22) — feed uses `var(--color*)` tokens governed by `HbcThemeProvider` |
+| UIF-005 (via UX-F4) | **H** | Collapsed lane state indistinguishable | ✅ Closed (2026-03-22) — `aria-expanded`, distinct backgrounds, chevron rotation, accent border |
+| UIF-006 (via UX-F4) | **H** | Work item rows: no padding/separators | ✅ Closed (2026-03-22) — `borderBottom`, `HBC_SPACE_SM/MD` padding, metadata row |
 
 ---
 

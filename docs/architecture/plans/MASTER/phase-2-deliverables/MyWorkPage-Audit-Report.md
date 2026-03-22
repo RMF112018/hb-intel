@@ -361,29 +361,29 @@ The card contains only placeholder text — no real data fetch, no `@hbc/my-work
 
 ---
 
-### UX-F4: P2-F1 UI Findings UIF-001 through UIF-018 All Unresolved (Critical)
+### UX-F4: P2-F1 UI Findings UIF-001 through UIF-018
 
 **Authority:** `P2-F1-My-Work-Hub-UI-Audit-Report.md` (updated 2026-03-21 after Wave 5 inspection)
 
-The consolidate UI audit report contains 18 findings, 4 Critical and 10 High severity, all currently marked re-opened. The most operationally significant:
+Feed visual structure findings (UIF-001, UIF-003, UIF-004, UIF-005, UIF-006) have been addressed in `@hbc/my-work-feed` components:
 
-**UIF-001 (Critical):** Lane headers in `@hbc/my-work-feed` render as OS-native gray rectangle buttons — no design token treatment, `appearance: auto`, `border-radius: 0px`. This is described as "the most trust-breaking visual on the page" and a "credibility disqualifier" for mold-breaker status.
+**UIF-001 (Critical):** ✅ Resolved (5-B, 2026-03-22) — Lane headers now render as `<div>` (not `<button>`), with token-based backgrounds (`var(--colorNeutralBackground2/3)`), lane-color left-border accent, sticky positioning, and `heading4` typography. The collapse button has full UA reset (`appearance: 'none'`).
 
-**UIF-002 (Critical):** Single-column layout buries the Insights panel 900px below fold. The governing layout spec (P2-D2) requires a two-column responsive grid (primary zone left, analytics right). The right portion of the viewport is empty throughout the work feed scroll.
+**UIF-002 (Critical):** ✅ Resolved (2-B/5-C) — Two-column responsive layout implemented via `HubZoneLayout` with `HbcProjectCanvas` in the secondary zone.
 
-**UIF-003 (Critical):** Work item title links render in browser-default blue (`rgb(0,0,238)`) on the dark shell background — a design system override failure.
+**UIF-003 (Critical):** ✅ Resolved (5-B, 2026-03-22) — Title links use `resolveTitleLinkColor()` → `HBC_STATUS_RAMP_INFO[50]` with explicit `textDecoration: 'none'`.
 
-**UIF-004 (Critical):** The page is in a split-theme state — shell chrome is dark, work item feed content area is near-white. Neither dark mode nor light mode; a collision of both.
+**UIF-004 (Critical):** ✅ Resolved (5-B, 2026-03-22) — Feed renders via `var(--color*)` CSS custom properties that adapt to the active Fluent theme. Theme coherence governed by `HbcThemeProvider` at app root.
 
-**UIF-006 (High):** Work item rows have zero padding, zero border separators, and transparent background. Items bleed together with no visual row boundary. No temporal metadata (due date, age, days blocked) visible on list rows — triage requires clicking every item.
+**UIF-005 (High):** ✅ Resolved (5-B, 2026-03-22) — `aria-expanded` attribute, distinct expanded/collapsed background colors, chevron rotation animation (`0°` → `-90°`), lane-color accent border on expand.
 
-**UIF-010 (High):** Dev overlays (`HB-AUTH-DEV` bar and TanStack devtools button) visible in production-accessible builds. Root-route `root-route.tsx` shows these have been addressed via `import.meta.env.DEV` guards — this finding may be partially resolved, but the audit report re-opened it.
+**UIF-006 (High):** ✅ Resolved (5-B, 2026-03-22) — Rows have `borderBottom: '1px solid var(--colorNeutralStroke2)'`, `HBC_SPACE_SM`/`HBC_SPACE_MD` padding, and metadata row with temporal data visible at standard+ complexity tier.
 
-**UIF-013 (High):** Left navigation rail shows only one item ("My Work") — no other module destinations visible without expansion.
+**UIF-010 (High):** Dev overlays gated behind `import.meta.env.DEV`.
 
-**UIF-014 through UIF-018** cover CTA label specificity, project color coding, focus ring visibility, and field-use touch targets — all open.
+**UIF-013, UIF-014 through UIF-018:** Navigation rail, CTA labels, focus rings, touch targets — tracked separately in Phase 5 sub-items.
 
-The full detailed remediation requirements for all 18 findings are in `P2-F1-My-Work-Hub-UI-Quality-and-Mold-Breaker-Conformance-Plan.md`. This audit does not duplicate them here but requires they be treated as a co-equal input to any remediation plan.
+The inline style approach in `@hbc/my-work-feed` is intentional for SPFx compatibility (D-07).
 
 ---
 
