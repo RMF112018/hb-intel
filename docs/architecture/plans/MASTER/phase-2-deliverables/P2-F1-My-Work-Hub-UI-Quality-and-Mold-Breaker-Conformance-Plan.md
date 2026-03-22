@@ -2313,6 +2313,36 @@ Desktop-only visibility enforced at the CSS level in `HubTeamModeSelector.rightS
 
 ---
 
+### 10A.71 UIF-049-addl: Mobile Quick Actions Sheet + FAB Trigger
+
+**Severity:** Medium
+**Category:** Mobile / Quick Actions
+
+**Implementation:**
+
+1. **`QuickActionsSheet`** — new bottom-sheet overlay component with:
+   - Scrim backdrop (dismiss on tap)
+   - Bottom-anchored panel with drag handle, heading, full-width action buttons
+   - Swipe-to-dismiss via touch event tracking (80px threshold)
+   - `role="dialog"`, `aria-modal="true"`, focus trap (auto-focus on open)
+   - Escape key dismiss
+   - z-index 1200 (above bottomNav 300, below modal 1300)
+   - iOS safe-area-inset-bottom support
+   - Reduced-motion respect (`prefers-reduced-motion`)
+
+2. **Mobile FAB trigger** — 48px floating action button (orange `#F37021`) positioned above the bottom nav, visible only below 1024px via `@media (max-width: 1023px)`. Hidden on desktop where the tab-row `QuickActionsStrip` is active.
+
+3. **MyWorkPage wiring** — `isActionsSheetOpen` state, FAB opens sheet, sheet dismiss closes it. Sheet rendered at page root level (outside `WorkspacePageShell`) to avoid overflow clipping.
+
+**Follow-on:** The FAB uses an inline `<style>` tag for responsive visibility — this should be migrated to a Griffel class in a future cleanup. The bottom-nav Actions slot integration (modifying the shared `HbcBottomNav`) was deferred to avoid changing the shared component in this pass.
+
+**Files changed:**
+- `apps/pwa/src/pages/my-work/cards/QuickActionsSheet.tsx` — new sheet component
+- `apps/pwa/src/pages/my-work/MyWorkPage.tsx` — sheet state + FAB trigger + sheet render
+- `apps/pwa/package.json` — version 0.12.64 → 0.12.65
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

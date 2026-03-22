@@ -37,6 +37,7 @@ import { useHubFeedRefresh } from './useHubFeedRefresh.js';
 import { HubConnectivityBanner } from './HubConnectivityBanner.js';
 import { HubTeamModeSelector } from './HubTeamModeSelector.js';
 import { QuickActionsStrip } from './cards/QuickActionsStrip.js';
+import { QuickActionsSheet } from './cards/QuickActionsSheet.js';
 import { useHubPersonalization } from './useHubPersonalization.js';
 
 // UIF-002: Lazy-load detail panel — zero cost until first item selection.
@@ -123,6 +124,9 @@ export function MyWorkPage(): ReactNode {
     }
   }, [defaultQuery.teamMode, defaultQuery.lane, querySeed]);
 
+  // ─── UIF-049-addl: Quick Actions sheet state (mobile) ────────────────────
+  const [isActionsSheetOpen, setIsActionsSheetOpen] = useState(false);
+
   // ─── UIF-027-addl: Badge counts for team mode tabs ───────────────────────
   const isExecutive = session?.resolvedRoles.includes('Executive') ?? false;
   const [[delegatedBlocked, teamBlocked], setBadgeCounts] = useState([0, 0]);
@@ -167,7 +171,7 @@ export function MyWorkPage(): ReactNode {
   // At essential tier both zones are hidden or empty — collapse to full-width.
   const hasRightPanelContent = tier !== 'essential' || !!selectedItem;
 
-  return (
+  return (<>
     <WorkspacePageShell
       layout="dashboard"
       title="My Work"
@@ -203,5 +207,43 @@ export function MyWorkPage(): ReactNode {
         </HubPageLevelEmptyState>
       </MyWorkProvider>
     </WorkspacePageShell>
+    {/* UIF-049-addl: Mobile-only floating Actions trigger + sheet.
+        Hidden at ≥1024px where the desktop strip is visible in the tab row.
+        Rendered at page root level so it overlays correctly. */}
+    <button
+      type="button"
+      data-hbc-ui="quick-actions-fab"
+      aria-label="Quick Actions"
+      onClick={() => setIsActionsSheetOpen(true)}
+      style={{
+        position: 'fixed',
+        bottom: 'calc(56px + env(safe-area-inset-bottom, 0px) + 12px)',
+        right: '16px',
+        width: '48px',
+        height: '48px',
+        borderRadius: '50%',
+        border: 'none',
+        backgroundColor: '#F37021',
+        color: '#FFFFFF',
+        fontSize: '1.5rem',
+        fontWeight: 700,
+        cursor: 'pointer',
+        zIndex: 299,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+        display: 'none',
+      }}
+      // Desktop hide via CSS — inline media query not possible, so use a className
+      // approach. For now, this FAB is always hidden via display:none and revealed
+      // by a <style> tag below.
+    >
+      +
+    </button>
+    <style>{`
+      @media (max-width: 1023px) {
+        [data-hbc-ui="quick-actions-fab"] { display: flex !important; align-items: center; justify-content: center; }
+      }
+    `}</style>
+    <QuickActionsSheet isOpen={isActionsSheetOpen} onDismiss={() => setIsActionsSheetOpen(false)} />
+  </>
   );
 }
