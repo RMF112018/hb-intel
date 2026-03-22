@@ -36,6 +36,7 @@ import { useHubReturnMemory } from './useHubReturnMemory.js';
 import { useHubFeedRefresh } from './useHubFeedRefresh.js';
 import { HubConnectivityBanner } from './HubConnectivityBanner.js';
 import { HubTeamModeSelector } from './HubTeamModeSelector.js';
+import { QuickActionsStrip } from './cards/QuickActionsStrip.js';
 import { useHubPersonalization } from './useHubPersonalization.js';
 
 // UIF-002: Lazy-load detail panel — zero cost until first item selection.
@@ -173,7 +174,7 @@ export function MyWorkPage(): ReactNode {
       breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'My Work' }]}
       suppressProjectContext
       stickyHeader
-      headerSlot={<HubTeamModeSelector activeMode={teamMode} onModeChange={setTeamMode} delegatedBlockedCount={delegatedBlocked} teamBlockedCount={teamBlocked} />}
+      headerSlot={<HubTeamModeSelector activeMode={teamMode} onModeChange={setTeamMode} delegatedBlockedCount={delegatedBlocked} teamBlockedCount={teamBlocked} rightSlot={<QuickActionsStrip />} />}
     >
       <MyWorkProvider context={runtimeContext} defaultQuery={defaultQuery}>
         <HubTabBadgeBridge activeMode={teamMode} isExecutive={isExecutive} onCounts={handleBadgeCounts} />

@@ -2291,6 +2291,28 @@ The Insights panel KPI layout is implementation-ready and governance-aligned:
 
 ---
 
+### 10A.70 UIF-048-addl: Desktop Quick Actions Strip in Tabs Row
+
+**Severity:** Medium
+**Category:** Layout / Quick Actions
+
+**Fix:** Added a `rightSlot` prop to `HubTeamModeSelector` and a new `QuickActionsStrip` component for desktop-only compact action buttons in the tab row.
+
+- **`HubTeamModeSelector`** — `rightSlot?: ReactNode` renders on the right side of the tab bar via flexbox `space-between`. The `rightSlotWrap` div is hidden below `HBC_BREAKPOINT_SIDEBAR` (1024px) with `display: none`.
+- **`QuickActionsStrip`** — compact inline strip with 3 ghost buttons (New, Requests, Hub) using the same TanStack Router navigation as `QuickActionsMenu`. No HbcCard wrapper. `data-hbc-ui="quick-actions-strip"`.
+- **`MyWorkPage`** passes `<QuickActionsStrip />` as `rightSlot` to `HubTeamModeSelector`.
+- **Tab row is already sticky** via `WorkspacePageShell.stickyHeaderBand` at `top: 56px; z-index: 2` — no additional sticky changes needed.
+
+Desktop-only visibility enforced at the CSS level in `HubTeamModeSelector.rightSlotWrap`. Pages that don't pass `rightSlot` render identically to before.
+
+**Files changed:**
+- `apps/pwa/src/pages/my-work/cards/QuickActionsStrip.tsx` — new compact strip component
+- `apps/pwa/src/pages/my-work/HubTeamModeSelector.tsx` — `rightSlot` prop + flex layout + responsive hide
+- `apps/pwa/src/pages/my-work/MyWorkPage.tsx` — passes QuickActionsStrip as rightSlot
+- `apps/pwa/package.json` — version 0.12.63 → 0.12.64
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

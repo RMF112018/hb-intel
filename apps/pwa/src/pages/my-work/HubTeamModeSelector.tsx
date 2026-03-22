@@ -19,14 +19,26 @@ import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import type { TeamMode } from '@hbc/shell';
-import { HbcTabs, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { HbcTabs, HBC_STATUS_COLORS, HBC_BREAKPOINT_SIDEBAR } from '@hbc/ui-kit';
 import type { LayoutTab } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
 import { useAuthStore } from '@hbc/auth';
 
 const useStyles = makeStyles({
+  // UIF-048-addl: Flex row with tabs left, rightSlot right.
   tabBar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: '16px',
+  },
+  // UIF-048-addl: rightSlot hidden below sidebar breakpoint.
+  rightSlotWrap: {
+    display: 'none',
+    [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
+      display: 'flex',
+      alignItems: 'center',
+    },
   },
 });
 
@@ -64,6 +76,8 @@ export interface HubTeamModeSelectorProps {
   delegatedBlockedCount?: number;
   /** UIF-027-addl: Blocked count for "My Team" tab badge. */
   teamBlockedCount?: number;
+  /** UIF-048-addl: Content rendered on the right side of the tab row (desktop only). */
+  rightSlot?: ReactNode;
 }
 
 export function HubTeamModeSelector({
@@ -71,6 +85,7 @@ export function HubTeamModeSelector({
   onModeChange,
   delegatedBlockedCount = 0,
   teamBlockedCount = 0,
+  rightSlot,
 }: HubTeamModeSelectorProps): ReactNode {
   const styles = useStyles();
   const { tier } = useComplexity();
@@ -109,6 +124,9 @@ export function HubTeamModeSelector({
         activeTabId={activeMode}
         onTabChange={(tabId) => onModeChange(tabId as TeamMode)}
       />
+      {rightSlot && (
+        <div className={styles.rightSlotWrap}>{rightSlot}</div>
+      )}
     </div>
   );
 }
