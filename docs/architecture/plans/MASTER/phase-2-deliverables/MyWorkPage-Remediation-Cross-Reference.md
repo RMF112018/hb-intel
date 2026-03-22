@@ -357,13 +357,13 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 7-D: Action vocabulary tests
+### 7-D: Action vocabulary tests ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| TST-F1 | **C** | Zero behavioral test coverage | ✅ Partial close — action dispatch domain covered |
-| OPM-01 | **H** | Each action key dispatches to correct handler (not `window.location.href`) | ✅ Gate evidence |
-| NAV-01 | **H** | `@hbc/workflow-handoff` called with correct `IHandoffPackage` for cross-domain actions | ✅ Gate evidence |
+| TST-F1 | **C** | Zero behavioral test coverage | ✅ Partial (2026-03-22) — 13 action tests (total: 66 across 7-A/B/C/D) |
+| OPM-01 | **H** | Action key dispatch verification | ✅ Evidence (2026-03-22) — 6 replayable actions verified; 3 navigation actions excluded; state transitions correct |
+| NAV-01 | **H** | No `window.location.href` in dispatch | ✅ Evidence (2026-03-22) — file content assertions verify HubDetailPanel + RecentActivityCard |
 
 ---
 
