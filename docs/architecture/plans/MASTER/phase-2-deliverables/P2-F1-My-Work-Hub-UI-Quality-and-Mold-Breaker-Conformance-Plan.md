@@ -2478,6 +2478,29 @@ All shell components now derive their dimensions from these tokens instead of ma
 
 ---
 
+### 10A.77+ Table Container Series: Final Readiness
+
+**Summary of table-container improvements:**
+
+1. **Token resolution verified** — Fluent token chain is correctly wired (FluentProvider → createLightTheme → CSS custom properties)
+2. **Row hover strengthened** — changed from `colorNeutralBackground1Hover` (imperceptible) to `colorNeutralBackground3` (visible)
+3. **Lane accent colors** — cascade: priority → lane → module → default gray (no transparent fallback)
+4. **Acronym-aware titles** — domain acronyms (BD, RFI, PM, etc.) stay uppercase
+5. **Count badge a11y** — `aria-label` on lane count badges
+6. **Column widths** — reduced from 820px to 550px total, eliminating horizontal overflow
+7. **Section overflow** — `overflowX: hidden` + `overflowY: visible` prevents horizontal bleed
+8. **Source cell** — placeholder dash removed; empty projects show only module chip
+9. **Project-grouping warning** — "No Project" all-null grouping shows info banner
+10. **aria-sort semantics** — only on sortable columns; non-sortable columns have no misleading ARIA
+11. **Detail panel a11y** — `role="region"`, `aria-label`, Escape close, focus management
+
+**Documentation updated:**
+- `docs/reference/ui-kit/HbcDataTable.md` — complete rewrite covering height behavior, density tiers, hover, lane grouping, accent colors, title formatting, column sizing, sortable semantics, status badges, source cell rules, project-grouping null state, item-detail drawer, grouping menu
+
+**Final readiness judgment:** The My Work table-container surface is implementation-ready. Token-driven styling, governed status badges, semantic ARIA, and accessible interactions are all in place. The remaining open item (data table scrollbar from content wrapping) is a virtualizer measurement issue deferred to a future pass.
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
