@@ -955,12 +955,15 @@ export function HbcDataTable<TData>({
                           : {}),
                       }}
                       scope="col"
+                      // Row-content-fix: only apply aria-sort on sortable columns.
                       aria-sort={
-                        header.column.getIsSorted() === 'asc'
-                          ? 'ascending'
-                          : header.column.getIsSorted() === 'desc'
-                            ? 'descending'
-                            : 'none'
+                        header.column.getCanSort()
+                          ? header.column.getIsSorted() === 'asc'
+                            ? 'ascending'
+                            : header.column.getIsSorted() === 'desc'
+                              ? 'descending'
+                              : 'none'
+                          : undefined
                       }
                     >
                       {header.isPlaceholder

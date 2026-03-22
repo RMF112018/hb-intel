@@ -384,12 +384,13 @@ function buildWorkItemColumns(
       cell: ({ row }) => {
         const item = row.original;
         const projectColor = resolveProjectColor(item.context.projectId);
-        const projectName = item.context.projectName ?? item.context.projectId ?? '—';
+        // Row-content-fix: only show project name when it's real data, not a placeholder dash.
+        const projectName = item.context.projectName ?? item.context.projectId ?? null;
         const moduleLabel = formatModuleLabel(item.context.moduleKey);
         return (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-            {/* UIF-010-addl: Project-color dot with title for context */}
-            <span
+            {/* Row-content-fix: Project dot only when project name exists */}
+            {projectName && <span
               aria-hidden="true"
               title={projectName}
               style={{
@@ -399,22 +400,25 @@ function buildWorkItemColumns(
                 backgroundColor: projectColor,
                 flexShrink: 0,
               }}
-            />
+            />}
             <div style={{ overflow: 'hidden', minWidth: 0 }}>
-              {/* UIF-010-addl: Tooltip on project name for truncated text */}
-              <HbcTooltip content={projectName}>
-                <div
-                  style={{
-                    fontSize: bodySmall.fontSize,
-                    color: 'var(--colorNeutralForeground1)',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {projectName}
-                </div>
-              </HbcTooltip>
+              {/* Row-content-fix: Only render project name when it exists.
+                  Placeholder dash removed — empty source cells show only the module chip. */}
+              {projectName && (
+                <HbcTooltip content={projectName}>
+                  <div
+                    style={{
+                      fontSize: bodySmall.fontSize,
+                      color: 'var(--colorNeutralForeground1)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {projectName}
+                  </div>
+                </HbcTooltip>
+              )}
               {/* UIF-006/010-addl: Module chip with border + tooltip */}
               <HbcTooltip content={moduleLabel}>
                 <span
@@ -750,8 +754,14 @@ export function HbcMyWorkFeed({
                 }
               }}
             />
-          ) : (
-            groups.map((group) => {
+          ) : (<>
+            {/* Row-content-fix: Warning when project grouping has no project data. */}
+            {groupingKey === 'project' && groups.length === 1 && groups[0].groupKey === 'No Project' && (
+              <HbcBanner variant="info">
+                No project data available for these items. Assign projects to enable meaningful grouping.
+              </HbcBanner>
+            )}
+            {groups.map((group) => {
               const isExpanded = !collapsedGroups.has(group.groupKey);
               const label = formatGroupLabel(group.groupKey);
               // Lane-container: accent color cascade — priority → lane → module → default.
@@ -908,8 +918,8 @@ export function HbcMyWorkFeed({
                   )}
                 </section>
               );
-            })
-          )}
+            })}
+          </>)}
         </div>
       )}
 
