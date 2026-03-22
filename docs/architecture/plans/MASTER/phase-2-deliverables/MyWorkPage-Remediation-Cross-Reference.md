@@ -94,16 +94,16 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ## Phase 2 — Canvas Integration (Core)
 
-### 2-A: Implement missing pilot-required cards (`hub:lane-summary`, `hub:source-breakdown`)
+### 2-A: Implement missing pilot-required cards (`hub:lane-summary`, `hub:source-breakdown`) ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| CRD-01 | **H** | `pa-lane-summary` (pilot-REQUIRED, locked) absent — `PersonalAnalyticsTile` shows source counts, not 4 lane counts | ✅ Full close |
-| CRD-02 | **H** | `pa-source-breakdown` (pilot-REQUIRED) absent as a governed card | ✅ Full close |
-| UX-F6 | **H** | Two of four pilot-required cards missing | ⚡ Partial — closes `pa-lane-summary` and `pa-source-breakdown`; `pa-recent-activity` addressed in 2-C; `ao-provisioning-health` in 6-B |
-| CRD-05 | **L** | Expert variant is an alias of Standard — all new cards must provide genuine E/S/X variants | ✅ Full close (for these two tiles — existing tiles addressed in 6-A) |
-| ARC-08 | **M** | Custom Griffel grid not aligned to `CANVAS_GRID_COLUMNS = 12` — new tile `defaultColSpan` values must conform | ⚡ Partial — new tile registrations use correct column counts; existing grid replaced in 2-B/2-C |
-| DOC-03 | — | `myWorkTileDefinitions.ts` has no reference to P2-D2 §6.1 namespace mandate | ⚡ Partial — namespace mandate doc comment added to header block during 0-A (2026-03-22); full close in 6-E |
+| CRD-01 | **H** | `pa-lane-summary` (pilot-REQUIRED, locked) absent — `PersonalAnalyticsTile` shows source counts, not 4 lane counts | ✅ Closed (2026-03-22) — `LaneSummaryCard` with E/S/X variants registered as `hub:lane-summary` |
+| CRD-02 | **H** | `pa-source-breakdown` (pilot-REQUIRED) absent as a governed card | ✅ Closed (2026-03-22) — `SourceBreakdownCard` with E/S/X variants registered as `hub:source-breakdown` |
+| UX-F6 | **H** | Two of four pilot-required cards missing | ⚡ Partial (2026-03-22) — `pa-lane-summary` and `pa-source-breakdown` implemented; `pa-recent-activity` addressed in 2-C; `ao-provisioning-health` in 6-B |
+| CRD-05 | **L** | Expert variant is an alias of Standard — all new cards must provide genuine E/S/X variants | ✅ Closed for new tiles (2026-03-22) — existing tiles addressed in 6-A |
+| ARC-08 | **M** | Custom Griffel grid not aligned to `CANVAS_GRID_COLUMNS = 12` — new tile `defaultColSpan` values must conform | ⚡ Partial (2026-03-22) — new tile registrations use correct column counts; existing grid replaced in 2-B/2-C |
+| DOC-03 | — | `myWorkTileDefinitions.ts` has no reference to P2-D2 §6.1 namespace mandate | ⚡ Partial — namespace mandate doc comment added during 0-A (2026-03-22); full close in 6-E |
 
 ---
 

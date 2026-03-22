@@ -138,6 +138,66 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
     lockable: false,
   },
 
+  // ── Pilot-required cards (P2-D3 §8, remediation 2-A) ──────────────────
+  {
+    tileKey: 'hub:lane-summary',
+    title: 'Lane Summary',
+    description: 'Work distribution across four responsibility lanes (P2-D3).',
+    defaultForRoles: [],
+    minComplexity: 'essential',
+    mandatory: true,
+    component: {
+      essential: React.lazy(() =>
+        import('./LaneSummaryTile.js').then((m) => ({
+          default: m.LaneSummaryTileEssential,
+        })),
+      ),
+      standard: React.lazy(() =>
+        import('./LaneSummaryTile.js').then((m) => ({
+          default: m.LaneSummaryTileStandard,
+        })),
+      ),
+      expert: React.lazy(() =>
+        import('./LaneSummaryTile.js').then((m) => ({
+          default: m.LaneSummaryTileExpert,
+        })),
+      ),
+    },
+    // P2-D2 §4.2: Wide — full width in 2-column grid (12 columns in standard grid)
+    defaultColSpan: 2,
+    defaultRowSpan: 1,
+    lockable: true,
+  },
+  {
+    tileKey: 'hub:source-breakdown',
+    title: 'Source Module Breakdown',
+    description: 'Work distribution across source modules (P2-D3).',
+    defaultForRoles: [],
+    minComplexity: 'essential',
+    mandatory: false,
+    component: {
+      essential: React.lazy(() =>
+        import('./SourceBreakdownTile.js').then((m) => ({
+          default: m.SourceBreakdownTileEssential,
+        })),
+      ),
+      standard: React.lazy(() =>
+        import('./SourceBreakdownTile.js').then((m) => ({
+          default: m.SourceBreakdownTileStandard,
+        })),
+      ),
+      expert: React.lazy(() =>
+        import('./SourceBreakdownTile.js').then((m) => ({
+          default: m.SourceBreakdownTileExpert,
+        })),
+      ),
+    },
+    // P2-D2 §4.2: Standard — 1 column in 2-column grid (6 columns in standard grid)
+    defaultColSpan: 1,
+    defaultRowSpan: 1,
+    lockable: false,
+  },
+
   // UIF-051-addl: Utility tiles (quick-access, recent-context) removed.
   // QuickActionsMenu moved to desktop tab-row strip (UIF-048-addl) and mobile sheet (UIF-049-addl).
   // RecentActivityCard rendered directly by HubTertiaryZone (UIF-050-addl).

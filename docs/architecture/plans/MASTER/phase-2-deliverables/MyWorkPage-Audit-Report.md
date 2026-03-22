@@ -152,11 +152,11 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 
 | Finding ID | Requirement | Current State | Severity |
 |---|---|---|---|
-| CRD-01 | `pa-lane-summary` (pilot-REQUIRED, locked) must display 4 lane counts; Standard variant: visual chart | `PersonalAnalyticsTile` renders `PersonalAnalyticsCard` which shows KPI counts by source module — not lane counts. No `pa-lane-summary` card exists | **High** |
-| CRD-02 | `pa-source-breakdown` (pilot-REQUIRED) must show work distribution by source module | Not present as a distinct card; source-module data is partially surfaced inside `PersonalAnalyticsCard` but not governed to spec | **High** |
+| CRD-01 | `pa-lane-summary` (pilot-REQUIRED, locked) must display 4 lane counts; Standard variant: visual chart | ✅ Implemented — `LaneSummaryCard` with E/S/X variants; registered as `hub:lane-summary` (mandatory, lockable, wide) (remediation 2-A, 2026-03-22) | **High** — Resolved |
+| CRD-02 | `pa-source-breakdown` (pilot-REQUIRED) must show work distribution by source module | ✅ Implemented — `SourceBreakdownCard` with E/S/X variants; registered as `hub:source-breakdown` (remediation 2-A, 2026-03-22) | **High** — Resolved |
 | CRD-03 | `pa-recent-activity` (tertiary zone) — 5 items in Standard tier | `RecentActivityCard` is a placeholder stub with empty-state only; no items rendered | **High** |
 | CRD-04 | `ao-provisioning-health` (Administrator, secondary zone) — provisioning failure list | `AdminOversightCard` is a stub containing placeholder text only; no data rendered | **High** |
-| CRD-05 | Card variants must cover all three complexity tiers (E/S/X) | All four tiles use `PersonalAnalyticsTileStandard as PersonalAnalyticsTileExpert` — Expert variant is an alias of Standard; no expert-specific implementation exists | **Low** |
+| CRD-05 | Card variants must cover all three complexity tiers (E/S/X) | ⚡ Partially resolved — new `hub:lane-summary` and `hub:source-breakdown` provide genuine E/S/X variants (remediation 2-A, 2026-03-22); existing tiles still use aliases (addressed in 6-A) | **Low** |
 | CRD-06 | Cards must not cross zones; secondary cards stay in secondary | `RecentActivityCard` is rendered by `HubTertiaryZone` — correct zone. `PersonalAnalyticsCard` is in secondary — correct zone | **Pass** |
 | CRD-07 | Locked cards cannot be personalized away | No lock enforcement mechanism exists since `HbcProjectCanvas`/`useCanvasMandatoryTiles` are absent | **Critical** (derives from ARC-03) |
 
@@ -414,8 +414,8 @@ Per P2-D3 §8, four cards are pilot-REQUIRED:
 
 | Card ID | Status |
 |---|---|
-| `pa-lane-summary` | **Missing** — `PersonalAnalyticsTile` shows source breakdown counts, not the 4 required lane counts (`nowCount`, `blockedCount`, `waitingCount`, `deferredCount`) |
-| `pa-source-breakdown` | **Missing** — not a distinct card; source data partially present inside `PersonalAnalyticsCard` |
+| `pa-lane-summary` | ✅ **Implemented** — `LaneSummaryCard` with E/S/X variants, registered as `hub:lane-summary` (remediation 2-A, 2026-03-22) |
+| `pa-source-breakdown` | ✅ **Implemented** — `SourceBreakdownCard` with E/S/X variants, registered as `hub:source-breakdown` (remediation 2-A, 2026-03-22) |
 | `tp-team-workload` | **Partially present** — `TeamPortfolioCard` renders team counts but uses `<span>Loading...</span>` and raw CSS variable strings |
 | `ut-quick-actions` | **Present** — `QuickActionsStrip` and `QuickActionsSheet` are implemented and wired |
 
@@ -524,10 +524,10 @@ Files: `MyWorkPage.tsx`, `HubSecondaryZone.tsx`
 Authority: P2-D5, P2-D3 §7
 Action: After T0-01 (canvas integration), pass `cardArrangement` from `useHubPersonalization` into the `HbcProjectCanvas` arrangement prop. Wire `updateCardVisibility` to the edit-mode surface. Until T0-01 is complete, at minimum stop discarding the value silently.
 
-**T1-07: Implement missing pilot-required cards (`pa-lane-summary`, `pa-source-breakdown`)**
-Files: New card and tile files; `myWorkTileDefinitions.ts`
+**T1-07: Implement missing pilot-required cards (`pa-lane-summary`, `pa-source-breakdown`)** ✅ Completed (2026-03-22)
+Files: `cards/LaneSummaryCard.tsx`, `tiles/LaneSummaryTile.tsx`, `cards/SourceBreakdownCard.tsx`, `tiles/SourceBreakdownTile.tsx`, `tiles/myWorkTileDefinitions.ts`
 Authority: P2-D3 §8
-Action: Create `LaneSummaryCard` consuming `useMyWorkCounts()` lane fields. Create `SourceBreakdownCard` consuming `IMyWorkFeedResult.counts` by `sourceModule`. Register as `hub:lane-summary` and `hub:personal-analytics-source` respectively. Lock `hub:lane-summary` via `useCanvasMandatoryTiles` (part of T0-01).
+Action: Created `LaneSummaryCard` with genuine E/S/X variants consuming `useMyWorkCounts()` lane fields (nowCount, blockedCount, waitingCount, deferredCount). Created `SourceBreakdownCard` with genuine E/S/X variants grouping `feed.items` by `context.moduleKey` via `formatModuleLabel()`. Registered as `hub:lane-summary` (mandatory, lockable, wide) and `hub:source-breakdown` (configurable, standard width). Mandatory lock enforcement deferred to T0-01 canvas integration.
 
 ---
 
