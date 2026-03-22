@@ -138,7 +138,7 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   return (
     <div data-hbc-shell="app-shell" data-mode={mode}>
       <HbcConnectivityBar />
-      <HbcHeader user={user} onSignOut={onSignOut} userMenuExtra={userMenuExtra} showProjectSelector={showProjectSelector} />
+      <HbcHeader user={user} onSignOut={onSignOut} userMenuExtra={userMenuExtra} showProjectSelector={showProjectSelector} mode={mode} />
       {showSidebar && (
         <HbcSidebar groups={sidebarGroups} activeItemId={resolvedActiveItemId} onNavigate={onNavigate} />
       )}

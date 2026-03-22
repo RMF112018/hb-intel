@@ -127,6 +127,7 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
   onToolboxOpen,
   userMenuExtra,
   showProjectSelector = true,
+  mode = 'pwa',
 }) => {
   const styles = useStyles();
   const { isFieldMode, toggleFieldMode } = useHbcTheme();
@@ -170,15 +171,17 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
         <HbcToolboxFlyout onToolboxOpen={onToolboxOpen} />
         <HbcFavoriteTools />
         <HbcCreateButton onClick={onCreateClick} />
-        <button
-          className={styles.m365Button}
-          aria-label="Microsoft 365 apps"
-          title="Microsoft 365 apps"
-          type="button"
-          data-hbc-spfx-suppress="true"
-        >
-          <ViewGrid size="lg" color={HBC_HEADER_TEXT} />
-        </button>
+        {/* M365 launcher — suppressed in SPFx where the host provides its own. */}
+        {mode !== 'spfx' && (
+          <button
+            className={styles.m365Button}
+            aria-label="Microsoft 365 apps"
+            title="Microsoft 365 apps"
+            type="button"
+          >
+            <ViewGrid size="lg" color={HBC_HEADER_TEXT} />
+          </button>
+        )}
         <HbcNotificationBell onClick={onNotificationsOpen} unreadCount={notificationCount} />
         {shellUser && (
           <HbcUserMenu

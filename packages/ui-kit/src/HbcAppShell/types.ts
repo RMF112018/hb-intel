@@ -64,6 +64,8 @@ export interface HbcHeaderProps {
   onNotificationsOpen?: () => void;
   /** Live unread/blocked notification count for the bell badge. 0 = badge hidden. */
   notificationCount?: number;
+  /** Shell mode — 'spfx' suppresses M365 launcher (host provides it). */
+  mode?: 'pwa' | 'spfx';
   onProjectSelect?: (projectId: string) => void;
   onToolboxOpen?: () => void;
   /** Extra content rendered inside the user menu dropdown, above Sign Out. Dev tooling slot. */
