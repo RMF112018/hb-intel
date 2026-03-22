@@ -7,7 +7,7 @@
  */
 import * as React from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
-import { HBC_DARK_HEADER, HBC_HEADER_TEXT, HBC_HEADER_HEIGHT, HBC_CONNECTIVITY_HEIGHT_ONLINE, HBC_CONNECTIVITY_HEIGHT_OFFLINE } from '../theme/tokens.js';
+import { HBC_DARK_HEADER, HBC_HEADER_TEXT, HBC_ACCENT_ORANGE, HBC_HEADER_HEIGHT, HBC_CONNECTIVITY_HEIGHT_ONLINE, HBC_CONNECTIVITY_HEIGHT_OFFLINE } from '../theme/tokens.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { HBC_BREAKPOINT_SIDEBAR } from '../theme/breakpoints.js';
 import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
@@ -43,18 +43,22 @@ const useStyles = makeStyles({
     boxSizing: 'border-box',
     zIndex: Z_INDEX.header,
   },
+  // Header zone rebalance: left anchors identity, center holds search, right holds actions.
   left: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
     flexShrink: 0,
+    minWidth: '160px',
   },
   center: {
     display: 'flex',
     alignItems: 'center',
-    gap: `${HBC_SPACE_SM}px`,
     flexGrow: 1,
     justifyContent: 'center',
+    maxWidth: '480px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
     // PH4C.12: align toolbar collapse with canonical sidebar boundary.
     [`@media (max-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
       display: 'none',
@@ -70,16 +74,21 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     textDecorationLine: 'none',
+    gap: '8px',
   },
+  // Brand lockup: "HB Intel" with accent left border pill.
   logoFallback: {
-    width: '32px',
-    height: '32px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: '6px',
     fontWeight: '700',
-    fontSize: '1rem',
+    fontSize: '0.875rem',
+    letterSpacing: '0.02em',
     color: HBC_HEADER_TEXT,
+    paddingLeft: '8px',
+    borderLeftWidth: '3px',
+    borderLeftStyle: 'solid',
+    borderLeftColor: HBC_ACCENT_ORANGE as string,
   },
   m365Button: {
     display: 'flex',
@@ -140,23 +149,23 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
       data-hbc-ui="header"
       style={{ top: topOffset }}
     >
-      {/* Left: Logo + Project Selector */}
+      {/* Left: Brand lockup + Project Selector */}
       <div className={styles.left}>
-        <a href="/" className={styles.logoLink} aria-label="Project Home">
-          {logo ?? <span className={styles.logoFallback}>HB</span>}
+        <a href="/" className={styles.logoLink} aria-label="HB Intel — Home">
+          {logo ?? <span className={styles.logoFallback}>HB Intel</span>}
         </a>
         {showProjectSelector && <HbcProjectSelector onProjectSelect={onProjectSelect} />}
       </div>
 
-      {/* Center: Toolbox + Favorites + Search */}
+      {/* Center: Search (sole center affordance) */}
       <div className={styles.center}>
-        <HbcToolboxFlyout onToolboxOpen={onToolboxOpen} />
-        <HbcFavoriteTools />
         <HbcGlobalSearch onSearchOpen={onSearchOpen} />
       </div>
 
-      {/* Right: Create + M365 + Notifications + User */}
+      {/* Right: Toolbox + Favorites + Create + M365 + Notifications + User */}
       <div className={styles.right}>
+        <HbcToolboxFlyout onToolboxOpen={onToolboxOpen} />
+        <HbcFavoriteTools />
         <HbcCreateButton onClick={onCreateClick} />
         <button className={styles.m365Button} aria-label="Microsoft 365 apps" type="button">
           <ViewGrid size="lg" color={HBC_HEADER_TEXT} />
