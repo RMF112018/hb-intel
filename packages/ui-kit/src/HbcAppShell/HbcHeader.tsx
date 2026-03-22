@@ -7,7 +7,7 @@
  */
 import * as React from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
-import { HBC_DARK_HEADER, HBC_HEADER_TEXT } from '../theme/tokens.js';
+import { HBC_DARK_HEADER, HBC_HEADER_TEXT, HBC_HEADER_HEIGHT, HBC_CONNECTIVITY_HEIGHT_ONLINE, HBC_CONNECTIVITY_HEIGHT_OFFLINE } from '../theme/tokens.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { HBC_BREAKPOINT_SIDEBAR } from '../theme/breakpoints.js';
 import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
@@ -26,11 +26,15 @@ import type { HbcHeaderProps } from './types.js';
 const useStyles = makeStyles({
   root: {
     position: 'fixed',
-    top: '2px',
+    top: `${HBC_CONNECTIVITY_HEIGHT_ONLINE}px`,
     left: '0px',
     width: '100%',
-    height: '56px',
+    height: `${HBC_HEADER_HEIGHT}px`,
     backgroundColor: HBC_DARK_HEADER,
+    // Shell-foundation: governed separator between header and page content.
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -115,7 +119,9 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
   const styles = useStyles();
   const { isFieldMode, toggleFieldMode } = useHbcTheme();
   const connectivityStatus = useOnlineStatus();
-  const topOffset = connectivityStatus === 'online' ? '2px' : '4px';
+  const topOffset = connectivityStatus === 'online'
+    ? `${HBC_CONNECTIVITY_HEIGHT_ONLINE}px`
+    : `${HBC_CONNECTIVITY_HEIGHT_OFFLINE}px`;
 
   const shellUser = user
     ? {

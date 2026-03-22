@@ -18,15 +18,17 @@ import { useSidebarState } from './hooks/useSidebarState.js';
 import { useIsTablet } from '../hooks/useIsTablet.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
+import { HBC_HEADER_HEIGHT, HBC_CONNECTIVITY_HEIGHT_ONLINE, HBC_CONNECTIVITY_HEIGHT_OFFLINE, HBC_SIDEBAR_WIDTH_COLLAPSED, HBC_SIDEBAR_WIDTH_EXPANDED, HBC_BOTTOM_NAV_HEIGHT } from '../theme/tokens.js';
 import type { HbcAppShellProps } from './types.js';
 import type { BottomNavItem } from '../HbcBottomNav/types.js';
 
 const FOCUS_EVENT = 'hbc-focus-mode-change';
 
 const useStyles = makeStyles({
+  // Shell-foundation: derived from governed tokens instead of magic numbers.
   main: {
-    marginTop: '58px',
-    minHeight: 'calc(100vh - 58px)',
+    marginTop: `${HBC_HEADER_HEIGHT + HBC_CONNECTIVITY_HEIGHT_ONLINE}px`,
+    minHeight: `calc(100vh - ${HBC_HEADER_HEIGHT + HBC_CONNECTIVITY_HEIGHT_ONLINE}px)`,
     transitionProperty: 'margin-left',
     transitionDuration: TRANSITION_NORMAL,
     transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -34,16 +36,16 @@ const useStyles = makeStyles({
     position: 'relative',
   },
   mainExpanded: {
-    marginLeft: '240px',
+    marginLeft: `${HBC_SIDEBAR_WIDTH_EXPANDED}px`,
   },
   mainCollapsed: {
-    marginLeft: '56px',
+    marginLeft: `${HBC_SIDEBAR_WIDTH_COLLAPSED}px`,
   },
   mainMobile: {
     marginLeft: '0px',
   },
   mainBottomNav: {
-    paddingBottom: '56px',
+    paddingBottom: `${HBC_BOTTOM_NAV_HEIGHT}px`,
   },
   mainFocusMode: {
     zIndex: Z_INDEX.sidebar,
@@ -89,7 +91,9 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   const syncedActiveItemId = useNavStore((s) => s.activeItemId);
   const [isFocusModeActive, setIsFocusModeActive] = React.useState(false);
   const styles = useStyles();
-  const shellOffset = connectivityStatus === 'online' ? 58 : 60;
+  const shellOffset = connectivityStatus === 'online'
+    ? HBC_HEADER_HEIGHT + HBC_CONNECTIVITY_HEIGHT_ONLINE
+    : HBC_HEADER_HEIGHT + HBC_CONNECTIVITY_HEIGHT_OFFLINE;
   // D-04: Route-derived nav state in navStore is authoritative when explicit prop is not supplied.
   const resolvedActiveItemId = activeItemId ?? syncedActiveItemId;
 

@@ -10,7 +10,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { Tooltip, tokens } from '@fluentui/react-components';
 import { usePermission } from '@hbc/auth';
-import { HBC_ACCENT_ORANGE } from '../theme/tokens.js';
+import { HBC_ACCENT_ORANGE, HBC_HEADER_HEIGHT, HBC_CONNECTIVITY_HEIGHT_ONLINE, HBC_CONNECTIVITY_HEIGHT_OFFLINE, HBC_SIDEBAR_WIDTH_COLLAPSED, HBC_SIDEBAR_WIDTH_EXPANDED } from '../theme/tokens.js';
 import { TRANSITION_NORMAL } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { Expand, Collapse } from '../icons/index.js';
@@ -22,9 +22,10 @@ import type { HbcSidebarProps, SidebarNavGroup, SidebarNavItem } from './types.j
 const useStyles = makeStyles({
   root: {
     position: 'fixed',
-    top: '58px',
+    // Shell-foundation: derived from governed tokens.
+    top: `${HBC_HEADER_HEIGHT + HBC_CONNECTIVITY_HEIGHT_ONLINE}px`,
     left: '0px',
-    height: 'calc(100vh - 58px)',
+    height: `calc(100vh - ${HBC_HEADER_HEIGHT + HBC_CONNECTIVITY_HEIGHT_ONLINE}px)`,
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.borderRight('1px', 'solid', tokens.colorNeutralStroke1),
     display: 'flex',
@@ -45,10 +46,10 @@ const useStyles = makeStyles({
     overflowX: 'hidden',
   },
   collapsed: {
-    width: '56px',
+    width: `${HBC_SIDEBAR_WIDTH_COLLAPSED}px`,
   },
   expanded: {
-    width: '240px',
+    width: `${HBC_SIDEBAR_WIDTH_EXPANDED}px`,
   },
   groupLabel: {
     fontSize: '0.625rem',
@@ -197,8 +198,11 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
   }, []);
 
   const effectiveExpanded = focusOverride ? false : isExpanded;
-  const topOffset = connectivityStatus === 'online' ? '58px' : '60px';
-  const sidebarHeight = connectivityStatus === 'online' ? 'calc(100vh - 58px)' : 'calc(100vh - 60px)';
+  const shellTop = connectivityStatus === 'online'
+    ? HBC_HEADER_HEIGHT + HBC_CONNECTIVITY_HEIGHT_ONLINE
+    : HBC_HEADER_HEIGHT + HBC_CONNECTIVITY_HEIGHT_OFFLINE;
+  const topOffset = `${shellTop}px`;
+  const sidebarHeight = `calc(100vh - ${shellTop}px)`;
 
   if (isMobile) return null;
 

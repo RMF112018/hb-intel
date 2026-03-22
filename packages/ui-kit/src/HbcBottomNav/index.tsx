@@ -14,7 +14,7 @@
 import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
-import { HBC_DARK_HEADER, HBC_ACCENT_ORANGE, HBC_HEADER_ICON_MUTED } from '../theme/tokens.js';
+import { HBC_DARK_HEADER, HBC_ACCENT_ORANGE, HBC_HEADER_ICON_MUTED, HBC_BOTTOM_NAV_HEIGHT } from '../theme/tokens.js';
 import { keyframes, TRANSITION_FAST, TRANSITION_NORMAL } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { MoreActions } from '../icons/index.js';
@@ -29,7 +29,7 @@ const useStyles = makeStyles({
     bottom: '0',
     left: '0',
     right: '0',
-    height: '56px',
+    height: `${HBC_BOTTOM_NAV_HEIGHT}px`,
     paddingBottom: 'env(safe-area-inset-bottom, 0px)',
     backgroundColor: HBC_DARK_HEADER,
     zIndex: Z_INDEX.bottomNav,

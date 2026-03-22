@@ -2415,6 +2415,34 @@ No Storybook stories existed for the old `QuickAccessCard` — none to remove. N
 
 ---
 
+### 10A.75 Shell Header Tokenization + Governed Boundary
+
+**Category:** Design System / Shell Foundation
+
+**What was tokenized:**
+- `HBC_HEADER_HEIGHT` (56) — header bar height
+- `HBC_CONNECTIVITY_HEIGHT_ONLINE` (2) / `HBC_CONNECTIVITY_HEIGHT_OFFLINE` (4) — connectivity bar heights
+- `HBC_SIDEBAR_WIDTH_COLLAPSED` (56) / `HBC_SIDEBAR_WIDTH_EXPANDED` (240) — sidebar widths
+- `HBC_BOTTOM_NAV_HEIGHT` (56) — bottom navigation height
+
+All shell components now derive their dimensions from these tokens instead of magic numbers. The dynamic `shellOffset` in `HbcAppShell` and `HbcSidebar` is computed as `HBC_HEADER_HEIGHT + HBC_CONNECTIVITY_HEIGHT_*`.
+
+**Governed header boundary:**
+`HbcHeader` already exists as a distinct component. This change formalizes its token contract: height, top offset, background, z-index, and separator are all governed. Added `borderBottom: 1px solid rgba(255,255,255,0.08)` as the header/content separator.
+
+**Icon colors:** Already using `HBC_HEADER_TEXT` via parent `color` inheritance + `currentColor` on SVGs. The `rgba(255,255,255,0.1)` hover overlay is intentional for the dark header context — not a token candidate.
+
+**Files changed:**
+- `packages/ui-kit/src/theme/tokens.ts` — 6 new shell dimension tokens
+- `packages/ui-kit/src/index.ts` — exports added
+- `packages/ui-kit/src/HbcAppShell/HbcHeader.tsx` — token-driven height, top, separator
+- `packages/ui-kit/src/HbcAppShell/HbcAppShell.tsx` — token-driven margins, offsets
+- `packages/ui-kit/src/HbcAppShell/HbcSidebar.tsx` — token-driven top, height, widths
+- `packages/ui-kit/src/HbcBottomNav/index.tsx` — token-driven height
+- `packages/ui-kit/package.json` — version 2.2.59 → 2.2.60
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

@@ -47,6 +47,21 @@ export const HBC_HEADER_TEXT = '#FFFFFF' as const;
 /** Header muted icon color */
 export const HBC_HEADER_ICON_MUTED = '#A0A0A0' as const;
 
+// Shell chrome dimensions — single source of truth for all shell offset calculations.
+// Used by HbcHeader, HbcAppShell, HbcSidebar, HbcBottomNav, WorkspacePageShell.
+/** Fixed header bar height (px) */
+export const HBC_HEADER_HEIGHT = 56;
+/** Connectivity bar height when online (px) */
+export const HBC_CONNECTIVITY_HEIGHT_ONLINE = 2;
+/** Connectivity bar height when offline/syncing (px) */
+export const HBC_CONNECTIVITY_HEIGHT_OFFLINE = 4;
+/** Sidebar collapsed (icon rail) width (px) */
+export const HBC_SIDEBAR_WIDTH_COLLAPSED = 56;
+/** Sidebar expanded width (px) */
+export const HBC_SIDEBAR_WIDTH_EXPANDED = 240;
+/** Bottom navigation bar height (px) */
+export const HBC_BOTTOM_NAV_HEIGHT = 56;
+
 // ---------------------------------------------------------------------------
 // V2.1 Sunlight-optimized status colors
 // ---------------------------------------------------------------------------
