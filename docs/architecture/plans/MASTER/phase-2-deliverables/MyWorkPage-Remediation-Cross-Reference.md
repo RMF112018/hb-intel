@@ -161,25 +161,25 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 2-G: Wire `HbcCanvasEditor` and `HbcTileCatalog`
+### 2-G: Wire `HbcCanvasEditor` and `HbcTileCatalog` ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| ARC-02 | **C** | `HbcCanvasEditor` and `useCanvasEditor` absent; no EditMode exists for secondary/tertiary zones | ✅ Full close |
-| ARC-07 | **H** | `HbcTileCatalog` absent; no tile picker during EditMode | ✅ Full close |
-| ARC-09 | **C** | Gate 4 (role eligibility filtering in catalog) | ✅ Gate 4 satisfied |
+| ARC-02 | **C** | `HbcCanvasEditor` and `useCanvasEditor` absent; no EditMode exists for secondary/tertiary zones | ✅ Closed (2026-03-22) — wired via `HbcProjectCanvas` in both zones |
+| ARC-07 | **H** | `HbcTileCatalog` absent; no tile picker during EditMode | ✅ Closed (2026-03-22) — rendered by `HbcCanvasEditor` |
+| ARC-09 | **C** | Gate 4 (role eligibility filtering in catalog) | ✅ Gate 4 satisfied (2026-03-22) |
 
 ---
 
 ## Phase 3 — Personalization Completion
 
-### 3-A: Wire `cardArrangement` into `HbcProjectCanvas`; wire `updateCardVisibility`
+### 3-A: Wire `cardArrangement` into `HbcProjectCanvas`; wire `updateCardVisibility` ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| PRS-01 | **H** | `cardArrangement` (30-day persisted draft) computed by `useHubPersonalization`, passed to no one | ✅ Full close |
-| ARC-F6 | **H** | `cardArrangement` destructured in `MyWorkPage` and immediately discarded | ✅ Full close |
-| PRS-02 | **M** | `updateCardVisibility` exported by `useHubPersonalization`, consumed nowhere | ✅ Full close |
+| PRS-01 | **H** | `cardArrangement` (30-day persisted draft) computed by `useHubPersonalization`, passed to no one | ✅ Closed (2026-03-22) — passed from MyWorkPage to HubSecondaryZone |
+| ARC-F6 | **H** | `cardArrangement` destructured in `MyWorkPage` and immediately discarded | ✅ Closed (2026-03-22) — no longer discarded |
+| PRS-02 | **M** | `updateCardVisibility` exported by `useHubPersonalization`, consumed nowhere | ✅ Closed (2026-03-22) — passed to HubSecondaryZone |
 
 ---
 

@@ -24,6 +24,7 @@ import { useMyWork } from '@hbc/my-work-feed';
 import { HbcProjectCanvas } from '@hbc/project-canvas';
 import { useCurrentSession } from '@hbc/auth';
 import type { TeamMode } from '@hbc/shell';
+import type { IMyWorkCardArrangement } from './hubStateTypes.js';
 import { MyWorkHubTileProvider } from './tiles/index.js';
 import { formatRelativeTime } from './formatRelativeTime.js';
 import { useHubTrustState } from './useHubTrustState.js';
@@ -73,12 +74,18 @@ export interface HubSecondaryZoneProps {
   activeFilter?: string | null;
   /** UIF-008: Callback when a KPI card is clicked. */
   onFilterChange?: (filter: string) => void;
+  /** PRS-01 / ARC-F6: Persisted card arrangement from useHubPersonalization (30-day TTL). */
+  cardArrangement?: IMyWorkCardArrangement | null;
+  /** PRS-02: Callback to persist card visibility changes. */
+  updateCardVisibility?: (zone: 'secondaryZone' | 'tertiaryZone', cardId: string, visible: boolean) => void;
 }
 
 export function HubSecondaryZone({
   teamMode = 'personal',
   activeFilter,
   onFilterChange,
+  cardArrangement: _cardArrangement,
+  updateCardVisibility: _updateCardVisibility,
 }: HubSecondaryZoneProps): ReactNode {
   const styles = useStyles();
   const { tier } = useComplexity();

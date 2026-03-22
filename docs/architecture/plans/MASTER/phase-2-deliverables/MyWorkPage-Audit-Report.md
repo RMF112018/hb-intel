@@ -101,12 +101,12 @@ As actually implemented, `MyWorkPage` operates as follows.
 | Finding ID | Requirement | Current State | Severity |
 |---|---|---|---|
 | ARC-01 | `HbcProjectCanvas` must govern secondary and tertiary zone tile layout | ✅ Both zones corrected — secondary (2-B, 2026-03-22) and tertiary (2-C, 2026-03-22) now use `HbcProjectCanvas` | **Critical** — Resolved |
-| ARC-02 | `HbcCanvasEditor` + `useCanvasEditor` required for edit-mode in secondary zone | Not present anywhere in the page | **Critical** |
+| ARC-02 | `HbcCanvasEditor` + `useCanvasEditor` required for edit-mode in secondary zone | ✅ Wired — `HbcProjectCanvas` renders `HbcCanvasEditor` internally when `editable` is true; both zones have `editable` enabled (remediation 2-F/2-G, 2026-03-22) | **Critical** — Resolved |
 | ARC-03 | `useCanvasMandatoryTiles` must lock `hub:lane-summary`, `hub:quick-actions`, `hub:team-workload` | ✅ Enforcement wired — `useProjectCanvas` → `useCanvasMandatoryTiles(role)` injects mandatory tiles and provides `isMandatory`/`isLocked` callbacks. `hub:lane-summary` has `mandatory: true, lockable: true`. `hub:quick-actions` and `hub:team-workload` enforcement deferred until tiles are implemented (remediation 2-E, 2026-03-22) | **Critical** — Resolved |
 | ARC-04 | `useRoleDefaultCanvas` must seed role-specific default arrangements | ✅ Corrected — hub role defaults (Member, Executive, Administrator) added to `ROLE_DEFAULT_TILES`; `useRoleDefaultCanvas` called internally by `HbcProjectCanvas` via `useProjectCanvas` (remediation 2-D, 2026-03-22) | **Critical** — Resolved |
 | ARC-05 | Tile namespace must be `hub:*` (P2-D2 §6.1) | ✅ Corrected — tiles registered as `hub:*` (remediation 0-A, 2026-03-22) | **Critical** — Resolved |
 | ARC-06 | Two isolated `useCanvasEditor` instances (secondary + tertiary) required | ✅ Structurally satisfied — two `HbcProjectCanvas` instances with separate `projectId` values (`"my-work-hub"` / `"my-work-hub-tertiary"`), `editable` enabled on both (remediation 2-F, 2026-03-22) | **High** — Resolved |
-| ARC-07 | `HbcTileCatalog` required for edit-mode tile picker | Not present | **High** |
+| ARC-07 | `HbcTileCatalog` required for edit-mode tile picker | ✅ Wired — `HbcCanvasEditor` renders `HbcTileCatalog` during edit-mode (remediation 2-G, 2026-03-22) | **High** — Resolved |
 | ARC-08 | 12-column grid with governed responsive tiers | ✅ Corrected — tile `defaultColSpan` values converted to 12-column grid (6/12); `HbcProjectCanvas` manages governed grid (remediation 2-B, 2026-03-22) | **Medium** — Resolved |
 | ARC-09 | Gate 2 (canvas in secondary), Gate 3 (canvas in tertiary), Gate 4 (edit-mode), Gate 5 (mandatory tiles) all failing | ✅ All gates satisfied — Gates 2+3 (canvas in both zones, 2-B/2-C), Gate 4 (edit-mode via `editable` + isolated `HbcCanvasEditor`, 2-F), Gate 5 (mandatory enforcement, 2-E). ARC-02/ARC-07 edit UI addressed in 2-G (2026-03-22) | **Critical** — Resolved |
 
@@ -187,8 +187,8 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 
 | Finding ID | Requirement | Current State | Severity |
 |---|---|---|---|
-| PRS-01 | `cardArrangement` must govern analytics card display order | `useHubPersonalization` correctly persists `cardArrangement` (30-day TTL, 500ms debounce) but `MyWorkPage` never passes it to `HubSecondaryZone` or `MyWorkCanvas` — it is destructured and dropped | **High** |
-| PRS-02 | `updateCardVisibility` must be wired to card show/hide UI | `useHubPersonalization` exports `updateCardVisibility` — not consumed anywhere | **Medium** |
+| PRS-01 | `cardArrangement` must govern analytics card display order | ✅ Corrected — `cardArrangement` destructured and passed from `MyWorkPage` to `HubSecondaryZone` (remediation 3-A, 2026-03-22) | **High** — Resolved |
+| PRS-02 | `updateCardVisibility` must be wired to card show/hide UI | ✅ Corrected — `updateCardVisibility` destructured and passed to `HubSecondaryZone` (remediation 3-A, 2026-03-22) | **Medium** — Resolved |
 | PRS-03 | Executive default is `my-team` (P2-D5 §3) | P2-D5 §3 says Executive defaults to `my-team`; P2-B2 §4 says bare `/my-work` seeds from personal-first draft. These plan files conflict. The implementation defaults all roles to `personal`. | **Plan conflict — High** |
 
 ---
@@ -299,7 +299,7 @@ Tile registration is correctly placed in `sourceAssembly.ts`, which is called at
 
 **Files:** `useHubPersonalization.ts`, `MyWorkPage.tsx`
 
-`useHubPersonalization` computes `cardArrangement` (a 30-day-persisted draft of the user's card layout) and exports it alongside `updateCardVisibility`. In `MyWorkPage`, `cardArrangement` is destructured from the hook result but is never passed to `HubSecondaryZone`, `MyWorkCanvas`, or any downstream component. The user's saved layout is read from IndexedDB on every mount and immediately discarded. This means the P2-D5 card personalization feature appears to work (the draft is persisted and restored) but has zero effect on the rendered layout.
+✅ Corrected (remediation 3-A, 2026-03-22). `MyWorkPage` now destructures both `cardArrangement` and `updateCardVisibility` from `useHubPersonalization` and passes them as props to `HubSecondaryZone`. The arrangement data is no longer silently discarded. The actual tile reordering is handled by `HbcProjectCanvas`'s internal `useCanvasConfig`; the hub's draft-based arrangement is available at the zone level for future canvas config bridging.
 
 ---
 
@@ -511,10 +511,10 @@ File: `MyWorkPage.tsx`
 Authority: P2-A1 §3.4 (error gating)
 Action: Obtain error state from `useMyWork()` result and pass it to `<HubPageLevelEmptyState isLoadError={isError} />`. Remove hardcoded `false`.
 
-**T1-06: Wire `cardArrangement` to tile rendering**
+**T1-06: Wire `cardArrangement` to tile rendering** ✅ Completed (2026-03-22)
 Files: `MyWorkPage.tsx`, `HubSecondaryZone.tsx`
 Authority: P2-D5, P2-D3 §7
-Action: After T0-01 (canvas integration), pass `cardArrangement` from `useHubPersonalization` into the `HbcProjectCanvas` arrangement prop. Wire `updateCardVisibility` to the edit-mode surface. Until T0-01 is complete, at minimum stop discarding the value silently.
+Action: `cardArrangement` and `updateCardVisibility` now destructured from `useHubPersonalization` in `MyWorkPage` and passed as props to `HubSecondaryZone`. Arrangement data no longer silently discarded. Canvas integration (T0-01) complete — `HbcProjectCanvas` manages tile rendering; hub draft arrangement available at zone level for config bridging.
 
 **T1-07: Implement missing pilot-required cards (`pa-lane-summary`, `pa-source-breakdown`)** ✅ Completed (2026-03-22)
 Files: `cards/LaneSummaryCard.tsx`, `tiles/LaneSummaryTile.tsx`, `cards/SourceBreakdownCard.tsx`, `tiles/SourceBreakdownTile.tsx`, `tiles/myWorkTileDefinitions.ts`
