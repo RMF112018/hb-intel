@@ -2263,6 +2263,34 @@ The Insights panel KPI layout is implementation-ready and governance-aligned:
 
 ---
 
+### 10A.69 UIF-047-addl: Quick Access Component Extraction
+
+**Severity:** Medium
+**Category:** Refactor / Component Architecture
+
+**What changed:** Decomposed the Quick Access zone into two standalone components:
+
+1. **`QuickActionsMenu`** (new) — extracted from `QuickActionsCard`. Adds `data-hbc-ui="quick-actions-menu"` wrapper. Same action buttons and navigation logic.
+2. **`RecentActivityCard`** (new) — extracted from `RecentContextCard`. Heading renamed from "Recent Context" to "Recent Activity". Same empty state + Browse Projects CTA.
+3. **Old files deleted:** `QuickActionsCard.tsx`, `RecentContextCard.tsx`
+4. **Tile adapters updated:** `QuickActionsTile.tsx` and `RecentContextTile.tsx` now import from the new components
+
+**Follow-on items deferred:**
+- Desktop tab-row action strip pattern (future UIF)
+- Mobile bottom-sheet pattern (future UIF)
+- Final right-panel layout optimization (future UIF)
+
+**Files changed:**
+- `apps/pwa/src/pages/my-work/cards/QuickActionsMenu.tsx` — new file
+- `apps/pwa/src/pages/my-work/cards/RecentActivityCard.tsx` — new file
+- `apps/pwa/src/pages/my-work/cards/QuickActionsCard.tsx` — deleted
+- `apps/pwa/src/pages/my-work/cards/RecentContextCard.tsx` — deleted
+- `apps/pwa/src/pages/my-work/tiles/QuickActionsTile.tsx` — updated import
+- `apps/pwa/src/pages/my-work/tiles/RecentContextTile.tsx` — updated import
+- `apps/pwa/package.json` — version 0.12.62 → 0.12.63
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

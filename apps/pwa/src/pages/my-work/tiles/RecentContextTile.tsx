@@ -1,14 +1,15 @@
 /**
- * RecentContextTile — canvas tile adapter for RecentContextCard.
+ * RecentActivityTile — canvas tile adapter for RecentActivityCard.
  *
+ * UIF-047-addl: Updated import from RecentContextCard → RecentActivityCard.
  * Essential variant returns null (zone hidden at essential tier).
  */
 import type { ReactNode } from 'react';
 import type { ICanvasTileProps } from '@hbc/project-canvas';
-import { RecentContextCard } from '../cards/RecentContextCard.js';
+import { RecentActivityCard } from '../cards/RecentActivityCard.js';
 
 function RecentContextTileStandard(_props: ICanvasTileProps): ReactNode {
-  return <RecentContextCard />;
+  return <RecentActivityCard />;
 }
 
 function RecentContextTileEssential(_props: ICanvasTileProps): ReactNode {

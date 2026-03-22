@@ -1,14 +1,15 @@
 /**
- * QuickActionsTile — canvas tile adapter for QuickActionsCard.
+ * QuickActionsTile — canvas tile adapter for QuickActionsMenu.
  *
- * minComplexity is 'essential' so all 3 variants render the card.
+ * UIF-047-addl: Updated import from QuickActionsCard → QuickActionsMenu.
+ * minComplexity is 'essential' so all 3 variants render the menu.
  */
 import type { ReactNode } from 'react';
 import type { ICanvasTileProps } from '@hbc/project-canvas';
-import { QuickActionsCard } from '../cards/QuickActionsCard.js';
+import { QuickActionsMenu } from '../cards/QuickActionsMenu.js';
 
 function QuickActionsTileStandard(_props: ICanvasTileProps): ReactNode {
-  return <QuickActionsCard />;
+  return <QuickActionsMenu />;
 }
 
 export { QuickActionsTileStandard as QuickActionsTileEssential };
