@@ -200,6 +200,16 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
   const [focusOverride, setFocusOverride] = React.useState(false);
   const styles = useStyles();
 
+  // Sidebar expansion: Escape key collapses the expanded sidebar.
+  React.useEffect(() => {
+    if (!isExpanded) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') toggle();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isExpanded, toggle]);
+
   // Listen for Focus Mode CustomEvent — force collapse when active
   React.useEffect(() => {
     const handler = (e: Event) => {
