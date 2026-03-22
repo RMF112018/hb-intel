@@ -6,6 +6,7 @@
  *
  * Lazy-loaded: mounted on first item selection via React.lazy() in MyWorkPage.
  */
+import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { makeStyles, shorthands, mergeClasses } from '@griffel/react';
 import { heading3, HbcButton, HbcStatusBadge, HbcCard, useAnimationStyles, elevationLevel3 } from '@hbc/ui-kit';
@@ -117,12 +118,40 @@ const useStyles = makeStyles({
 export function HubDetailPanel({ item, onClose }: HubDetailPanelProps): ReactNode {
   const styles = useStyles();
   const animStyles = useAnimationStyles();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<Element | null>(null);
 
   const laneLabel = LANE_LABELS[item.lane] ?? item.lane;
 
+  // Detail-panel a11y: focus panel on open, restore focus on close.
+  useEffect(() => {
+    triggerRef.current = document.activeElement;
+    requestAnimationFrame(() => panelRef.current?.focus());
+    return () => {
+      if (triggerRef.current instanceof HTMLElement) {
+        triggerRef.current.focus();
+      }
+    };
+  }, []);
+
+  // Detail-panel a11y: Escape to close.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   // UIF-002: slideInRight (250ms) entrance + elevationLevel3 box-shadow
   return (
-    <div className={mergeClasses(styles.panelWrapper, animStyles.slideInRight)}>
+    <div
+      ref={panelRef}
+      className={mergeClasses(styles.panelWrapper, animStyles.slideInRight)}
+      role="region"
+      aria-label={`Detail: ${item.title}`}
+      tabIndex={-1}
+    >
     <HbcCard weight="primary" header={<span>Item Detail</span>}>
       <div className={styles.root}>
         {/* Header: title + close */}
