@@ -47,6 +47,26 @@ export const ANNOTATION_DEFAULT_VISIBLE_TO_VIEWERS = true;
 export const ANNOTATION_DEFAULT_VERSION_AWARE = false;
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Anchor type defaults and conventions (Phase 3 Stage 0.1)
+// ─────────────────────────────────────────────────────────────────────────────
+
+import type { AnchorType } from '../types/IFieldAnnotation';
+
+/** Default anchor type for annotations when anchorType is absent */
+export const ANNOTATION_DEFAULT_ANCHOR_TYPE: AnchorType = 'field';
+
+/** Key prefix convention for section-level anchors (e.g., 'section:financial-summary') */
+export const ANCHOR_PREFIX_SECTION = 'section:';
+
+/** Key prefix convention for block-level anchors (e.g., 'block:cash-flow-table') */
+export const ANCHOR_PREFIX_BLOCK = 'block:';
+
+/** Resolves an optional AnchorType to a concrete value, defaulting to 'field' */
+export function resolveAnchorType(anchorType?: AnchorType): AnchorType {
+  return anchorType ?? ANNOTATION_DEFAULT_ANCHOR_TYPE;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Intent color tokens (used by HbcAnnotationMarker and HbcAnnotationThread)
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -1,4 +1,5 @@
 import type {
+  AnchorType,
   IFieldAnnotation,
   IAnnotationReply,
   IRawAnnotationListItem,
@@ -51,6 +52,7 @@ function mapListItemToAnnotation(raw: IRawAnnotationListItem): IFieldAnnotation 
     recordId: raw.RecordId,
     fieldKey: raw.FieldKey,
     fieldLabel: raw.FieldLabel,
+    anchorType: (raw.AnchorType as AnchorType) ?? 'field',
     intent: raw.Intent,
     status: raw.Status,
     author: {

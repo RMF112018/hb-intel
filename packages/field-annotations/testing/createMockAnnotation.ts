@@ -17,6 +17,7 @@ export function createMockAnnotation(
     recordId: 'mock-record-001',
     fieldKey: 'totalBuildableArea',
     fieldLabel: 'Total Buildable Area',
+    anchorType: 'field',
     intent: 'comment',
     status: 'open',
     author: {

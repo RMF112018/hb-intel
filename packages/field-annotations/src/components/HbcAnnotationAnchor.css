@@ -1,0 +1,68 @@
+/* Section/block annotation anchor — wraps content with positioned indicator */
+.hbc-annotation-anchor {
+  position: relative;
+  display: block;
+}
+
+/* Subtle border highlight on hover when annotations exist or user can annotate */
+.hbc-annotation-anchor--interactive:hover {
+  outline: 1px solid var(--hbc-color-grey-300);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Indicator positioned at top-right of the wrapped region */
+.hbc-annotation-anchor__indicator {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+  z-index: 1;
+}
+
+.hbc-annotation-anchor__indicator--red    { background-color: var(--hbc-color-red-500); }
+.hbc-annotation-anchor__indicator--amber  { background-color: var(--hbc-color-amber-500); }
+.hbc-annotation-anchor__indicator--blue   { background-color: var(--hbc-color-blue-500); }
+.hbc-annotation-anchor__indicator--grey   { background-color: var(--hbc-color-grey-400); }
+.hbc-annotation-anchor__indicator--add-only {
+  background-color: transparent;
+  border: 1.5px dashed var(--hbc-color-grey-300);
+  opacity: 0;
+}
+.hbc-annotation-anchor__indicator--add-only:focus,
+.hbc-annotation-anchor--interactive:hover .hbc-annotation-anchor__indicator--add-only {
+  opacity: 1;
+}
+
+/* Expert mode count badge */
+.hbc-annotation-anchor__count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 14px;
+  height: 14px;
+  background: var(--hbc-color-grey-700);
+  color: white;
+  font-size: 9px;
+  border-radius: 7px;
+  padding: 0 3px;
+  line-height: 14px;
+  text-align: center;
+}
+
+/* Resolved checkmark */
+.hbc-annotation-anchor__resolved-icon {
+  font-size: 10px;
+  color: white;
+  line-height: 1;
+}

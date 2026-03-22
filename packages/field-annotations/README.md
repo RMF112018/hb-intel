@@ -1,9 +1,9 @@
 # @hbc/field-annotations
 
-Field-level collaborative annotation primitive for HB Intel. Enables reviewers to attach
-comments, clarification requests, and revision flags to individual form fields on any record
-type. Integrates with BIC Next Move, Versioned Record, and Notification Intelligence via
-inversion-of-control.
+Field-level, section-level, and block-level collaborative annotation primitive for HB Intel.
+Enables reviewers to attach comments, clarification requests, and revision flags to form fields,
+content sections, and data blocks on any record type. Integrates with BIC Next Move, Versioned
+Record, and Notification Intelligence via inversion-of-control.
 
 ## Installation
 
@@ -55,10 +55,12 @@ const config: IFieldAnnotationConfig = {
 | `IAnnotationCounts` | Interface | Aggregated open/resolved counts (used for BIC blocking) |
 | `AnnotationIntent` | Union type | `'comment' \| 'clarification-request' \| 'flag-for-revision'` |
 | `AnnotationStatus` | Union type | `'open' \| 'resolved' \| 'withdrawn'` |
+| `AnchorType` | Union type | `'field' \| 'section' \| 'block'` — anchor targeting mode |
 | `useFieldAnnotations` | Hook | Record-level annotation list + counts |
 | `useFieldAnnotation` | Hook | Single-field annotation + replies |
 | `useAnnotationActions` | Hook | Create, reply, resolve, withdraw mutations |
 | `AnnotationApi` | Object | REST client for all annotation CRUD operations |
+| `HbcAnnotationAnchor` | Component | Section/block annotation wrapper — wraps content with positioned indicator |
 | `HbcAnnotationMarker` | Component | Complexity-gated field-adjacent marker (Standard: dot; Expert: dot+count badge) |
 | `HbcAnnotationThread` | Component | Anchored Popover showing annotation list and inline actions |
 | `HbcAnnotationSummary` | Component | Record-level summary panel (PWA only) |
@@ -67,6 +69,35 @@ const config: IFieldAnnotationConfig = {
 | `intentColorClass` | Constant | CSS color class map per `AnnotationIntent` |
 | `intentLabel` | Constant | Display label map per `AnnotationIntent` |
 | `resolveAnnotationConfig` | Function | Merges partial config with defaults |
+| `resolveAnchorType` | Function | Resolves optional `AnchorType` to concrete value (default: `'field'`) |
+| `ANCHOR_PREFIX_SECTION` | Constant | `'section:'` — key prefix convention for section anchors |
+| `ANCHOR_PREFIX_BLOCK` | Constant | `'block:'` — key prefix convention for block anchors |
+
+## Section/Block Anchoring
+
+For content regions that are not individual form fields (e.g., summary panels, data tables),
+use `HbcAnnotationAnchor` to wrap the target content:
+
+```tsx
+import { HbcAnnotationAnchor } from '@hbc/field-annotations';
+
+<HbcAnnotationAnchor
+  recordType="project-hub-pmp"
+  recordId={project.id}
+  anchorKey="section:financial-summary"
+  anchorLabel="Financial Summary"
+  anchorType="section"
+  config={config}
+  canAnnotate={canAnnotate}
+  canResolve={canResolve}
+>
+  <FinancialSummaryPanel data={financialData} />
+</HbcAnnotationAnchor>
+```
+
+Anchor key conventions:
+- **Section anchors:** `section:<slug>` (e.g., `section:financial-summary`)
+- **Block anchors:** `block:<slug>` (e.g., `block:cash-flow-table`)
 
 ## Testing
 
@@ -79,8 +110,8 @@ import {
 } from '@hbc/field-annotations/testing';
 ```
 
-Six canonical states: `empty`, `openComment`, `openClarification`, `openRevisionFlag`,
-`resolved`, `mixed`.
+Eight canonical states: `empty`, `openComment`, `openClarification`, `openRevisionFlag`,
+`resolved`, `sectionAnchor`, `blockAnchor`, `mixed`.
 
 ## Architecture Boundaries
 

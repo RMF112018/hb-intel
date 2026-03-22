@@ -88,6 +88,389 @@
 
 ---
 
+## Implementation Guide
+
+This guide provides a comprehensive, ordered task list for a full implementation of the Phase 3 Project Hub as defined by the plan files in this directory. Tasks are organized into stages that reflect dependency order. Within a stage, tasks may proceed in parallel unless otherwise noted.
+
+---
+
+### Stage 0 — Pre-Implementation Evaluation (Blocking)
+
+Evaluate all blocker dependencies before committing Phase 3 to active development. Proceeding without resolving these risks mid-sprint blockers.
+
+**0.1 — `@hbc/field-annotations` anchor gap assessment**
+Determine whether `@hbc/field-annotations` supports section-level and block-level anchor targeting, not just classic form-field anchors. This is a hard blocker for the executive review annotation layer on Financial, Schedule, Constraints, and Permits surfaces. If the gap exists, a remediation plan must be agreed before Phase 3 executive review work begins.
+Governing: P3-E1 §9.2, P3-E2 §3.4
+Status: **Assessed 2026-03-22 — gap confirmed, remediation delivered in v0.2.0.** Section/block anchor support added via `AnchorType` discriminator (`'field' | 'section' | 'block'`) and `HbcAnnotationAnchor` wrapper component. Existing field-level annotations unaffected. Stage 7 unblocked.
+
+**0.2 — `@hbc/auth` AccessControlOverrideRecord readiness**
+Confirm that `@hbc/auth` can issue, store, and revoke time-bounded AccessControlOverrideRecords for out-of-scope PER grants. If this record type does not yet exist, it must be added to `@hbc/auth` before the PER authority model can be implemented.
+Governing: P3-A2 §5.3
+
+**0.3 — `@hbc/my-work-feed` work item type readiness**
+Confirm that `@hbc/my-work-feed` (ADR-0115) supports structured typed work items with provenance fields (originRole, originReviewRunId, originAnnotationId, pushTimestamp) and a closure-loop response model. The Push-to-Project-Team feature requires this. If the work item model is narrower, agree on a work item type extension before executive review work begins.
+Governing: P3-D3 §5, P3-F1 §8.5
+
+**0.4 — SPFx shell cross-lane escalation affordance**
+Confirm that the SPFx shell can surface a Launch-to-PWA affordance and pass deep-link parameters including `projectId`, `module`, `action`, and `reviewArtifactId`. This is required for all SPFx-to-PWA escalation scenarios.
+Governing: P3-G2 §3, §8.8
+
+---
+
+### Stage 1 — Project Registry and Identity Foundation
+
+All subsequent stages depend on a functioning project registry and canonical identity resolution.
+
+**1.1 — Project registry record shape**
+Implement the project registry record with all required fields: `projectId` (UUID, canonical), `projectNumber` (legacy reference key), `siteUrl`, `status`, `department`, `activatedAt`, and `activationSource`. The `department` field is the authoritative scope key for leadership authority calculations.
+Governing: P3-A1 §2–§3
+
+**1.2 — Dual-key inbound routing normalization**
+Implement the transitional inbound routing layer that accepts both `projectId` (UUID) and `projectNumber` (legacy string). All inbound `projectNumber` references must resolve to `projectId` via a registry lookup before any internal processing. All internal state, links, and cross-lane handoffs use `projectId` exclusively. Redirect `projectNumber`-based routes to canonical `projectId`-based routes.
+Governing: P3-A1 §3.4–§3.6, P3-B1 §2.2
+
+**1.3 — Project activation transaction — setup seam**
+Implement the setup seam activation path: new project setup flow produces a valid project registry entry with `projectId`, `siteUrl`, and `status: 'active'`. Incomplete activations must be rejected atomically — no orphaned records.
+Governing: P3-A1 §4
+
+**1.4 — Project activation transaction — handoff seam**
+Implement the handoff seam activation path for projects pre-existing in other systems. Validate that handoff data satisfies all required registry fields before committing the registry entry.
+Governing: P3-A1 §4
+
+**1.5 — Registry lookup service**
+Implement the internal lookup service used by the dual-key routing layer, cross-lane handoff construction, and authority scoping. This service is the single resolution point for `projectNumber → projectId` normalization.
+Governing: P3-A1 §3.5
+
+**1.6 — Governed department reclassification flow**
+Implement the department change workflow: Manager of OpEx approval, audit record creation, downstream visibility recalculation (all role-scoped authority re-evaluated for the new department value), and suspension of any active PER override records for the project until re-grant.
+Governing: P3-A1 §4.3, P3-A2 §4.3
+
+---
+
+### Stage 2 — Authority, Membership, and Role Resolution
+
+Must follow Stage 1 (requires `projectId` and `department` from registry).
+
+**2.1 — Three-tier authority model implementation**
+Implement role resolution for all three tiers: Leadership (department-scoped, all projects in department), Portfolio Executive Reviewer (department-scoped, non-membership, review-layer only), and Project Executive (project-scoped, full operational authority). Resolve authority against `department` from the project registry record, not against projectType or any other field.
+Governing: P3-A2 §3
+
+**2.2 — Membership enforcement**
+Implement project membership validation. Membership is role-based and project-scoped. Implement the membership resolver used by both lanes (PWA route guards and SPFx web part initialization). The resolver must distinguish between membership-based access and PER oversight access — these are separate access paths.
+Governing: P3-A2 §6
+
+**2.3 — PER non-membership scoping**
+Implement the PER access path: a PER user reaches a project through department scope, not project membership. PER access grants read and annotation rights on review-capable surfaces only. PER access does not grant any project membership, operational write, or source-of-truth mutation rights. Implement the scope check that validates PER access without a membership record.
+Governing: P3-A2 §3.2, §6.4
+
+**2.4 — AccessControlOverrideRecord for out-of-scope PER grants**
+Implement time-bounded override records in `@hbc/auth` that grant a PER user access to a project outside their normal department scope. Records must include: grantedBy, expiresAt, scope, and reason. Implement revocation on expiry and on department reclassification.
+Governing: P3-A2 §5.3
+
+**2.5 — Role visibility rules**
+Implement the role-based visibility layer used by the canvas, module surfaces, and spine components. Visibility is computed from resolved authority tier and project membership state. PER visibility rules differ from membership-based visibility rules.
+Governing: P3-A2 §7, P3-C2 §8
+
+---
+
+### Stage 3 — Shared Spine Publication Infrastructure
+
+Must follow Stage 2 (role context required for spine publication filtering).
+
+**3.1 — Spine adapter interface definitions**
+Define the four spine adapter interfaces (Activity, Health, Work Queue, Related Items) with their publication contracts. All module adapters must implement these interfaces. No module should bypass the adapter interface to write directly to a spine.
+Governing: P3-A3 §4–§7
+
+**3.2 — Activity spine (`@hbc/features-project-hub` activity integration)**
+Implement the activity publication adapter. Module events publish to the activity spine via the adapter. Activity spine renders the PWA full-timeline view and the SPFx tile view. Spine data is consistent for the same `projectId` in both lanes.
+Governing: P3-A3 §7.1, P3-D1
+
+**3.3 — Health spine (`@hbc/features-project-hub` health-pulse, ADR-0110)**
+Implement the health spine. Health metrics are computed from module contributions. The health-pulse component exposes full detail + explainability in PWA and a shared component in SPFx. The executive review annotation layer does not write to health spine metrics.
+Governing: P3-A3 §7.2, P3-D2, ADR-0110
+
+**3.4 — Work Queue spine (`@hbc/my-work-feed`, ADR-0115)**
+Implement the work queue spine. Modules publish actionable items to the work queue. Implement the work item type model with provenance fields required by Push-to-Project-Team. Implement the closure-loop model (PER push → PM response → PER confirmation). Work queue renders as full feed+panel+team view in PWA and tile+panel in SPFx.
+Governing: P3-A3 §7.3, P3-D3, ADR-0115
+
+**3.5 — Related Items registry and presentation**
+Implement the related items registry. Modules register cross-module relationships by publishing relationship records. PER is a registered role in `visibleToRoles`. Review circle restriction must be enforced: a project team member cannot push to review circle if a PER push is already open on the same item. Related items renders as full panel + AI suggestions in PWA and compact panel in SPFx.
+Governing: P3-A3 §7.4, P3-D4
+
+---
+
+### Stage 4 — Project Context Continuity and Cross-Lane Routing
+
+Must follow Stage 1 (registry) and Stage 2 (auth). Can proceed in parallel with Stage 3.
+
+**4.1 — PWA routing shell integration**
+Integrate project context into the PWA routing shell. Routes are `projectId`-based. The context header resolves project identity from the URL and hydrates module context. Smart project switching operates in-app without page reload.
+Governing: P3-B1 §2.1, §4
+
+**4.2 — SPFx host-aware context resolution**
+Implement SPFx-side project identity resolution: `siteUrl` → registry lookup → `projectId`. The SharePoint web part must initialize with a valid `projectId` before rendering any module surface or spine component.
+Governing: P3-B1 §2.3, §3
+
+**4.3 — Smart project switching**
+Implement the project-switching mechanism: PWA uses in-app context switcher with return-memory; SPFx uses host-aware navigation with fallbacks. Both lanes must reset module context on project switch and produce no stale state.
+Governing: P3-B1 §5
+
+**4.4 — Deep-link handler and cross-lane handoff**
+Implement the deep-link handler that processes incoming cross-lane arrivals in PWA. Handler must extract `projectId`, `module`, `action`, and optional `reviewArtifactId` from the landing URL, normalize any `projectNumber` via registry, and route to the correct context. All outbound deep links from SPFx must use `projectId` — `projectNumber` must be normalized before link construction.
+Governing: P3-B1 §6, P3-G2 §5, §8.8
+
+**4.5 — Context restoration and mismatch reconciliation**
+Implement context restoration for users returning to a project after a session break or cross-lane handoff. Implement mismatch reconciliation when the resolved context does not match the user's current membership or authority state.
+Governing: P3-B1 §7
+
+---
+
+### Stage 5 — Project Canvas and Home
+
+Must follow Stage 2 (role resolution) and Stage 4 (routing). Can proceed in parallel with Stage 3.
+
+**5.1 — Canvas governance model**
+Implement the three governance tiers: locked (mandatory, immovable), role-default (visible by role, movable), and optional (catalog-selectable). Locked tiles cannot be removed or repositioned. The governance model is enforced in both lanes.
+Governing: P3-C1
+
+**5.2 — Mandatory core tile family**
+Implement all five mandatory operational core tiles: Health Summary, Activity Feed, Work Queue, Financial Summary, and Schedule Summary. These tiles must be present in both lanes. Role-based visibility rules apply — tiles are hidden when the role has no access, no empty placeholders shown.
+Governing: P3-C2
+
+**5.3 — Adaptive composition and personalization**
+Implement governed adaptive composition: user preferences persist (PWA: IndexedDB + server-side; SPFx: localStorage + SharePoint). Reset-to-role-default must restore mandatory tiles. Complexity tiers (essential / standard / expert) render per user preference.
+Governing: P3-C3
+
+**5.4 — SPFx canvas capability**
+Implement the SPFx lane canvas. Capability must match the P3-C3 lane-aware matrix. Personalization persistence uses the SPFx-appropriate storage tier.
+Governing: P3-C3 §6
+
+---
+
+### Stage 6 — Core Module Implementation
+
+Must follow Stage 2 (auth), Stage 3 (spine adapters), Stage 4 (routing). Each module must implement its P3-A3 spine adapters. Modules may be developed in parallel.
+
+For each module, the implementation contract is defined by P3-E2 (source-of-truth and action boundaries) and P3-E1 (classification and capability tier). Spreadsheet/document replacement guidance is in P3-E3.
+
+**6.1 — Financial module**
+Implement: budget import via CSV upload (PWA Required, SPFx Broad); Financial Summary editing (both lanes); GC/GR model (both lanes); Cash Flow model (both lanes); Exposure tracking (both lanes); Buyout support within Financial domain (both lanes). Implement spine adapters for all four spines per P3-A3. The Financial module owns its own budget/cost records as source-of-truth; no other module may write to Financial domain fields.
+Governing: P3-E1 §4.1, P3-E2 §3, P3-E3 §2
+
+**6.2 — Schedule module**
+Implement: milestone tracking (both lanes); forecast overrides with provenance and governance (both lanes); schedule file ingestion (PWA Required, SPFx Launch-to-PWA); upload history and restore (PWA Required, SPFx Launch-to-PWA). Implement spine adapters. The Schedule module owns milestone and forecast records; provenance is required on any forecast override.
+Governing: P3-E1 §4.2, P3-E2 §4, P3-E3 §3
+
+**6.3 — Constraints module**
+Implement: constraint CRUD (both lanes); change tracking (both lanes); delay log with quantified impact (both lanes). Implement spine adapters. The Constraints module owns constraint records; cross-module fields (e.g., financial exposure from a delay) are published to spines, not written directly to the Financial module.
+Governing: P3-E1 §4.3, P3-E2 §5, P3-E3 §4
+
+**6.4 — Permits module**
+Implement: permit log management (both lanes); linked inspections (both lanes); expiration tracking (both lanes). Implement spine adapters.
+Governing: P3-E1 §4.4, P3-E2 §6, P3-E3 §5
+
+**6.5 — Safety module**
+Implement: safety plan state (both lanes); orientations and acknowledgments (both lanes); checklists and inspection aggregation (both lanes); JHA log records (both lanes); incident reports with notifications (both lanes). Implement spine adapters. Note: Safety is explicitly excluded from the executive review annotation layer in Phase 3. No PER annotation affordance should be surfaced on any Safety surface.
+Governing: P3-E1 §4.5, P3-E2 §7, P3-E3 §6
+
+**6.6 — QC module (baseline-visible lifecycle)**
+Implement the QC module at baseline-visible lifecycle depth only. Phase 3 does not include deeper field-first QC execution. Do not scope beyond the baseline-visible classification.
+Governing: P3-E1 §3.7
+
+**6.7 — Warranty module (baseline-visible lifecycle)**
+Implement the Warranty module at baseline-visible lifecycle depth only. Phase 3 does not include deeper field-first Warranty execution. Do not scope beyond the baseline-visible classification.
+Governing: P3-E1 §3.8
+
+---
+
+### Stage 7 — Executive Review Layer
+
+Must follow Stage 2 (PER auth model), Stage 3 (work queue spine), Stage 6 (review-capable module surfaces present). Requires Stage 0.1 (`@hbc/field-annotations` gap) to be resolved before beginning.
+
+**7.1 — `@hbc/field-annotations` integration on review-capable surfaces**
+Integrate `@hbc/field-annotations` on Financial, Schedule, Constraints, and Permits module surfaces. Annotation affordances must target section-level and block-level anchors. PER role must have annotation write access; all other roles must be read-only or have no annotation access (depending on surface policy). Safety must have no annotation affordance — enforce this at both the UI and the auth layer.
+Governing: P3-E1 §9, P3-E2 §3.4, §4.4, §5.4, §6.4, §7.4
+
+**7.2 — Annotation isolation enforcement**
+Ensure all PER review annotations are stored in the `@hbc/field-annotations` annotation layer, completely separate from the module source-of-truth records. No annotation write path may mutate a PM-owned module record. Implement a test that proves annotation creation produces zero writes to module domain tables.
+Governing: P3-E2 §11.2
+
+**7.3 — Reviewer-generated review run**
+Implement the `runType: 'reviewer-generated'` report run path. A reviewer-generated run must use only the latest already-confirmed PM-owned report snapshot as its data source. The PM's current draft state must not be read, modified, or touched during a reviewer-generated run. Record `runType` in the run-ledger entry.
+Governing: P3-F1 §8.6
+
+**7.4 — Push-to-Project-Team structured work item**
+Implement the Push-to-Project-Team action available to PER users on review-capable surfaces. The push creates a structured work item in `@hbc/my-work-feed` with full provenance (originRole: 'portfolio-executive-reviewer', originReviewRunId, originAnnotationId, pushTimestamp). The PM receives the item in their work queue. Implement the closure loop: PM marks responded; PER receives closure notification; PER confirms closure; closure confirmation is stored.
+Governing: P3-D3 §5, P3-F1 §8.5
+
+**7.5 — Executive review lane depth enforcement**
+Implement lane-depth enforcement for PER posture: PWA provides the full executive review experience (all annotation operations, reviewer-generated runs, push, closure, thread management, multi-run comparison, full history browsing). SPFx provides broad direct interaction (annotation on supported surfaces, single review run, push initiation, closure confirmation) and escalates to PWA for depth operations (thread management, multi-run comparison, full history). Implement the SPFx escalation trigger points for these three cases.
+Governing: P3-G1 §4.8, P3-G2 §8.8
+
+---
+
+### Stage 8 — Reporting System
+
+Must follow Stage 2 (authority model), Stage 6 (module data available for assembly), Stage 7 (reviewer-generated run model in place).
+
+**8.1 — Central project-governance policy record**
+Implement the project-governance policy record data model. The record owns: global floor policy (set by Manager of OpEx), project-level overrides (set by PE), per-report-family approval/release policy, PM↔PE internal review chain configuration, and `perReleaseAuthority` per family. The Reports module reads and enforces this record but does not own or write it. The PE sets project-level configuration through a project settings surface, not through the Reports module.
+Governing: P3-F1 §14
+
+**8.2 — Report family definitions — PX Review**
+Implement the PX Review report family: PM draft lifecycle, PM narrative overrides with provenance, confirmation and generation pipeline, PM↔PE internal review chain enforcement (if configured), PX approval gate, and release. PWA provides the full lifecycle; SPFx provides generate and approve.
+Governing: P3-F1 §8.1, §14.5
+
+**8.3 — Report family definitions — Owner Report**
+Implement the Owner Report report family: PM draft lifecycle, PM narrative overrides with provenance, non-gated release. PWA provides the full lifecycle; SPFx provides generate and release.
+Governing: P3-F1 §8.2
+
+**8.4 — Report draft refresh and staleness detection**
+Implement the staleness detection model. When a draft's source data age exceeds the staleness threshold, display a staleness warning cue. Gate export on stale drafts until the user acknowledges or refreshes. Implement the refresh pipeline (pull latest module data, update draft, reset staleness timestamp). Full draft handling in PWA; refresh supported in SPFx.
+Governing: P3-F1 §4, §5
+
+**8.5 — Asynchronous generation pipeline**
+Implement the queued generation pipeline. Report generation is asynchronous. The UI shows queue state and notifies on completion. The pipeline must handle concurrent generation requests without race conditions on the run ledger.
+Governing: P3-F1 §6
+
+**8.6 — Run-ledger tracking**
+Implement the run-ledger entry model: runId, runType (`standard` | `reviewer-generated`), generatedAt, generatedBy, snapshotRef, status, and release artifacts. PWA provides full run-ledger browsing; SPFx escalates to PWA for run-ledger history.
+Governing: P3-F1 §7
+
+**8.7 — PER report permissions enforcement**
+Implement the PER report permission layer: view any report in their scope, annotate report surfaces via `@hbc/field-annotations`, generate reviewer-generated review runs. Enforce prohibitions: no PM draft edits, no source-of-truth writes, no approval gate authority, no standard run generation (only reviewer-generated). Per-family `perReleaseAuthority` must gate PER release participation.
+Governing: P3-F1 §8.5
+
+**8.8 — Report export (PDF → SharePoint)**
+Implement PDF artifact generation and storage in the project's SharePoint site. Export is available in both lanes. Produced artifacts are stored with the run-ledger entry reference.
+Governing: P3-F1 §9
+
+---
+
+### Stage 9 — SPFx Lane Integration
+
+Can begin after Stage 4 (cross-lane routing) and proceeds in parallel with Stages 6–8 for SPFx-tier capabilities. Full SPFx validation requires all module surfaces to be present.
+
+**9.1 — SPFx web part initialization**
+Implement `siteUrl`-based project identity resolution for each SPFx web part. Each web part must resolve `projectId` from the registry before rendering. No web part may render project content without a confirmed `projectId`.
+Governing: P3-B1 §3, P3-G1 §2
+
+**9.2 — SPFx lane capability per module**
+Implement SPFx-tier capabilities for each module per the P3-G1 lane capability matrix. Where a capability is classified as "Launch-to-PWA" in SPFx, implement the escalation affordance and deep-link construction — do not silently skip the feature.
+Governing: P3-G1 §4
+
+**9.3 — SPFx-to-PWA escalation affordances**
+Implement all Launch-to-PWA escalation entry points defined in P3-G2. Each escalation must construct a deep link with `projectId`, module, action, and optional `reviewArtifactId` context. The 13 escalation scenarios in P3-G2 §3 are the complete set for Phase 3.
+Governing: P3-G2 §3, §8
+
+**9.4 — SPFx personalization persistence**
+Implement the SPFx storage tier for canvas personalization: localStorage for immediate state, SharePoint list or user profile extension for server-side persistence.
+Governing: P3-C3 §6
+
+---
+
+### Stage 10 — UI Conformance Review
+
+Must run after all surfaces are substantively implemented (Stages 5–9 complete for the surface under review). UI conformance review is a pre-acceptance gate — no surface may enter §18 acceptance validation without conformance evidence. Use the `hb-ui-ux-conformance-reviewer` agent for all evaluation tasks in this stage.
+
+Governing: P3-C1 §14; UI-Kit-Mold-Breaker-Principles.md; UI-Kit-Usage-and-Composition-Guide.md; UI-Kit-Adaptive-Data-Surface-Patterns.md; UI-Kit-Field-Readability-Standards.md; P2-F1
+
+**10.1 — Apply `WorkspacePageShell` to all Project Hub page surfaces**
+Verify that every Project Hub page (canvas home, each module landing page, each module detail view, reports workspace, executive review surfaces, and spine full-page views) uses `WorkspacePageShell` as the page wrapper. Use the correct layout type per the shell's `layout` prop: `dashboard` for KPI+chart+data zones, `list` for filterable module lists, `detail` for single-item views.
+Governing: P3-C1 §14.2; UI-Kit-Wave1-Page-Patterns.md
+
+**10.2 — Data surface type selection per T06**
+For each module list/table surface, document the T06 surface type selected and verify the implementation matches the selection. Financial budget lines and scorecard tables → dense analysis table. Constraints log, Permits log, Schedule milestones → responsive hybrid. Work Queue, activity feed → card/list view. Project health / KPI strips → summary strip + `DashboardLayout` + `HbcKpiCard`.
+Governing: P3-C1 §14.2; UI-Kit-Adaptive-Data-Surface-Patterns.md
+
+**10.3 — Token compliance verification**
+Run the `enforce-hbc-tokens` ESLint rule across all Phase 3 feature packages. Zero violations must be present before any surface enters acceptance. All color, spacing, radius, elevation, and typography values must use `HBC_*` tokens. All Fluent UI primitives must be imported through `@hbc/ui-kit` (D-10).
+Governing: P3-C1 §14.2; MB-08
+
+**10.4 — Density and touch target compliance**
+Verify all Project Hub surfaces in all three density tiers: compact (desktop), comfortable (tablet), and touch (field). Specifically verify Safety module and any field-primary surface in touch density. Confirm `HBC_DENSITY_TOKENS[tier].touchTargetMin` is met on all interactive elements per tier (44px touch / 36px comfortable / 24px compact).
+Governing: P3-C1 §14.3 MB-07; UI-Kit-Field-Readability-Standards.md
+
+**10.5 — Horizontal scroll prohibition verification**
+Verify that no module data table produces horizontal scroll as the default at ≥1024px viewport. Verify adaptive column hiding is active on Financial, Schedule, Constraints, and Permits data tables. Verify card fallback renders at <640px on all responsive-hybrid surfaces.
+Governing: P3-C1 §14.3 MB-04; UI-Kit-Adaptive-Data-Surface-Patterns.md
+
+**10.6 — Card weight and hierarchy review**
+Review all canvas tiles and module KPI/summary card compositions. Verify card weight differentiation is applied (primary/standard/supporting) — no equal-weight card grids. Verify Three-Second Read Standard: on every primary surface, the most important item (health status, next action, critical constraint) is identifiable within 3 seconds without scanning.
+Governing: P3-C1 §14.2; UI-Kit-Visual-Hierarchy-and-Depth-Standards.md
+
+**10.7 — Empty state verification**
+Verify every data-dependent zone has an `HbcSmartEmptyState` or `HbcEmptyState` configured with actionable next-step guidance. No zone may render a blank area or a null state without guidance. Verify empty state text is context-specific ("No constraints yet. Typical next step: log the first delay impact.").
+Governing: P3-C1 §14.2 MB-01; UI-Kit-Usage-and-Composition-Guide.md
+
+**10.8 — Phase 2 UI precedent compliance**
+Verify: (a) all Project Hub KPI card surfaces use `DashboardLayout` + `HbcKpiCard`; (b) module detail views with primary content + context panel use the two-column persistent layout established in Phase 2; (c) all primary action buttons use context-sensitive CTA labels (no generic "Submit"/"OK"); (d) project color coding from Phase 2 is preserved in the project context header.
+Governing: P3-C1 §14.4; P2-F1
+
+**10.9 — `hb-ui-ux-conformance-reviewer` final sign-off**
+Run the `hb-ui-ux-conformance-reviewer` specialist across all Phase 3 surfaces for a final cross-surface UX consistency review. Verify: `@hbc/ui-kit` alignment, no feature-local duplicate primitives, cross-surface UX consistency between Project Hub and Personal Work Hub (Phase 2), mold-breaker MB-01–MB-08 alignment. Record conformance evidence in P3-H1 §13 (Evidence Collection Log). This sign-off is required before any surface can pass its §18 acceptance gate.
+Governing: P3-C1 §14.5; P3-H1 §6.7.12
+
+---
+
+### Stage 11 — Acceptance and Validation
+
+Must follow all implementation stages and Stage 10 (UI Conformance Review). Execute in order — staging scenarios build on one another.
+
+**11.1 — Execute all 10 staging scenarios (P3-H1 §9)**
+Run each staging scenario defined in P3-H1 §9 in the order listed. Collect evidence artifacts for each passing scenario. The scenarios in dependency order are:
+1. §9.1 Activation flow
+2. §9.2 Project switching
+3. §9.3 Stale draft handling
+4. §9.4 Cross-lane launch SPFx→PWA
+5. §9.5 Cross-lane launch PWA→SPFx
+6. §9.6 Module spine publication
+7. §9.7 Canvas governance enforcement
+8. §9.8 Report lifecycle (PX Review and Owner Report)
+9. §9.9 Push-to-Project-Team
+10. §9.10 Executive review loop
+
+**11.2 — §18.1–§18.7 gate validation**
+Validate each checklist item in P3-H1 §2–§8 including the §6.7 UI Conformance criteria. Record pass/fail status and evidence artifact reference for every item. All 95 items must pass before Phase 3 can advance to release.
+Governing: P3-H1 §2–§8
+
+**11.3 — Cross-lane evidence matrix completion**
+Complete the evidence collection matrix in P3-G3 §10: shared evidence, PWA-specific evidence, and SPFx escalation count (13 scenarios). The matrix must be filled with concrete artifact references.
+Governing: P3-G3 §10
+
+**11.4 — Release-readiness criteria check**
+Verify all 10 release-readiness criteria in P3-H1 §10, including the central project-governance policy record enforcement (10.9) and UI conformance evidence (10.10). Confirm the defer list in P3-H1 §11 is reviewed and no deferred items have leaked into Phase 3 acceptance.
+Governing: P3-H1 §10–§11
+
+**11.5 — Documentation alignment review**
+Verify that all 19 deliverables (P3-A1 through P3-H1) reflect the implemented state. Update any deliverable that drifted during implementation. Update the parent Phase 3 Plan (§18–§20) to reflect final implementation decisions.
+Governing: P3-H1 §10.5, P3-H1 §12
+
+---
+
+### Key Blocker Dependencies Summary
+
+| Dependency | Owner | Impact if missing | Gate |
+|---|---|---|---|
+| `@hbc/field-annotations` section/block anchor support | `@hbc/field-annotations` team | Executive review annotation layer cannot be built | Stage 0.1 |
+| `@hbc/auth` AccessControlOverrideRecord | `@hbc/auth` team | Out-of-scope PER grants cannot be issued or revoked | Stage 0.2 |
+| `@hbc/my-work-feed` provenance work item model | `@hbc/my-work-feed` team | Push-to-Project-Team cannot be implemented | Stage 0.3 |
+| SPFx shell Launch-to-PWA escalation affordance | SPFx shell team | 13 escalation scenarios blocked | Stage 0.4 |
+| `enforce-hbc-tokens` ESLint rule passing in all Phase 3 packages | UI-Kit / tooling team | UI conformance gate blocked | Stage 10.3 |
+
+### Explicit Phase 3 Defer List
+
+The following are explicitly deferred and must not be treated as Phase 3 scope. See P3-H1 §11 for the full list.
+- Direct Procore API budget integration (CSV upload is Phase 3)
+- Smart toolbox-talk topic generation
+- Full CPM authoring
+- Full ERP/accounting behavior
+- Full claims/legal/contract-admin behavior
+- Full jurisdiction-facing permitting package management
+- Deeper field-first execution for QC and Warranty beyond baseline-visible lifecycle
+
+---
+
 ## Related Documents
 
 - [Phase 3 Plan — Project Hub and Project Context](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
@@ -101,6 +484,6 @@
 
 ---
 
-**Last Updated:** 2026-03-21 — P3-H1 authored; all workstreams complete; 19 of 19 Phase 3 deliverables authored. Phase 3 is execution-ready.
+**Last Updated:** 2026-03-22 — Governance model updates applied across all deliverables (dual-key inbound routing, three-tier authority model, PER review layer, Push-to-Project-Team, Safety exclusion, central project-governance policy record, PM↔PE internal review chain, reviewer-generated review runs, department reclassification, lane depth doctrine). Implementation Guide added.
 
 **Governing Plan:** [Phase 3 Plan §14–§15](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

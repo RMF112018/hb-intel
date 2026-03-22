@@ -7,6 +7,22 @@ export type { IBicOwner } from '@hbc/bic-next-move';
 import type { IBicOwner } from '@hbc/bic-next-move';
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Anchor type — what structural level does this annotation target?
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Anchor targeting mode for an annotation.
+ *
+ * field   — classic form-field anchor (default; matches a single input name)
+ * section — section-level anchor (e.g., "Financial Summary section")
+ * block   — block-level anchor (e.g., "cash-flow forecast table")
+ *
+ * Defaults to 'field' when absent, preserving backward compatibility with
+ * all existing annotation data.
+ */
+export type AnchorType = 'field' | 'section' | 'block';
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Annotation intent — what type of feedback is this?
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -66,17 +82,24 @@ export interface IFieldAnnotation {
   recordId: string;
 
   /**
-   * Stable field key this annotation is attached to.
-   * Must match the form field's `name` attribute or a registered field key constant.
-   * Examples: 'totalBuildableArea', 'estimatedGMP', 'projectConstraints'
+   * Stable anchor key this annotation is attached to.
+   * For field anchors: matches the form field's `name` attribute or a registered constant.
+   * For section anchors: uses convention `section:<slug>` (e.g., `section:financial-summary`).
+   * For block anchors: uses convention `block:<slug>` (e.g., `block:cash-flow-table`).
    */
   fieldKey: string;
 
   /**
-   * Human-readable field label captured at creation time.
-   * Stored alongside the annotation so labels remain meaningful if the form field is renamed.
+   * Human-readable anchor label captured at creation time.
+   * Stored alongside the annotation so labels remain meaningful if the target is renamed.
    */
   fieldLabel: string;
+
+  /**
+   * Anchor targeting mode for this annotation.
+   * Defaults to 'field' when absent (backward-compatible with existing data).
+   */
+  anchorType?: AnchorType;
 
   intent: AnnotationIntent;
   status: AnnotationStatus;
@@ -237,6 +260,8 @@ export interface ICreateAnnotationInput {
   fieldLabel: string;
   intent: AnnotationIntent;
   body: string;
+  /** Anchor targeting mode; defaults to 'field' when absent */
+  anchorType?: AnchorType;
   /** Optional assignee (D-08); only allowed when config.allowAssignment is true */
   assignedTo?: IBicOwner | null;
   /** Version number of the record at creation time (D-04) */
@@ -287,6 +312,7 @@ export interface IRawAnnotationListItem {
   RecordId: string;
   FieldKey: string;
   FieldLabel: string;
+  AnchorType: string | null;
   Intent: AnnotationIntent;
   Status: AnnotationStatus;
   AuthorId: string;

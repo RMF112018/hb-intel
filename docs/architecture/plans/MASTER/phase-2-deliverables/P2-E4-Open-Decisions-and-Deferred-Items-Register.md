@@ -129,6 +129,12 @@ Items each deliverable explicitly deferred beyond first release:
 |---|---|---|---|
 | D-E3-1 | KPI threshold band calibration | Requires pilot Week 1 baseline data | During pilot |
 
+### Cross-Phase: Phase 3 Pre-Implementation Evaluation
+
+| # | Item | Rationale | Target |
+|---|---|---|---|
+| X-P3-1 | **`@hbc/field-annotations` section/block anchor support** | Phase 3 Stage 0.1 blocker assessment (P3-E1 §9.2, P3-E2 §3.4). Gap confirmed: data layer supports arbitrary keys, but type semantics and `HbcAnnotationMarker` component assumed field-level targets only. Remediation delivered in `@hbc/field-annotations` v0.2.0 — `AnchorType` discriminator and `HbcAnnotationAnchor` wrapper component added. Backward-compatible. | **Resolved 2026-03-22** |
+
 ---
 
 ## 3. Open Decisions Requiring Resolution

@@ -68,6 +68,32 @@ export const mockAnnotationStates: Record<string, IFieldAnnotation[]> = {
     }),
   ],
 
+  /** Section-level anchor — open comment on a section target */
+  sectionAnchor: [
+    createMockAnnotation({
+      annotationId: 'state-section-001',
+      fieldKey: 'section:financial-summary',
+      fieldLabel: 'Financial Summary',
+      anchorType: 'section',
+      intent: 'comment',
+      status: 'open',
+      body: 'The overall financial summary needs review before the next milestone.',
+    }),
+  ],
+
+  /** Block-level anchor — open clarification-request on a block target */
+  blockAnchor: [
+    createMockAnnotation({
+      annotationId: 'state-block-001',
+      fieldKey: 'block:cash-flow-table',
+      fieldLabel: 'Cash Flow Forecast Table',
+      anchorType: 'block',
+      intent: 'clarification-request',
+      status: 'open',
+      body: 'Please verify the Q3 projections in this table.',
+    }),
+  ],
+
   /** Mixed: 1 open clarification + 1 open comment + 1 resolved — red dot (highest priority) */
   mixed: [
     createMockAnnotation({

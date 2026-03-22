@@ -38,6 +38,7 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 - Depth classification rules (first-class working surface, governed report workspace, lifecycle-visible, spine owner, canvas-first surface)
 - Spine publication alignment (which modules publish to which spines)
 - Domain structure rules (Financial includes Buyout, QC/Warranty as lifecycle-visible)
+- Executive review layer classification (which module surfaces are review-capable in Phase 3; annotation boundary rules)
 
 ### This specification does NOT govern
 
@@ -47,6 +48,7 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 - Module source-of-truth and action-boundary rules — see P3-E2
 - Spreadsheet/document replacement reference — see P3-E3
 - Individual module implementation plans — governed by PH7 plans and Phase 3 execution sequencing
+- Executive review annotation layer implementation details — see [P3-D2 §2.5](P3-D2-Project-Health-Contract.md), [P3-F1](P3-F1-Reports-Workspace-Contract.md), [P3-A2 §3.2](P3-A2-Membership-Role-Authority-Contract.md)
 
 ---
 
@@ -65,6 +67,8 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 | **Module boundary** | The hard demarcation of what a module owns vs. what it consumes from other modules or upstream systems |
 | **PH7 reconciliation** | The process of aligning PH7-planned detailed module behavior with the Phase 3 module structure and current repo truth |
 | **Lifecycle-visible** | A module that retains navigation, basic state display, and architectural placement without full operational depth |
+| **Review-capable surface** | A module surface on which Portfolio Executive Reviewer annotations may be placed via the executive review layer in Phase 3; classified per §9 |
+| **Executive review annotation layer** | A separate artifact layer owned by `@hbc/field-annotations` carrying PER review annotations on module fields; never a mutation path for module source-of-truth records |
 
 ---
 
@@ -350,7 +354,55 @@ Per P3-G1 §4, the following summarizes lane depth by module:
 
 ---
 
-## 9. Repo-Truth Reconciliation Notes
+## 9. Executive Review Layer Classification
+
+This section classifies which Phase 3 module surfaces support executive review annotations and governs the annotation layer boundary rules. It applies the locked authority model from P3-A2 §3.2 to module-level surfaces.
+
+### 9.1 Phase 3 review-capable module surfaces
+
+Executive review annotations (placed by Portfolio Executive Reviewers) are permitted only on the following surfaces in Phase 3:
+
+| Module | Review-capable (Phase 3) | Annotation depth | Governing contract |
+|---|---|---|---|
+| Financial | **Yes** | Full field-level (not summary-only) | P3-E2 §3.4, P3-A2 §4.1 |
+| Schedule | **Yes** | Full field-level | P3-E2 §4.4, P3-A2 §4.1 |
+| Constraints | **Yes** | Full field-level | P3-E2 §5.4, P3-A2 §4.1 |
+| Permits | **Yes** | Full field-level | P3-E2 §6.4, P3-A2 §4.1 |
+| Safety | **No — excluded (Phase 3)** | Read-only access only; no review annotation layer | P3-A2 §4.1; see §9.3 |
+| Reports | **Yes** | Governed by P3-F1; PER report permissions and review run rules apply | P3-F1 |
+| Project Health | **Yes** | Full field-level; annotation isolation rules per P3-D2 §2.5 | P3-D2 §2.5 |
+| Home / Canvas | **No** | Presentation surface; not a review target | — |
+| Work Queue | **No** | Operational queue surface; not a review target | — |
+| Activity | **No** | Immutable event log; not a review target | — |
+| Related Items | **No** | Registry surface; not a review target | — |
+| Quality Control | **No (deferred)** | Lifecycle-visible; review layer deferred | — |
+| Warranty | **No (deferred)** | Lifecycle-visible; review layer deferred | — |
+
+### 9.2 Executive review annotation layer boundary rules
+
+All review-capable module implementations MUST enforce the following rules:
+
+| Rule | Description |
+|---|---|
+| **Annotation isolation** | Review annotations MUST be stored in a separate review-layer artifact (`@hbc/field-annotations`). They MUST NOT be stored in or alongside module source-of-truth records. |
+| **No mutation path** | Review annotations MUST NOT modify any module source-of-truth record. Annotations are read-layer overlays only. No annotation may trigger a write to the module's working state. |
+| **Package ownership** | `@hbc/field-annotations` owns the annotation artifact. Module packages do not own or store review annotations. |
+| **Visibility before push** | Review annotations are restricted to the review circle until the Portfolio Executive Reviewer explicitly pushes to the project team. |
+| **Push creates structured work item** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13, not an untracked notification. |
+| **Full field-level anchor depth** | Phase 3 annotation anchors on review-capable surfaces are full field-level, not summary-level only. |
+| **Blocker dependency** | Phase 3 executive review depends on `@hbc/field-annotations` supporting section/block anchors for non-classic anchor targets. **Evaluated 2026-03-22 — gap confirmed, remediation delivered in `@hbc/field-annotations` v0.2.0. `AnchorType` discriminator and `HbcAnnotationAnchor` component added. Stage 7 unblocked.** |
+
+### 9.3 Safety exclusion rationale
+
+Safety is explicitly excluded from Phase 3 executive review for the following reasons:
+
+- Safety data is operationally sensitive and compliance-critical. An annotation layer introduces risk of misrepresentation without operational authority.
+- Portfolio Executive Reviewer posture provides read-only access to Safety module data — there is no annotation capability and no push-to-team pathway from Safety in Phase 3.
+- This exclusion may be revisited in a later phase with appropriate governance controls, including explicit safety-review authority definitions.
+
+---
+
+## 10. Repo-Truth Reconciliation Notes
 
 1. **Project Health module — compliant**
    Fully implemented in `@hbc/features-project-hub` health-pulse (SF21, ADR-0110). Types, computors, components, hooks, integrations, governance all live and tested at ≥95% coverage. Classified as **compliant**.
@@ -378,19 +430,19 @@ Per P3-G1 §4, the following summarizes lane depth by module:
 
 ---
 
-## 10. Acceptance Gate Reference
+## 11. Acceptance Gate Reference
 
 **Gate:** Module classification and boundary gates (Phase 3 plan §18.5)
 
 | Field | Value |
 |---|---|
-| **Pass condition** | All modules classified, boundaries locked, PH7 reconciliation complete, spine publication obligations mapped, lane depth aligned with P3-G1 §4 |
+| **Pass condition** | All modules classified, boundaries locked, PH7 reconciliation complete, spine publication obligations mapped, lane depth aligned with P3-G1 §4, executive review layer classified per §9 and annotation boundary rules locked per P3-E2 §3.4–§7.4 |
 | **Evidence required** | P3-E1 (this document), module classification matrix (§2), boundary rules (§3), PH7 reconciliation map (§5), spine publication alignment (§7), lane depth summary (§8) |
 | **Primary owner** | Architecture + Project Hub platform owner |
 
 ---
 
-## 11. Policy Precedence
+## 12. Policy Precedence
 
 This specification establishes the **module classification and boundary definitions** that downstream work must conform to:
 
@@ -398,18 +450,19 @@ This specification establishes the **module classification and boundary definiti
 |---|---|
 | **Phase 3 Plan §11–§12** | Provides the module structure, classification tiers, and boundary rules that this specification codifies |
 | **PH7 Plans (ADR-0091)** | Provide the detailed module behavior definitions that this specification reconciles into the Phase 3 structure |
+| **P3-A2 §3.2** — PER Governed Authority | Defines the Portfolio Executive Reviewer posture and review-layer rules that §9 applies to module surfaces |
 | **P3-A3 §7** — Module Publication Matrix | Defines spine publication obligations that each module must satisfy per §7 |
 | **P3-G1 §4** — Module Lane Depth Matrix | Defines per-capability lane depth that each module must satisfy per §8 |
 | **P3-D1–D4** — Spine Contracts | Define the spine contracts that modules must publish into |
 | **P3-C2** — Mandatory Core Tile Family | Defines mandatory tiles that spine and canvas modules must support |
-| **P3-E2** — Module Source-of-Truth / Action-Boundary Matrix | Must align module boundaries with source-of-truth and action-boundary rules |
+| **P3-E2** — Module Source-of-Truth / Action-Boundary Matrix | Must align module boundaries with source-of-truth, action-boundary, and executive review annotation boundary rules |
 | **P3-E3** — Spreadsheet/Document Replacement Reference | Must align replacement workflows with module boundary definitions |
-| **P3-F1** — Reports Contract | Must implement the Reports module per the governed report workspace classification |
-| **Any module implementation** | Must respect the classification, boundary, and spine publication rules in this specification |
+| **P3-F1** — Reports Contract | Must implement the Reports module per the governed report workspace classification; governs PER report permissions |
+| **Any module implementation** | Must respect the classification, boundary, spine publication, and executive review annotation boundary rules in this specification |
 
 If a downstream deliverable conflicts with this specification, this specification takes precedence for module classification and boundary definitions unless the Architecture lead approves a documented exception.
 
 ---
 
-**Last Updated:** 2026-03-21
+**Last Updated:** 2026-03-22
 **Governing Authority:** [Phase 3 Plan §11–§12](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

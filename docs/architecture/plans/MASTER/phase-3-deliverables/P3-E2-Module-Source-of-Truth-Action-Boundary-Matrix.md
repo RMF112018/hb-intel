@@ -40,13 +40,16 @@ This is a **mandatory Phase 3 acceptance gate** per §18.5: "Financial, Schedule
 - Data mutation rules (who can write what, through which path)
 - Governed override rules (where manual overrides are permitted and how they are tracked)
 - Upstream integration authority (what external systems remain authoritative for)
+- Executive review annotation boundary rules (per-module: which actions are and are not permitted in the executive review layer)
 
 ### This specification does NOT govern
 
 - Module classification or depth — see [P3-E1](P3-E1-Phase-3-Module-Classification-Matrix.md)
+- Which module surfaces are review-capable in Phase 3 — classification is in [P3-E1 §9](P3-E1-Phase-3-Module-Classification-Matrix.md)
 - Spine implementation details — see [P3-D1](P3-D1-Project-Activity-Contract.md)–[P3-D4](P3-D4-Related-Items-Registry-Presentation-Contract.md)
 - Per-capability lane depth — see [P3-G1 §4](P3-G1-Lane-Capability-Matrix.md)
 - Spreadsheet/document replacement details — see P3-E3
+- Executive review annotation layer implementation details (`@hbc/field-annotations`) — see P3-E1 §9.2 and [P3-D2 §2.5](P3-D2-Project-Health-Contract.md)
 
 ---
 
@@ -63,6 +66,8 @@ This is a **mandatory Phase 3 acceptance gate** per §18.5: "Financial, Schedule
 | **Governed override** | A manual value entry that overrides system-derived data, carrying provenance metadata (who, when, why, approval) |
 | **Normalized state** | The operational state that Project Hub owns after ingesting, transforming, and enriching upstream data |
 | **Baseline input** | Raw data from upstream systems (budget CSV, schedule XER/XML, jurisdictional permits) that Project Hub ingests but does not originate |
+| **Executive review annotation layer** | A separate review-layer artifact owned by `@hbc/field-annotations` carrying Portfolio Executive Reviewer annotations on module fields; never a mutation path for module source-of-truth records |
+| **Review-capable surface** | A module surface on which PER annotations may be placed in Phase 3; classified per P3-E1 §9 |
 
 ---
 
@@ -159,6 +164,17 @@ This is a **mandatory Phase 3 acceptance gate** per §18.5: "Financial, Schedule
 
 Project Hub is NOT the ERP/accounting system-of-record. Financial is an operational financial surface that replaces spreadsheet workflow for project-team use. Budget baseline comes from upstream; working state is Project Hub's.
 
+### 3.4 Executive review annotation boundary
+
+Financial is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations at full field-level depth on Financial module content.
+
+| Rule | Description |
+|---|---|
+| **Annotation isolation** | Review annotations MUST be stored in a separate `@hbc/field-annotations` artifact. They MUST NOT be stored in or written to any Financial source-of-truth record (working forecast state, GC/GR model, Cash Flow model, Buyout state, etc.). |
+| **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of Financial working state — not a budget line, not a forecast override, not a checklist completion. |
+| **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
+| **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
+
 ---
 
 ## 4. Schedule Source-of-Truth
@@ -184,6 +200,17 @@ Project Hub is NOT the ERP/accounting system-of-record. Financial is an operatio
 
 Project Hub is NOT full CPM authoring. Schedule is an operational schedule surface. Upstream schedule systems remain authoritative for detailed baseline/update data and full CPM network logic. Project Hub owns normalized project schedule context.
 
+### 4.4 Executive review annotation boundary
+
+Schedule is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations at full field-level depth on Schedule module content.
+
+| Rule | Description |
+|---|---|
+| **Annotation isolation** | Review annotations MUST be stored in a separate `@hbc/field-annotations` artifact. They MUST NOT be stored in or written to any Schedule source-of-truth record. |
+| **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of milestone state, governed forecast overrides, projections, or upload history. |
+| **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
+| **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
+
 ---
 
 ## 5. Constraints Source-of-Truth
@@ -206,6 +233,17 @@ Supporting artifacts/documents MAY live in governed external destinations (Share
 
 Constraints module is the operational ledger owner. No upstream system is authoritative for constraint data — Project Hub originates and owns all constraint, change tracking, and delay log records.
 
+### 5.4 Executive review annotation boundary
+
+Constraints is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations at full field-level depth on Constraints module content.
+
+| Rule | Description |
+|---|---|
+| **Annotation isolation** | Review annotations MUST be stored in a separate `@hbc/field-annotations` artifact. They MUST NOT be stored in or written to the Constraints operational ledger. |
+| **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of constraint records, Change Tracking entries, Delay Log entries, due dates, BIC assignments, or delay impact values. |
+| **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
+| **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
+
 ---
 
 ## 6. Permits Source-of-Truth
@@ -226,6 +264,17 @@ Jurisdictional artifacts/documents and governed storage locations MAY exist outs
 ### 6.3 Boundary rule
 
 Permits module is the operational ledger owner for permits and inspections. External jurisdictional documents are referenced, not owned.
+
+### 6.4 Executive review annotation boundary
+
+Permits is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations at full field-level depth on Permits module content.
+
+| Rule | Description |
+|---|---|
+| **Annotation isolation** | Review annotations MUST be stored in a separate `@hbc/field-annotations` artifact. They MUST NOT be stored in or written to the permit ledger or inspection records. |
+| **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of permit status, inspection results/linkage, or expiration tracking. |
+| **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
+| **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
 
 ---
 
@@ -251,6 +300,17 @@ Governed safety artifacts/documents MAY live in destination libraries. Project H
 ### 7.3 Boundary rule
 
 Safety module is the operational platform owner. It replaces the current Site Specific Safety Plan file-based workflow. All operational safety state originates in and is owned by Project Hub.
+
+### 7.4 Executive review exclusion (Phase 3)
+
+Safety is **excluded from Phase 3 executive review** (P3-E1 §9.1 and §9.3). The following rules apply:
+
+| Rule | Description |
+|---|---|
+| **No annotation layer** | No executive review annotation layer exists for the Safety module in Phase 3. Portfolio Executive Reviewers MUST NOT place review annotations on Safety module content. |
+| **Read-only PER access** | PER posture grants read-only access to Safety module data. Read-only access does not constitute a review layer — there is no annotation capability and no push-to-team pathway from Safety in Phase 3. |
+| **No mutation path from PER** | PER access to Safety data is strictly non-operational. No PER action may trigger any write to Safety source-of-truth records. |
+| **Rationale** | Safety data is operationally sensitive and compliance-critical. This exclusion may be revisited in a later phase with appropriate governance controls (P3-E1 §9.3). |
 
 ---
 
@@ -281,6 +341,18 @@ Safety module is the operational platform owner. It replaces the current Site Sp
 ### 8.3 Boundary rule
 
 Reports module owns the report lifecycle (definition, generation, draft, approval, release). Reports does NOT own the module data it assembles — it consumes snapshots from the respective module spines at generation time.
+
+### 8.4 Executive review boundary
+
+Reports is a **review-capable surface** in Phase 3 but under governance that differs from the operational module surfaces. PER authority over Reports is governed by P3-F1 (the central project-governance policy record and report-family release rules).
+
+| Rule | Description |
+|---|---|
+| **Annotation isolation** | Review annotations on report content MUST NOT modify report definitions, the run ledger, draft state, or PM narrative. Annotations are a separate review-layer artifact. |
+| **No PM draft authority** | PER has no authority over PM draft state. PM draft state confirmation is PM/PE-owned exclusively. PER MUST NOT initiate, approve, or modify the PM draft confirmation step. |
+| **Reviewer-generated review runs** | PER may generate review runs only against the latest already-confirmed PM-owned snapshot. PER CANNOT generate a run against an unconfirmed or in-progress PM draft. |
+| **Release authority** | PER release authority on a given report family is governed by the central project-governance policy record (P3-F1). It is not universal — family-by-family, governed by policy. |
+| **PX Review cannot bypass PE internal review** | The PM↔PE internal review chain, when configured at project level, MUST complete before PX Review proceeds. PER cannot bypass this chain. |
 
 ---
 
@@ -398,6 +470,9 @@ Reports module owns the report lifecycle (definition, generation, draft, approva
 | Health scoring is deterministic projection — no UI-side recomputation | ADR-0110 D-02, P3-D2 §2.4 |
 | Relationships MUST NOT create cross-feature package imports | P3-A3 §6.2 |
 | Modules MUST NOT directly compute health scores | P3-A3 §4.2 |
+| Executive review annotations MUST NOT mutate any module source-of-truth record — Financial, Schedule, Constraints, Permits, Reports, or Health | P3-E1 §9.2, §3.4, §4.4, §5.4, §6.4, §8.4 |
+| Executive review annotations MUST be stored in a separate `@hbc/field-annotations` artifact, not in the module's domain storage | P3-E1 §9.2 |
+| PER MUST NOT place review annotations on Safety module content in Phase 3 | P3-E1 §9.3, §7.4 |
 
 ---
 
@@ -459,6 +534,9 @@ Overrides MUST always carry provenance metadata. No override may be applied sile
 6. **PH7 plans — aligned**
    PH7 module plans provide implementation-level detail that is consistent with the source-of-truth and action-boundary rules defined here. No reconciliation conflicts. Classified as **aligned**.
 
+7. **Executive review annotation boundary rules — gap filled**
+   No per-module executive review annotation boundary rules previously existed in this specification. Rules now locked in §3.4 (Financial), §4.4 (Schedule), §5.4 (Constraints), §6.4 (Permits), §7.4 (Safety exclusion), §8.4 (Reports), and in §11.2 mutation prohibitions. Classified as **gap — remediated in `@hbc/field-annotations` v0.2.0 (2026-03-22).** `AnchorType` discriminator and `HbcAnnotationAnchor` component added for section/block anchor targets.
+
 ---
 
 ## 14. Acceptance Gate Reference
@@ -467,8 +545,8 @@ Overrides MUST always carry provenance metadata. No override may be applied sile
 
 | Field | Value |
 |---|---|
-| **Pass condition** | Financial, Schedule, Constraints, Permits, Safety, Work Queue, and Reports meet their locked source-of-truth and action-boundary rules |
-| **Evidence required** | P3-E2 (this document), module implementations respecting authority matrices, spine publication flowing through governed boundaries, mutation rules enforced, override provenance tracked |
+| **Pass condition** | Financial, Schedule, Constraints, Permits, Safety, Work Queue, and Reports meet their locked source-of-truth and action-boundary rules; executive review annotation boundary rules enforced per §3.4–§8.4; Safety exclusion in place; annotation isolation mutation prohibitions verified |
+| **Evidence required** | P3-E2 (this document), module implementations respecting authority matrices, spine publication flowing through governed boundaries, mutation rules enforced, override provenance tracked, executive review annotation artifacts isolated from module source-of-truth records |
 | **Primary owner** | Architecture + Project Hub platform owner |
 
 ---
@@ -492,5 +570,5 @@ If a downstream deliverable conflicts with this specification, this specificatio
 
 ---
 
-**Last Updated:** 2026-03-21
+**Last Updated:** 2026-03-22
 **Governing Authority:** [Phase 3 Plan §6, §12](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
