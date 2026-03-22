@@ -1824,6 +1824,27 @@ Badges update reactively via TanStack Query cache — same data source as the fe
 
 ---
 
+### 10A.50 UIF-031-addl: Remove Unwanted Scrollbars from Work Item Tables
+
+**Severity:** High
+**Category:** Layout / PWA
+
+**Observed state:** Grouped data tables passed an invalid `autoHeight` prop to `HbcDataTable` (not in `HbcDataTableProps` type definition). The prop was silently ignored, producing a pre-existing TypeScript error (`Property 'autoHeight' does not exist on type 'HbcDataTableProps'`). The `height` prop already defaults to `'auto'` in `HbcDataTable`, which applies `overflow: 'visible'` — the correct behavior for small non-virtualized tables that should expand to fit content without scrollbars.
+
+**Fix:** Removed the invalid `autoHeight` prop from the grouped `HbcDataTable` call in `HbcMyWorkFeed`. The default `height='auto'` provides the correct `overflow: 'visible'` behavior, preventing scrollbars on content-sized tables. Section wrappers already use `overflow: 'visible'` (UIF-019-followup).
+
+**Acceptance criteria:**
+- No vertical scrollbar on work item section tables when all rows fit — **MET** (`height: 'auto'` → `overflow: 'visible'`)
+- No horizontal scrollbar from vertical scrollbar width consumption — **MET** (no scrollbar present)
+- All work item rows fully visible without scrolling — **MET** (auto-height container)
+- Pre-existing `autoHeight` TS error resolved — **MET** (invalid prop removed)
+
+**Files modified:**
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — removed invalid `autoHeight` prop
+- `packages/my-work-feed/package.json` — version 0.0.29 → 0.0.30
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

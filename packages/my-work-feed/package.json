@@ -1,6 +1,6 @@
 {
   "name": "@hbc/my-work-feed",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "private": true,
   "description": "Cross-module My Work aggregation feed for HB Intel",
   "type": "module",

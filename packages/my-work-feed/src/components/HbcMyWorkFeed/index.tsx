@@ -858,7 +858,6 @@ export function HbcMyWorkFeed({
                         data={group.items}
                         columns={workItemColumns}
                         isLoading={false}
-                        autoHeight
                         estimatedRowHeight={ESTIMATED_ROW_HEIGHT}
                         mobileCardFields={['title', 'dueDateIso']}
                         onRowClick={(item) => {
