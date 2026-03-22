@@ -123,11 +123,10 @@ const useStyles = makeStyles({
   cardHoverIcon: {
     opacity: '0.8',
   },
-  // INS-006: Subtitle below the value — small muted descriptor text.
+  // UIF-021-addl: Subtitle upgraded from 0.625rem (10px) to label scale (12px/500)
+  // to meet UI Kit field-readability minimum for status/badge text.
   subtitle: {
-    fontSize: '0.625rem',
-    fontWeight: '400',
-    lineHeight: '1.4',
+    ...hbcTypeScale.label,
     color: tokens.colorNeutralForeground3,
   },
 });
@@ -205,7 +204,10 @@ export const HbcKpiCard: React.FC<HbcKpiCardProps> = ({
       <span className={styles.value}>{value}</span>
       {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
       {trend && (
-        <span className={mergeClasses(styles.trend, trendClass)}>
+        <span
+          className={mergeClasses(styles.trend, trendClass)}
+          aria-label={`Trend: ${trend.direction === 'up' ? 'improving' : trend.direction === 'down' ? 'worsening' : 'no change'}`}
+        >
           {TREND_ARROWS[trend.direction]} {trend.label}
         </span>
       )}

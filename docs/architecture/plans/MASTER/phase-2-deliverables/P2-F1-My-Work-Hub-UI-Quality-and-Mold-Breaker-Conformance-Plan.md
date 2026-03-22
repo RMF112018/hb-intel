@@ -1604,6 +1604,30 @@ Wired `onClearKpiFilter` callback through `MyWorkPage` → `HubPrimaryZone` → 
 
 ---
 
+### 10A.41 UIF-021-addl: KPI Sub-label Size and Trend Accessibility (High)
+
+**Severity:** High
+**Category:** Visual Hierarchy / Design System
+**Governing authority:** `UI-Kit-Field-Readability-Standards.md` — 12px minimum for status/badge text. WCAG 1.3.1 — semantic meaning must not rely on text symbols alone. `UI-Kit-Visual-Language-Guide.md` — status indicators use semantic color.
+
+**Observed state:** KPI card sub-labels ("active work items") rendered at 10px (`0.625rem`) — below the UI Kit field-readability minimum of 12px. Trend indicators used raw Unicode arrows (▲▼▶) with no `aria-label`, making them inaccessible to screen readers. Color coding already existed (green/red/gray via `HBC_STATUS_COLORS`).
+
+**Fix:** Two changes in `HbcKpiCard`:
+1. Replaced subtitle inline font sizing (`0.625rem`/400) with `hbcTypeScale.label` (12px/500) — meets field-readability minimum
+2. Added `aria-label` to the trend `<span>` that describes direction semantically ("Trend: improving" / "Trend: worsening" / "Trend: no change")
+
+**Acceptance criteria:**
+- All sub-labels ≥ 12px — **MET** (`hbcTypeScale.label` = 0.75rem = 12px)
+- Trend indicator has `aria-label` for screen readers — **MET** (semantic direction label added)
+- Color coding matches UI Kit status ramp tokens — **MET** (already used `HBC_STATUS_COLORS.success`/`.error`/neutral for up/down/flat)
+- No raw Unicode arrows without accessible alternative — **MET** (arrows remain visual but `aria-label` provides semantic meaning)
+
+**Files modified:**
+- `packages/ui-kit/src/HbcKpiCard/index.tsx` — subtitle font size upgrade + trend `aria-label`
+- `packages/ui-kit/package.json` — version 2.2.44 → 2.2.45
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
