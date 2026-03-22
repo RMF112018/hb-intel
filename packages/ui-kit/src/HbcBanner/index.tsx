@@ -19,6 +19,7 @@ import {
   TRANSITION_FAST,
   body,
 } from '../theme/index.js';
+import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { HBC_SPACE_MD } from '../theme/grid.js';
 import {
   StatusInfoIcon,
@@ -34,6 +35,15 @@ const VARIANT_RAMP: Record<BannerVariant, { bg: string; text: string; accent: st
   success: { bg: HBC_STATUS_RAMP_GREEN['90'], text: HBC_STATUS_RAMP_GREEN['10'], accent: HBC_STATUS_COLORS.success },
   warning: { bg: HBC_STATUS_RAMP_AMBER['90'], text: HBC_STATUS_RAMP_AMBER['10'], accent: HBC_STATUS_COLORS.warning },
   error:   { bg: HBC_STATUS_RAMP_RED['90'],   text: HBC_STATUS_RAMP_RED['10'],   accent: HBC_STATUS_COLORS.error },
+};
+
+// UIF-028-addl: Dark-shell-compatible ramp for field/dark mode.
+// Uses translucent tinted backgrounds with light text for readability on dark surfaces.
+const FIELD_VARIANT_RAMP: Record<BannerVariant, { bg: string; text: string; accent: string }> = {
+  info:    { bg: 'rgba(59,130,246,0.12)',  text: '#93C5FD', accent: '#60A5FA' },
+  success: { bg: 'rgba(34,197,94,0.12)',   text: '#86EFAC', accent: '#22C55E' },
+  warning: { bg: 'rgba(251,191,36,0.12)',  text: '#FDE68A', accent: '#FBBF24' },
+  error:   { bg: 'rgba(239,68,68,0.12)',   text: '#FCA5A5', accent: '#EF4444' },
 };
 
 const VARIANT_ICON: Record<BannerVariant, React.FC<{ size?: 'sm' | 'md' | 'lg'; color?: string }>> = {
@@ -98,7 +108,9 @@ export const HbcBanner: React.FC<HbcBannerProps> = ({
   className,
 }) => {
   const classes = useStyles();
-  const ramp = VARIANT_RAMP[variant];
+  // UIF-028-addl: Select dark-compatible ramp in field/dark mode.
+  const { isFieldMode } = useHbcTheme();
+  const ramp = isFieldMode ? FIELD_VARIANT_RAMP[variant] : VARIANT_RAMP[variant];
   const DefaultIcon = VARIANT_ICON[variant];
 
   const role = variant === 'warning' || variant === 'error' ? 'alert' : 'status';

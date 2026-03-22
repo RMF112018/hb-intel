@@ -21,6 +21,7 @@
  * Hidden when freshness is 'live' and data is within the freshness window.
  * Shows stale-while-revalidate treatment when refreshing stale data.
  */
+import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import { HBC_BREAKPOINT_MOBILE, HbcStatusBadge, HbcBanner, HbcButton } from '@hbc/ui-kit';
@@ -100,6 +101,10 @@ export function HubFreshnessIndicator({
   const { freshness, lastRefreshedIso, isWithinFreshnessWindow, isStaleWhileRevalidating, degradedSourceCount, degradedSources } =
     trustState;
 
+  // UIF-028-addl: Dismissible banner — resets when degraded state changes.
+  const [dismissed, setDismissed] = useState(false);
+  useEffect(() => setDismissed(false), [degradedSourceCount]);
+
   // P2-B3 §5: Hide when live and within freshness window
   if (freshness === 'live' && isWithinFreshnessWindow && !isStaleWhileRevalidating) {
     return null;
@@ -120,15 +125,20 @@ export function HubFreshnessIndicator({
   const hasDegradedSources = tier !== 'essential' && freshness === 'partial' && degradedSourceCount > 0;
 
   // UIF-005-addl: Promote partial-sync to HbcBanner when sources are degraded.
-  // Banner is not dismissible — the warning persists until the issue is resolved.
+  // UIF-028-addl: Banner is now dismissible; resets on degraded-state change.
   // UIF-014-addl: Defensive fallback when degradedSources is empty but count > 0.
-  if (hasDegradedSources) {
+  if (hasDegradedSources && !dismissed) {
     const sourceNames = degradedSources
       .map((s) => SOURCE_DISPLAY_NAMES[s] ?? s)
       .filter(Boolean)
       .join(', ');
 
-    const syncSuffix = relativeTime ? ` Last synced ${relativeTime}.` : '';
+    // UIF-028-addl: Unambiguous sync suffix — when source names are unknown
+    // (fallback), say "Last sync attempt was incomplete" instead of the
+    // contradictory "Last synced just now" which implies success.
+    const syncSuffix = !sourceNames
+      ? (relativeTime ? ' Last sync attempt was incomplete.' : '')
+      : (relativeTime ? ` Last synced ${relativeTime}.` : '');
 
     // UIF-014-addl: When source names can't be resolved, use generic fallback
     // so the banner never renders with blank interpolation variables.
@@ -142,7 +152,7 @@ export function HubFreshnessIndicator({
 
     return (
       <div className={styles.bannerWrap} data-hub-trust={freshness}>
-        <HbcBanner variant="warning">
+        <HbcBanner variant="warning" onDismiss={() => setDismissed(true)}>
           <div className={styles.bannerContent}>
             <span>{message}</span>
             {onRetry && (

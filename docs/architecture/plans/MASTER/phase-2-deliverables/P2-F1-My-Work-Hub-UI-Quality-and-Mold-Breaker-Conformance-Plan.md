@@ -1752,6 +1752,36 @@ Badges update reactively via TanStack Query cache — same data source as the fe
 
 ---
 
+### 10A.47 UIF-028-addl: Fix Contradictory Banner Copy, Dark Theme, and Dismissibility (Critical)
+
+**Severity:** Critical
+**Category:** State Design / PWA
+**Governing authority:** MB-01 (Lower Cognitive Load) — unambiguous state communication. MB-08 (No Version-Boundary Seams) — banner must adapt to dark shell. `UI-Kit-Mold-Breaker-Principles.md`.
+
+**Observed state:** Alert banner simultaneously said "data sources are unavailable" AND "Last synced just now" — logically contradictory. The `#FFF0D4` cream background (light-mode amber) was jarring inside the dark shell. Banner was not dismissible.
+
+**Fix — three parts:**
+
+1. **Message copy** (HubFreshnessIndicator): When source names are unknown (fallback), changed sync suffix from "Last synced {time}" to "Last sync attempt was incomplete." — unambiguous. Named-source messages retain "Last synced {time}" since partial data IS timestamped.
+
+2. **Dark-shell HbcBanner** (HbcBanner): Added `useHbcTheme()` with `FIELD_VARIANT_RAMP` — translucent tinted backgrounds (`rgba(251,191,36,0.12)`) with light amber text for field/dark mode. Light-mode ramp unchanged.
+
+3. **Dismissible**: Added `dismissed` state to HubFreshnessIndicator that resets on `degradedSourceCount` change. Passes `onDismiss` to HbcBanner.
+
+**Acceptance criteria:**
+- Banner background is dark-shell compatible — **MET** (`FIELD_VARIANT_RAMP` with translucent bg via `useHbcTheme().isFieldMode`)
+- Message copy is unambiguous — **MET** (fallback: "Last sync attempt was incomplete."; named sources: "Last synced {time}.")
+- Retry button triggers clear loading state — **MET** (existing `onRetry` → `refetch()` wiring unchanged)
+- Banner is dismissible — **MET** (`onDismiss` passed to HbcBanner; state resets on degraded-count change)
+
+**Files modified:**
+- `packages/ui-kit/src/HbcBanner/index.tsx` — `useHbcTheme()`, `FIELD_VARIANT_RAMP`, dark-mode ramp selection
+- `apps/pwa/src/pages/my-work/HubFreshnessIndicator.tsx` — unambiguous sync suffix, dismissible state
+- `packages/ui-kit/package.json` — version 2.2.47 → 2.2.48
+- `apps/pwa/package.json` — version 0.12.53 → 0.12.54
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
