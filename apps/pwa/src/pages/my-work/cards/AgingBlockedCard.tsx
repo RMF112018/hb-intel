@@ -13,7 +13,6 @@ import {
   HbcKpiCard,
   HbcSpinner,
   HBC_SPACE_MD,
-  HBC_BREAKPOINT_MOBILE,
   HBC_STATUS_RAMP_AMBER,
   HBC_STATUS_RAMP_GRAY,
 } from '@hbc/ui-kit';
@@ -21,16 +20,13 @@ import { RoleGate } from '@hbc/auth';
 import { useMyWorkTeamFeed } from '@hbc/my-work-feed';
 import { Upload, StatusOverdueIcon } from '@hbc/ui-kit/icons';
 
-// UIF-039-addl: Explicit 2-column grid for 2 cards (Escalation Candidates, Aging).
-// Eliminates ghost columns from auto-fit when container is wider than needed.
+// UIF-043-addl: Container-aware auto-fill grid — adapts to actual panel width.
+// 2 cards (Escalation Candidates, Aging) flow into available columns.
 const useStyles = makeStyles({
   kpiGrid: {
     display: 'grid',
     gap: `${HBC_SPACE_MD}px`,
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
-      gridTemplateColumns: '1fr',
-    },
+    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
   },
 });
 

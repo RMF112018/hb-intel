@@ -18,7 +18,7 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import { HbcCard, heading3, HBC_BREAKPOINT_MOBILE, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { HbcCard, heading3, HBC_STATUS_COLORS } from '@hbc/ui-kit';
 import { StatusCompleteIcon, StatusAttentionIcon } from '@hbc/ui-kit/icons';
 import { useComplexity } from '@hbc/complexity';
 import { useMyWork } from '@hbc/my-work-feed';
@@ -64,15 +64,13 @@ const useStyles = makeStyles({
     animationIterationCount: 'infinite',
   },
   // INS-004: Clean 2-column grid replaces the overcomplicated 12-column micro-grid.
-  // Each tile occupies one cell directly — no column-group wrappers needed.
-  // Responsive: single-column on mobile (≤767px).
+  // UIF-043-addl: Single-column tile stack — each card group gets full panel width.
+  // The right panel is already narrow (3fr/2fr or 7fr/5fr); splitting it further
+  // into 2 columns made KPI cards unreadable. Vertical stacking is the correct layout.
   tileGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
+    gridTemplateColumns: '1fr',
     gap: '12px',
-    [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
-      gridTemplateColumns: '1fr',
-    },
   },
 });
 

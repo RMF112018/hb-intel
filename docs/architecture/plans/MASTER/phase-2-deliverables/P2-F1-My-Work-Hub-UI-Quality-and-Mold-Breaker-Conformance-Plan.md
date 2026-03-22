@@ -2138,6 +2138,34 @@ Trend pill styling: `inline-flex`, `borderRadius: 10px`, `padding: 3px 6px`, `fo
 
 ---
 
+### 10A.64 UIF-043-addl: Container-Aware KPI Layout Foundation
+
+**Severity:** High
+**Category:** Layout / Information Density
+
+**Prior defect:** Three fixed-column grids forced KPI cards into unreadable arrangements:
+- `tileGrid` (`HubSecondaryZone`): `repeat(2, 1fr)` put both card groups side-by-side in the narrow right panel, each getting ~50% of ~400px = ~200px, making secondary cards ~60-90px wide
+- `PersonalAnalyticsCard kpiGrid`: `repeat(3, 1fr)` forced 3 cards into ~60px columns
+- `AgingBlockedCard kpiGrid`: `repeat(2, 1fr)` forced 2 cards into ~90px columns
+
+**Fix — three layers:**
+
+1. **`HubSecondaryZone tileGrid`**: Changed from `repeat(2, 1fr)` to `1fr` — card groups now stack vertically, each getting full panel width. Removed unused `HBC_BREAKPOINT_MOBILE` mobile override (now single-column at all widths).
+
+2. **`PersonalAnalyticsCard kpiGrid`**: Changed from `repeat(3, 1fr)` to `repeat(auto-fill, minmax(120px, 1fr))` — adapts to container width. At ~360px panel: 2 columns. At ~500px+: 3 columns. Hero card still spans full width via `gridColumn: '1 / -1'`.
+
+3. **`AgingBlockedCard kpiGrid`**: Same `repeat(auto-fill, minmax(120px, 1fr))` — 2 cards adapt to available space.
+
+**Container queries not used** — Griffel ^1.5.0 doesn't support `@container`. The `auto-fill + minmax()` pattern provides container-responsive behavior at the CSS Grid level without requiring container queries or JS measurement. When Griffel supports `@container`, this can be upgraded.
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/HubSecondaryZone.tsx` — tileGrid to single-column stack
+- `apps/pwa/src/pages/my-work/cards/PersonalAnalyticsCard.tsx` — auto-fill grid
+- `apps/pwa/src/pages/my-work/cards/AgingBlockedCard.tsx` — auto-fill grid
+- `apps/pwa/package.json` — version 0.12.59 → 0.12.60
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
