@@ -9,6 +9,8 @@
  *
  * UIF-027-addl: Count badges on non-active tabs show blocked item count,
  * creating a persistent attention signal for cross-role intelligence.
+ * Badge counts are passed as props because this component renders in the
+ * WorkspacePageShell headerSlot, outside the MyWorkProvider boundary.
  *
  * Persisted via useAutoSaveDraft with 16-hour TTL per P2-D5 §7.
  * Hidden at essential complexity tier.
@@ -21,7 +23,6 @@ import { HbcTabs, HBC_STATUS_COLORS } from '@hbc/ui-kit';
 import type { LayoutTab } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
 import { useAuthStore } from '@hbc/auth';
-import { useMyWorkCounts } from '@hbc/my-work-feed';
 
 const useStyles = makeStyles({
   tabBar: {
@@ -59,24 +60,22 @@ function TabBadge({ count }: { count: number }): ReactNode {
 export interface HubTeamModeSelectorProps {
   activeMode: TeamMode;
   onModeChange: (mode: TeamMode) => void;
+  /** UIF-027-addl: Blocked count for "Delegated by Me" tab badge. */
+  delegatedBlockedCount?: number;
+  /** UIF-027-addl: Blocked count for "My Team" tab badge. */
+  teamBlockedCount?: number;
 }
 
 export function HubTeamModeSelector({
   activeMode,
   onModeChange,
+  delegatedBlockedCount = 0,
+  teamBlockedCount = 0,
 }: HubTeamModeSelectorProps): ReactNode {
   const styles = useStyles();
   const { tier } = useComplexity();
   const session = useAuthStore((s) => s.session);
   const isExecutive = session?.resolvedRoles.includes('Executive') ?? false;
-
-  // UIF-027-addl: Fetch blocked counts for non-active team modes.
-  const { counts: delegatedCounts } = useMyWorkCounts(
-    activeMode !== 'delegated-by-me' ? { teamMode: 'delegated-by-me' } : undefined,
-  );
-  const { counts: teamCounts } = useMyWorkCounts(
-    isExecutive && activeMode !== 'my-team' ? { teamMode: 'my-team' } : undefined,
-  );
 
   const tabs = useMemo<LayoutTab[]>(() => {
     const baseTabs: LayoutTab[] = [
@@ -85,7 +84,7 @@ export function HubTeamModeSelector({
         id: 'delegated-by-me',
         label: 'Delegated by Me',
         badge: activeMode !== 'delegated-by-me'
-          ? <TabBadge count={delegatedCounts?.blockedCount ?? 0} />
+          ? <TabBadge count={delegatedBlockedCount} />
           : undefined,
       },
     ];
@@ -94,12 +93,12 @@ export function HubTeamModeSelector({
         id: 'my-team',
         label: 'My Team',
         badge: activeMode !== 'my-team'
-          ? <TabBadge count={teamCounts?.blockedCount ?? 0} />
+          ? <TabBadge count={teamBlockedCount} />
           : undefined,
       });
     }
     return baseTabs;
-  }, [isExecutive, activeMode, delegatedCounts?.blockedCount, teamCounts?.blockedCount]);
+  }, [isExecutive, activeMode, delegatedBlockedCount, teamBlockedCount]);
 
   if (tier === 'essential') return null;
 

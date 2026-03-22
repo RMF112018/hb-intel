@@ -1726,10 +1726,29 @@ Badges update reactively via TanStack Query cache — same data source as the fe
 **Files modified:**
 - `packages/models/src/ui/index.ts` — `badge?: ReactNode` added to `LayoutTab`
 - `packages/ui-kit/src/HbcTabs/index.tsx` — renders `{tab.badge}` in tab button
-- `apps/pwa/src/pages/my-work/HubTeamModeSelector.tsx` — `useMyWorkCounts` per mode, `TabBadge` component
+- `apps/pwa/src/pages/my-work/HubTeamModeSelector.tsx` — accepts badge counts as props (was `useMyWorkCounts` — moved to bridge)
 - `packages/models/package.json` — version 0.3.0 → 0.3.1
 - `packages/ui-kit/package.json` — version 2.2.46 → 2.2.47
 - `apps/pwa/package.json` — version 0.12.51 → 0.12.52
+
+---
+
+### 10A.46 UIF-027-addl-fix: Context Provider Boundary Fix + Griffel Selector Fix
+
+**Severity:** Critical (runtime crash)
+**Category:** Bug Fix
+
+**Observed state:** `HubTeamModeSelector` called `useMyWorkCounts()` which requires `MyWorkProvider` context, but the component renders in `WorkspacePageShell.headerSlot` — outside the `MyWorkProvider` boundary. This caused an uncaught `useMyWorkContext must be used within a MyWorkProvider` error that crashed the entire page. Additionally, `HubTertiaryZone` used `'details[open] &'` as a Griffel selector which is unsupported, producing a console warning.
+
+**Fix:**
+1. **Badge bridge pattern:** Moved `useMyWorkCounts` calls into a `HubTabBadgeBridge` render-null component placed inside `MyWorkProvider`. The bridge pushes blocked counts up to `MyWorkPage` state via a callback. `HubTeamModeSelector` now accepts `delegatedBlockedCount` and `teamBlockedCount` as props.
+2. **Griffel selector fix:** Replaced unsupported `'details[open] &'` ancestor selector with state-driven `disclosureArrowOpen` class applied via `onToggle` event handler + `mergeClasses`.
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/MyWorkPage.tsx` — `HubTabBadgeBridge` component, badge state, wiring
+- `apps/pwa/src/pages/my-work/HubTeamModeSelector.tsx` — removed `useMyWorkCounts` import, accepts count props
+- `apps/pwa/src/pages/my-work/HubTertiaryZone.tsx` — replaced `details[open] &` with state-driven class
+- `apps/pwa/package.json` — version 0.12.52 → 0.12.53
 
 ---
 

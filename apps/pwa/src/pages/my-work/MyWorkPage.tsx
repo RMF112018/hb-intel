@@ -18,13 +18,13 @@
  * P2-D4: delegated-by-me and escalation-candidate scopes.
  * P2-D5: team mode toggle, card arrangement persistence.
  */
-import { lazy, Suspense, useEffect, useMemo, useState, useCallback } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { WorkspacePageShell } from '@hbc/ui-kit';
 import { useCurrentUser, useAuthStore } from '@hbc/auth';
 import { useComplexity } from '@hbc/complexity';
 import { useConnectivity } from '@hbc/session-state';
-import { MyWorkProvider } from '@hbc/my-work-feed';
+import { MyWorkProvider, useMyWorkCounts } from '@hbc/my-work-feed';
 import type { IMyWorkRuntimeContext, IMyWorkQuery, IMyWorkItem } from '@hbc/my-work-feed';
 import { HubPageLevelEmptyState } from './HubPageLevelEmptyState.js';
 import { HubZoneLayout } from './HubZoneLayout.js';
@@ -42,6 +42,40 @@ import { useHubPersonalization } from './useHubPersonalization.js';
 const HubDetailPanel = lazy(() =>
   import('./HubDetailPanel.js').then((m) => ({ default: m.HubDetailPanel })),
 );
+
+/**
+ * UIF-027-addl: Badge bridge — renders inside MyWorkProvider to access
+ * useMyWorkCounts, then pushes blocked counts up to page-level state
+ * for the header-slot HubTeamModeSelector (which is outside the provider).
+ */
+function HubTabBadgeBridge({
+  activeMode,
+  isExecutive,
+  onCounts,
+}: {
+  activeMode: string;
+  isExecutive: boolean;
+  onCounts: (delegated: number, team: number) => void;
+}): null {
+  const { counts: delegatedCounts } = useMyWorkCounts(
+    activeMode !== 'delegated-by-me' ? { teamMode: 'delegated-by-me' } : undefined,
+  );
+  const { counts: teamCounts } = useMyWorkCounts(
+    isExecutive && activeMode !== 'my-team' ? { teamMode: 'my-team' } : undefined,
+  );
+
+  const prevRef = useRef({ d: 0, t: 0 });
+  const d = delegatedCounts?.blockedCount ?? 0;
+  const t = teamCounts?.blockedCount ?? 0;
+  useEffect(() => {
+    if (prevRef.current.d !== d || prevRef.current.t !== t) {
+      prevRef.current = { d, t };
+      onCounts(d, t);
+    }
+  }, [d, t, onCounts]);
+
+  return null;
+}
 
 export function MyWorkPage(): ReactNode {
   const currentUser = useCurrentUser();
@@ -87,6 +121,11 @@ export function MyWorkPage(): ReactNode {
       });
     }
   }, [defaultQuery.teamMode, defaultQuery.lane, querySeed]);
+
+  // ─── UIF-027-addl: Badge counts for team mode tabs ───────────────────────
+  const isExecutive = session?.resolvedRoles.includes('Executive') ?? false;
+  const [[delegatedBlocked, teamBlocked], setBadgeCounts] = useState([0, 0]);
+  const handleBadgeCounts = useCallback((d: number, t: number) => setBadgeCounts([d, t]), []);
 
   // ─── UIF-002: Selected item for master-detail panel ─────────────────────
   const [selectedItem, setSelectedItem] = useState<IMyWorkItem | null>(null);
@@ -134,9 +173,10 @@ export function MyWorkPage(): ReactNode {
       breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'My Work' }]}
       suppressProjectContext
       stickyHeader
-      headerSlot={<HubTeamModeSelector activeMode={teamMode} onModeChange={setTeamMode} />}
+      headerSlot={<HubTeamModeSelector activeMode={teamMode} onModeChange={setTeamMode} delegatedBlockedCount={delegatedBlocked} teamBlockedCount={teamBlocked} />}
     >
       <MyWorkProvider context={runtimeContext} defaultQuery={defaultQuery}>
+        <HubTabBadgeBridge activeMode={teamMode} isExecutive={isExecutive} onCounts={handleBadgeCounts} />
         <HubPageLevelEmptyState
           isLoadError={false}
           hasPermission={currentUser !== null}

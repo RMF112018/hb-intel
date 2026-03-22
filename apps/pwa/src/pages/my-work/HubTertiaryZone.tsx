@@ -18,7 +18,7 @@
  */
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { makeStyles, shorthands } from '@griffel/react';
+import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { HbcCard, heading3, HBC_BREAKPOINT_MOBILE, HBC_BREAKPOINT_TABLET } from '@hbc/ui-kit';
 import { useComplexity } from '@hbc/complexity';
 import { MyWorkCanvas } from './tiles/index.js';
@@ -85,10 +85,13 @@ const useStyles = makeStyles({
     marginLeft: 'auto',
     fontSize: '12px',
     color: 'var(--colorNeutralForeground3)',
-    // Rotate when details is open
-    'details[open] &': {
-      transform: 'rotate(180deg)',
-    },
+    transitionProperty: 'transform',
+    transitionDuration: '200ms',
+    transitionTimingFunction: 'ease',
+  },
+  // State-driven rotation applied when <details> is open.
+  disclosureArrowOpen: {
+    transform: 'rotate(180deg)',
   },
 });
 
@@ -100,6 +103,7 @@ export function HubTertiaryZone(): ReactNode {
   // (<HBC_BREAKPOINT_SIDEBAR / ≤HBC_BREAKPOINT_TABLET). matchMedia is used
   // instead of a resize handler for efficiency. SSR-safe: starts false.
   const [isNarrow, setIsNarrow] = useState(false);
+  const [isDisclosureOpen, setIsDisclosureOpen] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const mq = window.matchMedia(`(max-width: ${HBC_BREAKPOINT_TABLET}px)`);
@@ -119,10 +123,10 @@ export function HubTertiaryZone(): ReactNode {
 
   if (isNarrow) {
     return (
-      <details className={styles.disclosure}>
+      <details className={styles.disclosure} onToggle={(e) => setIsDisclosureOpen((e.target as HTMLDetailsElement).open)}>
         <summary className={styles.disclosureSummary}>
           Quick Access
-          <span className={styles.disclosureArrow} aria-hidden="true">▾</span>
+          <span className={mergeClasses(styles.disclosureArrow, isDisclosureOpen && styles.disclosureArrowOpen)} aria-hidden="true">▾</span>
         </summary>
         <div className={styles.disclosureBody}>{tileGrid}</div>
       </details>
