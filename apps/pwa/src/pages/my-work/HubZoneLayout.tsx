@@ -134,14 +134,16 @@ const useStyles = makeStyles({
     },
     [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
       order: 0,
+      // UIF-050-fix: Protect Insights from compressing in the sticky flex column.
+      flexShrink: 0,
     },
   },
-  // UIF-016: At narrow widths, tertiaryZone (Quick Access) sinks below
-  // primaryZone via order:1 so the feed stays between KPI and actions.
+  // UIF-050-addl: At narrow widths, tertiaryZone (Recent Activity) sinks below
+  // primaryZone via order:1 so the feed stays between KPI and activity.
   tertiaryZone: {
     display: 'block',
     order: 1,
-    // UIF-033-addl: Constrain width at sm-tablet so Quick Access doesn't stretch full viewport.
+    // UIF-033-addl: Constrain width at sm-tablet so Recent Activity doesn't stretch full viewport.
     [`@media (min-width: ${HBC_BREAKPOINT_MOBILE + 1}px) and (max-width: ${HBC_BREAKPOINT_SIDEBAR - 1}px)`]: {
       maxWidth: '600px',
     },
