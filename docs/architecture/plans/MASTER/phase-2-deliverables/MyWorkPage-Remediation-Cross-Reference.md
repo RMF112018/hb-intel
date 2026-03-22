@@ -294,19 +294,19 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 6-C: Resolve `HubTabBadgeBridge`
+### 6-C: Resolve `HubTabBadgeBridge` ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| ARC-F9 | **M** | Null-rendering cross-boundary data bridge — invisible coupling with undocumented intent | ✅ Full close |
+| ARC-F9 | **M** | Null-rendering cross-boundary data bridge — undocumented intent | ✅ Closed (2026-03-22) — comprehensive JSDoc added; pattern is legitimate context boundary crossing |
 
 ---
 
-### 6-D: Add `README.md` to `apps/pwa/src/pages/my-work/`
+### 6-D: Add `README.md` to `apps/pwa/src/pages/my-work/` ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| DOC-05 | — | No README exists for the `my-work` page directory — complex state model and governing doc set undocumented | ✅ Full close |
+| DOC-05 | — | No README exists for the `my-work` page directory | ✅ Closed (2026-03-22) — README created with specs, directory structure, hooks, state model, tile system |
 
 ---
 

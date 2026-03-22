@@ -323,7 +323,7 @@ The card contains only placeholder text — no real data fetch, no `@hbc/my-work
 
 **File:** `MyWorkPage.tsx`
 
-`HubTabBadgeBridge` is a null-rendering component (returns `null`) whose sole purpose is to call `useMyWorkCounts()` inside the `MyWorkProvider` context boundary and presumably update some external tab badge state. This pattern creates invisible cross-boundary data coupling. If `useMyWorkCounts` is not the mechanism for badge updates, this is dead code; if it is, the coupling should be explicit. Either way, the intent should be documented or the pattern replaced with a context value passed to `HubTeamModeSelector`.
+✅ Resolved via documentation (remediation 6-C, 2026-03-22). The null-renderer bridge is a **legitimate React context boundary crossing pattern** — `HubTeamModeSelector` renders in `WorkspacePageShell` headerSlot OUTSIDE `MyWorkProvider`, but needs blocked counts from `useMyWorkCounts()` which requires the provider. Comprehensive JSDoc added explaining the boundary crossing requirement and why the component is not dead code.
 
 ---
 
@@ -584,8 +584,8 @@ P2-D2 §6.1 namespace mandate doc comment added to `myWorkTileDefinitions.ts` he
 **DOC-04: P2-D5 vs P2-B2 conflict (Executive default team mode)** ✅ Resolved (2026-03-22)
 ADR-0117 filed. P2-D5 §3 governs for Executive role; P2-B2 §4 superseded for Executive only. The contradiction in the plan corpus is resolved.
 
-**DOC-05: `apps/pwa/src/pages/my-work/README.md`**
-No README exists for the `my-work` page directory. Per `.claude/rules/04-documentation-standards.md`, a mature package or feature area that changes materially requires a `README.md` covering purpose, public exports, key hooks, governing plan references, and implementation notes. This is especially important given the complexity of the state management model.
+**DOC-05: `apps/pwa/src/pages/my-work/README.md`** ✅ Created (2026-03-22)
+README added covering purpose, governing specs, directory structure, key hooks, state management model, and tile system documentation.
 
 ---
 

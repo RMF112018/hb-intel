@@ -75,9 +75,17 @@ const useStyles = makeStyles({
 });
 
 /**
- * UIF-027-addl: Badge bridge — renders inside MyWorkProvider to access
- * useMyWorkCounts, then pushes blocked counts up to page-level state
- * for the header-slot HubTeamModeSelector (which is outside the provider).
+ * HubTabBadgeBridge — UIF-027-addl, ARC-F9 (documented).
+ *
+ * Null-rendering context boundary bridge. This component MUST render inside
+ * MyWorkProvider to access useMyWorkCounts(), but the badge counts are needed
+ * by HubTeamModeSelector which renders in the WorkspacePageShell headerSlot
+ * OUTSIDE the provider tree. The null-renderer pattern is the correct React
+ * approach for crossing a context boundary — it reads counts inside the
+ * provider and pushes them up via the onCounts callback.
+ *
+ * This is NOT dead code. Removing it breaks the blocked-count badges on
+ * the Delegated-by-Me and My Team tabs.
  */
 function HubTabBadgeBridge({
   activeMode,
