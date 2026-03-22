@@ -2118,6 +2118,26 @@ Trend pill styling: `inline-flex`, `borderRadius: 10px`, `padding: 3px 6px`, `fo
 
 ---
 
+### 10A.63 UIF-042-addl: Adaptive KPI Card Sizing
+
+**Severity:** Medium
+**Category:** Responsive / Design System
+
+**Architectural decision — viewport-relative `clamp()` over container queries:** Griffel ^1.5.0 does not support `@container` queries. True container queries would require inline styles or a separate CSS mechanism outside Griffel's atomic system. Viewport-relative `clamp()` provides sufficient width-adaptive behavior for KPI cards because the cards are always rendered inside a proportional grid cell whose width tracks the viewport.
+
+**Changes:**
+1. **Value font:** `1.75rem` → `clamp(1.25rem, 3vw, 1.75rem)` — scales from 20px (narrow, e.g., 400px viewport) to 28px (wide, ≥600px viewport)
+2. **Label:** Added `overflow: hidden`, `text-overflow: ellipsis`, `white-space: nowrap` for graceful truncation at narrow widths
+3. **Subtitle:** Same truncation treatment added
+
+**Tradeoff:** `vw`-based scaling responds to viewport width, not card width directly. In a two-column layout where cards occupy ~50% of the viewport, the scaling midpoint shifts — but the `clamp()` bounds ensure the value is always between 20px and 28px, both of which are legible. Full container-query support can be adopted when Griffel upgrades to support `@container`.
+
+**Files modified:**
+- `packages/ui-kit/src/HbcKpiCard/index.tsx` — `clamp()` value font + truncation on label/subtitle
+- `packages/ui-kit/package.json` — version 2.2.57 → 2.2.58
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

@@ -74,19 +74,24 @@ const useStyles = makeStyles({
     borderBottomColor: HBC_PRIMARY_BLUE as string,
     backgroundColor: tokens.colorSubtleBackgroundSelected,
   },
+  // UIF-042-addl: Label with truncation for narrow cards.
   label: {
     fontFamily: hbcTypeScale.label.fontFamily,
     fontSize: hbcTypeScale.label.fontSize,
     fontWeight: hbcTypeScale.label.fontWeight as string,
     lineHeight: hbcTypeScale.label.lineHeight,
-    // INS-012: Higher contrast (foreground2 ≈ 7:1 AAA) + sentence case for legibility.
     color: tokens.colorNeutralForeground2,
     letterSpacing: '0.02em',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
-  // UIF-041-addl: Bumped from 1.5rem to 1.75rem for stronger numeric emphasis.
+  // UIF-042-addl: Adaptive value font — clamp scales between 20px (narrow cards)
+  // and 28px (wide cards) using viewport-relative intermediate. Falls back to
+  // 1.75rem in browsers without clamp() support.
   value: {
     fontFamily: hbcTypeScale.display.fontFamily,
-    fontSize: '1.75rem',
+    fontSize: 'clamp(1.25rem, 3vw, 1.75rem)',
     fontWeight: '700',
     lineHeight: '1.2',
     color: tokens.colorNeutralForeground1,
@@ -135,11 +140,13 @@ const useStyles = makeStyles({
   cardHoverIcon: {
     opacity: '0.8',
   },
-  // UIF-021-addl: Subtitle upgraded from 0.625rem (10px) to label scale (12px/500)
-  // to meet UI Kit field-readability minimum for status/badge text.
+  // UIF-042-addl: Subtitle with truncation — graceful at narrow card widths.
   subtitle: {
     ...hbcTypeScale.label,
     color: tokens.colorNeutralForeground3,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
 });
 
