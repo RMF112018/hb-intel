@@ -93,6 +93,8 @@ const useStyles = makeStyles({
     ...shorthands.borderStyle('none'),
     ...shorthands.borderLeft('3px', 'solid', 'transparent'),
     cursor: 'pointer',
+    // Sidebar a11y: 36px desktop minimum touch target.
+    minHeight: '36px',
     // Sidebar nav-state: inactive uses muted foreground for typographic hierarchy.
     color: tokens.colorNeutralForeground2,
     fontWeight: '400',
@@ -234,17 +236,18 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
         '--hbc-nav-item-active-bg': 'var(--colorBrandBackground2)',
       } as React.CSSProperties}
     >
-      <div className={styles.navScroll}>
+      <div id="hbc-sidebar-nav" className={styles.navScroll}>
         {groups.map((group) => (
           <PermissionFilteredGroup key={group.id} group={group}>
             {(visible) =>
               visible ? (
-                <div>
+                <div role="group" aria-label={group.label}>
                   <div
                     className={mergeClasses(
                       styles.groupLabel,
                       !effectiveExpanded && styles.groupLabelCollapsed,
                     )}
+                    aria-hidden={!effectiveExpanded}
                   >
                     {effectiveExpanded ? group.label : ''}
                   </div>
@@ -308,6 +311,8 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
         className={styles.toggleButton}
         onClick={toggle}
         aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+        aria-expanded={isExpanded}
+        aria-controls="hbc-sidebar-nav"
         type="button"
       >
         {isExpanded ? <Collapse size="md" /> : <Expand size="md" />}

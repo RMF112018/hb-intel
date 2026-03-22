@@ -6,7 +6,8 @@
  * Composes: HbcConnectivityBar + HbcHeader + HbcSidebar + <main>
  */
 import * as React from 'react';
-import { makeStyles, mergeClasses } from '@griffel/react';
+import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
+import { tokens } from '@fluentui/react-components';
 import { useNavStore } from '@hbc/shell';
 import { TRANSITION_NORMAL } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
@@ -50,6 +51,26 @@ const useStyles = makeStyles({
   mainFocusMode: {
     zIndex: Z_INDEX.sidebar,
     position: 'relative',
+  },
+  // Sidebar a11y: Skip-to-content link — hidden until focused via Tab.
+  skipLink: {
+    position: 'absolute',
+    top: '-100px',
+    left: '16px',
+    zIndex: 10000,
+    backgroundColor: tokens.colorNeutralBackground1,
+    color: tokens.colorBrandForeground1,
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    ...shorthands.borderRadius('4px'),
+    textDecorationLine: 'none',
+    ':focus': {
+      top: '8px',
+    },
   },
   focusOverlay: {
     position: 'fixed',
@@ -137,6 +158,8 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
 
   return (
     <div data-hbc-shell="app-shell" data-mode={mode}>
+      {/* Sidebar a11y: Skip-to-content link — first focusable element in the shell. */}
+      <a href="#hbc-main-content" className={styles.skipLink}>Skip to main content</a>
       <HbcConnectivityBar />
       <HbcHeader user={user} onSignOut={onSignOut} userMenuExtra={userMenuExtra} showProjectSelector={showProjectSelector} mode={mode} />
       {showSidebar && (
@@ -151,6 +174,7 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
         aria-hidden="true"
       />
       <main
+        id="hbc-main-content"
         className={mainClass}
         style={{ marginTop: `${shellOffset}px`, minHeight: `calc(100vh - ${shellOffset}px)` }}
       >
