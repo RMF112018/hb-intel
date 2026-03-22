@@ -367,15 +367,15 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 7-E: Role entitlement and team mode tests
+### 7-E: Role entitlement and team mode tests ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| TST-F1 | **C** | Zero behavioral test coverage | ✅ Partial close — role entitlement domain covered |
-| ROL-01 | **C** | No local role constants survive in tile definitions — verification | ✅ Verification |
-| ROL-02 | **H** | Single role resolution source behavioral verification | ✅ Verification |
-| TM-01 | — | `my-team` role gate (already passing) — regression protection | ✅ Regression guard |
-| TST-F2 | — | P2-E3 validation plan — role entitlement matrix automated evidence | ✅ Satisfied |
+| TST-F1 | **C** | Zero behavioral test coverage | ✅ **FULLY CLOSED** (2026-03-22) — 88 tests across 6 test files (7-A through 7-E) |
+| ROL-01 | **C** | No local role constants | ✅ Verified (2026-03-22) — regex assertions confirm no EXECUTIVE_ROLES/ADMIN_ROLES constants |
+| ROL-02 | **H** | Single auth resolution | ✅ Verified (2026-03-22) — MyWorkPage uses useCurrentSession, not useAuthStore |
+| TM-01 | — | my-team role gate | ✅ Regression (2026-03-22) — isExecutive prop + conditional tab rendering verified |
+| TST-F2 | — | P2-E3 role entitlement evidence | ✅ Satisfied (2026-03-22) — 5 tile role gating assertions |
 
 ---
 
