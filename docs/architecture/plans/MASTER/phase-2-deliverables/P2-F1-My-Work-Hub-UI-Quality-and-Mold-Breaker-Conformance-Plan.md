@@ -1530,6 +1530,45 @@ Source/module chips ("BD Scorecard", "Est. Pursuit") are correctly non-interacti
 
 ---
 
+### 10A.39 UIF-019-addl: Dark Element Theme Adaptation (Critical)
+
+**Severity:** Critical
+**Category:** Design System / State Design
+**Governing authority:** MB-08 (No Version-Boundary Seams) — `UI-Kit-Mold-Breaker-Principles.md`. WCAG AA contrast (4.5:1 minimum). `UI-Kit-Usage-and-Composition-Guide.md`: "Hardcoding colors or spacing: Use HBC_* tokens."
+
+**Observed state:** Three components rendered hardcoded dark backgrounds (#141E2E, #0D1520) under the light theme. Fluent token-based text resolved to dark colors on these dark backgrounds, producing ≈1.08:1 contrast — catastrophic readability failure on every page load. KPI card hover used a white glow inappropriate for light backgrounds. HubTertiaryZone border used `rgba(255,255,255,0.06)` invisible in light mode.
+
+**Root cause:** Hardcoded hex values in Griffel `makeStyles` calls compiled to static CSS classes that never adapt to theme changes. All child text using `tokens.colorNeutralForeground*` resolved to dark colors under the light `FluentProvider` theme.
+
+**Fix:** Replaced all hardcoded dark backgrounds and borders with Fluent theme tokens:
+
+| Component | Before (hardcoded) | After (token) | Light resolves to |
+|---|---|---|---|
+| HbcCard `weightPrimary` bg | `#141E2E` | `tokens.colorNeutralBackground3` | `#F0F2F5` |
+| HbcCard `weightPrimary` border | `rgba(255,255,255,0.06)` | `tokens.colorNeutralStroke1` | `#D1D5DB` |
+| RecentContextCard bg | `#0D1520` | `tokens.colorNeutralBackground3` | `#F0F2F5` |
+| HbcKpiCard hover shadow | `elevationLevel2 + white glow` | `elevationLevel2` only | standard shadow |
+| HubTertiaryZone border | `rgba(255,255,255,0.06)` | `var(--colorNeutralStroke2)` | theme-adaptive |
+
+**Scope exclusions:** THA-004 (double-dash CSS vars) not found in source — source uses correct `--hbc-*`. THA-007 (theme toggle) is a new feature, out of scope. Header is intentionally always-dark per PH4C.13.
+
+**Acceptance criteria:**
+- HbcCard `weightPrimary` renders with theme-adaptive background; no hardcoded hex — **MET**
+- RecentContextCard renders with readable text in light mode — **MET**
+- KPI tiles readable in both themes (inherited from parent fix) — **MET**
+- All replaced values use Fluent `tokens.*` or CSS custom properties — **MET**
+- ESLint `enforce-hbc-tokens` passes on changed components — **MET** (tokens used, not hardcoded hex)
+
+**Files modified:**
+- `packages/ui-kit/src/HbcCard/index.tsx` — `weightPrimary` bg + border tokenized
+- `packages/ui-kit/src/HbcKpiCard/index.tsx` — removed white glow from hover shadow
+- `apps/pwa/src/pages/my-work/cards/RecentContextCard.tsx` — `#0D1520` → `tokens.colorNeutralBackground3`
+- `apps/pwa/src/pages/my-work/HubTertiaryZone.tsx` — border tokenized
+- `packages/ui-kit/package.json` — version 2.2.43 → 2.2.44
+- `apps/pwa/package.json` — version 0.12.49 → 0.12.50
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

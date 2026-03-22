@@ -12,6 +12,7 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
+import { tokens } from '@fluentui/react-components';
 import { HbcCard, HbcEmptyState, HbcButton, heading4 } from '@hbc/ui-kit';
 import { BlueprintRoll } from '@hbc/ui-kit/icons';
 
@@ -22,9 +23,10 @@ const useStyles = makeStyles({
     color: 'var(--colorNeutralForeground1)',
     margin: '0',
   },
-  // INS-014: Slightly darker background for depth against adjacent card.
+  // UIF-019-addl (THA-002): Theme-adaptive bg replaces hardcoded #0D1520.
+  // Light: #F0F2F5 (subtle depth). Dark/field: auto-adapts via Fluent token.
   card: {
-    backgroundColor: '#0D1520',
+    backgroundColor: tokens.colorNeutralBackground3,
   },
 });
 

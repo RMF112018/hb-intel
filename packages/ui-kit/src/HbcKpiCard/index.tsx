@@ -55,9 +55,9 @@ const useStyles = makeStyles({
   },
   cardClickable: {
     cursor: 'pointer',
-    // INS-008: Hover elevation with accent glow + pressed scale-down.
+    // UIF-019-addl (THA-003): Removed white glow; uses standard elevation only.
     ':hover': {
-      boxShadow: `${elevationLevel2}, 0 0 8px 0 rgba(255,255,255,0.06)`,
+      boxShadow: elevationLevel2,
     },
     ':active': {
       transform: 'scale(0.98)',

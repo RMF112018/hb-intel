@@ -25,10 +25,11 @@ const useStyles = makeStyles({
   // Weight variants
   weightPrimary: {
     boxShadow: elevationLevel2,
-    // INS-001: Subtle 1px separator instead of heavy 2px brand stroke.
-    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.06)'),
-    // INS-011: One step darker than page background for depth distinction.
-    backgroundColor: '#141E2E',
+    // UIF-019-addl (THA-001): Theme-adaptive border replaces rgba(255,255,255,0.06).
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    // UIF-019-addl (THA-001): Theme-adaptive bg replaces hardcoded #141E2E.
+    // Light: #F0F2F5 (subtle depth). Dark/field: auto-adapts via Fluent token.
+    backgroundColor: tokens.colorNeutralBackground3,
   },
   weightSupporting: {
     boxShadow: elevationLevel0,

@@ -46,7 +46,8 @@ const useStyles = makeStyles({
     paddingTop: '16px',
     borderTopWidth: '1px',
     borderTopStyle: 'solid',
-    borderTopColor: 'rgba(255,255,255,0.06)',
+    // UIF-019-addl: Theme-adaptive border replaces rgba(255,255,255,0.06).
+    borderTopColor: 'var(--colorNeutralStroke2)',
   },
   // UIF-016: <details> disclosure wrapper used at narrow viewports.
   disclosure: {
