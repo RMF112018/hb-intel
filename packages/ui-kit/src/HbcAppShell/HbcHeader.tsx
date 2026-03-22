@@ -102,10 +102,12 @@ const useStyles = makeStyles({
     paddingTop: '8px',
     paddingBottom: '8px',
     ...shorthands.borderRadius('4px'),
+    // Normalized desktop minimum + coarse-pointer bump.
+    minWidth: '36px',
+    minHeight: '36px',
     ':hover': {
       backgroundColor: 'rgba(255, 255, 255, 0.1)',
     },
-    // UIF-035-addl: Touch-target bump on coarse-pointer devices (WCAG 2.5.5).
     '@media (pointer: coarse)': {
       minHeight: '44px',
       minWidth: '44px',
@@ -120,6 +122,7 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
   onCreateClick,
   onSearchOpen,
   onNotificationsOpen,
+  notificationCount = 0,
   onProjectSelect,
   onToolboxOpen,
   userMenuExtra,
@@ -167,10 +170,16 @@ export const HbcHeader: React.FC<HbcHeaderProps> = ({
         <HbcToolboxFlyout onToolboxOpen={onToolboxOpen} />
         <HbcFavoriteTools />
         <HbcCreateButton onClick={onCreateClick} />
-        <button className={styles.m365Button} aria-label="Microsoft 365 apps" type="button">
+        <button
+          className={styles.m365Button}
+          aria-label="Microsoft 365 apps"
+          title="Microsoft 365 apps"
+          type="button"
+          data-hbc-spfx-suppress="true"
+        >
           <ViewGrid size="lg" color={HBC_HEADER_TEXT} />
         </button>
-        <HbcNotificationBell onClick={onNotificationsOpen} />
+        <HbcNotificationBell onClick={onNotificationsOpen} unreadCount={notificationCount} />
         {shellUser && (
           <HbcUserMenu
             user={shellUser}

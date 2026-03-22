@@ -62,6 +62,8 @@ export interface HbcHeaderProps {
   onCreateClick?: () => void;
   onSearchOpen?: () => void;
   onNotificationsOpen?: () => void;
+  /** Live unread/blocked notification count for the bell badge. 0 = badge hidden. */
+  notificationCount?: number;
   onProjectSelect?: (projectId: string) => void;
   onToolboxOpen?: () => void;
   /** Extra content rendered inside the user menu dropdown, above Sign Out. Dev tooling slot. */

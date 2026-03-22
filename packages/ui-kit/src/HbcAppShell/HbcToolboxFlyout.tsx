@@ -31,8 +31,15 @@ const useStyles = makeStyles({
     paddingTop: '8px',
     paddingBottom: '8px',
     ...shorthands.borderRadius('4px'),
+    // Normalized desktop minimum + coarse-pointer bump.
+    minWidth: '36px',
+    minHeight: '36px',
     ':hover': {
       backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    '@media (pointer: coarse)': {
+      minWidth: '44px',
+      minHeight: '44px',
     },
   },
   flyout: {

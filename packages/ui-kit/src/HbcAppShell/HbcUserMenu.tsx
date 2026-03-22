@@ -18,12 +18,17 @@ const useStyles = makeStyles({
   root: {
     position: 'relative',
   },
+  // Normalized: 36px desktop minimum, 44px on coarse pointer.
   trigger: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '32px',
-    height: '32px',
+    width: '36px',
+    height: '36px',
+    '@media (pointer: coarse)': {
+      width: '44px',
+      height: '44px',
+    },
     ...shorthands.borderRadius('50%'),
     // Header avatar trigger uses Fluent brand token for office/field adaptive parity.
     backgroundColor: tokens.colorBrandBackground,
@@ -35,8 +40,8 @@ const useStyles = makeStyles({
     overflow: 'hidden',
   },
   avatar: {
-    width: '32px',
-    height: '32px',
+    width: '36px',
+    height: '36px',
     ...shorthands.borderRadius('50%'),
     objectFit: 'cover' as const,
   },
