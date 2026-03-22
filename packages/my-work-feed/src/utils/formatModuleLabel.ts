@@ -28,6 +28,7 @@
 export const MODULE_DISPLAY_NAMES: Readonly<Record<string, string>> = {
   // ── BD / Pre-construction ──────────────────────────────────────────────────
   'bd-scorecard':          'BD Scorecard',
+  'bd-department-sections': 'BD Sections',
   'estimating':            'Estimating',
   'estimating-pursuit':    'Est. Pursuit',
 

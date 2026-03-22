@@ -282,6 +282,10 @@ Why this is a problem: The formatGroupLabel acronym-aware logic is not applied t
 Recommended change: Apply formatGroupLabel() to the source cell renderer. Ensure "BD Department Sections" is the rendered string. Audit all module name strings for acronym casing.
 Acceptance criteria: "BD Department Sections" not "Bd Department Sections". All known acronyms in module/source names render uppercase.
 
+---
+
+**Resolution Status (2026-03-22):** ✅ RESOLVED — Added `'bd-department-sections': 'BD Sections'` to `MODULE_DISPLAY_NAMES` in `formatModuleLabel.ts`. The fallback title-casing logic remains as a graceful degradation for future unknown keys, but all known `bd-*` keys now have explicit display names with correct acronym casing.
+
 
 UIF-013
 

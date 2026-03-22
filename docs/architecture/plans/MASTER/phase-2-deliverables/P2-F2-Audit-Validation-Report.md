@@ -28,7 +28,7 @@ The P2-F2 audit covered the full HB Intel PWA product — My Work, BD, Estimatin
 | UIF-009 | Work item titles use `textOverflow: 'clip'` | `HbcMyWorkListItem` uses `textOverflow: 'ellipsis'` | **DISPUTED** |
 | UIF-010 | My Project Requests error state uses unstyled pink banner + native button | `HbcBanner variant="error"` + native `<button>` — not `HbcEmptyState` | **CONFIRMED (partial)** |
 | UIF-011 | ISO dates (YYYY-MM-DD) in construction tables | `EstimatingPage` mock data uses ISO strings; no formatting applied | **CONFIRMED** |
-| UIF-012 | "Bd Department Sections" — acronym not uppercased | `formatModuleLabel` fallback uses `\b\w` title-case; unrecognized `bd-*` keys produce "Bd…" | **CONFIRMED** |
+| UIF-012 | "Bd Department Sections" — acronym not uppercased | `bd-department-sections` added to `MODULE_DISPLAY_NAMES` → "BD Sections" | **RESOLVED** |
 | UIF-013 | BD/Estimating/Project Hub are plain tables with no row actions, sort, filter | BD uses `HbcDataTable` + `HbcStatusBadge` + filter wiring; `onRowClick` absent from `HbcDataTable` call | **PARTIALLY CONFIRMED** |
 | UIF-014 | BD/Estimating/Project Hub lack breadcrumbs; "Home" not navigable | Confirmed — only My Work passes breadcrumbs to `WorkspacePageShell` | **CONFIRMED** |
 | UIF-015 | Filter buttons accessible name "Overdue0" (no separator) | Count badge uses `aria-label="\`${count} items\`"` — computed name is "Overdue 0 items" | **DISPUTED** |
@@ -271,7 +271,7 @@ The count badge uses `aria-label` to override its text content contribution to t
 | UIF-006 | Disputed | Active filter wired — no action. |
 | UIF-008 | Stale | Element doesn't exist — no action. |
 | UIF-009 | Disputed | `ellipsis` in use — no action. |
-| UIF-012 | **Confirmed** | `formatModuleLabel` fallback produces "Bd" for unrecognized `bd-*` keys. Add `'bd-department-sections'` (and any similar keys) to `MODULE_DISPLAY_NAMES`. |
+| UIF-012 | ✅ Resolved | `'bd-department-sections': 'BD Sections'` added to `MODULE_DISPLAY_NAMES` in `formatModuleLabel.ts`. |
 | UIF-015 | Disputed | `aria-label` on count badge correctly separates — no action. |
 | UIF-017 | Disputed | Dynamic inline bar, not static img — no action. |
 | UIF-018 | Disputed | `role="radiogroup"` implemented — no action. |
@@ -302,8 +302,8 @@ Two findings require attention before Phase 2 can be considered fully clean agai
 **1. UIF-003 — `aria-live="assertive"` on persistent degraded-data banners (Medium)** ✅ RESOLVED
 `HbcBanner` now supports an optional `polite` prop that overrides `aria-live` to `"polite"` and `role` to `"status"`. Applied to `HubConnectivityBanner`, `HubFreshnessIndicator`, and `HbcMyWorkOfflineBanner`. Default behavior for `variant="warning"` unchanged — zero blast radius to the 44 existing consumers.
 
-**2. UIF-012 — "Bd Department Sections" acronym casing (Low)**
-The `formatModuleLabel` fallback title-cases only the first character of each word. `bd-department-sections` → "Bd Department Sections". Fix: add the key to `MODULE_DISPLAY_NAMES` in `packages/my-work-feed/src/utils/formatModuleLabel.ts`. Audit all live `moduleKey` values in `domainQueryFns.ts` for similar unrecognized `bd-*` or acronym-containing keys and add them to the map.
+**2. UIF-012 — "Bd Department Sections" acronym casing (Low)** ✅ RESOLVED
+Added `'bd-department-sections': 'BD Sections'` to `MODULE_DISPLAY_NAMES` in `formatModuleLabel.ts`. All `bd-*` moduleKey values in `domainQueryFns.ts` are now explicitly mapped.
 
 **Residual item (RESOLVED):**
 - **Deep-link URL mismatch (UIF-001):** ✅ Fixed — mock data hrefs in `domainQueryFns.ts` corrected to use actual workspace routes with `?itemId=` query params. No more 404 on direct navigation.
