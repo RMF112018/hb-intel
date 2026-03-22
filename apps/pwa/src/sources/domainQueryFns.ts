@@ -38,7 +38,7 @@ export function createEstimatingQueryFn(): (userId: string) => Promise<IBicRegis
       moduleKey: 'estimating-pursuit',
       moduleLabel: 'Estimating Bid Readiness',
       title: 'Harbor View Medical Center — Bid Readiness',
-      href: '/estimating/pursuit-001',
+      href: '/estimating?itemId=pursuit-001',
       state: buildState({
         expectedAction: 'Resolve 2 readiness blockers before bid deadline',
         urgencyTier: 'immediate',
@@ -50,7 +50,7 @@ export function createEstimatingQueryFn(): (userId: string) => Promise<IBicRegis
       moduleKey: 'estimating-pursuit',
       moduleLabel: 'Estimating Bid Readiness',
       title: 'Riverside Office Complex — Bid Readiness',
-      href: '/estimating/pursuit-002',
+      href: '/estimating?itemId=pursuit-002',
       state: buildState({
         expectedAction: 'Review cost section completeness',
         urgencyTier: 'watch',
@@ -67,7 +67,7 @@ export function createBdScoreBenchmarkQueryFn(): (userId: string) => Promise<IBi
       moduleKey: 'bd-scorecard',
       moduleLabel: 'BD Score Benchmark',
       title: 'Downtown Transit Hub — Score Review',
-      href: '/business-development/scorecard/sc-001',
+      href: '/scorecard?itemId=sc-001',
       state: buildState({
         expectedAction: 'Review updated consensus score',
         urgencyTier: 'watch',
@@ -78,7 +78,7 @@ export function createBdScoreBenchmarkQueryFn(): (userId: string) => Promise<IBi
       moduleKey: 'bd-scorecard',
       moduleLabel: 'BD Score Benchmark',
       title: 'Airport Terminal Expansion — No-Bid Decision',
-      href: '/business-development/scorecard/sc-002',
+      href: '/scorecard?itemId=sc-002',
       state: buildState({
         expectedAction: 'Acknowledge no-bid recommendation',
         urgencyTier: 'immediate',
@@ -97,7 +97,7 @@ export function createBdStrategicIntelligenceQueryFn(): (userId: string) => Prom
       moduleKey: 'bd-department-sections',
       moduleLabel: 'BD Strategic Intelligence',
       title: 'Healthcare Market Entry Strategy — Approval Needed',
-      href: '/business-development/strategy/si-001',
+      href: '/business-development?itemId=si-001',
       state: buildState({
         expectedAction: 'Approve strategic intelligence entry',
         urgencyTier: 'immediate',
