@@ -219,7 +219,7 @@ export function MyWorkPage(): ReactNode {
           <div ref={scrollContainerRef as React.RefObject<HTMLDivElement>}>
             <HubZoneLayout
               primaryContent={
-                <HubPrimaryZone onItemSelect={setSelectedItem} kpiFilter={kpiFilter} onClearKpiFilter={handleClearKpiFilter} />
+                <HubPrimaryZone onItemSelect={setSelectedItem} activeItemId={selectedItem?.workItemId} kpiFilter={kpiFilter} onClearKpiFilter={handleClearKpiFilter} />
               }
               secondaryContent={
                 <HubSecondaryZone

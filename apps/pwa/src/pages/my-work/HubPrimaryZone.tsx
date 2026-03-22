@@ -16,12 +16,14 @@ import { HubFreshnessIndicator } from './HubFreshnessIndicator.js';
 
 export interface HubPrimaryZoneProps {
   onItemSelect?: (item: IMyWorkItem) => void;
+  /** UIF-001a: ID of the currently active/detail-viewed item for row highlighting. */
+  activeItemId?: string;
   kpiFilter?: string | null;
   /** UIF-020-addl: Callback to clear the active KPI filter. */
   onClearKpiFilter?: () => void;
 }
 
-export function HubPrimaryZone({ onItemSelect, kpiFilter, onClearKpiFilter }: HubPrimaryZoneProps): ReactNode {
+export function HubPrimaryZone({ onItemSelect, activeItemId, kpiFilter, onClearKpiFilter }: HubPrimaryZoneProps): ReactNode {
   const { feed, isLoading, refetch } = useMyWork();
   const trustState = useHubTrustState(feed, isLoading);
 
@@ -29,7 +31,7 @@ export function HubPrimaryZone({ onItemSelect, kpiFilter, onClearKpiFilter }: Hu
     <>
       {/* UIF-011: onRetry wires the feed refetch into the degraded-source Retry button. */}
       <HubFreshnessIndicator trustState={trustState} isLoading={isLoading} onRetry={refetch} />
-      <HbcMyWorkFeed onItemSelect={onItemSelect} kpiFilter={kpiFilter} onClearKpiFilter={onClearKpiFilter} />
+      <HbcMyWorkFeed onItemSelect={onItemSelect} activeItemId={activeItemId} kpiFilter={kpiFilter} onClearKpiFilter={onClearKpiFilter} />
     </>
   );
 }

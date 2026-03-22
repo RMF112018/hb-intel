@@ -81,6 +81,8 @@ export interface HbcDataTableProps<TData> extends IComplexityAwareProps {
   height?: string;
   /** Callback when a row is clicked */
   onRowClick?: (row: TData) => void;
+  /** Row to highlight as "active" (e.g. detail-panel open). Matches against row.id field. */
+  activeRowId?: string;
   /** Additional CSS class */
   className?: string;
 

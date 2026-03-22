@@ -213,6 +213,26 @@ The implementation demonstrates production-grade quality across architecture, ro
 
 ---
 
+## P2-F2 UI Audit Reconciliation (UIF-001)
+
+**Date:** 2026-03-22
+
+The original P2-F2 audit classified UIF-001 as **Critical** ("item-detail drawer is unimplemented; work item links are dead links"). This was a false negative: the audit script clicked the row's inner `<a>` anchor and triggered a dead-route navigation attempt. The drawer IS implemented and working via `HubDetailPanel` — row clicks open an inline detail panel with full action vocabulary, escape-to-close, and focus management.
+
+**UIF-001 reclassified to Medium** with scope limited to interaction-quality polish:
+
+| Sub-Item | Description | Resolution |
+|---|---|---|
+| UIF-001a | No selected-row highlight while drawer is open | ✅ Fixed — `activeRowId` prop added to `HbcDataTable`; threaded from `MyWorkPage` → `HubPrimaryZone` → `HbcMyWorkFeed` → table. Selected row shows `colorBrandBackground2` highlight. |
+| UIF-001b | Generic "Item Detail" card header label | ✅ Fixed — `HubDetailPanel` now shows module-specific label (e.g., "BD Scorecard Detail", "Project Hub Detail") via `formatModuleLabel`. |
+| UIF-001c | Wrapper background transparency | ✅ Fixed — `panelWrapper` now has explicit `colorNeutralBackground1` background behind the `HbcCard`. |
+| UIF-001d | Ambiguous "Open" CTA | Already resolved — `resolveCtaAction` (UIF-014) provides context-sensitive labels (Resolve Block, Approve, Take Action, etc.). |
+| UIF-001e | Escape-to-close / focus-return | Already implemented — global Escape handler + focus capture/restore working. |
+
+All 20 original P2-F2 findings are now fully resolved including the UIF-001 polish items.
+
+---
+
 ## Finding Resolution Summary
 
 | Category | Total | Resolved | Partial | Not Resolved |

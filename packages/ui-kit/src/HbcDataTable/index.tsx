@@ -409,6 +409,7 @@ export function HbcDataTable<TData>({
   estimatedRowHeight,
   height = 'auto',
   onRowClick,
+  activeRowId,
   className,
   // PH4.7 Step 1: Adaptive Density
   toolId,
@@ -460,6 +461,13 @@ export function HbcDataTable<TData>({
     densityOverride,
     isFieldMode,
   });
+
+  // UIF-001a: Check if a row matches the activeRowId by common ID fields.
+  const isActiveRow = React.useCallback((rowData: TData): boolean => {
+    if (activeRowId == null) return false;
+    const d = rowData as Record<string, unknown>;
+    return d.id === activeRowId || d.workItemId === activeRowId;
+  }, [activeRowId]);
 
   // Notify density change
   const prevTierRef = React.useRef(tier);
@@ -893,7 +901,7 @@ export function HbcDataTable<TData>({
                 columns={columns}
                 mobileCardFields={mobileCardFields!}
                 isExpanded={expandedCards.has(row.id)}
-                isSelected={row.getIsSelected()}
+                isSelected={row.getIsSelected() || isActiveRow(row.original)}
                 isResponsible={isRowResponsible(row.original)}
                 isFieldMode={isFieldMode}
                 enableRowSelection={enableRowSelection}
@@ -1008,7 +1016,7 @@ export function HbcDataTable<TData>({
                     className={mergeClasses(
                       styles.tr,
                       onRowClick ? styles.trClickable : undefined,
-                      row.getIsSelected() ? styles.trSelected : undefined,
+                      row.getIsSelected() || isActiveRow(row.original) ? styles.trSelected : undefined,
                       responsible
                         ? isFieldMode
                           ? styles.trResponsibilityField

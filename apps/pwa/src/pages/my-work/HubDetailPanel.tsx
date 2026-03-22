@@ -61,9 +61,11 @@ const LANE_LABELS: Record<string, string> = {
 
 const useStyles = makeStyles({
   // UIF-002: elevationLevel3 for detail panel (focused work zone)
+  // UIF-001c: Explicit background prevents transparency if card doesn't fill wrapper exactly.
   panelWrapper: {
     boxShadow: elevationLevel3,
     ...shorthands.borderRadius('8px'),
+    backgroundColor: 'var(--colorNeutralBackground1)',
   },
   root: {
     display: 'flex',
@@ -170,7 +172,7 @@ export function HubDetailPanel({ item, onClose }: HubDetailPanelProps): ReactNod
       aria-label={`Detail: ${item.title}`}
       tabIndex={-1}
     >
-    <HbcCard weight="primary" header={<span>Item Detail</span>}>
+    <HbcCard weight="primary" header={<span>{formatModuleLabel(item.context.moduleKey)} Detail</span>}>
       <div className={styles.root}>
         {/* Header: title + close */}
         <div className={styles.header}>

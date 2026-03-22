@@ -55,6 +55,8 @@ export interface IHbcMyWorkFeedProps {
   query?: IMyWorkQuery;
   onItemSelect?: (item: IMyWorkItem) => void;
   onOpenReasonDrawer?: (itemId: string) => void;
+  /** UIF-001a: ID of the currently active/detail-viewed item for row highlighting. */
+  activeItemId?: string;
   /** UIF-008: External KPI filter key (e.g. 'action-now', 'blocked', 'unread'). */
   kpiFilter?: string | null;
   /** UIF-020-addl: Callback to clear the active KPI filter. */
@@ -508,6 +510,7 @@ export function HbcMyWorkFeed({
   query,
   onItemSelect,
   onOpenReasonDrawer: _onOpenReasonDrawer,
+  activeItemId,
   kpiFilter,
   onClearKpiFilter,
   className,
@@ -746,6 +749,7 @@ export function HbcMyWorkFeed({
               isLoading={false}
               estimatedRowHeight={ESTIMATED_ROW_HEIGHT}
               mobileCardFields={['title', 'dueDateIso']}
+              activeRowId={activeItemId}
               onRowClick={(item) => {
                 if (onItemSelect) {
                   onItemSelect(item);
@@ -906,6 +910,7 @@ export function HbcMyWorkFeed({
                         isLoading={false}
                         estimatedRowHeight={ESTIMATED_ROW_HEIGHT}
                         mobileCardFields={['title', 'dueDateIso']}
+                        activeRowId={activeItemId}
                         onRowClick={(item) => {
                           if (onItemSelect) {
                             onItemSelect(item);
