@@ -26,21 +26,22 @@ export const ROLE_DEFAULT_TILES: Record<string, string[]> = {
   'Director of Preconstruction': ['bic-my-items', 'workflow-handoff-inbox', 'pending-approvals', 'bd-heritage'],
 
   // --- Hub role defaults — P2-D2 §7 (My Work Hub) ---
-  // Only currently registered hub:* tiles included. Future tiles (hub:team-workload,
-  // hub:escalation-candidates, hub:quick-actions, hub:provisioning-health) to be
-  // added as they are implemented.
+  // Secondary zone (analytics): role key matches resolvedRoles[0].
+  // Tertiary zone: uses "Role:tertiary" key for zone isolation.
   'Member': [
-    'hub:lane-summary', 'hub:personal-analytics', 'hub:source-breakdown',
-    'hub:recent-context',
+    'hub:lane-summary', 'hub:source-breakdown',
   ],
+  'Member:tertiary': ['hub:recent-context'],
   'Executive': [
-    'hub:lane-summary', 'hub:personal-analytics', 'hub:aging-blocked',
-    'hub:team-portfolio', 'hub:source-breakdown', 'hub:recent-context',
+    'hub:lane-summary', 'hub:aging-blocked',
+    'hub:team-portfolio', 'hub:source-breakdown',
   ],
+  'Executive:tertiary': ['hub:recent-context'],
   'Administrator': [
-    'hub:lane-summary', 'hub:personal-analytics', 'hub:source-breakdown',
-    'hub:admin-oversight', 'hub:recent-context',
+    'hub:lane-summary', 'hub:source-breakdown',
+    'hub:admin-oversight',
   ],
+  'Administrator:tertiary': ['hub:recent-context'],
 };
 
 // --- Editor constraints — D-04 ---

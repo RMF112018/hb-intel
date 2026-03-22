@@ -120,7 +120,7 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 |---|---|---|---|
 | STT-01 | `hbc-my-work-feed-cache` draft key (4h TTL) required for feed fallback on stale return | ✅ Corrected — `feedCache` key added to `HUB_DRAFT_KEYS` with 4h TTL; `useDraft` wired in `useHubStatePersistence` (remediation 1-B, 2026-03-22) | **High** — Resolved |
 | STT-02 | Route `onLeave` is primary return-state capture trigger | ✅ Corrected — `onLeave` wired to `myWorkRoute` via module-level bridge to `captureReturnState`; `visibilitychange` retained as secondary fallback (remediation 1-C, 2026-03-22) | **High** — Resolved |
-| STT-03 | URL is canonical state authority; bare `/my-work` seeds from draft | `window.history.replaceState` used for URL sync — not TanStack Router search params; state management coupling is incomplete | **Medium** |
+| STT-03 | URL is canonical state authority; bare `/my-work` seeds from draft | ✅ Corrected — `kpiFilter` managed via TanStack Router `validateSearch` + `useSearch`/`useNavigate`; `window.history.replaceState` removed (remediation 3-C, 2026-03-22) | **Medium** — Resolved |
 | STT-04 | Registry-driven bulk cleanup on session end required | Not implemented; no cleanup registry hook present | **Low** |
 
 ---

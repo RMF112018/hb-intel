@@ -231,6 +231,10 @@ export const requestDetailRoute = createRoute({
 export const myWorkRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'my-work',
+  // STT-03: Router-managed search params for KPI filter (replaces window.history.replaceState).
+  validateSearch: (search: Record<string, unknown>): { filter?: string } => ({
+    filter: typeof search.filter === 'string' ? search.filter : undefined,
+  }),
   beforeLoad: () => {
     requireAuth();
     const nav = useNavStore.getState();

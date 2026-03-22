@@ -19,6 +19,7 @@
  * P2-D5: team mode toggle, card arrangement persistence.
  */
 import { lazy, Suspense, useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { useSearch, useNavigate } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import { WorkspacePageShell, HBC_ACCENT_ORANGE } from '@hbc/ui-kit';
@@ -166,29 +167,20 @@ export function MyWorkPage(): ReactNode {
   // ─── UIF-002: Selected item for master-detail panel ─────────────────────
   const [selectedItem, setSelectedItem] = useState<IMyWorkItem | null>(null);
 
-  // ─── UIF-008: KPI click-to-filter with URL state ───────────────────────
-  const [kpiFilter, setKpiFilter] = useState<string | null>(() => {
-    if (typeof window === 'undefined') return null;
-    return new URLSearchParams(window.location.search).get('filter');
-  });
+  // ─── UIF-008: KPI click-to-filter with router-managed search params ────
+  // STT-03: Replaced window.history.replaceState with TanStack Router search params.
+  const { filter: kpiFilter } = useSearch({ strict: false }) as { filter?: string };
+  const navigate = useNavigate({ from: '/my-work' });
 
   const handleKpiFilter = useCallback((filter: string) => {
-    setKpiFilter((prev) => (prev === filter || filter === 'total' ? null : filter));
-  }, []);
+    const newFilter = (kpiFilter === filter || filter === 'total') ? undefined : filter;
+    void navigate({ search: { filter: newFilter } as Record<string, unknown>, replace: true });
+  }, [kpiFilter, navigate]);
 
   // UIF-020-addl: Clear KPI filter — used by empty state "View all items" action.
-  const handleClearKpiFilter = useCallback(() => setKpiFilter(null), []);
-
-  // Sync kpiFilter to URL
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    if (kpiFilter) {
-      url.searchParams.set('filter', kpiFilter);
-    } else {
-      url.searchParams.delete('filter');
-    }
-    window.history.replaceState({}, '', url.toString());
-  }, [kpiFilter]);
+  const handleClearKpiFilter = useCallback(() => {
+    void navigate({ search: { filter: undefined } as Record<string, unknown>, replace: true });
+  }, [navigate]);
 
   // ─── Detail panel (lazy-loaded) ────────────────────────────────────────
   const detailContent = selectedItem ? (

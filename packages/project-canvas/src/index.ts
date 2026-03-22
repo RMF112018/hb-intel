@@ -48,7 +48,6 @@ export {
 // Components
 export {
   HbcProjectCanvas,
-  HbcCanvasEditor,
   HbcTileCatalog,
   AIInsightTile,
 } from './components/index.js';

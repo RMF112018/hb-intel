@@ -46,8 +46,12 @@ export function useProjectCanvas(projectId: string, userId: string, role: string
       baseTiles = defaultTiles;
     }
     const existingKeys = new Set(baseTiles.map((t) => t.tileKey));
+    // Only inject mandatory tiles that belong to this role/zone's default set.
+    // Prevents cross-zone injection (e.g. hub:lane-summary into tertiary zone).
+    const defaultTileKeys = new Set(defaultTiles.map((t) => t.tileKey));
     const missingMandatory = mandatoryTiles
       .filter((mt) => !existingKeys.has(mt.tileKey))
+      .filter((mt) => defaultTileKeys.has(mt.tileKey))
       .map((mt) => ({
         tileKey: mt.tileKey,
         colStart: 1,

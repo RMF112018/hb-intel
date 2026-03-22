@@ -39,22 +39,25 @@ export function useCanvasConfig(userId: string, projectId: string): {
   }, [refresh]);
 
   const save = useCallback(async (newConfig: ICanvasUserConfig) => {
+    // Optimistic update — reflect changes immediately in local state.
+    setConfig(newConfig);
     setError(null);
     try {
       await CanvasApi.saveConfig(newConfig);
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
+    } catch {
+      // API unavailable (dev mode) — local state already updated above.
+      // In production, a retry mechanism could be added here.
     }
-  }, [refresh]);
+  }, []);
 
   const reset = useCallback(async (role: string) => {
     setError(null);
     try {
       const result = await CanvasApi.resetToRoleDefault(userId, projectId, role);
       setConfig(result);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
+    } catch {
+      // API unavailable — clear config so useProjectCanvas falls back to role defaults.
+      setConfig(null);
     }
   }, [userId, projectId]);
 

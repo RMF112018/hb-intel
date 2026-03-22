@@ -118,32 +118,15 @@ export function HubSecondaryZone({
   }
 
   return (
-    <HbcCard
-      weight="primary"
-      header={
-        <div className={styles.headerRow}>
-          <h3 className={styles.heading}>Insights</h3>
-          {syncLabel && (
-            <span className={styles.freshness}>
-              {syncIcon}
-              {syncLabel}
-            </span>
-          )}
-        </div>
-      }
-    >
-      {/* ARC-01 / 2-B: HbcProjectCanvas governs 12-column grid layout,
-          role defaults, mandatory enforcement, and edit-mode support.
-          MyWorkHubTileProvider preserved for hub-specific tile context. */}
-      <MyWorkHubTileProvider value={{ activeFilter, onFilterChange, teamMode }}>
-        <HbcProjectCanvas
-          projectId="my-work-hub"
-          userId={session?.user?.id ?? ''}
-          role={primaryRole}
-          complexityTier={tier}
-          editable
-        />
-      </MyWorkHubTileProvider>
-    </HbcCard>
+    <MyWorkHubTileProvider value={{ activeFilter, onFilterChange, teamMode }}>
+      <HbcProjectCanvas
+        projectId="my-work-hub"
+        userId={session?.user?.id ?? ''}
+        role={primaryRole}
+        complexityTier={tier}
+        editable
+        title="My Analytics"
+      />
+    </MyWorkHubTileProvider>
   );
 }

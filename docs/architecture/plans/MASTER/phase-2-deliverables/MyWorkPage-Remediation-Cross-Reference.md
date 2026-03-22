@@ -192,12 +192,12 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 3-C: Replace `window.history.replaceState` with TanStack Router search params
+### 3-C: Replace `window.history.replaceState` with TanStack Router search params ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| STT-03 | **M** | `window.history.replaceState` used for URL sync instead of TanStack Router search params; URL not truly canonical | ✅ Full close |
-| NAV-02 | **M** | No return-path state passed through handoff — router search params enable deep-link return path construction | ⚡ Partial — router state now linkable; full return path through `@hbc/workflow-handoff` completed in 4-A |
+| STT-03 | **M** | `window.history.replaceState` used for URL sync instead of TanStack Router search params; URL not truly canonical | ✅ Closed (2026-03-22) — `validateSearch` on myWorkRoute, `useSearch`/`useNavigate` in MyWorkPage |
+| NAV-02 | **M** | No return-path state passed through handoff — router search params enable deep-link return path construction | ⚡ Partial (2026-03-22) — router state now linkable; full return path through `@hbc/workflow-handoff` in 4-A |
 | STT-04 | **L** | Registry-driven bulk cleanup on session end not implemented — router lifecycle hooks now available | ⚡ Partial — unblocked; full implementation deferred per P2-B2 |
 
 ---

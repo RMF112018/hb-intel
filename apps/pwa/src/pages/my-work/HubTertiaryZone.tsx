@@ -19,14 +19,16 @@ export function HubTertiaryZone(): ReactNode {
 
   if (tier === 'essential') return null;
 
-  // P2-D2 Gate 3: Separate projectId from secondary zone ensures zone isolation.
+  // P2-D2 Gate 3: Separate projectId + tertiary role key for zone isolation.
+  // Tertiary zone: Recent Activity only, no editing, no heading.
   return (
     <HbcProjectCanvas
       projectId="my-work-hub-tertiary"
       userId={session?.user?.id ?? ''}
-      role={primaryRole}
+      role={`${primaryRole}:tertiary`}
       complexityTier={tier}
-      editable
+      editable={false}
+      title=""
     />
   );
 }
