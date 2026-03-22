@@ -102,16 +102,15 @@ const useStyles = makeStyles({
       ...shorthands.gap('0px'),
     },
     // Desktop: sticky right panel
-    // UIF-021: Fixed sticky positioning — panel collapses to fit-content height,
-    // enabling sticky travel as the primary zone scrolls past. top clears the
-    // 56px app header + ~74px sticky header band (UIF-018). maxHeight caps the
-    // panel to the remaining viewport; overflowY scrolls only if content exceeds.
+    // UIF-032-addl: top clears the full sticky chrome stack:
+    //   56px fixed app header + 152px sticky content bar (breadcrumb + H1 + tabs) = 208px.
+    // maxHeight fills from sticky chrome bottom to viewport bottom.
     [`@media (min-width: ${HBC_BREAKPOINT_DESKTOP}px)`]: {
       position: 'sticky' as const,
-      top: '130px',
+      top: '208px',
       alignSelf: 'flex-start',
       height: 'fit-content',
-      maxHeight: 'calc(100vh - 130px)',
+      maxHeight: 'calc(100vh - 210px)',
       overflowY: 'auto',
       // UIF-004-addl: subtle scrollbar if panel overflows
       scrollbarWidth: 'thin' as const,

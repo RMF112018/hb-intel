@@ -1859,6 +1859,20 @@ Badges update reactively via TanStack Query cache — same data source as the fe
 
 ---
 
+### 10A.52 UIF-032-addl: Right Panel Sticky Offset Fix
+
+**Severity:** High (layout regression)
+
+**Observed state:** Right panel (Insights/Item Detail) had `position: sticky; top: 130px` which only accounted for the 56px fixed header + ~74px of the sticky content bar. The full sticky chrome is 56px header + 152px content bar (breadcrumb + H1 + tabs) = 208px. The top 78px of the right panel slid behind the sticky chrome when scrolling.
+
+**Fix:** Updated `top` from `130px` to `208px` and `maxHeight` from `calc(100vh - 130px)` to `calc(100vh - 210px)` in the desktop media query of the `rightPanel` Griffel style in `HubZoneLayout.tsx`.
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/HubZoneLayout.tsx` — sticky `top` and `maxHeight` corrected
+- `apps/pwa/package.json` — version 0.12.54 → 0.12.55
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
