@@ -9,6 +9,8 @@ import type { IScorecardRepository } from './ports/IScorecardRepository.js';
 import type { IPmpRepository } from './ports/IPmpRepository.js';
 import type { IProjectRepository } from './ports/IProjectRepository.js';
 import type { IAuthRepository } from './ports/IAuthRepository.js';
+import type { IProjectRegistryService } from './services/IProjectRegistryService.js';
+import { MockProjectRegistryService } from './services/MockProjectRegistryService.js';
 import {
   MockLeadRepository,
   MockScheduleRepository,
@@ -247,4 +249,10 @@ export function createAuthRepository(mode?: AdapterMode): IAuthRepository {
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'AuthRepository');
   }
+}
+
+export function createProjectRegistryService(): IProjectRegistryService {
+  // Registry service is always in-memory for now.
+  // Proxy/SharePoint adapters will be added when backend registry API is available.
+  return new MockProjectRegistryService();
 }

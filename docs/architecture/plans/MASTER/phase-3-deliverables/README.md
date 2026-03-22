@@ -147,6 +147,7 @@ Status: **Implemented 2026-03-22 in `@hbc/provisioning` v0.3.1.** `HandoffActiva
 **1.5 — Registry lookup service**
 Implement the internal lookup service used by the dual-key routing layer, cross-lane handoff construction, and authority scoping. This service is the single resolution point for `projectNumber → projectId` normalization.
 Governing: P3-A1 §3.5
+Status: **Implemented 2026-03-22 in `@hbc/data-access` v0.6.0.** `IProjectRegistryService` with `getByProjectId`, `getByProjectNumber`, `getBySiteUrl`, `resolveProjectIdentity`, and `listByDepartment`. Returns `IProjectRegistryRecord`. Mock implementation and factory function added. Stage 1 complete.
 
 **1.6 — Governed department reclassification flow**
 Implement the department change workflow: Manager of OpEx approval, audit record creation, downstream visibility recalculation (all role-scoped authority re-evaluated for the new department value), and suspension of any active PER override records for the project until re-grant.

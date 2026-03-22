@@ -119,10 +119,17 @@ export {
   createPmpRepository,
   createProjectRepository,
   createAuthRepository,
+  createProjectRegistryService,
   resolveAdapterMode,
   setProxyContext,
 } from './factory.js';
 export type { AdapterMode } from './factory.js';
+
+// ---------------------------------------------------------------------------
+// Registry service (Phase 3 Stage 1.5 — single resolution point)
+// ---------------------------------------------------------------------------
+export type { IProjectRegistryService } from './services/IProjectRegistryService.js';
+export { MockProjectRegistryService } from './services/MockProjectRegistryService.js';
 
 // ---------------------------------------------------------------------------
 // Routing normalization (Phase 3 Stage 1.2 — dual-key project identity)
