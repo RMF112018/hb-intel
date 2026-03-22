@@ -5,10 +5,10 @@
  * No hardcoded pixel breakpoints (MB-08). No fixed pixel widths (MB-04).
  * SPFx-safe: uses percentage/flex/grid-fraction widths only.
  *
- * Responsive tiers per UIF-015:
+ * Responsive tiers per UIF-015 + UIF-033-addl:
  *   Desktop (≥1200px / HBC_BREAKPOINT_DESKTOP): full two-column 7fr 5fr
  *   Tablet  (1024–1199px / HBC_BREAKPOINT_SIDEBAR–CONTENT_MEDIUM): two-column 3fr 2fr
- *   Below tablet (768–1023px): single-column stack
+ *   sm-tablet (768–1023px): single-column, constrained secondary/tertiary zones (UIF-033-addl)
  *   Mobile  (≤767px / HBC_BREAKPOINT_MOBILE): single-column, tighter gap
  *
  * UIF-002: Master-detail — selected item shows detail panel in right column,
@@ -68,6 +68,11 @@ const useStyles = makeStyles({
       gridTemplateColumns: '7fr 5fr',
       alignItems: 'start',
     },
+    // UIF-033-addl: sm-tablet (768–1023px) — explicit tier for the responsive void.
+    // Single-column with intermediate gap between mobile (16px) and desktop (24px).
+    [`@media (min-width: ${HBC_BREAKPOINT_MOBILE + 1}px) and (max-width: ${HBC_BREAKPOINT_SIDEBAR - 1}px)`]: {
+      ...shorthands.gap('20px'),
+    },
     [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {
       ...shorthands.gap('16px'),
     },
@@ -124,6 +129,10 @@ const useStyles = makeStyles({
   secondaryZone: {
     display: 'block',
     order: -1,
+    // UIF-033-addl: Constrain width at sm-tablet so KPI cards don't stretch full viewport.
+    [`@media (min-width: ${HBC_BREAKPOINT_MOBILE + 1}px) and (max-width: ${HBC_BREAKPOINT_SIDEBAR - 1}px)`]: {
+      maxWidth: '600px',
+    },
     [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
       order: 0,
     },
@@ -133,6 +142,10 @@ const useStyles = makeStyles({
   tertiaryZone: {
     display: 'block',
     order: 1,
+    // UIF-033-addl: Constrain width at sm-tablet so Quick Access doesn't stretch full viewport.
+    [`@media (min-width: ${HBC_BREAKPOINT_MOBILE + 1}px) and (max-width: ${HBC_BREAKPOINT_SIDEBAR - 1}px)`]: {
+      maxWidth: '600px',
+    },
     [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
       order: 0,
     },

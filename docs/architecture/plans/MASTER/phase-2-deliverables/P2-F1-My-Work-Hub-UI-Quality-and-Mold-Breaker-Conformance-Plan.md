@@ -1887,6 +1887,35 @@ Badges update reactively via TanStack Query cache — same data source as the fe
 
 ---
 
+### 10A.54 UIF-033-addl: Tablet Breakpoint Architecture (768–1023px)
+
+**Severity:** High
+**Category:** Responsive Layout
+
+**Observed state:** The 768–1023px viewport range had no explicit media query tier — it fell through to the default single-column layout with `display: contents` on the right panel, causing secondary/tertiary zones to render full-width without constraint. This was an undesigned responsive void between `HBC_BREAKPOINT_MOBILE` (767) and `HBC_BREAKPOINT_SIDEBAR` (1024).
+
+**Fix:** Added an explicit `sm-tablet` responsive tier (768px–1023px) using canonical breakpoint tokens (`HBC_BREAKPOINT_MOBILE + 1` to `HBC_BREAKPOINT_SIDEBAR - 1`):
+
+| Property | sm-tablet (768–1023px) |
+|---|---|
+| Grid | Single-column `1fr` (unchanged) |
+| Gap | `20px` (intermediate between mobile 16px and desktop 24px) |
+| Secondary zone | `maxWidth: 600px` — constrains KPI cards |
+| Tertiary zone | `maxWidth: 600px` — constrains Quick Access |
+| Right panel | `display: contents` (unchanged — zones participate in single-column grid) |
+
+Final breakpoint structure:
+- Mobile (≤767px): 1fr, 16px gap
+- **sm-tablet (768–1023px): 1fr, 20px gap, 600px max-width on secondary/tertiary** (new)
+- Tablet (1024–1199px): 3fr 2fr two-column
+- Desktop (≥1200px): 7fr 5fr, sticky right panel
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/HubZoneLayout.tsx` — sm-tablet media queries for hubGrid, secondaryZone, tertiaryZone
+- `apps/pwa/package.json` — version 0.12.55 → 0.12.56
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
