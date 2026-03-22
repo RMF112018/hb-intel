@@ -316,18 +316,19 @@ function buildWorkItemColumns(
     {
       id: 'status',
       header: 'Status',
-      size: 80,
+      size: 100,
       cell: ({ row }) => {
         const item = row.original;
         const tags: React.ReactNode[] = [];
         if (item.isOverdue) {
           tags.push(
-            <HbcStatusBadge key="overdue" variant="error" label="Overdue" size="small" />,
+            // UIF-023-addl: medium size ensures consistent filled-pill rendering.
+            <HbcStatusBadge key="overdue" variant="error" label="Overdue" size="medium" />,
           );
         }
         if (item.isBlocked) {
           tags.push(
-            <HbcStatusBadge key="blocked" variant="warning" label="Blocked" size="small" />,
+            <HbcStatusBadge key="blocked" variant="warning" label="Blocked" size="medium" />,
           );
         }
         // UIF-008-addl: Show item state when no urgency flags — every row gets a status badge.
@@ -337,7 +338,7 @@ function buildWorkItemColumns(
               key="state"
               variant={STATE_BADGE_VARIANT[item.state]}
               label={STATE_DISPLAY_LABELS[item.state]}
-              size="small"
+              size="medium"
             />,
           );
         }

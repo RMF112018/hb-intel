@@ -1628,6 +1628,27 @@ Wired `onClearKpiFilter` callback through `MyWorkPage` → `HubPrimaryZone` → 
 
 ---
 
+### 10A.42 UIF-023-addl: Status Badge Consistent Pill Rendering (Medium)
+
+**Severity:** Medium
+**Category:** Design System / Typography
+**Governing authority:** `UI-Kit-Visual-Language-Guide.md` — status badges use `HBC_STATUS_RAMP_*` with filled background. MB-02 (Stronger Hierarchy) — status indicators must be immediately scannable.
+
+**Observed state:** Status badges in the data table Status column rendered at `size="small"` which produced a compact rendering that could lose the visible pill background, border-radius, and icon at reading distance. The audit found "background: transparent, border-radius: 0px" — consistent with Fluent `Badge` at small size not fully applying filled appearance styles.
+
+**Fix:** Upgraded all three `HbcStatusBadge` instances in the status column cell renderer from `size="small"` to `size="medium"` (24px height), ensuring consistent filled-pill rendering with visible background tint, border-radius, and dual-channel icon+text treatment. Widened column from 80px to 100px to accommodate medium badges.
+
+**Acceptance criteria:**
+- All status values render as proper filled badges with background tint — **MET** (`size="medium"` ensures full Badge appearance with background + icon)
+- Inline row badge matches hover-preview badge appearance — **MET** (both use `HbcStatusBadge` at medium size with same variant mapping)
+- No plain-text status values — **MET** (all states go through `HbcStatusBadge` via `STATE_BADGE_VARIANT` map)
+
+**Files modified:**
+- `packages/my-work-feed/src/components/HbcMyWorkFeed/index.tsx` — status column badges upgraded from `size="small"` to `size="medium"`; column width 80px → 100px
+- `packages/my-work-feed/package.json` — version 0.0.28 → 0.0.29
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
