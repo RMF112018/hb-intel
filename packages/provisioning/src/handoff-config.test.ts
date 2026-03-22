@@ -165,13 +165,15 @@ describe('SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG', () => {
     });
   });
 
-  describe('onAcknowledged (Wave 0 no-op)', () => {
-    it('returns empty destinationRecordId', async () => {
+  describe('onAcknowledged (Phase 3 activation)', () => {
+    it('returns UUID v4 destinationRecordId', async () => {
       const result = await SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG.onAcknowledged({
         handoffId: 'h-1',
         destinationSeedData: {},
       } as Parameters<typeof SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG.onAcknowledged>[0]);
-      expect(result.destinationRecordId).toBe('');
+      expect(result.destinationRecordId).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      );
     });
   });
 

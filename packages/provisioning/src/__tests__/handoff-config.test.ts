@@ -67,8 +67,8 @@ describe('SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG (P2-C4 §8)', () => {
     });
   });
 
-  describe('onAcknowledged (P2-C4 scenario 2)', () => {
-    it('returns destinationRecordId derived from handoffId', async () => {
+  describe('onAcknowledged (Phase 3 activation)', () => {
+    it('returns UUID v4 destinationRecordId', async () => {
       const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
       const request = createCompletedRequest();
       const seed = SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG.mapSourceToDestination(request);
@@ -78,7 +78,9 @@ describe('SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG (P2-C4 §8)', () => {
       };
 
       const result = await SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG.onAcknowledged(mockPkg as never);
-      expect(result.destinationRecordId).toBe('project-handoff-abc');
+      expect(result.destinationRecordId).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      );
       consoleSpy.mockRestore();
     });
   });

@@ -33,6 +33,10 @@ export {
   createProjectSetupBicRegistration,
 } from './bic-registration.js';
 
+// Phase 3 Stage 1.3: Project activation transaction
+export type { ProjectActivationInput, ProjectActivationResult } from './activation/index.js';
+export { validateActivationPreconditions, buildRegistryRecord } from './activation/index.js';
+
 // W0-G3-T02: Handoff contract (Estimating → Project Hub)
 export type { IProjectHubSeedData } from './handoff-config.js';
 export {

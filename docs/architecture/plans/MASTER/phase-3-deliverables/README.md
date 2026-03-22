@@ -137,6 +137,7 @@ Status: **Implemented 2026-03-22 in `@hbc/data-access` v0.5.0.** `getProjectByNu
 **1.3 — Project activation transaction — setup seam**
 Implement the setup seam activation path: new project setup flow produces a valid project registry entry with `projectId`, `siteUrl`, and `status: 'active'`. Incomplete activations must be rejected atomically — no orphaned records.
 Governing: P3-A1 §4
+Status: **Implemented 2026-03-22 in `@hbc/provisioning` v0.3.0.** `validateActivationPreconditions` (8 precondition checks per P3-A1 §5.2) and `buildRegistryRecord` (pure function producing all 24 fields with UUID v4 projectId, primary site association, audit trail) added. Handoff config `onAcknowledged` updated to use activation pipeline. Full runtime wiring (repository injection, auth context) is Phase 3 integration scope.
 
 **1.4 — Project activation transaction — handoff seam**
 Implement the handoff seam activation path for projects pre-existing in other systems. Validate that handoff data satisfies all required registry fields before committing the registry entry.

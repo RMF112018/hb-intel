@@ -118,16 +118,32 @@ export const SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG: IHandoffConfig<
   },
 
   onAcknowledged: async (pkg) => {
-    // P2-C4 §3.1: Provisioning completion → Project Hub seed creation.
-    // Generates deterministic record ID from handoff. When ProjectHubApi
-    // is available, replace with: ProjectHubApi.createProject(pkg.destinationSeedData, pkg.handoffId)
+    // Phase 3 Stage 1.3: Project activation transaction.
+    // The governed activation is implemented in ./activation/createProjectActivation.ts.
+    // Full wiring (repository injection, provisioning status resolution, auth context)
+    // will be completed during Phase 3 runtime integration.
+    //
+    // Target implementation:
+    //   const result = await executeProjectActivation(
+    //     { handoffId: pkg.handoffId, seed: pkg.destinationSeedData, provisioningStatus, acknowledgedByUpn },
+    //     projectRepository,
+    //   );
+    //   return { destinationRecordId: result.destinationRecordId };
+    //
+    // Interim: build the registry record shape to validate the pipeline.
     const seed = pkg.destinationSeedData;
-    const destinationRecordId = `project-${pkg.handoffId}`;
+    const { buildRegistryRecord } = await import('./activation/createProjectActivation.js');
+    const record = buildRegistryRecord({
+      handoffId: pkg.handoffId,
+      seed: seed as IProjectHubSeedData,
+      provisioningStatus: { entraGroups: null } as unknown as import('@hbc/models').IProvisioningStatus,
+      acknowledgedByUpn: 'pending-auth-context',
+    });
     console.info(
-      `[provisioning/handoff] Project Hub seed created for handoff ${pkg.handoffId}: ` +
-        `project="${seed?.projectName}", number="${seed?.projectNumber}", department="${seed?.department}"`,
+      `[provisioning/handoff] Project activation for handoff ${pkg.handoffId}: ` +
+        `projectId="${record.projectId}", project="${seed?.projectName}", number="${seed?.projectNumber}"`,
     );
-    return { destinationRecordId };
+    return { destinationRecordId: record.projectId };
   },
 
   onRejected: async (pkg) => {
