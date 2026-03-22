@@ -49,8 +49,10 @@ import { useComplexityGate } from '@hbc/complexity';
 import type { HbcDataTableProps, HbcDataTableSavedViewsConfig } from './types.js';
 
 const useStyles = makeStyles({
+  // UIF-031-fix: overflow removed from Griffel base — controlled entirely via
+  // inline style to prevent Griffel atomic CSS specificity from overriding the
+  // auto-height path (overflow: 'visible') with a competing overflow: 'auto'.
   wrapper: {
-    overflow: 'auto',
     position: 'relative',
     borderRadius: '4px',
     boxShadow: elevationRest,

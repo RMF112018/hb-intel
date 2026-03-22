@@ -1845,6 +1845,20 @@ Badges update reactively via TanStack Query cache — same data source as the fe
 
 ---
 
+### 10A.51 UIF-031-fix: Remove Griffel overflow:auto from HbcDataTable Wrapper
+
+**Severity:** High (scrollbar regression)
+
+**Observed state:** Data table wrappers rendered with `overflow: auto` from the Griffel `wrapper` class, conflicting with the inline style `overflow: 'visible'` intended for auto-height tables. Griffel's atomic CSS specificity could win over inline styles, causing scrollbars on content-sized tables.
+
+**Fix:** Removed `overflow: 'auto'` from the Griffel `wrapper` class. Overflow is now controlled entirely via the inline style: `overflow: 'visible'` for `height === 'auto'`, `overflow: 'auto'` for fixed-height tables. This eliminates the CSS specificity conflict.
+
+**Files modified:**
+- `packages/ui-kit/src/HbcDataTable/index.tsx` — removed `overflow: 'auto'` from wrapper Griffel class
+- `packages/ui-kit/package.json` — version 2.2.50 → 2.2.51
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
