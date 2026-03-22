@@ -19,6 +19,7 @@ navigation shell orchestration, and runtime host boundary enforcement. It consum
 - Redirect-memory orchestration and sign-out cleanup policy.
 - Startup timing budgets and release diagnostics surfaces.
 - SPFx host boundary validation and normalized host signal seam handling.
+- SPFx-to-PWA cross-lane escalation deep-link construction (Phase 3).
 - Protected feature registration contract validation/enforcement.
 
 `@hbc/shell` does not own:

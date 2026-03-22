@@ -116,6 +116,7 @@ Status: **Assessed 2026-03-22 — gap confirmed, remediation delivered in v0.0.3
 **0.4 — SPFx shell cross-lane escalation affordance**
 Confirm that the SPFx shell can surface a Launch-to-PWA affordance and pass deep-link parameters including `projectId`, `module`, `action`, and `reviewArtifactId`. This is required for all SPFx-to-PWA escalation scenarios.
 Governing: P3-G2 §3, §8.8
+Status: **Assessed 2026-03-22 — gap confirmed, remediation delivered in `@hbc/shell` v0.0.5.** `buildPwaDeepLink` URL builder and `useLaunchToPwa` hook added. Supports `projectId`, `module`, `action`, `view`, `reviewArtifactId`, `returnTo`, `source` parameters per P3-G2 §7. All SPFx-to-PWA escalation scenarios unblocked.
 
 ---
 

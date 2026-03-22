@@ -161,6 +161,8 @@ export {
 } from './redirectMemory.js';
 export { useShellStatusState, useDegradedModeVisibilityRules } from './hooks.js';
 export { resolveProjectHubUrl } from './utils/resolveProjectHubUrl.js';
+export { buildPwaDeepLink, useLaunchToPwa } from './escalation/index.js';
+export type { PwaDeepLinkParams } from './escalation/index.js';
 export {
   createDefaultShellSignOutCleanupDependencies,
   runShellSignOutCleanup,
