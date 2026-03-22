@@ -45,8 +45,8 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
         })),
       ),
     },
-    // INS-004: 1 column in 2-column grid (was 6 in 12-column grid)
-    defaultColSpan: 1,
+    // ARC-08: 12-column grid per CANVAS_GRID_COLUMNS — 6 = half width
+    defaultColSpan: 6,
     defaultRowSpan: 1,
     lockable: false,
   },
@@ -74,8 +74,8 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
         })),
       ),
     },
-    // INS-004: 1 column in 2-column grid
-    defaultColSpan: 1,
+    // ARC-08: 12-column grid per CANVAS_GRID_COLUMNS — 6 = half width
+    defaultColSpan: 6,
     defaultRowSpan: 1,
     lockable: false,
   },
@@ -103,8 +103,8 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
         })),
       ),
     },
-    // INS-004: 1 column in 2-column grid
-    defaultColSpan: 1,
+    // ARC-08: 12-column grid per CANVAS_GRID_COLUMNS — 6 = half width
+    defaultColSpan: 6,
     defaultRowSpan: 1,
     lockable: false,
   },
@@ -132,8 +132,8 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
         })),
       ),
     },
-    // INS-004: Full-width in 2-column grid (span 2)
-    defaultColSpan: 2,
+    // ARC-08: 12-column grid per CANVAS_GRID_COLUMNS — 12 = full width
+    defaultColSpan: 12,
     defaultRowSpan: 1,
     lockable: false,
   },
@@ -163,8 +163,8 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
         })),
       ),
     },
-    // P2-D2 §4.2: Wide — full width in 2-column grid (12 columns in standard grid)
-    defaultColSpan: 2,
+    // ARC-08: 12-column grid per CANVAS_GRID_COLUMNS — 12 = full width
+    defaultColSpan: 12,
     defaultRowSpan: 1,
     lockable: true,
   },
@@ -192,8 +192,8 @@ export const myWorkTileDefinitions: ICanvasTileDefinition[] = [
         })),
       ),
     },
-    // P2-D2 §4.2: Standard — 1 column in 2-column grid (6 columns in standard grid)
-    defaultColSpan: 1,
+    // ARC-08: 12-column grid per CANVAS_GRID_COLUMNS — 6 = half width
+    defaultColSpan: 6,
     defaultRowSpan: 1,
     lockable: false,
   },

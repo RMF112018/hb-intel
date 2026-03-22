@@ -107,15 +107,15 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 2-B: Replace `MyWorkCanvas` with `HbcProjectCanvas` — secondary zone
+### 2-B: Replace `MyWorkCanvas` with `HbcProjectCanvas` — secondary zone ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| ARC-01 | **C** | `HbcProjectCanvas` absent in secondary zone; `MyWorkCanvas` custom renderer used | ✅ Full close (secondary) |
-| ARC-F1 | **C** | `MyWorkCanvas` is a governance bypass — calls `getAll()` directly, no edit-mode, no mandatory enforcement | ✅ Full close (secondary) |
-| ARC-09 | **C** | Gate 2 (canvas in secondary zone) failing | ✅ Gate 2 satisfied (secondary) |
-| ARC-08 | **M** | Custom Griffel grid not aligned to governed 12-column grid | ✅ Full close — `HbcProjectCanvas` manages grid |
-| PRS-01 / ARC-F6 | **H** | `cardArrangement` computed and silently discarded — canvas now exists to receive it | ⚡ Partial — canvas mount point exists; `cardArrangement` fully wired in 3-A |
+| ARC-01 | **C** | `HbcProjectCanvas` absent in secondary zone; `MyWorkCanvas` custom renderer used | ✅ Closed — secondary zone (2026-03-22); tertiary in 2-C |
+| ARC-F1 | **C** | `MyWorkCanvas` is a governance bypass — calls `getAll()` directly, no edit-mode, no mandatory enforcement | ✅ Closed — `MyWorkCanvas.tsx` deleted (2026-03-22) |
+| ARC-09 | **C** | Gate 2 (canvas in secondary zone) failing | ✅ Gate 2 satisfied (2026-03-22) |
+| ARC-08 | **M** | Custom Griffel grid not aligned to governed 12-column grid | ✅ Closed — tile colSpan converted to 12-column; HbcProjectCanvas manages grid (2026-03-22) |
+| PRS-01 / ARC-F6 | **H** | `cardArrangement` computed and silently discarded — canvas now exists to receive it | ⚡ Partial — canvas mount point exists (2026-03-22); `cardArrangement` fully wired in 3-A |
 
 ---
 

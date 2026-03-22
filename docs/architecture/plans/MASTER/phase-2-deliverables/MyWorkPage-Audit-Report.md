@@ -100,15 +100,15 @@ As actually implemented, `MyWorkPage` operates as follows.
 
 | Finding ID | Requirement | Current State | Severity |
 |---|---|---|---|
-| ARC-01 | `HbcProjectCanvas` must govern secondary and tertiary zone tile layout | `MyWorkCanvas` custom renderer used; `HbcProjectCanvas` not present | **Critical** |
+| ARC-01 | `HbcProjectCanvas` must govern secondary and tertiary zone tile layout | ✅ Secondary zone corrected — `HbcProjectCanvas` replaces `MyWorkCanvas` (remediation 2-B, 2026-03-22); tertiary zone addressed in 2-C | **Critical** — Partially Resolved |
 | ARC-02 | `HbcCanvasEditor` + `useCanvasEditor` required for edit-mode in secondary zone | Not present anywhere in the page | **Critical** |
 | ARC-03 | `useCanvasMandatoryTiles` must lock `hub:lane-summary`, `hub:quick-actions`, `hub:team-workload` | Not present; no mandatory tile enforcement exists | **Critical** |
 | ARC-04 | `useRoleDefaultCanvas` must seed role-specific default arrangements | Not present; tile order is hard-coded by `getAll()` position | **Critical** |
 | ARC-05 | Tile namespace must be `hub:*` (P2-D2 §6.1) | ✅ Corrected — tiles registered as `hub:*` (remediation 0-A, 2026-03-22) | **Critical** — Resolved |
 | ARC-06 | Two isolated `useCanvasEditor` instances (secondary + tertiary) required | Not present | **High** |
 | ARC-07 | `HbcTileCatalog` required for edit-mode tile picker | Not present | **High** |
-| ARC-08 | 12-column grid with governed responsive tiers | Custom Griffel 1fr/2fr/7fr grid — no column alignment with design system grid | **Medium** |
-| ARC-09 | Gate 2 (canvas in secondary), Gate 3 (canvas in tertiary), Gate 4 (edit-mode), Gate 5 (mandatory tiles) all failing | All five gates failing (Gate 1 — primary zone isolation — passes) | **Critical** |
+| ARC-08 | 12-column grid with governed responsive tiers | ✅ Corrected — tile `defaultColSpan` values converted to 12-column grid (6/12); `HbcProjectCanvas` manages governed grid (remediation 2-B, 2026-03-22) | **Medium** — Resolved |
+| ARC-09 | Gate 2 (canvas in secondary), Gate 3 (canvas in tertiary), Gate 4 (edit-mode), Gate 5 (mandatory tiles) all failing | ⚡ Gate 2 satisfied — `HbcProjectCanvas` in secondary zone (remediation 2-B, 2026-03-22). Gates 3–5 still open. | **Critical** — Partially Resolved |
 
 P2-D2 is the single most consequential governance failure. Every gate beyond Gate 1 is unmet.
 
@@ -253,16 +253,9 @@ Rule: All colors and spacing must use `HBC_*` named token constants from `@hbc/u
 
 ### ARC-F1: `MyWorkCanvas` is a Governance Bypass (Critical)
 
-**File:** `tiles/MyWorkCanvas.tsx`
+**File:** `tiles/MyWorkCanvas.tsx` — ✅ **Deleted** (remediation 2-B, 2026-03-22)
 
-`MyWorkCanvas` calls `getAll()` from `@hbc/project-canvas` — the package's internal registry read — and then manually renders tiles using local role filtering and a hand-rolled Griffel grid. This completely bypasses:
-
-- `HbcProjectCanvas` (the governed canvas renderer with edit-mode support, mandatory tile enforcement, and role defaults)
-- `useRoleDefaultCanvas` (seeding the default arrangement based on resolved role)
-- `useCanvasMandatoryTiles` (ensuring `hub:lane-summary`, `hub:quick-actions`, `hub:team-workload` cannot be removed)
-- `HbcCanvasEditor` and `HbcTileCatalog` (the edit-mode tile management surface)
-
-P2-F1 §Revision Note (2026-03-21) explicitly identifies this as one of the two root causes of the page's production failure. The custom `MyWorkCanvas` must be replaced with `HbcProjectCanvas` in both the secondary and tertiary zones.
+`MyWorkCanvas` has been removed. `HubSecondaryZone` now renders tiles via `HbcProjectCanvas` from `@hbc/project-canvas`, which provides the governed 12-column grid, role-default seeding, mandatory tile enforcement, and edit-mode support. The `MyWorkHubTileProvider` context wrapper is preserved for hub-specific tile state (KPI filter, team mode). Tertiary zone replacement addressed in 2-C.
 
 ---
 
@@ -474,11 +467,10 @@ All items are pre-conditions for Phase 3 unless explicitly marked as "can procee
 
 These findings invalidate the implementation's fitness as a Phase 3 baseline. They cannot be deferred without creating compounding integration debt.
 
-**T0-01: Replace `MyWorkCanvas` with `HbcProjectCanvas` in secondary and tertiary zones**
-Files: `tiles/MyWorkCanvas.tsx`, `HubSecondaryZone.tsx`, `HubTertiaryZone.tsx`
+**T0-01: Replace `MyWorkCanvas` with `HbcProjectCanvas` in secondary and tertiary zones** ⚡ Secondary zone completed (2026-03-22)
+Files: `tiles/MyWorkCanvas.tsx` (**deleted**), `HubSecondaryZone.tsx`, `HubTertiaryZone.tsx` (pending 2-C)
 Authority: P2-D2, P2-F1 §G0
-Action: Remove `MyWorkCanvas`. Wire `HbcProjectCanvas` with `useRoleDefaultCanvas` for seeding, `useCanvasMandatoryTiles` locking `hub:lane-summary`, `hub:quick-actions`, `hub:team-workload`, and two isolated `useCanvasEditor` instances (secondary, tertiary). Add `HbcCanvasEditor` and `HbcTileCatalog` for edit mode.
-Risk: High — this is a full secondary/tertiary zone replacement. Requires careful coordination with `@hbc/project-canvas` API.
+Action: `MyWorkCanvas.tsx` deleted. `HubSecondaryZone` now renders via `HbcProjectCanvas` with `projectId="my-work-hub"`, `role` from `useCurrentSession()`, `complexityTier`, `editable=false`. Tile `defaultColSpan` values converted to 12-column grid (6/12). `MyWorkHubTileProvider` context preserved for hub-specific tile state. Tertiary zone replacement deferred to 2-C. Edit-mode and mandatory enforcement hooks deferred to subsequent phases.
 
 **T0-02: Re-register tiles under `hub:` namespace** ✅ Completed (2026-03-22)
 File: `tiles/myWorkTileDefinitions.ts`, `tiles/registerMyWorkTiles.ts`
