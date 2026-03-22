@@ -26,8 +26,9 @@ const useStyles = makeStyles({
     top: `${HBC_HEADER_HEIGHT + HBC_CONNECTIVITY_HEIGHT_ONLINE}px`,
     left: '0px',
     height: `calc(100vh - ${HBC_HEADER_HEIGHT + HBC_CONNECTIVITY_HEIGHT_ONLINE}px)`,
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderRight('1px', 'solid', tokens.colorNeutralStroke1),
+    // Sidebar-foundation: use CSS custom properties for theme-overridable styling.
+    backgroundColor: 'var(--hbc-sidebar-bg, var(--colorNeutralBackground1))',
+    ...shorthands.borderRight('1px', 'solid', 'var(--hbc-sidebar-border, var(--colorNeutralStroke1))'),
     display: 'flex',
     flexDirection: 'column',
     transitionProperty: 'width',
@@ -110,14 +111,14 @@ const useStyles = makeStyles({
     paddingRight: '0px',
   },
   navItemActive: {
-    // D-PH4C-27 invariant: keep brand orange accent for active rail marker.
-    borderLeftColor: HBC_ACCENT_ORANGE as string,
-    backgroundColor: tokens.colorBrandBackground2,
+    // Sidebar-foundation: active state uses CSS custom properties for theme override.
+    borderLeftColor: 'var(--hbc-nav-item-active-border)',
+    backgroundColor: 'var(--hbc-nav-item-active-bg)',
     color: tokens.colorBrandForeground1,
     fontWeight: '600',
   },
   navItemActiveCollapsed: {
-    borderLeftColor: HBC_ACCENT_ORANGE as string,
+    borderLeftColor: 'var(--hbc-nav-item-active-border)',
   },
   navItemIcon: {
     flexShrink: 0,
@@ -213,7 +214,15 @@ export const HbcSidebar: React.FC<HbcSidebarProps> = ({
       aria-label="Main navigation"
       data-hbc-ui="sidebar"
       data-expanded={effectiveExpanded}
-      style={{ top: topOffset, height: sidebarHeight }}
+      style={{
+        top: topOffset,
+        height: sidebarHeight,
+        // Sidebar CSS custom properties — overridable via devtools/theme.
+        '--hbc-sidebar-bg': 'var(--colorNeutralBackground1)',
+        '--hbc-sidebar-border': 'var(--colorNeutralStroke1)',
+        '--hbc-nav-item-active-border': HBC_ACCENT_ORANGE,
+        '--hbc-nav-item-active-bg': 'var(--colorBrandBackground2)',
+      } as React.CSSProperties}
     >
       <div className={styles.navScroll}>
         {groups.map((group) => (
