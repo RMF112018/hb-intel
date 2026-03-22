@@ -142,6 +142,7 @@ Status: **Implemented 2026-03-22 in `@hbc/provisioning` v0.3.0.** `validateActiv
 **1.4 — Project activation transaction — handoff seam**
 Implement the handoff seam activation path for projects pre-existing in other systems. Validate that handoff data satisfies all required registry fields before committing the registry entry.
 Governing: P3-A1 §4
+Status: **Implemented 2026-03-22 in `@hbc/provisioning` v0.3.1.** `HandoffActivationInput` (provisioning-independent), `validateHandoffActivationPreconditions`, and `buildRegistryRecordFromHandoff` added. Produces same `IProjectRegistryRecord` as setup seam. Both activation paths now complete.
 
 **1.5 — Registry lookup service**
 Implement the internal lookup service used by the dual-key routing layer, cross-lane handoff construction, and authority scoping. This service is the single resolution point for `projectNumber → projectId` normalization.
