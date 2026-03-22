@@ -56,9 +56,11 @@ const useStyles = makeStyles({
     gridTemplateColumns: '1fr',
     ...shorthands.gap('24px'),
     width: '100%',
-    // Tablet tier: two-column with narrower right panel
+    // UIF-034-addl: Tablet tier — two-column with narrower right panel.
+    // alignItems: 'start' lets right panel shrink to content height for sticky behavior.
     [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px) and (max-width: ${HBC_BREAKPOINT_CONTENT_MEDIUM}px)`]: {
       gridTemplateColumns: '3fr 2fr',
+      alignItems: 'start',
     },
     // Desktop tier: full two-column master-detail
     // UIF-021: alignItems start lets grid tracks size independently — right column
@@ -99,25 +101,21 @@ const useStyles = makeStyles({
   // and at ≥DESKTOP it becomes sticky.
   rightPanel: {
     display: 'contents',
-    // Tablet+: restore as a flex column in the right grid column
+    // UIF-034-addl: Tablet+ (≥1024px): restore as flex column, sticky positioning.
+    // Sticky applies to both tablet (3fr 2fr) and desktop (7fr 5fr) tiers.
+    // UIF-032-addl: top clears full sticky chrome stack:
+    //   56px fixed app header + 152px sticky content bar (breadcrumb + H1 + tabs) = 208px.
     [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px)`]: {
       display: 'flex',
       flexDirection: 'column',
       gridColumn: '2 / 3',
       ...shorthands.gap('0px'),
-    },
-    // Desktop: sticky right panel
-    // UIF-032-addl: top clears the full sticky chrome stack:
-    //   56px fixed app header + 152px sticky content bar (breadcrumb + H1 + tabs) = 208px.
-    // maxHeight fills from sticky chrome bottom to viewport bottom.
-    [`@media (min-width: ${HBC_BREAKPOINT_DESKTOP}px)`]: {
       position: 'sticky' as const,
       top: '208px',
       alignSelf: 'flex-start',
       height: 'fit-content',
       maxHeight: 'calc(100vh - 210px)',
       overflowY: 'auto',
-      // UIF-004-addl: subtle scrollbar if panel overflows
       scrollbarWidth: 'thin' as const,
       scrollbarColor: 'rgba(255,255,255,0.15) transparent',
     },

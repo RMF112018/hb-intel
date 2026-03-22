@@ -1916,6 +1916,34 @@ Final breakpoint structure:
 
 ---
 
+### 10A.55 UIF-034-addl: Sticky Sidebar for Tablet Tier + Boundary Fix
+
+**Severity:** High
+**Category:** Responsive Layout
+
+**Observed state:** The right panel (Insights) was only sticky at ≥1200px (desktop). At the 1024–1199px tablet tier, the grid used `3fr 2fr` two-column but lacked `alignItems: 'start'` and sticky positioning — the right panel stretched to match the primary zone height and scrolled away with the page.
+
+**Fix:** Two changes in `HubZoneLayout.tsx`:
+
+1. **hubGrid tablet tier** (1024–1199px): Added `alignItems: 'start'` so the right panel can shrink to content height, enabling sticky travel
+2. **rightPanel ≥SIDEBAR tier** (≥1024px): Merged sticky properties (`position: sticky`, `top: 208px`, `maxHeight`, `overflowY`, scrollbar styling) into the `≥1024px` rule. Both tablet and desktop tiers now get sticky behavior. The separate `≥1200px` rule was removed since all its properties are now in the `≥1024px` rule.
+
+Final sticky behavior across breakpoints:
+| Width | Grid | Right panel | Sticky |
+|---|---|---|---|
+| ≤767px | 1fr | `display: contents` | No |
+| 768–1023px | 1fr | `display: contents` | No |
+| 1024–1199px | 3fr 2fr, `alignItems: start` | flex column, sticky `top: 208px` | Yes |
+| ≥1200px | 7fr 5fr, `alignItems: start` | flex column, sticky `top: 208px` | Yes |
+
+No boundary collision at 1024px — the `≥SIDEBAR` rule applies cleanly with the tablet grid `3fr 2fr` range-scoped rule.
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/HubZoneLayout.tsx` — sticky merged into `≥1024px`, `alignItems: start` on tablet grid
+- `apps/pwa/package.json` — version 0.12.56 → 0.12.57
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
