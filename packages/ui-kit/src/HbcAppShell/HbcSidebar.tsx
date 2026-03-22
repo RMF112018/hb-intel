@@ -81,6 +81,12 @@ const useStyles = makeStyles({
     paddingRight: `${HBC_SPACE_MD}px`,
     paddingTop: `${HBC_SPACE_SM}px`,
     paddingBottom: `${HBC_SPACE_SM}px`,
+    // UIF-035-addl: Touch-target bump on coarse-pointer devices (WCAG 2.5.5).
+    '@media (pointer: coarse)': {
+      minHeight: '44px',
+      paddingTop: '12px',
+      paddingBottom: '12px',
+    },
     backgroundColor: 'transparent',
     ...shorthands.borderStyle('none'),
     ...shorthands.borderLeft('3px', 'solid', 'transparent'),

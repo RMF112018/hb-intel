@@ -1944,6 +1944,33 @@ No boundary collision at 1024px — the `≥SIDEBAR` rule applies cleanly with t
 
 ---
 
+### 10A.56 UIF-035-addl: Touch-Target Coarse-Pointer Fixes
+
+**Severity:** High
+**Category:** Accessibility / Field Use
+
+**Observed state:** Multiple interactive elements were below the 44px WCAG 2.5.5 touch-target minimum: HbcTabs buttons (40px), HbcSidebar nav items (~36px), HbcHeader icon buttons (~24-32px), HbcCommandBar SearchBox (36px). No CSS-level `@media (pointer: coarse)` rules existed — only HbcButton had JS-based `useTouchSize()`.
+
+**Fix:** Added `@media (pointer: coarse)` Griffel rules with `minHeight: '44px'` to four ui-kit components:
+
+| Component | Before | After (coarse pointer) |
+|---|---|---|
+| HbcTabs tab button | 40px | 44px minHeight |
+| HbcSidebar nav item | ~36px | 44px minHeight + 12px vertical padding |
+| HbcHeader m365Button | ~32px | 44px minHeight + 44px minWidth |
+| HbcCommandBar search | 36px | 44px minHeight |
+
+All changes are CSS-only `@media (pointer: coarse)` rules — no effect on mouse/keyboard desktop users. Consistent with the existing `useTouchSize()` pattern in HbcButton.
+
+**Files modified:**
+- `packages/ui-kit/src/HbcTabs/index.tsx` — tab button coarse-pointer rule
+- `packages/ui-kit/src/HbcAppShell/HbcSidebar.tsx` — nav item coarse-pointer rule
+- `packages/ui-kit/src/HbcAppShell/HbcHeader.tsx` — m365Button coarse-pointer rule
+- `packages/ui-kit/src/HbcCommandBar/index.tsx` — search coarse-pointer rule
+- `packages/ui-kit/package.json` — version 2.2.52 → 2.2.53
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

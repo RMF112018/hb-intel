@@ -92,6 +92,11 @@ const useStyles = makeStyles({
     ':hover': {
       backgroundColor: 'rgba(255, 255, 255, 0.1)',
     },
+    // UIF-035-addl: Touch-target bump on coarse-pointer devices (WCAG 2.5.5).
+    '@media (pointer: coarse)': {
+      minHeight: '44px',
+      minWidth: '44px',
+    },
   },
 });
 

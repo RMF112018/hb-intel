@@ -76,11 +76,14 @@ const useStyles = makeStyles({
     gap: `${HBC_SPACE_SM}px`,
     flexWrap: 'wrap',
   },
-  // UIF-029-addl: 36px minimum height meets touch-target requirement.
+  // UIF-029-addl: 36px minimum height; UIF-035-addl: 44px on coarse pointer.
   search: {
     minWidth: '200px',
     minHeight: '36px',
     flexShrink: 0,
+    '@media (pointer: coarse)': {
+      minHeight: '44px',
+    },
   },
   filters: {
     display: 'flex',

@@ -33,6 +33,10 @@ const useStyles = makeStyles({
     border: 'none',
     borderBottom: '3px solid transparent',
     padding: '0',
+    // UIF-035-addl: Touch-target bump on coarse-pointer devices (WCAG 2.5.5).
+    '@media (pointer: coarse)': {
+      minHeight: '44px',
+    },
     fontSize: '0.875rem',
     fontFamily: 'inherit',
     color: tokens.colorNeutralForeground3,
