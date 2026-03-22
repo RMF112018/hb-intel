@@ -1873,6 +1873,20 @@ Badges update reactively via TanStack Query cache — same data source as the fe
 
 ---
 
+### 10A.53 UIF-033-addl: Enable Density Toggle — Uncontrolled Fallback
+
+**Severity:** High
+
+**Observed state:** Density toggle button was permanently disabled (`disabled={!onDensityChange}`). Although UIF-015-addl wired `onDensityChange` from `HbcMyWorkFeed`, the Vite dev server resolves `@hbc/ui-kit` via the stale compiled dist (`package.json exports`), not source files. The compiled dist didn't include the updated props, so `onDensityChange` was `undefined` at runtime.
+
+**Fix:** Made the density button work in both controlled and uncontrolled mode. Added `useDensity()` as a fallback inside `HbcCommandBar`: when `onDensityChange` is not provided by the parent, the button uses `useDensity().setOverride()` internally. The `disabled` guard was removed — the button is always interactive. Rebuilt the `@hbc/ui-kit` dist to ensure runtime resolution matches source.
+
+**Files modified:**
+- `packages/ui-kit/src/HbcCommandBar/index.tsx` — `useDensity` fallback, removed disabled guard, `handleDensityChange` adapter
+- `packages/ui-kit/package.json` — version 2.2.51 → 2.2.52
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |

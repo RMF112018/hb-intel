@@ -24,6 +24,7 @@ import { HbcTooltip } from '../HbcTooltip/index.js';
 import { HbcButton } from '../HbcButton/index.js';
 import { HBC_SPACE_SM } from '../theme/grid.js';
 import { MoreActions } from '../icons/index.js';
+import { useDensity } from '../theme/useDensity.js';
 import type { HbcCommandBarProps, CommandBarAction, CommandBarFilter, CommandBarGrouping, DensityTier } from './types.js';
 
 // UIF-012: Urgency-differentiated badge background colors for filter count badges.
@@ -183,7 +184,18 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
 }) => {
   const styles = useStyles();
   const autoDetected = useAutoDetectDensity();
+  // UIF-033-addl: useDensity provides fallback setOverride when onDensityChange is absent.
+  // This makes the density button always functional — controlled or uncontrolled.
+  const { setOverride: internalSetOverride } = useDensity();
   const effectiveDensity = densityOverride ?? autoDetected;
+  const handleDensityChange = React.useCallback((tier: DensityTier) => {
+    if (onDensityChange) {
+      onDensityChange(tier);
+    } else {
+      // Uncontrolled: map 'standard' → 'comfortable' for useDensity compatibility
+      internalSetOverride(tier === 'standard' ? 'comfortable' : tier as 'compact' | 'comfortable' | 'touch');
+    }
+  }, [onDensityChange, internalSetOverride]);
   const minItemHeight = DENSITY_HEIGHT[effectiveDensity];
 
   const activeView = savedViews?.find((v) => v.isActive);
@@ -327,19 +339,14 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
 
       <div className={styles.spacer} />
 
-      {/* UIF-015-addl: Accessible density toggle — replaces bare <div> with
-         focusable, aria-pressed toggle button. Toggles compact↔touch. */}
+      {/* UIF-015-addl + UIF-033-addl: Accessible density toggle. Always enabled —
+         uses handleDensityChange which falls back to useDensity().setOverride
+         when onDensityChange is not provided by the parent. */}
       <HbcButton
         variant="ghost"
         size="sm"
         pressed={effectiveDensity === 'compact'}
-        disabled={!onDensityChange}
-        onClick={() => {
-          if (onDensityChange) {
-            const next = effectiveDensity === 'compact' ? 'touch' : 'compact';
-            onDensityChange(next);
-          }
-        }}
+        onClick={() => handleDensityChange(effectiveDensity === 'compact' ? 'touch' : 'compact')}
         aria-label={`Density: ${DENSITY_LABELS[effectiveDensity]}`}
       >
         {DENSITY_LABELS[effectiveDensity]}
