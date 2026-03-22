@@ -43,11 +43,12 @@ import { DashboardLayout } from '@hbc/ui-kit';
 
 ## Responsive Grid
 
-| Breakpoint | Columns |
-|-----------|---------|
-| > 1200px | 4 columns |
-| 768-1199px | 2 columns |
-| < 768px | 1 column |
+| Breakpoint | Columns | Token(s) |
+|---|---|---|
+| ≥ 1200px (desktop) | 4 columns | `HBC_BREAKPOINT_DESKTOP` |
+| 1024–1199px (tablet) | 3 columns | `HBC_BREAKPOINT_SIDEBAR` – `HBC_BREAKPOINT_CONTENT_MEDIUM` |
+| 768–1023px (sm-tablet) | 2 columns | `HBC_BREAKPOINT_MOBILE + 1` – `HBC_BREAKPOINT_SIDEBAR - 1` |
+| ≤ 767px (mobile) | 1 column | `HBC_BREAKPOINT_MOBILE` |
 
 ## Data Attribute
 

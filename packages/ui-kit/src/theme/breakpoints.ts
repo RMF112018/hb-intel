@@ -1,6 +1,17 @@
 /**
  * Canonical responsive breakpoints for PH4C.12 dead-zone remediation.
  * Traceability: D-PH4C-24, D-PH4C-25 | Blueprint §2c | Foundation Plan PH4.14.5 / PH4B.10
+ *
+ * Responsive tier architecture (UIF-033 through UIF-037):
+ *
+ *   Mobile       (≤767px):       1-column, 16px gap, no sidebar
+ *   sm-tablet    (768–1023px):   1-column, 20px gap, 600px max-width on secondary zones
+ *   Tablet       (1024–1199px):  2-column (3fr 2fr), sticky sidebar, 3-col KPI grid
+ *   Desktop      (≥1200px):      2-column (7fr 5fr), sticky sidebar, 4-col KPI grid
+ *   Wide desktop (≥1440px):      compact density eligible for fine pointers
+ *
+ * Width-only breakpoints — no @media (orientation: ...) rules.
+ * All common iPad dimensions map to intentional tiers (see UIF-037-addl §10A.58).
  */
 
 /** <=767px: full mobile; field-mode-first navigation surface. */

@@ -9,7 +9,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { heading1, label as labelType } from '../theme/typography.js';
 import { HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
-import { HBC_BREAKPOINT_CONTENT_MEDIUM, HBC_BREAKPOINT_MOBILE } from '../theme/breakpoints.js';
+import { HBC_BREAKPOINT_CONTENT_MEDIUM, HBC_BREAKPOINT_MOBILE, HBC_BREAKPOINT_SIDEBAR } from '../theme/breakpoints.js';
 import { elevationRest } from '../theme/elevation.js';
 import {
   HBC_SURFACE_LIGHT,
@@ -106,8 +106,12 @@ const useStyles = makeStyles({
     paddingTop: `${HBC_SPACE_LG}px`,
     paddingBottom: `${HBC_SPACE_LG}px`,
     gridTemplateColumns: 'repeat(4, 1fr)',
-    // PH4C.12: layout breakpoints are centralized to keep shell and content transitions aligned.
-    [`@media (max-width: ${HBC_BREAKPOINT_CONTENT_MEDIUM}px)`]: {
+    // UIF-036-addl: 4-tier KPI grid aligned with DashboardLayout.
+    // PH4C.12: layout breakpoints centralized to keep shell and content transitions aligned.
+    [`@media (min-width: ${HBC_BREAKPOINT_SIDEBAR}px) and (max-width: ${HBC_BREAKPOINT_CONTENT_MEDIUM}px)`]: {
+      gridTemplateColumns: 'repeat(3, 1fr)',
+    },
+    [`@media (max-width: ${HBC_BREAKPOINT_SIDEBAR - 1}px)`]: {
       gridTemplateColumns: 'repeat(2, 1fr)',
     },
     [`@media (max-width: ${HBC_BREAKPOINT_MOBILE}px)`]: {

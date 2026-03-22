@@ -2026,6 +2026,29 @@ Adding orientation-specific CSS rules would create maintenance complexity and po
 
 ---
 
+### 10A.59 Responsive Breakpoint Documentation + ToolLandingLayout Alignment
+
+**Category:** Documentation / Compliance
+
+**Changes:**
+1. **`breakpoints.ts` doc comment** — Updated to describe the full 5-tier responsive architecture (mobile → sm-tablet → tablet → desktop → wide desktop) and the width-only breakpoint decision
+2. **`DashboardLayout.md`** — Updated responsive grid table from 3-tier (1/2/4 columns) to 4-tier (1/2/3/4 columns) with token references
+3. **`ToolLandingLayout.tsx`** — Aligned KPI grid with `DashboardLayout`'s 4-tier structure: added 3-column intermediate tier at 1024–1199px using `HBC_BREAKPOINT_SIDEBAR`
+
+**Final readiness judgment:** The responsive breakpoint fixes (UIF-033 through UIF-037) are implementation-ready and governance-aligned. All five responsive tiers use canonical `HBC_BREAKPOINT_*` tokens. Both shared KPI grid layouts (`DashboardLayout` and `ToolLandingLayout`) now share the same 1→2→3→4 column progression. The width-only breakpoint architecture correctly handles all common iPad dimensions. Coarse-pointer touch targets are CSS-only and don't affect desktop users.
+
+**Known limitations:**
+- Data table scrollbar issue (rejected virtualizer fix) remains open — the table container can still show scrollbars when row content wraps
+- ToolLandingLayout KPI grid alignment is untested on pages other than My Work — visual verification recommended
+
+**Files modified:**
+- `packages/ui-kit/src/theme/breakpoints.ts` — 5-tier architecture doc comment
+- `docs/reference/ui-kit/DashboardLayout.md` — 4-tier responsive grid table
+- `packages/ui-kit/src/layouts/ToolLandingLayout.tsx` — 3-column intermediate KPI tier
+- `packages/ui-kit/package.json` — version 2.2.55 → 2.2.56
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
