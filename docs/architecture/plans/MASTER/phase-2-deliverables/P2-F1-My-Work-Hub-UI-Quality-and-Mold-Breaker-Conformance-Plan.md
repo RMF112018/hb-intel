@@ -2213,6 +2213,26 @@ Content priority at narrow widths: value → label → trend arrow → subtitle 
 
 ---
 
+### 10A.67 UIF-046-addl: Constrained-Height KPI Overflow
+
+**Severity:** Medium
+**Category:** Layout / Prioritization
+
+**Fix:** On short viewports (< 700px height), the AgingBlockedCard group collapses into a `<details>` disclosure element with summary "More insights (2)", keeping the hero card + primary 3 KPIs always visible. On normal-height viewports, the cards render normally. This prioritizes the most critical KPIs (Total Items, Action Now, Blocked, Unread) and lets executives expand the aging group when needed.
+
+Priority order under height constraint:
+1. Hero KPI (Total Items) — always visible
+2. Primary secondary cards (Action Now, Blocked, Unread) — always visible
+3. Executive aging cards (Escalation Candidates, Aging) — collapsed behind "More insights" on short viewports
+
+Pattern consistent with `HubTertiaryZone`'s `<details>` disclosure widget. Semantic HTML, keyboard-accessible, no JS measurement beyond `window.innerHeight` check.
+
+**Files modified:**
+- `apps/pwa/src/pages/my-work/cards/AgingBlockedCard.tsx` — short-viewport disclosure collapse
+- `apps/pwa/package.json` — version 0.12.61 → 0.12.62
+
+---
+
 ## 11. Acceptance Gate Contribution
 
 | Gate | Contributing Items | Pass Condition |
