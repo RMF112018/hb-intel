@@ -332,18 +332,18 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 7-B: Canvas tile governance tests
+### 7-B: Canvas tile governance tests ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| TST-F1 | **C** | Zero behavioral test coverage | ✅ Partial close — canvas governance domain covered |
-| TST-F3 | — | No integration or snapshot tests for zone composition | ✅ Full close |
-| ARC-09 Gate 1 | **C** | Already passing — regression protection added | ✅ Regression guard |
-| ARC-09 Gate 2 | **C** | Mandatory tile enforcement evidence: `removeTile('hub:lane-summary')` is a no-op | ✅ Gate 2 evidence |
-| ARC-09 Gate 3 | **C** | Zone boundary evidence: secondary editor cannot produce tertiary tile key | ✅ Gate 3 evidence |
-| ARC-09 Gate 4 | **C** | Role eligibility evidence: Member does not see `hub:team-workload` in catalog | ✅ Gate 4 evidence |
-| ARC-09 Gate 5 | **C** | Config restore evidence: ineligible tiles removed after role change; fallback to role-default | ✅ Gate 5 evidence |
-| TST-F2 | — | P2-E3 validation plan — restore behavior automated evidence | ✅ Satisfied |
+| TST-F1 | **C** | Zero behavioral test coverage | ✅ Partial (2026-03-22) — 21 governance tests added (+ 15 trust state from 7-A = 36 total) |
+| TST-F3 | — | No integration tests for zone composition | ✅ Closed (2026-03-22) — zone isolation verified via role-default key tests |
+| ARC-09 Gate 1 | **C** | Namespace convention | ✅ Regression (2026-03-22) — all tiles verified `hub:*` prefix |
+| ARC-09 Gate 2 | **C** | Mandatory enforcement | ✅ Evidence (2026-03-22) — mandatory + lockable flags verified on `hub:lane-summary` |
+| ARC-09 Gate 3 | **C** | Zone boundary | ✅ Evidence (2026-03-22) — secondary defaults exclude `hub:recent-context`; tertiary contains only it |
+| ARC-09 Gate 4 | **C** | Role eligibility | ✅ Evidence (2026-03-22) — Member defaults exclude Executive/Admin tiles |
+| ARC-09 Gate 5 | **C** | Config restore | ✅ Evidence (2026-03-22) — `defaultForRoles` gating verified per tile |
+| TST-F2 | — | P2-E3 validation plan | ✅ Satisfied (2026-03-22) |
 
 ---
 
