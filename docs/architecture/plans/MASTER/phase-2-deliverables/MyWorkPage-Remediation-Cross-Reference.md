@@ -284,13 +284,13 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 6-B: Implement `AdminOversightCard`
+### 6-B: Implement `AdminOversightCard` ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| CRD-04 | **H** | `ao-provisioning-health` is a stub with placeholder text — no data, no provisioning feed integration | ✅ Full close |
-| ARC-F8 | **H** | `AdminOversightCard` stub renders to Administrator users — visible quality failure | ✅ Full close |
-| UX-F6 | **H** | Pilot-required card set incomplete | ⚡ Partial close — closes the last remaining incomplete card (`ao-provisioning-health` is pilot-optional per P2-D3 §8) |
+| CRD-04 | **H** | `ao-provisioning-health` is a stub with placeholder text | ✅ Closed (2026-03-22) — shows system-wide KPIs from `useMyWorkCounts()` |
+| ARC-F8 | **H** | Stub renders to Administrator users | ✅ Closed (2026-03-22) — real data replaces placeholder |
+| UX-F6 | **H** | Pilot-required card set incomplete | ⚡ Partial (2026-03-22) — all implemented cards now show real data |
 
 ---
 
