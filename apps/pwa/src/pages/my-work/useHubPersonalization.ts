@@ -9,6 +9,7 @@
  */
 import { useCallback } from 'react';
 import { useAutoSaveDraft } from '@hbc/session-state';
+import { useCurrentSession } from '@hbc/auth';
 import { HUB_DRAFT_KEYS, HUB_DRAFT_TTL } from './hubStateTypes.js';
 import type {
   IMyWorkTeamModeDraft,
@@ -38,7 +39,11 @@ export function useHubPersonalization(): IHubPersonalization {
     500,
   );
 
-  const teamMode: TeamMode = teamModeDraft.value?.teamMode ?? 'personal';
+  // ADR-0117: Executive defaults to 'my-team'; all other roles default to 'personal'.
+  // P2-D5 §3 governs for Executive; P2-B2 §4 governs for other roles.
+  const session = useCurrentSession();
+  const isExecutive = session?.resolvedRoles.includes('Executive') ?? false;
+  const teamMode: TeamMode = teamModeDraft.value?.teamMode ?? (isExecutive ? 'my-team' : 'personal');
 
   const setTeamMode = useCallback(
     (mode: TeamMode) => {

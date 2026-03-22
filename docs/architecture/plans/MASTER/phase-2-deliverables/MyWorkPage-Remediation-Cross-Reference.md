@@ -215,13 +215,13 @@ Severity codes: **C** = Critical, **H** = High, **M** = Medium, **L** = Low
 
 ---
 
-### 4-B: Resolve Executive default team mode conflict (ADR + plan update)
+### 4-B: Resolve Executive default team mode conflict (ADR + plan update) ✅ Completed (2026-03-22)
 
 | Finding ID | Severity | Finding Summary | Closure |
 |---|---|---|---|
-| PRS-03 | **H** | P2-D5 §3 (Executive defaults to `my-team`) conflicts with P2-B2 §4 (bare `/my-work` seeds personal-first) | ✅ Full close — ADR resolves which governs |
-| ROL-03 | **M** | Implementation defaults all roles to `personal`; Executive role-default not applied | ✅ Full close — resolved behavior implemented |
-| DOC-04 | — | Plan corpus contains an unresolved contradiction; superseded document must reference the ADR | ✅ Full close |
+| PRS-03 | **H** | P2-D5 §3 (Executive defaults to `my-team`) conflicts with P2-B2 §4 (bare `/my-work` seeds personal-first) | ✅ Closed (2026-03-22) — ADR-0117 resolves: P2-D5 §3 governs for Executive |
+| ROL-03 | **M** | Implementation defaults all roles to `personal`; Executive role-default not applied | ✅ Closed (2026-03-22) — `useHubPersonalization` applies `my-team` for Executive |
+| DOC-04 | — | Plan corpus contains an unresolved contradiction; superseded document must reference the ADR | ✅ Closed (2026-03-22) — ADR-0117 filed |
 
 ---
 

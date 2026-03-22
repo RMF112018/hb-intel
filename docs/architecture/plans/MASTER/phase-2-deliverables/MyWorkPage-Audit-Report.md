@@ -143,7 +143,7 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 |---|---|---|---|
 | ROL-01 | `@hbc/auth` is the sole role resolution authority; no local role constants (§11.1) | ✅ Corrected — local role constants removed; inline literals used (remediation 0-B, 2026-03-22) | **Critical** — Resolved |
 | ROL-02 | `my-team` mode eligibility must use `resolvedRoles` from `@hbc/auth` exclusively | ✅ Corrected — MyWorkPage uses `useCurrentSession()` as single resolution site; `isExecutive` passed as prop to HubTeamModeSelector (remediation 1-D, 2026-03-22) | **High** — Resolved |
-| ROL-03 | Executive default landing is `my-team` mode (P2-D1 §4) | ⚡ Role-default tile layout now seeded correctly via `ROLE_DEFAULT_TILES` (remediation 2-D, 2026-03-22); Executive `my-team` default team mode resolved in 4-B | **Medium** — Partially Resolved |
+| ROL-03 | Executive default landing is `my-team` mode (P2-D1 §4) | ✅ Fully resolved — role-default tile layout seeded via `ROLE_DEFAULT_TILES` (2-D); Executive defaults to `my-team` mode via ADR-0117 (4-B, 2026-03-22) | **Medium** — Resolved |
 | ROL-04 | Administrator routes to `/admin`, not `/my-work` | `workspace-routes.ts` correctly gates `/admin` with `requireAdminAccessControl()`; `resolveLandingDecision` in the index route handles this | **Pass** |
 
 ---
@@ -189,7 +189,7 @@ P2-D2 is the single most consequential governance failure. Every gate beyond Gat
 |---|---|---|---|
 | PRS-01 | `cardArrangement` must govern analytics card display order | ✅ Corrected — `cardArrangement` destructured and passed from `MyWorkPage` to `HubSecondaryZone` (remediation 3-A, 2026-03-22) | **High** — Resolved |
 | PRS-02 | `updateCardVisibility` must be wired to card show/hide UI | ✅ Corrected — `updateCardVisibility` destructured and passed to `HubSecondaryZone` (remediation 3-A, 2026-03-22) | **Medium** — Resolved |
-| PRS-03 | Executive default is `my-team` (P2-D5 §3) | P2-D5 §3 says Executive defaults to `my-team`; P2-B2 §4 says bare `/my-work` seeds from personal-first draft. These plan files conflict. The implementation defaults all roles to `personal`. | **Plan conflict — High** |
+| PRS-03 | Executive default is `my-team` (P2-D5 §3) | ✅ Resolved via ADR-0117 — Executive defaults to `my-team`; other roles default to `personal`. P2-D5 §3 governs; P2-B2 §4 superseded for Executive only (remediation 4-B, 2026-03-22) | **Plan conflict — High** — Resolved |
 
 ---
 
@@ -564,9 +564,9 @@ File: `MyWorkPage.tsx`
 Authority: P2-B2 §3 (URL is canonical)
 Action: Use TanStack Router `useSearch` / `router.navigate({ search })` to sync `teamMode`, `kpiFilter`, and `selectedItem` into URL parameters. This makes URL truly canonical and enables deep-linking.
 
-**T3-05: Resolve P2-D5 vs P2-B2 Executive default conflict**
-Authority: Architecture decision required
-Action: P2-D5 §3 says Executive defaults to `my-team`; P2-B2 §4 says bare `/my-work` seeds from personal-first draft. These are contradictory. File an ADR or update one document to resolve. The implementation currently defaults all roles to `personal`.
+**T3-05: Resolve P2-D5 vs P2-B2 Executive default conflict** ✅ Completed (2026-03-22)
+Authority: ADR-0117
+Action: Filed ADR-0117 resolving that P2-D5 §3 governs for Executive role (defaults to `my-team`); P2-B2 §4 applies to all other roles (`personal`). Implemented in `useHubPersonalization` — reads `resolvedRoles` to apply role-aware default.
 
 ---
 
@@ -581,8 +581,8 @@ The file header already references P2-B2 §3–§6. The new `feedCache` key and 
 **DOC-03: `myWorkTileDefinitions.ts` comment** ⚡ Partially addressed (2026-03-22)
 P2-D2 §6.1 namespace mandate doc comment added to `myWorkTileDefinitions.ts` header block during remediation 0-A. Full close deferred to Phase 6-E per remediation cross-reference.
 
-**DOC-04: P2-D5 vs P2-B2 conflict (Executive default team mode)**
-Once the ADR from T3-05 is written, update whichever document is being superseded to reference the ADR. The current contradiction in the plan corpus is a documentation defect.
+**DOC-04: P2-D5 vs P2-B2 conflict (Executive default team mode)** ✅ Resolved (2026-03-22)
+ADR-0117 filed. P2-D5 §3 governs for Executive role; P2-B2 §4 superseded for Executive only. The contradiction in the plan corpus is resolved.
 
 **DOC-05: `apps/pwa/src/pages/my-work/README.md`**
 No README exists for the `my-work` page directory. Per `.claude/rules/04-documentation-standards.md`, a mature package or feature area that changes materially requires a `README.md` covering purpose, public exports, key hooks, governing plan references, and implementation notes. This is especially important given the complexity of the state management model.
