@@ -82,6 +82,14 @@ export interface IMyWorkSourceMeta {
   sourceItemId: string;
   sourceUpdatedAtIso: string;
   explanation?: string;
+  /** Role of the actor who originated this item (e.g., 'portfolio-executive-reviewer') */
+  originRole?: string;
+  /** Executive review annotation artifact ID — back-reference for closure-loop (P3-D3 §13) */
+  originAnnotationId?: string;
+  /** Reports run-ledger entry ID for review-run traceability (P3-F1 §8.5) */
+  originReviewRunId?: string;
+  /** ISO 8601 timestamp when item was pushed to project team */
+  pushTimestamp?: string;
 }
 
 export interface IMyWorkPermissionState {

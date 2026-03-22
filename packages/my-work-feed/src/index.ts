@@ -22,3 +22,8 @@ export * from './telemetry/index.js';
 export { resolveCtaLabel, resolveCtaAction } from './utils/resolveCtaLabel.js';
 export type { CtaAction, CtaVariant } from './utils/resolveCtaLabel.js';
 export { formatModuleLabel, MODULE_DISPLAY_NAMES } from './utils/formatModuleLabel.js';
+export {
+  createPushToTeamSourceMeta,
+  isPushToTeamItem,
+  getPushProvenance,
+} from './utils/pushProvenance.js';

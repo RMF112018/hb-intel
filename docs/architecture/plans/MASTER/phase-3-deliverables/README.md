@@ -111,6 +111,7 @@ Status: **Assessed 2026-03-22 — gap confirmed, remediation delivered in v0.4.0
 **0.3 — `@hbc/my-work-feed` work item type readiness**
 Confirm that `@hbc/my-work-feed` (ADR-0115) supports structured typed work items with provenance fields (originRole, originReviewRunId, originAnnotationId, pushTimestamp) and a closure-loop response model. The Push-to-Project-Team feature requires this. If the work item model is narrower, agree on a work item type extension before executive review work begins.
 Governing: P3-D3 §5, P3-F1 §8.5
+Status: **Assessed 2026-03-22 — gap confirmed, remediation delivered in v0.0.37.** `IMyWorkSourceMeta` extended with `originRole`, `originAnnotationId`, `originReviewRunId`, and `pushTimestamp` provenance fields. Push-to-Project-Team helpers added (`createPushToTeamSourceMeta`, `isPushToTeamItem`, `getPushProvenance`). Closure-loop state machine already supported. Existing work items and adapters unaffected. Stage 3 unblocked.
 
 **0.4 — SPFx shell cross-lane escalation affordance**
 Confirm that the SPFx shell can surface a Launch-to-PWA affordance and pass deep-link parameters including `projectId`, `module`, `action`, and `reviewArtifactId`. This is required for all SPFx-to-PWA escalation scenarios.

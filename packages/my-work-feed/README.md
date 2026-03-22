@@ -83,6 +83,29 @@ This entrypoint is excluded from production bundles. It will be populated starti
 - **Peer dependencies only** — `react` and `react-dom`.
 - **Public barrel only** — consumers import from `@hbc/my-work-feed` or `@hbc/my-work-feed/testing`, never from internal file paths.
 
+## Push-to-Project-Team Provenance (Phase 3)
+
+`IMyWorkSourceMeta` supports executive review Push-to-Project-Team traceability via optional provenance fields:
+
+```typescript
+import { createPushToTeamSourceMeta, isPushToTeamItem, getPushProvenance } from '@hbc/my-work-feed';
+
+const meta = createPushToTeamSourceMeta({
+  originRole: 'portfolio-executive-reviewer',
+  originAnnotationId: 'annotation-uuid',
+  originReviewRunId: 'run-uuid',       // optional
+  pushedAtIso: new Date().toISOString(),
+});
+
+// Check if a work item is a push-to-team item
+if (isPushToTeamItem(item)) {
+  const provenance = getPushProvenance(item);
+  // provenance.originAnnotationId → back-reference for closure-loop
+}
+```
+
+Governing: P3-D3 §13 (Push-to-Project-Team), P3-F1 §8.5.
+
 ## Related
 
 - [SF29 Master Plan](../../docs/architecture/plans/shared-features/SF29-My-Work-Feed.md)

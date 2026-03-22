@@ -123,6 +123,39 @@ export const mockMyWorkScenarios = {
     title: 'Team escalation candidate',
   }),
 
+  /** Push-to-Project-Team item with executive review provenance (Phase 3 P3-D3 §13) */
+  pushToTeam: createMockMyWorkItem({
+    workItemId: 'scenario-push-to-team',
+    class: 'queued-follow-up',
+    priority: 'soon',
+    state: 'new',
+    isUnread: true,
+    title: 'Executive Review: Financial forecast variance requires explanation',
+    summary: 'Portfolio Executive Reviewer flagged a $600K variance in Q3 cash-flow forecast for Harbor View Medical Center.',
+    expectedAction: 'Review and address the flagged variance, then mark as resolved.',
+    context: {
+      moduleKey: 'executive-review',
+      projectId: 'proj-001',
+      projectCode: 'HVMC',
+      projectName: 'Harbor View Medical Center',
+      recordId: 'review-artifact-001',
+      recordType: 'review-push',
+    },
+    sourceMeta: [
+      {
+        source: 'module',
+        sourceEventType: 'push-to-project-team',
+        sourceItemId: 'review-artifact-001',
+        sourceUpdatedAtIso: '2026-03-22T14:30:00.000Z',
+        explanation: 'Pushed to project team by Portfolio Executive Reviewer.',
+        originRole: 'portfolio-executive-reviewer',
+        originAnnotationId: 'annotation-456',
+        originReviewRunId: 'run-789',
+        pushTimestamp: '2026-03-22T14:30:00.000Z',
+      },
+    ],
+  }),
+
   partialSourceWithDiagnostics: createMockMyWorkFeedResult({
     healthState: {
       freshness: 'partial',
