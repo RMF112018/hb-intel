@@ -1,6 +1,7 @@
 /**
  * P3-E4 public contracts for Financial module.
- * T01: doctrine and authority. T02: budget line identity and import. T03: forecast versioning and checklist.
+ * T01: doctrine and authority. T02: budget line identity and import.
+ * T03: forecast versioning and checklist. T05: cash flow working model.
  */
 
 // ── Financial Version States ──────────────────────────────────────────
@@ -271,4 +272,95 @@ export interface IConfirmationGateResult {
 export interface IReportCandidateDesignationResult {
   readonly designated: IForecastVersion;
   readonly cleared: IForecastVersion | null;
+}
+
+// ── T05: Cash Flow Working Model ──────────────────────────────────────
+
+/** Cash flow record discriminator (T05 §7.1–§7.2). */
+export type CashFlowRecordType = 'Actual' | 'Forecast';
+
+/** Monthly actual cash flow record — read-only on all versions (T05 §7.1). */
+export interface ICashFlowActualRecord {
+  readonly monthlyRecordId: string;
+  readonly forecastVersionId: string;
+  readonly projectId: string;
+  readonly periodMonth: number;
+  readonly calendarDate: string;
+  readonly recordType: 'Actual';
+  readonly inflowOwnerPayments: number;
+  readonly inflowOtherInflows: number;
+  readonly totalInflows: number;                 // calculated
+  readonly outflowSubcontractorPayments: number;
+  readonly outflowMaterialCosts: number;
+  readonly outflowLaborCosts: number;
+  readonly outflowOverhead: number;
+  readonly outflowEquipment: number;
+  readonly totalOutflows: number;                // calculated
+  readonly netCashFlow: number;                  // calculated
+  readonly cumulativeCashFlow: number;           // calculated
+  readonly workingCapital: number | null;
+  readonly retentionHeld: number;
+  readonly forecastAccuracy: number | null;
+  readonly recordedAt: string;
+  readonly notes: string | null;
+}
+
+/** Monthly forecast cash flow record — PM-editable on working version only (T05 §7.2). */
+export interface ICashFlowForecastRecord {
+  readonly monthlyRecordId: string;
+  readonly forecastVersionId: string;
+  readonly projectId: string;
+  readonly periodMonth: number;
+  readonly calendarDate: string;
+  readonly recordType: 'Forecast';
+  readonly projectedInflows: number;
+  readonly projectedOutflows: number;
+  readonly projectedNetCashFlow: number;          // calculated
+  readonly projectedCumulativeCashFlow: number;   // calculated
+  readonly confidenceScore: number;
+  readonly notes: string | null;
+  readonly lastEditedBy: string | null;
+  readonly lastEditedAt: string | null;
+}
+
+/** Cash flow summary aggregate over all months (T05 §7.3). */
+export interface ICashFlowSummary {
+  readonly summaryId: string;
+  readonly forecastVersionId: string;
+  readonly projectId: string;
+  readonly totalActualInflows: number;
+  readonly totalActualOutflows: number;
+  readonly totalActualNetCashFlow: number;
+  readonly totalForecastedInflows: number;
+  readonly totalForecastedOutflows: number;
+  readonly totalForecastedNetCashFlow: number;
+  readonly combinedNetCashFlow: number;
+  readonly peakCashRequirement: number;
+  readonly cashFlowAtRisk: number;
+  readonly computedAt: string;
+  readonly lastUpdated: string;
+}
+
+/** Project-level retention configuration (T05 §7.4). */
+export interface IRetentionConfig {
+  readonly retainageRate: number;
+  readonly releaseSchedule: string | null;
+}
+
+/** A/R aging record — read-only, sourced from ERP daily sync (T05 §7.5). */
+export interface IARAgingRecord {
+  readonly arAgeId: string;
+  readonly projectId: string;
+  readonly projectName: string;
+  readonly projectManager: string;
+  readonly percentComplete: number;
+  readonly balanceToFinish: number;
+  readonly retainage: number;
+  readonly totalAR: number;
+  readonly current0To30: number;
+  readonly current30To60: number;
+  readonly current60To90: number;
+  readonly current90Plus: number;
+  readonly comments: string | null;
+  readonly refreshedAt: string;
 }

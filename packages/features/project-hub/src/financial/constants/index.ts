@@ -197,3 +197,24 @@ export const FORECAST_CHECKLIST_TEMPLATE: ReadonlyArray<IForecastChecklistTempla
   { itemId: 'buyout_savings_dispositioned', group: 'Additional', label: 'Buyout savings dispositioned (if undispositioned savings exist)', required: false },
   { itemId: 'executive_approval_noted', group: 'Additional', label: 'Executive review completed (optional)', required: false },
 ] as const;
+
+// ── T05: Cash Flow Working Model ──────────────────────────────────────
+
+export const CASH_FLOW_RECORD_TYPES = ['Actual', 'Forecast'] as const;
+
+/** Number of historical actual months displayed (T05 §7). */
+export const CASH_FLOW_ACTUAL_MONTHS = 13;
+
+/** Number of forward projection months (T05 §7). */
+export const CASH_FLOW_FORECAST_MONTHS = 18;
+
+/** Default retainage rate — configurable per project (T05 §7.4). */
+export const DEFAULT_RETAINAGE_RATE = 0.10;
+
+/** A/R aging bucket field names (T05 §7.5). */
+export const AR_AGING_BUCKETS = [
+  'current0To30',
+  'current30To60',
+  'current60To90',
+  'current90Plus',
+] as const;
