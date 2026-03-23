@@ -539,3 +539,11 @@ export { ActivityEventRow } from './ActivityEventRow/index.js';
 export type { ActivityEventRowProps, ActivityEventRowEvent } from './ActivityEventRow/index.js';
 export { HbcActivityTimeline } from './HbcActivityTimeline/index.js';
 export type { HbcActivityTimelineProps } from './HbcActivityTimeline/index.js';
+
+// Activity Timeline filter/diff/empty surfaces (SF28-T06, L-08)
+export { ActivityFilterBar } from './ActivityFilterBar/index.js';
+export type { ActivityFilterBarProps } from './ActivityFilterBar/index.js';
+export { ActivityDiffPopover } from './ActivityDiffPopover/index.js';
+export type { ActivityDiffPopoverProps, ActivityDiffEntry } from './ActivityDiffPopover/index.js';
+export { ActivityEmptyState } from './ActivityEmptyState/index.js';
+export type { ActivityEmptyStateProps, ActivityEmptyStateVariant } from './ActivityEmptyState/index.js';
