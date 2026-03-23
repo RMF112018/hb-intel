@@ -1,7 +1,7 @@
 /**
  * P3-E4 public contracts for Financial module.
  * T01: doctrine and authority. T02: budget line identity and import.
- * T03: forecast versioning and checklist. T05: cash flow working model.
+ * T03: forecast versioning and checklist. T05: cash flow working model. T06: buyout sub-domain.
  */
 
 // ── Financial Version States ──────────────────────────────────────────
@@ -363,4 +363,104 @@ export interface IARAgingRecord {
   readonly current90Plus: number;
   readonly comments: string | null;
   readonly refreshedAt: string;
+}
+
+// ── T06: Buyout Sub-Domain ────────────────────────────────────────────
+
+/** Buyout procurement lifecycle status (T06 §8.2). */
+export type BuyoutLineStatus =
+  | 'NotStarted'
+  | 'LoiPending'
+  | 'LoiExecuted'
+  | 'ContractPending'
+  | 'ContractExecuted'
+  | 'Complete'
+  | 'Void';
+
+/** Buyout savings disposition destination (T06 §8.5). */
+export type BuyoutSavingsDestination =
+  | 'AppliedToForecast'
+  | 'HeldInContingency'
+  | 'ReleasedToGoverned';
+
+/** Buyout savings disposition lifecycle (T06 §8.5). */
+export type BuyoutSavingsDispositionStatus =
+  | 'NoSavings'
+  | 'Undispositioned'
+  | 'PartiallyDispositioned'
+  | 'FullyDispositioned';
+
+/** Buyout line item — procurement/commitment-control record (T06 §8.1). */
+export interface IBuyoutLineItem {
+  readonly buyoutLineId: string;
+  readonly projectId: string;
+  readonly divisionCode: string;
+  readonly divisionDescription: string;
+  readonly lineItemDescription: string;
+  readonly subcontractorVendorName: string;
+  readonly originalBudget: number;
+  readonly contractAmount: number | null;
+  readonly overUnder: number | null;                      // calculated when contractAmount non-null
+  readonly buyoutSavingsAmount: number;                   // calculated
+  readonly savingsDispositionStatus: BuyoutSavingsDispositionStatus;
+  readonly loiDateToBeSent: string | null;
+  readonly loiReturnedExecuted: string | null;
+  readonly contractExecutedDate: string | null;
+  readonly status: BuyoutLineStatus;
+  readonly subcontractChecklistId: string | null;
+  readonly notes: string | null;
+  readonly lastEditedBy: string | null;
+  readonly lastEditedAt: string | null;
+}
+
+/** Dollar-weighted buyout summary metrics (T06 §8.4). */
+export interface IBuyoutSummaryMetrics {
+  readonly totalBudget: number;
+  readonly totalContractAmount: number;
+  readonly totalOverUnder: number;
+  readonly totalRealizedBuyoutSavings: number;
+  readonly totalUndispositionedSavings: number;
+  readonly percentBuyoutCompleteDollarWeighted: number;
+  readonly linesNotStarted: number;
+  readonly linesInProgress: number;
+  readonly linesComplete: number;
+  readonly linesVoid: number;
+  readonly totalLinesActive: number;
+}
+
+/** Buyout savings disposition record (T06 §8.5). */
+export interface IBuyoutSavingsDisposition {
+  readonly dispositionId: string;
+  readonly buyoutLineId: string;
+  readonly projectId: string;
+  readonly totalSavingsAmount: number;
+  readonly dispositionedAmount: number;
+  readonly undispositionedAmount: number;
+  readonly dispositionItems: readonly IBuyoutSavingsDispositionItem[];
+  readonly createdAt: string;
+  readonly lastUpdatedAt: string;
+}
+
+/** Individual savings disposition action (T06 §8.5). */
+export interface IBuyoutSavingsDispositionItem {
+  readonly itemId: string;
+  readonly destination: BuyoutSavingsDestination;
+  readonly amount: number;
+  readonly dispositionedBy: string;
+  readonly dispositionedAt: string;
+  readonly notes: string | null;
+  readonly linkedForecastVersionId: string | null;
+}
+
+/** ContractExecuted gate validation result (T06 §8.3). */
+export interface IContractExecutedGateResult {
+  readonly canTransition: boolean;
+  readonly blockers: readonly string[];
+}
+
+/** Buyout-to-budget reconciliation result (T06 §8.7). */
+export interface IBuyoutReconciliationResult {
+  readonly variance: number;
+  readonly variancePercent: number;
+  readonly withinTolerance: boolean;
 }

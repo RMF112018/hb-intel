@@ -1,4 +1,7 @@
 import type {
+  BuyoutLineStatus,
+  BuyoutSavingsDestination,
+  BuyoutSavingsDispositionStatus,
   CostType,
   ExternalSourceSystem,
   FinancialAccessAction,
@@ -218,3 +221,39 @@ export const AR_AGING_BUCKETS = [
   'current60To90',
   'current90Plus',
 ] as const;
+
+// ── T06: Buyout Sub-Domain ────────────────────────────────────────────
+
+export const BUYOUT_LINE_STATUSES = [
+  'NotStarted',
+  'LoiPending',
+  'LoiExecuted',
+  'ContractPending',
+  'ContractExecuted',
+  'Complete',
+  'Void',
+] as const satisfies ReadonlyArray<BuyoutLineStatus>;
+
+export const BUYOUT_SAVINGS_DESTINATIONS = [
+  'AppliedToForecast',
+  'HeldInContingency',
+  'ReleasedToGoverned',
+] as const satisfies ReadonlyArray<BuyoutSavingsDestination>;
+
+export const BUYOUT_SAVINGS_DISPOSITION_STATUSES = [
+  'NoSavings',
+  'Undispositioned',
+  'PartiallyDispositioned',
+  'FullyDispositioned',
+] as const satisfies ReadonlyArray<BuyoutSavingsDispositionStatus>;
+
+/** Statuses considered "in progress" for count metrics (T06 §8.4). */
+export const BUYOUT_IN_PROGRESS_STATUSES: ReadonlyArray<BuyoutLineStatus> = [
+  'LoiPending',
+  'LoiExecuted',
+  'ContractPending',
+  'ContractExecuted',
+] as const;
+
+/** Acceptable variance between buyout contracts and committed costs (T06 §8.7). */
+export const BUYOUT_RECONCILIATION_TOLERANCE = 0.05;
