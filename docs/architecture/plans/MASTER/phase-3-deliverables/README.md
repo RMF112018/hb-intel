@@ -189,6 +189,7 @@ Status: **Implemented 2026-03-22 in `@hbc/auth` v0.6.1.** Full PER override infr
 **2.5 — Role visibility rules**
 Implement the role-based visibility layer used by the canvas, module surfaces, and spine components. Visibility is computed from resolved authority tier and project membership state. PER visibility rules differ from membership-based visibility rules.
 Governing: P3-A2 §7, P3-C2 §8
+Status: **Implemented 2026-03-22 in `@hbc/auth` v0.7.0.** `getTileVisibility`, `getVisibleTileKeys`, and `getSpineVisibility` added for canvas tile and spine component role-based visibility per P3-C2 §8. PER/Viewer/External tile restrictions enforced. Stage 2 (Authority & Membership) complete.
 
 ---
 

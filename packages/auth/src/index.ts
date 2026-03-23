@@ -256,7 +256,7 @@ export {
   loadShellAuthConfiguration,
 } from './backend/index.js';
 
-// Project role resolution, membership enforcement, and module visibility (Phase 3 Stage 2.1–2.3)
+// Project role resolution, membership enforcement, visibility (Phase 3 Stage 2.1–2.5)
 export {
   resolveProjectRole,
   resolvePerEligibility,
@@ -269,6 +269,9 @@ export {
   canPerAnnotate,
   canPerPushToTeam,
   getPerRestrictions,
+  getTileVisibility,
+  getVisibleTileKeys,
+  getSpineVisibility,
 } from './project/index.js';
 export type {
   ProjectRoleResolutionInput,
@@ -281,6 +284,8 @@ export type {
   ModuleVisibility,
   ProjectModuleId,
   PerRestrictions,
+  TileVisibility,
+  CanvasTileKey,
 } from './project/index.js';
 
 // Adapters (Blueprint §2b — dual-mode auth)

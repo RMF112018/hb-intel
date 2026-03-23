@@ -33,3 +33,10 @@ export {
   getPerRestrictions,
 } from './perScope.js';
 export type { PerRestrictions } from './perScope.js';
+
+export {
+  getTileVisibility,
+  getVisibleTileKeys,
+  getSpineVisibility,
+} from './tileVisibility.js';
+export type { TileVisibility, CanvasTileKey } from './tileVisibility.js';
