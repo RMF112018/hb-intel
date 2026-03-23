@@ -264,6 +264,7 @@ Must follow Stage 2 (role resolution) and Stage 4 (routing). Can proceed in para
 **5.1 — Canvas governance model**
 Implement the three governance tiers: locked (mandatory, immovable), role-default (visible by role, movable), and optional (catalog-selectable). Locked tiles cannot be removed or repositioned. The governance model is enforced in both lanes.
 Governing: P3-C1
+Status: **Implemented 2026-03-23 in `@hbc/project-canvas` v0.1.0.** Added `project-work-queue` and `project-activity` mandatory tile definitions. Upgraded `related-items` to mandatory+lockable. Added `PROJECT_ROLE_DEFAULT_TILES` mapping 7 P3-A2 project roles. 14 total reference tiles (was 12). Governance infrastructure (TileRegistry, useCanvasEditor, CanvasApi) already mature.
 
 **5.2 — Mandatory core tile family**
 Implement all five mandatory operational core tiles: Health Summary, Activity Feed, Work Queue, Financial Summary, and Schedule Summary. These tiles must be present in both lanes. Role-based visibility rules apply — tiles are hidden when the role has no access, no empty placeholders shown.

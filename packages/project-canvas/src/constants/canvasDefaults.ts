@@ -44,6 +44,39 @@ export const ROLE_DEFAULT_TILES: Record<string, string[]> = {
   'Administrator:tertiary': ['hub:recent-context'],
 };
 
+// --- Phase 3 project role defaults — P3-A2 §3, P3-C1 §5 ---
+
+/** Default tile keys per Phase 3 project role (P3-A2 §3.1), ordered by display priority */
+export const PROJECT_ROLE_DEFAULT_TILES: Record<string, string[]> = {
+  'project-administrator': [
+    'bic-my-items', 'project-health-pulse', 'pending-approvals',
+    'project-work-queue', 'related-items', 'project-activity',
+    'active-constraints', 'permit-status', 'notification-summary',
+  ],
+  'project-executive': [
+    'bic-my-items', 'project-health-pulse', 'pending-approvals',
+    'related-items', 'project-activity',
+  ],
+  'project-manager': [
+    'bic-my-items', 'project-health-pulse', 'pending-approvals',
+    'project-work-queue', 'related-items', 'project-activity',
+    'active-constraints', 'workflow-handoff-inbox', 'bd-heritage',
+  ],
+  'superintendent': [
+    'bic-my-items', 'project-health-pulse', 'pending-approvals',
+    'project-work-queue', 'related-items', 'project-activity',
+    'active-constraints', 'permit-status',
+  ],
+  'project-team-member': [
+    'bic-my-items', 'project-health-pulse', 'pending-approvals',
+    'project-work-queue', 'related-items', 'project-activity',
+  ],
+  'project-viewer': [
+    'project-health-pulse', 'project-activity',
+  ],
+  'external-contributor': [],
+};
+
 // --- Editor constraints — D-04 ---
 
 /** Minimum column span a tile may occupy */

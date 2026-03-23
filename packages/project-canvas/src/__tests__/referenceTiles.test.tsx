@@ -30,12 +30,12 @@ afterEach(() => {
 
 describe('Reference Tile Definitions (D-SF13-T07)', () => {
   describe('Registration', () => {
-    it('registerReferenceTiles registers all 12 tiles', () => {
+    it('registerReferenceTiles registers all 14 tiles', () => {
       registerReferenceTiles();
-      expect(getAll()).toHaveLength(12);
+      expect(getAll()).toHaveLength(14);
     });
 
-    it('all 12 tiles retrievable via get() after registration', () => {
+    it('all 14 tiles retrievable via get() after registration', () => {
       registerReferenceTiles();
       for (const tile of referenceTiles) {
         expect(get(tile.tileKey)).toBeDefined();
@@ -55,7 +55,7 @@ describe('Reference Tile Definitions (D-SF13-T07)', () => {
     it('double-call is idempotent (no throw)', () => {
       registerReferenceTiles();
       expect(() => registerReferenceTiles()).not.toThrow();
-      expect(getAll()).toHaveLength(12);
+      expect(getAll()).toHaveLength(14);
     });
   });
 
@@ -102,8 +102,12 @@ describe('Reference Tile Definitions (D-SF13-T07)', () => {
     });
 
     it('non-mandatory tiles have mandatory !== true', () => {
+      const mandatoryKeys = [
+        'bic-my-items', 'pending-approvals', 'project-health-pulse',
+        'related-items', 'project-work-queue', 'project-activity',
+      ];
       const nonMandatory = referenceTiles.filter(
-        (t) => !['bic-my-items', 'pending-approvals', 'project-health-pulse'].includes(t.tileKey),
+        (t) => !mandatoryKeys.includes(t.tileKey),
       );
       for (const tile of nonMandatory) {
         expect(tile.mandatory).not.toBe(true);
@@ -223,8 +227,9 @@ describe('Reference Tile Definitions (D-SF13-T07)', () => {
       expect(keys).toContain('ai-insight');
     });
 
-    it('related-items (catalog-only) has empty defaultForRoles', () => {
-      expect(relatedItemsDef.defaultForRoles).toEqual([]);
+    it('related-items is mandatory with project roles (Phase 3)', () => {
+      expect(relatedItemsDef.mandatory).toBe(true);
+      expect(relatedItemsDef.defaultForRoles.length).toBeGreaterThan(0);
     });
   });
 });

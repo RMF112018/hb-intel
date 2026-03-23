@@ -146,16 +146,42 @@ export const notificationSummaryDef: ICanvasTileDefinition = {
   lockable: false,
 };
 
-/** Related Items — catalog-only, @hbc/related-items deferred */
+/** Related Items — mandatory (Phase 3 P3-C2 §5.4), @hbc/related-items */
 export const relatedItemsDef: ICanvasTileDefinition = {
   tileKey: 'related-items',
   title: 'Related Items',
-  description: 'Cross-references related items across modules. Available when @hbc/related-items is installed.',
-  defaultForRoles: [],
-  mandatory: false,
+  description: 'Cross-references related items across modules.',
+  defaultForRoles: ['project-administrator', 'project-executive', 'project-manager', 'superintendent', 'project-team-member'],
+  mandatory: true,
   component: createReferenceTileComponents('related-items', 'Related Items'),
   defaultColSpan: 4,
   defaultRowSpan: 1,
+  lockable: true,
+};
+
+/** Project Work Queue — mandatory (Phase 3 P3-C2 §4), @hbc/my-work-feed */
+export const projectWorkQueueDef: ICanvasTileDefinition = {
+  tileKey: 'project-work-queue',
+  title: 'Project Work Queue',
+  description: 'Actionable work items for this project filtered from the unified work feed.',
+  defaultForRoles: ['project-administrator', 'project-manager', 'superintendent', 'project-team-member'],
+  mandatory: true,
+  component: createReferenceTileComponents('project-work-queue', 'Project Work Queue'),
+  defaultColSpan: 4,
+  defaultRowSpan: 2,
+  lockable: true,
+};
+
+/** Project Activity — mandatory (Phase 3 P3-C2 §6), Activity spine */
+export const projectActivityDef: ICanvasTileDefinition = {
+  tileKey: 'project-activity',
+  title: 'Project Activity',
+  description: 'Recent project activity timeline from all module sources.',
+  defaultForRoles: ['project-administrator', 'project-executive', 'project-manager', 'superintendent', 'project-team-member', 'project-viewer'],
+  mandatory: true,
+  component: createReferenceTileComponents('project-activity', 'Project Activity'),
+  defaultColSpan: 4,
+  defaultRowSpan: 2,
   lockable: false,
 };
 
@@ -177,7 +203,7 @@ export const aiInsightDef: ICanvasTileDefinition = {
   lockable: false,
 };
 
-/** Aggregated array of all 12 reference tile definitions — D-SF13-T07 */
+/** Aggregated array of all 14 reference tile definitions — D-SF13-T07 + Phase 3 */
 export const referenceTiles: ICanvasTileDefinition[] = [
   bicMyItemsDef,
   activeConstraintsDef,
@@ -190,5 +216,7 @@ export const referenceTiles: ICanvasTileDefinition[] = [
   estimatingPursuitDef,
   notificationSummaryDef,
   relatedItemsDef,
+  projectWorkQueueDef,
+  projectActivityDef,
   aiInsightDef,
 ];
