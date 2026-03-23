@@ -88,7 +88,20 @@ export { InMemoryExportStorageAdapter } from './storage/index.js';
 // export * from './api/index.js';
 
 // Hooks — export orchestration hooks (SF24-T04)
-// export * from './hooks/index.js';
+export {
+  exportRuntimeKeys,
+  useExportRuntimeState,
+  useExportCompositionState,
+  useExportQueue,
+} from './hooks/index.js';
+export type {
+  UseExportRuntimeStateOptions,
+  UseExportRuntimeStateResult,
+  UseExportCompositionStateOptions,
+  UseExportCompositionStateResult,
+  UseExportQueueOptions,
+  UseExportQueueResult,
+} from './hooks/index.js';
 
 // Components — thin composition shells (SF24-T05/T06)
 // export * from './components/index.js';
