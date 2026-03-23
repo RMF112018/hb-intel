@@ -60,6 +60,10 @@ export type {
   UseWorkspaceStateMapperResult,
 } from './hooks/index.js';
 
+// Components — composition shells (SF26-T05)
+export { SavedViewPickerShell, SavedViewChipShell } from './components/index.js';
+export type { SavedViewPickerShellProps, SavedViewChipShellProps } from './components/index.js';
+
 // Adapters (SF26-T07)
 // export * from './adapters/index.js';
 

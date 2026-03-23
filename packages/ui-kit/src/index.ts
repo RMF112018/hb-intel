@@ -571,3 +571,9 @@ export { HbcRecordReviewPanel } from './HbcRecordReviewPanel/index.js';
 export type { HbcRecordReviewPanelProps, ReviewPanelField, ReviewPanelStep, ReviewPanelLink } from './HbcRecordReviewPanel/index.js';
 export { HbcRecordRecoveryBanner } from './HbcRecordRecoveryBanner/index.js';
 export type { HbcRecordRecoveryBannerProps, RecoveryBannerDraftInfo } from './HbcRecordRecoveryBanner/index.js';
+
+// Saved view picker and chip (SF26-T05, L-02/L-06)
+export { SavedViewPicker } from './SavedViewPicker/index.js';
+export type { SavedViewPickerProps, SavedViewPickerView, SavedViewPickerPermissions } from './SavedViewPicker/index.js';
+export { SavedViewChip } from './SavedViewChip/index.js';
+export type { SavedViewChipProps, SavedViewChipView } from './SavedViewChip/index.js';
