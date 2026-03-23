@@ -37,8 +37,15 @@ export {
   PUBLISH_WORKFLOW_VISIBILITY_POLICY,
 } from './types/index.js';
 
-// Model (SF25-T03) // export * from './model/index.js';
-// API (SF25-T03)   // export * from './api/index.js';
+// Model — lifecycle + governance (SF25-T03)
+export { createPublishRequest, transitionPublishState, VALID_PUBLISH_TRANSITIONS, evaluateReadiness, createPublishAuditEntry } from './model/index.js';
+export type { ICreatePublishRequestInput, PublishAuditAction, IPublishAuditEntry } from './model/index.js';
+
+// Storage (SF25-T03)
+export type { IPublishStorageAdapter, IPublishStorageRecord } from './storage/index.js';
+export { InMemoryPublishStorageAdapter } from './storage/index.js';
+
+// API (future)   // export * from './api/index.js';
 // Hooks (SF25-T04) // export * from './hooks/index.js';
 // Components (SF25-T05/T06) // export * from './components/index.js';
 // Rules (SF25-T03) // export * from './rules/index.js';
