@@ -1,18 +1,19 @@
 /**
  * P3-E5 runtime root barrel for Schedule module.
  *
- * Implemented: T01 (source identity, versioning, import, dual-calendar),
- * T02 (dual-truth commitments, reconciliation, milestones),
- * T03 (publication layer, published snapshots, schedule summary projection),
- * T04 (scenario branch model, promotion rules),
- * T05 (field execution layer, acknowledgement, progress verification, roll-up),
- * T06 (logic dependencies, propagation rules),
- * T07 (analytics, grading, confidence, recommendations, causation taxonomy),
- * T09 (platform integration, governance policy configuration),
- * T10 (business rules, capabilities, reference).
+ * Implemented: T01–T10 (all data model T-files complete).
+ * T11 acceptance gate assessed — contract-level complete.
  *
- * Pending: T08, T11 (
- * logic, analytics, classification, integration, business rules, acceptance).
+ * T01: source identity, versioning, import, dual-calendar
+ * T02: dual-truth commitments, reconciliation, milestones
+ * T03: publication layer, published snapshots, schedule summary projection
+ * T04: scenario branch model, promotion rules
+ * T05: field execution layer, acknowledgement, progress verification, roll-up
+ * T06: logic dependencies, propagation rules
+ * T07: analytics, grading, confidence, recommendations, causation taxonomy
+ * T08: classification, metadata, offline/sync, visibility/participation
+ * T09: platform integration, governance policy configuration
+ * T10: business rules, capabilities, reference
  */
 
 export * from './types/index.js';
@@ -26,3 +27,4 @@ export * from './logic/index.js';
 export * from './analytics/index.js';
 export * from './integration/index.js';
 export * from './business-rules/index.js';
+export * from './classification/index.js';

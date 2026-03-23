@@ -85,6 +85,15 @@ import type {
   IScheduleCapabilityConfig,
   ScheduleAuthorityLayer,
   IFieldSummaryEntry,
+  ClassificationDimension,
+  IClassificationMapping,
+  ClassificationUsageContext,
+  IntentOperationType,
+  IntentRecordType,
+  ConflictType,
+  IConflictResolutionRule,
+  VisibilityPolicyDimension,
+  ExternalParticipantWorkflow,
 } from '../types/index.js';
 
 /**
@@ -892,3 +901,56 @@ export const FIELD_SUMMARY_INDEX: ReadonlyArray<IFieldSummaryEntry> = [
   { recordType: 'CalendarRule', section: '17.2', primaryKey: 'calendarRuleId', authorityLayer: 'Governance' },
   { recordType: 'ScheduleSummaryProjection', section: '19.1', primaryKey: 'summaryId', authorityLayer: 'HealthSpine' },
 ];
+
+// ══════════════════════════════════════════════════════════════════════
+// T08: Classification, Metadata, Offline, and Sync (§14, §15, §16)
+// ══════════════════════════════════════════════════════════════════════
+
+export const CLASSIFICATION_DIMENSIONS: ReadonlyArray<IClassificationMapping> = [
+  { dimension: 'WBSCode', source: 'P6 wbs_id / wbs_name', governedMapping: 'Preserved; mapped to HB WBS structure if configured' },
+  { dimension: 'ActivityCodes', source: 'P6 activity code types', governedMapping: 'Mapped to governed code categories' },
+  { dimension: 'UDFValues', source: 'P6 user-defined fields', governedMapping: 'Mapped to typed classification fields' },
+  { dimension: 'TradeCode', source: 'Activity code or UDF', governedMapping: 'Governed mapping table' },
+  { dimension: 'PhaseCode', source: 'Activity code or UDF', governedMapping: 'Governed mapping table' },
+  { dimension: 'AreaCode', source: 'Activity code, UDF, or location', governedMapping: 'Governed mapping table' },
+  { dimension: 'ContractMilestoneFlag', source: 'Activity code or UDF', governedMapping: 'Boolean flag per governed rule' },
+  { dimension: 'Responsibility', source: 'Resource or UDF', governedMapping: 'Mapped to HB user/role' },
+];
+
+export const CLASSIFICATION_USAGE_CONTEXTS = [
+  'Filtering', 'AnalyticsSegmentation', 'WorkPackageDefaultPopulation',
+  'VisibilityPolicyEnforcement', 'RecommendationLogicInput', 'RollUpDimension',
+] as const satisfies ReadonlyArray<ClassificationUsageContext>;
+
+export const INTENT_OPERATION_TYPES = [
+  'Create', 'Update', 'StatusChange', 'LinkArtifact',
+] as const satisfies ReadonlyArray<IntentOperationType>;
+
+export const INTENT_RECORD_TYPES = [
+  'FieldWorkPackage', 'CommitmentRecord', 'BlockerRecord', 'ReadinessRecord',
+  'ProgressClaimRecord', 'AcknowledgementRecord', 'LookAheadPlan',
+] as const satisfies ReadonlyArray<IntentRecordType>;
+
+export const CONFLICT_RESOLUTION_RULES: ReadonlyArray<IConflictResolutionRule> = [
+  { conflictType: 'NonGovernedFieldUpdate', resolution: 'Last-write-wins; both values preserved in audit' },
+  { conflictType: 'GovernedStatusChange', resolution: 'Server state wins; user notified; intent preserved for manual review' },
+  { conflictType: 'CommitmentDatePendingApproval', resolution: 'Conflict routed to PM for manual reconciliation' },
+  { conflictType: 'CreateWithClientId', resolution: 'ID regenerated server-side if collision; client map updated' },
+];
+
+export const VISIBILITY_POLICY_DIMENSIONS = [
+  'InternalExternal', 'LiveVsPublished', 'SensitiveInternalSignals',
+  'FieldRecordByTrade', 'RecommendationVisibility', 'ConfidenceScoreVisibility',
+] as const satisfies ReadonlyArray<VisibilityPolicyDimension>;
+
+/** Hard visibility rules that cannot be overridden (§16.1). */
+export const VISIBILITY_HARD_RULES = [
+  'External participants never see Draft or ReadyForReview publication records',
+  'External participants never see ConfidenceRecords or RecommendationRecords unless explicitly enabled',
+  'Executive review operates exclusively against Published publication records',
+  'PM-owned draft commitments and working scenarios are never visible to PER',
+] as const;
+
+export const EXTERNAL_PARTICIPANT_WORKFLOWS = [
+  'FieldCommitment', 'BlockerResolution', 'ReadinessConfirmation', 'LookAheadReview',
+] as const satisfies ReadonlyArray<ExternalParticipantWorkflow>;

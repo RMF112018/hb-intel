@@ -121,3 +121,8 @@ export { createMockRecommendationRecord } from './createMockRecommendationRecord
 // ── P3-E5-T09 Integration and governance testing surface ────────────
 
 export { createMockGovernedPolicySet } from './createMockGovernedPolicySet.js';
+
+// ── P3-E5-T08 Classification and offline testing surface ────────────
+
+export { createMockIntentRecord } from './createMockIntentRecord.js';
+export { createMockExternalParticipantRecord } from './createMockExternalParticipantRecord.js';

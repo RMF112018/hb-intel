@@ -1597,3 +1597,89 @@ export interface IFieldSummaryEntry {
   readonly primaryKey: string;
   readonly authorityLayer: ScheduleAuthorityLayer;
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// T08: Classification, Metadata, Offline, and Sync (§14, §15, §16)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §14 Classification Framework ─────────────────────────────────────
+
+/** Classification dimension from source metadata (§14.1). */
+export type ClassificationDimension =
+  | 'WBSCode' | 'ActivityCodes' | 'UDFValues' | 'TradeCode'
+  | 'PhaseCode' | 'AreaCode' | 'ContractMilestoneFlag' | 'Responsibility';
+
+/** Classification mapping from source to governed value (§14.1). */
+export interface IClassificationMapping {
+  readonly dimension: ClassificationDimension;
+  readonly source: string;
+  readonly governedMapping: string;
+}
+
+/** Classification usage contexts (§14.3). */
+export type ClassificationUsageContext =
+  | 'Filtering' | 'AnalyticsSegmentation' | 'WorkPackageDefaultPopulation'
+  | 'VisibilityPolicyEnforcement' | 'RecommendationLogicInput' | 'RollUpDimension';
+
+// ── §15 Offline and Sync ─────────────────────────────────────────────
+
+/** Intent operation type (§15.1). */
+export type IntentOperationType = 'Create' | 'Update' | 'StatusChange' | 'LinkArtifact';
+
+/** Record types supporting offline intent creation (§15.1). */
+export type IntentRecordType =
+  | 'FieldWorkPackage' | 'CommitmentRecord' | 'BlockerRecord'
+  | 'ReadinessRecord' | 'ProgressClaimRecord' | 'AcknowledgementRecord' | 'LookAheadPlan';
+
+/** Offline-first intent record (§15.1). */
+export interface IIntentRecord {
+  readonly intentId: string;
+  readonly deviceId: string;
+  readonly userId: string;
+  readonly createdAt: string;
+  readonly operationType: IntentOperationType;
+  readonly recordType: IntentRecordType;
+  readonly targetId: string;
+  readonly payload: Record<string, unknown>;
+  readonly replayStatus: IntentReplayStatus;
+  readonly replayedAt: string | null;
+  readonly conflictDetails: Record<string, unknown> | null;
+  readonly retryCount: number;
+}
+
+/** Conflict type for offline sync (§15.3). */
+export type ConflictType =
+  | 'NonGovernedFieldUpdate' | 'GovernedStatusChange'
+  | 'CommitmentDatePendingApproval' | 'CreateWithClientId';
+
+/** Conflict resolution rule (§15.3). */
+export interface IConflictResolutionRule {
+  readonly conflictType: ConflictType;
+  readonly resolution: string;
+}
+
+// ── §16 Visibility and Participation ─────────────────────────────────
+
+/** Visibility policy dimension (§16.1). */
+export type VisibilityPolicyDimension =
+  | 'InternalExternal' | 'LiveVsPublished' | 'SensitiveInternalSignals'
+  | 'FieldRecordByTrade' | 'RecommendationVisibility' | 'ConfidenceScoreVisibility';
+
+/** External participant permitted workflows (§16.2). */
+export type ExternalParticipantWorkflow =
+  | 'FieldCommitment' | 'BlockerResolution' | 'ReadinessConfirmation' | 'LookAheadReview';
+
+/** External participant record (§16.2). */
+export interface IExternalParticipantRecord {
+  readonly participantId: string;
+  readonly projectId: string;
+  readonly externalUserId: string;
+  readonly organizationName: string;
+  readonly permittedWorkflows: ReadonlyArray<ExternalParticipantWorkflow>;
+  readonly permittedRecordTypes: ReadonlyArray<string>;
+  readonly sensitivityClassExclusions: ReadonlyArray<string>;
+  readonly auditEnabled: true;
+  readonly approvedBy: string;
+  readonly approvedAt: string;
+  readonly expiresAt: string;
+}
