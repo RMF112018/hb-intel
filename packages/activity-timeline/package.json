@@ -1,6 +1,6 @@
 {
   "name": "@hbc/activity-timeline",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "description": "Cross-module activity timeline primitive for HB Intel — normalized event contracts, emitter helpers, append-only storage, and query orchestration",
   "type": "module",

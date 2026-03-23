@@ -75,7 +75,25 @@ export { InMemoryStorageAdapter } from './storage/index.js';
 // export * from './adapters/index.js';
 
 // Hooks — query hooks, filter state (SF28-T04)
-// export * from './hooks/index.js';
+export {
+  activityTimelineKeys,
+  useActivityTimeline,
+  useActivityWorkspaceFeed,
+  useActivityRecordTimeline,
+  useActivityRelatedTimeline,
+  useActivityFilters,
+  useActivityEmitter,
+  useActivityDiff,
+  useActivitySourceHealth,
+} from './hooks/index.js';
+export type {
+  UseActivityTimelineOptions,
+  UseActivityTimelineResult,
+  UseActivityFiltersResult,
+  UseActivityEmitterResult,
+  UseActivityDiffResult,
+  UseActivitySourceHealthResult,
+} from './hooks/index.js';
 
 // Telemetry — KPI constants and engagement tracking (SF28-T09)
 // export * from './telemetry/index.js';

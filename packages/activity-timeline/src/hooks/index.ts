@@ -1,6 +1,14 @@
-/**
- * SF28-T04 scope — Query hooks, filter state, and timeline composition.
- *
- * Will contain: useActivityTimeline, useActivityFilters,
- * useActivitySummary, useActivitySourceHealth hooks.
- */
+export { activityTimelineKeys } from './queryKeys.js';
+export { useActivityTimeline } from './useActivityTimeline.js';
+export type { UseActivityTimelineOptions, UseActivityTimelineResult } from './useActivityTimeline.js';
+export { useActivityWorkspaceFeed } from './useActivityWorkspaceFeed.js';
+export { useActivityRecordTimeline } from './useActivityRecordTimeline.js';
+export { useActivityRelatedTimeline } from './useActivityRelatedTimeline.js';
+export { useActivityFilters } from './useActivityFilters.js';
+export type { UseActivityFiltersResult } from './useActivityFilters.js';
+export { useActivityEmitter } from './useActivityEmitter.js';
+export type { UseActivityEmitterResult } from './useActivityEmitter.js';
+export { useActivityDiff } from './useActivityDiff.js';
+export type { UseActivityDiffResult } from './useActivityDiff.js';
+export { useActivitySourceHealth } from './useActivitySourceHealth.js';
+export type { UseActivitySourceHealthResult } from './useActivitySourceHealth.js';
