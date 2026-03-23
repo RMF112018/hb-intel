@@ -84,3 +84,5 @@ T03 Delay Ledger: Delay record model with nested time/commercial impact records,
 T04 Change Ledger: Change event model with line items, Procore mapping record, 9-state lifecycle with approval gate, ManualNative/IntegratedWithProcore dual mode, 7 business rules, 5 health spine metrics. See `src/constraints/change-ledger/`.
 
 T05 Cross-Ledger Lineage: Immutable lineage records, 3 spawn paths with seed data, peer links with bidirectional validation, @hbc/related-items registrations, 5 lineage business rules. See `src/constraints/lineage/`.
+
+T06 Publication & Governance: Live/published state model, record snapshots, review packages, publication authority matrix, 32-team BIC registry, governance configurability framework. See `src/constraints/publication/`.

@@ -156,3 +156,9 @@ export { mockChangeLedgerScenarios } from './mockChangeLedgerScenarios.js';
 export { createMockLineageRecord } from './createMockLineageRecord.js';
 export { createMockCrossLedgerLink } from './createMockCrossLedgerLink.js';
 export { mockLineageScenarios } from './mockLineageScenarios.js';
+
+// ── P3-E6-T06 Publication testing surface ─────────────────────────────
+
+export { createMockLedgerRecordSnapshot } from './createMockLedgerRecordSnapshot.js';
+export { createMockReviewPackage } from './createMockReviewPackage.js';
+export { mockConstraintsPublicationScenarios } from './mockConstraintsPublicationScenarios.js';
