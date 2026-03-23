@@ -348,6 +348,7 @@ Governing: `docs/architecture/plans/shared-features/SF25-Publish-Workflow.md`
 **5.6 — Bulk Actions (`@hbc/bulk-actions`, SF27)**
 Deliver the shared bulk-actions package: selection semantics, per-item eligibility evaluation, execution lifecycle, mixed-result reporting, and `@hbc/ui-kit` bulk-action surfaces. Depends on 5.4 (Saved Views) for the `ISavedViewContext` execution scope handoff. Module action registrations are scaffolded here and wired into module surfaces in Stage 7.
 Governing: `docs/architecture/plans/shared-features/SF27-Bulk-Actions.md`
+**SF27-T01 scaffold:** **Implemented 2026-03-23 in `@hbc/bulk-actions` v0.0.1 + `@hbc/ui-kit` v2.2.83.** Package scaffold with types (SelectionScope, IBulkSelectionState, IBulkAction, IEligibilityResult, IChunkPlan, IBulkExecutionResult, ISelectionSourceAdapter, IBulkActionExecutionContext with ISavedViewContext handoff), model, selection, execution, adapters, hooks, telemetry barrels, testing subpath, and README per SF27 decisions. 6 ui-kit components: BulkSelectionBar, BulkActionMenu, BulkActionConfirmDialog, BulkActionInputDialog, BulkActionResultsPanel, SelectAllFilteredBanner. Layer 8 shared-feature primitive.
 
 ---
 

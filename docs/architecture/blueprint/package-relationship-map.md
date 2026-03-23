@@ -64,7 +64,7 @@ Layer 9 — Domain Data Infrastructure
   Domain-agnostic import/seeding utilities
 
 Layer 8 — Intelligence Scaffolds & Shared-Feature Primitives
-  (@hbc/health-indicator, @hbc/score-benchmark, @hbc/strategic-intelligence, @hbc/post-bid-autopsy, @hbc/my-work-feed, @hbc/export-runtime, @hbc/record-form, @hbc/saved-views, @hbc/publish-workflow)
+  (@hbc/health-indicator, @hbc/score-benchmark, @hbc/strategic-intelligence, @hbc/post-bid-autopsy, @hbc/my-work-feed, @hbc/export-runtime, @hbc/record-form, @hbc/saved-views, @hbc/publish-workflow, @hbc/bulk-actions)
   Scoring, analysis, learning signal, cross-module aggregation, and shared-feature runtime primitives
 
 Layer 7 — Workflow Primitives
@@ -945,6 +945,22 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 **Key exports:** `PublicationStatus` (8 states), `IPublicationRecord`, `IReadinessState`, `IApprovalState`, `ISupersessionState`, `IRevocationState`, `IPublicationReceipt`, `IReadinessRule`, `IApprovalRule`, 1 constant. Testing subpath at `@hbc/publish-workflow/testing`.
 
 **Governing plan:** [SF25-Publish-Workflow.md](../../docs/architecture/plans/shared-features/SF25-Publish-Workflow.md)
+
+---
+
+#### `@hbc/bulk-actions` · v0.0.1 · [Scaffold]
+
+| Field | Value |
+|-------|-------|
+| **Path** | `packages/bulk-actions/` |
+| **Layer** | 8 — Shared-Feature Primitives |
+| **Depends on** | `@hbc/models` (workspace) |
+| **Used by** | All Phase 3 modules requiring bulk operations; consumes `ISavedViewContext` from `@hbc/saved-views` |
+| **Maturity** | Scaffold |
+
+**Purpose:** Selection semantics, per-item eligibility, chunked execution, mixed-result reporting, and module adapter seams. 6 ui-kit components (BulkSelectionBar, BulkActionMenu, BulkActionConfirmDialog, BulkActionInputDialog, BulkActionResultsPanel, SelectAllFilteredBanner).
+
+**Governing plan:** [SF27-Bulk-Actions.md](../../docs/architecture/plans/shared-features/SF27-Bulk-Actions.md)
 
 ---
 
