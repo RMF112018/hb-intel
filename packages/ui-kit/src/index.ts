@@ -577,3 +577,13 @@ export { SavedViewPicker } from './SavedViewPicker/index.js';
 export type { SavedViewPickerProps, SavedViewPickerView, SavedViewPickerPermissions } from './SavedViewPicker/index.js';
 export { SavedViewChip } from './SavedViewChip/index.js';
 export type { SavedViewChipProps, SavedViewChipView } from './SavedViewChip/index.js';
+
+// Save view dialog, scope badge, default toggle, compatibility banner (SF26-T06)
+export { SaveViewDialog } from './SaveViewDialog/index.js';
+export type { SaveViewDialogProps, SaveViewDialogResult, SaveViewDialogMode, SaveViewDialogScope, SaveViewDialogPermissions, SaveViewDialogExistingView } from './SaveViewDialog/index.js';
+export { SavedViewScopeBadge } from './SavedViewScopeBadge/index.js';
+export type { SavedViewScopeBadgeProps } from './SavedViewScopeBadge/index.js';
+export { DefaultViewToggle } from './DefaultViewToggle/index.js';
+export type { DefaultViewToggleProps } from './DefaultViewToggle/index.js';
+export { ViewCompatibilityBanner } from './ViewCompatibilityBanner/index.js';
+export type { ViewCompatibilityBannerProps, ViewCompatibilityBannerResult } from './ViewCompatibilityBanner/index.js';

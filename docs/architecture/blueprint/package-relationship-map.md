@@ -912,7 +912,7 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 
 ---
 
-#### `@hbc/saved-views` · v0.0.5 · [Scaffold]
+#### `@hbc/saved-views` · v0.0.6 · [Scaffold]
 
 | Field | Value |
 |-------|-------|
