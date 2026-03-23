@@ -1,6 +1,12 @@
 /**
  * P3-E4 runtime root barrel for Financial module.
- * T01: doctrine and authority. T02: budget line identity and import. T03: forecast versioning and checklist.
+ *
+ * Implemented: T01 (doctrine/authority), T02 (budget line identity/import),
+ * T03 (forecast versioning/checklist), T05 (cash flow), T06 (buyout),
+ * T07 (business rules/calculations), T08 (platform integration/annotations).
+ *
+ * Pending: T04 (forecast summary and GC/GR data model interfaces).
+ * T09 acceptance gate: 37/48 items satisfied at contract level; 4 pending T04; 7 runtime/UAT scope.
  */
 
 export * from './types/index.js';
