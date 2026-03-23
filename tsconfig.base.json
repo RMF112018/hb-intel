@@ -25,6 +25,8 @@
       "@hbc/data-access/*": ["packages/data-access/src/*"],
       "@hbc/export-runtime": ["packages/export-runtime/src/index.ts"],
       "@hbc/export-runtime/*": ["packages/export-runtime/src/*"],
+      "@hbc/record-form": ["packages/record-form/src/index.ts"],
+      "@hbc/record-form/*": ["packages/record-form/src/*"],
       "@hbc/query-hooks": ["packages/query-hooks/src/index.ts"],
       "@hbc/query-hooks/*": ["packages/query-hooks/src/*"],
       "@hbc/ui-kit": ["packages/ui-kit/src/index.ts"],

@@ -306,6 +306,7 @@ Governing: `docs/architecture/plans/shared-features/SF24-Export-Runtime.md`
 **5.3 — Record Form runtime (`@hbc/record-form`, SF23)**
 Deliver the shared record-form package: create/edit/duplicate/template lifecycle, draft recovery, review/handoff orchestration, offline replay, and module adapter scaffold for all 9 Phase 3 modules. Each module adapter owns its domain schema; the primitive owns lifecycle, offline resilience, and telemetry. Module-level adapter wiring is Stage 7 scope.
 Governing: `docs/architecture/plans/shared-features/SF23-Record-Form.md`
+**SF23-T01 scaffold:** **Implemented 2026-03-23 in `@hbc/record-form` v0.0.1.** Package scaffold with types (trust-state vocabulary, recovery states, review steps, next recommended action, draft persistence, failure/retry diagnostics, telemetry), model, api, hooks, components, adapters barrels, testing subpath, and README per SF23 locked decisions L-01/L-03/L-04/L-06. Layer 8 shared-feature primitive. Feature adapter seams (with profiles directory) in `@hbc/features-business-development` and `@hbc/features-estimating`.
 
 **5.4 — Saved Views (`@hbc/saved-views`, SF26)**
 Deliver the shared saved-views package: view lifecycle, personal/team/role/system scope model, schema compatibility/reconciliation, `ISavedViewStateMapper<TState>` module adapter interface, SharePoint MVP persistence, and `@hbc/ui-kit` view picker and dialog surfaces. Establishes the `ISavedViewContext` handoff contract consumed by 5.6 (Bulk Actions) and by Stage 5.2 (Export Runtime). Module-level mapper wiring is Stage 7 scope.

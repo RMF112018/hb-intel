@@ -64,7 +64,7 @@ Layer 9 — Domain Data Infrastructure
   Domain-agnostic import/seeding utilities
 
 Layer 8 — Intelligence Scaffolds & Shared-Feature Primitives
-  (@hbc/health-indicator, @hbc/score-benchmark, @hbc/strategic-intelligence, @hbc/post-bid-autopsy, @hbc/my-work-feed, @hbc/export-runtime)
+  (@hbc/health-indicator, @hbc/score-benchmark, @hbc/strategic-intelligence, @hbc/post-bid-autopsy, @hbc/my-work-feed, @hbc/export-runtime, @hbc/record-form)
   Scoring, analysis, learning signal, cross-module aggregation, and shared-feature runtime primitives
 
 Layer 7 — Workflow Primitives
@@ -884,6 +884,31 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 - Module adapters must not re-invent export lifecycle interpretation locally.
 
 **Governing plan:** [SF24-Export-Runtime.md](../../docs/architecture/plans/shared-features/SF24-Export-Runtime.md)
+
+---
+
+#### `@hbc/record-form` · v0.0.1 · [Scaffold]
+
+| Field | Value |
+|-------|-------|
+| **Path** | `packages/record-form/` |
+| **Layer** | 8 — Shared-Feature Primitives |
+| **Depends on** | `@hbc/models` (workspace) |
+| **Used by** | `@hbc/features-business-development`, `@hbc/features-estimating`, and all Phase 3 module adapters |
+| **Maturity** | Scaffold |
+
+**Purpose:** Shared record authoring runtime primitive — create/edit/duplicate/template lifecycle, draft recovery, review/submission handoff, offline replay, and module adapter seams. All Phase 3 modules create lightweight adapters that supply module-specific schemas while the primitive owns lifecycle and trust state.
+
+**Key exports:** `RecordFormStatus`, `RecordFormIntent`, `RecordFormComplexityTier`, `RecordFormConfidence`, `IRecordFormState`, `IRecordFormTrustState`, `IRecordFormDraft`, `IRecordFormReviewStepState`, `IRecordFormNextRecommendedAction`, `IRecordFormRecoveryState`, `IRecordFormFailureState`, `IRecordFormRetryState`, `IRecordFormTelemetryState`, 4 reason-code unions, 3 constants. Testing subpath at `@hbc/record-form/testing`.
+
+**Correct usage:** Module adapters consume primitive public exports. Module-specific schemas and validation rules remain adapter-owned (projection-only). Runtime and orchestration ownership stays in the primitive. Reusable visual primitives belong in `@hbc/ui-kit`.
+
+**Anti-patterns / must not:**
+- Must not contain reusable visual primitives — those belong in `@hbc/ui-kit`.
+- Must not allow module adapters to import internal paths — public barrel only.
+- Module adapters must not re-invent lifecycle interpretation locally.
+
+**Governing plan:** [SF23-Record-Form.md](../../docs/architecture/plans/shared-features/SF23-Record-Form.md)
 
 ---
 
