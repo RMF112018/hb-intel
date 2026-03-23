@@ -117,3 +117,7 @@ export { createMockWorkPackageLinkRecord } from './createMockWorkPackageLinkReco
 export { createMockScheduleQualityGrade } from './createMockScheduleQualityGrade.js';
 export { createMockConfidenceRecord } from './createMockConfidenceRecord.js';
 export { createMockRecommendationRecord } from './createMockRecommendationRecord.js';
+
+// ── P3-E5-T09 Integration and governance testing surface ────────────
+
+export { createMockGovernedPolicySet } from './createMockGovernedPolicySet.js';

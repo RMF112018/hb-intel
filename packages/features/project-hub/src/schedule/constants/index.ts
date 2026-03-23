@@ -65,6 +65,19 @@ import type {
   RecommendationDisposition,
   RecommendationPromotionPath,
   CausationApplicableRecordType,
+  ScheduleRelatedItemType,
+  ScheduleLinkedArtifactObject,
+  ScheduleWorkflowHandoffType,
+  ScheduleWorkItemType,
+  IScheduleWorkItemConfig,
+  ScheduleNotificationType,
+  IScheduleNotificationConfig,
+  ScheduleComplexityTier,
+  IScheduleComplexityTierConfig,
+  ScheduleAnnotatableSurface,
+  IAnnotatableFieldConfig,
+  SchedulePolicyArea,
+  IGovernedPolicyArea,
 } from '../types/index.js';
 
 /**
@@ -693,3 +706,83 @@ export const DEFAULT_CAUSATION_ROOT_CATEGORIES = [
   'DESIGN', 'OWNER', 'SUBCONTRACTOR', 'WEATHER', 'REGULATORY', 'MATERIAL',
   'LABOR', 'EQUIPMENT', 'SCHEDULE', 'CHANGE', 'FORCE_MAJEURE', 'INTERNAL', 'OTHER',
 ] as const;
+
+// ══════════════════════════════════════════════════════════════════════
+// T09: Platform Integration and Governance (§18, §20, §23)
+// ══════════════════════════════════════════════════════════════════════
+
+export const SCHEDULE_RELATED_ITEM_TYPES = [
+  'RFI', 'Submittal', 'Permit', 'Inspection', 'Drawing', 'Photo',
+  'MeetingActionItem', 'WorkItem', 'ChangeEvent', 'OwnerDecision', 'HBIRecommendation',
+] as const satisfies ReadonlyArray<ScheduleRelatedItemType>;
+
+export const SCHEDULE_LINKED_ARTIFACT_OBJECTS = [
+  'ImportedActivitySnapshot', 'MilestoneRecord', 'FieldWorkPackage',
+  'CommitmentRecord', 'BlockerRecord', 'ReadinessRecord',
+  'ProgressClaimRecord', 'ManagedCommitmentRecord', 'PublicationRecord',
+  'RecommendationRecord', 'ScenarioBranch',
+] as const satisfies ReadonlyArray<ScheduleLinkedArtifactObject>;
+
+export const SCHEDULE_WORKFLOW_HANDOFF_TYPES = [
+  'PublicationReviewRequest', 'CommitmentApprovalRequest',
+  'ScenarioPromotionRequest', 'BaselineApprovalRequest', 'CanonicalSourcePromotionRequest',
+] as const satisfies ReadonlyArray<ScheduleWorkflowHandoffType>;
+
+export const SCHEDULE_WORK_ITEM_CONFIGS: ReadonlyArray<IScheduleWorkItemConfig> = [
+  { type: 'MilestoneAtRisk', trigger: 'milestone.status = AtRisk', assignee: 'PM' },
+  { type: 'MilestoneDelayed', trigger: 'milestone.status = Delayed or Critical', assignee: 'PM + PE' },
+  { type: 'CommitmentPendingAcknowledgement', trigger: 'AcknowledgementRecord.status = Pending (overdue)', assignee: 'Responsible party' },
+  { type: 'BlockerEscalated', trigger: 'BlockerRecord.status = Escalated', assignee: 'Owner + PM' },
+  { type: 'ReconciliationRequired', trigger: 'ManagedCommitmentRecord.reconciliationStatus = ConflictRequiresReview', assignee: 'PM' },
+  { type: 'PublicationPendingReview', trigger: 'PublicationRecord.lifecycleStatus = ReadyForReview', assignee: 'PE' },
+  { type: 'ProgressVerificationRequired', trigger: 'ProgressClaimRecord.verificationStatus = Pending', assignee: 'Designated verifier' },
+  { type: 'ConfidenceCollapsed', trigger: 'ConfidenceRecord.overallConfidenceLabel = VeryLow', assignee: 'PM + PE' },
+  { type: 'SyncConflictRequiresReview', trigger: 'IntentRecord.replayStatus = ConflictRequiresReview', assignee: 'Originating user' },
+  { type: 'ScheduleStalenessWarning', trigger: 'Days since last active import exceeds governed threshold', assignee: 'PM' },
+];
+
+export const SCHEDULE_NOTIFICATION_CONFIGS: ReadonlyArray<IScheduleNotificationConfig> = [
+  { type: 'MilestoneCriticalAlert', defaultTrigger: 'milestone.status = Critical', channel: 'Push + email' },
+  { type: 'ScheduleSlippageAlert', defaultTrigger: 'varianceDays > governed threshold', channel: 'Push' },
+  { type: 'ConfidenceCollapseAlert', defaultTrigger: 'confidenceScore < governed threshold', channel: 'Push + email (PM + PE)' },
+  { type: 'BlockerCriticalUnresolved', defaultTrigger: 'Blocking blocker open > governed days', channel: 'Push' },
+  { type: 'CommitmentOverdue', defaultTrigger: 'commitment.committedDate passed; status ≠ Kept', channel: 'Push' },
+  { type: 'PublicationStalenessAlert', defaultTrigger: 'Days since last Published > governed threshold', channel: 'Email' },
+];
+
+export const SCHEDULE_COMPLEXITY_TIER_CONFIGS: ReadonlyArray<IScheduleComplexityTierConfig> = [
+  { tier: 'Essential', label: 'Essential', features: ['Milestone status', 'Overall schedule health', 'Next milestone', 'Primary variance'] },
+  { tier: 'Standard', label: 'Standard', features: ['Activity list', 'Float indicators', 'Commitment summary', 'Blocker count', 'Confidence label'] },
+  { tier: 'Expert', label: 'Expert', features: ['Full analytics', 'Grading controls', 'Confidence factor breakdown', 'Slippage trends', 'Forensic comparison', 'Scenario comparison', 'Logic layer detail', 'Work-package roll-up detail'] },
+];
+
+export const SCHEDULE_ANNOTATABLE_SURFACE_CONFIGS: ReadonlyArray<IAnnotatableFieldConfig> = [
+  { surface: 'PublishedActivitySnapshot', annotatableFields: ['publishedFinishDate', 'varianceFromBaselineDays', 'reconciliationStatus'] },
+  { surface: 'MilestoneRecord', annotatableFields: ['forecastDate', 'varianceDays', 'status'] },
+  { surface: 'PublicationRecord', annotatableFields: ['reconciliationSummary', 'publishBasisNotes'] },
+  { surface: 'ScheduleSummaryProjection', annotatableFields: ['overallStatus', 'varianceDays', 'confidenceLabel'] },
+  { surface: 'ConfidenceRecord', annotatableFields: ['factorScores'] },
+];
+
+export const SCHEDULE_POLICY_AREAS: ReadonlyArray<IGovernedPolicyArea> = [
+  { area: 'CommitmentApprovalThresholds', description: 'Variance magnitude requiring PE approval; separate thresholds by commitment type' },
+  { area: 'PublicationApprovalRules', description: 'Required review roles; auto-publish criteria; publish blocker definitions' },
+  { area: 'MilestoneStatusThresholds', description: 'AtRisk and Delayed variance day thresholds' },
+  { area: 'OverallStatusThresholds', description: 'Variance day thresholds for schedule summary' },
+  { area: 'FloatNearCriticalThreshold', description: 'Hours below which an activity is near-critical' },
+  { area: 'CriticalityIndexBands', description: 'Score thresholds for critical / near-critical / standard display' },
+  { area: 'ConfidenceFactorWeights', description: 'Per-factor weights and label thresholds' },
+  { area: 'GradingControls', description: 'Control thresholds, weights, and inclusion rules' },
+  { area: 'LookAheadWindowLength', description: 'Default week span for LookAheadPlan' },
+  { area: 'ReadinessDimensionSet', description: 'Which dimensions are required per work type' },
+  { area: 'ProgressBasisAssignments', description: 'Progress basis method per activity code or trade' },
+  { area: 'CausationTaxonomy', description: 'Codes, labels, hierarchy, and applicability rules' },
+  { area: 'LocationHierarchyTemplate', description: 'Default location node hierarchy' },
+  { area: 'CalendarRules', description: 'Source and operating calendar definitions' },
+  { area: 'NotificationThresholds', description: 'All trigger thresholds for notifications' },
+  { area: 'VisibilityPolicies', description: 'Sensitivity classes, external participant rules' },
+  { area: 'EscalationRules', description: 'Overdue windows, escalation routing' },
+  { area: 'AutoPublishCriteria', description: 'Conditions under which auto-publish is permitted' },
+  { area: 'PPCRollingWindow', description: 'Number of look-ahead windows included in rolling PPC' },
+  { area: 'RollUpRules', description: 'Progress weighting, sensitivity thresholds' },
+];

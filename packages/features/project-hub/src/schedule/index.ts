@@ -7,9 +7,10 @@
  * T04 (scenario branch model, promotion rules),
  * T05 (field execution layer, acknowledgement, progress verification, roll-up),
  * T06 (logic dependencies, propagation rules),
- * T07 (analytics, grading, confidence, recommendations, causation taxonomy).
+ * T07 (analytics, grading, confidence, recommendations, causation taxonomy),
+ * T09 (platform integration, governance policy configuration).
  *
- * Pending: T08–T11 (
+ * Pending: T08, T10–T11 (
  * logic, analytics, classification, integration, business rules, acceptance).
  */
 
@@ -22,3 +23,4 @@ export * from './scenarios/index.js';
 export * from './field-execution/index.js';
 export * from './logic/index.js';
 export * from './analytics/index.js';
+export * from './integration/index.js';

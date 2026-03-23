@@ -1388,3 +1388,135 @@ export interface ICausationCode {
   readonly sortOrder: number;
   readonly createdAt: string;
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// T09: Platform Integration and Governance (§18, §20, §23)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §18.1 Related Items ──────────────────────────────────────────────
+
+/** Schedule-supported linked artifact relationship types (§18.1). */
+export type ScheduleRelatedItemType =
+  | 'RFI' | 'Submittal' | 'Permit' | 'Inspection' | 'Drawing'
+  | 'Photo' | 'MeetingActionItem' | 'WorkItem' | 'ChangeEvent'
+  | 'OwnerDecision' | 'HBIRecommendation';
+
+/** Mapping from relationship type to schedule object and linked-to object (§18.1). */
+export interface IScheduleRelatedItemMapping {
+  readonly relationshipType: ScheduleRelatedItemType;
+  readonly scheduleObjectType: string;
+  readonly linkedTo: string;
+}
+
+/** Schedule objects that support linked artifact relationships (§18.1). */
+export type ScheduleLinkedArtifactObject =
+  | 'ImportedActivitySnapshot' | 'MilestoneRecord' | 'FieldWorkPackage'
+  | 'CommitmentRecord' | 'BlockerRecord' | 'ReadinessRecord'
+  | 'ProgressClaimRecord' | 'ManagedCommitmentRecord' | 'PublicationRecord'
+  | 'RecommendationRecord' | 'ScenarioBranch';
+
+// ── §18.2 Workflow Handoff ───────────────────────────────────────────
+
+/** Schedule-generated workflow handoff types (§18.2). */
+export type ScheduleWorkflowHandoffType =
+  | 'PublicationReviewRequest'
+  | 'CommitmentApprovalRequest'
+  | 'ScenarioPromotionRequest'
+  | 'BaselineApprovalRequest'
+  | 'CanonicalSourcePromotionRequest';
+
+// ── §18.3 Work Feed ──────────────────────────────────────────────────
+
+/** Schedule-generated work item types (§18.3). */
+export type ScheduleWorkItemType =
+  | 'MilestoneAtRisk' | 'MilestoneDelayed'
+  | 'CommitmentPendingAcknowledgement' | 'BlockerEscalated'
+  | 'ReconciliationRequired' | 'PublicationPendingReview'
+  | 'ProgressVerificationRequired' | 'ConfidenceCollapsed'
+  | 'SyncConflictRequiresReview' | 'ScheduleStalenessWarning';
+
+/** Work item configuration with trigger and assignee (§18.3). */
+export interface IScheduleWorkItemConfig {
+  readonly type: ScheduleWorkItemType;
+  readonly trigger: string;
+  readonly assignee: string;
+}
+
+// ── §18.4 Notifications ──────────────────────────────────────────────
+
+/** Schedule notification event types (§18.4). */
+export type ScheduleNotificationType =
+  | 'MilestoneCriticalAlert' | 'ScheduleSlippageAlert'
+  | 'ConfidenceCollapseAlert' | 'BlockerCriticalUnresolved'
+  | 'CommitmentOverdue' | 'PublicationStalenessAlert';
+
+/** Notification configuration (§18.4). */
+export interface IScheduleNotificationConfig {
+  readonly type: ScheduleNotificationType;
+  readonly defaultTrigger: string;
+  readonly channel: string;
+}
+
+// ── §18.5 Complexity Tiers ───────────────────────────────────────────
+
+/** Progressive disclosure tier (§18.5). */
+export type ScheduleComplexityTier = 'Essential' | 'Standard' | 'Expert';
+
+/** Tier configuration (§18.5). */
+export interface IScheduleComplexityTierConfig {
+  readonly tier: ScheduleComplexityTier;
+  readonly label: string;
+  readonly features: ReadonlyArray<string>;
+}
+
+// ── §18.6 / §23 Annotation Scope ────────────────────────────────────
+
+/** Schedule annotation anchor (§18.6). */
+export interface IScheduleAnnotationAnchor {
+  readonly publicationId: string;
+  readonly externalActivityKey: string | null;
+  readonly milestoneId: string | null;
+  readonly fieldKey: string;
+}
+
+/** Annotatable surfaces on the published layer (§23). */
+export type ScheduleAnnotatableSurface =
+  | 'PublishedActivitySnapshot' | 'MilestoneRecord'
+  | 'PublicationRecord' | 'ScheduleSummaryProjection' | 'ConfidenceRecord';
+
+/** Annotatable field configuration per surface (§23). */
+export interface IAnnotatableFieldConfig {
+  readonly surface: ScheduleAnnotatableSurface;
+  readonly annotatableFields: ReadonlyArray<string>;
+}
+
+// ── §20 Governance ───────────────────────────────────────────────────
+
+/** Governed policy areas (§20.1). */
+export type SchedulePolicyArea =
+  | 'CommitmentApprovalThresholds' | 'PublicationApprovalRules'
+  | 'MilestoneStatusThresholds' | 'OverallStatusThresholds'
+  | 'FloatNearCriticalThreshold' | 'CriticalityIndexBands'
+  | 'ConfidenceFactorWeights' | 'GradingControls'
+  | 'LookAheadWindowLength' | 'ReadinessDimensionSet'
+  | 'ProgressBasisAssignments' | 'CausationTaxonomy'
+  | 'LocationHierarchyTemplate' | 'CalendarRules'
+  | 'NotificationThresholds' | 'VisibilityPolicies'
+  | 'EscalationRules' | 'AutoPublishCriteria'
+  | 'PPCRollingWindow' | 'RollUpRules';
+
+/** Single governed policy area with its description (§20.1). */
+export interface IGovernedPolicyArea {
+  readonly area: SchedulePolicyArea;
+  readonly description: string;
+}
+
+/** Centralized policy record for schedule governance configuration (§20.1). */
+export interface IGovernedPolicySet {
+  readonly policySetId: string;
+  readonly projectId: string;
+  readonly policyAreas: ReadonlyArray<IGovernedPolicyArea>;
+  readonly policyVersionId: string;
+  readonly lastUpdatedBy: string;
+  readonly lastUpdatedAt: string;
+}
