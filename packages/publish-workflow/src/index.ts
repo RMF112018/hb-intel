@@ -53,4 +53,6 @@ export type { UsePublishWorkflowStateOptions, UsePublishWorkflowStateResult, Use
 export { PublishPanelShell, PublishTargetSelectorShell, PublishApprovalChecklistShell, PublishReceiptCardShell } from './components/index.js';
 export type { PublishPanelShellProps, PublishTargetSelectorShellProps, PublishApprovalChecklistShellProps, PublishReceiptCardShellProps } from './components/index.js';
 // Rules (SF25-T03) // export * from './rules/index.js';
-// Adapters (SF25-T07) // export * from './adapters/index.js';
+// Adapters (SF25-T07)
+export { PublishModuleRegistry, createModulePublishRequest } from './adapters/index.js';
+export type { IPublishModuleRegistration } from './adapters/index.js';

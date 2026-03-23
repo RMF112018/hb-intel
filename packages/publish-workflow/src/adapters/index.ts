@@ -1,2 +1,3 @@
-/** SF25 module adapters. Implementation scope: SF25-T07. */
-export {};
+export { PublishModuleRegistry } from './PublishModuleRegistry.js';
+export type { IPublishModuleRegistration } from './PublishModuleRegistry.js';
+export { createModulePublishRequest } from './createModulePublishRequest.js';

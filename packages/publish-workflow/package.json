@@ -1,6 +1,6 @@
 {
   "name": "@hbc/publish-workflow",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "private": true,
   "description": "Shared publication workflow primitive for HB Intel — state machine, readiness/approval flow, supersession/revocation, receipt traceability, and module adapter seams",
   "type": "module",

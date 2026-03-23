@@ -1,2 +1,2 @@
-/** BD publish-workflow adapter seam. SF25-T01 scaffold — implementation in SF25-T07. */
-export {};
+/** BD publish-workflow adapter — SF25-T07. */
+export { BD_PUBLISH_MODULE_KEY, bdPublishRegistration } from './adapters/index.js';
