@@ -565,3 +565,9 @@ export { HbcRecordForm } from './HbcRecordForm/index.js';
 export type { HbcRecordFormProps, RecordFormField, RecordFormRecoveryBanner } from './HbcRecordForm/index.js';
 export { HbcRecordSubmitBar } from './HbcRecordSubmitBar/index.js';
 export type { HbcRecordSubmitBarProps, SubmitBarReviewOwner } from './HbcRecordSubmitBar/index.js';
+
+// Record review panel and recovery banner (SF23-T06, L-03/L-04)
+export { HbcRecordReviewPanel } from './HbcRecordReviewPanel/index.js';
+export type { HbcRecordReviewPanelProps, ReviewPanelField, ReviewPanelStep, ReviewPanelLink } from './HbcRecordReviewPanel/index.js';
+export { HbcRecordRecoveryBanner } from './HbcRecordRecoveryBanner/index.js';
+export type { HbcRecordRecoveryBannerProps, RecoveryBannerDraftInfo } from './HbcRecordRecoveryBanner/index.js';
