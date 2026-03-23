@@ -11,7 +11,7 @@
  * @see docs/architecture/plans/shared-features/SF28-Activity-Timeline.md
  */
 
-// Types — canonical event and query contracts (P3-D1)
+// Types — P3-D1 spine contracts (re-export)
 export type {
   ActivityCategory,
   ActivitySignificance,
@@ -22,6 +22,43 @@ export type {
   IActivitySourceAdapter,
   IActivitySourceRegistration,
   IActivityFeedResult,
+} from './types/index.js';
+
+// Types — SF28-T02 timeline-specific contracts
+export type {
+  ActivityEventType,
+  ActivityTimelineMode,
+  ActivityActorType,
+  ActivitySyncState,
+  ActivityEventConfidence,
+  IActivityActorAttribution,
+  IActivityObjectRef,
+  IActivityRelatedRef,
+  IActivityDiffEntry,
+  IActivityRecommendedOpenAction,
+  IActivityContextStamp,
+  IActivityDedupeState,
+  IActivityEvent,
+  IActivityTimelineQuery,
+  IActivityFilterState,
+  IActivityTimelinePage,
+  IActivityEventGroup,
+  IActivityEmissionInput,
+  IActivityStorageRecord,
+  IActivitySourceHealthState,
+  ActivityEventSourceReason,
+  ActivityConfidenceDowngradeReason,
+  ActivityDiffSuppressionReason,
+  ActivityDedupeReason,
+  ActivityQueryExclusionReason,
+} from './types/index.js';
+
+// Constants — SF28-T02 locked values
+export {
+  ACTIVITY_TIMELINE_PAGE_SIZE_DEFAULT,
+  ACTIVITY_TIMELINE_GROUPING_DEFAULT,
+  ACTIVITY_TIMELINE_SYNC_STATES,
+  ACTIVITY_TIMELINE_CONFIDENCE_STATES,
 } from './types/index.js';
 
 // Model — normalization, filtering, grouping (SF28-T03)
