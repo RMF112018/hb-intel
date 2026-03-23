@@ -219,6 +219,7 @@ Governing: P3-A3 §7.3, P3-D3, ADR-0115
 **3.5 — Related Items registry and presentation**
 Implement the related items registry. Modules register cross-module relationships by publishing relationship records. PER is a registered role in `visibleToRoles`. Review circle restriction must be enforced: a project team member cannot push to review circle if a PER push is already open on the same item. Related items renders as full panel + AI suggestions in PWA and compact panel in SPFx.
 Governing: P3-A3 §7.4, P3-D4
+Status: **Compliant — already implemented at production maturity (SF14, ADR-0103).** Per P3-D4 §1: `RelationshipRegistry` singleton, `RelatedItemsApi` (batched, BIC-enriched, AI suggestions), `useRelatedItems` hook, Panel/Tile/Card components, reference registrations (BD ↔ Estimating), AI suggestion hook, testing exports — all live. `emitGovernanceEvent` Activity spine integration is cross-spine scope. No new implementation required.
 
 ---
 
