@@ -1,12 +1,12 @@
 # Phase 3 Deliverables — Project Hub and Project Context
 
-**Doc Classification:** Active Deliverable Index — **Phase 3 deliverable production is complete.** All workstreams (A–H) delivered. 25 of 25 deliverables authored.
+**Doc Classification:** Active Deliverable Index — **Phase 3 deliverable production is complete.** All workstreams (A–H) delivered. 26 of 26 deliverables authored.
 
 ---
 
 ## Planning Status Summary
 
-**Phase 3 deliverable production is complete.** 25 of 25 deliverables are authored (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-E4, P3-E5, P3-E6, P3-E7, P3-E8, P3-E9, P3-F1, P3-G1, P3-G2, P3-G3, P3-H1). All workstreams (A–H) are complete. 24 deliverables are locked (Contract, Specification, or Note). 1 deliverable (P3-H1) is an Active Reference that evolves during implementation. Phase 3 is now execution-ready per [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
+**Phase 3 deliverable production is complete.** 26 of 26 deliverables are authored (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-E4, P3-E5, P3-E6, P3-E7, P3-E8, P3-E9, P3-E10, P3-F1, P3-G1, P3-G2, P3-G3, P3-H1). All workstreams (A–H) are complete. 25 deliverables are locked (Contract, Specification, or Note). 1 deliverable (P3-H1) is an Active Reference that evolves during implementation. Phase 3 is now execution-ready per [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
 
 ---
 
@@ -71,6 +71,7 @@
 | P3-E7 | [Permits Module Field Specification](P3-E7-Permits-Module-Field-Specification.md) | Specification |
 | P3-E8 | [Safety Module Field Specification](P3-E8-Safety-Module-Field-Specification.md) | Specification |
 | P3-E9 | [Reports Module Field Specification](P3-E9-Reports-Module-Field-Specification.md) | Specification |
+| P3-E10 | [Project Closeout Module Field Specification](P3-E10-Project-Closeout-Module-Field-Specification.md) | Specification |
 
 ### Workstream F — Governed reporting system
 
@@ -230,6 +231,7 @@ Must follow Stage 1 (registry) and Stage 2 (auth). Can proceed in parallel with 
 **4.1 — PWA routing shell integration**
 Integrate project context into the PWA routing shell. Routes are `projectId`-based. The context header resolves project identity from the URL and hydrates module context. Smart project switching operates in-app without page reload.
 Governing: P3-B1 §2.1, §4
+Status: **Implemented 2026-03-23 in `@hbc/shell` v0.1.0.** `resolveProjectRouteContext` for route-entry normalization + access validation (composes `normalizeProjectIdentifier` from 1.2). Per-project return memory (`saveReturnMemory`, `getReturnMemory`, `clearReturnMemory`, `pruneExpiredReturnMemory`) with 7-day TTL and 50-entry LRU in localStorage per P3-B1 §4. PWA route parameterization is app-level integration consuming this infrastructure.
 
 **4.2 — SPFx host-aware context resolution**
 Implement SPFx-side project identity resolution: `siteUrl` → registry lookup → `projectId`. The SharePoint web part must initialize with a valid `projectId` before rendering any module surface or spine component.
@@ -304,6 +306,10 @@ Governing: P3-E1 §3.7
 **6.7 — Warranty module (baseline-visible lifecycle)**
 Implement the Warranty module at baseline-visible lifecycle depth only. Phase 3 does not include deeper field-first Warranty execution. Do not scope beyond the baseline-visible classification.
 Governing: P3-E1 §3.8
+
+**6.8 — Project Closeout module**
+Implement: Closeout Checklist (70 items, 7 sections including jurisdiction-configurable Section 7) with tri-state results and date tracking; Subcontractor Scorecard entry with weighted 6-section evaluation (Safety 20%, Quality 20%, Schedule 20%, CostMgmt 15%, Communication 15%, Workforce 10%) and aggregation dashboard; Lessons Learned form entry and organization-wide knowledge database. Section 6 completion events must trigger snapshot publication to the Reports module. Reports module assembles snapshots into release artifacts — it does NOT own Closeout data. Item 4.14 (80-day lien deadline) is auto-calculated from item 4.13.
+Governing: P3-E1 §3.9, P3-E2 §12, **P3-E10** (field-level specification)
 
 ---
 
@@ -509,6 +515,6 @@ The following are explicitly deferred and must not be treated as Phase 3 scope. 
 
 ---
 
-**Last Updated:** 2026-03-22 — Governance model updates applied across all deliverables (dual-key inbound routing, three-tier authority model, PER review layer, Push-to-Project-Team, Safety exclusion, central project-governance policy record, PM↔PE internal review chain, reviewer-generated review runs, department reclassification, lane depth doctrine). Implementation Guide added. Per-module field specifications added (P3-E4 through P3-E9) covering Financial, Schedule, Constraints, Permits, Safety, and Reports modules with exhaustive field definitions, TypeScript data models, enum values, business rules, and scoring formulas grounded in company working templates.
+**Last Updated:** 2026-03-23 — P3-E10 Project Closeout module added (replaces SubScorecard SOP, Lessons Learned SOP, and Closeout Checklist PDF). SubScorecard and Lessons Learned reclassified from standalone report families to module-generated report artifacts owned by Project Closeout. P3-E9 updated with reclassification notice. P3-E3 inventory updated. Module count updated to 26 deliverables.
 
 **Governing Plan:** [Phase 3 Plan §14–§15](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

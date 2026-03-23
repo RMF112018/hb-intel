@@ -169,6 +169,17 @@ export {
 } from './signOutCleanup.js';
 export type { ShellSignOutCleanupDependencies } from './signOutCleanup.js';
 
+// Project route context and return memory (Phase 3 Stage 4.1)
+export { resolveProjectRouteContext } from './projectRouteContext.js';
+export type { ProjectRouteContextResult } from './projectRouteContext.js';
+export {
+  saveReturnMemory,
+  getReturnMemory,
+  clearReturnMemory,
+  pruneExpiredReturnMemory,
+} from './stores/projectReturnMemory.js';
+export type { IProjectReturnMemory } from './stores/projectReturnMemory.js';
+
 // Module Configurations (PH4B.2 §Step 3 — moved from ui-kit, F-014)
 export {
   scorecardsLanding,
