@@ -1,52 +1,75 @@
 /**
- * SF23-T01 — Record Form TypeScript Contract Stubs.
+ * SF23-T02 — Record Form TypeScript Contracts.
  *
- * Placeholder types reserving the public API surface for T02 full contracts.
- * Trust/explainability state, recovery/replay, review steps, next recommended
- * action, and conflict diagnostics.
+ * Canonical primitive contracts for record authoring lifecycle, trust/explainability
+ * state, validation, review-step semantics, recovery/conflict state, sync state,
+ * BIC handoff steps, provenance/versioning, and operational telemetry.
  *
- * Governing: SF23-T01, SF23 Master Plan L-01/L-03/L-04/L-06
+ * Governing: SF23-T02, SF23 Master Plan L-01 through L-06
  */
 
-// ── Lifecycle / Trust Vocabulary ─────────────────────────────────────────
+// ── Mode / Status / Sync / Confidence ────────────────────────────────────
 
 /**
- * Record form lifecycle status (SF23 trust vocabulary).
- *
- * All states must explain themselves to the user — no generic status text.
- */
-export type RecordFormStatus =
-  | 'blocked'
-  | 'valid-with-warnings'
-  | 'saved-locally'
-  | 'queued-to-sync'
-  | 'degraded'
-  | 'recovered-needs-review'
-  | 'partially-recovered'
-  | 'synced';
-
-/**
- * Record authoring intent classification.
+ * Record form authoring mode (T02).
  *
  * - `create` — new record from scratch
  * - `edit` — modify existing record
  * - `duplicate` — copy from existing record
  * - `template` — create from a template
+ * - `review` — read-only review mode
  */
-export type RecordFormIntent = 'create' | 'edit' | 'duplicate' | 'template';
+export type RecordFormMode = 'create' | 'edit' | 'duplicate' | 'template' | 'review';
+
+/**
+ * Record form lifecycle status (T02).
+ *
+ * All states must explain themselves to the user — no generic status text.
+ */
+export type RecordFormStatus =
+  | 'not-started'
+  | 'draft'
+  | 'dirty'
+  | 'valid-with-warnings'
+  | 'blocked'
+  | 'submitting'
+  | 'submitted'
+  | 'failed';
+
+/**
+ * Record sync state — separate from lifecycle status (T02).
+ *
+ * Tracks local-vs-server persistence state.
+ */
+export type RecordSyncState =
+  | 'local-only'
+  | 'saved-locally'
+  | 'queued-to-sync'
+  | 'synced'
+  | 'degraded'
+  | 'partially-recovered';
+
+/**
+ * State confidence level — how trustworthy is the current form state? (T02)
+ */
+export type RecordStateConfidence =
+  | 'trusted-synced'
+  | 'local-unsynced'
+  | 'recovered-needs-review'
+  | 'degraded-submission'
+  | 'partially-resolved';
 
 /**
  * Module complexity tier governing form surface depth (L-03).
- *
- * - `essential` — minimal fields + simple submit bar
- * - `standard` — full renderer + inline validation + read-only review
- * - `expert` — retrospective adjustments + full preview + configure link
  */
 export type RecordFormComplexityTier = 'essential' | 'standard' | 'expert';
 
-/**
- * State confidence level — how trustworthy is the current form state?
- */
+// ── T01 Aliases (backward compat) ────────────────────────────────────────
+
+/** @deprecated Use `RecordFormMode` instead. */
+export type RecordFormIntent = 'create' | 'edit' | 'duplicate' | 'template';
+
+/** @deprecated Use `RecordStateConfidence` instead. */
 export type RecordFormConfidence =
   | 'trusted-synced'
   | 'queued-local-only'
@@ -55,33 +78,71 @@ export type RecordFormConfidence =
   | 'degraded'
   | 'failed';
 
-// ── Core Interfaces ──────────────────────────────────────────────────────
+// ── Explanation / Validation ─────────────────────────────────────────────
 
 /**
- * Trust/explainability state — why the form is in its current condition.
+ * Explanation state — why the form is in its current condition (T02).
  *
- * Governs user-facing explanations for blocked, warning, recovery,
- * and review states.
+ * Answers: why blocked, why warning, why review, why recovery,
+ * why submission is suppressed/deferred/retryable.
  */
-export interface IRecordFormTrustState {
-  /** Current lifecycle status. */
-  status: RecordFormStatus;
-  /** State confidence level. */
-  confidence: RecordFormConfidence;
+export interface IRecordFormExplanationState {
   /** Whether the form is blocked from submission. */
   isBlocked: boolean;
-  /** User-facing block reasons (empty if not blocked). */
-  blockReasons: RecordFormBlockReasonCode[];
-  /** User-facing warnings (empty if none). */
-  warnings: RecordFormWarningReasonCode[];
-  /** Whether the form was recovered from offline/crash. */
-  isRecovered: boolean;
-  /** Recovery details (null if not recovered). */
-  recovery: IRecordFormRecoveryState | null;
+  /** Individual block reasons. */
+  blockReasons: IRecordBlockedReason[];
+  /** Whether warnings are present. */
+  hasWarnings: boolean;
+  /** Validation warnings. */
+  warnings: IRecordValidationWarning[];
+  /** Whether recovery is active. */
+  isRecoveryActive: boolean;
+  /** User-facing explanation of current overall state. */
+  summaryMessage: string;
+  /** Why submission is deferred (null if not deferred). */
+  deferReason: RecordDeferReasonCode | null;
 }
 
 /**
- * Draft persistence state with dirty tracking.
+ * Validation state — field-level errors and warnings (T02).
+ */
+export interface IRecordValidationState {
+  /** Whether the form passes all required validation. */
+  isValid: boolean;
+  /** Total count of validation errors. */
+  errorCount: number;
+  /** Field paths with validation errors. */
+  errorFields: string[];
+  /** Total count of validation warnings. */
+  warningCount: number;
+  /** Individual validation warnings. */
+  warnings: IRecordValidationWarning[];
+}
+
+/** Individual field validation warning. */
+export interface IRecordValidationWarning {
+  /** Field path. */
+  fieldPath: string;
+  /** Warning reason code. */
+  reasonCode: RecordWarningReasonCode;
+  /** User-facing warning message. */
+  message: string;
+}
+
+/** Individual block reason. */
+export interface IRecordBlockedReason {
+  /** Block reason code. */
+  reasonCode: RecordBlockedReasonCode;
+  /** User-facing block message. */
+  message: string;
+  /** Field paths causing the block (empty for non-field blocks). */
+  affectedFields: string[];
+}
+
+// ── Draft / Comparison ───────────────────────────────────────────────────
+
+/**
+ * Draft persistence state with dirty tracking (T01+T02).
  */
 export interface IRecordFormDraft {
   /** Unique draft identifier. */
@@ -92,8 +153,8 @@ export interface IRecordFormDraft {
   projectId: string;
   /** Module key owning the schema. */
   moduleKey: string;
-  /** Authoring intent. */
-  intent: RecordFormIntent;
+  /** Authoring mode. */
+  mode: RecordFormMode;
   /** Whether any fields have been modified since last save. */
   isDirty: boolean;
   /** ISO 8601 timestamp of last local save. */
@@ -102,14 +163,36 @@ export interface IRecordFormDraft {
   createdAtIso: string;
   /** UPN of the draft author. */
   authorUpn: string;
+  /** Schema version at draft creation time. */
+  schemaVersion: string;
 }
 
 /**
- * Review step state — blocking vs non-blocking, owner attribution.
- *
- * Review steps create granular BIC ownership with avatar projection (L-02).
+ * Draft comparison state — local vs server vs restored (T02).
  */
-export interface IRecordFormReviewStepState {
+export interface IRecordDraftComparisonState {
+  /** Whether a local draft exists. */
+  hasLocalDraft: boolean;
+  /** Whether a server draft exists. */
+  hasServerDraft: boolean;
+  /** Whether a restored draft exists. */
+  hasRestoredDraft: boolean;
+  /** Whether the local draft is stale relative to server. */
+  isStale: boolean;
+  /** ISO 8601 timestamp of server version (null if none). */
+  serverTimestampIso: string | null;
+  /** ISO 8601 timestamp of local version (null if none). */
+  localTimestampIso: string | null;
+  /** Field paths that differ between local and server (empty if identical). */
+  differingFields: string[];
+}
+
+// ── Review / BIC ─────────────────────────────────────────────────────────
+
+/**
+ * Review step state — blocking vs non-blocking, owner attribution (T01+T02).
+ */
+export interface IRecordReviewStepState {
   /** Unique step identifier. */
   stepId: string;
   /** Whether this step blocks submission. */
@@ -122,26 +205,50 @@ export interface IRecordFormReviewStepState {
   ownerName: string;
   /** Step status. */
   status: 'pending' | 'approved' | 'rejected' | 'skipped';
-  /** Reassignment history for this step. */
-  reassignmentHistory: IRecordFormReviewHistoryEntry[];
+  /** Reassignment history. */
+  reassignmentHistory: IRecordReviewStepHistoryEntry[];
 }
 
 /** Review step reassignment history entry. */
-export interface IRecordFormReviewHistoryEntry {
+export interface IRecordReviewStepHistoryEntry {
   /** Previous owner UPN. */
   fromUpn: string;
   /** New owner UPN. */
   toUpn: string;
-  /** ISO 8601 timestamp of reassignment. */
+  /** ISO 8601 timestamp. */
   reassignedAtIso: string;
-  /** Reason for reassignment (null if not provided). */
+  /** Reason (null if not provided). */
   reason: string | null;
 }
 
 /**
- * Next recommended action — guides users to the most useful next step.
+ * BIC ownership step configuration for record review/approval (L-02, T02).
  */
-export interface IRecordFormNextRecommendedAction {
+export interface IRecordBicStepConfig {
+  /** Unique step identifier. */
+  stepId: string;
+  /** Human-readable step label. */
+  stepLabel: string;
+  /** Whether this step blocks submission. */
+  blocking: boolean;
+  /** Owner UPN. */
+  ownerUpn: string;
+  /** Owner display name. */
+  ownerName: string;
+  /** Owner role. */
+  ownerRole: string;
+  /** Expected action description. */
+  expectedAction: string;
+  /** ISO 8601 due date (null if no deadline). */
+  dueDateIso: string | null;
+}
+
+// ── Next Recommended Action ──────────────────────────────────────────────
+
+/**
+ * Next recommended action — guides users to the most useful next step (T02).
+ */
+export interface IRecordNextRecommendedAction {
   /** Kind of recommended action. */
   actionKind:
     | 'submit'
@@ -150,26 +257,67 @@ export interface IRecordFormNextRecommendedAction {
     | 'resolve-warnings'
     | 'complete-required'
     | 'retry'
-    | 'restore-draft';
-  /** User-facing explanation of why this action is recommended. */
+    | 'restore-draft'
+    | 'await-approval';
+  /** User-facing explanation. */
   reason: string;
+  /** Whether the action is author-side or downstream-owner-side. */
+  side: 'author' | 'downstream-owner';
+  /** Category of the issue. */
+  category: 'data-completion' | 'sync-completion' | 'review-completion' | 'approval-dependency';
 }
 
+// ── Recovery / Conflict / Submit Guard ───────────────────────────────────
+
 /**
- * Recovery state — offline recovery, crash recovery, conflict diagnostics.
+ * Recovery state — offline/crash recovery with conflict diagnostics (T01+T02).
  */
-export interface IRecordFormRecoveryState {
+export interface IRecordRecoveryState {
   /** Recovery reason code. */
-  reasonCode: RecordFormRecoveryReasonCode;
+  reasonCode: RecordRecoveryReasonCode;
   /** ISO 8601 timestamp of recovery. */
   recoveredAtIso: string;
-  /** Whether there are conflicts with the server state. */
+  /** Whether conflicts exist. */
   hasConflicts: boolean;
-  /** Conflicting field paths (empty if no conflicts). */
+  /** Conflicting field paths. */
   conflictFields: string[];
   /** User-facing recovery message. */
   userMessage: string;
 }
+
+/**
+ * Conflict state — detailed field-level conflict information (T02).
+ */
+export interface IRecordConflictState {
+  /** Whether conflicts are detected. */
+  detected: boolean;
+  /** Conflicting field paths. */
+  fields: string[];
+  /** ISO 8601 timestamp of conflict detection. */
+  detectedAtIso: string;
+  /** Server version that conflicts. */
+  serverVersionNumber: number | null;
+  /** User-facing conflict summary. */
+  userMessage: string;
+}
+
+/**
+ * Submit guard state — submission eligibility check (T02).
+ */
+export interface IRecordSubmitGuardState {
+  /** Whether submission is allowed. */
+  canSubmit: boolean;
+  /** Why submission is blocked (empty if allowed). */
+  guardReasons: RecordBlockedReasonCode[];
+  /** Whether review gates are satisfied. */
+  reviewGatesSatisfied: boolean;
+  /** Whether validation passes. */
+  validationPasses: boolean;
+  /** Whether the form is in a submittable sync state. */
+  syncStateEligible: boolean;
+}
+
+// ── Failure / Retry ──────────────────────────────────────────────────────
 
 /** Failure state with diagnostic detail. */
 export interface IRecordFormFailureState {
@@ -177,74 +325,155 @@ export interface IRecordFormFailureState {
   failureCode: RecordFormFailureReasonCode;
   /** User-facing failure message. */
   userMessage: string;
-  /** Technical detail for logging/debugging (null if not available). */
+  /** Technical detail (null if not available). */
   technicalDetail: string | null;
-  /** ISO 8601 timestamp of failure. */
+  /** ISO 8601 timestamp. */
   occurredAtIso: string;
 }
 
 /** Retry state with attempt tracking. */
 export interface IRecordFormRetryState {
-  /** Number of retry attempts made. */
+  /** Number of retry attempts. */
   attemptCount: number;
-  /** Maximum allowed retry attempts. */
+  /** Maximum attempts. */
   maxAttempts: number;
-  /** ISO 8601 timestamp of last retry attempt. */
+  /** ISO 8601 timestamp of last attempt. */
   lastAttemptAtIso: string;
-  /** Whether another retry is allowed. */
+  /** Reason code. */
+  reasonCode: RecordRetryReasonCode;
+  /** Whether retry is allowed. */
   canRetry: boolean;
 }
 
+// ── Telemetry ────────────────────────────────────────────────────────────
+
 /**
- * Telemetry state for the five operational UX KPIs (L-06).
+ * Telemetry state for operational UX KPIs (L-06, T01+T02).
  */
 export interface IRecordFormTelemetryState {
-  /** ISO 8601 timestamp when the form was opened. */
+  /** ISO 8601 timestamp when form was opened. */
   openTimestampIso: string;
-  /** ISO 8601 timestamp when submission started (null if not yet). */
+  /** ISO 8601 timestamp when submission started. */
   submitStartTimestampIso: string | null;
-  /** ISO 8601 timestamp when submission completed (null if not yet). */
+  /** ISO 8601 timestamp when submission completed. */
   submitCompleteTimestampIso: string | null;
-  /** Total time from open to submit in milliseconds (null if not complete). */
+  /** Time from open to submit in ms. */
   timeToSubmitMs: number | null;
-  /** Whether the user abandoned the form. */
+  /** Whether user abandoned before submit. */
   abandonedBeforeSubmit: boolean;
-  /** Number of validation errors encountered. */
+  /** Validation error count. */
   validationErrorCount: number;
-  /** Number of draft saves. */
+  /** Draft save count. */
   draftSaveCount: number;
   /** Whether recovery was triggered. */
   recoveryTriggered: boolean;
+  /** Form mode for KPI segmentation. */
+  formMode: RecordFormMode;
 }
 
+// ── Sync / Confidence Wrappers ───────────────────────────────────────────
+
+/** Sync state wrapper with queue metadata (T02). */
+export interface IRecordSyncStateInfo {
+  /** Current sync state. */
+  state: RecordSyncState;
+  /** Position in sync queue (null if not queued). */
+  queuePosition: number | null;
+  /** ISO 8601 timestamp of last sync attempt. */
+  lastSyncAttemptIso: string | null;
+}
+
+/** Confidence state wrapper with reasons (T02). */
+export interface IRecordStateConfidenceInfo {
+  /** Current confidence level. */
+  level: RecordStateConfidence;
+  /** Reasons for confidence level (empty if trusted). */
+  reasons: string[];
+}
+
+// ── Top-Level Orchestration Contracts ────────────────────────────────────
+
 /**
- * Record form state — top-level orchestration contract.
+ * Record form definition — generic top-level orchestration contract (T02).
  *
- * Represents a single record authoring session from open through submission.
+ * Represents a complete record authoring session with module-specific
+ * record payload.
  */
-export interface IRecordFormState {
-  /** Current draft state. */
-  draft: IRecordFormDraft;
-  /** Trust/explainability state. */
-  trust: IRecordFormTrustState;
-  /** Complexity tier. */
-  complexityTier: RecordFormComplexityTier;
-  /** Review steps (empty if no review gates). */
-  reviewSteps: IRecordFormReviewStepState[];
-  /** Next recommended action (null if no recommendation). */
-  nextRecommendedAction: IRecordFormNextRecommendedAction | null;
+export interface IRecordFormDefinition<TRecord> {
+  /** Unique form instance identifier. */
+  formId: string;
+  /** Module identifier. */
+  moduleId: string;
+  /** Record type key. */
+  recordType: string;
+  /** Authoring mode. */
+  mode: RecordFormMode;
+  /** Schema version. */
+  schemaVersion: string;
+  /** Module-owned record payload. */
+  record: TRecord;
+  /** Validation state. */
+  validation: IRecordValidationState;
+  /** Explanation state. */
+  explanation: IRecordFormExplanationState;
+  /** Recovery state (null if no recovery). */
+  recovery: IRecordRecoveryState | null;
+  /** Review steps. */
+  reviewSteps: IRecordReviewStepState[];
+  /** Next recommended action. */
+  nextRecommendedAction: IRecordNextRecommendedAction | null;
+  /** Sync state. */
+  sync: IRecordSyncStateInfo;
+  /** Confidence state. */
+  confidence: IRecordStateConfidenceInfo;
+  /** BIC ownership steps. */
+  bicSteps: IRecordBicStepConfig[];
+  /** Telemetry state. */
+  telemetry: IRecordFormTelemetryState;
+  /** Submit guard state. */
+  submitGuard: IRecordSubmitGuardState;
+  /** Conflict state (null if no conflicts). */
+  conflict: IRecordConflictState | null;
+  /** Draft comparison state (null if not applicable). */
+  draftComparison: IRecordDraftComparisonState | null;
   /** Failure state (null if no failure). */
   failure: IRecordFormFailureState | null;
   /** Retry state (null if no retries). */
   retry: IRecordFormRetryState | null;
+}
+
+/**
+ * Record form state — non-generic alias for backward compatibility.
+ */
+export interface IRecordFormState {
+  /** Current draft state. */
+  draft: IRecordFormDraft;
+  /** Explanation state. */
+  explanation: IRecordFormExplanationState;
+  /** Validation state. */
+  validation: IRecordValidationState;
+  /** Complexity tier. */
+  complexityTier: RecordFormComplexityTier;
+  /** Review steps. */
+  reviewSteps: IRecordReviewStepState[];
+  /** Next recommended action. */
+  nextRecommendedAction: IRecordNextRecommendedAction | null;
+  /** Failure state. */
+  failure: IRecordFormFailureState | null;
+  /** Retry state. */
+  retry: IRecordFormRetryState | null;
   /** Telemetry state. */
   telemetry: IRecordFormTelemetryState;
+  /** Sync state. */
+  sync: IRecordSyncStateInfo;
+  /** Confidence state. */
+  confidence: IRecordStateConfidenceInfo;
 }
 
 // ── Reason-Code Enums ────────────────────────────────────────────────────
 
 /** Why the form is blocked from submission. */
-export type RecordFormBlockReasonCode =
+export type RecordBlockedReasonCode =
   | 'required-fields-missing'
   | 'validation-errors'
   | 'review-gate-pending'
@@ -252,7 +481,7 @@ export type RecordFormBlockReasonCode =
   | 'record-locked';
 
 /** Why a warning is shown on the form. */
-export type RecordFormWarningReasonCode =
+export type RecordWarningReasonCode =
   | 'unsaved-changes'
   | 'stale-data'
   | 'partial-recovery'
@@ -260,7 +489,7 @@ export type RecordFormWarningReasonCode =
   | 'approaching-deadline';
 
 /** Why recovery was triggered. */
-export type RecordFormRecoveryReasonCode =
+export type RecordRecoveryReasonCode =
   | 'offline-draft-restored'
   | 'crash-recovery'
   | 'session-timeout-restored'
@@ -274,28 +503,50 @@ export type RecordFormFailureReasonCode =
   | 'data-validation'
   | 'conflict-rejected';
 
+/** Why submission is deferred (T02). */
+export type RecordDeferReasonCode =
+  | 'offline-not-eligible'
+  | 'review-incomplete'
+  | 'approval-pending'
+  | 'schema-mismatch';
+
+/** Why retry is needed (T02). */
+export type RecordRetryReasonCode =
+  | 'transient-failure'
+  | 'timeout'
+  | 'conflict-retry';
+
 // ── Constants ────────────────────────────────────────────────────────────
 
-/** All record form lifecycle statuses. */
+/** All record form lifecycle statuses (T02). */
 export const RECORD_FORM_STATUSES: readonly RecordFormStatus[] = [
-  'blocked',
+  'not-started',
+  'draft',
+  'dirty',
   'valid-with-warnings',
-  'saved-locally',
-  'queued-to-sync',
-  'degraded',
-  'recovered-needs-review',
-  'partially-recovered',
-  'synced',
+  'blocked',
+  'submitting',
+  'submitted',
+  'failed',
 ] as const;
 
-/** All state confidence levels. */
-export const RECORD_FORM_CONFIDENCE_LEVELS: readonly RecordFormConfidence[] = [
-  'trusted-synced',
-  'queued-local-only',
-  'recovered-needs-review',
-  'partially-recovered',
+/** All record sync states (T02). */
+export const RECORD_SYNC_STATES: readonly RecordSyncState[] = [
+  'local-only',
+  'saved-locally',
+  'queued-to-sync',
+  'synced',
   'degraded',
-  'failed',
+  'partially-recovered',
+] as const;
+
+/** All state confidence levels (T02). */
+export const RECORD_STATE_CONFIDENCE_LEVELS: readonly RecordStateConfidence[] = [
+  'trusted-synced',
+  'local-unsynced',
+  'recovered-needs-review',
+  'degraded-submission',
+  'partially-resolved',
 ] as const;
 
 /** All complexity tiers (L-03). */
@@ -303,4 +554,24 @@ export const RECORD_FORM_COMPLEXITY_TIERS: readonly RecordFormComplexityTier[] =
   'essential',
   'standard',
   'expert',
+] as const;
+
+// ── T02 Constants ────────────────────────────────────────────────────────
+
+/** IndexedDB/Background Sync queue key for offline form replay (L-04, T02). */
+export const RECORD_FORM_SYNC_QUEUE_KEY = 'record-form-sync-queue' as const;
+
+/** Sync states representing offline-queued state (T02). */
+export const RECORD_FORM_SYNC_STATUSES: readonly RecordSyncState[] = [
+  'saved-locally',
+  'queued-to-sync',
+] as const;
+
+/** All trust/confidence states (T02). */
+export const RECORD_FORM_TRUST_STATES: readonly RecordStateConfidence[] = [
+  'trusted-synced',
+  'local-unsynced',
+  'recovered-needs-review',
+  'degraded-submission',
+  'partially-resolved',
 ] as const;

@@ -11,33 +11,52 @@
  * @see docs/architecture/plans/shared-features/SF23-Record-Form.md
  */
 
-// Types — SF23-T01 contract stubs
+// Types — SF23-T02 canonical contracts
 export type {
+  RecordFormMode,
   RecordFormStatus,
-  RecordFormIntent,
+  RecordSyncState,
+  RecordStateConfidence,
   RecordFormComplexityTier,
+  RecordFormIntent,
   RecordFormConfidence,
-  IRecordFormTrustState,
+  IRecordFormExplanationState,
+  IRecordValidationState,
+  IRecordValidationWarning,
+  IRecordBlockedReason,
   IRecordFormDraft,
-  IRecordFormReviewStepState,
-  IRecordFormReviewHistoryEntry,
-  IRecordFormNextRecommendedAction,
-  IRecordFormRecoveryState,
+  IRecordDraftComparisonState,
+  IRecordReviewStepState,
+  IRecordReviewStepHistoryEntry,
+  IRecordBicStepConfig,
+  IRecordNextRecommendedAction,
+  IRecordRecoveryState,
+  IRecordConflictState,
+  IRecordSubmitGuardState,
   IRecordFormFailureState,
   IRecordFormRetryState,
   IRecordFormTelemetryState,
+  IRecordSyncStateInfo,
+  IRecordStateConfidenceInfo,
+  IRecordFormDefinition,
   IRecordFormState,
-  RecordFormBlockReasonCode,
-  RecordFormWarningReasonCode,
-  RecordFormRecoveryReasonCode,
+  RecordBlockedReasonCode,
+  RecordWarningReasonCode,
+  RecordRecoveryReasonCode,
   RecordFormFailureReasonCode,
+  RecordDeferReasonCode,
+  RecordRetryReasonCode,
 } from './types/index.js';
 
-// Constants — SF23-T01 locked values
+// Constants — SF23-T01 + T02 locked values
 export {
   RECORD_FORM_STATUSES,
-  RECORD_FORM_CONFIDENCE_LEVELS,
+  RECORD_SYNC_STATES,
+  RECORD_STATE_CONFIDENCE_LEVELS,
   RECORD_FORM_COMPLEXITY_TIERS,
+  RECORD_FORM_SYNC_QUEUE_KEY,
+  RECORD_FORM_SYNC_STATUSES,
+  RECORD_FORM_TRUST_STATES,
 } from './types/index.js';
 
 // Model — lifecycle, state derivation, recovery (SF23-T03)
