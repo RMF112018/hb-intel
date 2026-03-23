@@ -375,6 +375,35 @@ Each always-on core module MUST register an activity adapter and emit events for
 | `health.compound-risk-detected` | `alert` | `critical` | Compound risk signal detected |
 | `health.action-recommended` | `record-change` | `notable` | New recommended action generated |
 
+### 8.8 Project Closeout
+
+| Event type | Category | Significance | Trigger |
+|---|---|---|---|
+| `closeout.checklist-item-completed` | `record-change` | `routine` | Single closeout checklist item marked complete |
+| `closeout.section-completed` | `milestone` | `notable` | All items in a checklist section completed |
+| `closeout.scorecard-submitted` | `record-change` | `notable` | Subcontractor performance scorecard submitted |
+| `closeout.lessons-learned-submitted` | `record-change` | `notable` | Lessons Learned form submitted |
+| `closeout.phase-complete` | `milestone` | `critical` | All closeout checklist items marked complete |
+
+### 8.9 Project Startup
+
+| Event type | Category | Significance | Trigger |
+|---|---|---|---|
+| `startup.checklist-section-completed` | `milestone` | `notable` | Job Startup Checklist section completed |
+| `startup.safety-checklist-completed` | `milestone` | `notable` | Jobsite Safety Checklist fully completed |
+| `startup.responsibility-matrix-finalized` | `record-change` | `notable` | Responsibility Matrix marked finalized by PM |
+| `startup.pm-plan-completed` | `milestone` | `notable` | All PM Plan sections marked complete |
+
+### 8.10 Subcontract Compliance
+
+| Event type | Category | Significance | Trigger |
+|---|---|---|---|
+| `subcontract.checklist-submitted` | `record-change` | `notable` | PM/APM sign-off recorded on subcontract checklist |
+| `subcontract.waiver-submitted` | `record-change` | `notable` | Compliance Waiver submitted for three-party approval routing |
+| `subcontract.waiver-approved` | `approval` | `notable` | All three approvers (PE, CFO, Compliance Manager) approved |
+| `subcontract.waiver-rejected` | `status-change` | `critical` | Any required approver rejected the waiver |
+| `subcontract.compliance-complete` | `milestone` | `notable` | Checklist complete and waiver resolved; gates Buyout `ContractExecuted` (P3-E4 §6.1) |
+
 ---
 
 ## 9. Rendering Contract
@@ -489,5 +518,5 @@ If a downstream deliverable conflicts with this contract, this contract takes pr
 
 ---
 
-**Last Updated:** 2026-03-21
+**Last Updated:** 2026-03-23 — Added §8.8 (Project Closeout), §8.9 (Project Startup), §8.10 (Subcontract Compliance) emission expectations
 **Governing Authority:** [Phase 3 Plan §8.3](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

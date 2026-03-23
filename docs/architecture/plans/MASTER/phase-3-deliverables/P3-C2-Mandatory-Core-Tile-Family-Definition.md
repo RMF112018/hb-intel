@@ -72,7 +72,7 @@ The following table maps each requirement to its implementation:
 | Project identity / context header | Canvas shell surface (not a tile) | N/A | N/A — rendered by `HbcProjectCanvas` shell | Always present; not user-manageable |
 | Project Health visibility | Mandatory tile | `project-health-pulse` | **Registered** (mandatory, lockable) | Mandatory locked |
 | Next-action / Work Queue visibility | Mandatory tile | `project-work-queue` | **Not yet registered** — Phase 3 scope | Mandatory locked |
-| Related-items visibility | Mandatory tile | `related-items` | **Registered** (optional) — requires upgrade to mandatory | Mandatory locked |
+| Related-items visibility | Mandatory tile | `related-items` | **Registered** (mandatory, lockable) | Mandatory locked |
 | Recent project activity visibility | Mandatory tile | `project-activity` | **Not yet registered** — Phase 3 scope | Mandatory locked |
 
 ---
@@ -192,7 +192,7 @@ Per Phase 3 plan §9.4, the mandatory work queue surface is **hybrid**: current-
 | **Spine binding** | Related-Items spine (P3-A3 §6) |
 | **Data source** | `RelationshipRegistry` from `@hbc/related-items` with project-scoped source records |
 | **Data-source badge** | `Hybrid` — relationships may include AI-suggested and manually-linked items |
-| **Registration status** | **Registered** (currently optional, catalog-only) — Phase 3 must upgrade to mandatory |
+| **Registration status** | **Registered** (mandatory, lockable) — upgrade complete |
 | **Default size** | 4 columns × 1 row |
 | **Mandatory for** | Project Administrator, Project Executive, Project Manager, Superintendent, Project Team Member |
 
@@ -211,12 +211,9 @@ The tile consumes relationships from `RelationshipRegistry`:
 - `IRelationshipDefinition[]` — registered definitions with `governanceMetadata.relationshipPriority` for ordering
 - Governance events via `IGovernanceTimelineEvent` for audit trail
 
-### 5.4 Upgrade requirement
+### 5.4 Registration status
 
-The existing `related-items` tile is registered as optional (catalog-only) with no `defaultForRoles` and `mandatory: false`. Phase 3 must:
-- Set `mandatory: true` and `lockable: true`
-- Add appropriate roles to `defaultForRoles`
-- Ensure all three complexity variants are implemented
+The `related-items` tile is registered as `mandatory: true`, `lockable: true` with `defaultForRoles` populated for Project Administrator, Project Executive, Project Manager, Superintendent, and Project Team Member in `packages/project-canvas/src/tiles/referenceTileDefinitions.ts`. All three complexity variants use `createReferenceTileComponents()` scaffolding pending Phase 3 full implementation with live `@hbc/related-items` data binding.
 
 ---
 
@@ -268,7 +265,7 @@ Events carry `significance` (routine, notable, critical). The tile SHOULD:
 | Identity header | N/A | Registry | N/A | Full width | Always | N/A | **Implemented** (canvas shell) |
 | Health | `project-health-pulse` | Health | Hybrid | 6 × 1 | Yes | Yes | **Implemented** |
 | Work Queue | `project-work-queue` | Work Queue | Live | 4 × 2 | Yes | Yes | **Not yet registered** |
-| Related Items | `related-items` | Related Items | Hybrid | 4 × 1 | Yes (upgrade) | Yes (upgrade) | **Registered** (requires upgrade) |
+| Related Items | `related-items` | Related Items | Hybrid | 4 × 1 | Yes | Yes | **Implemented** (mandatory, lockable) |
 | Activity | `project-activity` | Activity | Live | 4 × 2 | Yes | Yes | **Not yet registered** |
 
 ---
@@ -294,8 +291,8 @@ When a mandatory tile is hidden for a role (e.g., Work Queue for Viewer), the ca
 1. **`project-health-pulse` tile — compliant**
    Fully implemented in the reference tile set with all three complexity variants, mandatory and lockable flags set, and health-pulse canvas adapter providing the data projection. Classified as **compliant**.
 
-2. **`related-items` tile — requires upgrade from optional to mandatory**
-   Registered in the reference tile set but classified as optional (catalog-only) with `mandatory: false` and empty `defaultForRoles`. Phase 3 must upgrade to `mandatory: true`, `lockable: true`, and populate `defaultForRoles`. The tile's three complexity variants exist. Classified as **controlled evolution**.
+2. **`related-items` tile — compliant**
+   Registered in `packages/project-canvas/src/tiles/referenceTileDefinitions.ts` with `mandatory: true`, `lockable: true`, and `defaultForRoles` populated for five project roles (Administrator, Executive, Manager, Superintendent, Team Member). All three complexity variants scaffold using `createReferenceTileComponents()`, pending Phase 3 live data binding to `@hbc/related-items`. Classified as **compliant — data binding deferred to Phase 3 implementation**.
 
 3. **`project-work-queue` tile — not yet registered**
    No work-queue tile exists in the `TileRegistry`. Phase 3 must create the tile definition with all three complexity variants, register it as mandatory and lockable, and wire it to `@hbc/my-work-feed` with `projectId` filtering. Classified as **controlled evolution**.
@@ -343,5 +340,5 @@ If a downstream deliverable conflicts with this specification, this specificatio
 
 ---
 
-**Last Updated:** 2026-03-21
+**Last Updated:** 2026-03-23 — Marked `related-items` tile upgrade complete (code confirmed: mandatory, lockable, defaultForRoles populated); updated §1 tile inventory, §5 registration status, §7 summary matrix, §9.2 reconciliation note
 **Governing Authority:** [Phase 3 Plan §9.3](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

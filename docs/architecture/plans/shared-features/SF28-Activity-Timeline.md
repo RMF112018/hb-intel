@@ -151,6 +151,16 @@ The runtime remains headless-first; any reusable visual expansion triggered by S
 
 ---
 
+## Phase 3 Integration
+
+**Phase 3 Stage:** Stage 5 — Shared Feature Infrastructure Completion (Stage 5.1)
+**Phase 3 Workstream:** Workstream I — Shared Feature Infrastructure
+**Governing Plan:** `docs/architecture/plans/MASTER/phase-3-deliverables/README.md`
+
+SF28 is incorporated into Phase 3 as Workstream I item 5.1 and is the first shared feature delivered in Stage 5. The Phase 3 Activity Spine contract in P3-D1 establishes the emission vocabulary and event type catalogue for all 9 Phase 3 modules (Financial, Schedule, Constraints, Permits, Safety, Reports, Project Closeout, Project Startup, Subcontract Compliance). SF28 produces `@hbc/activity-timeline` as the runtime implementation of that spine — the emit helpers, normalization pipeline, storage adapters, and query hooks that all modules consume beginning in Stage 6. Stage 5.1 must complete before any module-level activity-spine integration work begins. See P3-D1 §8 for per-module emission expectations and P3-E1 §13 for per-module integration contracts.
+
+---
+
 ## Definition of Done
 
 - [ ] SF28 is documented as a shared append-only activity-history runtime over `@hbc/activity-timeline`

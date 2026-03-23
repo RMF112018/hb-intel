@@ -142,6 +142,16 @@ The primitive remains runtime-first; any reusable visual expansion triggered by 
 
 ---
 
+## Phase 3 Integration
+
+**Phase 3 Stage:** Stage 5 — Shared Feature Infrastructure Completion (Stage 5.3)
+**Phase 3 Workstream:** Workstream I — Shared Feature Infrastructure
+**Governing Plan:** `docs/architecture/plans/MASTER/phase-3-deliverables/README.md`
+
+SF23 is incorporated into Phase 3 as Workstream I item 5.3. All 9 Phase 3 modules include create, edit, duplicate, or review record flows — financial line items, schedule milestones, RFIs/submittals, permit records, safety incidents, closeout checklist items, startup checklists, subcontract compliance records, and report definitions. SF23 produces `@hbc/record-form` as the shared authoring runtime and scaffolds module adapters for each Phase 3 consumer. Each module adapter owns its domain schema; the primitive owns lifecycle, offline resilience, review/handoff orchestration, and telemetry. Stage 5.3 completes the primitive and adapter scaffolding before module-level record authoring integration begins in Stage 6. See P3-E1 §13 for per-module integration contracts.
+
+---
+
 ## Definition of Done
 
 - [ ] SF23 is documented as module adapters over `@hbc/record-form`

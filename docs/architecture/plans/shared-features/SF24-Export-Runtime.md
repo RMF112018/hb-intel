@@ -152,6 +152,16 @@ The primitive remains runtime-first; any reusable visual expansion triggered by 
 
 ---
 
+## Phase 3 Integration
+
+**Phase 3 Stage:** Stage 5 — Shared Feature Infrastructure Completion (Stage 5.2)
+**Phase 3 Workstream:** Workstream I — Shared Feature Infrastructure
+**Governing Plan:** `docs/architecture/plans/MASTER/phase-3-deliverables/README.md`
+
+SF24 is incorporated into Phase 3 as Workstream I item 5.2. All 9 Phase 3 modules expose export capabilities — financial reports, schedule exports, constraint logs, permit registers, safety incident reports, closeout scorecards, startup checklists, subcontract compliance registers, and general-purpose reports. SF24 produces `@hbc/export-runtime` so each module creates a lightweight adapter rather than a bespoke CSV/XLSX/PDF pipeline. Stage 5.2 delivers the shared runtime and MVP adapters for the first set of Phase 3 consumers. Saved-view context (SF26, Stage 5.4) feeds into export requests via `IExportRequest.savedViewContext`; this handoff contract is established during Stage 5.4 but the export primitive is scaffolded here in Stage 5.2. See P3-E1 §13 for per-module integration contracts.
+
+---
+
 ## Definition of Done
 
 - [ ] SF24 is documented as module adapters over `@hbc/export-runtime`

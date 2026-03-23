@@ -67,6 +67,16 @@ packages/features/estimating/
 
 ---
 
+## Phase 3 Integration
+
+**Phase 3 Stage:** Stage 5 — Shared Feature Infrastructure Completion (Stage 5.5)
+**Phase 3 Workstream:** Workstream I — Shared Feature Infrastructure
+**Governing Plan:** `docs/architecture/plans/MASTER/phase-3-deliverables/README.md`
+
+SF25 is incorporated into Phase 3 as Workstream I item 5.5. Phase 3 modules with governed publication flows — Reports (published project reports requiring review/approval before distribution) and Subcontract Compliance (waiver approval routing through PE/CFO/Compliance Manager, also governed by `@hbc/workflow-handoff`) — require a shared publication state machine rather than bespoke approval UIs. Project Closeout scorecards and Startup PM Plans may also surface publish-workflow gates for formal sign-off. SF25 produces `@hbc/publish-workflow` with module adapters scaffolded for Phase 3 consumers. Stage 5.5 must complete before module-level publication flows are integrated in Stage 6. See P3-E1 §13 for per-module integration contracts and P3-D1 §8.10 for the Subcontract Compliance waiver approval emission expectations.
+
+---
+
 ## Definition of Done
 
 - [ ] SF25 is documented as module adapters over `@hbc/publish-workflow`

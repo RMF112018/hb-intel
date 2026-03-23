@@ -380,6 +380,9 @@ This matrix reproduces P3-A3 §7 with governing contract annotations:
 | **Activity** | **Owns** | Consumes | Consumes | Consumes |
 | **Work Queue** | **Required** — P3-D1 §15.1 | **Required** — Office (P3-D2 §15.3) | **Owns** | Consumes |
 | **Related Items** | **Required** — P3-D1 §7.3 | Consumes | Consumes | **Owns** |
+| **Project Closeout** | **Required** — P3-D1 §8.8 | **Required** — Office dimension (P3-D2 §11) | **Required** — P3-D3 §12 | **Required** — P3-D4 §9 |
+| **Project Startup** | **Required** — P3-D1 §8.9 | **Required** — Office dimension (P3-D2 §11) | **Required** — P3-D3 §12 | **Required** — P3-D4 §9 |
+| **Subcontract Compliance** | **Required** — P3-D1 §8.10 | **Required** — Office dimension (P3-D2 §11) | **Required** — P3-D3 §12 | **Required** — P3-D4 §9 |
 | **Quality Control** | Deferred | Deferred | Deferred | Deferred |
 | **Warranty** | Deferred | Deferred | Deferred | Deferred |
 
@@ -402,6 +405,9 @@ Per P3-G1 §4, the following summarizes lane depth by module:
 | Work Queue | **Full** (panel, feed, team feed) | **Broad** (tile + panel) | Full feed and team feed are PWA-depth |
 | Related Items | **Full** (panel, AI suggestions) | **Broad** (tile + compact panel) | AI suggestion management is PWA-depth |
 | Activity | **Full** (page + filtering) | **Broad** (tile) | Full timeline page is PWA-depth |
+| Project Closeout | **Required** (all capabilities; activates at closeout phase) | **Required** (all capabilities) | Full parity |
+| Project Startup | **Required** (all capabilities; active from project creation) | **Required** (all capabilities) | Full parity |
+| Subcontract Compliance | **Required** (all capabilities; multi-record, one per subcontract) | **Required** (all capabilities) | Full parity |
 | Quality Control | Lifecycle-visible | Lifecycle-visible | Deferred |
 | Warranty | Lifecycle-visible | Lifecycle-visible | Deferred |
 
@@ -428,6 +434,9 @@ Executive review annotations (placed by Portfolio Executive Reviewers) are permi
 | Work Queue | **No** | Operational queue surface; not a review target | — |
 | Activity | **No** | Immutable event log; not a review target | — |
 | Related Items | **No** | Registry surface; not a review target | — |
+| Project Closeout | **Yes** | Full field-level | P3-E2 §16.4, P3-A2 §4.1 |
+| Project Startup | **Yes** | Full field-level | P3-E2 §15.4, P3-A2 §4.1 |
+| Subcontract Compliance | **Yes** | Full field-level | P3-E12, P3-A2 §4.1 |
 | Quality Control | **No (deferred)** | Lifecycle-visible; review layer deferred | — |
 | Warranty | **No (deferred)** | Lifecycle-visible; review layer deferred | — |
 
@@ -517,5 +526,154 @@ If a downstream deliverable conflicts with this specification, this specificatio
 
 ---
 
-**Last Updated:** 2026-03-22
+## 13. Module-to-Shared-Package Integration Matrix
+
+This section defines the shared package integration obligations for every always-on core module. Feature teams implementing each module MUST treat `Required` integrations as Phase 3 acceptance gates. `Optional` integrations are recommended for completeness but are not gate-blocking. `N/A` denotes that the package is not applicable to that module.
+
+### 13.1 Summary matrix
+
+| Module | `@hbc/field-annotations` | `@hbc/versioned-record` | `@hbc/my-work-feed` | `@hbc/notification-intelligence` | `@hbc/bic-next-move` | `@hbc/session-state` | `@hbc/complexity` | `@hbc/workflow-handoff` | `@hbc/smart-empty-state` | `@hbc/ui-kit` |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Financial | **R** | **R** | **R** | **R** | **R** | **R** | **R** | — | **R** | **R** |
+| Schedule | **R** | **R** | **R** | **R** | **R** | **R** | **R** | — | **R** | **R** |
+| Constraints | **R** | O | **R** | **R** | **R** | **R** | **R** | — | **R** | **R** |
+| Permits | **R** | O | **R** | **R** | **R** | **R** | **R** | — | **R** | **R** |
+| Safety | N/A ¹ | O | **R** | **R** | **R** | **R** | **R** | — | **R** | **R** |
+| Reports | **R** | **R** | **R** | **R** | **R** | **R** | **R** | **R** | **R** | **R** |
+| Project Closeout | **R** | **R** | **R** | **R** | **R** | **R** | **R** | — | **R** | **R** |
+| Project Startup | **R** | **R** | **R** | **R** | **R** | **R** | **R** | — | **R** | **R** |
+| Subcontract Compliance | **R** | O | **R** | **R** | **R** | **R** | **R** | **R** ² | **R** | **R** |
+
+**R** = Required (Phase 3 acceptance gate) — **O** = Optional (recommended, not gate-blocking) — **—** = Not applicable
+
+¹ Safety is excluded from the executive review annotation layer (§9.3). `@hbc/field-annotations` MUST NOT be integrated in the Safety module for Phase 3.
+
+² Subcontract Compliance requires `@hbc/workflow-handoff` for the three-party Compliance Waiver approval routing (Project Executive → CFO → Compliance Manager).
+
+---
+
+### 13.2 Per-module integration contracts
+
+#### Financial
+
+| Package | Integration point | Notes |
+|---|---|---|
+| `@hbc/field-annotations` | PER annotation layer on forecast lines, GC/GR working model, Financial Summary blocks | Version-aware anchors `{ forecastVersionId, canonicalBudgetLineId, fieldKey }` per P3-E4 §15 |
+| `@hbc/versioned-record` | Confirmed forecast version snapshots; version history UI | Each `ConfirmedInternal` and `PublishedMonthly` version stored as versioned record per P3-E4 §4 |
+| `@hbc/my-work-feed` | Budget line reconciliation conditions; annotation pending-disposition items; undispositioned buyout savings | Register `FinancialWorkAdapter` per P3-D3 §12 |
+| `@hbc/notification-intelligence` | Cost exposure threshold alerts; forecast staleness warnings; checklist completion | Register notification event types per P3-D2 integration |
+| `@hbc/bic-next-move` | Forecast confirmation ownership; budget reconciliation BIC | Register Financial ownership items |
+| `@hbc/session-state` | Offline draft persistence for working forecast; operation queue for checklist mutations | IndexedDB TTL per session-state contract |
+| `@hbc/complexity` | Field density gating across Essential/Standard/Expert tiers | Budget line detail, GC/GR breakdowns, and buyout sub-domain are Standard/Expert depth |
+| `@hbc/smart-empty-state` | Empty budget, no forecast working state, empty buyout log | Classify per 5-state model (first-use, filter, loading-failed, etc.) |
+
+#### Schedule
+
+| Package | Integration point | Notes |
+|---|---|---|
+| `@hbc/field-annotations` | PER annotation layer on schedule milestones, forecast overrides, upload history | Per P3-E2 §4.4 |
+| `@hbc/versioned-record` | Schedule file upload history; version snapshots for milestone state | Restore capability depends on versioned-record storage |
+| `@hbc/my-work-feed` | Milestone at-risk items; overdue milestone work items | Register `ScheduleWorkAdapter` per P3-D3 §12 |
+| `@hbc/notification-intelligence` | Milestone at-risk/critical alerts; schedule file staleness warnings | |
+| `@hbc/bic-next-move` | Milestone responsibility and accountability tracking | |
+| `@hbc/session-state` | Offline draft for manual milestone overrides | |
+| `@hbc/complexity` | Milestone list density, CPM detail depth | |
+| `@hbc/smart-empty-state` | No schedule file uploaded, no milestones, empty upload history | |
+
+#### Constraints
+
+| Package | Integration point | Notes |
+|---|---|---|
+| `@hbc/field-annotations` | PER annotation layer on constraint records, delay log entries | Per P3-E2 §5.4 |
+| `@hbc/versioned-record` | Optional — constraint history snapshots | Not required for Phase 3 acceptance |
+| `@hbc/my-work-feed` | Overdue constraint items; unresolved delay log entries | Register `ConstraintsWorkAdapter` |
+| `@hbc/notification-intelligence` | Overdue constraint alerts; delay-quantification requests | |
+| `@hbc/bic-next-move` | Constraint BIC and responsibility tracking | |
+| `@hbc/session-state` | Offline draft for constraint creation and editing | |
+| `@hbc/complexity` | Constraint log density; delay calculation detail | |
+| `@hbc/smart-empty-state` | No constraints logged, empty change tracking, empty delay log | |
+
+#### Permits
+
+| Package | Integration point | Notes |
+|---|---|---|
+| `@hbc/field-annotations` | PER annotation layer on permit records and inspection results | Per P3-E2 §6.4 |
+| `@hbc/versioned-record` | Optional — permit status history | Not required for Phase 3 acceptance |
+| `@hbc/my-work-feed` | Expiring permit items; failed inspection follow-up items | Register `PermitsWorkAdapter` |
+| `@hbc/notification-intelligence` | Permit expiration warnings; inspection overdue alerts | |
+| `@hbc/bic-next-move` | Inspection responsibility and permit renewal accountability | |
+| `@hbc/session-state` | Offline draft for permit and inspection entry | |
+| `@hbc/complexity` | Permit log density; inspection detail depth | |
+| `@hbc/smart-empty-state` | No permits logged, no inspections recorded | |
+
+#### Safety
+
+| Package | Integration point | Notes |
+|---|---|---|
+| `@hbc/field-annotations` | **NOT INTEGRATED** — Safety excluded from Phase 3 PER review layer (§9.3) | Do not register annotation anchors |
+| `@hbc/versioned-record` | Optional — safety checklist snapshot history | |
+| `@hbc/my-work-feed` | Incident follow-up work items; unresolved JHA actions | Register `SafetyWorkAdapter` |
+| `@hbc/notification-intelligence` | Incident reported alerts; orientation overdue warnings | |
+| `@hbc/bic-next-move` | Incident follow-up ownership; JHA responsible party | |
+| `@hbc/session-state` | Offline draft for checklist and incident entry | |
+| `@hbc/complexity` | Safety log density; JHA detail depth | |
+| `@hbc/smart-empty-state` | No incidents logged, no orientations recorded, no checklist started | |
+
+#### Reports
+
+| Package | Integration point | Notes |
+|---|---|---|
+| `@hbc/field-annotations` | PER annotation layer on report runs and narrative sections | Governed by P3-F1; PER report permissions apply |
+| `@hbc/versioned-record` | Module snapshot storage for report assembly; report run history | Reports assemble confirmed module snapshots via versioned-record |
+| `@hbc/my-work-feed` | Push-to-Project-Team work items with `IMyWorkSourceMeta` PER provenance | Per P3-D3 §5 and P3-F1 §8.5 |
+| `@hbc/notification-intelligence` | Stale draft warnings; PX Review approval notifications; release notifications | |
+| `@hbc/bic-next-move` | Report approval ownership (PM → PX → release) | |
+| `@hbc/session-state` | Offline draft state for PM narrative | |
+| `@hbc/complexity` | Report workspace density; run-ledger history depth | |
+| `@hbc/workflow-handoff` | PX Review approval handoff — draft → pending approval → approved → released | |
+| `@hbc/smart-empty-state` | No reports generated, no run history | |
+
+#### Project Closeout
+
+| Package | Integration point | Notes |
+|---|---|---|
+| `@hbc/field-annotations` | PER annotation layer on closeout checklist and scorecard | Per P3-E2 §16.4 |
+| `@hbc/versioned-record` | Snapshot published to Reports module on scorecard and lessons learned completion | Per P3-E10 hybrid model |
+| `@hbc/my-work-feed` | Pending closeout items; incomplete scorecard submissions | Register `CloseoutWorkAdapter` |
+| `@hbc/notification-intelligence` | Closeout phase activation alerts; overdue checklist section warnings | |
+| `@hbc/bic-next-move` | Checklist item responsibility; scorecard submission accountability | |
+| `@hbc/session-state` | Offline draft for checklist items and scorecard | |
+| `@hbc/complexity` | Checklist density; scorecard scoring detail depth | |
+| `@hbc/smart-empty-state` | Closeout not yet activated, no scorecard entries | |
+
+#### Project Startup
+
+| Package | Integration point | Notes |
+|---|---|---|
+| `@hbc/field-annotations` | PER annotation layer on Job Startup Checklist, PM Plan, Responsibility Matrix | Per P3-E2 §15.4 |
+| `@hbc/versioned-record` | PM Plan version snapshots; Responsibility Matrix finalization state | |
+| `@hbc/my-work-feed` | Incomplete startup checklist sections; unfinished PM Plan sections | Register `StartupWorkAdapter` |
+| `@hbc/notification-intelligence` | Startup readiness alerts; overdue checklist section warnings | |
+| `@hbc/bic-next-move` | Responsibility Matrix PM/role accountability tracking | |
+| `@hbc/session-state` | Offline draft for all startup checklist and PM Plan sections | |
+| `@hbc/complexity` | Checklist density; PM Plan section depth; Responsibility Matrix column depth | |
+| `@hbc/smart-empty-state` | No checklist started, PM Plan not begun, Responsibility Matrix empty | |
+
+#### Subcontract Compliance
+
+| Package | Integration point | Notes |
+|---|---|---|
+| `@hbc/field-annotations` | PER annotation layer on subcontract checklist and waiver | Per P3-E12 |
+| `@hbc/versioned-record` | Optional — waiver version history | |
+| `@hbc/my-work-feed` | Pending checklist sign-off items; waiver approval pending items | Register `SubcontractComplianceWorkAdapter` |
+| `@hbc/notification-intelligence` | Waiver approval routing notifications (PE, CFO, Compliance Manager); waiver rejection alerts | |
+| `@hbc/bic-next-move` | Waiver approver accountability; checklist sign-off BIC | |
+| `@hbc/session-state` | Offline draft for checklist completion and waiver submission | |
+| `@hbc/complexity` | Checklist item density; waiver requirement detail depth | |
+| `@hbc/workflow-handoff` | Three-party Compliance Waiver approval routing — submitted → PE approved → CFO approved → Compliance Manager approved → resolved | |
+| `@hbc/smart-empty-state` | No subcontracts in system, checklist not started, no waiver submitted | |
+
+---
+
+**Last Updated:** 2026-03-23 — Added §7 spine rows, §8 lane rows, and §9.1 review-capable entries for Project Closeout, Project Startup, and Subcontract Compliance; added §13 Module-to-Shared-Package Integration Matrix
 **Governing Authority:** [Phase 3 Plan §11–§12](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

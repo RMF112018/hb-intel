@@ -150,6 +150,16 @@ The runtime remains headless-first; any reusable visual expansion triggered by S
 
 ---
 
+## Phase 3 Integration
+
+**Phase 3 Stage:** Stage 5 — Shared Feature Infrastructure Completion (Stage 5.6)
+**Phase 3 Workstream:** Workstream I — Shared Feature Infrastructure
+**Governing Plan:** `docs/architecture/plans/MASTER/phase-3-deliverables/README.md`
+
+SF27 is incorporated into Phase 3 as Workstream I item 5.6 and is the last shared feature delivered in Stage 5. All Phase 3 modules with queue or grid surfaces — Financial, Schedule, Constraints, Permits, Safety, Reports, Project Closeout, Project Startup, and Subcontract Compliance — support multi-select and batch action patterns (bulk status updates, bulk assignment changes, bulk archive, bulk export). SF27 produces `@hbc/bulk-actions` with the shared selection runtime, eligibility framework, and `IBulkActionExecutionContext` handoff surface. Stage 5.6 depends on Stage 5.4 (SF26 Saved Views) because the `ISavedViewContext` snapshot feeds the bulk-action execution scope. Stage 5.6 must complete before module-level bulk-action integration begins in Stage 6. See P3-E1 §13 for per-module integration contracts.
+
+---
+
 ## Definition of Done
 
 - [ ] SF27 is documented as a shared selection and bulk-execution runtime over `@hbc/bulk-actions`
