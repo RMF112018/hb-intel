@@ -20,6 +20,9 @@ export default defineConfig({
         'src/**/*.test.{ts,tsx}',
         'src/**/index.ts',
         'src/types/**',
+        'src/hooks/**',
+        'src/components/**',
+        'src/storage/**',
       ],
       thresholds: {
         lines: 95,

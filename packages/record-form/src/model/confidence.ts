@@ -20,12 +20,13 @@ import type {
 export function computeRecordConfidence(state: IRecordFormState): RecordStateConfidence {
   const syncState = state.sync.state;
 
+  // Recovery takes precedence over sync state
+  if (state.explanation.isRecoveryActive) return 'recovered-needs-review';
+
   if (syncState === 'synced') return 'trusted-synced';
-  if (syncState === 'local-only' || syncState === 'saved-locally' || syncState === 'queued-to-sync') return 'local-unsynced';
   if (syncState === 'partially-recovered') return 'partially-resolved';
   if (syncState === 'degraded') return 'degraded-submission';
-
-  if (state.explanation.isRecoveryActive) return 'recovered-needs-review';
+  if (syncState === 'local-only' || syncState === 'saved-locally' || syncState === 'queued-to-sync') return 'local-unsynced';
 
   return 'local-unsynced';
 }

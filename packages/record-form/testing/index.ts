@@ -6,9 +6,13 @@
  *
  * @example
  * ```ts
- * import { createMockRecordFormState } from '@hbc/record-form/testing';
+ * import { createMockRecordFormState, mockRecordFormScenarios } from '@hbc/record-form/testing';
  * ```
- *
- * Implementation scope: SF23-T08.
  */
-export {};
+
+export { createMockRecordFormState } from './createMockRecordFormState.js';
+export { createMockRecordRecoveryState } from './createMockRecordRecoveryState.js';
+export { createMockRecordReviewStepState } from './createMockRecordReviewStepState.js';
+export { createMockRecordFormQueueState } from './createMockRecordFormQueueState.js';
+export { mockRecordFormScenarios } from './mockRecordFormScenarios.js';
+export { mockRecordFormComplexityProfiles } from './mockRecordFormComplexityProfiles.js';

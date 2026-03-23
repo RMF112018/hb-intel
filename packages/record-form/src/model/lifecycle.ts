@@ -185,6 +185,7 @@ export function transitionRecordFormStatus(
   const updatedExplanation: IRecordFormExplanationState = {
     ...state.explanation,
     isBlocked: targetStatus === 'blocked',
+    hasWarnings: targetStatus === 'valid-with-warnings' ? true : (targetStatus === 'blocked' || targetStatus === 'submitting' || targetStatus === 'submitted' || targetStatus === 'failed') ? false : state.explanation.hasWarnings,
     summaryMessage: getStatusMessage(targetStatus),
   };
 
@@ -224,6 +225,12 @@ export function transitionRecordFormStatus(
 // ── Helpers ──────────────────────────────────────────────────────────────
 
 function inferCurrentStatus(state: IRecordFormState): RecordFormStatus {
+  // Check terminal/in-flight states via telemetry
+  if (state.telemetry.submitCompleteTimestampIso !== null) {
+    return state.failure !== null ? 'failed' : 'submitted';
+  }
+  if (state.telemetry.submitStartTimestampIso !== null) return 'submitting';
+
   if (state.explanation.isBlocked) return 'blocked';
   if (state.explanation.hasWarnings) return 'valid-with-warnings';
   if (state.draft.isDirty) return 'dirty';
