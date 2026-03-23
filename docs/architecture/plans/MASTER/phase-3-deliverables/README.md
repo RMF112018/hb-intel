@@ -66,7 +66,7 @@
 | P3-E2 | [Module Source-of-Truth / Action-Boundary Matrix](P3-E2-Module-Source-of-Truth-Action-Boundary-Matrix.md) | Specification |
 | P3-E3 | [Spreadsheet/Document Replacement Reference Note Set](P3-E3-Spreadsheet-Document-Replacement-Reference-Note-Set.md) | Note |
 | P3-E4 | [Financial Module Field Specification](P3-E4-Financial-Module-Field-Specification.md) | Specification |
-| P3-E5 | [Schedule Module Field Specification](P3-E5-Schedule-Module-Field-Specification.md) | Specification |
+| P3-E5 | [Schedule Module Field Specification](P3-E5-Schedule-Module-Field-Specification.md) *(master index + T01–T11 detail files)* | Specification |
 | P3-E6 | [Constraints Module Field Specification](P3-E6-Constraints-Module-Field-Specification.md) | Specification |
 | P3-E7 | [Permits Module Field Specification](P3-E7-Permits-Module-Field-Specification.md) | Specification |
 | P3-E8 | [Safety Module Field Specification](P3-E8-Safety-Module-Field-Specification.md) | Specification |
@@ -293,6 +293,7 @@ Governing: P3-D1; `docs/architecture/plans/shared-features/SF28-Activity-Timelin
 Deliver the shared export runtime package: CSV/XLSX/PDF render pipeline, export receipt model, artifact provenance stamping, offline replay, and module adapter scaffold for Phase 3 consumers. The saved-view context handoff (`IExportRequest.savedViewContext`) contract is established during Stage 5.4 but the export primitive is scaffolded here. Module-level adapter wiring is Stage 7 scope.
 Governing: `docs/architecture/plans/shared-features/SF24-Export-Runtime.md`
 **SF24-T01 scaffold:** **Implemented 2026-03-23 in `@hbc/export-runtime` v0.0.1.** Package scaffold with types (export truth vocabulary, receipt states, artifact confidence, review steps, next recommended action, failure/retry diagnostics), model, api, hooks, components, composers, renderers, templates barrels, testing subpath, and README per SF24 locked decisions L-01/L-03/L-04/L-06. Layer 8 shared-feature primitive. Feature adapter seams in `@hbc/features-business-development` and `@hbc/features-estimating`.
+**SF24-T02 contracts:** **Implemented 2026-03-23 in `@hbc/export-runtime` v0.0.2.** Canonical TypeScript contracts: `IExportTruthState`, `ITableExportPayload`/`IReportExportPayload` (discriminated `ExportPayload` union), `IExportBicStepConfig` (L-02 BIC ownership), `IExportVersionRef` with `ExportVersionTag` (L-06 provenance), `IExportTelemetryState` (5 UX KPIs), `IExportSuppressedFormatState`, `IExportContextDeltaState`. `IExportRequest` expanded with payload, truth, bicSteps, versionRef, telemetry, suppressedFormats, contextDelta. T02 constants locked. Per L-01 through L-06.
 
 **5.3 — Record Form runtime (`@hbc/record-form`, SF23)**
 Deliver the shared record-form package: create/edit/duplicate/template lifecycle, draft recovery, review/handoff orchestration, offline replay, and module adapter scaffold for all 9 Phase 3 modules. Each module adapter owns its domain schema; the primitive owns lifecycle, offline resilience, and telemetry. Module-level adapter wiring is Stage 7 scope.
@@ -349,8 +350,8 @@ Implement: budget import via CSV upload (PWA Required, SPFx Broad); Financial Su
 Governing: P3-E1 §4.1, P3-E2 §3, P3-E3 §2, **P3-E4** (field-level specification)
 
 **7.2 — Schedule module**
-Implement: milestone tracking (both lanes); forecast overrides with provenance and governance (both lanes); schedule file ingestion (PWA Required, SPFx Launch-to-PWA); upload history and restore (PWA Required, SPFx Launch-to-PWA). Implement spine adapters. The Schedule module owns milestone and forecast records; provenance is required on any forecast override.
-Governing: P3-E1 §4.2, P3-E2 §4, P3-E3 §3, **P3-E5** (field-level specification)
+Implement the full three-layer schedule operating model: governed master-schedule layer (canonical source ingestion, frozen import snapshots, versioned baselines, dual-truth commitment reconciliation); published forecast layer (stage-gated publication, executive review and health spine consumer); and field execution layer (work packages, commitment management, blocker tracking, look-ahead planning with PPC, three-tier progress verification). Implement schedule file ingestion (PWA Required, SPFx Launch-to-PWA); scenario branch management; analytics and confidence grading; offline-first sync with intent-log; cross-platform workflow integration via shared packages. Implement spine adapters for all four spines per P3-A3. All thresholds, grading rules, roll-up rules, and governed taxonomies are configured exclusively by Manager of Operational Excellence.
+Governing: P3-E1 §4.2, P3-E2 §4, P3-E3 §3, **P3-E5** (field-level specification — master index + T01–T11 detail files)
 
 **7.3 — Constraints module**
 Implement: constraint CRUD (both lanes); change tracking (both lanes); delay log with quantified impact (both lanes). Implement spine adapters. The Constraints module owns constraint records; cross-module fields (e.g., financial exposure from a delay) are published to spines, not written directly to the Financial module.

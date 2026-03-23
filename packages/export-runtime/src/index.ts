@@ -12,7 +12,7 @@
  * @see docs/architecture/plans/shared-features/SF24-Export-Runtime.md
  */
 
-// Types — SF24-T01 contract stubs
+// Types — SF24-T01 foundation types
 export type {
   ExportFormat,
   ExportIntent,
@@ -36,12 +36,36 @@ export type {
   ExportFailureReasonCode,
 } from './types/index.js';
 
+// Types — SF24-T02 canonical contracts
+export type {
+  ExportVersionTag,
+  IExportTruthState,
+  IExportColumnDefinition,
+  ITableExportPayload,
+  IReportExportSection,
+  IReportExportPayload,
+  ExportPayload,
+  IExportBicStepConfig,
+  IExportVersionRef,
+  IExportTelemetryState,
+  IExportSuppressedFormatState,
+  IExportContextDeltaState,
+} from './types/index.js';
+
 // Constants — SF24-T01 locked values
 export {
   EXPORT_FORMATS,
   EXPORT_STATUSES,
   EXPORT_CONFIDENCE_LEVELS,
   EXPORT_COMPLEXITY_TIERS,
+} from './types/index.js';
+
+// Constants — SF24-T02 locked values
+export {
+  EXPORT_RUNTIME_SYNC_QUEUE_KEY,
+  EXPORT_RUNTIME_SYNC_STATUSES,
+  EXPORT_RUNTIME_COMPLEXITY_PROFILES,
+  EXPORT_RUNTIME_CONFIDENCE_STATES,
 } from './types/index.js';
 
 // Model — lifecycle, state derivation, confidence (SF24-T03)

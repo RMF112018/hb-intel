@@ -862,7 +862,7 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 
 ---
 
-#### `@hbc/export-runtime` · v0.0.1 · [Scaffold]
+#### `@hbc/export-runtime` · v0.0.2 · [Scaffold]
 
 | Field | Value |
 |-------|-------|
@@ -874,7 +874,7 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 
 **Purpose:** Shared export runtime primitive — export lifecycle orchestration, render pipeline contracts, receipt state management, artifact provenance stamping, offline replay, and module adapter seams. All Phase 3 modules create lightweight adapters over this primitive rather than bespoke CSV/XLSX/PDF pipelines.
 
-**Key exports:** `ExportFormat`, `ExportIntent`, `ExportRenderMode`, `ExportStatus`, `ExportArtifactConfidence`, `ExportComplexityTier`, `IExportSourceTruthStamp`, `IExportReceiptState`, `IExportReviewStepState`, `IExportNextRecommendedAction`, `IExportFailureState`, `IExportRetryState`, `IExportArtifactMetadata`, `IExportRequest`, 5 reason-code unions, 4 constants. Testing subpath at `@hbc/export-runtime/testing`.
+**Key exports:** `ExportFormat`, `ExportIntent`, `ExportRenderMode`, `ExportStatus`, `ExportArtifactConfidence`, `ExportComplexityTier`, `IExportSourceTruthStamp`, `IExportReceiptState`, `IExportReviewStepState`, `IExportNextRecommendedAction`, `IExportFailureState`, `IExportRetryState`, `IExportArtifactMetadata`, `IExportRequest`, `IExportTruthState`, `ITableExportPayload`/`IReportExportPayload` (discriminated `ExportPayload` union), `IExportBicStepConfig`, `IExportVersionRef`, `IExportTelemetryState`, `IExportSuppressedFormatState`, `IExportContextDeltaState`, 5 reason-code unions, 8 constants. Testing subpath at `@hbc/export-runtime/testing`.
 
 **Correct usage:** Module adapters consume primitive public exports. Module-specific payload composition remains adapter-owned (projection-only). Runtime and orchestration ownership stays in the primitive. Reusable visual primitives belong in `@hbc/ui-kit`.
 
