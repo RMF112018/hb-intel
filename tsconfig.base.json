@@ -29,6 +29,8 @@
       "@hbc/record-form/*": ["packages/record-form/src/*"],
       "@hbc/saved-views": ["packages/saved-views/src/index.ts"],
       "@hbc/saved-views/*": ["packages/saved-views/src/*"],
+      "@hbc/publish-workflow": ["packages/publish-workflow/src/index.ts"],
+      "@hbc/publish-workflow/*": ["packages/publish-workflow/src/*"],
       "@hbc/query-hooks": ["packages/query-hooks/src/index.ts"],
       "@hbc/query-hooks/*": ["packages/query-hooks/src/*"],
       "@hbc/ui-kit": ["packages/ui-kit/src/index.ts"],

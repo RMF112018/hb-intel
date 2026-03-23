@@ -68,6 +68,7 @@
     "@hbc/smart-empty-state": "workspace:*",
     "@hbc/export-runtime": "workspace:*",
     "@hbc/record-form": "workspace:*",
+    "@hbc/publish-workflow": "workspace:*",
     "@hbc/bic-next-move": "workspace:*",
     "@hbc/notification-intelligence": "workspace:*",
     "@hbc/health-indicator": "workspace:*",

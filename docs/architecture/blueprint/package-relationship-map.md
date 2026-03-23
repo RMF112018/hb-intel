@@ -64,7 +64,7 @@ Layer 9 — Domain Data Infrastructure
   Domain-agnostic import/seeding utilities
 
 Layer 8 — Intelligence Scaffolds & Shared-Feature Primitives
-  (@hbc/health-indicator, @hbc/score-benchmark, @hbc/strategic-intelligence, @hbc/post-bid-autopsy, @hbc/my-work-feed, @hbc/export-runtime, @hbc/record-form, @hbc/saved-views)
+  (@hbc/health-indicator, @hbc/score-benchmark, @hbc/strategic-intelligence, @hbc/post-bid-autopsy, @hbc/my-work-feed, @hbc/export-runtime, @hbc/record-form, @hbc/saved-views, @hbc/publish-workflow)
   Scoring, analysis, learning signal, cross-module aggregation, and shared-feature runtime primitives
 
 Layer 7 — Workflow Primitives
@@ -927,6 +927,24 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 **Key exports:** `SavedViewScope`, `ISavedViewDefinition`, `ISavedViewStateMapper<TState>`, `IFilterClause`, `ISortDefinition`, `IGroupDefinition`, `IViewPresentationState`, `ISchemaCompatibilityResult`, `IViewReconciliationResult`, `ISavedViewContext`, 2 constants. Testing subpath at `@hbc/saved-views/testing`.
 
 **Governing plan:** [SF26-Saved-Views.md](../../docs/architecture/plans/shared-features/SF26-Saved-Views.md)
+
+---
+
+#### `@hbc/publish-workflow` · v0.0.1 · [Scaffold]
+
+| Field | Value |
+|-------|-------|
+| **Path** | `packages/publish-workflow/` |
+| **Layer** | 8 — Shared-Feature Primitives |
+| **Depends on** | `@hbc/models` (workspace) |
+| **Used by** | Reports (P3-F1), Subcontract Compliance, and Phase 3 modules requiring publication lifecycle |
+| **Maturity** | Scaffold |
+
+**Purpose:** Publication state machine, readiness/approval flow, supersession/revocation, receipt traceability, and module adapter seams.
+
+**Key exports:** `PublicationStatus` (8 states), `IPublicationRecord`, `IReadinessState`, `IApprovalState`, `ISupersessionState`, `IRevocationState`, `IPublicationReceipt`, `IReadinessRule`, `IApprovalRule`, 1 constant. Testing subpath at `@hbc/publish-workflow/testing`.
+
+**Governing plan:** [SF25-Publish-Workflow.md](../../docs/architecture/plans/shared-features/SF25-Publish-Workflow.md)
 
 ---
 
