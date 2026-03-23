@@ -1,2 +1,2 @@
-/** SF27 bulk-action lifecycle model. Implementation scope: SF27-T03. */
-export {};
+export { evaluateEligibility, filterEligible } from './eligibility.js';
+export type { EligibilityEvaluator } from './eligibility.js';

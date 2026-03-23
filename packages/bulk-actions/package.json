@@ -1,6 +1,6 @@
 {
   "name": "@hbc/bulk-actions",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "description": "Shared bulk-actions primitive for HB Intel — selection semantics, per-item eligibility, chunked execution, mixed-result reporting, and module adapter seams",
   "type": "module",

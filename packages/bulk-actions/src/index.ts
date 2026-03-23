@@ -23,9 +23,15 @@ export {
   BULK_ACTIONS_EXECUTION_PHASES, BULK_ACTIONS_RESULT_KINDS,
 } from './types/index.js';
 
-// Model (SF27-T03) // export * from './model/index.js';
-// Selection (SF27-T03) // export * from './selection/index.js';
-// Execution (SF27-T03) // export * from './execution/index.js';
+// Model (SF27-T03)
+export { evaluateEligibility, filterEligible } from './model/index.js';
+export type { EligibilityEvaluator } from './model/index.js';
+
+// Selection (SF27-T03)
+export { createSelectionSnapshot, escalateScope, validateScopeIntegrity } from './selection/index.js';
+
+// Execution (SF27-T03)
+export { planExecution, aggregateResults } from './execution/index.js';
 // Hooks (SF27-T04) // export * from './hooks/index.js';
 // Adapters (SF27-T07) // export * from './adapters/index.js';
 // Telemetry (SF27-T07) // export * from './telemetry/index.js';
