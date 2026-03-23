@@ -15,3 +15,5 @@ export * from './versioning/index.js';
 export * from './cash-flow/index.js';
 export * from './buyout/index.js';
 export * from './business-rules/index.js';
+export * from './spine-events/index.js';
+export * from './annotations/index.js';

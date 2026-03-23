@@ -3,6 +3,7 @@
  * T01: doctrine and authority. T02: budget line identity and import.
  * T03: forecast versioning and checklist. T05: cash flow working model.
  * T06: buyout sub-domain. T07: business rules and calculations.
+ * T08: platform integration and annotation scope.
  */
 
 // ── Financial Version States ──────────────────────────────────────────
@@ -526,4 +527,101 @@ export interface IForecastSummaryCalculations {
   readonly currentProfit: number;
   readonly profitMargin: number;
   readonly expectedContingencyUse: number;
+}
+
+// ── T08: Platform Integration and Annotation Scope ────────────────────
+
+/** Activity spine event types for the Financial module (T08 §14.1). */
+export type FinancialActivityEventType =
+  | 'BudgetImported'
+  | 'ForecastVersionConfirmed'
+  | 'ForecastVersionDerived'
+  | 'ReportCandidateDesignated'
+  | 'ForecastVersionPublished'
+  | 'GCGRUpdated'
+  | 'BuyoutLineExecuted'
+  | 'BuyoutSavingsDispositioned'
+  | 'CashFlowProjectionUpdated'
+  | 'ReconciliationConditionResolved';
+
+/** Activity spine event record (T08 §14.1). */
+export interface IFinancialActivityEvent {
+  readonly eventType: FinancialActivityEventType;
+  readonly projectId: string;
+  readonly timestamp: string;
+  readonly payload: Readonly<Record<string, unknown>>;
+}
+
+/** Health spine metric keys for the Financial module (T08 §14.2). */
+export type FinancialHealthMetricKey =
+  | 'projectedOverUnder'
+  | 'profitMargin'
+  | 'estimatedCostAtCompletion'
+  | 'totalCostExposureToDate'
+  | 'percentBuyoutCompleteDollarWeighted'
+  | 'totalRealizedBuyoutSavings'
+  | 'totalUndispositionedSavings'
+  | 'peakCashRequirement'
+  | 'cashFlowAtRisk'
+  | 'buyoutToCommittedCostsReconciliation';
+
+/** Health spine metric record (T08 §14.2). */
+export interface IFinancialHealthMetric {
+  readonly key: FinancialHealthMetricKey;
+  readonly value: number;
+  readonly unit: 'usd' | 'percent';
+  readonly updatedAt: string;
+  readonly updatedOn: string;
+}
+
+/** Work queue item types for the Financial module (T08 §14.3). */
+export type FinancialWorkQueueItemType =
+  | 'BudgetReconciliationRequired'
+  | 'ForecastChecklistIncomplete'
+  | 'BudgetLineOverbudget'
+  | 'NegativeProfitForecast'
+  | 'CashFlowDeficit'
+  | 'BuyoutOverbudget'
+  | 'UndispositionedBuyoutSavings'
+  | 'BuyoutComplianceGateBlocked';
+
+/** Work queue item record (T08 §14.3). */
+export interface IFinancialWorkQueueItem {
+  readonly itemType: FinancialWorkQueueItemType;
+  readonly projectId: string;
+  readonly assignedTo: string;
+  readonly message: string;
+  readonly context: Readonly<Record<string, unknown>>;
+  readonly createdAt: string;
+}
+
+/** Annotation anchor type discriminator (T08 §15.4). */
+export type FinancialAnnotationAnchorType = 'field' | 'section' | 'block';
+
+/** Version-aware annotation anchor for executive review (T08 §15.4). */
+export interface IFinancialAnnotationAnchor {
+  readonly forecastVersionId: string;
+  readonly anchorType: FinancialAnnotationAnchorType;
+  readonly canonicalBudgetLineId?: string;
+  readonly fieldKey?: string;
+  readonly sectionKey?: string;
+  readonly blockKey?: string;
+}
+
+/** PM disposition status for carried-forward annotations (T08 §15.5). */
+export type PMAnnotationDispositionStatus =
+  | 'Pending'
+  | 'Addressed'
+  | 'StillApplicable'
+  | 'NeedsReviewerAttention';
+
+/** Carried-forward annotation record on version derivation (T08 §15.5). */
+export interface ICarriedForwardAnnotation {
+  readonly newAnnotationId: string;
+  readonly sourceAnnotationId: string;
+  readonly sourceForecastVersionId: string;
+  readonly targetForecastVersionId: string;
+  readonly inheritanceStatus: 'Inherited';
+  readonly pmDispositionStatus: PMAnnotationDispositionStatus;
+  readonly valueChangedFlag: boolean;
 }

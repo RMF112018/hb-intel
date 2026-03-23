@@ -284,3 +284,72 @@ export const PROFIT_MARGIN_WARNING_THRESHOLD = 5;
 
 /** Profit margin below this → critical alert requiring PE visibility (T07 §9.4). */
 export const PROFIT_MARGIN_CRITICAL_THRESHOLD = 0;
+
+// ── T08: Platform Integration and Annotation Scope ────────────────────
+
+export const FINANCIAL_ACTIVITY_EVENT_TYPES = [
+  'BudgetImported',
+  'ForecastVersionConfirmed',
+  'ForecastVersionDerived',
+  'ReportCandidateDesignated',
+  'ForecastVersionPublished',
+  'GCGRUpdated',
+  'BuyoutLineExecuted',
+  'BuyoutSavingsDispositioned',
+  'CashFlowProjectionUpdated',
+  'ReconciliationConditionResolved',
+] as const;
+
+export const FINANCIAL_HEALTH_METRIC_KEYS = [
+  'projectedOverUnder',
+  'profitMargin',
+  'estimatedCostAtCompletion',
+  'totalCostExposureToDate',
+  'percentBuyoutCompleteDollarWeighted',
+  'totalRealizedBuyoutSavings',
+  'totalUndispositionedSavings',
+  'peakCashRequirement',
+  'cashFlowAtRisk',
+  'buyoutToCommittedCostsReconciliation',
+] as const;
+
+export const FINANCIAL_WORK_QUEUE_ITEM_TYPES = [
+  'BudgetReconciliationRequired',
+  'ForecastChecklistIncomplete',
+  'BudgetLineOverbudget',
+  'NegativeProfitForecast',
+  'CashFlowDeficit',
+  'BuyoutOverbudget',
+  'UndispositionedBuyoutSavings',
+  'BuyoutComplianceGateBlocked',
+] as const;
+
+export const FINANCIAL_ANNOTATION_ANCHOR_TYPES = [
+  'field',
+  'section',
+  'block',
+] as const;
+
+export const PM_ANNOTATION_DISPOSITION_STATUSES = [
+  'Pending',
+  'Addressed',
+  'StillApplicable',
+  'NeedsReviewerAttention',
+] as const;
+
+/** Budget line field keys that PER can annotate (T08 §15.2). */
+export const FINANCIAL_ANNOTATABLE_FIELD_KEYS = [
+  'forecastToComplete',
+  'estimatedCostAtCompletion',
+  'projectedOverUnder',
+  'notes',
+] as const;
+
+/** Section-level anchor keys for PER annotations (T08 §15.2). */
+export const FINANCIAL_ANNOTATABLE_SECTION_KEYS = [
+  'cost-summary',
+  'contingency-summary',
+  'profit-summary',
+  'gcgr-section',
+  'buyout-section',
+] as const;
