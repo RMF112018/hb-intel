@@ -14,3 +14,5 @@ export * from './health-pulse/index.js';
 export { ProjectActivityRegistry, aggregateActivityFeed } from './activity/index.js';
 
 export * from './financial/index.js';
+
+export * from './schedule/index.js';

@@ -1,0 +1,357 @@
+/**
+ * P3-E5 public contracts for Schedule module.
+ * T01: source identity, versioning, import snapshot, dual-calendar model.
+ *
+ * Every type here maps 1:1 to the field tables in P3-E5-T01.
+ */
+
+// ── §1.1 CanonicalScheduleSource ─────────────────────────────────────
+
+/** CPM tool type for a schedule source registration (§1.1). */
+export type ScheduleSourceSystem =
+  | 'PrimaveraP6'
+  | 'MSProject'
+  | 'Asta'
+  | 'Oracle'
+  | 'Other';
+
+/** Who is responsible for keeping the schedule source current (§1.1, Ownership Maturity Model). */
+export type ScheduleSourceOwnerRole =
+  | 'PM'
+  | 'Scheduler'
+  | 'PE';
+
+/** Identity record for one master schedule source per project (§1.1). */
+export interface ICanonicalScheduleSource {
+  readonly sourceId: string;
+  readonly projectId: string;
+  readonly sourceName: string;
+  readonly sourceSystem: ScheduleSourceSystem;
+  readonly isCanonical: boolean;
+  readonly sourceOwnerRole: ScheduleSourceOwnerRole;
+  readonly registeredBy: string;
+  readonly registeredAt: string;
+  readonly promotedToCanonicalAt: string | null;
+  readonly promotedBy: string | null;
+  readonly deregisteredAt: string | null;
+  readonly notes: string | null;
+}
+
+// ── §1.2 ScheduleVersionRecord ───────────────────────────────────────
+
+/** Import file format (§1.2). */
+export type ScheduleImportFormat = 'XER' | 'XML' | 'CSV';
+
+/**
+ * Version lifecycle status (§1.2).
+ * Processing → Parsed → Active → Superseded.
+ * Failed is a terminal parse error state. Secondary is for non-canonical sources.
+ */
+export type ScheduleVersionStatus =
+  | 'Processing'
+  | 'Parsed'
+  | 'Active'
+  | 'Superseded'
+  | 'Failed'
+  | 'Secondary';
+
+/** Frozen, immutable dated update snapshot (§1.2). No import overwrites prior data. */
+export interface IScheduleVersionRecord {
+  readonly versionId: string;
+  readonly projectId: string;
+  readonly sourceId: string;
+  readonly versionLabel: string;
+  readonly dataDate: string;
+  readonly importedBy: string;
+  readonly importedAt: string;
+  readonly format: ScheduleImportFormat;
+  readonly originalFilename: string;
+  readonly fileStorageRef: string;
+  readonly activityCount: number;
+  readonly milestoneCount: number;
+  readonly status: ScheduleVersionStatus;
+  readonly isCanonicalVersion: boolean;
+  readonly supersededAt: string | null;
+  readonly supersededBy: string | null;
+  readonly activatedAt: string | null;
+  readonly parentVersionId: string | null;
+  readonly validationWarnings: ReadonlyArray<string>;
+  readonly validationErrors: ReadonlyArray<string>;
+}
+
+// ── §1.3 BaselineRecord ──────────────────────────────────────────────
+
+/** Baseline type classification (§1.3). */
+export type BaselineType =
+  | 'ContractBaseline'
+  | 'ApprovedRevision'
+  | 'RecoveryBaseline'
+  | 'Scenario';
+
+/** Governed baseline record — frozen at approval, never modified (§1.3). */
+export interface IBaselineRecord {
+  readonly baselineId: string;
+  readonly projectId: string;
+  readonly baselineLabel: string;
+  readonly baselineType: BaselineType;
+  readonly sourceVersionId: string;
+  readonly dataDate: string;
+  readonly approvedBy: string;
+  readonly approvedAt: string;
+  readonly approvalBasis: string;
+  readonly causationCode: string | null;
+  readonly isPrimary: boolean;
+  readonly supersededAt: string | null;
+  readonly supersededBy: string | null;
+}
+
+// ── §1.4 ImportedActivitySnapshot ────────────────────────────────────
+
+/** CPM activity type from source tool (§1.4). */
+export type ScheduleActivityType =
+  | 'TT_Task'
+  | 'TT_Mile'
+  | 'TT_LOE'
+  | 'TT_FinMile'
+  | 'TT_WBS';
+
+/** Activity status from source tool (§1.4). */
+export type ScheduleStatusCode =
+  | 'TK_NotStart'
+  | 'TK_Active'
+  | 'TK_Complete';
+
+/** Constraint type enumeration per §1.4.1. */
+export type ScheduleConstraintType =
+  | 'CS_MSOA'
+  | 'CS_MFOA'
+  | 'CS_MSON'
+  | 'CS_MFON'
+  | 'CS_SNLF'
+  | 'CS_FNLF'
+  | 'CS_MEOA'
+  | 'CS_MEON';
+
+/** Basis for percent complete calculation (§1.4). */
+export type PercentCompleteBasis =
+  | 'Duration'
+  | 'Physical'
+  | 'Units'
+  | 'Manual';
+
+/** Predecessor/successor relationship reference (§1.4). */
+export interface IRelationshipRef {
+  readonly activityCode: string;
+  readonly relationshipType: string;
+  readonly lagHrs: number;
+}
+
+/** Resource assignment reference (§1.4). */
+export interface IResourceRef {
+  readonly resourceCode: string;
+  readonly resourceName: string;
+  readonly role: string;
+}
+
+/** Activity code value from P6 activity codes (§1.4 classification). */
+export interface IActivityCodeValue {
+  readonly codeType: string;
+  readonly codeValue: string;
+  readonly codeDescription: string;
+}
+
+/** User-defined field value from source tool (§1.4 classification). */
+export interface IUDFValue {
+  readonly fieldName: string;
+  readonly fieldType: string;
+  readonly value: string;
+}
+
+/**
+ * Immutable snapshot of one activity from one import version (§1.4).
+ * Never modified after import. Cross-version identity via externalActivityKey.
+ */
+export interface IImportedActivitySnapshot {
+  readonly snapshotId: string;
+  readonly versionId: string;
+  readonly projectId: string;
+  readonly externalActivityKey: string;
+  readonly sourceActivityCode: string;
+  readonly activityName: string;
+  readonly activityType: ScheduleActivityType;
+  readonly statusCode: ScheduleStatusCode;
+  readonly wbsCode: string | null;
+  readonly wbsName: string | null;
+  readonly targetDurationHrs: number;
+  readonly remainingDurationHrs: number;
+  readonly actualDurationHrs: number;
+  readonly baselineStartDate: string | null;
+  readonly baselineFinishDate: string | null;
+  readonly targetStartDate: string;
+  readonly targetFinishDate: string;
+  readonly actualStartDate: string | null;
+  readonly actualFinishDate: string | null;
+  readonly totalFloatHrs: number;
+  readonly freeFloatHrs: number | null;
+  readonly percentComplete: number;
+  readonly percentCompleteBasis: PercentCompleteBasis;
+  readonly calendarId: string | null;
+  readonly calendarName: string | null;
+  readonly constraintType1: ScheduleConstraintType | null;
+  readonly constraintDate1: string | null;
+  readonly constraintType2: ScheduleConstraintType | null;
+  readonly constraintDate2: string | null;
+  readonly predecessors: ReadonlyArray<IRelationshipRef>;
+  readonly successors: ReadonlyArray<IRelationshipRef>;
+  readonly resources: ReadonlyArray<IResourceRef>;
+  readonly deleteFlag: boolean;
+  readonly importedAt: string;
+  // Classification fields preserved from source (§1.4)
+  readonly activityCodeValues: ReadonlyArray<IActivityCodeValue>;
+  readonly udfValues: ReadonlyArray<IUDFValue>;
+  readonly primaryResourceCode: string | null;
+  readonly primaryResponsibleUserId: string | null;
+  readonly tradeCode: string | null;
+  readonly phaseCode: string | null;
+  readonly areaCode: string | null;
+  readonly contractMilestoneFlag: boolean;
+}
+
+// ── §1.5 ActivityContinuityLink ──────────────────────────────────────
+
+/**
+ * Durable cross-version identity connection for a logical activity (§1.5).
+ * Enables forensic comparison, scenario branching, and cross-version analytics.
+ */
+export interface IActivityContinuityLink {
+  readonly continuityId: string;
+  readonly projectId: string;
+  readonly externalActivityKey: string;
+  readonly snapshotIds: ReadonlyArray<string>;
+  readonly firstSeenVersionId: string;
+  readonly lastSeenVersionId: string;
+  readonly isActive: boolean;
+  readonly splitFromKey: string | null;
+  readonly mergedIntoKey: string | null;
+}
+
+// ── §1.6 Import Validation ───────────────────────────────────────────
+
+/** Severity classification for import validation checks (§1.6). */
+export type ImportValidationSeverity = 'error' | 'warning' | 'informational';
+
+/** A single import validation rule definition (§1.6). */
+export interface IImportValidationRule {
+  readonly check: string;
+  readonly severity: ImportValidationSeverity;
+  readonly behavior: string;
+}
+
+/** Result of applying one validation rule to an import. */
+export interface IImportValidationResult {
+  readonly passed: boolean;
+  readonly rule: IImportValidationRule;
+  readonly message: string;
+}
+
+// ── §17 Dual-Calendar Model ─────────────────────────────────────────
+
+/** Calendar type discrimination (§17.1). */
+export type CalendarType = 'SourceCalendar' | 'OperatingCalendar';
+
+/** Holiday or non-work date exception. */
+export interface ICalendarException {
+  readonly date: string;
+  readonly description: string;
+}
+
+/** Governed calendar rule record (§17.2). */
+export interface ICalendarRule {
+  readonly calendarRuleId: string;
+  readonly projectId: string;
+  readonly calendarType: CalendarType;
+  readonly calendarName: string;
+  readonly hoursPerDay: number;
+  readonly workDays: ReadonlyArray<number>;
+  readonly exceptions: ReadonlyArray<ICalendarException>;
+  readonly effectiveFrom: string;
+  readonly effectiveTo: string | null;
+  readonly createdBy: string;
+  readonly createdAt: string;
+}
+
+// ── Integration Boundary Contracts ───────────────────────────────────
+
+/** Direction of data flow at the Schedule module integration boundary. */
+export type ScheduleIntegrationDirection = 'inbound' | 'outbound';
+
+export interface IScheduleIntegrationBoundary {
+  readonly key: string;
+  readonly direction: ScheduleIntegrationDirection;
+  readonly source: string;
+  readonly target: string;
+  readonly description: string;
+  readonly status: 'active' | 'planned';
+}
+
+// ── Authority Model Contracts ────────────────────────────────────────
+
+/**
+ * Schedule module authority roles (P3-E5 Operating Model + P3-E2 §4).
+ * Domain-scoped roles resolved from the app-level auth context.
+ */
+export type ScheduleAuthorityRole =
+  | 'PM'
+  | 'PE'
+  | 'Scheduler'
+  | 'Superintendent'
+  | 'Foreman'
+  | 'MOE';
+
+/** Schedule operating model layers (P3-E5 master). */
+export type ScheduleLayerAccess =
+  | 'master-schedule'
+  | 'operating'
+  | 'field-execution'
+  | 'published-forecast';
+
+/** Schedule access action types. */
+export type ScheduleAccessAction =
+  | 'read'
+  | 'write'
+  | 'approve'
+  | 'configure'
+  | 'publish';
+
+export interface IScheduleAccessQuery {
+  readonly role: ScheduleAuthorityRole;
+  readonly layer: ScheduleLayerAccess;
+}
+
+export interface IScheduleAccessResult {
+  readonly allowed: ReadonlyArray<ScheduleAccessAction>;
+  readonly denied: ReadonlyArray<ScheduleAccessAction>;
+  readonly hidden: boolean;
+}
+
+// ── Governance Validation Result Types ───────────────────────────────
+
+export interface ICanonicalSourceValidation {
+  readonly valid: boolean;
+  readonly violations: ReadonlyArray<string>;
+}
+
+export interface IVersionActivationValidation {
+  readonly canActivate: boolean;
+  readonly blockers: ReadonlyArray<string>;
+}
+
+export interface IBaselineApprovalValidation {
+  readonly canApprove: boolean;
+  readonly blockers: ReadonlyArray<string>;
+}
+
+export interface ICalendarDivergenceResult {
+  readonly diverges: boolean;
+  readonly deltas: ReadonlyArray<string>;
+}

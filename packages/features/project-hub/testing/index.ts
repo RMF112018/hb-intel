@@ -69,3 +69,12 @@ export {
   mockSourceAnnotations,
   mockHealthSnapshotInput,
 } from './mockSpineEventScenarios.js';
+
+// ── P3-E5 Schedule module testing surface ────────────────────────────
+
+export { createMockScheduleSource } from './createMockScheduleSource.js';
+export { createMockScheduleVersion } from './createMockScheduleVersion.js';
+export { createMockBaselineRecord } from './createMockBaselineRecord.js';
+export { createMockImportedActivitySnapshot } from './createMockImportedActivitySnapshot.js';
+export { createMockCalendarRule, createMockOperatingCalendar } from './createMockCalendarRule.js';
+export { mockScheduleAccessScenarios, importValidationScenarios } from './mockScheduleScenarios.js';
