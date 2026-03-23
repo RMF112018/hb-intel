@@ -143,3 +143,10 @@ export { createMockDelayRecord } from './createMockDelayRecord.js';
 export { createMockTimeImpactRecord } from './createMockTimeImpactRecord.js';
 export { createMockCommercialImpactRecord } from './createMockCommercialImpactRecord.js';
 export { mockDelayLedgerScenarios } from './mockDelayLedgerScenarios.js';
+
+// ── P3-E6-T04 Change Ledger testing surface ───────────────────────────
+
+export { createMockChangeEventRecord } from './createMockChangeEventRecord.js';
+export { createMockChangeLineItem } from './createMockChangeLineItem.js';
+export { createMockProcoreMappingRecord } from './createMockProcoreMappingRecord.js';
+export { mockChangeLedgerScenarios } from './mockChangeLedgerScenarios.js';

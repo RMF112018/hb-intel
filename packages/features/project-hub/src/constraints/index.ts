@@ -1,13 +1,15 @@
 /**
  * P3-E6 runtime root barrel for Constraints module.
  *
- * Implemented: T01 (Risk Ledger), T02 (Constraint Ledger), T03 (Delay Ledger).
+ * Implemented: T01 (Risk Ledger), T02 (Constraint Ledger), T03 (Delay Ledger), T04 (Change Ledger).
  *
  * T01: Risk record model, lifecycle, categorization, business rules, health spine metrics.
  * T02: Constraint record model, lifecycle, categorization, priority, business rules, health spine metrics.
  * T03: Delay record model, schedule reference, time/cost separation, evidence gates, metrics.
+ * T04: Change event model, line items, Procore mapping, approval gate, metrics.
  */
 
 export * from './risk-ledger/index.js';
 export * from './constraint-ledger/index.js';
 export * from './delay-ledger/index.js';
+export * from './change-ledger/index.js';

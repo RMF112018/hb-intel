@@ -80,3 +80,5 @@ T01 Risk Ledger: Risk record model, 8-state lifecycle state machine, 16 governed
 T02 Constraint Ledger: Constraint record model, 7-state lifecycle state machine, 26 governed categories, 4-level priority, daysOpen calculation, 8 business rules, 6 health spine metrics, testing fixtures. See `src/constraints/constraint-ledger/`.
 
 T03 Delay Ledger: Delay record model with nested time/commercial impact records, 7-state lifecycle with evidence gates, dual schedule reference model, 9 enumerations, 7 business rules, 5 health spine metrics, claims-ready B+/C evidence orientation. See `src/constraints/delay-ledger/`.
+
+T04 Change Ledger: Change event model with line items, Procore mapping record, 9-state lifecycle with approval gate, ManualNative/IntegratedWithProcore dual mode, 7 business rules, 5 health spine metrics. See `src/constraints/change-ledger/`.

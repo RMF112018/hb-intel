@@ -1,0 +1,38 @@
+import type { IChangeEventRecord } from '../src/constraints/change-ledger/types.js';
+
+export const createMockChangeEventRecord = (
+  overrides?: Partial<IChangeEventRecord>,
+): IChangeEventRecord => ({
+  changeEventId: 'ce-001',
+  projectId: 'proj-001',
+  changeEventNumber: 'CE-001',
+  title: 'Foundation redesign due to differing site conditions',
+  description:
+    'Geotechnical borings revealed clay deposits not identified in original survey, requiring redesign of Building A foundation from spread footings to drilled piers.',
+  origin: 'SITE_CONDITION',
+  dateIdentified: '2026-02-01',
+  identifiedBy: 'user-001',
+  parentConstraintId: null,
+  status: 'Identified',
+  statusDate: '2026-02-01',
+  approvedDate: null,
+  approvedBy: null,
+  closureReason: null,
+  dateClosed: null,
+  lineItems: [],
+  totalCostImpact: 0,
+  totalCostCalculated: false,
+  costConfidence: null,
+  scheduleImpactDays: null,
+  scheduleImpactDescription: null,
+  linkedDelayIds: [],
+  integrationMode: 'ManualNative',
+  procoreMapping: null,
+  attachments: [],
+  comments: [],
+  createdAt: '2026-02-01T09:00:00Z',
+  createdBy: 'user-001',
+  lastEditedAt: null,
+  lastEditedBy: null,
+  ...overrides,
+});
