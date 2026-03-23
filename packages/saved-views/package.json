@@ -1,6 +1,6 @@
 {
   "name": "@hbc/saved-views",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "description": "Shared workspace-state persistence runtime for HB Intel — view lifecycle, scope model, schema compatibility, reconciliation, and module adapter seams",
   "type": "module",

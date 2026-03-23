@@ -45,7 +45,20 @@ export type { ISavedViewsStorageAdapter } from './storage/index.js';
 export { InMemorySavedViewsStorageAdapter } from './storage/index.js';
 
 // Hooks (SF26-T04)
-// export * from './hooks/index.js';
+export {
+  savedViewsKeys,
+  useSavedViews,
+  useViewCompatibility,
+  useWorkspaceStateMapper,
+} from './hooks/index.js';
+export type {
+  UseSavedViewsOptions,
+  UseSavedViewsResult,
+  UseViewCompatibilityOptions,
+  UseViewCompatibilityResult,
+  UseWorkspaceStateMapperOptions,
+  UseWorkspaceStateMapperResult,
+} from './hooks/index.js';
 
 // Adapters (SF26-T07)
 // export * from './adapters/index.js';
