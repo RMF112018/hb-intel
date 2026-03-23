@@ -12,3 +12,13 @@ export type { IProjectRegistryRecord, ISiteAssociation } from './IProjectRegistr
 export { toActiveProject } from './IProjectRegistryRecord.js';
 export { type ProjectId, type ProjectNumber, type ProjectSearchCriteria } from './types.js';
 export { PROJECT_STATUS_LABELS, ACTIVE_PROJECT_STATUSES } from './constants.js';
+export type {
+  ActivityCategory,
+  ActivitySignificance,
+  IProjectActivityEvent,
+  IActivityRuntimeContext,
+  IActivityQuery,
+  IActivityEventTypeMetadata,
+  IActivitySourceAdapter,
+  IActivitySourceRegistration,
+} from './IActivitySpine.js';

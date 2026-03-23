@@ -200,6 +200,7 @@ Must follow Stage 2 (role context required for spine publication filtering).
 **3.1 — Spine adapter interface definitions**
 Define the four spine adapter interfaces (Activity, Health, Work Queue, Related Items) with their publication contracts. All module adapters must implement these interfaces. No module should bypass the adapter interface to write directly to a spine.
 Governing: P3-A3 §4–§7
+Status: **Implemented 2026-03-22 in `@hbc/models` v0.5.0.** Activity spine types added: `IProjectActivityEvent`, `IActivitySourceAdapter`, `IActivitySourceRegistration`, `IActivityQuery`, `ActivityCategory` (7 values), `ActivitySignificance` (3 tiers). Health (SF21), Work Queue (SF29/ADR-0115), and Related Items (SF14) adapter interfaces already mature — no changes needed.
 
 **3.2 — Activity spine (`@hbc/features-project-hub` activity integration)**
 Implement the activity publication adapter. Module events publish to the activity spine via the adapter. Activity spine renders the PWA full-timeline view and the SPFx tile view. Spine data is consistent for the same `projectId` in both lanes.
