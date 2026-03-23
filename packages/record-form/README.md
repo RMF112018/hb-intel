@@ -52,5 +52,8 @@ Test factories and mock adapters are exported from the `/testing` subpath, exclu
 
 ## Related
 
+- [ADR-0120 — Record Form Architecture](../../docs/architecture/adr/ADR-0120-record-form.md)
+- [Adoption Guide](../../docs/how-to/developer/record-form-adoption-guide.md)
+- [API Reference](../../docs/reference/record-form/api.md)
 - [SF23 Master Plan](../../docs/architecture/plans/shared-features/SF23-Record-Form.md)
 - [SF23-T09 — Testing and Deployment](../../docs/architecture/plans/shared-features/SF23-T09-Testing-and-Deployment.md)

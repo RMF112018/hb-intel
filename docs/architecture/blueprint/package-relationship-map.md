@@ -887,7 +887,7 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 
 ---
 
-#### `@hbc/record-form` · v0.0.8 · [Partial]
+#### `@hbc/record-form` · v0.1.0 · [Complete]
 
 | Field | Value |
 |-------|-------|
