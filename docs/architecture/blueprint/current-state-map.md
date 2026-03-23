@@ -117,6 +117,10 @@
 | `docs/architecture/adr/ADR-0121-saved-views.md` | **Permanent Decision Rationale** | SF26 saved views shared primitive architecture; 6 locked decisions (L-01–L-06) |
 | `docs/how-to/developer/saved-views-adoption-guide.md` | **Living Reference (Diataxis)** | How-to quadrant; developer audience; saved-views module adoption |
 | `docs/reference/saved-views/api.md` | **Living Reference (Diataxis)** | Reference quadrant; developer audience; saved-views API reference |
+| SF25 shared-feature plans (10 files: `SF25-Publish-Workflow.md` through `SF25-T09-Testing-and-Deployment.md`) | **Historical Foundational** | Phase 3 Stage 5.5; T01–T09 complete 2026-03-23; package `@hbc/publish-workflow` v0.1.0 feature-complete |
+| `docs/architecture/adr/ADR-0122-publish-workflow.md` | **Permanent Decision Rationale** | SF25 publish workflow shared primitive architecture; 6 locked decisions (L-01–L-06) |
+| `docs/how-to/developer/publish-workflow-adoption-guide.md` | **Living Reference (Diataxis)** | How-to quadrant; developer audience; publish-workflow module adoption |
+| `docs/reference/publish-workflow/api.md` | **Living Reference (Diataxis)** | Reference quadrant; developer audience; publish-workflow API reference |
 | `docs/architecture/adr/ADR-0115-my-work-feed-architecture.md` | **Permanent Decision Rationale** | SF29 my-work-feed multi-source aggregation architecture; 10 locked decisions (D-01–D-10) |
 | `docs/how-to/developer/my-work-feed-adoption-guide.md` | **Living Reference (Diátaxis)** | How-to quadrant; developer audience; my-work-feed module adoption |
 | `docs/reference/my-work-feed/api.md` | **Living Reference (Diátaxis)** | Reference quadrant; developer audience; my-work-feed API reference |
@@ -368,7 +372,7 @@ The original three (SF01–SF03) emerged organically; SF04–SF15 are planned pr
 | `packages/export-runtime` | @hbc/export-runtime | Shared export runtime — lifecycle, render pipeline, receipt state, provenance, offline replay | Depends on models, ui-kit; peer: react, react-dom, @tanstack/react-query | v0.1.0 | `packages/export-runtime/README.md` |
 | `packages/record-form` | @hbc/record-form | Shared record authoring runtime — create/edit/duplicate/template lifecycle, draft recovery, review handoff, offline replay | Depends on models, ui-kit; peer: react, react-dom, @tanstack/react-query | v0.1.0 | `packages/record-form/README.md` |
 | `packages/saved-views` | @hbc/saved-views | Shared workspace-state persistence — view lifecycle, scope model, schema compatibility, reconciliation | Depends on models, ui-kit; peer: react, react-dom, @tanstack/react-query | v0.1.0 | `packages/saved-views/README.md` |
-| `packages/publish-workflow` | @hbc/publish-workflow | Shared publication workflow — state machine, readiness/approval, supersession/revocation, receipt traceability | Depends on models, ui-kit; peer: react, react-dom, @tanstack/react-query | v0.0.8 | `packages/publish-workflow/README.md` |
+| `packages/publish-workflow` | @hbc/publish-workflow | Shared publication workflow — state machine, readiness/approval, supersession/revocation, receipt traceability | Depends on models, ui-kit; peer: react, react-dom, @tanstack/react-query | v0.1.0 | `packages/publish-workflow/README.md` |
 | `packages/ai-assist` | @hbc/ai-assist | Contextual AI action layer — Azure AI Foundry integration | Depends on auth, complexity, versioned-record | v0.0.1 | `packages/ai-assist/README.md` |
 | `packages/health-indicator` | @hbc/health-indicator | Health-indicator scoring/config/telemetry runtime for readiness models | None (standalone primitive) | v0.0.1 | `packages/health-indicator/README.md` |
 | `packages/notification-intelligence` | @hbc/notification-intelligence | Priority-tiered smart notification system | None (standalone primitive) | v0.0.2 | `packages/notification-intelligence/README.md` |

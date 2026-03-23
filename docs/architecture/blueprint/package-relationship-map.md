@@ -930,7 +930,7 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 
 ---
 
-#### `@hbc/publish-workflow` · v0.0.8 · [Partial]
+#### `@hbc/publish-workflow` · v0.1.0 · [Complete]
 
 | Field | Value |
 |-------|-------|

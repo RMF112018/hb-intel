@@ -38,5 +38,8 @@ Coverage threshold: 95/95/95/95.
 
 ## Related
 
+- [ADR-0122 — Publish Workflow Architecture](../../docs/architecture/adr/ADR-0122-publish-workflow.md)
+- [Adoption Guide](../../docs/how-to/developer/publish-workflow-adoption-guide.md)
+- [API Reference](../../docs/reference/publish-workflow/api.md)
 - [SF25 Master Plan](../../docs/architecture/plans/shared-features/SF25-Publish-Workflow.md)
 - [SF25-T09 — Testing and Deployment](../../docs/architecture/plans/shared-features/SF25-T09-Testing-and-Deployment.md)

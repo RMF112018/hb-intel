@@ -125,6 +125,7 @@
 - [ADR-0119: Export Runtime Shared Primitive Architecture](./ADR-0119-export-runtime.md)
 - [ADR-0120: Record Form Shared Primitive Architecture](./ADR-0120-record-form.md)
 - [ADR-0121: Saved Views Shared Primitive Architecture](./ADR-0121-saved-views.md)
+- [ADR-0122: Publish Workflow Shared Primitive Architecture](./ADR-0122-publish-workflow.md)
 
 ## Archived
 
@@ -139,7 +140,7 @@ Stale duplicate copies moved to `archived/` during PH7.11 conflict resolution:
 
 ## How to Add a New ADR
 
-1. Use the next available number: **ADR-0122**
+1. Use the next available number: **ADR-0123**
 2. Create a file: `ADR-XXXX-short-title.md`
 3. Use the standard format: Title, Status, Date, Context, Decision, Consequences
 4. Add entry to this README under the appropriate section
