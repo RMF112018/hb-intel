@@ -64,7 +64,7 @@ Layer 9 — Domain Data Infrastructure
   Domain-agnostic import/seeding utilities
 
 Layer 8 — Intelligence Scaffolds & Shared-Feature Primitives
-  (@hbc/health-indicator, @hbc/score-benchmark, @hbc/strategic-intelligence, @hbc/post-bid-autopsy, @hbc/my-work-feed, @hbc/export-runtime, @hbc/record-form)
+  (@hbc/health-indicator, @hbc/score-benchmark, @hbc/strategic-intelligence, @hbc/post-bid-autopsy, @hbc/my-work-feed, @hbc/export-runtime, @hbc/record-form, @hbc/saved-views)
   Scoring, analysis, learning signal, cross-module aggregation, and shared-feature runtime primitives
 
 Layer 7 — Workflow Primitives
@@ -909,6 +909,24 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 - Module adapters must not re-invent lifecycle interpretation locally.
 
 **Governing plan:** [SF23-Record-Form.md](../../docs/architecture/plans/shared-features/SF23-Record-Form.md)
+
+---
+
+#### `@hbc/saved-views` · v0.0.1 · [Scaffold]
+
+| Field | Value |
+|-------|-------|
+| **Path** | `packages/saved-views/` |
+| **Layer** | 8 — Shared-Feature Primitives |
+| **Depends on** | `@hbc/models` (workspace) |
+| **Used by** | All Phase 3 modules via `ISavedViewStateMapper<TState>`, `@hbc/export-runtime` (savedViewContext), `@hbc/bulk-actions` (scope handoff) |
+| **Maturity** | Scaffold |
+
+**Purpose:** Shared workspace-state persistence runtime — view lifecycle, scope model (personal/team/role/system), schema compatibility/reconciliation, and `ISavedViewStateMapper<TState>` module adapter seam. Establishes `ISavedViewContext` handoff consumed by export-runtime and bulk-actions.
+
+**Key exports:** `SavedViewScope`, `ISavedViewDefinition`, `ISavedViewStateMapper<TState>`, `IFilterClause`, `ISortDefinition`, `IGroupDefinition`, `IViewPresentationState`, `ISchemaCompatibilityResult`, `IViewReconciliationResult`, `ISavedViewContext`, 2 constants. Testing subpath at `@hbc/saved-views/testing`.
+
+**Governing plan:** [SF26-Saved-Views.md](../../docs/architecture/plans/shared-features/SF26-Saved-Views.md)
 
 ---
 
