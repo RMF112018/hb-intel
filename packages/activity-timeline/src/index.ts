@@ -62,13 +62,14 @@ export {
 } from './types/index.js';
 
 // Model — normalization, filtering, grouping (SF28-T03)
-// export * from './model/index.js';
+export { normalizeActivityEvent, applyDeduplication, markDeduped } from './model/index.js';
 
 // Formatters — diff summarization, readable formatting (SF28-T05/T06)
 // export * from './formatters/index.js';
 
 // Storage — append-only persistence adapters (SF28-T03)
-// export * from './storage/index.js';
+export type { IActivityStorageAdapter } from './storage/index.js';
+export { InMemoryStorageAdapter } from './storage/index.js';
 
 // Adapters — emitter helpers, module adapter seams (SF28-T07)
 // export * from './adapters/index.js';
