@@ -137,7 +137,10 @@
       "Bash(find /Users/bobbyfetting/hb-intel/packages/related-items/testing -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
       "Bash(find /Users/bobbyfetting/hb-intel/packages/my-work-feed -type f \\\\\\(-name *.css -o -name *.scss -o -name *styles* \\\\\\))",
       "Bash(npx vite:*)",
-      "Bash(zone\" elevation when item is selected, while analytics zones remain at:*)"
+      "Bash(zone\" elevation when item is selected, while analytics zones remain at:*)",
+      "Bash(while read:*)",
+      "Bash(then echo:*)",
+      "Bash(fi)"
     ]
   },
   "enabledPlugins": {

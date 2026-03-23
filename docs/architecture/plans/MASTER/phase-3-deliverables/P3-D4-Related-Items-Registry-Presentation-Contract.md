@@ -436,7 +436,8 @@ Each always-on core module that has cross-module record relationships MUST regis
 
 - Relationships MUST use `RelationshipRegistry.registerBidirectionalPair()` to ensure symmetric visibility.
 - Relationship definitions MUST include `governanceMetadata` with `relationshipPriority` for consistent ordering.
-- `visibleToRoles` MUST align with the module visibility matrix in P3-A2 §4.1.
+- `visibleToRoles` MUST align with the module visibility matrix in P3-A2 §4.1, including the Phase 3 three-tier authority model (Leadership / Portfolio Executive Reviewer / Project Executive).
+- Modules MUST account for the Portfolio Executive Reviewer (`portfolio-executive-reviewer`) as a registered role when defining `visibleToRoles`. PER relationship visibility is subject to the review circle restriction (P3-A2 §3.2) — PER does not see pushed items or full operational relationship context until access is in scope.
 - Relationships MUST NOT create cross-feature package imports — resolution functions use record IDs and URL builders only.
 
 ### 9.3 Architecture boundary (from P3-A3 §6.3)
@@ -595,7 +596,7 @@ This contract establishes the **Related-Items spine implementation specification
 | **P3-A3 §6** — Related-Items Spine Publication Contract | Provides the publication-level module registration expectations that this contract expands |
 | **P3-C2 §5** — Related-Items Tile | Defines the mandatory `related-items` tile that consumes relationship data per the rendering contract in §10 |
 | **P3-A1** — Project Registry | Provides `projectId` context for project-scoped relationship views |
-| **P3-A2** — Membership / Role Authority | Provides role-based visibility rules that `visibleToRoles` and `roleRelevanceMap` must align with |
+| **P3-A2** — Membership / Role Authority | Provides the three-tier authority model (Leadership / Portfolio Executive Reviewer / Project Executive) and role-based visibility rules that `visibleToRoles` and `roleRelevanceMap` must align with; PER posture affects relationship visibility per §9.2 |
 | **P3-D1** — Project Activity Contract | Defines the Activity spine that Related-Items publishes governance events into per §11.1 |
 | **P3-E1** — Module Classification Matrix | Module relationship registration expectations in §9 must align with module classifications |
 | **P3-H1** — Acceptance Checklist | Must include related-items spine gate evidence |
@@ -605,5 +606,5 @@ If a downstream deliverable conflicts with this contract, this contract takes pr
 
 ---
 
-**Last Updated:** 2026-03-21
+**Last Updated:** 2026-03-22
 **Governing Authority:** [Phase 3 Plan §8.5](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [ADR-0103](../../../adr/0103-related-items-unified-work-graph.md)

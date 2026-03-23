@@ -45,11 +45,15 @@ Report-family approval rules are explicitly different (Phase 3 plan §8.7):
 - The draft and snapshot model (auto-assembly, narrative overrides, refresh, freeze)
 - Staleness handling (thresholds, warnings, confirmed snapshots)
 - The generation pipeline (readiness, preview, queued generation, artifact production)
-- The run-ledger contract (run metadata, status lifecycle, artifact references)
+- The run-ledger contract (run metadata, status lifecycle, artifact references, run type)
 - Family-specific approval rules (PX Review gated, Owner Report non-gated)
 - Release and distribution lifecycle (release tracking, distribution state)
 - Module snapshot consumption rules
 - PM narrative override contract
+- **Portfolio Executive Reviewer report permissions** (what PER may and may not do in the reporting system)
+- **Reviewer-generated review runs** (PER-initiated runs against confirmed PM snapshots)
+- **Central project-governance policy record** (global and project-level report-family approval/release policy; Reports enforces, does not own)
+- **PM↔PE internal review chain** (optional project-level governance step; PX Review cannot bypass when configured)
 - Spine publication requirements (Activity, Health, Work Queue, Related Items)
 - Cross-lane reporting consistency
 
@@ -60,6 +64,7 @@ Report-family approval rules are explicitly different (Phase 3 plan §8.7):
 - Report canvas tile definition — see [P3-C2](P3-C2-Mandatory-Core-Tile-Family-Definition.md)
 - Per-capability lane depth detail — see [P3-G1 §4.6](P3-G1-Lane-Capability-Matrix.md)
 - PDF generation engine selection — implementation decision
+- PER posture and scope eligibility — governed by [P3-A2 §3.2](P3-A2-Membership-Role-Authority-Contract.md)
 
 ---
 
@@ -79,6 +84,10 @@ Report-family approval rules are explicitly different (Phase 3 plan §8.7):
 | **Release** | The governed act of making a generated report available for distribution |
 | **Distribution** | The tracked delivery of a released report to recipients |
 | **Report workspace** | The Project Hub surface where users interact with report families, drafts, generation, and history |
+| **Project-governance policy record** | The authoritative governance record owning report-family approval and release policy for a project; Reports module enforces this policy but does not own it |
+| **Internal review chain** | An optional PM↔PE governance step, configurable at project level, that must complete before PX Review (or release) may proceed |
+| **Reviewer-generated review run** | A report run initiated by a Portfolio Executive Reviewer, using only the latest already-confirmed PM-owned snapshot; tagged as `reviewer-generated` in the run ledger |
+| **PER report posture** | The Portfolio Executive Reviewer's permissions in the reporting system: view, annotate (review layer only), and generate reviewer-generated runs; no authority over PM draft state |
 
 ---
 
@@ -283,6 +292,7 @@ Readiness Check → Inline Preview → Queued Generation → Artifact Production
 | `projectId` | `string` | Project identity from P3-A1 registry |
 | `generatedAt` | `string` (ISO 8601) | When generation was triggered |
 | `generatedBy` | `string` | UPN of the user who triggered generation |
+| `runType` | `'standard' \| 'reviewer-generated'` | Distinguishes PM/PE-initiated runs from PER reviewer-generated runs |
 | `snapshotVersion` | `string` | Identifier of the frozen snapshot used |
 | `artifactUrl` | `string \| null` | URL of the generated PDF artifact (null if generation in progress or failed) |
 | `status` | `ReportRunStatus` | Current run status |
@@ -358,6 +368,43 @@ interface IReportApproval {
 - Only reports in `generated` status can be approved.
 - Approval is irreversible — once approved, the status cannot revert to `generated`.
 - The `approvalGated` flag on the report definition determines whether approval is required.
+
+### 8.5 Portfolio Executive Reviewer report permissions
+
+PER posture provides access to report content under a distinct permission set that differs from PM, PE, and project team roles. The central project-governance policy record (§14) further governs family-specific release authority.
+
+**What PER may do:**
+
+| Action | Permitted | Rules |
+|---|---|---|
+| View report runs (all families in scope) | **Yes** | Subject to department scope; PER sees runs for projects in their governed scope only |
+| Annotate report content (review layer) | **Yes** | Annotations stored in separate `@hbc/field-annotations` artifact; MUST NOT modify run-ledger, draft state, or PM narrative (P3-E2 §8.4) |
+| Generate reviewer-generated review runs | **Yes** | Only against the latest already-confirmed PM-owned snapshot; see §8.6 |
+| View release status | **Yes** | Read-only |
+| Release a report family | **Project-policy governed** | Authority is per-family, governed by the central project-governance policy record (§14); not universal |
+
+**What PER may NOT do:**
+
+| Action | Prohibited |
+|---|---|
+| Confirm a PM draft | PER MUST NOT initiate, approve, or modify PM draft confirmation. Draft state confirmation is PM/PE-owned exclusively. |
+| Edit PM narrative | PER MUST NOT modify PM narrative override content. Narrative is PM/PE-authored exclusively. |
+| Modify run-ledger entries | PER has no write access to the run ledger. Reviewer-generated runs are added as new entries only. |
+| Access unconfirmed PM drafts | Reviewer-generated runs must use the latest confirmed snapshot only; in-progress or unconfirmed PM drafts are not accessible to PER. |
+| Advance or bypass PM↔PE internal review chain | The PM↔PE internal review chain is PM/PE-owned; PER cannot initiate, advance, or skip it. |
+
+### 8.6 Reviewer-generated review runs
+
+A reviewer-generated review run is initiated by a Portfolio Executive Reviewer, distinct from PM/PE-initiated runs.
+
+| Rule | Description |
+|---|---|
+| **Snapshot source** | MUST use only the latest already-confirmed PM-owned snapshot. PER cannot trigger a new confirmation; no unconfirmed drafts are accessible. |
+| **Run type tag** | Run is recorded in the run-ledger as `runType: 'reviewer-generated'`. The `generatedBy` field captures PER identity. |
+| **Annotation attachment** | Reviewer-generated run may carry an attached `@hbc/field-annotations` review artifact as a contextual annotation layer. |
+| **No bypass** | A reviewer-generated run does not bypass, replace, or modify the PM's draft state, PM narrative, or the PM's own run history. |
+| **No new draft confirmation** | PER initiating a reviewer run does NOT trigger any PM draft state change. The PM's draft lifecycle is entirely unaffected. |
+| **Visibility** | Reviewer-generated runs are visible to the project team and PER. Review annotations are restricted to the review circle before PER pushes to the project team. |
 
 ---
 
@@ -504,7 +551,80 @@ Reports publishes to all 4 spines per P3-A3 §7:
 
 ---
 
-## 14. Repo-Truth Reconciliation Notes
+## 14. Central Project-Governance Policy Record
+
+### 14.1 Purpose and ownership
+
+The central project-governance policy record is the **authoritative source** for report-family approval and release policy for a project. The Reports module **enforces** this policy but does **not own** it.
+
+| Concern | Owner |
+|---|---|
+| Report-family approval/release policy | Project-governance policy record |
+| Policy enforcement in the reporting pipeline | Reports module (enforcer only) |
+| Global policy floor | Manager of Operational Excellence (company-wide default) |
+| Project-level policy customization | Project Executive (project-specific; may tighten global policy; may NOT loosen it) |
+
+### 14.2 Policy hierarchy
+
+| Level | Authority | Scope | Rule |
+|---|---|---|---|
+| **Global** | Manager of Operational Excellence | Company-wide floor | All projects comply by default; no project may loosen global policy |
+| **Project** | Project Executive | Project-specific | May add stricter rules; may NOT loosen or override the global floor |
+| **Effective** | Merged result | Per-project | Reports module reads effective policy = project overlay on global floor |
+
+### 14.3 Project-governance policy record shape
+
+| Field | Type | Description |
+|---|---|---|
+| `projectId` | `string` | Project identity (normalized per P3-A1 §3.4) |
+| `familyPolicies` | `Record<familyKey, IReportFamilyPolicy>` | Per-family policy overrides relative to global floor |
+| `internalReviewChainConfig` | `IInternalReviewChainConfig \| null` | PM↔PE internal review chain configuration (§14.5) |
+| `lastModifiedBy` | `string` | UPN of the PE who last modified project-level policy |
+| `lastModifiedAt` | `string` | ISO 8601 timestamp |
+
+### 14.4 Per-family policy shape
+
+| Field | Type | Description |
+|---|---|---|
+| `perReleaseAuthority` | `'pe-only' \| 'per-permitted' \| 'global'` | Governs PER release capability for this family |
+| `requiresInternalReviewChain` | `boolean` | Whether PM↔PE chain must complete before release/PX Review proceeds |
+| `bypassInternalReviewChainForOwnerReport` | `boolean` | Owner Report only: explicit opt-out of chain requirement (default: `false`) |
+
+**`perReleaseAuthority` values:**
+
+| Value | Meaning |
+|---|---|
+| `'pe-only'` | Only Project Executive (or Leadership) may release; PER may not release this family |
+| `'per-permitted'` | PER may release this family (subject to scope); PE may also release |
+| `'global'` | Apply global floor policy for this family |
+
+**Default global policy (set by Manager of OpEx):** `pe-only` for PX Review; `per-permitted` for Owner Report. Both are configurable at global level by Manager of OpEx.
+
+### 14.5 PM↔PE internal review chain
+
+The PM↔PE internal review chain is an optional project-level governance step that inserts a required PE review before PX Review (or other release actions) may proceed for a given report family.
+
+| Rule | Description |
+|---|---|
+| **Configuration** | PE enables the chain in the project-governance policy record per report family. Default: chain not required (unless global policy requires it). |
+| **Chain behavior** | PM submits the report run to PE for internal review → PE approves or returns for revision → chain marked complete → PX Review and/or release may proceed |
+| **PX Review cannot bypass** | When `requiresInternalReviewChain: true` for the PX Review family, PX Review CANNOT proceed until the PM↔PE chain is marked complete for that run. |
+| **PER cannot bypass** | PER cannot advance, approve, or skip PM↔PE internal review chain steps. The chain is PM/PE-owned exclusively. |
+| **Owner Report bypass** | Owner Report MAY bypass the chain ONLY when `bypassInternalReviewChainForOwnerReport: true` is explicitly set in the project family policy. Default: `false` (chain applies if enabled). |
+| **Chain ownership** | All chain steps are PM/PE-owned. PER has no role in this chain. |
+
+### 14.6 Reports module as policy enforcer
+
+The Reports module:
+- Reads effective policy at generation, approval, and release time
+- Enforces the `perReleaseAuthority` rule when PER attempts to release a report family
+- Enforces the `requiresInternalReviewChain` gate before PX Review or release actions are permitted
+- Does NOT modify the policy record itself — policy changes go through the PE (project-level) or Manager of OpEx (global-level)
+- Rejects any action that would violate the effective policy, regardless of the requesting actor's role
+
+---
+
+## 15. Repo-Truth Reconciliation Notes
 
 1. **Report-definition registry — gap**
    No registry exists. Phase 3 must implement the report-definition registry with PX Review and Owner Report families. Classified as **gap — new implementation required**.
@@ -527,21 +647,27 @@ Reports publishes to all 4 spines per P3-A3 §7:
 7. **Replacement workflow — documented**
    P3-E3 §7 documents the manual report assembly workflow being replaced. Classified as **compliant**.
 
+8. **PER report permissions and reviewer-generated runs — gap filled**
+   No PER report permission model, reviewer-generated run type, or run-ledger `runType` field previously existed. Now locked in §8.5–§8.6 and §7.1. Classified as **gap — now resolved**.
+
+9. **Central project-governance policy record — gap filled**
+   No project-governance policy record previously existed. Policy record structure, hierarchy, PM↔PE internal review chain, and PER release authority rules now locked in §14. Reports module is enforcer-only; Manager of OpEx sets global floor; PE sets project-level policy. Classified as **gap — now resolved**.
+
 ---
 
-## 15. Acceptance Gate Reference
+## 16. Acceptance Gate Reference
 
 **Gate:** Reporting gates (Phase 3 plan §18.6)
 
 | Field | Value |
 |---|---|
-| **Pass condition** | PX Review and Owner Report are live as governed report families. Draft refresh, staleness warning, queued generation, run tracking, and history work. PX Review explicit approval and Owner Report governed non-approval-gated release behavior are implemented correctly. |
-| **Evidence required** | P3-F1 (this document), report-definition registry with 2 families, draft/snapshot model functional, staleness handling operational, generation pipeline producing PDF artifacts, run-ledger tracking all runs, PX Review approval gate enforced, Owner Report non-gated release working, spine publication flowing |
+| **Pass condition** | PX Review and Owner Report are live as governed report families. Draft refresh, staleness warning, queued generation, run tracking, and history work. PX Review explicit approval and Owner Report governed non-approval-gated release behavior are implemented correctly. PER report permissions enforced (no draft authority, reviewer-generated runs against confirmed snapshots only). Central project-governance policy record enforced; global and project-level policy hierarchy in effect; PM↔PE internal review chain blocks PX Review when configured. |
+| **Evidence required** | P3-F1 (this document), report-definition registry with 2 families, draft/snapshot model functional, staleness handling operational, generation pipeline producing PDF artifacts, run-ledger tracking all runs with `runType` distinction, PX Review approval gate enforced, Owner Report non-gated release working, PER permission rules verified, project-governance policy record enforced, spine publication flowing |
 | **Primary owner** | Project Hub platform owner + Architecture |
 
 ---
 
-## 16. Policy Precedence
+## 17. Policy Precedence
 
 This contract establishes the **governed reporting system specification** that implementation must satisfy:
 
@@ -549,8 +675,9 @@ This contract establishes the **governed reporting system specification** that i
 |---|---|
 | **Phase 3 Plan §8.7, §12.6** | Provides the reporting model and module boundary that this contract codifies |
 | **PH7-14** — PX Review & Owner Report | Provides detailed implementation specifications that this contract governs |
-| **P3-E1** — Module Classification Matrix | Classifies Reports as governed report workspace (§3.6, §6.2) |
-| **P3-E2 §8** — Reports Source-of-Truth | Defines Reports ownership (lifecycle) vs. consumption (module snapshots) |
+| **P3-A2 §3.2** — PER Governed Authority | Defines the Portfolio Executive Reviewer posture and scope; PER report permissions (§8.5–§8.6) derive from this authority model |
+| **P3-E1** — Module Classification Matrix | Classifies Reports as governed report workspace (§3.6, §6.2); §9.1 classifies Reports as review-capable |
+| **P3-E2 §8** — Reports Source-of-Truth | Defines Reports ownership (lifecycle) vs. consumption (module snapshots); §8.4 governs executive review boundary |
 | **P3-E3 §7** — Reports Replacement Notes | Documents the manual workflow being replaced |
 | **P3-A3 §7** — Module Publication Matrix | Defines spine publication requirements (all 4 spines) |
 | **P3-D1 §8.6** — Activity Events | Defines Reports activity event types |
@@ -564,5 +691,5 @@ If a downstream deliverable conflicts with this contract, this contract takes pr
 
 ---
 
-**Last Updated:** 2026-03-21
+**Last Updated:** 2026-03-22
 **Governing Authority:** [Phase 3 Plan §8.7, §12.6](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

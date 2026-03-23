@@ -175,6 +175,8 @@ Financial is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Ex
 | **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
 | **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
 
+**Field-level specification:** [P3-E4 — Financial Module Field Specification](P3-E4-Financial-Module-Field-Specification.md)
+
 ---
 
 ## 4. Schedule Source-of-Truth
@@ -211,6 +213,8 @@ Schedule is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Exe
 | **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
 | **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
 
+**Field-level specification:** [P3-E5 — Schedule Module Field Specification](P3-E5-Schedule-Module-Field-Specification.md)
+
 ---
 
 ## 5. Constraints Source-of-Truth
@@ -244,6 +248,8 @@ Constraints is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio 
 | **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
 | **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
 
+**Field-level specification:** [P3-E6 — Constraints Module Field Specification](P3-E6-Constraints-Module-Field-Specification.md)
+
 ---
 
 ## 6. Permits Source-of-Truth
@@ -275,6 +281,8 @@ Permits is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Exec
 | **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of permit status, inspection results/linkage, or expiration tracking. |
 | **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
 | **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
+
+**Field-level specification:** [P3-E7 — Permits Module Field Specification](P3-E7-Permits-Module-Field-Specification.md)
 
 ---
 
@@ -311,6 +319,8 @@ Safety is **excluded from Phase 3 executive review** (P3-E1 §9.1 and §9.3). Th
 | **Read-only PER access** | PER posture grants read-only access to Safety module data. Read-only access does not constitute a review layer — there is no annotation capability and no push-to-team pathway from Safety in Phase 3. |
 | **No mutation path from PER** | PER access to Safety data is strictly non-operational. No PER action may trigger any write to Safety source-of-truth records. |
 | **Rationale** | Safety data is operationally sensitive and compliance-critical. This exclusion may be revisited in a later phase with appropriate governance controls (P3-E1 §9.3). |
+
+**Field-level specification:** [P3-E8 — Safety Module Field Specification](P3-E8-Safety-Module-Field-Specification.md)
 
 ---
 
@@ -353,6 +363,8 @@ Reports is a **review-capable surface** in Phase 3 but under governance that dif
 | **Reviewer-generated review runs** | PER may generate review runs only against the latest already-confirmed PM-owned snapshot. PER CANNOT generate a run against an unconfirmed or in-progress PM draft. |
 | **Release authority** | PER release authority on a given report family is governed by the central project-governance policy record (P3-F1). It is not universal — family-by-family, governed by policy. |
 | **PX Review cannot bypass PE internal review** | The PM↔PE internal review chain, when configured at project level, MUST complete before PX Review proceeds. PER cannot bypass this chain. |
+
+**Field-level specification:** [P3-E9 — Reports Module Field Specification](P3-E9-Reports-Module-Field-Specification.md)
 
 ---
 
@@ -539,19 +551,151 @@ Overrides MUST always carry provenance metadata. No override may be applied sile
 
 ---
 
-## 14. Acceptance Gate Reference
+## 14. Project Closeout Source-of-Truth
+
+### 14.1 Project Hub operational authority
+
+| Data domain | Authority | Notes |
+|---|---|---|
+| Closeout checklist items | **Project Hub owns** | 70-item checklist across 7 sections |
+| Checklist item results (Yes/No/N/A) | **Project Hub owns** | Tri-state per item |
+| Checklist date fields | **Project Hub owns** | Date-bearing items (2.10, 3.11, 4.2, 4.3, 4.4, 4.13); item 4.14 is calculated |
+| Subcontractor scorecard records | **Project Hub owns** | Full evaluation record per subcontractor |
+| Scorecard scoring and calculation | **Project Hub owns** | Section averages and weighted overall score computed in module |
+| Aggregation dashboard rows | **Project Hub owns** | Organization-wide subcontractor database fed from individual scorecards |
+| Lessons Learned entries | **Project Hub owns** | Per-lesson structured records |
+| Lessons database rows | **Project Hub owns** | Organization-wide lessons knowledge database |
+| Jurisdiction configuration (Section 7) | **Project Hub owns** | Per-project jurisdiction template selection |
+| Section 6 integration state | **Project Hub owns** | Completion status and snapshot triggers for Reports module |
+
+### 14.2 External references
+
+Completed closeout documents (certificates, surveys, letters) may live in governed external destinations (SharePoint libraries, document management). Project Hub maintains canonical references to those artifacts; the artifacts themselves are not owned by Project Hub.
+
+### 14.3 Boundary rule
+
+Project Closeout is the operational owner of all closeout execution state. No upstream system is authoritative for closeout checklist, scorecard, or lessons learned data. Project Hub originates and owns all records.
+
+**Hybrid publication rule:** When Section 6 completion items (6.3 Subcontractor Evaluation, 6.5 Lessons Learned) are marked complete, the Project Closeout module generates a snapshot and publishes it to the Reports module. The Reports module consumes the snapshot to assemble release artifacts (PDF export, distribution). The Reports module MUST NOT write back to or mutate any Closeout source-of-truth record during this process.
+
+### 14.4 Executive review annotation boundary
+
+Project Closeout is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations at full field-level depth on Project Closeout module content.
+
+| Rule | Description |
+|---|---|
+| **Annotation isolation** | Review annotations MUST be stored in a separate `@hbc/field-annotations` artifact. They MUST NOT be stored in or written to the closeout checklist, scorecard records, or lessons entries. |
+| **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of closeout records, scorecard scores, lessons entries, or aggregation dashboard rows. |
+| **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
+| **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
+
+**Field-level specification:** [P3-E10 — Project Closeout Module Field Specification](P3-E10-Project-Closeout-Module-Field-Specification.md)
+
+---
+
+## 15. Project Startup Source-of-Truth
+
+### 15.1 Project Hub operational authority
+
+| Authority dimension | Source-of-truth owner | Notes |
+|---|---|---|
+| Job Startup Checklist (55-item, 4 sections) | Project Hub | Operational state only; one checklist per project; created automatically on project creation |
+| Jobsite Safety Checklist (32-item startup readiness) | Project Hub | Startup safety readiness only; does NOT feed Safety module (P3-E8) |
+| Responsibility Matrix — PM sheet (84 tasks × 9 roles) | Project Hub | Project-specific assignments; task descriptions immutable from template |
+| Responsibility Matrix — Field sheet (28 tasks × 8 roles) | Project Hub | Project-specific assignments; task descriptions immutable from template |
+| Owner Contract Review rows | Project Hub | Structured extraction from uploaded Owner's contract; PM editable |
+| Project Management Plan (11 sections) | Project Hub | Narrative + structured fields; PX approval required for Approved status |
+| Procore setup reference fields | Procore (external) | Project Hub displays as read-only reference; does not write to Procore |
+
+### 15.2 External references
+
+| External system | Relationship |
+|---|---|
+| Procore | Procore is the external source for executed contract uploads (referenced in §4.1 of P3-E11) and Admin setup fields. Project Hub does not write to Procore. The Procore setup reference surface (§6 of P3-E11) is read-only guidance in Project Hub. |
+| Permits module (P3-E7) | Job Startup Checklist Section 4 (Permits Posted on Jobsite) is a parallel, independent surface. Neither module writes to the other based on Section 4 checklist state. See §15.3. |
+| Safety module (P3-E8) | The Jobsite Safety Checklist (startup readiness) is a parallel, independent surface. A Fail result does not create a Safety module corrective action. See §15.3. |
+
+### 15.3 Boundary rules
+
+**Permits non-interference rule:** Job Startup Checklist Section 4 (items 4.1–4.12) verifies permits are posted on the jobsite at startup. This checklist surface has NO write relationship to the Permits module. Marking a Section 4 item Yes does not create, update, or close a permit record in P3-E7. The Permits module does not auto-update Section 4 item results based on permit lifecycle state.
+
+**Safety non-interference rule:** The 32-item Jobsite Safety Checklist is owned by Project Startup and represents startup safety readiness. It has NO write relationship to the Safety module's ongoing inspection checklist, corrective action log, or incident records. A Fail result on a Jobsite Safety Checklist item does not create a corrective action in P3-E8.
+
+**PM Plan approval rule:** The Project Management Plan transitions from Draft → Submitted → Approved. Only a Project Executive (PX) may transition a plan to Approved status. Any post-Approved edit reverts the affected sections to Draft, requiring resubmission.
+
+**Task description immutability:** Responsibility Matrix task descriptions are verbatim from the company template. They MUST NOT be edited in any project instance. New project-specific tasks may be added under a `Custom` task category.
+
+### 15.4 Executive review annotation boundary
+
+Project Startup is a **review-capable surface** in Phase 3. Portfolio Executive Reviewers may place annotations at full field-level depth on all Project Startup sub-surfaces: Job Startup Checklist, Jobsite Safety Checklist, Responsibility Matrix, Owner Contract Review, and Project Management Plan.
+
+**Important distinction from Safety module:** Unlike the Safety module (P3-E8), the Jobsite Safety Checklist within Project Startup IS subject to executive review annotations. The Safety executive review exclusion applies only to the Safety module's own surfaces. Project Startup's safety readiness checklist follows standard annotation rules.
+
+| Action | Rule |
+|---|---|
+| **Annotate** | PER-sourced; `@hbc/field-annotations` artifact; MUST NOT write to operational records |
+| **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
+
+**Field-level specification:** [P3-E11 — Project Startup Module Field Specification](P3-E11-Project-Startup-Module-Field-Specification.md)
+
+---
+
+## 16. Subcontract Compliance Source-of-Truth
+
+### 16.1 Project Hub operational authority
+
+| Data domain | Authority | Notes |
+|---|---|---|
+| Subcontract Checklist records (one per subcontract) | Project Hub | Multi-record; created per subcontract by project team |
+| Document package receipt tracking (12 document types) | Project Hub | PM-controlled; required-flag override per checklist allowed |
+| Budget over/under (contractValue − budget) | Project Hub (calculated) | Calculated from PM-entered contractValue and budget fields |
+| Compliance Waiver record (insurance and/or licensing) | Project Hub | Optional; attached when SDI or insurance/licensing requirements are not met |
+| Waiver approval records (PX, CFO, Compliance Manager) | Project Hub | Three-party; sequencing flexible; all three required for Approved status |
+| Waiver submission audit trail | Project Hub | Preserved on rejection; submissionCount increments on each resubmission |
+
+### 16.2 External references
+
+| External system | Relationship |
+|---|---|
+| Buyout Log (P3-E4 §6) | Subcontract Checklist is the compliance gate for `ContractExecuted` status in the Buyout Log. The Financial module enforces the gate; the Subcontract Compliance module is the source-of-truth for gate satisfaction. See §16.3. |
+| Compass / SDI Prequalification | Compass is the external SDI prequalification system. The `CompassSDI` document item tracks receipt of the prequalification; Compass itself is not integrated into Project Hub in Phase 3. |
+
+### 16.3 Boundary rules
+
+**Buyout gate rule:** The Financial module's Buyout Log entry for a subcontract MUST NOT transition to `ContractExecuted` unless the linked `ISubcontractChecklist.status === 'Complete'` AND either no waiver is attached or the attached waiver's `status === 'Approved'`. This gate is enforced in the Financial module's Buyout status update API. The Subcontract Compliance module surfaces status; it does not perform gate enforcement itself.
+
+**Checklist → Financial read direction:** The Subcontract Compliance module may read the `budget` value from the linked Buyout Log entry to populate the `ISubcontractChecklist.budget` field. The Financial module MUST NOT write to or mutate Subcontract Compliance records.
+
+**Waiver approval independence:** No approval in the three-party waiver routing may be inferred or auto-populated from another. Each of PX, CFO, and Compliance Manager must explicitly record their action in their own `IWaiverApproval` record.
+
+**Over/under reason gate:** A checklist with `overUnder > 0` MUST NOT transition out of `Draft` status until `overUnderReason` is populated.
+
+### 16.4 Executive review annotation boundary
+
+Subcontract Compliance is a **review-capable surface** in Phase 3. Portfolio Executive Reviewers may place annotations on checklist and waiver content.
+
+| Action | Rule |
+|---|---|
+| **Annotate** | PER-sourced; `@hbc/field-annotations` artifact; MUST NOT write to checklist records, document items, or waiver approval records |
+| **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
+
+**Field-level specification:** [P3-E12 — Subcontract Compliance Module Field Specification](P3-E12-Subcontract-Compliance-Module-Field-Specification.md)
+
+---
+
+## 17. Acceptance Gate Reference
 
 **Gate:** Core module gates (Phase 3 plan §18.5)
 
 | Field | Value |
 |---|---|
-| **Pass condition** | Financial, Schedule, Constraints, Permits, Safety, Work Queue, and Reports meet their locked source-of-truth and action-boundary rules; executive review annotation boundary rules enforced per §3.4–§8.4; Safety exclusion in place; annotation isolation mutation prohibitions verified |
+| **Pass condition** | Financial, Schedule, Constraints, Permits, Safety, Work Queue, Reports, Project Closeout, Project Startup, and Subcontract Compliance meet their locked source-of-truth and action-boundary rules; executive review annotation boundary rules enforced per §3.4–§8.4, §14.4, §15.4, and §16.4; Safety exclusion applies to Safety module surfaces only (§8.4); annotation isolation mutation prohibitions verified; Closeout hybrid publication rule (§14.3) respected; Startup Permits and Safety non-interference rules (§15.3) respected; Subcontract Compliance buyout gate rule (§16.3) enforced at the Financial module API layer |
 | **Evidence required** | P3-E2 (this document), module implementations respecting authority matrices, spine publication flowing through governed boundaries, mutation rules enforced, override provenance tracked, executive review annotation artifacts isolated from module source-of-truth records |
 | **Primary owner** | Architecture + Project Hub platform owner |
 
 ---
 
-## 15. Policy Precedence
+## 18. Policy Precedence
 
 This specification establishes the **source-of-truth and action-boundary rules** that module implementations must satisfy:
 
@@ -570,5 +714,5 @@ If a downstream deliverable conflicts with this specification, this specificatio
 
 ---
 
-**Last Updated:** 2026-03-22
+**Last Updated:** 2026-03-23 (v2)
 **Governing Authority:** [Phase 3 Plan §6, §12](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

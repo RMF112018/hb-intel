@@ -130,7 +130,16 @@ The PWA MUST adopt the `$projectId`-parameterized route pattern defined in PH7.2
 /project-hub/                       → Project selector (no project context)
 ```
 
-The `$projectId` MUST be the canonical `projectId` (UUID) from the project registry (P3-A1). The `projectNumber` MAY be accepted as an alias and resolved to `projectId` via registry lookup.
+The `$projectId` in all canonical routes MUST be the canonical `projectId` (UUID) from the project registry (P3-A1).
+
+**Transitional dual-key inbound handling:** Inbound links or launch parameters may use `projectNumber` as the project key (e.g., via legacy deep links, external references, or cross-surface handoffs). The router MUST:
+
+1. Detect when a `projectNumber` is presented in place of a `projectId` (e.g., via `?projectNumber=` query parameter or a non-UUID route segment).
+2. Resolve the `projectNumber` to `projectId` via registry lookup (P3-A1 §3.4).
+3. Redirect to the canonical `projectId`-based route before rendering.
+4. All newly generated links, shared-spine queries, cross-lane handoffs, and internal state MUST use `projectId` after resolution. `projectNumber` is an inbound alias only.
+
+This normalization ensures that all internal project context, store state, and downstream consumers operate on `projectId` exclusively regardless of the inbound key used.
 
 ### 2.3 SPFx project identity resolution
 
@@ -407,5 +416,5 @@ If a downstream deliverable conflicts with this contract, this contract takes pr
 
 ---
 
-**Last Updated:** 2026-03-20
+**Last Updated:** 2026-03-22
 **Governing Authority:** [Phase 3 Plan §4.2–§4.3](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

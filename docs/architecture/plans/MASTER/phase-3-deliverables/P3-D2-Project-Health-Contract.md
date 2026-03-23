@@ -55,6 +55,7 @@ P3-A3 §4 defined the publication-level contract (module metric contribution exp
 - Health tile UI design — see [P3-C2 §3](P3-C2-Mandatory-Core-Tile-Family-Definition.md) for mandatory tile spec
 - Other spine specifications — see P3-D1 (Activity), P3-D3 (Work Queue), P3-D4 (Related Items)
 - Module-internal health thresholds, local alerts, or drill-down behavior — module-owned per the hybrid model
+- Executive review annotation artifacts — executive review annotations on Health are in a separate review-layer artifact, not in the `IProjectHealthPulse` type; see §2.5
 
 ---
 
@@ -106,6 +107,22 @@ P3-A3 §4 defined the publication-level contract (module metric contribution exp
 ---
 
 ## 2. Health Model Lifecycle
+
+### 2.5 Executive review layer applicability
+
+Project Health is a **review-capable surface** in Phase 3 (see P3-E1 §7 and P3-A2 §3.2).
+
+Portfolio Executive Reviewers may annotate the Health spine surface through the separate executive review artifact layer. The following rules apply:
+
+| Rule | Description |
+|---|---|
+| **Annotation scope** | Review annotations target the rendered health surface (overall status, dimension scores, recommended actions) at full field-level depth |
+| **Annotation isolation** | Executive review annotations are stored in a separate review-layer artifact; they are NOT part of `IProjectHealthPulse` or any health computation type |
+| **No mutation path** | Executive review annotations MUST NOT modify `IHealthMetric` values, dimension scores, confidence tiers, compound risk signals, or any computed health output. Health source data is owned exclusively by the computation pipeline. |
+| **Visibility before push** | Review annotations are visible only to the restricted executive review circle (originating reviewer, other authorized executive reviewers, PM/PE/designated surface owner) until pushed via Push-to-Project-Team (P3-A2 §3.4) |
+| **Reuse of `@hbc/field-annotations`** | The executive review annotation layer SHOULD reuse `@hbc/field-annotations` where applicable. If `@hbc/field-annotations` requires enhancement for section/block anchors or non-classic field anchors to support health surface annotation, that enhancement is a **blocker dependency** for executive review implementation. See blocker note below. |
+
+**Blocker note — field-annotations enhancement:** `@hbc/field-annotations` must be evaluated at Phase 3 kickoff to confirm whether it supports section-level or block-level anchors (not just classic field-level). If it does not, a `@hbc/field-annotations` enhancement for non-classic anchors is required before executive review on Health can be implemented. This evaluation must occur before the Health executive review feature is scoped for implementation.
 
 ### 2.1 Lifecycle stages
 
@@ -945,5 +962,5 @@ If a downstream deliverable conflicts with this contract, this contract takes pr
 
 ---
 
-**Last Updated:** 2026-03-21
+**Last Updated:** 2026-03-22
 **Governing Authority:** [Phase 3 Plan §8.4](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [ADR-0110](../../../adr/ADR-0110-project-health-pulse-multi-dimension-indicator.md)

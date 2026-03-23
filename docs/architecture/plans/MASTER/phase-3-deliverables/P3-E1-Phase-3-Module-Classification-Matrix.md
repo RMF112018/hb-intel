@@ -130,8 +130,11 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 | 9 | Permits | Always-on core | First-class working surface | PH7-12 | Publishes to all 4 spines |
 | 10 | Safety | Always-on core | First-class working surface | PH7-6 | Publishes to all 4 spines |
 | 11 | Reports | Always-on core | Governed report workspace | PH7-14 | Publishes to all 4 spines |
-| 12 | Quality Control | Baseline-visible lifecycle | Lifecycle-visible | PH7-7 | Deferred |
-| 13 | Warranty | Baseline-visible lifecycle | Lifecycle-visible | PH7-8 | Deferred |
+| 12 | Project Closeout | Always-on lifecycle | Hybrid — owns operational data; publishes snapshot to Reports | SOP: SubScorecard, LessonsLearned, Closeout Checklist | Publishes to all 4 spines |
+| 13 | Project Startup | Always-on lifecycle | First-class working surface — active from project creation | Job Startup Checklist, Jobsite Safety Checklist, Responsibility Matrix, Owner Contract Review, PM Plan | Publishes to all 4 spines |
+| 14 | Subcontract Compliance | Always-on core | First-class working surface — multi-record (one per subcontract) | Subcontract Checklist, Compliance Waiver | Publishes to all 4 spines; gates Buyout Log ContractExecuted (P3-E4 §6) |
+| 15 | Quality Control | Baseline-visible lifecycle | Lifecycle-visible | PH7-7 | Deferred |
+| 16 | Warranty | Baseline-visible lifecycle | Lifecycle-visible | PH7-8 | Deferred |
 
 ---
 
@@ -149,11 +152,15 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 **Domain rule:** Buyout is baseline as part of the Financial module/domain (Phase 3 Plan §11.3). It is NOT a separate top-level module.
 
+**Field-level specification:** [P3-E4 — Financial Module Field Specification](P3-E4-Financial-Module-Field-Specification.md)
+
 ### 3.2 Schedule
 
 **Boundary:** Operational schedule surface, not full CPM authoring. Upstream schedule systems remain authoritative for detailed baseline/update data and full CPM network logic.
 
 **Must support:** Schedule file ingestion (XER/XML/CSV), milestone tracking, manual milestone management, governed forecast overrides, upload history/restore, schedule summary projections into home, health, financial, and reports.
+
+**Field-level specification:** [P3-E5 — Schedule Module Field Specification](P3-E5-Schedule-Module-Field-Specification.md)
 
 ### 3.3 Constraints
 
@@ -163,11 +170,15 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 **Domain rule:** Constraints module owns the normalized operational ledger for Constraints, Change Tracking, and Delay Log.
 
+**Field-level specification:** [P3-E6 — Constraints Module Field Specification](P3-E6-Constraints-Module-Field-Specification.md)
+
 ### 3.4 Permits
 
 **Boundary:** Always-on first-class operational module. Jurisdictional artifacts/documents and governed storage locations may exist outside Project Hub with canonical references back to the permit ledger.
 
 **Must support:** Permit log management, linked required inspections, inspection results/status summaries, expiration/status tracking, comments/notes, export.
+
+**Field-level specification:** [P3-E7 — Permits Module Field Specification](P3-E7-Permits-Module-Field-Specification.md)
 
 ### 3.5 Safety
 
@@ -179,6 +190,8 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 **Future-state note:** Later development should support smart toolbox-talk topic generation linked to high-risk schedule activities.
 
+**Field-level specification:** [P3-E8 — Safety Module Field Specification](P3-E8-Safety-Module-Field-Specification.md)
+
 ### 3.6 Reports
 
 **Boundary:** Governed report workspace — not a simple launcher and not a full freeform authoring system.
@@ -187,6 +200,8 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 **Must support per report family:** Auto-assembly from module snapshots, PM narrative override, governed draft refresh and staleness handling, queued governed generation, run-ledger tracking, export and history, release/distribution state tracking.
 
+**Field-level specification:** [P3-E9 — Reports Module Field Specification](P3-E9-Reports-Module-Field-Specification.md)
+
 ### 3.7 Quality Control
 
 **Boundary:** Baseline-visible lifecycle module. Architectural placement and lifecycle continuity retained. Deeper field-first tool definition intentionally deferred (Phase 3 Plan §11.2, Repo-Truth Reconciliation Note 3, §22).
@@ -194,6 +209,44 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 ### 3.8 Warranty
 
 **Boundary:** Baseline-visible lifecycle module. Same as QC — deeper field-first definition deferred.
+
+### 3.9 Project Closeout
+
+**Boundary:** Always-on lifecycle module that activates when a project enters the closeout phase. Owns the operational state for all closeout execution: closeout checklist tracking, subcontractor performance evaluation, and lessons learned capture.
+
+**Must support:** 70-item closeout checklist across 7 sections (Tasks, Document Tracking, Inspections, Turnover, Post Turnover, Closeout Documents for PX, Jurisdiction-specific requirements); subcontractor scorecard with weighted 6-section evaluation and aggregation dashboard; lessons learned structured form and organization-wide knowledge database.
+
+**Hybrid model:** Project Closeout owns all operational closeout data. When Section 6 items (Subcontractor Evaluation Form, Lessons Learned) are completed, Project Closeout publishes a snapshot to the Reports module for assembly into release-ready artifacts. Reports does not own the closeout data — it consumes a Closeout-generated snapshot.
+
+**Replaces:** `06 20260307_SOP_SubScorecard-DRAFT.xlsx`, `07 20260307_SOP_LessonsLearnedReport-DRAFT.xlsx`, and `Project_Closeout_Checklist.pdf` manual workflow.
+
+**Field-level specification:** [P3-E10 — Project Closeout Module Field Specification](P3-E10-Project-Closeout-Module-Field-Specification.md)
+
+### 3.10 Project Startup
+
+**Boundary:** Always-on lifecycle module that is active from the moment a project is created in Project Hub. Owns the operational state for all project mobilization and startup-phase tracking.
+
+**Must support:** 55-item Job Startup Checklist (4 sections: Owner's Contract Review, Job Start-Up, Order Services and Equipment, Permits Posted on Jobsite); 32-item Jobsite Safety Checklist for startup safety readiness (2 sections: Areas of Highest Risk, Other Risks — Pass/Fail/N/A); Responsibility Matrix (PM sheet: 84 tasks × 9 roles; Field sheet: 28 tasks × 8 roles); Owner Contract Review structured extraction; Project Management Plan (11-section structured document with both narrative and typed field capture).
+
+**Startup Safety Checklist boundary:** The 32-item Jobsite Safety Checklist is distinct from the Safety module's (P3-E8) 93-item ongoing weighted inspection checklist. The Project Startup module owns startup safety readiness; the Safety module owns ongoing safety inspection operations. These two surfaces have no write relationship — they are parallel and complementary.
+
+**Permits Section 4 boundary:** Job Startup Checklist Section 4 (Permits Posted on Jobsite) verifies that permits are displayed on the jobsite at startup. This has no write relationship to the Permits module (P3-E7), which manages the full permit lifecycle. The two surfaces are parallel and complementary.
+
+**Replaces:** `Job Startup Checklist.pdf`, `Project_Startup_Checklist.pdf`, `Project_Safety_Checklist.pdf` (startup readiness portion), `Responsibility Matrix - Template.xlsx`, `Responsibility Matrix - Owner Contract Template.xlsx`, and `PROJECT MANAGEMENT PLAN 2019.docx` manual workflow. Also captures `Procore Startup Checklist Summary (1).pdf` as a Procore setup reference surface.
+
+**Field-level specification:** [P3-E11 — Project Startup Module Field Specification](P3-E11-Project-Startup-Module-Field-Specification.md)
+
+### 3.11 Subcontract Compliance
+
+**Boundary:** Always-on core module with one record per subcontract per project (multi-record, like Permits). Owns the operational state for all subcontract package submission verification and compliance relief tracking. Active from the point a subcontract is being prepared for award.
+
+**Must support:** Subcontract Checklist (12-item document package verification: Contract, Schedule A/B, Exhibit A/B, W-9, License, Insurance GL/Auto/Umbrella/Workers Comp, Compass SDI Prequalification) with budget over/under tracking and PM/APM sign-off; Compliance Waiver (optional, attached when a subcontractor does not qualify for SDI or does not meet insurance/licensing requirements) with Insurance Requirements and Licensing Requirements waiver sections and full three-party approval routing (Project Executive, CFO, Compliance Manager).
+
+**Buyout gate rule:** A Buyout Log entry in the Financial module (P3-E4 §6) MUST NOT advance to `ContractExecuted` unless the linked Subcontract Checklist is `Complete` AND any attached Compliance Waiver is `Approved`. This gate is enforced at the API layer of the Financial module.
+
+**Replaces:** `SUBCONTRACT CHECKLIST.xlsx` manual workflow (both worksheets: Subcontract Checklist and Compliance Waiver).
+
+**Field-level specification:** [P3-E12 — Subcontract Compliance Module Field Specification](P3-E12-Subcontract-Compliance-Module-Field-Specification.md)
 
 ---
 

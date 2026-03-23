@@ -9,7 +9,7 @@
 | **Owner** | Experience / Shell Team + Project Hub platform owner |
 | **Update Authority** | Experience lead; changes require review by Architecture and Product/Design |
 | **Last Reviewed Against Repo Truth** | 2026-03-21 |
-| **References** | [Phase 3 Plan §9](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [P3-A2 §5](P3-A2-Membership-Role-Authority-Contract.md); [P3-G1 §6](P3-G1-Lane-Capability-Matrix.md); [P2-D2](../phase-2-deliverables/P2-D2-Adaptive-Layout-and-Zone-Governance-Spec.md); [ADR-0102](../../../architecture/adr/ADR-0102-project-canvas-role-based-dashboard.md); [`@hbc/project-canvas` README](../../../../packages/project-canvas/README.md) |
+| **References** | [Phase 3 Plan §9](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [P3-A2 §5](P3-A2-Membership-Role-Authority-Contract.md); [P3-G1 §6](P3-G1-Lane-Capability-Matrix.md); [P2-D2](../phase-2-deliverables/P2-D2-Adaptive-Layout-and-Zone-Governance-Spec.md); [P2-F1](../phase-2-deliverables/P2-F1-My-Work-Hub-UI-Quality-and-Mold-Breaker-Conformance-Plan.md); [ADR-0102](../../../architecture/adr/ADR-0102-project-canvas-role-based-dashboard.md); [`@hbc/project-canvas` README](../../../../packages/project-canvas/README.md); [UI-Kit Mold-Breaker Principles](../../../reference/ui-kit/UI-Kit-Mold-Breaker-Principles.md); [UI-Kit Visual Language Guide](../../../reference/ui-kit/UI-Kit-Visual-Language-Guide.md); [UI-Kit Field-Readability Standards](../../../reference/ui-kit/UI-Kit-Field-Readability-Standards.md); [UI-Kit Adaptive Data Surface Patterns](../../../reference/ui-kit/UI-Kit-Adaptive-Data-Surface-Patterns.md); [UI-Kit Usage and Composition Guide](../../../reference/ui-kit/UI-Kit-Usage-and-Composition-Guide.md) |
 
 ---
 
@@ -43,6 +43,7 @@ This note formalizes the tile registration rules, mandatory tile policy, role-de
 - Data-source badge and transparency rules
 - Canvas persistence and reset behavior
 - Cross-lane canvas consistency
+- UI-Kit conformance requirements for all Phase 3 Project Hub surfaces (canvas, modules, spines, reports, executive review)
 
 ### This note does NOT govern
 
@@ -442,5 +443,83 @@ If a downstream deliverable conflicts with this note, this note takes precedence
 
 ---
 
-**Last Updated:** 2026-03-21
+## 14. UI Conformance Requirements for Phase 3 Project Hub Surfaces
+
+Every Phase 3 Project Hub surface — canvas/home, all module surfaces (Financial, Schedule, Constraints, Permits, Safety, QC, Warranty), all shared spine surfaces (Health, Activity, Work Queue, Related Items), Reports workspace, and executive review surfaces — must conform to the HB Intel UI Kit standards and the Phase 2 UI quality precedents established in P2-F1.
+
+### 14.1 Governing UI-Kit documents
+
+Implementors must read the governing document before making the corresponding implementation decision. A design choice not traceable to a governing source requires Experience lead approval.
+
+| Governing Document | What It Governs for Phase 3 |
+|---|---|
+| [UI-Kit-Mold-Breaker-Principles.md](../../../reference/ui-kit/UI-Kit-Mold-Breaker-Principles.md) | MB-01–MB-08 governing constraints for all Phase 3 surfaces. These are constraints, not aspirational goals. |
+| [UI-Kit-Visual-Language-Guide.md](../../../reference/ui-kit/UI-Kit-Visual-Language-Guide.md) | All `HBC_*` token values: color palette, shape/radius, typography scale, spacing, elevation shadows, surface roles. Hardcoded values are prohibited. |
+| [UI-Kit-Field-Readability-Standards.md](../../../reference/ui-kit/UI-Kit-Field-Readability-Standards.md) | Touch target sizes (`HBC_DENSITY_TOKENS`), row height minimums, body/label text minimums, contrast ratio requirements, and `useDensity()` usage. |
+| [UI-Kit-Visual-Hierarchy-and-Depth-Standards.md](../../../reference/ui-kit/UI-Kit-Visual-Hierarchy-and-Depth-Standards.md) | Elevation levels, content levels (`HBC_CONTENT_LEVELS`), zone distinctions (`HBC_ZONE_DISTINCTIONS`), card weight classes (`HBC_CARD_WEIGHTS`), and the Three-Second Read Standard. |
+| [UI-Kit-Adaptive-Data-Surface-Patterns.md](../../../reference/ui-kit/UI-Kit-Adaptive-Data-Surface-Patterns.md) | Data surface type selection: dense analysis table, responsive hybrid, card/list view, summary strip. Horizontal scroll prohibition enforcement. |
+| [UI-Kit-Wave1-Page-Patterns.md](../../../reference/ui-kit/UI-Kit-Wave1-Page-Patterns.md) | Approved composition patterns. `WorkspacePageShell` is required for every Project Hub page. |
+| [UI-Kit-Accessibility-Findings.md](../../../reference/ui-kit/UI-Kit-Accessibility-Findings.md) | ARIA requirements, focus ring patterns, reduced-motion compliance. |
+| [UI-Kit-Usage-and-Composition-Guide.md](../../../reference/ui-kit/UI-Kit-Usage-and-Composition-Guide.md) | Component import rules (Fluent UI through `@hbc/ui-kit` only), token import patterns, card weight class usage, `useDensity()` usage, and common composition mistakes. |
+| [UI-Kit-Application-Standards-Conformance-Report.md](../../../reference/ui-kit/UI-Kit-Application-Standards-Conformance-Report.md) | 6 contribution governance rules binding on all Phase 3 feature development. |
+
+### 14.2 Implementation rules binding on all Phase 3 Project Hub surfaces
+
+| Rule | Governing Source |
+|---|---|
+| Every Project Hub page surface MUST use `WorkspacePageShell` as the page wrapper | UI-Kit-Wave1-Page-Patterns.md; UI-Kit-Usage-and-Composition-Guide.md |
+| All Fluent UI primitives MUST be imported through `@hbc/ui-kit` — never directly from `@fluentui/react-components` (D-10) | UI-Kit-Usage-and-Composition-Guide.md; Application Standards Conformance Report |
+| No hardcoded hex, rgb, or pixel values in component CSS — use `HBC_*` tokens exclusively; the `enforce-hbc-tokens` ESLint rule must pass clean on all Phase 3 surfaces | MB-08; UI-Kit-Visual-Language-Guide.md |
+| Card weight classes MUST differentiate visual hierarchy — never render a grid of identically-weighted cards; use `weight="primary"` for the dominant card, `"standard"` for general content, `"supporting"` for metadata | T04 (UI-Kit-Visual-Hierarchy-and-Depth-Standards.md) |
+| Data surfaces MUST be selected per the T06 decision guide (dense analysis table / responsive hybrid / card/list / summary strip) — the selection must be documented per module surface | UI-Kit-Adaptive-Data-Surface-Patterns.md |
+| Density system MUST be implemented via `useDensity()` and `HBC_DENSITY_TOKENS` — all surfaces must function correctly in compact (desktop), comfortable (tablet), and touch (field) tiers | MB-05; UI-Kit-Field-Readability-Standards.md |
+| Touch targets MUST meet `HBC_DENSITY_TOKENS[tier].touchTargetMin` minimums: 44px in touch, 36px in comfortable, 24px in compact | MB-07; UI-Kit-Field-Readability-Standards.md |
+| Horizontal scrolling is PROHIBITED as a default behavior for data surfaces — use adaptive column hiding (`columnVisibility`), `frozenColumns`, and card fallback per T06 | MB-04; UI-Kit-Adaptive-Data-Surface-Patterns.md |
+| Every data-dependent zone MUST use `HbcSmartEmptyState` or `HbcEmptyState` — no blank areas or null-rendered zones | MB-01; UI-Kit-Usage-and-Composition-Guide.md |
+| Reusable visual primitives BELONG IN `@hbc/ui-kit` — no feature-local duplicates of kit components (enforced by T12 contribution governance) | Architecture invariant; Application Standards Conformance Report |
+| All new `@hbc/ui-kit` contributions require: Storybook stories covering all states and density variants, ARIA compliance, token-only styling, and README documentation | Application Standards Conformance Report §Contribution Governance |
+
+### 14.3 Mold-breaker principle bindings for Project Hub
+
+| Principle | Project Hub implementation requirement |
+|---|---|
+| **MB-01 Lower cognitive load** | Canvas home opens to role-appropriate current work; complexity tiers (essential/standard/expert) implemented on all tiles and module surfaces; smart empty states guide users to next actionable step; first actionable item reachable in <30 seconds |
+| **MB-02 Stronger first-glance hierarchy** | Status and next-move ownership indicators present on all work items, constraint records, permit records, and health pulse tiles; minimum 3-level type scale; status colors exceed 7:1 contrast ratio |
+| **MB-03 Less shell fatigue** | Project identity, current phase, and role-appropriate actions always visible in project context header; work queue spine consolidates actionable items; no scattered module-level notification indicators |
+| **MB-04 Less horizontal scrolling** | All module data tables (Financial budget lines, Schedule milestones, Constraints log, Permits log) operate without horizontal scroll at ≥1024px via adaptive column hiding; card fallback at <640px; split-pane financial views reflow at <1366px |
+| **MB-05 More adaptive density** | Three-tier density (Essential/Standard/Expert) implemented on all Project Hub surfaces; device-aware defaults; role-based admin configuration supported; advanced fields hidden in lower tiers with "?" disclosure affordance |
+| **MB-06 More deliberate depth** | Measured elevation system (2px/4px/8px/16px) applied to all Project Hub panels and overlays; module detail views include context breadcrumb enabling jump-back to canvas; interactive states (hover/focus/active/disabled) visually distinct on all controls |
+| **MB-07 Field-usable contrast and touch** | Status colors meet ≥7:1 contrast ratio for sunlight readability; Safety and field-primary module surfaces verified in touch density; all interactive elements meet touch target minimums per tier |
+| **MB-08 No version-boundary seams** | All Project Hub surfaces use the single `@hbc/ui-kit` token set; no module-level visual overrides; all modules share identical button styles, card patterns, table layouts, and status color semantics |
+
+### 14.4 Phase 2 UI precedents binding on Phase 3
+
+Phase 2 (My Work Hub / Personal Work Hub, P2-F1) established the following patterns that are binding precedents for Phase 3 Project Hub surfaces:
+
+| Phase 2 precedent (P2-F1) | Phase 3 Project Hub application |
+|---|---|
+| Two-column persistent layout (work feed + right panel) for the primary work surface | Project Hub module detail surfaces and spine panels with primary content + context panels use the same two-column persistent pattern |
+| KPI cards use `DashboardLayout` + `HbcKpiCard` with semantic color palette, typographic hierarchy, and click-to-filter | Project Health tile, Financial Summary tile, and all KPI-level data surfaces in Project Hub use `DashboardLayout` + `HbcKpiCard`; no raw custom KPI card implementations |
+| Work item rows show lane headers, metadata density, and collapse state; row metadata density standards from P2-F1 G2 | Work Queue spine surface and any work-item list in Project Hub follow the same row metadata density and lane header patterns |
+| `@hbc/project-canvas` tile layout for secondary and tertiary zones — no raw custom Griffel grid implementations for canvas zones | Project Hub canvas uses `HbcProjectCanvas` exclusively; no raw custom grid for canvas zones |
+| Active filter count visible in toolbar even when filter panel is collapsed | All Project Hub module data surfaces with filter systems show active filter count in the `HbcCommandBar` toolbar |
+| Context-sensitive CTA labels that match the current action context | All Project Hub primary actions and CTAs use context-sensitive labels; generic labels ("Submit", "OK") are prohibited |
+| Focus ring visibility verified on all interactive components (P2-F1 UIF-017) | All Phase 3 Project Hub interactive elements have visible focus indicators meeting WCAG AA minimum |
+| Project color coding in sidebar navigation | Project Hub preserves project identity color coding established in Phase 2 and applies it to the project context header |
+
+### 14.5 Conformance verification requirement
+
+Before any Phase 3 surface may pass its §18 acceptance gate, it must produce mold-breaker conformance evidence. Use the `.claude/agents/hb-ui-ux-conformance-reviewer.md` specialist to evaluate:
+
+- `@hbc/ui-kit` alignment and any feature-local duplicate primitive detection
+- Cross-surface UX consistency between Project Hub surfaces and Personal Work Hub (Phase 2)
+- Mold-breaker experience alignment per MB-01 through MB-08
+- Touch target and density compliance in all three density tiers
+- Token compliance (`enforce-hbc-tokens` ESLint rule passing clean)
+
+Conformance evidence must be recorded in P3-H1 §13 (Evidence Collection Log). No surface may pass the §18.3 home/canvas gate, §18.5 core module gate, or §18.6 reporting gate without mold-breaker conformance evidence.
+
+---
+
+**Last Updated:** 2026-03-22
 **Governing Authority:** [Phase 3 Plan §9](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

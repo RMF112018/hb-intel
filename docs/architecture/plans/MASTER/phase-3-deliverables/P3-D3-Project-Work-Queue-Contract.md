@@ -834,6 +834,51 @@ The following MUST remain consistent across both the PWA and SPFx lanes:
 
 ---
 
+## 13. Executive Review Push-to-Project-Team Integration
+
+When a Portfolio Executive Reviewer (PER) uses the Push-to-Project-Team capability (P3-A2 §3.4), the Work Queue spine is the **delivery mechanism** for the structured tracked item. This section defines how the Work Queue spine integrates with the executive review artifact layer.
+
+### 13.1 Push-to-Project-Team creates a Work Queue item
+
+Push-to-Project-Team MUST create a **structured tracked work item** in the work queue using the `'module'` source type and class `'attention-item'` (or `'queued-follow-up'` where the item requires explicit resolution). It is NOT a notification.
+
+| Aspect | Rule |
+|---|---|
+| **Item origin** | `source: 'module'`, originating module = `'executive-review'` |
+| **Item class** | `'queued-follow-up'` — requires explicit resolution by the project team |
+| **Priority** | `'soon'` by default; `'now'` if the pusher designates urgency |
+| **Provenance** | The item MUST carry a reference (`reviewArtifactId`) pointing to the originating executive review artifact; this is preserved even if the review artifact is in a restricted visibility state |
+| **Payload** | Default: curated summary content (structured summary of the review annotation). The pusher may choose full-context inclusion at push time. The original executive review thread remains a separate artifact regardless of payload choice. |
+| **Visibility** | The pushed work item is visible to the project team in the normal work queue; the underlying executive review artifact visibility is governed separately |
+| **Assignee** | Default: assigned to Project Manager; PE may reassign within the project team |
+
+### 13.2 Work Queue does NOT own executive review artifacts
+
+The Work Queue spine is the delivery and tracking mechanism for pushed items, but it MUST NOT:
+
+- convert the executive review artifact into a work queue item (the review artifact remains separate),
+- become the owner of executive review annotation state,
+- expose the full executive review thread to the project team through the work queue item (provenance reference only, unless full-context was chosen at push time).
+
+`@hbc/field-annotations` (if used for the review annotation layer) does NOT become the work-queue owner. Work queue ownership remains with the `MyWorkRegistry` / `IMyWorkSourceAdapter` pattern.
+
+### 13.3 Closure loop
+
+When the project team marks the pushed item as resolved in the work queue:
+
+1. The pushed work item status transitions to `completed`.
+2. The originating executive review artifact receives a **closure confirmation request** — it is returned to the executive review circle for the PER to confirm closure.
+3. The PER's closure confirmation marks the executive review thread as closed.
+4. The work queue item MUST NOT auto-close the executive review artifact without PER confirmation.
+
+This full loop (push → project team resolution → executive closure confirmation) MUST be reflected in the work item lifecycle and in the executive review artifact lifecycle (P3-F1 and the reports contract where applicable).
+
+### 13.4 Spine cross-reference
+
+The closure loop activity MUST be published to the Activity spine (P3-D1) as a `follow-up.resolved` and `review.closure-confirmed` event pair, preserving provenance linkage.
+
+---
+
 ## 18. Acceptance Gate Reference
 
 **Gate:** Shared spine gates — work queue component (Phase 3 plan §18.4)

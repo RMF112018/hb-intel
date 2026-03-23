@@ -45,14 +45,14 @@ Phase 3 is complete only when all §18 gates pass with evidence (Phase 3 plan §
 
 | Gate | §18 ref | Items | Status | Owner |
 |---|---|---|---|---|
-| Cross-lane contracts | §18.1 | 5 | Not Started | Architecture + Experience / Shell |
-| Project activation | §18.2 | 3 | Not Started | Platform / Core Services |
+| Cross-lane contracts | §18.1 | 8 | Not Started | Architecture + Experience / Shell |
+| Project activation | §18.2 | 4 | Not Started | Platform / Core Services |
 | Home/canvas | §18.3 | 8 | Not Started | Experience / Shell + Project Hub |
 | Shared spines | §18.4 | 6 | Not Started | Platform / Core Services + Project Hub |
-| Core modules | §18.5 | 27 | Not Started | Architecture + Project Hub |
-| Reporting | §18.6 | 10 | Not Started | Project Hub |
-| Validation | §18.7 | 8 | Not Started | Architecture + Experience / Shell |
-| **Total** | | **67** | | |
+| Core modules | §18.5 | 41 | Not Started | Architecture + Project Hub |
+| Reporting | §18.6 | 15 | Not Started | Project Hub |
+| Validation | §18.7 | 13 | Not Started | Architecture + Experience / Shell |
+| **Total** | | **95** | | |
 
 ---
 
@@ -65,6 +65,9 @@ Phase 3 is complete only when all §18 gates pass with evidence (Phase 3 plan §
 | 2.3 | Smart project switching — PWA in-app, SPFx host-aware fallbacks | Not Started | | P3-B1 §2, P3-G3 §3.3 |
 | 2.4 | Cross-lane handoff identity — projectId preserved during SPFx↔PWA | Not Started | | P3-G2 §5, P3-G3 §3.4 |
 | 2.5 | No context loss during handoff — deep-link handler processes arrival | Not Started | | P3-B1 §6.1, P3-G3 §3.5 |
+| 2.6 | PER scope validation enforced — PER non-membership scoping applied in both lanes | Not Started | | P3-A2 §3.2, P3-G3 §3.6 |
+| 2.7 | PER vs. membership distinction — review-layer access does not imply project membership in either lane | Not Started | | P3-A2 §6.4, P3-G3 §3.7 |
+| 2.8 | projectId normalization in handoff — all outbound deep links use projectId; projectNumber inbound normalized via registry before any cross-lane handoff | Not Started | | P3-A1 §3.4, P3-G2 §5.1, P3-G3 §3.8 |
 
 ---
 
@@ -75,6 +78,7 @@ Phase 3 is complete only when all §18 gates pass with evidence (Phase 3 plan §
 | 3.1 | Valid activation transaction — setup/handoff creates valid project record | Not Started | | P3-A1, P3-G3 §4.1 |
 | 3.2 | Routeable context — activated project has valid route in PWA and site in SPFx | Not Started | | P3-A1, P3-G3 §4.2 |
 | 3.3 | No partial activation — incomplete activation rejected, no orphaned records | Not Started | | P3-A1, P3-G3 §4.3 |
+| 3.4 | Department reclassification — department change triggers downstream visibility recalculation; authority scopes recalculated; active PER overrides suspended pending re-grant | Not Started | | P3-A1 §4.3, P3-A2 §4.3, P3-G3 §4.4 |
 
 ---
 
@@ -164,6 +168,25 @@ Phase 3 is complete only when all §18 gates pass with evidence (Phase 3 plan §
 |---|---|---|---|---|
 | 6.6.1 | Modules respect P3-E2 authority boundaries | Not Started | | P3-E2 |
 | 6.6.2 | All modules publish to all 4 spines per P3-A3 §7 | Not Started | | P3-A3 §7 |
+| 6.6.3 | Executive review annotation isolation — PER review artifacts stored separately from module source-of-truth; annotations do not mutate PM-owned module records | Not Started | | P3-E2 §11.2, P3-G3 §7.6 |
+| 6.6.4 | Safety executive review exclusion boundary — no review annotation layer on Safety in Phase 3; exclusion enforced in auth and UI | Not Started | | P3-E1 §9.3, P3-E2 §7.4, P3-G3 §7.6 |
+
+### 6.7 UI Conformance (cross-cutting — all Phase 3 surfaces)
+
+| # | Criterion | Status | Evidence | Notes |
+|---|---|---|---|---|
+| 6.7.1 | `WorkspacePageShell` used on every Project Hub page surface — canvas, all modules, all spines, reports, executive review views | Not Started | | P3-C1 §14.2, UI-Kit-Wave1-Page-Patterns.md |
+| 6.7.2 | No hardcoded hex, rgb, or pixel values — `enforce-hbc-tokens` ESLint rule passes clean on all Phase 3 feature packages | Not Started | | P3-C1 §14.2, UI-Kit-Visual-Language-Guide.md |
+| 6.7.3 | All Fluent UI primitives imported through `@hbc/ui-kit` — no direct `@fluentui/react-components` imports (D-10) | Not Started | | P3-C1 §14.2, UI-Kit-Usage-and-Composition-Guide.md |
+| 6.7.4 | Data surface type selected per T06 decision guide for each module list surface — selection documented per surface | Not Started | | P3-C1 §14.2, UI-Kit-Adaptive-Data-Surface-Patterns.md |
+| 6.7.5 | Density system implemented via `useDensity()` — all Project Hub surfaces verified in compact, comfortable, and touch tiers | Not Started | | P3-C1 §14.2, UI-Kit-Field-Readability-Standards.md |
+| 6.7.6 | Touch targets meet `HBC_DENSITY_TOKENS[tier].touchTargetMin` on all interactive elements in all three density tiers | Not Started | | P3-C1 §14.3 MB-07, UI-Kit-Field-Readability-Standards.md |
+| 6.7.7 | Horizontal scroll prohibited — all module data tables operate without horizontal scroll at ≥1024px via adaptive column hiding and card fallback | Not Started | | P3-C1 §14.3 MB-04, UI-Kit-Adaptive-Data-Surface-Patterns.md |
+| 6.7.8 | Card weight differentiation enforced — no equal-weight card grids on canvas tiles or module surfaces; `primary`/`standard`/`supporting` weights used per T04 | Not Started | | P3-C1 §14.2, UI-Kit-Usage-and-Composition-Guide.md |
+| 6.7.9 | Every data-dependent zone uses `HbcSmartEmptyState` or `HbcEmptyState` — no blank areas | Not Started | | P3-C1 §14.2 MB-01, UI-Kit-Usage-and-Composition-Guide.md |
+| 6.7.10 | No feature-local duplicate reusable visual primitives — all new reusable components contributed to `@hbc/ui-kit` with stories, ARIA review, and token-only styling | Not Started | | P3-C1 §14.2, Application Standards Conformance Report |
+| 6.7.11 | Phase 2 UI precedents applied — `DashboardLayout` + `HbcKpiCard` for all KPI surfaces; two-column persistent layout for primary content + context panel surfaces; context-sensitive CTA labels | Not Started | | P3-C1 §14.4, P2-F1 |
+| 6.7.12 | `hb-ui-ux-conformance-reviewer` conformance review passed on all Phase 3 surfaces — evidence recorded in §13 | Not Started | | P3-C1 §14.5 |
 
 ---
 
@@ -181,6 +204,11 @@ Phase 3 is complete only when all §18 gates pass with evidence (Phase 3 plan §
 | 7.8 | Owner Report non-gated release works | Not Started | | P3-F1 §8.2, P3-G3 §8.8 |
 | 7.9 | PM narrative overrides with provenance | Not Started | | P3-F1 §11, P3-G3 §8.9 |
 | 7.10 | Export produces PDF stored in SharePoint | Not Started | | P3-F1 §9, P3-G3 §8.10 |
+| 7.11 | PER report permissions enforced — view/annotate/generate reviewer runs permitted; PM draft writes and source-of-truth mutations prohibited | Not Started | | P3-F1 §8.5, P3-G3 §8.11 |
+| 7.12 | Reviewer-generated review runs — `runType: 'reviewer-generated'` uses only the latest confirmed PM snapshot; PM draft state untouched | Not Started | | P3-F1 §8.6, P3-G3 §8.12 |
+| 7.13 | Central project-governance policy record enforced — report-family approval/release policy owned by policy record; Reports module enforces only (no ownership) | Not Started | | P3-F1 §14, P3-G3 §8.13 |
+| 7.14 | PM↔PE internal review chain blocks PX Review release — when chain is configured at project level, PX Review release requires chain completion before advancing to PX Review stage | Not Started | | P3-F1 §14.5, P3-G3 §8.14 |
+| 7.15 | PER release authority per report family — `perReleaseAuthority` field respected per family definition | Not Started | | P3-F1 §14.4, P3-G3 §8.15 |
 
 ---
 
@@ -196,6 +224,11 @@ Phase 3 is complete only when all §18 gates pass with evidence (Phase 3 plan §
 | 8.6 | Module spine publication — all modules contributing | Not Started | | §9.6 staging scenario |
 | 8.7 | Canvas governance — edit-mode enforcement | Not Started | | §9.7 staging scenario |
 | 8.8 | Report lifecycle — PX Review and Owner Report full cycle | Not Started | | §9.8 staging scenario |
+| 8.9 | Push-to-Project-Team — structured tracked work item created; provenance preserved; closure loop requires PER confirmation | Not Started | | §9.9 staging scenario |
+| 8.10 | Executive review loop — PER annotates surface, generates reviewer-generated run, pushes to team, team responds, PER confirms closure | Not Started | | §9.10 staging scenario |
+| 8.11 | Executive review lane depth — PWA provides full executive review experience; SPFx provides broad interaction with escalation to PWA for depth | Not Started | | §9.10 staging scenario, P3-G1 §4.8 |
+| 8.12 | Annotation isolation in review loop — PER review artifacts stored independently; no module source-of-truth mutations produced during review run | Not Started | | §9.10 staging scenario, P3-E2 §11.2 |
+| 8.13 | UI conformance — all Phase 3 Project Hub surfaces pass mold-breaker conformance review; `enforce-hbc-tokens` ESLint clean; conformance evidence recorded in §13 | Not Started | | P3-C1 §14.5 |
 
 ---
 
@@ -273,6 +306,24 @@ Phase 3 is complete only when all §18 gates pass with evidence (Phase 3 plan §
 | **Expected outcome** | Full lifecycle works for both families; approval gated for PX Review; non-gated for Owner Report |
 | **Pass criteria** | PDF artifacts produced; run-ledger tracks all runs; approval enforcement correct |
 
+### 9.9 Push-to-Project-Team
+
+| Aspect | Definition |
+|---|---|
+| **Preconditions** | PER user in scope for a project; actionable finding on a review-capable surface (Financial, Schedule, Constraints, or Permits) |
+| **Steps** | 1. PER annotates a surface section or field with a finding. 2. PER invokes Push-to-Project-Team action. 3. Verify structured work item created in `@hbc/my-work-feed` with push provenance (originRole, originReviewRunId, originAnnotationId, pushTimestamp). 4. PM receives item in work queue. 5. PM resolves and marks responded. 6. Verify closure loop triggered — PER receives confirmation notification. 7. PER confirms closure. |
+| **Expected outcome** | Tracked work item with full provenance created; closure loop completes; PER-confirmed closure recorded |
+| **Pass criteria** | Work item has correct provenance fields; PM queue receives item; PER closure confirmation stored; annotation not mutated post-push |
+
+### 9.10 Executive review loop
+
+| Aspect | Definition |
+|---|---|
+| **Preconditions** | PER user scoped to a project; project has at least one confirmed PM report snapshot; review-capable module data available |
+| **Steps** | 1. PER opens project in PWA (full executive review experience). 2. PER annotates sections on Financial, Schedule, Constraints, and Permits surfaces — verify Safety surface has no annotation affordance. 3. PER generates a reviewer-generated review run. 4. Verify run uses latest confirmed PM snapshot (not draft); `runType: 'reviewer-generated'` recorded in run ledger. 5. Verify PM-owned draft state unchanged. 6. PER pushes finding to project team (§9.9 flow). 7. From SPFx, PER accesses same surfaces — verify broad interaction available; verify thread management / multi-run comparison / history depth triggers Launch-to-PWA escalation. 8. Verify PER cannot write to module source-of-truth fields on any surface. |
+| **Expected outcome** | Full executive review loop runs end-to-end; annotation isolation preserved; reviewer-generated run uses confirmed snapshot only; Safety exclusion enforced; lane depth doctrine observed |
+| **Pass criteria** | Annotation isolation confirmed (no module record mutations); reviewer run `runType` correct; PM draft state unchanged; Safety shows no annotation affordance; SPFx lane escalation triggers on depth operations; PER source-of-truth write blocked |
+
 ---
 
 ## 10. Release-Readiness Criteria
@@ -282,13 +333,15 @@ Phase 3 is release-ready when:
 | # | Criterion | Status | Evidence |
 |---|---|---|---|
 | 10.1 | All §18.1–§18.7 gate items pass (§2–§8 above) | Not Started | Gate checklist complete |
-| 10.2 | All 8 staging scenarios pass (§9) | Not Started | Staging scenario results |
+| 10.2 | All 10 staging scenarios pass (§9) | Not Started | Staging scenario results |
 | 10.3 | Defer list is explicit and documented (§11) | Not Started | §11 reviewed and confirmed |
 | 10.4 | No hidden future scope inside Phase 3 acceptance | Not Started | Defer list review |
 | 10.5 | Documentation current — all 19 deliverables reflect implementation state | Not Started | Deliverable review |
 | 10.6 | Cross-lane evidence complete — shared, PWA-specific, and SPFx-specific (P3-G3 §10) | Not Started | Evidence matrix filled |
 | 10.7 | Module source-of-truth boundaries respected (P3-E2) | Not Started | Authority boundary verification |
 | 10.8 | Spreadsheet/document replacement notes aligned with implementation (P3-E3) | Not Started | Replacement verification |
+| 10.9 | Central project-governance policy record deployed and enforced — approval/release policy drives report lifecycle; Records module enforces without owning policy | Not Started | Policy record verification |
+| 10.10 | UI conformance evidence complete — all Phase 3 surfaces pass mold-breaker conformance check per P3-C1 §14; `enforce-hbc-tokens` ESLint clean across all Phase 3 feature packages | Not Started | Conformance review results |
 
 ---
 
@@ -348,5 +401,5 @@ _This section is populated during Phase 3 implementation as evidence is collecte
 
 ---
 
-**Last Updated:** 2026-03-21
+**Last Updated:** 2026-03-22 — Governance model updates applied (dual-key routing, PER authority, review layer, Push-to-Project-Team, Safety exclusion, policy record, PM↔PE chain); §6.7 UI Conformance gate added; §8.13 UI validation; §10.10 UI release criterion; staging scenarios §9.9–§9.10 added.
 **Governing Authority:** [Phase 3 Plan §18, §22](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

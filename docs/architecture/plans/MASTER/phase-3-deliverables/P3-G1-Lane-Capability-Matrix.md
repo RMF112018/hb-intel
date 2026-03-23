@@ -37,6 +37,7 @@ Phase 3 uses a **shared-canonical cross-lane model** (Phase 3 plan §4.1):
 - Interaction and workflow depth rules (what SPFx can do vs what must escalate to PWA)
 - Canvas and composition rules by lane
 - Cross-lane navigation and handoff rules
+- Executive review lane depth (PWA = full experience; SPFx = broad direct interaction on supported surfaces)
 
 ### This specification does NOT govern
 
@@ -60,6 +61,8 @@ Phase 3 uses a **shared-canonical cross-lane model** (Phase 3 plan §4.1):
 | **Shared canonical contract** | A cross-lane contract that both lanes must consume identically (same types, same semantics, same validation) |
 | **Host-aware fallback** | Behavior that adapts to SPFx host constraints (e.g., no cross-project navigation within SharePoint site scope) |
 | **Operational surface** | A module page where users can view, create, edit, and manage records — not just a summary |
+| **Full executive review experience** | The complete PER workflow available in the PWA: annotations, review run generation, Push-to-Project-Team, closure confirmation, thread management, multi-run comparison, and review history browsing |
+| **Broad executive review** | The SPFx executive review capability subset: annotations on supported surfaces, reviewer-generated review runs, Push-to-Project-Team; deeper history, multi-run comparison, and thread management stay in PWA |
 
 ---
 
@@ -231,6 +234,24 @@ For each always-on core module, the following defines what each lane MUST suppor
 | Baseline-visible lifecycle placement | **Required** | **Required** |
 | Deeper field-first depth | Deferred to Phase 6 | Deferred to Phase 6 |
 
+### 4.8 Executive Review (Portfolio Executive Reviewer posture)
+
+Executive review capabilities apply to PER posture only; non-PER users are unaffected by this lane depth distinction. Review-capable module surfaces for Phase 3: Financial, Schedule, Constraints, Permits, Project Health, Reports (per P3-E1 §9.1).
+
+| Capability | PWA | SPFx | Notes |
+|---|---|---|---|
+| View review-capable module surfaces (read) | **Full** | **Full** | PER read-only access in both lanes |
+| Place review annotations on supported surfaces | **Full** | **Broad** | Annotation placement supported in both; SPFx may lack advanced anchor depth |
+| Generate reviewer-generated review runs | **Full** | **Broad** | Supported in both; run against confirmed PM snapshot per P3-F1 §8.6 |
+| Push-to-Project-Team (initiate from review annotation) | **Full** | **Broad** | Initiation supported in both lanes; P3-D3 §13 governs the work item |
+| Confirm PER closure of a pushed work item | **Full** | **Broad** | Confirmation action supported in both lanes |
+| Review annotation thread management | **Full** | **Launch-to-PWA** | Thread management (replies, history, resolution) is PWA-depth |
+| Multi-run comparison | **Full** | **Launch-to-PWA** | Comparing multiple reviewer-generated runs is PWA-depth |
+| Review history browsing | **Full** | **Launch-to-PWA** | Full annotation history and review run history browsing is PWA-depth |
+| Executive review catalog | **Full** | **Broad** | Catalog visible in both; deeper management stays in PWA |
+
+**Lane depth doctrine for executive review:** PWA provides the full executive review experience. SPFx provides broad direct interaction — a PER can read, annotate, generate runs, and push to team from SPFx without being forced to PWA for common review tasks. Deeper workflows (thread management, multi-run comparison, history browsing) stay in PWA.
+
 ---
 
 ## 5. Interaction and Workflow Depth Rules
@@ -255,6 +276,9 @@ The following interactions MUST route to the PWA because they require capabiliti
 | Schedule file ingestion (XER/XML/CSV upload + parsing) | Complex file processing and upload UX |
 | Schedule upload history / restore | Multi-step history browsing and restore workflow |
 | Report run-ledger full history browsing | Rich timeline and comparison UI |
+| Executive review thread management | Replies, thread history, and resolution require PWA-depth interaction |
+| Multi-run review comparison | Comparing multiple reviewer-generated runs requires PWA-depth |
+| Executive review history browsing | Full annotation history browsing is PWA-depth |
 | Cross-project navigation and continuity | SPFx is scoped to a single project site |
 | Advanced draft recovery workflows | Requires IndexedDB-backed `@hbc/session-state` |
 | Multi-project reporting or portfolio views | SPFx site scope does not support cross-project surfaces |
@@ -367,5 +391,5 @@ If a downstream deliverable conflicts with this specification, this specificatio
 
 ---
 
-**Last Updated:** 2026-03-20
+**Last Updated:** 2026-03-22
 **Governing Authority:** [Phase 3 Plan §10](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

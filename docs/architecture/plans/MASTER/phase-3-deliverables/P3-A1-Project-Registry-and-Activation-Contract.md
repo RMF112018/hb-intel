@@ -121,7 +121,7 @@ The canonical project registry record is the authoritative source for the fields
 | `lifecycleStatus` | `ProjectLifecycleStatus` | **Mutable** | Activation | Current lifecycle classification (see §2.2) |
 | `projectType` | `string` | **Mutable** | Activation (optional) | Project type classification |
 | `projectLocation` | `string` | **Mutable** | Activation (optional) | Project geographic location |
-| `department` | `'commercial' \| 'luxury-residential'` | **Mutable** | Activation | Business department (from provisioning W0-G1-T02) |
+| `department` | `'commercial' \| 'luxury-residential'` | **Governed-mutable — reclassification only** | Activation | Business department (from provisioning W0-G1-T02); authority-defining for access scoping — see §3.5 |
 | `startDate` | `string` (ISO 8601) | **Mutable** | Activation | Project start date |
 | `scheduledCompletionDate` | `string` (ISO 8601) | **Mutable** | Activation (optional) | Projected completion date |
 | `siteUrl` | `string` | **Immutable** | Activation | Primary SharePoint project site URL (see §4) |
@@ -187,11 +187,44 @@ The following fields are **immutable** after activation and MUST NOT be modified
 
 Both the PWA and SPFx lanes MUST resolve the same `projectId` and `projectNumber` for a given project. Neither lane may maintain a separate project identity namespace. This is enforced by both lanes consuming the same canonical registry through shared data access contracts.
 
-### 3.4 Project identity in routes
+### 3.4 Dual-key inbound handling and projectId normalization
 
-- The PWA uses `projectId` or `projectNumber` as the route parameter for project-scoped pages.
+Inbound links and launch parameters may use either `projectId` or `projectNumber` as the inbound project key. This transitional dual-key capability covers legacy links, external references, and cross-surface handoffs that may pre-date projectId-canonical routing.
+
+| Inbound key | Accepted? | Handling |
+|---|---|---|
+| `projectId` (UUID) | Yes — canonical | Use directly; no resolution required |
+| `projectNumber` | Yes — inbound alias | Look up in registry; resolve to `projectId`; redirect/normalize before further processing |
+
+**Normalization rule:** All internal state, newly generated links, shared-spine queries, and canonical routing MUST use `projectId` after resolution. `projectNumber` is an accepted inbound alias only and MUST NOT be stored or propagated as the primary project identity key after the resolution step.
+
+This normalization requirement flows into:
+- Route-canonical identity in P3-B1 (route carries `projectId`; `projectNumber` is an accepted query alias that triggers a redirect to the `projectId` form)
+- Shared-spine queries in P3-A3 (all queries use `projectId`)
+- Cross-lane handoff parameters in P3-G2 (handoff URLs carry `projectId`)
+
+### 3.5 Project identity in routes
+
+- The PWA uses `projectId` as the route parameter for project-scoped pages. `projectNumber` MAY be accepted as an inbound alias in query parameters and MUST be resolved and redirected to the `projectId` route form.
 - The SPFx lane resolves project identity from the site context (site URL → registry lookup) or from explicit route/query parameters.
 - In both cases, the registry record is the authoritative source. Route-carried identity takes precedence over cached or session-stored identity per Phase 3 plan §4.2.
+
+### 3.6 Department reclassification governance
+
+`department` is the **authority-defining field** for Portfolio Executive Reviewer access scoping (see P3-A2 §3.3). It cannot remain a normal mutable field after activation.
+
+**Governed department reclassification rules:**
+
+| Aspect | Rule |
+|---|---|
+| **Who may approve** | Manager of Operational Excellence only |
+| **Audit requirement** | Reclassification is a governed, auditable event; the old and new department values, approver, and timestamp are recorded in the central override/audit log |
+| **Downstream revalidation** | Immediate recomputation of all Portfolio Executive Reviewer visibility for the project is required |
+| **Visibility recalculation** | All existing scoped reviewer visibility (department-derived access) must be recalculated immediately after reclassification completes |
+| **Override/exception suspension** | Any existing permissive exceptions (out-of-scope overrides) tied to the old department are immediately moved to review-required / suspended status until revalidated under the new department |
+| **Active workflow reassignment** | If reclassification removes a reviewer from valid scope, their active review authority is terminated; they retain read-only legacy visibility to artifacts they originated; active workflow responsibilities are reassigned per P3-A2 §10 |
+
+Reclassification MUST NOT proceed without the approval of the Manager of Operational Excellence. Partial or unapproved changes to `department` are not an acceptable steady-state pattern.
 
 ---
 
@@ -332,6 +365,12 @@ The following reconciliations are locked for Phase 3 and MUST be honored in down
 7. **`projectId` generation — requires alignment**
    The current handoff seam generates `projectId` as `project-${handoffId}` (a composite string). The canonical registry requires UUID v4. This generation strategy must be aligned during implementation — either the handoff seam adopts UUID v4, or the contract accepts the current format as a valid project ID. This is a **known gap** requiring an implementation-time decision.
 
+8. **Dual-key inbound handling — normalization required**
+   The existing `BackToProjectHub` component and provisioning-linked navigation use `projectId` as the handoff parameter. The registry `projectNumber` field exists but is not currently used as a routing key. Phase 3 must implement `projectNumber`-to-`projectId` lookup resolution at the router/entry level so both keys are accepted inbound. After resolution, all internal usage normalizes to `projectId`. This is **controlled evolution**.
+
+9. **Department as authority-defining field — controlled evolution**
+   The `department` field currently exists as a mutable string on registry records without governed-reclassification enforcement. Phase 3 must implement the governed reclassification process defined in §3.6, including audit recording, downstream visibility recalculation trigger, and override/exception suspension logic. This is **controlled evolution**.
+
 ---
 
 ## 9. Acceptance Gate Reference
@@ -364,13 +403,14 @@ This contract establishes the **registry and activation foundation** that downst
 | **P3-A3** — Shared spine publication contract set | Must use `projectId` from the registry as the canonical project key for all spine publications |
 | **P3-B** — Project context continuity and switching contract | Must treat the registry as the source of truth for project identity; route-carried `projectId` must resolve against the registry |
 | **P3-C** — Project canvas governance note | Must use registry record fields for project identity header and canvas context |
+| **P3-A2** — Membership / role authority contract | Uses `department` as authority-defining scope key for Portfolio Executive Reviewer eligibility; must trigger reclassification revalidation per §3.6 |
 | **P3-G** — PWA / SPFx capability matrix | Must respect cross-lane registry consistency rules (§7) |
-| **P3-H** — Acceptance checklist | Must include registry and activation gate evidence |
+| **P3-H** — Acceptance checklist | Must include registry and activation gate evidence, including dual-key resolution and department reclassification governance |
 | **Any implementation artifact** | Must include repo-truth reconciliation notes where current-state and target-state differ |
 
 If a downstream deliverable conflicts with this contract, this contract takes precedence unless the Architecture lead approves a documented exception.
 
 ---
 
-**Last Updated:** 2026-03-20
+**Last Updated:** 2026-03-22
 **Governing Authority:** [Phase 3 Plan §4, §8](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

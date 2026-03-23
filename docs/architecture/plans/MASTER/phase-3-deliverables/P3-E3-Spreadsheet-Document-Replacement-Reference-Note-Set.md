@@ -201,7 +201,7 @@ Safety management currently relies on a **Site Specific Safety Plan** (SSSP) fil
 | `Safety Checklist Template - Weighted.xlsx` | Weighted safety inspection checklist | Checklist/inspection aggregation |
 | `Incident Report .docx` | Incident report form | Incident-report working state |
 | `Tropical Storm_Hurricane Preparedness Plan.pdf` | Emergency response plan | Emergency-plan acknowledgment state |
-| `Project_Safety_Checklist.pdf` | Project safety checklist | Checklist aggregation reference |
+| `Project_Safety_Checklist.pdf` | Startup safety readiness check — **RECLASSIFIED to Project Startup** (P3-E11 §2); NOT the ongoing safety checklist | See §8.4 reclassification note |
 | `CrisisComs/Emergency Contact Card.pdf` | Emergency contact reference | Emergency plan component |
 | `CrisisComs/HBC Crisis Communication Plan_KREPS 8.15.2025.pdf` | Crisis communication plan | Emergency plan component |
 | `CrisisComs/ICE Action Plan - Field.pdf` | ICE response plan | Emergency plan component |
@@ -248,20 +248,61 @@ Reports is a governed report workspace, NOT a simple launcher and NOT a full fre
 
 ---
 
-## 8. Quality Control / Warranty Notes
+## 8. Project Closeout Notes
 
-Quality Control and Warranty are **baseline-visible lifecycle modules** with deeper field-first definition deferred (P3-E1 §3.7, §3.8).
+Project Closeout is an **always-on lifecycle module** that activates when a project enters the closeout phase. It owns the operational data for all closeout execution and publishes snapshots to the Reports module for release artifacts.
 
 ### 8.1 Reference example files
 
-| File | Purpose | Status |
-|---|---|---|
-| `06 20260307_SOP_SubScorecard-DRAFT.xlsx` | Subcontractor scorecard SOP | Deferred — QC replacement scope |
-| `07 20260307_SOP_LessonsLearnedReport-DRAFT.xlsx` | Lessons learned report SOP | Deferred — QC replacement scope |
+| File | Purpose | Replacement Module | Status |
+|---|---|---|---|
+| `06 20260307_SOP_SubScorecard-DRAFT.xlsx` | Subcontractor performance scorecard | Project Closeout — SubScorecard sub-surface | **Phase 3** — field spec in P3-E10 §5 |
+| `07 20260307_SOP_LessonsLearnedReport-DRAFT.xlsx` | Lessons learned report | Project Closeout — Lessons Learned sub-surface | **Phase 3** — field spec in P3-E10 §6 |
+| `Project_Closeout_Checklist.pdf` | 70-item closeout checklist (7 sections) | Project Closeout — Closeout Checklist sub-surface | **Phase 3** — field spec in P3-E10 §4 |
 
-### 8.2 Deferred replacement scope
+### 8.2 Replacement scope
 
-QC and Warranty replacement workflows are intentionally deferred to a later phase. These modules retain lifecycle placement and architectural continuity in Phase 3 but do not absorb full field-first depth. The reference examples above are preserved for future phase implementation alignment.
+All three files are replaced by the Project Closeout module in Phase 3. The module owns:
+- The 70-item operational closeout checklist (replacing the PDF-based workflow)
+- Subcontractor scorecard entry and aggregation dashboard (replacing the Excel SOP)
+- Lessons learned structured entry and organization-wide knowledge database (replacing the Excel SOP)
+
+The Reports module assembles SubScorecard and Lessons Learned entries into release artifacts when Section 6 completion items are marked complete (P3-E2 §12.3, P3-E10 §12).
+
+### 8.3 Quality Control / Warranty Notes (unchanged)
+
+Quality Control and Warranty are **baseline-visible lifecycle modules** with deeper field-first definition deferred (P3-E1 §3.7, §3.8). No QC or Warranty files from the reference examples are in Phase 3 replacement scope beyond baseline lifecycle placement.
+
+### 8.4 Project Startup Notes
+
+Project Startup is an **always-on lifecycle module** that is active from project creation. It owns the operational data for all project mobilization activities.
+
+| File | Purpose | Replacement Module | Status |
+|---|---|---|---|
+| `Job Startup Checklist.pdf` | 55-item startup operational checklist (4 sections) | Project Startup — Job Startup Checklist sub-surface | **Phase 3** — field spec in P3-E11 §1 |
+| `Project_Startup_Checklist.pdf` | Same checklist as above; Procore inspection template export | Project Startup — Job Startup Checklist sub-surface | **Phase 3** — field spec in P3-E11 §1 |
+| `Project_Safety_Checklist.pdf` | 32-item startup safety readiness check (Pass/Fail/N/A) — NOT the ongoing Safety module checklist | Project Startup — Jobsite Safety Checklist sub-surface | **Phase 3** — field spec in P3-E11 §2; reclassified from Safety domain (see §6.2 note) |
+| `Responsibility Matrix - Template.xlsx` | PM (84 tasks × 9 roles) + Field (28 tasks × 8 roles) role assignment template | Project Startup — Responsibility Matrix sub-surface | **Phase 3** — field spec in P3-E11 §3 |
+| `Responsibility Matrix - Owner Contract Template.xlsx` | Owner contract obligations extraction template | Project Startup — Owner Contract Review sub-surface | **Phase 3** — field spec in P3-E11 §4 |
+| `PROJECT MANAGEMENT PLAN 2019.docx` | 11-section project management plan template | Project Startup — Project Management Plan sub-surface | **Phase 3** — field spec in P3-E11 §5 |
+| `Procore Startup Checklist Summary (1).pdf` | Procore admin setup field requirements | Project Startup — Procore Setup Reference (read-only) | **Phase 3** — field spec in P3-E11 §6 |
+
+**Project_Safety_Checklist.pdf reclassification note:** This file was previously uncategorized in the Safety domain. Upon content analysis, it is a startup-phase safety readiness check ("Jobsite Safety Checklist") with Pass/Fail/N/A scoring — distinct from the Safety module's 93-item ongoing weighted inspection checklist. It is now correctly owned by the Project Startup module. The Safety module does not own or receive write inputs from this checklist.
+
+**Field-level specification:** [P3-E11 — Project Startup Module Field Specification](P3-E11-Project-Startup-Module-Field-Specification.md)
+
+### 8.5 Subcontract Compliance Notes
+
+Subcontract Compliance is an **always-on core module** with one record per subcontract. It owns the operational state for subcontract package submission verification and compliance relief.
+
+| File | Purpose | Replacement Module | Status |
+|---|---|---|---|
+| `SUBCONTRACT CHECKLIST.xlsx` (Subcontract Checklist worksheet) | 12-item document package verification checklist submitted by PM for Risk Manager / PX review | Subcontract Compliance — Subcontract Checklist sub-surface | **Phase 3** — field spec in P3-E12 §1 |
+| `SUBCONTRACT CHECKLIST.xlsx` (Compliance Waiver worksheet) | Insurance/licensing waiver with PX + CFO + Compliance Manager three-party approval routing | Subcontract Compliance — Compliance Waiver sub-surface | **Phase 3** — field spec in P3-E12 §2 |
+
+**Reclassification note:** `SUBCONTRACT CHECKLIST.xlsx` was previously listed in §9.7 as "Estimating | Cross-cutting." This is incorrect. The file is a project-team document used during subcontract award review, not an estimating tool. It is now correctly classified under the Subcontract Compliance module.
+
+**Field-level specification:** [P3-E12 — Subcontract Compliance Module Field Specification](P3-E12-Subcontract-Compliance-Module-Field-Specification.md)
 
 ---
 
@@ -318,28 +359,52 @@ Complete mapping of `docs/reference/example/` files to modules and replacement w
 | `Safety Checklist Template - Weighted.xlsx` | Safety | Checklist aggregation |
 | `Incident Report .docx` | Safety | Incident working state |
 | `Tropical Storm_Hurricane Preparedness Plan.pdf` | Safety | Emergency plan |
-| `Project_Safety_Checklist.pdf` | Safety | Checklist reference |
+| `Project_Safety_Checklist.pdf` | **Project Startup** (reclassified — startup readiness, not ongoing Safety) | Jobsite Safety Checklist — P3-E11 §2 |
 | `CrisisComs/*.pdf` (6 files) | Safety | Emergency/crisis plan components |
 
-### 9.6 Quality / estimating / project management (deferred or cross-cutting)
+### 9.6 Project Closeout domain
+
+| File | Module | Replacement workflow |
+|---|---|---|
+| `06 20260307_SOP_SubScorecard-DRAFT.xlsx` | Project Closeout | SubScorecard sub-surface — P3-E10 §5 |
+| `07 20260307_SOP_LessonsLearnedReport-DRAFT.xlsx` | Project Closeout | Lessons Learned sub-surface — P3-E10 §6 |
+| `Project_Closeout_Checklist.pdf` | Project Closeout | Closeout Checklist sub-surface — P3-E10 §4 |
+
+### 9.7 Estimating / project management (deferred or cross-cutting)
 
 | File | Domain | Status |
 |---|---|---|
-| `06 20260307_SOP_SubScorecard-DRAFT.xlsx` | QC | Deferred |
-| `07 20260307_SOP_LessonsLearnedReport-DRAFT.xlsx` | QC | Deferred |
 | `Estimating Kickoff.xlsx` | Estimating | Cross-cutting (BD/estimating) |
 | `Estimating - Post Bid Autopsy Template 08.25.25.xlsx` | Estimating | Cross-cutting |
-| `SUBCONTRACT CHECKLIST.xlsx` | Estimating | Cross-cutting |
 | `HB GO_NOGO Template Ver 2.2 2025.12.05.xlsx` | BD | Cross-cutting |
-| `Responsibility Matrix - *.xlsx` (2 files) | Project Management | Cross-cutting |
-| `responsibility-matrix.json` | Project Management | Data model reference |
-| `PROJECT MANAGEMENT PLAN 2019.docx` | Project Management | Process reference |
+| `responsibility-matrix.json` | Project Management | Data model reference (aligned to P3-E11 §3) |
 | `Project Closeout Guide - DRAFT.docx` | Project Management | Lifecycle reference |
 | `E-Verify Tracking Log_Ver. 1, 7.10.csv` | HR/Compliance | Cross-cutting |
 | `marketLeads.json` | BD | Data reference |
 | `pipeline.json` | BD | Data reference |
 
-### 9.7 Historical directory structures
+> **Note:** `Responsibility Matrix - Template.xlsx`, `Responsibility Matrix - Owner Contract Template.xlsx`, and `PROJECT MANAGEMENT PLAN 2019.docx` have been reclassified from this section to **Project Startup domain** (§9.8). See §8.4.
+
+### 9.8 Project Startup domain
+
+| File | Module | Replacement workflow |
+|---|---|---|
+| `Job Startup Checklist.pdf` | Project Startup | Job Startup Checklist — P3-E11 §1 |
+| `Project_Startup_Checklist.pdf` | Project Startup | Job Startup Checklist (Procore export) — P3-E11 §1 |
+| `Project_Safety_Checklist.pdf` | Project Startup | Jobsite Safety Checklist (startup readiness) — P3-E11 §2 |
+| `Responsibility Matrix - Template.xlsx` | Project Startup | Responsibility Matrix — P3-E11 §3 |
+| `Responsibility Matrix - Owner Contract Template.xlsx` | Project Startup | Owner Contract Review — P3-E11 §4 |
+| `PROJECT MANAGEMENT PLAN 2019.docx` | Project Startup | Project Management Plan — P3-E11 §5 |
+| `Procore Startup Checklist Summary (1).pdf` | Project Startup | Procore Setup Reference — P3-E11 §6 |
+
+### 9.9 Subcontract Compliance domain
+
+| File | Module | Replacement workflow |
+|---|---|---|
+| `SUBCONTRACT CHECKLIST.xlsx` (Subcontract Checklist worksheet) | Subcontract Compliance | Document package verification — P3-E12 §1 |
+| `SUBCONTRACT CHECKLIST.xlsx` (Compliance Waiver worksheet) | Subcontract Compliance | Three-party approval waiver — P3-E12 §2 |
+
+### 9.10 Historical directory structures
 
 | Directory | Purpose | Status |
 |---|---|---|

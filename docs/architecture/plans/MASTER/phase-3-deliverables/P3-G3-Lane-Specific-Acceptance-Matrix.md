@@ -94,6 +94,9 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 | 3 | Smart project switching | Full in-app switching (P3-B1 §2) | Host-aware fallbacks (P3-B1 §8.4) | Switching scenario: context header switch in PWA, launch-to-project in SPFx |
 | 4 | Cross-lane handoff identity | Receives `projectId` from SPFx deep link | Sends `projectId` in deep-link URL | Handoff round-trip: SPFx→PWA→SPFx preserves project identity |
 | 5 | No context loss during handoff | Deep-link handler (P3-B1 §6.1) processes arrival | `BackToProjectHub` pattern sends correct params | Post-handoff verification: correct project, module, and access after arrival |
+| 6 | PER scope validation in both lanes | PER posture resolves correct department scope; out-of-scope projects are inaccessible without `AccessControlOverrideRecord` | Same PER scope validation applied | Scope test: PER in-scope projects accessible; out-of-scope projects inaccessible (P3-A2 §2.3, §6.1) |
+| 7 | PER vs. project membership distinction | PER posture does not grant project membership; operational writes blocked | Same distinction enforced | Boundary test: PER cannot perform membership-gated actions (P3-A2 §6.4) |
+| 8 | projectId normalization in handoff | All outbound deep links use `projectId`; incoming `projectNumber` is normalized before processing | Same normalization | Normalization test: `projectNumber` in inbound URL resolves to canonical `projectId` deep link (P3-A1 §3.4, P3-G2 §2.3) |
 
 ---
 
@@ -106,6 +109,7 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 | 1 | Valid activation transaction | Setup/handoff acknowledgment creates valid project record with `projectId`, `siteUrl`, status `active` | Activation flow test: registry entry created, site associated |
 | 2 | Routeable context on landing | Activated project lands with valid route in PWA and valid site in SPFx | Navigation test: both lanes can reach the project after activation |
 | 3 | No partial activation | Incomplete activation is rejected; partial records are not persisted | Error-path test: failed activation leaves no orphaned records |
+| 4 | Department reclassification downstream effects | After department reclassification: (a) visibility recalculated, (b) permissive exceptions suspended, (c) active workflows reassigned, (d) authority loss triggers reassignment per P3-A2 §9 | Same recalculation applies in both lanes | Reclassification test: change `department` via Manager of OpEx approval; verify immediate visibility update, exception suspension, and reassignment in both lanes (P3-A1 §3.6, P3-A2 §7) |
 
 ---
 
@@ -201,6 +205,8 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 |---|---|---|---|
 | 1 | Modules respect P3-E2 authority | Upstream authority honored; Project Hub owns operational state | Authority boundary tests per P3-E2 §3–§8 |
 | 2 | Spine publication flowing | All modules publish to all 4 spines per P3-A3 §7 | Spine data verification |
+| 3 | Executive review annotations isolated | Annotations for Financial, Schedule, Constraints, Permits do NOT appear in module source-of-truth records | Isolation test: annotation artifact is separate from module data; no module record mutation observed (P3-E2 §3.4–§6.4) |
+| 4 | Safety executive review exclusion | No review annotation layer exists for Safety; PER has read-only access only; no PER action triggers a Safety write | Boundary test: PER cannot annotate Safety content; read-only confirmed (P3-E2 §7.4) |
 
 ---
 
@@ -220,6 +226,11 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 | 8 | Owner Report non-gated | No approval step; governed release | Release without approval | Direct generate→release flow |
 | 9 | PM narrative | Full editing with provenance | **Broad** — basic editing | Narrative override saved with PM identity/timestamp |
 | 10 | Export | PDF artifact produced and stored | Export available | PDF in SharePoint document library |
+| 11 | PER report permissions enforced | PER cannot confirm PM draft; PER cannot edit PM narrative; reviewer-generated runs use confirmed snapshot only | Same PER restriction enforced | PER boundary test: attempt to confirm draft or edit narrative as PER yields rejected action (P3-F1 §8.5–§8.6) |
+| 12 | Reviewer-generated review runs | PER-initiated run uses latest confirmed PM snapshot; run-ledger records `runType: 'reviewer-generated'` | Same run behavior (broad lane: run initiation supported) | Run test: reviewer run tagged correctly; confirms snapshot version matches latest PM confirmation (P3-F1 §8.6) |
+| 13 | Central project-governance policy enforcement | Reports enforces effective policy (global floor + project overlay); global policy cannot be loosened by project policy | Same policy read and enforced | Policy test: project policy that would loosen global floor is rejected; effective policy = merged result (P3-F1 §14) |
+| 14 | PM↔PE internal review chain blocks PX Review when configured | PX Review action is blocked until chain is marked complete; no bypass path available | Same gate enforced | Chain test: with `requiresInternalReviewChain: true`, PX Review initiation is rejected before chain completion (P3-F1 §14.5) |
+| 15 | PER release authority per family | PER release is permitted or blocked per `perReleaseAuthority` value in effective policy | Same enforcement | Release authority test: PER can release families where `per-permitted`; cannot where `pe-only` (P3-F1 §14.4) |
 
 ---
 
@@ -237,6 +248,10 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 | 6 | Module publication | All module adapters publish to all 4 spines | Same | Spine data includes module contributions |
 | 7 | Defer list clear | Phase 3 has explicit defer list; no hidden scope | Same | Defer list review |
 | 8 | QC/Warranty lifecycle-visible | Navigation present; deeper depth deferred | Same | Module appears in nav; deferred note documented |
+| 9 | Push-to-Project-Team structured work item | PER push creates a Work Queue item (`source: 'module'`, class `queued-follow-up`, carries `reviewArtifactId`); not an untracked notification | Same item created via both lanes | Push test: PER push action creates correctly-shaped Work Queue item with provenance (P3-D3 §13.1) |
+| 10 | Push-to-Project-Team closure loop | Team resolves pushed item → pushed item completes → PER receives closure confirmation request → PER confirms → thread closes; no auto-close without PER confirmation | Same closure behavior | Loop test: full cycle from push → team resolution → PER confirmation → thread closure (P3-D3 §13.3) |
+| 11 | Executive review lane depth | PWA provides full executive review experience; SPFx provides broad direct interaction; thread management, multi-run comparison, and history browsing escalate to PWA | SPFx escalates correctly for three depth scenarios | Lane depth test: confirm SPFx provides annotations/push in-lane; confirm escalation deep links correct for thread management, comparison, history (P3-G1 §4.8) |
+| 12 | Executive review annotation not in module source-of-truth | After PER annotates Financial, Schedule, Constraints, or Permits: module record is unchanged; annotation exists only in separate review artifact | Same isolation in both lanes | Isolation test: post-annotation module record read shows no annotation data embedded (P3-E2 §3.4–§6.4, P3-E1 §9.2) |
 
 ---
 
@@ -255,6 +270,10 @@ Summary of all evidence artifacts organized by lane:
 | Spine data consistency | Same spine data for same query in both lanes | P3-D1–D4 |
 | Module source-of-truth | Same authority boundaries in both lanes | P3-E2 |
 | Report definitions | Same family definitions in both lanes | P3-F1 |
+| PER scope validation | Same scope enforcement in both lanes | P3-A2 §2.3, §6.1 |
+| Executive review annotation isolation | Annotations separate from module source-of-truth in both lanes | P3-E2 §3.4–§6.4 |
+| Push-to-Project-Team work item shape | Same structured work item created from both lanes | P3-D3 §13.1 |
+| Project-governance policy enforcement | Same policy applied in both lanes | P3-F1 §14 |
 
 ### 10.2 PWA-specific evidence
 
@@ -268,12 +287,13 @@ Summary of all evidence artifacts organized by lane:
 | Advanced canvas admin | Full admin panel access | P3-C3 §8 |
 | Schedule file ingestion | XER/XML/CSV upload + parsing | P3-G1 §4.2 |
 | Report run-ledger history | Rich timeline browsing | P3-G1 §4.6 |
+| Full executive review experience | Thread management, multi-run comparison, full history browsing | P3-G1 §4.8 |
 
 ### 10.3 SPFx-specific evidence
 
 | Evidence category | Description | Governing deliverable |
 |---|---|---|
-| Launch-to-PWA escalation | Correct deep links for 10 escalation scenarios | P3-G2 §3 |
+| Launch-to-PWA escalation | Correct deep links for 13 escalation scenarios (incl. 3 executive review) | P3-G2 §3 |
 | Canvas persistence | localStorage + SharePoint list | P3-C3 §6.2 |
 | Host-aware switching | Project switching with site-scoped fallbacks | P3-B1 §8.4 |
 | Broad module pages | Substantial direct working capability | P3-G1 §4, §5.1 |
@@ -298,6 +318,9 @@ Summary of all evidence artifacts organized by lane:
 5. **SPFx project hub — controlled evolution**
    Current 1 of 11+ pages must be expanded to satisfy broad operational companion acceptance criteria. Classified as **controlled evolution**.
 
+6. **PER scope validation criteria — gap filled**
+   No PER-specific lane acceptance criteria previously existed. PER scope validation (§3 rows 6–7), department reclassification downstream effects (§4 row 4), report policy chain (§8 rows 11–15), Push-to-Project-Team loop (§9 rows 9–10), executive review lane depth (§9 row 11), annotation isolation (§9 row 12) all added. Classified as **gap — now resolved**.
+
 ---
 
 ## 12. Acceptance Gate Reference
@@ -306,7 +329,7 @@ Summary of all evidence artifacts organized by lane:
 
 | Field | Value |
 |---|---|
-| **Pass condition** | All §18.1–§18.7 gate criteria pass per the lane-specific matrix in this specification; staging scenarios pass; defer list is clear and explicit |
+| **Pass condition** | All §18.1–§18.7 gate criteria pass per the lane-specific matrix in this specification; staging scenarios pass; defer list is clear and explicit; PER scope validation, department reclassification, report policy chain, Push-to-Project-Team loop, executive review loop closure, and executive review lane depth all pass |
 | **Evidence required** | P3-G3 (this document), per-criterion evidence artifacts from §3–§9, lane-specific evidence from §10 |
 | **Primary owner** | Architecture + Experience / Shell |
 
@@ -331,5 +354,5 @@ If a downstream deliverable conflicts with this specification, this specificatio
 
 ---
 
-**Last Updated:** 2026-03-21
+**Last Updated:** 2026-03-22
 **Governing Authority:** [Phase 3 Plan §18](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
