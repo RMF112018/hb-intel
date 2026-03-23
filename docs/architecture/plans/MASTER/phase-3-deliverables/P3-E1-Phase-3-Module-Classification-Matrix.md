@@ -180,11 +180,13 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 ### 3.4 Permits
 
-**Boundary:** Always-on first-class operational module. Jurisdictional artifacts/documents and governed storage locations may exist outside Project Hub with canonical references back to the permit ledger.
+**Boundary:** Always-on first-class operational module with a **multi-record governed ledger architecture**. Owns the full permit lifecycle from pre-application through post-closeout. Jurisdictional artifacts/documents and governed storage locations may exist outside Project Hub with canonical references back to the permit ledger via `PermitEvidenceRecord`.
 
-**Must support:** Permit log management, linked required inspections, inspection results/status summaries, expiration/status tracking, comments/notes, export.
+**Must support:** Seven first-class record families — `PermitApplication`, `IssuedPermit`, `RequiredInspectionCheckpoint`, `InspectionVisit`, `InspectionDeficiency`, `PermitLifecycleAction`, `PermitEvidenceRecord`. Governed lifecycle via immutable `PermitLifecycleAction` records (no direct status mutation). Permit thread model connecting master permits, subpermits, phased releases, revisions, temporary approvals, and closeout paths. Governed required inspection checkpoint template library per permit type. **Derived compliance health only** — no manual compliance score field. Health derived from deficiencies, expiration proximity, and blocking inspection outcomes. Responsibility envelopes on `IssuedPermit` and `InspectionVisit`. Full Work Queue publication across lifecycle (15 rules). PER annotation scope on `IssuedPermit` and `InspectionVisit`. xlsx required inspections import. One-time migration from prior flat `IPermit` model.
 
-**Field-level specification:** [P3-E7 — Permits Module Field Specification](P3-E7-Permits-Module-Field-Specification.md)
+**Locked decisions:** All 15 locked decisions from P3-E7 master index are binding. No `complianceScore` field may appear in any Permits record type.
+
+**Field-level specification:** [P3-E7 — Permits Module Field Specification](P3-E7-Permits-Module-Field-Specification.md) *(master index + T01–T08 detail files)*
 
 ### 3.5 Safety
 
@@ -611,12 +613,15 @@ This section defines the shared package integration obligations for every always
 
 | Package | Integration point | Notes |
 |---|---|---|
-| `@hbc/field-annotations` | PER annotation layer on permit records and inspection results | Per P3-E2 §6.4 |
-| `@hbc/versioned-record` | Optional — permit status history | Not required for Phase 3 acceptance |
-| `@hbc/my-work-feed` | Expiring permit items; failed inspection follow-up items | Register `PermitsWorkAdapter` |
-| `@hbc/notification-intelligence` | Permit expiration warnings; inspection overdue alerts | |
-| `@hbc/bic-next-move` | Inspection responsibility and permit renewal accountability | |
-| `@hbc/session-state` | Offline draft for permit and inspection entry | |
+| `@hbc/field-annotations` | PER annotation layer on `IssuedPermit` and `InspectionVisit` records; `IPermitAnnotationAnchor` struct | Per P3-E7-T05 §7; required for Phase 3 acceptance (B-PRM-03) |
+| `@hbc/versioned-record` | Audit trail for `IssuedPermit` field changes (expirationDate, jurisdictionContact, fees, conditions, accountability) | Required for Phase 3 acceptance (B-PRM-04) |
+| `@hbc/workflow-handoff` | Cross-party handoffs: GC→jurisdiction (submission), inspector→PM (deficiency), stop-work response | Required (B-PRM-01); governs 6 named handoff scenarios per P3-E7-T05 §5 |
+| `@hbc/acknowledgment` | Deficiency resolution acknowledgment; stop-work lift acknowledgment; lifecycle actions with `requiresAcknowledgment = true` | Required (B-PRM-02) |
+| `@hbc/bic-next-move` | Next-move prompts on permit detail and work queue for expiration, deficiency, inspection scheduling, closeout | Required (B-PRM-05); 7 prompt types per P3-E7-T05 §6 |
+| `@hbc/related-items` | Permit-to-schedule-milestone, permit-to-constraint, permit-to-financial-line relationships | Required (B-PRM-06); 5 relationship types per P3-E7-T05 §4 |
+| `@hbc/my-work-feed` | 15 work queue rules (WQ-PRM-01 through WQ-PRM-15): expiration, inspection, deficiency, lifecycle events | Register `PermitsWorkAdapter`; full rule set per P3-E7-T05 §3 |
+| `@hbc/notification-intelligence` | Permit expiration warnings; inspection overdue alerts; stop-work notifications | |
+| `@hbc/session-state` | Offline draft for permit application and inspection entry | |
 | `@hbc/complexity` | Permit log density; inspection detail depth | |
 | `@hbc/smart-empty-state` | No permits logged, no inspections recorded | |
 

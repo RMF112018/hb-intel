@@ -217,14 +217,25 @@ For each always-on core module, the following defines what each lane MUST suppor
 
 ### 4.4 Permits
 
-| Capability | PWA | SPFx |
-|---|---|---|
-| Permit log management | **Required** | **Required** |
-| Linked required inspections | **Required** | **Required** |
-| Inspection results/status summaries | **Required** | **Required** |
-| Expiration/status tracking | **Required** | **Required** |
-| Comments/notes | **Required** | **Required** |
-| Export | **Required** | **Required** |
+| Capability | PWA | SPFx | Notes |
+|---|---|---|---|
+| Permit application management (PermitApplication CRUD) | **Required** | **Required** | Pre-issuance lifecycle |
+| Issued permit record management (IssuedPermit CRUD) | **Required** | **Required** | Core permit ledger |
+| Lifecycle action creation (PermitLifecycleAction) | **Required** | **Required** | All 20 action types; no direct status mutation |
+| Required inspection checkpoint management | **Required** | **Required** | Template library + per-permit instances |
+| xlsx required inspections import | **Required** | **Launch-to-PWA** | Full upload UX in PWA; SPFx links to PWA |
+| Inspection visit logging (InspectionVisit) | **Required** | **Required** | |
+| Inspection deficiency tracking (InspectionDeficiency) | **Required** | **Required** | Full resolution workflow |
+| Deficiency acknowledgment and resolution workflow | **Required** | **Broad** — view + status update | Full workflow in PWA |
+| Expiration risk tracking (daysToExpiration, expirationRiskTier) | **Required** | **Required** | Derived; no manual score |
+| Derived compliance health (derivedHealthTier) | **Required** | **Required** | Computed from record truth; no complianceScore field |
+| Permit thread view (master + subpermits) | **Required** | **Broad** — thread list displayed; no full tree | Full thread tree in PWA |
+| Work queue items (WQ-PRM-01 through WQ-PRM-15) | **Required** | **Required** | Full work queue integration |
+| Evidence upload (PermitEvidenceRecord) | **Required** | **Launch-to-PWA** | Upload in PWA; view in both |
+| PER annotation layer (IssuedPermit + InspectionVisit) | **Required** | **Required** | `@hbc/field-annotations` per P3-E7-T05 §7 |
+| Compliance dashboard (project-level aggregate) | **Required** | **Required** | Health spine aggregate tiles |
+| Permit list export (CSV) | **Required** | **Required** | |
+| Annotated permit summary export (PER) | **Launch-to-PWA** | **Launch-to-PWA** | PER surface export |
 
 ### 4.5 Safety
 

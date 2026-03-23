@@ -187,11 +187,20 @@ For the comprehensive 53-item acceptance gate, see **P3-E6-T08 §8.2**. The crit
 
 ### 6.4 Permits
 
+See P3-E7-T08 §4 for the full 52-item acceptance gate (AC-PRM-01 through AC-PRM-52). The high-level gates below are entry conditions; the T08 gate is the authoritative completion criterion.
+
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.4.1 | Permit log management — Required both lanes | Not Started | | P3-E1, P3-G3 §7.4 |
-| 6.4.2 | Linked inspections — Required both lanes | Not Started | | P3-E2 §6 |
-| 6.4.3 | Expiration tracking — Required both lanes | Not Started | | P3-E2 §6 |
+| 6.4.1 | All 7 first-class record types implemented with correct TypeScript interfaces and zero type errors | Not Started | | P3-E7-T02; AC-PRM-01 |
+| 6.4.2 | No `complianceScore` field exists on any Permits record; derived health only | Not Started | | P3-E7-T04 §4; AC-PRM-05 |
+| 6.4.3 | `IssuedPermit.currentStatus` only changes via `PermitLifecycleAction`; direct mutation rejected | Not Started | | P3-E7-T03 §4.2; AC-PRM-03 |
+| 6.4.4 | All 20 lifecycle action types handled; invalid transitions rejected; terminal state guard active | Not Started | | P3-E7-T03 §3; AC-PRM-11–AC-PRM-13 |
+| 6.4.5 | Required inspection checkpoint template library seeded; auto-generation on permit creation works | Not Started | | P3-E7-T04 §1; AC-PRM-21–AC-PRM-22 |
+| 6.4.6 | Derived compliance health (derivedHealthTier) computed correctly for all health conditions | Not Started | | P3-E7-T04 §4; AC-PRM-33–AC-PRM-36 |
+| 6.4.7 | All 15 work queue rules (WQ-PRM-01 through WQ-PRM-15) fire and resolve correctly | Not Started | | P3-E7-T05 §3; AC-PRM-39–AC-PRM-43 |
+| 6.4.8 | PER annotation layer on IssuedPermit and InspectionVisit; read-only enforcement on PER surface | Not Started | | P3-E7-T05 §7; AC-PRM-49 |
+| 6.4.9 | Data migration complete: all prior IPermit records migrated; no complianceScore in migrated data | Not Started | | P3-E7-T07 §1; AC-PRM-51–AC-PRM-52 |
+| 6.4.10 | All 6 shared package blockers (B-PRM-01 through B-PRM-06) resolved | Not Started | | P3-E7-T08 §1 |
 
 ### 6.5 Safety
 

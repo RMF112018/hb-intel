@@ -320,31 +320,41 @@ Constraints is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio 
 
 | Data domain | Authority | Notes |
 |---|---|---|
-| Permit log | **Project Hub owns** | Full operational ledger |
-| Linked required inspections | **Project Hub owns** | Inspection linkage and tracking |
-| Inspection results/status | **Project Hub owns** | Aggregated status |
-| Expiration/status tracking | **Project Hub owns** | Proactive expiration monitoring |
+| `PermitApplication` | **Project Hub owns** | Pre-issuance lifecycle; origination through approval |
+| `IssuedPermit` | **Project Hub owns** | Operative post-approval permit record; status via lifecycle actions only |
+| `RequiredInspectionCheckpoint` | **Project Hub owns** | Governed template library and per-permit checkpoint tracking |
+| `InspectionVisit` | **Project Hub owns** | All inspection visit records; append-only |
+| `InspectionDeficiency` | **Project Hub owns** | All deficiency records; resolution workflow owned here |
+| `PermitLifecycleAction` | **Project Hub owns** | Immutable audit trail; only creation allowed; no update or delete |
+| `PermitEvidenceRecord` | **Project Hub owns** | Metadata and references to documents; not binary storage |
+| Permit thread relationships | **Project Hub owns** | Thread root, parent-child, relationship type |
+| Derived compliance health | **Project Hub derives** | Computed from record truth; not persisted as manual score |
 
 ### 6.2 External references
 
-Jurisdictional artifacts/documents and governed storage locations MAY exist outside Project Hub. Project Hub maintains canonical references back to the permit ledger.
+Jurisdictional artifacts/documents and governed storage locations MAY exist outside Project Hub. `PermitEvidenceRecord.storageUri` holds the reference. Project Hub does not manage document binary storage.
 
 ### 6.3 Boundary rule
 
-Permits module is the operational ledger owner for permits and inspections. External jurisdictional documents are referenced, not owned.
+Permits module is the **operational ledger owner** for all permit lifecycle data. `IssuedPermit.currentStatus` may only change via a `PermitLifecycleAction` record. Direct status mutation is a boundary violation.
+
+**No manual compliance score** may appear on any record in this module. Compliance health is derived exclusively from record truth per P3-E7-T04 §4.
+
+Upstream jurisdiction systems are referenced but not owned. Future jurisdiction API integration (P3-E7-T07 §5) will consume jurisdiction data but Project Hub remains the source-of-truth for the project-side record.
 
 ### 6.4 Executive review annotation boundary
 
-Permits is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations at full field-level depth on Permits module content.
+Permits is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations at full field-level depth on `IssuedPermit` and `InspectionVisit` records.
 
 | Rule | Description |
 |---|---|
-| **Annotation isolation** | Review annotations MUST be stored in a separate `@hbc/field-annotations` artifact. They MUST NOT be stored in or written to the permit ledger or inspection records. |
-| **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of permit status, inspection results/linkage, or expiration tracking. |
+| **Annotation isolation** | Review annotations MUST be stored in `@hbc/field-annotations` using `IPermitAnnotationAnchor`. MUST NOT be stored in any Permits ledger record. |
+| **No mutation path** | No annotation may trigger mutation of permit status, inspection results, deficiency resolution status, or expiration dates. All mutations flow through operational workflows only. |
+| **Annotatable record types** | `IssuedPermit` (any field), `InspectionVisit` (result, notes, followUpRequired), `InspectionDeficiency` (description, severity, resolutionStatus), `RequiredInspectionCheckpoint` (result, status, name). `PermitLifecycleAction` is NOT annotatable. |
 | **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
 | **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
 
-**Field-level specification:** [P3-E7 — Permits Module Field Specification](P3-E7-Permits-Module-Field-Specification.md)
+**Field-level specification:** [P3-E7 — Permits Module Field Specification](P3-E7-Permits-Module-Field-Specification.md) *(master index + T01–T08 detail files)*
 
 ---
 
