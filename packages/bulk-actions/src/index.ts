@@ -32,6 +32,8 @@ export { createSelectionSnapshot, escalateScope, validateScopeIntegrity } from '
 
 // Execution (SF27-T03)
 export { planExecution, aggregateResults } from './execution/index.js';
-// Hooks (SF27-T04) // export * from './hooks/index.js';
+// Hooks (SF27-T04)
+export { bulkActionKeys, useBulkSelection, useBulkActionExecution } from './hooks/index.js';
+export type { UseBulkSelectionOptions, UseBulkSelectionResult, UseBulkActionExecutionOptions, UseBulkActionExecutionResult } from './hooks/index.js';
 // Adapters (SF27-T07) // export * from './adapters/index.js';
 // Telemetry (SF27-T07) // export * from './telemetry/index.js';
