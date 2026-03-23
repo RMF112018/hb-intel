@@ -1,2 +1,2 @@
-/** SF27 module adapters. Implementation scope: SF27-T07. */
-export {};
+export { BulkActionModuleRegistry } from './BulkActionModuleRegistry.js';
+export type { IBulkActionModuleRegistration } from './BulkActionModuleRegistry.js';
