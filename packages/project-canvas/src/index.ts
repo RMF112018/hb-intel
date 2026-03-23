@@ -33,8 +33,8 @@ export type { RecommendationSignal } from './constants/index.js';
 export { register, registerMany, get, getAll } from './registry/index.js';
 
 // API
-export { CanvasApi } from './api/index.js';
-export type { ICanvasApi } from './api/index.js';
+export { CanvasApi, createSpfxCanvasStorageAdapter } from './api/index.js';
+export type { ICanvasApi, ISpfxCanvasStorageAdapter } from './api/index.js';
 
 // Hooks
 export {

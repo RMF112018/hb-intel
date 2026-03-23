@@ -279,6 +279,7 @@ Status: **Implemented 2026-03-23 in `@hbc/project-canvas` v0.2.0.** `useCanvasCo
 **5.4 — SPFx canvas capability**
 Implement the SPFx lane canvas. Capability must match the P3-C3 lane-aware matrix. Personalization persistence uses the SPFx-appropriate storage tier.
 Governing: P3-C3 §6
+Status: **Implemented 2026-03-23 in `@hbc/project-canvas` v0.2.1.** `createSpfxCanvasStorageAdapter` for localStorage-based canvas persistence in SPFx per P3-C3 §6.2. Canvas foundation is lane-agnostic — same package, same governance in both lanes. SharePoint list online sync is runtime integration scope. Stage 5 (Project Canvas and Home) complete.
 
 ---
 
