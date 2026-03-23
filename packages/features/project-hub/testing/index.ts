@@ -98,3 +98,11 @@ export { mockPublicationBlockers, scheduleSummaryVarianceScenarios } from './moc
 export { createMockScenarioBranch } from './createMockScenarioBranch.js';
 export { createMockScenarioActivityRecord } from './createMockScenarioActivityRecord.js';
 export { scenarioActivityOverrides } from './mockScenarioScenarios.js';
+
+// ── P3-E5-T05 Field execution testing surface ───────────────────────
+
+export { createMockFieldWorkPackage } from './createMockFieldWorkPackage.js';
+export { createMockFieldCommitmentRecord } from './createMockFieldCommitmentRecord.js';
+export { createMockBlockerRecord } from './createMockBlockerRecord.js';
+export { createMockLookAheadPlan } from './createMockLookAheadPlan.js';
+export { blockerRollUpScenarios, commitmentRollUpScenarios } from './mockFieldExecutionScenarios.js';

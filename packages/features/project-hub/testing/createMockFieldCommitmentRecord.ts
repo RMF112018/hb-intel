@@ -1,0 +1,30 @@
+import type { IFieldCommitmentRecord } from '../src/schedule/types/index.js';
+
+export const createMockFieldCommitmentRecord = (
+  overrides?: Partial<IFieldCommitmentRecord>,
+): IFieldCommitmentRecord => ({
+  commitmentId: 'fc-001',
+  projectId: 'proj-001',
+  workPackageId: 'wp-001',
+  externalActivityKey: null,
+  commitmentType: 'Completion',
+  responsibleUserId: 'user-foreman-001',
+  responsibleRole: 'Foreman — Concrete',
+  committedDate: '2026-04-15',
+  committedQuantity: null,
+  windowStart: '2026-04-07',
+  windowEnd: '2026-04-20',
+  status: 'Accepted',
+  acknowledgedAt: '2026-04-02T08:00:00Z',
+  keptAt: null,
+  missedAt: null,
+  missedCausationCode: null,
+  missedExplanation: null,
+  ppcCounted: true,
+  reminderDueAt: null,
+  escalationDueAt: null,
+  createdBy: 'user-001',
+  createdAt: '2026-04-01T09:00:00Z',
+  syncStatus: 'Synced',
+  ...overrides,
+});

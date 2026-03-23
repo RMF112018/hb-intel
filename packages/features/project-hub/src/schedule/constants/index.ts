@@ -1,21 +1,36 @@
 import type {
+  AckResponse,
+  AckStatus,
+  AckSubjectType,
   BaselineType,
+  BlockerSeverity,
+  BlockerStatus,
+  BlockerType,
   CalendarType,
   CommitmentType,
+  FieldCommitmentStatus,
+  FieldCommitmentType,
   IImportValidationRule,
   IMilestoneStatusDisplay,
   IMilestoneThresholdConfig,
+  IRollUpConfig,
   IScheduleIntegrationBoundary,
   IScheduleSummaryThresholdConfig,
+  LocationHierarchyLevel,
+  LookAheadStatus,
   MilestoneStatus,
   MilestoneType,
+  OverallReadiness,
   PercentCompleteBasis,
+  ProgressBasisType,
   PublicationInitiatorRole,
   PublicationLifecycleStatus,
   PublicationType,
   PublishBlockerSeverity,
+  ReadinessDimensionStatus,
   ReconciliationStatus,
   ReconciliationTrigger,
+  RollUpMethod,
   ScenarioLogicSource,
   ScenarioPromotionDisposition,
   ScenarioRelationshipType,
@@ -32,6 +47,11 @@ import type {
   ScheduleSourceSystem,
   ScheduleStatusCode,
   ScheduleVersionStatus,
+  SyncStatus,
+  VerificationMethod,
+  VerificationOutcome,
+  VerificationStatus,
+  WorkPackageStatus,
 } from '../types/index.js';
 
 /**
@@ -439,3 +459,114 @@ export const SCENARIO_LOGIC_SOURCES = [
   'ScenarioOverride',
   'WorkPackageLink',
 ] as const satisfies ReadonlyArray<ScenarioLogicSource>;
+
+// ══════════════════════════════════════════════════════════════════════
+// T05: Field Execution Layer (§6, §7, §8, §9)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §6.1 Work Package ────────────────────────────────────────────────
+
+export const PROGRESS_BASIS_TYPES = [
+  'MilestoneAchieved', 'DurationPct', 'PhysicalPct', 'UnitsInstalled',
+  'ResourcePct', 'QuantityInstalled', 'Configured',
+] as const satisfies ReadonlyArray<ProgressBasisType>;
+
+export const WORK_PACKAGE_STATUSES = [
+  'Planned', 'Ready', 'InProgress', 'Blocked', 'Complete', 'Cancelled', 'PendingVerification',
+] as const satisfies ReadonlyArray<WorkPackageStatus>;
+
+export const SYNC_STATUSES = [
+  'SavedLocally', 'QueuedToSync', 'Synced', 'ConflictRequiresReview',
+] as const satisfies ReadonlyArray<SyncStatus>;
+
+// ── §6.2 Location ────────────────────────────────────────────────────
+
+export const LOCATION_HIERARCHY_LEVELS = [
+  'Campus', 'Building', 'Level', 'Zone', 'Room', 'Workface', 'Custom',
+] as const satisfies ReadonlyArray<LocationHierarchyLevel>;
+
+// ── §6.3 Field Commitment ────────────────────────────────────────────
+
+export const FIELD_COMMITMENT_TYPES = [
+  'Completion', 'MilestoneAchievement', 'ReadinessGate', 'Quantity',
+] as const satisfies ReadonlyArray<FieldCommitmentType>;
+
+export const FIELD_COMMITMENT_STATUSES = [
+  'Requested', 'Acknowledged', 'Accepted', 'Declined', 'Reassigned',
+  'Kept', 'Missed', 'PartiallyKept', 'Cancelled',
+] as const satisfies ReadonlyArray<FieldCommitmentStatus>;
+
+// ── §6.4 Blocker ─────────────────────────────────────────────────────
+
+export const BLOCKER_TYPES = [
+  'Design', 'Material', 'Equipment', 'Labor', 'Permit', 'Inspection',
+  'Owner', 'Weather', 'RFI', 'Submittal', 'Safety', 'Funding', 'Predecessor', 'Other',
+] as const satisfies ReadonlyArray<BlockerType>;
+
+export const BLOCKER_SEVERITIES = [
+  'Informational', 'AtRisk', 'Blocking', 'Critical',
+] as const satisfies ReadonlyArray<BlockerSeverity>;
+
+export const BLOCKER_STATUSES = [
+  'Open', 'InProgress', 'Resolved', 'Escalated', 'Closed', 'Withdrawn',
+] as const satisfies ReadonlyArray<BlockerStatus>;
+
+// ── §6.5 Readiness ───────────────────────────────────────────────────
+
+export const OVERALL_READINESS_VALUES = [
+  'Ready', 'ConditionallyReady', 'NotReady', 'Unknown',
+] as const satisfies ReadonlyArray<OverallReadiness>;
+
+export const READINESS_DIMENSION_STATUSES = [
+  'Ready', 'AtRisk', 'NotReady', 'NotApplicable',
+] as const satisfies ReadonlyArray<ReadinessDimensionStatus>;
+
+/** Governed default readiness dimensions (§6.5). */
+export const DEFAULT_READINESS_DIMENSIONS = [
+  'DRAWINGS', 'MATERIALS', 'LABOR', 'EQUIPMENT', 'PERMITS', 'INSPECTIONS', 'PREDECESSOR_COMPLETE',
+] as const;
+
+// ── §6.6 Look-Ahead ─────────────────────────────────────────────────
+
+export const LOOK_AHEAD_STATUSES = [
+  'Draft', 'Published', 'InExecution', 'Closed',
+] as const satisfies ReadonlyArray<LookAheadStatus>;
+
+// ── §7 Acknowledgement ──────────────────────────────────────────────
+
+export const ACK_SUBJECT_TYPES = [
+  'Commitment', 'PublicationReview', 'ReconciliationRequest', 'EscalationNotice', 'ApprovalRequest',
+] as const satisfies ReadonlyArray<AckSubjectType>;
+
+export const ACK_STATUSES = [
+  'Pending', 'Acknowledged', 'Accepted', 'Declined', 'Reassigned', 'Overdue', 'Escalated', 'Withdrawn',
+] as const satisfies ReadonlyArray<AckStatus>;
+
+export const ACK_RESPONSES = [
+  'Accept', 'Decline', 'Reassign',
+] as const satisfies ReadonlyArray<AckResponse>;
+
+// ── §8 Progress and Verification ─────────────────────────────────────
+
+export const VERIFICATION_STATUSES = [
+  'Pending', 'Verified', 'VerificationFailed', 'Waived',
+] as const satisfies ReadonlyArray<VerificationStatus>;
+
+export const VERIFICATION_METHODS = [
+  'SiteWalkthrough', 'PhotoReview', 'InspectionRecord', 'QuantityMeasurement', 'SystemRecord', 'Other',
+] as const satisfies ReadonlyArray<VerificationMethod>;
+
+export const VERIFICATION_OUTCOMES = [
+  'Confirmed', 'AdjustedDown', 'AdjustedUp', 'Rejected',
+] as const satisfies ReadonlyArray<VerificationOutcome>;
+
+// ── §9 Roll-Up ───────────────────────────────────────────────────────
+
+export const ROLL_UP_METHODS = [
+  'WeightedAverage', 'UnweightedAverage', 'DurationWeighted',
+] as const satisfies ReadonlyArray<RollUpMethod>;
+
+export const DEFAULT_ROLL_UP_CONFIG: IRollUpConfig = {
+  progressRollUpMethod: 'WeightedAverage',
+  authoritativeOnlyVerified: true,
+};

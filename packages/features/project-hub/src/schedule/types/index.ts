@@ -770,3 +770,385 @@ export interface IScenarioPromotionValidation {
   readonly canPromote: boolean;
   readonly blockers: ReadonlyArray<string>;
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// T05: Field Execution Layer (§6, §7, §8, §9)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §6 Shared Enums ─────────────────────────────────────────────────
+
+/** Progress basis assignment — governed per trade/work type (§8.3). */
+export type ProgressBasisType =
+  | 'MilestoneAchieved'
+  | 'DurationPct'
+  | 'PhysicalPct'
+  | 'UnitsInstalled'
+  | 'ResourcePct'
+  | 'QuantityInstalled'
+  | 'Configured';
+
+/** Offline sync state (§15). */
+export type SyncStatus =
+  | 'SavedLocally'
+  | 'QueuedToSync'
+  | 'Synced'
+  | 'ConflictRequiresReview';
+
+// ── §6.1 FieldWorkPackage ────────────────────────────────────────────
+
+/** Work package lifecycle status (§6.1). */
+export type WorkPackageStatus =
+  | 'Planned'
+  | 'Ready'
+  | 'InProgress'
+  | 'Blocked'
+  | 'Complete'
+  | 'Cancelled'
+  | 'PendingVerification';
+
+/** Child decomposition of an ImportedActivitySnapshot (§6.1). */
+export interface IFieldWorkPackage {
+  readonly workPackageId: string;
+  readonly projectId: string;
+  readonly parentExternalActivityKey: string;
+  readonly workPackageName: string;
+  readonly workPackageScope: string;
+  readonly tradeCode: string | null;
+  readonly crewId: string | null;
+  readonly locationId: string | null;
+  readonly plannedStartDate: string;
+  readonly plannedFinishDate: string;
+  readonly committedStartDate: string | null;
+  readonly committedFinishDate: string | null;
+  readonly actualStartDate: string | null;
+  readonly actualFinishDate: string | null;
+  readonly progressBasis: ProgressBasisType;
+  readonly reportedProgressPct: number | null;
+  readonly verifiedProgressPct: number | null;
+  readonly authoritativeProgressPct: number | null;
+  readonly quantityPlanned: number | null;
+  readonly quantityInstalled: number | null;
+  readonly quantityVerified: number | null;
+  readonly quantityUnit: string | null;
+  readonly calendarOverrideId: string | null;
+  readonly readinessStatus: OverallReadiness | null;
+  readonly status: WorkPackageStatus;
+  readonly ppcIncluded: boolean;
+  readonly createdBy: string;
+  readonly createdAt: string;
+  readonly lastModifiedBy: string | null;
+  readonly lastModifiedAt: string | null;
+  readonly syncStatus: SyncStatus;
+}
+
+// ── §6.2 LocationNode ────────────────────────────────────────────────
+
+/** Governed hierarchical location level (§6.2). */
+export type LocationHierarchyLevel =
+  | 'Campus'
+  | 'Building'
+  | 'Level'
+  | 'Zone'
+  | 'Room'
+  | 'Workface'
+  | 'Custom';
+
+/** Governed hierarchical location model (§6.2). */
+export interface ILocationNode {
+  readonly locationId: string;
+  readonly projectId: string;
+  readonly parentLocationId: string | null;
+  readonly locationName: string;
+  readonly locationCode: string;
+  readonly hierarchyLevel: LocationHierarchyLevel;
+  readonly depth: number;
+  readonly sortOrder: number;
+  readonly isTemplate: boolean;
+  readonly createdBy: string;
+  readonly createdAt: string;
+}
+
+// ── §6.3 CommitmentRecord (Field) ────────────────────────────────────
+
+/** Field commitment type (§6.3). */
+export type FieldCommitmentType =
+  | 'Completion'
+  | 'MilestoneAchievement'
+  | 'ReadinessGate'
+  | 'Quantity';
+
+/** Field commitment lifecycle status (§6.3). */
+export type FieldCommitmentStatus =
+  | 'Requested'
+  | 'Acknowledged'
+  | 'Accepted'
+  | 'Declined'
+  | 'Reassigned'
+  | 'Kept'
+  | 'Missed'
+  | 'PartiallyKept'
+  | 'Cancelled';
+
+/** Time-bounded promise by a responsible party — PPC tracking unit (§6.3). */
+export interface IFieldCommitmentRecord {
+  readonly commitmentId: string;
+  readonly projectId: string;
+  readonly workPackageId: string | null;
+  readonly externalActivityKey: string | null;
+  readonly commitmentType: FieldCommitmentType;
+  readonly responsibleUserId: string;
+  readonly responsibleRole: string;
+  readonly committedDate: string;
+  readonly committedQuantity: number | null;
+  readonly windowStart: string;
+  readonly windowEnd: string;
+  readonly status: FieldCommitmentStatus;
+  readonly acknowledgedAt: string | null;
+  readonly keptAt: string | null;
+  readonly missedAt: string | null;
+  readonly missedCausationCode: string | null;
+  readonly missedExplanation: string | null;
+  readonly ppcCounted: boolean;
+  readonly reminderDueAt: string | null;
+  readonly escalationDueAt: string | null;
+  readonly createdBy: string;
+  readonly createdAt: string;
+  readonly syncStatus: SyncStatus;
+}
+
+// ── §6.4 BlockerRecord ───────────────────────────────────────────────
+
+/** Blocker type governed taxonomy (§6.4). */
+export type BlockerType =
+  | 'Design'
+  | 'Material'
+  | 'Equipment'
+  | 'Labor'
+  | 'Permit'
+  | 'Inspection'
+  | 'Owner'
+  | 'Weather'
+  | 'RFI'
+  | 'Submittal'
+  | 'Safety'
+  | 'Funding'
+  | 'Predecessor'
+  | 'Other';
+
+/** Blocker severity (§6.4). */
+export type BlockerSeverity = 'Informational' | 'AtRisk' | 'Blocking' | 'Critical';
+
+/** Blocker lifecycle status (§6.4). */
+export type BlockerStatus =
+  | 'Open'
+  | 'InProgress'
+  | 'Resolved'
+  | 'Escalated'
+  | 'Closed'
+  | 'Withdrawn';
+
+/** Reference to a linked artifact via @hbc/related-items. */
+export interface ILinkedArtifactRef {
+  readonly artifactType: string;
+  readonly artifactId: string;
+  readonly label: string;
+}
+
+/** Named impediment preventing or threatening work package execution (§6.4). */
+export interface IBlockerRecord {
+  readonly blockerId: string;
+  readonly projectId: string;
+  readonly workPackageId: string | null;
+  readonly externalActivityKey: string | null;
+  readonly blockerName: string;
+  readonly blockerDescription: string;
+  readonly blockerType: BlockerType;
+  readonly causationCode: string;
+  readonly severity: BlockerSeverity;
+  readonly status: BlockerStatus;
+  readonly ownerUserId: string;
+  readonly reportedBy: string;
+  readonly identifiedAt: string;
+  readonly targetResolutionDate: string;
+  readonly resolvedAt: string | null;
+  readonly resolutionNotes: string | null;
+  readonly scheduledImpactDays: number | null;
+  readonly linkedArtifacts: ReadonlyArray<ILinkedArtifactRef>;
+  readonly escalationDueAt: string | null;
+  readonly syncStatus: SyncStatus;
+  readonly createdAt: string;
+}
+
+// ── §6.5 ReadinessRecord ─────────────────────────────────────────────
+
+/** Overall readiness assessment (§6.5). */
+export type OverallReadiness = 'Ready' | 'ConditionallyReady' | 'NotReady' | 'Unknown';
+
+/** Per-dimension readiness status (§6.5). */
+export type ReadinessDimensionStatus = 'Ready' | 'AtRisk' | 'NotReady' | 'NotApplicable';
+
+/** Single readiness dimension assessment. */
+export interface IReadinessDimension {
+  readonly dimensionCode: string;
+  readonly status: ReadinessDimensionStatus;
+  readonly note: string | null;
+}
+
+/** Readiness state of a work package or activity (§6.5). */
+export interface IReadinessRecord {
+  readonly readinessId: string;
+  readonly projectId: string;
+  readonly workPackageId: string | null;
+  readonly externalActivityKey: string | null;
+  readonly assessedBy: string;
+  readonly assessedAt: string;
+  readonly overallReadiness: OverallReadiness;
+  readonly readinessDimensions: ReadonlyArray<IReadinessDimension>;
+  readonly notes: string | null;
+  readonly blockerIds: ReadonlyArray<string>;
+  readonly syncStatus: SyncStatus;
+  readonly createdAt: string;
+}
+
+// ── §6.6 LookAheadPlan ──────────────────────────────────────────────
+
+/** Look-ahead plan lifecycle status (§6.6). */
+export type LookAheadStatus = 'Draft' | 'Published' | 'InExecution' | 'Closed';
+
+/** Weekly/multi-week planning artifact with PPC metrics (§6.6). */
+export interface ILookAheadPlan {
+  readonly lookAheadId: string;
+  readonly projectId: string;
+  readonly windowStart: string;
+  readonly windowEnd: string;
+  readonly windowWeeks: number;
+  readonly status: LookAheadStatus;
+  readonly publishedBy: string | null;
+  readonly publishedAt: string | null;
+  readonly workPackageIds: ReadonlyArray<string>;
+  readonly commitmentIds: ReadonlyArray<string>;
+  readonly ppcNumerator: number | null;
+  readonly ppcDenominator: number | null;
+  readonly ppcPercent: number | null;
+  readonly createdBy: string;
+  readonly createdAt: string;
+}
+
+// ── §7.1 AcknowledgementRecord ───────────────────────────────────────
+
+/** Acknowledgement subject type (§7.1). */
+export type AckSubjectType =
+  | 'Commitment'
+  | 'PublicationReview'
+  | 'ReconciliationRequest'
+  | 'EscalationNotice'
+  | 'ApprovalRequest';
+
+/** Acknowledgement lifecycle status (§7.1). */
+export type AckStatus =
+  | 'Pending'
+  | 'Acknowledged'
+  | 'Accepted'
+  | 'Declined'
+  | 'Reassigned'
+  | 'Overdue'
+  | 'Escalated'
+  | 'Withdrawn';
+
+/** Acknowledgement response action. */
+export type AckResponse = 'Accept' | 'Decline' | 'Reassign';
+
+/** Acknowledgement record with lifecycle tracking (§7.1). */
+export interface IAcknowledgementRecord {
+  readonly ackId: string;
+  readonly projectId: string;
+  readonly subjectType: AckSubjectType;
+  readonly subjectId: string;
+  readonly requestedBy: string;
+  readonly requestedAt: string;
+  readonly assignedTo: string;
+  readonly dueAt: string | null;
+  readonly reminderAt: string | null;
+  readonly escalationAt: string | null;
+  readonly status: AckStatus;
+  readonly response: AckResponse | null;
+  readonly responseNote: string | null;
+  readonly reassignedTo: string | null;
+  readonly respondedAt: string | null;
+  readonly syncStatus: SyncStatus;
+  readonly createdAt: string;
+}
+
+// ── §8 Progress and Verification ─────────────────────────────────────
+
+/** Verification status for progress claims (§8.1). */
+export type VerificationStatus = 'Pending' | 'Verified' | 'VerificationFailed' | 'Waived';
+
+/** Verification method (§8.2). */
+export type VerificationMethod =
+  | 'SiteWalkthrough'
+  | 'PhotoReview'
+  | 'InspectionRecord'
+  | 'QuantityMeasurement'
+  | 'SystemRecord'
+  | 'Other';
+
+/** Verification outcome (§8.2). */
+export type VerificationOutcome = 'Confirmed' | 'AdjustedDown' | 'AdjustedUp' | 'Rejected';
+
+/** Reference to supporting evidence. */
+export interface IEvidenceRef {
+  readonly evidenceType: string;
+  readonly evidenceId: string;
+  readonly label: string;
+}
+
+/** Field-reported progress assertion (§8.1). */
+export interface IProgressClaimRecord {
+  readonly claimId: string;
+  readonly projectId: string;
+  readonly workPackageId: string | null;
+  readonly externalActivityKey: string | null;
+  readonly reportedBy: string;
+  readonly reportedAt: string;
+  readonly progressBasis: ProgressBasisType;
+  readonly reportedProgressPct: number | null;
+  readonly reportedQuantityInstalled: number | null;
+  readonly reportedActualStart: string | null;
+  readonly reportedActualFinish: string | null;
+  readonly evidenceRefs: ReadonlyArray<IEvidenceRef>;
+  readonly notes: string | null;
+  readonly verificationRequired: boolean;
+  readonly verificationStatus: VerificationStatus;
+  readonly syncStatus: SyncStatus;
+  readonly createdAt: string;
+}
+
+/** Verification of a progress claim (§8.2). */
+export interface IProgressVerificationRecord {
+  readonly verificationId: string;
+  readonly claimId: string;
+  readonly projectId: string;
+  readonly verifiedBy: string;
+  readonly verifiedAt: string;
+  readonly verificationMethod: VerificationMethod;
+  readonly verifiedProgressPct: number | null;
+  readonly verifiedQuantity: number | null;
+  readonly verificationOutcome: VerificationOutcome;
+  readonly adjustmentReason: string | null;
+  readonly evidenceRefs: ReadonlyArray<IEvidenceRef>;
+  readonly pmAcceptanceRequired: boolean;
+  readonly pmAcceptedBy: string | null;
+  readonly pmAcceptedAt: string | null;
+}
+
+// ── §9 Roll-Up Config ────────────────────────────────────────────────
+
+/** Roll-up calculation method (§9.1). */
+export type RollUpMethod = 'WeightedAverage' | 'UnweightedAverage' | 'DurationWeighted';
+
+/** Governed roll-up configuration (§9.1). */
+export interface IRollUpConfig {
+  readonly progressRollUpMethod: RollUpMethod;
+  readonly authoritativeOnlyVerified: boolean;
+}
