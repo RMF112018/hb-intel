@@ -8,12 +8,34 @@
  * @see docs/architecture/plans/shared-features/SF25-Publish-Workflow.md
  */
 
+// Types — SF25-T01 foundation + T02 canonical contracts
 export type {
-  PublicationStatus, IReadinessState, IApprovalState, ISupersessionState, IRevocationState,
-  IPublicationRecord, IPublicationReceipt, IReadinessRule, IApprovalRule,
+  PublishState,
+  PublicationStatus,
+  IReadinessState,
+  IApprovalState,
+  ISupersessionState,
+  IRevocationState,
+  IPublicationRecord,
+  IPublicationReceipt,
+  IReadinessRule,
+  IApprovalRule,
+  IPublishTarget,
+  IPublishApprovalRule,
+  IPublishBicStepConfig,
+  IPublishTelemetryState,
+  IPublishReceiptContextStamp,
+  IPublishRequest,
 } from './types/index.js';
 
-export { PUBLICATION_STATUSES } from './types/index.js';
+// Constants
+export {
+  PUBLISH_STATES,
+  PUBLICATION_STATUSES,
+  PUBLISH_WORKFLOW_SYNC_QUEUE_KEY,
+  PUBLISH_WORKFLOW_SYNC_STATUSES,
+  PUBLISH_WORKFLOW_VISIBILITY_POLICY,
+} from './types/index.js';
 
 // Model (SF25-T03) // export * from './model/index.js';
 // API (SF25-T03)   // export * from './api/index.js';
