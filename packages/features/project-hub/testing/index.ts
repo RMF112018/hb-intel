@@ -92,3 +92,9 @@ export { createMockPublicationRecord } from './createMockPublicationRecord.js';
 export { createMockPublishedActivitySnapshot } from './createMockPublishedActivitySnapshot.js';
 export { createMockScheduleSummaryProjection } from './createMockScheduleSummaryProjection.js';
 export { mockPublicationBlockers, scheduleSummaryVarianceScenarios } from './mockPublicationScenarios.js';
+
+// ── P3-E5-T04 Scenario branch testing surface ───────────────────────
+
+export { createMockScenarioBranch } from './createMockScenarioBranch.js';
+export { createMockScenarioActivityRecord } from './createMockScenarioActivityRecord.js';
+export { scenarioActivityOverrides } from './mockScenarioScenarios.js';

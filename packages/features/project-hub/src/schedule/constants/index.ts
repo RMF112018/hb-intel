@@ -16,6 +16,11 @@ import type {
   PublishBlockerSeverity,
   ReconciliationStatus,
   ReconciliationTrigger,
+  ScenarioLogicSource,
+  ScenarioPromotionDisposition,
+  ScenarioRelationshipType,
+  ScenarioStatus,
+  ScenarioType,
   ScheduleAccessAction,
   ScheduleActivityType,
   ScheduleAuthorityRole,
@@ -392,3 +397,45 @@ export const DEFAULT_SCHEDULE_SUMMARY_THRESHOLDS: IScheduleSummaryThresholdConfi
   delayedThresholdDays: 21,
   criticalThresholdDays: 21,
 };
+
+// ══════════════════════════════════════════════════════════════════════
+// T04: Scenario Branch Model (§5)
+// ══════════════════════════════════════════════════════════════════════
+
+export const SCENARIO_TYPES = [
+  'RecoverySchedule',
+  'AccelerationOption',
+  'WhatIfAnalysis',
+  'DelayImpact',
+  'BaselineCandidate',
+  'Other',
+] as const satisfies ReadonlyArray<ScenarioType>;
+
+export const SCENARIO_STATUSES = [
+  'Draft',
+  'UnderReview',
+  'Approved',
+  'Rejected',
+  'PromotedToCommitment',
+  'PromotedToPublication',
+  'Archived',
+] as const satisfies ReadonlyArray<ScenarioStatus>;
+
+export const SCENARIO_PROMOTION_DISPOSITIONS = [
+  'None',
+  'PromoteToCommitment',
+  'PromoteToPublication',
+  'PromoteToBaseline',
+] as const satisfies ReadonlyArray<ScenarioPromotionDisposition>;
+
+export const SCENARIO_RELATIONSHIP_TYPES = [
+  'FS',
+  'SS',
+  'FF',
+  'SF',
+] as const satisfies ReadonlyArray<ScenarioRelationshipType>;
+
+export const SCENARIO_LOGIC_SOURCES = [
+  'ScenarioOverride',
+  'WorkPackageLink',
+] as const satisfies ReadonlyArray<ScenarioLogicSource>;

@@ -3,9 +3,10 @@
  *
  * Implemented: T01 (source identity, versioning, import, dual-calendar),
  * T02 (dual-truth commitments, reconciliation, milestones),
- * T03 (publication layer, published snapshots, schedule summary projection).
+ * T03 (publication layer, published snapshots, schedule summary projection),
+ * T04 (scenario branch model, promotion rules).
  *
- * Pending: T04–T11 (scenarios, field execution,
+ * Pending: T05–T11 (field execution,
  * logic, analytics, classification, integration, business rules, acceptance).
  */
 
@@ -14,3 +15,4 @@ export * from './constants/index.js';
 export * from './governance/index.js';
 export * from './commitments/index.js';
 export * from './publication/index.js';
+export * from './scenarios/index.js';

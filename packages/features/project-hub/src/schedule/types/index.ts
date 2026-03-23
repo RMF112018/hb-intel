@@ -676,3 +676,97 @@ export interface IPublicationValidationResult {
   readonly canAdvance: boolean;
   readonly blockers: ReadonlyArray<string>;
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// T04: Scenario Branch Model (§5)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §5.1 ScenarioBranch ──────────────────────────────────────────────
+
+/** Scenario type classification (§5.1). */
+export type ScenarioType =
+  | 'RecoverySchedule'
+  | 'AccelerationOption'
+  | 'WhatIfAnalysis'
+  | 'DelayImpact'
+  | 'BaselineCandidate'
+  | 'Other';
+
+/** Scenario lifecycle status (§5.1). */
+export type ScenarioStatus =
+  | 'Draft'
+  | 'UnderReview'
+  | 'Approved'
+  | 'Rejected'
+  | 'PromotedToCommitment'
+  | 'PromotedToPublication'
+  | 'Archived';
+
+/** Scenario promotion disposition (§5.4). */
+export type ScenarioPromotionDisposition =
+  | 'None'
+  | 'PromoteToCommitment'
+  | 'PromoteToPublication'
+  | 'PromoteToBaseline';
+
+/** First-class governed scenario branch record (§5.1). */
+export interface IScenarioBranch {
+  readonly scenarioId: string;
+  readonly projectId: string;
+  readonly scenarioName: string;
+  readonly scenarioType: ScenarioType;
+  readonly status: ScenarioStatus;
+  readonly branchFromVersionId: string;
+  readonly branchFromBaselineId: string;
+  readonly assumptionSet: string;
+  readonly scenarioNotes: string | null;
+  readonly createdBy: string;
+  readonly createdAt: string;
+  readonly reviewedBy: string | null;
+  readonly reviewedAt: string | null;
+  readonly promotionDisposition: ScenarioPromotionDisposition;
+  readonly promotedAt: string | null;
+  readonly promotedBy: string | null;
+}
+
+// ── §5.2 ScenarioActivityRecord ──────────────────────────────────────
+
+/** Per-activity date/float overrides within a scenario (§5.2). Null = inherit from source. */
+export interface IScenarioActivityRecord {
+  readonly scenarioActivityId: string;
+  readonly scenarioId: string;
+  readonly externalActivityKey: string;
+  readonly scenarioStartDate: string | null;
+  readonly scenarioFinishDate: string | null;
+  readonly scenarioFloatHrs: number | null;
+  readonly scenarioCausationCode: string | null;
+  readonly assumptions: string | null;
+}
+
+// ── §5.3 ScenarioLogicRecord ─────────────────────────────────────────
+
+/** Dependency relationship types for scenario logic (§5.3). */
+export type ScenarioRelationshipType = 'FS' | 'SS' | 'FF' | 'SF';
+
+/** Source of scenario logic override (§5.3). */
+export type ScenarioLogicSource = 'ScenarioOverride' | 'WorkPackageLink';
+
+/** Alternative logic relationship within a scenario (§5.3). */
+export interface IScenarioLogicRecord {
+  readonly scenarioLogicId: string;
+  readonly scenarioId: string;
+  readonly predecessorKey: string;
+  readonly successorKey: string;
+  readonly relationshipType: ScenarioRelationshipType;
+  readonly lagHrs: number | null;
+  readonly logicSource: ScenarioLogicSource;
+  readonly promotionEligible: boolean;
+}
+
+// ── T04 Validation Types ─────────────────────────────────────────────
+
+/** Result of validating a scenario promotion (§5.4). */
+export interface IScenarioPromotionValidation {
+  readonly canPromote: boolean;
+  readonly blockers: ReadonlyArray<string>;
+}
