@@ -96,8 +96,15 @@ export type {
   UseRecordSubmissionResult,
 } from './hooks/index.js';
 
-// Components — thin composition shells (SF23-T05/T06)
-// export * from './components/index.js';
+// Components — thin composition shells (SF23-T05)
+export {
+  RecordFormShell,
+  RecordSubmitBarShell,
+} from './components/index.js';
+export type {
+  RecordFormShellProps,
+  RecordSubmitBarShellProps,
+} from './components/index.js';
 
 // Adapters — module registry (SF23-T07)
 // export * from './adapters/index.js';

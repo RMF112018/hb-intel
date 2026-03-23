@@ -559,3 +559,9 @@ export { ExportProgressToast } from './ExportProgressToast/index.js';
 export type { ExportProgressToastProps } from './ExportProgressToast/index.js';
 export { ExportReceiptCard } from './ExportReceiptCard/index.js';
 export type { ExportReceiptCardProps, ExportReceiptDetail, ExportReceiptTrustState, ExportReceiptReviewOwner, ExportReceiptRelatedLink } from './ExportReceiptCard/index.js';
+
+// Record form and submit bar (SF23-T05, L-02/L-03/L-05)
+export { HbcRecordForm } from './HbcRecordForm/index.js';
+export type { HbcRecordFormProps, RecordFormField, RecordFormRecoveryBanner } from './HbcRecordForm/index.js';
+export { HbcRecordSubmitBar } from './HbcRecordSubmitBar/index.js';
+export type { HbcRecordSubmitBarProps, SubmitBarReviewOwner } from './HbcRecordSubmitBar/index.js';
