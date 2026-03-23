@@ -111,3 +111,9 @@ export { blockerRollUpScenarios, commitmentRollUpScenarios } from './mockFieldEx
 
 export { createMockImportedRelationshipRecord } from './createMockImportedRelationshipRecord.js';
 export { createMockWorkPackageLinkRecord } from './createMockWorkPackageLinkRecord.js';
+
+// ── P3-E5-T07 Analytics testing surface ─────────────────────────────
+
+export { createMockScheduleQualityGrade } from './createMockScheduleQualityGrade.js';
+export { createMockConfidenceRecord } from './createMockConfidenceRecord.js';
+export { createMockRecommendationRecord } from './createMockRecommendationRecord.js';

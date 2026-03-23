@@ -58,6 +58,13 @@ import type {
   WorkPackageLinkType,
   PropagationType,
   IPropagationRule,
+  ScheduleLetterGrade,
+  ConfidenceLabel,
+  RecommendationTargetType,
+  RecommendationType,
+  RecommendationDisposition,
+  RecommendationPromotionPath,
+  CausationApplicableRecordType,
 } from '../types/index.js';
 
 /**
@@ -619,3 +626,70 @@ export const PROPAGATION_RULES: ReadonlyArray<IPropagationRule> = [
     becomesAuthoritativeWhen: 'Requires scenario promotion approval',
   },
 ];
+
+// ══════════════════════════════════════════════════════════════════════
+// T07: Analytics Intelligence and Grading (§11, §12, §13)
+// ══════════════════════════════════════════════════════════════════════
+
+export const SCHEDULE_LETTER_GRADES = [
+  'A', 'B', 'C', 'D', 'F',
+] as const satisfies ReadonlyArray<ScheduleLetterGrade>;
+
+/** Default grading control codes (§11.1). Governed by MOE. */
+export const DEFAULT_GRADING_CONTROL_CODES = [
+  'LOGIC_DENSITY', 'CRITICAL_PATH_FLOAT', 'HIGH_FLOAT', 'NEGATIVE_FLOAT',
+  'MISSING_BASELINES', 'CONSTRAINT_COUNT', 'TOTAL_FLOAT_SPREAD',
+  'UPDATE_FREQUENCY', 'INCOMPLETE_OPEN_ENDS', 'RESOURCE_LOADING',
+] as const;
+
+/** Default near-critical float threshold in hours (§11.2). Governed. */
+export const DEFAULT_NEAR_CRITICAL_FLOAT_HRS = 40;
+
+export const CONFIDENCE_LABELS = [
+  'High', 'Moderate', 'Low', 'VeryLow',
+] as const satisfies ReadonlyArray<ConfidenceLabel>;
+
+/** Default confidence factor weights (§11.4). All governed. */
+export const DEFAULT_CONFIDENCE_FACTORS: ReadonlyArray<{
+  readonly factorCode: string;
+  readonly defaultWeight: number;
+  readonly inputSource: string;
+}> = [
+  { factorCode: 'SCHEDULE_QUALITY', defaultWeight: 0.20, inputSource: 'ScheduleQualityGrade.overallScore' },
+  { factorCode: 'FLOAT_PATH_EXPOSURE', defaultWeight: 0.15, inputSource: 'Ratio of near-critical to total activities' },
+  { factorCode: 'UPDATE_STABILITY', defaultWeight: 0.15, inputSource: 'Avg version-over-version slippage across milestones' },
+  { factorCode: 'UNRESOLVED_BLOCKERS', defaultWeight: 0.15, inputSource: 'Count × severity of open BlockerRecords' },
+  { factorCode: 'READINESS_GAPS', defaultWeight: 0.10, inputSource: 'Count of NotReady readiness dimensions' },
+  { factorCode: 'COMMITMENT_RELIABILITY', defaultWeight: 0.10, inputSource: 'Rolling PPC% over configured window' },
+  { factorCode: 'SOURCE_FRESHNESS', defaultWeight: 0.10, inputSource: 'Days since last active canonical version import' },
+  { factorCode: 'SCENARIO_ASSUMPTIONS', defaultWeight: 0.05, inputSource: 'Whether publication is scenario-based' },
+];
+
+export const RECOMMENDATION_TARGET_TYPES = [
+  'Activity', 'Milestone', 'WorkPackage', 'Commitment', 'Blocker',
+  'Scenario', 'Publication', 'ScheduleQuality', 'Confidence',
+] as const satisfies ReadonlyArray<RecommendationTargetType>;
+
+export const RECOMMENDATION_TYPES = [
+  'ScheduleQualityFinding', 'FloatRisk', 'SlippageTrend', 'CommitmentRisk',
+  'BlockerEscalation', 'ReadinessGap', 'ConfidenceCollapse', 'CoachingTip', 'RecoveryOption',
+] as const satisfies ReadonlyArray<RecommendationType>;
+
+export const RECOMMENDATION_DISPOSITIONS = [
+  'Pending', 'Acknowledged', 'Accepted', 'Declined', 'Promoted', 'Superseded',
+] as const satisfies ReadonlyArray<RecommendationDisposition>;
+
+export const RECOMMENDATION_PROMOTION_PATHS = [
+  'ToScenario', 'ToWorkItem', 'ToCommitmentChange', 'ToPublicationReview', 'ToBlocker',
+] as const satisfies ReadonlyArray<RecommendationPromotionPath>;
+
+export const CAUSATION_APPLICABLE_RECORD_TYPES = [
+  'ForecastChange', 'Blocker', 'ReadinessFailure', 'MissedCommitment',
+  'ForensicAttribution', 'RecommendationRationale', 'Escalation', 'PublicationBasis', 'BaselineChange',
+] as const satisfies ReadonlyArray<CausationApplicableRecordType>;
+
+/** Default causation root categories (§13.1). 13 enterprise defaults. */
+export const DEFAULT_CAUSATION_ROOT_CATEGORIES = [
+  'DESIGN', 'OWNER', 'SUBCONTRACTOR', 'WEATHER', 'REGULATORY', 'MATERIAL',
+  'LABOR', 'EQUIPMENT', 'SCHEDULE', 'CHANGE', 'FORCE_MAJEURE', 'INTERNAL', 'OTHER',
+] as const;

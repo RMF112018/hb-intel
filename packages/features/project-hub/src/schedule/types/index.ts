@@ -1219,3 +1219,172 @@ export interface IPropagationAuthorityResult {
   readonly isAuthoritative: boolean;
   readonly requiresApproval: string | null;
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// T07: Analytics Intelligence and Grading (§11, §12, §13)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §11.1 ScheduleQualityGrade ───────────────────────────────────────
+
+/** Schedule quality letter grade (§11.1). Governed thresholds. */
+export type ScheduleLetterGrade = 'A' | 'B' | 'C' | 'D' | 'F';
+
+/** Per-control scoring within the composite grade (§11.1). */
+export interface IGradingControlScore {
+  readonly controlCode: string;
+  readonly threshold: number;
+  readonly measuredValue: number;
+  readonly score: number;
+  readonly weight: number;
+  readonly pass: boolean;
+  readonly explanation: string;
+}
+
+/** Composite schedule quality grade (§11.1). */
+export interface IScheduleQualityGrade {
+  readonly gradeId: string;
+  readonly versionId: string;
+  readonly projectId: string;
+  readonly computedAt: string;
+  readonly overallGrade: ScheduleLetterGrade;
+  readonly overallScore: number;
+  readonly controlScores: ReadonlyArray<IGradingControlScore>;
+  readonly policyVersionId: string;
+}
+
+// ── §11.2 FloatPathSnapshot ──────────────────────────────────────────
+
+/** Per-activity criticality index entry (§11.2.1). */
+export interface ICriticalityEntry {
+  readonly externalActivityKey: string;
+  readonly criticalityIndex: number;
+}
+
+/** Float path analysis snapshot (§11.2). */
+export interface IFloatPathSnapshot {
+  readonly floatSnapshotId: string;
+  readonly versionId: string;
+  readonly computedAt: string;
+  readonly criticalPathActivityCount: number;
+  readonly nearCriticalCount: number;
+  readonly negativeFloatCount: number;
+  readonly maxTotalFloatHrs: number;
+  readonly avgTotalFloatHrs: number;
+  readonly criticalPathIds: ReadonlyArray<string>;
+  readonly nearCriticalIds: ReadonlyArray<string>;
+  readonly criticalityIndex: ReadonlyArray<ICriticalityEntry>;
+}
+
+// ── §11.3 MilestoneSlippageTrend ─────────────────────────────────────
+
+/** Single version entry in a milestone slippage trend (§11.3). */
+export interface ISlippageTrendEntry {
+  readonly versionId: string;
+  readonly dataDate: string;
+  readonly forecastFinishDate: string;
+  readonly varianceFromBaselineDays: number;
+  readonly cumulativeSlippageDays: number;
+  readonly slippageSinceLastUpdateDays: number;
+}
+
+/** Version-over-version slippage history for a milestone (§11.3). */
+export interface IMilestoneSlippageTrend {
+  readonly trendId: string;
+  readonly projectId: string;
+  readonly externalActivityKey: string;
+  readonly trendEntries: ReadonlyArray<ISlippageTrendEntry>;
+}
+
+// ── §11.4 ConfidenceRecord ───────────────────────────────────────────
+
+/** Forecast confidence label (§11.4). Governed thresholds. */
+export type ConfidenceLabel = 'High' | 'Moderate' | 'Low' | 'VeryLow';
+
+/** Per-factor confidence score (§11.4). */
+export interface IConfidenceFactorScore {
+  readonly factorCode: string;
+  readonly factorLabel: string;
+  readonly score: number;
+  readonly weight: number;
+  readonly rawInputValue: string;
+  readonly explanation: string;
+}
+
+/** Multi-factor governed forecast confidence record (§11.4). */
+export interface IConfidenceRecord {
+  readonly confidenceId: string;
+  readonly projectId: string;
+  readonly publicationId: string | null;
+  readonly computedAt: string;
+  readonly overallConfidenceScore: number;
+  readonly overallConfidenceLabel: ConfidenceLabel;
+  readonly factorScores: ReadonlyArray<IConfidenceFactorScore>;
+  readonly policyVersionId: string;
+  readonly narrativeSummary: string | null;
+}
+
+// ── §12.1 RecommendationRecord ───────────────────────────────────────
+
+/** Recommendation target type (§12.1). */
+export type RecommendationTargetType =
+  | 'Activity' | 'Milestone' | 'WorkPackage' | 'Commitment'
+  | 'Blocker' | 'Scenario' | 'Publication' | 'ScheduleQuality' | 'Confidence';
+
+/** Recommendation type classification (§12.1). */
+export type RecommendationType =
+  | 'ScheduleQualityFinding' | 'FloatRisk' | 'SlippageTrend' | 'CommitmentRisk'
+  | 'BlockerEscalation' | 'ReadinessGap' | 'ConfidenceCollapse' | 'CoachingTip' | 'RecoveryOption';
+
+/** Recommendation disposition (§12.1). */
+export type RecommendationDisposition =
+  | 'Pending' | 'Acknowledged' | 'Accepted' | 'Declined' | 'Promoted' | 'Superseded';
+
+/** Promotion path when recommendation is accepted (§12.1). */
+export type RecommendationPromotionPath =
+  | 'ToScenario' | 'ToWorkItem' | 'ToCommitmentChange' | 'ToPublicationReview' | 'ToBlocker';
+
+/** Recommendation confidence label (§12.1). */
+export type RecommendationConfidenceLabel = 'High' | 'Moderate' | 'Low';
+
+/** First-class governed recommendation record (§12.1). */
+export interface IRecommendationRecord {
+  readonly recommendationId: string;
+  readonly projectId: string;
+  readonly targetType: RecommendationTargetType;
+  readonly targetId: string;
+  readonly recommendationType: RecommendationType;
+  readonly title: string;
+  readonly rationale: string;
+  readonly evidenceBasis: ReadonlyArray<string>;
+  readonly confidence: number;
+  readonly confidenceLabel: RecommendationConfidenceLabel;
+  readonly disposition: RecommendationDisposition;
+  readonly promotionPath: RecommendationPromotionPath | null;
+  readonly promotedToId: string | null;
+  readonly respondedBy: string | null;
+  readonly respondedAt: string | null;
+  readonly responseNote: string | null;
+  readonly generatedAt: string;
+  readonly policyVersionId: string;
+}
+
+// ── §13.1 CausationCode ─────────────────────────────────────────────
+
+/** Record types a causation code can be applied to (§13.1). */
+export type CausationApplicableRecordType =
+  | 'ForecastChange' | 'Blocker' | 'ReadinessFailure' | 'MissedCommitment'
+  | 'ForensicAttribution' | 'RecommendationRationale' | 'Escalation'
+  | 'PublicationBasis' | 'BaselineChange';
+
+/** Governed enterprise causation code (§13.1). */
+export interface ICausationCode {
+  readonly codeId: string;
+  readonly code: string;
+  readonly displayLabel: string;
+  readonly parentCodeId: string | null;
+  readonly tier: number;
+  readonly applicableRecordTypes: ReadonlyArray<CausationApplicableRecordType>;
+  readonly isActive: boolean;
+  readonly sortOrder: number;
+  readonly createdAt: string;
+}
