@@ -168,6 +168,7 @@ Status: **Implemented 2026-03-22 in `@hbc/models` v0.4.1 + `@hbc/auth` v0.5.0.**
 **2.2 — Membership enforcement**
 Implement project membership validation. Membership is role-based and project-scoped. Implement the membership resolver used by both lanes (PWA route guards and SPFx web part initialization). The resolver must distinguish between membership-based access and PER oversight access — these are separate access paths.
 Governing: P3-A2 §6
+Status: **Implemented 2026-03-22 in `@hbc/auth` v0.5.1.** `validateProjectAccess` enforcement wrapper with typed denial reasons (`no-eligibility-path`, `project-not-found`, `external-member-expired`). `ProjectMembershipGate` React component for project-scoped route/component enforcement. Wraps `resolveProjectRole` from 2.1.
 
 **2.3 — PER non-membership scoping**
 Implement the PER access path: a PER user reaches a project through department scope, not project membership. PER access grants read and annotation rights on review-capable surfaces only. PER access does not grant any project membership, operational write, or source-of-truth mutation rights. Implement the scope check that validates PER access without a membership record.

@@ -9,3 +9,12 @@ export type {
   PerEligibilityResult,
   PerEligibilitySource,
 } from './resolvePerEligibility.js';
+
+export { validateProjectAccess } from './validateProjectAccess.js';
+export type {
+  ProjectAccessResult,
+  ProjectAccessDenialReason,
+} from './validateProjectAccess.js';
+
+export { ProjectMembershipGate } from './ProjectMembershipGate.js';
+export type { ProjectMembershipGateProps } from './ProjectMembershipGate.js';
