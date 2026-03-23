@@ -593,3 +593,9 @@ export { HbcPublishPanel } from './HbcPublishPanel/index.js';
 export type { HbcPublishPanelProps, PublishPanelStep, PublishPanelTarget, PublishPanelReceipt } from './HbcPublishPanel/index.js';
 export { PublishTargetSelector } from './PublishTargetSelector/index.js';
 export type { PublishTargetSelectorProps, PublishTargetOption } from './PublishTargetSelector/index.js';
+
+// Publish approval checklist and receipt card (SF25-T06)
+export { PublishApprovalChecklist } from './PublishApprovalChecklist/index.js';
+export type { PublishChecklistProps, PublishChecklistItem } from './PublishApprovalChecklist/index.js';
+export { PublishReceiptCard } from './PublishReceiptCard/index.js';
+export type { PublishReceiptCardProps, PublishReceiptDetail, PublishReceiptTarget, PublishReceiptLink, PublishReceiptOwner } from './PublishReceiptCard/index.js';
