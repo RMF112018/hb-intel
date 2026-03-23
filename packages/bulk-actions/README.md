@@ -41,4 +41,7 @@ import { /* factories */ } from '@hbc/bulk-actions/testing';
 
 ## Related
 
+- [ADR-0123 — Bulk Actions Architecture](../../docs/architecture/adr/ADR-0123-bulk-actions.md)
+- [Adoption Guide](../../docs/how-to/developer/bulk-actions-adoption-guide.md)
+- [API Reference](../../docs/reference/bulk-actions/api.md)
 - [SF27 Master Plan](../../docs/architecture/plans/shared-features/SF27-Bulk-Actions.md)
