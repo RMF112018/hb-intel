@@ -187,6 +187,10 @@ export type {
   SpfxProjectContextResult,
 } from './spfxProjectContext.js';
 
+// Smart project switching (Phase 3 Stage 4.3)
+export { resolveProjectSwitch } from './projectSwitching.js';
+export type { ProjectSwitchInput, ProjectSwitchResult } from './projectSwitching.js';
+
 // Module Configurations (PH4B.2 §Step 3 — moved from ui-kit, F-014)
 export {
   scorecardsLanding,
