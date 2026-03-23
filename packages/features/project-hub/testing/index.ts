@@ -150,3 +150,9 @@ export { createMockChangeEventRecord } from './createMockChangeEventRecord.js';
 export { createMockChangeLineItem } from './createMockChangeLineItem.js';
 export { createMockProcoreMappingRecord } from './createMockProcoreMappingRecord.js';
 export { mockChangeLedgerScenarios } from './mockChangeLedgerScenarios.js';
+
+// ── P3-E6-T05 Lineage testing surface ─────────────────────────────────
+
+export { createMockLineageRecord } from './createMockLineageRecord.js';
+export { createMockCrossLedgerLink } from './createMockCrossLedgerLink.js';
+export { mockLineageScenarios } from './mockLineageScenarios.js';
