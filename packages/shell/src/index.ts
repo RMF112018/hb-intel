@@ -191,6 +191,10 @@ export type {
 export { resolveProjectSwitch } from './projectSwitching.js';
 export type { ProjectSwitchInput, ProjectSwitchResult } from './projectSwitching.js';
 
+// Deep-link handler (Phase 3 Stage 4.4)
+export { parseDeepLinkParams, buildTargetPathFromDeepLink } from './deepLinkHandler.js';
+export type { DeepLinkParams, DeepLinkResolution } from './deepLinkHandler.js';
+
 // Module Configurations (PH4B.2 §Step 3 — moved from ui-kit, F-014)
 export {
   scorecardsLanding,

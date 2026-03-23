@@ -247,6 +247,7 @@ Status: **Implemented 2026-03-23 in `@hbc/shell` v0.2.0.** `resolveProjectSwitch
 **4.4 — Deep-link handler and cross-lane handoff**
 Implement the deep-link handler that processes incoming cross-lane arrivals in PWA. Handler must extract `projectId`, `module`, `action`, and optional `reviewArtifactId` from the landing URL, normalize any `projectNumber` via registry, and route to the correct context. All outbound deep links from SPFx must use `projectId` — `projectNumber` must be normalized before link construction.
 Governing: P3-B1 §6, P3-G2 §5, §8.8
+Status: **Implemented 2026-03-23 in `@hbc/shell` v0.2.1.** `parseDeepLinkParams` and `buildTargetPathFromDeepLink` for inbound SPFx-to-PWA deep links. Extracts projectId, module, action, view, reviewArtifactId, returnTo, source. Outbound construction already delivered in `buildPwaDeepLink` (Stage 0.4).
 
 **4.5 — Context restoration and mismatch reconciliation**
 Implement context restoration for users returning to a project after a session break or cross-lane handoff. Implement mismatch reconciliation when the resolved context does not match the user's current membership or authority state.
