@@ -6,9 +6,14 @@ import type {
   IMilestoneStatusDisplay,
   IMilestoneThresholdConfig,
   IScheduleIntegrationBoundary,
+  IScheduleSummaryThresholdConfig,
   MilestoneStatus,
   MilestoneType,
   PercentCompleteBasis,
+  PublicationInitiatorRole,
+  PublicationLifecycleStatus,
+  PublicationType,
+  PublishBlockerSeverity,
   ReconciliationStatus,
   ReconciliationTrigger,
   ScheduleAccessAction,
@@ -17,6 +22,7 @@ import type {
   ScheduleConstraintType,
   ScheduleImportFormat,
   ScheduleLayerAccess,
+  ScheduleOverallStatus,
   ScheduleSourceOwnerRole,
   ScheduleSourceSystem,
   ScheduleStatusCode,
@@ -334,4 +340,55 @@ export const MILESTONE_STATUS_DISPLAY: ReadonlyArray<IMilestoneStatusDisplay> = 
 export const DEFAULT_MILESTONE_THRESHOLDS: IMilestoneThresholdConfig = {
   atRiskThresholdDays: 14,
   delayedThresholdDays: 30,
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// T03: Publication Layer (§3, §19)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §3.1 Publication Types ───────────────────────────────────────────
+
+export const PUBLICATION_TYPES = [
+  'MonthlyUpdate',
+  'MilestoneReview',
+  'IssueUpdate',
+  'RecoveryPlan',
+  'BaselineEstablishment',
+  'AutoPublish',
+] as const satisfies ReadonlyArray<PublicationType>;
+
+export const PUBLICATION_LIFECYCLE_STATUSES = [
+  'Draft',
+  'ReadyForReview',
+  'Published',
+  'Superseded',
+] as const satisfies ReadonlyArray<PublicationLifecycleStatus>;
+
+export const PUBLICATION_INITIATOR_ROLES = [
+  'PM',
+  'Scheduler',
+  'PE',
+] as const satisfies ReadonlyArray<PublicationInitiatorRole>;
+
+// ── §3.2 Blocker Severities ─────────────────────────────────────────
+
+export const PUBLISH_BLOCKER_SEVERITIES = [
+  'Hard',
+  'Soft',
+] as const satisfies ReadonlyArray<PublishBlockerSeverity>;
+
+// ── §19 Schedule Overall Statuses ────────────────────────────────────
+
+export const SCHEDULE_OVERALL_STATUSES = [
+  'OnTrack',
+  'AtRisk',
+  'Delayed',
+  'Critical',
+] as const satisfies ReadonlyArray<ScheduleOverallStatus>;
+
+/** Default governed thresholds for schedule summary overall status (§19.2). */
+export const DEFAULT_SCHEDULE_SUMMARY_THRESHOLDS: IScheduleSummaryThresholdConfig = {
+  atRiskThresholdDays: 7,
+  delayedThresholdDays: 21,
+  criticalThresholdDays: 21,
 };

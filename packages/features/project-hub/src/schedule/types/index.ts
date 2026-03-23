@@ -522,3 +522,157 @@ export interface IMilestoneStatusDisplay {
   readonly uiSignal: string;
   readonly color: string;
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// T03: Publication Layer (§3, §19)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §3.1 PublicationRecord ───────────────────────────────────────────
+
+/** Publication type classification (§3.1). */
+export type PublicationType =
+  | 'MonthlyUpdate'
+  | 'MilestoneReview'
+  | 'IssueUpdate'
+  | 'RecoveryPlan'
+  | 'BaselineEstablishment'
+  | 'AutoPublish';
+
+/** Publication lifecycle status (§3.1). Draft → ReadyForReview → Published → Superseded. */
+export type PublicationLifecycleStatus =
+  | 'Draft'
+  | 'ReadyForReview'
+  | 'Published'
+  | 'Superseded';
+
+/** Who initiated the publication — aligns with Ownership Maturity Model. */
+export type PublicationInitiatorRole = 'PM' | 'Scheduler' | 'PE';
+
+/**
+ * Stage-gated publication record (§3.1).
+ * Only one Published publication per project at a time.
+ */
+export interface IPublicationRecord {
+  readonly publicationId: string;
+  readonly projectId: string;
+  readonly publicationLabel: string;
+  readonly publicationType: PublicationType;
+  readonly sourceVersionId: string;
+  readonly baselineId: string;
+  readonly lifecycleStatus: PublicationLifecycleStatus;
+  readonly initiatedBy: string;
+  readonly initiatedByRole: PublicationInitiatorRole;
+  readonly submittedForReviewAt: string | null;
+  readonly reviewedBy: string | null;
+  readonly reviewedAt: string | null;
+  readonly publishedAt: string | null;
+  readonly supersededAt: string | null;
+  readonly supersededBy: string | null;
+  readonly reconciliationSummary: string | null;
+  readonly publishBasisNotes: string | null;
+  readonly autoPublishEligible: boolean;
+  readonly autoPublishedAt: string | null;
+  readonly blockers: ReadonlyArray<IPublishBlocker>;
+  readonly confidenceRecordId: string | null;
+}
+
+// ── §3.2 PublicationBlocker ──────────────────────────────────────────
+
+/** Blocker severity: Hard must be resolved; Soft is a PE-overridable warning (§3.2). */
+export type PublishBlockerSeverity = 'Hard' | 'Soft';
+
+/** Governed condition gating publication advancement (§3.2). */
+export interface IPublishBlocker {
+  readonly blockerCode: string;
+  readonly blockerDescription: string;
+  readonly severity: PublishBlockerSeverity;
+  readonly resolvedAt: string | null;
+}
+
+// ── §3.3 PublishedActivitySnapshot ───────────────────────────────────
+
+/**
+ * Frozen point-in-time copy of activity state at publication (§3.3).
+ * Combines source truth with managed commitments. Never modified after creation.
+ */
+export interface IPublishedActivitySnapshot {
+  readonly publishedSnapshotId: string;
+  readonly publicationId: string;
+  readonly externalActivityKey: string;
+  readonly sourceActivityCode: string;
+  readonly activityName: string;
+  readonly publishedStartDate: string;
+  readonly publishedFinishDate: string;
+  readonly publishedPercentComplete: number;
+  readonly varianceFromBaselineDays: number;
+  readonly sourceFinishDate: string;
+  readonly committedFinishDate: string | null;
+  readonly reconciliationStatus: ReconciliationStatus;
+  readonly isCriticalPath: boolean;
+  readonly isMilestone: boolean;
+}
+
+// ── §19 Schedule Summary Projection ─────────────────────────────────
+
+/** Overall schedule status for health spine (§19.2). */
+export type ScheduleOverallStatus =
+  | 'OnTrack'
+  | 'AtRisk'
+  | 'Delayed'
+  | 'Critical';
+
+/** Aggregate milestone status counts (§19.1). */
+export interface IMilestoneSummary {
+  readonly total: number;
+  readonly achieved: number;
+  readonly onTrack: number;
+  readonly atRisk: number;
+  readonly delayed: number;
+  readonly critical: number;
+  readonly notStarted: number;
+}
+
+/** Next upcoming milestone reference (§19.1). */
+export interface INextMilestoneRef {
+  readonly milestoneName: string;
+  readonly publishedForecastDate: string;
+  readonly varianceDays: number;
+  readonly status: MilestoneStatus;
+}
+
+/**
+ * Normalized snapshot for health spine and canvas tile (§19.1).
+ * Derived exclusively from the most recent Published PublicationRecord.
+ */
+export interface IScheduleSummaryProjection {
+  readonly summaryId: string;
+  readonly projectId: string;
+  readonly sourcePublicationId: string;
+  readonly computedAt: string;
+  readonly overallStatus: ScheduleOverallStatus;
+  readonly schedulePercentComplete: number;
+  readonly contractCompletionDate: string;
+  readonly publishedCompletionDate: string;
+  readonly varianceDays: number;
+  readonly criticalPathActivityCount: number;
+  readonly nearCriticalActivityCount: number;
+  readonly confidenceLabel: string;
+  readonly milestoneSummary: IMilestoneSummary;
+  readonly nextMilestone: INextMilestoneRef | null;
+  readonly qualityGrade: string | null;
+}
+
+// ── T03 Config Types ─────────────────────────────────────────────────
+
+/** Governed thresholds for schedule summary overall status (§19.2). */
+export interface IScheduleSummaryThresholdConfig {
+  readonly atRiskThresholdDays: number;
+  readonly delayedThresholdDays: number;
+  readonly criticalThresholdDays: number;
+}
+
+/** Result of validating a publication lifecycle advance. */
+export interface IPublicationValidationResult {
+  readonly canAdvance: boolean;
+  readonly blockers: ReadonlyArray<string>;
+}

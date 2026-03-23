@@ -85,3 +85,10 @@ export { createMockCommitmentRecord } from './createMockCommitmentRecord.js';
 export { createMockReconciliationRecord } from './createMockReconciliationRecord.js';
 export { createMockMilestoneRecord } from './createMockMilestoneRecord.js';
 export { mockCommitmentScenarios, mockMilestoneStatusScenarios } from './mockCommitmentScenarios.js';
+
+// ── P3-E5-T03 Publication layer testing surface ──────────────────────
+
+export { createMockPublicationRecord } from './createMockPublicationRecord.js';
+export { createMockPublishedActivitySnapshot } from './createMockPublishedActivitySnapshot.js';
+export { createMockScheduleSummaryProjection } from './createMockScheduleSummaryProjection.js';
+export { mockPublicationBlockers, scheduleSummaryVarianceScenarios } from './mockPublicationScenarios.js';
