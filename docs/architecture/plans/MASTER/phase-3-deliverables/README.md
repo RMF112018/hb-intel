@@ -292,6 +292,7 @@ Governing: P3-D1; `docs/architecture/plans/shared-features/SF28-Activity-Timelin
 **5.2 — Export Runtime (`@hbc/export-runtime`, SF24)**
 Deliver the shared export runtime package: CSV/XLSX/PDF render pipeline, export receipt model, artifact provenance stamping, offline replay, and module adapter scaffold for Phase 3 consumers. The saved-view context handoff (`IExportRequest.savedViewContext`) contract is established during Stage 5.4 but the export primitive is scaffolded here. Module-level adapter wiring is Stage 7 scope.
 Governing: `docs/architecture/plans/shared-features/SF24-Export-Runtime.md`
+**SF24-T01 scaffold:** **Implemented 2026-03-23 in `@hbc/export-runtime` v0.0.1.** Package scaffold with types (export truth vocabulary, receipt states, artifact confidence, review steps, next recommended action, failure/retry diagnostics), model, api, hooks, components, composers, renderers, templates barrels, testing subpath, and README per SF24 locked decisions L-01/L-03/L-04/L-06. Layer 8 shared-feature primitive. Feature adapter seams in `@hbc/features-business-development` and `@hbc/features-estimating`.
 
 **5.3 — Record Form runtime (`@hbc/record-form`, SF23)**
 Deliver the shared record-form package: create/edit/duplicate/template lifecycle, draft recovery, review/handoff orchestration, offline replay, and module adapter scaffold for all 9 Phase 3 modules. Each module adapter owns its domain schema; the primitive owns lifecycle, offline resilience, and telemetry. Module-level adapter wiring is Stage 7 scope.

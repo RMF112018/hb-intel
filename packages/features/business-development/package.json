@@ -51,6 +51,7 @@
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
     "@hbc/smart-empty-state": "workspace:*",
+    "@hbc/export-runtime": "workspace:*",
     "@hbc/score-benchmark": "workspace:*",
     "@hbc/bic-next-move": "workspace:*",
     "@hbc/project-canvas": "workspace:*",

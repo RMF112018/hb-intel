@@ -64,8 +64,8 @@ Layer 9 — Domain Data Infrastructure
   Domain-agnostic import/seeding utilities
 
 Layer 8 — Intelligence Scaffolds & Shared-Feature Primitives
-  (@hbc/health-indicator, @hbc/score-benchmark, @hbc/strategic-intelligence, @hbc/post-bid-autopsy, @hbc/my-work-feed)
-  Scoring, analysis, learning signal, and cross-module aggregation primitives
+  (@hbc/health-indicator, @hbc/score-benchmark, @hbc/strategic-intelligence, @hbc/post-bid-autopsy, @hbc/my-work-feed, @hbc/export-runtime)
+  Scoring, analysis, learning signal, cross-module aggregation, and shared-feature runtime primitives
 
 Layer 7 — Workflow Primitives
   (@hbc/step-wizard, @hbc/field-annotations, @hbc/workflow-handoff)
@@ -859,6 +859,31 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 - Must not implement its own IndexedDB layer — offline persistence is owned by `@hbc/session-state`.
 
 **ADR:** [ADR-0115 — My Work Feed Architecture](../../docs/architecture/adr/ADR-0115-my-work-feed-architecture.md)
+
+---
+
+#### `@hbc/export-runtime` · v0.0.1 · [Scaffold]
+
+| Field | Value |
+|-------|-------|
+| **Path** | `packages/export-runtime/` |
+| **Layer** | 8 — Shared-Feature Primitives |
+| **Depends on** | `@hbc/models` (workspace) |
+| **Used by** | `@hbc/features-business-development`, `@hbc/features-estimating`, and all Phase 3 module adapters |
+| **Maturity** | Scaffold |
+
+**Purpose:** Shared export runtime primitive — export lifecycle orchestration, render pipeline contracts, receipt state management, artifact provenance stamping, offline replay, and module adapter seams. All Phase 3 modules create lightweight adapters over this primitive rather than bespoke CSV/XLSX/PDF pipelines.
+
+**Key exports:** `ExportFormat`, `ExportIntent`, `ExportRenderMode`, `ExportStatus`, `ExportArtifactConfidence`, `ExportComplexityTier`, `IExportSourceTruthStamp`, `IExportReceiptState`, `IExportReviewStepState`, `IExportNextRecommendedAction`, `IExportFailureState`, `IExportRetryState`, `IExportArtifactMetadata`, `IExportRequest`, 5 reason-code unions, 4 constants. Testing subpath at `@hbc/export-runtime/testing`.
+
+**Correct usage:** Module adapters consume primitive public exports. Module-specific payload composition remains adapter-owned (projection-only). Runtime and orchestration ownership stays in the primitive. Reusable visual primitives belong in `@hbc/ui-kit`.
+
+**Anti-patterns / must not:**
+- Must not contain reusable visual primitives — those belong in `@hbc/ui-kit`.
+- Must not allow module adapters to import internal paths — public barrel only.
+- Module adapters must not re-invent export lifecycle interpretation locally.
+
+**Governing plan:** [SF24-Export-Runtime.md](../../docs/architecture/plans/shared-features/SF24-Export-Runtime.md)
 
 ---
 

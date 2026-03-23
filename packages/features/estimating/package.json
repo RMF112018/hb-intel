@@ -66,6 +66,7 @@
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
     "@hbc/smart-empty-state": "workspace:*",
+    "@hbc/export-runtime": "workspace:*",
     "@hbc/bic-next-move": "workspace:*",
     "@hbc/notification-intelligence": "workspace:*",
     "@hbc/health-indicator": "workspace:*",

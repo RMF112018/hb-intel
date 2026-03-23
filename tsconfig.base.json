@@ -23,6 +23,8 @@
       "@hbc/my-work-feed/*": ["packages/my-work-feed/src/*"],
       "@hbc/data-access": ["packages/data-access/src/index.ts"],
       "@hbc/data-access/*": ["packages/data-access/src/*"],
+      "@hbc/export-runtime": ["packages/export-runtime/src/index.ts"],
+      "@hbc/export-runtime/*": ["packages/export-runtime/src/*"],
       "@hbc/query-hooks": ["packages/query-hooks/src/index.ts"],
       "@hbc/query-hooks/*": ["packages/query-hooks/src/*"],
       "@hbc/ui-kit": ["packages/ui-kit/src/index.ts"],
