@@ -1,20 +1,27 @@
 /**
- * @hbc/bulk-actions
- *
- * Shared bulk-actions primitive for HB Intel. Selection semantics,
- * per-item eligibility, chunked execution, mixed-result reporting.
- *
+ * @hbc/bulk-actions — Shared bulk-actions primitive.
  * @see docs/architecture/plans/shared-features/SF27-Bulk-Actions.md
  */
 
 export type {
-  SelectionScope, BulkActionCategory, EligibilityStatus, ExecutionItemStatus,
-  IBulkSelectionState, IBulkAction, IEligibilityResult, IChunkPlan,
-  IBulkExecutionResult, IBulkExecutionItemResult, ISelectionSourceAdapter,
-  ISavedViewContext, IBulkActionExecutionContext,
+  BulkSelectionScope, BulkActionKind, BulkExecutionPhase, BulkResultKind,
+  IBulkActionItemRef, IBulkSelectionSnapshot,
+  IBulkActionDefinition, IBulkDestructiveActionMetadata, IBulkPermissionGate,
+  IBulkConfiguredInputSchema, IBulkConfiguredInputField,
+  IBulkEligibilityResult, IBulkActionContext,
+  IBulkExecutionPlan, IBulkExecutionChunk, IBulkExecutionProgress,
+  IBulkExecutionResult, IBulkItemExecutionResult,
+  IBulkGroupedFailureReason, IBulkResultsSummary,
+  IBulkSelectionAdapter, IBulkAuditEmission,
+  BulkIneligibilityReasonCode, BulkPermissionFailureReasonCode,
+  BulkConfirmationReasonCode, BulkBatchSkipReasonCode,
+  BulkRetryableFailureReasonCode, BulkScopeMismatchReasonCode,
 } from './types/index.js';
 
-export { SELECTION_SCOPES, BULK_ACTION_CATEGORIES } from './types/index.js';
+export {
+  BULK_ACTIONS_DEFAULT_CHUNK_SIZE, BULK_ACTIONS_SCOPE_VALUES,
+  BULK_ACTIONS_EXECUTION_PHASES, BULK_ACTIONS_RESULT_KINDS,
+} from './types/index.js';
 
 // Model (SF27-T03) // export * from './model/index.js';
 // Selection (SF27-T03) // export * from './selection/index.js';
