@@ -21,4 +21,5 @@ export type {
   IActivityEventTypeMetadata,
   IActivitySourceAdapter,
   IActivitySourceRegistration,
+  IActivityFeedResult,
 } from './IActivitySpine.js';

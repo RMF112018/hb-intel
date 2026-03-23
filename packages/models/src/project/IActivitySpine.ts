@@ -162,3 +162,27 @@ export interface IActivitySourceRegistration {
   /** Default significance for each event type */
   significanceDefaults: Record<string, ActivitySignificance>;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Feed result (P3-D1 §5.2)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Result of an aggregated activity feed query.
+ */
+export interface IActivityFeedResult {
+  /** Activity events matching the query, sorted by occurredAt descending */
+  events: IProjectActivityEvent[];
+  /** Total number of matching events (before pagination) */
+  totalCount: number;
+  /** Count of critical-significance events */
+  criticalCount: number;
+  /** Count of notable-significance events */
+  notableCount: number;
+  /** Whether more events exist beyond the current page */
+  hasMore: boolean;
+  /** Cursor for fetching the next page */
+  nextCursor?: string;
+  /** ISO 8601 timestamp of last data refresh */
+  lastRefreshedIso: string;
+}

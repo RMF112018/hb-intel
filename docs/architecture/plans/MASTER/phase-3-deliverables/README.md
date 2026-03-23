@@ -205,6 +205,7 @@ Status: **Implemented 2026-03-22 in `@hbc/models` v0.5.0.** Activity spine types
 **3.2 — Activity spine (`@hbc/features-project-hub` activity integration)**
 Implement the activity publication adapter. Module events publish to the activity spine via the adapter. Activity spine renders the PWA full-timeline view and the SPFx tile view. Spine data is consistent for the same `projectId` in both lanes.
 Governing: P3-A3 §7.1, P3-D1
+Status: **Implemented 2026-03-22 in `@hbc/features-project-hub` v0.1.0 + `@hbc/models` v0.5.1.** `ProjectActivityRegistry` singleton (freeze-on-write, module-keyed), `aggregateActivityFeed` pipeline (multi-adapter load, dedup, sort, filter, count), and `IActivityFeedResult` type added. Module-specific adapters are Stage 4+ scope.
 
 **3.3 — Health spine (`@hbc/features-project-hub` health-pulse, ADR-0110)**
 Implement the health spine. Health metrics are computed from module contributions. The health-pulse component exposes full detail + explainability in PWA and a shared component in SPFx. The executive review annotation layer does not write to health spine metrics.
