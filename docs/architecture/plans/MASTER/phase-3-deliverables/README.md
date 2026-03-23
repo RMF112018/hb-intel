@@ -274,6 +274,7 @@ Status: **Implemented 2026-03-23 in `@hbc/project-canvas` v0.1.1.** `ProjectWork
 **5.3 — Adaptive composition and personalization**
 Implement governed adaptive composition: user preferences persist (PWA: IndexedDB + server-side; SPFx: localStorage + SharePoint). Reset-to-role-default must restore mandatory tiles. Complexity tiers (essential / standard / expert) render per user preference.
 Governing: P3-C3
+Status: **Implemented 2026-03-23 in `@hbc/project-canvas` v0.2.0.** `useCanvasComplexity` bridge hook connecting `@hbc/complexity` context to canvas tile variant rendering. Personalization infrastructure (editor, API, role defaults, mandatory enforcement, reset-to-default) already mature from SF13/ADR-0102.
 
 **5.4 — SPFx canvas capability**
 Implement the SPFx lane canvas. Capability must match the P3-C3 lane-aware matrix. Personalization persistence uses the SPFx-appropriate storage tier.

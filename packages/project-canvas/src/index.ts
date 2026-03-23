@@ -44,7 +44,9 @@ export {
   useRoleDefaultCanvas,
   useCanvasRecommendations,
   useCanvasMandatoryTiles,
+  useCanvasComplexity,
 } from './hooks/index.js';
+export type { CanvasComplexityResult } from './hooks/index.js';
 
 // Components
 export {
