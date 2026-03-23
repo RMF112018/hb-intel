@@ -1,6 +1,14 @@
 /**
- * SF23 record form module adapters — registry singleton,
- * module-specific schema/rule providers.
- * Implementation scope: SF23-T07.
+ * SF23-T07 — Record form module adapters and registry.
+ *
+ * Governing: SF23-T07, L-01 through L-06
  */
-export {};
+
+export { RecordFormModuleRegistry } from './RecordFormModuleRegistry.js';
+export type {
+  IRecordFormModuleRegistration,
+  IRecordFormSchemaProvider,
+  RecordFormFieldDefinition,
+  RecordFormValidationRule,
+} from './RecordFormModuleRegistry.js';
+export { createModuleRecordFormSession } from './createModuleRecordFormSession.js';

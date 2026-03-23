@@ -110,5 +110,11 @@ export type {
   RecordRecoveryBannerShellProps,
 } from './components/index.js';
 
-// Adapters — module registry (SF23-T07)
-// export * from './adapters/index.js';
+// Adapters — module registry + integration helpers (SF23-T07)
+export { RecordFormModuleRegistry, createModuleRecordFormSession } from './adapters/index.js';
+export type {
+  IRecordFormModuleRegistration,
+  IRecordFormSchemaProvider,
+  RecordFormFieldDefinition,
+  RecordFormValidationRule,
+} from './adapters/index.js';

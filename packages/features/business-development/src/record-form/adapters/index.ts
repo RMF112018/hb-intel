@@ -1,5 +1,30 @@
 /**
- * BD record-form adapter layer — maps BD schemas to @hbc/record-form contracts.
- * Implementation scope: SF23-T07.
+ * BD record-form adapter — SF23-T07 reference. Standard tier.
+ *
+ * Governing: SF23-T07
  */
-export {};
+
+import type {
+  RecordFormMode,
+  IRecordFormModuleRegistration,
+  IRecordFormSchemaProvider,
+  RecordFormFieldDefinition,
+  RecordFormValidationRule,
+} from '@hbc/record-form';
+
+export const BD_RECORD_FORM_MODULE_KEY = 'business-development';
+
+export const bdRecordFormSchemaProvider: IRecordFormSchemaProvider = {
+  moduleKey: BD_RECORD_FORM_MODULE_KEY,
+  getFieldDefinitions: (_recordType: string, _mode: RecordFormMode): RecordFormFieldDefinition[] => [],
+  getValidationRules: (_recordType: string): RecordFormValidationRule[] => [],
+};
+
+export const bdRecordFormRegistration: IRecordFormModuleRegistration = {
+  moduleKey: BD_RECORD_FORM_MODULE_KEY,
+  displayName: 'Business Development',
+  supportedModes: ['create', 'edit', 'duplicate'],
+  supportedRecordTypes: ['pursuit', 'scorecard'],
+  complexityTier: 'standard',
+  schemaProvider: bdRecordFormSchemaProvider,
+};
