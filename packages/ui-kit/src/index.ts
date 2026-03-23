@@ -531,3 +531,11 @@ export {
   tokens,
 } from '@fluentui/react-components';
 export type { SelectTabData } from '@fluentui/react-components';
+
+// Activity Timeline surfaces (SF28-T05, L-08)
+export { ActivityEventIcon } from './ActivityEventIcon/index.js';
+export type { ActivityEventIconProps, ActivityEventIconType } from './ActivityEventIcon/index.js';
+export { ActivityEventRow } from './ActivityEventRow/index.js';
+export type { ActivityEventRowProps, ActivityEventRowEvent } from './ActivityEventRow/index.js';
+export { HbcActivityTimeline } from './HbcActivityTimeline/index.js';
+export type { HbcActivityTimelineProps } from './HbcActivityTimeline/index.js';
