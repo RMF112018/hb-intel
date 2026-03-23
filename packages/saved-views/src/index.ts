@@ -36,11 +36,13 @@ export {
   SAVED_VIEW_COMPATIBILITY_STATUSES,
 } from './types/index.js';
 
-// Model (SF26-T03)
-// export * from './model/index.js';
+// Model — lifecycle + reconciliation (SF26-T03)
+export { createSavedView, VIEW_LIFECYCLE_STATES, reconcile } from './model/index.js';
+export type { ViewLifecycleState, ICreateSavedViewInput } from './model/index.js';
 
-// Storage (SF26-T03)
-// export * from './storage/index.js';
+// Storage — adapter interface + in-memory (SF26-T03)
+export type { ISavedViewsStorageAdapter } from './storage/index.js';
+export { InMemorySavedViewsStorageAdapter } from './storage/index.js';
 
 // Hooks (SF26-T04)
 // export * from './hooks/index.js';

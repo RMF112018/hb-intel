@@ -1,5 +1,9 @@
 /**
- * SF26 view lifecycle model — scope resolution, compatibility, reconciliation.
- * Implementation scope: SF26-T03.
+ * SF26-T03 — View lifecycle model.
+ *
+ * Governing: SF26-T03
  */
-export {};
+
+export { createSavedView, VIEW_LIFECYCLE_STATES } from './lifecycle.js';
+export type { ViewLifecycleState, ICreateSavedViewInput } from './lifecycle.js';
+export { reconcile } from './compatibility.js';
