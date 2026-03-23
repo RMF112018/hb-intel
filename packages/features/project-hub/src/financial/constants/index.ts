@@ -1,12 +1,17 @@
 import type {
+  CostType,
+  ExternalSourceSystem,
   FinancialAccessAction,
   FinancialAuthorityRole,
   FinancialVersionState,
   IFinancialIntegrationBoundary,
+  ReconciliationConditionStatus,
+  ReconciliationResolution,
 } from '../types/index.js';
 
 /**
- * P3-E4-T01 contract constants.
+ * P3-E4 contract constants.
+ * T01: doctrine and authority. T02: budget line identity and import.
  * Values are locked for contract stability.
  */
 
@@ -79,3 +84,70 @@ export const FINANCIAL_INTEGRATION_BOUNDARIES: ReadonlyArray<IFinancialIntegrati
     status: 'planned',
   },
 ] as const;
+
+// ── T02: Budget Line Identity and Import ──────────────────────────────
+
+export const COST_TYPES = [
+  'Labor',
+  'Material',
+  'Equipment',
+  'Subcontract',
+  'Other',
+] as const satisfies ReadonlyArray<CostType>;
+
+export const EXTERNAL_SOURCE_SYSTEMS = [
+  'procore',
+  'manual',
+] as const satisfies ReadonlyArray<ExternalSourceSystem>;
+
+export const RECONCILIATION_CONDITION_STATUSES = [
+  'Pending',
+  'Resolved',
+  'Dismissed',
+] as const satisfies ReadonlyArray<ReconciliationConditionStatus>;
+
+export const RECONCILIATION_RESOLUTIONS = [
+  'MergedInto',
+  'CreatedNew',
+] as const satisfies ReadonlyArray<ReconciliationResolution>;
+
+/** Required columns in Procore budget CSV that must be non-empty. */
+export const BUDGET_LINE_REQUIRED_CSV_COLUMNS = [
+  'budgetCode',
+  'budgetCodeDescription',
+  'costType',
+  'costCodeTier1',
+  'originalBudget',
+] as const;
+
+/** Maps Procore CSV column headers to IBudgetImportRow field names. */
+export const PROCORE_CSV_COLUMN_MAP: Readonly<Record<string, string>> = {
+  'Sub Job': 'subJob',
+  'Cost Code Tier 1': 'costCodeTier1',
+  'Cost Code Tier 2': 'costCodeTier2',
+  'Cost Code Tier 3': 'costCodeTier3',
+  'Cost Type': 'costType',
+  'Budget Code': 'budgetCode',
+  'Budget Code Description': 'budgetCodeDescription',
+  'Original Budget Amount': 'originalBudget',
+  'Budget Modifications': 'budgetModifications',
+  'Approved COs': 'approvedCOs',
+  'Pending Budget Changes': 'pendingBudgetChanges',
+  'Direct Costs': 'jobToDateActualCost',
+  'Committed Costs': 'committedCosts',
+  'Pending Cost Changes': 'pendingCostChanges',
+  'Forecast To Complete': 'forecastToComplete',
+} as const;
+
+/**
+ * Maps Procore CSV cost type prefixes (before ' - ') to canonical CostType values.
+ * Real CSV values: 'MAT - Materials', 'LAB - Labor', 'LBN - Labor Burden', etc.
+ */
+export const PROCORE_COST_TYPE_MAP: Readonly<Record<string, CostType>> = {
+  'LAB': 'Labor',
+  'LBN': 'Labor',
+  'MAT': 'Material',
+  'EQU': 'Equipment',
+  'SUB': 'Subcontract',
+  'OTH': 'Other',
+} as const;

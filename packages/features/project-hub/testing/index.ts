@@ -25,3 +25,15 @@ export {
 
 export { createMockFinancialAccessQuery } from './createMockFinancialAccessQuery.js';
 export { mockFinancialAccessScenarios } from './mockFinancialScenarios.js';
+
+export { createMockBudgetLineItem } from './createMockBudgetLineItem.js';
+export { createMockReconciliationCondition } from './createMockReconciliationCondition.js';
+export { createMockBudgetImportRow } from './createMockBudgetImportRow.js';
+export {
+  cleanImportRows,
+  matchedImportRows,
+  matchedExistingLines,
+  ambiguousImportRows,
+  ambiguousExistingLines,
+  validationFailureRows,
+} from './mockBudgetImportScenarios.js';

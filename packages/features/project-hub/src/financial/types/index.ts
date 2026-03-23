@@ -1,6 +1,6 @@
 /**
- * P3-E4-T01 public contracts for Financial module doctrine and authority.
- * Contract-only surface: no data model fields here (T02–T08).
+ * P3-E4 public contracts for Financial module.
+ * T01: doctrine and authority. T02: budget line identity and import.
  */
 
 // ── Financial Version States ──────────────────────────────────────────
@@ -65,4 +65,135 @@ export interface IFinancialIntegrationBoundary {
   readonly description: string;
   /** Whether this integration is currently active or planned for future implementation. */
   readonly status: 'active' | 'planned';
+}
+
+// ── T02: Budget Line Identity and Import ──────────────────────────────
+
+/** Cost type enumeration (T02 §3.3). */
+export type CostType = 'Labor' | 'Material' | 'Equipment' | 'Subcontract' | 'Other';
+
+/** External source system identifier (T02 §2.2). */
+export type ExternalSourceSystem = 'procore' | 'manual';
+
+/** Reconciliation condition lifecycle (T02 §2.5). */
+export type ReconciliationConditionStatus = 'Pending' | 'Resolved' | 'Dismissed';
+export type ReconciliationResolution = 'MergedInto' | 'CreatedNew';
+
+/** Identity resolution outcomes (T02 §2.3). */
+export type IdentityResolutionOutcome = 'matched' | 'new' | 'ambiguous';
+
+/**
+ * Budget line item — the fundamental unit of financial tracking (T02 §3.1).
+ * Imported from Procore CSV; version-scoped within forecast versions.
+ */
+export interface IBudgetLineItem {
+  // Identity (§2.2)
+  readonly canonicalBudgetLineId: string;
+  readonly externalSourceSystem: ExternalSourceSystem;
+  readonly externalSourceLineId: string | null;
+  readonly fallbackCompositeMatchKey: string;
+  readonly budgetImportRowId: string;
+
+  // Context
+  readonly projectId: string;
+  readonly importBatchId: string;
+  readonly importedAt: string;
+
+  // Cost codes and description
+  readonly subJob: string | null;
+  readonly costCodeTier1: string;
+  readonly costCodeTier2: string | null;
+  readonly costCodeTier3: string | null;
+  readonly costType: CostType;
+  readonly budgetCode: string;
+  readonly budgetCodeDescription: string;
+
+  // Budget amounts (USD, 2 decimal places)
+  readonly originalBudget: number;
+  readonly budgetModifications: number;
+  readonly approvedCOs: number;
+  readonly revisedBudget: number;           // calculated: original + mods + COs
+  readonly pendingBudgetChanges: number;
+  readonly projectedBudget: number;         // calculated: revised + pending
+
+  // Cost exposure (USD)
+  readonly jobToDateActualCost: number;
+  readonly committedCosts: number;
+  readonly costExposureToDate: number;      // calculated: actual + committed
+  readonly pendingCostChanges: number;
+  readonly projectedCosts: number;          // calculated: exposure + pending
+
+  // PM forecast (working version only for edits)
+  readonly forecastToComplete: number;
+  readonly estimatedCostAtCompletion: number;  // calculated: exposure + FTC
+  readonly projectedOverUnder: number;         // calculated: revised - EAC (positive = favorable)
+
+  // Edit provenance
+  readonly lastEditedBy: string | null;
+  readonly lastEditedAt: string | null;
+  readonly priorForecastToComplete: number | null;
+  readonly notes: string | null;
+}
+
+/** Reconciliation condition record for ambiguous budget line matches (T02 §2.5). */
+export interface IBudgetLineReconciliationCondition {
+  readonly conditionId: string;
+  readonly projectId: string;
+  readonly importBatchId: string;
+  readonly importRowFallbackKey: string;
+  readonly candidateCanonicalLineIds: readonly string[];
+  readonly status: ReconciliationConditionStatus;
+  readonly resolvedBy?: string;
+  readonly resolvedAt?: string;
+  readonly resolution?: ReconciliationResolution;
+  readonly resolvedCanonicalLineId?: string;
+  readonly createdAt: string;
+}
+
+/** Raw CSV row before transformation — all values are strings. */
+export interface IBudgetImportRow {
+  readonly subJob?: string;
+  readonly costCodeTier1: string;
+  readonly costCodeTier2?: string;
+  readonly costCodeTier3?: string;
+  readonly costType: string;
+  readonly budgetCode: string;
+  readonly budgetCodeDescription: string;
+  readonly originalBudget: string;
+  readonly budgetModifications: string;
+  readonly approvedCOs: string;
+  readonly pendingBudgetChanges: string;
+  readonly jobToDateActualCost: string;
+  readonly committedCosts: string;
+  readonly pendingCostChanges: string;
+  readonly forecastToComplete: string;
+}
+
+/** Per-field validation error during budget import. */
+export interface IBudgetImportValidationError {
+  readonly rowIndex: number;
+  readonly field: string;
+  readonly value: string;
+  readonly message: string;
+}
+
+/** Identity resolution result for a single import row (T02 §2.3). */
+export interface IIdentityResolutionResult {
+  readonly outcome: IdentityResolutionOutcome;
+  /** Resolved canonical ID. Null when ambiguous (PM must resolve). */
+  readonly canonicalBudgetLineId: string | null;
+  /** Populated when outcome is 'ambiguous' — the existing lines that matched. */
+  readonly candidateCanonicalLineIds: readonly string[];
+}
+
+/** Aggregate result of a budget import operation. */
+export interface IBudgetImportResult {
+  readonly success: boolean;
+  readonly importBatchId: string;
+  readonly linesMatched: number;
+  readonly linesCreated: number;
+  readonly reconciliationConditionsCreated: number;
+  readonly validationErrors: readonly IBudgetImportValidationError[];
+  readonly lines: readonly IBudgetLineItem[];
+  readonly reconciliationConditions: readonly IBudgetLineReconciliationCondition[];
 }

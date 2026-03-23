@@ -15,12 +15,13 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],
-      include: ['src/health-pulse/**/*.{ts,tsx}'],
+      include: ['src/health-pulse/**/*.{ts,tsx}', 'src/financial/**/*.{ts,tsx}'],
       exclude: [
         'src/**/*.d.ts',
         'src/**/*.stories.{ts,tsx}',
         'src/__tests__/**',
         'src/health-pulse/types/**',
+        'src/financial/types/**',
         'testing/**',
       ],
       thresholds: {
