@@ -11,6 +11,7 @@ import type {
   ForecastDerivationReason,
   IFinancialIntegrationBoundary,
   IForecastChecklistTemplateEntry,
+  ISignConventionRule,
   ReconciliationConditionStatus,
   ReconciliationResolution,
 } from '../types/index.js';
@@ -257,3 +258,29 @@ export const BUYOUT_IN_PROGRESS_STATUSES: ReadonlyArray<BuyoutLineStatus> = [
 
 /** Acceptable variance between buyout contracts and committed costs (T06 §8.7). */
 export const BUYOUT_RECONCILIATION_TOLERANCE = 0.05;
+
+// ── T07: Business Rules and Calculations ──────────────────────────────
+
+/** Sign convention rules for each financial domain (T07 §9.1–§9.5). */
+export const SIGN_CONVENTION_RULES: ReadonlyArray<ISignConventionRule> = [
+  { domain: 'budgetLine', direction: 'budget-minus-cost', positiveInterpretation: 'Under budget (favorable)', negativeInterpretation: 'Over budget (unfavorable)', positiveColor: 'green', negativeColor: 'red' },
+  { domain: 'gcgr', direction: 'cost-minus-budget', positiveInterpretation: 'Cost overrun (unfavorable)', negativeInterpretation: 'Cost savings (favorable)', positiveColor: 'red', negativeColor: 'green' },
+  { domain: 'buyout', direction: 'cost-minus-budget', positiveInterpretation: 'Over budget (unfavorable)', negativeInterpretation: 'Under budget (favorable)', positiveColor: 'red', negativeColor: 'green' },
+  { domain: 'profit', direction: 'budget-minus-cost', positiveInterpretation: 'Forecasting profit', negativeInterpretation: 'Forecasting loss', positiveColor: 'green', negativeColor: 'red' },
+  { domain: 'cashFlow', direction: 'budget-minus-cost', positiveInterpretation: 'Cash surplus', negativeInterpretation: 'Cash deficit', positiveColor: 'green', negativeColor: 'red' },
+] as const;
+
+/** Display precision for currency fields (T07 §9.6). */
+export const DISPLAY_PRECISION_CURRENCY = 2;
+
+/** Display precision for percentage fields (T07 §9.6). */
+export const DISPLAY_PRECISION_PERCENT = 2;
+
+/** EAC exceeds revisedBudget × this factor → warning (T07 §10.2). */
+export const FTC_OVER_BUDGET_WARNING_THRESHOLD = 1.10;
+
+/** Profit margin below this → warning alert (T07 §9.4). */
+export const PROFIT_MARGIN_WARNING_THRESHOLD = 5;
+
+/** Profit margin below this → critical alert requiring PE visibility (T07 §9.4). */
+export const PROFIT_MARGIN_CRITICAL_THRESHOLD = 0;

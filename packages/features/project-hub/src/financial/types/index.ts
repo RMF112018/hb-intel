@@ -1,7 +1,8 @@
 /**
  * P3-E4 public contracts for Financial module.
  * T01: doctrine and authority. T02: budget line identity and import.
- * T03: forecast versioning and checklist. T05: cash flow working model. T06: buyout sub-domain.
+ * T03: forecast versioning and checklist. T05: cash flow working model.
+ * T06: buyout sub-domain. T07: business rules and calculations.
  */
 
 // ── Financial Version States ──────────────────────────────────────────
@@ -463,4 +464,66 @@ export interface IBuyoutReconciliationResult {
   readonly variance: number;
   readonly variancePercent: number;
   readonly withinTolerance: boolean;
+}
+
+// ── T07: Business Rules and Calculations ──────────────────────────────
+
+/**
+ * Sign convention direction (T07 §9).
+ * budget-minus-cost: positive = favorable (used for budget line projectedOverUnder, profit).
+ * cost-minus-budget: positive = unfavorable (used for GC/GR variance, buyout overUnder).
+ */
+export type SignConventionDirection = 'budget-minus-cost' | 'cost-minus-budget';
+
+/** Financial alert severity (T07 §9.4, §10.2). */
+export type FinancialAlertSeverity = 'none' | 'warning' | 'critical';
+
+/** Financial domain identifiers for sign convention lookup. */
+export type FinancialDomain = 'budgetLine' | 'gcgr' | 'buyout' | 'profit' | 'cashFlow';
+
+/** Sign convention rule for a financial domain (T07 §9.1–§9.5). */
+export interface ISignConventionRule {
+  readonly domain: FinancialDomain;
+  readonly direction: SignConventionDirection;
+  readonly positiveInterpretation: string;
+  readonly negativeInterpretation: string;
+  readonly positiveColor: 'green' | 'red';
+  readonly negativeColor: 'green' | 'red';
+}
+
+/** Financial alert for threshold-based warnings (T07 §10.2, §9.4). */
+export interface IFinancialAlert {
+  readonly field: string;
+  readonly severity: FinancialAlertSeverity;
+  readonly message: string;
+}
+
+/** FTC validation result (T07 §10.2). */
+export interface IForecastToCompleteValidation {
+  readonly isValid: boolean;
+  readonly alerts: readonly IFinancialAlert[];
+}
+
+/** Profit margin assessment (T07 §9.4, §10.3). */
+export interface IProfitMarginAssessment {
+  readonly currentProfit: number;
+  readonly profitMargin: number;
+  readonly severity: FinancialAlertSeverity;
+  readonly alert: IFinancialAlert | null;
+}
+
+/** GC/GR variance result (T07 §10.4). */
+export interface IGCGRVarianceResult {
+  readonly gcVariance: number;
+  readonly grVariance: number;
+  readonly totalVariance: number;
+}
+
+/** Forecast summary calculations result (T07 §10.3). */
+export interface IForecastSummaryCalculations {
+  readonly revisedContractCompletion: number;
+  readonly estimatedCostAtCompletion: number;
+  readonly currentProfit: number;
+  readonly profitMargin: number;
+  readonly expectedContingencyUse: number;
 }
