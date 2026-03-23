@@ -180,6 +180,13 @@ export {
 } from './stores/projectReturnMemory.js';
 export type { IProjectReturnMemory } from './stores/projectReturnMemory.js';
 
+// SPFx project context resolution (Phase 3 Stage 4.2)
+export { resolveSpfxProjectContext } from './spfxProjectContext.js';
+export type {
+  SpfxProjectContextInput,
+  SpfxProjectContextResult,
+} from './spfxProjectContext.js';
+
 // Module Configurations (PH4B.2 §Step 3 — moved from ui-kit, F-014)
 export {
   scorecardsLanding,
