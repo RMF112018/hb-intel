@@ -22,3 +22,6 @@ export { mockProjectHealthStates } from './mockProjectHealthStates.js';
 export {
   createMockProjectHealthPulseSnapshot,
 } from './createMockProjectHealthPulseSnapshot.js';
+
+export { createMockFinancialAccessQuery } from './createMockFinancialAccessQuery.js';
+export { mockFinancialAccessScenarios } from './mockFinancialScenarios.js';

@@ -12,3 +12,5 @@ export { projectHubProjectsEmptyStateConfig } from './empty-state/index.js';
 export * from './health-pulse/index.js';
 
 export { ProjectActivityRegistry, aggregateActivityFeed } from './activity/index.js';
+
+export * from './financial/index.js';
