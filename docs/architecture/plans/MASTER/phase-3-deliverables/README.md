@@ -1,12 +1,12 @@
 # Phase 3 Deliverables — Project Hub and Project Context
 
-**Doc Classification:** Active Deliverable Index — **Phase 3 deliverable production is complete.** All workstreams (A–H) delivered. 19 of 19 deliverables authored.
+**Doc Classification:** Active Deliverable Index — **Phase 3 deliverable production is complete.** All workstreams (A–H) delivered. 25 of 25 deliverables authored.
 
 ---
 
 ## Planning Status Summary
 
-**Phase 3 deliverable production is complete.** 19 of 19 deliverables are authored (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-F1, P3-G1, P3-G2, P3-G3, P3-H1). All workstreams (A–H) are complete. 18 deliverables are locked (Contract, Specification, or Note). 1 deliverable (P3-H1) is an Active Reference that evolves during implementation. Phase 3 is now execution-ready per [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
+**Phase 3 deliverable production is complete.** 25 of 25 deliverables are authored (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-E4, P3-E5, P3-E6, P3-E7, P3-E8, P3-E9, P3-F1, P3-G1, P3-G2, P3-G3, P3-H1). All workstreams (A–H) are complete. 24 deliverables are locked (Contract, Specification, or Note). 1 deliverable (P3-H1) is an Active Reference that evolves during implementation. Phase 3 is now execution-ready per [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
 
 ---
 
@@ -65,6 +65,12 @@
 | P3-E1 | [Phase 3 Module Classification Matrix](P3-E1-Phase-3-Module-Classification-Matrix.md) | Specification |
 | P3-E2 | [Module Source-of-Truth / Action-Boundary Matrix](P3-E2-Module-Source-of-Truth-Action-Boundary-Matrix.md) | Specification |
 | P3-E3 | [Spreadsheet/Document Replacement Reference Note Set](P3-E3-Spreadsheet-Document-Replacement-Reference-Note-Set.md) | Note |
+| P3-E4 | [Financial Module Field Specification](P3-E4-Financial-Module-Field-Specification.md) | Specification |
+| P3-E5 | [Schedule Module Field Specification](P3-E5-Schedule-Module-Field-Specification.md) | Specification |
+| P3-E6 | [Constraints Module Field Specification](P3-E6-Constraints-Module-Field-Specification.md) | Specification |
+| P3-E7 | [Permits Module Field Specification](P3-E7-Permits-Module-Field-Specification.md) | Specification |
+| P3-E8 | [Safety Module Field Specification](P3-E8-Safety-Module-Field-Specification.md) | Specification |
+| P3-E9 | [Reports Module Field Specification](P3-E9-Reports-Module-Field-Specification.md) | Specification |
 
 ### Workstream F — Governed reporting system
 
@@ -266,23 +272,23 @@ For each module, the implementation contract is defined by P3-E2 (source-of-trut
 
 **6.1 — Financial module**
 Implement: budget import via CSV upload (PWA Required, SPFx Broad); Financial Summary editing (both lanes); GC/GR model (both lanes); Cash Flow model (both lanes); Exposure tracking (both lanes); Buyout support within Financial domain (both lanes). Implement spine adapters for all four spines per P3-A3. The Financial module owns its own budget/cost records as source-of-truth; no other module may write to Financial domain fields.
-Governing: P3-E1 §4.1, P3-E2 §3, P3-E3 §2
+Governing: P3-E1 §4.1, P3-E2 §3, P3-E3 §2, **P3-E4** (field-level specification)
 
 **6.2 — Schedule module**
 Implement: milestone tracking (both lanes); forecast overrides with provenance and governance (both lanes); schedule file ingestion (PWA Required, SPFx Launch-to-PWA); upload history and restore (PWA Required, SPFx Launch-to-PWA). Implement spine adapters. The Schedule module owns milestone and forecast records; provenance is required on any forecast override.
-Governing: P3-E1 §4.2, P3-E2 §4, P3-E3 §3
+Governing: P3-E1 §4.2, P3-E2 §4, P3-E3 §3, **P3-E5** (field-level specification)
 
 **6.3 — Constraints module**
 Implement: constraint CRUD (both lanes); change tracking (both lanes); delay log with quantified impact (both lanes). Implement spine adapters. The Constraints module owns constraint records; cross-module fields (e.g., financial exposure from a delay) are published to spines, not written directly to the Financial module.
-Governing: P3-E1 §4.3, P3-E2 §5, P3-E3 §4
+Governing: P3-E1 §4.3, P3-E2 §5, P3-E3 §4, **P3-E6** (field-level specification)
 
 **6.4 — Permits module**
 Implement: permit log management (both lanes); linked inspections (both lanes); expiration tracking (both lanes). Implement spine adapters.
-Governing: P3-E1 §4.4, P3-E2 §6, P3-E3 §5
+Governing: P3-E1 §4.4, P3-E2 §6, P3-E3 §5, **P3-E7** (field-level specification)
 
 **6.5 — Safety module**
 Implement: safety plan state (both lanes); orientations and acknowledgments (both lanes); checklists and inspection aggregation (both lanes); JHA log records (both lanes); incident reports with notifications (both lanes). Implement spine adapters. Note: Safety is explicitly excluded from the executive review annotation layer in Phase 3. No PER annotation affordance should be surfaced on any Safety surface.
-Governing: P3-E1 §4.5, P3-E2 §7, P3-E3 §6
+Governing: P3-E1 §4.5, P3-E2 §7, P3-E3 §6, **P3-E8** (field-level specification)
 
 **6.6 — QC module (baseline-visible lifecycle)**
 Implement the QC module at baseline-visible lifecycle depth only. Phase 3 does not include deeper field-first QC execution. Do not scope beyond the baseline-visible classification.
@@ -323,6 +329,7 @@ Governing: P3-G1 §4.8, P3-G2 §8.8
 ### Stage 8 — Reporting System
 
 Must follow Stage 2 (authority model), Stage 6 (module data available for assembly), Stage 7 (reviewer-generated run model in place).
+Governing: **P3-E9** (field-level specification — data models for run ledger, approval/release records, SubScorecard, and Lessons Learned families)
 
 **8.1 — Central project-governance policy record**
 Implement the project-governance policy record data model. The record owns: global floor policy (set by Manager of OpEx), project-level overrides (set by PE), per-report-family approval/release policy, PM↔PE internal review chain configuration, and `perReleaseAuthority` per family. The Reports module reads and enforces this record but does not own or write it. The PE sets project-level configuration through a project settings surface, not through the Reports module.
@@ -495,6 +502,6 @@ The following are explicitly deferred and must not be treated as Phase 3 scope. 
 
 ---
 
-**Last Updated:** 2026-03-22 — Governance model updates applied across all deliverables (dual-key inbound routing, three-tier authority model, PER review layer, Push-to-Project-Team, Safety exclusion, central project-governance policy record, PM↔PE internal review chain, reviewer-generated review runs, department reclassification, lane depth doctrine). Implementation Guide added.
+**Last Updated:** 2026-03-22 — Governance model updates applied across all deliverables (dual-key inbound routing, three-tier authority model, PER review layer, Push-to-Project-Team, Safety exclusion, central project-governance policy record, PM↔PE internal review chain, reviewer-generated review runs, department reclassification, lane depth doctrine). Implementation Guide added. Per-module field specifications added (P3-E4 through P3-E9) covering Financial, Schedule, Constraints, Permits, Safety, and Reports modules with exhaustive field definitions, TypeScript data models, enum values, business rules, and scoring formulas grounded in company working templates.
 
 **Governing Plan:** [Phase 3 Plan §14–§15](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

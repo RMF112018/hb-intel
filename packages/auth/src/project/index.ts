@@ -18,3 +18,18 @@ export type {
 
 export { ProjectMembershipGate } from './ProjectMembershipGate.js';
 export type { ProjectMembershipGateProps } from './ProjectMembershipGate.js';
+
+export {
+  getModuleVisibility,
+  getPerModuleVisibility,
+  canAnnotateModule,
+} from './moduleVisibility.js';
+export type { ModuleVisibility, ProjectModuleId } from './moduleVisibility.js';
+
+export {
+  isPerRole,
+  canPerAnnotate,
+  canPerPushToTeam,
+  getPerRestrictions,
+} from './perScope.js';
+export type { PerRestrictions } from './perScope.js';

@@ -255,12 +255,19 @@ export {
   loadShellAuthConfiguration,
 } from './backend/index.js';
 
-// Project role resolution and membership enforcement (Phase 3 Stage 2.1–2.2)
+// Project role resolution, membership enforcement, and module visibility (Phase 3 Stage 2.1–2.3)
 export {
   resolveProjectRole,
   resolvePerEligibility,
   validateProjectAccess,
   ProjectMembershipGate,
+  getModuleVisibility,
+  getPerModuleVisibility,
+  canAnnotateModule,
+  isPerRole,
+  canPerAnnotate,
+  canPerPushToTeam,
+  getPerRestrictions,
 } from './project/index.js';
 export type {
   ProjectRoleResolutionInput,
@@ -270,6 +277,9 @@ export type {
   ProjectAccessResult,
   ProjectAccessDenialReason,
   ProjectMembershipGateProps,
+  ModuleVisibility,
+  ProjectModuleId,
+  PerRestrictions,
 } from './project/index.js';
 
 // Adapters (Blueprint §2b — dual-mode auth)
