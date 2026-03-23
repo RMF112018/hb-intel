@@ -1,0 +1,37 @@
+import type { IConstraintRecord } from '../src/constraints/constraint-ledger/types.js';
+
+export const createMockConstraintRecord = (
+  overrides?: Partial<IConstraintRecord>,
+): IConstraintRecord => ({
+  constraintId: 'con-001',
+  projectId: 'proj-001',
+  constraintNumber: 'CON-001',
+  title: 'RFI response pending from structural engineer',
+  description:
+    'Structural RFI-042 regarding foundation bearing capacity at grid lines A-D remains unanswered after 14 days, blocking excavation work in Zone 2.',
+  category: 'DESIGN',
+  priority: 2,
+  dateIdentified: '2026-02-01',
+  identifiedBy: 'user-001',
+  owner: 'user-002',
+  bic: 'Design Team',
+  dueDate: '2026-03-01',
+  daysOpen: 50,
+  status: 'Identified',
+  statusDate: '2026-02-01',
+  closureDocumentUri: null,
+  closureNotes: null,
+  dateClosed: null,
+  closureReason: null,
+  parentRiskId: null,
+  spawnedDelayIds: [],
+  spawnedChangeEventIds: [],
+  reference: 'RFI-042',
+  comments: [],
+  attachments: [],
+  createdAt: '2026-02-01T09:00:00Z',
+  createdBy: 'user-001',
+  lastEditedAt: null,
+  lastEditedBy: null,
+  ...overrides,
+});

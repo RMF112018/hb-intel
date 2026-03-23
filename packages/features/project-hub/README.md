@@ -76,3 +76,5 @@ See `src/schedule/` for the complete contract-level implementation.
 ## 11. Constraints Module (P3-E6) — Stage 7.3
 
 T01 Risk Ledger: Risk record model, 8-state lifecycle state machine, 16 governed categories, probability/impact scoring, 6 business rules, health spine metrics, testing fixtures. See `src/constraints/risk-ledger/`.
+
+T02 Constraint Ledger: Constraint record model, 7-state lifecycle state machine, 26 governed categories, 4-level priority, daysOpen calculation, 8 business rules, 6 health spine metrics, testing fixtures. See `src/constraints/constraint-ledger/`.

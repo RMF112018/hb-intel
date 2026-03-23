@@ -131,3 +131,8 @@ export { createMockExternalParticipantRecord } from './createMockExternalPartici
 
 export { createMockRiskRecord } from './createMockRiskRecord.js';
 export { mockRiskLedgerScenarios } from './mockRiskLedgerScenarios.js';
+
+// ── P3-E6-T02 Constraint Ledger testing surface ──────────────────────
+
+export { createMockConstraintRecord } from './createMockConstraintRecord.js';
+export { mockConstraintLedgerScenarios } from './mockConstraintLedgerScenarios.js';
