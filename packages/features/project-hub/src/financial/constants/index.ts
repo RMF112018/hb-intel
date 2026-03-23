@@ -4,14 +4,17 @@ import type {
   FinancialAccessAction,
   FinancialAuthorityRole,
   FinancialVersionState,
+  ForecastChecklistGroup,
+  ForecastDerivationReason,
   IFinancialIntegrationBoundary,
+  IForecastChecklistTemplateEntry,
   ReconciliationConditionStatus,
   ReconciliationResolution,
 } from '../types/index.js';
 
 /**
  * P3-E4 contract constants.
- * T01: doctrine and authority. T02: budget line identity and import.
+ * T01: doctrine and authority. T02: budget line identity and import. T03: forecast versioning and checklist.
  * Values are locked for contract stability.
  */
 
@@ -151,3 +154,46 @@ export const PROCORE_COST_TYPE_MAP: Readonly<Record<string, CostType>> = {
   'SUB': 'Subcontract',
   'OTH': 'Other',
 } as const;
+
+// ── T03: Forecast Versioning and Checklist ────────────────────────────
+
+export const FORECAST_DERIVATION_REASONS = [
+  'InitialSetup',
+  'BudgetImport',
+  'PostConfirmationEdit',
+  'ScheduleRefresh',
+  'ManualDerivation',
+] as const satisfies ReadonlyArray<ForecastDerivationReason>;
+
+export const FORECAST_CHECKLIST_GROUPS = [
+  'RequiredDocuments',
+  'ProfitForecast',
+  'Schedule',
+  'Additional',
+] as const satisfies ReadonlyArray<ForecastChecklistGroup>;
+
+/**
+ * Canonical forecast checklist template — 19 items from T03 §4.1.
+ * Used to generate checklist instances for each new working version.
+ */
+export const FORECAST_CHECKLIST_TEMPLATE: ReadonlyArray<IForecastChecklistTemplateEntry> = [
+  { itemId: 'doc_procore_budget', group: 'RequiredDocuments', label: 'Procore Budget export attached', required: true },
+  { itemId: 'doc_forecast_summary', group: 'RequiredDocuments', label: 'Forecast Summary completed', required: true },
+  { itemId: 'doc_gc_gr_log', group: 'RequiredDocuments', label: 'GC/GR Log completed', required: true },
+  { itemId: 'doc_cash_flow', group: 'RequiredDocuments', label: 'Cash Flow projection completed', required: true },
+  { itemId: 'doc_sdi_log', group: 'RequiredDocuments', label: 'SDI Log attached', required: true },
+  { itemId: 'doc_buyout_log', group: 'RequiredDocuments', label: 'Buyout Log completed', required: true },
+  { itemId: 'profit_changes_noted', group: 'ProfitForecast', label: 'Profit changes noted in working files', required: true },
+  { itemId: 'profit_negative_flagged', group: 'ProfitForecast', label: 'Negative profit values flagged for review', required: true },
+  { itemId: 'profit_gc_savings_confirmed', group: 'ProfitForecast', label: 'GC/buyout savings confirmed', required: true },
+  { itemId: 'profit_events_documented', group: 'ProfitForecast', label: 'Projected events documented', required: true },
+  { itemId: 'schedule_status_current', group: 'Schedule', label: 'Schedule status current (within 7 days)', required: true },
+  { itemId: 'schedule_brewing_items_noted', group: 'Schedule', label: 'Brewing issues noted', required: true },
+  { itemId: 'schedule_gc_gr_confirmed', group: 'Schedule', label: 'GC/GR schedule confirmed', required: true },
+  { itemId: 'schedule_delay_notices_sent', group: 'Schedule', label: 'Delay notices sent (if applicable)', required: false },
+  { itemId: 'reserve_contingency_confirmed', group: 'Additional', label: 'Contingency reserve confirmed', required: true },
+  { itemId: 'reserve_gc_confirmed', group: 'Additional', label: 'GC estimate at completion confirmed', required: true },
+  { itemId: 'ar_aging_reviewed', group: 'Additional', label: 'A/R aging reviewed (cash flow impact)', required: true },
+  { itemId: 'buyout_savings_dispositioned', group: 'Additional', label: 'Buyout savings dispositioned (if undispositioned savings exist)', required: false },
+  { itemId: 'executive_approval_noted', group: 'Additional', label: 'Executive review completed (optional)', required: false },
+] as const;

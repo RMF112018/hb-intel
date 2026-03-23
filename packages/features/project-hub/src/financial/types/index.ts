@@ -1,6 +1,6 @@
 /**
  * P3-E4 public contracts for Financial module.
- * T01: doctrine and authority. T02: budget line identity and import.
+ * T01: doctrine and authority. T02: budget line identity and import. T03: forecast versioning and checklist.
  */
 
 // ── Financial Version States ──────────────────────────────────────────
@@ -196,4 +196,79 @@ export interface IBudgetImportResult {
   readonly validationErrors: readonly IBudgetImportValidationError[];
   readonly lines: readonly IBudgetLineItem[];
   readonly reconciliationConditions: readonly IBudgetLineReconciliationCondition[];
+}
+
+// ── T03: Forecast Versioning and Checklist ────────────────────────────
+
+/** Alias for FinancialVersionState — spec alignment with T03 §3.2 terminology. */
+export type ForecastVersionType = FinancialVersionState;
+
+/** Why a forecast version was created (T03 §3.3). */
+export type ForecastDerivationReason =
+  | 'InitialSetup'
+  | 'BudgetImport'
+  | 'PostConfirmationEdit'
+  | 'ScheduleRefresh'
+  | 'ManualDerivation';
+
+/** Checklist item grouping (T03 §4.1). */
+export type ForecastChecklistGroup =
+  | 'RequiredDocuments'
+  | 'ProfitForecast'
+  | 'Schedule'
+  | 'Additional';
+
+/** Forecast version record — one entry in the versioned forecast ledger (T03 §3.3). */
+export interface IForecastVersion {
+  readonly forecastVersionId: string;
+  readonly projectId: string;
+  readonly versionType: ForecastVersionType;
+  readonly versionNumber: number;
+  readonly reportingMonth: string | null;
+  readonly derivedFromVersionId: string | null;
+  readonly derivationReason: ForecastDerivationReason | null;
+  readonly isReportCandidate: boolean;
+  readonly createdAt: string;
+  readonly createdBy: string;
+  readonly confirmedAt: string | null;
+  readonly confirmedBy: string | null;
+  readonly publishedAt: string | null;
+  readonly publishedByRunId: string | null;
+  readonly staleBudgetLineCount: number;
+  readonly checklistCompletedAt: string | null;
+  readonly notes: string | null;
+}
+
+/** Checklist item record for a specific forecast version (T03 §4.2). */
+export interface IForecastChecklistItem {
+  readonly checklistId: string;
+  readonly forecastVersionId: string;
+  readonly itemId: string;
+  readonly group: ForecastChecklistGroup;
+  readonly label: string;
+  readonly completed: boolean;
+  readonly completedBy: string | null;
+  readonly completedAt: string | null;
+  readonly notes: string | null;
+  readonly required: boolean;
+}
+
+/** Static template entry for checklist generation (T03 §4.1). */
+export interface IForecastChecklistTemplateEntry {
+  readonly itemId: string;
+  readonly group: ForecastChecklistGroup;
+  readonly label: string;
+  readonly required: boolean;
+}
+
+/** Confirmation gate validation result (T03 §4.3). */
+export interface IConfirmationGateResult {
+  readonly canConfirm: boolean;
+  readonly blockers: readonly string[];
+}
+
+/** Result of designating a report candidate (T03 §3.6). */
+export interface IReportCandidateDesignationResult {
+  readonly designated: IForecastVersion;
+  readonly cleared: IForecastVersion | null;
 }

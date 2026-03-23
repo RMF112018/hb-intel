@@ -1,9 +1,13 @@
 import type {
   FinancialAccessAction,
+  IConfirmationGateResult,
   IFinancialAccessQuery,
   IFinancialAccessResult,
+  IForecastChecklistItem,
+  IForecastChecklistTemplateEntry,
+  IForecastVersion,
 } from '../types/index.js';
-import { FINANCIAL_ACCESS_ACTIONS } from '../constants/index.js';
+import { FINANCIAL_ACCESS_ACTIONS, FORECAST_CHECKLIST_TEMPLATE } from '../constants/index.js';
 
 export const FINANCIAL_GOVERNANCE_SCOPE = 'financial/governance';
 
@@ -109,3 +113,60 @@ export const isFinancialActionAllowed = (
   const result = resolveFinancialVersionAccess(query);
   return result.allowed.includes(action);
 };
+
+// ── T03: Confirmation Gate and Checklist ──────────────────────────────
+
+/**
+ * Validate whether a working version can be confirmed (T03 §4.3).
+ * Returns a gate result with blockers list if confirmation is not allowed.
+ */
+export const validateConfirmationGate = (
+  version: IForecastVersion,
+  checklist: readonly IForecastChecklistItem[],
+  staleBudgetLineCount: number,
+): IConfirmationGateResult => {
+  const blockers: string[] = [];
+
+  // Version must be Working
+  if (version.versionType !== 'Working') {
+    blockers.push(`Version is ${version.versionType}, not Working`);
+  }
+
+  // All required checklist items must be completed
+  const requiredItems = checklist.filter((item) => item.required);
+  const incompleteRequired = requiredItems.filter((item) => !item.completed);
+  if (incompleteRequired.length > 0) {
+    blockers.push(
+      `${incompleteRequired.length} required checklist item(s) incomplete: ${incompleteRequired.map((i) => i.itemId).join(', ')}`,
+    );
+  }
+
+  // No unresolved reconciliation conditions
+  if (staleBudgetLineCount > 0) {
+    blockers.push(
+      `${staleBudgetLineCount} budget line(s) with unresolved reconciliation conditions`,
+    );
+  }
+
+  return { canConfirm: blockers.length === 0, blockers };
+};
+
+/**
+ * Generate a new checklist instance for a forecast version from the canonical template (T03 §4.1).
+ * All items start uncompleted.
+ */
+export const generateChecklistForVersion = (
+  forecastVersionId: string,
+): IForecastChecklistItem[] =>
+  FORECAST_CHECKLIST_TEMPLATE.map((entry: IForecastChecklistTemplateEntry) => ({
+    checklistId: crypto.randomUUID(),
+    forecastVersionId,
+    itemId: entry.itemId,
+    group: entry.group,
+    label: entry.label,
+    completed: false,
+    completedBy: null,
+    completedAt: null,
+    notes: null,
+    required: entry.required,
+  }));
