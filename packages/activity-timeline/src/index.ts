@@ -72,7 +72,7 @@ export type { IActivityStorageAdapter } from './storage/index.js';
 export { InMemoryStorageAdapter } from './storage/index.js';
 
 // Adapters — emitter helpers, module adapter seams (SF28-T07)
-// export * from './adapters/index.js';
+export { ActivitySourceRegistry, emitActivityEvent } from './adapters/index.js';
 
 // Hooks — query hooks, filter state (SF28-T04)
 export {
