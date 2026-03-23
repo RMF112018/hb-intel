@@ -587,3 +587,9 @@ export { DefaultViewToggle } from './DefaultViewToggle/index.js';
 export type { DefaultViewToggleProps } from './DefaultViewToggle/index.js';
 export { ViewCompatibilityBanner } from './ViewCompatibilityBanner/index.js';
 export type { ViewCompatibilityBannerProps, ViewCompatibilityBannerResult } from './ViewCompatibilityBanner/index.js';
+
+// Publish panel and target selector (SF25-T05)
+export { HbcPublishPanel } from './HbcPublishPanel/index.js';
+export type { HbcPublishPanelProps, PublishPanelStep, PublishPanelTarget, PublishPanelReceipt } from './HbcPublishPanel/index.js';
+export { PublishTargetSelector } from './PublishTargetSelector/index.js';
+export type { PublishTargetSelectorProps, PublishTargetOption } from './PublishTargetSelector/index.js';

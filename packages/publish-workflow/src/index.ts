@@ -49,6 +49,8 @@ export { InMemoryPublishStorageAdapter } from './storage/index.js';
 // Hooks (SF25-T04)
 export { publishWorkflowKeys, usePublishWorkflowState, usePublishReadinessState, usePublishQueue } from './hooks/index.js';
 export type { UsePublishWorkflowStateOptions, UsePublishWorkflowStateResult, UsePublishReadinessStateOptions, UsePublishReadinessStateResult, UsePublishQueueOptions, UsePublishQueueResult } from './hooks/index.js';
-// Components (SF25-T05/T06) // export * from './components/index.js';
+// Components (SF25-T05)
+export { PublishPanelShell, PublishTargetSelectorShell } from './components/index.js';
+export type { PublishPanelShellProps, PublishTargetSelectorShellProps } from './components/index.js';
 // Rules (SF25-T03) // export * from './rules/index.js';
 // Adapters (SF25-T07) // export * from './adapters/index.js';

@@ -1,2 +1,5 @@
-/** SF25 composition shells. Implementation scope: SF25-T05/T06. */
-export {};
+/** SF25-T05 — Composition shells. */
+export { PublishPanelShell } from './PublishPanelShell.js';
+export type { PublishPanelShellProps } from './PublishPanelShell.js';
+export { PublishTargetSelectorShell } from './PublishTargetSelectorShell.js';
+export type { PublishTargetSelectorShellProps } from './PublishTargetSelectorShell.js';
