@@ -47,5 +47,8 @@ Test factories exported from `/testing` subpath. Coverage threshold: 95/95/95/95
 
 ## Related
 
+- [ADR-0121 — Saved Views Architecture](../../docs/architecture/adr/ADR-0121-saved-views.md)
+- [Adoption Guide](../../docs/how-to/developer/saved-views-adoption-guide.md)
+- [API Reference](../../docs/reference/saved-views/api.md)
 - [SF26 Master Plan](../../docs/architecture/plans/shared-features/SF26-Saved-Views.md)
 - [SF26-T09 — Testing and Deployment](../../docs/architecture/plans/shared-features/SF26-T09-Testing-and-Deployment.md)
