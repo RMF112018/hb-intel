@@ -1152,3 +1152,70 @@ export interface IRollUpConfig {
   readonly progressRollUpMethod: RollUpMethod;
   readonly authoritativeOnlyVerified: boolean;
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// T06: Logic Dependencies and Propagation (§10)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §10.1 Logic Layers ───────────────────────────────────────────────
+
+/** Three distinct logic layers — do not overwrite each other (§10.1). */
+export type LogicLayer = 'SourceCPM' | 'Scenario' | 'WorkPackage';
+
+/** Relationship type for all logic layers (§10.2, §10.3). */
+export type LogicRelationshipType = 'FS' | 'SS' | 'FF' | 'SF';
+
+/** Source classification for logic records (§10.1). */
+export type LogicSource = 'SourceCPM' | 'ScenarioOverride' | 'WorkPackageLink';
+
+// ── §10.2 ImportedRelationshipRecord ─────────────────────────────────
+
+/** Immutable CPM logic from source import (§10.2). Stored per ScheduleVersionRecord. */
+export interface IImportedRelationshipRecord {
+  readonly relationshipId: string;
+  readonly versionId: string;
+  readonly predecessorKey: string;
+  readonly successorKey: string;
+  readonly relationshipType: LogicRelationshipType;
+  readonly lagHrs: number;
+  readonly logicSource: 'SourceCPM';
+}
+
+// ── §10.3 WorkPackageLinkRecord ──────────────────────────────────────
+
+/** Work-package link type alias for clarity. */
+export type WorkPackageLinkType = LogicRelationshipType;
+
+/** Short-interval execution-sequencing link created by field team (§10.3). */
+export interface IWorkPackageLinkRecord {
+  readonly linkId: string;
+  readonly projectId: string;
+  readonly predecessorWorkPackageId: string;
+  readonly successorWorkPackageId: string;
+  readonly linkType: WorkPackageLinkType;
+  readonly lagDays: number;
+  readonly promotionEligible: boolean;
+  readonly createdBy: string;
+  readonly createdAt: string;
+}
+
+// ── §10.4 Impact Propagation ─────────────────────────────────────────
+
+/** Propagation type classification (§10.4). */
+export type PropagationType =
+  | 'SourceSchedulePropagated'
+  | 'OperatingLayerProjected'
+  | 'ScenarioLayerProjected';
+
+/** Governed propagation rule (§10.4). */
+export interface IPropagationRule {
+  readonly propagationType: PropagationType;
+  readonly basis: string;
+  readonly becomesAuthoritativeWhen: string;
+}
+
+/** Result of classifying a propagation type's authority. */
+export interface IPropagationAuthorityResult {
+  readonly isAuthoritative: boolean;
+  readonly requiresApproval: string | null;
+}

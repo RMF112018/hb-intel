@@ -106,3 +106,8 @@ export { createMockFieldCommitmentRecord } from './createMockFieldCommitmentReco
 export { createMockBlockerRecord } from './createMockBlockerRecord.js';
 export { createMockLookAheadPlan } from './createMockLookAheadPlan.js';
 export { blockerRollUpScenarios, commitmentRollUpScenarios } from './mockFieldExecutionScenarios.js';
+
+// ── P3-E5-T06 Logic dependencies testing surface ────────────────────
+
+export { createMockImportedRelationshipRecord } from './createMockImportedRelationshipRecord.js';
+export { createMockWorkPackageLinkRecord } from './createMockWorkPackageLinkRecord.js';

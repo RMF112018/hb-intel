@@ -52,6 +52,12 @@ import type {
   VerificationOutcome,
   VerificationStatus,
   WorkPackageStatus,
+  LogicLayer,
+  LogicRelationshipType,
+  LogicSource,
+  WorkPackageLinkType,
+  PropagationType,
+  IPropagationRule,
 } from '../types/index.js';
 
 /**
@@ -570,3 +576,46 @@ export const DEFAULT_ROLL_UP_CONFIG: IRollUpConfig = {
   progressRollUpMethod: 'WeightedAverage',
   authoritativeOnlyVerified: true,
 };
+
+// ══════════════════════════════════════════════════════════════════════
+// T06: Logic Dependencies and Propagation (§10)
+// ══════════════════════════════════════════════════════════════════════
+
+export const LOGIC_LAYERS = [
+  'SourceCPM', 'Scenario', 'WorkPackage',
+] as const satisfies ReadonlyArray<LogicLayer>;
+
+export const LOGIC_RELATIONSHIP_TYPES = [
+  'FS', 'SS', 'FF', 'SF',
+] as const satisfies ReadonlyArray<LogicRelationshipType>;
+
+export const LOGIC_SOURCES = [
+  'SourceCPM', 'ScenarioOverride', 'WorkPackageLink',
+] as const satisfies ReadonlyArray<LogicSource>;
+
+export const WORK_PACKAGE_LINK_TYPES = [
+  'FS', 'SS', 'FF', 'SF',
+] as const satisfies ReadonlyArray<WorkPackageLinkType>;
+
+export const PROPAGATION_TYPES = [
+  'SourceSchedulePropagated', 'OperatingLayerProjected', 'ScenarioLayerProjected',
+] as const satisfies ReadonlyArray<PropagationType>;
+
+/** Governed propagation rules per §10.4. */
+export const PROPAGATION_RULES: ReadonlyArray<IPropagationRule> = [
+  {
+    propagationType: 'SourceSchedulePropagated',
+    basis: 'CPM float / logic from imported snapshot',
+    becomesAuthoritativeWhen: 'Already authoritative as imported source truth',
+  },
+  {
+    propagationType: 'OperatingLayerProjected',
+    basis: 'Commitment date changes + work-package link traversal',
+    becomesAuthoritativeWhen: 'Requires PM approval per governed threshold',
+  },
+  {
+    propagationType: 'ScenarioLayerProjected',
+    basis: 'Scenario date overrides + scenario logic',
+    becomesAuthoritativeWhen: 'Requires scenario promotion approval',
+  },
+];
