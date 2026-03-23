@@ -1,0 +1,87 @@
+/**
+ * SF24-T08 — Mock factory for IExportRequest.
+ */
+import type { IExportRequest } from '../src/types/index.js';
+
+export function createMockExportRequest(
+  overrides?: Partial<IExportRequest>,
+): IExportRequest {
+  return {
+    requestId: 'req-mock-001',
+    format: 'csv',
+    intent: 'working-data',
+    renderMode: 'local',
+    complexityTier: 'standard',
+    context: {
+      moduleKey: 'financial',
+      projectId: 'proj-001',
+      recordId: 'rec-001',
+      snapshotTimestampIso: '2026-03-23T14:00:00.000Z',
+      snapshotType: 'current-view',
+      appliedFilters: null,
+      appliedSort: null,
+      visibleColumns: null,
+    },
+    artifact: null,
+    receipt: {
+      receiptId: 'rct-mock-001',
+      status: 'saved-locally',
+      confidence: 'queued-local-only',
+      createdAtIso: '2026-03-23T14:00:00.000Z',
+      completedAtIso: null,
+      artifactUrl: null,
+      restoredFromCache: false,
+    },
+    reviewSteps: [],
+    nextRecommendedAction: null,
+    failure: null,
+    retry: null,
+    confidence: 'queued-local-only',
+    savedViewContext: null,
+    payload: {
+      kind: 'table',
+      columns: [],
+      rowCount: 0,
+      selectedRowIds: null,
+      filterSummary: null,
+      sortSummary: null,
+    },
+    truth: {
+      sourceTruthStamp: {
+        moduleKey: 'financial',
+        projectId: 'proj-001',
+        recordId: 'rec-001',
+        snapshotTimestampIso: '2026-03-23T14:00:00.000Z',
+        snapshotType: 'current-view',
+        appliedFilters: null,
+        appliedSort: null,
+        visibleColumns: null,
+      },
+      snapshotType: 'current-view',
+      filtersApplied: false,
+      sortApplied: false,
+      columnsRestricted: false,
+      selectedRowsOnly: false,
+      composedSections: null,
+      sourceTruthChangedDuringRender: false,
+      truthDowngradeReasons: [],
+    },
+    bicSteps: [],
+    versionRef: null,
+    telemetry: {
+      requestTimestampIso: '2026-03-23T14:00:00.000Z',
+      renderStartTimestampIso: null,
+      renderCompleteTimestampIso: null,
+      renderDurationMs: null,
+      downloadedByUser: false,
+      reviewCompletedByUser: false,
+      retryCount: 0,
+      abandonedBeforeComplete: false,
+      exportIntent: 'working-data',
+      exportFormat: 'csv',
+    },
+    suppressedFormats: [],
+    contextDelta: null,
+    ...overrides,
+  };
+}
