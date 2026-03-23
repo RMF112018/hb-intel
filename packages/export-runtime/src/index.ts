@@ -84,7 +84,11 @@ export type { IExportRequestInput, ExportAuditAction, IExportAuditEntry } from '
 export type { IExportStorageAdapter, IExportStorageRecord } from './storage/index.js';
 export { InMemoryExportStorageAdapter } from './storage/index.js';
 
-// API — render pipeline, sync (SF24-T03 future)
+// Adapters — module registry + integration helpers (SF24-T07)
+export { ExportModuleRegistry, createModuleExportRequest } from './adapters/index.js';
+export type { IExportModuleRegistration, IExportModuleTruthProvider } from './adapters/index.js';
+
+// API — render pipeline, sync (future)
 // export * from './api/index.js';
 
 // Hooks — export orchestration hooks (SF24-T04)
