@@ -8,9 +8,10 @@
  * T05 (field execution layer, acknowledgement, progress verification, roll-up),
  * T06 (logic dependencies, propagation rules),
  * T07 (analytics, grading, confidence, recommendations, causation taxonomy),
- * T09 (platform integration, governance policy configuration).
+ * T09 (platform integration, governance policy configuration),
+ * T10 (business rules, capabilities, reference).
  *
- * Pending: T08, T10–T11 (
+ * Pending: T08, T11 (
  * logic, analytics, classification, integration, business rules, acceptance).
  */
 
@@ -24,3 +25,4 @@ export * from './field-execution/index.js';
 export * from './logic/index.js';
 export * from './analytics/index.js';
 export * from './integration/index.js';
+export * from './business-rules/index.js';

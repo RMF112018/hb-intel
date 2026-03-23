@@ -1520,3 +1520,80 @@ export interface IGovernedPolicySet {
   readonly lastUpdatedBy: string;
   readonly lastUpdatedAt: string;
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// T10: Business Rules, Capabilities, and Reference (§21, §22, §27, §28)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §21 Business Rules ───────────────────────────────────────────────
+
+/** Per-commitment-type approval threshold (§21.1). */
+export interface ICommitmentApprovalThreshold {
+  readonly commitmentType: CommitmentType;
+  readonly thresholdDays: number;
+}
+
+/** Auto-publish eligibility criteria — all must be true (§21.3). */
+export interface IAutoPublishCriteria {
+  readonly noHardPublishBlockers: boolean;
+  readonly overallStatusOnTrackOrAtRisk: boolean;
+  readonly confidenceLabelHighOrModerate: boolean;
+  readonly noConflictRequiresReviewMilestones: boolean;
+  readonly sourceWithinFreshnessWindow: boolean;
+  readonly lifecycleTransitionValid: boolean;
+}
+
+/** Intent record replay status for offline sync (§21.9, §27 §26.13). */
+export type IntentReplayStatus =
+  | 'Pending'
+  | 'Queued'
+  | 'Replayed'
+  | 'ConflictRequiresReview'
+  | 'Failed';
+
+// ── §22 Required Capabilities ────────────────────────────────────────
+
+/** Schedule module required capabilities (§22). */
+export type ScheduleCapability =
+  | 'ScheduleFileIngestion'
+  | 'MultiBaselineManagement'
+  | 'CommitmentManagement'
+  | 'PublicationWorkflow'
+  | 'FieldExecutionLayer'
+  | 'ScenarioBranchManagement'
+  | 'AnalyticsAndIntelligence'
+  | 'OfflineFirstFieldExecution'
+  | 'ExportViaExportRuntime'
+  | 'LinkedArtifactGraph'
+  | 'HealthSpineAndCanvasTile'
+  | 'WorkFeedNotificationRegistration';
+
+/** Capability configuration with description and dependencies (§22). */
+export interface IScheduleCapabilityConfig {
+  readonly capability: ScheduleCapability;
+  readonly description: string;
+  readonly dependencies: ReadonlyArray<string>;
+}
+
+// ── §28 Field Summary Index ──────────────────────────────────────────
+
+/** Authority layer classification for field summary (§28). */
+export type ScheduleAuthorityLayer =
+  | 'MasterSchedule'
+  | 'Operating'
+  | 'PublishedForecast'
+  | 'Scenario'
+  | 'FieldExecution'
+  | 'Analytics'
+  | 'Governance'
+  | 'CrossLayer'
+  | 'OfflineSync'
+  | 'HealthSpine';
+
+/** Field summary index entry (§28). */
+export interface IFieldSummaryEntry {
+  readonly recordType: string;
+  readonly section: string;
+  readonly primaryKey: string;
+  readonly authorityLayer: ScheduleAuthorityLayer;
+}

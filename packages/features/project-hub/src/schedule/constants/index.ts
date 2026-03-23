@@ -78,6 +78,13 @@ import type {
   IAnnotatableFieldConfig,
   SchedulePolicyArea,
   IGovernedPolicyArea,
+  ICommitmentApprovalThreshold,
+  IAutoPublishCriteria,
+  IntentReplayStatus,
+  ScheduleCapability,
+  IScheduleCapabilityConfig,
+  ScheduleAuthorityLayer,
+  IFieldSummaryEntry,
 } from '../types/index.js';
 
 /**
@@ -785,4 +792,103 @@ export const SCHEDULE_POLICY_AREAS: ReadonlyArray<IGovernedPolicyArea> = [
   { area: 'AutoPublishCriteria', description: 'Conditions under which auto-publish is permitted' },
   { area: 'PPCRollingWindow', description: 'Number of look-ahead windows included in rolling PPC' },
   { area: 'RollUpRules', description: 'Progress weighting, sensitivity thresholds' },
+];
+
+// ══════════════════════════════════════════════════════════════════════
+// T10: Business Rules, Capabilities, and Reference (§21, §22, §27, §28)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §21.1 Commitment Approval Thresholds ─────────────────────────────
+
+export const DEFAULT_COMMITMENT_APPROVAL_THRESHOLDS: ReadonlyArray<ICommitmentApprovalThreshold> = [
+  { commitmentType: 'ActivityForecast', thresholdDays: 5 },
+  { commitmentType: 'MilestoneCommitment', thresholdDays: 3 },
+  { commitmentType: 'CompletionForecast', thresholdDays: 1 },
+];
+
+// ── §21.2 Duration Conversion ────────────────────────────────────────
+
+export const DEFAULT_HOURS_PER_DAY = 8;
+
+// ── §21.3 Auto-Publish Criteria Keys ─────────────────────────────────
+
+export const AUTO_PUBLISH_CRITERIA_KEYS: ReadonlyArray<keyof IAutoPublishCriteria> = [
+  'noHardPublishBlockers', 'overallStatusOnTrackOrAtRisk', 'confidenceLabelHighOrModerate',
+  'noConflictRequiresReviewMilestones', 'sourceWithinFreshnessWindow', 'lifecycleTransitionValid',
+];
+
+// ── §21.6 Staleness ──────────────────────────────────────────────────
+
+export const DEFAULT_STALENESS_THRESHOLD_DAYS = 30;
+
+// ── §21.10 PPC ───────────────────────────────────────────────────────
+
+export const DEFAULT_PPC_ROLLING_WINDOW = 4;
+
+// ── §21.9 / §27 Intent Replay Statuses ───────────────────────────────
+
+export const INTENT_REPLAY_STATUSES = [
+  'Pending', 'Queued', 'Replayed', 'ConflictRequiresReview', 'Failed',
+] as const satisfies ReadonlyArray<IntentReplayStatus>;
+
+// ── §22 Required Capabilities ────────────────────────────────────────
+
+export const SCHEDULE_CAPABILITIES: ReadonlyArray<IScheduleCapabilityConfig> = [
+  { capability: 'ScheduleFileIngestion', description: 'Upload and parse XER/XML/CSV schedule files', dependencies: ['T01'] },
+  { capability: 'MultiBaselineManagement', description: 'Establish, approve, and manage multiple governed baselines', dependencies: ['T01'] },
+  { capability: 'CommitmentManagement', description: 'PM sets working dates with causation codes and approval workflow', dependencies: ['T02'] },
+  { capability: 'PublicationWorkflow', description: 'Draft/review/publish lifecycle with PE approval gate', dependencies: ['T03'] },
+  { capability: 'FieldExecutionLayer', description: 'Work packages, commitments, blockers, readiness, look-ahead, PPC', dependencies: ['T05'] },
+  { capability: 'ScenarioBranchManagement', description: 'Create, review, and promote alternative schedule scenarios', dependencies: ['T04'] },
+  { capability: 'AnalyticsAndIntelligence', description: 'Quality grading, float analysis, confidence scoring, recommendations', dependencies: ['T07'] },
+  { capability: 'OfflineFirstFieldExecution', description: 'Intent queue, sync state, conflict resolution for field records', dependencies: ['T05', 'T08'] },
+  { capability: 'ExportViaExportRuntime', description: 'Published forecast, milestone, commitment, blocker exports', dependencies: ['T09', 'SF24'] },
+  { capability: 'LinkedArtifactGraph', description: 'Typed relationships to RFIs, submittals, permits, etc.', dependencies: ['T09'] },
+  { capability: 'HealthSpineAndCanvasTile', description: 'Schedule summary projection for health spine and canvas', dependencies: ['T03', 'T09'] },
+  { capability: 'WorkFeedNotificationRegistration', description: 'Work items and notification event registration', dependencies: ['T09'] },
+];
+
+// ── §28 Authority Layers ─────────────────────────────────────────────
+
+export const SCHEDULE_AUTHORITY_LAYERS = [
+  'MasterSchedule', 'Operating', 'PublishedForecast', 'Scenario',
+  'FieldExecution', 'Analytics', 'Governance', 'CrossLayer', 'OfflineSync', 'HealthSpine',
+] as const satisfies ReadonlyArray<ScheduleAuthorityLayer>;
+
+// ── §28 Field Summary Index ──────────────────────────────────────────
+
+export const FIELD_SUMMARY_INDEX: ReadonlyArray<IFieldSummaryEntry> = [
+  { recordType: 'CanonicalScheduleSource', section: '1.1', primaryKey: 'sourceId', authorityLayer: 'MasterSchedule' },
+  { recordType: 'ScheduleVersionRecord', section: '1.2', primaryKey: 'versionId', authorityLayer: 'MasterSchedule' },
+  { recordType: 'BaselineRecord', section: '1.3', primaryKey: 'baselineId', authorityLayer: 'MasterSchedule' },
+  { recordType: 'ImportedActivitySnapshot', section: '1.4', primaryKey: 'snapshotId', authorityLayer: 'MasterSchedule' },
+  { recordType: 'ActivityContinuityLink', section: '1.5', primaryKey: 'continuityId', authorityLayer: 'MasterSchedule' },
+  { recordType: 'ImportedRelationshipRecord', section: '10.2', primaryKey: 'relationshipId', authorityLayer: 'MasterSchedule' },
+  { recordType: 'ManagedCommitmentRecord', section: '2.1', primaryKey: 'commitmentId', authorityLayer: 'Operating' },
+  { recordType: 'ReconciliationRecord', section: '2.2', primaryKey: 'reconciliationId', authorityLayer: 'Operating' },
+  { recordType: 'PublicationRecord', section: '3.1', primaryKey: 'publicationId', authorityLayer: 'PublishedForecast' },
+  { recordType: 'PublishedActivitySnapshot', section: '3.3', primaryKey: 'publishedSnapshotId', authorityLayer: 'PublishedForecast' },
+  { recordType: 'MilestoneRecord', section: '4.2', primaryKey: 'milestoneId', authorityLayer: 'Operating' },
+  { recordType: 'ScenarioBranch', section: '5.1', primaryKey: 'scenarioId', authorityLayer: 'Scenario' },
+  { recordType: 'ScenarioActivityRecord', section: '5.2', primaryKey: 'scenarioActivityId', authorityLayer: 'Scenario' },
+  { recordType: 'ScenarioLogicRecord', section: '5.3', primaryKey: 'scenarioLogicId', authorityLayer: 'Scenario' },
+  { recordType: 'FieldWorkPackage', section: '6.1', primaryKey: 'workPackageId', authorityLayer: 'FieldExecution' },
+  { recordType: 'LocationNode', section: '6.2', primaryKey: 'locationId', authorityLayer: 'FieldExecution' },
+  { recordType: 'CommitmentRecord', section: '6.3', primaryKey: 'commitmentId', authorityLayer: 'FieldExecution' },
+  { recordType: 'BlockerRecord', section: '6.4', primaryKey: 'blockerId', authorityLayer: 'FieldExecution' },
+  { recordType: 'ReadinessRecord', section: '6.5', primaryKey: 'readinessId', authorityLayer: 'FieldExecution' },
+  { recordType: 'LookAheadPlan', section: '6.6', primaryKey: 'lookAheadId', authorityLayer: 'FieldExecution' },
+  { recordType: 'AcknowledgementRecord', section: '7.1', primaryKey: 'ackId', authorityLayer: 'CrossLayer' },
+  { recordType: 'ProgressClaimRecord', section: '8.1', primaryKey: 'claimId', authorityLayer: 'FieldExecution' },
+  { recordType: 'ProgressVerificationRecord', section: '8.2', primaryKey: 'verificationId', authorityLayer: 'FieldExecution' },
+  { recordType: 'WorkPackageLinkRecord', section: '10.3', primaryKey: 'linkId', authorityLayer: 'FieldExecution' },
+  { recordType: 'ScheduleQualityGrade', section: '11.1', primaryKey: 'gradeId', authorityLayer: 'Analytics' },
+  { recordType: 'FloatPathSnapshot', section: '11.2', primaryKey: 'floatSnapshotId', authorityLayer: 'Analytics' },
+  { recordType: 'MilestoneSlippageTrend', section: '11.3', primaryKey: 'trendId', authorityLayer: 'Analytics' },
+  { recordType: 'ConfidenceRecord', section: '11.4', primaryKey: 'confidenceId', authorityLayer: 'Analytics' },
+  { recordType: 'RecommendationRecord', section: '12.1', primaryKey: 'recommendationId', authorityLayer: 'Analytics' },
+  { recordType: 'CausationCode', section: '13.1', primaryKey: 'codeId', authorityLayer: 'Governance' },
+  { recordType: 'IntentRecord', section: '15.1', primaryKey: 'intentId', authorityLayer: 'OfflineSync' },
+  { recordType: 'CalendarRule', section: '17.2', primaryKey: 'calendarRuleId', authorityLayer: 'Governance' },
+  { recordType: 'ScheduleSummaryProjection', section: '19.1', primaryKey: 'summaryId', authorityLayer: 'HealthSpine' },
 ];
