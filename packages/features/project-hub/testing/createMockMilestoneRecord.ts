@@ -1,0 +1,31 @@
+import type { IMilestoneRecord } from '../src/schedule/types/index.js';
+
+export const createMockMilestoneRecord = (
+  overrides?: Partial<IMilestoneRecord>,
+): IMilestoneRecord => ({
+  milestoneId: 'mile-001',
+  projectId: 'proj-001',
+  externalActivityKey: 'src-001::M100',
+  activeSnapshotId: 'snap-m100',
+  milestoneName: 'Substantial Completion',
+  milestoneType: 'SubstantialCompletion',
+  isMilestoneOverride: false,
+  isManual: false,
+  baselineFinishDate: '2026-12-15',
+  approvedExtensionDays: 0,
+  revisedBaselineDate: '2026-12-15',
+  sourceFinishDate: '2026-12-20',
+  committedFinishDate: null,
+  forecastDate: '2026-12-20',
+  actualDate: null,
+  verificationStatus: null,
+  status: 'OnTrack',
+  varianceDays: -5,
+  isCriticalPath: true,
+  totalFloatHrs: 0,
+  contractMilestoneFlag: true,
+  notes: null,
+  createdAt: '2026-01-15T00:00:00Z',
+  createdBy: 'user-001',
+  ...overrides,
+});

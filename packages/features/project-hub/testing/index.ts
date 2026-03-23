@@ -78,3 +78,10 @@ export { createMockBaselineRecord } from './createMockBaselineRecord.js';
 export { createMockImportedActivitySnapshot } from './createMockImportedActivitySnapshot.js';
 export { createMockCalendarRule, createMockOperatingCalendar } from './createMockCalendarRule.js';
 export { mockScheduleAccessScenarios, importValidationScenarios } from './mockScheduleScenarios.js';
+
+// ── P3-E5-T02 Commitment and milestone testing surface ───────────────
+
+export { createMockCommitmentRecord } from './createMockCommitmentRecord.js';
+export { createMockReconciliationRecord } from './createMockReconciliationRecord.js';
+export { createMockMilestoneRecord } from './createMockMilestoneRecord.js';
+export { mockCommitmentScenarios, mockMilestoneStatusScenarios } from './mockCommitmentScenarios.js';

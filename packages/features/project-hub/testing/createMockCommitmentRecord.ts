@@ -1,0 +1,31 @@
+import type { IManagedCommitmentRecord } from '../src/schedule/types/index.js';
+
+export const createMockCommitmentRecord = (
+  overrides?: Partial<IManagedCommitmentRecord>,
+): IManagedCommitmentRecord => ({
+  commitmentId: 'commit-001',
+  projectId: 'proj-001',
+  externalActivityKey: 'src-001::A1000',
+  sourceVersionId: 'ver-001',
+  commitmentType: 'ActivityForecast',
+  sourceStartDate: '2026-02-01T00:00:00Z',
+  sourceFinishDate: '2026-04-01T00:00:00Z',
+  committedStartDate: null,
+  committedFinishDate: null,
+  startVarianceDays: null,
+  finishVarianceDays: null,
+  reconciliationStatus: 'Aligned',
+  primaryCausationCode: null,
+  causationCodes: [],
+  explanation: null,
+  confidenceNote: null,
+  approvalRequired: false,
+  approvedBy: null,
+  approvedAt: null,
+  rejectionReason: null,
+  createdBy: 'user-001',
+  createdAt: '2026-03-15T10:00:00Z',
+  lastModifiedBy: null,
+  lastModifiedAt: null,
+  ...overrides,
+});

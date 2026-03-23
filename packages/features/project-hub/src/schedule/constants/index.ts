@@ -1,9 +1,16 @@
 import type {
   BaselineType,
   CalendarType,
+  CommitmentType,
   IImportValidationRule,
+  IMilestoneStatusDisplay,
+  IMilestoneThresholdConfig,
   IScheduleIntegrationBoundary,
+  MilestoneStatus,
+  MilestoneType,
   PercentCompleteBasis,
+  ReconciliationStatus,
+  ReconciliationTrigger,
   ScheduleAccessAction,
   ScheduleActivityType,
   ScheduleAuthorityRole,
@@ -225,3 +232,106 @@ export const SCHEDULE_INTEGRATION_BOUNDARIES: ReadonlyArray<IScheduleIntegration
     status: 'planned',
   },
 ];
+
+// ══════════════════════════════════════════════════════════════════════
+// T02: Dual-Truth Commitments and Milestones (§2, §4)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §2.1 Commitment Types ────────────────────────────────────────────
+
+export const COMMITMENT_TYPES = [
+  'ActivityForecast',
+  'MilestoneCommitment',
+  'CompletionForecast',
+] as const satisfies ReadonlyArray<CommitmentType>;
+
+export const RECONCILIATION_STATUSES = [
+  'Aligned',
+  'PMOverride',
+  'SourceAhead',
+  'ConflictRequiresReview',
+  'PendingApproval',
+  'Approved',
+  'Rejected',
+] as const satisfies ReadonlyArray<ReconciliationStatus>;
+
+/** Human-readable descriptions for each reconciliation status (§2.1). */
+export const RECONCILIATION_STATUS_DESCRIPTIONS: ReadonlyArray<{
+  readonly status: ReconciliationStatus;
+  readonly description: string;
+}> = [
+  { status: 'Aligned', description: 'Committed dates match source truth within governed tolerance' },
+  { status: 'PMOverride', description: 'PM has set committed dates that differ from source truth; within approval threshold' },
+  { status: 'SourceAhead', description: 'New source import moved dates; committed dates are now behind source' },
+  { status: 'ConflictRequiresReview', description: 'Committed and source dates in irreconcilable conflict; PM action required' },
+  { status: 'PendingApproval', description: 'Change magnitude exceeds governed threshold; awaiting PE approval' },
+  { status: 'Approved', description: 'PE approved; committed dates are authoritative working position' },
+  { status: 'Rejected', description: 'PE rejected; prior committed dates restored; PM must revise' },
+];
+
+// ── §2.2 Reconciliation Triggers ─────────────────────────────────────
+
+export const RECONCILIATION_TRIGGERS = [
+  'SourceImport',
+  'PMEdit',
+  'PEApproval',
+  'PERejection',
+  'System',
+] as const satisfies ReadonlyArray<ReconciliationTrigger>;
+
+// ── §4.4 Milestone Types ─────────────────────────────────────────────
+
+export const MILESTONE_TYPES = [
+  'ContractCompletion',
+  'SubstantialCompletion',
+  'OwnerMilestone',
+  'HBInternal',
+  'SubMilestone',
+  'Permit',
+  'Inspection',
+  'Custom',
+] as const satisfies ReadonlyArray<MilestoneType>;
+
+/** Human-readable descriptions for each milestone type (§4.4). */
+export const MILESTONE_TYPE_DESCRIPTIONS: ReadonlyArray<{
+  readonly type: MilestoneType;
+  readonly description: string;
+}> = [
+  { type: 'ContractCompletion', description: 'Contract completion date' },
+  { type: 'SubstantialCompletion', description: 'Owner occupancy / retention release' },
+  { type: 'OwnerMilestone', description: 'Owner-specified event' },
+  { type: 'HBInternal', description: 'Internal construction milestone' },
+  { type: 'SubMilestone', description: 'Subcontractor phase completion' },
+  { type: 'Permit', description: 'Permit approval event' },
+  { type: 'Inspection', description: 'Inspection completion event' },
+  { type: 'Custom', description: 'User-defined category' },
+];
+
+// ── §4.3 Milestone Statuses ──────────────────────────────────────────
+
+export const MILESTONE_STATUSES = [
+  'NotStarted',
+  'OnTrack',
+  'AtRisk',
+  'Delayed',
+  'Critical',
+  'Achieved',
+  'Superseded',
+] as const satisfies ReadonlyArray<MilestoneStatus>;
+
+/** Status → UI signal and color mapping (§4.3). */
+export const MILESTONE_STATUS_DISPLAY: ReadonlyArray<IMilestoneStatusDisplay> = [
+  { status: 'NotStarted', uiSignal: 'Gray dot', color: 'Gray' },
+  { status: 'OnTrack', uiSignal: 'Checkmark', color: 'Green' },
+  { status: 'AtRisk', uiSignal: 'Exclamation', color: 'Yellow' },
+  { status: 'Delayed', uiSignal: 'Warning', color: 'Orange' },
+  { status: 'Critical', uiSignal: 'Red circle', color: 'Red' },
+  { status: 'Achieved', uiSignal: 'Checkmark', color: 'Green' },
+  { status: 'Superseded', uiSignal: 'Dash', color: 'Gray' },
+];
+
+/** Default governed thresholds for milestone status calculation (§4.3). */
+export const DEFAULT_MILESTONE_THRESHOLDS: IMilestoneThresholdConfig = {
+  atRiskThresholdDays: 14,
+  delayedThresholdDays: 30,
+};

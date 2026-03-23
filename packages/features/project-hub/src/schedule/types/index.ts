@@ -355,3 +355,170 @@ export interface ICalendarDivergenceResult {
   readonly diverges: boolean;
   readonly deltas: ReadonlyArray<string>;
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// T02: Dual-Truth Commitments and Milestones (§2, §4)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── §2.1 ManagedCommitmentRecord ─────────────────────────────────────
+
+/** Commitment type classification (§2.1). */
+export type CommitmentType =
+  | 'ActivityForecast'
+  | 'MilestoneCommitment'
+  | 'CompletionForecast';
+
+/**
+ * Reconciliation status between managed commitment and source truth (§2.1).
+ * Workflow states: PendingApproval → Approved | Rejected.
+ */
+export type ReconciliationStatus =
+  | 'Aligned'
+  | 'PMOverride'
+  | 'SourceAhead'
+  | 'ConflictRequiresReview'
+  | 'PendingApproval'
+  | 'Approved'
+  | 'Rejected';
+
+/**
+ * PM-owned working position for an activity or milestone (§2.1).
+ * The operating layer's "live" view and basis for publication when promoted.
+ */
+export interface IManagedCommitmentRecord {
+  readonly commitmentId: string;
+  readonly projectId: string;
+  readonly externalActivityKey: string;
+  readonly sourceVersionId: string;
+  readonly commitmentType: CommitmentType;
+  readonly sourceStartDate: string;
+  readonly sourceFinishDate: string;
+  readonly committedStartDate: string | null;
+  readonly committedFinishDate: string | null;
+  readonly startVarianceDays: number | null;
+  readonly finishVarianceDays: number | null;
+  readonly reconciliationStatus: ReconciliationStatus;
+  readonly primaryCausationCode: string | null;
+  readonly causationCodes: ReadonlyArray<string>;
+  readonly explanation: string | null;
+  readonly confidenceNote: string | null;
+  readonly approvalRequired: boolean;
+  readonly approvedBy: string | null;
+  readonly approvedAt: string | null;
+  readonly rejectionReason: string | null;
+  readonly createdBy: string;
+  readonly createdAt: string;
+  readonly lastModifiedBy: string | null;
+  readonly lastModifiedAt: string | null;
+}
+
+// ── §2.2 ReconciliationRecord ────────────────────────────────────────
+
+/** What triggered a reconciliation status change (§2.2). */
+export type ReconciliationTrigger =
+  | 'SourceImport'
+  | 'PMEdit'
+  | 'PEApproval'
+  | 'PERejection'
+  | 'System';
+
+/** Timestamped audit entry for reconciliation status transitions (§2.2). */
+export interface IReconciliationRecord {
+  readonly reconciliationId: string;
+  readonly commitmentId: string;
+  readonly projectId: string;
+  readonly priorStatus: ReconciliationStatus;
+  readonly newStatus: ReconciliationStatus;
+  readonly priorCommittedFinish: string | null;
+  readonly newCommittedFinish: string | null;
+  readonly sourceVersionId: string;
+  readonly triggeredBy: ReconciliationTrigger;
+  readonly causationCode: string | null;
+  readonly explanation: string | null;
+  readonly createdAt: string;
+  readonly createdBy: string;
+}
+
+// ── §4 Milestone Working Model ───────────────────────────────────────
+
+/** Milestone type classification (§4.4). */
+export type MilestoneType =
+  | 'ContractCompletion'
+  | 'SubstantialCompletion'
+  | 'OwnerMilestone'
+  | 'HBInternal'
+  | 'SubMilestone'
+  | 'Permit'
+  | 'Inspection'
+  | 'Custom';
+
+/**
+ * Calculated milestone status (§4.3). Never stored; recalculated on each load.
+ * Governed thresholds determine AtRisk/Delayed/Critical boundaries.
+ */
+export type MilestoneStatus =
+  | 'NotStarted'
+  | 'OnTrack'
+  | 'AtRisk'
+  | 'Delayed'
+  | 'Critical'
+  | 'Achieved'
+  | 'Superseded';
+
+/**
+ * View-projection record combining ImportedActivitySnapshot + ManagedCommitmentRecord
+ * for milestone-specific display, tracking, and publication surfaces (§4.2).
+ */
+export interface IMilestoneRecord {
+  readonly milestoneId: string;
+  readonly projectId: string;
+  readonly externalActivityKey: string;
+  readonly activeSnapshotId: string;
+  readonly milestoneName: string;
+  readonly milestoneType: MilestoneType;
+  readonly isMilestoneOverride: boolean;
+  readonly isManual: boolean;
+  readonly baselineFinishDate: string | null;
+  readonly approvedExtensionDays: number;
+  readonly revisedBaselineDate: string | null;
+  readonly sourceFinishDate: string;
+  readonly committedFinishDate: string | null;
+  readonly forecastDate: string;
+  readonly actualDate: string | null;
+  readonly verificationStatus: string | null;
+  readonly status: MilestoneStatus;
+  readonly varianceDays: number;
+  readonly isCriticalPath: boolean;
+  readonly totalFloatHrs: number | null;
+  readonly contractMilestoneFlag: boolean;
+  readonly notes: string | null;
+  readonly createdAt: string;
+  readonly createdBy: string;
+}
+
+// ── T02 Governance Config Types ──────────────────────────────────────
+
+/** Governed milestone status thresholds (§4.3). Configured by Manager of Operational Excellence. */
+export interface IMilestoneThresholdConfig {
+  readonly atRiskThresholdDays: number;
+  readonly delayedThresholdDays: number;
+}
+
+/** Input for resolveReconciliationStatus function. */
+export interface IReconciliationStatusInput {
+  readonly committedStartDate: string | null;
+  readonly committedFinishDate: string | null;
+  readonly sourceStartDate: string;
+  readonly sourceFinishDate: string;
+  readonly finishVarianceDays: number | null;
+  readonly approvalRequired: boolean;
+  readonly approvedBy: string | null;
+  readonly rejectionReason: string | null;
+}
+
+/** Milestone status display mapping (§4.3 UI table). */
+export interface IMilestoneStatusDisplay {
+  readonly status: MilestoneStatus;
+  readonly uiSignal: string;
+  readonly color: string;
+}
