@@ -4,12 +4,13 @@
  * Test factories, mock adapters, and scenario fixtures.
  * Excluded from production bundles.
  *
- * SF28-T08 scope — full test factory implementation.
- *
  * @example
  * ```ts
- * import { createMockActivityEvent } from '@hbc/activity-timeline/testing';
+ * import { createMockActivityEvent, mockActivityScenarios } from '@hbc/activity-timeline/testing';
  * ```
  */
 
-// Test factories will be added as SF28-T08 is implemented.
+export { createMockActivityEvent } from './createMockActivityEvent.js';
+export { createMockEmissionInput } from './createMockEmissionInput.js';
+export { createMockSourceAdapter, createMockSourceRegistration } from './createMockSourceAdapter.js';
+export { mockActivityScenarios } from './mockActivityScenarios.js';
