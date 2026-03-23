@@ -136,3 +136,10 @@ export { mockRiskLedgerScenarios } from './mockRiskLedgerScenarios.js';
 
 export { createMockConstraintRecord } from './createMockConstraintRecord.js';
 export { mockConstraintLedgerScenarios } from './mockConstraintLedgerScenarios.js';
+
+// ── P3-E6-T03 Delay Ledger testing surface ────────────────────────────
+
+export { createMockDelayRecord } from './createMockDelayRecord.js';
+export { createMockTimeImpactRecord } from './createMockTimeImpactRecord.js';
+export { createMockCommercialImpactRecord } from './createMockCommercialImpactRecord.js';
+export { mockDelayLedgerScenarios } from './mockDelayLedgerScenarios.js';
