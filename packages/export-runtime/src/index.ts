@@ -68,10 +68,23 @@ export {
   EXPORT_RUNTIME_CONFIDENCE_STATES,
 } from './types/index.js';
 
-// Model — lifecycle, state derivation, confidence (SF24-T03)
-// export * from './model/index.js';
+// Model — lifecycle, state derivation, confidence, naming, governance (SF24-T03)
+export {
+  createExportRequest,
+  transitionExportStatus,
+  VALID_TRANSITIONS,
+  computeArtifactConfidence,
+  detectContextDelta,
+  generateExportFileName,
+  createAuditEntry,
+} from './model/index.js';
+export type { IExportRequestInput, ExportAuditAction, IExportAuditEntry } from './model/index.js';
 
-// API — render pipeline, storage, sync (SF24-T03)
+// Storage — adapter interface + in-memory implementation (SF24-T03)
+export type { IExportStorageAdapter, IExportStorageRecord } from './storage/index.js';
+export { InMemoryExportStorageAdapter } from './storage/index.js';
+
+// API — render pipeline, sync (SF24-T03 future)
 // export * from './api/index.js';
 
 // Hooks — export orchestration hooks (SF24-T04)

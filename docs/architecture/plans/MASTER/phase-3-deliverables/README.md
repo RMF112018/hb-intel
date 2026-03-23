@@ -67,7 +67,7 @@
 | P3-E3 | [Spreadsheet/Document Replacement Reference Note Set](P3-E3-Spreadsheet-Document-Replacement-Reference-Note-Set.md) | Note |
 | P3-E4 | [Financial Module Field Specification](P3-E4-Financial-Module-Field-Specification.md) | Specification |
 | P3-E5 | [Schedule Module Field Specification](P3-E5-Schedule-Module-Field-Specification.md) *(master index + T01–T11 detail files)* | Specification |
-| P3-E6 | [Constraints Module Field Specification](P3-E6-Constraints-Module-Field-Specification.md) | Specification |
+| P3-E6 | [Constraints Module Field Specification](P3-E6-Constraints-Module-Field-Specification.md) *(master index + T01–T08 detail files)* | Specification |
 | P3-E7 | [Permits Module Field Specification](P3-E7-Permits-Module-Field-Specification.md) | Specification |
 | P3-E8 | [Safety Module Field Specification](P3-E8-Safety-Module-Field-Specification.md) | Specification |
 | P3-E9 | [Reports Module Field Specification](P3-E9-Reports-Module-Field-Specification.md) | Specification |
@@ -294,6 +294,7 @@ Deliver the shared export runtime package: CSV/XLSX/PDF render pipeline, export 
 Governing: `docs/architecture/plans/shared-features/SF24-Export-Runtime.md`
 **SF24-T01 scaffold:** **Implemented 2026-03-23 in `@hbc/export-runtime` v0.0.1.** Package scaffold with types (export truth vocabulary, receipt states, artifact confidence, review steps, next recommended action, failure/retry diagnostics), model, api, hooks, components, composers, renderers, templates barrels, testing subpath, and README per SF24 locked decisions L-01/L-03/L-04/L-06. Layer 8 shared-feature primitive. Feature adapter seams in `@hbc/features-business-development` and `@hbc/features-estimating`.
 **SF24-T02 contracts:** **Implemented 2026-03-23 in `@hbc/export-runtime` v0.0.2.** Canonical TypeScript contracts: `IExportTruthState`, `ITableExportPayload`/`IReportExportPayload` (discriminated `ExportPayload` union), `IExportBicStepConfig` (L-02 BIC ownership), `IExportVersionRef` with `ExportVersionTag` (L-06 provenance), `IExportTelemetryState` (5 UX KPIs), `IExportSuppressedFormatState`, `IExportContextDeltaState`. `IExportRequest` expanded with payload, truth, bicSteps, versionRef, telemetry, suppressedFormats, contextDelta. T02 constants locked. Per L-01 through L-06.
+**SF24-T03 lifecycle+storage:** **Implemented 2026-03-23 in `@hbc/export-runtime` v0.0.3.** Export lifecycle state machine (`createExportRequest`, `transitionExportStatus`, `VALID_TRANSITIONS` with monotonic enforcement), confidence computation (`computeArtifactConfidence`, `detectContextDelta`), deterministic file naming (`generateExportFileName`), governance audit trail (`createAuditEntry`, `IExportAuditEntry`), storage adapter interface (`IExportStorageAdapter`, `IExportStorageRecord`), and `InMemoryExportStorageAdapter` (dev/test). Per L-01, L-02, L-04, L-06.
 
 **5.3 — Record Form runtime (`@hbc/record-form`, SF23)**
 Deliver the shared record-form package: create/edit/duplicate/template lifecycle, draft recovery, review/handoff orchestration, offline replay, and module adapter scaffold for all 9 Phase 3 modules. Each module adapter owns its domain schema; the primitive owns lifecycle, offline resilience, and telemetry. Module-level adapter wiring is Stage 7 scope.
@@ -354,8 +355,8 @@ Implement the full three-layer schedule operating model: governed master-schedul
 Governing: P3-E1 §4.2, P3-E2 §4, P3-E3 §3, **P3-E5** (field-level specification — master index + T01–T11 detail files)
 
 **7.3 — Constraints module**
-Implement: constraint CRUD (both lanes); change tracking (both lanes); delay log with quantified impact (both lanes). Implement spine adapters. The Constraints module owns constraint records; cross-module fields (e.g., financial exposure from a delay) are published to spines, not written directly to the Financial module.
-Governing: P3-E1 §4.3, P3-E2 §5, P3-E3 §4, **P3-E6** (field-level specification)
+Implement the four-ledger project-controls workspace: Risk Ledger (forward-looking risk identification, probability/impact assessment, mitigation tracking, risk-to-constraint spawn); Constraint Ledger (active blockers and issues, peer of other ledgers — not a parent record type); Delay Ledger (contemporaneous delay event records with schedule reference model, evidence gates, separation of time impact from commercial/cost impact, B+/C-ready claims orientation); Change Ledger (manual-native in Phase 3; Procore-integration-ready data model with canonical HB Intel identity preserved through future integration). Implement governed cross-ledger lineage (spawn/promotion model with immutable `LineageRecord`). Implement live vs published state split: operational surfaces use live state; executive review consumes published snapshots and review packages. Implement spine adapters for all four spines per P3-A3. All taxonomies, thresholds, BIC registries, and escalation rules configurable by Manager of Operational Excellence.
+Governing: P3-E1 §4.3, P3-E2 §5, P3-E3 §4, **P3-E6** (field-level specification — master index + T01–T08 detail files)
 
 **7.4 — Permits module**
 Implement: permit log management (both lanes); linked inspections (both lanes); expiration tracking (both lanes). Implement spine adapters.
