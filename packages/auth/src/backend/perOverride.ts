@@ -1,4 +1,8 @@
-import { createOverrideRequest, revokeOverrideRecord } from './overrideRecord.js';
+import {
+  createOverrideRequest,
+  resolveOverrideLifecycleStatus,
+  revokeOverrideRecord,
+} from './overrideRecord.js';
 import type {
   AccessControlOverrideRecord,
   AccessOverrideRequest,
@@ -83,6 +87,26 @@ export function getPerOverridesForProject(
       r.projectIds != null &&
       r.projectIds.includes(projectId),
   );
+}
+
+/**
+ * Filter PER overrides to only those currently active (not expired, not revoked).
+ *
+ * Resolves lifecycle status considering expiration metadata — records
+ * past their `expiresAt` are excluded even if `status` is still `'active'`.
+ *
+ * @param records - All override records to filter
+ * @param now - Reference time for expiration check (defaults to current time)
+ */
+export function getActivePerOverrides(
+  records: AccessControlOverrideRecord[],
+  now: Date = new Date(),
+): AccessControlOverrideRecord[] {
+  return records.filter((r) => {
+    if (!isPerOverride(r)) return false;
+    const lifecycleStatus = resolveOverrideLifecycleStatus(r, now);
+    return lifecycleStatus === 'active';
+  });
 }
 
 /**

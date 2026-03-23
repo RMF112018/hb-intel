@@ -179,10 +179,12 @@ Status: **Implemented 2026-03-22 in `@hbc/auth` v0.5.1.** `validateProjectAccess
 **2.3 — PER non-membership scoping**
 Implement the PER access path: a PER user reaches a project through department scope, not project membership. PER access grants read and annotation rights on review-capable surfaces only. PER access does not grant any project membership, operational write, or source-of-truth mutation rights. Implement the scope check that validates PER access without a membership record.
 Governing: P3-A2 §3.2, §6.4
+Status: **Implemented 2026-03-22 in `@hbc/auth` v0.6.0.** Module visibility matrix (`getModuleVisibility`) with per-role access levels. PER scope helpers (`isPerRole`, `canPerAnnotate`, `canPerPushToTeam`, `getPerRestrictions`). Safety annotation excluded per P3-E1 §9.3.
 
 **2.4 — AccessControlOverrideRecord for out-of-scope PER grants**
 Implement time-bounded override records in `@hbc/auth` that grant a PER user access to a project outside their normal department scope. Records must include: grantedBy, expiresAt, scope, and reason. Implement revocation on expiry and on department reclassification.
 Governing: P3-A2 §5.3
+Status: **Implemented 2026-03-22 in `@hbc/auth` v0.6.1.** Full PER override infrastructure delivered across 0.2 (type extensions, helpers), 1.6 (department reclassification revocation), 2.1 (resolvePerEligibility integrates overrides). `getActivePerOverrides` added for expiry-aware filtering via `resolveOverrideLifecycleStatus`.
 
 **2.5 — Role visibility rules**
 Implement the role-based visibility layer used by the canvas, module surfaces, and spine components. Visibility is computed from resolved authority tier and project membership state. PER visibility rules differ from membership-based visibility rules.

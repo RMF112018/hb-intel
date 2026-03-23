@@ -248,6 +248,7 @@ export {
   isPerOverride,
   getPerOverridesForUser,
   getPerOverridesForProject,
+  getActivePerOverrides,
   suspendPerOverridesForDepartmentChange,
   DEFAULT_SHELL_AUTH_CONFIGURATION,
   resolveShellAuthConfiguration,

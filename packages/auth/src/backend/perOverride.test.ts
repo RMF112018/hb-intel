@@ -4,6 +4,7 @@ import {
   isPerOverride,
   getPerOverridesForUser,
   getPerOverridesForProject,
+  getActivePerOverrides,
   suspendPerOverridesForDepartmentChange,
 } from './perOverride.js';
 import { approveOverrideRequest, createOverrideRequest } from './overrideRecord.js';
@@ -139,6 +140,44 @@ describe('perOverride', () => {
       });
 
       expect(getPerOverridesForProject([per], 'proj-z')).toHaveLength(0);
+    });
+  });
+
+  describe('getActivePerOverrides', () => {
+    it('returns only non-expired active PER overrides', () => {
+      const active = makeActivePerOverride({
+        id: 'per-active',
+        targetUserId: 'exec-1',
+        projectIds: ['proj-a'],
+        department: 'Healthcare',
+      });
+      const result = getActivePerOverrides([active], new Date('2026-06-01T00:00:00Z'));
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('per-active');
+    });
+
+    it('filters out expired PER overrides', () => {
+      const pending = createPerOverrideRequest({
+        id: 'per-expired',
+        targetUserId: 'exec-1',
+        projectIds: ['proj-a'],
+        department: 'Healthcare',
+        reason: 'Out-of-scope review access.',
+        requesterId: 'opex-manager',
+        expiresAt: '2026-01-01T00:00:00.000Z', // Already expired
+      });
+      const approved = approveOverrideRequest(pending, {
+        approverId: 'opex-manager',
+        approverScope: 'company-wide',
+      });
+      const result = getActivePerOverrides([approved], new Date('2026-06-01T00:00:00Z'));
+      expect(result).toHaveLength(0);
+    });
+
+    it('filters out non-PER overrides', () => {
+      const general = makeGeneralOverride('gen-1', 'user-1');
+      const result = getActivePerOverrides([general]);
+      expect(result).toHaveLength(0);
     });
   });
 
