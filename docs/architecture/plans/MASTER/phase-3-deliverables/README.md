@@ -1,12 +1,12 @@
 # Phase 3 Deliverables — Project Hub and Project Context
 
-**Doc Classification:** Active Deliverable Index — **Phase 3 deliverable production is complete.** All workstreams (A–H) delivered. 27 of 27 deliverables authored.
+**Doc Classification:** Active Deliverable Index — **Phase 3 deliverable production is complete.** All workstreams (A–H) delivered. 28 of 28 deliverables authored.
 
 ---
 
 ## Planning Status Summary
 
-**Phase 3 deliverable production is complete.** 27 of 27 deliverables are authored (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-E4, P3-E5, P3-E6, P3-E7, P3-E8, P3-E9, P3-E10, P3-E11, P3-F1, P3-G1, P3-G2, P3-G3, P3-H1). All workstreams (A–H) are complete. 26 deliverables are locked (Contract, Specification, or Note). 1 deliverable (P3-H1) is an Active Reference that evolves during implementation. Phase 3 is now execution-ready per [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
+**Phase 3 deliverable production is complete.** 28 of 28 deliverables are authored (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-E4, P3-E5, P3-E6, P3-E7, P3-E8, P3-E9, P3-E10, P3-E11, P3-E12, P3-F1, P3-G1, P3-G2, P3-G3, P3-H1). All workstreams (A–H) are complete. 27 deliverables are locked (Contract, Specification, or Note). 1 deliverable (P3-H1) is an Active Reference that evolves during implementation. Phase 3 is now execution-ready per [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md).
 
 ---
 
@@ -73,6 +73,7 @@
 | P3-E9 | [Reports Module Field Specification](P3-E9-Reports-Module-Field-Specification.md) | Specification |
 | P3-E10 | [Project Closeout Module Field Specification](P3-E10-Project-Closeout-Module-Field-Specification.md) | Specification |
 | P3-E11 | [Project Startup Module Field Specification](P3-E11-Project-Startup-Module-Field-Specification.md) | Specification |
+| P3-E12 | [Subcontract Compliance Module Field Specification](P3-E12-Subcontract-Compliance-Module-Field-Specification.md) | Specification |
 
 ### Workstream F — Governed reporting system
 
@@ -252,6 +253,7 @@ Status: **Implemented 2026-03-23 in `@hbc/shell` v0.2.1.** `parseDeepLinkParams`
 **4.5 — Context restoration and mismatch reconciliation**
 Implement context restoration for users returning to a project after a session break or cross-lane handoff. Implement mismatch reconciliation when the resolved context does not match the user's current membership or authority state.
 Governing: P3-B1 §7
+Status: **Implemented 2026-03-23 in `@hbc/shell` v0.3.0.** `reconcileProjectContext` implementing P3-B1 §7 route-wins rule: detects store/route mismatch, returns authoritative projectId, signals store sync needed, preserves previousProjectId for return-memory. Stage 4 (Project Context Continuity) complete.
 
 ---
 

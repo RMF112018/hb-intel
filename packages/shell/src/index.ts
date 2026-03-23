@@ -195,6 +195,10 @@ export type { ProjectSwitchInput, ProjectSwitchResult } from './projectSwitching
 export { parseDeepLinkParams, buildTargetPathFromDeepLink } from './deepLinkHandler.js';
 export type { DeepLinkParams, DeepLinkResolution } from './deepLinkHandler.js';
 
+// Context mismatch reconciliation (Phase 3 Stage 4.5)
+export { reconcileProjectContext } from './contextReconciliation.js';
+export type { ContextMismatchInput, ContextReconciliationResult } from './contextReconciliation.js';
+
 // Module Configurations (PH4B.2 §Step 3 — moved from ui-kit, F-014)
 export {
   scorecardsLanding,
