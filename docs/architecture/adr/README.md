@@ -120,6 +120,10 @@
 - [ADR-0112: Score Benchmark Primitive Runtime](./ADR-0112-score-benchmark-primitive-runtime.md)
 - [ADR-0113: Strategic Intelligence Primitive Runtime](./ADR-0113-strategic-intelligence-primitive-runtime.md)
 
+### Phase 3 Shared Feature Infrastructure
+
+- [ADR-0119: Export Runtime Shared Primitive Architecture](./ADR-0119-export-runtime.md)
+
 ## Archived
 
 Stale duplicate copies moved to `archived/` during PH7.11 conflict resolution:
@@ -133,7 +137,7 @@ Stale duplicate copies moved to `archived/` during PH7.11 conflict resolution:
 
 ## How to Add a New ADR
 
-1. Use the next available number: **ADR-0114**
+1. Use the next available number: **ADR-0120**
 2. Create a file: `ADR-XXXX-short-title.md`
 3. Use the standard format: Title, Status, Date, Context, Decision, Consequences
 4. Add entry to this README under the appropriate section

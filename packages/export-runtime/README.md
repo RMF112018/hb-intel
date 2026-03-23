@@ -76,7 +76,8 @@ Test factories and mock adapters are exported from the `/testing` subpath, exclu
 
 ## Related
 
+- [ADR-0119 — Export Runtime Architecture](../../docs/architecture/adr/ADR-0119-export-runtime.md)
+- [Adoption Guide](../../docs/how-to/developer/export-runtime-adoption-guide.md)
+- [API Reference](../../docs/reference/export-runtime/api.md)
 - [SF24 Master Plan](../../docs/architecture/plans/shared-features/SF24-Export-Runtime.md)
 - [SF24-T09 — Testing and Deployment](../../docs/architecture/plans/shared-features/SF24-T09-Testing-and-Deployment.md)
-- ADR-0114 (export-runtime architecture decision)
-- Companion `@hbc/export-runtime` primitive ADR
