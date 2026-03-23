@@ -269,6 +269,7 @@ Status: **Implemented 2026-03-23 in `@hbc/project-canvas` v0.1.0.** Added `proje
 **5.2 — Mandatory core tile family**
 Implement all five mandatory operational core tiles: Health Summary, Activity Feed, Work Queue, Financial Summary, and Schedule Summary. These tiles must be present in both lanes. Role-based visibility rules apply — tiles are hidden when the role has no access, no empty placeholders shown.
 Governing: P3-C2
+Status: **Implemented 2026-03-23 in `@hbc/project-canvas` v0.1.1.** `ProjectWorkQueueTile` and `ProjectActivityTile` with essential/standard/expert variants wired into tile definitions. Health tile fully implemented via SF21. Related Items tile fully implemented via SF14. Identity header is canvas shell surface per P3-C2 §2.
 
 **5.3 — Adaptive composition and personalization**
 Implement governed adaptive composition: user preferences persist (PWA: IndexedDB + server-side; SPFx: localStorage + SharePoint). Reset-to-role-default must restore mandatory tiles. Complexity tiers (essential / standard / expert) render per user preference.
