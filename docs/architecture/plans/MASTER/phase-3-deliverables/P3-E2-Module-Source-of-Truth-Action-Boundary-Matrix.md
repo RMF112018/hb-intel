@@ -145,37 +145,54 @@ This is a **mandatory Phase 3 acceptance gate** per §18.5: "Financial, Schedule
 
 | Data | Source | Ingestion path | Project Hub role |
 |---|---|---|---|
-| Budget baseline | Procore / CSV upload (`budget_details`) | Budget import workflow | Ingest and normalize; does not originate budget data |
-| Future: direct API | Procore API integration | API sync (future) | Same ingestion role, different transport |
+| Budget baseline | Procore / CSV upload (`budget_details`) | Budget CSV import workflow; identity resolution per P3-E4-T02 §2.3 | Ingest, normalize, and maintain stable canonical identity; does not originate budget data |
+| Actual costs | Procore / ERP | CSV import (`jobToDateActualCost`, `committedCosts` columns) | Consume and display; read-only after ingestion |
+| A/R aging data | Accounting / ERP | Daily sync job | Read-only display; no PM editing |
+| Future: direct API | Procore API integration | API sync (future) | Same ingestion role; `externalSourceLineId` takes precedence over composite fallback matching |
 
 ### 3.2 Project Hub operational authority
 
-| Data domain | Authority | Notes |
-|---|---|---|
-| Financial Summary working state | **Project Hub owns** | Editable operational forecast |
-| GC/GR working model | **Project Hub owns** | Editable working model |
-| Cash Flow working model | **Project Hub owns** | Editable working model |
-| Forecast checklist completion | **Project Hub owns** | Checklist state and completion tracking |
-| Exposure tracking | **Project Hub owns** | Exposure flags and quantification |
-| Buyout working state | **Project Hub owns** | Within Financial domain (P3-E1 §4.1) |
-| Export artifacts | **Project Hub generates** | Derived from working state |
+| Data domain | Authority | Version scope | Notes |
+|---|---|---|---|
+| Budget line identity and working state | **Project Hub owns** | Working version only for `forecastToComplete` | `canonicalBudgetLineId` stable across imports; immutable on confirmed versions |
+| Financial Forecast Summary | **Project Hub owns** | Working version only for PM-editable fields | PM fields: `currentContractValue`, `currentContingency`, `approvedDaysExtensions`, etc. |
+| GC/GR working model | **Project Hub owns** | Working version only | Version-scoped; aggregate feeds Forecast Summary |
+| Cash Flow working model | **Project Hub owns** | Working version only for forecast months | Actual months sourced from ERP; read-only |
+| Forecast checklist | **Project Hub owns** | Per working version; starts empty on derivation | Confirmation gate enforced by Financial module |
+| Forecast version ledger | **Project Hub owns** | All version types | Working → ConfirmedInternal → PublishedMonthly lifecycle |
+| Buyout working state | **Project Hub owns** | Not version-scoped | Procurement-control state; savings disposition records |
+| Export artifacts | **Project Hub generates** | From confirmed or working version | Derived; not source-of-truth records |
 
-### 3.3 Boundary rule
+### 3.3 Version-specific mutability rule
 
-Project Hub is NOT the ERP/accounting system-of-record. Financial is an operational financial surface that replaces spreadsheet workflow for project-team use. Budget baseline comes from upstream; working state is Project Hub's.
+The Financial module's version lifecycle governs which state is mutable:
 
-### 3.4 Executive review annotation boundary
+| State | PM can edit | PER can annotate | Notes |
+|---|---|---|---|
+| Working version | Yes — `forecastToComplete`, GC/GR EAC, cash flow forecast months, FM-editable summary fields | **No** — never visible to PER | No confirmed version may be unlocked in place |
+| ConfirmedInternal | No | Yes — via `@hbc/field-annotations` | Annotation anchors target `canonicalBudgetLineId`, not `budgetImportRowId` |
+| PublishedMonthly | No | Yes — via `@hbc/field-annotations` | Finalized by P3-F1 publication callback |
+| Superseded | No | No | Audit trail only |
 
-Financial is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations at full field-level depth on Financial module content.
+### 3.4 Boundary rule
+
+Project Hub is NOT the ERP/accounting system-of-record. Budget baseline originates in Procore; actual cost data comes from Procore/ERP. Project Hub owns the normalized operational state built from those inputs — the versioned forecast ledger, the PM's working estimates, the confirmation and publication lifecycle, and the buyout procurement state. No other module may write to Financial domain fields.
+
+### 3.5 Executive review annotation boundary
+
+Financial is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may annotate confirmed versions (ConfirmedInternal and PublishedMonthly) at full field, section, and block anchor depth.
 
 | Rule | Description |
 |---|---|
-| **Annotation isolation** | Review annotations MUST be stored in a separate `@hbc/field-annotations` artifact. They MUST NOT be stored in or written to any Financial source-of-truth record (working forecast state, GC/GR model, Cash Flow model, Buyout state, etc.). |
-| **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of Financial working state — not a budget line, not a forecast override, not a checklist completion. |
+| **Version scope** | PER may annotate any `ConfirmedInternal` or `PublishedMonthly` version. The Working version is never visible to PER. |
+| **Annotation isolation** | Review annotations MUST be stored exclusively in `@hbc/field-annotations`. They MUST NOT be stored in or written to any Financial source-of-truth record. |
+| **No mutation path** | No annotation may trigger a write, edit, or validation override of any Financial record. |
+| **Anchor stability** | Annotation anchors use `canonicalBudgetLineId` (not `budgetImportRowId`) to ensure anchors survive re-imports and remain valid across version derivations. |
+| **Carry-forward** | When a new working version is derived from an annotated confirmed version, open annotations carry forward as `Inherited` carry-forward records. PM must disposition each before confirming the new version. |
 | **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
 | **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
 
-**Field-level specification:** [P3-E4 — Financial Module Field Specification](P3-E4-Financial-Module-Field-Specification.md)
+**Field-level specification:** [P3-E4 — Financial Module Field Specification](P3-E4-Financial-Module-Field-Specification.md) *(master index + T01–T09 detail files)*
 
 ---
 
@@ -185,70 +202,115 @@ Financial is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Ex
 
 | Data | Source | Ingestion path | Project Hub role |
 |---|---|---|---|
-| Detailed baseline schedule | Primavera / MS Project | XER/XML/CSV file ingestion | Ingest and normalize; does not originate CPM data |
-| Full CPM network logic | Upstream schedule system | Not ingested — remains upstream | Project Hub does not replicate CPM |
+| Detailed baseline and update schedule | Primavera / MS Project | XER/XML/CSV file ingestion — creates a frozen `ScheduleVersionRecord` + `ImportedActivitySnapshot` set | Ingest, normalize, and freeze; does not originate CPM data; every import is immutable |
+| Full CPM network logic | Upstream schedule system | `ImportedRelationshipRecord` per version — immutable | Project Hub does not replicate live CPM; imported logic is read-only source truth |
+| Durable activity identity | Derived at ingestion | `externalActivityKey = {sourceId}::{sourceActivityCode}` | Stable cross-version reconciliation key; `ActivityContinuityLink` maintains identity across imports |
 
-### 4.2 Project Hub operational authority
+### 4.2 Dual-truth model
+
+The Schedule module maintains two distinct truth layers on top of the upstream source:
+
+| Truth layer | Owner | Records | Notes |
+|---|---|---|---|
+| **Source truth** | Upstream schedule system (frozen in HB Intel) | `ImportedActivitySnapshot`, `ScheduleVersionRecord`, `BaselineRecord` | Immutable after ingestion; never overwritten |
+| **Commitment truth** | Project Manager (current state) / Scheduler (future state) | `ManagedCommitmentRecord`, `ReconciliationRecord` | PM-owned operating layer; reconciliation status tracks alignment with source truth |
+
+### 4.3 Project Hub operational authority
 
 | Data domain | Authority | Notes |
 |---|---|---|
-| Milestone tracking | **Project Hub owns** | Normalized milestone state |
-| Manual milestone management | **Project Hub owns** | User-created milestones |
-| Governed forecast overrides | **Project Hub owns** | Override with provenance metadata |
-| Schedule projections | **Project Hub owns** | Derived for health, financial, reports |
-| Upload history / restore | **Project Hub owns** | Full ingestion history |
+| Canonical source designation | **Project Hub owns** | One `CanonicalScheduleSource` per project at a time; secondary sources for comparison only |
+| Frozen import snapshots | **Project Hub owns** | `ScheduleVersionRecord` + `ImportedActivitySnapshot`; immutable after ingestion |
+| Governed baselines | **Project Hub owns** | `BaselineRecord` with PE approval; multiple governed baselines; primary designation |
+| Managed commitment layer | **Project Hub owns** | `ManagedCommitmentRecord` with `reconciliationStatus` tracking alignment with source truth |
+| Published forecast layer | **Project Hub owns** | `PublicationRecord` with `Draft → ReadyForReview → Published → Superseded` lifecycle |
+| Milestone records | **Project Hub owns** | View projections derived from Published layer; not an independent source of truth |
+| Field work packages | **Project Hub owns** | `FieldWorkPackage` (child of imported activity by location/trade/time); commitment and blocker records |
+| Look-ahead plans and PPC | **Project Hub owns** | `LookAheadPlan` + `CommitmentRecord`; PPC calculated per governed window |
+| Progress verification | **Project Hub owns** | Three-tier: reported → verified → authoritative; `ProgressClaimRecord` + `ProgressVerificationRecord` |
+| Schedule analytics and grading | **Project Hub owns** | `ScheduleQualityGrade`, `ConfidenceRecord`, `FloatPathSnapshot`; all weights governed |
+| Scenario branches | **Project Hub owns** | `ScenarioBranch` from specific version + baseline; promotion via governed workflow |
 
-### 4.3 Boundary rule
+### 4.4 Boundary rule
 
-Project Hub is NOT full CPM authoring. Schedule is an operational schedule surface. Upstream schedule systems remain authoritative for detailed baseline/update data and full CPM network logic. Project Hub owns normalized project schedule context.
+Project Hub is NOT full CPM authoring. The upstream schedule system remains authoritative for detailed CPM network logic and baseline data. HB Intel owns the commitment truth, publication lifecycle, field execution layer, and all analytics computed on top of the frozen source truth. All thresholds, grading rules, roll-up methods, and governed taxonomies are configured exclusively by Manager of Operational Excellence.
 
-### 4.4 Executive review annotation boundary
+### 4.5 Ownership maturity model
 
-Schedule is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations at full field-level depth on Schedule module content.
+| Ownership dimension | Current state | Future state |
+|---|---|---|
+| Source ownership | PM owns and uploads schedule files | Scheduler manages upload and canonical source designation |
+| Publication authority | PM publishes to executive review | PE approves and publishes |
+| Baseline authority | PM requests; PE approves | PE initiates and approves |
+| Field execution ownership | PM creates work packages | Trade foremen create and manage their packages |
+| Commitment approval | Governed threshold (configurable) | Full commitment approval workflow |
+
+Role assignment is governed configuration, not code-level change.
+
+### 4.6 Executive review annotation boundary
+
+Schedule is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations on Published layer content only.
 
 | Rule | Description |
 |---|---|
+| **Published layer only** | Annotations are anchored exclusively to `PublishedActivitySnapshot` and related Published layer records. No annotation on draft, managed commitment, or field execution records. |
 | **Annotation isolation** | Review annotations MUST be stored in a separate `@hbc/field-annotations` artifact. They MUST NOT be stored in or written to any Schedule source-of-truth record. |
-| **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of milestone state, governed forecast overrides, projections, or upload history. |
+| **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of any governed record. |
 | **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
 | **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
 
-**Field-level specification:** [P3-E5 — Schedule Module Field Specification](P3-E5-Schedule-Module-Field-Specification.md)
+**Field-level specification:** [P3-E5 — Schedule Module Field Specification](P3-E5-Schedule-Module-Field-Specification.md) *(master index)* + T01–T11 detail files. See P3-E5-T03 for publication lifecycle, P3-E5-T02 for dual-truth model, P3-E5-T05 for field execution layer, P3-E5-T07 for analytics and grading.
 
 ---
 
 ## 5. Constraints Source-of-Truth
 
-### 5.1 Project Hub operational authority
+### 5.1 Four-ledger workspace authority model
 
-| Data domain | Authority | Notes |
-|---|---|---|
-| Constraint records | **Project Hub owns** | Full operational ledger |
-| Change Tracking entries | **Project Hub owns** | Full operational ledger |
-| Delay Log entries | **Project Hub owns** | Full operational ledger |
-| Due dates, BIC, responsibility | **Project Hub owns** | Per-constraint management |
-| Delay impact quantification | **Project Hub owns** | Cross-module impact tracking |
+The Constraints module is a **four-ledger project-controls workspace**. Each ledger has its own source-of-truth authority:
 
-### 5.2 External references
+| Ledger | Authority | Notes |
+|--------|-----------|-------|
+| Risk Ledger | **HB Intel native** | HB Intel originates and owns all risk records; no external system integration |
+| Constraint Ledger | **HB Intel native** | HB Intel originates and owns all constraint records; no external system integration |
+| Delay Ledger | **HB Intel native** (with schedule reference integration) | Delay records are HB Intel-native; may consume governed schedule references from integrated schedule sources (P3-E5); Schedule records are not mutated by the Delay Ledger |
+| Change Ledger — manual mode | **HB Intel native** | HB Intel originates and owns all change event records in manual mode |
+| Change Ledger — integrated mode | **Dual authority** | HB Intel retains canonical identity (`changeEventId`, `changeEventNumber`) and normalized status model; Procore is the system of transaction for integrated change-event fields; authoritative transactional writes execute through Procore API paths |
 
-Supporting artifacts/documents MAY live in governed external destinations (SharePoint libraries, document management). Project Hub maintains canonical references back to the ledger.
+### 5.2 Live operational state vs published state
 
-### 5.3 Boundary rule
+| Consumer | State | Rationale |
+|----------|-------|-----------|
+| PM day-to-day operations | Live | PMs need current state without waiting for publish |
+| Escalation and Work Queue | Live | Actions must reflect current ledger state |
+| Executive review surfaces | Published | PER reviews confirmed snapshots; not live draft state |
+| Health spine (review-facing) | Published | Review-cycle metrics from published packages |
+| Health spine (operational) | Live | Day-to-day counts from live ledger |
+| Reports for review packages | Published | Report from published state for cadence review |
 
-Constraints module is the operational ledger owner. No upstream system is authoritative for constraint data — Project Hub originates and owns all constraint, change tracking, and delay log records.
+### 5.3 External references
 
-### 5.4 Executive review annotation boundary
+Supporting artifacts and documents may live in governed external destinations (SharePoint, document management). Project Hub maintains canonical references back to the ledger via attachment URI fields on each ledger record.
 
-Constraints is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations at full field-level depth on Constraints module content.
+### 5.4 Boundary rule
+
+The Constraints module is the HB Intel-native operational workspace for risk, constraint, delay, and change management. No external system is authoritative for Risk, Constraint, or Delay records. In Phase 3, the Change Ledger is also fully HB Intel-native. Post-Procore-integration, HB Intel retains canonical identity and governance semantics for Change records while Procore serves as the transactional system for integrated change-event fields.
+
+All module taxonomies, thresholds, BIC registries, escalation rules, and stage-gate requirements are governed configuration managed exclusively by the Manager of Operational Excellence or an authorized Admin.
+
+### 5.5 Executive review annotation boundary
+
+Constraints is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations on **published snapshots and review packages only**.
 
 | Rule | Description |
 |---|---|
-| **Annotation isolation** | Review annotations MUST be stored in a separate `@hbc/field-annotations` artifact. They MUST NOT be stored in or written to the Constraints operational ledger. |
-| **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of constraint records, Change Tracking entries, Delay Log entries, due dates, BIC assignments, or delay impact values. |
+| **Published state only** | Annotations are anchored to `LedgerRecordSnapshot` and `ReviewPackage` records; never to live ledger records. |
+| **Annotation isolation** | Review annotations MUST be stored in a separate `@hbc/field-annotations` artifact. They MUST NOT be stored in or written to any Constraints module ledger record. |
+| **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of any ledger record, status, BIC assignment, or impact value. |
 | **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
 | **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
 
-**Field-level specification:** [P3-E6 — Constraints Module Field Specification](P3-E6-Constraints-Module-Field-Specification.md)
+**Field-level specification:** [P3-E6 — Constraints Module Field Specification](P3-E6-Constraints-Module-Field-Specification.md) *(master index)* + T01–T08 detail files. See P3-E6-T06 for publication and review model, P3-E6-T01 for Risk, P3-E6-T02 for Constraint, P3-E6-T03 for Delay, P3-E6-T04 for Change.
 
 ---
 

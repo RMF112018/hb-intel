@@ -157,37 +157,63 @@ For each always-on core module, the following defines what each lane MUST suppor
 
 | Capability | PWA | SPFx |
 |---|---|---|
-| View Financial Summary | **Required** | **Required** |
-| Edit Financial Summary working state | **Required** | **Required** |
-| Budget import (CSV upload) | **Required** | **Broad** — supported |
+| View Financial Summary (confirmed/published versions) | **Required** | **Required** |
+| Edit Financial Summary working state (PM-editable fields) | **Required** | **Required** |
+| Budget import (CSV upload) with identity resolution | **Required** | **Broad** — supported |
+| Budget line reconciliation condition resolution | **Required** | **Required** |
+| Version management: confirm, derive, designate report candidate | **Required** | **Required** |
+| Version list view (all version types) | **Required** | **Required** |
 | GC/GR working model (view + edit) | **Required** | **Required** |
-| Cash Flow working model (view + edit) | **Required** | **Required** |
-| Forecast checklist completion | **Required** | **Required** |
-| Exposure tracking | **Required** | **Required** |
-| Export | **Required** | **Required** |
-| Buyout support | **Required** | **Required** |
+| Cash Flow working model — actuals view | **Required** | **Required** |
+| Cash Flow working model — forecast edit (18 months) | **Required** | **Required** |
+| Cash flow cumulative chart with deficit shading | **Required** | **Required** |
+| A/R aging display (read-only) | **Required** | **Required** |
+| Forecast checklist completion and confirmation gate | **Required** | **Required** |
+| Budget line `forecastToComplete` inline editing | **Required** | **Required** |
+| Buyout log management (view, add, edit, advance status) | **Required** | **Required** |
+| Buyout savings disposition workflow | **Required** | **Launch-to-PWA** — multi-step disposition modal is PWA-native |
+| Dollar-weighted buyout completion metric | **Required** | **Required** |
+| PER annotation on confirmed versions | **Required** | **Launch-to-PWA** |
+| Export (budget CSV, GC/GR CSV, cash flow CSV, buyout CSV, forecast summary snapshot) | **Required** | **Required** |
 
 ### 4.2 Schedule
 
 | Capability | PWA | SPFx |
 |---|---|---|
-| View schedule summary | **Required** | **Required** |
-| Milestone tracking | **Required** | **Required** |
-| Manual milestone management | **Required** | **Required** |
+| View schedule summary (Published layer) | **Required** | **Required** |
 | Schedule file ingestion (XER/XML/CSV) | **Required** | **Launch-to-PWA** |
-| Governed forecast overrides | **Required** | **Required** |
-| Upload history / restore | **Required** | **Launch-to-PWA** |
+| Version history and upload history | **Required** | **Launch-to-PWA** |
+| Canonical source designation and baseline management | **Required** | **Launch-to-PWA** |
+| Managed commitment layer (dual-truth reconciliation) | **Required** | **Required** |
+| Stage-gated publication workflow | **Required** | **Launch-to-PWA** |
+| Milestone tracking (view — derived from Published layer) | **Required** | **Required** |
+| Field work packages — create / manage | **Required** | **Required** |
+| Commitment management | **Required** | **Required** |
+| Blocker and readiness tracking | **Required** | **Required** |
+| Look-ahead planning with PPC | **Required** | **Required** |
+| Progress claims and three-tier verification | **Required** | **Launch-to-PWA** |
+| Scenario branch management | **Required** | **Launch-to-PWA** |
+| Schedule grading and confidence scoring | **Required** | **Required** |
+| Cross-platform workflow integration (`@hbc/related-items`, `@hbc/workflow-handoff`) | **Required** | **Required** |
+| Offline-first field execution (intent-log, sync) | **Required** | **Not Required** |
+| Export (published snapshots, look-ahead, grading, PPC trend) | **Required** | **Launch-to-PWA** |
 
 ### 4.3 Constraints
 
 | Capability | PWA | SPFx |
 |---|---|---|
-| Create / update / close constraints | **Required** | **Required** |
-| Manage Change Tracking entries | **Required** | **Required** |
-| Manage Delay Log entries | **Required** | **Required** |
-| Manage due dates / BIC / responsibility / comments | **Required** | **Required** |
-| Quantify delay impact | **Required** | **Required** |
-| Export | **Required** | **Required** |
+| Risk Ledger — create / update / manage lifecycle and riskScore | **Required** | **Required** |
+| Constraint Ledger — create / update / manage lifecycle and BIC tracking | **Required** | **Required** |
+| Delay Ledger — create / update (Integrated + ManualFallback schedule reference modes) | **Required** | **Required** |
+| Delay time/commercial impact separation and evidence gates | **Required** | **Required** |
+| Change Ledger — create / update / manage lifecycle (manual-native mode) | **Required** | **Required** |
+| Change event line items and approval workflow | **Required** | **Required** |
+| Cross-ledger spawn lineage (Risk→Constraint, Constraint→Delay, Constraint→Change) | **Required** | **Required** |
+| Delay ↔ Change Event peer linking | **Required** | **Required** |
+| Published snapshots and review packages | **Required** | **Launch-to-PWA** |
+| `@hbc/related-items` cross-module relationships panel | **Required** | **Required** |
+| Export (all four ledger types, cross-ledger summary, review package PDF) | **Required** | **Required** |
+| Offline-first logging (constraint / delay entry) | **Required** | **Not Required** |
 
 ### 4.4 Permits
 

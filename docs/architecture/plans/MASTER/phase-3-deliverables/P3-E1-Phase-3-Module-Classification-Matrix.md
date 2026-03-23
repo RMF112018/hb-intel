@@ -144,33 +144,39 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 ### 3.1 Financial (including Buyout)
 
-**Boundary:** Operational financial surface replacing spreadsheet workflow for project-team use, distinct from ERP/accounting system-of-record behavior.
+**Boundary:** Governed project-financial operating surface replacing spreadsheet workflow for project-team use. Not an ERP mirror and not an accounting system of record. Budget baseline originates in Procore; actual cost data comes from Procore/ERP. Project Hub owns the normalized operational state built from those inputs.
 
-**Must support:** Budget import, editable Financial Summary working state, editable GC/GR working model, editable Cash Flow working model, forecast checklist completion, exposure tracking, export, baseline Buyout support within the Financial domain.
+**Operating model:** Versioned forecast ledger (Working / ConfirmedInternal / PublishedMonthly / Superseded version lifecycle; no unlock-in-place; derivation-based editing). Budget line identity is stable across re-imports via `canonicalBudgetLineId` and composite fallback matching; ambiguous matches held in reconciliation conditions requiring PM resolution. Separated cost model: `jobToDateActualCost` (actual spend), `committedCosts` (legal obligation not yet invoiced), and `forecastToComplete` (PM future estimate) are always distinct. PER annotation targets confirmed versions only — working version is never visible to PER.
 
-**Implementation note:** Interim project-budget import must support uploaded CSV (`budget_details`), with future replacement by direct Procore API integration.
+**Must support:** Budget CSV import with stable identity resolution and reconciliation conditions; editable Financial Forecast Summary (working version only); editable GC/GR working model (version-scoped); editable Cash Flow working model (13 actuals + 18 forecast months; A/R aging read-only display); forecast checklist completion gate before confirmation; versioned forecast management (confirm, derive, designate report candidate); report-candidate → PublishedMonthly handoff via P3-F1 publication callback; Buyout sub-domain (procurement-control surface; dollar-weighted completion metric; savings tracking with explicit three-destination disposition workflow; `ContractExecuted` gate enforced via P3-E12 Subcontract Compliance); field-level PER annotation on confirmed versions with version-aware `canonicalBudgetLineId`-anchored annotation carry-forward on version derivation; export.
+
+**Implementation note:** Interim project-budget import must support uploaded CSV (`budget_details`), with future replacement by direct Procore API integration (`externalSourceLineId` field present in schema for forward compatibility).
 
 **Domain rule:** Buyout is baseline as part of the Financial module/domain (Phase 3 Plan §11.3). It is NOT a separate top-level module.
 
-**Field-level specification:** [P3-E4 — Financial Module Field Specification](P3-E4-Financial-Module-Field-Specification.md)
+**Field-level specification:** [P3-E4 — Financial Module Field Specification](P3-E4-Financial-Module-Field-Specification.md) *(master index)* + T01–T09 detail files in the same directory
 
 ### 3.2 Schedule
 
-**Boundary:** Operational schedule surface, not full CPM authoring. Upstream schedule systems remain authoritative for detailed baseline/update data and full CPM network logic.
+**Boundary:** Governed schedule intelligence and collaborative execution operating model, not full CPM authoring. Upstream schedule systems remain the canonical source for CPM network logic and baseline data; HB Intel owns the commitment truth, publication lifecycle, and field execution layer on top of that source truth.
 
-**Must support:** Schedule file ingestion (XER/XML/CSV), milestone tracking, manual milestone management, governed forecast overrides, upload history/restore, schedule summary projections into home, health, financial, and reports.
+**Operating model layers:** Governed master-schedule layer (canonical source ingestion, frozen import snapshots, multi-baseline governance, dual-truth commitment reconciliation); published forecast layer (stage-gated publication lifecycle; the sole layer consumed by executive review and health spine); field execution layer (field work packages, commitment and blocker management, look-ahead planning with PPC, three-tier progress verification); plus analytics/intelligence, scenario branch, artifact/workflow, and policy/config layers.
 
-**Field-level specification:** [P3-E5 — Schedule Module Field Specification](P3-E5-Schedule-Module-Field-Specification.md)
+**Must support:** Schedule file ingestion (XER/XML/CSV); durable activity identity and version reconciliation; governed baseline management; dual-truth commitment operating layer with reconciliation tracking; stage-gated publication workflow; milestone projections (view layer only, derived from published layer); field work packages, commitment management, blocker and readiness tracking; look-ahead planning with PPC; three-tier progress verification (reported → verified → authoritative); scenario branch management; composite schedule grading and multi-factor confidence scoring; governed causation taxonomy; offline-first sync with intent-log; cross-platform workflow integration; schedule summary projections into home, health, financial, and reports. All thresholds, grading rules, roll-up methods, and governed taxonomies configured exclusively by Manager of Operational Excellence.
+
+**Field-level specification:** [P3-E5 — Schedule Module Field Specification](P3-E5-Schedule-Module-Field-Specification.md) *(master index)* + T01–T11 detail files in the same directory
 
 ### 3.3 Constraints
 
-**Boundary:** Operational constraints surface replacing and improving worksheet-based process.
+**Boundary:** Governed project-controls workspace containing four peer operational ledgers. It is not a single-record constraint tracker and not a surface where risk, delay, and change are subordinate to a primary constraint record type. Each ledger is independently governed with its own lifecycle, field schema, and authority model.
 
-**Must support:** Create/update/close constraints, manage Change Tracking entries, manage Delay Log entries, manage due dates/BIC/responsibility/comments, quantify delay impact, export.
+**Ledger structure:** Four peer ledgers: (1) **Risk Ledger** — forward-looking risk identification, probability/impact assessment, and mitigation tracking; (2) **Constraint Ledger** — active blockers and issues requiring management action; (3) **Delay Ledger** — contemporaneous delay event records with claims-readiness orientation, schedule reference model, and time/commercial impact separation; (4) **Change Ledger** — change event management, manual-native in Phase 3, Procore-integration-ready data model with canonical HB Intel identity.
 
-**Domain rule:** Constraints module owns the normalized operational ledger for Constraints, Change Tracking, and Delay Log.
+**Must support:** Risk CRUD with probability/impact assessment; constraint CRUD with spawn to delay and change; delay logging with schedule reference (integrated + manual fallback), evidence gates, and time/commercial impact separation; change event management with line items and canonical identity model; governed cross-ledger spawn/promotion lineage with immutable `LineageRecord`; published snapshot and review package model; live operational state for PM surfaces; published state for executive review. All taxonomies, thresholds, and BIC registries configurable by Manager of Operational Excellence.
 
-**Field-level specification:** [P3-E6 — Constraints Module Field Specification](P3-E6-Constraints-Module-Field-Specification.md)
+**Domain rule:** Constraints module is the HB Intel-native operational workspace for risk, constraint, delay, and change management. No external system is authoritative for Risk, Constraint, or Delay records. The Change Ledger is HB Intel-native in Phase 3; in future Procore-integrated mode, HB Intel retains canonical identity and normalized status while Procore is the system of transaction for integrated change-event fields.
+
+**Field-level specification:** [P3-E6 — Constraints Module Field Specification](P3-E6-Constraints-Module-Field-Specification.md) *(master index)* + T01–T08 detail files in the same directory
 
 ### 3.4 Permits
 
@@ -558,11 +564,13 @@ This section defines the shared package integration obligations for every always
 
 | Package | Integration point | Notes |
 |---|---|---|
-| `@hbc/field-annotations` | PER annotation layer on forecast lines, GC/GR working model, Financial Summary blocks | Version-aware anchors `{ forecastVersionId, canonicalBudgetLineId, fieldKey }` per P3-E4 §15 |
-| `@hbc/versioned-record` | Confirmed forecast version snapshots; version history UI | Each `ConfirmedInternal` and `PublishedMonthly` version stored as versioned record per P3-E4 §4 |
-| `@hbc/my-work-feed` | Budget line reconciliation conditions; annotation pending-disposition items; undispositioned buyout savings | Register `FinancialWorkAdapter` per P3-D3 §12 |
-| `@hbc/notification-intelligence` | Cost exposure threshold alerts; forecast staleness warnings; checklist completion | Register notification event types per P3-D2 integration |
+| `@hbc/field-annotations` | PER annotation layer on **confirmed versions only** — budget line field-level anchors (`forecastToComplete`, `estimatedCostAtCompletion`, `projectedOverUnder`); Forecast Summary section-level anchors; GC/GR and cash flow block-level anchors; buyout section anchors | Version-aware anchors: `{ forecastVersionId, canonicalBudgetLineId, fieldKey/sectionKey/blockKey }` per P3-E4-T08 §15.4; working version never annotated |
+| `@hbc/versioned-record` | Field-level audit trail for PM-editable fields (`forecastToComplete`, GC/GR EAC fields, forecast summary PM fields); edit provenance per P3-E4-T07 §10.7 | Version lifecycle managed by Financial module's own `IForecastVersion` ledger — not delegated to `@hbc/versioned-record` |
+| `@hbc/my-work-feed` | 8 work item types via `FinancialWorkAdapter`: `BudgetReconciliationRequired`, `ForecastChecklistIncomplete`, `BudgetLineOverbudget`, `NegativeProfitForecast`, `CashFlowDeficit`, `BuyoutOverbudget`, `UndispositionedBuyoutSavings`, `BuyoutComplianceGateBlocked` | Register `FinancialWorkAdapter` per P3-D3 §12; per P3-E4-T08 §14.3 |
+| `@hbc/notification-intelligence` | Cost exposure threshold alerts; forecast confirmation events; buyout savings recognition; cash flow deficit | Register notification event types; per P3-E4-T08 §14.1 |
 | `@hbc/bic-next-move` | Forecast confirmation ownership; budget reconciliation BIC | Register Financial ownership items |
+| `@hbc/workflow-handoff` | P3-F1 publication callback (B-FIN-03): `ReportPublishedEvent` → `PublishedMonthly` promotion handoff | Event-driven stub in Phase 3; wires when P3-F1 defines handoff contract per P3-E4-T09 §18.1 |
+| `@hbc/export-runtime` | Budget line CSV; Forecast Summary snapshot for P3-F1 report pull; GC/GR CSV; Cash Flow CSV; Buyout Log CSV | Per P3-E4-T08 §13.8 |
 | `@hbc/session-state` | Offline draft persistence for working forecast; operation queue for checklist mutations | IndexedDB TTL per session-state contract |
 | `@hbc/complexity` | Field density gating across Essential/Standard/Expert tiers | Budget line detail, GC/GR breakdowns, and buyout sub-domain are Standard/Expert depth |
 | `@hbc/smart-empty-state` | Empty budget, no forecast working state, empty buyout log | Classify per 5-state model (first-use, filter, loading-failed, etc.) |
@@ -571,27 +579,33 @@ This section defines the shared package integration obligations for every always
 
 | Package | Integration point | Notes |
 |---|---|---|
-| `@hbc/field-annotations` | PER annotation layer on schedule milestones, forecast overrides, upload history | Per P3-E2 §4.4 |
-| `@hbc/versioned-record` | Schedule file upload history; version snapshots for milestone state | Restore capability depends on versioned-record storage |
-| `@hbc/my-work-feed` | Milestone at-risk items; overdue milestone work items | Register `ScheduleWorkAdapter` per P3-D3 §12 |
-| `@hbc/notification-intelligence` | Milestone at-risk/critical alerts; schedule file staleness warnings | |
-| `@hbc/bic-next-move` | Milestone responsibility and accountability tracking | |
-| `@hbc/session-state` | Offline draft for manual milestone overrides | |
-| `@hbc/complexity` | Milestone list density, CPM detail depth | |
-| `@hbc/smart-empty-state` | No schedule file uploaded, no milestones, empty upload history | |
+| `@hbc/field-annotations` | PER annotation layer on **Published layer only** — published activity snapshots, published milestones, published forecast lines | Scoped to Published layer; no annotation on draft or managed commitment records per P3-E5-T09 §18 |
+| `@hbc/my-work-feed` | 10 work item types via `ScheduleWorkAdapter`: commitment due, commitment overdue, blocker assigned, readiness gap, acknowledgement required, acknowledgement overdue, progress claim pending verification, look-ahead plan due, publication review requested, reconciliation conflict requiring review | Register `ScheduleWorkAdapter` per P3-E5-T09 §18 |
+| `@hbc/notification-intelligence` | 6 notification types: milestone at-risk, milestone critical, schedule staleness warning, commitment overdue escalation, blocker unresolved escalation, publication workflow state change | Register notification event types per P3-E5-T09 §18 |
+| `@hbc/workflow-handoff` | 5 handoff types: publication review request, scenario promotion to commitment, progress claim verification request, blocker escalation to management, baseline approval request | Per P3-E5-T09 §18 |
+| `@hbc/related-items` | 11 schedule object types (version, activity, milestone, work package, commitment, blocker, look-ahead plan, scenario branch, publication, baseline, progress claim); 11 relationship types (RFI, submittal, permit, inspection, drawing, photo, meeting/action item, work item, change event, owner decision, HBI recommendation) | Per P3-E5-T09 §18 |
+| `@hbc/session-state` | Offline persistence for `IntentRecord` log; operation queue for all governed mutations; IndexedDB TTL per session-state contract | Supports offline-first field execution layer per P3-E5-T08 §15 |
+| `@hbc/complexity` | 3-tier progressive disclosure (Essential / Standard / Expert) across all 11 T-file surface areas: activity list, milestone view, work package execution, commitment management, scenario branch, analytics/grading, confidence, look-ahead/PPC, publication workflow, cross-platform workflow, executive review | Per P3-E5-T09 §18 |
+| `@hbc/export-runtime` | Schedule data export: published activity snapshots, milestone report, look-ahead plan, PPC trend, grading report, confidence report, causation report | Per P3-E5-T09 §18 |
+| `@hbc/saved-views` | Saved filter/sort/grouping for activity list, work package views, look-ahead plans, blocker logs, scenario branches | Per P3-E5-T09 §18 |
+| `@hbc/smart-empty-state` | No canonical source configured, no schedule file ingested, no work packages created, no look-ahead plan, empty blocker log | Classify per 5-state model |
 
 #### Constraints
 
 | Package | Integration point | Notes |
 |---|---|---|
-| `@hbc/field-annotations` | PER annotation layer on constraint records, delay log entries | Per P3-E2 §5.4 |
-| `@hbc/versioned-record` | Optional — constraint history snapshots | Not required for Phase 3 acceptance |
-| `@hbc/my-work-feed` | Overdue constraint items; unresolved delay log entries | Register `ConstraintsWorkAdapter` |
-| `@hbc/notification-intelligence` | Overdue constraint alerts; delay-quantification requests | |
-| `@hbc/bic-next-move` | Constraint BIC and responsibility tracking | |
-| `@hbc/session-state` | Offline draft for constraint creation and editing | |
-| `@hbc/complexity` | Constraint log density; delay calculation detail | |
-| `@hbc/smart-empty-state` | No constraints logged, empty change tracking, empty delay log | |
+| `@hbc/field-annotations` | PER annotation layer on **published snapshots and review packages only** — `LedgerRecordSnapshot` and `ReviewPackage` anchors; never on live ledger records | Per T06 §6.4; live ledger records have no annotation write path |
+| `@hbc/related-items` | Cross-module relationships for all four ledger record types (Risk, Constraint, Delay, Change Event); 9+ relationship types to Schedule, Financial, Permits, RFIs, submittals, photos, meeting items, etc. | Per T05 §5.7; all four types registered as object types |
+| `@hbc/acknowledgement` | Formal acknowledgement of escalations, disposition outcomes, and review package receipt | Per T07 §7.1 |
+| `@hbc/workflow-handoff` | 5 handoff types: `ConstraintEscalationHandoff`, `DelayDispositionRequest`, `ChangeEventApprovalRequest`, `ReviewPackagePublicationHandoff`, `RiskMaterializationHandoff` | Per T07 §7.2 |
+| `@hbc/notification-intelligence` | 8 notification types: risk overdue, high-risk alert, constraint overdue, constraint critical, delay notification reminder, delay quantified alert, change event approval pending, review package ready | Per T07 §7.3 |
+| `@hbc/bic-next-move` | BIC ownership tracking across all four ledgers | Per T07 §7.1 |
+| `@hbc/versioned-record` | Field-level audit trail for all four ledger record types (who changed what and when) | Per T07 §7.1; replaces simplistic edit log |
+| `@hbc/my-work-feed` | 9 work item types via `ConstraintsWorkAdapter`: risk overdue, high-risk score, constraint overdue, constraint critical, delay notification due, delay disposition required, change event approval, change event closure, review package annotation response | Per T07 §7.4 |
+| `@hbc/complexity` | 3-tier progressive disclosure (Essential / Standard / Expert) across all four ledger views; risk score detail = Expert; delay analysis method = Standard/Expert; basic status = Essential | Per T07 §7.1 |
+| `@hbc/export-runtime` | Export for all four ledger types: risk register, constraint log, delay log, change event log, cross-ledger summary, review package PDF | Per T07 §7.1 |
+| `@hbc/session-state` | Offline persistence for constraint and delay logging; IndexedDB operation queue | Per T07 §7.1 |
+| `@hbc/smart-empty-state` | No risks logged, no constraints, no delays, no change events; empty per-ledger states | Classify per 5-state model |
 
 #### Permits
 

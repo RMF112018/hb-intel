@@ -114,33 +114,76 @@ Phase 3 is complete only when all §18 gates pass with evidence (Phase 3 plan §
 
 ### 6.1 Financial
 
+For the full 48-item Financial acceptance gate, see **P3-E4-T09 §20**. The criteria below are the high-level module-level gates required for Phase 3 release readiness; all must pass before the P3-E4-T09 detailed gate is evaluated.
+
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.1.1 | Budget import (CSV) — PWA Required, SPFx Broad | Not Started | | P3-E1, P3-G3 §7.1 |
-| 6.1.2 | Financial Summary editing — Required both lanes | Not Started | | P3-E2 §3 |
-| 6.1.3 | GC/GR model — Required both lanes | Not Started | | P3-E2 §3 |
-| 6.1.4 | Cash Flow model — Required both lanes | Not Started | | P3-E2 §3 |
-| 6.1.5 | Exposure tracking — Required both lanes | Not Started | | P3-E2 §3 |
-| 6.1.6 | Buyout support — Required both lanes (within Financial domain) | Not Started | | P3-E1 §4.1 |
-| 6.1.7 | Spreadsheet replacement notes included | Not Started | | P3-E3 §2 |
+| 6.1.1 | Budget CSV import — atomic validation, identity resolution, `canonicalBudgetLineId` stability across re-imports | Not Started | | P3-E4-T02 §2–§3; P3-G1 §4.1 |
+| 6.1.2 | Separated cost model — `jobToDateActualCost`, `committedCosts`, `forecastToComplete` are always distinct; `costExposureToDate` = actuals + committed | Not Started | | P3-E4-T02 §3.2; P3-E2 §3.2 |
+| 6.1.3 | Versioned forecast ledger — Working / ConfirmedInternal / PublishedMonthly / Superseded lifecycle; no unlock-in-place; derivation-based editing | Not Started | | P3-E4-T03 §3; P3-E2 §3.3 |
+| 6.1.4 | Forecast checklist gate enforced — confirmation blocked when required items incomplete or `staleBudgetLineCount > 0` | Not Started | | P3-E4-T03 §4.3 |
+| 6.1.5 | Financial Forecast Summary editing — PM-editable fields on working version only; all derived fields recompute correctly | Not Started | | P3-E4-T04 §5; P3-E2 §3.2 |
+| 6.1.6 | GC/GR working model — version-scoped; editable on working version only; aggregate feeds Forecast Summary | Not Started | | P3-E4-T04 §6 |
+| 6.1.7 | Cash Flow model — 13 actuals (read-only) + 18 forecast months; A/R aging read-only; cumulative chart with deficit shading | Not Started | | P3-E4-T05 §7 |
+| 6.1.8 | Buyout sub-domain — dollar-weighted completion metric; `ContractExecuted` gate enforced via P3-E12; savings recognition and three-destination disposition workflow | Not Started | | P3-E4-T06 §8; P3-E1 §4.1 |
+| 6.1.9 | Report-candidate designation — at most one `isReportCandidate = true` per project; P3-F1 publication handoff handler implemented (B-FIN-03 stub) | Not Started | | P3-E4-T03 §3.6; P3-E4-T09 §16 |
+| 6.1.10 | PER annotation on confirmed versions — working version not visible to PER; `canonicalBudgetLineId`-anchored; carry-forward on derivation | Not Started | | P3-E4-T08 §15; P3-E2 §3.5 |
+| 6.1.11 | All activity spine events, health spine metrics, and work queue items implemented per P3-E4-T08 §14 | Not Started | | P3-E4-T08 §14 |
+| 6.1.12 | Spreadsheet replacement notes verified | Not Started | | P3-E3 §2 |
 
 ### 6.2 Schedule
 
+For the comprehensive 50-item schedule acceptance gate, see **P3-E5-T11 §25**. The criteria below are the high-level module-level gates required for Phase 3 release readiness; all must pass before the P3-E5-T11 detailed gate is evaluated.
+
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.2.1 | Milestone tracking — Required both lanes | Not Started | | P3-E1, P3-G3 §7.2 |
-| 6.2.2 | Forecast overrides — Required both lanes (governed w/ provenance) | Not Started | | P3-E2 §4, §12.2 |
-| 6.2.3 | File ingestion — PWA Required, SPFx Launch-to-PWA | Not Started | | P3-G1 §4.2, P3-G2 §8.2 |
-| 6.2.4 | Upload history/restore — PWA Required, SPFx Launch-to-PWA | Not Started | | P3-G1 §4.2, P3-G2 §8.2 |
+| 6.2.1 | Schedule file ingestion (XER/XML/CSV) — PWA Required, SPFx Launch-to-PWA | Not Started | | P3-G1 §4.2; P3-E5-T01 §1 |
+| 6.2.2 | Frozen import snapshots created on every ingestion — `ScheduleVersionRecord` + `ImportedActivitySnapshot` immutable | Not Started | | P3-E5-T01 §1; P3-E2 §4.3 |
+| 6.2.3 | Durable activity identity established (`externalActivityKey`) and maintained across versions via `ActivityContinuityLink` | Not Started | | P3-E5-T01 §1 |
+| 6.2.4 | Canonical source designation — one `CanonicalScheduleSource` per project; secondary sources for comparison only | Not Started | | P3-E5-T01 §1; P3-E2 §4.3 |
+| 6.2.5 | Governed baseline management — `BaselineRecord` with PE approval gate | Not Started | | P3-E5-T01 §1 |
+| 6.2.6 | Dual-truth commitment layer — `ManagedCommitmentRecord` with `reconciliationStatus` tracking alignment with source truth | Not Started | | P3-E5-T02 §2; P3-E2 §4.2 |
+| 6.2.7 | Reconciliation audit trail (`ReconciliationRecord`) preserved | Not Started | | P3-E5-T02 §2 |
+| 6.2.8 | Stage-gated publication lifecycle — `Draft → ReadyForReview → Published → Superseded`; executive review and health spine consume Published layer only | Not Started | | P3-E5-T03 §3; P3-E2 §4.3 |
+| 6.2.9 | Milestone records are view projections from Published layer; not an independent source of truth | Not Started | | P3-E5-T02 §4; P3-E2 §4.3 |
+| 6.2.10 | Field work packages — `FieldWorkPackage` as child of imported activity by location/trade/time | Not Started | | P3-E5-T05 §6 |
+| 6.2.11 | Commitment and blocker management — `CommitmentRecord`, `BlockerRecord`, `ReadinessRecord` | Not Started | | P3-E5-T05 §6 |
+| 6.2.12 | Look-ahead planning with PPC — `LookAheadPlan`; PPC formula and window governed | Not Started | | P3-E5-T05 §6 |
+| 6.2.13 | Three-tier progress verification — reported → verified → authoritative; `ProgressClaimRecord` + `ProgressVerificationRecord` | Not Started | | P3-E5-T05 §8 |
+| 6.2.14 | Governed roll-up rules — work-package to activity to milestone; all methods configurable | Not Started | | P3-E5-T05 §9 |
+| 6.2.15 | Scenario branch management — `ScenarioBranch` from specific version + baseline; promotion workflow | Not Started | | P3-E5-T04 §5 |
+| 6.2.16 | Composite schedule grading — `ScheduleQualityGrade` with governed `GradingControlScore` array | Not Started | | P3-E5-T07 §11 |
+| 6.2.17 | Multi-factor confidence scoring — `ConfidenceRecord` with 8 governed factor scores | Not Started | | P3-E5-T07 §11 |
+| 6.2.18 | `RecommendationRecord` never silently mutates authoritative schedule truth; promotion creates draft records only | Not Started | | P3-E5-T07 §12 |
+| 6.2.19 | Governed causation taxonomy — `CausationCode` records; applicable by record type | Not Started | | P3-E5-T07 §13 |
+| 6.2.20 | Offline-first sync — `IntentRecord` durable intent log; sync state lifecycle; conflict routing for governed records | Not Started | | P3-E5-T08 §15 |
+| 6.2.21 | `@hbc/field-annotations` scoped to Published layer only; no annotation on draft or managed commitment records | Not Started | | P3-E5-T09 §18; P3-E2 §4.6 |
+| 6.2.22 | `@hbc/related-items` integration — 11 schedule object types; 11 relationship types | Not Started | | P3-E5-T09 §18 |
+| 6.2.23 | `@hbc/my-work-feed` `ScheduleWorkAdapter` registered — 10 work item types | Not Started | | P3-E5-T09 §18 |
+| 6.2.24 | All governed thresholds, grading rules, roll-up rules, and taxonomies configurable by Manager of Operational Excellence only | Not Started | | P3-E5-T09 §20; P3-E2 §4.4 |
+| 6.2.25 | Package blockers B-SCH-01 through B-SCH-05 resolved or formally deferred with owner sign-off | Not Started | | P3-E5-T11 §26 |
+| 6.2.26 | Full 50-item acceptance gate in P3-E5-T11 §25 passes | Not Started | | P3-E5-T11 §25 |
 
 ### 6.3 Constraints
 
+For the comprehensive 53-item acceptance gate, see **P3-E6-T08 §8.2**. The criteria below are the high-level module-level gates required for Phase 3 release readiness; all must pass before the P3-E6-T08 detailed gate is evaluated.
+
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.3.1 | Constraint CRUD — Required both lanes | Not Started | | P3-E1, P3-G3 §7.3 |
-| 6.3.2 | Change Tracking — Required both lanes | Not Started | | P3-E2 §5 |
-| 6.3.3 | Delay Log with quantified impact — Required both lanes | Not Started | | P3-E2 §5 |
-| 6.3.4 | Spreadsheet replacement notes included | Not Started | | P3-E3 §4 |
+| 6.3.1 | Four-ledger workspace implemented: Risk, Constraint, Delay, and Change ledgers each with independent CRUD and lifecycle — both lanes | Not Started | | P3-E6-T01–T04 |
+| 6.3.2 | No single-record-type model: all four are peer ledgers; Constraint is not parent of Delay or Change | Not Started | | P3-E6 master index |
+| 6.3.3 | Risk probability/impact assessment and riskScore working — both lanes | Not Started | | P3-E6-T01 §1 |
+| 6.3.4 | Constraint lifecycle enforced; overdue detection working — both lanes | Not Started | | P3-E6-T02 §2 |
+| 6.3.5 | Delay: Integrated + ManualFallback schedule reference modes; ManualFallback self-contained without P3-E5 — both lanes | Not Started | | P3-E6-T03 §3.2 |
+| 6.3.6 | Delay time/commercial impact separation enforced; `separationConfirmed` gate at Quantified transition | Not Started | | P3-E6-T03 §3.4 |
+| 6.3.7 | Change Ledger ManualNative mode working; canonical HB Intel identity preserved; Procore schema defined (not wired) | Not Started | | P3-E6-T04 |
+| 6.3.8 | Cross-ledger spawn lineage with immutable `LineageRecord`; lineage displayed on all detail views | Not Started | | P3-E6-T05 |
+| 6.3.9 | No hard delete enforced across all four ledgers | Not Started | | P3-E6 master index |
+| 6.3.10 | Published snapshots and review packages functional; PER annotation scoped to published state only | Not Started | | P3-E6-T06 |
+| 6.3.11 | All governed taxonomies and thresholds sourced from configuration; not hard-coded | Not Started | | P3-E6-T06 §6.6 |
+| 6.3.12 | Package blockers B-CON-01 through B-CON-03 resolved or deferred with sign-off | Not Started | | P3-E6-T08 §8.3 |
+| 6.3.13 | Full 53-item acceptance gate in P3-E6-T08 §8.2 passes | Not Started | | P3-E6-T08 §8.2 |
+| 6.3.14 | Spreadsheet replacement notes included | Not Started | | P3-E3 §4 |
 
 ### 6.4 Permits
 
