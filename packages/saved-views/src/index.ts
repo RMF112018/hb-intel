@@ -28,6 +28,7 @@ export type {
   ISavedViewContext,
   SavedViewAction,
   SavedViewTelemetryEvent,
+  IComplexityViewDefault,
 } from './types/index.js';
 
 // Constants
@@ -70,8 +71,9 @@ export type {
   SaveViewDialogShellProps, ViewCompatibilityBannerShellProps,
 } from './components/index.js';
 
-// Adapters (SF26-T07)
-// export * from './adapters/index.js';
+// Adapters — module registry + TanStack mapper (SF26-T07)
+export { SavedViewModuleRegistry, createTanStackTableMapper } from './adapters/index.js';
+export type { ISavedViewModuleRegistration, TanStackTableState } from './adapters/index.js';
 
 // Telemetry (SF26-T07)
 // export * from './telemetry/index.js';

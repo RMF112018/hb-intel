@@ -139,6 +139,14 @@ export type SavedViewTelemetryEvent =
   | 'schema-reconciled'
   | 'compatibility-warning';
 
+// ── Complexity Integration (T07) ─────────────────────────────────────────
+
+/** Complexity-based default view resolution (T07). */
+export interface IComplexityViewDefault {
+  complexityLevel: 'essential' | 'standard' | 'expert';
+  defaultViewId: string | undefined;
+}
+
 // ── Constants ────────────────────────────────────────────────────────────
 
 export const SAVED_VIEW_SCOPES: readonly SavedViewScope[] = ['personal', 'team', 'role', 'system'] as const;
