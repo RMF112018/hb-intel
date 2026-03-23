@@ -355,6 +355,7 @@ Governing: `docs/architecture/plans/shared-features/SF27-Bulk-Actions.md`
 **SF27-T05 bar+menu:** **Implemented 2026-03-23 in `@hbc/bulk-actions` v0.0.5.** Composition shells `BulkSelectionBarShell` (wires useBulkSelection to BulkSelectionBar) and `BulkActionMenuShell` (maps IBulkActionDefinition to BulkActionMenuItem). Added @hbc/ui-kit dep. UI components created in T01.
 **SF27-T06 confirm+input+results+banner:** **Implemented 2026-03-23 in `@hbc/bulk-actions` v0.0.6.** 4 composition shells: `BulkActionConfirmDialogShell`, `BulkActionInputDialogShell` (managed input state), `BulkActionResultsPanelShell` (maps IBulkExecutionResult to result items), `SelectAllFilteredBannerShell`. UI components from T01.
 **SF27-T07 integrations:** **Implemented 2026-03-23 in `@hbc/bulk-actions` v0.0.7.** `BulkActionModuleRegistry` singleton (additive, freeze-on-write, per-module action list), `IBulkActionModuleRegistration`, `getActionsForModule` helper. Per L-01 through L-10.
+**SF27-T08 testing:** **Implemented 2026-03-23 in `@hbc/bulk-actions` v0.0.8.** `@hbc/bulk-actions/testing` with `createMockBulkSelectionSnapshot` factory, `mockBulkActionScenarios` (5 fixtures). 25 unit tests (4 files) covering selection management, execution engine, eligibility, and registry. Coverage: 100% lines, 96% branches, 100% functions. Per L-01 through L-10.
 
 ---
 

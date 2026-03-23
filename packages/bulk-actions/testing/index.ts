@@ -1,2 +1,3 @@
-/** @hbc/bulk-actions/testing — Implementation scope: SF27-T08. */
-export {};
+/** @hbc/bulk-actions/testing */
+export { createMockBulkSelectionSnapshot } from './createMockBulkSelectionSnapshot.js';
+export { mockBulkActionScenarios } from './mockBulkActionScenarios.js';
