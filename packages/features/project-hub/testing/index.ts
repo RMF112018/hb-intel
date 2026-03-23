@@ -126,3 +126,8 @@ export { createMockGovernedPolicySet } from './createMockGovernedPolicySet.js';
 
 export { createMockIntentRecord } from './createMockIntentRecord.js';
 export { createMockExternalParticipantRecord } from './createMockExternalParticipantRecord.js';
+
+// ── P3-E6-T01 Risk Ledger testing surface ─────────────────────────────
+
+export { createMockRiskRecord } from './createMockRiskRecord.js';
+export { mockRiskLedgerScenarios } from './mockRiskLedgerScenarios.js';

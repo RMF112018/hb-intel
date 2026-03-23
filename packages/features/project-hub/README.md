@@ -64,3 +64,15 @@ Testing exports include canonical fixture factories and state presets:
 - [SF21 master plan](../../../docs/architecture/plans/shared-features/SF21-Project-Health-Pulse.md)
 - [SF21-T09 testing and deployment](../../../docs/architecture/plans/shared-features/SF21-T09-Testing-and-Deployment.md)
 - [ADR-0110 project health pulse multi-dimension indicator](../../../docs/architecture/adr/ADR-0110-project-health-pulse-multi-dimension-indicator.md)
+
+## 9. Financial Module (P3-E4) — Stage 7.1
+
+See `src/financial/` for the complete contract-level implementation.
+
+## 10. Schedule Module (P3-E5) — Stage 7.2
+
+See `src/schedule/` for the complete contract-level implementation.
+
+## 11. Constraints Module (P3-E6) — Stage 7.3
+
+T01 Risk Ledger: Risk record model, 8-state lifecycle state machine, 16 governed categories, probability/impact scoring, 6 business rules, health spine metrics, testing fixtures. See `src/constraints/risk-ledger/`.

@@ -1,0 +1,35 @@
+import type { IRiskRecord } from '../src/constraints/risk-ledger/types.js';
+
+export const createMockRiskRecord = (
+  overrides?: Partial<IRiskRecord>,
+): IRiskRecord => ({
+  riskId: 'risk-001',
+  projectId: 'proj-001',
+  riskNumber: 'RISK-001',
+  title: 'Geotechnical uncertainty at Building A foundation',
+  description:
+    'Subsurface conditions at Building A may differ from borings, requiring foundation redesign and potential schedule delay.',
+  category: 'SITE_CONDITIONS',
+  probability: 3,
+  impact: 4,
+  riskScore: 12,
+  dateIdentified: '2026-01-15',
+  identifiedBy: 'user-001',
+  owner: 'user-002',
+  bic: 'Project Management',
+  targetMitigationDate: '2026-04-15',
+  mitigationStrategy: null,
+  contingencyStrategy: null,
+  residualRiskNotes: null,
+  status: 'Identified',
+  statusDate: '2026-01-15',
+  closureReason: null,
+  dateClosed: null,
+  spawnedConstraintIds: [],
+  attachments: [],
+  createdAt: '2026-01-15T09:00:00Z',
+  createdBy: 'user-001',
+  lastEditedAt: null,
+  lastEditedBy: null,
+  ...overrides,
+});
