@@ -59,10 +59,25 @@ export {
   RECORD_FORM_TRUST_STATES,
 } from './types/index.js';
 
-// Model — lifecycle, state derivation, recovery (SF23-T03)
-// export * from './model/index.js';
+// Model — lifecycle, state derivation, draft, governance (SF23-T03)
+export {
+  createRecordFormSession,
+  transitionRecordFormStatus,
+  VALID_RECORD_TRANSITIONS,
+  computeRecordConfidence,
+  detectDraftConflict,
+  createDraft,
+  markDraftDirty,
+  compareDrafts,
+  createRecordFormAuditEntry,
+} from './model/index.js';
+export type { IRecordFormCreateInput, RecordFormAuditAction, IRecordFormAuditEntry } from './model/index.js';
 
-// API — draft persistence, submission, sync (SF23-T03)
+// Storage — adapter interface + in-memory implementation (SF23-T03)
+export type { IRecordFormStorageAdapter, IRecordFormStorageRecord } from './storage/index.js';
+export { InMemoryRecordFormStorageAdapter } from './storage/index.js';
+
+// API — submission pipeline, sync (future)
 // export * from './api/index.js';
 
 // Hooks — form orchestration hooks (SF23-T04)
