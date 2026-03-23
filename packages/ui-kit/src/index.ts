@@ -547,3 +547,9 @@ export { ActivityDiffPopover } from './ActivityDiffPopover/index.js';
 export type { ActivityDiffPopoverProps, ActivityDiffEntry } from './ActivityDiffPopover/index.js';
 export { ActivityEmptyState } from './ActivityEmptyState/index.js';
 export type { ActivityEmptyStateProps, ActivityEmptyStateVariant } from './ActivityEmptyState/index.js';
+
+// Export menu and format picker (SF24-T05, L-02/L-03/L-05)
+export { ExportActionMenu } from './ExportActionMenu/index.js';
+export type { ExportActionMenuProps, ExportMenuOption, ExportMenuRecommendation, ExportMenuSuppressedFormat, ExportMenuReviewOwner } from './ExportActionMenu/index.js';
+export { ExportFormatPicker } from './ExportFormatPicker/index.js';
+export type { ExportFormatPickerProps, ExportFormatOption, ExportContextPreview } from './ExportFormatPicker/index.js';

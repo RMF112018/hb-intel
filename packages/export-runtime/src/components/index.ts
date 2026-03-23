@@ -1,6 +1,14 @@
 /**
- * SF24 export composition shells — thin wrappers over @hbc/ui-kit + runtime state.
- * Reusable visual primitives belong in @hbc/ui-kit (L-01, CLAUDE.md).
- * Implementation scope: SF24-T05/T06.
+ * SF24-T05 — Export composition shells.
+ *
+ * Thin wrappers wiring runtime hooks to @hbc/ui-kit visual components.
+ * Reusable visual primitives live in @hbc/ui-kit (CLAUDE.md).
+ *
+ * Governing: SF24-T05, L-01 (primitive ownership)
  */
-export {};
+
+export { ExportActionMenuShell } from './ExportActionMenuShell.js';
+export type { ExportActionMenuShellProps } from './ExportActionMenuShell.js';
+
+export { ExportFormatPickerShell } from './ExportFormatPickerShell.js';
+export type { ExportFormatPickerShellProps } from './ExportFormatPickerShell.js';

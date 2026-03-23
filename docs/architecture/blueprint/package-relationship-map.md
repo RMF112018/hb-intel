@@ -862,13 +862,13 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 
 ---
 
-#### `@hbc/export-runtime` · v0.0.4 · [Scaffold]
+#### `@hbc/export-runtime` · v0.0.5 · [Scaffold]
 
 | Field | Value |
 |-------|-------|
 | **Path** | `packages/export-runtime/` |
 | **Layer** | 8 — Shared-Feature Primitives |
-| **Depends on** | `@hbc/models` (workspace) |
+| **Depends on** | `@hbc/models`, `@hbc/ui-kit` (workspace) |
 | **Used by** | `@hbc/features-business-development`, `@hbc/features-estimating`, and all Phase 3 module adapters |
 | **Maturity** | Scaffold |
 
