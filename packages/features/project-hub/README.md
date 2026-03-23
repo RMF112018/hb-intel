@@ -86,3 +86,5 @@ T04 Change Ledger: Change event model with line items, Procore mapping record, 9
 T05 Cross-Ledger Lineage: Immutable lineage records, 3 spawn paths with seed data, peer links with bidirectional validation, @hbc/related-items registrations, 5 lineage business rules. See `src/constraints/lineage/`.
 
 T06 Publication & Governance: Live/published state model, record snapshots, review packages, publication authority matrix, 32-team BIC registry, governance configurability framework. See `src/constraints/publication/`.
+
+T07 Platform Integration: 11 shared packages, 14 spine events, 5 handoffs, 8 notifications, 9 work items, 11 health metrics, 7 work queue items, 6 report types. See `src/constraints/integration/`.
