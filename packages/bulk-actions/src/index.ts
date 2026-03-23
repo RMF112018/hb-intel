@@ -35,8 +35,8 @@ export { planExecution, aggregateResults } from './execution/index.js';
 // Hooks (SF27-T04)
 export { bulkActionKeys, useBulkSelection, useBulkActionExecution } from './hooks/index.js';
 export type { UseBulkSelectionOptions, UseBulkSelectionResult, UseBulkActionExecutionOptions, UseBulkActionExecutionResult } from './hooks/index.js';
-// Components (SF27-T05)
-export { BulkSelectionBarShell, BulkActionMenuShell } from './components/index.js';
-export type { BulkSelectionBarShellProps, BulkActionMenuShellProps } from './components/index.js';
+// Components (SF27-T05/T06)
+export { BulkSelectionBarShell, BulkActionMenuShell, BulkActionConfirmDialogShell, BulkActionInputDialogShell, BulkActionResultsPanelShell, SelectAllFilteredBannerShell } from './components/index.js';
+export type { BulkSelectionBarShellProps, BulkActionMenuShellProps, BulkActionConfirmDialogShellProps, BulkActionInputDialogShellProps, BulkActionResultsPanelShellProps, SelectAllFilteredBannerShellProps } from './components/index.js';
 // Adapters (SF27-T07) // export * from './adapters/index.js';
 // Telemetry (SF27-T07) // export * from './telemetry/index.js';
