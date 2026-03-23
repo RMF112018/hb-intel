@@ -862,7 +862,7 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 
 ---
 
-#### `@hbc/export-runtime` · v0.0.5 · [Scaffold]
+#### `@hbc/export-runtime` · v0.0.6 · [Scaffold]
 
 | Field | Value |
 |-------|-------|

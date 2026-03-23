@@ -103,14 +103,18 @@ export type {
   UseExportQueueResult,
 } from './hooks/index.js';
 
-// Components — thin composition shells (SF24-T05)
+// Components — thin composition shells (SF24-T05/T06)
 export {
   ExportActionMenuShell,
   ExportFormatPickerShell,
+  ExportProgressToastShell,
+  ExportReceiptCardShell,
 } from './components/index.js';
 export type {
   ExportActionMenuShellProps,
   ExportFormatPickerShellProps,
+  ExportProgressToastShellProps,
+  ExportReceiptCardShellProps,
 } from './components/index.js';
 
 // Composers — report composition (SF24-T05)
