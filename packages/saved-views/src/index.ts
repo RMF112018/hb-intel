@@ -11,27 +11,29 @@
  * @see docs/architecture/plans/shared-features/SF26-Saved-Views.md
  */
 
-// Types — SF26-T01 contract stubs
+// Types — SF26-T02 canonical contracts
 export type {
   SavedViewScope,
-  SavedViewAction,
-  ISavedViewDefinition,
   IFilterClause,
   ISortDefinition,
   IGroupDefinition,
   IViewPresentationState,
+  ISavedViewDefinition,
+  ISavedViewSchemaDescriptor,
   ISavedViewStateMapper,
-  ISchemaCompatibilityResult,
-  IViewReconciliationResult,
-  IViewPermissionResult,
+  SavedViewCompatibilityStatus,
+  ISavedViewCompatibilityResult,
+  ISavedViewScopePermissions,
+  ISavedViewOwnershipCheck,
   ISavedViewContext,
+  SavedViewAction,
   SavedViewTelemetryEvent,
 } from './types/index.js';
 
 // Constants
 export {
   SAVED_VIEW_SCOPES,
-  SAVED_VIEW_ACTIONS,
+  SAVED_VIEW_COMPATIBILITY_STATUSES,
 } from './types/index.js';
 
 // Model (SF26-T03)

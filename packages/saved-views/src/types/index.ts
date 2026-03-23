@@ -1,126 +1,135 @@
 /**
- * SF26-T01 — Saved Views TypeScript Contract Stubs.
+ * SF26-T02 — Saved Views TypeScript Contracts.
  *
- * Scope model, schema compatibility, reconciliation, view lifecycle,
- * filter/sort/group/presentation state, and module adapter interface.
+ * View model, scope ownership, schema compatibility, module adapter
+ * interface, co-dependency surface, and lifecycle actions.
  *
- * Governing: SF26-T01, SF26 Master Plan L-01/L-04/L-06
+ * Governing: SF26-T02, SF26 Master Plan L-01/L-02/L-03/L-04/L-05
  */
 
 // ── Scope Model ──────────────────────────────────────────────────────────
 
-/** View ownership scope levels. */
 export type SavedViewScope = 'personal' | 'team' | 'role' | 'system';
 
-/** View lifecycle action. */
-export type SavedViewAction = 'save' | 'apply' | 'set-default' | 'share' | 'delete' | 'duplicate';
+// ── Filter / Sort / Group / Presentation ─────────────────────────────────
 
-// ── Core Interfaces ──────────────────────────────────────────────────────
+export interface IFilterClause {
+  field: string;
+  operator: 'equals' | 'not-equals' | 'contains' | 'in' | 'gt' | 'gte' | 'lt' | 'lte' | 'between' | 'is-empty' | 'is-not-empty';
+  value?: unknown;
+}
 
-/** A saved view definition with scope, schema, and presentation state. */
+export interface ISortDefinition {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
+export interface IGroupDefinition {
+  field: string;
+}
+
+export interface IViewPresentationState {
+  density?: 'compact' | 'standard' | 'comfortable';
+  visibleColumnKeys?: string[];
+  columnOrder?: string[];
+}
+
+// ── Core View Definition ─────────────────────────────────────────────────
+
 export interface ISavedViewDefinition {
   viewId: string;
-  name: string;
-  scope: SavedViewScope;
-  ownerUpn: string;
   moduleKey: string;
-  schemaVersion: string;
-  filters: IFilterClause[];
-  sort: ISortDefinition[];
-  groups: IGroupDefinition[];
+  workspaceKey: string;
+  title: string;
+  description?: string;
+  scope: SavedViewScope;
+  ownerUserId?: string;
+  filterClauses: IFilterClause[];
+  sortBy: ISortDefinition[];
+  groupBy: IGroupDefinition[];
   presentation: IViewPresentationState;
-  isDefault: boolean;
+  isDefault?: boolean;
+  schemaVersion: number;
   createdAtIso: string;
   updatedAtIso: string;
 }
 
-/** A single filter clause. */
-export interface IFilterClause {
-  fieldKey: string;
-  operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'in';
-  value: unknown;
-}
-
-/** A sort definition. */
-export interface ISortDefinition {
-  fieldKey: string;
-  direction: 'asc' | 'desc';
-}
-
-/** A group definition. */
-export interface IGroupDefinition {
-  fieldKey: string;
-  collapsed: boolean;
-}
-
-/** View presentation state (columns, density, etc.). */
-export interface IViewPresentationState {
-  visibleColumns: string[];
-  columnOrder: string[];
-  density: 'compact' | 'normal' | 'comfortable';
-  pinnedColumns: string[];
-}
-
 // ── Module Adapter Interface ─────────────────────────────────────────────
 
-/**
- * Module adapter interface for saved view state mapping.
- *
- * Modules implement this to translate between their domain state
- * and the saved-views primitive contract.
- */
-export interface ISavedViewStateMapper<TState> {
+export interface ISavedViewSchemaDescriptor {
   moduleKey: string;
-  toSavedView(state: TState): Omit<ISavedViewDefinition, 'viewId' | 'createdAtIso' | 'updatedAtIso'>;
-  fromSavedView(view: ISavedViewDefinition): TState;
-  getSchemaVersion(): string;
+  workspaceKey: string;
+  validColumnKeys: string[];
+  validFilterFields: string[];
+  validGroupFields: string[];
+  schemaVersion: number;
+}
+
+export interface ISavedViewStateMapper<TState> {
+  serialize(state: TState): Omit<ISavedViewDefinition, 'viewId' | 'createdAtIso' | 'updatedAtIso'>;
+  deserialize(view: ISavedViewDefinition): TState;
+  currentSchemaVersion(): number;
+  currentSchema(): ISavedViewSchemaDescriptor;
 }
 
 // ── Schema Compatibility ─────────────────────────────────────────────────
 
-/** Schema compatibility check result. */
-export interface ISchemaCompatibilityResult {
-  compatible: boolean;
-  currentVersion: string;
-  viewVersion: string;
-  missingFields: string[];
-  removedFields: string[];
-  userMessage: string | null;
-}
+export type SavedViewCompatibilityStatus = 'compatible' | 'degraded-compatible' | 'incompatible';
 
-/** Reconciliation result after applying a view with schema drift. */
-export interface IViewReconciliationResult {
-  reconciled: boolean;
-  droppedFilters: string[];
-  droppedSorts: string[];
-  droppedGroups: string[];
-  droppedColumns: string[];
-  userMessage: string;
+export interface ISavedViewCompatibilityResult {
+  status: SavedViewCompatibilityStatus;
+  removedColumns: string[];
+  removedFilterFields: string[];
+  removedGroupFields: string[];
+  fallbackApplied: boolean;
+  userExplanation: string;
 }
 
 // ── Scope Permissions ────────────────────────────────────────────────────
 
-/** Permission check result for a view action. */
-export interface IViewPermissionResult {
-  allowed: boolean;
-  reason: string | null;
+export interface ISavedViewScopePermissions {
+  canSavePersonal: boolean;
+  canSaveTeam: boolean;
+  canSaveRole: boolean;
+  canSaveSystem: boolean;
+  teamIds: string[];
+  roleIds: string[];
+}
+
+export interface ISavedViewOwnershipCheck {
+  isOwner: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  canShare: boolean;
 }
 
 // ── Co-Dependency Surface ────────────────────────────────────────────────
 
-/** Handoff context consumed by export-runtime and bulk-actions. */
 export interface ISavedViewContext {
-  viewId: string;
-  viewName: string;
-  filters: IFilterClause[];
-  sort: ISortDefinition[];
-  visibleColumns: string[];
-  scope: SavedViewScope;
+  activeViewId: string | undefined;
+  activeViewTitle: string | undefined;
+  activeFilterClauses: IFilterClause[];
+  activeSortBy: ISortDefinition[];
+  activeGroupBy: IGroupDefinition[];
+  activePresentation: IViewPresentationState;
+  moduleKey: string;
+  workspaceKey: string;
 }
+
+// ── Lifecycle Actions ────────────────────────────────────────────────────
+
+export type SavedViewAction =
+  | { type: 'apply'; viewId: string }
+  | { type: 'save'; patch: Partial<ISavedViewDefinition> }
+  | { type: 'save-as-new'; definition: Omit<ISavedViewDefinition, 'viewId' | 'createdAtIso' | 'updatedAtIso'> }
+  | { type: 'set-default'; viewId: string }
+  | { type: 'clear-default'; moduleKey: string; workspaceKey: string }
+  | { type: 'delete'; viewId: string }
+  | { type: 'duplicate'; viewId: string; newTitle: string }
+  | { type: 'share'; viewId: string; targetScope: 'team' | 'role' | 'system' };
 
 // ── Telemetry ────────────────────────────────────────────────────────────
 
-/** Saved view telemetry event type. */
 export type SavedViewTelemetryEvent =
   | 'view-created'
   | 'view-applied'
@@ -133,4 +142,7 @@ export type SavedViewTelemetryEvent =
 // ── Constants ────────────────────────────────────────────────────────────
 
 export const SAVED_VIEW_SCOPES: readonly SavedViewScope[] = ['personal', 'team', 'role', 'system'] as const;
-export const SAVED_VIEW_ACTIONS: readonly SavedViewAction[] = ['save', 'apply', 'set-default', 'share', 'delete', 'duplicate'] as const;
+
+export const SAVED_VIEW_COMPATIBILITY_STATUSES: readonly SavedViewCompatibilityStatus[] = [
+  'compatible', 'degraded-compatible', 'incompatible',
+] as const;
