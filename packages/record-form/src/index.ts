@@ -81,7 +81,20 @@ export { InMemoryRecordFormStorageAdapter } from './storage/index.js';
 // export * from './api/index.js';
 
 // Hooks — form orchestration hooks (SF23-T04)
-// export * from './hooks/index.js';
+export {
+  recordFormKeys,
+  useRecordFormState,
+  useRecordDraftPersistence,
+  useRecordSubmission,
+} from './hooks/index.js';
+export type {
+  UseRecordFormStateOptions,
+  UseRecordFormStateResult,
+  UseRecordDraftPersistenceOptions,
+  UseRecordDraftPersistenceResult,
+  UseRecordSubmissionOptions,
+  UseRecordSubmissionResult,
+} from './hooks/index.js';
 
 // Components — thin composition shells (SF23-T05/T06)
 // export * from './components/index.js';
