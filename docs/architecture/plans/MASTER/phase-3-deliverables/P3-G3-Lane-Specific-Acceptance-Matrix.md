@@ -213,24 +213,30 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 ## 8. Reporting Acceptance (§18.6)
 
 **Gate owner:** Project Hub platform owner
+**Full acceptance gate:** P3-E9-T10 §3 (AC-REP-01 through AC-REP-55)
 
 | # | Criterion | PWA | SPFx | Evidence |
 |---|---|---|---|---|
-| 1 | PX Review family live | Full lifecycle (draft→generate→approve→release) | Generate + approve | PX Review generation and approval flow |
-| 2 | Owner Report family live | Full lifecycle (draft→generate→release) | Generate + release | Owner Report generation and release flow |
-| 3 | Draft refresh | Full refresh with timestamp tracking | Refresh supported | Draft shows refreshed data |
-| 4 | Staleness warning | Full warning before export | Warning displayed | Stale draft triggers visual cue |
-| 5 | Queued generation | Asynchronous generation pipeline | Generation supported | Report queued and produced |
-| 6 | Run-ledger tracking | Full history browsing | **Launch-to-PWA** for history | Run-ledger entry created per generation |
-| 7 | PX Review approval | Explicit approval gate enforced | Approval action available | Approval required before release |
-| 8 | Owner Report non-gated | No approval step; governed release | Release without approval | Direct generate→release flow |
-| 9 | PM narrative | Full editing with provenance | **Broad** — basic editing | Narrative override saved with PM identity/timestamp |
-| 10 | Export | PDF artifact produced and stored | Export available | PDF in SharePoint document library |
-| 11 | PER report permissions enforced | PER cannot confirm PM draft; PER cannot edit PM narrative; reviewer-generated runs use confirmed snapshot only | Same PER restriction enforced | PER boundary test: attempt to confirm draft or edit narrative as PER yields rejected action (P3-F1 §8.5–§8.6) |
-| 12 | Reviewer-generated review runs | PER-initiated run uses latest confirmed PM snapshot; run-ledger records `runType: 'reviewer-generated'` | Same run behavior (broad lane: run initiation supported) | Run test: reviewer run tagged correctly; confirms snapshot version matches latest PM confirmation (P3-F1 §8.6) |
-| 13 | Central project-governance policy enforcement | Reports enforces effective policy (global floor + project overlay); global policy cannot be loosened by project policy | Same policy read and enforced | Policy test: project policy that would loosen global floor is rejected; effective policy = merged result (P3-F1 §14) |
-| 14 | PM↔PE internal review chain blocks PX Review when configured | PX Review action is blocked until chain is marked complete; no bypass path available | Same gate enforced | Chain test: with `requiresInternalReviewChain: true`, PX Review initiation is rejected before chain completion (P3-F1 §14.5) |
-| 15 | PER release authority per family | PER release is permitted or blocked per `perReleaseAuthority` value in effective policy | Same enforcement | Release authority test: PER can release families where `per-permitted`; cannot where `pe-only` (P3-F1 §14.4) |
+| 1 | PX Review family live | Full lifecycle (draft→generate→approve→release) | Generate + approve | PX Review generation and approval flow (AC-REP-01, AC-REP-26) |
+| 2 | Owner Report family live | Full lifecycle (draft→generate→release) | Generate + release | Owner Report generation and release flow (AC-REP-30) |
+| 3 | Sub-scorecard family live | Ingests P3-E10 confirmed snapshot; assembles PDF; no score re-computation | Same | P3-E10 snapshot consumed; scores match source (AC-REP-43–AC-REP-46) |
+| 4 | Lessons-learned family live | Ingests P3-E10 confirmed snapshot; assembles PDF | Same | All lesson fields present in PDF (AC-REP-44, AC-REP-47) |
+| 5 | Corporate template registry | 4 families registered with correct metadata; PX Review marked `isLocked: true` | Same | Registry query returns 4 families (AC-REP-01–AC-REP-03) |
+| 6 | Draft/active configuration version model | Draft editable; structural changes require PE re-approval; active config drives runs | Same | Structural change sets re-approval flag; prior active version still drives runs while draft pending (AC-REP-05) |
+| 7 | Draft refresh | Full refresh with timestamp tracking; preserves PM narrative | Refresh supported | Draft shows refreshed data; narrative unchanged (AC-REP-09–AC-REP-10) |
+| 8 | Staleness warning | Full warning before export; acknowledgment gate enforced | Warning displayed | Stale draft triggers visual cue; export gated (AC-REP-11–AC-REP-13) |
+| 9 | Queued generation | Asynchronous generation pipeline | Generation supported | Report queued and produced (AC-REP-19–AC-REP-21) |
+| 10 | Run-ledger tracking | Full history browsing | **Launch-to-PWA** for history | Run-ledger entry created per generation; `runType` distinguished (AC-REP-22–AC-REP-24) |
+| 11 | PX Review approval | Explicit approval gate enforced; PE-only | Approval action available | Approval required before release (AC-REP-26–AC-REP-29) |
+| 12 | Owner Report non-gated | No approval step; governed release | Release without approval | Direct generate→release flow (AC-REP-30) |
+| 13 | PM narrative | Full editing with provenance | **Broad** — basic editing | Narrative override saved with PM identity/timestamp (AC-REP-09, AC-REP-16) |
+| 14 | Export | PDF artifact produced and stored in SharePoint | Export available | PDF in SharePoint document library (AC-REP-20) |
+| 15 | PER report permissions enforced | PER cannot confirm PM draft; cannot edit PM narrative; cannot access unconfirmed drafts; reviewer-generated runs use confirmed snapshot only | Same PER restriction enforced | PER boundary test: attempt to confirm draft or edit narrative as PER yields rejected action (AC-REP-36–AC-REP-42; P3-F1 §8.5–§8.6) |
+| 16 | Reviewer-generated review runs | PER-initiated run uses latest confirmed PM snapshot; run-ledger records `runType: 'reviewer-generated'` | Same run behavior (broad: run initiation supported) | Run test: reviewer run tagged correctly; snapshot version matches latest PM confirmation (AC-REP-23; P3-F1 §8.6) |
+| 17 | Central project-governance policy enforcement | Reports enforces effective policy (global floor + project overlay); global policy cannot be loosened by project policy | Same policy read and enforced | Policy test: project overlay that loosens global floor is rejected; effective policy = merged result (AC-REP-07; P3-F1 §14) |
+| 18 | PM↔PE internal review chain blocks PX Review when configured | PX Review cannot proceed to approval until chain is `complete`; no bypass available | Same gate enforced | Chain test: PX Review approval rejected when chain required and incomplete (AC-REP-28; P3-F1 §14.5) |
+| 19 | PER release authority per family | PER release permitted/blocked per `perReleaseAuthority` in effective policy | Same enforcement | Release authority test: PER can release where `per-permitted`; cannot where `pe-only` (AC-REP-34; P3-F1 §14.4) |
+| 20 | Spine publication flowing | 4 event types; health metric; 3 work queue item types; provenance related items | Same | Spine events verified on lifecycle transitions (AC-REP-49–AC-REP-55) |
 
 ---
 

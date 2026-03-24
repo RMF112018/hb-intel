@@ -8,7 +8,7 @@
 | **Document Type** | Specification |
 | **Owner** | Experience / Shell Team + Architecture |
 | **Update Authority** | Architecture lead; changes require review by Experience lead and Project Hub platform owner |
-| **Last Reviewed Against Repo Truth** | 2026-03-20 |
+| **Last Reviewed Against Repo Truth** | 2026-03-24 |
 | **References** | [Phase 3 Plan §10](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [P3-A1](P3-A1-Project-Registry-and-Activation-Contract.md); [P3-A2](P3-A2-Membership-Role-Authority-Contract.md); [P3-A3](P3-A3-Shared-Spine-Publication-Contract-Set.md); [P3-B1](P3-B1-Project-Context-Continuity-and-Switching-Contract.md); [P2-B0](../phase-2-deliverables/P2-B0-Lane-Ownership-and-Coexistence-Rules.md); [PH7-BW plans](../../ph7-breakout-webparts/); [current-state-map](../../../blueprint/current-state-map.md) |
 
 ---
@@ -114,7 +114,7 @@ The following MUST be identical across both lanes. No lane may deviate from thes
 | Related-items spine | P3-A3 | `@hbc/related-items` |
 | Project context identity authority | P3-B1 | `@hbc/shell` (projectStore) |
 | Module visibility by role | P3-A2 §4 | `@hbc/auth` (FeaturePermissionRegistration) |
-| Report definitions, runs, release model | P3-F1 | Future reports package |
+| Report definitions, runs, release model | P3-F1; P3-E9 T-file family (T01–T10) | Future reports package |
 | Auth and role resolution | P2-D1 / P3-A2 | `@hbc/auth` |
 | Telemetry event vocabulary | P2-B0 §Cross-Lane Consistency | Shared telemetry contracts |
 
@@ -239,16 +239,35 @@ For each always-on core module, the following defines what each lane MUST suppor
 
 ### 4.5 Safety
 
+Note: Safety is excluded from PER annotation layer (P3-E1 §9.3). PER sees read-only tiered summaries only. No annotation affordance in Safety workspace on either lane.
+
 | Capability | PWA | SPFx |
 |---|---|---|
-| Project safety-plan state | **Required** | **Required** |
-| Subcontractor acknowledgments | **Required** | **Required** |
-| Safety orientation records | **Required** | **Required** |
-| Checklist / inspection aggregation | **Required** | **Required** |
-| JHA log records | **Required** | **Required** |
-| Emergency-plan acknowledgment | **Required** | **Required** |
-| Incident-report working state | **Required** | **Required** |
-| Linked safety follow-up actions | **Required** | **Required** |
+| SSSP base plan — view and project-instance editing | **Required** | **Required** |
+| SSSP governed sections — Safety Manager editing | **Required** | **Broad** — view governed sections; editing via PWA |
+| SSSP approval workflow (joint 3-party) | **Required** | **Required** |
+| SSSP addendum creation and approval | **Required** | **Broad** |
+| Inspection checklist template management | **Required** | **Broad** — view templates; template management via PWA |
+| Weekly inspection execution (Safety Manager) | **Required** | **Required** |
+| Inspection scorecard and trend view | **Required** | **Required** |
+| Corrective action ledger — view and manage | **Required** | **Required** |
+| Corrective action verification workflow | **Required** | **Required** |
+| Incident and case management (with privacy tier enforcement) | **Required** | **Broad** — STANDARD tier; SENSITIVE/RESTRICTED creation via PWA |
+| JHA creation, contributor input, approval | **Required** | **Required** |
+| Daily Pre-Task Plan creation and completion | **Required** | **Required** |
+| Toolbox talk prompt library and issuance | **Required** | **Broad** |
+| Weekly toolbox talk record and proof capture | **Required** | **Required** |
+| Worker orientation record creation and acknowledgment | **Required** | **Required** |
+| Subcontractor safety submission review | **Required** | **Broad** |
+| Certification and competent-person record management | **Required** | **Broad** |
+| HazCom / SDS record management | **Required** | **Broad** |
+| Readiness decision surface (project/subcontractor/activity) | **Required** | **Required** |
+| Readiness exception granting (Safety Manager) | **Required** | **Broad** |
+| Readiness override workflow | **Required** | **Required** |
+| Composite safety scorecard (Project Hub projection) | **Required** | **Required** |
+| PER tiered read-only summary | **Required** | **Required** |
+| Safety reports workspace | **Required** | **Launch-to-PWA** |
+| Schedule integration (toolbox prompt intelligence) | **Required** | **Required** (read-only) |
 
 ### 4.6 Reports
 
@@ -271,9 +290,73 @@ For each always-on core module, the following defines what each lane MUST suppor
 | Baseline-visible lifecycle placement | **Required** | **Required** |
 | Deeper field-first depth | Deferred to Phase 6 | Deferred to Phase 6 |
 
-### 4.8 Executive Review (Portfolio Executive Reviewer posture)
+### 4.8 Lifecycle Modules — Project Closeout, Project Startup, Subcontract Compliance
 
-Executive review capabilities apply to PER posture only; non-PER users are unaffected by this lane depth distinction. Review-capable module surfaces for Phase 3: Financial, Schedule, Constraints, Permits, Project Health, Reports (per P3-E1 §9.1).
+Per P3-E1 §8, all three lifecycle modules require **Full parity** across PWA and SPFx. The per-module capability tables below define depth expectations within that parity requirement.
+
+#### 4.8.1 Project Closeout
+
+Project Closeout is an always-on lifecycle module (active from closeout phase through archive). Full parity does not mean identical interaction patterns — see SPFx constraints below.
+
+| Capability | PWA | SPFx | Notes |
+|---|---|---|---|
+| **Closeout Execution Checklist** | | | |
+| View checklist and item results | **Required** | **Required** | Daily use surface for field staff |
+| Mark checklist items Yes/No/NA | **Required** | **Required** | SUPT marks field-scope items; PM marks all |
+| View completion percentage | **Required** | **Required** | Per-section and overall |
+| Add overlay items (PM only) | **Required** | **Broad** | Full overlay creation in PWA; view-only in SPFx |
+| View milestone status | **Required** | **Required** | |
+| **Subcontractor Scorecard** | | | |
+| Create and score Interim/FinalCloseout evaluation | **Required** | **Required** | Form-heavy; both types in both lanes |
+| Sign off on submission (PM + SUPT acknowledgment) | **Required** | **Required** | |
+| View scorecard history per sub | **Required** | **Broad** | Full history in PWA; current evaluation in SPFx |
+| PE scorecard approval workflow | **Required** | **Broad** | Approval action supported in both; approval history is PWA-depth |
+| **Lessons Learned** | | | |
+| Create lesson entry (rolling, any lifecycle phase) | **Required** | **Broad** | Authoring in both; lesson list navigation stays in both |
+| Submit `LessonsLearningReport` for PE review | **Required** | **Launch-to-PWA** | Report synthesis and submission is PWA-depth |
+| PE lessons approval workflow | **Required** | **Broad** | Approval action supported; full review thread is PWA-depth |
+| **Project Autopsy & Learning Legacy** | | | |
+| Activate autopsy sub-surface | **Required** | **Broad** | Activation in both; workshop facilitation model is PWA-depth |
+| View autopsy summary and findings | **Required** | **Required** | Summary view in both lanes |
+| Create findings, actions, legacy outputs | **Required** | **Launch-to-PWA** | Workshop facilitation and authoring is PWA-depth |
+| **Org Intelligence Surfaces** | | | |
+| View contextual lessons panel (Project Hub) | **Required** | **Required** | Read-only in both lanes |
+| View sub vetting intelligence panel | **Required** | **Required** | Role-gated in both lanes |
+| View learning legacy feed | **Required** | **Required** | Read-only in both lanes |
+| **Governance** | | | |
+| Archive-Ready gate review and PE approval | **Required** | **Broad** | Approval action in both; 8-criteria checklist in PWA |
+
+**SPFx constraints specific to Closeout:**
+- No `localStorage` or `sessionStorage`; all state must be server-round-tripped.
+- Offline checklist item queuing is PWA-only (IndexedDB-backed `@hbc/session-state`).
+- Push notification delivery is PWA-only; SPFx may display in-app notifications on polling.
+- Autopsy workshop facilitation (pre-survey issuance, findings capture during workshop) is PWA-depth; SPFx shows autopsy summary.
+
+#### 4.8.2 Project Startup
+
+| Capability | PWA | SPFx |
+|---|---|---|
+| Job Startup Checklist (55-item) | **Required** | **Required** |
+| Jobsite Safety Checklist (32-item startup readiness) | **Required** | **Required** |
+| Responsibility Matrix — view and assign | **Required** | **Required** |
+| Responsibility Matrix — template management | **Required** | **Launch-to-PWA** |
+| Owner Contract Review — view and extract | **Required** | **Required** |
+| Project Management Plan — authoring | **Required** | **Broad** |
+| Project Management Plan — PE approval workflow | **Required** | **Broad** |
+
+#### 4.8.3 Subcontract Compliance
+
+| Capability | PWA | SPFx |
+|---|---|---|
+| Subcontract Checklist — view and complete | **Required** | **Required** |
+| Subcontract Checklist — PM/APM sign-off | **Required** | **Required** |
+| Compliance Waiver — create and submit | **Required** | **Broad** |
+| Compliance Waiver — three-party approval routing | **Required** | **Broad** |
+| Buyout gate status (reads from Financial) | **Required** | **Required** |
+
+### 4.9 Executive Review (Portfolio Executive Reviewer posture)
+
+Executive review capabilities apply to PER posture only; non-PER users are unaffected by this lane depth distinction. Review-capable module surfaces for Phase 3: Financial, Schedule, Constraints, Permits, Project Health, Reports, Project Closeout, Project Startup, Subcontract Compliance (per P3-E1 §9.1).
 
 | Capability | PWA | SPFx | Notes |
 |---|---|---|---|

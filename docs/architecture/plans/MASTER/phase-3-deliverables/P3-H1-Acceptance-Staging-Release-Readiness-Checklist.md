@@ -204,15 +204,20 @@ See P3-E7-T08 §4 for the full 52-item acceptance gate (AC-PRM-01 through AC-PRM
 
 ### 6.5 Safety
 
+Full 60-item acceptance gate: AC-SAF-01 through AC-SAF-60 in P3-E8-T10 §4. High-level gates listed here.
+
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.5.1 | Safety plan state — Required both lanes | Not Started | | P3-E1, P3-G3 §7.5 |
-| 6.5.2 | Orientations/acknowledgments — Required both lanes | Not Started | | P3-E2 §7 |
-| 6.5.3 | Checklists/inspection aggregation — Required both lanes | Not Started | | P3-E2 §7 |
-| 6.5.4 | JHA log records — Required both lanes | Not Started | | P3-E2 §7 |
-| 6.5.5 | Incident reports with notifications — Required both lanes | Not Started | | P3-E2 §7 |
-| 6.5.6 | SSSP replacement notes included | Not Started | | P3-E3 §6 |
-| 6.5.7 | Future toolbox-talk note documented | Not Started | | P3-E3 §6.4 |
+| 6.5.1 | SSSP base plan lifecycle (DRAFT → PENDING_APPROVAL → APPROVED → SUPERSEDED) with joint 3-party approval enforced | Not Started | | P3-E8-T03; AC-SAF-01 through AC-SAF-08 |
+| 6.5.2 | Weekly inspection template governance, version pinning, and normalized scoring (applicable sections only) operational | Not Started | | P3-E8-T04; AC-SAF-09 through AC-SAF-14 |
+| 6.5.3 | Centralized corrective action ledger accepts all source types; severity-based due dates; overdue computed; verification workflow via `@hbc/workflow-handoff` | Not Started | | P3-E8-T05; AC-SAF-15 through AC-SAF-21 |
+| 6.5.4 | Incident tiered privacy model enforced (STANDARD/SENSITIVE/RESTRICTED); `personsInvolved` never exposed outside Safety Manager/Officer; LITIGATED state escalates evidence retention | Not Started | | P3-E8-T05; AC-SAF-22 through AC-SAF-27 |
+| 6.5.5 | JHA competent-person pre-condition enforced; Daily Pre-Task Plan requires APPROVED JHA reference | Not Started | | P3-E8-T06; AC-SAF-28 through AC-SAF-33 |
+| 6.5.6 | Toolbox talk program operational: governed prompt library, schedule-driven intelligence (Safety Manager review of AI suggestions required before governed), governed closure model | Not Started | | P3-E8-T06; AC-SAF-34 through AC-SAF-40 |
+| 6.5.7 | Orientation, subcontractor submissions, certifications, HazCom/SDS, and competent-person designations operational with appropriate expiration sweeps and work queue generation | Not Started | | P3-E8-T07; AC-SAF-41 through AC-SAF-47 |
+| 6.5.8 | Readiness evaluation engine operational at project/subcontractor/activity levels; HARD blocker cannot be excepted; exceptions and overrides require governed joint workflow | Not Started | | P3-E8-T08; AC-SAF-48 through AC-SAF-54 |
+| 6.5.9 | Composite safety scorecard published to Project Hub; PER receives sanitized score band (not raw score) and anonymized incident counts only; no annotation affordance anywhere in Safety workspace | Not Started | | P3-E8-T09; AC-SAF-55 through AC-SAF-60 |
+| 6.5.10 | All 25 work queue rules (WQ-SAF-01 through WQ-SAF-25) registered with `@hbc/my-work-feed` and firing correctly | Not Started | | P3-E8-T09 §4; AC-SAF-58 |
 
 ### 6.6 Source-of-Truth Compliance
 
@@ -244,23 +249,30 @@ See P3-E7-T08 §4 for the full 52-item acceptance gate (AC-PRM-01 through AC-PRM
 
 ## 7. Reporting Checklist (§18.6)
 
+**Full acceptance gate:** P3-E9-T10 §3 (AC-REP-01 through AC-REP-55). Items below are the lane-level summary; use T10 for complete implementation verification.
+
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 7.1 | PX Review family live — PWA full lifecycle, SPFx generate+approve | Not Started | | P3-F1, P3-G3 §8.1 |
-| 7.2 | Owner Report family live — PWA full lifecycle, SPFx generate+release | Not Started | | P3-F1, P3-G3 §8.2 |
-| 7.3 | Draft refresh — full handling PWA, refresh supported SPFx | Not Started | | P3-F1 §4, P3-G3 §8.3 |
-| 7.4 | Staleness warning — shown before export in both lanes | Not Started | | P3-F1 §5, P3-G3 §8.4 |
-| 7.5 | Queued generation — asynchronous pipeline works | Not Started | | P3-F1 §6, P3-G3 §8.5 |
-| 7.6 | Run-ledger tracking — PWA full browsing, SPFx Launch-to-PWA | Not Started | | P3-F1 §7, P3-G3 §8.6 |
-| 7.7 | PX Review approval gate enforced | Not Started | | P3-F1 §8.1, P3-G3 §8.7 |
-| 7.8 | Owner Report non-gated release works | Not Started | | P3-F1 §8.2, P3-G3 §8.8 |
-| 7.9 | PM narrative overrides with provenance | Not Started | | P3-F1 §11, P3-G3 §8.9 |
-| 7.10 | Export produces PDF stored in SharePoint | Not Started | | P3-F1 §9, P3-G3 §8.10 |
-| 7.11 | PER report permissions enforced — view/annotate/generate reviewer runs permitted; PM draft writes and source-of-truth mutations prohibited | Not Started | | P3-F1 §8.5, P3-G3 §8.11 |
-| 7.12 | Reviewer-generated review runs — `runType: 'reviewer-generated'` uses only the latest confirmed PM snapshot; PM draft state untouched | Not Started | | P3-F1 §8.6, P3-G3 §8.12 |
-| 7.13 | Central project-governance policy record enforced — report-family approval/release policy owned by policy record; Reports module enforces only (no ownership) | Not Started | | P3-F1 §14, P3-G3 §8.13 |
-| 7.14 | PM↔PE internal review chain blocks PX Review release — when chain is configured at project level, PX Review release requires chain completion before advancing to PX Review stage | Not Started | | P3-F1 §14.5, P3-G3 §8.14 |
-| 7.15 | PER release authority per report family — `perReleaseAuthority` field respected per family definition | Not Started | | P3-F1 §14.4, P3-G3 §8.15 |
+| 7.1 | PX Review family live — PWA full lifecycle, SPFx generate+approve | Not Started | | P3-F1, P3-G3 §8, AC-REP-01 |
+| 7.2 | Owner Report family live — PWA full lifecycle, SPFx generate+release | Not Started | | P3-F1, P3-G3 §8, AC-REP-30 |
+| 7.3 | Sub-scorecard family live — ingests P3-E10 confirmed snapshot; assembles PDF; no score re-computation | Not Started | | P3-E9-T06 §5.3, AC-REP-43–AC-REP-46 |
+| 7.4 | Lessons-learned family live — ingests P3-E10 confirmed snapshot; assembles PDF | Not Started | | P3-E9-T06 §5.5, AC-REP-44 |
+| 7.5 | Corporate template registry live — 4 families registered; PX Review locked | Not Started | | P3-E9-T05 §1, AC-REP-01–AC-REP-03 |
+| 7.6 | Draft/active configuration version model — structural changes require PE re-approval | Not Started | | P3-E9-T03 §1, AC-REP-05 |
+| 7.7 | Draft refresh — full handling PWA, refresh supported SPFx; PM narrative preserved | Not Started | | P3-F1 §4, P3-G3 §8, AC-REP-09–AC-REP-10 |
+| 7.8 | Staleness warning — shown before export in both lanes; acknowledgment gate | Not Started | | P3-F1 §5, P3-G3 §8, AC-REP-11–AC-REP-13 |
+| 7.9 | Queued generation — asynchronous pipeline works | Not Started | | P3-F1 §6, P3-G3 §8, AC-REP-19–AC-REP-21 |
+| 7.10 | Run-ledger tracking — PWA full browsing, SPFx Launch-to-PWA; `runType` distinction | Not Started | | P3-F1 §7, P3-G3 §8, AC-REP-22–AC-REP-24 |
+| 7.11 | PX Review approval gate enforced — PE-only | Not Started | | P3-F1 §8.1, P3-G3 §8, AC-REP-26–AC-REP-27 |
+| 7.12 | Owner Report non-gated release works | Not Started | | P3-F1 §8.2, P3-G3 §8, AC-REP-30 |
+| 7.13 | PM narrative overrides with provenance | Not Started | | P3-F1 §11, P3-G3 §8, AC-REP-16 |
+| 7.14 | Export produces PDF stored in SharePoint | Not Started | | P3-F1 §9, P3-G3 §8, AC-REP-20 |
+| 7.15 | PER report permissions enforced — view/annotate/generate reviewer runs permitted; PM draft writes and source-of-truth mutations prohibited; no unconfirmed draft access | Not Started | | P3-F1 §8.5, P3-G3 §8, AC-REP-36–AC-REP-42 |
+| 7.16 | Reviewer-generated review runs — `runType: 'reviewer-generated'` uses only the latest confirmed PM snapshot; PM draft state untouched | Not Started | | P3-F1 §8.6, P3-G3 §8, AC-REP-23 |
+| 7.17 | Central project-governance policy record enforced — global floor + project overlay merged; Reports enforces only; PE cannot loosen global floor | Not Started | | P3-F1 §14, P3-G3 §8, AC-REP-07 |
+| 7.18 | PM↔PE internal review chain blocks PX Review approval when configured | Not Started | | P3-F1 §14.5, P3-G3 §8, AC-REP-28 |
+| 7.19 | PER release authority per report family — `perReleaseAuthority` field respected per effective policy | Not Started | | P3-F1 §14.4, P3-G3 §8, AC-REP-34 |
+| 7.20 | Spine publication flowing — 4 Activity event types, health metric, 3 WQ item types, provenance related items | Not Started | | P3-E9-T08, AC-REP-49–AC-REP-55 |
 
 ---
 

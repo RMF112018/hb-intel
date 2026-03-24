@@ -362,24 +362,40 @@ Permits is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Exec
 
 ### 7.1 Project Hub operational authority
 
-| Data domain | Authority | Notes |
+The Safety Module is a governed multi-record workspace. All 15 record families below are owned by Project Hub / the Safety workspace. No external system is the source of truth for any of these records.
+
+| Data domain | Authority | Governing Record Family |
 |---|---|---|
-| Project safety-plan state | **Project Hub owns** | Structured safety plan |
-| Subcontractor acknowledgments | **Project Hub owns** | Acknowledgment records |
-| Safety orientation records | **Project Hub owns** | Orientation tracking |
-| Checklist / inspection aggregation | **Project Hub owns** | Aggregated from weighted safety checklist baseline |
-| JHA log records | **Project Hub owns** | Job hazard analysis logs |
-| Emergency-plan acknowledgment | **Project Hub owns** | Acknowledgment state |
-| Incident reports | **Project Hub owns** | Working state and notification state |
-| Safety follow-up actions | **Project Hub owns** | Linked follow-up tracking |
+| SSSP base plan (governed sections) | **Safety Manager owns** | `ISiteSpecificSafetyPlan` — governed sections |
+| SSSP base plan (instance sections) | **Project team owns** (within Safety Manager framework) | `ISiteSpecificSafetyPlan` — instance sections |
+| SSSP addenda | **Safety Manager owns** (project team may draft instance addenda) | `ISSSPAddendum` |
+| Inspection checklist templates | **Safety Manager owns exclusively** | `IInspectionChecklistTemplate` |
+| Completed weekly inspections | **Safety Manager owns exclusively** | `ICompletedInspection` |
+| Safety corrective actions | **Safety module owns** (centralized ledger, all sources) | `ISafetyCorrectiveAction` |
+| Incidents and cases | **Safety Manager / Safety Officer owns** | `IIncidentRecord` |
+| Job Hazard Analysis records | **Safety Manager approves; project team contributes** | `IJhaRecord` |
+| Daily Pre-Task Plans | **Project team creates; Safety Manager has read access** | `IDailyPreTaskPlan` |
+| Toolbox Talk Prompts | **Safety Manager owns** | `IToolboxTalkPrompt` |
+| Weekly Toolbox Talk records | **Safety Manager owns** | `IWeeklyToolboxTalkRecord` |
+| Worker orientation records | **Safety Manager / Safety Officer owns** | `IWorkerOrientationRecord` |
+| Subcontractor safety submissions | **Safety Manager reviews and approves** | `ISubcontractorSafetySubmission` |
+| Certifications and qualifications | **Safety Manager owns** | `ICertificationRecord` |
+| HazCom / SDS records | **Safety Manager owns** | `IHazComSdsRecord` |
+| Competent-person designations | **Safety Manager owns** | `ICompetentPersonDesignation` |
+| Safety evidence records | **Safety Manager owns** | `ISafetyEvidenceRecord` |
+| Readiness decisions | **Safety module derives; Safety Manager sets exceptions/overrides** | `ISafetyReadinessDecision` |
+| Composite safety scorecard | **Safety module publishes (derived — never stored as raw score)** | `ISafetyCompositeScorecard` |
 
-### 7.2 External references
+### 7.2 Status mutation prohibition
 
-Governed safety artifacts/documents MAY live in destination libraries. Project Hub maintains canonical references.
+- `ICompletedInspection.status` may only be set by Safety Manager or Safety Officer. Project team cannot initiate or complete inspections.
+- `ISafetyCorrectiveAction.status` transitions to `CLOSED` require Safety Manager verification (the `PENDING_VERIFICATION → CLOSED` step is Safety Manager-only).
+- `ISafetyReadinessDecision`: exceptions may only be granted by Safety Manager. Overrides require joint acknowledgment (Safety Manager + PM + Superintendent for activity-level; Safety Manager + PM for project/subcontractor level).
+- No `complianceScore` numeric field exists anywhere in the Safety module. The composite scorecard is derived, not stored.
 
-### 7.3 Boundary rule
+### 7.3 External references
 
-Safety module is the operational platform owner. It replaces the current Site Specific Safety Plan file-based workflow. All operational safety state originates in and is owned by Project Hub.
+Governed safety artifacts/documents MAY live in destination libraries. The SSSP rendered PDF output is stored as a governed `ISafetyEvidenceRecord` and referenced by `ISiteSpecificSafetyPlan.renderedDocumentRef`. The Safety module maintains canonical references to all document outputs.
 
 ### 7.4 Executive review exclusion (Phase 3)
 
@@ -387,56 +403,63 @@ Safety is **excluded from Phase 3 executive review** (P3-E1 §9.1 and §9.3). Th
 
 | Rule | Description |
 |---|---|
-| **No annotation layer** | No executive review annotation layer exists for the Safety module in Phase 3. Portfolio Executive Reviewers MUST NOT place review annotations on Safety module content. |
-| **Read-only PER access** | PER posture grants read-only access to Safety module data. Read-only access does not constitute a review layer — there is no annotation capability and no push-to-team pathway from Safety in Phase 3. |
+| **No annotation layer** | No executive review annotation layer exists for the Safety module in Phase 3. Portfolio Executive Reviewers MUST NOT place review annotations on Safety module content. `@hbc/field-annotations` MUST NOT be integrated in the Safety module. |
+| **Tiered PER read access** | PER posture grants read-only access to governed operational summaries only: composite scorecard (score band, not raw score), readiness decision, corrective action counts, and anonymized incident counts by type. No individual incident detail, no raw inspection scores. |
 | **No mutation path from PER** | PER access to Safety data is strictly non-operational. No PER action may trigger any write to Safety source-of-truth records. |
+| **No push-to-team** | There is no push-to-team pathway from Safety in Phase 3. |
 | **Rationale** | Safety data is operationally sensitive and compliance-critical. This exclusion may be revisited in a later phase with appropriate governance controls (P3-E1 §9.3). |
 
-**Field-level specification:** [P3-E8 — Safety Module Field Specification](P3-E8-Safety-Module-Field-Specification.md)
+**Field-level specification:** [P3-E8 — Safety Module Field Specification](P3-E8-Safety-Module-Field-Specification.md) *(master index + T01–T10 detail files)*
 
 ---
 
 ## 8. Reports Source-of-Truth
 
-### 8.1 Project Hub operational authority
+### 8.1 Reports operational authority
 
 | Data domain | Authority | Notes |
 |---|---|---|
-| Report family definitions | **Project Hub owns** | PX Review, Owner Report |
-| Report run ledger | **Project Hub owns** | Run history, generation tracking |
-| Draft state | **Project Hub owns** | Auto-assembled drafts with staleness handling |
-| PM narrative overrides | **Project Hub owns** | Governed narrative editing |
-| Release/distribution state | **Project Hub owns** | Release lifecycle tracking |
-| Export artifacts | **Project Hub generates** | Derived from draft state |
+| Corporate template library (family definitions, section schemas, allowed content types) | **Reports owns** (governed by MOE/Admin) | PX Review (locked), Owner Report, sub-scorecard, lessons-learned family definitions |
+| Project family registrations | **Reports owns** | Activation state, active configuration version per project-family |
+| Draft configuration (PM-editable, pending PE activation) | **Reports owns** | Draft and active configuration version model; structural changes require PE re-approval |
+| PM narrative overrides | **Reports owns** | Narrative-only sections; PM/PE-authored exclusively; PER has no write authority |
+| Run ledger | **Reports owns** | All generation runs (standard + reviewer-generated), status transitions, approval/release records |
+| Artifact provenance | **Reports owns** | Snapshot references frozen on run creation; immutable |
+| Central project-governance policy record | **Reports enforces only** — Policy record owned by MOE (global floor) and PE (project overlay); Reports reads and enforces but does not write |
 
 ### 8.2 Module snapshot consumption
 
 | Source module | Data consumed | Authority |
 |---|---|---|
-| Financial | Forecast summary, exposure, checklist status | Financial module owns source |
-| Schedule | Milestone status, variance, projections | Schedule module owns source |
-| Constraints | Open/overdue counts, delay impact | Constraints module owns source |
-| Permits | Status summary, expiration risk | Permits module owns source |
-| Safety | Incident summary, compliance metrics | Safety module owns source |
-| Health | Overall status, dimension scores, triage | Health spine owns source |
+| P3-A1 (Project Registry) | Project metadata, team, contract summary | P3-A1 owns source |
+| P3-E3 (Action Items / Constraints) | Open item counts, summaries | P3-E3 owns source |
+| P3-E5 (Financial) | Forecast summary, budget status, change orders | Financial module owns source |
+| P3-E6 (Schedule) | Milestone status, percent complete, critical path summary | Schedule module owns source |
+| P3-E7 (Permits & Constraints) | Open permits, active constraints summary | Permits module owns source |
+| P3-E8 (Safety) | Safety posture band, composite score band, corrective actions summary | Safety module owns source |
+| P3-E10 (Closeout) | Pre-computed sub-scorecard (scores, ratings, narrative) and lessons-learned entries | **P3-E10 owns all source data; Reports ingests confirmed snapshot only** |
+
+**Sub-scorecard and lessons-learned boundary:** P3-E10 (Project Closeout) is the source-of-truth for all sub-scorecard and lessons-learned operational data. Reports assembles these into governed PDF artifacts but does not own, compute, or re-derive this data. Scoring formulas (section averages, overall weighted score, performance ratings) are executed by P3-E10 before snapshot publication to Reports.
 
 ### 8.3 Boundary rule
 
-Reports module owns the report lifecycle (definition, generation, draft, approval, release). Reports does NOT own the module data it assembles — it consumes snapshots from the respective module spines at generation time.
+Reports module owns the report lifecycle (definition, generation, draft configuration, approval, release). Reports does NOT own the module data it assembles — it consumes immutable snapshots from source modules at generation time. Reports does NOT own sub-scorecard or lessons-learned data — these are owned by P3-E10.
 
 ### 8.4 Executive review boundary
 
-Reports is a **review-capable surface** in Phase 3 but under governance that differs from the operational module surfaces. PER authority over Reports is governed by P3-F1 (the central project-governance policy record and report-family release rules).
+Reports is a **review-capable surface** in Phase 3. PER authority over Reports is governed by P3-F1 (the central project-governance policy record and report-family release rules).
 
 | Rule | Description |
 |---|---|
-| **Annotation isolation** | Review annotations on report content MUST NOT modify report definitions, the run ledger, draft state, or PM narrative. Annotations are a separate review-layer artifact. |
+| **Annotation isolation** | Review annotations on report content MUST NOT modify report definitions, the run ledger, draft state, or PM narrative. Annotations are a separate `@hbc/field-annotations` review-layer artifact. |
 | **No PM draft authority** | PER has no authority over PM draft state. PM draft state confirmation is PM/PE-owned exclusively. PER MUST NOT initiate, approve, or modify the PM draft confirmation step. |
+| **No draft access** | PER cannot access unconfirmed or in-progress PM drafts. |
 | **Reviewer-generated review runs** | PER may generate review runs only against the latest already-confirmed PM-owned snapshot. PER CANNOT generate a run against an unconfirmed or in-progress PM draft. |
-| **Release authority** | PER release authority on a given report family is governed by the central project-governance policy record (P3-F1). It is not universal — family-by-family, governed by policy. |
+| **Release authority** | PER release authority on a given report family is governed by the effective project-governance policy record (P3-F1 §14.4). It is not universal — family-by-family, governed by policy. `perReleaseAuthority = 'per-permitted'` required. |
 | **PX Review cannot bypass PE internal review** | The PM↔PE internal review chain, when configured at project level, MUST complete before PX Review proceeds. PER cannot bypass this chain. |
+| **No chain authority** | PER cannot initiate, advance, or skip the PM↔PE internal review chain. |
 
-**Field-level specification:** [P3-E9 — Reports Module Field Specification](P3-E9-Reports-Module-Field-Specification.md)
+**Field-level specification:** [P3-E9 — Reports Module Field Specification](P3-E9-Reports-Module-Field-Specification.md) *(master index + T01–T10)*
 
 ---
 
@@ -629,39 +652,66 @@ Overrides MUST always carry provenance metadata. No override may be applied sile
 
 | Data domain | Authority | Notes |
 |---|---|---|
-| Closeout checklist items | **Project Hub owns** | 70-item checklist across 7 sections |
-| Checklist item results (Yes/No/N/A) | **Project Hub owns** | Tri-state per item |
-| Checklist date fields | **Project Hub owns** | Date-bearing items (2.10, 3.11, 4.2, 4.3, 4.4, 4.13); item 4.14 is calculated |
-| Subcontractor scorecard records | **Project Hub owns** | Full evaluation record per subcontractor |
-| Scorecard scoring and calculation | **Project Hub owns** | Section averages and weighted overall score computed in module |
-| Aggregation dashboard rows | **Project Hub owns** | Organization-wide subcontractor database fed from individual scorecards |
-| Lessons Learned entries | **Project Hub owns** | Per-lesson structured records |
-| Lessons database rows | **Project Hub owns** | Organization-wide lessons knowledge database |
-| Jurisdiction configuration (Section 7) | **Project Hub owns** | Per-project jurisdiction template selection |
-| Section 6 integration state | **Project Hub owns** | Completion status and snapshot triggers for Reports module |
+| Closeout checklist items | **Project Hub owns** | 70-item governed checklist; MOE-controlled template library |
+| Checklist item results (Yes/No/NA) | **Project Hub owns** | Tri-state per item; every mutation creates an audit trail entry |
+| Checklist date fields | **Project Hub owns** | Date-bearing items (2.10, 3.11, 4.2, 4.3, 4.4, 4.13); item 4.14 is calculated from item 3.11 |
+| Checklist overlay items | **Project Hub owns** | PM-added items bounded at max 5 per section; auditable |
+| Subcontractor scorecard records | **Project Hub owns** | Interim and FinalCloseout evaluation types; full evaluation record per subcontractor |
+| Scorecard scoring and calculation | **Project Hub owns** | Section averages, overall weighted score, and performance rating — computed by module, not Reports |
+| Lessons Learned entries | **Project Hub owns** | Per-lesson structured records; rolling capture throughout project lifecycle |
+| `LessonsLearningReport` synthesis container | **Project Hub owns** | One per project; packages rolling entries for PE review |
+| Impact magnitude derivation | **Project Hub derives** | Backend text-parsing service; PM cannot set or override; 422 on no signal |
+| Project Autopsy records | **Project Hub owns** | `AutopsyRecord`, `AutopsyFinding`, `AutopsyAction`, `LearningLegacyOutput` per project |
+| Pre-survey templates | **MOE owns** | Governs `PreSurveyTemplate` library; PM/PE issues per project |
+| Closeout lifecycle state | **Project Hub owns** | 9-state `CloseoutLifecycleState` machine; 13 `CloseoutMilestone` records |
+| Jurisdiction configuration | **Project Hub owns** | Per-project jurisdiction template selection for Section 7 items |
 
-### 14.2 External references
+### 14.2 Org intelligence — derived read models (not operational records)
 
-Completed closeout documents (certificates, surveys, letters) may live in governed external destinations (SharePoint libraries, document management). Project Hub maintains canonical references to those artifacts; the artifacts themselves are not owned by Project Hub.
+The following are **derived read models** populated from PE-approved Closeout publication events at project `ARCHIVED` state. They are not editable ledgers within the module. No user may write to them directly; they are populated only by Closeout publication events.
 
-### 14.3 Boundary rule
+| Derived index | Populated from | Visibility |
+|---|---|---|
+| `LessonsIntelligenceIndex` | PE-approved `LessonsLearningReport` on project archive | Broadly available — all internal Project Hub users |
+| `SubIntelligenceIndex` | PE-approved `FinalCloseout` scorecard on project archive | Restricted — PE, PER, MOE, or explicit `SUB_INTELLIGENCE_VIEWER` grant only |
+| `LearningLegacyFeed` | PE-approved individual `LearningLegacyOutput` records on project archive | Broadly available — all internal Project Hub users |
 
-Project Closeout is the operational owner of all closeout execution state. No upstream system is authoritative for closeout checklist, scorecard, or lessons learned data. Project Hub originates and owns all records.
+### 14.3 External references
 
-**Hybrid publication rule:** When Section 6 completion items (6.3 Subcontractor Evaluation, 6.5 Lessons Learned) are marked complete, the Project Closeout module generates a snapshot and publishes it to the Reports module. The Reports module consumes the snapshot to assemble release artifacts (PDF export, distribution). The Reports module MUST NOT write back to or mutate any Closeout source-of-truth record during this process.
+Completed closeout documents (certificates of occupancy, owner acceptance letters, surveys, lien releases) may live in governed external destinations (SharePoint libraries, document management). Project Hub maintains canonical references to those artifacts; the artifacts themselves are not owned by Project Hub.
 
-### 14.4 Executive review annotation boundary
+### 14.4 Boundary rules
 
-Project Closeout is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Portfolio Executive Reviewers may place annotations at full field-level depth on Project Closeout module content.
+**Ownership rule:** Project Closeout is the sole operational owner of all closeout execution state. No other feature package may write to any Closeout record. No upstream system is authoritative for closeout checklist, scorecard, lessons, or autopsy data.
+
+**Publication trigger rule:** Org intelligence publication does **not** occur on Section 6 item completion. The correct trigger sequence is:
+1. Records reach `publicationStatus = PE_APPROVED` via PE approval workflow.
+2. Project lifecycle reaches `ARCHIVED` state (PE-gated).
+3. Closeout emits publication events; org indexes are populated from the events.
+
+This replaces the earlier "Section 6 items marked complete → snapshot to Reports" framing, which was incorrect.
+
+**Reports module snapshot rule:** Reports ingests Closeout sub-scorecard and lessons-learned data via the snapshot API (`GET /api/closeout/{projectId}/scorecard/{id}/snapshot`; `GET /api/closeout/{projectId}/lessons/snapshot`). Precondition: `publicationStatus ≥ PE_APPROVED` and PE role on the requesting user. Reports does NOT recompute any Closeout scores or re-derive any data. Reports MUST NOT write back to or mutate any Closeout source-of-truth record.
+
+**Org intelligence read boundary:** Project Hub contextual surfaces (lessons panel, sub vetting panel, learning legacy feed) are read-only consumers of the org intelligence indexes. No Project Hub surface may mutate any Closeout source-of-truth record through the org intelligence read path.
+
+**Cross-module read boundary:** Closeout reads cross-module data (permit lifecycle state, financial variance, schedule dates) exclusively through `@hbc/related-items` read signals and through the respective module's summary/snapshot APIs (for the autopsy pre-briefing pack assembly). Closeout does not import from other feature packages.
+
+### 14.5 Executive review and approval boundary
+
+Project Closeout is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Both PE (Project Executive) and PER (Portfolio Executive Reviewer) may annotate Closeout content. PE additionally has formal approval authority at all milestone gates and publication approvals.
 
 | Rule | Description |
 |---|---|
-| **Annotation isolation** | Review annotations MUST be stored in a separate `@hbc/field-annotations` artifact. They MUST NOT be stored in or written to the closeout checklist, scorecard records, or lessons entries. |
-| **No mutation path** | Annotations are read-layer overlays only. No review annotation may trigger a mutation of closeout records, scorecard scores, lessons entries, or aggregation dashboard rows. |
-| **Visibility** | Restricted to the review circle before the PER explicitly pushes to the project team. |
-| **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
+| **Annotation isolation** | All annotations MUST be stored in `@hbc/field-annotations`. They MUST NOT be stored in or written to any Closeout operational record (checklist, scorecard, lessons, autopsy). |
+| **No mutation path from annotation** | No annotation action may trigger a mutation of any Closeout record. PE adding an annotation does not advance any status. |
+| **PE annotation ≠ PE approval** | PE annotation (non-blocking observation stored in `@hbc/field-annotations`) is categorically distinct from PE approval (explicit API action that advances `publicationStatus` or `lifecycleState` and is stored on the operational record). These must be separate API actions and separate UI paths. |
+| **PER annotation visibility** | PER annotations on Closeout records are visible to PM and PE; not visible to SUPT. |
+| **PE annotation visibility** | PE annotations are visible to PM, SUPT, PE, and PER. |
+| **Retention** | All annotation history is retained indefinitely; annotations survive project archive. |
+| **Push** | PE push-to-project-team creates a governed work queue item per P3-D3 §13. |
 
-**Field-level specification:** [P3-E10 — Project Closeout Module Field Specification](P3-E10-Project-Closeout-Module-Field-Specification.md)
+**Field-level specification:** [P3-E10 — Project Closeout Module Field Specification](P3-E10-Project-Closeout-Module-Field-Specification.md) *(master index + T01–T11 detail files)*
 
 ---
 
@@ -786,5 +836,5 @@ If a downstream deliverable conflicts with this specification, this specificatio
 
 ---
 
-**Last Updated:** 2026-03-23 (v2)
+**Last Updated:** 2026-03-24 (v3) — §14 Project Closeout rewritten to reflect derived intelligence model, correct publication trigger (PE_APPROVED + ARCHIVED, not Section 6 completion), Autopsy sub-surface, LessonsIntelligenceIndex/SubIntelligenceIndex/LearningLegacyFeed as derived read models, PE annotation vs. PE approval formal distinction, and updated field-level specification link. Prior: 2026-03-23 (v2)
 **Governing Authority:** [Phase 3 Plan §6, §12](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

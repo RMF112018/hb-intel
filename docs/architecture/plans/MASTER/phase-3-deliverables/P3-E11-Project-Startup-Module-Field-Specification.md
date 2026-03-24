@@ -27,7 +27,7 @@ This document is grounded in the company's working operational startup processes
 
 ### Module Classification
 
-Project Startup is an **always-on lifecycle module** that is active from the moment a project is created in Project Hub. The data it captures is project-specific and does not aggregate across projects (unlike Project Closeout's Aggregation Dashboard). The module provides read-only spine publication for Activity, Health, Work Queue, and Related Items surfaces.
+Project Startup is an **always-on lifecycle module** that is active from the moment a project is created in Project Hub. The data it captures is project-specific and does not publish to org-wide derived intelligence indexes (unlike Project Closeout, which derives the LessonsIntelligenceIndex, SubIntelligenceIndex, and LearningLegacyFeed upon archive). The module provides read-only spine publication for Activity, Health, Work Queue, and Related Items surfaces.
 
 ### Source Files
 

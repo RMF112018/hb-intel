@@ -242,3 +242,9 @@ export {
   createMockProjectProfile,
   createMockIndexEntryProfile,
 } from './createMockConsumptionSurface.js';
+
+// ── P3-E10-T09 Closeout permissions testing surface ────────────────
+
+export {
+  createMockCloseoutRoleAction,
+} from './createMockCloseoutRoleAction.js';

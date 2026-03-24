@@ -169,6 +169,7 @@ At the end of Phase 3:
 - Project-to-domain navigation and cross-lane continuity
 - Governed reporting workspace, report definitions, report runs, and export/release rules
 - Review Mode phase assignment governance and kickoff reclassification note
+- Document-enabling seams for project context: project-scoped launch and route contracts, project zone model, source/authority/restriction vocabulary, related-item document references, preview/adaptive contract, and publish/handoff intent seams (Workstream J — **enablement only**; full Documents product is Phase 5)
 
 ### 6.2 Out of scope
 
@@ -181,6 +182,7 @@ At the end of Phase 3:
 - Full field-first execution depth for QC and Warranty; deeper definition is deferred to `07_Phase-6_Field-First-HB-Site-Control-Plan.md` (see Repo-Truth Reconciliation Note 3)
 - Future direct Procore API replacement of interim budget file import (explicit future-state item)
 - Future smart toolbox talk topic automation linked to schedule risk/activity triggers (explicit future-state item)
+- Full unified Documents product: global Documents shell, My Files / Departments / Company roots, global smart views (Recent / Shared With Me / Pinned), platform-wide document search, cross-workspace document unification, desktop-sync orchestration — all Phase 5 scope (see `06_Phase-5_Search-Connected-Records-and-Document-Access-Plan.md`)
 
 ---
 
@@ -718,6 +720,35 @@ Review Mode remains assigned to Phase 3, but this plan preserves the explicit go
 
 ---
 
+### Workstream J — Documents Enabling Seams
+
+**Goal:** leave Phase 3 with the project-context seams, zone model, trust vocabulary, related-item contracts, preview/adaptive contract, and publish/handoff events that Phase 5 will need — without building the full Documents product.
+
+**Activities**
+- Define project-scoped document launch and route contracts
+- Define project zone model and registry schema
+- Design Project Hub contextual document entry surface
+- Bind document references into the related-items model
+- Establish source/authority/restriction state vocabulary
+- Define publish/handoff intent event seams
+- Define preview and adaptive tablet/field contract
+- Execute readiness spikes and produce Phase 5 handoff package
+
+**Deliverables**
+- P3-J1: Documents Enabling Seams and Contracts (Specification)
+- Route contract catalog and launch-state schema
+- Project-zone registry schema
+- Source/authority/restriction vocabulary and UI state matrix
+- Related-document reference model
+- Publish/handoff event contract catalog
+- Preview shell contract and adaptive behavior matrix
+- Contradiction register and Phase 5 handoff memo
+
+**Non-scope boundary**
+This workstream is enablement only. It does not build the full global Documents product, global navigation, smart views, or platform-wide search. Those remain Phase 5 scope per `06_Phase-5_Search-Connected-Records-and-Document-Access-Plan.md`.
+
+---
+
 ## 15. Mandatory Deliverables
 
 | Workstream | Deliverable |
@@ -742,6 +773,7 @@ Review Mode remains assigned to Phase 3, but this plan preserves the explicit go
 | G | Cross-lane navigation and handoff map |
 | G | Lane-specific acceptance matrix |
 | H | Acceptance, staging, and release-readiness checklist |
+| J | Documents enabling seams and contracts (P3-J1) |
 
 ---
 
@@ -800,7 +832,7 @@ Cross-lane acceptance gates and execution-readiness criteria are passed.
 Phase 3 enables:
 
 - later field-first project execution depth (Phase 6)
-- stronger project-linked document/search behavior (Phase 5)
+- full unified Documents product and platform-wide document/search behavior (Phase 5) — Phase 3 Workstream J delivers the enabling seams; Phase 5 delivers the product
 - cleaner cross-project continuity and operational rollups
 - richer project-centered reporting, health, and escalation behavior
 
@@ -934,6 +966,7 @@ The following are intentionally deferred or future-state items and must not be s
 - Full jurisdiction-facing permitting package/submission management
 - Full deeper field-first execution depth for QC and Warranty (see Repo-Truth Reconciliation Note 3)
 - Any field-first expansion that exceeds the baseline-visible lifecycle posture for QC/Warranty in this phase
+- Full unified Documents product: global shell, My Files / Departments / Company roots, global smart views, platform-wide search, cross-workspace document unification, desktop-sync orchestration — Phase 5 scope; Phase 3 Workstream J delivers the enabling seams only (route contracts, zone schema, source/authority vocabulary, related-item document references, preview/adaptive contract, publish/handoff seams, and the Phase 5 handoff package)
 
 These should be captured as controlled follow-on artifacts or implementation subtasks, not kept as hidden blockers inside the plan.
 
@@ -999,7 +1032,10 @@ Phase 3 is successful only if Project Hub becomes a genuine project-centered ope
 - `02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md`
 - `03_Phase-2_Personal-Work-Hub-and-PWA-Shell-Plan.md`
 - `05_Phase-4_Core-Business-Domain-Completion-Plan.md`
+- `06_Phase-5_Search-Connected-Records-and-Document-Access-Plan.md` *(deferred target for full Documents implementation)*
 - `07_Phase-6_Field-First-HB-Site-Control-Plan.md`
+- `phase-3-deliverables/04_Phase-3_Unified-Documents-Enabling-Plan.md` *(governing background plan for Workstream J)*
+- `phase-3-deliverables/P3-J1-Documents-Enabling-Seams-and-Contracts.md` *(Workstream J deliverable)*
 - `docs/architecture/blueprint/current-state-map.md`
 - `docs/architecture/blueprint/package-relationship-map.md`
 - `docs/architecture/blueprint/HB-Intel-Dev-Roadmap.md`

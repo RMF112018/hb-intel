@@ -310,6 +310,8 @@ For each always-on core module, the following defines cross-lane navigation patt
 
 ### 8.6 Reports
 
+See P3-E9-T07 §6 for full cross-lane navigation details.
+
 | Interaction | In-lane (SPFx) | Escalates to PWA | Deep-link format |
 |---|---|---|---|
 | View report list | Yes | No | — |
@@ -317,8 +319,11 @@ For each always-on core module, the following defines cross-lane navigation patt
 | View report output | Yes | No | — |
 | PM narrative (basic) | Broad | No | — |
 | Approval (PX Review) | Yes | No | — |
+| Release / distribution state | Broad | No | — |
 | **Run-ledger full history** | No | **Yes** | `/project-hub/{projectId}/reports?view=history` |
 | **Advanced draft editing** | No | **Yes** | `/project-hub/{projectId}/reports/{familyKey}/draft` |
+| **Multi-run comparison (PER)** | No | **Yes** | `/project-hub/{projectId}/review?view=compare` |
+| **Review thread management (PER)** | No | **Yes** | `/project-hub/{projectId}/review?view=threads` |
 
 ### 8.8 Executive Review (PER posture only)
 

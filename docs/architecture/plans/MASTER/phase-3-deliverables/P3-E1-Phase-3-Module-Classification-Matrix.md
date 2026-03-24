@@ -130,7 +130,7 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 | 9 | Permits | Always-on core | First-class working surface | PH7-12 | Publishes to all 4 spines |
 | 10 | Safety | Always-on core | First-class working surface | PH7-6 | Publishes to all 4 spines |
 | 11 | Reports | Always-on core | Governed report workspace | PH7-14 | Publishes to all 4 spines |
-| 12 | Project Closeout | Always-on lifecycle | Hybrid — owns operational data; publishes snapshot to Reports | SOP: SubScorecard, LessonsLearned, Closeout Checklist | Publishes to all 4 spines |
+| 12 | Project Closeout | Always-on lifecycle | Hybrid — owns all operational closeout data; publishes PE-approved snapshots to Reports; derives org intelligence indexes on archive | Closeout Checklist, Subcontractor Scorecard, Lessons Learned, Project Autopsy & Learning Legacy | Publishes to all 4 spines |
 | 13 | Project Startup | Always-on lifecycle | First-class working surface — active from project creation | Job Startup Checklist, Jobsite Safety Checklist, Responsibility Matrix, Owner Contract Review, PM Plan | Publishes to all 4 spines |
 | 14 | Subcontract Compliance | Always-on core | First-class working surface — multi-record (one per subcontract) | Subcontract Checklist, Compliance Waiver | Publishes to all 4 spines; gates Buyout Log ContractExecuted (P3-E4 §6) |
 | 15 | Quality Control | Baseline-visible lifecycle | Lifecycle-visible | PH7-7 | Deferred |
@@ -190,25 +190,29 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 ### 3.5 Safety
 
-**Boundary:** Always-on baseline safety operating platform. Governed safety artifacts/documents may live in destination libraries with canonical references back to Project Hub.
+**Boundary:** Always-on governed safety operating platform. Manages the complete construction safety lifecycle for every active project — SSSP governance, inspection program, corrective action ledger, incident/case management, JHA and pre-task planning, toolbox talk program, worker orientation, subcontractor compliance submissions, certifications, HazCom/SDS, and competent-person designations. Publishes composite safety scorecard (inspection trend + corrective action health + readiness posture + blockers + compliance completion) to Project Hub. Publishes sanitized score band and anonymized incident counts to PER — no annotation layer, no push-to-team.
 
-**Must support:** Structured project safety-plan state, subcontractor acknowledgments, safety orientation records, checklist/inspection aggregation, JHA log records, emergency-plan acknowledgment state, incident-report working state and notification state, linked safety follow-up actions.
+**Must support:** 15 first-class record families (SSSP Base Plan, SSSP Addendum, Inspection Checklist Template, Completed Inspection, Safety Corrective Action, Incident/Case, JHA, Daily Pre-Task Plan, Toolbox Talk Prompt, Weekly Toolbox Talk, Worker Orientation, Subcontractor Safety Submission, Certification/Qualification, HazCom/SDS, Competent-Person Designation). Governed multi-record workspace with Safety Manager authority split from project-instance content. Readiness decision surface at project/subcontractor/activity levels using governed blocker-and-exception matrix (not weighted score). 25 work queue rules. Composite safety scorecard for Project Hub and sanitized PER projection. 6 shared package blockers (B-SAF-01 through B-SAF-06) must be verified before feature implementation. Toolbox talk prompt intelligence driven by schedule activity reading (schedule-driven high-risk detection; governed mappings first; AI assistance for gaps requiring Safety Manager review).
 
-**Replaces:** Current Site Specific Safety Plan file-based workflow and weighted safety checklist baseline.
+**Replaces:** Current Site Specific Safety Plan file-based workflow, weighted safety checklist baseline, flat `ISafetyInspection` monolith, standalone `ICorrectiveAction` tied to inspections only, flat `IIncidentReport`, and basic `IJhaRecord`. `complianceScore` numeric field is dropped entirely — replaced by derived composite scorecard.
 
-**Future-state note:** Later development should support smart toolbox-talk topic generation linked to high-risk schedule activities.
+**Authority note:** Per Decisions 4–39 in P3-E8: governed sections of the SSSP are Safety Manager-only; weekly inspections are conducted by the Safety Manager, not the project team; corrective action ledger is centralized regardless of source workflow. Full decision register in master index.
 
-**Field-level specification:** [P3-E8 — Safety Module Field Specification](P3-E8-Safety-Module-Field-Specification.md)
+**Field-level specification:** [P3-E8 — Safety Module Field Specification](P3-E8-Safety-Module-Field-Specification.md) *(master index + T01–T10 detail files)*
 
 ### 3.6 Reports
 
-**Boundary:** Governed report workspace — not a simple launcher and not a full freeform authoring system.
+**Boundary:** Governed report-production and distribution architecture. Reports owns the corporate template library, project family registrations, draft/snapshot/narrative configuration layer, run ledger, artifact production pipeline, spine publication, and enforcement of the central project-governance policy record. Reports does NOT own source-of-truth data from originating modules.
 
-**Minimum governed report families:** PX Review, Owner Report.
+**Native report families (Phase 3):** PX Review (locked corporate template; PE approval required), Owner Report (configurable corporate template; non-gated release).
 
-**Must support per report family:** Auto-assembly from module snapshots, PM narrative override, governed draft refresh and staleness handling, queued governed generation, run-ledger tracking, export and history, release/distribution state tracking.
+**Integration-driven artifact families (Phase 3):** Sub-scorecard and lessons-learned. Source data is owned by P3-E10 (Project Closeout). Reports ingests P3-E10-confirmed snapshots and assembles governed PDF artifacts. Reports does not compute sub-scorecard scores or lessons-learned entries.
 
-**Field-level specification:** [P3-E9 — Reports Module Field Specification](P3-E9-Reports-Module-Field-Specification.md)
+**Must support per report family:** Governed corporate template library with project-level configuration overlays within template bounds; draft/active configuration version model with PE re-approval for structural changes; PM narrative authoring (text only; no data bindings); draft refresh with staleness detection and acknowledgment gate; async generation pipeline with SharePoint artifact storage; run ledger with standard and reviewer-generated run distinction; PX Review approval gate (PE-only); governed release/distribution class enforcement; PER reviewer-generated runs against confirmed PM snapshots; central project-governance policy record enforcement.
+
+**Review-capable surface:** Yes — PER may view, annotate, and generate reviewer-generated runs for all report families in governed scope (P3-E1 §9.1).
+
+**Field-level specification:** [P3-E9 — Reports Module Field Specification](P3-E9-Reports-Module-Field-Specification.md) *(master index + T01–T10 detail files)*
 
 ### 3.7 Quality Control
 
@@ -220,15 +224,17 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 ### 3.9 Project Closeout
 
-**Boundary:** Always-on lifecycle module that activates when a project enters the closeout phase. Owns the operational state for all closeout execution: closeout checklist tracking, subcontractor performance evaluation, and lessons learned capture.
+**Boundary:** Always-on lifecycle module that activates when a project enters the closeout phase and remains active through archive. Owns the operational state for all five closeout sub-surfaces: checklist execution, subcontractor scorecard, lessons learned, project autopsy and learning legacy, and the executive review layer.
 
-**Must support:** 70-item closeout checklist across 7 sections (Tasks, Document Tracking, Inspections, Turnover, Post Turnover, Closeout Documents for PX, Jurisdiction-specific requirements); subcontractor scorecard with weighted 6-section evaluation and aggregation dashboard; lessons learned structured form and organization-wide knowledge database.
+**Must support:** 70-item governed closeout checklist (MOE-controlled template library, project overlay model, 6 sections); subcontractor scorecard with weighted 6-section/28-criterion evaluation in Interim and FinalCloseout evaluation types; rolling lessons learned capture with PE-gated publication; project autopsy workshop model with pre-briefing pack, pre-survey, 12-section finding framework, and learning legacy feed-forward; PE/PER annotation layer across all sub-surfaces.
 
-**Hybrid model:** Project Closeout owns all operational closeout data. When Section 6 items (Subcontractor Evaluation Form, Lessons Learned) are completed, Project Closeout publishes a snapshot to the Reports module for assembly into release-ready artifacts. Reports does not own the closeout data — it consumes a Closeout-generated snapshot.
+**Hybrid model:** Project Closeout owns all operational closeout data. On project archive, Closeout publishes PE-approved snapshots to the Reports module (for sub-scorecard and lessons-learned PDF artifacts) and publishes to three org-wide derived intelligence indexes (SubIntelligence, LessonsIntelligence, LearningLegacy feed). Reports does not own the closeout data — it consumes a PE-approved, immutable snapshot. Org intelligence indexes are derived read models; they are not editable ledgers within the module.
+
+**Lifecycle governance:** A 9-state `CloseoutLifecycleState` machine governs project-level state transitions. Thirteen `CloseoutMilestone` records govern formal completion events. An 8-criterion Archive-Ready gate requires explicit PE approval before project archive.
 
 **Replaces:** `06 20260307_SOP_SubScorecard-DRAFT.xlsx`, `07 20260307_SOP_LessonsLearnedReport-DRAFT.xlsx`, and `Project_Closeout_Checklist.pdf` manual workflow.
 
-**Field-level specification:** [P3-E10 — Project Closeout Module Field Specification](P3-E10-Project-Closeout-Module-Field-Specification.md)
+**Field-level specification:** [P3-E10 — Project Closeout Module Field Specification](P3-E10-Project-Closeout-Module-Field-Specification.md) *(master index + T01–T11 detail files)*
 
 ### 3.10 Project Startup
 
@@ -442,7 +448,7 @@ Executive review annotations (placed by Portfolio Executive Reviewers) are permi
 | Work Queue | **No** | Operational queue surface; not a review target | — |
 | Activity | **No** | Immutable event log; not a review target | — |
 | Related Items | **No** | Registry surface; not a review target | — |
-| Project Closeout | **Yes** | Full field-level | P3-E2 §16.4, P3-A2 §4.1 |
+| Project Closeout | **Yes** | Full field-level | P3-E2 §14.5, P3-A2 §4.1 |
 | Project Startup | **Yes** | Full field-level | P3-E2 §15.4, P3-A2 §4.1 |
 | Subcontract Compliance | **Yes** | Full field-level | P3-E12, P3-A2 §4.1 |
 | Quality Control | **No (deferred)** | Lifecycle-visible; review layer deferred | — |
@@ -629,14 +635,17 @@ This section defines the shared package integration obligations for every always
 
 | Package | Integration point | Notes |
 |---|---|---|
-| `@hbc/field-annotations` | **NOT INTEGRATED** — Safety excluded from Phase 3 PER review layer (§9.3) | Do not register annotation anchors |
-| `@hbc/versioned-record` | Optional — safety checklist snapshot history | |
-| `@hbc/my-work-feed` | Incident follow-up work items; unresolved JHA actions | Register `SafetyWorkAdapter` |
-| `@hbc/notification-intelligence` | Incident reported alerts; orientation overdue warnings | |
-| `@hbc/bic-next-move` | Incident follow-up ownership; JHA responsible party | |
-| `@hbc/session-state` | Offline draft for checklist and incident entry | |
-| `@hbc/complexity` | Safety log density; JHA detail depth | |
-| `@hbc/smart-empty-state` | No incidents logged, no orientations recorded, no checklist started | |
+| `@hbc/field-annotations` | **NOT INTEGRATED** — Safety excluded from Phase 3 PER review layer (§9.3) | Do not register annotation anchors; no annotation affordance anywhere in Safety workspace |
+| `@hbc/acknowledgment` | Toolbox talk acknowledgment (high-risk governed talks); orientation acknowledgment; SSSP section acknowledgment | Required (B-SAF-01); three `IAcknowledgmentConfig<T>` contexts per P3-E8-T06 and T07 |
+| `@hbc/workflow-handoff` | SSSP approval routing (joint 3-party); corrective action verification; readiness override workflow; JHA approval routing | Required (B-SAF-02); 6 handoff scenarios per P3-E8-T09 §7 |
+| `@hbc/bic-next-move` | Safety workspace next-move prompts: no SSSP, inspection overdue, CRITICAL CA, readiness exceptions, subcontractor blocker | Required (B-SAF-03); 7 prompt types per P3-E8-T09 §8 |
+| `@hbc/my-work-feed` | 25 work queue rules (WQ-SAF-01 through WQ-SAF-25): SSSP approval, inspections, corrective actions, incidents, toolbox talks, orientations, submissions, certifications, readiness blockers | Required (B-SAF-04); register `SafetyWorkAdapter`; full rule set per P3-E8-T09 §4 |
+| `@hbc/related-items` | Safety record relationships: CA originated from inspection/incident/JHA; JHA governs pre-task plans; toolbox talk fulfills prompt; addendum amends SSSP | Required (B-SAF-05); 8 relationship types per P3-E8-T09 §5 |
+| `@hbc/versioned-record` | Inspection records, SSSP versions, toolbox talk records, evidence audit trail; full mutation history for governed safety records | Required (B-SAF-06); per P3-E8-T02 §4.3 |
+| `@hbc/notification-intelligence` | Incident reported alerts; CRITICAL CA alerts; certification expiration warnings; orientation overdue warnings; readiness blocker escalation | |
+| `@hbc/session-state` | Offline draft for inspection entry and daily pre-task plan creation | |
+| `@hbc/complexity` | Safety log density; JHA step-hazard depth; corrective action aging | |
+| `@hbc/smart-empty-state` | No SSSP, no inspection started, no incidents logged, no orientations recorded | |
 
 #### Reports
 
@@ -656,14 +665,17 @@ This section defines the shared package integration obligations for every always
 
 | Package | Integration point | Notes |
 |---|---|---|
-| `@hbc/field-annotations` | PER annotation layer on closeout checklist and scorecard | Per P3-E2 §16.4 |
-| `@hbc/versioned-record` | Snapshot published to Reports module on scorecard and lessons learned completion | Per P3-E10 hybrid model |
-| `@hbc/my-work-feed` | Pending closeout items; incomplete scorecard submissions | Register `CloseoutWorkAdapter` |
-| `@hbc/notification-intelligence` | Closeout phase activation alerts; overdue checklist section warnings | |
-| `@hbc/bic-next-move` | Checklist item responsibility; scorecard submission accountability | |
+| `@hbc/field-annotations` | PE/PER annotation layer across all five sub-surfaces (checklist, scorecard, lessons, autopsy, legacy outputs) | Per P3-E2 §14.4; annotations stored in annotation layer only — zero writes to operational records |
+| `@hbc/versioned-record` | Audit trail for item results, scorecard scoring history, lessons publication lifecycle, autopsy record changes, template version capture | Required for checklist, scorecard, lessons, autopsy, and template records |
+| `@hbc/workflow-handoff` | PE approval routing for all 5 gated handoffs: scorecard submission, lessons report submission, autopsy submission, OWNER_ACCEPTANCE evidence, Archive-Ready gate | Required; Closeout does not implement its own approval routing |
+| `@hbc/acknowledgment` | Named-party sign-off for FinalCloseout scorecard (PM + SUPT co-signature) | Required for scorecard submission |
+| `@hbc/related-items` | Cross-module record readiness signals: closeout item → permit, closeout item → financial variance, closeout item → schedule milestone, autopsy finding → lesson entry | Read-only signals; must not trigger auto-writes to item results |
+| `@hbc/bic-next-move` | Next-action prompts for PM and PE: permit readiness, overdue scorecard, overdue lessons, open autopsy actions, archive approval needed | Register Closeout prompt types at module initialization |
+| `@hbc/notification-intelligence` | PE review request notifications; lien deadline warnings (14-day + missed); autopsy action reminders; archive-ready PE notification | Closeout generates payloads; package handles delivery |
+| `@hbc/my-work-feed` | Pending closeout items; incomplete scorecard and lessons submissions | Register `CloseoutWorkAdapter` |
 | `@hbc/session-state` | Offline draft for checklist items and scorecard | |
 | `@hbc/complexity` | Checklist density; scorecard scoring detail depth | |
-| `@hbc/smart-empty-state` | Closeout not yet activated, no scorecard entries | |
+| `@hbc/smart-empty-state` | Closeout not yet activated; no scorecard entries; no lessons entries | |
 
 #### Project Startup
 
@@ -694,5 +706,5 @@ This section defines the shared package integration obligations for every always
 
 ---
 
-**Last Updated:** 2026-03-23 — Added §7 spine rows, §8 lane rows, and §9.1 review-capable entries for Project Closeout, Project Startup, and Subcontract Compliance; added §13 Module-to-Shared-Package Integration Matrix
+**Last Updated:** 2026-03-24 — Updated §3.9 Project Closeout boundary to reflect 5 sub-surfaces, Autopsy, derived intelligence model, and PE-approval-gated publication; updated module table row; updated §13 Closeout shared-package integration table to reflect all 7 required packages (workflow-handoff, acknowledgment, related-items added; versioned-record and field-annotations notes corrected). Prior: 2026-03-23 — Added §7 spine rows, §8 lane rows, §9.1 review-capable entries for Project Closeout, Project Startup, and Subcontract Compliance; added §13 Module-to-Shared-Package Integration Matrix
 **Governing Authority:** [Phase 3 Plan §11–§12](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

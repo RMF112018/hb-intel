@@ -256,18 +256,18 @@ Project Closeout is an **always-on lifecycle module** that activates when a proj
 
 | File | Purpose | Replacement Module | Status |
 |---|---|---|---|
-| `06 20260307_SOP_SubScorecard-DRAFT.xlsx` | Subcontractor performance scorecard | Project Closeout — SubScorecard sub-surface | **Phase 3** — field spec in P3-E10 §5 |
-| `07 20260307_SOP_LessonsLearnedReport-DRAFT.xlsx` | Lessons learned report | Project Closeout — Lessons Learned sub-surface | **Phase 3** — field spec in P3-E10 §6 |
-| `Project_Closeout_Checklist.pdf` | 70-item closeout checklist (7 sections) | Project Closeout — Closeout Checklist sub-surface | **Phase 3** — field spec in P3-E10 §4 |
+| `06 20260307_SOP_SubScorecard-DRAFT.xlsx` | Subcontractor performance scorecard | Project Closeout — SubScorecard sub-surface | **Phase 3** — field spec in P3-E10-T06 |
+| `07 20260307_SOP_LessonsLearnedReport-DRAFT.xlsx` | Lessons learned report | Project Closeout — Lessons Learned sub-surface | **Phase 3** — field spec in P3-E10-T05 |
+| `Project_Closeout_Checklist.pdf` | 70-item closeout checklist (7 sections) | Project Closeout — Closeout Checklist sub-surface | **Phase 3** — field spec in P3-E10-T03 |
 
 ### 8.2 Replacement scope
 
 All three files are replaced by the Project Closeout module in Phase 3. The module owns:
 - The 70-item operational closeout checklist (replacing the PDF-based workflow)
-- Subcontractor scorecard entry and aggregation dashboard (replacing the Excel SOP)
-- Lessons learned structured entry and organization-wide knowledge database (replacing the Excel SOP)
+- Subcontractor scorecard entry and publication to the SubIntelligence org index (derived read model; replacing the Excel SOP)
+- Lessons learned structured entry and publication to the LessonsIntelligence org index (derived read model; replacing the Excel SOP)
 
-The Reports module assembles SubScorecard and Lessons Learned entries into release artifacts when Section 6 completion items are marked complete (P3-E2 §12.3, P3-E10 §12).
+The Reports module assembles SubScorecard and Lessons Learned entries into release artifacts when the project reaches `PE_APPROVED` publication status (P3-E2 §14.4, P3-E10-T11 §2).
 
 ### 8.3 Quality Control / Warranty Notes (unchanged)
 
