@@ -18,3 +18,5 @@ export * from './financial/index.js';
 export * from './schedule/index.js';
 
 export * from './constraints/index.js';
+
+export * from './permits/index.js';

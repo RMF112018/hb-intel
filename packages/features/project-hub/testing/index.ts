@@ -162,3 +162,8 @@ export { mockLineageScenarios } from './mockLineageScenarios.js';
 export { createMockLedgerRecordSnapshot } from './createMockLedgerRecordSnapshot.js';
 export { createMockReviewPackage } from './createMockReviewPackage.js';
 export { mockConstraintsPublicationScenarios } from './mockConstraintsPublicationScenarios.js';
+
+// ── P3-E7-T01 Permits foundation testing surface ─────────────────────
+
+export { createMockPermitThreadNode } from './createMockPermitThreadNode.js';
+export { mockPermitFoundationScenarios } from './mockPermitFoundationScenarios.js';

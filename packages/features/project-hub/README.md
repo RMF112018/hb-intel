@@ -90,3 +90,7 @@ T06 Publication & Governance: Live/published state model, record snapshots, revi
 T07 Platform Integration: 11 shared packages, 14 spine events, 5 handoffs, 8 notifications, 9 work items, 11 health metrics, 7 work queue items, 6 report types. See `src/constraints/integration/`.
 
 T08 Implementation Closure: Contract-level complete. 44 source files, 17 test files, 331 tests. 44 of 53 acceptance items satisfied; 9 runtime/UAT scope.
+
+## 12. Permits Module (P3-E7) — Stage 7.4
+
+T01 Foundation: Thread model, authority matrix, compliance health doctrine (derived, no manual score), 15 locked decisions. See `src/permits/foundation/`.
