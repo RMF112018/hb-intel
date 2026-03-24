@@ -122,7 +122,7 @@ The `category` field classifies tasks by operational domain. Categories drive Wo
 
 | Severity | Code | Meaning | System behavior |
 |---|---|---|---|
-| Critical | `CRITICAL` | Must be addressed before mobilization. A `NO` result without an approved waiver blocks certification. | Automatically creates a `TaskBlocker` stub when result = NO |
+| Critical | `CRITICAL` | Must be addressed before mobilization. A `NO` result requires documented blocker handling for submission and an approved waiver if the gap remains unresolved at PE gate review. | Automatically creates a `TaskBlocker` stub when result = NO |
 | High | `HIGH` | Strong expectation of YES. A `NO` result without a documented TaskBlocker prevents certification submission. | Flags the task in the certification submission pre-check |
 | Standard | `STANDARD` | Expected completion. `NO` result is allowed without a blocker, but is visible to PE in gate review. | Advisory only; no system enforcement |
 
@@ -130,8 +130,8 @@ The `category` field classifies tasks by operational domain. Categories drive Wo
 
 | Gating impact | Code | Effect on certification |
 |---|---|---|
-| Blocks certification | `BLOCKS_CERTIFICATION` | If `result = NO` or `null` and no approved `ExceptionWaiverRecord` exists, certification cannot be submitted. |
-| Requires blocker if open | `REQUIRES_BLOCKER_IF_OPEN` | If `result = NO` or `null`, a `TaskBlocker` record must exist before certification can be submitted. Blockers may be unresolved — they are documented and PE sees them. |
+| Blocks certification | `BLOCKS_CERTIFICATION` | If `result = NO` or `null`, certification submission requires a documented blocker or approved waiver, and PE gate acceptance requires any remaining gap to be covered by an approved `ExceptionWaiverRecord`. |
+| Requires blocker if open | `REQUIRES_BLOCKER_IF_OPEN` | If `result = NO` or `null`, a `TaskBlocker` record must exist before certification can be submitted. The blocker may remain unresolved for submission, but if it is still OPEN at PE gate review it must be covered by an approved waiver to satisfy T02 gate criteria. |
 | Advisory | `ADVISORY` | No system-level constraint. Task is visible in the certification payload; PE may review. |
 
 The relationship between severity and gating impact is typically:
@@ -196,7 +196,7 @@ When a `StartupTaskInstance` is created, the system attempts to calculate a `due
 | `ON_PROJECT_CREATION` | `StartupProgram.createdAt` | Due = creation date (these tasks should be done immediately) |
 | `ON_CONTRACT_EXECUTION` | `ContractObligationsRegister.contractDate` | Due = contract date; recalculated when contractDate is set; null until contractDate exists |
 | `ON_NTP_ISSUED` | `BaselineSectionField.noticeToProceedDate` | Due = NTP date; recalculated when NTP date is set; null until set |
-| `DAYS_BEFORE_MOBILIZATION` | `StartupProgram.stabilizationWindowOpensAt` (proxy for mobilization) | Due = mobilization date + `dueOffsetDays` (negative = before); null until mobilization date known |
+| `DAYS_BEFORE_MOBILIZATION` | `ProjectExecutionBaseline.section VI.projectStartDate` | Due = planned project start date + `dueOffsetDays` (negative = before); null until the planned start date is set in the Project Execution Baseline |
 | `NONE` | N/A | `dueDate = null`; no SLA enforced |
 
 Due dates are best-effort guidance. They do not block result entry. They drive Work Queue items and the overdue flag.
@@ -235,7 +235,7 @@ Each `StartupTaskTemplate.evidenceTypes` array lists the expected artifacts that
 Evidence attachments on `StartupTaskInstance` records are visible to:
 - All roles with read access to the Startup module
 - PE during ReadinessGateRecord evaluation
-- The `StartupBaseline` does not snapshot evidence attachments themselves, but does record `evidenceAttachmentIds` in the `executionBaselineFieldsAtLock` map for the Section XI attachment tracking fields
+- The `StartupBaseline` does not snapshot raw task-level evidence attachments or `evidenceAttachmentIds`; it preserves aggregate task-library counts plus the separately governed Project Execution Baseline attachment fields defined in T06
 
 ---
 
@@ -270,8 +270,8 @@ OPEN → RESOLVED (task is corrected or external action taken; task result updat
 OPEN → WAIVED (PE approves ExceptionWaiverRecord; linkedWaiverId set)
 ```
 
-- `OPEN` blockers with `gatingImpact = BLOCKS_CERTIFICATION` prevent certification submission unless an approved waiver covers the blocker.
-- `OPEN` blockers with `gatingImpact = REQUIRES_BLOCKER_IF_OPEN` are listed in the certification payload; PE sees them in the gate record.
+- `OPEN` blockers tied to parent tasks with `gatingImpact = BLOCKS_CERTIFICATION` must be documented for certification submission and must have an approved waiver if they remain unresolved at PE gate review.
+- `OPEN` blockers tied to parent tasks with `gatingImpact = REQUIRES_BLOCKER_IF_OPEN` satisfy the submission documentation rule, but if they remain OPEN at PE gate review they fail `TASK_LIB_NO_UNWAIVED_BLOCKERS` unless they have a linked approved waiver.
 - Resolving a blocker does not automatically change the task `result`. The PM must separately update the task result to `YES` after resolving the blocker. This ensures the task result is a deliberate human act, not a side effect of blocker management.
 
 ### 8.3 Auto-Creation Rules
@@ -297,7 +297,7 @@ This distinction is the architectural reason the task library is not a simple ch
 
 A task library with 55 `YES` results is not "certified." It is "operationally complete" — eligible for certification submission. Certification requires that the PM submits and PE accepts.
 
-Conversely, a task library with some `NO` results and documented `OPEN` blockers may still be certified if PE reviews the blockers and waivers and accepts the state as adequate for mobilization. **The PM cannot force certification by setting tasks to YES. The PE cannot be bypassed by completing tasks.**
+Conversely, a task library with some `NO` results and documented `OPEN` blockers may still be submitted for PE review, but PE gate acceptance remains governed by T02: any blocker still OPEN at gate time must be covered by an approved waiver. **The PM cannot force certification by setting tasks to YES. The PE cannot be bypassed by completing tasks.**
 
 ---
 
@@ -309,7 +309,7 @@ The `ReadinessGateRecord` for `STARTUP_TASK_LIBRARY` evaluates the following cri
 |---|---|
 | `TASK_LIB_ALL_REVIEWED` | Every `StartupTaskInstance` has `result ≠ null`, OR has a `TaskBlocker` in OPEN status documenting why it is unreviewed |
 | `TASK_LIB_CRITICAL_COMPLETE` | All instances with `severity = CRITICAL` have `result = YES` or an approved `ExceptionWaiverRecord` |
-| `TASK_LIB_NO_UNWAIVED_BLOCKERS` | All `TaskBlocker` records in `OPEN` status either have a linked approved waiver or have `gatingImpact = ADVISORY` |
+| `TASK_LIB_NO_UNWAIVED_BLOCKERS` | All `TaskBlocker` records still in `OPEN` status at gate time have a linked approved `ExceptionWaiverRecord` |
 
 PE may add additional criteria to a specific gate evaluation at their discretion.
 
@@ -339,7 +339,7 @@ The following catalog defines every governed `StartupTaskTemplate` in the librar
 
 **Severity codes:** C = Critical | H = High | S = Standard
 **Gating codes:** B = Blocks Certification | R = Requires Blocker | A = Advisory
-**Owner codes:** PM | PA | PX | ACCT = Project Accountant | SUPER = Superintendent | SAFETY
+**Owner codes:** PM | PA | PX | PROJ_ACCT | SUPERINTENDENT | SAFETY_MANAGER
 **Due trigger codes:** PROJ = On Project Creation | CONT = On Contract Execution | NTP = On NTP Issued | MOB-N = N days before mobilization | NONE
 
 ### Section 1 — Review Owner's Contract (4 tasks)
@@ -357,11 +357,11 @@ The following catalog defines every governed `StartupTaskTemplate` in the librar
 |---|---|---|---|---|---|---|---|
 | 2.1 | Review Bonding / SDI Requirements (HB and Subcontractor) | `CONTRACTUAL_OBLIGATION` | C | B | PX | CONT | No |
 | 2.2 | Complete Bond Application(s) and Submit to CFO to obtain (If Applicable) | `CONTRACTUAL_OBLIGATION` | C | B | PX | CONT | No |
-| 2.3 | Verify project is set up job in Accounting | `ADMIN_SETUP` | H | R | ACCT | PROJ | No |
+| 2.3 | Verify project is set up job in Accounting | `ADMIN_SETUP` | H | R | PROJ_ACCT | PROJ | No |
 | 2.4 | Verify job is set up in Procore (see Job Set Up Procedures) | `ADMIN_SETUP` | H | R | PA | PROJ | No |
 | 2.5 | Job Turnover Meeting from Estimating to Project Team | `TEAM_SETUP` | C | B | PM | PROJ | No |
-| 2.6 | Have Budget rolled from Sage Estimating to Accounting (if Applicable) | `FINANCIAL_SETUP` | H | R | ACCT | PROJ | No |
-| 2.7 | Have Budget rolled from Sage Accounting to Procore | `FINANCIAL_SETUP` | H | R | ACCT | PROJ | No |
+| 2.6 | Have Budget rolled from Sage Estimating to Accounting (if Applicable) | `FINANCIAL_SETUP` | H | R | PROJ_ACCT | PROJ | No |
+| 2.7 | Have Budget rolled from Sage Accounting to Procore | `FINANCIAL_SETUP` | H | R | PROJ_ACCT | PROJ | No |
 | 2.8 | Order Project Signs through HB Marketing Department | `COMMUNITY_AND_EXTERNAL` | S | A | PA | MOB-21 | Yes |
 | 2.9 | Enter Drawings and Specifications in Procore | `ADMIN_SETUP` | H | R | PA | MOB-14 | No |
 | 2.10 | Contract to Owner with Schedule of Values / Pay app | `OWNER_COORDINATION` | C | B | PM | CONT | No |
@@ -377,7 +377,7 @@ The following catalog defines every governed `StartupTaskTemplate` in the librar
 | 2.20 | Pre-Construction Meeting with Owner | `OWNER_COORDINATION` | H | R | PM | MOB-7 | No |
 | 2.21 | Verify owner has provided Threshold & Testing company/under contract | `OWNER_COORDINATION` | H | R | PM | MOB-14 | Yes |
 | 2.22 | Verify need for Photo/Video Surveys of any adjacent property/Structures | `LEGAL_AND_NOTICE` | H | R | PM | MOB-14 | No |
-| 2.23 | Verify need for any vibration monitoring | `SITE_SERVICES` | H | R | SUPER | MOB-14 | No |
+| 2.23 | Verify need for any vibration monitoring | `SITE_SERVICES` | H | R | SUPERINTENDENT | MOB-14 | No |
 | 2.24 | Write Subcontracts in Procore (Identify longest lead items & award first) | `SUBCONTRACTOR_MANAGEMENT` | H | R | PM | MOB-14 | No |
 | 2.25 | Confirm review of estimate, qualifications & Sub proposals after plan scope reviews | `SUBCONTRACTOR_MANAGEMENT` | H | R | PM | MOB-14 | No |
 | 2.26 | Create buyout tracking log (verify any owner provided items and track) | `FINANCIAL_SETUP` | H | R | PM | MOB-14 | No |
@@ -385,8 +385,8 @@ The following catalog defines every governed `StartupTaskTemplate` in the librar
 | 2.28 | Create, record and track the NTO. Insert date reminder in Outlook | `LEGAL_AND_NOTICE` | C | B | PA | NTP | Yes |
 | 2.29 | Mail Notice to Owner (Certified Mail/Return Receipt) | `LEGAL_AND_NOTICE` | C | B | PA | NTP | Yes |
 | 2.30 | Verify Owner's purchase of Builder's Risk Insurance | `CONTRACTUAL_OBLIGATION` | C | B | PM | CONT | Yes |
-| 2.31 | Provide Superintendent with Project Safety Plan and SDS Notebook | `SAFETY_COORDINATION` | C | B | SAFETY | MOB-3 | Yes |
-| 2.32 | Contact local Utilities and notify them of your project and services required | `SITE_SERVICES` | H | R | SUPER | MOB-14 | No |
+| 2.31 | Provide Superintendent with Project Safety Plan and SDS Notebook | `SAFETY_COORDINATION` | C | B | SAFETY_MANAGER | MOB-3 | Yes |
+| 2.32 | Contact local Utilities and notify them of your project and services required | `SITE_SERVICES` | H | R | SUPERINTENDENT | MOB-14 | No |
 | 2.33 | Consider a community awareness program if warranted | `COMMUNITY_AND_EXTERNAL` | S | A | PM | NONE | Yes |
 
 ### Section 3 — Order Services and Equipment (6 tasks)
@@ -394,10 +394,10 @@ The following catalog defines every governed `StartupTaskTemplate` in the librar
 | No. | Title | Cat | Sev | Gating | Owner | Due | Stab |
 |---|---|---|---|---|---|---|---|
 | 3.1 | Telephone and/or Internet (ordered/set up by the IT Department) | `SITE_SERVICES` | H | R | PA | MOB-14 | Yes |
-| 3.2 | Sanitary | `SITE_SERVICES` | H | R | SUPER | MOB-3 | Yes |
-| 3.3 | Field Office (ordered through the Main Office) | `SITE_SERVICES` | H | R | SUPER | MOB-14 | Yes |
-| 3.4 | Job Office Trailer (Permit is required) | `SITE_SERVICES` | H | R | SUPER | MOB-14 | Yes |
-| 3.5 | Order/Re-stock First Aid Kit & Purchase/Recharge fire extinguishers | `SAFETY_COORDINATION` | C | B | SUPER | MOB-3 | Yes |
+| 3.2 | Sanitary | `SITE_SERVICES` | H | R | SUPERINTENDENT | MOB-3 | Yes |
+| 3.3 | Field Office (ordered through the Main Office) | `SITE_SERVICES` | H | R | SUPERINTENDENT | MOB-14 | Yes |
+| 3.4 | Job Office Trailer (Permit is required) | `SITE_SERVICES` | H | R | SUPERINTENDENT | MOB-14 | Yes |
+| 3.5 | Order/Re-stock First Aid Kit & Purchase/Recharge fire extinguishers | `SAFETY_COORDINATION` | C | B | SUPERINTENDENT | MOB-3 | Yes |
 | 3.6 | Other | `SITE_SERVICES` | S | A | PM | NONE | Yes |
 
 ### Section 4 — Permits Posted on Jobsite (12 tasks)
@@ -406,18 +406,18 @@ Section 4 tasks are governed by the Permit Posting Verification model (T07 §4).
 
 | No. | Title | Cat | Sev | Gating | Owner | Due | Stab |
 |---|---|---|---|---|---|---|---|
-| 4.01 | Master permit | `PERMIT_POSTING` | C | B | SUPER | MOB-0 | Yes |
-| 4.02 | Roofing permit | `PERMIT_POSTING` | H | R | SUPER | MOB-0 | Yes |
-| 4.03 | Plumbing permit | `PERMIT_POSTING` | H | R | SUPER | MOB-0 | Yes |
-| 4.04 | HVAC permit | `PERMIT_POSTING` | H | R | SUPER | MOB-0 | Yes |
-| 4.05 | Electric permit | `PERMIT_POSTING` | H | R | SUPER | MOB-0 | Yes |
-| 4.06 | Fire Alarm permit | `PERMIT_POSTING` | H | R | SUPER | MOB-0 | Yes |
-| 4.07 | Fire Sprinklers permit | `PERMIT_POSTING` | H | R | SUPER | MOB-0 | Yes |
-| 4.08 | Elevator permit | `PERMIT_POSTING` | S | A | SUPER | MOB-0 | Yes |
-| 4.09 | Irrigation permit | `PERMIT_POSTING` | S | A | SUPER | MOB-0 | Yes |
-| 4.10 | Low Voltage permit | `PERMIT_POSTING` | S | A | SUPER | MOB-0 | Yes |
-| 4.11 | Site-Utilities — Drainage, Water & Sewer permits | `PERMIT_POSTING` | H | R | SUPER | MOB-0 | Yes |
-| 4.12 | Any Right of way, FDOT, MOT plans, etc. | `PERMIT_POSTING` | H | R | SUPER | MOB-0 | Yes |
+| 4.01 | Master permit | `PERMIT_POSTING` | C | B | SUPERINTENDENT | MOB-0 | Yes |
+| 4.02 | Roofing permit | `PERMIT_POSTING` | H | R | SUPERINTENDENT | MOB-0 | Yes |
+| 4.03 | Plumbing permit | `PERMIT_POSTING` | H | R | SUPERINTENDENT | MOB-0 | Yes |
+| 4.04 | HVAC permit | `PERMIT_POSTING` | H | R | SUPERINTENDENT | MOB-0 | Yes |
+| 4.05 | Electric permit | `PERMIT_POSTING` | H | R | SUPERINTENDENT | MOB-0 | Yes |
+| 4.06 | Fire Alarm permit | `PERMIT_POSTING` | H | R | SUPERINTENDENT | MOB-0 | Yes |
+| 4.07 | Fire Sprinklers permit | `PERMIT_POSTING` | H | R | SUPERINTENDENT | MOB-0 | Yes |
+| 4.08 | Elevator permit | `PERMIT_POSTING` | S | A | SUPERINTENDENT | MOB-0 | Yes |
+| 4.09 | Irrigation permit | `PERMIT_POSTING` | S | A | SUPERINTENDENT | MOB-0 | Yes |
+| 4.10 | Low Voltage permit | `PERMIT_POSTING` | S | A | SUPERINTENDENT | MOB-0 | Yes |
+| 4.11 | Site-Utilities — Drainage, Water & Sewer permits | `PERMIT_POSTING` | H | R | SUPERINTENDENT | MOB-0 | Yes |
+| 4.12 | Any Right of way, FDOT, MOT plans, etc. | `PERMIT_POSTING` | H | R | SUPERINTENDENT | MOB-0 | Yes |
 
 > **MOB-0** for Section 4 tasks means "by mobilization date" — not before, but by. Section 4 is explicitly designed for confirmation at mobilization, hence all tasks are `activeDuringStabilization = true`.
 
@@ -434,7 +434,7 @@ The `STARTUP_TASK_LIBRARY` certification may be submitted when all of the follow
 3. Every instance with `severity = HIGH` and `result = NO` or `null` has a `TaskBlocker` in OPEN status (may be unresolved at submission)
 4. No auto-created `TaskBlocker` stubs have empty `description` fields
 
-`NO`-result tasks are explicitly permitted in a submitted certification. The purpose of the certification is to document the current state — not to assert that every task is complete. PE reviews the gap state and decides whether to accept, return for correction, or accept with waivers.
+`NO`-result tasks are explicitly permitted in a submitted certification. The purpose of the certification is to document the current state — not to assert that every task is complete. PE reviews the gap state and decides whether to accept, return for correction, or require waivers. Submission eligibility does not guarantee PE gate acceptance: any `TaskBlocker` still OPEN at gate time must be covered by an approved `ExceptionWaiverRecord` to satisfy T02 `TASK_LIB_NO_UNWAIVED_BLOCKERS`.
 
 ### 13.2 Completion Percentage Calculation
 

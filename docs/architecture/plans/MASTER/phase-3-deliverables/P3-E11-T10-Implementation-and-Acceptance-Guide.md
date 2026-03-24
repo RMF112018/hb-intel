@@ -53,13 +53,13 @@ Implement in the order below. Each stage has a gate check before proceeding. Do 
 
 ### Stage 2 — Task Library
 
-**Implements:** `StartupTaskLibrary`, `StartupTaskInstance`, `TaskBlocker` (startup scope)
+**Implements:** governed `StartupTaskTemplate` catalog support, project-scoped `StartupTaskInstance`, `TaskBlocker`
 
 **Gate check:**
-- `StartupTaskLibrary` and its `StartupTaskInstance` records are created from the governed template defined in T03; `taskNumber` and `title` are immutable after creation
+- Project-scoped `StartupTaskInstance` records are created from the governed `StartupTaskTemplate` catalog defined in T03; `taskNumber` and `title` are immutable after creation
 - Task results (`YES`, `NO`, `NA`, or null while unreviewed) are persisted and versioned via `@hbc/versioned-record`
 - Section 4 (Permit Posting) instances display permit cross-reference context sourced from read-only query to Permits module — no Permits records are written
-- `TaskBlocker` creation, resolution, and waiver lifecycle per T02 §3.4
+- `TaskBlocker` creation and resolution follow T03 §8; any blocker waiver path is represented by a linked approved `ExceptionWaiverRecord`, not by a local blocker-only waiver shortcut
 - `STARTUP_TASK_LIBRARY` certification requires no co-signer; `certifiedBy[]` records the submitting PM only unless future policy expands the surface
 - Activity Spine events: `StartupTaskLibraryActivated`, `StartupTaskInstanceUpdated`, `TaskBlockerCreated`, `TaskBlockerResolved`
 - Health metrics: `startupTaskCompletionRate`, `startupOpenTaskBlockerCount`
@@ -202,7 +202,7 @@ The following criteria govern whether the Startup module implementation is compl
 |---|---|---|
 | 7 | Task Library instantiated from governed template | `taskNumber` and `title` match source template verbatim and are immutable |
 | 8 | Task instance results are versioned | Each `StartupTaskInstance.result` change creates a version record via `@hbc/versioned-record` |
-| 9 | `TaskBlocker` lifecycle | Blocker creation, resolution, and waiver transitions per T02 §3.4 all function; PM waiver on non-critical blockers, PX required on critical-gating blockers |
+| 9 | `TaskBlocker` lifecycle | Blocker creation and resolution per T03 §8 function; unresolved blockers may support certification submission when documented, but PE gate acceptance requires any blocker still OPEN to have a linked approved `ExceptionWaiverRecord` |
 
 **Safety Readiness**
 
@@ -352,8 +352,8 @@ The following record names changed in the split. Any prior implementation using 
 
 | Old name | New name | Notes |
 |---|---|---|
-| `StartupChecklist` | `StartupTaskLibrary` | Top-level container renamed |
-| `StartupChecklistSection` | (section grouping within `StartupTaskLibrary`) | Sections are now groupings on `StartupTaskInstance`, not separate records |
+| `StartupChecklist` | Governed `StartupTaskTemplate` catalog + project `StartupTaskInstance` set | The old flat checklist no longer maps to a single top-level record |
+| `StartupChecklistSection` | Section grouping on `StartupTaskTemplate` / `StartupTaskInstance` | Sections are groupings, not separate records |
 | `StartupChecklistItem` | `StartupTaskInstance` | Item records renamed |
 | `StartupChecklistBlocker` | `TaskBlocker` | Blocker is now a shared record type, not a Startup-specific type |
 | `JobsiteSafetyChecklist` | `JobsiteSafetyChecklist` | Current governing record name retained |
