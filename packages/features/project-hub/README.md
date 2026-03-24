@@ -102,3 +102,5 @@ T03 Lifecycle & Governance: Dual state machines (application + issued permit via
 T04 Inspection & Compliance: Checkpoint templates (14 master building), deficiency health impact, expiration risk tiers, compliance closeout gate, xlsx import validation. See `src/permits/inspection/`.
 
 T05 Workflow & Downstream: 21 spine events, 18 health metrics, 15 work queue rules, 5 related items, 6 handoffs, 7 BIC prompts, PER annotation scopes. See `src/permits/workflow/`.
+
+T06 UX Surface & Reporting: 5 views, 12 list columns, health indicators, 11 detail sections, 6 dashboard tiles, 6 report types, PER annotation UX. See `src/permits/views/`.
