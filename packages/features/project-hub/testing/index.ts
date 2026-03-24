@@ -167,3 +167,8 @@ export { mockConstraintsPublicationScenarios } from './mockConstraintsPublicatio
 
 export { createMockPermitThreadNode } from './createMockPermitThreadNode.js';
 export { mockPermitFoundationScenarios } from './mockPermitFoundationScenarios.js';
+
+// ── P3-E7-T02 Permits records testing surface ────────────────────────
+
+export { createMockPermitApplication } from './createMockPermitApplication.js';
+export { createMockIssuedPermit } from './createMockIssuedPermit.js';

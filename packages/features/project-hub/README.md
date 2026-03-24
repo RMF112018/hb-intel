@@ -94,3 +94,5 @@ T08 Implementation Closure: Contract-level complete. 44 source files, 17 test fi
 ## 12. Permits Module (P3-E7) — Stage 7.4
 
 T01 Foundation: Thread model, authority matrix, compliance health doctrine (derived, no manual score), 15 locked decisions. See `src/permits/foundation/`.
+
+T02 Record Architecture: 7 record families (PermitApplication, IssuedPermit, RequiredInspectionCheckpoint, InspectionVisit, InspectionDeficiency, PermitLifecycleAction, PermitEvidenceRecord), 15 enumerations, responsibility envelopes. See `src/permits/records/`.
