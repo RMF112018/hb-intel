@@ -8,8 +8,8 @@
 | **Document Type** | Module Field Specification — T-File Master Index |
 | **Owner** | Project Hub Leadership |
 | **Last Updated** | 2026-03-24 |
-| **Status** | Specification — All T-files governing; **T10 Stage 1 foundation implemented (v0.1.82)** |
-| **Related contracts** | P3-E1 §3.x, P3-E2 §17, P3-D1, P3-D2, P3-D3, P3-D4, P3-E4 (back-charge advisory), P3-E10 (Closeout seam), P3-E11 (Startup seam), P3-G1, P3-G2, P3-H1 |
+| **Status** | Specification — All T-files governing; **T10 Stage 1–2 implemented (v0.1.83)** |
+| **Related contracts** | P3-E1 §3.x, P3-E2 §18, P3-D1, P3-D2, P3-D3, P3-D4, P3-E4 (back-charge advisory), P3-E10 (Closeout seam), P3-E11 (Startup seam), P3-E15 (upstream quality-basis seam), P3-G1, P3-G2, P3-H1 |
 
 ---
 
@@ -106,8 +106,8 @@ Phase 3 delivers Layer 1 in full:
 
 | Concern | Governing source |
 |---|---|
-| Module classification | P3-E1 §3.x (pending update — see T10 §6) |
-| SoT and action boundary | P3-E2 §17 (pending update — see T10 §6) |
+| Module classification | P3-E1 §3.8 |
+| SoT and action boundary | P3-E2 §18 |
 | Three-tier authority model | P3-A2 |
 | Activity publication | P3-D1 + T09 §3 |
 | Health publication | P3-D2 + T09 §4 |
@@ -119,6 +119,7 @@ Phase 3 delivers Layer 1 in full:
 | Financial back-charge advisory | P3-E4 + T06 §7 |
 | Closeout turnover seam | P3-E10 + T03 §5 |
 | Startup commissioning seam | P3-E11 + T03 §6 |
+| Upstream quality-basis seam | P3-E15 + T03/T06/T09 — Warranty reads accepted quality basis, approved deviations, evidence lineage, and responsible-organization quality history without mutating QC records |
 
 ---
 

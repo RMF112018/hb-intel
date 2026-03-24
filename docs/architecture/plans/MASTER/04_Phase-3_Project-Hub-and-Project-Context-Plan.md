@@ -39,7 +39,7 @@ Phase 3 planning must explicitly acknowledge the following current-state foundat
 - A real **`/project-hub` route** already exists in the PWA (`apps/pwa/src/router/workspace-routes.ts`). The current `ProjectHubPage` is an **MVP-level scaffold** — a portfolio dashboard with summary cards and data table — not yet the robust operating layer this phase envisions.
 - Supporting shared packages already exist at verified maturity levels:
   - `@hbc/project-canvas` (v0.0.1, mature — dist build, exports, storybook, tests; SF13, ADR-0102 locked)
-  - `@hbc/features-project-hub` (v0.1.82, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, Project Closeout, Project Startup, and Subcontract Execution Readiness are live; Project Warranty T10 Stage 1 foundation implemented)
+  - `@hbc/features-project-hub` (v0.1.83, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, Project Closeout, Project Startup, and Subcontract Execution Readiness are live; Project Warranty T10 Stages 1–2 implemented; P3-E15 Quality Control planning family authored and reconciled as implementation-ready architecture)
   - `@hbc/related-items` (v0.0.2, mature — cross-module record relationship panel)
   - `@hbc/workflow-handoff` (v0.1.0, mature — platform workflow primitive)
   - `@hbc/session-state` (v0.0.1, mature — SF12, ADR-0101 locked; offline model ready)
@@ -410,7 +410,7 @@ The always-on core baseline for every activated project is:
 
 ### 11.2 Baseline-visible lifecycle modules
 
-**Quality Control** is a baseline-visible lifecycle module rather than an equal-intensity always-on core surface at day-one depth. Its deeper field-first operating depth is deferred (see Repo-Truth Reconciliation Note 3 and §22).
+**Quality Control** is a baseline-visible lifecycle/control module in Phase 3, governed by P3-E15. It is now a first-class internal Project Hub operating surface for quality plans, reviews, issues, deviations, evidence, advisory, health rollups, and turnover-quality readiness. Its deeper field-first/mobile operating depth remains deferred (see Repo-Truth Reconciliation Note 3 and §22).
 
 **Warranty** has been elevated to a first-class Phase 3 operating surface. P3-E14 (Project Warranty Module Field Specification, T01–T10) governs the full Layer 1 scope: Coverage Registry, Warranty Case lifecycle (16 states), SLA escalation, Subcontractor Coordination, Owner Intake Log, spine publication, and canvas tile. Layer 2 (owner portal, direct subcontractor access, external collaborative workspace) and deeper field-first execution depth beyond the Layer 1 control surface remain explicitly deferred (see §22 and P3-E14 T08).
 
@@ -441,7 +441,7 @@ Buyout is not treated as a separate top-level baseline module in this refined pl
 
 #### Lifecycle-visible modules with later deeper field-first definition
 
-- Quality Control
+- Quality Control (P3-E15 — internal Project Hub quality plans, reviews, issues, advisory, health, and turnover-quality readiness; deep field/mobile execution deferred)
 
 #### First-class lifecycle modules with governed Layer 1 scope and deferred external workspace
 
@@ -639,7 +639,7 @@ Report-family behavior:
 
 ### 12.7 Quality Control and Warranty
 
-**Quality Control** remains a **baseline-visible lifecycle module** in Phase 3. Its deeper field-first tool definition is intentionally deferred (see Repo-Truth Reconciliation Note 3 and §22). QC retains lifecycle placement and architectural continuity but does not absorb full field-first depth in this phase.
+**Quality Control** is a **first-class internal Project Hub control surface** in Phase 3, governed by P3-E15. Phase 3 delivers the baseline-visible QC operating model: governed quality-plan sets, work-package quality plans, preconstruction/design-package review packages, review findings with issue lineage, the authoritative QC issue/corrective-action ledger, deviations and evidence references, external approval dependency tracking, submittal-completeness advisory, governed health and responsible-organization rollups, schedule-aware readiness signals, and lifecycle continuity through pre-punch and turnover-quality readiness. QC remains internal-only in Phase 3, stores metadata and references rather than package files, and does not absorb full field-first/mobile execution depth in this phase.
 
 **Warranty** has been elevated to a **first-class Phase 3 operating surface** by P3-E14 (Project Warranty Module Field Specification). Phase 3 delivers the full Layer 1 Warranty control surface:
 
@@ -654,7 +654,7 @@ What remains deferred:
 - **Layer 2** — owner-facing intake portal, direct subcontractor access, shared PM + owner + sub workspace; governed by P3-E14 T05 and T06 seam contracts
 - **Deeper field-first execution** beyond the Layer 1 control surface model (see §22 and `07_Phase-6_Field-First-HB-Site-Control-Plan.md`)
 
-Governing plan: P3-E14 T01–T10. Related contracts: P3-E1 §3.x, P3-E2 §17, P3-E4 (back-charge advisory), P3-E10 (Closeout seam), P3-E11 (Startup seam).
+Governing plan: P3-E14 T01–T10. Related contracts: P3-E1 §3.x, P3-E2 §18, P3-E4 (back-charge advisory), P3-E10 (Closeout seam), P3-E11 (Startup seam), P3-E15 (upstream quality-basis seam).
 
 ---
 
