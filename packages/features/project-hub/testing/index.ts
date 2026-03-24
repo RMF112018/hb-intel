@@ -280,3 +280,7 @@ export { createMockContractObligation } from './createMockContractObligation.js'
 // ── P3-E11-T10 Stage 6 Startup responsibility matrix testing surface ─
 
 export { createMockResponsibilityAssignment } from './createMockResponsibilityAssignment.js';
+
+// ── P3-E11-T10 Stage 7 Startup execution baseline testing surface ───
+
+export { createMockExecutionBaseline } from './createMockExecutionBaseline.js';
