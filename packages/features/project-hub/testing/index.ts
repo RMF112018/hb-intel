@@ -268,3 +268,7 @@ export { createMockTaskBlocker } from './createMockTaskBlocker.js';
 
 export { createMockSafetyReadinessItem } from './createMockSafetyReadinessItem.js';
 export { createMockSafetyRemediationRecord } from './createMockSafetyRemediationRecord.js';
+
+// ── P3-E11-T10 Stage 4 Startup permit posting testing surface ──────
+
+export { createMockPermitVerificationDetail } from './createMockPermitVerificationDetail.js';
