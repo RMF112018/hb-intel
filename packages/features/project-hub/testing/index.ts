@@ -272,3 +272,7 @@ export { createMockSafetyRemediationRecord } from './createMockSafetyRemediation
 // ── P3-E11-T10 Stage 4 Startup permit posting testing surface ──────
 
 export { createMockPermitVerificationDetail } from './createMockPermitVerificationDetail.js';
+
+// ── P3-E11-T10 Stage 5 Startup contract obligations testing surface ─
+
+export { createMockContractObligation } from './createMockContractObligation.js';
