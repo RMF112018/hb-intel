@@ -129,9 +129,9 @@ Implement in the order below. Each stage has a gate check before proceeding. Do 
 **Gate check:**
 - 11 sections instantiated per T06 §3; `sectionNumber` and `sectionTitle` are immutable
 - All structured fields from T06 §5 are available for data entry and correctly typed
-- `ExecutionAssumption` records associated with PM Plan sections are authored per T06 §4: `assumptionText`, `successCriteria`, `ownerRole`, and `reviewFrequency` are all required fields
+- `ExecutionAssumption` records are authored per T06 §7 as categorized baseline records; `category`, `description`, and `isSuccessCriterion` are required, and `successMeasure` is required when `isSuccessCriterion = true`
 - PM Plan approval flow enforced: `DRAFT` → `SUBMITTED` → `APPROVED` per T06 §2.1; editing a `SUBMITTED` plan requires revert to `DRAFT`
-- PX must set `status = Approved` before `EXECUTION_BASELINE` `ReadinessCertification` can be submitted
+- `EXECUTION_BASELINE` certification gate enforced per T02/T06: `status = Approved`, T06 critical baseline fields populated, and PM/PX signatures present in `PlanTeamSignature`
 - `BaselineSectionField.value` changes versioned via `@hbc/versioned-record`
 - Activity Spine events: `PMPlanSubmitted`, `PMPlanApproved`, `ExecutionAssumptionAdded`
 - Health metric: `pmPlanStatus`
@@ -239,8 +239,8 @@ The following criteria govern whether the Startup module implementation is compl
 | # | Criterion | Pass condition |
 |---|---|---|
 | 19 | PM Plan approval flow enforced | `DRAFT` → `SUBMITTED` → `APPROVED` transitions work; editing `SUBMITTED` plan requires revert to `DRAFT` |
-| 20 | Certification requires Approved PM Plan | `EXECUTION_BASELINE` `ReadinessCertification` POST returns HTTP 400 if `status ≠ Approved` |
-| 21 | `ExecutionAssumption` required fields enforced | `ExecutionAssumption` save returns HTTP 400 if `assumptionText`, `successCriteria`, `ownerRole`, or `reviewFrequency` missing |
+| 20 | Certification requires approved, signed PM Plan with critical fields set | `EXECUTION_BASELINE` `ReadinessCertification` POST returns HTTP 400 unless `status = Approved`, T06 critical baseline fields are populated, and PM/PX signatures exist in `PlanTeamSignature` |
+| 21 | `ExecutionAssumption` required fields enforced | `ExecutionAssumption` save returns HTTP 400 if `category`, `description`, or `isSuccessCriterion` is missing, or if `successMeasure` is missing when `isSuccessCriterion = true` |
 
 **Closeout continuity**
 

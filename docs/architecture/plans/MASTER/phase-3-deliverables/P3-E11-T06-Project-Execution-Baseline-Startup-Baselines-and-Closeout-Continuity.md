@@ -65,6 +65,18 @@ Draft → Submitted → Approved → (Archived)
 
 A `ReadinessCertification` for `EXECUTION_BASELINE` requires `status = Approved` before submission. Attempting to submit certification while `status ≠ Approved` returns HTTP 400 with `EXECUTION_BASELINE_NOT_APPROVED`.
 
+### 2.3 Certification Prerequisites for `EXECUTION_BASELINE`
+
+T02 defines three gate criteria for the baseline certification. T06 is authoritative for what those criteria mean in practice:
+
+| Criterion | Pass condition |
+|---|---|
+| `BASELINE_APPROVED` | `ProjectExecutionBaseline.status = Approved` |
+| `BASELINE_CRITICAL_FIELDS_SET` | `safetyOfficerName`, `safetyOfficerRole`, `projectStartDate`, `substantialCompletionDate`, `noticeToProceedDate`, `goalSubstantialCompletionDate`, and `goalFinalCompletionDate` are populated |
+| `BASELINE_SIGNED` | `PlanTeamSignature` includes signed PM and PX entries (`signedAt` populated for both roles) |
+
+The signature block and Residential/Commercial distribution block come from the source PM Plan template and remain part of the baseline header model. The certification gate, however, is driven specifically by the PM/PX signature requirement above.
+
 ### 2.2 PlanTeamSignature Model
 
 | Field | Type | Required | Rule |
@@ -122,9 +134,9 @@ Structured fields capture typed commitment values that are queryable by Closeout
 | `fieldType` | `enum` | Yes | No | `Text` \| `Number` \| `Date` \| `Currency` \| `Boolean` \| `LongText` |
 | `value` | `string \| number \| boolean \| Date \| null` | No | No | Current value; null until set |
 | `sectionNumber` | `number` | Yes | No | Owning section number |
-| `isBaselineQueryable` | `boolean` | Yes | No | `true` = this field is included in the `StartupBaseline` snapshot for Closeout delta analysis; `false` = informational only |
+| `isBaselineQueryable` | `boolean` | Yes | No | `true` = this field participates in versioned baseline-query and Closeout delta-analysis contracts; `false` = informational only, but the field still appears in the full `executionBaselineFieldsAtLock` snapshot map |
 
-`@hbc/versioned-record` is required on `value` changes to any field where `isBaselineQueryable = true`.
+`@hbc/versioned-record` is required on `value` changes to any field where `isBaselineQueryable = true`. The lock snapshot still carries all structured field values, including non-queryable informational fields.
 
 ---
 
@@ -241,7 +253,7 @@ When the program enters `BASELINE_LOCKED` (PE closes the stabilization window), 
 
 1. All `ExecutionBaselineSection` and `BaselineSectionField` records become read-only (HTTP 405 on any PATCH/PUT)
 2. All `ExecutionAssumption` records become read-only (HTTP 405 on any PATCH/PUT)
-3. The current values of all `isBaselineQueryable = true` fields are snapshotted into `StartupBaseline.executionBaselineFieldsAtLock` (T02 §7.2) atomically with the state transition
+3. The current values of all `BaselineSectionField` records are snapshotted into `StartupBaseline.executionBaselineFieldsAtLock` (T02 §7.2) atomically with the state transition; `isBaselineQueryable` governs versioning and Closeout delta-query use, not whether a field is included in the snapshot
 4. `PlanTeamSignature` records are frozen
 5. `status` retains its value at lock time (typically `Approved`)
 
@@ -252,6 +264,8 @@ The lock is irreversible. There is no unlock path. Post-lock plan amendments mus
 ## 7. ExecutionAssumption Model — Critical Assumptions and Operating Hypotheses
 
 Beyond the structured `BaselineSectionField` records, the team captures explicit **critical assumptions** — statements about project conditions, Owner commitments, vendor behavior, and operating hypotheses that the plan depends on. Each assumption is a discrete record. If an assumption proves wrong during execution, the Closeout/Autopsy team can trace the deviation back to a specific stated assumption.
+
+These are categorized baseline records. They are not the stale `assumptionText` / `successCriteria` / `ownerRole` / `reviewFrequency` contract still echoed in older dependent docs.
 
 | Field | Type | Required | Calculated | Rule |
 |---|---|---|---|---|
@@ -312,6 +326,7 @@ The `StartupBaseline` snapshot (see T02 §7.2) is created atomically at `BASELIN
 
 | Snapshot group | Fields captured |
 |---|---|
+| Full structured field map | `executionBaselineFieldsAtLock` keyed by every `BaselineSectionField.fieldKey` across all populated sections, including informational/non-queryable fields |
 | Schedule commitments | `projectStartDate`, `substantialCompletionDate`, `goalSubstantialCompletionDate`, `goalFinalCompletionDate`, `noticeToProceedDate`, `scheduleFloatDays` |
 | Financial commitments | `contractAmount`, `buyoutTargetAmount`, `liquidatedDamagesPerDay` |
 | Risk and assumptions | `costRiskAreas`, `costSavingsAreas`, `criticalPathConcerns`, `safetyGoals`, `safetyConcerns`, `existingSiteConditions` |
@@ -331,7 +346,7 @@ GET /api/startup/{projectId}/baseline
 → 405 on any PATCH/PUT
 ```
 
-Closeout does **not** query live `ProjectExecutionBaseline`, `ExecutionBaselineSection`, or `BaselineSectionField` records. The snapshot is the sole continuity interface.
+Closeout does **not** query live `ProjectExecutionBaseline`, `ExecutionBaselineSection`, or `BaselineSectionField` records. The snapshot is the sole continuity interface, and `executionBaselineFieldsAtLock` is the authoritative keyed record of baseline field values at lock time.
 
 | Closeout/Autopsy analysis | Source fields from snapshot |
 |---|---|

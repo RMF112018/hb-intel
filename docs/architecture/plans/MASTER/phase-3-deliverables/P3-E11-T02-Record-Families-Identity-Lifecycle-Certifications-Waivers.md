@@ -221,7 +221,7 @@ One per gate criterion per gate evaluation. The criteria set for each sub-surfac
 | `RESPONSIBILITY_MATRIX` | `RM_PM_SHEET_ASSIGNED` | PM sheet has at least one named assignee per task category |
 | `RESPONSIBILITY_MATRIX` | `RM_FIELD_SHEET_ASSIGNED` | Field sheet has at least one named assignee per task category |
 | `EXECUTION_BASELINE` | `BASELINE_APPROVED` | ProjectExecutionBaseline.status = Approved |
-| `EXECUTION_BASELINE` | `BASELINE_CRITICAL_FIELDS_SET` | Schedule date fields (Sections V, VI) and safety officer fields (Section IV) are populated |
+| `EXECUTION_BASELINE` | `BASELINE_CRITICAL_FIELDS_SET` | `safetyOfficerName`, `safetyOfficerRole`, `projectStartDate`, `substantialCompletionDate`, `noticeToProceedDate`, `goalSubstantialCompletionDate`, and `goalFinalCompletionDate` are populated per T06 |
 | `EXECUTION_BASELINE` | `BASELINE_SIGNED` | At least PM and PX signatures present in PlanTeamSignature array |
 
 ### 3.8 Role-Scoped Certification Ownership
@@ -360,7 +360,7 @@ The `StartupBaseline` is an **immutable snapshot** created atomically when the p
 | `permitPostingSnapshotAtLock` | `object[]` | Yes | Yes | Per-item array: `[ { taskNumber, description, result } ]` for all 12 Section 4 items |
 | `contractObligationsSnapshotAtLock` | `object` | Yes | Yes | `{ totalObligations, flaggedObligations, openObligations, satisfiedObligations }` |
 | `responsibilitySnapshotAtLock` | `object` | Yes | Yes | `{ pmSheetAssigned: bool, fieldSheetAssigned: bool, unassignedCategories: string[], primaryAssignments: [ { sheet, taskCategory, roleCode, assignedPersonName, assignedUserId, acknowledgedAt } ] }` |
-| `executionBaselineFieldsAtLock` | `object` | Yes | Yes | Full `BaselineSectionField.value` map keyed by `fieldKey` — all 11 sections |
+| `executionBaselineFieldsAtLock` | `object` | Yes | Yes | Full `BaselineSectionField.value` map keyed by `fieldKey` across all populated sections, including non-queryable informational fields |
 | `pmPlanStatusAtLock` | `enum` | Yes | Yes | `ProjectExecutionBaseline.status` at lock time |
 | `certificationSummaryAtLock` | `object[]` | Yes | Yes | Array of `{ subSurface, certStatus, certVersion, certifiedBy[] }` for all 6 surfaces |
 | `approvedWaiversAtLock` | `object[]` | Yes | Yes | Array of `{ waiverId, subSurface, waivedItemRef, rationale, plannedResolutionDate }` |
