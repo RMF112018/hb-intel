@@ -334,15 +334,32 @@ Project Closeout is an always-on lifecycle module (active from closeout phase th
 
 #### 4.8.2 Project Startup
 
-| Capability | PWA | SPFx |
-|---|---|---|
-| Job Startup Checklist (55-item) | **Required** | **Required** |
-| Jobsite Safety Checklist (32-item startup readiness) | **Required** | **Required** |
-| Responsibility Matrix — view and assign | **Required** | **Required** |
-| Responsibility Matrix — template management | **Required** | **Launch-to-PWA** |
-| Owner Contract Review — view and extract | **Required** | **Required** |
-| Project Management Plan — authoring | **Required** | **Broad** |
-| Project Management Plan — PE approval workflow | **Required** | **Broad** |
+Full parity across both lanes — no core Startup certification or gate action requires escalation to PWA. See T09 §7 for the governing lane depth specification.
+
+| Capability | PWA | SPFx | Notes |
+|---|---|---|---|
+| Task Library — item result entry and blocker management | **Required** | **Required** | |
+| Task Library — `ReadinessCertification` submission | **Required** | **Required** | |
+| Safety Readiness — item result entry and remediation notes | **Required** | **Required** | |
+| Safety Readiness — `SafetyRemediationRecord` assignment | **Required** | **Required** | |
+| Safety Readiness — certification and PE review | **Required** | **Required** | |
+| Contract Obligations Register — entry, flagging, monitoring | **Required** | **Required** | |
+| Responsibility Matrix — view and assign (PM and Field sheets) | **Required** | **Required** | |
+| Responsibility Matrix — critical-category acknowledgment | **Required** | **Required** | |
+| Project Execution Baseline / PM Plan — section authoring | **Required** | **Required** | |
+| Project Execution Baseline / PM Plan — `ExecutionAssumption` authoring | **Required** | **Required** | |
+| Project Execution Baseline / PM Plan — PX approval workflow | **Required** | **Required** | |
+| Permit Posting Verification — metadata entry | **Required** | **Required** | |
+| Permit Posting Verification — photo evidence upload | **Required** | **Launch-to-PWA** | SPFx supports metadata entry; photo upload is PWA-depth |
+| `ReadinessCertification` — all six sub-surfaces | **Required** | **Required** | |
+| PE certification review and gate criterion entry | **Required** | **Required** | |
+| `PEMobilizationAuthorization` creation | **Required** | **Required** | |
+| Baseline lock action | **Required** | **Required** | |
+| `ExceptionWaiverRecord` creation and management | **Required** | **Required** | |
+| `ProgramBlocker` management | **Required** | **Required** | |
+| State machine visualization with history timeline | **Required** | **Launch-to-PWA** | State transitions work in SPFx; timeline view is PWA-depth |
+| Advanced blocker dependency chain visualization | **Required** | **Launch-to-PWA** | |
+| Post-lock `StartupBaseline` summary view | **Required** | **Required** | |
 
 #### 4.8.3 Subcontract Compliance
 

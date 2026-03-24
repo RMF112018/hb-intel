@@ -719,46 +719,60 @@ Project Closeout is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Both 
 
 ### 15.1 Project Hub operational authority
 
-| Authority dimension | Source-of-truth owner | Notes |
-|---|---|---|
-| Job Startup Checklist (55-item, 4 sections) | Project Hub | Operational state only; one checklist per project; created automatically on project creation |
-| Jobsite Safety Checklist (32-item startup readiness) | Project Hub | Startup safety readiness only; does NOT feed Safety module (P3-E8) |
-| Responsibility Matrix — PM sheet (84 tasks × 9 roles) | Project Hub | Project-specific assignments; task descriptions immutable from template |
-| Responsibility Matrix — Field sheet (28 tasks × 8 roles) | Project Hub | Project-specific assignments; task descriptions immutable from template |
-| Owner Contract Review rows | Project Hub | Structured extraction from uploaded Owner's contract; PM editable |
-| Project Management Plan (11 sections) | Project Hub | Narrative + structured fields; PX approval required for Approved status |
-| Procore setup reference fields | Procore (external) | Project Hub displays as read-only reference; does not write to Procore |
+| Authority dimension | Source-of-truth owner | Record name | Notes |
+|---|---|---|---|
+| Task Library | Project Hub | `StartupTaskLibrary` / `StartupTaskInstance` | One library per project; created automatically on project creation; Pass/Fail/N/A/Pending results; `taskNumber` and `description` immutable |
+| Safety Readiness | Project Hub | `SafetyReadinessSurface` / `SafetyReadinessItem` / `SafetyRemediationRecord` | Startup safety readiness only; does NOT feed Safety module (P3-E8) |
+| Contract Obligations Register | Project Hub | `ContractObligationsRegister` / `ContractObligation` | Structured obligation tracking with `PENDING` / `ACTIVE` / `SATISFIED` / `FLAGGED` / `WAIVED` lifecycle; PM owned; PX required for waiver |
+| Responsibility Matrix — PM sheet (84 tasks × 9 roles) | Project Hub | `ResponsibilityMatrixRow` (sheet = PM) | Project-specific assignments; task descriptions immutable from template; critical-category rows require `acknowledgedAt` gate before certification |
+| Responsibility Matrix — Field sheet (28 tasks × 8 roles) | Project Hub | `ResponsibilityMatrixRow` (sheet = Field) | Project-specific assignments; task descriptions immutable from template |
+| Project Execution Baseline / PM Plan (11 sections) | Project Hub | `ProjectExecutionBaseline` / `ExecutionBaselineSection` / `BaselineSectionField` / `ExecutionAssumption` | Narrative + structured fields; `ExecutionAssumption` records associate structured assumptions with sections; PX approval required |
+| Permit Posting Verification | Project Hub | `PermitVerificationDetail` (within Task Library Section 4) | Photo evidence upload is PWA-depth; metadata entry available in SPFx |
+| Readiness certifications | Project Hub | `ReadinessCertification` | Six sub-surface certifications; SAFETY_READINESS requires Safety Manager co-sign; PX exclusive acceptance |
+| Mobilization authorization | Project Hub | `PEMobilizationAuthorization` | PX exclusive; requires all certifications `ACCEPTED` or `WAIVED` and no open `ProgramBlocker` |
+| Startup Baseline snapshot | Project Hub | `StartupBaseline` | Created atomically at `BASELINE_LOCKED`; immutable; consumed read-only by Closeout (P3-E10) |
+| Procore setup reference fields | Procore (external) | — | Project Hub displays as read-only reference; does not write to Procore |
 
 ### 15.2 External references
 
 | External system | Relationship |
 |---|---|
-| Procore | Procore is the external source for executed contract uploads (referenced in §4.1 of P3-E11) and Admin setup fields. Project Hub does not write to Procore. The Procore setup reference surface (§6 of P3-E11) is read-only guidance in Project Hub. |
-| Permits module (P3-E7) | Job Startup Checklist Section 4 (Permits Posted on Jobsite) is a parallel, independent surface. Neither module writes to the other based on Section 4 checklist state. See §15.3. |
-| Safety module (P3-E8) | The Jobsite Safety Checklist (startup readiness) is a parallel, independent surface. A Fail result does not create a Safety module corrective action. See §15.3. |
+| Procore | Procore is the external source for executed contract uploads and Admin setup fields. Project Hub does not write to Procore. The Procore setup reference surface in P3-E11 is read-only guidance in Project Hub. |
+| Permits module (P3-E7) | Task Library Section 4 (`PermitVerificationDetail`) is a parallel, independent surface. `PermitVerificationDetail` records do not create, update, or close Permit records in P3-E7. Startup reads Permits read-only for cross-reference display context only. See §15.3. |
+| Safety module (P3-E8) | Safety Readiness (`SafetyReadinessSurface`) is a parallel, independent surface. A Fail result on a Safety Readiness item does not create a corrective action in P3-E8. See §15.3. |
+| Project Closeout module (P3-E10) | Startup publishes `StartupBaseline` as a read-only API (`GET /api/startup/{projectId}/baseline`) consumed by Closeout. Startup writes no Closeout records; Closeout writes no Startup records. See §15.3. |
 
 ### 15.3 Boundary rules
 
-**Permits non-interference rule:** Job Startup Checklist Section 4 (items 4.1–4.12) verifies permits are posted on the jobsite at startup. This checklist surface has NO write relationship to the Permits module. Marking a Section 4 item Yes does not create, update, or close a permit record in P3-E7. The Permits module does not auto-update Section 4 item results based on permit lifecycle state.
+**Permits non-interference rule:** Task Library Section 4 (`PermitVerificationDetail` records) verifies that permits are posted on the jobsite at startup. This surface has NO write relationship to the Permits module. `PermitVerificationDetail` status changes do not create, update, or close permit records in P3-E7. The Permits module does not auto-update Task Library results based on permit lifecycle state. Startup may read Permits data for cross-reference display only.
 
-**Safety non-interference rule:** The 32-item Jobsite Safety Checklist is owned by Project Startup and represents startup safety readiness. It has NO write relationship to the Safety module's ongoing inspection checklist, corrective action log, or incident records. A Fail result on a Jobsite Safety Checklist item does not create a corrective action in P3-E8.
+**Safety non-interference rule:** Safety Readiness (`SafetyReadinessSurface`) is owned by Project Startup and represents startup safety readiness only. It has NO write relationship to the Safety module's ongoing inspection checklist, corrective action log, or incident records. A Fail result on a Safety Readiness item does not create a corrective action in P3-E8. The Safety Manager co-certification role in the startup workflow does not grant Safety module write access.
 
-**PM Plan approval rule:** The Project Management Plan transitions from Draft → Submitted → Approved. Only a Project Executive (PX) may transition a plan to Approved status. Any post-Approved edit reverts the affected sections to Draft, requiring resubmission.
+**PM Plan approval rule:** The Project Execution Baseline transitions from Draft → Submitted → Approved. Only a Project Executive (PX) may approve the plan. `ReadinessCertification` for `EXECUTION_BASELINE` cannot be submitted until the plan is `Approved`. Post-Approved edits require reversion to Draft and re-approval.
 
-**Task description immutability:** Responsibility Matrix task descriptions are verbatim from the company template. They MUST NOT be edited in any project instance. New project-specific tasks may be added under a `Custom` task category.
+**Task description immutability:** `taskDescription` on governed `ResponsibilityMatrixRow` records is verbatim from the company template and MUST NOT be edited in any project instance. Custom rows (`isCustomRow = true`) are fully mutable.
+
+**Startup-to-Closeout continuity rule:** `StartupBaseline` is the only Startup artifact published for Closeout consumption. It is read-only from Closeout's perspective (`GET /api/startup/{projectId}/baseline`). Startup publishes no org-intelligence indexes; it does not contribute to the Closeout module's scoring, ranking, or intelligence surfaces. Startup publishes to the Activity Spine and Health Spine for project-scoped signals only.
+
+**Safety Remediation escalation:** A `SafetyRemediationRecord.escalated = true` flag on a startup safety item triggers an Activity Spine `SafetyRemediationEscalated` event and a Work Queue escalation item. It does not trigger any Safety module record. Escalation is internal to the Startup module.
+
+**Waivers and exceptions:** PX may waive a `ReadinessCertification` sub-surface gate via `ExceptionWaiverRecord`. All waiver records are preserved permanently. There is no hard-delete path for any waiver record. Waivers do not suppress the underlying data — the certification state transitions to `WAIVED` and the waiver note is preserved in the record.
 
 ### 15.4 Executive review annotation boundary
 
-Project Startup is a **review-capable surface** in Phase 3. Portfolio Executive Reviewers may place annotations at full field-level depth on all Project Startup sub-surfaces: Job Startup Checklist, Jobsite Safety Checklist, Responsibility Matrix, Owner Contract Review, and Project Management Plan.
+Project Startup is a **review-capable surface** in Phase 3. Portfolio Executive Reviewers (PER) may place annotations at full field-level depth on all six Project Startup sub-surfaces: Task Library, Safety Readiness, Contract Obligations Register, Responsibility Matrix, Project Execution Baseline, and Permit Posting Verification.
 
-**Important distinction from Safety module:** Unlike the Safety module (P3-E8), the Jobsite Safety Checklist within Project Startup IS subject to executive review annotations. The Safety executive review exclusion applies only to the Safety module's own surfaces. Project Startup's safety readiness checklist follows standard annotation rules.
+**Important distinction from Safety module:** Unlike the Safety module (P3-E8), the Safety Readiness surface within Project Startup IS subject to executive review annotations. The Safety executive review exclusion applies only to the Safety module's own surfaces. Project Startup's safety readiness surface follows standard annotation rules.
+
+**Post-lock annotation:** After `BASELINE_LOCKED`, all sub-surface records become read-only. PX and PER annotations continue to be permitted on all sub-surfaces post-lock. Annotations do not require a writable record state.
 
 | Action | Rule |
 |---|---|
-| **Annotate** | PER-sourced; `@hbc/field-annotations` artifact; MUST NOT write to operational records |
-| **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
+| **Annotate** | PER-sourced; `@hbc/field-annotations` artifact; MUST NOT write to any operational Startup record |
+| **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13 |
+| **Post-lock annotate** | Permitted for PX and PER; annotation layer unaffected by `BASELINE_LOCKED` state |
 
-**Field-level specification:** [P3-E11 — Project Startup Module Field Specification](P3-E11-Project-Startup-Module-Field-Specification.md)
+**Field-level specification:** [P3-E11 — Project Startup Module Field Specification](P3-E11-Project-Startup-Module-Field-Specification.md) *(master index + T01–T10 detail files)*
 
 ---
 

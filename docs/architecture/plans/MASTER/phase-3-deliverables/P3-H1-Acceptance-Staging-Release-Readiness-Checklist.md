@@ -219,31 +219,52 @@ Full 60-item acceptance gate: AC-SAF-01 through AC-SAF-60 in P3-E8-T10 §4. High
 | 6.5.9 | Composite safety scorecard published to Project Hub; PER receives sanitized score band (not raw score) and anonymized incident counts only; no annotation affordance anywhere in Safety workspace | Not Started | | P3-E8-T09; AC-SAF-55 through AC-SAF-60 |
 | 6.5.10 | All 25 work queue rules (WQ-SAF-01 through WQ-SAF-25) registered with `@hbc/my-work-feed` and firing correctly | Not Started | | P3-E8-T09 §4; AC-SAF-58 |
 
-### 6.6 Source-of-Truth Compliance
+### 6.6 Project Startup
+
+Full acceptance gate: P3-E11-T10 §5 (31 acceptance criteria, AC items 1–31). Items below are the gate summary; use T10 §5 for the complete implementation verification list.
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.6.1 | Modules respect P3-E2 authority boundaries | Not Started | | P3-E2 |
-| 6.6.2 | All modules publish to all 4 spines per P3-A3 §7 | Not Started | | P3-A3 §7 |
-| 6.6.3 | Executive review annotation isolation — PER review artifacts stored separately from module source-of-truth; annotations do not mutate PM-owned module records | Not Started | | P3-E2 §11.2, P3-G3 §7.6 |
-| 6.6.4 | Safety executive review exclusion boundary — no review annotation layer on Safety in Phase 3; exclusion enforced in auth and UI | Not Started | | P3-E1 §9.3, P3-E2 §7.4, P3-G3 §7.6 |
+| 6.6.1 | `StartupProgram` created at project creation in `DRAFT` state; state machine transitions guarded; invalid transitions return HTTP 409 | Not Started | | P3-E11-T10 §5 items 1–2; T01 §4.2 |
+| 6.6.2 | `PEMobilizationAuthorization` exclusive to PX role (HTTP 403 on non-PX); all-certifications-`ACCEPTED`-or-`WAIVED` guard enforced (HTTP 400 `UNACCEPTED_CERTIFICATIONS`); open `ProgramBlocker` guard enforced (HTTP 400 `OPEN_PROGRAM_BLOCKERS`) | Not Started | | P3-E11-T10 §5 items 3–5; T09 §4 |
+| 6.6.3 | `StartupBaseline` created atomically at `BASELINE_LOCKED`; all sub-surface records read-only post-lock (HTTP 405 on mutation); baseline immutable to all callers | Not Started | | P3-E11-T10 §5 items 6, 23, 28; T02 §7.2 |
+| 6.6.4 | Task Library instantiated from governed template; `taskNumber` and `title` immutable; `TaskBlocker` lifecycle per T02 §3.4 | Not Started | | P3-E11-T10 §5 items 7–9; T03 §3 |
+| 6.6.5 | Safety Readiness instantiated from governed template; Fail items require `SafetyRemediationRecord` before certification; Safety module non-interference verified by integration test | Not Started | | P3-E11-T10 §5 items 10–12; T07 §4 |
+| 6.6.6 | Section 4 Permit Posting non-interference verified by integration test; `PermitVerificationDetail` required fields enforced | Not Started | | P3-E11-T10 §5 items 13–14; T07 §9.1 |
+| 6.6.7 | Contract Obligations lifecycle per T04 §4; `WAIVED` requires PX and `waiverNote`; certification blocked on any obligation with `flagForMonitoring = true` and `obligationStatus = OPEN` unless waived | Not Started | | P3-E11-T10 §5 items 15–16; T04 §4 |
+| 6.6.8 | Responsibility Matrix governed row `taskDescription` immutable; critical-category `acknowledgedAt` gate blocks certification | Not Started | | P3-E11-T10 §5 items 17–18; T05 §4, §9.2 |
+| 6.6.9 | PM Plan approval flow enforced; `EXECUTION_BASELINE` certification blocked until `status = Approved`; `ExecutionAssumption` required fields enforced | Not Started | | P3-E11-T10 §5 items 19–21; T06 §2.1 |
+| 6.6.10 | Closeout reads `StartupBaseline` via read-only API; HTTP 403 for unauthorized callers; HTTP 405 on mutation | Not Started | | P3-E11-T10 §5 items 22–23; P3-E10 |
+| 6.6.11 | All Activity Spine events, Health metrics, and Work Queue item types fire on trigger conditions | Not Started | | P3-E11-T10 §5 items 24–26; T08 §1–§3 |
+| 6.6.12 | `@hbc/field-annotations` writes isolated from operational records; post-lock annotation continues | Not Started | | P3-E11-T10 §5 item 27; T09 §6 |
+| 6.6.13 | Canvas tile registered (`StartupCanvasTileAdapter`); pre-lock and post-lock tile states correct | Not Started | | P3-E11-T10 §5 items 29–30; T09 §10 |
+| 6.6.14 | All Startup surfaces use `WorkspacePageShell`; all components sourced from `@hbc/ui-kit`; all empty sub-surface states use `HbcSmartEmptyState` | Not Started | | P3-E11-T10 §5 item 31; §6.8.9 |
 
-### 6.7 UI Conformance (cross-cutting — all Phase 3 surfaces)
+### 6.7 Source-of-Truth Compliance
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.7.1 | `WorkspacePageShell` used on every Project Hub page surface — canvas, all modules, all spines, reports, executive review views | Not Started | | P3-C1 §14.2, UI-Kit-Wave1-Page-Patterns.md |
-| 6.7.2 | No hardcoded hex, rgb, or pixel values — `enforce-hbc-tokens` ESLint rule passes clean on all Phase 3 feature packages | Not Started | | P3-C1 §14.2, UI-Kit-Visual-Language-Guide.md |
-| 6.7.3 | All Fluent UI primitives imported through `@hbc/ui-kit` — no direct `@fluentui/react-components` imports (D-10) | Not Started | | P3-C1 §14.2, UI-Kit-Usage-and-Composition-Guide.md |
-| 6.7.4 | Data surface type selected per T06 decision guide for each module list surface — selection documented per surface | Not Started | | P3-C1 §14.2, UI-Kit-Adaptive-Data-Surface-Patterns.md |
-| 6.7.5 | Density system implemented via `useDensity()` — all Project Hub surfaces verified in compact, comfortable, and touch tiers | Not Started | | P3-C1 §14.2, UI-Kit-Field-Readability-Standards.md |
-| 6.7.6 | Touch targets meet `HBC_DENSITY_TOKENS[tier].touchTargetMin` on all interactive elements in all three density tiers | Not Started | | P3-C1 §14.3 MB-07, UI-Kit-Field-Readability-Standards.md |
-| 6.7.7 | Horizontal scroll prohibited — all module data tables operate without horizontal scroll at ≥1024px via adaptive column hiding and card fallback | Not Started | | P3-C1 §14.3 MB-04, UI-Kit-Adaptive-Data-Surface-Patterns.md |
-| 6.7.8 | Card weight differentiation enforced — no equal-weight card grids on canvas tiles or module surfaces; `primary`/`standard`/`supporting` weights used per T04 | Not Started | | P3-C1 §14.2, UI-Kit-Usage-and-Composition-Guide.md |
-| 6.7.9 | Every data-dependent zone uses `HbcSmartEmptyState` or `HbcEmptyState` — no blank areas | Not Started | | P3-C1 §14.2 MB-01, UI-Kit-Usage-and-Composition-Guide.md |
-| 6.7.10 | No feature-local duplicate reusable visual primitives — all new reusable components contributed to `@hbc/ui-kit` with stories, ARIA review, and token-only styling | Not Started | | P3-C1 §14.2, Application Standards Conformance Report |
-| 6.7.11 | Phase 2 UI precedents applied — `DashboardLayout` + `HbcKpiCard` for all KPI surfaces; two-column persistent layout for primary content + context panel surfaces; context-sensitive CTA labels | Not Started | | P3-C1 §14.4, P2-F1 |
-| 6.7.12 | `hb-ui-ux-conformance-reviewer` conformance review passed on all Phase 3 surfaces — evidence recorded in §13 | Not Started | | P3-C1 §14.5 |
+| 6.7.1 | Modules respect P3-E2 authority boundaries | Not Started | | P3-E2 |
+| 6.7.2 | All modules publish to all 4 spines per P3-A3 §7 | Not Started | | P3-A3 §7 |
+| 6.7.3 | Executive review annotation isolation — PER review artifacts stored separately from module source-of-truth; annotations do not mutate PM-owned module records | Not Started | | P3-E2 §11.2, P3-G3 §7.6 |
+| 6.7.4 | Safety executive review exclusion boundary — no review annotation layer on Safety in Phase 3; exclusion enforced in auth and UI | Not Started | | P3-E1 §9.3, P3-E2 §7.4, P3-G3 §7.6 |
+
+### 6.8 UI Conformance (cross-cutting — all Phase 3 surfaces)
+
+| # | Criterion | Status | Evidence | Notes |
+|---|---|---|---|---|
+| 6.8.1 | `WorkspacePageShell` used on every Project Hub page surface — canvas, all modules, all spines, reports, executive review views | Not Started | | P3-C1 §14.2, UI-Kit-Wave1-Page-Patterns.md |
+| 6.8.2 | No hardcoded hex, rgb, or pixel values — `enforce-hbc-tokens` ESLint rule passes clean on all Phase 3 feature packages | Not Started | | P3-C1 §14.2, UI-Kit-Visual-Language-Guide.md |
+| 6.8.3 | All Fluent UI primitives imported through `@hbc/ui-kit` — no direct `@fluentui/react-components` imports (D-10) | Not Started | | P3-C1 §14.2, UI-Kit-Usage-and-Composition-Guide.md |
+| 6.8.4 | Data surface type selected per T06 decision guide for each module list surface — selection documented per surface | Not Started | | P3-C1 §14.2, UI-Kit-Adaptive-Data-Surface-Patterns.md |
+| 6.8.5 | Density system implemented via `useDensity()` — all Project Hub surfaces verified in compact, comfortable, and touch tiers | Not Started | | P3-C1 §14.2, UI-Kit-Field-Readability-Standards.md |
+| 6.8.6 | Touch targets meet `HBC_DENSITY_TOKENS[tier].touchTargetMin` on all interactive elements in all three density tiers | Not Started | | P3-C1 §14.3 MB-07, UI-Kit-Field-Readability-Standards.md |
+| 6.8.7 | Horizontal scroll prohibited — all module data tables operate without horizontal scroll at ≥1024px via adaptive column hiding and card fallback | Not Started | | P3-C1 §14.3 MB-04, UI-Kit-Adaptive-Data-Surface-Patterns.md |
+| 6.8.8 | Card weight differentiation enforced — no equal-weight card grids on canvas tiles or module surfaces; `primary`/`standard`/`supporting` weights used per T04 | Not Started | | P3-C1 §14.2, UI-Kit-Usage-and-Composition-Guide.md |
+| 6.8.9 | Every data-dependent zone uses `HbcSmartEmptyState` or `HbcEmptyState` — no blank areas | Not Started | | P3-C1 §14.2 MB-01, UI-Kit-Usage-and-Composition-Guide.md |
+| 6.8.10 | No feature-local duplicate reusable visual primitives — all new reusable components contributed to `@hbc/ui-kit` with stories, ARIA review, and token-only styling | Not Started | | P3-C1 §14.2, Application Standards Conformance Report |
+| 6.8.11 | Phase 2 UI precedents applied — `DashboardLayout` + `HbcKpiCard` for all KPI surfaces; two-column persistent layout for primary content + context panel surfaces; context-sensitive CTA labels | Not Started | | P3-C1 §14.4, P2-F1 |
+| 6.8.12 | `hb-ui-ux-conformance-reviewer` conformance review passed on all Phase 3 surfaces — evidence recorded in §13 | Not Started | | P3-C1 §14.5 |
 
 ---
 

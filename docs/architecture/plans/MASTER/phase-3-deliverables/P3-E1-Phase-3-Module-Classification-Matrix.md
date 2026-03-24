@@ -131,7 +131,7 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 | 10 | Safety | Always-on core | First-class working surface | PH7-6 | Publishes to all 4 spines |
 | 11 | Reports | Always-on core | Governed report workspace | PH7-14 | Publishes to all 4 spines |
 | 12 | Project Closeout | Always-on lifecycle | Hybrid — owns all operational closeout data; publishes PE-approved snapshots to Reports; derives org intelligence indexes on archive | Closeout Checklist, Subcontractor Scorecard, Lessons Learned, Project Autopsy & Learning Legacy | Publishes to all 4 spines |
-| 13 | Project Startup | Always-on lifecycle | First-class working surface — active from project creation | Job Startup Checklist, Jobsite Safety Checklist, Responsibility Matrix, Owner Contract Review, PM Plan | Publishes to all 4 spines |
+| 13 | Project Startup | Always-on lifecycle | First-class working surface — active from project creation | Task Library, Safety Readiness, Contract Obligations Register, Responsibility Matrix, Project Execution Baseline (PM Plan), Permit Posting Verification | Publishes to all 4 spines |
 | 14 | Subcontract Compliance | Always-on core | First-class working surface — multi-record (one per subcontract) | Subcontract Checklist, Compliance Waiver | Publishes to all 4 spines; gates Buyout Log ContractExecuted (P3-E4 §6) |
 | 15 | Quality Control | Baseline-visible lifecycle | Lifecycle-visible | PH7-7 | Deferred |
 | 16 | Warranty | Baseline-visible lifecycle | Lifecycle-visible | PH7-8 | Deferred |
@@ -240,11 +240,11 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 **Boundary:** Always-on lifecycle module that is active from the moment a project is created in Project Hub. Owns the operational state for all project mobilization and startup-phase tracking.
 
-**Must support:** 55-item Job Startup Checklist (4 sections: Owner's Contract Review, Job Start-Up, Order Services and Equipment, Permits Posted on Jobsite); 32-item Jobsite Safety Checklist for startup safety readiness (2 sections: Areas of Highest Risk, Other Risks — Pass/Fail/N/A); Responsibility Matrix (PM sheet: 84 tasks × 9 roles; Field sheet: 28 tasks × 8 roles); Owner Contract Review structured extraction; Project Management Plan (11-section structured document with both narrative and typed field capture).
+**Must support:** Task Library (`StartupTaskLibrary` / `StartupTaskInstance` — Pass/Fail/N/A/Pending results with `TaskBlocker` lifecycle; Section 4 items include `PermitVerificationDetail` for permit posting verification); Safety Readiness (`SafetyReadinessSurface` / `SafetyReadinessItem` — startup safety assessment with `SafetyRemediationRecord` escalation model; Safety Manager co-certification required); Contract Obligations Register (`ContractObligationsRegister` / `ContractObligation` — structured obligation tracking with `PENDING` / `ACTIVE` / `SATISFIED` / `FLAGGED` / `WAIVED` lifecycle); Responsibility Matrix (PM sheet: 84 tasks × 9 roles; Field sheet: 28 tasks × 8 roles; critical-category `acknowledgedAt` gate for certification); Project Execution Baseline (`ProjectExecutionBaseline` — 11-section PM Plan with `ExecutionAssumption` authoring and PX approval gate); readiness certification lifecycle (`ReadinessCertification` across all 6 sub-surfaces), `PEMobilizationAuthorization` (PX exclusive), and `StartupBaseline` snapshot at `BASELINE_LOCKED`.
 
-**Startup Safety Checklist boundary:** The 32-item Jobsite Safety Checklist is distinct from the Safety module's (P3-E8) 93-item ongoing weighted inspection checklist. The Project Startup module owns startup safety readiness; the Safety module owns ongoing safety inspection operations. These two surfaces have no write relationship — they are parallel and complementary.
+**Safety Readiness boundary:** The startup Safety Readiness surface is distinct from the Safety module's (P3-E8) 93-item ongoing weighted inspection checklist. The Project Startup module owns startup safety readiness; the Safety module owns ongoing safety inspection operations. These two surfaces have no write relationship — they are parallel and complementary.
 
-**Permits Section 4 boundary:** Job Startup Checklist Section 4 (Permits Posted on Jobsite) verifies that permits are displayed on the jobsite at startup. This has no write relationship to the Permits module (P3-E7), which manages the full permit lifecycle. The two surfaces are parallel and complementary.
+**Permits Section 4 boundary:** Task Library Section 4 (Permit Posting Verification) verifies that permits are displayed on the jobsite at startup via `PermitVerificationDetail` records. This has no write relationship to the Permits module (P3-E7), which manages the full permit lifecycle. The two surfaces are parallel and complementary.
 
 **Replaces:** `Job Startup Checklist.pdf`, `Project_Startup_Checklist.pdf`, `Project_Safety_Checklist.pdf` (startup readiness portion), `Responsibility Matrix - Template.xlsx`, `Responsibility Matrix - Owner Contract Template.xlsx`, and `PROJECT MANAGEMENT PLAN 2019.docx` manual workflow. Also captures `Procore Startup Checklist Summary (1).pdf` as a Procore setup reference surface.
 
@@ -679,16 +679,32 @@ This section defines the shared package integration obligations for every always
 
 #### Project Startup
 
+Hard-blocker packages (required before any Startup UI ships):
+
 | Package | Integration point | Notes |
 |---|---|---|
-| `@hbc/field-annotations` | PER annotation layer on Job Startup Checklist, PM Plan, Responsibility Matrix | Per P3-E2 §15.4 |
-| `@hbc/versioned-record` | PM Plan version snapshots; Responsibility Matrix finalization state | |
-| `@hbc/my-work-feed` | Incomplete startup checklist sections; unfinished PM Plan sections | Register `StartupWorkAdapter` |
-| `@hbc/notification-intelligence` | Startup readiness alerts; overdue checklist section warnings | |
-| `@hbc/bic-next-move` | Responsibility Matrix PM/role accountability tracking | |
-| `@hbc/session-state` | Offline draft for all startup checklist and PM Plan sections | |
-| `@hbc/complexity` | Checklist density; PM Plan section depth; Responsibility Matrix column depth | |
-| `@hbc/smart-empty-state` | No checklist started, PM Plan not begun, Responsibility Matrix empty | |
+| `@hbc/field-annotations` | PE/PER annotation layer on all six sub-surface fields | Per P3-E2 §15.4; T09 §9.1 |
+| `@hbc/versioned-record` | Version-on-write for `obligationStatus`, assignment changes, task results, `BaselineSectionField.value`, `SafetyReadinessItem.result`, `ReadinessCertification.certStatus` | T09 §9.1 |
+| `@hbc/project-canvas` | `StartupCanvasTileAdapter` — readiness tile from project creation through post-lock summary | T09 §9.1 |
+| `@hbc/my-work-feed` | `StartupWorkAdapter` — all Work Queue items across program lifecycle, task library, obligations, safety, matrix, PM Plan, and permit posting | T09 §9.1 |
+| `@hbc/activity-spine` | Activity event publication for all Startup lifecycle events | T09 §9.1 |
+| `@hbc/health-spine` | Health metric publication for all 11 Startup metrics | T09 §9.1 |
+
+High-value integrations (required, not blocking core implementation):
+
+| Package | Integration point | Notes |
+|---|---|---|
+| `@hbc/related-items` | Cross-module record relationships: permit verification → permit, obligation → schedule milestone, baseline → closeout | T09 §9.2 |
+| `@hbc/notification-intelligence` | Startup readiness alerts; overdue obligation and remediation notifications | T09 §9.2 |
+| `@hbc/workflow-handoff` | Safety co-certification workflow (PM submits, Safety Manager acknowledges) | Required before Safety Readiness certification is production-ready; T09 §9.2 |
+| `@hbc/session-state` | Offline draft support for Task Library item entry and PM Plan section authoring | PWA offline capability; T09 §9.2 |
+
+Evaluate-not-assume:
+
+| Package | Evaluation question | Notes |
+|---|---|---|
+| `@hbc/complexity` | Does Startup need a complexity indicator beyond Health spine metrics? | Evaluate before adding; T09 §9.3 |
+| `@hbc/smart-empty-state` | Empty sub-surface states | Required for UI conformance per P3-H1 §6.7.9; T09 §9.3 |
 
 #### Subcontract Compliance
 

@@ -107,6 +107,7 @@ The following 14 decisions are binding. All T-files conform to these decisions. 
 | Acceptance criteria | P3-H1 §18.5 + T11 §5 |
 | Shared package integration | T10 §3 |
 | Role and visibility governance | T09 |
+| Startup Baseline read API (upstream dependency) | P3-E11-T10 §4; P3-E11-T02 §7.2 — Closeout consumes `GET /api/startup/{projectId}/baseline` as read-only input; no Closeout record is written to the Startup module |
 
 ---
 

@@ -9,7 +9,7 @@
 | **Owner** | Platform / Core Services + Project Hub platform owner |
 | **Update Authority** | Architecture lead; changes require review by Platform lead and Experience lead |
 | **Last Reviewed Against Repo Truth** | 2026-03-21 |
-| **References** | [Phase 3 Plan §8.6, §9.4](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [P3-A3 §5](P3-A3-Shared-Spine-Publication-Contract-Set.md); [P3-C2 §4](P3-C2-Mandatory-Core-Tile-Family-Definition.md); [ADR-0115](../../../adr/ADR-0115-my-work-feed-architecture.md); [P3-A1](P3-A1-Project-Registry-and-Activation-Contract.md); [P3-A2](P3-A2-Membership-Role-Authority-Contract.md); [P3-D1](P3-D1-Project-Activity-Contract.md); [P3-D2](P3-D2-Project-Health-Contract.md); [`@hbc/my-work-feed`](../../../../packages/my-work-feed/src/index.ts) |
+| **References** | [Phase 3 Plan §8.6, §9.4](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [P3-A3 §5](P3-A3-Shared-Spine-Publication-Contract-Set.md); [P3-C2 §4](P3-C2-Mandatory-Core-Tile-Family-Definition.md); [ADR-0115](../../../adr/ADR-0115-my-work-feed-architecture.md); [P3-A1](P3-A1-Project-Registry-and-Activation-Contract.md); [P3-A2](P3-A2-Membership-Role-Authority-Contract.md); [P3-D1](P3-D1-Project-Activity-Contract.md); [P3-D2](P3-D2-Project-Health-Contract.md); [`@hbc/my-work-feed`](../../../../../packages/my-work-feed/src/index.ts) |
 
 ---
 
