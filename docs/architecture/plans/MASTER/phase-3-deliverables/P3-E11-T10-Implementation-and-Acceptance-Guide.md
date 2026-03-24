@@ -114,6 +114,7 @@ Implement in the order below. Each stage has a gate check before proceeding. Do 
 **Gate check:**
 - PM sheet rows and Field sheet rows instantiated from governed templates; `taskDescription` and `sheet` are immutable on governed rows
 - Custom rows may be added with `isCustomRow = true`; custom rows are mutable
+- Assignment-bearing PM and Field task categories must each have at least one named `Primary` assignee before `RESPONSIBILITY_MATRIX` certification can be submitted; PM reminder-only rows are excluded from this gate
 - CRITICAL-category rows: `acknowledgedAt` must be populated on each critical row before `RESPONSIBILITY_MATRIX` certification can be submitted — the system enforces this gate
 - Assignment changes versioned via `@hbc/versioned-record`
 - PM Plan Section VII `responsibilityMatrixRef` field populated with `matrixId`
@@ -230,8 +231,8 @@ The following criteria govern whether the Startup module implementation is compl
 
 | # | Criterion | Pass condition |
 |---|---|---|
-| 17 | Governed row task descriptions immutable | PATCH on `taskDescription` of a governed row returns HTTP 409 |
-| 18 | Critical-category acknowledgment gate | `RESPONSIBILITY_MATRIX` certification blocked if any critical-category row has no `acknowledgedAt` value |
+| 17 | Named primary coverage gate | `RESPONSIBILITY_MATRIX` certification blocked if any assignment-bearing PM or Field task category has no named `Primary` assignee |
+| 18 | Critical-category acknowledgment gate | `RESPONSIBILITY_MATRIX` certification blocked if any critical-category `Primary` assignment has no `acknowledgedAt` value |
 
 **PM Plan and Execution Baseline**
 

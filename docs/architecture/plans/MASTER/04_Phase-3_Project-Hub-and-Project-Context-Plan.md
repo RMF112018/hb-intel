@@ -39,7 +39,7 @@ Phase 3 planning must explicitly acknowledge the following current-state foundat
 - A real **`/project-hub` route** already exists in the PWA (`apps/pwa/src/router/workspace-routes.ts`). The current `ProjectHubPage` is an **MVP-level scaffold** — a portfolio dashboard with summary cards and data table — not yet the robust operating layer this phase envisions.
 - Supporting shared packages already exist at verified maturity levels:
   - `@hbc/project-canvas` (v0.0.1, mature — dist build, exports, storybook, tests; SF13, ADR-0102 locked)
-  - `@hbc/features-project-hub` (v0.1.58, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout are live; Project Startup and Subcontract Compliance remain Phase 3 planning/implementation scope)
+  - `@hbc/features-project-hub` (v0.1.59, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout are live; Project Startup and Subcontract Compliance remain Phase 3 planning/implementation scope)
   - `@hbc/related-items` (v0.0.2, mature — cross-module record relationship panel)
   - `@hbc/workflow-handoff` (v0.1.0, mature — platform workflow primitive)
   - `@hbc/session-state` (v0.0.1, mature — SF12, ADR-0101 locked; offline model ready)
@@ -589,6 +589,10 @@ Phase 3 Project Startup must support:
 - obligation rows with canonical `OPEN` / `IN_PROGRESS` / `SATISFIED` / `WAIVED` / `NOT_APPLICABLE` lifecycle states, `flagForMonitoring`-driven monitoring priority, due-date and recurrence handling, and routed accountability by role/category
 - Contract Obligations certification rules based on documented review, routing, and acknowledgment of monitored and near-due obligations rather than blanket obligation closure
 - read-only advisory cross-reference to Financial and Schedule context, with `StartupBaseline` preserving contract-obligation counts for Closeout continuity
+- a governed Responsibility Matrix overlay model in which immutable workbook-derived template rows are instantiated per project, with PM reminder-only rows preserved for display/reference but excluded from category-coverage and acknowledgment certification gates
+- a workbook-grounded routing footprint of 7 PM assignment columns across 71 assignment-bearing rows plus 11 recurring reminder rows, and 5 Field assignment columns across 27 assignment-bearing rows
+- category-level named-`Primary` assignment coverage plus critical-category `acknowledgedAt` completion as distinct Responsibility Matrix certification gates
+- `responsibilityMatrixRef` read-through from PM Plan Section VII and `responsibilitySnapshotAtLock` continuity for Closeout staffing delta analysis
 - explicit separation between sub-surface operational completeness and formal readiness certification
 - six project-scoped `ReadinessCertification` records, each reviewable through PE `ReadinessGateRecord` / `ReadinessGateCriterion` evaluation
 - `ExceptionWaiverRecord` and `ProgramBlocker` governance for unresolved readiness exceptions without collapsing them into task completion status
@@ -1022,7 +1026,7 @@ The following reconciliations are locked for Phase 3 and MUST be honored in down
    `@hbc/app-shell` currently has **zero consumers** anywhere in the workspace — no app or package imports from it. The live SPFx extension imports `HbcAppShell` directly from `'@hbc/ui-kit/app-shell'`, not from `@hbc/app-shell`. The package's self-description is internally inconsistent: `src/index.ts` calls it a "PWA facade" while the README warns against PWA use. This plan lists `@hbc/app-shell` as an incoming dependency for potential SPFx / Project Hub convenience use, but current repo truth is that neither lane has adopted it. `@hbc/shell` remains canonical. The package's self-description should be aligned with intent before consumers are added.
 
 2. **`@hbc/features-project-hub` maturity reconciliation**
-   The plan envisions a robust module structure within Project Hub. Current repo truth: `@hbc/features-project-hub` (v0.1.58) already contains SF21 health-pulse plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout. The package remains under active expansion for the remaining Phase 3 modules, including Project Startup and Subcontract Compliance. This is still classified as **controlled evolution** — the plan remains slightly ahead of final module completion, but no longer assumes a health-pulse-only scaffold.
+   The plan envisions a robust module structure within Project Hub. Current repo truth: `@hbc/features-project-hub` (v0.1.59) already contains SF21 health-pulse plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout. The package remains under active expansion for the remaining Phase 3 modules, including Project Startup and Subcontract Compliance. This is still classified as **controlled evolution** — the plan remains slightly ahead of final module completion, but no longer assumes a health-pulse-only scaffold.
 
 3. **QC/Warranty deferral target reconciliation**
    This plan defers deeper QC/Warranty field-first depth to `07_Phase-6_Field-First-HB-Site-Control-Plan.md`. However, the Phase 6 plan is currently a draft that covers generic field-first UX, workflow selection, and offline sync — it does **not** explicitly accept QC/Warranty deeper depth in its current scope. This deferral target is **directional**: Phase 6 will need to be refined to absorb this scope when it is formally activated. This does not change Phase 3's decision to exclude deeper QC/Warranty depth.

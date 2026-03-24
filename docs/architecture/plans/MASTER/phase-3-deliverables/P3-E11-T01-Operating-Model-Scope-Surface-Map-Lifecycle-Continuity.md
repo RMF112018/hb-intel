@@ -129,7 +129,7 @@ The new model replaces composite math with a governed readiness program: structu
 | 2 | **Startup Safety Readiness** | 32-item pre-mobilization safety check; remediation-capable | PM, Safety Manager | Required |
 | 3 | **Permit Posting Verification** | Section 4 cross-reference — confirms permits are physically posted on jobsite | PM, Superintendent | Required |
 | 4 | **Contract Obligations Register** | Governed ledger of extracted Owner contract obligations with lifecycle states | PM, PA | Required |
-| 5 | **Responsibility Routing Engine** | PM sheet (84 tasks, 9 roles) + Field sheet (28 tasks, 8 roles); named assignments | PM, PX | Required |
+| 5 | **Responsibility Routing Engine** | PM sheet with 7 assignment columns, 71 assignment-bearing rows, and 11 reminder-only rows plus Field sheet with 5 assignment columns and 27 assignment-bearing rows; named assignments | PM, PX | Required |
 | 6 | **Project Execution Baseline** | 11-section structured commitment baseline; the PM Plan as a typed record | PM (submit) + PX (approve) | Required |
 
 ---

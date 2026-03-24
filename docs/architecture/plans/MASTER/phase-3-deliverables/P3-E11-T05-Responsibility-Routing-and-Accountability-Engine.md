@@ -27,7 +27,7 @@ The routing engine model means:
 - The `StartupBaseline` snapshot captures assignment state at baseline lock for Closeout delta analysis
 
 **Source documents:**
-- `docs/reference/example/Responsibility Matrix - Template.xlsx` — PM sheet (84 tasks, 9 roles) + Field sheet (28 tasks, 8 roles)
+- `docs/reference/example/Responsibility Matrix - Template.xlsx` — PM sheet with 7 assignment role columns, 71 assignment-bearing rows, and 11 recurring reminder-only rows; Field sheet with 5 assignment role columns and 27 assignment-bearing rows
 
 ---
 
@@ -42,6 +42,8 @@ The Responsibility Matrix operates as a two-layer model:
 - Custom rows (PM-added, project-specific)
 - Acknowledgment records for critical assignments
 - Assignment effective dates and history
+
+PM reminder-only rows from the workbook are preserved as governed display/reference rows, but they do not create `Primary` coverage requirements, do not generate `ResponsibilityAssignment` records, and do not participate in certification or Work Queue routing gates.
 
 The overlay does not affect the template. Template changes propagate to new projects only — they do not retroactively update existing project matrices after creation.
 
@@ -84,7 +86,7 @@ One matrix per project. Created at project creation alongside `StartupProgram`.
 
 ## 4. ResponsibilityMatrixRow Model
 
-Each task row in the PM or Field sheet is a `ResponsibilityMatrixRow`. The 84 PM rows and 28 Field rows are instantiated verbatim from the governed template on matrix creation. `taskDescription`, `taskCategory`, and `sheet` are immutable on governed rows.
+Each task row in the PM or Field sheet is a `ResponsibilityMatrixRow`. PM assignment-bearing rows and PM reminder-only rows are both instantiated from the governed workbook, but only assignment-bearing rows create `ResponsibilityAssignment` records and participate in category-coverage or acknowledgment gates. Field sheet rows are all assignment-bearing. `taskDescription`, `taskCategory`, and `sheet` are immutable on governed rows.
 
 | Field | Type | Required | Calculated | Rule |
 |---|---|---|---|---|
@@ -100,6 +102,8 @@ Each task row in the PM or Field sheet is a `ResponsibilityMatrixRow`. The 84 PM
 | `assignments` | `ResponsibilityAssignment[]` | Yes | No | One per role column; see §5 |
 
 **Custom rows:** PM may add project-specific rows under a `Custom` task category. Custom rows have `isCustomRow = true`. `taskDescription` on custom rows is editable by PM. No upper limit on custom rows. Custom rows do not affect certification requirements.
+
+**Reminder-only PM rows:** Reminder rows preserve workbook cadence items such as monthly financial/reporting due dates. These rows keep `assignments = []`, are rendered read-only from the governed template text, and are excluded from the T05 §9.1 category-coverage gate and the T05 §9.2 critical-category acknowledgment gate.
 
 ---
 
@@ -137,7 +141,7 @@ enum ResponsibilityValue {
 
 ## 6. PM Sheet — Roles and Task Categories
 
-### 6.1 PM Sheet Role Columns (9 roles)
+### 6.1 PM Sheet Role Columns (7 assignment roles)
 
 | Column | Role Code | Full Label |
 |---|---|---|
@@ -149,28 +153,26 @@ enum ResponsibilityValue {
 | 8 | `QAQC` | QA/QC Manager |
 | 9 | `ProjAcct` | Project Accountant |
 
-> Two additional columns in the source template (`Super` and one display-annotation column) are not standard role assignment columns and are treated as display annotations only, not as `ResponsibilityAssignment` records.
-
 ### 6.2 PM Sheet Task Categories
 
 | Task Category | Item Count | Description |
 |---|---|---|
 | `PX` | 4 | Project Executive authority tasks — sign contracts, prime and sub COs above threshold, Owner notices |
-| `SPM` | 14 | Senior PM operational tasks — change orders below $10K, SOV review, financials, meetings |
-| `PM2` | 11 | PM2 tasks — subcontract buyout, OAC meeting management, design center |
-| `PM1` | 11 | PM1 tasks — RFIs, submittals, BIM, procurement log |
-| `PA` | 17 | Project Administrator tasks — RFIs, submittals, permits, drawings, meeting minutes |
-| `QAQC` | 5 | QA/QC Manager tasks — design coordination, field verification, inspections |
-| `ProjAcct` | 13 | Project Accountant tasks — billing, lien waivers, insurance, COI |
-| `All / PM's` | 5 | All PM team recurring tasks — payroll, expense reports, financial reports |
+| `SPM` | 12 assignment rows + 2 reminder-only rows | Senior PM operational tasks plus recurring financial/change-order reminder items |
+| `PM2` | 11 assignment rows | PM2 tasks — subcontract buyout, OAC meeting management, design center |
+| `PM1` | 11 assignment rows | PM1 tasks — source workbook aliases `PM 1` and `PM1` are normalized into one category for certification/routing |
+| `PA` | 17 assignment rows | Project Administrator tasks — RFIs, submittals, permits, drawings, meeting minutes |
+| `QAQC` | 5 assignment rows | QA/QC Manager tasks — design coordination, field verification, inspections |
+| `ProjAcct` | 11 assignment rows + 2 reminder-only rows | Project Accountant tasks plus recurring payment-application reminders |
+| `Shared recurring reminders` | 5 reminder-only rows | Source workbook reminder labels `PM's`, `All`, `PM's/Supers`, and `PM/Super`; preserved for display/reference only |
 
-**Total PM sheet rows: 80 governed rows** (plus custom rows). Note: the source template's subtotal of 84 includes all category rows when summed across legacy and transitional rows; implementation ingests the source template exactly.
+**Total PM sheet rows: 82 governed rows** = 71 assignment-bearing rows + 11 reminder-only rows.
 
 ---
 
 ## 7. Field Sheet — Roles and Task Categories
 
-### 7.1 Field Sheet Role Columns (5 active role columns)
+### 7.1 Field Sheet Role Columns (5 assignment roles)
 
 | Column | Role Code | Full Label |
 |---|---|---|
@@ -180,8 +182,6 @@ enum ResponsibilityValue {
 | 7 | `AsstSuper` | Assistant Superintendent |
 | 8 | `QAQC_Field` | QA/QC (Field) |
 
-> The source template lists 8 columns including a PM reference column and a notes column that are not role assignment columns.
-
 ### 7.2 Field Sheet Task Categories
 
 | Task Category | Item Count | Description |
@@ -189,9 +189,9 @@ enum ResponsibilityValue {
 | `LeadSuper` | 10 | Overall job lead — schedule updates, site work, landscape, utilities, roads |
 | `MEPSuper` | 5 | MEP coordination, interiors, amenities, exterior lighting, site logistics |
 | `InteriorEnvelope` | 11 | Stucco, roofing, windows, painting, flooring, trim, window coverings, MEP trim-out |
-| `QAQC_Field` | 2 | Building envelope submittals and details review |
+| `QAQC_Field` | 1 | Building envelope submittals and details review |
 
-**Total Field sheet rows: 28 governed rows.**
+**Total Field sheet rows: 27 assignment-bearing governed rows.**
 
 ---
 
@@ -213,10 +213,10 @@ The `value` field on a `ResponsibilityAssignment` is not decorative. Each value 
 ### 9.1 Named Assignment Requirement for Certification
 
 The matrix meets certification requirements when:
-- At least one PM sheet role column for each `taskCategory` has a `value = Primary` assignment with `assignedPersonName` populated, **AND**
-- At least one Field sheet role column for each `taskCategory` has a `value = Primary` assignment with `assignedPersonName` populated
+- At least one PM sheet role column for each assignment-bearing PM `taskCategory` has a `value = Primary` assignment with `assignedPersonName` populated, **AND**
+- At least one Field sheet role column for each Field `taskCategory` has a `value = Primary` assignment with `assignedPersonName` populated
 
-Rows in the `All / PM's` category require at least one named `Primary` assignee on any PM role column.
+PM reminder-only rows are excluded from this certification gate because they do not carry assignment cells in the governing workbook and do not instantiate `ResponsibilityAssignment` records.
 
 ### 9.2 Critical Category Acknowledgment Requirement
 
