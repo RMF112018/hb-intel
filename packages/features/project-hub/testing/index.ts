@@ -229,3 +229,9 @@ export {
 export {
   createMockScorecardCriterionScores,
 } from './createMockScorecardCriterion.js';
+
+// ── P3-E10-T07 Closeout autopsy testing surface ────────────────────
+
+export {
+  createMockAutopsyRecord,
+} from './createMockAutopsyRecord.js';
