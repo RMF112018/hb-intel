@@ -98,3 +98,5 @@ T01 Foundation: Thread model, authority matrix, compliance health doctrine (deri
 T02 Record Architecture: 7 record families (PermitApplication, IssuedPermit, RequiredInspectionCheckpoint, InspectionVisit, InspectionDeficiency, PermitLifecycleAction, PermitEvidenceRecord), 15 enumerations, responsibility envelopes. See `src/permits/records/`.
 
 T03 Lifecycle & Governance: Dual state machines (application + issued permit via lifecycle actions), 20-rule transition table, governance constraints, system-driven transitions, API contracts. See `src/permits/lifecycle/`.
+
+T04 Inspection & Compliance: Checkpoint templates (14 master building), deficiency health impact, expiration risk tiers, compliance closeout gate, xlsx import validation. See `src/permits/inspection/`.

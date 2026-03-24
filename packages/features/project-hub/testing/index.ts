@@ -172,3 +172,7 @@ export { mockPermitFoundationScenarios } from './mockPermitFoundationScenarios.j
 
 export { createMockPermitApplication } from './createMockPermitApplication.js';
 export { createMockIssuedPermit } from './createMockIssuedPermit.js';
+
+// ── P3-E7-T04 Permits inspection testing surface ─────────────────────
+
+export { createMockCheckpointTemplate } from './createMockCheckpointTemplate.js';
