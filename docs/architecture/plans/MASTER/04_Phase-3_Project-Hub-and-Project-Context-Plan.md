@@ -39,7 +39,7 @@ Phase 3 planning must explicitly acknowledge the following current-state foundat
 - A real **`/project-hub` route** already exists in the PWA (`apps/pwa/src/router/workspace-routes.ts`). The current `ProjectHubPage` is an **MVP-level scaffold** — a portfolio dashboard with summary cards and data table — not yet the robust operating layer this phase envisions.
 - Supporting shared packages already exist at verified maturity levels:
   - `@hbc/project-canvas` (v0.0.1, mature — dist build, exports, storybook, tests; SF13, ADR-0102 locked)
-  - `@hbc/features-project-hub` (v0.1.63, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout are live; Project Startup and Subcontract Compliance remain Phase 3 planning/implementation scope)
+  - `@hbc/features-project-hub` (v0.1.73, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, Project Closeout, and Project Startup are live; Subcontract Execution Readiness T08 Stage 1 foundation implemented; Project Warranty remains Phase 3 planning/implementation scope)
   - `@hbc/related-items` (v0.0.2, mature — cross-module record relationship panel)
   - `@hbc/workflow-handoff` (v0.1.0, mature — platform workflow primitive)
   - `@hbc/session-state` (v0.0.1, mature — SF12, ADR-0101 locked; offline model ready)
@@ -410,12 +410,9 @@ The always-on core baseline for every activated project is:
 
 ### 11.2 Baseline-visible lifecycle modules
 
-The following modules are baseline-visible lifecycle modules rather than equal-intensity always-on core at day-one depth:
+**Quality Control** is a baseline-visible lifecycle module rather than an equal-intensity always-on core surface at day-one depth. Its deeper field-first operating depth is deferred (see Repo-Truth Reconciliation Note 3 and §22).
 
-- Quality Control
-- Warranty
-
-Their deeper field-first operating depth is deferred (see Repo-Truth Reconciliation Note 3 and §22).
+**Warranty** has been elevated to a first-class Phase 3 operating surface. P3-E14 (Project Warranty Module Field Specification, T01–T10) governs the full Layer 1 scope: Coverage Registry, Warranty Case lifecycle (16 states), SLA escalation, Subcontractor Coordination, Owner Intake Log, spine publication, and canvas tile. Layer 2 (owner portal, direct subcontractor access, external collaborative workspace) and deeper field-first execution depth beyond the Layer 1 control surface remain explicitly deferred (see §22 and P3-E14 T08).
 
 ### 11.3 Financial domain structure
 
@@ -445,7 +442,10 @@ Buyout is not treated as a separate top-level baseline module in this refined pl
 #### Lifecycle-visible modules with later deeper field-first definition
 
 - Quality Control
-- Warranty
+
+#### First-class lifecycle modules with governed Layer 1 scope and deferred external workspace
+
+- Warranty (P3-E14 — coverage registry, case lifecycle, SLA, subcontractor coordination; Layer 2 external workspace deferred)
 
 ---
 
@@ -639,11 +639,22 @@ Report-family behavior:
 
 ### 12.7 Quality Control and Warranty
 
-QC and Warranty are **baseline-visible lifecycle modules** in Phase 3.
+**Quality Control** remains a **baseline-visible lifecycle module** in Phase 3. Its deeper field-first tool definition is intentionally deferred (see Repo-Truth Reconciliation Note 3 and §22). QC retains lifecycle placement and architectural continuity but does not absorb full field-first depth in this phase.
 
-Their deeper field-first tool definition is intentionally deferred (see Repo-Truth Reconciliation Note 3 and §22).
+**Warranty** has been elevated to a **first-class Phase 3 operating surface** by P3-E14 (Project Warranty Module Field Specification). Phase 3 delivers the full Layer 1 Warranty control surface:
 
-This refined Phase 3 plan still requires those modules to retain lifecycle placement and architectural continuity, but not to absorb full later-phase field-first depth here.
+- Coverage Registry: typed `WarrantyCoverageItem` records with three-layer taxonomy (Product / Labor / System), Closeout turnover linkage, Startup commissioning linkage, and daily expiration sweep
+- Warranty Case Workspace: 16-state lifecycle, two-tier SLA model (Standard / Expedited), Next Move ownership, subcontractor acknowledgment and scope-dispute model, evidence chain, and immutable resolution records
+- Owner Intake Log: PM-entered only in Phase 3; `sourceChannel` seam for Layer 2
+- Subcontractor Coordination: PM-proxy model in Phase 3; `enteredBy` seam for direct sub access in Layer 2
+- Spine publication: Activity (24 events), Health (leading / lagging / failure signals), Work Queue (20 rules), Related Items
+- Canvas tile, saved views, and mold-breaking UX per P3-E14 T07
+
+What remains deferred:
+- **Layer 2** — owner-facing intake portal, direct subcontractor access, shared PM + owner + sub workspace; governed by P3-E14 T05 and T06 seam contracts
+- **Deeper field-first execution** beyond the Layer 1 control surface model (see §22 and `07_Phase-6_Field-First-HB-Site-Control-Plan.md`)
+
+Governing plan: P3-E14 T01–T10. Related contracts: P3-E1 §3.x, P3-E2 §17, P3-E4 (back-charge advisory), P3-E10 (Closeout seam), P3-E11 (Startup seam).
 
 ---
 
@@ -1026,8 +1037,9 @@ The following are intentionally deferred or future-state items and must not be s
 - Full ERP/accounting behavior inside Project Hub
 - Full claims/legal/contract-admin behavior inside Constraints
 - Full jurisdiction-facing permitting package/submission management
-- Full deeper field-first execution depth for QC and Warranty (see Repo-Truth Reconciliation Note 3)
-- Any field-first expansion that exceeds the baseline-visible lifecycle posture for QC/Warranty in this phase
+- Full deeper field-first execution depth for QC (see Repo-Truth Reconciliation Note 3)
+- Warranty Layer 2: owner-facing intake portal, direct subcontractor access, shared PM + owner + sub collaborative workspace (governed by P3-E14 T05/T06 seam contracts; Layer 1 operating surface is Phase 3 scope)
+- Any field-first expansion that exceeds the governed Phase 3 scope for QC (baseline-visible) or Warranty Layer 1 control surface (P3-E14)
 - Full unified Documents product: global shell, My Files / Departments / Company roots, global smart views, platform-wide search, cross-workspace document unification, desktop-sync orchestration — Phase 5 scope; Phase 3 Workstream J delivers the enabling seams only (route contracts, zone schema, source/authority vocabulary, related-item document references, preview/adaptive contract, publish/handoff seams, and the Phase 5 handoff package)
 
 These should be captured as controlled follow-on artifacts or implementation subtasks, not kept as hidden blockers inside the plan.
@@ -1042,10 +1054,10 @@ The following reconciliations are locked for Phase 3 and MUST be honored in down
    `@hbc/app-shell` currently has **zero consumers** anywhere in the workspace — no app or package imports from it. The live SPFx extension imports `HbcAppShell` directly from `'@hbc/ui-kit/app-shell'`, not from `@hbc/app-shell`. The package's self-description is internally inconsistent: `src/index.ts` calls it a "PWA facade" while the README warns against PWA use. This plan lists `@hbc/app-shell` as an incoming dependency for potential SPFx / Project Hub convenience use, but current repo truth is that neither lane has adopted it. `@hbc/shell` remains canonical. The package's self-description should be aligned with intent before consumers are added.
 
 2. **`@hbc/features-project-hub` maturity reconciliation**
-   The plan envisions a robust module structure within Project Hub. Current repo truth: `@hbc/features-project-hub` (v0.1.63) already contains SF21 health-pulse plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout. The package remains under active expansion for the remaining Phase 3 modules, including Project Startup and Subcontract Compliance. This is still classified as **controlled evolution** — the plan remains slightly ahead of final module completion, but no longer assumes a health-pulse-only scaffold.
+   The plan envisions a robust module structure within Project Hub. Current repo truth: `@hbc/features-project-hub` (v0.1.73) already contains SF21 health-pulse plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, Project Closeout, and Project Startup (complete, 630 tests). Subcontract Execution Readiness T08 Stage 1 foundation is implemented. The package remains under active expansion for the remaining Subcontract Execution Readiness stages and Project Warranty. This is still classified as **controlled evolution** — the plan remains slightly ahead of final module completion, but no longer assumes a health-pulse-only scaffold.
 
 3. **QC/Warranty deferral target reconciliation**
-   This plan defers deeper QC/Warranty field-first depth to `07_Phase-6_Field-First-HB-Site-Control-Plan.md`. However, the Phase 6 plan is currently a draft that covers generic field-first UX, workflow selection, and offline sync — it does **not** explicitly accept QC/Warranty deeper depth in its current scope. This deferral target is **directional**: Phase 6 will need to be refined to absorb this scope when it is formally activated. This does not change Phase 3's decision to exclude deeper QC/Warranty depth.
+   **Warranty Layer 1** (coverage registry, case lifecycle, SLA, subcontractor coordination, owner intake log, spine publication) is now Phase 3 scope, governed by P3-E14 T01–T10. This reconciliation note now applies specifically to: (a) QC deeper field-first depth, and (b) Warranty Layer 2 (owner portal, direct subcontractor access, external collaborative workspace) and Warranty's deeper field-first execution beyond the Layer 1 control surface. Those remain deferred to `07_Phase-6_Field-First-HB-Site-Control-Plan.md`. However, the Phase 6 plan is currently a draft that covers generic field-first UX, workflow selection, and offline sync — it does **not** explicitly accept QC or Warranty Layer 2/deeper depth in its current scope. This deferral target is **directional**: Phase 6 will need to be refined to absorb this scope when it is formally activated.
 
 4. **PH7 deferred-scope reconciliation**
    PH7 feature plans (61 files, 4 task directories) are canonically locked (ADR-0091 satisfied 2026-03-09) and contain detailed module behavior definitions. Per current-state-map, PH7 plans are classified as **Deferred Scope** pending Phase 3 formal kickoff. At kickoff, PH7 plans must be formally reconciled into the Phase 3 deliverable package — they are implementation-shaping inputs, not background reference.
