@@ -217,3 +217,9 @@ export {
   createMockCloseoutMilestoneRecord,
   createMockArchiveReadyContext,
 } from './createMockCloseoutMilestone.js';
+
+// ── P3-E10-T05 Closeout lessons testing surface ────────────────────
+
+export {
+  createMockLessonsLearnedSnapshot,
+} from './createMockLessonsSnapshot.js';

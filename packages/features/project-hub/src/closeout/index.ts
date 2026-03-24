@@ -6,9 +6,11 @@
  * - T02 records — record families, identity, field architecture, publication states.
  * - T03 checklist — execution checklist, template library, overlay model.
  * - T04 lifecycle — state machine, milestones, evidence gates, approval rules.
+ * - T05 lessons — lessons learned operating model and intelligence publication.
  */
 
 export * from './foundation/index.js';
 export * from './records/index.js';
 export * from './checklist/index.js';
 export * from './lifecycle/index.js';
+export * from './lessons/index.js';
