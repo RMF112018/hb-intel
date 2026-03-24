@@ -203,3 +203,10 @@ export {
   createMockSubcontractorScorecard,
   createMockLessonEntry,
 } from './createMockCloseoutRecordFamily.js';
+
+// ── P3-E10-T03 Closeout checklist testing surface ──────────────────
+
+export {
+  createMockGovernedChecklistItem,
+  createMockChecklistSectionDefinition,
+} from './createMockGovernedChecklistItem.js';
