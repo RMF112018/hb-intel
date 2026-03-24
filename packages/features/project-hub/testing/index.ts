@@ -263,3 +263,8 @@ export { createMockStartupProgram } from './createMockStartupProgram.js';
 
 export { createMockStartupTaskInstance } from './createMockStartupTaskInstance.js';
 export { createMockTaskBlocker } from './createMockTaskBlocker.js';
+
+// ── P3-E11-T10 Stage 3 Startup safety readiness testing surface ────
+
+export { createMockSafetyReadinessItem } from './createMockSafetyReadinessItem.js';
+export { createMockSafetyRemediationRecord } from './createMockSafetyRemediationRecord.js';
