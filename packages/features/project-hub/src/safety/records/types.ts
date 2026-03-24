@@ -6,6 +6,7 @@
 import type { IncidentPrivacyTier } from '../foundation/enums.js';
 import type { ApplicabilityCondition, InspectionItemResponseValue } from '../inspection/enums.js';
 import type { IncidentPersonRole } from '../corrective-actions/enums.js';
+import type { PromptClosureType } from '../jha-toolbox/enums.js';
 import type { ISectionScoreSummary } from '../inspection/types.js';
 import type {
   AcknowledgmentMethod,
@@ -454,8 +455,10 @@ export interface IToolboxPromptIssuance {
   readonly issuedBy: string;
   readonly issuedAt: string;
   readonly closureRequired: boolean;
+  readonly closureType: PromptClosureType;
   readonly closedAt: string | null;
   readonly closureProofRecordId: string | null;
+  readonly closureVerifiedById: string | null;
 }
 
 export interface IToolboxTalkPrompt {

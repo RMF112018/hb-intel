@@ -1,7 +1,7 @@
 /**
  * P3-E8 runtime root barrel for Safety module.
  *
- * Implemented: T01–T05 complete.
+ * Implemented: T01–T06 complete.
  *
  * T01: Module scope, operating model, record families, lane ownership, authority matrix,
  *      visibility doctrine, PER exclusion, cross-contract positioning, locked decisions.
@@ -16,6 +16,9 @@
  * T05: Centralized CA ledger governance (overdue computation, severity escalation, work queue),
  *      incident privacy model (3-tier role-based visibility), evidence governance (sensitivity
  *      defaults, retention, LITIGATION_HOLD), composite CA health signals.
+ * T06: JHA approval governance (competent person pre-condition, supersession), daily pre-task
+ *      validation (JHA reference enforcement, completion criteria), toolbox prompt intelligence
+ *      (schedule risk mapping, closure model STANDARD/HIGH_RISK/CRITICAL), weekly talk proof.
  */
 
 export * from './foundation/index.js';
@@ -23,3 +26,4 @@ export * from './records/index.js';
 export * from './lifecycle/index.js';
 export * from './inspection/index.js';
 export * from './corrective-actions/index.js';
+export * from './jha-toolbox/index.js';
