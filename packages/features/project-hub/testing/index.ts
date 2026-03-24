@@ -223,3 +223,9 @@ export {
 export {
   createMockLessonsLearnedSnapshot,
 } from './createMockLessonsSnapshot.js';
+
+// ── P3-E10-T06 Closeout scorecard testing surface ──────────────────
+
+export {
+  createMockScorecardCriterionScores,
+} from './createMockScorecardCriterion.js';
