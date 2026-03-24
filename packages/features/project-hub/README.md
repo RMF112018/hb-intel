@@ -96,3 +96,5 @@ T08 Implementation Closure: Contract-level complete. 44 source files, 17 test fi
 T01 Foundation: Thread model, authority matrix, compliance health doctrine (derived, no manual score), 15 locked decisions. See `src/permits/foundation/`.
 
 T02 Record Architecture: 7 record families (PermitApplication, IssuedPermit, RequiredInspectionCheckpoint, InspectionVisit, InspectionDeficiency, PermitLifecycleAction, PermitEvidenceRecord), 15 enumerations, responsibility envelopes. See `src/permits/records/`.
+
+T03 Lifecycle & Governance: Dual state machines (application + issued permit via lifecycle actions), 20-rule transition table, governance constraints, system-driven transitions, API contracts. See `src/permits/lifecycle/`.
