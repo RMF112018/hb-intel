@@ -1,7 +1,7 @@
 /**
  * P3-E8 runtime root barrel for Safety module.
  *
- * Implemented: T01–T09 complete.
+ * Implemented: T01–T09 complete. T10 acceptance gate assessed — contract-level complete.
  *
  * T01: Module scope, operating model, record families, lane ownership, authority matrix,
  *      visibility doctrine, PER exclusion, cross-contract positioning, locked decisions.
@@ -28,6 +28,7 @@
  * T09: Publication contracts: composite scorecard (5 dimensions + SafetyPosture), sanitized PER
  *      projection, 18 activity spine events, 25 work queue rules (WQ-SAF-01–25), 8 related items,
  *      7 reports, 6 handoffs, 7 BIC next-move prompts.
+ * T10: Implementation closure assessed. 54 of 60 acceptance items satisfied at contract level.
  */
 
 export * from './foundation/index.js';
