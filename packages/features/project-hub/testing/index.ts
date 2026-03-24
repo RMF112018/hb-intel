@@ -276,3 +276,7 @@ export { createMockPermitVerificationDetail } from './createMockPermitVerificati
 // ── P3-E11-T10 Stage 5 Startup contract obligations testing surface ─
 
 export { createMockContractObligation } from './createMockContractObligation.js';
+
+// ── P3-E11-T10 Stage 6 Startup responsibility matrix testing surface ─
+
+export { createMockResponsibilityAssignment } from './createMockResponsibilityAssignment.js';
