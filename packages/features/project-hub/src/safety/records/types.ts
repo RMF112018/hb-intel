@@ -41,54 +41,41 @@ import type {
 } from './enums.js';
 
 // ============================================================================
-// SSSP SECTION STUBS (governed and instance — detail in T03)
+// SSSP SECTION AND APPROVAL TYPES (implemented in T03 lifecycle/types.ts)
 // ============================================================================
 
-/** Governed section: hazard identification and control. Detail in T03. */
-export type SSSPGoverned_HazardSection = Record<string, unknown>;
+import type {
+  ISSSPGoverned_HazardSection,
+  ISSSPGoverned_EmergencySection,
+  ISSSPGoverned_ProgramSection,
+  ISSSPGoverned_RegulatorySection,
+  ISSSPGoverned_CompetentPersonSection,
+  ISSSPGoverned_SubcontractorSection,
+  ISSSPGoverned_IncidentSection,
+  ISSSPInstance_Contacts,
+  ISSSPInstance_SubcontractorList,
+  ISSSPInstance_Location,
+  ISSSPInstance_SiteLayout,
+  ISSSPInstance_OrientationSchedule,
+  ISSSPApproval,
+  ISSSPAddendumApproval,
+} from '../lifecycle/types.js';
 
-/** Governed section: emergency response procedures. Detail in T03. */
-export type SSSPGoverned_EmergencySection = Record<string, unknown>;
-
-/** Governed section: safety program standards. Detail in T03. */
-export type SSSPGoverned_ProgramSection = Record<string, unknown>;
-
-/** Governed section: regulatory and code citations. Detail in T03. */
-export type SSSPGoverned_RegulatorySection = Record<string, unknown>;
-
-/** Governed section: competent person requirements. Detail in T03. */
-export type SSSPGoverned_CompetentPersonSection = Record<string, unknown>;
-
-/** Governed section: subcontractor compliance standards. Detail in T03. */
-export type SSSPGoverned_SubcontractorSection = Record<string, unknown>;
-
-/** Governed section: incident reporting protocol. Detail in T03. */
-export type SSSPGoverned_IncidentSection = Record<string, unknown>;
-
-/** Instance section: project contacts. Detail in T03. */
-export type SSSPInstance_Contacts = Record<string, unknown>;
-
-/** Instance section: subcontractor list. Detail in T03. */
-export type SSSPInstance_SubcontractorList = Record<string, unknown>;
-
-/** Instance section: project location / site description. Detail in T03. */
-export type SSSPInstance_Location = Record<string, unknown>;
-
-/** Instance section: emergency assembly and site layout. Detail in T03. */
-export type SSSPInstance_SiteLayout = Record<string, unknown>;
-
-/** Instance section: project-specific orientation schedule. Detail in T03. */
-export type SSSPInstance_OrientationSchedule = Record<string, unknown>;
-
-// ============================================================================
-// APPROVAL STUBS (detail in T03)
-// ============================================================================
-
-/** Joint SSSP approval record (Safety Manager + PM + Superintendent). Detail in T03. */
-export type SSSPApproval = Record<string, unknown>;
-
-/** Addendum approval record. Detail in T03. */
-export type SSSPAddendumApproval = Record<string, unknown>;
+// Re-export with backward-compatible aliases
+export type SSSPGoverned_HazardSection = ISSSPGoverned_HazardSection;
+export type SSSPGoverned_EmergencySection = ISSSPGoverned_EmergencySection;
+export type SSSPGoverned_ProgramSection = ISSSPGoverned_ProgramSection;
+export type SSSPGoverned_RegulatorySection = ISSSPGoverned_RegulatorySection;
+export type SSSPGoverned_CompetentPersonSection = ISSSPGoverned_CompetentPersonSection;
+export type SSSPGoverned_SubcontractorSection = ISSSPGoverned_SubcontractorSection;
+export type SSSPGoverned_IncidentSection = ISSSPGoverned_IncidentSection;
+export type SSSPInstance_Contacts = ISSSPInstance_Contacts;
+export type SSSPInstance_SubcontractorList = ISSSPInstance_SubcontractorList;
+export type SSSPInstance_Location = ISSSPInstance_Location;
+export type SSSPInstance_SiteLayout = ISSSPInstance_SiteLayout;
+export type SSSPInstance_OrientationSchedule = ISSSPInstance_OrientationSchedule;
+export type SSSPApproval = ISSSPApproval;
+export type SSSPAddendumApproval = ISSSPAddendumApproval;
 
 // ============================================================================
 // §2.1 — ISiteSpecificSafetyPlan (SSSP Base Plan)
