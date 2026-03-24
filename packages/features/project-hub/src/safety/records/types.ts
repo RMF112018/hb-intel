@@ -5,6 +5,7 @@
 
 import type { IncidentPrivacyTier } from '../foundation/enums.js';
 import type { ApplicabilityCondition, InspectionItemResponseValue } from '../inspection/enums.js';
+import type { IncidentPersonRole } from '../corrective-actions/enums.js';
 import type { ISectionScoreSummary } from '../inspection/types.js';
 import type {
   AcknowledgmentMethod,
@@ -322,11 +323,15 @@ export interface ISafetyCorrectiveAction {
 export interface IIncidentPersonRecord {
   readonly personId: string | null;
   readonly personName: string;
-  readonly role: string;
-  readonly companyId: string | null;
-  readonly companyName: string | null;
+  readonly personCompanyId: string | null;
+  readonly personCompanyName: string;
+  readonly roleInIncident: IncidentPersonRole;
   readonly injuryDescription: string | null;
-  readonly treatmentProvided: string | null;
+  readonly injuryBodyPart: string | null;
+  readonly medicalAttentionRequired: boolean;
+  readonly medicalFacility: string | null;
+  readonly returnToWorkDate: string | null;
+  readonly lostDays: number | null;
 }
 
 export interface IIncidentRecord {
