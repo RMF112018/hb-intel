@@ -1,6 +1,7 @@
 /**
  * Subcontract Execution Readiness module barrel.
- * Re-exports all foundation exports.
+ * Re-exports all stage exports.
  */
 
 export * from './foundation/index.js';
+export * from './record-families/index.js';
