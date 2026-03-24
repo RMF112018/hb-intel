@@ -112,3 +112,5 @@ T08 Implementation Closure: Contract-level complete. 30 source files, 10 test fi
 ## 13. Project Closeout Module (P3-E10) — Stage 7.8
 
 T01 Foundation: Three-class surface model (operational/derived/consumption), 16 owned record families, 10 enumerations, SoT boundary matrix (11 rows), always-on activation model (5 phases), 12 cross-contract references, 14 locked architecture decisions, 7 shared package requirements, 5 operating principles, 10 business rules. See `src/closeout/foundation/`.
+
+T02 Records: 8-state publication model, publication state applicability matrix (10 families), 7 T02 enumerations, 5 operational record interfaces (CloseoutChecklist, CloseoutChecklistItem, SubcontractorScorecard, LessonEntry, LessonsLearningReport), 3 org intelligence provenance contracts (SubIntelligenceIndexEntry, LessonsIntelligenceIndexEntry, LearningLegacyFeedEntry), record family hierarchy (15 relationships), 6 autopsy invariants, 5 autopsy relationships, 10 immutability rules, 12 business rules, testing fixtures. See `src/closeout/records/`.

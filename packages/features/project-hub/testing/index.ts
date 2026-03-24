@@ -195,3 +195,11 @@ export {
 // ── P3-E10-T01 Closeout foundation testing surface ──────────────────
 
 export { createMockCloseoutSoTBoundary } from './createMockCloseoutSoTBoundary.js';
+
+// ── P3-E10-T02 Closeout records testing surface ────────────────────
+
+export {
+  createMockCloseoutChecklist,
+  createMockSubcontractorScorecard,
+  createMockLessonEntry,
+} from './createMockCloseoutRecordFamily.js';
