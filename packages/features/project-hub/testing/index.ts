@@ -180,3 +180,14 @@ export { createMockCheckpointTemplate } from './createMockCheckpointTemplate.js'
 // ── P3-E8-T01 Safety foundation testing surface ──────────────────────
 
 export { createMockSafetyAuthorityRule } from './createMockSafetyAuthorityRule.js';
+
+// ── P3-E8-T02 Safety records testing surface ─────────────────────────
+
+export {
+  createMockSiteSpecificSafetyPlan,
+  createMockCompletedInspection,
+  createMockSafetyCorrectiveAction,
+  createMockIncidentRecord,
+  createMockJhaRecord,
+  createMockSafetyEvidenceRecord,
+} from './createMockSafetyRecord.js';
