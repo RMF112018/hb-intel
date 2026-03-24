@@ -182,7 +182,7 @@ No other feature package may import from `@hbc/project-startup`. All cross-modul
 
 ---
 
-## 9. Required Shared Package Integrations
+## 9. Required Shared Package and Spine Integrations
 
 ### 9.1 Hard Blockers (required before any Startup UI ships)
 
@@ -192,8 +192,8 @@ No other feature package may import from `@hbc/project-startup`. All cross-modul
 | `@hbc/versioned-record` | Audit trail on `obligationStatus`, `assignedPersonName`/`value`, task `result`, `BaselineSectionField.value`, `SafetyReadinessItem.result`, `ReadinessCertification.certStatus` | **Hard blocker.** All result changes must be versioned per T02 §2.2. |
 | `@hbc/project-canvas` | Startup readiness tile in project canvas (pre- and post-lock states) | **Hard blocker.** Startup must surface in project canvas from project creation onward. |
 | `@hbc/my-work-feed` | `StartupWorkAdapter` — all Work Queue items per T08 §3 | **Hard blocker.** Startup is a primary driver of Work Queue items across the project lifecycle. |
-| `@hbc/activity-spine` | Activity event publication per T08 §1 | **Hard blocker.** Startup must publish lifecycle events. |
-| `@hbc/health-spine` | Health metric publication per T08 §2 | **Hard blocker.** Startup readiness state is a core project health signal. |
+| `@hbc/activity-timeline` | Activity event publication per T08 §1 and normalized timeline runtime consumption | **Hard blocker.** Startup must publish lifecycle events through the canonical Activity Timeline contract/runtime. |
+| P3-D2 Health Spine publication contract | Health metric publication per T08 §2, consumed by Project Health Pulse surfaces in `@hbc/features-project-hub` | **Hard blocker.** Startup readiness state is a core project health signal and must publish through the canonical Health Spine contract. |
 
 ### 9.2 High-Value Integrations (required but not blocking core Startup implementation)
 
@@ -219,7 +219,7 @@ No other feature package may import from `@hbc/project-startup`. All cross-modul
 | Direct import from `@hbc/safety` | No cross-feature imports. Cross-reference is via Related Items only. |
 | Direct import from `@hbc/permits` | No cross-feature imports. Startup reads Permits via API for display context only. |
 | Direct import from `@hbc/financial` | No cross-feature imports. Financial data used only for pre-fill suggestions via API. |
-| Spine publications that bypass `@hbc/activity-spine`, `@hbc/health-spine`, or `@hbc/my-work-feed` package contracts | All spine publication must go through established spine package contracts. |
+| Spine publications that bypass `@hbc/activity-timeline`, the P3-D2 Health Spine publication contract, or `@hbc/my-work-feed` package contracts | All spine publication must go through the established Activity Timeline, Health Spine, and Work Queue contracts. |
 | Creating visual primitives (buttons, cards, tables, status badges) outside `@hbc/ui-kit` | All reusable UI must come from `@hbc/ui-kit`. Feature-local composition shells are permitted within `@hbc/project-startup`. |
 
 ---

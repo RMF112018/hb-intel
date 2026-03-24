@@ -15,7 +15,7 @@
 
 ## 1. Pre-Implementation: Hard No-Go Conditions
 
-Do not write any `@hbc/project-startup` application code until all hard blocker shared packages are confirmed available and callable. These packages are not workaround-able — local substitutes violate architecture invariants and will require re-extraction later.
+Do not write any `@hbc/project-startup` application code until all hard blocker shared packages and spine publication contracts are confirmed available and callable. These dependencies are not workaround-able — local substitutes violate architecture invariants and will require re-extraction later.
 
 | Shared package | Blocker level | Verification required |
 |---|---|---|
@@ -23,8 +23,8 @@ Do not write any `@hbc/project-startup` application code until all hard blocker 
 | `@hbc/versioned-record` | **Hard blocker** | Version-on-write hooks available for record mutation events |
 | `@hbc/project-canvas` | **Hard blocker** | Canvas tile registration API accepts Startup `StartupCanvasTileAdapter` |
 | `@hbc/my-work-feed` | **Hard blocker** | Work Queue item creation API accepts Startup source module and all item type keys defined in T08 §3 |
-| `@hbc/activity-spine` | **Hard blocker** | Activity event publication API accepts Startup event types in T08 §1 |
-| `@hbc/health-spine` | **Hard blocker** | Health metric publication API accepts all Startup metric keys in T08 §2 |
+| `@hbc/activity-timeline` | **Hard blocker** | Activity Timeline publication/runtime accepts Startup event types in T08 §1 |
+| P3-D2 Health Spine publication contract | **Hard blocker** | Health Spine publication contract accepts all Startup metric keys in T08 §2 and exposes them to Project Health Pulse consumers |
 
 **If any hard blocker is unavailable:** raise the blocker, do not work around it with local storage, local counters, or local event buses. All spine publication and annotation contracts are enforced at the API boundary — local substitutes create hidden coupling that cannot be extracted cleanly.
 

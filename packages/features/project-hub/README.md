@@ -1,6 +1,6 @@
 # @hbc/features-project-hub
 
-Project Hub feature package for HB Intel, including SF21 Project Health Pulse contracts, computation, hooks, UI surfaces, and reference integrations.
+Project Hub feature package for HB Intel, including Project Health Pulse plus Phase 3 contract-level module implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout.
 
 ## 1. Pulse Overview and Value Proposition
 
@@ -152,3 +152,17 @@ T08 Consumption: 3 data classes (operational/published intelligence/read-only), 
 T09 Permissions: 6 roles, 31-row master role matrix, 2-regime intelligence visibility, 16-field SubIntelligence field visibility, annotation isolation contract (PE/PER annotations never write to operational records), PE approval vs. annotation formal distinction (7 dimensions), 7 PE formal review surfaces, 6 SUPT checklist section scopes, 5 PE work queue items, role-based business rules, testing fixtures. See `src/closeout/permissions/`.
 
 T10 Integration: Package identity (@hbc/project-closeout L5 Feature), 5-surface PWA/SPFx classification, 7 shared package contracts (related-items, versioned-record, field-annotations, workflow-handoff, acknowledgment, bic-next-move, notification-intelligence), 3 spine contracts, 6 prohibited dependencies, 7 lane capabilities, auto-write blocking, testing fixtures. See `src/closeout/integration/`.
+
+## 15. Project Startup Module (P3-E11) — Planning Status
+
+Project Startup is not yet implemented in this package. Its planning and governance set is now aligned to the T01-T10 readiness-program model in the Phase 3 deliverables:
+
+- Startup is a top-level readiness program with six governed subordinate surfaces, not five peer forms.
+- The governing lifecycle is the eight-state readiness model with separate certification, PE mobilization authorization, stabilization, and baseline-lock phases.
+- Closeout continuity is handled through the immutable `StartupBaseline` read model; Startup writes it and Closeout reads it.
+
+Use the canonical planning set before implementation:
+
+- `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-Project-Startup-Module-Field-Specification.md`
+- `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T01-Operating-Model-Scope-Surface-Map-Lifecycle-Continuity.md`
+- `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T10-Implementation-and-Acceptance-Guide.md`

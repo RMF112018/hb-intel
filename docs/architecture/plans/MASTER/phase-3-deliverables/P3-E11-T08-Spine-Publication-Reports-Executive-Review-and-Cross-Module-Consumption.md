@@ -63,7 +63,7 @@ Project Startup publishes the following events to the Activity Spine (P3-D1). Al
 
 ## 2. Health Spine Publication
 
-Project Startup publishes the following metrics to the Health Spine (P3-D2). These are `IHealthMetric` contributions via the `@hbc/health-spine` publication API. Startup publishes under the `Startup` dimension (or the office-level dimension used by the Health spine per P3-D2 §11).
+Project Startup publishes the following metrics to the Health Spine (P3-D2). These are `IHealthMetric` contributions via the Phase 3 Health Spine publication contract consumed by Project Health Pulse surfaces in `@hbc/features-project-hub`. Startup publishes under the `Startup` dimension (or the office-level dimension used by the Health Spine per P3-D2 §11).
 
 | Metric key | Calculation | Update trigger |
 |---|---|---|
@@ -288,7 +288,7 @@ The Safety module (P3-E8) operates executive review exclusion rules for its own 
 | Module | Consumes Startup data | How | Direction |
 |---|---|---|---|
 | P3-D1 Activity Spine | Activity events per §1 | Activity event bus | Startup → Spine |
-| P3-D2 Health Spine | Metrics per §2 | `@hbc/health-spine` metric publication | Startup → Spine |
+| P3-D2 Health Spine | Metrics per §2 | P3-D2 Health Spine publication contract consumed by Project Health Pulse | Startup → Spine |
 | P3-D3 Work Queue | Items per §3 | `@hbc/my-work-feed` `StartupWorkAdapter` | Startup → Spine |
 | P3-D4 Related Items | Relationships per §4 | `@hbc/related-items` registration | Startup → Spine |
 | P3-E10 Closeout | `StartupBaseline` snapshot | `GET /api/startup/{projectId}/baseline` | **Closeout reads; Startup does not push** |

@@ -1,8 +1,8 @@
 {
   "name": "@hbc/features-project-hub",
-  "version": "0.1.54",
+  "version": "0.1.55",
   "private": true,
-  "description": "Project Hub feature package with SF21 Project Health Pulse scaffold boundaries",
+  "description": "Project Hub feature package with Project Health Pulse and Phase 3 core module contracts",
   "type": "module",
   "sideEffects": false,
   "main": "./src/index.ts",

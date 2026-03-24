@@ -7,7 +7,7 @@
 **Application Lanes:** PWA lane and SPFx lane
 **Primary Outcome:** Deliver a shared-canonical Project Hub model with a robust PWA product, a broad SPFx companion experience, and stable cross-lane project context continuity
 **Read With:** [`00_HB-Intel_Master-Development-Summary-Plan.md`](00_HB-Intel_Master-Development-Summary-Plan.md)
-**Last Reviewed Against Repo Truth:** 2026-03-20
+**Last Reviewed Against Repo Truth:** 2026-03-24
 
 ---
 
@@ -39,7 +39,7 @@ Phase 3 planning must explicitly acknowledge the following current-state foundat
 - A real **`/project-hub` route** already exists in the PWA (`apps/pwa/src/router/workspace-routes.ts`). The current `ProjectHubPage` is an **MVP-level scaffold** — a portfolio dashboard with summary cards and data table — not yet the robust operating layer this phase envisions.
 - Supporting shared packages already exist at verified maturity levels:
   - `@hbc/project-canvas` (v0.0.1, mature — dist build, exports, storybook, tests; SF13, ADR-0102 locked)
-  - `@hbc/features-project-hub` (v0.0.1, **partial** — SF21 health-pulse scaffolding finalized; not yet the full module structure this phase requires)
+  - `@hbc/features-project-hub` (v0.1.55, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout are live; Project Startup and Subcontract Compliance remain Phase 3 planning/implementation scope)
   - `@hbc/related-items` (v0.0.2, mature — cross-module record relationship panel)
   - `@hbc/workflow-handoff` (v0.1.0, mature — platform workflow primitive)
   - `@hbc/session-state` (v0.0.1, mature — SF12, ADR-0101 locked; offline model ready)
@@ -382,7 +382,7 @@ The SPFx lane must be a **broad operational project-site companion**:
 | Project switching | Smart same-page switching | Full | Full, with host-aware fallbacks |
 | Home/canvas | Same governance and mandatory core | Richer continuity/customization | Broad site-native companion |
 | Health/activity/work/related-items | Same normalized semantics | Full | Full |
-| Financial / Schedule / Constraints / Permits / Safety | Same authority boundaries | First-class working surfaces | Broad operational surfaces |
+| Financial / Schedule / Constraints / Permits / Safety / Project Startup | Same authority boundaries | First-class working surfaces | Broad operational surfaces |
 | Reports | Same report definitions, runs, and release model | Richer history/continuity/recovery | Broad report interaction and launch |
 | Cross-project continuity | Shared identity rules | Richest | Limited by host reality |
 | Advanced workflow depth | Shared baseline contracts | Richest | Broad but not canonical owner of deepest flows |
@@ -400,6 +400,7 @@ The always-on core baseline for every activated project is:
 - Activity
 - Related Items
 - Work Queue
+- Project Startup
 - Financial
 - Schedule
 - Constraints
@@ -433,6 +434,7 @@ Buyout is not treated as a separate top-level baseline module in this refined pl
 - Work Queue
 - Permits
 - Safety
+- Project Startup
 
 #### Governed report workspace
 
@@ -555,6 +557,30 @@ Phase 3 Safety must support:
 Safety is intended to replace the current **Site Specific Safety Plan** file-based workflow and to aggregate inspection/checklist points from the current weighted safety checklist baseline.
 
 **Future-state note:** later development should support smart toolbox-talk topic generation linked to high-risk schedule activities surfaced about one week before the activity start.
+
+### 12.5a Project Startup
+
+Phase 3 uses a **governed startup readiness program** rather than a set of flat launch forms:
+
+- Project Hub owns the readiness-program state machine, certification workflow, PE mobilization authorization, stabilization window, and immutable startup baseline continuity record.
+- Adjacent modules remain authoritative for their live operational domains; Startup only cross-references them where the source-of-truth boundary explicitly allows it.
+
+Project Startup is an **always-on first-class operational module** that begins at project creation, remains active through early execution stabilization, then persists as a read-only launch record after baseline lock.
+
+Phase 3 Project Startup must support:
+
+- six governed subordinate surfaces:
+  - Startup Program Checklist
+  - Startup Safety Readiness
+  - Permit Posting Verification
+  - Contract Obligations Register
+  - Responsibility Routing Engine
+  - Project Execution Baseline
+- explicit separation between sub-surface operational completeness and formal readiness certification
+- PE gate acceptance followed by separate PE mobilization authorization
+- a configurable stabilization window before baseline lock
+- immutable `StartupBaseline` continuity into Project Closeout / Autopsy for delta analysis
+- full cross-lane canonical behavior, with lane differences limited to depth and host constraints rather than different startup semantics
 
 ### 12.6 Reports
 
@@ -818,7 +844,7 @@ Cross-lane acceptance gates and execution-readiness criteria are passed.
 - Working provisioning/handoff seams suitable for upgrade into Project Hub activation
 - Shared package readiness for:
   - `@hbc/project-canvas` (mature)
-  - `@hbc/features-project-hub` (partial — requires module expansion)
+  - `@hbc/features-project-hub` (active expansion — substantial Phase 3 module implementation already landed; Startup and later modules still require additional delivery)
   - `@hbc/related-items` (mature)
   - `@hbc/session-state` (mature)
   - `@hbc/my-work-feed` (mature)
@@ -980,7 +1006,7 @@ The following reconciliations are locked for Phase 3 and MUST be honored in down
    `@hbc/app-shell` currently has **zero consumers** anywhere in the workspace — no app or package imports from it. The live SPFx extension imports `HbcAppShell` directly from `'@hbc/ui-kit/app-shell'`, not from `@hbc/app-shell`. The package's self-description is internally inconsistent: `src/index.ts` calls it a "PWA facade" while the README warns against PWA use. This plan lists `@hbc/app-shell` as an incoming dependency for potential SPFx / Project Hub convenience use, but current repo truth is that neither lane has adopted it. `@hbc/shell` remains canonical. The package's self-description should be aligned with intent before consumers are added.
 
 2. **`@hbc/features-project-hub` maturity reconciliation**
-   The plan envisions a robust module structure within Project Hub. Current repo truth: `@hbc/features-project-hub` (v0.0.1) contains only SF21 health-pulse scaffolding. The package is **partial** and requires significant expansion to satisfy the always-on core module structure (§11). This is classified as **controlled evolution** — the plan is intentionally ahead of implementation.
+   The plan envisions a robust module structure within Project Hub. Current repo truth: `@hbc/features-project-hub` (v0.1.55) already contains SF21 health-pulse plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout. The package remains under active expansion for the remaining Phase 3 modules, including Project Startup and Subcontract Compliance. This is still classified as **controlled evolution** — the plan remains slightly ahead of final module completion, but no longer assumes a health-pulse-only scaffold.
 
 3. **QC/Warranty deferral target reconciliation**
    This plan defers deeper QC/Warranty field-first depth to `07_Phase-6_Field-First-HB-Site-Control-Plan.md`. However, the Phase 6 plan is currently a draft that covers generic field-first UX, workflow selection, and offline sync — it does **not** explicitly accept QC/Warranty deeper depth in its current scope. This deferral target is **directional**: Phase 6 will need to be refined to absorb this scope when it is formally activated. This does not change Phase 3's decision to exclude deeper QC/Warranty depth.

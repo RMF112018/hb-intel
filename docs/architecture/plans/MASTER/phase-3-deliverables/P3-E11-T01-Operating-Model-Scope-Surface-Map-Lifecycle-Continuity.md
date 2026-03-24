@@ -217,16 +217,16 @@ The new model replaces composite math with a governed readiness program: structu
 | `DRAFT` | `ACTIVE_PLANNING` | System | First edit to any Tier 2 sub-surface record | No |
 | `ACTIVE_PLANNING` | `READINESS_REVIEW` | PM action | PM submits ReadinessCertification for all 6 sub-surfaces (all must have `certStatus ≠ NOT_SUBMITTED`) | No |
 | `READINESS_REVIEW` | `ACTIVE_PLANNING` | PE action | PE rejects any certification (certStatus → REJECTED); program regresses for correction | No |
-| `READINESS_REVIEW` | `READY_FOR_MOBILIZATION` | PE action | All ReadinessGateRecord evaluations → ACCEPTED or WAIVED; PE issues PEMobilizationAuthorization | **Yes — PX role required** |
-| `READY_FOR_MOBILIZATION` | `ACTIVE_PLANNING` | PE action | PE revokes authorization before mobilization (rare; documented action) | **Yes** |
-| `READY_FOR_MOBILIZATION` | `MOBILIZED` | PE action | PE confirms physical mobilization commenced; stabilization window configured and opened | **Yes** |
+| `READINESS_REVIEW` | `READY_FOR_MOBILIZATION` | PE action | All ReadinessGateRecord evaluations → ACCEPTED or WAIVED; readiness gates are formally accepted and the program is cleared for mobilization review | **Yes — PX role required** |
+| `READY_FOR_MOBILIZATION` | `ACTIVE_PLANNING` | PE action | PE reopens readiness before mobilization because a material correction or newly discovered issue requires recertification; PE-authored rationale note required | **Yes** |
+| `READY_FOR_MOBILIZATION` | `MOBILIZED` | PE action | PE issues `PEMobilizationAuthorization`, confirms physical mobilization commenced, and opens the stabilization window | **Yes** |
 | `MOBILIZED` | `STABILIZING` | System | Auto-transition at mobilization confirmation timestamp | No |
 | `STABILIZING` | `BASELINE_LOCKED` | PE action or timer | PE closes stabilization window, OR stabilization window duration expires | **PE action or timer** |
 | `BASELINE_LOCKED` | `ARCHIVED` | System | Project archive event from project record | No |
 
 **Guard rules:**
 - States cannot be skipped. The API rejects out-of-sequence transitions with HTTP 409 and logs the attempt.
-- `READY_FOR_MOBILIZATION` → `ACTIVE_PLANNING` revocations require a PE-authored rationale note.
+- `READY_FOR_MOBILIZATION` → `ACTIVE_PLANNING` reopen actions require a PE-authored rationale note.
 - Timer expiry on the stabilization window runs the same code path as the PE close action; the system becomes the actor.
 
 ### 4.3 Material Changes During READY_FOR_MOBILIZATION
