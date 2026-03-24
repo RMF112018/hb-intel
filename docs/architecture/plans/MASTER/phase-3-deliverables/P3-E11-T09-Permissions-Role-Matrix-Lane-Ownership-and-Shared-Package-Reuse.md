@@ -99,10 +99,10 @@ The `PEMobilizationAuthorization` is the formal PE act that transitions the prog
 
 | Waiver type | Authority | Required fields |
 |---|---|---|
-| `ExceptionWaiverRecord` — waives a `ReadinessCertification` sub-surface gate | PX only | `waiverNote` describing the exception basis; `approvedBy` = PX userId |
-| `ContractObligation.obligationStatus = WAIVED` | PX only | `waiverNote` describing contractual basis |
-| `TaskBlocker` waiver | PM (for non-gating blockers); PX required for blockers tied to CRITICAL gating tasks | `resolvedBy`, `waiverNote` |
-| `ProgramBlocker` waiver | PX only | `waiverNote`, `resolvedBy` |
+| `ExceptionWaiverRecord` — waives a `ReadinessCertification` sub-surface gate | PX only | T02-governed waiver fields: `rationale`, `riskAcknowledgment`, `plannedResolutionDate`, `requestedBy`, `peDecisionBy`, and `peDecisionNotes` |
+| `ContractObligation.obligationStatus = WAIVED` | PX only | T04-governed contractual waiver basis recorded in the obligation waiver note fields; non-PX attempt returns HTTP 403 |
+| `TaskBlocker` waiver | PM (for non-gating blockers); PX required for blockers tied to CRITICAL gating tasks | `resolvedBy` plus the linked T02/T03-governed waiver rationale fields when the blocker remains open by exception |
+| `ProgramBlocker` waiver | PX only | T02-governed blocker-waiver rationale and PE decision fields; `resolvedBy` recorded with the final decision |
 | `SafetyRemediationRecord` acknowledged-but-open at certification | PE review and acceptance constitutes implicit waiver for certification purposes | PE acceptance recorded in `ReadinessCertification.reviewNotes` |
 
 All waiver records are preserved permanently. There is no hard-delete path for any waiver record.
@@ -124,7 +124,7 @@ All waiver records are preserved permanently. There is no hard-delete path for a
 
 ## 7. Lane Ownership — PWA vs. SPFx
 
-Per P3-G1 §4.8.2, Project Startup is a lifecycle module with full parity across both lanes. Both lanes deliver the complete Startup experience; there is no escalation to PWA required for any core Startup certification or gate action.
+Per P3-G1 §4.8.2, Project Startup is a lifecycle module with **PWA-first depth and broad SPFx direct parity**. Both lanes honor the same canonical Startup semantics and gate rules, but some depth operations remain Launch-to-PWA rather than fully native in SPFx.
 
 ### 7.1 PWA Depth
 
@@ -173,12 +173,12 @@ Both lanes must implement identically:
 
 | Property | Value |
 |---|---|
-| Package name | `@hbc/project-startup` |
+| Package name | `@hbc/features-project-hub` |
 | Layer | L5 Feature |
 | Surface classification | Lifecycle module — always-on |
 | Owner | Project Hub Leadership |
 
-No other feature package may import from `@hbc/project-startup`. All cross-module data flows go through the Spine publication contracts, Work Queue registration, and the `StartupBaseline` read API.
+Project Startup is planned and delivered inside `@hbc/features-project-hub`; there is no separate `@hbc/project-startup` feature package in repo truth. No other feature package may import Startup implementation directly. All cross-module data flows go through the Spine publication contracts, Work Queue registration, Related Items registration, and the `StartupBaseline` read API.
 
 ---
 
@@ -220,7 +220,7 @@ No other feature package may import from `@hbc/project-startup`. All cross-modul
 | Direct import from `@hbc/permits` | No cross-feature imports. Startup reads Permits via API for display context only. |
 | Direct import from `@hbc/financial` | No cross-feature imports. Financial data used only for pre-fill suggestions via API. |
 | Spine publications that bypass `@hbc/activity-timeline`, the P3-D2 Health Spine publication contract, or `@hbc/my-work-feed` package contracts | All spine publication must go through the established Activity Timeline, Health Spine, and Work Queue contracts. |
-| Creating visual primitives (buttons, cards, tables, status badges) outside `@hbc/ui-kit` | All reusable UI must come from `@hbc/ui-kit`. Feature-local composition shells are permitted within `@hbc/project-startup`. |
+| Creating visual primitives (buttons, cards, tables, status badges) outside `@hbc/ui-kit` | All reusable UI must come from `@hbc/ui-kit`. Feature-local composition shells are permitted within the Project Startup area of `@hbc/features-project-hub`. |
 
 ---
 

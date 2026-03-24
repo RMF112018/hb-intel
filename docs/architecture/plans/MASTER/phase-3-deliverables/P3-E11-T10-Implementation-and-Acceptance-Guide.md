@@ -15,7 +15,7 @@
 
 ## 1. Pre-Implementation: Hard No-Go Conditions
 
-Do not write any `@hbc/project-startup` application code until all hard blocker shared packages and spine publication contracts are confirmed available and callable. These dependencies are not workaround-able — local substitutes violate architecture invariants and will require re-extraction later.
+Do not write any Project Startup application code inside `@hbc/features-project-hub` until all hard blocker shared packages and spine publication contracts are confirmed available and callable. These dependencies are not workaround-able — local substitutes violate architecture invariants and will require re-extraction later.
 
 | Shared package | Blocker level | Verification required |
 |---|---|---|
@@ -102,7 +102,7 @@ Implement in the order below. Each stage has a gate check before proceeding. Do 
 - Obligation lifecycle states (`OPEN`, `IN_PROGRESS`, `SATISFIED`, `WAIVED`, `NOT_APPLICABLE`) transition correctly per T04 §4
 - Obligations with `flagForMonitoring = true` and `obligationStatus = OPEN` generate `ObligationOpenFlagged` Work Queue items
 - Obligations with `dueDate` within lead days per `monitoringPriority` generate `ObligationDueSoon` Work Queue items
-- `obligationStatus = WAIVED` requires PX role and `waiverNote`; non-PX attempt returns HTTP 403
+- `obligationStatus = WAIVED` requires PX role and the T04-governed contractual waiver rationale fields; non-PX attempt returns HTTP 403
 - Obligation field changes versioned via `@hbc/versioned-record`
 - Certification eligibility rules in T04 §7 enforced: certification requires documented review/routing/acknowledgment of monitored and near-due obligations; it does not impose a blanket rule that every open monitored obligation must be waived or closed
 - Activity Spine events: `ContractObligationAdded`, `ContractObligationStatusChanged`
@@ -226,7 +226,7 @@ The following criteria govern whether the Startup module implementation is compl
 
 | # | Criterion | Pass condition |
 |---|---|---|
-| 15 | Obligation lifecycle states transition correctly | All `ContractObligation` state transitions per T04 §4 function; `WAIVED` requires PX and `waiverNote` |
+| 15 | Obligation lifecycle states transition correctly | All `ContractObligation` state transitions per T04 §4 function; `WAIVED` requires PX and the T04-governed waiver rationale fields |
 | 16 | Certification eligibility enforced | `CONTRACT_OBLIGATIONS` certification blocked unless the T04 §7 review/routing/acknowledgment conditions are satisfied for monitored and near-due obligations |
 
 **Responsibility Matrix**
@@ -257,7 +257,7 @@ The following criteria govern whether the Startup module implementation is compl
 |---|---|---|
 | 24 | Activity Spine — all events fire | Integration test confirms all event types in T08 §1 fire on their defined trigger conditions |
 | 25 | Health Spine — all metrics publish | Integration test confirms all 11 metric keys in T08 §2 publish with correct values on trigger conditions |
-| 26 | Work Queue items — all conditions generate items | Integration test confirms all item types across T08 §3 subsections generate Work Queue items and clear on resolution |
+| 26 | Work Queue items and Related Items registrations align to T08 boundaries | Integration test confirms all item types across T08 §3 subsections generate Work Queue items and clear on resolution, all T08 §4 Related Items relationships register without local shadow link storage, and Startup registers no Reports snapshot adapter or org-intelligence publisher |
 | 27 | Annotations isolated from operational records | `@hbc/field-annotations` write does not update any field in any Startup data record; annotation stored in annotation layer only |
 | 28 | Post-lock read-only enforcement | Any PATCH/PUT on any Startup sub-surface record after `BASELINE_LOCKED` returns HTTP 405 |
 
@@ -317,10 +317,11 @@ The following evidence is required before the Startup module passes the Phase 3 
 | Non-interference test results | Passing CI tests: Section 4 → Permits, Safety Readiness → Safety module |
 | Certification gate test results | Passing tests for all 6 sub-surface certification blocking conditions |
 | Spine publication test results | Integration test log showing all T08 §1 events and §2 metrics firing |
-| Work Queue test results | Integration test log confirming all T08 §3 item types generate and clear |
+| Work Queue and Related Items test results | Integration test log confirming all T08 §3 item types generate and clear and all T08 §4 relationships register correctly |
 | Immutability test results | Passing tests for governed row immutability and `StartupBaseline` immutability |
 | Role permission test results | Passing tests for PX-exclusive actions (HTTP 403 on non-PX attempts) |
 | Closeout read API test results | Passing integration test from Closeout context |
+| No-Reports/no-org-intelligence boundary evidence | Verification note or contract test confirming Startup registers no Reports snapshot adapter and no org-intelligence publisher |
 | Canvas tile screenshot | Screenshot of canvas tile in pre-lock and post-lock state |
 | UI conformance review | Confirmation from `hb-ui-ux-conformance-reviewer` that all surfaces source from `@hbc/ui-kit` |
 
@@ -398,7 +399,7 @@ T01–T10 collectively supersede the original single-file P3-E11 specification. 
 | PM Plan sections and ExecutionAssumption | T06 §3–§5 |
 | Safety Readiness template and remediation | T07 §4 |
 | Spine publication, Work Queue, Related Items | T08 §1–§4 |
-| Permissions, certification co-signing, lane depth | T09 §1–§7 |
+| Permissions, certification co-signing, lane depth, package boundary | T09 §1–§9 |
 | Phase 3 acceptance gate | P3-H1 §6 |
 | Closeout consumption contract | P3-E10 T01 / T11 §4 |
 

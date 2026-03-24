@@ -26,9 +26,9 @@ This document is the master index for the P3-E11 Project Startup Module T-file s
 | [T05](P3-E11-T05-Responsibility-Routing-and-Accountability-Engine.md) | Responsibility Routing and Accountability Engine | Responsibility Matrix as a routing engine, not a spreadsheet artifact; 7 PM assignment columns with 71 assignment-bearing rows plus 11 reminder rows; 5 Field assignment columns with 27 assignment-bearing rows; category-level primary coverage and critical acknowledgment gates |
 | [T06](P3-E11-T06-Project-Execution-Baseline-Startup-Baselines-and-Closeout-Continuity.md) | Project Execution Baseline, Startup Baselines, and Closeout Continuity | PM Plan as an 11-section structured baseline; typed commitment fields plus categorized `ExecutionAssumption` records; PM/PX signatures and PX approval before certification; full-field `StartupBaseline` snapshot; Closeout reads immutable continuity snapshot only |
 | [T07](P3-E11-T07-Startup-Safety-Readiness-and-Permit-Posting-Verification.md) | Startup Safety Readiness and Permit Posting Verification | 32-item / 2-section startup safety surface with first-class `SafetyRemediationRecord` escalation and blocker handling; Section 4 permit-posting companion `PermitVerificationDetail` model; evidence/discrepancy rules; Safety and Permits module non-interference rules |
-| [T08](P3-E11-T08-Spine-Publication-Reports-Executive-Review-and-Cross-Module-Consumption.md) | Spine Publication, Reports, Executive Review, and Cross-Module Consumption | Activity Spine events; Health Spine metrics; Work Queue items; Related Items relationships; Reports integration; executive review annotation model; cross-module consumption surfaces |
-| [T09](P3-E11-T09-Permissions-Role-Matrix-Lane-Ownership-and-Shared-Package-Reuse.md) | Permissions, Role Matrix, Lane Ownership, and Shared Package Reuse | Master role permission matrix; PE mobilization authorization authority; lane depth (PWA vs. SPFx); shared package integration contracts; prohibited dependencies |
-| [T10](P3-E11-T10-Implementation-and-Acceptance-Guide.md) | Implementation and Acceptance Guide | Where to start; shared package blocker check; 7-stage implementation sequence with per-stage acceptance gates; cross-module API contracts; acceptance criteria; testing concerns |
+| [T08](P3-E11-T08-Spine-Publication-Reports-Executive-Review-and-Cross-Module-Consumption.md) | Spine Publication, Reports, Executive Review, and Cross-Module Consumption | Activity Spine events; Health Spine metrics; Work Queue items; Related Items relationships; project-canvas summary publication; no Reports publication; no org-intelligence publication; executive review annotation isolation; Closeout read-only baseline consumption |
+| [T09](P3-E11-T09-Permissions-Role-Matrix-Lane-Ownership-and-Shared-Package-Reuse.md) | Permissions, Role Matrix, Lane Ownership, and Shared Package Reuse | Master role permission matrix; PX-exclusive certification, waiver, mobilization, and baseline-lock authority; PWA-first lane depth with explicit SPFx Launch-to-PWA deferrals; repo-truth shared-package integration contracts; `@hbc/features-project-hub` ownership and prohibited dependencies |
+| [T10](P3-E11-T10-Implementation-and-Acceptance-Guide.md) | Implementation and Acceptance Guide | Where to start; shared package blocker check; 8-stage implementation sequence with per-stage acceptance gates; cross-module API contracts; acceptance criteria; testing concerns |
 
 ---
 
@@ -47,6 +47,10 @@ At the contract-review layer, T04 governs the Contract Obligations Register as a
 At the baseline layer, T06 governs the PM Plan as a structured baseline and continuity contract. It is not a narrative-only attachment: typed commitment fields, categorized assumptions, signature/approval gates, and the immutable `StartupBaseline` snapshot all flow from that baseline model.
 
 At the safety-and-permit boundary, T07 governs Startup Safety as a remediation/escalation review surface and Permit Posting as a Section 4 companion-record verification surface. Neither is an independent downstream ledger: Startup Safety does not write to Safety, and Permit Posting does not write to Permits.
+
+At the publication layer, T08 governs Startup's shared-spine and canvas contract. Startup publishes to Activity, Health, Work Queue, Related Items, and project-canvas only; it does not publish to Reports or any org-intelligence index, and executive review annotations remain isolated from formal gate actions.
+
+At the permissions-and-delivery layer, T09 governs role authority, lane ownership, and package-reuse boundaries. Startup planning is owned by `@hbc/features-project-hub`, not a standalone `@hbc/project-startup` package, and the module must reuse the canonical shared-package stack rather than invent local substitutes or direct cross-feature imports.
 
 ### Program Sub-Surfaces
 
@@ -105,7 +109,7 @@ At the safety-and-permit boundary, T07 governs Startup Safety as a remediation/e
 
 ### Governance Boundaries
 
-- `@hbc/project-startup` (L5 Feature) owns all operational state. No other feature package writes to Startup records.
+- `@hbc/features-project-hub` (L5 Feature) owns all Project Startup planning and eventual operational state. No other feature package writes to Startup records, and no standalone `@hbc/project-startup` package should be introduced for this module.
 - The Startup Safety Readiness surface does not feed Safety module corrective-action ledgers. Safety and Startup are operationally independent.
 - Permit Posting Verification (Section 4) cross-references the Permits module for display context but does not write permit records, resolve permit lifecycle states, or auto-resolve checklist items based on permit status.
 - The StartupBaseline snapshot is a Startup-owned read model that survives into Closeout. Closeout reads it for delta analysis. Closeout may not modify it.

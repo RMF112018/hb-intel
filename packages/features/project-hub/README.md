@@ -165,6 +165,8 @@ Project Startup is not yet implemented in this package. Its planning and governa
 - The T05 responsibility-routing surface is a governed `ResponsibilityMatrix` engine with 7 PM assignment columns across 71 assignment-bearing rows plus 11 reminder-only rows, 5 Field assignment columns across 27 assignment-bearing rows, category-level named-`Primary` coverage, and critical-category acknowledgment gates.
 - The T06 execution-baseline surface treats the PM Plan as an 11-section structured `ProjectExecutionBaseline`, with typed baseline fields, categorized `ExecutionAssumption` records, PM/PX signatures plus PX approval before certification, and immutable `StartupBaseline` continuity into Closeout.
 - The T07 safety/permit surface treats Startup Safety as a 32-item remediation-capable review surface with first-class `SafetyRemediationRecord` escalation and blocker handling, while Permit Posting remains Section 4 of the task library with one-to-one `PermitVerificationDetail` companion records, evidence/discrepancy requirements, and strict non-interference with Safety and Permits.
+- The T08 publication layer limits Startup to Activity Spine, Health Spine, Work Queue, Related Items, and project-canvas publication; Startup does not publish to Reports or org-intelligence indexes, Closeout reads only the immutable `StartupBaseline`, and executive review annotations stay isolated from formal gate actions.
+- The T09 governance layer fixes Startup ownership inside `@hbc/features-project-hub`, not a separate `@hbc/project-startup` package, and defines the authoritative role matrix, PX-exclusive certification/waiver/mobilization/baseline-lock actions, PWA-first lane ownership with explicit SPFx Launch-to-PWA depth deferrals, and the repo-truth shared-package reuse boundary.
 - Readiness review is modeled through six `ReadinessCertification` records plus PE `ReadinessGateRecord` / `ReadinessGateCriterion` evaluation, with `ExceptionWaiverRecord` and `ProgramBlocker` governance for unresolved launch exceptions.
 - Closeout continuity is handled through the immutable `StartupBaseline` read model; Startup writes it and Closeout reads it.
 
@@ -178,4 +180,6 @@ Use the canonical planning set before implementation:
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T05-Responsibility-Routing-and-Accountability-Engine.md`
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T06-Project-Execution-Baseline-Startup-Baselines-and-Closeout-Continuity.md`
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T07-Startup-Safety-Readiness-and-Permit-Posting-Verification.md`
+- `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T08-Spine-Publication-Reports-Executive-Review-and-Cross-Module-Consumption.md`
+- `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T09-Permissions-Role-Matrix-Lane-Ownership-and-Shared-Package-Reuse.md`
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T10-Implementation-and-Acceptance-Guide.md`

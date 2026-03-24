@@ -31,7 +31,7 @@ Project Startup publishes the following events to the Activity Spine (P3-D1). Al
 | `ProgramBlocker` resolved or waived | `ProgramBlockerResolved` | `blockerId`, `resolution`, `resolvedBy` |
 | `PEMobilizationAuthorization` created | `StartupMobilizationAuthorized` | `authId`, `authorizedBy`, `stabilizationWindowDays`, `programId` |
 | `StartupBaseline` created (at BASELINE_LOCKED) | `StartupBaselineLocked` | `snapshotId`, `lockedBy`, `lockedAt`, `programId` |
-| `ExceptionWaiverRecord` created | `StartupWaiverCreated` | `waiverId`, `subSurface`, `waivedBy`, `waiverNote` |
+| `ExceptionWaiverRecord` created | `StartupWaiverCreated` | `waiverId`, `subSurface`, `waiverStatus`, `requestedBy`, `plannedResolutionDate` |
 
 ### 1.2 Task Library Events
 
@@ -109,7 +109,7 @@ Project Startup raises Work Queue items via `@hbc/my-work-feed` (`StartupWorkAda
 |---|---|---|---|
 | `SafetyRemediationRecord` auto-created on `Fail` result | `SafetyRemediationPending` | PM | Remediation `remediationNote` and `assignedPersonName` populated |
 | `SafetyRemediationRecord` unassigned after 2 business days | `SafetyRemediationUnassigned` | PM | `assignedPersonName` populated |
-| `SafetyRemediationRecord` overdue (`dueDate < today`) | `SafetyRemediationOverdue` | `assignedUserId` AND `accountableRoleCode` | Remediation resolved or waived |
+| `SafetyRemediationRecord` overdue (`dueDate < today`) | `SafetyRemediationOverdue` | `assignedUserId` if present, otherwise `assignedRoleCode`; PX escalation continues through `SafetyRemediationEscalatedPX` when `escalationLevel = PX` | Remediation resolved or waived |
 | `SafetyRemediationRecord` escalated to PX | `SafetyRemediationEscalatedPX` | PX | Blocker resolved or remediation resolved |
 
 ### 3.4 Contract Obligation Items
@@ -171,7 +171,9 @@ Related Items links from Startup are read-only navigation aids. They do not conf
 
 Project Startup does not provide a snapshot API for P3-E9 Reports assembly. Startup data is not a source for any governed report family (PX Review, Owner Report) in Phase 3.
 
-**Rationale:** Reports assembles financial, schedule, safety, and project health data for external presentation. Startup data is pre-execution baseline material — a readiness certification program, not a recurring project status surface appropriate for PX Review or Owner Report inclusion. Including startup readiness state in a monthly PX Review would be misleading after the stabilization window closes and the module enters `BASELINE_LOCKED`.
+Startup therefore has no Reports snapshot endpoint, no report-family publication adapter, and no release-governed publication workflow in Phase 3. Any implementation that attempts to push Startup readiness state into P3-E9 report families violates this boundary.
+
+**Rationale:** Reports assembles financial, schedule, safety, and project health data for external presentation. Startup data is pre-execution baseline material — a readiness certification program, not a recurring project status surface appropriate for PX Review or Owner Report inclusion. Including startup readiness state in a monthly PX Review would be misleading after the stabilization window closes and the module enters `BASELINE_LOCKED`, and it would duplicate the governed Closeout learning loop that already consumes the immutable `StartupBaseline`.
 
 ### 5.2 Startup Does Not Publish Org Intelligence
 
@@ -279,7 +281,7 @@ The formal PE gate actions (certification review, mobilization authorization, ba
 
 ### 7.4 Safety Module Executive Review Exclusion Does Not Apply
 
-The Safety module (P3-E8) operates executive review exclusion rules for its own inspection and incident surfaces. These exclusion rules apply within the Safety module only. The Startup Safety Readiness surface (owned by `@hbc/project-startup`) is subject to standard executive review annotation. PE and PER may annotate any safety readiness item or remediation record without restriction.
+The Safety module (P3-E8) operates executive review exclusion rules for its own inspection and incident surfaces. These exclusion rules apply within the Safety module only. The Startup Safety Readiness surface (owned within `@hbc/features-project-hub`) is subject to standard executive review annotation. PE and PER may annotate any safety readiness item or remediation record without restriction.
 
 ---
 

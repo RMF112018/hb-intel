@@ -235,8 +235,8 @@ Full acceptance gate: P3-E11-T10 §5 (31 acceptance criteria, AC items 1–31). 
 | 6.6.8 | Responsibility Matrix certification requires named `Primary` coverage for all assignment-bearing PM/Field task categories and `acknowledgedAt` completion for all critical-category `Primary` assignments; governed row `taskDescription` remains immutable | Not Started | | P3-E11-T10 §5 items 17–18; T05 §4, §9.1–§9.2 |
 | 6.6.9 | PM Plan approval flow enforced; `EXECUTION_BASELINE` certification blocked until the plan is approved, T06 critical fields are populated, and PM/PX signatures are present; `ExecutionAssumption` uses the T06 categorized field model with conditional `successMeasure` requirement | Not Started | | P3-E11-T10 §5 items 19–21; T06 §2.1, §2.3, §7 |
 | 6.6.10 | Closeout reads `StartupBaseline` via read-only API; HTTP 403 for unauthorized callers; HTTP 405 on mutation | Not Started | | P3-E11-T10 §5 items 22–23; P3-E10 |
-| 6.6.11 | All Activity Spine events, Health metrics, and Work Queue item types fire on trigger conditions | Not Started | | P3-E11-T10 §5 items 24–26; T08 §1–§3 |
-| 6.6.12 | `@hbc/field-annotations` writes isolated from operational records; post-lock annotation continues | Not Started | | P3-E11-T10 §5 item 27; T09 §6 |
+| 6.6.11 | All Activity Spine events, Health metrics, Work Queue item types, and Related Items registrations fire on their governed T08 trigger conditions and relationship contracts | Not Started | | P3-E11-T10 §5 items 24–26; T08 §1–§4 |
+| 6.6.12 | `@hbc/field-annotations` writes isolated from operational records; post-lock annotation continues; Startup publishes to shared spines/canvas only and does not publish to Reports or org-intelligence indexes | Not Started | | P3-E11-T10 §5 items 27–28; T08 §5, T09 §6 |
 | 6.6.13 | Canvas tile registered (`StartupCanvasTileAdapter`); pre-lock and post-lock tile states correct | Not Started | | P3-E11-T10 §5 items 29–30; T09 §10 |
 | 6.6.14 | All Startup surfaces use `WorkspacePageShell`; all components sourced from `@hbc/ui-kit`; all empty sub-surface states use `HbcSmartEmptyState` | Not Started | | P3-E11-T10 §5 item 31; §6.8.9 |
 
