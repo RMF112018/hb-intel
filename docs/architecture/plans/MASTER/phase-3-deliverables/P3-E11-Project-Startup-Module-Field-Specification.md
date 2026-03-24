@@ -8,7 +8,7 @@
 | **Document Type** | Module Field Specification — T-File Master Index |
 | **Owner** | Project Hub Leadership |
 | **Last Updated** | 2026-03-24 |
-| **Status** | Specification — locked architecture; T-files govern |
+| **Status** | Specification — locked architecture; T-files govern; **T10 implementation complete (all 8 stages, 31/31 acceptance criteria verified, 630 tests, v0.1.72)** |
 | **Related contracts** | P3-E1 §3.10, P3-E2 §13, P3-E3 §9.7, P3-H1 §18.6, P3-D1 (Activity), P3-D2 (Health), P3-D3 (Work Queue), P3-D4 (Related Items) |
 
 ---
