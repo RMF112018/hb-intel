@@ -258,3 +258,8 @@ export {
 // ── P3-E11-T10 Stage 1 Startup foundation testing surface ──────────
 
 export { createMockStartupProgram } from './createMockStartupProgram.js';
+
+// ── P3-E11-T10 Stage 2 Startup task library testing surface ────────
+
+export { createMockStartupTaskInstance } from './createMockStartupTaskInstance.js';
+export { createMockTaskBlocker } from './createMockTaskBlocker.js';
