@@ -9,6 +9,7 @@
  * - T10 Stage 5 contract-obligations — obligation ledger, lifecycle, monitoring, certification.
  * - T10 Stage 6 responsibility-matrix — PM/Field two-sheet routing engine, critical acknowledgment.
  * - T10 Stage 7 execution-baseline — 11-section PM Plan, structured fields, assumptions, signatures.
+ * - T10 Stage 8 baseline-lock — immutable StartupBaseline snapshot, Closeout read API, continuity.
  */
 
 export * from './foundation/index.js';
@@ -18,3 +19,4 @@ export * from './permit-posting/index.js';
 export * from './contract-obligations/index.js';
 export * from './responsibility-matrix/index.js';
 export * from './execution-baseline/index.js';
+export * from './baseline-lock/index.js';

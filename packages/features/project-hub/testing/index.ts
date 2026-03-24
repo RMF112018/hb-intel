@@ -284,3 +284,7 @@ export { createMockResponsibilityAssignment } from './createMockResponsibilityAs
 // ── P3-E11-T10 Stage 7 Startup execution baseline testing surface ───
 
 export { createMockExecutionBaseline } from './createMockExecutionBaseline.js';
+
+// ── P3-E11-T10 Stage 8 Startup baseline lock testing surface ────────
+
+export { createMockStartupBaseline } from './createMockStartupBaseline.js';
