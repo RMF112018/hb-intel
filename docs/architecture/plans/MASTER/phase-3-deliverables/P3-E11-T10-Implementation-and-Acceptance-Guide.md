@@ -102,7 +102,7 @@ Implement in the order below. Each stage has a gate check before proceeding. Do 
 - Obligations with `dueDate` within lead days per `monitoringPriority` generate `ObligationDueSoon` Work Queue items
 - `obligationStatus = WAIVED` requires PX role and `waiverNote`; non-PX attempt returns HTTP 403
 - Obligation field changes versioned via `@hbc/versioned-record`
-- Certification eligibility rules in T04 §6 enforced: no obligation with `flagForMonitoring = true` and `obligationStatus = OPEN` may exist at certification time without a waiver
+- Certification eligibility rules in T04 §7 enforced: certification requires documented review/routing/acknowledgment of monitored and near-due obligations; it does not impose a blanket rule that every open monitored obligation must be waived or closed
 - Activity Spine events: `ContractObligationAdded`, `ContractObligationStatusChanged`
 - Health metrics: `contractObligationsFlagged`, `contractObligationsOverdue`
 - Work Queue items: `ObligationOpenFlagged`, `ObligationDueSoon`, `ObligationOverdue`
@@ -224,7 +224,7 @@ The following criteria govern whether the Startup module implementation is compl
 | # | Criterion | Pass condition |
 |---|---|---|
 | 15 | Obligation lifecycle states transition correctly | All `ContractObligation` state transitions per T04 §4 function; `WAIVED` requires PX and `waiverNote` |
-| 16 | Certification eligibility enforced | `CONTRACT_OBLIGATIONS` certification blocked if any obligation has `flagForMonitoring = true` and `obligationStatus = OPEN` and no waiver |
+| 16 | Certification eligibility enforced | `CONTRACT_OBLIGATIONS` certification blocked unless the T04 §7 review/routing/acknowledgment conditions are satisfied for monitored and near-due obligations |
 
 **Responsibility Matrix**
 

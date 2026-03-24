@@ -28,7 +28,7 @@ The distinction from the superseded "Owner Contract Review" model:
 | No routing by obligation type | `category` and `responsibleRoleCode` drive routing to correct Work Queue owner |
 | No Closeout continuity | Open count and flagged count snapshotted into `StartupBaseline` at lock |
 
-The register's ongoing value extends beyond startup. Obligations with `flagForReview = true` remain surfaced in Work Queue throughout the project lifecycle until resolved or waived.
+The register's ongoing value extends beyond startup. Obligations with `flagForMonitoring = true` remain surfaced in Work Queue throughout the project lifecycle until resolved, waived, or explicitly reopened under PX governance.
 
 **Source document:** `docs/reference/example/Responsibility Matrix - Owner Contract Template.xlsx` — Owner contract obligations matrix (45 reference rows across 6 columns: Article / Page / Responsible Party / Description / Category / Notes).
 
@@ -127,6 +127,7 @@ OPEN ──────────────────── → IN_PROGRES
   └── → WAIVED (PX note required)
 
 IN_PROGRESS → WAIVED (PX note required)
+SATISFIED / NOT_APPLICABLE / WAIVED → OPEN (PX reopen only; note required)
 ```
 
 | State | Code | Description | Terminal |
@@ -147,7 +148,7 @@ IN_PROGRESS → WAIVED (PX note required)
 | `IN_PROGRESS → SATISFIED` | `evidenceAttachmentIds` must contain at least one file, OR `notes` must be populated with justification |
 | `IN_PROGRESS → OPEN` | Permitted; regression documented in `notes` |
 | `IN_PROGRESS → WAIVED` | `waiverNote` required; PX must be the actor |
-| Any terminal → non-terminal | Blocked; requires PX to explicitly reopen |
+| `SATISFIED` \| `NOT_APPLICABLE` \| `WAIVED` → `OPEN` | PX must be the actor; `notes` must document why the obligation is being reopened |
 
 All `obligationStatus` changes are versioned via `@hbc/versioned-record`.
 
@@ -227,7 +228,7 @@ When a `RECURRING_MONTHLY` or `RECURRING_QUARTERLY` obligation is `SATISFIED` fo
 4. All `LIQUIDATED_DAMAGES` obligations have `dueDate` populated
 5. All `INSURANCE_REQUIREMENTS` obligations have `dueDate` populated (or `triggerBasis = RECURRING_MONTHLY` with `dueDate` set to next renewal)
 
-The register does not require every obligation to be `SATISFIED` for certification. It requires the team has reviewed, routed, and acknowledged all active and near-due obligations. PE reviews the submitted certification with full visibility into `openObligationCount`, `flaggedObligationCount`, and `overdueObligationCount`.
+The register does not require every obligation to be `SATISFIED`, `WAIVED`, or otherwise terminal for certification. It requires the team to document the review position, route ownership, and acknowledge all monitored and near-due obligations that remain active. PE reviews the submitted certification with full visibility into `openObligationCount`, `flaggedObligationCount`, and `overdueObligationCount`, then decides whether the documented position is acceptable for readiness.
 
 ---
 

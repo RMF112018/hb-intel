@@ -161,6 +161,7 @@ Project Startup is not yet implemented in this package. Its planning and governa
 - The governing lifecycle is the eight-state readiness model with separate certification, PE mobilization authorization, stabilization, and baseline-lock phases.
 - The T02 record layer is fixed as 28 Startup-owned record families across four tiers, with the org-governed `StartupTaskTemplate` separated from project-scoped operational records.
 - The T03 checklist surface is a governed template-instance model: MOE owns the `StartupTaskTemplate` catalog and each project gets 55 `StartupTaskInstance` records across 4 sections, with first-class `TaskBlocker` handling.
+- The T04 contract-review surface is a governed `ContractObligationsRegister`: an active monitoring ledger with `flagForMonitoring`-driven routing, canonical obligation lifecycle states, due-date and recurrence handling, and certification based on documented review/routing/acknowledgment rather than blanket closure.
 - Readiness review is modeled through six `ReadinessCertification` records plus PE `ReadinessGateRecord` / `ReadinessGateCriterion` evaluation, with `ExceptionWaiverRecord` and `ProgramBlocker` governance for unresolved launch exceptions.
 - Closeout continuity is handled through the immutable `StartupBaseline` read model; Startup writes it and Closeout reads it.
 
@@ -170,4 +171,5 @@ Use the canonical planning set before implementation:
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T01-Operating-Model-Scope-Surface-Map-Lifecycle-Continuity.md`
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T02-Record-Families-Identity-Lifecycle-Certifications-Waivers.md`
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T03-Startup-Program-Checklist-Library-Readiness-Tasks-Blockers-Evidence.md`
+- `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T04-Contract-Obligations-Register-Operating-Model.md`
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T10-Implementation-and-Acceptance-Guide.md`

@@ -721,9 +721,9 @@ Project Closeout is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Both 
 
 | Authority dimension | Source-of-truth owner | Record name | Notes |
 |---|---|---|---|
-| Task Library | Project Hub | `StartupTaskLibrary` / `StartupTaskInstance` | One library per project; created automatically on project creation; Pass/Fail/N/A/Pending results; `taskNumber` and `description` immutable |
+| Task Library | Project Hub | `StartupTaskTemplate` / `StartupTaskInstance` | MOE-governed template catalog plus project instance set; project instances created automatically on project creation; Pass/Fail/N/A/Pending results; `taskNumber` and `description` immutable on governed entries |
 | Safety Readiness | Project Hub | `SafetyReadinessSurface` / `SafetyReadinessItem` / `SafetyRemediationRecord` | Startup safety readiness only; does NOT feed Safety module (P3-E8) |
-| Contract Obligations Register | Project Hub | `ContractObligationsRegister` / `ContractObligation` | Structured obligation tracking with `PENDING` / `ACTIVE` / `SATISFIED` / `FLAGGED` / `WAIVED` lifecycle; PM owned; PX required for waiver |
+| Contract Obligations Register | Project Hub | `ContractObligationsRegister` / `ContractObligation` | Structured obligation tracking with `OPEN` / `IN_PROGRESS` / `SATISFIED` / `WAIVED` / `NOT_APPLICABLE` lifecycle; PM owned; PX required for waiver |
 | Responsibility Matrix — PM sheet (84 tasks × 9 roles) | Project Hub | `ResponsibilityMatrixRow` (sheet = PM) | Project-specific assignments; task descriptions immutable from template; critical-category rows require `acknowledgedAt` gate before certification |
 | Responsibility Matrix — Field sheet (28 tasks × 8 roles) | Project Hub | `ResponsibilityMatrixRow` (sheet = Field) | Project-specific assignments; task descriptions immutable from template |
 | Project Execution Baseline / PM Plan (11 sections) | Project Hub | `ProjectExecutionBaseline` / `ExecutionBaselineSection` / `BaselineSectionField` / `ExecutionAssumption` | Narrative + structured fields; `ExecutionAssumption` records associate structured assumptions with sections; PX approval required |

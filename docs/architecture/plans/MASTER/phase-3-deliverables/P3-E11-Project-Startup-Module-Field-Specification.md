@@ -22,7 +22,7 @@ This document is the master index for the P3-E11 Project Startup Module T-file s
 | [T01](P3-E11-T01-Operating-Model-Scope-Surface-Map-Lifecycle-Continuity.md) | Operating Model, Scope, Surface Map, Lifecycle Continuity | Startup as top-level readiness program; why five-surface composite model is superseded; three-tier architecture; full 8-state lifecycle (Draft → Active Planning → Readiness Review → Ready for Mobilization → Mobilized → Stabilizing → Baseline Locked → Archived); program status vs. sub-surface certification status; always-on lifecycle positioning; stabilization window governing rules; SoT boundary matrix (18 data concerns); Closeout continuity interface |
 | [T02](P3-E11-T02-Record-Families-Identity-Lifecycle-Certifications-Waivers.md) | Record Families, Identity, Lifecycle, Certifications, Waivers | All 28 record families across 4 validated tiers; split org-governed template vs. project-scoped operational identity model; canonical provenance rules; `@hbc/versioned-record` requirements; `PublicationState` applicability by record family; `ReadinessGateRecord` + `ReadinessGateCriterion`; governed gate criteria per sub-surface; `ProgramBlocker`; `ExceptionWaiverRecord` lapse model; `StartupProgramVersion` audit log; role-scoped certification ownership; `StartupBaseline` full field architecture |
 | [T03](P3-E11-T03-Startup-Program-Checklist-Library-Readiness-Tasks-Blockers-Evidence.md) | Startup Program Checklist Library, Readiness Tasks, Blockers, Evidence | Governed template-instance checklist architecture with no separate top-level library record; MOE-owned `StartupTaskTemplate` catalog → per-project `StartupTaskInstance` set; 55-task, 4-section template catalog; task category/severity/gating taxonomy; dependency and SLA model anchored to planned launch dates; `TaskBlocker` first-class records; evidence expectations; task completion vs. readiness approval distinction |
-| [T04](P3-E11-T04-Contract-Obligations-Register-Operating-Model.md) | Contract Obligations Register Operating Model | Owner Contract Review as a governed Contract Obligations Register; obligation lifecycle states; obligation categories; flagging and monitoring model; Procore setup reference |
+| [T04](P3-E11-T04-Contract-Obligations-Register-Operating-Model.md) | Contract Obligations Register Operating Model | Owner Contract Review replaced by an active Contract Obligations monitoring ledger; canonical obligation lifecycle; `flagForMonitoring` routing and due-date/recurrence model; certification review rules; Procore setup reference |
 | [T05](P3-E11-T05-Responsibility-Routing-and-Accountability-Engine.md) | Responsibility Routing and Accountability Engine | Responsibility Matrix as a role-accountability routing engine; PM sheet (84 tasks × 9 roles); Field sheet (28 tasks × 8 roles); task category reference; assignment change tracking; routing rules |
 | [T06](P3-E11-T06-Project-Execution-Baseline-Startup-Baselines-and-Closeout-Continuity.md) | Project Execution Baseline, Startup Baselines, and Closeout Continuity | PM Plan as Project Execution Baseline; 11-section structured baseline; key baseline fields by section; baseline lock event; StartupBaseline snapshot; Closeout continuity handoff record |
 | [T07](P3-E11-T07-Startup-Safety-Readiness-and-Permit-Posting-Verification.md) | Startup Safety Readiness and Permit Posting Verification | 32-item safety readiness surface; remediation-capable Fail model; Permit Posting Verification (Section 4); evidence-and-cross-reference model; Safety and Permits module non-interference rules |
@@ -42,6 +42,8 @@ At the record layer, T02 governs a four-tier architecture: Tier 1 program-core g
 
 At the checklist layer, T03 governs a template-instance operating model rather than a separate `StartupTaskLibrary` record. The "library" is the combination of the MOE-owned `StartupTaskTemplate` catalog and the project-scoped `StartupTaskInstance` set generated for each Startup program.
 
+At the contract-review layer, T04 governs the Contract Obligations Register as an active monitoring ledger with certification-review rules; it is not a one-time extraction artifact that disappears after startup entry.
+
 ### Program Sub-Surfaces
 
 | # | Sub-surface | Architectural role | Description |
@@ -49,7 +51,7 @@ At the checklist layer, T03 governs a template-instance operating model rather t
 | 1 | **Startup Program Checklist** | Readiness task library | 55-item MOE-governed mobilization readiness task library; tri-state result (N/A / Yes / No); blocker and evidence attachment model |
 | 2 | **Startup Safety Readiness** | Verification surface — remediation-capable | 32-item startup-phase safety check (Pass/Fail/N/A); Fail items require remediation notes; distinct from Safety module ongoing inspections |
 | 3 | **Permit Posting Verification** | Verification surface — evidence and cross-reference | Section 4 of the startup checklist; verifies permits are posted on jobsite; cross-references Permits module for context but does not write to it |
-| 4 | **Contract Obligations Register** | Ledger — obligations lifecycle | Structured extraction and ongoing monitoring of Owner contract obligations; obligation lifecycle states; flagging model for active monitoring |
+| 4 | **Contract Obligations Register** | Ledger — obligations lifecycle | Structured extraction and active monitoring of Owner contract obligations; certification review is based on documented routing/acknowledgment, not blanket closure |
 | 5 | **Responsibility Routing Engine** | Ledger — accountability routing | PM sheet (84 tasks × 9 roles) + Field sheet (28 tasks × 8 roles); role-accountability routing engine; immutable task descriptions; named assignments |
 | 6 | **Project Execution Baseline** | Baseline record — structured commitments | 11-section PM Plan structured as project execution baseline; baseline fields capture explicit commitments for Closeout delta analysis; PM Plan is the primary delivery vehicle |
 
@@ -114,7 +116,7 @@ The following 10 decisions are binding. All T-files conform to these decisions. 
 | # | Decision |
 |---|---|
 | 1 | Project Startup is a top-level readiness program; its sub-surfaces are subordinate ledgers, verification surfaces, and baseline records — not five equal peer forms |
-| 2 | Owner Contract Review is a Contract Obligations Register with obligation lifecycle states and active monitoring capability; it is not a one-time review form |
+| 2 | Owner Contract Review is a Contract Obligations Register with obligation lifecycle states, active monitoring capability, and certification-review rules; it is not a one-time review form |
 | 3 | Startup operates a formal readiness state machine with blocker tracking, evidence gates, readiness review, and exception handling including waivers |
 | 4 | The Responsibility Matrix is a role-accountability and routing engine; assignment routing rules govern who is accountable for each task category; task descriptions are immutable template entries |
 | 5 | The PM Plan is a structured Project Execution Baseline; its sections capture explicit commitment records against which Closeout/Autopsy can compute deltas |
