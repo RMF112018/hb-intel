@@ -830,8 +830,64 @@ Subcontract Execution Readiness is a **review-capable surface** in Phase 3. Port
 
 | Field | Value |
 |---|---|
-| **Pass condition** | Financial, Schedule, Constraints, Permits, Safety, Work Queue, Reports, Project Closeout, Project Startup, and Subcontract Execution Readiness meet their locked source-of-truth and action-boundary rules; executive review annotation boundary rules enforced per §3.4–§8.4, §14.4, §15.4, and §16.4; Safety exclusion applies to Safety module surfaces only (§8.4); annotation isolation mutation prohibitions verified; Closeout hybrid publication rule (§14.3) respected; Startup Permits and Safety non-interference rules (§15.3) respected; Subcontract Execution Readiness buyout gate rule (§16.3) enforced at the Financial module API layer |
+| **Pass condition** | Financial, Schedule, Constraints, Permits, Safety, Work Queue, Reports, Project Closeout, Project Startup, Subcontract Execution Readiness, and Warranty meet their locked source-of-truth and action-boundary rules; executive review annotation boundary rules enforced per §3.4–§8.4, §14.4, §15.4, §16.4, and §17.4; Safety exclusion applies to Safety module surfaces only (§8.4); annotation isolation mutation prohibitions verified; Closeout hybrid publication rule (§14.3) respected; Startup Permits and Safety non-interference rules (§15.3) respected; Subcontract Execution Readiness buyout gate rule (§16.3) enforced at the Financial module API layer; Warranty Financial boundary (§17.3) enforced — back-charge advisory only |
 | **Evidence required** | P3-E2 (this document), module implementations respecting authority matrices, spine publication flowing through governed boundaries, mutation rules enforced, override provenance tracked, executive review annotation artifacts isolated from module source-of-truth records |
+| **Primary owner** | Architecture + Project Hub platform owner |
+
+---
+
+## 17. Warranty Source-of-Truth
+
+### 17.1 Project Hub operational authority
+
+| Data concern | Source-of-truth owner | Warranty relationship | Notes |
+|---|---|---|---|
+| Coverage items (scope, dates, subcontractor, asset/system/location) | Warranty module | **Owns — exclusive write** | `IWarrantyCoverageItem` with daily expiration sweep |
+| Case lifecycle (16 states, SLA, escalation) | Warranty module | **Owns — exclusive write** | `IWarrantyCase` with `WarrantyCaseStatus` state machine |
+| Coverage decisions (covered / not-covered / partial) | Warranty module | **Owns — specialist-governed** | `IWarrantyCoverageDecision` follows supersede-not-mutate |
+| Case assignments (subcontractor, supersede model) | Warranty module | **Owns — exclusive write** | `IWarrantyCaseAssignment` with supersede |
+| Subcontractor acknowledgments (acceptance, dispute, resolution) | Warranty module | **Owns — exclusive write** | `ISubcontractorAcknowledgment` with state machine |
+| Evidence (photos, documents, inspection records) | Warranty module | **Owns — exclusive write** | `IWarrantyCaseEvidence` with typed evidence |
+| Resolution records (corrected, denied, closed, voided) | Warranty module | **Owns — exclusive write** | `IWarrantyCaseResolutionRecord` — immutable after creation |
+| Owner intake log (PM-entered owner reports) | Warranty module | **Owns — exclusive write** | `IOwnerIntakeLog` — PM-proxy model; no owner-facing portal in Phase 3 |
+| Communication events (owner/sub correspondence log) | Warranty module | **Owns — exclusive write** | `IWarrantyCommunicationEvent` — PM-proxy entries |
+| Visits (scheduled, completed, missed) | Warranty module | **Owns — exclusive write** | `IWarrantyVisit` with typed status |
+
+### 17.2 External references
+
+| External source | What Warranty reads | Warranty write behavior |
+|---|---|---|
+| Financial (P3-E4) | Back-charge advisory consumption | Warranty publishes advisory; Financial acts — Warranty never writes Financial records |
+| Closeout (P3-E10) | Turnover reference (`ICloseoutTurnoverRef`) | Read-only seam; Warranty does not write Closeout data |
+| Startup (P3-E11) | Commissioning reference (`IStartupCommissioningRef`) | Read-only seam; Warranty does not write Startup data |
+| Reports (P3-E9) | Report assembly consumes Warranty publication events | Reports never owns Warranty data |
+| Future owner/sub workspace (Layer 2) | External intake, acknowledgments, evidence | Layer 2 writes to Phase 3 record model via seam fields; no data fork |
+
+### 17.3 Boundary rules
+
+- Warranty owns all coverage, case, assignment, acknowledgment, evidence, resolution, intake, and communication records.
+- Financial consumes back-charge advisory only — Warranty never writes Financial records.
+- Closeout and Startup are seam references only — Warranty reads turnover and commissioning context but does not own or mutate those records.
+- Reports consumes publication events — Reports is not the Warranty ledger.
+- Health, Work Queue, Activity, and Related Items consume downstream projections only.
+- Layer 2 seam fields (`sourceChannel`, `enteredBy`, `externalReferenceId`) are optional discriminators — they do not create a separate data model.
+- `IWarrantyCaseResolutionRecord` is immutable after creation.
+- `IWarrantyCoverageDecision` follows supersede-not-mutate.
+- No owner-facing routes, views, or authentication flows exist in Phase 3.
+- No subcontractor direct-access surfaces exist in Phase 3.
+
+### 17.4 Executive review annotation boundary
+
+PER and authorized review actors may annotate supported Warranty surfaces through `@hbc/field-annotations`. Annotations are review-only and non-mutating. Annotation write paths must not alter coverage items, case state, assignments, acknowledgments, evidence, decisions, or resolution records.
+
+---
+
+## 17A. Acceptance Gate — Warranty
+
+| Field | Value |
+|---|---|
+| **Pass condition** | Financial, Schedule, Constraints, Permits, Safety, Work Queue, Reports, Project Closeout, Project Startup, Subcontract Execution Readiness, and Warranty meet their locked source-of-truth and action-boundary rules; executive review annotation boundary rules enforced; Warranty Financial boundary (back-charge advisory only) respected; Warranty Closeout/Startup seam boundaries respected; Layer 2 seam fields present as optional discriminators; resolution record immutability enforced |
+| **Evidence required** | P3-E2 (this document), module implementations respecting authority matrices per T10 AC-WAR-01 through AC-WAR-46 |
 | **Primary owner** | Architecture + Project Hub platform owner |
 
 ---
@@ -855,5 +911,5 @@ If a downstream deliverable conflicts with this specification, this specificatio
 
 ---
 
-**Last Updated:** 2026-03-24 (v4) — §16 rewritten to replace the old P3-E12 Subcontract Compliance checklist-and-waiver boundary with the P3-E13 Subcontract Execution Readiness case / profile / exception / decision model, including the revised Financial gate contract and review annotation boundary. Prior: 2026-03-24 (v3) — §14 Project Closeout rewritten to reflect derived intelligence model, correct publication trigger (PE_APPROVED + ARCHIVED, not Section 6 completion), Autopsy sub-surface, LessonsIntelligenceIndex/SubIntelligenceIndex/LearningLegacyFeed as derived read models, PE annotation vs. PE approval formal distinction, and updated field-level specification link. Prior: 2026-03-23 (v2)
+**Last Updated:** 2026-03-24 (v5) — §17 Warranty Source-of-Truth added per P3-E14 readiness review. Coverage items, cases, decisions, assignments, acknowledgments, evidence, resolutions, intake, and communications declared as Warranty-owned. Financial boundary (back-charge advisory only), Closeout/Startup seam references, Layer 2 seam field doctrine, resolution record immutability, and annotation boundary added. Acceptance gate updated to include Warranty. Prior: 2026-03-24 (v4) — §16 rewritten to replace the old P3-E12 Subcontract Compliance checklist-and-waiver boundary with the P3-E13 Subcontract Execution Readiness case / profile / exception / decision model, including the revised Financial gate contract and review annotation boundary. Prior: 2026-03-24 (v3) — §14 Project Closeout rewritten to reflect derived intelligence model, correct publication trigger (PE_APPROVED + ARCHIVED, not Section 6 completion), Autopsy sub-surface, LessonsIntelligenceIndex/SubIntelligenceIndex/LearningLegacyFeed as derived read models, PE annotation vs. PE approval formal distinction, and updated field-level specification link. Prior: 2026-03-23 (v2)
 **Governing Authority:** [Phase 3 Plan §6, §12](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

@@ -134,7 +134,7 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 | 13 | Project Startup | Always-on lifecycle | First-class working surface — active from project creation | Task Library, Safety Readiness, Contract Obligations Register, Responsibility Matrix, Project Execution Baseline (PM Plan), Permit Posting Verification | Publishes to all 4 spines |
 | 14 | Subcontract Execution Readiness | Always-on core | First-class working surface — multi-record readiness case (one active case per project + subcontractor legal entity + governed award / buyout intent) | Subcontract Readiness Case, Requirement Profiles, Exception Packets, Readiness Decision | Publishes to all 4 spines; gates Buyout Log ContractExecuted (P3-E4 §6) |
 | 15 | Quality Control | Baseline-visible lifecycle | Lifecycle-visible | PH7-7 | Deferred |
-| 16 | Warranty | Baseline-visible lifecycle | Lifecycle-visible | PH7-8 | Deferred |
+| 16 | Warranty | Always-on lifecycle | First-class working surface — two-layer operating model (Layer 1 Phase 3, Layer 2 deferred) | PH7-8 | Publishes to all 4 spines |
 
 ---
 
@@ -220,7 +220,15 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 ### 3.8 Warranty
 
-**Boundary:** Baseline-visible lifecycle module. Same as QC — deeper field-first definition deferred.
+**Boundary:** Always-on lifecycle module that activates when warranty coverage items exist for a project and remains active through coverage expiration and case resolution. Owns the operational state for warranty coverage tracking, case management, subcontractor coordination, owner intake logging, and resolution records.
+
+**Must support:** Coverage Registry (coverage items by scope, dates, responsible subcontractor, asset/system/location anchoring, daily expiration sweep); Case Workspace (16-state lifecycle with SLA timers, two-tier Standard/Expedited SLA, escalation routing, verification gate, re-open authority); Subcontractor Coordination (assignment with supersede model, acknowledgment state machine with scope dispute paths, resolution declarations with immutability); Owner Intake Log (PM-entered only — no owner-facing portal in Phase 3); Resolution Records with back-charge advisory publication to Financial; Communications timeline for owner-originated cases.
+
+**Two-layer model:** Layer 1 (Phase 3 scope) delivers the internal PM/specialist control surface. Layer 2 (future scope) delivers external collaborative workspace seams for owner and subcontractor direct participation. Layer 2 seam fields (`sourceChannel`, `enteredBy`, `externalReferenceId`) are present as optional discriminators on Phase 3 records. Layer 2 must write to the Phase 3 record model without forking data schema.
+
+**Replaces:** Manual warranty tracking workflows; no existing production module.
+
+**Field-level specification:** [P3-E14 — Project Warranty Module Field Specification](P3-E14-Project-Warranty-Module-Field-Specification.md) *(master index + T01–T10 detail files)*
 
 ### 3.9 Project Closeout
 
@@ -270,9 +278,11 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 Buyout is NOT a separate top-level baseline module. Financial owns the budget import dependency and working model that Buyout depends on (Phase 3 Plan §11.3). PH7-11 (Buyout Log) maps to the Financial module's Buyout sub-domain.
 
-### 4.2 QC and Warranty are baseline-visible, not equal-intensity
+### 4.2 QC is baseline-visible; Warranty is promoted to always-on lifecycle
 
-Quality Control and Warranty are baseline-visible lifecycle modules, not equal-intensity always-on core modules at day-one depth (Phase 3 Plan §11.2). They retain lifecycle placement and architectural continuity but do not absorb full later-phase field-first depth in Phase 3.
+Quality Control remains a baseline-visible lifecycle module, not an equal-intensity always-on core module at day-one depth (Phase 3 Plan §11.2). QC retains lifecycle placement and architectural continuity but does not absorb full later-phase field-first depth in Phase 3.
+
+Warranty has been promoted to an always-on lifecycle module with a full Layer 1 Phase 3 operating surface governed by P3-E14 T01–T10. Warranty delivers coverage tracking, case management with SLA, subcontractor coordination, owner intake logging, and resolution records with back-charge advisory. Layer 2 external collaborative workspace is deferred. Deeper field-first Warranty execution beyond Layer 1 is not Phase 3 scope.
 
 ### 4.3 Spine-focused modules
 
@@ -398,7 +408,7 @@ This matrix reproduces P3-A3 §7 with governing contract annotations:
 | **Project Startup** | **Required** — P3-D1 §8.9 | **Required** — Office dimension (P3-D2 §11) | **Required** — P3-D3 §12 | **Required** — P3-D4 §9 |
 | **Subcontract Execution Readiness** | **Required** — P3-D1 §8.10 | **Required** — Office dimension (P3-D2 §11) | **Required** — P3-D3 §12 | **Required** — P3-D4 §9 |
 | **Quality Control** | Deferred | Deferred | Deferred | Deferred |
-| **Warranty** | Deferred | Deferred | Deferred | Deferred |
+| **Warranty** | Required | Required | Required | Required |
 
 ---
 

@@ -240,7 +240,22 @@ Full acceptance gate: P3-E11-T10 §5 (31 acceptance criteria, AC items 1–31). 
 | 6.6.13 | Canvas tile registered (`StartupCanvasTileAdapter`); pre-lock and post-lock tile states correct | Not Started | | P3-E11-T10 §5 items 29–30; T09 §10 |
 | 6.6.14 | All Startup surfaces use `WorkspacePageShell`; all components sourced from `@hbc/ui-kit`; all empty sub-surface states use `HbcSmartEmptyState` | Not Started | | P3-E11-T10 §5 item 31; §6.8.9 |
 
-### 6.7 Source-of-Truth Compliance
+### 6.7 Warranty
+
+For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (AC-WAR-01 through AC-WAR-46). The criteria below are the high-level module-level gates required for Phase 3 release readiness.
+
+| # | Criterion | Status | Evidence | Notes |
+|---|---|---|---|---|
+| 6.7.1 | All TypeScript interfaces (T02, T05, T06) compile; enums match canonical definitions; authority matrix gates correctly; Layer 2 seam fields present and optional | Not Started | | P3-E14-T10 AC-WAR-01 through AC-WAR-06 |
+| 6.7.2 | 16-state case machine fully implemented; invalid transitions return 409; SLA computation correct for Standard/Expedited; SLA pauses at AwaitingOwner; daily expiration sweep works; `businessDaysBetween` in shared package | Not Started | | P3-E14-T10 AC-WAR-07 through AC-WAR-14 |
+| 6.7.3 | All 24 Activity events, 20 Work Queue rules, Health metrics, and system views registered with shared packages; no local substitutes | Not Started | | P3-E14-T10 AC-WAR-15 through AC-WAR-20 |
+| 6.7.4 | PWA surfaces: Coverage Registry, Case Workspace (5 tabs), Next Move card, complexity dial, smart empty states, owner status summary, communications tab | Not Started | | P3-E14-T10 AC-WAR-21 through AC-WAR-30 |
+| 6.7.5 | SPFx surfaces: read-only coverage/case lists, Launch-to-PWA for mutations, canvas tile, deep-links | Not Started | | P3-E14-T10 AC-WAR-31 through AC-WAR-34 |
+| 6.7.6 | Reports assembly, telemetry (no PII), back-charge advisory to Financial (no Financial record writes) | Not Started | | P3-E14-T10 AC-WAR-35 through AC-WAR-38 |
+| 6.7.7 | No owner-facing routes/views/auth; no subcontractor direct-access; EXT_OWNER/EXT_SUB roles absent | Not Started | | P3-E14-T10 AC-WAR-39 through AC-WAR-41 |
+| 6.7.8 | Mold-breaker UX: PM can close case without leaving workspace; Next Move visible without scrolling; owner intake + SLA + responsible party in single view | Not Started | | P3-E14-T10 AC-WAR-42 through AC-WAR-46 |
+
+### 6.8 Source-of-Truth Compliance (renumbered from §6.7)
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
@@ -443,8 +458,9 @@ The following items are **explicitly deferred** from Phase 3 and MUST NOT be sil
 | 11.5 | Full claims/legal/contract-admin behavior inside Constraints | Exceeds operational constraints ledger scope | Future phase |
 | 11.6 | Full jurisdiction-facing permitting package/submission management | Exceeds operational permit ledger scope | Future phase |
 | 11.7 | Deeper field-first execution depth for Quality Control | QC is baseline-visible lifecycle in Phase 3 (P3-E1 §3.7) | Phase 6 |
-| 11.8 | Deeper field-first execution depth for Warranty | Warranty is baseline-visible lifecycle in Phase 3 (P3-E1 §3.8) | Phase 6 |
-| 11.9 | Any field-first expansion exceeding baseline-visible lifecycle for QC/Warranty | Must not leak into Phase 3 acceptance | Future phase |
+| 11.8 | Deeper field-first execution depth for Warranty beyond Layer 1 | Warranty Layer 1 is Phase 3 scope; Layer 2 (external workspace) and deeper field-first depth are deferred per P3-E14 T08 §2 | Phase 6 |
+| 11.9 | Any field-first expansion exceeding baseline-visible lifecycle for QC | Must not leak into Phase 3 acceptance | Future phase |
+| 11.10 | Owner-facing warranty portal, subcontractor direct-access surfaces, or Layer 2 external collaboration | Explicitly deferred per P3-E14 T08 §4 and T10 AC-WAR-39 through AC-WAR-41 | Future phase |
 
 ---
 

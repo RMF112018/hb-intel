@@ -290,7 +290,7 @@ Note: Safety is excluded from PER annotation layer (P3-E1 §9.3). PER sees read-
 | Baseline-visible lifecycle placement | **Required** | **Required** |
 | Deeper field-first depth | Deferred to Phase 6 | Deferred to Phase 6 |
 
-### 4.8 Lifecycle Modules — Project Closeout, Project Startup, Subcontract Execution Readiness
+### 4.8 Lifecycle Modules — Project Closeout, Project Startup, Subcontract Execution Readiness, Warranty
 
 Per P3-E1 §8, all three lifecycle modules require **Full parity** across PWA and SPFx. The per-module capability tables below define depth expectations within that parity requirement.
 
@@ -374,9 +374,26 @@ Full parity across both lanes — no core Startup certification or gate action r
 | Precedent publication management | **Required** | **Launch-to-PWA** |
 | Readiness gate projection surfaced to Financial for `ContractExecuted` enforcement | **Required** | **Required** |
 
+#### 4.8.4 Warranty
+
+| Capability | PWA | SPFx |
+|---|---|---|
+| Coverage Registry — list, filter, saved views, complexity dial | **Required** | **Read-only** (Essential tier) |
+| Coverage item create / edit | **Required** | **Launch-to-PWA** |
+| Case Workspace — 5 tabs, Next Move card | **Required** | **Launch-to-PWA** |
+| Case create / assign / resolve / close | **Required** | **Launch-to-PWA** |
+| Subcontractor acknowledgment workflow | **Required** | **Launch-to-PWA** |
+| Owner intake log (PM-entered) | **Required** | **Launch-to-PWA** |
+| Evidence upload (photos, documents) | **Required** | **Launch-to-PWA** |
+| Communications tab | **Required** | **Launch-to-PWA** |
+| Resolution record creation (immutable) | **Required** | **Launch-to-PWA** |
+| SLA status and escalation visibility | **Required** | **Read-only** |
+| Canvas tile (Health-derived metrics) | **Required** | **Required** |
+| Deep-link from SPFx to PWA case workspace | N/A | **Required** |
+
 ### 4.9 Executive Review (Portfolio Executive Reviewer posture)
 
-Executive review capabilities apply to PER posture only; non-PER users are unaffected by this lane depth distinction. Review-capable module surfaces for Phase 3: Financial, Schedule, Constraints, Permits, Project Health, Reports, Project Closeout, Project Startup, Subcontract Execution Readiness (per P3-E1 §9.1).
+Executive review capabilities apply to PER posture only; non-PER users are unaffected by this lane depth distinction. Review-capable module surfaces for Phase 3: Financial, Schedule, Constraints, Permits, Project Health, Reports, Project Closeout, Project Startup, Subcontract Execution Readiness, and Warranty (per P3-E1 §9.1).
 
 | Capability | PWA | SPFx | Notes |
 |---|---|---|---|
@@ -531,5 +548,5 @@ If a downstream deliverable conflicts with this specification, this specificatio
 
 ---
 
-**Last Updated:** 2026-03-24 — Updated §4.8.3 and executive-review references to replace the old Subcontract Compliance checklist / waiver lane model with the P3-E13 Subcontract Execution Readiness case / evaluation / exception / precedent model.
+**Last Updated:** 2026-03-24 — Added §4.8.4 Warranty lane depth per P3-E14 readiness review (PWA full-depth, SPFx read-only with Launch-to-PWA for all mutations per P3-E14-T08). Updated §4.8 heading and executive-review surface list to include Warranty. Prior: 2026-03-24 — Updated §4.8.3 and executive-review references to replace the old Subcontract Compliance checklist / waiver lane model with the P3-E13 Subcontract Execution Readiness case / evaluation / exception / precedent model.
 **Governing Authority:** [Phase 3 Plan §10](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
