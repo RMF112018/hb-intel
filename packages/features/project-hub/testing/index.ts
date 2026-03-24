@@ -235,3 +235,10 @@ export {
 export {
   createMockAutopsyRecord,
 } from './createMockAutopsyRecord.js';
+
+// ── P3-E10-T08 Closeout consumption testing surface ────────────────
+
+export {
+  createMockProjectProfile,
+  createMockIndexEntryProfile,
+} from './createMockConsumptionSurface.js';

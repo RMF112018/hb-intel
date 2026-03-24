@@ -109,7 +109,29 @@ T07 Migration & Import: Flat-to-multi-record mapping (4 record families), status
 
 T08 Implementation Closure: Contract-level complete. 30 source files, 10 test files, 214 tests. 42 of 52 acceptance items satisfied; 10 runtime/UAT/migration scope.
 
-## 13. Project Closeout Module (P3-E10) — Stage 7.8
+## 13. Safety Module (P3-E8) — Stage 7.5
+
+T01 Foundation: Module scope, operating model, 16 record families, authority matrix (Safety Manager/Officer primary), incident privacy tiers (3-tier: STANDARD/SENSITIVE/RESTRICTED), PER visibility tiers, composite scorecard dimensions, lane ownership split, 15 locked decisions. See `src/safety/foundation/`.
+
+T02 Workspace Architecture: 16 record family interfaces (SSSP, Addendum, Template, Inspection, CA, Incident, JHA, Pre-Task, Toolbox Prompt, Toolbox Talk, Orientation, Submission, Certification, SDS, Competent-Person Designation, Evidence). See `src/safety/records/`.
+
+T03 SSSP Governance: Governed/instance section model, joint approval (SM+PM+Super), 4-state lifecycle (DRAFT/PENDING_APPROVAL/APPROVED/SUPERSEDED), material change detection, addendum with operationallyAffected routing, rendered PDF document config. See `src/safety/lifecycle/`.
+
+T04 Inspection Program: 12-section standard template with version governance, normalized scoring algorithm (N/A section exclusion, weight renormalization), scorecard snapshot publication, CA auto-generation on failed items. See `src/safety/inspection/`.
+
+T05 Corrective Actions and Incidents: Centralized CA ledger (5 source types), severity-based due dates, isOverdue daily sweep, 4-state lifecycle with verification workflow, 3-tier incident privacy model, LITIGATION_HOLD evidence retention. See `src/safety/corrective-actions/`.
+
+T06 JHA and Toolbox: JHA step-hazard-control structure, competent-person pre-condition enforcement, daily pre-task validation, governed toolbox prompt library, schedule-risk mapping, AI-assisted gap detection (SM review required), hybrid proof model. See `src/safety/jha-toolbox/`.
+
+T07 Orientation and Compliance: Worker orientation with hybrid identity, subcontractor submission review lifecycle, certification expiration sweep (EXPIRING_SOON/EXPIRED), HazCom SDS compliance, competent-person designation with certification linkage. See `src/safety/compliance/`.
+
+T08 Readiness Engine: 3-level evaluation (project/subcontractor/activity), 24 governed blockers (HARD/SOFT), exception model (SM-only), override workflow (joint approval), daily/event-driven re-evaluation, summary projection. See `src/safety/readiness/`.
+
+T09 Publication Contracts: Composite scorecard (5 dimensions + SafetyPosture derivation), sanitized PER projection, 18 activity spine events, 25 work queue rules, 8 related items, 7 reports, 6 handoffs, 7 BIC prompts. See `src/safety/publication/`.
+
+T10 Implementation Closure: Contract-level complete. 45 source files, 17 test files, 507 tests. 54 of 60 acceptance items satisfied; 6 runtime/integration/UAT scope.
+
+## 14. Project Closeout Module (P3-E10) — Stage 7.8
 
 T01 Foundation: Three-class surface model (operational/derived/consumption), 16 owned record families, 10 enumerations, SoT boundary matrix (11 rows), always-on activation model (5 phases), 12 cross-contract references, 14 locked architecture decisions, 7 shared package requirements, 5 operating principles, 10 business rules. See `src/closeout/foundation/`.
 
@@ -124,3 +146,5 @@ T05 Lessons: 15 lesson categories, 7 delivery methods, 13 market sectors, 6 proj
 T06 Scorecard: 6-section weighted scoring model (29 criteria, weights sum to 1.00), 5-point scale with NA, system-derived performance ratings (5 ranges), section average and overall weighted score formulas, submission validation, FinalCloseout amendment workflow, interim publication exception, 8-row visibility matrix, 3-row org access rules, testing fixtures. See `src/closeout/scorecard/`.
 
 T07 Autopsy: 12 thematic sections (10 always + 2 conditional), 5 finding types, 8 action types, 8 learning legacy output types, 14 root-cause categories, pre-survey model, 10-block workshop agenda, 10 pre-briefing data sources, 4 root-cause levels, per-output PE approval with three-condition publication gate, waiver model, section applicability rules, testing fixtures. See `src/closeout/autopsy/`.
+
+T08 Consumption: 3 data classes (operational/published intelligence/read-only), 3 org intelligence indexes (LessonsIntelligence/SubIntelligence/LearningLegacy) with search dimensions, contextual relevance scoring, 3 Project Hub consumption surfaces, 17 activity spine events, 4 health spine metrics, 2 report artifact families with snapshot preconditions, 7 UI data class rules, role-gated query enforcement, testing fixtures. See `src/closeout/consumption/`.

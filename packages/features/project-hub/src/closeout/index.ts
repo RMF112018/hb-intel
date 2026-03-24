@@ -9,6 +9,7 @@
  * - T05 lessons — lessons learned operating model and intelligence publication.
  * - T06 scorecard — subcontractor scorecard model and intelligence publication.
  * - T07 autopsy — project autopsy and learning legacy.
+ * - T08 consumption — project hub consumption, derived intelligence indexes, reporting.
  */
 
 export * from './foundation/index.js';
@@ -18,3 +19,4 @@ export * from './lifecycle/index.js';
 export * from './lessons/index.js';
 export * from './scorecard/index.js';
 export * from './autopsy/index.js';
+export * from './consumption/index.js';
