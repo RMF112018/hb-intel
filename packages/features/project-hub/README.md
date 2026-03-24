@@ -164,6 +164,7 @@ Project Startup is not yet implemented in this package. Its planning and governa
 - The T04 contract-review surface is a governed `ContractObligationsRegister`: an active monitoring ledger with `flagForMonitoring`-driven routing, canonical obligation lifecycle states, due-date and recurrence handling, and certification based on documented review/routing/acknowledgment rather than blanket closure.
 - The T05 responsibility-routing surface is a governed `ResponsibilityMatrix` engine with 7 PM assignment columns across 71 assignment-bearing rows plus 11 reminder-only rows, 5 Field assignment columns across 27 assignment-bearing rows, category-level named-`Primary` coverage, and critical-category acknowledgment gates.
 - The T06 execution-baseline surface treats the PM Plan as an 11-section structured `ProjectExecutionBaseline`, with typed baseline fields, categorized `ExecutionAssumption` records, PM/PX signatures plus PX approval before certification, and immutable `StartupBaseline` continuity into Closeout.
+- The T07 safety/permit surface treats Startup Safety as a 32-item remediation-capable review surface with first-class `SafetyRemediationRecord` escalation and blocker handling, while Permit Posting remains Section 4 of the task library with one-to-one `PermitVerificationDetail` companion records, evidence/discrepancy requirements, and strict non-interference with Safety and Permits.
 - Readiness review is modeled through six `ReadinessCertification` records plus PE `ReadinessGateRecord` / `ReadinessGateCriterion` evaluation, with `ExceptionWaiverRecord` and `ProgramBlocker` governance for unresolved launch exceptions.
 - Closeout continuity is handled through the immutable `StartupBaseline` read model; Startup writes it and Closeout reads it.
 
@@ -176,4 +177,5 @@ Use the canonical planning set before implementation:
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T04-Contract-Obligations-Register-Operating-Model.md`
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T05-Responsibility-Routing-and-Accountability-Engine.md`
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T06-Project-Execution-Baseline-Startup-Baselines-and-Closeout-Continuity.md`
+- `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T07-Startup-Safety-Readiness-and-Permit-Posting-Verification.md`
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T10-Implementation-and-Acceptance-Guide.md`

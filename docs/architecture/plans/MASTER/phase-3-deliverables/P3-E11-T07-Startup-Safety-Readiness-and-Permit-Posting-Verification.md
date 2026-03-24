@@ -18,7 +18,7 @@
 This T-file covers two closely related Startup verification surfaces:
 
 1. **Startup Safety Readiness** (§2–§6) — the 32-item startup-phase safety readiness assessment; remediation-capable with full escalation and blocker model; distinct from Safety module ongoing operations
-2. **Permit Posting Verification** (§7–§9) — Section 4 of the Startup Task Library as a governed evidence-and-cross-reference surface for permits posted on the jobsite
+2. **Permit Posting Verification** (§7–§9) — Section 4 of the Startup Task Library as a governed companion-record evidence-and-cross-reference surface for permits posted on the jobsite
 
 Both surfaces are owned exclusively by `@hbc/project-startup`. Neither writes to any other module.
 
@@ -30,7 +30,7 @@ The Startup Safety Readiness surface is a **remediation-capable startup-phase sa
 
 **Source document:** `docs/reference/example/Project_Safety_Checklist.pdf` — "Jobsite Safety Checklist"; 32 items in 2 sections; response values: Pass = Satisfactory; Fail = Unsatisfactory; N/A = Not Observed.
 
-"Remediation-capable" means: a `Fail` result does not block the checklist from advancing, but it creates a first-class `SafetyRemediationRecord` that must be explicitly acknowledged, assigned, and tracked through to resolution before the surface can be certified ready. Open remediations generate Work Queue items and can escalate to `ProgramBlocker` severity.
+"Remediation-capable" means: a `Fail` result does not block the checklist from advancing, but it creates a first-class `SafetyRemediationRecord` that must be explicitly documented, assigned, due-dated, and tracked through to resolution or formal PE acknowledgment before the surface can be certified ready. Open remediations generate Work Queue items and can escalate to `ProgramBlocker` severity.
 
 ### 2.1 Boundary Rules — Safety Module Non-Interference
 
@@ -40,6 +40,8 @@ The following rules are locked and must not be violated:
 - A `Fail` result on a Safety Readiness item **does not create** a corrective action record in P3-E8 Safety.
 - Safety module executive review exclusion rules **do not apply** to the Startup Safety Readiness surface. Startup Safety is subject to standard executive review annotation boundaries (via `@hbc/field-annotations`).
 - The two surfaces are architecturally parallel. They may be visually cross-referenced in the UI via Related Items links, but they remain operationally independent.
+
+This review-capable status is intentional: Startup Safety participates in the same Project Startup certification and annotation model as the other Startup sub-surfaces even though the ongoing Safety module remains annotation-excluded in Phase 3.
 
 See §10 for the full SoT boundary table covering both surfaces.
 
@@ -220,7 +222,7 @@ The blocker must be resolved or waived (with PE note) before the `SAFETY_READINE
 4. Every `Fail` item's `SafetyRemediationRecord` has `dueDate` populated
 5. No `SafetyRemediationRecord` has `escalationLevel = PX` or an active `programBlockerRef` (or any such blockers are waived with PE note)
 
-`openRemediationCount > 0` is permitted at submission — PE reviews and may accept the certification with acknowledged open remediations, or return it for additional resolution.
+`openRemediationCount > 0` is permitted at submission. T07 does **not** require every remediation to be fully resolved before review. The submission requirement is that each Fail item is documented (`remediationNote`), routed (`assignedPersonName`), and time-bound (`dueDate`). PE then reviews the open remediation set and may accept the certification with acknowledged open remediations, or return it for additional resolution.
 
 Items with `result = NA` are excluded from pass/fail counts. PE reviews the full `failCount`, `openRemediationCount`, and `escalatedRemediationCount` before accepting.
 
@@ -232,7 +234,7 @@ The Permit Posting Verification surface is **Section 4 of the Startup Task Libra
 
 **Section 4 items are `StartupTaskInstance` records** (see T03) created from `StartupTaskTemplate` records in the `STARTUP_TASK_LIBRARY`. The `sectionTitle` for Section 4 is `PermitsPostedOnJobsite`. There are 12 Section 4 items.
 
-In addition to the standard `StartupTaskInstance` fields, each Section 4 item has a companion `PermitVerificationDetail` record that carries permit-specific verification metadata (see §8.2). This companion record is created automatically alongside each Section 4 `StartupTaskInstance`.
+In addition to the standard `StartupTaskInstance` fields, each Section 4 item has a one-to-one companion `PermitVerificationDetail` record that carries permit-specific verification metadata (see §8.2). This companion record is created automatically alongside each Section 4 `StartupTaskInstance`. It is not a standalone permit ledger and does not replace the parent task record.
 
 ### 8.1 Boundary Rules — Permits Module Non-Interference
 

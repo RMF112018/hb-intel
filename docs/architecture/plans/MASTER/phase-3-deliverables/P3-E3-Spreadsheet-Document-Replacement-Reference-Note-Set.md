@@ -201,7 +201,7 @@ Safety management currently relies on a **Site Specific Safety Plan** (SSSP) fil
 | `Safety Checklist Template - Weighted.xlsx` | Weighted safety inspection checklist | Checklist/inspection aggregation |
 | `Incident Report .docx` | Incident report form | Incident-report working state |
 | `Tropical Storm_Hurricane Preparedness Plan.pdf` | Emergency response plan | Emergency-plan acknowledgment state |
-| `Project_Safety_Checklist.pdf` | Startup safety readiness check — **RECLASSIFIED to Project Startup** (P3-E11 §2); NOT the ongoing safety checklist | See §8.4 reclassification note |
+| `Project_Safety_Checklist.pdf` | Startup safety readiness check — **RECLASSIFIED to Project Startup** (P3-E11-T07); NOT the ongoing safety checklist | See §8.4 reclassification note |
 | `CrisisComs/Emergency Contact Card.pdf` | Emergency contact reference | Emergency plan component |
 | `CrisisComs/HBC Crisis Communication Plan_KREPS 8.15.2025.pdf` | Crisis communication plan | Emergency plan component |
 | `CrisisComs/ICE Action Plan - Field.pdf` | ICE response plan | Emergency plan component |
@@ -279,13 +279,13 @@ Project Startup is an **always-on lifecycle module** that is active from project
 
 | File | Purpose | Replacement Module | Status |
 |---|---|---|---|
-| `Job Startup Checklist.pdf` | 55-item startup operational checklist (4 sections) | Project Startup — Job Startup Checklist sub-surface | **Phase 3** — field spec in P3-E11 §1 |
-| `Project_Startup_Checklist.pdf` | Same checklist as above; Procore inspection template export | Project Startup — Job Startup Checklist sub-surface | **Phase 3** — field spec in P3-E11 §1 |
-| `Project_Safety_Checklist.pdf` | 32-item startup safety readiness check (Pass/Fail/N/A) — NOT the ongoing Safety module checklist | Project Startup — Jobsite Safety Checklist sub-surface | **Phase 3** — field spec in P3-E11 §2; reclassified from Safety domain (see §6.2 note) |
+| `Job Startup Checklist.pdf` | 55-item startup operational checklist (4 sections) | Project Startup — Job Startup Checklist sub-surface | **Phase 3** — field spec in P3-E11-T03 |
+| `Project_Startup_Checklist.pdf` | Same checklist as above; Procore inspection template export | Project Startup — Job Startup Checklist sub-surface | **Phase 3** — field spec in P3-E11-T03 |
+| `Project_Safety_Checklist.pdf` | 32-item startup safety readiness check (Pass/Fail/N/A) — NOT the ongoing Safety module checklist | Project Startup — Jobsite Safety Checklist sub-surface | **Phase 3** — field spec in P3-E11-T07; reclassified from Safety domain (see §6.2 note) |
 | `Responsibility Matrix - Template.xlsx` | PM (71 assignment rows + 11 reminder rows × 7 assignment roles) + Field (27 assignment rows × 5 assignment roles) role assignment template | Project Startup — Responsibility Matrix sub-surface | **Phase 3** — field spec in P3-E11 §3 |
-| `Responsibility Matrix - Owner Contract Template.xlsx` | Owner contract obligations extraction template | Project Startup — Owner Contract Review sub-surface | **Phase 3** — field spec in P3-E11 §4 |
+| `Responsibility Matrix - Owner Contract Template.xlsx` | Owner contract obligations extraction template | Project Startup — Contract Obligations Register sub-surface | **Phase 3** — field spec in P3-E11-T04 |
 | `PROJECT MANAGEMENT PLAN 2019.docx` | 11-section project management plan template | Project Startup — Project Management Plan sub-surface | **Phase 3** — field spec in P3-E11-T06 |
-| `Procore Startup Checklist Summary (1).pdf` | Procore admin setup field requirements | Project Startup — Procore Setup Reference (read-only) | **Phase 3** — field spec in P3-E11 §6 |
+| `Procore Startup Checklist Summary (1).pdf` | Procore admin setup field requirements | Project Startup — Procore Setup Reference (read-only) | **Phase 3** — field spec in P3-E11-T04 |
 
 **Project_Safety_Checklist.pdf reclassification note:** This file was previously uncategorized in the Safety domain. Upon content analysis, it is a startup-phase safety readiness check ("Jobsite Safety Checklist") with Pass/Fail/N/A scoring — distinct from the Safety module's 93-item ongoing weighted inspection checklist. It is now correctly owned by the Project Startup module. The Safety module does not own or receive write inputs from this checklist.
 
@@ -359,7 +359,7 @@ Complete mapping of `docs/reference/example/` files to modules and replacement w
 | `Safety Checklist Template - Weighted.xlsx` | Safety | Checklist aggregation |
 | `Incident Report .docx` | Safety | Incident working state |
 | `Tropical Storm_Hurricane Preparedness Plan.pdf` | Safety | Emergency plan |
-| `Project_Safety_Checklist.pdf` | **Project Startup** (reclassified — startup readiness, not ongoing Safety) | Jobsite Safety Checklist — P3-E11 §2 |
+| `Project_Safety_Checklist.pdf` | **Project Startup** (reclassified — startup readiness, not ongoing Safety) | Jobsite Safety Checklist — P3-E11-T07 |
 | `CrisisComs/*.pdf` (6 files) | Safety | Emergency/crisis plan components |
 
 ### 9.6 Project Closeout domain
@@ -389,11 +389,11 @@ Complete mapping of `docs/reference/example/` files to modules and replacement w
 
 | File | Module | Replacement workflow |
 |---|---|---|
-| `Job Startup Checklist.pdf` | Project Startup | Job Startup Checklist — P3-E11 §1 |
-| `Project_Startup_Checklist.pdf` | Project Startup | Job Startup Checklist (Procore export) — P3-E11 §1 |
-| `Project_Safety_Checklist.pdf` | Project Startup | Jobsite Safety Checklist (startup readiness) — P3-E11 §2 |
-| `Responsibility Matrix - Template.xlsx` | Project Startup | Responsibility Matrix — P3-E11 §3 (routing engine with PM reminder-row preservation) |
-| `Responsibility Matrix - Owner Contract Template.xlsx` | Project Startup | Owner Contract Review — P3-E11 §4 |
+| `Job Startup Checklist.pdf` | Project Startup | Job Startup Checklist — P3-E11-T03 |
+| `Project_Startup_Checklist.pdf` | Project Startup | Job Startup Checklist (Procore export) — P3-E11-T03 |
+| `Project_Safety_Checklist.pdf` | Project Startup | Jobsite Safety Checklist (startup readiness) — P3-E11-T07 |
+| `Responsibility Matrix - Template.xlsx` | Project Startup | Responsibility Matrix — P3-E11-T05 (routing engine with PM reminder-row preservation) |
+| `Responsibility Matrix - Owner Contract Template.xlsx` | Project Startup | Contract Obligations Register — P3-E11-T04 |
 | `PROJECT MANAGEMENT PLAN 2019.docx` | Project Startup | Project Management Plan — P3-E11-T06 |
 | `Procore Startup Checklist Summary (1).pdf` | Project Startup | Procore Setup Reference — P3-E11 §6 |
 

@@ -722,7 +722,7 @@ Project Closeout is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Both 
 | Authority dimension | Source-of-truth owner | Record name | Notes |
 |---|---|---|---|
 | Task Library | Project Hub | `StartupTaskTemplate` / `StartupTaskInstance` | MOE-governed template catalog plus project instance set; project instances created automatically on project creation; Pass/Fail/N/A/Pending results; `taskNumber` and `description` immutable on governed entries |
-| Safety Readiness | Project Hub | `SafetyReadinessSurface` / `SafetyReadinessItem` / `SafetyRemediationRecord` | Startup safety readiness only; does NOT feed Safety module (P3-E8) |
+| Safety Readiness | Project Hub | `JobsiteSafetyChecklist` / `SafetyReadinessItem` / `SafetyRemediationRecord` | Startup safety readiness only; does NOT feed Safety module (P3-E8); open remediations are reviewable within Startup and may escalate internally |
 | Contract Obligations Register | Project Hub | `ContractObligationsRegister` / `ContractObligation` | Structured obligation tracking with `OPEN` / `IN_PROGRESS` / `SATISFIED` / `WAIVED` / `NOT_APPLICABLE` lifecycle; PM owned; PX required for waiver |
 | Responsibility Matrix — PM sheet (71 assignment rows + 11 reminder rows × 7 assignment roles) | Project Hub | `ResponsibilityMatrixRow` (sheet = PM) | Project-specific assignments on assignment-bearing rows; reminder rows preserved from workbook for display/reference only; named-`Primary` coverage and critical-category acknowledgment gate certification |
 | Responsibility Matrix — Field sheet (27 assignment rows × 5 assignment roles) | Project Hub | `ResponsibilityMatrixRow` (sheet = Field) | Project-specific assignments; task descriptions immutable from template; category-level named-`Primary` coverage required before certification |
@@ -739,14 +739,14 @@ Project Closeout is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Both 
 |---|---|
 | Procore | Procore is the external source for executed contract uploads and Admin setup fields. Project Hub does not write to Procore. The Procore setup reference surface in P3-E11 is read-only guidance in Project Hub. |
 | Permits module (P3-E7) | Task Library Section 4 (`PermitVerificationDetail`) is a parallel, independent surface. `PermitVerificationDetail` records do not create, update, or close Permit records in P3-E7. Startup reads Permits read-only for cross-reference display context only. See §15.3. |
-| Safety module (P3-E8) | Safety Readiness (`SafetyReadinessSurface`) is a parallel, independent surface. A Fail result on a Safety Readiness item does not create a corrective action in P3-E8. See §15.3. |
+| Safety module (P3-E8) | Safety Readiness (`JobsiteSafetyChecklist` / `SafetyReadinessItem`) is a parallel, independent surface. A Fail result on a Safety Readiness item does not create a corrective action in P3-E8. See §15.3. |
 | Project Closeout module (P3-E10) | Startup publishes `StartupBaseline` as a read-only API (`GET /api/startup/{projectId}/baseline`) consumed by Closeout. Startup writes no Closeout records; Closeout writes no Startup records. See §15.3. |
 
 ### 15.3 Boundary rules
 
 **Permits non-interference rule:** Task Library Section 4 (`PermitVerificationDetail` records) verifies that permits are posted on the jobsite at startup. This surface has NO write relationship to the Permits module. `PermitVerificationDetail` status changes do not create, update, or close permit records in P3-E7. The Permits module does not auto-update Task Library results based on permit lifecycle state. Startup may read Permits data for cross-reference display only.
 
-**Safety non-interference rule:** Safety Readiness (`SafetyReadinessSurface`) is owned by Project Startup and represents startup safety readiness only. It has NO write relationship to the Safety module's ongoing inspection checklist, corrective action log, or incident records. A Fail result on a Safety Readiness item does not create a corrective action in P3-E8. The Safety Manager co-certification role in the startup workflow does not grant Safety module write access.
+**Safety non-interference rule:** Safety Readiness (`JobsiteSafetyChecklist` / `SafetyReadinessItem`) is owned by Project Startup and represents startup safety readiness only. It has NO write relationship to the Safety module's ongoing inspection checklist, corrective action log, or incident records. A Fail result on a Safety Readiness item does not create a corrective action in P3-E8. The Safety Manager co-certification role in the startup workflow does not grant Safety module write access.
 
 **PM Plan approval rule:** The Project Execution Baseline transitions from Draft → Submitted → Approved. Only a Project Executive (PX) may approve the plan. `ReadinessCertification` for `EXECUTION_BASELINE` cannot be submitted until the plan is `Approved`. Post-Approved edits require reversion to Draft and re-approval.
 
@@ -754,7 +754,7 @@ Project Closeout is a **review-capable surface** in Phase 3 (P3-E1 §9.1). Both 
 
 **Startup-to-Closeout continuity rule:** `StartupBaseline` is the only Startup artifact published for Closeout consumption. It is read-only from Closeout's perspective (`GET /api/startup/{projectId}/baseline`). Startup publishes no org-intelligence indexes; it does not contribute to the Closeout module's scoring, ranking, or intelligence surfaces. Startup publishes to the Activity Spine and Health Spine for project-scoped signals only.
 
-**Safety Remediation escalation:** A `SafetyRemediationRecord.escalated = true` flag on a startup safety item triggers an Activity Spine `SafetyRemediationEscalated` event and a Work Queue escalation item. It does not trigger any Safety module record. Escalation is internal to the Startup module.
+**Safety Remediation escalation:** A `SafetyRemediationRecord` reaching `escalationLevel = PX` / `remediationStatus = ESCALATED` on a startup safety item triggers an Activity Spine `SafetyRemediationEscalated` event and a Work Queue escalation item, and may raise a `ProgramBlocker`. It does not trigger any Safety module record. Escalation is internal to the Startup module.
 
 **Waivers and exceptions:** PX may waive a `ReadinessCertification` sub-surface gate via `ExceptionWaiverRecord`. All waiver records are preserved permanently. There is no hard-delete path for any waiver record. Waivers do not suppress the underlying data — the certification state transitions to `WAIVED` and the waiver note is preserved in the record.
 

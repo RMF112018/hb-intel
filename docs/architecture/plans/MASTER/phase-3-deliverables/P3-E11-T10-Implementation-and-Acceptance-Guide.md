@@ -71,9 +71,10 @@ Implement in the order below. Each stage has a gate check before proceeding. Do 
 
 **Gate check:**
 - Safety readiness items instantiated from the governed template per T07 §4; `itemNumber` and `description` are immutable
-- `result = Fail` auto-creates a `SafetyRemediationRecord` stub; `remediationNote` is required before `SAFETY_READINESS` certification can be submitted
+- `result = Fail` auto-creates a `SafetyRemediationRecord` stub; `remediationNote`, `assignedPersonName`, and `dueDate` are required before `SAFETY_READINESS` certification can be submitted
 - `remediationStatus = ESCALATED` on a `SafetyRemediationRecord` fires the `SafetyRemediationEscalated` Activity Spine event and raises an escalation Work Queue item
 - `openRemediationCount` drives health metric `safetyReadinessOpenRemediations` and Work Queue items
+- Open remediations may remain at certification submission when documented, assigned, and due-dated, but submission is blocked if any remediation is PX-escalated or has an active `programBlockerRef` unless covered by approved waiver
 - Safety module exclusion rule does NOT apply here: PE may annotate any safety readiness field; see T09 §6
 - Safety Readiness item result changes do NOT write any records to the `@hbc/safety` module; non-interference verified by integration test
 - `SAFETY_READINESS` certification requires Safety Manager co-sign (co-certification via `@hbc/workflow-handoff`; if `@hbc/workflow-handoff` not yet available, PM documents Safety Manager review in certification notes as interim workaround — mark as pre-production-ready)
@@ -87,6 +88,7 @@ Implement in the order below. Each stage has a gate check before proceeding. Do 
 **Gate check:**
 - `PermitVerificationDetail` records are associated with Section 4 `StartupTaskInstance` entries (see T07 §9.1)
 - `verifiedBy`, `verifiedAt`, and `physicalEvidenceAttachmentIds[]` are required for a Section 4 item to be confirmed as physically posted
+- `result = No` on a Section 4 item requires `discrepancyReason` on the companion `PermitVerificationDetail` and raises the governed `PendingPermit` blocker/work-queue path from T07 §9.4
 - Photo evidence upload (`physicalEvidenceAttachmentIds[]`) is PWA-depth only; SPFx supports metadata entry but defers photo upload to PWA (per T09 §7.2)
 - Section 4 item result changes produce zero Permit module record mutations — non-interference verified by integration test
 - Activity Spine event: `PermitPostingVerified`
@@ -210,7 +212,7 @@ The following criteria govern whether the Startup module implementation is compl
 | # | Criterion | Pass condition |
 |---|---|---|
 | 10 | Safety items instantiated from governed template | `itemNumber` and `description` match source template verbatim and are immutable |
-| 11 | Fail items require remediation before certification | `SAFETY_READINESS` certification submission blocked if any `SafetyRemediationRecord` has no `remediationNote` |
+| 11 | Fail items require documented remediation routing before certification | `SAFETY_READINESS` certification submission blocked if any `SafetyRemediationRecord` lacks `remediationNote`, `assignedPersonName`, or `dueDate`, or if any remediation is PX-escalated / blocker-active without approved waiver |
 | 12 | Safety Readiness does not write to Safety module | Zero `@hbc/safety` module records created or modified by any Safety Readiness item result change; verified by non-interference integration test |
 
 **Permit Posting**
@@ -218,7 +220,7 @@ The following criteria govern whether the Startup module implementation is compl
 | # | Criterion | Pass condition |
 |---|---|---|
 | 13 | Section 4 does not write to Permits module | Zero Permit records created, updated, or closed by any Section 4 item result change; verified by non-interference integration test |
-| 14 | `PermitVerificationDetail` required fields enforced | Section 4 verification save or certification submit returns HTTP 400 if `verifiedBy`, `verifiedAt`, or `physicalEvidenceAttachmentIds[]` is missing for an item marked `result = Yes` |
+| 14 | `PermitVerificationDetail` required fields enforced | Section 4 verification save or certification submit returns HTTP 400 if `verifiedBy`, `verifiedAt`, or `physicalEvidenceAttachmentIds[]` is missing for an item marked `result = Yes`, or if `discrepancyReason` is missing for an item marked `result = No` |
 
 **Contract Obligations**
 

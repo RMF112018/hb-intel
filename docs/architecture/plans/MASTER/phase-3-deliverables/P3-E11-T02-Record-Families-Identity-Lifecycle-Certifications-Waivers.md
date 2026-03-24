@@ -211,8 +211,8 @@ One per gate criterion per gate evaluation. The criteria set for each sub-surfac
 | `STARTUP_TASK_LIBRARY` | `TASK_LIB_CRITICAL_COMPLETE` | All tasks with severity = Critical have result = Yes or an approved waiver |
 | `STARTUP_TASK_LIBRARY` | `TASK_LIB_NO_UNWAIVED_BLOCKERS` | All TaskBlockers in OPEN status have an approved ExceptionWaiverRecord |
 | `SAFETY_READINESS` | `SAFETY_ALL_ASSESSED` | All 32 safety readiness items have a result |
-| `SAFETY_READINESS` | `SAFETY_FAILS_REMEDIATED` | All Fail items have a SafetyRemediationRecord with remediationNote populated |
-| `SAFETY_READINESS` | `SAFETY_OPEN_REMEDIATIONS_ACKNOWLEDGED` | PE has acknowledged all remediations in PENDING or IN_PROGRESS status |
+| `SAFETY_READINESS` | `SAFETY_FAILS_REMEDIATED` | All Fail items have a SafetyRemediationRecord with `remediationNote`, `assignedPersonName`, and `dueDate` populated |
+| `SAFETY_READINESS` | `SAFETY_OPEN_REMEDIATIONS_ACKNOWLEDGED` | PE has acknowledged all remediations remaining in `PENDING` or `IN_PROGRESS` status at review time, and none are PX-escalated or blocker-active unless waived |
 | `PERMIT_POSTING` | `PERMITS_ALL_REVIEWED` | All 12 Section 4 items have a result |
 | `PERMIT_POSTING` | `PERMITS_MATERIAL_PRESENT` | Items covering building permit and master permit are Yes or NA with documented rationale |
 | `CONTRACT_OBLIGATIONS` | `CONTRACT_REGISTER_POPULATED` | At least one ContractObligation row exists |
