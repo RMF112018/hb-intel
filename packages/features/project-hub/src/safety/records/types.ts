@@ -4,6 +4,8 @@
  */
 
 import type { IncidentPrivacyTier } from '../foundation/enums.js';
+import type { ApplicabilityCondition, InspectionItemResponseValue } from '../inspection/enums.js';
+import type { ISectionScoreSummary } from '../inspection/types.js';
 import type {
   AcknowledgmentMethod,
   CertificationStatus,
@@ -160,6 +162,9 @@ export interface ISectionScoringWeight {
 export interface IApplicabilityRule {
   readonly sectionKey: string;
   readonly conditionDescription: string;
+  readonly condition: ApplicabilityCondition;
+  readonly conditionValue: string | null;
+  readonly notesRequired: boolean;
 }
 
 export interface IInspectionItem {
@@ -206,22 +211,37 @@ export interface IInspectionChecklistTemplate {
 export interface IInspectionSectionResponse {
   readonly sectionKey: string;
   readonly isApplicable: boolean;
+  readonly notApplicableReason: string | null;
   readonly itemResponses: readonly IInspectionItemResponse[];
+  readonly sectionScore: number | null;
+  readonly sectionMaxScore: number | null;
   readonly sectionNotes: string | null;
 }
 
 export interface IInspectionItemResponse {
   readonly itemKey: string;
-  readonly response: string;
+  readonly response: InspectionItemResponseValue;
+  readonly numericValue: number | null;
   readonly notes: string | null;
-  readonly photoEvidenceIds: readonly string[];
+  readonly correctiveActionId: string | null;
+  readonly evidenceRecordIds: readonly string[];
 }
 
 export interface IInspectionScorecardSnapshot {
   readonly inspectionId: string;
+  readonly projectId: string;
   readonly inspectionDate: string;
+  readonly inspectionWeek: string;
+  readonly templateId: string;
+  readonly templateVersion: number;
   readonly normalizedScore: number;
   readonly applicableSectionCount: number;
+  readonly totalSectionCount: number;
+  readonly failedItemCount: number;
+  readonly naItemCount: number;
+  readonly correctiveActionsGeneratedCount: number;
+  readonly criticalCorrectiveActionsCount: number;
+  readonly sectionScoreSummary: readonly ISectionScoreSummary[];
   readonly publishedAt: string;
 }
 
