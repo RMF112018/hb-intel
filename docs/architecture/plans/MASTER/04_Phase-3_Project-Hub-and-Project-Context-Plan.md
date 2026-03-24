@@ -36,10 +36,10 @@ This plan is written to align with the following governing architecture referenc
 Phase 3 planning must explicitly acknowledge the following current-state foundations (verified 2026-03-20 against current-state-map and live packages):
 
 - A real **PWA application shell** already exists, including router, auth integration, workspace routing, and shell composition. Phase 2 locks the shell, landing, and lane-ownership foundations that Phase 3 inherits.
-- A real **`/project-hub` route** already exists in the PWA (`apps/pwa/src/router/workspace-routes.ts`). The current `ProjectHubPage` is an **MVP-level scaffold** — a portfolio dashboard with summary cards and data table — not yet the robust operating layer this phase envisions.
+- A real **`/project-hub` route** already exists in the PWA (`apps/pwa/src/router/workspace-routes.ts`). The current `ProjectHubPage` is an **MVP-level scaffold** — a portfolio dashboard with summary cards and data table. Phase 3 now locks the target split: `/project-hub` is the meaningful unscoped portfolio root, while `/project-hub/{projectId}` is the canonical project-scoped Control Center route.
 - Supporting shared packages already exist at verified maturity levels:
   - `@hbc/project-canvas` (v0.0.1, mature — dist build, exports, storybook, tests; SF13, ADR-0102 locked)
-  - `@hbc/features-project-hub` (v0.1.84, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, Project Closeout, Project Startup, and Subcontract Execution Readiness are live; Project Warranty T10 Stages 1–3 implemented; P3-E15 Quality Control planning family authored and reconciled as implementation-ready architecture)
+  - `@hbc/features-project-hub` (v0.1.85, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, Project Closeout, Project Startup, and Subcontract Execution Readiness are live; Project Warranty T10 Stages 1–4 implemented; P3-E15 Quality Control planning family authored and reconciled as implementation-ready architecture)
   - `@hbc/related-items` (v0.0.2, mature — cross-module record relationship panel)
   - `@hbc/workflow-handoff` (v0.1.0, mature — platform workflow primitive)
   - `@hbc/session-state` (v0.0.1, mature — SF12, ADR-0101 locked; offline model ready)
@@ -103,6 +103,8 @@ Phase 3 uses a **shared-canonical cross-lane model**:
 Phase 3 uses a **hybrid project context model with hard rules**:
 
 - The **URL/route is canonical** for addressable project identity.
+- `/project-hub` is the permission-aware unscoped portfolio root.
+- `/project-hub/{projectId}` is the canonical project-scoped Control Center route.
 - Shell, store, and session layers may carry enriched working context such as:
   - last valid page per project
   - filters / sort / view state
@@ -110,14 +112,19 @@ Phase 3 uses a **hybrid project context model with hard rules**:
   - draft/session recovery state
 - Enriched context **cannot silently override** the route-carried project identity.
 - On mismatch, the route/URL wins unless the user explicitly initiates a project switch.
+- Multi-project explicit navigation to `/project-hub` always lands on the portfolio root first.
+- Single-project explicit navigation to `/project-hub` immediately canonicalizes to `/project-hub/{projectId}`.
+- Unauthorized, invalid, or unavailable project contexts render an in-shell Project Hub no-access / not-available state using `@hbc/smart-empty-state`.
 
 ### 4.3 Project switching behavior
 
 Project switching uses a **smart same-page model**:
 
 - When a user changes projects, the system should try to keep the user on the equivalent page/section in the target project.
-- If the target page is unavailable, unauthorized, or invalid for that project, the system falls back to the target project's home page.
+- If the target section is unavailable, unauthorized, or invalid for that project, the system falls back to the target project's Control Center.
 - Return-memory must be tracked **per project**, not as one global last page.
+- The portfolio root has separate continuity behavior for filters, search, sort, and scroll position.
+- "Back to Portfolio" is a first-class in-project control; it must not rely on browser-back semantics.
 
 ### 4.4 Project activation model
 
@@ -693,6 +700,7 @@ Review Mode remains assigned to Phase 3, but this plan preserves the explicit go
 - Define URL-canonical project routing rules
 - Define store/session enrichment rules
 - Define project switching and per-project return-memory
+- Define the unscoped portfolio root, canonical project-scoped Control Center route, Back to Portfolio behavior, and in-shell no-access handling
 - Define deep-link, refresh, reopen, and handoff launch behavior
 
 **Deliverables**
@@ -918,7 +926,7 @@ Phase 3 is complete only when all of the following are true:
 ### 18.1 Cross-lane contract gates
 
 - Both lanes consume the same canonical project identity, context, and membership rules.
-- Smart project switching works consistently across both lanes.
+- Smart same-section project switching with Control Center fallback works consistently across both lanes.
 - Cross-lane launches/handoffs do not lose project identity.
 
 ### 18.2 Project activation gates

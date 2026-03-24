@@ -6,3 +6,4 @@
 export * from './foundation/index.js';
 export * from './record-families/index.js';
 export * from './coverage-registry/index.js';
+export * from './case-lifecycle/index.js';

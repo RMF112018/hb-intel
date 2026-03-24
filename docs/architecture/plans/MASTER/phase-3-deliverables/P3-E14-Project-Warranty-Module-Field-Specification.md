@@ -8,7 +8,7 @@
 | **Document Type** | Module Field Specification — T-File Master Index |
 | **Owner** | Project Hub Leadership |
 | **Last Updated** | 2026-03-24 |
-| **Status** | Specification — All T-files governing; **T10 Stage 1–3 implemented (v0.1.84)** |
+| **Status** | Specification — All T-files governing; **T10 Stage 1–4 implemented (v0.1.85)** |
 | **Related contracts** | P3-E1 §3.x, P3-E2 §18, P3-D1, P3-D2, P3-D3, P3-D4, P3-E4 (back-charge advisory), P3-E10 (Closeout seam), P3-E11 (Startup seam), P3-E15 (upstream quality-basis seam), P3-G1, P3-G2, P3-H1 |
 
 ---
