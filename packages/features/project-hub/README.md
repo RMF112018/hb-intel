@@ -108,3 +108,7 @@ T06 UX Surface & Reporting: 5 views, 12 list columns, health indicators, 11 deta
 T07 Migration & Import: Flat-to-multi-record mapping (4 record families), status/result tables, migration defaults, validation checklist, evidence upload config, versioned record tracking, future integration points. See `src/permits/migration/`.
 
 T08 Implementation Closure: Contract-level complete. 30 source files, 10 test files, 214 tests. 42 of 52 acceptance items satisfied; 10 runtime/UAT/migration scope.
+
+## 13. Project Closeout Module (P3-E10) — Stage 7.8
+
+T01 Foundation: Three-class surface model (operational/derived/consumption), 16 owned record families, 10 enumerations, SoT boundary matrix (11 rows), always-on activation model (5 phases), 12 cross-contract references, 14 locked architecture decisions, 7 shared package requirements, 5 operating principles, 10 business rules. See `src/closeout/foundation/`.

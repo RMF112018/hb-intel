@@ -191,3 +191,7 @@ export {
   createMockJhaRecord,
   createMockSafetyEvidenceRecord,
 } from './createMockSafetyRecord.js';
+
+// ── P3-E10-T01 Closeout foundation testing surface ──────────────────
+
+export { createMockCloseoutSoTBoundary } from './createMockCloseoutSoTBoundary.js';

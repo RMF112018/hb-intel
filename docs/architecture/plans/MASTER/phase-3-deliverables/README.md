@@ -1,12 +1,12 @@
 # Phase 3 Deliverables — Project Hub and Project Context
 
-**Doc Classification:** Active Deliverable Index — **Phase 3 primary deliverable production is complete (Workstreams A–H).** 28 of 28 primary deliverables authored. Workstream I (Shared Feature Infrastructure) added 2026-03-23.
+**Doc Classification:** Active Deliverable Index — **Phase 3 primary deliverable production is complete (Workstreams A–H).** 29 of 29 primary deliverables authored. Workstream I (Shared Feature Infrastructure) added 2026-03-23. Workstream J (Documents Enabling Seams) added 2026-03-24.
 
 ---
 
 ## Planning Status Summary
 
-**Phase 3 deliverable production is complete for Workstreams A–H.** 28 of 28 primary deliverables are authored (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-E4, P3-E5, P3-E6, P3-E7, P3-E8, P3-E9, P3-E10, P3-E11, P3-E12, P3-F1, P3-G1, P3-G2, P3-G3, P3-H1). All workstreams (A–H) are complete. 27 deliverables are locked (Contract, Specification, or Note). 1 deliverable (P3-H1) is an Active Reference that evolves during implementation. Phase 3 is now execution-ready per [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md). **Workstream I** (Shared Feature Infrastructure) has been added 2026-03-23, incorporating 6 shared feature plan families (SF23, SF24, SF25, SF26, SF27, SF28) as Phase 3 Stage 5. Governing plan files are in `docs/architecture/plans/shared-features/`. The Implementation Guide has been updated: Stage 5 is new Shared Feature Infrastructure; former Stages 5–11 are renumbered Stages 6–12.
+**Phase 3 deliverable production is complete for Workstreams A–H.** 29 of 29 primary deliverables are authored (P3-A1, P3-A2, P3-A3, P3-B1, P3-C1, P3-C2, P3-C3, P3-D1, P3-D2, P3-D3, P3-D4, P3-E1, P3-E2, P3-E3, P3-E4, P3-E5, P3-E6, P3-E7, P3-E8, P3-E9, P3-E10, P3-E11, P3-E12, P3-F1, P3-G1, P3-G2, P3-G3, P3-H1, P3-J1). All workstreams (A–H) are complete. 27 deliverables are locked (Contract, Specification, or Note). 1 deliverable (P3-H1) is an Active Reference that evolves during implementation. 1 deliverable (P3-J1) is a Specification not yet started. Phase 3 is now execution-ready per [Phase 3 Plan §20](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md). **Workstream I** (Shared Feature Infrastructure) has been added 2026-03-23, incorporating 6 shared feature plan families (SF23, SF24, SF25, SF26, SF27, SF28) as Phase 3 Stage 5. Governing plan files are in `docs/architecture/plans/shared-features/`. The Implementation Guide has been updated: Stage 5 is new Shared Feature Infrastructure; former Stages 5–11 are renumbered Stages 6–12. **Workstream J** (Documents Enabling Seams) has been added 2026-03-24 as Phase 3 Stage 13. Governing deliverable is P3-J1; governing plan is `04_Phase-3_Unified-Documents-Enabling-Plan.md`. Full Documents implementation remains Phase 5 scope.
 
 ---
 
@@ -71,7 +71,7 @@
 | P3-E7 | [Permits Module Field Specification](P3-E7-Permits-Module-Field-Specification.md) *(master index + T01–T08 detail files)* | Specification |
 | P3-E8 | [Safety Module Field Specification](P3-E8-Safety-Module-Field-Specification.md) *(master index + T01–T10 detail files)* | Specification |
 | P3-E9 | [Reports Module Field Specification](P3-E9-Reports-Module-Field-Specification.md) *(master index + T01–T10 detail files)* | Specification |
-| P3-E10 | [Project Closeout Module Field Specification](P3-E10-Project-Closeout-Module-Field-Specification.md) | Specification |
+| P3-E10 | [Project Closeout Module Field Specification](P3-E10-Project-Closeout-Module-Field-Specification.md) *(master index + T01–T11 detail files)* | Specification |
 | P3-E11 | [Project Startup Module Field Specification](P3-E11-Project-Startup-Module-Field-Specification.md) | Specification |
 | P3-E12 | [Subcontract Compliance Module Field Specification](P3-E12-Subcontract-Compliance-Module-Field-Specification.md) | Specification |
 
@@ -107,6 +107,14 @@ Shared feature plan files live in `docs/architecture/plans/shared-features/`. Th
 | [SF26-Saved-Views.md](../../shared-features/SF26-Saved-Views.md) | Saved Views (`@hbc/saved-views`) | Specification |
 | [SF25-Publish-Workflow.md](../../shared-features/SF25-Publish-Workflow.md) | Publish Workflow (`@hbc/publish-workflow`) | Specification |
 | [SF27-Bulk-Actions.md](../../shared-features/SF27-Bulk-Actions.md) | Bulk Actions (`@hbc/bulk-actions`) | Specification |
+
+### Workstream J — Documents Enabling Seams
+
+Phase 3 document enablement delivers the seams and contracts that make the unified Documents feature implementable in Phase 5 without architectural rework. Full Documents implementation (global shell, smart views, platform-wide search) is explicitly Phase 5 scope. The governing background plan is `04_Phase-3_Unified-Documents-Enabling-Plan.md`.
+
+| Doc ID | Title | Status |
+|---|---|---|
+| P3-J1 | [Documents Enabling Seams and Contracts](P3-J1-Documents-Enabling-Seams-and-Contracts.md) | Specification |
 
 ---
 
@@ -471,6 +479,7 @@ Governing: P3-E1 §3.8
 **7.8 — Project Closeout module**
 Implement: Closeout Checklist (70 items, 7 sections including jurisdiction-configurable Section 7) with tri-state results and date tracking; Subcontractor Scorecard entry with weighted 6-section evaluation (Safety 20%, Quality 20%, Schedule 20%, CostMgmt 15%, Communication 15%, Workforce 10%) and aggregation dashboard; Lessons Learned form entry and organization-wide knowledge database. Section 6 completion events must trigger snapshot publication to the Reports module. Reports module assembles snapshots into release artifacts — it does NOT own Closeout data. Item 4.14 (80-day lien deadline) is auto-calculated from item 4.13.
 Governing: P3-E1 §3.9, P3-E2 §14, **P3-E10** (field-level specification)
+**T01 Operating Model, Scope, Surface Map, SoT Boundaries:** **Implemented 2026-03-24 in `@hbc/features-project-hub` v0.1.45.** Closeout module foundation: `CloseoutRecordFamily` (16 record families per §3.1), `CloseoutSurfaceClass` (3 classes per §2.1 — ProjectScoped/OrgDerived/ProjectHubConsumption), `CloseoutOperationalSurface` (4 surfaces per §2.2), `CloseoutDerivedIndex` (3 org-wide indexes per §2.2), `CloseoutConsumptionPoint` (3 Project Hub panels per §2.2), `CloseoutAuthorityRole` (6 roles), `CloseoutAuthorityAction` (5 actions), `CloseoutLifecyclePhase` (5 phases per §4 — always-on activation model), `CloseoutFunction` (2 — ProjectScopedOperations vs. IntelligencePublication per §1), `CloseoutCrossModuleSource` (5 read-only sources per §3.2), SoT boundary matrix (11 rows per §5), cross-contract positioning (12 references per §6), 14 locked architecture decisions from master index, 7 shared package requirements (B-CLO-01 through B-CLO-07), 5 operating principles, surface class business rules (`isClass1Surface`/`isClass2Index`/`isClass3ConsumptionPoint`/`getSurfaceClass`), always-on activation rules (`isAlwaysOnSurface`/`isCloseoutPhaseRequired`), cross-module immutability enforcements (`canCloseoutMutate` always false, `canClass2IndexBeDirectlyWritten` always false), testing fixtures, contract stability tests. Closeout module Stage 7.8 T01 foundation complete.
 
 **7.9 — Project Startup module**
 Implement all five sub-surfaces, active from project creation: (1) Job Startup Checklist — 55 items across 4 sections (Review Owner's Contract 4 items, Job Start-Up 33 items, Order Services and Equipment 6 items, Permits Posted on Jobsite 12 items) with N/A / Yes / No tri-state per item; (2) Jobsite Safety Checklist — 32-item startup safety readiness check (Areas of Highest Risk 4 items, Other Risks 28 items) with Pass / Fail / N/A per item — this is NOT the Safety module's 93-item weighted ongoing checklist; (3) Responsibility Matrix — PM sheet (84 tasks × 9 roles: PX, Sr. PM, PM2, PM1, PA, QAQC, Proj Acct) + Field sheet (28 tasks × 8 roles: Lead Super, MEP Super, Interior Super, Asst Super, QAQC); (4) Owner Contract Review — structured extraction from executed Owner's contract with Article/Page/ResponsibleParty/Description/Category/FlagForReview fields; (5) Project Management Plan — 11-section structured document (I–XI: Team Philosophy, Quality Control, Preconstruction Meeting, Safety, Cost Control, Schedule, Team Member Responsibilities, Site Management, Project Administration, Project Closeout reference, Attachments) with typed structured fields for sections IV, V, VI, VIII, and XI. Permits Section 4 boundary rule and Safety non-interference rule must be enforced (see P3-E2 §15.3).
@@ -648,6 +657,46 @@ Governing: P3-H1 §10.5, P3-H1 §12
 
 ---
 
+### Stage 13 — Documents Enabling Seams
+
+May begin after Stage 4 (PWA routing foundations in place for project-scoped launch contracts) and Stage 5 (`@hbc/related-items` and `@hbc/publish-workflow` available for E4 and E6 seams). Workstreams E1, E2, and E5 (Sequence A) may start in parallel immediately; E3, E4, E7 (Sequence B) must follow Sequence A; E6 and E8 (Sequence C) may start after Sequence B. Must complete before Phase 5 document implementation begins.
+
+Governing: P3-J1; `docs/architecture/plans/MASTER/04_Phase-3_Unified-Documents-Enabling-Plan.md`
+
+**13.1 — Route and launch contracts (E1)**
+Define the complete route contract catalog for project-scoped document access: project-scoped document landing, project-zone landing, direct document deep link, raw library fallback, and escape hatch to the future Global Documents shell. Define the launch-state parameter schema (`projectId`, `workspaceId`, `zoneId`, `sourceRoute`, `relatedRecordContext`, `searchScopeDefault`). Define redirect and deep-link handling rules. Project-scoped launches must not use raw SharePoint library URLs as their primary contract. A future shared shell must be mountable without changing Project Hub's route assumptions.
+Governing: P3-J1 §3 E1
+
+**13.2 — Project zone model and registry schema (E2)**
+Define the initial normalized project-zone schema. Map each zone to document purpose, default location target, fallback raw structure reference, and visibility/governance metadata. Define the governance field matrix distinguishing globally governed vs project-extensible zones. Define project-level supplemental zone request metadata.
+Governing: P3-J1 §3 E2
+
+**13.3 — Source, authority, and restriction vocabulary (E5)**
+Define and bind the project-context trust vocabulary and visual states: governed project file, restricted item, preview available, raw library location, canonical/authoritative indicator, not-authoritative/linked copy. Bind all states to `@hbc/ui-kit` badge, list-row, preview-card, and empty-state patterns. Define plain-language explanation copy rules. This vocabulary must be reusable into Phase 5 without redefinition.
+Governing: P3-J1 §3 E5
+
+**13.4 — Project Hub contextual entry surface (E3)**
+Implement or design the Project Hub document entry surface as a contextual launch/entry layer, not a standalone feature. Use shared-shell language and `@hbc/ui-kit` patterns — no feature-local UI primitive duplication. Provide CTA paths for: open project documents, view by zone, raw library fallback, related documents from records, preview when supported. Define empty-state and no-access states.
+Governing: P3-J1 §3 E3
+
+**13.5 — Related-items document reference model (E4)**
+Define the document reference model for related items: linked project records, record attachments, zone associations, restricted placeholders. Bind document references into `@hbc/related-items` where appropriate. Define minimum metadata for contextual visibility (title, sourceType, authorityState, availabilityState, originatingRecord, lastRelevantActivity). Define the restricted-stub contract so document references appear safely in project context without broad permission leakage.
+Governing: P3-J1 §3 E4; P3-D4
+
+**13.6 — Preview and adaptive tablet/field contract (E7)**
+Define the project-scoped preview/details surface contract. Define adaptive behavior requirements for desktop, tablet, and field mode. Bind those requirements to `@hbc/ui-kit` adaptive standards. Keep preview-provider choice abstract so Phase 5 can implement without redesigning the Project Hub surface.
+Governing: P3-J1 §3 E7
+
+**13.7 — Publish/handoff intent seams (E6)**
+Define event and payload shapes for publish requested, destination suggested, handoff requested, publish completed, and publish failed. Identify where `@hbc/workflow-handoff`, `@hbc/publish-workflow`, and `@hbc/notification-intelligence` will bind in Phase 5. Add lightweight UI affordances only where they support current Project Hub clarity. Phase 5 must be able to add guided publish/handoff without changing Project Hub's domain contracts.
+Governing: P3-J1 §3 E6
+
+**13.8 — Data, telemetry, and readiness spikes (E8)**
+Spike project-scoped registry resolution against real/proposed site-library patterns. Spike auth/token flow for project-context document access. Spike preview feasibility and handoff mechanics. Define telemetry events for launch, preview, raw fallback, restricted-stub exposure, and no-access states. Capture all contradictions discovered during spikes in the contradiction register. Produce a Phase 5 handoff memo summarizing findings and outstanding risks.
+Governing: P3-J1 §3 E8; P3-J1 §8
+
+---
+
 ### Key Blocker Dependencies Summary
 
 | Dependency | Owner | Impact if missing | Gate |
@@ -668,12 +717,15 @@ The following are explicitly deferred and must not be treated as Phase 3 scope. 
 - Full claims/legal/contract-admin behavior
 - Full jurisdiction-facing permitting package management
 - Deeper field-first execution for QC and Warranty beyond baseline-visible lifecycle
+- Full unified Documents product: global shell, My Files / Departments / Company roots, global smart views (Recent / Shared With Me / Pinned), platform-wide document search — all Phase 5 scope (see `06_Phase-5_Search-Connected-Records-and-Document-Access-Plan.md`)
 
 ---
 
 ## Related Documents
 
 - [Phase 3 Plan — Project Hub and Project Context](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
+- [Phase 3 Unified Documents Enabling Plan](./04_Phase-3_Unified-Documents-Enabling-Plan.md) *(governing background plan for Workstream J)*
+- [Phase 5 Plan — Search, Connected Records, and Document Access](../06_Phase-5_Search-Connected-Records-and-Document-Access-Plan.md) *(deferred target for full Documents implementation)*
 - [Master Development Summary Plan](../00_HB-Intel_Master-Development-Summary-Plan.md)
 - [Phase 2 Deliverables](../phase-2-deliverables/README.md)
 - [Phase 1 Deliverables](../phase-1-deliverables/README.md)
@@ -684,6 +736,6 @@ The following are explicitly deferred and must not be treated as Phase 3 scope. 
 
 ---
 
-**Last Updated:** 2026-03-23 (v4) — Workstream I (Shared Feature Infrastructure) added. SF23 (Record Form), SF24 (Export Runtime), SF25 (Publish Workflow), SF26 (Saved Views), SF27 (Bulk Actions), SF28 (Activity Timeline) incorporated as Phase 3 Stage 5. Stage 5 inserted into Implementation Guide; former Stages 5–11 renumbered Stages 6–12. Stage 7 dependency updated to require Stage 5. SF26 plan file created (was missing). Phase 3 Integration sections added to all 6 SF plan files. P3-E1 §13 governs per-module integration contracts. Previously (v3): — P3-E12 Subcontract Compliance module added (replaces SUBCONTRACT CHECKLIST.xlsx manual workflow; reclassified from Estimating/Cross-cutting). P3-E1 §3.11 and classification table row 14 added. P3-E2 §16 source-of-truth and action-boundary added; §17 Acceptance Gate updated; tail renumbered to §14–§18. P3-E3 §8.5, §9.9, §9.10 added; §9.7 updated. P3-E4 §6.1 `subcontractChecklistId` field and §6.2a ContractExecuted gate rule added. Implementation Guide: Stage 6.10 added; Stage 0.1 and Stage 7.1 updated to include Project Closeout, Project Startup, and Subcontract Compliance as review-capable surfaces. Deliverable count updated to 28. Previously: P3-E11 Project Startup module added (replaces Job Startup Checklist, Jobsite Safety Checklist, Responsibility Matrix templates, Owner Contract Review template, and PROJECT MANAGEMENT PLAN 2019.docx manual workflow). Project_Safety_Checklist.pdf reclassified from Safety domain to Project Startup. Responsibility Matrix files and PM Plan reclassified from cross-cutting to Project Startup. P3-E1 §3.10 and classification table row 13 added. P3-E2 §15 source-of-truth and action-boundary added (tail sections renumbered to §14–§17 to avoid duplication with original §12–§13). P3-E3 §8.4 and §9.8 added; §6.2, §9.5, §9.7 updated. Deliverable count updated to 27. Previously: P3-E10 Project Closeout module added (replaces SubScorecard SOP, Lessons Learned SOP, and Closeout Checklist PDF). SubScorecard and Lessons Learned reclassified from standalone report families to module-generated report artifacts owned by Project Closeout. P3-E9 updated with reclassification notice. P3-E3 inventory updated.
+**Last Updated:** 2026-03-24 (v5) — Workstream J (Documents Enabling Seams) added. P3-J1 Specification created. Stage 13 added to Implementation Guide. Full unified Documents product added to Explicit Phase 3 Defer List. Related Documents updated with enabling plan and Phase 5 plan references. Previously (v4): Workstream I (Shared Feature Infrastructure) added. SF23 (Record Form), SF24 (Export Runtime), SF25 (Publish Workflow), SF26 (Saved Views), SF27 (Bulk Actions), SF28 (Activity Timeline) incorporated as Phase 3 Stage 5. Stage 5 inserted into Implementation Guide; former Stages 5–11 renumbered Stages 6–12. Stage 7 dependency updated to require Stage 5. SF26 plan file created (was missing). Phase 3 Integration sections added to all 6 SF plan files. P3-E1 §13 governs per-module integration contracts. Previously (v3): — P3-E12 Subcontract Compliance module added (replaces SUBCONTRACT CHECKLIST.xlsx manual workflow; reclassified from Estimating/Cross-cutting). P3-E1 §3.11 and classification table row 14 added. P3-E2 §16 source-of-truth and action-boundary added; §17 Acceptance Gate updated; tail renumbered to §14–§18. P3-E3 §8.5, §9.9, §9.10 added; §9.7 updated. P3-E4 §6.1 `subcontractChecklistId` field and §6.2a ContractExecuted gate rule added. Implementation Guide: Stage 6.10 added; Stage 0.1 and Stage 7.1 updated to include Project Closeout, Project Startup, and Subcontract Compliance as review-capable surfaces. Deliverable count updated to 28. Previously: P3-E11 Project Startup module added (replaces Job Startup Checklist, Jobsite Safety Checklist, Responsibility Matrix templates, Owner Contract Review template, and PROJECT MANAGEMENT PLAN 2019.docx manual workflow). Project_Safety_Checklist.pdf reclassified from Safety domain to Project Startup. Responsibility Matrix files and PM Plan reclassified from cross-cutting to Project Startup. P3-E1 §3.10 and classification table row 13 added. P3-E2 §15 source-of-truth and action-boundary added (tail sections renumbered to §14–§17 to avoid duplication with original §12–§13). P3-E3 §8.4 and §9.8 added; §6.2, §9.5, §9.7 updated. Deliverable count updated to 27. Previously: P3-E10 Project Closeout module added (replaces SubScorecard SOP, Lessons Learned SOP, and Closeout Checklist PDF). SubScorecard and Lessons Learned reclassified from standalone report families to module-generated report artifacts owned by Project Closeout. P3-E9 updated with reclassification notice. P3-E3 inventory updated.
 
 **Governing Plan:** [Phase 3 Plan §14–§15](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
