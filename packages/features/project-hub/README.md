@@ -100,3 +100,5 @@ T02 Record Architecture: 7 record families (PermitApplication, IssuedPermit, Req
 T03 Lifecycle & Governance: Dual state machines (application + issued permit via lifecycle actions), 20-rule transition table, governance constraints, system-driven transitions, API contracts. See `src/permits/lifecycle/`.
 
 T04 Inspection & Compliance: Checkpoint templates (14 master building), deficiency health impact, expiration risk tiers, compliance closeout gate, xlsx import validation. See `src/permits/inspection/`.
+
+T05 Workflow & Downstream: 21 spine events, 18 health metrics, 15 work queue rules, 5 related items, 6 handoffs, 7 BIC prompts, PER annotation scopes. See `src/permits/workflow/`.
