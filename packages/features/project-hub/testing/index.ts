@@ -210,3 +210,10 @@ export {
   createMockGovernedChecklistItem,
   createMockChecklistSectionDefinition,
 } from './createMockGovernedChecklistItem.js';
+
+// ── P3-E10-T04 Closeout lifecycle testing surface ──────────────────
+
+export {
+  createMockCloseoutMilestoneRecord,
+  createMockArchiveReadyContext,
+} from './createMockCloseoutMilestone.js';
