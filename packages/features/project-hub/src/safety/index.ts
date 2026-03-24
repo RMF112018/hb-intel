@@ -1,7 +1,7 @@
 /**
  * P3-E8 runtime root barrel for Safety module.
  *
- * Implemented: T01–T07 complete.
+ * Implemented: T01–T08 complete.
  *
  * T01: Module scope, operating model, record families, lane ownership, authority matrix,
  *      visibility doctrine, PER exclusion, cross-contract positioning, locked decisions.
@@ -22,6 +22,9 @@
  * T07: Orientation governance (topic list, acknowledgment evidence, readiness blocking),
  *      submission review (retry cycles, required types check), certification expiration sweep
  *      (30-day EXPIRING_SOON, cascade to designations), SDS compliance, workforce identity.
+ * T08: Readiness evaluation engine: 3-level evaluation (project/subcontractor/activity),
+ *      25 blocker definitions (HARD/SOFT), exception model (Safety Manager-only, auto-lapse),
+ *      override workflow (joint governance signatures), summary projection, 5 work queue triggers.
  */
 
 export * from './foundation/index.js';
@@ -31,3 +34,4 @@ export * from './inspection/index.js';
 export * from './corrective-actions/index.js';
 export * from './jha-toolbox/index.js';
 export * from './compliance/index.js';
+export * from './readiness/index.js';
