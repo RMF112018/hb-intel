@@ -106,3 +106,5 @@ T05 Workflow & Downstream: 21 spine events, 18 health metrics, 15 work queue rul
 T06 UX Surface & Reporting: 5 views, 12 list columns, health indicators, 11 detail sections, 6 dashboard tiles, 6 report types, PER annotation UX. See `src/permits/views/`.
 
 T07 Migration & Import: Flat-to-multi-record mapping (4 record families), status/result tables, migration defaults, validation checklist, evidence upload config, versioned record tracking, future integration points. See `src/permits/migration/`.
+
+T08 Implementation Closure: Contract-level complete. 30 source files, 10 test files, 214 tests. 42 of 52 acceptance items satisfied; 10 runtime/UAT/migration scope.
