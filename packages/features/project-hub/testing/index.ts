@@ -176,3 +176,7 @@ export { createMockIssuedPermit } from './createMockIssuedPermit.js';
 // ── P3-E7-T04 Permits inspection testing surface ─────────────────────
 
 export { createMockCheckpointTemplate } from './createMockCheckpointTemplate.js';
+
+// ── P3-E8-T01 Safety foundation testing surface ──────────────────────
+
+export { createMockSafetyAuthorityRule } from './createMockSafetyAuthorityRule.js';
