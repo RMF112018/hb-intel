@@ -17,15 +17,19 @@
 
 Project Startup owns 28 distinct record families organized across four tiers. Every record Startup creates or writes to is exclusively owned by `@hbc/project-startup`. No other module writes to these records.
 
-| Tier | Record families |
-|---|---|
-| **Tier 1 — Program Core** | StartupProgram, StartupProgramVersion, StartupReadinessState, ReadinessCertification, ReadinessGateRecord, ReadinessGateCriterion, ExceptionWaiverRecord, ProgramBlocker, PEMobilizationAuthorization |
-| **Tier 2 — Task Library** | StartupTaskTemplate, StartupTaskInstance, TaskBlocker |
-| **Tier 2 — Safety Readiness** | JobsiteSafetyChecklist, SafetyReadinessSection, SafetyReadinessItem, SafetyRemediationRecord |
-| **Tier 2 — Permit Posting Verification** | PermitVerificationDetail |
-| **Tier 2 — Ledger Surfaces** | ContractObligationsRegister, ContractObligation, ResponsibilityMatrix, ResponsibilityMatrixRow, ResponsibilityAssignment |
-| **Tier 2 — Execution Baseline** | ProjectExecutionBaseline, ExecutionBaselineSection, BaselineSectionField, ExecutionAssumption, PlanTeamSignature |
-| **Tier 3 — Continuity** | StartupBaseline |
+| Tier | Count | Record families |
+|---|---:|---|
+| **Tier 1 — Program Core** | 9 | StartupProgram, StartupProgramVersion, StartupReadinessState, ReadinessCertification, ReadinessGateRecord, ReadinessGateCriterion, ExceptionWaiverRecord, ProgramBlocker, PEMobilizationAuthorization |
+| **Tier 2 — Governed Template and Task Library** | 3 | StartupTaskTemplate, StartupTaskInstance, TaskBlocker |
+| **Tier 3 — Project-Scoped Operational Surfaces** | 15 | JobsiteSafetyChecklist, SafetyReadinessSection, SafetyReadinessItem, SafetyRemediationRecord, PermitVerificationDetail, ContractObligationsRegister, ContractObligation, ResponsibilityMatrix, ResponsibilityMatrixRow, ResponsibilityAssignment, ProjectExecutionBaseline, ExecutionBaselineSection, BaselineSectionField, ExecutionAssumption, PlanTeamSignature |
+| **Tier 4 — Continuity** | 1 | StartupBaseline |
+
+This four-tier split is intentional:
+
+- Tier 1 governs the readiness program itself.
+- Tier 2 mixes one org-governed template family (`StartupTaskTemplate`) with two project-scoped task-execution families.
+- Tier 3 contains the project-scoped operational records that certifications review and baseline lock governs.
+- Tier 4 contains the immutable continuity snapshot consumed by Closeout.
 
 ---
 
@@ -33,12 +37,17 @@ Project Startup owns 28 distinct record families organized across four tiers. Ev
 
 ### 2.1 Canonical Identity Rules
 
-Every Startup record follows these identity rules:
+Every Startup record follows these baseline identity rules:
 
 - **UUID primary keys:** All `*Id` fields are server-generated UUIDs. Client-proposed IDs are rejected.
 - **Immutable IDs:** Once created, primary key values never change. Update operations never touch the PK.
-- **Project scoping:** Every record includes a `projectId` FK. All Startup queries are project-scoped; there are no multi-project operations.
-- **Program anchoring:** All sub-surface records also include a `programId` FK to the `StartupProgram`. This enables a single join to retrieve all records for a startup program without traversing the project record.
+- **Single owner:** Startup remains the only writer for all 28 record families, including the org-governed task template family.
+
+Scoping rules then split by record class:
+
+- **Project-scoped records:** All Startup records except `StartupTaskTemplate` include a `projectId` FK. Operational queries are project-scoped; there are no multi-project mutations.
+- **Program-anchored records:** All project-scoped sub-surface and governance records except `StartupBaseline` also include a `programId` FK to `StartupProgram`. This enables a single join to retrieve the active readiness program without traversing the project record repeatedly.
+- **Org-governed template record:** `StartupTaskTemplate` is MOE-governed and does not carry `projectId` or `programId`; it is copied into project-scoped `StartupTaskInstance` records when a Startup program is initialized.
 
 ### 2.2 Audit and Provenance Requirements
 
@@ -64,7 +73,7 @@ For records governed by `@hbc/versioned-record`, every mutation writes a version
 
 ### 2.3 Publication States
 
-Each Tier 2 record also carries a `publicationState` field that tracks its status relative to the baseline lock:
+Each project-scoped Tier 2 and Tier 3 operational record carries a `publicationState` field that tracks its status relative to readiness certification and baseline lock. The org-governed `StartupTaskTemplate` does not carry `publicationState`.
 
 ```typescript
 enum PublicationState {
@@ -75,9 +84,17 @@ enum PublicationState {
 ```
 
 `publicationState` is system-maintained. It transitions as follows:
-- On ReadinessCertification ACCEPTED for the owning sub-surface: Tier 2 records for that surface → `CERTIFIED`
-- On `BASELINE_LOCKED` event: all Tier 2 records → `LOCKED`
-- During `STABILIZING`: `publicationState` may revert to `DRAFT` if PE flags a record for re-review
+- On `ReadinessCertification` `ACCEPTED` for the owning sub-surface: the affected project-scoped operational records for that surface move to `CERTIFIED`
+- On `BASELINE_LOCKED` event: all project-scoped operational records move to `LOCKED`
+- During `STABILIZING`: `publicationState` may revert to `DRAFT` if PE flags a project-scoped record for re-review
+
+| Record family group | Carries `publicationState`? | Notes |
+|---|---|---|
+| `StartupTaskTemplate` | No | Org-governed template family; versioned by template release, not by project certification/baseline lock |
+| `StartupTaskInstance`, `TaskBlocker` | Yes | Project-scoped task execution records under Startup Program Checklist certification |
+| `JobsiteSafetyChecklist`, `SafetyReadinessSection`, `SafetyReadinessItem`, `SafetyRemediationRecord` | Yes | Project-scoped Startup Safety records |
+| `PermitVerificationDetail` | Yes | Project-scoped Section 4 verification record |
+| `ContractObligationsRegister`, `ContractObligation`, `ResponsibilityMatrix`, `ResponsibilityMatrixRow`, `ResponsibilityAssignment`, `ProjectExecutionBaseline`, `ExecutionBaselineSection`, `BaselineSectionField`, `ExecutionAssumption`, `PlanTeamSignature` | Yes | Project-scoped ledger and baseline records governed by certification and baseline lock |
 
 ---
 
@@ -294,7 +311,7 @@ Formal PE gate record authorizing project mobilization. One per project. Its cre
 
 ---
 
-## 4. Tier 2 — Task Library Records
+## 4. Tier 2 — Governed Template and Task Library Records
 
 See T03 for the full field architecture of `StartupTaskTemplate`, `StartupTaskInstance`, and `TaskBlocker`. Summary here:
 
@@ -306,13 +323,13 @@ See T03 for the full field architecture of `StartupTaskTemplate`, `StartupTaskIn
 
 ---
 
-## 5. Tier 2 — Safety Readiness and Permit Verification Records
+## 5. Tier 3 — Safety Readiness and Permit Verification Records
 
 See T07 for the full field architecture of `JobsiteSafetyChecklist`, `SafetyReadinessSection`, `SafetyReadinessItem`, `SafetyRemediationRecord`, and `PermitVerificationDetail`.
 
 ---
 
-## 6. Tier 2 — Ledger Surface Records
+## 6. Tier 3 — Ledger Surface Records
 
 See T04 for `ContractObligationsRegister` and `ContractObligation`.
 See T05 for `ResponsibilityMatrix`, `ResponsibilityMatrixRow`, and `ResponsibilityAssignment`.
@@ -320,7 +337,7 @@ See T06 for `ProjectExecutionBaseline`, `ExecutionBaselineSection`, and `Baselin
 
 ---
 
-## 7. Tier 3 — StartupBaseline Continuity Record
+## 7. Tier 4 — StartupBaseline Continuity Record
 
 ### 7.1 Purpose and Immutability
 
@@ -381,7 +398,7 @@ Returns 405 on any mutation attempt (PATCH, PUT, DELETE)
 | `ExceptionWaiverRecord` | Until BASELINE_LOCKED (PE may resolve waivers post-lock) | Post-lock: waiverStatus only updatable | Yes (status) |
 | `ProgramBlocker` | Until BASELINE_LOCKED | BASELINE_LOCKED | Yes (status) |
 | `PEMobilizationAuthorization` | Never (one-write record) | Creation | No |
-| `StartupTaskTemplate` | MOE-governed update process | Between template versions | Yes |
+| `StartupTaskTemplate` | MOE-governed template release lifecycle | Between template versions | Yes |
 | `StartupTaskInstance` | Until BASELINE_LOCKED | BASELINE_LOCKED | Yes (result) |
 | `TaskBlocker` | Until BASELINE_LOCKED | BASELINE_LOCKED | Yes (status) |
 | `JobsiteSafetyChecklist` | Until BASELINE_LOCKED | BASELINE_LOCKED | No |

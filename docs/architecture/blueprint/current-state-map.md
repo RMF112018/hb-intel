@@ -393,7 +393,7 @@ Feature packages export source directly (`main: "./src/index.ts"`) and share the
 |---------|------|--------|---------|
 | `packages/features/accounting` | @hbc/features-accounting | Accounting | v0.0.0 |
 | `packages/features/estimating` | @hbc/features-estimating | Estimating | v0.0.1 |
-| `packages/features/project-hub` | @hbc/features-project-hub | Project Hub | v0.1.55 |
+| `packages/features/project-hub` | @hbc/features-project-hub | Project Hub | v0.1.56 |
 | `packages/features/leadership` | @hbc/features-leadership | Leadership | v0.0.0 |
 | `packages/features/business-development` | @hbc/features-business-development | Business Development | v0.0.1 |
 | `packages/features/admin` | @hbc/features-admin | Admin | v0.2.1 |

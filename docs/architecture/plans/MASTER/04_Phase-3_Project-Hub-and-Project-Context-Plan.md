@@ -39,7 +39,7 @@ Phase 3 planning must explicitly acknowledge the following current-state foundat
 - A real **`/project-hub` route** already exists in the PWA (`apps/pwa/src/router/workspace-routes.ts`). The current `ProjectHubPage` is an **MVP-level scaffold** — a portfolio dashboard with summary cards and data table — not yet the robust operating layer this phase envisions.
 - Supporting shared packages already exist at verified maturity levels:
   - `@hbc/project-canvas` (v0.0.1, mature — dist build, exports, storybook, tests; SF13, ADR-0102 locked)
-  - `@hbc/features-project-hub` (v0.1.55, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout are live; Project Startup and Subcontract Compliance remain Phase 3 planning/implementation scope)
+  - `@hbc/features-project-hub` (v0.1.56, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout are live; Project Startup and Subcontract Compliance remain Phase 3 planning/implementation scope)
   - `@hbc/related-items` (v0.0.2, mature — cross-module record relationship panel)
   - `@hbc/workflow-handoff` (v0.1.0, mature — platform workflow primitive)
   - `@hbc/session-state` (v0.0.1, mature — SF12, ADR-0101 locked; offline model ready)
@@ -576,7 +576,16 @@ Phase 3 Project Startup must support:
   - Contract Obligations Register
   - Responsibility Routing Engine
   - Project Execution Baseline
+- a four-tier record architecture:
+  - Tier 1 program-core governance records
+  - Tier 2 governed template/task-library records
+  - Tier 3 project-scoped operational surface records
+  - Tier 4 immutable continuity records
+- split identity rules so org-governed `StartupTaskTemplate` remains outside project/baseline-lock scoping while operational records stay project-scoped and program-anchored
 - explicit separation between sub-surface operational completeness and formal readiness certification
+- six project-scoped `ReadinessCertification` records, each reviewable through PE `ReadinessGateRecord` / `ReadinessGateCriterion` evaluation
+- `ExceptionWaiverRecord` and `ProgramBlocker` governance for unresolved readiness exceptions without collapsing them into task completion status
+- project-scoped `PublicationState` governance on operational records only; certification and baseline lock do not apply to the org-level template family
 - PE gate acceptance followed by separate PE mobilization authorization
 - a configurable stabilization window before baseline lock
 - immutable `StartupBaseline` continuity into Project Closeout / Autopsy for delta analysis
@@ -1006,7 +1015,7 @@ The following reconciliations are locked for Phase 3 and MUST be honored in down
    `@hbc/app-shell` currently has **zero consumers** anywhere in the workspace — no app or package imports from it. The live SPFx extension imports `HbcAppShell` directly from `'@hbc/ui-kit/app-shell'`, not from `@hbc/app-shell`. The package's self-description is internally inconsistent: `src/index.ts` calls it a "PWA facade" while the README warns against PWA use. This plan lists `@hbc/app-shell` as an incoming dependency for potential SPFx / Project Hub convenience use, but current repo truth is that neither lane has adopted it. `@hbc/shell` remains canonical. The package's self-description should be aligned with intent before consumers are added.
 
 2. **`@hbc/features-project-hub` maturity reconciliation**
-   The plan envisions a robust module structure within Project Hub. Current repo truth: `@hbc/features-project-hub` (v0.1.55) already contains SF21 health-pulse plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout. The package remains under active expansion for the remaining Phase 3 modules, including Project Startup and Subcontract Compliance. This is still classified as **controlled evolution** — the plan remains slightly ahead of final module completion, but no longer assumes a health-pulse-only scaffold.
+   The plan envisions a robust module structure within Project Hub. Current repo truth: `@hbc/features-project-hub` (v0.1.56) already contains SF21 health-pulse plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout. The package remains under active expansion for the remaining Phase 3 modules, including Project Startup and Subcontract Compliance. This is still classified as **controlled evolution** — the plan remains slightly ahead of final module completion, but no longer assumes a health-pulse-only scaffold.
 
 3. **QC/Warranty deferral target reconciliation**
    This plan defers deeper QC/Warranty field-first depth to `07_Phase-6_Field-First-HB-Site-Control-Plan.md`. However, the Phase 6 plan is currently a draft that covers generic field-first UX, workflow selection, and offline sync — it does **not** explicitly accept QC/Warranty deeper depth in its current scope. This deferral target is **directional**: Phase 6 will need to be refined to absorb this scope when it is formally activated. This does not change Phase 3's decision to exclude deeper QC/Warranty depth.
@@ -1074,5 +1083,5 @@ Phase 3 is successful only if Project Hub becomes a genuine project-centered ope
 
 ---
 
-**Last Updated:** 2026-03-20
+**Last Updated:** 2026-03-24
 **Governing Authority:** [Master Development Summary Plan](00_HB-Intel_Master-Development-Summary-Plan.md)
