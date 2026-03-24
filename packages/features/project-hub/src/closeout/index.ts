@@ -11,6 +11,7 @@
  * - T07 autopsy — project autopsy and learning legacy.
  * - T08 consumption — project hub consumption, derived intelligence indexes, reporting.
  * - T09 permissions — permissions, visibility, executive review, role matrix.
+ * - T10 integration — lane ownership and shared package reuse.
  */
 
 export * from './foundation/index.js';
@@ -22,3 +23,4 @@ export * from './scorecard/index.js';
 export * from './autopsy/index.js';
 export * from './consumption/index.js';
 export * from './permissions/index.js';
+export * from './integration/index.js';

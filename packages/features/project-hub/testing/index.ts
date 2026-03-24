@@ -248,3 +248,9 @@ export {
 export {
   createMockCloseoutRoleAction,
 } from './createMockCloseoutRoleAction.js';
+
+// ── P3-E10-T10 Closeout integration testing surface ────────────────
+
+export {
+  createMockRelatedItemsPair,
+} from './createMockIntegrationContract.js';
