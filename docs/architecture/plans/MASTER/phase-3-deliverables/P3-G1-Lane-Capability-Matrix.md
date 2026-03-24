@@ -290,7 +290,7 @@ Note: Safety is excluded from PER annotation layer (P3-E1 §9.3). PER sees read-
 | Baseline-visible lifecycle placement | **Required** | **Required** |
 | Deeper field-first depth | Deferred to Phase 6 | Deferred to Phase 6 |
 
-### 4.8 Lifecycle Modules — Project Closeout, Project Startup, Subcontract Compliance
+### 4.8 Lifecycle Modules — Project Closeout, Project Startup, Subcontract Execution Readiness
 
 Per P3-E1 §8, all three lifecycle modules require **Full parity** across PWA and SPFx. The per-module capability tables below define depth expectations within that parity requirement.
 
@@ -361,19 +361,22 @@ Full parity across both lanes — no core Startup certification or gate action r
 | Advanced blocker dependency chain visualization | **Required** | **Launch-to-PWA** | |
 | Post-lock `StartupBaseline` summary view | **Required** | **Required** | |
 
-#### 4.8.3 Subcontract Compliance
+#### 4.8.3 Subcontract Execution Readiness
 
 | Capability | PWA | SPFx |
 |---|---|---|
-| Subcontract Checklist — view and complete | **Required** | **Required** |
-| Subcontract Checklist — PM/APM sign-off | **Required** | **Required** |
-| Compliance Waiver — create and submit | **Required** | **Broad** |
-| Compliance Waiver — three-party approval routing | **Required** | **Broad** |
-| Buyout gate status (reads from Financial) | **Required** | **Required** |
+| Readiness case — view and maintain | **Required** | **Required** |
+| Requirement item artifact intake | **Required** | **Required** |
+| Compliance / Risk evaluation workbench | **Required** | **Broad** |
+| `ExceptionCase` / `ExceptionSubmissionIteration` — create, revise, and submit | **Required** | **Broad** |
+| Exception approval-slot routing on submission iterations | **Required** | **Broad** |
+| Controlled reassignment audit trail | **Required** | **Launch-to-PWA** |
+| Precedent publication management | **Required** | **Launch-to-PWA** |
+| Readiness gate projection surfaced to Financial for `ContractExecuted` enforcement | **Required** | **Required** |
 
 ### 4.9 Executive Review (Portfolio Executive Reviewer posture)
 
-Executive review capabilities apply to PER posture only; non-PER users are unaffected by this lane depth distinction. Review-capable module surfaces for Phase 3: Financial, Schedule, Constraints, Permits, Project Health, Reports, Project Closeout, Project Startup, Subcontract Compliance (per P3-E1 §9.1).
+Executive review capabilities apply to PER posture only; non-PER users are unaffected by this lane depth distinction. Review-capable module surfaces for Phase 3: Financial, Schedule, Constraints, Permits, Project Health, Reports, Project Closeout, Project Startup, Subcontract Execution Readiness (per P3-E1 §9.1).
 
 | Capability | PWA | SPFx | Notes |
 |---|---|---|---|
@@ -528,5 +531,5 @@ If a downstream deliverable conflicts with this specification, this specificatio
 
 ---
 
-**Last Updated:** 2026-03-22
+**Last Updated:** 2026-03-24 — Updated §4.8.3 and executive-review references to replace the old Subcontract Compliance checklist / waiver lane model with the P3-E13 Subcontract Execution Readiness case / evaluation / exception / precedent model.
 **Governing Authority:** [Phase 3 Plan §10](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

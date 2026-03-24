@@ -132,7 +132,7 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 | 11 | Reports | Always-on core | Governed report workspace | PH7-14 | Publishes to all 4 spines |
 | 12 | Project Closeout | Always-on lifecycle | Hybrid — owns all operational closeout data; publishes PE-approved snapshots to Reports; derives org intelligence indexes on archive | Closeout Checklist, Subcontractor Scorecard, Lessons Learned, Project Autopsy & Learning Legacy | Publishes to all 4 spines |
 | 13 | Project Startup | Always-on lifecycle | First-class working surface — active from project creation | Task Library, Safety Readiness, Contract Obligations Register, Responsibility Matrix, Project Execution Baseline (PM Plan), Permit Posting Verification | Publishes to all 4 spines |
-| 14 | Subcontract Compliance | Always-on core | First-class working surface — multi-record (one per subcontract) | Subcontract Checklist, Compliance Waiver | Publishes to all 4 spines; gates Buyout Log ContractExecuted (P3-E4 §6) |
+| 14 | Subcontract Execution Readiness | Always-on core | First-class working surface — multi-record readiness case (one active case per project + subcontractor legal entity + governed award / buyout intent) | Subcontract Readiness Case, Requirement Profiles, Exception Packets, Readiness Decision | Publishes to all 4 spines; gates Buyout Log ContractExecuted (P3-E4 §6) |
 | 15 | Quality Control | Baseline-visible lifecycle | Lifecycle-visible | PH7-7 | Deferred |
 | 16 | Warranty | Baseline-visible lifecycle | Lifecycle-visible | PH7-8 | Deferred |
 
@@ -148,7 +148,7 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 **Operating model:** Versioned forecast ledger (Working / ConfirmedInternal / PublishedMonthly / Superseded version lifecycle; no unlock-in-place; derivation-based editing). Budget line identity is stable across re-imports via `canonicalBudgetLineId` and composite fallback matching; ambiguous matches held in reconciliation conditions requiring PM resolution. Separated cost model: `jobToDateActualCost` (actual spend), `committedCosts` (legal obligation not yet invoiced), and `forecastToComplete` (PM future estimate) are always distinct. PER annotation targets confirmed versions only — working version is never visible to PER.
 
-**Must support:** Budget CSV import with stable identity resolution and reconciliation conditions; editable Financial Forecast Summary (working version only); editable GC/GR working model (version-scoped); editable Cash Flow working model (13 actuals + 18 forecast months; A/R aging read-only display); forecast checklist completion gate before confirmation; versioned forecast management (confirm, derive, designate report candidate); report-candidate → PublishedMonthly handoff via P3-F1 publication callback; Buyout sub-domain (procurement-control surface; dollar-weighted completion metric; savings tracking with explicit three-destination disposition workflow; `ContractExecuted` gate enforced via P3-E12 Subcontract Compliance); field-level PER annotation on confirmed versions with version-aware `canonicalBudgetLineId`-anchored annotation carry-forward on version derivation; export.
+**Must support:** Budget CSV import with stable identity resolution and reconciliation conditions; editable Financial Forecast Summary (working version only); editable GC/GR working model (version-scoped); editable Cash Flow working model (13 actuals + 18 forecast months; A/R aging read-only display); forecast checklist completion gate before confirmation; versioned forecast management (confirm, derive, designate report candidate); report-candidate → PublishedMonthly handoff via P3-F1 publication callback; Buyout sub-domain (procurement-control surface; dollar-weighted completion metric; savings tracking with explicit three-destination disposition workflow; `ContractExecuted` gate enforced via P3-E13 Subcontract Execution Readiness); field-level PER annotation on confirmed versions with version-aware `canonicalBudgetLineId`-anchored annotation carry-forward on version derivation; export.
 
 **Implementation note:** Interim project-budget import must support uploaded CSV (`budget_details`), with future replacement by direct Procore API integration (`externalSourceLineId` field present in schema for forward compatibility).
 
@@ -250,17 +250,17 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 **Field-level specification:** [P3-E11 — Project Startup Module Field Specification](P3-E11-Project-Startup-Module-Field-Specification.md)
 
-### 3.11 Subcontract Compliance
+### 3.11 Subcontract Execution Readiness
 
-**Boundary:** Always-on core module with one record per subcontract per project (multi-record, like Permits). Owns the operational state for all subcontract package submission verification and compliance relief tracking. Active from the point a subcontract is being prepared for award.
+**Boundary:** Always-on core module with one active governed `SubcontractReadinessCase` per project + subcontractor legal entity + governed award / buyout intent. Owns the operational state for requirement-profile binding, requirement-item evaluation, exception handling, and readiness decision issuance from the point a subcontract package enters award preparation.
 
-**Must support:** Subcontract Checklist (12-item document package verification: Contract, Schedule A/B, Exhibit A/B, W-9, License, Insurance GL/Auto/Umbrella/Workers Comp, Compass SDI Prequalification) with budget over/under tracking and PM/APM sign-off; Compliance Waiver (optional, attached when a subcontractor does not qualify for SDI or does not meet insurance/licensing requirements) with Insurance Requirements and Licensing Requirements waiver sections and full three-party approval routing (Project Executive, CFO, Compliance Manager).
+**Must support:** Governed requirement profiles that instantiate requirement items from award-path facts rather than from a universal checklist; requirement items with independent artifact state and compliance evaluation state; SDI / prequalification as a governed requirement family with multiple valid outcomes; immutable `ExceptionSubmissionIteration` submissions with governed approval slots and controlled reassignment; `GlobalPrecedentReference` publication without automatic approval reuse; a distinct `ExecutionReadinessDecision` issued by Compliance / Risk; and timer-driven reminder / escalation behavior through shared work-intelligence primitives.
 
-**Buyout gate rule:** A Buyout Log entry in the Financial module (P3-E4 §6) MUST NOT advance to `ContractExecuted` unless the linked Subcontract Checklist is `Complete` AND any attached Compliance Waiver is `Approved`. This gate is enforced at the API layer of the Financial module.
+**Buyout gate rule:** A Buyout Log entry in the Financial module (P3-E4 §6) MUST NOT advance to `ContractExecuted` unless the linked readiness gate projection is `READY` from an issued `ExecutionReadinessDecision`. This gate is enforced at the API layer of the Financial module.
 
-**Replaces:** `SUBCONTRACT CHECKLIST.xlsx` manual workflow (both worksheets: Subcontract Checklist and Compliance Waiver).
+**Replaces:** `SUBCONTRACT CHECKLIST.xlsx` manual workflow, specifically the flat Subcontract Checklist and mutable Compliance Waiver shape.
 
-**Field-level specification:** [P3-E12 — Subcontract Compliance Module Field Specification](P3-E12-Subcontract-Compliance-Module-Field-Specification.md)
+**Field-level specification:** [P3-E13 — Subcontract Execution Readiness Module Field Specification](P3-E13-Subcontract-Execution-Readiness-Module-Field-Specification.md)
 
 ---
 
@@ -396,7 +396,7 @@ This matrix reproduces P3-A3 §7 with governing contract annotations:
 | **Related Items** | **Required** — P3-D1 §7.3 | Consumes | Consumes | **Owns** |
 | **Project Closeout** | **Required** — P3-D1 §8.8 | **Required** — Office dimension (P3-D2 §11) | **Required** — P3-D3 §12 | **Required** — P3-D4 §9 |
 | **Project Startup** | **Required** — P3-D1 §8.9 | **Required** — Office dimension (P3-D2 §11) | **Required** — P3-D3 §12 | **Required** — P3-D4 §9 |
-| **Subcontract Compliance** | **Required** — P3-D1 §8.10 | **Required** — Office dimension (P3-D2 §11) | **Required** — P3-D3 §12 | **Required** — P3-D4 §9 |
+| **Subcontract Execution Readiness** | **Required** — P3-D1 §8.10 | **Required** — Office dimension (P3-D2 §11) | **Required** — P3-D3 §12 | **Required** — P3-D4 §9 |
 | **Quality Control** | Deferred | Deferred | Deferred | Deferred |
 | **Warranty** | Deferred | Deferred | Deferred | Deferred |
 
@@ -421,7 +421,7 @@ Per P3-G1 §4, the following summarizes lane depth by module:
 | Activity | **Full** (page + filtering) | **Broad** (tile) | Full timeline page is PWA-depth |
 | Project Closeout | **Required** (all capabilities; activates at closeout phase) | **Required** (all capabilities) | Full parity |
 | Project Startup | **Required** (all capabilities; active from project creation) | **Required** (all capabilities) | Full parity |
-| Subcontract Compliance | **Required** (all capabilities; multi-record, one per subcontract) | **Required** (all capabilities) | Full parity |
+| Subcontract Execution Readiness | **Required** (case management, evaluation, gate state) | **Required** (broad direct interaction; precedent publication and deep audit are PWA-depth) | Broad parity with governed PWA-depth exceptions |
 | Quality Control | Lifecycle-visible | Lifecycle-visible | Deferred |
 | Warranty | Lifecycle-visible | Lifecycle-visible | Deferred |
 
@@ -450,7 +450,7 @@ Executive review annotations (placed by Portfolio Executive Reviewers) are permi
 | Related Items | **No** | Registry surface; not a review target | — |
 | Project Closeout | **Yes** | Full field-level | P3-E2 §14.5, P3-A2 §4.1 |
 | Project Startup | **Yes** | Full field-level | P3-E2 §15.4, P3-A2 §4.1 |
-| Subcontract Compliance | **Yes** | Full field-level | P3-E12, P3-A2 §4.1 |
+| Subcontract Execution Readiness | **Yes** | Case, requirement item, exception-packet, and decision fields | P3-E13, P3-A2 §4.1 |
 | Quality Control | **No (deferred)** | Lifecycle-visible; review layer deferred | — |
 | Warranty | **No (deferred)** | Lifecycle-visible; review layer deferred | — |
 
@@ -556,13 +556,13 @@ This section defines the shared package integration obligations for every always
 | Reports | **R** | **R** | **R** | **R** | **R** | **R** | **R** | **R** | **R** | **R** |
 | Project Closeout | **R** | **R** | **R** | **R** | **R** | **R** | **R** | — | **R** | **R** |
 | Project Startup | **R** | **R** | **R** | **R** | **R** | **R** | **R** | — | **R** | **R** |
-| Subcontract Compliance | **R** | O | **R** | **R** | **R** | **R** | **R** | **R** ² | **R** | **R** |
+| Subcontract Execution Readiness | **R** | **R** | **R** | **R** | **R** | **R** | **R** | **R** ² | **R** | **R** |
 
 **R** = Required (Phase 3 acceptance gate) — **O** = Optional (recommended, not gate-blocking) — **—** = Not applicable
 
 ¹ Safety is excluded from the executive review annotation layer (§9.3). `@hbc/field-annotations` MUST NOT be integrated in the Safety module for Phase 3.
 
-² Subcontract Compliance requires `@hbc/workflow-handoff` for the three-party Compliance Waiver approval routing (Project Executive → CFO → Compliance Manager).
+² Subcontract Execution Readiness requires `@hbc/workflow-handoff` for governed exception-packet approval-slot routing and controlled reassignment audit.
 
 ---
 
@@ -706,21 +706,22 @@ Evaluate-not-assume:
 | `@hbc/complexity` | Does Startup need a complexity indicator beyond Health spine metrics? | Evaluate before adding; T09 §9.3 |
 | `@hbc/smart-empty-state` | Empty sub-surface states | Required for UI conformance per P3-H1 §6.7.9; T09 §9.3 |
 
-#### Subcontract Compliance
+#### Subcontract Execution Readiness
 
 | Package | Integration point | Notes |
 |---|---|---|
-| `@hbc/field-annotations` | PER annotation layer on subcontract checklist and waiver | Per P3-E12 |
-| `@hbc/versioned-record` | Optional — waiver version history | |
-| `@hbc/my-work-feed` | Pending checklist sign-off items; waiver approval pending items | Register `SubcontractComplianceWorkAdapter` |
-| `@hbc/notification-intelligence` | Waiver approval routing notifications (PE, CFO, Compliance Manager); waiver rejection alerts | |
-| `@hbc/bic-next-move` | Waiver approver accountability; checklist sign-off BIC | |
-| `@hbc/session-state` | Offline draft for checklist completion and waiver submission | |
-| `@hbc/complexity` | Checklist item density; waiver requirement detail depth | |
-| `@hbc/workflow-handoff` | Three-party Compliance Waiver approval routing — submitted → PE approved → CFO approved → Compliance Manager approved → resolved | |
-| `@hbc/smart-empty-state` | No subcontracts in system, checklist not started, no waiver submitted | |
+| `@hbc/field-annotations` | PER annotation layer on readiness case, requirement items, exception packets, and decisions | Per P3-E13 |
+| `@hbc/versioned-record` | Required audit trail for case mutations, evaluations, decisions, and packet iterations | |
+| `@hbc/my-work-feed` | Profile bind due, artifact response overdue, approval pending, readiness decision due, execution blocked | Register `SubcontractExecutionReadinessWorkAdapter` |
+| `@hbc/notification-intelligence` | Timer-driven reminder and escalation notifications for evaluator / approver work | |
+| `@hbc/bic-next-move` | Blocked execution and overdue approval prompts | |
+| `@hbc/session-state` | Offline draft for PM artifact intake only | Never authoritative for approval or decision actions |
+| `@hbc/complexity` | Requirement-density and packet-history disclosure depth | |
+| `@hbc/workflow-handoff` | Governed exception-packet approval-slot routing and controlled reassignment callbacks | |
+| `@hbc/publish-workflow` | Governed precedent-publication lifecycle for `GlobalPrecedentReference` outputs | |
+| `@hbc/smart-empty-state` | No readiness case, no active exceptions, no precedent references | |
 
 ---
 
-**Last Updated:** 2026-03-24 — Updated §3.9 Project Closeout boundary to reflect 5 sub-surfaces, Autopsy, derived intelligence model, and PE-approval-gated publication; updated module table row; updated §13 Closeout shared-package integration table to reflect all 7 required packages (workflow-handoff, acknowledgment, related-items added; versioned-record and field-annotations notes corrected). Prior: 2026-03-23 — Added §7 spine rows, §8 lane rows, §9.1 review-capable entries for Project Closeout, Project Startup, and Subcontract Compliance; added §13 Module-to-Shared-Package Integration Matrix
+**Last Updated:** 2026-03-24 — Updated §3.11 and related classification matrices to replace the old P3-E12 Subcontract Compliance checklist-and-waiver model with the P3-E13 Subcontract Execution Readiness case model, including Buyout gate wording, lane-depth posture, review-capable scope, and shared-package integration contracts. Prior: 2026-03-24 — Updated §3.9 Project Closeout boundary to reflect 5 sub-surfaces, Autopsy, derived intelligence model, and PE-approval-gated publication; updated module table row; updated §13 Closeout shared-package integration table to reflect all 7 required packages (workflow-handoff, acknowledgment, related-items added; versioned-record and field-annotations notes corrected). Prior: 2026-03-23 — Added §7 spine rows, §8 lane rows, §9.1 review-capable entries for Project Closeout, Project Startup, and Subcontract Compliance; added §13 Module-to-Shared-Package Integration Matrix
 **Governing Authority:** [Phase 3 Plan §11–§12](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

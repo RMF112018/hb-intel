@@ -125,7 +125,7 @@ For the full 48-item Financial acceptance gate, see **P3-E4-T09 §20**. The crit
 | 6.1.5 | Financial Forecast Summary editing — PM-editable fields on working version only; all derived fields recompute correctly | Not Started | | P3-E4-T04 §5; P3-E2 §3.2 |
 | 6.1.6 | GC/GR working model — version-scoped; editable on working version only; aggregate feeds Forecast Summary | Not Started | | P3-E4-T04 §6 |
 | 6.1.7 | Cash Flow model — 13 actuals (read-only) + 18 forecast months; A/R aging read-only; cumulative chart with deficit shading | Not Started | | P3-E4-T05 §7 |
-| 6.1.8 | Buyout sub-domain — dollar-weighted completion metric; `ContractExecuted` gate enforced via P3-E12; savings recognition and three-destination disposition workflow | Not Started | | P3-E4-T06 §8; P3-E1 §4.1 |
+| 6.1.8 | Buyout sub-domain — dollar-weighted completion metric; `ContractExecuted` gate enforced via issued Subcontract Execution Readiness decision / gate projection per P3-E13; savings recognition and three-destination disposition workflow | Not Started | | P3-E4-T06 §8; P3-E13-T07 §1 |
 | 6.1.9 | Report-candidate designation — at most one `isReportCandidate = true` per project; P3-F1 publication handoff handler implemented (B-FIN-03 stub) | Not Started | | P3-E4-T03 §3.6; P3-E4-T09 §16 |
 | 6.1.10 | PER annotation on confirmed versions — working version not visible to PER; `canonicalBudgetLineId`-anchored; carry-forward on derivation | Not Started | | P3-E4-T08 §15; P3-E2 §3.5 |
 | 6.1.11 | All activity spine events, health spine metrics, and work queue items implemented per P3-E4-T08 §14 | Not Started | | P3-E4-T08 §14 |

@@ -776,46 +776,51 @@ Project Startup is a **review-capable surface** in Phase 3. Portfolio Executive 
 
 ---
 
-## 16. Subcontract Compliance Source-of-Truth
+## 16. Subcontract Execution Readiness Source-of-Truth
 
 ### 16.1 Project Hub operational authority
 
 | Data domain | Authority | Notes |
 |---|---|---|
-| Subcontract Checklist records (one per subcontract) | Project Hub | Multi-record; created per subcontract by project team |
-| Document package receipt tracking (12 document types) | Project Hub | PM-controlled; required-flag override per checklist allowed |
-| Budget over/under (contractValue − budget) | Project Hub (calculated) | Calculated from PM-entered contractValue and budget fields |
-| Compliance Waiver record (insurance and/or licensing) | Project Hub | Optional; attached when SDI or insurance/licensing requirements are not met |
-| Waiver approval records (PX, CFO, Compliance Manager) | Project Hub | Three-party; sequencing flexible; all three required for Approved status |
-| Waiver submission audit trail | Project Hub | Preserved on rejection; submissionCount increments on each resubmission |
+| `SubcontractReadinessCase` records | Project Hub | One active case per subcontractor legal entity plus governed award / buyout intent; successor cases required for material path changes |
+| `RequirementProfileBinding` | Project Hub | Governed profile provenance; no ad hoc PM configuration |
+| `ReadinessRequirementItem` records | Project Hub | Generated from the bound profile; owns artifact state and evaluation state |
+| `RequirementArtifact` | Project Hub | Attachment, reference, and receipt provenance for item review |
+| `RequirementEvaluation` | Project Hub | Compliance / Risk-owned evaluation output |
+| `ExecutionReadinessDecision` | Project Hub | Distinct ready / blocked / superseded / void output consumed by Financial |
+| `ExceptionCase` and `ExceptionSubmissionIteration` | Project Hub | Governed relief mechanism; immutable submission iterations |
+| Approval-slot and delegation audit | Project Hub | Preserves slot identity and reassignment history |
+| `GlobalPrecedentReference` | Project Hub | Reference-only publication; never automatic approval carry-forward |
 
 ### 16.2 External references
 
 | External system | Relationship |
 |---|---|
-| Buyout Log (P3-E4 §6) | Subcontract Checklist is the compliance gate for `ContractExecuted` status in the Buyout Log. The Financial module enforces the gate; the Subcontract Compliance module is the source-of-truth for gate satisfaction. See §16.3. |
-| Compass / SDI Prequalification | Compass is the external SDI prequalification system. The `CompassSDI` document item tracks receipt of the prequalification; Compass itself is not integrated into Project Hub in Phase 3. |
+| Buyout Log (P3-E4 §6) | The readiness gate projection is the execution gate for `ContractExecuted`. Financial enforces the gate; this module sources the readiness truth. See §16.3. |
+| Compass / SDI Prequalification | Compass is one reference input to the SDI / prequalification requirement family. Readiness logic evaluates governed outcomes; Compass is not the whole rule. |
 
 ### 16.3 Boundary rules
 
-**Buyout gate rule:** The Financial module's Buyout Log entry for a subcontract MUST NOT transition to `ContractExecuted` unless the linked `ISubcontractChecklist.status === 'Complete'` AND either no waiver is attached or the attached waiver's `status === 'Approved'`. This gate is enforced in the Financial module's Buyout status update API. The Subcontract Compliance module surfaces status; it does not perform gate enforcement itself.
+**Buyout gate rule:** The Financial module's Buyout Log entry for a subcontract MUST NOT transition to `ContractExecuted` unless the active `ReadinessGateProjection.executionReadinessOutcome` allows execution for the current identity and current award path, based on the active issued `ExecutionReadinessDecision`. This gate is enforced in the Financial module's Buyout status update API. The readiness module surfaces the source-of-truth state; it does not perform the Financial transition itself.
 
-**Checklist → Financial read direction:** The Subcontract Compliance module may read the `budget` value from the linked Buyout Log entry to populate the `ISubcontractChecklist.budget` field. The Financial module MUST NOT write to or mutate Subcontract Compliance records.
+**Readiness → Financial read direction:** The readiness module may read budget, contract value, and award-path context from the linked Buyout Log entry to populate case header context. The Financial module MUST NOT write to or mutate readiness records.
 
-**Waiver approval independence:** No approval in the three-party waiver routing may be inferred or auto-populated from another. Each of PX, CFO, and Compliance Manager must explicitly record their action in their own `IWaiverApproval` record.
+**Governed applicability:** PM / APM users may request applicability review, but they may not directly mark governed items not required. Only Compliance / Risk may resolve an item to `NOT_REQUIRED_BY_RULE`.
 
-**Over/under reason gate:** A checklist with `overUnder > 0` MUST NOT transition out of `Draft` status until `overUnderReason` is populated.
+**Approval-slot independence:** No approval in an exception packet may be inferred or auto-populated from another. Each governed slot records its own action history.
+
+**Material award-path change rule:** If award-path facts change in a way that affects profile selection or gate posture, the active case must be `SUPERSEDED` or `VOID`, and a successor case must be created where appropriate.
 
 ### 16.4 Executive review annotation boundary
 
-Subcontract Compliance is a **review-capable surface** in Phase 3. Portfolio Executive Reviewers may place annotations on checklist and waiver content.
+Subcontract Execution Readiness is a **review-capable surface** in Phase 3. Portfolio Executive Reviewers may place annotations on case, requirement-item, exception-packet, and readiness-decision content.
 
 | Action | Rule |
 |---|---|
-| **Annotate** | PER-sourced; `@hbc/field-annotations` artifact; MUST NOT write to checklist records, document items, or waiver approval records |
+| **Annotate** | PER-sourced; `@hbc/field-annotations` artifact; MUST NOT write to case, item, evaluation, packet, or decision records |
 | **Push** | Push-to-Project-Team creates a governed work queue item per P3-D3 §13. |
 
-**Field-level specification:** [P3-E12 — Subcontract Compliance Module Field Specification](P3-E12-Subcontract-Compliance-Module-Field-Specification.md)
+**Field-level specification:** [P3-E13 — Subcontract Execution Readiness Module Field Specification](P3-E13-Subcontract-Execution-Readiness-Module-Field-Specification.md)
 
 ---
 
@@ -825,7 +830,7 @@ Subcontract Compliance is a **review-capable surface** in Phase 3. Portfolio Exe
 
 | Field | Value |
 |---|---|
-| **Pass condition** | Financial, Schedule, Constraints, Permits, Safety, Work Queue, Reports, Project Closeout, Project Startup, and Subcontract Compliance meet their locked source-of-truth and action-boundary rules; executive review annotation boundary rules enforced per §3.4–§8.4, §14.4, §15.4, and §16.4; Safety exclusion applies to Safety module surfaces only (§8.4); annotation isolation mutation prohibitions verified; Closeout hybrid publication rule (§14.3) respected; Startup Permits and Safety non-interference rules (§15.3) respected; Subcontract Compliance buyout gate rule (§16.3) enforced at the Financial module API layer |
+| **Pass condition** | Financial, Schedule, Constraints, Permits, Safety, Work Queue, Reports, Project Closeout, Project Startup, and Subcontract Execution Readiness meet their locked source-of-truth and action-boundary rules; executive review annotation boundary rules enforced per §3.4–§8.4, §14.4, §15.4, and §16.4; Safety exclusion applies to Safety module surfaces only (§8.4); annotation isolation mutation prohibitions verified; Closeout hybrid publication rule (§14.3) respected; Startup Permits and Safety non-interference rules (§15.3) respected; Subcontract Execution Readiness buyout gate rule (§16.3) enforced at the Financial module API layer |
 | **Evidence required** | P3-E2 (this document), module implementations respecting authority matrices, spine publication flowing through governed boundaries, mutation rules enforced, override provenance tracked, executive review annotation artifacts isolated from module source-of-truth records |
 | **Primary owner** | Architecture + Project Hub platform owner |
 
@@ -850,5 +855,5 @@ If a downstream deliverable conflicts with this specification, this specificatio
 
 ---
 
-**Last Updated:** 2026-03-24 (v3) — §14 Project Closeout rewritten to reflect derived intelligence model, correct publication trigger (PE_APPROVED + ARCHIVED, not Section 6 completion), Autopsy sub-surface, LessonsIntelligenceIndex/SubIntelligenceIndex/LearningLegacyFeed as derived read models, PE annotation vs. PE approval formal distinction, and updated field-level specification link. Prior: 2026-03-23 (v2)
+**Last Updated:** 2026-03-24 (v4) — §16 rewritten to replace the old P3-E12 Subcontract Compliance checklist-and-waiver boundary with the P3-E13 Subcontract Execution Readiness case / profile / exception / decision model, including the revised Financial gate contract and review annotation boundary. Prior: 2026-03-24 (v3) — §14 Project Closeout rewritten to reflect derived intelligence model, correct publication trigger (PE_APPROVED + ARCHIVED, not Section 6 completion), Autopsy sub-surface, LessonsIntelligenceIndex/SubIntelligenceIndex/LearningLegacyFeed as derived read models, PE annotation vs. PE approval formal distinction, and updated field-level specification link. Prior: 2026-03-23 (v2)
 **Governing Authority:** [Phase 3 Plan §6, §12](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

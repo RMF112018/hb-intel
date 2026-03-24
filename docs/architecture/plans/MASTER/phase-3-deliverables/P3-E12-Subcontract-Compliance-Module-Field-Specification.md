@@ -13,6 +13,10 @@
 
 ---
 
+> **Supersession Note (2026-03-24):** [P3-E13 — Subcontract Execution Readiness Module Field Specification](P3-E13-Subcontract-Execution-Readiness-Module-Field-Specification.md) now governs the active Phase 3 module shape. P3-E12 is retained as a historical reference describing the superseded checklist-and-waiver model only.
+
+---
+
 ## Purpose
 
 This specification defines the complete data model, field definitions, status enumerations, business rules, and required workflows for the Subcontract Compliance module implementation. Every field listed here **MUST** be implemented. A developer reading this specification must have no ambiguity about what to build.

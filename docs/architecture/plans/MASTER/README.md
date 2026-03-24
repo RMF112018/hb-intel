@@ -6,7 +6,7 @@
 
 ## What This Plan Set Is
 
-This directory contains the complete HB Intel development plan set: a governing master summary, eight phase plans covering the full program lifecycle, and two deliverables folders containing the mandatory artifacts produced during Phase 0 and Phase 1 planning.
+This directory contains the complete HB Intel development plan set: a governing master summary, eight phase plans covering the full program lifecycle, and three deliverables folders covering the mandatory artifacts produced during Phase 0 and Phase 1 planning plus the active Phase 3 deliverables index.
 
 The plan set translates the [target-state architecture](../../blueprint/HB-Intel-Blueprint-V4.md) into an executable program of work. The [current-state map](../../blueprint/current-state-map.md) defines what exists today; the plans define how to move from present truth to finished platform state.
 
@@ -42,6 +42,7 @@ The plan set translates the [target-state architecture](../../blueprint/HB-Intel
 | 08 | [Phase 7 — HBI Intelligence, Production Hardening, and Rollout](08_Phase-7_HBI-Intelligence-Production-Hardening-and-Rollout-Plan.md) | Draft | Phase Plan | Intelligence features, security hardening, production readiness, enterprise rollout |
 | — | [phase-0-deliverables/](phase-0-deliverables/) | Complete | Deliverables Folder | 7 mandatory Phase 0 artifacts (reconciliation, readiness, guardrails, entry criteria) |
 | — | [phase-1-deliverables/](phase-1-deliverables/) | Planning Complete | Deliverables Folder | 24 Phase 1 artifacts (schemas, adapters, contracts, test plans, staging readiness) |
+| — | [phase-3-deliverables/](phase-3-deliverables/) | Active Reference | Deliverables Folder | Active Phase 3 deliverables index including locked module-spec packages such as P3-E10, P3-E11, and P3-E13 |
 
 ---
 
@@ -56,14 +57,17 @@ MASTER/
 ├── 03–08_Phases-2-through-7         ← Phase plans (Draft — forward planning)
 ├── phase-0-deliverables/            ← 7 artifacts + index README
 │   └── README.md                    ← Phase 0 deliverables index
-└── phase-1-deliverables/            ← 24 artifacts + index README
-    └── README.md                    ← Phase 1 deliverables index
+├── phase-1-deliverables/            ← 24 artifacts + index README
+│   └── README.md                    ← Phase 1 deliverables index
+└── phase-3-deliverables/            ← Active Phase 3 deliverables index + split T-file packages
+    └── README.md                    ← Phase 3 deliverables index
 ```
 
 **How the layers relate:**
 - The **Master Summary (00)** governs the entire program — phase sequencing, dependency logic, milestones, and workstreams.
 - Each **Phase Plan (01–08)** defines scope, workstreams, milestones, and acceptance criteria for one execution phase.
 - Each **Deliverables Folder** contains the artifacts produced during that phase's planning, with its own index README describing status, reading paths, and completion criteria.
+- The **Phase 3 Deliverables Folder** is the active deliverable index for Project Hub planning, including the split-file module packages that refine Workstream E specifications.
 
 ---
 
@@ -143,7 +147,8 @@ The `plans/shared-features/` and `plans/UI-Kit/` directories contain shared-feat
 ### Forward Planning
 1. **[Master Summary (00)](00_HB-Intel_Master-Development-Summary-Plan.md)** — Cross-phase dependency logic and parallel work guidance
 2. **Phase plans 03–08** — Scope and sequencing for Phases 2–7
-3. **[Phase 0 Open Decisions Register](phase-0-deliverables/P0-E2-Open-Decisions-Register.md)** — Decisions deferred to future phases
+3. **[Phase 3 Deliverables README](phase-3-deliverables/README.md)** — Active Phase 3 specification index and module-package reading paths
+4. **[Phase 0 Open Decisions Register](phase-0-deliverables/P0-E2-Open-Decisions-Register.md)** — Decisions deferred to future phases
 
 ---
 
@@ -175,6 +180,7 @@ The `plans/shared-features/` and `plans/UI-Kit/` directories contain shared-feat
 
 - **Phase 0 Deliverables Index:** [phase-0-deliverables/README.md](phase-0-deliverables/README.md)
 - **Phase 1 Deliverables Index:** [phase-1-deliverables/README.md](phase-1-deliverables/README.md)
+- **Phase 3 Deliverables Index:** [phase-3-deliverables/README.md](phase-3-deliverables/README.md)
 - **Current-State Map:** [docs/architecture/blueprint/current-state-map.md](../../blueprint/current-state-map.md)
 - **Target Architecture (Blueprint V4):** [docs/architecture/blueprint/HB-Intel-Blueprint-V4.md](../../blueprint/HB-Intel-Blueprint-V4.md)
 - **Package Relationship Map:** [docs/architecture/blueprint/package-relationship-map.md](../../blueprint/package-relationship-map.md)
