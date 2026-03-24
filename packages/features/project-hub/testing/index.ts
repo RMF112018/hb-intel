@@ -254,3 +254,7 @@ export {
 export {
   createMockRelatedItemsPair,
 } from './createMockIntegrationContract.js';
+
+// ── P3-E11-T10 Stage 1 Startup foundation testing surface ──────────
+
+export { createMockStartupProgram } from './createMockStartupProgram.js';

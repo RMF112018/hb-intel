@@ -153,9 +153,9 @@ T09 Permissions: 6 roles, 31-row master role matrix, 2-regime intelligence visib
 
 T10 Integration: Package identity (@hbc/project-closeout L5 Feature), 5-surface PWA/SPFx classification, 7 shared package contracts (related-items, versioned-record, field-annotations, workflow-handoff, acknowledgment, bic-next-move, notification-intelligence), 3 spine contracts, 6 prohibited dependencies, 7 lane capabilities, auto-write blocking, testing fixtures. See `src/closeout/integration/`.
 
-## 15. Project Startup Module (P3-E11) — Planning Status
+## 15. Project Startup Module (P3-E11) — Implementation Status
 
-Project Startup is not yet implemented in this package. Its planning and governance set is now aligned to the T01-T10 readiness-program model in the Phase 3 deliverables:
+Project Startup implementation is in progress. T10 Stage 1 (Program Core and State Machine) is complete. Its planning and governance set is aligned to the T01-T10 readiness-program model in the Phase 3 deliverables:
 
 - Startup is a top-level readiness program with six governed subordinate surfaces, not five peer forms.
 - The governing lifecycle is the eight-state readiness model with separate certification, PE mobilization authorization, stabilization, and baseline-lock phases.
@@ -183,3 +183,7 @@ Use the canonical planning set before implementation:
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T08-Spine-Publication-Reports-Executive-Review-and-Cross-Module-Consumption.md`
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T09-Permissions-Role-Matrix-Lane-Ownership-and-Shared-Package-Reuse.md`
 - `docs/architecture/plans/MASTER/phase-3-deliverables/P3-E11-T10-Implementation-and-Acceptance-Guide.md`
+
+### T10 Stage 1 Implementation (v0.1.64)
+
+T10 Stage 1 Foundation: Program core (`StartupProgram`, `StartupProgramVersion`, `StartupReadinessState`), 8-state lifecycle machine per T01 §4.2 (9 valid transitions), 6 `ReadinessCertification` surfaces with 7 cert statuses, `ReadinessGateRecord`/`ReadinessGateCriterion` (16 governed criteria across 6 surfaces per T02 §3.7), `ExceptionWaiverRecord` (5-state lifecycle with lapse model), `ProgramBlocker` (6 types, PROGRAM/MULTI_SURFACE scope), `PEMobilizationAuthorization` (ISSUED/REVOKED), 28 record families across 4 tiers, 10 locked architecture decisions, 6 hard blocker shared packages, 18 SoT boundary rows, 6 Stage 1 Activity Spine events, 3 Health Spine metrics, canvas tile registration. Business rules: `isValidStateTransition`, `canAdvanceToReadyForMobilization`, `canIssueMobilizationAuth`, `isWaiverLapsed`, `isPXExclusiveAction`, `isStartupOwnedRecord`. Testing fixtures: `createMockStartupProgram`. See `src/startup/foundation/`.
