@@ -4,3 +4,4 @@
  */
 
 export * from './foundation/index.js';
+export * from './governance/index.js';
