@@ -764,6 +764,7 @@ Governing: P3-J1 §3 E5
 **13.4 — Project Hub contextual entry surface (E3)**
 Implement or design the Project Hub document entry surface as a contextual launch/entry layer, not a standalone feature. Use shared-shell language and `@hbc/ui-kit` patterns — no feature-local UI primitive duplication. Provide CTA paths for: open project documents, view by zone, raw library fallback, related documents from records, preview when supported. Define empty-state and no-access states.
 Governing: P3-J1 §3 E3
+Status: **Implemented 2026-03-25 in `@hbc/features-project-hub` v0.2.17.** Contextual entry surface contracts: 5 enum type unions, 5 interface contracts (CTA definitions with route type mapping, entry state configs, empty/no-access state definitions, @hbc/ui-kit composition contracts), governed constants (5 CTA paths, 5 entry states, 4 empty state reasons, 4 no-access reasons, 3 composition contracts all enforcing no-feature-local-duplication), 10 business rules; 44 tests. Stage 13.4 E3 contextual entry complete.
 
 **13.5 — Related-items document reference model (E4)**
 Define the document reference model for related items: linked project records, record attachments, zone associations, restricted placeholders. Bind document references into `@hbc/related-items` where appropriate. Define minimum metadata for contextual visibility (title, sourceType, authorityState, availabilityState, originatingRecord, lastRelevantActivity). Define the restricted-stub contract so document references appear safely in project context without broad permission leakage.
