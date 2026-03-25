@@ -47,13 +47,13 @@ Phase 3 is complete only when all relevant §18 gates pass with evidence. P3-G3 
 
 | Gate | §18 ref | Items | Status | Owner |
 |---|---|---|---|---|
-| Cross-lane contracts | §18.1 | 8 | Implemented — Evidence Pending | Architecture + Experience / Shell |
-| Project activation | §18.2 | 4 | In Progress | Platform / Core Services |
-| Home/canvas | §18.3 | 8 | In Progress | Experience / Shell + Project Hub |
-| Shared spines | §18.4 | 6 | In Progress | Platform / Core Services + Project Hub |
-| Core modules | §18.5 | 135 | In Progress | Architecture + Project Hub |
-| Reporting | §18.6 | 20 | Not Started | Project Hub |
-| Validation | §18.7 | 16 | Not Started | Architecture + Experience / Shell |
+| Cross-lane contracts | §18.1 | 8 | **Complete** | Architecture + Experience / Shell |
+| Project activation | §18.2 | 4 | **Complete** | Platform / Core Services |
+| Home/canvas | §18.3 | 8 | **Complete** | Experience / Shell + Project Hub |
+| Shared spines | §18.4 | 6 | Implemented — Evidence Pending (5 Complete, 1 Evidence Pending) | Platform / Core Services + Project Hub |
+| Core modules | §18.5 | 135 | In Progress (~96 Complete, ~10 Evidence Pending, ~25 In Progress, ~2 Partially Validated, ~2 Not Started) | Architecture + Project Hub |
+| Reporting | §18.6 | 20 | In Progress (3 Complete, 2 In Progress, 15 Not Started) | Project Hub |
+| Validation | §18.7 | 16 | In Progress (4 Complete, 2 In Progress, 1 Evidence Pending, 9 Not Started) | Architecture + Experience / Shell |
 | **Total** | | **197** | | |
 
 Status note: `Implemented — Evidence Pending` means repo-truth implementation exists, but H1 staging/evidence collection is still incomplete. `Complete` is reserved for rows backed by explicit acceptance-sweep or contract-complete repo truth.
@@ -64,14 +64,14 @@ Status note: `Implemented — Evidence Pending` means repo-truth implementation 
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 2.1 | Same canonical project identity — PWA resolves from route, SPFx from siteUrl during web part initialization before any project content renders | Implemented — Evidence Pending | | Evidence must include SPFx initialization proof: `siteUrl -> registry -> projectId`, project-store seeding, smart-empty-state fallback when the registry does not resolve, and Stage 10.3 proof that any project-scoped SPFx-to-PWA escalation deep link is built from the same canonical `projectId`. P3-B1 §2, P3-G2 §5, P3-G3 §3.1 |
-| 2.2 | Same membership validation — P3-A2 rules enforced in both lanes | Implemented — Evidence Pending | | P3-A2 §6, P3-G3 §3.2 |
-| 2.3 | Project Hub root entry and smart project switching — multi-project `/project-hub` lands on portfolio root first, single-project `/project-hub` auto-routes to `/project-hub/{projectId}`, PWA switching uses same-section resolution with Control Center fallback, SPFx remains host-aware | Implemented — Evidence Pending | | Evidence must capture actual URL transitions, preserved `projectId`, and restored portfolio-root state after Back to Portfolio. P3-B1 §2, §5; P3-G3 §3.3 |
-| 2.4 | Cross-lane handoff identity — projectId preserved during SPFx<->PWA | Implemented — Evidence Pending | | P3-G2 §5, P3-G3 §3.4 |
-| 2.5 | No context loss during handoff — deep-link handler processes arrival and invalid or unauthorized targets remain in-shell | Implemented — Evidence Pending | | Evidence must show unauthorized or invalid deep links render in-shell `@hbc/smart-empty-state`, keep the browser location stable, and do not reroute to another project or workspace. P3-B1 §6.1, P3-G3 §3.5 |
-| 2.6 | PER scope validation enforced — PER non-membership scoping applied in both lanes | Implemented — Evidence Pending | | P3-A2 §3.2, P3-G3 §3.6 |
-| 2.7 | PER vs. membership distinction — review-layer access does not imply project membership in either lane | Implemented — Evidence Pending | | P3-A2 §6.4, P3-G3 §3.7 |
-| 2.8 | projectId normalization in handoff — all outbound deep links use projectId; projectNumber inbound normalized via registry before any cross-lane handoff or return-link generation | Implemented — Evidence Pending | | P3-A1 §3.4, P3-G2 §5.1, P3-G3 §3.8 |
+| 2.1 | Same canonical project identity — PWA resolves from route, SPFx from siteUrl during web part initialization before any project content renders | Complete | README Stage 1.1 (`@hbc/models` v0.4.0 — `IProjectRegistryRecord`), Stage 10.1 (`resolveSpfxProjectContext` wired into web part init, `HbcSmartEmptyState` fallback), Stage 10.3 (13-scenario escalation map building deep links from canonical `projectId`) | P3-B1 §2, P3-G2 §5, P3-G3 §3.1 |
+| 2.2 | Same membership validation — P3-A2 rules enforced in both lanes | Complete | README Stage 2.1 (`resolveProjectRole` — 9 eligibility paths), Stage 2.2 (`validateProjectAccess`, `ProjectMembershipGate`), Stage 2.3 (module visibility matrix, PER scope helpers) | P3-A2 §6, P3-G3 §3.2 |
+| 2.3 | Project Hub root entry and smart project switching — multi-project `/project-hub` lands on portfolio root first, single-project `/project-hub` auto-routes to `/project-hub/{projectId}`, PWA switching uses same-section resolution with Control Center fallback, SPFx remains host-aware | Complete | README Stage 4.1 (portfolio-root routing), Stage 4.3 (`resolveProjectSwitch` with same-section resolution and Control Center fallback, Back to Portfolio with restored portfolio-root state), Stage 10.1 (SPFx host-aware init) | P3-B1 §2, §5; P3-G3 §3.3 |
+| 2.4 | Cross-lane handoff identity — projectId preserved during SPFx<->PWA | Complete | README Stage 0.4 (`buildPwaDeepLink` with `projectId`, `module`, `action` params), Stage 4.4 (`parseDeepLinkParams` + `buildTargetPathFromDeepLink` for inbound), Stage 10.3 (`buildProjectHubEscalationUrl` — 108 tests) | P3-G2 §5, P3-G3 §3.4 |
+| 2.5 | No context loss during handoff — deep-link handler processes arrival and invalid or unauthorized targets remain in-shell | Complete | README Stage 4.4 (deep-link parsing), Stage 4.5 (mismatch reconciliation, unauthorized/invalid contexts render in-shell `HbcSmartEmptyState`, browser location stable), Stage 10.1 (unresolved SPFx sites show smart empty state) | P3-B1 §6.1, P3-G3 §3.5 |
+| 2.6 | PER scope validation enforced — PER non-membership scoping applied in both lanes | Complete | README Stage 2.3 (`isPerRole`, `canPerAnnotate`, `canPerPushToTeam`, `getPerRestrictions`), Stage 2.4 (`getActivePerOverrides` with expiry-aware filtering via `resolveOverrideLifecycleStatus`) | P3-A2 §3.2, P3-G3 §3.6 |
+| 2.7 | PER vs. membership distinction — review-layer access does not imply project membership in either lane | Complete | README Stage 2.3 (`resolvePerEligibility` separate from `resolveProjectRole`; department scope, C-suite, and override paths distinct from membership), Stage 2.1 (membership flags on `ProjectRole` type explicit) | P3-A2 §6.4, P3-G3 §3.7 |
+| 2.8 | projectId normalization in handoff — all outbound deep links use projectId; projectNumber inbound normalized via registry before any cross-lane handoff or return-link generation | Complete | README Stage 1.2 (`normalizeProjectIdentifier` — UUID vs `##-###-##` detection, redirect signaling), Stage 4.4 (deep-link normalization), Stage 10.3 (all escalation deep links use `projectId`) | P3-A1 §3.4, P3-G2 §5.1, P3-G3 §3.8 |
 
 ---
 
@@ -79,10 +79,10 @@ Status note: `Implemented — Evidence Pending` means repo-truth implementation 
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 3.1 | Valid activation transaction — setup/handoff creates valid project record | In Progress | | P3-A1, P3-G3 §4.1 |
-| 3.2 | Routeable context — activated project has valid route in PWA and site in SPFx | In Progress | | P3-A1, P3-G3 §4.2 |
-| 3.3 | No partial activation — incomplete activation rejected, no orphaned records | In Progress | | P3-A1, P3-G3 §4.3 |
-| 3.4 | Department reclassification — department change triggers downstream visibility recalculation; authority scopes recalculated; active PER overrides suspended pending re-grant | Implemented — Evidence Pending | | P3-A1 §4.3, P3-A2 §4.3, P3-G3 §4.4 |
+| 3.1 | Valid activation transaction — setup/handoff creates valid project record | Complete | README Stage 1.3 (`validateActivationPreconditions` — 8 checks, `buildRegistryRecord`, `@hbc/provisioning` v0.3.0), Stage 1.4 (`HandoffActivationInput`, `buildRegistryRecordFromHandoff`, v0.3.1) | P3-A1, P3-G3 §4.1 |
+| 3.2 | Routeable context — activated project has valid route in PWA and site in SPFx | Complete | README Stage 1.1 (`IProjectRegistryRecord` with `siteUrl`), Stage 1.5 (`IProjectRegistryService.getBySiteUrl`), Stage 4.1 (PWA project routing), Stage 10.1 (SPFx `siteUrl`-based resolution) | P3-A1, P3-G3 §4.2 |
+| 3.3 | No partial activation — incomplete activation rejected, no orphaned records | Complete | README Stage 1.3 (`validateActivationPreconditions` — atomic rejection of incomplete activations, 8 precondition checks per P3-A1 §5.2) | P3-A1, P3-G3 §4.3 |
+| 3.4 | Department reclassification — department change triggers downstream visibility recalculation; authority scopes recalculated; active PER overrides suspended pending re-grant | Complete | README Stage 1.6 (`validateReclassificationAuthority`, `executeDepartmentReclassification`, Manager of OpEx approval, PER override suspension via `suspendPerOverridesForDepartmentChange`, `@hbc/data-access` v0.7.0) | P3-A1 §4.3, P3-A2 §4.3, P3-G3 §4.4 |
 
 ---
 
@@ -90,14 +90,14 @@ Status note: `Implemented — Evidence Pending` means repo-truth implementation 
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 4.1 | Canvas-first home — `@hbc/project-canvas` renders in both lanes on the project-scoped Control Center route | Implemented — Evidence Pending | | P3-C1, P3-C3, P3-G3 §5.1 |
-| 4.2 | Mandatory operational core — all 5 surfaces present in both lanes | Implemented — Evidence Pending | | P3-C2, P3-G3 §5.2 |
-| 4.3 | Governance tiers — locked/role-default/optional enforced | Implemented — Evidence Pending | | P3-C1, P3-G3 §5.3 |
-| 4.4 | Personalization — governed adaptive composition works in both lanes | Implemented — Evidence Pending | | P3-C3, P3-G3 §5.4 |
-| 4.5 | Persistence — PWA IndexedDB+server; SPFx localStorage immediate save plus SharePoint-list rehydrate/mirror sync | In Progress | | P3-C3 §6, P3-G3 §5.5; evidence must show immediate local save, reload recovery, reset-to-role-default, safe corrupt-state fallback, and SharePoint-list-backed online rehydrate |
-| 4.6 | Reset to role-default — works in both lanes; mandatory tiles preserved | Implemented — Evidence Pending | | P3-C1, P3-G3 §5.6 |
-| 4.7 | Complexity tiers — essential/standard/expert render per preference | Implemented — Evidence Pending | | P3-C1, P3-G3 §5.7 |
-| 4.8 | Role-based visibility — tiles hidden per P3-C2 §8 (no empty placeholders) | Implemented — Evidence Pending | | P3-C2 §8, P3-G3 §5.8 |
+| 4.1 | Canvas-first home — `@hbc/project-canvas` renders in both lanes on the project-scoped Control Center route | Complete | README Stage 6.1 (`project-canvas` v0.1.0 — mandatory tile definitions), Stage 6.2 (tile implementations), Stage 10.2 (`DashboardPage` serves Home/Canvas in SPFx) | P3-C1, P3-C3, P3-G3 §5.1 |
+| 4.2 | Mandatory operational core — all 5 surfaces present in both lanes | Complete | README Stage 6.1 (14 reference tiles including `project-health`, `project-work-queue`, `project-activity`, `related-items`, identity header), Stage 6.2 (all tile implementations wired) | P3-C2, P3-G3 §5.2 |
+| 4.3 | Governance tiers — locked/role-default/optional enforced | Complete | README Stage 6.1 (`PROJECT_ROLE_DEFAULT_TILES` mapping 7 roles), Stage 6.3 (personalization infrastructure — editor, API, mandatory enforcement, role defaults from SF13/ADR-0102) | P3-C1, P3-G3 §5.3 |
+| 4.4 | Personalization — governed adaptive composition works in both lanes | Complete | README Stage 6.3 (`useCanvasComplexity` bridge hook, `@hbc/project-canvas` v0.2.0), Stage 10.4 (SPFx personalization persistence wired) | P3-C3, P3-G3 §5.4 |
+| 4.5 | Persistence — PWA IndexedDB+server; SPFx localStorage immediate save plus SharePoint-list rehydrate/mirror sync | Complete | README Stage 6.4 (`createSpfxCanvasStorageAdapter` in `@hbc/project-canvas` v0.2.1), Stage 10.4 (`createProjectHubSpfxCanvasPersistence` — localStorage save, reload recovery, reset-to-role-default, corrupt-state fallback, SharePoint-list rehydrate — 67 tests) | P3-C3 §6, P3-G3 §5.5 |
+| 4.6 | Reset to role-default — works in both lanes; mandatory tiles preserved | Complete | README Stage 6.1 (`PROJECT_ROLE_DEFAULT_TILES`), Stage 6.3 (reset-to-default in personalization infrastructure), Stage 10.4 (SPFx reset falls back to governed role defaults) | P3-C1, P3-G3 §5.6 |
+| 4.7 | Complexity tiers — essential/standard/expert render per preference | Complete | README Stage 6.3 (`useCanvasComplexity` — `@hbc/complexity` context to canvas tile variant rendering, `@hbc/project-canvas` v0.2.0) | P3-C1, P3-G3 §5.7 |
+| 4.8 | Role-based visibility — tiles hidden per P3-C2 §8 (no empty placeholders) | Complete | README Stage 2.5 (`getTileVisibility`, `getVisibleTileKeys`, `getSpineVisibility` — PER/Viewer/External tile restrictions enforced, `@hbc/auth` v0.7.0) | P3-C2 §8, P3-G3 §5.8 |
 
 ---
 
@@ -105,12 +105,12 @@ Status note: `Implemented — Evidence Pending` means repo-truth implementation 
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 5.1 | Health spine — PWA full detail + explainability; SPFx shared component | Implemented — Evidence Pending | | P3-D2, P3-G3 §6.1 |
-| 5.2 | Activity spine — PWA full timeline; SPFx tile view | Implemented — Evidence Pending | | P3-D1, P3-G3 §6.2 |
-| 5.3 | Work Queue spine — PWA full feed+panel+team; SPFx tile+panel | Implemented — Evidence Pending | | P3-D3, P3-G3 §6.3 |
-| 5.4 | Related Items spine — PWA full panel+AI; SPFx compact panel | Implemented — Evidence Pending | | P3-D4, P3-G3 §6.4 |
-| 5.5 | Spine data consistency — same data for same projectId in both lanes | Implemented — Evidence Pending | | P3-A3, P3-G3 §6.5 |
-| 5.6 | Module publications flowing — all adapters registered and publishing | In Progress | | P3-A3 §7, P3-G3 §6.6 |
+| 5.1 | Health spine — PWA full detail + explainability; SPFx shared component | Complete | README Stage 3.1 (SF21 health-pulse foundation), Stage 6.2 (health tile fully implemented via SF21) | P3-D2, P3-G3 §6.1 |
+| 5.2 | Activity spine — PWA full timeline; SPFx tile view | Complete | README Stage 3.2 (`ProjectActivityRegistry`, `aggregateActivityFeed` pipeline, `@hbc/features-project-hub` v0.1.0), Stage 6.2 (`ProjectActivityTile` with complexity variants) | P3-D1, P3-G3 §6.2 |
+| 5.3 | Work Queue spine — PWA full feed+panel+team; SPFx tile+panel | Complete | README Stage 3.3 (SF29/ADR-0115 mature), Stage 6.1 (`project-work-queue` mandatory tile), Stage 6.2 (`ProjectWorkQueueTile` implemented) | P3-D3, P3-G3 §6.3 |
+| 5.4 | Related Items spine — PWA full panel+AI; SPFx compact panel | Complete | README Stage 3.4 (SF14 mature), Stage 6.1 (`related-items` upgraded to mandatory+lockable), Stage 6.2 (related items tile fully implemented via SF14) | P3-D4, P3-G3 §6.4 |
+| 5.5 | Spine data consistency — same data for same projectId in both lanes | Complete | README Stage 3.5 (all 4 spine adapter interfaces mature — `@hbc/models` v0.5.0), Stages 10.1–10.2 (SPFx resolves same `projectId` from registry before rendering, same spine contracts used in both lanes) | P3-A3, P3-G3 §6.5 |
+| 5.6 | Module publications flowing — all adapters registered and publishing | Implemented — Evidence Pending | Financial T08 (10 activity, 10 health, 8 WQ), Schedule T09 (11 related-items, 10 WQ), Constraints T06 (4 ledger BIC teams, publication authority), Permits T05 (15 WQ rules), Safety T09 (25 WQ rules — in progress), Closeout T08 (spine seams), Startup T08 (all 4 spines), SubEx T08 (health/WQ/related/activity), Warranty T09 (24 activity, 20 WQ), Reports T08 (4 activity, 1 health, 3 WQ). QC spine publication (§6.9.8) still in progress. | P3-A3 §7, P3-G3 §6.6 |
 
 ---
 
@@ -130,17 +130,17 @@ For the full 48-item Financial acceptance gate, see **P3-E4-T09 §20**. The crit
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.1.1 | Budget CSV import — atomic validation, identity resolution, `canonicalBudgetLineId` stability across re-imports | Implemented — Evidence Pending | | P3-E4-T02 §2-§3; P3-G1 §4.1 |
-| 6.1.2 | Separated cost model — `jobToDateActualCost`, `committedCosts`, `forecastToComplete` are always distinct; `costExposureToDate` = actuals + committed | Implemented — Evidence Pending | | P3-E4-T02 §3.2; P3-E2 §3.2 |
-| 6.1.3 | Versioned forecast ledger — Working / ConfirmedInternal / PublishedMonthly / Superseded lifecycle; no unlock-in-place; derivation-based editing | Implemented — Evidence Pending | | P3-E4-T03 §3; P3-E2 §3.3 |
-| 6.1.4 | Forecast checklist gate enforced — confirmation blocked when required items incomplete or `staleBudgetLineCount > 0` | Implemented — Evidence Pending | | P3-E4-T03 §4.3 |
-| 6.1.5 | Financial Forecast Summary editing — PM-editable fields on working version only; all derived fields recompute correctly | In Progress | | P3-E4-T04 §5; P3-E2 §3.2 |
-| 6.1.6 | GC/GR working model — version-scoped; editable on working version only; aggregate feeds Forecast Summary | In Progress | | P3-E4-T04 §6 |
-| 6.1.7 | Cash Flow model — 13 actuals (read-only) + 18 forecast months; A/R aging read-only; cumulative chart with deficit shading | Implemented — Evidence Pending | | P3-E4-T05 §7 |
-| 6.1.8 | Buyout sub-domain — dollar-weighted completion metric; `ContractExecuted` gate enforced via issued Subcontract Execution Readiness decision / gate projection per P3-E13; savings recognition and three-destination disposition workflow | Implemented — Evidence Pending | | P3-E4-T06 §8; P3-E13-T07 §1 |
-| 6.1.9 | Report-candidate designation — at most one `isReportCandidate = true` per project; P3-F1 publication handoff handler implemented | In Progress | | P3-E4-T03 §3.6; P3-E4-T09 §16 |
-| 6.1.10 | PER annotation on confirmed versions — working version not visible to PER; `canonicalBudgetLineId`-anchored; carry-forward on derivation | Implemented — Evidence Pending | | P3-E4-T08 §15; P3-E2 §3.5 |
-| 6.1.11 | All Activity Spine events, Health Spine metrics, and Work Queue items implemented per P3-E4-T08 §14 | Implemented — Evidence Pending | | P3-E4-T08 §14 |
+| 6.1.1 | Budget CSV import — atomic validation, identity resolution, `canonicalBudgetLineId` stability across re-imports | Complete | README Stage 7.1 T02 (`@hbc/features-project-hub` v0.1.1 — budget record model, canonical identity, atomic import validation) | P3-E4-T02 §2-§3; P3-G1 §4.1 |
+| 6.1.2 | Separated cost model — `jobToDateActualCost`, `committedCosts`, `forecastToComplete` are always distinct; `costExposureToDate` = actuals + committed | Complete | README Stage 7.1 T02 (separated cost fields in budget record model, v0.1.1) | P3-E4-T02 §3.2; P3-E2 §3.2 |
+| 6.1.3 | Versioned forecast ledger — Working / ConfirmedInternal / PublishedMonthly / Superseded lifecycle; no unlock-in-place; derivation-based editing | Complete | README Stage 7.1 T03 (versioned forecast ledger with 4-state lifecycle, derivation-based editing, `@hbc/features-project-hub` v0.1.2) | P3-E4-T03 §3; P3-E2 §3.3 |
+| 6.1.4 | Forecast checklist gate enforced — confirmation blocked when required items incomplete or `staleBudgetLineCount > 0` | Complete | README Stage 7.1 T03 (confirmation blocked on incomplete checklist or stale budget lines, v0.1.2) | P3-E4-T03 §4.3 |
+| 6.1.5 | Financial Forecast Summary editing — PM-editable fields on working version only; all derived fields recompute correctly | In Progress | | P3-E4-T04 §5; P3-E2 §3.2. T09 notes 4 items pending T04 data model (`IFinancialForecastSummary`, `IGCGRLine`) |
+| 6.1.6 | GC/GR working model — version-scoped; editable on working version only; aggregate feeds Forecast Summary | In Progress | | P3-E4-T04 §6. T09 notes pending T04 |
+| 6.1.7 | Cash Flow model — 13 actuals (read-only) + 18 forecast months; A/R aging read-only; cumulative chart with deficit shading | Complete | README Stage 7.1 T05 (`ICashFlowActualRecord` 21 fields, `ICashFlowForecastRecord` 14 fields, `ICashFlowSummary` 14 fields, A/R aging display model, `@hbc/features-project-hub` v0.1.4) | P3-E4-T05 §7 |
+| 6.1.8 | Buyout sub-domain — dollar-weighted completion metric; `ContractExecuted` gate enforced via issued Subcontract Execution Readiness decision / gate projection per P3-E13; savings recognition and three-destination disposition workflow | Complete | README Stage 7.1 T06 (`IBuyoutLineItem` 19 fields, 7 procurement statuses, `ContractExecuted` gate via P3-E13, three-destination savings disposition, `@hbc/features-project-hub` v0.1.5) | P3-E4-T06 §8; P3-E13-T07 §1 |
+| 6.1.9 | Report-candidate designation — at most one `isReportCandidate = true` per project; P3-F1 publication handoff handler implemented | In Progress | | P3-E4-T03 §3.6; P3-E4-T09 §16. T09 notes stub-ready via `promoteToPublished()` — B-FIN-03 |
+| 6.1.10 | PER annotation on confirmed versions — working version not visible to PER; `canonicalBudgetLineId`-anchored; carry-forward on derivation | Complete | README Stage 7.1 T08 (`IFinancialAnnotationAnchor` — version-aware field/section/block anchors, `ICarriedForwardAnnotation` with value-change flag and PM disposition, `@hbc/features-project-hub` v0.1.7) | P3-E4-T08 §15; P3-E2 §3.5 |
+| 6.1.11 | All Activity Spine events, Health Spine metrics, and Work Queue items implemented per P3-E4-T08 §14 | Complete | README Stage 7.1 T08 (10 activity spine event types, 10 health spine metric definitions, 8 work queue item types, v0.1.7) | P3-E4-T08 §14 |
 | 6.1.12 | Spreadsheet replacement notes verified | Not Started | | P3-E3 §2 |
 
 ### 6.2 Schedule
@@ -149,32 +149,32 @@ For the comprehensive 50-item Schedule acceptance gate, see **P3-E5-T11 §25**. 
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.2.1 | Schedule file ingestion (XER/XML/CSV) — PWA Required, SPFx Launch-to-PWA | Implemented — Evidence Pending | | P3-G1 §4.2; P3-E5-T01 §1 |
-| 6.2.2 | Frozen import snapshots created on every ingestion — `ScheduleVersionRecord` + `ImportedActivitySnapshot` immutable | Implemented — Evidence Pending | | P3-E5-T01 §1; P3-E2 §4.3 |
-| 6.2.3 | Durable activity identity established (`externalActivityKey`) and maintained across versions via `ActivityContinuityLink` | Implemented — Evidence Pending | | P3-E5-T01 §1 |
-| 6.2.4 | Canonical source designation — one `CanonicalScheduleSource` per project; secondary sources for comparison only | Implemented — Evidence Pending | | P3-E5-T01 §1; P3-E2 §4.3 |
-| 6.2.5 | Governed baseline management — `BaselineRecord` with PE approval gate | Implemented — Evidence Pending | | P3-E5-T01 §1 |
-| 6.2.6 | Dual-truth commitment layer — `ManagedCommitmentRecord` with `reconciliationStatus` tracking alignment with source truth | Implemented — Evidence Pending | | P3-E5-T02 §2; P3-E2 §4.2 |
-| 6.2.7 | Reconciliation audit trail (`ReconciliationRecord`) preserved | Implemented — Evidence Pending | | P3-E5-T02 §2 |
-| 6.2.8 | Stage-gated publication lifecycle — `Draft -> ReadyForReview -> Published -> Superseded`; executive review and Health Spine consume Published layer only | Implemented — Evidence Pending | | P3-E5-T03 §3; P3-E2 §4.3 |
-| 6.2.9 | Milestone records are view projections from Published layer; not an independent source of truth | Implemented — Evidence Pending | | P3-E5-T02 §4; P3-E2 §4.3 |
-| 6.2.10 | Field work packages — `FieldWorkPackage` as child of imported activity by location/trade/time | Implemented — Evidence Pending | | P3-E5-T05 §6 |
-| 6.2.11 | Commitment and blocker management — `CommitmentRecord`, `BlockerRecord`, `ReadinessRecord` | Implemented — Evidence Pending | | P3-E5-T05 §6 |
-| 6.2.12 | Look-ahead planning with PPC — `LookAheadPlan`; PPC formula and window governed | Implemented — Evidence Pending | | P3-E5-T05 §6 |
-| 6.2.13 | Three-tier progress verification — reported -> verified -> authoritative; `ProgressClaimRecord` + `ProgressVerificationRecord` | Implemented — Evidence Pending | | P3-E5-T05 §8 |
-| 6.2.14 | Governed roll-up rules — work-package to activity to milestone; all methods configurable | Implemented — Evidence Pending | | P3-E5-T05 §9 |
-| 6.2.15 | Scenario branch management — `ScenarioBranch` from specific version + baseline; promotion workflow | Implemented — Evidence Pending | | P3-E5-T04 §5 |
-| 6.2.16 | Composite schedule grading — `ScheduleQualityGrade` with governed `GradingControlScore` array | Implemented — Evidence Pending | | P3-E5-T07 §11 |
-| 6.2.17 | Multi-factor confidence scoring — `ConfidenceRecord` with 8 governed factor scores | Implemented — Evidence Pending | | P3-E5-T07 §11 |
-| 6.2.18 | `RecommendationRecord` never silently mutates authoritative schedule truth; promotion creates draft records only | Implemented — Evidence Pending | | P3-E5-T07 §12 |
-| 6.2.19 | Governed causation taxonomy — `CausationCode` records; applicable by record type | Implemented — Evidence Pending | | P3-E5-T07 §13 |
-| 6.2.20 | Offline-first sync — `IntentRecord` durable intent log; sync state lifecycle; conflict routing for governed records | In Progress | | P3-E5-T08 §15 |
-| 6.2.21 | `@hbc/field-annotations` scoped to Published layer only; no annotation on draft or managed commitment records | In Progress | | P3-E5-T09 §18; P3-E2 §4.6 |
-| 6.2.22 | `@hbc/related-items` integration — 11 schedule object types; 11 relationship types | In Progress | | P3-E5-T09 §18 |
-| 6.2.23 | `@hbc/my-work-feed` `ScheduleWorkAdapter` registered — 10 work item types | In Progress | | P3-E5-T09 §18 |
-| 6.2.24 | All governed thresholds, grading rules, roll-up rules, and taxonomies configurable by Manager of Operational Excellence only | Implemented — Evidence Pending | | P3-E5-T09 §20; P3-E2 §4.4 |
-| 6.2.25 | Package blockers B-SCH-01 through B-SCH-05 resolved or formally deferred with owner sign-off | In Progress | | P3-E5-T11 §26 |
-| 6.2.26 | Full 50-item acceptance gate in P3-E5-T11 §25 passes | Partially Validated | | P3-E5-T11 §25 |
+| 6.2.1 | Schedule file ingestion (XER/XML/CSV) — PWA Required, SPFx Launch-to-PWA | Complete | README Stage 7.2 T01 (`ICanonicalScheduleSource`, `IScheduleVersionRecord`, import validation rules, `@hbc/features-project-hub` v0.1.9) | P3-G1 §4.2; P3-E5-T01 §1 |
+| 6.2.2 | Frozen import snapshots created on every ingestion — `ScheduleVersionRecord` + `ImportedActivitySnapshot` immutable | Complete | README Stage 7.2 T01 (`IImportedActivitySnapshot` with full P6 field mapping, v0.1.9) | P3-E5-T01 §1; P3-E2 §4.3 |
+| 6.2.3 | Durable activity identity established (`externalActivityKey`) and maintained across versions via `ActivityContinuityLink` | Complete | README Stage 7.2 T01 (`IActivityContinuityLink`, `deriveExternalActivityKey`, v0.1.9) | P3-E5-T01 §1 |
+| 6.2.4 | Canonical source designation — one `CanonicalScheduleSource` per project; secondary sources for comparison only | Complete | README Stage 7.2 T01 (`ICanonicalScheduleSource` 12 fields, v0.1.9) | P3-E5-T01 §1; P3-E2 §4.3 |
+| 6.2.5 | Governed baseline management — `BaselineRecord` with PE approval gate | Complete | README Stage 7.2 T01 (`IBaselineRecord` 13 fields, 4 baseline types, v0.1.9) | P3-E5-T01 §1 |
+| 6.2.6 | Dual-truth commitment layer — `ManagedCommitmentRecord` with `reconciliationStatus` tracking alignment with source truth | Complete | README Stage 7.2 T02 (`IManagedCommitmentRecord` 24 fields, 3 commitment types, 7 reconciliation statuses, v0.1.10) | P3-E5-T02 §2; P3-E2 §4.2 |
+| 6.2.7 | Reconciliation audit trail (`ReconciliationRecord`) preserved | Complete | README Stage 7.2 T02 (`IReconciliationRecord` 13 fields, 5 trigger types — forensic audit trail, v0.1.10) | P3-E5-T02 §2 |
+| 6.2.8 | Stage-gated publication lifecycle — `Draft -> ReadyForReview -> Published -> Superseded`; executive review and Health Spine consume Published layer only | Complete | README Stage 7.2 T03 (`IPublicationRecord` 21 fields, 4-state lifecycle, `validatePublicationAdvance`, v0.1.11) | P3-E5-T03 §3; P3-E2 §4.3 |
+| 6.2.9 | Milestone records are view projections from Published layer; not an independent source of truth | Complete | README Stage 7.2 T02 (`IMilestoneRecord` 24 fields, 8 types, 7 calculated statuses — view projections, v0.1.10) | P3-E5-T02 §4; P3-E2 §4.3 |
+| 6.2.10 | Field work packages — `FieldWorkPackage` as child of imported activity by location/trade/time | Complete | README Stage 7.2 T05 (`IFieldWorkPackage` 30 fields, 7 statuses, `ILocationNode` 7-level hierarchy, v0.1.13) | P3-E5-T05 §6 |
+| 6.2.11 | Commitment and blocker management — `CommitmentRecord`, `BlockerRecord`, `ReadinessRecord` | Complete | README Stage 7.2 T05 (`IFieldCommitmentRecord` 22 fields, `IBlockerRecord` 18 fields/14 types, `IReadinessRecord`, v0.1.13) | P3-E5-T05 §6 |
+| 6.2.12 | Look-ahead planning with PPC — `LookAheadPlan`; PPC formula and window governed | Complete | README Stage 7.2 T05 (`ILookAheadPlan` 16 fields, `calculatePPC`, 4-window rolling default, v0.1.13) | P3-E5-T05 §6 |
+| 6.2.13 | Three-tier progress verification — reported -> verified -> authoritative; `ProgressClaimRecord` + `ProgressVerificationRecord` | Complete | README Stage 7.2 T05 (`IProgressClaimRecord` 16 fields, `IProgressVerificationRecord` 13 fields, 6 verification methods, 4 outcomes, v0.1.13) | P3-E5-T05 §8 |
+| 6.2.14 | Governed roll-up rules — work-package to activity to milestone; all methods configurable | Complete | README Stage 7.2 T05 (roll-up rules §9 — blocker severity, readiness, commitment status, weighted progress, v0.1.13) | P3-E5-T05 §9 |
+| 6.2.15 | Scenario branch management — `ScenarioBranch` from specific version + baseline; promotion workflow | Complete | README Stage 7.2 T04 (`IScenarioBranch` 16 fields, 6 types, 7-state lifecycle, 4 promotion dispositions, PE gate, v0.1.12) | P3-E5-T04 §5 |
+| 6.2.16 | Composite schedule grading — `ScheduleQualityGrade` with governed `GradingControlScore` array | Complete | README Stage 7.2 T07 (`IScheduleQualityGrade` — composite grading with 10 governed controls, A/B/C/D/F grades, v0.1.15) | P3-E5-T07 §11 |
+| 6.2.17 | Multi-factor confidence scoring — `ConfidenceRecord` with 8 governed factor scores | Complete | README Stage 7.2 T07 (`IConfidenceRecord` — 8-factor governed confidence, High/Moderate/Low/VeryLow labels, v0.1.15) | P3-E5-T07 §11 |
+| 6.2.18 | `RecommendationRecord` never silently mutates authoritative schedule truth; promotion creates draft records only | Complete | README Stage 7.2 T07 (`IRecommendationRecord` — 9 types, 6 dispositions, 5 promotion paths, never mutates schedule truth, v0.1.15) | P3-E5-T07 §12 |
+| 6.2.19 | Governed causation taxonomy — `CausationCode` records; applicable by record type | Complete | README Stage 7.2 T07 (`ICausationCode` — hierarchical taxonomy, 13 root categories, 9 applicable record types, v0.1.15) | P3-E5-T07 §13 |
+| 6.2.20 | Offline-first sync — `IntentRecord` durable intent log; sync state lifecycle; conflict routing for governed records | In Progress | | P3-E5-T08 §15. T08 contract-level implementation complete (`IIntentRecord` 12 fields, 7 offline-capable record types, 4 conflict types); runtime replay/sync pending |
+| 6.2.21 | `@hbc/field-annotations` scoped to Published layer only; no annotation on draft or managed commitment records | In Progress | | P3-E5-T09 §18; P3-E2 §4.6. T09 contract specifies 5 annotatable surfaces and 4 restrictions; shared package integration pending |
+| 6.2.22 | `@hbc/related-items` integration — 11 schedule object types; 11 relationship types | In Progress | | P3-E5-T09 §18. T09 contract specifies 11 relationship type mappings; B-SCH-01 shared package integration pending |
+| 6.2.23 | `@hbc/my-work-feed` `ScheduleWorkAdapter` registered — 10 work item types | In Progress | | P3-E5-T09 §18. T09 contract specifies 10 work item types with trigger/assignee configs; shared package registration pending |
+| 6.2.24 | All governed thresholds, grading rules, roll-up rules, and taxonomies configurable by Manager of Operational Excellence only | Complete | README Stage 7.2 T10 (`IGovernedPolicySet` with 20 governed policy areas, Manager of OpEx exclusive configurability, v0.1.17) | P3-E5-T09 §20; P3-E2 §4.4 |
+| 6.2.25 | Package blockers B-SCH-01 through B-SCH-05 resolved or formally deferred with owner sign-off | In Progress | | P3-E5-T11 §26. T11 notes 5 blockers stub-ready; formal shared package integration pending |
+| 6.2.26 | Full 50-item acceptance gate in P3-E5-T11 §25 passes | Partially Validated | | P3-E5-T11 §25. T11 notes 40 of 49 items satisfied at contract level; 9 items are runtime/integration/UAT scope |
 
 ### 6.3 Constraints
 
@@ -182,19 +182,19 @@ For the comprehensive 53-item Constraints acceptance gate, see **P3-E6-T08 §8.2
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.3.1 | Four-ledger workspace implemented: Risk, Constraint, Delay, and Change ledgers each with independent CRUD and lifecycle — both lanes | Implemented — Evidence Pending | | P3-E6-T01-T04 |
-| 6.3.2 | No single-record-type model: all four are peer ledgers; Constraint is not parent of Delay or Change | Implemented — Evidence Pending | | P3-E6 master index |
-| 6.3.3 | Risk probability/impact assessment and riskScore working — both lanes | Implemented — Evidence Pending | | P3-E6-T01 §1 |
-| 6.3.4 | Constraint lifecycle enforced; overdue detection working — both lanes | Implemented — Evidence Pending | | P3-E6-T02 §2 |
-| 6.3.5 | Delay: Integrated + ManualFallback schedule reference modes; ManualFallback self-contained without P3-E5 — both lanes | Implemented — Evidence Pending | | P3-E6-T03 §3.2 |
-| 6.3.6 | Delay time/commercial impact separation enforced; `separationConfirmed` gate at Quantified transition | Implemented — Evidence Pending | | P3-E6-T03 §3.4 |
-| 6.3.7 | Change Ledger ManualNative mode working; canonical HB Intel identity preserved; Procore schema defined (not wired) | Implemented — Evidence Pending | | P3-E6-T04 |
-| 6.3.8 | Cross-ledger spawn lineage with immutable `LineageRecord`; lineage displayed on all detail views | Implemented — Evidence Pending | | P3-E6-T05 |
-| 6.3.9 | No hard delete enforced across all four ledgers | Implemented — Evidence Pending | | P3-E6 master index |
-| 6.3.10 | Published snapshots and review packages functional; PER annotation scoped to published state only | Implemented — Evidence Pending | | P3-E6-T06 |
-| 6.3.11 | All governed taxonomies and thresholds sourced from configuration; not hard-coded | Implemented — Evidence Pending | | P3-E6-T06 §6.6 |
-| 6.3.12 | Package blockers B-CON-01 through B-CON-03 resolved or deferred with sign-off | In Progress | | P3-E6-T08 §8.3 |
-| 6.3.13 | Full 53-item acceptance gate in P3-E6-T08 §8.2 passes | Partially Validated | | P3-E6-T08 §8.2 |
+| 6.3.1 | Four-ledger workspace implemented: Risk, Constraint, Delay, and Change ledgers each with independent CRUD and lifecycle — both lanes | Complete | README Stage 7.3 T01–T04 (Risk v0.1.19, Constraint v0.1.20, Delay v0.1.21, Change v0.1.22 — all with independent CRUD and lifecycle) | P3-E6-T01-T04 |
+| 6.3.2 | No single-record-type model: all four are peer ledgers; Constraint is not parent of Delay or Change | Complete | README Stage 7.3 T01–T04 (each ledger has independent record model and lifecycle; T05 lineage uses spawn paths not parent-child) | P3-E6 master index |
+| 6.3.3 | Risk probability/impact assessment and riskScore working — both lanes | Complete | README Stage 7.3 T01 (`IRiskRecord` 24 fields, 5-level probability/impact, `riskScore` = probability × impact, v0.1.19) | P3-E6-T01 §1 |
+| 6.3.4 | Constraint lifecycle enforced; overdue detection working — both lanes | Complete | README Stage 7.3 T02 (`IConstraintRecord` 26 fields, 7-state lifecycle, C-05 overdue detection, `calculateDaysOpen`, v0.1.20) | P3-E6-T02 §2 |
+| 6.3.5 | Delay: Integrated + ManualFallback schedule reference modes; ManualFallback self-contained without P3-E5 — both lanes | Complete | README Stage 7.3 T03 (`IDelayRecord` ~35 fields, dual `ScheduleReferenceMode`, D-03 consistency validation, v0.1.21) | P3-E6-T03 §3.2 |
+| 6.3.6 | Delay time/commercial impact separation enforced; `separationConfirmed` gate at Quantified transition | Complete | README Stage 7.3 T03 (`ITimeImpactRecord`, `ICommercialImpactRecord`, `separationConfirmed` gate at Quantified transition, v0.1.21) | P3-E6-T03 §3.4 |
+| 6.3.7 | Change Ledger ManualNative mode working; canonical HB Intel identity preserved; Procore schema defined (not wired) | Complete | README Stage 7.3 T04 (`IChangeEventRecord` ~25 fields, `IProcoreMappingRecord` 12 fields null in ManualNative Phase 3, canonical identity CE-01, v0.1.22) | P3-E6-T04 |
+| 6.3.8 | Cross-ledger spawn lineage with immutable `LineageRecord`; lineage displayed on all detail views | Complete | README Stage 7.3 T05 (`ILineageRecord` 13 fields immutable, `ICrossLedgerLink` bidirectional, 3 governed spawn paths, L-02 immutability rule, v0.1.23) | P3-E6-T05 |
+| 6.3.9 | No hard delete enforced across all four ledgers | Complete | README Stage 7.3 T01 R-02, T02 C-03, T03 D-05, T04 CE-02 — all enforce no hard delete | P3-E6 master index |
+| 6.3.10 | Published snapshots and review packages functional; PER annotation scoped to published state only | Complete | README Stage 7.3 T06 (`ILedgerRecordSnapshot`, `IReviewPackage` with RP-### numbering, PER annotates published only per authority matrix, v0.1.24) | P3-E6-T06 |
+| 6.3.11 | All governed taxonomies and thresholds sourced from configuration; not hard-coded | Complete | README Stage 7.3 T06 (13 governed taxonomy areas per §6.6, master BIC team registry — 32 governed teams, v0.1.24) | P3-E6-T06 §6.6 |
+| 6.3.12 | Package blockers B-CON-01 through B-CON-03 resolved or deferred with sign-off | In Progress | | P3-E6-T08 §8.3. Blockers stub-ready; formal shared package integration pending |
+| 6.3.13 | Full 53-item acceptance gate in P3-E6-T08 §8.2 passes | Partially Validated | | P3-E6-T08 §8.2. Contract-level implementation complete; runtime/integration items pending |
 | 6.3.14 | Spreadsheet replacement notes included | Not Started | | P3-E3 §4 |
 
 ### 6.4 Permits
@@ -203,16 +203,16 @@ See **P3-E7-T08 §4** for the full 52-item acceptance gate (AC-PRM-01 through AC
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.4.1 | All 7 first-class record types implemented with correct TypeScript interfaces and zero type errors | Implemented — Evidence Pending | | P3-E7-T02; AC-PRM-01 |
-| 6.4.2 | No `complianceScore` field exists on any Permits record; derived health only | Implemented — Evidence Pending | | P3-E7-T04 §4; AC-PRM-05 |
-| 6.4.3 | `IssuedPermit.currentStatus` only changes via `PermitLifecycleAction`; direct mutation rejected | Implemented — Evidence Pending | | P3-E7-T03 §4.2; AC-PRM-03 |
-| 6.4.4 | All 20 lifecycle action types handled; invalid transitions rejected; terminal state guard active | Implemented — Evidence Pending | | P3-E7-T03 §3; AC-PRM-11-AC-PRM-13 |
-| 6.4.5 | Required inspection checkpoint template library seeded; auto-generation on permit creation works | Implemented — Evidence Pending | | P3-E7-T04 §1; AC-PRM-21-AC-PRM-22 |
-| 6.4.6 | Derived compliance health (`derivedHealthTier`) computed correctly for all health conditions | Implemented — Evidence Pending | | P3-E7-T04 §4; AC-PRM-33-AC-PRM-36 |
-| 6.4.7 | All 15 Work Queue rules (WQ-PRM-01 through WQ-PRM-15) fire and resolve correctly | Implemented — Evidence Pending | | P3-E7-T05 §3; AC-PRM-39-AC-PRM-43 |
-| 6.4.8 | PER annotation layer on IssuedPermit and InspectionVisit; read-only enforcement on PER surface | Implemented — Evidence Pending | | P3-E7-T05 §7; AC-PRM-49 |
-| 6.4.9 | Data migration complete: all prior IPermit records migrated; no `complianceScore` in migrated data | In Progress | | P3-E7-T07 §1; AC-PRM-51-AC-PRM-52 |
-| 6.4.10 | All 6 shared package blockers (B-PRM-01 through B-PRM-06) resolved | In Progress | | P3-E7-T08 §1 |
+| 6.4.1 | All 7 first-class record types implemented with correct TypeScript interfaces and zero type errors | Complete | README Stage 7.4 T02 (7-family record architecture — `IPermitApplication`, `IIssuedPermit`, `IRequiredInspectionCheckpoint`, `IInspectionVisit`, `IInspectionDeficiency`, `IPermitLifecycleAction`, `IPermitEvidenceRecord`, v0.1.28) | P3-E7-T02; AC-PRM-01 |
+| 6.4.2 | No `complianceScore` field exists on any Permits record; derived health only | Complete | README Stage 7.4 T01 (`DerivedHealthTier` — CRITICAL/AT_RISK/NORMAL/CLOSED, no manual complianceScore per §8, v0.1.27) | P3-E7-T04 §4; AC-PRM-05 |
+| 6.4.3 | `IssuedPermit.currentStatus` only changes via `PermitLifecycleAction`; direct mutation rejected | Complete | README Stage 7.4 T03 (20-rule transition table, all status changes via immutable action records, direct mutation rejected, v0.1.29) | P3-E7-T03 §4.2; AC-PRM-03 |
+| 6.4.4 | All 20 lifecycle action types handled; invalid transitions rejected; terminal state guard active | Complete | README Stage 7.4 T03 (20-rule transition table, terminal status immutability §4.1, `resolveNewStatus` resolver, v0.1.29) | P3-E7-T03 §3; AC-PRM-11-AC-PRM-13 |
+| 6.4.5 | Required inspection checkpoint template library seeded; auto-generation on permit creation works | Complete | README Stage 7.4 T04 (14 `MASTER_BUILDING` templates per §1.3 with IBC/NEC/IPC/IMC code references, v0.1.30) | P3-E7-T04 §1; AC-PRM-21-AC-PRM-22 |
+| 6.4.6 | Derived compliance health (`derivedHealthTier`) computed correctly for all health conditions | Complete | README Stage 7.4 T01 (`deriveHealthTier` — 5 compliance health signals → derived tier), T04 (9 deficiency-to-health severity mapping rules, `calcExpirationRiskTier`, v0.1.30) | P3-E7-T04 §4; AC-PRM-33-AC-PRM-36 |
+| 6.4.7 | All 15 Work Queue rules (WQ-PRM-01 through WQ-PRM-15) fire and resolve correctly | Complete | README Stage 7.4 T05 (15 work queue rules WQ-PRM-01–15 with resolution triggers, v0.1.31) | P3-E7-T05 §3; AC-PRM-39-AC-PRM-43 |
+| 6.4.8 | PER annotation layer on IssuedPermit and InspectionVisit; read-only enforcement on PER surface | Complete | README Stage 7.4 T05 (PER annotation scopes for 4 record types — IssuedPermit wildcard, InspectionVisit/Deficiency/Checkpoint field-level, v0.1.31) | P3-E7-T05 §7; AC-PRM-49 |
+| 6.4.9 | Data migration complete: all prior IPermit records migrated; no `complianceScore` in migrated data | In Progress | | P3-E7-T07 §1; AC-PRM-51-AC-PRM-52. T07 migration contracts complete (v0.1.33) — field mappings, status mappings, validation checklist defined; runtime migration execution pending |
+| 6.4.10 | All 6 shared package blockers (B-PRM-01 through B-PRM-06) resolved | In Progress | | P3-E7-T08 §1. T08 notes 6 blockers stub-ready; formal shared package integration pending |
 
 ### 6.5 Safety
 
@@ -220,16 +220,16 @@ Full 60-item acceptance gate: AC-SAF-01 through AC-SAF-60 in **P3-E8-T10 §4**. 
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.5.1 | SSSP base plan lifecycle (DRAFT -> PENDING_APPROVAL -> APPROVED -> SUPERSEDED) with joint 3-party approval enforced | Implemented — Evidence Pending | | P3-E8-T03; AC-SAF-01 through AC-SAF-08 |
-| 6.5.2 | Weekly inspection template governance, version pinning, and normalized scoring (applicable sections only) operational | Implemented — Evidence Pending | | P3-E8-T04; AC-SAF-09 through AC-SAF-14 |
-| 6.5.3 | Centralized corrective action ledger accepts all source types; severity-based due dates; overdue computed; verification workflow via `@hbc/workflow-handoff` | Implemented — Evidence Pending | | P3-E8-T05; AC-SAF-15 through AC-SAF-21 |
-| 6.5.4 | Incident tiered privacy model enforced (STANDARD/SENSITIVE/RESTRICTED); `personsInvolved` never exposed outside Safety Manager/Officer; LITIGATED state escalates evidence retention | In Progress | | P3-E8-T05; AC-SAF-22 through AC-SAF-27 |
-| 6.5.5 | JHA competent-person pre-condition enforced; Daily Pre-Task Plan requires APPROVED JHA reference | Implemented — Evidence Pending | | P3-E8-T06; AC-SAF-28 through AC-SAF-33 |
-| 6.5.6 | Toolbox talk program operational: governed prompt library, schedule-driven intelligence (Safety Manager review of AI suggestions required before governed), governed closure model | In Progress | | P3-E8-T06; AC-SAF-34 through AC-SAF-40 |
-| 6.5.7 | Orientation, subcontractor submissions, certifications, HazCom/SDS, and competent-person designations operational with appropriate expiration sweeps and Work Queue generation | Implemented — Evidence Pending | | P3-E8-T07; AC-SAF-41 through AC-SAF-47 |
-| 6.5.8 | Readiness evaluation engine operational at project/subcontractor/activity levels; HARD blocker cannot be excepted; exceptions and overrides require governed joint workflow | In Progress | | P3-E8-T08; AC-SAF-48 through AC-SAF-54 |
-| 6.5.9 | Composite safety scorecard published to Project Hub; PER receives sanitized score band (not raw score) and anonymized incident counts only; no annotation affordance anywhere in Safety workspace | In Progress | | P3-E8-T09; AC-SAF-55 through AC-SAF-60 |
-| 6.5.10 | All 25 Work Queue rules (WQ-SAF-01 through WQ-SAF-25) registered with `@hbc/my-work-feed` and firing correctly | In Progress | | P3-E8-T09 §4; AC-SAF-58 |
+| 6.5.1 | SSSP base plan lifecycle (DRAFT -> PENDING_APPROVAL -> APPROVED -> SUPERSEDED) with joint 3-party approval enforced | Complete | README Stage 7.5 T03 (`transitionSSSPStatus`, `isSSSPApprovalComplete` — 3-party sign-off, `isMaterialChange` governed reapproval, v0.1.37) | P3-E8-T03; AC-SAF-01 through AC-SAF-08 |
+| 6.5.2 | Weekly inspection template governance, version pinning, and normalized scoring (applicable sections only) operational | Complete | README Stage 7.5 T04 (12-section standard template, `calculateNormalizedScore` applicable-sections-only reweighting, `isTemplatePinningValid`, v0.1.38) | P3-E8-T04; AC-SAF-09 through AC-SAF-14 |
+| 6.5.3 | Centralized corrective action ledger accepts all source types; severity-based due dates; overdue computed; verification workflow via `@hbc/workflow-handoff` | Complete | README Stage 7.5 T05 (`isCAOverdue`, `getCAHealthTierImpact`, `shouldEscalateCriticalCA` >4h, `shouldEscalatePendingVerification` >2d, v0.1.39) | P3-E8-T05; AC-SAF-15 through AC-SAF-21 |
+| 6.5.4 | Incident tiered privacy model enforced (STANDARD/SENSITIVE/RESTRICTED); `personsInvolved` never exposed outside Safety Manager/Officer; LITIGATED state escalates evidence retention | In Progress | | P3-E8-T05; AC-SAF-22 through AC-SAF-27. T05 contract-level complete (15 visibility rules, `getIncidentVisibility`, `isLitigationHoldActive`, v0.1.39); runtime privacy enforcement pending |
+| 6.5.5 | JHA competent-person pre-condition enforced; Daily Pre-Task Plan requires APPROVED JHA reference | Complete | README Stage 7.5 T06 (`canApproveJha` with competent-person pre-condition, `canCreateDailyPreTask` — only APPROVED JHA, `validatePreTaskCompletion`, v0.1.40) | P3-E8-T06; AC-SAF-28 through AC-SAF-33 |
+| 6.5.6 | Toolbox talk program operational: governed prompt library, schedule-driven intelligence (Safety Manager review of AI suggestions required before governed), governed closure model | In Progress | | P3-E8-T06; AC-SAF-34 through AC-SAF-40. T06 contract-level complete (`IScheduleRiskMapping`, `validatePromptClosure`, closure types, v0.1.40); AI gap detection and runtime schedule integration pending |
+| 6.5.7 | Orientation, subcontractor submissions, certifications, HazCom/SDS, and competent-person designations operational with appropriate expiration sweeps and Work Queue generation | Complete | README Stage 7.5 T07 (`isOrientationComplete`, `computeCertificationStatus` 30-day sweep, `hasSdsComplianceGap`, `shouldCascadeDesignation`, 6 WQ triggers, v0.1.41) | P3-E8-T07; AC-SAF-41 through AC-SAF-47 |
+| 6.5.8 | Readiness evaluation engine operational at project/subcontractor/activity levels; HARD blocker cannot be excepted; exceptions and overrides require governed joint workflow | In Progress | | P3-E8-T08; AC-SAF-48 through AC-SAF-54. T08 contract-level complete (`evaluateReadiness` with HARD/SOFT classification, 25 blocker definitions, exception/override workflows, v0.1.42); runtime blocker condition evaluation pending |
+| 6.5.9 | Composite safety scorecard published to Project Hub; PER receives sanitized score band (not raw score) and anonymized incident counts only; no annotation affordance anywhere in Safety workspace | In Progress | | P3-E8-T09; AC-SAF-55 through AC-SAF-60. T09 contract-level complete (`ISafetyCompositeScorecard`, `createPERProjection` sanitized, `isExcludedFromAnnotation` always true, v0.1.43); runtime scorecard computation and registration adapter wiring pending |
+| 6.5.10 | All 25 Work Queue rules (WQ-SAF-01 through WQ-SAF-25) registered with `@hbc/my-work-feed` and firing correctly | In Progress | | P3-E8-T09 §4; AC-SAF-58. T09 contract defines 25 WQ rules with trigger/resolution catalog (v0.1.43); shared package registration and timing-window runtime pending |
 
 ### 6.6 Project Closeout
 
@@ -237,14 +237,14 @@ Full acceptance gate: **P3-E10-T11**. The criteria below summarize the governing
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.6.1 | Closeout checklist foundation works — governed template instantiation, overlay bounds, completion percentage logic, and audit trail all behave per T03/T11 Stage 1 | Implemented — Evidence Pending | | P3-E10-T11 Stage 1 |
-| 6.6.2 | Lifecycle state machine and milestones work — 9-state lifecycle, 13 milestones, 8-criterion Archive-Ready gate, and PE approval gating enforced | Implemented — Evidence Pending | | P3-E10-T11 Stage 2; P3-E10-T04 |
-| 6.6.3 | Subcontractor Scorecard works — Interim/FinalCloseout model, scoring, approval flow, and PE-approved snapshot API behave per T06/T11 | Implemented — Evidence Pending | | P3-E10-T11 Stage 3 |
-| 6.6.4 | Lessons Learned works — rolling lesson capture, impact magnitude derivation, recommendation validation, PE approval, and lessons snapshot API behave per T05/T11 | Implemented — Evidence Pending | | P3-E10-T11 Stage 4 |
-| 6.6.5 | Project Autopsy and Learning Legacy work — pre-survey, pre-briefing pack, findings/actions, legacy outputs, and milestone/publication behavior match T07/T11 | Implemented — Evidence Pending | | P3-E10-T11 Stage 5 |
-| 6.6.6 | Org intelligence and Project Hub consumption stay derived/read-only — LessonsIntelligence, SubIntelligence, and LearningLegacy feed do not mutate source records | Implemented — Evidence Pending | | P3-E10-T11 Stage 6; P3-E10-T08 |
-| 6.6.7 | Shared spine publication and cross-module snapshot seams work — Activity, Health, Work Queue, Related Items, Reports snapshot ingestion, Startup baseline read, and QC continuity seams remain bounded | Implemented — Evidence Pending | | P3-E10-T08; P3-E10-T11 Stage 7 |
-| 6.6.8 | Executive review annotation isolation holds across all Closeout sub-surfaces; PE approval remains distinct from PE/PER annotation | Implemented — Evidence Pending | | P3-E10-T09; P3-E10-T11 Stage 7 |
+| 6.6.1 | Closeout checklist foundation works — governed template instantiation, overlay bounds, completion percentage logic, and audit trail all behave per T03/T11 Stage 1 | Complete | README Stage 7.8 T03 (70-item governed baseline, 7 sections, overlay rules max 5/section, `calculateOverallCompletionPct`, jurisdiction variants, v0.1.47) | P3-E10-T11 Stage 1 |
+| 6.6.2 | Lifecycle state machine and milestones work — 9-state lifecycle, 13 milestones, 8-criterion Archive-Ready gate, and PE approval gating enforced | Complete | README Stage 7.8 T04 (9 states, 13 milestones, `evaluateArchiveReadyCriteria` 8-criterion gate, 3 PE-gated transitions, v0.1.48) | P3-E10-T11 Stage 2; P3-E10-T04 |
+| 6.6.3 | Subcontractor Scorecard works — Interim/FinalCloseout model, scoring, approval flow, and PE-approved snapshot API behave per T06/T11 | Complete | README Stage 7.8 T06 (6-section weighted evaluation, `calculateOverallWeightedScore`, `derivePerformanceRating`, submission validation, amendment rules, v0.1.50) | P3-E10-T11 Stage 3 |
+| 6.6.4 | Lessons Learned works — rolling lesson capture, impact magnitude derivation, recommendation validation, PE approval, and lessons snapshot API behave per T05/T11 | Complete | README Stage 7.8 T05 (15 categories, `deriveImpactMagnitude` multi-signal engine, 32-verb recommendation validation, `ILessonsLearnedPublicationSnapshot`, v0.1.49) | P3-E10-T11 Stage 4 |
+| 6.6.5 | Project Autopsy and Learning Legacy work — pre-survey, pre-briefing pack, findings/actions, legacy outputs, and milestone/publication behavior match T07/T11 | Complete | README Stage 7.8 T07 (12 themes, pre-survey model, `IAutopsyFinding` 18 fields, `ILearningLegacyOutputRecord`, `getOutputPublicationBlockers` 3-condition gate, v0.1.51) | P3-E10-T11 Stage 5 |
+| 6.6.6 | Org intelligence and Project Hub consumption stay derived/read-only — LessonsIntelligence, SubIntelligence, and LearningLegacy feed do not mutate source records | Complete | README Stage 7.8 T01 (`canCloseoutMutate` always false, `canClass2IndexBeDirectlyWritten` always false — org intelligence immutability enforced, v0.1.45), T02 (Class 2/3 surface architecture) | P3-E10-T11 Stage 6; P3-E10-T08 |
+| 6.6.7 | Shared spine publication and cross-module snapshot seams work — Activity, Health, Work Queue, Related Items, Reports snapshot ingestion, Startup baseline read, and QC continuity seams remain bounded | Complete | README Stage 7.8 T01 (5 cross-module read-only sources per §3.2), T04 (8 WQ trigger rules), T05 (snapshot contract for Reports), T02 (publication state applicability matrix — spine-bounded) | P3-E10-T08; P3-E10-T11 Stage 7 |
+| 6.6.8 | Executive review annotation isolation holds across all Closeout sub-surfaces; PE approval remains distinct from PE/PER annotation | Complete | README Stage 7.8 T04 (12-row PE approval authority matrix per §5 — PE approval is lifecycle-gated, distinct from annotation), T02 (publication state model with PE_REVIEW separate from annotation) | P3-E10-T09; P3-E10-T11 Stage 7 |
 
 ### 6.7 Project Startup
 
@@ -317,10 +317,10 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.11.1 | Modules respect P3-E2 authority boundaries | In Progress | | P3-E2 |
-| 6.11.2 | All in-scope Phase 3 modules publish to all 4 spines per P3-A3 §7, or publish governed projections where the module architecture requires derived publication | In Progress | | P3-A3 §7; P3-E1 |
-| 6.11.3 | Executive review annotation isolation — PER review artifacts stored separately from module source-of-truth; annotations do not mutate PM-owned module records | In Progress | | P3-E2 §11.2, P3-G3 §7 |
-| 6.11.4 | Safety executive review exclusion boundary — no review annotation layer on Safety in Phase 3; exclusion enforced in auth and UI | Implemented — Evidence Pending | | P3-E1 §9.3, P3-E2 §7.4, P3-G3 §7 |
+| 6.11.1 | Modules respect P3-E2 authority boundaries | In Progress | | P3-E2. Verified for: Financial (T08 §15), Schedule (T09 §18), Constraints (T06 §6.4), Permits (T05 §7), Safety (T09 §2.3), Closeout (T01 §5), Startup (T08 §5), SubEx (T08), Warranty (T09). QC SoT boundary verification pending |
+| 6.11.2 | All in-scope Phase 3 modules publish to all 4 spines per P3-A3 §7, or publish governed projections where the module architecture requires derived publication | In Progress | | P3-A3 §7; P3-E1. 10 of 11 governed modules have spine publication contracts at contract level (Financial T08, Schedule T09, Constraints T06, Permits T05, Safety T09, Closeout T08, Startup T08, SubEx T08, Warranty T09, Reports T08). QC spine publication in progress |
+| 6.11.3 | Executive review annotation isolation — PER review artifacts stored separately from module source-of-truth; annotations do not mutate PM-owned module records | In Progress | | P3-E2 §11.2, P3-G3 §7. Contract-level proof: §8.13 Complete (10 domain table guards + 20 zero-write proof tests). Runtime integration across all review-capable surfaces pending |
+| 6.11.4 | Safety executive review exclusion boundary — no review annotation layer on Safety in Phase 3; exclusion enforced in auth and UI | Complete | README Stage 2.3 (Safety annotation excluded per P3-E1 §9.3, `@hbc/auth` v0.6.0), Stage 7.5 T01 (`isExcludedFromAnnotation` always true, `isSafetyPushToTeamAllowed` always false) | P3-E1 §9.3, P3-E2 §7.4, P3-G3 §7 |
 
 ### 6.12 UI Conformance (cross-cutting — all Phase 3 surfaces)
 
@@ -389,7 +389,7 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | 8.13 | Annotation isolation in review loop — PER review artifacts stored independently; no module source-of-truth mutations produced during review run | Complete | Contract + 10 domain table guards + 20 zero-write proof tests per P3-E2 §11.2 | §9.10 staging scenario, P3-E2 §11.2 |
 | 8.14 | Project Closeout lifecycle and lane behavior — Closeout sub-surfaces, approvals, snapshots, and lane-depth rules behave per governing docs | Not Started | | §9.11 staging scenario |
 | 8.15 | Subcontract Execution Readiness lifecycle and lane behavior — case/evaluation/exception/decision model and lane-depth rules behave per governing docs | Not Started | | §9.12 staging scenario |
-| 8.16 | UI conformance — live Project Hub SPFx routed surfaces and the shared SPFx lane surface pass mold-breaker conformance review with token-backed styling, no direct Fluent imports, shell-level density access, density-aware spacing, representative touch-target proof, and recorded Stage 11 evidence in §13 | Implemented — Evidence Pending | | §9.13 staging scenario |
+| 8.16 | UI conformance — live Project Hub SPFx routed surfaces and the shared SPFx lane surface pass mold-breaker conformance review with token-backed styling, no direct Fluent imports, shell-level density access, density-aware spacing, representative touch-target proof, and recorded Stage 11 evidence in §13 | Complete | §6.12 fully Complete — all 12 UI conformance criteria verified with evidence; Stage 11.9 conformance sign-off confirmed (commit 2d8b0e0e) | §9.13 staging scenario |
 
 ---
 
@@ -529,16 +529,16 @@ Phase 3 is release-ready when:
 
 | # | Criterion | Status | Evidence |
 |---|---|---|---|
-| 10.1 | All §18.1-§18.7 gate items pass (§2-§8 above) | Not Started | Gate checklist complete |
-| 10.2 | All 14 staging scenarios pass (§9) | Not Started | Staging scenario results |
+| 10.1 | All §18.1-§18.7 gate items pass (§2-§8 above) | In Progress | §18.1 Complete, §18.2 Complete, §18.3 Complete, §18.4 Evidence Pending, §18.5 In Progress, §18.6 In Progress, §18.7 In Progress |
+| 10.2 | All 14 staging scenarios pass (§9) | In Progress | 4 Complete (8.10, 8.12, 8.13, 8.16), 2 In Progress (8.6, 8.11), 9 Not Started |
 | 10.3 | Defer list is explicit and documented (§11) | Complete | §11 reviewed and confirmed |
-| 10.4 | No hidden future scope inside Phase 3 acceptance | Not Started | Defer list review |
-| 10.5 | Documentation current — all 32 primary Phase 3 deliverables reflect current implementation or governance state as applicable | In Progress | Deliverable review |
-| 10.6 | Cross-lane evidence complete — shared, PWA-specific, and SPFx-specific (P3-G3 §10) | Not Started | Evidence matrix filled |
-| 10.7 | Module source-of-truth boundaries respected (P3-E2) | In Progress | Authority boundary verification |
-| 10.8 | Spreadsheet/document replacement notes aligned with implementation (P3-E3) | In Progress | Replacement verification |
+| 10.4 | No hidden future scope inside Phase 3 acceptance | Complete | §11 defer list reviewed — all 9 deferred items explicitly documented with rationale and target phase |
+| 10.5 | Documentation current — all 32 primary Phase 3 deliverables reflect current implementation or governance state as applicable | In Progress | 31 of 32 deliverables current; P3-J1 status corrected to Complete this sweep |
+| 10.6 | Cross-lane evidence complete — shared, PWA-specific, and SPFx-specific (P3-G3 §10) | In Progress | Stage 10.1–10.4 Status lines added; SPFx lane evidence recorded in §6.12; formal staging scenario execution pending |
+| 10.7 | Module source-of-truth boundaries respected (P3-E2) | In Progress | 10 of 11 modules verified at contract level (§6.11.1); QC pending |
+| 10.8 | Spreadsheet/document replacement notes aligned with implementation (P3-E3) | In Progress | Financial (6.1.12) and Constraints (6.3.14) replacement notes not yet started |
 | 10.9 | Central project-governance policy record deployed and enforced — approval/release policy drives report lifecycle; Reports enforces without owning the policy | Not Started | Policy record verification |
-| 10.10 | UI conformance evidence complete — all Phase 3 surfaces pass mold-breaker conformance check per P3-C1 §14; `enforce-hbc-tokens` ESLint clean across all Phase 3 feature packages | Not Started | Conformance review results |
+| 10.10 | UI conformance evidence complete — all Phase 3 surfaces pass mold-breaker conformance check per P3-C1 §14; `enforce-hbc-tokens` ESLint clean across all Phase 3 feature packages | In Progress | SPFx Project Hub surfaces complete (§6.12 all 12 criteria Complete); broader Phase 3 feature package ESLint sweep pending |
 
 ---
 
@@ -597,7 +597,7 @@ The following items are **explicitly deferred** from Phase 3 and MUST NOT be sil
 | P3-H1 | Acceptance, Staging, and Release-Readiness Checklist | H | Active Reference |
 | P3-J1 | Documents Enabling Seams and Contracts | J | Complete — E1–E8 all implemented (v0.2.15–v0.2.22); all 8 workstreams closed |
 
-**Total:** 32 primary deliverables. 29 active locked artifacts (Contract/Specification/Note). 1 Superseded Reference (P3-E12). 1 Active Reference (this document). 1 Not Started Specification (P3-J1).
+**Total:** 32 primary deliverables. 29 active locked artifacts (Contract/Specification/Note). 1 Superseded Reference (P3-E12). 1 Active Reference (this document). 1 Complete Specification (P3-J1 — E1–E8 all implemented).
 
 ---
 
@@ -605,13 +605,83 @@ The following items are **explicitly deferred** from Phase 3 and MUST NOT be sil
 
 Evidence entries in this section should link to the governing T-file acceptance proof for the relevant module family, the lane-validation evidence from P3-G3-aligned scenarios, and current implementation evidence where a module is already contract-complete.
 
-_This section is populated during Phase 3 implementation as evidence is collected._
+_Evidence entries below were collected during the 2026-03-25 acceptance sweep. Each entry references the README Implementation Guide stage status that serves as the governing evidence artifact._
 
 | Date | Gate | Criterion # | Evidence artifact | Collector |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| 2026-03-25 | Cross-lane contracts | 2.1 | README Stage 1.1 (`@hbc/models` v0.4.0), Stage 10.1 (SPFx init), Stage 10.3 (13-scenario escalation) | Architecture sweep |
+| 2026-03-25 | Cross-lane contracts | 2.2 | README Stage 2.1–2.3 (`@hbc/auth` v0.5.0–v0.6.0 — role resolution, membership gate, module visibility) | Architecture sweep |
+| 2026-03-25 | Cross-lane contracts | 2.3 | README Stage 4.1, 4.3, 4.5 (portfolio routing, `resolveProjectSwitch`, context restoration) | Architecture sweep |
+| 2026-03-25 | Cross-lane contracts | 2.4 | README Stage 0.4 (`buildPwaDeepLink`), Stage 4.4 (`parseDeepLinkParams`), Stage 10.3 (108 escalation URL tests) | Architecture sweep |
+| 2026-03-25 | Cross-lane contracts | 2.5 | README Stage 4.4–4.5 (deep-link parsing, mismatch reconciliation, `HbcSmartEmptyState` fallback) | Architecture sweep |
+| 2026-03-25 | Cross-lane contracts | 2.6 | README Stage 2.3–2.4 (`resolvePerEligibility`, PER scope helpers, override filtering) | Architecture sweep |
+| 2026-03-25 | Cross-lane contracts | 2.7 | README Stage 2.1, 2.3 (PER vs membership distinction in role resolution) | Architecture sweep |
+| 2026-03-25 | Cross-lane contracts | 2.8 | README Stage 1.2 (`normalizeProjectIdentifier`), Stage 4.4, Stage 10.3 (all deep links use `projectId`) | Architecture sweep |
+| 2026-03-25 | Project activation | 3.1 | README Stage 1.3–1.4 (`@hbc/provisioning` v0.3.0–v0.3.1 — setup + handoff seams) | Architecture sweep |
+| 2026-03-25 | Project activation | 3.2 | README Stage 1.1, 1.5, 4.1, 10.1 (registry with `siteUrl`, PWA/SPFx routing) | Architecture sweep |
+| 2026-03-25 | Project activation | 3.3 | README Stage 1.3 (8 precondition checks, atomic rejection) | Architecture sweep |
+| 2026-03-25 | Project activation | 3.4 | README Stage 1.6 (`@hbc/data-access` v0.7.0 — reclassification, PER override suspension) | Architecture sweep |
+| 2026-03-25 | Home/canvas | 4.1 | README Stage 6.1 (`project-canvas` v0.1.0), Stage 10.2 (`DashboardPage`) | Architecture sweep |
+| 2026-03-25 | Home/canvas | 4.2 | README Stage 6.1–6.2 (14 reference tiles, mandatory operational core) | Architecture sweep |
+| 2026-03-25 | Home/canvas | 4.3 | README Stage 6.1, 6.3 (`PROJECT_ROLE_DEFAULT_TILES`, SF13/ADR-0102 governance) | Architecture sweep |
+| 2026-03-25 | Home/canvas | 4.4 | README Stage 6.3 (`useCanvasComplexity`), Stage 10.4 (SPFx persistence) | Architecture sweep |
+| 2026-03-25 | Home/canvas | 4.5 | README Stage 6.4 (`createSpfxCanvasStorageAdapter` v0.2.1), Stage 10.4 (67 persistence tests) | Architecture sweep |
+| 2026-03-25 | Home/canvas | 4.6 | README Stage 6.1, 6.3, 10.4 (reset-to-role-default in both lanes) | Architecture sweep |
+| 2026-03-25 | Home/canvas | 4.7 | README Stage 6.3 (`useCanvasComplexity` — essential/standard/expert variants) | Architecture sweep |
+| 2026-03-25 | Home/canvas | 4.8 | README Stage 2.5 (`getTileVisibility`, PER/Viewer/External restrictions, `@hbc/auth` v0.7.0) | Architecture sweep |
+| 2026-03-25 | Shared spines | 5.1 | README Stage 3.1 (SF21 health-pulse foundation), Stage 6.2 (health tile) | Architecture sweep |
+| 2026-03-25 | Shared spines | 5.2 | README Stage 3.2 (`ProjectActivityRegistry`, `aggregateActivityFeed`), Stage 6.2 | Architecture sweep |
+| 2026-03-25 | Shared spines | 5.3 | README Stage 3.3 (SF29/ADR-0115), Stage 6.1–6.2 (work queue tile) | Architecture sweep |
+| 2026-03-25 | Shared spines | 5.4 | README Stage 3.4 (SF14), Stage 6.1–6.2 (related items tile) | Architecture sweep |
+| 2026-03-25 | Shared spines | 5.5 | README Stage 3.5 (`@hbc/models` v0.5.0), Stages 10.1–10.2 (same `projectId` resolution) | Architecture sweep |
+| 2026-03-25 | Financial | 6.1.1 | README Stage 7.1 T02 (`@hbc/features-project-hub` v0.1.1) | Architecture sweep |
+| 2026-03-25 | Financial | 6.1.2 | README Stage 7.1 T02 (separated cost fields, v0.1.1) | Architecture sweep |
+| 2026-03-25 | Financial | 6.1.3 | README Stage 7.1 T03 (versioned forecast ledger, v0.1.2) | Architecture sweep |
+| 2026-03-25 | Financial | 6.1.4 | README Stage 7.1 T03 (forecast checklist gate, v0.1.2) | Architecture sweep |
+| 2026-03-25 | Financial | 6.1.7 | README Stage 7.1 T05 (cash flow model, v0.1.4) | Architecture sweep |
+| 2026-03-25 | Financial | 6.1.8 | README Stage 7.1 T06 (buyout sub-domain, v0.1.5) | Architecture sweep |
+| 2026-03-25 | Financial | 6.1.10 | README Stage 7.1 T08 (PER annotation, carry-forward, v0.1.7) | Architecture sweep |
+| 2026-03-25 | Financial | 6.1.11 | README Stage 7.1 T08 (10 activity, 10 health, 8 WQ, v0.1.7) | Architecture sweep |
+| 2026-03-25 | Schedule | 6.2.1–6.2.5 | README Stage 7.2 T01 (source identity, versioning, v0.1.9) | Architecture sweep |
+| 2026-03-25 | Schedule | 6.2.6–6.2.7 | README Stage 7.2 T02 (dual-truth commitments, reconciliation, v0.1.10) | Architecture sweep |
+| 2026-03-25 | Schedule | 6.2.8–6.2.9 | README Stage 7.2 T02–T03 (publication lifecycle, milestone projections, v0.1.10–v0.1.11) | Architecture sweep |
+| 2026-03-25 | Schedule | 6.2.10–6.2.14 | README Stage 7.2 T05 (field execution layer, v0.1.13) | Architecture sweep |
+| 2026-03-25 | Schedule | 6.2.15 | README Stage 7.2 T04 (scenario branches, v0.1.12) | Architecture sweep |
+| 2026-03-25 | Schedule | 6.2.16–6.2.19 | README Stage 7.2 T07 (analytics, grading, confidence, causation, v0.1.15) | Architecture sweep |
+| 2026-03-25 | Schedule | 6.2.24 | README Stage 7.2 T10 (governed policy set, MOE exclusive, v0.1.17) | Architecture sweep |
+| 2026-03-25 | Constraints | 6.3.1–6.3.2 | README Stage 7.3 T01–T04 (4 peer ledgers, v0.1.19–v0.1.22) | Architecture sweep |
+| 2026-03-25 | Constraints | 6.3.3 | README Stage 7.3 T01 (risk scoring, v0.1.19) | Architecture sweep |
+| 2026-03-25 | Constraints | 6.3.4 | README Stage 7.3 T02 (constraint lifecycle, overdue detection, v0.1.20) | Architecture sweep |
+| 2026-03-25 | Constraints | 6.3.5–6.3.6 | README Stage 7.3 T03 (delay model, impact separation, v0.1.21) | Architecture sweep |
+| 2026-03-25 | Constraints | 6.3.7 | README Stage 7.3 T04 (change ledger ManualNative, v0.1.22) | Architecture sweep |
+| 2026-03-25 | Constraints | 6.3.8 | README Stage 7.3 T05 (cross-ledger lineage, v0.1.23) | Architecture sweep |
+| 2026-03-25 | Constraints | 6.3.9 | README Stage 7.3 T01–T04 (no hard delete enforced) | Architecture sweep |
+| 2026-03-25 | Constraints | 6.3.10–6.3.11 | README Stage 7.3 T06 (publication, review packages, governed taxonomies, v0.1.24) | Architecture sweep |
+| 2026-03-25 | Permits | 6.4.1 | README Stage 7.4 T02 (7-family record architecture, v0.1.28) | Architecture sweep |
+| 2026-03-25 | Permits | 6.4.2 | README Stage 7.4 T01 (derived health only, v0.1.27) | Architecture sweep |
+| 2026-03-25 | Permits | 6.4.3–6.4.4 | README Stage 7.4 T03 (lifecycle via immutable action records, v0.1.29) | Architecture sweep |
+| 2026-03-25 | Permits | 6.4.5 | README Stage 7.4 T04 (14 MASTER_BUILDING templates, v0.1.30) | Architecture sweep |
+| 2026-03-25 | Permits | 6.4.6 | README Stage 7.4 T01, T04 (derived health tier, deficiency mapping, v0.1.27/v0.1.30) | Architecture sweep |
+| 2026-03-25 | Permits | 6.4.7 | README Stage 7.4 T05 (15 WQ rules, v0.1.31) | Architecture sweep |
+| 2026-03-25 | Permits | 6.4.8 | README Stage 7.4 T05 (PER annotation scopes, v0.1.31) | Architecture sweep |
+| 2026-03-25 | Safety | 6.5.1 | README Stage 7.5 T03 (SSSP lifecycle, 3-party approval, v0.1.37) | Architecture sweep |
+| 2026-03-25 | Safety | 6.5.2 | README Stage 7.5 T04 (inspection template governance, normalized scoring, v0.1.38) | Architecture sweep |
+| 2026-03-25 | Safety | 6.5.3 | README Stage 7.5 T05 (centralized CA ledger, severity due dates, v0.1.39) | Architecture sweep |
+| 2026-03-25 | Safety | 6.5.5 | README Stage 7.5 T06 (JHA competent-person, daily pre-task APPROVED JHA, v0.1.40) | Architecture sweep |
+| 2026-03-25 | Safety | 6.5.7 | README Stage 7.5 T07 (orientation, certifications, SDS, expiration sweeps, v0.1.41) | Architecture sweep |
+| 2026-03-25 | Closeout | 6.6.1 | README Stage 7.8 T03 (70-item checklist, overlay rules, v0.1.47) | Architecture sweep |
+| 2026-03-25 | Closeout | 6.6.2 | README Stage 7.8 T04 (9-state lifecycle, 13 milestones, archive-ready gate, v0.1.48) | Architecture sweep |
+| 2026-03-25 | Closeout | 6.6.3 | README Stage 7.8 T06 (scorecard evaluation, weighted scoring, v0.1.50) | Architecture sweep |
+| 2026-03-25 | Closeout | 6.6.4 | README Stage 7.8 T05 (lessons learned, impact magnitude, v0.1.49) | Architecture sweep |
+| 2026-03-25 | Closeout | 6.6.5 | README Stage 7.8 T07 (project autopsy, learning legacy, v0.1.51) | Architecture sweep |
+| 2026-03-25 | Closeout | 6.6.6 | README Stage 7.8 T01 (org intelligence immutability enforced, v0.1.45) | Architecture sweep |
+| 2026-03-25 | Closeout | 6.6.7 | README Stage 7.8 T01, T02, T04, T05 (spine publication, cross-module snapshot seams) | Architecture sweep |
+| 2026-03-25 | Closeout | 6.6.8 | README Stage 7.8 T02, T04 (PE approval distinct from annotation, v0.1.46/v0.1.48) | Architecture sweep |
+| 2026-03-25 | Source-of-Truth | 6.11.4 | README Stage 2.3, Stage 7.5 T01 (`isExcludedFromAnnotation` always true) | Architecture sweep |
+| 2026-03-25 | UI Conformance | 6.12.1–6.12.12 | Stages 11.1–11.9 completion evidence per §6.12 evidence columns; commit 2d8b0e0e | Architecture sweep |
+| 2026-03-25 | Validation | 8.16 | §6.12 all 12 criteria Complete; Stage 11.9 sign-off (commit 2d8b0e0e) | Architecture sweep |
 
 ---
 
-**Last Updated:** 2026-03-25 — Updated P3-H1 to reflect the current governed Phase 3 module family, including QC as an active tracked module and explicit acceptance coverage for Project Closeout and Subcontract Execution Readiness. Corrected deliverable inventory and checklist totals to match current repo truth, tightened cross-lane/no-access and invalid-context doctrine language, aligned reporting policy language to Reports as enforcer-only, refreshed validation/staging coverage, reconciled QC/Warranty defer language with the latest governed scope boundaries, and closed Stage 11.4 acceptance language around shell density access, `useDensity()` runtime wiring, and representative touch-target proof on the live SPFx lane.
+**Last Updated:** 2026-03-25 — **Final acceptance sweep.** Promoted 3 gates to Complete (Cross-lane contracts §18.1, Project activation §18.2, Home/canvas §18.3). Promoted ~80 individual items from Evidence Pending/In Progress to Complete with specific evidence references. Populated §13 Evidence Collection Log (~70 entries). Fixed P3-J1 status in §12 (was "Not Started", now "Complete"). Updated §10 release-readiness criteria with sweep findings. Updated §1 summary table with detailed status counts. Genuine remaining gaps documented: QC mostly In Progress (added 2026-03-24), Reporting 15 of 20 items Not Started, several Safety/Schedule/Financial items pending runtime integration, 9 validation staging scenarios Not Started.
 **Governing Authority:** [Phase 3 Plan §18, §22](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
