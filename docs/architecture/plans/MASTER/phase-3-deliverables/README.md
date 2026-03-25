@@ -656,7 +656,15 @@ Acceptance evidence for Stage 10.2 must be collected module-by-module; a single 
 Governing: P3-G1 §4
 
 **10.3 — SPFx-to-PWA escalation affordances**
-Implement all Launch-to-PWA escalation entry points defined in P3-G2. Each escalation must construct a deep link with `projectId`, module, action, and optional `reviewArtifactId` context. The 13 escalation scenarios in P3-G2 §3 are the complete set for Phase 3.
+Implement all Launch-to-PWA escalation entry points defined in P3-G2. Stage 10.2 delivered governed module pages, but that alone is insufficient: Stage 10.3 closes the remaining repo-truth gap by wiring the full 13-scenario escalation map across the actual SPFx runtime surfaces.
+
+Stage 10.3 evidence must show:
+- dashboard / home / canvas escalation actions for portfolio-root, Personal Work Hub, work queue, activity, and advanced canvas administration
+- module-level escalation actions for the governed PWA-depth workflows that remain outside the SPFx lane
+- reports / executive-review escalation actions for advanced draft recovery, run-ledger history, review comparison, review history, and artifact-specific thread management
+- canonical deep-link construction from Stage 10.1 registry-backed project context, with in-shell failure handling when required project or review-artifact context is unavailable
+
+Current partial launch actions do not satisfy this stage unless all 13 P3-G2 scenarios are explicitly surfaced and evidenced.
 Governing: P3-G2 §3, §8
 
 **10.4 — SPFx personalization persistence**
@@ -786,6 +794,7 @@ Governing: P3-J1 §3 E7
 **13.7 — Publish/handoff intent seams (E6)**
 Define event and payload shapes for publish requested, destination suggested, handoff requested, publish completed, and publish failed. Identify where `@hbc/workflow-handoff`, `@hbc/publish-workflow`, and `@hbc/notification-intelligence` will bind in Phase 5. Add lightweight UI affordances only where they support current Project Hub clarity. Phase 5 must be able to add guided publish/handoff without changing Project Hub's domain contracts.
 Governing: P3-J1 §3 E6
+Status: **Implemented 2026-03-25 in `@hbc/features-project-hub` v0.2.20.** Publish/handoff seam contracts: 4 enum type unions, 4 interface contracts, governed constants (5 event contracts all seam-only, 3 workflow integration bindings to @hbc/workflow-handoff/@hbc/publish-workflow/@hbc/notification-intelligence, 4 notification seam definitions, scope guard enforcing SEAM_ONLY), 8 business rules; 38 tests. Stage 13.7 E6 publish seams complete.
 
 **13.8 — Data, telemetry, and readiness spikes (E8)**
 Spike project-scoped registry resolution against real/proposed site-library patterns. Spike auth/token flow for project-context document access. Spike preview feasibility and handoff mechanics. Define telemetry events for launch, preview, raw fallback, restricted-stub exposure, and no-access states. Capture all contradictions discovered during spikes in the contradiction register. Produce a Phase 5 handoff memo summarizing findings and outstanding risks.

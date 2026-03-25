@@ -64,7 +64,7 @@ Status note: `Implemented — Evidence Pending` means repo-truth implementation 
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 2.1 | Same canonical project identity — PWA resolves from route, SPFx from siteUrl during web part initialization before any project content renders | Implemented — Evidence Pending | | Evidence must include SPFx initialization proof: `siteUrl -> registry -> projectId`, project-store seeding, and smart-empty-state fallback when the registry does not resolve. P3-B1 §2, P3-G3 §3.1 |
+| 2.1 | Same canonical project identity — PWA resolves from route, SPFx from siteUrl during web part initialization before any project content renders | Implemented — Evidence Pending | | Evidence must include SPFx initialization proof: `siteUrl -> registry -> projectId`, project-store seeding, smart-empty-state fallback when the registry does not resolve, and Stage 10.3 proof that any project-scoped SPFx-to-PWA escalation deep link is built from the same canonical `projectId`. P3-B1 §2, P3-G2 §5, P3-G3 §3.1 |
 | 2.2 | Same membership validation — P3-A2 rules enforced in both lanes | Implemented — Evidence Pending | | P3-A2 §6, P3-G3 §3.2 |
 | 2.3 | Project Hub root entry and smart project switching — multi-project `/project-hub` lands on portfolio root first, single-project `/project-hub` auto-routes to `/project-hub/{projectId}`, PWA switching uses same-section resolution with Control Center fallback, SPFx remains host-aware | Implemented — Evidence Pending | | Evidence must capture actual URL transitions, preserved `projectId`, and restored portfolio-root state after Back to Portfolio. P3-B1 §2, §5; P3-G3 §3.3 |
 | 2.4 | Cross-lane handoff identity — projectId preserved during SPFx<->PWA | Implemented — Evidence Pending | | P3-G2 §5, P3-G3 §3.4 |
@@ -378,8 +378,8 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | 8.2 | Project Hub root entry, Back to Portfolio, and project switching — PWA owns portfolio/root continuity and same-section switching with Control Center fallback; SPFx remains host-aware | Not Started | | §9.2 staging scenario; evidence must include route captures, preserved `projectId`, and restored portfolio state |
 | 8.3 | Unauthorized or invalid project context handling — unauthorized/nonexistent project contexts remain in-shell with unchanged browser location; invalid module paths fall back only to the target project's Control Center | Not Started | | §9.2a staging scenario |
 | 8.4 | Stale draft handling — warning + refresh flow | Not Started | | §9.3 staging scenario |
-| 8.5 | Cross-lane launch SPFx->PWA — deep-link round-trip | Not Started | | §9.4 staging scenario; evidence must show canonical project route and preserved `projectId` |
-| 8.6 | Cross-lane launch PWA->SPFx — siteUrl navigation with registry-based SPFx initialization before module render, then landing on a governed Stage 10.2 module surface or explicit Launch-to-PWA affordance | Not Started | | §9.5 staging scenario; evidence must show no project-identity drift across the handoff, successful SPFx initialization or in-shell failure handling when unresolved, and module-by-module lane compliance after arrival |
+| 8.5 | Cross-lane launch SPFx->PWA — deep-link round-trip | Not Started | | §9.4 staging scenario; evidence must show canonical project route and preserved `projectId`, plus Stage 10.3 proof that the correct trigger exists on each governed module, dashboard, canvas, or reports/review surface for the applicable scenario |
+| 8.6 | Cross-lane launch PWA->SPFx — siteUrl navigation with registry-based SPFx initialization before module render, then landing on a governed Stage 10.2 module surface or explicit Launch-to-PWA affordance | Not Started | | §9.5 staging scenario; evidence must show no project-identity drift across the handoff, successful SPFx initialization or in-shell failure handling when unresolved, module-by-module lane compliance after arrival, and bidirectional proof that the landed SPFx surface exposes the correct Stage 10.3 escalation affordances where deeper workflow depth still belongs to PWA |
 | 8.7 | Module spine publication — all governed modules contributing through the correct publication contract or governed projection | Not Started | | §9.6 staging scenario |
 | 8.8 | Canvas governance — edit-mode enforcement | Not Started | | §9.7 staging scenario |
 | 8.9 | Report lifecycle — PX Review and Owner Report full cycle | Not Started | | §9.8 staging scenario |
@@ -436,9 +436,9 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | Aspect | Definition |
 |---|---|
 | **Preconditions** | User in SPFx project site; interaction requires PWA escalation |
-| **Steps** | 1. Trigger launch-to-PWA action (for example, Schedule file ingestion or Warranty mutation). 2. Verify deep-link URL construction. 3. Land in PWA. 4. Verify project identity preserved and inbound identifier normalized if needed. |
-| **Expected outcome** | PWA opens with correct project, module, and context |
-| **Pass criteria** | `projectId` matches; module page loads; no identity loss; `returnTo` parameter present if applicable; deep-link normalization does not change the target project |
+| **Steps** | 1. Trigger launch-to-PWA actions from each governed Stage 10.3 surface family: module pages (for example, Schedule import/history), dashboard or home/canvas actions (portfolio root, My Work, work queue, activity, advanced canvas administration), and reports / executive-review actions (run-ledger history, advanced draft recovery, review comparison, review history, artifact-specific thread management). 2. Verify deep-link URL construction for each triggered scenario. 3. Land in PWA. 4. Verify project identity preserved and inbound identifier normalized if needed. 5. For artifact-specific review thread management, verify the launch remains disabled until a concrete `reviewArtifactId` is provided. |
+| **Expected outcome** | PWA opens with correct project, module, and context for every governed Stage 10.3 scenario, and stays in-shell in SPFx when required launch context is unavailable |
+| **Pass criteria** | `projectId` matches when required; projectless launches target the correct portfolio-root or Personal Work Hub route; module page or workspace loads; no identity loss; `returnTo` parameter present if applicable; deep-link normalization does not change the target project; missing project or review-artifact context never fabricates a fallback launch |
 
 ### 9.5 Cross-lane launch PWA->SPFx
 
@@ -447,7 +447,7 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | **Preconditions** | User in PWA; wants SharePoint context for the project |
 | **Steps** | 1. Click "Open in SharePoint" or equivalent. 2. Verify `siteUrl` from registry used. 3. SPFx site opens in new tab. 4. Verify the web part resolves `siteUrl` through the registry before rendering project content. 5. If the registry cannot resolve the site, verify the surface remains in-shell and renders `@hbc/smart-empty-state` rather than project content. |
 | **Expected outcome** | SPFx project site opens with correct project and lands on a governed Stage 10.2 module surface, or fails safely with in-shell guidance when no canonical registry record exists |
-| **Pass criteria** | Correct `siteUrl` used; project resolves in SPFx before module render; new tab opens; unresolved site does not fabricate project context and instead shows smart empty state; landed SPFx route shows a real in-lane module surface or explicit Launch-to-PWA action instead of a generic placeholder |
+| **Pass criteria** | Correct `siteUrl` used; project resolves in SPFx before module render; new tab opens; unresolved site does not fabricate project context and instead shows smart empty state; landed SPFx route shows a real in-lane module surface or explicit Launch-to-PWA action instead of a generic placeholder; if the landed surface has Stage 10.3 depth boundaries, the correct escalation trigger is present immediately after arrival |
 
 ### 9.6 Module spine publication
 
@@ -490,7 +490,7 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | Aspect | Definition |
 |---|---|
 | **Preconditions** | PER user scoped to a project; project has at least one confirmed PM report snapshot; review-capable module data available |
-| **Steps** | 1. PER opens project in PWA (full executive review experience). 2. PER annotates supported surfaces on Financial, Schedule, Constraints, Permits, Project Closeout, Project Startup, Subcontract Execution Readiness, and Warranty — verify Safety has no annotation affordance. 3. PER generates a reviewer-generated review run. 4. Verify run uses latest confirmed PM snapshot (not draft); `runType: 'reviewer-generated'` recorded in run ledger. 5. Verify PM-owned draft state unchanged. 6. PER pushes finding to project team (§9.9 flow). 7. From SPFx, PER accesses the same supported surfaces — verify broad interaction available; verify thread management / multi-run comparison / history depth triggers Launch-to-PWA escalation. 8. Verify PER cannot write to module source-of-truth fields on any surface. |
+| **Steps** | 1. PER opens project in PWA (full executive review experience). 2. PER annotates supported surfaces on Financial, Schedule, Constraints, Permits, Project Closeout, Project Startup, Subcontract Execution Readiness, and Warranty — verify Safety has no annotation affordance. 3. PER generates a reviewer-generated review run. 4. Verify run uses latest confirmed PM snapshot (not draft); `runType: 'reviewer-generated'` recorded in run ledger. 5. Verify PM-owned draft state unchanged. 6. PER pushes finding to project team (§9.9 flow). 7. From SPFx, PER accesses the same supported surfaces — verify broad interaction available; verify thread management, multi-run comparison, review history, run-ledger history, and advanced draft recovery all trigger the governed Stage 10.3 PWA escalation paths from the reports / review-adjacent surface. 8. Verify PER cannot write to module source-of-truth fields on any surface. |
 | **Expected outcome** | Full executive review loop runs end-to-end; annotation isolation preserved; reviewer-generated run uses confirmed snapshot only; Safety exclusion enforced; lane-depth doctrine observed |
 | **Pass criteria** | Annotation isolation confirmed (no module record mutations); reviewer run `runType` correct; PM draft state unchanged; Safety shows no annotation affordance; SPFx lane escalation triggers on depth operations; PER source-of-truth write blocked |
 
@@ -595,7 +595,7 @@ The following items are **explicitly deferred** from Phase 3 and MUST NOT be sil
 | P3-G2 | Cross-Lane Navigation and Handoff Map | G | Specification |
 | P3-G3 | Lane-Specific Acceptance Matrix | G | Specification |
 | P3-H1 | Acceptance, Staging, and Release-Readiness Checklist | H | Active Reference |
-| P3-J1 | Documents Enabling Seams and Contracts | J | In Progress — E1–E5 complete (v0.2.15–v0.2.19); E6–E8 pending |
+| P3-J1 | Documents Enabling Seams and Contracts | J | In Progress — E1–E6 complete (v0.2.15–v0.2.20); E7–E8 pending |
 
 **Total:** 32 primary deliverables. 29 active locked artifacts (Contract/Specification/Note). 1 Superseded Reference (P3-E12). 1 Active Reference (this document). 1 Not Started Specification (P3-J1).
 
