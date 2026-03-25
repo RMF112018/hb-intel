@@ -49,6 +49,8 @@ export * from './document-vocabulary/index.js';
 
 export * from './document-publish-seams/index.js';
 
+export * from './document-preview-adaptive/index.js';
+
 export * from './reports/index.js';
 
 export * from './spfx-lane/index.js';
