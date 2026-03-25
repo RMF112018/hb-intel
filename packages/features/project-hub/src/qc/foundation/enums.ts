@@ -260,10 +260,12 @@ export type CorrectiveActionState =
 export type DeviationState =
   | 'DRAFT'
   | 'SUBMITTED'
+  | 'UNDER_REVIEW'
   | 'APPROVED'
   | 'REJECTED'
   | 'EXPIRED'
-  | 'WITHDRAWN';
+  | 'WITHDRAWN'
+  | 'RESOLVED';
 
 /** EvidenceReference state per T03 §2.4. */
 export type EvidenceRefState =

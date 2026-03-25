@@ -176,7 +176,7 @@ export const CORRECTIVE_ACTION_STATES = [
 ] as const satisfies ReadonlyArray<CorrectiveActionState>;
 
 export const DEVIATION_STATES = [
-  'DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'EXPIRED', 'WITHDRAWN',
+  'DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'EXPIRED', 'WITHDRAWN', 'RESOLVED',
 ] as const satisfies ReadonlyArray<DeviationState>;
 
 export const EVIDENCE_REF_STATES = [

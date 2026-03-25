@@ -143,8 +143,8 @@ describe('QC record-families contract stability', () => {
       expect(QC_CORRECTIVE_ACTION_VALID_TRANSITIONS).toHaveLength(10);
     });
 
-    it('QC_DEVIATION_VALID_TRANSITIONS has 7 entries', () => {
-      expect(QC_DEVIATION_VALID_TRANSITIONS).toHaveLength(7);
+    it('QC_DEVIATION_VALID_TRANSITIONS has 11 entries', () => {
+      expect(QC_DEVIATION_VALID_TRANSITIONS).toHaveLength(11);
     });
 
     it('QC_FAMILIES_REQUIRING_RESPONSIBLE_PARTY has 10 entries', () => {
@@ -173,8 +173,8 @@ describe('QC record-families contract stability', () => {
       expect(QC_CORRECTIVE_ACTION_TERMINAL_STATES).toHaveLength(2);
     });
 
-    it('QC_DEVIATION_TERMINAL_STATES has 4 entries', () => {
-      expect(QC_DEVIATION_TERMINAL_STATES).toHaveLength(4);
+    it('QC_DEVIATION_TERMINAL_STATES has 5 entries', () => {
+      expect(QC_DEVIATION_TERMINAL_STATES).toHaveLength(5);
     });
   });
 

@@ -377,7 +377,11 @@ export const QC_DEVIATION_VALID_TRANSITIONS: ReadonlyArray<{
   { from: 'SUBMITTED', to: 'APPROVED' },
   { from: 'SUBMITTED', to: 'REJECTED' },
   { from: 'SUBMITTED', to: 'WITHDRAWN' },
+  { from: 'SUBMITTED', to: 'UNDER_REVIEW' },
+  { from: 'UNDER_REVIEW', to: 'APPROVED' },
+  { from: 'UNDER_REVIEW', to: 'REJECTED' },
   { from: 'APPROVED', to: 'EXPIRED' },
+  { from: 'APPROVED', to: 'RESOLVED' },
   { from: 'REJECTED', to: 'DRAFT' },
 ];
 
@@ -398,6 +402,7 @@ export const QC_DEVIATION_TERMINAL_STATES = [
   'REJECTED',
   'EXPIRED',
   'WITHDRAWN',
+  'RESOLVED',
 ] as const satisfies ReadonlyArray<DeviationState>;
 
 // -- Families Requiring Responsible Party --------------------------------------
