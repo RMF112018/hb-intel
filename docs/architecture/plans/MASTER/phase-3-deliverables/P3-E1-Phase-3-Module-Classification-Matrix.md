@@ -104,7 +104,7 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 
 | Module | PH7 Plan | Current repo state | Status |
 |---|---|---|---|
-| Quality Control | P3-E15 (supersedes PH7-7 as Phase 3 authority) | Stage 1 foundation complete in `@hbc/features-project-hub` v0.1.91 — T01–T03 governance, record families, authority model, versioning, role matrix contracts | **Controlled evolution** |
+| Quality Control | P3-E15 (supersedes PH7-7 as Phase 3 authority) | Stage 2 governance complete in `@hbc/features-project-hub` v0.1.92 — T02 governance ownership and versioning contracts: governed standard lifecycle, project extension lifecycle, promotion workflow, update notice adoption, conflict handling, write-action authority matrix | **Controlled evolution** |
 | Warranty | PH7-8 | No production implementation | **Controlled evolution** |
 
 ### 1.5 PH7 plan inventory
