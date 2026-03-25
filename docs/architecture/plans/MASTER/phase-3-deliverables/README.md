@@ -717,6 +717,7 @@ Status: **Implemented 2026-03-25 in `@hbc/spfx-project-hub` v0.0.11.** Card weig
 **11.7 — Empty state verification**
 Verify every data-dependent zone has an `HbcSmartEmptyState` or `HbcEmptyState` configured with actionable next-step guidance. No zone may render a blank area or a null state without guidance. Verify empty state text is context-specific ("No constraints yet. Typical next step: log the first delay impact.").
 Governing: P3-C1 §14.2 MB-01; UI-Kit-Usage-and-Composition-Guide.md
+Status: **Implemented 2026-03-25 in `@hbc/spfx-project-hub` v0.0.12.** Empty state audit: DashboardPage ✓ (personalization unavailable), ProjectModulePage ✓ (module surface unavailable), App.tsx ✓ (initialization failure), DocumentsPage/PreconstructionPage/TeamPage ✓ (all with HbcSmartEmptyState). Gap closed: ProjectHubSpfxLaneSurface now renders HbcSmartEmptyState inline when spfxCapabilities is empty instead of blank list. All data-dependent zones covered with context-specific guidance. Stage 11.7 empty state verification complete.
 
 **11.8 — Phase 2 UI precedent compliance**
 Verify: (a) all Project Hub KPI card surfaces use `DashboardLayout` + `HbcKpiCard`; (b) module detail views with primary content + context panel use the two-column persistent layout established in Phase 2; (c) all primary action buttons use context-sensitive CTA labels (no generic "Submit"/"OK"); (d) project color coding from Phase 2 is preserved in the project context header.

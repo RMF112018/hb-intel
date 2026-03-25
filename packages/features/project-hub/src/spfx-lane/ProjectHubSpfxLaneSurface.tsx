@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
+import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import {
   HBC_BREAKPOINT_SIDEBAR,
   HBC_DENSITY_TOKENS,
@@ -128,6 +130,32 @@ function resolveDepthBadge(depth: ProjectHubSpfxLaneDepth): {
   }
 }
 
+/** Stage 11.7: empty-state config for module surface with no capabilities */
+const CAPABILITIES_EMPTY_CONFIG: ISmartEmptyStateConfig = {
+  resolve: (context) => ({
+    module: context.module,
+    view: context.view,
+    classification: 'truly-empty',
+    heading: 'No capabilities defined for this module in the SPFx lane',
+    description:
+      'This module surface does not have governed SPFx capabilities assigned for Phase 3. ' +
+      'Use the Project Hub tool picker to navigate to a module with active SPFx lane depth.',
+    coachingTip:
+      'Module capabilities are governed by the Phase 3 lane-depth matrix. ' +
+      'If this module should have SPFx capabilities, check the governing P3-G1 lane assignment.',
+  }),
+};
+
+const CAPABILITIES_EMPTY_CONTEXT: IEmptyStateContext = {
+  module: 'project-hub',
+  view: 'spfx-module-capabilities',
+  hasActiveFilters: false,
+  hasPermission: true,
+  isFirstVisit: false,
+  currentUserRole: 'user',
+  isLoadError: false,
+};
+
 export interface ProjectHubSpfxLaneSurfaceProps {
   readonly definition: ProjectHubSpfxModuleDefinition;
   readonly projectName: string;
@@ -191,19 +219,27 @@ export function ProjectHubSpfxLaneSurface({
           <CardHeader
             header={<Text weight="semibold">Available in this SPFx lane</Text>}
             description={
-              <ul
-                className={mergeClasses(
-                  styles.capabilityList,
-                  activeDensityTier === 'comfortable' && styles.capabilityListComfortable,
-                  activeDensityTier === 'touch' && styles.capabilityListTouch,
-                )}
-              >
-                {definition.spfxCapabilities.map((capability) => (
-                  <li key={capability}>
-                    <Text>{capability}</Text>
-                  </li>
-                ))}
-              </ul>
+              definition.spfxCapabilities.length > 0 ? (
+                <ul
+                  className={mergeClasses(
+                    styles.capabilityList,
+                    activeDensityTier === 'comfortable' && styles.capabilityListComfortable,
+                    activeDensityTier === 'touch' && styles.capabilityListTouch,
+                  )}
+                >
+                  {definition.spfxCapabilities.map((capability) => (
+                    <li key={capability}>
+                      <Text>{capability}</Text>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <HbcSmartEmptyState
+                  config={CAPABILITIES_EMPTY_CONFIG}
+                  context={CAPABILITIES_EMPTY_CONTEXT}
+                  variant="inline"
+                />
+              )
             }
           />
         </Card>
