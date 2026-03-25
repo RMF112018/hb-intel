@@ -104,7 +104,7 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 
 | Module | PH7 Plan | Current repo state | Status |
 |---|---|---|---|
-| Quality Control | P3-E15 (supersedes PH7-7 as Phase 3 authority) | Stage 4 plans-reviews complete in `@hbc/features-project-hub` v0.1.94 — T04 quality plans, reviews, control gates: soft-gate status lifecycle, plan readiness posture, coverage rules, finding-to-issue spawn, two-depth activation model | **Controlled evolution** |
+| Quality Control | P3-E15 (supersedes PH7-7 as Phase 3 authority) | Stage 5 issues-actions complete in `@hbc/features-project-hub` v0.1.95 — T05 issues, corrective actions, work queue publication: origination modes with lineage, verifier-only closure, root-cause qualification, parent-child coupling, SLA/escalation model, normalized WQ publication contract | **Controlled evolution** |
 | Warranty | PH7-8 | No production implementation | **Controlled evolution** |
 
 ### 1.5 PH7 plan inventory
