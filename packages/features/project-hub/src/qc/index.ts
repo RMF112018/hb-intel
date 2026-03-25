@@ -7,3 +7,4 @@ export * from './foundation/index.js';
 export * from './governance/index.js';
 export * from './record-families/index.js';
 export * from './plans-reviews/index.js';
+export * from './issues-actions/index.js';

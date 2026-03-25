@@ -365,6 +365,7 @@ export type VersionDriftAlertState =
 /** QcIssue origin classification per T03 §2.3. */
 export type QcIssueOrigin =
   | 'FINDING'
+  | 'GATE'
   | 'AD_HOC'
   | 'ADVISORY'
   | 'DEVIATION_FALLBACK';

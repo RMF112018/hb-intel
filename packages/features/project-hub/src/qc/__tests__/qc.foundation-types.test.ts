@@ -143,7 +143,7 @@ describe('P3-E15-T10 Stage 1 QC foundation contract stability', () => {
     it('AdvisoryVerdictState has 2', () => { expect(ADVISORY_VERDICT_STATES).toHaveLength(2); });
     it('AdvisoryExceptionState has 5', () => { expect(ADVISORY_EXCEPTION_STATES).toHaveLength(5); });
     it('VersionDriftAlertState has 5', () => { expect(VERSION_DRIFT_ALERT_STATES).toHaveLength(5); });
-    it('QcIssueOrigin has 4', () => { expect(QC_ISSUE_ORIGINS).toHaveLength(4); });
+    it('QcIssueOrigin has 5', () => { expect(QC_ISSUE_ORIGINS).toHaveLength(5); });
   });
 
   // -- Label maps ---------------------------------------------------------------

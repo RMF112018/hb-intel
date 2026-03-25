@@ -233,7 +233,7 @@ export const VERSION_DRIFT_ALERT_STATES = [
 ] as const satisfies ReadonlyArray<VersionDriftAlertState>;
 
 export const QC_ISSUE_ORIGINS = [
-  'FINDING', 'AD_HOC', 'ADVISORY', 'DEVIATION_FALLBACK',
+  'FINDING', 'GATE', 'AD_HOC', 'ADVISORY', 'DEVIATION_FALLBACK',
 ] as const satisfies ReadonlyArray<QcIssueOrigin>;
 
 // -- Label Maps -----------------------------------------------------------------
