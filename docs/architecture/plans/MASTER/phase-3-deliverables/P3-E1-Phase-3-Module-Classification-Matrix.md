@@ -104,7 +104,7 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 
 | Module | PH7 Plan | Current repo state | Status |
 |---|---|---|---|
-| Quality Control | P3-E15 (supersedes PH7-7 as Phase 3 authority) | Stage 8 health-scorecards complete in `@hbc/features-project-hub` v0.1.98 — T08 health, scorecards, root cause, responsible-org performance: 5 scorecard domains with numeric scores, status band classification, confidence tiers, structured numeric rollup inputs, governed learning pipeline, drilldown descriptors | **Controlled evolution** |
+| Quality Control | P3-E15 (supersedes PH7-7 as Phase 3 authority) | Stage 9 schedule-handoffs complete in `@hbc/features-project-hub` v0.1.99 — T09 schedule awareness, lifecycle handoffs, downstream integrations: read-only schedule refs, quality readiness signals, preserved-lineage handoff contracts to Closeout/Startup/Warranty/Site Controls, baseline-visible surfaces | **Controlled evolution** |
 | Warranty | PH7-8 | No production implementation | **Controlled evolution** |
 
 ### 1.5 PH7 plan inventory
