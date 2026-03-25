@@ -790,6 +790,7 @@ Status: **Implemented 2026-03-25 in `@hbc/features-project-hub` v0.2.18.** Docum
 **13.6 — Preview and adaptive tablet/field contract (E7)**
 Define the project-scoped preview/details surface contract. Define adaptive behavior requirements for desktop, tablet, and field mode. Bind those requirements to `@hbc/ui-kit` adaptive standards. Keep preview-provider choice abstract so Phase 5 can implement without redesigning the Project Hub surface.
 Governing: P3-J1 §3 E7
+Status: **Implemented 2026-03-25 in `@hbc/features-project-hub` v0.2.21.** Preview/adaptive contracts: 4 enum type unions, 4 interface contracts, governed constants (12-row adaptive behavior matrix, 4 ui-kit dependencies, provider-abstract preview shell contract, preview-first readiness check), 8 business rules enforcing no-native-open-first and no-desktop-only assumptions; 39 tests. Stage 13.6 E7 preview adaptive complete.
 
 **13.7 — Publish/handoff intent seams (E6)**
 Define event and payload shapes for publish requested, destination suggested, handoff requested, publish completed, and publish failed. Identify where `@hbc/workflow-handoff`, `@hbc/publish-workflow`, and `@hbc/notification-intelligence` will bind in Phase 5. Add lightweight UI affordances only where they support current Project Hub clarity. Phase 5 must be able to add guided publish/handoff without changing Project Hub's domain contracts.

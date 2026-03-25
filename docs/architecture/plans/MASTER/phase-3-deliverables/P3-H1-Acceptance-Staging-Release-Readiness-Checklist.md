@@ -595,7 +595,7 @@ The following items are **explicitly deferred** from Phase 3 and MUST NOT be sil
 | P3-G2 | Cross-Lane Navigation and Handoff Map | G | Specification |
 | P3-G3 | Lane-Specific Acceptance Matrix | G | Specification |
 | P3-H1 | Acceptance, Staging, and Release-Readiness Checklist | H | Active Reference |
-| P3-J1 | Documents Enabling Seams and Contracts | J | In Progress — E1–E6 complete (v0.2.15–v0.2.20); E7–E8 pending |
+| P3-J1 | Documents Enabling Seams and Contracts | J | In Progress — E1–E7 complete (v0.2.15–v0.2.21); E8 pending |
 
 **Total:** 32 primary deliverables. 29 active locked artifacts (Contract/Specification/Note). 1 Superseded Reference (P3-E12). 1 Active Reference (this document). 1 Not Started Specification (P3-J1).
 
