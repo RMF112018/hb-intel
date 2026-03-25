@@ -11,3 +11,4 @@ export * from './issues-actions/index.js';
 export * from './deviations-evidence/index.js';
 export * from './submittal-advisory/index.js';
 export * from './health-scorecards/index.js';
+export * from './schedule-handoffs/index.js';
