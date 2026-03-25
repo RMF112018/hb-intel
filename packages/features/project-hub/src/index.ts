@@ -41,4 +41,6 @@ export * from './document-launch/index.js';
 
 export * from './document-zones/index.js';
 
+export * from './document-entry/index.js';
+
 export * from './reports/index.js';
