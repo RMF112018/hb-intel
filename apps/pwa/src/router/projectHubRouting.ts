@@ -53,7 +53,7 @@ export type ProjectHubProjectResolution =
       reason: ProjectHubDeniedReason;
     };
 
-const PROJECT_HUB_SUPPORTED_SECTIONS = new Set(['health']);
+const PROJECT_HUB_SUPPORTED_SECTIONS = new Set(['health', 'reports']);
 
 export function validateProjectHubSearch(search: Record<string, unknown>): ProjectHubSearch {
   return {
@@ -170,4 +170,3 @@ export function resolveProjectHubSwitchTarget(params: {
     result.targetPath === '/' ? null : result.targetPath.replace(/^\//, ''),
   );
 }
-

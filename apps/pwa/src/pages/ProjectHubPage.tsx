@@ -6,6 +6,12 @@ import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
 import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import type { IActiveProject } from '@hbc/models';
 import {
+  PROJECT_HUB_BASELINE_REPORT_FAMILIES,
+  PROJECT_HUB_REPORT_MODULE_AUDIT,
+  getProjectHubReportsSummary,
+} from '@hbc/features-project-hub';
+import type { IProjectHubReportModuleAuditRow } from '@hbc/features-project-hub';
+import {
   getProjectHubPortfolioState,
   reconcileProjectContext,
   saveProjectHubPortfolioState,
@@ -18,6 +24,20 @@ const columns: ColumnDef<IActiveProject, unknown>[] = [
   { accessorKey: 'status', header: 'Status' },
   { accessorKey: 'startDate', header: 'Start Date' },
   { accessorKey: 'endDate', header: 'End Date' },
+];
+
+interface ReportAuditTableRow {
+  readonly module: string;
+  readonly implementation: string;
+  readonly consumableToday: string;
+  readonly baselineUsage: string;
+}
+
+const reportColumns: ColumnDef<ReportAuditTableRow, unknown>[] = [
+  { accessorKey: 'module', header: 'Module' },
+  { accessorKey: 'implementation', header: 'Implementation Status' },
+  { accessorKey: 'consumableToday', header: 'Reports Can Consume Today' },
+  { accessorKey: 'baselineUsage', header: 'Recommended Baseline Usage' },
 ];
 
 const PROJECT_HUB_NO_ACCESS_CONFIG: ISmartEmptyStateConfig = {
@@ -203,6 +223,7 @@ export interface ProjectHubControlCenterPageProps {
   projects: IActiveProject[];
   section?: string | null;
   onBackToPortfolio: () => void;
+  onOpenReports?: () => void;
 }
 
 export function ProjectHubControlCenterPage({
@@ -210,6 +231,7 @@ export function ProjectHubControlCenterPage({
   projects,
   section,
   onBackToPortfolio,
+  onOpenReports,
 }: ProjectHubControlCenterPageProps): ReactNode {
   useEffect(() => {
     syncProjectStore(projects, project);
@@ -222,10 +244,24 @@ export function ProjectHubControlCenterPage({
     { label: 'End Date', value: project.endDate },
   ];
 
+  const reportsSummary = useMemo(() => getProjectHubReportsSummary(), []);
+  const reportAuditRows = useMemo<ReportAuditTableRow[]>(
+    () =>
+      PROJECT_HUB_REPORT_MODULE_AUDIT.map((row: IProjectHubReportModuleAuditRow) => ({
+        module: row.module,
+        implementation: row.currentImplementationStatus,
+        consumableToday: row.canReportsConsumeToday,
+        baselineUsage: row.recommendedBaselineUsage,
+      })),
+    [],
+  );
+
+  const reportsSection = section === 'reports';
+
   return (
     <WorkspacePageShell
       layout="dashboard"
-      title="Project Hub Control Center"
+      title={reportsSection ? 'Project Hub Reports' : 'Project Hub Control Center'}
       stickyHeader
       headerSlot={
         <div style={{ padding: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -240,31 +276,129 @@ export function ProjectHubControlCenterPage({
         </div>
       }
     >
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: 16,
-        }}
-      >
-        {cards.map((card) => (
-          <Card key={card.label} size="small">
-            <CardHeader
-              header={<Text weight="semibold">{card.label}</Text>}
-              description={<Text size={700} weight="bold">{card.value}</Text>}
-            />
-          </Card>
-        ))}
-      </div>
-      <div style={{ marginTop: 24 }}>
-        <Text size={500} weight="semibold">
-          Project-scoped entry is now route-canonical.
-        </Text>
-        <Text size={300} style={{ display: 'block', marginTop: 8 }}>
-          Refresh, deep links, and in-shell project switching all keep this Control Center scoped to{' '}
-          {project.name}.
-        </Text>
-      </div>
+      {reportsSection ? (
+        <>
+          <Text size={400}>
+            This baseline Reports surface shows what Project Hub can actually support today. It does
+            not replace the future P3-F1-governed registry, run-ledger, generation, and release
+            lifecycle.
+          </Text>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: 16,
+              marginTop: 24,
+            }}
+          >
+            <Card size="small">
+              <CardHeader
+                header={<Text weight="semibold">Baseline Families</Text>}
+                description={<Text size={700} weight="bold">{String(reportsSummary.baselineFamilyCount)}</Text>}
+              />
+            </Card>
+            <Card size="small">
+              <CardHeader
+                header={<Text weight="semibold">Partial Source Modules</Text>}
+                description={<Text size={700} weight="bold">{String(reportsSummary.partialSourceCount)}</Text>}
+              />
+            </Card>
+            <Card size="small">
+              <CardHeader
+                header={<Text weight="semibold">Blocked Source Modules</Text>}
+                description={<Text size={700} weight="bold">{String(reportsSummary.blockedSourceCount)}</Text>}
+              />
+            </Card>
+            <Card size="small">
+              <CardHeader
+                header={<Text weight="semibold">Closeout Artifact Families</Text>}
+                description={<Text size={700} weight="bold">{String(reportsSummary.closeoutArtifactFamilyCount)}</Text>}
+              />
+            </Card>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gap: 16,
+              marginTop: 24,
+            }}
+          >
+            {PROJECT_HUB_BASELINE_REPORT_FAMILIES.map((family) => (
+              <Card key={family.key} size="small">
+                <CardHeader
+                  header={<Text weight="semibold">{family.label}</Text>}
+                  description={<Text size={200}>{family.currentStatus}</Text>}
+                />
+                <div style={{ padding: '0 16px 16px' }}>
+                  <Text size={200}>{family.purpose}</Text>
+                  <Text size={200} style={{ display: 'block', marginTop: 8 }}>
+                    Source modules: {family.sourceModules.join(', ')}
+                  </Text>
+                  <Text size={200} style={{ display: 'block', marginTop: 8 }}>
+                    Recommended usage: {family.recommendedUsage}
+                  </Text>
+                  <Text size={200} style={{ display: 'block', marginTop: 8 }}>
+                    Current blocker: {family.blocker}
+                  </Text>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 24 }}>
+            <Text size={500} weight="semibold">
+              Module readiness audit
+            </Text>
+            <Text size={200} style={{ display: 'block', marginTop: 8 }}>
+              This matrix stays strict about repo truth: module-local report definitions do not
+              count as a central Reports source until a normalized adapter exists.
+            </Text>
+            <div style={{ marginTop: 16 }}>
+              <HbcDataTable<ReportAuditTableRow>
+                data={reportAuditRows}
+                columns={reportColumns}
+                height="480px"
+              />
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: 16,
+            }}
+          >
+            {cards.map((card) => (
+              <Card key={card.label} size="small">
+                <CardHeader
+                  header={<Text weight="semibold">{card.label}</Text>}
+                  description={<Text size={700} weight="bold">{card.value}</Text>}
+                />
+              </Card>
+            ))}
+          </div>
+          <div style={{ marginTop: 24 }}>
+            <Text size={500} weight="semibold">
+              Project-scoped entry is now route-canonical.
+            </Text>
+            <Text size={300} style={{ display: 'block', marginTop: 8 }}>
+              Refresh, deep links, and in-shell project switching all keep this Control Center scoped to{' '}
+              {project.name}.
+            </Text>
+            {onOpenReports ? (
+              <div style={{ marginTop: 16 }}>
+                <HbcButton onClick={onOpenReports}>Open Reports Baseline</HbcButton>
+              </div>
+            ) : null}
+          </div>
+        </>
+      )}
     </WorkspacePageShell>
   );
 }

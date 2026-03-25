@@ -127,6 +127,9 @@ function ProjectHubProjectRouteComponent(): ReactNode {
       onBackToPortfolio: () => {
         void navigate({ to: '/project-hub' });
       },
+      onOpenReports: () => {
+        void navigate({ to: `/project-hub/${data.project.id}/reports` });
+      },
     });
   }
 
@@ -154,6 +157,9 @@ function ProjectHubSectionRouteComponent(): ReactNode {
       section: data.section,
       onBackToPortfolio: () => {
         void navigate({ to: '/project-hub' });
+      },
+      onOpenReports: () => {
+        void navigate({ to: `/project-hub/${data.project.id}/reports` });
       },
     });
   }

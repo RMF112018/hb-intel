@@ -14,7 +14,7 @@ Every section in every registered report family has a `contentType` (defined in 
 
 | Content Type | Data Source | PM May Override? | Project May Bind? |
 |--------------|-------------|-----------------|-------------------|
-| `module-snapshot` | Immutable snapshot from a source module (e.g., P3-E5 Financial, P3-E6 Schedule) | Narrative overlay only | No data binding |
+| `module-snapshot` | Immutable snapshot from a source module (e.g., P3-E4 Financial, P3-E5 Schedule) | Narrative overlay only | No data binding |
 | `calculated-rollup` | MOE-approved rollup formula applied to snapshot data | Narrative overlay only | No formula override |
 | `narrative-only` | PM-authored free text; no data source | Full authorship | N/A — text is the content |
 
@@ -43,7 +43,7 @@ Each source module that a report family depends on must implement a snapshot API
    - The data payload (module-specific structure, opaque to Reports)
 3. Reports freezes the snapshot association on the run record.
 
-The snapshot API contract for each source module is specified in that module's T-file family (e.g., P3-E5-T09 for Financial, P3-E6-T09 for Schedule).
+The snapshot API contract for each source module is specified in that module's T-file family (e.g., P3-E4-T09 for Financial, P3-E5-T09 for Schedule).
 
 ### 2.2 Snapshot Readiness Check
 
@@ -69,12 +69,12 @@ PX Review is a locked corporate template (`isLocked: true`). Its section structu
 | Section Key | Content Type | Source Module |
 |-------------|-------------|---------------|
 | `project-overview` | `module-snapshot` | P3-A1 (Project Registry) |
-| `financial-summary` | `calculated-rollup` | P3-E5 (Financial) |
-| `schedule-summary` | `calculated-rollup` | P3-E6 (Schedule) |
+| `financial-summary` | `calculated-rollup` | P3-E4 (Financial) |
+| `schedule-summary` | `calculated-rollup` | P3-E5 (Schedule) |
 | `safety-summary` | `calculated-rollup` | P3-E8 (Safety) |
-| `quality-summary` | `module-snapshot` | P3-E4 (QC) — if available; otherwise omit |
-| `constraints-summary` | `module-snapshot` | P3-E7 (Permits & Constraints) |
-| `open-items-summary` | `calculated-rollup` | P3-E3 (Action Items / RFIs) |
+| `quality-summary` | `module-snapshot` | P3-E15 (QC) — only when a governed QC snapshot is available; otherwise omit |
+| `constraints-summary` | `module-snapshot` | P3-E6 (Constraints) |
+| `open-items-summary` | `calculated-rollup` | P3-D3 (Work Queue) |
 | `executive-narrative` | `narrative-only` | PM-authored |
 | `forecast-and-risk` | `narrative-only` | PM-authored |
 
@@ -89,10 +89,10 @@ Owner Report is a corporate configurable template. MOE defines the base section 
 | Section Key | Content Type | Source Module | Optional? |
 |-------------|-------------|---------------|-----------|
 | `project-status-summary` | `module-snapshot` | P3-A1 (Project Registry) | No |
-| `milestone-progress` | `calculated-rollup` | P3-E6 (Schedule) | No |
-| `budget-status` | `calculated-rollup` | P3-E5 (Financial) | No |
+| `milestone-progress` | `calculated-rollup` | P3-E5 (Schedule) | No |
+| `budget-status` | `calculated-rollup` | P3-E4 (Financial) | No |
 | `safety-highlights` | `module-snapshot` | P3-E8 (Safety) — score band only | No |
-| `open-items` | `module-snapshot` | P3-E3 | Yes |
+| `open-items` | `module-snapshot` | P3-D3 (Work Queue) | Yes |
 | `owner-narrative` | `narrative-only` | PM-authored | No |
 | `upcoming-milestones` | `narrative-only` | PM-authored | No |
 

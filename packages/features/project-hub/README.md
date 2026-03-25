@@ -1,6 +1,6 @@
 # @hbc/features-project-hub
 
-Project Hub feature package for HB Intel, including Project Health Pulse plus Phase 3 contract-level module implementations for Financial, Schedule, Constraints, Permits, Safety, and Project Closeout.
+Project Hub feature package for HB Intel, including Project Health Pulse plus Phase 3 contract-level module implementations for Financial, Schedule, Constraints, Permits, Safety, Project Closeout, Startup, Subcontract Readiness, Warranty, QC foundation, and the baseline Project Hub reports catalog/readiness seam.
 
 ## 1. Pulse Overview and Value Proposition
 
@@ -217,6 +217,16 @@ T10 Stage 7 Project Execution Baseline (PM Plan): 5 record interfaces per T06: `
 T10 Stage 8 Baseline Lock and Closeout Continuity: `IStartupBaseline` Tier 4 immutable snapshot (22 fields per T02 §7.2) created atomically at `BASELINE_LOCKED`. 10 nested snapshot types (`ITaskLibrarySnapshot`, `ISafetyReadinessSnapshot`, `IPermitPostingSnapshotItem`, `IContractObligationsSnapshot`, `IResponsibilitySnapshot`, `IPrimaryAssignmentSnapshot`, `ICertificationSummaryAtLock`, `IApprovedWaiverAtLock`, `IOpenBlockerAtLock`, `IPEFlagAtLock`). 5-step atomic lock transaction per T01 §7.5 (snapshot→read-only→state advance→spine event→clear Work Queue). Closeout read API: `GET /api/startup/{projectId}/baseline` (200/403/404; PATCH/PUT/DELETE→405 BASELINE_IMMUTABLE). Triple immutability: snapshot itself (HTTP 405 always), all Tier 2 records (read-only), governed fields (locked). Related Items: `startup-baseline-feeds-autopsy` relationship. 9-entry Closeout delta analysis map (schedule/cost/risk/savings/safety/assumptions/success/team/lessons). Stage 8 spine: 1 Activity event (`StartupBaselineLocked`). Business rules: `isBaselineSnapshotComplete`, `isBaselineMutationAllowed`, `isBaselineReadAuthorized`, `canCreateBaselineSnapshot`, `getBaselineAPIResponse`. Testing fixtures: `createMockStartupBaseline`. See `src/startup/baseline-lock/`.
 
 **All 8 T10 implementation stages complete. Total: 630 tests across 16 test files.**
+
+## 17. Reports Baseline Seam (P3-E9 / P3-F1 integration boundary)
+
+`src/reports/` exposes the current baseline reporting surface that Project Hub can honestly support today:
+
+- baseline report catalog for `PX Review`, `Owner Report`, `Sub-scorecard`, and `Lessons-learned`
+- module-by-module source-readiness matrix for `P3-E4` through `P3-E15`
+- explicit distinction between source-contract readiness and missing central Reports runtime
+
+This is intentionally not a full Reports workspace. The P3-F1-governed registry, draft lifecycle, run ledger, generation pipeline, and release workflow remain separate implementation scope.
 
 ### P3-E11 Acceptance Sweep (v0.1.72)
 

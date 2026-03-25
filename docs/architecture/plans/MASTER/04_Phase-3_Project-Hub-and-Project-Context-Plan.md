@@ -758,6 +758,8 @@ Review Mode remains assigned to Phase 3, but this plan preserves the explicit go
 
 **Goal:** deliver a real reporting system, not two one-off report pages.
 
+**Repo-truth note — 2026-03-25.** `@hbc/features-project-hub` and the PWA Project Hub route now expose a baseline report catalog and source-readiness surface at `/project-hub/{projectId}/reports`. The full P3-F1 registry, draft, run-ledger, generation, and release lifecycle remains Workstream F delivery scope.
+
 **Activities**
 - Define report-definition registry
 - Define report draft/snapshot rules

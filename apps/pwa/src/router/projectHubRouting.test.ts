@@ -105,6 +105,21 @@ describe('projectHubRouting', () => {
     });
   });
 
+  it('treats reports as a supported project-hub section', async () => {
+    const result = await resolveProjectHubProjectEntry(
+      'proj-uuid-001',
+      'reports',
+      createRepo(PROJECTS),
+    );
+
+    expect(result).toEqual({
+      mode: 'project',
+      projects: PROJECTS,
+      project: PROJECTS[0],
+      section: 'reports',
+    });
+  });
+
   it('switches to the same supported section when available', () => {
     expect(
       resolveProjectHubSwitchTarget({
@@ -124,5 +139,14 @@ describe('projectHubRouting', () => {
       }),
     ).toBe('/project-hub/proj-uuid-002');
   });
-});
 
+  it('keeps the reports section during in-project switching', () => {
+    expect(
+      resolveProjectHubSwitchTarget({
+        currentProjectId: 'proj-uuid-001',
+        currentSection: 'reports',
+        targetProjectId: 'proj-uuid-002',
+      }),
+    ).toBe('/project-hub/proj-uuid-002/reports');
+  });
+});

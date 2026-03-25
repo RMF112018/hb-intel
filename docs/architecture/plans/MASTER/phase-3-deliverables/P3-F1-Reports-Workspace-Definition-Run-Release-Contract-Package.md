@@ -8,7 +8,7 @@
 | **Document Type** | Contract |
 | **Owner** | Project Hub platform owner + Architecture |
 | **Update Authority** | Architecture lead; changes require review by Experience lead and Project Hub platform owner |
-| **Last Reviewed Against Repo Truth** | 2026-03-21 |
+| **Last Reviewed Against Repo Truth** | 2026-03-25 |
 | **References** | [Phase 3 Plan §8.7, §12.6, §14.6](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [P3-E1](P3-E1-Phase-3-Module-Classification-Matrix.md); [P3-E2 §8](P3-E2-Module-Source-of-Truth-Action-Boundary-Matrix.md); [P3-E3 §7](P3-E3-Spreadsheet-Document-Replacement-Reference-Note-Set.md); [P3-A3 §7](P3-A3-Shared-Spine-Publication-Contract-Set.md); [P3-D1 §8.6](P3-D1-Project-Activity-Contract.md); [P3-D2 §11](P3-D2-Project-Health-Contract.md); [P3-D3 §12](P3-D3-Project-Work-Queue-Contract.md); [P3-D4 §9](P3-D4-Related-Items-Registry-Presentation-Contract.md); [P3-G1 §4.6](P3-G1-Lane-Capability-Matrix.md); [PH7-14](../../ph7-project-hub/PH7-ProjectHub-14-PXReview-OwnerReport.md) |
 | **Field-level specification** | [P3-E9 — Reports Module Field Specification](P3-E9-Reports-Module-Field-Specification.md) *(master index + T01–T10)* — governs template library architecture, project registration model, draft/active config version model, section source model, sub-scorecard/lessons-learned ingestion from P3-E10 (PE-approved snapshot; precondition: `publicationStatus ≥ PE_APPROVED`), PER review boundaries, lane depth, spine publication contracts, and acceptance gate |
 
@@ -33,7 +33,7 @@ Report-family approval rules are explicitly different (Phase 3 plan §8.7):
 - **PX Review requires explicit approval** before treated as approved/released.
 - **Owner Report does not require a separate explicit approval gate** but still participates in governed run, export, storage, and distribution tracking.
 
-**Repo-truth audit — 2026-03-21.** No production reporting implementation exists. PH7-14 (PX Review & Owner Report) provides detailed implementation specifications including API routes, auto-assembly logic, section layouts, and PDF generation requirements. PH7-14 is locked per ADR-0091 (Deferred Scope). P3-E3 §7 documents the manual report assembly workflow being replaced. No report-definition registry, run-ledger, or draft model exists. This is a **gap requiring new implementation**. See §1 for full reconciliation.
+**Repo-truth audit — 2026-03-25.** No full production reporting implementation exists. PH7-14 (PX Review & Owner Report) provides detailed implementation specifications including API routes, auto-assembly logic, section layouts, and PDF generation requirements. PH7-14 is locked per ADR-0091 (Deferred Scope). P3-E3 §7 documents the manual report assembly workflow being replaced. A baseline report catalog and source-readiness seam now exists in `@hbc/features-project-hub` and is surfaced at `/project-hub/{projectId}/reports`, but no report-definition registry, run-ledger, draft model, generation pipeline, or release workflow exists yet. This remains a **gap requiring new implementation**. See §1 for full reconciliation.
 
 ---
 
@@ -100,13 +100,14 @@ Report-family approval rules are explicitly different (Phase 3 plan §8.7):
 | Report draft/snapshot model | **Gap** | Does not exist — new implementation required |
 | Report run-ledger | **Gap** | Does not exist — new implementation required |
 | Report generation pipeline | **Gap** | Does not exist — new implementation required |
+| Baseline report catalog / source-readiness surface | **Implemented** | `@hbc/features-project-hub/src/reports` and `/project-hub/{projectId}/reports` expose the baseline catalog and module-readiness matrix; informational only, not a full Reports workspace |
 | PH7-14 (PX Review & Owner Report) | **Locked** — ADR-0091 (Deferred Scope) | Detailed implementation specs: API routes, auto-assembly logic, section layouts, PDF generation |
 | P3-E3 §7 replacement notes | **Locked** | Documents the manual assembly workflow being replaced |
 | P3-E1 §3.6 / §6.2 classification | **Locked** | Reports classified as governed report workspace |
 | P3-E2 §8 source-of-truth | **Locked** | Reports owns lifecycle, consumes module snapshots |
 | Spine publication requirements | **Locked** | P3-A3 §7 + P3-D1 §8.6 + P3-D2 §11 + P3-D3 §12 + P3-D4 §9 |
 
-**Classification:** No reporting implementation exists. All governing contracts are locked. This is a **gap requiring new implementation** with PH7-14 providing implementation-ready specifications.
+**Classification:** No full reporting workspace implementation exists. A baseline catalog/source-readiness seam is live, but the governed registry, draft, run-ledger, generation, approval, and release lifecycle remain a **gap requiring new implementation** with PH7-14 providing implementation-ready specifications.
 
 ---
 

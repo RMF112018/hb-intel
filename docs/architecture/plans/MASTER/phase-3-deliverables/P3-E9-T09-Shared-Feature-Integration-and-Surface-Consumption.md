@@ -75,12 +75,14 @@ Reports depends on snapshot APIs from multiple source modules. The following mod
 | Source Module | Used By | Snapshot Content |
 |---------------|---------|-----------------|
 | P3-A1 (Project Registry) | PX Review, Owner Report | Project metadata, team, contract summary |
-| P3-E3 (Action Items / Constraints) | PX Review (open-items-summary), Owner Report (open-items) | Open item counts, summaries |
-| P3-E5 (Financial) | PX Review, Owner Report | Budget, forecast, change orders, EVM indicators |
-| P3-E6 (Schedule) | PX Review, Owner Report | Milestones, percent complete, critical path summary |
-| P3-E7 (Permits & Constraints) | PX Review (constraints-summary) | Open permits, active constraints |
+| P3-D3 (Work Queue) | PX Review (open-items-summary), Owner Report (open-items) | Open item counts, assignments, aging summaries |
+| P3-E4 (Financial) | PX Review, Owner Report | Budget, forecast, change orders, EVM indicators |
+| P3-E5 (Schedule) | PX Review, Owner Report | Milestones, percent complete, critical path summary |
+| P3-E6 (Constraints) | PX Review (constraints-summary) | Open constraints, delay posture, published review-package summaries |
+| P3-E7 (Permits) | PX Review, Owner Report (optional posture summary) | Permit posture, inspection posture, expiration risk summaries |
 | P3-E8 (Safety) | PX Review, Owner Report | Safety posture band, composite score band, corrective actions summary |
 | P3-E10 (Closeout) | sub-scorecard, lessons-learned | Pre-computed scored data, lesson entries |
+| P3-E15 (QC) | PX Review (quality-summary) when implemented | QC health, readiness, and responsible-org rollup snapshots |
 
 Each source module's snapshot API contract is defined in its own T09 file. Reports consumes the envelope (`IModuleSnapshot` wrapper) and relies on the source module's schema reference for field-level rendering.
 
@@ -168,6 +170,8 @@ The Project Hub reads Reports data for:
 - **Activity feed** — Report lifecycle events shown in the project activity feed
 
 Project Hub does not embed the Reports UI directly; it surfaces summary state and links to the Reports module page.
+
+**Repo-truth note — 2026-03-25.** A baseline report catalog and source-readiness surface now exists inside Project Hub at `/project-hub/{projectId}/reports`. The full P3-F1 registry, run-ledger, generation, and release lifecycle remains separate implementation scope.
 
 ### 8.2 SPFx Hub Webpart Consumption
 

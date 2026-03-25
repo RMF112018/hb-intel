@@ -74,10 +74,27 @@ describe('ProjectHubPage', () => {
         project={{ ...PROJECTS[0] }}
         projects={[...PROJECTS]}
         onBackToPortfolio={() => undefined}
+        onOpenReports={() => undefined}
       />,
     );
 
     expect(screen.getByRole('button', { name: /back to portfolio/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /open reports baseline/i })).toBeTruthy();
+  });
+
+  it('renders the baseline reports section when requested', () => {
+    renderWithTheme(
+      <ProjectHubControlCenterPage
+        project={{ ...PROJECTS[0] }}
+        projects={[...PROJECTS]}
+        section="reports"
+        onBackToPortfolio={() => undefined}
+      />,
+    );
+
+    expect(screen.getByText(/this baseline reports surface shows/i)).toBeTruthy();
+    expect(screen.getAllByText(/PX Review/).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Module readiness audit/i)).toBeTruthy();
   });
 
   it('renders the Project Hub no-access smart-empty-state in-shell', () => {

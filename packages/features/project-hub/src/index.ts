@@ -34,5 +34,3 @@ export * from './warranty/index.js';
 export * from './qc/index.js';
 
 export * from './reports/index.js';
-
-export * from './qc/index.js';
