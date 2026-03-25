@@ -354,7 +354,7 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | 7.13 | PM narrative overrides with provenance | Not Started | | P3-F1 §11, P3-G3 §8, AC-REP-16 |
 | 7.14 | Export produces PDF stored in SharePoint | Not Started | | P3-F1 §9, P3-G3 §8, AC-REP-20 |
 | 7.15 | PER report permissions enforced — view/annotate/generate reviewer runs permitted; PM draft writes and source-of-truth mutations prohibited; no unconfirmed draft access | Not Started | | P3-F1 §8.5, P3-G3 §8, AC-REP-36-AC-REP-42 |
-| 7.16 | Reviewer-generated review runs — `runType: 'reviewer-generated'` uses only the latest confirmed PM snapshot; PM draft state untouched | Not Started | | P3-F1 §8.6, P3-G3 §8, AC-REP-23 |
+| 7.16 | Reviewer-generated review runs — `runType: 'reviewer-generated'` uses only the latest confirmed PM snapshot; PM draft state untouched | Complete | Run-ledger contracts + 14 business rules + 40 tests per P3-F1 §8.6 | P3-F1 §8.6, P3-G3 §8, AC-REP-23 |
 | 7.17 | Central project-governance policy record enforced — global floor + project overlay merged; Reports enforces, does not own; PE cannot loosen global floor | Not Started | | P3-F1 §14, P3-G3 §8, AC-REP-07 |
 | 7.18 | PM<->PE internal review chain blocks PX Review approval when configured | Not Started | | P3-F1 §14.5, P3-G3 §8, AC-REP-28 |
 | 7.19 | PER release authority per report family — `perReleaseAuthority` field respected per effective policy | Not Started | | P3-F1 §14.4, P3-G3 §8, AC-REP-34 |
@@ -376,7 +376,7 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | 8.8 | Canvas governance — edit-mode enforcement | Not Started | | §9.7 staging scenario |
 | 8.9 | Report lifecycle — PX Review and Owner Report full cycle | Not Started | | §9.8 staging scenario |
 | 8.10 | Push-to-Project-Team — structured tracked work item created; provenance preserved; closure loop requires PER confirmation | Not Started | | §9.9 staging scenario |
-| 8.11 | Executive review loop — PER annotation, reviewer-generated run, push-to-team, response, and closure flow works end-to-end | In Progress | 8.1 annotation contract complete; 8.2 isolation enforcement complete; 8.3 pending | §9.10 staging scenario |
+| 8.11 | Executive review loop — PER annotation, reviewer-generated run, push-to-team, response, and closure flow works end-to-end | In Progress | 8.1 annotation contract complete; 8.2 isolation enforcement complete; 8.3 reviewer-generated run complete; 8.4+ pending | §9.10 staging scenario |
 | 8.12 | Executive review lane depth — PWA provides full executive review experience; SPFx provides broad interaction with escalation to PWA for depth | Not Started | | §9.10 staging scenario, P3-G1 §4.9 |
 | 8.13 | Annotation isolation in review loop — PER review artifacts stored independently; no module source-of-truth mutations produced during review run | Complete | Contract + 10 domain table guards + 20 zero-write proof tests per P3-E2 §11.2 | §9.10 staging scenario, P3-E2 §11.2 |
 | 8.14 | Project Closeout lifecycle and lane behavior — Closeout sub-surfaces, approvals, snapshots, and lane-depth rules behave per governing docs | Not Started | | §9.11 staging scenario |
