@@ -343,7 +343,7 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | 7.2 | Owner Report family live — PWA full lifecycle, SPFx generate+release | Not Started | | P3-F1, P3-G3 §8, AC-REP-30 |
 | 7.3 | Sub-scorecard family live — ingests P3-E10 confirmed snapshot; assembles PDF; no score re-computation | Not Started | | P3-E9-T06 §5.3, AC-REP-43-AC-REP-46 |
 | 7.4 | Lessons-learned family live — ingests P3-E10 confirmed snapshot; assembles PDF | Not Started | | P3-E9-T06 §5.5, AC-REP-44, AC-REP-47 |
-| 7.5 | Corporate template registry live — 4 families registered; PX Review locked | Not Started | | P3-E9-T05 §1, AC-REP-01-AC-REP-03 |
+| 7.5 | Corporate template registry live — 4 families registered; PX Review locked | Complete | T01 foundation + T05 template governance contracts; 4 families in PHASE_3_REGISTERED_FAMILIES; locked constraints enforced | P3-E9-T05 §1, AC-REP-01-AC-REP-03 |
 | 7.6 | Draft/active configuration version model — structural changes require PE re-approval | Not Started | | P3-E9-T03 §1, AC-REP-05 |
 | 7.7 | Draft refresh — full handling PWA, refresh supported SPFx; PM narrative preserved | Not Started | | P3-F1 §4, P3-G3 §8, AC-REP-09-AC-REP-10 |
 | 7.8 | Staleness warning — shown before export in both lanes; acknowledgment gate | Not Started | | P3-F1 §5, P3-G3 §8, AC-REP-11-AC-REP-13 |
@@ -358,7 +358,7 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | 7.17 | Central project-governance policy record enforced — global floor + project overlay merged; Reports enforces, does not own; PE cannot loosen global floor | Not Started | | P3-F1 §14, P3-G3 §8, AC-REP-07 |
 | 7.18 | PM<->PE internal review chain blocks PX Review approval when configured | Not Started | | P3-F1 §14.5, P3-G3 §8, AC-REP-28 |
 | 7.19 | PER release authority per report family — `perReleaseAuthority` field respected per effective policy | Not Started | | P3-F1 §14.4, P3-G3 §8, AC-REP-34 |
-| 7.20 | Spine publication flowing — 4 Activity event types, health metric, 3 Work Queue item types, provenance related items | Not Started | | P3-E9-T08, AC-REP-49-AC-REP-55 |
+| 7.20 | Spine publication flowing — 4 Activity event types, health metric, 3 Work Queue item types, provenance related items | Complete | T08 spine-publication contracts: 4 activity events, Report Currency metric, 3 WQ items with deduplication, 2 related item types, 47 tests | P3-E9-T08, AC-REP-49-AC-REP-55 |
 
 ---
 

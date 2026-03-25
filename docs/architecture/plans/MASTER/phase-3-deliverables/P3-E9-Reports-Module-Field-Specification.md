@@ -1,6 +1,6 @@
 # P3-E9 — Reports Module Field Specification (Master Index)
 
-**Status:** Refactored into T-file family — this file is the master index and reading guide. T01–T08 implementation complete in `@hbc/features-project-hub` v0.2.13.
+**Status:** Refactored into T-file family — this file is the master index and reading guide. T01–T08 implementation complete; T09 integration reference; T10 acceptance sweep verified — all 55 AC-REP criteria verified at contract level in `@hbc/features-project-hub` v0.2.14.
 **Governing contract:** P3-F1 — Reports Workspace / Definition / Run / Release Contract Package.
 **Replaces:** Monolithic `P3-E9-Reports-Module-Field-Specification.md` (1,260 lines).
 **Pattern:** Follows T-file family structure established by P3-E4 through P3-E8.
