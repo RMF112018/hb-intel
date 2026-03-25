@@ -39,7 +39,7 @@ Phase 3 planning must explicitly acknowledge the following current-state foundat
 - A real **`/project-hub` route** already exists in the PWA (`apps/pwa/src/router/workspace-routes.ts`). The current `ProjectHubPage` is an **MVP-level scaffold** — a portfolio dashboard with summary cards and data table. Phase 3 now locks the target split: `/project-hub` is the meaningful unscoped portfolio root, while `/project-hub/{projectId}` is the canonical project-scoped Control Center route.
 - Supporting shared packages already exist at verified maturity levels:
   - `@hbc/project-canvas` (v0.0.1, mature — dist build, exports, storybook, tests; SF13, ADR-0102 locked)
-  - `@hbc/features-project-hub` (v0.1.87, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, Project Closeout, Project Startup, and Subcontract Execution Readiness are live; Project Warranty T10 Stages 1–6 implemented; P3-E15 Quality Control planning family authored and reconciled as implementation-ready architecture)
+  - `@hbc/features-project-hub` (v0.1.88, **active expansion** — SF21 health-pulse foundation plus contract-level implementations for Financial, Schedule, Constraints, Permits, Safety, Project Closeout, Project Startup, and Subcontract Execution Readiness are live; Project Warranty T10 Stages 1–7 implemented; P3-E15 Quality Control planning family authored and reconciled as implementation-ready architecture)
   - `@hbc/related-items` (v0.0.2, mature — cross-module record relationship panel)
   - `@hbc/workflow-handoff` (v0.1.0, mature — platform workflow primitive)
   - `@hbc/session-state` (v0.0.1, mature — SF12, ADR-0101 locked; offline model ready)

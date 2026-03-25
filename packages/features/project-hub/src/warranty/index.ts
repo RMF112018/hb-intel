@@ -9,3 +9,4 @@ export * from './coverage-registry/index.js';
 export * from './case-lifecycle/index.js';
 export * from './owner-intake/index.js';
 export * from './subcontractor-participation/index.js';
+export * from './ux-surfaces/index.js';
