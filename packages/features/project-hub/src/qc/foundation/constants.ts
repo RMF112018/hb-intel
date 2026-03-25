@@ -156,7 +156,7 @@ export const PROJECT_EXTENSION_STATES = [
 ] as const satisfies ReadonlyArray<ProjectExtensionState>;
 
 export const WORK_PACKAGE_PLAN_STATES = [
-  'DRAFT', 'IN_REVIEW', 'ACTIVE', 'REVISED', 'SUPERSEDED', 'CLOSED',
+  'DRAFT', 'IN_REVIEW', 'PRELIMINARILY_ACTIVE', 'ACTIVE', 'READY_FOR_CONTROL_GATES', 'REVISED', 'SUPERSEDED', 'CLOSED',
 ] as const satisfies ReadonlyArray<WorkPackagePlanState>;
 
 export const REVIEW_PACKAGE_STATES = [

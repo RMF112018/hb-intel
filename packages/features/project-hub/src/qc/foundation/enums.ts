@@ -211,7 +211,9 @@ export type ProjectExtensionState =
 export type WorkPackagePlanState =
   | 'DRAFT'
   | 'IN_REVIEW'
+  | 'PRELIMINARILY_ACTIVE'
   | 'ACTIVE'
+  | 'READY_FOR_CONTROL_GATES'
   | 'REVISED'
   | 'SUPERSEDED'
   | 'CLOSED';
