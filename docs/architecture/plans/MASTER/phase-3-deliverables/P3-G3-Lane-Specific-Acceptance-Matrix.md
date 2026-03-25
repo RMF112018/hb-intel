@@ -21,7 +21,7 @@ P3-G1 defined lane capability depth. P3-G2 defined cross-lane navigation and han
 
 Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. This matrix provides the structured acceptance framework that P3-H1 (Acceptance, Staging, and Release-Readiness Checklist) will use for execution tracking.
 
-**Repo-truth audit — 2026-03-21.** All governing deliverables across Workstreams A–G are locked. Acceptance gates are defined in Phase 3 plan §18. No lane-specific acceptance matrix previously existed. This specification fills that gap.
+**Repo-truth audit — 2026-03-25.** All governing deliverables across Workstreams A–G are locked. Acceptance gates are defined in Phase 3 plan §18. Stage 10.2 now requires concrete SPFx module-lane proof rather than placeholder-shell evidence: module acceptance in the SPFx lane must show either real in-lane working capability or explicit Launch-to-PWA handoff behavior per P3-G1. Stage 10.3 extends that proof to the full `P3-G2` escalation map: acceptance in the SPFx lane must now show the correct trigger placement on module, dashboard / home / canvas, and reports / executive-review surfaces rather than only proving that a generic launch helper exists.
 
 ---
 
@@ -123,7 +123,7 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 | 2 | Mandatory operational core | Identity header + Health + Work Queue + Related Items + Activity tiles present | Same 5 mandatory surfaces present | Tile verification: all mandatory tiles registered and rendering |
 | 3 | Governance tiers | Mandatory locked tiles cannot be removed/moved; role-default present; optional available | Same governance enforcement | Edit-mode test: locked tiles resist manipulation |
 | 4 | Personalization | Full governed adaptive composition | Full governed adaptive composition | Canvas edit test: add/remove/reorder/resize non-mandatory tiles |
-| 5 | Persistence | CanvasApi → IndexedDB + server sync | CanvasApi → localStorage + SharePoint list | Persistence test: layout survives session close and reopen |
+| 5 | Persistence | CanvasApi → IndexedDB + server sync | Governed persistence adapter → localStorage immediate save plus SharePoint-list rehydrate and mirror sync | Persistence test: layout survives session close and reopen, corrupt state falls back to role-defaults, and SharePoint-backed rehydrate is evidenced when available |
 | 6 | Reset to role-default | Reset returns to role-default layout | Reset returns to role-default layout | Reset test: mandatory tiles preserved after reset |
 | 7 | Complexity tiers | Essential/standard/expert render per preference | Essential/standard/expert render per preference | Tier toggle: tiles re-render at each complexity level |
 | 8 | Role-based visibility | Tiles hidden per P3-C2 §8 (e.g., Work Queue hidden for Viewer) | Same visibility rules | Role test: Viewer canvas omits Work Queue tile |
@@ -148,6 +148,8 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 ## 7. Core Module Acceptance (§18.5)
 
 **Gate owner:** Architecture + Project Hub platform owner
+
+SPFx evidence in this section is module-by-module. A generic shell page, placeholder route, or undifferentiated empty state does not satisfy Stage 10.2. Every SPFx module row below must prove the exact lane posture assigned in P3-G1: `Required`, `Broad`, `Baseline-visible`, `Read-only`, and explicit `Launch-to-PWA` where applicable.
 
 ### 7.1 Financial
 
@@ -290,14 +292,14 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 | 2 | Project Hub root entry and project switching | Multi-project `/project-hub` lands on portfolio root; single-project `/project-hub` auto-routes to `/project-hub/{projectId}`; in-project switching uses same-section resolution with Control Center fallback | Host-aware fallback (P3-B1 §8.4) | Multi-project root-entry and switching test with URL capture, preserved `projectId`, and restored portfolio state after Back to Portfolio |
 | 3 | Unauthorized or invalid project context handling | Unauthorized/nonexistent project contexts render in-shell no-access/not-available state with unchanged browser location | Same browser-location stability required after handoff arrival | Invalid-context test: no silent redirect to another project or workspace |
 | 4 | Stale draft handling | Staleness warning shown; refresh available; export gated | Staleness warning shown | Stale draft scenario test |
-| 5 | Cross-lane launch SPFx→PWA | Deep-link arrival resolves project and module | Launch-to-PWA constructs correct deep link | Round-trip test (P3-G2 §3) |
-| 6 | Cross-lane launch PWA→SPFx | Opens SPFx site in new tab via `siteUrl` | Site opens with correct project | Navigation test (P3-G2 §4) |
+| 5 | Cross-lane launch SPFx→PWA | Deep-link arrival resolves project and module | Launch-to-PWA constructs the correct deep link from the affected governed surface: module, dashboard / home / canvas, or reports / executive-review; no generic placeholder launch path | Round-trip test (P3-G2 §3) |
+| 6 | Cross-lane launch PWA→SPFx | Opens SPFx site in new tab via `siteUrl` | Site opens with correct project and lands on a governed Stage 10.2 module surface after registry-backed initialization, with any applicable Stage 10.3 escalation affordances present immediately on arrival and Stage 10.4 personalization continuity available for the same canonical project | Navigation test (P3-G2 §4) |
 | 7 | Module publication | All module adapters publish to all 4 spines, or publish governed projections where the module architecture requires it | Same | Spine data includes module contributions |
 | 8 | Defer list clear | Phase 3 has explicit defer list; no hidden scope | Same | Defer list review |
 | 9 | QC/Warranty lifecycle-visible | Navigation present; governed Phase 3 depth visible; only deferred depth remains deferred | Same | Module appears in nav; deferred note documented |
 | 10 | Push-to-Project-Team structured work item | PER push creates a Work Queue item (`source: 'module'`, class `queued-follow-up`, carries `reviewArtifactId`); not an untracked notification | Same item created via both lanes | Push test: PER push action creates correctly-shaped Work Queue item with provenance (P3-D3 §13.1) |
 | 11 | Push-to-Project-Team closure loop | Team resolves pushed item → pushed item completes → PER receives closure confirmation request → PER confirms → thread closes; no auto-close without PER confirmation | Same closure behavior | Loop test: full cycle from push → team resolution → PER confirmation → thread closure (P3-D3 §13.3) |
-| 12 | Executive review lane depth | PWA provides full executive review experience; SPFx provides broad direct interaction; thread management, multi-run comparison, and history browsing escalate to PWA | SPFx escalates correctly for three depth scenarios | Lane depth test: confirm SPFx provides annotations/push in-lane; confirm escalation deep links correct for thread management, comparison, history (P3-G1 §4.9) |
+| 12 | Executive review lane depth | PWA provides full executive review experience; SPFx provides broad direct interaction; thread management, multi-run comparison, history browsing, and advanced recovery depth escalate to PWA from the reports / review-adjacent surface | SPFx escalates correctly for the governed reports / executive-review depth scenarios and blocks artifact-specific thread launch until concrete review context exists | Lane depth test: confirm SPFx provides annotations/push in-lane; confirm escalation deep links and disabled-state behavior for thread management, comparison, history, and advanced recovery (P3-G1 §4.9, P3-G2 §8.6, §8.8) |
 | 13 | Executive review annotation not in module source-of-truth | After PER annotates any review-capable module surface: module record is unchanged; annotation exists only in separate review artifact | Same isolation in both lanes | Isolation test: post-annotation module record read shows no annotation data embedded across the full review-capable surface family |
 | 14 | Project Closeout lifecycle and lane behavior | Closeout sub-surfaces, approvals, snapshots, and lane-depth boundaries behave as governed | Same governed semantics with host-appropriate depth | Closeout lifecycle/lane scenario test |
 | 15 | Subcontract Execution Readiness lifecycle and lane behavior | Readiness case, exception, decision, and gate-projection flows behave as governed | Same governed semantics with host-appropriate depth | Readiness lifecycle/lane scenario test |
@@ -344,10 +346,10 @@ Summary of all evidence artifacts organized by lane:
 
 | Evidence category | Description | Governing deliverable |
 |---|---|---|
-| Launch-to-PWA escalation | Correct deep links for 13 escalation scenarios (incl. 3 executive review); cross-project launches land on the PWA portfolio root rather than a project-scoped fallback | P3-G2 §3 |
+| Launch-to-PWA escalation | Correct deep links for 13 escalation scenarios (incl. 3 executive review); cross-project launches land on the PWA portfolio root rather than a project-scoped fallback; trigger placement proven on module, dashboard / home / canvas, and reports / executive-review surfaces | P3-G2 §3 |
 | Canvas persistence | localStorage + SharePoint list | P3-C3 §6.2 |
 | Host-aware switching | Project switching with site-scoped fallbacks | P3-B1 §8.4 |
-| Broad module pages | Substantial direct working capability | P3-G1 §4, §5.1 |
+| Broad module pages | Substantial direct working capability proven module-by-module across the governed Stage 10.2 route family | P3-G1 §4, §5.1 |
 | BackToProjectHub pattern | Return navigation to PWA | P3-G2 §6 |
 
 ---

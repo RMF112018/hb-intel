@@ -34,7 +34,11 @@ export { register, registerMany, get, getAll } from './registry/index.js';
 
 // API
 export { CanvasApi, createSpfxCanvasStorageAdapter } from './api/index.js';
-export type { ICanvasApi, ISpfxCanvasStorageAdapter } from './api/index.js';
+export type {
+  ICanvasApi,
+  ICanvasPersistenceAdapter,
+  ISpfxCanvasStorageAdapter,
+} from './api/index.js';
 
 // Hooks
 export {

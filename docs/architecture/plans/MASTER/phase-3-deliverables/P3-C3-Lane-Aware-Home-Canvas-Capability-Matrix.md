@@ -205,10 +205,10 @@ All tiles registered in `TileRegistry` are available in both lanes. No tile is l
 
 | Aspect | Implementation |
 |---|---|
-| **Offline storage** | `CanvasApi` → localStorage |
-| **Online sync** | `CanvasApi` → SharePoint list on the project site |
+| **Offline storage** | Governed SPFx persistence adapter → localStorage |
+| **Online sync** | Governed SPFx persistence adapter → SharePoint list on the project site |
 | **First visit** | Auto-generates role-default layout from `ROLE_DEFAULT_TILES` |
-| **Reset** | `CanvasApi.resetCanvas()` → restores role-default; mandatory tiles always preserved |
+| **Reset** | Governed reset flow clears persisted SPFx state and restores role-defaults; mandatory tiles always preserved |
 | **Session recovery** | Limited recovery from localStorage; no deep session-state recovery |
 | **Cross-device** | SharePoint-list-synced — layout available within the SharePoint environment |
 
@@ -310,14 +310,14 @@ SPFx surfaces that need deeper interaction construct a PWA deep link with:
 2. **PWA `ProjectHubPage` route split — compliant; canvas adoption remains controlled evolution**
    The PWA now implements the Project Hub route split with a meaningful unscoped portfolio root, a project-scoped Control Center surface, and in-shell no-access rendering. The remaining controlled-evolution gap is adopting `@hbc/project-canvas` as the live project-scoped Control Center home. Classified as **compliant for routing, controlled evolution for canvas adoption**.
 
-3. **SPFx project-hub `DashboardPage` — controlled evolution**
-   Only 1 of 11+ planned pages implemented. Must be upgraded to a canvas-first project home using `@hbc/project-canvas` with governed adaptive composition. Classified as **controlled evolution**.
+3. **SPFx project-hub `DashboardPage` — compliant after Stage 10.4**
+   The SPFx Project Hub runtime now uses `@hbc/project-canvas` as the governed personalized home surface instead of a summary-only placeholder shell. Classified as **compliant**.
 
 4. **Mandatory tile registrations — per P3-C2 reconciliation**
    Health tile: compliant. Work Queue tile: not yet registered. Related Items tile: requires upgrade (optional → mandatory). Activity tile: not yet registered. Identity header: not yet implemented as distinct shell surface. Classified per P3-C2 §9.
 
-5. **SPFx persistence backend — controlled evolution**
-   `CanvasApi` persistence to SharePoint list requires SPFx-specific storage adapter. The canvas API contract exists; the SPFx adapter implementation is Phase 3 scope. Classified as **controlled evolution**.
+5. **SPFx persistence backend — Stage 10.4 closure**
+   The local SPFx adapter already existed, but the shared canvas hooks were still API-hardcoded. Stage 10.4 closes that runtime wiring gap by routing the SPFx dashboard through a governed persistence adapter: localStorage immediate state plus SharePoint-list-backed rehydrate and mirror sync on the project site. Classified as **compliant**.
 
 6. **Cross-lane persistence separation — by design**
    PWA and SPFx maintain separate canvas layout instances. This is intentional — each lane has its own persistence backend and the user's canvas may differ between lanes. No reconciliation gap; this is the designed behavior.

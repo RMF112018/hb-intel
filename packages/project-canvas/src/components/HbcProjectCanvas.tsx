@@ -11,6 +11,7 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import type { DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import type { ComplexityTier } from '../types/index.js';
+import type { ICanvasPersistenceAdapter } from '../api/index.js';
 import { useProjectCanvas } from '../hooks/useProjectCanvas.js';
 import { useCanvasEditor } from '../hooks/useCanvasEditor.js';
 import { CanvasTileCard } from './CanvasTileCard.js';
@@ -19,7 +20,6 @@ import {
   HbcButton,
   HbcSpinner,
   HbcModal,
-  HBC_SPACE_SM,
   HBC_SPACE_MD,
   heading3,
   HBC_STATUS_RAMP_GRAY,
@@ -30,6 +30,7 @@ export interface HbcProjectCanvasProps {
   projectId: string;
   userId: string;
   role: string;
+  persistenceAdapter?: ICanvasPersistenceAdapter;
   complexityTier?: ComplexityTier;
   editable?: boolean;
   /** Heading text. Pass empty string to suppress the heading entirely. */
@@ -85,6 +86,7 @@ export function HbcProjectCanvas({
   projectId,
   userId,
   role,
+  persistenceAdapter,
   complexityTier = 'standard',
   editable = false,
   title = 'Project Canvas',
@@ -94,6 +96,7 @@ export function HbcProjectCanvas({
     projectId,
     userId,
     role,
+    persistenceAdapter,
   );
   const [isEditing, setIsEditing] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);

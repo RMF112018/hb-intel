@@ -1,6 +1,15 @@
 import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router';
 import { ShellLayout } from '@hbc/shell';
 import type { SimplifiedShellConfig } from '@hbc/shell';
+import { PROJECT_HUB_SPFX_MODULES } from '@hbc/features-project-hub';
+
+const PROJECT_HUB_TOOL_PICKER_ITEMS = [
+  { label: 'Home', path: '/' },
+  ...PROJECT_HUB_SPFX_MODULES.map((module) => ({
+    label: module.navLabel,
+    path: `/${module.slug}`,
+  })),
+];
 
 /**
  * D-PH7-BW-6: Project Hub root route with simplified shell config.
@@ -9,12 +18,7 @@ import type { SimplifiedShellConfig } from '@hbc/shell';
 const PROJECT_HUB_SHELL_CONFIG: SimplifiedShellConfig = {
   workspaceName: 'Project Hub',
   showBackToProjectHub: false,
-  toolPickerItems: [
-    { label: 'Dashboard', path: '/' },
-    { label: 'Preconstruction', path: '/preconstruction' },
-    { label: 'Documents', path: '/documents' },
-    { label: 'Team', path: '/team' },
-  ],
+  toolPickerItems: PROJECT_HUB_TOOL_PICKER_ITEMS,
 };
 
 function RootComponent(): React.ReactNode {

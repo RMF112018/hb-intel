@@ -24,7 +24,7 @@ Phase 3 uses a **shared-canonical cross-lane model** (Phase 3 plan §4.1):
 - Both lanes consume the **same canonical shared contracts** for project identity, context, membership, spines, and reporting.
 - Lane differences are about **depth, continuity, and host behavior**, not about inventing different project semantics.
 
-**Repo-truth audit — 2026-03-20.** The PWA has 24 workspace routes including `project-hub` (non-parameterized, MVP scaffold with portfolio dashboard). The SPFx project-hub app has 4 internal routes (dashboard, preconstruction, documents, team) with 1 implemented page and 3 empty-state placeholders. Both lanes consume shared infrastructure (`@hbc/auth`, `@hbc/shell`, `@hbc/ui-kit`, `@hbc/models`, `@hbc/data-access`, `@hbc/query-hooks`). The `@hbc/features-project-hub` shared feature package exports health-pulse components consumed by both lanes. 11 domain SPFx apps exist in the workspace per the PH7-BW architecture. See §1 for full reconciliation.
+**Repo-truth audit — 2026-03-25.** The PWA has 24 workspace routes including `project-hub` (non-parameterized, MVP scaffold with portfolio dashboard). The SPFx `apps/project-hub` app now resolves `siteUrl -> projectId` before render and exposes a governed Stage 10.2 module lane: dashboard/home plus Financial, Schedule, Constraints, Permits, Safety, Reports, QC, Closeout, Startup, Subcontract Execution Readiness, and Warranty. Both lanes consume shared infrastructure (`@hbc/auth`, `@hbc/shell`, `@hbc/ui-kit`, `@hbc/models`, `@hbc/data-access`, `@hbc/query-hooks`). `@hbc/features-project-hub` now exports shared Stage 10.2 module-lane definitions and surfaces in addition to health-pulse components. 11 domain SPFx apps exist in the workspace per the PH7-BW architecture. See §1 for full reconciliation.
 
 ---
 
@@ -84,19 +84,20 @@ Phase 3 uses a **shared-canonical cross-lane model** (Phase 3 plan §4.1):
 | Aspect | Status | Detail |
 |---|---|---|
 | Webpart entry | `ProjectHubWebPart.tsx` | Fully wired with auth bridge (`bootstrapSpfxAuth`, `resolveSpfxPermissions`) |
-| Routes | 4 internal | `/` (dashboard), `/preconstruction`, `/documents`, `/team` |
-| Pages | 1 implemented, 3 placeholders | `DashboardPage` (same structure as PWA); `TeamPage`, `DocumentsPage`, `PreconstructionPage` are empty-state |
+| Routes | Governed Stage 10.2 module lane | `/` (home), `/financial`, `/schedule`, `/constraints`, `/permits`, `/safety`, `/reports`, `/qc`, `/closeout`, `/startup`, `/subcontract-readiness`, `/warranty` |
+| Pages | Home + governed module surfaces | Home canvas companion plus module-specific SPFx lane surfaces; deeper workflows use explicit Launch-to-PWA actions where the matrix requires it |
 | Shell mode | Simplified | `WorkspacePageShell` with tool-picker nav; no cross-workspace switching |
 | Data layer | Mock only | 2 hardcoded projects via `bootstrap.ts` |
 | Shared packages | Same as PWA | `@hbc/auth`, `@hbc/shell`, `@hbc/ui-kit`, `@hbc/models`, `@hbc/data-access`, `@hbc/query-hooks`, `@hbc/smart-empty-state`, `@hbc/complexity` |
 
 ### 1.3 Shared feature package
 
-`@hbc/features-project-hub` (v0.0.1) currently exports:
+`@hbc/features-project-hub` currently exports:
 - `projectHubProjectsEmptyStateConfig` — empty-state configuration
 - Health-pulse components, computors, governance, hooks, integrations (SF21)
+- Stage 10.2 SPFx lane module definitions and reusable module-lane summary surface composition
 
-Module-level page components are not yet in the shared feature package — they currently live in `apps/project-hub/src/pages/`. PH7-BW-0 identifies migration to shared feature packages as the target architecture.
+Module route assembly still lives in `apps/project-hub/src/pages/`, but Stage 10.2 now consumes shared lane definitions and reusable SPFx module surfaces from the shared feature package instead of leaving the lane as app-local placeholders.
 
 ---
 
@@ -499,14 +500,14 @@ All cross-lane navigation MUST preserve project identity:
 
 ## 8. Repo-Truth Reconciliation Notes
 
-1. **SPFx project-hub has 1 of 11+ planned pages implemented — controlled evolution**
-   Only `DashboardPage` is implemented; `TeamPage`, `DocumentsPage`, and `PreconstructionPage` are empty-state placeholders. PH7 plans define the full module page set. Phase 3 must deliver broad operational capability per this matrix. Classified as **controlled evolution**.
+1. **SPFx project-hub now exposes the governed Stage 10.2 module lane — controlled evolution**
+   The earlier 4-route placeholder shell has been replaced with the governed Stage 10.2 module family. The app still uses shared summary surfaces rather than full field-depth UIs for every module, so lane-depth proof remains acceptance-driven, but the placeholder gap is now closed. Classified as **controlled evolution**.
 
 2. **PWA project-hub is MVP scaffold — controlled evolution**
    The PWA `ProjectHubPage` is a portfolio dashboard, not a per-project operating layer. Phase 3 must implement `$projectId`-parameterized routes per PH7.2 and P3-B1. Classified as **controlled evolution**.
 
-3. **Module pages live in app directories, not shared feature package — controlled evolution**
-   PH7-BW-0 identifies migration of page components to `@hbc/features-project-hub` as the target architecture. Current pages live in `apps/project-hub/src/pages/`. Phase 3 should follow the shared feature package pattern so both lanes consume the same page components. Classified as **controlled evolution**.
+3. **Module route assembly remains app-local while shared lane surfaces live in `@hbc/features-project-hub` — controlled evolution**
+   PH7-BW-0 identifies deeper page-component migration to shared feature packages as the target architecture. Stage 10.2 now moves the canonical SPFx lane definitions and reusable lane surfaces into `@hbc/features-project-hub`, while `apps/project-hub` still owns route assembly and shell composition. Classified as **controlled evolution**.
 
 4. **`@hbc/project-canvas` usage is broad for both lanes — compliant**
    P2-B0 restricts SPFx to curated composition for the Personal Work Hub only. Phase 3 Project Hub defines its own lane doctrine (§6) where both lanes use governed adaptive composition. This is **compliant** — P2-B0 §SPFx Composition Constraint explicitly notes the constraint applies to "Personal Work Hub lane doctrine" and "does not declare package-wide PWA exclusivity."

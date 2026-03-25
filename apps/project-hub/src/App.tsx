@@ -11,6 +11,10 @@ import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
 import type { IEmptyStateContext, ISmartEmptyStateConfig } from '@hbc/smart-empty-state';
 import { createWebpartRouter } from './router/index.js';
 import type { ProjectHubSpfxInitState } from './spfx/initializeProjectHubContext.js';
+import {
+  ProjectHubRuntimeProvider,
+  type ProjectHubSpfxContextLike,
+} from './spfx/ProjectHubRuntimeContext.js';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: defaultQueryOptions },
@@ -19,7 +23,7 @@ const queryClient = new QueryClient({
 const router = createWebpartRouter();
 
 interface AppProps {
-  spfxContext?: { pageContext: { user: { loginName: string } } };
+  spfxContext?: ProjectHubSpfxContextLike;
   initState?: ProjectHubSpfxInitState;
 }
 
@@ -54,7 +58,7 @@ function ProjectHubInitializationFallback({
   };
 
   return (
-    <WorkspacePageShell layout="detail" title="Project Hub">
+    <WorkspacePageShell layout="dashboard" title="Project Hub" showDensityControl>
       <HbcSmartEmptyState
         config={INIT_EMPTY_CONFIG}
         context={context}
@@ -65,19 +69,25 @@ function ProjectHubInitializationFallback({
 }
 
 export function App({ spfxContext, initState }: AppProps): React.ReactNode {
+  const complexitySpfxContext = spfxContext?.pageContext?.user?.loginName
+    ? { pageContext: { user: { loginName: spfxContext.pageContext.user.loginName } } }
+    : undefined;
+
   return (
-    <HbcThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <HbcErrorBoundary>
-          <ComplexityProvider spfxContext={spfxContext}>
-            {initState && initState.status !== 'resolved' ? (
-              <ProjectHubInitializationFallback initState={initState} />
-            ) : (
-              <RouterProvider router={router} />
-            )}
-          </ComplexityProvider>
-        </HbcErrorBoundary>
-      </QueryClientProvider>
-    </HbcThemeProvider>
+    <ProjectHubRuntimeProvider value={{ spfxContext, initState }}>
+      <HbcThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <HbcErrorBoundary>
+            <ComplexityProvider spfxContext={complexitySpfxContext}>
+              {initState && initState.status !== 'resolved' ? (
+                <ProjectHubInitializationFallback initState={initState} />
+              ) : (
+                <RouterProvider router={router} />
+              )}
+            </ComplexityProvider>
+          </HbcErrorBoundary>
+        </QueryClientProvider>
+      </HbcThemeProvider>
+    </ProjectHubRuntimeProvider>
   );
 }

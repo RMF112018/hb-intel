@@ -9,10 +9,20 @@ Role-based configurable project dashboard canvas for HB Intel — Mold Breaker S
 ## Quick Start
 
 ```tsx
-import { HbcProjectCanvas } from '@hbc/project-canvas';
+import {
+  HbcProjectCanvas,
+  createSpfxCanvasStorageAdapter,
+} from '@hbc/project-canvas';
 
 function ProjectDashboard({ projectId }: { projectId: string }) {
-  return <HbcProjectCanvas />;
+  return (
+    <HbcProjectCanvas
+      projectId={projectId}
+      userId="user-001"
+      role="Project Manager"
+      persistenceAdapter={createSpfxCanvasStorageAdapter()}
+    />
+  );
 }
 ```
 
@@ -54,6 +64,13 @@ The `AIInsightTile` component provides a standardized container for AI-driven in
 |-------------|-------------|
 | `@hbc/project-canvas` | Full package: types, constants, registry, API, hooks, components |
 | `@hbc/project-canvas/testing` | Test factories: `createMockTileDefinition`, `createMockCanvasConfig`, `createMockTilePlacement`, `mockRoleDefaultCanvases` |
+
+## Persistence Adapters
+
+`HbcProjectCanvas`, `useProjectCanvas`, and `useCanvasConfig` default to the shared `CanvasApi` persistence path. Consumers that need a different governed runtime seam may supply an additive `ICanvasPersistenceAdapter` instead of forking the canvas logic.
+
+- PWA or API-backed consumers can keep the default `CanvasApi` path.
+- SPFx consumers can use `createSpfxCanvasStorageAdapter()` for immediate local persistence and compose additional host-specific mirror sync above that adapter.
 
 ## Architecture Boundaries
 

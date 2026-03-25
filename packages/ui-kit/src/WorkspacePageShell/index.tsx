@@ -261,6 +261,7 @@ export function WorkspacePageShell({
   breadcrumbs,
   actions,
   overflowActions,
+  showDensityControl = false,
   dashboardConfig,
   listConfig,
   supportedModes,
@@ -303,6 +304,7 @@ export function WorkspacePageShell({
   }, [banner?.message, banner?.variant]);
 
   const hasActions = (actions?.length ?? 0) > 0 || (overflowActions?.length ?? 0) > 0;
+  const showCommandBar = showDensityControl || (hasActions && !isFieldMode);
 
   // Field mode: derive primary + secondary actions — PH4B.4 §4b.4.3
   const primaryAction = actions?.find((a) => a.primary);
@@ -389,8 +391,8 @@ export function WorkspacePageShell({
           </HbcBanner>
         )}
 
-        {/* Command bar — D-03: all page actions via actions/overflowActions props */}
-        {hasActions && !isFieldMode && (
+        {/* Command bar — D-03: page actions via actions/overflowActions props; density control may render standalone */}
+        {showCommandBar && (
           <div className={styles.commandBarZone}>
             <HbcCommandBar actions={actions} overflowActions={overflowActions} />
           </div>

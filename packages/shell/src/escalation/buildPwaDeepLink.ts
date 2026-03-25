@@ -22,7 +22,7 @@ export interface PwaDeepLinkParams {
   action?: string;
   /** View mode to activate (e.g., 'history', 'thread', 'comparison') */
   view?: string;
-  /** Executive review annotation artifact ID for closure-loop context (P3-G2 §8.8) */
+  /** Executive review annotation artifact ID for closure-loop context (serialized as `artifact=` per P3-G2 §8.8) */
   reviewArtifactId?: string;
   /** URL-encoded return path for back-navigation to SPFx */
   returnTo?: string;
@@ -70,7 +70,7 @@ export function buildPwaDeepLink(
     searchParams.set('view', params.view);
   }
   if (params.reviewArtifactId) {
-    searchParams.set('reviewArtifactId', params.reviewArtifactId);
+    searchParams.set('artifact', params.reviewArtifactId);
   }
   if (params.returnTo) {
     searchParams.set('returnTo', params.returnTo);

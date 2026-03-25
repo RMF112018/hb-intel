@@ -5,13 +5,18 @@
  */
 import { useMemo, useCallback } from 'react';
 import type { ICanvasTilePlacement } from '../types/index.js';
-import { CanvasApi } from '../api/index.js';
+import type { ICanvasPersistenceAdapter } from '../api/index.js';
 import { get } from '../registry/index.js';
 import { useCanvasConfig } from './useCanvasConfig.js';
 import { useRoleDefaultCanvas } from './useRoleDefaultCanvas.js';
 import { useCanvasMandatoryTiles } from './useCanvasMandatoryTiles.js';
 
-export function useProjectCanvas(projectId: string, userId: string, role: string): {
+export function useProjectCanvas(
+  projectId: string,
+  userId: string,
+  role: string,
+  persistenceAdapter?: ICanvasPersistenceAdapter,
+): {
   tiles: ICanvasTilePlacement[];
   isLoading: boolean;
   error: Error | null;
@@ -20,7 +25,13 @@ export function useProjectCanvas(projectId: string, userId: string, role: string
   isMandatory: (tileKey: string) => boolean;
   isLocked: (tileKey: string) => boolean;
 } {
-  const { config, isLoading: configLoading, error: configError, reset: configReset } = useCanvasConfig(userId, projectId);
+  const {
+    config,
+    isLoading: configLoading,
+    error: configError,
+    reset: configReset,
+    save: saveConfig,
+  } = useCanvasConfig(userId, projectId, persistenceAdapter);
   const { tiles: defaultTiles, isLoading: defaultsLoading } = useRoleDefaultCanvas(role);
   const {
     mandatoryTiles,
@@ -67,8 +78,8 @@ export function useProjectCanvas(projectId: string, userId: string, role: string
   const error = configError ?? mandatoryError ?? null;
 
   const save = useCallback(async (newTiles: ICanvasTilePlacement[]) => {
-    await CanvasApi.saveConfig({ userId, projectId, tiles: newTiles });
-  }, [userId, projectId]);
+    await saveConfig({ userId, projectId, tiles: newTiles });
+  }, [projectId, saveConfig, userId]);
 
   const reset = useCallback(async () => {
     await configReset(role);

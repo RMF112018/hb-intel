@@ -14,6 +14,7 @@
     "build": "tsc --project tsconfig.json",
     "dev": "tsc --project tsconfig.json --watch",
     "check-types": "tsc --noEmit",
+    "lint": "eslint src/spfx-lane --ext .ts,.tsx",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "storybook:test": "vitest run --passWithNoTests -- storybook-matrix",
@@ -37,6 +38,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@griffel/react": "^1.5.0",
     "@hbc/bic-next-move": "workspace:*",
     "@hbc/models": "workspace:*",
     "@hbc/notification-intelligence": "workspace:*",

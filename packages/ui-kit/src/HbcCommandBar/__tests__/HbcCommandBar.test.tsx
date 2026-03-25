@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { HbcThemeProvider } from '../../HbcAppShell/HbcThemeContext.js';
 import { HbcCommandBar } from '../index.js';
 
 function renderWithFluent(ui: React.ReactNode) {
-  return render(<FluentProvider theme={webLightTheme}>{ui}</FluentProvider>);
+  return render(<HbcThemeProvider>{ui}</HbcThemeProvider>);
 }
 
 describe('HbcCommandBar', () => {
@@ -74,5 +74,32 @@ describe('HbcCommandBar', () => {
     );
     const bar = container.querySelector('[data-hbc-ui="command-bar"]');
     expect(bar?.className).toContain('custom-bar-class');
+  });
+
+  it('cycles density through compact, standard, and touch', () => {
+    const handleDensityChange = vi.fn();
+
+    const { rerender } = renderWithFluent(
+      <HbcCommandBar densityTier="compact" onDensityChange={handleDensityChange} />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Compact' }));
+    expect(handleDensityChange).toHaveBeenLastCalledWith('standard');
+
+    rerender(
+      <HbcThemeProvider>
+        <HbcCommandBar densityTier="standard" onDensityChange={handleDensityChange} />
+      </HbcThemeProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Standard' }));
+    expect(handleDensityChange).toHaveBeenLastCalledWith('touch');
+
+    rerender(
+      <HbcThemeProvider>
+        <HbcCommandBar densityTier="touch" onDensityChange={handleDensityChange} />
+      </HbcThemeProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Touch' }));
+    expect(handleDensityChange).toHaveBeenLastCalledWith('compact');
   });
 });

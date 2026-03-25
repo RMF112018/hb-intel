@@ -10,19 +10,13 @@
  */
 
 import type { ICanvasUserConfig } from '../types/index.js';
+import type { ICanvasPersistenceAdapter } from './CanvasPersistenceAdapter.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-export interface ISpfxCanvasStorageAdapter {
-  /** Retrieve canvas config for a project+user. Returns null if not found or corrupt. */
-  getConfig(projectId: string, userId: string): ICanvasUserConfig | null;
-  /** Save canvas config for a project+user. */
-  saveConfig(config: ICanvasUserConfig): void;
-  /** Reset (remove) canvas config for a project+user. */
-  resetConfig(projectId: string, userId: string): void;
-}
+export interface ISpfxCanvasStorageAdapter extends ICanvasPersistenceAdapter {}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Implementation
@@ -42,7 +36,7 @@ function buildKey(projectId: string, userId: string): string {
  */
 export function createSpfxCanvasStorageAdapter(): ISpfxCanvasStorageAdapter {
   return {
-    getConfig(projectId: string, userId: string): ICanvasUserConfig | null {
+    async getConfig(projectId: string, userId: string): Promise<ICanvasUserConfig | null> {
       try {
         const raw = localStorage.getItem(buildKey(projectId, userId));
         if (!raw) return null;
@@ -57,7 +51,7 @@ export function createSpfxCanvasStorageAdapter(): ISpfxCanvasStorageAdapter {
       }
     },
 
-    saveConfig(config: ICanvasUserConfig): void {
+    async saveConfig(config: ICanvasUserConfig): Promise<void> {
       try {
         localStorage.setItem(
           buildKey(config.projectId, config.userId),
@@ -68,7 +62,7 @@ export function createSpfxCanvasStorageAdapter(): ISpfxCanvasStorageAdapter {
       }
     },
 
-    resetConfig(projectId: string, userId: string): void {
+    async resetConfig(projectId: string, userId: string): Promise<void> {
       try {
         localStorage.removeItem(buildKey(projectId, userId));
       } catch {

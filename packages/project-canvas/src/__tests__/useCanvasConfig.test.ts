@@ -2,6 +2,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { CanvasApi } from '../api/index.js';
 import { useCanvasConfig } from '../hooks/useCanvasConfig.js';
 import { createMockCanvasConfig } from '@hbc/project-canvas/testing';
+import type { ICanvasPersistenceAdapter } from '../api/index.js';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -173,5 +174,28 @@ describe('useCanvasConfig (D-SF13-T04, D-03)', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.error?.message).toBe('42');
+  });
+
+  it('uses a supplied persistence adapter instead of CanvasApi', async () => {
+    const adapter: ICanvasPersistenceAdapter = {
+      getConfig: vi.fn().mockResolvedValue(createMockCanvasConfig({ tiles: [] })),
+      saveConfig: vi.fn().mockResolvedValue(undefined),
+      resetConfig: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const getConfigSpy = vi.spyOn(CanvasApi, 'getConfig');
+    const { result } = renderHook(() => useCanvasConfig('user-001', 'project-001', adapter));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(adapter.getConfig).toHaveBeenCalledWith('project-001', 'user-001');
+    expect(getConfigSpy).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await result.current.save(createMockCanvasConfig({ tiles: [] }));
+      await result.current.reset('Project Manager');
+    });
+
+    expect(adapter.saveConfig).toHaveBeenCalledTimes(1);
+    expect(adapter.resetConfig).toHaveBeenCalledWith('project-001', 'user-001');
   });
 });

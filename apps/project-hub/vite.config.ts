@@ -10,6 +10,7 @@ export default defineConfig(({ command, mode }) => ({
       '@hbc/models': path.resolve(__dirname, '../../packages/models/src/index.ts'),
       '@hbc/data-access': path.resolve(__dirname, '../../packages/data-access/src/index.ts'),
       '@hbc/query-hooks': path.resolve(__dirname, '../../packages/query-hooks/src/index.ts'),
+      '@hbc/project-canvas': path.resolve(__dirname, '../../packages/project-canvas/src/index.ts'),
       '@hbc/auth': path.resolve(__dirname, '../../packages/auth/src'),
       '@hbc/auth/spfx': resolve(__dirname, '../../packages/auth/src/spfx/index.ts'),
       '@hbc/shell': path.resolve(__dirname, '../../packages/shell/src'),

@@ -471,13 +471,17 @@ Implementors must read the governing document before making the corresponding im
 | All Fluent UI primitives MUST be imported through `@hbc/ui-kit` — never directly from `@fluentui/react-components` (D-10) | UI-Kit-Usage-and-Composition-Guide.md; Application Standards Conformance Report |
 | No hardcoded hex, rgb, or pixel values in component CSS — use `HBC_*` tokens exclusively; the `enforce-hbc-tokens` ESLint rule must pass clean on all Phase 3 surfaces | MB-08; UI-Kit-Visual-Language-Guide.md |
 | Card weight classes MUST differentiate visual hierarchy — never render a grid of identically-weighted cards; use `weight="primary"` for the dominant card, `"standard"` for general content, `"supporting"` for metadata | T04 (UI-Kit-Visual-Hierarchy-and-Depth-Standards.md) |
-| Data surfaces MUST be selected per the T06 decision guide (dense analysis table / responsive hybrid / card/list / summary strip) — the selection must be documented per module surface | UI-Kit-Adaptive-Data-Surface-Patterns.md |
+| Data surfaces MUST be selected per the T06 decision guide (dense analysis table / responsive hybrid / card/list / summary strip) — the selection must be documented per live routed surface and per planned deeper module data zone | UI-Kit-Adaptive-Data-Surface-Patterns.md |
 | Density system MUST be implemented via `useDensity()` and `HBC_DENSITY_TOKENS` — all surfaces must function correctly in compact (desktop), comfortable (tablet), and touch (field) tiers | MB-05; UI-Kit-Field-Readability-Standards.md |
 | Touch targets MUST meet `HBC_DENSITY_TOKENS[tier].touchTargetMin` minimums: 44px in touch, 36px in comfortable, 24px in compact | MB-07; UI-Kit-Field-Readability-Standards.md |
 | Horizontal scrolling is PROHIBITED as a default behavior for data surfaces — use adaptive column hiding (`columnVisibility`), `frozenColumns`, and card fallback per T06 | MB-04; UI-Kit-Adaptive-Data-Surface-Patterns.md |
 | Every data-dependent zone MUST use `HbcSmartEmptyState` or `HbcEmptyState` — no blank areas or null-rendered zones | MB-01; UI-Kit-Usage-and-Composition-Guide.md |
 | Reusable visual primitives BELONG IN `@hbc/ui-kit` — no feature-local duplicates of kit components (enforced by T12 contribution governance) | Architecture invariant; Application Standards Conformance Report |
 | All new `@hbc/ui-kit` contributions require: Storybook stories covering all states and density variants, ARIA compliance, token-only styling, and README documentation | Application Standards Conformance Report §Contribution Governance |
+
+**Repo-truth reconciliation — 2026-03-25.** Stage 11.2 splits T06 conformance into two inventories so implementation evidence stays honest. The live routed SPFx Project Hub surfaces currently implemented in `apps/project-hub` use: summary-strip / KPI for the home-route summary band, and card/list view for the governed module-lane summary/action surfaces and dashboard escalation or launcher zones. Future deeper module data zones keep their T06 commitments documented now without being treated as already-live SPFx runtime: Financial budget-line and scorecard comparisons are `dense analysis table`; Schedule milestone and upload-history lists are `responsive hybrid`; Constraints and Permits ledger-style logs are `responsive hybrid`; Work Queue and Activity feeds are `card/list view`; Project health summary bands remain `summary strip / KPI`. Undocumented ad hoc surface choices do not satisfy Stage 11.2.
+
+**Repo-truth reconciliation — 2026-03-25.** Stage 11.3 closes a separate conformance gap from T06. The live Project Hub SPFx routed surfaces and shared `src/spfx-lane` surface still had hardcoded spacing/layout literals and inline-style debt after Stage 11.2, while the existing `enforce-hbc-tokens` rule only verified hex literals in app scope. Stage 11.3 therefore requires both runtime cleanup and rule/scope expansion: the routed app surfaces and shared lane surface must use token-backed styling, `enforce-hbc-tokens` must verify hex/rgb/pixel literals in style-bearing contexts, and D-10 direct-import proof must stay explicit and separate from token verification. Unrelated package areas with independent UI debt are not valid substitutes for Stage 11.3 evidence on the live Project Hub SPFx lane.
 
 ### 14.3 Mold-breaker principle bindings for Project Hub
 
@@ -509,6 +513,8 @@ Phase 2 (My Work Hub / Personal Work Hub, P2-F1) established the following patte
 
 ### 14.5 Conformance verification requirement
 
+**Repo-truth reconciliation note — 2026-03-25.** Stage 11.4 is not a pure review checkbox. Before this closure pass, the live routed Project Hub SPFx lane still lacked explicit `useDensity()` wiring and had no shell-level density control when a page had no command actions. Stage 11.4 therefore closes a live runtime gap on the routed home, governed module, shared SPFx lane, and unresolved-context fallback surfaces. This density/touch work remains separate from Stage 11.3 token-compliance verification even though both belong to the broader Stage 11 mold-breaker gate.
+
 Before any Phase 3 surface may pass its §18 acceptance gate, it must produce mold-breaker conformance evidence. Use the `.claude/agents/hb-ui-ux-conformance-reviewer.md` specialist to evaluate:
 
 - `@hbc/ui-kit` alignment and any feature-local duplicate primitive detection
@@ -521,5 +527,5 @@ Conformance evidence must be recorded in P3-H1 §13 (Evidence Collection Log). N
 
 ---
 
-**Last Updated:** 2026-03-22
+**Last Updated:** 2026-03-25
 **Governing Authority:** [Phase 3 Plan §9](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

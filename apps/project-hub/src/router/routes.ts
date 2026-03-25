@@ -1,9 +1,15 @@
 /**
  * Webpart-scoped routes — Project Hub.
  */
+import { createElement } from 'react';
 import { createRoute, lazyRouteComponent } from '@tanstack/react-router';
 import { useNavStore } from '@hbc/shell';
+import {
+  PROJECT_HUB_SPFX_MODULES,
+  type ProjectHubSpfxModuleSlug,
+} from '@hbc/features-project-hub';
 import { rootRoute } from './root-route.js';
+import { ProjectModulePage } from '../pages/ProjectModulePage.js';
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -16,28 +22,15 @@ const indexRoute = createRoute({
   ),
 });
 
-const preconstructionRoute = createRoute({
+const moduleRoutes = PROJECT_HUB_SPFX_MODULES.map((module) => createRoute({
   getParentRoute: () => rootRoute,
-  path: '/preconstruction',
-  component: lazyRouteComponent(
-    () => import('../pages/PreconstructionPage.js').then((m) => ({ default: m.PreconstructionPage })),
-  ),
-});
+  path: `/${module.slug}`,
+  beforeLoad: () => {
+    useNavStore.getState().setActiveWorkspace('project-hub');
+  },
+  component: () => createElement(ProjectModulePage, {
+    moduleSlug: module.slug as ProjectHubSpfxModuleSlug,
+  }),
+}));
 
-const documentsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/documents',
-  component: lazyRouteComponent(
-    () => import('../pages/DocumentsPage.js').then((m) => ({ default: m.DocumentsPage })),
-  ),
-});
-
-const teamRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/team',
-  component: lazyRouteComponent(
-    () => import('../pages/TeamPage.js').then((m) => ({ default: m.TeamPage })),
-  ),
-});
-
-export const webpartRoutes = [indexRoute, preconstructionRoute, documentsRoute, teamRoute];
+export const webpartRoutes = [indexRoute, ...moduleRoutes];

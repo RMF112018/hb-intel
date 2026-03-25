@@ -393,6 +393,28 @@ The SPFx lane must be a **broad operational project-site companion**:
 - launch into deeper PWA workflows only where the PWA remains intentionally richer
 - registry-backed site initialization before render, with in-shell `@hbc/smart-empty-state` fallback when no canonical project can be resolved
 
+Stage 10.2 closes the earlier placeholder-shell gap by requiring the SPFx Project Hub app to expose the governed module lane directly in SharePoint. The Stage 10.2 module family is:
+
+- Home / Canvas
+- Financial
+- Schedule
+- Constraints
+- Permits
+- Safety
+- Reports
+- Quality Control
+- Project Closeout
+- Project Startup
+- Subcontract Execution Readiness
+- Warranty
+
+Every Stage 10.2 module surface must prove one of the following:
+
+- a real in-lane SPFx working surface for `Required`, `Broad`, `Baseline-visible`, or `Read-only` depth
+- an explicit `Launch-to-PWA` affordance for any deeper workflow the matrix assigns to the PWA
+
+Generic placeholder pages do not satisfy the lane doctrine. Stage 10.1 project-context initialization is a hard prerequisite, and `@hbc/features-project-hub` remains the canonical shared owner for reusable module-lane contracts and summary surfaces consumed by the SPFx app.
+
 ### 10.3 Cross-lane matrix
 
 | Capability | Shared Canonical Contract | PWA | SPFx |
@@ -401,10 +423,45 @@ The SPFx lane must be a **broad operational project-site companion**:
 | Project switching | Smart same-page switching | Full | Full, with host-aware fallbacks |
 | Home/canvas | Same governance and mandatory core | Richer continuity/customization | Broad site-native companion |
 | Health/activity/work/related-items | Same normalized semantics | Full | Full |
-| Financial / Schedule / Constraints / Permits / Safety / Project Startup | Same authority boundaries | First-class working surfaces | Broad operational surfaces |
+| Financial / Schedule / Constraints / Permits / Safety / Project Startup | Same authority boundaries | First-class working surfaces | Broad or required operational surfaces with explicit PWA handoff for depth-only workflows |
 | Reports | Same report definitions, runs, and release model | Richer history/continuity/recovery | Broad report interaction and launch |
+| Quality Control | Same internal control and projection boundaries | Baseline-visible internal surface | Baseline-visible internal surface |
+| Project Closeout / Subcontract Execution Readiness / Warranty | Same lifecycle boundaries and publication rules | First-class lifecycle surfaces | Broad or read-only lifecycle surfaces with explicit Launch-to-PWA for deeper authoring/mutation flows |
 | Cross-project continuity | Shared identity rules | Richest | Limited by host reality |
 | Advanced workflow depth | Shared baseline contracts | Richest | Broad but not canonical owner of deepest flows |
+
+Stage 10.3 is the governed implementation pass that closes the SPFx-to-PWA escalation map defined in `P3-G2`. Stage 10.1 canonical project initialization remains a hard prerequisite: no escalation affordance may build or launch without the resolved canonical `projectId` (or the intentionally projectless portfolio / Personal Work Hub targets defined in `P3-G2`).
+
+Stage 10.3 is satisfied only when all `P3-G2` scenarios are wired to deliberate SPFx affordances on the exact surface where the lane-depth boundary is encountered:
+
+- module-level escalation actions for module-specific depth boundaries such as Schedule ingestion/history and Reports run-ledger history
+- dashboard / home / canvas escalation actions for portfolio root, My Work, work queue, activity, and advanced canvas administration
+- reports / executive-review escalation actions for advanced draft recovery, review comparison, review history, and artifact-specific thread management
+
+Generic placeholder buttons, undocumented launch helpers, or shell-only utilities do not satisfy Stage 10.3. Workstream G and Workstream H evidence must prove scenario-by-scenario trigger placement, canonical deep-link construction, and safe in-shell failure behavior when canonical project or review-artifact context is unavailable.
+
+### 10.4 SPFx personalization persistence
+
+Stage 10.4 closes the remaining SPFx home/canvas persistence gap. Stage 10.1 canonical project initialization is a hard prerequisite: the SPFx lane must not load or persist any personalized canvas state until the host `siteUrl` has been resolved to a confirmed canonical `projectId`.
+
+The governed Stage 10.4 runtime rule is:
+
+- `@hbc/project-canvas` remains the shared owner of the governed canvas persistence contract and fallback behavior
+- the SPFx dashboard or home surface must use that shared contract through an SPFx-specific adapter instead of ad hoc app-local dashboard state
+- immediate persistence is localStorage-backed for same-session and reload continuity
+- online rehydrate and mirror sync target is a SharePoint list on the project site
+- first visit, reset, and corrupt-state recovery all fall back to governed role-default generation rather than fabricating or silently mutating user state
+- SPFx and PWA remain lane-independent personalization instances; cross-lane continuity is canonical project identity and governed handoff, not shared layout state
+
+Generic summary cards or transient dashboard-only state do not satisfy Stage 10.4. Workstream G and Workstream H evidence must prove reload persistence, reset-to-role-default, corrupted-state recovery, and SharePoint-list-backed rehydrate behavior in the SPFx lane.
+
+**Repo-truth note — 2026-03-25.** The live routed SPFx Project Hub surfaces are already wrapped in `WorkspacePageShell`; Stage 11.1 therefore closes the remaining conformance gap rather than introducing the shell for the first time. The required closure work is an audited page-surface inventory, correct `layout` selection per UI Kit page patterns, and explicit evidence that module landing/summary routes are not left on a blanket `detail` wrapper when they function as dashboard-style landing surfaces.
+
+**Repo-truth note — 2026-03-25.** The live routed SPFx Project Hub lane also remains a summary/card-oriented companion surface, not a full module-table runtime. Stage 11.2 therefore closes the T06 selection and evidence gap in two layers: the routed home surface must use the governed summary-strip / KPI pattern (`DashboardLayout` + `HbcKpiCard` via `WorkspacePageShell dashboardConfig`), and the current governed module-route family must be explicitly classified as `card/list view`. Financial budget-line tables, scorecard comparison tables, Schedule milestone/history grids, Constraints ledgers, and Permits logs remain future deeper module-zone selections that must be documented now without being misrepresented as live SPFx runtime.
+
+**Repo-truth note — 2026-03-25.** The live Project Hub SPFx lane also carried remaining token-compliance debt after Stage 11.2: hardcoded spacing/layout literals still existed on the routed dashboard and shared lane surface, inline styles remained in the shared `ProjectHubSpfxLaneSurface`, and `enforce-hbc-tokens` only enforced hex literals in app scope rather than the documented hex/rgb/pixel standard. Stage 11.3 therefore closes two gaps together: runtime cleanup of the live routed SPFx surfaces and shared lane surface, plus rule/scope expansion so lint evidence actually verifies hex/rgb/pixel literals in style-bearing contexts. D-10 proof for direct Fluent imports remains a separate acceptance line from token verification.
+
+**Repo-truth note — 2026-03-25.** The live Project Hub SPFx lane also lacked explicit density wiring after Stage 11.3: routed surfaces were still relying on component-local defaults, `useDensity()` was not consumed in the app or shared SPFx lane surface, and `WorkspacePageShell` did not expose the shell density control unless the page also had command actions. Stage 11.4 therefore closes both the runtime and evidence gap by requiring shell-level density access on the routed home, governed module, and unresolved-context fallback surfaces; `useDensity()` + `HBC_DENSITY_TOKENS`-backed spacing/tap-zone behavior in `apps/project-hub` and the shared `ProjectHubSpfxLaneSurface`; and representative touch-target proof on dashboard launches, module Launch-to-PWA actions, reports/executive-review actions, and the density control itself. Density verification remains separate from Stage 11.3 token-compliance proof.
 
 ---
 
@@ -794,6 +851,10 @@ Review Mode remains assigned to Phase 3, but this plan preserves the explicit go
 - Define PWA continuity / advanced-depth differentiation
 - Define cross-lane navigation and context preservation rules
 - Define SPFx initialization evidence: registry lookup, store seeding, no-render-before-resolution, and smart-empty-state failure handling
+- Define SPFx personalization persistence evidence: immediate local save, SharePoint-list mirror sync, reset-to-role-default, and corrupt-state recovery
+- Define the governed routed page-surface inventory and the required `WorkspacePageShell` layout classification for home, module-lane, and in-shell failure surfaces
+- Define the governed T06 surface-selection inventory for the live routed SPFx surfaces and the doc-locked future deeper module data zones so runtime and plan assumptions do not drift
+- Define Stage 11.3 token-compliance evidence for the live routed SPFx surfaces and the shared Project Hub lane files, including token-backed styling cleanup, no-direct-Fluent proof, and lint verification that now covers hex/rgb/pixel style literals in the app and shared lane scope
 
 **Deliverables**
 - PWA / SPFx capability matrix
@@ -809,6 +870,10 @@ Review Mode remains assigned to Phase 3, but this plan preserves the explicit go
 - Define staging/test scenarios for activation, switching, stale drafts, and cross-lane continuity
 - Define release-readiness criteria for the mandatory operational core
 - Require Stage 10.1 evidence proving SPFx `siteUrl -> projectId` initialization parity with the PWA route-carried identity model
+- Require Stage 10.4 evidence proving SPFx personalization persistence continuity without fabricating project or user context
+- Require Stage 11.1 evidence proving every live routed SPFx Project Hub surface remains inside `WorkspacePageShell` with the correct UI-Kit-governed `layout` classification
+- Require Stage 11.2 evidence proving the live dashboard summary surface uses the governed summary-strip / KPI pattern, the current module-route family is intentionally `card/list view`, and future dense / hybrid module data zones are documented as planned selections rather than claimed runtime
+- Require Stage 11.3 evidence proving the live routed SPFx surfaces and shared lane surface contain no hardcoded hex/rgb/pixel style literals, shared lane styling no longer relies on inline style props, `@hbc/ui-kit` remains the only Fluent primitive boundary, and lint verification now covers the documented style-bearing contexts in both `apps/project-hub` and `packages/features/project-hub/src/spfx-lane`
 
 **Deliverables**
 - Phase 3 acceptance checklist
@@ -1146,5 +1211,5 @@ Phase 3 is successful only if Project Hub becomes a genuine project-centered ope
 
 ---
 
-**Last Updated:** 2026-03-24
+**Last Updated:** 2026-03-25
 **Governing Authority:** [Master Development Summary Plan](00_HB-Intel_Master-Development-Summary-Plan.md)

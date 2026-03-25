@@ -824,9 +824,15 @@ importers:
       '@hbc/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
+      '@hbc/features-project-hub':
+        specifier: workspace:*
+        version: link:../../packages/features/project-hub
       '@hbc/models':
         specifier: workspace:*
         version: link:../../packages/models
+      '@hbc/project-canvas':
+        specifier: workspace:*
+        version: link:../../packages/project-canvas
       '@hbc/query-hooks':
         specifier: workspace:*
         version: link:../../packages/query-hooks
@@ -2057,6 +2063,9 @@ importers:
 
   packages/features/project-hub:
     dependencies:
+      '@griffel/react':
+        specifier: ^1.5.0
+        version: 1.5.32(react@18.3.1)
       '@hbc/auth':
         specifier: workspace:*
         version: link:../../auth

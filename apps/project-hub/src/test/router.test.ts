@@ -13,4 +13,10 @@ describe('createWebpartRouter (project-hub)', () => {
     await router.navigate({ to: '/' });
     expect(router.state.location.pathname).toBe('/');
   });
+
+  it('resolves governed module routes', async () => {
+    const router = createWebpartRouter();
+    await router.navigate({ to: '/financial' });
+    expect(router.state.location.pathname).toBe('/financial');
+  });
 });

@@ -33,14 +33,14 @@ describe('buildPwaDeepLink', () => {
     expect(url).toContain('view=history');
   });
 
-  it('includes reviewArtifactId for executive review escalation', () => {
+  it('serializes reviewArtifactId as artifact for executive review escalation', () => {
     const url = buildPwaDeepLink(base, {
       projectId: 'proj-001',
       module: 'review',
       reviewArtifactId: 'artifact-uuid-123',
       view: 'thread',
     });
-    expect(url).toContain('reviewArtifactId=artifact-uuid-123');
+    expect(url).toContain('artifact=artifact-uuid-123');
     expect(url).toContain('view=thread');
   });
 
@@ -81,7 +81,7 @@ describe('buildPwaDeepLink', () => {
     expect(url).toMatch(/^https:\/\/app\.example\.com\/project-hub\/proj-001\/review\?/);
     expect(url).toContain('action=annotate');
     expect(url).toContain('view=thread');
-    expect(url).toContain('reviewArtifactId=art-456');
+    expect(url).toContain('artifact=art-456');
     expect(url).toContain('returnTo=%2Fsites%2Fproject-hub');
     expect(url).toContain('source=spfx');
   });

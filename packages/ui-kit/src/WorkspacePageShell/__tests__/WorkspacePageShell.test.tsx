@@ -63,4 +63,14 @@ describe('WorkspacePageShell', () => {
     );
     expect(container.querySelector('[data-layout="detail"]')).toBeInTheDocument();
   });
+
+  it('renders the density control when requested without page actions', () => {
+    renderShell(
+      <WorkspacePageShell title="Shell" layout="dashboard" showDensityControl>
+        <div>Body</div>
+      </WorkspacePageShell>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Standard' })).toBeInTheDocument();
+  });
 });

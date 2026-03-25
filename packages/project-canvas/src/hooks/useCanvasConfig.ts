@@ -6,8 +6,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { ICanvasUserConfig } from '../types/index.js';
 import { CanvasApi } from '../api/index.js';
+import type { ICanvasPersistenceAdapter } from '../api/index.js';
 
-export function useCanvasConfig(userId: string, projectId: string): {
+export function useCanvasConfig(
+  userId: string,
+  projectId: string,
+  persistenceAdapter?: ICanvasPersistenceAdapter,
+): {
   config: ICanvasUserConfig | null;
   isLoading: boolean;
   error: Error | null;
@@ -23,16 +28,19 @@ export function useCanvasConfig(userId: string, projectId: string): {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await CanvasApi.getConfig(userId, projectId);
+      const result = persistenceAdapter
+        ? await persistenceAdapter.getConfig(projectId, userId)
+        : await CanvasApi.getConfig(userId, projectId);
       setConfig(result);
-    } catch {
+    } catch (err) {
       // API unavailable (dev mode, network error) — treat as no saved config.
       // useProjectCanvas will fall back to role defaults via useRoleDefaultCanvas.
+      setError(err instanceof Error ? err : new Error(String(err)));
       setConfig(null);
     } finally {
       setIsLoading(false);
     }
-  }, [userId, projectId]);
+  }, [persistenceAdapter, userId, projectId]);
 
   useEffect(() => {
     void refresh();
@@ -43,23 +51,33 @@ export function useCanvasConfig(userId: string, projectId: string): {
     setConfig(newConfig);
     setError(null);
     try {
-      await CanvasApi.saveConfig(newConfig);
-    } catch {
-      // API unavailable (dev mode) — local state already updated above.
-      // In production, a retry mechanism could be added here.
+      if (persistenceAdapter) {
+        await persistenceAdapter.saveConfig(newConfig);
+      } else {
+        await CanvasApi.saveConfig(newConfig);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error(String(err)));
     }
-  }, []);
+  }, [persistenceAdapter]);
 
   const reset = useCallback(async (role: string) => {
     setError(null);
     try {
+      if (persistenceAdapter) {
+        await persistenceAdapter.resetConfig(projectId, userId);
+        setConfig(null);
+        return;
+      }
+
       const result = await CanvasApi.resetToRoleDefault(userId, projectId, role);
       setConfig(result);
-    } catch {
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error(String(err)));
       // API unavailable — clear config so useProjectCanvas falls back to role defaults.
       setConfig(null);
     }
-  }, [userId, projectId]);
+  }, [persistenceAdapter, projectId, userId]);
 
   return { config, isLoading, error, save, reset, refresh };
 }

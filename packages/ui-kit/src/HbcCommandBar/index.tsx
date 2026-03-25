@@ -62,6 +62,17 @@ const DENSITY_LABELS: Record<DensityTier, string> = {
   touch: 'Touch',
 };
 
+function getNextDensityTier(tier: DensityTier): DensityTier {
+  switch (tier) {
+    case 'compact':
+      return 'standard';
+    case 'standard':
+      return 'touch';
+    case 'touch':
+      return 'compact';
+  }
+}
+
 const useStyles = makeStyles({
   root: {
     display: 'flex',
@@ -349,7 +360,7 @@ export const HbcCommandBar: React.FC<HbcCommandBarProps> = ({
         variant="ghost"
         size="sm"
         pressed={effectiveDensity === 'compact'}
-        onClick={() => handleDensityChange(effectiveDensity === 'compact' ? 'touch' : 'compact')}
+        onClick={() => handleDensityChange(getNextDensityTier(effectiveDensity))}
         aria-label={`Density: ${DENSITY_LABELS[effectiveDensity]}`}
       >
         {DENSITY_LABELS[effectiveDensity]}

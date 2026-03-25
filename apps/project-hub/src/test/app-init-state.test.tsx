@@ -29,6 +29,8 @@ describe('App initialization gate', () => {
     );
 
     expect(html).toContain('Project context unavailable');
+    expect(html).toContain('data-layout="dashboard"');
+    expect(html).toContain('data-hbc-density="standard"');
     expect(html).not.toContain('Project Name');
   });
 });

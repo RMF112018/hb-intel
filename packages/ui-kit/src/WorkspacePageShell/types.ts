@@ -45,6 +45,12 @@ export interface WorkspacePageShellProps {
   actions?: CommandBarAction[];
   /** Overflow menu actions */
   overflowActions?: CommandBarAction[];
+  /**
+   * When true, renders the shell-level density control even when the page has
+   * no command actions. Use this on routed surfaces that still need one-tap
+   * density access.
+   */
+  showDensityControl?: boolean;
   /** Dashboard layout config (only used when layout='dashboard') */
   dashboardConfig?: DashboardConfig;
   /** List-mode config (forwarded to ListLayout context) */

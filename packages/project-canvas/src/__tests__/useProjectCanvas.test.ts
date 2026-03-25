@@ -2,6 +2,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { CanvasApi } from '../api/index.js';
 import { useProjectCanvas } from '../hooks/useProjectCanvas.js';
 import { createMockCanvasConfig, createMockTileDefinition, createMockTilePlacement } from '@hbc/project-canvas/testing';
+import type { ICanvasPersistenceAdapter } from '../api/index.js';
 
 vi.mock('../registry/index.js', () => ({
   get: vi.fn((key: string) => {
@@ -183,5 +184,33 @@ describe('useProjectCanvas (D-SF13-T04, orchestrator)', () => {
     const added = result.current.tiles.find((t) => t.tileKey === 'mandatory-c');
     expect(added).toBeDefined();
     expect(added!.rowStart).toBe(4); // placed after row 3 (max row in config)
+  });
+
+  it('save delegates to a supplied persistence adapter', async () => {
+    setupMocks({ config: null });
+    const adapter: ICanvasPersistenceAdapter = {
+      getConfig: vi.fn().mockResolvedValue(createMockCanvasConfig({ tiles: [] })),
+      saveConfig: vi.fn().mockResolvedValue(undefined),
+      resetConfig: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const { result } = renderHook(() =>
+      useProjectCanvas('project-001', 'user-001', 'Project Manager', adapter),
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const newTiles = [createMockTilePlacement({ tileKey: 'persisted-tile' })];
+    await act(async () => {
+      await result.current.save(newTiles);
+      await result.current.reset();
+    });
+
+    expect(adapter.saveConfig).toHaveBeenCalledWith({
+      userId: 'user-001',
+      projectId: 'project-001',
+      tiles: newTiles,
+    });
+    expect(adapter.resetConfig).toHaveBeenCalledWith('project-001', 'user-001');
   });
 });
