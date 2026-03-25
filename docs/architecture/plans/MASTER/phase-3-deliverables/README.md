@@ -652,6 +652,7 @@ Each module surface must prove one of two governed outcomes:
 - explicit `Launch-to-PWA` affordances with canonical `projectId` deep-link construction for deeper workflows
 
 `@hbc/features-project-hub` is the canonical shared owner for reusable Stage 10.2 module-lane definitions and summary surfaces. `apps/project-hub` owns shell composition, route assembly, and SPFx-to-PWA launches — not duplicate module business logic.
+Acceptance evidence for Stage 10.2 must be collected module-by-module; a single generic SPFx shell proof does not satisfy the Stage 10 gate.
 Governing: P3-G1 §4
 
 **10.3 — SPFx-to-PWA escalation affordances**
@@ -766,6 +767,7 @@ Status: **Implemented 2026-03-25 in `@hbc/features-project-hub` v0.2.16.** Proje
 **13.3 — Source, authority, and restriction vocabulary (E5)**
 Define and bind the project-context trust vocabulary and visual states: governed project file, restricted item, preview available, raw library location, canonical/authoritative indicator, not-authoritative/linked copy. Bind all states to `@hbc/ui-kit` badge, list-row, preview-card, and empty-state patterns. Define plain-language explanation copy rules. This vocabulary must be reusable into Phase 5 without redefinition.
 Governing: P3-J1 §3 E5
+Status: **Implemented 2026-03-25 in `@hbc/features-project-hub` v0.2.19.** Trust vocabulary contracts: 5 enum type unions (6 trust states, 4 UI patterns, 4 terminology guardrails, 6 badge variants, 3 copy tone rules), 5 interface contracts, governed constants (6-row trust state definitions, 24-row UI state matrix binding all trust states to @hbc/ui-kit patterns, 4 terminology guardrails with violation examples, 3 copy rules, 12 state-to-UI bindings), 10 business rules including SharePoint-internals-never-exposed invariant and terminology violation detection; 50 tests. Stage 13.3 E5 state vocabulary complete.
 
 **13.4 — Project Hub contextual entry surface (E3)**
 Implement or design the Project Hub document entry surface as a contextual launch/entry layer, not a standalone feature. Use shared-shell language and `@hbc/ui-kit` patterns — no feature-local UI primitive duplication. Provide CTA paths for: open project documents, view by zone, raw library fallback, related documents from records, preview when supported. Define empty-state and no-access states.
