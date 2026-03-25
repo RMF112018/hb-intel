@@ -8,7 +8,7 @@
 | **Document Type** | Module Field Specification — T-File Master Index |
 | **Owner** | Project Hub Leadership |
 | **Last Updated** | 2026-03-24 |
-| **Status** | Specification — T01 through T10 authored; Stage 2 governance complete in `@hbc/features-project-hub` v0.1.92 |
+| **Status** | Specification — T01 through T10 authored; Stage 3 record-families complete in `@hbc/features-project-hub` v0.1.93 |
 | **Related contracts** | P3-E1 §3.7, P3-E2, P3-D1, P3-D2, P3-D3, P3-D4, P3-E5, P3-E8, P3-E9, P3-E10, P3-E11, P3-E14, P3-G1 §4.7, P3-G2, P3-H1, Phase 6 |
 
 ---
