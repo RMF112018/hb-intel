@@ -712,6 +712,7 @@ Status: **Implemented 2026-03-25 in `@hbc/spfx-project-hub` v0.0.10.** Runtime h
 **11.6 — Card weight and hierarchy review**
 Review all canvas tiles and module KPI/summary card compositions. Verify card weight differentiation is applied (primary/standard/supporting) — no equal-weight card grids. Verify Three-Second Read Standard: on every primary surface, the most important item (health status, next action, critical constraint) is identifiable within 3 seconds without scanning.
 Governing: P3-C1 §14.2; UI-Kit-Visual-Hierarchy-and-Depth-Standards.md
+Status: **Implemented 2026-03-25 in `@hbc/spfx-project-hub` v0.0.11.** Card weight differentiation applied across all live SPFx surfaces: DashboardPage (canvas card `primary`, escalation hub `supporting`, module launchers `standard`), ProjectModulePage (introduction card `primary`, scenario action cards `standard`, artifact thread card `supporting`), ProjectHubSpfxLaneSurface (module title card `primary`, capability grid cards `standard`, governance note card `supporting`). All equal-weight card grids eliminated per P3-C1 §14.2. Stage 11.6 card weight review complete.
 
 **11.7 — Empty state verification**
 Verify every data-dependent zone has an `HbcSmartEmptyState` or `HbcEmptyState` configured with actionable next-step guidance. No zone may render a blank area or a null state without guidance. Verify empty state text is context-specific ("No constraints yet. Typical next step: log the first delay impact.").
