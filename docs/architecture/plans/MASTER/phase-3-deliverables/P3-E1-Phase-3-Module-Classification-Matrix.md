@@ -104,7 +104,7 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 
 | Module | PH7 Plan | Current repo state | Status |
 |---|---|---|---|
-| Quality Control | P3-E15 (supersedes PH7-7 as Phase 3 authority) | Stage 6 deviations-evidence complete in `@hbc/features-project-hub` v0.1.96 — T06 deviations, evidence, external approval dependencies: conditions-of-approval model, evidence minimum enforcement by use case, official-source conflict handling, readiness impact propagation, approval provenance audit | **Controlled evolution** |
+| Quality Control | P3-E15 (supersedes PH7-7 as Phase 3 authority) | Stage 7 submittal-advisory complete in `@hbc/features-project-hub` v0.1.97 — T07 submittal completeness advisory: 3 new record types (revision history, official source references, downstream activation mapping), 15 enums, document family taxonomy, two-stage activation, verdict evaluation, spec/package anchoring, version drift alerts | **Controlled evolution** |
 | Warranty | PH7-8 | No production implementation | **Controlled evolution** |
 
 ### 1.5 PH7 plan inventory
