@@ -3,7 +3,7 @@
 **Doc ID:** P3-J1
 **Workstream:** J — Documents Enabling Seams
 **Classification:** Specification
-**Status:** In Progress — E1–E7 complete (v0.2.15–v0.2.21); E8 pending
+**Status:** Complete — E1–E8 all implemented (v0.2.15–v0.2.22); all 8 enabling workstreams closed
 **Phase:** Phase 3 — Project Hub and Project Context
 **Governing Plan:** [04_Phase-3_Unified-Documents-Enabling-Plan.md](./04_Phase-3_Unified-Documents-Enabling-Plan.md)
 **Deferred Full Implementation:** `docs/architecture/plans/MASTER/06_Phase-5_Search-Connected-Records-and-Document-Access-Plan.md`

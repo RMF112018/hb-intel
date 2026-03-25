@@ -800,6 +800,7 @@ Status: **Implemented 2026-03-25 in `@hbc/features-project-hub` v0.2.20.** Publi
 **13.8 — Data, telemetry, and readiness spikes (E8)**
 Spike project-scoped registry resolution against real/proposed site-library patterns. Spike auth/token flow for project-context document access. Spike preview feasibility and handoff mechanics. Define telemetry events for launch, preview, raw fallback, restricted-stub exposure, and no-access states. Capture all contradictions discovered during spikes in the contradiction register. Produce a Phase 5 handoff memo summarizing findings and outstanding risks.
 Governing: P3-J1 §3 E8; P3-J1 §8
+Status: **Implemented 2026-03-25 in `@hbc/features-project-hub` v0.2.22.** Readiness spike contracts: 4 enum type unions, 4 interface contracts, governed constants (4 spike finding areas, 5 telemetry events, 4 Phase 5 handoff recommendations all RECOMMENDED, contradiction register template), 8 business rules; 47 tests. **P3-J1 Documents Enabling Seams — all 8 workstreams (E1–E8) complete.** Stage 13 documents enabling closed.
 
 ---
 
