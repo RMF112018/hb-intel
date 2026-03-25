@@ -8,3 +8,4 @@ export * from './run-lifecycle/index.js';
 export * from './template-governance/index.js';
 export * from './section-sources/index.js';
 export * from './review-boundaries/index.js';
+export * from './spine-publication/index.js';
