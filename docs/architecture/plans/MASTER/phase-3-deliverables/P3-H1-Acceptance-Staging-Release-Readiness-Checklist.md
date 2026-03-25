@@ -339,7 +339,7 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 7.1 | PX Review family live — PWA full lifecycle, SPFx generate+approve | Not Started | | P3-F1, P3-G3 §8, AC-REP-01 |
+| 7.1 | PX Review family live — PWA full lifecycle, SPFx generate+approve | In Progress | T01 foundation contracts complete (family registry, authority model, operating principles); runtime pending | P3-F1, P3-G3 §8, AC-REP-01 |
 | 7.2 | Owner Report family live — PWA full lifecycle, SPFx generate+release | Not Started | | P3-F1, P3-G3 §8, AC-REP-30 |
 | 7.3 | Sub-scorecard family live — ingests P3-E10 confirmed snapshot; assembles PDF; no score re-computation | Not Started | | P3-E9-T06 §5.3, AC-REP-43-AC-REP-46 |
 | 7.4 | Lessons-learned family live — ingests P3-E10 confirmed snapshot; assembles PDF | Not Started | | P3-E9-T06 §5.5, AC-REP-44, AC-REP-47 |
