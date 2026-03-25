@@ -71,8 +71,8 @@ describe('QC record-families contract stability', () => {
       expect(QC_ROOT_CAUSE_CATEGORIES).toHaveLength(10);
     });
 
-    it('QC_RECURRENCE_CLASSIFICATIONS has 4 members', () => {
-      expect(QC_RECURRENCE_CLASSIFICATIONS).toHaveLength(4);
+    it('QC_RECURRENCE_CLASSIFICATIONS has 5 members', () => {
+      expect(QC_RECURRENCE_CLASSIFICATIONS).toHaveLength(5);
     });
 
     it('QC_SUBMITTAL_ACTIVATION_STAGES has 2 members', () => {

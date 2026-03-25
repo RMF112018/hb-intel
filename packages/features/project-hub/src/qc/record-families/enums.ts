@@ -83,7 +83,8 @@ export type RecurrenceClassification =
   | 'FIRST_OCCURRENCE'
   | 'RECURRING'
   | 'SYSTEMIC'
-  | 'TRENDING';
+  | 'TRENDING'
+  | 'REPEAT_ENTERPRISE_CANDIDATE';
 
 // -- Submittal Activation Stage (T03 §2.6) ------------------------------------
 

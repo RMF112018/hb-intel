@@ -92,6 +92,7 @@ export const QC_RECURRENCE_CLASSIFICATIONS = [
   'RECURRING',
   'SYSTEMIC',
   'TRENDING',
+  'REPEAT_ENTERPRISE_CANDIDATE',
 ] as const satisfies ReadonlyArray<RecurrenceClassification>;
 
 export const QC_SUBMITTAL_ACTIVATION_STAGES = [
