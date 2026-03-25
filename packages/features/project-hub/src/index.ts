@@ -43,4 +43,8 @@ export * from './document-zones/index.js';
 
 export * from './document-entry/index.js';
 
+export * from './document-references/index.js';
+
 export * from './reports/index.js';
+
+export * from './spfx-lane/index.js';
