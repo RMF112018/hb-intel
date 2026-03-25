@@ -3,7 +3,7 @@
 **Doc ID:** P3-J1
 **Workstream:** J — Documents Enabling Seams
 **Classification:** Specification
-**Status:** Not Started
+**Status:** In Progress — E1 route and launch contracts complete in `@hbc/features-project-hub` v0.2.15
 **Phase:** Phase 3 — Project Hub and Project Context
 **Governing Plan:** [04_Phase-3_Unified-Documents-Enabling-Plan.md](./04_Phase-3_Unified-Documents-Enabling-Plan.md)
 **Deferred Full Implementation:** `docs/architecture/plans/MASTER/06_Phase-5_Search-Connected-Records-and-Document-Access-Plan.md`
@@ -213,7 +213,7 @@ The workstreams should be executed in three sequences. E1, E2, and E5 are front-
 
 ### PWA lane
 
-Owns: project-scoped launch states in the PWA shell, future-compatible document route patterns, preview/details composition in shared-shell terms, and any Project Hub PWA entry surfaces.
+Owns: project-scoped launch states in the PWA shell, future-compatible document route patterns, preview/details composition in shared-shell terms, and any Project Hub PWA entry surfaces. Future content-aware entry points must align to [P1-F12 Microsoft 365 Graph Content](../phase-1-deliverables/P1-F12-Microsoft-365-Graph-Content-Connector-Family.md) through published content read models and references, not direct Graph connector operations.
 
 ### SPFx lane
 
@@ -225,7 +225,7 @@ Owns: project-site companion launch points, contextual panels and links in Share
 |---|---|
 | `@hbc/shell` | Project/workspace context for document launch states |
 | `@hbc/auth` | Auth and permission gates for document access |
-| `@hbc/sharepoint-docs` | SharePoint document operations only; all direct Graph calls route here |
+| `@hbc/sharepoint-docs` | SharePoint document operations only; all direct Graph calls route here; future Graph-content awareness must enter through `P1-F12` published read models and references |
 | `@hbc/related-items` | Project related-item presentation (E4) |
 | `@hbc/session-state` | Offline-safe state |
 | `@hbc/workflow-handoff` | Future handoff seam (E6) |
@@ -247,6 +247,7 @@ Phase 3 document enablement is complete only when all of the following are true:
 6. Preview-first and adaptive-tablet assumptions are prepared, not contradicted.
 7. Publish/handoff seams are defined without dragging the full publish product into Phase 3.
 8. A contradiction register exists for any discovered blockers to Phase 5 execution.
+9. Future Microsoft 365 content-aware document access is expressed through `P1-F12` published read models and references rather than direct connector or raw Graph layers.
 
 ---
 
