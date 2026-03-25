@@ -41,7 +41,7 @@ The plan set translates the [target-state architecture](../../blueprint/HB-Intel
 | 07 | [Phase 6 — Field-First HB Site Control](07_Phase-6_Field-First-HB-Site-Control-Plan.md) | Draft | Phase Plan | HB Site Control field experience, mobile/tablet patterns, offline-capable workflows |
 | 08 | [Phase 7 — HBI Intelligence, Production Hardening, and Rollout](08_Phase-7_HBI-Intelligence-Production-Hardening-and-Rollout-Plan.md) | Draft | Phase Plan | Intelligence features, security hardening, production readiness, enterprise rollout |
 | — | [phase-0-deliverables/](phase-0-deliverables/) | Complete | Deliverables Folder | 7 mandatory Phase 0 artifacts (reconciliation, readiness, guardrails, entry criteria) |
-| — | [phase-1-deliverables/](phase-1-deliverables/) | Planning Complete | Deliverables Folder | 24 Phase 1 artifacts (schemas, adapters, contracts, test plans, staging readiness) |
+| — | [phase-1-deliverables/](phase-1-deliverables/) | Planning Complete | Deliverables Folder | 24 original Phase 1 workstream artifacts plus the authored P1-F umbrella families under Phase 1 deliverables and closeout/reconciliation records; downstream phases consume their published read-model contracts rather than connector internals |
 | — | [phase-3-deliverables/](phase-3-deliverables/) | Active Reference | Deliverables Folder | Active Phase 3 deliverables index including locked module-spec packages such as P3-E10, P3-E11, and P3-E13 |
 
 ---
@@ -57,7 +57,7 @@ MASTER/
 ├── 03–08_Phases-2-through-7         ← Phase plans (Draft — forward planning)
 ├── phase-0-deliverables/            ← 7 artifacts + index README
 │   └── README.md                    ← Phase 0 deliverables index
-├── phase-1-deliverables/            ← 24 artifacts + index README
+├── phase-1-deliverables/            ← 24 original artifacts + authored P1-F umbrella families + index README
 │   └── README.md                    ← Phase 1 deliverables index
 └── phase-3-deliverables/            ← Active Phase 3 deliverables index + split T-file packages
     └── README.md                    ← Phase 3 deliverables index
@@ -79,7 +79,7 @@ MASTER/
 Execution complete (2026-03-16). Seven mandatory deliverables produced: reconciliation memo, divergence log, production readiness matrix, development guardrail sheet, environment and promotion matrix, Phase 1 entry checklist, and open decisions register. All five milestones (M0.1–M0.5) satisfied, all six Phase 1 entry blockers resolved, and all 17 completion gate checkboxes cleared (see P0-E1). These artifacts established the program truth baseline that Phase 1 planning built upon.
 
 **Phase 1 — Production Data Plane and Integration Backbone**
-Planning and implementation complete. Twenty-four deliverables produced across five workstreams. All design decisions are locked. Pre-Phase-1 contradiction closeout completed 2026-03-18 (26 contradictions resolved, go/no-go checklist 7/7 PASS). All implementation workstreams code-complete as of 2026-03-19. See [P1-CLOSEOUT](phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) for the full blocker register.
+Planning and implementation established the original A-E workstreams, and the plan set now includes an active repo-truth-grounded extension: the authored `P1-F` family set under [phase-1-deliverables](phase-1-deliverables/). The original 24 tracked workstream artifacts and closeout records remain in place. Workstream F now governs the multi-wave native integration program against current implementation reality without claiming the target Azure-first runtime is already complete. Downstream plans in Phases 3-5 must treat `P1-F` families as governed upstream dependencies and consume published read models or governed repositories only. See [P1-CLOSEOUT](phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) and [P1 Native Integration Audit](phase-1-deliverables/P1-CLOSEOUT-Native-Integration-Backbone-Repo-Truth-Audit.md) for the reconciliation basis.
 
 **Phase 1 Implementation Baseline (updated 2026-03-19):**
 
@@ -90,6 +90,13 @@ Planning and implementation complete. Twenty-four deliverables produced across f
 | Implementation verdict | **Code-complete** — B1 (11/11 repos), C1, C2, C3, D1, E1 all delivered and tested |
 | Remaining blockers for staging execution | IT-side function app deployment, auth app registration, environment variable configuration; IT Graph permission grant; PO schema approval |
 | Recommended immediate next step | Resolve IT-side staging deployment blockers to execute P1-E2 staging readiness checklist |
+
+**Phase 1 native integration extension (2026-03-25):**
+
+- [`P1-F1` Native Integration Backbone family](phase-1-deliverables/P1-F1-Native-Integration-Backbone-Master-Index.md) is now the governing umbrella for the authored `P1-F2` through `P1-F19` connector and expansion-pack families.
+- The family is explicitly grounded in current repo truth and the completed Phase 1 native integration audit.
+- Present truth still lives in [current-state-map](../../blueprint/current-state-map.md); `P1-F1` governs the transition and connector-program planning model, not a claim that the Azure-first target is already implemented today.
+- The implementation companion for this planning set is the [Native Integration Backbone Implementation Guide](../../how-to/developer/native-integration-backbone-implementation-guide.md), which translates `P1-F*` and downstream reconciliations into package/runtime responsibilities, seam changes, publication rules, and rollout guidance.
 
 For the full three-tier implementation-entry gate, see [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md) §Phase 1 Implementation-Entry Gate.
 
@@ -133,16 +140,20 @@ The `plans/shared-features/` and `plans/UI-Kit/` directories contain shared-feat
 1. **This README** — Plan set overview and status
 2. **[Master Summary (00)](00_HB-Intel_Master-Development-Summary-Plan.md)** — Phase stack, milestones, dependency logic
 3. **[Phase 1 Deliverables README](phase-1-deliverables/README.md)** — Planning completion summary and deliverables index
+4. **[`P1-F1` Native Integration Backbone family](phase-1-deliverables/P1-F1-Native-Integration-Backbone-Master-Index.md)** — Governing umbrella for the authored native integration family set, publication boundary, and wave structure
 
 ### Architecture and Data Governance
 1. **[Master Summary (00)](00_HB-Intel_Master-Development-Summary-Plan.md)** — Platform assumptions and governing hierarchy
 2. **[Phase 1 Plan (02)](02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md)** — Data plane architecture and workstream design
-3. **[P1-A1 Data Ownership Matrix](phase-1-deliverables/P1-A1-Data-Ownership-Matrix.md)** → **[P1-A2 Source-of-Record Register](phase-1-deliverables/P1-A2-Source-of-Record-Register.md)** → **[P1-C1 Backend Service Contract Catalog](phase-1-deliverables/P1-C1-Backend-Service-Contract-Catalog.md)**
+3. **[`P1-F1` Native Integration Backbone family](phase-1-deliverables/P1-F1-Native-Integration-Backbone-Master-Index.md)** — Current umbrella for transitional custody, publication boundary, and wave structure
+4. **Named connector families as needed** — [P1-F5](phase-1-deliverables/P1-F5-Procore-Connector-Family.md), [P1-F6](phase-1-deliverables/P1-F6-Sage-Intacct-Connector-Family.md), [P1-F7](phase-1-deliverables/P1-F7-BambooHR-Connector-Family.md), [P1-F12](phase-1-deliverables/P1-F12-Microsoft-365-Graph-Content-Connector-Family.md), and [P1-F14](phase-1-deliverables/P1-F14-Oracle-Primavera-Connector-Family.md) when reconciling downstream consumer plans
+4. **[P1-A1 Data Ownership Matrix](phase-1-deliverables/P1-A1-Data-Ownership-Matrix.md)** → **[P1-A2 Source-of-Record Register](phase-1-deliverables/P1-A2-Source-of-Record-Register.md)** → **[P1-C1 Backend Service Contract Catalog](phase-1-deliverables/P1-C1-Backend-Service-Contract-Catalog.md)**
 
 ### Implementation / Engineering
 1. **[Phase 1 Deliverables README](phase-1-deliverables/README.md)** — Full deliverables index with status and reading paths
 2. **[P1-B1 Proxy Adapter Implementation Plan](phase-1-deliverables/P1-B1-Proxy-Adapter-Implementation-Plan.md)** — TDD engineering plan for all 11 domain repositories
 3. **[P1-E1 Contract Test Suite Plan](phase-1-deliverables/P1-E1-Contract-Test-Suite-Plan.md)** — Locked transport conventions and test infrastructure
+4. **[`P1-F1` Native Integration Backbone family](phase-1-deliverables/P1-F1-Native-Integration-Backbone-Master-Index.md)** — Governing integration-program extension for future connector families
 
 ### Forward Planning
 1. **[Master Summary (00)](00_HB-Intel_Master-Development-Summary-Plan.md)** — Cross-phase dependency logic and parallel work guidance
@@ -180,6 +191,7 @@ The `plans/shared-features/` and `plans/UI-Kit/` directories contain shared-feat
 
 - **Phase 0 Deliverables Index:** [phase-0-deliverables/README.md](phase-0-deliverables/README.md)
 - **Phase 1 Deliverables Index:** [phase-1-deliverables/README.md](phase-1-deliverables/README.md)
+- **P1-F1 Native Integration Backbone family:** [phase-1-deliverables/P1-F1-Native-Integration-Backbone-Master-Index.md](phase-1-deliverables/P1-F1-Native-Integration-Backbone-Master-Index.md)
 - **Phase 3 Deliverables Index:** [phase-3-deliverables/README.md](phase-3-deliverables/README.md)
 - **Current-State Map:** [docs/architecture/blueprint/current-state-map.md](../../blueprint/current-state-map.md)
 - **Target Architecture (Blueprint V4):** [docs/architecture/blueprint/HB-Intel-Blueprint-V4.md](../../blueprint/HB-Intel-Blueprint-V4.md)

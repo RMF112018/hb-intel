@@ -11,7 +11,7 @@
 
 ## Purpose
 
-Establish the authoritative source, read/write paths, and identity strategy for each HB Intel domain. This register is the operational handbook for adapter design: it tells developers where each domain's data lives, how to reach it safely, what identity key to use, and what class of write safety is required.
+Establish the authoritative source, read/write paths, and identity strategy for each HB Intel domain. This register began as the operational handbook for a SharePoint-native Phase 1 adapter model. It is now reconciled against current repo truth and the authored `P1-F` native integration backbone families: current active domain services are largely Azure-backed, SharePoint is transitional for provisioning and selected published operational read models, and external-system ingestion is governed by named `P1-F*` families rather than deferred as an unspecified future integration step.
 
 ---
 
@@ -33,9 +33,23 @@ Establish the authoritative source, read/write paths, and identity strategy for 
 
 ---
 
+## Current Reconciliation Guidance (2026-03-25)
+
+Use the following rules when applying this register:
+
+- **Current repo truth beats the original SharePoint-native adapter target.** Current backend domain services are Azure Table-backed across leads, projects, estimating, schedule, buyout, compliance, contracts, risk, scorecards, and PMP.
+- **SharePoint remains transitional.** It is authoritative for provisioning/site/list/document operations and may host selected published operational read models during transition, but it is not the default active domain SoR for current operational CRUD.
+- **Named external-system planning path is now locked.** Wave 1 uses [P1-F5](P1-F5-Procore-Connector-Family.md), [P1-F6](P1-F6-Sage-Intacct-Connector-Family.md), and [P1-F7](P1-F7-BambooHR-Connector-Family.md). Wave 2 uses [P1-F9](P1-F9-Unanet-CRM-Connector-Family.md), [P1-F10](P1-F10-Autodesk-BuildingConnected-Connector-Family.md), [P1-F11](P1-F11-Autodesk-TradeTapp-Connector-Family.md), [P1-F12](P1-F12-Microsoft-365-Graph-Content-Connector-Family.md), and [P1-F13](P1-F13-Autodesk-Construction-Cloud-Core-Connector-Family.md). Wave 3 uses [P1-F14](P1-F14-Oracle-Primavera-Connector-Family.md), [P1-F15](P1-F15-Microsoft-365-Graph-Work-Orchestration-Connector-Family.md), and [P1-F16](P1-F16-Autodesk-Construction-Cloud-Advanced-Governance-Connector-Family.md).
+- **Downstream consumer rule:** Project Hub, Reports, Documents, Search, and later domains consume published read models or governed repositories only. They do not consume raw custody, normalized source-aligned records, or thin canonical core outputs directly.
+- **Current seam changes remain mandatory prerequisites:** durable project registry, proxy context startup wiring if proxy stays in play, proxy/backend route reconciliation, and replacement of mock PWA source/query providers behind governed repositories.
+
+---
+
 ## Domain Source-of-Record Register
 
 > **Summary layer.** This table defines SoR, adapter path, identity key, and write safety at the *domain* level. For entity-level governance (individual canonical models within each domain), see the [Entity-Level Source-of-Record and Adapter Behavior Register](#entity-level-source-of-record-and-adapter-behavior-register) below.
+>
+> **Reconciliation note.** The table below captures the original A-series domain adapter target. Where it conflicts with the reconciliation guidance above, current repo truth and the `P1-F` families govern.
 
 **Site-scope placement authority:** For the authoritative mapping of all Phase 1 artifacts to SharePoint site scopes (Hub Site, Project Site, Sales/BD Site, Shared Site) and Azure Table Storage, see the [Site-Scope Placement Authority](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md) section in P1-A3. A2 entity-level storage targets are consistent with the A3 placement matrix.
 
@@ -887,4 +901,3 @@ This checklist confirms that the Phase 1 identity strategy freeze is complete an
 | 1.9 | 2026-03-17 | Architecture | Froze Vendor Identity Resolution Platform Standard: consolidated Class H (vendor/party) structural contract into a dedicated cross-schema section — `*_key` + `*_display` pair with nullable key for unresolved vendor names, adapter/service-layer resolution ownership, vendor registry as Phase 2 deliverable. Enumerated all Phase 1 governed fields (A11 responsible_party, A12 subcontractor, A15 owner_client). Noted buyout vendorName as pre-existing display field. |
 | 2.0 | 2026-03-17 | Architecture | Lessons phase dictionary reconciliation: added `lesson_phase_dictionary` entity to reference section (Class C, hub site, `LessonPhases`); updated `lesson_record` FK list to include `phase_encountered_key`. |
 | 2.1 | 2026-03-17 | Architecture | Added cross-reference to P1-A3 Site-Scope Placement Authority (v2.8) in Domain SoR Register. A3 is now the authoritative source for artifact-to-site-scope mapping. A2 entity-level storage targets are confirmed consistent with the A3 placement matrix. |
-

@@ -61,6 +61,17 @@ Because these foundations already exist, Phase 3 must focus on:
 
 Phase 3 must **not** waste effort re-describing already-established shell, canvas, and relationship foundations as if they were still hypothetical.
 
+### 2.4 Integration backbone dependency
+
+Phase 3 must also treat the authored `P1-F` native integration backbone families as active upstream planning dependencies:
+
+- Project-financial and project-control context flows through [P1-F5 Procore](phase-1-deliverables/P1-F5-Procore-Connector-Family.md) and [P1-F6 Sage Intacct](phase-1-deliverables/P1-F6-Sage-Intacct-Connector-Family.md) published read models.
+- Workforce-aware planning surfaces consume governed workforce read models from [P1-F7 BambooHR](phase-1-deliverables/P1-F7-BambooHR-Connector-Family.md).
+- Document/content-aware surfaces consume published content read models and references from [P1-F12 Microsoft 365 Graph Content](phase-1-deliverables/P1-F12-Microsoft-365-Graph-Content-Connector-Family.md).
+- Schedule-aware surfaces depend on [P1-F14 Oracle Primavera](phase-1-deliverables/P1-F14-Oracle-Primavera-Connector-Family.md) as the governed Wave 3 schedule connector family.
+
+Project Hub / Control Center consumes published read models or governed repositories only. It does not consume raw connector contracts, normalized source-aligned records, or thin canonical core layers directly. Future implementation must also honor the current seam corrections locked in `P1-F1-T02` and `P1-F1-T12`, including durable project-registry work, proxy/backend route reconciliation, proxy context startup wiring where relevant, and replacement of mock PWA source/query providers.
+
 ---
 
 ## 3. Strategic Phase Objective
@@ -187,7 +198,7 @@ At the end of Phase 3:
 - Full jurisdiction-facing permitting platform
 - Full enterprise EHS platform beyond the committed Project Hub safety operating model
 - Full field-first execution depth for QC and Warranty; deeper definition is deferred to `07_Phase-6_Field-First-HB-Site-Control-Plan.md` (see Repo-Truth Reconciliation Note 3)
-- Future direct Procore API replacement of interim budget file import (explicit future-state item)
+- Direct connector-contract consumption inside Project Hub or Control Center; the governed transition path is via `P1-F5` / `P1-F6` published read models and downstream repositories rather than direct connector APIs
 - Future smart toolbox talk topic automation linked to schedule risk/activity triggers (explicit future-state item)
 - Full unified Documents product: global Documents shell, My Files / Departments / Company roots, global smart views (Recent / Shared With Me / Pinned), platform-wide document search, cross-workspace document unification, desktop-sync orchestration — all Phase 5 scope (see `06_Phase-5_Search-Connected-Records-and-Document-Access-Plan.md`)
 
@@ -358,7 +369,7 @@ It is user-centered first, but not user-exclusive.
 
 ### 10.1 Canonical lane rule
 
-Both lanes consume the same canonical shared contracts. Lane differences are about depth, continuity, and host behavior, not about inventing different project semantics.
+Both lanes consume the same canonical shared contracts. Lane differences are about depth, continuity, and host behavior, not about inventing different project semantics. In the SPFx lane, this includes a hard initialization rule: no module route, page surface, or project-scoped shell content may render until the host `siteUrl` has been resolved through the canonical project registry to a confirmed `projectId`.
 
 ### 10.2 Lane posture
 
@@ -380,12 +391,13 @@ The SPFx lane must be a **broad operational project-site companion**:
 - substantial direct working capability across most always-on core modules
 - meaningful site-native operational value
 - launch into deeper PWA workflows only where the PWA remains intentionally richer
+- registry-backed site initialization before render, with in-shell `@hbc/smart-empty-state` fallback when no canonical project can be resolved
 
 ### 10.3 Cross-lane matrix
 
 | Capability | Shared Canonical Contract | PWA | SPFx |
 |---|---|---|---|
-| Project identity | Route/URL canonical | Full | Full |
+| Project identity | Route/URL canonical | Full | Full, with `siteUrl` resolved to canonical `projectId` before render |
 | Project switching | Smart same-page switching | Full | Full, with host-aware fallbacks |
 | Home/canvas | Same governance and mandatory core | Richer continuity/customization | Broad site-native companion |
 | Health/activity/work/related-items | Same normalized semantics | Full | Full |
@@ -781,6 +793,7 @@ Review Mode remains assigned to Phase 3, but this plan preserves the explicit go
 - Define SPFx broad operational companion envelope
 - Define PWA continuity / advanced-depth differentiation
 - Define cross-lane navigation and context preservation rules
+- Define SPFx initialization evidence: registry lookup, store seeding, no-render-before-resolution, and smart-empty-state failure handling
 
 **Deliverables**
 - PWA / SPFx capability matrix
@@ -795,6 +808,7 @@ Review Mode remains assigned to Phase 3, but this plan preserves the explicit go
 - Define acceptance gates per lane and per module group
 - Define staging/test scenarios for activation, switching, stale drafts, and cross-lane continuity
 - Define release-readiness criteria for the mandatory operational core
+- Require Stage 10.1 evidence proving SPFx `siteUrl -> projectId` initialization parity with the PWA route-carried identity model
 
 **Deliverables**
 - Phase 3 acceptance checklist

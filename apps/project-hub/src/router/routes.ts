@@ -1,7 +1,7 @@
 /**
  * Webpart-scoped routes — Project Hub.
  */
-import { createRoute, redirect, lazyRouteComponent } from '@tanstack/react-router';
+import { createRoute, lazyRouteComponent } from '@tanstack/react-router';
 import { useNavStore } from '@hbc/shell';
 import { rootRoute } from './root-route.js';
 

@@ -36,11 +36,14 @@ This document is the **canonical delivery roadmap** for completed and remaining 
 - **Historical implementation baseline:** `docs/architecture/plans/hb-intel-foundation-plan.md`
 - **Binding architecture decisions:** `docs/architecture/adr/*`
 - **Detailed implementation plans:** `docs/architecture/plans/PH*`, `ph7-*`, `shared-features/*`, `MVP/*`
+- **Phase 1 native integration umbrella family:** `docs/architecture/plans/MASTER/phase-1-deliverables/P1-F1-*`
 - **This document:** the consolidated execution roadmap across completed, MVP, and future production stages
 
 ### 2.2 How to use this roadmap
 
 Use this roadmap to understand **sequence, dependencies, wave structure, readiness gates, and long-range convergence**. Do not use it as proof that something is already implemented. Any statement about current implementation status should be verified against `current-state-map.md`.
+
+The native integration program is now governed in detail by the `P1-F1` umbrella family under MASTER Phase 1 deliverables, together with its named child families such as `P1-F5` Procore, `P1-F6` Sage Intacct, `P1-F7` BambooHR, `P1-F12` Microsoft 365 Graph Content, and `P1-F14` Oracle Primavera. Those families govern connector-program custody, publication, and readiness expectations. This roadmap remains sequencing-oriented and does not replace the detailed `P1-F*` family files, and downstream modules consume only published read models from that backbone.
 
 ---
 
@@ -172,6 +175,16 @@ The documentation set now has:
 - and a clearer truth hierarchy.
 
 That means the roadmap can now be managed as a **single delivery narrative** instead of being reconstructed from scattered summary files.
+
+### 5.4 Native integration umbrella family
+
+The roadmap now assumes a governed native integration program under MASTER Phase 1 deliverables:
+
+- Wave 1: Procore, Sage Intacct, BambooHR
+- Wave 2: Unanet CRM, Autodesk BuildingConnected, Autodesk TradeTapp, Microsoft 365 Graph Content, Autodesk Construction Cloud Core
+- Wave 3: Oracle Primavera, Microsoft 365 Graph Work-Orchestration, Autodesk Construction Cloud Advanced Governance
+
+Detailed custody, publication, and connector-family rules live in the `P1-F1` umbrella family and the named `P1-F*` child families, not in this roadmap. Project Hub, Reports, Documents, and later-phase search or staffing surfaces are expected to depend on those family outputs through the published read-model boundary.
 
 ---
 

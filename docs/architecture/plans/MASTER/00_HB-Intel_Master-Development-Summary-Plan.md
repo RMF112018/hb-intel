@@ -59,6 +59,16 @@ This plan set uses **8 execution phases** plus this governing summary plan.
 - **Phase 6** — Field-First HB Site Control Completion
 - **Phase 7** — HBI Intelligence, Production Hardening, Security, and Rollout
 
+### 4.1 Phase 1 active workstream extension
+
+Phase 1 now includes a sixth workstream:
+
+- **Workstream F — Native Integration Backbone Expansion and Reconciliation**
+
+Workstream F is governed by the `P1-F1` family under `docs/architecture/plans/MASTER/phase-1-deliverables/`. It extends the original Phase 1 planning set with a wave-based native integration program grounded in current repo truth and the completed native-integration audit. This extension does not assert that the target Azure-first runtime is already implemented; it defines how the transition and future connector families must be governed.
+
+Downstream planning is now expected to reference the named `P1-F` child families where consumer modules depend on them. Phase 3 through Phase 5 surfaces consume published read models or governed repositories produced by the integration backbone; they do not consume raw, normalized, or canonical connector layers directly.
+
 ## 5. Cross-Phase Dependency Logic
 
 ### 5.1 Non-negotiable dependency order
@@ -171,6 +181,7 @@ The following items should be explicitly curated, not left implicit:
 - Final production-readiness definition for packages, apps, and integrations
 - Source-of-record model by domain and data class
 - Project identity model and cross-system key strategy
+- Native-integration custody, publication, and connector-wave governance
 - Degree of personalization allowed in Personal Work Hub and Project Hub
 - Search scope, ranking, and permission-trimming strategy
 - Offline behavior policy for HB Site Control

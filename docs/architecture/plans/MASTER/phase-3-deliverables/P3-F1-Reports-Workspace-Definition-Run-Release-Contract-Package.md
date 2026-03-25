@@ -27,6 +27,8 @@ Phase 3 reporting uses a **governed report workspace** model (Phase 3 plan §8.7
 - A **hybrid run-ledger** for run metadata, status, artifact references, and release/distribution state
 - An **approval-governed publication/distribution model** with family-specific rules
 
+Reports is also a major downstream consumer of the native integration backbone. Financial, schedule, workforce-aware, and document-aware report content must arrive through source-module snapshots or governed published read models aligned to [P1-F5](../phase-1-deliverables/P1-F5-Procore-Connector-Family.md), [P1-F6](../phase-1-deliverables/P1-F6-Sage-Intacct-Connector-Family.md), [P1-F7](../phase-1-deliverables/P1-F7-BambooHR-Connector-Family.md), [P1-F12](../phase-1-deliverables/P1-F12-Microsoft-365-Graph-Content-Connector-Family.md), and [P1-F14](../phase-1-deliverables/P1-F14-Oracle-Primavera-Connector-Family.md). Reports does not consume raw connector layers directly.
+
 Minimum governed report families for Phase 3: **PX Review** and **Owner Report**.
 
 Report-family approval rules are explicitly different (Phase 3 plan §8.7):

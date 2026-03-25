@@ -31,6 +31,8 @@ The Financial module is a **governed project-financial operating surface** — n
 - **Buyout control** — Subcontract and vendor commitments tracked as procurement/commitment-control state.
 - **Variance and history continuity** — Budget line identity is stable across imports and versions.
 
+The upstream source boundary is now explicitly governed by the native integration backbone. Financial consumes published read models or governed repositories sourced from [P1-F5 Procore](../phase-1-deliverables/P1-F5-Procore-Connector-Family.md) for project-operational financial-control context and [P1-F6 Sage Intacct](../phase-1-deliverables/P1-F6-Sage-Intacct-Connector-Family.md) for financial and project-accounting backbone context. The current CSV/import-era seams remain transitional implementation reality until those published read-model paths exist.
+
 ---
 
 ## Source Files

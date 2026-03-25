@@ -28,6 +28,8 @@ Projects may not introduce:
 
 All data in generated reports flows exclusively from approved source-module snapshots or MOE-approved rollup calculations.
 
+Connector-backed data follows the same boundary. Reports may consume only published read models or source-module snapshots that already encapsulate data from `P1-F` connector families. Reports never binds directly to raw custody, normalized source-aligned records, thin canonical core outputs, or vendor connector contracts.
+
 ---
 
 ## 2. Source Module Snapshot Integration
@@ -247,7 +249,7 @@ Calculated rollup sections use MOE-approved formulas applied to snapshot data. P
 
 ### 6.1 Financial Summary Rollup (PX Review)
 
-Draws from P3-E5 (Financial) snapshot:
+Draws from P3-E4 (Financial) snapshot:
 - Current cost at completion (CAC)
 - Budget at completion (BAC)
 - Cost variance: `CV = BAC - CAC`
@@ -256,7 +258,7 @@ Draws from P3-E5 (Financial) snapshot:
 
 ### 6.2 Schedule Summary Rollup (PX Review)
 
-Draws from P3-E6 (Schedule) snapshot:
+Draws from P3-E5 (Schedule) snapshot:
 - Current project percent complete vs. planned percent complete
 - Schedule variance: `SV = EV - PV` (if EVM enabled)
 - Count of active critical path activities

@@ -84,7 +84,7 @@ Reports depends on snapshot APIs from multiple source modules. The following mod
 | P3-E10 (Closeout) | sub-scorecard, lessons-learned | Pre-computed scored data, lesson entries |
 | P3-E15 (QC) | PX Review (quality-summary) when implemented | QC health, readiness, and responsible-org rollup snapshots |
 
-Each source module's snapshot API contract is defined in its own T09 file. Reports consumes the envelope (`IModuleSnapshot` wrapper) and relies on the source module's schema reference for field-level rendering.
+Each source module's snapshot API contract is defined in its own T09 file. Reports consumes the envelope (`IModuleSnapshot` wrapper) and relies on the source module's schema reference for field-level rendering. Where those source modules themselves depend on `P1-F` families, Reports remains a downstream consumer of published read models only and never binds to connector contracts directly.
 
 ---
 
@@ -170,6 +170,7 @@ The Project Hub reads Reports data for:
 - **Activity feed** — Report lifecycle events shown in the project activity feed
 
 Project Hub does not embed the Reports UI directly; it surfaces summary state and links to the Reports module page.
+Project Hub also treats Reports as a downstream consumer of published connector-backed read models. Connector-aware report inputs must flow through source modules or governed publication services, not direct vendor clients in Reports or feature packages.
 
 **Repo-truth note — 2026-03-25.** A baseline report catalog and source-readiness surface now exists inside Project Hub at `/project-hub/{projectId}/reports`. The full P3-F1 registry, run-ledger, generation, and release lifecycle remains separate implementation scope.
 

@@ -22,6 +22,8 @@ Phase 3 uses a **hybrid membership authority** (Phase 3 plan §8.2):
 - **Central auth / registry contracts** own canonical project access eligibility, effective Project Hub role context, module visibility / enablement, canvas defaults and locked tiles, and lane access decisions.
 - **Site-local or module-local membership data** may exist as projection, cached, or subordinate data but may **not silently override** canonical Project Hub access truth.
 
+Workforce identity enrichment may later consume published read models from [P1-F7 BambooHR](../phase-1-deliverables/P1-F7-BambooHR-Connector-Family.md), but BambooHR does not replace this contract's authority model. Membership authority, role resolution, and project-scope access decisions remain governed by HB Intel auth, registry, and membership contracts.
+
 This contract governs how a user's identity, system role, project membership, and Entra group membership combine to produce an effective project role context that determines what that user can see and do within a specific project.
 
 ### Authority split — three-tier leadership model

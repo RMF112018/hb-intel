@@ -161,7 +161,17 @@ In the SPFx lane, project identity is resolved from the SharePoint site context:
 1. Read the current site URL from the SPFx page context.
 2. Look up the site URL in the project registry's site associations (P3-A1 §4.3).
 3. If found, use the associated `projectId` as canonical project identity.
-4. If not found, display an appropriate error/guidance state — do NOT fabricate project context.
+4. Seed the project store only after the canonical `projectId` has been confirmed from the registry record.
+5. If not found, display an appropriate error/guidance state in-shell — do NOT fabricate project context.
+
+SPFx initialization order is therefore fixed:
+
+1. Bootstrap auth and host context.
+2. Resolve `siteUrl -> registry record -> canonical projectId`.
+3. Seed project-scoped shell/store state.
+4. Render project content.
+
+The SPFx lane MUST NOT render project-scoped module content ahead of step 2.
 
 ---
 

@@ -142,7 +142,9 @@
       "Bash(then echo:*)",
       "Bash(fi)",
       "Bash(find /Users/bobbyfetting/hb-intel/packages/ui-kit/src -type f \\\\\\(-name *app*header* -o -name *AppHeader* \\\\\\))",
-      "Bash(for ledger:*)"
+      "Bash(for ledger:*)",
+      "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(find /Users/bobbyfetting/hb-intel/packages /Users/bobbyfetting/hb-intel/apps -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))"
     ]
   },
   "enabledPlugins": {

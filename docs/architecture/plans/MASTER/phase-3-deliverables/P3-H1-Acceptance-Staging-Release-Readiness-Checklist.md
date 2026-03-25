@@ -64,7 +64,7 @@ Status note: `Implemented — Evidence Pending` means repo-truth implementation 
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 2.1 | Same canonical project identity — PWA resolves from route, SPFx from siteUrl | Implemented — Evidence Pending | | P3-B1 §2, P3-G3 §3.1 |
+| 2.1 | Same canonical project identity — PWA resolves from route, SPFx from siteUrl during web part initialization before any project content renders | Implemented — Evidence Pending | | Evidence must include SPFx initialization proof: `siteUrl -> registry -> projectId`, project-store seeding, and smart-empty-state fallback when the registry does not resolve. P3-B1 §2, P3-G3 §3.1 |
 | 2.2 | Same membership validation — P3-A2 rules enforced in both lanes | Implemented — Evidence Pending | | P3-A2 §6, P3-G3 §3.2 |
 | 2.3 | Project Hub root entry and smart project switching — multi-project `/project-hub` lands on portfolio root first, single-project `/project-hub` auto-routes to `/project-hub/{projectId}`, PWA switching uses same-section resolution with Control Center fallback, SPFx remains host-aware | Implemented — Evidence Pending | | Evidence must capture actual URL transitions, preserved `projectId`, and restored portfolio-root state after Back to Portfolio. P3-B1 §2, §5; P3-G3 §3.3 |
 | 2.4 | Cross-lane handoff identity — projectId preserved during SPFx<->PWA | Implemented — Evidence Pending | | P3-G2 §5, P3-G3 §3.4 |
@@ -371,7 +371,7 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | 8.3 | Unauthorized or invalid project context handling — unauthorized/nonexistent project contexts remain in-shell with unchanged browser location; invalid module paths fall back only to the target project's Control Center | Not Started | | §9.2a staging scenario |
 | 8.4 | Stale draft handling — warning + refresh flow | Not Started | | §9.3 staging scenario |
 | 8.5 | Cross-lane launch SPFx->PWA — deep-link round-trip | Not Started | | §9.4 staging scenario; evidence must show canonical project route and preserved `projectId` |
-| 8.6 | Cross-lane launch PWA->SPFx — siteUrl navigation | Not Started | | §9.5 staging scenario; evidence must show no project-identity drift across the handoff |
+| 8.6 | Cross-lane launch PWA->SPFx — siteUrl navigation with registry-based SPFx initialization before module render | Not Started | | §9.5 staging scenario; evidence must show no project-identity drift across the handoff, plus successful SPFx initialization or in-shell failure handling when unresolved |
 | 8.7 | Module spine publication — all governed modules contributing through the correct publication contract or governed projection | Not Started | | §9.6 staging scenario |
 | 8.8 | Canvas governance — edit-mode enforcement | Not Started | | §9.7 staging scenario |
 | 8.9 | Report lifecycle — PX Review and Owner Report full cycle | Not Started | | §9.8 staging scenario |
@@ -437,9 +437,9 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | Aspect | Definition |
 |---|---|
 | **Preconditions** | User in PWA; wants SharePoint context for the project |
-| **Steps** | 1. Click "Open in SharePoint" or equivalent. 2. Verify `siteUrl` from registry used. 3. SPFx site opens in new tab. |
-| **Expected outcome** | SPFx project site opens with correct project |
-| **Pass criteria** | Correct `siteUrl` used; project resolves in SPFx; new tab opens |
+| **Steps** | 1. Click "Open in SharePoint" or equivalent. 2. Verify `siteUrl` from registry used. 3. SPFx site opens in new tab. 4. Verify the web part resolves `siteUrl` through the registry before rendering project content. 5. If the registry cannot resolve the site, verify the surface remains in-shell and renders `@hbc/smart-empty-state` rather than project content. |
+| **Expected outcome** | SPFx project site opens with correct project, or fails safely with in-shell guidance when no canonical registry record exists |
+| **Pass criteria** | Correct `siteUrl` used; project resolves in SPFx before module render; new tab opens; unresolved site does not fabricate project context and instead shows smart empty state |
 
 ### 9.6 Module spine publication
 

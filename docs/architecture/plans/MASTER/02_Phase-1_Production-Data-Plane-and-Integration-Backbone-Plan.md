@@ -2,7 +2,7 @@
 
 **Document ID:** 02
 **Classification:** Phase Master Plan
-**Status:** Implementation Complete — code-complete across all workstreams (B1, C1, C2, C3, D1, E1); E2 staging verification gated on IT-side deployment
+**Status:** Active Reference — original Workstreams A-E remain planning-complete; original implementation workstreams are materially code-complete, and Workstream F now includes the authored native-integration umbrella, wave, connector, and expansion-pack planning families grounded in current repo truth
 **Primary Role:** Define the production data plane, integration backbone, and service contract layer for HB Intel
 **Read With:** [`00_HB-Intel_Master-Development-Summary-Plan.md`](00_HB-Intel_Master-Development-Summary-Plan.md)
 
@@ -10,9 +10,9 @@
 
 ### Phase 1 Planning Completion Summary
 
-Phase 1 planning established the complete production data plane and integration backbone design for HB Intel. Twenty-four planning artifacts across five workstreams define data ownership, canonical schemas, production adapter architecture, backend service contracts, write-safety patterns, and contract testing infrastructure. All design decisions are locked and transport-shape conventions are fully reconciled.
+Phase 1 planning established the original production data plane and integration backbone design for HB Intel. Twenty-four tracked planning artifacts across five original workstreams define data ownership, canonical schemas, production adapter architecture, backend service contracts, write-safety patterns, and contract testing infrastructure. Workstream F now extends the Phase 1 family with a repo-truth-grounded native integration backbone umbrella plus authored child connector families across Wave 1, Wave 2, and Wave 3 without asserting that the target Azure-first runtime is already implemented.
 
-As of 2026-03-19, all Phase 1 implementation workstreams are code-complete: B1 proxy transport foundation (all 11 repos, 189+ tests), C1 backend domain route handlers, C2 auth middleware, C3 telemetry instrumentation and health endpoint, D1 write-safety and idempotency infrastructure, and E1 contract test suite. E2 staging readiness checklist execution is the sole remaining gate and is blocked on IT-side deployment (function app provisioning, auth app registration, and environment variable configuration) and two external approvals (IT Graph permission grant, PO schema approval). No further code work is required before staging verification. The detailed deliverable index and readiness positioning are maintained in [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md); the blocker ledger is in [`phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md`](phase-1-deliverables/P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md).
+As of 2026-03-19, the original implementation workstreams were materially code-complete: B1 proxy transport foundation (all 11 repos), C1 backend domain route handlers, C2 auth middleware, C3 telemetry instrumentation and health endpoint, D1 write-safety and idempotency infrastructure, and E1 contract test suite. E2 staging readiness checklist execution remains gated on IT-side deployment and external approvals. Since that milestone, repo-truth reconciliation has shown that the current implementation reality and the original Phase 1 custody assumptions are not fully aligned. Workstream F exists to govern that reconciliation and the named child connector families that now operationalize the wave-based native integration program. The detailed deliverable index is maintained in [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md); the reconciliation basis is in [`phase-1-deliverables/P1-CLOSEOUT-Native-Integration-Backbone-Repo-Truth-Audit.md`](phase-1-deliverables/P1-CLOSEOUT-Native-Integration-Backbone-Repo-Truth-Audit.md).
 
 ---
 
@@ -29,6 +29,7 @@ Phase 1 planning addressed the following objectives:
 - Specified hardening for critical read/write paths with retry, idempotency, error handling, and observability (Workstream D).
 - Established mock-isolation governance to remove placeholder service behavior from production paths (Workstream B).
 - Created contract testing infrastructure and staging readiness criteria for downstream phases (Workstream E).
+- Established a governed native integration program aligned to current repo truth, transitional custody, and future connector waves (Workstream F).
 
 ## 3. Delivered End State (Planning Level)
 
@@ -51,6 +52,7 @@ Phase 1 planning covered:
 - Observability and instrumentation requirements
 - Contract, integration, and smoke testing infrastructure
 - Staging readiness criteria and operational sign-off process
+- Native integration custody, publication, wave structure, and downstream boundary governance
 
 ## 5. Phase 1 Boundary Conditions
 
@@ -149,6 +151,24 @@ The following were explicitly outside Phase 1 scope:
 - P1-E1 — Contract Test Suite Plan
 - P1-E2 — Staging Readiness Checklist
 
+### 6.6 Workstream F — Native Integration Backbone Expansion and Reconciliation
+
+**Outcome:** Extends Phase 1 with a repo-truth-grounded umbrella family plus the authored wave, connector, and expansion-pack families for the native integration program spanning Wave 1, Wave 2, and Wave 3.
+
+**What was accomplished:**
+- Locked transitional hybrid custody against current repo truth.
+- Locked Azure custody for raw, normalized, replay, reconciliation, audit, and canonical mapping layers.
+- Locked the SharePoint transitional published-read-model role.
+- Locked the published read-model boundary for downstream consumers.
+- Defined the wave structure and authored the connector-family set for Wave 1, Wave 2, and Wave 3 plus Wave 1 expansion packs.
+- Named the current adapter/query/backend seam changes that future implementation must address.
+
+**Deliverables (142):**
+- `P1-F1` family (13 artifacts) — Native Integration Backbone umbrella, custody, publication, security, operations, wave structure, and readiness gates
+- `P1-F2`, `P1-F3`, `P1-F4`, and `P1-F8` (4 artifacts) — wave and expansion-pack index families
+- `P1-F5` through `P1-F16` (110 artifacts) — full split connector families across Wave 1, Wave 2, and Wave 3
+- `P1-F17` through `P1-F19` (15 artifacts) — Wave 1 expansion-pack split families
+
 ## 7. Planning Milestones Achieved
 
 ### M1.1 — Data ownership model defined
@@ -166,9 +186,12 @@ Retry, idempotency, and recovery behaviors are specified in P1-D1.
 ### M1.5 — Test and readiness infrastructure planned
 Contract test suite, smoke-test policy, and staging readiness checklist are complete in P1-E1 and P1-E2.
 
+### M1.6 — Native integration umbrella family defined
+The governed native integration program, transitional custody model, publication boundary, and Wave 1 / Wave 2 / Wave 3 structure are now defined in P1-F1.
+
 ## 8. Mandatory Deliverables
 
-Phase 1 produced 24 planning artifacts. The detailed index with per-document status is maintained in [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md).
+Phase 1 now tracks 166 workstream artifacts: the original 24 artifacts across Workstreams A-E plus 142 Workstream F artifacts. Closeout and reconciliation artifacts are tracked separately in the deliverables index.
 
 | Workstream | Count | Deliverables |
 |---|---|---|
@@ -177,6 +200,7 @@ Phase 1 produced 24 planning artifacts. The detailed index with per-document sta
 | C — Backend Contracts | 3 | P1-C1 (contract catalog), P1-C2 (auth hardening), P1-C3 (observability spec) |
 | D — Write Safety | 1 | P1-D1 (write safety, retry, and recovery) |
 | E — Test Baseline | 2 | P1-E1 (contract test suite plan), P1-E2 (staging readiness checklist) |
+| F — Native Integration Backbone | 142 | P1-F1 umbrella family, P1-F2/P1-F3/P1-F4/P1-F8 indexes, P1-F5 through P1-F16 connector families, and P1-F17 through P1-F19 expansion-pack families |
 
 ## 9. Dependencies
 
@@ -193,6 +217,7 @@ Phase 1 planning enables:
 - **Phase 5 (Search and Connected Records):** Data ownership model defines what is indexable and where
 - **Phase 6 (Field Experience):** Write-safety and recovery patterns designed for field-first use
 - **Phase 7 (Enterprise Readiness):** Observability and telemetry requirements specified
+- **Connector-family planning:** Native integration wave families are now authored under the P1-F umbrella and remain gated for runtime use by the official-source and seam-readiness conditions in P1-F1-T12
 
 ## 10. Phase 1 Completion Criteria
 
@@ -239,6 +264,7 @@ These questions were scoped out of Phase 1 or remain partially open for later ph
 - What is the acceptable latency and recovery target for critical writes? (partially addressed in P1-D1; final SLAs require production measurement)
 - Which workflows require near-real-time behavior versus eventual consistency? (design patterns in P1-D1; runtime classification deferred to implementation)
 - Full auth route catalog beyond `/api/auth/me` smoke utility (deferred to C2 delivery; see P1-E1 decision 12)
+- Exact connector-family contract surfaces by connector (deferred to future `P1-F2` through `P1-F19` authoring with official-source-backed evidence)
 
 ## 14. Risks Being Mitigated
 
@@ -249,6 +275,7 @@ Phase 1 planning explicitly mitigates the following risks. These remain relevant
 - **Unpredictable failures:** Field workflows failing without recovery — mitigated by P1-D1 write-safety design
 - **Operational blind spots:** Support burden spiking without telemetry — mitigated by P1-C3 observability spec and P1-E1 telemetry gate evidence
 - **Foundational rework:** Later phases forced to re-open data ownership decisions — mitigated by completing all A-series schemas during planning
+- **Connector-family drift:** Later connector planning bypassing current repo truth or the published read-model boundary — mitigated by P1-F1 umbrella governance
 
 ## 15. Phase 1 Execution Priorities
 
@@ -278,6 +305,7 @@ Phase 1 planning explicitly mitigates the following risks. These remain relevant
 | Write safety and recovery | Retry, idempotency, audit, failure-handling patterns | P1-D1 |
 | Contract testing infrastructure | Zod schemas, MSW handlers, smoke-test policy, locked conventions | P1-E1 |
 | Staging readiness criteria | Operational checklist with dependency matrix and acceptance gates | P1-E2 |
+| Native integration umbrella governance | Repo-truth-grounded custody, publication, wave structure, and connector-family readiness gating | P1-F1, P1-F1-T01 through T12 |
 
 ## 17. How to Use This Plan Now
 
@@ -287,6 +315,7 @@ Phase 1 planning explicitly mitigates the following risks. These remain relevant
 | Check what was in and out of scope | Sections 4–5 (scope delivered, boundary conditions) |
 | Understand a specific workstream | Section 6 (workstream summaries with deliverable lists) |
 | Find the detailed deliverable index | [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md) |
+| Understand the native integration umbrella family | [`phase-1-deliverables/P1-F1-Native-Integration-Backbone-Master-Index.md`](phase-1-deliverables/P1-F1-Native-Integration-Backbone-Master-Index.md) |
 | Understand implementation sequencing | Section 15 (execution priorities) |
 | Check completion criteria | Section 10 (what defines Phase 1 as done) |
 | Understand what later phases can rely on | Section 9 (outgoing dependencies) |
@@ -300,10 +329,11 @@ Phase 1 planning explicitly mitigates the following risks. These remain relevant
 - **Program Summary:** [`00_HB-Intel_Master-Development-Summary-Plan.md`](00_HB-Intel_Master-Development-Summary-Plan.md)
 - **Phase 0 Plan:** [`01_Phase-0_Program-Control-and-Repo-Truth-Plan.md`](01_Phase-0_Program-Control-and-Repo-Truth-Plan.md)
 - **Phase 1 Deliverables Index:** [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md)
+- **P1-F1 Native Integration Backbone family:** [`phase-1-deliverables/P1-F1-Native-Integration-Backbone-Master-Index.md`](phase-1-deliverables/P1-F1-Native-Integration-Backbone-Master-Index.md)
 - **Current-State Map:** [`../blueprint/current-state-map.md`](../blueprint/current-state-map.md)
 - **Package Relationship Map:** [`../blueprint/package-relationship-map.md`](../blueprint/package-relationship-map.md)
 
 ---
 
-**Last Updated:** 2026-03-18
+**Last Updated:** 2026-03-25
 **Governing Authority:** [`00_HB-Intel_Master-Development-Summary-Plan.md`](00_HB-Intel_Master-Development-Summary-Plan.md)

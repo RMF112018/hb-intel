@@ -32,8 +32,8 @@ A budget line carries multiple identity-related fields operating at distinct lay
 | Identity Field | Layer | Description |
 |----------------|-------|-------------|
 | `canonicalBudgetLineId` | **Canonical** | Project Hub's stable identifier for this budget line concept within this project. Assigned at first recognition (either from a stable external ID or after composite match resolution). Immutable once assigned. Survives re-imports as long as matching succeeds. |
-| `externalSourceSystem` | **Source** | The upstream system that originated this line. Values: `'procore'` \| `'manual'`. Future: `'procore-api'` when direct API integration replaces CSV import. |
-| `externalSourceLineId` | **Source** | The native line-item identifier from the upstream system. For future Procore API integration, this is the Procore budget line item `id` field. For current CSV imports, this is `null` (Procore CSV export does not include stable internal IDs). |
+| `externalSourceSystem` | **Source** | The governed upstream source that originated this line. Values: `'procore'` \| `'sage-intacct'` \| `'manual'`. Project Hub consumes these sources through published read models or governed repositories defined by `P1-F5` and `P1-F6`, even while current implementation reality still uses transitional CSV/import seams. |
+| `externalSourceLineId` | **Source** | The native line-item identifier from the upstream source when available through the published read-model path. For current CSV imports, this is often `null` because the transitional export does not include a stable external ID. |
 | `fallbackCompositeMatchKey` | **Fallback** | A deterministic composite string derived from `(costCodeTier1 + '|' + costType + '|' + budgetCode)` and normalized (trimmed, lowercased). Used for matching when `externalSourceLineId` is unavailable. Must be computed consistently on every import. |
 | `budgetImportRowId` | **Import** | UUID generated per import row. Identifies this line as it arrived in a specific import batch. New ID on each import. Used for import audit trail and rollback, not for cross-import identity. |
 
@@ -41,7 +41,7 @@ A budget line carries multiple identity-related fields operating at distinct lay
 
 When a new budget import arrives:
 
-1. **If `externalSourceLineId` is present** (future Procore API path): match on `(externalSourceSystem, externalSourceLineId)`. If matched, reuse the existing `canonicalBudgetLineId`. If no match, assign a new `canonicalBudgetLineId`.
+1. **If `externalSourceLineId` is present** (connector-backed published read-model path): match on `(externalSourceSystem, externalSourceLineId)`. If matched, reuse the existing `canonicalBudgetLineId`. If no match, assign a new `canonicalBudgetLineId`.
 
 2. **If `externalSourceLineId` is absent** (current CSV path): compute `fallbackCompositeMatchKey` for the incoming row. Attempt to match against existing lines for this project.
    - **Unique match**: reuse the existing `canonicalBudgetLineId`.
@@ -86,8 +86,8 @@ The budget line item is the fundamental unit of financial tracking. It is import
 | Field Name (camelCase) | TypeScript Type | Required | Calculated | Source Column (Procore) | Business Rule / Formula |
 |------------------------|-----------------|----------|------------|-------------------------|------------------------|
 | `canonicalBudgetLineId` | `string` | Yes | See §2.3 | — | Stable project-level identifier per §2.2; persists across imports and versions |
-| `externalSourceSystem` | `'procore' \| 'manual'` | Yes | No | — | Source system identifier; `'procore'` for CSV/API imports; `'manual'` for PM-entered lines |
-| `externalSourceLineId` | `string \| null` | No | No | — | Procore native line item `id`; null for current CSV imports; populated when direct API integration is available |
+| `externalSourceSystem` | `'procore' \| 'sage-intacct' \| 'manual'` | Yes | No | — | Source system identifier; `P1-F5` Procore and `P1-F6` Sage Intacct remain upstream authorities, though current implementation still includes transitional CSV/import seams |
+| `externalSourceLineId` | `string \| null` | No | No | — | Native upstream line identifier when available through governed published read-model paths; may remain null for transitional CSV imports |
 | `fallbackCompositeMatchKey` | `string` | Yes | Yes | — | Deterministic composite: `lowercase(costCodeTier1 + '|' + costType + '|' + budgetCode)`; computed on import |
 | `budgetImportRowId` | `string` | Yes | Yes | — | UUID generated per import row; stable only within a single import batch |
 | `projectId` | `string` | Yes | No | — | FK to project record |
@@ -163,7 +163,7 @@ The three cost fields represent distinct financial concepts that must never be b
 ### 3.5 Budget line import workflow
 
 **CSV import process:**
-1. PM uploads Procore_Budget.csv file via the Financial module UI.
+1. PM uploads the current transitional budget import file via the Financial module UI until `P1-F5` / `P1-F6` published read-model providers replace this seam.
 2. System validates all rows:
    - Required: `budgetCode`, `budgetCodeDescription`, `costType`, `originalBudget`
    - `costCodeTier1` validated against `cost-code-dictionary.csv` (7,566 records); import fails with specific line error if not found

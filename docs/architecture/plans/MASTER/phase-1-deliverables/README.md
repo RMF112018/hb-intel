@@ -1,12 +1,12 @@
 # Phase 1 Deliverables — Production Data Plane and Integration Backbone
 
-**Doc Classification:** Planning-Complete Deliverable Index — Phase 1 transport conventions and A-series schemas are final and decision-locked; B-series trackers and E-series checklists remain living documents updated as implementation progresses. Implementation proceeds as upstream dependencies are satisfied.
+**Doc Classification:** Planning-Complete Deliverable Index — Phase 1 transport conventions and A-series schemas are final and decision-locked; B-series trackers and E-series checklists remain living documents updated as implementation progresses. Workstream F extends the Phase 1 planning set with a repo-truth-grounded native integration umbrella plus authored wave, connector, and expansion-pack families.
 
 ---
 
 ## Planning Completion Summary
 
-Phase 1 planning established the complete production data plane and integration backbone design for HB Intel. The 25 deliverables in this folder define:
+Phase 1 planning established the original production data plane and integration backbone design for HB Intel. The tracked artifacts in this folder now define:
 
 - **Data ownership and source-of-record model** across all 15+ business domains (A-series)
 - **Canonical schemas** for SharePoint storage, ingestion pipelines, and governed data structures (A-series)
@@ -14,8 +14,16 @@ Phase 1 planning established the complete production data plane and integration 
 - **Backend service contracts** including route catalog, auth hardening, and observability instrumentation (C-series)
 - **Write-safety and recovery design** with retry, idempotency, and failure-handling patterns (D-series)
 - **Contract testing infrastructure** with locked transport conventions, smoke-test policy, and staging readiness criteria (E-series)
+- **Native integration umbrella governance** for transitional custody, publication boundary, and Wave 1 / Wave 2 / Wave 3 planning (F-series)
+- **Downstream consumer alignment** so Project Hub, Reports, Documents, Search, and later business-domain plans treat the `P1-F` families as governed upstream dependencies and consume published read models only
 
 All design decisions are locked. Transport-shape conventions (response envelopes, error formats, pagination, route paths) are fully reconciled.
+
+### Repo-Truth Extension Note
+
+`P1-F1` exists because the completed native-integration audit established that current implementation reality does not fully match the original SharePoint-native Phase 1 custody assumptions. `P1-F1` is the governing umbrella for the now-authored `P1-F2` through `P1-F19` family set and for the publication-boundary rules those child families inherit. It does not claim the target Azure-first runtime is already fully implemented. `P1-A1` and `P1-A2` must now be read through that reconciliation lens: SharePoint is transitional for provisioning and selected published operational read models, while downstream consumers use published read models rather than connector internals.
+
+Implementation of the native integration backbone should follow the developer-facing [Native Integration Backbone Implementation Guide](../../../how-to/developer/native-integration-backbone-implementation-guide.md). That guide translates the `P1-F*` planning stack into concrete package/runtime responsibilities, current seam changes, publication/read-model rules, and rollout sequencing.
 
 ### Readiness Positioning
 
@@ -150,11 +158,71 @@ All code workstreams (B1, C1, C2, C3, D1, E1 Tasks 1–7) are **complete**. Phas
 | P1-E1-Contract-Test-Suite-Plan.md | Engineering Plan | In Progress — Tasks 1–7 complete (Zod schemas, vitest, MSW handlers, adapter contract tests, response envelope contract tests); Tasks 8–9 scaffold delivered (env-gated, blocked on staging) |
 | P1-E2-Staging-Readiness-Checklist.md | Acceptance Checklist | **Gated on staging deployment** — all code dependencies delivered (B1 ✅, C1 ✅, C2 ✅, C3 ✅, D1 ✅, E1 ✅); execution blocked on IT-side function app deployment, auth registration, and environment variable configuration |
 
-### Closeout and Reconciliation (1 deliverable)
+### Workstream F — Native Integration Backbone Expansion and Reconciliation (142 deliverables)
+
+| Document | Type | Status |
+|---|---|---|
+| [P1-F1-Native-Integration-Backbone-Master-Index.md](P1-F1-Native-Integration-Backbone-Master-Index.md) | T-File Master Index | Final |
+| [P1-F1-T01-Operating-Model-Scope-and-Locked-Positions.md](P1-F1-T01-Operating-Model-Scope-and-Locked-Positions.md) | Architecture Specification | Final |
+| [P1-F1-T02-Source-of-Truth-Custody-and-Current-Data-Layer-Alignment.md](P1-F1-T02-Source-of-Truth-Custody-and-Current-Data-Layer-Alignment.md) | Architecture Specification | Final |
+| [P1-F1-T03-Raw-Normalized-Canonical-and-Published-Read-Model-Architecture.md](P1-F1-T03-Raw-Normalized-Canonical-and-Published-Read-Model-Architecture.md) | Architecture Specification | Final |
+| [P1-F1-T04-Identity-Mapping-Reconciliation-Replay-and-Audit.md](P1-F1-T04-Identity-Mapping-Reconciliation-Replay-and-Audit.md) | Architecture Specification | Final |
+| [P1-F1-T05-Security-Permissions-Secrets-Tenancy-and-Masking.md](P1-F1-T05-Security-Permissions-Secrets-Tenancy-and-Masking.md) | Architecture Specification | Final |
+| [P1-F1-T06-Batch-Webhook-and-Orchestration-Model.md](P1-F1-T06-Batch-Webhook-and-Orchestration-Model.md) | Architecture Specification | Final |
+| [P1-F1-T07-Admin-Operations-Observability-Recovery-Dead-Letter-and-Replay.md](P1-F1-T07-Admin-Operations-Observability-Recovery-Dead-Letter-and-Replay.md) | Architecture Specification | Final |
+| [P1-F1-T08-Downstream-Consumer-Boundary-Publication-Model-and-Phase-3-Reconciliation.md](P1-F1-T08-Downstream-Consumer-Boundary-Publication-Model-and-Phase-3-Reconciliation.md) | Architecture Specification | Final |
+| [P1-F1-T09-Wave-1-Connector-Program-and-Expansion-Pack-Model.md](P1-F1-T09-Wave-1-Connector-Program-and-Expansion-Pack-Model.md) | Architecture Specification | Final |
+| [P1-F1-T10-Wave-2-Connector-Program.md](P1-F1-T10-Wave-2-Connector-Program.md) | Architecture Specification | Final |
+| [P1-F1-T11-Wave-3-Connector-Program.md](P1-F1-T11-Wave-3-Connector-Program.md) | Architecture Specification | Final |
+| [P1-F1-T12-Implementation-Acceptance-and-Readiness-Gates.md](P1-F1-T12-Implementation-Acceptance-and-Readiness-Gates.md) | Architecture Specification | Final |
+| [P1-F2-Wave-1-Connector-Index.md](P1-F2-Wave-1-Connector-Index.md) | Wave Index | Final |
+| [P1-F3-Wave-2-Connector-Index.md](P1-F3-Wave-2-Connector-Index.md) | Wave Index | Final |
+| [P1-F4-Wave-3-Connector-Index.md](P1-F4-Wave-3-Connector-Index.md) | Wave Index | Final |
+| [P1-F5-Procore-Connector-Family.md](P1-F5-Procore-Connector-Family.md) | Connector Family | Final |
+| [P1-F6-Sage-Intacct-Connector-Family.md](P1-F6-Sage-Intacct-Connector-Family.md) | Connector Family | Final |
+| [P1-F7-BambooHR-Connector-Family.md](P1-F7-BambooHR-Connector-Family.md) | Connector Family | Final |
+| [P1-F8-Wave-1-Expansion-Pack-Index.md](P1-F8-Wave-1-Expansion-Pack-Index.md) | Expansion-Pack Index | Final |
+| [P1-F9-Unanet-CRM-Connector-Family.md](P1-F9-Unanet-CRM-Connector-Family.md) | Connector Family | Final |
+| [P1-F10-Autodesk-BuildingConnected-Connector-Family.md](P1-F10-Autodesk-BuildingConnected-Connector-Family.md) | Connector Family | Final |
+| [P1-F11-Autodesk-TradeTapp-Connector-Family.md](P1-F11-Autodesk-TradeTapp-Connector-Family.md) | Connector Family | Final |
+| [P1-F12-Microsoft-365-Graph-Content-Connector-Family.md](P1-F12-Microsoft-365-Graph-Content-Connector-Family.md) | Connector Family | Final |
+| [P1-F13-Autodesk-Construction-Cloud-Core-Connector-Family.md](P1-F13-Autodesk-Construction-Cloud-Core-Connector-Family.md) | Connector Family | Final |
+| [P1-F14-Oracle-Primavera-Connector-Family.md](P1-F14-Oracle-Primavera-Connector-Family.md) | Connector Family | Final |
+| [P1-F15-Microsoft-365-Graph-Work-Orchestration-Connector-Family.md](P1-F15-Microsoft-365-Graph-Work-Orchestration-Connector-Family.md) | Connector Family | Final |
+| [P1-F16-Autodesk-Construction-Cloud-Advanced-Governance-Connector-Family.md](P1-F16-Autodesk-Construction-Cloud-Advanced-Governance-Connector-Family.md) | Connector Family | Final |
+| [P1-F17-Procore-Expansion-Pack-Family.md](P1-F17-Procore-Expansion-Pack-Family.md) | Expansion-Pack Family | Final |
+| [P1-F18-Sage-Intacct-Expansion-Pack-Family.md](P1-F18-Sage-Intacct-Expansion-Pack-Family.md) | Expansion-Pack Family | Final |
+| [P1-F19-BambooHR-Expansion-Pack-Family.md](P1-F19-BambooHR-Expansion-Pack-Family.md) | Expansion-Pack Family | Final |
+
+#### Workstream F Family Groups
+
+- Wave 1: [P1-F2](P1-F2-Wave-1-Connector-Index.md), [P1-F5](P1-F5-Procore-Connector-Family.md), [P1-F6](P1-F6-Sage-Intacct-Connector-Family.md), [P1-F7](P1-F7-BambooHR-Connector-Family.md)
+- Wave 1 expansion packs: [P1-F8](P1-F8-Wave-1-Expansion-Pack-Index.md), [P1-F17](P1-F17-Procore-Expansion-Pack-Family.md), [P1-F18](P1-F18-Sage-Intacct-Expansion-Pack-Family.md), [P1-F19](P1-F19-BambooHR-Expansion-Pack-Family.md)
+- Wave 2: [P1-F3](P1-F3-Wave-2-Connector-Index.md), [P1-F9](P1-F9-Unanet-CRM-Connector-Family.md), [P1-F10](P1-F10-Autodesk-BuildingConnected-Connector-Family.md), [P1-F11](P1-F11-Autodesk-TradeTapp-Connector-Family.md), [P1-F12](P1-F12-Microsoft-365-Graph-Content-Connector-Family.md), [P1-F13](P1-F13-Autodesk-Construction-Cloud-Core-Connector-Family.md)
+- Wave 3: [P1-F4](P1-F4-Wave-3-Connector-Index.md), [P1-F14](P1-F14-Oracle-Primavera-Connector-Family.md), [P1-F15](P1-F15-Microsoft-365-Graph-Work-Orchestration-Connector-Family.md), [P1-F16](P1-F16-Autodesk-Construction-Cloud-Advanced-Governance-Connector-Family.md)
+
+### Closeout and Reconciliation (2 deliverables)
 
 | Document | Type | Status |
 |---|---|---|
 | P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md | Closeout Register | Final |
+| P1-CLOSEOUT-Native-Integration-Backbone-Repo-Truth-Audit.md | Closeout Reconciliation Audit | Final |
+
+### Tracked Artifact Counting Rule
+
+This folder now contains:
+
+- **166 tracked workstream artifacts** across Workstreams A-F
+- **2 closeout/reconciliation artifacts**
+- companion implementation and approval-support files that are not counted as primary workstream artifacts
+
+Workstream F count breakdown:
+
+- `P1-F1` family: 13 artifacts
+- wave and expansion indexes: 4 artifacts
+- connector families: 110 artifacts
+- expansion-pack families: 15 artifacts
+- total Workstream F artifacts: **142**
 
 ---
 
@@ -196,12 +264,14 @@ These notes anchor the status labels above to the actual codebase. They document
 3. **P1-A2** — Source-of-record authority (who owns each domain's write path)
 4. **P1-C1** — Backend service contract catalog (the API surface)
 5. **P1-B3** — Mock isolation policy (production readiness governance)
+6. **P1-F1** — Native Integration Backbone umbrella family (repo-truth-grounded connector-program governance)
 
 ### Architecture and Data Governance Path
 1. **P1-A1** → **P1-A2** → **P1-A3** — Ownership → authority → physical schema implementation
 2. **P1-A4 through P1-A15** — Domain-by-domain canonical schemas (read as needed per domain)
 3. **P1-C1** — Backend route contracts and transport conventions
 4. **P1-C3** — Observability and instrumentation requirements
+5. **P1-F1** — Transitional custody, publication boundary, and Wave 1 / Wave 2 / Wave 3 governance
 
 ### Implementation / Engineering Path
 1. **P1-B1** — Proxy adapter engineering plan (TDD, all 11 domain repositories)
@@ -209,11 +279,13 @@ These notes anchor the status labels above to the actual codebase. They document
 3. **P1-D1** — Write safety, retry, and recovery patterns
 4. **P1-E1** — Contract test suite (Zod schemas, MSW handlers, smoke tests)
 5. **P1-B2** — Adapter completion tracker (update during implementation)
+6. **P1-F1** — Native integration umbrella family (transitional custody, publication boundary, waves, and readiness gating)
 
 ### Operational Closeout Path
 1. **P1-E2** — Staging readiness checklist (sign-off criteria)
 2. **P1-B2** — Adapter completion status (verify all domains progressed)
 3. **P1-B3** — Mock isolation policy (confirm no mock adapters in production paths)
+4. **P1-F1** — Native integration umbrella family (connector-program governance and downstream publication boundary)
 
 ---
 
@@ -242,6 +314,7 @@ These decisions were identified as blockers during planning and have been resolv
 | Auth scope in Phase 1 | External except `/api/auth/me` smoke utility | P1-E1 decision 12 |
 | Telemetry evidence model | Three-table correlation: `requests` + `dependencies` + `traces` | P1-E1 Telemetry Gate Evidence |
 | Canonical model ownership | `@hbc/models` interfaces are canonical; Zod schemas are derived validation artifacts | P1-E1 Type Source-of-Truth Rule |
+| Native integration umbrella governance | `P1-F1` governs transitional custody, publication boundary, and Wave 1 / Wave 2 / Wave 3 connector-family sequencing | P1-F1 master index and T-files |
 
 ## Carry-Forward Items
 
@@ -281,6 +354,7 @@ These items remain open and must be resolved before or during Phase 1 implementa
 | Understand what Phase 1 decided about data ownership | P1-A1 → P1-A2 |
 | Look up the canonical schema for a specific domain | P1-A3 through P1-A15 (find by domain name) |
 | Understand the backend API contract | P1-C1 |
+| Understand the governed native integration program | [P1-F1-Native-Integration-Backbone-Master-Index.md](P1-F1-Native-Integration-Backbone-Master-Index.md) |
 | Implement a proxy adapter | P1-B1 (engineering plan) → P1-B3 (mock policy) |
 | Implement backend auth or validation | P1-C2 |
 | Implement contract tests | P1-E1 (all decisions reconciled, locked conventions documented) |
@@ -294,16 +368,18 @@ These items remain open and must be resolved before or during Phase 1 implementa
 ## Related Documents
 
 - **Pre-Phase-1 Contradiction Closeout:** [`P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md`](P1-CLOSEOUT-Pre-Phase-1-Contradiction-Register.md) — 23 resolved contradictions, go/no-go checklist (7/7 PASS), blocker ledger (3 closed, 2 code-complete, 1 approval-ready, 1 in-progress)
+- **Native Integration Repo-Truth Audit:** [`P1-CLOSEOUT-Native-Integration-Backbone-Repo-Truth-Audit.md`](P1-CLOSEOUT-Native-Integration-Backbone-Repo-Truth-Audit.md)
+- **Native Integration Umbrella Family:** [`P1-F1-Native-Integration-Backbone-Master-Index.md`](P1-F1-Native-Integration-Backbone-Master-Index.md)
 - **SharePoint Schema Approval Package:** [`P1-A3-Schema-Approval-Package.md`](P1-A3-Schema-Approval-Package.md) — Decision package for Product Owner: 49 containers, 4 deployment scopes, pending approval for physical deployment
 - **Phase 0 Deliverables:** [`../phase-0-deliverables/README.md`](../phase-0-deliverables/README.md)
 - **Phase 0 Entry Checklist:** [`../phase-0-deliverables/P0-E1-Phase1-Entry-Checklist.md`](../phase-0-deliverables/P0-E1-Phase1-Entry-Checklist.md)
 - **Phase 0 Open Decisions Register:** [`../phase-0-deliverables/P0-E2-Open-Decisions-Register.md`](../phase-0-deliverables/P0-E2-Open-Decisions-Register.md)
 - **Phase 1 Master Plan:** [`../02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md`](../02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md)
 - **Program Summary:** [`../00_HB-Intel_Master-Development-Summary-Plan.md`](../00_HB-Intel_Master-Development-Summary-Plan.md)
-- **Current-State Map:** [`../../blueprint/current-state-map.md`](../../blueprint/current-state-map.md)
-- **Package Relationship Map:** [`../../blueprint/package-relationship-map.md`](../../blueprint/package-relationship-map.md)
+- **Current-State Map:** [`../../../blueprint/current-state-map.md`](../../../blueprint/current-state-map.md)
+- **Package Relationship Map:** [`../../../blueprint/package-relationship-map.md`](../../../blueprint/package-relationship-map.md)
 
 ---
 
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-03-25
 **Governing Authority:** [`../02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md`](../02_Phase-1_Production-Data-Plane-and-Integration-Backbone-Plan.md)

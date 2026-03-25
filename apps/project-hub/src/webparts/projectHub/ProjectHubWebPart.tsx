@@ -15,6 +15,10 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { createRoot, type Root } from 'react-dom/client';
 import { App } from '../../App.js';
 import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
+import {
+  initializeProjectHubContext,
+  type ProjectHubSpfxInitState,
+} from '../../spfx/initializeProjectHubContext.js';
 
 export interface IProjectHubWebPartProps {
   description: string;
@@ -30,6 +34,7 @@ export interface IProjectHubWebPartProps {
  */
 export default class ProjectHubWebPart extends BaseClientSideWebPart<IProjectHubWebPartProps> {
   private _root: Root | undefined;
+  private _initState: ProjectHubSpfxInitState | undefined;
 
   /**
    * Called by SharePoint before render(). Resolves SP group membership
@@ -41,6 +46,7 @@ export default class ProjectHubWebPart extends BaseClientSideWebPart<IProjectHub
     await super.onInit();
     const permissionKeys = await resolveSpfxPermissions(this.context);
     await bootstrapSpfxAuth(this.context, permissionKeys);
+    this._initState = await initializeProjectHubContext({ spfxContext: this.context });
   }
 
   /**
@@ -51,7 +57,7 @@ export default class ProjectHubWebPart extends BaseClientSideWebPart<IProjectHub
     if (!this._root) {
       this._root = createRoot(this.domElement);
     }
-    this._root.render(<App spfxContext={this.context} />);
+    this._root.render(<App spfxContext={this.context} initState={this._initState} />);
   }
 
   /**

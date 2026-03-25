@@ -14,6 +14,8 @@
 
 ## 18. Cross-Platform Workflow, Linked Artifacts, and Shared Package Reuse
 
+Schedule's governed upstream dependency is [P1-F14 Oracle Primavera](../phase-1-deliverables/P1-F14-Oracle-Primavera-Connector-Family.md). Until that Wave 3 connector family is implemented, transitional XER/XML/CSV imports remain acceptable repo-truth seams. The Schedule module consumes published read models or governed repositories only and must not consume raw connector layers directly.
+
 ### 18.1 Linked Artifacts via `@hbc/related-items`
 
 The Schedule module integrates `@hbc/related-items` for the linked artifact graph. Schedule objects support typed relationships to other records within the platform. These relationships are part of explanation, readiness, forensics, escalation, and publication context.

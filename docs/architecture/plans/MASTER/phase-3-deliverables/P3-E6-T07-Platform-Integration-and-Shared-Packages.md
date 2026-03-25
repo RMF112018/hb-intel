@@ -18,6 +18,8 @@
 
 ## 7. Platform Integration and Shared Packages
 
+The Constraints module remains HB Intel-native for operational ledgers, but future change-event, issue, and project-control context must be sourced through [P1-F5 Procore](../phase-1-deliverables/P1-F5-Procore-Connector-Family.md) published operational read models rather than direct Procore contracts. Constraint, delay, and change consumers stay behind the published read-model boundary.
+
 ### 7.1 Shared package integration table
 
 | Package | Integration point | Mode | Notes |
@@ -144,7 +146,7 @@ The Constraints module supports the following report types:
 - **Risk Register Report** — all open risks with score, owner, mitigation status
 - **Constraint Log Report** — all constraints with status, owner, BIC, overdue flag
 - **Delay Log Report** — all delays with event type, critical path impact, quantified days, notification status
-- **Change Event Log Report** — all change events with status, cost impact, Procore sync state (if integrated)
+- **Change Event Log Report** — all change events with status, cost impact, and `P1-F5`-aligned Procore publication state when integrated
 - **Cross-Ledger Summary Report** — lineage summary: risk-to-constraint materialization rate, constraint-to-delay/change spawn counts
 - **Review Package Export** — PDF export of published review packages for distribution
 

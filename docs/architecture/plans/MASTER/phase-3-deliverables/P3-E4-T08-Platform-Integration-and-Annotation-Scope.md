@@ -18,6 +18,15 @@
 
 ## 13. Required Capabilities
 
+### 13.0 Connector-backed publication boundary
+
+The Financial module consumes upstream project-financial context through governed downstream repositories and published read models only:
+
+- [P1-F5 Procore](../phase-1-deliverables/P1-F5-Procore-Connector-Family.md) for project-operational financial-control context such as budget, commitments, prime contract context, and change context
+- [P1-F6 Sage Intacct](../phase-1-deliverables/P1-F6-Sage-Intacct-Connector-Family.md) for financial and project-accounting backbone context
+
+Current CSV/import-era seams remain part of repo truth until those providers exist. Future implementation must preserve the published read-model boundary and address the current seam corrections called out by `P1-F1-T02` / `T12`, including durable project identity/mapping, proxy/backend route reconciliation, and replacement of mock PWA query seams.
+
 ### 13.1 CSV budget import
 
 - File upload via UI: "Upload Budget CSV"

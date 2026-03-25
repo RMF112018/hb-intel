@@ -34,6 +34,8 @@ Milestones and deep schedule analytics serve as the executive, summary, and publ
 
 **Upstream CPM tools remain authoritative for formal network authorship and baseline CPM data.** HB Intel owns managed commitments, scenarios, field planning, analytics, publication workflows, and collaborative execution records. Approved changes may be packaged for governed export or selective sync-back to upstream tools.
 
+The governed upstream dependency for schedule/program source data is now [P1-F14 Oracle Primavera](../phase-1-deliverables/P1-F14-Oracle-Primavera-Connector-Family.md). Schedule consumers remain behind published read models or governed repositories; they do not consume raw connector contracts directly. Transitional file-import seams remain valid until that Wave 3 path is implemented.
+
 **Governance rule:** All threshold values, visibility policies, grading rules, causation taxonomies, confidence factor weights, roll-up rules, classification mappings, calendar rules, and workflow routing tables described as "Governed" in this document are managed and configurable exclusively by the Manager of Operational Excellence or an authorized Admin unless otherwise stated.
 
 ### Source Files (Reference Examples)

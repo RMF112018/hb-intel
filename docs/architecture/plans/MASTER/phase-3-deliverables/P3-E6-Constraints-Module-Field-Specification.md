@@ -26,7 +26,7 @@ The Constraints module is a **governed project-controls workspace** containing f
 - **Risk Ledger** — forward-looking risk identification, probability/impact assessment, mitigation tracking, and risk-to-constraint promotion. Risks are future possibilities, not active blockers.
 - **Constraint Ledger** — active blockers and issues requiring management action. Constraints are present-state impediments, not the parent record type for delays or change events.
 - **Delay Ledger** — contemporaneous delay event records, structured for claims-readiness and contemporaneous documentation. B+/C-ready evidence orientation with separation of time impact from cost/commercial impact.
-- **Change Ledger** — change event management. Manual-native today; Procore-integrated in future phases. Shaped now for clean Procore mapping without requiring redesign at integration time.
+- **Change Ledger** — change event management. Manual-native today; governed Procore-backed publication path in future phases via [P1-F5 Procore](../phase-1-deliverables/P1-F5-Procore-Connector-Family.md). Shaped now for clean Procore mapping without requiring redesign at integration time.
 
 Ledgers share a common module shell, governance framework, publication model, lineage model, and shared platform package integrations. They are operationally independent with governed spawn/promotion relationships between them.
 

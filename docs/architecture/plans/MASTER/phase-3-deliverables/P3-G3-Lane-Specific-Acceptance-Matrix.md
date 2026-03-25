@@ -89,7 +89,7 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 
 | # | Criterion | PWA pass condition | SPFx pass condition | Evidence |
 |---|---|---|---|---|
-| 1 | Same canonical project identity | Resolves `projectId` from URL route params | Resolves `projectId` from `siteUrl` (P3-B1 §2.3) | Identity resolution test: same project yields same `projectId`, `projectNumber`, `projectName` |
+| 1 | Same canonical project identity | Resolves `projectId` from URL route params | Resolves `projectId` from `siteUrl` (P3-B1 §2.3) before project content renders | Identity resolution test: same project yields same `projectId`, `projectNumber`, `projectName`; SPFx evidence must include no-render-before-resolution behavior and smart-empty-state fallback when unresolved |
 | 2 | Same membership validation | P3-A2 §6 access eligibility enforced | P3-A2 §6 access eligibility enforced | Access test: same user + project yields same module access in both lanes |
 | 3 | Root entry and smart project switching | Explicit `/project-hub` entry honors the portfolio-root doctrine; in-project switching uses same-section resolution with target-project Control Center fallback | Host-aware fallbacks remain project-site scoped; cross-project transitions launch to the PWA portfolio root | Switching scenario with recorded URL transitions, preserved `projectId`, Back to Portfolio state restoration, and SPFx launch-to-portfolio proof |
 | 4 | Cross-lane handoff identity | Receives `projectId` from SPFx deep link | Sends `projectId` in deep-link URL | Handoff round-trip: SPFx→PWA→SPFx preserves project identity |

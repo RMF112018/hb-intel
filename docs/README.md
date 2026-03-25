@@ -175,6 +175,7 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 - [BD Heritage Strategic Intelligence Adoption Guide](./how-to/developer/bd-heritage-strategic-intelligence-adoption-guide.md) — Integration and validation guidance for downstream consumers
 - [My Work Feed API](./reference/my-work-feed/api.md) — SF29 multi-source aggregation feed API contracts and testing exports
 - [My Work Feed Adoption Guide](./how-to/developer/my-work-feed-adoption-guide.md) — Integration and validation guidance for downstream consumers
+- [Native Integration Backbone Implementation Guide](./how-to/developer/native-integration-backbone-implementation-guide.md) — Implementation and adoption guide for the integration-driven data layer, publication boundary, and downstream consumer model
 
 ### Provisioning Reference
 

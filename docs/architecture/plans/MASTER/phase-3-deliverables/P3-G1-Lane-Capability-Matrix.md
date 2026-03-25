@@ -514,6 +514,9 @@ All cross-lane navigation MUST preserve project identity:
 5. **11 domain SPFx apps exist — compliant**
    All 11 domain SPFx apps exist in the workspace per PH7-BW-1, with `project-hub` being the first to have a wired webpart entry point. The shared infrastructure package `@hbc/spfx` provides SPFx utilities. Classified as **compliant**.
 
+7. **Project Hub SPFx bootstrap now includes canonical site resolution — controlled evolution**
+   `apps/project-hub` originally bootstrapped SPFx auth only. Stage 10.1 adds registry-backed `siteUrl -> projectId` initialization before project content render, plus in-shell smart-empty-state fallback when no canonical project context resolves. Classified as **controlled evolution**.
+
 6. **Shared package consumption is identical across lanes — compliant**
    Both `apps/pwa` and `apps/project-hub` consume the same shared packages (`@hbc/auth`, `@hbc/shell`, `@hbc/ui-kit`, `@hbc/models`, `@hbc/data-access`, `@hbc/query-hooks`, `@hbc/smart-empty-state`, `@hbc/complexity`). Classified as **compliant**.
 

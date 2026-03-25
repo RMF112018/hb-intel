@@ -207,6 +207,7 @@ This normalization requirement flows into:
 
 - The PWA uses `projectId` as the route parameter for project-scoped pages. `projectNumber` MAY be accepted as an inbound alias in query parameters and MUST be resolved and redirected to the `projectId` route form.
 - The SPFx lane resolves project identity from the site context (site URL → registry lookup) or from explicit route/query parameters.
+- SPFx web part initialization MUST complete that lookup before any project-scoped shell or module content renders. If the `siteUrl` cannot be matched to a canonical registry record, the surface MUST remain in-shell and render guidance or error state instead of fabricating project context.
 - In both cases, the registry record is the authoritative source. Route-carried identity takes precedence over cached or session-stored identity per Phase 3 plan §4.2.
 
 ### 3.6 Department reclassification governance
@@ -255,7 +256,8 @@ When the SPFx lane loads within a SharePoint project site:
 1. Resolve the current site URL.
 2. Look up the site URL in the registry's site associations.
 3. If found, use the associated `projectId` as the canonical project identity for that session.
-4. If not found, the SPFx surface MUST NOT silently fabricate a project context. It should display appropriate guidance or error state.
+4. Seed the SPFx project store only after the registry-backed `projectId` is confirmed.
+5. If not found, the SPFx surface MUST NOT silently fabricate a project context. It should display appropriate guidance or error state.
 
 ---
 

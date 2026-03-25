@@ -11,9 +11,22 @@
 
 ## Purpose
 
-Define which data categories belong in which storage platforms and establish the governance-level ownership model for each domain's data. This matrix governs Phase 1 adapter design and data provisioning strategy, ensuring HB Intel respects SharePoint as the primary business data store while using Azure Table Storage for operational state.
+Define which data categories belong in which storage platforms and establish the governance-level ownership model for each domain's data. This matrix originally described a SharePoint-native Phase 1 storage model. It is now reconciled against repo truth and the authored `P1-F` native integration backbone families: active domain CRUD is already largely Azure Table-backed in current implementation reality, SharePoint is transitional for provisioning and selected published operational read models, and downstream consumers must consume published read models or governed repositories rather than connector internals.
 
 This document is the **governance-level** authority for data ownership, storage platform decisions, field-level ownership schema, and lifecycle/retention/visibility/search/analytics participation. It does not define detailed SharePoint physical container schemas — those live in [P1-A3-SharePoint-Lists-Libraries-Schema-Register.md](./P1-A3-SharePoint-Lists-Libraries-Schema-Register.md).
+
+---
+
+## Repo-Truth Reconciliation (2026-03-25)
+
+The following reconciliation rules now govern this document where older A-series assumptions conflict with current implementation reality:
+
+- **Active domain CRUD repo truth:** current backend domain services are Azure Table-backed across leads, projects, estimating, schedule, buyout, compliance, contracts, risk, scorecards, and PMP. Treat Azure-backed services as present implementation truth for active operational state, not SharePoint lists.
+- **Connector custody target:** per `P1-F1`, Azure is the target custody layer for raw custody, normalized source-aligned records, replay, reconciliation, audit, and thin canonical core mapping.
+- **SharePoint role:** SharePoint remains real for provisioning request lifecycle, site/list/document operations, and selected transitional published operational read models. It is not the default business-data source of truth for active domain workflows.
+- **Downstream consumer boundary:** Project Hub, Reports, Documents, Search, and later domains consume published read models or governed repositories only. No downstream plan may consume raw, normalized, or canonical connector layers directly.
+- **Named external-system ingestion path:** Wave 1 uses [P1-F5](P1-F5-Procore-Connector-Family.md), [P1-F6](P1-F6-Sage-Intacct-Connector-Family.md), and [P1-F7](P1-F7-BambooHR-Connector-Family.md). Wave 2 uses [P1-F9](P1-F9-Unanet-CRM-Connector-Family.md), [P1-F10](P1-F10-Autodesk-BuildingConnected-Connector-Family.md), [P1-F11](P1-F11-Autodesk-TradeTapp-Connector-Family.md), [P1-F12](P1-F12-Microsoft-365-Graph-Content-Connector-Family.md), and [P1-F13](P1-F13-Autodesk-Construction-Cloud-Core-Connector-Family.md). Wave 3 uses [P1-F14](P1-F14-Oracle-Primavera-Connector-Family.md), [P1-F15](P1-F15-Microsoft-365-Graph-Work-Orchestration-Connector-Family.md), and [P1-F16](P1-F16-Autodesk-Construction-Cloud-Advanced-Governance-Connector-Family.md).
+- **Current seam dependencies future implementation must honor:** durable project registry replacing the current mock-only registry posture, proxy context startup wiring if proxy remains in play, proxy/backend route reconciliation, and replacement of mock PWA domain query providers behind `@hbc/query-hooks`.
 
 ---
 
@@ -42,17 +55,19 @@ Each platform in the HB Intel stack owns specific data categories.
 
 | Platform | Owns | Does NOT Own | Notes |
 |----------|------|--------------|-------|
-| **SharePoint Lists** | Transactional, reference, document metadata, workflow state (list items with status fields) | Operational ephemeral state, audit history, time-series telemetry | Single source of truth for business data; schema provisioned per project site |
+| **SharePoint Lists** | Transitional published operational read models, reference data, selected document metadata, provisioning-linked state where required by SharePoint operations | Default active domain CRUD, raw connector custody, canonical mapping, replay/audit ownership | Transitional store only; may host selected published operational read models during migration, but is not the default business-data source of truth in current repo truth |
 | **SharePoint Document Libraries** | Document content, document metadata, version history | Data embedded in documents (must be extracted and versioned separately) | Content versioning and permissions tied to site/library; not used for bulk transactional state |
-| **Azure Table Storage** | Workflow state (provisioning, approval queues), audit history, operational ephemeral state, cache invalidation signals | Authoritative business data, user identity, reference lookups | Append-only logs, high-throughput state transitions; GDPR-safe retention policy |
+| **Azure Table Storage** | Current active operational domain services in repo truth, workflow state, audit history, project identity mapping, and the target custody layer for raw/normalized/replay/reconciliation/thin-canonical data under `P1-F*` | SharePoint document binaries, Entra identity authority | Present repo truth already uses Azure Table-backed domain services; future native integration work extends this custody model rather than reversing it |
 | **Redis Cache** | Ephemeral query results, session tokens, rate-limiting counters | Persistent state, audit trails, identity data | Non-authoritative; loss does not corrupt business data; sub-minute TTL typical |
-| **External Systems** | Domain-specific data (Procore timesheets, Sage accounting, Autodesk schedules) | HB-provisioned site identity, project portfolio hierarchy | Federated identity; write-back through adapters only; Phase 4+ scope |
+| **External Systems** | Upstream domain-specific source data reached through governed `P1-F` connector families and landed into Azure-backed custody/published read-model flows | Direct downstream feature consumption, HB project identity authority | External systems remain upstream authorities by domain, but downstream consumers receive only published read models or governed repositories |
 | **Microsoft Graph / Entra ID** | User identity (UPN, display name, group membership, email) | Project business data, domain-specific reference | Source of truth for authentication and RBAC; read-only in Phase 1 |
 | **Azure SQL** | Long-term data warehouse, analytics, complex cross-project queries | Transactional writes (read-mostly copy), real-time state | Phase 7+ target; not in scope for Phase 1 |
 
 ---
 
 ## Domain Data Classification Table
+
+The table below reflects the original A-series domain planning baseline. Where a row conflicts with the reconciliation rules above, the repo-truth and `P1-F` guidance govern current implementation and future connector work.
 
 This table maps each HB Intel domain to its primary store, read/write paths, and sync strategy:
 
@@ -86,7 +101,7 @@ This table maps each HB Intel domain to its primary store, read/write paths, and
 - **Best for:** Transactional domain data, reference data, structured workflow state
 - **Limits:** Row size (5000 items soft limit per view; use incremental load), query latency (200-500ms typical), no aggregation queries
 - **Consistency:** Strong consistency within list; eventual consistency across farms
-- **Phase 1 Strategy:** All domain business data lives here; AF adapters use PnPjs for CRUD
+- **Phase 1 Strategy:** Transitional read-model, provisioning, and reference-data support only. Current repo truth keeps active operational CRUD in Azure-backed domain services while SharePoint remains available for selected published operational read models and SharePoint-native operations.
 
 ### Azure Table Storage
 - **Best for:** Operational state, audit trails, high-throughput writes, project identity mapping
@@ -385,7 +400,7 @@ These rules govern how rows are added during domain-by-domain field expansion:
 
 4. **Calculated fields.** Store a calculated field only when it materially supports one or more of: workflow decisions, filtering, search indexing, reporting/analytics, point-in-time snapshots, or read performance. Do not store calculated fields that can be trivially recomputed on read.
 
-5. **External-system mirroring.** Mirror fields from external systems (Procore, Sage, Autodesk) only when approved for working visibility within HB Intel. Mirrored fields must have `Authority Type` = `Mirrored` and `Field Origin` = `Imported / Mirrored`. Phase 1 has no active external-system mirroring.
+5. **External-system mirroring.** Mirror fields from external systems (Procore, Sage, Autodesk) only when approved for working visibility within HB Intel. Mirrored fields must have `Authority Type` = `Mirrored` and `Field Origin` = `Imported / Mirrored`. The governed mirroring and publication path is now defined by the `P1-F` connector families; downstream consumers still consume published read models rather than source connector layers directly.
 
 6. **Relationship fields.** Use stable keys (`Primary Foreign Key`) for entity relationships plus optional `Display Mirror` fields for UI convenience. Do not rely solely on display values for cross-entity linkage.
 

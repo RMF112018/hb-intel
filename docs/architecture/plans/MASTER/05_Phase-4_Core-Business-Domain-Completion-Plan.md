@@ -28,6 +28,8 @@ Recommended completion order for this phase:
 
 This order should still be validated against real business priority and dependency truth.
 
+Phase 4 domain completion must also reconcile to the native integration backbone. Workforce-aware planning surfaces and future HR completion depend on [P1-F7 BambooHR](phase-1-deliverables/P1-F7-BambooHR-Connector-Family.md) as the governed workforce-truth family. Accounting and project-financial completion depend on [P1-F6 Sage Intacct](phase-1-deliverables/P1-F6-Sage-Intacct-Connector-Family.md) for financial/project-accounting backbone context and [P1-F5 Procore](phase-1-deliverables/P1-F5-Procore-Connector-Family.md) for project-control context. Phase 4 consumers stay behind published read models and governed repositories only.
+
 ## 4. Desired End State
 
 At the end of Phase 4:
@@ -99,6 +101,7 @@ At the end of Phase 4:
 - Define accounting’s minimum production-relevant workflow set.
 - Complete the highest-value accounting paths first.
 - Ensure accounting follows the same shared platform model as the other domains.
+- Reconcile accounting authority splits against `P1-F5` / `P1-F6` so downstream surfaces consume published read models rather than direct ERP or connector contracts.
 
 **Deliverables**
 - Accounting MVP-to-production domain definition
@@ -151,6 +154,7 @@ Mandatory deliverables for Phase 4:
 - Phase 1 stable backbone
 - Phase 2 Personal Work Hub baseline
 - Phase 3 Project Hub baseline
+- Named integration dependencies where relevant: `P1-F5` Procore, `P1-F6` Sage Intacct, and `P1-F7` BambooHR
 
 ### Outgoing dependencies
 Phase 4 enables:
@@ -187,6 +191,7 @@ Business Domains Team
 
 - Is the proposed domain completion order correct for business value and technical dependency truth?
 - What is the minimum acceptable production scope for Accounting in this phase?
+- Which Phase 4 HR/staffing and accounting surfaces must explicitly depend on `P1-F7`, `P1-F6`, and `P1-F5` published read models at first release?
 - Which domain workflows are required for first pilot release versus later enrichment?
 - What must be universal across domains and what can remain domain-specific?
 - Which later lifecycle domains should be queued next and why?

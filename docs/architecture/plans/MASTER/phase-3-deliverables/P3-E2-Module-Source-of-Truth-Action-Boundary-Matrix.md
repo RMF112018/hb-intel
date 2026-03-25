@@ -28,6 +28,8 @@ This is a **mandatory Phase 3 acceptance gate** per §18.5: "Financial, Schedule
 
 **Repo-truth audit — 2026-03-21.** No source-of-truth or action-boundary matrix previously existed. P3-E1 §3 defines high-level module boundaries. P3-A3 §4.3/§5.3/§6.3 lock spine-level architecture boundaries. PH7 plans (ADR-0091 locked) provide module-level implementation detail. This specification fills the gap between high-level classification and implementation-level boundary enforcement.
 
+**Integration backbone reconciliation — 2026-03-25.** Module authors must now read this matrix with the MASTER Phase 1 native integration backbone families. Upstream connector-backed data arrives through published read models or governed repositories only. No module may consume raw custody, normalized source-aligned records, or thin canonical core outputs directly. Future implementation must also honor the seam corrections locked in `P1-F1-T02` and `P1-F1-T12`: durable project registry, proxy context startup wiring if proxy remains in play, proxy/backend route reconciliation, and replacement of mock PWA source/query providers behind governed repositories.
+
 ---
 
 ## Specification Scope
@@ -91,14 +93,15 @@ This is a **mandatory Phase 3 acceptance gate** per §18.5: "Financial, Schedule
 
 | Module | Data domain | Upstream authority | Project Hub authority | Reconciliation rule |
 |---|---|---|---|---|
-| **Financial** | Budget baseline | Procore / CSV import | — | Ingested, not originated |
+| **Financial** | Budget baseline | `P1-F5` Procore published read model (transitional CSV/import-era seams remain until that path exists) | — | Ingested, not originated |
 | | Working forecast state | — | **Owns** | Project Hub is canonical |
 | | GC/GR working model | — | **Owns** | Project Hub is canonical |
 | | Cash Flow working model | — | **Owns** | Project Hub is canonical |
 | | Exposure tracking | — | **Owns** | Project Hub is canonical |
 | | Forecast checklist | — | **Owns** | Project Hub is canonical |
 | | Buyout working state | — | **Owns** (within Financial domain) | Project Hub is canonical |
-| **Schedule** | Detailed baseline / CPM | Primavera / MS Project (XER/XML/CSV) | — | Ingested, not originated |
+| | Financial backbone / actual-cost context | `P1-F6` Sage Intacct published read model with `P1-F5` project-control context where required | — | Consumed through governed downstream repositories; not originated in Project Hub |
+| **Schedule** | Detailed baseline / CPM | `P1-F14` Oracle Primavera published read model (with transitional file-import seams until available) | — | Ingested, not originated |
 | | Milestone tracking | — | **Owns** | Project Hub is canonical |
 | | Forecast overrides | — | **Owns** (governed) | Override with provenance |
 | | Schedule projections | — | **Owns** | Derived from ingested + override data |
@@ -118,7 +121,7 @@ This is a **mandatory Phase 3 acceptance gate** per §18.5: "Financial, Schedule
 | **Reports** | Report definitions | — | **Owns** | Project Hub defines report families |
 | | Run ledger / history | — | **Owns** | Project Hub tracks all runs |
 | | Draft state / narrative | — | **Owns** | Project Hub is canonical for drafts |
-| | Module snapshot data | Respective module spines | **Consumes** | Reports reads from modules; does not own source data |
+| | Module snapshot data | Respective module spines and connector-backed published read models exposed through governed module/publication contracts | **Consumes** | Reports reads from modules and governed published read models; does not own source data |
 | | Release/distribution state | — | **Owns** | Project Hub tracks release lifecycle |
 
 ### 2.2 Spine modules

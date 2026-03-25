@@ -23,6 +23,8 @@ Phase 3 uses a **hybrid spine model** for all four spines (Phase 3 plan §8.3–
 - **Modules retain authority** over item origin, business rules, completion semantics, deeper workflows, local thresholds, and richer drill-down behavior.
 - Modules **publish** into spines through governed adapter and registration patterns. Spines **consume** those publications for normalized rollups.
 
+Where upstream module data is connector-backed, that publication must already have been reduced to governed published read models or downstream module publications. Spines never ingest raw custody, normalized source-aligned records, thin canonical core outputs, or direct vendor connector contracts.
+
 Three of four spines have mature existing implementations (`@hbc/my-work-feed`, `@hbc/features-project-hub` health-pulse, `@hbc/related-items`). The **Activity spine** is the primary new contract defined here.
 
 **Repo-truth audit — 2026-03-20.** Work Queue spine (`@hbc/my-work-feed`, SF29, ADR-0115) is mature with a complete adapter registry, project-scoped filtering, and canonical item normalization. Health spine (`@hbc/features-project-hub` health-pulse, SF21) is mature with deterministic scoring, four dimensions, compound risk signals, explainability, and admin governance. Related-Items spine (`@hbc/related-items`, SF14) is mature with a bidirectional relationship registry, governance metadata, and AI suggestion hooks. Activity spine has no canonical implementation — only an `IGovernanceTimelineEvent` placeholder in `@hbc/related-items`. See §1 for full reconciliation.

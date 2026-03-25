@@ -641,6 +641,7 @@ Can begin after Stage 4 (cross-lane routing) and proceeds in parallel with Stage
 
 **10.1 — SPFx web part initialization**
 Implement `siteUrl`-based project identity resolution for each SPFx web part. Each web part must resolve `projectId` from the registry before rendering. No web part may render project content without a confirmed `projectId`.
+Repo-truth note: `apps/project-hub/src/webparts/projectHub/ProjectHubWebPart.tsx` previously bootstrapped SPFx auth only. Stage 10.1 closes that gap by requiring registry-backed site resolution during web part initialization, store seeding only after successful resolution, and in-shell `@hbc/smart-empty-state` fallback when the current `siteUrl` cannot be matched to a canonical project record.
 Governing: P3-B1 §3, P3-G1 §2
 
 **10.2 — SPFx lane capability per module**

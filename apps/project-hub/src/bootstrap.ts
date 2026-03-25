@@ -3,6 +3,11 @@
  * D-PH7-BW-5: Updated to use PERSONA_REGISTRY as source of truth for dev identity.
  * Checks localStorage for a persisted DevToolbar persona selection before falling back
  * to the default Administrator persona.
+ *
+ * Dev mode intentionally seeds a deterministic project context equivalent to a
+ * successful registry resolution. This is only for local verification. The SPFx
+ * runtime path must still resolve project identity from `siteUrl` through the
+ * canonical registry before rendering project content.
  */
 import type { IActiveProject } from '@hbc/models';
 import {

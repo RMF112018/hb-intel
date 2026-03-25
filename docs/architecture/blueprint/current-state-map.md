@@ -427,6 +427,8 @@ All SPFx apps use Vite + React 18, build to `dist/`, and are port-mapped 4001–
 | `apps/operational-excellence` | @hbc/spfx-operational-excellence | 4010 | @hbc/features-operational-excellence |
 | `apps/human-resources` | @hbc/spfx-human-resources | 4011 | @hbc/features-human-resources |
 
+Repo-truth note: `apps/project-hub` now resolves the SharePoint `siteUrl` through the canonical project registry during SPFx web part initialization before rendering project content. When no registry-backed project context resolves, it fails safely with in-shell `@hbc/smart-empty-state` rather than fabricating project identity.
+
 #### Standalone Applications (3)
 
 | App | Name | Port | Runtime | Role |

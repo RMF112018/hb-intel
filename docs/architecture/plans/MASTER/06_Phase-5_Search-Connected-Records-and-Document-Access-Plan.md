@@ -34,6 +34,7 @@ At the end of Phase 5:
 - File/source transparency and ownership cues
 - Mobile/tablet-safe document access expectations
 - SF16 (`@hbc/search`, Azure Cognitive Search) — assigned to Phase 5 per OD-007 decision (2026-03-16); ADR-0105 reserved; planning complete, implementation deferred until Phase 5
+- Consumption of published content/document read models and references from [P1-F12 Microsoft 365 Graph Content](phase-1-deliverables/P1-F12-Microsoft-365-Graph-Content-Connector-Family.md) where document-aware search and navigation require them
 
 ## 5. Out of Scope
 
@@ -77,6 +78,7 @@ At the end of Phase 5:
 - Design project-centered and workflow-centered document entry points.
 - Surface recent/relevant documents, not just storage structures.
 - Clarify source location, ownership, and what actions are safe to take.
+- Keep document/content awareness behind published read models, references, and governed access surfaces rather than direct connector or raw Graph layers.
 
 **Deliverables**
 - Document journey map
@@ -139,6 +141,7 @@ Mandatory deliverables for Phase 5:
 - Phase 1 data/integration backbone
 - Phase 3 Project Hub baseline
 - Phase 4 core domain outputs with real records and work items
+- Named upstream dependency for document/content awareness: `P1-F12` Microsoft 365 Graph Content; ACC families are future optional dependencies only where a search surface explicitly binds to those published read models
 
 ### Outgoing dependencies
 Phase 5 enables:
@@ -155,6 +158,7 @@ Phase 5 is complete only when:
 - related records are meaningful, visible, and navigable
 - permission behavior is correct and understandable
 - search/document use demonstrably reduces current access friction
+- document-aware search and access consume governed published read models and references rather than raw connector layers
 
 ## 11. Recommended Team Ownership
 
