@@ -47,3 +47,29 @@ export type PushVisibility = 'REVIEW_CIRCLE_BEFORE_PUSH' | 'PROJECT_TEAM_AFTER_P
 // -- Push Assignee Default --------------------------------------------------------
 
 export type PushAssigneeDefault = 'PROJECT_MANAGER';
+
+// -- Stage 8.5 Lane Depth Enforcement Enums --------------------------------------
+
+/** Review lane depth per P3-G1 §4.9. */
+export type ReviewLaneDepth = 'PWA_FULL' | 'SPFX_BROAD' | 'SPFX_ESCALATE_TO_PWA';
+
+/** Review capability per P3-G1 §4.9. */
+export type ReviewCapability =
+  | 'VIEW_SURFACES'
+  | 'PLACE_ANNOTATIONS'
+  | 'GENERATE_REVIEWER_RUNS'
+  | 'PUSH_TO_TEAM'
+  | 'CONFIRM_CLOSURE'
+  | 'THREAD_MANAGEMENT'
+  | 'MULTI_RUN_COMPARISON'
+  | 'REVIEW_HISTORY_BROWSING'
+  | 'EXECUTIVE_REVIEW_CATALOG';
+
+/** SPFx escalation trigger cases per P3-G2 §8.8. */
+export type EscalationTriggerCase =
+  | 'THREAD_MANAGEMENT'
+  | 'MULTI_RUN_COMPARISON'
+  | 'FULL_HISTORY_BROWSING';
+
+/** Escalation deep-link view per P3-G2 §8.8. */
+export type EscalationDeepLinkView = 'THREAD' | 'COMPARE' | 'HISTORY';

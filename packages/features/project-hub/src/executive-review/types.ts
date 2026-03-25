@@ -5,13 +5,18 @@
 
 import type {
   ClosureLoopState,
+  EscalationDeepLinkView,
+  EscalationTriggerCase,
   PushActivityEvent,
   PushOriginRole,
   PushPayloadMode,
   PushPriority,
   PushVisibility,
   PushWorkItemStatus,
+  ReviewCapability,
+  ReviewLaneDepth,
 } from './enums.js';
+import type { ApplicationLane } from '../subcontract-readiness/lanes-permissions/enums.js';
 
 export interface IPushToTeamAction {
   readonly pushActionId: string;
@@ -78,4 +83,39 @@ export interface IPushAutoClosePreventionRule {
   readonly description: string;
   readonly autoCloseAllowed: boolean;
   readonly requiresPerConfirmation: boolean;
+}
+
+// -- Stage 8.5 Lane Depth Enforcement Types ---------------------------------------
+
+export interface IReviewLaneCapability {
+  readonly capability: ReviewCapability;
+  readonly pwaDepth: ReviewLaneDepth;
+  readonly spfxDepth: ReviewLaneDepth;
+  readonly requiresEscalation: boolean;
+  readonly escalationCase: EscalationTriggerCase | null;
+}
+
+export interface IEscalationTriggerDefinition {
+  readonly triggerCase: EscalationTriggerCase;
+  readonly deepLinkTemplate: string;
+  readonly deepLinkView: EscalationDeepLinkView;
+  readonly contextPreservationRequired: boolean;
+  readonly requiredParams: readonly string[];
+  readonly description: string;
+}
+
+export interface IEscalationDeepLink {
+  readonly projectId: string;
+  readonly reviewArtifactId: string | null;
+  readonly view: EscalationDeepLinkView;
+  readonly returnToSpfxSurface: string | null;
+  readonly resolvedUrl: string;
+  readonly contextPreserved: boolean;
+}
+
+export interface ILaneDepthEnforcementResult {
+  readonly capability: ReviewCapability;
+  readonly currentLane: ApplicationLane;
+  readonly isAllowedInLane: boolean;
+  readonly escalationRequired: boolean;
 }

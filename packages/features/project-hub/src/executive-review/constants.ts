@@ -5,6 +5,8 @@
 
 import type {
   ClosureLoopState,
+  EscalationDeepLinkView,
+  EscalationTriggerCase,
   PushActivityEvent,
   PushAssigneeDefault,
   PushOriginRole,
@@ -12,8 +14,11 @@ import type {
   PushPriority,
   PushVisibility,
   PushWorkItemStatus,
+  ReviewCapability,
+  ReviewLaneDepth,
 } from './enums.js';
-import type { IPushAutoClosePreventionRule } from './types.js';
+import type { ApplicationLane } from '../subcontract-readiness/lanes-permissions/enums.js';
+import type { IEscalationTriggerDefinition, IPushAutoClosePreventionRule, IReviewLaneCapability } from './types.js';
 
 // -- Enum Arrays ------------------------------------------------------------------
 
@@ -110,4 +115,59 @@ export const PUSH_ACTIVITY_SPINE_EVENT_DEFINITIONS: ReadonlyArray<{ readonly eve
   { event: 'PUSH_CREATED', description: 'PER pushed review item to project team work queue' },
   { event: 'FOLLOW_UP_RESOLVED', description: 'Project team marked pushed follow-up item as resolved' },
   { event: 'REVIEW_CLOSURE_CONFIRMED', description: 'PER confirmed closure of originating review artifact' },
+];
+
+// -- Stage 8.5 Lane Depth Enforcement Constants -----------------------------------
+
+export const REVIEW_LANE_DEPTHS = ['PWA_FULL', 'SPFX_BROAD', 'SPFX_ESCALATE_TO_PWA'] as const satisfies ReadonlyArray<ReviewLaneDepth>;
+
+export const REVIEW_CAPABILITIES = [
+  'VIEW_SURFACES', 'PLACE_ANNOTATIONS', 'GENERATE_REVIEWER_RUNS', 'PUSH_TO_TEAM',
+  'CONFIRM_CLOSURE', 'THREAD_MANAGEMENT', 'MULTI_RUN_COMPARISON',
+  'REVIEW_HISTORY_BROWSING', 'EXECUTIVE_REVIEW_CATALOG',
+] as const satisfies ReadonlyArray<ReviewCapability>;
+
+export const ESCALATION_TRIGGER_CASES = [
+  'THREAD_MANAGEMENT', 'MULTI_RUN_COMPARISON', 'FULL_HISTORY_BROWSING',
+] as const satisfies ReadonlyArray<EscalationTriggerCase>;
+
+export const ESCALATION_DEEP_LINK_VIEWS = ['THREAD', 'COMPARE', 'HISTORY'] as const satisfies ReadonlyArray<EscalationDeepLinkView>;
+
+export const REVIEW_LANE_CAPABILITY_MATRIX: ReadonlyArray<IReviewLaneCapability> = [
+  { capability: 'VIEW_SURFACES', pwaDepth: 'PWA_FULL', spfxDepth: 'SPFX_BROAD', requiresEscalation: false, escalationCase: null },
+  { capability: 'PLACE_ANNOTATIONS', pwaDepth: 'PWA_FULL', spfxDepth: 'SPFX_BROAD', requiresEscalation: false, escalationCase: null },
+  { capability: 'GENERATE_REVIEWER_RUNS', pwaDepth: 'PWA_FULL', spfxDepth: 'SPFX_BROAD', requiresEscalation: false, escalationCase: null },
+  { capability: 'PUSH_TO_TEAM', pwaDepth: 'PWA_FULL', spfxDepth: 'SPFX_BROAD', requiresEscalation: false, escalationCase: null },
+  { capability: 'CONFIRM_CLOSURE', pwaDepth: 'PWA_FULL', spfxDepth: 'SPFX_BROAD', requiresEscalation: false, escalationCase: null },
+  { capability: 'THREAD_MANAGEMENT', pwaDepth: 'PWA_FULL', spfxDepth: 'SPFX_ESCALATE_TO_PWA', requiresEscalation: true, escalationCase: 'THREAD_MANAGEMENT' },
+  { capability: 'MULTI_RUN_COMPARISON', pwaDepth: 'PWA_FULL', spfxDepth: 'SPFX_ESCALATE_TO_PWA', requiresEscalation: true, escalationCase: 'MULTI_RUN_COMPARISON' },
+  { capability: 'REVIEW_HISTORY_BROWSING', pwaDepth: 'PWA_FULL', spfxDepth: 'SPFX_ESCALATE_TO_PWA', requiresEscalation: true, escalationCase: 'FULL_HISTORY_BROWSING' },
+  { capability: 'EXECUTIVE_REVIEW_CATALOG', pwaDepth: 'PWA_FULL', spfxDepth: 'SPFX_BROAD', requiresEscalation: false, escalationCase: null },
+];
+
+export const LANE_DEPTH_ESCALATION_TRIGGER_DEFINITIONS: ReadonlyArray<IEscalationTriggerDefinition> = [
+  {
+    triggerCase: 'THREAD_MANAGEMENT',
+    deepLinkTemplate: '/project-hub/{projectId}/review?artifact={reviewArtifactId}&view=thread',
+    deepLinkView: 'THREAD',
+    contextPreservationRequired: true,
+    requiredParams: ['projectId', 'reviewArtifactId'],
+    description: 'Thread management (replies, history, resolution) escalates to PWA',
+  },
+  {
+    triggerCase: 'MULTI_RUN_COMPARISON',
+    deepLinkTemplate: '/project-hub/{projectId}/review?view=compare',
+    deepLinkView: 'COMPARE',
+    contextPreservationRequired: true,
+    requiredParams: ['projectId'],
+    description: 'Multi-run comparison of reviewer-generated runs escalates to PWA',
+  },
+  {
+    triggerCase: 'FULL_HISTORY_BROWSING',
+    deepLinkTemplate: '/project-hub/{projectId}/review?view=history',
+    deepLinkView: 'HISTORY',
+    contextPreservationRequired: true,
+    requiredParams: ['projectId'],
+    description: 'Full annotation and review run history browsing escalates to PWA',
+  },
 ];
