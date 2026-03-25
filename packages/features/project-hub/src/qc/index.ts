@@ -9,3 +9,4 @@ export * from './record-families/index.js';
 export * from './plans-reviews/index.js';
 export * from './issues-actions/index.js';
 export * from './deviations-evidence/index.js';
+export * from './submittal-advisory/index.js';
