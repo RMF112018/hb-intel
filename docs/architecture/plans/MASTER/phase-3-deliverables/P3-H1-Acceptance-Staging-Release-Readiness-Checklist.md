@@ -116,6 +116,13 @@ Status note: `Implemented — Evidence Pending` means repo-truth implementation 
 
 ## 6. Core Module Checklist (§18.5)
 
+Stage 10.2 applies to this entire section. High-level module acceptance is not satisfied by placeholder routes or generic empty states in the SPFx lane. For every governed module family below, SPFx evidence must show either:
+
+- a real in-lane module surface matching the `Required` / `Broad` / `Baseline-visible` / `Read-only` posture in P3-G1, or
+- an explicit `Launch-to-PWA` affordance carrying canonical `projectId` context for the deeper workflow
+
+Module-by-module lane proof is part of release readiness, not optional cleanup.
+
 ### 6.1 Financial
 
 For the full 48-item Financial acceptance gate, see **P3-E4-T09 §20**. The criteria below are the high-level module-level gates required for Phase 3 release readiness; all must pass before the P3-E4-T09 detailed gate is evaluated.
@@ -371,7 +378,7 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | 8.3 | Unauthorized or invalid project context handling — unauthorized/nonexistent project contexts remain in-shell with unchanged browser location; invalid module paths fall back only to the target project's Control Center | Not Started | | §9.2a staging scenario |
 | 8.4 | Stale draft handling — warning + refresh flow | Not Started | | §9.3 staging scenario |
 | 8.5 | Cross-lane launch SPFx->PWA — deep-link round-trip | Not Started | | §9.4 staging scenario; evidence must show canonical project route and preserved `projectId` |
-| 8.6 | Cross-lane launch PWA->SPFx — siteUrl navigation with registry-based SPFx initialization before module render | Not Started | | §9.5 staging scenario; evidence must show no project-identity drift across the handoff, plus successful SPFx initialization or in-shell failure handling when unresolved |
+| 8.6 | Cross-lane launch PWA->SPFx — siteUrl navigation with registry-based SPFx initialization before module render, then landing on a governed Stage 10.2 module surface or explicit Launch-to-PWA affordance | Not Started | | §9.5 staging scenario; evidence must show no project-identity drift across the handoff, successful SPFx initialization or in-shell failure handling when unresolved, and module-by-module lane compliance after arrival |
 | 8.7 | Module spine publication — all governed modules contributing through the correct publication contract or governed projection | Not Started | | §9.6 staging scenario |
 | 8.8 | Canvas governance — edit-mode enforcement | Not Started | | §9.7 staging scenario |
 | 8.9 | Report lifecycle — PX Review and Owner Report full cycle | Not Started | | §9.8 staging scenario |
@@ -438,8 +445,8 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 |---|---|
 | **Preconditions** | User in PWA; wants SharePoint context for the project |
 | **Steps** | 1. Click "Open in SharePoint" or equivalent. 2. Verify `siteUrl` from registry used. 3. SPFx site opens in new tab. 4. Verify the web part resolves `siteUrl` through the registry before rendering project content. 5. If the registry cannot resolve the site, verify the surface remains in-shell and renders `@hbc/smart-empty-state` rather than project content. |
-| **Expected outcome** | SPFx project site opens with correct project, or fails safely with in-shell guidance when no canonical registry record exists |
-| **Pass criteria** | Correct `siteUrl` used; project resolves in SPFx before module render; new tab opens; unresolved site does not fabricate project context and instead shows smart empty state |
+| **Expected outcome** | SPFx project site opens with correct project and lands on a governed Stage 10.2 module surface, or fails safely with in-shell guidance when no canonical registry record exists |
+| **Pass criteria** | Correct `siteUrl` used; project resolves in SPFx before module render; new tab opens; unresolved site does not fabricate project context and instead shows smart empty state; landed SPFx route shows a real in-lane module surface or explicit Launch-to-PWA action instead of a generic placeholder |
 
 ### 9.6 Module spine publication
 
@@ -587,7 +594,7 @@ The following items are **explicitly deferred** from Phase 3 and MUST NOT be sil
 | P3-G2 | Cross-Lane Navigation and Handoff Map | G | Specification |
 | P3-G3 | Lane-Specific Acceptance Matrix | G | Specification |
 | P3-H1 | Acceptance, Staging, and Release-Readiness Checklist | H | Active Reference |
-| P3-J1 | Documents Enabling Seams and Contracts | J | In Progress — E1 v0.2.15; E2 v0.2.16; E3 v0.2.17 |
+| P3-J1 | Documents Enabling Seams and Contracts | J | In Progress — E1–E4 complete (v0.2.15–v0.2.18); E5–E8 pending |
 
 **Total:** 32 primary deliverables. 29 active locked artifacts (Contract/Specification/Note). 1 Superseded Reference (P3-E12). 1 Active Reference (this document). 1 Not Started Specification (P3-J1).
 

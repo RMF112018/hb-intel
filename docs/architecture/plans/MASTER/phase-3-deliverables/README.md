@@ -645,7 +645,13 @@ Repo-truth note: `apps/project-hub/src/webparts/projectHub/ProjectHubWebPart.tsx
 Governing: P3-B1 §3, P3-G1 §2
 
 **10.2 — SPFx lane capability per module**
-Implement SPFx-tier capabilities for each module per the P3-G1 lane capability matrix. Where a capability is classified as "Launch-to-PWA" in SPFx, implement the escalation affordance and deep-link construction — do not silently skip the feature.
+Implement the governed SPFx module lane per the P3-G1 matrix. Stage 10.2 closes the repo-truth gap where `apps/project-hub` previously exposed only a 4-route shell (`/`, `/preconstruction`, `/documents`, `/team`) with three placeholder pages. The Stage 10.2 runtime must replace that placeholder posture with the governed module family: Home / Canvas, Financial, Schedule, Constraints, Permits, Safety, Reports, Quality Control, Project Closeout, Project Startup, Subcontract Execution Readiness, and Warranty.
+
+Each module surface must prove one of two governed outcomes:
+- real in-lane SPFx capability for modules classified as `Required`, `Broad`, `Baseline-visible`, or `Read-only`
+- explicit `Launch-to-PWA` affordances with canonical `projectId` deep-link construction for deeper workflows
+
+`@hbc/features-project-hub` is the canonical shared owner for reusable Stage 10.2 module-lane definitions and summary surfaces. `apps/project-hub` owns shell composition, route assembly, and SPFx-to-PWA launches — not duplicate module business logic.
 Governing: P3-G1 §4
 
 **10.3 — SPFx-to-PWA escalation affordances**
@@ -769,6 +775,7 @@ Status: **Implemented 2026-03-25 in `@hbc/features-project-hub` v0.2.17.** Conte
 **13.5 — Related-items document reference model (E4)**
 Define the document reference model for related items: linked project records, record attachments, zone associations, restricted placeholders. Bind document references into `@hbc/related-items` where appropriate. Define minimum metadata for contextual visibility (title, sourceType, authorityState, availabilityState, originatingRecord, lastRelevantActivity). Define the restricted-stub contract so document references appear safely in project context without broad permission leakage.
 Governing: P3-J1 §3 E4; P3-D4
+Status: **Implemented 2026-03-25 in `@hbc/features-project-hub` v0.2.18.** Document reference contracts: 5 enum type unions, 5 interface contracts (related-item refs with authority/availability states, restricted stubs with 6-field minimum metadata, rendering rules per context, zone associations, permission boundaries preventing leakage), governed constants (4 rendering rules, 4 permission boundaries all preventing broad leakage, 6 restricted-stub required fields), 10 business rules; 45 tests. Stage 13.5 E4 document references complete.
 
 **13.6 — Preview and adaptive tablet/field contract (E7)**
 Define the project-scoped preview/details surface contract. Define adaptive behavior requirements for desktop, tablet, and field mode. Bind those requirements to `@hbc/ui-kit` adaptive standards. Keep preview-provider choice abstract so Phase 5 can implement without redesigning the Project Hub surface.
