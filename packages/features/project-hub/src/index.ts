@@ -39,4 +39,6 @@ export * from './executive-review/index.js';
 
 export * from './document-launch/index.js';
 
+export * from './document-zones/index.js';
+
 export * from './reports/index.js';
