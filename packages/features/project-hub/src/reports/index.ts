@@ -6,3 +6,4 @@ export * from './contracts/index.js';
 export * from './draft-model/index.js';
 export * from './run-lifecycle/index.js';
 export * from './template-governance/index.js';
+export * from './section-sources/index.js';
