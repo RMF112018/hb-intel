@@ -668,7 +668,16 @@ Current partial launch actions do not satisfy this stage unless all 13 P3-G2 sce
 Governing: P3-G2 §3, §8
 
 **10.4 — SPFx personalization persistence**
-Implement the SPFx storage tier for canvas personalization: localStorage for immediate state, SharePoint list or user profile extension for server-side persistence.
+Implement the governed SPFx home/canvas persistence tier. `@hbc/project-canvas` already ships `createSpfxCanvasStorageAdapter()` for immediate localStorage persistence, but the repo-truth gap is that the shared canvas hooks still default to `CanvasApi` and `apps/project-hub` still needs to wire the real personalized canvas home through that shared seam.
+
+Stage 10.4 closes that wiring gap by requiring:
+- `@hbc/project-canvas` to support an additive persistence adapter seam instead of API-only persistence
+- `apps/project-hub` to render the actual personalized home/canvas surface, not only summary cards
+- immediate SPFx persistence via localStorage
+- server-side rehydrate and mirror sync via a SharePoint list on the project site
+- governed fallback to role-default generation when the SharePoint sync path is unavailable or persisted state is corrupt
+
+The old “SharePoint list or user profile extension” ambiguity is now closed. Stage 10.4 uses **SharePoint list** as the governed server-side target.
 Governing: P3-C3 §6
 
 ---
@@ -680,24 +689,25 @@ Must run after all surfaces are substantively implemented (Stages 6–10 complet
 Governing: P3-C1 §14; UI-Kit-Mold-Breaker-Principles.md; UI-Kit-Usage-and-Composition-Guide.md; UI-Kit-Adaptive-Data-Surface-Patterns.md; UI-Kit-Field-Readability-Standards.md; P2-F1
 
 **11.1 — Apply `WorkspacePageShell` to all Project Hub page surfaces**
-Verify that every Project Hub page (canvas home, each module landing page, each module detail view, reports workspace, executive review surfaces, and spine full-page views) uses `WorkspacePageShell` as the page wrapper. Use the correct layout type per the shell's `layout` prop: `dashboard` for KPI+chart+data zones, `list` for filterable module lists, `detail` for single-item views.
+Close the remaining Stage 11.1 conformance gap in the live SPFx Project Hub app. Current repo truth already has `WorkspacePageShell` on the routed home surface, governed module routes, and in-shell failure states; the remaining work is to make the routed page-surface inventory explicit and enforce the correct `layout` per UI Kit page-pattern authority. Home/canvas remains `layout="dashboard"`. Governed Stage 10.2 module routes are landing/summary surfaces and must not remain on a blanket `detail` wrapper when they function as dashboard-style operational landing pages. Acceptance scope for this stage is the live routed Project Hub surfaces, not every historical page file still present in `apps/project-hub/src/pages`.
 Governing: P3-C1 §14.2; UI-Kit-Wave1-Page-Patterns.md
 
 **11.2 — Data surface type selection per T06**
-For each module list/table surface, document the T06 surface type selected and verify the implementation matches the selection. Financial budget lines and scorecard tables → dense analysis table. Constraints log, Permits log, Schedule milestones → responsive hybrid. Work Queue, activity feed → card/list view. Project health / KPI strips → summary strip + `DashboardLayout` + `HbcKpiCard`.
+Close the remaining Stage 11.2 conformance gap by separating live routed SPFx surface classifications from future deeper module-zone commitments. Current repo truth is that the routed SPFx Project Hub app is still summary/card-driven, not a full module-table runtime. The live home route must therefore use the governed summary-strip / KPI pattern (`DashboardLayout` + `HbcKpiCard` through `WorkspacePageShell dashboardConfig`), while the current governed module-route family is intentionally `card/list view` rather than dense or hybrid tables. Future deeper module data zones must still lock their T06 selections now without being misrepresented as already-live SPFx runtime: Financial budget-line and scorecard-style comparisons → `dense analysis table`; Schedule milestone and upload-history-style lists → `responsive hybrid`; Constraints ledgers and Permits logs → `responsive hybrid`; Work Queue and Activity feed → `card/list view`; Project health / KPI summaries → `summary strip / KPI`.
 Governing: P3-C1 §14.2; UI-Kit-Adaptive-Data-Surface-Patterns.md
 
 **11.3 — Token compliance verification**
-Run the `enforce-hbc-tokens` ESLint rule across all Phase 3 feature packages. Zero violations must be present before any surface enters acceptance. All color, spacing, radius, elevation, and typography values must use `HBC_*` tokens. All Fluent UI primitives must be imported through `@hbc/ui-kit` (D-10).
+Close the remaining Stage 11.3 conformance gap by reconciling runtime cleanup with actual lint enforcement. Current repo truth is that the live Project Hub SPFx routed surfaces and shared `src/spfx-lane` companion surface still carried hardcoded spacing/layout literals and inline style debt after Stage 11.2, while `enforce-hbc-tokens` only enforced hex literals in app scope. Stage 11.3 therefore requires two closure actions together: token-backed cleanup of the live routed dashboard/module surfaces and shared SPFx lane surface, plus lint-rule/scope expansion so style-bearing contexts now reject hardcoded hex, rgb/rgba, and pixel literals in both `apps/project-hub` and `packages/features/project-hub/src/spfx-lane`. Direct Fluent import proof remains a separate D-10 acceptance line through `@hbc/ui-kit`.
 Governing: P3-C1 §14.2; MB-08
 
 **11.4 — Density and touch target compliance**
-Verify all Project Hub surfaces in all three density tiers: compact (desktop), comfortable (tablet), and touch (field). Specifically verify Safety module and any field-primary surface in touch density. Confirm `HBC_DENSITY_TOKENS[tier].touchTargetMin` is met on all interactive elements per tier (44px touch / 36px comfortable / 24px compact).
+Close the remaining Stage 11.4 conformance gap by wiring the live routed SPFx lane to the canonical UI Kit density system instead of treating density as a verification-only checklist. Current repo truth was that the routed Project Hub surfaces still relied on component-local defaults, did not consume `useDensity()`, and could not expose the built-in shell density control because `WorkspacePageShell` only rendered `HbcCommandBar` when page actions existed. Stage 11.4 therefore requires: a shell-level density-control opt-in on the routed home, governed module, and unresolved-context fallback surfaces; `useDensity()` + `HBC_DENSITY_TOKENS`-backed spacing behavior on `apps/project-hub` and the shared `packages/features/project-hub/src/spfx-lane` surface; and representative touch-target proof on dashboard launches, module Launch-to-PWA actions, reports / executive-review actions, and the density control itself. Safety and another action-heavy live surface must be part of the touch-tier evidence set.
 Governing: P3-C1 §14.3 MB-07; UI-Kit-Field-Readability-Standards.md
 
 **11.5 — Horizontal scroll prohibition verification**
-Verify that no module data table produces horizontal scroll as the default at ≥1024px viewport. Verify adaptive column hiding is active on Financial, Schedule, Constraints, and Permits data tables. Verify card fallback renders at <640px on all responsive-hybrid surfaces.
+Verify that live routed SPFx Project Hub surfaces produce no horizontal overflow at ≥1024px viewport and reflow without horizontal scroll at <640px. The live SPFx lane is currently card/canvas/escalation-driven — not a dense module-table runtime. Stage 11.5 closes the live horizontal-overflow evidence gap on current routed surfaces (dashboard, governed module routes, reports/review escalation, in-shell fallbacks) and documents that future deeper module data zones (Financial/Schedule/Constraints/Permits table surfaces) must satisfy MB-04 through adaptive column hiding and card fallback when those surfaces are actually implemented. Stage 11.5 does not fabricate table surfaces that do not yet exist in the live SPFx lane.
 Governing: P3-C1 §14.3 MB-04; UI-Kit-Adaptive-Data-Surface-Patterns.md
+Status: **Implemented 2026-03-25 in `@hbc/spfx-project-hub` v0.0.10.** Runtime hardening: `min-width: 0` on flex children preventing overflow, `overflow-wrap: anywhere` for text, `flex-wrap` on action rows. Browser-level e2e: overflow assertions at 1024px desktop, 768px tablet, and 375px narrow viewport using `scrollWidth <= clientWidth` DOM checks on shell-layout/shell-body/shell-content containers. Stage 11.5 horizontal-scroll conformance complete.
 
 **11.6 — Card weight and hierarchy review**
 Review all canvas tiles and module KPI/summary card compositions. Verify card weight differentiation is applied (primary/standard/supporting) — no equal-weight card grids. Verify Three-Second Read Standard: on every primary surface, the most important item (health status, next action, critical constraint) is identifiable within 3 seconds without scanning.

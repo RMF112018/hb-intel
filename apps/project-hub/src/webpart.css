@@ -22,10 +22,19 @@
 [data-hbc-shell="shell-body"] {
   display: flex;
   flex: 1;
+  min-width: 0; /* Stage 11.5: prevent flex child overflow */
 }
 
 [data-hbc-shell="shell-content"] {
   flex: 1;
+  min-width: 0; /* Stage 11.5: prevent flex child overflow */
   padding: 24px;
   overflow-y: auto;
+  overflow-wrap: anywhere; /* Stage 11.5: long text/IDs wrap instead of overflow */
+}
+
+/* Stage 11.5: responsive guard — button/action rows wrap on narrow viewports */
+[data-hbc-shell="shell-content"] [role="toolbar"],
+[data-hbc-shell="shell-content"] [data-action-row] {
+  flex-wrap: wrap;
 }

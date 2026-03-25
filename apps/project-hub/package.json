@@ -1,6 +1,6 @@
 {
   "name": "@hbc/spfx-project-hub",
-  "version": "0.0.2",
+  "version": "0.0.10",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,6 +16,8 @@
     "@hbc/complexity": "workspace:*",
     "@hbc/models": "workspace:*",
     "@hbc/data-access": "workspace:*",
+    "@hbc/features-project-hub": "workspace:*",
+    "@hbc/project-canvas": "workspace:*",
     "@hbc/query-hooks": "workspace:*",
     "@hbc/auth": "workspace:*",
     "@hbc/shell": "workspace:*",
