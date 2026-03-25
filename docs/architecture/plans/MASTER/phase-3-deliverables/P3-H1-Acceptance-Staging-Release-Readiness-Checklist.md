@@ -376,9 +376,9 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | 8.8 | Canvas governance — edit-mode enforcement | Not Started | | §9.7 staging scenario |
 | 8.9 | Report lifecycle — PX Review and Owner Report full cycle | Not Started | | §9.8 staging scenario |
 | 8.10 | Push-to-Project-Team — structured tracked work item created; provenance preserved; closure loop requires PER confirmation | Not Started | | §9.9 staging scenario |
-| 8.11 | Executive review loop — PER annotation, reviewer-generated run, push-to-team, response, and closure flow works end-to-end | Not Started | | §9.10 staging scenario |
+| 8.11 | Executive review loop — PER annotation, reviewer-generated run, push-to-team, response, and closure flow works end-to-end | In Progress | 8.1 annotation contract complete; 8.2/8.3 pending | §9.10 staging scenario |
 | 8.12 | Executive review lane depth — PWA provides full executive review experience; SPFx provides broad interaction with escalation to PWA for depth | Not Started | | §9.10 staging scenario, P3-G1 §4.9 |
-| 8.13 | Annotation isolation in review loop — PER review artifacts stored independently; no module source-of-truth mutations produced during review run | Not Started | | §9.10 staging scenario, P3-E2 §11.2 |
+| 8.13 | Annotation isolation in review loop — PER review artifacts stored independently; no module source-of-truth mutations produced during review run | In Progress | Isolation contract and business rules defined; runtime integration pending | §9.10 staging scenario, P3-E2 §11.2 |
 | 8.14 | Project Closeout lifecycle and lane behavior — Closeout sub-surfaces, approvals, snapshots, and lane-depth rules behave per governing docs | Not Started | | §9.11 staging scenario |
 | 8.15 | Subcontract Execution Readiness lifecycle and lane behavior — case/evaluation/exception/decision model and lane-depth rules behave per governing docs | Not Started | | §9.12 staging scenario |
 | 8.16 | UI conformance — all Phase 3 Project Hub surfaces pass mold-breaker conformance review; `enforce-hbc-tokens` ESLint clean; conformance evidence recorded in §13 | Not Started | | §9.13 staging scenario |
