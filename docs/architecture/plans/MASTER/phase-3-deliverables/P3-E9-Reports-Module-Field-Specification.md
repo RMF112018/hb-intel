@@ -1,6 +1,6 @@
 # P3-E9 — Reports Module Field Specification (Master Index)
 
-**Status:** Refactored into T-file family — this file is the master index and reading guide. T01–T03 implementation complete in `@hbc/features-project-hub` v0.2.8.
+**Status:** Refactored into T-file family — this file is the master index and reading guide. T01–T04 implementation complete in `@hbc/features-project-hub` v0.2.9.
 **Governing contract:** P3-F1 — Reports Workspace / Definition / Run / Release Contract Package.
 **Replaces:** Monolithic `P3-E9-Reports-Module-Field-Specification.md` (1,260 lines).
 **Pattern:** Follows T-file family structure established by P3-E4 through P3-E8.
@@ -19,7 +19,9 @@ Reports is the governed report-production and distribution architecture for HB I
 - spine publication (Activity, Health, Work Queue, Related Items),
 - and enforcement of the central project-governance policy record.
 
-Reports does **not** own source-of-truth data from originating modules. It assembles governed report artifacts from immutable module snapshots provided at generation time.
+Reports does **not** own source-of-truth data from originating modules. It assembles governed report artifacts from immutable module snapshots and connector-backed published read models provided through governed module/publication contracts at generation time.
+
+Reports is also a major downstream consumer of the native integration backbone. Relevant upstream planning dependencies include [P1-F5 Procore](../phase-1-deliverables/P1-F5-Procore-Connector-Family.md), [P1-F6 Sage Intacct](../phase-1-deliverables/P1-F6-Sage-Intacct-Connector-Family.md), [P1-F7 BambooHR](../phase-1-deliverables/P1-F7-BambooHR-Connector-Family.md), [P1-F12 Microsoft 365 Graph Content](../phase-1-deliverables/P1-F12-Microsoft-365-Graph-Content-Connector-Family.md), and [P1-F14 Oracle Primavera](../phase-1-deliverables/P1-F14-Oracle-Primavera-Connector-Family.md). Reports consumes them only through published read models or downstream module snapshots, never through raw connector layers.
 
 **Ownership boundary for sub-scorecard and lessons-learned:** P3-E10 (Project Closeout) owns all operational data — evaluations, lesson entries, scoring — for subcontractor scorecards and lessons-learned reports. Reports assembles these into governed release artifacts but does not own or re-derive the source data.
 
