@@ -9,12 +9,17 @@ import type {
   AnnotationEligibleModule,
   AnnotationExcludedModule,
   AnnotationIsolationRule,
+  AnnotationMutationAuditEvent,
+  AnnotationWritePathValidation,
+  IsolationProofResult,
+  ModuleDomainTable,
   ReviewSurfacePolicy,
 } from './enums.js';
 import type {
   IAnnotationAnchorKeyRegistry,
   IAnnotationIsolationContract,
   IModuleAnnotationConfig,
+  IModuleDomainTableGuard,
   ISafetyAnnotationExclusion,
 } from './types.js';
 
@@ -188,4 +193,54 @@ export const ANNOTATION_ANCHOR_KEY_REGISTRIES: ReadonlyArray<IAnnotationAnchorKe
   { module: 'PROJECT_CLOSEOUT', sectionKeys: ['checklist', 'scorecard', 'lessons', 'autopsy'], blockKeys: ['checklist-table', 'scorecard-table', 'lessons-table'], fieldKeyPattern: '{recordId}:{fieldKey}' },
   { module: 'PROJECT_STARTUP', sectionKeys: ['task-library', 'safety-readiness', 'permit-posting', 'contract-obligations', 'responsibility-matrix', 'execution-baseline'], blockKeys: ['task-table', 'remediation-table', 'obligation-table'], fieldKeyPattern: '{taskInstanceId}:{fieldKey}' },
   { module: 'SUBCONTRACT_EXECUTION_READINESS', sectionKeys: ['case-registry', 'requirement-workbench', 'exception-packet'], blockKeys: ['requirement-table', 'evaluation-table'], fieldKeyPattern: '{caseId}:{fieldKey}' },
+];
+
+// -- Stage 8.2 Isolation Enforcement Constants ------------------------------------
+
+export const ANNOTATION_WRITE_PATH_VALIDATIONS = [
+  'VALID_ANNOTATION_LAYER', 'BLOCKED_MODULE_MUTATION', 'BLOCKED_DOMAIN_TABLE_WRITE', 'BLOCKED_SAFETY_MODULE',
+] as const satisfies ReadonlyArray<AnnotationWritePathValidation>;
+
+export const ISOLATION_PROOF_RESULTS = [
+  'ZERO_MODULE_WRITES', 'MODULE_WRITE_DETECTED', 'DOMAIN_TABLE_WRITE_DETECTED',
+] as const satisfies ReadonlyArray<IsolationProofResult>;
+
+export const ANNOTATION_MUTATION_AUDIT_EVENTS = [
+  'ANNOTATION_CREATED', 'ANNOTATION_UPDATED', 'ANNOTATION_RESOLVED', 'ANNOTATION_DELETED',
+  'MODULE_MUTATION_BLOCKED', 'DOMAIN_WRITE_BLOCKED', 'SAFETY_WRITE_BLOCKED',
+] as const satisfies ReadonlyArray<AnnotationMutationAuditEvent>;
+
+export const MODULE_DOMAIN_TABLES = [
+  'FINANCIAL_FORECAST', 'FINANCIAL_BUDGET', 'SCHEDULE_SOURCE', 'SCHEDULE_COMMITMENT',
+  'CONSTRAINTS_LEDGER', 'PERMITS_REGISTRY', 'CLOSEOUT_CHECKLIST', 'STARTUP_PROGRAM',
+  'SUBCONTRACT_READINESS_CASE', 'REPORTS_RUN_LEDGER',
+] as const satisfies ReadonlyArray<ModuleDomainTable>;
+
+export const MODULE_DOMAIN_TABLE_GUARDS: ReadonlyArray<IModuleDomainTableGuard> = [
+  { guardId: 'guard-fin-forecast', domainTable: 'FINANCIAL_FORECAST', module: 'FINANCIAL', isAnnotationWriteBlocked: true, governingSpecRef: 'P3-E2 §3.4' },
+  { guardId: 'guard-fin-budget', domainTable: 'FINANCIAL_BUDGET', module: 'FINANCIAL', isAnnotationWriteBlocked: true, governingSpecRef: 'P3-E2 §3.4' },
+  { guardId: 'guard-sch-source', domainTable: 'SCHEDULE_SOURCE', module: 'SCHEDULE', isAnnotationWriteBlocked: true, governingSpecRef: 'P3-E2 §4.4' },
+  { guardId: 'guard-sch-commit', domainTable: 'SCHEDULE_COMMITMENT', module: 'SCHEDULE', isAnnotationWriteBlocked: true, governingSpecRef: 'P3-E2 §4.4' },
+  { guardId: 'guard-con-ledger', domainTable: 'CONSTRAINTS_LEDGER', module: 'CONSTRAINTS', isAnnotationWriteBlocked: true, governingSpecRef: 'P3-E2 §5.4' },
+  { guardId: 'guard-per-registry', domainTable: 'PERMITS_REGISTRY', module: 'PERMITS', isAnnotationWriteBlocked: true, governingSpecRef: 'P3-E2 §6.4' },
+  { guardId: 'guard-clo-checklist', domainTable: 'CLOSEOUT_CHECKLIST', module: 'PROJECT_CLOSEOUT', isAnnotationWriteBlocked: true, governingSpecRef: 'P3-E2 §14.4' },
+  { guardId: 'guard-sta-program', domainTable: 'STARTUP_PROGRAM', module: 'PROJECT_STARTUP', isAnnotationWriteBlocked: true, governingSpecRef: 'P3-E2 §15.4' },
+  { guardId: 'guard-sub-case', domainTable: 'SUBCONTRACT_READINESS_CASE', module: 'SUBCONTRACT_EXECUTION_READINESS', isAnnotationWriteBlocked: true, governingSpecRef: 'P3-E2 §16.4' },
+  { guardId: 'guard-rep-ledger', domainTable: 'REPORTS_RUN_LEDGER', module: 'FINANCIAL', isAnnotationWriteBlocked: true, governingSpecRef: 'P3-E2 §11.2' },
+];
+
+export const ISOLATION_PROOF_TEST_EXPECTATIONS: ReadonlyArray<{ module: AnnotationEligibleModule; moduleRecordWritesDetected: number; domainTableWritesDetected: number }> = [
+  { module: 'FINANCIAL', moduleRecordWritesDetected: 0, domainTableWritesDetected: 0 },
+  { module: 'SCHEDULE', moduleRecordWritesDetected: 0, domainTableWritesDetected: 0 },
+  { module: 'CONSTRAINTS', moduleRecordWritesDetected: 0, domainTableWritesDetected: 0 },
+  { module: 'PERMITS', moduleRecordWritesDetected: 0, domainTableWritesDetected: 0 },
+  { module: 'PROJECT_CLOSEOUT', moduleRecordWritesDetected: 0, domainTableWritesDetected: 0 },
+  { module: 'PROJECT_STARTUP', moduleRecordWritesDetected: 0, domainTableWritesDetected: 0 },
+  { module: 'SUBCONTRACT_EXECUTION_READINESS', moduleRecordWritesDetected: 0, domainTableWritesDetected: 0 },
+];
+
+export const PER_WRITE_PATH_RULES: ReadonlyArray<{ rule: string; enforcement: string }> = [
+  { rule: 'Annotation-layer writes are allowed for PER role', enforcement: 'VALID_ANNOTATION_LAYER' },
+  { rule: 'Module domain writes are blocked for all annotation operations', enforcement: 'BLOCKED_MODULE_MUTATION' },
+  { rule: 'Safety module annotation writes are blocked entirely', enforcement: 'BLOCKED_SAFETY_MODULE' },
 ];

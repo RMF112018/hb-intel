@@ -16,7 +16,14 @@ import {
   ANNOTATION_EXCLUDED_MODULES,
   ANNOTATION_ISOLATION_CONTRACT,
   ANNOTATION_ISOLATION_RULES,
+  ANNOTATION_MUTATION_AUDIT_EVENTS,
+  ANNOTATION_WRITE_PATH_VALIDATIONS,
+  ISOLATION_PROOF_RESULTS,
+  ISOLATION_PROOF_TEST_EXPECTATIONS,
   MODULE_ANNOTATION_CONFIGS,
+  MODULE_DOMAIN_TABLE_GUARDS,
+  MODULE_DOMAIN_TABLES,
+  PER_WRITE_PATH_RULES,
   REVIEW_SURFACE_POLICIES,
   SAFETY_ANNOTATION_EXCLUSION,
 } from '../index.js';
@@ -155,5 +162,31 @@ describe('annotation-integration contract stability', () => {
     expect(registry.sectionKeys).toBeDefined();
     expect(registry.blockKeys).toBeDefined();
     expect(registry.fieldKeyPattern).toBeDefined();
+  });
+
+  // -- Stage 8.2 Isolation Enforcement Contract Stability --------------------------
+
+  describe('Stage 8.2 isolation enforcement enums', () => {
+    it('ANNOTATION_WRITE_PATH_VALIDATIONS has 4', () => { expect(ANNOTATION_WRITE_PATH_VALIDATIONS).toHaveLength(4); });
+    it('ISOLATION_PROOF_RESULTS has 3', () => { expect(ISOLATION_PROOF_RESULTS).toHaveLength(3); });
+    it('ANNOTATION_MUTATION_AUDIT_EVENTS has 7', () => { expect(ANNOTATION_MUTATION_AUDIT_EVENTS).toHaveLength(7); });
+    it('MODULE_DOMAIN_TABLES has 10', () => { expect(MODULE_DOMAIN_TABLES).toHaveLength(10); });
+  });
+
+  describe('Stage 8.2 isolation enforcement constants', () => {
+    it('MODULE_DOMAIN_TABLE_GUARDS has 10', () => { expect(MODULE_DOMAIN_TABLE_GUARDS).toHaveLength(10); });
+    it('all guards have isAnnotationWriteBlocked true', () => {
+      for (const guard of MODULE_DOMAIN_TABLE_GUARDS) {
+        expect(guard.isAnnotationWriteBlocked).toBe(true);
+      }
+    });
+    it('ISOLATION_PROOF_TEST_EXPECTATIONS has 7', () => { expect(ISOLATION_PROOF_TEST_EXPECTATIONS).toHaveLength(7); });
+    it('all proof expectations have 0 module writes', () => {
+      for (const exp of ISOLATION_PROOF_TEST_EXPECTATIONS) {
+        expect(exp.moduleRecordWritesDetected).toBe(0);
+        expect(exp.domainTableWritesDetected).toBe(0);
+      }
+    });
+    it('PER_WRITE_PATH_RULES has 3', () => { expect(PER_WRITE_PATH_RULES).toHaveLength(3); });
   });
 });

@@ -39,3 +39,41 @@ export type ReviewSurfacePolicy =
   | 'FULL_ANNOTATION'
   | 'READ_ONLY_ANNOTATION'
   | 'NO_ANNOTATION';
+
+// -- Stage 8.2 Isolation Enforcement Enums ----------------------------------------
+
+/** Annotation write-path validation result per P3-E2 §11.2. */
+export type AnnotationWritePathValidation =
+  | 'VALID_ANNOTATION_LAYER'
+  | 'BLOCKED_MODULE_MUTATION'
+  | 'BLOCKED_DOMAIN_TABLE_WRITE'
+  | 'BLOCKED_SAFETY_MODULE';
+
+/** Isolation proof test result per P3-E2 §11.2. */
+export type IsolationProofResult =
+  | 'ZERO_MODULE_WRITES'
+  | 'MODULE_WRITE_DETECTED'
+  | 'DOMAIN_TABLE_WRITE_DETECTED';
+
+/** Annotation mutation audit event types per P3-E2 §11.2. */
+export type AnnotationMutationAuditEvent =
+  | 'ANNOTATION_CREATED'
+  | 'ANNOTATION_UPDATED'
+  | 'ANNOTATION_RESOLVED'
+  | 'ANNOTATION_DELETED'
+  | 'MODULE_MUTATION_BLOCKED'
+  | 'DOMAIN_WRITE_BLOCKED'
+  | 'SAFETY_WRITE_BLOCKED';
+
+/** Module domain tables protected from annotation writes per P3-E2 §3-§16. */
+export type ModuleDomainTable =
+  | 'FINANCIAL_FORECAST'
+  | 'FINANCIAL_BUDGET'
+  | 'SCHEDULE_SOURCE'
+  | 'SCHEDULE_COMMITMENT'
+  | 'CONSTRAINTS_LEDGER'
+  | 'PERMITS_REGISTRY'
+  | 'CLOSEOUT_CHECKLIST'
+  | 'STARTUP_PROGRAM'
+  | 'SUBCONTRACT_READINESS_CASE'
+  | 'REPORTS_RUN_LEDGER';

@@ -1,20 +1,30 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  canAnnotationWriteToModuleDomain,
+  canAnnotationWriteToReportsDomain,
   canNonPerRoleMutateAnnotations,
   canPerRoleWriteAnnotations,
   doesAnnotationMutateModuleRecord,
   doesAnnotationWriteToDomainTable,
   getAnnotationAccessForRole,
   getBlockAnchorKeysForModule,
+  getExpectedDomainTableWritesForAnnotation,
+  getExpectedModuleWritesForAnnotation,
   getModuleAnnotationConfig,
   getSectionAnchorKeysForModule,
   isAnchorLevelSupportedForModule,
+  isAnnotationMutationAuditRequired,
   isAnnotationStoredInFieldAnnotationsLayer,
+  isIsolationProofPassing,
   isModuleAnnotationEligible,
+  isModuleDomainTableProtected,
+  isPerSourceOfTruthWriteBlocked,
   isSafetyAnnotationBlocked,
   isSafetyAnnotationEnforcedAtAuth,
   isSafetyAnnotationEnforcedAtUI,
+  validateAnnotationWritePath,
+  validateIsolationProofForModule,
 } from '../index.js';
 
 describe('annotation-integration business rules', () => {
@@ -154,5 +164,46 @@ describe('annotation-integration business rules', () => {
 
   it('isSafetyAnnotationEnforcedAtAuth returns true', () => {
     expect(isSafetyAnnotationEnforcedAtAuth()).toBe(true);
+  });
+
+  // -- Stage 8.2 Isolation Enforcement Rules ---------------------------------------
+
+  describe('Stage 8.2 isolation enforcement rules', () => {
+    it('validateAnnotationWritePath returns VALID for annotation layer', () => {
+      expect(validateAnnotationWritePath('FINANCIAL', true)).toBe('VALID_ANNOTATION_LAYER');
+    });
+    it('validateAnnotationWritePath returns BLOCKED for module mutation', () => {
+      expect(validateAnnotationWritePath('FINANCIAL', false)).toBe('BLOCKED_MODULE_MUTATION');
+    });
+    it('validateAnnotationWritePath returns BLOCKED for Safety', () => {
+      expect(validateAnnotationWritePath('SAFETY', true)).toBe('BLOCKED_SAFETY_MODULE');
+    });
+    it('isIsolationProofPassing true for ZERO_MODULE_WRITES', () => {
+      expect(isIsolationProofPassing('ZERO_MODULE_WRITES')).toBe(true);
+    });
+    it('isIsolationProofPassing false for MODULE_WRITE_DETECTED', () => {
+      expect(isIsolationProofPassing('MODULE_WRITE_DETECTED')).toBe(false);
+    });
+    it('isModuleDomainTableProtected true for all 10 tables', () => {
+      const tables = ['FINANCIAL_FORECAST', 'FINANCIAL_BUDGET', 'SCHEDULE_SOURCE', 'SCHEDULE_COMMITMENT', 'CONSTRAINTS_LEDGER', 'PERMITS_REGISTRY', 'CLOSEOUT_CHECKLIST', 'STARTUP_PROGRAM', 'SUBCONTRACT_READINESS_CASE', 'REPORTS_RUN_LEDGER'];
+      for (const table of tables) {
+        expect(isModuleDomainTableProtected(table as never)).toBe(true);
+      }
+    });
+    it('canAnnotationWriteToModuleDomain returns false', () => { expect(canAnnotationWriteToModuleDomain()).toBe(false); });
+    it('canAnnotationWriteToReportsDomain returns false', () => { expect(canAnnotationWriteToReportsDomain()).toBe(false); });
+    it('isAnnotationMutationAuditRequired returns true', () => { expect(isAnnotationMutationAuditRequired()).toBe(true); });
+    it('getExpectedModuleWritesForAnnotation returns 0', () => { expect(getExpectedModuleWritesForAnnotation()).toBe(0); });
+    it('getExpectedDomainTableWritesForAnnotation returns 0', () => { expect(getExpectedDomainTableWritesForAnnotation()).toBe(0); });
+    it('isPerSourceOfTruthWriteBlocked returns true', () => { expect(isPerSourceOfTruthWriteBlocked()).toBe(true); });
+    it('validateIsolationProofForModule returns ZERO_MODULE_WRITES for 0 writes', () => {
+      expect(validateIsolationProofForModule('FINANCIAL', 0, 0)).toBe('ZERO_MODULE_WRITES');
+    });
+    it('validateIsolationProofForModule returns MODULE_WRITE_DETECTED for >0 module writes', () => {
+      expect(validateIsolationProofForModule('FINANCIAL', 1, 0)).toBe('MODULE_WRITE_DETECTED');
+    });
+    it('validateIsolationProofForModule returns DOMAIN_TABLE_WRITE_DETECTED for >0 domain writes', () => {
+      expect(validateIsolationProofForModule('FINANCIAL', 0, 1)).toBe('DOMAIN_TABLE_WRITE_DETECTED');
+    });
   });
 });

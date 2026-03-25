@@ -3,11 +3,19 @@
  * PER role gating, Safety exclusion, isolation enforcement.
  */
 
-import type { AnnotationAccessRole, AnnotationAnchorLevel, AnnotationEligibleModule } from './enums.js';
+import type {
+  AnnotationAccessRole,
+  AnnotationAnchorLevel,
+  AnnotationEligibleModule,
+  AnnotationWritePathValidation,
+  IsolationProofResult,
+  ModuleDomainTable,
+} from './enums.js';
 import {
   ANNOTATION_ANCHOR_KEY_REGISTRIES,
   ANNOTATION_ELIGIBLE_MODULES,
   MODULE_ANNOTATION_CONFIGS,
+  MODULE_DOMAIN_TABLES,
 } from './constants.js';
 import type { IModuleAnnotationConfig } from './types.js';
 
@@ -65,3 +73,42 @@ export const isAnchorLevelSupportedForModule = (
 export const isSafetyAnnotationEnforcedAtUI = (): true => true;
 
 export const isSafetyAnnotationEnforcedAtAuth = (): true => true;
+
+// -- Stage 8.2 Isolation Enforcement Rules ----------------------------------------
+
+export const validateAnnotationWritePath = (
+  module: string,
+  isAnnotationLayer: boolean,
+): AnnotationWritePathValidation => {
+  if (module === 'SAFETY') return 'BLOCKED_SAFETY_MODULE';
+  if (!isAnnotationLayer) return 'BLOCKED_MODULE_MUTATION';
+  return 'VALID_ANNOTATION_LAYER';
+};
+
+export const isIsolationProofPassing = (result: IsolationProofResult): boolean =>
+  result === 'ZERO_MODULE_WRITES';
+
+export const isModuleDomainTableProtected = (table: ModuleDomainTable): boolean =>
+  (MODULE_DOMAIN_TABLES as readonly string[]).includes(table);
+
+export const canAnnotationWriteToModuleDomain = (): false => false;
+
+export const canAnnotationWriteToReportsDomain = (): false => false;
+
+export const isAnnotationMutationAuditRequired = (): true => true;
+
+export const getExpectedModuleWritesForAnnotation = (): 0 => 0;
+
+export const getExpectedDomainTableWritesForAnnotation = (): 0 => 0;
+
+export const isPerSourceOfTruthWriteBlocked = (): true => true;
+
+export const validateIsolationProofForModule = (
+  _module: AnnotationEligibleModule,
+  moduleWrites: number,
+  domainTableWrites: number,
+): IsolationProofResult => {
+  if (moduleWrites > 0) return 'MODULE_WRITE_DETECTED';
+  if (domainTableWrites > 0) return 'DOMAIN_TABLE_WRITE_DETECTED';
+  return 'ZERO_MODULE_WRITES';
+};
